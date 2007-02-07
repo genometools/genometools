@@ -1,0 +1,10 @@
+*.core
+*.gt_bsi
+*.gt_bsr
+*.swp
+bin
+dist
+obj
+lib
+testsuite/stest_testsuite
+testsuite/stest_stest_tests
