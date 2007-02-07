@@ -129,5 +129,6 @@ void msa_show(MSA *msa)
 void msa_free(MSA *msa)
 {
   if (!msa);
+  bioseq_free(msa->bs);
   free(msa);
 }
