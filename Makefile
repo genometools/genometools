@@ -1,6 +1,6 @@
 #
-# Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2006 Center for Bioinformatics, University of Hamburg 
+# Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg 
 # See LICENSE file or http://genometools.org/license.html for license details
 #
 
@@ -9,7 +9,7 @@ CC:=$(CCACHE) gcc
 LD:=gcc
 INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj
 CFLAGS:=
-GT_CFLAGS:= -Wall -Os $(INCLUDEOPT)
+GT_CFLAGS:= -Wall $(INCLUDEOPT)
 LDFLAGS:=
 LDLIBS:=-lm
 
@@ -17,6 +17,17 @@ VPATH:=$(VPATH):$(CURDIR)/src
 
 LIBSRC:=$(filter-out gt.c, $(notdir $(wildcard src/*.c)))
 LIBOBJ:=$(LIBSRC:%.c=obj/%.o)
+
+# process arguments
+ifeq ($(opt),no)
+  GT_CFLAGS += -g
+else
+  GT_CFLAGS += -Os
+endif
+
+ifeq ($(assert),no)
+  GT_CFLAGS += -DNDEBUG
+endif
 
 all: dirs lib/libgt.a bin/gt
 
