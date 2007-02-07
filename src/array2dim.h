@@ -9,7 +9,7 @@
 
 #include "xansi.h"
 
-#define ARRAY2DIM_MALLOC(ARRAY2DIM, ROWS, COLUMNS, TYPE)             \
+#define array2dim_malloc(ARRAY2DIM, ROWS, COLUMNS, TYPE)             \
         {                                                            \
           unsigned long i;                                           \
 	  ARRAY2DIM = xmalloc(sizeof(TYPE*) * (ROWS));               \
@@ -18,7 +18,7 @@
             ARRAY2DIM[i] = ARRAY2DIM[i-1] + (COLUMNS);               \
         }
 
-#define ARRAY2DIM_CALLOC(ARRAY2DIM, ROWS, COLUMNS, TYPE)             \
+#define array2dim_calloc(ARRAY2DIM, ROWS, COLUMNS, TYPE)             \
         {                                                            \
           unsigned long i;                                           \
 	  ARRAY2DIM = xmalloc(sizeof(TYPE*) * (ROWS));               \
@@ -27,7 +27,7 @@
             ARRAY2DIM[i] = ARRAY2DIM[i-1] + (COLUMNS);               \
         }
 
-#define ARRAY2DIM_FREE(ARRAY2DIM)                                    \
+#define array2dim_free(ARRAY2DIM)                                    \
         free(ARRAY2DIM[0]);                                          \
         free(ARRAY2DIM);
 

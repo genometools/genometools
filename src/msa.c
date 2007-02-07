@@ -55,7 +55,7 @@ static unsigned long** get_count(char **msa, unsigned long number_of_seqs,
 {
   unsigned long col, seq, **count;
   assert(msa);
-  ARRAY2DIM_CALLOC(count, seqlen, UCHAR_MAX, unsigned long);
+  array2dim_calloc(count, seqlen, UCHAR_MAX, unsigned long);
   for (seq = 0; seq < number_of_seqs; seq++) {
     for (col = 0; col < seqlen; col++)
       count[col][(int) msa[seq][col]]++;
@@ -109,7 +109,7 @@ unsigned long msa_consensus_distance(const MSA *msa)
 
   /* free */
   free(consensus);
-  ARRAY2DIM_FREE(count);
+  array2dim_free(count);
   free(msa_array);
 
   return dist;

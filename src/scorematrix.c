@@ -27,7 +27,7 @@ ScoreMatrix* scorematrix_new(Alpha *alpha)
   s = xmalloc(sizeof(ScoreMatrix));
   s->alpha = alpha_ref(alpha);
   s->dimension = alpha_size(alpha);
-  ARRAY2DIM_CALLOC(s->scores, s->dimension, s->dimension, int);
+  array2dim_calloc(s->scores, s->dimension, s->dimension, int);
   return s;
 }
 
@@ -196,6 +196,6 @@ void scorematrix_show(const ScoreMatrix *s, FILE *fp)
 void scorematrix_free(ScoreMatrix *s)
 {
   if (!s) return;
-  ARRAY2DIM_FREE(s->scores);
+  array2dim_free(s->scores);
   free(s);
 }

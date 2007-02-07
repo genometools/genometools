@@ -157,11 +157,11 @@ Alignment* affinealign(const char *u, unsigned long ulen,
   DPentry **dptable;
   Alignment *a;
   assert(u && ulen && v && vlen);
-  ARRAY2DIM_MALLOC(dptable, ulen+1, vlen+1, DPentry);
+  array2dim_malloc(dptable, ulen+1, vlen+1, DPentry);
   fillDPtable(dptable, u, ulen, v, vlen,
               replacement_cost, gap_opening_cost, gap_extension_cost);
   a = alignment_new_with_seqs(u, ulen, v, vlen);
   traceback(a, dptable, ulen, vlen);
-  ARRAY2DIM_FREE(dptable);
+  array2dim_free(dptable);
   return a;
 }

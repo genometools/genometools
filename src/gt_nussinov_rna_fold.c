@@ -145,7 +145,7 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
   }
 
   /* alloc space for the matrix E */
-  ARRAY2DIM_CALLOC(E, rna_length+1, rna_length+1, int); /* XXX */
+  array2dim_calloc(E, rna_length+1, rna_length+1, int); /* XXX */
 
   /* compute matrix */
   compute_matrix(E, rna_sequence, rna_length, l_min, energy_function);
@@ -159,7 +159,7 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
   xfputc('\n', fp);
 
   /* free matrix E */
-  ARRAY2DIM_FREE(E);
+  array2dim_free(E);
 }
 
 int gt_nussinov_rna_fold(int argc, char *argv[])

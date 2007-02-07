@@ -79,7 +79,7 @@ Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf)
   DPentry **dptable;
   Alignment *a = NULL;
   assert(u && v && sf);
-  ARRAY2DIM_CALLOC(dptable, seq_length(u)+1, seq_length(v)+1, DPentry);
+  array2dim_calloc(dptable, seq_length(u)+1, seq_length(v)+1, DPentry);
   fillDPtable(dptable, seq_get_encoded(u), seq_length(u),
                        seq_get_encoded(v), seq_length(v), sf, &alignment_end);
   if (dptable[alignment_end.x][alignment_end.y].score) {
@@ -98,6 +98,6 @@ Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf)
                        seq_get_orig(v) + alignment_start.y,
                        alignment_end.y - alignment_start.y + 1);
   }
-  ARRAY2DIM_FREE(dptable);
+  array2dim_free(dptable);
   return a;
 }
