@@ -53,12 +53,17 @@ obj/%.o: src/%.c
 # read deps
 -include obj/*.d
 
-.PHONY: dist srcdist gt libgt splint test clean cleanup
+.PHONY: dist srcdist release gt libgt splint test clean cleanup
 
 dist: all
 	tar cvzf gt-`cat VERSION`.tar.gz bin/gt_*
 
 srcdist:
+	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
+        gzip -9 > genometools-`cat VERSION`.tar.gz 
+
+release:
+	git tag "v`cat VERSION`"
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
         gzip -9 > genometools-`cat VERSION`.tar.gz 
 
