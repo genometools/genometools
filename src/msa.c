@@ -55,8 +55,8 @@ static unsigned long** get_count(char **msa, unsigned long number_of_seqs,
 {
   unsigned long col, seq, **count;
   assert(msa);
-  ARRAY2DIM_CALLOC(count, seqlen, UCHAR_MAX, unsigned long); 
-  for (seq = 0; seq < number_of_seqs; seq++) { 
+  ARRAY2DIM_CALLOC(count, seqlen, UCHAR_MAX, unsigned long);
+  for (seq = 0; seq < number_of_seqs; seq++) {
     for (col = 0; col < seqlen; col++)
       count[col][(int) msa[seq][col]]++;
   }

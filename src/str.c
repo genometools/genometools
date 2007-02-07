@@ -23,7 +23,7 @@ Str* str_new(void)
   s->length = 0;                      /* set the initial length */
   s->allocated = 1;                   /* set the initially allocated space */
   s->reference_count = 0;             /* set the initial reference count */
-  return s;                           /* return the new string object */ 
+  return s;                           /* return the new string object */
 }
 
 Str* str_new_cstr(const char *cstr)
@@ -278,7 +278,7 @@ int str_unit_test(void)
 
 void str_free(Str *s)
 {
-  if (!s) return;           /* return without action if 's' is NULL */ 
+  if (!s) return;           /* return without action if 's' is NULL */
   if (s->reference_count) { /* there are multiple references to this string */
     s->reference_count--;   /* decrement the reference counter */
     return;                 /* return without freeing the object */
