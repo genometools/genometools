@@ -6,6 +6,7 @@
 
 #include <assert.h>
 #include "dynalloc.h"
+#include "ensure.h"
 #include "str.h"
 #include "xansi.h"
 
@@ -216,61 +217,61 @@ int str_unit_test(void)
 
   /* the empty string */
   s1 = str_new();
-  assert(str_length(s1) == 0);
+  ensure(str_length(s1) == 0);
   str_free(s1);
 
   /* string testing */
   s1 = str_new();
   str_set(s1, cstring_1);
-  assert(str_length(s1) == 11);
-  assert(strcmp(str_get(s1), cstring_1) == 0);
+  ensure(str_length(s1) == 11);
+  ensure(strcmp(str_get(s1), cstring_1) == 0);
   str_free(s1);
 
   s1 = str_new_cstr(cstring_1);
-  assert(str_length(s1) == 11);
+  ensure(str_length(s1) == 11);
   str_free(s1);
 
   s1 = str_new();
   s2 = str_new_cstr("foo");
-  assert(str_length(s2) == 3);
+  ensure(str_length(s2) == 3);
   str_append_str(s1, s2);
-  assert(str_length(s1) == 3);
+  ensure(str_length(s1) == 3);
   str_append_cstr(s1, "bar");
-  assert(str_length(s1) == 6);
+  ensure(str_length(s1) == 6);
   str_append_char(s1, 'b');
   str_append_char(s1, 'a');
   str_append_char(s1, 'z');
-  assert(str_length(s1) == 9);
-  assert(strcmp("foobarbaz", str_get(s1)) == 0);
-  assert(strcmp("foo", str_get(s2)) == 0);
+  ensure(str_length(s1) == 9);
+  ensure(strcmp("foobarbaz", str_get(s1)) == 0);
+  ensure(strcmp("foo", str_get(s2)) == 0);
   str_append_ulong(s1, 1984);
-  assert(strcmp("foobarbaz1984", str_get(s1)) == 0);
+  ensure(strcmp("foobarbaz1984", str_get(s1)) == 0);
   str_free(s1);
   str_free(s2);
 
   /* testing str_append_ulong() and str_set_length() */
   s = str_new();
   str_append_ulong(s, 0);
-  assert(strcmp("0", str_get(s)) == 0);
+  ensure(strcmp("0", str_get(s)) == 0);
   str_reset(s);
-  assert(strcmp("", str_get(s)) == 0);
+  ensure(strcmp("", str_get(s)) == 0);
   str_append_ulong(s, 6);
-  assert(strcmp("6", str_get(s)) == 0);
+  ensure(strcmp("6", str_get(s)) == 0);
   str_append_ulong(s, 16);
-  assert(strcmp("616", str_get(s)) == 0);
+  ensure(strcmp("616", str_get(s)) == 0);
   str_free(s);
 
   /* make sure that str_get never returns NULL */
   s = str_new();
-  assert(str_get(s));
-  assert(str_length(s) == 0);
-  assert(strlen(str_get(s)) == 0);
+  ensure(str_get(s));
+  ensure(str_length(s) == 0);
+  ensure(strlen(str_get(s)) == 0);
   str_free(s);
 
   s = str_new_cstr(NULL);
-  assert(str_get(s));
-  assert(str_length(s) == 0);
-  assert(strlen(str_get(s)) == 0);
+  ensure(str_get(s));
+  ensure(str_length(s) == 0);
+  ensure(strlen(str_get(s)) == 0);
   str_free(s);
 
   return EXIT_SUCCESS;

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "dynalloc.h"
+#include "ensure.h"
 #include "splitter.h"
 #include "xansi.h"
 
@@ -90,57 +91,57 @@ int splitter_unit_test(void)
               string_6[]  = "test";
 
   /* string_1 */
-  assert(!splitter_size(s));
+  ensure(!splitter_size(s));
   splitter_split(s, string_1, strlen(string_1), ' ');
-  assert(splitter_size(s) == 5);
-  assert(strcmp(splitter_get_token(s, 0), "a") == 0);
-  assert(strcmp(splitter_get_token(s, 1), "bb") == 0);
-  assert(strcmp(splitter_get_token(s, 2), "ccc") == 0);
-  assert(strcmp(splitter_get_token(s, 3), "dddd") == 0);
-  assert(strcmp(splitter_get_token(s, 4), "eeeee") == 0);
+  ensure(splitter_size(s) == 5);
+  ensure(strcmp(splitter_get_token(s, 0), "a") == 0);
+  ensure(strcmp(splitter_get_token(s, 1), "bb") == 0);
+  ensure(strcmp(splitter_get_token(s, 2), "ccc") == 0);
+  ensure(strcmp(splitter_get_token(s, 3), "dddd") == 0);
+  ensure(strcmp(splitter_get_token(s, 4), "eeeee") == 0);
   splitter_reset(s);
 
   /* string_2 */
-  assert(!splitter_size(s));
+  ensure(!splitter_size(s));
   splitter_split(s, string_2, strlen(string_2), '\t');
-  assert(splitter_size(s) == 5);
-  assert(strcmp(splitter_get_token(s, 0), "a") == 0);
-  assert(strcmp(splitter_get_token(s, 1), "bb") == 0);
-  assert(strcmp(splitter_get_token(s, 2), "ccc") == 0);
-  assert(strcmp(splitter_get_token(s, 3), "dddd") == 0);
-  assert(strcmp(splitter_get_token(s, 4), "eeeee") == 0);
+  ensure(splitter_size(s) == 5);
+  ensure(strcmp(splitter_get_token(s, 0), "a") == 0);
+  ensure(strcmp(splitter_get_token(s, 1), "bb") == 0);
+  ensure(strcmp(splitter_get_token(s, 2), "ccc") == 0);
+  ensure(strcmp(splitter_get_token(s, 3), "dddd") == 0);
+  ensure(strcmp(splitter_get_token(s, 4), "eeeee") == 0);
   splitter_reset(s);
 
   /* string_3 */
-  assert(!splitter_size(s));
+  ensure(!splitter_size(s));
   splitter_split(s, string_3, strlen(string_3), '\t');
-  assert(splitter_size(s) == 1);
-  assert(strcmp(splitter_get_token(s, 0), "") == 0);
+  ensure(splitter_size(s) == 1);
+  ensure(strcmp(splitter_get_token(s, 0), "") == 0);
   splitter_reset(s);
 
   /* string_4 */
-  assert(!splitter_size(s));
+  ensure(!splitter_size(s));
   splitter_split(s, string_4, strlen(string_4), ' ');
-  assert(splitter_size(s) == 3);
-  assert(strcmp(splitter_get_token(s, 0), "a") == 0);
-  assert(strcmp(splitter_get_token(s, 1), "") == 0);
-  assert(strcmp(splitter_get_token(s, 2), "b") == 0);
+  ensure(splitter_size(s) == 3);
+  ensure(strcmp(splitter_get_token(s, 0), "a") == 0);
+  ensure(strcmp(splitter_get_token(s, 1), "") == 0);
+  ensure(strcmp(splitter_get_token(s, 2), "b") == 0);
   splitter_reset(s);
 
   /* string_5 */
-  assert(!splitter_size(s));
+  ensure(!splitter_size(s));
   splitter_split(s, string_5, strlen(string_5), ' ');
-  assert(splitter_size(s) == 3);
-  assert(strcmp(splitter_get_token(s, 0), "ac") == 0);
-  assert(strcmp(splitter_get_token(s, 1), "bc") == 0);
-  assert(strcmp(splitter_get_token(s, 2), "") == 0);
+  ensure(splitter_size(s) == 3);
+  ensure(strcmp(splitter_get_token(s, 0), "ac") == 0);
+  ensure(strcmp(splitter_get_token(s, 1), "bc") == 0);
+  ensure(strcmp(splitter_get_token(s, 2), "") == 0);
   splitter_reset(s);
 
   /* string_6 */
-  assert(!splitter_size(s));
+  ensure(!splitter_size(s));
   splitter_split(s, string_6, strlen(string_6), ';');
-  assert(splitter_size(s) == 1);
-  assert(strcmp(splitter_get_token(s, 0), "test") == 0);
+  ensure(splitter_size(s) == 1);
+  ensure(strcmp(splitter_get_token(s, 0), "test") == 0);
 
   /* free */
   splitter_free(s);

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -9,6 +9,7 @@
 #include <string.h>
 #include "array.h"
 #include "dynalloc.h"
+#include "ensure.h"
 #include "xansi.h"
 
 #define NUM_OF_TESTS	100
@@ -163,8 +164,8 @@ int array_unit_test(void)
     array_set_size(char_array, 0);
     array_set_size(int_array, 0);
 
-    assert(array_size(char_array) == 0);
-    assert(array_size(int_array) == 0);
+    ensure(array_size(char_array) == 0);
+    ensure(array_size(int_array) == 0);
 
     for (i = 0; i < size; i++) {
       cc = ((double) rand() / RAND_MAX) * CHAR_MAX;
@@ -173,34 +174,34 @@ int array_unit_test(void)
       array_add(char_array, cc);
       array_add(int_array, ci);
 
-      assert(array_size(char_array) == i+1);
-      assert(array_size(int_array) == i+1);
-      assert(*((char*) array_get(char_array, i)) == cc);
-      assert(*((int*) array_get(int_array, i)) == ci);
+      ensure(array_size(char_array) == i+1);
+      ensure(array_size(int_array) == i+1);
+      ensure(*((char*) array_get(char_array, i)) == cc);
+      ensure(*((int*) array_get(int_array, i)) == ci);
 
       array_add_elem(char_array, &cc, sizeof(char));
       array_add_elem(int_array, &ci, sizeof(int));
 
-      assert(array_size(char_array) == i+2);
-      assert(array_size(int_array) == i+2);
-      assert(*((char*) array_get(char_array, i+1)) == cc);
-      assert(*((int*) array_get(int_array, i+1)) == ci);
-      assert(*((char*) array_pop(char_array)) == cc);
-      assert(*((int*) array_pop(int_array)) == ci);
-      assert(array_size(char_array) == i+1);
-      assert(array_size(int_array) == i+1);
-      assert(*((char*) array_get(char_array, i)) == cc);
-      assert(*((int*) array_get(int_array, i)) == ci);
+      ensure(array_size(char_array) == i+2);
+      ensure(array_size(int_array) == i+2);
+      ensure(*((char*) array_get(char_array, i+1)) == cc);
+      ensure(*((int*) array_get(int_array, i+1)) == ci);
+      ensure(*((char*) array_pop(char_array)) == cc);
+      ensure(*((int*) array_pop(int_array)) == ci);
+      ensure(array_size(char_array) == i+1);
+      ensure(array_size(int_array) == i+1);
+      ensure(*((char*) array_get(char_array, i)) == cc);
+      ensure(*((int*) array_get(int_array, i)) == ci);
 
       char_array_test[i] = cc;
       char_array_test[i+1]= '\0';
       int_array_test[i] = ci;
 
-      assert(strncmp(array_get_space(char_array), char_array_test,
+      ensure(strncmp(array_get_space(char_array), char_array_test,
                      strlen(char_array_test)) == 0);
 
       for (j = 0; j <= i; j++)
-        assert(*(int*) array_get(int_array, j) == int_array_test[j]);
+        ensure(*(int*) array_get(int_array, j) == int_array_test[j]);
     }
   }
 

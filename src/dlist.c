@@ -1,12 +1,13 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
 #include <assert.h>
 #include <limits.h>
 #include "dlist.h"
+#include "ensure.h"
 #include "mathsupport.h"
 #include "xansi.h"
 
@@ -143,39 +144,39 @@ int dlist_unit_test(void)
 
   /* boundary case: empty dlist */
   dlist = dlist_new(compare);
-  assert(!dlist_size(dlist));
+  ensure(!dlist_size(dlist));
   dlist_free(dlist);
 
   dlist = dlist_new(NULL);
-  assert(!dlist_size(dlist));
+  ensure(!dlist_size(dlist));
   dlist_free(dlist);
 
   /* boundary case: dlist containing one element */
   dlist = dlist_new(compare);
   dlist_add(dlist, &elem_a);
-  assert(dlist_size(dlist) == 1);
-  assert(elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
+  ensure(dlist_size(dlist) == 1);
+  ensure(elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
   dlist_free(dlist);
 
   dlist = dlist_new(NULL);
   dlist_add(dlist, &elem_a);
-  assert(dlist_size(dlist) == 1);
-  assert(elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
+  ensure(dlist_size(dlist) == 1);
+  ensure(elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
   dlist_free(dlist);
 
   /* boundary case: dlist containing two elements */
   dlist = dlist_new(compare);
   dlist_add(dlist, &elem_a);
   dlist_add(dlist, &elem_b);
-  assert(dlist_size(dlist) == 2);
-  assert(elem_b == *(int*) dlistelem_get_data(dlist_first(dlist)));
+  ensure(dlist_size(dlist) == 2);
+  ensure(elem_b == *(int*) dlistelem_get_data(dlist_first(dlist)));
   dlist_free(dlist);
 
   dlist = dlist_new(NULL);
   dlist_add(dlist, &elem_a);
   dlist_add(dlist, &elem_b);
-  assert(dlist_size(dlist) == 2);
-  assert(elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
+  ensure(dlist_size(dlist) == 2);
+  ensure(elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
   dlist_free(dlist);
 
   for (i = 0; i < NUM_OF_TESTS; i++) {
@@ -191,10 +192,10 @@ int dlist_unit_test(void)
 
     /* test with compare function */
     dlist = dlist_new(compare);
-    assert(!dlist_size(dlist));
+    ensure(!dlist_size(dlist));
     for (j = 0; j < size; j++) {
       dlist_add(dlist, elems + j);
-      assert(dlist_size(dlist) == j+1);
+      ensure(dlist_size(dlist) == j+1);
 
       for (dlistelem = dlist_first(dlist); dlistelem != NULL;
            dlistelem = dlistelem_next(dlistelem)) {
@@ -204,7 +205,7 @@ int dlist_unit_test(void)
     for (dlistelem = dlist_first(dlist); dlistelem != NULL;
          dlistelem = dlistelem_next(dlistelem)) {
       data = dlistelem_get_data(dlistelem);
-      assert(*data == elems_backup[j]);
+      ensure(*data == elems_backup[j]);
       j++;
     }
     /* remove first element */
@@ -212,7 +213,7 @@ int dlist_unit_test(void)
       dlist_remove(dlist, dlist_first(dlist));
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_first(dlist));
-        assert(*data == elems_backup[1]);
+        ensure(*data == elems_backup[1]);
       }
     }
     /* remove last element */
@@ -220,7 +221,7 @@ int dlist_unit_test(void)
       dlist_remove(dlist, dlist_last(dlist));
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_last(dlist));
-        assert(*data == elems_backup[size - 2]);
+        ensure(*data == elems_backup[size - 2]);
       }
     }
     /* XXX: fix this */
@@ -235,23 +236,23 @@ int dlist_unit_test(void)
       for (j = 1; j < dlist_size(dlist) / 2 + 1; j++)
         dlistelem = dlistelem_next(dlistelem);
       data = dlistelem_get_data(dlist_last(dlist));
-      assert(*data == elems_backup[size / 2 + 1]);
+      ensure(*data == elems_backup[size / 2 + 1]);
     }
 #endif
     dlist_free(dlist);
 
     /* test without compare function */
     dlist = dlist_new(NULL);
-    assert(!dlist_size(dlist));
+    ensure(!dlist_size(dlist));
     for (j = 0; j < size; j++) {
       dlist_add(dlist, elems + j);
-      assert(dlist_size(dlist) == j+1);
+      ensure(dlist_size(dlist) == j+1);
     }
     j = 0;
     for (dlistelem = dlist_first(dlist); dlistelem != NULL;
          dlistelem = dlistelem_next(dlistelem)) {
       data = dlistelem_get_data(dlistelem);
-      assert(*data == elems[j]);
+      ensure(*data == elems[j]);
       j++;
     }
     /* remove first element */
@@ -259,7 +260,7 @@ int dlist_unit_test(void)
       dlist_remove(dlist, dlist_first(dlist));
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_first(dlist));
-        assert(*data == elems[1]);
+        ensure(*data == elems[1]);
       }
     }
     /* remove last element */
@@ -267,7 +268,7 @@ int dlist_unit_test(void)
       dlist_remove(dlist, dlist_last(dlist));
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_last(dlist));
-        assert(*data == elems[size - 2]);
+        ensure(*data == elems[size - 2]);
       }
     }
     dlist_free(dlist);

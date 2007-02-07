@@ -1,9 +1,10 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#include "ensure.h"
 #include "grep.h"
 
 static void grep_error(int errcode, regex_t *matcher)
@@ -34,11 +35,11 @@ unsigned int grep(const char *pattern, const char *line)
 
 int grep_unit_test(void)
 {
-  assert( grep("a", "a"));
-  assert(!grep("b", "a"));
-  assert( grep("aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA"));
-  assert(!grep("aba", "wenbapzbpqSayhzzaBaZZqyghaAAahhaA"));
-  assert( grep("^aba", "abawenbapzbpqSayhzzZZqyghaAAahhaA"));
-  assert(!grep("^aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA"));
+  ensure( grep("a", "a"));
+  ensure(!grep("b", "a"));
+  ensure( grep("aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA"));
+  ensure(!grep("aba", "wenbapzbpqSayhzzaBaZZqyghaAAahhaA"));
+  ensure( grep("^aba", "abawenbapzbpqSayhzzZZqyghaAAahhaA"));
+  ensure(!grep("^aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA"));
   return EXIT_SUCCESS;
 }

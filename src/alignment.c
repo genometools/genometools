@@ -7,6 +7,7 @@
 #include <assert.h>
 #include "alignment.h"
 #include "array.h"
+#include "ensure.h"
 #include "xansi.h"
 
 #define GAPSYMBOL      '-'
@@ -301,7 +302,7 @@ int alignment_unit_test(void)
   alignment_add_replacement(a);
   alignment_add_replacement(a);
 
-  assert(alignment_eval(a) == 10);
+  ensure(alignment_eval(a) == 10);
 
   alignment_free(a);
 

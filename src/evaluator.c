@@ -1,11 +1,12 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
 #include <assert.h>
 #include <string.h>
+#include "ensure.h"
 #include "evaluator.h"
 #include "xansi.h"
 
@@ -84,59 +85,59 @@ int evaluator_unit_test(void)
 {
   Evaluator *e = evaluator_new();
 
-  assert(evaluator_get_sensitivity(e) == 1.0);
-  assert(evaluator_get_specificity(e) == 1.0);
+  ensure(evaluator_get_sensitivity(e) == 1.0);
+  ensure(evaluator_get_specificity(e) == 1.0);
 
   evaluator_add_actual(e, 1);
-  assert(evaluator_get_sensitivity(e) == 0.0);
-  assert(evaluator_get_specificity(e) == 1.0);
+  ensure(evaluator_get_sensitivity(e) == 0.0);
+  ensure(evaluator_get_specificity(e) == 1.0);
 
   evaluator_add_predicted(e, 1);
-  assert(evaluator_get_sensitivity(e) == 0.0);
-  assert(evaluator_get_specificity(e) == 0.0);
+  ensure(evaluator_get_sensitivity(e) == 0.0);
+  ensure(evaluator_get_specificity(e) == 0.0);
 
   evaluator_add_true(e);
-  assert(evaluator_get_sensitivity(e) == 1.0);
-  assert(evaluator_get_specificity(e) == 1.0);
+  ensure(evaluator_get_sensitivity(e) == 1.0);
+  ensure(evaluator_get_specificity(e) == 1.0);
 
   evaluator_reset(e);
-  assert(evaluator_get_sensitivity(e) == 1.0);
-  assert(evaluator_get_specificity(e) == 1.0);
+  ensure(evaluator_get_sensitivity(e) == 1.0);
+  ensure(evaluator_get_specificity(e) == 1.0);
 
   evaluator_add_predicted(e, 1);
-  assert(evaluator_get_sensitivity(e) == 1.0);
-  assert(evaluator_get_specificity(e) == 0.0);
+  ensure(evaluator_get_sensitivity(e) == 1.0);
+  ensure(evaluator_get_specificity(e) == 0.0);
 
   evaluator_reset(e);
-  assert(evaluator_get_sensitivity(e) == 1.0);
-  assert(evaluator_get_specificity(e) == 1.0);
+  ensure(evaluator_get_sensitivity(e) == 1.0);
+  ensure(evaluator_get_specificity(e) == 1.0);
 
   evaluator_add_actual(e, 2);
   evaluator_add_predicted(e, 2);
   evaluator_add_true(e);
-  assert(evaluator_get_sensitivity(e) == 0.5);
-  assert(evaluator_get_specificity(e) == 0.5);
+  ensure(evaluator_get_sensitivity(e) == 0.5);
+  ensure(evaluator_get_specificity(e) == 0.5);
 
   evaluator_reset(e);
-  assert(evaluator_get_sensitivity(e) == 1.0);
-  assert(evaluator_get_specificity(e) == 1.0);
+  ensure(evaluator_get_sensitivity(e) == 1.0);
+  ensure(evaluator_get_specificity(e) == 1.0);
 
   evaluator_add_actual(e, 4);
   evaluator_add_predicted(e, 4);
   evaluator_add_true(e);
-  assert(evaluator_get_sensitivity(e) == 0.25);
-  assert(evaluator_get_specificity(e) == 0.25);
+  ensure(evaluator_get_sensitivity(e) == 0.25);
+  ensure(evaluator_get_specificity(e) == 0.25);
   evaluator_add_true(e);
-  assert(evaluator_get_sensitivity(e) == 0.5);
-  assert(evaluator_get_specificity(e) == 0.5);
+  ensure(evaluator_get_sensitivity(e) == 0.5);
+  ensure(evaluator_get_specificity(e) == 0.5);
 
   evaluator_add_true(e);
-  assert(evaluator_get_sensitivity(e) == 0.75);
-  assert(evaluator_get_specificity(e) == 0.75);
+  ensure(evaluator_get_sensitivity(e) == 0.75);
+  ensure(evaluator_get_specificity(e) == 0.75);
 
   evaluator_add_true(e);
-  assert(evaluator_get_sensitivity(e) == 1.0);
-  assert(evaluator_get_specificity(e) == 1.0);
+  ensure(evaluator_get_sensitivity(e) == 1.0);
+  ensure(evaluator_get_specificity(e) == 1.0);
 
   evaluator_free(e);
 

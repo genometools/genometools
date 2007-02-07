@@ -1,10 +1,11 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
 #include <assert.h>
+#include "ensure.h"
 #include "hashtable.h"
 #include "st.h"
 #include "xansi.h"
@@ -124,16 +125,16 @@ static void hashtable_test(Hash_type hash_type)
   /* hashes containing one element */
   ht = hashtable_new(hash_type, NULL, NULL);
   hashtable_add(ht, s1, s2);
-  assert(hashtable_get(ht, s1) == s2);
-  assert(!hashtable_get(ht, s2));
+  ensure(hashtable_get(ht, s1) == s2);
+  ensure(!hashtable_get(ht, s2));
   hashtable_free(ht);
 
   /* hashes containing two elements */
   ht = hashtable_new(hash_type, NULL, NULL);
   hashtable_add(ht, s1, s2);
   hashtable_add(ht, s2, s1);
-  assert(hashtable_get(ht, s1) == s2);
-  assert(hashtable_get(ht, s2) == s1);
+  ensure(hashtable_get(ht, s1) == s2);
+  ensure(hashtable_get(ht, s2) == s1);
   hashtable_free(ht);
 }
 

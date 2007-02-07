@@ -5,6 +5,7 @@
 */
 
 #include <assert.h>
+#include "ensure.h"
 #include "tokenizer.h"
 #include "xansi.h"
 
@@ -119,7 +120,7 @@ int tokenizer_unit_test(void)
   xfclose(tmpfp);
   t = tokenizer_new(io_new(tmpfilename, "r"));
   tokenizer_skip_comment_lines(t);
-  assert(!tokenizer_has_token(t));
+  ensure(!tokenizer_has_token(t));
   tokenizer_free(t);
   xremove(tmpfilename);
 
@@ -131,31 +132,31 @@ int tokenizer_unit_test(void)
   t = tokenizer_new(io_new(tmpfilename, "r"));
 
   token = tokenizer_get_token(t);
-  assert(!strcmp(str_get(token), "a"));
+  ensure(!strcmp(str_get(token), "a"));
   str_free(token);
 
   tokenizer_next_token(t);
   token = tokenizer_get_token(t);
-  assert(!strcmp(str_get(token), "bb"));
+  ensure(!strcmp(str_get(token), "bb"));
   str_free(token);
 
   tokenizer_next_token(t);
   token = tokenizer_get_token(t);
-  assert(!strcmp(str_get(token), "ccc\n"));
+  ensure(!strcmp(str_get(token), "ccc\n"));
   str_free(token);
 
   tokenizer_next_token(t);
   token = tokenizer_get_token(t);
-  assert(!strcmp(str_get(token), "dddd"));
+  ensure(!strcmp(str_get(token), "dddd"));
   str_free(token);
 
   tokenizer_next_token(t);
   token = tokenizer_get_token(t);
-  assert(!strcmp(str_get(token), "-5"));
+  ensure(!strcmp(str_get(token), "-5"));
   str_free(token);
 
   tokenizer_next_token(t);
-  assert(!tokenizer_has_token(t));
+  ensure(!tokenizer_has_token(t));
   tokenizer_free(t);
   xremove(tmpfilename);
 

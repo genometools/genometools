@@ -12,6 +12,7 @@
 #include "array2dim.h"
 #include "coin_hmm.h"
 #include "dice_hmm.h"
+#include "ensure.h"
 #include "hmm.h"
 #include "mathsupport.h"
 #include "xansi.h"
@@ -598,17 +599,17 @@ int hmm_unit_test(void)
     for (j = 0; j < len; j++)
       encoded_seq[j] = alpha_encode(alpha, coin_tosses[i][j]);
     /* XXX: remove exp() calls */
-    assert(double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
+    ensure(double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
                                 exp(hmm_backward(fair_hmm, encoded_seq, len))));
-    assert(double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len)),
+    ensure(double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len)),
                                 exp(hmm_backward(loaded_hmm, encoded_seq, len)))
                                );
   }
 
   free(encoded_seq);
   alpha_free(alpha);
-  assert(double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
-  assert(double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
+  ensure(double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
+  ensure(double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
   hmm_free(loaded_hmm);
   hmm_free(fair_hmm);
 
@@ -625,17 +626,17 @@ int hmm_unit_test(void)
       encoded_seq[j] = alpha_encode(alpha, dice_rolls[i][j]);
     }
     /* XXX: remove exp() calls */
-    assert(double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
+    ensure(double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
                                 exp(hmm_backward(fair_hmm, encoded_seq, len))));
-    assert(double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len)),
+    ensure(double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len)),
                                 exp(hmm_backward(loaded_hmm, encoded_seq, len)))
                                );
   }
 
   free(encoded_seq);
   alpha_free(alpha);
-  assert(double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
-  assert(double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
+  ensure(double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
+  ensure(double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
   hmm_free(loaded_hmm);
   hmm_free(fair_hmm);
 

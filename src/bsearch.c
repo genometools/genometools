@@ -1,11 +1,12 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
 #include <assert.h>
 #include "bsearch.h"
+#include "ensure.h"
 
 void bsearch_all(Array *members, const void *key, const void *base,
                  size_t nmemb, size_t size,
@@ -87,7 +88,7 @@ int bsearch_unit_test(void)
   /* the empty case */
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof(int), cmp);
-  assert(!array_size(members)); /* no member found */
+  ensure(!array_size(members)); /* no member found */
 
   /* 1 element */
   key = 7;
@@ -95,55 +96,55 @@ int bsearch_unit_test(void)
   array_add(elements, element);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof(int), cmp);
-  assert(array_size(members) == 1); /* one member found */
+  ensure(array_size(members) == 1); /* one member found */
   member_ptr = *(int**) array_get(members, 0);
-  assert(*member_ptr == element);
+  ensure(*member_ptr == element);
 
   key = -7;
   array_set_size(members, 0);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof(int), cmp);
-  assert(!array_size(members)); /* no member found */
+  ensure(!array_size(members)); /* no member found */
 
   /* 2 elements */
   key = 7;
   array_set_size(members, 0);
   array_add(elements, element);
-  assert(array_size(elements) == 2);
+  ensure(array_size(elements) == 2);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof(int), cmp);
-  assert(array_size(members) == 2); /* two members found */
+  ensure(array_size(members) == 2); /* two members found */
   member_ptr = *(int**) array_get(members, 0);
-  assert(*member_ptr == element);
+  ensure(*member_ptr == element);
   member_ptr = *(int**) array_get(members, 1);
-  assert(*member_ptr == element);
+  ensure(*member_ptr == element);
 
   key = -7;
   array_set_size(members, 0);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof(int), cmp);
-  assert(!array_size(members)); /* no member found */
+  ensure(!array_size(members)); /* no member found */
 
   /* 3 elements */
   key = 7;
   array_set_size(members, 0);
   array_add(elements, element);
-  assert(array_size(elements) == 3);
+  ensure(array_size(elements) == 3);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof(int), cmp);
-  assert(array_size(members) == 3); /* three members found */
+  ensure(array_size(members) == 3); /* three members found */
   member_ptr = *(int**) array_get(members, 0);
-  assert(*member_ptr == element);
+  ensure(*member_ptr == element);
   member_ptr = *(int**) array_get(members, 1);
-  assert(*member_ptr == element);
+  ensure(*member_ptr == element);
   member_ptr = *(int**) array_get(members, 2);
-  assert(*member_ptr == element);
+  ensure(*member_ptr == element);
 
   key = -7;
   array_set_size(members, 0);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof(int), cmp);
-  assert(!array_size(members)); /* no member found */
+  ensure(!array_size(members)); /* no member found */
 
   /* large case: -10 -5 -3 -3 -3 0 1 2 3 */
   array_set_size(elements, 0);
@@ -163,36 +164,36 @@ int bsearch_unit_test(void)
   array_add(elements, element);
   element = 3;
   array_add(elements, element);
-  assert(array_size(elements) == 9);
+  ensure(array_size(elements) == 9);
   key = -3;
   array_set_size(members, 0);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof(int), cmp);
-  assert(array_size(members) == 3); /* three members found */
+  ensure(array_size(members) == 3); /* three members found */
   member_ptr = *(int**) array_get(members, 0);
-  assert(*member_ptr == -3);
+  ensure(*member_ptr == -3);
   member_ptr = *(int**) array_get(members, 1);
-  assert(*member_ptr == -3);
+  ensure(*member_ptr == -3);
   member_ptr = *(int**) array_get(members, 2);
-  assert(*member_ptr == -3);
+  ensure(*member_ptr == -3);
 
   /* test bsearch_all_mark() with large case */
   array_set_size(members, 0);
   b = bittab_new(array_size(elements));
   bsearch_all_mark(members, &key, array_get_space(elements),
                    array_size(elements), sizeof(int), cmp, b);
-  assert(array_size(members) == 3); /* three members found */
+  ensure(array_size(members) == 3); /* three members found */
   member_ptr = *(int**) array_get(members, 0);
-  assert(*member_ptr == -3);
+  ensure(*member_ptr == -3);
   member_ptr = *(int**) array_get(members, 1);
-  assert(*member_ptr == -3);
+  ensure(*member_ptr == -3);
   member_ptr = *(int**) array_get(members, 2);
-  assert(*member_ptr == -3);
+  ensure(*member_ptr == -3);
   /* the correct elements are marked (and only these) */
-  assert(bittab_bit_is_set(b, 2));
-  assert(bittab_bit_is_set(b, 3));
-  assert(bittab_bit_is_set(b, 4));
-  assert(bittab_count_set_bits(b) == 3);
+  ensure(bittab_bit_is_set(b, 2));
+  ensure(bittab_bit_is_set(b, 3));
+  ensure(bittab_bit_is_set(b, 4));
+  ensure(bittab_count_set_bits(b) == 3);
 
   /* free */
   array_free(elements);
