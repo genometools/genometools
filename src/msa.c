@@ -87,18 +87,31 @@ unsigned long msa_consensus_distance(const MSA *msa)
 {
   unsigned long col, number_of_seqs, seqlen, **count, dist = 0;
   char **msa_array, *consensus;
+
   assert(msa);
+
   number_of_seqs = bioseq_number_of_sequences(msa->bs);
   seqlen = bioseq_get_sequence_length(msa->bs, 0);
+
+  /* get the MSA in a convenient form */
   msa_array = get_msa_array(msa->bs);
+
+  /* compute the character count array */
   count = get_count(msa_array, number_of_seqs, seqlen);
+
+  /* compute the consensus from the count array */
   consensus = get_consensus(count, seqlen);
+
+  /* compute the actual consensus distance */
   for (col = 0; col < seqlen; col++) {
     dist += number_of_seqs - count[col][(int) consensus[col]];
   }
+
+  /* free */
   free(consensus);
   ARRAY2DIM_FREE(count);
   free(msa_array);
+
   return dist;
 }
 
@@ -106,16 +119,23 @@ unsigned long msa_sum_of_pairwise_scores(const MSA *msa)
 {
   unsigned long i, j, col, number_of_seqs, seqlen, sum = 0;
   char **msa_array;
+
   assert(msa);
+
   number_of_seqs = bioseq_number_of_sequences(msa->bs);
   seqlen = bioseq_get_sequence_length(msa->bs, 0);
+
+  /* get the MSA in a convenient form */
   msa_array = get_msa_array(msa->bs);
+
+  /* compute the actual sum of pairwise scores */
   for (i = 0; i < number_of_seqs-1; i++) {
     for (j = i+1; j < number_of_seqs; j++) {
       for (col = 0; col < seqlen; col++)
         sum += (msa_array[i][col] == msa_array[j][col]) ? 0 : 1; /* delta */
     }
   }
+
   free(msa_array);
   return sum;
 }
