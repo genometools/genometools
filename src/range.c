@@ -1,10 +1,11 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
 #include <assert.h>
+#include "ensure.h"
 #include "fptr.h"
 #include "msort.h"
 #include "range.h"
@@ -131,7 +132,7 @@ int range_unit_test(void)
   Array *ranges, *tmp_ranges, *ctr;
   unsigned long i;
 
-  assert(sizeof(ranges_out) / sizeof(ranges_out[0]) ==
+  ensure(sizeof(ranges_out) / sizeof(ranges_out[0]) ==
          sizeof(counts)     / sizeof(counts[0]));
 
   /* test ranges_uniq() */
@@ -140,11 +141,11 @@ int range_unit_test(void)
   for (i = 0; i < sizeof(ranges_in) / sizeof(ranges_in[0]); i++)
     array_add(ranges, ranges_in[i]);
   ranges_uniq(tmp_ranges, ranges);
-  assert(array_size(ranges) == sizeof(ranges_in) / sizeof(ranges_in[0]));
-  assert(array_size(tmp_ranges) == sizeof(ranges_out) / sizeof(ranges_out[0]));
+  ensure(array_size(ranges) == sizeof(ranges_in) / sizeof(ranges_in[0]));
+  ensure(array_size(tmp_ranges) == sizeof(ranges_out) / sizeof(ranges_out[0]));
   for (i = 0; i < array_size(tmp_ranges); i++) {
-    assert(ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
-    assert(ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
+    ensure(ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
+    ensure(ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
   }
 
   /* test ranges_uniq_in_place() */
@@ -152,30 +153,30 @@ int range_unit_test(void)
   array_add_array(tmp_ranges, ranges);
   ranges_uniq_in_place(tmp_ranges);
   for (i = 0; i < array_size(tmp_ranges); i++) {
-    assert(ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
-    assert(ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
+    ensure(ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
+    ensure(ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
   }
 
   /* test ranges_uniq_count() */
   array_set_size(tmp_ranges, 0);
   ctr = ranges_uniq_count(tmp_ranges, ranges);
-  assert(array_size(tmp_ranges) == array_size(ctr));
-  assert(array_size(ctr) == sizeof(counts) / sizeof(counts[0]));
+  ensure(array_size(tmp_ranges) == array_size(ctr));
+  ensure(array_size(ctr) == sizeof(counts) / sizeof(counts[0]));
   for (i = 0; i < array_size(ctr); i++) {
-    assert(counts[i] == *(unsigned long*) array_get(ctr, i));
-    assert(ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
-    assert(ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
+    ensure(counts[i] == *(unsigned long*) array_get(ctr, i));
+    ensure(ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
+    ensure(ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
   }
   array_free(ctr);
 
   /* test ranges_uniq_in_place_count() */
   ctr = ranges_uniq_in_place_count(ranges);
-  assert(array_size(ranges) == array_size(ctr));
-  assert(array_size(ctr) == sizeof(counts) / sizeof(counts[0]));
+  ensure(array_size(ranges) == array_size(ctr));
+  ensure(array_size(ctr) == sizeof(counts) / sizeof(counts[0]));
   for (i = 0; i < array_size(ctr); i++) {
-    assert(counts[i] == *(unsigned long*) array_get(ctr, i));
-    assert(ranges_out[i].start == (*(Range*) array_get(ranges, i)).start);
-    assert(ranges_out[i].end == (*(Range*) array_get(ranges, i)).end);
+    ensure(counts[i] == *(unsigned long*) array_get(ctr, i));
+    ensure(ranges_out[i].start == (*(Range*) array_get(ranges, i)).start);
+    ensure(ranges_out[i].end == (*(Range*) array_get(ranges, i)).end);
   }
   array_free(ctr);
 

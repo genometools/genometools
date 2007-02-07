@@ -1,10 +1,11 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
 #include "array.h"
+#include "ensure.h"
 #include "reverse.h"
 #include "splicedseq.h"
 #include "str.h"
@@ -109,12 +110,12 @@ static void check_splicedseq(Splicedseq *ss)
 
   splicedseq_add(ss, 2, 3, origseq);
   splicedseq_add(ss, 6, 8, origseq);
-  assert(strcmp(splicedseq_get(ss), splicedseq) == 0);
-  assert(!splicedseq_pos_is_border(ss, 0));
-  assert( splicedseq_pos_is_border(ss, 1));
-  assert(!splicedseq_pos_is_border(ss, 2));
-  assert(!splicedseq_pos_is_border(ss, 3));
-  assert(!splicedseq_pos_is_border(ss, 4));
+  ensure(strcmp(splicedseq_get(ss), splicedseq) == 0);
+  ensure(!splicedseq_pos_is_border(ss, 0));
+  ensure( splicedseq_pos_is_border(ss, 1));
+  ensure(!splicedseq_pos_is_border(ss, 2));
+  ensure(!splicedseq_pos_is_border(ss, 3));
+  ensure(!splicedseq_pos_is_border(ss, 4));
 }
 
 int splicedseq_unit_test(void)

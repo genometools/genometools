@@ -437,7 +437,7 @@ static void compute_R(Bittab **R, Bittab **C, Bittab **right,
   bittab_free(tmpset);
 }
 
-#ifndef DEBUG
+#ifndef NDEBUG
 static unsigned int splice_form_is_valid(Bittab *SA_p,
                                          const Consensus_SA *csa)
 {

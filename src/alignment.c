@@ -110,6 +110,7 @@ void alignment_remove_last(Alignment *a)
     meop_ptr->steps--;
 }
 
+#ifndef NDEBUG
 static int alignment_is_valid(const Alignment *a)
 {
   unsigned long i, len;
@@ -134,6 +135,7 @@ static int alignment_is_valid(const Alignment *a)
     return 0;
   return 1;
 }
+#endif
 
 unsigned long alignment_eval(const Alignment *a)
 {

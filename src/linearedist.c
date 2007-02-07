@@ -4,7 +4,6 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "align.h" /* XXX: remove */
 #include "minmax.h"
 #include "xansi.h"
 
@@ -34,15 +33,9 @@ unsigned long linearedist(const char *u, unsigned long n,
                           const char *v, unsigned long m)
 {
   unsigned long *dptable, edist;
-  Alignment *alignment;
   dptable = xmalloc(sizeof(unsigned long) * (MIN(n,m) + 1));
   fillDPtable(dptable, n <= m ? u : v, MIN(n,m), n <= m ? v : u, MAX(n,m));
   edist = dptable[MIN(n,m)];
-  /* XXX: remove */
-#ifndef NDEBUG
-  alignment = align(u, n, v, m);
-  assert(alignment_eval(alignment) == edist);
-#endif
   free(dptable);
   return edist;
 }

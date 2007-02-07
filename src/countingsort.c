@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <string.h>
 #include "countingsort.h"
+#include "ensure.h"
 #include "xansi.h"
 
 void countingsort(void *out, const void *in, size_t elem_size,
@@ -67,6 +68,6 @@ int countingsort_unit_test(void)
   countingsort(numbers_out, numbers, sizeof(unsigned int), 5,
                countingsort_get_max(numbers, sizeof(unsigned int), 5, NULL,
                                     get_int), NULL,  get_int);
-  assert(!memcmp(sorted_numbers, numbers_out, sizeof(unsigned int) * 5));
+  ensure(!memcmp(sorted_numbers, numbers_out, sizeof(unsigned int) * 5));
   return EXIT_SUCCESS;
 }
