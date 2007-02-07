@@ -1,0 +1,19 @@
+/*
+  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
+*/
+
+#ifndef MERGE_STREAM_H
+#define MERGE_STREAM_H
+
+#include <stdio.h>
+#include "genome_stream.h"
+
+/* implements the ``genome_stream'' interface */
+typedef struct Merge_stream Merge_stream;
+
+const Genome_stream_class* merge_stream_class(void);
+Genome_stream*             merge_stream_new(const Array *genome_streams);
+
+#endif

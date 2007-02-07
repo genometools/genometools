@@ -1,0 +1,12 @@
+fold the following RNA sequence with Nussinov Algorithm:
+ggttccatggtgtaatggttagcactctggactctgaatccagcgatccgagttcaaatctcggtggaacct
+length of RNA sequence = 72
+using the following parameters:
+l_min =  3
+alpha(G,C) = alpha(C,G) = -3
+alpha(A,U) = alpha(U,A) = -2
+alpha(G,U) = alpha(U,G) = -1
+all other alpha values have been set to infinity
+score: -69
+result:
+(1,71)(2,70)(3,69)(4,68)(5,67)(6,66)(7,47)(8,46)(9,44)(10,25)(11,24)(12,23)(13,21)(14,20)(15,19)(27,43)(28,42)(29,41)(30,40)(31,39)(32,36)(10,25)(11,24)(12,23)(13,21)(14,20)(15,19)(27,43)(28,42)(29,41)(30,40)(31,39)(32,36)(48,64)(49,63)(50,62)(51,61)(52,60)(54,58)

@@ -1,0 +1,333 @@
+##gff-version   3
+##sequence-region   ENm001 1 4294967295
+ENm001	gth	gene	63867	87012	1.000000	+	.	ID=gene1
+ENm001	gth	exon	86827	87012	1.000000	+	.	Parent=gene1
+ENm001	gth	exon	81851	82009	1.000000	+	.	Parent=gene1
+ENm001	gth	exon	81293	81508	1.000000	+	.	Parent=gene1
+ENm001	gth	exon	79694	80029	1.000000	+	.	Parent=gene1
+ENm001	gth	exon	78553	78805	1.000000	+	.	Parent=gene1
+ENm001	gth	exon	64067	64152	1.000000	+	.	Parent=gene1
+ENm001	gth	exon	63867	63893	0.196078	+	.	Parent=gene1
+###
+ENm001	gth	gene	78298	87012	0.883554	+	.	ID=gene2
+ENm001	gth	exon	86827	87012	0.960317	+	.	Parent=gene2
+ENm001	gth	exon	81851	82009	0.938776	+	.	Parent=gene2
+ENm001	gth	exon	81293	81508	0.899756	+	.	Parent=gene2
+ENm001	gth	exon	79694	80029	0.810409	+	.	Parent=gene2
+ENm001	gth	exon	78553	78805	0.883152	+	.	Parent=gene2
+ENm001	gth	exon	78298	78301	1.000000	+	.	Parent=gene2
+###
+ENm001	gth	gene	286309	286912	0.663080	+	.	ID=gene3
+ENm001	gth	exon	286309	286912	0.663080	+	.	Parent=gene3
+###
+ENm001	gth	gene	286309	287101	0.547515	+	.	ID=gene4
+ENm001	gth	exon	287066	287101	0.223881	+	.	Parent=gene4
+ENm001	gth	exon	286309	286974	0.547515	+	.	Parent=gene4
+###
+ENm001	gth	gene	329315	335651	1.000000	+	.	ID=gene5
+ENm001	gth	exon	335504	335651	1.000000	+	.	Parent=gene5
+ENm001	gth	exon	329793	329980	1.000000	+	.	Parent=gene5
+ENm001	gth	exon	329315	329464	1.000000	+	.	Parent=gene5
+###
+ENm001	gth	gene	329315	335651	0.796171	+	.	ID=gene6
+ENm001	gth	exon	335504	335651	0.900383	+	.	Parent=gene6
+ENm001	gth	exon	329793	329980	0.715789	+	.	Parent=gene6
+ENm001	gth	exon	329315	329451	0.809717	+	.	Parent=gene6
+###
+ENm001	gth	gene	329315	335651	0.795647	+	.	ID=gene7
+ENm001	gth	exon	335504	335651	0.861660	+	.	Parent=gene7
+ENm001	gth	exon	329793	329980	0.815790	+	.	Parent=gene7
+ENm001	gth	exon	329315	329464	0.711111	+	.	Parent=gene7
+###
+ENm001	gth	gene	329315	335651	0.859504	+	.	ID=gene8
+ENm001	gth	exon	335504	335651	0.896825	+	.	Parent=gene8
+ENm001	gth	exon	329793	329980	0.852761	+	.	Parent=gene8
+ENm001	gth	exon	329315	329458	0.832714	+	.	Parent=gene8
+###
+ENm001	gth	gene	356027	388817	0.810929	+	.	ID=gene9
+ENm001	gth	exon	388479	388817	0.883275	+	.	Parent=gene9
+ENm001	gth	exon	356027	356222	0.689150	+	.	Parent=gene9
+###
+ENm001	gth	gene	356028	388817	0.897489	+	.	ID=gene10
+ENm001	gth	exon	388479	388817	0.941957	+	.	Parent=gene10
+ENm001	gth	exon	356028	356222	0.821530	+	.	Parent=gene10
+###
+ENm001	gth	gene	356028	388817	0.900932	+	.	ID=gene11
+ENm001	gth	exon	388479	388817	0.968379	+	.	Parent=gene11
+ENm001	gth	exon	356028	356222	0.803977	+	.	Parent=gene11
+###
+ENm001	gth	gene	356028	388817	0.895961	+	.	ID=gene12
+ENm001	gth	exon	388479	388817	0.959432	+	.	Parent=gene12
+ENm001	gth	exon	356028	356222	0.799383	+	.	Parent=gene12
+###
+ENm001	gth	gene	356028	388817	0.900932	+	.	ID=gene13
+ENm001	gth	exon	388479	388817	0.968379	+	.	Parent=gene13
+ENm001	gth	exon	356028	356222	0.803977	+	.	Parent=gene13
+###
+ENm001	gth	gene	356028	388817	0.902720	+	.	ID=gene14
+ENm001	gth	exon	388479	388817	0.950249	+	.	Parent=gene14
+ENm001	gth	exon	356028	356222	0.821530	+	.	Parent=gene14
+###
+ENm001	gth	gene	356031	388817	0.938775	+	.	ID=gene15
+ENm001	gth	exon	388479	388817	1.000000	+	.	Parent=gene15
+ENm001	gth	exon	356031	356222	0.866142	+	.	Parent=gene15
+###
+ENm001	gth	gene	468516	468738	0.704600	+	.	ID=gene16
+ENm001	gth	exon	468516	468738	0.704600	+	.	Parent=gene16
+###
+ENm001	gth	gene	468516	468738	0.730583	+	.	ID=gene17
+ENm001	gth	exon	468516	468738	0.730583	+	.	Parent=gene17
+###
+ENm001	gth	gene	528618	625654	0.999442	+	.	ID=gene18
+ENm001	gth	exon	625420	625654	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	625188	625324	0.981651	+	.	Parent=gene18
+ENm001	gth	exon	612837	613002	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	611521	611630	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	608309	608490	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	606922	607002	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	604414	604644	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	601382	601522	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	601031	601187	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	599178	599324	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	592583	592801	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	588924	589023	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	587992	588153	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	587171	587307	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	586970	587072	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	584888	585048	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	570385	570558	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	569483	569617	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	561201	561392	1.000000	+	.	Parent=gene18
+ENm001	gth	exon	528618	529817	1.000000	+	.	Parent=gene18
+###
+ENm001	gth	gene	620432	684293	0.991022	-	.	ID=gene19
+ENm001	gth	exon	684144	684293	0.979167	-	.	Parent=gene19
+ENm001	gth	exon	680427	680540	1.000000	-	.	Parent=gene19
+ENm001	gth	exon	679175	679280	1.000000	-	.	Parent=gene19
+ENm001	gth	exon	667845	667954	1.000000	-	.	Parent=gene19
+ENm001	gth	exon	666825	666881	1.000000	-	.	Parent=gene19
+ENm001	gth	exon	665748	665823	0.961538	-	.	Parent=gene19
+ENm001	gth	exon	664782	664906	1.000000	-	.	Parent=gene19
+ENm001	gth	exon	663032	663166	1.000000	-	.	Parent=gene19
+ENm001	gth	exon	662083	662194	1.000000	-	.	Parent=gene19
+ENm001	gth	exon	627618	627729	1.000000	-	.	Parent=gene19
+ENm001	gth	exon	625533	625655	0.974468	-	.	Parent=gene19
+ENm001	gth	exon	620957	621056	0.963235	-	.	Parent=gene19
+ENm001	gth	exon	620432	620536	1.000000	-	.	Parent=gene19
+###
+ENm001	gth	gene	620432	684293	1.000000	-	.	ID=gene20
+ENm001	gth	exon	684144	684293	1.000000	-	.	Parent=gene20
+ENm001	gth	exon	680427	680540	1.000000	-	.	Parent=gene20
+ENm001	gth	exon	679175	679280	1.000000	-	.	Parent=gene20
+ENm001	gth	exon	667845	667954	1.000000	-	.	Parent=gene20
+ENm001	gth	exon	666825	666881	1.000000	-	.	Parent=gene20
+ENm001	gth	exon	665748	665823	1.000000	-	.	Parent=gene20
+ENm001	gth	exon	664782	664906	1.000000	-	.	Parent=gene20
+ENm001	gth	exon	663032	663166	1.000000	-	.	Parent=gene20
+ENm001	gth	exon	662083	662194	1.000000	-	.	Parent=gene20
+ENm001	gth	exon	627618	627729	1.000000	-	.	Parent=gene20
+ENm001	gth	exon	625533	625655	1.000000	-	.	Parent=gene20
+ENm001	gth	exon	620957	621056	1.000000	-	.	Parent=gene20
+ENm001	gth	exon	620432	620536	1.000000	-	.	Parent=gene20
+###
+ENm001	gth	gene	625234	684293	0.808461	-	.	ID=gene21
+ENm001	gth	exon	684144	684293	0.779468	-	.	Parent=gene21
+ENm001	gth	exon	680427	680540	0.811518	-	.	Parent=gene21
+ENm001	gth	exon	679175	679280	0.953608	-	.	Parent=gene21
+ENm001	gth	exon	667797	667954	0.516484	-	.	Parent=gene21
+ENm001	gth	exon	665748	665823	0.921053	-	.	Parent=gene21
+ENm001	gth	exon	664782	664906	0.850000	-	.	Parent=gene21
+ENm001	gth	exon	663032	663166	0.880184	-	.	Parent=gene21
+ENm001	gth	exon	662083	662194	0.973684	-	.	Parent=gene21
+ENm001	gth	exon	627618	627729	0.825581	-	.	Parent=gene21
+ENm001	gth	exon	625500	625655	0.752508	-	.	Parent=gene21
+ENm001	gth	exon	625234	625253	0.200000	-	.	Parent=gene21
+###
+ENm001	gth	gene	717619	747397	0.765398	+	.	ID=gene22
+ENm001	gth	exon	747260	747397	1.000000	+	.	Parent=gene22
+ENm001	gth	exon	745593	745655	0.962264	+	.	Parent=gene22
+ENm001	gth	exon	741602	741673	1.000000	+	.	Parent=gene22
+ENm001	gth	exon	739766	739844	0.947059	+	.	Parent=gene22
+ENm001	gth	exon	735796	735875	0.953271	+	.	Parent=gene22
+ENm001	gth	exon	733622	733916	0.577438	+	.	Parent=gene22
+ENm001	gth	exon	717619	717748	0.530516	+	.	Parent=gene22
+###
+ENm001	gth	gene	717622	747397	0.876956	+	.	ID=gene23
+ENm001	gth	exon	747260	747397	1.000000	+	.	Parent=gene23
+ENm001	gth	exon	745593	745655	1.000000	+	.	Parent=gene23
+ENm001	gth	exon	741602	741673	1.000000	+	.	Parent=gene23
+ENm001	gth	exon	739766	739844	0.973510	+	.	Parent=gene23
+ENm001	gth	exon	735796	735875	0.972222	+	.	Parent=gene23
+ENm001	gth	exon	733710	733916	0.945161	+	.	Parent=gene23
+ENm001	gth	exon	728305	728368	0.933333	+	.	Parent=gene23
+ENm001	gth	exon	717622	717773	0.451737	+	.	Parent=gene23
+###
+ENm001	gth	gene	717622	747397	0.890370	+	.	ID=gene24
+ENm001	gth	exon	747260	747397	1.000000	+	.	Parent=gene24
+ENm001	gth	exon	745593	745655	1.000000	+	.	Parent=gene24
+ENm001	gth	exon	741602	741673	1.000000	+	.	Parent=gene24
+ENm001	gth	exon	739766	739844	1.000000	+	.	Parent=gene24
+ENm001	gth	exon	735796	735875	1.000000	+	.	Parent=gene24
+ENm001	gth	exon	733710	733916	1.000000	+	.	Parent=gene24
+ENm001	gth	exon	728305	728368	0.933333	+	.	Parent=gene24
+ENm001	gth	exon	717622	717773	0.451737	+	.	Parent=gene24
+###
+ENm001	gth	gene	717625	733850	0.712980	+	.	ID=gene25
+ENm001	gth	exon	733710	733850	0.913043	+	.	Parent=gene25
+ENm001	gth	exon	728305	728368	0.933333	+	.	Parent=gene25
+ENm001	gth	exon	717625	717773	0.468000	+	.	Parent=gene25
+###
+ENm001	gth	gene	724903	769734	0.966519	-	.	ID=gene26
+ENm001	gth	exon	769508	769734	0.953125	-	.	Parent=gene26
+ENm001	gth	exon	750016	750280	0.975824	-	.	Parent=gene26
+ENm001	gth	exon	732544	732821	0.973361	-	.	Parent=gene26
+ENm001	gth	exon	727099	727325	0.971800	-	.	Parent=gene26
+ENm001	gth	exon	724903	724985	0.944134	-	.	Parent=gene26
+###
+ENm001	gth	gene	724903	769734	1.000000	-	.	ID=gene27
+ENm001	gth	exon	769508	769734	1.000000	-	.	Parent=gene27
+ENm001	gth	exon	750016	750280	1.000000	-	.	Parent=gene27
+ENm001	gth	exon	732544	732821	1.000000	-	.	Parent=gene27
+ENm001	gth	exon	727099	727325	1.000000	-	.	Parent=gene27
+ENm001	gth	exon	724903	724985	1.000000	-	.	Parent=gene27
+###
+ENm001	gth	gene	1333735	1496638	0.889211	+	.	ID=gene28
+ENm001	gth	exon	1496441	1496638	0.739550	+	.	Parent=gene28
+ENm001	gth	exon	1494992	1495097	0.902703	+	.	Parent=gene28
+ENm001	gth	exon	1494221	1494393	1.000000	+	.	Parent=gene28
+ENm001	gth	exon	1482375	1482464	1.000000	+	.	Parent=gene28
+ENm001	gth	exon	1471971	1472126	0.965779	+	.	Parent=gene28
+ENm001	gth	exon	1457055	1457303	0.849020	+	.	Parent=gene28
+ENm001	gth	exon	1444146	1444246	0.976471	+	.	Parent=gene28
+ENm001	gth	exon	1441114	1441341	1.000000	+	.	Parent=gene28
+ENm001	gth	exon	1440052	1440202	0.846847	+	.	Parent=gene28
+ENm001	gth	exon	1436207	1436286	0.969697	+	.	Parent=gene28
+ENm001	gth	exon	1433027	1433315	0.740594	+	.	Parent=gene28
+ENm001	gth	exon	1424463	1424591	0.882353	+	.	Parent=gene28
+ENm001	gth	exon	1421467	1422190	0.835843	+	.	Parent=gene28
+ENm001	gth	exon	1419886	1419972	1.000000	+	.	Parent=gene28
+ENm001	gth	exon	1417272	1417366	0.974684	+	.	Parent=gene28
+ENm001	gth	exon	1388997	1389188	0.951923	+	.	Parent=gene28
+ENm001	gth	exon	1378174	1378356	0.843450	+	.	Parent=gene28
+ENm001	gth	exon	1371549	1371641	0.968944	+	.	Parent=gene28
+ENm001	gth	exon	1369633	1369879	0.977117	+	.	Parent=gene28
+ENm001	gth	exon	1366081	1366206	0.957547	+	.	Parent=gene28
+ENm001	gth	exon	1364781	1364944	0.851590	+	.	Parent=gene28
+ENm001	gth	exon	1363809	1363898	1.000000	+	.	Parent=gene28
+ENm001	gth	exon	1360432	1360647	0.986111	+	.	Parent=gene28
+ENm001	gth	exon	1338567	1338675	0.967033	+	.	Parent=gene28
+ENm001	gth	exon	1333735	1333896	0.682432	+	.	Parent=gene28
+###
+ENm001	gth	gene	1333735	1496638	0.962358	+	.	ID=gene29
+ENm001	gth	exon	1496441	1496638	0.972050	+	.	Parent=gene29
+ENm001	gth	exon	1494992	1495097	1.000000	+	.	Parent=gene29
+ENm001	gth	exon	1494221	1494393	1.000000	+	.	Parent=gene29
+ENm001	gth	exon	1482375	1482464	1.000000	+	.	Parent=gene29
+ENm001	gth	exon	1471971	1472126	1.000000	+	.	Parent=gene29
+ENm001	gth	exon	1457055	1457303	0.909091	+	.	Parent=gene29
+ENm001	gth	exon	1444146	1444246	0.965035	+	.	Parent=gene29
+ENm001	gth	exon	1441114	1441341	1.000000	+	.	Parent=gene29
+ENm001	gth	exon	1440052	1440202	1.000000	+	.	Parent=gene29
+ENm001	gth	exon	1436207	1436286	1.000000	+	.	Parent=gene29
+ENm001	gth	exon	1433027	1433315	0.828753	+	.	Parent=gene29
+ENm001	gth	exon	1424463	1424591	1.000000	+	.	Parent=gene29
+ENm001	gth	exon	1421467	1422190	0.972794	+	.	Parent=gene29
+ENm001	gth	exon	1419886	1419972	1.000000	+	.	Parent=gene29
+ENm001	gth	exon	1417272	1417366	1.000000	+	.	Parent=gene29
+ENm001	gth	exon	1388997	1389188	0.965649	+	.	Parent=gene29
+ENm001	gth	exon	1378174	1378356	0.967213	+	.	Parent=gene29
+ENm001	gth	exon	1371549	1371641	1.000000	+	.	Parent=gene29
+ENm001	gth	exon	1369633	1369879	0.989305	+	.	Parent=gene29
+ENm001	gth	exon	1366081	1366206	0.981481	+	.	Parent=gene29
+ENm001	gth	exon	1364781	1364944	0.989041	+	.	Parent=gene29
+ENm001	gth	exon	1363809	1363898	1.000000	+	.	Parent=gene29
+ENm001	gth	exon	1360432	1360647	1.000000	+	.	Parent=gene29
+ENm001	gth	exon	1338567	1338675	0.967033	+	.	Parent=gene29
+ENm001	gth	exon	1333735	1333896	0.754777	+	.	Parent=gene29
+###
+ENm001	gth	gene	1333735	1496638	0.983471	+	.	ID=gene30
+ENm001	gth	exon	1496441	1496638	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1494992	1495097	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1494221	1494393	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1482375	1482464	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1471971	1472126	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1457055	1457303	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1444146	1444246	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1441114	1441341	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1440052	1440202	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1436207	1436286	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1433027	1433315	0.873706	+	.	Parent=gene30
+ENm001	gth	exon	1424463	1424591	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1421467	1422190	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1419886	1419972	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1417272	1417366	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1388997	1389188	0.984674	+	.	Parent=gene30
+ENm001	gth	exon	1378174	1378356	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1371549	1371641	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1369633	1369879	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1366081	1366206	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1364781	1364944	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1363809	1363898	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1360432	1360647	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1338567	1338675	1.000000	+	.	Parent=gene30
+ENm001	gth	exon	1333735	1333896	0.768987	+	.	Parent=gene30
+###
+ENm001	gth	gene	1333735	1496638	0.882760	+	.	ID=gene31
+ENm001	gth	exon	1496441	1496638	0.739550	+	.	Parent=gene31
+ENm001	gth	exon	1494992	1495097	0.862745	+	.	Parent=gene31
+ENm001	gth	exon	1494221	1494393	0.982684	+	.	Parent=gene31
+ENm001	gth	exon	1482375	1482464	0.966667	+	.	Parent=gene31
+ENm001	gth	exon	1471971	1472126	0.965779	+	.	Parent=gene31
+ENm001	gth	exon	1457055	1457303	0.846303	+	.	Parent=gene31
+ENm001	gth	exon	1444146	1444246	0.976471	+	.	Parent=gene31
+ENm001	gth	exon	1441114	1441341	0.968668	+	.	Parent=gene31
+ENm001	gth	exon	1440052	1440202	0.859155	+	.	Parent=gene31
+ENm001	gth	exon	1436207	1436286	0.939850	+	.	Parent=gene31
+ENm001	gth	exon	1433027	1433315	0.755859	+	.	Parent=gene31
+ENm001	gth	exon	1424463	1424591	0.882353	+	.	Parent=gene31
+ENm001	gth	exon	1421467	1422190	0.829035	+	.	Parent=gene31
+ENm001	gth	exon	1419886	1419972	1.000000	+	.	Parent=gene31
+ENm001	gth	exon	1417272	1417366	0.972222	+	.	Parent=gene31
+ENm001	gth	exon	1388997	1389188	0.914286	+	.	Parent=gene31
+ENm001	gth	exon	1378174	1378356	0.860841	+	.	Parent=gene31
+ENm001	gth	exon	1371549	1371641	0.943820	+	.	Parent=gene31
+ENm001	gth	exon	1369633	1369879	0.977117	+	.	Parent=gene31
+ENm001	gth	exon	1366081	1366206	0.930481	+	.	Parent=gene31
+ENm001	gth	exon	1364781	1364944	0.899083	+	.	Parent=gene31
+ENm001	gth	exon	1363809	1363898	0.963235	+	.	Parent=gene31
+ENm001	gth	exon	1360432	1360647	0.986111	+	.	Parent=gene31
+ENm001	gth	exon	1338567	1338675	0.967033	+	.	Parent=gene31
+ENm001	gth	exon	1333735	1333896	0.668919	+	.	Parent=gene31
+###
+ENm001	gth	gene	1333738	1496638	0.906741	+	.	ID=gene32
+ENm001	gth	exon	1496441	1496638	0.801282	+	.	Parent=gene32
+ENm001	gth	exon	1494992	1495097	0.950276	+	.	Parent=gene32
+ENm001	gth	exon	1494221	1494393	0.961864	+	.	Parent=gene32
+ENm001	gth	exon	1482375	1482464	1.000000	+	.	Parent=gene32
+ENm001	gth	exon	1471971	1472126	0.974895	+	.	Parent=gene32
+ENm001	gth	exon	1457055	1457303	0.851852	+	.	Parent=gene32
+ENm001	gth	exon	1444146	1444246	1.000000	+	.	Parent=gene32
+ENm001	gth	exon	1441114	1441341	0.976982	+	.	Parent=gene32
+ENm001	gth	exon	1440052	1440202	0.884445	+	.	Parent=gene32
+ENm001	gth	exon	1436207	1436286	1.000000	+	.	Parent=gene32
+ENm001	gth	exon	1433027	1433315	0.775701	+	.	Parent=gene32
+ENm001	gth	exon	1424463	1424591	0.842391	+	.	Parent=gene32
+ENm001	gth	exon	1421467	1422190	0.864656	+	.	Parent=gene32
+ENm001	gth	exon	1419886	1419972	1.000000	+	.	Parent=gene32
+ENm001	gth	exon	1417272	1417366	0.942029	+	.	Parent=gene32
+ENm001	gth	exon	1388997	1389188	0.975936	+	.	Parent=gene32
+ENm001	gth	exon	1378174	1378356	0.871257	+	.	Parent=gene32
+ENm001	gth	exon	1371549	1371641	0.972973	+	.	Parent=gene32
+ENm001	gth	exon	1369633	1369879	0.990338	+	.	Parent=gene32
+ENm001	gth	exon	1366081	1366206	0.981481	+	.	Parent=gene32
+ENm001	gth	exon	1364781	1364944	0.933884	+	.	Parent=gene32
+ENm001	gth	exon	1360432	1360647	0.987805	+	.	Parent=gene32
+ENm001	gth	exon	1338567	1338675	1.000000	+	.	Parent=gene32
+ENm001	gth	exon	1333738	1333896	0.698842	+	.	Parent=gene32
+###
+ENm001	gth	gene	1421486	1422028	0.816017	+	.	ID=gene33
+ENm001	gth	exon	1421486	1422028	0.816017	+	.	Parent=gene33
+###
+ENm001	gth	gene	1421501	1422028	0.933333	+	.	ID=gene34
+ENm001	gth	exon	1421501	1422028	0.933333	+	.	Parent=gene34
+###

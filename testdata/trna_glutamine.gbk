@@ -1,0 +1,48 @@
+LOCUS       NR_000037                 72 bp    tRNA    linear   PRI 17-DEC-2003
+DEFINITION  Homo sapiens tRNA glutamine 1 (TRQ1) on chromosome 17.
+ACCESSION   NR_000037
+VERSION     NR_000037.1  GI:24371439
+KEYWORDS    .
+SOURCE      Homo sapiens (human)
+  ORGANISM  Homo sapiens
+            Eukaryota; Metazoa; Chordata; Craniata; Vertebrata; Euteleostomi;
+            Mammalia; Eutheria; Primates; Catarrhini; Hominidae; Homo.
+REFERENCE   1  (bases 1 to 72)
+  AUTHORS   Morrison,N., Goddard,J.P., Ledbetter,D.H., Boyd,E., Bourn,D. and
+            Connor,J.M.
+  TITLE     Chromosomal assignment of a large tRNA gene cluster (tRNA(Leu),
+            tRNA(Gln), tRNA(Lys), tRNA(Arg), tRNA(Gly)) to 17p13.1
+  JOURNAL   Hum. Genet. 87 (2), 226-230 (1991)
+   PUBMED   2066114
+REFERENCE   2  (bases 1 to 72)
+  AUTHORS   Roy,K.L., Cooke,H. and Buckland,R.
+  TITLE     Nucleotide sequence of a segment of human DNA containing the three
+            tRNA genes
+  JOURNAL   Nucleic Acids Res. 10 (22), 7313-7322 (1982)
+   PUBMED   6296772
+COMMENT     PROVISIONAL REFSEQ: This record has not yet been subject to final
+            NCBI review. The reference sequence was derived from K01797.1.
+FEATURES             Location/Qualifiers
+     source          1..72
+                     /organism="Homo sapiens"
+                     /mol_type="tRNA"
+                     /db_xref="taxon:9606"
+                     /chromosome="17"
+                     /map="17p13.1"
+     gene            1..72
+                     /gene="TRQ1"
+                     /db_xref="GeneID:7228"
+                     /db_xref="LocusID:7228"
+                     /db_xref="MIM:189919"
+     tRNA            1..72
+                     /gene="TRQ1"
+                     /product="tRNA-Gln"
+                     /note="codon recognized: CAG; G00-120-457"
+                     /db_xref="GeneID:7228"
+                     /db_xref="LocusID:7228"
+                     /db_xref="MIM:189919"
+ORIGIN      
+        1 ggttccatgg tgtaatggtt agcactctgg actctgaatc cagcgatccg agttcaaatc
+       61 tcggtggaac ct
+//
+

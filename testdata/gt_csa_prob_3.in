@@ -1,0 +1,12 @@
+##gff-version   3
+##sequence-region   NC_003070 1 4294967295
+NC_003070	gth	gene	20552738	20552824	0.747126	+	.	ID=gene1
+NC_003070	gth	exon	20552738	20552824	0.747126	+	.	Parent=gene1
+###
+NC_003070	gth	gene	20552738	20553188	0.780269	+	.	ID=gene2
+NC_003070	gth	exon	20552738	20552824	0.747126	+	.	Parent=gene2
+NC_003070	gth	exon	20553053	20553188	0.801471	+	.	Parent=gene2
+###
+NC_003070	gth	gene	24280722	24280936	0.804651	+	.	ID=gene3
+NC_003070	gth	exon	24280722	24280936	0.804651	+	.	Parent=gene3
+###

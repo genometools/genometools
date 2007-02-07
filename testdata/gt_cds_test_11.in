@@ -1,0 +1,4 @@
+##gff-version   3
+##sequence-region dna 1 11
+dna	.	gene	1	11	.	-	.	ID=gene1
+dna	.	exon	1	11	.	-	.	Parent=gene1

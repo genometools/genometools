@@ -1,0 +1,447 @@
+/*
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
+*/
+
+#include <assert.h>
+#include "consensus_sa.h"
+#include "csa_visitor.h"
+#include "fptr.h"
+#include "log.h"
+#include "genome_visitor_rep.h"
+#include "queue.h"
+#include "undef.h"
+
+#define GTH_CSA_SOURCE_TAG      "gth_csa"
+
+struct Csa_visitor {
+  const Genome_visitor parent_instance;
+  Queue *genome_node_buffer;
+  unsigned long join_length;
+  Array *cluster;
+  Genome_feature *buffered_feature;
+  Range first_range,
+        second_range;
+  Str *first_str,
+      *second_str,
+      *gth_csa_source_str;
+};
+
+typedef struct {
+  unsigned int is_first_splice_form : 1;
+  Genome_node* gene_feature;
+  Str *seqid,
+      *gth_csa_source_str;
+  Strand gene_strand;
+} Process_splice_form_info;
+
+#define csa_visitor_cast(GV)\
+        genome_visitor_cast(csa_visitor_class(), GV)
+
+static void csa_visitor_free(Genome_visitor *gv)
+{
+  Csa_visitor *csa_visitor = csa_visitor_cast(gv);
+  queue_free(csa_visitor->genome_node_buffer);
+  array_free(csa_visitor->cluster);
+  assert(!csa_visitor->buffered_feature);
+  str_free(csa_visitor->gth_csa_source_str);
+}
+
+static void csa_visitor_genome_feature(Genome_visitor *gv, Genome_feature *gf,
+                                       Log *l)
+{
+  Csa_visitor *csa_visitor = csa_visitor_cast(gv);
+
+  /* determine the first range if necessary */
+  if (csa_visitor->buffered_feature) {
+    csa_visitor->first_range = genome_node_get_range((Genome_node*) csa_visitor
+                                                     ->buffered_feature);
+    csa_visitor->first_str = genome_node_get_seqid((Genome_node*) csa_visitor
+                                                   ->buffered_feature);
+    assert(!array_size(csa_visitor->cluster));
+    array_add(csa_visitor->cluster, csa_visitor->buffered_feature);
+    csa_visitor->buffered_feature = NULL;
+  }
+  else if (!array_size(csa_visitor->cluster)) {
+    csa_visitor->first_range = genome_node_get_range((Genome_node*) gf);
+    csa_visitor->first_str = genome_node_get_seqid((Genome_node*) gf);
+    array_add(csa_visitor->cluster, gf);
+    return;
+  }
+
+  assert(!csa_visitor->buffered_feature);
+  csa_visitor->second_range = genome_node_get_range((Genome_node*) gf);
+  csa_visitor->second_str = genome_node_get_seqid((Genome_node*) gf);
+
+#if 0
+  printf("# first range =%lu, %lu\n", csa_visitor->first_range.start,
+         csa_visitor->first_range.end);
+  printf("# second range=%lu, %lu\n", csa_visitor->second_range.start,
+         csa_visitor->second_range.end);
+#endif
+
+  if ((str_cmp(csa_visitor->first_str, csa_visitor->second_str) == 0) &&
+      (csa_visitor->first_range.end + csa_visitor->join_length >=
+       csa_visitor->second_range.start)) {
+      /* we are still in the cluster */
+      array_add(csa_visitor->cluster, gf);
+      /* update first range */
+      assert(csa_visitor->second_range.start >= csa_visitor->first_range.start);
+#if 1
+      if (csa_visitor->second_range.end > csa_visitor->first_range.end)
+        csa_visitor->first_range.end = csa_visitor->second_range.end;
+#else
+    csa_visitor->first_range = csa_visitor->second_range;
+#endif
+  }
+  else {
+    /* end of cluster -> process it */
+    log_log(l, "process cluster");
+    csa_visitor->buffered_feature = gf;
+    csa_visitor_process_cluster(gv, 0, l);
+    csa_visitor->first_range = csa_visitor->second_range;
+    csa_visitor->first_str = csa_visitor->second_str;
+  }
+}
+
+static void csa_visitor_default_func(Genome_visitor *gv, Genome_node *gn,
+                                     /*@unused@*/ Log *l)
+{
+  Csa_visitor *csa_visitor = csa_visitor_cast(gv);
+  queue_add(csa_visitor->genome_node_buffer, gn);
+}
+
+const Genome_visitor_class* csa_visitor_class()
+{
+  static const Genome_visitor_class gvc = { sizeof(Csa_visitor),
+                                            csa_visitor_free,
+                                            NULL,
+                                            csa_visitor_genome_feature,
+                                            NULL,
+                                            csa_visitor_default_func };
+  return &gvc;
+}
+
+Genome_visitor* csa_visitor_new(unsigned long join_length)
+{
+  Genome_visitor *gv = genome_visitor_create(csa_visitor_class());
+  Csa_visitor *csa_visitor = csa_visitor_cast(gv);
+  csa_visitor->genome_node_buffer = queue_new(sizeof(Genome_node*));
+  csa_visitor->join_length = join_length;
+  csa_visitor->cluster = array_new(sizeof(Genome_feature*));
+  csa_visitor->buffered_feature = NULL;
+  csa_visitor->gth_csa_source_str = str_new_cstr(GTH_CSA_SOURCE_TAG);
+  return gv;
+}
+
+unsigned long csa_visitor_node_buffer_size(Genome_visitor *gv)
+{
+  Csa_visitor *csa_visitor = csa_visitor_cast(gv);
+  return queue_size(csa_visitor->genome_node_buffer);
+}
+
+Genome_node* csa_visitor_get_node(Genome_visitor *gv)
+{
+  Csa_visitor *csa_visitor = csa_visitor_cast(gv);
+  return *(Genome_node**) queue_get(csa_visitor->genome_node_buffer);
+}
+
+static Range get_genomic_range(const void *sa)
+{
+  Genome_feature *gf = *(Genome_feature**) sa;
+  assert(gf && genome_feature_get_type(gf) == gft_gene);
+  return genome_node_get_range((Genome_node*) gf);
+}
+
+static Strand get_strand(const void *sa)
+{
+  Genome_feature *gf = *(Genome_feature**) sa;
+  assert(gf && genome_feature_get_type(gf) == gft_gene);
+  return genome_feature_get_strand(gf);
+}
+
+static void save_exon(Genome_node *gn, void *data)
+{
+  Genome_feature *gf = (Genome_feature*) gn;
+  Array *exon_ranges = (Array*) data;
+  Range range;
+
+  assert(gf && exon_ranges);
+
+  if (genome_feature_get_type(gf) == gft_exon) {
+    range = genome_node_get_range(gn);
+    array_add(exon_ranges, range);
+  }
+}
+
+static void get_exons(Array *exon_ranges, const void *sa)
+{
+  Genome_feature *gf = *(Genome_feature**) sa;
+  assert(exon_ranges && gf && genome_feature_get_type(gf) == gft_gene);
+
+  genome_node_traverse_children((Genome_node*) gf, exon_ranges, save_exon,
+                                0);
+
+  /* we got at least one exon */
+  assert(array_size(exon_ranges));
+  assert(ranges_are_sorted_and_do_not_overlap(exon_ranges));
+}
+
+static void add_sa_to_exon_feature_array(Array *exon_nodes,
+                                         Genome_feature *sa,
+                                         Str *seqid,
+                                         Str *gth_csa_source_str,
+                                         Strand gene_strand)
+{
+  Array *exons_from_sa;
+  unsigned long i,
+                exon_feature_index = 0,
+                exons_from_sa_index = 0;
+  Genome_feature *exon_feature, *exons_from_sa_feature;
+  Genome_node *new_feature;
+  Range exon_feature_range, exons_from_sa_range;
+
+  assert(exon_nodes && sa);
+  assert(gene_strand != STRAND_BOTH); /* is defined */
+
+  exons_from_sa = array_new(sizeof(Genome_feature*));
+  genome_feature_get_exons(sa, exons_from_sa);
+  genome_nodes_sort(exons_from_sa);
+
+  while (exon_feature_index < array_size(exon_nodes) &&
+        exons_from_sa_index < array_size(exons_from_sa)) {
+    exon_feature = *(Genome_feature**)
+                   array_get(exon_nodes, exon_feature_index);
+    exons_from_sa_feature = *(Genome_feature**)
+                            array_get(exons_from_sa, exons_from_sa_index);
+
+    exon_feature_range = genome_node_get_range((Genome_node*) exon_feature);
+    exons_from_sa_range =
+      genome_node_get_range((Genome_node*) exons_from_sa_feature);
+
+    switch (range_compare(exon_feature_range, exons_from_sa_range)) {
+      case -1:
+        if (range_overlap(exon_feature_range, exons_from_sa_range)) {
+          if (!range_contains(exon_feature_range, exons_from_sa_range)) {
+            assert(genome_node_get_start((Genome_node*) exon_feature) <=
+                   genome_node_get_start((Genome_node*) exons_from_sa_feature));
+            assert(genome_node_get_end((Genome_node*) exon_feature) <
+                   genome_node_get_end((Genome_node*) exons_from_sa_feature));
+            /* update right border and score */
+            genome_feature_set_end(exon_feature,
+                                   genome_node_get_end((Genome_node*)
+                                                       exons_from_sa_feature));
+            genome_feature_set_score(exon_feature,
+                               genome_feature_get_score(exons_from_sa_feature));
+          }
+          exons_from_sa_index++;
+        }
+        exon_feature_index++;
+        break;
+      case 0:
+        assert(range_overlap(exon_feature_range, exons_from_sa_range));
+        /* update score if necessary */
+        if (genome_feature_get_score(exon_feature) <
+            genome_feature_get_score(exons_from_sa_feature)) {
+          genome_feature_set_score(exon_feature,
+                               genome_feature_get_score(exons_from_sa_feature));
+        }
+        exon_feature_index++;
+        exons_from_sa_index++;
+        break;
+      case 1:
+        assert(range_overlap(exon_feature_range, exons_from_sa_range));
+        assert(genome_node_get_start((Genome_node*) exon_feature) <=
+               genome_node_get_start((Genome_node*) exons_from_sa_feature));
+        /* update right border and score, if necessary */
+        if (genome_node_get_end((Genome_node*) exons_from_sa_feature) >
+            genome_node_get_end((Genome_node*) exon_feature)) {
+          genome_feature_set_end(exon_feature,
+                                 genome_node_get_end((Genome_node*)
+                                                     exons_from_sa_feature));
+          genome_feature_set_score(exon_feature,
+                               genome_feature_get_score(exons_from_sa_feature));
+        }
+        exon_feature_index++;
+        exons_from_sa_index++;
+        break;
+      default: assert(0);
+    }
+  }
+
+  /* add remaining exons */
+  for (i = exons_from_sa_index; i < array_size(exons_from_sa); i++) {
+    exons_from_sa_feature = *(Genome_feature**) array_get(exons_from_sa, i);
+    new_feature =
+      genome_feature_new(gft_exon,
+                         genome_node_get_range((Genome_node*)
+                                               exons_from_sa_feature),
+                         gene_strand, NULL, UNDEFULONG);
+    genome_node_set_seqid(new_feature, seqid);
+    genome_feature_set_score((Genome_feature*) new_feature,
+                             genome_feature_get_score(exons_from_sa_feature));
+    genome_node_set_source(new_feature, gth_csa_source_str);
+    array_add(exon_nodes, new_feature);
+  }
+
+  array_free(exons_from_sa);
+}
+
+#ifndef NDEBUG
+static unsigned int genome_nodes_are_sorted_and_do_not_overlap(Array
+                                                               *exon_nodes)
+{
+  Array *ranges = array_new(sizeof(Range));
+  unsigned long i;
+  Range range;
+  unsigned int rval;
+
+  assert(exon_nodes);
+
+  for (i = 0; i < array_size(exon_nodes); i++) {
+    range = genome_node_get_range(*(Genome_node**) array_get(exon_nodes, i));
+    array_add(ranges, range);
+  }
+  rval = ranges_are_sorted_and_do_not_overlap(ranges);
+
+  array_free(ranges);
+
+  return rval;
+}
+#endif
+
+static void process_splice_form(Array *spliced_alignments_in_form,
+                                const void *set_of_sas,
+                                unsigned long number_of_sas,
+                                size_t size_of_sa,
+                                void *userdata)
+{
+  Process_splice_form_info *info = (Process_splice_form_info*) userdata;
+  Genome_node *mRNA_feature, *sa_node;
+  Array *exon_nodes;
+  Range gene_range, mRNA_range, tmp_range;
+  unsigned long i, sa_num;
+
+  if (info->is_first_splice_form) {
+    assert(!info->gene_feature);
+    /* compute gene range */
+    gene_range.start = ~0UL;
+    gene_range.end   = 0UL;
+    /* for the gene range we have to iterate over all spliced alignments */
+    for (i = 0; i < number_of_sas; i++) {
+      sa_node = *(Genome_node**) (set_of_sas + i * size_of_sa);
+
+      /* gene range */
+      tmp_range = genome_node_get_range(sa_node);
+      if (tmp_range.start < gene_range.start)
+        gene_range.start = tmp_range.start;
+      if (tmp_range.end > gene_range.end)
+        gene_range.end = tmp_range.end;
+
+      /* determine seqid */
+      if (!i)
+        info->seqid = genome_node_get_seqid(*(Genome_node**) (set_of_sas));
+      else {
+        assert(!str_cmp(info->seqid,
+                        genome_node_get_seqid(*(Genome_node**)
+                                              (set_of_sas + i * size_of_sa))));
+      }
+    }
+
+    /* determine strand (we have to iterate over all spliced alignments in this
+       splice form */
+    for (i = 0; i < array_size(spliced_alignments_in_form); i++) {
+      sa_node = *(Genome_node**)
+                (set_of_sas +
+                 *(unsigned long*) array_get(spliced_alignments_in_form, i) *
+                 size_of_sa);
+      info->gene_strand =
+        strand_join(info->gene_strand,
+                    genome_feature_get_strand((Genome_feature*) sa_node));
+    }
+
+    assert(info->gene_strand != STRAND_BOTH);
+    info->gene_feature = genome_feature_new(gft_gene, gene_range,
+                                            info->gene_strand, NULL,
+                                            UNDEFULONG);
+    genome_node_set_seqid(info->gene_feature, info->seqid);
+    genome_node_set_source(info->gene_feature, info->gth_csa_source_str);
+    info->is_first_splice_form = 0;
+  }
+
+  exon_nodes = array_new(sizeof(Genome_node*));
+
+  for (i = 0; i < array_size(spliced_alignments_in_form); i++) {
+    sa_num = *(unsigned long*) array_get(spliced_alignments_in_form, i);
+    assert(sa_num < number_of_sas);
+    add_sa_to_exon_feature_array(exon_nodes,
+                                 *(Genome_feature**)
+                                 (set_of_sas + sa_num * size_of_sa),
+                                 info->seqid, info->gth_csa_source_str,
+                                 info->gene_strand);
+  }
+  assert(genome_nodes_are_sorted_and_do_not_overlap(exon_nodes));
+
+  mRNA_range.start = genome_node_get_start(*(Genome_node**)
+                                           array_get(exon_nodes, 0));
+  mRNA_range.end   = genome_node_get_end(*(Genome_node**)
+                                         array_get(exon_nodes,
+                                         array_size(exon_nodes) - 1));
+  assert(info->gene_strand != STRAND_BOTH);
+  mRNA_feature = genome_feature_new(gft_mRNA, mRNA_range, info->gene_strand,
+                                    NULL, UNDEFULONG);
+  genome_node_set_seqid(mRNA_feature, info->seqid);
+  genome_node_set_source(mRNA_feature, info->gth_csa_source_str);
+  genome_node_is_part_of_genome_node(info->gene_feature, mRNA_feature);
+  for (i = 0; i < array_size(exon_nodes); i++) {
+    genome_node_is_part_of_genome_node(mRNA_feature,
+                                       *(Genome_node**)
+                                       array_get(exon_nodes, i));
+  }
+
+  array_free(exon_nodes);
+}
+
+void csa_visitor_process_cluster(Genome_visitor *gv,
+                                 unsigned int final_cluster, Log *l)
+{
+  Csa_visitor *csa_visitor = csa_visitor_cast(gv);
+  Process_splice_form_info info;
+  unsigned long i;
+
+  if (final_cluster) {
+    assert(!array_size(csa_visitor->cluster) || !csa_visitor->buffered_feature);
+    if (csa_visitor->buffered_feature) {
+      array_add(csa_visitor->cluster, csa_visitor->buffered_feature);
+      csa_visitor->buffered_feature = NULL;
+    }
+  }
+
+  /* compute the consenus spliced alignments */
+  info.is_first_splice_form = 1;
+  info.gene_feature = NULL;
+  info.seqid = NULL;
+  info.gth_csa_source_str = csa_visitor->gth_csa_source_str;
+  info.gene_strand = STRAND_BOTH; /* undefined */
+  if (!array_size(csa_visitor->cluster)) {
+    assert(final_cluster);
+    return;
+  }
+  consensus_sa(array_get_space(csa_visitor->cluster),
+               array_size(csa_visitor->cluster),
+               sizeof(Genome_feature*),
+               get_genomic_range,
+               get_strand,
+               get_exons,
+               process_splice_form,
+               &info,
+               l);
+  assert(info.gene_feature);
+  queue_add(csa_visitor->genome_node_buffer, info.gene_feature);
+
+  /* remove the cluster genome nodes */
+  for (i = 0; i < array_size(csa_visitor->cluster); i++)
+    genome_node_rec_free(*(Genome_node**) array_get(csa_visitor->cluster, i));
+  array_set_size(csa_visitor->cluster, 0);
+}

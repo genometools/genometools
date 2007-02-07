@@ -1,0 +1,1976 @@
+a
+|
+a
+
+a
+ 
+b
+
+-a
+ |
+ba
+
+a--
+|  
+abb
+
+---a
+   |
+baba
+
+--a-
+  | 
+cbab
+
+--a-
+  | 
+bbac
+
+-----a
+     |
+bcbaba
+
+-----a-
+     | 
+bacabac
+
+------a
+      |
+bacbaba
+
+-------a
+       |
+bbaccbca
+
+------a
+      |
+bbbacba
+
+--a
+  |
+bba
+
+------a
+      |
+ababcba
+
+--------a-
+        | 
+bbabcbabac
+
+----------a
+          |
+babaabacaba
+
+----------a-----
+          |     
+bbabcccbababcccb
+
+--------------a
+              |
+cbcbabababababa
+
+----------a
+          |
+bbababbbaba
+
+b
+ 
+a
+
+b
+|
+b
+
+b-
+| 
+ba
+
+--b
+  |
+abb
+
+--b-
+  | 
+baba
+
+---b
+   |
+cbab
+
+-b--
+ |  
+bbac
+
+----b-
+    | 
+bcbaba
+
+----b--
+    |  
+bacabac
+
+-----b-
+     | 
+bacbaba
+
+-----b--
+     |  
+bbaccbca
+
+-----b-
+     | 
+bbbacba
+
+-b-
+ | 
+bba
+
+-----b-
+     | 
+ababcba
+
+-------b--
+       |  
+bbabcbabac
+
+---------b-
+         | 
+babaabacaba
+
+---------------b
+               |
+bbabcccbababcccb
+
+-------------b-
+             | 
+cbcbabababababa
+
+---------b-
+         | 
+bbababbbaba
+
+ab
+| 
+a-
+
+ab
+ |
+-b
+
+ab
+  
+ba
+
+a-b
+| |
+abb
+
+-ab-
+ || 
+baba
+
+--ab
+  ||
+cbab
+
+--ab
+  | 
+bbac
+
+---ab-
+   || 
+bcbaba
+
+---ab--
+   ||  
+bacabac
+
+----ab-
+    || 
+bacbaba
+
+--a--b--
+  |  |  
+bbaccbca
+
+---a-b-
+   | | 
+bbbacba
+
+ab-
+ | 
+bba
+
+--a--b-
+  |  | 
+ababcba
+
+------ab--
+      ||  
+bbabcbabac
+
+--------ab-
+        || 
+babaabacaba
+
+----------a----b
+          |    |
+bbabcccbababcccb
+
+------------ab-
+            || 
+cbcbabababababa
+
+--------ab-
+        || 
+bbababbbaba
+
+ba
+ |
+-a
+
+ba
+| 
+b-
+
+ba
+||
+ba
+
+-ba
+ | 
+abb
+
+--ba
+  ||
+baba
+
+-ba-
+ || 
+cbab
+
+-ba-
+ || 
+bbac
+
+----ba
+    ||
+bcbaba
+
+----ba-
+    || 
+bacabac
+
+-----ba
+     ||
+bacbaba
+
+-----b-a
+     | |
+bbaccbca
+
+-----ba
+     ||
+bbbacba
+
+-ba
+ ||
+bba
+
+-----ba
+     ||
+ababcba
+
+-------ba-
+       || 
+bbabcbabac
+
+---------ba
+         ||
+babaabacaba
+
+---------ba-----
+         ||     
+bbabcccbababcccb
+
+-------------ba
+             ||
+cbcbabababababa
+
+---------ba
+         ||
+bbababbbaba
+
+aa
+ |
+-a
+
+aa
+  
+-b
+
+aa
+ |
+ba
+
+a-a
+|  
+abb
+
+-a-a
+ | |
+baba
+
+--aa
+  | 
+cbab
+
+--aa
+  | 
+bbac
+
+---a-a
+   | |
+bcbaba
+
+---a-a-
+   | | 
+bacabac
+
+----a-a
+    | |
+bacbaba
+
+--a----a
+  |    |
+bbaccbca
+
+---a--a
+   |  |
+bbbacba
+
+-aa
+  |
+bba
+
+--a---a
+  |   |
+ababcba
+
+------a-a-
+      | | 
+bbabcbabac
+
+--------a-a
+        | |
+babaabacaba
+
+--------a-a-----
+        | |     
+bbabcccbababcccb
+
+------------a-a
+            | |
+cbcbabababababa
+
+--------a-a
+        | |
+bbababbbaba
+
+bb
+  
+-a
+
+bb
+ |
+-b
+
+bb
+| 
+ba
+
+-bb
+ ||
+abb
+
+b-b-
+| | 
+baba
+
+-b-b
+ | |
+cbab
+
+bb--
+||  
+bbac
+
+--b-b-
+  | | 
+bcbaba
+
+b---b--
+|   |  
+bacabac
+
+---b-b-
+   | | 
+bacbaba
+
+-b---b--
+ |   |  
+bbaccbca
+
+--b--b-
+  |  | 
+bbbacba
+
+bb-
+|| 
+bba
+
+---b-b-
+   | | 
+ababcba
+
+-----b-b--
+     | |  
+bbabcbabac
+
+-----b---b-
+     |   | 
+babaabacaba
+
+-----------b---b
+           |   |
+bbabcccbababcccb
+
+-----------b-b-
+           | | 
+cbcbabababababa
+
+-------b-b-
+       | | 
+bbababbbaba
+
+aba
+  |
+--a
+
+aba
+ | 
+-b-
+
+aba
+ ||
+-ba
+
+aba
+|| 
+abb
+
+-aba
+ |||
+baba
+
+aba-
+ || 
+cbab
+
+aba-
+ || 
+bbac
+
+---aba
+   |||
+bcbaba
+
+---aba-
+   ||| 
+bacabac
+
+----aba
+    |||
+bacbaba
+
+--a--b-a
+  |  | |
+bbaccbca
+
+---a-ba
+   | ||
+bbbacba
+
+aba
+ ||
+bba
+
+--a--ba
+  |  ||
+ababcba
+
+------aba-
+      ||| 
+bbabcbabac
+
+--------aba
+        |||
+babaabacaba
+
+--------aba-----
+        |||     
+bbabcccbababcccb
+
+------------aba
+            |||
+cbcbabababababa
+
+--------aba
+        |||
+bbababbbaba
+
+bab
+ | 
+-a-
+
+bab
+  |
+--b
+
+bab
+|| 
+ba-
+
+bab
+  |
+abb
+
+bab-
+||| 
+baba
+
+-bab
+ |||
+cbab
+
+-bab
+ || 
+bbac
+
+--bab-
+  ||| 
+bcbaba
+
+b--ab--
+|  ||  
+bacabac
+
+---bab-
+   ||| 
+bacbaba
+
+-ba--b--
+ ||  |  
+bbaccbca
+
+--ba-b-
+  || | 
+bbbacba
+
+bab
+|  
+bba
+
+-ba--b-
+ ||  | 
+ababcba
+
+-----bab--
+     |||  
+bbabcbabac
+
+-----b--ab-
+     |  || 
+babaabacaba
+
+---------ba----b
+         ||    |
+bbabcccbababcccb
+
+-----------bab-
+           ||| 
+cbcbabababababa
+
+-------bab-
+       ||| 
+bbababbbaba
+
+abab
+  | 
+--a-
+
+abab
+   |
+---b
+
+abab
+ || 
+-ba-
+
+abab
+|| |
+ab-b
+
+-abab
+ ||| 
+baba-
+
+abab
+ |||
+cbab
+
+abab
+ || 
+bbac
+
+-abab-
+  ||| 
+bcbaba
+
+---abab
+   ||| 
+bacabac
+
+-a-bab-
+ | ||| 
+bacbaba
+
+aba--b--
+ ||  |  
+bbaccbca
+
+-aba-b-
+  || | 
+bbbacba
+
+abab
+ || 
+bba-
+
+aba--b-
+|||  | 
+ababcba
+
+--a--bab--
+  |  |||  
+bbabcbabac
+
+----ab--ab-
+    ||  || 
+babaabacaba
+
+--------aba----b
+        |||    |
+bbabcccbababcccb
+
+----------abab-
+          |||| 
+cbcbabababababa
+
+----a--bab-
+    |  ||| 
+bbababbbaba
+
+abba
+   |
+---a
+
+abba
+  | 
+--b-
+
+abba
+  ||
+--ba
+
+abba
+||| 
+abb-
+
+abba
+  ||
+baba
+
+abba
+ |  
+cbab
+
+abba-
+ ||| 
+-bbac
+
+-ab-ba
+  | ||
+bcbaba
+
+-a-bba-
+ |  || 
+bacabac
+
+-a-b-ba
+ | | ||
+bacbaba
+
+--a--bba
+  |  | |
+bbaccbca
+
+---abba
+   | ||
+bbbacba
+
+abba
+ |||
+-bba
+
+--ab-ba
+  || ||
+ababcba
+
+--a--b-ba-
+  |  | || 
+bbabcbabac
+
+----ab---ba
+    ||   ||
+babaabacaba
+
+--a----b-ba-----
+  |    | ||     
+bbabcccbababcccb
+
+----------ab-ba
+          || ||
+cbcbabababababa
+
+----a--b-ba
+    |  | ||
+bbababbbaba
+
+baba
+   |
+---a
+
+baba
+  | 
+--b-
+
+baba
+  ||
+--ba
+
+baba
+ || 
+-abb
+
+baba
+||||
+baba
+
+-baba
+ ||| 
+cbab-
+
+baba-
+| || 
+b-bac
+
+--baba
+  ||||
+bcbaba
+
+b--aba-
+|  ||| 
+bacabac
+
+---baba
+   ||||
+bacbaba
+
+-ba--b-a
+ ||  | |
+bbaccbca
+
+--ba-ba
+  || ||
+bbbacba
+
+baba
+| ||
+b-ba
+
+-ba--ba
+ ||  ||
+ababcba
+
+-----baba-
+     |||| 
+bbabcbabac
+
+-----b--aba
+     |  |||
+babaabacaba
+
+-------baba-----
+       ||||     
+bbabcccbababcccb
+
+-----------baba
+           ||||
+cbcbabababababa
+
+-------baba
+       ||||
+bbababbbaba
+
+cbacb
+  |  
+--a--
+
+cbacb
+    |
+----b
+
+cbacb
+ ||  
+-ba--
+
+cbacb
+  | |
+--abb
+
+cbacb
+ ||  
+-baba
+
+cbacb
+||| |
+cba-b
+
+cbacb
+ ||| 
+bbac-
+
+-cbacb
+ |||  
+bcbaba
+
+--c-bacb
+  | ||| 
+bacabac-
+
+--cbacb
+  |||  
+bacbaba
+
+cba-cb--
+ || ||  
+bbaccbca
+
+-cbacb-
+  |||| 
+bbbacba
+
+cbacb
+ ||  
+bba--
+
+cba-cb-
+ || || 
+ababcba
+
+cba-c--b--
+ || |  |  
+bbabcbabac
+
+----cbac-b-
+     ||| | 
+babaabacaba
+
+------c--ba---cb
+      |  ||   ||
+bbabcccbababcccb
+
+--c------ba-cb-
+  |      ||  | 
+cbcbabababababa
+
+--cba---cb-
+   ||    | 
+bbababbbaba
+
+bbacba
+     |
+-----a
+
+bbacba
+    | 
+----b-
+
+bbacba
+    ||
+----ba
+
+bbacba
+  | | 
+--a-bb
+
+bbacba
+ || ||
+-ba-ba
+
+bbacba
+ || | 
+cba-b-
+
+bbacba
+||||  
+bbac--
+
+b-bacba
+| || ||
+bcba-ba
+
+bbac-ba-
+ ||| || 
+-bacabac
+
+b--bacba
+|  || ||
+bacba-ba
+
+bba-cb-a
+||| || |
+bbaccbca
+
+-bbacba
+ ||||||
+bbbacba
+
+bbacba
+ |  ||
+-b--ba
+
+bba-cba
+ || |||
+ababcba
+
+bba-c--ba-
+||| |  || 
+bbabcbabac
+
+--b--bac-ba
+  |  ||| ||
+babaabacaba
+
+bba---c--ba-----
+|||   |  ||     
+bbabcccbababcccb
+
+-------b-ba-cba
+       | ||  ||
+cbcbabababababa
+
+-b-ba---cba
+ | ||    ||
+bbababbbaba
+
+bacbaaab
+      | 
+------a-
+
+bacbaaab
+       |
+-------b
+
+bacbaaab
+   |  | 
+---b--a-
+
+bacbaaab
+ | |   |
+-a-b---b
+
+bacbaaab
+|| |  | 
+ba-b--a-
+
+bacbaaab
+  ||  ||
+--cb--ab
+
+bacbaaab
+|  |  | 
+b--b--ac
+
+bacbaaab
+| ||| | 
+b-cbaba-
+
+bacbaaab
+||| | | 
+bac-abac
+
+bacbaaab
+||||| | 
+bacbaba-
+
+-bacbaaab
+ |||   | 
+bbaccbca-
+
+bacbaaab
+|  ||   
+b-bbacba
+
+bacbaaab
+|  |  | 
+b--b--a-
+
+-bacbaaab
+ || |  | 
+aba-bcba-
+
+-ba-cbaaab
+ || ||| | 
+bbabcbabac
+
+--bacbaaab-
+  || || || 
+babaabacaba
+
+-ba---cba-a---ab
+ ||   ||| |    |
+bbabcccbababcccb
+
+---ba-cba-a-ab-
+   ||  || | || 
+cbcbabababababa
+
+-ba-cbaaab-
+ ||  |  || 
+bbababbbaba
+
+baacba
+     |
+-----a
+
+baacba
+    | 
+----b-
+
+baacba
+    ||
+----ba
+
+baacba
+  | | 
+--a-bb
+
+baacba
+| | ||
+b-a-ba
+
+baacba
+  | | 
+cba-b-
+
+baacba
+| ||  
+bbac--
+
+baacba
+|   ||
+bcbaba
+
+baacba-
+||  || 
+bacabac
+
+ba-acba
+||   ||
+bacbaba
+
+-baacb-a
+ || || |
+bbaccbca
+
+-baacba
+ | ||||
+bbbacba
+
+baacba
+|   ||
+b---ba
+
+-baacba
+ || |||
+ababcba
+
+-baac--ba-
+ || |  || 
+bbabcbabac
+
+--b-a-ac-ba
+  | | || ||
+babaabacaba
+
+-ba--ac--ba-----
+ ||   |  ||     
+bbabcccbababcccb
+
+-------ba-a-cba
+       || |  ||
+cbcbabababababa
+
+-ba-a---cba
+ || |    ||
+bbababbbaba
+
+bca
+  |
+--a
+
+bca
+|  
+b--
+
+bca
+| |
+b-a
+
+bca
+   
+abb
+
+b-ca
+|  |
+baba
+
+-bca
+ |  
+cbab
+
+bca-
+| | 
+bbac
+
+bc---a
+||   |
+bcbaba
+
+b-c--a-
+| |  | 
+bacabac
+
+b-c---a
+| |   |
+bacbaba
+
+-----bca
+     |||
+bbaccbca
+
+--b-c-a
+  | | |
+bbbacba
+
+bca
+| |
+bba
+
+---bc-a
+   || |
+ababcba
+
+---bc---a-
+   ||   | 
+bbabcbabac
+
+-----b-c--a
+     | |  |
+babaabacaba
+
+---b--c---a-----
+   |  |   |     
+bbabcccbababcccb
+
+-bc-----------a
+ ||           |
+cbcbabababababa
+
+-------b-ca
+       |  |
+bbababbbaba
+
+ababbbababa
+          |
+----------a
+
+ababbbababa
+         | 
+---------b-
+
+ababbbababa
+         ||
+---------ba
+
+ababbbababa
+      || | 
+------ab-b-
+
+ababbbababa
+       ||||
+-------baba
+
+ababbbababa
+       ||| 
+------cbab-
+
+ababbbababa
+     | ||  
+-----b-ba-c
+
+ababbbababa
+     | ||||
+-----bcbaba
+
+ababbbababa
+ ||   |||  
+-ba--caba-c
+
+ababbbababa
+ ||    ||||
+-ba---cbaba
+
+ababbbababa
+ | |   |  |
+-b-baccb-ca
+
+ababbbababa
+   ||||  ||
+---bbba-cba
+
+ababbbababa
+       | ||
+-------b-ba
+
+ababbbababa
+  |  ||| ||
+--a--babcba
+
+ababbbababa
+ ||| ||||  
+bbabcbaba-c
+
+-ababbbababa
+ |||  || |||
+baba-abacaba
+
+abab--bbabab---a
+ |||   |||||    
+bbabcccbababcccb
+
+----ababbbababa
+    |||| ||||||
+cbcbabababababa
+
+ababbbababa
+ ||| | ||||
+bbababbbaba
+
+bababab
+     | 
+-----a-
+
+bababab
+      |
+------b
+
+bababab
+    || 
+----ba-
+
+bababab
+   || |
+---ab-b
+
+bababab
+  |||| 
+--baba-
+
+bababab
+    |||
+---cbab
+
+bababab
+  | || 
+--b-bac
+
+bababab
+| |||| 
+bcbaba-
+
+bababab
+|| ||| 
+bacabac
+
+ba-babab
+|| |||| 
+bacbaba-
+
+-bababab
+ ||  |  
+bbaccbca
+
+baba-bab
+| || || 
+bbbacba-
+
+bababab
+  | || 
+--b-ba-
+
+-bababab
+ ||| || 
+ababcba-
+
+-ba--babab
+ ||  |||| 
+bbabcbabac
+
+bab-ab--ab-
+||| ||  || 
+babaabacaba
+
+-ba----baba----b
+ ||    ||||    |
+bbabcccbababcccb
+
+-------bababab-
+       ||||||| 
+cbcbabababababa
+
+-baba--bab-
+ ||||  ||| 
+bbababbbaba
+
+abababaab
+       | 
+-------a-
+
+abababaab
+        |
+--------b
+
+abababaab
+     | | 
+-----b-a-
+
+abababaab
+    ||  |
+----ab--b
+
+abababaab
+   ||| | 
+---bab-a-
+
+abababaab
+     | ||
+----cb-ab
+
+abababaab
+   | | | 
+---b-b-ac
+
+abababaab
+ | ||| | 
+-bcbab-a-
+
+abababaab
+ || || | 
+-bacab-ac
+
+aba-babaab
+ || ||| | 
+-bacbab-a-
+
+abababaab
+ ||  | | 
+bbaccbca-
+
+abababaab
+ | ||  | 
+-bbbacba-
+
+abababaab
+   | | | 
+---b-b-a-
+
+abababaab
+|||| | | 
+ababcb-a-
+
+abababa-ab
+ ||| || | 
+bbabcbabac
+
+-abababa-ab-
+ ||| ||| || 
+baba-abacaba
+
+--a----babab-aab
+  |    |||||   |
+bbabcccbababcccb
+
+----abababa-ab-
+    ||||||| || 
+cbcbabababababa
+
+ababa-baab-
+ |||| | || 
+bbababbbaba
+
+bbaabbabab
+        | 
+--------a-
+
+bbaabbabab
+         |
+---------b
+
+bbaabbabab
+       || 
+-------ba-
+
+bbaabbabab
+      || |
+------ab-b
+
+bbaabbabab
+     |||| 
+-----baba-
+
+bbaabbabab
+       |||
+------cbab
+
+bbaabbabab
+     | || 
+-----b-bac
+
+bbaabbabab
+ |   |||| 
+-b--cbaba-
+
+bbaabbabab
+ | |  ||| 
+-b-a-cabac
+
+bbaabbabab
+ | | |||| 
+-b-acbaba-
+
+bbaabbabab
+|||  |  | 
+bbaccb-ca-
+
+bbaabbabab
+||  |  || 
+bb--bacba-
+
+bbaabbabab
+     | || 
+-----b-ba-
+
+bbaabbabab
+ | | | || 
+ab-a-bcba-
+
+bbaabbabab
+|||  |||| 
+bbabcbabac
+
+b-baab-babab
+| ||||  ||| 
+babaabacaba-
+
+bba---ab-bab--ab
+|||    | |||   |
+bbabcccbababcccb
+
+-b-ba-ab-babab-
+ | || || ||||| 
+cbcbabababababa
+
+bba-a-bbabab
+||| | ||||| 
+bbababbbaba-
+
+bbababbbaba
+          |
+----------a
+
+bbababbbaba
+         | 
+---------b-
+
+bbababbbaba
+         ||
+---------ba
+
+bbababbbaba
+    |  | | 
+----a--b-b-
+
+bbababbbaba
+       ||||
+-------baba
+
+bbababbbaba
+       ||| 
+------cbab-
+
+bbababbbaba
+      |||  
+------bba-c
+
+bbababbbaba
+     | ||||
+-----bcbaba
+
+bbababbbaba
+ || |  ||  
+-baca--ba-c
+
+bbababbbaba
+   ||  ||||
+---ba-cbaba
+
+bbababbbaba
+ | ||  |  |
+-b-baccb-ca
+
+bbababbbaba
+|| ||    ||
+bb-ba---cba
+
+bbababbbaba
+       | ||
+-------b-ba
+
+bbababbbaba
+  |||  | ||
+--aba--bcba
+
+bbababbbaba
+|||| | ||  
+bbabcbaba-c
+
+b-bababbbaba
+| || ||  |||
+baba-abacaba
+
+bbab--abbbab---a
+||||   | |||    
+bbabcccbababcccb
+
+-b-babab-b-baba
+ | ||||| | ||||
+cbcbabababababa
+
+bbababbbaba
+|||||||||||
+bbababbbaba
+
+bababaab
+      | 
+------a-
+
+bababaab
+       |
+-------b
+
+bababaab
+    | | 
+----b-a-
+
+bababaab
+   ||  |
+---ab--b
+
+bababaab
+  ||| | 
+--bab-a-
+
+bababaab
+    | ||
+---cb-ab
+
+bababaab
+  | | | 
+--b-b-ac
+
+bababaab
+| ||| | 
+bcbab-a-
+
+bababaab
+|| || | 
+bacab-ac
+
+ba-babaab
+|| ||| | 
+bacbab-a-
+
+-bababaab
+ ||  | | 
+bbaccbca-
+
+bababaab
+| ||  | 
+bbbacba-
+
+bababaab
+  | | | 
+--b-b-a-
+
+bababaab
+ ||||   
+-ababcba
+
+-bababa-ab
+ ||| || | 
+bbabcbabac
+
+bab-aba-ab-
+||| ||| || 
+babaabacaba
+
+-ba----baba---ab
+ ||    ||||    |
+bbabcccbababcccb
+
+-----bababa-ab-
+     |||||| || 
+cbcbabababababa
+
+-baba-baab-
+ |||| | || 
+bbababbbaba
+
+bcbaaabb
+     |  
+-----a--
+
+bcbaaabb
+       |
+-------b
+
+bcbaaabb
+  |  |  
+--b--a--
+
+bcbaaabb
+     |||
+-----abb
+
+bcbaaabb
+  |  || 
+--b--aba
+
+bcbaaabb
+ ||  | |
+-cb--a-b
+
+bcbaaabb
+| |  |  
+b-b--a-c
+
+bcbaaabb
+|||  || 
+bcb--aba
+
+bcbaaabb
+|  | |  
+bacaba-c
+
+b-cbaaabb
+| ||  || 
+bacb--aba
+
+bcbaaab-b
+| ||  |  
+b-baccbca
+
+bcbaaabb
+| | | | 
+b-bbacba
+
+bcbaaabb
+| |  |  
+b-b--a--
+
+bcbaaabb
+  ||  | 
+-ababcba
+
+---bcbaaabb
+   |||| |  
+bbabcbaba-c
+
+bcb-a-a-abb
+| | | | || 
+babaabacaba
+
+---b--cbaaab---b
+   |  ||| ||   |
+bbabcccbababcccb
+
+-bc--ba-a-ab-b-
+ ||  || | || | 
+cbcbabababababa
+
+-bcba--aabb
+ | ||   || 
+bbababbbaba
+
+ccbaabac
+      | 
+------a-
+
+ccbaabac
+     |  
+-----b--
+
+ccbaabac
+     || 
+-----ba-
+
+ccbaabac
+    ||  
+----ab-b
+
+ccbaabac
+  | ||| 
+--b-aba-
+
+ccbaabac
+ || ||  
+-cb-ab--
+
+ccbaabac
+  |  |||
+--b--bac
+
+ccbaabac
+ || ||| 
+bcb-aba-
+
+ccba-abac
+  || ||||
+--bacabac
+
+-ccbaabac
+  || ||| 
+bacb-aba-
+
+ccba-abac
+  ||  |  
+-bbaccbca
+
+ccbaabac
+  || || 
+bbbacba-
+
+ccbaabac
+  |  || 
+--b--ba-
+
+ccba-abac
+  ||  || 
+-ababcba-
+
+-ccb-aabac
+   |  ||||
+bbabcbabac
+
+ccbaabac---
+  ||||||   
+babaabacaba
+
+-----ccba-ab-ac-
+     |||| ||  | 
+bbabcccbababcccb
+
+c-c----ba-aba-c
+| |    || |||  
+cbcbabababababa
+
+-ccba-aba-c
+   ||  ||  
+bbababbbaba
+
+bccbaca
+      |
+------a
+
+bccbaca
+   |   
+---b---
+
+bccbaca
+   |  |
+---b--a
+
+bccbaca
+    |  
+----abb
+
+bccbaca
+   || |
+---baba
+
+bccbaca
+  |||  
+--cba-b
+
+bccbaca
+|  ||| 
+b--bac-
+
+bccbaca
+| ||| |
+b-cbaba
+
+b-ccbaca
+| | ||| 
+bacabac-
+
+bccbaca
+| ||| |
+bacbaba
+
+-b-ccbaca
+ | ||| ||
+bbaccb-ca
+
+bccbac-a
+|  ||| |
+b-bbacba
+
+bccbaca
+|  |  |
+b--b--a
+
+bccbaca
+   |  |
+ababcba
+
+-b-ccbaca-
+ |  ||| | 
+bbabcbabac
+
+--bccbac--a
+  |  |||  |
+babaabacaba
+
+---b-cc--ba---ca
+   | ||  ||   | 
+bbabcccbababcccb
+
+-bc-------cbaca
+ ||        || |
+cbcbabababababa
+
+---b-ccbaca
+   |   || |
+bbababbbaba
+
+cbabaccbabacb
+          |  
+----------a--
+
+cbabaccbabacb
+            |
+------------b
+
+cbabaccbabacb
+         ||  
+---------ba--
+
+cbabaccbabacb
+        ||  |
+--------ab--b
+
+cbabaccbabacb
+       ||||  
+-------baba--
+
+cbabaccbabacb
+      |  || |
+------c--ba-b
+
+cbabaccbabacb
+       | ||| 
+-------b-bac-
+
+cbabaccbabacb
+   |  |||||  
+---b--cbaba--
+
+cbabaccbabacb
+   || | |||| 
+---ba-c-abac-
+
+cbabaccbabacb
+   || |||||  
+---ba-cbaba--
+
+cbabaccbabacb
+ | ||||  | | 
+-b-bacc--b-ca
+
+cbabaccbabacb
+ | || |  ||  
+-bbba-c--ba--
+
+cbabaccbabacb
+       | ||  
+-------b-ba--
+
+cbabaccbabacb
+  |||  | ||  
+--aba--bcba--
+
+cbabaccbabacb
+ | || |||||| 
+-b-babcbabac-
+
+cbabaccbabacb
+ ||||  || |  
+-baba-abacaba
+
+cbabaccbaba---cb
+ ||| ||||||   ||
+bbabcccbababcccb
+
+--cbabaccbabacb
+  |||||  ||||  
+cbcbabababababa
+
+cbabaccbabacb
+ ||||  ||||  
+bbababbbaba--
+

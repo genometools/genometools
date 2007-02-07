@@ -1,0 +1,22 @@
+##gff-version   3
+##sequence-region   ENm001 40027 1703041
+ENm001	.	gene	328776	338075	.	+	.	ID=gene2
+ENm001	.	mRNA	328776	335792	.	+	.	ID=mRNA2;Parent=gene2
+ENm001	VEGA_Known	exon	328776	328875	.	+	.	Parent=mRNA2
+ENm001	VEGA_Known	CDS	328841	328875	.	+	0	Parent=mRNA2
+ENm001	VEGA_Known	CDS	329375	329465	.	+	1	Parent=mRNA2
+ENm001	VEGA_Known	exon	329375	329465	.	+	.	Parent=mRNA2
+ENm001	VEGA_Known	CDS	329794	329981	.	+	0	Parent=mRNA2
+ENm001	VEGA_Known	exon	329794	329981	.	+	.	Parent=mRNA2
+ENm001	VEGA_Known	CDS	335505	335652	.	+	1	Parent=mRNA2
+ENm001	VEGA_Known	exon	335505	335792	.	+	.	Parent=mRNA2
+ENm001	VEGA_Known	CDS	335653	335655	.	+	1	Parent=mRNA2
+ENm001	.	mRNA	328924	338075	.	+	.	ID=mRNA3;Parent=gene2
+ENm001	VEGA_Known	exon	328924	329465	.	+	.	Parent=mRNA3
+ENm001	VEGA_Known	CDS	329316	329465	.	+	0	Parent=mRNA3
+ENm001	VEGA_Known	CDS	329794	329981	.	+	0	Parent=mRNA3
+ENm001	VEGA_Known	exon	329794	329981	.	+	.	Parent=mRNA3
+ENm001	VEGA_Known	CDS	335505	335652	.	+	1	Parent=mRNA3
+ENm001	VEGA_Known	exon	335505	338075	.	+	.	Parent=mRNA3
+ENm001	VEGA_Known	CDS	335653	335655	.	+	1	Parent=mRNA3
+###

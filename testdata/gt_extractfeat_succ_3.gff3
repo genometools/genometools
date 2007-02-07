@@ -1,0 +1,10 @@
+##gff-version   3
+##sequence-region   foo 1 100
+foo	.	gene	1	100	.	.	.	ID=gene1
+foo	.	mRNA	1	50	.	.	.	ID=mRNA1;Parent=gene1
+foo	.	exon	1	10	.	.	.	Parent=mRNA1
+foo	.	exon	41	50	.	.	.	Parent=mRNA1
+foo	.	mRNA	41	100	.	.	.	ID=mRNA2;Parent=gene1
+foo	.	exon	41	50	.	.	.	Parent=mRNA2
+foo	.	exon	91	100	.	.	.	Parent=mRNA2
+###

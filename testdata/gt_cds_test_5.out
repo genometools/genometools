@@ -1,0 +1,7 @@
+##gff-version   3
+##sequence-region   dna 1 10
+dna	.	gene	1	10	.	+	.	ID=gene1
+dna	.	mRNA	1	10	.	+	.	ID=mRNA1;Parent=gene1
+dna	.	exon	1	10	.	+	.	Parent=mRNA1
+dna	gt_cds	CDS	2	10	.	+	0	Parent=mRNA1
+###

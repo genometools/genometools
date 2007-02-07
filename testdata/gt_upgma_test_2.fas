@@ -1,0 +1,12 @@
+> seq 1
+acgtcgagag
+> seq 2
+acgtctagag
+> seq 3
+aggtcgagag
+> seq 4
+acgtcgagat
+> seq 5
+tggtcgagag
+> seq 6
+acctcaagtg

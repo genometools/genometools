@@ -1,0 +1,6 @@
+##gff-version   3
+##sequence-region   gDNA 1 1000
+gDNA	.	gene	175	300	.	-	.	ID=gene
+gDNA	.	mRNA	175	300	.	-	.	ID=mRNA;Parent=gene
+gDNA	.	exon	175	200	.	-	.	Parent=mRNA
+gDNA	.	exon	250	300	.	-	.	Parent=mRNA

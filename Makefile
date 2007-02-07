@@ -1,0 +1,81 @@
+#
+# Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2006 Center for Bioinformatics, University of Hamburg 
+# See LICENSE file or http://genometools.org/license.html for license details
+#
+
+CCACHE:= $(shell type ccache >/dev/null && echo ccache)
+CC:=$(CCACHE) gcc
+LD:=gcc
+INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj
+CFLAGS:=
+GT_CFLAGS:= -Wall -Os $(INCLUDEOPT)
+LDFLAGS:=
+LDLIBS:=-lm
+
+VPATH:=$(VPATH):$(CURDIR)/src
+
+LIBSRC:=$(filter-out gt.c, $(notdir $(wildcard src/*.c)))
+LIBOBJ:=$(LIBSRC:%.c=obj/%.o)
+
+all: dirs lib/libgt.a bin/gt
+
+dirs:
+	@test -d obj || mkdir -p obj 
+	@test -d lib || mkdir -p lib 
+	@test -d bin || mkdir -p bin 
+
+lib/libgt.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h $(LIBOBJ)
+	ar ruv $@ $(LIBOBJ)
+ifdef RANLIB
+	$(RANLIB) $@
+endif
+
+bin/gt: obj/gt.o lib/libgt.a
+	$(LD) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+obj/gt_build.h:
+	@date +'#define GT_BUILT "%Y-%m-%d %H:%M:%S"' > $@
+
+obj/gt_cc.h:
+	@echo '#define GT_CC "'`$(CC) --version | head -n 1`\" > $@
+
+obj/gt_cflags.h:
+	@echo '#define GT_CFLAGS "$(CFLAGS) $(GT_CFLAGS)"' > $@
+
+obj/gt_version.h: VERSION
+	@echo '#define GT_VERSION "'`cat VERSION`\" > $@
+
+# we create the dependency files on the fly
+obj/%.o: src/%.c
+	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+
+# read deps
+-include obj/*.d
+
+.PHONY: dist srcdist gt libgt splint test clean cleanup
+
+dist: all
+	tar cvzf gt-`cat VERSION`.tar.gz bin/gt_*
+
+srcdist:
+	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
+        gzip -9 > genometools-`cat VERSION`.tar.gz 
+
+gt: dirs bin/gt
+
+libgt: dirs lib/libgt.a
+
+splint:
+	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) $(CURDIR)/src/*.c
+
+test: dirs bin/gt
+	bin/gt -test
+	cd testsuite && env -i ruby -I. testsuite.rb -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin
+
+clean:
+	rm -rf obj
+	rm -rf testsuite/stest_testsuite testsuite/stest_stest_testsuite
+
+cleanup: clean
+	rm -rf lib bin

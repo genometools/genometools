@@ -1,0 +1,12 @@
+fold the following RNA sequence with Nussinov Algorithm:
+accct
+length of RNA sequence = 5
+using the following parameters:
+l_min =  3
+alpha(G,C) = alpha(C,G) = -3
+alpha(A,U) = alpha(U,A) = -2
+alpha(G,U) = alpha(U,G) = -1
+all other alpha values have been set to infinity
+score: -2
+result:
+(1,5)

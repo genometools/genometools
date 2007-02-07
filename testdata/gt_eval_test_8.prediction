@@ -1,0 +1,14 @@
+##gff-version   3
+##sequence-region   gDNA 1 1000
+gDNA	.	gene	100	125	.	-	.	ID=gene1
+gDNA	.	mRNA	100	125	.	-	.	ID=mRNA1;Parent=gene1
+gDNA	.	CDS	100	125	.	-	.	Parent=mRNA1
+gDNA	.	exon	100	130	.	-	.	Parent=mRNA1
+###
+gDNA	.	gene	100	200	.	-	.	ID=gene2
+gDNA	.	mRNA	100	200	.	-	.	ID=mRNA2;Parent=gene2
+gDNA	.	exon	100	125	.	-	.	Parent=mRNA2
+gDNA	.	CDS	100	125	.	-	.	Parent=mRNA2
+gDNA	.	exon	175	200	.	-	.	Parent=mRNA2
+gDNA	.	CDS	175	200	.	-	.	Parent=mRNA2
+###

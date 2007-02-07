@@ -1,0 +1,8 @@
+gene sensitivity:                0.00% (0/1) (missing genes: 1)
+gene specificity:              100.00% (0/0) (wrong genes: 0)
+mRNA sensitivity:                0.00% (0/1) (missing mRNAs: 1)
+mRNA specificity:              100.00% (0/0) (wrong mRNAs: 0)
+exon sensitivity (mRNA level):   0.00% (0/2)
+exon specificity (mRNA level): 100.00% (0/0)
+exon sensitivity (CDS level):  100.00% (0/0)
+exon specificity (CDS level):  100.00% (0/0)

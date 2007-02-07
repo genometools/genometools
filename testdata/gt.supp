@@ -1,0 +1,16 @@
+{
+   <zlib>
+   Memcheck:Cond
+   fun:_tr_flush_block
+   fun:deflate_slow
+   fun:deflate
+   fun:png_write_finish_row
+}
+{
+   <zlib>
+   Memcheck:Cond
+   fun:_tr_flush_block
+   fun:deflate_slow
+   fun:deflate
+   fun:png_write_filtered_row
+}

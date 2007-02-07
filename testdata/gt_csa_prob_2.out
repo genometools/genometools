@@ -1,0 +1,14 @@
+##gff-version   3
+##sequence-region   NC_003070 1 4294967295
+NC_003070	gth_csa	gene	10472279	10475601	.	+	.	ID=gene1
+NC_003070	gth_csa	mRNA	10472279	10475601	.	+	.	ID=mRNA1;Parent=gene1
+NC_003070	gth_csa	exon	10472279	10472330	0.788462	+	.	Parent=mRNA1
+NC_003070	gth_csa	exon	10473721	10473759	0.666667	+	.	Parent=mRNA1
+NC_003070	gth_csa	exon	10475053	10475601	0.967093	+	.	Parent=mRNA1
+NC_003070	gth_csa	mRNA	10474921	10475601	.	+	.	ID=mRNA2;Parent=gene1
+NC_003070	gth_csa	exon	10474921	10475601	0.967093	+	.	Parent=mRNA2
+###
+NC_003070	gth_csa	gene	10478330	10478990	.	+	.	ID=gene2
+NC_003070	gth_csa	mRNA	10478330	10478990	.	+	.	ID=mRNA3;Parent=gene2
+NC_003070	gth_csa	exon	10478330	10478990	0.907692	+	.	Parent=mRNA3
+###

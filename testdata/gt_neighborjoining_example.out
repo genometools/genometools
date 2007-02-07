@@ -1,0 +1,7 @@
+edge from node 6 to node 7 with distance 0.049950
+edge from node 6 to node 4 with distance 0.141200
+edge from node 6 to node 1 with distance 0.064600
+edge from node 7 to node 5 with distance 0.072950
+edge from node 7 to node 0 with distance 0.049200
+edge from node 5 to node 3 with distance 0.168050
+edge from node 5 to node 2 with distance 0.111450

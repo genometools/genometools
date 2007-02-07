@@ -1,0 +1,6 @@
+##gff-version   3
+##sequence-region foo 1 100
+foo	.	gene	1	100	.	.	.	ID=gene1
+foo	.	exon	1	10	.	.	.	Parent=gene1
+foo	.	exon	41	50	.	.	.	Parent=gene1
+foo	.	exon	91	100	.	.	.	Parent=gene1
