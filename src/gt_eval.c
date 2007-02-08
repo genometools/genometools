@@ -16,9 +16,9 @@ static int parse_options(EvalArguments *arguments, int argc, char **argv)
   int parsed_args;
   OptionParser *op;
   Option *option;
-  option_parser_new("reality_file prediction_file ",
-                    "Evaluate a gene prediction against a given ``reality'' "
-                    "file (both in GFF3).");
+  op = option_parser_new("reality_file prediction_file ",
+                         "Evaluate a gene prediction against a given "
+                         "``reality'' file (both in GFF3).");
 
   /* -v */
   option = option_new_verbose(&arguments->verbose);
