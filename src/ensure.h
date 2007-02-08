@@ -9,7 +9,7 @@
 
 #include "error.h"
 
-/* the ensure makro used for unit tests */
+/* the ensure macro used for unit tests */
 #define ensure(e)                                                      \
         (e) ?  0 : error("ensure \"%s\" failed: file \"%s\", line %d", \
                          #e, __FILE__, __LINE__);
