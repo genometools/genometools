@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -14,11 +14,11 @@ typedef struct {
 static int parse_options(EvalArguments *arguments, int argc, char **argv)
 {
   int parsed_args;
-  OptionParser *op = option_parser_new("reality_file prediction_file ",
-                                       "Evaluate a gene prediction against a "
-                                       "given ``reality'' file (both in "
-                                       "GFF3).");
+  OptionParser *op;
   Option *option;
+  option_parser_new("reality_file prediction_file ",
+                    "Evaluate a gene prediction against a given ``reality'' "
+                    "file (both in GFF3).");
 
   /* -v */
   option = option_new_verbose(&arguments->verbose);
