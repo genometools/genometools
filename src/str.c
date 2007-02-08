@@ -179,7 +179,7 @@ Str* str_clone(const Str *s)
 Str* str_ref(Str *s)
 {
   if (!s) return NULL;
-  s->reference_count++;
+  s->reference_count++; /* increase the reference counter */
   return s;
 }
 
