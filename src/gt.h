@@ -23,6 +23,7 @@
 #include "cstr.h"                      /* C-string class */
 #include "dlist.h"                     /* double-linked list class */
 #include "dynalloc.h"                  /* dynamic allocating module */
+#include "ensure.h"                    /* defines the ensure macro */
 #include "extractfeat_stream.h"        /* extract feature stream class */
 #include "evaluator.h"                 /* evaluator class */
 #include "fileutils.h"                 /* file utilities module */

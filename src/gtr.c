@@ -148,17 +148,17 @@ static int run_tests(GTR *gtr)
   assert(gtr);
 
   /* The following type assumptions are made in the GenomeTools library. */
-  assert(sizeof(char) == 1);
-  assert(sizeof(unsigned char) == 1);
-  assert(sizeof(short) == 2);
-  assert(sizeof(unsigned short) == 2);
-  assert(sizeof(int) == 4);
-  assert(sizeof(unsigned int) == 4);
-  assert(sizeof(long) == 4 || sizeof(long) == 8);
-  assert(sizeof(unsigned long) == 4 || sizeof(unsigned long) == 8);
-  assert(sizeof(unsigned long) >= sizeof(size_t));
-  assert(sizeof(long long) == 8);
-  assert(sizeof(unsigned long long) == 8);
+  ensure(sizeof(char) == 1);
+  ensure(sizeof(unsigned char) == 1);
+  ensure(sizeof(short) == 2);
+  ensure(sizeof(unsigned short) == 2);
+  ensure(sizeof(int) == 4);
+  ensure(sizeof(unsigned int) == 4);
+  ensure(sizeof(long) == 4 || sizeof(long) == 8);
+  ensure(sizeof(unsigned long) == 4 || sizeof(unsigned long) == 8);
+  ensure(sizeof(unsigned long) >= sizeof(size_t));
+  ensure(sizeof(long long) == 8);
+  ensure(sizeof(unsigned long long) == 8);
 
   if (gtr->unit_tests) {
     hashtable_foreach(gtr->unit_tests, run_test, &rval);
