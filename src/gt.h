@@ -20,10 +20,10 @@
 #include <libgt/consensus_sa.h>              /* consensus spliced align. mod. */
 #include <libgt/countingsort.h>              /* countingsort module */
 #include <libgt/csa_stream.h>                /* consensus spliced align. str. */
-#include <libgt/coin_hmm.h>                  /*  XXX */
+#include <libgt/coin_hmm.h>                  /* the coin HMM class */
 #include <libgt/compare.h>                   /* compare module */
 #include <libgt/cstr.h>                      /* C-string class */
-#include <libgt/dice_hmm.h>                  /*  XXX */
+#include <libgt/dice_hmm.h>                  /* the dice HMM class */
 #include <libgt/dlist.h>                     /* double-linked list class */
 #include <libgt/dynalloc.h>                  /* dynamic allocating module */
 #include <libgt/ensure.h>                    /* defines the ensure macro */
