@@ -32,18 +32,24 @@ ifeq ($(assert),no)
   GT_CFLAGS += -DNDEBUG
 endif
 
+# set prefix for install target
+prefix ?= /usr/local
+
 all: dirs lib/libgt.a bin/gt
 
 dirs:
-	@test -d obj || mkdir -p obj 
-	@test -d lib || mkdir -p lib 
-	@test -d bin || mkdir -p bin 
+	@test -d include || mkdir -p include/libgt
+	@test -d obj     || mkdir -p obj 
+	@test -d lib     || mkdir -p lib 
+	@test -d bin     || mkdir -p bin 
 
 lib/libgt.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h $(LIBGT_OBJ)
 	ar ruv $@ $(LIBGT_OBJ)
 ifdef RANLIB
 	$(RANLIB) $@
 endif
+	ln src/gt.h include
+	ln src/libgt/*.h include/libgt
 
 bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgt.a
 	$(LD) $(LDFLAGS) $^ $(LDLIBS) -o $@
@@ -73,7 +79,7 @@ obj/%.o: src/tools/%.c
 # read deps
 -include obj/*.d
 
-.PHONY: dist srcdist release gt libgt splint test clean cleanup
+.PHONY: dist srcdist release gt libgt install splint test clean cleanup
 
 dist: all
 	tar cvzf gt-`cat VERSION`.tar.gz bin/gt_*
@@ -91,6 +97,15 @@ gt: dirs bin/gt
 
 libgt: dirs lib/libgt.a
 
+install:
+	test -d $(prefix)/bin || mkdir -p $(prefix)/bin
+	cp bin/gt $(prefix)/bin
+	test -d $(prefix)/include/libgt || mkdir -p $(prefix)/include/libgt
+	cp src/gt.h $(prefix)/include	
+	cp src/libgt/*.h $(prefix)/include/libgt
+	test -d $(prefix)/lib || mkdir -p $(prefix)/lib
+	cp lib/libgt.a $(prefix)/lib
+	
 splint:
 	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) $(CURDIR)/src/*.c
 
@@ -103,4 +118,4 @@ clean:
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_testsuite
 
 cleanup: clean
-	rm -rf lib bin
+	rm -rf include lib bin
