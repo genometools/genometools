@@ -14,3 +14,5 @@ src/libgt the C source code for the ``libgt''
 src/tools the C source code for all tools
 testdata/ the test data necessary for the test suite
 testdata/ the test suite
+
+See INSTALL file for installation guidelines.

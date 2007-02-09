@@ -1,0 +1,46 @@
+Building GenomeTools
+--------------------
+
+Invoke GNU make, e.g.:
+
+$ make [argument ...] 
+
+to build GenomeTools.
+
+On *BSD GNU make is often called ``gmake''.
+Possible arguments:
+
+- opt=no to disable optimization
+- assert=no to disable assertions
+
+Example call to build GenomeTools without assertions on a system where GNU make
+is called ``gmake'':
+
+$ gmake assert=no
+
+
+Testing GenomeTools (optional)
+------------------------------
+
+Call
+
+$ make test
+
+to make sure your GenomeTools build went fine.
+This step requires an installed Ruby interpreter (see 
+http://www.ruby-lang.org/en/ for informations on Ruby).
+
+
+Installing GenomeTools (optional)
+---------------------------------
+
+To install the ``gt'' binary and the ``libgt'' library (plus header files) on
+your system invoke
+
+$ make install
+
+Per default the files are installed under /usr/local
+You can change this with the prefix argument. For example, to install under
+/usr invoke
+
+$ make prefix=/usr
