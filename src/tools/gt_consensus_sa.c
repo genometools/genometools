@@ -4,14 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include "consensus_sa.h"
-#include "error.h"
-#include "range.h"
-#include "str.h"
-#include "xansi.h"
+#include <gt.h>
 
 #define DELIMITER         ','
 #define FORWARDSTRANDCHAR '+'

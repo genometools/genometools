@@ -8,58 +8,60 @@
 #define GT_H
 
 /* The GenomeTools library (libgt) header */
-#include "affinealign.h"               /* affine align module */
-#include "align.h"                     /* align module */
-#include "alignment.h"                 /* alignment class */
-#include "array.h"                     /* array class */
-#include "array2dim.h"                 /* 2-dimensional array class */
-#include "bioseq.h"                    /* biosequence class */
-#include "bittab.h"                    /* bittab class */
-#include "bsearch.h"                   /* bsearch module */
-#include "cds_stream.h"                /* CDS stream */
-#include "countingsort.h"              /* countingsort module */
-#include "csa_stream.h"                /* consensus spliced alignment stream */
-#include "compare.h"                   /* compare module */
-#include "cstr.h"                      /* C-string class */
-#include "dlist.h"                     /* double-linked list class */
-#include "dynalloc.h"                  /* dynamic allocating module */
-#include "ensure.h"                    /* defines the ensure macro */
-#include "extractfeat_stream.h"        /* extract feature stream class */
-#include "evaluator.h"                 /* evaluator class */
-#include "fileutils.h"                 /* file utilities module */
-#include "filter_stream.h"             /* filter stream class */
-#include "gff3_in_stream.h"            /* GFF3 input stream class */
-#include "gff3_out_stream.h"           /* GFF3 output stream class */
-#include "gtf_in_stream.h"             /* GTF input stream class */
-#include "genome_stream.h"             /* genome stream class */
-#include "grep.h"                      /* grep module */
-#include "gtr.h"                       /* the GenomeTools runtime */
-#include "hashtable.h"                 /* hashtable class */
-#include "hmm.h"                       /* HMM class */
-#include "linearedist.h"               /* linear edit distance module */
-#include "merge_stream.h"              /* merge stream class */
-#include "mergefeat_stream_sorted.h"   /* merge feat. stream (sorted) class */
-#include "mergefeat_stream_unsorted.h" /* merge feat. stream (unsorted) class */
-#include "msa.h"                       /* multiple sequence alignment class */
-#include "neighborjoining.h"           /* the Neighbor-Joining class */
-#include "option.h"                    /* option parser class */
-#include "progressbar.h"               /* progressbar module */
-#include "qgramdist.h"                 /* q-gram distance module */
-#include "range.h"                     /* range class */
-#include "scorefunction.h"             /* score function class */
-#include "scorematrix.h"               /* score matrix class */
-#include "sort_stream.h"               /* sort stream class */
-#include "splicedseq.h"                /* splicedseq class */
-#include "splitter.h"                  /* splitter class */
-#include "stat_visitor.h"              /* status visitor class */
-#include "str.h"                       /* string class */
-#include "stream_evaluator.h"          /* string class */
-#include "swalign.h"                   /* Smith-Waterman alignment module */
-#include "tokenizer.h"                 /* tokenizer class */
-#include "undef.h"                     /* undef module */
-#include "upgma.h"                     /* UPGMA class */
-#include "versionfunc.h"               /* version module */
-#include "xansi.h"                     /* ANSI wrapper module */
-#include "xposix.h"                    /* POSIX wrapper module */
+#include <libgt/affinealign.h>               /* affine align module */
+#include <libgt/align.h>                     /* align module */
+#include <libgt/alignment.h>                 /* alignment class */
+#include <libgt/array.h>                     /* array class */
+#include <libgt/array2dim.h>                 /* 2-dimensional array class */
+#include <libgt/bioseq.h>                    /* biosequence class */
+#include <libgt/bittab.h>                    /* bittab class */
+#include <libgt/bsearch.h>                   /* bsearch module */
+#include <libgt/cds_stream.h>                /* CDS stream */
+#include <libgt/consensus_sa.h>              /* consensus spliced align. mod. */
+#include <libgt/countingsort.h>              /* countingsort module */
+#include <libgt/csa_stream.h>                /* consensus spliced align. str. */
+#include <libgt/coin_hmm.h>                  /*  XXX */
+#include <libgt/compare.h>                   /* compare module */
+#include <libgt/cstr.h>                      /* C-string class */
+#include <libgt/dice_hmm.h>                  /*  XXX */
+#include <libgt/dlist.h>                     /* double-linked list class */
+#include <libgt/dynalloc.h>                  /* dynamic allocating module */
+#include <libgt/ensure.h>                    /* defines the ensure macro */
+#include <libgt/extractfeat_stream.h>        /* extract feature stream class */
+#include <libgt/evaluator.h>                 /* evaluator class */
+#include <libgt/fileutils.h>                 /* file utilities module */
+#include <libgt/filter_stream.h>             /* filter stream class */
+#include <libgt/gff3_in_stream.h>            /* GFF3 input stream class */
+#include <libgt/gff3_out_stream.h>           /* GFF3 output stream class */
+#include <libgt/gtf_in_stream.h>             /* GTF input stream class */
+#include <libgt/genome_stream.h>             /* genome stream class */
+#include <libgt/grep.h>                      /* grep module */
+#include <libgt/hashtable.h>                 /* hashtable class */
+#include <libgt/hmm.h>                       /* HMM class */
+#include <libgt/linearedist.h>               /* linear edit distance module */
+#include <libgt/merge_stream.h>              /* merge stream class */
+#include <libgt/mergefeat_stream_sorted.h>   /* merge feat. stream class */
+#include <libgt/mergefeat_stream_unsorted.h> /* merge feat. stream class */
+#include <libgt/msa.h>                       /* multiple seq. alignment class */
+#include <libgt/neighborjoining.h>           /* the Neighbor-Joining class */
+#include <libgt/option.h>                    /* option parser class */
+#include <libgt/progressbar.h>               /* progressbar module */
+#include <libgt/qgramdist.h>                 /* q-gram distance module */
+#include <libgt/range.h>                     /* range class */
+#include <libgt/scorefunction.h>             /* score function class */
+#include <libgt/scorematrix.h>               /* score matrix class */
+#include <libgt/sort_stream.h>               /* sort stream class */
+#include <libgt/splicedseq.h>                /* splicedseq class */
+#include <libgt/splitter.h>                  /* splitter class */
+#include <libgt/stat_visitor.h>              /* status visitor class */
+#include <libgt/str.h>                       /* string class */
+#include <libgt/stream_evaluator.h>          /* string class */
+#include <libgt/swalign.h>                   /* Smith-Waterman align. module */
+#include <libgt/tokenizer.h>                 /* tokenizer class */
+#include <libgt/undef.h>                     /* undef module */
+#include <libgt/upgma.h>                     /* UPGMA class */
+#include <libgt/versionfunc.h>               /* version module */
+#include <libgt/xansi.h>                     /* ANSI wrapper module */
+#include <libgt/xposix.h>                    /* POSIX wrapper module */
 
 #endif

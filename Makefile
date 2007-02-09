@@ -15,8 +15,11 @@ LDLIBS:=-lm
 
 VPATH:=$(VPATH):$(CURDIR)/src
 
-LIBSRC:=$(filter-out gt.c, $(notdir $(wildcard src/*.c)))
-LIBOBJ:=$(LIBSRC:%.c=obj/%.o)
+LIBGT_SRC:=$(notdir $(wildcard src/libgt/*.c))
+LIBGT_OBJ:=$(LIBGT_SRC:%.c=obj/%.o)
+
+TOOLS_SRC:=$(notdir $(wildcard src/tools/*.c))
+TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
 
 # process arguments
 ifeq ($(opt),no)
@@ -36,13 +39,13 @@ dirs:
 	@test -d lib || mkdir -p lib 
 	@test -d bin || mkdir -p bin 
 
-lib/libgt.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h $(LIBOBJ)
-	ar ruv $@ $(LIBOBJ)
+lib/libgt.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h $(LIBGT_OBJ)
+	ar ruv $@ $(LIBGT_OBJ)
 ifdef RANLIB
 	$(RANLIB) $@
 endif
 
-bin/gt: obj/gt.o lib/libgt.a
+bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgt.a
 	$(LD) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 obj/gt_build.h:
@@ -59,6 +62,12 @@ obj/gt_version.h: VERSION
 
 # we create the dependency files on the fly
 obj/%.o: src/%.c
+	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+
+obj/%.o: src/libgt/%.c
+	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+
+obj/%.o: src/tools/%.c
 	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 # read deps

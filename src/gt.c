@@ -4,7 +4,8 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include <gt.h>
+#include "gtr.h"
 
 /* The GenomeTools (gt) genome analysis system */
 int main(int argc, char *argv[])

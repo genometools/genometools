@@ -9,6 +9,8 @@ The GenomeTools genome analysis system is a collection of bioinformatics tools
 It is based on a C library named ``libgt''.
 
 scripts/  scripts used for development
-src/      the C source code for libgt and the gt source file ``gt.c''
+src/      the C source code gt itself and the runtime
+src/libgt the C source code for the ``libgt''
+src/tools the C source code for all tools
 testdata/ the test data necessary for the test suite
 testdata/ the test suite
