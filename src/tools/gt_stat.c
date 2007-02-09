@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -23,8 +23,8 @@ static int parse_options(Stat_arguments *arguments, int argc, char **argv)
   OptionParser *op;
   Option *option;
 
-  op = option_parser_new("[option ...] [gff3_file ...]",
-                         "Show statistics about features contained in gff3 "
+  op = option_parser_new("[option ...] [GFF3_file ...]",
+                         "Show statistics about features contained in GFF3 "
                          "files.");
 
   /* -genelengthdistri */

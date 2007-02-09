@@ -12,8 +12,8 @@ static int parse_options(FILE **outfp, int argc, char **argv)
   OptionParser *op;
   Option *option;
 
-  op = option_parser_new("[option ...] [gff3_file ...]",
-                         "Merge sorted gff3 files in sorted fashion.");
+  op = option_parser_new("[option ...] [GFF3_file ...]",
+                         "Merge sorted GFF3 files in sorted fashion.");
 
   option = option_new_outputfile(outfp);
   option_parser_add_option(op, option);

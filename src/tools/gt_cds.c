@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -17,8 +17,8 @@ static int parse_options(CDS_arguments *arguments, int argc,
   OptionParser *op;
   Option *option;
 
-  op = option_parser_new("[option ...] gff3_file sequence_file",
-                         "Add CDS features to exon features given in gff3_file "
+  op = option_parser_new("[option ...] GFF3_file sequence_file",
+                         "Add CDS features to exon features given in GFF3_file "
                          "(which refers to sequence_file).");
 
   /* -v */

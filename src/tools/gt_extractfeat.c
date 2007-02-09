@@ -20,8 +20,8 @@ static int parse_options(Extractfeat_arguments *arguments, int argc,
   OptionParser *op;
   Option *option;
 
-  op = option_parser_new("[option ...] gff3_file sequence_file",
-                         "Extract features given in gff3_file from "
+  op = option_parser_new("[option ...] GFF3_file sequence_file",
+                         "Extract features given in GFF3_file from "
                          "sequence_file.");
 
   /* -type */

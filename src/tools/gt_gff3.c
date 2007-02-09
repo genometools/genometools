@@ -19,9 +19,9 @@ static int parse_options(Gff3_arguments *arguments, int argc, char **argv)
   int parsed_args;
   OptionParser *op;
   Option *sort_option, *mergefeat_option, *option;
-  op = option_parser_new("[option ...] [gff3_file ...]",
-                         "Parse, possibly transform, and output gff3 files.");
-  sort_option = option_new_boolean("sort", "sort the gff3 features (memory "
+  op = option_parser_new("[option ...] [GFF3_file ...]",
+                         "Parse, possibly transform, and output GFF3 files.");
+  sort_option = option_new_boolean("sort", "sort the GFF3 features (memory "
                                    "consumption is O(file_size))",
                                    &arguments->sort, 0);
   option_parser_add_option(op, sort_option);

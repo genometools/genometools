@@ -19,7 +19,7 @@ static int parse_options(Filter_arguments *arguments, int argc, char **argv)
   OptionParser *op;
   Option *option;
 
-  op = option_parser_new("[option ...] [gff3_file ...]", "Filter gff3 files.");
+  op = option_parser_new("[option ...] [GFF3_file ...]", "Filter GFF3 files.");
 
   /* -maxgenelength */
   option = option_new_ulong_min("maxgenelength", "the maximum length a gene "
