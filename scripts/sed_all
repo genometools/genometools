@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+# See LICENSE file or http://genometools.org/license.html for license details.
+#
+
+if [ $# -le 1 ]
+then
+  echo "Usage: `basename $0` sed_command file [...]" >&2
+  echo "Apply \"sed_command\" to each \"file\" and replace it afterwards." >&2
+  echo "The original \"file\" is saved as \"file.bac\"." >&2
+  exit 1
+fi
+
+sed_command=$1
+shift
+
+for FILE in $*
+do
+  TMPFILE=`mktemp`
+  cp $FILE $FILE.bac
+  sed $sed_command $FILE > $TMPFILE
+  mv -f $TMPFILE $FILE
+done
