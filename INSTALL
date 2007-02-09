@@ -43,7 +43,7 @@ Per default the files are installed under /usr/local
 You can change this with the prefix argument. For example, to install under
 /usr invoke
 
-$ make prefix=/usr
+# make prefix=/usr
 
 
 Finale note
