@@ -31,8 +31,8 @@ This step requires an installed Ruby interpreter (see
 http://www.ruby-lang.org/en/ for informations on Ruby).
 
 
-Installing GenomeTools (optional)
----------------------------------
+Installing GenomeTools
+----------------------
 
 To install the ``gt'' binary and the ``libgt'' library (plus header files) on
 your system invoke
@@ -44,3 +44,12 @@ You can change this with the prefix argument. For example, to install under
 /usr invoke
 
 $ make prefix=/usr
+
+
+Finale note
+-----------
+
+Please look at http://genometools.org for updates and report bugs if you
+encounter any.
+
+Enjoy!
