@@ -1,0 +1,43 @@
+#!/bin/sh
+#
+# Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+# See LICENSE file or http://genometools.org/license.html for license details.
+#
+
+if [ $# -eq 0 ]
+then
+  echo "Usage: $0 file [...]" >&2
+  echo "Check C sources for accordance with coding standards." >&2
+  exit 1
+fi
+
+# if at least one of the checks fails an error code is returned at the end
+err=0
+
+grep -n ' $' $*
+if [ $? -eq 0 ]; then echo "unnecessary blank(s) at the end of line"; err=1; fi
+
+grep -n -e 'if('     \
+        -e 'switch(' \
+        -e 'while('  \
+        -e 'for('    \
+        -e 'do{'     \
+        -e '){'      \
+        $*
+if [ $? -eq 0 ]; then echo "missing blank(s)"; err=1; fi
+
+grep -n '.\{81,\}' $*
+if [ $? -eq 0 ]; then echo "line(s) longer than 80 characters"; err=1; fi
+
+grep -n '[^:]//' $*
+if [ $? -eq 0 ]; then echo "C++ style comment"; err=1; fi
+
+grep -n '^ *,' $*
+if [ $? -eq 0 ]; then echo "illegal ',' at beginning of line"; err=1; fi
+
+dir=`dirname $0`
+$dir/two_empty_lines $*
+if [ $? -ne 0 ]; then err=1; fi
+
+exit $err

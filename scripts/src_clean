@@ -1,0 +1,27 @@
+#!/bin/sh -e
+#
+# Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+# Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+# See LICENSE file or http://genometools.org/license.html for license details.
+#
+
+if [ $# -eq 0 ]
+then
+  echo "Usage: $0 file [...]" >&2
+  echo "Clean up C sources in given files." >&2
+  exit 1
+fi
+
+for FILE in $*
+do
+  TMPFILE=`mktemp`
+  sed -e s/[[:space:]]*$//     \
+      -e 's/if(/if (/'         \
+      -e 's/switch(/switch (/' \
+      -e 's/while(/while (/'   \
+      -e 's/for(/for (/'       \
+      -e 's/do{/do {/'         \
+      -e 's/){/) {/'           \
+      $FILE > $TMPFILE
+  mv -f $TMPFILE $FILE
+done
