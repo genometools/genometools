@@ -62,11 +62,11 @@ struct Option {
     unsigned int ui;
     unsigned long ul;
   } min_value;
-  unsigned int is_set                : 1,
-               is_mandatory          : 1,
-               hide_default          : 1,
-               min_value_set         : 1,
-               is_development_option : 1;
+  bool is_set,
+       is_mandatory,
+       hide_default,
+       min_value_set,
+       is_development_option;
   Array *implications, /* contains option arrays, from each array at least one
                           option needs to be set */
         *exclusions;
@@ -100,8 +100,8 @@ static Option* option_new_helpdev(void)
   Option *o = option_new("helpdev",
                          "display help for development options and exit", NULL);
   o->option_type = OPTION_HELPDEV;
-  o->default_value.b = 0;
-  o->is_development_option = 1;
+  o->default_value.b = false;
+  o->is_development_option = true;
   return o;
 }
 
@@ -374,7 +374,7 @@ static int parse(OptionParser *op, int argc, char **argv,
         /* make sure option has not been used before */
         if (option->is_set)
           error("option \"%s\" already set", str_get(option->option_str));
-        option->is_set = 1;
+        option->is_set = true;
         switch (option->option_type) {
           case OPTION_BOOL:
             /* XXX: the next argument (if any) is an option
@@ -569,7 +569,7 @@ Option* option_new_verbose(bool *value)
 Option* option_new_debug(bool *value)
 {
   Option *o = option_new_bool("debug", "enable debugging output", value, false);
-  o->is_development_option = 1;
+  o->is_development_option = true;
   return o;
 }
 
@@ -616,7 +616,7 @@ Option* option_new_int_min(const char *option_str,
                            int min_value)
 {
   Option *o = option_new_int(option_str, description, value, default_value);
-  o->min_value_set = 1;
+  o->min_value_set = true;
   o->min_value.i = min_value;
   return o;
 }
@@ -641,7 +641,7 @@ Option* option_new_uint_min(const char *option_str,
 {
   Option *o = option_new_int(option_str, description, (int*) value,
                              default_value);
-  o->min_value_set = 1;
+  o->min_value_set = true;
   o->min_value.ui = min_value;
   return o;
 }
@@ -676,7 +676,7 @@ Option* option_new_ulong_min(const char *option_str, const char *description,
                              unsigned long min_value)
 {
   Option *o = option_new_ulong(option_str, description, value, default_value);
-  o->min_value_set = 1;
+  o->min_value_set = true;
   o->min_value.ul = min_value;
   return o;
 }
@@ -694,13 +694,13 @@ Option* option_new_string(const char *option_str, const char *description,
 void option_is_mandatory(Option *o)
 {
   assert(o);
-  o->is_mandatory = 1;
+  o->is_mandatory = true;
 }
 
 void option_is_development_option(Option *o)
 {
   assert(o);
-  o->is_development_option = 1;
+  o->is_development_option = true;
 }
 
 void option_imply(Option *o, const Option *implied_option)
@@ -740,7 +740,7 @@ void option_exclude(Option *o_a, Option *o_b)
 void option_hide_default(Option *o)
 {
   assert(o);
-  o->hide_default = 1;
+  o->hide_default = true;
 }
 
 void option_free(Option *o)
