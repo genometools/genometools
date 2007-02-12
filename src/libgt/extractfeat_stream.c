@@ -44,7 +44,7 @@ const Genome_stream_class* extractfeat_stream_class(void)
 Genome_stream* extractfeat_stream_new(Genome_stream *in_stream,
                                       Str *sequence_file,
                                       Genome_feature_type type,
-                                      unsigned int join, unsigned int translate)
+                                      bool join, bool translate)
 {
   Genome_stream *gs = genome_stream_create(extractfeat_stream_class(), 1);
   Extractfeat_stream *extractfeat_stream = extractfeat_stream_cast(gs);

@@ -19,7 +19,7 @@ const Genome_stream_class* extractfeat_stream_class(void);
 Genome_stream*             extractfeat_stream_new(Genome_stream*,
                                                   Str *sequence_file,
                                                   Genome_feature_type type,
-                                                  unsigned int join,
-                                                  unsigned int translate);
+                                                  bool join,
+                                                  bool translate);
 
 #endif
