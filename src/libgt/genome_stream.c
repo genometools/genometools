@@ -34,16 +34,13 @@ void genome_stream_class_init(Genome_stream_class *gsc, size_t size, ...)
 }
 
 Genome_stream* genome_stream_create(const Genome_stream_class *gsc,
-                                   unsigned int ensure_sorting)
+                                    bool ensure_sorting)
 {
   Genome_stream *gs;
-
   assert(gsc && gsc->size);
-
   gs = xcalloc(1, gsc->size);
   gs->c_class = gsc;
   gs->ensure_sorting = ensure_sorting;
-
   return gs;
 }
 

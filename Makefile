@@ -7,7 +7,7 @@
 CCACHE:= $(shell type ccache >/dev/null && echo ccache)
 CC:=$(CCACHE) gcc
 LD:=gcc
-INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj
+INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj -I$(CURDIR)/src/lua-5.1.1/src
 CFLAGS:=
 GT_CFLAGS:= -Wall $(INCLUDEOPT)
 LDFLAGS:=

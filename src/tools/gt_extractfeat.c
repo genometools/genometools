@@ -20,7 +20,7 @@ static int parse_options(Extractfeat_arguments *arguments, int argc,
 {
   int parsed_args;
   OptionParser *op;
-  Option *option;
+  Option *option, *seqfile_option, *regionmapping_option;
 
   op = option_parser_new("[option ...] GFF3_file",
                          "Extract features given in GFF3_file from "
@@ -45,17 +45,23 @@ static int parse_options(Extractfeat_arguments *arguments, int argc,
   option_parser_add_option(op, option);
 
   /* -seqfile */
-  option = option_new_string("seqfile", "set the sequence file from which to "
-                             "extract the features", arguments->seqfile, NULL);
-  option_is_mandatory(option);
-  option_parser_add_option(op, option);
+  seqfile_option = option_new_string("seqfile", "set the sequence file from "
+                                     "which to extract the features",
+                                     arguments->seqfile, NULL);
+  option_parser_add_option(op, seqfile_option);
 
   /* -regionmapping */
-  option = option_new_string("regionmapping", "set file containing sequence-"
-                             "region to sequence file mapping",
-                             arguments->regionmapping, NULL);
-  option_is_development_option(option);
-  option_parser_add_option(op, option);
+  regionmapping_option = option_new_string("regionmapping", "set file "
+                                           "containing sequence-region to "
+                                           "sequence file mapping",
+                                           arguments->regionmapping, NULL);
+  option_parser_add_option(op, regionmapping_option);
+
+  /* either option -seqfile or -regionmapping is mandatory */
+  option_is_mandatory_either(seqfile_option, regionmapping_option);
+
+  /* the options -seqfile and -regionmapping exclude each other */
+  option_exclude(seqfile_option, regionmapping_option);
 
   /* -v */
   option = option_new_verbose(&arguments->verbose);
@@ -76,6 +82,7 @@ int gt_extractfeat(int argc, char *argv[])
   Genome_node *gn;
   Genome_feature_type type;
   Extractfeat_arguments arguments;
+  RegionMapping *regionmapping;
   int parsed_args;
 
   /* option parsing */
@@ -95,9 +102,18 @@ int gt_extractfeat(int argc, char *argv[])
 
   /* create extract feature stream */
   extractfeat_stream = extractfeat_stream_new(gff3_in_stream,
-                                              arguments.seqfile,
                                               type, arguments.join,
                                               arguments.translate);
+
+  /* set sequence source */
+  assert(str_get(arguments.seqfile) || str_get(arguments.regionmapping));
+  assert(!(str_get(arguments.seqfile) && str_get(arguments.regionmapping)));
+  if (str_get(arguments.seqfile))
+    extractfeat_stream_use_sequence_file(extractfeat_stream, arguments.seqfile);
+  else {
+    regionmapping = regionmapping_new(str_get(arguments.regionmapping));
+    extractfeat_stream_use_region_mapping(extractfeat_stream, regionmapping);
+  }
 
   /* pull the features through the stream and free them afterwards */
   while ((gn = genome_stream_next_tree(extractfeat_stream, NULL)))

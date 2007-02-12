@@ -25,7 +25,7 @@ struct Genome_stream
 };
 
 Genome_stream* genome_stream_create(const Genome_stream_class*,
-                                    unsigned int ensure_sorting);
+                                    bool ensure_sorting);
 void*          genome_stream_cast(const Genome_stream_class*, Genome_stream*);
 
 #endif

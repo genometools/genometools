@@ -25,6 +25,7 @@ struct Extractfeat_visitor {
        reverse_strand;
   Bioseq *bioseq;
   unsigned long fastaseq_counter;
+  RegionMapping *regionmapping;
 };
 
 #define extractfeat_visitor_cast(GV)\
@@ -39,6 +40,7 @@ static void extractfeat_visitor_free(Genome_visitor *gv)
   str_free(extractfeat_visitor->sequence);
   str_free(extractfeat_visitor->protein);
   bioseq_free(extractfeat_visitor->bioseq);
+  regionmapping_free(extractfeat_visitor->regionmapping);
 }
 
 static void extract_join_feature(Genome_node *gn, void *data)
@@ -140,7 +142,7 @@ static void extractfeat_visitor_genome_feature(Genome_visitor *gv,
                                                /*@unused@*/ Log *l)
 {
   Extractfeat_visitor *v = extractfeat_visitor_cast(gv);
-  genome_node_traverse_children((Genome_node*) gf, v, extract_feature, 0);
+  genome_node_traverse_children((Genome_node*) gf, v, extract_feature, false);
 }
 
 static void extractfeat_visitor_sequence_region(Genome_visitor *gv,
@@ -169,20 +171,43 @@ const Genome_visitor_class* extractfeat_visitor_class()
   return &gvc;
 }
 
-Genome_visitor* extractfeat_visitor_new(Str *sequence_file,
-                                        Genome_feature_type type,
-                                        bool join, bool translate)
+static Genome_visitor* extractfeat_visitor_new(Genome_feature_type type,
+                                               bool join, bool translate)
 {
   Genome_visitor *gv = genome_visitor_create(extractfeat_visitor_class());
   Extractfeat_visitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
-  extractfeat_visitor->sequence_file = str_ref(sequence_file);
   extractfeat_visitor->description = str_new();
   extractfeat_visitor->sequence = str_new();
   extractfeat_visitor->protein = str_new();
   extractfeat_visitor->type = type;
   extractfeat_visitor->join = join;
   extractfeat_visitor->translate = translate;
-  extractfeat_visitor->bioseq = bioseq_new_str(sequence_file);
   extractfeat_visitor->fastaseq_counter = 0;
+  return gv;
+}
+
+Genome_visitor* extractfeat_visitor_new_seqfile(Str *sequence_file,
+                                                Genome_feature_type type,
+                                                bool join, bool translate)
+{
+  Genome_visitor *gv;
+  Extractfeat_visitor *extractfeat_visitor;
+  assert(sequence_file);
+  gv = extractfeat_visitor_new(type, join, translate);
+  extractfeat_visitor = extractfeat_visitor_cast(gv);
+  extractfeat_visitor->sequence_file = str_ref(sequence_file);
+  extractfeat_visitor->bioseq = bioseq_new_str(sequence_file);
+  return gv;
+}
+
+Genome_visitor* extractfeat_visitor_new_regionmapping(RegionMapping *rm,
+                                                      Genome_feature_type type,
+                                                      bool join, bool translate)
+{
+  Genome_visitor *gv;
+  Extractfeat_visitor *extractfeat_visitor;
+  gv = extractfeat_visitor_new(type, join, translate);
+  extractfeat_visitor = extractfeat_visitor_cast(gv);
+  extractfeat_visitor->regionmapping = rm;
   return gv;
 }
