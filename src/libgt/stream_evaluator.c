@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -55,13 +55,13 @@ typedef struct {
 typedef struct
 {
   Slot *slot;
-  unsigned int verbose : 1;
+  bool verbose;
 } Process_real_feature_data;
 
 typedef struct {
   Slot *slot;
-  unsigned int verbose  : 1,
-               exondiff : 1;
+  bool verbose,
+       exondiff;
   Evaluator *gene_evaluator,
             *mRNA_evaluator,
             *mRNA_exon_evaluator,
@@ -692,8 +692,8 @@ void determine_missing_features(void *key, void *value, void *data)
   }
 }
 
-void stream_evaluator_evaluate(Stream_evaluator *se, unsigned int verbose,
-                               unsigned int exondiff)
+void stream_evaluator_evaluate(Stream_evaluator *se, bool verbose,
+                               bool exondiff)
 {
   Genome_node *gn;
   Sequence_region *sr;

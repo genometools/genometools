@@ -11,7 +11,7 @@
 
 struct Tokenizer {
   IO *io;
-  unsigned int skip_comment_lines : 1;
+  bool skip_comment_lines;
   Str *token; /* the current token */
 };
 
@@ -27,7 +27,7 @@ Tokenizer* tokenizer_new(IO *io)
 void tokenizer_skip_comment_lines(Tokenizer *t)
 {
   assert(t);
-  t->skip_comment_lines = 1;
+  t->skip_comment_lines = true;
 }
 
 Str* tokenizer_get_token(Tokenizer *t)

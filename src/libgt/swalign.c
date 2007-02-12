@@ -13,9 +13,9 @@
 
 typedef struct {
   long score;
-  unsigned int max_replacement_edge_in : 1,
-               max_deletion_edge_in    : 1,
-               max_insertion_edge_in   : 1;
+  bool max_replacement,
+       max_deletion,
+       max_insertion;
 } DPentry;
 
 static void fillDPtable(DPentry **dptable,
@@ -35,9 +35,9 @@ static void fillDPtable(DPentry **dptable,
       insscore = dptable[i][j-1].score + scorefunction_get_insertion_score(sf);
       maxscore = MAX(MAX(MAX(repscore, delscore), insscore), 0);
       dptable[i][j].score = maxscore;
-      dptable[i][j].max_replacement_edge_in = (maxscore == repscore) ? 1 : 0;
-      dptable[i][j].max_deletion_edge_in    = (maxscore == delscore) ? 1 : 0;
-      dptable[i][j].max_insertion_edge_in   = (maxscore == insscore) ? 1 : 0;
+      dptable[i][j].max_replacement = (maxscore == repscore) ? true : false;
+      dptable[i][j].max_deletion    = (maxscore == delscore) ? true : false;
+      dptable[i][j].max_insertion   = (maxscore == insscore) ? true : false;
       if (maxscore > overall_maxscore) {
         overall_maxscore = maxscore;
         max_coordinate->x = i;
@@ -56,16 +56,16 @@ static Coordinate traceback(Alignment *a, DPentry **dptable,
     assert(dptable[i][j].score > 0);
     start_coordinate.x = i;
     start_coordinate.y = j;
-    if (dptable[i][j].max_replacement_edge_in) {
+    if (dptable[i][j].max_replacement) {
       alignment_add_replacement(a);
       i--;
       j--;
     }
-    else if (dptable[i][j].max_deletion_edge_in) {
+    else if (dptable[i][j].max_deletion) {
       alignment_add_deletion(a);
       i--;;
     }
-    else if (dptable[i][j].max_insertion_edge_in) {
+    else if (dptable[i][j].max_insertion) {
       alignment_add_insertion(a);
       j--;
     }

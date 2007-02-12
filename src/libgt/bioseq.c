@@ -27,7 +27,7 @@ struct Bioseq {
   char *raw_sequence;
   size_t raw_sequence_length;
   Alpha *alpha;
-  unsigned int bioseq_is_filled : 1;
+  bool bioseq_is_filled;
 };
 
 typedef struct {
@@ -214,7 +214,7 @@ void bioseq_fill(Bioseq *bs, unsigned int recreate)
   str_free(bioseq_index_file);
   str_free(bioseq_raw_file);
 
-  bs->bioseq_is_filled = 1;
+  bs->bioseq_is_filled = true;
 }
 
 Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx)
