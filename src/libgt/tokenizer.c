@@ -68,20 +68,20 @@ Str* tokenizer_get_token(Tokenizer *t)
   return NULL;
 }
 
-unsigned int tokenizer_has_token(Tokenizer *t)
+bool tokenizer_has_token(Tokenizer *t)
 {
-  unsigned int has_token = 0;
+  bool has_token = false;
   Str *token;
   assert(t);
   token = tokenizer_get_token(t);
   if (token) {
-    has_token = 1;
+    has_token = true;
     str_free(token);
   }
   return has_token;
 }
 
-unsigned int tokenizer_line_start(const Tokenizer *t)
+bool tokenizer_line_start(const Tokenizer *t)
 {
   assert(t);
   return io_line_start(t->io);

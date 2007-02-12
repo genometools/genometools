@@ -43,21 +43,22 @@ int range_compare_by_length_ptr(const Range *range_a, const Range *range_b)
   return 1;
 }
 
-unsigned int range_overlap(Range range_a, Range range_b)
+bool range_overlap(Range range_a, Range range_b)
 {
   assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
 
   if (range_a.start <= range_b.end && range_a.end >= range_b.start)
-    return 1;
-  return 0;
+    return true;
+  return false;
 }
 
-unsigned int range_contains(Range range_a, Range range_b)
+bool range_contains(Range range_a, Range range_b)
 {
   assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
 
-  if (range_a.start <= range_b.start && range_a.end >= range_b.end) return 1;
-  return 0;
+  if (range_a.start <= range_b.start && range_a.end >= range_b.end)
+    return true;
+  return false;
 }
 
 Range range_join(Range range_a, Range range_b)
@@ -200,7 +201,7 @@ void ranges_sort_by_length_stable(Array *ranges)
         (Compare) range_compare_by_length_ptr);
 }
 
-unsigned int ranges_are_sorted(const Array *ranges)
+bool ranges_are_sorted(const Array *ranges)
 {
   unsigned long i;
 
@@ -209,13 +210,13 @@ unsigned int ranges_are_sorted(const Array *ranges)
   for (i = 1; i < array_size(ranges); i++) {
     if (range_compare(*(Range*) array_get(ranges, i-1),
                       *(Range*) array_get(ranges, i)) == 1) {
-      return 0;
+      return false;
     }
   }
-  return 1;
+  return true;
 }
 
-unsigned int ranges_do_not_overlap(const Array *ranges)
+bool ranges_do_not_overlap(const Array *ranges)
 {
   unsigned long i;
 
@@ -224,18 +225,18 @@ unsigned int ranges_do_not_overlap(const Array *ranges)
   for (i = 1; i < array_size(ranges); i++) {
     if (range_overlap(*(Range*) array_get(ranges, i-1),
                       *(Range*) array_get(ranges, i))) {
-      return 0;
+      return false;
     }
   }
-  return 1;
+  return true;
 }
 
-unsigned int ranges_are_sorted_and_do_not_overlap(const Array *ranges)
+bool ranges_are_sorted_and_do_not_overlap(const Array *ranges)
 {
   return ranges_are_sorted(ranges) && ranges_do_not_overlap(ranges);
 }
 
-unsigned int ranges_are_equal(const Array *ranges_1, const Array *ranges_2)
+bool ranges_are_equal(const Array *ranges_1, const Array *ranges_2)
 {
   unsigned long i;
   Range range_1, range_2;
@@ -243,16 +244,16 @@ unsigned int ranges_are_equal(const Array *ranges_1, const Array *ranges_2)
   assert(ranges_are_sorted(ranges_1) && ranges_are_sorted(ranges_2));
 
   if (array_size(ranges_1) != array_size(ranges_2))
-    return 0;
+    return false;
 
   for (i = 0; i < array_size(ranges_1); i++) {
     range_1 = *(Range*) array_get(ranges_1, i);
     range_2 = *(Range*) array_get(ranges_2, i);
     if (range_compare(range_1, range_2))
-      return 0;
+      return false;
   }
 
-  return 1;
+  return true;
 }
 
 static Array* generic_ranges_uniq(Array *out_ranges, const Array *in_ranges,

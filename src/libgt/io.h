@@ -7,6 +7,7 @@
 #ifndef IO_H
 #define IO_H
 
+#include <stdbool.h>
 #include <stdio.h>
 
 /* the I/O class */
@@ -15,7 +16,7 @@ typedef struct IO IO;
 IO*           io_new(const char *path, const char *mode);
 int           io_get_char(IO*, char*); /* returns -1 if no char is left */
 void          io_unget_char(IO*, char);
-unsigned int  io_line_start(const IO*);
+bool          io_line_start(const IO*);
 unsigned long io_get_line_number(const IO*);
 const char*   io_get_filename(const IO*);
 void          io_free(IO*);

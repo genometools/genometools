@@ -12,7 +12,7 @@ struct IO {
   FILE *fp;
   char *path;
   unsigned long line_number;
-  unsigned int line_start : 1;
+  bool line_start;
 };
 
 IO* io_new(const char *path, const char *mode)
@@ -24,7 +24,7 @@ IO* io_new(const char *path, const char *mode)
   io->fp = xfopen(path, mode);
   io->path = xstrdup(path);
   io->line_number = 1;
-  io->line_start = 1;
+  io->line_start = true;
   return io;
 }
 
@@ -35,10 +35,10 @@ int io_get_char(IO *io, char *c)
   cc = xfgetc(io->fp);
   if (cc == '\n') {
     io->line_number++;
-    io->line_start = 1;
+    io->line_start = true;
   }
   else
-    io->line_start = 0;
+    io->line_start = false;
   if (cc == EOF)
     return -1; /* no character left */
   *c = cc;
@@ -51,7 +51,7 @@ void io_unget_char(IO *io, char c)
   xungetc(c, io->fp);
 }
 
-unsigned int io_line_start(const IO *io)
+bool io_line_start(const IO *io)
 {
   assert(io);
   return io->line_start;
