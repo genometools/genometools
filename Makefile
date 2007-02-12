@@ -51,14 +51,9 @@ dirs:
 	@test -d lib     || mkdir -p lib 
 	@test -d bin     || mkdir -p bin 
 
-lib/libgt.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h $(LIBGT_OBJ)
-	ar ruv $@ $(LIBGT_OBJ)
-ifdef RANLIB
-	$(RANLIB) $@
-endif
-
-lib/liblua.a: $(LIBLUA_OBJ)
-	ar ruv $@ $(LIBLUA_OBJ)
+lib/libgt.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h \
+             $(LIBGT_OBJ) $(LIBLUA_OBJ)
+	ar ruv $@ $(LIBGT_OBJ) $(LIBLUA_OBJ)
 ifdef RANLIB
 	$(RANLIB) $@
 endif
