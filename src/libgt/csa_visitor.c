@@ -13,7 +13,7 @@
 #include "queue.h"
 #include "undef.h"
 
-#define GTH_CSA_SOURCE_TAG      "gth_csa"
+#define GT_CSA_SOURCE_TAG "gt csa"
 
 struct Csa_visitor {
   const GenomeVisitor parent_instance;
@@ -131,7 +131,7 @@ GenomeVisitor* csa_visitor_new(unsigned long join_length)
   csa_visitor->join_length = join_length;
   csa_visitor->cluster = array_new(sizeof(Genome_feature*));
   csa_visitor->buffered_feature = NULL;
-  csa_visitor->gth_csa_source_str = str_new_cstr(GTH_CSA_SOURCE_TAG);
+  csa_visitor->gth_csa_source_str = str_new_cstr(GT_CSA_SOURCE_TAG);
   return gv;
 }
 
