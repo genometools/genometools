@@ -77,22 +77,9 @@ unsigned long splicedseq_length(const Splicedseq *ss)
 
 void splicedseq_reverse(Splicedseq *ss)
 {
-  /*unsigned long i;*/
   assert(ss);
   reverse_complement(str_get(ss->splicedseq), str_length(ss->splicedseq));
-#if 0
-  for (i = 0; i < array_size(ss->positionmapping); i++) {
-    printf("%lu ", *(unsigned long*) array_get(ss->positionmapping, i));
-  }
-  putchar('\n');
-#endif
   array_reverse(ss->positionmapping);
-#if 0
-  for (i = 0; i < array_size(ss->positionmapping); i++) {
-    printf("%lu ", *(unsigned long*) array_get(ss->positionmapping, i));
-  }
-  putchar('\n');
-#endif
   ss->forward = !ss->forward;
 }
 
