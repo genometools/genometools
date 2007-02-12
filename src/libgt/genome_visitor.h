@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -18,8 +18,7 @@ typedef struct GenomeVisitor GenomeVisitor;
 #include "sequence_region.h"
 
 void genome_visitor_visit_comment(GenomeVisitor*, Comment*, Log*);
-void genome_visitor_visit_genome_feature(GenomeVisitor*, Genome_feature*,
-                                         Log*);
+void genome_visitor_visit_genome_feature(GenomeVisitor*, Genome_feature*, Log*);
 void genome_visitor_visit_sequence_region(GenomeVisitor*, SequenceRegion*,
                                           Log*);
 void genome_visitor_free(GenomeVisitor *gv);

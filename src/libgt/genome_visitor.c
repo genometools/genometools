@@ -33,8 +33,8 @@ void genome_visitor_visit_comment(GenomeVisitor *gv, Comment *c, Log *l)
     gv->c_class->default_func(gv, (GenomeNode*) c, l);
 }
 
-void genome_visitor_visit_genome_feature(GenomeVisitor *gv,
-                                         Genome_feature *gf, Log *l)
+void genome_visitor_visit_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
+                                         Log *l)
 {
   assert(gv && gf && gv->c_class);
   if (gv->c_class->genome_feature)
@@ -43,8 +43,8 @@ void genome_visitor_visit_genome_feature(GenomeVisitor *gv,
     gv->c_class->default_func(gv, (GenomeNode*) gf, l);
 }
 
-void genome_visitor_visit_sequence_region(GenomeVisitor *gv,
-                                          SequenceRegion *sr, Log *l)
+void genome_visitor_visit_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
+                                          Log *l)
 {
   assert(gv && sr && gv->c_class);
   if (gv->c_class->sequence_region)
