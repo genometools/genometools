@@ -5,15 +5,16 @@
 */
 
 #include <assert.h>
+#include <stdbool.h>
 #include "align.h"
 #include "array2dim.h"
 #include "minmax.h"
 
 typedef struct {
   unsigned long distvalue;
-  unsigned int min_replacement_edge_in : 1,
-               min_deletion_edge_in    : 1,
-               min_insertion_edge_in   : 1;
+  bool min_replacement,
+       min_deletion,
+       min_insertion;
 } DPentry;
 
 static void fillDPtable(DPentry **dptable,
@@ -24,20 +25,20 @@ static void fillDPtable(DPentry **dptable,
   assert(dptable && u && ulen && v && vlen);
   for (i = 1; i <= ulen; i++) {
     dptable[i][0].distvalue = i;
-    dptable[i][0].min_deletion_edge_in = 1;
+    dptable[i][0].min_deletion = true;
   }
   for (j = 1; j <= vlen; j++) {
     dptable[0][j].distvalue = j;
-    dptable[0][j].min_insertion_edge_in = 1;
+    dptable[0][j].min_insertion = true;
     for (i = 1; i <= ulen; i++) {
       repvalue = dptable[i-1][j-1].distvalue + ((u[i-1] == v[j-1]) ? 0 : 1);
       delvalue = dptable[i-1][j].distvalue + 1;
       insvalue = dptable[i][j-1].distvalue + 1;
       minvalue = MIN(MIN(repvalue, delvalue), insvalue);
       dptable[i][j].distvalue = minvalue;
-      dptable[i][j].min_replacement_edge_in = (minvalue == repvalue) ? 1 : 0;
-      dptable[i][j].min_deletion_edge_in    = (minvalue == delvalue) ? 1 : 0;
-      dptable[i][j].min_insertion_edge_in   = (minvalue == insvalue) ? 1 : 0;
+      dptable[i][j].min_replacement = (minvalue == repvalue) ? true : false;
+      dptable[i][j].min_deletion    = (minvalue == delvalue) ? true : false;
+      dptable[i][j].min_insertion   = (minvalue == insvalue) ? true : false;
     }
   }
 }
@@ -47,16 +48,16 @@ static void traceback(Alignment *a, DPentry **dptable,
 {
   assert(a && dptable);
   while (i > 0 || j > 0) {
-    if (dptable[i][j].min_replacement_edge_in) {
+    if (dptable[i][j].min_replacement) {
       alignment_add_replacement(a);
       i--;
       j--;
     }
-    else if (dptable[i][j].min_deletion_edge_in) {
+    else if (dptable[i][j].min_deletion) {
       alignment_add_deletion(a);
       i--;
     }
-    else if (dptable[i][j].min_insertion_edge_in) {
+    else if (dptable[i][j].min_insertion) {
       alignment_add_insertion(a);
       j--;
     }
@@ -73,19 +74,19 @@ static unsigned long traceback_all(Alignment *a, DPentry **dptable,
   unsigned long aligns = 0;
   unsigned int backtrace = 0;
   assert(a && dptable);
-  if (dptable[i][j].min_replacement_edge_in) {
+  if (dptable[i][j].min_replacement) {
     backtrace = 1;
     alignment_add_replacement(a);
     aligns += traceback_all(a, dptable, i-1, j-1, dist, proc_alignment, data);
     alignment_remove_last(a);
   }
-  if (dptable[i][j].min_deletion_edge_in) {
+  if (dptable[i][j].min_deletion) {
     backtrace = 1;
     alignment_add_deletion(a);
     aligns += traceback_all(a, dptable, i-1, j, dist, proc_alignment, data);
     alignment_remove_last(a);
   }
-  if (dptable[i][j].min_insertion_edge_in) {
+  if (dptable[i][j].min_insertion) {
     backtrace = 1;
     alignment_add_insertion(a);
     aligns += traceback_all(a, dptable, i, j-1, dist, proc_alignment, data);

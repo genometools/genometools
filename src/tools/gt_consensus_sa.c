@@ -12,7 +12,7 @@
 
 typedef struct {
   Str* id;
-  unsigned int forward : 1;
+  bool forward;
   Array *exons; /* the exon ranges */
 } SplicedAlignment;
 
@@ -20,7 +20,7 @@ static void initSplicedAlignment(SplicedAlignment *sa)
 {
   assert(sa);
   sa->id = str_new();
-  sa->forward = 1;
+  sa->forward = true;
   sa->exons = array_new(sizeof(Range));
 }
 
@@ -58,9 +58,9 @@ static void parse_input_line(SplicedAlignment *alignment, const char *line,
 
   /* parsing orientation */
   if (line[i] == FORWARDSTRANDCHAR)
-    alignment->forward = 1;
+    alignment->forward = true;
   else if (line[i] == REVERSESTRANDCHAR)
-    alignment->forward = 0;
+    alignment->forward = false;
   else {
     error("wrong formatted input line, orientation must be %c or %c\n"
           "line=%s", FORWARDSTRANDCHAR, REVERSESTRANDCHAR, line);
