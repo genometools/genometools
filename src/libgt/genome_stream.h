@@ -15,7 +15,7 @@ typedef struct GenomeStreamClass GenomeStreamClass;
 typedef struct GenomeStream GenomeStream;
 
 GenomeNode* genome_stream_next_tree(GenomeStream*, Log*);
-bool         genome_stream_is_sorted(GenomeStream*);
-void         genome_stream_free(GenomeStream*);
+bool        genome_stream_is_sorted(GenomeStream*);
+void        genome_stream_free(GenomeStream*);
 
 #endif
