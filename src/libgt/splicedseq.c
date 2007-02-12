@@ -45,21 +45,21 @@ char* splicedseq_get(const Splicedseq *ss)
   return str_get(ss->splicedseq);
 }
 
-unsigned int splicedseq_pos_is_border(const Splicedseq *ss, unsigned long pos)
+bool splicedseq_pos_is_border(const Splicedseq *ss, unsigned long pos)
 {
   assert(ss && str_length(ss->splicedseq) == array_size(ss->positionmapping));
   assert(pos < str_length(ss->splicedseq)); /* legal position */
   if (ss->forward && pos + 1 < array_size(ss->positionmapping) &&
       *(unsigned long*) array_get(ss->positionmapping, pos) + 1 !=
       *(unsigned long*) array_get(ss->positionmapping, pos+1)) {
-    return 1;
+    return true;
   }
   if (!ss->forward && pos &&
       *(unsigned long*) array_get(ss->positionmapping, pos-1) - 1 !=
       *(unsigned long*) array_get(ss->positionmapping, pos)) {
-    return 1;
+    return true;
   }
-  return 0;
+  return false;
 }
 
 unsigned long splicedseq_map(const Splicedseq *ss, unsigned long pos)

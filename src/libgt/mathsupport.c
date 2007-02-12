@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -18,18 +18,18 @@ double logsum(double p1, double p2)
   return (p2-p1 > 50.0) ? p2 : p2 + log(1.0 + exp(p1-p2));
 }
 
-unsigned int double_equals_one(double d)
+bool double_equals_one(double d)
 {
   if (fabs(1.0 - d) <= EPSILON)
-    return 1;
-  return 0;
+    return true;
+  return false;
 }
 
-unsigned int double_equals_double(double d1, double d2)
+bool double_equals_double(double d1, double d2)
 {
   if (fabs(d1 - d2) <= EPSILON)
-    return 1;
-  return 0;
+    return true;
+  return false;
 }
 
 unsigned long rand_max(unsigned long maximal_value)
