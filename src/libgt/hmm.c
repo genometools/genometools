@@ -177,7 +177,7 @@ double hmm_get_emission_probability(const HMM *hmm,
   return exp(hmm->emission_prob[state_num][symbol_num]);
 }
 
-static unsigned int hmm_has_valid_initial_state_probs(const HMM *hmm)
+static bool hmm_has_valid_initial_state_probs(const HMM *hmm)
 {
   unsigned int state;
   double sum_of_probabilities = 0.0;
@@ -190,7 +190,7 @@ static unsigned int hmm_has_valid_initial_state_probs(const HMM *hmm)
   return double_equals_one(sum_of_probabilities);
 }
 
-static unsigned int hmm_has_valid_emissions(const HMM *hmm)
+static bool hmm_has_valid_emissions(const HMM *hmm)
 {
   unsigned int state, symbol;
   double sum_of_probabilities;
@@ -202,12 +202,12 @@ static unsigned int hmm_has_valid_emissions(const HMM *hmm)
     for (symbol = 0; symbol < hmm->num_of_symbols; symbol++)
       sum_of_probabilities += hmm_get_emission_probability(hmm, state, symbol);
     if (!double_equals_one(sum_of_probabilities))
-      return 0;
+      return false;
   }
-  return 1;
+  return true;
 }
 
-static unsigned int hmm_has_valid_states(const HMM *hmm)
+static bool hmm_has_valid_states(const HMM *hmm)
 {
   unsigned int state_1, state_2;
   double sum_of_probabilities;
@@ -222,13 +222,13 @@ static unsigned int hmm_has_valid_states(const HMM *hmm)
 
     }
     if (!double_equals_one(sum_of_probabilities))
-      return 0;
+      return false;
   }
 
-  return 1;
+  return true;
 }
 
-unsigned int hmm_is_valid(const HMM *hmm)
+bool hmm_is_valid(const HMM *hmm)
 {
   assert(hmm);
   return (hmm_has_valid_initial_state_probs(hmm) &&
