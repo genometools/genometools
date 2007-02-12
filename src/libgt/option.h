@@ -81,6 +81,7 @@ Option*        option_new_string(const char *option_str,
                                  const char *description,
                                  Str *value, const char *default_value);
 void           option_is_mandatory(Option*);
+void           option_is_mandatory_either(Option*, const Option*);
 void           option_is_development_option(Option*);
 void           option_imply(Option*, const Option*);
 void           option_imply_either_2(Option*, const Option*, const Option*);

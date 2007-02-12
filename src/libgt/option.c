@@ -70,6 +70,7 @@ struct Option {
   Array *implications, /* contains option arrays, from each array at least one
                           option needs to be set */
         *exclusions;
+  const Option *mandatory_either_option;
 };
 
 static Option *option_new(const char *option_str,
@@ -336,6 +337,23 @@ static void check_option_exclusions(OptionParser *op)
   }
 }
 
+static void check_mandatory_either_options(OptionParser *op)
+{
+  unsigned long i;
+  Option *o;
+
+  for (i = 0; i < array_size(op->options); i++) {
+    o = *(Option**) array_get(op->options, i);
+    if (o->mandatory_either_option) {
+      if (!o->is_set && !o->mandatory_either_option->is_set) {
+        error("either option \"-%s\" or option \"-%s\" is mandatory",
+               str_get(o->option_str),
+               str_get(o->mandatory_either_option->option_str));
+      }
+    }
+  }
+}
+
 static int parse(OptionParser *op, int argc, char **argv,
                  Show_version_func show_version_func,
                  unsigned int min_additional_arguments,
@@ -501,6 +519,7 @@ static int parse(OptionParser *op, int argc, char **argv,
   check_mandatory_options(op);
   check_option_implications(op);
   check_option_exclusions(op);
+  check_mandatory_either_options(op);
 
   op->parser_called = true;
   return argnum;
@@ -695,6 +714,13 @@ void option_is_mandatory(Option *o)
 {
   assert(o);
   o->is_mandatory = true;
+}
+
+void option_is_mandatory_either(Option *o, const Option *meo)
+{
+  assert(o && meo);
+  assert(!o->mandatory_either_option);
+  o->mandatory_either_option = meo;
 }
 
 void option_is_development_option(Option *o)
