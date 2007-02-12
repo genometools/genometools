@@ -163,35 +163,35 @@ void bittab_get_all_bitnums(const Bittab *b, Array *bitnums)
     if (bittab_bit_is_set(b, i)) array_add(bitnums, i);
 }
 
-unsigned int bittab_bit_is_set(const Bittab *b, unsigned long bit)
+bool bittab_bit_is_set(const Bittab *b, unsigned long bit)
 {
   if (b->tabptr[(bit >> 3) / sizeof(unsigned long)] &
       1UL << (bit & (8UL * sizeof(unsigned long) - 1))) {
-    return 1;
+    return true;
   }
-  return 0;
+  return false;
 }
 
-unsigned int bittab_is_true(const Bittab *b)
+bool bittab_is_true(const Bittab *b)
 {
   unsigned long i;
   assert(b);
   for (i = 0; i < b->tabsize; i++) {
     if (b->tabptr[i])
-      return 1;
+      return true;
   }
-  return 0;
+  return false;
 }
 
-unsigned int bittab_cmp(const Bittab *b1, const Bittab *b2)
+bool bittab_cmp(const Bittab *b1, const Bittab *b2)
 {
   unsigned long i;
   assert(b1 && b2 && b1->num_of_bits == b2->num_of_bits);
   for (i = 0; i < b1->tabsize; i++) {
     if (b1->tabptr[i] != b2->tabptr[i])
-      return 0;
+      return false;
   }
-  return 1;
+  return true;
 }
 
 unsigned long bittab_size(Bittab *b)

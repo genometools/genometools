@@ -7,6 +7,7 @@
 #ifndef BITTAB_H
 #define BITTAB_H
 
+#include <stdbool.h>
 #include <stdio.h>
 #include "array.h"
 
@@ -27,9 +28,9 @@ void          bittab_shift_right_equal(Bittab*);                   /* a>>=1  */
 void          bittab_unset(Bittab*);                               /* a=0    */
 void          bittab_show(const Bittab*, FILE*);
 void          bittab_get_all_bitnums(const Bittab*, Array*);
-unsigned int  bittab_bit_is_set(const Bittab*, unsigned long);
-unsigned int  bittab_is_true(const Bittab*);
-unsigned int  bittab_cmp(const Bittab*, const Bittab*);
+bool          bittab_bit_is_set(const Bittab*, unsigned long);
+bool          bittab_is_true(const Bittab*);
+bool          bittab_cmp(const Bittab*, const Bittab*);
 unsigned long bittab_get_first_bitnum(const Bittab*);
 unsigned long bittab_get_last_bitnum(const Bittab*);
 unsigned long bittab_get_next_bitnum(const Bittab*, unsigned long);
