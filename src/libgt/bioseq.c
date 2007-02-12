@@ -320,15 +320,14 @@ unsigned long bioseq_number_of_sequences(Bioseq *bs)
   return array_size(bs->descriptions);
 }
 
-unsigned int bioseq_contains_sequence(Bioseq *bs,
-                                      /*@unused@*/ const char *sequence)
+bool bioseq_contains_sequence(Bioseq *bs, /*@unused@*/ const char *sequence)
 {
   assert(bs);
   if (!bs->bioseq_is_filled)
     bioseq_fill(bs, 0);
   if (get_seqnum_with_desc(bs, sequence) != UNDEFULONG)
-    return 1;
-  return 0;
+    return true;
+  return false;
 }
 
 void bioseq_free(Bioseq *bs)

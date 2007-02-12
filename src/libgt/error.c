@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -22,8 +22,8 @@ void error(const char *format, ...)
 
 /* the sophisticated interface */
 struct Error {
-  unsigned int error_is_set : 1;
   char error_string[BUFSIZ];
+  bool error_is_set;
 };
 
 Error* error_new(void)
@@ -36,7 +36,7 @@ void error_set(Error *e, const char *format, ...)
   va_list ap;
   va_start(ap, format);
   if (e) {
-    e->error_is_set = 1;
+    e->error_is_set = true;
     (void) vsnprintf(e->error_string, sizeof(e->error_string), format, ap);
     va_end(ap);
   }
@@ -49,7 +49,7 @@ void error_set(Error *e, const char *format, ...)
   }
 }
 
-unsigned int error_is_set(const Error *e)
+bool error_is_set(const Error *e)
 {
   assert(e);
   return e->error_is_set;
@@ -58,7 +58,7 @@ unsigned int error_is_set(const Error *e)
 void error_unset(Error *e)
 {
   assert(e);
-  e->error_is_set = 0;
+  e->error_is_set = false;
   e->error_string[0] = '\0';
 }
 

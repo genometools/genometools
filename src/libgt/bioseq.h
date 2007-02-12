@@ -30,7 +30,7 @@ const char*   bioseq_get_sequence_with_desc(Bioseq*, const char *description,
 unsigned long bioseq_get_sequence_length(Bioseq*, unsigned long);
 unsigned long bioseq_get_raw_sequence_length(Bioseq*);
 unsigned long bioseq_number_of_sequences(Bioseq*);
-unsigned int  bioseq_contains_sequence(Bioseq*, const char*);
+bool          bioseq_contains_sequence(Bioseq*, const char*);
 void          bioseq_free(Bioseq*);
 
 /* shows a bioseq on stdout (in fasta format).

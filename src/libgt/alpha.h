@@ -7,6 +7,7 @@
 #ifndef ALPHA_H
 #define ALPHA_H
 
+#include <stdbool.h>
 #include <stdio.h>
 
 /* the alphabet class */
@@ -26,7 +27,7 @@ void         alpha_decode_seq(const Alpha*, char *out, char *in,
                               unsigned long length); /* in can be == out */
 void         alpha_encode_seq(const Alpha*, char *out, char *in,
                               unsigned long length); /* in can be == out */
-unsigned int alpha_is_compatible_with_alpha(const Alpha*, const Alpha*);
+bool         alpha_is_compatible_with_alpha(const Alpha*, const Alpha*);
 unsigned int alpha_size(const Alpha*);
 void         alpha_free(Alpha*);
 

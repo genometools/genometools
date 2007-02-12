@@ -150,13 +150,13 @@ void alpha_encode_seq(const Alpha *a, char *out, char *in, unsigned long length)
   }
 }
 
-unsigned int alpha_is_compatible_with_alpha(const Alpha *alpha_a,
+bool alpha_is_compatible_with_alpha(const Alpha *alpha_a,
                                             const Alpha *alpha_b)
 {
   assert(alpha_a && alpha_b);
   if (alpha_a->map_size == alpha_b->map_size)
-    return 1;
-  return 0;
+    return true;
+  return false;
 }
 
 unsigned int alpha_size(const Alpha *a)

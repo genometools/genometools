@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -11,16 +11,16 @@
 #include "xansi.h"
 #include "xposix.h"
 
-unsigned int file_exists(const char *path)
+bool file_exists(const char *path)
 {
   FILE *file;
   if ((file = fopen(path, "r")) == NULL)
-    return 0;
+    return false;
   xfclose(file);
-  return 1;
+  return true;
 }
 
-unsigned int file_is_newer(const char *a, const char *b)
+bool file_is_newer(const char *a, const char *b)
 {
   struct stat stat_a, stat_b;
   assert(a && b);
@@ -29,9 +29,9 @@ unsigned int file_is_newer(const char *a, const char *b)
   if (stat_a.st_mtime > stat_b.st_mtime ||
       (stat_a.st_mtime == stat_b.st_mtime &&
        stat_a.st_mtime > stat_b.st_mtime)) {
-    return 1;
+    return true;
   }
-  return 0;
+  return false;
 }
 
 unsigned long file_number_of_lines(FILE *fp)
