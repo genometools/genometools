@@ -14,7 +14,7 @@
 struct Splicedseq {
   Str *splicedseq;
   Array *positionmapping;
-  unsigned int forward : 1;
+  bool forward;
 };
 
 Splicedseq* splicedseq_new(void)
@@ -22,7 +22,7 @@ Splicedseq* splicedseq_new(void)
   Splicedseq *ss = xmalloc(sizeof(Splicedseq));
   ss->splicedseq = str_new();
   ss->positionmapping = array_new(sizeof(unsigned long));
-  ss->forward = 1;
+  ss->forward = true;
   return ss;
 }
 
@@ -101,7 +101,7 @@ void splicedseq_reset(Splicedseq *ss)
   assert(ss);
   str_reset(ss->splicedseq);
   array_set_size(ss->positionmapping, 0);
-  ss->forward = 1;
+  ss->forward = true;
 }
 
 static void check_splicedseq(Splicedseq *ss)
