@@ -21,10 +21,10 @@ struct Sort_stream
 #define sort_stream_cast(GS)\
         genome_stream_cast(sort_stream_class(), GS);
 
-static Genome_node* sort_stream_next_tree(Genome_stream *gs, Log *l)
+static GenomeNode* sort_stream_next_tree(Genome_stream *gs, Log *l)
 {
   Sort_stream *sort_stream;
-  Genome_node *gn;
+  GenomeNode *gn;
 
   sort_stream = sort_stream_cast(gs);
 
@@ -37,7 +37,7 @@ static Genome_node* sort_stream_next_tree(Genome_stream *gs, Log *l)
 
   assert(sort_stream->sorted);
   if (sort_stream->idx < array_size(sort_stream->trees)) {
-    gn = *(Genome_node**) array_get(sort_stream->trees, sort_stream->idx);
+    gn = *(GenomeNode**) array_get(sort_stream->trees, sort_stream->idx);
     sort_stream->idx++;
     return gn;
   }
@@ -68,6 +68,6 @@ Genome_stream* sort_stream_new(Genome_stream *in_stream)
   sort_stream->in_stream = in_stream;
   sort_stream->sorted = false;
   sort_stream->idx = 0;
-  sort_stream->trees = array_new(sizeof(Genome_node*));
+  sort_stream->trees = array_new(sizeof(GenomeNode*));
   return gs;
 }

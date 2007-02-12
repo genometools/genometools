@@ -55,7 +55,7 @@ int gt_gff3(int argc, char *argv[])
                 *mergefeat_stream = NULL,
                 *gff3_out_stream;
   Gff3_arguments arguments;
-  Genome_node *gn;
+  GenomeNode *gn;
   int parsed_args;
 
   /* option parsing */

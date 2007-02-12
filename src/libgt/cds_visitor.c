@@ -37,7 +37,7 @@ static void cds_visitor_free(Genome_visitor *gv)
   bioseq_free(cds_visitor->bioseq);
 }
 
-static void extract_cds_if_necessary(Genome_node *gn, void *data)
+static void extract_cds_if_necessary(GenomeNode *gn, void *data)
 {
   CDS_visitor *v = (CDS_visitor*) data;
   const char *sequence;
@@ -61,10 +61,10 @@ static void extract_cds_if_necessary(Genome_node *gn, void *data)
   }
 }
 
-static void add_cds_if_necessary(Genome_node *gn, void *data)
+static void add_cds_if_necessary(GenomeNode *gn, void *data)
 {
   CDS_visitor *v = (CDS_visitor*) data;
-  Genome_node *cds_feature;
+  GenomeNode *cds_feature;
   Str *pr_0, *pr_1, *pr_2;
   Genome_feature *gf;
   unsigned long i;
@@ -179,20 +179,20 @@ static void cds_visitor_genome_feature(Genome_visitor *gv,
                                                /*@unused@*/ Log *l)
 {
   CDS_visitor *v = cds_visitor_cast(gv);
-  genome_node_traverse_children((Genome_node*) gf, v, add_cds_if_necessary, 0);
+  genome_node_traverse_children((GenomeNode*) gf, v, add_cds_if_necessary, 0);
 }
 
 static void cds_visitor_sequence_region(Genome_visitor *gv,
-                                        Sequence_region *sr,
+                                        SequenceRegion *sr,
                                         /*@unused@*/ Log *l)
 {
   CDS_visitor *cds_visitor = cds_visitor_cast(gv);
   /* check if the given sequence file contains this sequence (region) */
   if (!bioseq_contains_sequence(cds_visitor->bioseq,
-                                str_get(genome_node_get_seqid((Genome_node*)
+                                str_get(genome_node_get_seqid((GenomeNode*)
                                                               sr)))) {
     error("sequence \"%s\" not contained in sequence file \"%s\"",
-          str_get(genome_node_get_seqid((Genome_node*) sr)),
+          str_get(genome_node_get_seqid((GenomeNode*) sr)),
           str_get(cds_visitor->sequence_file));
   }
 }

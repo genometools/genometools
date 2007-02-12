@@ -13,14 +13,14 @@
 struct Genome_stream_class
 {
   size_t size;
-  Genome_node* (*next_tree)(Genome_stream*, Log*);
+  GenomeNode* (*next_tree)(Genome_stream*, Log*);
   void         (*free)(Genome_stream*);
 };
 
 struct Genome_stream
 {
   const Genome_stream_class *c_class;
-  Genome_node *last_node;
+  GenomeNode *last_node;
   bool ensure_sorting;
 };
 

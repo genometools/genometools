@@ -19,7 +19,7 @@ struct Mergefeat_stream_sorted {
 #define mergefeat_stream_sorted_cast(GS)\
         genome_stream_cast(mergefeat_stream_sorted_class(), GS)
 
-Genome_node* mergefeat_stream_sorted_next_tree(Genome_stream *gs, Log *l)
+GenomeNode* mergefeat_stream_sorted_next_tree(Genome_stream *gs, Log *l)
 {
   Mergefeat_stream_sorted *mfs = mergefeat_stream_sorted_cast(gs);
   return genome_stream_next_tree(mfs->sort_stream, l);

@@ -38,7 +38,7 @@ int gt_cds(int argc, char *argv[])
   Genome_stream *gff3_in_stream,
                 *cds_stream,
                 *gff3_out_stream;
-  Genome_node *gn;
+  GenomeNode *gn;
   CDS_arguments arguments;
   int parsed_args;
 

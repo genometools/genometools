@@ -20,7 +20,7 @@ typedef struct Genome_visitor Genome_visitor;
 void genome_visitor_visit_comment(Genome_visitor*, Comment*, Log*);
 void genome_visitor_visit_genome_feature(Genome_visitor*, Genome_feature*,
                                          Log*);
-void genome_visitor_visit_sequence_region(Genome_visitor*, Sequence_region*,
+void genome_visitor_visit_sequence_region(Genome_visitor*, SequenceRegion*,
                                           Log*);
 void genome_visitor_free(Genome_visitor *gv);
 

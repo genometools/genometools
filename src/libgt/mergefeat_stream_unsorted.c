@@ -18,10 +18,10 @@ struct Mergefeat_stream_unsorted {
 #define mergefeat_stream_unsorted_cast(GS)\
         genome_stream_cast(mergefeat_stream_unsorted_class(), GS)
 
-Genome_node* mergefeat_stream_unsorted_next_tree(Genome_stream *gs, Log *l)
+GenomeNode* mergefeat_stream_unsorted_next_tree(Genome_stream *gs, Log *l)
 {
   Mergefeat_stream_unsorted *mfs = mergefeat_stream_unsorted_cast(gs);
-  Genome_node *gn = genome_stream_next_tree(mfs->in_stream, l);
+  GenomeNode *gn = genome_stream_next_tree(mfs->in_stream, l);
   if (gn)
     genome_node_accept(gn, mfs->mergefeat_visitor, l);
   return gn;

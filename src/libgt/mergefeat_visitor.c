@@ -12,7 +12,7 @@
 
 struct Mergefeat_visitor {
   const Genome_visitor parent_instance;
-  Genome_node *current_tree;
+  GenomeNode *current_tree;
   Hashtable *ht; /* type -> previous node */
 };
 
@@ -26,7 +26,7 @@ static void mergefeat_visitor_free(Genome_visitor *gv)
   hashtable_free(mergefeat_visitor->ht);
 }
 
-static void mergefeat_in_children(Genome_node *gn, void *data)
+static void mergefeat_in_children(GenomeNode *gn, void *data)
 {
   Mergefeat_visitor *v = (Mergefeat_visitor*) data;
   Genome_feature *previous_feature, *current_feature;
@@ -38,19 +38,19 @@ static void mergefeat_in_children(Genome_node *gn, void *data)
     /* previous feature found -> check if merging is necessary */
     assert(genome_feature_get_type(previous_feature) ==
            genome_feature_get_type(current_feature));
-    previous_range = genome_node_get_range((Genome_node*) previous_feature);
-    current_range = genome_node_get_range((Genome_node*) current_feature);
+    previous_range = genome_node_get_range((GenomeNode*) previous_feature);
+    current_range = genome_node_get_range((GenomeNode*) current_feature);
     assert(range_compare(previous_range, current_range) <= 0); /* sorted */
     if (previous_range.end + 1 == current_range.start) {
       /* merge nodes */
       genome_feature_set_end(previous_feature, current_range.end);
       /* XXX: compute average score ? */
       genome_feature_set_score(previous_feature, UNDEFDOUBLE);
-      assert(!genome_node_number_of_children((Genome_node*) current_feature));
+      assert(!genome_node_number_of_children((GenomeNode*) current_feature));
       /* XXX: */
-      genome_node_remove_leaf(v->current_tree, (Genome_node*) current_feature);
+      genome_node_remove_leaf(v->current_tree, (GenomeNode*) current_feature);
 #if 0
-      genome_node_free((Genome_node*) current_feature);
+      genome_node_free((GenomeNode*) current_feature);
 #endif
     }
     /* remove previous feature */
@@ -62,7 +62,7 @@ static void mergefeat_in_children(Genome_node *gn, void *data)
                 genome_feature_get_type(current_feature)), current_feature);
 }
 
-static void mergefeat_if_necessary(Genome_node *gn, void *data)
+static void mergefeat_if_necessary(GenomeNode *gn, void *data)
 {
   Mergefeat_visitor *v = (Mergefeat_visitor*) data;
   Genome_feature *gf;
@@ -78,7 +78,7 @@ static void mergefeat_visitor_genome_feature(Genome_visitor *gv,
                                              /*@unused@*/ Log *l)
 {
   Mergefeat_visitor *v = mergefeat_visitor_cast(gv);
-  genome_node_traverse_children((Genome_node*) gf, v, mergefeat_if_necessary,0);
+  genome_node_traverse_children((GenomeNode*) gf, v, mergefeat_if_necessary,0);
 }
 
 const Genome_visitor_class* mergefeat_visitor_class()

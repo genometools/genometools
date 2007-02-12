@@ -59,7 +59,7 @@ static void parse_regular_gff3_line(GFF3_parser *gff3_parser,
                                     unsigned long line_number,
                                     unsigned int *break_loop)
 {
-  Genome_node *gn, *genome_feature = NULL, *parent_gf;
+  GenomeNode *gn, *genome_feature = NULL, *parent_gf;
   Genome_feature_type gft;
   Splitter *splitter, *attribute_splitter, *tmp_splitter, *parents_splitter;
   Str *seqid_str, *source_str;
@@ -225,7 +225,7 @@ static void parse_meta_gff3_line(GFF3_parser *gff3_parser, Queue *genome_nodes,
                                  unsigned int *break_loop)
 {
   char *tmpline, *tmplineend, *seqid = NULL;
-  Genome_node *gn;
+  GenomeNode *gn;
   Str *seqid_str;
   Range range;
   int rval;

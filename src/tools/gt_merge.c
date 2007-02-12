@@ -28,7 +28,7 @@ int gt_merge(int argc, char *argv[])
                 *merge_stream,
                 *gff3_out_stream;
   Array *genome_streams = array_new(sizeof(Genome_stream*));
-  Genome_node *gn;
+  GenomeNode *gn;
   unsigned long i;
   int parsed_args;
   FILE *outfp;

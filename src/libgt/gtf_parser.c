@@ -83,7 +83,7 @@ static void construct_sequence_regions(void *key, void *value, void *data)
 {
   Str *seqid;
   Range range;
-  Genome_node *gn;
+  GenomeNode *gn;
   Queue *genome_nodes = (Queue*) data;
 
   assert(key && value && data);
@@ -100,7 +100,7 @@ static void construct_mRNAs(void *key, void *value, void *data)
 {
   Array *genome_node_array = (Array*) value,
         *mRNAs = (Array*) data;
-  Genome_node *mRNA_node, *first_node, *gn;
+  GenomeNode *mRNA_node, *first_node, *gn;
   Strand mRNA_strand;
   Range mRNA_range;
   Str *mRNA_seqid;
@@ -110,12 +110,12 @@ static void construct_mRNAs(void *key, void *value, void *data)
   assert(array_size(genome_node_array)); /* at least one node in array */
 
   /* determine the range and the strand of the mRNA */
-  first_node = *(Genome_node**) array_get(genome_node_array, 0);
+  first_node = *(GenomeNode**) array_get(genome_node_array, 0);
   mRNA_range = genome_node_get_range(first_node);
   mRNA_strand = genome_feature_get_strand((Genome_feature*) first_node);
   mRNA_seqid = genome_node_get_seqid(first_node);
   for (i = 1; i < array_size(genome_node_array); i++) {
-    gn = *(Genome_node**) array_get(genome_node_array, i);
+    gn = *(GenomeNode**) array_get(genome_node_array, i);
     mRNA_range = range_join(mRNA_range, genome_node_get_range(gn));
     /* XXX: an error check is necessary here, otherwise strand_join() can cause
        a failed assertion */
@@ -135,7 +135,7 @@ static void construct_mRNAs(void *key, void *value, void *data)
 
   /* register children */
   for (i = 0; i < array_size(genome_node_array); i++) {
-    gn = *(Genome_node**) array_get(genome_node_array, i);
+    gn = *(GenomeNode**) array_get(genome_node_array, i);
     genome_node_is_part_of_genome_node(mRNA_node, gn);
   }
 
@@ -147,8 +147,8 @@ static void construct_genes(void *key, void *value, void *data)
 {
   Hashtable *transcript_id_hash = (Hashtable*) value;
   Queue *genome_nodes = (Queue*) data;
-  Array *mRNAs = array_new(sizeof(Genome_node*));
-  Genome_node *gene_node, *gn;
+  Array *mRNAs = array_new(sizeof(GenomeNode*));
+  GenomeNode *gene_node, *gn;
   Strand gene_strand;
   Range gene_range;
   Str *gene_seqid;
@@ -160,12 +160,12 @@ static void construct_genes(void *key, void *value, void *data)
   assert(array_size(mRNAs)); /* at least one mRNA constructed */
 
   /* determine the range and the strand of the gene */
-  gn = *(Genome_node**) array_get(mRNAs, 0);
+  gn = *(GenomeNode**) array_get(mRNAs, 0);
   gene_range = genome_node_get_range(gn);
   gene_strand = genome_feature_get_strand((Genome_feature*) gn);
   gene_seqid = genome_node_get_seqid(gn);
   for (i = 1; i < array_size(mRNAs); i++) {
-    gn = *(Genome_node**) array_get(mRNAs, i);
+    gn = *(GenomeNode**) array_get(mRNAs, i);
     gene_range = range_join(gene_range, genome_node_get_range(gn));
     gene_strand = strand_join(gene_strand,
                               genome_feature_get_strand((Genome_feature*) gn));
@@ -177,7 +177,7 @@ static void construct_genes(void *key, void *value, void *data)
 
   /* register children */
   for (i = 0; i < array_size(mRNAs); i++) {
-    gn = *(Genome_node**) array_get(mRNAs, i);
+    gn = *(GenomeNode**) array_get(mRNAs, i);
     genome_node_is_part_of_genome_node(gene_node, gn);
   }
 
@@ -196,7 +196,7 @@ void gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   char *line;
   size_t line_length;
   unsigned long i, line_number = 0;
-  Genome_node *gn;
+  GenomeNode *gn;
   Range range, *rangeptr;
   Phase phase_value;
   Strand strand_value;
@@ -379,7 +379,7 @@ void gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
 
       if (!(genome_node_array = hashtable_get(transcript_id_hash,
                                               transcript_id))) {
-        genome_node_array = array_new(sizeof(Genome_node*));
+        genome_node_array = array_new(sizeof(GenomeNode*));
         hashtable_add(transcript_id_hash, xstrdup(transcript_id),
                       genome_node_array);
       }

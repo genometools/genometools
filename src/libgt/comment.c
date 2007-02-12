@@ -12,21 +12,21 @@
 
 struct Comment
 {
-  const Genome_node parent_instance;
+  const GenomeNode parent_instance;
   char *comment;
 };
 
 #define comment_cast(GN)\
         genome_node_cast(comment_class(), GN)
 
-static void comment_free(Genome_node *gn)
+static void comment_free(GenomeNode *gn)
 {
   Comment *c = comment_cast(gn);
   assert(c && c->comment);
   free(c->comment);
 }
 
-static Str* comment_get_idstr(/*@unused@*/ Genome_node *gn)
+static Str* comment_get_idstr(/*@unused@*/ GenomeNode *gn)
 {
   static Str *comment_str;
   static unsigned int initialized = 0;
@@ -38,7 +38,7 @@ static Str* comment_get_idstr(/*@unused@*/ Genome_node *gn)
   return comment_str;
 }
 
-static Range comment_get_range(/*@unused@*/ Genome_node *gn)
+static Range comment_get_range(/*@unused@*/ GenomeNode *gn)
 {
   Range range;
   range.start = 0;
@@ -46,26 +46,26 @@ static Range comment_get_range(/*@unused@*/ Genome_node *gn)
   return range;
 }
 
-static void comment_accept(Genome_node *gn, Genome_visitor *gv, Log *l)
+static void comment_accept(GenomeNode *gn, Genome_visitor *gv, Log *l)
 {
   Comment *c = comment_cast(gn);
   genome_visitor_visit_comment(gv, c, l);
 }
 
-const Genome_node_class* comment_class()
+const GenomeNodeClass* comment_class()
 {
-  static const Genome_node_class gnc = { sizeof(Comment), comment_free, NULL,
+  static const GenomeNodeClass gnc = { sizeof(Comment), comment_free, NULL,
                                          comment_get_idstr, comment_get_range,
                                          NULL, NULL, NULL, NULL,
                                          comment_accept };
   return &gnc;
 }
 
-Genome_node* comment_new(const char *comment,
+GenomeNode* comment_new(const char *comment,
                          const char *filename,
                          unsigned long line_number)
 {
-  Genome_node *gn = genome_node_create(comment_class(), filename, line_number);
+  GenomeNode *gn = genome_node_create(comment_class(), filename, line_number);
   Comment *c = comment_cast(gn);
   assert(comment);
   c->comment = xstrdup(comment);

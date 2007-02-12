@@ -49,7 +49,7 @@ static int parse_options(Stat_arguments *arguments, int argc, char **argv)
   return parsed_args;
 }
 
-static void compute_statistics(Genome_node *gn, void *data)
+static void compute_statistics(GenomeNode *gn, void *data)
 {
   Stat_info *info = (Stat_info*) data;
   assert(info && info->stat_visitor);
@@ -59,7 +59,7 @@ static void compute_statistics(Genome_node *gn, void *data)
 int gt_stat(int argc, char *argv[])
 {
   Genome_stream *gff3_in_stream;
-  Genome_node *gn;
+  GenomeNode *gn;
   int parsed_args;
   Stat_arguments arguments;
   Stat_info info;

@@ -79,7 +79,7 @@ int gt_extractfeat(int argc, char *argv[])
 {
   Genome_stream *gff3_in_stream,
                 *extractfeat_stream;
-  Genome_node *gn;
+  GenomeNode *gn;
   Genome_feature_type type;
   Extractfeat_arguments arguments;
   RegionMapping *regionmapping;

@@ -43,7 +43,7 @@ static void extractfeat_visitor_free(Genome_visitor *gv)
   regionmapping_free(extractfeat_visitor->regionmapping);
 }
 
-static void extract_join_feature(Genome_node *gn, void *data)
+static void extract_join_feature(GenomeNode *gn, void *data)
 {
   Extractfeat_visitor *v = (Extractfeat_visitor*) data;
   Genome_feature_type gf_type;
@@ -67,7 +67,7 @@ static void extract_join_feature(Genome_node *gn, void *data)
   }
 }
 
-static void extract_feature(Genome_node *gn, void *data)
+static void extract_feature(GenomeNode *gn, void *data)
 {
   Extractfeat_visitor *v = (Extractfeat_visitor*) data;
   Genome_feature_type gf_type;
@@ -142,20 +142,20 @@ static void extractfeat_visitor_genome_feature(Genome_visitor *gv,
                                                /*@unused@*/ Log *l)
 {
   Extractfeat_visitor *v = extractfeat_visitor_cast(gv);
-  genome_node_traverse_children((Genome_node*) gf, v, extract_feature, false);
+  genome_node_traverse_children((GenomeNode*) gf, v, extract_feature, false);
 }
 
 static void extractfeat_visitor_sequence_region(Genome_visitor *gv,
-                                                Sequence_region *sr,
+                                                SequenceRegion *sr,
                                                 /*@unused@*/ Log *l)
 {
   Extractfeat_visitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
   /* check if the given sequence file contains this sequence (region) */
   if (!bioseq_contains_sequence(extractfeat_visitor->bioseq,
-                                str_get(genome_node_get_seqid((Genome_node*)
+                                str_get(genome_node_get_seqid((GenomeNode*)
                                                               sr)))) {
     error("sequence \"%s\" not contained in sequence file \"%s\"",
-          str_get(genome_node_get_seqid((Genome_node*) sr)),
+          str_get(genome_node_get_seqid((GenomeNode*) sr)),
           str_get(extractfeat_visitor->sequence_file));
   }
 }

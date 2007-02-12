@@ -37,7 +37,7 @@ static void stat_visitor_genome_feature(Genome_visitor *gv, Genome_feature *gf,
       stat_visitor->number_of_genes++;
      if (stat_visitor->gene_length_distribution) {
        disc_distri_add(stat_visitor->gene_length_distribution,
-                       range_length(genome_node_get_range((Genome_node*) gf)));
+                       range_length(genome_node_get_range((GenomeNode*) gf)));
      }
      if (stat_visitor->gene_score_distribution) {
        disc_distri_add(stat_visitor->gene_score_distribution,

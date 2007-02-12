@@ -53,7 +53,7 @@ int gt_filter(int argc, char *argv[])
   Genome_stream *gff3_in_stream,
                 *filter_stream,
                 *gff3_out_stream;
-  Genome_node *gn;
+  GenomeNode *gn;
   Filter_arguments arguments;
   int parsed_args;
 

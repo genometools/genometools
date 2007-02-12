@@ -16,8 +16,8 @@ struct Genome_visitor_class {
   void (*free)(Genome_visitor*);
   void (*comment)(Genome_visitor*, Comment*, Log*);
   void (*genome_feature)(Genome_visitor*, Genome_feature*, Log*);
-  void (*sequence_region)(Genome_visitor*, Sequence_region*, Log*);
-  void (*default_func)(Genome_visitor*, Genome_node*, Log*);
+  void (*sequence_region)(Genome_visitor*, SequenceRegion*, Log*);
+  void (*default_func)(Genome_visitor*, GenomeNode*, Log*);
 };
 
 struct Genome_visitor {

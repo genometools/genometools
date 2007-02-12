@@ -20,10 +20,10 @@ struct Csa_stream {
 #define csa_stream_cast(GS)\
         genome_stream_cast(csa_stream_class(), GS)
 
-Genome_node* csa_stream_next_tree(Genome_stream *gs, Log *l)
+GenomeNode* csa_stream_next_tree(Genome_stream *gs, Log *l)
 {
   Csa_stream *cs = csa_stream_cast(gs);
-  Genome_node *gn;
+  GenomeNode *gn;
 
   if (csa_visitor_node_buffer_size(cs->csa_visitor))
     return csa_visitor_get_node(cs->csa_visitor);

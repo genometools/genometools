@@ -28,13 +28,13 @@ struct Gff3_in_stream
   unsigned long line_number;
   Queue *genome_node_buffer;
   GFF3_parser *gff3_parser;
-  Genome_node *last_node;
+  GenomeNode *last_node;
 };
 
 #define gff3_in_stream_cast(GS)\
         genome_stream_cast(gff3_in_stream_class(), GS)
 
-static Genome_node* gff3_in_stream_next_tree(Genome_stream *gs,
+static GenomeNode* gff3_in_stream_next_tree(Genome_stream *gs,
                                              /*@unused@*/ Log *l)
 {
   Gff3_in_stream *is = gff3_in_stream_cast(gs);
@@ -43,7 +43,7 @@ static Genome_node* gff3_in_stream_next_tree(Genome_stream *gs,
 
   if (queue_size(is->genome_node_buffer)) {
     /* we still have a node in the buffer -> serve it from there */
-    return *(Genome_node**) queue_get(is->genome_node_buffer);
+    return *(GenomeNode**) queue_get(is->genome_node_buffer);
   }
 
   /* the buffer is empty */
@@ -105,7 +105,7 @@ static Genome_node* gff3_in_stream_next_tree(Genome_stream *gs,
     /* make sure the parsed nodes are sorted */
     if (is->ensure_sorting) {
       for (i = 0; i < queue_size(is->genome_node_buffer); i++) {
-        if (!genome_node_tree_is_sorted(&is->last_node, *(Genome_node**)
+        if (!genome_node_tree_is_sorted(&is->last_node, *(GenomeNode**)
                                         queue_get_elem(is->genome_node_buffer,
                                                        i))) {
           assert(is->last_node);
@@ -114,12 +114,12 @@ static Genome_node* gff3_in_stream_next_tree(Genome_stream *gs,
           error("the file %s is not sorted (example: line %lu and %lu)",
                 genome_node_get_filename(is->last_node),
                 genome_node_get_line_number(is->last_node),
-                genome_node_get_line_number(*(Genome_node**)
+                genome_node_get_line_number(*(GenomeNode**)
                                     queue_get_elem(is->genome_node_buffer, i)));
         }
       }
     }
-    return *(Genome_node**) queue_get(is->genome_node_buffer);
+    return *(GenomeNode**) queue_get(is->genome_node_buffer);
   }
   return NULL;
 }
@@ -156,7 +156,7 @@ static Genome_stream* gff3_in_stream_new(Array *files, /* takes ownership */
   gff3_in_stream->non_stdin_file_is_open = false;
   gff3_in_stream->fpin                   = NULL;
   gff3_in_stream->line_number            = 0;
-  gff3_in_stream->genome_node_buffer     = queue_new(sizeof(Genome_node*));
+  gff3_in_stream->genome_node_buffer     = queue_new(sizeof(GenomeNode*));
   gff3_in_stream->gff3_parser            = gff3_new();
   gff3_in_stream->last_node              = NULL;
   gff3_in_stream->be_verbose             = be_verbose;

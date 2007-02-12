@@ -22,10 +22,10 @@ struct Extractfeat_stream
 #define extractfeat_stream_cast(GS)\
         genome_stream_cast(extractfeat_stream_class(), GS)
 
-static Genome_node* extractfeat_stream_next_tree(Genome_stream *gs, Log *l)
+static GenomeNode* extractfeat_stream_next_tree(Genome_stream *gs, Log *l)
 {
   Extractfeat_stream *extractfeat_stream = extractfeat_stream_cast(gs);
-  Genome_node *gn = genome_stream_next_tree(extractfeat_stream->in_stream, l);
+  GenomeNode *gn = genome_stream_next_tree(extractfeat_stream->in_stream, l);
   assert(extractfeat_stream->extractfeat_visitor);
   if (gn)
     genome_node_accept(gn, extractfeat_stream->extractfeat_visitor, l);

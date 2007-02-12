@@ -21,10 +21,10 @@ struct Filter_stream
 #define filter_stream_cast(GS)\
         genome_stream_cast(filter_stream_class(), GS);
 
-static Genome_node* filter_stream_next_tree(Genome_stream *gs, Log *l)
+static GenomeNode* filter_stream_next_tree(Genome_stream *gs, Log *l)
 {
   Filter_stream *fs;
-  Genome_node *gn;
+  GenomeNode *gn;
   Genome_feature *gf;
 
   fs = filter_stream_cast(gs);

@@ -13,14 +13,14 @@
 struct Merge_stream {
   const Genome_stream parent_instance;
   Array *genome_streams;
-  Genome_node **buffer;
+  GenomeNode **buffer;
 };
 
 #define merge_stream_cast(GS)\
         genome_stream_cast(merge_stream_class(), GS)
 
-static unsigned int genome_nodes_are_equal_sequence_regions(Genome_node *gn_a,
-                                                            Genome_node *gn_b)
+static unsigned int genome_nodes_are_equal_sequence_regions(GenomeNode *gn_a,
+                                                            GenomeNode *gn_b)
 {
   void *sr_a, *sr_b;
 
@@ -34,7 +34,7 @@ static unsigned int genome_nodes_are_equal_sequence_regions(Genome_node *gn_a,
   return 0;
 }
 
-static void consolidate_sequence_regions(Genome_node *gn_a, Genome_node *gn_b)
+static void consolidate_sequence_regions(GenomeNode *gn_a, GenomeNode *gn_b)
 {
   Range range_a, range_b;
 
@@ -51,10 +51,10 @@ static void consolidate_sequence_regions(Genome_node *gn_a, Genome_node *gn_b)
   genome_node_set_range(gn_a, range_a);
 }
 
-Genome_node* merge_stream_next_tree(Genome_stream *gs, Log *l)
+GenomeNode* merge_stream_next_tree(Genome_stream *gs, Log *l)
 {
   Merge_stream *ms = merge_stream_cast(gs);
-  Genome_node *min_node = NULL;
+  GenomeNode *min_node = NULL;
   unsigned long i, j, min_i = UNDEFULONG;
   unsigned int genome_node_consolidated;
 
@@ -131,6 +131,6 @@ Genome_stream* merge_stream_new(const Array *genome_streams)
   }
 #endif
   ms->genome_streams = array_clone(genome_streams);
-  ms->buffer = xcalloc(array_size(genome_streams), sizeof(Genome_node*));
+  ms->buffer = xcalloc(array_size(genome_streams), sizeof(GenomeNode*));
   return gs;
 }

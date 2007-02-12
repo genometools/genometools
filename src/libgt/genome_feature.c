@@ -16,7 +16,7 @@
 
 struct Genome_feature
 {
-  const Genome_node parent_instance;
+  const GenomeNode parent_instance;
   Str *seqid,
       *source;
   Genome_feature_type type;
@@ -29,7 +29,7 @@ struct Genome_feature
 #define genome_feature_cast(GN)\
         genome_node_cast(genome_feature_class(), GN)
 
-static void genome_feature_free(Genome_node *gn)
+static void genome_feature_free(GenomeNode *gn)
 {
   Genome_feature *gf = genome_feature_cast(gn);
   assert(gf);
@@ -37,26 +37,26 @@ static void genome_feature_free(Genome_node *gn)
   str_free(gf->source);
 }
 
-static Str* genome_feature_get_seqid(Genome_node *gn)
+static Str* genome_feature_get_seqid(GenomeNode *gn)
 {
   Genome_feature *gf = genome_feature_cast(gn);
   return gf->seqid;
 }
 
-static Range genome_feature_get_range(Genome_node *gn)
+static Range genome_feature_get_range(GenomeNode *gn)
 {
   Genome_feature *gf = genome_feature_cast(gn);
   return gf->range;
 }
 
-static void genome_feature_set_seqid(Genome_node *gn, Str *seqid)
+static void genome_feature_set_seqid(GenomeNode *gn, Str *seqid)
 {
   Genome_feature *gf = genome_feature_cast(gn);
   assert(gf && seqid && !gf->seqid);
   gf->seqid = str_ref(seqid);
 }
 
-static void genome_feature_set_source(Genome_node *gn, Str *source)
+static void genome_feature_set_source(GenomeNode *gn, Str *source)
 {
   Genome_feature *gf = genome_feature_cast(gn);
   assert(gf && source && !gf->source);
@@ -69,22 +69,22 @@ void genome_feature_set_score(Genome_feature *gf, double score)
   gf->score = score;
 }
 
-static void genome_feature_set_phase(Genome_node *gn, Phase phase)
+static void genome_feature_set_phase(GenomeNode *gn, Phase phase)
 {
   Genome_feature *gf = genome_feature_cast(gn);
   assert(gf && gf->phase == PHASE_UNDEFINED);
   gf->phase = phase;
 }
 
-static void genome_feature_accept(Genome_node *gn, Genome_visitor *gv, Log *l)
+static void genome_feature_accept(GenomeNode *gn, Genome_visitor *gv, Log *l)
 {
   Genome_feature *gf = genome_feature_cast(gn);
   genome_visitor_visit_genome_feature(gv, gf, l);
 }
 
-const Genome_node_class* genome_feature_class()
+const GenomeNodeClass* genome_feature_class()
 {
-  static const Genome_node_class gnc = { sizeof(Genome_feature),
+  static const GenomeNodeClass gnc = { sizeof(Genome_feature),
                                          genome_feature_free,
                                          genome_feature_get_seqid,
                                          genome_feature_get_seqid,
@@ -97,13 +97,13 @@ const Genome_node_class* genome_feature_class()
   return &gnc;
 }
 
-Genome_node* genome_feature_new(Genome_feature_type type,
+GenomeNode* genome_feature_new(Genome_feature_type type,
                                 Range range,
                                 Strand strand,
                                 const char *filename,
                                 unsigned long line_number)
 {
-  Genome_node *gn = genome_node_create(genome_feature_class(), filename,
+  GenomeNode *gn = genome_node_create(genome_feature_class(), filename,
                                        line_number);
   Genome_feature *gf = genome_feature_cast(gn);
   assert(range.start <= range.end);
@@ -147,7 +147,7 @@ Phase genome_feature_get_phase(Genome_feature *gf)
   return gf->phase;
 }
 
-static void save_exon(Genome_node *gn, void *data)
+static void save_exon(GenomeNode *gn, void *data)
 {
   Genome_feature *gf = (Genome_feature*) gn;
   Array *exon_features = (Array*) data;
@@ -160,7 +160,7 @@ static void save_exon(Genome_node *gn, void *data)
 void genome_feature_get_exons(Genome_feature *gf, Array *exon_features)
 {
   assert(gf && exon_features && !array_size(exon_features));
-  genome_node_traverse_children((Genome_node*) gf, exon_features, save_exon, 0);
+  genome_node_traverse_children((GenomeNode*) gf, exon_features, save_exon, 0);
 }
 
 void genome_feature_set_end(Genome_feature *gf, unsigned long end)

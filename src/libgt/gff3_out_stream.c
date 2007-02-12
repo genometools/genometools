@@ -18,10 +18,10 @@ struct Gff3_out_stream {
 #define gff3_out_stream_cast(GS)\
         genome_stream_cast(gff3_out_stream_class(), GS);
 
-static Genome_node* gff3_out_stream_next_tree(Genome_stream *gs, Log *l)
+static GenomeNode* gff3_out_stream_next_tree(Genome_stream *gs, Log *l)
 {
   Gff3_out_stream *gff3_out_stream;
-  Genome_node *gn;
+  GenomeNode *gn;
   gff3_out_stream = gff3_out_stream_cast(gs);
   gn = genome_stream_next_tree(gff3_out_stream->in_stream, l);
   if (gn)

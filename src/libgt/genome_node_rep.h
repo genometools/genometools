@@ -12,31 +12,31 @@
 #include "genome_node.h"
 
 /* the ``genome node'' interface */
-struct Genome_node_class
+struct GenomeNodeClass
 {
   size_t size;
-  void  (*free)(Genome_node*);
-  Str*  (*get_seqid)(Genome_node*);
-  Str*  (*get_idstr)(Genome_node*);
-  Range (*get_range)(Genome_node*);
-  void  (*set_range)(Genome_node*, Range);
-  void  (*set_seqid)(Genome_node*, Str*);
-  void  (*set_source)(Genome_node*, Str*);
-  void  (*set_phase)(Genome_node*, Phase);
-  void  (*accept)(Genome_node*, Genome_visitor*, Log*);
+  void  (*free)(GenomeNode*);
+  Str*  (*get_seqid)(GenomeNode*);
+  Str*  (*get_idstr)(GenomeNode*);
+  Range (*get_range)(GenomeNode*);
+  void  (*set_range)(GenomeNode*, Range);
+  void  (*set_seqid)(GenomeNode*, Str*);
+  void  (*set_source)(GenomeNode*, Str*);
+  void  (*set_phase)(GenomeNode*, Phase);
+  void  (*accept)(GenomeNode*, Genome_visitor*, Log*);
 };
 
-struct Genome_node
+struct GenomeNode
 {
-  const Genome_node_class *c_class;
+  const GenomeNodeClass *c_class;
   const char *filename;
   unsigned long line_number;
   Dlist *children;
   unsigned int reference_count;
 };
 
-void         genome_node_class_init(Genome_node_class*, size_t, ...);
-Genome_node* genome_node_create(const Genome_node_class*, const char *filename,
+void         genome_node_class_init(GenomeNodeClass*, size_t, ...);
+GenomeNode* genome_node_create(const GenomeNodeClass*, const char *filename,
                                 unsigned long line_number);
 
 #endif

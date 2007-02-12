@@ -16,8 +16,8 @@ typedef struct Genome_feature Genome_feature;
 #include "range.h"
 #include "strand.h"
 
-const Genome_node_class* genome_feature_class(void);
-Genome_node*        genome_feature_new(Genome_feature_type, Range, Strand,
+const GenomeNodeClass* genome_feature_class(void);
+GenomeNode*        genome_feature_new(Genome_feature_type, Range, Strand,
                                        const char *filename,
                                        unsigned long line_number);
 const char*         genome_feature_get_source(Genome_feature*);

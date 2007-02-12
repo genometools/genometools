@@ -14,8 +14,8 @@ typedef struct Comment Comment;
 
 #include "genome_node.h"
 
-const Genome_node_class* comment_class(void);
-Genome_node*             comment_new(const char *comment,
+const GenomeNodeClass* comment_class(void);
+GenomeNode*             comment_new(const char *comment,
                                      const char *filename,
                                      unsigned long line_number);
 const char*              comment_get_comment(Comment *c);

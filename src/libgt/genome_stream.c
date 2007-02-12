@@ -53,9 +53,9 @@ void genome_stream_free(Genome_stream *gs)
   free(gs);
 }
 
-Genome_node* genome_stream_next_tree(Genome_stream *gs, Log *l)
+GenomeNode* genome_stream_next_tree(Genome_stream *gs, Log *l)
 {
-  Genome_node *gn;
+  GenomeNode *gn;
   assert(gs && gs->c_class && gs->c_class->next_tree);
   gn = gs->c_class->next_tree(gs, l);
   if (gn && gs->ensure_sorting)

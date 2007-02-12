@@ -20,14 +20,14 @@ struct Gtf_in_stream
 #define gtf_in_stream_cast(GS)\
         genome_stream_cast(gtf_in_stream_class(), GS)
 
-static Genome_node* gtf_in_stream_next_tree(Genome_stream *gs,
+static GenomeNode* gtf_in_stream_next_tree(Genome_stream *gs,
                                             /*@unused@*/ Log *l)
 {
   Gtf_in_stream *is = gtf_in_stream_cast(gs);
 
   if (queue_size(is->genome_node_buffer)) {
     /* we still have a node in the buffer -> serve it from there */
-    return *(Genome_node**) queue_get(is->genome_node_buffer);
+    return *(GenomeNode**) queue_get(is->genome_node_buffer);
   }
 
   /* the buffer is empty */
@@ -57,7 +57,7 @@ Genome_stream* gtf_in_stream_new(const char *filename, unsigned int be_tolerant)
   GTF_parser *gtf_parser = gtf_parser_new();
   FILE *fpin;
 
-  gtf_in_stream->genome_node_buffer = queue_new(sizeof(Genome_node*));
+  gtf_in_stream->genome_node_buffer = queue_new(sizeof(GenomeNode*));
 
   /* open input file */
   if (filename)

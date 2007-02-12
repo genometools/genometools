@@ -19,10 +19,10 @@ struct CDS_stream
 #define cds_stream_cast(GS)\
         genome_stream_cast(cds_stream_class(), GS)
 
-static Genome_node* cds_stream_next_tree(Genome_stream *gs, Log *l)
+static GenomeNode* cds_stream_next_tree(Genome_stream *gs, Log *l)
 {
   CDS_stream *cds_stream = cds_stream_cast(gs);
-  Genome_node *gn = genome_stream_next_tree(cds_stream->in_stream, l);
+  GenomeNode *gn = genome_stream_next_tree(cds_stream->in_stream, l);
   if (gn)
     genome_node_accept(gn, cds_stream->cds_visitor, l);
   return gn;

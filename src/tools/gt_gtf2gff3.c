@@ -31,7 +31,7 @@ int gt_gtf2gff3(int argc, char *argv[])
 {
   Genome_stream *gtf_in_stream,
                 *gff3_out_stream;
-  Genome_node *gn;
+  GenomeNode *gn;
   int parsed_args;
   bool be_tolerant;
 

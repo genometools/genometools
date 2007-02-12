@@ -63,7 +63,7 @@ static void gff3_visitor_comment(Genome_visitor *gv, Comment *c,
   fprintf(gff3_visitor->outfp, "#%s\n", comment_get_comment(c));
 }
 
-static void add_id(Genome_node *gn, void *data)
+static void add_id(GenomeNode *gn, void *data)
 {
   Add_id_info *info = (Add_id_info*) data;
   Array *parent_features = NULL;
@@ -76,7 +76,7 @@ static void add_id(Genome_node *gn, void *data)
   array_add(parent_features, info->id);
 }
 
-static void gff3_show_genome_feature(Genome_node *gn, void *data)
+static void gff3_show_genome_feature(GenomeNode *gn, void *data)
 {
   unsigned int part_shown = 0;
   Gff3_visitor *gff3_visitor = (Gff3_visitor*) data;
@@ -118,7 +118,7 @@ static void gff3_show_genome_feature(Genome_node *gn, void *data)
   xfputc('\n', gff3_visitor->outfp);
 }
 
-static void store_ids(Genome_node *gn, void *data)
+static void store_ids(GenomeNode *gn, void *data)
 {
   Gff3_visitor *gff3_visitor = (Gff3_visitor*) data;
   Genome_feature *gf = (Genome_feature*) gn;
@@ -154,9 +154,9 @@ static void gff3_visitor_genome_feature(Genome_visitor *gv, Genome_feature *gf,
 
   gff3_version_string(gv);
 
-  genome_node_traverse_children((Genome_node*) gf, gff3_visitor, store_ids,
+  genome_node_traverse_children((GenomeNode*) gf, gff3_visitor, store_ids,
                                 1);
-  genome_node_traverse_children((Genome_node*) gf, gff3_visitor,
+  genome_node_traverse_children((GenomeNode*) gf, gff3_visitor,
                                 gff3_show_genome_feature, 1);
 
   /* clear hashtable */
@@ -169,21 +169,21 @@ static void gff3_visitor_genome_feature(Genome_visitor *gv, Genome_feature *gf,
 }
 
 static void gff3_visitor_sequence_region(Genome_visitor *gv,
-                                         Sequence_region *sr,
+                                         SequenceRegion *sr,
                                          /*@unused@*/ Log *l)
 {
   Gff3_visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && sr);
   /* a sequence region has no children */
-  assert(!genome_node_has_children((Genome_node*) sr));
+  assert(!genome_node_has_children((GenomeNode*) sr));
 
   gff3_version_string(gv);
   fprintf(gff3_visitor->outfp,
           "%s   %s %lu %lu\n",
           GFF_SEQUENCE_REGION,
-          str_get(genome_node_get_seqid((Genome_node*) sr)),
-          genome_node_get_start((Genome_node*) sr),
-          genome_node_get_end((Genome_node*) sr));
+          str_get(genome_node_get_seqid((GenomeNode*) sr)),
+          genome_node_get_start((GenomeNode*) sr),
+          genome_node_get_end((GenomeNode*) sr));
 }
 
 const Genome_visitor_class* gff3_visitor_class()

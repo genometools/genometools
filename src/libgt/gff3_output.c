@@ -11,13 +11,13 @@
 
 void gff3_output_leading(Genome_feature *gf, FILE *outfp)
 {
-  Genome_node *gn;
+  GenomeNode *gn;
   Genome_feature_type type;
   double score;
 
   assert(gf);
 
-  gn = (Genome_node*) gf;
+  gn = (GenomeNode*) gf;
   type = genome_feature_get_type(gf);
 
   fprintf(outfp, "%s\t%s\t%s\t%lu\t%lu\t", str_get(genome_node_get_seqid(gn)),
