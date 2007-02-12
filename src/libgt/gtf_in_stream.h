@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -15,7 +15,7 @@ typedef struct Gtf_in_stream Gtf_in_stream;
 
 const GenomeStreamClass* gtf_in_stream_class(void);
 /* filename == NULL -> use stdin */
-GenomeStream*             gtf_in_stream_new(const char *filename,
-                                             unsigned int be_tolerant);
+GenomeStream*            gtf_in_stream_new(const char *filename,
+                                           bool be_tolerant);
 
 #endif

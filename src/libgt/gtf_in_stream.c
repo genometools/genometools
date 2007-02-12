@@ -45,14 +45,14 @@ static void gtf_in_stream_free(GenomeStream *gs)
 const GenomeStreamClass* gtf_in_stream_class(void)
 {
   static const GenomeStreamClass gsc = { sizeof(Gtf_in_stream),
-                                           gtf_in_stream_next_tree,
-                                           gtf_in_stream_free };
+                                         gtf_in_stream_next_tree,
+                                         gtf_in_stream_free };
   return &gsc;
 }
 
-GenomeStream* gtf_in_stream_new(const char *filename, unsigned int be_tolerant)
+GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant)
 {
-  GenomeStream *gs = genome_stream_create(gtf_in_stream_class(), 0);
+  GenomeStream *gs = genome_stream_create(gtf_in_stream_class(), false);
   Gtf_in_stream *gtf_in_stream = gtf_in_stream_cast(gs);
   GTF_parser *gtf_parser = gtf_parser_new();
   FILE *fpin;

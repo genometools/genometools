@@ -50,8 +50,8 @@ static void csa_stream_free(GenomeStream *gs)
 const GenomeStreamClass* csa_stream_class(void)
 {
   static const GenomeStreamClass gsc = { sizeof(Csa_stream),
-                                           csa_stream_next_tree,
-                                           csa_stream_free };
+                                         csa_stream_next_tree,
+                                         csa_stream_free };
   return &gsc;
 }
 
@@ -59,7 +59,7 @@ GenomeStream* csa_stream_new(GenomeStream *in_stream,
                               unsigned long join_length)
 {
   GenomeStream *gs = genome_stream_create(csa_stream_class(),
-                                           genome_stream_is_sorted(in_stream));
+                                          genome_stream_is_sorted(in_stream));
   Csa_stream *cs = csa_stream_cast(gs);
   cs->in_stream = in_stream;
   cs->csa_visitor = csa_visitor_new(join_length);

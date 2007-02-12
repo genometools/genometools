@@ -112,14 +112,14 @@ static void merge_stream_free(GenomeStream *gs)
 const GenomeStreamClass* merge_stream_class(void)
 {
   static const GenomeStreamClass gsc = { sizeof(Merge_stream),
-                                           merge_stream_next_tree,
-                                           merge_stream_free };
+                                         merge_stream_next_tree,
+                                         merge_stream_free };
   return &gsc;
 }
 
 GenomeStream* merge_stream_new(const Array *genome_streams)
 {
-  GenomeStream *gs = genome_stream_create(merge_stream_class(), 1);
+  GenomeStream *gs = genome_stream_create(merge_stream_class(), true);
   Merge_stream *ms = merge_stream_cast(gs);
 #ifndef NDEBUG
   unsigned long i;

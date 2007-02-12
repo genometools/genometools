@@ -36,14 +36,15 @@ static void mergefeat_stream_unsorted_free(GenomeStream *gs)
 const GenomeStreamClass* mergefeat_stream_unsorted_class(void)
 {
   static const GenomeStreamClass gsc = { sizeof(Mergefeat_stream_unsorted),
-                                           mergefeat_stream_unsorted_next_tree,
-                                           mergefeat_stream_unsorted_free };
+                                         mergefeat_stream_unsorted_next_tree,
+                                         mergefeat_stream_unsorted_free };
   return &gsc;
 }
 
 GenomeStream* mergefeat_stream_unsorted_new(GenomeStream *in_stream)
 {
-  GenomeStream *gs = genome_stream_create(mergefeat_stream_unsorted_class(),0);
+  GenomeStream *gs = genome_stream_create(mergefeat_stream_unsorted_class(),
+                                          false);
   Mergefeat_stream_unsorted *mfs = mergefeat_stream_unsorted_cast(gs);
   mfs->in_stream = in_stream;
   mfs->mergefeat_visitor = mergefeat_visitor_new();

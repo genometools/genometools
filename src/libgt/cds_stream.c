@@ -45,7 +45,7 @@ const GenomeStreamClass* cds_stream_class(void)
 GenomeStream* cds_stream_new(GenomeStream *in_stream,
                               const char *sequence_file, const char *source)
 {
-  GenomeStream *gs = genome_stream_create(cds_stream_class(), 1);
+  GenomeStream *gs = genome_stream_create(cds_stream_class(), true);
   CDS_stream *cds_stream = cds_stream_cast(gs);
   Str *sequence_file_str = str_new_cstr(sequence_file),
       *source_str = str_new_cstr(source);

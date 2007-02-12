@@ -38,15 +38,15 @@ static void gff3_out_stream_free(GenomeStream *gs)
 const GenomeStreamClass* gff3_out_stream_class(void)
 {
   static const GenomeStreamClass gsc = { sizeof (Gff3_out_stream),
-                                           gff3_out_stream_next_tree,
-                                           gff3_out_stream_free };
+                                         gff3_out_stream_next_tree,
+                                         gff3_out_stream_free };
   return &gsc;
 }
 
 GenomeStream* gff3_out_stream_new(GenomeStream *in_stream, FILE *outfp)
 {
   GenomeStream *gs = genome_stream_create(gff3_out_stream_class(),
-                                           genome_stream_is_sorted(in_stream));
+                                          genome_stream_is_sorted(in_stream));
   Gff3_out_stream *gff3_out_stream = gff3_out_stream_cast(gs);
   gff3_out_stream->in_stream = in_stream;
   gff3_out_stream->first_genome_feature = true;

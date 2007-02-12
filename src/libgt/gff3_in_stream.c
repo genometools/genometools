@@ -138,16 +138,16 @@ static void gff3_in_stream_free(GenomeStream *gs)
 const GenomeStreamClass* gff3_in_stream_class(void)
 {
   static const GenomeStreamClass gsc = { sizeof(Gff3_in_stream),
-                                           gff3_in_stream_next_tree,
-                                           gff3_in_stream_free };
+                                         gff3_in_stream_next_tree,
+                                         gff3_in_stream_free };
   return &gsc;
 }
 
 static GenomeStream* gff3_in_stream_new(Array *files, /* takes ownership */
-                                         bool ensure_sorting, bool be_verbose)
+                                        bool ensure_sorting, bool be_verbose)
 {
   GenomeStream *gs = genome_stream_create(gff3_in_stream_class(),
-                                           ensure_sorting);
+                                          ensure_sorting);
   Gff3_in_stream *gff3_in_stream         = gff3_in_stream_cast(gs);
   gff3_in_stream->next_file              = 0;
   gff3_in_stream->files                  = files;

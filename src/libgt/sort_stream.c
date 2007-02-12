@@ -55,14 +55,14 @@ static void sort_stream_free(GenomeStream *gs)
 const GenomeStreamClass* sort_stream_class(void)
 {
   static const GenomeStreamClass gsc = { sizeof (Sort_stream),
-                                           sort_stream_next_tree,
-                                           sort_stream_free };
+                                         sort_stream_next_tree,
+                                         sort_stream_free };
   return &gsc;
 }
 
 GenomeStream* sort_stream_new(GenomeStream *in_stream)
 {
-  GenomeStream *gs = genome_stream_create(sort_stream_class(), 1);
+  GenomeStream *gs = genome_stream_create(sort_stream_class(), true);
   Sort_stream *sort_stream = sort_stream_cast(gs);
   assert(in_stream);
   sort_stream->in_stream = in_stream;
