@@ -114,7 +114,7 @@ Genome_node* genome_node_rec_ref(Genome_node *gn)
 void genome_node_traverse_children(Genome_node *genome_node,
                                    void *data,
                                    Genome_node_traverse_func traverse,
-                                   unsigned int traverse_only_once)
+                                   bool traverse_only_once)
 {
   Array *node_stack, *list_of_children;
   Genome_node *gn, *child_feature;
@@ -290,20 +290,20 @@ void genome_node_remove_leaf(Genome_node *tree, Genome_node *leafn)
   genome_node_traverse_children(tree, leafn, remove_leaf, 1);
 }
 
-unsigned int genome_node_has_children(Genome_node *gn)
+bool genome_node_has_children(Genome_node *gn)
 {
   assert(gn);
   if (!gn->children || dlist_size(gn->children) == 0)
-    return 0;
-  return 1;
+    return false;
+  return true;
 }
 
-unsigned int genome_node_direct_children_do_not_overlap(Genome_node *gn)
+bool genome_node_direct_children_do_not_overlap(Genome_node *gn)
 {
   Array *children_ranges = array_new(sizeof(Range));
   Dlistelem *dlistelem;
   Range range;
-  unsigned int rval;
+  bool rval;
 
   assert(gn);
 
@@ -329,7 +329,7 @@ unsigned int genome_node_direct_children_do_not_overlap(Genome_node *gn)
   return rval;
 }
 
-unsigned int genome_node_tree_is_sorted(Genome_node **buffer,
+bool genome_node_tree_is_sorted(Genome_node **buffer,
                                         Genome_node *current_node)
 {
   assert(buffer && current_node);
@@ -337,25 +337,25 @@ unsigned int genome_node_tree_is_sorted(Genome_node **buffer,
   if (*buffer) {
     /* the last node is not larger than the current one */
     if (genome_node_compare(buffer, &current_node) == 1)
-      return 0;
+      return false;
     genome_node_free(*buffer);
   }
   *buffer = genome_node_ref(current_node);
-  return 1;
+  return true;
 }
 
-unsigned int genome_node_overlaps_nodes(Genome_node *gn, Array *nodes)
+bool genome_node_overlaps_nodes(Genome_node *gn, Array *nodes)
 {
   return genome_node_overlaps_nodes_mark(gn, nodes, NULL);
 }
 
-unsigned int genome_node_overlaps_nodes_mark(Genome_node *gn, Array *nodes,
+bool genome_node_overlaps_nodes_mark(Genome_node *gn, Array *nodes,
                                              Bittab *b)
 {
   unsigned long i;
   Genome_node *node;
   Range gn_range;
-  int rval = 0;
+  bool rval = false;
 #ifndef NDEBUG
   Str *gn_id;
   assert(gn && nodes);
@@ -368,7 +368,7 @@ unsigned int genome_node_overlaps_nodes_mark(Genome_node *gn, Array *nodes,
     node = *(Genome_node**) array_get(nodes, i);
     assert(!str_cmp(gn_id, genome_node_get_idstr(node)));
     if (range_overlap(gn_range, genome_node_get_range(node))) {
-      rval = 1;
+      rval = true;
       if (b)
         bittab_set_bit(b, i);
       else
@@ -417,13 +417,13 @@ void genome_nodes_sort_stable(Array *nodes)
 
 }
 
-unsigned int genome_nodes_are_sorted(const Array *nodes)
+bool genome_nodes_are_sorted(const Array *nodes)
 {
   unsigned long i;
   assert(nodes);
   for (i = 1; i < array_size(nodes); i++) {
     if (genome_node_compare(array_get(nodes, i-1), array_get(nodes, i)) == 1)
-      return 0;
+      return false;
   }
-  return 1;
+  return true;
 }

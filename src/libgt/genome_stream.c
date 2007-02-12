@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -66,7 +66,7 @@ Genome_node* genome_stream_next_tree(Genome_stream *gs, Log *l)
   return gn;
 }
 
-unsigned int genome_stream_is_sorted(Genome_stream *gs)
+bool genome_stream_is_sorted(Genome_stream *gs)
 {
   assert(gs);
   return gs->ensure_sorting;

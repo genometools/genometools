@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -21,7 +21,7 @@ struct Genome_stream
 {
   const Genome_stream_class *c_class;
   Genome_node *last_node;
-  unsigned int ensure_sorting : 1;
+  bool ensure_sorting;
 };
 
 Genome_stream* genome_stream_create(const Genome_stream_class*,
