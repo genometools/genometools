@@ -48,8 +48,6 @@ lib/libgt.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h $(LIBGT
 ifdef RANLIB
 	$(RANLIB) $@
 endif
-	ln src/gt.h include
-	ln src/libgt/*.h include/libgt
 
 bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgt.a
 	$(LD) $(LDFLAGS) $^ $(LDLIBS) -o $@
@@ -118,4 +116,4 @@ clean:
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_testsuite
 
 cleanup: clean
-	rm -rf include lib bin
+	rm -rf lib bin
