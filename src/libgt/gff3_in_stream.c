@@ -20,10 +20,10 @@ struct Gff3_in_stream
   const Genome_stream parent_instance;
   int next_file;
   Array *files; /* contains char* to filenames */
-  unsigned int ensure_sorting         : 1,
-               stdin_argument         : 1,
-               non_stdin_file_is_open : 1,
-               be_verbose             : 1;
+  bool ensure_sorting,
+       stdin_argument,
+       non_stdin_file_is_open,
+       be_verbose;
   FILE *fpin;
   unsigned long line_number;
   Queue *genome_node_buffer;
@@ -60,11 +60,11 @@ static Genome_node* gff3_in_stream_next_tree(Genome_stream *gs,
           if (is->stdin_argument)
             error("multiple specification of argument file \"-\"\n");
           is->fpin = stdin;
-          is->stdin_argument = 1;
+          is->stdin_argument = true;
         }
         else {
           is->fpin = xfopen(*(char**) array_get(is->files, is->next_file), "r");
-          is->non_stdin_file_is_open = 1;
+          is->non_stdin_file_is_open = true;
         }
         is->next_file++;
       }
@@ -94,7 +94,7 @@ static Genome_node* gff3_in_stream_next_tree(Genome_stream *gs,
         assert(is->fpin);
         if (is->be_verbose) progressbar_stop();
         xfclose(is->fpin);
-        is->non_stdin_file_is_open = 0;
+        is->non_stdin_file_is_open = false;
       }
       is->fpin = NULL;
       gff3_reset(is->gff3_parser);
@@ -144,8 +144,7 @@ const Genome_stream_class* gff3_in_stream_class(void)
 }
 
 static Genome_stream* gff3_in_stream_new(Array *files, /* takes ownership */
-                                         unsigned int ensure_sorting,
-                                         unsigned int be_verbose)
+                                         bool ensure_sorting, bool be_verbose)
 {
   Genome_stream *gs = genome_stream_create(gff3_in_stream_class(),
                                            ensure_sorting);
@@ -153,8 +152,8 @@ static Genome_stream* gff3_in_stream_new(Array *files, /* takes ownership */
   gff3_in_stream->next_file              = 0;
   gff3_in_stream->files                  = files;
   gff3_in_stream->ensure_sorting         = ensure_sorting;
-  gff3_in_stream->stdin_argument         = 0;
-  gff3_in_stream->non_stdin_file_is_open = 0;
+  gff3_in_stream->stdin_argument         = false;
+  gff3_in_stream->non_stdin_file_is_open = false;
   gff3_in_stream->fpin                   = NULL;
   gff3_in_stream->line_number            = 0;
   gff3_in_stream->genome_node_buffer     = queue_new(sizeof(Genome_node*));
@@ -172,20 +171,20 @@ void gff3_in_stream_set_offset(Genome_stream *gs, long offset)
 
 Genome_stream* gff3_in_stream_new_unsorted(int num_of_files,
                                            char **filenames,
-                                           unsigned int be_verbose)
+                                           bool be_verbose)
 {
   int i;
   Array *files = array_new(sizeof(char*));
   for (i = 0; i < num_of_files; i++)
     array_add(files, filenames[i]);
-  return gff3_in_stream_new(files, 0, be_verbose);
+  return gff3_in_stream_new(files, false, be_verbose);
 }
 
 Genome_stream* gff3_in_stream_new_sorted(char *filename,
-                                         unsigned int be_verbose)
+                                         bool be_verbose)
 {
   Array *files = array_new(sizeof(char*));
   if (filename)
     array_add(files, filename);
-  return gff3_in_stream_new(files, 1, be_verbose);
+  return gff3_in_stream_new(files, true, be_verbose);
 }

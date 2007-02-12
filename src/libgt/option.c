@@ -37,7 +37,7 @@ struct OptionParser {
        *synopsis,
        *one_liner;
   Array *options;
-  unsigned int parser_called : 1;
+  bool parser_called;
   Show_comment_func comment_func;
   void *comment_func_data;
 };
@@ -124,7 +124,7 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner)
   op->synopsis = xstrdup(synopsis);
   op->one_liner = xstrdup(one_liner);
   op->options = array_new(sizeof(Option*));
-  op->parser_called = 0;
+  op->parser_called = false;
   op->comment_func = NULL;
   op->comment_func_data = NULL;
   return op;
@@ -502,7 +502,7 @@ static int parse(OptionParser *op, int argc, char **argv,
   check_option_implications(op);
   check_option_exclusions(op);
 
-  op->parser_called = 1;
+  op->parser_called = true;
   return argnum;
 }
 

@@ -29,7 +29,7 @@ struct Csa_visitor {
 };
 
 typedef struct {
-  unsigned int is_first_splice_form : 1;
+  bool is_first_splice_form;
   Genome_node* gene_feature;
   Str *seqid,
       *gth_csa_source_str;
@@ -367,7 +367,7 @@ static void process_splice_form(Array *spliced_alignments_in_form,
                                             UNDEFULONG);
     genome_node_set_seqid(info->gene_feature, info->seqid);
     genome_node_set_source(info->gene_feature, info->gth_csa_source_str);
-    info->is_first_splice_form = 0;
+    info->is_first_splice_form = false;
   }
 
   exon_nodes = array_new(sizeof(Genome_node*));
@@ -419,7 +419,7 @@ void csa_visitor_process_cluster(Genome_visitor *gv,
   }
 
   /* compute the consenus spliced alignments */
-  info.is_first_splice_form = 1;
+  info.is_first_splice_form = true;
   info.gene_feature = NULL;
   info.seqid = NULL;
   info.gth_csa_source_str = csa_visitor->gth_csa_source_str;

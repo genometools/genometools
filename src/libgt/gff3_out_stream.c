@@ -11,7 +11,7 @@
 struct Gff3_out_stream {
   const Genome_stream parent_instance;
   Genome_stream *in_stream;
-  unsigned int first_genome_feature : 1;
+  bool first_genome_feature;
   Genome_visitor *gff3_visitor;
 };
 
@@ -49,7 +49,7 @@ Genome_stream* gff3_out_stream_new(Genome_stream *in_stream, FILE *outfp)
                                            genome_stream_is_sorted(in_stream));
   Gff3_out_stream *gff3_out_stream = gff3_out_stream_cast(gs);
   gff3_out_stream->in_stream = in_stream;
-  gff3_out_stream->first_genome_feature = 1;
+  gff3_out_stream->first_genome_feature = true;
   gff3_out_stream->gff3_visitor = gff3_visitor_new(outfp);
   return gs;
 }

@@ -20,9 +20,9 @@ struct Extractfeat_visitor {
       *sequence,    /* the sequence of the currently extracted feature */
       *protein;
   Genome_feature_type type;
-  unsigned int join           : 1,
-               translate      : 1,
-               reverse_strand : 1;
+  bool join,
+       translate,
+       reverse_strand;
   Bioseq *bioseq;
   unsigned long fastaseq_counter;
 };
@@ -61,7 +61,7 @@ static void extract_join_feature(Genome_node *gn, void *data)
     assert(range.end <= bioseq_get_raw_sequence_length(v->bioseq));
     str_append_cstr_nt(v->sequence, raw_sequence, range_length(range));
     if (genome_feature_get_strand(gf) == STRAND_REVERSE)
-      v->reverse_strand = 1;
+      v->reverse_strand = true;
   }
 }
 
@@ -91,7 +91,7 @@ static void extract_feature(Genome_node *gn, void *data)
   if (v->join) {
     /* in this case we have to traverse the children */
     str_reset(v->sequence);
-    v->reverse_strand = 0;
+    v->reverse_strand = false;
     genome_node_traverse_direct_children(gn, v, extract_join_feature);
     if (str_length(v->sequence)) {
       if (v->reverse_strand)
@@ -171,8 +171,7 @@ const Genome_visitor_class* extractfeat_visitor_class()
 
 Genome_visitor* extractfeat_visitor_new(Str *sequence_file,
                                         Genome_feature_type type,
-                                        unsigned int join,
-                                        unsigned int translate)
+                                        bool join, bool translate)
 {
   Genome_visitor *gv = genome_visitor_create(extractfeat_visitor_class());
   Extractfeat_visitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
