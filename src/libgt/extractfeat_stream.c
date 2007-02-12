@@ -7,7 +7,6 @@
 #include "extractfeat_stream.h"
 #include "extractfeat_visitor.h"
 #include "genome_stream_rep.h"
-#include "str.h"
 
 struct Extractfeat_stream
 {
@@ -43,19 +42,16 @@ const Genome_stream_class* extractfeat_stream_class(void)
 }
 
 Genome_stream* extractfeat_stream_new(Genome_stream *in_stream,
-                                      const char *sequence_file,
+                                      Str *sequence_file,
                                       Genome_feature_type type,
                                       unsigned int join, unsigned int translate)
 {
   Genome_stream *gs = genome_stream_create(extractfeat_stream_class(), 1);
   Extractfeat_stream *extractfeat_stream = extractfeat_stream_cast(gs);
-  Str *sequence_file_str = str_new_cstr(sequence_file);
 
   extractfeat_stream->in_stream = in_stream;
   extractfeat_stream->extractfeat_visitor =
-    extractfeat_visitor_new(sequence_file_str, type, join, translate);
-
-  str_free(sequence_file_str);
+    extractfeat_visitor_new(sequence_file, type, join, translate);
 
   return gs;
 }

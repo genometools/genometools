@@ -10,7 +10,9 @@ typedef struct {
   bool join,
        translate,
        verbose;
-  Str *type;
+  Str *type,
+      *seqfile,
+      *regionmapping;
 } Extractfeat_arguments;
 
 static int parse_options(Extractfeat_arguments *arguments, int argc,
@@ -20,9 +22,9 @@ static int parse_options(Extractfeat_arguments *arguments, int argc,
   OptionParser *op;
   Option *option;
 
-  op = option_parser_new("[option ...] GFF3_file sequence_file",
+  op = option_parser_new("[option ...] GFF3_file",
                          "Extract features given in GFF3_file from "
-                         "sequence_file.");
+                         "sequence file.");
 
   /* -type */
   option = option_new_string("type", "set type of features to extract",
@@ -42,13 +44,26 @@ static int parse_options(Extractfeat_arguments *arguments, int argc,
                            false);
   option_parser_add_option(op, option);
 
+  /* -seqfile */
+  option = option_new_string("seqfile", "set the sequence file from which to "
+                             "extract the features", arguments->seqfile, NULL);
+  option_is_mandatory(option);
+  option_parser_add_option(op, option);
+
+  /* -regionmapping */
+  option = option_new_string("regionmapping", "set file containing sequence-"
+                             "region to sequence file mapping",
+                             arguments->regionmapping, NULL);
+  option_is_development_option(option);
+  option_parser_add_option(op, option);
+
   /* -v */
   option = option_new_verbose(&arguments->verbose);
   option_parser_add_option(op, option);
 
   /* parse */
   parsed_args = option_parser_parse_min_max_args(op, argc, argv, versionfunc,
-                                                 2, 2);
+                                                 1, 1);
   option_parser_free(op);
 
   return parsed_args;
@@ -65,6 +80,8 @@ int gt_extractfeat(int argc, char *argv[])
 
   /* option parsing */
   arguments.type = str_new();
+  arguments.seqfile = str_new();
+  arguments.regionmapping = str_new();
   parsed_args = parse_options(&arguments, argc, argv);
 
   /* determine type and make sure it is a valid one */
@@ -77,9 +94,8 @@ int gt_extractfeat(int argc, char *argv[])
                                              arguments.verbose);
 
   /* create extract feature stream */
-  assert(parsed_args + 1 < argc);
   extractfeat_stream = extractfeat_stream_new(gff3_in_stream,
-                                              argv[parsed_args + 1],
+                                              arguments.seqfile,
                                               type, arguments.join,
                                               arguments.translate);
 
@@ -90,6 +106,8 @@ int gt_extractfeat(int argc, char *argv[])
   /* free */
   genome_stream_free(extractfeat_stream);
   genome_stream_free(gff3_in_stream);
+  str_free(arguments.regionmapping);
+  str_free(arguments.seqfile);
   str_free(arguments.type);
 
   return EXIT_SUCCESS;
