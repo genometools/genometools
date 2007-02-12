@@ -17,7 +17,7 @@ static void grep_error(int errcode, regex_t *matcher)
   error("grep(): %s", buf ? buf : sbuf);
 }
 
-unsigned int grep(const char *pattern, const char *line)
+bool grep(const char *pattern, const char *line)
 {
   regex_t matcher;
   int rval;
@@ -29,8 +29,8 @@ unsigned int grep(const char *pattern, const char *line)
     grep_error(rval, &matcher);
   regfree(&matcher);
   if (rval)
-    return 0;
-  return 1;
+    return false;
+  return true;
 }
 
 int grep_unit_test(void)
