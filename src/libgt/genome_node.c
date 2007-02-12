@@ -251,7 +251,7 @@ void genome_node_set_phase(GenomeNode *gn, Phase p)
   gn->c_class->set_phase(gn, p);
 }
 
-void genome_node_accept(GenomeNode *gn, Genome_visitor *gv, Log *l)
+void genome_node_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l)
 {
   assert(gn && gv && gn->c_class && gn->c_class->accept);
   gn->c_class->accept(gn, gv, l);

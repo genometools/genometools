@@ -10,7 +10,7 @@
 #include "stat_visitor.h"
 
 struct Stat_visitor {
-  const Genome_visitor parent_instance;
+  const GenomeVisitor parent_instance;
   unsigned long number_of_genes,
                 number_of_mRNAs,
                 number_of_exons;
@@ -21,14 +21,14 @@ struct Stat_visitor {
 #define stat_visitor_cast(GV)\
         genome_visitor_cast(stat_visitor_class(), GV)
 
-static void stat_visitor_free(Genome_visitor *gv)
+static void stat_visitor_free(GenomeVisitor *gv)
 {
   Stat_visitor *stat_visitor = stat_visitor_cast(gv);
   disc_distri_free(stat_visitor->gene_length_distribution);
   disc_distri_free(stat_visitor->gene_score_distribution);
 }
 
-static void stat_visitor_genome_feature(Genome_visitor *gv, Genome_feature *gf,
+static void stat_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
                                         /*@unused@*/ Log *l)
 {
   Stat_visitor *stat_visitor = stat_visitor_cast(gv);
@@ -55,9 +55,9 @@ static void stat_visitor_genome_feature(Genome_visitor *gv, Genome_feature *gf,
   }
 }
 
-const Genome_visitor_class* stat_visitor_class()
+const GenomeVisitorClass* stat_visitor_class()
 {
-  static const Genome_visitor_class gvc = { sizeof(Stat_visitor),
+  static const GenomeVisitorClass gvc = { sizeof(Stat_visitor),
                                             stat_visitor_free,
                                             NULL,
                                             stat_visitor_genome_feature,
@@ -66,10 +66,10 @@ const Genome_visitor_class* stat_visitor_class()
   return &gvc;
 }
 
-Genome_visitor* stat_visitor_new(unsigned int gene_length_distri,
+GenomeVisitor* stat_visitor_new(unsigned int gene_length_distri,
                                  unsigned int gene_score_distri)
 {
-  Genome_visitor *gv = genome_visitor_create(stat_visitor_class());
+  GenomeVisitor *gv = genome_visitor_create(stat_visitor_class());
   Stat_visitor *stat_visitor = stat_visitor_cast(gv);
   if (gene_length_distri)
     stat_visitor->gene_length_distribution = disc_distri_new();
@@ -78,7 +78,7 @@ Genome_visitor* stat_visitor_new(unsigned int gene_length_distri,
   return gv;
 }
 
-void stat_visitor_show_stats(Genome_visitor *gv)
+void stat_visitor_show_stats(GenomeVisitor *gv)
 {
   Stat_visitor *stat_visitor = stat_visitor_cast(gv);
   if (stat_visitor->number_of_exons)

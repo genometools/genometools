@@ -10,22 +10,22 @@
 #include <stdio.h>
 #include "genome_stream.h"
 
-struct Genome_stream_class
+struct GenomeStreamClass
 {
   size_t size;
-  GenomeNode* (*next_tree)(Genome_stream*, Log*);
-  void         (*free)(Genome_stream*);
+  GenomeNode* (*next_tree)(GenomeStream*, Log*);
+  void         (*free)(GenomeStream*);
 };
 
-struct Genome_stream
+struct GenomeStream
 {
-  const Genome_stream_class *c_class;
+  const GenomeStreamClass *c_class;
   GenomeNode *last_node;
   bool ensure_sorting;
 };
 
-Genome_stream* genome_stream_create(const Genome_stream_class*,
+GenomeStream* genome_stream_create(const GenomeStreamClass*,
                                     bool ensure_sorting);
-void*          genome_stream_cast(const Genome_stream_class*, Genome_stream*);
+void*          genome_stream_cast(const GenomeStreamClass*, GenomeStream*);
 
 #endif

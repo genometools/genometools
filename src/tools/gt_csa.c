@@ -57,7 +57,7 @@ static int parse_options(Csa_arguments *arguments, int argc, char *argv[])
 
 int gt_csa(int argc, char *argv[])
 {
-  Genome_stream *gff3_in_stream,
+  GenomeStream *gff3_in_stream,
                 *csa_stream,
                 *gff3_out_stream;
   GenomeNode *gn;

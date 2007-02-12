@@ -11,15 +11,15 @@
 
 struct CDS_stream
 {
-  const Genome_stream parent_instance;
-  Genome_stream *in_stream;
-  Genome_visitor *cds_visitor;
+  const GenomeStream parent_instance;
+  GenomeStream *in_stream;
+  GenomeVisitor *cds_visitor;
 };
 
 #define cds_stream_cast(GS)\
         genome_stream_cast(cds_stream_class(), GS)
 
-static GenomeNode* cds_stream_next_tree(Genome_stream *gs, Log *l)
+static GenomeNode* cds_stream_next_tree(GenomeStream *gs, Log *l)
 {
   CDS_stream *cds_stream = cds_stream_cast(gs);
   GenomeNode *gn = genome_stream_next_tree(cds_stream->in_stream, l);
@@ -28,24 +28,24 @@ static GenomeNode* cds_stream_next_tree(Genome_stream *gs, Log *l)
   return gn;
 }
 
-static void cds_stream_free(Genome_stream *gs)
+static void cds_stream_free(GenomeStream *gs)
 {
   CDS_stream *cds_stream = cds_stream_cast(gs);
   genome_visitor_free(cds_stream->cds_visitor);
 }
 
-const Genome_stream_class* cds_stream_class(void)
+const GenomeStreamClass* cds_stream_class(void)
 {
-  static const Genome_stream_class gsc = { sizeof(CDS_stream),
+  static const GenomeStreamClass gsc = { sizeof(CDS_stream),
                                            cds_stream_next_tree,
                                            cds_stream_free };
   return &gsc;
 }
 
-Genome_stream* cds_stream_new(Genome_stream *in_stream,
+GenomeStream* cds_stream_new(GenomeStream *in_stream,
                               const char *sequence_file, const char *source)
 {
-  Genome_stream *gs = genome_stream_create(cds_stream_class(), 1);
+  GenomeStream *gs = genome_stream_create(cds_stream_class(), 1);
   CDS_stream *cds_stream = cds_stream_cast(gs);
   Str *sequence_file_str = str_new_cstr(sequence_file),
       *source_str = str_new_cstr(source);

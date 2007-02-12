@@ -14,7 +14,7 @@ typedef struct {
 
 typedef struct {
   unsigned long number_of_trees;
-  Genome_visitor *stat_visitor;
+  GenomeVisitor *stat_visitor;
 } Stat_info;
 
 static int parse_options(Stat_arguments *arguments, int argc, char **argv)
@@ -58,7 +58,7 @@ static void compute_statistics(GenomeNode *gn, void *data)
 
 int gt_stat(int argc, char *argv[])
 {
-  Genome_stream *gff3_in_stream;
+  GenomeStream *gff3_in_stream;
   GenomeNode *gn;
   int parsed_args;
   Stat_arguments arguments;

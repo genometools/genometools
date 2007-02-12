@@ -12,7 +12,7 @@
 /* implements the ``genome stream'' interface */
 typedef struct Gff3_out_stream Gff3_out_stream;
 
-const Genome_stream_class* gff3_out_stream_class(void);
-Genome_stream*             gff3_out_stream_new(Genome_stream*, FILE*);
+const GenomeStreamClass* gff3_out_stream_class(void);
+GenomeStream*             gff3_out_stream_new(GenomeStream*, FILE*);
 
 #endif

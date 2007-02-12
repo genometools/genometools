@@ -11,11 +11,11 @@
 #include "genome_node.h"
 
 /* the ``genome stream'' interface */
-typedef struct Genome_stream_class Genome_stream_class;
-typedef struct Genome_stream Genome_stream;
+typedef struct GenomeStreamClass GenomeStreamClass;
+typedef struct GenomeStream GenomeStream;
 
-GenomeNode* genome_stream_next_tree(Genome_stream*, Log*);
-bool         genome_stream_is_sorted(Genome_stream*);
-void         genome_stream_free(Genome_stream*);
+GenomeNode* genome_stream_next_tree(GenomeStream*, Log*);
+bool         genome_stream_is_sorted(GenomeStream*);
+void         genome_stream_free(GenomeStream*);
 
 #endif

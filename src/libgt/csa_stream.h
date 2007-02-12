@@ -13,8 +13,8 @@
 /* implements the ``genome_stream'' interface */
 typedef struct Csa_stream Csa_stream;
 
-const Genome_stream_class* csa_stream_class(void);
-Genome_stream*             csa_stream_new(Genome_stream*,
+const GenomeStreamClass* csa_stream_class(void);
+GenomeStream*             csa_stream_new(GenomeStream*,
                                           unsigned long join_length);
 
 #endif

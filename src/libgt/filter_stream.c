@@ -12,8 +12,8 @@
 
 struct Filter_stream
 {
-  const Genome_stream parent_instance;
-  Genome_stream *in_stream;
+  const GenomeStream parent_instance;
+  GenomeStream *in_stream;
   unsigned long max_gene_length;
   double min_gene_score;
 };
@@ -21,7 +21,7 @@ struct Filter_stream
 #define filter_stream_cast(GS)\
         genome_stream_cast(filter_stream_class(), GS);
 
-static GenomeNode* filter_stream_next_tree(Genome_stream *gs, Log *l)
+static GenomeNode* filter_stream_next_tree(GenomeStream *gs, Log *l)
 {
   Filter_stream *fs;
   GenomeNode *gn;
@@ -53,19 +53,19 @@ static GenomeNode* filter_stream_next_tree(Genome_stream *gs, Log *l)
   return gn;
 }
 
-const Genome_stream_class* filter_stream_class(void)
+const GenomeStreamClass* filter_stream_class(void)
 {
-  static const Genome_stream_class gsc = { sizeof (Filter_stream),
+  static const GenomeStreamClass gsc = { sizeof (Filter_stream),
                                            filter_stream_next_tree,
                                            NULL };
   return &gsc;
 }
 
-Genome_stream* filter_stream_new(Genome_stream *in_stream,
+GenomeStream* filter_stream_new(GenomeStream *in_stream,
                                  unsigned long max_gene_length,
                                  double min_gene_score)
 {
-  Genome_stream *gs = genome_stream_create(filter_stream_class(),
+  GenomeStream *gs = genome_stream_create(filter_stream_class(),
                                            genome_stream_is_sorted(in_stream));
   Filter_stream *filter_stream = filter_stream_cast(gs);
   assert(in_stream);

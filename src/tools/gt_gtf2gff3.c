@@ -29,7 +29,7 @@ static int parse_options(bool *be_tolerant, int argc, char **argv)
 
 int gt_gtf2gff3(int argc, char *argv[])
 {
-  Genome_stream *gtf_in_stream,
+  GenomeStream *gtf_in_stream,
                 *gff3_out_stream;
   GenomeNode *gn;
   int parsed_args;

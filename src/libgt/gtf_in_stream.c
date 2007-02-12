@@ -13,14 +13,14 @@
 
 struct Gtf_in_stream
 {
-  const Genome_stream parent_instance;
+  const GenomeStream parent_instance;
   Queue *genome_node_buffer;
 };
 
 #define gtf_in_stream_cast(GS)\
         genome_stream_cast(gtf_in_stream_class(), GS)
 
-static GenomeNode* gtf_in_stream_next_tree(Genome_stream *gs,
+static GenomeNode* gtf_in_stream_next_tree(GenomeStream *gs,
                                             /*@unused@*/ Log *l)
 {
   Gtf_in_stream *is = gtf_in_stream_cast(gs);
@@ -36,23 +36,23 @@ static GenomeNode* gtf_in_stream_next_tree(Genome_stream *gs,
   return NULL;
 }
 
-static void gtf_in_stream_free(Genome_stream *gs)
+static void gtf_in_stream_free(GenomeStream *gs)
 {
   Gtf_in_stream *gtf_in_stream = gtf_in_stream_cast(gs);
   queue_free(gtf_in_stream->genome_node_buffer);
 }
 
-const Genome_stream_class* gtf_in_stream_class(void)
+const GenomeStreamClass* gtf_in_stream_class(void)
 {
-  static const Genome_stream_class gsc = { sizeof(Gtf_in_stream),
+  static const GenomeStreamClass gsc = { sizeof(Gtf_in_stream),
                                            gtf_in_stream_next_tree,
                                            gtf_in_stream_free };
   return &gsc;
 }
 
-Genome_stream* gtf_in_stream_new(const char *filename, unsigned int be_tolerant)
+GenomeStream* gtf_in_stream_new(const char *filename, unsigned int be_tolerant)
 {
-  Genome_stream *gs = genome_stream_create(gtf_in_stream_class(), 0);
+  GenomeStream *gs = genome_stream_create(gtf_in_stream_class(), 0);
   Gtf_in_stream *gtf_in_stream = gtf_in_stream_cast(gs);
   GTF_parser *gtf_parser = gtf_parser_new();
   FILE *fpin;

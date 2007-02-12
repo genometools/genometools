@@ -11,21 +11,21 @@
 #include "genome_visitor.h"
 
 /* the ``genome visitor'' interface */
-struct Genome_visitor_class {
+struct GenomeVisitorClass {
   size_t size;
-  void (*free)(Genome_visitor*);
-  void (*comment)(Genome_visitor*, Comment*, Log*);
-  void (*genome_feature)(Genome_visitor*, Genome_feature*, Log*);
-  void (*sequence_region)(Genome_visitor*, SequenceRegion*, Log*);
-  void (*default_func)(Genome_visitor*, GenomeNode*, Log*);
+  void (*free)(GenomeVisitor*);
+  void (*comment)(GenomeVisitor*, Comment*, Log*);
+  void (*genome_feature)(GenomeVisitor*, Genome_feature*, Log*);
+  void (*sequence_region)(GenomeVisitor*, SequenceRegion*, Log*);
+  void (*default_func)(GenomeVisitor*, GenomeNode*, Log*);
 };
 
-struct Genome_visitor {
-  const Genome_visitor_class *c_class;
+struct GenomeVisitor {
+  const GenomeVisitorClass *c_class;
 };
 
-Genome_visitor* genome_visitor_create(const Genome_visitor_class*);
-void*           genome_visitor_cast(const Genome_visitor_class*,
-                                    Genome_visitor*);
+GenomeVisitor* genome_visitor_create(const GenomeVisitorClass*);
+void*           genome_visitor_cast(const GenomeVisitorClass*,
+                                    GenomeVisitor*);
 
 #endif

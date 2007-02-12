@@ -24,10 +24,10 @@ static int parse_options(FILE **outfp, int argc, char **argv)
 
 int gt_merge(int argc, char *argv[])
 {
-  Genome_stream *gff3_in_stream,
+  GenomeStream *gff3_in_stream,
                 *merge_stream,
                 *gff3_out_stream;
-  Array *genome_streams = array_new(sizeof(Genome_stream*));
+  Array *genome_streams = array_new(sizeof(GenomeStream*));
   GenomeNode *gn;
   unsigned long i;
   int parsed_args;
@@ -66,7 +66,7 @@ int gt_merge(int argc, char *argv[])
   genome_stream_free(gff3_out_stream);
   genome_stream_free(merge_stream);
   for (i = 0; i < array_size(genome_streams); i++)
-    genome_stream_free(*(Genome_stream**) array_get(genome_streams, i));
+    genome_stream_free(*(GenomeStream**) array_get(genome_streams, i));
   array_free(genome_streams);
   if (outfp != stdout) xfclose(outfp);
 

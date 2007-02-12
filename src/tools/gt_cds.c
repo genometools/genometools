@@ -35,7 +35,7 @@ static int parse_options(CDS_arguments *arguments, int argc,
 
 int gt_cds(int argc, char *argv[])
 {
-  Genome_stream *gff3_in_stream,
+  GenomeStream *gff3_in_stream,
                 *cds_stream,
                 *gff3_out_stream;
   GenomeNode *gn;

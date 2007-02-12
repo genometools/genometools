@@ -50,7 +50,7 @@ static int parse_options(Gff3_arguments *arguments, int argc, char **argv)
 
 int gt_gff3(int argc, char *argv[])
 {
-  Genome_stream *gff3_in_stream,
+  GenomeStream *gff3_in_stream,
                 *sort_stream = NULL,
                 *mergefeat_stream = NULL,
                 *gff3_out_stream;

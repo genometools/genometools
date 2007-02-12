@@ -40,7 +40,7 @@ static int parse_options(EvalArguments *arguments, int argc, char **argv)
 
 int gt_eval(int argc, char *argv[])
 {
-  Genome_stream *reality_stream,
+  GenomeStream *reality_stream,
                 *prediction_stream;
   Stream_evaluator *evaluator;
   EvalArguments arguments;

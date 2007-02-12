@@ -46,7 +46,7 @@ static Range comment_get_range(/*@unused@*/ GenomeNode *gn)
   return range;
 }
 
-static void comment_accept(GenomeNode *gn, Genome_visitor *gv, Log *l)
+static void comment_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l)
 {
   Comment *c = comment_cast(gn);
   genome_visitor_visit_comment(gv, c, l);

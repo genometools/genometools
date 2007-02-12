@@ -11,7 +11,7 @@
 #include "undef.h"
 
 struct Mergefeat_visitor {
-  const Genome_visitor parent_instance;
+  const GenomeVisitor parent_instance;
   GenomeNode *current_tree;
   Hashtable *ht; /* type -> previous node */
 };
@@ -19,7 +19,7 @@ struct Mergefeat_visitor {
 #define mergefeat_visitor_cast(GV)\
         genome_visitor_cast(mergefeat_visitor_class(), GV)
 
-static void mergefeat_visitor_free(Genome_visitor *gv)
+static void mergefeat_visitor_free(GenomeVisitor *gv)
 {
   Mergefeat_visitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
   assert(mergefeat_visitor);
@@ -73,7 +73,7 @@ static void mergefeat_if_necessary(GenomeNode *gn, void *data)
   genome_node_traverse_direct_children(gn, v, mergefeat_in_children);
 }
 
-static void mergefeat_visitor_genome_feature(Genome_visitor *gv,
+static void mergefeat_visitor_genome_feature(GenomeVisitor *gv,
                                              Genome_feature *gf,
                                              /*@unused@*/ Log *l)
 {
@@ -81,9 +81,9 @@ static void mergefeat_visitor_genome_feature(Genome_visitor *gv,
   genome_node_traverse_children((GenomeNode*) gf, v, mergefeat_if_necessary,0);
 }
 
-const Genome_visitor_class* mergefeat_visitor_class()
+const GenomeVisitorClass* mergefeat_visitor_class()
 {
-  static const Genome_visitor_class gvc = { sizeof(Mergefeat_visitor),
+  static const GenomeVisitorClass gvc = { sizeof(Mergefeat_visitor),
                                             mergefeat_visitor_free,
                                             NULL,
                                             mergefeat_visitor_genome_feature,
@@ -92,9 +92,9 @@ const Genome_visitor_class* mergefeat_visitor_class()
   return &gvc;
 }
 
-Genome_visitor* mergefeat_visitor_new(void)
+GenomeVisitor* mergefeat_visitor_new(void)
 {
-  Genome_visitor *gv = genome_visitor_create(mergefeat_visitor_class());
+  GenomeVisitor *gv = genome_visitor_create(mergefeat_visitor_class());
   Mergefeat_visitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
   mergefeat_visitor->ht = hashtable_new(HASH_STRING, NULL, NULL);
   return gv;

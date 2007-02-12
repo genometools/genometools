@@ -9,11 +9,11 @@
 
 #include "genome.h"
 
-typedef struct Genome_stream Genome_stream;
+typedef struct GenomeStream GenomeStream;
 
-Genome_feature* genome_stream_next_feature(Genome_stream *gs);
+Genome_feature* genome_stream_next_feature(GenomeStream *gs);
 
-genome_stream_push(Genome_stream *gs);
-void genome_stream_free(Genome_stream *gs);
+genome_stream_push(GenomeStream *gs);
+void genome_stream_free(GenomeStream *gs);
 
 #endif

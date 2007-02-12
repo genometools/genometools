@@ -77,7 +77,7 @@ static int parse_options(Extractfeat_arguments *arguments, int argc,
 
 int gt_extractfeat(int argc, char *argv[])
 {
-  Genome_stream *gff3_in_stream,
+  GenomeStream *gff3_in_stream,
                 *extractfeat_stream;
   GenomeNode *gn;
   Genome_feature_type type;

@@ -12,7 +12,7 @@ typedef struct Gff3_visitor Gff3_visitor;
 
 #include "genome_visitor.h"
 
-const Genome_visitor_class* gff3_visitor_class(void);
-Genome_visitor*             gff3_visitor_new(FILE*);
+const GenomeVisitorClass* gff3_visitor_class(void);
+GenomeVisitor*             gff3_visitor_new(FILE*);
 
 #endif

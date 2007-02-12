@@ -11,8 +11,8 @@
 
 struct Sort_stream
 {
-  const Genome_stream parent_instance;
-  Genome_stream *in_stream;
+  const GenomeStream parent_instance;
+  GenomeStream *in_stream;
   unsigned long idx;
   Array *trees;
   bool sorted;
@@ -21,7 +21,7 @@ struct Sort_stream
 #define sort_stream_cast(GS)\
         genome_stream_cast(sort_stream_class(), GS);
 
-static GenomeNode* sort_stream_next_tree(Genome_stream *gs, Log *l)
+static GenomeNode* sort_stream_next_tree(GenomeStream *gs, Log *l)
 {
   Sort_stream *sort_stream;
   GenomeNode *gn;
@@ -45,24 +45,24 @@ static GenomeNode* sort_stream_next_tree(Genome_stream *gs, Log *l)
   return NULL;
 }
 
-static void sort_stream_free(Genome_stream *gs)
+static void sort_stream_free(GenomeStream *gs)
 {
   Sort_stream *sort_stream = sort_stream_cast(gs);
   assert(!array_size(sort_stream->trees));
   array_free(sort_stream->trees);
 }
 
-const Genome_stream_class* sort_stream_class(void)
+const GenomeStreamClass* sort_stream_class(void)
 {
-  static const Genome_stream_class gsc = { sizeof (Sort_stream),
+  static const GenomeStreamClass gsc = { sizeof (Sort_stream),
                                            sort_stream_next_tree,
                                            sort_stream_free };
   return &gsc;
 }
 
-Genome_stream* sort_stream_new(Genome_stream *in_stream)
+GenomeStream* sort_stream_new(GenomeStream *in_stream)
 {
-  Genome_stream *gs = genome_stream_create(sort_stream_class(), 1);
+  GenomeStream *gs = genome_stream_create(sort_stream_class(), 1);
   Sort_stream *sort_stream = sort_stream_cast(gs);
   assert(in_stream);
   sort_stream->in_stream = in_stream;

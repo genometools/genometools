@@ -12,8 +12,8 @@
 /* implements the ``genome stream'' interface */
 typedef struct Filter_stream Filter_stream;
 
-const Genome_stream_class* filter_stream_class(void);
-Genome_stream*             filter_stream_new(Genome_stream*,
+const GenomeStreamClass* filter_stream_class(void);
+GenomeStream*             filter_stream_new(GenomeStream*,
                                              unsigned long max_gene_length,
                                              double min_gene_score);
 

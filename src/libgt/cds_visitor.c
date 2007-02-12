@@ -16,7 +16,7 @@
 #include "undef.h"
 
 struct CDS_visitor {
-  const Genome_visitor parent_instance;
+  const GenomeVisitor parent_instance;
   Str *sequence_file,
       *source;
   Splicedseq *splicedseq; /* the (spliced) sequence of the currently considered
@@ -27,7 +27,7 @@ struct CDS_visitor {
 #define cds_visitor_cast(GV)\
         genome_visitor_cast(cds_visitor_class(), GV)
 
-static void cds_visitor_free(Genome_visitor *gv)
+static void cds_visitor_free(GenomeVisitor *gv)
 {
   CDS_visitor *cds_visitor = cds_visitor_cast(gv);
   assert(cds_visitor);
@@ -174,7 +174,7 @@ static void add_cds_if_necessary(GenomeNode *gn, void *data)
   }
 }
 
-static void cds_visitor_genome_feature(Genome_visitor *gv,
+static void cds_visitor_genome_feature(GenomeVisitor *gv,
                                                Genome_feature *gf,
                                                /*@unused@*/ Log *l)
 {
@@ -182,7 +182,7 @@ static void cds_visitor_genome_feature(Genome_visitor *gv,
   genome_node_traverse_children((GenomeNode*) gf, v, add_cds_if_necessary, 0);
 }
 
-static void cds_visitor_sequence_region(Genome_visitor *gv,
+static void cds_visitor_sequence_region(GenomeVisitor *gv,
                                         SequenceRegion *sr,
                                         /*@unused@*/ Log *l)
 {
@@ -197,9 +197,9 @@ static void cds_visitor_sequence_region(Genome_visitor *gv,
   }
 }
 
-const Genome_visitor_class* cds_visitor_class()
+const GenomeVisitorClass* cds_visitor_class()
 {
-  static const Genome_visitor_class gvc = { sizeof(CDS_visitor),
+  static const GenomeVisitorClass gvc = { sizeof(CDS_visitor),
                                             cds_visitor_free,
                                             NULL,
                                             cds_visitor_genome_feature,
@@ -208,9 +208,9 @@ const Genome_visitor_class* cds_visitor_class()
   return &gvc;
 }
 
-Genome_visitor* cds_visitor_new(Str *sequence_file, Str *source)
+GenomeVisitor* cds_visitor_new(Str *sequence_file, Str *source)
 {
-  Genome_visitor *gv = genome_visitor_create(cds_visitor_class());
+  GenomeVisitor *gv = genome_visitor_create(cds_visitor_class());
   CDS_visitor *cds_visitor = cds_visitor_cast(gv);
   cds_visitor->sequence_file = str_ref(sequence_file);
   cds_visitor->source = str_ref(source);

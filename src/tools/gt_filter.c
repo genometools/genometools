@@ -50,7 +50,7 @@ static int parse_options(Filter_arguments *arguments, int argc, char **argv)
 
 int gt_filter(int argc, char *argv[])
 {
-  Genome_stream *gff3_in_stream,
+  GenomeStream *gff3_in_stream,
                 *filter_stream,
                 *gff3_out_stream;
   GenomeNode *gn;

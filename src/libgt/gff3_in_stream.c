@@ -17,7 +17,7 @@
 
 struct Gff3_in_stream
 {
-  const Genome_stream parent_instance;
+  const GenomeStream parent_instance;
   int next_file;
   Array *files; /* contains char* to filenames */
   bool ensure_sorting,
@@ -34,7 +34,7 @@ struct Gff3_in_stream
 #define gff3_in_stream_cast(GS)\
         genome_stream_cast(gff3_in_stream_class(), GS)
 
-static GenomeNode* gff3_in_stream_next_tree(Genome_stream *gs,
+static GenomeNode* gff3_in_stream_next_tree(GenomeStream *gs,
                                              /*@unused@*/ Log *l)
 {
   Gff3_in_stream *is = gff3_in_stream_cast(gs);
@@ -124,7 +124,7 @@ static GenomeNode* gff3_in_stream_next_tree(Genome_stream *gs,
   return NULL;
 }
 
-static void gff3_in_stream_free(Genome_stream *gs)
+static void gff3_in_stream_free(GenomeStream *gs)
 {
   Gff3_in_stream *gff3_in_stream = gff3_in_stream_cast(gs);
   /* the file has been read completely and is therefore already closed */
@@ -135,18 +135,18 @@ static void gff3_in_stream_free(Genome_stream *gs)
   genome_node_free(gff3_in_stream->last_node);
 }
 
-const Genome_stream_class* gff3_in_stream_class(void)
+const GenomeStreamClass* gff3_in_stream_class(void)
 {
-  static const Genome_stream_class gsc = { sizeof(Gff3_in_stream),
+  static const GenomeStreamClass gsc = { sizeof(Gff3_in_stream),
                                            gff3_in_stream_next_tree,
                                            gff3_in_stream_free };
   return &gsc;
 }
 
-static Genome_stream* gff3_in_stream_new(Array *files, /* takes ownership */
+static GenomeStream* gff3_in_stream_new(Array *files, /* takes ownership */
                                          bool ensure_sorting, bool be_verbose)
 {
-  Genome_stream *gs = genome_stream_create(gff3_in_stream_class(),
+  GenomeStream *gs = genome_stream_create(gff3_in_stream_class(),
                                            ensure_sorting);
   Gff3_in_stream *gff3_in_stream         = gff3_in_stream_cast(gs);
   gff3_in_stream->next_file              = 0;
@@ -163,13 +163,13 @@ static Genome_stream* gff3_in_stream_new(Array *files, /* takes ownership */
   return gs;
 }
 
-void gff3_in_stream_set_offset(Genome_stream *gs, long offset)
+void gff3_in_stream_set_offset(GenomeStream *gs, long offset)
 {
   Gff3_in_stream *is = gff3_in_stream_cast(gs);
   gff3_set_offset(is->gff3_parser, offset);
 }
 
-Genome_stream* gff3_in_stream_new_unsorted(int num_of_files,
+GenomeStream* gff3_in_stream_new_unsorted(int num_of_files,
                                            char **filenames,
                                            bool be_verbose)
 {
@@ -180,7 +180,7 @@ Genome_stream* gff3_in_stream_new_unsorted(int num_of_files,
   return gff3_in_stream_new(files, false, be_verbose);
 }
 
-Genome_stream* gff3_in_stream_new_sorted(char *filename,
+GenomeStream* gff3_in_stream_new_sorted(char *filename,
                                          bool be_verbose)
 {
   Array *files = array_new(sizeof(char*));

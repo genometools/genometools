@@ -13,9 +13,9 @@
 /* implements the ``genome_stream'' interface */
 typedef struct CDS_stream CDS_stream;
 
-const Genome_stream_class* cds_stream_class(void);
+const GenomeStreamClass* cds_stream_class(void);
 
-Genome_stream*             cds_stream_new(Genome_stream*,
+GenomeStream*             cds_stream_new(GenomeStream*,
                                           const char *sequence_file,
 					  const char *source);
 

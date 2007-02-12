@@ -16,7 +16,7 @@
 #define GTH_CSA_SOURCE_TAG      "gth_csa"
 
 struct Csa_visitor {
-  const Genome_visitor parent_instance;
+  const GenomeVisitor parent_instance;
   Queue *genome_node_buffer;
   unsigned long join_length;
   Array *cluster;
@@ -39,7 +39,7 @@ typedef struct {
 #define csa_visitor_cast(GV)\
         genome_visitor_cast(csa_visitor_class(), GV)
 
-static void csa_visitor_free(Genome_visitor *gv)
+static void csa_visitor_free(GenomeVisitor *gv)
 {
   Csa_visitor *csa_visitor = csa_visitor_cast(gv);
   queue_free(csa_visitor->genome_node_buffer);
@@ -48,7 +48,7 @@ static void csa_visitor_free(Genome_visitor *gv)
   str_free(csa_visitor->gth_csa_source_str);
 }
 
-static void csa_visitor_genome_feature(Genome_visitor *gv, Genome_feature *gf,
+static void csa_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
                                        Log *l)
 {
   Csa_visitor *csa_visitor = csa_visitor_cast(gv);
@@ -105,16 +105,16 @@ static void csa_visitor_genome_feature(Genome_visitor *gv, Genome_feature *gf,
   }
 }
 
-static void csa_visitor_default_func(Genome_visitor *gv, GenomeNode *gn,
+static void csa_visitor_default_func(GenomeVisitor *gv, GenomeNode *gn,
                                      /*@unused@*/ Log *l)
 {
   Csa_visitor *csa_visitor = csa_visitor_cast(gv);
   queue_add(csa_visitor->genome_node_buffer, gn);
 }
 
-const Genome_visitor_class* csa_visitor_class()
+const GenomeVisitorClass* csa_visitor_class()
 {
-  static const Genome_visitor_class gvc = { sizeof(Csa_visitor),
+  static const GenomeVisitorClass gvc = { sizeof(Csa_visitor),
                                             csa_visitor_free,
                                             NULL,
                                             csa_visitor_genome_feature,
@@ -123,9 +123,9 @@ const Genome_visitor_class* csa_visitor_class()
   return &gvc;
 }
 
-Genome_visitor* csa_visitor_new(unsigned long join_length)
+GenomeVisitor* csa_visitor_new(unsigned long join_length)
 {
-  Genome_visitor *gv = genome_visitor_create(csa_visitor_class());
+  GenomeVisitor *gv = genome_visitor_create(csa_visitor_class());
   Csa_visitor *csa_visitor = csa_visitor_cast(gv);
   csa_visitor->genome_node_buffer = queue_new(sizeof(GenomeNode*));
   csa_visitor->join_length = join_length;
@@ -135,13 +135,13 @@ Genome_visitor* csa_visitor_new(unsigned long join_length)
   return gv;
 }
 
-unsigned long csa_visitor_node_buffer_size(Genome_visitor *gv)
+unsigned long csa_visitor_node_buffer_size(GenomeVisitor *gv)
 {
   Csa_visitor *csa_visitor = csa_visitor_cast(gv);
   return queue_size(csa_visitor->genome_node_buffer);
 }
 
-GenomeNode* csa_visitor_get_node(Genome_visitor *gv)
+GenomeNode* csa_visitor_get_node(GenomeVisitor *gv)
 {
   Csa_visitor *csa_visitor = csa_visitor_cast(gv);
   return *(GenomeNode**) queue_get(csa_visitor->genome_node_buffer);
@@ -403,7 +403,7 @@ static void process_splice_form(Array *spliced_alignments_in_form,
   array_free(exon_nodes);
 }
 
-void csa_visitor_process_cluster(Genome_visitor *gv,
+void csa_visitor_process_cluster(GenomeVisitor *gv,
                                  unsigned int final_cluster, Log *l)
 {
   Csa_visitor *csa_visitor = csa_visitor_cast(gv);

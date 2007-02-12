@@ -11,7 +11,7 @@
 #include "xansi.h"
 
 struct Merge_stream {
-  const Genome_stream parent_instance;
+  const GenomeStream parent_instance;
   Array *genome_streams;
   GenomeNode **buffer;
 };
@@ -51,7 +51,7 @@ static void consolidate_sequence_regions(GenomeNode *gn_a, GenomeNode *gn_b)
   genome_node_set_range(gn_a, range_a);
 }
 
-GenomeNode* merge_stream_next_tree(Genome_stream *gs, Log *l)
+GenomeNode* merge_stream_next_tree(GenomeStream *gs, Log *l)
 {
   Merge_stream *ms = merge_stream_cast(gs);
   GenomeNode *min_node = NULL;
@@ -61,7 +61,7 @@ GenomeNode* merge_stream_next_tree(Genome_stream *gs, Log *l)
   /* fill buffers */
   for (i = 0; i < array_size(ms->genome_streams); i++) {
     if (!ms->buffer[i])
-      ms->buffer[i] = genome_stream_next_tree(*(Genome_stream**)
+      ms->buffer[i] = genome_stream_next_tree(*(GenomeStream**)
                                               array_get(ms->genome_streams, i),
                                               l);
   }
@@ -102,31 +102,31 @@ GenomeNode* merge_stream_next_tree(Genome_stream *gs, Log *l)
   return min_node;
 }
 
-static void merge_stream_free(Genome_stream *gs)
+static void merge_stream_free(GenomeStream *gs)
 {
   Merge_stream *ms = merge_stream_cast(gs);
   array_free(ms->genome_streams);
   free(ms->buffer);
 }
 
-const Genome_stream_class* merge_stream_class(void)
+const GenomeStreamClass* merge_stream_class(void)
 {
-  static const Genome_stream_class gsc = { sizeof(Merge_stream),
+  static const GenomeStreamClass gsc = { sizeof(Merge_stream),
                                            merge_stream_next_tree,
                                            merge_stream_free };
   return &gsc;
 }
 
-Genome_stream* merge_stream_new(const Array *genome_streams)
+GenomeStream* merge_stream_new(const Array *genome_streams)
 {
-  Genome_stream *gs = genome_stream_create(merge_stream_class(), 1);
+  GenomeStream *gs = genome_stream_create(merge_stream_class(), 1);
   Merge_stream *ms = merge_stream_cast(gs);
 #ifndef NDEBUG
   unsigned long i;
   assert(array_size(genome_streams)); /* at least on input stream given */
   /* each input stream is sorted */
   for (i = 0; i < array_size(genome_streams); i++) {
-    assert(genome_stream_is_sorted(*(Genome_stream**)
+    assert(genome_stream_is_sorted(*(GenomeStream**)
                                    array_get(genome_streams, i)));
   }
 #endif

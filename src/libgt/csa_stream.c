@@ -12,15 +12,15 @@
 #include "queue.h"
 
 struct Csa_stream {
-  const Genome_stream parent_instance;
-  Genome_stream *in_stream;
-  Genome_visitor *csa_visitor; /* the actual work is done in the visitor */
+  const GenomeStream parent_instance;
+  GenomeStream *in_stream;
+  GenomeVisitor *csa_visitor; /* the actual work is done in the visitor */
 };
 
 #define csa_stream_cast(GS)\
         genome_stream_cast(csa_stream_class(), GS)
 
-GenomeNode* csa_stream_next_tree(Genome_stream *gs, Log *l)
+GenomeNode* csa_stream_next_tree(GenomeStream *gs, Log *l)
 {
   Csa_stream *cs = csa_stream_cast(gs);
   GenomeNode *gn;
@@ -41,24 +41,24 @@ GenomeNode* csa_stream_next_tree(Genome_stream *gs, Log *l)
   return NULL;
 }
 
-static void csa_stream_free(Genome_stream *gs)
+static void csa_stream_free(GenomeStream *gs)
 {
   Csa_stream *cs = csa_stream_cast(gs);
   genome_visitor_free(cs->csa_visitor);
 }
 
-const Genome_stream_class* csa_stream_class(void)
+const GenomeStreamClass* csa_stream_class(void)
 {
-  static const Genome_stream_class gsc = { sizeof(Csa_stream),
+  static const GenomeStreamClass gsc = { sizeof(Csa_stream),
                                            csa_stream_next_tree,
                                            csa_stream_free };
   return &gsc;
 }
 
-Genome_stream* csa_stream_new(Genome_stream *in_stream,
+GenomeStream* csa_stream_new(GenomeStream *in_stream,
                               unsigned long join_length)
 {
-  Genome_stream *gs = genome_stream_create(csa_stream_class(),
+  GenomeStream *gs = genome_stream_create(csa_stream_class(),
                                            genome_stream_is_sorted(in_stream));
   Csa_stream *cs = csa_stream_cast(gs);
   cs->in_stream = in_stream;

@@ -76,7 +76,7 @@ static void genome_feature_set_phase(GenomeNode *gn, Phase phase)
   gf->phase = phase;
 }
 
-static void genome_feature_accept(GenomeNode *gn, Genome_visitor *gv, Log *l)
+static void genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l)
 {
   Genome_feature *gf = genome_feature_cast(gn);
   genome_visitor_visit_genome_feature(gv, gf, l);

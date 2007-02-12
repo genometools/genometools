@@ -38,7 +38,7 @@ void          genome_node_set_range(GenomeNode*, Range);
 void          genome_node_set_seqid(GenomeNode*, Str*);
 void          genome_node_set_source(GenomeNode*, Str*);
 void          genome_node_set_phase(GenomeNode*, Phase);
-void          genome_node_accept(GenomeNode*, Genome_visitor*, Log *l);
+void          genome_node_accept(GenomeNode*, GenomeVisitor*, Log *l);
 void          genome_node_is_part_of_genome_node(GenomeNode *parent,
                                                  GenomeNode *child);
 /* does not free the leaf */

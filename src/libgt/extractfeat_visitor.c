@@ -14,7 +14,7 @@
 #include "translate.h"
 
 struct Extractfeat_visitor {
-  const Genome_visitor parent_instance;
+  const GenomeVisitor parent_instance;
   Str *sequence_file,
       *description, /* the description of the currently extracted feature */
       *sequence,    /* the sequence of the currently extracted feature */
@@ -31,7 +31,7 @@ struct Extractfeat_visitor {
 #define extractfeat_visitor_cast(GV)\
         genome_visitor_cast(extractfeat_visitor_class(), GV)
 
-static void extractfeat_visitor_free(Genome_visitor *gv)
+static void extractfeat_visitor_free(GenomeVisitor *gv)
 {
   Extractfeat_visitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
   assert(extractfeat_visitor);
@@ -137,7 +137,7 @@ static void extract_feature(GenomeNode *gn, void *data)
   }
 }
 
-static void extractfeat_visitor_genome_feature(Genome_visitor *gv,
+static void extractfeat_visitor_genome_feature(GenomeVisitor *gv,
                                                Genome_feature *gf,
                                                /*@unused@*/ Log *l)
 {
@@ -145,7 +145,7 @@ static void extractfeat_visitor_genome_feature(Genome_visitor *gv,
   genome_node_traverse_children((GenomeNode*) gf, v, extract_feature, false);
 }
 
-static void extractfeat_visitor_sequence_region(Genome_visitor *gv,
+static void extractfeat_visitor_sequence_region(GenomeVisitor *gv,
                                                 SequenceRegion *sr,
                                                 /*@unused@*/ Log *l)
 {
@@ -160,9 +160,9 @@ static void extractfeat_visitor_sequence_region(Genome_visitor *gv,
   }
 }
 
-const Genome_visitor_class* extractfeat_visitor_class()
+const GenomeVisitorClass* extractfeat_visitor_class()
 {
-  static const Genome_visitor_class gvc = { sizeof(Extractfeat_visitor),
+  static const GenomeVisitorClass gvc = { sizeof(Extractfeat_visitor),
                                             extractfeat_visitor_free,
                                             NULL,
                                             extractfeat_visitor_genome_feature,
@@ -171,10 +171,10 @@ const Genome_visitor_class* extractfeat_visitor_class()
   return &gvc;
 }
 
-static Genome_visitor* extractfeat_visitor_new(Genome_feature_type type,
+static GenomeVisitor* extractfeat_visitor_new(Genome_feature_type type,
                                                bool join, bool translate)
 {
-  Genome_visitor *gv = genome_visitor_create(extractfeat_visitor_class());
+  GenomeVisitor *gv = genome_visitor_create(extractfeat_visitor_class());
   Extractfeat_visitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
   extractfeat_visitor->description = str_new();
   extractfeat_visitor->sequence = str_new();
@@ -186,11 +186,11 @@ static Genome_visitor* extractfeat_visitor_new(Genome_feature_type type,
   return gv;
 }
 
-Genome_visitor* extractfeat_visitor_new_seqfile(Str *sequence_file,
+GenomeVisitor* extractfeat_visitor_new_seqfile(Str *sequence_file,
                                                 Genome_feature_type type,
                                                 bool join, bool translate)
 {
-  Genome_visitor *gv;
+  GenomeVisitor *gv;
   Extractfeat_visitor *extractfeat_visitor;
   assert(sequence_file);
   gv = extractfeat_visitor_new(type, join, translate);
@@ -200,11 +200,11 @@ Genome_visitor* extractfeat_visitor_new_seqfile(Str *sequence_file,
   return gv;
 }
 
-Genome_visitor* extractfeat_visitor_new_regionmapping(RegionMapping *rm,
+GenomeVisitor* extractfeat_visitor_new_regionmapping(RegionMapping *rm,
                                                       Genome_feature_type type,
                                                       bool join, bool translate)
 {
-  Genome_visitor *gv;
+  GenomeVisitor *gv;
   Extractfeat_visitor *extractfeat_visitor;
   gv = extractfeat_visitor_new(type, join, translate);
   extractfeat_visitor = extractfeat_visitor_cast(gv);

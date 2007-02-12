@@ -13,9 +13,9 @@
 /* implements the ``genome_stream'' interface */
 typedef struct Gtf_in_stream Gtf_in_stream;
 
-const Genome_stream_class* gtf_in_stream_class(void);
+const GenomeStreamClass* gtf_in_stream_class(void);
 /* filename == NULL -> use stdin */
-Genome_stream*             gtf_in_stream_new(const char *filename,
+GenomeStream*             gtf_in_stream_new(const char *filename,
                                              unsigned int be_tolerant);
 
 #endif

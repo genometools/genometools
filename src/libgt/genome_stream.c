@@ -10,7 +10,7 @@
 #include "genome_stream_rep.h"
 #include "xansi.h"
 
-void genome_stream_class_init(Genome_stream_class *gsc, size_t size, ...)
+void genome_stream_class_init(GenomeStreamClass *gsc, size_t size, ...)
 {
   va_list ap;
   Fptr func, meth, *mm;
@@ -33,10 +33,10 @@ void genome_stream_class_init(Genome_stream_class *gsc, size_t size, ...)
   va_end(ap);
 }
 
-Genome_stream* genome_stream_create(const Genome_stream_class *gsc,
+GenomeStream* genome_stream_create(const GenomeStreamClass *gsc,
                                     bool ensure_sorting)
 {
-  Genome_stream *gs;
+  GenomeStream *gs;
   assert(gsc && gsc->size);
   gs = xcalloc(1, gsc->size);
   gs->c_class = gsc;
@@ -44,7 +44,7 @@ Genome_stream* genome_stream_create(const Genome_stream_class *gsc,
   return gs;
 }
 
-void genome_stream_free(Genome_stream *gs)
+void genome_stream_free(GenomeStream *gs)
 {
   if (!gs) return;
   assert(gs->c_class);
@@ -53,7 +53,7 @@ void genome_stream_free(Genome_stream *gs)
   free(gs);
 }
 
-GenomeNode* genome_stream_next_tree(Genome_stream *gs, Log *l)
+GenomeNode* genome_stream_next_tree(GenomeStream *gs, Log *l)
 {
   GenomeNode *gn;
   assert(gs && gs->c_class && gs->c_class->next_tree);
@@ -63,13 +63,13 @@ GenomeNode* genome_stream_next_tree(Genome_stream *gs, Log *l)
   return gn;
 }
 
-bool genome_stream_is_sorted(Genome_stream *gs)
+bool genome_stream_is_sorted(GenomeStream *gs)
 {
   assert(gs);
   return gs->ensure_sorting;
 }
 
-void* genome_stream_cast(const Genome_stream_class *gsc, Genome_stream *gs)
+void* genome_stream_cast(const GenomeStreamClass *gsc, GenomeStream *gs)
 {
   assert(gsc && gs && gs->c_class == gsc);
   return gs;

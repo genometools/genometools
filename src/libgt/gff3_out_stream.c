@@ -9,16 +9,16 @@
 #include "gff3_visitor.h"
 
 struct Gff3_out_stream {
-  const Genome_stream parent_instance;
-  Genome_stream *in_stream;
+  const GenomeStream parent_instance;
+  GenomeStream *in_stream;
   bool first_genome_feature;
-  Genome_visitor *gff3_visitor;
+  GenomeVisitor *gff3_visitor;
 };
 
 #define gff3_out_stream_cast(GS)\
         genome_stream_cast(gff3_out_stream_class(), GS);
 
-static GenomeNode* gff3_out_stream_next_tree(Genome_stream *gs, Log *l)
+static GenomeNode* gff3_out_stream_next_tree(GenomeStream *gs, Log *l)
 {
   Gff3_out_stream *gff3_out_stream;
   GenomeNode *gn;
@@ -29,23 +29,23 @@ static GenomeNode* gff3_out_stream_next_tree(Genome_stream *gs, Log *l)
   return gn;
 }
 
-static void gff3_out_stream_free(Genome_stream *gs)
+static void gff3_out_stream_free(GenomeStream *gs)
 {
   Gff3_out_stream *gff3_out_stream = gff3_out_stream_cast(gs);
   genome_visitor_free(gff3_out_stream->gff3_visitor);
 }
 
-const Genome_stream_class* gff3_out_stream_class(void)
+const GenomeStreamClass* gff3_out_stream_class(void)
 {
-  static const Genome_stream_class gsc = { sizeof (Gff3_out_stream),
+  static const GenomeStreamClass gsc = { sizeof (Gff3_out_stream),
                                            gff3_out_stream_next_tree,
                                            gff3_out_stream_free };
   return &gsc;
 }
 
-Genome_stream* gff3_out_stream_new(Genome_stream *in_stream, FILE *outfp)
+GenomeStream* gff3_out_stream_new(GenomeStream *in_stream, FILE *outfp)
 {
-  Genome_stream *gs = genome_stream_create(gff3_out_stream_class(),
+  GenomeStream *gs = genome_stream_create(gff3_out_stream_class(),
                                            genome_stream_is_sorted(in_stream));
   Gff3_out_stream *gff3_out_stream = gff3_out_stream_cast(gs);
   gff3_out_stream->in_stream = in_stream;

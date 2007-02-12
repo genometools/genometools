@@ -16,7 +16,7 @@
 #include "xansi.h"
 
 struct Stream_evaluator {
-  Genome_stream *reality,
+  GenomeStream *reality,
                 *prediction;
   Hashtable *real_features; /* sequence name -> feature type hash */
   Evaluator *gene_evaluator,
@@ -119,8 +119,8 @@ static void slot_free(Slot *s)
   free(s);
 }
 
-Stream_evaluator* stream_evaluator_new(Genome_stream *reality,
-                                       Genome_stream *prediction)
+Stream_evaluator* stream_evaluator_new(GenomeStream *reality,
+                                       GenomeStream *prediction)
 {
   Stream_evaluator *evaluator = xmalloc(sizeof(Stream_evaluator));
   evaluator->reality = reality;

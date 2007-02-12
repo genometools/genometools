@@ -15,10 +15,10 @@
 /* implements the ``genome_stream'' interface */
 typedef struct Extractfeat_stream Extractfeat_stream;
 
-const Genome_stream_class* extractfeat_stream_class(void);
+const GenomeStreamClass* extractfeat_stream_class(void);
 
 /* create a plain Extractfeat_stream */
-Genome_stream*             extractfeat_stream_new(Genome_stream*,
+GenomeStream*             extractfeat_stream_new(GenomeStream*,
                                                   Genome_feature_type type,
                                                   bool join,
                                                   bool translate);
@@ -27,11 +27,11 @@ Genome_stream*             extractfeat_stream_new(Genome_stream*,
    Extractfeat_stream usable */
 
 /* use the file named ``seqfile'' as sequence source */
-void                       extractfeat_stream_use_sequence_file(Genome_stream*,
+void                       extractfeat_stream_use_sequence_file(GenomeStream*,
                                                                 Str *seqfile);
 
 /* use the given RegionMapping (takes ownership) as sequence file source */
-void                       extractfeat_stream_use_region_mapping(Genome_stream*,
+void                       extractfeat_stream_use_region_mapping(GenomeStream*,
                                                                 RegionMapping*);
 
 #endif

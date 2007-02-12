@@ -12,9 +12,9 @@ typedef struct Stat_visitor Stat_visitor;
 
 #include "genome_visitor.h"
 
-const Genome_visitor_class* stat_visitor_class(void);
-Genome_visitor*             stat_visitor_new(unsigned int gene_length_distri,
+const GenomeVisitorClass* stat_visitor_class(void);
+GenomeVisitor*             stat_visitor_new(unsigned int gene_length_distri,
                                              unsigned int gene_score_distri);
-void                        stat_visitor_show_stats(Genome_visitor*);
+void                        stat_visitor_show_stats(GenomeVisitor*);
 
 #endif

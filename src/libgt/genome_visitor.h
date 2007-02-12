@@ -10,18 +10,18 @@
 #include "log.h"
 
 /* the ``genome visitor'' interface, a visitor for genome nodes */
-typedef struct Genome_visitor_class Genome_visitor_class;
-typedef struct Genome_visitor Genome_visitor;
+typedef struct GenomeVisitorClass GenomeVisitorClass;
+typedef struct GenomeVisitor GenomeVisitor;
 
 #include "comment.h"
 #include "genome_feature.h"
 #include "sequence_region.h"
 
-void genome_visitor_visit_comment(Genome_visitor*, Comment*, Log*);
-void genome_visitor_visit_genome_feature(Genome_visitor*, Genome_feature*,
+void genome_visitor_visit_comment(GenomeVisitor*, Comment*, Log*);
+void genome_visitor_visit_genome_feature(GenomeVisitor*, Genome_feature*,
                                          Log*);
-void genome_visitor_visit_sequence_region(Genome_visitor*, SequenceRegion*,
+void genome_visitor_visit_sequence_region(GenomeVisitor*, SequenceRegion*,
                                           Log*);
-void genome_visitor_free(Genome_visitor *gv);
+void genome_visitor_free(GenomeVisitor *gv);
 
 #endif

@@ -13,7 +13,7 @@
 /* implements the ``genome_stream'' interface */
 typedef struct Mergefeat_stream_sorted Mergefeat_stream_sorted;
 
-const Genome_stream_class* mergefeat_stream_sorted_class(void);
-Genome_stream*             mergefeat_stream_sorted_new(Genome_stream*);
+const GenomeStreamClass* mergefeat_stream_sorted_class(void);
+GenomeStream*             mergefeat_stream_sorted_new(GenomeStream*);
 
 #endif

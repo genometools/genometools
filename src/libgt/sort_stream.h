@@ -12,7 +12,7 @@
 /* implements the ``genome stream'' interface */
 typedef struct Sort_stream Sort_stream;
 
-const Genome_stream_class* sort_stream_class(void);
-Genome_stream*             sort_stream_new(Genome_stream*);
+const GenomeStreamClass* sort_stream_class(void);
+GenomeStream*             sort_stream_new(GenomeStream*);
 
 #endif
