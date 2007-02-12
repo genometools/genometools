@@ -174,12 +174,12 @@ static void add_cds_if_necessary(GenomeNode *gn, void *data)
   }
 }
 
-static void cds_visitor_genome_feature(GenomeVisitor *gv,
-                                               Genome_feature *gf,
-                                               /*@unused@*/ Log *l)
+static void cds_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
+                                       /*@unused@*/ Log *l)
 {
   CDS_visitor *v = cds_visitor_cast(gv);
-  genome_node_traverse_children((GenomeNode*) gf, v, add_cds_if_necessary, 0);
+  genome_node_traverse_children((GenomeNode*) gf, v, add_cds_if_necessary,
+                                false);
 }
 
 static void cds_visitor_sequence_region(GenomeVisitor *gv,

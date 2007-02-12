@@ -155,9 +155,9 @@ static void gff3_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
   gff3_version_string(gv);
 
   genome_node_traverse_children((GenomeNode*) gf, gff3_visitor, store_ids,
-                                1);
+                                true);
   genome_node_traverse_children((GenomeNode*) gf, gff3_visitor,
-                                gff3_show_genome_feature, 1);
+                                gff3_show_genome_feature, true);
 
   /* clear hashtable */
   /* XXX */

@@ -179,10 +179,8 @@ static void get_exons(Array *exon_ranges, const void *sa)
 {
   Genome_feature *gf = *(Genome_feature**) sa;
   assert(exon_ranges && gf && genome_feature_get_type(gf) == gft_gene);
-
   genome_node_traverse_children((GenomeNode*) gf, exon_ranges, save_exon,
-                                0);
-
+                                false);
   /* we got at least one exon */
   assert(array_size(exon_ranges));
   assert(ranges_are_sorted_and_do_not_overlap(exon_ranges));

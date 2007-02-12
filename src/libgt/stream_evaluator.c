@@ -328,8 +328,8 @@ static unsigned int mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   exons_2 = array_new(sizeof(Range));
 
   /* get exon ranges */
-  genome_node_traverse_children(gn_1, exons_1, store_exon, 0);
-  genome_node_traverse_children(gn_2, exons_2, store_exon, 0);
+  genome_node_traverse_children(gn_1, exons_1, store_exon, false);
+  genome_node_traverse_children(gn_2, exons_2, store_exon, false);
 
   /* sort exon ranges */
   ranges_sort(exons_1);
@@ -739,7 +739,7 @@ void stream_evaluator_evaluate(Stream_evaluator *se, bool verbose,
       /* store the exons */
       process_real_feature_data.slot = slot;
       genome_node_traverse_children(gn, &process_real_feature_data,
-                                    process_real_feature, 0);
+                                    process_real_feature, false);
     }
     genome_node_rec_free(gn);
   }
@@ -758,7 +758,7 @@ void stream_evaluator_evaluate(Stream_evaluator *se, bool verbose,
       if (slot) {
         info.slot = slot;
         genome_node_traverse_children(gn, &info, process_predicted_feature,
-                                      0);
+                                      false);
       }
       else {
         /* we got no (real) slot */

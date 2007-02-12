@@ -107,7 +107,7 @@ static GenomeNode* genome_node_ref(GenomeNode *gn)
 GenomeNode* genome_node_rec_ref(GenomeNode *gn)
 {
   assert(gn);
-  genome_node_traverse_children(gn, NULL, increase_reference_count, 1);
+  genome_node_traverse_children(gn, NULL, increase_reference_count, true);
   return gn;
 }
 
@@ -287,7 +287,7 @@ void genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn)
 {
   assert(tree && leafn);
   assert(!genome_node_number_of_children(leafn));
-  genome_node_traverse_children(tree, leafn, remove_leaf, 1);
+  genome_node_traverse_children(tree, leafn, remove_leaf, true);
 }
 
 bool genome_node_has_children(GenomeNode *gn)
@@ -401,7 +401,7 @@ static void free_genome_node(GenomeNode *gn, /*@unused@*/ void *data)
 void genome_node_rec_free(GenomeNode *gn)
 {
   if (!gn) return;
-  genome_node_traverse_children(gn, NULL, free_genome_node, 1);
+  genome_node_traverse_children(gn, NULL, free_genome_node, true);
 }
 
 void genome_nodes_sort(Array *nodes)
