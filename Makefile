@@ -21,6 +21,14 @@ LIBGT_OBJ:=$(LIBGT_SRC:%.c=obj/%.o)
 TOOLS_SRC:=$(notdir $(wildcard src/tools/*.c))
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
 
+LIBLUA_OBJ=obj/lapi.o obj/lcode.o obj/ldebug.o obj/ldo.o obj/ldump.o \
+           obj/lfunc.o obj/lgc.o obj/llex.o obj/lmem.o obj/lobject.o \
+           obj/lopcodes.o obj/lparser.o obj/lstate.o obj/lstring.o   \
+           obj/ltable.o obj/ltm.o obj/lundump.o obj/lvm.o obj/lzio.o \
+           obj/lauxlib.o obj/lbaselib.o obj/ldblib.o obj/liolib.o    \
+           obj/lmathlib.o obj/loslib.o obj/ltablib.o obj/lstrlib.o   \
+           obj/loadlib.o obj/linit.o
+
 # process arguments
 ifeq ($(opt),no)
   GT_CFLAGS += -g
@@ -49,6 +57,12 @@ ifdef RANLIB
 	$(RANLIB) $@
 endif
 
+lib/liblua.a: $(LIBLUA_OBJ)
+	ar ruv $@ $(LIBLUA_OBJ)
+ifdef RANLIB
+	$(RANLIB) $@
+endif
+
 bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgt.a
 	$(LD) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
@@ -73,6 +87,9 @@ obj/%.o: src/libgt/%.c
 
 obj/%.o: src/tools/%.c
 	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+
+obj/%.o: src/lua-5.1.1/src/%.c
+	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DLUA_USE_POSIX -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 # read deps
 -include obj/*.d
