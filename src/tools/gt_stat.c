@@ -7,9 +7,9 @@
 #include "gt.h"
 
 typedef struct {
-  unsigned int verbose,
-               gene_length_distribution,
-               gene_score_distribution;
+  bool verbose,
+       gene_length_distribution,
+       gene_score_distribution;
 } Stat_arguments;
 
 typedef struct {
@@ -28,14 +28,14 @@ static int parse_options(Stat_arguments *arguments, int argc, char **argv)
                          "files.");
 
   /* -genelengthdistri */
-  option = option_new_boolean("genelengthdistri",
-                              "show gene length distribution",
-                              &arguments->gene_length_distribution, 0);
+  option = option_new_bool("genelengthdistri",
+                           "show gene length distribution",
+                           &arguments->gene_length_distribution, false);
   option_parser_add_option(op, option);
 
   /* -genescoresdistri */
-  option = option_new_boolean("genescoredistri", "show gene score distribution",
-                              &arguments->gene_score_distribution, 0);
+  option = option_new_bool("genescoredistri", "show gene score distribution",
+                           &arguments->gene_score_distribution, false);
   option_parser_add_option(op, option);
 
   /* -v */

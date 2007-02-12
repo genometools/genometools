@@ -7,6 +7,7 @@
 #ifndef OPTION_H
 #define OPTION_H
 
+#include <stdbool.h>
 #include "str.h"
 
 typedef struct OptionParser OptionParser;
@@ -40,12 +41,12 @@ void          option_parser_free(OptionParser*);
 
 /* the options */
 Option*        option_new_outputfile(FILE**);
-Option*        option_new_verbose(unsigned int *value);
-Option*        option_new_debug(unsigned int *value);
-Option*        option_new_boolean(const char *option_str,
-                                  const char *description,
-                                  unsigned int *value,
-                                  unsigned int default_value);
+Option*        option_new_verbose(bool *value);
+Option*        option_new_debug(bool *value);
+Option*        option_new_bool(const char *option_str,
+                               const char *description,
+                               bool *value,
+                               bool default_value);
 Option*        option_new_double(const char *option_str,
                                  const char *description,
                                  double *value, double default_value);

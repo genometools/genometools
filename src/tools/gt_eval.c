@@ -7,8 +7,8 @@
 #include "gt.h"
 
 typedef struct {
-  unsigned int verbose,
-               exondiff;
+  bool verbose,
+       exondiff;
 } EvalArguments;
 
 static int parse_options(EvalArguments *arguments, int argc, char **argv)
@@ -25,8 +25,8 @@ static int parse_options(EvalArguments *arguments, int argc, char **argv)
   option_parser_add_option(op, option);
 
   /* -exondiff */
-  option = option_new_boolean("exondiff", "show a diff for the exons",
-                              &arguments->exondiff, 0);
+  option = option_new_bool("exondiff", "show a diff for the exons",
+                           &arguments->exondiff, false);
   option_is_development_option(option);
   option_parser_add_option(op, option);
 

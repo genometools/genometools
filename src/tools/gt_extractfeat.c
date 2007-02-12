@@ -7,9 +7,9 @@
 #include "gt.h"
 
 typedef struct {
-  unsigned int join,
-               translate,
-               verbose;
+  bool join,
+       translate,
+       verbose;
   Str *type;
 } Extractfeat_arguments;
 
@@ -31,15 +31,15 @@ static int parse_options(Extractfeat_arguments *arguments, int argc,
   option_parser_add_option(op, option);
 
   /* -join */
-  option = option_new_boolean("join", "join feature sequences in the same "
-                              "subgraph into a single one", &arguments->join,
-                              0);
+  option = option_new_bool("join", "join feature sequences in the same "
+                           "subgraph into a single one", &arguments->join,
+                           false);
   option_parser_add_option(op, option);
 
   /* -translate */
-  option = option_new_boolean("translate", "translate the features (of a DNA "
-                              "sequence) into protein", &arguments->translate,
-                              0);
+  option = option_new_bool("translate", "translate the features (of a DNA "
+                           "sequence) into protein", &arguments->translate,
+                           false);
   option_parser_add_option(op, option);
 
   /* -v */

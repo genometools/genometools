@@ -7,9 +7,9 @@
 #include "gt.h"
 
 typedef struct {
-  unsigned int show,
-               consensus,
-               sumofpairs;
+  bool show,
+       consensus,
+       sumofpairs;
 } MSAparse_arguments;
 
 static int parse_options(MSAparse_arguments *arguments, int argc, char **argv)
@@ -21,16 +21,16 @@ static int parse_options(MSAparse_arguments *arguments, int argc, char **argv)
                          "Parse multiple sequence alignment (MSA) file and "
                          "optionally show score(s).");
   /* -show */
-  o = option_new_boolean("show", "show the parsed MSA on stdout",
-                         &arguments->show, 0);
+  o = option_new_bool("show", "show the parsed MSA on stdout", &arguments->show,
+                      false);
   option_parser_add_option(op, o);
   /* -consensus */
-  o = option_new_boolean("consensus", "show consensus distance",
-                         &arguments->consensus, 0);
+  o = option_new_bool("consensus", "show consensus distance",
+                      &arguments->consensus, false);
   option_parser_add_option(op, o);
   /* -sumofpairs */
-  o = option_new_boolean("sumofpairs", "show optimal sum of pairwise scores",
-                         &arguments->sumofpairs, 0);
+  o = option_new_bool("sumofpairs", "show optimal sum of pairwise scores",
+                      &arguments->sumofpairs, false);
   option_parser_add_option(op, o);
   /* parse */
   parsed_args = option_parser_parse_min_max_args(op, argc, argv, versionfunc, 1,

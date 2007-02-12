@@ -1,15 +1,15 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
 #include "gt.h"
 
 typedef struct {
-  unsigned int recreate,
-               showfasta,
-               stat;
+  bool recreate,
+       showfasta,
+       stat;
   unsigned long showseqnum,
                 width;
 } Bioseq_arguments;
@@ -25,14 +25,14 @@ static int parse_options(Bioseq_arguments *arguments, int argc, char **argv)
                          "sequence_file (if necessary).");
 
   /* -recreate */
-  option = option_new_boolean("recreate", "recreate Biosequence files, even if "
-                              "they exist already", &arguments->recreate, 0);
+  option = option_new_bool("recreate", "recreate Biosequence files, even if "
+                           "they exist already", &arguments->recreate, false);
   option_parser_add_option(op, option);
 
   /* -showfasta */
-  option_showfasta = option_new_boolean("showfasta", "show sequences on stdout "
-                                        "(in fasta format)",
-                                        &arguments->showfasta, 0);
+  option_showfasta = option_new_bool("showfasta", "show sequences on stdout "
+                                     "(in fasta format)", &arguments->showfasta,
+                                     false);
   option_parser_add_option(op, option_showfasta);
 
   /* -showseqnum */
@@ -43,8 +43,8 @@ static int parse_options(Bioseq_arguments *arguments, int argc, char **argv)
   option_parser_add_option(op, option_showseqnum);
 
   /* -stat */
-  option_stat = option_new_boolean("stat", "show sequence statistics",
-                                   &arguments->stat, 0);
+  option_stat = option_new_bool("stat", "show sequence statistics",
+                                &arguments->stat, false);
   option_parser_add_option(op, option_stat);
 
   /* -width */

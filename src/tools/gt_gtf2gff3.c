@@ -6,7 +6,7 @@
 
 #include "gt.h"
 
-static int parse_options(unsigned int *be_tolerant, int argc, char **argv)
+static int parse_options(bool *be_tolerant, int argc, char **argv)
 {
   int parsed_args;
   OptionParser *op;
@@ -16,9 +16,8 @@ static int parse_options(unsigned int *be_tolerant, int argc, char **argv)
                          "Parse GTF2.2 file and show it as GFF3.");
 
   /* -tolerant */
-  option = option_new_boolean("tolerant",
-                              "be tolerant when parsing the GTF file",
-                              be_tolerant, 0);
+  option = option_new_bool("tolerant", "be tolerant when parsing the GTF file",
+                           be_tolerant, false);
   option_parser_add_option(op, option);
 
   /* parse */
@@ -34,7 +33,7 @@ int gt_gtf2gff3(int argc, char *argv[])
                 *gff3_out_stream;
   Genome_node *gn;
   int parsed_args;
-  unsigned int be_tolerant;
+  bool be_tolerant;
 
   /* option parsing */
   parsed_args = parse_options(&be_tolerant, argc, argv);

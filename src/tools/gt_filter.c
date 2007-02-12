@@ -7,7 +7,7 @@
 #include "gt.h"
 
 typedef struct {
-  unsigned int verbose;
+  bool verbose;
   unsigned long max_gene_length;
   double min_gene_score;
   FILE *outfp;

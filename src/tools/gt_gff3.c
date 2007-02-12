@@ -7,9 +7,9 @@
 #include "gt.h"
 
 typedef struct {
-  unsigned int sort,
-               mergefeat,
-               verbose;
+  bool sort,
+       mergefeat,
+       verbose;
   long offset;
   FILE *outfp;
 } Gff3_arguments;
@@ -21,13 +21,13 @@ static int parse_options(Gff3_arguments *arguments, int argc, char **argv)
   Option *sort_option, *mergefeat_option, *option;
   op = option_parser_new("[option ...] [GFF3_file ...]",
                          "Parse, possibly transform, and output GFF3 files.");
-  sort_option = option_new_boolean("sort", "sort the GFF3 features (memory "
-                                   "consumption is O(file_size))",
-                                   &arguments->sort, 0);
+  sort_option = option_new_bool("sort", "sort the GFF3 features (memory "
+                                "consumption is O(file_size))",
+                                &arguments->sort, false);
   option_parser_add_option(op, sort_option);
-  mergefeat_option = option_new_boolean("mergefeat", "merge adjacent features "
-                                        "of the same type",
-                                        &arguments->mergefeat, 0);
+  mergefeat_option = option_new_bool("mergefeat", "merge adjacent features of "
+                                     "the same type", &arguments->mergefeat,
+                                     false);
   option_is_development_option(mergefeat_option);
   option_imply(mergefeat_option, sort_option);
   option_parser_add_option(op, mergefeat_option);

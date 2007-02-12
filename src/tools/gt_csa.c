@@ -9,8 +9,8 @@
 #define DEFAULT_JOINLENGTH 300
 
 typedef struct {
-  unsigned int verbose,
-               debug;
+  bool verbose,
+       debug;
   unsigned long join_length;
   Log *log;
   FILE *outfp;

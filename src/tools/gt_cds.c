@@ -7,7 +7,7 @@
 #include "gt.h"
 
 typedef struct {
-  unsigned int verbose;
+  bool verbose;
 } CDS_arguments;
 
 static int parse_options(CDS_arguments *arguments, int argc,

@@ -6,7 +6,7 @@
 
 #include "gt.h"
 
-static int parse_options(unsigned int *all, int argc, char **argv)
+static int parse_options(bool *all, int argc, char **argv)
 {
   OptionParser *op;
   Option *option;
@@ -14,8 +14,8 @@ static int parse_options(unsigned int *all, int argc, char **argv)
   op = option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Globally align each sequence in seq_file_1 with each "
                          "sequence in seq_file_2.");
-  option = option_new_boolean("all", "show all optimal alignments instead of "
-                              "just one", all, 0);
+  option = option_new_bool("all", "show all optimal alignments instead of just "
+                           "one", all, false);
   option_parser_add_option(op, option);
   parsed_args = option_parser_parse_min_max_args(op, argc, argv, versionfunc, 2,
                                                  2);
@@ -40,9 +40,9 @@ int gt_align(int argc, char *argv[])
 {
   Bioseq *bioseq_1, *bioseq_2;
   unsigned long i, j;
-  unsigned int all = 0;
   int parsed_args;
   Alignment *a;
+  bool all;
 
   /* option parsing */
   parsed_args = parse_options(&all, argc, argv);

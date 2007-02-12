@@ -21,7 +21,7 @@
 #include "tools/gt_stat.h"
 
 struct GTR {
-  unsigned int test;
+  bool test;
   Hashtable *tools,
             *unit_tests;
 };
@@ -71,7 +71,7 @@ int gtr_parse(GTR *gtr, int argc, char **argv)
                          "The GenomeTools (gt) genome analysis system "
                           "(http://genometools.org).");
   option_parser_set_comment_func(op, show_option_comments, gtr);
-  o = option_new_boolean("test", "perform unit tests and exit", &gtr->test, 0);
+  o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false);
   option_parser_add_option(op, o);
   parsed_args = option_parser_parse(op, argc, argv, versionfunc);
   option_parser_free(op);

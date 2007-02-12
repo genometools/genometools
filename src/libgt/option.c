@@ -48,7 +48,7 @@ struct Option {
       *description;
   void *value;
   union {
-    unsigned int b : 1;
+    bool b;
     double d;
     FILE *fp;
     int i;
@@ -345,7 +345,7 @@ static int parse(OptionParser *op, int argc, char **argv,
   unsigned long i;
   double double_value;
   Option *option;
-  unsigned int option_parsed;
+  bool option_parsed;
   long long_value;
 
   assert(op);
@@ -366,7 +366,7 @@ static int parse(OptionParser *op, int argc, char **argv,
       break;
 
     /* look for matching option */
-    option_parsed = 0;
+    option_parsed = false;
     for (i = 0; i < array_size(op->options); i++) {
       option = *(Option**) array_get(op->options, i);
 
@@ -380,8 +380,8 @@ static int parse(OptionParser *op, int argc, char **argv,
             /* XXX: the next argument (if any) is an option
                (boolean parsing not implemented yet) */
             /* assert(!argv[argnum+1] || argv[argnum+1][0] == '-'); */
-            *(unsigned int*) option->value = 1;
-            option_parsed = 1;
+            *(bool*) option->value = true;
+            option_parsed = true;
             break;
           case OPTION_DOUBLE:
             check_missing_argument(argnum, argc, option->option_str);
@@ -391,7 +391,7 @@ static int parse(OptionParser *op, int argc, char **argv,
                     str_get(option->option_str));
             }
             *(double*) option->value = double_value;
-            option_parsed = 1;
+            option_parsed = true;
             break;
           case OPTION_HELP:
             show_help(op, 0);
@@ -403,7 +403,7 @@ static int parse(OptionParser *op, int argc, char **argv,
             check_missing_argument(argnum, argc, option->option_str);
             argnum++;
             *(FILE**) option->value = xfopen(argv[argnum] , "w");
-            option_parsed = 1;
+            option_parsed = true;
             break;
           case OPTION_INT:
             check_missing_argument(argnum, argc, option->option_str);
@@ -418,7 +418,7 @@ static int parse(OptionParser *op, int argc, char **argv,
                     str_get(option->option_str), option->min_value.i);
             }
             *(int*) option->value = int_value;
-            option_parsed = 1;
+            option_parsed = true;
             break;
           case OPTION_UINT:
             check_missing_argument(argnum, argc, option->option_str);
@@ -433,7 +433,7 @@ static int parse(OptionParser *op, int argc, char **argv,
                     str_get(option->option_str), option->min_value.ui);
             }
             *(unsigned int*) option->value = int_value;
-            option_parsed = 1;
+            option_parsed = true;
             break;
           case OPTION_LONG:
             check_missing_argument(argnum, argc, option->option_str);
@@ -443,7 +443,7 @@ static int parse(OptionParser *op, int argc, char **argv,
                     str_get(option->option_str));
             }
             *(long*) option->value = long_value;
-            option_parsed = 1;
+            option_parsed = true;
             break;
           case OPTION_ULONG:
             check_missing_argument(argnum, argc, option->option_str);
@@ -459,13 +459,13 @@ static int parse(OptionParser *op, int argc, char **argv,
                     str_get(option->option_str), option->min_value.ul);
             }
             *(unsigned long*) option->value = long_value;
-            option_parsed = 1;
+            option_parsed = true;
             break;
           case OPTION_STRING:
             check_missing_argument(argnum, argc, option->option_str);
             argnum++;
             str_set(option->value, argv[argnum]);
-            option_parsed = 1;
+            option_parsed = true;
             break;
           case OPTION_VERSION:
             ((Show_version_func) option->value)(op->progname);
@@ -473,10 +473,12 @@ static int parse(OptionParser *op, int argc, char **argv,
           default: assert(0);
         }
       }
-      if (option_parsed) break;
+      if (option_parsed)
+        break;
     }
 
-    if (option_parsed) continue;
+    if (option_parsed)
+      continue;
 
     /* no matching option found -> error */
     error("unknown option: %s (-help shows possible options)", argv[argnum]);
@@ -559,23 +561,22 @@ Option* option_new_outputfile(FILE **outfp)
   return o;
 }
 
-Option* option_new_verbose(unsigned int *value)
+Option* option_new_verbose(bool *value)
 {
-  return option_new_boolean("v", "be verbose", value, 0);
+  return option_new_bool("v", "be verbose", value, false);
 }
 
-Option* option_new_debug(unsigned int *value)
+Option* option_new_debug(bool *value)
 {
-  Option *o = option_new_boolean("debug", "enable debugging output", value,
-                                 0);
+  Option *o = option_new_bool("debug", "enable debugging output", value, false);
   o->is_development_option = 1;
   return o;
 }
 
-Option* option_new_boolean(const char *option_str,
-                           const char *description,
-                           unsigned int *value,
-                           unsigned int default_value)
+Option* option_new_bool(const char *option_str,
+                        const char *description,
+                        bool *value,
+                        bool default_value)
 {
   Option *o = option_new(option_str, description, value);
   o->option_type = OPTION_BOOL;
