@@ -4,7 +4,13 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#include <sys/types.h>
+#include <assert.h>
+#include <regex.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include "ensure.h"
+#include "error.h"
 #include "grep.h"
 
 static void grep_error(int errcode, regex_t *matcher)
