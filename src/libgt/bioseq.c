@@ -40,7 +40,7 @@ Bioseq* bioseq_new(const char *sequence_file)
 {
   Bioseq *bs = xcalloc(1, sizeof(Bioseq));
   if (!file_exists(sequence_file)) {
-    error("sequence file '%s' does not exist or is not readable",
+    error("sequence file \"%s\" does not exist or is not readable",
           sequence_file);
   }
   bs->sequence_file = str_new_cstr(sequence_file);
@@ -53,7 +53,7 @@ Bioseq* bioseq_new_str(Str *sequence_file)
 {
   Bioseq *bs = xcalloc(1, sizeof(Bioseq));
   if (!file_exists(str_get(sequence_file))) {
-    error("sequence file '%s' does not exist or is not readable",
+    error("sequence file \"%s\" does not exist or is not readable",
           str_get(sequence_file));
   }
   bs->sequence_file = str_ref(sequence_file);
