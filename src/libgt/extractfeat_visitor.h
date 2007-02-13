@@ -8,21 +8,21 @@
 #define EXTRACTFEAT_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct Extractfeat_visitor Extractfeat_visitor;
+typedef struct ExtractFeatVisitor ExtractFeatVisitor;
 
 #include <stdbool.h>
 #include "genome_visitor.h"
 #include "regionmapping.h"
 
 const GenomeVisitorClass* extractfeat_visitor_class(void);
-GenomeVisitor*             extractfeat_visitor_new_seqfile(Str *sequence_file,
-                                                       GenomeFeatureType type,
-                                                       bool join,
-                                                       bool translate);
+GenomeVisitor*            extractfeat_visitor_new_seqfile(Str *sequence_file,
+                                                          GenomeFeatureType,
+                                                          bool join,
+                                                          bool translate);
 /* takes ownership of the RegionMapping */
 GenomeVisitor*            extractfeat_visitor_new_regionmapping(RegionMapping*,
-                                                       GenomeFeatureType type,
-                                                       bool join,
-                                                       bool translate);
+                                                              GenomeFeatureType,
+                                                                bool join,
+                                                                bool translate);
 
 #endif

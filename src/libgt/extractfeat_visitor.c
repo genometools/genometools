@@ -13,7 +13,7 @@
 #include "reverse.h"
 #include "translate.h"
 
-struct Extractfeat_visitor {
+struct ExtractFeatVisitor {
   const GenomeVisitor parent_instance;
   Str *sequence_file,
       *description, /* the description of the currently extracted feature */
@@ -33,7 +33,7 @@ struct Extractfeat_visitor {
 
 static void extractfeat_visitor_free(GenomeVisitor *gv)
 {
-  Extractfeat_visitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
+  ExtractFeatVisitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
   assert(extractfeat_visitor);
   str_free(extractfeat_visitor->sequence_file);
   str_free(extractfeat_visitor->description);
@@ -45,7 +45,7 @@ static void extractfeat_visitor_free(GenomeVisitor *gv)
 
 static void extract_join_feature(GenomeNode *gn, void *data)
 {
-  Extractfeat_visitor *v = (Extractfeat_visitor*) data;
+  ExtractFeatVisitor *v = (ExtractFeatVisitor*) data;
   GenomeFeatureType gf_type;
   const char *raw_sequence;
   Genome_feature *gf;
@@ -69,7 +69,7 @@ static void extract_join_feature(GenomeNode *gn, void *data)
 
 static void extract_feature(GenomeNode *gn, void *data)
 {
-  Extractfeat_visitor *v = (Extractfeat_visitor*) data;
+  ExtractFeatVisitor *v = (ExtractFeatVisitor*) data;
   GenomeFeatureType gf_type;
   Genome_feature *gf;
   Range range;
@@ -141,73 +141,73 @@ static void extractfeat_visitor_genome_feature(GenomeVisitor *gv,
                                                Genome_feature *gf,
                                                /*@unused@*/ Log *l)
 {
-  Extractfeat_visitor *v = extractfeat_visitor_cast(gv);
-  genome_node_traverse_children((GenomeNode*) gf, v, extract_feature, false);
+  ExtractFeatVisitor *efv = extractfeat_visitor_cast(gv);
+  genome_node_traverse_children((GenomeNode*) gf, efv, extract_feature, false);
 }
 
 static void extractfeat_visitor_sequence_region(GenomeVisitor *gv,
                                                 SequenceRegion *sr,
                                                 /*@unused@*/ Log *l)
 {
-  Extractfeat_visitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
+  ExtractFeatVisitor *efv = extractfeat_visitor_cast(gv);
   /* check if the given sequence file contains this sequence (region) */
-  if (!bioseq_contains_sequence(extractfeat_visitor->bioseq,
+  if (!bioseq_contains_sequence(efv->bioseq,
                                 str_get(genome_node_get_seqid((GenomeNode*)
                                                               sr)))) {
     error("sequence \"%s\" not contained in sequence file \"%s\"",
           str_get(genome_node_get_seqid((GenomeNode*) sr)),
-          str_get(extractfeat_visitor->sequence_file));
+          str_get(efv->sequence_file));
   }
 }
 
 const GenomeVisitorClass* extractfeat_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof(Extractfeat_visitor),
-                                            extractfeat_visitor_free,
-                                            NULL,
-                                            extractfeat_visitor_genome_feature,
-                                            extractfeat_visitor_sequence_region,
-                                            NULL };
+  static const GenomeVisitorClass gvc = { sizeof(ExtractFeatVisitor),
+                                          extractfeat_visitor_free,
+                                          NULL,
+                                          extractfeat_visitor_genome_feature,
+                                          extractfeat_visitor_sequence_region,
+                                          NULL };
   return &gvc;
 }
 
 static GenomeVisitor* extractfeat_visitor_new(GenomeFeatureType type,
-                                               bool join, bool translate)
+                                              bool join, bool translate)
 {
   GenomeVisitor *gv = genome_visitor_create(extractfeat_visitor_class());
-  Extractfeat_visitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
-  extractfeat_visitor->description = str_new();
-  extractfeat_visitor->sequence = str_new();
-  extractfeat_visitor->protein = str_new();
-  extractfeat_visitor->type = type;
-  extractfeat_visitor->join = join;
-  extractfeat_visitor->translate = translate;
-  extractfeat_visitor->fastaseq_counter = 0;
+  ExtractFeatVisitor *efv= extractfeat_visitor_cast(gv);
+  efv->description = str_new();
+  efv->sequence = str_new();
+  efv->protein = str_new();
+  efv->type = type;
+  efv->join = join;
+  efv->translate = translate;
+  efv->fastaseq_counter = 0;
   return gv;
 }
 
 GenomeVisitor* extractfeat_visitor_new_seqfile(Str *sequence_file,
-                                                GenomeFeatureType type,
-                                                bool join, bool translate)
+                                               GenomeFeatureType type,
+                                               bool join, bool translate)
 {
   GenomeVisitor *gv;
-  Extractfeat_visitor *extractfeat_visitor;
+  ExtractFeatVisitor *efv;
   assert(sequence_file);
   gv = extractfeat_visitor_new(type, join, translate);
-  extractfeat_visitor = extractfeat_visitor_cast(gv);
-  extractfeat_visitor->sequence_file = str_ref(sequence_file);
-  extractfeat_visitor->bioseq = bioseq_new_str(sequence_file);
+  efv = extractfeat_visitor_cast(gv);
+  efv->sequence_file = str_ref(sequence_file);
+  efv->bioseq = bioseq_new_str(sequence_file);
   return gv;
 }
 
 GenomeVisitor* extractfeat_visitor_new_regionmapping(RegionMapping *rm,
-                                                      GenomeFeatureType type,
-                                                      bool join, bool translate)
+                                                     GenomeFeatureType type,
+                                                     bool join, bool translate)
 {
   GenomeVisitor *gv;
-  Extractfeat_visitor *extractfeat_visitor;
+  ExtractFeatVisitor *efv;
   gv = extractfeat_visitor_new(type, join, translate);
-  extractfeat_visitor = extractfeat_visitor_cast(gv);
-  extractfeat_visitor->regionmapping = rm;
+  efv = extractfeat_visitor_cast(gv);
+  efv->regionmapping = rm;
   return gv;
 }
