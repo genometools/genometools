@@ -16,6 +16,8 @@
 */
 
 gzFile xgzopen(const char *path, const char *mode);
+int    xgzread(gzFile, void *buf, unsigned len); /* returns num of read bytes */
+void   xgzrewind(gzFile);
 void   xgzclose(gzFile);
 
 #endif

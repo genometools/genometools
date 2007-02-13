@@ -9,11 +9,12 @@
 #include "error.h"
 #include "fasta.h"
 #include "fasta_reader.h"
+#include "genfile.h"
 #include "xansi.h"
 
 struct FastaReader {
   Str *sequence_filename;
-  FILE *sequence_file;
+  GenFile *sequence_file;
 };
 
 typedef enum {
@@ -27,7 +28,9 @@ FastaReader* fasta_reader_new(Str *sequence_filename)
 {
   FastaReader *fs = xmalloc(sizeof(FastaReader));
   fs->sequence_filename = str_ref(sequence_filename);
-  fs->sequence_file = xfopen(str_get(sequence_filename), "r");
+  fs->sequence_file =
+    genfile_xopen(genfilemode_determine(str_get(sequence_filename)),
+                  str_get(sequence_filename), "r");
   return fs;
 }
 
@@ -51,10 +54,10 @@ void fasta_reader_run(FastaReader *fr,
   assert(proc_description || proc_character || proc_sequence_length);
 
   /* rewind sequence file (to allow multiple calls) */
-  rewind(fr->sequence_file);
+  genfile_xrewind(fr->sequence_file);
 
   /* reading */
-  while (xfread(&cc, sizeof(unsigned char), 1, fr->sequence_file) != 0) {
+  while (genfile_xread(fr->sequence_file, &cc, 1) != 0) {
     switch (state) {
       case EXPECTING_SEPARATOR:
         if (cc != FASTA_SEPARATOR)
@@ -132,6 +135,6 @@ void fasta_reader_free(FastaReader *fr)
 {
   if (!fr) return;
   str_free(fr->sequence_filename);
-  xfclose(fr->sequence_file);
+  genfile_xclose(fr->sequence_file);
   free(fr);
 }

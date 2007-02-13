@@ -11,7 +11,7 @@ INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj -I$(CURDIR)/src/lua-5.1.1/src
 CFLAGS:=
 GT_CFLAGS:= -Wall $(INCLUDEOPT)
 LDFLAGS:=
-LDLIBS:=-lm
+LDLIBS:=-lm -lz
 
 VPATH:=$(VPATH):$(CURDIR)/src
 

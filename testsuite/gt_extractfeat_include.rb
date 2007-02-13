@@ -5,6 +5,13 @@ Test do
   run "diff #{$last_stdout} #{$testdata}/gt_extractfeat_succ_1.out"
 end
 
+Name "gt extractfeat -seqfile test 1 (compressed)"
+Keywords "gt_extractfeat"
+Test do
+  run_test "#{$bin}gt extractfeat -type gene -seqfile #{$testdata}/gt_extractfeat_succ_1.fas.gz  #{$testdata}/gt_extractfeat_succ_1.gff3"
+  run "diff #{$last_stdout} #{$testdata}/gt_extractfeat_succ_1.out"
+end
+
 Name "gt extractfeat -seqfile test 2"
 Keywords "gt_extractfeat"
 Test do

@@ -20,6 +20,24 @@ gzFile xgzopen(const char *path, const char *mode)
   return file;
 }
 
+int xgzread(gzFile file, void *buf, unsigned len)
+{
+  int rval;
+  if ((rval = gzread(file, buf, len)) == -1) {
+    fprintf(stderr, "cannod read from compressed file\n");
+    exit(EXIT_FAILURE);
+  }
+  return rval;
+}
+
+void xgzrewind(gzFile file)
+{
+  if (gzrewind(file) == -1) {
+    fprintf(stderr, "cannot rewind compressed file\n");
+    exit(EXIT_FAILURE);
+  }
+}
+
 void xgzclose(gzFile file)
 {
   const char *msg;

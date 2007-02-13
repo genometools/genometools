@@ -28,6 +28,13 @@ GenFileMode genfilemode_determine(const char *path);
 
 /* create a new GenFile object and open the underlying file handle */
 GenFile*    genfile_xopen(GenFileMode, const char *path, const char *mode);
+
+/* read up to 'nbytes' and store result in 'buf', returns bytes read or EOF */
+int         genfile_xread(GenFile*, void *buf, size_t nbytes);
+
+/* rewind the file */
+void        genfile_xrewind(GenFile*);
+
 /* close the underlying file handle and destroy the object */
 void        genfile_xclose(GenFile*);
 
