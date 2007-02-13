@@ -110,7 +110,7 @@ int gt_extractfeat(int argc, char *argv[])
   if (str_get(arguments.seqfile))
     extractfeat_stream_use_sequence_file(extractfeat_stream, arguments.seqfile);
   else {
-    regionmapping = regionmapping_new(str_get(arguments.regionmapping));
+    regionmapping = regionmapping_new(arguments.regionmapping);
     extractfeat_stream_use_region_mapping(extractfeat_stream, regionmapping);
   }
 

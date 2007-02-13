@@ -53,3 +53,24 @@ Test do
   run_test("#{$bin}gt extractfeat -type exon -regionmapping #{$testdata}/regionmapping_1.lua #{$testdata}/gt_extractfeat_succ_1.gff3", :retval => 1 )
   grep($last_stderr, "'mapping' must be either a table or a function ");
 end
+
+Name "gt extractfeat -regionmapping fail 3 (nil mapping)"
+Keywords "gt_extractfeat"
+Test do
+  run_test("#{$bin}gt extractfeat -type exon -regionmapping #{$testdata}/regionmapping_2.lua #{$testdata}/gt_extractfeat_succ_1.gff3", :retval => 1 )
+  grep($last_stderr, "is nil");
+end
+
+Name "gt extractfeat -regionmapping fail 4 (non string mapping)"
+Keywords "gt_extractfeat"
+Test do
+  run_test("#{$bin}gt extractfeat -type exon -regionmapping #{$testdata}/regionmapping_3.lua #{$testdata}/gt_extractfeat_succ_1.gff3", :retval => 1 )
+  grep($last_stderr, "is not a string");
+end
+
+Name "gt extractfeat -regionmapping test 1 (non string mapping)"
+Keywords "gt_extractfeat"
+Test do
+  run_test "env GT_TESTDATA=#{$testdata} #{$bin}gt extractfeat -type gene -regionmapping #{$testdata}/regionmapping_4.lua #{$testdata}/gt_extractfeat_succ_1.gff3"
+  run "diff #{$last_stdout} #{$testdata}/gt_extractfeat_succ_1.out"
+end
