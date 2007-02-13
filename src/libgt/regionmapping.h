@@ -7,11 +7,14 @@
 #ifndef REGIONMAPPING_H
 #define REGIONMAPPING_H
 
+#include "str.h"
+
 /* maps a sequence-region to a sequence file */
 typedef struct RegionMapping RegionMapping;
 
 RegionMapping* regionmapping_new(const char *mapping_filename);
-const char*    regionmapping_map(RegionMapping*, const char *sequence_region);
+/* returns a new reference */
+Str*           regionmapping_map(RegionMapping*, const char *sequence_region);
 void           regionmapping_free(RegionMapping*);
 
 #endif

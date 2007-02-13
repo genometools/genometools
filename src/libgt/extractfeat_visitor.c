@@ -15,10 +15,10 @@
 
 struct ExtractFeatVisitor {
   const GenomeVisitor parent_instance;
-  Str *sequence_file,
-      *description, /* the description of the currently extracted feature */
-      *sequence,    /* the sequence of the currently extracted feature */
-      *protein;
+  Str *sequence_file, /* the (current) sequence file */
+      *description,   /* the description of the currently extracted feature */
+      *sequence,      /* the sequence of the currently extracted feature */
+      *protein;       /* the translated protein sequence (if applicable) */
   GenomeFeatureType type;
   bool join,
        translate,
@@ -150,13 +150,25 @@ static void extractfeat_visitor_sequence_region(GenomeVisitor *gv,
                                                 /*@unused@*/ Log *l)
 {
   ExtractFeatVisitor *efv = extractfeat_visitor_cast(gv);
-  /* check if the given sequence file contains this sequence (region) */
-  if (!bioseq_contains_sequence(efv->bioseq,
-                                str_get(genome_node_get_seqid((GenomeNode*)
+  if (efv->regionmapping) { /* region mapping used -> determine bioseq */
+    if (!efv->sequence_file ||
+        str_cmp(efv->sequence_file, genome_node_get_seqid((GenomeNode*) sr))) {
+      str_free(efv->sequence_file);
+      efv->sequence_file = regionmapping_map(efv->regionmapping,
+                              str_get(genome_node_get_seqid((GenomeNode*) sr)));
+      bioseq_free(efv->bioseq);
+      efv->bioseq = bioseq_new_str(efv->sequence_file);
+    }
+  }
+  else { /* we have only one bioseq */
+    /* check if the given sequence file contains this sequence (region) */
+    if (!bioseq_contains_sequence(efv->bioseq,
+                                  str_get(genome_node_get_seqid((GenomeNode*)
                                                               sr)))) {
-    error("sequence \"%s\" not contained in sequence file \"%s\"",
-          str_get(genome_node_get_seqid((GenomeNode*) sr)),
-          str_get(efv->sequence_file));
+      error("sequence \"%s\" not contained in sequence file \"%s\"",
+            str_get(genome_node_get_seqid((GenomeNode*) sr)),
+            str_get(efv->sequence_file));
+    }
   }
 }
 
