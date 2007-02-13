@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -11,7 +11,7 @@
 #include "fasta_reader.h"
 #include "xansi.h"
 
-struct Fasta_reader {
+struct FastaReader {
   Str *sequence_filename;
   FILE *sequence_file;
 };
@@ -21,24 +21,24 @@ typedef enum {
   READING_DESCRIPTION,
   READING_SEQUENCE_AFTER_NEWLINE,
   READING_SEQUENCE
-} Fasta_reader_state;
+} FastaReader_state;
 
-Fasta_reader* fasta_reader_new(Str *sequence_filename)
+FastaReader* fasta_reader_new(Str *sequence_filename)
 {
-  Fasta_reader *fs = xmalloc(sizeof(Fasta_reader));
+  FastaReader *fs = xmalloc(sizeof(FastaReader));
   fs->sequence_filename = str_ref(sequence_filename);
   fs->sequence_file = xfopen(str_get(sequence_filename), "r");
   return fs;
 }
 
-void fasta_reader_run(Fasta_reader *fr,
-                      Fasta_reader_proc_description proc_description,
-                      Fasta_reader_proc_character proc_character,
-                      Fasta_reader_proc_sequence_length proc_sequence_length,
+void fasta_reader_run(FastaReader *fr,
+                      FastaReader_proc_description proc_description,
+                      FastaReader_proc_character proc_character,
+                      FastaReader_proc_sequence_length proc_sequence_length,
                       void *data)
 {
   unsigned char cc;
-  Fasta_reader_state state = EXPECTING_SEPARATOR;
+  FastaReader_state state = EXPECTING_SEPARATOR;
   unsigned long sequence_length = 0, line_counter = 1;
   Str *description;
 
@@ -128,7 +128,7 @@ void fasta_reader_run(Fasta_reader *fr,
   str_free(description);
 }
 
-void fasta_reader_free(Fasta_reader *fr)
+void fasta_reader_free(FastaReader *fr)
 {
   if (!fr) return;
   str_free(fr->sequence_filename);

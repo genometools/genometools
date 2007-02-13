@@ -105,7 +105,7 @@ static void remove_bioseq_files(int sigraised)
 static void construct_bioseq_files(Str *bioseq_index_file, Str *bioseq_raw_file,
                                    Str *sequence_file)
 {
-  Fasta_reader *fasta_reader;
+  FastaReader *fasta_reader;
 
   /* open files & init */
   bioseq_files_info.bioseq_index = xfopen(str_get(bioseq_index_file), "w");
