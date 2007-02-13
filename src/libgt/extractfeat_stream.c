@@ -71,7 +71,8 @@ void extractfeat_stream_use_sequence_file(GenomeStream *gs, Str *seqfile)
 void extractfeat_stream_use_region_mapping(GenomeStream *gs, RegionMapping *rm)
 {
   Extractfeat_stream *extractfeat_stream = extractfeat_stream_cast(gs);
-  extractfeat_visitor_new_regionmapping(rm, extractfeat_stream->type,
-                                        extractfeat_stream->join,
-                                        extractfeat_stream->translate);
+  extractfeat_stream->extractfeat_visitor =
+    extractfeat_visitor_new_regionmapping(rm, extractfeat_stream->type,
+                                          extractfeat_stream->join,
+                                          extractfeat_stream->translate);
 }
