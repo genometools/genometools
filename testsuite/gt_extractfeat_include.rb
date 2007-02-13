@@ -68,9 +68,23 @@ Test do
   grep($last_stderr, "is not a string");
 end
 
-Name "gt extractfeat -regionmapping test 1 (non string mapping)"
+Name "gt extractfeat -regionmapping fail 5 (function returns nil)"
+Keywords "gt_extractfeat"
+Test do
+  run_test("#{$bin}gt extractfeat -type exon -regionmapping #{$testdata}/regionmapping_5.lua #{$testdata}/gt_extractfeat_succ_1.gff3", :retval => 1 )
+  grep($last_stderr, "function 'mapping' must return a string");
+end
+
+Name "gt extractfeat -regionmapping test 1 (mapping table)"
 Keywords "gt_extractfeat"
 Test do
   run_test "env GT_TESTDATA=#{$testdata} #{$bin}gt extractfeat -type gene -regionmapping #{$testdata}/regionmapping_4.lua #{$testdata}/gt_extractfeat_succ_1.gff3"
+  run "diff #{$last_stdout} #{$testdata}/gt_extractfeat_succ_1.out"
+end
+
+Name "gt extractfeat -regionmapping test 1 (mapping function)"
+Keywords "gt_extractfeat"
+Test do
+  run_test "env GT_TESTDATA=#{$testdata} #{$bin}gt extractfeat -type gene -regionmapping #{$testdata}/regionmapping_6.lua #{$testdata}/gt_extractfeat_succ_1.gff3"
   run "diff #{$last_stdout} #{$testdata}/gt_extractfeat_succ_1.out"
 end

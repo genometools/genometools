@@ -53,8 +53,8 @@ Str* regionmapping_map(RegionMapping *rm, const char *sequence_region)
 {
   Str *result;
   assert(rm && sequence_region);
+  lua_pushstring(rm->L, sequence_region);
   if (rm->is_table) {
-    lua_pushstring(rm->L, sequence_region);
     lua_gettable(rm->L, -2); /* get mapping[sequence_region] */
     /* make sure mapping[sequence_region] is defined */
     if (lua_isnil(rm->L, -1)) {
@@ -66,12 +66,19 @@ Str* regionmapping_map(RegionMapping *rm, const char *sequence_region)
       error("mapping[%s] is not a string (defined in \"%s\")", sequence_region,
             str_get(rm->mapping_filename));
     }
-    result = str_new_cstr(lua_tostring(rm->L, -1));
-    lua_pop(rm->L, 1);
   }
   else {
-    result = NULL; /* XXX */
+    /* call function */
+    if (lua_pcall(rm->L, 1, 1, 0))
+      error("running function 'mapping': %s", lua_tostring(rm->L, 01));
+    /* make sure the result is a string */
+    if (!lua_isstring(rm->L, -1)) {
+      error("function 'mapping' must return a string (defined in \"%s\")",
+            str_get(rm->mapping_filename));
+    }
   }
+  result = str_new_cstr(lua_tostring(rm->L, -1));
+  lua_pop(rm->L, 1); /* pop result */
   return result;
 }
 
