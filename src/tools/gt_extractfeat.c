@@ -13,10 +13,9 @@ typedef struct {
   Str *type,
       *seqfile,
       *regionmapping;
-} Extractfeat_arguments;
+} ExtractFeatArguments;
 
-static int parse_options(Extractfeat_arguments *arguments, int argc,
-                         char **argv)
+static int parse_options(ExtractFeatArguments *arguments, int argc, char **argv)
 {
   int parsed_args;
   OptionParser *op;
@@ -80,8 +79,8 @@ int gt_extractfeat(int argc, char *argv[])
   GenomeStream *gff3_in_stream,
                 *extractfeat_stream;
   GenomeNode *gn;
-  Genome_feature_type type;
-  Extractfeat_arguments arguments;
+  GenomeFeatureType type;
+  ExtractFeatArguments arguments;
   RegionMapping *regionmapping;
   int parsed_args;
 

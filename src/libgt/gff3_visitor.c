@@ -122,7 +122,7 @@ static void store_ids(GenomeNode *gn, void *data)
 {
   Gff3_visitor *gff3_visitor = (Gff3_visitor*) data;
   Genome_feature *gf = (Genome_feature*) gn;
-  Genome_feature_type type = genome_feature_get_type(gf);
+  GenomeFeatureType type = genome_feature_get_type(gf);
   Add_id_info add_id_info;
   Str *id;
 

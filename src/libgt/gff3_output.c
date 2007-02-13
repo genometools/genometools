@@ -12,7 +12,7 @@
 void gff3_output_leading(Genome_feature *gf, FILE *outfp)
 {
   GenomeNode *gn;
-  Genome_feature_type type;
+  GenomeFeatureType type;
   double score;
 
   assert(gf);

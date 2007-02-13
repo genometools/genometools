@@ -17,11 +17,11 @@ typedef struct Genome_feature Genome_feature;
 #include "strand.h"
 
 const GenomeNodeClass* genome_feature_class(void);
-GenomeNode*        genome_feature_new(Genome_feature_type, Range, Strand,
+GenomeNode*        genome_feature_new(GenomeFeatureType, Range, Strand,
                                        const char *filename,
                                        unsigned long line_number);
 const char*         genome_feature_get_source(Genome_feature*);
-Genome_feature_type genome_feature_get_type(Genome_feature*);
+GenomeFeatureType genome_feature_get_type(Genome_feature*);
 double              genome_feature_get_score(Genome_feature*);
 Strand              genome_feature_get_strand(Genome_feature*);
 Phase               genome_feature_get_phase(Genome_feature*);

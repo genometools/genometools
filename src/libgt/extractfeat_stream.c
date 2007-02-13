@@ -9,12 +9,12 @@
 #include "extractfeat_visitor.h"
 #include "genome_stream_rep.h"
 
-struct Extractfeat_stream
+struct ExtractFeatStream
 {
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
   GenomeVisitor *extractfeat_visitor;
-  Genome_feature_type type;
+  GenomeFeatureType type;
   bool join,
        translate;
 };
@@ -24,7 +24,7 @@ struct Extractfeat_stream
 
 static GenomeNode* extractfeat_stream_next_tree(GenomeStream *gs, Log *l)
 {
-  Extractfeat_stream *extractfeat_stream = extractfeat_stream_cast(gs);
+  ExtractFeatStream *extractfeat_stream = extractfeat_stream_cast(gs);
   GenomeNode *gn = genome_stream_next_tree(extractfeat_stream->in_stream, l);
   assert(extractfeat_stream->extractfeat_visitor);
   if (gn)
@@ -34,45 +34,45 @@ static GenomeNode* extractfeat_stream_next_tree(GenomeStream *gs, Log *l)
 
 static void extractfeat_stream_free(GenomeStream *gs)
 {
-  Extractfeat_stream *extractfeat_stream = extractfeat_stream_cast(gs);
+  ExtractFeatStream *extractfeat_stream = extractfeat_stream_cast(gs);
   genome_visitor_free(extractfeat_stream->extractfeat_visitor);
 }
 
 const GenomeStreamClass* extractfeat_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof(Extractfeat_stream),
-                                           extractfeat_stream_next_tree,
-                                           extractfeat_stream_free };
+  static const GenomeStreamClass gsc = { sizeof(ExtractFeatStream),
+                                         extractfeat_stream_next_tree,
+                                         extractfeat_stream_free };
   return &gsc;
 }
 
 GenomeStream* extractfeat_stream_new(GenomeStream *in_stream,
-                                      Genome_feature_type type,
+                                      GenomeFeatureType type,
                                       bool join, bool translate)
 {
   GenomeStream *gs = genome_stream_create(extractfeat_stream_class(), true);
-  Extractfeat_stream *extractfeat_stream = extractfeat_stream_cast(gs);
-  extractfeat_stream->in_stream = in_stream;
-  extractfeat_stream->type = type;
-  extractfeat_stream->join = join;
-  extractfeat_stream->translate = translate;
+  ExtractFeatStream *efs = extractfeat_stream_cast(gs);
+  efs->in_stream = in_stream;
+  efs->type = type;
+  efs->join = join;
+  efs->translate = translate;
   return gs;
 }
 
 void extractfeat_stream_use_sequence_file(GenomeStream *gs, Str *seqfile)
 {
-  Extractfeat_stream *extractfeat_stream = extractfeat_stream_cast(gs);
-  extractfeat_stream->extractfeat_visitor =
-    extractfeat_visitor_new_seqfile(seqfile, extractfeat_stream->type,
-                                    extractfeat_stream->join,
-                                    extractfeat_stream->translate);
+  ExtractFeatStream *efs = extractfeat_stream_cast(gs);
+  efs->extractfeat_visitor = extractfeat_visitor_new_seqfile(seqfile, efs->type,
+                                                             efs->join,
+                                                             efs->translate);
 }
 
 void extractfeat_stream_use_region_mapping(GenomeStream *gs, RegionMapping *rm)
 {
-  Extractfeat_stream *extractfeat_stream = extractfeat_stream_cast(gs);
-  extractfeat_stream->extractfeat_visitor =
-    extractfeat_visitor_new_regionmapping(rm, extractfeat_stream->type,
-                                          extractfeat_stream->join,
-                                          extractfeat_stream->translate);
+  ExtractFeatStream *efs = extractfeat_stream_cast(gs);
+  efs->extractfeat_visitor = extractfeat_visitor_new_regionmapping(rm,
+                                                                   efs->type,
+                                                                   efs->join,
+                                                                   efs
+                                                                   ->translate);
 }

@@ -19,7 +19,7 @@ struct Genome_feature
   const GenomeNode parent_instance;
   Str *seqid,
       *source;
-  Genome_feature_type type;
+  GenomeFeatureType type;
   Range range;
   double score;
   Strand strand;
@@ -97,7 +97,7 @@ const GenomeNodeClass* genome_feature_class()
   return &gnc;
 }
 
-GenomeNode* genome_feature_new(Genome_feature_type type,
+GenomeNode* genome_feature_new(GenomeFeatureType type,
                                 Range range,
                                 Strand strand,
                                 const char *filename,
@@ -123,7 +123,7 @@ const char* genome_feature_get_source(Genome_feature *gf)
   return gf->source ? str_get(gf->source) : ".";
 }
 
-Genome_feature_type genome_feature_get_type(Genome_feature *gf)
+GenomeFeatureType genome_feature_get_type(Genome_feature *gf)
 {
   assert(gf);
   return gf->type;

@@ -19,7 +19,7 @@ struct Extractfeat_visitor {
       *description, /* the description of the currently extracted feature */
       *sequence,    /* the sequence of the currently extracted feature */
       *protein;
-  Genome_feature_type type;
+  GenomeFeatureType type;
   bool join,
        translate,
        reverse_strand;
@@ -46,7 +46,7 @@ static void extractfeat_visitor_free(GenomeVisitor *gv)
 static void extract_join_feature(GenomeNode *gn, void *data)
 {
   Extractfeat_visitor *v = (Extractfeat_visitor*) data;
-  Genome_feature_type gf_type;
+  GenomeFeatureType gf_type;
   const char *raw_sequence;
   Genome_feature *gf;
   Range range;
@@ -70,7 +70,7 @@ static void extract_join_feature(GenomeNode *gn, void *data)
 static void extract_feature(GenomeNode *gn, void *data)
 {
   Extractfeat_visitor *v = (Extractfeat_visitor*) data;
-  Genome_feature_type gf_type;
+  GenomeFeatureType gf_type;
   Genome_feature *gf;
   Range range;
 
@@ -171,7 +171,7 @@ const GenomeVisitorClass* extractfeat_visitor_class()
   return &gvc;
 }
 
-static GenomeVisitor* extractfeat_visitor_new(Genome_feature_type type,
+static GenomeVisitor* extractfeat_visitor_new(GenomeFeatureType type,
                                                bool join, bool translate)
 {
   GenomeVisitor *gv = genome_visitor_create(extractfeat_visitor_class());
@@ -187,7 +187,7 @@ static GenomeVisitor* extractfeat_visitor_new(Genome_feature_type type,
 }
 
 GenomeVisitor* extractfeat_visitor_new_seqfile(Str *sequence_file,
-                                                Genome_feature_type type,
+                                                GenomeFeatureType type,
                                                 bool join, bool translate)
 {
   GenomeVisitor *gv;
@@ -201,7 +201,7 @@ GenomeVisitor* extractfeat_visitor_new_seqfile(Str *sequence_file,
 }
 
 GenomeVisitor* extractfeat_visitor_new_regionmapping(RegionMapping *rm,
-                                                      Genome_feature_type type,
+                                                      GenomeFeatureType type,
                                                       bool join, bool translate)
 {
   GenomeVisitor *gv;

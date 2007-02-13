@@ -16,12 +16,12 @@ typedef struct Extractfeat_visitor Extractfeat_visitor;
 
 const GenomeVisitorClass* extractfeat_visitor_class(void);
 GenomeVisitor*             extractfeat_visitor_new_seqfile(Str *sequence_file,
-                                                       Genome_feature_type type,
+                                                       GenomeFeatureType type,
                                                        bool join,
                                                        bool translate);
 /* takes ownership of the RegionMapping */
 GenomeVisitor*            extractfeat_visitor_new_regionmapping(RegionMapping*,
-                                                       Genome_feature_type type,
+                                                       GenomeFeatureType type,
                                                        bool join,
                                                        bool translate);
 

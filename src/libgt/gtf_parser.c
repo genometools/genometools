@@ -221,7 +221,7 @@ void gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   Error *err;
   GTF_feature_type gtf_feature_type;
   /* abuse gft_TF_binding_site as an undefined value */
-  Genome_feature_type gff_feature_type = gft_TF_binding_site;
+  GenomeFeatureType gff_feature_type = gft_TF_binding_site;
 
   /* alloc */
   splitter = splitter_new(),

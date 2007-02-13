@@ -22,7 +22,7 @@ static const char *genome_feature_type_strings[] = { "CDS",
                                                      "intron",
                                                      "mRNA" };
 
-int genome_feature_type_get(Genome_feature_type *type, char *gft_string)
+int genome_feature_type_get(GenomeFeatureType *type, char *gft_string)
 {
   void *result;
 
@@ -36,7 +36,7 @@ int genome_feature_type_get(Genome_feature_type *type, char *gft_string)
                    compare);
 
   if (result) {
-    *type = (Genome_feature_type)
+    *type = (GenomeFeatureType)
             ((char**) result - (char**) genome_feature_type_strings);
     return 0;
   }
@@ -44,7 +44,7 @@ int genome_feature_type_get(Genome_feature_type *type, char *gft_string)
   return -1;
 }
 
-const char* genome_feature_type_get_cstr(Genome_feature_type type)
+const char* genome_feature_type_get_cstr(GenomeFeatureType type)
 {
   return genome_feature_type_strings[type];
 }

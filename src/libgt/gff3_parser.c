@@ -60,7 +60,7 @@ static void parse_regular_gff3_line(GFF3_parser *gff3_parser,
                                     unsigned int *break_loop)
 {
   GenomeNode *gn, *genome_feature = NULL, *parent_gf;
-  Genome_feature_type gft;
+  GenomeFeatureType gft;
   Splitter *splitter, *attribute_splitter, *tmp_splitter, *parents_splitter;
   Str *seqid_str, *source_str;
   Strand strand_value;

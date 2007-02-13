@@ -13,25 +13,24 @@
 #include "str.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct Extractfeat_stream Extractfeat_stream;
+typedef struct ExtractFeatStream ExtractFeatStream;
 
 const GenomeStreamClass* extractfeat_stream_class(void);
 
-/* create a plain Extractfeat_stream */
-GenomeStream*             extractfeat_stream_new(GenomeStream*,
-                                                  Genome_feature_type type,
-                                                  bool join,
-                                                  bool translate);
+/* create a plain ExtractFeatStream */
+GenomeStream*            extractfeat_stream_new(GenomeStream*,
+                                                GenomeFeatureType type,
+                                                bool join, bool translate);
 
 /* exactly one of the following two functions has to be called to make an
-   Extractfeat_stream usable */
+   ExtractFeatStream usable */
 
 /* use the file named ``seqfile'' as sequence source */
-void                       extractfeat_stream_use_sequence_file(GenomeStream*,
-                                                                Str *seqfile);
+void                     extractfeat_stream_use_sequence_file(GenomeStream*,
+                                                              Str *seqfile);
 
 /* use the given RegionMapping (takes ownership) as sequence file source */
-void                       extractfeat_stream_use_region_mapping(GenomeStream*,
-                                                                RegionMapping*);
+void                     extractfeat_stream_use_region_mapping(GenomeStream*,
+                                                               RegionMapping*);
 
 #endif
