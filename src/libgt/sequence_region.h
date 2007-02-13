@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -15,9 +15,8 @@ typedef struct SequenceRegion SequenceRegion;
 #include "str.h"
 
 const GenomeNodeClass* sequence_region_class(void);
-GenomeNode* sequence_region_new(Str *seqid,
-                                 Range range,
-                                 const char *filename,
-                                 unsigned long line_number);
+GenomeNode*            sequence_region_new(Str *seqid, Range range,
+                                           const char *filename,
+                                           unsigned long line_number);
 
 #endif

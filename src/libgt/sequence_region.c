@@ -53,25 +53,25 @@ static void sequence_region_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l)
 const GenomeNodeClass* sequence_region_class()
 {
   static const GenomeNodeClass gnc = { sizeof(SequenceRegion),
-                                         sequence_region_free,
-                                         sequence_region_get_seqid,
-                                         sequence_region_get_seqid,
-                                         sequence_region_get_range,
-                                         sequence_region_set_range,
-                                         NULL,
-                                         NULL,
-                                         NULL,
-                                         sequence_region_accept };
+                                       sequence_region_free,
+                                       sequence_region_get_seqid,
+                                       sequence_region_get_seqid,
+                                       sequence_region_get_range,
+                                       sequence_region_set_range,
+                                       NULL,
+                                       NULL,
+                                       NULL,
+                                       sequence_region_accept };
   return &gnc;
 }
 
 GenomeNode* sequence_region_new(Str *seqid,
-                                 Range range,
-                                 const char *filename,
-                                 unsigned long line_number)
+                                Range range,
+                                const char *filename,
+                                unsigned long line_number)
 {
   GenomeNode *gn = genome_node_create(sequence_region_class(), filename,
-                                       line_number);
+                                      line_number);
   SequenceRegion *sr = sequence_region_cast(gn);
   assert(seqid);
   sr->seqid = str_ref(seqid);
