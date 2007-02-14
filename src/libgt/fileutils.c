@@ -62,7 +62,7 @@ Str* file_dirname(const char *file)
     if (file[i] == '/')
       break;
   }
-  if (i) {
+  if (i > 0) {
     path = str_new();
     str_append_cstr_nt(path, file, i);
     return path;
@@ -90,7 +90,6 @@ Str* file_find_in_path(const char *file)
   else
     error("environment variable $PATH is not defined");
   splitter = splitter_new();
-
   splitter_split(splitter, pathvariable, strlen(pathvariable), ':');
   path = str_new();
   for (i = 0; i < splitter_size(splitter); i++) {

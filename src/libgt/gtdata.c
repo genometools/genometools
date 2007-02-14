@@ -23,6 +23,7 @@ Str* gtdata_get_path(const char *prog)
   Str *path;
   assert(prog);
   path = file_find_in_path(prog);
+  assert(path);
   str_append_cstr(path, GTDATADIR);
   if (file_exists(str_get(path)))
     return path;
@@ -46,6 +47,7 @@ void gtdata_show_help(const char *progname, void *unused)
   splitter = splitter_new();
   splitter_split(splitter, prog, strlen(prog), ' ');
   doc_file = gtdata_get_path(splitter_get_token(splitter, 0));
+  assert(doc_file);
   str_append_cstr(doc_file, "/doc/");
   str_append_cstr(doc_file,
                   splitter_get_token(splitter, splitter_size(splitter) - 1));
