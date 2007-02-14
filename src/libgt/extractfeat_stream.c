@@ -47,8 +47,8 @@ const GenomeStreamClass* extractfeat_stream_class(void)
 }
 
 GenomeStream* extractfeat_stream_new(GenomeStream *in_stream,
-                                      GenomeFeatureType type,
-                                      bool join, bool translate)
+                                     GenomeFeatureType type,
+                                     bool join, bool translate)
 {
   GenomeStream *gs = genome_stream_create(extractfeat_stream_class(), true);
   ExtractFeatStream *efs = extractfeat_stream_cast(gs);
