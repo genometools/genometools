@@ -23,59 +23,59 @@ Splitter* splitter_new(void)
   return xcalloc(1, sizeof(Splitter));
 }
 
-void splitter_split(Splitter *t, char *string, unsigned long length,
+void splitter_split(Splitter *s, char *string, unsigned long length,
                     char delimiter)
 {
 
   char *end_of_token, *string_index = string;
 
-  assert(t && string);
+  assert(s && string);
 
   /* splitting */
   while (string_index < string + length &&
          (end_of_token = strchr(string_index, delimiter))) {
     assert(end_of_token != NULL);
     *end_of_token = '\0';
-    if ((t->num_of_tokens + 1) * sizeof(char*) > t->allocated)
-      t->tokens = dynalloc(t->tokens, &t->allocated,
-                           (t->num_of_tokens + 1) * sizeof(char*));
-    t->tokens[t->num_of_tokens++] = string_index;
+    if ((s->num_of_tokens + 1) * sizeof(char*) > s->allocated)
+      s->tokens = dynalloc(s->tokens, &s->allocated,
+                           (s->num_of_tokens + 1) * sizeof(char*));
+    s->tokens[s->num_of_tokens++] = string_index;
     string_index = end_of_token + 1;
   }
 
   /* save last token */
-  if ((t->num_of_tokens + 2) * sizeof(char*) > t->allocated)
-    t->tokens = dynalloc(t->tokens, &t->allocated,
-                         (t->num_of_tokens + 2) * sizeof(char*));
-  t->tokens[t->num_of_tokens++] = string_index;
-  t->tokens[t->num_of_tokens]   = NULL;
+  if ((s->num_of_tokens + 2) * sizeof(char*) > s->allocated)
+    s->tokens = dynalloc(s->tokens, &s->allocated,
+                         (s->num_of_tokens + 2) * sizeof(char*));
+  s->tokens[s->num_of_tokens++] = string_index;
+  s->tokens[s->num_of_tokens]   = NULL;
 
-  assert(t->num_of_tokens);
+  assert(s->num_of_tokens);
 }
 
-char** splitter_get_tokens(Splitter *t)
+char** splitter_get_tokens(Splitter *s)
 {
-  assert(t);
-  return t->tokens;
+  assert(s);
+  return s->tokens;
 }
 
-char* splitter_get_token(Splitter *t, unsigned long token_num)
+char* splitter_get_token(Splitter *s, unsigned long token_num)
 {
-  assert(t && token_num < t->num_of_tokens);
-  return t->tokens[token_num];
+  assert(s && token_num < s->num_of_tokens);
+  return s->tokens[token_num];
 }
 
-void splitter_reset(Splitter *t)
+void splitter_reset(Splitter *s)
 {
-  assert(t);
-  if (t->tokens) t->tokens[0] = NULL;
-  t->num_of_tokens = 0;
+  assert(s);
+  if (s->tokens) s->tokens[0] = NULL;
+  s->num_of_tokens = 0;
 }
 
-unsigned long splitter_size(Splitter *t)
+unsigned long splitter_size(Splitter *s)
 {
-  assert(t);
-  return t->num_of_tokens;
+  assert(s);
+  return s->num_of_tokens;
 }
 
 int splitter_unit_test(void)
@@ -147,9 +147,9 @@ int splitter_unit_test(void)
   return EXIT_SUCCESS;
 }
 
-void splitter_free(Splitter *t)
+void splitter_free(Splitter *s)
 {
-  if (!t) return;
-  free(t->tokens);
-  free(t);
+  if (!s) return;
+  free(s->tokens);
+  free(s);
 }
