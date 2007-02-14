@@ -274,6 +274,13 @@ int str_unit_test(void)
   ensure(strlen(str_get(s)) == 0);
   str_free(s);
 
+  /* test str_new() followed by str_append_cstr_nt() */
+  s = str_new();
+  str_append_cstr_nt(s, "foo", 3);
+  ensure(strcmp("foo", str_get(s)) == 0);
+  ensure(str_length(s) == 3);
+  str_free(s);
+
   return EXIT_SUCCESS;
 }
 
