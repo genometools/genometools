@@ -109,6 +109,7 @@ libgt: dirs lib/libgt.a
 install:
 	test -d $(prefix)/bin || mkdir -p $(prefix)/bin
 	cp bin/gt $(prefix)/bin
+	cp -r gtdata $(prefix)/bin
 	test -d $(prefix)/include/libgt || mkdir -p $(prefix)/include/libgt
 	cp src/gt.h $(prefix)/include	
 	cp src/libgt/*.h $(prefix)/include/libgt
