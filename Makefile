@@ -46,7 +46,6 @@ prefix ?= /usr/local
 all: dirs lib/libgt.a bin/gt
 
 dirs:
-	@test -d include || mkdir -p include/libgt
 	@test -d obj     || mkdir -p obj 
 	@test -d lib     || mkdir -p lib 
 	@test -d bin     || mkdir -p bin 
