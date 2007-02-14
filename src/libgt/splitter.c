@@ -13,8 +13,7 @@
 #include "xansi.h"
 
 struct Splitter {
-  char *string,
-       **tokens;
+  char **tokens;
   unsigned long num_of_tokens;
   size_t allocated;
 };
@@ -69,7 +68,6 @@ char* splitter_get_token(Splitter *t, unsigned long token_num)
 void splitter_reset(Splitter *t)
 {
   assert(t);
-  t->string = NULL;
   if (t->tokens) t->tokens[0] = NULL;
   t->num_of_tokens = 0;
 }
