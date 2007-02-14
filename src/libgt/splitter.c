@@ -24,7 +24,7 @@ Splitter* splitter_new(void)
   return xcalloc(1, sizeof(Splitter));
 }
 
-void splitter_split(Splitter *t, char *string, unsigned long string_length,
+void splitter_split(Splitter *t, char *string, unsigned long length,
                     char delimiter)
 {
 
@@ -33,7 +33,7 @@ void splitter_split(Splitter *t, char *string, unsigned long string_length,
   assert(t && string);
 
   /* splitting */
-  while (string_index < string + string_length &&
+  while (string_index < string + length &&
          (end_of_token = strchr(string_index, delimiter))) {
     assert(end_of_token != NULL);
     *end_of_token = '\0';
