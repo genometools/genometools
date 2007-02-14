@@ -41,7 +41,7 @@ static void show_tool(void *key, void *value, void *data)
   array_add(toolnames, toolname);
 }
 
-static void show_option_comments(void *data)
+static void show_option_comments(const char *progname, void *data)
 {
   Array *toolnames;
   unsigned long i;

@@ -14,7 +14,7 @@ typedef struct OptionParser OptionParser;
 typedef struct Option Option;
 
 typedef void (*Show_version_func)(const char *progname);
-typedef void (*Show_comment_func)(void *data);
+typedef void (*Show_comment_func)(const char *progname, void *data);
 
 /* the option parser */
 OptionParser* option_parser_new(const char *synopsis, const char *one_liner);

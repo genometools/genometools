@@ -28,7 +28,7 @@ static void save_exercise_name(void *key, void *value, void *data)
   array_add(exercisenames, exercisename);
 }
 
-static void show_exercise_tools(void *data)
+static void show_exercise_tools(const char *progname, void *data)
 {
   Hashtable *exercise_tools;
   Array *exercisenames;

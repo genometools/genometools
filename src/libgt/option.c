@@ -235,7 +235,7 @@ static void show_help(OptionParser *op, unsigned int show_development_options)
     }
   }
   if (op->comment_func)
-    op->comment_func(op->comment_func_data);
+    op->comment_func(op->progname, op->comment_func_data);
   printf("\nReport bugs to %s.\n", MAILADDRESS);
 }
 
