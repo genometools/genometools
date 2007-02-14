@@ -41,7 +41,7 @@ def run_test(str, opts = {})
   if $arguments["memcheck"] then
     if $systemname == "Linux" then 
       memcheck = "valgrind --tool=memcheck --suppressions="+
-                 File.join($testdata, "gth.supp")+
+                 File.join($testdata, "gt.supp")+
                  " --leak-check=yes -q"
     elsif $systemname == "OpenBSD" then
       memcheck = "env MALLOC_OPTIONS='GJ'"
@@ -53,7 +53,6 @@ def run_test(str, opts = {})
 end
 
 # include the actual test modules
-# XXX require 'consensus_sa'
 require 'gt_bioseq_include'
 require 'gt_cds_include'
 require 'gt_csa_include'
