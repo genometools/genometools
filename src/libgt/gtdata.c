@@ -42,22 +42,34 @@ void gtdata_show_help(const char *progname, void *unused)
   Str *doc_file;
   lua_State *L;
   char *prog;
+
   assert(progname);
-  prog = xstrdup(progname);
+
+  prog = xstrdup(progname); /* create modifiable copy for splitter */
   splitter = splitter_new();
   splitter_split(splitter, prog, strlen(prog), ' ');
   doc_file = gtdata_get_path(splitter_get_token(splitter, 0));
   assert(doc_file);
   str_append_cstr(doc_file, "/doc/");
-  str_append_cstr(doc_file,
-                  splitter_get_token(splitter, splitter_size(splitter) - 1));
-  str_append_cstr(doc_file, ".lua");
+
+  /* create Lua & push gtdata_doc_dir to Lua */
   L = luaL_newstate();
   luaL_openlibs(L);
   if (!L)
     error("out of memory (cannot create new lua state)");
+  lua_pushstring(L, str_get(doc_file));
+  lua_setglobal(L, "gtdata_doc_dir");
+
+  /* finish creating doc_file */
+  str_append_cstr(doc_file,
+                  splitter_get_token(splitter, splitter_size(splitter) - 1));
+  str_append_cstr(doc_file, ".lua");
+
+  /* execute doc_file */
   if (luaL_loadfile(L, str_get(doc_file)) || lua_pcall(L, 0, 0, 0))
     error("cannot run doc file: %s", lua_tostring(L, -1));
+
+  /* free */
   lua_close(L);
   str_free(doc_file);
   splitter_free(splitter);
