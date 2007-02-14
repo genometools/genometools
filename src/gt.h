@@ -33,6 +33,7 @@
 #include <libgt/filter_stream.h>             /* filter stream class */
 #include <libgt/gff3_in_stream.h>            /* GFF3 input stream class */
 #include <libgt/gff3_out_stream.h>           /* GFF3 output stream class */
+#include <libgt/gtdata.h>                    /* gtdata/ module */
 #include <libgt/gtf_in_stream.h>             /* GTF input stream class */
 #include <libgt/genome_stream.h>             /* genome stream class */
 #include <libgt/grep.h>                      /* grep module */

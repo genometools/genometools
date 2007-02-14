@@ -67,6 +67,7 @@ static int parse_options(ExtractFeatArguments *arguments, int argc, char **argv)
   option_parser_add_option(op, option);
 
   /* parse */
+  option_parser_set_comment_func(op, gtdata_show_help, NULL);
   parsed_args = option_parser_parse_min_max_args(op, argc, argv, versionfunc,
                                                  1, 1);
   option_parser_free(op);
