@@ -142,6 +142,16 @@ static void extractfeat_visitor_genome_feature(GenomeVisitor *gv,
                                                /*@unused@*/ Log *l)
 {
   ExtractFeatVisitor *efv = extractfeat_visitor_cast(gv);
+  if (efv->regionmapping) { /* region mapping used -> determine bioseq */
+    if (!efv->sequence_file ||
+        str_cmp(efv->sequence_file, genome_node_get_seqid((GenomeNode*) gf))) {
+      str_free(efv->sequence_file);
+      efv->sequence_file = regionmapping_map(efv->regionmapping,
+                              str_get(genome_node_get_seqid((GenomeNode*) gf)));
+      bioseq_free(efv->bioseq);
+      efv->bioseq = bioseq_new_str(efv->sequence_file);
+    }
+  }
   genome_node_traverse_children((GenomeNode*) gf, efv, extract_feature, false);
 }
 
@@ -150,17 +160,7 @@ static void extractfeat_visitor_sequence_region(GenomeVisitor *gv,
                                                 /*@unused@*/ Log *l)
 {
   ExtractFeatVisitor *efv = extractfeat_visitor_cast(gv);
-  if (efv->regionmapping) { /* region mapping used -> determine bioseq */
-    if (!efv->sequence_file ||
-        str_cmp(efv->sequence_file, genome_node_get_seqid((GenomeNode*) sr))) {
-      str_free(efv->sequence_file);
-      efv->sequence_file = regionmapping_map(efv->regionmapping,
-                              str_get(genome_node_get_seqid((GenomeNode*) sr)));
-      bioseq_free(efv->bioseq);
-      efv->bioseq = bioseq_new_str(efv->sequence_file);
-    }
-  }
-  else { /* we have only one bioseq */
+  if (!efv->regionmapping) { /* we have only one bioseq */
     /* check if the given sequence file contains this sequence (region) */
     if (!bioseq_contains_sequence(efv->bioseq,
                                   str_get(genome_node_get_seqid((GenomeNode*)
