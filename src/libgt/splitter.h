@@ -11,7 +11,8 @@ typedef struct Splitter Splitter;
 
 Splitter*     splitter_new(void);
 
-/* split 'string' of given 'length' into tokens delimited by 'delimiter' */
+/* split 'string' of given 'length' into tokens delimited by 'delimiter'.
+   'string' is modified in the splitting process! */
 void          splitter_split(Splitter*, char *string, unsigned long length,
                              char delimiter);
 
