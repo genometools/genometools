@@ -7,7 +7,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "error.h"
 #include "fileutils.h"
+#include "splitter.h"
 #include "xansi.h"
 #include "xposix.h"
 
@@ -50,4 +52,69 @@ unsigned long file_number_of_lines(FILE *fp)
   }
   xfsetpos(fp, &current_pos);
   return number_of_lines;
+}
+
+Str* file_dirname(const char *file)
+{
+  long i;
+  Str *path;
+  for (i = strlen(file) - 1; i >= 0; i--) {
+    if (file[i] == '/')
+      break;
+  }
+  if (i) {
+    path = str_new();
+    str_append_cstr_nt(path, file, i);
+    return path;
+  }
+  return NULL;
+}
+
+Str* file_find_in_path(const char *file)
+{
+  char *pathvariable, *pathcomponent = NULL;
+  Splitter *splitter;
+  unsigned long i;
+  Str *path;
+
+  assert(file);
+
+  /* check if 'file' has dirname */
+  path = file_dirname(file);
+  if (path)
+    return path;
+  /* 'file' has no dirname -> scan $PATH */
+  pathvariable = getenv("PATH");
+  if (pathvariable)
+    pathvariable = xstrdup(pathvariable); /* make writeable copy */
+  else
+    error("environment variable $PATH is not defined");
+  splitter = splitter_new();
+
+  splitter_split(splitter, pathvariable, strlen(pathvariable), ':');
+  path = str_new();
+  for (i = 0; i < splitter_size(splitter); i++) {
+    pathcomponent = splitter_get_token(splitter, i);
+    str_set_length(path, 0);
+    str_append_cstr(path, pathcomponent);
+    str_append_char(path, '/');
+    str_append_cstr(path, file);
+    if (file_exists(str_get(path)))
+      break;
+  }
+
+  if (i < splitter_size(splitter)) { /* file found in path -> return path */
+    str_set_length(path, 0);
+    str_append_cstr(path, pathcomponent);
+  }
+  else { /* file not found in path -> return NULL */
+    str_free(path);
+    path = NULL;
+  }
+
+  /* free */
+  free(pathvariable);
+  splitter_free(splitter);
+
+  return path;
 }
