@@ -17,5 +17,4 @@ print([[
 The first form defines a Lua (http://www.lua.org/) table named ``mapping''
 which maps each sequence region to the corresponding sequence file.
 The second one defines a Lua function ``mapping'', which has to return the
-sequence file name when it is called with the sequence_region as argument.
-]])
+sequence file name when it is called with the sequence_region as argument.]])
