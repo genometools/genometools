@@ -44,7 +44,8 @@ int gt_eval(int argc, char *argv[])
                 *prediction_stream;
   Stream_evaluator *evaluator;
   EvalArguments arguments;
-  int parsed_args;
+  int has_err, parsed_args;
+  Error *err = error_new();
 
   /* option parsing */
   parsed_args = parse_options(&arguments, argc, argv);
@@ -61,13 +62,17 @@ int gt_eval(int argc, char *argv[])
   evaluator = stream_evaluator_new(reality_stream, prediction_stream);
 
   /* compute the evaluation */
-  stream_evaluator_evaluate(evaluator, arguments.verbose, arguments.exondiff);
+  has_err = stream_evaluator_evaluate(evaluator, arguments.verbose,
+                                      arguments.exondiff, err);
 
   /* show the evaluation */
-  stream_evaluator_show(evaluator, stdout);
+  if (!has_err)
+    stream_evaluator_show(evaluator, stdout);
 
   /* free */
   stream_evaluator_free(evaluator);
+  error_abort(err);
+  error_free(err);
 
   return EXIT_SUCCESS;
 }

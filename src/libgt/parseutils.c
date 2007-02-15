@@ -11,52 +11,54 @@
 #include "parseutils.h"
 #include "undef.h"
 
-Range parse_range(const char *start, const char *end, unsigned long line_number,
-                  const char *filename, Error *err)
+int parse_range(Range *range, const char *start, const char *end,
+                unsigned long line_number, const char *filename, Error *err)
 {
-  Range range;
   long start_val, end_val;
   int rval;
 
   assert(start && end && line_number && filename);
+  error_check(err);
 
-  range.start = UNDEFULONG;
-  range.end = UNDEFULONG;
+  range->start = UNDEFULONG;
+  range->end = UNDEFULONG;
 
-  /* start */
+  /* parse and check start */
   if ((rval = sscanf(start, "%ld", &start_val)) != 1) {
     error_set(err, "could not parse start '%s' on line %lu in file '%s'",
               start, line_number, filename);
-    return range;
+    return -1;
   }
   if (start_val < 0) {
     error_set(err, "start '%s' is negative on line %lu in file '%s'",
               start, line_number, filename);
-    return range;
+    return -1;
   }
 
-  /* end */
+  /* parse and check end */
   if ((rval = sscanf(end, "%ld", &end_val)) != 1) {
     error_set(err, "could not parse end '%s' on line %lu in file '%s'",
               end, line_number, filename);
-    return range;
+    return -1;
   }
   if (end_val < 0) {
     error_set(err, "end '%s' is negative on line %lu in file '%s'", end,
               line_number, filename);
-    return range;
+    return -1;
   }
 
-  /* range */
-  range.start = start_val;
-  range.end = end_val;
-  if (range.start > range.end) {
+  /* check range */
+  if (start_val > end_val) {
     error_set(err, "start '%lu' is larger then end '%lu' on line %lu in "
-              "file '%s'", range.start, range.end, line_number, filename);
-    return range;
+              "file '%s'", start_val, end_val, line_number, filename);
+    return -1;
   }
 
-  return range;
+  /* set result */
+  range->start = start_val;
+  range->end = end_val;
+
+  return 0;
 }
 
 double parse_score(const char *score, unsigned long line_number,

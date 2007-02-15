@@ -48,12 +48,13 @@ int gt_gtf2gff3(int argc, char *argv[])
   gff3_out_stream = gff3_out_stream_new(gtf_in_stream, stdout);
 
   /* pull the features through the stream and free them afterwards */
-  while ((gn = genome_stream_next_tree(gff3_out_stream, NULL)))
+  while (!genome_stream_next_tree(gff3_out_stream, &gn, NULL, err) && gn)
     genome_node_rec_free(gn);
 
   /* free */
   genome_stream_free(gff3_out_stream);
   genome_stream_free(gtf_in_stream);
+  error_abort(err);
   error_free(err);
 
   return EXIT_SUCCESS;

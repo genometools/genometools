@@ -19,13 +19,17 @@ struct CDS_stream
 #define cds_stream_cast(GS)\
         genome_stream_cast(cds_stream_class(), GS)
 
-static GenomeNode* cds_stream_next_tree(GenomeStream *gs, Log *l)
+static int cds_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
+                                Error *err)
 {
-  CDS_stream *cds_stream = cds_stream_cast(gs);
-  GenomeNode *gn = genome_stream_next_tree(cds_stream->in_stream, l);
-  if (gn)
-    genome_node_accept(gn, cds_stream->cds_visitor, l);
-  return gn;
+  CDS_stream *cds_stream;
+  int has_err;
+  error_check(err);
+  cds_stream = cds_stream_cast(gs);
+  has_err = genome_stream_next_tree(cds_stream->in_stream, gn, l, err);
+  if (!has_err && *gn)
+    genome_node_accept(*gn, cds_stream->cds_visitor, l);
+  return has_err;
 }
 
 static void cds_stream_free(GenomeStream *gs)
@@ -37,8 +41,8 @@ static void cds_stream_free(GenomeStream *gs)
 const GenomeStreamClass* cds_stream_class(void)
 {
   static const GenomeStreamClass gsc = { sizeof(CDS_stream),
-                                           cds_stream_next_tree,
-                                           cds_stream_free };
+                                         cds_stream_next_tree,
+                                         cds_stream_free };
   return &gsc;
 }
 

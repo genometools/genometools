@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -51,55 +51,69 @@ static void consolidate_sequence_regions(GenomeNode *gn_a, GenomeNode *gn_b)
   genome_node_set_range(gn_a, range_a);
 }
 
-GenomeNode* merge_stream_next_tree(GenomeStream *gs, Log *l)
+int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
+                           Error *err)
 {
-  Merge_stream *ms = merge_stream_cast(gs);
+  Merge_stream *ms;
   GenomeNode *min_node = NULL;
   unsigned long i, j, min_i = UNDEFULONG;
   unsigned int genome_node_consolidated;
+  int has_err = 0;
+
+  error_check(err);
+
+  ms = merge_stream_cast(gs);
 
   /* fill buffers */
   for (i = 0; i < array_size(ms->genome_streams); i++) {
-    if (!ms->buffer[i])
-      ms->buffer[i] = genome_stream_next_tree(*(GenomeStream**)
-                                              array_get(ms->genome_streams, i),
-                                              l);
+    if (!ms->buffer[i]) {
+      has_err = genome_stream_next_tree(*(GenomeStream**)
+                                        array_get(ms->genome_streams, i),
+                                        ms->buffer + i, l, err);
+      if (has_err)
+        break;
+    }
   }
 
   /* consolidate sequence regions (to avoid duplicates) */
-  for (;;) {
-    genome_node_consolidated = 0;
-    for (i = 0; i < array_size(ms->genome_streams); i++) {
-      for (j = i+1; j < array_size(ms->genome_streams); j++) {
-        assert(i != j);
-        if (genome_nodes_are_equal_sequence_regions(ms->buffer[i],
-                                                    ms->buffer[j])) {
-          consolidate_sequence_regions(ms->buffer[i], ms->buffer[j]);
-          genome_node_rec_free(ms->buffer[j]);
-          ms->buffer[j] = NULL;
+  if (!has_err) {
+    for (;;) {
+      genome_node_consolidated = 0;
+      for (i = 0; i < array_size(ms->genome_streams); i++) {
+        for (j = i+1; j < array_size(ms->genome_streams); j++) {
+          assert(i != j);
+          if (genome_nodes_are_equal_sequence_regions(ms->buffer[i],
+                                                      ms->buffer[j])) {
+            consolidate_sequence_regions(ms->buffer[i], ms->buffer[j]);
+            genome_node_rec_free(ms->buffer[j]);
+            ms->buffer[j] = NULL;
+          }
         }
       }
+      if (!genome_node_consolidated)
+        break;
     }
-    if (!genome_node_consolidated)
-      break;
   }
 
   /* find minimal node */
-  for (i = 0; i < array_size(ms->genome_streams); i++) {
-    if (ms->buffer[i]) {
-      if (min_i != UNDEFULONG) {
-        if (genome_node_compare(ms->buffer + i, ms->buffer + min_i) < 0)
-          min_i = i;
+  if (!has_err) {
+    for (i = 0; i < array_size(ms->genome_streams); i++) {
+      if (ms->buffer[i]) {
+        if (min_i != UNDEFULONG) {
+          if (genome_node_compare(ms->buffer + i, ms->buffer + min_i) < 0)
+            min_i = i;
+        }
+        else min_i = i;
       }
-      else min_i = i;
+    }
+    if (min_i != UNDEFULONG) {
+      min_node = ms->buffer[min_i];
+      ms->buffer[min_i] = NULL;
     }
   }
 
-  if (min_i != UNDEFULONG) {
-    min_node = ms->buffer[min_i];
-    ms->buffer[min_i] = NULL;
-  }
-  return min_node;
+  *gn = min_node;
+  return has_err;
 }
 
 static void merge_stream_free(GenomeStream *gs)

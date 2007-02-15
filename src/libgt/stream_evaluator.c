@@ -692,8 +692,8 @@ void determine_missing_features(void *key, void *value, void *data)
   }
 }
 
-void stream_evaluator_evaluate(Stream_evaluator *se, bool verbose,
-                               bool exondiff)
+int stream_evaluator_evaluate(Stream_evaluator *se, bool verbose,
+                               bool exondiff, Error *err)
 {
   GenomeNode *gn;
   SequenceRegion *sr;
@@ -701,8 +701,10 @@ void stream_evaluator_evaluate(Stream_evaluator *se, bool verbose,
   Slot *slot;
   Process_real_feature_data process_real_feature_data;
   Process_predicted_feature_info info;
+  int has_err;
 
   assert(se);
+  error_check(err);
 
   /* init */
   process_real_feature_data.verbose = verbose;
@@ -716,7 +718,8 @@ void stream_evaluator_evaluate(Stream_evaluator *se, bool verbose,
   info.wrong_mRNAs = &se->wrong_mRNAs;
 
   /* process the reality stream completely */
-  while ((gn = genome_stream_next_tree(se->reality, NULL))) {
+  while (!(has_err = genome_stream_next_tree(se->reality, &gn, NULL, err)) &&
+         gn) {
     sr = genome_node_cast(sequence_region_class(), gn);
     if (sr) {
       /* each sequence region gets its own ``slot'' */
@@ -745,32 +748,39 @@ void stream_evaluator_evaluate(Stream_evaluator *se, bool verbose,
   }
 
   /* set the actuals and sort them */
-  hashtable_foreach(se->real_features, set_actuals_and_sort_them, se);
+  if (!has_err)
+    hashtable_foreach(se->real_features, set_actuals_and_sort_them, se);
 
   /* process the prediction stream */
-  while ((gn = genome_stream_next_tree(se->prediction, NULL))) {
-    gf = genome_node_cast(genome_feature_class(), gn);
-    /* we consider only genome features */
-    if (gf) {
-      /* get (real) slot */
-      slot = hashtable_get(se->real_features,
-                           str_get(genome_node_get_seqid(gn)));
-      if (slot) {
-        info.slot = slot;
-        genome_node_traverse_children(gn, &info, process_predicted_feature,
-                                      false);
+  if (!has_err) {
+    while (!(has_err = genome_stream_next_tree(se->prediction, &gn, NULL, err))
+           && gn) {
+      gf = genome_node_cast(genome_feature_class(), gn);
+      /* we consider only genome features */
+      if (gf) {
+        /* get (real) slot */
+        slot = hashtable_get(se->real_features,
+                             str_get(genome_node_get_seqid(gn)));
+        if (slot) {
+          info.slot = slot;
+          genome_node_traverse_children(gn, &info, process_predicted_feature,
+                                        false);
+        }
+        else {
+          /* we got no (real) slot */
+          warning("sequence id \"%s\" (with predictions) not given in "
+                  "``reality''", str_get(genome_node_get_seqid(gn)));
+        }
       }
-      else {
-        /* we got no (real) slot */
-        warning("sequence id \"%s\" (with predictions) not given in "
-                "``reality''", str_get(genome_node_get_seqid(gn)));
-      }
+      genome_node_rec_free(gn);
     }
-    genome_node_rec_free(gn);
   }
 
   /* determine the missing mRNAs */
-  hashtable_foreach(se->real_features, determine_missing_features, se);
+  if (!has_err)
+    hashtable_foreach(se->real_features, determine_missing_features, se);
+
+  return has_err;
 }
 
 void stream_evaluator_show(Stream_evaluator *se, FILE *outfp)

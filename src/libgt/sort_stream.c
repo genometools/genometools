@@ -21,28 +21,40 @@ struct Sort_stream
 #define sort_stream_cast(GS)\
         genome_stream_cast(sort_stream_class(), GS);
 
-static GenomeNode* sort_stream_next_tree(GenomeStream *gs, Log *l)
+static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
+                                 Error *err)
 {
   Sort_stream *sort_stream;
-  GenomeNode *gn;
-
+  int has_err = 0;
+  error_check(err);
   sort_stream = sort_stream_cast(gs);
 
   if (!sort_stream->sorted) {
-    while ((gn = genome_stream_next_tree(sort_stream->in_stream, l)) != NULL)
-      array_add(sort_stream->trees, gn);
-    genome_nodes_sort_stable(sort_stream->trees);
-    sort_stream->sorted = true;
+    while (!(has_err = genome_stream_next_tree(sort_stream->in_stream, gn, l,
+             err)) && *gn) {
+      array_add(sort_stream->trees, *gn);
+    }
+    if (!has_err) {
+      genome_nodes_sort_stable(sort_stream->trees);
+      sort_stream->sorted = true;
+    }
   }
 
-  assert(sort_stream->sorted);
-  if (sort_stream->idx < array_size(sort_stream->trees)) {
-    gn = *(GenomeNode**) array_get(sort_stream->trees, sort_stream->idx);
-    sort_stream->idx++;
-    return gn;
+  if (!has_err) {
+    assert(sort_stream->sorted);
+    if (sort_stream->idx < array_size(sort_stream->trees)) {
+      *gn = *(GenomeNode**) array_get(sort_stream->trees, sort_stream->idx);
+      sort_stream->idx++;
+      return 0;
+    }
   }
-  array_set_size(sort_stream->trees, 0);
-  return NULL;
+
+  if (!has_err) {
+    array_set_size(sort_stream->trees, 0);
+    *gn = NULL;
+  }
+
+  return has_err;
 }
 
 static void sort_stream_free(GenomeStream *gs)

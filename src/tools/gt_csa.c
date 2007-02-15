@@ -63,6 +63,7 @@ int gt_csa(int argc, char *argv[])
   GenomeNode *gn;
   Csa_arguments arguments;
   int parsed_args;
+  Error *err = error_new();
 
   /* option parsing */
   parsed_args = parse_options(&arguments, argc, argv);
@@ -75,8 +76,10 @@ int gt_csa(int argc, char *argv[])
   gff3_out_stream = gff3_out_stream_new(csa_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while ((gn = genome_stream_next_tree(gff3_out_stream, arguments.log)))
+  while (!genome_stream_next_tree(gff3_out_stream, &gn, arguments.log, err) &&
+         gn) {
     genome_node_rec_free(gn);
+  }
 
   /* free */
   genome_stream_free(gff3_out_stream);
@@ -85,6 +88,9 @@ int gt_csa(int argc, char *argv[])
   log_free(arguments.log);
   if (arguments.outfp != stdout)
     xfclose(arguments.outfp);
+
+  error_abort(err);
+  error_free(err);
 
   return EXIT_SUCCESS;
 }

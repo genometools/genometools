@@ -34,16 +34,19 @@ struct Gff3_in_stream
 #define gff3_in_stream_cast(GS)\
         genome_stream_cast(gff3_in_stream_class(), GS)
 
-static GenomeNode* gff3_in_stream_next_tree(GenomeStream *gs,
-                                             /*@unused@*/ Log *l)
+static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
+                                    /*@unused@*/ Log *l, Error *err)
 {
   Gff3_in_stream *is = gff3_in_stream_cast(gs);
   unsigned long i;
-  int rval;
+  int has_err = 0, status_code;
+
+  error_check(err);
 
   if (queue_size(is->genome_node_buffer)) {
     /* we still have a node in the buffer -> serve it from there */
-    return *(GenomeNode**) queue_get(is->genome_node_buffer);
+    *gn = *(GenomeNode**) queue_get(is->genome_node_buffer);
+    return 0;
   }
 
   /* the buffer is empty */
@@ -79,16 +82,19 @@ static GenomeNode* gff3_in_stream_next_tree(GenomeStream *gs,
         progressbar_start(&is->line_number, file_number_of_lines(is->fpin));
     }
 
-    assert(is->fpin);
+    assert(is->fpin); /* file is open */
 
-    if ((rval = gff3_parse_genome_nodes(is->gff3_parser,
-                                        is->genome_node_buffer,
-                                        array_size(is->files)
-                                        ? *(char**) array_get(is->files,
-                                                              is->next_file-1)
-                                        : "stdin",
-                                        &is->line_number,
-                                        is->fpin)) == EOF) {
+    has_err = gff3_parse_genome_nodes(&status_code, is->gff3_parser,
+                                      is->genome_node_buffer,
+                                      array_size(is->files)
+                                      ? *(char**) array_get(is->files,
+                                                            is->next_file-1)
+                                      : "stdin",
+                                      &is->line_number, is->fpin, err);
+    if (has_err)
+      break;
+
+    if (status_code == EOF) {
       /* end of current file */
       if (is->non_stdin_file_is_open) {
         assert(is->fpin);
@@ -98,10 +104,13 @@ static GenomeNode* gff3_in_stream_next_tree(GenomeStream *gs,
       }
       is->fpin = NULL;
       gff3_reset(is->gff3_parser);
-      if (!array_size(is->files)) break;
+      if (!array_size(is->files))
+        break;
       continue;
     }
+
     assert(queue_size(is->genome_node_buffer));
+
     /* make sure the parsed nodes are sorted */
     if (is->ensure_sorting) {
       for (i = 0; i < queue_size(is->genome_node_buffer); i++) {
@@ -119,9 +128,12 @@ static GenomeNode* gff3_in_stream_next_tree(GenomeStream *gs,
         }
       }
     }
-    return *(GenomeNode**) queue_get(is->genome_node_buffer);
+    *gn = *(GenomeNode**) queue_get(is->genome_node_buffer);
+    assert(!has_err);
+    return 0;
   }
-  return NULL;
+  *gn = NULL;
+  return has_err;
 }
 
 static void gff3_in_stream_free(GenomeStream *gs)

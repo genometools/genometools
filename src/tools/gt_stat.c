@@ -60,9 +60,10 @@ int gt_stat(int argc, char *argv[])
 {
   GenomeStream *gff3_in_stream;
   GenomeNode *gn;
-  int parsed_args;
+  int has_err, parsed_args;
   Stat_arguments arguments;
   Stat_info info;
+  Error *err = error_new();
 
   /* option parsing */
   parsed_args = parse_options(&arguments, argc, argv);
@@ -79,19 +80,24 @@ int gt_stat(int argc, char *argv[])
 
   /* pull the features through the stream , compute the statistics, and free
      them afterwards */
-  while ((gn = genome_stream_next_tree(gff3_in_stream, NULL))) {
+  while (!(has_err = genome_stream_next_tree(gff3_in_stream, &gn, NULL, err)) &&
+         gn) {
     info.number_of_trees++;
     genome_node_traverse_children(gn, &info, compute_statistics, 1);
     genome_node_rec_free(gn);
   }
 
   /* show statistics */
-  printf("parsed feature trees: %lu\n", info.number_of_trees);
-  stat_visitor_show_stats(info.stat_visitor);
+  if (!has_err) {
+    printf("parsed feature trees: %lu\n", info.number_of_trees);
+    stat_visitor_show_stats(info.stat_visitor);
+  }
 
   /* free */
   genome_visitor_free(info.stat_visitor);
   genome_stream_free(gff3_in_stream);
+  error_abort(err);
+  error_free(err);
 
   return EXIT_SUCCESS;
 }

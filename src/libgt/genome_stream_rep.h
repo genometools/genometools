@@ -13,8 +13,8 @@
 struct GenomeStreamClass
 {
   size_t size;
-  GenomeNode* (*next_tree)(GenomeStream*, Log*);
-  void         (*free)(GenomeStream*);
+  int (*next_tree)(GenomeStream*, GenomeNode**, Log*, Error*);
+  void        (*free)(GenomeStream*);
 };
 
 struct GenomeStream

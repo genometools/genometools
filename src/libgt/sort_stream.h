@@ -13,6 +13,6 @@
 typedef struct Sort_stream Sort_stream;
 
 const GenomeStreamClass* sort_stream_class(void);
-GenomeStream*             sort_stream_new(GenomeStream*);
+GenomeStream*            sort_stream_new(GenomeStream*);
 
 #endif

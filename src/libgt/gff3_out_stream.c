@@ -18,15 +18,17 @@ struct Gff3_out_stream {
 #define gff3_out_stream_cast(GS)\
         genome_stream_cast(gff3_out_stream_class(), GS);
 
-static GenomeNode* gff3_out_stream_next_tree(GenomeStream *gs, Log *l)
+static int gff3_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
+                                     Error *err)
 {
   Gff3_out_stream *gff3_out_stream;
-  GenomeNode *gn;
+  int has_err;
+  error_check(err);
   gff3_out_stream = gff3_out_stream_cast(gs);
-  gn = genome_stream_next_tree(gff3_out_stream->in_stream, l);
-  if (gn)
-    genome_node_accept(gn, gff3_out_stream->gff3_visitor, l);
-  return gn;
+  has_err = genome_stream_next_tree(gff3_out_stream->in_stream, gn, l, err);
+  if (!has_err && *gn)
+    genome_node_accept(*gn, gff3_out_stream->gff3_visitor, l);
+  return has_err;
 }
 
 static void gff3_out_stream_free(GenomeStream *gs)

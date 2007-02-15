@@ -14,8 +14,8 @@ typedef struct Stream_evaluator Stream_evaluator;
 /* takes ownership of the given streams */
 Stream_evaluator* stream_evaluator_new(GenomeStream *reality,
                                        GenomeStream *prediction);
-void              stream_evaluator_evaluate(Stream_evaluator*,
-                                            bool verbose, bool exondiff);
+int               stream_evaluator_evaluate(Stream_evaluator*, bool verbose,
+                                            bool exondiff, Error*);
 void              stream_evaluator_show(Stream_evaluator*, FILE*);
 void              stream_evaluator_free(Stream_evaluator*);
 

@@ -21,27 +21,31 @@ struct Filter_stream
 #define filter_stream_cast(GS)\
         genome_stream_cast(filter_stream_class(), GS);
 
-static GenomeNode* filter_stream_next_tree(GenomeStream *gs, Log *l)
+static int filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
+                                   Error *err)
 {
   Filter_stream *fs;
-  GenomeNode *gn;
   Genome_feature *gf;
+  int has_err;
+
+  error_check(err);
 
   fs = filter_stream_cast(gs);
 
   /* enforce maximum gene length */
   /* XXX: we (spuriously) assume that genes are always root nodes */
-  while ((gn = genome_stream_next_tree(fs->in_stream, l))) {
+  while (!(has_err = genome_stream_next_tree(fs->in_stream, gn, l, err)) &&
+         *gn) {
     /* XXX: use visitor pattern */
-    gf = genome_node_cast(genome_feature_class(), gn);
+    gf = genome_node_cast(genome_feature_class(), *gn);
     if (gf && genome_feature_get_type(gf) == gft_gene) {
       if (fs->max_gene_length != UNDEFULONG &&
-         range_length(genome_node_get_range(gn)) > fs->max_gene_length) {
-        genome_node_rec_free(gn);
+         range_length(genome_node_get_range(*gn)) > fs->max_gene_length) {
+        genome_node_rec_free(*gn);
       }
       else if (fs->min_gene_score != UNDEFDOUBLE &&
                genome_feature_get_score(gf) < fs->min_gene_score) {
-        genome_node_rec_free(gn);
+        genome_node_rec_free(*gn);
       }
       else
         break;
@@ -50,7 +54,7 @@ static GenomeNode* filter_stream_next_tree(GenomeStream *gs, Log *l)
       break;
   }
 
-  return gn;
+  return has_err;
 }
 
 const GenomeStreamClass* filter_stream_class(void)

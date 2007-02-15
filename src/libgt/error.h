@@ -7,6 +7,7 @@
 #ifndef ERROR_H
 #define ERROR_H
 
+#include <assert.h>
 #include <stdbool.h>
 
 /* simple error interface: print an error and exit */

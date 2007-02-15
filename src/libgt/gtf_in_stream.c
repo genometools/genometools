@@ -20,20 +20,21 @@ struct Gtf_in_stream
 #define gtf_in_stream_cast(GS)\
         genome_stream_cast(gtf_in_stream_class(), GS)
 
-static GenomeNode* gtf_in_stream_next_tree(GenomeStream *gs,
-                                            /*@unused@*/ Log *l)
+static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
+                                   /*@unused@*/ Log *l, Error *err)
 {
-  Gtf_in_stream *is = gtf_in_stream_cast(gs);
-
+  Gtf_in_stream *is;
+  error_check(err);
+  is = gtf_in_stream_cast(gs);
   if (queue_size(is->genome_node_buffer)) {
     /* we still have a node in the buffer -> serve it from there */
-    return *(GenomeNode**) queue_get(is->genome_node_buffer);
+    *gn = *(GenomeNode**) queue_get(is->genome_node_buffer);
+    return 0;
   }
-
   /* the buffer is empty */
   assert(!queue_size(is->genome_node_buffer));
-
-  return NULL;
+  *gn = NULL;
+  return 0;
 }
 
 static void gtf_in_stream_free(GenomeStream *gs)

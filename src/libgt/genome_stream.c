@@ -53,14 +53,17 @@ void genome_stream_free(GenomeStream *gs)
   free(gs);
 }
 
-GenomeNode* genome_stream_next_tree(GenomeStream *gs, Log *l)
+int genome_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
+                            Error *err)
 {
-  GenomeNode *gn;
+  int has_err;
   assert(gs && gs->c_class && gs->c_class->next_tree);
-  gn = gs->c_class->next_tree(gs, l);
-  if (gn && gs->ensure_sorting)
-    assert(genome_node_tree_is_sorted(&gs->last_node, gn));
-  return gn;
+  error_check(err);
+  has_err = gs->c_class->next_tree(gs, gn, l, err);
+  if (!has_err && *gn && gs->ensure_sorting) {
+    assert(genome_node_tree_is_sorted(&gs->last_node, *gn));
+  }
+  return has_err;
 }
 
 bool genome_stream_is_sorted(GenomeStream *gs)

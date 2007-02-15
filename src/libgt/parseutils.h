@@ -13,7 +13,7 @@
 #include "strand.h"
 
 /* enforces that start <= end */
-Range  parse_range(const char *start, const char *end,
+int    parse_range(Range*, const char *start, const char *end,
                    unsigned long line_number, const char *filename, Error*);
 
 /* returns UNDEFDOUBLE if strcmp(score, ".") == 0 */

@@ -53,11 +53,11 @@ void gff3_set_offset(GFF3Parser *gff3_parser, long offset)
   gff3_parser->offset = offset;
 }
 
-static void parse_regular_gff3_line(GFF3Parser *gff3_parser,
-                                    Queue *genome_nodes, char *line,
-                                    size_t line_length, const char *filename,
-                                    unsigned long line_number,
-                                    bool *break_loop)
+static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
+                                   Queue *genome_nodes, char *line,
+                                   size_t line_length, const char *filename,
+                                   unsigned long line_number,
+                                   bool *break_loop, Error *err)
 {
   GenomeNode *gn, *genome_feature = NULL, *parent_gf;
   GenomeFeatureType gft;
@@ -71,6 +71,9 @@ static void parse_regular_gff3_line(GFF3Parser *gff3_parser,
        *phase, *attributes, *token, *tmp_token, **tokens;
   bool out_node_complete = true, is_child = false;
   unsigned long i;
+  int has_err;
+
+  error_check(err);
 
   /* create splitter */
   splitter = splitter_new();
@@ -102,82 +105,93 @@ static void parse_regular_gff3_line(GFF3Parser *gff3_parser,
   }
 
   /* parse the range */
-  range = parse_range(start, end, line_number, filename, NULL);
-  if (gff3_parser->offset != UNDEFLONG)
+  has_err = parse_range(&range, start, end, line_number, filename, err);
+
+  if (!has_err && gff3_parser->offset != UNDEFLONG)
     range = range_offset(range, gff3_parser->offset, line_number);
 
   /* parse the score */
-  score_value = parse_score(score, line_number, filename, NULL);
+  if (!has_err)
+    score_value = parse_score(score, line_number, filename, NULL);
 
   /* parse the strand */
-  strand_value = parse_strand(strand, line_number, filename, NULL);
+  if (!has_err)
+    strand_value = parse_strand(strand, line_number, filename, NULL);
 
   /* parse the phase */
-  phase_value = parse_phase(phase, line_number, filename, NULL);
+  if (!has_err)
+    phase_value = parse_phase(phase, line_number, filename, NULL);
 
   /* parse the unique id and the parents */
-  splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
-  for (i = 0; i < splitter_size(attribute_splitter); i++) {
-    token = splitter_get_token(attribute_splitter, i);
-    if (strncmp(token, ID_STRING, strlen(ID_STRING)) == 0) {
-      if (id) {
-        error("more then one %s token on line %lu in file \"%s\"", ID_STRING,
-              line_number, filename);
+  if (!has_err) {
+    splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
+    for (i = 0; i < splitter_size(attribute_splitter); i++) {
+      token = splitter_get_token(attribute_splitter, i);
+      if (strncmp(token, ID_STRING, strlen(ID_STRING)) == 0) {
+        if (id) {
+          error("more then one %s token on line %lu in file \"%s\"", ID_STRING,
+                line_number, filename);
+        }
+        splitter_reset(tmp_splitter);
+        splitter_split(tmp_splitter, token, strlen(token), '=');
+        if (splitter_size(tmp_splitter) != 2) {
+          error("token \"%s\" on line %lu in file \"%s\" does not contain "
+                "exactly one '='", token, line_number, filename);
+        }
+        id = xstrdup(splitter_get_token(tmp_splitter, 1));
       }
-      splitter_reset(tmp_splitter);
-      splitter_split(tmp_splitter, token, strlen(token), '=');
-      if (splitter_size(tmp_splitter) != 2) {
-        error("token \"%s\" on line %lu in file \"%s\" does not contain "
-              "exactly one '='", token, line_number, filename);
+      else if (strncmp(token, PARENT_STRING, strlen(PARENT_STRING)) == 0) {
+        splitter_reset(tmp_splitter);
+        splitter_split(tmp_splitter, token, strlen(token), '=');
+        if (splitter_size(tmp_splitter) != 2) {
+          error("token \"%s\" on line %lu in file \"%s\" does not contain "
+                "exactly one '='", token, line_number, filename);
+        }
+        tmp_token = splitter_get_token(tmp_splitter, 1);
+        splitter_split(parents_splitter, tmp_token, strlen(tmp_token), ',');
+        assert(splitter_size(parents_splitter));
       }
-      id = xstrdup(splitter_get_token(tmp_splitter, 1));
+      /* XXX: add other attributes here */
     }
-    else if (strncmp(token, PARENT_STRING, strlen(PARENT_STRING)) == 0) {
-      splitter_reset(tmp_splitter);
-      splitter_split(tmp_splitter, token, strlen(token), '=');
-      if (splitter_size(tmp_splitter) != 2) {
-        error("token \"%s\" on line %lu in file \"%s\" does not contain "
-              "exactly one '='", token, line_number, filename);
-      }
-      tmp_token = splitter_get_token(tmp_splitter, 1);
-      splitter_split(parents_splitter, tmp_token, strlen(tmp_token), ',');
-      assert(splitter_size(parents_splitter));
-    }
-
-    /* XXX: add other attributes here */
   }
 
   /* create the feature */
-  genome_feature = genome_feature_new(gft, range, strand_value, filename,
-                                      line_number);
+  if (!has_err) {
+    genome_feature = genome_feature_new(gft, range, strand_value, filename,
+                                        line_number);
+  }
 
   /* set seqid */
-  seqid_str = hashtable_get(gff3_parser->seqid_to_str_mapping, seqid);
-  if (!seqid_str) {
-    error("seqid \"%s\" on line %lu in file \"%s\" has not been previously "
-          "introduced with a \"%s\" line", seqid, line_number, filename,
-              GFF_SEQUENCE_REGION);
+  if (!has_err) {
+    seqid_str = hashtable_get(gff3_parser->seqid_to_str_mapping, seqid);
+    if (!seqid_str) {
+      error("seqid \"%s\" on line %lu in file \"%s\" has not been previously "
+            "introduced with a \"%s\" line", seqid, line_number, filename,
+            GFF_SEQUENCE_REGION);
+    }
+    assert(seqid_str);
+    genome_node_set_seqid(genome_feature, seqid_str);
   }
-  assert(seqid_str);
-  genome_node_set_seqid(genome_feature, seqid_str);
 
   /* set source */
-  source_str = hashtable_get(gff3_parser->source_to_str_mapping, source);
-  if (!source_str) {
-    source_str = str_new_cstr(source);
-    hashtable_add(gff3_parser->source_to_str_mapping, str_get(source_str),
-                  source_str);
+  if (!has_err) {
+    source_str = hashtable_get(gff3_parser->source_to_str_mapping, source);
+    if (!source_str) {
+      source_str = str_new_cstr(source);
+      hashtable_add(gff3_parser->source_to_str_mapping, str_get(source_str),
+                    source_str);
+    }
+    assert(source_str);
+    genome_node_set_source(genome_feature, source_str);
   }
-  assert(source_str);
-  genome_node_set_source(genome_feature, source_str);
 
-  if (score_value != UNDEFDOUBLE)
+  if (!has_err && score_value != UNDEFDOUBLE)
     genome_feature_set_score((Genome_feature*) genome_feature, score_value);
-  if (phase_value != PHASE_UNDEFINED)
+  if (!has_err && phase_value != PHASE_UNDEFINED)
     genome_node_set_phase(genome_feature, phase_value);
 
   /* store id */
-  if (id) {
+  if (!has_err && id) {
     if ((gn = hashtable_get(gff3_parser->id_to_genome_node_mapping, id))) {
       /* this id has been used already -> raise error */
       error("the %s \"%s\" on line %lu in file \"%s\" has been used "
@@ -188,21 +202,23 @@ static void parse_regular_gff3_line(GFF3Parser *gff3_parser,
     hashtable_add(gff3_parser->id_to_genome_node_mapping, id, genome_feature);
   }
 
-  for (i = 0; i < splitter_size(parents_splitter); i++) {
-    parent_gf = hashtable_get(gff3_parser->id_to_genome_node_mapping,
-                              splitter_get_token(parents_splitter, i));
-    if (!parent_gf) {
-      error("%s \"%s\" on line %lu in file \"%s\" has not been previously "
-            "defined (via \"%s=\")", PARENT_STRING,
-                splitter_get_token(parents_splitter, i), line_number,
-                filename, ID_STRING);
+  if (!has_err) {
+    for (i = 0; i < splitter_size(parents_splitter); i++) {
+      parent_gf = hashtable_get(gff3_parser->id_to_genome_node_mapping,
+                                splitter_get_token(parents_splitter, i));
+      if (!parent_gf) {
+        error("%s \"%s\" on line %lu in file \"%s\" has not been previously "
+              "defined (via \"%s=\")", PARENT_STRING,
+                  splitter_get_token(parents_splitter, i), line_number,
+                  filename, ID_STRING);
+      }
+      genome_node_is_part_of_genome_node(parent_gf, genome_feature);
+      out_node_complete = false;
+      is_child = true;
     }
-    genome_node_is_part_of_genome_node(parent_gf, genome_feature);
-    out_node_complete = false;
-    is_child = true;
+    assert(genome_feature);
   }
 
-  assert(genome_feature);
   gn = is_child ? NULL : genome_feature;
 
   if (gn)
@@ -216,6 +232,7 @@ static void parse_regular_gff3_line(GFF3Parser *gff3_parser,
   splitter_free(tmp_splitter);
   splitter_free(parents_splitter);
 
+  return has_err;
 }
 
 static void parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
@@ -323,16 +340,19 @@ static void parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   }
 }
 
-int gff3_parse_genome_nodes(GFF3Parser *gff3_parser,
+int gff3_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
                             Queue *genome_nodes,
                             const char *filename,
                             unsigned long *line_number,
-                            FILE *fpin)
+                            FILE *fpin, Error *err)
 {
   bool break_loop = false;
   size_t line_length;
   Str *line_buffer;
   char *line;
+  int has_err = 0;
+
+  error_check(err);
 
   /* init */
   line_buffer = str_new();
@@ -359,9 +379,10 @@ int gff3_parse_genome_nodes(GFF3Parser *gff3_parser,
         break;
     }
     else {
-      parse_regular_gff3_line(gff3_parser, genome_nodes, line, line_length,
-                              filename, *line_number, &break_loop);
-      if (break_loop)
+      has_err = parse_regular_gff3_line(gff3_parser, genome_nodes, line,
+                                        line_length, filename, *line_number,
+                                        &break_loop, err);
+      if (has_err || break_loop)
         break;
     }
     str_reset(line_buffer);
@@ -369,8 +390,10 @@ int gff3_parse_genome_nodes(GFF3Parser *gff3_parser,
 
   str_free(line_buffer);
   if (queue_size(genome_nodes))
-    return 0; /* at least one node was created */
-  return EOF;
+    *status_code = 0; /* at least one node was created */
+  else
+    *status_code = EOF;
+  return has_err;
 }
 
 void gff3_reset(GFF3Parser *gff3_parser)

@@ -299,7 +299,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       assert(gff_feature_type != gft_TF_binding_site);
 
       /* parse the range */
-      range = parse_range(start, end, line_number, filename, err);
+      (void) parse_range(&range, start, end, line_number, filename, err);
       HANDLE_ERROR;
 
       /* process seqname (we have to do it here because we need the range) */

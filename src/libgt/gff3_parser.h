@@ -7,6 +7,7 @@
 #ifndef GFF3_PARSER_H
 #define GFF3_PARSER_H
 
+#include "error.h"
 #include "queue.h"
 
 #define GFF_VERSION_STRING  "##gff-version   3"
@@ -20,11 +21,11 @@ typedef struct GFF3Parser GFF3Parser;
 
 GFF3Parser* gff3_new(void);
 void        gff3_set_offset(GFF3Parser*, long);
-int         gff3_parse_genome_nodes(GFF3Parser*,
+int         gff3_parse_genome_nodes(int *status_code, GFF3Parser*,
                                     Queue *genome_nodes,
                                     const char *filename,
                                     unsigned long *line_number,
-                                    FILE *fpin);
+                                    FILE *fpin, Error*);
 /* resets the GFF3 parser (necessary if the processed input file is switched) */
 void         gff3_reset(GFF3Parser*);
 void         gff3_free(GFF3Parser*);
