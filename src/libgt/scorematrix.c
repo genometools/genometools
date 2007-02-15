@@ -31,51 +31,66 @@ ScoreMatrix* scorematrix_new(Alpha *alpha)
   return s;
 }
 
-static void parse_alphabet_line(Array *index_to_alpha_char_mapping,
-                                Tokenizer *tz)
+static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
+                                Tokenizer *tz, Error *err)
 {
   Str *token;
   char *tokenstr, amino_acid, parsed_characters[UCHAR_MAX] = { 0 };
+  int has_err = 0;
+  error_check(err);
   assert(index_to_alpha_char_mapping && tz);
   assert(!array_size(index_to_alpha_char_mapping));
   while ((token = tokenizer_get_token(tz))) {
     if (str_length(token) > 2) {
-      error("illegal character token '%s' on line %lu in file '%s'",
-            str_get(token), tokenizer_get_line_number(tz),
-            tokenizer_get_filename(tz));
+      error_set(err, "illegal character token '%s' on line %lu in file '%s'",
+                str_get(token), tokenizer_get_line_number(tz),
+                tokenizer_get_filename(tz));
+      has_err = -1;
+      break;
     }
     tokenstr = str_get(token);
     amino_acid = tokenstr[0];
     /* check for character duplications */
     if (parsed_characters[(int) amino_acid]) {
-      error("the character '%c' appears more then once on line %lu in file "
-            " '%s'", amino_acid, tokenizer_get_line_number(tz),
-            tokenizer_get_filename(tz));
-   }
+      error_set(err, "the character '%c' appears more then once on line %lu in "
+                "file  '%s'", amino_acid, tokenizer_get_line_number(tz),
+                tokenizer_get_filename(tz));
+      has_err = -1;
+      break;
+    }
     parsed_characters[(int) amino_acid] = UNDEFCHAR;
     if (amino_acid == '\n') {
       str_free(token);
       tokenizer_next_token(tz);
-      return;
+      assert(!has_err);
+      return 0;
     }
     array_add(index_to_alpha_char_mapping, amino_acid);
     if (str_length(token) == 2) {
       if (tokenstr[1] != '\n') {
-        error("illegal character token '%s' on line %lu in file '%s'",
-              str_get(token), tokenizer_get_line_number(tz),
-              tokenizer_get_filename(tz));
+        error_set(err, "illegal character token '%s' on line %lu in file '%s'",
+                  str_get(token), tokenizer_get_line_number(tz),
+                  tokenizer_get_filename(tz));
+        has_err = -1;
+        break;
       }
       str_free(token);
       tokenizer_next_token(tz);
-      return;
+      assert(!has_err);
+      return 0;
     }
     str_free(token);
     tokenizer_next_token(tz);
   }
-  if (!array_size(index_to_alpha_char_mapping)) {
-    error("could not parse a single alphabet character in file '%s' (file "
-          "empty or directory?)", tokenizer_get_filename(tz));
+  if (!has_err) {
+    if (!array_size(index_to_alpha_char_mapping)) {
+      error_set(err, "could not parse a single alphabet character in file '%s' "
+                "(file empty or directory?)", tokenizer_get_filename(tz));
+    has_err = -1;
+    }
   }
+  str_free(token);
+  return has_err;
 }
 
 static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
@@ -91,34 +106,38 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
   token = tokenizer_get_token(tz);
   assert(token);
   if (str_length(token) != 1) {
-    error("illegal character token '%s' on line %lu in file '%s'",
-          str_get(token), tokenizer_get_line_number(tz),
-          tokenizer_get_filename(tz));
+    error_set(err, "illegal character token '%s' on line %lu in file '%s'",
+              str_get(token), tokenizer_get_line_number(tz),
+              tokenizer_get_filename(tz));
+    has_err = -1;
   }
   amino_acid = str_get(token)[0];
   /* check for character duplications */
   if (parsed_characters[(int) amino_acid]) {
-    error("multiple character '%c' entry on line %lu in file '%s'",
-          amino_acid, tokenizer_get_line_number(tz),
-          tokenizer_get_filename(tz));
+    error_set(err, "multiple character '%c' entry on line %lu in file '%s'",
+              amino_acid, tokenizer_get_line_number(tz),
+              tokenizer_get_filename(tz));
+    has_err = -1;
   }
   parsed_characters[(int) amino_acid] = UNDEFCHAR;
   str_free(token);
-  tokenizer_next_token(tz);
-  while ((token = tokenizer_get_token(tz))) {
-    has_err = parse_int(&score, str_get(token), tokenizer_get_line_number(tz),
-                        tokenizer_get_filename(tz), err);
-    if (has_err)
-      break;
-    scorematrix_set_score(s, (unsigned char) alpha_encode(s->alpha, amino_acid),
-                          (unsigned char) alpha_encode(s->alpha, *(char*)
-                                          array_get(index_to_alpha_char_mapping,
-                                                    i)), score);
-    i++;
-    str_free(token);
+  if (!has_err) {
     tokenizer_next_token(tz);
-    if (tokenizer_line_start(tz))
-      break;
+    while ((token = tokenizer_get_token(tz))) {
+      has_err = parse_int(&score, str_get(token), tokenizer_get_line_number(tz),
+                          tokenizer_get_filename(tz), err);
+      if (has_err)
+        break;
+      scorematrix_set_score(s,
+                            (unsigned char) alpha_encode(s->alpha, amino_acid),
+                            (unsigned char) alpha_encode(s->alpha, *(char*)
+                            array_get(index_to_alpha_char_mapping, i)), score);
+      i++;
+      str_free(token);
+      tokenizer_next_token(tz);
+      if (tokenizer_line_start(tz))
+          break;
+    }
   }
   return has_err;
 }
@@ -136,13 +155,15 @@ static int parse_scorematrix(ScoreMatrix *s, const char *path, Error *err)
   tz = tokenizer_new(io_new(path, "r"));
   index_to_alpha_char_mapping = array_new(sizeof(char));
   tokenizer_skip_comment_lines(tz);
-  parse_alphabet_line(index_to_alpha_char_mapping, tz);
-  while (tokenizer_has_token(tz)) {
-    has_err = parse_score_line(s, tz, index_to_alpha_char_mapping,
-                               parsed_characters, err);
-    if (has_err)
-      break;
-    parsed_score_lines++;
+  has_err = parse_alphabet_line(index_to_alpha_char_mapping, tz, err);
+  if (!has_err) {
+    while (tokenizer_has_token(tz)) {
+      has_err = parse_score_line(s, tz, index_to_alpha_char_mapping,
+                                 parsed_characters, err);
+      if (has_err)
+        break;
+      parsed_score_lines++;
+    }
   }
 
   /* check the number of parsed score lines */
