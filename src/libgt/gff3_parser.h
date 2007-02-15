@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -16,17 +16,17 @@
 #define ID_STRING           "ID"
 #define PARENT_STRING       "Parent"
 
-typedef struct GFF3_parser GFF3_parser;
+typedef struct GFF3Parser GFF3Parser;
 
-GFF3_parser* gff3_new(void);
-void         gff3_set_offset(GFF3_parser*, long);
-int          gff3_parse_genome_nodes(GFF3_parser*,
-                                     Queue *genome_nodes,
-                                     const char *filename,
-                                     unsigned long *line_number,
-                                     FILE *fpin);
+GFF3Parser* gff3_new(void);
+void        gff3_set_offset(GFF3Parser*, long);
+int         gff3_parse_genome_nodes(GFF3Parser*,
+                                    Queue *genome_nodes,
+                                    const char *filename,
+                                    unsigned long *line_number,
+                                    FILE *fpin);
 /* resets the GFF3 parser (necessary if the processed input file is switched) */
-void         gff3_reset(GFF3_parser*);
-void         gff3_free(GFF3_parser*);
+void         gff3_reset(GFF3Parser*);
+void         gff3_free(GFF3Parser*);
 
 #endif

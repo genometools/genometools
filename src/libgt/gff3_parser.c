@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -27,16 +27,16 @@
 #include "warning.h"
 #include "xansi.h"
 
-struct GFF3_parser {
+struct GFF3Parser {
   Hashtable *id_to_genome_node_mapping,
             *seqid_to_str_mapping,
             *source_to_str_mapping;
   long offset;
 };
 
-GFF3_parser* gff3_new(void)
+GFF3Parser* gff3_new(void)
 {
-  GFF3_parser *gff3_parser = xmalloc(sizeof(GFF3_parser));
+  GFF3Parser *gff3_parser = xmalloc(sizeof(GFF3Parser));
   gff3_parser->id_to_genome_node_mapping = hashtable_new(HASH_STRING, free,
                                                          NULL);
   gff3_parser->seqid_to_str_mapping = hashtable_new(HASH_STRING, NULL,
@@ -47,13 +47,13 @@ GFF3_parser* gff3_new(void)
   return gff3_parser;
 }
 
-void gff3_set_offset(GFF3_parser *gff3_parser, long offset)
+void gff3_set_offset(GFF3Parser *gff3_parser, long offset)
 {
   assert(gff3_parser);
   gff3_parser->offset = offset;
 }
 
-static void parse_regular_gff3_line(GFF3_parser *gff3_parser,
+static void parse_regular_gff3_line(GFF3Parser *gff3_parser,
                                     Queue *genome_nodes, char *line,
                                     size_t line_length, const char *filename,
                                     unsigned long line_number,
@@ -218,7 +218,7 @@ static void parse_regular_gff3_line(GFF3_parser *gff3_parser,
 
 }
 
-static void parse_meta_gff3_line(GFF3_parser *gff3_parser, Queue *genome_nodes,
+static void parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                                  char *line, size_t line_length,
                                  const char *filename,
                                  unsigned long line_number,
@@ -323,7 +323,7 @@ static void parse_meta_gff3_line(GFF3_parser *gff3_parser, Queue *genome_nodes,
   }
 }
 
-int gff3_parse_genome_nodes(GFF3_parser *gff3_parser,
+int gff3_parse_genome_nodes(GFF3Parser *gff3_parser,
                             Queue *genome_nodes,
                             const char *filename,
                             unsigned long *line_number,
@@ -373,7 +373,7 @@ int gff3_parse_genome_nodes(GFF3_parser *gff3_parser,
   return EOF;
 }
 
-void gff3_reset(GFF3_parser *gff3_parser)
+void gff3_reset(GFF3Parser *gff3_parser)
 {
   assert(gff3_parser && gff3_parser->id_to_genome_node_mapping);
   hashtable_reset(gff3_parser->id_to_genome_node_mapping);
@@ -381,7 +381,7 @@ void gff3_reset(GFF3_parser *gff3_parser)
   hashtable_reset(gff3_parser->source_to_str_mapping);
 }
 
-void gff3_free(GFF3_parser *gff3_parser)
+void gff3_free(GFF3Parser *gff3_parser)
 {
   if (!gff3_parser) return;
   assert(gff3_parser->id_to_genome_node_mapping);

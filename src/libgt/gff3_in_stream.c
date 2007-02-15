@@ -27,7 +27,7 @@ struct Gff3_in_stream
   FILE *fpin;
   unsigned long line_number;
   Queue *genome_node_buffer;
-  GFF3_parser *gff3_parser;
+  GFF3Parser *gff3_parser;
   GenomeNode *last_node;
 };
 
