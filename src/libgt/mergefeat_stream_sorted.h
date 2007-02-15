@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -11,9 +11,9 @@
 #include "genome_stream.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct Mergefeat_stream_sorted Mergefeat_stream_sorted;
+typedef struct MergefeatStreamSorted MergefeatStreamSorted;
 
 const GenomeStreamClass* mergefeat_stream_sorted_class(void);
-GenomeStream*             mergefeat_stream_sorted_new(GenomeStream*);
+GenomeStream*            mergefeat_stream_sorted_new(GenomeStream*);
 
 #endif
