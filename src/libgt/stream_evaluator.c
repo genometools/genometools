@@ -15,7 +15,7 @@
 #include "warning.h"
 #include "xansi.h"
 
-struct Stream_evaluator {
+struct StreamEvaluator {
   GenomeStream *reality,
                 *prediction;
   Hashtable *real_features; /* sequence name -> feature type hash */
@@ -119,10 +119,10 @@ static void slot_free(Slot *s)
   free(s);
 }
 
-Stream_evaluator* stream_evaluator_new(GenomeStream *reality,
-                                       GenomeStream *prediction)
+StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
+                                      GenomeStream *prediction)
 {
-  Stream_evaluator *evaluator = xmalloc(sizeof(Stream_evaluator));
+  StreamEvaluator *evaluator = xmalloc(sizeof(StreamEvaluator));
   evaluator->reality = reality;
   evaluator->prediction = prediction;
   evaluator->real_features = hashtable_new(HASH_STRING, NULL, (Free) slot_free);
@@ -139,7 +139,7 @@ Stream_evaluator* stream_evaluator_new(GenomeStream *reality,
 
 static void set_actuals_and_sort_them(void *key, void *value, void *data)
 {
-  Stream_evaluator *se = (Stream_evaluator*) data;
+  StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *s = (Slot*) value;
 
   assert(key && value && data);
@@ -671,7 +671,7 @@ static void process_predicted_feature(GenomeNode *gn, void *data)
 
 void determine_missing_features(void *key, void *value, void *data)
 {
-  Stream_evaluator *se = (Stream_evaluator*) data;
+  StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *slot = (Slot*) value;
   assert(key && value && data);
   if (slot->overlapped_genes_forward) {
@@ -692,8 +692,8 @@ void determine_missing_features(void *key, void *value, void *data)
   }
 }
 
-int stream_evaluator_evaluate(Stream_evaluator *se, bool verbose,
-                               bool exondiff, Error *err)
+int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
+                              Error *err)
 {
   GenomeNode *gn;
   SequenceRegion *sr;
@@ -783,7 +783,7 @@ int stream_evaluator_evaluate(Stream_evaluator *se, bool verbose,
   return has_err;
 }
 
-void stream_evaluator_show(Stream_evaluator *se, FILE *outfp)
+void stream_evaluator_show(StreamEvaluator *se, FILE *outfp)
 {
   assert(se);
 
@@ -820,7 +820,7 @@ void stream_evaluator_show(Stream_evaluator *se, FILE *outfp)
   xfputc('\n', outfp);
 }
 
-void stream_evaluator_free(Stream_evaluator *se)
+void stream_evaluator_free(StreamEvaluator *se)
 {
   if (!se) return;
   genome_stream_free(se->reality);

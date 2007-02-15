@@ -9,14 +9,14 @@
 
 #include "genome_stream.h"
 
-typedef struct Stream_evaluator Stream_evaluator;
+typedef struct StreamEvaluator StreamEvaluator;
 
 /* takes ownership of the given streams */
-Stream_evaluator* stream_evaluator_new(GenomeStream *reality,
-                                       GenomeStream *prediction);
-int               stream_evaluator_evaluate(Stream_evaluator*, bool verbose,
-                                            bool exondiff, Error*);
-void              stream_evaluator_show(Stream_evaluator*, FILE*);
-void              stream_evaluator_free(Stream_evaluator*);
+StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
+                                      GenomeStream *prediction);
+int              stream_evaluator_evaluate(StreamEvaluator*, bool verbose,
+                                           bool exondiff, Error*);
+void             stream_evaluator_show(StreamEvaluator*, FILE*);
+void             stream_evaluator_free(StreamEvaluator*);
 
 #endif

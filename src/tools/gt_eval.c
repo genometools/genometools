@@ -42,7 +42,7 @@ int gt_eval(int argc, char *argv[])
 {
   GenomeStream *reality_stream,
                 *prediction_stream;
-  Stream_evaluator *evaluator;
+  StreamEvaluator *evaluator;
   EvalArguments arguments;
   int has_err, parsed_args;
   Error *err = error_new();
