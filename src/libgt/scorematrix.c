@@ -78,15 +78,16 @@ static void parse_alphabet_line(Array *index_to_alpha_char_mapping,
   }
 }
 
-static void parse_score_line(ScoreMatrix *s, Tokenizer *tz,
-                             Array *index_to_alpha_char_mapping,
-                             char *parsed_characters)
+static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
+                            Array *index_to_alpha_char_mapping,
+                            char *parsed_characters, Error *err)
 {
   unsigned int i = 0;
   char amino_acid;
-  int score;
+  int score, has_err = 0;
   Str *token;
   assert(s && tz && index_to_alpha_char_mapping);
+  error_check(err);
   token = tokenizer_get_token(tz);
   assert(token);
   if (str_length(token) != 1) {
@@ -105,8 +106,10 @@ static void parse_score_line(ScoreMatrix *s, Tokenizer *tz,
   str_free(token);
   tokenizer_next_token(tz);
   while ((token = tokenizer_get_token(tz))) {
-    score = parse_int(str_get(token), tokenizer_get_line_number(tz),
-                      tokenizer_get_filename(tz), NULL);
+    has_err = parse_int(&score, str_get(token), tokenizer_get_line_number(tz),
+                        tokenizer_get_filename(tz), err);
+    if (has_err)
+      break;
     scorematrix_set_score(s, (unsigned char) alpha_encode(s->alpha, amino_acid),
                           (unsigned char) alpha_encode(s->alpha, *(char*)
                                           array_get(index_to_alpha_char_mapping,
@@ -117,36 +120,51 @@ static void parse_score_line(ScoreMatrix *s, Tokenizer *tz,
     if (tokenizer_line_start(tz))
       break;
   }
+  return has_err;
 }
 
 /* the score matrix parser */
-static void parse_scorematrix(ScoreMatrix *s, const char *path)
+static int parse_scorematrix(ScoreMatrix *s, const char *path, Error *err)
 {
   Tokenizer *tz;
   Array *index_to_alpha_char_mapping;
   unsigned int parsed_score_lines = 0;
   char parsed_characters[UCHAR_MAX] = { 0 };
+  int has_err = 0;
   assert(s && path && s->alpha);
+  error_check(err);
   tz = tokenizer_new(io_new(path, "r"));
   index_to_alpha_char_mapping = array_new(sizeof(char));
   tokenizer_skip_comment_lines(tz);
   parse_alphabet_line(index_to_alpha_char_mapping, tz);
   while (tokenizer_has_token(tz)) {
-    parse_score_line(s, tz, index_to_alpha_char_mapping, parsed_characters);
+    has_err = parse_score_line(s, tz, index_to_alpha_char_mapping,
+                               parsed_characters, err);
+    if (has_err)
+      break;
     parsed_score_lines++;
   }
+
   /* check the number of parsed score lines */
-  if (parsed_score_lines != array_size(index_to_alpha_char_mapping))
-    error("the scorematrix given in '%s' is not symmetric", path);
+  if (!has_err &&
+      parsed_score_lines != array_size(index_to_alpha_char_mapping)) {
+    error_set(err, "the scorematrix given in '%s' is not symmetric", path);
+    has_err = -1;
+  }
+
   array_free(index_to_alpha_char_mapping);
   tokenizer_free(tz);
+
+  return has_err;
 }
 
-ScoreMatrix* scorematrix_read_protein(const char *path)
+ScoreMatrix* scorematrix_read_protein(const char *path, Error *err)
 {
   Alpha *protein_alpha;
   ScoreMatrix *s;
+  int has_err;
   assert(path);
+  error_check(err);
 
   /* create score matrix */
   protein_alpha = alpha_new_protein();
@@ -154,8 +172,12 @@ ScoreMatrix* scorematrix_read_protein(const char *path)
   alpha_free(protein_alpha);
 
   /* parse matrix file */
-  parse_scorematrix(s, path);
+  has_err = parse_scorematrix(s, path, err);
 
+  if (has_err) {
+    scorematrix_free(s);
+    return NULL;
+  }
   return s;
 }
 

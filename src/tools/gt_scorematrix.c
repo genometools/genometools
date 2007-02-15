@@ -9,14 +9,18 @@
 int gt_scorematrix(int argc, char *argv[])
 {
   ScoreMatrix *sm;
+  Error *err = error_new();
   if (argc != 2) {
     fprintf(stderr, "Usage: %s scorematrix_filename\n", argv[0]);
     fprintf(stderr, "Parse the given protein score matrix and show it on "
                     "stdout.\n");
     return EXIT_FAILURE;
   }
-  sm = scorematrix_read_protein(argv[1]);
-  scorematrix_show(sm, stdout);
+  sm = scorematrix_read_protein(argv[1], err);
+  if (sm)
+    scorematrix_show(sm, stdout);
   scorematrix_free(sm);
+  error_abort(err);
+  error_free(err);
   return EXIT_SUCCESS;
 }

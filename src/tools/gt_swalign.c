@@ -27,12 +27,13 @@ static int parse_options(int *indelscore, int argc, char **argv)
 
 int gt_swalign(int argc, char *argv[])
 {
-  Bioseq *bioseq_1, *bioseq_2;
-  ScoreFunction *scorefunction;
+  Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
+  ScoreFunction *scorefunction = NULL;
   ScoreMatrix *scorematrix;
   unsigned long i, j;
   int parsed_args, indelscore;
   Alignment *a;
+  Error *err = error_new();
 
   /* option parsing */
   parsed_args = parse_options(&indelscore, argc, argv);
@@ -40,20 +41,22 @@ int gt_swalign(int argc, char *argv[])
 
   /* init */
   /* XXX: make this more flexible */
-  scorematrix  = scorematrix_read_protein(argv[parsed_args]);
-  scorefunction = scorefunction_new(scorematrix, indelscore, indelscore);
-  bioseq_1 = bioseq_new(argv[parsed_args+1]);
-  bioseq_2 = bioseq_new(argv[parsed_args+2]);
+  scorematrix  = scorematrix_read_protein(argv[parsed_args], err);
+  if (scorematrix) {
+    scorefunction = scorefunction_new(scorematrix, indelscore, indelscore);
+    bioseq_1 = bioseq_new(argv[parsed_args+1]);
+    bioseq_2 = bioseq_new(argv[parsed_args+2]);
 
-  /* aligning all sequence combinations */
-  for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
-    for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
-      a = swalign(bioseq_get_seq(bioseq_1, i), bioseq_get_seq(bioseq_2, j),
-                  scorefunction);
-      if (a) {
-        alignment_show(a, stdout);
-        xputchar('\n');
-        alignment_free(a);
+    /* aligning all sequence combinations */
+    for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
+      for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
+        a = swalign(bioseq_get_seq(bioseq_1, i), bioseq_get_seq(bioseq_2, j),
+                    scorefunction);
+        if (a) {
+          alignment_show(a, stdout);
+          xputchar('\n');
+          alignment_free(a);
+        }
       }
     }
   }
@@ -62,6 +65,8 @@ int gt_swalign(int argc, char *argv[])
   bioseq_free(bioseq_2);
   bioseq_free(bioseq_1);
   scorefunction_free(scorefunction);
+  error_abort(err);
+  error_free(err);
 
   return EXIT_SUCCESS;
 }

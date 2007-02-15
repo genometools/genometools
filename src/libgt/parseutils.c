@@ -80,51 +80,62 @@ int parse_score(double *score_value, const char *score,
   return 0;
 }
 
-Strand parse_strand(const char *strand, unsigned long line_number,
-                    const char *filename, Error *err)
+int parse_strand(Strand *strand_value, const char *strand,
+                 unsigned long line_number, const char *filename, Error *err)
 {
   assert(strand && line_number && filename);
+  error_check(err);
 
   if (strlen(strand) != 1) {
     error_set(err, "strand '%s' not one character long on line %lu in file "
               "'%s'", strand, line_number, filename);
-    return STRAND_UNKNOWN;
+    *strand_value = STRAND_UNKNOWN;
+    return -1;
   }
   if (strspn(strand, STRANDCHARS) != 1) {
     error_set(err, "strand '%s' on line %lu in file '%s' not a valid character "
               "from the set '%s'", strand, line_number, filename, STRANDCHARS);
-    return STRAND_UNKNOWN;
+    *strand_value = STRAND_UNKNOWN;
+    return -1;
   }
-  return strand_get(strand[0]);
+  *strand_value = strand_get(strand[0]);
+  return 0;
 }
 
-Phase parse_phase(const char *phase, unsigned long line_number,
-                  const char *filename, Error *err)
+int parse_phase(Phase *phase_value, const char *phase,
+                unsigned long line_number, const char *filename, Error *err)
 {
   assert(phase && line_number && filename);
+  error_check(err);
 
   if (strlen(phase) != 1) {
     error_set(err,
               "phase '%s' not one character long on line %lu in file '%s'",
               phase, line_number, filename);
-    return PHASE_UNDEFINED;
+    *phase_value = PHASE_UNDEFINED;
+    return -1;
   }
   if (strspn(phase, PHASECHARS) != 1) {
     error_set(err, "phase '%s' on line %lu in file '%s' not a valid character "
               "from the set '%s'", phase, line_number, filename, PHASECHARS);
-    return PHASE_UNDEFINED;
+    *phase_value = PHASE_UNDEFINED;
+    return -1;
   }
-  return phase_get(phase[0]);
+  *phase_value = phase_get(phase[0]);
+  return 0;
 }
 
-int parse_int(const char *integer, unsigned long line_number,
+int parse_int(int *int_value, const char *integer, unsigned long line_number,
               const char *filename, Error *err)
 {
-  int int_value, rval;
+  int rval;
   assert(integer && line_number && filename);
-  if ((rval = sscanf(integer, "%d", &int_value)) != 1) {
+  error_check(err);
+
+  if ((rval = sscanf(integer, "%d", int_value)) != 1) {
     error_set(err, "could not parse integer '%s' on line %lu in file '%s'",
               integer, line_number, filename);
+    return -1;
   }
-  return int_value;
+  return 0;
 }

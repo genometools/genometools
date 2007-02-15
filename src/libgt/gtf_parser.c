@@ -323,11 +323,13 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       HANDLE_ERROR;
 
       /* parse the strand */
-      strand_value = parse_strand(strand, line_number, filename, err);
+      /* XXX: process return value differently */
+      (void) parse_strand(&strand_value, strand, line_number, filename, err);
       HANDLE_ERROR;
 
       /* parse the frame */
-      phase_value = parse_phase(frame, line_number, filename, err);
+      /* XXX: process return value differently */
+      (void) parse_phase(&phase_value, frame, line_number, filename, err);
       HANDLE_ERROR;
 
       /* parse the attributes */

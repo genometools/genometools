@@ -116,11 +116,11 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
 
   /* parse the strand */
   if (!has_err)
-    strand_value = parse_strand(strand, line_number, filename, NULL);
+    has_err = parse_strand(&strand_value, strand, line_number, filename, err);
 
   /* parse the phase */
   if (!has_err)
-    phase_value = parse_phase(phase, line_number, filename, NULL);
+    has_err = parse_phase(&phase_value, phase, line_number, filename, err);
 
   /* parse the unique id and the parents */
   if (!has_err) {

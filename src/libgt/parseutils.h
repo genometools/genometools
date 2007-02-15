@@ -13,20 +13,20 @@
 #include "strand.h"
 
 /* enforces that start <= end */
-int    parse_range(Range*, const char *start, const char *end,
-                   unsigned long line_number, const char *filename, Error*);
+int parse_range(Range*, const char *start, const char *end,
+                unsigned long line_number, const char *filename, Error*);
 
 /* sets 'score_value' to UNDEFDOUBLE if strcmp(score, ".") == 0 */
-int    parse_score(double *score_value, const char *score,
-                   unsigned long line_number, const char *filename, Error*);
+int parse_score(double *score_value, const char *score,
+                unsigned long line_number, const char *filename, Error*);
 
-Strand parse_strand(const char *strand,
-                    unsigned long line_number, const char *filename, Error*);
-
-Phase  parse_phase(const char *phase,
-                   unsigned long line_number, const char *filename, Error*);
-
-int    parse_int(const char *integer,
+int parse_strand(Strand*, const char *strand,
                  unsigned long line_number, const char *filename, Error*);
+
+int parse_phase(Phase*, const char *phase,
+               unsigned long line_number, const char *filename, Error*);
+
+int parse_int(int*, const char *integer,
+              unsigned long line_number, const char *filename, Error*);
 
 #endif
