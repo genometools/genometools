@@ -9,7 +9,7 @@
 #include "genome_stream_rep.h"
 #include "sort_stream.h"
 
-struct Sort_stream
+struct SortStream
 {
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
@@ -24,7 +24,7 @@ struct Sort_stream
 static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
                                  Error *err)
 {
-  Sort_stream *sort_stream;
+  SortStream *sort_stream;
   int has_err = 0;
   error_check(err);
   sort_stream = sort_stream_cast(gs);
@@ -59,14 +59,14 @@ static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
 
 static void sort_stream_free(GenomeStream *gs)
 {
-  Sort_stream *sort_stream = sort_stream_cast(gs);
+  SortStream *sort_stream = sort_stream_cast(gs);
   assert(!array_size(sort_stream->trees));
   array_free(sort_stream->trees);
 }
 
 const GenomeStreamClass* sort_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (Sort_stream),
+  static const GenomeStreamClass gsc = { sizeof (SortStream),
                                          sort_stream_next_tree,
                                          sort_stream_free };
   return &gsc;
@@ -75,7 +75,7 @@ const GenomeStreamClass* sort_stream_class(void)
 GenomeStream* sort_stream_new(GenomeStream *in_stream)
 {
   GenomeStream *gs = genome_stream_create(sort_stream_class(), true);
-  Sort_stream *sort_stream = sort_stream_cast(gs);
+  SortStream *sort_stream = sort_stream_cast(gs);
   assert(in_stream);
   sort_stream->in_stream = in_stream;
   sort_stream->sorted = false;
