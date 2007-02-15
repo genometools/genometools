@@ -12,7 +12,7 @@
 #include "genome_stream.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct Gtf_in_stream Gtf_in_stream;
+typedef struct GTFInStream GTFInStream;
 
 const GenomeStreamClass* gtf_in_stream_class(void);
 /* filename == NULL -> use stdin */

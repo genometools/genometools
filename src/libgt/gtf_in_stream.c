@@ -11,7 +11,7 @@
 #include "queue.h"
 #include "xansi.h"
 
-struct Gtf_in_stream
+struct GTFInStream
 {
   const GenomeStream parent_instance;
   Queue *genome_node_buffer;
@@ -23,7 +23,7 @@ struct Gtf_in_stream
 static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                                    /*@unused@*/ Log *l, Error *err)
 {
-  Gtf_in_stream *is;
+  GTFInStream *is;
   error_check(err);
   is = gtf_in_stream_cast(gs);
   if (queue_size(is->genome_node_buffer)) {
@@ -39,13 +39,13 @@ static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 
 static void gtf_in_stream_free(GenomeStream *gs)
 {
-  Gtf_in_stream *gtf_in_stream = gtf_in_stream_cast(gs);
+  GTFInStream *gtf_in_stream = gtf_in_stream_cast(gs);
   queue_free(gtf_in_stream->genome_node_buffer);
 }
 
 const GenomeStreamClass* gtf_in_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof(Gtf_in_stream),
+  static const GenomeStreamClass gsc = { sizeof(GTFInStream),
                                          gtf_in_stream_next_tree,
                                          gtf_in_stream_free };
   return &gsc;
@@ -55,7 +55,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
                                 Error *err)
 {
   GenomeStream *gs;
-  Gtf_in_stream *gtf_in_stream;
+  GTFInStream *gtf_in_stream;
   GTF_parser *gtf_parser;
   int has_err;
   FILE *fpin;
