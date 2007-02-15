@@ -11,7 +11,7 @@
 #include "genome_stream_rep.h"
 #include "queue.h"
 
-struct Csa_stream {
+struct CSAStream {
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
   GenomeVisitor *csa_visitor; /* the actual work is done in the visitor */
@@ -22,7 +22,7 @@ struct Csa_stream {
 
 int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l, Error *err)
 {
-  Csa_stream *cs = csa_stream_cast(gs);
+  CSAStream *cs = csa_stream_cast(gs);
   int has_err;
   error_check(err);
 
@@ -57,13 +57,13 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l, Error *err)
 
 static void csa_stream_free(GenomeStream *gs)
 {
-  Csa_stream *cs = csa_stream_cast(gs);
+  CSAStream *cs = csa_stream_cast(gs);
   genome_visitor_free(cs->csa_visitor);
 }
 
 const GenomeStreamClass* csa_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof(Csa_stream),
+  static const GenomeStreamClass gsc = { sizeof(CSAStream),
                                          csa_stream_next_tree,
                                          csa_stream_free };
   return &gsc;
@@ -74,7 +74,7 @@ GenomeStream* csa_stream_new(GenomeStream *in_stream,
 {
   GenomeStream *gs = genome_stream_create(csa_stream_class(),
                                           genome_stream_is_sorted(in_stream));
-  Csa_stream *cs = csa_stream_cast(gs);
+  CSAStream *cs = csa_stream_cast(gs);
   cs->in_stream = in_stream;
   cs->csa_visitor = csa_visitor_new(join_length);
   return gs;
