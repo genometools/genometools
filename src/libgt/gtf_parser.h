@@ -1,12 +1,13 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
 #ifndef GTF_PARSER_H
 #define GTF_PARSER_H
 
+#include "error.h"
 #include "queue.h"
 
 /* This is a parser for gth GTF2.2 Gene Annotation Format as described at
@@ -25,9 +26,9 @@
 typedef struct GTF_parser GTF_parser;
 
 GTF_parser* gtf_parser_new(void);
-void        gtf_parser_parse(GTF_parser*, Queue *genome_nodes,
+int         gtf_parser_parse(GTF_parser*, Queue *genome_nodes,
                              const char *filename, FILE*,
-                             unsigned int be_tolerant);
+                             unsigned int be_tolerant, Error *err);
 void        gtf_parser_free(GTF_parser*);
 
 #endif

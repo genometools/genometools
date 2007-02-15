@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -188,11 +188,11 @@ static void construct_genes(void *key, void *value, void *data)
   array_free(mRNAs);
 }
 
-void gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
-                      const char *filename, FILE *fpin,
-                      unsigned int be_tolerant)
+int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
+                     const char *filename, FILE *fpin,
+                     unsigned int be_tolerant, Error *err)
 {
-  Str *seqid_str, *source_str, *line_buffer = str_new();
+  Str *seqid_str, *source_str, *line_buffer;
   char *line;
   size_t line_length;
   unsigned long i, line_number = 0;
@@ -218,15 +218,17 @@ void gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   Hashtable *transcript_id_hash; /* map from transcript id to array of genome
                                     nodes */
   Array *genome_node_array;
-  Error *err;
   GTF_feature_type gtf_feature_type;
   /* abuse gft_TF_binding_site as an undefined value */
   GenomeFeatureType gff_feature_type = gft_TF_binding_site;
 
+  assert(parser && genome_nodes && filename && fpin);
+  error_check(err);
+
   /* alloc */
+  line_buffer = str_new();
   splitter = splitter_new(),
   attribute_splitter = splitter_new();
-  err = error_new();
 
 #define HANDLE_ERROR                                                \
         if (error_is_set(err)) {                                    \
@@ -236,11 +238,13 @@ void gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
             str_reset(line_buffer);                                 \
             continue;                                               \
           }                                                         \
-          else                                                      \
-            error_abort(err);                                       \
+          else {                                                    \
+            splitter_free(splitter);                                \
+            splitter_free(attribute_splitter);                      \
+            str_free(line_buffer);                                  \
+            return -1;                                              \
+          }                                                         \
         }
-
-  assert(parser && genome_nodes && filename && fpin);
 
   while (str_read_next_line(line_buffer, fpin) != EOF) {
     line = str_get(line_buffer);
@@ -430,7 +434,8 @@ void gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   splitter_free(splitter);
   splitter_free(attribute_splitter);
   str_free(line_buffer);
-  error_free(err);
+
+  return 0;
 }
 
 void gtf_parser_free(GTF_parser *parser)

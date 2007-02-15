@@ -50,12 +50,20 @@ const GenomeStreamClass* gtf_in_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant)
+GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
+                                Error *err)
 {
-  GenomeStream *gs = genome_stream_create(gtf_in_stream_class(), false);
-  Gtf_in_stream *gtf_in_stream = gtf_in_stream_cast(gs);
-  GTF_parser *gtf_parser = gtf_parser_new();
+  GenomeStream *gs;
+  Gtf_in_stream *gtf_in_stream;
+  GTF_parser *gtf_parser;
+  int has_err;
   FILE *fpin;
+
+  error_check(err);
+
+  gs = genome_stream_create(gtf_in_stream_class(), false);
+  gtf_in_stream = gtf_in_stream_cast(gs);
+  gtf_parser = gtf_parser_new();
 
   gtf_in_stream->genome_node_buffer = queue_new(sizeof(GenomeNode*));
 
@@ -66,8 +74,9 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant)
     fpin = stdin;
 
   /* parse input file */
-  gtf_parser_parse(gtf_parser, gtf_in_stream->genome_node_buffer,
-                   filename ? filename : "stdin", fpin, be_tolerant);
+  has_err = gtf_parser_parse(gtf_parser, gtf_in_stream->genome_node_buffer,
+                             filename ? filename : "stdin", fpin, be_tolerant,
+                             err);
 
   /* close input file, if necessary */
   if (filename)
@@ -76,5 +85,9 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant)
   /* free */
   gtf_parser_free(gtf_parser);
 
+  if (has_err) {
+    genome_stream_free(gs);
+    return NULL;
+  }
   return gs;
 }

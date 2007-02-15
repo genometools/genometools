@@ -8,6 +8,7 @@
 #define GTF_IN_STREAM_H
 
 #include <stdio.h>
+#include "error.h"
 #include "genome_stream.h"
 
 /* implements the ``genome_stream'' interface */
@@ -16,6 +17,6 @@ typedef struct Gtf_in_stream Gtf_in_stream;
 const GenomeStreamClass* gtf_in_stream_class(void);
 /* filename == NULL -> use stdin */
 GenomeStream*            gtf_in_stream_new(const char *filename,
-                                           bool be_tolerant);
+                                           bool be_tolerant, Error*);
 
 #endif

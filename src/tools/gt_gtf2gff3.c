@@ -34,12 +34,15 @@ int gt_gtf2gff3(int argc, char *argv[])
   GenomeNode *gn;
   int parsed_args;
   bool be_tolerant;
+  Error *err = error_new();
 
   /* option parsing */
   parsed_args = parse_options(&be_tolerant, argc, argv);
 
   /* create a gtf input stream */
-  gtf_in_stream = gtf_in_stream_new(argv[parsed_args], be_tolerant);
+  gtf_in_stream = gtf_in_stream_new(argv[parsed_args], be_tolerant, err);
+  if (!gtf_in_stream)
+    error_abort(err);
 
   /* create a gff3 output stream */
   gff3_out_stream = gff3_out_stream_new(gtf_in_stream, stdout);
@@ -51,6 +54,7 @@ int gt_gtf2gff3(int argc, char *argv[])
   /* free */
   genome_stream_free(gff3_out_stream);
   genome_stream_free(gtf_in_stream);
+  error_free(err);
 
   return EXIT_SUCCESS;
 }
