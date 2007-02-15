@@ -19,6 +19,14 @@ is called ``gmake'':
 $ gmake assert=no
 
 
+Note for Mac OS X
+-----------------
+
+On Mac OS X you have to use `ranlib` to compile GenomeTools as follows
+
+$ make RANLIB=ranlib
+
+
 Testing GenomeTools (optional)
 ------------------------------
 
