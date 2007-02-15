@@ -8,7 +8,7 @@
 #define CSA_VISITOR_H
 
 /* implements the ``genome visitor'' interface */
-typedef struct Csa_visitor Csa_visitor;
+typedef struct CSAVisitor CSAVisitor;
 
 #include "genome_visitor.h"
 
@@ -17,7 +17,6 @@ GenomeVisitor*            csa_visitor_new(unsigned long join_length);
 unsigned long             csa_visitor_node_buffer_size(GenomeVisitor*);
 GenomeNode*               csa_visitor_get_node(GenomeVisitor*);
 void                      csa_visitor_process_cluster(GenomeVisitor*,
-                                                      bool final_cluster,
-                                                      Log*);
+                                                      bool final_cluster, Log*);
 
 #endif
