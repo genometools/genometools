@@ -10,7 +10,7 @@
 #include "undef.h"
 #include "xansi.h"
 
-struct Merge_stream {
+struct MergeStream {
   const GenomeStream parent_instance;
   Array *genome_streams;
   GenomeNode **buffer;
@@ -54,7 +54,7 @@ static void consolidate_sequence_regions(GenomeNode *gn_a, GenomeNode *gn_b)
 int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
                            Error *err)
 {
-  Merge_stream *ms;
+  MergeStream *ms;
   GenomeNode *min_node = NULL;
   unsigned long i, j, min_i = UNDEFULONG;
   unsigned int genome_node_consolidated;
@@ -118,14 +118,14 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
 
 static void merge_stream_free(GenomeStream *gs)
 {
-  Merge_stream *ms = merge_stream_cast(gs);
+  MergeStream *ms = merge_stream_cast(gs);
   array_free(ms->genome_streams);
   free(ms->buffer);
 }
 
 const GenomeStreamClass* merge_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof(Merge_stream),
+  static const GenomeStreamClass gsc = { sizeof(MergeStream),
                                          merge_stream_next_tree,
                                          merge_stream_free };
   return &gsc;
@@ -134,7 +134,7 @@ const GenomeStreamClass* merge_stream_class(void)
 GenomeStream* merge_stream_new(const Array *genome_streams)
 {
   GenomeStream *gs = genome_stream_create(merge_stream_class(), true);
-  Merge_stream *ms = merge_stream_cast(gs);
+  MergeStream *ms = merge_stream_cast(gs);
 #ifndef NDEBUG
   unsigned long i;
   assert(array_size(genome_streams)); /* at least on input stream given */
