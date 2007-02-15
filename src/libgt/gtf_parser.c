@@ -221,6 +221,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   GTF_feature_type gtf_feature_type;
   /* abuse gft_TF_binding_site as an undefined value */
   GenomeFeatureType gff_feature_type = gft_TF_binding_site;
+  int has_err = 0;
 
   assert(parser && genome_nodes && filename && fpin);
   error_check(err);
@@ -231,11 +232,12 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   attribute_splitter = splitter_new();
 
 #define HANDLE_ERROR                                                \
-        if (error_is_set(err)) {                                    \
+        if (has_err) {                                              \
           if (be_tolerant) {                                        \
             fprintf(stderr, "skipping line: %s\n", error_get(err)); \
             error_unset(err);                                       \
             str_reset(line_buffer);                                 \
+            has_err = 0;                                            \
             continue;                                               \
           }                                                         \
           else {                                                    \
@@ -299,8 +301,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       assert(gff_feature_type != gft_TF_binding_site);
 
       /* parse the range */
-      /* XXX: process return value differently */
-      (void) parse_range(&range, start, end, line_number, filename, err);
+      has_err = parse_range(&range, start, end, line_number, filename, err);
       HANDLE_ERROR;
 
       /* process seqname (we have to do it here because we need the range) */
@@ -318,18 +319,15 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       }
 
       /* parse the score */
-      /* XXX: process return value differently */
-      (void) parse_score(&score_value, score, line_number, filename, err);
+      has_err = parse_score(&score_value, score, line_number, filename, err);
       HANDLE_ERROR;
 
       /* parse the strand */
-      /* XXX: process return value differently */
-      (void) parse_strand(&strand_value, strand, line_number, filename, err);
+      has_err = parse_strand(&strand_value, strand, line_number, filename, err);
       HANDLE_ERROR;
 
       /* parse the frame */
-      /* XXX: process return value differently */
-      (void) parse_phase(&phase_value, frame, line_number, filename, err);
+      has_err = parse_phase(&phase_value, frame, line_number, filename, err);
       HANDLE_ERROR;
 
       /* parse the attributes */
