@@ -57,7 +57,7 @@ static void parse_regular_gff3_line(GFF3_parser *gff3_parser,
                                     Queue *genome_nodes, char *line,
                                     size_t line_length, const char *filename,
                                     unsigned long line_number,
-                                    unsigned int *break_loop)
+                                    bool *break_loop)
 {
   GenomeNode *gn, *genome_feature = NULL, *parent_gf;
   GenomeFeatureType gft;
@@ -69,7 +69,7 @@ static void parse_regular_gff3_line(GFF3_parser *gff3_parser,
   Range range;
   char *id = NULL, *seqid, *source, *type, *start, *end, *score, *strand,
        *phase, *attributes, *token, *tmp_token, **tokens;
-  unsigned int out_node_complete = 1, is_child = 0;
+  bool out_node_complete = true, is_child = false;
   unsigned long i;
 
   /* create splitter */
@@ -184,7 +184,7 @@ static void parse_regular_gff3_line(GFF3_parser *gff3_parser,
             "already for the feature defined on line %lu", ID_STRING, id,
                 line_number, filename, genome_node_get_line_number(gn));
     }
-    out_node_complete = 0;
+    out_node_complete = false;
     hashtable_add(gff3_parser->id_to_genome_node_mapping, id, genome_feature);
   }
 
@@ -198,8 +198,8 @@ static void parse_regular_gff3_line(GFF3_parser *gff3_parser,
                 filename, ID_STRING);
     }
     genome_node_is_part_of_genome_node(parent_gf, genome_feature);
-    out_node_complete = 0;
-    is_child = 1;
+    out_node_complete = false;
+    is_child = true;
   }
 
   assert(genome_feature);
@@ -208,7 +208,7 @@ static void parse_regular_gff3_line(GFF3_parser *gff3_parser,
   if (gn)
     queue_add(genome_nodes, gn);
   if (out_node_complete)
-    *break_loop = 1;
+    *break_loop = true;
 
   /* free */
   splitter_free(splitter);
@@ -222,7 +222,7 @@ static void parse_meta_gff3_line(GFF3_parser *gff3_parser, Queue *genome_nodes,
                                  char *line, size_t line_length,
                                  const char *filename,
                                  unsigned long line_number,
-                                 unsigned int *break_loop)
+                                 bool *break_loop)
 {
   char *tmpline, *tmplineend, *seqid = NULL;
   GenomeNode *gn;
@@ -236,7 +236,7 @@ static void parse_meta_gff3_line(GFF3_parser *gff3_parser, Queue *genome_nodes,
     /* storing comment */
     gn = comment_new(line+1, filename, line_number);
     queue_add(genome_nodes, gn);
-    *break_loop = 1;
+    *break_loop = true;
   }
   else if ((strncmp(line, GFF_SEQUENCE_REGION,
                     strlen(GFF_SEQUENCE_REGION)) == 0)) {
@@ -308,14 +308,14 @@ static void parse_meta_gff3_line(GFF3_parser *gff3_parser, Queue *genome_nodes,
     assert(seqid_str);
     gn = sequence_region_new(seqid_str, range, filename, line_number);
                              queue_add(genome_nodes, gn);
-    *break_loop = 1;
+    *break_loop = true;
   }
   else if (strcmp(line, GFF_TERMINATOR) == 0) { /* terminator */
     if (!queue_size(genome_nodes)) {
       error("terminator tag \"%s\" given on line %lu in file \"%s\" before a "
             "feature was defined", GFF_TERMINATOR, line_number, filename);
     }
-    *break_loop = 1;
+    *break_loop = true;
   }
   else {
     warning("skipping unknown meta line %lu in file \"%s\": %s", line_number,
@@ -329,7 +329,7 @@ int gff3_parse_genome_nodes(GFF3_parser *gff3_parser,
                             unsigned long *line_number,
                             FILE *fpin)
 {
-  unsigned int break_loop = 0;
+  bool break_loop = false;
   size_t line_length;
   Str *line_buffer;
   char *line;
