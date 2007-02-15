@@ -99,7 +99,7 @@ static void csa_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
     /* end of cluster -> process it */
     log_log(l, "process cluster");
     csa_visitor->buffered_feature = gf;
-    csa_visitor_process_cluster(gv, 0, l);
+    csa_visitor_process_cluster(gv, false, l);
     csa_visitor->first_range = csa_visitor->second_range;
     csa_visitor->first_str = csa_visitor->second_str;
   }
