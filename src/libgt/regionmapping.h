@@ -12,7 +12,7 @@
 /* maps a sequence-region to a sequence file */
 typedef struct RegionMapping RegionMapping;
 
-RegionMapping* regionmapping_new(Str *mapping_filename);
+RegionMapping* regionmapping_new(Str *mapping_filename, Error*);
 /* returns a new reference */
 Str*           regionmapping_map(RegionMapping*, const char *sequence_region);
 void           regionmapping_free(RegionMapping*);

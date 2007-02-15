@@ -85,6 +85,7 @@ int gt_extractfeat(int argc, char *argv[])
   RegionMapping *regionmapping;
   int parsed_args;
   Error *err = error_new();
+  int has_err = 0;
 
   /* option parsing */
   arguments.type = str_new();
@@ -112,13 +113,18 @@ int gt_extractfeat(int argc, char *argv[])
   if (str_get(arguments.seqfile))
     extractfeat_stream_use_sequence_file(extractfeat_stream, arguments.seqfile);
   else {
-    regionmapping = regionmapping_new(arguments.regionmapping);
-    extractfeat_stream_use_region_mapping(extractfeat_stream, regionmapping);
+    regionmapping = regionmapping_new(arguments.regionmapping, err);
+    if (!regionmapping)
+      has_err = -1;
+    else
+      extractfeat_stream_use_region_mapping(extractfeat_stream, regionmapping);
   }
 
   /* pull the features through the stream and free them afterwards */
-  while (!genome_stream_next_tree(extractfeat_stream, &gn, NULL, err) && gn)
-    genome_node_rec_free(gn);
+  if (!has_err) {
+    while (!genome_stream_next_tree(extractfeat_stream, &gn, NULL, err) && gn)
+      genome_node_rec_free(gn);
+  }
 
   /* free */
   genome_stream_free(extractfeat_stream);
