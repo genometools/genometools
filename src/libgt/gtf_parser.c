@@ -221,7 +221,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   GTF_feature_type gtf_feature_type;
   /* abuse gft_TF_binding_site as an undefined value */
   GenomeFeatureType gff_feature_type = gft_TF_binding_site;
-  int has_err = 0;
+  int has_err;
 
   assert(parser && genome_nodes && filename && fpin);
   error_check(err);
@@ -241,6 +241,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
             continue;                                               \
           }                                                         \
           else {                                                    \
+            assert(!error_is_set(err));                             \
             splitter_free(splitter);                                \
             splitter_free(attribute_splitter);                      \
             str_free(line_buffer);                                  \
@@ -252,6 +253,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
     line = str_get(line_buffer);
     line_length = str_length(line_buffer);
     line_number++;
+    has_err = 0;
 
     if (line_length == 0)
       warning("skipping blank line %lu in file \"%s\"", line_number, filename);
@@ -345,6 +347,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
           if (strlen(token) + 2 < strlen(GENE_ID_ATTRIBUTE)) {
             error_set(err, "missing value to attribute \"%s\" on line %lu in "
                       "file \"%s\"", GENE_ID_ATTRIBUTE, line_number, filename);
+            has_err = -1;
           }
           HANDLE_ERROR;
           gene_id = token + strlen(GENE_ID_ATTRIBUTE) + 1;
@@ -355,6 +358,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
             error_set(err, "missing value to attribute \"%s\" on line %lu in "
                       "file \"%s\"", TRANSCRIPT_ID_ATTRIBUTE, line_number,
                       filename);
+            has_err = -1;
           }
           HANDLE_ERROR;
           transcript_id = token + strlen(TRANSCRIPT_ID_ATTRIBUTE) + 1;
@@ -365,11 +369,13 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       if (!gene_id) {
         error_set(err, "missing attribute \"%s\" on line %lu in file \"%s\"",
                   GENE_ID_ATTRIBUTE, line_number, filename);
+        has_err = -1;
       }
       HANDLE_ERROR;
       if (!transcript_id) {
         error_set(err, "missing attribute \"%s\" on line %lu in file \"%s\"",
                   TRANSCRIPT_ID_ATTRIBUTE, line_number, filename);
+        has_err = -1;
       }
       HANDLE_ERROR;
 
