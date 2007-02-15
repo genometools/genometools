@@ -20,9 +20,9 @@ static int parse_options(Bioseq_arguments *arguments, int argc, char **argv)
          *option_stat;
   OptionParser *op;
   int parsed_args;
-  op = option_parser_new("[option ...] sequence_file",
+  op = option_parser_new("[option ...] sequence_file [...]",
                          "Construct the Biosequence files for the given "
-                         "sequence_file (if necessary).");
+                         "sequence_file(s) (if necessary).");
 
   /* -recreate */
   option = option_new_bool("recreate", "recreate Biosequence files, even if "
@@ -62,8 +62,7 @@ static int parse_options(Bioseq_arguments *arguments, int argc, char **argv)
   option_exclude(option_showseqnum, option_stat);
 
   /* parse */
-  parsed_args = option_parser_parse_min_max_args(op, argc, argv, versionfunc, 1,
-                                                 1);
+  parsed_args = option_parser_parse_min_args(op, argc, argv, versionfunc, 1);
   option_parser_free(op);
 
   return parsed_args;
@@ -79,29 +78,37 @@ int gt_bioseq(int argc, char *argv[])
   parsed_args = parse_options(&arguments, argc, argv);
   assert(parsed_args < argc);
 
-  /* bioseq construction */
-  bioseq = bioseq_new(argv[parsed_args]);
-  bioseq_fill(bioseq, arguments.recreate);
+  /* option -showseqnum makes only sense if we got a single sequence file */
+  if (parsed_args + 1 != argc)
+    error("option '-showseqnum' makes only sense with a single sequence_file");
 
-  /* output */
-  if (arguments.showfasta)
-    bioseq_show_as_fasta(bioseq, arguments.width);
+  while (parsed_args < argc) {
+    /* bioseq construction */
+    bioseq = bioseq_new(argv[parsed_args]);
+    bioseq_fill(bioseq, arguments.recreate);
 
-  if (arguments.showseqnum != UNDEFULONG) {
-    if (arguments.showseqnum > bioseq_number_of_sequences(bioseq)) {
-      error("argument '%lu' to option '-showseqnum' is too large. The "
-            "Biosequence contains only '%lu' sequences.", arguments.showseqnum,
-            bioseq_number_of_sequences(bioseq));
+    /* output */
+    if (arguments.showfasta)
+      bioseq_show_as_fasta(bioseq, arguments.width);
+
+    if (arguments.showseqnum != UNDEFULONG) {
+      if (arguments.showseqnum > bioseq_number_of_sequences(bioseq)) {
+        error("argument '%lu' to option '-showseqnum' is too large. The "
+              "Biosequence contains only '%lu' sequences.",
+              arguments.showseqnum, bioseq_number_of_sequences(bioseq));
+      }
+      bioseq_show_sequence_as_fasta(bioseq, arguments.showseqnum - 1,
+                                    arguments.width);
     }
-    bioseq_show_sequence_as_fasta(bioseq, arguments.showseqnum - 1,
-                                  arguments.width);
+
+    if (arguments.stat)
+      bioseq_show_stat(bioseq);
+
+    /* free */
+    bioseq_free(bioseq);
+
+    parsed_args++;
   }
-
-  if (arguments.stat)
-    bioseq_show_stat(bioseq);
-
-  /* free */
-  bioseq_free(bioseq);
 
   return EXIT_SUCCESS;
 }

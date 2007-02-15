@@ -379,6 +379,8 @@ void bioseq_show_stat(Bioseq *bs)
   unsigned long i, num_of_seqs;
   assert(bs);
   num_of_seqs = bioseq_number_of_sequences(bs);
+  printf("showing statistics for sequence file \"%s\"\n",
+         str_get(bs->sequence_file));
   printf("number of sequences: %lu\n", num_of_seqs);
   printf("total length: %lu\n", bioseq_get_raw_sequence_length(bs));
   for (i = 0; i < num_of_seqs; i++) {
