@@ -79,53 +79,72 @@ RegionMapping* regionmapping_new(Str *mapping_filename, Error *err)
   return rm;
 }
 
-static Str* map_table(RegionMapping *rm, const char *sequence_region)
+static Str* map_table(RegionMapping *rm, const char *sequence_region,
+                      Error *err)
 {
   Str *result = NULL;
+  int has_err = 0;
+  error_check(err);
   assert(rm && sequence_region);
   lua_pushstring(rm->L, sequence_region);
   lua_gettable(rm->L, -2); /* get mapping[sequence_region] */
   /* make sure mapping[sequence_region] is defined */
   if (lua_isnil(rm->L, -1)) {
-    error("mapping[%s] is nil (defined in \"%s\")", sequence_region,
-          str_get(rm->mapping_filename));
+    error_set(err, "mapping[%s] is nil (defined in \"%s\")", sequence_region,
+              str_get(rm->mapping_filename));
+    has_err = -1;
   }
   /* make sure mapping[sequence_region] is a string */
-  if (!(lua_isstring(rm->L, -1))) {
-    error("mapping[%s] is not a string (defined in \"%s\")", sequence_region,
-          str_get(rm->mapping_filename));
+  if (!has_err) {
+    if (!(lua_isstring(rm->L, -1))) {
+      error_set(err, "mapping[%s] is not a string (defined in \"%s\")",
+                sequence_region, str_get(rm->mapping_filename));
+      has_err = -1;
+    }
   }
-  result = str_new_cstr(lua_tostring(rm->L, -1));
+  if (!has_err)
+    result = str_new_cstr(lua_tostring(rm->L, -1));
   lua_pop(rm->L, 1); /* pop result */
   return result;
 }
 
-static Str* map_function(RegionMapping *rm, const char *sequence_region)
+static Str* map_function(RegionMapping *rm, const char *sequence_region,
+                         Error *err)
 {
   Str *result = NULL;
+  int has_err = 0;
+  error_check(err);
   assert(rm && sequence_region);
   lua_getglobal(rm->L, "mapping");
   lua_pushstring(rm->L, sequence_region);
   /* call function */
-  if (lua_pcall(rm->L, 1, 1, 0))
-     error("running function 'mapping': %s", lua_tostring(rm->L, -1));
-  /* make sure the result is a string */
-  if (!lua_isstring(rm->L, -1)) {
-     error("function 'mapping' must return a string (defined in \"%s\")",
-          str_get(rm->mapping_filename));
+  if (lua_pcall(rm->L, 1, 1, 0)) {
+    error_set(err, "running function 'mapping': %s", lua_tostring(rm->L, -1));
+    has_err = -1;
   }
-  result = str_new_cstr(lua_tostring(rm->L, -1));
-  lua_pop(rm->L, 1); /* pop result */
+  /* make sure the result is a string */
+  if (!has_err) {
+    if (!lua_isstring(rm->L, -1)) {
+      error_set(err, "function 'mapping' must return a string (defined in "
+                "\"%s\")", str_get(rm->mapping_filename));
+      has_err = -1;
+    }
+    if (!has_err)
+      result = str_new_cstr(lua_tostring(rm->L, -1));
+    lua_pop(rm->L, 1); /* pop result */
+  }
   return result;
 }
 
-Str* regionmapping_map(RegionMapping *rm, const char *sequence_region)
+Str* regionmapping_map(RegionMapping *rm, const char *sequence_region,
+                       Error *err)
 {
+  error_check(err);
   assert(rm && sequence_region);
   if (rm->is_table)
-    return map_table(rm, sequence_region);
+    return map_table(rm, sequence_region, err);
   else
-    return map_function(rm, sequence_region);
+    return map_function(rm, sequence_region, err);
 }
 
 void regionmapping_free(RegionMapping *rm)

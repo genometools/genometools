@@ -157,6 +157,7 @@ static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
                                                /*@unused@*/ Log *l, Error *err)
 {
   ExtractFeatVisitor *efv;
+  int has_err = 0;
   error_check(err);
   efv = extractfeat_visitor_cast(gv);
   if (efv->regionmapping) { /* region mapping used -> determine bioseq */
@@ -164,13 +165,21 @@ static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
         str_cmp(efv->sequence_file, genome_node_get_seqid((GenomeNode*) gf))) {
       str_free(efv->sequence_file);
       efv->sequence_file = regionmapping_map(efv->regionmapping,
-                              str_get(genome_node_get_seqid((GenomeNode*) gf)));
-      bioseq_free(efv->bioseq);
-      efv->bioseq = bioseq_new_str(efv->sequence_file);
+                              str_get(genome_node_get_seqid((GenomeNode*) gf)),
+                              err);
+      if (!efv->sequence_file)
+        has_err = -1;
+      else {
+        bioseq_free(efv->bioseq);
+        efv->bioseq = bioseq_new_str(efv->sequence_file);
+      }
     }
   }
-  return genome_node_traverse_children((GenomeNode*) gf, efv, extract_feature,
-                                       false, err);
+  if (!has_err) {
+    has_err = genome_node_traverse_children((GenomeNode*) gf, efv,
+                                            extract_feature, false, err);
+  }
+  return has_err;
 }
 
 static int extractfeat_visitor_sequence_region(GenomeVisitor *gv,

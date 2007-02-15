@@ -139,8 +139,6 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 static void gff3_in_stream_free(GenomeStream *gs)
 {
   Gff3_in_stream *gff3_in_stream = gff3_in_stream_cast(gs);
-  /* the file has been read completely and is therefore already closed */
-  assert(!gff3_in_stream->fpin);
   array_free(gff3_in_stream->files);
   queue_free(gff3_in_stream->genome_node_buffer);
   gff3_free(gff3_in_stream->gff3_parser);

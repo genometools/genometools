@@ -14,7 +14,8 @@ typedef struct RegionMapping RegionMapping;
 
 RegionMapping* regionmapping_new(Str *mapping_filename, Error*);
 /* returns a new reference */
-Str*           regionmapping_map(RegionMapping*, const char *sequence_region);
+Str*           regionmapping_map(RegionMapping*, const char *sequence_region,
+                                 Error*);
 void           regionmapping_free(RegionMapping*);
 
 #endif
