@@ -51,7 +51,7 @@ static void stat_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
       stat_visitor->number_of_exons++;
       break;
     default:
-      assert(1);
+      assert(0);
   }
 }
 
