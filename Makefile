@@ -13,8 +13,6 @@ GT_CFLAGS:= -Wall $(INCLUDEOPT)
 LDFLAGS:=
 LDLIBS:=-lm -lz
 
-VPATH:=$(VPATH):$(CURDIR)/src
-
 LIBGT_SRC:=$(notdir $(wildcard src/libgt/*.c))
 LIBGT_OBJ:=$(LIBGT_SRC:%.c=obj/%.o)
 
