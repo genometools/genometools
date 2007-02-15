@@ -1,11 +1,14 @@
 *.bac
 *.core
+*.diff
 *.gt_bsi
 *.gt_bsr
+*.orig
 *.swp
 bin
 dist
 obj
 lib
+tags
 testsuite/stest_testsuite
 testsuite/stest_stest_tests
