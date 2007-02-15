@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -14,10 +14,10 @@
 struct GenomeVisitorClass {
   size_t size;
   void (*free)(GenomeVisitor*);
-  void (*comment)(GenomeVisitor*, Comment*, Log*);
-  void (*genome_feature)(GenomeVisitor*, Genome_feature*, Log*);
-  void (*sequence_region)(GenomeVisitor*, SequenceRegion*, Log*);
-  void (*default_func)(GenomeVisitor*, GenomeNode*, Log*);
+  int (*comment)(GenomeVisitor*, Comment*, Log*, Error*);
+  int (*genome_feature)(GenomeVisitor*, Genome_feature*, Log*, Error*);
+  int (*sequence_region)(GenomeVisitor*, SequenceRegion*, Log*, Error*);
+  int (*default_func)(GenomeVisitor*, GenomeNode*, Log*, Error*);
 };
 
 struct GenomeVisitor {
@@ -25,7 +25,6 @@ struct GenomeVisitor {
 };
 
 GenomeVisitor* genome_visitor_create(const GenomeVisitorClass*);
-void*           genome_visitor_cast(const GenomeVisitorClass*,
-                                    GenomeVisitor*);
+void*          genome_visitor_cast(const GenomeVisitorClass*, GenomeVisitor*);
 
 #endif

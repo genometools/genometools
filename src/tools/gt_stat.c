@@ -49,11 +49,12 @@ static int parse_options(Stat_arguments *arguments, int argc, char **argv)
   return parsed_args;
 }
 
-static void compute_statistics(GenomeNode *gn, void *data)
+static int compute_statistics(GenomeNode *gn, void *data, Error *err)
 {
   Stat_info *info = (Stat_info*) data;
+  error_check(err);
   assert(info && info->stat_visitor);
-  genome_node_accept(gn, info->stat_visitor, NULL);
+  return genome_node_accept(gn, info->stat_visitor, NULL, err);
 }
 
 int gt_stat(int argc, char *argv[])
@@ -83,8 +84,10 @@ int gt_stat(int argc, char *argv[])
   while (!(has_err = genome_stream_next_tree(gff3_in_stream, &gn, NULL, err)) &&
          gn) {
     info.number_of_trees++;
-    genome_node_traverse_children(gn, &info, compute_statistics, 1);
+    has_err = genome_node_traverse_children(gn, &info, compute_statistics, true,
+                                            err);
     genome_node_rec_free(gn);
+    if (has_err) break;
   }
 
   /* show statistics */

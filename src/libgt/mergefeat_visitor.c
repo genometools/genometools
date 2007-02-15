@@ -26,11 +26,12 @@ static void mergefeat_visitor_free(GenomeVisitor *gv)
   hashtable_free(mergefeat_visitor->ht);
 }
 
-static void mergefeat_in_children(GenomeNode *gn, void *data)
+static int mergefeat_in_children(GenomeNode *gn, void *data, Error *err)
 {
   Mergefeat_visitor *v = (Mergefeat_visitor*) data;
   Genome_feature *previous_feature, *current_feature;
   Range previous_range, current_range;
+  error_check(err);
   current_feature = genome_node_cast(genome_feature_class(), gn);
   assert(current_feature);
   if ((previous_feature = hashtable_get(v->ht, genome_feature_type_get_cstr(
@@ -60,25 +61,31 @@ static void mergefeat_in_children(GenomeNode *gn, void *data)
   /* add current feature */
   hashtable_add(v->ht, (char*) genome_feature_type_get_cstr(
                 genome_feature_get_type(current_feature)), current_feature);
+  return 0;
 }
 
-static void mergefeat_if_necessary(GenomeNode *gn, void *data)
+static int mergefeat_if_necessary(GenomeNode *gn, void *data, Error *err)
 {
   Mergefeat_visitor *v = (Mergefeat_visitor*) data;
   Genome_feature *gf;
+  error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
   v->current_tree = gn;
   hashtable_reset(v->ht);
-  genome_node_traverse_direct_children(gn, v, mergefeat_in_children);
+  return genome_node_traverse_direct_children(gn, v, mergefeat_in_children,
+                                              err);
 }
 
-static void mergefeat_visitor_genome_feature(GenomeVisitor *gv,
-                                             Genome_feature *gf,
-                                             /*@unused@*/ Log *l)
+static int mergefeat_visitor_genome_feature(GenomeVisitor *gv,
+                                            Genome_feature *gf,
+                                            /*@unused@*/ Log *l, Error *err)
 {
-  Mergefeat_visitor *v = mergefeat_visitor_cast(gv);
-  genome_node_traverse_children((GenomeNode*) gf, v, mergefeat_if_necessary,0);
+  Mergefeat_visitor *v;
+  error_check(err);
+  v = mergefeat_visitor_cast(gv);
+  return genome_node_traverse_children((GenomeNode*) gf, v,
+                                       mergefeat_if_necessary, false, err);
 }
 
 const GenomeVisitorClass* mergefeat_visitor_class()

@@ -36,7 +36,9 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l, Error *err)
   while (!(has_err = genome_stream_next_tree(cs->in_stream, gn, l, err)) &&
          *gn) {
     assert(*gn && !has_err);
-    genome_node_accept(*gn, cs->csa_visitor, l);
+    has_err = genome_node_accept(*gn, cs->csa_visitor, l, err);
+    if (has_err)
+      break;
     if (csa_visitor_node_buffer_size(cs->csa_visitor)) {
       *gn = csa_visitor_get_node(cs->csa_visitor);
       return 0;

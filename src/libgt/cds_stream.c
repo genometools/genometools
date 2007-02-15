@@ -28,7 +28,7 @@ static int cds_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
   cds_stream = cds_stream_cast(gs);
   has_err = genome_stream_next_tree(cds_stream->in_stream, gn, l, err);
   if (!has_err && *gn)
-    genome_node_accept(*gn, cds_stream->cds_visitor, l);
+    has_err = genome_node_accept(*gn, cds_stream->cds_visitor, l, err);
   return has_err;
 }
 

@@ -27,7 +27,7 @@ static int gff3_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
   gff3_out_stream = gff3_out_stream_cast(gs);
   has_err = genome_stream_next_tree(gff3_out_stream->in_stream, gn, l, err);
   if (!has_err && *gn)
-    genome_node_accept(*gn, gff3_out_stream->gff3_visitor, l);
+    has_err = genome_node_accept(*gn, gff3_out_stream->gff3_visitor, l, err);
   return has_err;
 }
 

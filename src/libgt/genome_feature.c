@@ -76,10 +76,13 @@ static void genome_feature_set_phase(GenomeNode *gn, Phase phase)
   gf->phase = phase;
 }
 
-static void genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l)
+static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l,
+                                 Error *err)
 {
-  Genome_feature *gf = genome_feature_cast(gn);
-  genome_visitor_visit_genome_feature(gv, gf, l);
+  Genome_feature *gf;
+  error_check(err);
+  gf = genome_feature_cast(gn);
+  return genome_visitor_visit_genome_feature(gv, gf, l, err);
 }
 
 const GenomeNodeClass* genome_feature_class()
@@ -147,20 +150,26 @@ Phase genome_feature_get_phase(Genome_feature *gf)
   return gf->phase;
 }
 
-static void save_exon(GenomeNode *gn, void *data)
+static int save_exon(GenomeNode *gn, void *data, Error *err)
 {
-  Genome_feature *gf = (Genome_feature*) gn;
+  Genome_feature *gf;
   Array *exon_features = (Array*) data;
+  error_check(err);
+  gf = (Genome_feature*) gn;
   assert(gf && exon_features);
   if (genome_feature_get_type(gf) == gft_exon) {
     array_add(exon_features, gf);
   }
+  return 0;
 }
 
 void genome_feature_get_exons(Genome_feature *gf, Array *exon_features)
 {
+  int has_err;
   assert(gf && exon_features && !array_size(exon_features));
-  genome_node_traverse_children((GenomeNode*) gf, exon_features, save_exon, 0);
+  has_err = genome_node_traverse_children((GenomeNode*) gf, exon_features,
+                                          save_exon, false, NULL);
+  assert(!has_err); /* cannot happen, because save_exon() is sane */
 }
 
 void genome_feature_set_end(Genome_feature *gf, unsigned long end)

@@ -33,7 +33,8 @@ static int extractfeat_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   if (!has_err) {
   assert(extractfeat_stream->extractfeat_visitor);
   if (*gn)
-    genome_node_accept(*gn, extractfeat_stream->extractfeat_visitor, l);
+    has_err = genome_node_accept(*gn, extractfeat_stream->extractfeat_visitor,
+                                 l, err);
   }
   return has_err;
 }

@@ -48,10 +48,12 @@ static void csa_visitor_free(GenomeVisitor *gv)
   str_free(csa_visitor->gth_csa_source_str);
 }
 
-static void csa_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
-                                       Log *l)
+static int csa_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
+                                      Log *l, Error *err)
 {
-  CSAVisitor *csa_visitor = csa_visitor_cast(gv);
+  CSAVisitor *csa_visitor;
+  error_check(err);
+  csa_visitor = csa_visitor_cast(gv);
 
   /* determine the first range if necessary */
   if (csa_visitor->buffered_feature) {
@@ -67,7 +69,7 @@ static void csa_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
     csa_visitor->first_range = genome_node_get_range((GenomeNode*) gf);
     csa_visitor->first_str = genome_node_get_seqid((GenomeNode*) gf);
     array_add(csa_visitor->cluster, gf);
-    return;
+    return 0;
   }
 
   assert(!csa_visitor->buffered_feature);
@@ -103,13 +105,17 @@ static void csa_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
     csa_visitor->first_range = csa_visitor->second_range;
     csa_visitor->first_str = csa_visitor->second_str;
   }
+  return 0;
 }
 
-static void csa_visitor_default_func(GenomeVisitor *gv, GenomeNode *gn,
-                                     /*@unused@*/ Log *l)
+static int csa_visitor_default_func(GenomeVisitor *gv, GenomeNode *gn,
+                                    /*@unused@*/ Log *l, Error *err)
 {
-  CSAVisitor *csa_visitor = csa_visitor_cast(gv);
+  CSAVisitor *csa_visitor;
+  error_check(err);
+  csa_visitor = csa_visitor_cast(gv);
   queue_add(csa_visitor->genome_node_buffer, gn);
+  return 0;
 }
 
 const GenomeVisitorClass* csa_visitor_class()
@@ -161,26 +167,29 @@ static Strand get_strand(const void *sa)
   return genome_feature_get_strand(gf);
 }
 
-static void save_exon(GenomeNode *gn, void *data)
+static int save_exon(GenomeNode *gn, void *data, Error *err)
 {
   Genome_feature *gf = (Genome_feature*) gn;
   Array *exon_ranges = (Array*) data;
   Range range;
-
+  error_check(err);
   assert(gf && exon_ranges);
-
   if (genome_feature_get_type(gf) == gft_exon) {
     range = genome_node_get_range(gn);
     array_add(exon_ranges, range);
   }
+  return 0;
 }
 
 static void get_exons(Array *exon_ranges, const void *sa)
 {
   Genome_feature *gf = *(Genome_feature**) sa;
+  int has_err;
   assert(exon_ranges && gf && genome_feature_get_type(gf) == gft_gene);
-  genome_node_traverse_children((GenomeNode*) gf, exon_ranges, save_exon,
-                                false);
+  has_err = genome_node_traverse_children((GenomeNode*) gf, exon_ranges,
+                                          save_exon, false, NULL);
+  /* we cannot have an error here, because save_exon() doesn't produces one. */
+  assert(!has_err);
   /* we got at least one exon */
   assert(array_size(exon_ranges));
   assert(ranges_are_sorted_and_do_not_overlap(exon_ranges));

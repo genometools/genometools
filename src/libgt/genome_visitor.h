@@ -17,10 +17,11 @@ typedef struct GenomeVisitor GenomeVisitor;
 #include "genome_feature.h"
 #include "sequence_region.h"
 
-void genome_visitor_visit_comment(GenomeVisitor*, Comment*, Log*);
-void genome_visitor_visit_genome_feature(GenomeVisitor*, Genome_feature*, Log*);
-void genome_visitor_visit_sequence_region(GenomeVisitor*, SequenceRegion*,
-                                          Log*);
+int  genome_visitor_visit_comment(GenomeVisitor*, Comment*, Log*, Error*);
+int  genome_visitor_visit_genome_feature(GenomeVisitor*, Genome_feature*, Log*,
+                                         Error*);
+int  genome_visitor_visit_sequence_region(GenomeVisitor*, SequenceRegion*,
+                                          Log*, Error*);
 void genome_visitor_free(GenomeVisitor *gv);
 
 #endif

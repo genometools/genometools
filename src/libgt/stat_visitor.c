@@ -28,10 +28,12 @@ static void stat_visitor_free(GenomeVisitor *gv)
   disc_distri_free(stat_visitor->gene_score_distribution);
 }
 
-static void stat_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
-                                        /*@unused@*/ Log *l)
+static int stat_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
+                                        /*@unused@*/ Log *l, Error *err)
 {
-  Stat_visitor *stat_visitor = stat_visitor_cast(gv);
+  Stat_visitor *stat_visitor;
+  error_check(err);
+  stat_visitor = stat_visitor_cast(gv);
   switch (genome_feature_get_type(gf)) {
     case gft_gene:
       stat_visitor->number_of_genes++;
@@ -53,6 +55,7 @@ static void stat_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
     default:
       assert(0);
   }
+  return 0;
 }
 
 const GenomeVisitorClass* stat_visitor_class()

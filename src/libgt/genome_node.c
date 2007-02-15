@@ -13,7 +13,7 @@
 #include "xansi.h"
 
 typedef struct {
-  GenomeNode_traverse_func func;
+  GenomeNodeTraverseFunc func;
   void *data;
 } Traverse_children_info;
 
@@ -92,37 +92,49 @@ void* genome_node_cast(const GenomeNodeClass *gnc, GenomeNode *gn)
   return NULL;
 }
 
-static void increase_reference_count(GenomeNode *gn, /*@unused@*/ void *data)
+static int increase_reference_count(GenomeNode *gn, /*@unused@*/ void *data,
+                                    Error *err)
 {
+  error_check(err);
   assert(gn);
   gn->reference_count++;
+  return 0;
 }
 
 static GenomeNode* genome_node_ref(GenomeNode *gn)
 {
-  increase_reference_count(gn, NULL);
+  int has_err;
+  has_err = increase_reference_count(gn, NULL, NULL);
+  assert(!has_err); /* cannot happen, increase_reference_count() is sane */
   return gn;
 }
 
 GenomeNode* genome_node_rec_ref(GenomeNode *gn)
 {
+  int has_err;
   assert(gn);
-  genome_node_traverse_children(gn, NULL, increase_reference_count, true);
+  has_err = genome_node_traverse_children(gn, NULL, increase_reference_count,
+                                          true, NULL);
+  assert(!has_err); /* cannot happen, increase_reference_count() is sane */
   return gn;
 }
 
-void genome_node_traverse_children(GenomeNode *genome_node,
-                                   void *data,
-                                   GenomeNode_traverse_func traverse,
-                                   bool traverse_only_once)
+int genome_node_traverse_children(GenomeNode *genome_node,
+                                  void *data,
+                                  GenomeNodeTraverseFunc traverse,
+                                  bool traverse_only_once, Error *err)
 {
   Array *node_stack, *list_of_children;
   GenomeNode *gn, *child_feature;
   Dlistelem *dlistelem;
   unsigned long i;
   Hashtable *traversed_nodes = NULL;
+  int has_err = 0;
 
-  if (!genome_node) return;
+  error_check(err);
+
+  if (!genome_node)
+    return 0;
 
   node_stack = array_new(sizeof(GenomeNode*));
   list_of_children = array_new(sizeof(GenomeNode*));
@@ -143,7 +155,11 @@ void genome_node_traverse_children(GenomeNode *genome_node,
         array_add(list_of_children, child_feature);
       }
     }
-    if (traverse) traverse(gn, data);
+    if (traverse) {
+      has_err = traverse(gn, data, err);
+      if (has_err)
+        break;
+    }
     /* we go backwards to traverse in order */
     for (i = array_size(list_of_children); i > 0; i--) {
       child_feature = *((GenomeNode**) array_get(list_of_children, i-1));
@@ -162,21 +178,30 @@ void genome_node_traverse_children(GenomeNode *genome_node,
     hashtable_free(traversed_nodes);
   array_free(list_of_children);
   array_free(node_stack);
+
+  return has_err;
 }
 
-void genome_node_traverse_direct_children(GenomeNode *gn,
-                                          void *traverse_func_data,
-                                          GenomeNode_traverse_func traverse)
+int genome_node_traverse_direct_children(GenomeNode *gn,
+                                         void *traverse_func_data,
+                                         GenomeNodeTraverseFunc traverse,
+                                         Error *err)
 {
   Dlistelem *dlistelem;
-  if (!gn || !traverse) return;
+  int has_err = 0;
+  error_check(err);
+  if (!gn || !traverse)
+    return 0;
   if (gn->children) {
     for (dlistelem = dlist_first(gn->children); dlistelem != NULL;
          dlistelem = dlistelem_next(dlistelem)) {
-      traverse((GenomeNode*) dlistelem_get_data(dlistelem),
-               traverse_func_data);
+      has_err = traverse((GenomeNode*) dlistelem_get_data(dlistelem),
+                          traverse_func_data, err);
+      if (has_err)
+        break;
     }
   }
+  return has_err;
 }
 
 const char* genome_node_get_filename(const GenomeNode *gn)
@@ -251,10 +276,11 @@ void genome_node_set_phase(GenomeNode *gn, Phase p)
   gn->c_class->set_phase(gn, p);
 }
 
-void genome_node_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l)
+int genome_node_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l, Error *err)
 {
+  error_check(err);
   assert(gn && gv && gn->c_class && gn->c_class->accept);
-  gn->c_class->accept(gn, gv, l);
+  return gn->c_class->accept(gn, gv, l, err);
 }
 
 void genome_node_is_part_of_genome_node(GenomeNode *parent,
@@ -267,10 +293,11 @@ void genome_node_is_part_of_genome_node(GenomeNode *parent,
   dlist_add(parent->children, child); /* XXX: check for circles */
 }
 
-static void remove_leaf(GenomeNode *node, void *data)
+static int remove_leaf(GenomeNode *node, void *data, Error *err)
 {
   Dlistelem *dlistelem;
   GenomeNode *child, *leaf = (GenomeNode*) data;
+  error_check(err);
   if (node != leaf && node->children) {
     for (dlistelem = dlist_first(node->children); dlistelem != NULL;
          dlistelem = dlistelem_next(dlistelem)) {
@@ -281,13 +308,16 @@ static void remove_leaf(GenomeNode *node, void *data)
       }
     }
   }
+  return 0;
 }
 
 void genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn)
 {
+  int has_err;
   assert(tree && leafn);
   assert(!genome_node_number_of_children(leafn));
-  genome_node_traverse_children(tree, leafn, remove_leaf, true);
+  has_err = genome_node_traverse_children(tree, leafn, remove_leaf, true, NULL);
+  assert(!has_err); /* cannot happen, remove_leaf() is sane */
 }
 
 bool genome_node_has_children(GenomeNode *gn)
@@ -393,15 +423,20 @@ void genome_node_free(GenomeNode *gn)
   free(gn);
 }
 
-static void free_genome_node(GenomeNode *gn, /*@unused@*/ void *data)
+static int free_genome_node(GenomeNode *gn, /*@unused@*/ void *data, Error *err)
 {
+  error_check(err);
   genome_node_free(gn);
+  return 0;
 }
 
 void genome_node_rec_free(GenomeNode *gn)
 {
+  int has_err;
   if (!gn) return;
-  genome_node_traverse_children(gn, NULL, free_genome_node, true);
+  has_err = genome_node_traverse_children(gn, NULL, free_genome_node, true,
+                                          NULL);
+  assert(!has_err); /* cannot happen, free_genome_node() is sane */
 }
 
 void genome_nodes_sort(Array *nodes)

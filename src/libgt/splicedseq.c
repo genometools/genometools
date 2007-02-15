@@ -75,12 +75,17 @@ unsigned long splicedseq_length(const Splicedseq *ss)
   return str_length(ss->splicedseq);
 }
 
-void splicedseq_reverse(Splicedseq *ss)
+int splicedseq_reverse(Splicedseq *ss, Error *err)
 {
+  int has_err;
   assert(ss);
-  reverse_complement(str_get(ss->splicedseq), str_length(ss->splicedseq));
-  array_reverse(ss->positionmapping);
-  ss->forward = !ss->forward;
+  has_err = reverse_complement(str_get(ss->splicedseq),
+                               str_length(ss->splicedseq), err);
+  if (!has_err) {
+    array_reverse(ss->positionmapping);
+    ss->forward = !ss->forward;
+  }
+  return has_err;
 }
 
 void splicedseq_reset(Splicedseq *ss)

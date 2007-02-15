@@ -241,7 +241,6 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
             continue;                                               \
           }                                                         \
           else {                                                    \
-            assert(!error_is_set(err));                             \
             splitter_free(splitter);                                \
             splitter_free(attribute_splitter);                      \
             str_free(line_buffer);                                  \

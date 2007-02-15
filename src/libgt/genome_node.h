@@ -12,20 +12,22 @@ typedef struct GenomeNodeClass GenomeNodeClass;
 typedef struct GenomeNode GenomeNode;
 
 #include "bittab.h"
+#include "error.h"
 #include "genome_visitor.h"
 #include "phase.h"
 #include "range.h"
 #include "str.h"
 
-typedef void (*GenomeNode_traverse_func)(GenomeNode*, void*);
+typedef int (*GenomeNodeTraverseFunc)(GenomeNode*, void*, Error*);
 
 GenomeNode*  genome_node_rec_ref(GenomeNode*);
 void*         genome_node_cast(const GenomeNodeClass*, GenomeNode*);
-void          genome_node_traverse_children(GenomeNode*, void*,
-                                            GenomeNode_traverse_func,
-                                            bool traverse_only_once);
-void          genome_node_traverse_direct_children(GenomeNode*, void*,
-                                                   GenomeNode_traverse_func);
+int           genome_node_traverse_children(GenomeNode*, void*,
+                                            GenomeNodeTraverseFunc,
+                                            bool traverse_only_once, Error*);
+int           genome_node_traverse_direct_children(GenomeNode*, void*,
+                                                   GenomeNodeTraverseFunc,
+                                                   Error*);
 const char*   genome_node_get_filename(const GenomeNode*);
 unsigned long genome_node_get_line_number(const GenomeNode*);
 unsigned long genome_node_number_of_children(const GenomeNode*);
@@ -38,7 +40,7 @@ void          genome_node_set_range(GenomeNode*, Range);
 void          genome_node_set_seqid(GenomeNode*, Str*);
 void          genome_node_set_source(GenomeNode*, Str*);
 void          genome_node_set_phase(GenomeNode*, Phase);
-void          genome_node_accept(GenomeNode*, GenomeVisitor*, Log *l);
+int           genome_node_accept(GenomeNode*, GenomeVisitor*, Log *l, Error*);
 void          genome_node_is_part_of_genome_node(GenomeNode *parent,
                                                  GenomeNode *child);
 /* does not free the leaf */

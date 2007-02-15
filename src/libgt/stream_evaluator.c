@@ -221,7 +221,7 @@ static void set_actuals_and_sort_them(void *key, void *value, void *data)
                                 : NULL;
 }
 
-static void process_real_feature(GenomeNode *gn, void *data)
+static int process_real_feature(GenomeNode *gn, void *data, Error *err)
 {
   Process_real_feature_data *process_real_feature_data =
     (Process_real_feature_data*) data;
@@ -229,6 +229,7 @@ static void process_real_feature(GenomeNode *gn, void *data)
   Genome_feature *gf;
   Range range;
 
+  error_check(err);
   assert(gn && data);
   gf = (Genome_feature*) gn;
 
@@ -302,24 +303,29 @@ static void process_real_feature(GenomeNode *gn, void *data)
     default:
       assert(1); /* shut up compiler */
   }
+  return 0;
 }
 
-static void store_exon(GenomeNode *gn, void *data)
+static int store_exon(GenomeNode *gn, void *data, Error *err)
 {
   Array *exons = (Array*) data;
   Range range;
-  Genome_feature *gf = genome_node_cast(genome_feature_class(), gn);
+  Genome_feature *gf;
+  error_check(err);
+  gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf && exons);
   if (genome_feature_get_type(gf) == gft_exon) {
     range = genome_node_get_range(gn);
     array_add(exons, range);
   }
+  return 0;
 }
 
 static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
 {
   Array *exons_1, *exons_2;
   bool equal;
+  int has_err;
 
   assert(gn_1 && gn_2);
 
@@ -328,8 +334,12 @@ static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   exons_2 = array_new(sizeof(Range));
 
   /* get exon ranges */
-  genome_node_traverse_children(gn_1, exons_1, store_exon, false);
-  genome_node_traverse_children(gn_2, exons_2, store_exon, false);
+  has_err = genome_node_traverse_children(gn_1, exons_1, store_exon, false,
+                                          NULL);
+  assert(!has_err); /* cannot happen, store_exon() is sane */
+  has_err = genome_node_traverse_children(gn_2, exons_2, store_exon, false,
+                                          NULL);
+  assert(!has_err); /* cannot happen, store_exon() is sane */
 
   /* sort exon ranges */
   ranges_sort(exons_1);
@@ -350,11 +360,13 @@ typedef struct {
         *mRNAs;
 } Store_gene_feature_info;
 
-static void store_gene_feature(GenomeNode *gn, void *data)
+static int store_gene_feature(GenomeNode *gn, void *data, Error *err)
 {
-  Genome_feature *gf = genome_node_cast(genome_feature_class(), gn);
+  Genome_feature *gf;
   Store_gene_feature_info *info = (Store_gene_feature_info*) data;
   Range range;
+  error_check(err);
+  gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf && info);
   switch (genome_feature_get_type(gf)) {
     case gft_mRNA:
@@ -367,6 +379,7 @@ static void store_gene_feature(GenomeNode *gn, void *data)
     default:
       assert(1);
   }
+  return 0;
 }
 
 static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
@@ -375,6 +388,7 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   Store_gene_feature_info info;
   unsigned long i;
   bool equal;
+  int has_err;
 
   /* init */
   exons_1 = array_new(sizeof(Range));
@@ -385,10 +399,14 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   /* get (direct) gene features */
   info.exons = exons_1;
   info.mRNAs = mRNAs_1;
-  genome_node_traverse_direct_children(gn_1, &info, store_gene_feature);
+  has_err = genome_node_traverse_direct_children(gn_1, &info,
+                                                 store_gene_feature, NULL);
+  assert(!has_err); /* cannot happen, store_gene_feature() is sane */
   info.exons = exons_2;
   info.mRNAs = mRNAs_2;
-  genome_node_traverse_direct_children(gn_2, &info, store_gene_feature);
+  has_err = genome_node_traverse_direct_children(gn_2, &info,
+                                                 store_gene_feature, NULL);
+  assert(!has_err); /* cannot happen, store_gene_feature() is sane */
 
   /* sort exon ranges */
   ranges_sort(exons_1);
@@ -420,7 +438,7 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   return equal;
 }
 
-static void process_predicted_feature(GenomeNode *gn, void *data)
+static int process_predicted_feature(GenomeNode *gn, void *data, Error *err)
 {
   Process_predicted_feature_info *info = (Process_predicted_feature_info*) data;
   Range *actual_range, predicted_range;
@@ -429,6 +447,7 @@ static void process_predicted_feature(GenomeNode *gn, void *data)
   Array *real_genome_nodes;
   GenomeNode **real_gn;
 
+  error_check(err);
   assert(gn && data);
 
   predicted_range = genome_node_get_range(gn);
@@ -667,6 +686,7 @@ static void process_predicted_feature(GenomeNode *gn, void *data)
       assert(1); /* shut up compiler */
   }
   array_free(real_genome_nodes);
+  return 0;
 }
 
 void determine_missing_features(void *key, void *value, void *data)
@@ -741,8 +761,10 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       assert(slot);
       /* store the exons */
       process_real_feature_data.slot = slot;
-      genome_node_traverse_children(gn, &process_real_feature_data,
-                                    process_real_feature, false);
+      has_err = genome_node_traverse_children(gn, &process_real_feature_data,
+                                              process_real_feature, false,
+                                              NULL);
+      assert(!has_err); /* cannot happen, process_real_feature() is sane */
     }
     genome_node_rec_free(gn);
   }
@@ -763,8 +785,11 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                              str_get(genome_node_get_seqid(gn)));
         if (slot) {
           info.slot = slot;
-          genome_node_traverse_children(gn, &info, process_predicted_feature,
-                                        false);
+          has_err = genome_node_traverse_children(gn, &info,
+                                                  process_predicted_feature,
+                                                  false, NULL);
+          assert(!has_err); /* cannot happen, process_predicted_feature() is
+                               sane */
         }
         else {
           /* we got no (real) slot */

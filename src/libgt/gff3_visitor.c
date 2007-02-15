@@ -54,19 +54,23 @@ static void gff3_visitor_free(GenomeVisitor *gv)
   hashtable_free(gff3_visitor->genome_feature_to_unique_id_str);
 }
 
-static void gff3_visitor_comment(GenomeVisitor *gv, Comment *c,
-                                 /*@unused@*/ Log *l)
+static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c,
+                                /*@unused@*/ Log *l, Error *err)
 {
-  Gff3_visitor *gff3_visitor = gff3_visitor_cast(gv);
+  Gff3_visitor *gff3_visitor;
+  error_check(err);
+  gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && c);
   gff3_version_string(gv);
   fprintf(gff3_visitor->outfp, "#%s\n", comment_get_comment(c));
+  return 0;
 }
 
-static void add_id(GenomeNode *gn, void *data)
+static int add_id(GenomeNode *gn, void *data, Error *err)
 {
   Add_id_info *info = (Add_id_info*) data;
   Array *parent_features = NULL;
+  error_check(err);
   assert(gn && info && info->genome_feature_to_id_array && info->id);
   parent_features = hashtable_get(info->genome_feature_to_id_array, gn);
   if (!parent_features) {
@@ -74,9 +78,10 @@ static void add_id(GenomeNode *gn, void *data)
     hashtable_add(info->genome_feature_to_id_array, gn, parent_features);
   }
   array_add(parent_features, info->id);
+  return 0;
 }
 
-static void gff3_show_genome_feature(GenomeNode *gn, void *data)
+static int gff3_show_genome_feature(GenomeNode *gn, void *data, Error *err)
 {
   unsigned int part_shown = 0;
   Gff3_visitor *gff3_visitor = (Gff3_visitor*) data;
@@ -85,6 +90,7 @@ static void gff3_show_genome_feature(GenomeNode *gn, void *data)
   unsigned long i;
   Str *id;
 
+  error_check(err);
   assert(gn && gf && gff3_visitor);
 
   /* output leading part */
@@ -116,17 +122,22 @@ static void gff3_show_genome_feature(GenomeNode *gn, void *data)
   /* if (part_shown) putc(';', gff3_visitor->outfp); */
 
   xfputc('\n', gff3_visitor->outfp);
+
+  return 0;
 }
 
-static void store_ids(GenomeNode *gn, void *data)
+static int store_ids(GenomeNode *gn, void *data, Error *err)
 {
   Gff3_visitor *gff3_visitor = (Gff3_visitor*) data;
   Genome_feature *gf = (Genome_feature*) gn;
-  GenomeFeatureType type = genome_feature_get_type(gf);
+  GenomeFeatureType type;
   Add_id_info add_id_info;
+  int has_err = 0;
   Str *id;
 
+  error_check(err);
   assert(gn && gf && gff3_visitor);
+  type = genome_feature_get_type(gf);
 
   if (genome_node_has_children(gn)) {
     /* increase id counter */
@@ -143,21 +154,29 @@ static void store_ids(GenomeNode *gn, void *data)
     add_id_info.genome_feature_to_id_array =
       gff3_visitor->genome_feature_to_id_array,
     add_id_info.id = str_get(id);
-    genome_node_traverse_direct_children(gn, &add_id_info, add_id);
+    has_err = genome_node_traverse_direct_children(gn, &add_id_info, add_id,
+                                                   err);
   }
+  return has_err;
 }
 
-static void gff3_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
-                                        /*@unused@*/ Log *l)
+static int gff3_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
+                                       /*@unused@*/ Log *l, Error *err)
 {
-  Gff3_visitor *gff3_visitor = gff3_visitor_cast(gv);
+  Gff3_visitor *gff3_visitor;
+  int has_err;
+  error_check(err);
+  gff3_visitor = gff3_visitor_cast(gv);
 
   gff3_version_string(gv);
 
-  genome_node_traverse_children((GenomeNode*) gf, gff3_visitor, store_ids,
-                                true);
-  genome_node_traverse_children((GenomeNode*) gf, gff3_visitor,
-                                gff3_show_genome_feature, true);
+  has_err = genome_node_traverse_children((GenomeNode*) gf, gff3_visitor,
+                                          store_ids, true, err);
+  if (!has_err) {
+    has_err = genome_node_traverse_children((GenomeNode*) gf, gff3_visitor,
+                                            gff3_show_genome_feature, true,
+                                            err);
+  }
 
   /* clear hashtable */
   /* XXX */
@@ -166,13 +185,16 @@ static void gff3_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
 
   /* terminator */
   xfputs("###\n", gff3_visitor->outfp);
+
+  return has_err;
 }
 
-static void gff3_visitor_sequence_region(GenomeVisitor *gv,
-                                         SequenceRegion *sr,
-                                         /*@unused@*/ Log *l)
+static int gff3_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
+                                        /*@unused@*/ Log *l, Error *err)
 {
-  Gff3_visitor *gff3_visitor = gff3_visitor_cast(gv);
+  Gff3_visitor *gff3_visitor;
+  error_check(err);
+  gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && sr);
   /* a sequence region has no children */
   assert(!genome_node_has_children((GenomeNode*) sr));
@@ -184,16 +206,17 @@ static void gff3_visitor_sequence_region(GenomeVisitor *gv,
           str_get(genome_node_get_seqid((GenomeNode*) sr)),
           genome_node_get_start((GenomeNode*) sr),
           genome_node_get_end((GenomeNode*) sr));
+  return 0;
 }
 
 const GenomeVisitorClass* gff3_visitor_class()
 {
   static const GenomeVisitorClass gvc = { sizeof(Gff3_visitor),
-                                            gff3_visitor_free,
-                                            gff3_visitor_comment,
-                                            gff3_visitor_genome_feature,
-                                            gff3_visitor_sequence_region,
-                                            NULL };
+                                          gff3_visitor_free,
+                                          gff3_visitor_comment,
+                                          gff3_visitor_genome_feature,
+                                          gff3_visitor_sequence_region,
+                                          NULL };
   return &gvc;
 }
 
