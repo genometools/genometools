@@ -34,19 +34,11 @@ Error* error_new(void)
 void error_set(Error *e, const char *format, ...)
 {
   va_list ap;
+  assert(e);
   va_start(ap, format);
-  if (e) {
-    e->error_is_set = true;
-    (void) vsnprintf(e->error_string, sizeof(e->error_string), format, ap);
-    va_end(ap);
-  }
-  else {
-    fprintf(stderr, "error: ");
-    (void) vfprintf(stderr, format, ap);
-    (void) putc('\n', stderr);
-    va_end(ap);
-    exit(EXIT_FAILURE);
-  }
+  e->error_is_set = true;
+  (void) vsnprintf(e->error_string, sizeof(e->error_string), format, ap);
+  va_end(ap);
 }
 
 bool error_is_set(const Error *e)
