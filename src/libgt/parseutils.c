@@ -61,22 +61,23 @@ int parse_range(Range *range, const char *start, const char *end,
   return 0;
 }
 
-double parse_score(const char *score, unsigned long line_number,
-                   const char *filename, Error *err)
+int parse_score(double *score_value, const char *score,
+                unsigned long line_number, const char *filename, Error *err)
 {
-  double score_value = UNDEFDOUBLE;
   int rval;
 
   assert(score && line_number && filename);
+  error_check(err);
 
   if (strlen(score) == 1 && score[0] == '.')
-    score_value = UNDEFDOUBLE;
-  else if ((rval = sscanf(score, "%lf", &score_value)) != 1) {
+    *score_value = UNDEFDOUBLE;
+  else if ((rval = sscanf(score, "%lf", score_value)) != 1) {
     error_set(err, "could not parse score '%s' on line %lu in file '%s'",
               score, line_number, filename);
+    return -1;
   }
 
-  return score_value;
+  return 0;
 }
 
 Strand parse_strand(const char *strand, unsigned long line_number,

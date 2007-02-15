@@ -299,6 +299,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       assert(gff_feature_type != gft_TF_binding_site);
 
       /* parse the range */
+      /* XXX: process return value differently */
       (void) parse_range(&range, start, end, line_number, filename, err);
       HANDLE_ERROR;
 
@@ -317,7 +318,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       }
 
       /* parse the score */
-      score_value = parse_score(score, line_number, filename, err);
+      /* XXX: process return value differently */
+      (void) parse_score(&score_value, score, line_number, filename, err);
       HANDLE_ERROR;
 
       /* parse the strand */

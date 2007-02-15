@@ -112,7 +112,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
 
   /* parse the score */
   if (!has_err)
-    score_value = parse_score(score, line_number, filename, NULL);
+    has_err = parse_score(&score_value, score, line_number, filename, err);
 
   /* parse the strand */
   if (!has_err)
