@@ -93,7 +93,7 @@ void gtr_register_components(GTR *gtr)
   hashtable_add(gtr->tools, "extractfeat", gt_extractfeat);
   hashtable_add(gtr->tools, "filter", gt_filter);
   hashtable_add(gtr->tools, "gff3", gt_gff3);
-  hashtable_add(gtr->tools, "gtf2gff3", gt_gff3);
+  hashtable_add(gtr->tools, "gtf2gff3", gt_gtf2gff3);
   hashtable_add(gtr->tools, "merge", gt_merge);
   hashtable_add(gtr->tools, "mmapandread", gt_mmapandread);
   hashtable_add(gtr->tools, "stat", gt_stat);
