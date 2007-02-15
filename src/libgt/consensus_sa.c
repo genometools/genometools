@@ -15,10 +15,10 @@ typedef struct
   const void *set_of_sas;
   unsigned long number_of_sas;
   size_t size_of_sa;
-  Get_genomic_range_func get_genomic_range;
-  Get_strand_func get_strand;
-  Get_exons_func get_exons;
-  Process_splice_form_func process_splice_form;
+  GetGenomicRangeFunc get_genomic_range;
+  GetStrandFunc get_strand;
+  GetExonsFunc get_exons;
+  ProcessSpliceFormFunc process_splice_form;
   void *userdata;
 } Consensus_SA;
 
@@ -26,7 +26,7 @@ typedef struct
 static unsigned int set_of_sas_is_sorted(const void *set_of_sas,
                                          unsigned long number_of_sas,
                                          size_t size_of_sa,
-                                         Get_genomic_range_func
+                                         GetGenomicRangeFunc
                                          get_genomic_range, Log *l)
 {
   Range range_a, range_b;
@@ -589,14 +589,10 @@ static void compute_csas(Consensus_SA *csa)
   array_free(splice_form);
 }
 
-void consensus_sa(const void *set_of_sas,
-                  unsigned long number_of_sas,
-                  size_t size_of_sa,
-                  Get_genomic_range_func get_genomic_range,
-                  Get_strand_func get_strand,
-                  Get_exons_func get_exons,
-                  Process_splice_form_func process_splice_form,
-                  void *userdata,
+void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
+                  size_t size_of_sa, GetGenomicRangeFunc get_genomic_range,
+                  GetStrandFunc get_strand, GetExonsFunc get_exons,
+                  ProcessSpliceFormFunc process_splice_form, void *userdata,
                   Log *l)
 {
   Consensus_SA csa;

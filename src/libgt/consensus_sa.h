@@ -27,22 +27,22 @@
   Technology, 47(15):965-978, 2005.
 */
 
-typedef Range (*Get_genomic_range_func)(const void *sa);
-typedef Strand (*Get_strand_func)(const void *sa);
-typedef void (*Get_exons_func)(Array *exon_ranges, const void *sa);
-typedef void (*Process_splice_form_func)(Array *spliced_alignments_in_form,
-                                         const void *set_of_sas,
-                                         unsigned long number_of_sas,
-                                         size_t size_of_sa,
-                                         void *userdata);
+typedef Range  (*GetGenomicRangeFunc)(const void *sa);
+typedef Strand (*GetStrandFunc)(const void *sa);
+typedef void   (*GetExonsFunc)(Array *exon_ranges, const void *sa);
+typedef void   (*ProcessSpliceFormFunc)(Array *spliced_alignments_in_form,
+                                        const void *set_of_sas,
+                                        unsigned long number_of_sas,
+                                        size_t size_of_sa,
+                                        void *userdata);
 
 void consensus_sa(const void *set_of_sas,
                   unsigned long number_of_sas,
                   size_t size_of_sa,
-                  Get_genomic_range_func get_genomic_range,
-                  Get_strand_func get_strand,
-                  Get_exons_func get_exons,
-                  Process_splice_form_func process_splice_form,
+                  GetGenomicRangeFunc get_genomic_range,
+                  GetStrandFunc get_strand,
+                  GetExonsFunc get_exons,
+                  ProcessSpliceFormFunc process_splice_form,
                   void *userdata,
                   Log *l);
 
