@@ -9,7 +9,7 @@
 #include "mergefeat_stream_unsorted.h"
 #include "mergefeat_visitor.h"
 
-struct Mergefeat_stream_unsorted {
+struct MergefeatStreamUnsorted {
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
   GenomeVisitor *mergefeat_visitor;
@@ -22,7 +22,7 @@ static int mergefeat_stream_unsorted_next_tree(GenomeStream *gs,
                                                GenomeNode **gn,
                                                Log *l, Error *err)
 {
-  Mergefeat_stream_unsorted *mfs;
+  MergefeatStreamUnsorted *mfs;
   int has_err;
   error_check(err);
   mfs = mergefeat_stream_unsorted_cast(gs);
@@ -34,13 +34,13 @@ static int mergefeat_stream_unsorted_next_tree(GenomeStream *gs,
 
 static void mergefeat_stream_unsorted_free(GenomeStream *gs)
 {
-  Mergefeat_stream_unsorted *mfs = mergefeat_stream_unsorted_cast(gs);
+  MergefeatStreamUnsorted *mfs = mergefeat_stream_unsorted_cast(gs);
   genome_visitor_free(mfs->mergefeat_visitor);
 }
 
 const GenomeStreamClass* mergefeat_stream_unsorted_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof(Mergefeat_stream_unsorted),
+  static const GenomeStreamClass gsc = { sizeof(MergefeatStreamUnsorted),
                                          mergefeat_stream_unsorted_next_tree,
                                          mergefeat_stream_unsorted_free };
   return &gsc;
@@ -50,7 +50,7 @@ GenomeStream* mergefeat_stream_unsorted_new(GenomeStream *in_stream)
 {
   GenomeStream *gs = genome_stream_create(mergefeat_stream_unsorted_class(),
                                           false);
-  Mergefeat_stream_unsorted *mfs = mergefeat_stream_unsorted_cast(gs);
+  MergefeatStreamUnsorted *mfs = mergefeat_stream_unsorted_cast(gs);
   mfs->in_stream = in_stream;
   mfs->mergefeat_visitor = mergefeat_visitor_new();
   return gs;
