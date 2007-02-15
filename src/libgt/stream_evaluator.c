@@ -316,10 +316,10 @@ static void store_exon(GenomeNode *gn, void *data)
   }
 }
 
-static unsigned int mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
+static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
 {
-  unsigned int equal;
   Array *exons_1, *exons_2;
+  bool equal;
 
   assert(gn_1 && gn_2);
 
@@ -369,12 +369,12 @@ static void store_gene_feature(GenomeNode *gn, void *data)
   }
 }
 
-static unsigned int genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
+static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
 {
   Array *exons_1, *exons_2, *mRNAs_1, *mRNAs_2;
   Store_gene_feature_info info;
-  unsigned int equal;
   unsigned long i;
+  bool equal;
 
   /* init */
   exons_1 = array_new(sizeof(Range));
