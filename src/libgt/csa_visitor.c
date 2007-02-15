@@ -401,8 +401,7 @@ static void process_splice_form(Array *spliced_alignments_in_form,
   array_free(exon_nodes);
 }
 
-void csa_visitor_process_cluster(GenomeVisitor *gv,
-                                 unsigned int final_cluster, Log *l)
+void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster, Log *l)
 {
   Csa_visitor *csa_visitor = csa_visitor_cast(gv);
   Process_splice_form_info info;
