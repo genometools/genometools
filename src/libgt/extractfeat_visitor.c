@@ -16,6 +16,7 @@
 struct ExtractFeatVisitor {
   const GenomeVisitor parent_instance;
   Str *sequence_file, /* the (current) sequence file */
+      *sequence_name, /* the (current) sequence name */
       *description,   /* the description of the currently extracted feature */
       *sequence,      /* the sequence of the currently extracted feature */
       *protein;       /* the translated protein sequence (if applicable) */
@@ -36,6 +37,7 @@ static void extractfeat_visitor_free(GenomeVisitor *gv)
   ExtractFeatVisitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
   assert(extractfeat_visitor);
   str_free(extractfeat_visitor->sequence_file);
+  str_free(extractfeat_visitor->sequence_name);
   str_free(extractfeat_visitor->description);
   str_free(extractfeat_visitor->sequence);
   str_free(extractfeat_visitor->protein);
@@ -162,7 +164,7 @@ static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
   efv = extractfeat_visitor_cast(gv);
   if (efv->regionmapping) { /* region mapping used -> determine bioseq */
     if (!efv->sequence_file ||
-        str_cmp(efv->sequence_file, genome_node_get_seqid((GenomeNode*) gf))) {
+        str_cmp(efv->sequence_name, genome_node_get_seqid((GenomeNode*) gf))) {
       str_free(efv->sequence_file);
       efv->sequence_file = regionmapping_map(efv->regionmapping,
                               str_get(genome_node_get_seqid((GenomeNode*) gf)),
@@ -170,6 +172,12 @@ static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
       if (!efv->sequence_file)
         has_err = -1;
       else {
+        if (!efv->sequence_name)
+          efv->sequence_name = str_new();
+        else
+          str_reset(efv->sequence_name);
+        str_append_str(efv->sequence_name,
+                       genome_node_get_seqid((GenomeNode*) gf));
         bioseq_free(efv->bioseq);
         efv->bioseq = bioseq_new_str(efv->sequence_file);
       }
