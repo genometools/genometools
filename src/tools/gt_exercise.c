@@ -55,7 +55,7 @@ static int parse_options(int argc, char **argv, Hashtable *exercise_tools)
                          "Call exercise tool with name exercise_tool_name and "
                          "pass argument(s) to it.");
   option_parser_set_comment_func(op, show_exercise_tools, exercise_tools);
-  parsed_args = option_parser_parse_min_args(op, argc, argv, versionfunc, 1);
+  option_parser_parse_min_args(op, &parsed_args, argc, argv, versionfunc, 1);
   option_parser_free(op);
   return parsed_args;
 }

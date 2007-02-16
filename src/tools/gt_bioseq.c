@@ -62,7 +62,7 @@ static int parse_options(Bioseq_arguments *arguments, int argc, char **argv)
   option_exclude(option_showseqnum, option_stat);
 
   /* parse */
-  parsed_args = option_parser_parse_min_args(op, argc, argv, versionfunc, 1);
+  option_parser_parse_min_args(op, &parsed_args, argc, argv, versionfunc, 1);
   option_parser_free(op);
 
   return parsed_args;

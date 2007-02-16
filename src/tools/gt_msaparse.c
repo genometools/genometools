@@ -33,8 +33,8 @@ static int parse_options(MSAparse_arguments *arguments, int argc, char **argv)
                       &arguments->sumofpairs, false);
   option_parser_add_option(op, o);
   /* parse */
-  parsed_args = option_parser_parse_min_max_args(op, argc, argv, versionfunc, 1,
-                                                 1);
+  option_parser_parse_min_max_args(op, &parsed_args, argc, argv, versionfunc, 1,
+                                   1);
   option_parser_free(op);
   return parsed_args;
 }

@@ -42,7 +42,7 @@ static int parse_options(Gff3_arguments *arguments, int argc, char **argv)
   option_parser_add_option(op, option);
   option = option_new_verbose(&arguments->verbose);
   option_parser_add_option(op, option);
-  parsed_args = option_parser_parse(op, argc, argv, versionfunc);
+  option_parser_parse(op, &parsed_args, argc, argv, versionfunc);
   option_parser_free(op);
 
   return parsed_args;

@@ -16,8 +16,8 @@ static int parse_options(unsigned int *q, int argc, char **argv)
                          "combination.");
   o = option_new_uint_min("q", "set q", q, 3, 1);
   option_parser_add_option(op, o);
-  parsed_args = option_parser_parse_min_max_args(op, argc, argv, versionfunc, 2,
-                                                 2);
+  option_parser_parse_min_max_args(op, &parsed_args, argc, argv, versionfunc, 2,
+                                   2);
   option_parser_free(op);
 
   return parsed_args;

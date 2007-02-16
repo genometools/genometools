@@ -29,8 +29,8 @@ static int parse_options(Costs *costs, int argc, char **argv)
   option = option_new_int("gapext", "set gap extension cost",
                           &costs->gap_extension_cost, 1);
   option_parser_add_option(op, option);
-  parsed_args = option_parser_parse_min_max_args(op, argc, argv, versionfunc, 2,
-                                                 2);
+  option_parser_parse_min_max_args(op, &parsed_args, argc, argv, versionfunc, 2,
+                                   2);
   option_parser_free(op);
   return parsed_args;
 }

@@ -32,17 +32,20 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner);
 void          option_parser_add_option(OptionParser*, Option*);
 void          option_parser_set_comment_func(OptionParser*, ShowCommentFunc,
                                              void* data);
-int           option_parser_parse(OptionParser*, int argc, char **argv,
-                                  ShowVersionFunc);
-int           option_parser_parse_min_args(OptionParser*, int argc,
-                                           char **argv, ShowVersionFunc,
+void          option_parser_parse(OptionParser*, int *parsed_args, int argc,
+                                  char **argv, ShowVersionFunc);
+void          option_parser_parse_min_args(OptionParser*, int *parsed_args,
+                                           int argc, char **argv,
+                                           ShowVersionFunc,
                                            unsigned int
                                            min_additional_arguments);
-int           option_parser_parse_max_args(OptionParser*, int argc,
-                                           char **argv, ShowVersionFunc,
+void          option_parser_parse_max_args(OptionParser*, int *parsed_args,
+                                           int argc, char **argv,
+                                           ShowVersionFunc,
                                            unsigned int
                                            max_additional_arguments);
-int           option_parser_parse_min_max_args(OptionParser*, int argc,
+void          option_parser_parse_min_max_args(OptionParser*, int *parsed_args,
+                                               int argc,
                                                char **argv, ShowVersionFunc,
                                                unsigned int
                                                min_additional_arguments,

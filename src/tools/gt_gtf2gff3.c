@@ -21,7 +21,7 @@ static int parse_options(bool *be_tolerant, int argc, char **argv)
   option_parser_add_option(op, option);
 
   /* parse */
-  parsed_args = option_parser_parse_max_args(op, argc, argv, versionfunc, 1);
+  option_parser_parse_max_args(op, &parsed_args, argc, argv, versionfunc, 1);
   option_parser_free(op);
 
   return parsed_args;

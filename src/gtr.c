@@ -73,7 +73,7 @@ int gtr_parse(GTR *gtr, int argc, char **argv)
   option_parser_set_comment_func(op, show_option_comments, gtr);
   o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false);
   option_parser_add_option(op, o);
-  parsed_args = option_parser_parse(op, argc, argv, versionfunc);
+  option_parser_parse(op, &parsed_args, argc, argv, versionfunc);
   option_parser_free(op);
   return parsed_args - 1;
 }
