@@ -10,14 +10,25 @@
 #include <stdbool.h>
 #include "str.h"
 
+/* the option parser class */
 typedef struct OptionParser OptionParser;
+/* the option class */
 typedef struct Option Option;
+
+/* the possible return values of the OptionParser */
+typedef enum {
+  OPTIONPARSER_OK,          /* everything went fine */
+  OPTIONPARSER_ERROR,       /* an error occured during option parsing */
+  OPTIONPARSER_REQUEST_EXIT /* the option parser requests an exit, because
+                               option -help, -helpdev, or -version was used */
+} OptionParserRval;
 
 typedef void (*ShowVersionFunc)(const char *progname);
 typedef void (*ShowCommentFunc)(const char *progname, void *data);
 
 /* the option parser */
 OptionParser* option_parser_new(const char *synopsis, const char *one_liner);
+/* takes ownership */
 void          option_parser_add_option(OptionParser*, Option*);
 void          option_parser_set_comment_func(OptionParser*, ShowCommentFunc,
                                              void* data);
