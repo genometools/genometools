@@ -18,7 +18,7 @@
 #include "undef.h"
 #include "xansi.h"
 
-struct Gff3_visitor {
+struct GFF3Visitor {
   const GenomeVisitor parent_instance;
   unsigned int version_string_shown;
   unsigned long *id_counter;
@@ -37,7 +37,7 @@ typedef struct {
 
 static void gff3_version_string(GenomeVisitor *gv)
 {
-  Gff3_visitor *gff3_visitor = gff3_visitor_cast(gv);
+  GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gff3_visitor);
   if (!gff3_visitor->version_string_shown) {
     fprintf(gff3_visitor->outfp, "%s\n", GFF_VERSION_STRING);
@@ -47,7 +47,7 @@ static void gff3_version_string(GenomeVisitor *gv)
 
 static void gff3_visitor_free(GenomeVisitor *gv)
 {
-  Gff3_visitor *gff3_visitor = gff3_visitor_cast(gv);
+  GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gff3_visitor);
   free(gff3_visitor->id_counter);
   hashtable_free(gff3_visitor->genome_feature_to_id_array);
@@ -57,7 +57,7 @@ static void gff3_visitor_free(GenomeVisitor *gv)
 static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c,
                                 /*@unused@*/ Log *l, Error *err)
 {
-  Gff3_visitor *gff3_visitor;
+  GFF3Visitor *gff3_visitor;
   error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && c);
@@ -84,7 +84,7 @@ static int add_id(GenomeNode *gn, void *data, Error *err)
 static int gff3_show_genome_feature(GenomeNode *gn, void *data, Error *err)
 {
   unsigned int part_shown = 0;
-  Gff3_visitor *gff3_visitor = (Gff3_visitor*) data;
+  GFF3Visitor *gff3_visitor = (GFF3Visitor*) data;
   Genome_feature *gf = (Genome_feature*) gn;
   Array *parent_features = NULL;
   unsigned long i;
@@ -128,7 +128,7 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data, Error *err)
 
 static int store_ids(GenomeNode *gn, void *data, Error *err)
 {
-  Gff3_visitor *gff3_visitor = (Gff3_visitor*) data;
+  GFF3Visitor *gff3_visitor = (GFF3Visitor*) data;
   Genome_feature *gf = (Genome_feature*) gn;
   GenomeFeatureType type;
   Add_id_info add_id_info;
@@ -163,7 +163,7 @@ static int store_ids(GenomeNode *gn, void *data, Error *err)
 static int gff3_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
                                        /*@unused@*/ Log *l, Error *err)
 {
-  Gff3_visitor *gff3_visitor;
+  GFF3Visitor *gff3_visitor;
   int has_err;
   error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
@@ -192,7 +192,7 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
 static int gff3_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
                                         /*@unused@*/ Log *l, Error *err)
 {
-  Gff3_visitor *gff3_visitor;
+  GFF3Visitor *gff3_visitor;
   error_check(err);
   gff3_visitor = gff3_visitor_cast(gv);
   assert(gv && sr);
@@ -211,7 +211,7 @@ static int gff3_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
 
 const GenomeVisitorClass* gff3_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof(Gff3_visitor),
+  static const GenomeVisitorClass gvc = { sizeof(GFF3Visitor),
                                           gff3_visitor_free,
                                           gff3_visitor_comment,
                                           gff3_visitor_genome_feature,
@@ -223,7 +223,7 @@ const GenomeVisitorClass* gff3_visitor_class()
 GenomeVisitor* gff3_visitor_new(FILE *outfp)
 {
   GenomeVisitor *gv = genome_visitor_create(gff3_visitor_class());
-  Gff3_visitor *gff3_visitor = gff3_visitor_cast(gv);
+  GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   gff3_visitor->version_string_shown = 0;
   gff3_visitor->id_counter = xcalloc(genome_feature_type_num_of_features(),
                                      sizeof(unsigned long));
