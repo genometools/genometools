@@ -69,6 +69,7 @@ const GenomeStreamClass* filter_stream_class(void)
 
 GenomeStream* filter_stream_new(GenomeStream *in_stream,
                                 Str *seqid, unsigned long max_gene_length,
+                                unsigned long max_gene_num,
                                 double min_gene_score)
 {
   GenomeStream *gs = genome_stream_create(filter_stream_class(),
@@ -77,6 +78,7 @@ GenomeStream* filter_stream_new(GenomeStream *in_stream,
   assert(in_stream);
   filter_stream->in_stream = in_stream;
   filter_stream->filter_visitor = filter_visitor_new(seqid, max_gene_length,
+                                                     max_gene_num,
                                                      min_gene_score);
   return gs;
 }

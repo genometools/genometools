@@ -46,3 +46,17 @@ Test do
   run_test "#{$bin}gt filter -mingenescore .6 #{$testdata}standard_gene_as_tree.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_filter_test.out"
 end
+
+Name "gt filter test 8 (-maxgenenum)"
+Keywords "gt_filter"
+Test do
+  run_test "#{$bin}gt filter -maxgenenum 1 #{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}standard_gene_as_tree.gff3"
+end
+
+Name "gt filter test 9 (-maxgenenum)"
+Keywords "gt_filter"
+Test do
+  run_test "#{$bin}gt filter -maxgenenum 0 #{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_filter_test.out"
+end

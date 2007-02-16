@@ -9,7 +9,8 @@
 typedef struct {
   bool verbose;
   Str *seqid;
-  unsigned long max_gene_length;
+  unsigned long max_gene_length,
+                max_gene_num;
   double min_gene_score;
   FILE *outfp;
 } FilterArgumentss;
@@ -34,6 +35,12 @@ static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
   option = option_new_ulong_min("maxgenelength", "the maximum length a gene "
                                 "can have to pass the filter",
                                 &arguments->max_gene_length, UNDEFULONG, 1);
+  option_parser_add_option(op, option);
+
+  /* -maxgenenum */
+  option = option_new_ulong("maxgenenum", "the maximum number of genes which "
+                            "can pass the filter", &arguments->max_gene_num,
+                            UNDEFULONG);
   option_parser_add_option(op, option);
 
   /* -mingenescore */
@@ -84,6 +91,7 @@ int gt_filter(int argc, char *argv[], Error *err)
   /* create a filter stream */
   filter_stream = filter_stream_new(gff3_in_stream, arguments.seqid,
                                     arguments.max_gene_length,
+                                    arguments.max_gene_num,
                                     arguments.min_gene_score);
 
   /* create a gff3 output stream */
