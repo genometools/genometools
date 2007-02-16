@@ -11,9 +11,9 @@ typedef struct {
   unsigned long max_gene_length;
   double min_gene_score;
   FILE *outfp;
-} Filter_arguments;
+} FilterArgumentss;
 
-static OPrval parse_options(int *parsed_args, Filter_arguments *arguments,
+static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
                             int argc, char **argv, Error *err)
 {
   OptionParser *op;
@@ -55,7 +55,7 @@ int gt_filter(int argc, char *argv[], Error *err)
                 *filter_stream,
                 *gff3_out_stream;
   GenomeNode *gn;
-  Filter_arguments arguments;
+  FilterArgumentss arguments;
   int parsed_args;
 
   /* option parsing */
