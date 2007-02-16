@@ -15,7 +15,7 @@
 #include "translate.h"
 #include "undef.h"
 
-struct CDS_visitor {
+struct CDSVisitor {
   const GenomeVisitor parent_instance;
   Str *sequence_file,
       *source;
@@ -29,7 +29,7 @@ struct CDS_visitor {
 
 static void cds_visitor_free(GenomeVisitor *gv)
 {
-  CDS_visitor *cds_visitor = cds_visitor_cast(gv);
+  CDSVisitor *cds_visitor = cds_visitor_cast(gv);
   assert(cds_visitor);
   str_free(cds_visitor->sequence_file);
   str_free(cds_visitor->source);
@@ -39,7 +39,7 @@ static void cds_visitor_free(GenomeVisitor *gv)
 
 static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 {
-  CDS_visitor *v = (CDS_visitor*) data;
+  CDSVisitor *v = (CDSVisitor*) data;
   const char *sequence;
   unsigned long seqnum;
   Genome_feature *gf;
@@ -65,7 +65,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 
 static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 {
-  CDS_visitor *v = (CDS_visitor*) data;
+  CDSVisitor *v = (CDSVisitor*) data;
   GenomeNode *cds_feature;
   Str *pr_0, *pr_1, *pr_2;
   Genome_feature *gf;
@@ -172,7 +172,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 static int cds_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
                                       /*@unused@*/ Log *l, Error *err)
 {
-  CDS_visitor *v = cds_visitor_cast(gv);
+  CDSVisitor *v = cds_visitor_cast(gv);
   error_check(err);
   return genome_node_traverse_children((GenomeNode*) gf, v,
                                        add_cds_if_necessary, false, err);
@@ -182,7 +182,7 @@ static int cds_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
 static int cds_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
                                        /*@unused@*/ Log *l, Error *err)
 {
-  CDS_visitor *cds_visitor;
+  CDSVisitor *cds_visitor;
   error_check(err);
   cds_visitor = cds_visitor_cast(gv);
   /* check if the given sequence file contains this sequence (region) */
@@ -199,7 +199,7 @@ static int cds_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
 
 const GenomeVisitorClass* cds_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof(CDS_visitor),
+  static const GenomeVisitorClass gvc = { sizeof(CDSVisitor),
                                           cds_visitor_free,
                                           NULL,
                                           cds_visitor_genome_feature,
@@ -211,7 +211,7 @@ const GenomeVisitorClass* cds_visitor_class()
 GenomeVisitor* cds_visitor_new(Str *sequence_file, Str *source)
 {
   GenomeVisitor *gv = genome_visitor_create(cds_visitor_class());
-  CDS_visitor *cds_visitor = cds_visitor_cast(gv);
+  CDSVisitor *cds_visitor = cds_visitor_cast(gv);
   cds_visitor->sequence_file = str_ref(sequence_file);
   cds_visitor->source = str_ref(source);
   cds_visitor->splicedseq = splicedseq_new();
