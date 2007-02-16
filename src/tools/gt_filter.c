@@ -8,6 +8,7 @@
 
 typedef struct {
   bool verbose;
+  Str *seqid;
   unsigned long max_gene_length;
   double min_gene_score;
   FILE *outfp;
@@ -22,6 +23,12 @@ static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
   error_check(err);
 
   op = option_parser_new("[option ...] [GFF3_file ...]", "Filter GFF3 files.");
+
+  /* -seqid */
+  option = option_new_string("seqid", "seqid a feature must have to pass the "
+                             "filter (excluding comments)", arguments->seqid,
+                             NULL);
+  option_parser_add_option(op, option);
 
   /* -maxgenelength */
   option = option_new_ulong_min("maxgenelength", "the maximum length a gene "
@@ -51,18 +58,21 @@ static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
 
 int gt_filter(int argc, char *argv[], Error *err)
 {
-  GenomeStream *gff3_in_stream,
-                *filter_stream,
-                *gff3_out_stream;
+  GenomeStream *gff3_in_stream, *filter_stream, *gff3_out_stream;
   GenomeNode *gn;
   FilterArgumentss arguments;
   int parsed_args;
 
   /* option parsing */
+  arguments.seqid = str_new();
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+    case OPTIONPARSER_ERROR:
+      str_free(arguments.seqid);
+      return -1;
+    case OPTIONPARSER_REQUESTS_EXIT:
+      str_free(arguments.seqid);
+      return 0;
   }
 
   /* create a gff3 input stream */
@@ -72,7 +82,8 @@ int gt_filter(int argc, char *argv[], Error *err)
                                                arguments.outfp != stdout);
 
   /* create a filter stream */
-  filter_stream = filter_stream_new(gff3_in_stream, arguments.max_gene_length,
+  filter_stream = filter_stream_new(gff3_in_stream, arguments.seqid,
+                                    arguments.max_gene_length,
                                     arguments.min_gene_score);
 
   /* create a gff3 output stream */
@@ -88,6 +99,7 @@ int gt_filter(int argc, char *argv[], Error *err)
   genome_stream_free(gff3_in_stream);
   if (arguments.outfp != stdout)
     xfclose(arguments.outfp);
+  str_free(arguments.seqid);
 
   return 0;
 }

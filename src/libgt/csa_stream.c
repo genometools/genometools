@@ -46,8 +46,10 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l, Error *err)
     }
   }
 
+  /* either we have an error or no new node */
   assert(has_err || !*gn);
 
+  /* if we have no error, process the last cluster */
   if (!has_err) {
     csa_visitor_process_cluster(cs->csa_visitor, true, l);
     if (csa_visitor_node_buffer_size(cs->csa_visitor)) {
