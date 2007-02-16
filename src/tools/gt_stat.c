@@ -17,12 +17,13 @@ typedef struct {
   GenomeVisitor *stat_visitor;
 } Stat_info;
 
-static int parse_options(Stat_arguments *arguments, int argc, char **argv)
+static OPrval parse_options(int *parsed_args, Stat_arguments *arguments,
+                            int argc, char **argv, Error *err)
 {
-  int parsed_args;
   OptionParser *op;
   Option *option;
-
+  OPrval oprval;
+  error_check(err);
   op = option_parser_new("[option ...] [GFF3_file ...]",
                          "Show statistics about features contained in GFF3 "
                          "files.");
@@ -43,10 +44,9 @@ static int parse_options(Stat_arguments *arguments, int argc, char **argv)
   option_parser_add_option(op, option);
 
   /* parse */
-  option_parser_parse(op, &parsed_args, argc, argv, versionfunc);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_free(op);
-
-  return parsed_args;
+  return oprval;
 }
 
 static int compute_statistics(GenomeNode *gn, void *data, Error *err)
@@ -57,17 +57,21 @@ static int compute_statistics(GenomeNode *gn, void *data, Error *err)
   return genome_node_accept(gn, info->stat_visitor, NULL, err);
 }
 
-int gt_stat(int argc, char *argv[])
+int gt_stat(int argc, char *argv[], Error *err)
 {
   GenomeStream *gff3_in_stream;
   GenomeNode *gn;
   int has_err, parsed_args;
   Stat_arguments arguments;
   Stat_info info;
-  Error *err = error_new();
+  error_check(err);
 
   /* option parsing */
-  parsed_args = parse_options(&arguments, argc, argv);
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+  }
 
   /* init */
   info.number_of_trees = 0;
@@ -99,8 +103,6 @@ int gt_stat(int argc, char *argv[])
   /* free */
   genome_visitor_free(info.stat_visitor);
   genome_stream_free(gff3_in_stream);
-  error_abort(err);
-  error_free(err);
 
-  return EXIT_SUCCESS;
+  return has_err;
 }

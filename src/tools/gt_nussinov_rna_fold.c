@@ -162,7 +162,7 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
   array2dim_free(E);
 }
 
-int gt_nussinov_rna_fold(int argc, char *argv[])
+int gt_nussinov_rna_fold(int argc, char *argv[], Error *err)
 {
   unsigned long i, j, rna_length;
   unsigned int l_min;
@@ -170,6 +170,7 @@ int gt_nussinov_rna_fold(int argc, char *argv[])
   int rval;
   Alpha *dna_alpha;
   ScoreMatrix *energy_function; /* alpha */
+  error_check(err);
 
   /* check if correct arguments are given */
   if (argc !=6) {
@@ -177,7 +178,7 @@ int gt_nussinov_rna_fold(int argc, char *argv[])
                     "RNA_sequence\n");
     fprintf(stderr, "Fold the supplied RNA sequence with the Nussinov "
                     "algorithm.\n");
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE); /* XXX */
   }
 
   /* set DNA alphabet */
@@ -215,5 +216,5 @@ int gt_nussinov_rna_fold(int argc, char *argv[])
   scorematrix_free(energy_function);
   alpha_free(dna_alpha);
 
-  return EXIT_SUCCESS;
+  return 0;
 }

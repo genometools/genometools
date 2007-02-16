@@ -14,12 +14,14 @@ typedef struct {
                 width;
 } Bioseq_arguments;
 
-static int parse_options(Bioseq_arguments *arguments, int argc, char **argv)
+static OPrval parse_options(int *parsed_args, Bioseq_arguments *arguments,
+                            int argc, char **argv, Error *err)
 {
   Option *option, *option_showfasta, *option_showseqnum, *option_width,
          *option_stat;
   OptionParser *op;
-  int parsed_args;
+  OPrval oprval;
+  error_check(err);
   op = option_parser_new("[option ...] sequence_file [...]",
                          "Construct the Biosequence files for the given "
                          "sequence_file(s) (if necessary).");
@@ -62,20 +64,26 @@ static int parse_options(Bioseq_arguments *arguments, int argc, char **argv)
   option_exclude(option_showseqnum, option_stat);
 
   /* parse */
-  option_parser_parse_min_args(op, &parsed_args, argc, argv, versionfunc, 1);
+  oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
+                                        versionfunc, 1, err);
   option_parser_free(op);
 
-  return parsed_args;
+  return oprval;
 }
 
-int gt_bioseq(int argc, char *argv[])
+int gt_bioseq(int argc, char *argv[], Error *err)
 {
   Bioseq_arguments arguments;
   Bioseq *bioseq;
   int parsed_args;
+  error_check(err);
 
   /* option parsing */
-  parsed_args = parse_options(&arguments, argc, argv);
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+  }
   assert(parsed_args < argc);
 
   /* option -showseqnum makes only sense if we got a single sequence file */
@@ -110,5 +118,5 @@ int gt_bioseq(int argc, char *argv[])
     parsed_args++;
   }
 
-  return EXIT_SUCCESS;
+  return 0;
 }

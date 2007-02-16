@@ -11,11 +11,13 @@ typedef struct {
        exondiff;
 } EvalArguments;
 
-static int parse_options(EvalArguments *arguments, int argc, char **argv)
+static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
+                            int argc, char **argv, Error *err)
 {
-  int parsed_args;
   OptionParser *op;
   Option *option;
+  OPrval oprval;
+  error_check(err);
   op = option_parser_new("reality_file prediction_file ",
                          "Evaluate a gene prediction against a given "
                          "``reality'' file (both in GFF3).");
@@ -31,24 +33,27 @@ static int parse_options(EvalArguments *arguments, int argc, char **argv)
   option_parser_add_option(op, option);
 
   /* parse */
-  option_parser_parse_min_max_args(op, &parsed_args, argc, argv, versionfunc, 2,
-                                   2);
+  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
+                                            versionfunc, 2, 2, err);
   option_parser_free(op);
-
-  return parsed_args;
+  return oprval;
 }
 
-int gt_eval(int argc, char *argv[])
+int gt_eval(int argc, char *argv[], Error *err)
 {
   GenomeStream *reality_stream,
                 *prediction_stream;
   StreamEvaluator *evaluator;
   EvalArguments arguments;
   int has_err, parsed_args;
-  Error *err = error_new();
+  error_check(err);
 
   /* option parsing */
-  parsed_args = parse_options(&arguments, argc, argv);
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+  }
 
   /* create the reality stream */
   reality_stream = gff3_in_stream_new_sorted(argv[parsed_args],
@@ -71,8 +76,6 @@ int gt_eval(int argc, char *argv[])
 
   /* free */
   stream_evaluator_free(evaluator);
-  error_abort(err);
-  error_free(err);
 
-  return EXIT_SUCCESS;
+  return has_err;
 }

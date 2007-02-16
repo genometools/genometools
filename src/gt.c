@@ -28,8 +28,10 @@ int main(int argc, char *argv[])
     case OPTIONPARSER_REQUESTS_EXIT:
       rval = EXIT_SUCCESS;
   }
-  if (error_is_set(err))
-    fprintf(stderr, "error %s\n", error_get(err));
+  if (error_is_set(err)) {
+    fprintf(stderr, "error: %s\n", error_get(err));
+    assert(rval);
+  }
   error_free(err);
   gtr_free(gtr);
   return rval;

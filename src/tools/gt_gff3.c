@@ -14,11 +14,13 @@ typedef struct {
   FILE *outfp;
 } Gff3_arguments;
 
-static int parse_options(Gff3_arguments *arguments, int argc, char **argv)
+static OPrval parse_options(int *parsed_args, Gff3_arguments *arguments,
+                            int argc, char **argv, Error *err)
 {
-  int parsed_args;
   OptionParser *op;
   Option *sort_option, *mergefeat_option, *option;
+  OPrval oprval;
+  error_check(err);
   op = option_parser_new("[option ...] [GFF3_file ...]",
                          "Parse, possibly transform, and output GFF3 files.");
   sort_option = option_new_bool("sort", "sort the GFF3 features (memory "
@@ -42,13 +44,12 @@ static int parse_options(Gff3_arguments *arguments, int argc, char **argv)
   option_parser_add_option(op, option);
   option = option_new_verbose(&arguments->verbose);
   option_parser_add_option(op, option);
-  option_parser_parse(op, &parsed_args, argc, argv, versionfunc);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_free(op);
-
-  return parsed_args;
+  return oprval;
 }
 
-int gt_gff3(int argc, char *argv[])
+int gt_gff3(int argc, char *argv[], Error *err)
 {
   GenomeStream *gff3_in_stream,
                 *sort_stream = NULL,
@@ -57,10 +58,14 @@ int gt_gff3(int argc, char *argv[])
   Gff3_arguments arguments;
   GenomeNode *gn;
   int parsed_args;
-  Error *err = error_new();
+  error_check(err);
 
   /* option parsing */
-  parsed_args = parse_options(&arguments, argc, argv);
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+  }
 
   /* create a gff3 input stream */
   gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
@@ -99,8 +104,6 @@ int gt_gff3(int argc, char *argv[])
   genome_stream_free(gff3_in_stream);
   if (arguments.outfp != stdout)
     xfclose(arguments.outfp);
-  error_abort(err);
-  error_free(err);
 
-  return EXIT_SUCCESS;
+  return 0;
 }

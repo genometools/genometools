@@ -44,6 +44,7 @@ unsigned long cstr_array_size(char **cstr_array)
 void cstr_array_free(char **cstr_array)
 {
   unsigned long i = 0;
+  if (!cstr_array) return;
   while (cstr_array[i])
     free(cstr_array[i++]);
   free(cstr_array);

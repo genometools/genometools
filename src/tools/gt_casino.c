@@ -6,10 +6,11 @@
 
 #include <gt.h>
 
-int gt_casino(int argc, char *argv[])
+int gt_casino(int argc, char *argv[], Error *err)
 {
   unsigned int i, *emissions, *state_sequence, num_of_emissions;
   HMM *hmm;
+  error_check(err);
 
   /* argument checking */
   if (argc != 2) {

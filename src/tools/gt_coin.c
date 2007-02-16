@@ -7,15 +7,16 @@
 #include <ctype.h>
 #include <gt.h>
 
-int gt_coin(int argc, char *argv[])
+int gt_coin(int argc, char *argv[], Error *err)
 {
   unsigned int i, *emissions, *state_sequence, num_of_emissions;
   HMM *hmm;
+  error_check(err);
 
   /* argument checking */
   if (argc != 2) {
     fprintf(stderr, "Usage: %s sequence_of_coin_tosses\n", argv[0]);
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE); /* XXX */
   }
 
   /* save sequence */
@@ -33,7 +34,7 @@ int gt_coin(int argc, char *argv[])
       default:
         fprintf(stderr , "emissions[%u]=%c is not a valid character (only `H' "
                          "and `T' allowed)", i, emissions[i]);
-        return EXIT_FAILURE;
+        exit(EXIT_FAILURE); /* XXX */
     }
   }
 
@@ -63,5 +64,5 @@ int gt_coin(int argc, char *argv[])
   free(emissions);
   free(state_sequence);
 
-  return EXIT_SUCCESS;
+  return 0;
 }

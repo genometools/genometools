@@ -8,6 +8,6 @@
 #define GT_SWALIGN_H
 
 /* the Smith-Waterman alignment tool */
-int gt_swalign(int argc, char **argv);
+int gt_swalign(int argc, char **argv, Error*);
 
 #endif

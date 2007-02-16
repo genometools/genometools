@@ -32,14 +32,15 @@ static void remove_pattern_in_current_dir(const char *pattern)
   str_free(path);
 }
 
-int gt_clean(int argc, char *argv[])
+int gt_clean(int argc, char *argv[], Error *err)
 {
+  error_check(err);
 
   if (argc > 1) {
     fprintf(stderr, "Usage: %s\n", argv[0]);
     fprintf(stderr, "Remove all files in the current directory which are "
                     "automatically created by gt.\n");
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE); /* XXX */
   }
 
   /* remove GT_BIOSEQ_INDEX files */
@@ -48,5 +49,5 @@ int gt_clean(int argc, char *argv[])
   /* remove GT_BIOSEQ_RAW files */
   remove_pattern_in_current_dir(GT_BIOSEQ_RAW);
 
-  return EXIT_SUCCESS;
+  return 0;
 }

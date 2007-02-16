@@ -6,21 +6,23 @@
 
 #include "gt.h"
 
-static int parse_options(bool *all, int argc, char **argv)
+static OPrval parse_options(int *parsed_args, bool *all, int argc, char **argv,
+                            Error *err)
 {
   OptionParser *op;
   Option *option;
-  int parsed_args;
+  OPrval oprval;
+  error_check(err);
   op = option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Globally align each sequence in seq_file_1 with each "
                          "sequence in seq_file_2.");
   option = option_new_bool("all", "show all optimal alignments instead of just "
                            "one", all, false);
   option_parser_add_option(op, option);
-  option_parser_parse_min_max_args(op, &parsed_args, argc, argv, versionfunc, 2,
-                                   2);
+  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
+                                            versionfunc, 2, 2, err);
   option_parser_free(op);
-  return parsed_args;
+  return oprval;
 }
 
 void show_alignment(const Alignment *a, void *data)
@@ -36,16 +38,21 @@ void show_aligns(unsigned long aligns, void *data)
   printf("number of optimal alignments: %lu\n\n", aligns);
 }
 
-int gt_align(int argc, char *argv[])
+int gt_align(int argc, char *argv[], Error *err)
 {
   Bioseq *bioseq_1, *bioseq_2;
   unsigned long i, j;
   int parsed_args;
   Alignment *a;
   bool all;
+  error_check(err);
 
   /* option parsing */
-  parsed_args = parse_options(&all, argc, argv);
+  switch (parse_options(&parsed_args, &all, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+  }
   assert(parsed_args+1 < argc);
 
   /* init */
@@ -78,5 +85,5 @@ int gt_align(int argc, char *argv[])
   bioseq_free(bioseq_2);
   bioseq_free(bioseq_1);
 
-  return EXIT_SUCCESS;
+  return 0;
 }

@@ -12,18 +12,19 @@ typedef struct {
   bool verbose,
        debug;
   unsigned long join_length;
-  Log *log;
   FILE *outfp;
 } Csa_arguments;
 
-static int parse_options(Csa_arguments *arguments, int argc, char *argv[])
+static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
+                            int argc, char *argv[], Error *err)
 {
-  int parsed_args;
   OptionParser *op = option_parser_new("[option ...] [GFF3_file]",
                                        "Replace spliced alignments with "
                                        "computed consensus spliced "
                                        "alignments.");
   Option *option;
+  OPrval oprval;
+  error_check(err);
 
   /* -join-length */
   option = option_new_ulong("join-length", "set join length for the spliced "
@@ -44,29 +45,34 @@ static int parse_options(Csa_arguments *arguments, int argc, char *argv[])
   option_parser_add_option(op, option);
 
   /* parse */
-  option_parser_parse_max_args(op, &parsed_args, argc, argv, versionfunc, 1);
+  oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
+                                        versionfunc, 1, err);
   option_parser_free(op);
 
-  if (arguments->debug)
-    arguments->log = log_new();
-  else
-    arguments->log = NULL;
-
-  return parsed_args;
+  return oprval;
 }
 
-int gt_csa(int argc, char *argv[])
+int gt_csa(int argc, char *argv[], Error *err)
 {
   GenomeStream *gff3_in_stream,
                 *csa_stream,
                 *gff3_out_stream;
   GenomeNode *gn;
   Csa_arguments arguments;
+  Log *log = NULL;
   int parsed_args;
-  Error *err = error_new();
+  error_check(err);
 
   /* option parsing */
-  parsed_args = parse_options(&arguments, argc, argv);
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+  }
+
+  /* create log object if necessary */
+  if (arguments.debug)
+    log = log_new();
 
   /* create the streams */
   gff3_in_stream  = gff3_in_stream_new_sorted(argv[parsed_args],
@@ -76,21 +82,16 @@ int gt_csa(int argc, char *argv[])
   gff3_out_stream = gff3_out_stream_new(csa_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!genome_stream_next_tree(gff3_out_stream, &gn, arguments.log, err) &&
-         gn) {
+  while (!genome_stream_next_tree(gff3_out_stream, &gn, log, err) && gn)
     genome_node_rec_free(gn);
-  }
 
   /* free */
   genome_stream_free(gff3_out_stream);
   genome_stream_free(csa_stream);
   genome_stream_free(gff3_in_stream);
-  log_free(arguments.log);
+  log_free(log);
   if (arguments.outfp != stdout)
     xfclose(arguments.outfp);
 
-  error_abort(err);
-  error_free(err);
-
-  return EXIT_SUCCESS;
+  return 0;
 }

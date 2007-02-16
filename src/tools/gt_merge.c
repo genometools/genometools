@@ -6,23 +6,23 @@
 
 #include "gt.h"
 
-static int parse_options(FILE **outfp, int argc, char **argv)
+static OPrval parse_options(int *parsed_args, FILE **outfp, int argc,
+                            char **argv, Error *err)
 {
-  int parsed_args;
   OptionParser *op;
   Option *option;
-
+  OPrval oprval;
+  error_check(err);
   op = option_parser_new("[option ...] [GFF3_file ...]",
                          "Merge sorted GFF3 files in sorted fashion.");
-
   option = option_new_outputfile(outfp);
   option_parser_add_option(op, option);
-  option_parser_parse(op, &parsed_args, argc, argv, versionfunc);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_free(op);
-  return parsed_args;
+  return oprval;
 }
 
-int gt_merge(int argc, char *argv[])
+int gt_merge(int argc, char *argv[], Error *err)
 {
   GenomeStream *gff3_in_stream,
                 *merge_stream,
@@ -32,13 +32,16 @@ int gt_merge(int argc, char *argv[])
   unsigned long i;
   int parsed_args;
   FILE *outfp;
-  Error *err = error_new();
 
   /* alloc */
   genome_streams = array_new(sizeof(GenomeStream*));
 
   /* option parsing */
-  parsed_args = parse_options(&outfp, argc, argv);
+  switch (parse_options(&parsed_args, &outfp, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+  }
 
   /* XXX: check for multiple specification of '-' */
 
@@ -74,8 +77,6 @@ int gt_merge(int argc, char *argv[])
   array_free(genome_streams);
   if (outfp != stdout)
     xfclose(outfp);
-  error_abort(err);
-  error_free(err);
 
-  return EXIT_SUCCESS;
+  return 0;
 }

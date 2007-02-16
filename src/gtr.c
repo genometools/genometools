@@ -65,6 +65,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, char **argv, Error *err)
 {
   OptionParser *op;
   Option *o;
+  OPrval oprval;
   error_check(err);
   assert(gtr);
   op = option_parser_new("[option ...] [tool ...] [argument ...]",
@@ -73,10 +74,10 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, char **argv, Error *err)
   option_parser_set_comment_func(op, show_option_comments, gtr);
   o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false);
   option_parser_add_option(op, o);
-  option_parser_parse(op, parsed_args, argc, argv, versionfunc);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
   option_parser_free(op);
   (*parsed_args)--;
-  return OPTIONPARSER_OK; /* XXX */
+  return oprval;
 }
 
 void gtr_register_components(GTR *gtr)
@@ -169,7 +170,7 @@ static int run_tests(GTR *gtr)
 
 int gtr_run(GTR *gtr, int argc, char **argv, Error *err)
 {
-  int (*tool)(int, char**) = NULL;
+  int (*tool)(int, char**, Error*) = NULL;
   char **nargv;
   int rval;
   error_check(err);
@@ -184,9 +185,11 @@ int gtr_run(GTR *gtr, int argc, char **argv, Error *err)
     error("tool '%s' not found; option -help lists possible tools", argv[1]);
   assert(argc);
   nargv = cstr_array_prefix_first(argv+1, argv[0]);
-  rval = tool(argc-1, nargv);
+  rval = tool(argc-1, nargv, err);
   cstr_array_free(nargv);
-  return rval;
+  if (rval)
+    return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }
 
 void gtr_free(GTR *gtr)

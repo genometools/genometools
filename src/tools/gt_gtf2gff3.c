@@ -6,38 +6,40 @@
 
 #include "gt.h"
 
-static int parse_options(bool *be_tolerant, int argc, char **argv)
+static OPrval parse_options(int *parsed_args, bool *be_tolerant, int argc,
+                            char **argv, Error *err)
 {
-  int parsed_args;
   OptionParser *op;
   Option *option;
-
+  OPrval oprval;
   op = option_parser_new("[gtf_file]",
                          "Parse GTF2.2 file and show it as GFF3.");
-
   /* -tolerant */
   option = option_new_bool("tolerant", "be tolerant when parsing the GTF file",
                            be_tolerant, false);
   option_parser_add_option(op, option);
-
   /* parse */
-  option_parser_parse_max_args(op, &parsed_args, argc, argv, versionfunc, 1);
+  oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
+                                        versionfunc, 1, err);
   option_parser_free(op);
-
-  return parsed_args;
+  return oprval;
 }
 
-int gt_gtf2gff3(int argc, char *argv[])
+int gt_gtf2gff3(int argc, char *argv[], Error *err)
 {
   GenomeStream *gtf_in_stream,
                 *gff3_out_stream;
   GenomeNode *gn;
   int parsed_args;
   bool be_tolerant;
-  Error *err = error_new();
+  error_check(err);
 
   /* option parsing */
-  parsed_args = parse_options(&be_tolerant, argc, argv);
+  switch (parse_options(&parsed_args, &be_tolerant, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+  }
 
   /* create a gtf input stream */
   gtf_in_stream = gtf_in_stream_new(argv[parsed_args], be_tolerant, err);
@@ -54,8 +56,6 @@ int gt_gtf2gff3(int argc, char *argv[])
   /* free */
   genome_stream_free(gff3_out_stream);
   genome_stream_free(gtf_in_stream);
-  error_abort(err);
-  error_free(err);
 
-  return EXIT_SUCCESS;
+  return 0;
 }

@@ -12,11 +12,13 @@ typedef struct {
        sumofpairs;
 } MSAparse_arguments;
 
-static int parse_options(MSAparse_arguments *arguments, int argc, char **argv)
+static OPrval parse_options(int *parsed_args, MSAparse_arguments *arguments,
+                            int argc, char **argv, Error *err)
 {
   OptionParser *op;
   Option *o;
-  int parsed_args;
+  OPrval oprval;
+  error_check(err);
   op = option_parser_new("[option ...] MSA_file",
                          "Parse multiple sequence alignment (MSA) file and "
                          "optionally show score(s).");
@@ -33,20 +35,25 @@ static int parse_options(MSAparse_arguments *arguments, int argc, char **argv)
                       &arguments->sumofpairs, false);
   option_parser_add_option(op, o);
   /* parse */
-  option_parser_parse_min_max_args(op, &parsed_args, argc, argv, versionfunc, 1,
-                                   1);
+  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
+                                            versionfunc, 1, 1, err);
   option_parser_free(op);
-  return parsed_args;
+  return oprval;
 }
 
-int gt_msaparse(int argc, char *argv[])
+int gt_msaparse(int argc, char *argv[], Error *err)
 {
   MSAparse_arguments arguments;
   int parsed_args;
   MSA *msa;
+  error_check(err);
 
   /* option parsing */
-  parsed_args = parse_options(&arguments, argc, argv);
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+  }
 
   /* make sure sequence_file exists */
   assert(parsed_args < argc);
@@ -67,5 +74,5 @@ int gt_msaparse(int argc, char *argv[])
   /* free */
   msa_free(msa);
 
-  return EXIT_SUCCESS;
+  return 0;
 }

@@ -6,21 +6,22 @@
 
 #include "gt.h"
 
-int gt_scorematrix(int argc, char *argv[])
+int gt_scorematrix(int argc, char *argv[], Error *err)
 {
   ScoreMatrix *sm;
-  Error *err = error_new();
+  int has_err = 0;
+  error_check(err);
   if (argc != 2) {
     fprintf(stderr, "Usage: %s scorematrix_filename\n", argv[0]);
     fprintf(stderr, "Parse the given protein score matrix and show it on "
                     "stdout.\n");
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE); /* XXX */
   }
   sm = scorematrix_read_protein(argv[1], err);
-  if (sm)
+  if (!sm)
+    has_err = -1;
+  if (!has_err)
     scorematrix_show(sm, stdout);
   scorematrix_free(sm);
-  error_abort(err);
-  error_free(err);
-  return EXIT_SUCCESS;
+  return has_err;
 }

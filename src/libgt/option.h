@@ -32,25 +32,26 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner);
 void          option_parser_add_option(OptionParser*, Option*);
 void          option_parser_set_comment_func(OptionParser*, ShowCommentFunc,
                                              void* data);
-void          option_parser_parse(OptionParser*, int *parsed_args, int argc,
-                                  char **argv, ShowVersionFunc);
-void          option_parser_parse_min_args(OptionParser*, int *parsed_args,
+OPrval        option_parser_parse(OptionParser*, int *parsed_args, int argc,
+                                  char **argv, ShowVersionFunc, Error*);
+OPrval        option_parser_parse_min_args(OptionParser*, int *parsed_args,
                                            int argc, char **argv,
                                            ShowVersionFunc,
                                            unsigned int
-                                           min_additional_arguments);
-void          option_parser_parse_max_args(OptionParser*, int *parsed_args,
+                                           min_additional_arguments, Error*);
+OPrval        option_parser_parse_max_args(OptionParser*, int *parsed_args,
                                            int argc, char **argv,
                                            ShowVersionFunc,
                                            unsigned int
-                                           max_additional_arguments);
-void          option_parser_parse_min_max_args(OptionParser*, int *parsed_args,
+                                           max_additional_arguments, Error*);
+OPrval        option_parser_parse_min_max_args(OptionParser*, int *parsed_args,
                                                int argc,
                                                char **argv, ShowVersionFunc,
                                                unsigned int
                                                min_additional_arguments,
                                                unsigned int
-                                               max_additional_arguments);
+                                               max_additional_arguments,
+                                               Error*);
 void          option_parser_free(OptionParser*);
 
 /* the options */

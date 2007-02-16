@@ -1,28 +1,42 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
 #include "gt.h"
 
-int gt_mmapandread(int argc, char *argv[])
+static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
 {
-  int i, fd;
+  OptionParser *op;
+  OPrval oprval;
+  error_check(err);
+  op = option_parser_new("file [...]", "Map the supplied files into memory and "
+                         "read them once.");
+  oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
+                                        versionfunc, 1, err);
+  option_parser_free(op);
+  return oprval;
+}
+
+int gt_mmapandread(int argc, char *argv[], Error *err)
+{
+  int i, fd, parsed_args;
   void *map;
   struct stat sb;
   unsigned long j;
   char byte = 0;
+  error_check(err);
 
-  /* make sure at least one file is supplied */
-  if (argc < 2) {
-    fprintf(stderr, "Usage: %s file [...]\n", argv[0]);
-    fprintf(stderr, "Map the supplied files into memory and read them once.\n");
-    return EXIT_FAILURE;
+  /* option parsing */
+  switch (parse_options(&parsed_args, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
 
   /* iterate over all files */
-  for (i = 1; i < argc; i++) {
+  for (i = parsed_args; i < argc; i++) {
     /* open file */
     fd = xopen(argv[i], O_RDONLY, 0);
 
@@ -56,5 +70,5 @@ int gt_mmapandread(int argc, char *argv[])
   if (!byte)
     printf("all read files contained only null characters\n");
 
-  return EXIT_SUCCESS;
+  return 0;
 }

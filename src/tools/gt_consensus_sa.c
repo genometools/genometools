@@ -186,11 +186,12 @@ static int compare_spliced_alignment(const void *a, const void *b)
   return range_compare_long_first(range_a, range_b);
 }
 
-int gt_consensus_sa(int argc, char *argv[])
+int gt_consensus_sa(int argc, char *argv[], Error *err)
 {
   Array *spliced_alignments;
   SplicedAlignment *sa;
   unsigned long i;
+  error_check(err);
 
   /* check number of arguments */
   if (argc != 2) {
@@ -198,7 +199,7 @@ int gt_consensus_sa(int argc, char *argv[])
     fprintf(stderr, "Read file containing spliced alingments, compute "
                     "consensus spliced alignments, \n"
                     "and print them to stdout.\n");
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE); /* XXX */
   }
 
   /* parse input file and store resuilts in the spliced alignment array */
@@ -223,5 +224,5 @@ int gt_consensus_sa(int argc, char *argv[])
   }
   array_free(spliced_alignments);
 
-  return EXIT_SUCCESS;
+  return 0;
 }

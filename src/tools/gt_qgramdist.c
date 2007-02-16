@@ -6,34 +6,39 @@
 
 #include "gt.h"
 
-static int parse_options(unsigned int *q, int argc, char **argv)
+static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
+                            char **argv, Error *err)
 {
   OptionParser *op;
   Option *o;
-  int parsed_args;
+  OPrval oprval;
+  error_check(err);
   op = option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Compute q-gram distance for each sequence "
                          "combination.");
   o = option_new_uint_min("q", "set q", q, 3, 1);
   option_parser_add_option(op, o);
-  option_parser_parse_min_max_args(op, &parsed_args, argc, argv, versionfunc, 2,
-                                   2);
+  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
+                                            versionfunc, 2, 2, err);
   option_parser_free(op);
-
-  return parsed_args;
+  return oprval;
 }
 
-int gt_qgramdist(int argc, char *argv[])
+int gt_qgramdist(int argc, char *argv[], Error *err)
 {
   Bioseq *bioseq_1, *bioseq_2;
   unsigned long i, j, dist;
   Seq *seq_1, *seq_2;
   int parsed_args;
   unsigned int q;
+  error_check(err);
 
   /* option parsing */
-  parsed_args = parse_options(&q, argc, argv);
-
+  switch (parse_options(&parsed_args, &q, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+  }
   assert(parsed_args+1 < argc);
 
   /* make sure seq_file_1 exists */
@@ -66,5 +71,5 @@ int gt_qgramdist(int argc, char *argv[])
   bioseq_free(bioseq_2);
   bioseq_free(bioseq_1);
 
-  return EXIT_SUCCESS;
+  return 0;
 }

@@ -106,10 +106,10 @@ static Option* option_new_helpdev(void)
   return o;
 }
 
-static Option* option_new_version(ShowVersionFunc show_version_func)
+static Option* option_new_version(ShowVersionFunc versionfunc)
 {
   Option *o = option_new("version", "display version information and exit",
-                         show_version_func);
+                         versionfunc);
   o->option_type = OPTION_VERSION;
   return o;
 }
@@ -354,10 +354,10 @@ static void check_mandatory_either_options(OptionParser *op)
   }
 }
 
-static void parse(OptionParser *op, int *parsed_args, int argc, char **argv,
-                  ShowVersionFunc show_version_func,
-                  unsigned int min_additional_arguments,
-                  unsigned int max_additional_arguments)
+static OPrval parse(OptionParser *op, int *parsed_args, int argc, char **argv,
+                    ShowVersionFunc versionfunc,
+                    unsigned int min_additional_arguments,
+                    unsigned int max_additional_arguments, Error *err)
 {
   int argnum, int_value;
   unsigned long i;
@@ -366,6 +366,7 @@ static void parse(OptionParser *op, int *parsed_args, int argc, char **argv,
   bool option_parsed;
   long long_value;
 
+  error_check(err);
   assert(op);
   assert(!op->parser_called); /* to avoid multiple adding of common options */
 
@@ -376,7 +377,7 @@ static void parse(OptionParser *op, int *parsed_args, int argc, char **argv,
   option_parser_add_option(op, option);
   option = option_new_helpdev();
   option_parser_add_option(op, option);
-  option = option_new_version(show_version_func);
+  option = option_new_version(versionfunc);
   option_parser_add_option(op, option);
 
   for (argnum = 1; argnum < argc; argnum++) {
@@ -413,10 +414,10 @@ static void parse(OptionParser *op, int *parsed_args, int argc, char **argv,
             break;
           case OPTION_HELP:
             show_help(op, false);
-            exit(EXIT_SUCCESS);
+            return OPTIONPARSER_REQUESTS_EXIT;
           case OPTION_HELPDEV:
             show_help(op, true);
-            exit(EXIT_SUCCESS);
+            return OPTIONPARSER_REQUESTS_EXIT;
           case OPTION_OUTPUTFILE:
             check_missing_argument(argnum, argc, option->option_str);
             argnum++;
@@ -487,7 +488,7 @@ static void parse(OptionParser *op, int *parsed_args, int argc, char **argv,
             break;
           case OPTION_VERSION:
             ((ShowVersionFunc) option->value)(op->progname);
-            exit(EXIT_SUCCESS);
+            return OPTIONPARSER_REQUESTS_EXIT;
           default: assert(0);
         }
       }
@@ -523,40 +524,51 @@ static void parse(OptionParser *op, int *parsed_args, int argc, char **argv,
 
   op->parser_called = true;
   *parsed_args = argnum;
+
+  return OPTIONPARSER_OK;
 }
 
-void option_parser_parse(OptionParser *op, int *parsed_args, int argc,
-                         char **argv, ShowVersionFunc show_version_func)
+OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
+                           char **argv, ShowVersionFunc versionfunc,
+                           Error *err)
 {
-  parse(op, parsed_args, argc, argv, show_version_func, UNDEFUINT, UNDEFUINT);
+  error_check(err);
+  return parse(op, parsed_args, argc, argv, versionfunc, UNDEFUINT, UNDEFUINT,
+               err);
 }
 
-void option_parser_parse_min_args(OptionParser *op, int *parsed_args, int argc,
-                                  char **argv,
-                                  ShowVersionFunc show_version_func,
-                                  unsigned int min_additional_arguments)
+OPrval option_parser_parse_min_args(OptionParser *op, int *parsed_args,
+                                    int argc, char **argv,
+                                    ShowVersionFunc versionfunc,
+                                    unsigned int min_additional_arguments,
+                                    Error *err)
 {
-  parse(op, parsed_args, argc, argv, show_version_func,
-        min_additional_arguments, UNDEFUINT);
+  error_check(err);
+  return parse(op, parsed_args, argc, argv, versionfunc,
+               min_additional_arguments, UNDEFUINT, err);
 }
 
-void option_parser_parse_max_args(OptionParser *op, int *parsed_args, int argc,
-                                  char **argv,
-                                  ShowVersionFunc show_version_func,
-                                  unsigned int max_additional_arguments)
+OPrval option_parser_parse_max_args(OptionParser *op, int *parsed_args,
+                                    int argc, char **argv,
+                                    ShowVersionFunc versionfunc,
+                                    unsigned int max_additional_arguments,
+                                    Error *err)
 {
-  parse(op, parsed_args, argc, argv, show_version_func, UNDEFUINT,
-        max_additional_arguments);
+  error_check(err);
+  return parse(op, parsed_args, argc, argv, versionfunc, UNDEFUINT,
+               max_additional_arguments, err);
 }
 
-void option_parser_parse_min_max_args(OptionParser *op, int *parsed_args,
-                                      int argc, char **argv,
-                                      ShowVersionFunc show_version_func,
-                                      unsigned int min_additional_arguments,
-                                      unsigned int max_additional_arguments)
+OPrval option_parser_parse_min_max_args(OptionParser *op, int *parsed_args,
+                                        int argc, char **argv,
+                                        ShowVersionFunc versionfunc,
+                                        unsigned int min_additional_arguments,
+                                        unsigned int max_additional_arguments,
+                                        Error *err)
 {
-  parse(op, parsed_args, argc, argv, show_version_func,
-        min_additional_arguments, max_additional_arguments);
+  error_check(err);
+  return parse(op, parsed_args, argc, argv, versionfunc,
+               min_additional_arguments, max_additional_arguments, err);
 }
 
 void option_parser_free(OptionParser *op)

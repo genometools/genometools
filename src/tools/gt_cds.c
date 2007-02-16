@@ -10,13 +10,13 @@ typedef struct {
   bool verbose;
 } CDS_arguments;
 
-static int parse_options(CDS_arguments *arguments, int argc,
-                         char **argv)
+static OPrval parse_options(int *parsed_args, CDS_arguments *arguments,
+                            int argc, char **argv, Error *err)
 {
-  int parsed_args;
   OptionParser *op;
   Option *option;
-
+  OPrval oprval;
+  error_check(err);
   op = option_parser_new("[option ...] GFF3_file sequence_file",
                          "Add CDS features to exon features given in GFF3_file "
                          "(which refers to sequence_file).");
@@ -26,14 +26,13 @@ static int parse_options(CDS_arguments *arguments, int argc,
   option_parser_add_option(op, option);
 
   /* parse */
-  option_parser_parse_min_max_args(op, &parsed_args, argc, argv, versionfunc, 2,
-                                   2);
+  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
+                                            versionfunc, 2, 2, err);
   option_parser_free(op);
-
-  return parsed_args;
+  return oprval;
 }
 
-int gt_cds(int argc, char *argv[])
+int gt_cds(int argc, char *argv[], Error *err)
 {
   GenomeStream *gff3_in_stream,
                 *cds_stream,
@@ -41,10 +40,14 @@ int gt_cds(int argc, char *argv[])
   GenomeNode *gn;
   CDS_arguments arguments;
   int parsed_args;
-  Error *err = error_new();
+  error_check(err);
 
   /* option parsing */
-  parsed_args = parse_options(&arguments, argc, argv);
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+  }
 
   /* create gff3 input stream */
   assert(parsed_args < argc);
@@ -67,8 +70,5 @@ int gt_cds(int argc, char *argv[])
   genome_stream_free(cds_stream);
   genome_stream_free(gff3_in_stream);
 
-  error_abort(err);
-  error_free(err);
-
-  return EXIT_SUCCESS;
+  return 0;
 }

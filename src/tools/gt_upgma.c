@@ -39,7 +39,7 @@ int gt_upgma(int argc, char *argv[])
             "cost edit distance as distance function). If 'example' is given "
             "as\n"
             "sequence_file, a builtin example is used.\n");
-    return EXIT_FAILURE;
+    exit(EXIT_FAILURE); /* XXX */
   }
 
   if (!strcmp(argv[1], "example"))

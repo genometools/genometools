@@ -26,11 +26,12 @@ static double exampledistfunc(unsigned long i, unsigned long j, void *data)
   return exampledistances[i][j];
 }
 
-int gt_neighborjoining(int argc, char *argv[])
+int gt_neighborjoining(int argc, char *argv[], Error *err)
 {
   unsigned int use_hard_coded_example = 0;
   Bioseq *bioseq = NULL;
   NeighborJoining *nj;
+  error_check(err);
 
   if (argc != 2) {
     fprintf(stderr, "Usage: %s sequence_file|example\n", argv[0]);
@@ -39,7 +40,7 @@ int gt_neighborjoining(int argc, char *argv[])
             "cost edit distance as distance function). If 'example' is given "
             "as\n"
             "sequence_file, a builtin example is used.\n");
-    return EXIT_FAILURE;
+    exit (EXIT_FAILURE); /* XXX */
   }
 
   if (!strcmp(argv[1], "example"))
@@ -58,5 +59,5 @@ int gt_neighborjoining(int argc, char *argv[])
   bioseq_free(bioseq);
   neighborjoining_free(nj);
 
-  return EXIT_SUCCESS;
+  return 0;
 }

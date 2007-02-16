@@ -15,12 +15,13 @@ typedef struct {
       *regionmapping;
 } ExtractFeatArguments;
 
-static int parse_options(ExtractFeatArguments *arguments, int argc, char **argv)
+static OPrval parse_options(int *parsed_args, ExtractFeatArguments *arguments,
+                            int argc, char **argv, Error *err)
 {
-  int parsed_args;
   OptionParser *op;
   Option *option, *seqfile_option, *regionmapping_option;
-
+  OPrval oprval;
+  error_check(err);
   op = option_parser_new("[option ...] GFF3_file",
                          "Extract features given in GFF3_file from "
                          "sequence file.");
@@ -68,30 +69,40 @@ static int parse_options(ExtractFeatArguments *arguments, int argc, char **argv)
 
   /* parse */
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
-  option_parser_parse_min_max_args(op, &parsed_args, argc, argv, versionfunc, 1,
-                                   1);
+  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
+                                            versionfunc, 1, 1, err);
   option_parser_free(op);
-
-  return parsed_args;
+  return oprval;
 }
 
-int gt_extractfeat(int argc, char *argv[])
+int gt_extractfeat(int argc, char *argv[], Error *err)
 {
-  GenomeStream *gff3_in_stream,
-                *extractfeat_stream;
+  GenomeStream *gff3_in_stream, *extractfeat_stream;
   GenomeNode *gn;
   GenomeFeatureType type;
   ExtractFeatArguments arguments;
   RegionMapping *regionmapping;
   int parsed_args;
-  Error *err = error_new();
   int has_err = 0;
+  error_check(err);
 
   /* option parsing */
   arguments.type = str_new();
   arguments.seqfile = str_new();
   arguments.regionmapping = str_new();
-  parsed_args = parse_options(&arguments, argc, argv);
+  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR:
+      str_free(arguments.regionmapping);
+      str_free(arguments.seqfile);
+      str_free(arguments.type);
+      return -1;
+    case OPTIONPARSER_REQUESTS_EXIT:
+      str_free(arguments.regionmapping);
+      str_free(arguments.seqfile);
+      str_free(arguments.type);
+      return 0;
+  }
 
   /* determine type and make sure it is a valid one */
   if (genome_feature_type_get(&type, str_get(arguments.type)) == -1)
@@ -122,7 +133,8 @@ int gt_extractfeat(int argc, char *argv[])
 
   /* pull the features through the stream and free them afterwards */
   if (!has_err) {
-    while (!genome_stream_next_tree(extractfeat_stream, &gn, NULL, err) && gn)
+    while (!(has_err = genome_stream_next_tree(extractfeat_stream, &gn, NULL,
+                                               err)) && gn)
       genome_node_rec_free(gn);
   }
 
@@ -132,8 +144,6 @@ int gt_extractfeat(int argc, char *argv[])
   str_free(arguments.regionmapping);
   str_free(arguments.seqfile);
   str_free(arguments.type);
-  error_abort(err);
-  error_free(err);
 
-  return EXIT_SUCCESS;
+  return has_err;
 }

@@ -8,24 +8,26 @@
 
 #define DEFAULT_INDELSCORE -3
 
-static int parse_options(int *indelscore, int argc, char **argv)
+static OPrval parse_options(int *parsed_args, int *indelscore, int argc,
+                            char **argv, Error *err)
 {
   OptionParser *op;
   Option *o;
-  int parsed_args;
+  OPrval oprval;
+  error_check(err);
   op = option_parser_new("[option ...] scorematrix seq_file_1 seq_file_2",
                          "Locally align each sequence in seq_file_1 "
                          "with each sequence in seq_file_2.");
   o = option_new_int("indelscore", "set the score used for "
                      "insertions/deletions", indelscore, DEFAULT_INDELSCORE);
   option_parser_add_option(op, o);
-  option_parser_parse_min_max_args(op, &parsed_args, argc, argv, versionfunc, 3,
-                                   3);
+  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
+                                            versionfunc, 3, 3, err);
   option_parser_free(op);
-  return parsed_args;
+  return oprval;
 }
 
-int gt_swalign(int argc, char *argv[])
+int gt_swalign(int argc, char *argv[], Error *err)
 {
   Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
   ScoreFunction *scorefunction = NULL;
@@ -33,10 +35,14 @@ int gt_swalign(int argc, char *argv[])
   unsigned long i, j;
   int parsed_args, indelscore;
   Alignment *a;
-  Error *err = error_new();
+  error_check(err);
 
   /* option parsing */
-  parsed_args = parse_options(&indelscore, argc, argv);
+  switch (parse_options(&parsed_args, &indelscore, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+  }
   assert(parsed_args+2 < argc);
 
   /* init */
@@ -65,8 +71,6 @@ int gt_swalign(int argc, char *argv[])
   bioseq_free(bioseq_2);
   bioseq_free(bioseq_1);
   scorefunction_free(scorefunction);
-  error_abort(err);
-  error_free(err);
 
-  return EXIT_SUCCESS;
+  return 0;
 }
