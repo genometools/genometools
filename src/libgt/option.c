@@ -172,7 +172,7 @@ static void show_long_description(unsigned long initial_space,
 }
 #endif
 
-static void show_help(OptionParser *op, unsigned int show_development_options)
+static void show_help(OptionParser *op, bool show_development_options)
 {
   unsigned long i, max_option_length = 0;
   Option *option;
@@ -412,10 +412,10 @@ static int parse(OptionParser *op, int argc, char **argv,
             option_parsed = true;
             break;
           case OPTION_HELP:
-            show_help(op, 0);
+            show_help(op, false);
             exit(EXIT_SUCCESS);
           case OPTION_HELPDEV:
-            show_help(op, 1);
+            show_help(op, true);
             exit(EXIT_SUCCESS);
           case OPTION_OUTPUTFILE:
             check_missing_argument(argnum, argc, option->option_str);
