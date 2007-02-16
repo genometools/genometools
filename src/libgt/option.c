@@ -38,7 +38,7 @@ struct OptionParser {
        *one_liner;
   Array *options;
   bool parser_called;
-  Show_comment_func comment_func;
+  ShowCommentFunc comment_func;
   void *comment_func_data;
 };
 
@@ -106,7 +106,7 @@ static Option* option_new_helpdev(void)
   return o;
 }
 
-static Option* option_new_version(Show_version_func show_version_func)
+static Option* option_new_version(ShowVersionFunc show_version_func)
 {
   Option *o = option_new("version", "display version information and exit",
                          show_version_func);
@@ -138,7 +138,7 @@ void option_parser_add_option(OptionParser *op, Option *o)
 }
 
 void option_parser_set_comment_func(OptionParser *op,
-                                    Show_comment_func comment_func, void *data)
+                                    ShowCommentFunc comment_func, void *data)
 {
   assert(op);
   op->comment_func = comment_func;
@@ -355,7 +355,7 @@ static void check_mandatory_either_options(OptionParser *op)
 }
 
 static int parse(OptionParser *op, int argc, char **argv,
-                 Show_version_func show_version_func,
+                 ShowVersionFunc show_version_func,
                  unsigned int min_additional_arguments,
                  unsigned int max_additional_arguments)
 {
@@ -486,7 +486,7 @@ static int parse(OptionParser *op, int argc, char **argv,
             option_parsed = true;
             break;
           case OPTION_VERSION:
-            ((Show_version_func) option->value)(op->progname);
+            ((ShowVersionFunc) option->value)(op->progname);
             exit(EXIT_SUCCESS);
           default: assert(0);
         }
@@ -526,13 +526,13 @@ static int parse(OptionParser *op, int argc, char **argv,
 }
 
 int option_parser_parse(OptionParser *op, int argc, char **argv,
-                        Show_version_func show_version_func)
+                        ShowVersionFunc show_version_func)
 {
   return parse(op, argc, argv, show_version_func, UNDEFUINT, UNDEFUINT);
 }
 
 int option_parser_parse_min_args(OptionParser *op, int argc, char **argv,
-                                 Show_version_func show_version_func,
+                                 ShowVersionFunc show_version_func,
                                  unsigned int min_additional_arguments)
 {
   return parse(op, argc, argv, show_version_func, min_additional_arguments,
@@ -540,7 +540,7 @@ int option_parser_parse_min_args(OptionParser *op, int argc, char **argv,
 }
 
 int option_parser_parse_max_args(OptionParser *op, int argc, char **argv,
-                                 Show_version_func show_version_func,
+                                 ShowVersionFunc show_version_func,
                                  unsigned int max_additional_arguments)
 {
   return parse(op, argc, argv, show_version_func, UNDEFUINT,
@@ -548,7 +548,7 @@ int option_parser_parse_max_args(OptionParser *op, int argc, char **argv,
 }
 
 int option_parser_parse_min_max_args(OptionParser *op, int argc, char **argv,
-                                     Show_version_func show_version_func,
+                                     ShowVersionFunc show_version_func,
                                      unsigned int min_additional_arguments,
                                      unsigned int max_additional_arguments)
 {

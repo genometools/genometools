@@ -13,26 +13,26 @@
 typedef struct OptionParser OptionParser;
 typedef struct Option Option;
 
-typedef void (*Show_version_func)(const char *progname);
-typedef void (*Show_comment_func)(const char *progname, void *data);
+typedef void (*ShowVersionFunc)(const char *progname);
+typedef void (*ShowCommentFunc)(const char *progname, void *data);
 
 /* the option parser */
 OptionParser* option_parser_new(const char *synopsis, const char *one_liner);
 void          option_parser_add_option(OptionParser*, Option*);
-void          option_parser_set_comment_func(OptionParser*, Show_comment_func,
+void          option_parser_set_comment_func(OptionParser*, ShowCommentFunc,
                                              void* data);
 int           option_parser_parse(OptionParser*, int argc, char **argv,
-                                  Show_version_func);
+                                  ShowVersionFunc);
 int           option_parser_parse_min_args(OptionParser*, int argc,
-                                           char **argv, Show_version_func,
+                                           char **argv, ShowVersionFunc,
                                            unsigned int
                                            min_additional_arguments);
 int           option_parser_parse_max_args(OptionParser*, int argc,
-                                           char **argv, Show_version_func,
+                                           char **argv, ShowVersionFunc,
                                            unsigned int
                                            max_additional_arguments);
 int           option_parser_parse_min_max_args(OptionParser*, int argc,
-                                               char **argv, Show_version_func,
+                                               char **argv, ShowVersionFunc,
                                                unsigned int
                                                min_additional_arguments,
                                                unsigned int
