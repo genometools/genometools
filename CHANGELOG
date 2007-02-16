@@ -1,5 +1,5 @@
 changes in version 0.6.8:
 
 - Lua has been imported into the source tree
-- gt extractfeat has new a new option -regionmapping
-- gt bioseq can be used with more then one sequence file
+- `gt extractfeat` has new a new option -regionmapping
+- `gt bioseq` can be used with more then one sequence file
