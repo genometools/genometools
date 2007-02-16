@@ -15,13 +15,13 @@ typedef struct OptionParser OptionParser;
 /* the option class */
 typedef struct Option Option;
 
-/* the possible return values of the OptionParser */
+/* possible option parser return values */
 typedef enum {
-  OPTIONPARSER_OK,          /* everything went fine */
-  OPTIONPARSER_ERROR,       /* an error occured during option parsing */
-  OPTIONPARSER_REQUEST_EXIT /* the option parser requests an exit, because
-                               option -help, -helpdev, or -version was used */
-} OptionParserRval;
+  OPTIONPARSER_OK,           /* everything went fine */
+  OPTIONPARSER_ERROR,        /* an error occured during option parsing */
+  OPTIONPARSER_REQUESTS_EXIT /* the option parser requests an exit, because
+                                option -help, -helpdev, or -version was used */
+} OPrval;
 
 typedef void (*ShowVersionFunc)(const char *progname);
 typedef void (*ShowCommentFunc)(const char *progname, void *data);
