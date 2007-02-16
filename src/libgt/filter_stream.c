@@ -10,7 +10,7 @@
 #include "genome_stream_rep.h"
 #include "undef.h"
 
-struct Filter_stream
+struct FilterStream
 {
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
@@ -24,7 +24,7 @@ struct Filter_stream
 static int filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
                                    Error *err)
 {
-  Filter_stream *fs;
+  FilterStream *fs;
   Genome_feature *gf;
   int has_err;
 
@@ -59,7 +59,7 @@ static int filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
 
 const GenomeStreamClass* filter_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof (Filter_stream),
+  static const GenomeStreamClass gsc = { sizeof (FilterStream),
                                            filter_stream_next_tree,
                                            NULL };
   return &gsc;
@@ -71,7 +71,7 @@ GenomeStream* filter_stream_new(GenomeStream *in_stream,
 {
   GenomeStream *gs = genome_stream_create(filter_stream_class(),
                                            genome_stream_is_sorted(in_stream));
-  Filter_stream *filter_stream = filter_stream_cast(gs);
+  FilterStream *filter_stream = filter_stream_cast(gs);
   assert(in_stream);
   filter_stream->in_stream = in_stream;
   filter_stream->max_gene_length = max_gene_length;
