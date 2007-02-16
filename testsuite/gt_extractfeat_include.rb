@@ -95,3 +95,10 @@ Test do
   run_test "env GT_TESTDATA=#{$testdata} #{$bin}gt extractfeat -type gene -regionmapping #{$testdata}/regionmapping_6.lua #{$testdata}/gt_extractfeat_succ_1.gff3"
   run "diff #{$last_stdout} #{$testdata}/gt_extractfeat_succ_1.out"
 end
+
+Name "gt extractfeat -help"
+Keywords "gt_extractfeat"
+Test do
+  run_test "#{$bin}gt extractfeat -help"
+  grep($last_stdout, "Lua");
+end
