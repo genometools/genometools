@@ -53,3 +53,10 @@ Keywords "gt_bioseq"
 Test do
   run_test "#{$bin}gt bioseq -stat #{$testdata}gt_bioseq_succ_3.fas"
 end
+
+Name "gt bioseq test multiple sequence files"
+Keywords "gt_bioseq"
+Test do
+  run_test "#{$bin}gt bioseq -recreate #{$testdata}gt_bioseq_succ_1.fas #{$testdata}gt_bioseq_succ_2.fas"
+end
+

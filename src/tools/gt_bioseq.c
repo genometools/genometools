@@ -75,7 +75,7 @@ int gt_bioseq(int argc, char *argv[], Error *err)
 {
   Bioseq_arguments arguments;
   Bioseq *bioseq;
-  int parsed_args;
+  int parsed_args, has_err = 0;
   error_check(err);
 
   /* option parsing */
@@ -87,10 +87,13 @@ int gt_bioseq(int argc, char *argv[], Error *err)
   assert(parsed_args < argc);
 
   /* option -showseqnum makes only sense if we got a single sequence file */
-  if (parsed_args + 1 != argc)
-    error("option '-showseqnum' makes only sense with a single sequence_file");
+  if (arguments.showseqnum != UNDEFULONG && parsed_args + 1 != argc) {
+    error_set(err, "option '-showseqnum' makes only sense with a single "
+                   "sequence_file");
+    has_err = -1;
+  }
 
-  while (parsed_args < argc) {
+  while (!has_err && parsed_args < argc) {
     /* bioseq construction */
     bioseq = bioseq_new(argv[parsed_args]);
     bioseq_fill(bioseq, arguments.recreate);
@@ -101,15 +104,18 @@ int gt_bioseq(int argc, char *argv[], Error *err)
 
     if (arguments.showseqnum != UNDEFULONG) {
       if (arguments.showseqnum > bioseq_number_of_sequences(bioseq)) {
-        error("argument '%lu' to option '-showseqnum' is too large. The "
-              "Biosequence contains only '%lu' sequences.",
-              arguments.showseqnum, bioseq_number_of_sequences(bioseq));
+        error_set(err, "argument '%lu' to option '-showseqnum' is too large. "
+                  "The Biosequence contains only '%lu' sequences.",
+                  arguments.showseqnum, bioseq_number_of_sequences(bioseq));
+        has_err = -1;
       }
-      bioseq_show_sequence_as_fasta(bioseq, arguments.showseqnum - 1,
-                                    arguments.width);
+      if (!has_err) {
+        bioseq_show_sequence_as_fasta(bioseq, arguments.showseqnum - 1,
+                                      arguments.width);
+      }
     }
 
-    if (arguments.stat)
+    if (!has_err && arguments.stat)
       bioseq_show_stat(bioseq);
 
     /* free */
@@ -118,5 +124,5 @@ int gt_bioseq(int argc, char *argv[], Error *err)
     parsed_args++;
   }
 
-  return 0;
+  return has_err;
 }
