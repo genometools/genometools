@@ -36,7 +36,7 @@ int genome_visitor_visit_comment(GenomeVisitor *gv, Comment *c, Log *l,
   return 0;
 }
 
-int genome_visitor_visit_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
+int genome_visitor_visit_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                         Log *l, Error *err)
 {
   error_check(err);

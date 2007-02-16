@@ -112,7 +112,7 @@ static void construct_mRNAs(void *key, void *value, void *data)
   /* determine the range and the strand of the mRNA */
   first_node = *(GenomeNode**) array_get(genome_node_array, 0);
   mRNA_range = genome_node_get_range(first_node);
-  mRNA_strand = genome_feature_get_strand((Genome_feature*) first_node);
+  mRNA_strand = genome_feature_get_strand((GenomeFeature*) first_node);
   mRNA_seqid = genome_node_get_seqid(first_node);
   for (i = 1; i < array_size(genome_node_array); i++) {
     gn = *(GenomeNode**) array_get(genome_node_array, i);
@@ -120,7 +120,7 @@ static void construct_mRNAs(void *key, void *value, void *data)
     /* XXX: an error check is necessary here, otherwise strand_join() can cause
        a failed assertion */
     mRNA_strand = strand_join(mRNA_strand,
-                              genome_feature_get_strand((Genome_feature*) gn));
+                              genome_feature_get_strand((GenomeFeature*) gn));
     if (str_cmp(mRNA_seqid, genome_node_get_seqid(gn))) {
       error("The features on lines %lu and %lu refer to different genomic "
             "sequences (``seqname''), although they have the same gene IDs "
@@ -162,13 +162,13 @@ static void construct_genes(void *key, void *value, void *data)
   /* determine the range and the strand of the gene */
   gn = *(GenomeNode**) array_get(mRNAs, 0);
   gene_range = genome_node_get_range(gn);
-  gene_strand = genome_feature_get_strand((Genome_feature*) gn);
+  gene_strand = genome_feature_get_strand((GenomeFeature*) gn);
   gene_seqid = genome_node_get_seqid(gn);
   for (i = 1; i < array_size(mRNAs); i++) {
     gn = *(GenomeNode**) array_get(mRNAs, i);
     gene_range = range_join(gene_range, genome_node_get_range(gn));
     gene_strand = strand_join(gene_strand,
-                              genome_feature_get_strand((Genome_feature*) gn));
+                              genome_feature_get_strand((GenomeFeature*) gn));
     assert(str_cmp(gene_seqid, genome_node_get_seqid(gn)) == 0);
   }
 
@@ -421,7 +421,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       genome_node_set_source(gn, source_str);
 
       if (score_value != UNDEFDOUBLE)
-        genome_feature_set_score((Genome_feature*) gn, score_value);
+        genome_feature_set_score((GenomeFeature*) gn, score_value);
       if (phase_value != PHASE_UNDEFINED)
         genome_node_set_phase(gn, phase_value);
       array_add(genome_node_array, gn);

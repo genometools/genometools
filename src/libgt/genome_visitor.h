@@ -18,7 +18,7 @@ typedef struct GenomeVisitor GenomeVisitor;
 #include "sequence_region.h"
 
 int  genome_visitor_visit_comment(GenomeVisitor*, Comment*, Log*, Error*);
-int  genome_visitor_visit_genome_feature(GenomeVisitor*, Genome_feature*, Log*,
+int  genome_visitor_visit_genome_feature(GenomeVisitor*, GenomeFeature*, Log*,
                                          Error*);
 int  genome_visitor_visit_sequence_region(GenomeVisitor*, SequenceRegion*,
                                           Log*, Error*);

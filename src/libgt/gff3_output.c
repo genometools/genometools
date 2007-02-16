@@ -9,7 +9,7 @@
 #include "undef.h"
 #include "xansi.h"
 
-void gff3_output_leading(Genome_feature *gf, FILE *outfp)
+void gff3_output_leading(GenomeFeature *gf, FILE *outfp)
 {
   GenomeNode *gn;
   GenomeFeatureType type;

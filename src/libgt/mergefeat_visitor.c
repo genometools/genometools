@@ -10,7 +10,7 @@
 #include "hashtable.h"
 #include "undef.h"
 
-struct Mergefeat_visitor {
+struct MergefeatVisitor {
   const GenomeVisitor parent_instance;
   GenomeNode *current_tree;
   Hashtable *ht; /* type -> previous node */
@@ -21,15 +21,15 @@ struct Mergefeat_visitor {
 
 static void mergefeat_visitor_free(GenomeVisitor *gv)
 {
-  Mergefeat_visitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
+  MergefeatVisitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
   assert(mergefeat_visitor);
   hashtable_free(mergefeat_visitor->ht);
 }
 
 static int mergefeat_in_children(GenomeNode *gn, void *data, Error *err)
 {
-  Mergefeat_visitor *v = (Mergefeat_visitor*) data;
-  Genome_feature *previous_feature, *current_feature;
+  MergefeatVisitor *v = (MergefeatVisitor*) data;
+  GenomeFeature *previous_feature, *current_feature;
   Range previous_range, current_range;
   error_check(err);
   current_feature = genome_node_cast(genome_feature_class(), gn);
@@ -66,8 +66,8 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, Error *err)
 
 static int mergefeat_if_necessary(GenomeNode *gn, void *data, Error *err)
 {
-  Mergefeat_visitor *v = (Mergefeat_visitor*) data;
-  Genome_feature *gf;
+  MergefeatVisitor *v = (MergefeatVisitor*) data;
+  GenomeFeature *gf;
   error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
@@ -78,10 +78,10 @@ static int mergefeat_if_necessary(GenomeNode *gn, void *data, Error *err)
 }
 
 static int mergefeat_visitor_genome_feature(GenomeVisitor *gv,
-                                            Genome_feature *gf,
+                                            GenomeFeature *gf,
                                             /*@unused@*/ Log *l, Error *err)
 {
-  Mergefeat_visitor *v;
+  MergefeatVisitor *v;
   error_check(err);
   v = mergefeat_visitor_cast(gv);
   return genome_node_traverse_children((GenomeNode*) gf, v,
@@ -90,7 +90,7 @@ static int mergefeat_visitor_genome_feature(GenomeVisitor *gv,
 
 const GenomeVisitorClass* mergefeat_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof(Mergefeat_visitor),
+  static const GenomeVisitorClass gvc = { sizeof(MergefeatVisitor),
                                             mergefeat_visitor_free,
                                             NULL,
                                             mergefeat_visitor_genome_feature,
@@ -102,7 +102,7 @@ const GenomeVisitorClass* mergefeat_visitor_class()
 GenomeVisitor* mergefeat_visitor_new(void)
 {
   GenomeVisitor *gv = genome_visitor_create(mergefeat_visitor_class());
-  Mergefeat_visitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
+  MergefeatVisitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
   mergefeat_visitor->ht = hashtable_new(HASH_STRING, NULL, NULL);
   return gv;
 }

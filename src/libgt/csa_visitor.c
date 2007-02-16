@@ -20,7 +20,7 @@ struct CSAVisitor {
   Queue *genome_node_buffer;
   unsigned long join_length;
   Array *cluster;
-  Genome_feature *buffered_feature;
+  GenomeFeature *buffered_feature;
   Range first_range,
         second_range;
   Str *first_str,
@@ -48,7 +48,7 @@ static void csa_visitor_free(GenomeVisitor *gv)
   str_free(csa_visitor->gth_csa_source_str);
 }
 
-static int csa_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
+static int csa_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                       Log *l, Error *err)
 {
   CSAVisitor *csa_visitor;
@@ -135,7 +135,7 @@ GenomeVisitor* csa_visitor_new(unsigned long join_length)
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
   csa_visitor->genome_node_buffer = queue_new(sizeof(GenomeNode*));
   csa_visitor->join_length = join_length;
-  csa_visitor->cluster = array_new(sizeof(Genome_feature*));
+  csa_visitor->cluster = array_new(sizeof(GenomeFeature*));
   csa_visitor->buffered_feature = NULL;
   csa_visitor->gth_csa_source_str = str_new_cstr(GT_CSA_SOURCE_TAG);
   return gv;
@@ -155,21 +155,21 @@ GenomeNode* csa_visitor_get_node(GenomeVisitor *gv)
 
 static Range get_genomic_range(const void *sa)
 {
-  Genome_feature *gf = *(Genome_feature**) sa;
+  GenomeFeature *gf = *(GenomeFeature**) sa;
   assert(gf && genome_feature_get_type(gf) == gft_gene);
   return genome_node_get_range((GenomeNode*) gf);
 }
 
 static Strand get_strand(const void *sa)
 {
-  Genome_feature *gf = *(Genome_feature**) sa;
+  GenomeFeature *gf = *(GenomeFeature**) sa;
   assert(gf && genome_feature_get_type(gf) == gft_gene);
   return genome_feature_get_strand(gf);
 }
 
 static int save_exon(GenomeNode *gn, void *data, Error *err)
 {
-  Genome_feature *gf = (Genome_feature*) gn;
+  GenomeFeature *gf = (GenomeFeature*) gn;
   Array *exon_ranges = (Array*) data;
   Range range;
   error_check(err);
@@ -183,7 +183,7 @@ static int save_exon(GenomeNode *gn, void *data, Error *err)
 
 static void get_exons(Array *exon_ranges, const void *sa)
 {
-  Genome_feature *gf = *(Genome_feature**) sa;
+  GenomeFeature *gf = *(GenomeFeature**) sa;
   int has_err;
   assert(exon_ranges && gf && genome_feature_get_type(gf) == gft_gene);
   has_err = genome_node_traverse_children((GenomeNode*) gf, exon_ranges,
@@ -196,7 +196,7 @@ static void get_exons(Array *exon_ranges, const void *sa)
 }
 
 static void add_sa_to_exon_feature_array(Array *exon_nodes,
-                                         Genome_feature *sa,
+                                         GenomeFeature *sa,
                                          Str *seqid,
                                          Str *gth_csa_source_str,
                                          Strand gene_strand)
@@ -205,22 +205,22 @@ static void add_sa_to_exon_feature_array(Array *exon_nodes,
   unsigned long i,
                 exon_feature_index = 0,
                 exons_from_sa_index = 0;
-  Genome_feature *exon_feature, *exons_from_sa_feature;
+  GenomeFeature *exon_feature, *exons_from_sa_feature;
   GenomeNode *new_feature;
   Range exon_feature_range, exons_from_sa_range;
 
   assert(exon_nodes && sa);
   assert(gene_strand != STRAND_BOTH); /* is defined */
 
-  exons_from_sa = array_new(sizeof(Genome_feature*));
+  exons_from_sa = array_new(sizeof(GenomeFeature*));
   genome_feature_get_exons(sa, exons_from_sa);
   genome_nodes_sort(exons_from_sa);
 
   while (exon_feature_index < array_size(exon_nodes) &&
         exons_from_sa_index < array_size(exons_from_sa)) {
-    exon_feature = *(Genome_feature**)
+    exon_feature = *(GenomeFeature**)
                    array_get(exon_nodes, exon_feature_index);
-    exons_from_sa_feature = *(Genome_feature**)
+    exons_from_sa_feature = *(GenomeFeature**)
                             array_get(exons_from_sa, exons_from_sa_index);
 
     exon_feature_range = genome_node_get_range((GenomeNode*) exon_feature);
@@ -279,14 +279,14 @@ static void add_sa_to_exon_feature_array(Array *exon_nodes,
 
   /* add remaining exons */
   for (i = exons_from_sa_index; i < array_size(exons_from_sa); i++) {
-    exons_from_sa_feature = *(Genome_feature**) array_get(exons_from_sa, i);
+    exons_from_sa_feature = *(GenomeFeature**) array_get(exons_from_sa, i);
     new_feature =
       genome_feature_new(gft_exon,
                          genome_node_get_range((GenomeNode*)
                                                exons_from_sa_feature),
                          gene_strand, NULL, UNDEFULONG);
     genome_node_set_seqid(new_feature, seqid);
-    genome_feature_set_score((Genome_feature*) new_feature,
+    genome_feature_set_score((GenomeFeature*) new_feature,
                              genome_feature_get_score(exons_from_sa_feature));
     genome_node_set_source(new_feature, gth_csa_source_str);
     array_add(exon_nodes, new_feature);
@@ -365,7 +365,7 @@ static void process_splice_form(Array *spliced_alignments_in_form,
                  size_of_sa);
       info->gene_strand =
         strand_join(info->gene_strand,
-                    genome_feature_get_strand((Genome_feature*) sa_node));
+                    genome_feature_get_strand((GenomeFeature*) sa_node));
     }
 
     assert(info->gene_strand != STRAND_BOTH);
@@ -383,7 +383,7 @@ static void process_splice_form(Array *spliced_alignments_in_form,
     sa_num = *(unsigned long*) array_get(spliced_alignments_in_form, i);
     assert(sa_num < number_of_sas);
     add_sa_to_exon_feature_array(exon_nodes,
-                                 *(Genome_feature**)
+                                 *(GenomeFeature**)
                                  (set_of_sas + sa_num * size_of_sa),
                                  info->seqid, info->gth_csa_source_str,
                                  info->gene_strand);
@@ -436,7 +436,7 @@ void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster, Log *l)
   }
   consensus_sa(array_get_space(csa_visitor->cluster),
                array_size(csa_visitor->cluster),
-               sizeof(Genome_feature*),
+               sizeof(GenomeFeature*),
                get_genomic_range,
                get_strand,
                get_exons,

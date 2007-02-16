@@ -37,7 +37,7 @@ static int filter_visitor_comment(GenomeVisitor *gv, Comment *c,
   return 0;
 }
 
-static int filter_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
+static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                          Log *l, Error *err)
 {
   FilterVisitor *filter_visitor;

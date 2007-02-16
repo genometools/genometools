@@ -50,7 +50,7 @@ static int extract_join_feature(GenomeNode *gn, void *data, Error *err)
   ExtractFeatVisitor *v = (ExtractFeatVisitor*) data;
   GenomeFeatureType gf_type;
   const char *raw_sequence;
-  Genome_feature *gf;
+  GenomeFeature *gf;
   Range range;
 
   error_check(err);
@@ -75,7 +75,7 @@ static int extract_feature(GenomeNode *gn, void *data, Error *err)
 {
   ExtractFeatVisitor *v = (ExtractFeatVisitor*) data;
   GenomeFeatureType gf_type;
-  Genome_feature *gf;
+  GenomeFeature *gf;
   Range range;
   int has_err = 0;
 
@@ -155,7 +155,7 @@ static int extract_feature(GenomeNode *gn, void *data, Error *err)
 }
 
 static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
-                                              Genome_feature *gf,
+                                              GenomeFeature *gf,
                                               /*@unused@*/ Log *l, Error *err)
 {
   ExtractFeatVisitor *efv;

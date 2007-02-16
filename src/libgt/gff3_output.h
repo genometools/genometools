@@ -11,6 +11,6 @@
 
 /* output the leading part of a genome feature in GFF3 format (i.e., the part
    up to the attributes) */
-void gff3_output_leading(Genome_feature *gf, FILE*);
+void gff3_output_leading(GenomeFeature *gf, FILE*);
 
 #endif

@@ -186,7 +186,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   }
 
   if (!has_err && score_value != UNDEFDOUBLE)
-    genome_feature_set_score((Genome_feature*) genome_feature, score_value);
+    genome_feature_set_score((GenomeFeature*) genome_feature, score_value);
   if (!has_err && phase_value != PHASE_UNDEFINED)
     genome_node_set_phase(genome_feature, phase_value);
 

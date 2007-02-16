@@ -85,7 +85,7 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data, Error *err)
 {
   unsigned int part_shown = 0;
   GFF3Visitor *gff3_visitor = (GFF3Visitor*) data;
-  Genome_feature *gf = (Genome_feature*) gn;
+  GenomeFeature *gf = (GenomeFeature*) gn;
   Array *parent_features = NULL;
   unsigned long i;
   Str *id;
@@ -129,7 +129,7 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data, Error *err)
 static int store_ids(GenomeNode *gn, void *data, Error *err)
 {
   GFF3Visitor *gff3_visitor = (GFF3Visitor*) data;
-  Genome_feature *gf = (Genome_feature*) gn;
+  GenomeFeature *gf = (GenomeFeature*) gn;
   GenomeFeatureType type;
   Add_id_info add_id_info;
   int has_err = 0;
@@ -160,7 +160,7 @@ static int store_ids(GenomeNode *gn, void *data, Error *err)
   return has_err;
 }
 
-static int gff3_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
+static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                        /*@unused@*/ Log *l, Error *err)
 {
   GFF3Visitor *gff3_visitor;

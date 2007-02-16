@@ -8,7 +8,7 @@
 #define GENOME_FEATURE_H
 
 /* implements the ``genome node'' interface */
-typedef struct Genome_feature Genome_feature;
+typedef struct GenomeFeature GenomeFeature;
 
 #include "genome_node.h"
 #include "genome_feature_type.h"
@@ -20,15 +20,15 @@ const GenomeNodeClass* genome_feature_class(void);
 GenomeNode*            genome_feature_new(GenomeFeatureType, Range, Strand,
                                           const char *filename,
                                           unsigned long line_number);
-const char*            genome_feature_get_source(Genome_feature*);
-GenomeFeatureType      genome_feature_get_type(Genome_feature*);
-double                 genome_feature_get_score(Genome_feature*);
-Strand                 genome_feature_get_strand(Genome_feature*);
-Phase                  genome_feature_get_phase(Genome_feature*);
-void                   genome_feature_get_exons(Genome_feature*,
+const char*            genome_feature_get_source(GenomeFeature*);
+GenomeFeatureType      genome_feature_get_type(GenomeFeature*);
+double                 genome_feature_get_score(GenomeFeature*);
+Strand                 genome_feature_get_strand(GenomeFeature*);
+Phase                  genome_feature_get_phase(GenomeFeature*);
+void                   genome_feature_get_exons(GenomeFeature*,
                                                 Array *exon_features);
-void                   genome_feature_set_end(Genome_feature*, unsigned long);
+void                   genome_feature_set_end(GenomeFeature*, unsigned long);
 /* XXX: move to genome_node */
-void                   genome_feature_set_score(Genome_feature*, double);
+void                   genome_feature_set_score(GenomeFeature*, double);
 
 #endif

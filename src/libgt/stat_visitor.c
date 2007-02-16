@@ -9,7 +9,7 @@
 #include "genome_visitor_rep.h"
 #include "stat_visitor.h"
 
-struct Stat_visitor {
+struct StatVisitor {
   const GenomeVisitor parent_instance;
   unsigned long number_of_genes,
                 number_of_mRNAs,
@@ -23,15 +23,15 @@ struct Stat_visitor {
 
 static void stat_visitor_free(GenomeVisitor *gv)
 {
-  Stat_visitor *stat_visitor = stat_visitor_cast(gv);
+  StatVisitor *stat_visitor = stat_visitor_cast(gv);
   disc_distri_free(stat_visitor->gene_length_distribution);
   disc_distri_free(stat_visitor->gene_score_distribution);
 }
 
-static int stat_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
+static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                         /*@unused@*/ Log *l, Error *err)
 {
-  Stat_visitor *stat_visitor;
+  StatVisitor *stat_visitor;
   error_check(err);
   stat_visitor = stat_visitor_cast(gv);
   switch (genome_feature_get_type(gf)) {
@@ -60,7 +60,7 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
 
 const GenomeVisitorClass* stat_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof(Stat_visitor),
+  static const GenomeVisitorClass gvc = { sizeof(StatVisitor),
                                             stat_visitor_free,
                                             NULL,
                                             stat_visitor_genome_feature,
@@ -73,7 +73,7 @@ GenomeVisitor* stat_visitor_new(unsigned int gene_length_distri,
                                  unsigned int gene_score_distri)
 {
   GenomeVisitor *gv = genome_visitor_create(stat_visitor_class());
-  Stat_visitor *stat_visitor = stat_visitor_cast(gv);
+  StatVisitor *stat_visitor = stat_visitor_cast(gv);
   if (gene_length_distri)
     stat_visitor->gene_length_distribution = disc_distri_new();
   if (gene_score_distri)
@@ -83,7 +83,7 @@ GenomeVisitor* stat_visitor_new(unsigned int gene_length_distri,
 
 void stat_visitor_show_stats(GenomeVisitor *gv)
 {
-  Stat_visitor *stat_visitor = stat_visitor_cast(gv);
+  StatVisitor *stat_visitor = stat_visitor_cast(gv);
   if (stat_visitor->number_of_exons)
     printf("genes: %lu\n", stat_visitor->number_of_genes);
   if (stat_visitor->number_of_mRNAs)

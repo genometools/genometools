@@ -226,12 +226,12 @@ static int process_real_feature(GenomeNode *gn, void *data, Error *err)
   Process_real_feature_data *process_real_feature_data =
     (Process_real_feature_data*) data;
   GenomeNode *gn_ref;
-  Genome_feature *gf;
+  GenomeFeature *gf;
   Range range;
 
   error_check(err);
   assert(gn && data);
-  gf = (Genome_feature*) gn;
+  gf = (GenomeFeature*) gn;
 
   switch (genome_feature_get_type(gf)) {
     case gft_gene:
@@ -310,7 +310,7 @@ static int store_exon(GenomeNode *gn, void *data, Error *err)
 {
   Array *exons = (Array*) data;
   Range range;
-  Genome_feature *gf;
+  GenomeFeature *gf;
   error_check(err);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf && exons);
@@ -362,7 +362,7 @@ typedef struct {
 
 static int store_gene_feature(GenomeNode *gn, void *data, Error *err)
 {
-  Genome_feature *gf;
+  GenomeFeature *gf;
   Store_gene_feature_info *info = (Store_gene_feature_info*) data;
   Range range;
   error_check(err);
@@ -451,10 +451,10 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Error *err)
   assert(gn && data);
 
   predicted_range = genome_node_get_range(gn);
-  predicted_strand = genome_feature_get_strand((Genome_feature*) gn);
+  predicted_strand = genome_feature_get_strand((GenomeFeature*) gn);
   real_genome_nodes = array_new(sizeof(GenomeNode**));
 
-  switch (genome_feature_get_type((Genome_feature*) gn)) {
+  switch (genome_feature_get_type((GenomeFeature*) gn)) {
     case gft_gene:
       /* store predicted gene */
       evaluator_add_predicted(info->gene_evaluator, 1);
@@ -627,7 +627,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Error *err)
           }
           else if (info->exondiff) {
             printf("> ");
-            gff3_output_leading((Genome_feature*) gn, stdout);
+            gff3_output_leading((GenomeFeature*) gn, stdout);
             printf(".\n");
           }
           break;
@@ -717,7 +717,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 {
   GenomeNode *gn;
   SequenceRegion *sr;
-  Genome_feature *gf;
+  GenomeFeature *gf;
   Slot *slot;
   Process_real_feature_data process_real_feature_data;
   Process_predicted_feature_info info;

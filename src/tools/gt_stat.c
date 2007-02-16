@@ -15,7 +15,7 @@ typedef struct {
 typedef struct {
   unsigned long number_of_trees;
   GenomeVisitor *stat_visitor;
-} Stat_info;
+} StatInfo;
 
 static OPrval parse_options(int *parsed_args, Stat_arguments *arguments,
                             int argc, char **argv, Error *err)
@@ -51,7 +51,7 @@ static OPrval parse_options(int *parsed_args, Stat_arguments *arguments,
 
 static int compute_statistics(GenomeNode *gn, void *data, Error *err)
 {
-  Stat_info *info = (Stat_info*) data;
+  StatInfo *info = (StatInfo*) data;
   error_check(err);
   assert(info && info->stat_visitor);
   return genome_node_accept(gn, info->stat_visitor, NULL, err);
@@ -63,7 +63,7 @@ int gt_stat(int argc, char *argv[], Error *err)
   GenomeNode *gn;
   int has_err, parsed_args;
   Stat_arguments arguments;
-  Stat_info info;
+  StatInfo info;
   error_check(err);
 
   /* option parsing */

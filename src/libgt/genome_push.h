@@ -11,7 +11,7 @@
 
 typedef struct GenomeStream GenomeStream;
 
-Genome_feature* genome_stream_next_feature(GenomeStream *gs);
+GenomeFeature* genome_stream_next_feature(GenomeStream *gs);
 
 genome_stream_push(GenomeStream *gs);
 void genome_stream_free(GenomeStream *gs);

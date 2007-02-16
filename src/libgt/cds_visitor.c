@@ -42,7 +42,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
   CDSVisitor *v = (CDSVisitor*) data;
   const char *sequence;
   unsigned long seqnum;
-  Genome_feature *gf;
+  GenomeFeature *gf;
   Range range;
 
   error_check(err);
@@ -68,7 +68,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
   CDSVisitor *v = (CDSVisitor*) data;
   GenomeNode *cds_feature;
   Str *pr_0, *pr_1, *pr_2;
-  Genome_feature *gf;
+  GenomeFeature *gf;
   unsigned long i;
   Array *orfs;
   Range orf, cds;
@@ -131,7 +131,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
            strand == STRAND_FORWARD ? i++ : i--) {
         if (splicedseq_pos_is_border(v->splicedseq, i)) {
           /*printf("i=%lu\n", i);*/
-          genome_feature_set_end((Genome_feature*) cds_feature,
+          genome_feature_set_end((GenomeFeature*) cds_feature,
                                  splicedseq_map(v->splicedseq, i) + 1);
           genome_node_is_part_of_genome_node(gn, cds_feature);
           if (strand == STRAND_FORWARD)
@@ -153,7 +153,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
         }
       }
       /* set the end of the last CDS feature and store it */
-      genome_feature_set_end((Genome_feature*) cds_feature,
+      genome_feature_set_end((GenomeFeature*) cds_feature,
                              splicedseq_map(v->splicedseq,
                                             strand == STRAND_FORWARD
                                             ? orf.end : orf.start) + 1);
@@ -169,7 +169,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
   return has_err;
 }
 
-static int cds_visitor_genome_feature(GenomeVisitor *gv, Genome_feature *gf,
+static int cds_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                       /*@unused@*/ Log *l, Error *err)
 {
   CDSVisitor *v = cds_visitor_cast(gv);
