@@ -61,11 +61,11 @@ static void show_option_comments(const char *progname, void *data)
   array_free(toolnames);
 }
 
-int gtr_parse(GTR *gtr, int argc, char **argv)
+OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, char **argv, Error *err)
 {
-  int parsed_args;
   OptionParser *op;
   Option *o;
+  error_check(err);
   assert(gtr);
   op = option_parser_new("[option ...] [tool ...] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
@@ -73,9 +73,10 @@ int gtr_parse(GTR *gtr, int argc, char **argv)
   option_parser_set_comment_func(op, show_option_comments, gtr);
   o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false);
   option_parser_add_option(op, o);
-  option_parser_parse(op, &parsed_args, argc, argv, versionfunc);
+  option_parser_parse(op, parsed_args, argc, argv, versionfunc);
   option_parser_free(op);
-  return parsed_args - 1;
+  (*parsed_args)--;
+  return OPTIONPARSER_OK; /* XXX */
 }
 
 void gtr_register_components(GTR *gtr)
@@ -166,11 +167,12 @@ static int run_tests(GTR *gtr)
   return rval;
 }
 
-int gtr_run(GTR *gtr, int argc, char **argv)
+int gtr_run(GTR *gtr, int argc, char **argv, Error *err)
 {
   int (*tool)(int, char**) = NULL;
   char **nargv;
   int rval;
+  error_check(err);
   assert(gtr);
   if (gtr->test) {
     return run_tests(gtr);

@@ -11,13 +11,26 @@
 int main(int argc, char *argv[])
 {
   GTR *gtr;
+  Error *err;
   int rval;
   gtr = gtr_new();
+  err = error_new();
   gtr_register_components(gtr);
-  rval = gtr_parse(gtr, argc, argv);
-  argc -= rval;
-  argv += rval;
-  rval = gtr_run(gtr, argc, argv);
+  switch (gtr_parse(gtr, &rval, argc, argv, err)) {
+    case OPTIONPARSER_OK:
+      argc -= rval;
+      argv += rval;
+      rval = gtr_run(gtr, argc, argv, err);
+      break;
+    case OPTIONPARSER_ERROR:
+      rval = EXIT_FAILURE;
+      break;
+    case OPTIONPARSER_REQUESTS_EXIT:
+      rval = EXIT_SUCCESS;
+  }
+  if (error_is_set(err))
+    fprintf(stderr, "error %s\n", error_get(err));
+  error_free(err);
   gtr_free(gtr);
   return rval;
 }
