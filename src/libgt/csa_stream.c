@@ -22,9 +22,10 @@ struct CSAStream {
 
 int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l, Error *err)
 {
-  CSAStream *cs = csa_stream_cast(gs);
+  CSAStream *cs;
   int has_err;
   error_check(err);
+  cs = csa_stream_cast(gs);
 
   /* we have still nodes in the buffer */
   if (csa_visitor_node_buffer_size(cs->csa_visitor)) {
