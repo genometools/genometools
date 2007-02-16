@@ -155,8 +155,8 @@ static int extract_feature(GenomeNode *gn, void *data, Error *err)
 }
 
 static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
-                                               Genome_feature *gf,
-                                               /*@unused@*/ Log *l, Error *err)
+                                              Genome_feature *gf,
+                                              /*@unused@*/ Log *l, Error *err)
 {
   ExtractFeatVisitor *efv;
   int has_err = 0;
