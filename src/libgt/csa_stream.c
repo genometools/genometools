@@ -45,7 +45,7 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l, Error *err)
     }
   }
 
-  assert(has_err || !*gn );
+  assert(has_err || !*gn);
 
   if (!has_err) {
     csa_visitor_process_cluster(cs->csa_visitor, true, l);
