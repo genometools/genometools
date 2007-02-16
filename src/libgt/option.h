@@ -24,7 +24,7 @@ typedef enum {
 } OPrval;
 
 typedef void (*ShowVersionFunc)(const char *progname);
-typedef void (*ShowCommentFunc)(const char *progname, void *data);
+typedef int  (*ShowCommentFunc)(const char *progname, void *data, Error*);
 
 /* the option parser */
 OptionParser* option_parser_new(const char *synopsis, const char *one_liner);

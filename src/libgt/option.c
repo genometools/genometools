@@ -172,10 +172,13 @@ static void show_long_description(unsigned long initial_space,
 }
 #endif
 
-static void show_help(OptionParser *op, bool show_development_options)
+static int show_help(OptionParser *op, bool show_development_options,
+                     Error *err)
 {
   unsigned long i, max_option_length = 0;
   Option *option;
+  int has_err = 0;
+  error_check(err);
 
   /* determine maximum option length */
   for (i = 0; i < array_size(op->options); i++) {
@@ -235,8 +238,10 @@ static void show_help(OptionParser *op, bool show_development_options)
     }
   }
   if (op->comment_func)
-    op->comment_func(op->progname, op->comment_func_data);
-  printf("\nReport bugs to %s.\n", MAILADDRESS);
+    has_err = op->comment_func(op->progname, op->comment_func_data, err);
+  if (!has_err)
+    printf("\nReport bugs to %s.\n", MAILADDRESS);
+  return has_err;
 }
 
 static void check_missing_argument(int argnum, int argc, Str *option)
@@ -413,10 +418,12 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc, char **argv,
             option_parsed = true;
             break;
           case OPTION_HELP:
-            show_help(op, false);
+            if (show_help(op, false, err))
+              return OPTIONPARSER_ERROR;
             return OPTIONPARSER_REQUESTS_EXIT;
           case OPTION_HELPDEV:
-            show_help(op, true);
+            if (show_help(op, true, err))
+              return OPTIONPARSER_ERROR;
             return OPTIONPARSER_REQUESTS_EXIT;
           case OPTION_OUTPUTFILE:
             check_missing_argument(argnum, argc, option->option_str);

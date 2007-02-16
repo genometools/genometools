@@ -28,11 +28,12 @@ static void save_exercise_name(void *key, void *value, void *data)
   array_add(exercisenames, exercisename);
 }
 
-static void show_exercise_tools(const char *progname, void *data)
+static int show_exercise_tools(const char *progname, void *data, Error *err)
 {
   Hashtable *exercise_tools;
   Array *exercisenames;
   unsigned long i;
+  error_check(err);
   assert(data);
   exercise_tools = (Hashtable*) data;
   exercisenames = array_new(sizeof(const char*));
@@ -45,6 +46,7 @@ static void show_exercise_tools(const char *progname, void *data)
     puts(*(const char**) array_get(exercisenames, i));
   }
   array_free(exercisenames);
+  return 0;
 }
 
 static OPrval parse_options(int *parsed_args, int argc, char **argv,

@@ -41,11 +41,12 @@ static void show_tool(void *key, void *value, void *data)
   array_add(toolnames, toolname);
 }
 
-static void show_option_comments(const char *progname, void *data)
+static int show_option_comments(const char *progname, void *data, Error *err)
 {
   Array *toolnames;
   unsigned long i;
   GTR *gtr;
+  error_check(err);
   assert(data);
   gtr = (GTR*) data;
   toolnames = array_new(sizeof(const char*));
@@ -59,6 +60,7 @@ static void show_option_comments(const char *progname, void *data)
       xputs(*(const char**) array_get(toolnames, i));
   }
   array_free(toolnames);
+  return 0;
 }
 
 OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, char **argv, Error *err)
