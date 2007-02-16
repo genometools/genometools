@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -35,8 +35,8 @@ struct GenomeNode
   unsigned int reference_count;
 };
 
-void         genome_node_class_init(GenomeNodeClass*, size_t, ...);
+void        genome_node_class_init(GenomeNodeClass*, size_t, ...);
 GenomeNode* genome_node_create(const GenomeNodeClass*, const char *filename,
-                                unsigned long line_number);
+                               unsigned long line_number);
 
 #endif
