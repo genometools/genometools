@@ -1,7 +1,7 @@
 changes in version 0.6.8:
 
 - Lua has been imported into the source tree
-- `gt extractfeat` has new a new option -regionmapping
+- `gt extractfeat` has a new option -regionmapping
 - `gt bioseq` can be used with more then one sequence file
-- `gt filter` has new option -seqid
-- `gt filter` has new option -maxgenenum
+- `gt filter` has a new option -seqid
+- `gt filter` has a new option -maxgenenum
