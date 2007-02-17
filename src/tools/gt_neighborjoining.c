@@ -44,7 +44,7 @@ static double exampledistfunc(unsigned long i, unsigned long j, void *data)
 
 int gt_neighborjoining(int argc, char *argv[], Error *err)
 {
-  unsigned int use_hard_coded_example = 0;
+  bool use_hard_coded_example = false;
   Bioseq *bioseq = NULL;
   NeighborJoining *nj;
   int parsed_args;
@@ -58,7 +58,7 @@ int gt_neighborjoining(int argc, char *argv[], Error *err)
   }
 
   if (!strcmp(argv[1], "example"))
-    use_hard_coded_example = 1;
+    use_hard_coded_example = true;
 
   if (use_hard_coded_example)
     nj = neighborjoining_new(5, NULL, exampledistfunc);
