@@ -6,6 +6,19 @@
 
 #include "gt.h"
 
+static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
+{
+  OptionParser *op;
+  OPrval oprval;
+  error_check(err);
+  op = option_parser_new("", "Remove all files in the current directory which "
+                         "are automatically created by gt.");
+  oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
+                                        versionfunc, 0, err);
+  option_parser_free(op);
+  return oprval;
+}
+
 static void remove_pattern_in_current_dir(const char *pattern)
 {
   char **files_to_remove;
@@ -34,14 +47,16 @@ static void remove_pattern_in_current_dir(const char *pattern)
 
 int gt_clean(int argc, char *argv[], Error *err)
 {
+  int parsed_args;
   error_check(err);
 
-  if (argc > 1) {
-    fprintf(stderr, "Usage: %s\n", argv[0]);
-    fprintf(stderr, "Remove all files in the current directory which are "
-                    "automatically created by gt.\n");
-    exit(EXIT_FAILURE); /* XXX */
+  /* option parsing */
+  switch (parse_options(&parsed_args, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
+  assert(parsed_args == 1);
 
   /* remove GT_BIOSEQ_INDEX files */
   remove_pattern_in_current_dir(GT_BIOSEQ_INDEX);
