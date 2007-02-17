@@ -13,7 +13,8 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
   OPrval oprval;
   error_check(err);
   op = option_parser_new("sequence_of_coin_tosses", "Decode "
-                         "sequence_of_coin_tosses and show on stdout.");
+                         "'sequence_of_coin_tosses' and show the result on "
+                         "stdout.");
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 1, err);
   option_parser_free(op);
