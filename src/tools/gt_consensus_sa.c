@@ -24,18 +24,19 @@ static void initSplicedAlignment(SplicedAlignment *sa)
   sa->exons = array_new(sizeof(Range));
 }
 
-static void parse_input_line(SplicedAlignment *alignment, const char *line,
-                             unsigned long line_length)
+static int parse_input_line(SplicedAlignment *alignment, const char *line,
+                            unsigned long line_length, Error *err)
 {
   long leftpos, rightpos;
   unsigned long i = 0;
   Range exon;
+  error_check(err);
 
 #define CHECKLINELENGTH\
-        if (i >= line_length) {                     \
-          fprintf(stderr, "incomplete input line\n" \
-                  "line=%s", line);                 \
-          exit(EXIT_FAILURE);                       \
+        if (i >= line_length) {                    \
+          error_set(err, "incomplete input line\n" \
+                         "line=%s", line);         \
+          return -1;                               \
         }
 
   /* parsing id */
@@ -62,21 +63,25 @@ static void parse_input_line(SplicedAlignment *alignment, const char *line,
   else if (line[i] == REVERSESTRANDCHAR)
     alignment->forward = false;
   else {
-    error("wrong formatted input line, orientation must be %c or %c\n"
-          "line=%s", FORWARDSTRANDCHAR, REVERSESTRANDCHAR, line);
+    error_set(err, "wrong formatted input line, orientation must be %c or %c\n"
+                   "line=%s", FORWARDSTRANDCHAR, REVERSESTRANDCHAR, line);
+    return -1;
   }
   i++;
   CHECKLINELENGTH;
 
-  if (line[i] != DELIMITER)
-    error("incomplete input line\nline=%s", line);
+  if (line[i] != DELIMITER) {
+    error_set(err, "incomplete input line\nline=%s", line);
+    return -1;
+  }
 
-  while (1) {
+  for (;;) {
     if (line[i] == DELIMITER) {
       i++;
       CHECKLINELENGTH;
       if (sscanf(line+i, "%ld-%ld", &leftpos, &rightpos) != 2) {
-        error("incomplete input line\nline=%s", line);
+        error_set(err, "incomplete input line\nline=%s", line);
+        return -1;
       }
       exon.start = leftpos;
       exon.end   = rightpos;
@@ -91,31 +96,38 @@ static void parse_input_line(SplicedAlignment *alignment, const char *line,
 
   /* alignment contains at least one exon */
   assert(array_size(alignment->exons));
+
+  return 0;
 }
 
-static void parse_input_file(Array *spliced_alignments,
-                             const char *file_name)
+static int parse_input_file(Array *spliced_alignments,
+                             const char *file_name, Error *err)
 {
   FILE *input_file;
   SplicedAlignment sa;
+  int has_err = 0;
   Str *line;
+  error_check(err);
 
   line = str_new();
   input_file = xfopen(file_name, "r");
 
-  while (str_read_next_line(line, input_file) != EOF) {
+  while (!has_err && str_read_next_line(line, input_file) != EOF) {
     /* init new spliced alignment */
     initSplicedAlignment(&sa);
     /* parse input line and save result in spliced alignment */
-    parse_input_line(&sa, str_get(line), str_length(line));
-    /* store spliced alignment */
-    array_add(spliced_alignments, sa);
-    /* reset array */
-    str_reset(line);
+    has_err = parse_input_line(&sa, str_get(line), str_length(line), err);
+    if (!has_err) {
+      /* store spliced alignment */
+      array_add(spliced_alignments, sa);
+      /* reset array */
+      str_reset(line);
+    }
   }
 
   xfclose(input_file);
   str_free(line);
+  return has_err;
 }
 
 static Range get_genomic_range(const void *sa)
@@ -186,35 +198,51 @@ static int compare_spliced_alignment(const void *a, const void *b)
   return range_compare_long_first(range_a, range_b);
 }
 
+static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
+{
+  OptionParser *op;
+  OPrval oprval;
+  error_check(err);
+  op = option_parser_new("spliced_alignment_file", "Read file containing "
+                         "spliced alingments, compute consensus spliced "
+                         "alignments,\nand print them to stdout.");
+  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
+                                            versionfunc, 1, 1, err);
+  option_parser_free(op);
+  return oprval;
+}
+
 int gt_consensus_sa(int argc, char *argv[], Error *err)
 {
   Array *spliced_alignments;
   SplicedAlignment *sa;
   unsigned long i;
+  int parsed_args, has_err = 0;
   error_check(err);
 
-  /* check number of arguments */
-  if (argc != 2) {
-    fprintf(stderr, "Usage: %s spliced_alignment_file\n", argv[0]);
-    fprintf(stderr, "Read file containing spliced alingments, compute "
-                    "consensus spliced alignments, \n"
-                    "and print them to stdout.\n");
-    exit(EXIT_FAILURE); /* XXX */
+  /* option parsing */
+  switch (parse_options(&parsed_args, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
+  assert(parsed_args == 1);
 
   /* parse input file and store resuilts in the spliced alignment array */
   spliced_alignments = array_new(sizeof(SplicedAlignment));
-  parse_input_file(spliced_alignments, argv[1]);
+  has_err = parse_input_file(spliced_alignments, argv[1], err);
 
-  /* sort spliced alignments */
-  qsort(array_get_space(spliced_alignments), array_size(spliced_alignments),
-        sizeof(SplicedAlignment), compare_spliced_alignment);
+  if (!has_err) {
+    /* sort spliced alignments */
+    qsort(array_get_space(spliced_alignments), array_size(spliced_alignments),
+          sizeof(SplicedAlignment), compare_spliced_alignment);
 
-  /* compute the consensus spliced alignments */
-  consensus_sa(array_get_space(spliced_alignments),
-               array_size(spliced_alignments), sizeof(SplicedAlignment),
-               get_genomic_range, get_strand, get_exons, process_splice_form,
-               NULL, NULL);
+    /* compute the consensus spliced alignments */
+    consensus_sa(array_get_space(spliced_alignments),
+                 array_size(spliced_alignments), sizeof(SplicedAlignment),
+                 get_genomic_range, get_strand, get_exons, process_splice_form,
+                 NULL, NULL);
+  }
 
   /* free */
   for (i = 0; i < array_size(spliced_alignments); i++) {
@@ -224,5 +252,5 @@ int gt_consensus_sa(int argc, char *argv[], Error *err)
   }
   array_free(spliced_alignments);
 
-  return 0;
+  return has_err;
 }
