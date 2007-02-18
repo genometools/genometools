@@ -15,8 +15,8 @@
 #include <stdlib.h>
 #include "error.h"
 
-/* returns true if pattern matches line, false otherwise */
-bool grep(const char *pattern, const char *line);
+/* sets 'match' to true if pattern matches line, to false otherwise */
+int  grep(bool *match, const char *pattern, const char *line, Error*);
 int  grep_unit_test(void);
 
 #endif

@@ -267,12 +267,17 @@ static unsigned long get_seqnum_with_desc(Bioseq *bs, const char *description)
 {
   unsigned long i, seqnum = UNDEFULONG;
   Str *pattern;
+  int has_err;
+  bool match;
   assert(bs && description);
   pattern = str_new();
   str_append_char(pattern, '^');
   str_append_cstr(pattern, description);
   for (i = 0; i < array_size(bs->descriptions); i++) {
-    if (grep(str_get(pattern), *(char**) array_get(bs->descriptions, i))) {
+    has_err = grep(&match, str_get(pattern),
+                   *(char**) array_get(bs->descriptions, i), NULL);
+    assert(!has_err);
+    if (match) {
       seqnum = i;
       break;
     }

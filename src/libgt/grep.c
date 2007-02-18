@@ -13,39 +13,73 @@
 #include "error.h"
 #include "grep.h"
 
-static void grep_error(int errcode, regex_t *matcher)
+static void grep_error(int errcode, regex_t *matcher, Error *err)
 {
   char sbuf[BUFSIZ], *buf;
   size_t bufsize;
+  error_check(err);
   bufsize = regerror(errcode, matcher, NULL, 0);
   buf = malloc(bufsize);
   (void) regerror(errcode, matcher, buf ? buf : sbuf, buf ? bufsize : BUFSIZ);
-  error("grep(): %s", buf ? buf : sbuf);
+  error_set(err, "grep(): %s", buf ? buf : sbuf);
+  free(buf);
 }
 
-bool grep(const char *pattern, const char *line)
+int grep(bool *match, const char *pattern, const char *line, Error *err)
 {
   regex_t matcher;
-  int rval;
+  int rval, has_err = 0;
+  error_check(err);
   assert(pattern && line);
-  if ((rval = regcomp(&matcher, pattern, REG_EXTENDED | REG_NOSUB)))
-    grep_error(rval, &matcher);
-  rval = regexec(&matcher, line, 0, NULL, 0);
-  if (rval && rval != REG_NOMATCH)
-    grep_error(rval, &matcher);
+  if ((rval = regcomp(&matcher, pattern, REG_EXTENDED | REG_NOSUB))) {
+    grep_error(rval, &matcher, err);
+    has_err = -1;
+  }
+  if (!has_err) {
+    rval = regexec(&matcher, line, 0, NULL, 0);
+    if (rval && rval != REG_NOMATCH) {
+      grep_error(rval, &matcher, err);
+      has_err = -1;
+    }
+  }
   regfree(&matcher);
-  if (rval)
-    return false;
-  return true;
+  if (!has_err) {
+    if (rval)
+      *match = false;
+    else
+      *match = true;
+  }
+  return has_err;
 }
 
 int grep_unit_test(void)
 {
-  ensure( grep("a", "a"));
-  ensure(!grep("b", "a"));
-  ensure( grep("aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA"));
-  ensure(!grep("aba", "wenbapzbpqSayhzzaBaZZqyghaAAahhaA"));
-  ensure( grep("^aba", "abawenbapzbpqSayhzzZZqyghaAAahhaA"));
-  ensure(!grep("^aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA"));
+  int has_err;
+  bool match;
+
+  has_err = grep(&match, "a", "a", NULL);
+  ensure(!has_err);
+  ensure(match);
+
+  has_err = grep(&match, "b", "a", NULL);
+  ensure(!has_err);
+  ensure(!match);
+
+  has_err =  grep(&match, "aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA", NULL);
+  ensure(!has_err);
+  ensure(match);
+
+  has_err = grep(&match, "aba", "wenbapzbpqSayhzzaBaZZqyghaAAahhaA", NULL);
+  ensure(!has_err);
+  ensure(!match);
+
+  has_err = grep(&match, "^aba", "abawenbapzbpqSayhzzZZqyghaAAahhaA", NULL);
+  ensure(!has_err);
+  ensure(match);
+
+  has_err = grep(&match, "^aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA", NULL);
+  ensure(!has_err);
+  ensure(!match);
+
   return EXIT_SUCCESS;
 }
