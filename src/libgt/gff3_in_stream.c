@@ -60,8 +60,11 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
       assert(!is->non_stdin_file_is_open);
       if (array_size(is->files)) {
         if (strcmp(*(char**) array_get(is->files, is->next_file), "-") == 0) {
-          if (is->stdin_argument)
-            error("multiple specification of argument file \"-\"\n");
+          if (is->stdin_argument) {
+            error_set(err, "multiple specification of argument file \"-\"\n");
+            has_err = -1;
+            break;
+          }
           is->fpin = stdin;
           is->stdin_argument = true;
         }
@@ -120,17 +123,20 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
           assert(is->last_node);
           /* a sorted stream can have at most one input file */
           assert(array_size(is->files) == 0 || array_size(is->files) == 1);
-          error("the file %s is not sorted (example: line %lu and %lu)",
-                genome_node_get_filename(is->last_node),
-                genome_node_get_line_number(is->last_node),
-                genome_node_get_line_number(*(GenomeNode**)
+          error_set(err,
+                    "the file %s is not sorted (example: line %lu and %lu)",
+                    genome_node_get_filename(is->last_node),
+                    genome_node_get_line_number(is->last_node),
+                    genome_node_get_line_number(*(GenomeNode**)
                                     queue_get_elem(is->genome_node_buffer, i)));
+          has_err = -1;
+          break;
         }
       }
     }
-    *gn = *(GenomeNode**) queue_get(is->genome_node_buffer);
-    assert(!has_err);
-    return 0;
+    if (!has_err)
+      *gn = *(GenomeNode**) queue_get(is->genome_node_buffer);
+    return has_err;
   }
   *gn = NULL;
   return has_err;
