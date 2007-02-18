@@ -94,5 +94,5 @@ int gt_casino(int argc, char *argv[], Error *err)
   free(emissions);
   free(state_sequence);
 
-  return (EXIT_SUCCESS);
+  return has_err;
 }
