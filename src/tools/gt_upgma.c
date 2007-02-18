@@ -44,7 +44,7 @@ static double exampledistfunc(unsigned long i, unsigned long j, void *data)
 
 int gt_upgma(int argc, char *argv[], Error *err)
 {
-  unsigned int use_hard_coded_example = 0;
+  bool use_hard_coded_example = false;
   int parsed_args;
   Bioseq *bioseq = NULL;
   UPGMA *upgma;
@@ -59,7 +59,7 @@ int gt_upgma(int argc, char *argv[], Error *err)
   assert(parsed_args == 1);
 
   if (!strcmp(argv[1], "example"))
-    use_hard_coded_example = 1;
+    use_hard_coded_example = true;
 
   if (use_hard_coded_example)
     upgma = upgma_new(5, NULL, exampledistfunc);
