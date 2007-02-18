@@ -255,10 +255,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
             continue;                                               \
           }                                                         \
           else {                                                    \
-            splitter_free(splitter);                                \
-            splitter_free(attribute_splitter);                      \
-            str_free(line_buffer);                                  \
-            return -1;                                              \
+            has_err = -1;                                           \
+            break;                                                  \
           }                                                         \
         }
 
@@ -283,10 +281,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         error_set(err, "line %lu in file \"%s\" contains %lu tab (\\t) "
                   "separated fields instead of 9", line_number, filename,
                   splitter_size(splitter));
-        splitter_free(splitter);
-        splitter_free(attribute_splitter);
-        str_free(line_buffer);
-        return -1;
+        has_err = -1;
+        break;
       }
       tokens = splitter_get_tokens(splitter);
       seqname    = tokens[0];
