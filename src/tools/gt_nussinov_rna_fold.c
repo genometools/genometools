@@ -162,24 +162,37 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
   array2dim_free(E);
 }
 
+static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
+{
+  OptionParser *op;
+  OPrval oprval;
+  error_check(err);
+  op = option_parser_new("l_min alpha(G,C) alpha(A,U) alpha(G,U) RNA_sequence",
+                         "Fold the supplied RNA sequence with the Nussinov "
+                         "algorithm.");
+  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
+                                            versionfunc, 5, 5, err);
+  option_parser_free(op);
+  return oprval;
+}
+
 int gt_nussinov_rna_fold(int argc, char *argv[], Error *err)
 {
   unsigned long i, j, rna_length;
   unsigned int l_min;
   char *rna_sequence;
-  int rval;
+  int parsed_args, rval;
   Alpha *dna_alpha;
   ScoreMatrix *energy_function; /* alpha */
   error_check(err);
 
-  /* check if correct arguments are given */
-  if (argc !=6) {
-    fprintf(stderr, "Usage: l_min alpha(G,C) alpha(A,U) alpha(G,U) "
-                    "RNA_sequence\n");
-    fprintf(stderr, "Fold the supplied RNA sequence with the Nussinov "
-                    "algorithm.\n");
-    exit(EXIT_FAILURE); /* XXX */
+  /* option parsing */
+  switch (parse_options(&parsed_args, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
+  assert(parsed_args == 1);
 
   /* set DNA alphabet */
   dna_alpha = alpha_new_dna();
