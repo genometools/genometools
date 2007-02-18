@@ -19,22 +19,35 @@ struct MSA {
   Bioseq *bs;
 };
 
-MSA* msa_new(const char *MSA_filename)
+MSA* msa_new(const char *MSA_filename, Error *err)
 {
   unsigned long i, firstseqlen;
+  int has_err = 0;
   MSA *msa;
+  error_check(err);
   msa = xmalloc(sizeof(MSA));
   msa->bs = bioseq_new(MSA_filename);
   /* make sure that the MSA contains at least two sequences */
-  if (bioseq_number_of_sequences(msa->bs) < 2)
-    error("the MSA file '%s' contains less then 2 sequences", MSA_filename);
-  /* make sure that all sequences have the same length */
-  firstseqlen = bioseq_get_sequence_length(msa->bs, 0);
-  for (i = 1; i < bioseq_number_of_sequences(msa->bs); i++) {
-    if (bioseq_get_sequence_length(msa->bs, i) != firstseqlen) {
-      error("length of sequence %lu in the MSA file '%s' differs from the "
-            "first", i, MSA_filename);
+  if (bioseq_number_of_sequences(msa->bs) < 2) {
+    error_set(err, "the MSA file '%s' contains less then 2 sequences",
+              MSA_filename);
+    has_err = -1;
+  }
+  if (!has_err) {
+    /* make sure that all sequences have the same length */
+    firstseqlen = bioseq_get_sequence_length(msa->bs, 0);
+    for (i = 1; i < bioseq_number_of_sequences(msa->bs); i++) {
+      if (bioseq_get_sequence_length(msa->bs, i) != firstseqlen) {
+        error_set(err, "length of sequence %lu in the MSA file '%s' differs "
+                  "from the first", i, MSA_filename);
+        has_err = -1;
+        break;
+      }
     }
+  }
+  if (has_err) {
+    msa_free(msa);
+    return NULL;
   }
   return msa;
 }
@@ -148,7 +161,7 @@ void msa_show(MSA *msa)
 
 void msa_free(MSA *msa)
 {
-  if (!msa);
+  if (!msa) return;
   bioseq_free(msa->bs);
   free(msa);
 }

@@ -64,8 +64,12 @@ int gt_msaparse(int argc, char *argv[], Error *err)
 
   if (!has_err) {
     /* multiple sequence alignment construction */
-    msa = msa_new(argv[parsed_args]);
+    msa = msa_new(argv[parsed_args], err);
+    if (!msa)
+      has_err = -1;
+  }
 
+  if (!has_err) {
     /* output */
     if (arguments.show)
       msa_show(msa);
