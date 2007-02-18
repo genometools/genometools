@@ -84,22 +84,25 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   /* parse */
   splitter_split(splitter, line, line_length, '\t');
   if (splitter_size(splitter) != 9UL) {
-    error("line %lu in file \"%s\" does not contain 9 tab (\\t) separated "
-          "fields", line_number, filename);
+    error_set(err, "line %lu in file \"%s\" does not contain 9 tab (\\t) "
+              "separated fields", line_number, filename);
+    has_err = -1;
   }
-  tokens = splitter_get_tokens(splitter);
-  seqid      = tokens[0];
-  source     = tokens[1];
-  type       = tokens[2];
-  start      = tokens[3];
-  end        = tokens[4];
-  score      = tokens[5];
-  strand     = tokens[6];
-  phase      = tokens[7];
-  attributes = tokens[8];
+  if (!has_err) {
+    tokens = splitter_get_tokens(splitter);
+    seqid      = tokens[0];
+    source     = tokens[1];
+    type       = tokens[2];
+    start      = tokens[3];
+    end        = tokens[4];
+    score      = tokens[5];
+    strand     = tokens[6];
+    phase      = tokens[7];
+    attributes = tokens[8];
+  }
 
   /* parse the feature type */
-  if (genome_feature_type_get(&gft, type) == -1) {
+  if (!has_err && genome_feature_type_get(&gft, type) == -1) {
     error_set(err, "type \"%s\" on line %lu in file \"%s\" is not a valid one",
               type, line_number, filename);
     has_err = -1;
@@ -219,16 +222,18 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
       parent_gf = hashtable_get(gff3_parser->id_to_genome_node_mapping,
                                 splitter_get_token(parents_splitter, i));
       if (!parent_gf) {
-        error("%s \"%s\" on line %lu in file \"%s\" has not been previously "
-              "defined (via \"%s=\")", PARENT_STRING,
+        error_set(err, "%s \"%s\" on line %lu in file \"%s\" has not been "
+                  "previously defined (via \"%s=\")", PARENT_STRING,
                   splitter_get_token(parents_splitter, i), line_number,
                   filename, ID_STRING);
+        has_err = -1;
       }
-      genome_node_is_part_of_genome_node(parent_gf, genome_feature);
-      out_node_complete = false;
-      is_child = true;
+      else {
+        genome_node_is_part_of_genome_node(parent_gf, genome_feature);
+        out_node_complete = false;
+        is_child = true;
+      }
     }
-    assert(genome_feature);
   }
 
   gn = is_child ? NULL : genome_feature;
@@ -378,9 +383,12 @@ int gff3_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
     (*line_number)++;
 
     if (*line_number == 1) {
-      if (strcmp(line, GFF_VERSION_STRING))
-        error("line %lu in file \"%s\" does not equal \"%s\"", *line_number,
-              filename, GFF_VERSION_STRING);
+      if (strcmp(line, GFF_VERSION_STRING)) {
+        error_set(err, "line %lu in file \"%s\" does not equal \"%s\"",
+                  *line_number, filename, GFF_VERSION_STRING);
+        has_err = -1;
+        break;
+      }
     }
     else if (line_length == 0)
       warning("skipping blank line %lu in file \"%s\"", *line_number, filename);
