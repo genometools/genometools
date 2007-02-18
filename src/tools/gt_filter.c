@@ -68,7 +68,7 @@ int gt_filter(int argc, char *argv[], Error *err)
   GenomeStream *gff3_in_stream, *filter_stream, *gff3_out_stream;
   GenomeNode *gn;
   FilterArgumentss arguments;
-  int parsed_args;
+  int parsed_args, has_err;
 
   /* option parsing */
   arguments.seqid = str_new();
@@ -98,8 +98,10 @@ int gt_filter(int argc, char *argv[], Error *err)
   gff3_out_stream = gff3_out_stream_new(filter_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!genome_stream_next_tree(gff3_out_stream, &gn, NULL, err) && gn)
+  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, NULL, err))
+         && gn) {
     genome_node_rec_free(gn);
+  }
 
   /* free */
   genome_stream_free(gff3_out_stream);
@@ -109,5 +111,5 @@ int gt_filter(int argc, char *argv[], Error *err)
     xfclose(arguments.outfp);
   str_free(arguments.seqid);
 
-  return 0;
+  return has_err;
 }

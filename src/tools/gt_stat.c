@@ -91,7 +91,8 @@ int gt_stat(int argc, char *argv[], Error *err)
     has_err = genome_node_traverse_children(gn, &info, compute_statistics, true,
                                             err);
     genome_node_rec_free(gn);
-    if (has_err) break;
+    if (has_err)
+      break;
   }
 
   /* show statistics */

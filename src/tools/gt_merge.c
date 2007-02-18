@@ -30,7 +30,7 @@ int gt_merge(int argc, char *argv[], Error *err)
   Array *genome_streams;
   GenomeNode *gn;
   unsigned long i;
-  int parsed_args;
+  int parsed_args, has_err;
   FILE *outfp;
 
   /* alloc */
@@ -66,8 +66,10 @@ int gt_merge(int argc, char *argv[], Error *err)
   gff3_out_stream = gff3_out_stream_new(merge_stream, outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!genome_stream_next_tree(gff3_out_stream, &gn, NULL, err) && gn)
+  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, NULL, err))
+         && gn) {
     genome_node_rec_free(gn);
+  }
 
   /* free */
   genome_stream_free(gff3_out_stream);
@@ -78,5 +80,5 @@ int gt_merge(int argc, char *argv[], Error *err)
   if (outfp != stdout)
     xfclose(outfp);
 
-  return 0;
+  return has_err;
 }

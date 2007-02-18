@@ -39,7 +39,7 @@ int gt_cds(int argc, char *argv[], Error *err)
                 *gff3_out_stream;
   GenomeNode *gn;
   CDS_arguments arguments;
-  int parsed_args;
+  int parsed_args, has_err;
   error_check(err);
 
   /* option parsing */
@@ -62,13 +62,15 @@ int gt_cds(int argc, char *argv[], Error *err)
   gff3_out_stream = gff3_out_stream_new(cds_stream, stdout);
 
   /* pull the features through the stream and free them afterwards */
-  while (!genome_stream_next_tree(gff3_out_stream, &gn, NULL, err) && gn)
+  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, NULL, err))
+         && gn) {
     genome_node_rec_free(gn);
+  }
 
   /* free */
   genome_stream_free(gff3_out_stream);
   genome_stream_free(cds_stream);
   genome_stream_free(gff3_in_stream);
 
-  return 0;
+  return has_err;
 }
