@@ -522,21 +522,27 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc, char **argv,
       continue;
 
     /* no matching option found -> error */
-    error("unknown option: %s (-help shows possible options)", argv[argnum]);
+    error_set(err, "unknown option: %s (-help shows possible options)",
+              argv[argnum]);
+    has_err = -1;
+    break;
   }
 
   /* check for minimum number of additional arguments, if necessary */
-  if (min_additional_arguments != UNDEFUINT &&
+  if (!has_err && min_additional_arguments != UNDEFUINT &&
       argc - argnum < min_additional_arguments) {
-    error("missing argument\nUsage: %s %s", op->progname, op->synopsis);
+    error_set(err, "missing argument\nUsage: %s %s", op->progname,
+              op->synopsis);
+    has_err = -1;
   }
 
   /* check for maximal number of additional arguments, if necessary */
-  if (max_additional_arguments != UNDEFUINT &&
+  if (!has_err && max_additional_arguments != UNDEFUINT &&
       argc - argnum > max_additional_arguments) {
-    error("superfluous argument \"%s\"\nUsage: %s %s",
-          argv[argnum + max_additional_arguments],
-          op->progname, op->synopsis);
+    error_set(err, "superfluous argument \"%s\"\nUsage: %s %s",
+              argv[argnum + max_additional_arguments],
+              op->progname, op->synopsis);
+    has_err = -1;
   }
 
   if (!has_err)
