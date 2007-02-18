@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <gt.h>
+#include "gt.h"
 
 static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
 {

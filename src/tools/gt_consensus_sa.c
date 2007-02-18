@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <gt.h>
+#include "gt.h"
 
 #define DELIMITER         ','
 #define FORWARDSTRANDCHAR '+'
