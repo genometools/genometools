@@ -6,6 +6,22 @@
 
 #include "gt.h"
 
+static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
+{
+  OptionParser *op;
+  OPrval oprval;
+  error_check(err);
+  op = option_parser_new("sequence_file|example", "Compute and show UPGMA tree "
+                         "for the sequences in sequence file (using the unit\n"
+                         "cost edit distance as distance function). If "
+                         "'example' is given as\nsequence_file, a builtin "
+                         "example is used.");
+  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
+                                            versionfunc, 1, 1, err);
+  option_parser_free(op);
+  return oprval;
+}
+
 static double distfunc(unsigned long i, unsigned long j, void *data)
 {
   Bioseq *bioseq= (Bioseq*) data;
@@ -26,21 +42,21 @@ static double exampledistfunc(unsigned long i, unsigned long j, void *data)
   return exampledistances[i][j];
 }
 
-int gt_upgma(int argc, char *argv[])
+int gt_upgma(int argc, char *argv[], Error *err)
 {
   unsigned int use_hard_coded_example = 0;
+  int parsed_args;
   Bioseq *bioseq = NULL;
   UPGMA *upgma;
+  error_check(err);
 
-  if (argc != 2) {
-    fprintf(stderr, "Usage: %s sequence_file|example\n", argv[0]);
-    fprintf(stderr, "Compute and show UPGMA tree for the sequences in sequence "
-            "file (using the unit\n"
-            "cost edit distance as distance function). If 'example' is given "
-            "as\n"
-            "sequence_file, a builtin example is used.\n");
-    exit(EXIT_FAILURE); /* XXX */
+  /* option parsing */
+  switch (parse_options(&parsed_args, argc, argv, err)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR: return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
+  assert(parsed_args == 1);
 
   if (!strcmp(argv[1], "example"))
     use_hard_coded_example = 1;
@@ -57,5 +73,5 @@ int gt_upgma(int argc, char *argv[])
   bioseq_free(bioseq);
   upgma_free(upgma);
 
-  return EXIT_SUCCESS;
+  return 0;
 }
