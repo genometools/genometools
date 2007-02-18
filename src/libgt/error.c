@@ -60,15 +60,6 @@ const char* error_get(const Error *e)
   return e->error_string;
 }
 
-void error_abort(const Error *e)
-{
-  assert(e);
-  if (e->error_is_set) {
-    fprintf(stderr, "error: %s\n", e->error_string);
-    exit(EXIT_FAILURE);
-  }
-}
-
 void error_free(Error *e)
 {
   if (!e) return;

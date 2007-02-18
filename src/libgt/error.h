@@ -28,8 +28,6 @@ bool        error_is_set(const Error*);
 void        error_unset(Error*);
 /* get the error string (the error must be set) */
 const char* error_get(const Error*);
-/* aborts and shows error string, if the error is set */
-void        error_abort(const Error*);
 void        error_free(Error*);
 
 #endif
