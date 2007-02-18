@@ -252,18 +252,19 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   return has_err;
 }
 
-static void parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
-                                 char *line, size_t line_length,
-                                 const char *filename,
-                                 unsigned long line_number,
-                                 bool *break_loop)
+static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
+                                char *line, size_t line_length,
+                                const char *filename,
+                                unsigned long line_number,
+                                bool *break_loop, Error *err)
 {
   char *tmpline, *tmplineend, *seqid = NULL;
   GenomeNode *gn;
   Str *seqid_str;
   Range range;
-  int rval;
+  int rval, has_err = 0;
 
+  error_check(err);
   assert(line[0] == '#');
 
   if (line_length == 1 || line[1] != '#') {
@@ -282,72 +283,88 @@ static void parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     while (tmpline[0] == ' ')
       tmpline++;
     if (tmpline > tmplineend) {
-      error("missing sequence region on line %lu in file \"%s\"", line_number,
-            filename);
+      error_set(err, "missing sequence region on line %lu in file \"%s\"",
+                line_number, filename);
+      has_err = -1;
     }
-    seqid = tmpline; /* save seqid */
-    /* skip non-blanks */
-    while (tmpline < tmplineend && !(tmpline[0] == ' '))
-      tmpline++;
-    /* terminate seqid */
-    *tmpline++ = '\0';
-    /* skip blanks */
-    while (tmpline < tmplineend && tmpline[0] == ' ')
-      tmpline++;
-    if (tmpline > tmplineend) {
-      error("missing sequence region start on line %lu in file \"%s\"",
-            line_number, filename);
+    if (!has_err) {
+      seqid = tmpline; /* save seqid */
+      /* skip non-blanks */
+      while (tmpline < tmplineend && !(tmpline[0] == ' '))
+        tmpline++;
+      /* terminate seqid */
+      *tmpline++ = '\0';
+      /* skip blanks */
+      while (tmpline < tmplineend && tmpline[0] == ' ')
+        tmpline++;
+      if (tmpline > tmplineend) {
+        error_set(err, "missing sequence region start on line %lu in file "
+                  "\"%s\"", line_number, filename);
+        has_err = -1;
+      }
     }
-    if ((rval = sscanf(tmpline, "%lu", &range.start)) != 1) {
-      error("could not parse region start on line %lu in file \"%s\"",
-            line_number, filename);
+    if (!has_err) {
+      if ((rval = sscanf(tmpline, "%lu", &range.start)) != 1) {
+        error_set(err, "could not parse region start on line %lu in file "
+                  "\"%s\"", line_number, filename);
+        has_err = -1;
+      }
     }
-
-    /* skip non-blanks */
-    while (tmpline <= tmplineend && !(tmpline[0] == ' '))
-      tmpline++;
-    /* skip blanks */
-    while (tmpline < tmplineend && tmpline[0] == ' ')
-      tmpline++;
-    if (tmpline > tmplineend) {
-      error("missing sequence region end on line %lu in file \"%s\"",
-            line_number, filename);
+    if (!has_err) {
+      /* skip non-blanks */
+      while (tmpline <= tmplineend && !(tmpline[0] == ' '))
+        tmpline++;
+      /* skip blanks */
+      while (tmpline < tmplineend && tmpline[0] == ' ')
+        tmpline++;
+      if (tmpline > tmplineend) {
+        error_set(err, "missing sequence region end on line %lu in file \"%s\"",
+                  line_number, filename);
+        has_err = -1;
+      }
     }
-
-    if ((rval = sscanf(tmpline, "%lu", &range.end)) != 1) {
-      error("could not parse region end on line %lu in file \"%s\"",
-            line_number, filename);
+    if (!has_err && (rval = sscanf(tmpline, "%lu", &range.end)) != 1) {
+      error_set(err, "could not parse region end on line %lu in file \"%s\"",
+                line_number, filename);
+      has_err = -1;
     }
-
-    if (range.start > range.end) {
-      error("region start %lu is larger then region end %lu on line %lu in "
-            "file \"%s\"", range.start, range.end, line_number, filename);
+    if (!has_err && (range.start > range.end)) {
+      error_set(err, "region start %lu is larger then region end %lu on line "
+                "%lu in file \"%s\"", range.start, range.end, line_number,
+                filename);
+      has_err = -1;
     }
-
-    if (gff3_parser->offset != UNDEFLONG)
-      range = range_offset(range, gff3_parser->offset, line_number);
-
-    /* now we can create a sequence region node */
-    assert(seqid);
-    seqid_str = hashtable_get(gff3_parser->seqid_to_str_mapping, seqid);
-    if (seqid_str) {
-      error("the sequence region \"%s\" on line %lu in file \"%s\" is already "
-            "defined", str_get(seqid_str), line_number, filename);
+    if (!has_err) {
+      if (gff3_parser->offset != UNDEFLONG)
+        range = range_offset(range, gff3_parser->offset, line_number);
+      /* now we can create a sequence region node */
+      assert(seqid);
+      seqid_str = hashtable_get(gff3_parser->seqid_to_str_mapping, seqid);
+      if (seqid_str) {
+        error_set(err, "the sequence region \"%s\" on line %lu in file "
+                  "\"%s\" is already defined", str_get(seqid_str), line_number,
+                  filename);
+        has_err = -1;
+      }
+      else {
+        seqid_str = str_new_cstr(seqid);
+        hashtable_add(gff3_parser->seqid_to_str_mapping, str_get(seqid_str),
+                      seqid_str);
+      }
     }
-    else {
-      seqid_str = str_new_cstr(seqid);
-      hashtable_add(gff3_parser->seqid_to_str_mapping, str_get(seqid_str),
-                    seqid_str);
+    if (!has_err) {
+      assert(seqid_str);
+      gn = sequence_region_new(seqid_str, range, filename, line_number);
+                               queue_add(genome_nodes, gn);
     }
-    assert(seqid_str);
-    gn = sequence_region_new(seqid_str, range, filename, line_number);
-                             queue_add(genome_nodes, gn);
     *break_loop = true;
   }
   else if (strcmp(line, GFF_TERMINATOR) == 0) { /* terminator */
     if (!queue_size(genome_nodes)) {
-      error("terminator tag \"%s\" given on line %lu in file \"%s\" before a "
-            "feature was defined", GFF_TERMINATOR, line_number, filename);
+      error_set(err, "terminator tag \"%s\" given on line %lu in file \"%s\" "
+                "before a feature was defined", GFF_TERMINATOR, line_number,
+                filename);
+      has_err = -1;
     }
     *break_loop = true;
   }
@@ -355,6 +372,7 @@ static void parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     warning("skipping unknown meta line %lu in file \"%s\": %s", line_number,
             filename, line);
   }
+  return has_err;
 }
 
 int gff3_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
@@ -393,9 +411,10 @@ int gff3_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
     else if (line_length == 0)
       warning("skipping blank line %lu in file \"%s\"", *line_number, filename);
     else if (line[0] == '#') {
-      parse_meta_gff3_line(gff3_parser, genome_nodes, line, line_length,
-                           filename, *line_number, &break_loop);
-      if (break_loop)
+      has_err = parse_meta_gff3_line(gff3_parser, genome_nodes, line,
+                                     line_length, filename, *line_number,
+                                     &break_loop, err);
+      if (has_err || break_loop)
         break;
     }
     else {
