@@ -77,7 +77,7 @@ static OPrval parse_options(int *parsed_args, ExtractFeatArguments *arguments,
 
 int gt_extractfeat(int argc, char *argv[], Error *err)
 {
-  GenomeStream *gff3_in_stream, *extractfeat_stream;
+  GenomeStream *gff3_in_stream = NULL, *extractfeat_stream = NULL;
   GenomeNode *gn;
   GenomeFeatureType type;
   ExtractFeatArguments arguments;
@@ -105,30 +105,37 @@ int gt_extractfeat(int argc, char *argv[], Error *err)
   }
 
   /* determine type and make sure it is a valid one */
-  if (genome_feature_type_get(&type, str_get(arguments.type)) == -1)
-    error("\"%s\" is not a valid feature type", str_get(arguments.type));
+  if (genome_feature_type_get(&type, str_get(arguments.type)) == -1) {
+    error_set(err, "\"%s\" is not a valid feature type",
+              str_get(arguments.type));
+    has_err = -1;
+  }
 
-  /* create gff3 input stream */
-  assert(parsed_args < argc);
-  gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
-                                             arguments.verbose);
+  if (!has_err) {
+    /* create gff3 input stream */
+    assert(parsed_args < argc);
+    gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
+                                               arguments.verbose);
 
-  /* create extract feature stream */
-  extractfeat_stream = extractfeat_stream_new(gff3_in_stream,
-                                              type, arguments.join,
-                                              arguments.translate);
+    /* create extract feature stream */
+    extractfeat_stream = extractfeat_stream_new(gff3_in_stream,
+                                                type, arguments.join,
+                                                arguments.translate);
 
-  /* set sequence source */
-  assert(str_get(arguments.seqfile) || str_get(arguments.regionmapping));
-  assert(!(str_get(arguments.seqfile) && str_get(arguments.regionmapping)));
-  if (str_get(arguments.seqfile))
-    extractfeat_stream_use_sequence_file(extractfeat_stream, arguments.seqfile);
-  else {
-    regionmapping = regionmapping_new(arguments.regionmapping, err);
-    if (!regionmapping)
-      has_err = -1;
-    else
-      extractfeat_stream_use_region_mapping(extractfeat_stream, regionmapping);
+    /* set sequence source */
+    assert(str_get(arguments.seqfile) || str_get(arguments.regionmapping));
+    assert(!(str_get(arguments.seqfile) && str_get(arguments.regionmapping)));
+    if (str_get(arguments.seqfile))
+      extractfeat_stream_use_sequence_file(extractfeat_stream,
+                                           arguments.seqfile);
+    else {
+      regionmapping = regionmapping_new(arguments.regionmapping, err);
+      if (!regionmapping)
+        has_err = -1;
+      else
+        extractfeat_stream_use_region_mapping(extractfeat_stream,
+                                              regionmapping);
+    }
   }
 
   /* pull the features through the stream and free them afterwards */
