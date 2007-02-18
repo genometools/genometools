@@ -71,7 +71,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
        *phase, *attributes, *token, *tmp_token, **tokens;
   bool out_node_complete = true, is_child = false;
   unsigned long i;
-  int has_err;
+  int has_err = 0;
 
   error_check(err);
 
@@ -100,12 +100,14 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
 
   /* parse the feature type */
   if (genome_feature_type_get(&gft, type) == -1) {
-    error("type \"%s\" on line %lu in file \"%s\" is not a valid one", type,
-          line_number, filename);
+    error_set(err, "type \"%s\" on line %lu in file \"%s\" is not a valid one",
+              type, line_number, filename);
+    has_err = -1;
   }
 
   /* parse the range */
-  has_err = parse_range(&range, start, end, line_number, filename, err);
+  if (!has_err)
+    has_err = parse_range(&range, start, end, line_number, filename, err);
 
   if (!has_err && gff3_parser->offset != UNDEFLONG)
     range = range_offset(range, gff3_parser->offset, line_number);
@@ -129,14 +131,18 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
       token = splitter_get_token(attribute_splitter, i);
       if (strncmp(token, ID_STRING, strlen(ID_STRING)) == 0) {
         if (id) {
-          error("more then one %s token on line %lu in file \"%s\"", ID_STRING,
-                line_number, filename);
+          error_set(err, "more then one %s token on line %lu in file \"%s\"",
+                    ID_STRING, line_number, filename);
+          has_err = -1;
+          break;
         }
         splitter_reset(tmp_splitter);
         splitter_split(tmp_splitter, token, strlen(token), '=');
         if (splitter_size(tmp_splitter) != 2) {
-          error("token \"%s\" on line %lu in file \"%s\" does not contain "
-                "exactly one '='", token, line_number, filename);
+          error_set(err, "token \"%s\" on line %lu in file \"%s\" does not "
+                    "contain exactly one '='", token, line_number, filename);
+          has_err = -1;
+          break;
         }
         id = xstrdup(splitter_get_token(tmp_splitter, 1));
       }
@@ -144,8 +150,10 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
         splitter_reset(tmp_splitter);
         splitter_split(tmp_splitter, token, strlen(token), '=');
         if (splitter_size(tmp_splitter) != 2) {
-          error("token \"%s\" on line %lu in file \"%s\" does not contain "
-                "exactly one '='", token, line_number, filename);
+          error_set(err, "token \"%s\" on line %lu in file \"%s\" does not "
+                    "contain exactly one '='", token, line_number, filename);
+          has_err = -1;
+          break;
         }
         tmp_token = splitter_get_token(tmp_splitter, 1);
         splitter_split(parents_splitter, tmp_token, strlen(tmp_token), ',');
@@ -165,12 +173,13 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   if (!has_err) {
     seqid_str = hashtable_get(gff3_parser->seqid_to_str_mapping, seqid);
     if (!seqid_str) {
-      error("seqid \"%s\" on line %lu in file \"%s\" has not been previously "
-            "introduced with a \"%s\" line", seqid, line_number, filename,
-            GFF_SEQUENCE_REGION);
+      error_set(err, "seqid \"%s\" on line %lu in file \"%s\" has not been "
+                "previously introduced with a \"%s\" line", seqid, line_number,
+                filename, GFF_SEQUENCE_REGION);
+      has_err = -1;
     }
-    assert(seqid_str);
-    genome_node_set_seqid(genome_feature, seqid_str);
+    else
+      genome_node_set_seqid(genome_feature, seqid_str);
   }
 
   /* set source */
@@ -194,12 +203,15 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   if (!has_err && id) {
     if ((gn = hashtable_get(gff3_parser->id_to_genome_node_mapping, id))) {
       /* this id has been used already -> raise error */
-      error("the %s \"%s\" on line %lu in file \"%s\" has been used "
-            "already for the feature defined on line %lu", ID_STRING, id,
+      error_set(err, "the %s \"%s\" on line %lu in file \"%s\" has been used "
+                "already for the feature defined on line %lu", ID_STRING, id,
                 line_number, filename, genome_node_get_line_number(gn));
+      has_err = -1;
     }
-    out_node_complete = false;
-    hashtable_add(gff3_parser->id_to_genome_node_mapping, id, genome_feature);
+    else {
+      out_node_complete = false;
+      hashtable_add(gff3_parser->id_to_genome_node_mapping, id, genome_feature);
+    }
   }
 
   if (!has_err) {
