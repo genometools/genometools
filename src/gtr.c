@@ -31,27 +31,31 @@ GTR* gtr_new(void)
   return xcalloc(1, sizeof(GTR));
 }
 
-static void show_tool(void *key, void *value, void *data)
+static int show_tool(void *key, void *value, void *data, Error *err)
 {
   const char *toolname;
   Array *toolnames;
+  error_check(err);
   assert(key && value && data);
   toolname = (const char*) key;
   toolnames = (Array*) data;
   array_add(toolnames, toolname);
+  return 0;
 }
 
 static int show_option_comments(const char *progname, void *data, Error *err)
 {
   Array *toolnames;
   unsigned long i;
+  int has_err;
   GTR *gtr;
   error_check(err);
   assert(data);
   gtr = (GTR*) data;
   toolnames = array_new(sizeof(const char*));
   if (gtr->tools) {
-    hashtable_foreach(gtr->tools, show_tool, toolnames);
+    has_err = hashtable_foreach(gtr->tools, show_tool, toolnames, err);
+    assert(!has_err); /* cannot happen, show_tool() is sane */
     printf("\nTools:\n\n");
     assert(array_size(toolnames));
     qsort(array_get_space(toolnames), array_size(toolnames),
@@ -121,11 +125,12 @@ void gtr_register_components(GTR *gtr)
   hashtable_add(gtr->unit_tests, "tokenizer class", tokenizer_unit_test);
 }
 
-void run_test(void *key, void *value, void *data)
+int run_test(void *key, void *value, void *data, Error *err)
 {
   const char *testname;
   int (*test)(void);
   int rval, *rvalp;
+  error_check(err);
   assert(key && value && data);
   testname = (const char*) key;
   test = value;
@@ -144,11 +149,12 @@ void run_test(void *key, void *value, void *data)
     default: assert(0);
   }
   xfflush(stdout);
+  return 0;
 }
 
 static int run_tests(GTR *gtr)
 {
-  int rval = EXIT_SUCCESS;
+  int has_err, rval = EXIT_SUCCESS;
   assert(gtr);
 
   /* The following type assumptions are made in the GenomeTools library. */
@@ -165,7 +171,8 @@ static int run_tests(GTR *gtr)
   ensure(sizeof(unsigned long long) == 8);
 
   if (gtr->unit_tests) {
-    hashtable_foreach(gtr->unit_tests, run_test, &rval);
+    has_err = hashtable_foreach(gtr->unit_tests, run_test, &rval, NULL);
+    assert(!has_err); /* cannot happen, run_test() is sane */
   }
   return rval;
 }

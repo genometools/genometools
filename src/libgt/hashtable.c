@@ -21,6 +21,8 @@ struct Hashtable
 typedef struct {
   Hashiteratorfunc iterfunc;
   void *data;
+  Error *err;
+  int has_err;
 } St_iterfunc_info;
 
 Hashtable* hashtable_new(Hash_type hash_type, Hashkeyfreefunc key_free,
@@ -78,17 +80,24 @@ static int st_iterfunc(void *key, void *value, void *data)
 {
   St_iterfunc_info *info = (St_iterfunc_info*) data;
   assert(info->iterfunc);
-  info->iterfunc(key, value, info->data);
+  info->has_err = info->iterfunc(key, value, info->data, info->err);
+  if (info->has_err)
+    return ST_STOP;
   return ST_CONTINUE;
 }
 
-void hashtable_foreach(Hashtable *ht, Hashiteratorfunc iterfunc, void *data)
+int hashtable_foreach(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
+                      Error *err)
 {
   St_iterfunc_info info;
+  error_check(err);
   assert(ht && iterfunc);
   info.iterfunc = iterfunc;
   info.data = data;
+  info.err = err;
+  info.has_err = 0;
   (void) st_foreach(ht->st_table, st_iterfunc, (st_data_t) &info);
+  return info.has_err;
 }
 
 static int remove_key_value_pair(void *key, void *value, void *data)

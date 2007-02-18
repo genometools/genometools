@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -16,13 +16,13 @@ typedef enum {
 
 typedef void (*Hashkeyfreefunc)(void*);
 typedef void (*Hashvaluefreefunc)(void*);
-typedef void (*Hashiteratorfunc)(void *key, void *value, void *data);
+typedef int  (*Hashiteratorfunc)(void *key, void *value, void *data, Error*);
 
 Hashtable* hashtable_new(Hash_type, Hashkeyfreefunc, Hashvaluefreefunc);
 void*      hashtable_get(Hashtable*, const void*);
 void       hashtable_add(Hashtable*, void*, void*);
 void       hashtable_remove(Hashtable*, void*);
-void       hashtable_foreach(Hashtable*, Hashiteratorfunc, void*);
+int        hashtable_foreach(Hashtable*, Hashiteratorfunc, void*, Error*);
 void       hashtable_reset(Hashtable*);
 int        hashtable_unit_test(void);
 void       hashtable_free(Hashtable*);

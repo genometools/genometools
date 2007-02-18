@@ -137,11 +137,13 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   return evaluator;
 }
 
-static void set_actuals_and_sort_them(void *key, void *value, void *data)
+static int set_actuals_and_sort_them(void *key, void *value, void *data,
+                                     Error *err)
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *s = (Slot*) value;
 
+  error_check(err);
   assert(key && value && data);
 
   /* set actual genes */
@@ -219,6 +221,8 @@ static void set_actuals_and_sort_them(void *key, void *value, void *data)
   s->overlapped_mRNAs_reverse = array_size(s->mRNAs_reverse)
                                 ? bittab_new(array_size(s->mRNAs_reverse))
                                 : NULL;
+
+  return 0;
 }
 
 static int process_real_feature(GenomeNode *gn, void *data, Error *err)
@@ -689,10 +693,11 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Error *err)
   return 0;
 }
 
-void determine_missing_features(void *key, void *value, void *data)
+int determine_missing_features(void *key, void *value, void *data, Error *err)
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *slot = (Slot*) value;
+  error_check(err);
   assert(key && value && data);
   if (slot->overlapped_genes_forward) {
     se->missing_genes += bittab_size(slot->overlapped_genes_forward) -
@@ -710,6 +715,7 @@ void determine_missing_features(void *key, void *value, void *data)
     se->missing_mRNAs += bittab_size(slot->overlapped_mRNAs_reverse) -
                          bittab_count_set_bits(slot->overlapped_mRNAs_reverse);
   }
+  return 0;
 }
 
 int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
@@ -770,8 +776,10 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   }
 
   /* set the actuals and sort them */
-  if (!has_err)
-    hashtable_foreach(se->real_features, set_actuals_and_sort_them, se);
+  if (!has_err) {
+    has_err = hashtable_foreach(se->real_features, set_actuals_and_sort_them,
+                                se, err);
+  }
 
   /* process the prediction stream */
   if (!has_err) {
@@ -802,8 +810,10 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   }
 
   /* determine the missing mRNAs */
-  if (!has_err)
-    hashtable_foreach(se->real_features, determine_missing_features, se);
+  if (!has_err) {
+    has_err = hashtable_foreach(se->real_features, determine_missing_features,
+                                se, err);
+  }
 
   return has_err;
 }

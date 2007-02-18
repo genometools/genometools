@@ -18,14 +18,16 @@
 #include "gt_swalign.h"
 #include "gt_upgma.h"
 
-static void save_exercise_name(void *key, void *value, void *data)
+static int save_exercise_name(void *key, void *value, void *data, Error *err)
 {
   const char *exercisename;
   Array *exercisenames;
+  error_check(err);
   assert(key && value && data);
   exercisename = (const char*) key;
   exercisenames = (Array*) data;
   array_add(exercisenames, exercisename);
+  return 0;
 }
 
 static int show_exercise_tools(const char *progname, void *data, Error *err)
@@ -33,11 +35,14 @@ static int show_exercise_tools(const char *progname, void *data, Error *err)
   Hashtable *exercise_tools;
   Array *exercisenames;
   unsigned long i;
+  int has_err;
   error_check(err);
   assert(data);
   exercise_tools = (Hashtable*) data;
   exercisenames = array_new(sizeof(const char*));
-  hashtable_foreach(exercise_tools, save_exercise_name, exercisenames);
+  has_err = hashtable_foreach(exercise_tools, save_exercise_name, exercisenames,
+                              err);
+  assert(!has_err); /* cannot happen, save_exercise_name() is sane */
   printf("\nExercise tools:\n\n");
   assert(array_size(exercisenames));
   qsort(array_get_space(exercisenames), array_size(exercisenames),
