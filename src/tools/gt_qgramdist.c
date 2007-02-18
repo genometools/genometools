@@ -26,10 +26,10 @@ static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
 
 int gt_qgramdist(int argc, char *argv[], Error *err)
 {
-  Bioseq *bioseq_1, *bioseq_2;
+  Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
   unsigned long i, j, dist;
   Seq *seq_1, *seq_2;
-  int parsed_args;
+  int parsed_args, has_err = 0;
   unsigned int q;
   error_check(err);
 
@@ -42,28 +42,34 @@ int gt_qgramdist(int argc, char *argv[], Error *err)
   assert(parsed_args+1 < argc);
 
   /* make sure seq_file_1 exists */
-  if (!file_exists(argv[parsed_args]))
-    error("seq_file_1 \"%s\" does not exist", argv[parsed_args]);
+  if (!file_exists(argv[parsed_args])) {
+    error_set(err, "seq_file_1 \"%s\" does not exist", argv[parsed_args]);
+    has_err = -1;
+  }
 
   /* make sure seq_file_2 exists */
-  if (!file_exists(argv[parsed_args+1]))
-    error("seq_file_2 \"%s\" does not exist", argv[parsed_args+1]);
+  if (!has_err && !file_exists(argv[parsed_args+1])) {
+    error_set(err, "seq_file_2 \"%s\" does not exist", argv[parsed_args+1]);
+    has_err = -1;
+  }
 
   /* init */
-  bioseq_1 = bioseq_new(argv[parsed_args]);
-  bioseq_2 = bioseq_new(argv[parsed_args+1]);
+  if (!has_err) {
+    bioseq_1 = bioseq_new(argv[parsed_args]);
+    bioseq_2 = bioseq_new(argv[parsed_args+1]);
 
-  /* compute q-gram distance for all sequence combinations */
-  for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
-    for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
-      seq_1 = bioseq_get_seq(bioseq_1, i);
-      seq_2 = bioseq_get_seq(bioseq_2, j);
-      dist = qgramdist(seq_1, seq_2, q);
-      printf("qgramdist_%u_(", q);
-      cstr_show(seq_get_orig(seq_1), seq_length(seq_1), stdout);
-      xputchar(',');
-      cstr_show(seq_get_orig(seq_2), seq_length(seq_2), stdout);
-      printf(")=%lu\n", dist);
+    /* compute q-gram distance for all sequence combinations */
+    for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
+      for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
+        seq_1 = bioseq_get_seq(bioseq_1, i);
+        seq_2 = bioseq_get_seq(bioseq_2, j);
+        dist = qgramdist(seq_1, seq_2, q);
+        printf("qgramdist_%u_(", q);
+        cstr_show(seq_get_orig(seq_1), seq_length(seq_1), stdout);
+        xputchar(',');
+        cstr_show(seq_get_orig(seq_2), seq_length(seq_2), stdout);
+        printf(")=%lu\n", dist);
+      }
     }
   }
 
@@ -71,5 +77,5 @@ int gt_qgramdist(int argc, char *argv[], Error *err)
   bioseq_free(bioseq_2);
   bioseq_free(bioseq_1);
 
-  return 0;
+  return has_err;
 }
