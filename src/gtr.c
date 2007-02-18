@@ -173,23 +173,31 @@ static int run_tests(GTR *gtr)
 int gtr_run(GTR *gtr, int argc, char **argv, Error *err)
 {
   int (*tool)(int, char**, Error*) = NULL;
-  char **nargv;
-  int rval;
+  char **nargv = NULL;
+  int has_err = 0;
   error_check(err);
   assert(gtr);
   if (gtr->test) {
     return run_tests(gtr);
   }
   assert(argc);
-  if (argc == 1)
-    error("no tool specified; option -help lists possible tools");
-  if (!gtr->tools || !(tool = hashtable_get(gtr->tools, argv[1])))
-    error("tool '%s' not found; option -help lists possible tools", argv[1]);
-  assert(argc);
-  nargv = cstr_array_prefix_first(argv+1, argv[0]);
-  rval = tool(argc-1, nargv, err);
+  if (argc == 1) {
+    error_set(err, "no tool specified; option -help lists possible tools");
+    has_err = -1;
+  }
+  if (!has_err) {
+    if (!gtr->tools || !(tool = hashtable_get(gtr->tools, argv[1]))) {
+      error_set(err, "tool '%s' not found; option -help lists possible tools",
+                argv[1]);
+      has_err = -1;
+    }
+  }
+  if (!has_err) {
+    nargv = cstr_array_prefix_first(argv+1, argv[0]);
+    has_err = tool(argc-1, nargv, err);
+  }
   cstr_array_free(nargv);
-  if (rval)
+  if (has_err)
     return EXIT_FAILURE;
   return EXIT_SUCCESS;
 }
