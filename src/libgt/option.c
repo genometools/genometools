@@ -244,10 +244,14 @@ static int show_help(OptionParser *op, bool show_development_options,
   return has_err;
 }
 
-static void check_missing_argument(int argnum, int argc, Str *option)
+static int check_missing_argument(int argnum, int argc, Str *option, Error *err)
 {
-  if (argnum + 1 >= argc)
-    error("missing argument to option \"-%s\"", str_get(option));
+  error_check(err);
+  if (argnum + 1 >= argc) {
+    error_set(err, "missing argument to option \"-%s\"", str_get(option));
+    return -1;
+  }
+  return 0;
 }
 
 static int check_mandatory_options(OptionParser *op, Error *err)
@@ -411,117 +415,179 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc, char **argv,
 
       if (strcmp(argv[argnum]+1, str_get(option->option_str)) == 0) {
         /* make sure option has not been used before */
-        if (option->is_set)
-          error("option \"%s\" already set", str_get(option->option_str));
-        option->is_set = true;
-        switch (option->option_type) {
-          case OPTION_BOOL:
-            /* XXX: the next argument (if any) is an option
-               (boolean parsing not implemented yet) */
-            /* assert(!argv[argnum+1] || argv[argnum+1][0] == '-'); */
-            *(bool*) option->value = true;
-            option_parsed = true;
-            break;
-          case OPTION_DOUBLE:
-            check_missing_argument(argnum, argc, option->option_str);
-            argnum++;
-            if (sscanf(argv[argnum], "%lf", &double_value) != 1) {
-              error("argument to option \"-%s\" must be floating-point number",
+        if (option->is_set) {
+          error_set(err, "option \"%s\" already set",
                     str_get(option->option_str));
-            }
-            *(double*) option->value = double_value;
-            option_parsed = true;
-            break;
-          case OPTION_HELP:
-            if (show_help(op, false, err))
-              return OPTIONPARSER_ERROR;
-            return OPTIONPARSER_REQUESTS_EXIT;
-          case OPTION_HELPDEV:
-            if (show_help(op, true, err))
-              return OPTIONPARSER_ERROR;
-            return OPTIONPARSER_REQUESTS_EXIT;
-          case OPTION_OUTPUTFILE:
-            check_missing_argument(argnum, argc, option->option_str);
-            argnum++;
-            *(FILE**) option->value = xfopen(argv[argnum] , "w");
-            option_parsed = true;
-            break;
-          case OPTION_INT:
-            check_missing_argument(argnum, argc, option->option_str);
-            argnum++;
-            if (sscanf(argv[argnum], "%d", &int_value) != 1) {
-              error("argument to option \"-%s\" must be an integer",
-                    str_get(option->option_str));
-            }
-            /* minimum value check */
-            if (option->min_value_set && int_value < option->min_value.i) {
-              error("argument to option \"-%s\" must be an integer >= %d",
-                    str_get(option->option_str), option->min_value.i);
-            }
-            *(int*) option->value = int_value;
-            option_parsed = true;
-            break;
-          case OPTION_UINT:
-            check_missing_argument(argnum, argc, option->option_str);
-            argnum++;
-            if (sscanf(argv[argnum], "%d", &int_value) != 1 || int_value < 0) {
-              error("argument to option \"-%s\" must be a non-negative integer",
-                     str_get(option->option_str));
-            }
-            /* minimum value check */
-            if (option->min_value_set && int_value < option->min_value.ui) {
-              error("argument to option \"-%s\" must be an integer >= %u",
-                    str_get(option->option_str), option->min_value.ui);
-            }
-            *(unsigned int*) option->value = int_value;
-            option_parsed = true;
-            break;
-          case OPTION_LONG:
-            check_missing_argument(argnum, argc, option->option_str);
-            argnum++;
-            if (sscanf(argv[argnum], "%ld", &long_value) != 1) {
-              error("argument to option \"-%s\" must be an integer",
-                    str_get(option->option_str));
-            }
-            *(long*) option->value = long_value;
-            option_parsed = true;
-            break;
-          case OPTION_ULONG:
-            check_missing_argument(argnum, argc, option->option_str);
-            argnum++;
-            if (sscanf(argv[argnum], "%ld", &long_value) != 1 ||
-                long_value < 0) {
-              error("argument to option \"-%s\" must be a non-negative integer",
-                    str_get(option->option_str));
-            }
-            /* minimum value check */
-            if (option->min_value_set && long_value < option->min_value.ul) {
-              error("argument to option \"-%s\" must be an integer >= %lu",
-                    str_get(option->option_str), option->min_value.ul);
-            }
-            *(unsigned long*) option->value = long_value;
-            option_parsed = true;
-            break;
-          case OPTION_STRING:
-            check_missing_argument(argnum, argc, option->option_str);
-            argnum++;
-            str_set(option->value, argv[argnum]);
-            option_parsed = true;
-            break;
-          case OPTION_VERSION:
-            ((ShowVersionFunc) option->value)(op->progname);
-            return OPTIONPARSER_REQUESTS_EXIT;
-          default: assert(0);
+          has_err = -1;
         }
+        else
+          option->is_set = true;
+        if (!has_err) {
+          switch (option->option_type) {
+            case OPTION_BOOL:
+              /* XXX: the next argument (if any) is an option
+                 (boolean parsing not implemented yet) */
+              /* assert(!argv[argnum+1] || argv[argnum+1][0] == '-'); */
+              *(bool*) option->value = true;
+              option_parsed = true;
+              break;
+            case OPTION_DOUBLE:
+              has_err = check_missing_argument(argnum, argc, option->option_str,
+                                               err);
+              if (!has_err) {
+                argnum++;
+                if (sscanf(argv[argnum], "%lf", &double_value) != 1) {
+                  error_set(err, "argument to option \"-%s\" must be "
+                            "floating-point number",
+                            str_get(option->option_str));
+                  has_err = -1;
+                }
+                else {
+                  *(double*) option->value = double_value;
+                  option_parsed = true;
+                }
+              }
+              break;
+            case OPTION_HELP:
+              if (show_help(op, false, err))
+                return OPTIONPARSER_ERROR;
+              return OPTIONPARSER_REQUESTS_EXIT;
+            case OPTION_HELPDEV:
+              if (show_help(op, true, err))
+                return OPTIONPARSER_ERROR;
+              return OPTIONPARSER_REQUESTS_EXIT;
+            case OPTION_OUTPUTFILE:
+              has_err = check_missing_argument(argnum, argc, option->option_str,
+                                               err);
+              if (!has_err) {
+                argnum++;
+                *(FILE**) option->value = xfopen(argv[argnum] , "w");
+                option_parsed = true;
+              }
+              break;
+            case OPTION_INT:
+              has_err = check_missing_argument(argnum, argc, option->option_str,
+                                               err);
+              if (!has_err) {
+                argnum++;
+                if (sscanf(argv[argnum], "%d", &int_value) != 1) {
+                  error_set(err, "argument to option \"-%s\" must be an "
+                            "integer", str_get(option->option_str));
+                  has_err = -1;
+                }
+              }
+              if (!has_err) {
+                /* minimum value check */
+                if (option->min_value_set && int_value < option->min_value.i) {
+                  error_set(err, "argument to option \"-%s\" must be an "
+                            "integer >= %d", str_get(option->option_str),
+                            option->min_value.i);
+                  has_err = -1;
+                }
+              }
+              if (!has_err) {
+                *(int*) option->value = int_value;
+                option_parsed = true;
+              }
+              break;
+            case OPTION_UINT:
+              has_err = check_missing_argument(argnum, argc, option->option_str,
+                                               err);
+              if (!has_err) {
+                argnum++;
+                if (sscanf(argv[argnum], "%d", &int_value) != 1 ||
+                    int_value < 0) {
+                  error_set(err, "argument to option \"-%s\" must be a "
+                            "non-negative integer",
+                            str_get(option->option_str));
+                  has_err = -1;
+                }
+              }
+              if (!has_err) {
+                /* minimum value check */
+                if (option->min_value_set && int_value < option->min_value.ui) {
+                  error_set(err, "argument to option \"-%s\" must be an "
+                            "integer >= %u", str_get(option->option_str),
+                            option->min_value.ui);
+                  has_err = -1;
+                }
+              }
+              if (!has_err) {
+                *(unsigned int*) option->value = int_value;
+                option_parsed = true;
+              }
+              break;
+            case OPTION_LONG:
+              has_err = check_missing_argument(argnum, argc, option->option_str,
+                        err);
+              if (!has_err) {
+                argnum++;
+                if (sscanf(argv[argnum], "%ld", &long_value) != 1) {
+                  error_set(err, "argument to option \"-%s\" must be an "
+                            "integer", str_get(option->option_str));
+                  has_err = -1;
+                }
+              }
+              if (!has_err) {
+                *(long*) option->value = long_value;
+                option_parsed = true;
+              }
+              break;
+            case OPTION_ULONG:
+              has_err = check_missing_argument(argnum, argc, option->option_str,
+                                               err);
+              if (!has_err) {
+                argnum++;
+                if (sscanf(argv[argnum], "%ld", &long_value) != 1 ||
+                    long_value < 0) {
+                  error_set(err, "argument to option \"-%s\" must be a "
+                            "non-negative integer",
+                            str_get(option->option_str));
+                  has_err = -1;
+                }
+              }
+              if (!has_err) {
+                /* minimum value check */
+                if (option->min_value_set &&
+                    long_value < option->min_value.ul) {
+                  error_set(err, "argument to option \"-%s\" must be an "
+                            "integer >= %lu", str_get(option->option_str),
+                            option->min_value.ul);
+                  has_err = -1;
+                }
+              }
+              if (!has_err) {
+                *(unsigned long*) option->value = long_value;
+                option_parsed = true;
+              }
+              break;
+            case OPTION_STRING:
+              has_err = check_missing_argument(argnum, argc, option->option_str,
+                        err);
+              if (!has_err) {
+                argnum++;
+                str_set(option->value, argv[argnum]);
+                option_parsed = true;
+              }
+              break;
+            case OPTION_VERSION:
+              ((ShowVersionFunc) option->value)(op->progname);
+              return OPTIONPARSER_REQUESTS_EXIT;
+            default: assert(0);
+          }
+        }
+        if (has_err || option_parsed)
+          break;
       }
-      if (option_parsed)
-        break;
     }
 
+    if (has_err)
+      break;
     if (option_parsed)
       continue;
 
     /* no matching option found -> error */
+    assert(!has_err);
     error_set(err, "unknown option: %s (-help shows possible options)",
               argv[argnum]);
     has_err = -1;
