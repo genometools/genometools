@@ -44,8 +44,8 @@ static OPrval parse_options(int *parsed_args, MSAparse_arguments *arguments,
 int gt_msaparse(int argc, char *argv[], Error *err)
 {
   MSAparse_arguments arguments;
-  int parsed_args;
-  MSA *msa;
+  int parsed_args, has_err = 0;
+  MSA *msa = NULL;
   error_check(err);
 
   /* option parsing */
@@ -57,22 +57,26 @@ int gt_msaparse(int argc, char *argv[], Error *err)
 
   /* make sure sequence_file exists */
   assert(parsed_args < argc);
-  if (!file_exists(argv[parsed_args]))
-    error("MSA_file '%s' does not exist", argv[parsed_args]);
+  if (!file_exists(argv[parsed_args])) {
+    error_set(err, "MSA_file '%s' does not exist", argv[parsed_args]);
+    has_err = -1;
+  }
 
-  /* multiple sequence alignment construction */
-  msa = msa_new(argv[parsed_args]);
+  if (!has_err) {
+    /* multiple sequence alignment construction */
+    msa = msa_new(argv[parsed_args]);
 
-  /* output */
-  if (arguments.show)
-    msa_show(msa);
-  if (arguments.consensus)
-    printf("consensus distance: %lu\n", msa_consensus_distance(msa));
-  if (arguments.sumofpairs)
-    printf("sum of pairwise scores: %lu\n", msa_sum_of_pairwise_scores(msa));
+    /* output */
+    if (arguments.show)
+      msa_show(msa);
+    if (arguments.consensus)
+      printf("consensus distance: %lu\n", msa_consensus_distance(msa));
+    if (arguments.sumofpairs)
+      printf("sum of pairwise scores: %lu\n", msa_sum_of_pairwise_scores(msa));
+  }
 
   /* free */
   msa_free(msa);
 
-  return 0;
+  return has_err;
 }
