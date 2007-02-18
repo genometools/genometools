@@ -6,15 +6,20 @@
 
 #include "gt.h"
 
-#define SCAN_ALPHA_VALUE(NUM, CHAR_1, CHAR_2)                                  \
-        if (sscanf(argv[NUM], "%d", &rval) != 1 || rval > 0) {                 \
-          error("argument for alpha(%c,%c) must be non-positive integer",      \
-                CHAR_1, CHAR_2);                                               \
-        }                                                                      \
-        scorematrix_set_score(energy_function, alpha_encode(dna_alpha, CHAR_1),\
-                              alpha_encode(dna_alpha, CHAR_2), rval);          \
-        scorematrix_set_score(energy_function, alpha_encode(dna_alpha, CHAR_2),\
-                              alpha_encode(dna_alpha, CHAR_1), rval)
+#define SCAN_ALPHA_VALUE(NUM, CHAR_1, CHAR_2)                                \
+        if (!has_err && (sscanf(argv[NUM], "%d", &rval) != 1 || rval > 0)) { \
+          error_set(err, "argument for alpha(%c,%c) must be non-positive "   \
+                         "integer", CHAR_1, CHAR_2);                         \
+          has_err = -1;                                                      \
+        }                                                                    \
+        if (!has_err) {                                                      \
+          scorematrix_set_score(energy_function, alpha_encode(dna_alpha,     \
+                                CHAR_1), alpha_encode(dna_alpha, CHAR_2),    \
+                                rval);                                       \
+          scorematrix_set_score(energy_function, alpha_encode(dna_alpha,     \
+                                CHAR_2), alpha_encode(dna_alpha, CHAR_1),    \
+                                rval);                                       \
+       }
 
 static int computeEentry(unsigned long i, unsigned long j, int **E,
                          char *rna_sequence, unsigned long rna_length,
@@ -180,8 +185,8 @@ int gt_nussinov_rna_fold(int argc, char *argv[], Error *err)
 {
   unsigned long i, j, rna_length;
   unsigned int l_min;
-  char *rna_sequence;
-  int parsed_args, rval;
+  char *rna_sequence = NULL;
+  int parsed_args, rval, has_err = 0;
   Alpha *dna_alpha;
   ScoreMatrix *energy_function; /* alpha */
   error_check(err);
@@ -206,28 +211,33 @@ int gt_nussinov_rna_fold(int argc, char *argv[], Error *err)
   }
 
   /* save l_min value */
-  if (sscanf(argv[1], "%d", &rval) != 1 || rval <= 0)
-    error("argument for l_min must be positive integer");
-  l_min = (unsigned int) rval;
+  if (sscanf(argv[1], "%d", &rval) != 1 || rval <= 0) {
+    error_set(err, "argument for l_min must be positive integer");
+    has_err = -1;
+  }
+  else
+    l_min = (unsigned int) rval;
 
   /* save alpha values */
   SCAN_ALPHA_VALUE(2, 'G', 'C');
   SCAN_ALPHA_VALUE(3, 'A', 'U');
   SCAN_ALPHA_VALUE(4, 'G', 'U');
 
-  /* save RNA sequence */
-  rna_length = strlen(argv[5]);
-  rna_sequence = xstrdup(argv[5]);
-  alpha_encode_seq(dna_alpha, rna_sequence, rna_sequence, rna_length);
+  if (!has_err) {
+    /* save RNA sequence */
+    rna_length = strlen(argv[5]);
+    rna_sequence = xstrdup(argv[5]);
+    alpha_encode_seq(dna_alpha, rna_sequence, rna_sequence, rna_length);
 
-  /* fold RNA sequence with Nussinov algorithm */
-  nussinov_rna_fold(rna_sequence, rna_length, l_min, 1, energy_function,
-                    dna_alpha, stdout);
+    /* fold RNA sequence with Nussinov algorithm */
+    nussinov_rna_fold(rna_sequence, rna_length, l_min, 1, energy_function,
+                      dna_alpha, stdout);
+  }
 
   /* free */
   free(rna_sequence);
   scorematrix_free(energy_function);
   alpha_free(dna_alpha);
 
-  return 0;
+  return has_err;
 }
