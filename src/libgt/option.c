@@ -250,27 +250,30 @@ static void check_missing_argument(int argnum, int argc, Str *option)
     error("missing argument to option \"-%s\"", str_get(option));
 }
 
-static void check_mandatory_options(OptionParser *op)
+static int check_mandatory_options(OptionParser *op, Error *err)
 {
   unsigned long i;
   Option *o;
-
+  error_check(err);
   assert(op);
-
   for (i = 0; i < array_size(op->options); i++) {
     o = *(Option**) array_get(op->options, i);
-    if (o->is_mandatory && !o->is_set)
-      error("option \"-%s\" is mandatory", str_get(o->option_str));
+    if (o->is_mandatory && !o->is_set) {
+      error_set(err, "option \"-%s\" is mandatory", str_get(o->option_str));
+      return -1;
+    }
   }
+  return 0;
 }
 
-static void check_option_implications(OptionParser *op)
+static int check_option_implications(OptionParser *op, Error *err)
 {
   unsigned long i, j, k, l;
   Array *implied_option_array;
   Option *o, *implied_option;
   unsigned int option_set;
   Str *error_str;
+  error_check(err);
 
   for (i = 0; i < array_size(op->options); i++) {
     o = *(Option**) array_get(op->options, i);
@@ -282,8 +285,9 @@ static void check_option_implications(OptionParser *op)
 	  /* special case: option implies exactly one option */
           implied_option = *(Option**) array_get(implied_option_array, 0);
           if (!implied_option->is_set) {
-            error("option \"-%s\" requires option \"-%s\"",
-	          str_get(o->option_str), str_get(implied_option->option_str));
+            error_set(err, "option \"-%s\" requires option \"-%s\"",
+	              str_get(o->option_str), str_get(implied_option->option_str));
+            return -1;
           }
 	}
 	else {
@@ -315,18 +319,22 @@ static void check_option_implications(OptionParser *op)
 	                             array_size(implied_option_array) - 1))
 		                     ->option_str);
             str_append_cstr(error_str, "\"");
-	    error("%s", str_get(error_str));
+	    error_set(err, "%s", str_get(error_str));
+            str_free(error_str);
+            return -1;
 	  }
 	}
       }
     }
   }
+  return 0;
 }
 
-static void check_option_exclusions(OptionParser *op)
+static int check_option_exclusions(OptionParser *op, Error *err)
 {
   unsigned long i, j;
   Option *o, *excluded_option;
+  error_check(err);
 
   for (i = 0; i < array_size(op->options); i++) {
     o = *(Option**) array_get(op->options, i);
@@ -334,29 +342,35 @@ static void check_option_exclusions(OptionParser *op)
       for (j = 0; j < array_size(o->exclusions); j++) {
         excluded_option = *(Option**) array_get(o->exclusions, j);
         if (excluded_option->is_set) {
-          error("option \"-%s\" and option \"-%s\" exclude each other",
-                str_get(o->option_str), str_get(excluded_option->option_str));
+          error_set(err, "option \"-%s\" and option \"-%s\" exclude each other",
+                    str_get(o->option_str),
+                    str_get(excluded_option->option_str));
+          return -1;
         }
       }
     }
   }
+  return 0;
 }
 
-static void check_mandatory_either_options(OptionParser *op)
+static int check_mandatory_either_options(OptionParser *op, Error *err)
 {
   unsigned long i;
   Option *o;
+  error_check(err);
 
   for (i = 0; i < array_size(op->options); i++) {
     o = *(Option**) array_get(op->options, i);
     if (o->mandatory_either_option) {
       if (!o->is_set && !o->mandatory_either_option->is_set) {
-        error("either option \"-%s\" or option \"-%s\" is mandatory",
-               str_get(o->option_str),
-               str_get(o->mandatory_either_option->option_str));
+        error_set(err, "either option \"-%s\" or option \"-%s\" is mandatory",
+                  str_get(o->option_str),
+                  str_get(o->mandatory_either_option->option_str));
+        return -1;
       }
     }
   }
+  return 0;
 }
 
 static OPrval parse(OptionParser *op, int *parsed_args, int argc, char **argv,
@@ -370,6 +384,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc, char **argv,
   Option *option;
   bool option_parsed;
   long long_value;
+  int has_err = 0;
 
   error_check(err);
   assert(op);
@@ -524,14 +539,20 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc, char **argv,
           op->progname, op->synopsis);
   }
 
-  check_mandatory_options(op);
-  check_option_implications(op);
-  check_option_exclusions(op);
-  check_mandatory_either_options(op);
+  if (!has_err)
+    has_err = check_mandatory_options(op, err);
+  if (!has_err)
+    has_err = check_option_implications(op, err);
+  if (!has_err)
+    has_err = check_option_exclusions(op, err);
+  if (!has_err)
+    has_err = check_mandatory_either_options(op, err);
 
   op->parser_called = true;
   *parsed_args = argnum;
 
+  if (has_err)
+    return OPTIONPARSER_ERROR;
   return OPTIONPARSER_OK;
 }
 
