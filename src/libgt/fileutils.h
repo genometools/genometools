@@ -11,11 +11,11 @@
 #include <stdio.h>
 #include "str.h"
 
-bool          file_exists(const char*);
+bool           file_exists(const char*);
 /* returns 1 if the file with path a has a later modification time then the file
    with path b, 0 otherwise. */
-bool          file_is_newer(const char *a, const char *b);
-unsigned long file_number_of_lines(FILE*);
+bool           file_is_newer(const char *a, const char *b);
+unsigned long  file_number_of_lines(FILE*);
 
 /* set 'dirname' to the dirname of 'file', if it has one, to "" otherwise */
 void           file_dirname(Str *dirname, const char *file);
