@@ -46,19 +46,27 @@ const GenomeStreamClass* cds_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* cds_stream_new(GenomeStream *in_stream,
-                              const char *sequence_file, const char *source)
+GenomeStream* cds_stream_new(GenomeStream *in_stream, const char *sequence_file,
+                             const char *source, Error *err)
 {
-  GenomeStream *gs = genome_stream_create(cds_stream_class(), true);
-  CDS_stream *cds_stream = cds_stream_cast(gs);
-  Str *sequence_file_str = str_new_cstr(sequence_file),
-      *source_str = str_new_cstr(source);
-
+  GenomeStream *gs;
+  CDS_stream *cds_stream;
+  Str *sequence_file_str, *source_str;
+  int has_err = 0;
+  error_check(err);
+  gs = genome_stream_create(cds_stream_class(), true);
+  cds_stream = cds_stream_cast(gs);
+  sequence_file_str = str_new_cstr(sequence_file),
+  source_str = str_new_cstr(source);
   cds_stream->in_stream = in_stream;
-  cds_stream->cds_visitor = cds_visitor_new(sequence_file_str, source_str);
-
+  cds_stream->cds_visitor = cds_visitor_new(sequence_file_str, source_str, err);
+  if (!cds_stream->cds_visitor)
+    has_err = -1;
   str_free(sequence_file_str);
   str_free(source_str);
-
+  if (has_err) {
+    cds_stream_free(gs);
+    return NULL;
+  }
   return gs;
 }

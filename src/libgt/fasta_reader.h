@@ -19,9 +19,10 @@ typedef void (*FastaReader_proc_character)(char, void *data);
 typedef void (*FastaReader_proc_sequence_length)(unsigned long, void *data);
 
 FastaReader* fasta_reader_new(Str *sequence_filename);
-void         fasta_reader_run(FastaReader*, FastaReader_proc_description,
+int          fasta_reader_run(FastaReader*, FastaReader_proc_description,
                               FastaReader_proc_character,
-                              FastaReader_proc_sequence_length, void *data);
+                              FastaReader_proc_sequence_length, void *data,
+                              Error*);
 void         fasta_reader_free(FastaReader*);
 
 #endif

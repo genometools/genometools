@@ -13,6 +13,7 @@ typedef struct CDSVisitor CDSVisitor;
 #include "genome_visitor.h"
 
 const GenomeVisitorClass* cds_visitor_class(void);
-GenomeVisitor*            cds_visitor_new(Str *sequence_file, Str *source);
+GenomeVisitor*            cds_visitor_new(Str *sequence_file, Str *source,
+                                          Error*);
 
 #endif

@@ -45,9 +45,9 @@ static double exampledistfunc(unsigned long i, unsigned long j, void *data)
 int gt_upgma(int argc, char *argv[], Error *err)
 {
   bool use_hard_coded_example = false;
-  int parsed_args;
+  int parsed_args, has_err = 0;
   Bioseq *bioseq = NULL;
-  UPGMA *upgma;
+  UPGMA *upgma = NULL;
   error_check(err);
 
   /* option parsing */
@@ -64,14 +64,18 @@ int gt_upgma(int argc, char *argv[], Error *err)
   if (use_hard_coded_example)
     upgma = upgma_new(5, NULL, exampledistfunc);
   else {
-    bioseq = bioseq_new(argv[1]);
-    upgma = upgma_new(bioseq_number_of_sequences(bioseq), bioseq, distfunc);
+    bioseq = bioseq_new(argv[1], err);
+    if (!bioseq)
+      has_err = -1;
+    if (!has_err)
+      upgma = upgma_new(bioseq_number_of_sequences(bioseq), bioseq, distfunc);
   }
 
-  upgma_show_tree(upgma, stdout);
+  if (!has_err)
+    upgma_show_tree(upgma, stdout);
 
   bioseq_free(bioseq);
   upgma_free(upgma);
 
-  return 0;
+  return has_err;
 }

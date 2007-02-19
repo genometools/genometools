@@ -55,8 +55,14 @@ int gt_qgramdist(int argc, char *argv[], Error *err)
 
   /* init */
   if (!has_err) {
-    bioseq_1 = bioseq_new(argv[parsed_args]);
-    bioseq_2 = bioseq_new(argv[parsed_args+1]);
+    bioseq_1 = bioseq_new(argv[parsed_args], err);
+    if (!bioseq_1)
+      has_err = -1;
+    if (!has_err) {
+      bioseq_2 = bioseq_new(argv[parsed_args+1], err);
+      if (!bioseq_2)
+        has_err = -1;
+    }
 
     /* compute q-gram distance for all sequence combinations */
     for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {

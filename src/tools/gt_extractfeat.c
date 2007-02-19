@@ -125,9 +125,10 @@ int gt_extractfeat(int argc, char *argv[], Error *err)
     /* set sequence source */
     assert(str_get(arguments.seqfile) || str_get(arguments.regionmapping));
     assert(!(str_get(arguments.seqfile) && str_get(arguments.regionmapping)));
-    if (str_get(arguments.seqfile))
-      extractfeat_stream_use_sequence_file(extractfeat_stream,
-                                           arguments.seqfile);
+    if (str_get(arguments.seqfile)) {
+      has_err = extractfeat_stream_use_sequence_file(extractfeat_stream,
+                                                     arguments.seqfile, err);
+    }
     else {
       regionmapping = regionmapping_new(arguments.regionmapping, err);
       if (!regionmapping)

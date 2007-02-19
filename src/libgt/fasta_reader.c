@@ -34,17 +34,19 @@ FastaReader* fasta_reader_new(Str *sequence_filename)
   return fs;
 }
 
-void fasta_reader_run(FastaReader *fr,
-                      FastaReader_proc_description proc_description,
-                      FastaReader_proc_character proc_character,
-                      FastaReader_proc_sequence_length proc_sequence_length,
-                      void *data)
+int fasta_reader_run(FastaReader *fr,
+                     FastaReader_proc_description proc_description,
+                     FastaReader_proc_character proc_character,
+                     FastaReader_proc_sequence_length proc_sequence_length,
+                     void *data, Error *err)
 {
   unsigned char cc;
   FastaReader_state state = EXPECTING_SEPARATOR;
   unsigned long sequence_length = 0, line_counter = 1;
   Str *description;
+  int has_err = 0;
 
+  error_check(err);
   assert(fr);
 
   /* init */
@@ -57,13 +59,17 @@ void fasta_reader_run(FastaReader *fr,
   genfile_xrewind(fr->sequence_file);
 
   /* reading */
-  while (genfile_xread(fr->sequence_file, &cc, 1) != 0) {
+  while (!has_err && genfile_xread(fr->sequence_file, &cc, 1) != 0) {
     switch (state) {
       case EXPECTING_SEPARATOR:
-        if (cc != FASTA_SEPARATOR)
-          error("the first character of fasta file \"%s\" has to be '%c'",
-                str_get(fr->sequence_filename), FASTA_SEPARATOR);
-        state = READING_DESCRIPTION;
+        if (cc != FASTA_SEPARATOR) {
+          error_set(err,
+                    "the first character of fasta file \"%s\" has to be '%c'",
+                    str_get(fr->sequence_filename), FASTA_SEPARATOR);
+          has_err = -1;
+        }
+        else
+          state = READING_DESCRIPTION;
         break;
       case READING_DESCRIPTION:
         if (cc == '\n') {
@@ -82,13 +88,16 @@ void fasta_reader_run(FastaReader *fr,
         if (cc == FASTA_SEPARATOR) {
           if (!sequence_length) {
             assert(line_counter);
-            error("empty sequence after description given in line %lu",
-                  line_counter - 1);
+            error_set(err, "empty sequence after description given in line %lu",
+                      line_counter - 1);
+            has_err = -1;
           }
-          if (proc_sequence_length)
-            proc_sequence_length(sequence_length, data);
-          state = READING_DESCRIPTION;
-          continue;
+          else {
+            if (proc_sequence_length)
+              proc_sequence_length(sequence_length, data);
+            state = READING_DESCRIPTION;
+            continue;
+          }
         }
         /*@fallthrough@*/
       case READING_SEQUENCE:
@@ -129,6 +138,8 @@ void fasta_reader_run(FastaReader *fr,
 
   /* free */
   str_free(description);
+
+  return has_err;
 }
 
 void fasta_reader_free(FastaReader *fr)

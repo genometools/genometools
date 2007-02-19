@@ -179,7 +179,9 @@ static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
         str_append_str(efv->sequence_name,
                        genome_node_get_seqid((GenomeNode*) gf));
         bioseq_free(efv->bioseq);
-        efv->bioseq = bioseq_new_str(efv->sequence_file);
+        efv->bioseq = bioseq_new_str(efv->sequence_file, err);
+        if (!efv->bioseq)
+          has_err = -1;
       }
     }
   }
@@ -240,15 +242,21 @@ static GenomeVisitor* extractfeat_visitor_new(GenomeFeatureType type,
 
 GenomeVisitor* extractfeat_visitor_new_seqfile(Str *sequence_file,
                                                GenomeFeatureType type,
-                                               bool join, bool translate)
+                                               bool join, bool translate,
+                                               Error *err)
 {
   GenomeVisitor *gv;
   ExtractFeatVisitor *efv;
+  error_check(err);
   assert(sequence_file);
   gv = extractfeat_visitor_new(type, join, translate);
   efv = extractfeat_visitor_cast(gv);
   efv->sequence_file = str_ref(sequence_file);
-  efv->bioseq = bioseq_new_str(sequence_file);
+  efv->bioseq = bioseq_new_str(sequence_file, err);
+  if (!efv->bioseq) {
+    extractfeat_visitor_free(gv);
+    return NULL;
+  }
   return gv;
 }
 

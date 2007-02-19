@@ -18,7 +18,8 @@ const GenomeVisitorClass* extractfeat_visitor_class(void);
 GenomeVisitor*            extractfeat_visitor_new_seqfile(Str *sequence_file,
                                                           GenomeFeatureType,
                                                           bool join,
-                                                          bool translate);
+                                                          bool translate,
+                                                          Error*);
 /* takes ownership of the RegionMapping */
 GenomeVisitor*            extractfeat_visitor_new_regionmapping(RegionMapping*,
                                                               GenomeFeatureType,

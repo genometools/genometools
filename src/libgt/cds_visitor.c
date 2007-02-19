@@ -208,13 +208,20 @@ const GenomeVisitorClass* cds_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* cds_visitor_new(Str *sequence_file, Str *source)
+GenomeVisitor* cds_visitor_new(Str *sequence_file, Str *source, Error *err)
 {
-  GenomeVisitor *gv = genome_visitor_create(cds_visitor_class());
-  CDSVisitor *cds_visitor = cds_visitor_cast(gv);
+  GenomeVisitor *gv;
+  CDSVisitor *cds_visitor;
+  error_check(err);
+  gv = genome_visitor_create(cds_visitor_class());
+  cds_visitor = cds_visitor_cast(gv);
   cds_visitor->sequence_file = str_ref(sequence_file);
   cds_visitor->source = str_ref(source);
   cds_visitor->splicedseq = splicedseq_new();
-  cds_visitor->bioseq = bioseq_new_str(sequence_file);
+  cds_visitor->bioseq = bioseq_new_str(sequence_file, err);
+  if (!cds_visitor->bioseq) {
+    cds_visitor_free(gv);
+    return NULL;
+  }
   return gv;
 }

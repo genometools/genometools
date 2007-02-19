@@ -46,8 +46,8 @@ int gt_neighborjoining(int argc, char *argv[], Error *err)
 {
   bool use_hard_coded_example = false;
   Bioseq *bioseq = NULL;
-  NeighborJoining *nj;
-  int parsed_args;
+  NeighborJoining *nj = NULL;
+  int parsed_args, has_err = 0;
   error_check(err);
 
   /* option parsing */
@@ -63,15 +63,20 @@ int gt_neighborjoining(int argc, char *argv[], Error *err)
   if (use_hard_coded_example)
     nj = neighborjoining_new(5, NULL, exampledistfunc);
   else {
-    bioseq = bioseq_new(argv[1]);
-    nj = neighborjoining_new(bioseq_number_of_sequences(bioseq), bioseq,
-                             distfunc);
+    bioseq = bioseq_new(argv[1], err);
+    if (!bioseq)
+      has_err = -1;
+    if (!has_err) {
+      nj = neighborjoining_new(bioseq_number_of_sequences(bioseq), bioseq,
+                               distfunc);
+    }
   }
 
-  neighborjoining_show_tree(nj, stdout);
+  if (!has_err)
+    neighborjoining_show_tree(nj, stdout);
 
   bioseq_free(bioseq);
   neighborjoining_free(nj);
 
-  return 0;
+  return has_err;
 }

@@ -39,9 +39,9 @@ static OPrval parse_options(int *parsed_args, Costs *costs, int argc,
 
 int gt_affinealign(int argc, char *argv[], Error *err)
 {
-  Bioseq *bioseq_1, *bioseq_2;
+  Bioseq *bioseq_1, *bioseq_2 = NULL;
   unsigned long i, j;
-  int parsed_args;
+  int parsed_args, has_err = 0;
   Alignment *a;
   Costs costs;
   error_check(err);
@@ -55,21 +55,29 @@ int gt_affinealign(int argc, char *argv[], Error *err)
   assert(parsed_args+1 < argc);
 
   /* init */
-  bioseq_1 = bioseq_new(argv[parsed_args]);
-  bioseq_2 = bioseq_new(argv[parsed_args+1]);
+  bioseq_1 = bioseq_new(argv[parsed_args], err);
+  if (!bioseq_1)
+     has_err = -1;
+  if (!has_err) {
+    bioseq_2 = bioseq_new(argv[parsed_args+1], err);
+    if (!bioseq_2)
+      has_err = -1;
+  }
 
   /* aligning all sequence combinations */
-  for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
-    for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
-      a = affinealign(bioseq_get_sequence(bioseq_1, i),
-                      bioseq_get_sequence_length(bioseq_1, i),
-                      bioseq_get_sequence(bioseq_2, j),
-                      bioseq_get_sequence_length(bioseq_2, j),
-                      costs.replacement_cost, costs.gap_opening_cost,
-                      costs.gap_extension_cost);
-      alignment_show(a, stdout);
-      xputchar('\n');
-      alignment_free(a);
+  if (!has_err) {
+    for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
+      for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
+        a = affinealign(bioseq_get_sequence(bioseq_1, i),
+                        bioseq_get_sequence_length(bioseq_1, i),
+                        bioseq_get_sequence(bioseq_2, j),
+                        bioseq_get_sequence_length(bioseq_2, j),
+                        costs.replacement_cost, costs.gap_opening_cost,
+                        costs.gap_extension_cost);
+        alignment_show(a, stdout);
+        xputchar('\n');
+        alignment_free(a);
+      }
     }
   }
 
@@ -77,5 +85,5 @@ int gt_affinealign(int argc, char *argv[], Error *err)
   bioseq_free(bioseq_2);
   bioseq_free(bioseq_1);
 
-  return 0;
+  return has_err;
 }

@@ -66,12 +66,19 @@ GenomeStream* extractfeat_stream_new(GenomeStream *in_stream,
   return gs;
 }
 
-void extractfeat_stream_use_sequence_file(GenomeStream *gs, Str *seqfile)
+int extractfeat_stream_use_sequence_file(GenomeStream *gs, Str *seqfile,
+                                         Error *err)
 {
-  ExtractFeatStream *efs = extractfeat_stream_cast(gs);
+  ExtractFeatStream *efs;
+  error_check(err);
+  efs = extractfeat_stream_cast(gs);
   efs->extractfeat_visitor = extractfeat_visitor_new_seqfile(seqfile, efs->type,
                                                              efs->join,
-                                                             efs->translate);
+                                                             efs->translate,
+                                                             err);
+  if (!efs->extractfeat_visitor)
+    return -1;
+  return 0;
 }
 
 void extractfeat_stream_use_region_mapping(GenomeStream *gs, RegionMapping *rm)

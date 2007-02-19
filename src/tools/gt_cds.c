@@ -6,6 +6,8 @@
 
 #include "gt.h"
 
+#define GT_CDS_SOURCE_TAG "gt cds"
+
 typedef struct {
   bool verbose;
 } CDS_arguments;
@@ -34,12 +36,10 @@ static OPrval parse_options(int *parsed_args, CDS_arguments *arguments,
 
 int gt_cds(int argc, char *argv[], Error *err)
 {
-  GenomeStream *gff3_in_stream,
-                *cds_stream,
-                *gff3_out_stream;
+  GenomeStream *gff3_in_stream, *cds_stream, *gff3_out_stream = NULL;
   GenomeNode *gn;
   CDS_arguments arguments;
-  int parsed_args, has_err;
+  int parsed_args, has_err = 0;
   error_check(err);
 
   /* option parsing */
@@ -56,10 +56,14 @@ int gt_cds(int argc, char *argv[], Error *err)
 
   /* create CDS stream */
   assert(parsed_args + 1 < argc);
-  cds_stream = cds_stream_new(gff3_in_stream, argv[parsed_args + 1], "gt_cds");
+  cds_stream = cds_stream_new(gff3_in_stream, argv[parsed_args + 1],
+                              GT_CDS_SOURCE_TAG, err);
+  if (!cds_stream)
+    has_err = -1;
 
   /* create gff3 output stream */
-  gff3_out_stream = gff3_out_stream_new(cds_stream, stdout);
+  if (!has_err)
+    gff3_out_stream = gff3_out_stream_new(cds_stream, stdout);
 
   /* pull the features through the stream and free them afterwards */
   while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, NULL, err))

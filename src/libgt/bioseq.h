@@ -7,6 +7,7 @@
 #ifndef BIOSEQ_H
 #define BIOSEQ_H
 
+#include "error.h"
 #include "seq.h"
 #include "str.h"
 
@@ -16,10 +17,11 @@
 
 typedef struct Bioseq Bioseq;
 
-Bioseq*       bioseq_new(const char *sequence_file);
-Bioseq*       bioseq_new_str(Str* sequence_file);
-/* it is not necessary to call the following function explicitly */
-void          bioseq_fill(Bioseq*, unsigned int recreate);
+/* construct a new bioseq object (and create the bioseq files, if necessary) */
+Bioseq*       bioseq_new(const char *sequence_file, Error*);
+/* construct a new bioseq object (and always create the the bioseq files) */
+Bioseq*       bioseq_new_recreate(const char *sequence_file, Error*);
+Bioseq*       bioseq_new_str(Str* sequence_file, Error*);
 Seq*          bioseq_get_seq(Bioseq*, unsigned long);
 const char*   bioseq_get_description(Bioseq*, unsigned long);
 const char*   bioseq_get_sequence(Bioseq*, unsigned long);

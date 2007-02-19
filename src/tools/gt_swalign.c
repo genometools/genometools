@@ -33,7 +33,7 @@ int gt_swalign(int argc, char *argv[], Error *err)
   ScoreFunction *scorefunction = NULL;
   ScoreMatrix *scorematrix;
   unsigned long i, j;
-  int parsed_args, indelscore;
+  int parsed_args, indelscore, has_err = 0;
   Alignment *a;
   error_check(err);
 
@@ -50,18 +50,26 @@ int gt_swalign(int argc, char *argv[], Error *err)
   scorematrix  = scorematrix_read_protein(argv[parsed_args], err);
   if (scorematrix) {
     scorefunction = scorefunction_new(scorematrix, indelscore, indelscore);
-    bioseq_1 = bioseq_new(argv[parsed_args+1]);
-    bioseq_2 = bioseq_new(argv[parsed_args+2]);
+    bioseq_1 = bioseq_new(argv[parsed_args+1], err);
+    if (!bioseq_1)
+      has_err = -1;
+    if (!has_err) {
+      bioseq_2 = bioseq_new(argv[parsed_args+2], err);
+      if (!bioseq_2)
+        has_err = -1;
+    }
 
-    /* aligning all sequence combinations */
-    for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
-      for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
-        a = swalign(bioseq_get_seq(bioseq_1, i), bioseq_get_seq(bioseq_2, j),
-                    scorefunction);
-        if (a) {
-          alignment_show(a, stdout);
-          xputchar('\n');
-          alignment_free(a);
+    if (!has_err) {
+      /* aligning all sequence combinations */
+      for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
+        for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
+          a = swalign(bioseq_get_seq(bioseq_1, i), bioseq_get_seq(bioseq_2, j),
+                      scorefunction);
+          if (a) {
+            alignment_show(a, stdout);
+            xputchar('\n');
+            alignment_free(a);
+          }
         }
       }
     }
@@ -72,5 +80,5 @@ int gt_swalign(int argc, char *argv[], Error *err)
   bioseq_free(bioseq_1);
   scorefunction_free(scorefunction);
 
-  return 0;
+  return has_err;
 }

@@ -26,12 +26,16 @@ MSA* msa_new(const char *MSA_filename, Error *err)
   MSA *msa;
   error_check(err);
   msa = xmalloc(sizeof(MSA));
-  msa->bs = bioseq_new(MSA_filename);
-  /* make sure that the MSA contains at least two sequences */
-  if (bioseq_number_of_sequences(msa->bs) < 2) {
-    error_set(err, "the MSA file '%s' contains less then 2 sequences",
-              MSA_filename);
+  msa->bs = bioseq_new(MSA_filename, err);
+  if (!msa->bs)
     has_err = -1;
+  if (!has_err) {
+    /* make sure that the MSA contains at least two sequences */
+    if (bioseq_number_of_sequences(msa->bs) < 2) {
+      error_set(err, "the MSA file '%s' contains less then 2 sequences",
+                MSA_filename);
+      has_err = -1;
+    }
   }
   if (!has_err) {
     /* make sure that all sequences have the same length */

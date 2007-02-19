@@ -95,14 +95,18 @@ int gt_bioseq(int argc, char *argv[], Error *err)
 
   while (!has_err && parsed_args < argc) {
     /* bioseq construction */
-    bioseq = bioseq_new(argv[parsed_args]);
-    bioseq_fill(bioseq, arguments.recreate);
+    if (arguments.recreate)
+      bioseq = bioseq_new_recreate(argv[parsed_args], err);
+    else
+      bioseq = bioseq_new_recreate(argv[parsed_args], err);
+    if (!bioseq)
+      has_err = -1;
 
     /* output */
-    if (arguments.showfasta)
+    if (!has_err && arguments.showfasta)
       bioseq_show_as_fasta(bioseq, arguments.width);
 
-    if (arguments.showseqnum != UNDEFULONG) {
+    if (!has_err && arguments.showseqnum != UNDEFULONG) {
       if (arguments.showseqnum > bioseq_number_of_sequences(bioseq)) {
         error_set(err, "argument '%lu' to option '-showseqnum' is too large. "
                   "The Biosequence contains only '%lu' sequences.",
