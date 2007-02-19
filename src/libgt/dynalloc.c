@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -23,11 +23,9 @@ void* dynalloc(void *ptr, size_t *allocated, size_t size)
     /* if nothing has been allocated already, we allocate what was asked for */
     size_to_alloc = size;
   }
-  else if (*allocated == SIZE_MAX) {
-    /* we cannot allocate more space */
-    error("overflow");
-  }
   else {
+    /* XXX: no overflow */
+    assert(*allocated != SIZE_MAX);
     /* otherwise we double the allocated space, if possible */
     size_to_alloc = *allocated;
     while (size_to_alloc < size) {
