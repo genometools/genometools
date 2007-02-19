@@ -21,23 +21,29 @@
 Str* gtdata_get_path(const char *prog, Error *err)
 {
   Str *path;
+  int has_err = 0;
   error_check(err);
   assert(prog);
-  path = file_find_in_path(prog);
-  assert(path);
-  str_append_cstr(path, GTDATADIR);
-  if (file_exists(str_get(path)))
-    return path;
-  str_set_length(path, str_length(path) - strlen(GTDATADIR));
-  str_append_cstr(path, UPDIR);
-  str_append_cstr(path, GTDATADIR);
-  if (file_exists(str_get(path)))
-    return path;
-  else {
-    error_set(err, "could not find gtdata/ directory");
+  path = str_new();
+  has_err = file_find_in_path(path, prog, err);
+  if (!has_err) {
+    assert(str_length(path));
+    str_append_cstr(path, GTDATADIR);
+    if (file_exists(str_get(path)))
+      return path;
+    str_set_length(path, str_length(path) - strlen(GTDATADIR));
+    str_append_cstr(path, UPDIR);
+    str_append_cstr(path, GTDATADIR);
+    if (!file_exists(str_get(path))) {
+      error_set(err, "could not find gtdata/ directory");
+      has_err = -1;
+    }
+  }
+  if (has_err) {
     str_free(path);
     return NULL;
   }
+  return path;
 }
 
 int gtdata_show_help(const char *progname, void *unused, Error *err)
