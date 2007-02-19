@@ -20,6 +20,6 @@ for FILE in $*
 do
   TMPFILE=`mktemp`
   cp $FILE $FILE.bac
-  sed $sed_command $FILE > $TMPFILE
+  sed "$sed_command" $FILE > $TMPFILE
   mv -f $TMPFILE $FILE
 done
