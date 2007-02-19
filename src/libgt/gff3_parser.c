@@ -385,7 +385,7 @@ int gff3_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
   size_t line_length;
   Str *line_buffer;
   char *line;
-  int has_err = 0;
+  int version, has_err = 0;
 
   error_check(err);
 
@@ -401,11 +401,25 @@ int gff3_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
     (*line_number)++;
 
     if (*line_number == 1) {
-      if (strcmp(line, GFF_VERSION_STRING)) {
-        error_set(err, "line %lu in file \"%s\" does not equal \"%s\"",
-                  *line_number, filename, GFF_VERSION_STRING);
+      if (strncmp(line, GFF_VERSION_PREFIX, strlen(GFF_VERSION_PREFIX))) {
+        error_set(err, "line %lu in file \"%s\" does begin with \"%s\"",
+                  *line_number, filename, GFF_VERSION_PREFIX);
         has_err = -1;
         break;
+      }
+      if (!has_err) {
+        line += strlen(GFF_VERSION_PREFIX);
+        /* skip blanks */
+        while (line[0] == ' ')
+          line++;
+        has_err = parse_int(&version, line, *line_number, filename, err);
+      }
+      if (!has_err) {
+        if (version != GFF_VERSION) {
+          error_set(err, "GFF version %d does not equal required version %u ",
+                    version, GFF_VERSION);
+          has_err = -1;
+        }
       }
     }
     else if (line_length == 0)

@@ -40,7 +40,7 @@ static void gff3_version_string(GenomeVisitor *gv)
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gff3_visitor);
   if (!gff3_visitor->version_string_shown) {
-    fprintf(gff3_visitor->outfp, "%s\n", GFF_VERSION_STRING);
+    fprintf(gff3_visitor->outfp, "%s   %u\n", GFF_VERSION_PREFIX, GFF_VERSION);
     gff3_visitor->version_string_shown = 1;
   }
 }

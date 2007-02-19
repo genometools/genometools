@@ -10,7 +10,8 @@
 #include "error.h"
 #include "queue.h"
 
-#define GFF_VERSION_STRING  "##gff-version   3"
+#define GFF_VERSION         3
+#define GFF_VERSION_PREFIX  "##gff-version"
 #define GFF_SEQUENCE_REGION "##sequence-region"
 #define GFF_TERMINATOR      "###"
 

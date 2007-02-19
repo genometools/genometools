@@ -96,6 +96,26 @@ Test do
   run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_test_18.gff3", :retval => 1)
 end
 
+Name "gt gff3 test 19"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_19.gff3"
+end
+
+Name "gt gff3 test 20"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_test_20.gff3", :retval => 1);
+  grep($last_stderr, /could not parse/);
+end
+
+Name "gt gff3 test 21"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_test_21.gff3", :retval => 1);
+  grep($last_stderr, /does not equal required version/);
+end
+
 Name "gt gff3 fail 1"
 Keywords "gt_gff3"
 Test do
