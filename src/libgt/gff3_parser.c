@@ -355,17 +355,11 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     if (!has_err) {
       assert(seqid_str);
       gn = sequence_region_new(seqid_str, range, filename, line_number);
-                               queue_add(genome_nodes, gn);
+      queue_add(genome_nodes, gn);
     }
     *break_loop = true;
   }
   else if (strcmp(line, GFF_TERMINATOR) == 0) { /* terminator */
-    if (!queue_size(genome_nodes)) {
-      error_set(err, "terminator tag \"%s\" given on line %lu in file \"%s\" "
-                "before a feature was defined", GFF_TERMINATOR, line_number,
-                filename);
-      has_err = -1;
-    }
     *break_loop = true;
   }
   else {
