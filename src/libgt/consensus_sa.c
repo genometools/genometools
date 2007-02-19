@@ -122,8 +122,8 @@ static unsigned int compatible(const Consensus_SA *csa,
   /* check strands */
   if (extract_strand(csa, sa_1) != extract_strand(csa, sa_2)) return 0;
 
-  exons_sa_1 = array_new(sizeof(Range));
-  exons_sa_2 = array_new(sizeof(Range));
+  exons_sa_1 = array_new(sizeof (Range));
+  exons_sa_2 = array_new(sizeof (Range));
 
   /* get ranges */
   range_sa_1 = extract_genomic_range(csa, sa_1);
@@ -490,11 +490,11 @@ static void compute_csas(Consensus_SA *csa)
   assert(csa && csa->set_of_sas);
 
   /* init sets */
-  C     = xmalloc(sizeof(Bittab*) * csa->number_of_sas);
-  left  = xmalloc(sizeof(Bittab*) * csa->number_of_sas);
-  right = xmalloc(sizeof(Bittab*) * csa->number_of_sas);
-  L     = xmalloc(sizeof(Bittab*) * csa->number_of_sas);
-  R     = xmalloc(sizeof(Bittab*) * csa->number_of_sas);
+  C     = xmalloc(sizeof (Bittab*) * csa->number_of_sas);
+  left  = xmalloc(sizeof (Bittab*) * csa->number_of_sas);
+  right = xmalloc(sizeof (Bittab*) * csa->number_of_sas);
+  L     = xmalloc(sizeof (Bittab*) * csa->number_of_sas);
+  R     = xmalloc(sizeof (Bittab*) * csa->number_of_sas);
 
   for (i = 0; i < csa->number_of_sas; i++) {
     C[i]     = bittab_new(csa->number_of_sas);
@@ -508,7 +508,7 @@ static void compute_csas(Consensus_SA *csa)
   SA_i     = bittab_new(csa->number_of_sas);
   SA_prime = bittab_new(csa->number_of_sas);
 
-  splice_form = array_new(sizeof(unsigned long));
+  splice_form = array_new(sizeof (unsigned long));
 
   /* compute sets */
   compute_C(C, csa);

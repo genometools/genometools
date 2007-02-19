@@ -31,7 +31,7 @@ GenFile*  genfile_xopen(GenFileMode genfilemode, const char *path,
 {
   GenFile *genfile;
   assert(path && mode);
-  genfile = xcalloc(1, sizeof(GenFile));
+  genfile = xcalloc(1, sizeof (GenFile));
   genfile->mode = genfilemode;
   switch (genfilemode) {
     case UNCOMPRESSED:

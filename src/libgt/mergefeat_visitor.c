@@ -90,7 +90,7 @@ static int mergefeat_visitor_genome_feature(GenomeVisitor *gv,
 
 const GenomeVisitorClass* mergefeat_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof(MergefeatVisitor),
+  static const GenomeVisitorClass gvc = { sizeof (MergefeatVisitor),
                                             mergefeat_visitor_free,
                                             NULL,
                                             mergefeat_visitor_genome_feature,

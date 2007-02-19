@@ -120,7 +120,7 @@ static int csa_visitor_default_func(GenomeVisitor *gv, GenomeNode *gn,
 
 const GenomeVisitorClass* csa_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof(CSAVisitor),
+  static const GenomeVisitorClass gvc = { sizeof (CSAVisitor),
                                           csa_visitor_free,
                                           NULL,
                                           csa_visitor_genome_feature,
@@ -133,9 +133,9 @@ GenomeVisitor* csa_visitor_new(unsigned long join_length)
 {
   GenomeVisitor *gv = genome_visitor_create(csa_visitor_class());
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
-  csa_visitor->genome_node_buffer = queue_new(sizeof(GenomeNode*));
+  csa_visitor->genome_node_buffer = queue_new(sizeof (GenomeNode*));
   csa_visitor->join_length = join_length;
-  csa_visitor->cluster = array_new(sizeof(GenomeFeature*));
+  csa_visitor->cluster = array_new(sizeof (GenomeFeature*));
   csa_visitor->buffered_feature = NULL;
   csa_visitor->gth_csa_source_str = str_new_cstr(GT_CSA_SOURCE_TAG);
   return gv;
@@ -212,7 +212,7 @@ static void add_sa_to_exon_feature_array(Array *exon_nodes,
   assert(exon_nodes && sa);
   assert(gene_strand != STRAND_BOTH); /* is defined */
 
-  exons_from_sa = array_new(sizeof(GenomeFeature*));
+  exons_from_sa = array_new(sizeof (GenomeFeature*));
   genome_feature_get_exons(sa, exons_from_sa);
   genome_nodes_sort(exons_from_sa);
 
@@ -299,7 +299,7 @@ static void add_sa_to_exon_feature_array(Array *exon_nodes,
 static unsigned int genome_nodes_are_sorted_and_do_not_overlap(Array
                                                                *exon_nodes)
 {
-  Array *ranges = array_new(sizeof(Range));
+  Array *ranges = array_new(sizeof (Range));
   unsigned long i;
   Range range;
   unsigned int rval;
@@ -377,7 +377,7 @@ static void process_splice_form(Array *spliced_alignments_in_form,
     info->is_first_splice_form = false;
   }
 
-  exon_nodes = array_new(sizeof(GenomeNode*));
+  exon_nodes = array_new(sizeof (GenomeNode*));
 
   for (i = 0; i < array_size(spliced_alignments_in_form); i++) {
     sa_num = *(unsigned long*) array_get(spliced_alignments_in_form, i);
@@ -436,7 +436,7 @@ void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster, Log *l)
   }
   consensus_sa(array_get_space(csa_visitor->cluster),
                array_size(csa_visitor->cluster),
-               sizeof(GenomeFeature*),
+               sizeof (GenomeFeature*),
                get_genomic_range,
                get_strand,
                get_exons,

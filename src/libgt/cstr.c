@@ -23,9 +23,9 @@ char** cstr_array_prefix_first(char **cstr_array, const char *p)
   char **a;
   assert(cstr_array && p);
   a_len = cstr_array_size(cstr_array);
-  a = xmalloc(sizeof(char*) * (a_len + 1));
+  a = xmalloc(sizeof (char*) * (a_len + 1));
   f_len = strlen(p) + strlen(cstr_array[0]) + 2; /* blank + '\0' */
-  a[0] = xmalloc(sizeof(char) * f_len);
+  a[0] = xmalloc(sizeof (char) * f_len);
   (void) snprintf(a[0], f_len, "%s %s", p, cstr_array[0]);
   for (i = 1; i < a_len; i++)
     a[i] = xstrdup(cstr_array[i]);

@@ -24,7 +24,7 @@ struct Timer {
 Timer* timer_new(void)
 {
   Timer *t;
-  t = xmalloc(sizeof(Timer));
+  t = xmalloc(sizeof (Timer));
   t->state = TIMER_RUNNING;
   return t;
 }

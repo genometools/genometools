@@ -39,7 +39,7 @@ static int show_exercise_tools(const char *progname, void *data, Error *err)
   error_check(err);
   assert(data);
   exercise_tools = (Hashtable*) data;
-  exercisenames = array_new(sizeof(const char*));
+  exercisenames = array_new(sizeof (const char*));
   has_err = hashtable_foreach(exercise_tools, save_exercise_name, exercisenames,
                               err);
   assert(!has_err); /* cannot happen, save_exercise_name() is sane */

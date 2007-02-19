@@ -38,7 +38,7 @@ static void mergefeat_stream_sorted_free(GenomeStream *gs)
 
 const GenomeStreamClass* mergefeat_stream_sorted_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof(MergefeatStreamSorted),
+  static const GenomeStreamClass gsc = { sizeof (MergefeatStreamSorted),
                                          mergefeat_stream_sorted_next_tree,
                                          mergefeat_stream_sorted_free };
   return &gsc;

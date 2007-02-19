@@ -136,8 +136,8 @@ int genome_node_traverse_children(GenomeNode *genome_node,
   if (!genome_node)
     return 0;
 
-  node_stack = array_new(sizeof(GenomeNode*));
-  list_of_children = array_new(sizeof(GenomeNode*));
+  node_stack = array_new(sizeof (GenomeNode*));
+  list_of_children = array_new(sizeof (GenomeNode*));
   array_add(node_stack, genome_node);
 
   if (traverse_only_once)
@@ -330,7 +330,7 @@ bool genome_node_has_children(GenomeNode *gn)
 
 bool genome_node_direct_children_do_not_overlap(GenomeNode *gn)
 {
-  Array *children_ranges = array_new(sizeof(Range));
+  Array *children_ranges = array_new(sizeof (Range));
   Dlistelem *dlistelem;
   Range range;
   bool rval;
@@ -441,13 +441,13 @@ void genome_node_rec_free(GenomeNode *gn)
 
 void genome_nodes_sort(Array *nodes)
 {
-  qsort(array_get_space(nodes), array_size(nodes), sizeof(GenomeNode*),
+  qsort(array_get_space(nodes), array_size(nodes), sizeof (GenomeNode*),
         (Compare) genome_node_compare);
 }
 
 void genome_nodes_sort_stable(Array *nodes)
 {
-  msort(array_get_space(nodes), array_size(nodes), sizeof(GenomeNode*),
+  msort(array_get_space(nodes), array_size(nodes), sizeof (GenomeNode*),
         (Compare) genome_node_compare);
 
 }

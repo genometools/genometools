@@ -135,19 +135,19 @@ int range_unit_test(Error *err)
   int has_err = 0;
   error_check(err);
 
-  ensure(has_err, sizeof(ranges_out) / sizeof(ranges_out[0]) ==
-                  sizeof(counts)     / sizeof(counts[0]));
+  ensure(has_err, sizeof (ranges_out) / sizeof (ranges_out[0]) ==
+                  sizeof (counts)     / sizeof (counts[0]));
 
   /* test ranges_uniq() */
-  ranges = array_new(sizeof(Range));
-  tmp_ranges = array_new(sizeof(Range));
-  for (i = 0; i < sizeof(ranges_in) / sizeof(ranges_in[0]) && !has_err; i++)
+  ranges = array_new(sizeof (Range));
+  tmp_ranges = array_new(sizeof (Range));
+  for (i = 0; i < sizeof (ranges_in) / sizeof (ranges_in[0]) && !has_err; i++)
     array_add(ranges, ranges_in[i]);
   ranges_uniq(tmp_ranges, ranges);
-  ensure(has_err,
-         array_size(ranges) == sizeof(ranges_in) / sizeof(ranges_in[0]));
-  ensure(has_err,
-         array_size(tmp_ranges) == sizeof(ranges_out) / sizeof(ranges_out[0]));
+  ensure(has_err, array_size(ranges) ==
+                  sizeof (ranges_in) / sizeof (ranges_in[0]));
+  ensure(has_err, array_size(tmp_ranges) ==
+                  sizeof (ranges_out) / sizeof (ranges_out[0]));
   for (i = 0; i < array_size(tmp_ranges) && !has_err; i++) {
     ensure(has_err,
            ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
@@ -170,7 +170,7 @@ int range_unit_test(Error *err)
   array_set_size(tmp_ranges, 0);
   ctr = ranges_uniq_count(tmp_ranges, ranges);
   ensure(has_err, array_size(tmp_ranges) == array_size(ctr));
-  ensure(has_err, array_size(ctr) == sizeof(counts) / sizeof(counts[0]));
+  ensure(has_err, array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
   for (i = 0; i < array_size(ctr) && !has_err; i++) {
     ensure(has_err, counts[i] == *(unsigned long*) array_get(ctr, i));
     ensure(has_err,
@@ -183,7 +183,7 @@ int range_unit_test(Error *err)
   /* test ranges_uniq_in_place_count() */
   ctr = ranges_uniq_in_place_count(ranges);
   ensure(has_err, array_size(ranges) == array_size(ctr));
-  ensure(has_err, array_size(ctr) == sizeof(counts) / sizeof(counts[0]));
+  ensure(has_err, array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
   for (i = 0; i < array_size(ctr) && !has_err; i++) {
     ensure(has_err, counts[i] == *(unsigned long*) array_get(ctr, i));
     ensure(has_err,
@@ -202,14 +202,14 @@ int range_unit_test(Error *err)
 void ranges_sort(Array *ranges)
 {
   assert(ranges);
-  qsort(array_get_space(ranges), array_size(ranges), sizeof(Range),
+  qsort(array_get_space(ranges), array_size(ranges), sizeof (Range),
         (Compare) range_compare_ptr);
 }
 
 void ranges_sort_by_length_stable(Array *ranges)
 {
   assert(ranges);
-  msort(array_get_space(ranges), array_size(ranges), sizeof(Range),
+  msort(array_get_space(ranges), array_size(ranges), sizeof (Range),
         (Compare) range_compare_by_length_ptr);
 }
 
@@ -278,7 +278,7 @@ static Array* generic_ranges_uniq(Array *out_ranges, const Array *in_ranges,
   assert(out_ranges && in_ranges);
   assert(ranges_are_sorted(in_ranges));
   if (count)
-    count_array = array_new(sizeof(unsigned long));
+    count_array = array_new(sizeof (unsigned long));
   for (i = 0; i < array_size(in_ranges); i++) {
     cur = *(Range*) array_get(in_ranges, i);
     if (!i) {
@@ -308,7 +308,7 @@ static Array* generic_ranges_uniq_in_place(Array *ranges, unsigned int count)
 {
   Array *out_ranges, *count_array;
   assert(ranges);
-  out_ranges = array_new(sizeof(Range));
+  out_ranges = array_new(sizeof (Range));
   count_array = generic_ranges_uniq(out_ranges, ranges, count);
   array_set_size(ranges, 0);
   array_add_array(ranges, out_ranges); /* XXX: could be more efficient with

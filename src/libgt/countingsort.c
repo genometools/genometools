@@ -18,7 +18,7 @@ void countingsort(void *out, const void *in, size_t elem_size,
   assert(out && in && elem_size && size && max_elemvalue && get_elemvalue);
 
   /* allocate count array */
-  c = xcalloc(sizeof(unsigned long), max_elemvalue + 1);
+  c = xcalloc(sizeof (unsigned long), max_elemvalue + 1);
 
   /* count number of elements of a given value */
   for (i = 0; i < size; i++) {
@@ -67,10 +67,10 @@ int countingsort_unit_test(Error *err)
                sorted_numbers[] = { 0, 1, 1, 2, 2 };
   int has_err = 0;
   error_check(err);
-  countingsort(numbers_out, numbers, sizeof(unsigned int), 5,
-               countingsort_get_max(numbers, sizeof(unsigned int), 5, NULL,
+  countingsort(numbers_out, numbers, sizeof (unsigned int), 5,
+               countingsort_get_max(numbers, sizeof (unsigned int), 5, NULL,
                                     get_int), NULL,  get_int);
   ensure(has_err,
-         !memcmp(sorted_numbers, numbers_out, sizeof(unsigned int) * 5));
+         !memcmp(sorted_numbers, numbers_out, sizeof (unsigned int) * 5));
   return has_err;
 }

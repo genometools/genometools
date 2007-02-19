@@ -24,7 +24,7 @@ ScoreMatrix* scorematrix_new(Alpha *alpha)
 {
   ScoreMatrix *s;
   assert(alpha);
-  s = xmalloc(sizeof(ScoreMatrix));
+  s = xmalloc(sizeof (ScoreMatrix));
   s->alpha = alpha_ref(alpha);
   s->dimension = alpha_size(alpha);
   array2dim_calloc(s->scores, s->dimension, s->dimension, int);
@@ -153,7 +153,7 @@ static int parse_scorematrix(ScoreMatrix *s, const char *path, Error *err)
   assert(s && path && s->alpha);
   error_check(err);
   tz = tokenizer_new(io_new(path, "r"));
-  index_to_alpha_char_mapping = array_new(sizeof(char));
+  index_to_alpha_char_mapping = array_new(sizeof (char));
   tokenizer_skip_comment_lines(tz);
   has_err = parse_alphabet_line(index_to_alpha_char_mapping, tz, err);
   if (!has_err) {

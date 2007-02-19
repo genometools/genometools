@@ -50,9 +50,9 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
 
   result = bsearch(&feature_string,
                    GTF_feature_type_strings,
-                   sizeof(GTF_feature_type_strings) /
-                   sizeof(GTF_feature_type_strings[0]),
-                   sizeof(char*),
+                   sizeof (GTF_feature_type_strings) /
+                   sizeof (GTF_feature_type_strings[0]),
+                   sizeof (char*),
                    compare);
 
   if (result) {
@@ -66,7 +66,7 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
 
 GTF_parser* gtf_parser_new(void)
 {
-  GTF_parser *parser = xmalloc(sizeof(GTF_parser));
+  GTF_parser *parser = xmalloc(sizeof (GTF_parser));
 
   parser->sequence_region_to_range = hashtable_new(HASH_STRING, free, free);
   parser->gene_id_hash = hashtable_new(HASH_STRING, free,
@@ -155,7 +155,7 @@ static int construct_genes(void *key, void *value, void *data, Error *err)
 {
   Hashtable *transcript_id_hash = (Hashtable*) value;
   Queue *genome_nodes = (Queue*) data;
-  Array *mRNAs = array_new(sizeof(GenomeNode*));
+  Array *mRNAs = array_new(sizeof (GenomeNode*));
   GenomeNode *gene_node, *gn;
   Strand gene_strand;
   Range gene_range;
@@ -327,7 +327,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       }
       else {
         /* sequence region is not already defined -> define it */
-        rangeptr = xmalloc(sizeof(Range));
+        rangeptr = xmalloc(sizeof (Range));
         *rangeptr = range;
         hashtable_add(parser->sequence_region_to_range, xstrdup(seqname),
                       rangeptr);
@@ -404,7 +404,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
 
       if (!(genome_node_array = hashtable_get(transcript_id_hash,
                                               transcript_id))) {
-        genome_node_array = array_new(sizeof(GenomeNode*));
+        genome_node_array = array_new(sizeof (GenomeNode*));
         hashtable_add(transcript_id_hash, xstrdup(transcript_id),
                       genome_node_array);
       }

@@ -74,7 +74,7 @@ static int add_id(GenomeNode *gn, void *data, Error *err)
   assert(gn && info && info->genome_feature_to_id_array && info->id);
   parent_features = hashtable_get(info->genome_feature_to_id_array, gn);
   if (!parent_features) {
-    parent_features = array_new(sizeof(char*));
+    parent_features = array_new(sizeof (char*));
     hashtable_add(info->genome_feature_to_id_array, gn, parent_features);
   }
   array_add(parent_features, info->id);
@@ -211,7 +211,7 @@ static int gff3_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
 
 const GenomeVisitorClass* gff3_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof(GFF3Visitor),
+  static const GenomeVisitorClass gvc = { sizeof (GFF3Visitor),
                                           gff3_visitor_free,
                                           gff3_visitor_comment,
                                           gff3_visitor_genome_feature,
@@ -226,7 +226,7 @@ GenomeVisitor* gff3_visitor_new(FILE *outfp)
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   gff3_visitor->version_string_shown = 0;
   gff3_visitor->id_counter = xcalloc(genome_feature_type_num_of_features(),
-                                     sizeof(unsigned long));
+                                     sizeof (unsigned long));
   gff3_visitor->genome_feature_to_id_array = hashtable_new(HASH_DIRECT, NULL,
                                                            (Free) array_free);
   gff3_visitor->genome_feature_to_unique_id_str = hashtable_new(HASH_DIRECT,

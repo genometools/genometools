@@ -72,15 +72,15 @@ typedef struct {
 
 static Slot* slot_new(void)
 {
-  Slot *s = xcalloc(sizeof(Slot), 1);
-  s->genes_forward = array_new(sizeof(GenomeNode*));
-  s->genes_reverse = array_new(sizeof(GenomeNode*));
-  s->mRNAs_forward = array_new(sizeof(GenomeNode*));
-  s->mRNAs_reverse = array_new(sizeof(GenomeNode*));
-  s->mRNA_exons_forward = array_new(sizeof(Range));
-  s->mRNA_exons_reverse = array_new(sizeof(Range));
-  s->CDS_exons_forward = array_new(sizeof(Range));
-  s->CDS_exons_reverse = array_new(sizeof(Range));
+  Slot *s = xcalloc(sizeof (Slot), 1);
+  s->genes_forward = array_new(sizeof (GenomeNode*));
+  s->genes_reverse = array_new(sizeof (GenomeNode*));
+  s->mRNAs_forward = array_new(sizeof (GenomeNode*));
+  s->mRNAs_reverse = array_new(sizeof (GenomeNode*));
+  s->mRNA_exons_forward = array_new(sizeof (Range));
+  s->mRNA_exons_reverse = array_new(sizeof (Range));
+  s->CDS_exons_forward = array_new(sizeof (Range));
+  s->CDS_exons_reverse = array_new(sizeof (Range));
   return s;
 }
 
@@ -122,7 +122,7 @@ static void slot_free(Slot *s)
 StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
                                       GenomeStream *prediction)
 {
-  StreamEvaluator *evaluator = xmalloc(sizeof(StreamEvaluator));
+  StreamEvaluator *evaluator = xmalloc(sizeof (StreamEvaluator));
   evaluator->reality = reality;
   evaluator->prediction = prediction;
   evaluator->real_features = hashtable_new(HASH_STRING, NULL, (Free) slot_free);
@@ -334,8 +334,8 @@ static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   assert(gn_1 && gn_2);
 
   /* init */
-  exons_1 = array_new(sizeof(Range));
-  exons_2 = array_new(sizeof(Range));
+  exons_1 = array_new(sizeof (Range));
+  exons_2 = array_new(sizeof (Range));
 
   /* get exon ranges */
   has_err = genome_node_traverse_children(gn_1, exons_1, store_exon, false,
@@ -395,10 +395,10 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   int has_err;
 
   /* init */
-  exons_1 = array_new(sizeof(Range));
-  exons_2 = array_new(sizeof(Range));
-  mRNAs_1 = array_new(sizeof(GenomeNode*));
-  mRNAs_2 = array_new(sizeof(GenomeNode*));
+  exons_1 = array_new(sizeof (Range));
+  exons_2 = array_new(sizeof (Range));
+  mRNAs_1 = array_new(sizeof (GenomeNode*));
+  mRNAs_2 = array_new(sizeof (GenomeNode*));
 
   /* get (direct) gene features */
   info.exons = exons_1;
@@ -456,7 +456,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Error *err)
 
   predicted_range = genome_node_get_range(gn);
   predicted_strand = genome_feature_get_strand((GenomeFeature*) gn);
-  real_genome_nodes = array_new(sizeof(GenomeNode**));
+  real_genome_nodes = array_new(sizeof (GenomeNode**));
 
   switch (genome_feature_get_type((GenomeFeature*) gn)) {
     case gft_gene:
@@ -473,7 +473,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Error *err)
                            predicted_strand == STRAND_FORWARD
                            ? array_size(info->slot->genes_forward)
                            : array_size(info->slot->genes_reverse),
-                           sizeof(GenomeNode*), (Compare) genome_node_compare,
+                           sizeof (GenomeNode*), (Compare) genome_node_compare,
                            predicted_strand == STRAND_FORWARD
                            ? info->slot->overlapped_genes_forward
                            : info->slot->overlapped_genes_reverse);
@@ -540,7 +540,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Error *err)
                            predicted_strand == STRAND_FORWARD
                            ? array_size(info->slot->mRNAs_forward)
                            : array_size(info->slot->mRNAs_reverse),
-                           sizeof(GenomeNode*), (Compare) genome_node_compare,
+                           sizeof (GenomeNode*), (Compare) genome_node_compare,
                            predicted_strand == STRAND_FORWARD
                            ? info->slot->overlapped_mRNAs_forward
                            : info->slot->overlapped_mRNAs_reverse);
@@ -608,7 +608,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Error *err)
                        predicted_strand == STRAND_FORWARD
                        ? array_size(info->slot->mRNA_exons_forward)
                        : array_size(info->slot->mRNA_exons_reverse),
-                       sizeof(Range),
+                       sizeof (Range),
                        (Compare) range_compare_ptr))) {
             if (predicted_strand == STRAND_FORWARD) {
               num = actual_range -
@@ -657,7 +657,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Error *err)
                        predicted_strand == STRAND_FORWARD
                        ?  array_size(info->slot->CDS_exons_forward)
                        :  array_size(info->slot->CDS_exons_reverse),
-                       sizeof(Range),
+                       sizeof (Range),
                        (Compare) range_compare_ptr))) {
             if (predicted_strand == STRAND_FORWARD) {
               num = actual_range -

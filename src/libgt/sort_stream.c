@@ -80,6 +80,6 @@ GenomeStream* sort_stream_new(GenomeStream *in_stream)
   sort_stream->in_stream = in_stream;
   sort_stream->sorted = false;
   sort_stream->idx = 0;
-  sort_stream->trees = array_new(sizeof(GenomeNode*));
+  sort_stream->trees = array_new(sizeof (GenomeNode*));
   return gs;
 }

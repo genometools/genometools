@@ -20,7 +20,7 @@ IO* io_new(const char *path, const char *mode)
   IO *io;
   assert(path && mode);
   assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
-  io = xmalloc(sizeof(IO));
+  io = xmalloc(sizeof (IO));
   io->fp = xfopen(path, mode);
   io->path = xstrdup(path);
   io->line_number = 1;

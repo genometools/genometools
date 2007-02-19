@@ -47,7 +47,7 @@ static void extractfeat_stream_free(GenomeStream *gs)
 
 const GenomeStreamClass* extractfeat_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof(ExtractFeatStream),
+  static const GenomeStreamClass gsc = { sizeof (ExtractFeatStream),
                                          extractfeat_stream_next_tree,
                                          extractfeat_stream_free };
   return &gsc;

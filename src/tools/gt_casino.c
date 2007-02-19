@@ -37,7 +37,7 @@ int gt_casino(int argc, char *argv[], Error *err)
 
   /* save sequence */
   num_of_emissions = strlen(argv[1]);
-  emissions = xmalloc(sizeof(unsigned int) * num_of_emissions);
+  emissions = xmalloc(sizeof (unsigned int) * num_of_emissions);
   for (i = 0; i < num_of_emissions; i++) {
     emissions[i] = argv[1][i];
     switch (emissions[i]) {
@@ -71,7 +71,7 @@ int gt_casino(int argc, char *argv[], Error *err)
     hmm = dice_hmm_loaded();
 
     /* decoding */
-    state_sequence = xmalloc(sizeof(unsigned int) * num_of_emissions);
+    state_sequence = xmalloc(sizeof (unsigned int) * num_of_emissions);
     hmm_decode(hmm, state_sequence, emissions, num_of_emissions);
 
     /* print most probable state sequence state sequence */

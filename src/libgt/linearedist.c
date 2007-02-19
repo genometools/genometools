@@ -33,7 +33,7 @@ unsigned long linearedist(const char *u, unsigned long n,
                           const char *v, unsigned long m)
 {
   unsigned long *dptable, edist;
-  dptable = xmalloc(sizeof(unsigned long) * (MIN(n,m) + 1));
+  dptable = xmalloc(sizeof (unsigned long) * (MIN(n,m) + 1));
   fillDPtable(dptable, n <= m ? u : v, MIN(n,m), n <= m ? v : u, MAX(n,m));
   edist = dptable[MIN(n,m)];
   free(dptable);

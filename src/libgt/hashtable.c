@@ -28,7 +28,7 @@ typedef struct {
 Hashtable* hashtable_new(Hash_type hash_type, Hashkeyfreefunc key_free,
                          Hashvaluefreefunc value_free)
 {
-  Hashtable *ht = xmalloc(sizeof(Hashtable));
+  Hashtable *ht = xmalloc(sizeof (Hashtable));
   ht->hash_type = hash_type;
   ht->key_free = key_free;
   ht->value_free = value_free;

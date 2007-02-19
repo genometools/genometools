@@ -87,7 +87,7 @@ static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l,
 
 const GenomeNodeClass* genome_feature_class()
 {
-  static const GenomeNodeClass gnc = { sizeof(GenomeFeature),
+  static const GenomeNodeClass gnc = { sizeof (GenomeFeature),
                                        genome_feature_free,
                                        genome_feature_get_seqid,
                                        genome_feature_get_seqid,

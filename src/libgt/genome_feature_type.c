@@ -30,9 +30,9 @@ int genome_feature_type_get(GenomeFeatureType *type, char *gft_string)
 
   result = bsearch(&gft_string,
                    genome_feature_type_strings,
-                   sizeof(genome_feature_type_strings) /
-                   sizeof(genome_feature_type_strings[0]),
-                   sizeof(char*),
+                   sizeof (genome_feature_type_strings) /
+                   sizeof (genome_feature_type_strings[0]),
+                   sizeof (char*),
                    compare);
 
   if (result) {
@@ -51,6 +51,6 @@ const char* genome_feature_type_get_cstr(GenomeFeatureType type)
 
 unsigned long genome_feature_type_num_of_features(void)
 {
-  return sizeof(genome_feature_type_strings) /
-         sizeof(genome_feature_type_strings[0]);
+  return sizeof (genome_feature_type_strings) /
+         sizeof (genome_feature_type_strings[0]);
 }

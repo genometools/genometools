@@ -40,7 +40,7 @@ static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
   nj->numofnodes = 2 * num_of_taxa - 2;
   nj->finalnodeA = UNDEFULONG;
   nj->finalnodeB = UNDEFULONG;
-  nj->nodes      = xmalloc(sizeof(NJnode) * nj->numofnodes);
+  nj->nodes      = xmalloc(sizeof (NJnode) * nj->numofnodes);
 
   for (i = 0; i < nj->numofnodes; i++) {
     nj->nodes[i].leftdaughter  = UNDEFULONG;
@@ -49,7 +49,7 @@ static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
     nj->nodes[i].rightdist     = UNDEFDOUBLE;
 
     if (i > 0) {
-      nj->nodes[i].distances = xmalloc(sizeof(double) * i);
+      nj->nodes[i].distances = xmalloc(sizeof (double) * i);
       for (j = 0; j < i; j++) {
         if (i < num_of_taxa) {
           retval = distfunc(i, j, data);
@@ -109,7 +109,7 @@ static void neighborjoining_compute(NeighborJoining *nj)
   activenodes = nj->num_of_taxa;
 
   /* init the r table */
-  rtab = xmalloc(sizeof(double) * nj->numofnodes);
+  rtab = xmalloc(sizeof (double) * nj->numofnodes);
 
   /* the neighbor joining takes num_of_taxa - 2 steps */
   for (step = 0; step < nj->num_of_taxa - 2; step++) {
@@ -179,7 +179,7 @@ NeighborJoining* neighborjoining_new(unsigned long num_of_taxa, void *data,
 {
   NeighborJoining *nj;
   assert(num_of_taxa && distfunc);
-  nj = xmalloc(sizeof(NeighborJoining));
+  nj = xmalloc(sizeof (NeighborJoining));
   neighborjoining_init(nj, num_of_taxa, data, distfunc);
   neighborjoining_compute(nj);
   return nj;

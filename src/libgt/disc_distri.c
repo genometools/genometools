@@ -17,7 +17,7 @@ struct Disc_distri {
 
 Disc_distri* disc_distri_new(void)
 {
-  return xcalloc(1, sizeof(Disc_distri));
+  return xcalloc(1, sizeof (Disc_distri));
 }
 
 void disc_distri_add(Disc_distri *d, unsigned long value)
@@ -26,7 +26,7 @@ void disc_distri_add(Disc_distri *d, unsigned long value)
   assert(d);
 
   if (!d->values)
-    d->values = array_new(sizeof(unsigned long));
+    d->values = array_new(sizeof (unsigned long));
 
   while (array_size(d->values) <= value)
     array_add(d->values, zero);

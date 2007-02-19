@@ -40,7 +40,7 @@ static void cds_stream_free(GenomeStream *gs)
 
 const GenomeStreamClass* cds_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof(CDSStream),
+  static const GenomeStreamClass gsc = { sizeof (CDSStream),
                                          cds_stream_next_tree,
                                          cds_stream_free };
   return &gsc;

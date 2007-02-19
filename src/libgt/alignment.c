@@ -38,8 +38,8 @@ typedef struct {
 Alignment* alignment_new(void)
 {
   Alignment *a;
-  a = xcalloc(1, sizeof(Alignment));
-  a->eops = array_new(sizeof(Multieop));
+  a = xcalloc(1, sizeof (Alignment));
+  a->eops = array_new(sizeof (Multieop));
   return a;
 }
 

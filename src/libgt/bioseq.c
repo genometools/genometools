@@ -213,7 +213,7 @@ static Bioseq* bioseq_new_with_recreate(Str *sequence_file,
   Bioseq *bs;
   int has_err = 0;
   error_check(err);
-  bs = xcalloc(1, sizeof(Bioseq));
+  bs = xcalloc(1, sizeof (Bioseq));
   if (!file_exists(str_get(sequence_file))) {
     error_set(err, "sequence file \"%s\" does not exist or is not readable",
               str_get(sequence_file));
@@ -221,8 +221,8 @@ static Bioseq* bioseq_new_with_recreate(Str *sequence_file,
   }
   if (!has_err) {
     bs->sequence_file = str_ref(sequence_file);
-    bs->descriptions = array_new(sizeof(char*));
-    bs->sequence_ranges = array_new(sizeof(Range));
+    bs->descriptions = array_new(sizeof (char*));
+    bs->sequence_ranges = array_new(sizeof (Range));
     has_err = bioseq_fill(bs, recreate, err);
   }
   if (has_err) {
@@ -264,7 +264,7 @@ Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx)
   assert(bs);
   assert(idx < array_size(bs->descriptions));
   if (!bs->seqs)
-    bs->seqs = xcalloc(array_size(bs->descriptions), sizeof(Seq*));
+    bs->seqs = xcalloc(array_size(bs->descriptions), sizeof (Seq*));
   if (!bs->alpha) {
     bs->alpha = alpha_guess(bioseq_get_raw_sequence(bs),
                             bioseq_get_raw_sequence_length(bs));

@@ -44,8 +44,8 @@ HMM* hmm_new(unsigned int num_of_states, unsigned int num_of_symbols)
   assert(num_of_states > 0 && num_of_symbols > 0);
 
   /* alloc */
-  hmm = xmalloc(sizeof(HMM));
-  hmm->initial_state_prob = xmalloc(sizeof(double) * num_of_states);
+  hmm = xmalloc(sizeof (HMM));
+  hmm->initial_state_prob = xmalloc(sizeof (double) * num_of_states);
   array2dim_malloc(hmm->transition_prob, num_of_states, num_of_states, double);
   array2dim_malloc(hmm->emission_prob, num_of_states, num_of_symbols, double);
 
@@ -593,8 +593,8 @@ int hmm_unit_test(Error *err)
   fair_hmm = coin_hmm_fair();
   loaded_hmm = coin_hmm_loaded();
   alpha = coin_hmm_alpha();
-  size = sizeof(coin_tosses) / sizeof(coin_tosses[0]);
-  encoded_seq = xmalloc(sizeof(int) * strlen(coin_tosses[size-1]));
+  size = sizeof (coin_tosses) / sizeof (coin_tosses[0]);
+  encoded_seq = xmalloc(sizeof (int) * strlen(coin_tosses[size-1]));
 
   for (i = 0; i < size && !has_err; i++) {
     len = strlen(coin_tosses[i]);
@@ -621,8 +621,8 @@ int hmm_unit_test(Error *err)
   fair_hmm = dice_hmm_fair();
   loaded_hmm = dice_hmm_loaded();
   alpha = dice_hmm_alpha();
-  size = sizeof(dice_rolls) / sizeof(dice_rolls[0]);
-  encoded_seq = xmalloc(sizeof(int) * strlen(dice_rolls[size-1]));
+  size = sizeof (dice_rolls) / sizeof (dice_rolls[0]);
+  encoded_seq = xmalloc(sizeof (int) * strlen(dice_rolls[size-1]));
 
   for (i = 0; i < size && !has_err; i++) {
     len = strlen(dice_rolls[i]);

@@ -24,7 +24,7 @@ struct Array {
 
 Array* array_new(size_t size_of_elem)
 {
-  Array *a = xcalloc(1, sizeof(Array));
+  Array *a = xcalloc(1, sizeof (Array));
   assert(size_of_elem);
   a->size_of_elem = size_of_elem;
   return a;
@@ -71,7 +71,7 @@ void array_reverse(Array *a)
 {
   void *front, *back, *tmp;
   assert(a);
-  tmp = xmalloc(sizeof(a->size_of_elem));
+  tmp = xmalloc(sizeof (a->size_of_elem));
   for (front = a->space, back = a->space + (a->next_free-1) * a->size_of_elem;
        front < back; front += a->size_of_elem, back -= a->size_of_elem) {
     memcpy(tmp, front, a->size_of_elem);
@@ -131,7 +131,7 @@ Array* array_clone(const Array *a)
 {
   Array *a_copy;
   assert(a);
-  a_copy = xmalloc(sizeof(Array));
+  a_copy = xmalloc(sizeof (Array));
   /* XXX: overflow checks -> safemult(next_free, size_of_elem) */
   a_copy->space = xmalloc(a->next_free * a->size_of_elem);
   memcpy(a_copy->space, a->space, a->next_free * a->size_of_elem);
@@ -150,15 +150,15 @@ int array_unit_test(Error *err)
   error_check(err);
 
   /* testing an empty array */
-  char_array = array_new(sizeof(char));
+  char_array = array_new(sizeof (char));
   array_free(char_array);
-  int_array = array_new(sizeof(int));
+  int_array = array_new(sizeof (int));
   array_free(int_array);
 
-  char_array = array_new(sizeof(char));
-  int_array = array_new(sizeof(int));
-  char_array_test = xmalloc((MAX_SIZE + 1) * sizeof(char));
-  int_array_test = xmalloc(MAX_SIZE * sizeof(int));
+  char_array = array_new(sizeof (char));
+  int_array = array_new(sizeof (int));
+  char_array_test = xmalloc((MAX_SIZE + 1) * sizeof (char));
+  int_array_test = xmalloc(MAX_SIZE * sizeof (int));
 
   for (i = 0; i < NUM_OF_TESTS && !has_err; i++) {
     size = ((double) rand() / RAND_MAX) * MAX_SIZE;
@@ -181,8 +181,8 @@ int array_unit_test(Error *err)
       ensure(has_err, *((char*) array_get(char_array, i)) == cc);
       ensure(has_err, *((int*) array_get(int_array, i)) == ci);
 
-      array_add_elem(char_array, &cc, sizeof(char));
-      array_add_elem(int_array, &ci, sizeof(int));
+      array_add_elem(char_array, &cc, sizeof (char));
+      array_add_elem(int_array, &ci, sizeof (int));
 
       ensure(has_err, array_size(char_array) == i+2);
       ensure(has_err, array_size(int_array) == i+2);

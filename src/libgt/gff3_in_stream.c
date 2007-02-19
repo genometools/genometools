@@ -153,7 +153,7 @@ static void gff3_in_stream_free(GenomeStream *gs)
 
 const GenomeStreamClass* gff3_in_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof(GFF3InStream),
+  static const GenomeStreamClass gsc = { sizeof (GFF3InStream),
                                          gff3_in_stream_next_tree,
                                          gff3_in_stream_free };
   return &gsc;
@@ -172,7 +172,7 @@ static GenomeStream* gff3_in_stream_new(Array *files, /* takes ownership */
   gff3_in_stream->non_stdin_file_is_open = false;
   gff3_in_stream->fpin                   = NULL;
   gff3_in_stream->line_number            = 0;
-  gff3_in_stream->genome_node_buffer     = queue_new(sizeof(GenomeNode*));
+  gff3_in_stream->genome_node_buffer     = queue_new(sizeof (GenomeNode*));
   gff3_in_stream->gff3_parser            = gff3_new();
   gff3_in_stream->last_node              = NULL;
   gff3_in_stream->be_verbose             = be_verbose;
@@ -190,7 +190,7 @@ GenomeStream* gff3_in_stream_new_unsorted(int num_of_files,
                                            bool be_verbose)
 {
   int i;
-  Array *files = array_new(sizeof(char*));
+  Array *files = array_new(sizeof (char*));
   for (i = 0; i < num_of_files; i++)
     array_add(files, filenames[i]);
   return gff3_in_stream_new(files, false, be_verbose);
@@ -199,7 +199,7 @@ GenomeStream* gff3_in_stream_new_unsorted(int num_of_files,
 GenomeStream* gff3_in_stream_new_sorted(char *filename,
                                          bool be_verbose)
 {
-  Array *files = array_new(sizeof(char*));
+  Array *files = array_new(sizeof (char*));
   if (filename)
     array_add(files, filename);
   return gff3_in_stream_new(files, true, be_verbose);

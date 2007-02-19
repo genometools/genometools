@@ -12,8 +12,8 @@
 #define array2dim_malloc(ARRAY2DIM, ROWS, COLUMNS, TYPE)             \
         {                                                            \
           unsigned long i;                                           \
-	  ARRAY2DIM = xmalloc(sizeof(TYPE*) * (ROWS));               \
-	  ARRAY2DIM[0] = xmalloc(sizeof(TYPE) * (ROWS) * (COLUMNS)); \
+	  ARRAY2DIM = xmalloc(sizeof (TYPE*) * (ROWS));               \
+	  ARRAY2DIM[0] = xmalloc(sizeof (TYPE) * (ROWS) * (COLUMNS)); \
 	  for (i = 1; i < (ROWS); i++)                               \
             ARRAY2DIM[i] = ARRAY2DIM[i-1] + (COLUMNS);               \
         }
@@ -21,8 +21,8 @@
 #define array2dim_calloc(ARRAY2DIM, ROWS, COLUMNS, TYPE)             \
         {                                                            \
           unsigned long i;                                           \
-	  ARRAY2DIM = xmalloc(sizeof(TYPE*) * (ROWS));               \
-	  ARRAY2DIM[0] = xcalloc((ROWS) * (COLUMNS), sizeof(TYPE));  \
+	  ARRAY2DIM = xmalloc(sizeof (TYPE*) * (ROWS));               \
+	  ARRAY2DIM[0] = xcalloc((ROWS) * (COLUMNS), sizeof (TYPE));  \
 	  for (i = 1; i < (ROWS); i++)                               \
             ARRAY2DIM[i] = ARRAY2DIM[i-1] + (COLUMNS);               \
         }

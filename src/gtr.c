@@ -28,7 +28,7 @@ struct GTR {
 
 GTR* gtr_new(void)
 {
-  return xcalloc(1, sizeof(GTR));
+  return xcalloc(1, sizeof (GTR));
 }
 
 static int show_tool(void *key, void *value, void *data, Error *err)
@@ -52,7 +52,7 @@ static int show_option_comments(const char *progname, void *data, Error *err)
   error_check(err);
   assert(data);
   gtr = (GTR*) data;
-  toolnames = array_new(sizeof(const char*));
+  toolnames = array_new(sizeof (const char*));
   if (gtr->tools) {
     has_err = hashtable_foreach(gtr->tools, show_tool, toolnames, err);
     assert(!has_err); /* cannot happen, show_tool() is sane */
@@ -158,17 +158,17 @@ static int run_tests(GTR *gtr, Error *err)
   assert(gtr);
 
   /* The following type assumptions are made in the GenomeTools library. */
-  ensure(has_err, sizeof(char) == 1);
-  ensure(has_err, sizeof(unsigned char) == 1);
-  ensure(has_err, sizeof(short) == 2);
-  ensure(has_err, sizeof(unsigned short) == 2);
-  ensure(has_err, sizeof(int) == 4);
-  ensure(has_err, sizeof(unsigned int) == 4);
-  ensure(has_err, sizeof(long) == 4 || sizeof(long) == 8);
-  ensure(has_err, sizeof(unsigned long) == 4 || sizeof(unsigned long) == 8);
-  ensure(has_err, sizeof(unsigned long) >= sizeof(size_t));
-  ensure(has_err, sizeof(long long) == 8);
-  ensure(has_err, sizeof(unsigned long long) == 8);
+  ensure(has_err, sizeof (char) == 1);
+  ensure(has_err, sizeof (unsigned char) == 1);
+  ensure(has_err, sizeof (short) == 2);
+  ensure(has_err, sizeof (unsigned short) == 2);
+  ensure(has_err, sizeof (int) == 4);
+  ensure(has_err, sizeof (unsigned int) == 4);
+  ensure(has_err, sizeof (long) == 4 || sizeof (long) == 8);
+  ensure(has_err, sizeof (unsigned long) == 4 || sizeof (unsigned long) == 8);
+  ensure(has_err, sizeof (unsigned long) >= sizeof (size_t));
+  ensure(has_err, sizeof (long long) == 8);
+  ensure(has_err, sizeof (unsigned long long) == 8);
 
   if (gtr->unit_tests) {
     has_err = hashtable_foreach(gtr->unit_tests, run_test, &had_err, err);

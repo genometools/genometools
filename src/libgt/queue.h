@@ -18,7 +18,7 @@ Queue*        queue_new(size_t);
 void*         queue_get(Queue*);
 void*         queue_get_elem(Queue*, unsigned long);
 #define       queue_add(q, elem)\
-              queue_add_elem(q, &(elem), sizeof(elem))
+              queue_add_elem(q, &(elem), sizeof (elem))
 void          queue_add_elem(Queue*, void*, size_t);
 unsigned long queue_size(const Queue*);
 void          queue_free(Queue*);

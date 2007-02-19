@@ -94,7 +94,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
     pr_1 = str_new();
     pr_2 = str_new();
     /* printf("pr_0=%s\n", str_get(pr_0)); */
-    orfs = array_new(sizeof(Range));
+    orfs = array_new(sizeof (Range));
     translate_dna(pr_0, splicedseq_get(v->splicedseq),
                   splicedseq_length(v->splicedseq), 0);
     translate_dna(pr_1, splicedseq_get(v->splicedseq),
@@ -199,7 +199,7 @@ static int cds_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
 
 const GenomeVisitorClass* cds_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof(CDSVisitor),
+  static const GenomeVisitorClass gvc = { sizeof (CDSVisitor),
                                           cds_visitor_free,
                                           NULL,
                                           cds_visitor_genome_feature,

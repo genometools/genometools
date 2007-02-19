@@ -43,7 +43,7 @@ static struct st_hash_type type_strhash = {
 
 static void rehash(st_table *);
 
-#define alloc(type) (type*)xmalloc((unsigned)sizeof(type))
+#define alloc(type) (type*)xmalloc((unsigned)sizeof (type))
 #define Calloc(n,s) (char*)xcalloc((n),(s))
 
 #define EQUAL(table,x,y) ((x)==(y) || (*table->type->compare)((x),(y)) == 0)
@@ -107,7 +107,7 @@ new_size(size)
     int newsize;
 
     for (i = 0, newsize = MINSIZE;
-	 i < sizeof(primes)/sizeof(primes[0]);
+	 i < sizeof (primes)/sizeof (primes[0]);
 	 i++, newsize <<= 1) {
 	if (newsize > size) return primes[i];
     }
@@ -149,7 +149,7 @@ st_init_table_with_size(type, size)
     tbl->type = type;
     tbl->num_entries = 0;
     tbl->num_bins = size;
-    tbl->bins = (st_table_entry **)Calloc(size, sizeof(st_table_entry*));
+    tbl->bins = (st_table_entry **)Calloc(size, sizeof (st_table_entry*));
 
     return tbl;
 }
@@ -310,7 +310,7 @@ rehash(table)
     unsigned int hash_val;
 
     new_num_bins = new_size(old_num_bins+1);
-    new_bins = (st_table_entry**)Calloc(new_num_bins, sizeof(st_table_entry*));
+    new_bins = (st_table_entry**)Calloc(new_num_bins, sizeof (st_table_entry*));
 
     for (i = 0; i < old_num_bins; i++) {
 	ptr = table->bins[i];
@@ -342,7 +342,7 @@ st_copy(old_table)
 
     *new_table = *old_table;
     new_table->bins = (st_table_entry**)
-	Calloc((unsigned)num_bins, sizeof(st_table_entry*));
+	Calloc((unsigned)num_bins, sizeof (st_table_entry*));
 
     if (new_table->bins == 0) {
 	free(new_table);

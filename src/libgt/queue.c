@@ -16,7 +16,7 @@ struct Queue {
 
 Queue* queue_new(size_t size_of_elem)
 {
-  Queue *q = xmalloc(sizeof(Queue));
+  Queue *q = xmalloc(sizeof (Queue));
 
   assert(size_of_elem);
 

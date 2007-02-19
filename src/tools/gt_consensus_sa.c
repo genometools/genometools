@@ -21,7 +21,7 @@ static void initSplicedAlignment(SplicedAlignment *sa)
   assert(sa);
   sa->id = str_new();
   sa->forward = true;
-  sa->exons = array_new(sizeof(Range));
+  sa->exons = array_new(sizeof (Range));
 }
 
 static int parse_input_line(SplicedAlignment *alignment, const char *line,
@@ -229,17 +229,17 @@ int gt_consensus_sa(int argc, char *argv[], Error *err)
   assert(parsed_args == 1);
 
   /* parse input file and store resuilts in the spliced alignment array */
-  spliced_alignments = array_new(sizeof(SplicedAlignment));
+  spliced_alignments = array_new(sizeof (SplicedAlignment));
   has_err = parse_input_file(spliced_alignments, argv[1], err);
 
   if (!has_err) {
     /* sort spliced alignments */
     qsort(array_get_space(spliced_alignments), array_size(spliced_alignments),
-          sizeof(SplicedAlignment), compare_spliced_alignment);
+          sizeof (SplicedAlignment), compare_spliced_alignment);
 
     /* compute the consensus spliced alignments */
     consensus_sa(array_get_space(spliced_alignments),
-                 array_size(spliced_alignments), sizeof(SplicedAlignment),
+                 array_size(spliced_alignments), sizeof (SplicedAlignment),
                  get_genomic_range, get_strand, get_exons, process_splice_form,
                  NULL, NULL);
   }

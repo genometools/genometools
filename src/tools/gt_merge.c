@@ -34,7 +34,7 @@ int gt_merge(int argc, char *argv[], Error *err)
   FILE *outfp;
 
   /* alloc */
-  genome_streams = array_new(sizeof(GenomeStream*));
+  genome_streams = array_new(sizeof (GenomeStream*));
 
   /* option parsing */
   switch (parse_options(&parsed_args, &outfp, argc, argv, err)) {

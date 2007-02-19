@@ -45,7 +45,7 @@ static void gtf_in_stream_free(GenomeStream *gs)
 
 const GenomeStreamClass* gtf_in_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof(GTFInStream),
+  static const GenomeStreamClass gsc = { sizeof (GTFInStream),
                                          gtf_in_stream_next_tree,
                                          gtf_in_stream_free };
   return &gsc;
@@ -66,7 +66,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
   gtf_in_stream = gtf_in_stream_cast(gs);
   gtf_parser = gtf_parser_new();
 
-  gtf_in_stream->genome_node_buffer = queue_new(sizeof(GenomeNode*));
+  gtf_in_stream->genome_node_buffer = queue_new(sizeof (GenomeNode*));
 
   /* open input file */
   if (filename)

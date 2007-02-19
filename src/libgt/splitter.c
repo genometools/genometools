@@ -20,7 +20,7 @@ struct Splitter {
 
 Splitter* splitter_new(void)
 {
-  return xcalloc(1, sizeof(Splitter));
+  return xcalloc(1, sizeof (Splitter));
 }
 
 void splitter_split(Splitter *s, char *string, unsigned long length,
@@ -36,17 +36,17 @@ void splitter_split(Splitter *s, char *string, unsigned long length,
          (end_of_token = strchr(string_index, delimiter))) {
     assert(end_of_token != NULL);
     *end_of_token = '\0';
-    if ((s->num_of_tokens + 1) * sizeof(char*) > s->allocated)
+    if ((s->num_of_tokens + 1) * sizeof (char*) > s->allocated)
       s->tokens = dynalloc(s->tokens, &s->allocated,
-                           (s->num_of_tokens + 1) * sizeof(char*));
+                           (s->num_of_tokens + 1) * sizeof (char*));
     s->tokens[s->num_of_tokens++] = string_index;
     string_index = end_of_token + 1;
   }
 
   /* save last token */
-  if ((s->num_of_tokens + 2) * sizeof(char*) > s->allocated)
+  if ((s->num_of_tokens + 2) * sizeof (char*) > s->allocated)
     s->tokens = dynalloc(s->tokens, &s->allocated,
-                         (s->num_of_tokens + 2) * sizeof(char*));
+                         (s->num_of_tokens + 2) * sizeof (char*));
   s->tokens[s->num_of_tokens++] = string_index;
   s->tokens[s->num_of_tokens]   = NULL;
 

@@ -55,7 +55,7 @@ static int sequence_region_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l,
 
 const GenomeNodeClass* sequence_region_class()
 {
-  static const GenomeNodeClass gnc = { sizeof(SequenceRegion),
+  static const GenomeNodeClass gnc = { sizeof (SequenceRegion),
                                        sequence_region_free,
                                        sequence_region_get_seqid,
                                        sequence_region_get_seqid,

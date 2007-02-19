@@ -19,9 +19,9 @@ struct Splicedseq {
 
 Splicedseq* splicedseq_new(void)
 {
-  Splicedseq *ss = xmalloc(sizeof(Splicedseq));
+  Splicedseq *ss = xmalloc(sizeof (Splicedseq));
   ss->splicedseq = str_new();
-  ss->positionmapping = array_new(sizeof(unsigned long));
+  ss->positionmapping = array_new(sizeof (unsigned long));
   ss->forward = true;
   return ss;
 }

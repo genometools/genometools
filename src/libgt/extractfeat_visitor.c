@@ -216,7 +216,7 @@ static int extractfeat_visitor_sequence_region(GenomeVisitor *gv,
 
 const GenomeVisitorClass* extractfeat_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof(ExtractFeatVisitor),
+  static const GenomeVisitorClass gvc = { sizeof (ExtractFeatVisitor),
                                           extractfeat_visitor_free,
                                           NULL,
                                           extractfeat_visitor_genome_feature,

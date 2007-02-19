@@ -77,7 +77,7 @@ static Option *option_new(const char *option_str,
                           const char *description,
                           void *value)
 {
-  Option *o = xcalloc(1, sizeof(Option));
+  Option *o = xcalloc(1, sizeof (Option));
 
   assert(option_str && strlen(option_str) && option_str[0] != '-');
 
@@ -116,7 +116,7 @@ static Option* option_new_version(ShowVersionFunc versionfunc)
 
 OptionParser* option_parser_new(const char *synopsis, const char *one_liner)
 {
-  OptionParser *op = xmalloc(sizeof(OptionParser));
+  OptionParser *op = xmalloc(sizeof (OptionParser));
   assert(synopsis && one_liner);
   /* enforce upper case letter at start and '.' at end of one line desc. */
   assert(strlen(one_liner) && isupper(one_liner[0]));
@@ -124,7 +124,7 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner)
   op->progname = NULL;
   op->synopsis = xstrdup(synopsis);
   op->one_liner = xstrdup(one_liner);
-  op->options = array_new(sizeof(Option*));
+  op->options = array_new(sizeof (Option*));
   op->parser_called = false;
   op->comment_func = NULL;
   op->comment_func_data = NULL;
@@ -848,8 +848,8 @@ void option_imply(Option *o, const Option *implied_option)
   Array *option_array;
   assert(o && implied_option);
   if (!o->implications)
-    o->implications = array_new(sizeof(Array*));
-  option_array = array_new(sizeof(Option*));
+    o->implications = array_new(sizeof (Array*));
+  option_array = array_new(sizeof (Option*));
   array_add(option_array, implied_option);
   array_add(o->implications, option_array);
 }
@@ -859,8 +859,8 @@ void option_imply_either_2(Option *o, const Option *io1, const Option *io2)
   Array *option_array;
   assert(o && io1 && io2);
   if (!o->implications)
-    o->implications = array_new(sizeof(Array*));
-  option_array = array_new(sizeof(Option*));
+    o->implications = array_new(sizeof (Array*));
+  option_array = array_new(sizeof (Option*));
   array_add(option_array, io1);
   array_add(option_array, io2);
   array_add(o->implications, option_array);
@@ -870,9 +870,9 @@ void option_exclude(Option *o_a, Option *o_b)
 {
   assert(o_a && o_b);
   if (!o_a->exclusions)
-    o_a->exclusions = array_new(sizeof(Option*));
+    o_a->exclusions = array_new(sizeof (Option*));
   if (!o_b->exclusions)
-    o_b->exclusions = array_new(sizeof(Option*));
+    o_b->exclusions = array_new(sizeof (Option*));
   array_add(o_a->exclusions, o_b);
   array_add(o_b->exclusions, o_a);
 }

@@ -60,7 +60,7 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 
 const GenomeVisitorClass* stat_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof(StatVisitor),
+  static const GenomeVisitorClass gvc = { sizeof (StatVisitor),
                                             stat_visitor_free,
                                             NULL,
                                             stat_visitor_genome_feature,

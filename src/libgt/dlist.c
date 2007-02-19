@@ -29,7 +29,7 @@ struct Dlistelem {
 
 Dlist* dlist_new(Compare cmp_func)
 {
-  Dlist *dlist = xcalloc(1, sizeof(Dlist));
+  Dlist *dlist = xcalloc(1, sizeof (Dlist));
   dlist->cmp_func = cmp_func;
   return dlist;
 }
@@ -53,7 +53,7 @@ unsigned long dlist_size(const Dlist *dlist)
 
 void dlist_add(Dlist *dlist, void *data)
 {
-  Dlistelem *oldelem, *newelem = xcalloc(1, sizeof(Dlistelem));
+  Dlistelem *oldelem, *newelem = xcalloc(1, sizeof (Dlistelem));
   assert(dlist); /* data can be null */
   newelem->data = data;
 
@@ -190,7 +190,7 @@ int dlist_unit_test(Error *err)
     }
 
     /* sort the backup elements */
-    qsort(elems_backup, size, sizeof(int), compare);
+    qsort(elems_backup, size, sizeof (int), compare);
 
     /* test with compare function */
     dlist = dlist_new(compare);

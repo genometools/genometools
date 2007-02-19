@@ -35,7 +35,7 @@ static void upgma_init(UPGMA *upgma, unsigned long num_of_taxa, void *data,
 
   upgma->num_of_taxa = num_of_taxa;
   upgma->num_of_clusters = 2 * num_of_taxa - 1;
-  upgma->clusters = xmalloc(sizeof(UPGMAcluster) * upgma->num_of_clusters);
+  upgma->clusters = xmalloc(sizeof (UPGMAcluster) * upgma->num_of_clusters);
 
   for (i = 0; i < upgma->num_of_clusters; i++) {
     upgma->clusters[i].leftdaughter  = UNDEFULONG;
@@ -51,7 +51,7 @@ static void upgma_init(UPGMA *upgma, unsigned long num_of_taxa, void *data,
     }
 
     if ((i > 0) && (i < upgma->num_of_clusters - 1)) {
-      upgma->clusters[i].distances = xmalloc(sizeof(double) * i);
+      upgma->clusters[i].distances = xmalloc(sizeof (double) * i);
       for (j = 0; j < i; j++) {
         if (i < num_of_taxa) {
           retval = distfunc(i, j, data);
@@ -151,7 +151,7 @@ UPGMA* upgma_new(unsigned long num_of_taxa, void *data,
 {
   UPGMA *upgma;
   assert(num_of_taxa && distfunc);
-  upgma = xmalloc(sizeof(UPGMA));
+  upgma = xmalloc(sizeof (UPGMA));
   upgma_init(upgma, num_of_taxa, data, distfunc);
   upgma_compute(upgma);
   return upgma;

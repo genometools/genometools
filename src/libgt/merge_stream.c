@@ -125,7 +125,7 @@ static void merge_stream_free(GenomeStream *gs)
 
 const GenomeStreamClass* merge_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof(MergeStream),
+  static const GenomeStreamClass gsc = { sizeof (MergeStream),
                                          merge_stream_next_tree,
                                          merge_stream_free };
   return &gsc;
@@ -145,6 +145,6 @@ GenomeStream* merge_stream_new(const Array *genome_streams)
   }
 #endif
   ms->genome_streams = array_clone(genome_streams);
-  ms->buffer = xcalloc(array_size(genome_streams), sizeof(GenomeNode*));
+  ms->buffer = xcalloc(array_size(genome_streams), sizeof (GenomeNode*));
   return gs;
 }

@@ -19,7 +19,7 @@ Tokenizer* tokenizer_new(IO *io)
 {
   Tokenizer *t;
   assert(io);
-  t = xcalloc(1, sizeof(Tokenizer));
+  t = xcalloc(1, sizeof (Tokenizer));
   t->io = io;
   return t;
 }

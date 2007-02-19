@@ -24,11 +24,11 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q)
   assert(alpha_is_compatible_with_alpha(alpha_a, alpha_b));
   alphasize_to_the_power_of_q = pow(alpha_size(alpha_a), q);
 
-  seq_a_profile = xcalloc(alphasize_to_the_power_of_q, sizeof(unsigned long));
-  seq_b_profile = xcalloc(alphasize_to_the_power_of_q, sizeof(unsigned long));
+  seq_a_profile = xcalloc(alphasize_to_the_power_of_q, sizeof (unsigned long));
+  seq_b_profile = xcalloc(alphasize_to_the_power_of_q, sizeof (unsigned long));
 
-  seq_a_qgrams = array_new(sizeof(unsigned long));
-  seq_b_qgrams = array_new(sizeof(unsigned long));
+  seq_a_qgrams = array_new(sizeof (unsigned long));
+  seq_b_qgrams = array_new(sizeof (unsigned long));
 
   qgram_compute(seq_a_qgrams, seq_get_encoded(seq_a), seq_length(seq_a),
                 alpha_size(alpha_a), q);

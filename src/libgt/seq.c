@@ -19,7 +19,7 @@ Seq* seq_new(const char *seq, unsigned long seqlen, Alpha *seqalpha)
 {
   Seq *s;
   assert(seq && seqalpha);
-  s = xcalloc(1, sizeof(Seq));
+  s = xcalloc(1, sizeof (Seq));
   s->seq = seq;
   s->seqlen = seqlen;
   s->seqalpha = alpha_ref(seqalpha);
@@ -42,7 +42,7 @@ const char* seq_get_encoded(Seq *s)
 {
   assert(s);
   if (!s->encoded_seq) {
-    s->encoded_seq = xmalloc(sizeof(char) * (s->seqlen+1));
+    s->encoded_seq = xmalloc(sizeof (char) * (s->seqlen+1));
     alpha_encode_seq(s->seqalpha, s->encoded_seq, (char*) s->seq, s->seqlen);
     s->encoded_seq[s->seqlen] = '\0';
   }

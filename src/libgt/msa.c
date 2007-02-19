@@ -25,7 +25,7 @@ MSA* msa_new(const char *MSA_filename, Error *err)
   int has_err = 0;
   MSA *msa;
   error_check(err);
-  msa = xmalloc(sizeof(MSA));
+  msa = xmalloc(sizeof (MSA));
   msa->bs = bioseq_new(MSA_filename, err);
   if (!msa->bs)
     has_err = -1;
@@ -61,7 +61,7 @@ static char** get_msa_array(Bioseq *bs)
   unsigned long i;
   char **msa;
   assert(bs);
-  msa = xmalloc(sizeof(const char*) * bioseq_number_of_sequences(bs));
+  msa = xmalloc(sizeof (const char*) * bioseq_number_of_sequences(bs));
   for (i = 0; i < bioseq_number_of_sequences(bs); i++)
     msa[i] = (char*) bioseq_get_sequence(bs, i);
   return msa;
@@ -85,7 +85,7 @@ static char* get_consensus(unsigned long **count, unsigned long seqlen)
   unsigned long col, c, max_count;
   char *consensus, consensus_char = GAPSYMBOL;
   assert(count);
-  consensus = xmalloc(sizeof(char) * seqlen);
+  consensus = xmalloc(sizeof (char) * seqlen);
   for (col = 0; col < seqlen; col++) {
     max_count = 0;
     for (c = 0; c < UCHAR_MAX; c++) {

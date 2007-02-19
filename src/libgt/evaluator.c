@@ -18,7 +18,7 @@ struct Evaluator {
 
 Evaluator* evaluator_new(void)
 {
-  return xcalloc(1, sizeof(Evaluator));
+  return xcalloc(1, sizeof (Evaluator));
 }
 
 void evaluator_add_true(Evaluator *e)
@@ -78,7 +78,7 @@ void evaluator_show_specificity(const Evaluator *e, FILE *outfp)
 void evaluator_reset(Evaluator *e)
 {
   assert(e);
-  memset(e, 0, sizeof(Evaluator));
+  memset(e, 0, sizeof (Evaluator));
 }
 
 int evaluator_unit_test(Error *err)

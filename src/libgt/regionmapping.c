@@ -25,7 +25,7 @@ RegionMapping* regionmapping_new(Str *mapping_filename, Error *err)
   error_check(err);
   assert(mapping_filename);
   /* alloc */
-  rm = xcalloc(1, sizeof(RegionMapping));
+  rm = xcalloc(1, sizeof (RegionMapping));
   rm->mapping_filename = str_ref(mapping_filename);
   /* create new lua state (i.e., interpreter) */
   rm->L = luaL_newstate();

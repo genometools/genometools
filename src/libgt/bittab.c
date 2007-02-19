@@ -25,29 +25,29 @@ Bittab* bittab_new(unsigned long num_of_bits)
 
   assert(num_of_bits);
 
-  b = xmalloc(sizeof(Bittab));
+  b = xmalloc(sizeof (Bittab));
   b->num_of_bits = num_of_bits;
 
-  if (num_of_bits / (8UL * sizeof(unsigned long)))
-    b->tabsize = 1 + ((num_of_bits - 1) / (8UL * sizeof(unsigned long)));
+  if (num_of_bits / (8UL * sizeof (unsigned long)))
+    b->tabsize = 1 + ((num_of_bits - 1) / (8UL * sizeof (unsigned long)));
   else
     b->tabsize = 1UL;
 
-  b->tabptr = xcalloc(b->tabsize, sizeof(unsigned long));
+  b->tabptr = xcalloc(b->tabsize, sizeof (unsigned long));
 
   return b;
 }
 
 void bittab_set_bit(Bittab *b, unsigned long bit)
 {
-  b->tabptr[(bit >> 3) / sizeof(unsigned long)] |=
-    1UL << (bit & (8UL * sizeof(unsigned long) - 1));
+  b->tabptr[(bit >> 3) / sizeof (unsigned long)] |=
+    1UL << (bit & (8UL * sizeof (unsigned long) - 1));
 }
 
 void bittab_unset_bit(Bittab *b, unsigned long bit)
 {
-  b->tabptr[(bit >> 3) / sizeof(unsigned long)] &=
-    ~(1UL << (bit & (8UL * sizeof(unsigned long) - 1)));
+  b->tabptr[(bit >> 3) / sizeof (unsigned long)] &=
+    ~(1UL << (bit & (8UL * sizeof (unsigned long) - 1)));
 }
 
 void bittab_complement(Bittab *dest, const Bittab *src)
@@ -64,7 +64,7 @@ void bittab_complement(Bittab *dest, const Bittab *src)
   dest->tabptr[src->tabsize - 1] = ~src->tabptr[src->tabsize - 1] &
                                    (~0UL >> (- src->num_of_bits +
                                              src->tabsize * 8UL *
-                                             sizeof(unsigned long)));
+                                             sizeof (unsigned long)));
 }
 
 void bittab_equal(Bittab *dest, const Bittab *src)
@@ -130,9 +130,9 @@ void bittab_shift_left_equal(Bittab *b)
   unsigned long i, new_carry, old_carry = 0;
   assert(b);
   for (i = 0; i < b->tabsize; i++) {
-    new_carry = b->tabptr[i] & (1UL << (8UL * sizeof(unsigned long) - 1));
+    new_carry = b->tabptr[i] & (1UL << (8UL * sizeof (unsigned long) - 1));
     b->tabptr[i] = (b->tabptr[i] << 1) | old_carry;
-    old_carry = new_carry >> (8UL * sizeof(unsigned long) - 1);
+    old_carry = new_carry >> (8UL * sizeof (unsigned long) - 1);
   }
 }
 
@@ -143,7 +143,7 @@ void bittab_shift_right_equal(Bittab *b)
   for (i = b->tabsize; i > 0; i--) {
     new_carry = b->tabptr[i-1] & 1UL;
     b->tabptr[i-1] = (b->tabptr[i-1] >> 1) | old_carry;
-    old_carry = new_carry << (8UL * sizeof(unsigned long) - 1);
+    old_carry = new_carry << (8UL * sizeof (unsigned long) - 1);
   }
 }
 
@@ -165,8 +165,8 @@ void bittab_get_all_bitnums(const Bittab *b, Array *bitnums)
 
 bool bittab_bit_is_set(const Bittab *b, unsigned long bit)
 {
-  if (b->tabptr[(bit >> 3) / sizeof(unsigned long)] &
-      1UL << (bit & (8UL * sizeof(unsigned long) - 1))) {
+  if (b->tabptr[(bit >> 3) / sizeof (unsigned long)] &
+      1UL << (bit & (8UL * sizeof (unsigned long) - 1))) {
     return true;
   }
   return false;
@@ -266,7 +266,7 @@ unsigned long bittab_count_set_bits(Bittab *b)
                                                    6, 7, 6, 7, 7, 8 };
   unsigned long i, j, counter = 0;
   for (i = 0; i < b->tabsize; i++)
-    for (j = 0; j < sizeof(unsigned long); j++)
+    for (j = 0; j < sizeof (unsigned long); j++)
       counter += bits_in_char[((b->tabptr[i] >> (j * 8)) & 0xffu)];
   return counter;
 }

@@ -56,7 +56,7 @@ static int comment_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l, Error *err)
 
 const GenomeNodeClass* comment_class()
 {
-  static const GenomeNodeClass gnc = { sizeof(Comment),
+  static const GenomeNodeClass gnc = { sizeof (Comment),
                                        comment_free,
                                        NULL,
                                        comment_get_idstr,

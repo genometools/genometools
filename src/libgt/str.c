@@ -19,8 +19,8 @@ struct Str {
 
 Str* str_new(void)
 {
-  Str *s = xmalloc(sizeof(Str));      /* create new string object */
-  s->cstr = xcalloc(1, sizeof(char)); /* init the string with '\0' */
+  Str *s = xmalloc(sizeof (Str));      /* create new string object */
+  s->cstr = xcalloc(1, sizeof (char)); /* init the string with '\0' */
   s->length = 0;                      /* set the initial length */
   s->allocated = 1;                   /* set the initially allocated space */
   s->reference_count = 0;             /* set the initial reference count */
@@ -46,7 +46,7 @@ void str_set(Str *s, const char *cstr)
   }
   else {
     cstrlen = strlen(cstr);
-    s->cstr = dynalloc(s->cstr, &s->allocated, (cstrlen + 1) * sizeof(char));
+    s->cstr = dynalloc(s->cstr, &s->allocated, (cstrlen + 1) * sizeof (char));
     sptr = s->cstr;
     while (*cstr != '\0') *sptr++ = *cstr++;
     s->length = cstrlen;
@@ -59,7 +59,7 @@ void str_append_str(Str *dest, const Str* src)
   unsigned long i;
   assert(dest && src);
   dest->cstr = dynalloc(dest->cstr, &dest->allocated,
-                        (dest->length + src->length + 1) * sizeof(char));
+                        (dest->length + src->length + 1) * sizeof (char));
   for (i = 0; i < src->length; i++)
     dest->cstr[dest->length + i] = src->cstr[i];
   dest->length += src->length;
@@ -73,7 +73,7 @@ void str_append_cstr(Str *dest, const char *cstr)
   assert(dest && cstr);
   cstrlen = strlen(cstr);
   dest->cstr = dynalloc(dest->cstr, &dest->allocated,
-                        (dest->length + cstrlen + 1) * sizeof(char));
+                        (dest->length + cstrlen + 1) * sizeof (char));
   destptr = dest->cstr + dest->length;
   while (*cstr != '\0')
     *destptr++ = *cstr++;
@@ -87,7 +87,7 @@ void str_append_cstr_nt(Str *dest, const char *cstr, unsigned long length)
   char *destptr;
   assert(dest && cstr);
   dest->cstr = dynalloc(dest->cstr, &dest->allocated,
-                        (dest->length + length + 1) * sizeof(char));
+                        (dest->length + length + 1) * sizeof (char));
   destptr = dest->cstr + dest->length;
   for (i = 0; i < length; i++)
     *destptr++ = *cstr++;
@@ -109,7 +109,7 @@ void str_append_ulong(Str *dest, unsigned long u)
   }
   /* make sure the string is long enough */
   dest->cstr = dynalloc(dest->cstr, &dest->allocated,
-                        (dest->length + ulength + 1) * sizeof(char));
+                        (dest->length + ulength + 1) * sizeof (char));
  /* format */
   s = dest->cstr + dest->length + ulength;
   do {
@@ -125,7 +125,7 @@ void str_append_char(Str *dest, char c)
 {
   assert(dest);
   dest->cstr = dynalloc(dest->cstr, &dest->allocated,
-                        (dest->length + 2) * sizeof(char));
+                        (dest->length + 2) * sizeof (char));
   dest->cstr[dest->length++] = c;
   dest->cstr[dest->length] = '\0';
 }
@@ -169,7 +169,7 @@ Str* str_clone(const Str *s)
 {
   Str *s_copy;
   assert(s);
-  s_copy = xmalloc(sizeof(Str));
+  s_copy = xmalloc(sizeof (Str));
   s_copy->cstr = xstrdup(s->cstr);
   s_copy->length = s_copy->allocated = s->length;
   s_copy->reference_count = 0;
@@ -198,14 +198,14 @@ int str_read_next_line(Str *s, FILE *fpin)
       return EOF;
     }
     if (cc == '\n') {
-      if ((s->length+1) * sizeof(char) > s->allocated)
-        s->cstr = dynalloc(s->cstr, &s->allocated, (s->length+1)*sizeof(char));
+      if ((s->length+1) * sizeof (char) > s->allocated)
+        s->cstr = dynalloc(s->cstr, &s->allocated, (s->length+1)*sizeof (char));
       s->cstr[s->length] = '\0';
       return 0;
     }
     c = cc;
-    if ((s->length+2) * sizeof(char) > s->allocated)
-      s->cstr = dynalloc(s->cstr, &s->allocated, (s->length+2)*sizeof(char));
+    if ((s->length+2) * sizeof (char) > s->allocated)
+      s->cstr = dynalloc(s->cstr, &s->allocated, (s->length+2)*sizeof (char));
     s->cstr[s->length++] = c;
   }
 }

@@ -68,7 +68,7 @@ static void csa_stream_free(GenomeStream *gs)
 
 const GenomeStreamClass* csa_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof(CSAStream),
+  static const GenomeStreamClass gsc = { sizeof (CSAStream),
                                          csa_stream_next_tree,
                                          csa_stream_free };
   return &gsc;

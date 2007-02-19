@@ -15,7 +15,7 @@ struct Log {
 
 Log* log_new(void)
 {
-  Log *l = xmalloc(sizeof(Log));
+  Log *l = xmalloc(sizeof (Log));
   l->logfp = stderr;
   return l;
 }

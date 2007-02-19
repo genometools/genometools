@@ -87,7 +87,7 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
 
 const GenomeVisitorClass* filter_visitor_class()
 {
-  static const GenomeVisitorClass gvc = { sizeof(FilterVisitor),
+  static const GenomeVisitorClass gvc = { sizeof (FilterVisitor),
                                           filter_visitor_free,
                                           filter_visitor_comment,
                                           filter_visitor_genome_feature,
@@ -102,7 +102,7 @@ GenomeVisitor* filter_visitor_new(Str *seqid, unsigned long max_gene_length,
 {
   GenomeVisitor *gv = genome_visitor_create(filter_visitor_class());
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
-  filter_visitor->genome_node_buffer = queue_new(sizeof(GenomeNode*));
+  filter_visitor->genome_node_buffer = queue_new(sizeof (GenomeNode*));
   filter_visitor->seqid = str_ref(seqid);
   filter_visitor->max_gene_length = max_gene_length;
   filter_visitor->gene_num = 0;

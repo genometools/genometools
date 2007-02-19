@@ -15,7 +15,7 @@ struct Error {
 
 Error* error_new(void)
 {
-  return xcalloc(1, sizeof(Error));
+  return xcalloc(1, sizeof (Error));
 }
 
 void error_set(Error *e, const char *format, ...)
@@ -24,7 +24,7 @@ void error_set(Error *e, const char *format, ...)
   assert(e);
   va_start(ap, format);
   e->error_is_set = true;
-  (void) vsnprintf(e->error_string, sizeof(e->error_string), format, ap);
+  (void) vsnprintf(e->error_string, sizeof (e->error_string), format, ap);
   va_end(ap);
 }
 

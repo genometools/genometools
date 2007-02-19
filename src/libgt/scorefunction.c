@@ -19,7 +19,7 @@ ScoreFunction* scorefunction_new(ScoreMatrix *sm,
 {
   ScoreFunction *sf;
   assert(sm);
-  sf = xmalloc(sizeof(ScoreFunction));
+  sf = xmalloc(sizeof (ScoreFunction));
   sf->sm = sm;
   sf->deletion_score = deletion_score;
   sf->insertion_score = insertion_score;

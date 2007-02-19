@@ -28,7 +28,7 @@ struct Alpha {
 
 Alpha* alpha_new(void)
 {
-  Alpha *a = xcalloc(1, sizeof(Alpha));
+  Alpha *a = xcalloc(1, sizeof (Alpha));
   memset(a->code_to_character_map, UNDEFUCHAR, UCHAR_MAX);
   memset(a->character_to_code_map, UNDEFUCHAR, UCHAR_MAX);
   return a;

@@ -26,7 +26,7 @@ typedef enum {
 
 FastaReader* fasta_reader_new(Str *sequence_filename)
 {
-  FastaReader *fs = xmalloc(sizeof(FastaReader));
+  FastaReader *fs = xmalloc(sizeof (FastaReader));
   fs->sequence_filename = str_ref(sequence_filename);
   fs->sequence_file =
     genfile_xopen(genfilemode_determine(str_get(sequence_filename)),

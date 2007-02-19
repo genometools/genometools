@@ -36,7 +36,7 @@ struct GFF3Parser {
 
 GFF3Parser* gff3_new(void)
 {
-  GFF3Parser *gff3_parser = xmalloc(sizeof(GFF3Parser));
+  GFF3Parser *gff3_parser = xmalloc(sizeof (GFF3Parser));
   gff3_parser->id_to_genome_node_mapping = hashtable_new(HASH_STRING, free,
                                                          NULL);
   gff3_parser->seqid_to_str_mapping = hashtable_new(HASH_STRING, NULL,

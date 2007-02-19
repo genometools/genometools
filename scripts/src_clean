@@ -15,13 +15,14 @@ fi
 for FILE in $*
 do
   TMPFILE=`mktemp`
-  sed -e s/[[:space:]]*$//     \
-      -e 's/if(/if (/'         \
-      -e 's/switch(/switch (/' \
-      -e 's/while(/while (/'   \
-      -e 's/for(/for (/'       \
-      -e 's/do{/do {/'         \
-      -e 's/){/) {/'           \
+  sed -e s/[[:space:]]*$//      \
+      -e 's/if(/if (/'          \
+      -e 's/sizeof(/sizeof (/g' \
+      -e 's/switch(/switch (/'  \
+      -e 's/while(/while (/'    \
+      -e 's/for(/for (/'        \
+      -e 's/do{/do {/'          \
+      -e 's/){/) {/'            \
       $FILE > $TMPFILE
   mv -f $TMPFILE $FILE
 done

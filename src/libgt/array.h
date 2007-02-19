@@ -20,7 +20,7 @@ void*         array_get_last(const Array*);
 void*         array_pop(Array*);
 void*         array_get_space(const Array*);
 #define       array_add(a, elem)\
-              array_add_elem(a, &(elem), sizeof(elem))
+              array_add_elem(a, &(elem), sizeof (elem))
 void          array_add_elem(Array*, void*, size_t);
 void          array_add_array(Array*, const Array*);
 void          array_rem(Array*, unsigned long); /* O(n) */
@@ -38,7 +38,7 @@ void          array_free(Array*);
   {
     unsigned long i;
     Array *a;
-    a = array_new(sizeof(unsigned long));
+    a = array_new(sizeof (unsigned long));
     for (i = 0; i < 100; i++) {
       array_add(a, i);
       assert(i = *(unsigned long*) array_get(a, i));
