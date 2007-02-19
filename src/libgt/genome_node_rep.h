@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include "dlist.h"
 #include "genome_node.h"
+#include "genome_node_info.h"
 
 /* the ``genome node'' interface */
 struct GenomeNodeClass
@@ -33,6 +34,7 @@ struct GenomeNode
   unsigned long line_number;
   Dlist *children;
   unsigned int reference_count;
+  GenomeNodeInfo info;
 };
 
 void        genome_node_class_init(GenomeNodeClass*, size_t, ...);

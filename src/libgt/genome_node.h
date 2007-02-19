@@ -22,9 +22,15 @@ typedef int (*GenomeNodeTraverseFunc)(GenomeNode*, void*, Error*);
 
 GenomeNode*   genome_node_rec_ref(GenomeNode*);
 void*         genome_node_cast(const GenomeNodeClass*, GenomeNode*);
+/* perform depth first traversal of the given genome node */
 int           genome_node_traverse_children(GenomeNode*, void*,
                                             GenomeNodeTraverseFunc,
                                             bool traverse_only_once, Error*);
+/* perform breadth first traversal of the given genome node  */
+int           genome_node_traverse_children_breadth(GenomeNode*, void*,
+                                                    GenomeNodeTraverseFunc,
+                                                    bool traverse_only_once,
+                                                    Error*);
 int           genome_node_traverse_direct_children(GenomeNode*, void*,
                                                    GenomeNodeTraverseFunc,
                                                    Error*);
@@ -47,6 +53,7 @@ void          genome_node_is_part_of_genome_node(GenomeNode *parent,
 void          genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn);
 bool          genome_node_has_children(GenomeNode*);
 bool          genome_node_direct_children_do_not_overlap(GenomeNode*);
+bool          genome_node_is_tree(GenomeNode*);
 bool          genome_node_tree_is_sorted(GenomeNode **buffer,
                                          GenomeNode *current_node);
 /* returns true if the genome node overlaps at least one of the nodes given in

@@ -10,6 +10,7 @@
 #include "genome_node_rep.h"
 #include "hashtable.h"
 #include "msort.h"
+#include "queue.h"
 #include "xansi.h"
 
 typedef struct {
@@ -71,16 +72,15 @@ GenomeNode* genome_node_create(const GenomeNodeClass *gnc,
                                 unsigned long line_number)
 {
   GenomeNode *gn;
-
   assert(gnc && gnc->size);
-
   gn                  = xmalloc(gnc->size);
   gn->c_class         = gnc;
   gn->filename        = filename;
   gn->line_number     = line_number;
   gn->children        = NULL; /* the children list is created on demand */
   gn->reference_count = 0;
-
+  gn->info            = 0;
+  genome_node_info_set_tree_status(&gn->info, GENOME_NODE_IS_TREE);
   return gn;
 }
 
@@ -119,16 +119,19 @@ GenomeNode* genome_node_rec_ref(GenomeNode *gn)
   return gn;
 }
 
-int genome_node_traverse_children(GenomeNode *genome_node,
-                                  void *data,
-                                  GenomeNodeTraverseFunc traverse,
-                                  bool traverse_only_once, Error *err)
+int genome_node_traverse_children_generic(GenomeNode *genome_node,
+                                          void *data,
+                                          GenomeNodeTraverseFunc traverse,
+                                          bool traverse_only_once,
+                                          bool depth_first, Error *err)
 {
-  Array *node_stack, *list_of_children;
+  Array *node_stack = NULL, *list_of_children;
+  Queue *node_queue = NULL;
   GenomeNode *gn, *child_feature;
   Dlistelem *dlistelem;
   unsigned long i;
   Hashtable *traversed_nodes = NULL;
+  bool has_node_with_multiple_parents = false;
   int has_err = 0;
 
   error_check(err);
@@ -136,15 +139,24 @@ int genome_node_traverse_children(GenomeNode *genome_node,
   if (!genome_node)
     return 0;
 
-  node_stack = array_new(sizeof (GenomeNode*));
+  if (depth_first) {
+    node_stack = array_new(sizeof (GenomeNode*));
+    array_add(node_stack, genome_node);
+  }
+  else {
+    node_queue = queue_new(sizeof (GenomeNode*));
+    queue_add(node_queue, genome_node);
+  }
   list_of_children = array_new(sizeof (GenomeNode*));
-  array_add(node_stack, genome_node);
 
   if (traverse_only_once)
     traversed_nodes = hashtable_new(HASH_DIRECT, NULL, NULL);
 
-  while (array_size(node_stack)) {
-    gn = *(GenomeNode**) array_pop(node_stack);
+  while ((depth_first ? array_size(node_stack): queue_size(node_queue))) {
+    if (depth_first)
+      gn = *(GenomeNode**) array_pop(node_stack);
+    else
+      gn = *(GenomeNode**) queue_get(node_queue);
     array_set_size(list_of_children, 0);
     if (gn->children) {
       /* a backup of the children array is necessary if traverse() frees the
@@ -160,26 +172,76 @@ int genome_node_traverse_children(GenomeNode *genome_node,
       if (has_err)
         break;
     }
-    /* we go backwards to traverse in order */
-    for (i = array_size(list_of_children); i > 0; i--) {
-      child_feature = *((GenomeNode**) array_get(list_of_children, i-1));
+    /* store the implications of <gn> to the tree status of <genome_node> */
+    if (!has_err) {
+      if (genome_node_info_multiple_parents(&gn->info))
+        has_node_with_multiple_parents = true;
+    }
+    for (i = 0; i < array_size(list_of_children); i++) {
+      if (depth_first) {
+        /* we go backwards to traverse in order */
+        child_feature = *(GenomeNode**) array_get(list_of_children,
+                                                  array_size(list_of_children)
+                                                  - i - 1);
+      }
+      else {
+        child_feature = *(GenomeNode**) array_get(list_of_children, i);
+      }
       if (!traverse_only_once ||
           !hashtable_get(traversed_nodes, child_feature)) {
         /* feature has not been traversed or has to be traversed multiple
            times */
-        array_add(node_stack, child_feature);
+        if (depth_first)
+          array_add(node_stack, child_feature);
+        else
+          queue_add(node_queue, child_feature);
         if (traverse_only_once)
           hashtable_add(traversed_nodes, child_feature, child_feature);
       }
     }
   }
 
+  /* save the tree status of the genome node */
+  if (!has_err) {
+    if (has_node_with_multiple_parents) {
+      genome_node_info_set_tree_status(&genome_node->info,
+                                       GENOME_NODE_IS_NOT_A_TREE);
+      assert(genome_node_info_get_tree_status(&genome_node->info) ==
+             GENOME_NODE_IS_NOT_A_TREE);
+    }
+    else {
+      genome_node_info_set_tree_status(&genome_node->info,
+                                       GENOME_NODE_IS_TREE);
+      assert(genome_node_info_get_tree_status(&genome_node->info) ==
+             GENOME_NODE_IS_TREE);
+    }
+  }
+
+  /* free */
   if (traverse_only_once)
     hashtable_free(traversed_nodes);
   array_free(list_of_children);
   array_free(node_stack);
+  queue_free(node_queue);
 
   return has_err;
+}
+
+int genome_node_traverse_children(GenomeNode *genome_node, void *data,
+                                  GenomeNodeTraverseFunc traverse,
+                                  bool traverse_only_once, Error *err)
+{
+  return genome_node_traverse_children_generic(genome_node, data, traverse,
+                                               traverse_only_once, true, err);
+}
+
+int genome_node_traverse_children_breadth(GenomeNode *genome_node, void *data,
+                                          GenomeNodeTraverseFunc traverse,
+                                          bool traverse_only_once,
+                                          Error *err)
+{
+  return genome_node_traverse_children_generic(genome_node, data, traverse,
+                                               traverse_only_once, false, err);
 }
 
 int genome_node_traverse_direct_children(GenomeNode *gn,
@@ -291,6 +353,11 @@ void genome_node_is_part_of_genome_node(GenomeNode *parent,
   if (!parent->children)
     parent->children = dlist_new((Compare) compare_genome_nodes);
   dlist_add(parent->children, child); /* XXX: check for circles */
+  /* update tree status of <parent> */
+  genome_node_info_set_tree_status(&parent->info,
+                                   GENOME_NODE_TREE_STATUS_UNDETERMINED);
+  /* update parent info of <child> */
+  genome_node_info_add_parent(&child->info);
 }
 
 static int remove_leaf(GenomeNode *node, void *data, Error *err)
@@ -357,6 +424,21 @@ bool genome_node_direct_children_do_not_overlap(GenomeNode *gn)
   array_free(children_ranges);
 
   return rval;
+}
+
+bool genome_node_is_tree(GenomeNode *gn)
+{
+  assert(gn);
+  switch (genome_node_info_get_tree_status(&gn->info)) {
+    case GENOME_NODE_IS_TREE:
+      return true;
+    case GENOME_NODE_IS_NOT_A_TREE:
+      return false;
+    case GENOME_NODE_TREE_STATUS_UNDETERMINED:
+      /* not implemented, the tree status must have been determined by a
+         previous genome_node_traverse_children() invocation */
+    default: assert(0);
+  }
 }
 
 bool genome_node_tree_is_sorted(GenomeNode **buffer,

@@ -173,9 +173,19 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   has_err = genome_node_traverse_children((GenomeNode*) gf, gff3_visitor,
                                           store_ids, true, err);
   if (!has_err) {
-    has_err = genome_node_traverse_children((GenomeNode*) gf, gff3_visitor,
-                                            gff3_show_genome_feature, true,
-                                            err);
+    if (genome_node_is_tree((GenomeNode*) gf)) {
+      has_err = genome_node_traverse_children((GenomeNode*) gf, gff3_visitor,
+                                              gff3_show_genome_feature, true,
+                                              err);
+    }
+    else {
+      /* got a DAG -> traverse bin breadth first fashion to make sure that the
+         'Parent' attributes are shown in correct order */
+      has_err = genome_node_traverse_children_breadth((GenomeNode*) gf,
+                                                      gff3_visitor,
+                                                      gff3_show_genome_feature,
+                                                      true, err);
+    }
   }
 
   /* reset hashtables */

@@ -116,6 +116,20 @@ Test do
   grep($last_stderr, /does not equal required version/);
 end
 
+Name "gt gff3 test 22"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_22.gff3 | #{$bin}gt gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_test_22.gff3"
+end
+
+Name "gt gff3 test 22 (-sort)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -sort #{$testdata}gt_gff3_test_22.gff3 | #{$bin}gt gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_test_22.gff3"
+end
+
 Name "gt gff3 fail 1"
 Keywords "gt_gff3"
 Test do
