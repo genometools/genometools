@@ -96,28 +96,34 @@ void splicedseq_reset(Splicedseq *ss)
   ss->forward = true;
 }
 
-static void check_splicedseq(Splicedseq *ss)
+static int check_splicedseq(Splicedseq *ss, Error *err)
 {                       /*0123456789*/
   static char *origseq = "aaccaagtga", *splicedseq = "ccgtg";
-
+  int has_err = 0;
+  error_check(err);
   splicedseq_add(ss, 2, 3, origseq);
   splicedseq_add(ss, 6, 8, origseq);
-  ensure(strcmp(splicedseq_get(ss), splicedseq) == 0);
-  ensure(!splicedseq_pos_is_border(ss, 0));
-  ensure( splicedseq_pos_is_border(ss, 1));
-  ensure(!splicedseq_pos_is_border(ss, 2));
-  ensure(!splicedseq_pos_is_border(ss, 3));
-  ensure(!splicedseq_pos_is_border(ss, 4));
+  ensure(has_err, strcmp(splicedseq_get(ss), splicedseq) == 0);
+  ensure(has_err, !splicedseq_pos_is_border(ss, 0));
+  ensure(has_err,  splicedseq_pos_is_border(ss, 1));
+  ensure(has_err, !splicedseq_pos_is_border(ss, 2));
+  ensure(has_err, !splicedseq_pos_is_border(ss, 3));
+  ensure(has_err, !splicedseq_pos_is_border(ss, 4));
+  return has_err;
 }
 
-int splicedseq_unit_test(void)
+int splicedseq_unit_test(Error *err)
 {
+  int has_err = 0;
+  error_check(err);
   Splicedseq *ss = splicedseq_new();
-  check_splicedseq(ss);
-  splicedseq_reset(ss);
-  check_splicedseq(ss);
+  has_err = check_splicedseq(ss, err);
+  if (!has_err) {
+    splicedseq_reset(ss);
+    has_err = check_splicedseq(ss, err);
+  }
   splicedseq_free(ss);
-  return EXIT_SUCCESS;
+  return has_err;
 }
 
 void splicedseq_free(Splicedseq *ss)

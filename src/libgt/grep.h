@@ -17,6 +17,6 @@
 
 /* sets 'match' to true if pattern matches line, to false otherwise */
 int  grep(bool *match, const char *pattern, const char *line, Error*);
-int  grep_unit_test(void);
+int  grep_unit_test(Error*);
 
 #endif

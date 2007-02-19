@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -8,6 +8,7 @@
 #define ARRAY_H
 
 #include <stdlib.h>
+#include "error.h"
 
 typedef struct Array Array;
 
@@ -27,7 +28,7 @@ void          array_reverse(Array*);
 void          array_set_size(Array*, unsigned long);
 size_t        array_elem_size(const Array*);
 unsigned long array_size(const Array*);
-int           array_unit_test(void);
+int           array_unit_test(Error*);
 void          array_free(Array*);
 
 #if 0

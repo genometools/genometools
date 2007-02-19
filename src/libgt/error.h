@@ -10,11 +10,7 @@
 #include <assert.h>
 #include <stdbool.h>
 
-/* simple error interface: print an error and exit */
-void error(const char *format, ...)
-  __attribute__ ((format (printf, 1, 2)));
-
-/* sophisticated error interface: full-fledged error class */
+/* the error class */
 typedef struct Error Error;
 
 Error*      error_new(void);

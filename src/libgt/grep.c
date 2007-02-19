@@ -52,34 +52,35 @@ int grep(bool *match, const char *pattern, const char *line, Error *err)
   return has_err;
 }
 
-int grep_unit_test(void)
+int grep_unit_test(Error *err)
 {
-  int has_err;
   bool match;
+  int grep_err, has_err = 0;
+  error_check(err);
 
-  has_err = grep(&match, "a", "a", NULL);
-  ensure(!has_err);
-  ensure(match);
+  grep_err = grep(&match, "a", "a", NULL);
+  ensure(has_err, !grep_err);
+  ensure(has_err, match);
 
-  has_err = grep(&match, "b", "a", NULL);
-  ensure(!has_err);
-  ensure(!match);
+  grep_err = grep(&match, "b", "a", NULL);
+  ensure(has_err, !grep_err);
+  ensure(has_err, !match);
 
-  has_err =  grep(&match, "aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA", NULL);
-  ensure(!has_err);
-  ensure(match);
+  grep_err =  grep(&match, "aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA", NULL);
+  ensure(has_err, !grep_err);
+  ensure(has_err, match);
 
-  has_err = grep(&match, "aba", "wenbapzbpqSayhzzaBaZZqyghaAAahhaA", NULL);
-  ensure(!has_err);
-  ensure(!match);
+  grep_err = grep(&match, "aba", "wenbapzbpqSayhzzaBaZZqyghaAAahhaA", NULL);
+  ensure(has_err, !grep_err);
+  ensure(has_err, !match);
 
-  has_err = grep(&match, "^aba", "abawenbapzbpqSayhzzZZqyghaAAahhaA", NULL);
-  ensure(!has_err);
-  ensure(match);
+  grep_err = grep(&match, "^aba", "abawenbapzbpqSayhzzZZqyghaAAahhaA", NULL);
+  ensure(has_err, !grep_err);
+  ensure(has_err, match);
 
-  has_err = grep(&match, "^aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA", NULL);
-  ensure(!has_err);
-  ensure(!match);
+  grep_err = grep(&match, "^aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA", NULL);
+  ensure(has_err, !grep_err);
+  ensure(has_err, !match);
 
-  return EXIT_SUCCESS;
+  return has_err;
 }

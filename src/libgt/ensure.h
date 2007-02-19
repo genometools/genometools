@@ -10,8 +10,13 @@
 #include "error.h"
 
 /* the ensure macro used for unit tests */
-#define ensure(e)                                                      \
-        (e) ?  0 : error("ensure \"%s\" failed: file \"%s\", line %d", \
-                         #e, __FILE__, __LINE__);
+#define ensure(has_err, e)                                               \
+        if (!has_err) {                                                  \
+          if (!(e)) {                                                    \
+            error_set(err, "ensure \"%s\" failed: file \"%s\", line %d", \
+                      #e, __FILE__, __LINE__);                           \
+            has_err = -1;                                                \
+          }                                                              \
+        }
 
 #endif

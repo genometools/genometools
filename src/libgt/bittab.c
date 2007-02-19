@@ -289,80 +289,82 @@ void bittab_show(const Bittab *b, FILE *outfp)
   (void) putc('\n', outfp);
 }
 
-int bittab_unit_test(void)
+int bittab_unit_test(Error *err)
 {
   unsigned long i, j, size, bit, counter;
   Bittab *b, *tmp, *and;
   FILE *fp;
+  int has_err = 0;
+  error_check(err);
 
-  for (i = 0; i < NUM_OF_TESTS; i++) {
+  for (i = 0; i < NUM_OF_TESTS && !has_err; i++) {
     size = ((double) rand() / RAND_MAX) * MAX_SIZE + 1;
     b = bittab_new(size);
     tmp = bittab_new(size);
     and = bittab_new(size);
-    ensure(bittab_size(b) == size);
+    ensure(has_err, bittab_size(b) == size);
 
-    for (j = 0; j < size; j++) {
+    for (j = 0; j < size && !has_err; j++) {
       counter = 0;
       for (bit  = bittab_get_first_bitnum(b);
            bit != bittab_get_last_bitnum(b);
            bit  = bittab_get_next_bitnum(b, bit)) {
         counter++;
       }
-      ensure(counter == j);
+      ensure(has_err, counter == j);
 
-      ensure(bittab_count_set_bits(b) == j);
-      ensure(!bittab_bit_is_set(b, j));
+      ensure(has_err, bittab_count_set_bits(b) == j);
+      ensure(has_err, !bittab_bit_is_set(b, j));
       bittab_set_bit(b, j);
-      ensure(bittab_bit_is_set(b, j));
+      ensure(has_err, bittab_bit_is_set(b, j));
 
       bittab_complement(tmp, b);
-      ensure(bittab_count_set_bits(tmp) == size - j - 1);
-      ensure(!bittab_cmp(b, tmp));
+      ensure(has_err, bittab_count_set_bits(tmp) == size - j - 1);
+      ensure(has_err, !bittab_cmp(b, tmp));
       bittab_and(and, b, tmp);
-      ensure(bittab_count_set_bits(and) == 0);
+      ensure(has_err, bittab_count_set_bits(and) == 0);
 
       bittab_unset(and);
       bittab_equal(and, b);
       bittab_or_equal(and, tmp);
-      ensure(bittab_size(and) == size);
+      ensure(has_err, bittab_size(and) == size);
 
       bittab_equal(and, b);
-      ensure(bittab_count_set_bits(and) == j + 1);
+      ensure(has_err, bittab_count_set_bits(and) == j + 1);
       bittab_and_equal(and, tmp);
-      ensure(bittab_count_set_bits(and) == 0);
+      ensure(has_err, bittab_count_set_bits(and) == 0);
 
       bittab_complement(tmp, tmp);
-      ensure(bittab_cmp(b, tmp));
+      ensure(has_err, bittab_cmp(b, tmp));
     }
 
-    ensure(bittab_count_set_bits(b) == size);
+    ensure(has_err, bittab_count_set_bits(b) == size);
     bittab_complement(tmp, b);
-    ensure(bittab_count_set_bits(tmp) == 0);
+    ensure(has_err, bittab_count_set_bits(tmp) == 0);
 
-    for (j = 0; j < size; j++) {
+    for (j = 0; j < size && !has_err; j++) {
       bittab_unset_bit(b, j);
-      ensure(!bittab_bit_is_set(b, j));
-      ensure(bittab_count_set_bits(b) == size - j - 1);
+      ensure(has_err, !bittab_bit_is_set(b, j));
+      ensure(has_err, bittab_count_set_bits(b) == size - j - 1);
 
       bittab_complement(tmp, b);
-      ensure(!bittab_cmp(b, tmp));
-      ensure(bittab_count_set_bits(tmp) == j + 1);
+      ensure(has_err, !bittab_cmp(b, tmp));
+      ensure(has_err, bittab_count_set_bits(tmp) == j + 1);
       bittab_and(and, b, tmp);
-      ensure(bittab_count_set_bits(and) == 0);
+      ensure(has_err, bittab_count_set_bits(and) == 0);
 
       bittab_unset(and);
       bittab_equal(and, b);
       bittab_or_equal(and, tmp);
-      ensure(bittab_size(and) == size);
+      ensure(has_err, bittab_size(and) == size);
 
       bittab_equal(and, b);
-      ensure(bittab_count_set_bits(and) == size - j - 1);
+      ensure(has_err, bittab_count_set_bits(and) == size - j - 1);
       bittab_and_equal(and, tmp);
-      ensure(bittab_count_set_bits(and) == 0);
+      ensure(has_err, bittab_count_set_bits(and) == 0);
 
       bittab_complement(tmp, tmp);
-      ensure(bittab_cmp(b, tmp));
+      ensure(has_err, bittab_cmp(b, tmp));
     }
 
     bittab_free(b);
@@ -389,15 +391,15 @@ int bittab_unit_test(void)
   bittab_set_bit(b, 77);
   bittab_set_bit(b, 96);
   bittab_set_bit(b, 124);
-  ensure(bittab_count_set_bits(b) == 6);
+  ensure(has_err, bittab_count_set_bits(b) == 6);
   bittab_shift_left_equal(b);
-  ensure(bittab_count_set_bits(b) == 6);
-  ensure(bittab_bit_is_set(b, 1));
-  ensure(bittab_bit_is_set(b, 33));
-  ensure(bittab_bit_is_set(b, 65));
-  ensure(bittab_bit_is_set(b, 78));
-  ensure(bittab_bit_is_set(b, 97));
-  ensure(bittab_bit_is_set(b, 125));
+  ensure(has_err, bittab_count_set_bits(b) == 6);
+  ensure(has_err, bittab_bit_is_set(b, 1));
+  ensure(has_err, bittab_bit_is_set(b, 33));
+  ensure(has_err, bittab_bit_is_set(b, 65));
+  ensure(has_err, bittab_bit_is_set(b, 78));
+  ensure(has_err, bittab_bit_is_set(b, 97));
+  ensure(has_err, bittab_bit_is_set(b, 125));
   bittab_free(b);
 
   /* test bittab_shift_right_equal() */
@@ -408,18 +410,18 @@ int bittab_unit_test(void)
   bittab_set_bit(b, 77);
   bittab_set_bit(b, 97);
   bittab_set_bit(b, 125);
-  ensure(bittab_count_set_bits(b) == 6);
+  ensure(has_err, bittab_count_set_bits(b) == 6);
   bittab_shift_right_equal(b);
-  ensure(bittab_count_set_bits(b) == 6);
-  ensure(bittab_bit_is_set(b, 0));
-  ensure(bittab_bit_is_set(b, 32));
-  ensure(bittab_bit_is_set(b, 64));
-  ensure(bittab_bit_is_set(b, 76));
-  ensure(bittab_bit_is_set(b, 96));
-  ensure(bittab_bit_is_set(b, 124));
+  ensure(has_err, bittab_count_set_bits(b) == 6);
+  ensure(has_err, bittab_bit_is_set(b, 0));
+  ensure(has_err, bittab_bit_is_set(b, 32));
+  ensure(has_err, bittab_bit_is_set(b, 64));
+  ensure(has_err, bittab_bit_is_set(b, 76));
+  ensure(has_err, bittab_bit_is_set(b, 96));
+  ensure(has_err, bittab_bit_is_set(b, 124));
   bittab_free(b);
 
-  return EXIT_SUCCESS;
+  return has_err;
 }
 
 void bittab_free(Bittab *b)

@@ -132,7 +132,7 @@ static int compare(const void *a, const void *b)
   return *(int*) a - *(int*) b;
 }
 
-int dlist_unit_test(void)
+int dlist_unit_test(Error *err)
 {
   Dlist *dlist;
   Dlistelem *dlistelem;
@@ -140,46 +140,48 @@ int dlist_unit_test(void)
       elem_a = 7,
       elem_b = 6,
       elems[MAX_SIZE],
-      elems_backup[MAX_SIZE];
+      elems_backup[MAX_SIZE],
+      has_err = 0;
+  error_check(err);
 
   /* boundary case: empty dlist */
   dlist = dlist_new(compare);
-  ensure(!dlist_size(dlist));
+  ensure(has_err, !dlist_size(dlist));
   dlist_free(dlist);
 
   dlist = dlist_new(NULL);
-  ensure(!dlist_size(dlist));
+  ensure(has_err, !dlist_size(dlist));
   dlist_free(dlist);
 
   /* boundary case: dlist containing one element */
   dlist = dlist_new(compare);
   dlist_add(dlist, &elem_a);
-  ensure(dlist_size(dlist) == 1);
-  ensure(elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
+  ensure(has_err, dlist_size(dlist) == 1);
+  ensure(has_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
   dlist_free(dlist);
 
   dlist = dlist_new(NULL);
   dlist_add(dlist, &elem_a);
-  ensure(dlist_size(dlist) == 1);
-  ensure(elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
+  ensure(has_err, dlist_size(dlist) == 1);
+  ensure(has_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
   dlist_free(dlist);
 
   /* boundary case: dlist containing two elements */
   dlist = dlist_new(compare);
   dlist_add(dlist, &elem_a);
   dlist_add(dlist, &elem_b);
-  ensure(dlist_size(dlist) == 2);
-  ensure(elem_b == *(int*) dlistelem_get_data(dlist_first(dlist)));
+  ensure(has_err, dlist_size(dlist) == 2);
+  ensure(has_err, elem_b == *(int*) dlistelem_get_data(dlist_first(dlist)));
   dlist_free(dlist);
 
   dlist = dlist_new(NULL);
   dlist_add(dlist, &elem_a);
   dlist_add(dlist, &elem_b);
-  ensure(dlist_size(dlist) == 2);
-  ensure(elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
+  ensure(has_err, dlist_size(dlist) == 2);
+  ensure(has_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
   dlist_free(dlist);
 
-  for (i = 0; i < NUM_OF_TESTS; i++) {
+  for (i = 0; i < NUM_OF_TESTS && !has_err; i++) {
     /* construct the random elements for the list */
     size = rand_max(MAX_SIZE);
     for (j = 0; j < size; j++) {
@@ -192,10 +194,10 @@ int dlist_unit_test(void)
 
     /* test with compare function */
     dlist = dlist_new(compare);
-    ensure(!dlist_size(dlist));
-    for (j = 0; j < size; j++) {
+    ensure(has_err, !dlist_size(dlist));
+    for (j = 0; j < size && !has_err; j++) {
       dlist_add(dlist, elems + j);
-      ensure(dlist_size(dlist) == j+1);
+      ensure(has_err, dlist_size(dlist) == j+1);
 
       for (dlistelem = dlist_first(dlist); dlistelem != NULL;
            dlistelem = dlistelem_next(dlistelem)) {
@@ -205,7 +207,7 @@ int dlist_unit_test(void)
     for (dlistelem = dlist_first(dlist); dlistelem != NULL;
          dlistelem = dlistelem_next(dlistelem)) {
       data = dlistelem_get_data(dlistelem);
-      ensure(*data == elems_backup[j]);
+      ensure(has_err, *data == elems_backup[j]);
       j++;
     }
     /* remove first element */
@@ -213,7 +215,7 @@ int dlist_unit_test(void)
       dlist_remove(dlist, dlist_first(dlist));
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_first(dlist));
-        ensure(*data == elems_backup[1]);
+        ensure(has_err, *data == elems_backup[1]);
       }
     }
     /* remove last element */
@@ -221,7 +223,7 @@ int dlist_unit_test(void)
       dlist_remove(dlist, dlist_last(dlist));
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_last(dlist));
-        ensure(*data == elems_backup[size - 2]);
+        ensure(has_err, *data == elems_backup[size - 2]);
       }
     }
     /* XXX: fix this */
@@ -236,23 +238,23 @@ int dlist_unit_test(void)
       for (j = 1; j < dlist_size(dlist) / 2 + 1; j++)
         dlistelem = dlistelem_next(dlistelem);
       data = dlistelem_get_data(dlist_last(dlist));
-      ensure(*data == elems_backup[size / 2 + 1]);
+      ensure(has_err, *data == elems_backup[size / 2 + 1]);
     }
 #endif
     dlist_free(dlist);
 
     /* test without compare function */
     dlist = dlist_new(NULL);
-    ensure(!dlist_size(dlist));
-    for (j = 0; j < size; j++) {
+    ensure(has_err, !dlist_size(dlist));
+    for (j = 0; j < size && !has_err; j++) {
       dlist_add(dlist, elems + j);
-      ensure(dlist_size(dlist) == j+1);
+      ensure(has_err, dlist_size(dlist) == j+1);
     }
     j = 0;
     for (dlistelem = dlist_first(dlist); dlistelem != NULL;
          dlistelem = dlistelem_next(dlistelem)) {
       data = dlistelem_get_data(dlistelem);
-      ensure(*data == elems[j]);
+      ensure(has_err, *data == elems[j]);
       j++;
     }
     /* remove first element */
@@ -260,7 +262,7 @@ int dlist_unit_test(void)
       dlist_remove(dlist, dlist_first(dlist));
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_first(dlist));
-        ensure(*data == elems[1]);
+        ensure(has_err, *data == elems[1]);
       }
     }
     /* remove last element */
@@ -268,13 +270,13 @@ int dlist_unit_test(void)
       dlist_remove(dlist, dlist_last(dlist));
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_last(dlist));
-        ensure(*data == elems[size - 2]);
+        ensure(has_err, *data == elems[size - 2]);
       }
     }
     dlist_free(dlist);
   }
 
-  return EXIT_SUCCESS;
+  return has_err;
 }
 
 void dlist_free(Dlist *dlist)

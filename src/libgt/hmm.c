@@ -561,7 +561,7 @@ void hmm_show(const HMM *hmm, FILE *fp)
   }
 }
 
-int hmm_unit_test(void)
+int hmm_unit_test(Error *err)
 {
   /* the last coin string must be the longest */
   static char *coin_tosses[] = { "H", "T", "HH", "HT", "TH", "TT", "HTHT",
@@ -586,6 +586,8 @@ int hmm_unit_test(void)
   Alpha *alpha;
   size_t i, j, len, size;
   HMM *fair_hmm, *loaded_hmm;
+  int has_err = 0;
+  error_check(err);
 
   /* test the HMM class with the coin HMMs */
   fair_hmm = coin_hmm_fair();
@@ -594,22 +596,24 @@ int hmm_unit_test(void)
   size = sizeof(coin_tosses) / sizeof(coin_tosses[0]);
   encoded_seq = xmalloc(sizeof(int) * strlen(coin_tosses[size-1]));
 
-  for (i = 0; i < size; i++) {
+  for (i = 0; i < size && !has_err; i++) {
     len = strlen(coin_tosses[i]);
     for (j = 0; j < len; j++)
       encoded_seq[j] = alpha_encode(alpha, coin_tosses[i][j]);
     /* XXX: remove exp() calls */
-    ensure(double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
+    ensure(has_err,
+           double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
                                 exp(hmm_backward(fair_hmm, encoded_seq, len))));
-    ensure(double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len)),
+    ensure(has_err,
+           double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len)),
                                 exp(hmm_backward(loaded_hmm, encoded_seq, len)))
                                );
   }
 
   free(encoded_seq);
   alpha_free(alpha);
-  ensure(double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
-  ensure(double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
+  ensure(has_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
+  ensure(has_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
   hmm_free(loaded_hmm);
   hmm_free(fair_hmm);
 
@@ -620,27 +624,29 @@ int hmm_unit_test(void)
   size = sizeof(dice_rolls) / sizeof(dice_rolls[0]);
   encoded_seq = xmalloc(sizeof(int) * strlen(dice_rolls[size-1]));
 
-  for (i = 0; i < size; i++) {
+  for (i = 0; i < size && !has_err; i++) {
     len = strlen(dice_rolls[i]);
     for (j = 0; j < len; j++) {
       encoded_seq[j] = alpha_encode(alpha, dice_rolls[i][j]);
     }
     /* XXX: remove exp() calls */
-    ensure(double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
+    ensure(has_err,
+           double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
                                 exp(hmm_backward(fair_hmm, encoded_seq, len))));
-    ensure(double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len)),
+    ensure(has_err,
+           double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len)),
                                 exp(hmm_backward(loaded_hmm, encoded_seq, len)))
                                );
   }
 
   free(encoded_seq);
   alpha_free(alpha);
-  ensure(double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
-  ensure(double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
+  ensure(has_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
+  ensure(has_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
   hmm_free(loaded_hmm);
   hmm_free(fair_hmm);
 
-  return EXIT_SUCCESS;
+  return has_err;
 }
 
 void hmm_free(HMM *hmm)

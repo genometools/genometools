@@ -128,53 +128,55 @@ void gtr_register_components(GTR *gtr)
 int run_test(void *key, void *value, void *data, Error *err)
 {
   const char *testname;
-  int (*test)(void);
-  int rval, *rvalp;
+  int (*test)(Error*);
+  int has_err, *had_errp;
   error_check(err);
   assert(key && value && data);
   testname = (const char*) key;
   test = value;
-  rvalp = (int*) data;
+  had_errp = (int*) data;
   printf("%s...", testname);
   xfflush(stdout);
-  rval = test();
-  switch (rval) {
-    case EXIT_SUCCESS:
-      xputs("ok");
-      break;
-    case EXIT_FAILURE:
-      xputs("error");
-      *rvalp = rval;
-      break;
-    default: assert(0);
+  has_err = test(err);
+  if (has_err) {
+    xputs("error");
+    *had_errp = has_err;
+    fprintf(stderr, "first error: %s\n", error_get(err));
+    error_unset(err);
+    xfflush(stderr);
   }
+  else
+    xputs("ok");
   xfflush(stdout);
   return 0;
 }
 
-static int run_tests(GTR *gtr)
+static int run_tests(GTR *gtr, Error *err)
 {
-  int has_err, rval = EXIT_SUCCESS;
+  int had_err = 0, has_err = 0;
+  error_check(err);
   assert(gtr);
 
   /* The following type assumptions are made in the GenomeTools library. */
-  ensure(sizeof(char) == 1);
-  ensure(sizeof(unsigned char) == 1);
-  ensure(sizeof(short) == 2);
-  ensure(sizeof(unsigned short) == 2);
-  ensure(sizeof(int) == 4);
-  ensure(sizeof(unsigned int) == 4);
-  ensure(sizeof(long) == 4 || sizeof(long) == 8);
-  ensure(sizeof(unsigned long) == 4 || sizeof(unsigned long) == 8);
-  ensure(sizeof(unsigned long) >= sizeof(size_t));
-  ensure(sizeof(long long) == 8);
-  ensure(sizeof(unsigned long long) == 8);
+  ensure(has_err, sizeof(char) == 1);
+  ensure(has_err, sizeof(unsigned char) == 1);
+  ensure(has_err, sizeof(short) == 2);
+  ensure(has_err, sizeof(unsigned short) == 2);
+  ensure(has_err, sizeof(int) == 4);
+  ensure(has_err, sizeof(unsigned int) == 4);
+  ensure(has_err, sizeof(long) == 4 || sizeof(long) == 8);
+  ensure(has_err, sizeof(unsigned long) == 4 || sizeof(unsigned long) == 8);
+  ensure(has_err, sizeof(unsigned long) >= sizeof(size_t));
+  ensure(has_err, sizeof(long long) == 8);
+  ensure(has_err, sizeof(unsigned long long) == 8);
 
   if (gtr->unit_tests) {
-    has_err = hashtable_foreach(gtr->unit_tests, run_test, &rval, NULL);
+    has_err = hashtable_foreach(gtr->unit_tests, run_test, &had_err, err);
     assert(!has_err); /* cannot happen, run_test() is sane */
   }
-  return rval;
+  if (had_err)
+    return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }
 
 int gtr_run(GTR *gtr, int argc, char **argv, Error *err)
@@ -185,7 +187,7 @@ int gtr_run(GTR *gtr, int argc, char **argv, Error *err)
   error_check(err);
   assert(gtr);
   if (gtr->test) {
-    return run_tests(gtr);
+    return run_tests(gtr, err);
   }
   assert(argc);
   if (argc == 1) {

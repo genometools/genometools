@@ -268,11 +268,13 @@ void alignment_show_multieop_list(const Alignment *a, FILE *fp)
   }
 }
 
-int alignment_unit_test(void)
+int alignment_unit_test(Error *err)
 {
   static char u[] = "acgtagatatatagat",
               v[] = "agaaagaggtaagaggga";
   Alignment *a;
+  int has_err = 0;
+  error_check(err);
 
   /* construct the following alignment (backwards):
 
@@ -302,11 +304,11 @@ int alignment_unit_test(void)
   alignment_add_replacement(a);
   alignment_add_replacement(a);
 
-  ensure(alignment_eval(a) == 10);
+  ensure(has_err, alignment_eval(a) == 10);
 
   alignment_free(a);
 
-  return EXIT_SUCCESS;
+  return has_err;
 }
 
 void alignment_free(Alignment *a)

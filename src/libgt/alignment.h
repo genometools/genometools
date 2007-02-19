@@ -8,6 +8,7 @@
 #define ALIGNMENT_H
 
 #include <stdio.h>
+#include "error.h"
 
 /* the Alignment class (an Alignment object has to be contructed backwards) */
 typedef struct Alignment Alignment;
@@ -24,7 +25,7 @@ void          alignment_remove_last(Alignment*); /* undo last add opteration */
 unsigned long alignment_eval(const Alignment*); /* returns unit cost */
 void          alignment_show(const Alignment*, FILE*);
 void          alignment_show_multieop_list(const Alignment*, FILE*);
-int           alignment_unit_test(void);
+int           alignment_unit_test(Error*);
 void          alignment_free(Alignment*);
 
 #endif

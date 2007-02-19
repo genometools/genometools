@@ -78,73 +78,76 @@ unsigned long splitter_size(Splitter *s)
   return s->num_of_tokens;
 }
 
-int splitter_unit_test(void)
+int splitter_unit_test(Error *err)
 {
-  Splitter *s = splitter_new();
   static char string_1[]  = "a bb ccc dddd eeeee",
               string_2[]  = "a\tbb\tccc\tdddd\teeeee",
               string_3[]  = "",
               string_4[]  = "a  b",
               string_5[]  = "ac bc ",
               string_6[]  = "test";
+  Splitter *s;
+  int has_err = 0;
+  error_check(err);
+  s = splitter_new();
 
   /* string_1 */
-  ensure(!splitter_size(s));
+  ensure(has_err, !splitter_size(s));
   splitter_split(s, string_1, strlen(string_1), ' ');
-  ensure(splitter_size(s) == 5);
-  ensure(strcmp(splitter_get_token(s, 0), "a") == 0);
-  ensure(strcmp(splitter_get_token(s, 1), "bb") == 0);
-  ensure(strcmp(splitter_get_token(s, 2), "ccc") == 0);
-  ensure(strcmp(splitter_get_token(s, 3), "dddd") == 0);
-  ensure(strcmp(splitter_get_token(s, 4), "eeeee") == 0);
+  ensure(has_err, splitter_size(s) == 5);
+  ensure(has_err, strcmp(splitter_get_token(s, 0), "a") == 0);
+  ensure(has_err, strcmp(splitter_get_token(s, 1), "bb") == 0);
+  ensure(has_err, strcmp(splitter_get_token(s, 2), "ccc") == 0);
+  ensure(has_err, strcmp(splitter_get_token(s, 3), "dddd") == 0);
+  ensure(has_err, strcmp(splitter_get_token(s, 4), "eeeee") == 0);
   splitter_reset(s);
 
   /* string_2 */
-  ensure(!splitter_size(s));
+  ensure(has_err, !splitter_size(s));
   splitter_split(s, string_2, strlen(string_2), '\t');
-  ensure(splitter_size(s) == 5);
-  ensure(strcmp(splitter_get_token(s, 0), "a") == 0);
-  ensure(strcmp(splitter_get_token(s, 1), "bb") == 0);
-  ensure(strcmp(splitter_get_token(s, 2), "ccc") == 0);
-  ensure(strcmp(splitter_get_token(s, 3), "dddd") == 0);
-  ensure(strcmp(splitter_get_token(s, 4), "eeeee") == 0);
+  ensure(has_err, splitter_size(s) == 5);
+  ensure(has_err, strcmp(splitter_get_token(s, 0), "a") == 0);
+  ensure(has_err, strcmp(splitter_get_token(s, 1), "bb") == 0);
+  ensure(has_err, strcmp(splitter_get_token(s, 2), "ccc") == 0);
+  ensure(has_err, strcmp(splitter_get_token(s, 3), "dddd") == 0);
+  ensure(has_err, strcmp(splitter_get_token(s, 4), "eeeee") == 0);
   splitter_reset(s);
 
   /* string_3 */
-  ensure(!splitter_size(s));
+  ensure(has_err, !splitter_size(s));
   splitter_split(s, string_3, strlen(string_3), '\t');
-  ensure(splitter_size(s) == 1);
-  ensure(strcmp(splitter_get_token(s, 0), "") == 0);
+  ensure(has_err, splitter_size(s) == 1);
+  ensure(has_err, strcmp(splitter_get_token(s, 0), "") == 0);
   splitter_reset(s);
 
   /* string_4 */
-  ensure(!splitter_size(s));
+  ensure(has_err, !splitter_size(s));
   splitter_split(s, string_4, strlen(string_4), ' ');
-  ensure(splitter_size(s) == 3);
-  ensure(strcmp(splitter_get_token(s, 0), "a") == 0);
-  ensure(strcmp(splitter_get_token(s, 1), "") == 0);
-  ensure(strcmp(splitter_get_token(s, 2), "b") == 0);
+  ensure(has_err, splitter_size(s) == 3);
+  ensure(has_err, strcmp(splitter_get_token(s, 0), "a") == 0);
+  ensure(has_err, strcmp(splitter_get_token(s, 1), "") == 0);
+  ensure(has_err, strcmp(splitter_get_token(s, 2), "b") == 0);
   splitter_reset(s);
 
   /* string_5 */
-  ensure(!splitter_size(s));
+  ensure(has_err, !splitter_size(s));
   splitter_split(s, string_5, strlen(string_5), ' ');
-  ensure(splitter_size(s) == 3);
-  ensure(strcmp(splitter_get_token(s, 0), "ac") == 0);
-  ensure(strcmp(splitter_get_token(s, 1), "bc") == 0);
-  ensure(strcmp(splitter_get_token(s, 2), "") == 0);
+  ensure(has_err, splitter_size(s) == 3);
+  ensure(has_err, strcmp(splitter_get_token(s, 0), "ac") == 0);
+  ensure(has_err, strcmp(splitter_get_token(s, 1), "bc") == 0);
+  ensure(has_err, strcmp(splitter_get_token(s, 2), "") == 0);
   splitter_reset(s);
 
   /* string_6 */
-  ensure(!splitter_size(s));
+  ensure(has_err, !splitter_size(s));
   splitter_split(s, string_6, strlen(string_6), ';');
-  ensure(splitter_size(s) == 1);
-  ensure(strcmp(splitter_get_token(s, 0), "test") == 0);
+  ensure(has_err, splitter_size(s) == 1);
+  ensure(has_err, strcmp(splitter_get_token(s, 0), "test") == 0);
 
   /* free */
   splitter_free(s);
 
-  return EXIT_SUCCESS;
+  return has_err;
 }
 
 void splitter_free(Splitter *s)

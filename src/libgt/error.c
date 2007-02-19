@@ -8,19 +8,6 @@
 #include "error.h"
 #include "xansi.h"
 
-/* the simple interface */
-void error(const char *format, ...)
-{
-  va_list ap;
-  va_start(ap, format);
-  fprintf(stderr, "error: ");
-  (void) vfprintf(stderr, format, ap);
-  (void) putc('\n', stderr);
-  va_end(ap);
-  exit (EXIT_FAILURE);
-}
-
-/* the sophisticated interface */
 struct Error {
   char error_string[BUFSIZ];
   bool error_is_set;

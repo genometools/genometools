@@ -91,7 +91,7 @@ unsigned long range_length(Range range)
   return range.end - range.start + 1;
 }
 
-int range_unit_test(void)
+int range_unit_test(Error *err)
 {
   static Range ranges_in[] = {  { 620432, 620536 }, { 620432, 620536 },
                                 { 620957, 621056 }, { 620957, 621056 },
@@ -132,59 +132,71 @@ int range_unit_test(void)
                              2, 2, 2, 2 };
   Array *ranges, *tmp_ranges, *ctr;
   unsigned long i;
+  int has_err = 0;
+  error_check(err);
 
-  ensure(sizeof(ranges_out) / sizeof(ranges_out[0]) ==
-         sizeof(counts)     / sizeof(counts[0]));
+  ensure(has_err, sizeof(ranges_out) / sizeof(ranges_out[0]) ==
+                  sizeof(counts)     / sizeof(counts[0]));
 
   /* test ranges_uniq() */
   ranges = array_new(sizeof(Range));
   tmp_ranges = array_new(sizeof(Range));
-  for (i = 0; i < sizeof(ranges_in) / sizeof(ranges_in[0]); i++)
+  for (i = 0; i < sizeof(ranges_in) / sizeof(ranges_in[0]) && !has_err; i++)
     array_add(ranges, ranges_in[i]);
   ranges_uniq(tmp_ranges, ranges);
-  ensure(array_size(ranges) == sizeof(ranges_in) / sizeof(ranges_in[0]));
-  ensure(array_size(tmp_ranges) == sizeof(ranges_out) / sizeof(ranges_out[0]));
-  for (i = 0; i < array_size(tmp_ranges); i++) {
-    ensure(ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
-    ensure(ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
+  ensure(has_err,
+         array_size(ranges) == sizeof(ranges_in) / sizeof(ranges_in[0]));
+  ensure(has_err,
+         array_size(tmp_ranges) == sizeof(ranges_out) / sizeof(ranges_out[0]));
+  for (i = 0; i < array_size(tmp_ranges) && !has_err; i++) {
+    ensure(has_err,
+           ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
+    ensure(has_err,
+           ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
   }
 
   /* test ranges_uniq_in_place() */
   array_set_size(tmp_ranges, 0);
   array_add_array(tmp_ranges, ranges);
   ranges_uniq_in_place(tmp_ranges);
-  for (i = 0; i < array_size(tmp_ranges); i++) {
-    ensure(ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
-    ensure(ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
+  for (i = 0; i < array_size(tmp_ranges) && !has_err; i++) {
+    ensure(has_err,
+           ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
+    ensure(has_err,
+           ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
   }
 
   /* test ranges_uniq_count() */
   array_set_size(tmp_ranges, 0);
   ctr = ranges_uniq_count(tmp_ranges, ranges);
-  ensure(array_size(tmp_ranges) == array_size(ctr));
-  ensure(array_size(ctr) == sizeof(counts) / sizeof(counts[0]));
-  for (i = 0; i < array_size(ctr); i++) {
-    ensure(counts[i] == *(unsigned long*) array_get(ctr, i));
-    ensure(ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
-    ensure(ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
+  ensure(has_err, array_size(tmp_ranges) == array_size(ctr));
+  ensure(has_err, array_size(ctr) == sizeof(counts) / sizeof(counts[0]));
+  for (i = 0; i < array_size(ctr) && !has_err; i++) {
+    ensure(has_err, counts[i] == *(unsigned long*) array_get(ctr, i));
+    ensure(has_err,
+           ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
+    ensure(has_err,
+           ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
   }
   array_free(ctr);
 
   /* test ranges_uniq_in_place_count() */
   ctr = ranges_uniq_in_place_count(ranges);
-  ensure(array_size(ranges) == array_size(ctr));
-  ensure(array_size(ctr) == sizeof(counts) / sizeof(counts[0]));
-  for (i = 0; i < array_size(ctr); i++) {
-    ensure(counts[i] == *(unsigned long*) array_get(ctr, i));
-    ensure(ranges_out[i].start == (*(Range*) array_get(ranges, i)).start);
-    ensure(ranges_out[i].end == (*(Range*) array_get(ranges, i)).end);
+  ensure(has_err, array_size(ranges) == array_size(ctr));
+  ensure(has_err, array_size(ctr) == sizeof(counts) / sizeof(counts[0]));
+  for (i = 0; i < array_size(ctr) && !has_err; i++) {
+    ensure(has_err, counts[i] == *(unsigned long*) array_get(ctr, i));
+    ensure(has_err,
+           ranges_out[i].start == (*(Range*) array_get(ranges, i)).start);
+    ensure(has_err,
+           ranges_out[i].end == (*(Range*) array_get(ranges, i)).end);
   }
   array_free(ctr);
 
   /* free */
   array_free(ranges);
   array_free(tmp_ranges);
-  return EXIT_SUCCESS;
+  return has_err;
 }
 
 void ranges_sort(Array *ranges)

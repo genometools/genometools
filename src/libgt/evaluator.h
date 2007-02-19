@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -20,7 +20,7 @@ double     evaluator_get_specificity(const Evaluator*);
 void       evaluator_show_sensitivity(const Evaluator*, FILE*);
 void       evaluator_show_specificity(const Evaluator*, FILE*);
 void       evaluator_reset(Evaluator*);
-int        evaluator_unit_test(void);
+int        evaluator_unit_test(Error*);
 void       evaluator_free(Evaluator*);
 
 #endif

@@ -7,6 +7,8 @@
 #ifndef HMM_H
 #define HMM_H
 
+#include "error.h"
+
 /* The Hidden Markov Model (HMM) class */
 typedef struct HMM HMM;
 
@@ -43,7 +45,7 @@ bool   hmm_is_valid(const HMM*);
 /* returns the RMSD of two HMMs */
 double hmm_rmsd(const HMM*, const HMM*);
 void   hmm_show(const HMM*, FILE*);
-int    hmm_unit_test(void);
+int    hmm_unit_test(Error*);
 void   hmm_free(HMM*);
 
 #endif

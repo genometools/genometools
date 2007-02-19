@@ -5,3 +5,4 @@ changes in version 0.6.8:
 - `gt bioseq` can be used with more then one sequence file
 - `gt filter` has a new option -seqid
 - `gt filter` has a new option -maxgenenum
+- the error() function has been removed

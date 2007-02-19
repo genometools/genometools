@@ -24,7 +24,7 @@ void       hashtable_add(Hashtable*, void*, void*);
 void       hashtable_remove(Hashtable*, void*);
 int        hashtable_foreach(Hashtable*, Hashiteratorfunc, void*, Error*);
 void       hashtable_reset(Hashtable*);
-int        hashtable_unit_test(void);
+int        hashtable_unit_test(Error*);
 void       hashtable_free(Hashtable*);
 
 #endif

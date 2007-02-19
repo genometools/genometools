@@ -22,7 +22,7 @@ unsigned long splicedseq_map(const Splicedseq*, unsigned long);
 unsigned long splicedseq_length(const Splicedseq*);
 int           splicedseq_reverse(Splicedseq*, Error*);
 void          splicedseq_reset(Splicedseq*);
-int           splicedseq_unit_test(void);
+int           splicedseq_unit_test(Error*);
 void          splicedseq_free(Splicedseq*);
 
 #endif

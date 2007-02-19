@@ -81,67 +81,69 @@ void evaluator_reset(Evaluator *e)
   memset(e, 0, sizeof(Evaluator));
 }
 
-int evaluator_unit_test(void)
+int evaluator_unit_test(Error *err)
 {
   Evaluator *e = evaluator_new();
+  int has_err = 0;
+  error_check(err);
 
-  ensure(evaluator_get_sensitivity(e) == 1.0);
-  ensure(evaluator_get_specificity(e) == 1.0);
+  ensure(has_err, evaluator_get_sensitivity(e) == 1.0);
+  ensure(has_err, evaluator_get_specificity(e) == 1.0);
 
   evaluator_add_actual(e, 1);
-  ensure(evaluator_get_sensitivity(e) == 0.0);
-  ensure(evaluator_get_specificity(e) == 1.0);
+  ensure(has_err, evaluator_get_sensitivity(e) == 0.0);
+  ensure(has_err, evaluator_get_specificity(e) == 1.0);
 
   evaluator_add_predicted(e, 1);
-  ensure(evaluator_get_sensitivity(e) == 0.0);
-  ensure(evaluator_get_specificity(e) == 0.0);
+  ensure(has_err, evaluator_get_sensitivity(e) == 0.0);
+  ensure(has_err, evaluator_get_specificity(e) == 0.0);
 
   evaluator_add_true(e);
-  ensure(evaluator_get_sensitivity(e) == 1.0);
-  ensure(evaluator_get_specificity(e) == 1.0);
+  ensure(has_err, evaluator_get_sensitivity(e) == 1.0);
+  ensure(has_err, evaluator_get_specificity(e) == 1.0);
 
   evaluator_reset(e);
-  ensure(evaluator_get_sensitivity(e) == 1.0);
-  ensure(evaluator_get_specificity(e) == 1.0);
+  ensure(has_err, evaluator_get_sensitivity(e) == 1.0);
+  ensure(has_err, evaluator_get_specificity(e) == 1.0);
 
   evaluator_add_predicted(e, 1);
-  ensure(evaluator_get_sensitivity(e) == 1.0);
-  ensure(evaluator_get_specificity(e) == 0.0);
+  ensure(has_err, evaluator_get_sensitivity(e) == 1.0);
+  ensure(has_err, evaluator_get_specificity(e) == 0.0);
 
   evaluator_reset(e);
-  ensure(evaluator_get_sensitivity(e) == 1.0);
-  ensure(evaluator_get_specificity(e) == 1.0);
+  ensure(has_err, evaluator_get_sensitivity(e) == 1.0);
+  ensure(has_err, evaluator_get_specificity(e) == 1.0);
 
   evaluator_add_actual(e, 2);
   evaluator_add_predicted(e, 2);
   evaluator_add_true(e);
-  ensure(evaluator_get_sensitivity(e) == 0.5);
-  ensure(evaluator_get_specificity(e) == 0.5);
+  ensure(has_err, evaluator_get_sensitivity(e) == 0.5);
+  ensure(has_err, evaluator_get_specificity(e) == 0.5);
 
   evaluator_reset(e);
-  ensure(evaluator_get_sensitivity(e) == 1.0);
-  ensure(evaluator_get_specificity(e) == 1.0);
+  ensure(has_err, evaluator_get_sensitivity(e) == 1.0);
+  ensure(has_err, evaluator_get_specificity(e) == 1.0);
 
   evaluator_add_actual(e, 4);
   evaluator_add_predicted(e, 4);
   evaluator_add_true(e);
-  ensure(evaluator_get_sensitivity(e) == 0.25);
-  ensure(evaluator_get_specificity(e) == 0.25);
+  ensure(has_err, evaluator_get_sensitivity(e) == 0.25);
+  ensure(has_err, evaluator_get_specificity(e) == 0.25);
   evaluator_add_true(e);
-  ensure(evaluator_get_sensitivity(e) == 0.5);
-  ensure(evaluator_get_specificity(e) == 0.5);
+  ensure(has_err, evaluator_get_sensitivity(e) == 0.5);
+  ensure(has_err, evaluator_get_specificity(e) == 0.5);
 
   evaluator_add_true(e);
-  ensure(evaluator_get_sensitivity(e) == 0.75);
-  ensure(evaluator_get_specificity(e) == 0.75);
+  ensure(has_err, evaluator_get_sensitivity(e) == 0.75);
+  ensure(has_err, evaluator_get_specificity(e) == 0.75);
 
   evaluator_add_true(e);
-  ensure(evaluator_get_sensitivity(e) == 1.0);
-  ensure(evaluator_get_specificity(e) == 1.0);
+  ensure(has_err, evaluator_get_sensitivity(e) == 1.0);
+  ensure(has_err, evaluator_get_specificity(e) == 1.0);
 
   evaluator_free(e);
 
-  return EXIT_SUCCESS;
+  return has_err;
 }
 
 void evaluator_free(Evaluator *e)

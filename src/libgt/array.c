@@ -140,12 +140,14 @@ Array* array_clone(const Array *a)
   return a_copy;
 }
 
-int array_unit_test(void)
+int array_unit_test(Error *err)
 {
   Array *char_array, *int_array;
   char cc, *char_array_test;
   int ci, *int_array_test;
   unsigned long i, j, size;
+  int has_err = 0;
+  error_check(err);
 
   /* testing an empty array */
   char_array = array_new(sizeof(char));
@@ -158,50 +160,50 @@ int array_unit_test(void)
   char_array_test = xmalloc((MAX_SIZE + 1) * sizeof(char));
   int_array_test = xmalloc(MAX_SIZE * sizeof(int));
 
-  for (i = 0; i < NUM_OF_TESTS; i++) {
+  for (i = 0; i < NUM_OF_TESTS && !has_err; i++) {
     size = ((double) rand() / RAND_MAX) * MAX_SIZE;
 
     array_set_size(char_array, 0);
     array_set_size(int_array, 0);
 
-    ensure(array_size(char_array) == 0);
-    ensure(array_size(int_array) == 0);
+    ensure(has_err, array_size(char_array) == 0);
+    ensure(has_err, array_size(int_array) == 0);
 
-    for (i = 0; i < size; i++) {
+    for (i = 0; i < size && !has_err; i++) {
       cc = ((double) rand() / RAND_MAX) * CHAR_MAX;
       ci = ((double) rand() / RAND_MAX) * INT_MAX;
 
       array_add(char_array, cc);
       array_add(int_array, ci);
 
-      ensure(array_size(char_array) == i+1);
-      ensure(array_size(int_array) == i+1);
-      ensure(*((char*) array_get(char_array, i)) == cc);
-      ensure(*((int*) array_get(int_array, i)) == ci);
+      ensure(has_err, array_size(char_array) == i+1);
+      ensure(has_err, array_size(int_array) == i+1);
+      ensure(has_err, *((char*) array_get(char_array, i)) == cc);
+      ensure(has_err, *((int*) array_get(int_array, i)) == ci);
 
       array_add_elem(char_array, &cc, sizeof(char));
       array_add_elem(int_array, &ci, sizeof(int));
 
-      ensure(array_size(char_array) == i+2);
-      ensure(array_size(int_array) == i+2);
-      ensure(*((char*) array_get(char_array, i+1)) == cc);
-      ensure(*((int*) array_get(int_array, i+1)) == ci);
-      ensure(*((char*) array_pop(char_array)) == cc);
-      ensure(*((int*) array_pop(int_array)) == ci);
-      ensure(array_size(char_array) == i+1);
-      ensure(array_size(int_array) == i+1);
-      ensure(*((char*) array_get(char_array, i)) == cc);
-      ensure(*((int*) array_get(int_array, i)) == ci);
+      ensure(has_err, array_size(char_array) == i+2);
+      ensure(has_err, array_size(int_array) == i+2);
+      ensure(has_err, *((char*) array_get(char_array, i+1)) == cc);
+      ensure(has_err, *((int*) array_get(int_array, i+1)) == ci);
+      ensure(has_err, *((char*) array_pop(char_array)) == cc);
+      ensure(has_err, *((int*) array_pop(int_array)) == ci);
+      ensure(has_err, array_size(char_array) == i+1);
+      ensure(has_err, array_size(int_array) == i+1);
+      ensure(has_err, *((char*) array_get(char_array, i)) == cc);
+      ensure(has_err, *((int*) array_get(int_array, i)) == ci);
 
       char_array_test[i] = cc;
       char_array_test[i+1]= '\0';
       int_array_test[i] = ci;
 
-      ensure(strncmp(array_get_space(char_array), char_array_test,
-                     strlen(char_array_test)) == 0);
+      ensure(has_err, strncmp(array_get_space(char_array), char_array_test,
+                              strlen(char_array_test)) == 0);
 
-      for (j = 0; j <= i; j++)
-        ensure(*(int*) array_get(int_array, j) == int_array_test[j]);
+      for (j = 0; j <= i && !has_err; j++)
+        ensure(has_err, *(int*) array_get(int_array, j) == int_array_test[j]);
     }
   }
 
@@ -210,7 +212,7 @@ int array_unit_test(void)
   free(char_array_test);
   free(int_array_test);
 
-  return EXIT_SUCCESS;
+  return has_err;
 }
 
 void array_free(Array *a)

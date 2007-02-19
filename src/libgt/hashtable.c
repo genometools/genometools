@@ -117,10 +117,12 @@ void hashtable_reset(Hashtable *ht)
   (void) st_foreach(ht->st_table, remove_key_value_pair, (st_data_t) ht);
 }
 
-static void hashtable_test(Hash_type hash_type)
+static int hashtable_test(Hash_type hash_type, Error *err)
 {
   char *s1 = "foo", *s2 = "bar";
   Hashtable *ht;
+  int has_err = 0;
+  error_check(err);
 
   /* empty hash */
   ht = hashtable_new(hash_type, NULL, NULL);
@@ -134,28 +136,34 @@ static void hashtable_test(Hash_type hash_type)
   /* hashes containing one element */
   ht = hashtable_new(hash_type, NULL, NULL);
   hashtable_add(ht, s1, s2);
-  ensure(hashtable_get(ht, s1) == s2);
-  ensure(!hashtable_get(ht, s2));
+  ensure(has_err, hashtable_get(ht, s1) == s2);
+  ensure(has_err, !hashtable_get(ht, s2));
   hashtable_free(ht);
 
   /* hashes containing two elements */
   ht = hashtable_new(hash_type, NULL, NULL);
   hashtable_add(ht, s1, s2);
   hashtable_add(ht, s2, s1);
-  ensure(hashtable_get(ht, s1) == s2);
-  ensure(hashtable_get(ht, s2) == s1);
+  ensure(has_err, hashtable_get(ht, s1) == s2);
+  ensure(has_err, hashtable_get(ht, s2) == s1);
   hashtable_free(ht);
+
+  return has_err;
 }
 
-int hashtable_unit_test(void)
+int hashtable_unit_test(Error *err)
 {
+  int has_err;
+  error_check(err);
+
   /* direct hash */
-  hashtable_test(HASH_DIRECT);
+  has_err = hashtable_test(HASH_DIRECT, err);
 
   /* string hash */
-  hashtable_test(HASH_STRING);
+  if (!has_err)
+    has_err = hashtable_test(HASH_STRING, err);
 
-  return EXIT_SUCCESS;
+  return has_err;
 }
 
 void hashtable_free(Hashtable *ht)
