@@ -11,7 +11,7 @@
 #include "genome_stream.h"
 
 /* implements the ``genome_stream'' interface */
-typedef struct CDS_stream CDS_stream;
+typedef struct CDSStream CDSStream;
 
 const GenomeStreamClass* cds_stream_class(void);
 

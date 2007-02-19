@@ -15,7 +15,7 @@
 #include "queue.h"
 #include "xansi.h"
 
-struct Gff3_in_stream
+struct GFF3InStream
 {
   const GenomeStream parent_instance;
   int next_file;
@@ -37,7 +37,7 @@ struct Gff3_in_stream
 static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                                     /*@unused@*/ Log *l, Error *err)
 {
-  Gff3_in_stream *is = gff3_in_stream_cast(gs);
+  GFF3InStream *is = gff3_in_stream_cast(gs);
   unsigned long i;
   int has_err = 0, status_code;
 
@@ -144,7 +144,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 
 static void gff3_in_stream_free(GenomeStream *gs)
 {
-  Gff3_in_stream *gff3_in_stream = gff3_in_stream_cast(gs);
+  GFF3InStream *gff3_in_stream = gff3_in_stream_cast(gs);
   array_free(gff3_in_stream->files);
   queue_free(gff3_in_stream->genome_node_buffer);
   gff3_free(gff3_in_stream->gff3_parser);
@@ -153,7 +153,7 @@ static void gff3_in_stream_free(GenomeStream *gs)
 
 const GenomeStreamClass* gff3_in_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof(Gff3_in_stream),
+  static const GenomeStreamClass gsc = { sizeof(GFF3InStream),
                                          gff3_in_stream_next_tree,
                                          gff3_in_stream_free };
   return &gsc;
@@ -164,7 +164,7 @@ static GenomeStream* gff3_in_stream_new(Array *files, /* takes ownership */
 {
   GenomeStream *gs = genome_stream_create(gff3_in_stream_class(),
                                           ensure_sorting);
-  Gff3_in_stream *gff3_in_stream         = gff3_in_stream_cast(gs);
+  GFF3InStream *gff3_in_stream         = gff3_in_stream_cast(gs);
   gff3_in_stream->next_file              = 0;
   gff3_in_stream->files                  = files;
   gff3_in_stream->ensure_sorting         = ensure_sorting;
@@ -181,7 +181,7 @@ static GenomeStream* gff3_in_stream_new(Array *files, /* takes ownership */
 
 void gff3_in_stream_set_offset(GenomeStream *gs, long offset)
 {
-  Gff3_in_stream *is = gff3_in_stream_cast(gs);
+  GFF3InStream *is = gff3_in_stream_cast(gs);
   gff3_set_offset(is->gff3_parser, offset);
 }
 

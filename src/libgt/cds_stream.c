@@ -9,7 +9,7 @@
 #include "genome_stream_rep.h"
 #include "str.h"
 
-struct CDS_stream
+struct CDSStream
 {
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
@@ -22,7 +22,7 @@ struct CDS_stream
 static int cds_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
                                 Error *err)
 {
-  CDS_stream *cds_stream;
+  CDSStream *cds_stream;
   int has_err;
   error_check(err);
   cds_stream = cds_stream_cast(gs);
@@ -34,13 +34,13 @@ static int cds_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
 
 static void cds_stream_free(GenomeStream *gs)
 {
-  CDS_stream *cds_stream = cds_stream_cast(gs);
+  CDSStream *cds_stream = cds_stream_cast(gs);
   genome_visitor_free(cds_stream->cds_visitor);
 }
 
 const GenomeStreamClass* cds_stream_class(void)
 {
-  static const GenomeStreamClass gsc = { sizeof(CDS_stream),
+  static const GenomeStreamClass gsc = { sizeof(CDSStream),
                                          cds_stream_next_tree,
                                          cds_stream_free };
   return &gsc;
@@ -50,7 +50,7 @@ GenomeStream* cds_stream_new(GenomeStream *in_stream, const char *sequence_file,
                              const char *source, Error *err)
 {
   GenomeStream *gs;
-  CDS_stream *cds_stream;
+  CDSStream *cds_stream;
   Str *sequence_file_str, *source_str;
   int has_err = 0;
   error_check(err);
