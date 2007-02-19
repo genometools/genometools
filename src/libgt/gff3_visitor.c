@@ -178,8 +178,7 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                             err);
   }
 
-  /* clear hashtable */
-  /* XXX */
+  /* reset hashtables */
   hashtable_reset(gff3_visitor->genome_feature_to_id_array);
   hashtable_reset(gff3_visitor->genome_feature_to_unique_id_str);
 
