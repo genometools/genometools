@@ -20,7 +20,7 @@ typedef struct GenomeNode GenomeNode;
 
 typedef int (*GenomeNodeTraverseFunc)(GenomeNode*, void*, Error*);
 
-GenomeNode*  genome_node_rec_ref(GenomeNode*);
+GenomeNode*   genome_node_rec_ref(GenomeNode*);
 void*         genome_node_cast(const GenomeNodeClass*, GenomeNode*);
 int           genome_node_traverse_children(GenomeNode*, void*,
                                             GenomeNodeTraverseFunc,
