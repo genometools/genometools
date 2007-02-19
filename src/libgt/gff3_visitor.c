@@ -32,6 +32,11 @@ typedef struct {
   const char *id;
 } Add_id_info;
 
+typedef struct {
+  bool attribute_shown;
+  FILE *outfp;
+} ShowAttributeInfo;
+
 #define gff3_visitor_cast(GV)\
         genome_visitor_cast(gff3_visitor_class(), GV)
 
@@ -81,13 +86,29 @@ static int add_id(GenomeNode *gn, void *data, Error *err)
   return 0;
 }
 
+static int show_attribute(const char *attr_name, const char *attr_value,
+                          void *data, Error *err)
+{
+  ShowAttributeInfo *info = (ShowAttributeInfo*) data;
+  error_check(err);
+  assert(attr_name && attr_value && info);
+  if (info->attribute_shown)
+    xfputc(';', info->outfp);
+  else
+    info->attribute_shown = true;
+  fprintf(info->outfp, "%s=%s", attr_name, attr_value);
+  return 0;
+}
+
 static int gff3_show_genome_feature(GenomeNode *gn, void *data, Error *err)
 {
-  unsigned int part_shown = 0;
+  bool part_shown = false;
   GFF3Visitor *gff3_visitor = (GFF3Visitor*) data;
   GenomeFeature *gf = (GenomeFeature*) gn;
   Array *parent_features = NULL;
+  ShowAttributeInfo info;
   unsigned long i;
+  int has_err = 0;
   Str *id;
 
   error_check(err);
@@ -99,7 +120,7 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data, Error *err)
   /* show unique id part of attributes */
   if ((id = hashtable_get(gff3_visitor->genome_feature_to_unique_id_str, gn))) {
     fprintf(gff3_visitor->outfp, "%s=%s", ID_STRING, str_get(id));
-    part_shown = 1;
+    part_shown = true;
   }
 
   /* show parent part of attributes */
@@ -115,15 +136,22 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data, Error *err)
       fprintf(gff3_visitor->outfp, "%s",
               *(char**) array_get(parent_features, i));
     }
-    part_shown = 1;
+    part_shown = true;
   }
 
-  /* XXX: show missing part of attributes */
-  /* if (part_shown) putc(';', gff3_visitor->outfp); */
+  /* show missing part of attributes */
+  if (genome_feature_has_attribute(gf)) {
+    if (part_shown)
+      xfputc(';', gff3_visitor->outfp);
+    info.attribute_shown = false;
+    info.outfp = gff3_visitor->outfp;
+    has_err = genome_feature_foreach_attribute(gf, show_attribute, &info, err);
+  }
 
+  /* show terminal newline */
   xfputc('\n', gff3_visitor->outfp);
 
-  return 0;
+  return has_err;
 }
 
 static int store_ids(GenomeNode *gn, void *data, Error *err)

@@ -93,7 +93,8 @@ end
 Name "gt gff3 test 18"
 Keywords "gt_gff3"
 Test do
-  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_test_18.gff3", :retval => 1)
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_18.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_test_18.gff3"
 end
 
 Name "gt gff3 test 19"

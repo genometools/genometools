@@ -59,7 +59,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
                                    unsigned long line_number,
                                    bool *break_loop, Error *err)
 {
-  GenomeNode *gn, *genome_feature = NULL, *parent_gf;
+  GenomeNode *gn = NULL, *genome_feature = NULL, *parent_gf;
   GenomeFeatureType gft;
   Splitter *splitter, *attribute_splitter, *tmp_splitter, *parents_splitter;
   Str *seqid_str, *source_str;
@@ -127,12 +127,28 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   if (!has_err)
     has_err = parse_phase(&phase_value, phase, line_number, filename, err);
 
+  /* create the feature */
+  if (!has_err) {
+    genome_feature = genome_feature_new(gft, range, strand_value, filename,
+                                        line_number);
+  }
+
   /* parse the unique id and the parents */
   if (!has_err) {
     splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
     for (i = 0; i < splitter_size(attribute_splitter); i++) {
       token = splitter_get_token(attribute_splitter, i);
-      if (strncmp(token, ID_STRING, strlen(ID_STRING)) == 0) {
+      if (strncmp(token, ".", 1) == 0) {
+        if (splitter_size(attribute_splitter) > 1) {
+          error_set(err, "more than one attribute token defined on line %lu in"
+                         "file \"%s\", altough the first one is '.'",
+                    line_number, filename);
+          has_err = -1;
+        }
+        if (!has_err)
+          break; /* no attributes to parse */
+      }
+      else if (strncmp(token, ID_STRING, strlen(ID_STRING)) == 0) {
         if (id) {
           error_set(err, "more then one %s token on line %lu in file \"%s\"",
                     ID_STRING, line_number, filename);
@@ -160,16 +176,23 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
         }
         tmp_token = splitter_get_token(tmp_splitter, 1);
         splitter_split(parents_splitter, tmp_token, strlen(tmp_token), ',');
-        assert(splitter_size(parents_splitter));
+        assert(splitter_size(parents_splitter)); /* XXX: should be an error */
       }
-      /* XXX: add other attributes here */
+      else {
+        /* add other attributes here */
+        splitter_reset(tmp_splitter);
+        splitter_split(tmp_splitter, token, strlen(token), '=');
+        if (splitter_size(tmp_splitter) != 2) {
+          error_set(err, "token \"%s\" on line %lu in file \"%s\" does not "
+                    "contain exactly one '='", token, line_number, filename);
+          has_err = -1;
+          break;
+        }
+        genome_feature_add_attribute((GenomeFeature*) genome_feature,
+                                     splitter_get_token(tmp_splitter, 0),
+                                     splitter_get_token(tmp_splitter, 1));
+      }
     }
-  }
-
-  /* create the feature */
-  if (!has_err) {
-    genome_feature = genome_feature_new(gft, range, strand_value, filename,
-                                        line_number);
   }
 
   /* set seqid */
@@ -236,7 +259,10 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
     }
   }
 
-  gn = is_child ? NULL : genome_feature;
+  if (!has_err)
+    gn = is_child ? NULL : genome_feature;
+  else
+    genome_node_free(genome_feature);
 
   if (gn)
     queue_add(genome_nodes, gn);

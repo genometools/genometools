@@ -16,6 +16,9 @@ typedef struct GenomeFeature GenomeFeature;
 #include "range.h"
 #include "strand.h"
 
+typedef int (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
+                                 void *data, Error*);
+
 const GenomeNodeClass* genome_feature_class(void);
 GenomeNode*            genome_feature_new(GenomeFeatureType, Range, Strand,
                                           const char *filename,
@@ -28,7 +31,13 @@ Phase                  genome_feature_get_phase(GenomeFeature*);
 void                   genome_feature_get_exons(GenomeFeature*,
                                                 Array *exon_features);
 void                   genome_feature_set_end(GenomeFeature*, unsigned long);
-/* XXX: move to genome_node */
 void                   genome_feature_set_score(GenomeFeature*, double);
+void                   genome_feature_add_attribute(GenomeFeature*,
+                                                    const char *attr_name,
+                                                    const char *attr_value);
+bool                   genome_feature_has_attribute(const GenomeFeature*);
+int                    genome_feature_foreach_attribute(GenomeFeature*,
+                                                        AttributeIterFunc,
+                                                        void *data, Error*);
 
 #endif

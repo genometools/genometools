@@ -9,6 +9,7 @@
 #include "genome_feature.h"
 #include "genome_feature_type.h"
 #include "genome_node_rep.h"
+#include "hashtable.h"
 #include "range.h"
 #include "strand.h"
 #include "undef.h"
@@ -24,6 +25,8 @@ struct GenomeFeature
   double score;
   Strand strand;
   Phase phase;
+  Hashtable *attributes; /* stores additional the attributes besides 'Parent'
+                            and 'ID'; created on demand */
 };
 
 #define genome_feature_cast(GN)\
@@ -35,6 +38,7 @@ static void genome_feature_free(GenomeNode *gn)
   assert(gf);
   str_free(gf->seqid);
   str_free(gf->source);
+  hashtable_free(gf->attributes);
 }
 
 static Str* genome_feature_get_seqid(GenomeNode *gn)
@@ -61,12 +65,6 @@ static void genome_feature_set_source(GenomeNode *gn, Str *source)
   GenomeFeature *gf = genome_feature_cast(gn);
   assert(gf && source && !gf->source);
   gf->source = str_ref(source);
-}
-
-void genome_feature_set_score(GenomeFeature *gf, double score)
-{
-  assert(gf);
-  gf->score = score;
 }
 
 static void genome_feature_set_phase(GenomeNode *gn, Phase phase)
@@ -110,13 +108,14 @@ GenomeNode* genome_feature_new(GenomeFeatureType type,
                                        line_number);
   GenomeFeature *gf = genome_feature_cast(gn);
   assert(range.start <= range.end);
-  gf->seqid  = NULL;
-  gf->source = NULL;
-  gf->type   = type;
-  gf->score  = UNDEFDOUBLE;
-  gf->range  = range;
-  gf->strand = strand;
-  gf->phase  = PHASE_UNDEFINED;
+  gf->seqid      = NULL;
+  gf->source     = NULL;
+  gf->type       = type;
+  gf->score      = UNDEFDOUBLE;
+  gf->range      = range;
+  gf->strand     = strand;
+  gf->phase      = PHASE_UNDEFINED;
+  gf->attributes = NULL;
   return gn;
 }
 
@@ -176,4 +175,38 @@ void genome_feature_set_end(GenomeFeature *gf, unsigned long end)
 {
   assert(gf && gf->range.start <= end);
   gf->range.end = end;
+}
+
+void genome_feature_set_score(GenomeFeature *gf, double score)
+{
+  assert(gf);
+  gf->score = score;
+}
+
+void genome_feature_add_attribute(GenomeFeature *gf, const char *attr_name,
+                                  const char *attr_value)
+{
+  assert(gf && attr_name && attr_value);
+  if (!gf->attributes)
+    gf->attributes = hashtable_new(HASH_DIRECT, free, free);
+  hashtable_add(gf->attributes, xstrdup(attr_name), xstrdup(attr_value));
+}
+
+bool genome_feature_has_attribute(const GenomeFeature *gf)
+{
+  assert(gf);
+  if (gf->attributes)
+    return true;
+  return false;
+}
+
+int genome_feature_foreach_attribute(GenomeFeature *gf,
+                                     AttributeIterFunc iterfunc, void *data,
+                                     Error *err)
+{
+  error_check(err);
+  assert(gf && iterfunc);
+  assert(genome_feature_has_attribute(gf));
+  return hashtable_foreach(gf->attributes, (Hashiteratorfunc) iterfunc, data,
+                           err);
 }

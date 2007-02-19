@@ -6,3 +6,4 @@ changes in version 0.6.8:
 - `gt filter` has a new option -seqid
 - `gt filter` has a new option -maxgenenum
 - the error() function has been removed
+- the GFF3 parser handles additional attributes
