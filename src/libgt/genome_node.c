@@ -127,7 +127,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
 {
   Array *node_stack = NULL, *list_of_children;
   Queue *node_queue = NULL;
-  GenomeNode *gn, *child_feature;
+  GenomeNode *gn, *gn_ref, *child_feature;
   Dlistelem *dlistelem;
   unsigned long i;
   Hashtable *traversed_nodes = NULL;
@@ -138,6 +138,10 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
 
   if (!genome_node)
     return 0;
+
+  /* create additional reference to <genome_node> (necessary if genome_node is
+     freed by <traverse>) */
+  gn_ref = genome_node_ref(genome_node);
 
   if (depth_first) {
     node_stack = array_new(sizeof (GenomeNode*));
@@ -167,15 +171,14 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
         array_add(list_of_children, child_feature);
       }
     }
+    /* store the implications of <gn> to the tree status of <genome_node> */
+    if (genome_node_info_multiple_parents(&gn->info))
+      has_node_with_multiple_parents = true;
+    /* call traverse function */
     if (traverse) {
       has_err = traverse(gn, data, err);
       if (has_err)
         break;
-    }
-    /* store the implications of <gn> to the tree status of <genome_node> */
-    if (!has_err) {
-      if (genome_node_info_multiple_parents(&gn->info))
-        has_node_with_multiple_parents = true;
     }
     for (i = 0; i < array_size(list_of_children); i++) {
       if (depth_first) {
@@ -204,20 +207,20 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   /* save the tree status of the genome node */
   if (!has_err) {
     if (has_node_with_multiple_parents) {
-      genome_node_info_set_tree_status(&genome_node->info,
+      genome_node_info_set_tree_status(&gn_ref->info,
                                        GENOME_NODE_IS_NOT_A_TREE);
-      assert(genome_node_info_get_tree_status(&genome_node->info) ==
+      assert(genome_node_info_get_tree_status(&gn_ref->info) ==
              GENOME_NODE_IS_NOT_A_TREE);
     }
     else {
-      genome_node_info_set_tree_status(&genome_node->info,
-                                       GENOME_NODE_IS_TREE);
-      assert(genome_node_info_get_tree_status(&genome_node->info) ==
+      genome_node_info_set_tree_status(&gn_ref->info, GENOME_NODE_IS_TREE);
+      assert(genome_node_info_get_tree_status(&gn_ref->info) ==
              GENOME_NODE_IS_TREE);
     }
   }
 
   /* free */
+  genome_node_free(gn_ref);
   if (traverse_only_once)
     hashtable_free(traversed_nodes);
   array_free(list_of_children);
