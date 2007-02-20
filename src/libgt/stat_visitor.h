@@ -13,8 +13,8 @@ typedef struct StatVisitor StatVisitor;
 #include "genome_visitor.h"
 
 const GenomeVisitorClass* stat_visitor_class(void);
-GenomeVisitor*            stat_visitor_new(unsigned int gene_length_distri,
-                                           unsigned int gene_score_distri);
+GenomeVisitor*            stat_visitor_new(bool gene_length_distri,
+                                           bool gene_score_distri);
 void                      stat_visitor_show_stats(GenomeVisitor*);
 
 #endif

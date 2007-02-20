@@ -61,16 +61,16 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 const GenomeVisitorClass* stat_visitor_class()
 {
   static const GenomeVisitorClass gvc = { sizeof (StatVisitor),
-                                            stat_visitor_free,
-                                            NULL,
-                                            stat_visitor_genome_feature,
-                                            NULL,
-                                            NULL };
+                                          stat_visitor_free,
+                                          NULL,
+                                          stat_visitor_genome_feature,
+                                          NULL,
+                                          NULL };
   return &gvc;
 }
 
-GenomeVisitor* stat_visitor_new(unsigned int gene_length_distri,
-                                 unsigned int gene_score_distri)
+GenomeVisitor* stat_visitor_new(bool gene_length_distri,
+                                bool gene_score_distri)
 {
   GenomeVisitor *gv = genome_visitor_create(stat_visitor_class());
   StatVisitor *stat_visitor = stat_visitor_cast(gv);
