@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -10,17 +10,17 @@
 #include "disc_distri.h"
 #include "xansi.h"
 
-struct Disc_distri {
+struct DiscDistri {
   Array *values;
   unsigned long num_of_occurrences;
 };
 
-Disc_distri* disc_distri_new(void)
+DiscDistri* disc_distri_new(void)
 {
-  return xcalloc(1, sizeof (Disc_distri));
+  return xcalloc(1, sizeof (DiscDistri));
 }
 
-void disc_distri_add(Disc_distri *d, unsigned long value)
+void disc_distri_add(DiscDistri *d, unsigned long value)
 {
   unsigned long *distri, zero = 0;
   assert(d);
@@ -36,7 +36,7 @@ void disc_distri_add(Disc_distri *d, unsigned long value)
   d->num_of_occurrences++;
 }
 
-void disc_distri_show(const Disc_distri *d)
+void disc_distri_show(const DiscDistri *d)
 {
   unsigned long value, occurrences;
   double probability, cumulative_probability = 0.0;
@@ -52,7 +52,7 @@ void disc_distri_show(const Disc_distri *d)
   }
 }
 
-void disc_distri_free(Disc_distri *d)
+void disc_distri_free(DiscDistri *d)
 {
   if (!d) return;
   array_free(d->values);

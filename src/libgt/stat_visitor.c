@@ -14,8 +14,8 @@ struct StatVisitor {
   unsigned long number_of_genes,
                 number_of_mRNAs,
                 number_of_exons;
-  Disc_distri *gene_length_distribution,
-              *gene_score_distribution;
+  DiscDistri *gene_length_distribution,
+             *gene_score_distribution;
 };
 
 #define stat_visitor_cast(GV)\

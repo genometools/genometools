@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -8,11 +8,11 @@
 #define DISC_DISTRI_H
 
 /* A descrete distribution */
-typedef struct Disc_distri Disc_distri;
+typedef struct DiscDistri DiscDistri;
 
-Disc_distri* disc_distri_new(void);
-void         disc_distri_add(Disc_distri*, unsigned long);
-void         disc_distri_show(const Disc_distri*); /* on stdout */
-void         disc_distri_free(Disc_distri*);
+DiscDistri* disc_distri_new(void);
+void        disc_distri_add(DiscDistri*, unsigned long);
+void        disc_distri_show(const DiscDistri*); /* on stdout */
+void        disc_distri_free(DiscDistri*);
 
 #endif
