@@ -18,4 +18,16 @@ MA*    env_ma(const Env*);    /* return the memory allocator */
 Error* env_error(const Env*); /* return the error object */
 void   env_delete(Env*);
 
+/* wrapper for error functions (to make many env_error() calls unnecessary */
+void    env_error_set(Env*, const char *format, ...)
+          __attribute__ ((format (printf, 2, 3)));
+#define env_error_is_set(env)\
+        error_is_set(env_error(env))
+#define env_error_check(env)\
+        error_check(env_error(env))
+#define env_error_unset(env)\
+        error_unset(env_error(env))
+#define env_error_get(env)\
+        error_get(env_error(env))
+
 #endif

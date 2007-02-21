@@ -39,3 +39,12 @@ void env_delete(Env *e)
   error_delete(e->error);
   free(e);
 }
+
+void env_error_set(Env *e, const char *format, ...)
+{
+  va_list ap;
+  assert(e && format);
+  va_start(ap, format);
+  error_vset(env_err(e), format, ap);
+  va_end(ap);
+}
