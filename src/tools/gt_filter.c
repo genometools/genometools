@@ -8,7 +8,8 @@
 
 typedef struct {
   bool verbose;
-  Str *seqid;
+  Str *seqid,
+      *typefilter;
   unsigned long max_gene_length,
                 max_gene_num;
   double min_gene_score;
@@ -29,6 +30,11 @@ static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
   option = option_new_string("seqid", "seqid a feature must have to pass the "
                              "filter (excluding comments)", arguments->seqid,
                              NULL);
+  option_parser_add_option(op, option);
+
+  /* -typefilter */
+  option = option_new_string("typefilter", "filter out all features of the "
+                             "given type", arguments->typefilter, NULL);
   option_parser_add_option(op, option);
 
   /* -maxgenelength */
@@ -72,13 +78,16 @@ int gt_filter(int argc, char *argv[], Error *err)
 
   /* option parsing */
   arguments.seqid = str_new();
+  arguments.typefilter = str_new();
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_free(arguments.seqid);
+      str_free(arguments.typefilter);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
       str_free(arguments.seqid);
+      str_free(arguments.typefilter);
       return 0;
   }
 
@@ -90,6 +99,7 @@ int gt_filter(int argc, char *argv[], Error *err)
 
   /* create a filter stream */
   filter_stream = filter_stream_new(gff3_in_stream, arguments.seqid,
+                                    arguments.typefilter,
                                     arguments.max_gene_length,
                                     arguments.max_gene_num,
                                     arguments.min_gene_score);
@@ -110,6 +120,7 @@ int gt_filter(int argc, char *argv[], Error *err)
   if (arguments.outfp != stdout)
     xfclose(arguments.outfp);
   str_free(arguments.seqid);
+  str_free(arguments.typefilter);
 
   return has_err;
 }

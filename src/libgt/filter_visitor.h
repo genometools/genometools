@@ -13,7 +13,7 @@ typedef struct FilterVisitor FilterVisitor;
 #include "genome_visitor.h"
 
 const GenomeVisitorClass* filter_visitor_class(void);
-GenomeVisitor*            filter_visitor_new(Str *seqid,
+GenomeVisitor*            filter_visitor_new(Str *seqid, Str *typefilter,
                                              unsigned long max_gene_length,
                                              unsigned long max_gene_num,
                                              double min_gene_score);

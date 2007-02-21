@@ -4,6 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#include <string.h>
 #include "filter_visitor.h"
 #include "genome_visitor_rep.h"
 #include "queue.h"
@@ -12,7 +13,8 @@
 struct FilterVisitor {
   const GenomeVisitor parent_instance;
   Queue *genome_node_buffer;
-  Str *seqid;
+  Str *seqid,
+      *typefilter;
   unsigned long max_gene_length,
                 gene_num,     /* the number of passed genes */
                 max_gene_num; /* the maximal number of genes which can pass */
@@ -27,6 +29,7 @@ static void filter_visitor_free(GenomeVisitor *gv)
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
   queue_free(filter_visitor->genome_node_buffer);
   str_free(filter_visitor->seqid);
+  str_free(filter_visitor->typefilter);
 }
 
 static int filter_visitor_comment(GenomeVisitor *gv, Comment *c,
@@ -42,31 +45,30 @@ static int filter_visitor_comment(GenomeVisitor *gv, Comment *c,
 static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                          Log *l, Error *err)
 {
-  FilterVisitor *filter_visitor;
+  FilterVisitor *fv;
   error_check(err);
-  filter_visitor = filter_visitor_cast(gv);
-  if (!str_get(filter_visitor->seqid) || /* no seqid was specified */
-      !str_cmp(filter_visitor->seqid,    /* or seqids are equal */
-               genome_node_get_seqid((GenomeNode*) gf))) {
+  fv = filter_visitor_cast(gv);
+  if (!str_get(fv->seqid) || /* no seqid was specified or seqids are equal */
+      !str_cmp(fv->seqid, genome_node_get_seqid((GenomeNode*) gf))) {
     /* enforce maximum gene length */
     /* XXX: we (spuriously) assume that genes are always root nodes */
     if (gf && genome_feature_get_type(gf) == gft_gene) {
-      if (filter_visitor->max_gene_length != UNDEFULONG &&
+      if (fv->max_gene_length != UNDEFULONG &&
           range_length(genome_node_get_range((GenomeNode*) gf)) >
-          filter_visitor->max_gene_length) {
+          fv->max_gene_length) {
         return 0;
       }
-      else if (filter_visitor->max_gene_num != UNDEFULONG &&
-               filter_visitor->gene_num >= filter_visitor->max_gene_num) {
+      else if (fv->max_gene_num != UNDEFULONG &&
+               fv->gene_num >= fv->max_gene_num) {
         return 0;
       }
-      else if (filter_visitor->min_gene_score != UNDEFDOUBLE &&
-               genome_feature_get_score(gf) < filter_visitor->min_gene_score) {
+      else if (fv->min_gene_score != UNDEFDOUBLE &&
+               genome_feature_get_score(gf) < fv->min_gene_score) {
         return 0;
       }
-      filter_visitor->gene_num++; /* gene passed filter */
+      fv->gene_num++; /* gene passed filter */
     }
-    queue_add(filter_visitor->genome_node_buffer, gf);
+    queue_add(fv->genome_node_buffer, gf);
   }
   return 0;
 }
@@ -96,7 +98,8 @@ const GenomeVisitorClass* filter_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* filter_visitor_new(Str *seqid, unsigned long max_gene_length,
+GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
+                                  unsigned long max_gene_length,
                                   unsigned long max_gene_num,
                                   double min_gene_score)
 {
@@ -104,6 +107,7 @@ GenomeVisitor* filter_visitor_new(Str *seqid, unsigned long max_gene_length,
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
   filter_visitor->genome_node_buffer = queue_new(sizeof (GenomeNode*));
   filter_visitor->seqid = str_ref(seqid);
+  filter_visitor->typefilter = str_ref(typefilter);
   filter_visitor->max_gene_length = max_gene_length;
   filter_visitor->gene_num = 0;
   filter_visitor->max_gene_num = max_gene_num;
