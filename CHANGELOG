@@ -1,6 +1,7 @@
 changes in version 0.6.9:
 
 - `gt stat` has new options -exonlengthdistri and -intronlengthdistri
+- `gt filter` has new option -typefilter
 
 changes in version 0.6.8:
 
