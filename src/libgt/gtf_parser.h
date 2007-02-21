@@ -29,6 +29,6 @@ GTF_parser* gtf_parser_new(void);
 int         gtf_parser_parse(GTF_parser*, Queue *genome_nodes,
                              const char *filename, FILE*,
                              unsigned int be_tolerant, Error *err);
-void        gtf_parser_free(GTF_parser*);
+void        gtf_parser_delete(GTF_parser*);
 
 #endif

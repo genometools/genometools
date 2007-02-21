@@ -15,7 +15,7 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
                          "score matrix and show it on stdout.");
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 1, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -38,7 +38,7 @@ int gt_scorematrix(int argc, char *argv[], Error *err)
     has_err = -1;
   if (!has_err)
     scorematrix_show(sm, stdout);
-  scorematrix_free(sm);
+  scorematrix_delete(sm);
 
   return has_err;
 }

@@ -47,7 +47,7 @@ static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
   /* parse */
   oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
                                         versionfunc, 1, err);
-  option_parser_free(op);
+  option_parser_delete(op);
 
   return oprval;
 }
@@ -84,14 +84,14 @@ int gt_csa(int argc, char *argv[], Error *err)
   /* pull the features through the stream and free them afterwards */
   while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, log, err))
          && gn) {
-    genome_node_rec_free(gn);
+    genome_node_rec_delete(gn);
   }
 
   /* free */
-  genome_stream_free(gff3_out_stream);
-  genome_stream_free(csa_stream);
-  genome_stream_free(gff3_in_stream);
-  log_free(log);
+  genome_stream_delete(gff3_out_stream);
+  genome_stream_delete(csa_stream);
+  genome_stream_delete(gff3_in_stream);
+  log_delete(log);
   if (arguments.outfp != stdout)
     xfclose(arguments.outfp);
 

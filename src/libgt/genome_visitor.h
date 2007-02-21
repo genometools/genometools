@@ -22,6 +22,6 @@ int  genome_visitor_visit_genome_feature(GenomeVisitor*, GenomeFeature*, Log*,
                                          Error*);
 int  genome_visitor_visit_sequence_region(GenomeVisitor*, SequenceRegion*,
                                           Log*, Error*);
-void genome_visitor_free(GenomeVisitor *gv);
+void genome_visitor_delete(GenomeVisitor *gv);
 
 #endif

@@ -141,15 +141,15 @@ int fasta_reader_run(FastaReader *fr,
   }
 
   /* free */
-  str_free(description);
+  str_delete(description);
 
   return has_err;
 }
 
-void fasta_reader_free(FastaReader *fr)
+void fasta_reader_delete(FastaReader *fr)
 {
   if (!fr) return;
-  str_free(fr->sequence_filename);
+  str_delete(fr->sequence_filename);
   genfile_xclose(fr->sequence_file);
   free(fr);
 }

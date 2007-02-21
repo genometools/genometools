@@ -15,7 +15,7 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
                          "read them once.");
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
                                         versionfunc, 1, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 

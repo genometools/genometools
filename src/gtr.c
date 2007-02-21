@@ -63,7 +63,7 @@ static int show_option_comments(const char *progname, void *data, Error *err)
     for (i = 0; i < array_size(toolnames); i++)
       xputs(*(const char**) array_get(toolnames, i));
   }
-  array_free(toolnames);
+  array_delete(toolnames);
   return 0;
 }
 
@@ -81,7 +81,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, char **argv, Error *err)
   o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false);
   option_parser_add_option(op, o);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   (*parsed_args)--;
   return oprval;
 }
@@ -90,7 +90,7 @@ void gtr_register_components(GTR *gtr)
 {
   assert(gtr);
   /* add tools */
-  hashtable_free(gtr->tools);
+  hashtable_delete(gtr->tools);
   gtr->tools = hashtable_new(HASH_STRING, NULL, NULL);
   hashtable_add(gtr->tools, "bioseq", gt_bioseq);
   hashtable_add(gtr->tools, "cds", gt_cds);
@@ -106,7 +106,7 @@ void gtr_register_components(GTR *gtr)
   hashtable_add(gtr->tools, "mmapandread", gt_mmapandread);
   hashtable_add(gtr->tools, "stat", gt_stat);
   /* add unit tests */
-  hashtable_free(gtr->unit_tests);
+  hashtable_delete(gtr->unit_tests);
   gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL);
   hashtable_add(gtr->unit_tests, "alignment class", alignment_unit_test);
   hashtable_add(gtr->unit_tests, "array class", array_unit_test);
@@ -205,7 +205,7 @@ int gtr_run(GTR *gtr, int argc, char **argv, Error *err)
     nargv = cstr_array_prefix_first(argv+1, argv[0]);
     has_err = tool(argc-1, nargv, err);
   }
-  cstr_array_free(nargv);
+  cstr_array_delete(nargv);
   if (has_err)
     return EXIT_FAILURE;
   return EXIT_SUCCESS;
@@ -214,7 +214,7 @@ int gtr_run(GTR *gtr, int argc, char **argv, Error *err)
 void gtr_free(GTR *gtr)
 {
   if (!gtr) return;
-  hashtable_free(gtr->tools);
-  hashtable_free(gtr->unit_tests);
+  hashtable_delete(gtr->tools);
+  hashtable_delete(gtr->unit_tests);
   free(gtr);
 }

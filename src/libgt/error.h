@@ -24,6 +24,6 @@ bool        error_is_set(const Error*);
 void        error_unset(Error*);
 /* get the error string (the error must be set) */
 const char* error_get(const Error*);
-void        error_free(Error*);
+void        error_delete(Error*);
 
 #endif

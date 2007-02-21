@@ -27,7 +27,7 @@
             ARRAY2DIM[i] = ARRAY2DIM[i-1] + (COLUMNS);               \
         }
 
-#define array2dim_free(ARRAY2DIM)                                    \
+#define array2dim_delete(ARRAY2DIM)                                    \
         free(ARRAY2DIM[0]);                                          \
         free(ARRAY2DIM);
 
@@ -38,7 +38,7 @@
 
   array2dim_malloc(a2dim, 10, 20, double); /* create a 10 * 20 double array */
   /* ... (use array a2dim in conventional way via a2dim[row][column]) */
-  array2dim_free(a2dim);
+  array2dim_delete(a2dim);
 #endif
 
 #endif

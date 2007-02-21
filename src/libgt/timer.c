@@ -58,7 +58,7 @@ void timer_show(Timer *t, FILE *fp)
           t->stop_ru.ru_stime.tv_sec - t->stop_ru.ru_stime.tv_sec);
 }
 
-void timer_free(Timer *t)
+void timer_delete(Timer *t)
 {
   if (!t) return;
   free(t);

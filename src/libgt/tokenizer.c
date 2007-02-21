@@ -76,7 +76,7 @@ bool tokenizer_has_token(Tokenizer *t)
   token = tokenizer_get_token(t);
   if (token) {
     has_token = true;
-    str_free(token);
+    str_delete(token);
   }
   return has_token;
 }
@@ -90,7 +90,7 @@ bool tokenizer_line_start(const Tokenizer *t)
 void tokenizer_next_token(Tokenizer *t)
 {
   assert(t);
-  str_free(t->token);
+  str_delete(t->token);
   t->token = NULL;
 }
 
@@ -123,7 +123,7 @@ int tokenizer_unit_test(Error *err)
   t = tokenizer_new(io_new(tmpfilename, "r"));
   tokenizer_skip_comment_lines(t);
   ensure(has_err, !tokenizer_has_token(t));
-  tokenizer_free(t);
+  tokenizer_delete(t);
   xremove(tmpfilename);
 
   /* larger test */
@@ -135,40 +135,40 @@ int tokenizer_unit_test(Error *err)
 
   token = tokenizer_get_token(t);
   ensure(has_err, !strcmp(str_get(token), "a"));
-  str_free(token);
+  str_delete(token);
 
   tokenizer_next_token(t);
   token = tokenizer_get_token(t);
   ensure(has_err, !strcmp(str_get(token), "bb"));
-  str_free(token);
+  str_delete(token);
 
   tokenizer_next_token(t);
   token = tokenizer_get_token(t);
   ensure(has_err, !strcmp(str_get(token), "ccc\n"));
-  str_free(token);
+  str_delete(token);
 
   tokenizer_next_token(t);
   token = tokenizer_get_token(t);
   ensure(has_err, !strcmp(str_get(token), "dddd"));
-  str_free(token);
+  str_delete(token);
 
   tokenizer_next_token(t);
   token = tokenizer_get_token(t);
   ensure(has_err, !strcmp(str_get(token), "-5"));
-  str_free(token);
+  str_delete(token);
 
   tokenizer_next_token(t);
   ensure(has_err, !tokenizer_has_token(t));
-  tokenizer_free(t);
+  tokenizer_delete(t);
   xremove(tmpfilename);
 
   return has_err;
 }
 
-void tokenizer_free(Tokenizer *t)
+void tokenizer_delete(Tokenizer *t)
 {
   if (!t) return;
-  io_free(t->io);
-  str_free(t->token);
+  io_delete(t->io);
+  str_delete(t->token);
   free(t);
 }

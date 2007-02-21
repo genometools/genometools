@@ -122,14 +122,14 @@ int splicedseq_unit_test(Error *err)
     splicedseq_reset(ss);
     has_err = check_splicedseq(ss, err);
   }
-  splicedseq_free(ss);
+  splicedseq_delete(ss);
   return has_err;
 }
 
-void splicedseq_free(Splicedseq *ss)
+void splicedseq_delete(Splicedseq *ss)
 {
   if (!ss) return;
-  str_free(ss->splicedseq);
-  array_free(ss->positionmapping);
+  str_delete(ss->splicedseq);
+  array_delete(ss->positionmapping);
   free(ss);
 }

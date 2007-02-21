@@ -16,6 +16,6 @@ RegionMapping* regionmapping_new(Str *mapping_filename, Error*);
 /* returns a new reference */
 Str*           regionmapping_map(RegionMapping*, const char *sequence_region,
                                  Error*);
-void           regionmapping_free(RegionMapping*);
+void           regionmapping_delete(RegionMapping*);
 
 #endif

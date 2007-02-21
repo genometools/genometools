@@ -164,7 +164,7 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
   xfputc('\n', fp);
 
   /* free matrix E */
-  array2dim_free(E);
+  array2dim_delete(E);
 }
 
 static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
@@ -177,7 +177,7 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
                          "algorithm.");
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 5, 5, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -236,8 +236,8 @@ int gt_nussinov_rna_fold(int argc, char *argv[], Error *err)
 
   /* free */
   free(rna_sequence);
-  scorematrix_free(energy_function);
-  alpha_free(dna_alpha);
+  scorematrix_delete(energy_function);
+  alpha_delete(dna_alpha);
 
   return has_err;
 }

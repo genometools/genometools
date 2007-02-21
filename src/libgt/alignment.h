@@ -26,6 +26,6 @@ unsigned long alignment_eval(const Alignment*); /* returns unit cost */
 void          alignment_show(const Alignment*, FILE*);
 void          alignment_show_multieop_list(const Alignment*, FILE*);
 int           alignment_unit_test(Error*);
-void          alignment_free(Alignment*);
+void          alignment_delete(Alignment*);
 
 #endif

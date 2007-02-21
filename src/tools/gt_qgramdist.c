@@ -20,7 +20,7 @@ static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
   option_parser_add_option(op, o);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 2, 2, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -80,8 +80,8 @@ int gt_qgramdist(int argc, char *argv[], Error *err)
   }
 
   /* free */
-  bioseq_free(bioseq_2);
-  bioseq_free(bioseq_1);
+  bioseq_delete(bioseq_2);
+  bioseq_delete(bioseq_1);
 
   return has_err;
 }

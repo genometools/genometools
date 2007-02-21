@@ -18,7 +18,7 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
                          "given as\nsequence_file, a builtin example is used.");
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 1, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -75,8 +75,8 @@ int gt_neighborjoining(int argc, char *argv[], Error *err)
   if (!has_err)
     neighborjoining_show_tree(nj, stdout);
 
-  bioseq_free(bioseq);
-  neighborjoining_free(nj);
+  bioseq_delete(bioseq);
+  neighborjoining_delete(nj);
 
   return has_err;
 }

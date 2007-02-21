@@ -143,7 +143,7 @@ static void upgma_compute(UPGMA *upgma)
     newclusternum++;
   }
 
-  bittab_free(clustertab);
+  bittab_delete(clustertab);
 }
 
 UPGMA* upgma_new(unsigned long num_of_taxa, void *data,
@@ -177,7 +177,7 @@ void upgma_show_tree(const UPGMA *upgma, FILE *fp)
   upgma_show_node(upgma, upgma->num_of_clusters-1, 0, fp);
 }
 
-void upgma_free(UPGMA *upgma)
+void upgma_delete(UPGMA *upgma)
 {
   unsigned long i;
   if (!upgma) return;

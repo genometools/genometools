@@ -69,7 +69,7 @@ const char* io_get_filename(const IO *io)
   return io->path;
 }
 
-void io_free(IO *io)
+void io_delete(IO *io)
 {
   if (!io) return;
   xfclose(io->fp);

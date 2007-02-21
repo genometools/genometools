@@ -60,7 +60,7 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
     }
     parsed_characters[(int) amino_acid] = UNDEFCHAR;
     if (amino_acid == '\n') {
-      str_free(token);
+      str_delete(token);
       tokenizer_next_token(tz);
       assert(!has_err);
       return 0;
@@ -74,12 +74,12 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
         has_err = -1;
         break;
       }
-      str_free(token);
+      str_delete(token);
       tokenizer_next_token(tz);
       assert(!has_err);
       return 0;
     }
-    str_free(token);
+    str_delete(token);
     tokenizer_next_token(tz);
   }
   if (!has_err) {
@@ -89,7 +89,7 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
     has_err = -1;
     }
   }
-  str_free(token);
+  str_delete(token);
   return has_err;
 }
 
@@ -120,7 +120,7 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
     has_err = -1;
   }
   parsed_characters[(int) amino_acid] = UNDEFCHAR;
-  str_free(token);
+  str_delete(token);
   if (!has_err) {
     tokenizer_next_token(tz);
     while ((token = tokenizer_get_token(tz))) {
@@ -133,7 +133,7 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
                             (unsigned char) alpha_encode(s->alpha, *(char*)
                             array_get(index_to_alpha_char_mapping, i)), score);
       i++;
-      str_free(token);
+      str_delete(token);
       tokenizer_next_token(tz);
       if (tokenizer_line_start(tz))
           break;
@@ -173,8 +173,8 @@ static int parse_scorematrix(ScoreMatrix *s, const char *path, Error *err)
     has_err = -1;
   }
 
-  array_free(index_to_alpha_char_mapping);
-  tokenizer_free(tz);
+  array_delete(index_to_alpha_char_mapping);
+  tokenizer_delete(tz);
 
   return has_err;
 }
@@ -190,13 +190,13 @@ ScoreMatrix* scorematrix_read_protein(const char *path, Error *err)
   /* create score matrix */
   protein_alpha = alpha_new_protein();
   s = scorematrix_new(protein_alpha);
-  alpha_free(protein_alpha);
+  alpha_delete(protein_alpha);
 
   /* parse matrix file */
   has_err = parse_scorematrix(s, path, err);
 
   if (has_err) {
-    scorematrix_free(s);
+    scorematrix_delete(s);
     return NULL;
   }
   return s;
@@ -236,9 +236,9 @@ void scorematrix_show(const ScoreMatrix *s, FILE *fp)
   }
 }
 
-void scorematrix_free(ScoreMatrix *s)
+void scorematrix_delete(ScoreMatrix *s)
 {
   if (!s) return;
-  array2dim_free(s->scores);
+  array2dim_delete(s->scores);
   free(s);
 }

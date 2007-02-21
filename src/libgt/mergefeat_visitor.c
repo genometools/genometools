@@ -23,7 +23,7 @@ static void mergefeat_visitor_free(GenomeVisitor *gv)
 {
   MergefeatVisitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
   assert(mergefeat_visitor);
-  hashtable_free(mergefeat_visitor->ht);
+  hashtable_delete(mergefeat_visitor->ht);
 }
 
 static int mergefeat_in_children(GenomeNode *gn, void *data, Error *err)
@@ -51,7 +51,7 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, Error *err)
       /* XXX: */
       genome_node_remove_leaf(v->current_tree, (GenomeNode*) current_feature);
 #if 0
-      genome_node_free((GenomeNode*) current_feature);
+      genome_node_delete((GenomeNode*) current_feature);
 #endif
     }
     /* remove previous feature */

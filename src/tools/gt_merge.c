@@ -18,7 +18,7 @@ static OPrval parse_options(int *parsed_args, FILE **outfp, int argc,
   option = option_new_outputfile(outfp);
   option_parser_add_option(op, option);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -68,15 +68,15 @@ int gt_merge(int argc, char *argv[], Error *err)
   /* pull the features through the stream and free them afterwards */
   while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, NULL, err))
          && gn) {
-    genome_node_rec_free(gn);
+    genome_node_rec_delete(gn);
   }
 
   /* free */
-  genome_stream_free(gff3_out_stream);
-  genome_stream_free(merge_stream);
+  genome_stream_delete(gff3_out_stream);
+  genome_stream_delete(merge_stream);
   for (i = 0; i < array_size(genome_streams); i++)
-    genome_stream_free(*(GenomeStream**) array_get(genome_streams, i));
-  array_free(genome_streams);
+    genome_stream_delete(*(GenomeStream**) array_get(genome_streams, i));
+  array_delete(genome_streams);
   if (outfp != stdout)
     xfclose(outfp);
 

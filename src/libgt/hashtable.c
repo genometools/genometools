@@ -126,19 +126,19 @@ static int hashtable_test(Hash_type hash_type, Error *err)
 
   /* empty hash */
   ht = hashtable_new(hash_type, NULL, NULL);
-  hashtable_free(ht);
+  hashtable_delete(ht);
 
   /* empty hash with reset */
   ht = hashtable_new(hash_type, NULL, NULL);
   hashtable_reset(ht);
-  hashtable_free(ht);
+  hashtable_delete(ht);
 
   /* hashes containing one element */
   ht = hashtable_new(hash_type, NULL, NULL);
   hashtable_add(ht, s1, s2);
   ensure(has_err, hashtable_get(ht, s1) == s2);
   ensure(has_err, !hashtable_get(ht, s2));
-  hashtable_free(ht);
+  hashtable_delete(ht);
 
   /* hashes containing two elements */
   ht = hashtable_new(hash_type, NULL, NULL);
@@ -146,7 +146,7 @@ static int hashtable_test(Hash_type hash_type, Error *err)
   hashtable_add(ht, s2, s1);
   ensure(has_err, hashtable_get(ht, s1) == s2);
   ensure(has_err, hashtable_get(ht, s2) == s1);
-  hashtable_free(ht);
+  hashtable_delete(ht);
 
   return has_err;
 }
@@ -166,7 +166,7 @@ int hashtable_unit_test(Error *err)
   return has_err;
 }
 
-void hashtable_free(Hashtable *ht)
+void hashtable_delete(Hashtable *ht)
 {
   if (!ht) return;
   hashtable_reset(ht);

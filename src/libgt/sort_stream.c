@@ -61,7 +61,7 @@ static void sort_stream_free(GenomeStream *gs)
 {
   SortStream *sort_stream = sort_stream_cast(gs);
   assert(!array_size(sort_stream->trees));
-  array_free(sort_stream->trees);
+  array_delete(sort_stream->trees);
 }
 
 const GenomeStreamClass* sort_stream_class(void)

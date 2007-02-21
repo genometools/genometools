@@ -162,6 +162,6 @@ Alignment* affinealign(const char *u, unsigned long ulen,
               replacement_cost, gap_opening_cost, gap_extension_cost);
   a = alignment_new_with_seqs(u, ulen, v, vlen);
   traceback(a, dptable, ulen, vlen);
-  array2dim_free(dptable);
+  array2dim_delete(dptable);
   return a;
 }

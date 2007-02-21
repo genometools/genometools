@@ -199,9 +199,9 @@ int bsearch_unit_test(Error *err)
   ensure(has_err, bittab_count_set_bits(b) == 3);
 
   /* free */
-  array_free(elements);
-  array_free(members);
-  bittab_free(b);
+  array_delete(elements);
+  array_delete(members);
+  bittab_delete(b);
 
   return has_err;
 }

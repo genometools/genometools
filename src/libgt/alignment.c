@@ -306,14 +306,14 @@ int alignment_unit_test(Error *err)
 
   ensure(has_err, alignment_eval(a) == 10);
 
-  alignment_free(a);
+  alignment_delete(a);
 
   return has_err;
 }
 
-void alignment_free(Alignment *a)
+void alignment_delete(Alignment *a)
 {
   if (!a) return;
-  array_free(a->eops);
+  array_delete(a->eops);
   free(a);
 }

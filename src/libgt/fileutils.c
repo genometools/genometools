@@ -114,7 +114,7 @@ int file_find_in_path(Str *path, const char *file, Error *err)
 
   /* free */
   free(pathvariable);
-  splitter_free(splitter);
+  splitter_delete(splitter);
 
   return has_err;
 }

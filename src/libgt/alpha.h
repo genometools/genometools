@@ -29,6 +29,6 @@ void         alpha_encode_seq(const Alpha*, char *out, char *in,
                               unsigned long length); /* in can be == out */
 bool         alpha_is_compatible_with_alpha(const Alpha*, const Alpha*);
 unsigned int alpha_size(const Alpha*);
-void         alpha_free(Alpha*);
+void         alpha_delete(Alpha*);
 
 #endif

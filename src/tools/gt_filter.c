@@ -65,7 +65,7 @@ static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
 
   /* parse */
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -82,12 +82,12 @@ int gt_filter(int argc, char *argv[], Error *err)
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      str_free(arguments.seqid);
-      str_free(arguments.typefilter);
+      str_delete(arguments.seqid);
+      str_delete(arguments.typefilter);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      str_free(arguments.seqid);
-      str_free(arguments.typefilter);
+      str_delete(arguments.seqid);
+      str_delete(arguments.typefilter);
       return 0;
   }
 
@@ -110,17 +110,17 @@ int gt_filter(int argc, char *argv[], Error *err)
   /* pull the features through the stream and free them afterwards */
   while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, NULL, err))
          && gn) {
-    genome_node_rec_free(gn);
+    genome_node_rec_delete(gn);
   }
 
   /* free */
-  genome_stream_free(gff3_out_stream);
-  genome_stream_free(filter_stream);
-  genome_stream_free(gff3_in_stream);
+  genome_stream_delete(gff3_out_stream);
+  genome_stream_delete(filter_stream);
+  genome_stream_delete(gff3_in_stream);
   if (arguments.outfp != stdout)
     xfclose(arguments.outfp);
-  str_free(arguments.seqid);
-  str_free(arguments.typefilter);
+  str_delete(arguments.seqid);
+  str_delete(arguments.typefilter);
 
   return has_err;
 }

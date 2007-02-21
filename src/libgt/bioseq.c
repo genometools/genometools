@@ -131,7 +131,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
   }
 
   xfclose(index_file);
-  str_free(index_line);
+  str_delete(index_line);
 
   return has_err;
 }
@@ -158,7 +158,7 @@ static int construct_bioseq_files(Str *bioseq_index_file, Str *bioseq_raw_file,
   fasta_reader = fasta_reader_new(sequence_file);
   has_err = fasta_reader_run(fasta_reader, proc_description, proc_character,
                    proc_sequence_length, &bioseq_files_info, err);
-  fasta_reader_free(fasta_reader);
+  fasta_reader_delete(fasta_reader);
 
   /* unregister the signal handler */
   sig_unregister_all();
@@ -201,8 +201,8 @@ static int bioseq_fill(Bioseq *bs, bool recreate, Error *err)
   }
 
   /* free */
-  str_free(bioseq_index_file);
-  str_free(bioseq_raw_file);
+  str_delete(bioseq_index_file);
+  str_delete(bioseq_raw_file);
 
   return has_err;
 }
@@ -226,7 +226,7 @@ static Bioseq* bioseq_new_with_recreate(Str *sequence_file,
     has_err = bioseq_fill(bs, recreate, err);
   }
   if (has_err) {
-    bioseq_free(bs);
+    bioseq_delete(bs);
     return NULL;
   }
   return bs;
@@ -239,7 +239,7 @@ Bioseq* bioseq_new(const char *sequence_file, Error *err)
   error_check(err);
   seqfile = str_new_cstr(sequence_file);
   bs = bioseq_new_with_recreate(seqfile, false, err);
-  str_free(seqfile);
+  str_delete(seqfile);
   return bs;
 }
 
@@ -250,7 +250,7 @@ Bioseq* bioseq_new_recreate(const char *sequence_file, Error *err)
   error_check(err);
   seqfile = str_new_cstr(sequence_file);
   bs = bioseq_new_with_recreate(seqfile, true, err);
-  str_free(seqfile);
+  str_delete(seqfile);
   return bs;
 }
 
@@ -316,7 +316,7 @@ static unsigned long get_seqnum_with_desc(Bioseq *bs, const char *description)
       break;
     }
   }
-  str_free(pattern);
+  str_delete(pattern);
   return seqnum;
 }
 
@@ -361,22 +361,22 @@ bool bioseq_contains_sequence(Bioseq *bs, /*@unused@*/ const char *sequence)
   return false;
 }
 
-void bioseq_free(Bioseq *bs)
+void bioseq_delete(Bioseq *bs)
 {
   unsigned long i;
   if (!bs) return;
-  str_free(bs->sequence_file);
+  str_delete(bs->sequence_file);
   if (bs->seqs) {
     for (i = 0; i < array_size(bs->descriptions); i++)
-      seq_free(bs->seqs[i]);
+      seq_delete(bs->seqs[i]);
     free(bs->seqs);
   }
   for (i = 0; i < array_size(bs->descriptions); i++)
     free(*(char**) array_get(bs->descriptions, i));
-  array_free(bs->descriptions);
-  array_free(bs->sequence_ranges);
+  array_delete(bs->descriptions);
+  array_delete(bs->sequence_ranges);
   xmunmap(bs->raw_sequence, bs->raw_sequence_length);
-  alpha_free(bs->alpha);
+  alpha_delete(bs->alpha);
   free(bs);
 }
 

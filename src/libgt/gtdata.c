@@ -40,7 +40,7 @@ Str* gtdata_get_path(const char *prog, Error *err)
     }
   }
   if (has_err) {
-    str_free(path);
+    str_delete(path);
     return NULL;
   }
   return path;
@@ -91,8 +91,8 @@ int gtdata_show_help(const char *progname, void *unused, Error *err)
 
   /* free */
   if (L) lua_close(L);
-  str_free(doc_file);
-  splitter_free(splitter);
+  str_delete(doc_file);
+  splitter_delete(splitter);
   free(prog);
 
   return has_err;

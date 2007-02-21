@@ -15,6 +15,6 @@ Log*  log_new(void);
 void  log_log(Log*, const char *format, ...)
   __attribute__ ((format (printf, 2, 3)));
 FILE* log_fp(Log*);
-void  log_free(Log*);
+void  log_delete(Log*);
 
 #endif

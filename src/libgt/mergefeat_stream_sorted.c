@@ -32,8 +32,8 @@ static int mergefeat_stream_sorted_next_tree(GenomeStream *gs,
 static void mergefeat_stream_sorted_free(GenomeStream *gs)
 {
   MergefeatStreamSorted *mfs = mergefeat_stream_sorted_cast(gs);
-  genome_stream_free(mfs->mergefeat_stream_unsorted);
-  genome_stream_free(mfs->sort_stream);
+  genome_stream_delete(mfs->mergefeat_stream_unsorted);
+  genome_stream_delete(mfs->sort_stream);
 }
 
 const GenomeStreamClass* mergefeat_stream_sorted_class(void)

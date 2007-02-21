@@ -165,7 +165,7 @@ unsigned int alpha_size(const Alpha *a)
   return a->map_size;
 }
 
-void alpha_free(Alpha *a)
+void alpha_delete(Alpha *a)
 {
   if (!a) return;
   if (a->reference_count) { a->reference_count--; return; }

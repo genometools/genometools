@@ -71,7 +71,7 @@ static OPrval parse_options(int *parsed_args, ExtractFeatArguments *arguments,
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 1, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -93,14 +93,14 @@ int gt_extractfeat(int argc, char *argv[], Error *err)
   switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      str_free(arguments.regionmapping);
-      str_free(arguments.seqfile);
-      str_free(arguments.type);
+      str_delete(arguments.regionmapping);
+      str_delete(arguments.seqfile);
+      str_delete(arguments.type);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      str_free(arguments.regionmapping);
-      str_free(arguments.seqfile);
-      str_free(arguments.type);
+      str_delete(arguments.regionmapping);
+      str_delete(arguments.seqfile);
+      str_delete(arguments.type);
       return 0;
   }
 
@@ -143,15 +143,15 @@ int gt_extractfeat(int argc, char *argv[], Error *err)
   if (!has_err) {
     while (!(has_err = genome_stream_next_tree(extractfeat_stream, &gn, NULL,
                                                err)) && gn)
-      genome_node_rec_free(gn);
+      genome_node_rec_delete(gn);
   }
 
   /* free */
-  genome_stream_free(extractfeat_stream);
-  genome_stream_free(gff3_in_stream);
-  str_free(arguments.regionmapping);
-  str_free(arguments.seqfile);
-  str_free(arguments.type);
+  genome_stream_delete(extractfeat_stream);
+  genome_stream_delete(gff3_in_stream);
+  str_delete(arguments.regionmapping);
+  str_delete(arguments.seqfile);
+  str_delete(arguments.type);
 
   return has_err;
 }

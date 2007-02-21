@@ -50,7 +50,7 @@ MSA* msa_new(const char *MSA_filename, Error *err)
     }
   }
   if (has_err) {
-    msa_free(msa);
+    msa_delete(msa);
     return NULL;
   }
   return msa;
@@ -126,7 +126,7 @@ unsigned long msa_consensus_distance(const MSA *msa)
 
   /* free */
   free(consensus);
-  array2dim_free(count);
+  array2dim_delete(count);
   free(msa_array);
 
   return dist;
@@ -163,9 +163,9 @@ void msa_show(MSA *msa)
   bioseq_show_as_fasta(msa->bs, 0);
 }
 
-void msa_free(MSA *msa)
+void msa_delete(MSA *msa)
 {
   if (!msa) return;
-  bioseq_free(msa->bs);
+  bioseq_delete(msa->bs);
   free(msa);
 }

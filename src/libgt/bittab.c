@@ -367,9 +367,9 @@ int bittab_unit_test(Error *err)
       ensure(has_err, bittab_cmp(b, tmp));
     }
 
-    bittab_free(b);
-    bittab_free(tmp);
-    bittab_free(and);
+    bittab_delete(b);
+    bittab_delete(tmp);
+    bittab_delete(and);
   }
 
   /* test bittab_show */
@@ -380,7 +380,7 @@ int bittab_unit_test(Error *err)
       bittab_set_bit(b, i);
   }
   bittab_show(b, fp);
-  bittab_free(b);
+  bittab_delete(b);
   xfclose(fp);
 
   /* test bittab_shift_left_equal() */
@@ -400,7 +400,7 @@ int bittab_unit_test(Error *err)
   ensure(has_err, bittab_bit_is_set(b, 78));
   ensure(has_err, bittab_bit_is_set(b, 97));
   ensure(has_err, bittab_bit_is_set(b, 125));
-  bittab_free(b);
+  bittab_delete(b);
 
   /* test bittab_shift_right_equal() */
   b = bittab_new(125);
@@ -419,12 +419,12 @@ int bittab_unit_test(Error *err)
   ensure(has_err, bittab_bit_is_set(b, 76));
   ensure(has_err, bittab_bit_is_set(b, 96));
   ensure(has_err, bittab_bit_is_set(b, 124));
-  bittab_free(b);
+  bittab_delete(b);
 
   return has_err;
 }
 
-void bittab_free(Bittab *b)
+void bittab_delete(Bittab *b)
 {
   if (!b) return;
   free(b->tabptr);

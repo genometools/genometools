@@ -25,7 +25,7 @@ void genome_stream_class_init(GenomeStreamClass *gsc, size_t size, ...)
     if (func == (Fptr) genome_stream_next_tree) {
       mm  = (Fptr*) &gsc->next_tree; *mm = meth;
     }
-    else if (func == (Fptr) genome_stream_free) {
+    else if (func == (Fptr) genome_stream_delete) {
       mm  = (Fptr*) &gsc->free; *mm = meth;
     }
     else assert(0);
@@ -44,12 +44,12 @@ GenomeStream* genome_stream_create(const GenomeStreamClass *gsc,
   return gs;
 }
 
-void genome_stream_free(GenomeStream *gs)
+void genome_stream_delete(GenomeStream *gs)
 {
   if (!gs) return;
   assert(gs->c_class);
   if (gs->c_class->free) gs->c_class->free(gs);
-  genome_node_free(gs->last_node);
+  genome_node_delete(gs->last_node);
   free(gs);
 }
 

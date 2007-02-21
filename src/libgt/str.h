@@ -31,6 +31,6 @@ int           str_cmp(const Str*, const Str*);
 int           str_read_next_line(Str*, FILE*);
 unsigned long str_length(const Str*);
 int           str_unit_test(Error*);
-void          str_free(Str*);
+void          str_delete(Str*);
 
 #endif

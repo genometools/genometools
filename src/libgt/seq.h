@@ -17,6 +17,6 @@ const char*   seq_get_orig(const Seq*); /* not '\0' terminated */
 const char*   seq_get_encoded(Seq*);
 const Alpha*  seq_get_alpha(const Seq*);
 unsigned long seq_length(const Seq*);
-void          seq_free(Seq*);
+void          seq_delete(Seq*);
 
 #endif

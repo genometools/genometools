@@ -61,9 +61,9 @@ unsigned long queue_size(const Queue *q)
   return array_size(q->queue) - q->current_index;
 }
 
-void queue_free(Queue *q)
+void queue_delete(Queue *q)
 {
   if (!q) return;
-  array_free(q->queue);
+  array_delete(q->queue);
   free(q);
 }

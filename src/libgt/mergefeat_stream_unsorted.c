@@ -35,7 +35,7 @@ static int mergefeat_stream_unsorted_next_tree(GenomeStream *gs,
 static void mergefeat_stream_unsorted_free(GenomeStream *gs)
 {
   MergefeatStreamUnsorted *mfs = mergefeat_stream_unsorted_cast(gs);
-  genome_visitor_free(mfs->mergefeat_visitor);
+  genome_visitor_delete(mfs->mergefeat_visitor);
 }
 
 const GenomeStreamClass* mergefeat_stream_unsorted_class(void)

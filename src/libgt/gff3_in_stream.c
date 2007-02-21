@@ -145,10 +145,10 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 static void gff3_in_stream_free(GenomeStream *gs)
 {
   GFF3InStream *gff3_in_stream = gff3_in_stream_cast(gs);
-  array_free(gff3_in_stream->files);
-  queue_free(gff3_in_stream->genome_node_buffer);
-  gff3_free(gff3_in_stream->gff3_parser);
-  genome_node_free(gff3_in_stream->last_node);
+  array_delete(gff3_in_stream->files);
+  queue_delete(gff3_in_stream->genome_node_buffer);
+  gff3_delete(gff3_in_stream->gff3_parser);
+  genome_node_delete(gff3_in_stream->last_node);
 }
 
 const GenomeStreamClass* gff3_in_stream_class(void)

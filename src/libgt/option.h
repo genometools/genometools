@@ -52,7 +52,7 @@ OPrval        option_parser_parse_min_max_args(OptionParser*, int *parsed_args,
                                                unsigned int
                                                max_additional_arguments,
                                                Error*);
-void          option_parser_free(OptionParser*);
+void          option_parser_delete(OptionParser*);
 
 /* the options */
 Option*        option_new_outputfile(FILE**);
@@ -102,6 +102,6 @@ void           option_imply(Option*, const Option*);
 void           option_imply_either_2(Option*, const Option*, const Option*);
 void           option_exclude(Option*, Option*);
 void           option_hide_default(Option*);
-void           option_free(Option*);
+void           option_delete(Option*);
 
 #endif

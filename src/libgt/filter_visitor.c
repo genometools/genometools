@@ -27,9 +27,9 @@ struct FilterVisitor {
 static void filter_visitor_free(GenomeVisitor *gv)
 {
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
-  queue_free(filter_visitor->genome_node_buffer);
-  str_free(filter_visitor->seqid);
-  str_free(filter_visitor->typefilter);
+  queue_delete(filter_visitor->genome_node_buffer);
+  str_delete(filter_visitor->seqid);
+  str_delete(filter_visitor->typefilter);
 }
 
 static int filter_visitor_comment(GenomeVisitor *gv, Comment *c,

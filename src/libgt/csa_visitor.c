@@ -42,10 +42,10 @@ typedef struct {
 static void csa_visitor_free(GenomeVisitor *gv)
 {
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
-  queue_free(csa_visitor->genome_node_buffer);
-  array_free(csa_visitor->cluster);
+  queue_delete(csa_visitor->genome_node_buffer);
+  array_delete(csa_visitor->cluster);
   assert(!csa_visitor->buffered_feature);
-  str_free(csa_visitor->gth_csa_source_str);
+  str_delete(csa_visitor->gth_csa_source_str);
 }
 
 static int csa_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
@@ -292,7 +292,7 @@ static void add_sa_to_exon_feature_array(Array *exon_nodes,
     array_add(exon_nodes, new_feature);
   }
 
-  array_free(exons_from_sa);
+  array_delete(exons_from_sa);
 }
 
 #ifndef NDEBUG
@@ -312,7 +312,7 @@ static unsigned int genome_nodes_are_sorted_and_do_not_overlap(Array
   }
   rval = ranges_are_sorted_and_do_not_overlap(ranges);
 
-  array_free(ranges);
+  array_delete(ranges);
 
   return rval;
 }
@@ -407,7 +407,7 @@ static void process_splice_form(Array *spliced_alignments_in_form,
                                        array_get(exon_nodes, i));
   }
 
-  array_free(exon_nodes);
+  array_delete(exon_nodes);
 }
 
 void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster, Log *l)
@@ -448,6 +448,6 @@ void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster, Log *l)
 
   /* remove the cluster genome nodes */
   for (i = 0; i < array_size(csa_visitor->cluster); i++)
-    genome_node_rec_free(*(GenomeNode**) array_get(csa_visitor->cluster, i));
+    genome_node_rec_delete(*(GenomeNode**) array_get(csa_visitor->cluster, i));
   array_set_size(csa_visitor->cluster, 0);
 }

@@ -35,7 +35,7 @@ static int cds_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
 static void cds_stream_free(GenomeStream *gs)
 {
   CDSStream *cds_stream = cds_stream_cast(gs);
-  genome_visitor_free(cds_stream->cds_visitor);
+  genome_visitor_delete(cds_stream->cds_visitor);
 }
 
 const GenomeStreamClass* cds_stream_class(void)
@@ -62,8 +62,8 @@ GenomeStream* cds_stream_new(GenomeStream *in_stream, const char *sequence_file,
   cds_stream->cds_visitor = cds_visitor_new(sequence_file_str, source_str, err);
   if (!cds_stream->cds_visitor)
     has_err = -1;
-  str_free(sequence_file_str);
-  str_free(source_str);
+  str_delete(sequence_file_str);
+  str_delete(source_str);
   if (has_err) {
     cds_stream_free(gs);
     return NULL;

@@ -15,6 +15,6 @@ NeighborJoining* neighborjoining_new(unsigned long num_of_taxa, void *data,
                                      double (*distfunc)
                                      (unsigned long, unsigned long, void*));
 void             neighborjoining_show_tree(const NeighborJoining*, FILE*);
-void             neighborjoining_free(NeighborJoining*);
+void             neighborjoining_delete(NeighborJoining*);
 
 #endif

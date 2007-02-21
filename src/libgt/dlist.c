@@ -147,24 +147,24 @@ int dlist_unit_test(Error *err)
   /* boundary case: empty dlist */
   dlist = dlist_new(compare);
   ensure(has_err, !dlist_size(dlist));
-  dlist_free(dlist);
+  dlist_delete(dlist);
 
   dlist = dlist_new(NULL);
   ensure(has_err, !dlist_size(dlist));
-  dlist_free(dlist);
+  dlist_delete(dlist);
 
   /* boundary case: dlist containing one element */
   dlist = dlist_new(compare);
   dlist_add(dlist, &elem_a);
   ensure(has_err, dlist_size(dlist) == 1);
   ensure(has_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_free(dlist);
+  dlist_delete(dlist);
 
   dlist = dlist_new(NULL);
   dlist_add(dlist, &elem_a);
   ensure(has_err, dlist_size(dlist) == 1);
   ensure(has_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_free(dlist);
+  dlist_delete(dlist);
 
   /* boundary case: dlist containing two elements */
   dlist = dlist_new(compare);
@@ -172,14 +172,14 @@ int dlist_unit_test(Error *err)
   dlist_add(dlist, &elem_b);
   ensure(has_err, dlist_size(dlist) == 2);
   ensure(has_err, elem_b == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_free(dlist);
+  dlist_delete(dlist);
 
   dlist = dlist_new(NULL);
   dlist_add(dlist, &elem_a);
   dlist_add(dlist, &elem_b);
   ensure(has_err, dlist_size(dlist) == 2);
   ensure(has_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_free(dlist);
+  dlist_delete(dlist);
 
   for (i = 0; i < NUM_OF_TESTS && !has_err; i++) {
     /* construct the random elements for the list */
@@ -241,7 +241,7 @@ int dlist_unit_test(Error *err)
       ensure(has_err, *data == elems_backup[size / 2 + 1]);
     }
 #endif
-    dlist_free(dlist);
+    dlist_delete(dlist);
 
     /* test without compare function */
     dlist = dlist_new(NULL);
@@ -273,13 +273,13 @@ int dlist_unit_test(Error *err)
         ensure(has_err, *data == elems[size - 2]);
       }
     }
-    dlist_free(dlist);
+    dlist_delete(dlist);
   }
 
   return has_err;
 }
 
-void dlist_free(Dlist *dlist)
+void dlist_delete(Dlist *dlist)
 {
   Dlistelem *elem;
   if (!dlist) return;

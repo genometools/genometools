@@ -31,10 +31,10 @@ static void cds_visitor_free(GenomeVisitor *gv)
 {
   CDSVisitor *cds_visitor = cds_visitor_cast(gv);
   assert(cds_visitor);
-  str_free(cds_visitor->sequence_file);
-  str_free(cds_visitor->source);
-  splicedseq_free(cds_visitor->splicedseq);
-  bioseq_free(cds_visitor->bioseq);
+  str_delete(cds_visitor->sequence_file);
+  str_delete(cds_visitor->source);
+  splicedseq_delete(cds_visitor->splicedseq);
+  bioseq_delete(cds_visitor->bioseq);
 }
 
 static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
@@ -161,10 +161,10 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
     }
 
     /* free */
-    array_free(orfs);
-    str_free(pr_2);
-    str_free(pr_1);
-    str_free(pr_0);
+    array_delete(orfs);
+    str_delete(pr_2);
+    str_delete(pr_1);
+    str_delete(pr_0);
   }
   return has_err;
 }

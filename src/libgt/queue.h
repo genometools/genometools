@@ -21,6 +21,6 @@ void*         queue_get_elem(Queue*, unsigned long);
               queue_add_elem(q, &(elem), sizeof (elem))
 void          queue_add_elem(Queue*, void*, size_t);
 unsigned long queue_size(const Queue*);
-void          queue_free(Queue*);
+void          queue_delete(Queue*);
 
 #endif

@@ -17,6 +17,6 @@ int            scorefunction_get_score(const ScoreFunction*,
                                        unsigned char, unsigned char);
 int            scorefunction_get_deletion_score(const ScoreFunction*);
 int            scorefunction_get_insertion_score(const ScoreFunction*);
-void           scorefunction_free(ScoreFunction*);
+void           scorefunction_delete(ScoreFunction*);
 
 #endif

@@ -126,7 +126,7 @@ static int parse_input_file(Array *spliced_alignments,
   }
 
   xfclose(input_file);
-  str_free(line);
+  str_delete(line);
   return has_err;
 }
 
@@ -208,7 +208,7 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
                          "alignments,\nand print them to stdout.");
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 1, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -247,10 +247,10 @@ int gt_consensus_sa(int argc, char *argv[], Error *err)
   /* free */
   for (i = 0; i < array_size(spliced_alignments); i++) {
     sa = array_get(spliced_alignments, i);
-    str_free(sa->id);
-    array_free(sa->exons);
+    str_delete(sa->id);
+    array_delete(sa->exons);
   }
-  array_free(spliced_alignments);
+  array_delete(spliced_alignments);
 
   return has_err;
 }

@@ -220,18 +220,18 @@ int str_unit_test(Error *err)
   /* the empty string */
   s1 = str_new();
   ensure(has_err, str_length(s1) == 0);
-  str_free(s1);
+  str_delete(s1);
 
   /* string testing */
   s1 = str_new();
   str_set(s1, cstring_1);
   ensure(has_err, str_length(s1) == 11);
   ensure(has_err, strcmp(str_get(s1), cstring_1) == 0);
-  str_free(s1);
+  str_delete(s1);
 
   s1 = str_new_cstr(cstring_1);
   ensure(has_err, str_length(s1) == 11);
-  str_free(s1);
+  str_delete(s1);
 
   s1 = str_new();
   s2 = str_new_cstr("foo");
@@ -248,8 +248,8 @@ int str_unit_test(Error *err)
   ensure(has_err, strcmp("foo", str_get(s2)) == 0);
   str_append_ulong(s1, 1984);
   ensure(has_err, strcmp("foobarbaz1984", str_get(s1)) == 0);
-  str_free(s1);
-  str_free(s2);
+  str_delete(s1);
+  str_delete(s2);
 
   /* testing str_append_ulong() and str_set_length() */
   s = str_new();
@@ -261,32 +261,32 @@ int str_unit_test(Error *err)
   ensure(has_err, strcmp("6", str_get(s)) == 0);
   str_append_ulong(s, 16);
   ensure(has_err, strcmp("616", str_get(s)) == 0);
-  str_free(s);
+  str_delete(s);
 
   /* make sure that str_get never returns NULL */
   s = str_new();
   ensure(has_err, str_get(s));
   ensure(has_err, str_length(s) == 0);
   ensure(has_err, strlen(str_get(s)) == 0);
-  str_free(s);
+  str_delete(s);
 
   s = str_new_cstr(NULL);
   ensure(has_err, str_get(s));
   ensure(has_err, str_length(s) == 0);
   ensure(has_err, strlen(str_get(s)) == 0);
-  str_free(s);
+  str_delete(s);
 
   /* test str_new() followed by str_append_cstr_nt() */
   s = str_new();
   str_append_cstr_nt(s, "foo", 3);
   ensure(has_err, strcmp("foo", str_get(s)) == 0);
   ensure(has_err, str_length(s) == 3);
-  str_free(s);
+  str_delete(s);
 
   return has_err;
 }
 
-void str_free(Str *s)
+void str_delete(Str *s)
 {
   if (!s) return;           /* return without action if 's' is NULL */
   if (s->reference_count) { /* there are multiple references to this string */

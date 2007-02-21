@@ -37,7 +37,7 @@ static OPrval parse_options(int *parsed_args, MSAparse_arguments *arguments,
   /* parse */
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 1, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -80,7 +80,7 @@ int gt_msaparse(int argc, char *argv[], Error *err)
   }
 
   /* free */
-  msa_free(msa);
+  msa_delete(msa);
 
   return has_err;
 }

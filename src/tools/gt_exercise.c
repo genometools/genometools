@@ -50,7 +50,7 @@ static int show_exercise_tools(const char *progname, void *data, Error *err)
   for (i = 0; i < array_size(exercisenames); i++) {
     puts(*(const char**) array_get(exercisenames, i));
   }
-  array_free(exercisenames);
+  array_delete(exercisenames);
   return 0;
 }
 
@@ -66,7 +66,7 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv,
   option_parser_set_comment_func(op, show_exercise_tools, exercise_tools);
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
                                         versionfunc, 1, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -101,10 +101,10 @@ int gt_exercise(int argc, char *argv[], Error *err)
   switch (parse_options(&parsed_args, argc, argv, exercise_tools, err)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      hashtable_free(exercise_tools);
+      hashtable_delete(exercise_tools);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      hashtable_free(exercise_tools);
+      hashtable_delete(exercise_tools);
       return 0;
   }
   assert(parsed_args < argc);
@@ -123,8 +123,8 @@ int gt_exercise(int argc, char *argv[], Error *err)
   }
 
   /* free */
-  cstr_array_free(nargv);
-  hashtable_free(exercise_tools);
+  cstr_array_delete(nargv);
+  hashtable_delete(exercise_tools);
 
   return has_err;
 }

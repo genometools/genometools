@@ -60,7 +60,7 @@ int genome_visitor_visit_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
   return 0;
 }
 
-void genome_visitor_free(GenomeVisitor *gv)
+void genome_visitor_delete(GenomeVisitor *gv)
 {
   if (!gv) return;
   assert(gv->c_class);

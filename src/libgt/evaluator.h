@@ -21,6 +21,6 @@ void       evaluator_show_sensitivity(const Evaluator*, FILE*);
 void       evaluator_show_specificity(const Evaluator*, FILE*);
 void       evaluator_reset(Evaluator*);
 int        evaluator_unit_test(Error*);
-void       evaluator_free(Evaluator*);
+void       evaluator_delete(Evaluator*);
 
 #endif

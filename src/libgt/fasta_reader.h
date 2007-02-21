@@ -23,6 +23,6 @@ int          fasta_reader_run(FastaReader*, FastaReader_proc_description,
                               FastaReader_proc_character,
                               FastaReader_proc_sequence_length, void *data,
                               Error*);
-void         fasta_reader_free(FastaReader*);
+void         fasta_reader_delete(FastaReader*);
 
 #endif

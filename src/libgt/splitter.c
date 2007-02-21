@@ -145,12 +145,12 @@ int splitter_unit_test(Error *err)
   ensure(has_err, strcmp(splitter_get_token(s, 0), "test") == 0);
 
   /* free */
-  splitter_free(s);
+  splitter_delete(s);
 
   return has_err;
 }
 
-void splitter_free(Splitter *s)
+void splitter_delete(Splitter *s)
 {
   if (!s) return;
   free(s->tokens);

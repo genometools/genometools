@@ -18,6 +18,6 @@ Timer* timer_new(void);
 void   timer_start(Timer*);
 void   timer_stop(Timer*);
 void   timer_show(Timer*, FILE*);
-void   timer_free(Timer*);
+void   timer_delete(Timer*);
 
 #endif

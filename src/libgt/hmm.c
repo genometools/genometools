@@ -343,8 +343,8 @@ void hmm_decode(const HMM *hmm,
     state_sequence[column] = backtrace[state_sequence[column + 1]][column + 1];
 
   /* free tables */
-  array2dim_free(backtrace);
-  array2dim_free(max_probabilities);
+  array2dim_delete(backtrace);
+  array2dim_delete(max_probabilities);
 }
 
 /* [DEKM98, p. 58] */
@@ -400,7 +400,7 @@ double hmm_forward(const HMM* hmm, const unsigned int *emissions,
     P = logsum(P, f[i][num_of_emissions-1]);
   }
 
-  array2dim_free(f);
+  array2dim_delete(f);
   return P;
 }
 
@@ -458,7 +458,7 @@ double hmm_backward(const HMM* hmm, const unsigned int *emissions,
                   hmm->emission_prob[i][emissions[0]] + b[i][0]);
   }
 
-  array2dim_free(b);
+  array2dim_delete(b);
   return P;
 }
 
@@ -611,11 +611,11 @@ int hmm_unit_test(Error *err)
   }
 
   free(encoded_seq);
-  alpha_free(alpha);
+  alpha_delete(alpha);
   ensure(has_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
   ensure(has_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
-  hmm_free(loaded_hmm);
-  hmm_free(fair_hmm);
+  hmm_delete(loaded_hmm);
+  hmm_delete(fair_hmm);
 
   /* test the HMM class with the dice HMMs */
   fair_hmm = dice_hmm_fair();
@@ -640,20 +640,20 @@ int hmm_unit_test(Error *err)
   }
 
   free(encoded_seq);
-  alpha_free(alpha);
+  alpha_delete(alpha);
   ensure(has_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
   ensure(has_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
-  hmm_free(loaded_hmm);
-  hmm_free(fair_hmm);
+  hmm_delete(loaded_hmm);
+  hmm_delete(fair_hmm);
 
   return has_err;
 }
 
-void hmm_free(HMM *hmm)
+void hmm_delete(HMM *hmm)
 {
   if (!hmm) return;
   free(hmm->initial_state_prob);
-  array2dim_free(hmm->transition_prob);
-  array2dim_free(hmm->emission_prob);
+  array2dim_delete(hmm->transition_prob);
+  array2dim_delete(hmm->emission_prob);
   free(hmm);
 }

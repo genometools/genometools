@@ -33,7 +33,7 @@ unsigned long bioseq_get_sequence_length(Bioseq*, unsigned long);
 unsigned long bioseq_get_raw_sequence_length(Bioseq*);
 unsigned long bioseq_number_of_sequences(Bioseq*);
 bool          bioseq_contains_sequence(Bioseq*, const char*);
-void          bioseq_free(Bioseq*);
+void          bioseq_delete(Bioseq*);
 
 /* shows a bioseq on stdout (in fasta format).
    If width is != 0 the sequences are formatted accordingly */

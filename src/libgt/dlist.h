@@ -23,7 +23,7 @@ void          dlist_add(Dlist*, void *data); /* usually: O(n) (O(1) if data is
                                                 added in sorted order) */
 void          dlist_remove(Dlist*, Dlistelem*); /* XXX: frees the elem */
 int           dlist_unit_test(Error*);
-void          dlist_free(Dlist*);
+void          dlist_delete(Dlist*);
 
 Dlistelem*    dlistelem_next(const Dlistelem*);
 void*         dlistelem_get_data(const Dlistelem*);

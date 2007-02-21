@@ -98,6 +98,6 @@ Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf)
                        seq_get_orig(v) + alignment_start.y,
                        alignment_end.y - alignment_start.y + 1);
   }
-  array2dim_free(dptable);
+  array2dim_delete(dptable);
   return a;
 }

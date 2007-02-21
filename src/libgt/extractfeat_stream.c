@@ -42,7 +42,7 @@ static int extractfeat_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 static void extractfeat_stream_free(GenomeStream *gs)
 {
   ExtractFeatStream *extractfeat_stream = extractfeat_stream_cast(gs);
-  genome_visitor_free(extractfeat_stream->extractfeat_visitor);
+  genome_visitor_delete(extractfeat_stream->extractfeat_visitor);
 }
 
 const GenomeStreamClass* extractfeat_stream_class(void)

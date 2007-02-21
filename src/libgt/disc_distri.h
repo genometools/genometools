@@ -13,6 +13,6 @@ typedef struct DiscDistri DiscDistri;
 DiscDistri* disc_distri_new(void);
 void        disc_distri_add(DiscDistri*, unsigned long);
 void        disc_distri_show(const DiscDistri*); /* on stdout */
-void        disc_distri_free(DiscDistri*);
+void        disc_distri_delete(DiscDistri*);
 
 #endif

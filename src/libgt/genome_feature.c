@@ -36,9 +36,9 @@ static void genome_feature_free(GenomeNode *gn)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   assert(gf);
-  str_free(gf->seqid);
-  str_free(gf->source);
-  hashtable_free(gf->attributes);
+  str_delete(gf->seqid);
+  str_delete(gf->source);
+  hashtable_delete(gf->attributes);
 }
 
 static Str* genome_feature_get_seqid(GenomeNode *gn)

@@ -18,7 +18,7 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
                          "example is used.");
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 1, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -74,8 +74,8 @@ int gt_upgma(int argc, char *argv[], Error *err)
   if (!has_err)
     upgma_show_tree(upgma, stdout);
 
-  bioseq_free(bioseq);
-  upgma_free(upgma);
+  bioseq_delete(bioseq);
+  upgma_delete(upgma);
 
   return has_err;
 }

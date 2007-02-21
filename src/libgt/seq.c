@@ -61,10 +61,10 @@ unsigned long seq_length(const Seq *s)
   return s->seqlen;
 }
 
-void seq_free(Seq *s)
+void seq_delete(Seq *s)
 {
   if (!s) return;
   free(s->encoded_seq);
-  alpha_free(s->seqalpha);
+  alpha_delete(s->seqalpha);
   free(s);
 }

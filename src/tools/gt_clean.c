@@ -15,7 +15,7 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
                          "are automatically created by gt.");
   oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
                                         versionfunc, 0, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -42,7 +42,7 @@ static void remove_pattern_in_current_dir(const char *pattern)
 
   /* free */
   globfree(&g);
-  str_free(path);
+  str_delete(path);
 }
 
 int gt_clean(int argc, char *argv[], Error *err)

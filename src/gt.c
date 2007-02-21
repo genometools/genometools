@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "error: %s\n", error_get(err));
     assert(rval);
   }
-  error_free(err);
+  error_delete(err);
   gtr_free(gtr);
   return rval;
 }

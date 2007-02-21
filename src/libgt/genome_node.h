@@ -64,8 +64,8 @@ bool          genome_node_overlaps_nodes(GenomeNode*, Array*);
    to overlapped nodes are marked (i.e., set) */
 bool          genome_node_overlaps_nodes_mark(GenomeNode*, Array*, Bittab*);
 int           genome_node_compare(GenomeNode**, GenomeNode**);
-void          genome_node_free(GenomeNode*);
-void          genome_node_rec_free(GenomeNode*);
+void          genome_node_delete(GenomeNode*);
+void          genome_node_rec_delete(GenomeNode*);
 
 void          genome_nodes_sort(Array*);
 void          genome_nodes_sort_stable(Array*);

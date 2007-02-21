@@ -50,8 +50,8 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q)
       dist += seq_b_profile[i] - seq_a_profile[i];
   }
 
-  array_free(seq_b_qgrams);
-  array_free(seq_a_qgrams);
+  array_delete(seq_b_qgrams);
+  array_delete(seq_a_qgrams);
   free(seq_b_profile);
   free(seq_a_profile);
 

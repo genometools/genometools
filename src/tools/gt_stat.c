@@ -59,7 +59,7 @@ static OPrval parse_options(int *parsed_args, Stat_arguments *arguments,
 
   /* parse */
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -106,7 +106,7 @@ int gt_stat(int argc, char *argv[], Error *err)
     info.number_of_trees++;
     has_err = genome_node_traverse_children(gn, &info, compute_statistics, true,
                                             err);
-    genome_node_rec_free(gn);
+    genome_node_rec_delete(gn);
     if (has_err)
       break;
   }
@@ -118,8 +118,8 @@ int gt_stat(int argc, char *argv[], Error *err)
   }
 
   /* free */
-  genome_visitor_free(info.stat_visitor);
-  genome_stream_free(gff3_in_stream);
+  genome_visitor_delete(info.stat_visitor);
+  genome_stream_delete(gff3_in_stream);
 
   return has_err;
 }

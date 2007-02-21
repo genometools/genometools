@@ -37,7 +37,7 @@ unsigned long bittab_get_next_bitnum(const Bittab*, unsigned long);
 unsigned long bittab_count_set_bits(Bittab*);
 unsigned long bittab_size(Bittab*);
 int           bittab_unit_test(Error*);
-void          bittab_free(Bittab*);
+void          bittab_delete(Bittab*);
 
 #if 0
   a typical iterator loop:

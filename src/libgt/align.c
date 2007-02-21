@@ -112,7 +112,7 @@ Alignment* align(const char *u, unsigned long ulen,
   fillDPtable(dptable, u, ulen, v, vlen);
   traceback(a, dptable, ulen, vlen);
   assert(dptable[ulen][vlen].distvalue == alignment_eval(a));
-  array2dim_free(dptable);
+  array2dim_delete(dptable);
   return a;
 }
 
@@ -132,6 +132,6 @@ void align_all(const char *u, unsigned long ulen,
                          proc_alignment, data);
   if (proc_aligns)
     proc_aligns(aligns, data);
-  alignment_free(a);
-  array2dim_free(dptable);
+  alignment_delete(a);
+  array2dim_delete(dptable);
 }

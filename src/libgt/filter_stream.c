@@ -56,7 +56,7 @@ static int filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
 static void filter_stream_free(GenomeStream *gs)
 {
   FilterStream *fs = filter_stream_cast(gs);
-  genome_visitor_free(fs->filter_visitor);
+  genome_visitor_delete(fs->filter_visitor);
 }
 
 const GenomeStreamClass* filter_stream_class(void)

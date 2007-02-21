@@ -29,7 +29,7 @@ void          array_set_size(Array*, unsigned long);
 size_t        array_elem_size(const Array*);
 unsigned long array_size(const Array*);
 int           array_unit_test(Error*);
-void          array_free(Array*);
+void          array_delete(Array*);
 
 #if 0
   a typical array use case:
@@ -46,7 +46,7 @@ void          array_free(Array*);
     assert(array_size(a) == 100);
     assert(*(unsigned long*) array_pop(a) == 99);
     assert(array_size(a) == 99);
-    array_free(a);
+    array_delete(a);
     return EXIT_SUCCESS;
   }
 #endif

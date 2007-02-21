@@ -23,7 +23,7 @@ static void sequence_region_free(GenomeNode *gn)
 {
   SequenceRegion *sr = sequence_region_cast(gn);
   assert(sr && sr->seqid);
-  str_free(sr->seqid);
+  str_delete(sr->seqid);
 }
 
 static Str* sequence_region_get_seqid(GenomeNode *gn)

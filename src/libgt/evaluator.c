@@ -141,12 +141,12 @@ int evaluator_unit_test(Error *err)
   ensure(has_err, evaluator_get_sensitivity(e) == 1.0);
   ensure(has_err, evaluator_get_specificity(e) == 1.0);
 
-  evaluator_free(e);
+  evaluator_delete(e);
 
   return has_err;
 }
 
-void evaluator_free(Evaluator *e)
+void evaluator_delete(Evaluator *e)
 {
   if (!e) return;
   free(e);

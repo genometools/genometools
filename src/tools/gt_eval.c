@@ -35,7 +35,7 @@ static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
   /* parse */
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 2, 2, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -75,7 +75,7 @@ int gt_eval(int argc, char *argv[], Error *err)
     stream_evaluator_show(evaluator, stdout);
 
   /* free */
-  stream_evaluator_free(evaluator);
+  stream_evaluator_delete(evaluator);
 
   return has_err;
 }

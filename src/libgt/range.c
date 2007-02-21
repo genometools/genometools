@@ -178,7 +178,7 @@ int range_unit_test(Error *err)
     ensure(has_err,
            ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
   }
-  array_free(ctr);
+  array_delete(ctr);
 
   /* test ranges_uniq_in_place_count() */
   ctr = ranges_uniq_in_place_count(ranges);
@@ -191,11 +191,11 @@ int range_unit_test(Error *err)
     ensure(has_err,
            ranges_out[i].end == (*(Range*) array_get(ranges, i)).end);
   }
-  array_free(ctr);
+  array_delete(ctr);
 
   /* free */
-  array_free(ranges);
-  array_free(tmp_ranges);
+  array_delete(ranges);
+  array_delete(tmp_ranges);
   return has_err;
 }
 
@@ -314,7 +314,7 @@ static Array* generic_ranges_uniq_in_place(Array *ranges, unsigned int count)
   array_add_array(ranges, out_ranges); /* XXX: could be more efficient with
                                           something like array_replace(ranges,
                                           out_ranges) */
-  array_free(out_ranges);
+  array_delete(out_ranges);
   return count_array;
 }
 

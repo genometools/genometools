@@ -59,7 +59,7 @@ void genome_node_class_init(GenomeNodeClass *gnc, size_t size, ...)
   while ((func = va_arg(ap, Fptr))) {
     meth = va_arg(ap, Fptr);
     assert(meth);
-    if (func == (Fptr) genome_node_free) {
+    if (func == (Fptr) genome_node_delete) {
       mm  = (Fptr*) &gnc->free; *mm = meth;
     }
     else assert(0);
@@ -220,12 +220,12 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   }
 
   /* free */
-  genome_node_free(gn_ref);
+  genome_node_delete(gn_ref);
   if (traverse_only_once)
-    hashtable_free(traversed_nodes);
-  array_free(list_of_children);
-  array_free(node_stack);
-  queue_free(node_queue);
+    hashtable_delete(traversed_nodes);
+  array_delete(list_of_children);
+  array_delete(node_stack);
+  queue_delete(node_queue);
 
   return has_err;
 }
@@ -424,7 +424,7 @@ bool genome_node_direct_children_do_not_overlap(GenomeNode *gn)
   assert(ranges_are_sorted(children_ranges));
   rval = ranges_do_not_overlap(children_ranges);
 
-  array_free(children_ranges);
+  array_delete(children_ranges);
 
   return rval;
 }
@@ -453,7 +453,7 @@ bool genome_node_tree_is_sorted(GenomeNode **buffer,
     /* the last node is not larger than the current one */
     if (genome_node_compare(buffer, &current_node) == 1)
       return false;
-    genome_node_free(*buffer);
+    genome_node_delete(*buffer);
   }
   *buffer = genome_node_ref(current_node);
   return true;
@@ -498,24 +498,24 @@ int genome_node_compare(GenomeNode **gn_a, GenomeNode **gn_b)
   return compare_genome_nodes(*gn_a, *gn_b);
 }
 
-void genome_node_free(GenomeNode *gn)
+void genome_node_delete(GenomeNode *gn)
 {
   if (!gn) return;
   if (gn->reference_count) { gn->reference_count--; return; }
   assert(gn->c_class);
   if (gn->c_class->free) gn->c_class->free(gn);
-  dlist_free(gn->children);
+  dlist_delete(gn->children);
   free(gn);
 }
 
 static int free_genome_node(GenomeNode *gn, /*@unused@*/ void *data, Error *err)
 {
   error_check(err);
-  genome_node_free(gn);
+  genome_node_delete(gn);
   return 0;
 }
 
-void genome_node_rec_free(GenomeNode *gn)
+void genome_node_rec_delete(GenomeNode *gn)
 {
   int has_err;
   if (!gn) return;

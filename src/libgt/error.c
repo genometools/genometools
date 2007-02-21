@@ -47,7 +47,7 @@ const char* error_get(const Error *e)
   return e->error_string;
 }
 
-void error_free(Error *e)
+void error_delete(Error *e)
 {
   if (!e) return;
   free(e);

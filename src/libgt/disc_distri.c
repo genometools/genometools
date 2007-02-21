@@ -52,9 +52,9 @@ void disc_distri_show(const DiscDistri *d)
   }
 }
 
-void disc_distri_free(DiscDistri *d)
+void disc_distri_delete(DiscDistri *d)
 {
   if (!d) return;
-  array_free(d->values);
+  array_delete(d->values);
   free(d);
 }

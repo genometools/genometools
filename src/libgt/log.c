@@ -37,7 +37,7 @@ FILE* log_fp(Log *l)
   return l->logfp;
 }
 
-void log_free(Log *l)
+void log_delete(Log *l)
 {
   if (!l) return;
   free(l);

@@ -73,7 +73,7 @@ RegionMapping* regionmapping_new(Str *mapping_filename, Error *err)
   }
   /* return */
   if (has_err) {
-    regionmapping_free(rm);
+    regionmapping_delete(rm);
     return NULL;
   }
   return rm;
@@ -147,10 +147,10 @@ Str* regionmapping_map(RegionMapping *rm, const char *sequence_region,
     return map_function(rm, sequence_region, err);
 }
 
-void regionmapping_free(RegionMapping *rm)
+void regionmapping_delete(RegionMapping *rm)
 {
   if (!rm) return;
-  str_free(rm->mapping_filename);
+  str_delete(rm->mapping_filename);
   if (rm->L) lua_close(rm->L);
   free(rm);
 }

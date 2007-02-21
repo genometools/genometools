@@ -63,7 +63,7 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l, Error *err)
 static void csa_stream_free(GenomeStream *gs)
 {
   CSAStream *cs = csa_stream_cast(gs);
-  genome_visitor_free(cs->csa_visitor);
+  genome_visitor_delete(cs->csa_visitor);
 }
 
 const GenomeStreamClass* csa_stream_class(void)

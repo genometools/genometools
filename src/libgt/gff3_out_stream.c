@@ -34,7 +34,7 @@ static int gff3_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
 static void gff3_out_stream_free(GenomeStream *gs)
 {
   GFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
-  genome_visitor_free(gff3_out_stream->gff3_visitor);
+  genome_visitor_delete(gff3_out_stream->gff3_visitor);
 }
 
 const GenomeStreamClass* gff3_out_stream_class(void)

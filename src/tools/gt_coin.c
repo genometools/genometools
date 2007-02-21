@@ -17,7 +17,7 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
                          "stdout.");
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 1, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -79,7 +79,7 @@ int gt_coin(int argc, char *argv[], Error *err)
   }
 
   /* free */
-  hmm_free(hmm);
+  hmm_delete(hmm);
   free(emissions);
   free(state_sequence);
 

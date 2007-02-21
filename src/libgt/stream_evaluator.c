@@ -89,33 +89,33 @@ static void slot_free(Slot *s)
   unsigned long i;
   assert(s);
   for (i = 0; i < array_size(s->genes_forward); i++)
-    genome_node_rec_free(*(GenomeNode**) array_get(s->genes_forward, i));
-  array_free(s->genes_forward);
+    genome_node_rec_delete(*(GenomeNode**) array_get(s->genes_forward, i));
+  array_delete(s->genes_forward);
   for (i = 0; i < array_size(s->genes_reverse); i++)
-    genome_node_rec_free(*(GenomeNode**) array_get(s->genes_reverse, i));
-  array_free(s->genes_reverse);
+    genome_node_rec_delete(*(GenomeNode**) array_get(s->genes_reverse, i));
+  array_delete(s->genes_reverse);
   for (i = 0; i < array_size(s->mRNAs_forward); i++)
-    genome_node_rec_free(*(GenomeNode**) array_get(s->mRNAs_forward, i));
-  array_free(s->mRNAs_forward);
+    genome_node_rec_delete(*(GenomeNode**) array_get(s->mRNAs_forward, i));
+  array_delete(s->mRNAs_forward);
   for (i = 0; i < array_size(s->mRNAs_reverse); i++)
-    genome_node_rec_free(*(GenomeNode**) array_get(s->mRNAs_reverse, i));
-  array_free(s->mRNAs_reverse);
-  array_free(s->mRNA_exons_forward);
-  array_free(s->mRNA_exons_reverse);
-  array_free(s->CDS_exons_forward);
-  array_free(s->CDS_exons_reverse);
-  array_free(s->true_mRNA_exons_forward);
-  array_free(s->true_mRNA_exons_reverse);
-  array_free(s->true_CDS_exons_forward);
-  array_free(s->true_CDS_exons_reverse);
-  bittab_free(s->true_genes_forward);
-  bittab_free(s->true_genes_reverse);
-  bittab_free(s->true_mRNAs_forward);
-  bittab_free(s->true_mRNAs_reverse);
-  bittab_free(s->overlapped_genes_forward);
-  bittab_free(s->overlapped_genes_reverse);
-  bittab_free(s->overlapped_mRNAs_forward);
-  bittab_free(s->overlapped_mRNAs_reverse);
+    genome_node_rec_delete(*(GenomeNode**) array_get(s->mRNAs_reverse, i));
+  array_delete(s->mRNAs_reverse);
+  array_delete(s->mRNA_exons_forward);
+  array_delete(s->mRNA_exons_reverse);
+  array_delete(s->CDS_exons_forward);
+  array_delete(s->CDS_exons_reverse);
+  array_delete(s->true_mRNA_exons_forward);
+  array_delete(s->true_mRNA_exons_reverse);
+  array_delete(s->true_CDS_exons_forward);
+  array_delete(s->true_CDS_exons_reverse);
+  bittab_delete(s->true_genes_forward);
+  bittab_delete(s->true_genes_reverse);
+  bittab_delete(s->true_mRNAs_forward);
+  bittab_delete(s->true_mRNAs_reverse);
+  bittab_delete(s->overlapped_genes_forward);
+  bittab_delete(s->overlapped_genes_reverse);
+  bittab_delete(s->overlapped_mRNAs_forward);
+  bittab_delete(s->overlapped_mRNAs_reverse);
   free(s);
 }
 
@@ -353,8 +353,8 @@ static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   equal = ranges_are_equal(exons_1, exons_2);
 
   /* free */
-  array_free(exons_1);
-  array_free(exons_2);
+  array_delete(exons_1);
+  array_delete(exons_2);
 
   return equal;
 }
@@ -434,10 +434,10 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   }
 
   /* free */
-  array_free(exons_1);
-  array_free(exons_2);
-  array_free(mRNAs_1);
-  array_free(mRNAs_2);
+  array_delete(exons_1);
+  array_delete(exons_2);
+  array_delete(mRNAs_1);
+  array_delete(mRNAs_2);
 
   return equal;
 }
@@ -689,7 +689,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Error *err)
     default:
       assert(1); /* shut up compiler */
   }
-  array_free(real_genome_nodes);
+  array_delete(real_genome_nodes);
   return 0;
 }
 
@@ -772,7 +772,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                                               NULL);
       assert(!has_err); /* cannot happen, process_real_feature() is sane */
     }
-    genome_node_rec_free(gn);
+    genome_node_rec_delete(gn);
   }
 
   /* set the actuals and sort them */
@@ -805,7 +805,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                   "``reality''", str_get(genome_node_get_seqid(gn)));
         }
       }
-      genome_node_rec_free(gn);
+      genome_node_rec_delete(gn);
     }
   }
 
@@ -855,15 +855,15 @@ void stream_evaluator_show(StreamEvaluator *se, FILE *outfp)
   xfputc('\n', outfp);
 }
 
-void stream_evaluator_free(StreamEvaluator *se)
+void stream_evaluator_delete(StreamEvaluator *se)
 {
   if (!se) return;
-  genome_stream_free(se->reality);
-  genome_stream_free(se->prediction);
-  hashtable_free(se->real_features);
-  evaluator_free(se->gene_evaluator);
-  evaluator_free(se->mRNA_evaluator);
-  evaluator_free(se->mRNA_exon_evaluator);
-  evaluator_free(se->CDS_exon_evaluator);
+  genome_stream_delete(se->reality);
+  genome_stream_delete(se->prediction);
+  hashtable_delete(se->real_features);
+  evaluator_delete(se->gene_evaluator);
+  evaluator_delete(se->mRNA_evaluator);
+  evaluator_delete(se->mRNA_exon_evaluator);
+  evaluator_delete(se->CDS_exon_evaluator);
   free(se);
 }

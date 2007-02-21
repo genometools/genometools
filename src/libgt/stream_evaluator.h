@@ -17,6 +17,6 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
 int              stream_evaluator_evaluate(StreamEvaluator*, bool verbose,
                                            bool exondiff, Error*);
 void             stream_evaluator_show(StreamEvaluator*, FILE*);
-void             stream_evaluator_free(StreamEvaluator*);
+void             stream_evaluator_delete(StreamEvaluator*);
 
 #endif

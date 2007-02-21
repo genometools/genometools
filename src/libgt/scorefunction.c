@@ -45,9 +45,9 @@ int scorefunction_get_insertion_score(const ScoreFunction *s)
   return s->insertion_score;
 }
 
-void scorefunction_free(ScoreFunction *sf)
+void scorefunction_delete(ScoreFunction *sf)
 {
   if (!sf) return;
-  scorematrix_free(sf->sm);
+  scorematrix_delete(sf->sm);
   free(sf);
 }

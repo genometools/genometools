@@ -23,7 +23,7 @@ static OPrval parse_options(int *parsed_args, int *indelscore, int argc,
   option_parser_add_option(op, o);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 3, 3, err);
-  option_parser_free(op);
+  option_parser_delete(op);
   return oprval;
 }
 
@@ -68,7 +68,7 @@ int gt_swalign(int argc, char *argv[], Error *err)
           if (a) {
             alignment_show(a, stdout);
             xputchar('\n');
-            alignment_free(a);
+            alignment_delete(a);
           }
         }
       }
@@ -76,9 +76,9 @@ int gt_swalign(int argc, char *argv[], Error *err)
   }
 
   /* free */
-  bioseq_free(bioseq_2);
-  bioseq_free(bioseq_1);
-  scorefunction_free(scorefunction);
+  bioseq_delete(bioseq_2);
+  bioseq_delete(bioseq_1);
+  scorefunction_delete(scorefunction);
 
   return has_err;
 }

@@ -324,7 +324,7 @@ static int check_option_implications(OptionParser *op, Error *err)
 		                     ->option_str);
             str_append_cstr(error_str, "\"");
 	    error_set(err, "%s", str_get(error_str));
-            str_free(error_str);
+            str_delete(error_str);
             return -1;
 	  }
 	}
@@ -671,7 +671,7 @@ OPrval option_parser_parse_min_max_args(OptionParser *op, int *parsed_args,
                min_additional_arguments, max_additional_arguments, err);
 }
 
-void option_parser_free(OptionParser *op)
+void option_parser_delete(OptionParser *op)
 {
   unsigned long i;
   if (!op) return;
@@ -679,8 +679,8 @@ void option_parser_free(OptionParser *op)
   free(op->synopsis);
   free(op->one_liner);
   for (i = 0; i < array_size(op->options); i++)
-    option_free(*(Option**) array_get(op->options, i));
-  array_free(op->options);
+    option_delete(*(Option**) array_get(op->options, i));
+  array_delete(op->options);
   free(op);
 }
 
@@ -883,15 +883,15 @@ void option_hide_default(Option *o)
   o->hide_default = true;
 }
 
-void option_free(Option *o)
+void option_delete(Option *o)
 {
   unsigned long i;
   if (!o) return;
-  str_free(o->option_str);
-  str_free(o->description);
+  str_delete(o->option_str);
+  str_delete(o->description);
   for (i = 0; i < array_size(o->implications); i++)
-    array_free(*(Array**) array_get(o->implications, i));
-  array_free(o->implications);
-  array_free(o->exclusions);
+    array_delete(*(Array**) array_get(o->implications, i));
+  array_delete(o->implications);
+  array_delete(o->exclusions);
   free(o);
 }

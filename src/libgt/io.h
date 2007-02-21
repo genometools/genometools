@@ -19,6 +19,6 @@ void          io_unget_char(IO*, char);
 bool          io_line_start(const IO*);
 unsigned long io_get_line_number(const IO*);
 const char*   io_get_filename(const IO*);
-void          io_free(IO*);
+void          io_delete(IO*);
 
 #endif

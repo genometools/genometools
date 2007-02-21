@@ -66,7 +66,7 @@ static OPrval parse_options(int *parsed_args, Bioseq_arguments *arguments,
   /* parse */
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
                                         versionfunc, 1, err);
-  option_parser_free(op);
+  option_parser_delete(op);
 
   return oprval;
 }
@@ -123,7 +123,7 @@ int gt_bioseq(int argc, char *argv[], Error *err)
       bioseq_show_stat(bioseq);
 
     /* free */
-    bioseq_free(bioseq);
+    bioseq_delete(bioseq);
 
     parsed_args++;
   }

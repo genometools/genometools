@@ -21,6 +21,6 @@ int          scorematrix_get_score(const ScoreMatrix*,
 void         scorematrix_set_score(ScoreMatrix*,
                                    unsigned char, unsigned char, int);
 void         scorematrix_show(const ScoreMatrix*, FILE*);
-void         scorematrix_free(ScoreMatrix*);
+void         scorematrix_delete(ScoreMatrix*);
 
 #endif

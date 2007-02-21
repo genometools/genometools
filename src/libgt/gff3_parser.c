@@ -40,9 +40,9 @@ GFF3Parser* gff3_new(void)
   gff3_parser->id_to_genome_node_mapping = hashtable_new(HASH_STRING, free,
                                                          NULL);
   gff3_parser->seqid_to_str_mapping = hashtable_new(HASH_STRING, NULL,
-                                                    (Free) str_free);
+                                                    (Free) str_delete);
   gff3_parser->source_to_str_mapping = hashtable_new(HASH_STRING, NULL,
-                                                     (Free) str_free);
+                                                     (Free) str_delete);
   gff3_parser->offset = UNDEFLONG;
   return gff3_parser;
 }
@@ -262,7 +262,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   if (!has_err)
     gn = is_child ? NULL : genome_feature;
   else
-    genome_node_free(genome_feature);
+    genome_node_delete(genome_feature);
 
   if (gn)
     queue_add(genome_nodes, gn);
@@ -270,10 +270,10 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
     *break_loop = true;
 
   /* free */
-  splitter_free(splitter);
-  splitter_free(attribute_splitter);
-  splitter_free(tmp_splitter);
-  splitter_free(parents_splitter);
+  splitter_delete(splitter);
+  splitter_delete(attribute_splitter);
+  splitter_delete(tmp_splitter);
+  splitter_delete(parents_splitter);
 
   return has_err;
 }
@@ -461,7 +461,7 @@ int gff3_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
     str_reset(line_buffer);
   }
 
-  str_free(line_buffer);
+  str_delete(line_buffer);
   if (queue_size(genome_nodes))
     *status_code = 0; /* at least one node was created */
   else
@@ -477,12 +477,12 @@ void gff3_reset(GFF3Parser *gff3_parser)
   hashtable_reset(gff3_parser->source_to_str_mapping);
 }
 
-void gff3_free(GFF3Parser *gff3_parser)
+void gff3_delete(GFF3Parser *gff3_parser)
 {
   if (!gff3_parser) return;
   assert(gff3_parser->id_to_genome_node_mapping);
-  hashtable_free(gff3_parser->id_to_genome_node_mapping);
-  hashtable_free(gff3_parser->seqid_to_str_mapping);
-  hashtable_free(gff3_parser->source_to_str_mapping);
+  hashtable_delete(gff3_parser->id_to_genome_node_mapping);
+  hashtable_delete(gff3_parser->seqid_to_str_mapping);
+  hashtable_delete(gff3_parser->source_to_str_mapping);
   free(gff3_parser);
 }

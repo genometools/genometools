@@ -36,13 +36,13 @@ static void extractfeat_visitor_free(GenomeVisitor *gv)
 {
   ExtractFeatVisitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
   assert(extractfeat_visitor);
-  str_free(extractfeat_visitor->sequence_file);
-  str_free(extractfeat_visitor->sequence_name);
-  str_free(extractfeat_visitor->description);
-  str_free(extractfeat_visitor->sequence);
-  str_free(extractfeat_visitor->protein);
-  bioseq_free(extractfeat_visitor->bioseq);
-  regionmapping_free(extractfeat_visitor->regionmapping);
+  str_delete(extractfeat_visitor->sequence_file);
+  str_delete(extractfeat_visitor->sequence_name);
+  str_delete(extractfeat_visitor->description);
+  str_delete(extractfeat_visitor->sequence);
+  str_delete(extractfeat_visitor->protein);
+  bioseq_delete(extractfeat_visitor->bioseq);
+  regionmapping_delete(extractfeat_visitor->regionmapping);
 }
 
 static int extract_join_feature(GenomeNode *gn, void *data, Error *err)
@@ -165,7 +165,7 @@ static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
   if (efv->regionmapping) { /* region mapping used -> determine bioseq */
     if (!efv->sequence_file ||
         str_cmp(efv->sequence_name, genome_node_get_seqid((GenomeNode*) gf))) {
-      str_free(efv->sequence_file);
+      str_delete(efv->sequence_file);
       efv->sequence_file = regionmapping_map(efv->regionmapping,
                               str_get(genome_node_get_seqid((GenomeNode*) gf)),
                               err);
@@ -178,7 +178,7 @@ static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
           str_reset(efv->sequence_name);
         str_append_str(efv->sequence_name,
                        genome_node_get_seqid((GenomeNode*) gf));
-        bioseq_free(efv->bioseq);
+        bioseq_delete(efv->bioseq);
         efv->bioseq = bioseq_new_str(efv->sequence_file, err);
         if (!efv->bioseq)
           has_err = -1;

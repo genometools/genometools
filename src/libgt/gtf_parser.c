@@ -70,11 +70,11 @@ GTF_parser* gtf_parser_new(void)
 
   parser->sequence_region_to_range = hashtable_new(HASH_STRING, free, free);
   parser->gene_id_hash = hashtable_new(HASH_STRING, free,
-                                       (Free) hashtable_free);
+                                       (Free) hashtable_delete);
   parser->seqid_to_str_mapping = hashtable_new(HASH_STRING, NULL,
-                                               (Free) str_free);
+                                               (Free) str_delete);
   parser->source_to_str_mapping = hashtable_new(HASH_STRING, NULL,
-                                                (Free) str_free);
+                                                (Free) str_delete);
 
   return parser;
 }
@@ -92,7 +92,7 @@ static int construct_sequence_regions(void *key, void *value, void *data,
   range = *(Range*) value;
   gn = sequence_region_new(seqid, range, NULL, 0);
   queue_add(genome_nodes, gn);
-  str_free(seqid);
+  str_delete(seqid);
   return 0;
 }
 
@@ -196,7 +196,7 @@ static int construct_genes(void *key, void *value, void *data, Error *err)
     queue_add(genome_nodes, gene_node);
 
     /* free */
-    array_free(mRNAs);
+    array_delete(mRNAs);
   }
 
   return has_err;
@@ -396,7 +396,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       if (!(transcript_id_hash = hashtable_get(parser->gene_id_hash,
                                                gene_id))) {
         transcript_id_hash = hashtable_new(HASH_STRING, free,
-                                           (Free) array_free);
+                                           (Free) array_delete);
         hashtable_add(parser->gene_id_hash, xstrdup(gene_id),
                       transcript_id_hash);
       }
@@ -457,19 +457,19 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   }
 
   /* free */
-  splitter_free(splitter);
-  splitter_free(attribute_splitter);
-  str_free(line_buffer);
+  splitter_delete(splitter);
+  splitter_delete(attribute_splitter);
+  str_delete(line_buffer);
 
   return 0;
 }
 
-void gtf_parser_free(GTF_parser *parser)
+void gtf_parser_delete(GTF_parser *parser)
 {
   if (!parser) return;
-  hashtable_free(parser->sequence_region_to_range);
-  hashtable_free(parser->gene_id_hash);
-  hashtable_free(parser->seqid_to_str_mapping);
-  hashtable_free(parser->source_to_str_mapping);
+  hashtable_delete(parser->sequence_region_to_range);
+  hashtable_delete(parser->gene_id_hash);
+  hashtable_delete(parser->seqid_to_str_mapping);
+  hashtable_delete(parser->source_to_str_mapping);
   free(parser);
 }

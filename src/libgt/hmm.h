@@ -46,6 +46,6 @@ bool   hmm_is_valid(const HMM*);
 double hmm_rmsd(const HMM*, const HMM*);
 void   hmm_show(const HMM*, FILE*);
 int    hmm_unit_test(Error*);
-void   hmm_free(HMM*);
+void   hmm_delete(HMM*);
 
 #endif

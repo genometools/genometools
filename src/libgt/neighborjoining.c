@@ -169,7 +169,7 @@ static void neighborjoining_compute(NeighborJoining *nj)
   nj->finalnodeB = nj->numofnodes - 1;
   nj->finaldist  = nj->nodes[nj->finalnodeB].distances[nj->finalnodeA];
 
-  bittab_free(nodetab);
+  bittab_delete(nodetab);
   free(rtab);
 }
 
@@ -212,7 +212,7 @@ void neighborjoining_show_tree(const NeighborJoining *nj, FILE *fp)
     neighborjoining_show_node(nj, nj->finalnodeB, fp);
 }
 
-void neighborjoining_free(NeighborJoining *nj)
+void neighborjoining_delete(NeighborJoining *nj)
 {
   unsigned long i;
   if (!nj) return;

@@ -29,6 +29,6 @@ int         gff3_parse_genome_nodes(int *status_code, GFF3Parser*,
                                     FILE *fpin, Error*);
 /* resets the GFF3 parser (necessary if the processed input file is switched) */
 void         gff3_reset(GFF3Parser*);
-void         gff3_free(GFF3Parser*);
+void         gff3_delete(GFF3Parser*);
 
 #endif

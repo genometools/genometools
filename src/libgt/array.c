@@ -151,9 +151,9 @@ int array_unit_test(Error *err)
 
   /* testing an empty array */
   char_array = array_new(sizeof (char));
-  array_free(char_array);
+  array_delete(char_array);
   int_array = array_new(sizeof (int));
-  array_free(int_array);
+  array_delete(int_array);
 
   char_array = array_new(sizeof (char));
   int_array = array_new(sizeof (int));
@@ -207,15 +207,15 @@ int array_unit_test(Error *err)
     }
   }
 
-  array_free(char_array);
-  array_free(int_array);
+  array_delete(char_array);
+  array_delete(int_array);
   free(char_array_test);
   free(int_array_test);
 
   return has_err;
 }
 
-void array_free(Array *a)
+void array_delete(Array *a)
 {
   if (!a) return;
   free(a->space);

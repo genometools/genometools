@@ -130,8 +130,8 @@ static unsigned int compatible(const Consensus_SA *csa,
   range_sa_2 = extract_genomic_range(csa, sa_2);
 
   if (!range_overlap(range_sa_1, range_sa_2)) {
-    array_free(exons_sa_1);
-    array_free(exons_sa_2);
+    array_delete(exons_sa_1);
+    array_delete(exons_sa_2);
     return 0;
   }
 
@@ -161,8 +161,8 @@ static unsigned int compatible(const Consensus_SA *csa,
   }
 
   if (!start_values_set) {
-    array_free(exons_sa_1);
-    array_free(exons_sa_2);
+    array_delete(exons_sa_1);
+    array_delete(exons_sa_2);
     return 0;
   }
 
@@ -171,8 +171,8 @@ static unsigned int compatible(const Consensus_SA *csa,
   assert(start_1 != UNDEFULONG && start_2 != UNDEFULONG);
   if (!(start_1 == 0 || start_2 == 0)) {
     /* no first segment could be maped */
-    array_free(exons_sa_1);
-    array_free(exons_sa_2);
+    array_delete(exons_sa_1);
+    array_delete(exons_sa_2);
     return 0;
   }
 
@@ -194,22 +194,22 @@ static unsigned int compatible(const Consensus_SA *csa,
             has_acceptor_site(exons_sa_2, start_2) &&
             range_sa_1.start!= range_sa_2.start) {
           /* the acceptor sites are different */
-          array_free(exons_sa_1);
-          array_free(exons_sa_2);
+          array_delete(exons_sa_1);
+          array_delete(exons_sa_2);
           return 0;
         }
         else if (has_acceptor_site(exons_sa_1, start_1) &&
                  range_sa_2.start + fuzzlength < range_sa_1.start) {
           /* not within fuzzlength */
-          array_free(exons_sa_1);
-          array_free(exons_sa_2);
+          array_delete(exons_sa_1);
+          array_delete(exons_sa_2);
           return 0;
         }
         else if (has_acceptor_site(exons_sa_2, start_2) &&
                  range_sa_1.start + fuzzlength < range_sa_2.start) {
           /* not within fuzzlength */
-          array_free(exons_sa_1);
-          array_free(exons_sa_2);
+          array_delete(exons_sa_1);
+          array_delete(exons_sa_2);
           return 0;
         }
       }
@@ -227,30 +227,30 @@ static unsigned int compatible(const Consensus_SA *csa,
             has_donor_site(exons_sa_2, start_2) &&
             range_sa_1.end != range_sa_2.end) {
           /* the donor sites are different */
-          array_free(exons_sa_1);
-          array_free(exons_sa_2);
+          array_delete(exons_sa_1);
+          array_delete(exons_sa_2);
           return 0;
         }
         else if (has_donor_site(exons_sa_1, start_1) &&
                  range_sa_2.end - fuzzlength > range_sa_1.end) {
           /* not within fuzzlength */
-          array_free(exons_sa_1);
-          array_free(exons_sa_2);
+          array_delete(exons_sa_1);
+          array_delete(exons_sa_2);
           return 0;
         }
         else if (has_donor_site(exons_sa_2, start_2) &&
                  range_sa_1.end - fuzzlength > range_sa_2.end) {
           /* not within fuzzlength */
-          array_free(exons_sa_1);
-          array_free(exons_sa_2);
+          array_delete(exons_sa_1);
+          array_delete(exons_sa_2);
           return 0;
         }
       }
     }
     else {
       /* no overlap: two ordered segments do not overlap each other */
-      array_free(exons_sa_1);
-      array_free(exons_sa_2);
+      array_delete(exons_sa_1);
+      array_delete(exons_sa_2);
       return 0;
     }
 
@@ -259,8 +259,8 @@ static unsigned int compatible(const Consensus_SA *csa,
   }
 
   /* passed all tests */
-  array_free(exons_sa_1);
-  array_free(exons_sa_2);
+  array_delete(exons_sa_1);
+  array_delete(exons_sa_2);
   return 1;
 }
 
@@ -389,7 +389,7 @@ static void compute_L(Bittab **L, Bittab **C, Bittab **left,
     }
   }
 
-  bittab_free(tmpset);
+  bittab_delete(tmpset);
 }
 
 static void compute_R(Bittab **R, Bittab **C, Bittab **right,
@@ -434,7 +434,7 @@ static void compute_R(Bittab **R, Bittab **C, Bittab **right,
     }
   }
 
-  bittab_free(tmpset);
+  bittab_delete(tmpset);
 }
 
 #ifndef NDEBUG
@@ -461,12 +461,12 @@ static unsigned int splice_form_is_valid(Bittab *SA_p,
       }
     }
     if (!incompatible_found) {
-      bittab_free(SA_p_complement);
+      bittab_delete(SA_p_complement);
       return 0;
     }
   }
 
-  bittab_free(SA_p_complement);
+  bittab_delete(SA_p_complement);
   return 1;
 }
 #endif
@@ -570,11 +570,11 @@ static void compute_csas(Consensus_SA *csa)
 
   /* free sets */
   for (i = 0; i < csa->number_of_sas; i++) {
-    bittab_free(C[i]);
-    bittab_free(left[i]);
-    bittab_free(right[i]);
-    bittab_free(L[i]);
-    bittab_free(R[i]);
+    bittab_delete(C[i]);
+    bittab_delete(left[i]);
+    bittab_delete(right[i]);
+    bittab_delete(L[i]);
+    bittab_delete(R[i]);
   }
   free(C);
   free(left);
@@ -582,11 +582,11 @@ static void compute_csas(Consensus_SA *csa)
   free(L);
   free(R);
 
-  bittab_free(U_i);
-  bittab_free(SA_i);
-  bittab_free(SA_prime);
+  bittab_delete(U_i);
+  bittab_delete(SA_i);
+  bittab_delete(SA_prime);
 
-  array_free(splice_form);
+  array_delete(splice_form);
 }
 
 void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
