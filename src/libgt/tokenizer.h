@@ -23,7 +23,7 @@ bool          tokenizer_line_start(const Tokenizer*);
 void          tokenizer_next_token(Tokenizer*); /* go to the next token */
 unsigned long tokenizer_get_line_number(const Tokenizer*);
 const char*   tokenizer_get_filename(const Tokenizer*);
-int           tokenizer_unit_test(Error*);
+int           tokenizer_unit_test(Env*);
 void          tokenizer_delete(Tokenizer*);
 
 #endif

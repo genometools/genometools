@@ -7,34 +7,34 @@
 #include "gt.h"
 
 static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
-                            char **argv, Error *err)
+                            char **argv, Env *env)
 {
   OptionParser *op;
   Option *o;
   OPrval oprval;
-  error_check(err);
+  env_error_check(env);
   op = option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Compute q-gram distance for each sequence "
                          "combination.");
   o = option_new_uint_min("q", "set q", q, 3, 1);
   option_parser_add_option(op, o);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 2, 2, err);
+                                            versionfunc, 2, 2, env);
   option_parser_delete(op);
   return oprval;
 }
 
-int gt_qgramdist(int argc, char *argv[], Error *err)
+int gt_qgramdist(int argc, char *argv[], Env *env)
 {
   Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
   unsigned long i, j, dist;
   Seq *seq_1, *seq_2;
   int parsed_args, has_err = 0;
   unsigned int q;
-  error_check(err);
+  env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &q, argc, argv, err)) {
+  switch (parse_options(&parsed_args, &q, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -43,23 +43,23 @@ int gt_qgramdist(int argc, char *argv[], Error *err)
 
   /* make sure seq_file_1 exists */
   if (!file_exists(argv[parsed_args])) {
-    error_set(err, "seq_file_1 \"%s\" does not exist", argv[parsed_args]);
+    env_error_set(env, "seq_file_1 \"%s\" does not exist", argv[parsed_args]);
     has_err = -1;
   }
 
   /* make sure seq_file_2 exists */
   if (!has_err && !file_exists(argv[parsed_args+1])) {
-    error_set(err, "seq_file_2 \"%s\" does not exist", argv[parsed_args+1]);
+    env_error_set(env, "seq_file_2 \"%s\" does not exist", argv[parsed_args+1]);
     has_err = -1;
   }
 
   /* init */
   if (!has_err) {
-    bioseq_1 = bioseq_new(argv[parsed_args], err);
+    bioseq_1 = bioseq_new(argv[parsed_args], env);
     if (!bioseq_1)
       has_err = -1;
     if (!has_err) {
-      bioseq_2 = bioseq_new(argv[parsed_args+1], err);
+      bioseq_2 = bioseq_new(argv[parsed_args+1], env);
       if (!bioseq_2)
         has_err = -1;
     }

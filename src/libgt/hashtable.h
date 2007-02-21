@@ -16,15 +16,15 @@ typedef enum {
 
 typedef void (*Hashkeyfreefunc)(void*);
 typedef void (*Hashvaluefreefunc)(void*);
-typedef int  (*Hashiteratorfunc)(void *key, void *value, void *data, Error*);
+typedef int  (*Hashiteratorfunc)(void *key, void *value, void *data, Env*);
 
 Hashtable* hashtable_new(Hash_type, Hashkeyfreefunc, Hashvaluefreefunc);
 void*      hashtable_get(Hashtable*, const void*);
 void       hashtable_add(Hashtable*, void*, void*);
 void       hashtable_remove(Hashtable*, void*);
-int        hashtable_foreach(Hashtable*, Hashiteratorfunc, void*, Error*);
+int        hashtable_foreach(Hashtable*, Hashiteratorfunc, void*, Env*);
 void       hashtable_reset(Hashtable*);
-int        hashtable_unit_test(Error*);
+int        hashtable_unit_test(Env*);
 void       hashtable_delete(Hashtable*);
 
 #endif

@@ -8,7 +8,7 @@
 #define COUNTINGSORT_H
 
 #include <stdlib.h>
-#include "error.h"
+#include "env.h"
 
 /*
   This module implements the counting sort algorithm. For a description see
@@ -36,6 +36,6 @@ unsigned long countingsort_get_max(const void *in, size_t elem_size,
                                                  (const void *elem,
                                                   void *data));
 
-int           countingsort_unit_test(Error*);
+int           countingsort_unit_test(Env*);
 
 #endif

@@ -8,6 +8,6 @@
 #define GT_EXERCISE_H
 
 /* the exercise tool */
-int gt_exercise(int argc, char **argv, Error*);
+int gt_exercise(int argc, char **argv, Env*);
 
 #endif

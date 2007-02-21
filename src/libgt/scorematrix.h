@@ -8,14 +8,14 @@
 #define SCOREMATRIX_H
 
 #include "alpha.h"
-#include "error.h"
+#include "env.h"
 
 typedef struct ScoreMatrix ScoreMatrix;
 
 /* a score matrix is always defined over a given alphabet */
 ScoreMatrix* scorematrix_new(Alpha*);
 /* reads in a protein scorematrix from the given path and returns it */
-ScoreMatrix* scorematrix_read_protein(const char *path, Error*);
+ScoreMatrix* scorematrix_read_protein(const char *path, Env*);
 int          scorematrix_get_score(const ScoreMatrix*,
                                    unsigned char, unsigned char);
 void         scorematrix_set_score(ScoreMatrix*,

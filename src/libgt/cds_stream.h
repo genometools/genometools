@@ -17,6 +17,6 @@ const GenomeStreamClass* cds_stream_class(void);
 
 GenomeStream*            cds_stream_new(GenomeStream*,
                                         const char *sequence_file,
-                                        const char *source, Error*);
+                                        const char *source, Env*);
 
 #endif

@@ -138,12 +138,12 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
 }
 
 static int set_actuals_and_sort_them(void *key, void *value, void *data,
-                                     Error *err)
+                                     Env *env)
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *s = (Slot*) value;
 
-  error_check(err);
+  env_error_check(env);
   assert(key && value && data);
 
   /* set actual genes */
@@ -225,7 +225,7 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
   return 0;
 }
 
-static int process_real_feature(GenomeNode *gn, void *data, Error *err)
+static int process_real_feature(GenomeNode *gn, void *data, Env *env)
 {
   Process_real_feature_data *process_real_feature_data =
     (Process_real_feature_data*) data;
@@ -233,7 +233,7 @@ static int process_real_feature(GenomeNode *gn, void *data, Error *err)
   GenomeFeature *gf;
   Range range;
 
-  error_check(err);
+  env_error_check(env);
   assert(gn && data);
   gf = (GenomeFeature*) gn;
 
@@ -310,12 +310,12 @@ static int process_real_feature(GenomeNode *gn, void *data, Error *err)
   return 0;
 }
 
-static int store_exon(GenomeNode *gn, void *data, Error *err)
+static int store_exon(GenomeNode *gn, void *data, Env *env)
 {
   Array *exons = (Array*) data;
   Range range;
   GenomeFeature *gf;
-  error_check(err);
+  env_error_check(env);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf && exons);
   if (genome_feature_get_type(gf) == gft_exon) {
@@ -364,12 +364,12 @@ typedef struct {
         *mRNAs;
 } Store_gene_feature_info;
 
-static int store_gene_feature(GenomeNode *gn, void *data, Error *err)
+static int store_gene_feature(GenomeNode *gn, void *data, Env *env)
 {
   GenomeFeature *gf;
   Store_gene_feature_info *info = (Store_gene_feature_info*) data;
   Range range;
-  error_check(err);
+  env_error_check(env);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf && info);
   switch (genome_feature_get_type(gf)) {
@@ -442,7 +442,7 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   return equal;
 }
 
-static int process_predicted_feature(GenomeNode *gn, void *data, Error *err)
+static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
 {
   Process_predicted_feature_info *info = (Process_predicted_feature_info*) data;
   Range *actual_range, predicted_range;
@@ -451,7 +451,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Error *err)
   Array *real_genome_nodes;
   GenomeNode **real_gn;
 
-  error_check(err);
+  env_error_check(env);
   assert(gn && data);
 
   predicted_range = genome_node_get_range(gn);
@@ -693,11 +693,11 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Error *err)
   return 0;
 }
 
-int determine_missing_features(void *key, void *value, void *data, Error *err)
+int determine_missing_features(void *key, void *value, void *data, Env *env)
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *slot = (Slot*) value;
-  error_check(err);
+  env_error_check(env);
   assert(key && value && data);
   if (slot->overlapped_genes_forward) {
     se->missing_genes += bittab_size(slot->overlapped_genes_forward) -
@@ -719,7 +719,7 @@ int determine_missing_features(void *key, void *value, void *data, Error *err)
 }
 
 int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
-                              Error *err)
+                              Env *env)
 {
   GenomeNode *gn;
   SequenceRegion *sr;
@@ -730,7 +730,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   int has_err;
 
   assert(se);
-  error_check(err);
+  env_error_check(env);
 
   /* init */
   process_real_feature_data.verbose = verbose;
@@ -744,7 +744,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   info.wrong_mRNAs = &se->wrong_mRNAs;
 
   /* process the reality stream completely */
-  while (!(has_err = genome_stream_next_tree(se->reality, &gn, NULL, err)) &&
+  while (!(has_err = genome_stream_next_tree(se->reality, &gn, NULL, env)) &&
          gn) {
     sr = genome_node_cast(sequence_region_class(), gn);
     if (sr) {
@@ -778,12 +778,12 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   /* set the actuals and sort them */
   if (!has_err) {
     has_err = hashtable_foreach(se->real_features, set_actuals_and_sort_them,
-                                se, err);
+                                se, env);
   }
 
   /* process the prediction stream */
   if (!has_err) {
-    while (!(has_err = genome_stream_next_tree(se->prediction, &gn, NULL, err))
+    while (!(has_err = genome_stream_next_tree(se->prediction, &gn, NULL, env))
            && gn) {
       gf = genome_node_cast(genome_feature_class(), gn);
       /* we consider only genome features */
@@ -812,7 +812,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   /* determine the missing mRNAs */
   if (!has_err) {
     has_err = hashtable_foreach(se->real_features, determine_missing_features,
-                                se, err);
+                                se, env);
   }
 
   return has_err;

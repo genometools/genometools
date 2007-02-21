@@ -21,7 +21,7 @@ struct Hashtable
 typedef struct {
   Hashiteratorfunc iterfunc;
   void *data;
-  Error *err;
+  Env *env;
   int has_err;
 } St_iterfunc_info;
 
@@ -80,21 +80,21 @@ static int st_iterfunc(void *key, void *value, void *data)
 {
   St_iterfunc_info *info = (St_iterfunc_info*) data;
   assert(info->iterfunc);
-  info->has_err = info->iterfunc(key, value, info->data, info->err);
+  info->has_err = info->iterfunc(key, value, info->data, info->env);
   if (info->has_err)
     return ST_STOP;
   return ST_CONTINUE;
 }
 
 int hashtable_foreach(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
-                      Error *err)
+                      Env *env)
 {
   St_iterfunc_info info;
-  error_check(err);
+  env_error_check(env);
   assert(ht && iterfunc);
   info.iterfunc = iterfunc;
   info.data = data;
-  info.err = err;
+  info.env = env;
   info.has_err = 0;
   (void) st_foreach(ht->st_table, st_iterfunc, (st_data_t) &info);
   return info.has_err;
@@ -117,12 +117,12 @@ void hashtable_reset(Hashtable *ht)
   (void) st_foreach(ht->st_table, remove_key_value_pair, (st_data_t) ht);
 }
 
-static int hashtable_test(Hash_type hash_type, Error *err)
+static int hashtable_test(Hash_type hash_type, Env *env)
 {
   char *s1 = "foo", *s2 = "bar";
   Hashtable *ht;
   int has_err = 0;
-  error_check(err);
+  env_error_check(env);
 
   /* empty hash */
   ht = hashtable_new(hash_type, NULL, NULL);
@@ -151,17 +151,17 @@ static int hashtable_test(Hash_type hash_type, Error *err)
   return has_err;
 }
 
-int hashtable_unit_test(Error *err)
+int hashtable_unit_test(Env *env)
 {
   int has_err;
-  error_check(err);
+  env_error_check(env);
 
   /* direct hash */
-  has_err = hashtable_test(HASH_DIRECT, err);
+  has_err = hashtable_test(HASH_DIRECT, env);
 
   /* string hash */
   if (!has_err)
-    has_err = hashtable_test(HASH_STRING, err);
+    has_err = hashtable_test(HASH_STRING, env);
 
   return has_err;
 }

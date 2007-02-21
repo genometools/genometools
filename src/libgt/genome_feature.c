@@ -75,12 +75,12 @@ static void genome_feature_set_phase(GenomeNode *gn, Phase phase)
 }
 
 static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l,
-                                 Error *err)
+                                 Env *env)
 {
   GenomeFeature *gf;
-  error_check(err);
+  env_error_check(env);
   gf = genome_feature_cast(gn);
-  return genome_visitor_visit_genome_feature(gv, gf, l, err);
+  return genome_visitor_visit_genome_feature(gv, gf, l, env);
 }
 
 const GenomeNodeClass* genome_feature_class()
@@ -149,11 +149,11 @@ Phase genome_feature_get_phase(GenomeFeature *gf)
   return gf->phase;
 }
 
-static int save_exon(GenomeNode *gn, void *data, Error *err)
+static int save_exon(GenomeNode *gn, void *data, Env *env)
 {
   GenomeFeature *gf;
   Array *exon_features = (Array*) data;
-  error_check(err);
+  env_error_check(env);
   gf = (GenomeFeature*) gn;
   assert(gf && exon_features);
   if (genome_feature_get_type(gf) == gft_exon) {
@@ -202,11 +202,11 @@ bool genome_feature_has_attribute(const GenomeFeature *gf)
 
 int genome_feature_foreach_attribute(GenomeFeature *gf,
                                      AttributeIterFunc iterfunc, void *data,
-                                     Error *err)
+                                     Env *env)
 {
-  error_check(err);
+  env_error_check(env);
   assert(gf && iterfunc);
   assert(genome_feature_has_attribute(gf));
   return hashtable_foreach(gf->attributes, (Hashiteratorfunc) iterfunc, data,
-                           err);
+                           env);
 }

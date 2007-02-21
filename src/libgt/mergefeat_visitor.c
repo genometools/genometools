@@ -26,12 +26,12 @@ static void mergefeat_visitor_free(GenomeVisitor *gv)
   hashtable_delete(mergefeat_visitor->ht);
 }
 
-static int mergefeat_in_children(GenomeNode *gn, void *data, Error *err)
+static int mergefeat_in_children(GenomeNode *gn, void *data, Env *env)
 {
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GenomeFeature *previous_feature, *current_feature;
   Range previous_range, current_range;
-  error_check(err);
+  env_error_check(env);
   current_feature = genome_node_cast(genome_feature_class(), gn);
   assert(current_feature);
   if ((previous_feature = hashtable_get(v->ht, genome_feature_type_get_cstr(
@@ -64,28 +64,28 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, Error *err)
   return 0;
 }
 
-static int mergefeat_if_necessary(GenomeNode *gn, void *data, Error *err)
+static int mergefeat_if_necessary(GenomeNode *gn, void *data, Env *env)
 {
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GenomeFeature *gf;
-  error_check(err);
+  env_error_check(env);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
   v->current_tree = gn;
   hashtable_reset(v->ht);
   return genome_node_traverse_direct_children(gn, v, mergefeat_in_children,
-                                              err);
+                                              env);
 }
 
 static int mergefeat_visitor_genome_feature(GenomeVisitor *gv,
                                             GenomeFeature *gf,
-                                            /*@unused@*/ Log *l, Error *err)
+                                            /*@unused@*/ Log *l, Env *env)
 {
   MergefeatVisitor *v;
-  error_check(err);
+  env_error_check(env);
   v = mergefeat_visitor_cast(gv);
   return genome_node_traverse_children((GenomeNode*) gf, v,
-                                       mergefeat_if_necessary, false, err);
+                                       mergefeat_if_necessary, false, env);
 }
 
 const GenomeVisitorClass* mergefeat_visitor_class()

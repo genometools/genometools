@@ -31,10 +31,10 @@ static void stat_visitor_free(GenomeVisitor *gv)
 }
 
 static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                        /*@unused@*/ Log *l, Error *err)
+                                        /*@unused@*/ Log *l, Env *env)
 {
   StatVisitor *stat_visitor;
-  error_check(err);
+  env_error_check(env);
   stat_visitor = stat_visitor_cast(gv);
   switch (genome_feature_get_type(gf)) {
     case gft_gene:

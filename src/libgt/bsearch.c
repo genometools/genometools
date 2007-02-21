@@ -76,14 +76,14 @@ static int cmp(const void *a_ptr, const void *b_ptr)
 /* XXX: This unit test could be done much better by filling an array randomly,
    sorting it, and comparing bsearch_all() against a brute force implementation.
 */
-int bsearch_unit_test(Error *err)
+int bsearch_unit_test(Env *env)
 {
   Array *elements, *members;
   int key, element, *member_ptr;
   Bittab *b;
   int has_err = 0;
 
-  error_check(err);
+  env_error_check(env);
 
   elements = array_new(sizeof (int));
   members = array_new(sizeof (int*));

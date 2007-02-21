@@ -14,6 +14,6 @@ typedef struct CDSVisitor CDSVisitor;
 
 const GenomeVisitorClass* cds_visitor_class(void);
 GenomeVisitor*            cds_visitor_new(Str *sequence_file, Str *source,
-                                          Error*);
+                                          Env*);
 
 #endif

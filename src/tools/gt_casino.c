@@ -6,29 +6,29 @@
 
 #include "gt.h"
 
-static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
+static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  env_error_check(env);
   op = option_parser_new("sequence_of_die_rolls", "Decode "
                          "'sequence_of_die_rolls' and show the result on "
                          "stdout.");
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 1, err);
+                                            versionfunc, 1, 1, env);
   option_parser_delete(op);
   return oprval;
 }
 
-int gt_casino(int argc, char *argv[], Error *err)
+int gt_casino(int argc, char *argv[], Env *env)
 {
   unsigned int i, *emissions, *state_sequence = NULL, num_of_emissions;
   int parsed_args, has_err = 0;
   HMM *hmm = NULL;
-  error_check(err);
+  env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, err)) {
+  switch (parse_options(&parsed_args, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -60,8 +60,8 @@ int gt_casino(int argc, char *argv[], Error *err)
         emissions[i] = SIX;
         break;
       default:
-        error_set(err, "emissions[%u]=%c is not a valid character (only `1' "
-                       "to `6' allowed)", i, emissions[i]);
+        env_error_set(env, "emissions[%u]=%c is not a valid character (only "
+                      "`1' to `6' allowed)", i, emissions[i]);
         has_err = -1;
     }
   }

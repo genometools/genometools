@@ -8,6 +8,6 @@
 #define GT_COIN_H
 
 /* the coin tool */
-int gt_coin(int argc, char**argv, Error*);
+int gt_coin(int argc, char**argv, Env*);
 
 #endif

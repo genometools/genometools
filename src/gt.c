@@ -11,16 +11,16 @@
 int main(int argc, char *argv[])
 {
   GTR *gtr;
-  Error *err;
+  Env *env;
   int rval;
   gtr = gtr_new();
-  err = error_new();
+  env = env_new();
   gtr_register_components(gtr);
-  switch (gtr_parse(gtr, &rval, argc, argv, err)) {
+  switch (gtr_parse(gtr, &rval, argc, argv, env)) {
     case OPTIONPARSER_OK:
       argc -= rval;
       argv += rval;
-      rval = gtr_run(gtr, argc, argv, err);
+      rval = gtr_run(gtr, argc, argv, env);
       break;
     case OPTIONPARSER_ERROR:
       rval = EXIT_FAILURE;
@@ -28,11 +28,11 @@ int main(int argc, char *argv[])
     case OPTIONPARSER_REQUESTS_EXIT:
       rval = EXIT_SUCCESS;
   }
-  if (error_is_set(err)) {
-    fprintf(stderr, "error: %s\n", error_get(err));
+  if (env_error_is_set(env)) {
+    fprintf(stderr, "error: %s\n", env_error_get(env));
     assert(rval);
   }
-  error_delete(err);
+  env_delete(env);
   gtr_free(gtr);
   return rval;
 }

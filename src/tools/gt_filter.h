@@ -8,6 +8,6 @@
 #define GT_FILTER_H
 
 /* the filter tool */
-int gt_filter(int argc, char **argv, Error*);
+int gt_filter(int argc, char **argv, Env*);
 
 #endif

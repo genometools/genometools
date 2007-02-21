@@ -35,13 +35,13 @@ struct GFF3InStream
         genome_stream_cast(gff3_in_stream_class(), GS)
 
 static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                    /*@unused@*/ Log *l, Error *err)
+                                    /*@unused@*/ Log *l, Env *env)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   unsigned long i;
   int has_err = 0, status_code;
 
-  error_check(err);
+  env_error_check(env);
 
   if (queue_size(is->genome_node_buffer)) {
     /* we still have a node in the buffer -> serve it from there */
@@ -61,7 +61,8 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
       if (array_size(is->files)) {
         if (strcmp(*(char**) array_get(is->files, is->next_file), "-") == 0) {
           if (is->stdin_argument) {
-            error_set(err, "multiple specification of argument file \"-\"\n");
+            env_error_set(env,
+                          "multiple specification of argument file \"-\"\n");
             has_err = -1;
             break;
           }
@@ -94,7 +95,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                                               array_get(is->files,
                                                         is->next_file-1)
                                             : "stdin",
-                                            &is->line_number, is->fpin, err);
+                                            &is->line_number, is->fpin, env);
     if (has_err)
       break;
 
@@ -124,7 +125,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
           assert(is->last_node);
           /* a sorted stream can have at most one input file */
           assert(array_size(is->files) == 0 || array_size(is->files) == 1);
-          error_set(err,
+          env_error_set(env,
                     "the file %s is not sorted (example: line %lu and %lu)",
                     genome_node_get_filename(is->last_node),
                     genome_node_get_line_number(is->last_node),

@@ -106,14 +106,14 @@ const char* tokenizer_get_filename(const Tokenizer *t)
   return io_get_filename(t->io);
 }
 
-int tokenizer_unit_test(Error *err)
+int tokenizer_unit_test(Env *env)
 {
   const char *tmpfilename;
   Tokenizer *t;
   FILE *tmpfp;
   Str *token;
   int has_err = 0;
-  error_check(err);
+  env_error_check(env);
 
   /* empty file (except comment line) */
   tmpfilename = xtmpnam(NULL);

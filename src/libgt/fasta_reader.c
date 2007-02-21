@@ -38,7 +38,7 @@ int fasta_reader_run(FastaReader *fr,
                      FastaReader_proc_description proc_description,
                      FastaReader_proc_character proc_character,
                      FastaReader_proc_sequence_length proc_sequence_length,
-                     void *data, Error *err)
+                     void *data, Env *env)
 {
   unsigned char cc;
   FastaReader_state state = EXPECTING_SEPARATOR;
@@ -46,7 +46,7 @@ int fasta_reader_run(FastaReader *fr,
   Str *description;
   int has_err = 0;
 
-  error_check(err);
+  env_error_check(env);
   assert(fr);
 
   /* init */
@@ -63,7 +63,7 @@ int fasta_reader_run(FastaReader *fr,
     switch (state) {
       case EXPECTING_SEPARATOR:
         if (cc != FASTA_SEPARATOR) {
-          error_set(err,
+          env_error_set(env,
                     "the first character of fasta file \"%s\" has to be '%c'",
                     str_get(fr->sequence_filename), FASTA_SEPARATOR);
           has_err = -1;
@@ -88,8 +88,8 @@ int fasta_reader_run(FastaReader *fr,
         if (cc == FASTA_SEPARATOR) {
           if (!sequence_length) {
             assert(line_counter);
-            error_set(err, "empty sequence after description given in line %lu",
-                      line_counter - 1);
+            env_error_set(env, "empty sequence after description given in line "
+                          "%lu", line_counter - 1);
             has_err = -1;
           }
           else {
@@ -118,21 +118,22 @@ int fasta_reader_run(FastaReader *fr,
     /* checks after reading */
     switch (state) {
       case EXPECTING_SEPARATOR:
-        error_set(err, "sequence file \"%s\" is empty",
+        env_error_set(env, "sequence file \"%s\" is empty",
                   str_get(fr->sequence_filename));
         has_err = -1;
         break;
       case READING_DESCRIPTION:
-        error_set(err, "unfinished fasta entry in line %lu of sequence file "
-                  "\"%s\"", line_counter, str_get(fr->sequence_filename));
+        env_error_set(env, "unfinished fasta entry in line %lu of sequence "
+                      "file \"%s\"", line_counter,
+                      str_get(fr->sequence_filename));
         has_err = -1;
         break;
       case READING_SEQUENCE_AFTER_NEWLINE:
       case READING_SEQUENCE:
         if (!sequence_length) {
           assert(line_counter);
-          error_set(err, "empty sequence after description given in line %lu",
-                    line_counter - 1);
+          env_error_set(env, "empty sequence after description given in line "
+                        "%lu", line_counter - 1);
           has_err = -1;
         }
         else if (proc_sequence_length)

@@ -17,12 +17,12 @@ typedef struct {
 } FilterArgumentss;
 
 static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
-                            int argc, char **argv, Error *err)
+                            int argc, char **argv, Env *env)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
-  error_check(err);
+  env_error_check(env);
 
   op = option_parser_new("[option ...] [GFF3_file ...]", "Filter GFF3 files.");
 
@@ -64,12 +64,12 @@ static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
   option_parser_add_option(op, option);
 
   /* parse */
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
   option_parser_delete(op);
   return oprval;
 }
 
-int gt_filter(int argc, char *argv[], Error *err)
+int gt_filter(int argc, char *argv[], Env *env)
 {
   GenomeStream *gff3_in_stream, *filter_stream, *gff3_out_stream;
   GenomeNode *gn;
@@ -79,7 +79,7 @@ int gt_filter(int argc, char *argv[], Error *err)
   /* option parsing */
   arguments.seqid = str_new();
   arguments.typefilter = str_new();
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_delete(arguments.seqid);
@@ -108,7 +108,7 @@ int gt_filter(int argc, char *argv[], Error *err)
   gff3_out_stream = gff3_out_stream_new(filter_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, NULL, err))
+  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, NULL, env))
          && gn) {
     genome_node_rec_delete(gn);
   }

@@ -9,9 +9,9 @@
 #include "reverse.h"
 #include "undef.h"
 
-static int complement(char *reverse_char, char dna_char, Error *err)
+static int complement(char *reverse_char, char dna_char, Env *env)
 {
-  error_check(err);
+  env_error_check(env);
   switch (dna_char) {
     case 'A': *reverse_char = 'T'; return 0;
     case 'C': *reverse_char = 'G'; return 0;
@@ -22,23 +22,24 @@ static int complement(char *reverse_char, char dna_char, Error *err)
     case 'g': *reverse_char = 'c'; return 0;
     case 't': *reverse_char = 'a'; return 0;
     default:
-      error_set(err, "complement of DNA character '%c' not defined", dna_char);
+      env_error_set(env, "complement of DNA character '%c' not defined",
+                    dna_char);
       return -1;
   }
 }
 
-int reverse_complement(char *dna_seq, unsigned long seqlen, Error *err)
+int reverse_complement(char *dna_seq, unsigned long seqlen, Env *env)
 {
   char *front_char, *back_char, tmp_char;
   int has_err = 0;
-  error_check(err);
+  env_error_check(env);
   assert(dna_seq);
   for (front_char = dna_seq, back_char = dna_seq + seqlen - 1;
        front_char <= back_char;
        front_char++, back_char--) {
-    has_err = complement(&tmp_char, *front_char, err);
+    has_err = complement(&tmp_char, *front_char, env);
     if (!has_err)
-      has_err = complement(front_char, *back_char, err);
+      has_err = complement(front_char, *back_char, env);
     if (!has_err)
       *back_char = tmp_char;
     if (has_err)

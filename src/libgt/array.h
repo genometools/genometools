@@ -8,7 +8,7 @@
 #define ARRAY_H
 
 #include <stdlib.h>
-#include "error.h"
+#include "env.h"
 
 typedef struct Array Array;
 
@@ -28,7 +28,7 @@ void          array_reverse(Array*);
 void          array_set_size(Array*, unsigned long);
 size_t        array_elem_size(const Array*);
 unsigned long array_size(const Array*);
-int           array_unit_test(Error*);
+int           array_unit_test(Env*);
 void          array_delete(Array*);
 
 #if 0

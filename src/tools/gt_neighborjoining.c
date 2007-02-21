@@ -6,18 +6,18 @@
 
 #include "gt.h"
 
-static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
+static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  env_error_check(env);
   op = option_parser_new("sequence_file|example",
                          "Compute and show Neighbor-Joining tree for the "
                          "sequences in sequence file (using\nthe unit cost "
                          "edit distance as distance function). If 'example' is "
                          "given as\nsequence_file, a builtin example is used.");
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 1, err);
+                                            versionfunc, 1, 1, env);
   option_parser_delete(op);
   return oprval;
 }
@@ -42,16 +42,16 @@ static double exampledistfunc(unsigned long i, unsigned long j, void *data)
   return exampledistances[i][j];
 }
 
-int gt_neighborjoining(int argc, char *argv[], Error *err)
+int gt_neighborjoining(int argc, char *argv[], Env *env)
 {
   bool use_hard_coded_example = false;
   Bioseq *bioseq = NULL;
   NeighborJoining *nj = NULL;
   int parsed_args, has_err = 0;
-  error_check(err);
+  env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, err)) {
+  switch (parse_options(&parsed_args, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -63,7 +63,7 @@ int gt_neighborjoining(int argc, char *argv[], Error *err)
   if (use_hard_coded_example)
     nj = neighborjoining_new(5, NULL, exampledistfunc);
   else {
-    bioseq = bioseq_new(argv[1], err);
+    bioseq = bioseq_new(argv[1], env);
     if (!bioseq)
       has_err = -1;
     if (!has_err) {

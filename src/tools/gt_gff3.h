@@ -8,6 +8,6 @@
 #define GT_GFF3_H
 
 /* the GFF3 tool */
-int gt_gff3(int argc, char **argv, Error*);
+int gt_gff3(int argc, char **argv, Env*);
 
 #endif

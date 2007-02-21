@@ -13,32 +13,32 @@
 #include "error.h"
 #include "grep.h"
 
-static void grep_error(int errcode, regex_t *matcher, Error *err)
+static void grep_error(int errcode, regex_t *matcher, Env *env)
 {
   char sbuf[BUFSIZ], *buf;
   size_t bufsize;
-  error_check(err);
+  env_error_check(env);
   bufsize = regerror(errcode, matcher, NULL, 0);
   buf = malloc(bufsize);
   (void) regerror(errcode, matcher, buf ? buf : sbuf, buf ? bufsize : BUFSIZ);
-  error_set(err, "grep(): %s", buf ? buf : sbuf);
+  env_error_set(env, "grep(): %s", buf ? buf : sbuf);
   free(buf);
 }
 
-int grep(bool *match, const char *pattern, const char *line, Error *err)
+int grep(bool *match, const char *pattern, const char *line, Env *env)
 {
   regex_t matcher;
   int rval, has_err = 0;
-  error_check(err);
+  env_error_check(env);
   assert(pattern && line);
   if ((rval = regcomp(&matcher, pattern, REG_EXTENDED | REG_NOSUB))) {
-    grep_error(rval, &matcher, err);
+    grep_error(rval, &matcher, env);
     has_err = -1;
   }
   if (!has_err) {
     rval = regexec(&matcher, line, 0, NULL, 0);
     if (rval && rval != REG_NOMATCH) {
-      grep_error(rval, &matcher, err);
+      grep_error(rval, &matcher, env);
       has_err = -1;
     }
   }
@@ -52,11 +52,11 @@ int grep(bool *match, const char *pattern, const char *line, Error *err)
   return has_err;
 }
 
-int grep_unit_test(Error *err)
+int grep_unit_test(Env *env)
 {
   bool match;
   int grep_err, has_err = 0;
-  error_check(err);
+  env_error_check(env);
 
   grep_err = grep(&match, "a", "a", NULL);
   ensure(has_err, !grep_err);

@@ -22,6 +22,6 @@ void           file_dirname(Str *dirname, const char *file);
 
 /* find 'file' in $PATH, if it has no dirname; set 'path' to dirname otherwise.
    sets 'path' to the empty string if 'file' could not be found in $PATH. */
-int            file_find_in_path(Str *path, const char *file, Error *err);
+int            file_find_in_path(Str *path, const char *file, Env *err);
 
 #endif

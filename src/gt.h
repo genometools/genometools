@@ -27,6 +27,7 @@
 #include <libgt/dlist.h>                     /* double-linked list class */
 #include <libgt/dynalloc.h>                  /* dynamic allocating module */
 #include <libgt/ensure.h>                    /* defines the ensure macro */
+#include <libgt/env.h>                       /* environment class */
 #include <libgt/extractfeat_stream.h>        /* extract feature stream class */
 #include <libgt/evaluator.h>                 /* evaluator class */
 #include <libgt/fileutils.h>                 /* file utilities module */

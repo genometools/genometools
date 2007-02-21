@@ -8,6 +8,6 @@
 #define GT_MERGE_H
 
 /* the merge tool */
-int gt_merge(int argc, char **argv, Error*);
+int gt_merge(int argc, char **argv, Env*);
 
 #endif

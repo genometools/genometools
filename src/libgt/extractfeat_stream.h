@@ -28,7 +28,7 @@ GenomeStream*            extractfeat_stream_new(GenomeStream*,
 /* use the file named ``seqfile'' as sequence source */
 int                      extractfeat_stream_use_sequence_file(GenomeStream*,
                                                               Str *seqfile,
-                                                              Error*);
+                                                              Env*);
 
 /* use the given RegionMapping (takes ownership) as sequence file source */
 void                     extractfeat_stream_use_region_mapping(GenomeStream*,

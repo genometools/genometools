@@ -6,15 +6,15 @@
 
 #include "gt.h"
 
-static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
+static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  env_error_check(env);
   op = option_parser_new("", "Remove all files in the current directory which "
                          "are automatically created by gt.");
   oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
-                                        versionfunc, 0, err);
+                                        versionfunc, 0, env);
   option_parser_delete(op);
   return oprval;
 }
@@ -45,13 +45,13 @@ static void remove_pattern_in_current_dir(const char *pattern)
   str_delete(path);
 }
 
-int gt_clean(int argc, char *argv[], Error *err)
+int gt_clean(int argc, char *argv[], Env *env)
 {
   int parsed_args;
-  error_check(err);
+  env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, err)) {
+  switch (parse_options(&parsed_args, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;

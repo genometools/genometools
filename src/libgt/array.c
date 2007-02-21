@@ -140,14 +140,14 @@ Array* array_clone(const Array *a)
   return a_copy;
 }
 
-int array_unit_test(Error *err)
+int array_unit_test(Env *env)
 {
   Array *char_array, *int_array;
   char cc, *char_array_test;
   int ci, *int_array_test;
   unsigned long i, j, size;
   int has_err = 0;
-  error_check(err);
+  env_error_check(env);
 
   /* testing an empty array */
   char_array = array_new(sizeof (char));

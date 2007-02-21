@@ -12,28 +12,28 @@ typedef struct GenomeNodeClass GenomeNodeClass;
 typedef struct GenomeNode GenomeNode;
 
 #include "bittab.h"
-#include "error.h"
+#include "env.h"
 #include "genome_visitor.h"
 #include "phase.h"
 #include "range.h"
 #include "str.h"
 
-typedef int (*GenomeNodeTraverseFunc)(GenomeNode*, void*, Error*);
+typedef int (*GenomeNodeTraverseFunc)(GenomeNode*, void*, Env*);
 
 GenomeNode*   genome_node_rec_ref(GenomeNode*);
 void*         genome_node_cast(const GenomeNodeClass*, GenomeNode*);
 /* perform depth first traversal of the given genome node */
 int           genome_node_traverse_children(GenomeNode*, void*,
                                             GenomeNodeTraverseFunc,
-                                            bool traverse_only_once, Error*);
+                                            bool traverse_only_once, Env*);
 /* perform breadth first traversal of the given genome node  */
 int           genome_node_traverse_children_breadth(GenomeNode*, void*,
                                                     GenomeNodeTraverseFunc,
                                                     bool traverse_only_once,
-                                                    Error*);
+                                                    Env*);
 int           genome_node_traverse_direct_children(GenomeNode*, void*,
                                                    GenomeNodeTraverseFunc,
-                                                   Error*);
+                                                   Env*);
 const char*   genome_node_get_filename(const GenomeNode*);
 unsigned long genome_node_get_line_number(const GenomeNode*);
 unsigned long genome_node_number_of_children(const GenomeNode*);
@@ -46,7 +46,7 @@ void          genome_node_set_range(GenomeNode*, Range);
 void          genome_node_set_seqid(GenomeNode*, Str*);
 void          genome_node_set_source(GenomeNode*, Str*);
 void          genome_node_set_phase(GenomeNode*, Phase);
-int           genome_node_accept(GenomeNode*, GenomeVisitor*, Log *l, Error*);
+int           genome_node_accept(GenomeNode*, GenomeVisitor*, Log *l, Env*);
 void          genome_node_is_part_of_genome_node(GenomeNode *parent,
                                                  GenomeNode *child);
 /* does not free the leaf */

@@ -15,13 +15,13 @@ typedef struct {
 } Bioseq_arguments;
 
 static OPrval parse_options(int *parsed_args, Bioseq_arguments *arguments,
-                            int argc, char **argv, Error *err)
+                            int argc, char **argv, Env *env)
 {
   Option *option, *option_showfasta, *option_showseqnum, *option_width,
          *option_stat;
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  env_error_check(env);
   op = option_parser_new("[option ...] sequence_file [...]",
                          "Construct the Biosequence files for the given "
                          "sequence_file(s) (if necessary).");
@@ -65,21 +65,21 @@ static OPrval parse_options(int *parsed_args, Bioseq_arguments *arguments,
 
   /* parse */
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, err);
+                                        versionfunc, 1, env);
   option_parser_delete(op);
 
   return oprval;
 }
 
-int gt_bioseq(int argc, char *argv[], Error *err)
+int gt_bioseq(int argc, char *argv[], Env *env)
 {
   Bioseq_arguments arguments;
   Bioseq *bioseq;
   int parsed_args, has_err = 0;
-  error_check(err);
+  env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -88,7 +88,7 @@ int gt_bioseq(int argc, char *argv[], Error *err)
 
   /* option -showseqnum makes only sense if we got a single sequence file */
   if (arguments.showseqnum != UNDEFULONG && parsed_args + 1 != argc) {
-    error_set(err, "option '-showseqnum' makes only sense with a single "
+    env_error_set(env, "option '-showseqnum' makes only sense with a single "
                    "sequence_file");
     has_err = -1;
   }
@@ -96,9 +96,9 @@ int gt_bioseq(int argc, char *argv[], Error *err)
   while (!has_err && parsed_args < argc) {
     /* bioseq construction */
     if (arguments.recreate)
-      bioseq = bioseq_new_recreate(argv[parsed_args], err);
+      bioseq = bioseq_new_recreate(argv[parsed_args], env);
     else
-      bioseq = bioseq_new_recreate(argv[parsed_args], err);
+      bioseq = bioseq_new_recreate(argv[parsed_args], env);
     if (!bioseq)
       has_err = -1;
 
@@ -108,9 +108,9 @@ int gt_bioseq(int argc, char *argv[], Error *err)
 
     if (!has_err && arguments.showseqnum != UNDEFULONG) {
       if (arguments.showseqnum > bioseq_number_of_sequences(bioseq)) {
-        error_set(err, "argument '%lu' to option '-showseqnum' is too large. "
-                  "The Biosequence contains only '%lu' sequences.",
-                  arguments.showseqnum, bioseq_number_of_sequences(bioseq));
+        env_error_set(env, "argument '%lu' to option '-showseqnum' is too "
+                      "large. The Biosequence contains only '%lu' sequences.",
+                      arguments.showseqnum, bioseq_number_of_sequences(bioseq));
         has_err = -1;
       }
       if (!has_err) {

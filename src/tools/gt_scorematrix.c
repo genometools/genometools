@@ -6,34 +6,34 @@
 
 #include "gt.h"
 
-static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
+static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  env_error_check(env);
   op = option_parser_new("scorematrix_filename", "Parse the given protein "
                          "score matrix and show it on stdout.");
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 1, err);
+                                            versionfunc, 1, 1, env);
   option_parser_delete(op);
   return oprval;
 }
 
-int gt_scorematrix(int argc, char *argv[], Error *err)
+int gt_scorematrix(int argc, char *argv[], Env *env)
 {
   ScoreMatrix *sm;
   int parsed_args, has_err = 0;
-  error_check(err);
+  env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, err)) {
+  switch (parse_options(&parsed_args, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
   assert(parsed_args == 1);
 
-  sm = scorematrix_read_protein(argv[1], err);
+  sm = scorematrix_read_protein(argv[1], env);
   if (!sm)
     has_err = -1;
   if (!has_err)

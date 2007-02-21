@@ -210,12 +210,12 @@ int str_read_next_line(Str *s, FILE *fpin)
   }
 }
 
-int str_unit_test(Error *err)
+int str_unit_test(Env *env)
 {
   Str *s, *s1, *s2;
   static char cstring_1[] = "test_string"; /* l=11 */
   int has_err = 0;
-  error_check(err);
+  env_error_check(env);
 
   /* the empty string */
   s1 = str_new();

@@ -66,14 +66,14 @@ void file_dirname(Str *path, const char *file)
     str_append_cstr_nt(path, file, i);
 }
 
-int file_find_in_path(Str *path, const char *file, Error *err)
+int file_find_in_path(Str *path, const char *file, Env *env)
 {
   char *pathvariable, *pathcomponent = NULL;
   Splitter *splitter = NULL;
   unsigned long i;
   int has_err = 0;
 
-  error_check(err);
+  env_error_check(env);
   assert(file);
 
   /* check if 'file' has dirname */
@@ -85,7 +85,7 @@ int file_find_in_path(Str *path, const char *file, Error *err)
   if (pathvariable)
     pathvariable = xstrdup(pathvariable); /* make writeable copy */
   else {
-    error_set(err, "environment variable $PATH is not defined");
+    env_error_set(env, "environment variable $PATH is not defined");
     has_err = -1;
   }
 

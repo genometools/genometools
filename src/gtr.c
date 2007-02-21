@@ -31,11 +31,11 @@ GTR* gtr_new(void)
   return xcalloc(1, sizeof (GTR));
 }
 
-static int show_tool(void *key, void *value, void *data, Error *err)
+static int show_tool(void *key, void *value, void *data, Env *env)
 {
   const char *toolname;
   Array *toolnames;
-  error_check(err);
+  env_error_check(env);
   assert(key && value && data);
   toolname = (const char*) key;
   toolnames = (Array*) data;
@@ -43,18 +43,18 @@ static int show_tool(void *key, void *value, void *data, Error *err)
   return 0;
 }
 
-static int show_option_comments(const char *progname, void *data, Error *err)
+static int show_option_comments(const char *progname, void *data, Env *env)
 {
   Array *toolnames;
   unsigned long i;
   int has_err;
   GTR *gtr;
-  error_check(err);
+  env_error_check(env);
   assert(data);
   gtr = (GTR*) data;
   toolnames = array_new(sizeof (const char*));
   if (gtr->tools) {
-    has_err = hashtable_foreach(gtr->tools, show_tool, toolnames, err);
+    has_err = hashtable_foreach(gtr->tools, show_tool, toolnames, env);
     assert(!has_err); /* cannot happen, show_tool() is sane */
     printf("\nTools:\n\n");
     assert(array_size(toolnames));
@@ -67,12 +67,12 @@ static int show_option_comments(const char *progname, void *data, Error *err)
   return 0;
 }
 
-OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, char **argv, Error *err)
+OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, char **argv, Env *env)
 {
   OptionParser *op;
   Option *o;
   OPrval oprval;
-  error_check(err);
+  env_error_check(env);
   assert(gtr);
   op = option_parser_new("[option ...] [tool ...] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
@@ -80,7 +80,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, char **argv, Error *err)
   option_parser_set_comment_func(op, show_option_comments, gtr);
   o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false);
   option_parser_add_option(op, o);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
   option_parser_delete(op);
   (*parsed_args)--;
   return oprval;
@@ -125,24 +125,24 @@ void gtr_register_components(GTR *gtr)
   hashtable_add(gtr->unit_tests, "tokenizer class", tokenizer_unit_test);
 }
 
-int run_test(void *key, void *value, void *data, Error *err)
+int run_test(void *key, void *value, void *data, Env *env)
 {
   const char *testname;
-  int (*test)(Error*);
+  int (*test)(Env*);
   int has_err, *had_errp;
-  error_check(err);
+  env_error_check(env);
   assert(key && value && data);
   testname = (const char*) key;
   test = value;
   had_errp = (int*) data;
   printf("%s...", testname);
   xfflush(stdout);
-  has_err = test(err);
+  has_err = test(env);
   if (has_err) {
     xputs("error");
     *had_errp = has_err;
-    fprintf(stderr, "first error: %s\n", error_get(err));
-    error_unset(err);
+    fprintf(stderr, "first error: %s\n", env_error_get(env));
+    env_error_unset(env);
     xfflush(stderr);
   }
   else
@@ -151,10 +151,10 @@ int run_test(void *key, void *value, void *data, Error *err)
   return 0;
 }
 
-static int run_tests(GTR *gtr, Error *err)
+static int run_tests(GTR *gtr, Env *env)
 {
   int had_err = 0, has_err = 0;
-  error_check(err);
+  env_error_check(env);
   assert(gtr);
 
   /* The following type assumptions are made in the GenomeTools library. */
@@ -171,7 +171,7 @@ static int run_tests(GTR *gtr, Error *err)
   ensure(has_err, sizeof (unsigned long long) == 8);
 
   if (gtr->unit_tests) {
-    has_err = hashtable_foreach(gtr->unit_tests, run_test, &had_err, err);
+    has_err = hashtable_foreach(gtr->unit_tests, run_test, &had_err, env);
     assert(!has_err); /* cannot happen, run_test() is sane */
   }
   if (had_err)
@@ -179,31 +179,31 @@ static int run_tests(GTR *gtr, Error *err)
   return EXIT_SUCCESS;
 }
 
-int gtr_run(GTR *gtr, int argc, char **argv, Error *err)
+int gtr_run(GTR *gtr, int argc, char **argv, Env *env)
 {
-  int (*tool)(int, char**, Error*) = NULL;
+  int (*tool)(int, char**, Env*) = NULL;
   char **nargv = NULL;
   int has_err = 0;
-  error_check(err);
+  env_error_check(env);
   assert(gtr);
   if (gtr->test) {
-    return run_tests(gtr, err);
+    return run_tests(gtr, env);
   }
   assert(argc);
   if (argc == 1) {
-    error_set(err, "no tool specified; option -help lists possible tools");
+    env_error_set(env, "no tool specified; option -help lists possible tools");
     has_err = -1;
   }
   if (!has_err) {
     if (!gtr->tools || !(tool = hashtable_get(gtr->tools, argv[1]))) {
-      error_set(err, "tool '%s' not found; option -help lists possible tools",
-                argv[1]);
+      env_error_set(env, "tool '%s' not found; option -help lists possible "
+                         "tools", argv[1]);
       has_err = -1;
     }
   }
   if (!has_err) {
     nargv = cstr_array_prefix_first(argv+1, argv[0]);
-    has_err = tool(argc-1, nargv, err);
+    has_err = tool(argc-1, nargv, env);
   }
   cstr_array_delete(nargv);
   if (has_err)

@@ -268,13 +268,13 @@ void alignment_show_multieop_list(const Alignment *a, FILE *fp)
   }
 }
 
-int alignment_unit_test(Error *err)
+int alignment_unit_test(Env *env)
 {
   static char u[] = "acgtagatatatagat",
               v[] = "agaaagaggtaagaggga";
   Alignment *a;
   int has_err = 0;
-  error_check(err);
+  env_error_check(env);
 
   /* construct the following alignment (backwards):
 

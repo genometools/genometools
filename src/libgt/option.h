@@ -24,7 +24,7 @@ typedef enum {
 } OPrval;
 
 typedef void (*ShowVersionFunc)(const char *progname);
-typedef int  (*ShowCommentFunc)(const char *progname, void *data, Error*);
+typedef int  (*ShowCommentFunc)(const char *progname, void *data, Env*);
 
 /* the option parser */
 OptionParser* option_parser_new(const char *synopsis, const char *one_liner);
@@ -33,17 +33,17 @@ void          option_parser_add_option(OptionParser*, Option*);
 void          option_parser_set_comment_func(OptionParser*, ShowCommentFunc,
                                              void* data);
 OPrval        option_parser_parse(OptionParser*, int *parsed_args, int argc,
-                                  char **argv, ShowVersionFunc, Error*);
+                                  char **argv, ShowVersionFunc, Env*);
 OPrval        option_parser_parse_min_args(OptionParser*, int *parsed_args,
                                            int argc, char **argv,
                                            ShowVersionFunc,
                                            unsigned int
-                                           min_additional_arguments, Error*);
+                                           min_additional_arguments, Env*);
 OPrval        option_parser_parse_max_args(OptionParser*, int *parsed_args,
                                            int argc, char **argv,
                                            ShowVersionFunc,
                                            unsigned int
-                                           max_additional_arguments, Error*);
+                                           max_additional_arguments, Env*);
 OPrval        option_parser_parse_min_max_args(OptionParser*, int *parsed_args,
                                                int argc,
                                                char **argv, ShowVersionFunc,
@@ -51,7 +51,7 @@ OPrval        option_parser_parse_min_max_args(OptionParser*, int *parsed_args,
                                                min_additional_arguments,
                                                unsigned int
                                                max_additional_arguments,
-                                               Error*);
+                                               Env*);
 void          option_parser_delete(OptionParser*);
 
 /* the options */

@@ -9,12 +9,12 @@
 #define DEFAULT_INDELSCORE -3
 
 static OPrval parse_options(int *parsed_args, int *indelscore, int argc,
-                            char **argv, Error *err)
+                            char **argv, Env *env)
 {
   OptionParser *op;
   Option *o;
   OPrval oprval;
-  error_check(err);
+  env_error_check(env);
   op = option_parser_new("[option ...] scorematrix seq_file_1 seq_file_2",
                          "Locally align each sequence in seq_file_1 "
                          "with each sequence in seq_file_2.");
@@ -22,12 +22,12 @@ static OPrval parse_options(int *parsed_args, int *indelscore, int argc,
                      "insertions/deletions", indelscore, DEFAULT_INDELSCORE);
   option_parser_add_option(op, o);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 3, 3, err);
+                                            versionfunc, 3, 3, env);
   option_parser_delete(op);
   return oprval;
 }
 
-int gt_swalign(int argc, char *argv[], Error *err)
+int gt_swalign(int argc, char *argv[], Env *env)
 {
   Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
   ScoreFunction *scorefunction = NULL;
@@ -35,10 +35,10 @@ int gt_swalign(int argc, char *argv[], Error *err)
   unsigned long i, j;
   int parsed_args, indelscore, has_err = 0;
   Alignment *a;
-  error_check(err);
+  env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &indelscore, argc, argv, err)) {
+  switch (parse_options(&parsed_args, &indelscore, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -47,14 +47,14 @@ int gt_swalign(int argc, char *argv[], Error *err)
 
   /* init */
   /* XXX: make this more flexible */
-  scorematrix  = scorematrix_read_protein(argv[parsed_args], err);
+  scorematrix  = scorematrix_read_protein(argv[parsed_args], env);
   if (scorematrix) {
     scorefunction = scorefunction_new(scorematrix, indelscore, indelscore);
-    bioseq_1 = bioseq_new(argv[parsed_args+1], err);
+    bioseq_1 = bioseq_new(argv[parsed_args+1], env);
     if (!bioseq_1)
       has_err = -1;
     if (!has_err) {
-      bioseq_2 = bioseq_new(argv[parsed_args+2], err);
+      bioseq_2 = bioseq_new(argv[parsed_args+2], env);
       if (!bioseq_2)
         has_err = -1;
     }

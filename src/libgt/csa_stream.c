@@ -20,11 +20,11 @@ struct CSAStream {
 #define csa_stream_cast(GS)\
         genome_stream_cast(csa_stream_class(), GS)
 
-int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l, Error *err)
+int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l, Env *env)
 {
   CSAStream *cs;
   int has_err;
-  error_check(err);
+  env_error_check(env);
   cs = csa_stream_cast(gs);
 
   /* we have still nodes in the buffer */
@@ -34,10 +34,10 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l, Error *err)
   }
 
   /* no nodes in the buffer -> get new nodes */
-  while (!(has_err = genome_stream_next_tree(cs->in_stream, gn, l, err)) &&
+  while (!(has_err = genome_stream_next_tree(cs->in_stream, gn, l, env)) &&
          *gn) {
     assert(*gn && !has_err);
-    has_err = genome_node_accept(*gn, cs->csa_visitor, l, err);
+    has_err = genome_node_accept(*gn, cs->csa_visitor, l, env);
     if (has_err)
       break;
     if (csa_visitor_node_buffer_size(cs->csa_visitor)) {

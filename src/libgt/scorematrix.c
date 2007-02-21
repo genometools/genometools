@@ -32,19 +32,20 @@ ScoreMatrix* scorematrix_new(Alpha *alpha)
 }
 
 static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
-                                Tokenizer *tz, Error *err)
+                                Tokenizer *tz, Env *env)
 {
   Str *token;
   char *tokenstr, amino_acid, parsed_characters[UCHAR_MAX] = { 0 };
   int has_err = 0;
-  error_check(err);
+  env_error_check(env);
   assert(index_to_alpha_char_mapping && tz);
   assert(!array_size(index_to_alpha_char_mapping));
   while ((token = tokenizer_get_token(tz))) {
     if (str_length(token) > 2) {
-      error_set(err, "illegal character token '%s' on line %lu in file '%s'",
-                str_get(token), tokenizer_get_line_number(tz),
-                tokenizer_get_filename(tz));
+      env_error_set(env,
+                    "illegal character token '%s' on line %lu in file '%s'",
+                    str_get(token), tokenizer_get_line_number(tz),
+                    tokenizer_get_filename(tz));
       has_err = -1;
       break;
     }
@@ -52,9 +53,10 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
     amino_acid = tokenstr[0];
     /* check for character duplications */
     if (parsed_characters[(int) amino_acid]) {
-      error_set(err, "the character '%c' appears more then once on line %lu in "
-                "file  '%s'", amino_acid, tokenizer_get_line_number(tz),
-                tokenizer_get_filename(tz));
+      env_error_set(env,
+                    "the character '%c' appears more then once on line %lu in "
+                    "file  '%s'", amino_acid, tokenizer_get_line_number(tz),
+                    tokenizer_get_filename(tz));
       has_err = -1;
       break;
     }
@@ -68,9 +70,10 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
     array_add(index_to_alpha_char_mapping, amino_acid);
     if (str_length(token) == 2) {
       if (tokenstr[1] != '\n') {
-        error_set(err, "illegal character token '%s' on line %lu in file '%s'",
-                  str_get(token), tokenizer_get_line_number(tz),
-                  tokenizer_get_filename(tz));
+        env_error_set(env,
+                      "illegal character token '%s' on line %lu in file '%s'",
+                      str_get(token), tokenizer_get_line_number(tz),
+                      tokenizer_get_filename(tz));
         has_err = -1;
         break;
       }
@@ -84,8 +87,9 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
   }
   if (!has_err) {
     if (!array_size(index_to_alpha_char_mapping)) {
-      error_set(err, "could not parse a single alphabet character in file '%s' "
-                "(file empty or directory?)", tokenizer_get_filename(tz));
+      env_error_set(env, "could not parse a single alphabet character in file "
+                    "'%s' (file empty or directory?)",
+                    tokenizer_get_filename(tz));
     has_err = -1;
     }
   }
@@ -95,18 +99,18 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
 
 static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
                             Array *index_to_alpha_char_mapping,
-                            char *parsed_characters, Error *err)
+                            char *parsed_characters, Env *env)
 {
   unsigned int i = 0;
   char amino_acid;
   int score, has_err = 0;
   Str *token;
   assert(s && tz && index_to_alpha_char_mapping);
-  error_check(err);
+  env_error_check(env);
   token = tokenizer_get_token(tz);
   assert(token);
   if (str_length(token) != 1) {
-    error_set(err, "illegal character token '%s' on line %lu in file '%s'",
+    env_error_set(env, "illegal character token '%s' on line %lu in file '%s'",
               str_get(token), tokenizer_get_line_number(tz),
               tokenizer_get_filename(tz));
     has_err = -1;
@@ -114,7 +118,7 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
   amino_acid = str_get(token)[0];
   /* check for character duplications */
   if (parsed_characters[(int) amino_acid]) {
-    error_set(err, "multiple character '%c' entry on line %lu in file '%s'",
+    env_error_set(env, "multiple character '%c' entry on line %lu in file '%s'",
               amino_acid, tokenizer_get_line_number(tz),
               tokenizer_get_filename(tz));
     has_err = -1;
@@ -125,7 +129,7 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
     tokenizer_next_token(tz);
     while ((token = tokenizer_get_token(tz))) {
       has_err = parse_int(&score, str_get(token), tokenizer_get_line_number(tz),
-                          tokenizer_get_filename(tz), err);
+                          tokenizer_get_filename(tz), env);
       if (has_err)
         break;
       scorematrix_set_score(s,
@@ -143,7 +147,7 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
 }
 
 /* the score matrix parser */
-static int parse_scorematrix(ScoreMatrix *s, const char *path, Error *err)
+static int parse_scorematrix(ScoreMatrix *s, const char *path, Env *env)
 {
   Tokenizer *tz;
   Array *index_to_alpha_char_mapping;
@@ -151,15 +155,15 @@ static int parse_scorematrix(ScoreMatrix *s, const char *path, Error *err)
   char parsed_characters[UCHAR_MAX] = { 0 };
   int has_err = 0;
   assert(s && path && s->alpha);
-  error_check(err);
+  env_error_check(env);
   tz = tokenizer_new(io_new(path, "r"));
   index_to_alpha_char_mapping = array_new(sizeof (char));
   tokenizer_skip_comment_lines(tz);
-  has_err = parse_alphabet_line(index_to_alpha_char_mapping, tz, err);
+  has_err = parse_alphabet_line(index_to_alpha_char_mapping, tz, env);
   if (!has_err) {
     while (tokenizer_has_token(tz)) {
       has_err = parse_score_line(s, tz, index_to_alpha_char_mapping,
-                                 parsed_characters, err);
+                                 parsed_characters, env);
       if (has_err)
         break;
       parsed_score_lines++;
@@ -169,7 +173,7 @@ static int parse_scorematrix(ScoreMatrix *s, const char *path, Error *err)
   /* check the number of parsed score lines */
   if (!has_err &&
       parsed_score_lines != array_size(index_to_alpha_char_mapping)) {
-    error_set(err, "the scorematrix given in '%s' is not symmetric", path);
+    env_error_set(env, "the scorematrix given in '%s' is not symmetric", path);
     has_err = -1;
   }
 
@@ -179,13 +183,13 @@ static int parse_scorematrix(ScoreMatrix *s, const char *path, Error *err)
   return has_err;
 }
 
-ScoreMatrix* scorematrix_read_protein(const char *path, Error *err)
+ScoreMatrix* scorematrix_read_protein(const char *path, Env *env)
 {
   Alpha *protein_alpha;
   ScoreMatrix *s;
   int has_err;
   assert(path);
-  error_check(err);
+  env_error_check(env);
 
   /* create score matrix */
   protein_alpha = alpha_new_protein();
@@ -193,7 +197,7 @@ ScoreMatrix* scorematrix_read_protein(const char *path, Error *err)
   alpha_delete(protein_alpha);
 
   /* parse matrix file */
-  has_err = parse_scorematrix(s, path, err);
+  has_err = parse_scorematrix(s, path, env);
 
   if (has_err) {
     scorematrix_delete(s);

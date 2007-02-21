@@ -12,9 +12,9 @@
 /* This module defines functions working on the ``gtdata'' directory */
 
 /* get the path to the gtdata/ directory (including it) for the given 'prog' */
-Str* gtdata_get_path(const char *prog, Error*);
+Str* gtdata_get_path(const char *prog, Env*);
 
 /* execute helpfile gtdata/doc/progname.lua */
-int gtdata_show_help(const char *progname, void *unused, Error*);
+int gtdata_show_help(const char *progname, void *unused, Env*);
 
 #endif

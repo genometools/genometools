@@ -54,12 +54,12 @@ void genome_stream_delete(GenomeStream *gs)
 }
 
 int genome_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
-                            Error *err)
+                            Env *env)
 {
   int has_err;
   assert(gs && gs->c_class && gs->c_class->next_tree);
-  error_check(err);
-  has_err = gs->c_class->next_tree(gs, gn, l, err);
+  env_error_check(env);
+  has_err = gs->c_class->next_tree(gs, gn, l, env);
   if (!has_err && *gn && gs->ensure_sorting) {
     assert(genome_node_tree_is_sorted(&gs->last_node, *gn));
   }

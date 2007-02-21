@@ -91,7 +91,7 @@ unsigned long range_length(Range range)
   return range.end - range.start + 1;
 }
 
-int range_unit_test(Error *err)
+int range_unit_test(Env *env)
 {
   static Range ranges_in[] = {  { 620432, 620536 }, { 620432, 620536 },
                                 { 620957, 621056 }, { 620957, 621056 },
@@ -133,7 +133,7 @@ int range_unit_test(Error *err)
   Array *ranges, *tmp_ranges, *ctr;
   unsigned long i;
   int has_err = 0;
-  error_check(err);
+  env_error_check(env);
 
   ensure(has_err, sizeof (ranges_out) / sizeof (ranges_out[0]) ==
                   sizeof (counts)     / sizeof (counts[0]));

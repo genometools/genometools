@@ -19,7 +19,7 @@ GenomeVisitor*            extractfeat_visitor_new_seqfile(Str *sequence_file,
                                                           GenomeFeatureType,
                                                           bool join,
                                                           bool translate,
-                                                          Error*);
+                                                          Env*);
 /* takes ownership of the RegionMapping */
 GenomeVisitor*            extractfeat_visitor_new_regionmapping(RegionMapping*,
                                                               GenomeFeatureType,

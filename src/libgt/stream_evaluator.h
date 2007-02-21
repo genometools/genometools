@@ -15,7 +15,7 @@ typedef struct StreamEvaluator StreamEvaluator;
 StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
                                       GenomeStream *prediction);
 int              stream_evaluator_evaluate(StreamEvaluator*, bool verbose,
-                                           bool exondiff, Error*);
+                                           bool exondiff, Env*);
 void             stream_evaluator_show(StreamEvaluator*, FILE*);
 void             stream_evaluator_delete(StreamEvaluator*);
 

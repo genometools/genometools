@@ -28,7 +28,7 @@ void          splitter_reset(Splitter*);
 /* returns the number of tokens */
 unsigned long splitter_size(Splitter*);
 
-int           splitter_unit_test(Error*);
+int           splitter_unit_test(Env*);
 void          splitter_delete(Splitter*);
 
 #endif

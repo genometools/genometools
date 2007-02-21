@@ -8,6 +8,6 @@
 #define GT_ALIGN_H
 
 /* the align tool */
-int gt_align(int argc, char **argv, Error*);
+int gt_align(int argc, char **argv, Env*);
 
 #endif

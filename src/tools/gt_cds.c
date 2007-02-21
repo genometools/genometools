@@ -13,12 +13,12 @@ typedef struct {
 } CDS_arguments;
 
 static OPrval parse_options(int *parsed_args, CDS_arguments *arguments,
-                            int argc, char **argv, Error *err)
+                            int argc, char **argv, Env *env)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
-  error_check(err);
+  env_error_check(env);
   op = option_parser_new("[option ...] GFF3_file sequence_file",
                          "Add CDS features to exon features given in GFF3_file "
                          "(which refers to sequence_file).");
@@ -29,21 +29,21 @@ static OPrval parse_options(int *parsed_args, CDS_arguments *arguments,
 
   /* parse */
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 2, 2, err);
+                                            versionfunc, 2, 2, env);
   option_parser_delete(op);
   return oprval;
 }
 
-int gt_cds(int argc, char *argv[], Error *err)
+int gt_cds(int argc, char *argv[], Env *env)
 {
   GenomeStream *gff3_in_stream, *cds_stream, *gff3_out_stream = NULL;
   GenomeNode *gn;
   CDS_arguments arguments;
   int parsed_args, has_err = 0;
-  error_check(err);
+  env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -57,7 +57,7 @@ int gt_cds(int argc, char *argv[], Error *err)
   /* create CDS stream */
   assert(parsed_args + 1 < argc);
   cds_stream = cds_stream_new(gff3_in_stream, argv[parsed_args + 1],
-                              GT_CDS_SOURCE_TAG, err);
+                              GT_CDS_SOURCE_TAG, env);
   if (!cds_stream)
     has_err = -1;
 
@@ -66,7 +66,7 @@ int gt_cds(int argc, char *argv[], Error *err)
     gff3_out_stream = gff3_out_stream_new(cds_stream, stdout);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, NULL, err))
+  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, NULL, env))
          && gn) {
     genome_node_rec_delete(gn);
   }

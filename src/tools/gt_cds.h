@@ -8,6 +8,6 @@
 #define GT_CDS_H
 
 /* the coding sequence (CDS) tool */
-int gt_cds(int argc, char **argv, Error*);
+int gt_cds(int argc, char **argv, Env*);
 
 #endif

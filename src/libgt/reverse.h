@@ -7,7 +7,9 @@
 #ifndef REVERSE_H
 #define REVERSE_H
 
+#include "env.h"
+
 /* reverse 'dna_seq' of length 'seqlen' in place */
-int reverse_complement(char *dna_seq, unsigned long seqlen, Error *err);
+int reverse_complement(char *dna_seq, unsigned long seqlen, Env *err);
 
 #endif

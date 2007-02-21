@@ -8,6 +8,6 @@
 #define GT_CLEAN_H
 
 /* the clean tool */
-int gt_clean(int argc, char **argv, Error*);
+int gt_clean(int argc, char **argv, Env*);
 
 #endif

@@ -75,12 +75,12 @@ unsigned long splicedseq_length(const Splicedseq *ss)
   return str_length(ss->splicedseq);
 }
 
-int splicedseq_reverse(Splicedseq *ss, Error *err)
+int splicedseq_reverse(Splicedseq *ss, Env *env)
 {
   int has_err;
   assert(ss);
   has_err = reverse_complement(str_get(ss->splicedseq),
-                               str_length(ss->splicedseq), err);
+                               str_length(ss->splicedseq), env);
   if (!has_err) {
     array_reverse(ss->positionmapping);
     ss->forward = !ss->forward;
@@ -96,11 +96,11 @@ void splicedseq_reset(Splicedseq *ss)
   ss->forward = true;
 }
 
-static int check_splicedseq(Splicedseq *ss, Error *err)
+static int check_splicedseq(Splicedseq *ss, Env *env)
 {                       /*0123456789*/
   static char *origseq = "aaccaagtga", *splicedseq = "ccgtg";
   int has_err = 0;
-  error_check(err);
+  env_error_check(env);
   splicedseq_add(ss, 2, 3, origseq);
   splicedseq_add(ss, 6, 8, origseq);
   ensure(has_err, strcmp(splicedseq_get(ss), splicedseq) == 0);
@@ -112,15 +112,15 @@ static int check_splicedseq(Splicedseq *ss, Error *err)
   return has_err;
 }
 
-int splicedseq_unit_test(Error *err)
+int splicedseq_unit_test(Env *env)
 {
   int has_err = 0;
-  error_check(err);
+  env_error_check(env);
   Splicedseq *ss = splicedseq_new();
-  has_err = check_splicedseq(ss, err);
+  has_err = check_splicedseq(ss, env);
   if (!has_err) {
     splicedseq_reset(ss);
-    has_err = check_splicedseq(ss, err);
+    has_err = check_splicedseq(ss, env);
   }
   splicedseq_delete(ss);
   return has_err;

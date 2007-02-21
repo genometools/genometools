@@ -132,7 +132,7 @@ static int compare(const void *a, const void *b)
   return *(int*) a - *(int*) b;
 }
 
-int dlist_unit_test(Error *err)
+int dlist_unit_test(Env *env)
 {
   Dlist *dlist;
   Dlistelem *dlistelem;
@@ -142,7 +142,7 @@ int dlist_unit_test(Error *err)
       elems[MAX_SIZE],
       elems_backup[MAX_SIZE],
       has_err = 0;
-  error_check(err);
+  env_error_check(env);
 
   /* boundary case: empty dlist */
   dlist = dlist_new(compare);

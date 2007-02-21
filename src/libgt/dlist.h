@@ -7,7 +7,7 @@
 #ifndef DLIST_H
 #define DLIST_H
 
-#include "error.h"
+#include "env.h"
 #include "fptr.h"
 
 /* a double-linked list which is sorted according to a qsort(3)-like compare
@@ -22,7 +22,7 @@ unsigned long dlist_size(const Dlist*);
 void          dlist_add(Dlist*, void *data); /* usually: O(n) (O(1) if data is
                                                 added in sorted order) */
 void          dlist_remove(Dlist*, Dlistelem*); /* XXX: frees the elem */
-int           dlist_unit_test(Error*);
+int           dlist_unit_test(Env*);
 void          dlist_delete(Dlist*);
 
 Dlistelem*    dlistelem_next(const Dlistelem*);

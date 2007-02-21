@@ -22,7 +22,7 @@ bool          range_contains(Range, Range);
 Range         range_join(Range, Range);
 Range         range_offset(Range, long offset, unsigned long line_number);
 unsigned long range_length(Range);
-int           range_unit_test(Error*);
+int           range_unit_test(Env*);
 
 void          ranges_sort(Array*);
 void          ranges_sort_by_length_stable(Array*);

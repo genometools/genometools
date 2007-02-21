@@ -8,7 +8,7 @@
 #define STR_H
 
 #include <stdio.h>
-#include "error.h"
+#include "env.h"
 
 /* the string class, string objects are strings which grow on demand */
 typedef struct Str Str;
@@ -30,7 +30,7 @@ void          str_reset(Str*);
 int           str_cmp(const Str*, const Str*);
 int           str_read_next_line(Str*, FILE*);
 unsigned long str_length(const Str*);
-int           str_unit_test(Error*);
+int           str_unit_test(Env*);
 void          str_delete(Str*);
 
 #endif

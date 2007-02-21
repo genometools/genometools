@@ -13,9 +13,9 @@
 typedef struct GTR GTR;
 
 GTR*   gtr_new(void);
-OPrval gtr_parse(GTR*, int *parsed_args, int argc, char **argv, Error*);
+OPrval gtr_parse(GTR*, int *parsed_args, int argc, char **argv, Env*);
 void   gtr_register_components(GTR*);
-int    gtr_run(GTR*, int argc, char **argv, Error*);
+int    gtr_run(GTR*, int argc, char **argv, Env*);
 void   gtr_free(GTR*);
 
 #endif

@@ -37,7 +37,7 @@ static void cds_visitor_free(GenomeVisitor *gv)
   bioseq_delete(cds_visitor->bioseq);
 }
 
-static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
+static int extract_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
 {
   CDSVisitor *v = (CDSVisitor*) data;
   const char *sequence;
@@ -45,7 +45,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
   GenomeFeature *gf;
   Range range;
 
-  error_check(err);
+  env_error_check(env);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
 
@@ -63,7 +63,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
   return 0;
 }
 
-static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
+static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
 {
   CDSVisitor *v = (CDSVisitor*) data;
   GenomeNode *cds_feature;
@@ -75,18 +75,18 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
   Strand strand;
   int has_err;
 
-  error_check(err);
+  env_error_check(env);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
 
   /* traverse the direct children */
   splicedseq_reset(v->splicedseq);
   has_err = genome_node_traverse_direct_children(gn, v,
-                                                 extract_cds_if_necessary, err);
+                                                 extract_cds_if_necessary, env);
   if (!has_err && splicedseq_length(v->splicedseq) > 2) {
     strand = genome_feature_get_strand(gf);
     if (strand == STRAND_REVERSE) {
-      if (splicedseq_reverse(v->splicedseq, err))
+      if (splicedseq_reverse(v->splicedseq, env))
         return -1;
     }
     /* determine ORFs for all three frames */
@@ -170,26 +170,26 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *err)
 }
 
 static int cds_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                      /*@unused@*/ Log *l, Error *err)
+                                      /*@unused@*/ Log *l, Env *env)
 {
   CDSVisitor *v = cds_visitor_cast(gv);
-  error_check(err);
+  env_error_check(env);
   return genome_node_traverse_children((GenomeNode*) gf, v,
-                                       add_cds_if_necessary, false, err);
+                                       add_cds_if_necessary, false, env);
 
 }
 
 static int cds_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                       /*@unused@*/ Log *l, Error *err)
+                                       /*@unused@*/ Log *l, Env *env)
 {
   CDSVisitor *cds_visitor;
-  error_check(err);
+  env_error_check(env);
   cds_visitor = cds_visitor_cast(gv);
   /* check if the given sequence file contains this sequence (region) */
   if (!bioseq_contains_sequence(cds_visitor->bioseq,
                                 str_get(genome_node_get_seqid((GenomeNode*)
                                                               sr)))) {
-    error_set(err, "sequence \"%s\" not contained in sequence file \"%s\"",
+    env_error_set(env, "sequence \"%s\" not contained in sequence file \"%s\"",
               str_get(genome_node_get_seqid((GenomeNode*) sr)),
               str_get(cds_visitor->sequence_file));
     return -1;
@@ -208,17 +208,17 @@ const GenomeVisitorClass* cds_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* cds_visitor_new(Str *sequence_file, Str *source, Error *err)
+GenomeVisitor* cds_visitor_new(Str *sequence_file, Str *source, Env *env)
 {
   GenomeVisitor *gv;
   CDSVisitor *cds_visitor;
-  error_check(err);
+  env_error_check(env);
   gv = genome_visitor_create(cds_visitor_class());
   cds_visitor = cds_visitor_cast(gv);
   cds_visitor->sequence_file = str_ref(sequence_file);
   cds_visitor->source = str_ref(source);
   cds_visitor->splicedseq = splicedseq_new();
-  cds_visitor->bioseq = bioseq_new_str(sequence_file, err);
+  cds_visitor->bioseq = bioseq_new_str(sequence_file, env);
   if (!cds_visitor->bioseq) {
     cds_visitor_free(gv);
     return NULL;

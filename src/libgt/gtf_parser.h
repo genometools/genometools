@@ -7,7 +7,7 @@
 #ifndef GTF_PARSER_H
 #define GTF_PARSER_H
 
-#include "error.h"
+#include "env.h"
 #include "queue.h"
 
 /* This is a parser for gth GTF2.2 Gene Annotation Format as described at
@@ -28,7 +28,7 @@ typedef struct GTF_parser GTF_parser;
 GTF_parser* gtf_parser_new(void);
 int         gtf_parser_parse(GTF_parser*, Queue *genome_nodes,
                              const char *filename, FILE*,
-                             unsigned int be_tolerant, Error *err);
+                             unsigned int be_tolerant, Env *err);
 void        gtf_parser_delete(GTF_parser*);
 
 #endif

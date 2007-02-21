@@ -20,12 +20,12 @@ typedef struct {
 } StatInfo;
 
 static OPrval parse_options(int *parsed_args, Stat_arguments *arguments,
-                            int argc, char **argv, Error *err)
+                            int argc, char **argv, Env *env)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
-  error_check(err);
+  env_error_check(env);
   op = option_parser_new("[option ...] [GFF3_file ...]",
                          "Show statistics about features contained in GFF3 "
                          "files.");
@@ -58,30 +58,30 @@ static OPrval parse_options(int *parsed_args, Stat_arguments *arguments,
   option_parser_add_option(op, option);
 
   /* parse */
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
   option_parser_delete(op);
   return oprval;
 }
 
-static int compute_statistics(GenomeNode *gn, void *data, Error *err)
+static int compute_statistics(GenomeNode *gn, void *data, Env *env)
 {
   StatInfo *info = (StatInfo*) data;
-  error_check(err);
+  env_error_check(env);
   assert(info && info->stat_visitor);
-  return genome_node_accept(gn, info->stat_visitor, NULL, err);
+  return genome_node_accept(gn, info->stat_visitor, NULL, env);
 }
 
-int gt_stat(int argc, char *argv[], Error *err)
+int gt_stat(int argc, char *argv[], Env *env)
 {
   GenomeStream *gff3_in_stream;
   GenomeNode *gn;
   int has_err, parsed_args;
   Stat_arguments arguments;
   StatInfo info;
-  error_check(err);
+  env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -101,11 +101,11 @@ int gt_stat(int argc, char *argv[], Error *err)
 
   /* pull the features through the stream , compute the statistics, and free
      them afterwards */
-  while (!(has_err = genome_stream_next_tree(gff3_in_stream, &gn, NULL, err)) &&
+  while (!(has_err = genome_stream_next_tree(gff3_in_stream, &gn, NULL, env)) &&
          gn) {
     info.number_of_trees++;
     has_err = genome_node_traverse_children(gn, &info, compute_statistics, true,
-                                            err);
+                                            env);
     genome_node_rec_delete(gn);
     if (has_err)
       break;

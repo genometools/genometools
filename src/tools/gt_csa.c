@@ -16,7 +16,7 @@ typedef struct {
 } Csa_arguments;
 
 static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
-                            int argc, char *argv[], Error *err)
+                            int argc, char *argv[], Env *env)
 {
   OptionParser *op = option_parser_new("[option ...] [GFF3_file]",
                                        "Replace spliced alignments with "
@@ -24,7 +24,7 @@ static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
                                        "alignments.");
   Option *option;
   OPrval oprval;
-  error_check(err);
+  env_error_check(env);
 
   /* -join-length */
   option = option_new_ulong("join-length", "set join length for the spliced "
@@ -46,13 +46,13 @@ static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
 
   /* parse */
   oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, err);
+                                        versionfunc, 1, env);
   option_parser_delete(op);
 
   return oprval;
 }
 
-int gt_csa(int argc, char *argv[], Error *err)
+int gt_csa(int argc, char *argv[], Env *env)
 {
   GenomeStream *gff3_in_stream,
                 *csa_stream,
@@ -61,10 +61,10 @@ int gt_csa(int argc, char *argv[], Error *err)
   Csa_arguments arguments;
   Log *log = NULL;
   int parsed_args, has_err;
-  error_check(err);
+  env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &arguments, argc, argv, err)) {
+  switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -82,7 +82,7 @@ int gt_csa(int argc, char *argv[], Error *err)
   gff3_out_stream = gff3_out_stream_new(csa_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, log, err))
+  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, log, env))
          && gn) {
     genome_node_rec_delete(gn);
   }

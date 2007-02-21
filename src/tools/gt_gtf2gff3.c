@@ -7,7 +7,7 @@
 #include "gt.h"
 
 static OPrval parse_options(int *parsed_args, bool *be_tolerant, int argc,
-                            char **argv, Error *err)
+                            char **argv, Env *env)
 {
   OptionParser *op;
   Option *option;
@@ -20,28 +20,28 @@ static OPrval parse_options(int *parsed_args, bool *be_tolerant, int argc,
   option_parser_add_option(op, option);
   /* parse */
   oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, err);
+                                        versionfunc, 1, env);
   option_parser_delete(op);
   return oprval;
 }
 
-int gt_gtf2gff3(int argc, char *argv[], Error *err)
+int gt_gtf2gff3(int argc, char *argv[], Env *env)
 {
   GenomeStream *gtf_in_stream = NULL, *gff3_out_stream = NULL;
   GenomeNode *gn;
   int parsed_args, has_err = 0;
   bool be_tolerant;
-  error_check(err);
+  env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &be_tolerant, argc, argv, err)) {
+  switch (parse_options(&parsed_args, &be_tolerant, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
 
   /* create a gtf input stream */
-  gtf_in_stream = gtf_in_stream_new(argv[parsed_args], be_tolerant, err);
+  gtf_in_stream = gtf_in_stream_new(argv[parsed_args], be_tolerant, env);
   if (!gtf_in_stream)
     has_err = -1;
 
@@ -51,7 +51,7 @@ int gt_gtf2gff3(int argc, char *argv[], Error *err)
 
     /* pull the features through the stream and free them afterwards */
     while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, NULL,
-                                               err)) && gn) {
+                                               env)) && gn) {
       genome_node_rec_delete(gn);
     }
   }

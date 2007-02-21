@@ -8,6 +8,6 @@
 #define GT_CASINO_H
 
 /* the casino tool */
-int gt_casino(int argc, char**argv, Error*);
+int gt_casino(int argc, char**argv, Env*);
 
 #endif

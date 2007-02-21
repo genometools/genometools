@@ -19,10 +19,6 @@ void        error_set(Error*, const char *format, ...)
               __attribute__ ((format (printf, 2, 3)));
 void        error_vset(Error*, const char *format, va_list);
 bool        error_is_set(const Error*);
-/* make sure that the error is not set, has to be used at the beginning of
-   every routine which has an Error* argument */
-#define     error_check(e)\
-            assert(!e || !error_is_set(e))
 void        error_unset(Error*);
 /* get the error string (the error must be set) */
 const char* error_get(const Error*);

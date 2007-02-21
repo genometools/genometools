@@ -22,7 +22,7 @@ FastaReader* fasta_reader_new(Str *sequence_filename);
 int          fasta_reader_run(FastaReader*, FastaReader_proc_description,
                               FastaReader_proc_character,
                               FastaReader_proc_sequence_length, void *data,
-                              Error*);
+                              Env*);
 void         fasta_reader_delete(FastaReader*);
 
 #endif

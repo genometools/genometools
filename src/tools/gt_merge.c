@@ -7,22 +7,22 @@
 #include "gt.h"
 
 static OPrval parse_options(int *parsed_args, FILE **outfp, int argc,
-                            char **argv, Error *err)
+                            char **argv, Env *env)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
-  error_check(err);
+  env_error_check(env);
   op = option_parser_new("[option ...] [GFF3_file ...]",
                          "Merge sorted GFF3 files in sorted fashion.");
   option = option_new_outputfile(outfp);
   option_parser_add_option(op, option);
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, err);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
   option_parser_delete(op);
   return oprval;
 }
 
-int gt_merge(int argc, char *argv[], Error *err)
+int gt_merge(int argc, char *argv[], Env *env)
 {
   GenomeStream *gff3_in_stream,
                 *merge_stream,
@@ -37,7 +37,7 @@ int gt_merge(int argc, char *argv[], Error *err)
   genome_streams = array_new(sizeof (GenomeStream*));
 
   /* option parsing */
-  switch (parse_options(&parsed_args, &outfp, argc, argv, err)) {
+  switch (parse_options(&parsed_args, &outfp, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -66,7 +66,7 @@ int gt_merge(int argc, char *argv[], Error *err)
   gff3_out_stream = gff3_out_stream_new(merge_stream, outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, NULL, err))
+  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, NULL, env))
          && gn) {
     genome_node_rec_delete(gn);
   }

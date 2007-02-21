@@ -23,18 +23,18 @@ struct ExtractFeatStream
         genome_stream_cast(extractfeat_stream_class(), GS)
 
 static int extractfeat_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                        Log *l, Error *err)
+                                        Log *l, Env *env)
 {
   ExtractFeatStream *extractfeat_stream;
   int has_err;
-  error_check(err);
+  env_error_check(env);
   extractfeat_stream = extractfeat_stream_cast(gs);
-  has_err = genome_stream_next_tree(extractfeat_stream->in_stream, gn, l, err);
+  has_err = genome_stream_next_tree(extractfeat_stream->in_stream, gn, l, env);
   if (!has_err) {
   assert(extractfeat_stream->extractfeat_visitor);
   if (*gn)
     has_err = genome_node_accept(*gn, extractfeat_stream->extractfeat_visitor,
-                                 l, err);
+                                 l, env);
   }
   return has_err;
 }
@@ -67,15 +67,15 @@ GenomeStream* extractfeat_stream_new(GenomeStream *in_stream,
 }
 
 int extractfeat_stream_use_sequence_file(GenomeStream *gs, Str *seqfile,
-                                         Error *err)
+                                         Env *env)
 {
   ExtractFeatStream *efs;
-  error_check(err);
+  env_error_check(env);
   efs = extractfeat_stream_cast(gs);
   efs->extractfeat_visitor = extractfeat_visitor_new_seqfile(seqfile, efs->type,
                                                              efs->join,
                                                              efs->translate,
-                                                             err);
+                                                             env);
   if (!efs->extractfeat_visitor)
     return -1;
   return 0;

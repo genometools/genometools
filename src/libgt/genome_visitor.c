@@ -25,38 +25,38 @@ void* genome_visitor_cast(const GenomeVisitorClass *gvc, GenomeVisitor *gv)
 }
 
 int genome_visitor_visit_comment(GenomeVisitor *gv, Comment *c, Log *l,
-                                 Error *err)
+                                 Env *env)
 {
-  error_check(err);
+  env_error_check(env);
   assert(gv && c && gv->c_class);
   if (gv->c_class->comment)
-    return gv->c_class->comment(gv, c, l, err);
+    return gv->c_class->comment(gv, c, l, env);
   else if (gv->c_class->default_func)
-    return gv->c_class->default_func(gv, (GenomeNode*) c, l, err);
+    return gv->c_class->default_func(gv, (GenomeNode*) c, l, env);
   return 0;
 }
 
 int genome_visitor_visit_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                        Log *l, Error *err)
+                                        Log *l, Env *env)
 {
-  error_check(err);
+  env_error_check(env);
   assert(gv && gf && gv->c_class);
   if (gv->c_class->genome_feature)
-    return gv->c_class->genome_feature(gv, gf, l, err);
+    return gv->c_class->genome_feature(gv, gf, l, env);
   else if (gv->c_class->default_func)
-    return gv->c_class->default_func(gv, (GenomeNode*) gf, l, err);
+    return gv->c_class->default_func(gv, (GenomeNode*) gf, l, env);
   return 0;
 }
 
 int genome_visitor_visit_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                         Log *l, Error *err)
+                                         Log *l, Env *env)
 {
-  error_check(err);
+  env_error_check(env);
   assert(gv && sr && gv->c_class);
   if (gv->c_class->sequence_region)
-    return gv->c_class->sequence_region(gv, sr, l, err);
+    return gv->c_class->sequence_region(gv, sr, l, env);
   else if (gv->c_class->default_func)
-    return gv->c_class->default_func(gv, (GenomeNode*) sr, l, err);
+    return gv->c_class->default_func(gv, (GenomeNode*) sr, l, env);
   return 0;
 }
 

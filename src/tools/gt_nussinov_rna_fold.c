@@ -6,19 +6,19 @@
 
 #include "gt.h"
 
-#define SCAN_ALPHA_VALUE(NUM, CHAR_1, CHAR_2)                                \
-        if (!has_err && (sscanf(argv[NUM], "%d", &rval) != 1 || rval > 0)) { \
-          error_set(err, "argument for alpha(%c,%c) must be non-positive "   \
-                         "integer", CHAR_1, CHAR_2);                         \
-          has_err = -1;                                                      \
-        }                                                                    \
-        if (!has_err) {                                                      \
-          scorematrix_set_score(energy_function, alpha_encode(dna_alpha,     \
-                                CHAR_1), alpha_encode(dna_alpha, CHAR_2),    \
-                                rval);                                       \
-          scorematrix_set_score(energy_function, alpha_encode(dna_alpha,     \
-                                CHAR_2), alpha_encode(dna_alpha, CHAR_1),    \
-                                rval);                                       \
+#define SCAN_ALPHA_VALUE(NUM, CHAR_1, CHAR_2)                                  \
+        if (!has_err && (sscanf(argv[NUM], "%d", &rval) != 1 || rval > 0)) {   \
+          env_error_set(env, "argument for alpha(%c,%c) must be non-positive " \
+                         "integer", CHAR_1, CHAR_2);                           \
+          has_err = -1;                                                        \
+        }                                                                      \
+        if (!has_err) {                                                        \
+          scorematrix_set_score(energy_function, alpha_encode(dna_alpha,       \
+                                CHAR_1), alpha_encode(dna_alpha, CHAR_2),      \
+                                rval);                                         \
+          scorematrix_set_score(energy_function, alpha_encode(dna_alpha,       \
+                                CHAR_2), alpha_encode(dna_alpha, CHAR_1),      \
+                                rval);                                         \
        }
 
 static int computeEentry(unsigned long i, unsigned long j, int **E,
@@ -167,21 +167,21 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
   array2dim_delete(E);
 }
 
-static OPrval parse_options(int *parsed_args, int argc, char **argv, Error *err)
+static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
 {
   OptionParser *op;
   OPrval oprval;
-  error_check(err);
+  env_error_check(env);
   op = option_parser_new("l_min alpha(G,C) alpha(A,U) alpha(G,U) RNA_sequence",
                          "Fold the supplied RNA sequence with the Nussinov "
                          "algorithm.");
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 5, 5, err);
+                                            versionfunc, 5, 5, env);
   option_parser_delete(op);
   return oprval;
 }
 
-int gt_nussinov_rna_fold(int argc, char *argv[], Error *err)
+int gt_nussinov_rna_fold(int argc, char *argv[], Env *env)
 {
   unsigned long i, j, rna_length;
   unsigned int l_min;
@@ -189,10 +189,10 @@ int gt_nussinov_rna_fold(int argc, char *argv[], Error *err)
   int parsed_args, rval, has_err = 0;
   Alpha *dna_alpha;
   ScoreMatrix *energy_function; /* alpha */
-  error_check(err);
+  env_error_check(env);
 
   /* option parsing */
-  switch (parse_options(&parsed_args, argc, argv, err)) {
+  switch (parse_options(&parsed_args, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
@@ -212,7 +212,7 @@ int gt_nussinov_rna_fold(int argc, char *argv[], Error *err)
 
   /* save l_min value */
   if (sscanf(argv[1], "%d", &rval) != 1 || rval <= 0) {
-    error_set(err, "argument for l_min must be positive integer");
+    env_error_set(env, "argument for l_min must be positive integer");
     has_err = -1;
   }
   else

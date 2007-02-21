@@ -8,6 +8,6 @@
 #define GT_STAT_H
 
 /* the stat tool */
-int gt_stat(int argc, char **argv, Error*);
+int gt_stat(int argc, char **argv, Env*);
 
 #endif

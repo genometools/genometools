@@ -18,14 +18,14 @@
 #define GTDATADIR "/gtdata"
 #define UPDIR     "/.."
 
-Str* gtdata_get_path(const char *prog, Error *err)
+Str* gtdata_get_path(const char *prog, Env *env)
 {
   Str *path;
   int has_err = 0;
-  error_check(err);
+  env_error_check(env);
   assert(prog);
   path = str_new();
-  has_err = file_find_in_path(path, prog, err);
+  has_err = file_find_in_path(path, prog, env);
   if (!has_err) {
     assert(str_length(path));
     str_append_cstr(path, GTDATADIR);
@@ -35,7 +35,7 @@ Str* gtdata_get_path(const char *prog, Error *err)
     str_append_cstr(path, UPDIR);
     str_append_cstr(path, GTDATADIR);
     if (!file_exists(str_get(path))) {
-      error_set(err, "could not find gtdata/ directory");
+      env_error_set(env, "could not find gtdata/ directory");
       has_err = -1;
     }
   }
@@ -46,7 +46,7 @@ Str* gtdata_get_path(const char *prog, Error *err)
   return path;
 }
 
-int gtdata_show_help(const char *progname, void *unused, Error *err)
+int gtdata_show_help(const char *progname, void *unused, Env *env)
 {
   Splitter *splitter;
   Str *doc_file;
@@ -54,13 +54,13 @@ int gtdata_show_help(const char *progname, void *unused, Error *err)
   char *prog;
   int has_err = 0;
 
-  error_check(err);
+  env_error_check(env);
   assert(progname);
 
   prog = xstrdup(progname); /* create modifiable copy for splitter */
   splitter = splitter_new();
   splitter_split(splitter, prog, strlen(prog), ' ');
-  doc_file = gtdata_get_path(splitter_get_token(splitter, 0), err);
+  doc_file = gtdata_get_path(splitter_get_token(splitter, 0), env);
   if (!doc_file)
     has_err = -1;
 
@@ -69,7 +69,7 @@ int gtdata_show_help(const char *progname, void *unused, Error *err)
     /* create Lua & push gtdata_doc_dir to Lua */
     L = luaL_newstate();
     if (!L) {
-      error_set(err, "out of memory (cannot create new lua state)");
+      env_error_set(env, "out of memory (cannot create new lua state)");
       has_err = -1;
     }
   }
@@ -84,7 +84,7 @@ int gtdata_show_help(const char *progname, void *unused, Error *err)
     str_append_cstr(doc_file, ".lua");
     /* execute doc_file */
     if (luaL_loadfile(L, str_get(doc_file)) || lua_pcall(L, 0, 0, 0)) {
-      error_set(err, "cannot run doc file: %s", lua_tostring(L, -1));
+      env_error_set(env, "cannot run doc file: %s", lua_tostring(L, -1));
       has_err = -1;
     }
   }

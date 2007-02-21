@@ -8,6 +8,6 @@
 #define GT_QGRAMDIST_H
 
 /* the q-gram distance tool */
-int gt_qgramdist(int argc, char **argv, Error*);
+int gt_qgramdist(int argc, char **argv, Env*);
 
 #endif
