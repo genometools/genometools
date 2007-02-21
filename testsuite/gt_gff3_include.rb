@@ -21,14 +21,14 @@ Test do
 end
 
 Name "gt gff3 prob 2"
-Keywords "gt gff3"
+Keywords "gt_gff3"
 Test do
   run "env LC_ALL=C #{$bin}gt gff3 -sort #{$testdata}gt_gff3_prob_2.in"
   run "diff #{$last_stdout} #{$testdata}gt_gff3_prob_2.out"
 end
 
 Name "gt gff3 prob 3"
-Keywords "gt gff3"
+Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_prob_3.gff3"
 end
