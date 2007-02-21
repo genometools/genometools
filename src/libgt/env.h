@@ -21,7 +21,17 @@ Log*   env_log(const Env*);   /* return the log object or NULL */
 void   env_set_log(Env*, Log*);
 void   env_delete(Env*);
 
-/* wrapper for error functions (to make many env_error() calls unnecessary */
+/* wrapper for memory functions */
+#define env_ma_malloc(env, size)\
+        ma_malloc(env_ma(env), size)
+#define env_ma_calloc(env, nmemb, size)\
+        ma_calloc(env_ma(env), nmemb, size)
+#define env_ma_realloc(env, ptr, size)\
+        ma_realloc(env_ma(env), ptr, size)
+#define env_ma_free(env, ptr)\
+        ma_free(env_ma(env), ptr)
+
+/* wrapper for error functions */
 void    env_error_set(Env*, const char *format, ...)
           __attribute__ ((format (printf, 2, 3)));
 #define env_error_is_set(env)\
@@ -30,7 +40,6 @@ void    env_error_set(Env*, const char *format, ...)
         error_unset(env_error(env))
 #define env_error_get(env)\
         error_get(env_error(env))
-
 /* make sure that the error is not set, has to be used at the beginning of
    every routine which has an Env* argument */
 #define env_error_check(env)\
