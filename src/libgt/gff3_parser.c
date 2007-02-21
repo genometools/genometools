@@ -34,7 +34,7 @@ struct GFF3Parser {
   long offset;
 };
 
-GFF3Parser* gff3_new(void)
+GFF3Parser* gff3parser_new(void)
 {
   GFF3Parser *gff3_parser = xmalloc(sizeof (GFF3Parser));
   gff3_parser->id_to_genome_node_mapping = hashtable_new(HASH_STRING, free,
@@ -47,7 +47,7 @@ GFF3Parser* gff3_new(void)
   return gff3_parser;
 }
 
-void gff3_set_offset(GFF3Parser *gff3_parser, long offset)
+void gff3parser_set_offset(GFF3Parser *gff3_parser, long offset)
 {
   assert(gff3_parser);
   gff3_parser->offset = offset;
@@ -395,11 +395,11 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   return has_err;
 }
 
-int gff3_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
-                            Queue *genome_nodes,
-                            const char *filename,
-                            unsigned long *line_number,
-                            FILE *fpin, Error *err)
+int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
+                                  Queue *genome_nodes,
+                                  const char *filename,
+                                  unsigned long *line_number,
+                                  FILE *fpin, Error *err)
 {
   bool break_loop = false;
   size_t line_length;
@@ -469,7 +469,7 @@ int gff3_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
   return has_err;
 }
 
-void gff3_reset(GFF3Parser *gff3_parser)
+void gff3parser_reset(GFF3Parser *gff3_parser)
 {
   assert(gff3_parser && gff3_parser->id_to_genome_node_mapping);
   hashtable_reset(gff3_parser->id_to_genome_node_mapping);
@@ -477,7 +477,7 @@ void gff3_reset(GFF3Parser *gff3_parser)
   hashtable_reset(gff3_parser->source_to_str_mapping);
 }
 
-void gff3_delete(GFF3Parser *gff3_parser)
+void gff3parser_delete(GFF3Parser *gff3_parser)
 {
   if (!gff3_parser) return;
   assert(gff3_parser->id_to_genome_node_mapping);
