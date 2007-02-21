@@ -9,7 +9,9 @@
 typedef struct {
   bool verbose,
        gene_length_distribution,
-       gene_score_distribution;
+       gene_score_distribution,
+       exon_length_distribution,
+       intron_length_distribution;
 } Stat_arguments;
 
 typedef struct {
@@ -37,6 +39,18 @@ static OPrval parse_options(int *parsed_args, Stat_arguments *arguments,
   /* -genescoresdistri */
   option = option_new_bool("genescoredistri", "show gene score distribution",
                            &arguments->gene_score_distribution, false);
+  option_parser_add_option(op, option);
+
+  /* -exonlengthdistri */
+  option = option_new_bool("exonlengthdistri",
+                           "show exon length distribution",
+                           &arguments->exon_length_distribution, false);
+  option_parser_add_option(op, option);
+
+  /* -intronlengthdistri */
+  option = option_new_bool("intronlengthdistri",
+                           "show intron length distribution",
+                           &arguments->intron_length_distribution, false);
   option_parser_add_option(op, option);
 
   /* -v */
@@ -76,7 +90,9 @@ int gt_stat(int argc, char *argv[], Error *err)
   /* init */
   info.number_of_trees = 0;
   info.stat_visitor = stat_visitor_new(arguments.gene_length_distribution,
-                                       arguments.gene_score_distribution);
+                                       arguments.gene_score_distribution,
+                                       arguments.exon_length_distribution,
+                                       arguments.intron_length_distribution);
 
   /* create a gff3 input stream */
   gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
