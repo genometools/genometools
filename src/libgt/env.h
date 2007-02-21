@@ -8,6 +8,7 @@
 #define ENV_H
 
 #include "error.h"
+#include "log.h"
 #include "ma.h"
 
 /* the enviroment class (creates and holds all singular objects) */
@@ -16,6 +17,8 @@ typedef struct Env Env;
 Env*   env_new(void);
 MA*    env_ma(const Env*);    /* return the memory allocator */
 Error* env_error(const Env*); /* return the error object */
+Log*   env_log(const Env*);   /* return the log object or NULL */
+void   env_set_log(Env*, Log*);
 void   env_delete(Env*);
 
 /* wrapper for error functions (to make many env_error() calls unnecessary */

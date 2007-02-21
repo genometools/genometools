@@ -10,11 +10,12 @@
 struct Env {
   MA *ma;
   Error *error;
+  Log *log;
 };
 
 Env* env_new(void)
 {
-  Env *e = xmalloc(sizeof (Env));
+  Env *e = xcalloc(1, sizeof (Env));
   e->ma = ma_new();
   e->error = error_new();
   return e;
@@ -32,11 +33,24 @@ Error* env_error(const Env *e)
   return e->error;
 }
 
+Log* env_log(const Env *e)
+{
+  assert(e);
+  return e->log;
+}
+
+void env_set_log(Env *e, Log *log)
+{
+  assert(e);
+  e->log = log;
+}
+
 void env_delete(Env *e)
 {
   if (!e) return;
   ma_delete(e->ma);
   error_delete(e->error);
+  log_delete(e->log);
   free(e);
 }
 

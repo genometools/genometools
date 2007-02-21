@@ -21,7 +21,8 @@
 #include "tools/gt_stat.h"
 
 struct GTR {
-  bool test;
+  bool test,
+       debug;
   Hashtable *tools,
             *unit_tests;
 };
@@ -79,6 +80,8 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, char **argv, Env *env)
                           "(http://genometools.org).");
   option_parser_set_comment_func(op, show_option_comments, gtr);
   o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false);
+  option_parser_add_option(op, o);
+  o = option_new_debug(&gtr->debug);
   option_parser_add_option(op, o);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
   option_parser_delete(op);
@@ -189,6 +192,8 @@ int gtr_run(GTR *gtr, int argc, char **argv, Env *env)
   if (gtr->test) {
     return run_tests(gtr, env);
   }
+  if (gtr->debug)
+    env_set_log(env, log_new());
   assert(argc);
   if (argc == 1) {
     env_error_set(env, "no tool specified; option -help lists possible tools");

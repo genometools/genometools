@@ -9,8 +9,7 @@
 #define DEFAULT_JOINLENGTH 300
 
 typedef struct {
-  bool verbose,
-       debug;
+  bool verbose;
   unsigned long join_length;
   FILE *outfp;
 } Csa_arguments;
@@ -40,10 +39,6 @@ static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
   option = option_new_verbose(&arguments->verbose);
   option_parser_add_option(op, option);
 
-  /* -debug */
-  option = option_new_debug(&arguments->debug);
-  option_parser_add_option(op, option);
-
   /* parse */
   oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
                                         versionfunc, 1, env);
@@ -59,7 +54,6 @@ int gt_csa(int argc, char *argv[], Env *env)
                 *gff3_out_stream;
   GenomeNode *gn;
   Csa_arguments arguments;
-  Log *log = NULL;
   int parsed_args, has_err;
   env_error_check(env);
 
@@ -70,10 +64,6 @@ int gt_csa(int argc, char *argv[], Env *env)
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
 
-  /* create log object if necessary */
-  if (arguments.debug)
-    log = log_new();
-
   /* create the streams */
   gff3_in_stream  = gff3_in_stream_new_sorted(argv[parsed_args],
                                               arguments.verbose &&
@@ -82,7 +72,8 @@ int gt_csa(int argc, char *argv[], Env *env)
   gff3_out_stream = gff3_out_stream_new(csa_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, log, env))
+  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, env_log(env),
+                                             env))
          && gn) {
     genome_node_rec_delete(gn);
   }
@@ -91,7 +82,6 @@ int gt_csa(int argc, char *argv[], Env *env)
   genome_stream_delete(gff3_out_stream);
   genome_stream_delete(csa_stream);
   genome_stream_delete(gff3_in_stream);
-  log_delete(log);
   if (arguments.outfp != stdout)
     xfclose(arguments.outfp);
 
