@@ -49,7 +49,7 @@ static void csa_visitor_free(GenomeVisitor *gv)
 }
 
 static int csa_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                      Log *l, Env *env)
+                                      Env *env)
 {
   CSAVisitor *csa_visitor;
   env_error_check(env);
@@ -99,17 +99,16 @@ static int csa_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   }
   else {
     /* end of cluster -> process it */
-    log_log(l, "process cluster");
+    log_log(env_log(env), "process cluster");
     csa_visitor->buffered_feature = gf;
-    csa_visitor_process_cluster(gv, false, l);
+    csa_visitor_process_cluster(gv, false, env);
     csa_visitor->first_range = csa_visitor->second_range;
     csa_visitor->first_str = csa_visitor->second_str;
   }
   return 0;
 }
 
-static int csa_visitor_default_func(GenomeVisitor *gv, GenomeNode *gn,
-                                    /*@unused@*/ Log *l, Env *env)
+static int csa_visitor_default_func(GenomeVisitor *gv, GenomeNode *gn, Env *env)
 {
   CSAVisitor *csa_visitor;
   env_error_check(env);
@@ -410,7 +409,8 @@ static void process_splice_form(Array *spliced_alignments_in_form,
   array_delete(exon_nodes);
 }
 
-void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster, Log *l)
+void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster,
+                                 Env *env)
 {
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
   Process_splice_form_info info;
@@ -442,7 +442,7 @@ void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster, Log *l)
                get_exons,
                process_splice_form,
                &info,
-               l);
+               env_log(env));
   assert(info.gene_feature);
   queue_add(csa_visitor->genome_node_buffer, info.gene_feature);
 

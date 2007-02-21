@@ -21,8 +21,7 @@ struct FilterStream
 #define filter_stream_cast(GS)\
         genome_stream_cast(filter_stream_class(), GS);
 
-static int filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
-                                   Env *env)
+static int filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
   FilterStream *fs;
   int has_err;
@@ -36,10 +35,9 @@ static int filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
   }
 
   /* no nodes in the buffer -> get new nodes */
-  while (!(has_err = genome_stream_next_tree(fs->in_stream, gn, l, env)) &&
-         *gn) {
+  while (!(has_err = genome_stream_next_tree(fs->in_stream, gn, env)) && *gn) {
     assert(*gn && !has_err);
-    has_err = genome_node_accept(*gn, fs->filter_visitor, l, env);
+    has_err = genome_node_accept(*gn, fs->filter_visitor, env);
     if (has_err)
       break;
     if (filter_visitor_node_buffer_size(fs->filter_visitor)) {

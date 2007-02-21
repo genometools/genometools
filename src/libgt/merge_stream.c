@@ -51,8 +51,7 @@ static void consolidate_sequence_regions(GenomeNode *gn_a, GenomeNode *gn_b)
   genome_node_set_range(gn_a, range_a);
 }
 
-int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
-                           Env *env)
+int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
   MergeStream *ms;
   GenomeNode *min_node = NULL;
@@ -69,7 +68,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
     if (!ms->buffer[i]) {
       has_err = genome_stream_next_tree(*(GenomeStream**)
                                         array_get(ms->genome_streams, i),
-                                        ms->buffer + i, l, env);
+                                        ms->buffer + i, env);
       if (has_err)
         break;
     }

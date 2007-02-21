@@ -32,8 +32,7 @@ static void filter_visitor_free(GenomeVisitor *gv)
   str_delete(filter_visitor->typefilter);
 }
 
-static int filter_visitor_comment(GenomeVisitor *gv, Comment *c,
-                                  Log *l, Env *env)
+static int filter_visitor_comment(GenomeVisitor *gv, Comment *c, Env *env)
 {
   FilterVisitor *filter_visitor;
   env_error_check(env);
@@ -43,7 +42,7 @@ static int filter_visitor_comment(GenomeVisitor *gv, Comment *c,
 }
 
 static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                         Log *l, Env *env)
+                                         Env *env)
 {
   FilterVisitor *fv;
   env_error_check(env);
@@ -74,7 +73,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 }
 
 static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                          Log *l, Env *env)
+                                          Env *env)
 {
   FilterVisitor *filter_visitor;
   env_error_check(env);

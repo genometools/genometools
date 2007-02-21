@@ -31,7 +31,7 @@ static void stat_visitor_free(GenomeVisitor *gv)
 }
 
 static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                        /*@unused@*/ Log *l, Env *env)
+                                       Env *env)
 {
   StatVisitor *stat_visitor;
   env_error_check(env);

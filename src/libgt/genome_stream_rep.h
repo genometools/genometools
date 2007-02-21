@@ -13,8 +13,8 @@
 struct GenomeStreamClass
 {
   size_t size;
-  int (*next_tree)(GenomeStream*, GenomeNode**, Log*, Env*);
-  void        (*free)(GenomeStream*);
+  int  (*next_tree)(GenomeStream*, GenomeNode**, Env*);
+  void (*free)(GenomeStream*);
 };
 
 struct GenomeStream
@@ -24,7 +24,7 @@ struct GenomeStream
   bool ensure_sorting;
 };
 
-GenomeStream* genome_stream_create(const GenomeStreamClass*,
+GenomeStream*  genome_stream_create(const GenomeStreamClass*,
                                     bool ensure_sorting);
 void*          genome_stream_cast(const GenomeStreamClass*, GenomeStream*);
 

@@ -341,11 +341,11 @@ void genome_node_set_phase(GenomeNode *gn, Phase p)
   gn->c_class->set_phase(gn, p);
 }
 
-int genome_node_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l, Env *env)
+int genome_node_accept(GenomeNode *gn, GenomeVisitor *gv, Env *env)
 {
   env_error_check(env);
   assert(gn && gv && gn->c_class && gn->c_class->accept);
-  return gn->c_class->accept(gn, gv, l, env);
+  return gn->c_class->accept(gn, gv, env);
 }
 
 void genome_node_is_part_of_genome_node(GenomeNode *parent,

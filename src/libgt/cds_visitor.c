@@ -170,7 +170,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
 }
 
 static int cds_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                      /*@unused@*/ Log *l, Env *env)
+                                      Env *env)
 {
   CDSVisitor *v = cds_visitor_cast(gv);
   env_error_check(env);
@@ -180,7 +180,7 @@ static int cds_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 }
 
 static int cds_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                       /*@unused@*/ Log *l, Env *env)
+                                       Env *env)
 {
   CDSVisitor *cds_visitor;
   env_error_check(env);

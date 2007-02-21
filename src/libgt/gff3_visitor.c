@@ -59,8 +59,7 @@ static void gff3_visitor_free(GenomeVisitor *gv)
   hashtable_delete(gff3_visitor->genome_feature_to_unique_id_str);
 }
 
-static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c,
-                                /*@unused@*/ Log *l, Env *env)
+static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c, Env *env)
 {
   GFF3Visitor *gff3_visitor;
   env_error_check(env);
@@ -189,7 +188,7 @@ static int store_ids(GenomeNode *gn, void *data, Env *env)
 }
 
 static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                       /*@unused@*/ Log *l, Env *env)
+                                       Env *env)
 {
   GFF3Visitor *gff3_visitor;
   int has_err;
@@ -227,7 +226,7 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 }
 
 static int gff3_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                        /*@unused@*/ Log *l, Env *env)
+                                        Env *env)
 {
   GFF3Visitor *gff3_visitor;
   env_error_check(env);

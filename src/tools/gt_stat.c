@@ -68,7 +68,7 @@ static int compute_statistics(GenomeNode *gn, void *data, Env *env)
   StatInfo *info = (StatInfo*) data;
   env_error_check(env);
   assert(info && info->stat_visitor);
-  return genome_node_accept(gn, info->stat_visitor, NULL, env);
+  return genome_node_accept(gn, info->stat_visitor, env);
 }
 
 int gt_stat(int argc, char *argv[], Env *env)
@@ -101,8 +101,7 @@ int gt_stat(int argc, char *argv[], Env *env)
 
   /* pull the features through the stream , compute the statistics, and free
      them afterwards */
-  while (!(has_err = genome_stream_next_tree(gff3_in_stream, &gn, NULL, env)) &&
-         gn) {
+  while (!(has_err = genome_stream_next_tree(gff3_in_stream, &gn, env)) && gn) {
     info.number_of_trees++;
     has_err = genome_node_traverse_children(gn, &info, compute_statistics, true,
                                             env);

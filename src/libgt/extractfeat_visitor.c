@@ -155,8 +155,7 @@ static int extract_feature(GenomeNode *gn, void *data, Env *env)
 }
 
 static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
-                                              GenomeFeature *gf,
-                                              /*@unused@*/ Log *l, Env *env)
+                                              GenomeFeature *gf, Env *env)
 {
   ExtractFeatVisitor *efv;
   int has_err = 0;
@@ -193,8 +192,7 @@ static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
 }
 
 static int extractfeat_visitor_sequence_region(GenomeVisitor *gv,
-                                               SequenceRegion *sr,
-                                               /*@unused@*/ Log *l, Env *env)
+                                               SequenceRegion *sr, Env *env)
 {
   ExtractFeatVisitor *efv;
   int has_err = 0;

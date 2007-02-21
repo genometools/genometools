@@ -14,10 +14,10 @@
 struct GenomeVisitorClass {
   size_t size;
   void (*free)(GenomeVisitor*);
-  int  (*comment)(GenomeVisitor*, Comment*, Log*, Env*);
-  int  (*genome_feature)(GenomeVisitor*, GenomeFeature*, Log*, Env*);
-  int  (*sequence_region)(GenomeVisitor*, SequenceRegion*, Log*, Env*);
-  int  (*default_func)(GenomeVisitor*, GenomeNode*, Log*, Env*);
+  int  (*comment)(GenomeVisitor*, Comment*, Env*);
+  int  (*genome_feature)(GenomeVisitor*, GenomeFeature*, Env*);
+  int  (*sequence_region)(GenomeVisitor*, SequenceRegion*, Env*);
+  int  (*default_func)(GenomeVisitor*, GenomeNode*, Env*);
 };
 
 struct GenomeVisitor {

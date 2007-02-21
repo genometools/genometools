@@ -19,16 +19,15 @@ struct CDSStream
 #define cds_stream_cast(GS)\
         genome_stream_cast(cds_stream_class(), GS)
 
-static int cds_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Log *l,
-                                Env *env)
+static int cds_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
   CDSStream *cds_stream;
   int has_err;
   env_error_check(env);
   cds_stream = cds_stream_cast(gs);
-  has_err = genome_stream_next_tree(cds_stream->in_stream, gn, l, env);
+  has_err = genome_stream_next_tree(cds_stream->in_stream, gn, env);
   if (!has_err && *gn)
-    has_err = genome_node_accept(*gn, cds_stream->cds_visitor, l, env);
+    has_err = genome_node_accept(*gn, cds_stream->cds_visitor, env);
   return has_err;
 }
 

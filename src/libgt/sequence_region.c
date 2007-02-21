@@ -44,13 +44,12 @@ static void sequence_region_set_range(GenomeNode *gn, Range range)
   sr->range = range;
 }
 
-static int sequence_region_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l,
-                                  Env *env)
+static int sequence_region_accept(GenomeNode *gn, GenomeVisitor *gv, Env *env)
 {
   SequenceRegion *sr;
   env_error_check(env);
   sr = sequence_region_cast(gn);
-  return genome_visitor_visit_sequence_region(gv, sr, l, env);
+  return genome_visitor_visit_sequence_region(gv, sr, env);
 }
 
 const GenomeNodeClass* sequence_region_class()

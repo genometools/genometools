@@ -744,8 +744,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   info.wrong_mRNAs = &se->wrong_mRNAs;
 
   /* process the reality stream completely */
-  while (!(has_err = genome_stream_next_tree(se->reality, &gn, NULL, env)) &&
-         gn) {
+  while (!(has_err = genome_stream_next_tree(se->reality, &gn, env)) && gn) {
     sr = genome_node_cast(sequence_region_class(), gn);
     if (sr) {
       /* each sequence region gets its own ``slot'' */
@@ -783,8 +782,8 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
   /* process the prediction stream */
   if (!has_err) {
-    while (!(has_err = genome_stream_next_tree(se->prediction, &gn, NULL, env))
-           && gn) {
+    while (!(has_err = genome_stream_next_tree(se->prediction, &gn, env)) &&
+           gn) {
       gf = genome_node_cast(genome_feature_class(), gn);
       /* we consider only genome features */
       if (gf) {

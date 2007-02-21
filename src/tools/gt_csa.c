@@ -72,9 +72,8 @@ int gt_csa(int argc, char *argv[], Env *env)
   gff3_out_stream = gff3_out_stream_new(csa_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, env_log(env),
-                                             env))
-         && gn) {
+  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
+         gn) {
     genome_node_rec_delete(gn);
   }
 

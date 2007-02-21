@@ -19,14 +19,13 @@ struct MergefeatStreamSorted {
 #define mergefeat_stream_sorted_cast(GS)\
         genome_stream_cast(mergefeat_stream_sorted_class(), GS)
 
-static int mergefeat_stream_sorted_next_tree(GenomeStream *gs,
-                                             GenomeNode **gn, Log *l,
+static int mergefeat_stream_sorted_next_tree(GenomeStream *gs, GenomeNode **gn,
                                              Env *env)
 {
   MergefeatStreamSorted *mfs;
   env_error_check(env);
   mfs = mergefeat_stream_sorted_cast(gs);
-  return genome_stream_next_tree(mfs->sort_stream, gn, l, env);
+  return genome_stream_next_tree(mfs->sort_stream, gn, env);
 }
 
 static void mergefeat_stream_sorted_free(GenomeStream *gs)

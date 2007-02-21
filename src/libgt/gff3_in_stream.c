@@ -34,8 +34,7 @@ struct GFF3InStream
 #define gff3_in_stream_cast(GS)\
         genome_stream_cast(gff3_in_stream_class(), GS)
 
-static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                    /*@unused@*/ Log *l, Env *env)
+static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   unsigned long i;

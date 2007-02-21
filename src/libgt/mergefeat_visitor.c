@@ -78,8 +78,7 @@ static int mergefeat_if_necessary(GenomeNode *gn, void *data, Env *env)
 }
 
 static int mergefeat_visitor_genome_feature(GenomeVisitor *gv,
-                                            GenomeFeature *gf,
-                                            /*@unused@*/ Log *l, Env *env)
+                                            GenomeFeature *gf, Env *env)
 {
   MergefeatVisitor *v;
   env_error_check(env);

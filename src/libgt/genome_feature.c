@@ -74,13 +74,12 @@ static void genome_feature_set_phase(GenomeNode *gn, Phase phase)
   gf->phase = phase;
 }
 
-static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, Log *l,
-                                 Env *env)
+static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, Env *env)
 {
   GenomeFeature *gf;
   env_error_check(env);
   gf = genome_feature_cast(gn);
-  return genome_visitor_visit_genome_feature(gv, gf, l, env);
+  return genome_visitor_visit_genome_feature(gv, gf, env);
 }
 
 const GenomeNodeClass* genome_feature_class()

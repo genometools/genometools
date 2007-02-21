@@ -19,16 +19,15 @@ struct MergefeatStreamUnsorted {
         genome_stream_cast(mergefeat_stream_unsorted_class(), GS)
 
 static int mergefeat_stream_unsorted_next_tree(GenomeStream *gs,
-                                               GenomeNode **gn,
-                                               Log *l, Env *env)
+                                               GenomeNode **gn, Env *env)
 {
   MergefeatStreamUnsorted *mfs;
   int has_err;
   env_error_check(env);
   mfs = mergefeat_stream_unsorted_cast(gs);
-  has_err = genome_stream_next_tree(mfs->in_stream, gn, l, env);
+  has_err = genome_stream_next_tree(mfs->in_stream, gn, env);
   if (!has_err && *gn)
-    has_err = genome_node_accept(*gn, mfs->mergefeat_visitor, l, env);
+    has_err = genome_node_accept(*gn, mfs->mergefeat_visitor, env);
   return has_err;
 }
 

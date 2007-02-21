@@ -23,18 +23,18 @@ struct ExtractFeatStream
         genome_stream_cast(extractfeat_stream_class(), GS)
 
 static int extractfeat_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                        Log *l, Env *env)
+                                        Env *env)
 {
   ExtractFeatStream *extractfeat_stream;
   int has_err;
   env_error_check(env);
   extractfeat_stream = extractfeat_stream_cast(gs);
-  has_err = genome_stream_next_tree(extractfeat_stream->in_stream, gn, l, env);
+  has_err = genome_stream_next_tree(extractfeat_stream->in_stream, gn, env);
   if (!has_err) {
   assert(extractfeat_stream->extractfeat_visitor);
   if (*gn)
     has_err = genome_node_accept(*gn, extractfeat_stream->extractfeat_visitor,
-                                 l, env);
+                                 env);
   }
   return has_err;
 }

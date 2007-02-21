@@ -141,9 +141,10 @@ int gt_extractfeat(int argc, char *argv[], Env *env)
 
   /* pull the features through the stream and free them afterwards */
   if (!has_err) {
-    while (!(has_err = genome_stream_next_tree(extractfeat_stream, &gn, NULL,
-                                               env)) && gn)
+    while (!(has_err = genome_stream_next_tree(extractfeat_stream, &gn, env)) &&
+           gn) {
       genome_node_rec_delete(gn);
+    }
   }
 
   /* free */

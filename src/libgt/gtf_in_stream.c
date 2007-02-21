@@ -20,8 +20,7 @@ struct GTFInStream
 #define gtf_in_stream_cast(GS)\
         genome_stream_cast(gtf_in_stream_class(), GS)
 
-static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                   /*@unused@*/ Log *l, Env *env)
+static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
   GTFInStream *is;
   env_error_check(env);
