@@ -21,5 +21,12 @@ do
   TMPFILE=`mktemp`
   cp $FILE $FILE.bac
   sed "$sed_command" $FILE > $TMPFILE
-  mv -f $TMPFILE $FILE
+  if [ $? -eq 0 ]
+  then
+    # sed command succeeded -> overwrite file
+    mv -f $TMPFILE $FILE
+  else
+    echo "`basename $0`: sed command failed, removing tmpfile"
+    rm -f $TMPFILE
+  fi
 done
