@@ -18,6 +18,30 @@ MA* ma_new(void)
   return xcalloc(1, sizeof (MA));
 }
 
+void* ma_malloc(MA *ma, size_t size)
+{
+  assert(ma);
+  return xmalloc(size);
+}
+
+void* ma_calloc(MA *ma, size_t nmemb, size_t size)
+{
+  assert(ma);
+  return xcalloc(nmemb, size);
+}
+
+void* ma_realloc(MA *ma, void *ptr, size_t size)
+{
+  assert(ma);
+  return xrealloc(ptr, size);
+}
+
+void ma_free(MA *ma, void *ptr)
+{
+  assert(ma);
+  free(ptr);
+}
+
 void ma_delete(MA *ma)
 {
   if (!ma) return;
