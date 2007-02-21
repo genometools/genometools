@@ -23,9 +23,15 @@ void error_set(Error *e, const char *format, ...)
   va_list ap;
   assert(e);
   va_start(ap, format);
+  error_vset(e, format, ap);
+  va_end(ap);
+}
+
+void error_vset(Error *e, const char *format, va_list ap)
+{
+  assert(e && format);
   e->error_is_set = true;
   (void) vsnprintf(e->error_string, sizeof (e->error_string), format, ap);
-  va_end(ap);
 }
 
 bool error_is_set(const Error *e)
