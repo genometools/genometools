@@ -1,0 +1,10 @@
+parsed feature trees: 2
+genes: 1
+mRNAs: 3
+exons: 11
+exon length distribution:
+201: 1 (prob=0.0909,cumulative=0.0909)
+451: 2 (prob=0.1818,cumulative=0.2727)
+501: 3 (prob=0.2727,cumulative=0.5455)
+903: 2 (prob=0.1818,cumulative=0.7273)
+2001: 3 (prob=0.2727,cumulative=1.0000)
