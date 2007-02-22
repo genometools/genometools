@@ -161,12 +161,12 @@ static int save_exon(GenomeNode *gn, void *data, Env *env)
   return 0;
 }
 
-void genome_feature_get_exons(GenomeFeature *gf, Array *exon_features)
+void genome_feature_get_exons(GenomeFeature *gf, Array *exon_features, Env *env)
 {
   int has_err;
   assert(gf && exon_features && !array_size(exon_features));
   has_err = genome_node_traverse_children((GenomeNode*) gf, exon_features,
-                                          save_exon, false, NULL);
+                                          save_exon, false, env);
   assert(!has_err); /* cannot happen, because save_exon() is sane */
 }
 

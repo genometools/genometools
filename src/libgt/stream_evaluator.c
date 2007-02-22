@@ -356,10 +356,10 @@ static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
 
   /* get exon ranges */
   has_err = genome_node_traverse_children(gn_1, exons_1, store_exon, false,
-                                          NULL);
+                                          env);
   assert(!has_err); /* cannot happen, store_exon() is sane */
   has_err = genome_node_traverse_children(gn_2, exons_2, store_exon, false,
-                                          NULL);
+                                          env);
   assert(!has_err); /* cannot happen, store_exon() is sane */
 
   /* sort exon ranges */
@@ -421,12 +421,12 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   info.exons = exons_1;
   info.mRNAs = mRNAs_1;
   has_err = genome_node_traverse_direct_children(gn_1, &info,
-                                                 store_gene_feature, NULL);
+                                                 store_gene_feature, env);
   assert(!has_err); /* cannot happen, store_gene_feature() is sane */
   info.exons = exons_2;
   info.mRNAs = mRNAs_2;
   has_err = genome_node_traverse_direct_children(gn_2, &info,
-                                                 store_gene_feature, NULL);
+                                                 store_gene_feature, env);
   assert(!has_err); /* cannot happen, store_gene_feature() is sane */
 
   /* sort exon ranges */
@@ -785,7 +785,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       process_real_feature_data.slot = slot;
       has_err = genome_node_traverse_children(gn, &process_real_feature_data,
                                               process_real_feature, false,
-                                              NULL);
+                                              env);
       assert(!has_err); /* cannot happen, process_real_feature() is sane */
     }
     genome_node_rec_delete(gn, env);
@@ -811,7 +811,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
           info.slot = slot;
           has_err = genome_node_traverse_children(gn, &info,
                                                   process_predicted_feature,
-                                                  false, NULL);
+                                                  false, env);
           assert(!has_err); /* cannot happen, process_predicted_feature() is
                                sane */
         }

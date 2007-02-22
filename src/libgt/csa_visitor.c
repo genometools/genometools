@@ -184,7 +184,7 @@ static void get_exons(Array *exon_ranges, const void *sa, Env *env)
   int has_err;
   assert(exon_ranges && gf && genome_feature_get_type(gf) == gft_gene);
   has_err = genome_node_traverse_children((GenomeNode*) gf, exon_ranges,
-                                          save_exon, false, NULL);
+                                          save_exon, false, env);
   /* we cannot have an error here, because save_exon() doesn't produces one. */
   assert(!has_err);
   /* we got at least one exon */
@@ -210,7 +210,7 @@ static void add_sa_to_exon_feature_array(Array *exon_nodes,
   assert(gene_strand != STRAND_BOTH); /* is defined */
 
   exons_from_sa = array_new(sizeof (GenomeFeature*), env);
-  genome_feature_get_exons(sa, exons_from_sa);
+  genome_feature_get_exons(sa, exons_from_sa, env);
   genome_nodes_sort(exons_from_sa);
 
   while (exon_feature_index < array_size(exon_nodes) &&
