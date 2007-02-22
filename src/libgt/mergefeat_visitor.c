@@ -61,7 +61,8 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, Env *env)
   }
   /* add current feature */
   hashtable_add(v->ht, (char*) genome_feature_type_get_cstr(
-                genome_feature_get_type(current_feature)), current_feature);
+                genome_feature_get_type(current_feature)), current_feature,
+                env);
   return 0;
 }
 
@@ -73,7 +74,7 @@ static int mergefeat_if_necessary(GenomeNode *gn, void *data, Env *env)
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
   v->current_tree = gn;
-  hashtable_reset(v->ht);
+  hashtable_reset(v->ht, env);
   return genome_node_traverse_direct_children(gn, v, mergefeat_in_children,
                                               env);
 }

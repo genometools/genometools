@@ -180,7 +180,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
         else
           queue_add(node_queue, child_feature, env);
         if (traverse_only_once)
-          hashtable_add(traversed_nodes, child_feature, child_feature);
+          hashtable_add(traversed_nodes, child_feature, child_feature, env);
       }
     }
   }

@@ -70,21 +70,21 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv,
   return oprval;
 }
 
-void register_exercises(Hashtable *exercise_tools)
+void register_exercises(Hashtable *exercise_tools, Env *env)
 {
   assert(exercise_tools);
-  hashtable_add(exercise_tools, "affinealign", gt_affinealign);
-  hashtable_add(exercise_tools, "align", gt_align);
-  hashtable_add(exercise_tools, "casino", gt_casino);
-  hashtable_add(exercise_tools, "coin", gt_coin);
-  hashtable_add(exercise_tools, "consensus_sa", gt_consensus_sa);
-  hashtable_add(exercise_tools, "msaparse", gt_msaparse);
-  hashtable_add(exercise_tools, "neighborjoining", gt_neighborjoining);
-  hashtable_add(exercise_tools, "nussinov_rna_fold", gt_nussinov_rna_fold);
-  hashtable_add(exercise_tools, "qgramdist", gt_qgramdist);
-  hashtable_add(exercise_tools, "scorematrix", gt_scorematrix);
-  hashtable_add(exercise_tools, "swalign", gt_swalign);
-  hashtable_add(exercise_tools, "upgma", gt_upgma);
+  hashtable_add(exercise_tools, "affinealign", gt_affinealign, env);
+  hashtable_add(exercise_tools, "align", gt_align, env);
+  hashtable_add(exercise_tools, "casino", gt_casino, env);
+  hashtable_add(exercise_tools, "coin", gt_coin, env);
+  hashtable_add(exercise_tools, "consensus_sa", gt_consensus_sa, env);
+  hashtable_add(exercise_tools, "msaparse", gt_msaparse, env);
+  hashtable_add(exercise_tools, "neighborjoining", gt_neighborjoining, env);
+  hashtable_add(exercise_tools, "nussinov_rna_fold", gt_nussinov_rna_fold, env);
+  hashtable_add(exercise_tools, "qgramdist", gt_qgramdist, env);
+  hashtable_add(exercise_tools, "scorematrix", gt_scorematrix, env);
+  hashtable_add(exercise_tools, "swalign", gt_swalign, env);
+  hashtable_add(exercise_tools, "upgma", gt_upgma, env);
 }
 
 int gt_exercise(int argc, char *argv[], Env *env)
@@ -97,7 +97,7 @@ int gt_exercise(int argc, char *argv[], Env *env)
 
   /* option parsing */
   exercise_tools = hashtable_new(HASH_STRING, NULL, NULL, env);
-  register_exercises(exercise_tools);
+  register_exercises(exercise_tools, env);
   switch (parse_options(&parsed_args, argc, argv, exercise_tools, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:

@@ -107,7 +107,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
         is->non_stdin_file_is_open = false;
       }
       is->fpin = NULL;
-      gff3parser_reset(is->gff3_parser);
+      gff3parser_reset(is->gff3_parser, env);
       if (!array_size(is->files))
         break;
       continue;

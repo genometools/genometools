@@ -218,7 +218,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
     if (!source_str) {
       source_str = str_new_cstr(source, env);
       hashtable_add(gff3_parser->source_to_str_mapping, str_get(source_str),
-                    source_str);
+                    source_str, env);
     }
     assert(source_str);
     genome_node_set_source(genome_feature, source_str);
@@ -241,7 +241,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
     }
     else {
       out_node_complete = false;
-      hashtable_add(gff3_parser->id_to_genome_node_mapping, id, genome_feature);
+      hashtable_add(gff3_parser->id_to_genome_node_mapping, id, genome_feature,
+                    env);
     }
   }
 
@@ -380,7 +381,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
       else {
         seqid_str = str_new_cstr(seqid, env);
         hashtable_add(gff3_parser->seqid_to_str_mapping, str_get(seqid_str),
-                      seqid_str);
+                      seqid_str, env);
       }
     }
     if (!has_err) {
@@ -474,12 +475,12 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
   return has_err;
 }
 
-void gff3parser_reset(GFF3Parser *gff3_parser)
+void gff3parser_reset(GFF3Parser *gff3_parser, Env *env)
 {
   assert(gff3_parser && gff3_parser->id_to_genome_node_mapping);
-  hashtable_reset(gff3_parser->id_to_genome_node_mapping);
-  hashtable_reset(gff3_parser->seqid_to_str_mapping);
-  hashtable_reset(gff3_parser->source_to_str_mapping);
+  hashtable_reset(gff3_parser->id_to_genome_node_mapping, env);
+  hashtable_reset(gff3_parser->seqid_to_str_mapping, env);
+  hashtable_reset(gff3_parser->source_to_str_mapping, env);
 }
 
 void gff3parser_delete(GFF3Parser *gff3_parser, Env *env)

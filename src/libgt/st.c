@@ -41,10 +41,10 @@ static struct st_hash_type type_strhash = {
     strhash,
 };
 
-static void rehash(st_table *);
+static void rehash(st_table *, Env*);
 
-#define alloc(type) (type*)xmalloc((unsigned)sizeof (type))
-#define Calloc(n,s) (char*)xcalloc((n),(s))
+#define alloc(type) (type*)env_ma_malloc(env, (unsigned)sizeof (type))
+#define Calloc(n,s) (char*)env_ma_calloc(env, (n),(s))
 
 #define EQUAL(table,x,y) ((x)==(y) || (*table->type->compare)((x),(y)) == 0)
 
@@ -130,9 +130,7 @@ stat_col()
 #endif
 
 st_table*
-st_init_table_with_size(type, size)
-    struct st_hash_type *type;
-    int size;
+st_init_table_with_size(struct st_hash_type *type, int size, Env *env)
 {
     st_table *tbl;
 
@@ -155,41 +153,37 @@ st_init_table_with_size(type, size)
 }
 
 st_table*
-st_init_table(type)
-    struct st_hash_type *type;
+st_init_table(struct st_hash_type *type, Env *env)
 {
-    return st_init_table_with_size(type, 0);
+    return st_init_table_with_size(type, 0, env);
 }
 
 st_table*
-st_init_numtable(void)
+st_init_numtable(Env *env)
 {
-    return st_init_table(&type_numhash);
+    return st_init_table(&type_numhash, env);
 }
 
 st_table*
-st_init_numtable_with_size(size)
-    int size;
+st_init_numtable_with_size(int size, Env *env)
 {
-    return st_init_table_with_size(&type_numhash, size);
+    return st_init_table_with_size(&type_numhash, size, env);
 }
 
 st_table*
-st_init_strtable(void)
+st_init_strtable(Env *env)
 {
-    return st_init_table(&type_strhash);
+    return st_init_table(&type_strhash, env);
 }
 
 st_table*
-st_init_strtable_with_size(size)
-    int size;
+st_init_strtable_with_size(int size, Env *env)
 {
-    return st_init_table_with_size(&type_strhash, size);
+    return st_init_table_with_size(&type_strhash, size, env);
 }
 
 void
-st_free_table(table)
-    st_table *table;
+st_free_table(st_table *table, Env *env)
 {
     register st_table_entry *ptr, *next;
     int i;
@@ -198,12 +192,12 @@ st_free_table(table)
 	ptr = table->bins[i];
 	while (ptr != 0) {
 	    next = ptr->next;
-	    free(ptr);
+	    env_ma_free(ptr, env);
 	    ptr = next;
 	}
     }
-    free(table->bins);
-    free(table);
+    env_ma_free(table->bins, env);
+    env_ma_free(table, env);
 }
 
 #define PTR_NOT_EQUAL(table, ptr, hash_val, key) \
@@ -252,7 +246,7 @@ st_lookup(table, key, value)
 do {\
     st_table_entry *entry;\
     if (table->num_entries/(table->num_bins) > ST_DEFAULT_MAX_DENSITY) {\
-	rehash(table);\
+	rehash(table, env);\
         bin_pos = hash_val % table->num_bins;\
     }\
     \
@@ -267,10 +261,7 @@ do {\
 } while (0)
 
 int
-st_insert(table, key, value)
-    register st_table *table;
-    register st_data_t key;
-    st_data_t value;
+st_insert(st_table *table, st_data_t key, st_data_t value, Env *env)
 {
     unsigned int hash_val, bin_pos;
     register st_table_entry *ptr;
@@ -289,10 +280,7 @@ st_insert(table, key, value)
 }
 
 void
-st_add_direct(table, key, value)
-    st_table *table;
-    st_data_t key;
-    st_data_t value;
+st_add_direct(st_table *table, st_data_t key, st_data_t value, Env *env)
 {
     unsigned int hash_val, bin_pos;
 
@@ -302,8 +290,7 @@ st_add_direct(table, key, value)
 }
 
 static void
-rehash(table)
-    register st_table *table;
+rehash(st_table *table, Env *env)
 {
     register st_table_entry *ptr, *next, **new_bins;
     int i, old_num_bins = table->num_bins, new_num_bins;
@@ -322,14 +309,13 @@ rehash(table)
 	    ptr = next;
 	}
     }
-    free(table->bins);
+    env_ma_free(table->bins, env);
     table->num_bins = new_num_bins;
     table->bins = new_bins;
 }
 
 st_table*
-st_copy(old_table)
-    st_table *old_table;
+st_copy(st_table *old_table, Env *env)
 {
     st_table *new_table;
     st_table_entry *ptr, *entry;
@@ -345,7 +331,7 @@ st_copy(old_table)
 	Calloc((unsigned)num_bins, sizeof (st_table_entry*));
 
     if (new_table->bins == 0) {
-	free(new_table);
+	env_ma_free(new_table, env);
 	return 0;
     }
 
@@ -355,8 +341,8 @@ st_copy(old_table)
 	while (ptr != 0) {
 	    entry = alloc(st_table_entry);
 	    if (entry == 0) {
-		free(new_table->bins);
-		free(new_table);
+		env_ma_free(new_table->bins, env);
+		env_ma_free(new_table, env);
 		return 0;
 	    }
 	    *entry = *ptr;
@@ -369,10 +355,7 @@ st_copy(old_table)
 }
 
 int
-st_delete(table, key, value)
-    register st_table *table;
-    register st_data_t *key;
-    st_data_t *value;
+st_delete(st_table *table, st_data_t *key, st_data_t *value, Env *env)
 {
     unsigned int hash_val;
     st_table_entry *tmp;
@@ -391,7 +374,7 @@ st_delete(table, key, value)
 	table->num_entries--;
 	if (value != 0) *value = ptr->record;
 	*key = ptr->key;
-	free(ptr);
+	env_ma_free(ptr, env);
 	return 1;
     }
 
@@ -402,7 +385,7 @@ st_delete(table, key, value)
 	    table->num_entries--;
 	    if (value != 0) *value = tmp->record;
 	    *key = tmp->key;
-	    free(tmp);
+	    env_ma_free(tmp, env);
 	    return 1;
 	}
     }
@@ -449,22 +432,16 @@ delete_never(key, value, never)
     return ST_CONTINUE;
 }
 
-void
-st_cleanup_safe(table, never)
-    st_table *table;
-    st_data_t never;
+void st_cleanup_safe(st_table *table, st_data_t never, Env *env)
 {
     int num_entries = table->num_entries;
 
-    (void) st_foreach(table, delete_never, never);
+    (void) st_foreach(table, delete_never, never, env);
     table->num_entries = num_entries;
 }
 
 int
-st_foreach(table, func, arg)
-    st_table *table;
-    int (*func)();
-    st_data_t arg;
+st_foreach(st_table *table, st_iterfunc_type func, st_data_t arg, Env *env)
 {
     st_table_entry *ptr, *last, *tmp;
     enum st_retval retval;
@@ -473,7 +450,8 @@ st_foreach(table, func, arg)
     for (i = 0; i < table->num_bins; i++) {
 	last = 0;
 	for (ptr = table->bins[i]; ptr != 0;) {
-	    retval = (*func)(ptr->key, ptr->record, arg);
+	    retval = func((void*) ptr->key, (void*) ptr->record, (void*) arg,
+                          env);
 	    switch (retval) {
 	    case ST_CHECK:	/* check if hash is modified during iteration */
 	        tmp = 0;
@@ -502,7 +480,7 @@ st_foreach(table, func, arg)
 		    last->next = ptr->next;
 		}
 		ptr = ptr->next;
-		free(tmp);
+		env_ma_free(tmp, env);
 		table->num_entries--;
 	    }
 	}

@@ -79,7 +79,7 @@ static int add_id(GenomeNode *gn, void *data, Env *env)
   parent_features = hashtable_get(info->genome_feature_to_id_array, gn);
   if (!parent_features) {
     parent_features = array_new(sizeof (char*), env);
-    hashtable_add(info->genome_feature_to_id_array, gn, parent_features);
+    hashtable_add(info->genome_feature_to_id_array, gn, parent_features, env);
   }
   array_add(parent_features, info->id, env);
   return 0;
@@ -175,7 +175,7 @@ static int store_ids(GenomeNode *gn, void *data, Env *env)
     str_append_ulong(id, gff3_visitor->id_counter[type], env);
 
     /* store (unique) id */
-    hashtable_add(gff3_visitor->genome_feature_to_unique_id_str, gn, id);
+    hashtable_add(gff3_visitor->genome_feature_to_unique_id_str, gn, id, env);
 
     /* for each child -> store the parent feature in the hash table */
     add_id_info.genome_feature_to_id_array =
@@ -216,8 +216,8 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   }
 
   /* reset hashtables */
-  hashtable_reset(gff3_visitor->genome_feature_to_id_array);
-  hashtable_reset(gff3_visitor->genome_feature_to_unique_id_str);
+  hashtable_reset(gff3_visitor->genome_feature_to_id_array, env);
+  hashtable_reset(gff3_visitor->genome_feature_to_unique_id_str, env);
 
   /* terminator */
   xfputs("###\n", gff3_visitor->outfp);

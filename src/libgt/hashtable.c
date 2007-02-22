@@ -34,10 +34,10 @@ Hashtable* hashtable_new(Hash_type hash_type, FreeFunc keyfree,
   ht->value_free = valuefree;
   switch (hash_type) {
     case HASH_DIRECT:
-      ht->st_table = st_init_numtable();
+      ht->st_table = st_init_numtable(env);
       break;
     case HASH_STRING:
-      ht->st_table = st_init_strtable();
+      ht->st_table = st_init_strtable(env);
   }
   assert(ht->st_table);
   return ht;
@@ -53,12 +53,12 @@ void* hashtable_get(Hashtable *ht, const void *key)
   return vptr;
 }
 
-void hashtable_add(Hashtable *ht, void *key, void *value)
+void hashtable_add(Hashtable *ht, void *key, void *value, Env *env)
 {
   assert(ht && key && value);
   /* the hash table containes no element with this key yet */
   assert(!st_lookup(ht->st_table, (st_data_t) key, NULL));
-  (void) st_insert(ht->st_table, (st_data_t) key, (st_data_t) value);
+  (void) st_insert(ht->st_table, (st_data_t) key, (st_data_t) value, env);
 }
 
 void hashtable_remove(Hashtable *ht, void *key, Env *env)
@@ -69,14 +69,14 @@ void hashtable_remove(Hashtable *ht, void *key, Env *env)
   (void) st_lookup(ht->st_table, (st_data_t) key, &value);
   /* the hashtable containes an element with this key already */
   assert(value);
-  (void) st_delete(ht->st_table, &key_t, NULL);
+  (void) st_delete(ht->st_table, &key_t, NULL, env);
   if (ht->key_free)
     ht->key_free(key, env);
   if (ht->value_free)
     ht->value_free(&value, env);
 }
 
-static int st_iterfunc(void *key, void *value, void *data)
+static int st_iterfunc(void *key, void *value, void *data, Env *env)
 {
   St_iterfunc_info *info = (St_iterfunc_info*) data;
   assert(info->iterfunc);
@@ -96,7 +96,7 @@ int hashtable_foreach(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
   info.data = data;
   info.env = env;
   info.has_err = 0;
-  (void) st_foreach(ht->st_table, st_iterfunc, (st_data_t) &info);
+  (void) st_foreach(ht->st_table, st_iterfunc, (st_data_t) &info, env);
   return info.has_err;
 }
 
@@ -111,10 +111,10 @@ static int remove_key_value_pair(void *key, void *value, void *data, Env *env)
   return ST_DELETE;
 }
 
-void hashtable_reset(Hashtable *ht)
+void hashtable_reset(Hashtable *ht, Env *env)
 {
   assert(ht && ht->st_table);
-  (void) st_foreach(ht->st_table, remove_key_value_pair, (st_data_t) ht);
+  (void) st_foreach(ht->st_table, remove_key_value_pair, (st_data_t) ht, env);
 }
 
 static int hashtable_test(Hash_type hash_type, Env *env)
@@ -130,20 +130,20 @@ static int hashtable_test(Hash_type hash_type, Env *env)
 
   /* empty hash with reset */
   ht = hashtable_new(hash_type, NULL, NULL, env);
-  hashtable_reset(ht);
+  hashtable_reset(ht, env);
   hashtable_delete(ht, env);
 
   /* hashes containing one element */
   ht = hashtable_new(hash_type, NULL, NULL, env);
-  hashtable_add(ht, s1, s2);
+  hashtable_add(ht, s1, s2, env);
   ensure(has_err, hashtable_get(ht, s1) == s2);
   ensure(has_err, !hashtable_get(ht, s2));
   hashtable_delete(ht, env);
 
   /* hashes containing two elements */
   ht = hashtable_new(hash_type, NULL, NULL, env);
-  hashtable_add(ht, s1, s2);
-  hashtable_add(ht, s2, s1);
+  hashtable_add(ht, s1, s2, env);
+  hashtable_add(ht, s2, s1, env);
   ensure(has_err, hashtable_get(ht, s1) == s2);
   ensure(has_err, hashtable_get(ht, s2) == s1);
   hashtable_delete(ht, env);
@@ -169,8 +169,8 @@ int hashtable_unit_test(Env *env)
 void hashtable_delete(Hashtable *ht, Env *env)
 {
   if (!ht) return;
-  hashtable_reset(ht);
+  hashtable_reset(ht, env);
   assert(ht->st_table);
-  st_free_table(ht->st_table);
+  st_free_table(ht->st_table, env);
   env_ma_free(ht, env);
 }

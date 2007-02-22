@@ -20,10 +20,10 @@ typedef int  (*Hashiteratorfunc)(void *key, void *value, void *data, Env*);
 
 Hashtable* hashtable_new(Hash_type, FreeFunc keyfree, FreeFunc valuefree, Env*);
 void*      hashtable_get(Hashtable*, const void*);
-void       hashtable_add(Hashtable*, void*, void*);
+void       hashtable_add(Hashtable*, void*, void*, Env*);
 void       hashtable_remove(Hashtable*, void*, Env*);
 int        hashtable_foreach(Hashtable*, Hashiteratorfunc, void*, Env*);
-void       hashtable_reset(Hashtable*);
+void       hashtable_reset(Hashtable*, Env*);
 int        hashtable_unit_test(Env*);
 void       hashtable_delete(Hashtable*, Env*);
 

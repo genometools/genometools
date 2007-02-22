@@ -96,37 +96,38 @@ void gtr_register_components(GTR *gtr, Env *env)
   /* add tools */
   hashtable_delete(gtr->tools, env);
   gtr->tools = hashtable_new(HASH_STRING, NULL, NULL, env);
-  hashtable_add(gtr->tools, "bioseq", gt_bioseq);
-  hashtable_add(gtr->tools, "cds", gt_cds);
-  hashtable_add(gtr->tools, "clean", gt_clean);
-  hashtable_add(gtr->tools, "csa", gt_csa);
-  hashtable_add(gtr->tools, "eval", gt_eval);
-  hashtable_add(gtr->tools, "exercise", gt_exercise);
-  hashtable_add(gtr->tools, "extractfeat", gt_extractfeat);
-  hashtable_add(gtr->tools, "filter", gt_filter);
-  hashtable_add(gtr->tools, "gff3", gt_gff3);
-  hashtable_add(gtr->tools, "gtf2gff3", gt_gtf2gff3);
-  hashtable_add(gtr->tools, "merge", gt_merge);
-  hashtable_add(gtr->tools, "mmapandread", gt_mmapandread);
-  hashtable_add(gtr->tools, "stat", gt_stat);
+  hashtable_add(gtr->tools, "bioseq", gt_bioseq, env);
+  hashtable_add(gtr->tools, "cds", gt_cds, env);
+  hashtable_add(gtr->tools, "clean", gt_clean, env);
+  hashtable_add(gtr->tools, "csa", gt_csa, env);
+  hashtable_add(gtr->tools, "eval", gt_eval, env);
+  hashtable_add(gtr->tools, "exercise", gt_exercise, env);
+  hashtable_add(gtr->tools, "extractfeat", gt_extractfeat, env);
+  hashtable_add(gtr->tools, "filter", gt_filter, env);
+  hashtable_add(gtr->tools, "gff3", gt_gff3, env);
+  hashtable_add(gtr->tools, "gtf2gff3", gt_gtf2gff3, env);
+  hashtable_add(gtr->tools, "merge", gt_merge, env);
+  hashtable_add(gtr->tools, "mmapandread", gt_mmapandread, env);
+  hashtable_add(gtr->tools, "stat", gt_stat, env);
   /* add unit tests */
   hashtable_delete(gtr->unit_tests, env);
   gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL, env);
-  hashtable_add(gtr->unit_tests, "alignment class", alignment_unit_test);
-  hashtable_add(gtr->unit_tests, "array class", array_unit_test);
-  hashtable_add(gtr->unit_tests, "bittab class", bittab_unit_test);
-  hashtable_add(gtr->unit_tests, "bsearch module", bsearch_unit_test);
-  hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test);
-  hashtable_add(gtr->unit_tests, "dlist class", dlist_unit_test);
-  hashtable_add(gtr->unit_tests, "evaluator class", evaluator_unit_test);
-  hashtable_add(gtr->unit_tests, "grep module", grep_unit_test);
-  hashtable_add(gtr->unit_tests, "hashtable class", hashtable_unit_test);
-  hashtable_add(gtr->unit_tests, "hmm class", hmm_unit_test);
-  hashtable_add(gtr->unit_tests, "range class", range_unit_test);
-  hashtable_add(gtr->unit_tests, "splicedseq class", splicedseq_unit_test);
-  hashtable_add(gtr->unit_tests, "splitter class", splitter_unit_test);
-  hashtable_add(gtr->unit_tests, "string class", str_unit_test);
-  hashtable_add(gtr->unit_tests, "tokenizer class", tokenizer_unit_test);
+  hashtable_add(gtr->unit_tests, "alignment class", alignment_unit_test, env);
+  hashtable_add(gtr->unit_tests, "array class", array_unit_test, env);
+  hashtable_add(gtr->unit_tests, "bittab class", bittab_unit_test, env);
+  hashtable_add(gtr->unit_tests, "bsearch module", bsearch_unit_test, env);
+  hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test,
+                env);
+  hashtable_add(gtr->unit_tests, "dlist class", dlist_unit_test, env);
+  hashtable_add(gtr->unit_tests, "evaluator class", evaluator_unit_test, env);
+  hashtable_add(gtr->unit_tests, "grep module", grep_unit_test, env);
+  hashtable_add(gtr->unit_tests, "hashtable class", hashtable_unit_test, env);
+  hashtable_add(gtr->unit_tests, "hmm class", hmm_unit_test, env);
+  hashtable_add(gtr->unit_tests, "range class", range_unit_test, env);
+  hashtable_add(gtr->unit_tests, "splicedseq class", splicedseq_unit_test, env);
+  hashtable_add(gtr->unit_tests, "splitter class", splitter_unit_test, env);
+  hashtable_add(gtr->unit_tests, "string class", str_unit_test, env);
+  hashtable_add(gtr->unit_tests, "tokenizer class", tokenizer_unit_test, env);
 }
 
 int run_test(void *key, void *value, void *data, Env *env)

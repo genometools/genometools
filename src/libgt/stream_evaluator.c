@@ -770,7 +770,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
         slot = slot_new(env);
         hashtable_add(se->real_features, str_get(genome_node_get_seqid(gn)),
-                      slot);
+                      slot, env);
       }
       assert(slot);
     }
