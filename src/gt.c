@@ -23,16 +23,17 @@ int main(int argc, char *argv[])
       rval = gtr_run(gtr, argc, argv, env);
       break;
     case OPTIONPARSER_ERROR:
-      rval = EXIT_FAILURE;
+      rval = 1; /* user error */
       break;
     case OPTIONPARSER_REQUESTS_EXIT:
-      rval = EXIT_SUCCESS;
+      rval = 0; /* everything went fine */
   }
   if (env_error_is_set(env)) {
     fprintf(stderr, "error: %s\n", env_error_get(env));
     assert(rval);
   }
   gtr_delete(gtr, env);
-  env_delete(env);
+  if (env_delete(env))
+    return 2; /* programmer error */
   return rval;
 }

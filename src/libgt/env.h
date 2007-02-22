@@ -19,7 +19,7 @@ MA*    env_ma(const Env*);    /* return the memory allocator */
 Error* env_error(const Env*); /* return the error object */
 Log*   env_log(const Env*);   /* return the log object or NULL */
 void   env_set_log(Env*, Log*);
-void   env_delete(Env*);
+int    env_delete(Env*);
 
 /* wrapper for memory functions */
 #define env_ma_malloc(env, size)\

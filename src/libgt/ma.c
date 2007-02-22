@@ -42,6 +42,12 @@ void ma_free(void *ptr, MA *ma)
   free(ptr);
 }
 
+int ma_check_space_leak(MA *ma)
+{
+  assert(ma);
+  return 0;
+}
+
 void ma_delete(MA *ma)
 {
   if (!ma) return;

@@ -45,13 +45,16 @@ void env_set_log(Env *e, Log *log)
   e->log = log;
 }
 
-void env_delete(Env *e)
+int env_delete(Env *e)
 {
-  if (!e) return;
+  int rval;
+  assert(e);
   log_delete(e->log, e->ma);
   error_delete(e->error, e->ma);
+  rval = ma_check_space_leak(e->ma);
   ma_delete(e->ma);
   free(e);
+  return rval;
 }
 
 void env_ma_free(void *ptr, Env *env)
