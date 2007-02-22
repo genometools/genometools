@@ -11,10 +11,11 @@
 
 typedef struct Splicedseq Splicedseq;
 
-Splicedseq*   splicedseq_new(void);
+Splicedseq*   splicedseq_new(Env*);
 /* adds an ``exon'' to the spliced sequence */
 void          splicedseq_add(Splicedseq*, unsigned long start,
-                             unsigned long end, const char *original_sequence);
+                             unsigned long end, const char *original_sequence,
+                             Env*);
 char*         splicedseq_get(const Splicedseq*);
 bool          splicedseq_pos_is_border(const Splicedseq*, unsigned long);
 /* maps the given position back to the original coordinate system */
@@ -23,6 +24,6 @@ unsigned long splicedseq_length(const Splicedseq*);
 int           splicedseq_reverse(Splicedseq*, Env*);
 void          splicedseq_reset(Splicedseq*);
 int           splicedseq_unit_test(Env*);
-void          splicedseq_delete(Splicedseq*);
+void          splicedseq_delete(Splicedseq*, Env*);
 
 #endif

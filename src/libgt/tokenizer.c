@@ -15,11 +15,11 @@ struct Tokenizer {
   Str *token; /* the current token */
 };
 
-Tokenizer* tokenizer_new(IO *io)
+Tokenizer* tokenizer_new(IO *io, Env *env)
 {
   Tokenizer *t;
   assert(io);
-  t = xcalloc(1, sizeof (Tokenizer));
+  t = env_ma_calloc(env, 1, sizeof (Tokenizer));
   t->io = io;
   return t;
 }
@@ -30,7 +30,7 @@ void tokenizer_skip_comment_lines(Tokenizer *t)
   t->skip_comment_lines = true;
 }
 
-Str* tokenizer_get_token(Tokenizer *t)
+Str* tokenizer_get_token(Tokenizer *t, Env *env)
 {
   char c = EOF;
   assert(t);
@@ -51,15 +51,15 @@ Str* tokenizer_get_token(Tokenizer *t)
     do {
       if (c != EOF) {
         if (!t->token)
-          t->token = str_new();
+          t->token = str_new(env);
         if (c == '\n')
           break;
-        str_append_char(t->token, c);
+        str_append_char(t->token, c, env);
       }
     } while ((io_get_char(t->io, &c) != -1) && c != ' ' && c != '\n');
     if (c == '\n' && c != EOF) {
       assert(t->token);
-      str_append_char(t->token, c);
+      str_append_char(t->token, c, env);
     }
   }
   /* return token */
@@ -68,15 +68,15 @@ Str* tokenizer_get_token(Tokenizer *t)
   return NULL;
 }
 
-bool tokenizer_has_token(Tokenizer *t)
+bool tokenizer_has_token(Tokenizer *t, Env *env)
 {
   bool has_token = false;
   Str *token;
   assert(t);
-  token = tokenizer_get_token(t);
+  token = tokenizer_get_token(t, env);
   if (token) {
     has_token = true;
-    str_delete(token);
+    str_delete(token, env);
   }
   return has_token;
 }
@@ -87,10 +87,10 @@ bool tokenizer_line_start(const Tokenizer *t)
   return io_line_start(t->io);
 }
 
-void tokenizer_next_token(Tokenizer *t)
+void tokenizer_next_token(Tokenizer *t, Env *env)
 {
   assert(t);
-  str_delete(t->token);
+  str_delete(t->token, env);
   t->token = NULL;
 }
 
@@ -120,10 +120,10 @@ int tokenizer_unit_test(Env *env)
   tmpfp = xfopen(tmpfilename, "w");
   fprintf(tmpfp, "# comment line\n");
   xfclose(tmpfp);
-  t = tokenizer_new(io_new(tmpfilename, "r"));
+  t = tokenizer_new(io_new(tmpfilename, "r", env), env);
   tokenizer_skip_comment_lines(t);
-  ensure(has_err, !tokenizer_has_token(t));
-  tokenizer_delete(t);
+  ensure(has_err, !tokenizer_has_token(t, env));
+  tokenizer_delete(t, env);
   xremove(tmpfilename);
 
   /* larger test */
@@ -131,44 +131,44 @@ int tokenizer_unit_test(Env *env)
   tmpfp = xfopen(tmpfilename, "w");
   fprintf(tmpfp, " a bb ccc\ndddd -5");
   xfclose(tmpfp);
-  t = tokenizer_new(io_new(tmpfilename, "r"));
+  t = tokenizer_new(io_new(tmpfilename, "r", env), env);
 
-  token = tokenizer_get_token(t);
+  token = tokenizer_get_token(t, env);
   ensure(has_err, !strcmp(str_get(token), "a"));
-  str_delete(token);
+  str_delete(token, env);
 
-  tokenizer_next_token(t);
-  token = tokenizer_get_token(t);
+  tokenizer_next_token(t, env);
+  token = tokenizer_get_token(t, env);
   ensure(has_err, !strcmp(str_get(token), "bb"));
-  str_delete(token);
+  str_delete(token, env);
 
-  tokenizer_next_token(t);
-  token = tokenizer_get_token(t);
+  tokenizer_next_token(t, env);
+  token = tokenizer_get_token(t, env);
   ensure(has_err, !strcmp(str_get(token), "ccc\n"));
-  str_delete(token);
+  str_delete(token, env);
 
-  tokenizer_next_token(t);
-  token = tokenizer_get_token(t);
+  tokenizer_next_token(t, env);
+  token = tokenizer_get_token(t, env);
   ensure(has_err, !strcmp(str_get(token), "dddd"));
-  str_delete(token);
+  str_delete(token, env);
 
-  tokenizer_next_token(t);
-  token = tokenizer_get_token(t);
+  tokenizer_next_token(t, env);
+  token = tokenizer_get_token(t, env);
   ensure(has_err, !strcmp(str_get(token), "-5"));
-  str_delete(token);
+  str_delete(token, env);
 
-  tokenizer_next_token(t);
-  ensure(has_err, !tokenizer_has_token(t));
-  tokenizer_delete(t);
+  tokenizer_next_token(t, env);
+  ensure(has_err, !tokenizer_has_token(t, env));
+  tokenizer_delete(t, env);
   xremove(tmpfilename);
 
   return has_err;
 }
 
-void tokenizer_delete(Tokenizer *t)
+void tokenizer_delete(Tokenizer *t, Env *env)
 {
   if (!t) return;
-  io_delete(t->io);
-  str_delete(t->token);
-  free(t);
+  io_delete(t->io, env);
+  str_delete(t->token, env);
+  env_ma_free(t, env);
 }

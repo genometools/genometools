@@ -36,7 +36,7 @@ void* ma_realloc(MA *ma, void *ptr, size_t size)
   return xrealloc(ptr, size);
 }
 
-void ma_free(MA *ma, void *ptr)
+void ma_free(void *ptr, MA *ma)
 {
   assert(ma);
   free(ptr);

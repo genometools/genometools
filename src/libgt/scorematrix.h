@@ -13,7 +13,7 @@
 typedef struct ScoreMatrix ScoreMatrix;
 
 /* a score matrix is always defined over a given alphabet */
-ScoreMatrix* scorematrix_new(Alpha*);
+ScoreMatrix* scorematrix_new(Alpha*, Env*);
 /* reads in a protein scorematrix from the given path and returns it */
 ScoreMatrix* scorematrix_read_protein(const char *path, Env*);
 int          scorematrix_get_score(const ScoreMatrix*,
@@ -21,6 +21,6 @@ int          scorematrix_get_score(const ScoreMatrix*,
 void         scorematrix_set_score(ScoreMatrix*,
                                    unsigned char, unsigned char, int);
 void         scorematrix_show(const ScoreMatrix*, FILE*);
-void         scorematrix_delete(ScoreMatrix*);
+void         scorematrix_delete(ScoreMatrix*, Env*);
 
 #endif

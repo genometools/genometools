@@ -28,11 +28,11 @@ static int mergefeat_stream_sorted_next_tree(GenomeStream *gs, GenomeNode **gn,
   return genome_stream_next_tree(mfs->sort_stream, gn, env);
 }
 
-static void mergefeat_stream_sorted_free(GenomeStream *gs)
+static void mergefeat_stream_sorted_free(GenomeStream *gs, Env *env)
 {
   MergefeatStreamSorted *mfs = mergefeat_stream_sorted_cast(gs);
-  genome_stream_delete(mfs->mergefeat_stream_unsorted);
-  genome_stream_delete(mfs->sort_stream);
+  genome_stream_delete(mfs->mergefeat_stream_unsorted, env);
+  genome_stream_delete(mfs->sort_stream, env);
 }
 
 const GenomeStreamClass* mergefeat_stream_sorted_class(void)
@@ -43,13 +43,14 @@ const GenomeStreamClass* mergefeat_stream_sorted_class(void)
   return &gsc;
 }
 
-GenomeStream* mergefeat_stream_sorted_new(GenomeStream *in_stream)
+GenomeStream* mergefeat_stream_sorted_new(GenomeStream *in_stream, Env *env)
 {
   GenomeStream *gs = genome_stream_create(mergefeat_stream_sorted_class(),
                                           true);
   MergefeatStreamSorted *mfs = mergefeat_stream_sorted_cast(gs);
   assert(in_stream && genome_stream_is_sorted(in_stream));
-  mfs->mergefeat_stream_unsorted = mergefeat_stream_unsorted_new(in_stream);
-  mfs->sort_stream = sort_stream_new(mfs->mergefeat_stream_unsorted);
+  mfs->mergefeat_stream_unsorted = mergefeat_stream_unsorted_new(in_stream,
+                                                                 env);
+  mfs->sort_stream = sort_stream_new(mfs->mergefeat_stream_unsorted, env);
   return gs;
 }

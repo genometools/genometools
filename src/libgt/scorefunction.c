@@ -14,12 +14,12 @@ struct ScoreFunction {
       insertion_score;
 };
 
-ScoreFunction* scorefunction_new(ScoreMatrix *sm,
-                                 int deletion_score, int insertion_score)
+ScoreFunction* scorefunction_new(ScoreMatrix *sm, int deletion_score,
+                                 int insertion_score, Env *env)
 {
   ScoreFunction *sf;
   assert(sm);
-  sf = xmalloc(sizeof (ScoreFunction));
+  sf = env_ma_malloc(env, sizeof (ScoreFunction));
   sf->sm = sm;
   sf->deletion_score = deletion_score;
   sf->insertion_score = insertion_score;
@@ -45,9 +45,9 @@ int scorefunction_get_insertion_score(const ScoreFunction *s)
   return s->insertion_score;
 }
 
-void scorefunction_delete(ScoreFunction *sf)
+void scorefunction_delete(ScoreFunction *sf, Env *env)
 {
   if (!sf) return;
-  scorematrix_delete(sf->sm);
-  free(sf);
+  scorematrix_delete(sf->sm, env);
+  env_ma_free(sf, env);
 }

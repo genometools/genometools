@@ -74,7 +74,7 @@ RegionMapping* regionmapping_new(Str *mapping_filename, Env *env)
   }
   /* return */
   if (has_err) {
-    regionmapping_delete(rm);
+    regionmapping_delete(rm, env);
     return NULL;
   }
   return rm;
@@ -104,7 +104,7 @@ static Str* map_table(RegionMapping *rm, const char *sequence_region,
     }
   }
   if (!has_err)
-    result = str_new_cstr(lua_tostring(rm->L, -1));
+    result = str_new_cstr(lua_tostring(rm->L, -1), env);
   lua_pop(rm->L, 1); /* pop result */
   return result;
 }
@@ -132,7 +132,7 @@ static Str* map_function(RegionMapping *rm, const char *sequence_region,
       has_err = -1;
     }
     if (!has_err)
-      result = str_new_cstr(lua_tostring(rm->L, -1));
+      result = str_new_cstr(lua_tostring(rm->L, -1), env);
     lua_pop(rm->L, 1); /* pop result */
   }
   return result;
@@ -149,10 +149,10 @@ Str* regionmapping_map(RegionMapping *rm, const char *sequence_region,
     return map_function(rm, sequence_region, env);
 }
 
-void regionmapping_delete(RegionMapping *rm)
+void regionmapping_delete(RegionMapping *rm, Env *env)
 {
   if (!rm) return;
-  str_delete(rm->mapping_filename);
+  str_delete(rm->mapping_filename, env);
   if (rm->L) lua_close(rm->L);
-  free(rm);
+  env_ma_free(rm, env);
 }

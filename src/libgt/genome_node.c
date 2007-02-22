@@ -6,7 +6,6 @@
 
 #include <assert.h>
 #include <stdarg.h>
-#include "fptr.h"
 #include "genome_node_rep.h"
 #include "hashtable.h"
 #include "msort.h"
@@ -49,31 +48,13 @@ static int compare_genome_nodes(GenomeNode *gn_a, GenomeNode *gn_b)
                        genome_node_get_range(gn_b));
 }
 
-void genome_node_class_init(GenomeNodeClass *gnc, size_t size, ...)
-{
-  va_list ap;
-  Fptr func, meth, *mm;
-
-  gnc->size = size;
-  va_start(ap, size);
-  while ((func = va_arg(ap, Fptr))) {
-    meth = va_arg(ap, Fptr);
-    assert(meth);
-    if (func == (Fptr) genome_node_delete) {
-      mm  = (Fptr*) &gnc->free; *mm = meth;
-    }
-    else assert(0);
-  }
-  va_end(ap);
-}
-
 GenomeNode* genome_node_create(const GenomeNodeClass *gnc,
                                 const char *filename,
-                                unsigned long line_number)
+                                unsigned long line_number, Env *env)
 {
   GenomeNode *gn;
   assert(gnc && gnc->size);
-  gn                  = xmalloc(gnc->size);
+  gn                  = env_ma_malloc(env, gnc->size);
   gn->c_class         = gnc;
   gn->filename        = filename;
   gn->line_number     = line_number;
@@ -109,12 +90,12 @@ static GenomeNode* genome_node_ref(GenomeNode *gn)
   return gn;
 }
 
-GenomeNode* genome_node_rec_ref(GenomeNode *gn)
+GenomeNode* genome_node_rec_ref(GenomeNode *gn, Env *env)
 {
   int has_err;
   assert(gn);
   has_err = genome_node_traverse_children(gn, NULL, increase_reference_count,
-                                          true, NULL);
+                                          true, env);
   assert(!has_err); /* cannot happen, increase_reference_count() is sane */
   return gn;
 }
@@ -144,17 +125,17 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   gn_ref = genome_node_ref(genome_node);
 
   if (depth_first) {
-    node_stack = array_new(sizeof (GenomeNode*));
-    array_add(node_stack, genome_node);
+    node_stack = array_new(sizeof (GenomeNode*), env);
+    array_add(node_stack, genome_node, env);
   }
   else {
-    node_queue = queue_new(sizeof (GenomeNode*));
-    queue_add(node_queue, genome_node);
+    node_queue = queue_new(sizeof (GenomeNode*), env);
+    queue_add(node_queue, genome_node, env);
   }
-  list_of_children = array_new(sizeof (GenomeNode*));
+  list_of_children = array_new(sizeof (GenomeNode*), env);
 
   if (traverse_only_once)
-    traversed_nodes = hashtable_new(HASH_DIRECT, NULL, NULL);
+    traversed_nodes = hashtable_new(HASH_DIRECT, NULL, NULL, env);
 
   while ((depth_first ? array_size(node_stack): queue_size(node_queue))) {
     if (depth_first)
@@ -168,7 +149,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
       for (dlistelem = dlist_first(gn->children); dlistelem != NULL;
            dlistelem = dlistelem_next(dlistelem)) {
         child_feature = (GenomeNode*) dlistelem_get_data(dlistelem);
-        array_add(list_of_children, child_feature);
+        array_add(list_of_children, child_feature, env);
       }
     }
     /* store the implications of <gn> to the tree status of <genome_node> */
@@ -195,9 +176,9 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
         /* feature has not been traversed or has to be traversed multiple
            times */
         if (depth_first)
-          array_add(node_stack, child_feature);
+          array_add(node_stack, child_feature, env);
         else
-          queue_add(node_queue, child_feature);
+          queue_add(node_queue, child_feature, env);
         if (traverse_only_once)
           hashtable_add(traversed_nodes, child_feature, child_feature);
       }
@@ -220,12 +201,12 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   }
 
   /* free */
-  genome_node_delete(gn_ref);
+  genome_node_delete(gn_ref, env);
   if (traverse_only_once)
-    hashtable_delete(traversed_nodes);
-  array_delete(list_of_children);
-  array_delete(node_stack);
-  queue_delete(node_queue);
+    hashtable_delete(traversed_nodes, env);
+  array_delete(list_of_children, env);
+  array_delete(node_stack, env);
+  queue_delete(node_queue, env);
 
   return has_err;
 }
@@ -348,14 +329,14 @@ int genome_node_accept(GenomeNode *gn, GenomeVisitor *gv, Env *env)
   return gn->c_class->accept(gn, gv, env);
 }
 
-void genome_node_is_part_of_genome_node(GenomeNode *parent,
-                                        GenomeNode *child)
+void genome_node_is_part_of_genome_node(GenomeNode *parent, GenomeNode *child,
+                                        Env *env)
 {
   assert(parent && child);
   /* create children list  on demand */
   if (!parent->children)
-    parent->children = dlist_new((Compare) compare_genome_nodes);
-  dlist_add(parent->children, child); /* XXX: check for circles */
+    parent->children = dlist_new((Compare) compare_genome_nodes, env);
+  dlist_add(parent->children, child, env); /* XXX: check for circles */
   /* update tree status of <parent> */
   genome_node_info_set_tree_status(&parent->info,
                                    GENOME_NODE_TREE_STATUS_UNDETERMINED);
@@ -381,12 +362,12 @@ static int remove_leaf(GenomeNode *node, void *data, Env *env)
   return 0;
 }
 
-void genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn)
+void genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn, Env *env)
 {
   int has_err;
   assert(tree && leafn);
   assert(!genome_node_number_of_children(leafn));
-  has_err = genome_node_traverse_children(tree, leafn, remove_leaf, true, NULL);
+  has_err = genome_node_traverse_children(tree, leafn, remove_leaf, true, env);
   assert(!has_err); /* cannot happen, remove_leaf() is sane */
 }
 
@@ -398,9 +379,9 @@ bool genome_node_has_children(GenomeNode *gn)
   return true;
 }
 
-bool genome_node_direct_children_do_not_overlap(GenomeNode *gn)
+bool genome_node_direct_children_do_not_overlap(GenomeNode *gn, Env *env)
 {
-  Array *children_ranges = array_new(sizeof (Range));
+  Array *children_ranges = array_new(sizeof (Range), env);
   Dlistelem *dlistelem;
   Range range;
   bool rval;
@@ -416,7 +397,7 @@ bool genome_node_direct_children_do_not_overlap(GenomeNode *gn)
          dlistelem = dlistelem_next(dlistelem)) {
       range = genome_node_get_range((GenomeNode*)
                                     dlistelem_get_data(dlistelem));
-      array_add(children_ranges, range);
+      array_add(children_ranges, range, env);
     }
   }
 
@@ -424,7 +405,7 @@ bool genome_node_direct_children_do_not_overlap(GenomeNode *gn)
   assert(ranges_are_sorted(children_ranges));
   rval = ranges_do_not_overlap(children_ranges);
 
-  array_delete(children_ranges);
+  array_delete(children_ranges, env);
 
   return rval;
 }
@@ -444,8 +425,8 @@ bool genome_node_is_tree(GenomeNode *gn)
   }
 }
 
-bool genome_node_tree_is_sorted(GenomeNode **buffer,
-                                        GenomeNode *current_node)
+bool genome_node_tree_is_sorted(GenomeNode **buffer, GenomeNode *current_node,
+                                Env *env)
 {
   assert(buffer && current_node);
 
@@ -453,7 +434,7 @@ bool genome_node_tree_is_sorted(GenomeNode **buffer,
     /* the last node is not larger than the current one */
     if (genome_node_compare(buffer, &current_node) == 1)
       return false;
-    genome_node_delete(*buffer);
+    genome_node_delete(*buffer, env);
   }
   *buffer = genome_node_ref(current_node);
   return true;
@@ -498,29 +479,29 @@ int genome_node_compare(GenomeNode **gn_a, GenomeNode **gn_b)
   return compare_genome_nodes(*gn_a, *gn_b);
 }
 
-void genome_node_delete(GenomeNode *gn)
+void genome_node_delete(GenomeNode *gn, Env *env)
 {
   if (!gn) return;
   if (gn->reference_count) { gn->reference_count--; return; }
   assert(gn->c_class);
-  if (gn->c_class->free) gn->c_class->free(gn);
-  dlist_delete(gn->children);
-  free(gn);
+  if (gn->c_class->free) gn->c_class->free(gn, env);
+  dlist_delete(gn->children, env);
+  env_ma_free(gn, env);
 }
 
 static int free_genome_node(GenomeNode *gn, /*@unused@*/ void *data, Env *env)
 {
   env_error_check(env);
-  genome_node_delete(gn);
+  genome_node_delete(gn, env);
   return 0;
 }
 
-void genome_node_rec_delete(GenomeNode *gn)
+void genome_node_rec_delete(GenomeNode *gn, Env *env)
 {
   int has_err;
   if (!gn) return;
   has_err = genome_node_traverse_children(gn, NULL, free_genome_node, true,
-                                          NULL);
+                                          env);
   assert(!has_err); /* cannot happen, free_genome_node() is sane */
 }
 

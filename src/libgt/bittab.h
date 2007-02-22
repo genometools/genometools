@@ -13,7 +13,7 @@
 
 typedef struct Bittab Bittab;
 
-Bittab*       bittab_new(unsigned long num_of_bits);
+Bittab*       bittab_new(unsigned long num_of_bits, Env*);
 void          bittab_set_bit(Bittab*, unsigned long);
 void          bittab_unset_bit(Bittab*, unsigned long);
 void          bittab_complement(Bittab*, const Bittab*);           /* a=~b   */
@@ -27,7 +27,7 @@ void          bittab_shift_left_equal(Bittab*);                    /* a<<=1  */
 void          bittab_shift_right_equal(Bittab*);                   /* a>>=1  */
 void          bittab_unset(Bittab*);                               /* a=0    */
 void          bittab_show(const Bittab*, FILE*);
-void          bittab_get_all_bitnums(const Bittab*, Array*);
+void          bittab_get_all_bitnums(const Bittab*, Array*, Env*);
 bool          bittab_bit_is_set(const Bittab*, unsigned long);
 bool          bittab_is_true(const Bittab*);
 bool          bittab_cmp(const Bittab*, const Bittab*);
@@ -37,7 +37,7 @@ unsigned long bittab_get_next_bitnum(const Bittab*, unsigned long);
 unsigned long bittab_count_set_bits(Bittab*);
 unsigned long bittab_size(Bittab*);
 int           bittab_unit_test(Env*);
-void          bittab_delete(Bittab*);
+void          bittab_delete(Bittab*, Env*);
 
 #if 0
   a typical iterator loop:

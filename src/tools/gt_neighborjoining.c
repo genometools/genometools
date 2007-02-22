@@ -15,10 +15,11 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
                          "Compute and show Neighbor-Joining tree for the "
                          "sequences in sequence file (using\nthe unit cost "
                          "edit distance as distance function). If 'example' is "
-                         "given as\nsequence_file, a builtin example is used.");
+                         "given as\nsequence_file, a builtin example is used.",
+                         env);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 1, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   return oprval;
 }
 
@@ -61,22 +62,22 @@ int gt_neighborjoining(int argc, char *argv[], Env *env)
     use_hard_coded_example = true;
 
   if (use_hard_coded_example)
-    nj = neighborjoining_new(5, NULL, exampledistfunc);
+    nj = neighborjoining_new(5, NULL, exampledistfunc, env);
   else {
     bioseq = bioseq_new(argv[1], env);
     if (!bioseq)
       has_err = -1;
     if (!has_err) {
       nj = neighborjoining_new(bioseq_number_of_sequences(bioseq), bioseq,
-                               distfunc);
+                               distfunc, env);
     }
   }
 
   if (!has_err)
     neighborjoining_show_tree(nj, stdout);
 
-  bioseq_delete(bioseq);
-  neighborjoining_delete(nj);
+  bioseq_delete(bioseq, env);
+  neighborjoining_delete(nj, env);
 
   return has_err;
 }

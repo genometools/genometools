@@ -9,14 +9,15 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include "env.h"
 
 /* the alphabet class */
 typedef struct Alpha Alpha; /* XXX: Alpha -> Alphabet */
 
-Alpha*       alpha_new(void);
-Alpha*       alpha_new_dna(void);
-Alpha*       alpha_new_protein(void);
-Alpha*       alpha_guess(const char *seq, unsigned long seqlen);
+Alpha*       alpha_new(Env*);
+Alpha*       alpha_new_dna(Env*);
+Alpha*       alpha_new_protein(Env*);
+Alpha*       alpha_guess(const char *seq, unsigned long seqlen, Env*);
 Alpha*       alpha_ref(Alpha*);
 /* add the mapping of all given characters to the alphabet, the first character
    is the result of subsequent alpha_decode() calls  */
@@ -29,6 +30,6 @@ void         alpha_encode_seq(const Alpha*, char *out, char *in,
                               unsigned long length); /* in can be == out */
 bool         alpha_is_compatible_with_alpha(const Alpha*, const Alpha*);
 unsigned int alpha_size(const Alpha*);
-void         alpha_delete(Alpha*);
+void         alpha_delete(Alpha*, Env*);
 
 #endif

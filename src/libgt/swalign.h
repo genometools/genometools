@@ -14,6 +14,6 @@
 /* (locally) align u and v (Smith-Waterman algorithm ) with the given score
    function and return one optimal Alignment.
    If no such alignment was found, NULL is returned. */
-Alignment* swalign(Seq *u, Seq *v, const ScoreFunction*);
+Alignment* swalign(Seq *u, Seq *v, const ScoreFunction*, Env*);
 
 #endif

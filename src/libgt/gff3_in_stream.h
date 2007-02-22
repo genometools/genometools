@@ -17,9 +17,9 @@ const GenomeStreamClass* gff3_in_stream_class(void);
 void                     gff3_in_stream_set_offset(GenomeStream*, long);
 GenomeStream*            gff3_in_stream_new_unsorted(int num_of_files,
                                                      char **filenames,
-                                                     bool be_verbose);
+                                                     bool be_verbose, Env*);
 /* filename == NULL -> use stdin */
 GenomeStream*            gff3_in_stream_new_sorted(char *filename,
-                                                   bool be_verbose);
+                                                   bool be_verbose, Env*);
 
 #endif

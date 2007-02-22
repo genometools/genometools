@@ -22,7 +22,7 @@ typedef int (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
 const GenomeNodeClass* genome_feature_class(void);
 GenomeNode*            genome_feature_new(GenomeFeatureType, Range, Strand,
                                           const char *filename,
-                                          unsigned long line_number);
+                                          unsigned long line_number, Env*);
 const char*            genome_feature_get_source(GenomeFeature*);
 GenomeFeatureType      genome_feature_get_type(GenomeFeature*);
 double                 genome_feature_get_score(GenomeFeature*);
@@ -34,7 +34,8 @@ void                   genome_feature_set_end(GenomeFeature*, unsigned long);
 void                   genome_feature_set_score(GenomeFeature*, double);
 void                   genome_feature_add_attribute(GenomeFeature*,
                                                     const char *attr_name,
-                                                    const char *attr_value);
+                                                    const char *attr_value,
+                                                    Env*);
 bool                   genome_feature_has_attribute(const GenomeFeature*);
 int                    genome_feature_foreach_attribute(GenomeFeature*,
                                                         AttributeIterFunc,

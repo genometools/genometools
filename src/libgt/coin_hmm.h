@@ -21,8 +21,8 @@ typedef enum {
   COIN_NUM_OF_SYMBOLS
 } Coin_emissions;
 
-HMM*   coin_hmm_loaded(void);
-HMM*   coin_hmm_fair(void);
-Alpha* coin_hmm_alpha(void);
+HMM*   coin_hmm_loaded(Env*);
+HMM*   coin_hmm_fair(Env*);
+Alpha* coin_hmm_alpha(Env*);
 
 #endif

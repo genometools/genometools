@@ -10,31 +10,8 @@
 #include "genome_stream_rep.h"
 #include "xansi.h"
 
-void genome_stream_class_init(GenomeStreamClass *gsc, size_t size, ...)
-{
-  va_list ap;
-  Fptr func, meth, *mm;
-
-  assert(gsc && size);
-
-  gsc->size = size;
-  va_start(ap, size);
-  while ((func = va_arg(ap, Fptr))) {
-    meth = va_arg(ap, Fptr);
-    assert(meth);
-    if (func == (Fptr) genome_stream_next_tree) {
-      mm  = (Fptr*) &gsc->next_tree; *mm = meth;
-    }
-    else if (func == (Fptr) genome_stream_delete) {
-      mm  = (Fptr*) &gsc->free; *mm = meth;
-    }
-    else assert(0);
-  }
-  va_end(ap);
-}
-
 GenomeStream* genome_stream_create(const GenomeStreamClass *gsc,
-                                    bool ensure_sorting)
+                                   bool ensure_sorting)
 {
   GenomeStream *gs;
   assert(gsc && gsc->size);
@@ -44,12 +21,12 @@ GenomeStream* genome_stream_create(const GenomeStreamClass *gsc,
   return gs;
 }
 
-void genome_stream_delete(GenomeStream *gs)
+void genome_stream_delete(GenomeStream *gs, Env *env)
 {
   if (!gs) return;
   assert(gs->c_class);
-  if (gs->c_class->free) gs->c_class->free(gs);
-  genome_node_delete(gs->last_node);
+  if (gs->c_class->free) gs->c_class->free(gs, env);
+  genome_node_delete(gs->last_node, env);
   free(gs);
 }
 
@@ -60,7 +37,7 @@ int genome_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   env_error_check(env);
   has_err = gs->c_class->next_tree(gs, gn, env);
   if (!has_err && *gn && gs->ensure_sorting) {
-    assert(genome_node_tree_is_sorted(&gs->last_node, *gn));
+    assert(genome_node_tree_is_sorted(&gs->last_node, *gn, env));
   }
   return has_err;
 }

@@ -27,9 +27,9 @@ struct GTR {
             *unit_tests;
 };
 
-GTR* gtr_new(void)
+GTR* gtr_new(Env *env)
 {
-  return xcalloc(1, sizeof (GTR));
+  return env_ma_calloc(env, 1, sizeof (GTR));
 }
 
 static int show_tool(void *key, void *value, void *data, Env *env)
@@ -40,7 +40,7 @@ static int show_tool(void *key, void *value, void *data, Env *env)
   assert(key && value && data);
   toolname = (const char*) key;
   toolnames = (Array*) data;
-  array_add(toolnames, toolname);
+  array_add(toolnames, toolname, env);
   return 0;
 }
 
@@ -53,7 +53,7 @@ static int show_option_comments(const char *progname, void *data, Env *env)
   env_error_check(env);
   assert(data);
   gtr = (GTR*) data;
-  toolnames = array_new(sizeof (const char*));
+  toolnames = array_new(sizeof (const char*), env);
   if (gtr->tools) {
     has_err = hashtable_foreach(gtr->tools, show_tool, toolnames, env);
     assert(!has_err); /* cannot happen, show_tool() is sane */
@@ -64,7 +64,7 @@ static int show_option_comments(const char *progname, void *data, Env *env)
     for (i = 0; i < array_size(toolnames); i++)
       xputs(*(const char**) array_get(toolnames, i));
   }
-  array_delete(toolnames);
+  array_delete(toolnames, env);
   return 0;
 }
 
@@ -77,24 +77,25 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, char **argv, Env *env)
   assert(gtr);
   op = option_parser_new("[option ...] [tool ...] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
-                          "(http://genometools.org).");
+                          "(http://genometools.org).", env);
   option_parser_set_comment_func(op, show_option_comments, gtr);
-  o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false);
-  option_parser_add_option(op, o);
-  o = option_new_debug(&gtr->debug);
-  option_parser_add_option(op, o);
+  o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false,
+                      env);
+  option_parser_add_option(op, o, env);
+  o = option_new_debug(&gtr->debug, env);
+  option_parser_add_option(op, o, env);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   (*parsed_args)--;
   return oprval;
 }
 
-void gtr_register_components(GTR *gtr)
+void gtr_register_components(GTR *gtr, Env *env)
 {
   assert(gtr);
   /* add tools */
-  hashtable_delete(gtr->tools);
-  gtr->tools = hashtable_new(HASH_STRING, NULL, NULL);
+  hashtable_delete(gtr->tools, env);
+  gtr->tools = hashtable_new(HASH_STRING, NULL, NULL, env);
   hashtable_add(gtr->tools, "bioseq", gt_bioseq);
   hashtable_add(gtr->tools, "cds", gt_cds);
   hashtable_add(gtr->tools, "clean", gt_clean);
@@ -109,8 +110,8 @@ void gtr_register_components(GTR *gtr)
   hashtable_add(gtr->tools, "mmapandread", gt_mmapandread);
   hashtable_add(gtr->tools, "stat", gt_stat);
   /* add unit tests */
-  hashtable_delete(gtr->unit_tests);
-  gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL);
+  hashtable_delete(gtr->unit_tests, env);
+  gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL, env);
   hashtable_add(gtr->unit_tests, "alignment class", alignment_unit_test);
   hashtable_add(gtr->unit_tests, "array class", array_unit_test);
   hashtable_add(gtr->unit_tests, "bittab class", bittab_unit_test);
@@ -193,7 +194,7 @@ int gtr_run(GTR *gtr, int argc, char **argv, Env *env)
     return run_tests(gtr, env);
   }
   if (gtr->debug)
-    env_set_log(env, log_new());
+    env_set_log(env, log_new(env_ma(env)));
   assert(argc);
   if (argc == 1) {
     env_error_set(env, "no tool specified; option -help lists possible tools");
@@ -210,16 +211,16 @@ int gtr_run(GTR *gtr, int argc, char **argv, Env *env)
     nargv = cstr_array_prefix_first(argv+1, argv[0]);
     has_err = tool(argc-1, nargv, env);
   }
-  cstr_array_delete(nargv);
+  cstr_array_delete(nargv, env);
   if (has_err)
     return EXIT_FAILURE;
   return EXIT_SUCCESS;
 }
 
-void gtr_free(GTR *gtr)
+void gtr_delete(GTR *gtr, Env *env)
 {
   if (!gtr) return;
-  hashtable_delete(gtr->tools);
-  hashtable_delete(gtr->unit_tests);
-  free(gtr);
+  hashtable_delete(gtr->tools, env);
+  hashtable_delete(gtr->unit_tests, env);
+  env_ma_free(gtr, env);
 }

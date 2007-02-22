@@ -12,21 +12,21 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
   OPrval oprval;
   env_error_check(env);
   op = option_parser_new("", "Remove all files in the current directory which "
-                         "are automatically created by gt.");
+                         "are automatically created by gt.", env);
   oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
                                         versionfunc, 0, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   return oprval;
 }
 
-static void remove_pattern_in_current_dir(const char *pattern)
+static void remove_pattern_in_current_dir(const char *pattern, Env *env)
 {
   char **files_to_remove;
   Str *path;
   glob_t g;
 
-  path = str_new_cstr("./*");
-  str_append_cstr(path, pattern);
+  path = str_new_cstr("./*", env);
+  str_append_cstr(path, pattern, env);
   xglob(str_get(path), GLOB_NOCHECK, NULL, &g);
 
   /* remove found files */
@@ -42,7 +42,7 @@ static void remove_pattern_in_current_dir(const char *pattern)
 
   /* free */
   globfree(&g);
-  str_delete(path);
+  str_delete(path, env);
 }
 
 int gt_clean(int argc, char *argv[], Env *env)
@@ -59,10 +59,10 @@ int gt_clean(int argc, char *argv[], Env *env)
   assert(parsed_args == 1);
 
   /* remove GT_BIOSEQ_INDEX files */
-  remove_pattern_in_current_dir(GT_BIOSEQ_INDEX);
+  remove_pattern_in_current_dir(GT_BIOSEQ_INDEX, env);
 
   /* remove GT_BIOSEQ_RAW files */
-  remove_pattern_in_current_dir(GT_BIOSEQ_RAW);
+  remove_pattern_in_current_dir(GT_BIOSEQ_RAW, env);
 
   return 0;
 }

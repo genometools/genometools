@@ -8,13 +8,15 @@
 #define NEIGHBORJOINING_H
 
 #include <stdio.h>
+#include "env.h"
 
 typedef struct NeighborJoining NeighborJoining;
 
 NeighborJoining* neighborjoining_new(unsigned long num_of_taxa, void *data,
                                      double (*distfunc)
-                                     (unsigned long, unsigned long, void*));
+                                     (unsigned long, unsigned long, void*),
+                                     Env*);
 void             neighborjoining_show_tree(const NeighborJoining*, FILE*);
-void             neighborjoining_delete(NeighborJoining*);
+void             neighborjoining_delete(NeighborJoining*, Env*);
 
 #endif

@@ -15,15 +15,15 @@
 typedef struct Dlist Dlist;
 typedef struct Dlistelem Dlistelem;
 
-Dlist*        dlist_new(Compare);
+Dlist*        dlist_new(Compare, Env*);
 Dlistelem*    dlist_first(const Dlist*);
 Dlistelem*    dlist_last(const Dlist*);
 unsigned long dlist_size(const Dlist*);
-void          dlist_add(Dlist*, void *data); /* usually: O(n) (O(1) if data is
-                                                added in sorted order) */
+ /* usually: O(n) (O(1) if data is added in sorted order) */
+void          dlist_add(Dlist*, void *data, Env*);
 void          dlist_remove(Dlist*, Dlistelem*); /* XXX: frees the elem */
 int           dlist_unit_test(Env*);
-void          dlist_delete(Dlist*);
+void          dlist_delete(Dlist*, Env*);
 
 Dlistelem*    dlistelem_next(const Dlistelem*);
 void*         dlistelem_get_data(const Dlistelem*);

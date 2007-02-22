@@ -7,12 +7,14 @@
 #ifndef DISC_DISTRI_H
 #define DISC_DISTRI_H
 
+#include "env.h"
+
 /* A descrete distribution */
 typedef struct DiscDistri DiscDistri;
 
 DiscDistri* disc_distri_new(void);
-void        disc_distri_add(DiscDistri*, unsigned long);
+void        disc_distri_add(DiscDistri*, unsigned long, Env*);
 void        disc_distri_show(const DiscDistri*); /* on stdout */
-void        disc_distri_delete(DiscDistri*);
+void        disc_distri_delete(DiscDistri*, Env*);
 
 #endif

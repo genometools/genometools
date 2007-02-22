@@ -20,16 +20,16 @@ DiscDistri* disc_distri_new(void)
   return xcalloc(1, sizeof (DiscDistri));
 }
 
-void disc_distri_add(DiscDistri *d, unsigned long value)
+void disc_distri_add(DiscDistri *d, unsigned long value, Env *env)
 {
   unsigned long *distri, zero = 0;
   assert(d);
 
   if (!d->values)
-    d->values = array_new(sizeof (unsigned long));
+    d->values = array_new(sizeof (unsigned long), env);
 
   while (array_size(d->values) <= value)
-    array_add(d->values, zero);
+    array_add(d->values, zero, env);
 
   distri = array_get_space(d->values);
   distri[value]++;
@@ -52,9 +52,9 @@ void disc_distri_show(const DiscDistri *d)
   }
 }
 
-void disc_distri_delete(DiscDistri *d)
+void disc_distri_delete(DiscDistri *d, Env *env)
 {
   if (!d) return;
-  array_delete(d->values);
+  array_delete(d->values, env);
   free(d);
 }

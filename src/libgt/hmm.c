@@ -36,7 +36,7 @@ struct HMM {
          **emission_prob;     /* log values */
 };
 
-HMM* hmm_new(unsigned int num_of_states, unsigned int num_of_symbols)
+HMM* hmm_new(unsigned int num_of_states, unsigned int num_of_symbols, Env *env)
 {
   HMM *hmm;
   unsigned int i, j;
@@ -44,10 +44,12 @@ HMM* hmm_new(unsigned int num_of_states, unsigned int num_of_symbols)
   assert(num_of_states > 0 && num_of_symbols > 0);
 
   /* alloc */
-  hmm = xmalloc(sizeof (HMM));
-  hmm->initial_state_prob = xmalloc(sizeof (double) * num_of_states);
-  array2dim_malloc(hmm->transition_prob, num_of_states, num_of_states, double);
-  array2dim_malloc(hmm->emission_prob, num_of_states, num_of_symbols, double);
+  hmm = env_ma_malloc(env, sizeof (HMM));
+  hmm->initial_state_prob = env_ma_malloc(env, sizeof (double) * num_of_states);
+  array2dim_malloc(hmm->transition_prob, num_of_states, num_of_states, double,
+                   env);
+  array2dim_malloc(hmm->emission_prob, num_of_states, num_of_symbols, double,
+                   env);
 
   /* init */
   hmm->num_of_states = num_of_states;
@@ -284,7 +286,7 @@ void hmm_init_random(HMM *hmm)
 void hmm_decode(const HMM *hmm,
                 unsigned int *state_sequence,
                 const unsigned int *emissions,
-                unsigned int num_of_emissions)
+                unsigned int num_of_emissions, Env *env)
 {
   double **max_probabilities, tmp_prob;
   unsigned int **backtrace, colidx, precolidx;
@@ -297,8 +299,8 @@ void hmm_decode(const HMM *hmm,
   /* alloc tables */
   num_of_rows = hmm->num_of_states;
   num_of_columns = num_of_emissions;
-  array2dim_malloc(max_probabilities, num_of_rows, 2, double);
-  array2dim_malloc(backtrace, num_of_rows, num_of_columns, unsigned int);
+  array2dim_malloc(max_probabilities, num_of_rows, 2, double, env);
+  array2dim_malloc(backtrace, num_of_rows, num_of_columns, unsigned int, env);
 
   /* fill DP table */
   for (row = 0; row < num_of_rows; row++) { /* first column */
@@ -343,8 +345,8 @@ void hmm_decode(const HMM *hmm,
     state_sequence[column] = backtrace[state_sequence[column + 1]][column + 1];
 
   /* free tables */
-  array2dim_delete(backtrace);
-  array2dim_delete(max_probabilities);
+  array2dim_delete(backtrace, env);
+  array2dim_delete(max_probabilities, env);
 }
 
 /* [DEKM98, p. 58] */
@@ -382,13 +384,13 @@ static void compute_forward_table(double **f, const HMM *hmm,
 
 /* [DEKM98, p. 58] */
 double hmm_forward(const HMM* hmm, const unsigned int *emissions,
-                   unsigned int num_of_emissions)
+                   unsigned int num_of_emissions, Env *env)
 {
   unsigned int i;
   double **f, P;
 
   assert(hmm && emissions && num_of_emissions);
-  array2dim_malloc(f, hmm->num_of_states, num_of_emissions, double);
+  array2dim_malloc(f, hmm->num_of_states, num_of_emissions, double, env);
 
   /* XXX: we do not need the full table here, the last column would suffice */
   compute_forward_table(f, hmm, emissions, num_of_emissions);
@@ -400,7 +402,7 @@ double hmm_forward(const HMM* hmm, const unsigned int *emissions,
     P = logsum(P, f[i][num_of_emissions-1]);
   }
 
-  array2dim_delete(f);
+  array2dim_delete(f, env);
   return P;
 }
 
@@ -438,13 +440,13 @@ static void compute_backward_table(double **b, const HMM *hmm,
 
 /* [DEKM98, p. 59] */
 double hmm_backward(const HMM* hmm, const unsigned int *emissions,
-                    unsigned int num_of_emissions)
+                    unsigned int num_of_emissions, Env *env)
 {
   unsigned int i;
   double **b, P;
 
   assert(hmm && emissions && num_of_emissions);
-  array2dim_malloc(b, hmm->num_of_states, num_of_emissions, double);
+  array2dim_malloc(b, hmm->num_of_states, num_of_emissions, double, env);
 
   /* XXX: we do not need the full table here, the last column would suffice */
   compute_backward_table(b, hmm, emissions, num_of_emissions);
@@ -458,7 +460,7 @@ double hmm_backward(const HMM* hmm, const unsigned int *emissions,
                   hmm->emission_prob[i][emissions[0]] + b[i][0]);
   }
 
-  array2dim_delete(b);
+  array2dim_delete(b, env);
   return P;
 }
 
@@ -590,9 +592,9 @@ int hmm_unit_test(Env *env)
   env_error_check(env);
 
   /* test the HMM class with the coin HMMs */
-  fair_hmm = coin_hmm_fair();
-  loaded_hmm = coin_hmm_loaded();
-  alpha = coin_hmm_alpha();
+  fair_hmm = coin_hmm_fair(env);
+  loaded_hmm = coin_hmm_loaded(env);
+  alpha = coin_hmm_alpha(env);
   size = sizeof (coin_tosses) / sizeof (coin_tosses[0]);
   encoded_seq = xmalloc(sizeof (int) * strlen(coin_tosses[size-1]));
 
@@ -602,25 +604,29 @@ int hmm_unit_test(Env *env)
       encoded_seq[j] = alpha_encode(alpha, coin_tosses[i][j]);
     /* XXX: remove exp() calls */
     ensure(has_err,
-           double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
-                                exp(hmm_backward(fair_hmm, encoded_seq, len))));
+           double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len,
+                                                env)),
+                                exp(hmm_backward(fair_hmm, encoded_seq, len,
+                                                 env))));
     ensure(has_err,
-           double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len)),
-                                exp(hmm_backward(loaded_hmm, encoded_seq, len)))
+           double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len,
+                                                env)),
+                                exp(hmm_backward(loaded_hmm, encoded_seq, len,
+                                                 env)))
                                );
   }
 
-  free(encoded_seq);
-  alpha_delete(alpha);
+  env_ma_free(encoded_seq, env);
+  alpha_delete(alpha, env);
   ensure(has_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
   ensure(has_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
-  hmm_delete(loaded_hmm);
-  hmm_delete(fair_hmm);
+  hmm_delete(loaded_hmm, env);
+  hmm_delete(fair_hmm, env);
 
   /* test the HMM class with the dice HMMs */
-  fair_hmm = dice_hmm_fair();
-  loaded_hmm = dice_hmm_loaded();
-  alpha = dice_hmm_alpha();
+  fair_hmm = dice_hmm_fair(env);
+  loaded_hmm = dice_hmm_loaded(env);
+  alpha = dice_hmm_alpha(env);
   size = sizeof (dice_rolls) / sizeof (dice_rolls[0]);
   encoded_seq = xmalloc(sizeof (int) * strlen(dice_rolls[size-1]));
 
@@ -631,29 +637,33 @@ int hmm_unit_test(Env *env)
     }
     /* XXX: remove exp() calls */
     ensure(has_err,
-           double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
-                                exp(hmm_backward(fair_hmm, encoded_seq, len))));
+           double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len,
+                                                env)),
+                                exp(hmm_backward(fair_hmm, encoded_seq, len,
+                                                 env))));
     ensure(has_err,
-           double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len)),
-                                exp(hmm_backward(loaded_hmm, encoded_seq, len)))
+           double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len,
+                                                env)),
+                                exp(hmm_backward(loaded_hmm, encoded_seq, len,
+                                                 env)))
                                );
   }
 
-  free(encoded_seq);
-  alpha_delete(alpha);
+  env_ma_free(encoded_seq, env);
+  alpha_delete(alpha, env);
   ensure(has_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
   ensure(has_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
-  hmm_delete(loaded_hmm);
-  hmm_delete(fair_hmm);
+  hmm_delete(loaded_hmm, env);
+  hmm_delete(fair_hmm, env);
 
   return has_err;
 }
 
-void hmm_delete(HMM *hmm)
+void hmm_delete(HMM *hmm, Env *env)
 {
   if (!hmm) return;
-  free(hmm->initial_state_prob);
-  array2dim_delete(hmm->transition_prob);
-  array2dim_delete(hmm->emission_prob);
-  free(hmm);
+  env_ma_free(hmm->initial_state_prob, env);
+  array2dim_delete(hmm->transition_prob, env);
+  array2dim_delete(hmm->emission_prob, env);
+  env_ma_free(hmm, env);
 }

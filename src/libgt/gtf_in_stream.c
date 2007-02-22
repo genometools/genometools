@@ -36,10 +36,10 @@ static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return 0;
 }
 
-static void gtf_in_stream_free(GenomeStream *gs)
+static void gtf_in_stream_free(GenomeStream *gs, Env *env)
 {
   GTFInStream *gtf_in_stream = gtf_in_stream_cast(gs);
-  queue_delete(gtf_in_stream->genome_node_buffer);
+  queue_delete(gtf_in_stream->genome_node_buffer, env);
 }
 
 const GenomeStreamClass* gtf_in_stream_class(void)
@@ -63,9 +63,9 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
 
   gs = genome_stream_create(gtf_in_stream_class(), false);
   gtf_in_stream = gtf_in_stream_cast(gs);
-  gtf_parser = gtf_parser_new();
+  gtf_parser = gtf_parser_new(env);
 
-  gtf_in_stream->genome_node_buffer = queue_new(sizeof (GenomeNode*));
+  gtf_in_stream->genome_node_buffer = queue_new(sizeof (GenomeNode*), env);
 
   /* open input file */
   if (filename)
@@ -83,10 +83,10 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
     xfclose(fpin);
 
   /* free */
-  gtf_parser_delete(gtf_parser);
+  gtf_parser_delete(gtf_parser, env);
 
   if (has_err) {
-    genome_stream_delete(gs);
+    genome_stream_delete(gs, env);
     return NULL;
   }
   return gs;

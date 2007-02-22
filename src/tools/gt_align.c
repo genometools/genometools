@@ -15,13 +15,13 @@ static OPrval parse_options(int *parsed_args, bool *all, int argc, char **argv,
   env_error_check(env);
   op = option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Globally align each sequence in seq_file_1 with each "
-                         "sequence in seq_file_2.");
+                         "sequence in seq_file_2.", env);
   option = option_new_bool("all", "show all optimal alignments instead of just "
-                           "one", all, false);
-  option_parser_add_option(op, option);
+                           "one", all, false, env);
+  option_parser_add_option(op, option, env);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 2, 2, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   return oprval;
 }
 
@@ -74,24 +74,24 @@ int gt_align(int argc, char *argv[], Env *env)
                     bioseq_get_sequence_length(bioseq_1, i),
                     bioseq_get_sequence(bioseq_2, j),
                     bioseq_get_sequence_length(bioseq_2, j),
-                    show_alignment, show_aligns, NULL);
+                    show_alignment, show_aligns, NULL, env);
         }
         else {
           a = align(bioseq_get_sequence(bioseq_1, i),
                     bioseq_get_sequence_length(bioseq_1, i),
                     bioseq_get_sequence(bioseq_2, j),
-                    bioseq_get_sequence_length(bioseq_2, j));
+                    bioseq_get_sequence_length(bioseq_2, j), env);
           alignment_show(a, stdout);
           xputchar('\n');
-          alignment_delete(a);
+          alignment_delete(a, env);
         }
       }
     }
   }
 
   /* free */
-  bioseq_delete(bioseq_2);
-  bioseq_delete(bioseq_1);
+  bioseq_delete(bioseq_2, env);
+  bioseq_delete(bioseq_1, env);
 
   return has_err;
 }

@@ -13,7 +13,7 @@
 /* the ``genome visitor'' interface */
 struct GenomeVisitorClass {
   size_t size;
-  void (*free)(GenomeVisitor*);
+  void (*free)(GenomeVisitor*, Env*);
   int  (*comment)(GenomeVisitor*, Comment*, Env*);
   int  (*genome_feature)(GenomeVisitor*, GenomeFeature*, Env*);
   int  (*sequence_region)(GenomeVisitor*, SequenceRegion*, Env*);

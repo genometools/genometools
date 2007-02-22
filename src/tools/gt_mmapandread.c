@@ -12,10 +12,10 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
   OPrval oprval;
   env_error_check(env);
   op = option_parser_new("file [...]", "Map the supplied files into memory and "
-                         "read them once.");
+                         "read them once.", env);
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
                                         versionfunc, 1, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   return oprval;
 }
 

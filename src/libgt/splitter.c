@@ -18,13 +18,13 @@ struct Splitter {
   size_t allocated;
 };
 
-Splitter* splitter_new(void)
+Splitter* splitter_new(Env *env)
 {
-  return xcalloc(1, sizeof (Splitter));
+  return env_ma_calloc(env, 1, sizeof (Splitter));
 }
 
 void splitter_split(Splitter *s, char *string, unsigned long length,
-                    char delimiter)
+                    char delimiter, Env *env)
 {
 
   char *end_of_token, *string_index = string;
@@ -38,7 +38,7 @@ void splitter_split(Splitter *s, char *string, unsigned long length,
     *end_of_token = '\0';
     if ((s->num_of_tokens + 1) * sizeof (char*) > s->allocated)
       s->tokens = dynalloc(s->tokens, &s->allocated,
-                           (s->num_of_tokens + 1) * sizeof (char*));
+                           (s->num_of_tokens + 1) * sizeof (char*), env);
     s->tokens[s->num_of_tokens++] = string_index;
     string_index = end_of_token + 1;
   }
@@ -46,7 +46,7 @@ void splitter_split(Splitter *s, char *string, unsigned long length,
   /* save last token */
   if ((s->num_of_tokens + 2) * sizeof (char*) > s->allocated)
     s->tokens = dynalloc(s->tokens, &s->allocated,
-                         (s->num_of_tokens + 2) * sizeof (char*));
+                         (s->num_of_tokens + 2) * sizeof (char*), env);
   s->tokens[s->num_of_tokens++] = string_index;
   s->tokens[s->num_of_tokens]   = NULL;
 
@@ -89,11 +89,11 @@ int splitter_unit_test(Env *env)
   Splitter *s;
   int has_err = 0;
   env_error_check(env);
-  s = splitter_new();
+  s = splitter_new(env);
 
   /* string_1 */
   ensure(has_err, !splitter_size(s));
-  splitter_split(s, string_1, strlen(string_1), ' ');
+  splitter_split(s, string_1, strlen(string_1), ' ', env);
   ensure(has_err, splitter_size(s) == 5);
   ensure(has_err, strcmp(splitter_get_token(s, 0), "a") == 0);
   ensure(has_err, strcmp(splitter_get_token(s, 1), "bb") == 0);
@@ -104,7 +104,7 @@ int splitter_unit_test(Env *env)
 
   /* string_2 */
   ensure(has_err, !splitter_size(s));
-  splitter_split(s, string_2, strlen(string_2), '\t');
+  splitter_split(s, string_2, strlen(string_2), '\t', env);
   ensure(has_err, splitter_size(s) == 5);
   ensure(has_err, strcmp(splitter_get_token(s, 0), "a") == 0);
   ensure(has_err, strcmp(splitter_get_token(s, 1), "bb") == 0);
@@ -115,14 +115,14 @@ int splitter_unit_test(Env *env)
 
   /* string_3 */
   ensure(has_err, !splitter_size(s));
-  splitter_split(s, string_3, strlen(string_3), '\t');
+  splitter_split(s, string_3, strlen(string_3), '\t', env);
   ensure(has_err, splitter_size(s) == 1);
   ensure(has_err, strcmp(splitter_get_token(s, 0), "") == 0);
   splitter_reset(s);
 
   /* string_4 */
   ensure(has_err, !splitter_size(s));
-  splitter_split(s, string_4, strlen(string_4), ' ');
+  splitter_split(s, string_4, strlen(string_4), ' ', env);
   ensure(has_err, splitter_size(s) == 3);
   ensure(has_err, strcmp(splitter_get_token(s, 0), "a") == 0);
   ensure(has_err, strcmp(splitter_get_token(s, 1), "") == 0);
@@ -131,7 +131,7 @@ int splitter_unit_test(Env *env)
 
   /* string_5 */
   ensure(has_err, !splitter_size(s));
-  splitter_split(s, string_5, strlen(string_5), ' ');
+  splitter_split(s, string_5, strlen(string_5), ' ', env);
   ensure(has_err, splitter_size(s) == 3);
   ensure(has_err, strcmp(splitter_get_token(s, 0), "ac") == 0);
   ensure(has_err, strcmp(splitter_get_token(s, 1), "bc") == 0);
@@ -140,19 +140,19 @@ int splitter_unit_test(Env *env)
 
   /* string_6 */
   ensure(has_err, !splitter_size(s));
-  splitter_split(s, string_6, strlen(string_6), ';');
+  splitter_split(s, string_6, strlen(string_6), ';', env);
   ensure(has_err, splitter_size(s) == 1);
   ensure(has_err, strcmp(splitter_get_token(s, 0), "test") == 0);
 
   /* free */
-  splitter_delete(s);
+  splitter_delete(s, env);
 
   return has_err;
 }
 
-void splitter_delete(Splitter *s)
+void splitter_delete(Splitter *s, Env *env)
 {
   if (!s) return;
-  free(s->tokens);
-  free(s);
+  env_ma_free(s->tokens, env);
+  env_ma_free(s, env);
 }

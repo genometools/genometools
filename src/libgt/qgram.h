@@ -25,6 +25,6 @@ unsigned long qgram_step(unsigned long current_code, char previous, char next,
    alpha_size) and stores them in the array qgrams. */
 void          qgram_compute(Array *qgrams, const char *encoded_seq,
                             unsigned long seqlen, unsigned long alpha_size,
-                            unsigned int q);
+                            unsigned int q, Env*);
 
 #endif

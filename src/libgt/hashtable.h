@@ -7,6 +7,8 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
+#include "fptr.h"
+
 typedef struct Hashtable Hashtable;
 
 typedef enum {
@@ -14,17 +16,15 @@ typedef enum {
   HASH_STRING
 } Hash_type;
 
-typedef void (*Hashkeyfreefunc)(void*);
-typedef void (*Hashvaluefreefunc)(void*);
 typedef int  (*Hashiteratorfunc)(void *key, void *value, void *data, Env*);
 
-Hashtable* hashtable_new(Hash_type, Hashkeyfreefunc, Hashvaluefreefunc);
+Hashtable* hashtable_new(Hash_type, FreeFunc keyfree, FreeFunc valuefree, Env*);
 void*      hashtable_get(Hashtable*, const void*);
 void       hashtable_add(Hashtable*, void*, void*);
-void       hashtable_remove(Hashtable*, void*);
+void       hashtable_remove(Hashtable*, void*, Env*);
 int        hashtable_foreach(Hashtable*, Hashiteratorfunc, void*, Env*);
 void       hashtable_reset(Hashtable*);
 int        hashtable_unit_test(Env*);
-void       hashtable_delete(Hashtable*);
+void       hashtable_delete(Hashtable*, Env*);
 
 #endif

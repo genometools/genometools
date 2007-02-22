@@ -16,9 +16,9 @@ struct Evaluator {
                 P; /* predicted */
 };
 
-Evaluator* evaluator_new(void)
+Evaluator* evaluator_new(Env *env)
 {
-  return xcalloc(1, sizeof (Evaluator));
+  return env_ma_calloc(env, 1, sizeof (Evaluator));
 }
 
 void evaluator_add_true(Evaluator *e)
@@ -83,7 +83,7 @@ void evaluator_reset(Evaluator *e)
 
 int evaluator_unit_test(Env *env)
 {
-  Evaluator *e = evaluator_new();
+  Evaluator *e = evaluator_new(env);
   int has_err = 0;
   env_error_check(env);
 
@@ -141,13 +141,13 @@ int evaluator_unit_test(Env *env)
   ensure(has_err, evaluator_get_sensitivity(e) == 1.0);
   ensure(has_err, evaluator_get_specificity(e) == 1.0);
 
-  evaluator_delete(e);
+  evaluator_delete(e, env);
 
   return has_err;
 }
 
-void evaluator_delete(Evaluator *e)
+void evaluator_delete(Evaluator *e, Env *env)
 {
   if (!e) return;
-  free(e);
+  env_ma_free(e, env);
 }

@@ -22,9 +22,9 @@ struct Array {
          size_of_elem;
 };
 
-Array* array_new(size_t size_of_elem)
+Array* array_new(size_t size_of_elem, Env *env)
 {
-  Array *a = xcalloc(1, sizeof (Array));
+  Array *a = env_ma_calloc(env, 1, sizeof (Array));
   assert(size_of_elem);
   a->size_of_elem = size_of_elem;
   return a;
@@ -67,18 +67,18 @@ void array_rem(Array *a, unsigned long idx)
   a->next_free--;
 }
 
-void array_reverse(Array *a)
+void array_reverse(Array *a, Env *env)
 {
   void *front, *back, *tmp;
   assert(a);
-  tmp = xmalloc(sizeof (a->size_of_elem));
+  tmp = env_ma_malloc(env, sizeof (a->size_of_elem));
   for (front = a->space, back = a->space + (a->next_free-1) * a->size_of_elem;
        front < back; front += a->size_of_elem, back -= a->size_of_elem) {
     memcpy(tmp, front, a->size_of_elem);
     memcpy(front, back, a->size_of_elem);
     memcpy(back, tmp, a->size_of_elem);
   }
-  free(tmp);
+  env_ma_free(tmp, env);
 }
 
 void* array_get_space(const Array *a)
@@ -87,7 +87,7 @@ void* array_get_space(const Array *a)
   return a->space;
 }
 
-void array_add_elem(Array *a, void *elem, size_t size_of_elem)
+void array_add_elem(Array *a, void *elem, size_t size_of_elem, Env *env)
 {
   assert(a && elem);
   assert(a->size_of_elem == size_of_elem);
@@ -95,18 +95,18 @@ void array_add_elem(Array *a, void *elem, size_t size_of_elem)
   /* make sure we have enough space */
   if ((a->next_free + 1) * a->size_of_elem > a->allocated)
     a->space = dynalloc(a->space, &a->allocated,
-                        (a->next_free + 1) * a->size_of_elem);
+                        (a->next_free + 1) * a->size_of_elem, env);
   /* add */
   memcpy(a->space + a->next_free * a->size_of_elem, elem, a->size_of_elem);
   a->next_free++;
 }
 
-void array_add_array(Array *dest, const Array *src)
+void array_add_array(Array *dest, const Array *src, Env *env)
 {
   unsigned long i;
   assert(dest && src && dest->size_of_elem == src->size_of_elem);
   for (i = 0; i < array_size(src); i++)
-    array_add_elem(dest, array_get(src, i), src->size_of_elem);
+    array_add_elem(dest, array_get(src, i), src->size_of_elem, env);
 }
 
 size_t array_elem_size(const Array *a)
@@ -127,13 +127,13 @@ void array_set_size(Array *a, unsigned long size)
   a->next_free = size;
 }
 
-Array* array_clone(const Array *a)
+Array* array_clone(const Array *a, Env *env)
 {
   Array *a_copy;
   assert(a);
-  a_copy = xmalloc(sizeof (Array));
+  a_copy = env_ma_malloc(env, sizeof (Array));
   /* XXX: overflow checks -> safemult(next_free, size_of_elem) */
-  a_copy->space = xmalloc(a->next_free * a->size_of_elem);
+  a_copy->space = env_ma_malloc(env, a->next_free * a->size_of_elem);
   memcpy(a_copy->space, a->space, a->next_free * a->size_of_elem);
   a_copy->next_free = a_copy->allocated = a->next_free;
   a_copy->size_of_elem = a->size_of_elem;
@@ -150,15 +150,15 @@ int array_unit_test(Env *env)
   env_error_check(env);
 
   /* testing an empty array */
-  char_array = array_new(sizeof (char));
-  array_delete(char_array);
-  int_array = array_new(sizeof (int));
-  array_delete(int_array);
+  char_array = array_new(sizeof (char), env);
+  array_delete(char_array, env);
+  int_array = array_new(sizeof (int), env);
+  array_delete(int_array, env);
 
-  char_array = array_new(sizeof (char));
-  int_array = array_new(sizeof (int));
-  char_array_test = xmalloc((MAX_SIZE + 1) * sizeof (char));
-  int_array_test = xmalloc(MAX_SIZE * sizeof (int));
+  char_array = array_new(sizeof (char), env);
+  int_array = array_new(sizeof (int), env);
+  char_array_test = env_ma_malloc(env, (MAX_SIZE + 1) * sizeof (char));
+  int_array_test = env_ma_malloc(env, MAX_SIZE * sizeof (int));
 
   for (i = 0; i < NUM_OF_TESTS && !has_err; i++) {
     size = ((double) rand() / RAND_MAX) * MAX_SIZE;
@@ -173,16 +173,16 @@ int array_unit_test(Env *env)
       cc = ((double) rand() / RAND_MAX) * CHAR_MAX;
       ci = ((double) rand() / RAND_MAX) * INT_MAX;
 
-      array_add(char_array, cc);
-      array_add(int_array, ci);
+      array_add(char_array, cc, env);
+      array_add(int_array, ci, env);
 
       ensure(has_err, array_size(char_array) == i+1);
       ensure(has_err, array_size(int_array) == i+1);
       ensure(has_err, *((char*) array_get(char_array, i)) == cc);
       ensure(has_err, *((int*) array_get(int_array, i)) == ci);
 
-      array_add_elem(char_array, &cc, sizeof (char));
-      array_add_elem(int_array, &ci, sizeof (int));
+      array_add_elem(char_array, &cc, sizeof (char), env);
+      array_add_elem(int_array, &ci, sizeof (int), env);
 
       ensure(has_err, array_size(char_array) == i+2);
       ensure(has_err, array_size(int_array) == i+2);
@@ -207,17 +207,17 @@ int array_unit_test(Env *env)
     }
   }
 
-  array_delete(char_array);
-  array_delete(int_array);
-  free(char_array_test);
-  free(int_array_test);
+  array_delete(char_array, env);
+  array_delete(int_array, env);
+  env_ma_free(char_array_test, env);
+  env_ma_free(int_array_test, env);
 
   return has_err;
 }
 
-void array_delete(Array *a)
+void array_delete(Array *a, Env *env)
 {
   if (!a) return;
-  free(a->space);
-  free(a);
+  env_ma_free(a->space, env);
+  env_ma_free(a, env);
 }

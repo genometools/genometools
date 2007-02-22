@@ -7,12 +7,12 @@
 #include <assert.h>
 #include "dice_hmm.h"
 
-HMM* dice_hmm_loaded(void)
+HMM* dice_hmm_loaded(Env *env)
 {
   HMM *hmm;
 
   /* create the HMM */
-  hmm = hmm_new(DICE_NUM_OF_STATES, DICE_NUM_OF_SYMBOLS);
+  hmm = hmm_new(DICE_NUM_OF_STATES, DICE_NUM_OF_SYMBOLS, env);
 
   /* set emmission probabilities */
   hmm_set_emission_probability(hmm, DICE_FAIR, ONE,   1.0/6);
@@ -38,12 +38,12 @@ HMM* dice_hmm_loaded(void)
   return hmm;
 }
 
-HMM* dice_hmm_fair(void)
+HMM* dice_hmm_fair(Env *env)
 {
   HMM *hmm;
 
   /* create the HMM */
-  hmm = hmm_new(DICE_NUM_OF_STATES, DICE_NUM_OF_SYMBOLS);
+  hmm = hmm_new(DICE_NUM_OF_STATES, DICE_NUM_OF_SYMBOLS, env);
 
   /* set emmission probabilities */
   hmm_set_emission_probability(hmm, DICE_FAIR, ONE,   1.0/6);
@@ -69,9 +69,9 @@ HMM* dice_hmm_fair(void)
   return hmm;
 }
 
-Alpha* dice_hmm_alpha(void)
+Alpha* dice_hmm_alpha(Env *env)
 {
-  Alpha *a = alpha_new();
+  Alpha *a = alpha_new(env);
   alpha_add_mapping(a, "1");
   alpha_add_mapping(a, "2");
   alpha_add_mapping(a, "3");

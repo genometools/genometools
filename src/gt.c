@@ -10,12 +10,12 @@
 /* The GenomeTools (gt) genome analysis system */
 int main(int argc, char *argv[])
 {
-  GTR *gtr;
   Env *env;
+  GTR *gtr;
   int rval;
-  gtr = gtr_new();
   env = env_new();
-  gtr_register_components(gtr);
+  gtr = gtr_new(env);
+  gtr_register_components(gtr, env);
   switch (gtr_parse(gtr, &rval, argc, argv, env)) {
     case OPTIONPARSER_OK:
       argc -= rval;
@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
     fprintf(stderr, "error: %s\n", env_error_get(env));
     assert(rval);
   }
+  gtr_delete(gtr, env);
   env_delete(env);
-  gtr_free(gtr);
   return rval;
 }

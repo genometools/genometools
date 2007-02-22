@@ -31,10 +31,10 @@ static int cds_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return has_err;
 }
 
-static void cds_stream_free(GenomeStream *gs)
+static void cds_stream_free(GenomeStream *gs, Env *env)
 {
   CDSStream *cds_stream = cds_stream_cast(gs);
-  genome_visitor_delete(cds_stream->cds_visitor);
+  genome_visitor_delete(cds_stream->cds_visitor, env);
 }
 
 const GenomeStreamClass* cds_stream_class(void)
@@ -55,16 +55,16 @@ GenomeStream* cds_stream_new(GenomeStream *in_stream, const char *sequence_file,
   env_error_check(env);
   gs = genome_stream_create(cds_stream_class(), true);
   cds_stream = cds_stream_cast(gs);
-  sequence_file_str = str_new_cstr(sequence_file),
-  source_str = str_new_cstr(source);
+  sequence_file_str = str_new_cstr(sequence_file, env),
+  source_str = str_new_cstr(source, env);
   cds_stream->in_stream = in_stream;
   cds_stream->cds_visitor = cds_visitor_new(sequence_file_str, source_str, env);
   if (!cds_stream->cds_visitor)
     has_err = -1;
-  str_delete(sequence_file_str);
-  str_delete(source_str);
+  str_delete(sequence_file_str, env);
+  str_delete(source_str, env);
   if (has_err) {
-    cds_stream_free(gs);
+    cds_stream_free(gs, env);
     return NULL;
   }
   return gs;

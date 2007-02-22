@@ -31,10 +31,10 @@ static int gff3_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   return has_err;
 }
 
-static void gff3_out_stream_free(GenomeStream *gs)
+static void gff3_out_stream_free(GenomeStream *gs, Env *env)
 {
   GFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
-  genome_visitor_delete(gff3_out_stream->gff3_visitor);
+  genome_visitor_delete(gff3_out_stream->gff3_visitor, env);
 }
 
 const GenomeStreamClass* gff3_out_stream_class(void)
@@ -45,13 +45,14 @@ const GenomeStreamClass* gff3_out_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* gff3_out_stream_new(GenomeStream *in_stream, FILE *outfp)
+GenomeStream* gff3_out_stream_new(GenomeStream *in_stream, FILE *outfp,
+                                  Env *env)
 {
   GenomeStream *gs = genome_stream_create(gff3_out_stream_class(),
                                           genome_stream_is_sorted(in_stream));
   GFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
   gff3_out_stream->in_stream = in_stream;
   gff3_out_stream->first_genome_feature = true;
-  gff3_out_stream->gff3_visitor = gff3_visitor_new(outfp);
+  gff3_out_stream->gff3_visitor = gff3_visitor_new(outfp, env);
   return gs;
 }

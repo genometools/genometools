@@ -28,8 +28,9 @@ void   env_delete(Env*);
         ma_calloc(env_ma(env), nmemb, size)
 #define env_ma_realloc(env, ptr, size)\
         ma_realloc(env_ma(env), ptr, size)
-#define env_ma_free(env, ptr)\
-        ma_free(env_ma(env), ptr)
+/* free functions get the data object (here the env object) _always_ as the
+   last object */
+void    env_ma_free(void *ptr, Env*);
 
 /* wrapper for error functions */
 void    env_error_set(Env*, const char *format, ...)
@@ -44,5 +45,9 @@ void    env_error_set(Env*, const char *format, ...)
    every routine which has an Env* argument */
 #define env_error_check(env)\
         assert(!env || !error_is_set(env_error(env)))
+
+/* wrapper for log functions */
+void    env_log_log(Env*, const char *format, ...)
+          __attribute__ ((format (printf, 2, 3)));
 
 #endif

@@ -15,12 +15,12 @@ struct IO {
   bool line_start;
 };
 
-IO* io_new(const char *path, const char *mode)
+IO* io_new(const char *path, const char *mode, Env *env)
 {
   IO *io;
   assert(path && mode);
   assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
-  io = xmalloc(sizeof (IO));
+  io = env_ma_malloc(env, sizeof (IO));
   io->fp = xfopen(path, mode);
   io->path = xstrdup(path);
   io->line_number = 1;
@@ -69,10 +69,10 @@ const char* io_get_filename(const IO *io)
   return io->path;
 }
 
-void io_delete(IO *io)
+void io_delete(IO *io, Env *env)
 {
   if (!io) return;
   xfclose(io->fp);
-  free(io->path);
-  free(io);
+  env_ma_free(io->path, env);
+  env_ma_free(io, env);
 }

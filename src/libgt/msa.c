@@ -25,7 +25,7 @@ MSA* msa_new(const char *MSA_filename, Env *env)
   int has_err = 0;
   MSA *msa;
   env_error_check(env);
-  msa = xmalloc(sizeof (MSA));
+  msa = env_ma_malloc(env, sizeof (MSA));
   msa->bs = bioseq_new(MSA_filename, env);
   if (!msa->bs)
     has_err = -1;
@@ -50,29 +50,30 @@ MSA* msa_new(const char *MSA_filename, Env *env)
     }
   }
   if (has_err) {
-    msa_delete(msa);
+    msa_delete(msa, env);
     return NULL;
   }
   return msa;
 }
 
-static char** get_msa_array(Bioseq *bs)
+static char** get_msa_array(Bioseq *bs, Env *env)
 {
   unsigned long i;
   char **msa;
   assert(bs);
-  msa = xmalloc(sizeof (const char*) * bioseq_number_of_sequences(bs));
+  msa = env_ma_malloc(env,
+                      sizeof (const char*) * bioseq_number_of_sequences(bs));
   for (i = 0; i < bioseq_number_of_sequences(bs); i++)
     msa[i] = (char*) bioseq_get_sequence(bs, i);
   return msa;
 }
 
 static unsigned long** get_count(char **msa, unsigned long number_of_seqs,
-                                 unsigned long seqlen)
+                                 unsigned long seqlen, Env *env)
 {
   unsigned long col, seq, **count;
   assert(msa);
-  array2dim_calloc(count, seqlen, UCHAR_MAX, unsigned long);
+  array2dim_calloc(count, seqlen, UCHAR_MAX, unsigned long, env);
   for (seq = 0; seq < number_of_seqs; seq++) {
     for (col = 0; col < seqlen; col++)
       count[col][(int) msa[seq][col]]++;
@@ -80,12 +81,13 @@ static unsigned long** get_count(char **msa, unsigned long number_of_seqs,
   return count;
 }
 
-static char* get_consensus(unsigned long **count, unsigned long seqlen)
+static char* get_consensus(unsigned long **count, unsigned long seqlen,
+                           Env *env)
 {
   unsigned long col, c, max_count;
   char *consensus, consensus_char = GAPSYMBOL;
   assert(count);
-  consensus = xmalloc(sizeof (char) * seqlen);
+  consensus = env_ma_malloc(env, sizeof (char) * seqlen);
   for (col = 0; col < seqlen; col++) {
     max_count = 0;
     for (c = 0; c < UCHAR_MAX; c++) {
@@ -100,7 +102,7 @@ static char* get_consensus(unsigned long **count, unsigned long seqlen)
   return consensus;
 }
 
-unsigned long msa_consensus_distance(const MSA *msa)
+unsigned long msa_consensus_distance(const MSA *msa, Env *env)
 {
   unsigned long col, number_of_seqs, seqlen, **count, dist = 0;
   char **msa_array, *consensus;
@@ -111,13 +113,13 @@ unsigned long msa_consensus_distance(const MSA *msa)
   seqlen = bioseq_get_sequence_length(msa->bs, 0);
 
   /* get the MSA in a convenient form */
-  msa_array = get_msa_array(msa->bs);
+  msa_array = get_msa_array(msa->bs, env);
 
   /* compute the character count array */
-  count = get_count(msa_array, number_of_seqs, seqlen);
+  count = get_count(msa_array, number_of_seqs, seqlen, env);
 
   /* compute the consensus from the count array */
-  consensus = get_consensus(count, seqlen);
+  consensus = get_consensus(count, seqlen, env);
 
   /* compute the actual consensus distance */
   for (col = 0; col < seqlen; col++) {
@@ -125,14 +127,14 @@ unsigned long msa_consensus_distance(const MSA *msa)
   }
 
   /* free */
-  free(consensus);
-  array2dim_delete(count);
-  free(msa_array);
+  env_ma_free(consensus, env);
+  array2dim_delete(count, env);
+  env_ma_free(msa_array, env);
 
   return dist;
 }
 
-unsigned long msa_sum_of_pairwise_scores(const MSA *msa)
+unsigned long msa_sum_of_pairwise_scores(const MSA *msa, Env *env)
 {
   unsigned long i, j, col, number_of_seqs, seqlen, sum = 0;
   char **msa_array;
@@ -143,7 +145,7 @@ unsigned long msa_sum_of_pairwise_scores(const MSA *msa)
   seqlen = bioseq_get_sequence_length(msa->bs, 0);
 
   /* get the MSA in a convenient form */
-  msa_array = get_msa_array(msa->bs);
+  msa_array = get_msa_array(msa->bs, env);
 
   /* compute the actual sum of pairwise scores */
   for (i = 0; i < number_of_seqs-1; i++) {
@@ -163,9 +165,9 @@ void msa_show(MSA *msa)
   bioseq_show_as_fasta(msa->bs, 0);
 }
 
-void msa_delete(MSA *msa)
+void msa_delete(MSA *msa, Env *env)
 {
   if (!msa) return;
-  bioseq_delete(msa->bs);
+  bioseq_delete(msa->bs, env);
   free(msa);
 }

@@ -50,7 +50,7 @@ int fasta_reader_run(FastaReader *fr,
   assert(fr);
 
   /* init */
-  description = str_new();
+  description = str_new(env);
 
   /* at least one function has to be defined */
   assert(proc_description || proc_character || proc_sequence_length);
@@ -82,7 +82,7 @@ int fasta_reader_run(FastaReader *fr,
           state = READING_SEQUENCE_AFTER_NEWLINE;
         }
         else if (proc_description)
-          str_append_char(description, cc);
+          str_append_char(description, cc, env);
         break;
       case READING_SEQUENCE_AFTER_NEWLINE:
         if (cc == FASTA_SEPARATOR) {
@@ -142,15 +142,15 @@ int fasta_reader_run(FastaReader *fr,
   }
 
   /* free */
-  str_delete(description);
+  str_delete(description, env);
 
   return has_err;
 }
 
-void fasta_reader_delete(FastaReader *fr)
+void fasta_reader_delete(FastaReader *fr, Env *env)
 {
   if (!fr) return;
-  str_delete(fr->sequence_filename);
+  str_delete(fr->sequence_filename, env);
   genfile_xclose(fr->sequence_file);
-  free(fr);
+  env_ma_free(fr, env);
 }

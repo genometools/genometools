@@ -54,7 +54,7 @@ unsigned long file_number_of_lines(FILE *fp)
   return number_of_lines;
 }
 
-void file_dirname(Str *path, const char *file)
+void file_dirname(Str *path, const char *file, Env *env)
 {
   long i;
   str_reset(path);
@@ -63,7 +63,7 @@ void file_dirname(Str *path, const char *file)
       break;
   }
   if (i > 0)
-    str_append_cstr_nt(path, file, i);
+    str_append_cstr_nt(path, file, i, env);
 }
 
 int file_find_in_path(Str *path, const char *file, Env *env)
@@ -77,7 +77,7 @@ int file_find_in_path(Str *path, const char *file, Env *env)
   assert(file);
 
   /* check if 'file' has dirname */
-  file_dirname(path, file);
+  file_dirname(path, file, env);
   if (str_length(path))
     return has_err;
   /* 'file' has no dirname -> scan $PATH */
@@ -90,21 +90,21 @@ int file_find_in_path(Str *path, const char *file, Env *env)
   }
 
   if (!has_err) {
-    splitter = splitter_new();
-    splitter_split(splitter, pathvariable, strlen(pathvariable), ':');
+    splitter = splitter_new(env);
+    splitter_split(splitter, pathvariable, strlen(pathvariable), ':', env);
     for (i = 0; i < splitter_size(splitter); i++) {
       pathcomponent = splitter_get_token(splitter, i);
       str_set_length(path, 0);
-      str_append_cstr(path, pathcomponent);
-      str_append_char(path, '/');
-      str_append_cstr(path, file);
+      str_append_cstr(path, pathcomponent, env);
+      str_append_char(path, '/', env);
+      str_append_cstr(path, file, env);
       if (file_exists(str_get(path)))
         break;
     }
     if (i < splitter_size(splitter)) {
       /* file found in path */
       str_set_length(path, 0);
-      str_append_cstr(path, pathcomponent);
+      str_append_cstr(path, pathcomponent, env);
     }
     else {
       /* file not found in path  */
@@ -113,8 +113,8 @@ int file_find_in_path(Str *path, const char *file, Env *env)
   }
 
   /* free */
-  free(pathvariable);
-  splitter_delete(splitter);
+  env_ma_free(pathvariable, env);
+  splitter_delete(splitter, env);
 
   return has_err;
 }

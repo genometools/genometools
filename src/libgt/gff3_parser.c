@@ -34,15 +34,17 @@ struct GFF3Parser {
   long offset;
 };
 
-GFF3Parser* gff3parser_new(void)
+GFF3Parser* gff3parser_new(Env *env)
 {
-  GFF3Parser *gff3_parser = xmalloc(sizeof (GFF3Parser));
-  gff3_parser->id_to_genome_node_mapping = hashtable_new(HASH_STRING, free,
-                                                         NULL);
+  GFF3Parser *gff3_parser = env_ma_malloc(env, sizeof (GFF3Parser));
+  gff3_parser->id_to_genome_node_mapping = hashtable_new(HASH_STRING,
+                                                         env_ma_free, NULL,
+                                                         env);
   gff3_parser->seqid_to_str_mapping = hashtable_new(HASH_STRING, NULL,
-                                                    (Free) str_delete);
+                                                    (FreeFunc) str_delete, env);
   gff3_parser->source_to_str_mapping = hashtable_new(HASH_STRING, NULL,
-                                                     (Free) str_delete);
+                                                     (FreeFunc) str_delete,
+                                                     env);
   gff3_parser->offset = UNDEFLONG;
   return gff3_parser;
 }
@@ -76,13 +78,13 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   env_error_check(env);
 
   /* create splitter */
-  splitter = splitter_new();
-  attribute_splitter = splitter_new();
-  tmp_splitter = splitter_new();
-  parents_splitter = splitter_new();
+  splitter = splitter_new(env);
+  attribute_splitter = splitter_new(env);
+  tmp_splitter = splitter_new(env);
+  parents_splitter = splitter_new(env);
 
   /* parse */
-  splitter_split(splitter, line, line_length, '\t');
+  splitter_split(splitter, line, line_length, '\t', env);
   if (splitter_size(splitter) != 9UL) {
     env_error_set(env, "line %lu in file \"%s\" does not contain 9 tab (\\t) "
               "separated fields", line_number, filename);
@@ -130,12 +132,13 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   /* create the feature */
   if (!has_err) {
     genome_feature = genome_feature_new(gft, range, strand_value, filename,
-                                        line_number);
+                                        line_number, env);
   }
 
   /* parse the unique id and the parents */
   if (!has_err) {
-    splitter_split(attribute_splitter, attributes, strlen(attributes), ';');
+    splitter_split(attribute_splitter, attributes, strlen(attributes), ';',
+                   env);
     for (i = 0; i < splitter_size(attribute_splitter); i++) {
       token = splitter_get_token(attribute_splitter, i);
       if (strncmp(token, ".", 1) == 0) {
@@ -156,7 +159,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
           break;
         }
         splitter_reset(tmp_splitter);
-        splitter_split(tmp_splitter, token, strlen(token), '=');
+        splitter_split(tmp_splitter, token, strlen(token), '=', env);
         if (splitter_size(tmp_splitter) != 2) {
           env_error_set(env, "token \"%s\" on line %lu in file \"%s\" does not "
                     "contain exactly one '='", token, line_number, filename);
@@ -167,7 +170,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
       }
       else if (strncmp(token, PARENT_STRING, strlen(PARENT_STRING)) == 0) {
         splitter_reset(tmp_splitter);
-        splitter_split(tmp_splitter, token, strlen(token), '=');
+        splitter_split(tmp_splitter, token, strlen(token), '=', env);
         if (splitter_size(tmp_splitter) != 2) {
           env_error_set(env, "token \"%s\" on line %lu in file \"%s\" does not "
                     "contain exactly one '='", token, line_number, filename);
@@ -175,13 +178,14 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
           break;
         }
         tmp_token = splitter_get_token(tmp_splitter, 1);
-        splitter_split(parents_splitter, tmp_token, strlen(tmp_token), ',');
+        splitter_split(parents_splitter, tmp_token, strlen(tmp_token), ',',
+                       env);
         assert(splitter_size(parents_splitter)); /* XXX: should be an error */
       }
       else {
         /* add other attributes here */
         splitter_reset(tmp_splitter);
-        splitter_split(tmp_splitter, token, strlen(token), '=');
+        splitter_split(tmp_splitter, token, strlen(token), '=', env);
         if (splitter_size(tmp_splitter) != 2) {
           env_error_set(env, "token \"%s\" on line %lu in file \"%s\" does not "
                     "contain exactly one '='", token, line_number, filename);
@@ -190,7 +194,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
         }
         genome_feature_add_attribute((GenomeFeature*) genome_feature,
                                      splitter_get_token(tmp_splitter, 0),
-                                     splitter_get_token(tmp_splitter, 1));
+                                     splitter_get_token(tmp_splitter, 1), env);
       }
     }
   }
@@ -212,7 +216,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   if (!has_err) {
     source_str = hashtable_get(gff3_parser->source_to_str_mapping, source);
     if (!source_str) {
-      source_str = str_new_cstr(source);
+      source_str = str_new_cstr(source, env);
       hashtable_add(gff3_parser->source_to_str_mapping, str_get(source_str),
                     source_str);
     }
@@ -253,7 +257,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
         has_err = -1;
       }
       else {
-        genome_node_is_part_of_genome_node(parent_gf, genome_feature);
+        genome_node_is_part_of_genome_node(parent_gf, genome_feature, env);
         out_node_complete = false;
         is_child = true;
       }
@@ -263,18 +267,18 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   if (!has_err)
     gn = is_child ? NULL : genome_feature;
   else
-    genome_node_delete(genome_feature);
+    genome_node_delete(genome_feature, env);
 
   if (gn)
-    queue_add(genome_nodes, gn);
+    queue_add(genome_nodes, gn, env);
   if (out_node_complete)
     *break_loop = true;
 
   /* free */
-  splitter_delete(splitter);
-  splitter_delete(attribute_splitter);
-  splitter_delete(tmp_splitter);
-  splitter_delete(parents_splitter);
+  splitter_delete(splitter, env);
+  splitter_delete(attribute_splitter, env);
+  splitter_delete(tmp_splitter, env);
+  splitter_delete(parents_splitter, env);
 
   return has_err;
 }
@@ -296,8 +300,8 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
 
   if (line_length == 1 || line[1] != '#') {
     /* storing comment */
-    gn = comment_new(line+1, filename, line_number);
-    queue_add(genome_nodes, gn);
+    gn = comment_new(line+1, filename, line_number, env);
+    queue_add(genome_nodes, gn, env);
     *break_loop = true;
   }
   else if ((strncmp(line, GFF_SEQUENCE_REGION,
@@ -374,15 +378,15 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         has_err = -1;
       }
       else {
-        seqid_str = str_new_cstr(seqid);
+        seqid_str = str_new_cstr(seqid, env);
         hashtable_add(gff3_parser->seqid_to_str_mapping, str_get(seqid_str),
                       seqid_str);
       }
     }
     if (!has_err) {
       assert(seqid_str);
-      gn = sequence_region_new(seqid_str, range, filename, line_number);
-      queue_add(genome_nodes, gn);
+      gn = sequence_region_new(seqid_str, range, filename, line_number, env);
+      queue_add(genome_nodes, gn, env);
     }
     *break_loop = true;
   }
@@ -411,12 +415,12 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
   env_error_check(env);
 
   /* init */
-  line_buffer = str_new();
+  line_buffer = str_new(env);
 
   /* the given (buffer) queue is empty */
   assert(!queue_size(genome_nodes));
 
-  while (str_read_next_line(line_buffer, fpin) != EOF) {
+  while (str_read_next_line(line_buffer, fpin, env) != EOF) {
     line = str_get(line_buffer);
     line_length = str_length(line_buffer);
     (*line_number)++;
@@ -462,7 +466,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
     str_reset(line_buffer);
   }
 
-  str_delete(line_buffer);
+  str_delete(line_buffer, env);
   if (queue_size(genome_nodes))
     *status_code = 0; /* at least one node was created */
   else
@@ -478,12 +482,12 @@ void gff3parser_reset(GFF3Parser *gff3_parser)
   hashtable_reset(gff3_parser->source_to_str_mapping);
 }
 
-void gff3parser_delete(GFF3Parser *gff3_parser)
+void gff3parser_delete(GFF3Parser *gff3_parser, Env *env)
 {
   if (!gff3_parser) return;
   assert(gff3_parser->id_to_genome_node_mapping);
-  hashtable_delete(gff3_parser->id_to_genome_node_mapping);
-  hashtable_delete(gff3_parser->seqid_to_str_mapping);
-  hashtable_delete(gff3_parser->source_to_str_mapping);
-  free(gff3_parser);
+  hashtable_delete(gff3_parser->id_to_genome_node_mapping, env);
+  hashtable_delete(gff3_parser->seqid_to_str_mapping, env);
+  hashtable_delete(gff3_parser->source_to_str_mapping, env);
+  env_ma_free(gff3_parser, env);
 }

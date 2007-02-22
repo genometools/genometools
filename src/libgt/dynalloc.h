@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -8,6 +8,7 @@
 #define DYNALLOC_H
 
 #include <stdlib.h>
+#include "env.h"
 
 /*
   Do not use this function directly! It is only used internally to implement
@@ -19,8 +20,9 @@
   ptr: the previously allocated memory
   allocated: allocated memory size before and after the call
   size: requested memory size
+  env: the environment object
 */
 
-void* dynalloc(void *ptr, size_t *allocated, size_t size);
+void* dynalloc(void *ptr, size_t *allocated, size_t size, Env *env);
 
 #endif

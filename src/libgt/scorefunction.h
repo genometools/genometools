@@ -12,11 +12,12 @@
 typedef struct ScoreFunction ScoreFunction;
 
 ScoreFunction* scorefunction_new(ScoreMatrix*, /* takes ownership  */
-                                 int deletion_score, int insertion_score);
+                                 int deletion_score, int insertion_score,
+                                 Env*);
 int            scorefunction_get_score(const ScoreFunction*,
                                        unsigned char, unsigned char);
 int            scorefunction_get_deletion_score(const ScoreFunction*);
 int            scorefunction_get_insertion_score(const ScoreFunction*);
-void           scorefunction_delete(ScoreFunction*);
+void           scorefunction_delete(ScoreFunction*, Env*);
 
 #endif

@@ -51,10 +51,10 @@ static int filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return has_err;
 }
 
-static void filter_stream_free(GenomeStream *gs)
+static void filter_stream_free(GenomeStream *gs, Env *env)
 {
   FilterStream *fs = filter_stream_cast(gs);
-  genome_visitor_delete(fs->filter_visitor);
+  genome_visitor_delete(fs->filter_visitor, env);
 }
 
 const GenomeStreamClass* filter_stream_class(void)
@@ -69,7 +69,7 @@ GenomeStream* filter_stream_new(GenomeStream *in_stream,
                                 Str *seqid, Str *typefilter,
                                 unsigned long max_gene_length,
                                 unsigned long max_gene_num,
-                                double min_gene_score)
+                                double min_gene_score, Env *env)
 {
   GenomeStream *gs = genome_stream_create(filter_stream_class(),
                                            genome_stream_is_sorted(in_stream));
@@ -79,6 +79,6 @@ GenomeStream* filter_stream_new(GenomeStream *in_stream,
   filter_stream->filter_visitor = filter_visitor_new(seqid, typefilter,
                                                      max_gene_length,
                                                      max_gene_num,
-                                                     min_gene_score);
+                                                     min_gene_score, env);
   return gs;
 }

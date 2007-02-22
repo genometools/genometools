@@ -27,14 +27,14 @@ struct CDSVisitor {
 #define cds_visitor_cast(GV)\
         genome_visitor_cast(cds_visitor_class(), GV)
 
-static void cds_visitor_free(GenomeVisitor *gv)
+static void cds_visitor_free(GenomeVisitor *gv, Env *env)
 {
   CDSVisitor *cds_visitor = cds_visitor_cast(gv);
   assert(cds_visitor);
-  str_delete(cds_visitor->sequence_file);
-  str_delete(cds_visitor->source);
-  splicedseq_delete(cds_visitor->splicedseq);
-  bioseq_delete(cds_visitor->bioseq);
+  str_delete(cds_visitor->sequence_file, env);
+  str_delete(cds_visitor->source, env);
+  splicedseq_delete(cds_visitor->splicedseq, env);
+  bioseq_delete(cds_visitor->bioseq, env);
 }
 
 static int extract_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
@@ -54,11 +54,12 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
        genome_feature_get_strand(gf) == STRAND_REVERSE)) {
     sequence = bioseq_get_sequence_with_desc(v->bioseq,
                                              str_get(genome_node_get_seqid(gn)),
-                                             &seqnum);
+                                             &seqnum, env);
     range = genome_node_get_range(gn);
     assert(range.start && range.end); /* 1-based coordinates */
     assert(range.end <= bioseq_get_sequence_length(v->bioseq, seqnum));
-    splicedseq_add(v->splicedseq, range.start - 1, range.end - 1, sequence);
+    splicedseq_add(v->splicedseq, range.start - 1, range.end - 1, sequence,
+                   env);
   }
   return 0;
 }
@@ -90,20 +91,20 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
         return -1;
     }
     /* determine ORFs for all three frames */
-    pr_0 = str_new();
-    pr_1 = str_new();
-    pr_2 = str_new();
+    pr_0 = str_new(env);
+    pr_1 = str_new(env);
+    pr_2 = str_new(env);
     /* printf("pr_0=%s\n", str_get(pr_0)); */
-    orfs = array_new(sizeof (Range));
+    orfs = array_new(sizeof (Range), env);
     translate_dna(pr_0, splicedseq_get(v->splicedseq),
-                  splicedseq_length(v->splicedseq), 0);
+                  splicedseq_length(v->splicedseq), 0, env);
     translate_dna(pr_1, splicedseq_get(v->splicedseq),
-                  splicedseq_length(v->splicedseq), 1);
+                  splicedseq_length(v->splicedseq), 1, env);
     translate_dna(pr_2, splicedseq_get(v->splicedseq),
-                  splicedseq_length(v->splicedseq), 2);
-    determine_ORFs(orfs, 0, str_get(pr_0), str_length(pr_0));
-    determine_ORFs(orfs, 1, str_get(pr_1), str_length(pr_1));
-    determine_ORFs(orfs, 2, str_get(pr_2), str_length(pr_2));
+                  splicedseq_length(v->splicedseq), 2, env);
+    determine_ORFs(orfs, 0, str_get(pr_0), str_length(pr_0), env);
+    determine_ORFs(orfs, 1, str_get(pr_1), str_length(pr_1), env);
+    determine_ORFs(orfs, 2, str_get(pr_2), str_length(pr_2), env);
 
     if (array_size(orfs)) {
       /* sort ORFs according to length */
@@ -121,7 +122,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
       /*printf("%lu, %lu\n", cds.start, cds.end);*/
       cds_feature = genome_feature_new(gft_CDS, cds,
                                        genome_feature_get_strand(gf), NULL,
-                                       UNDEFULONG);
+                                       UNDEFULONG, env);
       genome_node_set_source(cds_feature, v->source);
       genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
       genome_node_set_phase(cds_feature, 0);
@@ -133,7 +134,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
           /*printf("i=%lu\n", i);*/
           genome_feature_set_end((GenomeFeature*) cds_feature,
                                  splicedseq_map(v->splicedseq, i) + 1);
-          genome_node_is_part_of_genome_node(gn, cds_feature);
+          genome_node_is_part_of_genome_node(gn, cds_feature, env);
           if (strand == STRAND_FORWARD)
             orf.start = i + 1;
           else
@@ -144,7 +145,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
                                    ? orf.end : orf.start) + 1;
           cds_feature = genome_feature_new(gft_CDS, cds,
                                            genome_feature_get_strand(gf), NULL,
-                                           UNDEFULONG);
+                                           UNDEFULONG, env);
           genome_node_set_source(cds_feature, v->source);
           genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
           /* XXX correct this */
@@ -157,14 +158,14 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
                              splicedseq_map(v->splicedseq,
                                             strand == STRAND_FORWARD
                                             ? orf.end : orf.start) + 1);
-      genome_node_is_part_of_genome_node(gn, cds_feature);
+      genome_node_is_part_of_genome_node(gn, cds_feature, env);
     }
 
     /* free */
-    array_delete(orfs);
-    str_delete(pr_2);
-    str_delete(pr_1);
-    str_delete(pr_0);
+    array_delete(orfs, env);
+    str_delete(pr_2, env);
+    str_delete(pr_1, env);
+    str_delete(pr_0, env);
   }
   return has_err;
 }
@@ -188,7 +189,7 @@ static int cds_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
   /* check if the given sequence file contains this sequence (region) */
   if (!bioseq_contains_sequence(cds_visitor->bioseq,
                                 str_get(genome_node_get_seqid((GenomeNode*)
-                                                              sr)))) {
+                                                              sr)), env)) {
     env_error_set(env, "sequence \"%s\" not contained in sequence file \"%s\"",
               str_get(genome_node_get_seqid((GenomeNode*) sr)),
               str_get(cds_visitor->sequence_file));
@@ -217,10 +218,10 @@ GenomeVisitor* cds_visitor_new(Str *sequence_file, Str *source, Env *env)
   cds_visitor = cds_visitor_cast(gv);
   cds_visitor->sequence_file = str_ref(sequence_file);
   cds_visitor->source = str_ref(source);
-  cds_visitor->splicedseq = splicedseq_new();
+  cds_visitor->splicedseq = splicedseq_new(env);
   cds_visitor->bioseq = bioseq_new_str(sequence_file, env);
   if (!cds_visitor->bioseq) {
-    cds_visitor_free(gv);
+    cds_visitor_free(gv, env);
     return NULL;
   }
   return gv;

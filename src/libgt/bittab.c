@@ -19,13 +19,13 @@ struct Bittab {
                 num_of_bits;
 };
 
-Bittab* bittab_new(unsigned long num_of_bits)
+Bittab* bittab_new(unsigned long num_of_bits, Env *env)
 {
   Bittab *b;
 
   assert(num_of_bits);
 
-  b = xmalloc(sizeof (Bittab));
+  b = env_ma_malloc(env, sizeof (Bittab));
   b->num_of_bits = num_of_bits;
 
   if (num_of_bits / (8UL * sizeof (unsigned long)))
@@ -33,7 +33,7 @@ Bittab* bittab_new(unsigned long num_of_bits)
   else
     b->tabsize = 1UL;
 
-  b->tabptr = xcalloc(b->tabsize, sizeof (unsigned long));
+  b->tabptr = env_ma_calloc(env, b->tabsize, sizeof (unsigned long));
 
   return b;
 }
@@ -155,12 +155,12 @@ void bittab_unset(Bittab *b)
     b->tabptr[i] = 0;
 }
 
-void bittab_get_all_bitnums(const Bittab *b, Array *bitnums)
+void bittab_get_all_bitnums(const Bittab *b, Array *bitnums, Env *env)
 {
   unsigned long i;
   assert(b && bitnums);
   for (i = 0; i < b->num_of_bits; i++)
-    if (bittab_bit_is_set(b, i)) array_add(bitnums, i);
+    if (bittab_bit_is_set(b, i)) array_add(bitnums, i, env);
 }
 
 bool bittab_bit_is_set(const Bittab *b, unsigned long bit)
@@ -299,9 +299,9 @@ int bittab_unit_test(Env *env)
 
   for (i = 0; i < NUM_OF_TESTS && !has_err; i++) {
     size = ((double) rand() / RAND_MAX) * MAX_SIZE + 1;
-    b = bittab_new(size);
-    tmp = bittab_new(size);
-    and = bittab_new(size);
+    b = bittab_new(size, env);
+    tmp = bittab_new(size, env);
+    and = bittab_new(size, env);
     ensure(has_err, bittab_size(b) == size);
 
     for (j = 0; j < size && !has_err; j++) {
@@ -367,24 +367,24 @@ int bittab_unit_test(Env *env)
       ensure(has_err, bittab_cmp(b, tmp));
     }
 
-    bittab_delete(b);
-    bittab_delete(tmp);
-    bittab_delete(and);
+    bittab_delete(b, env);
+    bittab_delete(tmp, env);
+    bittab_delete(and, env);
   }
 
   /* test bittab_show */
   fp = xfopen("/dev/null", "w");
-  b = bittab_new(80);
+  b = bittab_new(80, env);
   for (i = 0; i < 80; i++) {
     if (i % 2)
       bittab_set_bit(b, i);
   }
   bittab_show(b, fp);
-  bittab_delete(b);
+  bittab_delete(b, env);
   xfclose(fp);
 
   /* test bittab_shift_left_equal() */
-  b = bittab_new(125);
+  b = bittab_new(125, env);
   bittab_set_bit(b, 0);
   bittab_set_bit(b, 32);
   bittab_set_bit(b, 64);
@@ -400,10 +400,10 @@ int bittab_unit_test(Env *env)
   ensure(has_err, bittab_bit_is_set(b, 78));
   ensure(has_err, bittab_bit_is_set(b, 97));
   ensure(has_err, bittab_bit_is_set(b, 125));
-  bittab_delete(b);
+  bittab_delete(b, env);
 
   /* test bittab_shift_right_equal() */
-  b = bittab_new(125);
+  b = bittab_new(125, env);
   bittab_set_bit(b, 1);
   bittab_set_bit(b, 33);
   bittab_set_bit(b, 65);
@@ -419,14 +419,14 @@ int bittab_unit_test(Env *env)
   ensure(has_err, bittab_bit_is_set(b, 76));
   ensure(has_err, bittab_bit_is_set(b, 96));
   ensure(has_err, bittab_bit_is_set(b, 124));
-  bittab_delete(b);
+  bittab_delete(b, env);
 
   return has_err;
 }
 
-void bittab_delete(Bittab *b)
+void bittab_delete(Bittab *b, Env *env)
 {
   if (!b) return;
-  free(b->tabptr);
-  free(b);
+  env_ma_free(b->tabptr, env);
+  env_ma_free(b, env);
 }

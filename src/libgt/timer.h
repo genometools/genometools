@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -10,14 +10,15 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <stdio.h>
+#include "env.h"
 
 /* the timer class */
 typedef struct Timer Timer;
 
-Timer* timer_new(void);
+Timer* timer_new(Env*);
 void   timer_start(Timer*);
 void   timer_stop(Timer*);
 void   timer_show(Timer*, FILE*);
-void   timer_delete(Timer*);
+void   timer_delete(Timer*, Env*);
 
 #endif

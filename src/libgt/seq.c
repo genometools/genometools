@@ -15,11 +15,11 @@ struct Seq {
   Alpha *seqalpha;
 };
 
-Seq* seq_new(const char *seq, unsigned long seqlen, Alpha *seqalpha)
+Seq* seq_new(const char *seq, unsigned long seqlen, Alpha *seqalpha, Env *env)
 {
   Seq *s;
   assert(seq && seqalpha);
-  s = xcalloc(1, sizeof (Seq));
+  s = env_ma_calloc(env, 1, sizeof (Seq));
   s->seq = seq;
   s->seqlen = seqlen;
   s->seqalpha = alpha_ref(seqalpha);
@@ -61,10 +61,10 @@ unsigned long seq_length(const Seq *s)
   return s->seqlen;
 }
 
-void seq_delete(Seq *s)
+void seq_delete(Seq *s, Env *env)
 {
   if (!s) return;
-  free(s->encoded_seq);
-  alpha_delete(s->seqalpha);
-  free(s);
+  env_ma_free(s->encoded_seq, env);
+  alpha_delete(s->seqalpha, env);
+  env_ma_free(s, env);
 }

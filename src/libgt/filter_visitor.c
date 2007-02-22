@@ -24,12 +24,12 @@ struct FilterVisitor {
 #define filter_visitor_cast(GV)\
         genome_visitor_cast(filter_visitor_class(), GV)
 
-static void filter_visitor_free(GenomeVisitor *gv)
+static void filter_visitor_free(GenomeVisitor *gv, Env *env)
 {
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
-  queue_delete(filter_visitor->genome_node_buffer);
-  str_delete(filter_visitor->seqid);
-  str_delete(filter_visitor->typefilter);
+  queue_delete(filter_visitor->genome_node_buffer, env);
+  str_delete(filter_visitor->seqid, env);
+  str_delete(filter_visitor->typefilter, env);
 }
 
 static int filter_visitor_comment(GenomeVisitor *gv, Comment *c, Env *env)
@@ -37,7 +37,7 @@ static int filter_visitor_comment(GenomeVisitor *gv, Comment *c, Env *env)
   FilterVisitor *filter_visitor;
   env_error_check(env);
   filter_visitor = filter_visitor_cast(gv);
-  queue_add(filter_visitor->genome_node_buffer, c);
+  queue_add(filter_visitor->genome_node_buffer, c, env);
   return 0;
 }
 
@@ -67,7 +67,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
       }
       fv->gene_num++; /* gene passed filter */
     }
-    queue_add(fv->genome_node_buffer, gf);
+    queue_add(fv->genome_node_buffer, gf, env);
   }
   return 0;
 }
@@ -81,7 +81,7 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
   if (!str_get(filter_visitor->seqid) || /* no seqid was specified */
       !str_cmp(filter_visitor->seqid,    /* or seqids are equal */
                genome_node_get_seqid((GenomeNode*) sr))) {
-    queue_add(filter_visitor->genome_node_buffer, sr);
+    queue_add(filter_visitor->genome_node_buffer, sr, env);
   }
   return 0;
 }
@@ -100,11 +100,11 @@ const GenomeVisitorClass* filter_visitor_class()
 GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
                                   unsigned long max_gene_length,
                                   unsigned long max_gene_num,
-                                  double min_gene_score)
+                                  double min_gene_score, Env *env)
 {
   GenomeVisitor *gv = genome_visitor_create(filter_visitor_class());
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
-  filter_visitor->genome_node_buffer = queue_new(sizeof (GenomeNode*));
+  filter_visitor->genome_node_buffer = queue_new(sizeof (GenomeNode*), env);
   filter_visitor->seqid = str_ref(seqid);
   filter_visitor->typefilter = str_ref(typefilter);
   filter_visitor->max_gene_length = max_gene_length;

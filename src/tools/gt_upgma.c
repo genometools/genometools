@@ -15,10 +15,10 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
                          "for the sequences in sequence file (using the unit\n"
                          "cost edit distance as distance function). If "
                          "'example' is given as\nsequence_file, a builtin "
-                         "example is used.");
+                         "example is used.", env);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 1, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   return oprval;
 }
 
@@ -62,20 +62,21 @@ int gt_upgma(int argc, char *argv[], Env *env)
     use_hard_coded_example = true;
 
   if (use_hard_coded_example)
-    upgma = upgma_new(5, NULL, exampledistfunc);
+    upgma = upgma_new(5, NULL, exampledistfunc, env);
   else {
     bioseq = bioseq_new(argv[1], env);
     if (!bioseq)
       has_err = -1;
     if (!has_err)
-      upgma = upgma_new(bioseq_number_of_sequences(bioseq), bioseq, distfunc);
+      upgma = upgma_new(bioseq_number_of_sequences(bioseq), bioseq, distfunc,
+                        env);
   }
 
   if (!has_err)
     upgma_show_tree(upgma, stdout);
 
-  bioseq_delete(bioseq);
-  upgma_delete(upgma);
+  bioseq_delete(bioseq, env);
+  upgma_delete(upgma, env);
 
   return has_err;
 }

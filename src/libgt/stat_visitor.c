@@ -23,11 +23,11 @@ struct StatVisitor {
 #define stat_visitor_cast(GV)\
         genome_visitor_cast(stat_visitor_class(), GV)
 
-static void stat_visitor_free(GenomeVisitor *gv)
+static void stat_visitor_free(GenomeVisitor *gv, Env *env)
 {
   StatVisitor *stat_visitor = stat_visitor_cast(gv);
-  disc_distri_delete(stat_visitor->gene_length_distribution);
-  disc_distri_delete(stat_visitor->gene_score_distribution);
+  disc_distri_delete(stat_visitor->gene_length_distribution, env);
+  disc_distri_delete(stat_visitor->gene_score_distribution, env);
 }
 
 static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
@@ -41,11 +41,12 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
       stat_visitor->number_of_genes++;
       if (stat_visitor->gene_length_distribution) {
         disc_distri_add(stat_visitor->gene_length_distribution,
-                        range_length(genome_node_get_range((GenomeNode*) gf)));
+                        range_length(genome_node_get_range((GenomeNode*) gf)),
+                        env);
       }
       if (stat_visitor->gene_score_distribution) {
         disc_distri_add(stat_visitor->gene_score_distribution,
-                        genome_feature_get_score(gf) * 100.0);
+                        genome_feature_get_score(gf) * 100.0, env);
       }
       break;
     case gft_mRNA:
@@ -55,13 +56,15 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
       stat_visitor->number_of_exons++;
       if (stat_visitor->exon_length_distribution) {
         disc_distri_add(stat_visitor->exon_length_distribution,
-                        range_length(genome_node_get_range((GenomeNode*) gf)));
+                        range_length(genome_node_get_range((GenomeNode*) gf)),
+                        env);
       }
       break;
     case gft_intron:
       if (stat_visitor->intron_length_distribution) {
         disc_distri_add(stat_visitor->intron_length_distribution,
-                        range_length(genome_node_get_range((GenomeNode*) gf)));
+                        range_length(genome_node_get_range((GenomeNode*) gf)),
+                        env);
       }
       break;
     default: assert(1); /* nothing to do for all other types */

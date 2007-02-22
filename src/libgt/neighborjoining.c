@@ -31,7 +31,8 @@ struct NeighborJoining {
 static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
                                  void *data,
                                  double (*distfunc)
-                                        (unsigned long, unsigned long, void*))
+                                        (unsigned long, unsigned long, void*),
+                                 Env *env)
 {
   unsigned long i, j;
   double retval;
@@ -40,7 +41,7 @@ static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
   nj->numofnodes = 2 * num_of_taxa - 2;
   nj->finalnodeA = UNDEFULONG;
   nj->finalnodeB = UNDEFULONG;
-  nj->nodes      = xmalloc(sizeof (NJnode) * nj->numofnodes);
+  nj->nodes      = env_ma_malloc(env, sizeof (NJnode) * nj->numofnodes);
 
   for (i = 0; i < nj->numofnodes; i++) {
     nj->nodes[i].leftdaughter  = UNDEFULONG;
@@ -49,7 +50,7 @@ static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
     nj->nodes[i].rightdist     = UNDEFDOUBLE;
 
     if (i > 0) {
-      nj->nodes[i].distances = xmalloc(sizeof (double) * i);
+      nj->nodes[i].distances = env_ma_malloc(env, sizeof (double) * i);
       for (j = 0; j < i; j++) {
         if (i < num_of_taxa) {
           retval = distfunc(i, j, data);
@@ -94,7 +95,7 @@ static void updatertab(double *rtab, Bittab *nodetab, unsigned long activenodes,
   }
 }
 
-static void neighborjoining_compute(NeighborJoining *nj)
+static void neighborjoining_compute(NeighborJoining *nj, Env *env)
 {
   unsigned long i, j, min_i = UNDEFULONG, min_j = UNDEFULONG, step,
                 newnodenum = nj->num_of_taxa,
@@ -103,13 +104,13 @@ static void neighborjoining_compute(NeighborJoining *nj)
   double mindist, *rtab;
 
   /* init node tab */
-  nodetab = bittab_new(nj->numofnodes);
+  nodetab = bittab_new(nj->numofnodes, env);
   for (i = 0; i < nj->num_of_taxa; i++)
     bittab_set_bit(nodetab, i);
   activenodes = nj->num_of_taxa;
 
   /* init the r table */
-  rtab = xmalloc(sizeof (double) * nj->numofnodes);
+  rtab = env_ma_malloc(env, sizeof (double) * nj->numofnodes);
 
   /* the neighbor joining takes num_of_taxa - 2 steps */
   for (step = 0; step < nj->num_of_taxa - 2; step++) {
@@ -169,19 +170,20 @@ static void neighborjoining_compute(NeighborJoining *nj)
   nj->finalnodeB = nj->numofnodes - 1;
   nj->finaldist  = nj->nodes[nj->finalnodeB].distances[nj->finalnodeA];
 
-  bittab_delete(nodetab);
-  free(rtab);
+  bittab_delete(nodetab, env);
+  env_ma_free(rtab, env);
 }
 
 NeighborJoining* neighborjoining_new(unsigned long num_of_taxa, void *data,
                                      double (*distfunc)
-                                     (unsigned long, unsigned long, void *data))
+                                     (unsigned long, unsigned long, void *data),
+                                     Env *env)
 {
   NeighborJoining *nj;
   assert(num_of_taxa && distfunc);
-  nj = xmalloc(sizeof (NeighborJoining));
-  neighborjoining_init(nj, num_of_taxa, data, distfunc);
-  neighborjoining_compute(nj);
+  nj = env_ma_malloc(env, sizeof (NeighborJoining));
+  neighborjoining_init(nj, num_of_taxa, data, distfunc, env);
+  neighborjoining_compute(nj, env);
   return nj;
 }
 
@@ -212,12 +214,12 @@ void neighborjoining_show_tree(const NeighborJoining *nj, FILE *fp)
     neighborjoining_show_node(nj, nj->finalnodeB, fp);
 }
 
-void neighborjoining_delete(NeighborJoining *nj)
+void neighborjoining_delete(NeighborJoining *nj, Env *env)
 {
   unsigned long i;
   if (!nj) return;
   for (i = 1; i < nj->numofnodes; i++)
-    free(nj->nodes[i].distances);
-  free(nj->nodes);
-  free(nj);
+    env_ma_free(nj->nodes[i].distances, env);
+  env_ma_free(nj->nodes, env);
+  env_ma_free(nj, env);
 }

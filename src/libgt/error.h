@@ -10,11 +10,12 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <stdbool.h>
+#include "ma.h"
 
 /* the error class */
 typedef struct Error Error;
 
-Error*      error_new(void);
+Error*      error_new(MA*);
 void        error_set(Error*, const char *format, ...)
               __attribute__ ((format (printf, 2, 3)));
 void        error_vset(Error*, const char *format, va_list);
@@ -22,6 +23,6 @@ bool        error_is_set(const Error*);
 void        error_unset(Error*);
 /* get the error string (the error must be set) */
 const char* error_get(const Error*);
-void        error_delete(Error*);
+void        error_delete(Error*, MA*);
 
 #endif

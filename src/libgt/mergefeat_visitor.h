@@ -13,6 +13,6 @@ typedef struct MergefeatVisitor MergefeatVisitor;
 #include "genome_visitor.h"
 
 const GenomeVisitorClass* mergefeat_visitor_class(void);
-GenomeVisitor*            mergefeat_visitor_new(void);
+GenomeVisitor*            mergefeat_visitor_new(Env*);
 
 #endif

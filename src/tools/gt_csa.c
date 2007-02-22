@@ -20,7 +20,7 @@ static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
   OptionParser *op = option_parser_new("[option ...] [GFF3_file]",
                                        "Replace spliced alignments with "
                                        "computed consensus spliced "
-                                       "alignments.");
+                                       "alignments.", env);
   Option *option;
   OPrval oprval;
   env_error_check(env);
@@ -28,21 +28,21 @@ static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
   /* -join-length */
   option = option_new_ulong("join-length", "set join length for the spliced "
                             "alignment clustering", &arguments->join_length,
-                            DEFAULT_JOINLENGTH);
-  option_parser_add_option(op, option);
+                            DEFAULT_JOINLENGTH, env);
+  option_parser_add_option(op, option, env);
 
   /* -o */
-  option = option_new_outputfile(&arguments->outfp);
-  option_parser_add_option(op, option);
+  option = option_new_outputfile(&arguments->outfp, env);
+  option_parser_add_option(op, option, env);
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, option);
+  option = option_new_verbose(&arguments->verbose, env);
+  option_parser_add_option(op, option, env);
 
   /* parse */
   oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
                                         versionfunc, 1, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
 
   return oprval;
 }
@@ -67,20 +67,20 @@ int gt_csa(int argc, char *argv[], Env *env)
   /* create the streams */
   gff3_in_stream  = gff3_in_stream_new_sorted(argv[parsed_args],
                                               arguments.verbose &&
-                                              arguments.outfp != stdout);
-  csa_stream      = csa_stream_new(gff3_in_stream, arguments.join_length);
-  gff3_out_stream = gff3_out_stream_new(csa_stream, arguments.outfp);
+                                              arguments.outfp != stdout, env);
+  csa_stream      = csa_stream_new(gff3_in_stream, arguments.join_length, env);
+  gff3_out_stream = gff3_out_stream_new(csa_stream, arguments.outfp, env);
 
   /* pull the features through the stream and free them afterwards */
   while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
          gn) {
-    genome_node_rec_delete(gn);
+    genome_node_rec_delete(gn, env);
   }
 
   /* free */
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(csa_stream);
-  genome_stream_delete(gff3_in_stream);
+  genome_stream_delete(gff3_out_stream, env);
+  genome_stream_delete(csa_stream, env);
+  genome_stream_delete(gff3_in_stream, env);
   if (arguments.outfp != stdout)
     xfclose(arguments.outfp);
 

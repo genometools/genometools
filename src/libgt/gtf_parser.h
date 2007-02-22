@@ -25,10 +25,10 @@
 
 typedef struct GTF_parser GTF_parser;
 
-GTF_parser* gtf_parser_new(void);
+GTF_parser* gtf_parser_new(Env*);
 int         gtf_parser_parse(GTF_parser*, Queue *genome_nodes,
                              const char *filename, FILE*,
                              unsigned int be_tolerant, Env *err);
-void        gtf_parser_delete(GTF_parser*);
+void        gtf_parser_delete(GTF_parser*, Env*);
 
 #endif

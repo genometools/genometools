@@ -22,30 +22,31 @@ static OPrval parse_options(int *parsed_args, Gff3_arguments *arguments,
   OPrval oprval;
   env_error_check(env);
   op = option_parser_new("[option ...] [GFF3_file ...]",
-                         "Parse, possibly transform, and output GFF3 files.");
+                         "Parse, possibly transform, and output GFF3 files.",
+                         env);
   sort_option = option_new_bool("sort", "sort the GFF3 features (memory "
                                 "consumption is O(file_size))",
-                                &arguments->sort, false);
-  option_parser_add_option(op, sort_option);
+                                &arguments->sort, false, env);
+  option_parser_add_option(op, sort_option, env);
   mergefeat_option = option_new_bool("mergefeat", "merge adjacent features of "
                                      "the same type", &arguments->mergefeat,
-                                     false);
+                                     false, env);
   option_is_development_option(mergefeat_option);
-  option_imply(mergefeat_option, sort_option);
-  option_parser_add_option(op, mergefeat_option);
+  option_imply(mergefeat_option, sort_option, env);
+  option_parser_add_option(op, mergefeat_option, env);
   option = option_new_long("offset",
                            "transform all features by the given offset",
-                           &arguments->offset, UNDEFLONG);
+                           &arguments->offset, UNDEFLONG, env);
   /* XXX: do not make this a ``normal option'' until the necessary envor checks
      have been added to range_offset() in range.c */
   option_is_development_option(option);
-  option_parser_add_option(op, option);
-  option = option_new_outputfile(&arguments->outfp);
-  option_parser_add_option(op, option);
-  option = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, option);
+  option_parser_add_option(op, option, env);
+  option = option_new_outputfile(&arguments->outfp, env);
+  option_parser_add_option(op, option, env);
+  option = option_new_verbose(&arguments->verbose, env);
+  option_parser_add_option(op, option, env);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   return oprval;
 }
 
@@ -71,7 +72,7 @@ int gt_gff3(int argc, char *argv[], Env *env)
   gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
                                                argv + parsed_args,
                                                arguments.verbose &&
-                                               arguments.outfp != stdout);
+                                               arguments.outfp != stdout, env);
 
   /* set offset (if necessary) */
   if (arguments.offset != UNDEFLONG)
@@ -79,31 +80,31 @@ int gt_gff3(int argc, char *argv[], Env *env)
 
   /* create sort stream (if necessary) */
   if (arguments.sort)
-    sort_stream = sort_stream_new(gff3_in_stream);
+    sort_stream = sort_stream_new(gff3_in_stream, env);
 
   /* create merge feature stream (if necessary) */
   if (arguments.mergefeat) {
     assert(sort_stream);
-    mergefeat_stream = mergefeat_stream_sorted_new(sort_stream);
+    mergefeat_stream = mergefeat_stream_sorted_new(sort_stream, env);
   }
 
   /* create gff3 output stream */
   gff3_out_stream = gff3_out_stream_new(mergefeat_stream ? mergefeat_stream
                                         : (sort_stream ? sort_stream
                                                         : gff3_in_stream),
-                                        arguments.outfp);
+                                        arguments.outfp, env);
 
   /* pull the features through the stream and free them afterwards */
   while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
          gn) {
-    genome_node_rec_delete(gn);
+    genome_node_rec_delete(gn, env);
   }
 
   /* free */
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(sort_stream);
-  genome_stream_delete(mergefeat_stream);
-  genome_stream_delete(gff3_in_stream);
+  genome_stream_delete(gff3_out_stream, env);
+  genome_stream_delete(sort_stream, env);
+  genome_stream_delete(mergefeat_stream, env);
+  genome_stream_delete(gff3_in_stream, env);
   if (arguments.outfp != stdout)
     xfclose(arguments.outfp);
 

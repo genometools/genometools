@@ -31,7 +31,7 @@ static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   if (!sort_stream->sorted) {
     while (!(has_err = genome_stream_next_tree(sort_stream->in_stream, gn,
              env)) && *gn) {
-      array_add(sort_stream->trees, *gn);
+      array_add(sort_stream->trees, *gn, env);
     }
     if (!has_err) {
       genome_nodes_sort_stable(sort_stream->trees);
@@ -56,11 +56,11 @@ static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return has_err;
 }
 
-static void sort_stream_free(GenomeStream *gs)
+static void sort_stream_free(GenomeStream *gs, Env *env)
 {
   SortStream *sort_stream = sort_stream_cast(gs);
   assert(!array_size(sort_stream->trees));
-  array_delete(sort_stream->trees);
+  array_delete(sort_stream->trees, env);
 }
 
 const GenomeStreamClass* sort_stream_class(void)
@@ -71,7 +71,7 @@ const GenomeStreamClass* sort_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* sort_stream_new(GenomeStream *in_stream)
+GenomeStream* sort_stream_new(GenomeStream *in_stream, Env *env)
 {
   GenomeStream *gs = genome_stream_create(sort_stream_class(), true);
   SortStream *sort_stream = sort_stream_cast(gs);
@@ -79,6 +79,6 @@ GenomeStream* sort_stream_new(GenomeStream *in_stream)
   sort_stream->in_stream = in_stream;
   sort_stream->sorted = false;
   sort_stream->idx = 0;
-  sort_stream->trees = array_new(sizeof (GenomeNode*));
+  sort_stream->trees = array_new(sizeof (GenomeNode*), env);
   return gs;
 }

@@ -32,13 +32,13 @@ struct GenomeFeature
 #define genome_feature_cast(GN)\
         genome_node_cast(genome_feature_class(), GN)
 
-static void genome_feature_free(GenomeNode *gn)
+static void genome_feature_free(GenomeNode *gn, Env *env)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   assert(gf);
-  str_delete(gf->seqid);
-  str_delete(gf->source);
-  hashtable_delete(gf->attributes);
+  str_delete(gf->seqid, env);
+  str_delete(gf->source, env);
+  hashtable_delete(gf->attributes, env);
 }
 
 static Str* genome_feature_get_seqid(GenomeNode *gn)
@@ -101,10 +101,10 @@ GenomeNode* genome_feature_new(GenomeFeatureType type,
                                 Range range,
                                 Strand strand,
                                 const char *filename,
-                                unsigned long line_number)
+                                unsigned long line_number, Env *env)
 {
   GenomeNode *gn = genome_node_create(genome_feature_class(), filename,
-                                       line_number);
+                                      line_number, env);
   GenomeFeature *gf = genome_feature_cast(gn);
   assert(range.start <= range.end);
   gf->seqid      = NULL;
@@ -156,7 +156,7 @@ static int save_exon(GenomeNode *gn, void *data, Env *env)
   gf = (GenomeFeature*) gn;
   assert(gf && exon_features);
   if (genome_feature_get_type(gf) == gft_exon) {
-    array_add(exon_features, gf);
+    array_add(exon_features, gf, env);
   }
   return 0;
 }
@@ -183,11 +183,11 @@ void genome_feature_set_score(GenomeFeature *gf, double score)
 }
 
 void genome_feature_add_attribute(GenomeFeature *gf, const char *attr_name,
-                                  const char *attr_value)
+                                  const char *attr_value, Env *env)
 {
   assert(gf && attr_name && attr_value);
   if (!gf->attributes)
-    gf->attributes = hashtable_new(HASH_DIRECT, free, free);
+    gf->attributes = hashtable_new(HASH_DIRECT, env_ma_free, env_ma_free, env);
   hashtable_add(gf->attributes, xstrdup(attr_name), xstrdup(attr_value));
 }
 

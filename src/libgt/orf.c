@@ -14,7 +14,7 @@
 #define STOP_AMINO  '*'
 
 void determine_ORFs(Array *ranges, unsigned int framenum,
-                    const char *frame, unsigned long framelen)
+                    const char *frame, unsigned long framelen, Env *env)
 {
   unsigned long i;
   Range orf;
@@ -28,7 +28,7 @@ void determine_ORFs(Array *ranges, unsigned int framenum,
     else {
       if (frame[i] == STOP_AMINO) {
         orf.end = i * CODONLENGTH + framenum + 2;
-        array_add(ranges, orf);
+        array_add(ranges, orf, env);
         orf.start = UNDEFULONG;
       }
     }

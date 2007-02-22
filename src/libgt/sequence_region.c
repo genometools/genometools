@@ -19,11 +19,11 @@ struct SequenceRegion
 #define sequence_region_cast(GN)\
         genome_node_cast(sequence_region_class(), GN)
 
-static void sequence_region_free(GenomeNode *gn)
+static void sequence_region_free(GenomeNode *gn, Env *env)
 {
   SequenceRegion *sr = sequence_region_cast(gn);
   assert(sr && sr->seqid);
-  str_delete(sr->seqid);
+  str_delete(sr->seqid, env);
 }
 
 static Str* sequence_region_get_seqid(GenomeNode *gn)
@@ -67,13 +67,11 @@ const GenomeNodeClass* sequence_region_class()
   return &gnc;
 }
 
-GenomeNode* sequence_region_new(Str *seqid,
-                                Range range,
-                                const char *filename,
-                                unsigned long line_number)
+GenomeNode* sequence_region_new(Str *seqid, Range range, const char *filename,
+                                unsigned long line_number, Env *env)
 {
   GenomeNode *gn = genome_node_create(sequence_region_class(), filename,
-                                      line_number);
+                                      line_number, env);
   SequenceRegion *sr = sequence_region_cast(gn);
   assert(seqid);
   sr->seqid = str_ref(seqid);

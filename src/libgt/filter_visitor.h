@@ -16,7 +16,7 @@ const GenomeVisitorClass* filter_visitor_class(void);
 GenomeVisitor*            filter_visitor_new(Str *seqid, Str *typefilter,
                                              unsigned long max_gene_length,
                                              unsigned long max_gene_num,
-                                             double min_gene_score);
+                                             double min_gene_score, Env*);
 unsigned long             filter_visitor_node_buffer_size(GenomeVisitor*);
 GenomeNode*               filter_visitor_get_node(GenomeVisitor*);
 

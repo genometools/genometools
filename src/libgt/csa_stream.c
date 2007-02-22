@@ -59,10 +59,10 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return has_err;
 }
 
-static void csa_stream_free(GenomeStream *gs)
+static void csa_stream_free(GenomeStream *gs, Env *env)
 {
   CSAStream *cs = csa_stream_cast(gs);
-  genome_visitor_delete(cs->csa_visitor);
+  genome_visitor_delete(cs->csa_visitor, env);
 }
 
 const GenomeStreamClass* csa_stream_class(void)
@@ -73,13 +73,13 @@ const GenomeStreamClass* csa_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* csa_stream_new(GenomeStream *in_stream,
-                              unsigned long join_length)
+GenomeStream* csa_stream_new(GenomeStream *in_stream, unsigned long join_length,
+                             Env *env)
 {
   GenomeStream *gs = genome_stream_create(csa_stream_class(),
                                           genome_stream_is_sorted(in_stream));
   CSAStream *cs = csa_stream_cast(gs);
   cs->in_stream = in_stream;
-  cs->csa_visitor = csa_visitor_new(join_length);
+  cs->csa_visitor = csa_visitor_new(join_length, env);
   return gs;
 }

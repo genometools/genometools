@@ -84,7 +84,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
           if (genome_nodes_are_equal_sequence_regions(ms->buffer[i],
                                                       ms->buffer[j])) {
             consolidate_sequence_regions(ms->buffer[i], ms->buffer[j]);
-            genome_node_rec_delete(ms->buffer[j]);
+            genome_node_rec_delete(ms->buffer[j], env);
             ms->buffer[j] = NULL;
           }
         }
@@ -115,10 +115,10 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return has_err;
 }
 
-static void merge_stream_free(GenomeStream *gs)
+static void merge_stream_free(GenomeStream *gs, Env *env)
 {
   MergeStream *ms = merge_stream_cast(gs);
-  array_delete(ms->genome_streams);
+  array_delete(ms->genome_streams, env);
   free(ms->buffer);
 }
 
@@ -130,7 +130,7 @@ const GenomeStreamClass* merge_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* merge_stream_new(const Array *genome_streams)
+GenomeStream* merge_stream_new(const Array *genome_streams, Env *env)
 {
   GenomeStream *gs = genome_stream_create(merge_stream_class(), true);
   MergeStream *ms = merge_stream_cast(gs);
@@ -143,7 +143,7 @@ GenomeStream* merge_stream_new(const Array *genome_streams)
                                    array_get(genome_streams, i)));
   }
 #endif
-  ms->genome_streams = array_clone(genome_streams);
+  ms->genome_streams = array_clone(genome_streams, env);
   ms->buffer = xcalloc(array_size(genome_streams), sizeof (GenomeNode*));
   return gs;
 }

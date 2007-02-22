@@ -7,14 +7,17 @@
 #ifndef LOG_H
 #define LOG_H
 
+#include <stdarg.h>
 #include <stdio.h>
+#include "ma.h"
 
 typedef struct Log Log;
 
-Log*  log_new(void);
+Log*  log_new(MA*);
 void  log_log(Log*, const char *format, ...)
   __attribute__ ((format (printf, 2, 3)));
+void  log_vlog(Log*, const char *format, va_list);
 FILE* log_fp(Log*);
-void  log_delete(Log*);
+void  log_delete(Log*, MA*);
 
 #endif

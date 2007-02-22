@@ -27,9 +27,9 @@ struct Dlistelem {
   void *data;
 };
 
-Dlist* dlist_new(Compare cmp_func)
+Dlist* dlist_new(Compare cmp_func, Env *env)
 {
-  Dlist *dlist = xcalloc(1, sizeof (Dlist));
+  Dlist *dlist = env_ma_calloc(env, 1, sizeof (Dlist));
   dlist->cmp_func = cmp_func;
   return dlist;
 }
@@ -51,10 +51,11 @@ unsigned long dlist_size(const Dlist *dlist)
   return dlist ? dlist->size : 0;
 }
 
-void dlist_add(Dlist *dlist, void *data)
+void dlist_add(Dlist *dlist, void *data, Env *env)
 {
-  Dlistelem *oldelem, *newelem = xcalloc(1, sizeof (Dlistelem));
+  Dlistelem *oldelem, *newelem;
   assert(dlist); /* data can be null */
+  newelem = env_ma_calloc(env, 1, sizeof (Dlistelem));
   newelem->data = data;
 
   if (!dlist->first) {
@@ -145,41 +146,41 @@ int dlist_unit_test(Env *env)
   env_error_check(env);
 
   /* boundary case: empty dlist */
-  dlist = dlist_new(compare);
+  dlist = dlist_new(compare, env);
   ensure(has_err, !dlist_size(dlist));
-  dlist_delete(dlist);
+  dlist_delete(dlist, env);
 
-  dlist = dlist_new(NULL);
+  dlist = dlist_new(NULL, env);
   ensure(has_err, !dlist_size(dlist));
-  dlist_delete(dlist);
+  dlist_delete(dlist, env);
 
   /* boundary case: dlist containing one element */
-  dlist = dlist_new(compare);
-  dlist_add(dlist, &elem_a);
+  dlist = dlist_new(compare, env);
+  dlist_add(dlist, &elem_a, env);
   ensure(has_err, dlist_size(dlist) == 1);
   ensure(has_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_delete(dlist);
+  dlist_delete(dlist, env);
 
-  dlist = dlist_new(NULL);
-  dlist_add(dlist, &elem_a);
+  dlist = dlist_new(NULL, env);
+  dlist_add(dlist, &elem_a, env);
   ensure(has_err, dlist_size(dlist) == 1);
   ensure(has_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_delete(dlist);
+  dlist_delete(dlist, env);
 
   /* boundary case: dlist containing two elements */
-  dlist = dlist_new(compare);
-  dlist_add(dlist, &elem_a);
-  dlist_add(dlist, &elem_b);
+  dlist = dlist_new(compare, env);
+  dlist_add(dlist, &elem_a, env);
+  dlist_add(dlist, &elem_b, env);
   ensure(has_err, dlist_size(dlist) == 2);
   ensure(has_err, elem_b == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_delete(dlist);
+  dlist_delete(dlist, env);
 
-  dlist = dlist_new(NULL);
-  dlist_add(dlist, &elem_a);
-  dlist_add(dlist, &elem_b);
+  dlist = dlist_new(NULL, env);
+  dlist_add(dlist, &elem_a, env);
+  dlist_add(dlist, &elem_b, env);
   ensure(has_err, dlist_size(dlist) == 2);
   ensure(has_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_delete(dlist);
+  dlist_delete(dlist, env);
 
   for (i = 0; i < NUM_OF_TESTS && !has_err; i++) {
     /* construct the random elements for the list */
@@ -193,10 +194,10 @@ int dlist_unit_test(Env *env)
     qsort(elems_backup, size, sizeof (int), compare);
 
     /* test with compare function */
-    dlist = dlist_new(compare);
+    dlist = dlist_new(compare, env);
     ensure(has_err, !dlist_size(dlist));
     for (j = 0; j < size && !has_err; j++) {
-      dlist_add(dlist, elems + j);
+      dlist_add(dlist, elems + j, env);
       ensure(has_err, dlist_size(dlist) == j+1);
 
       for (dlistelem = dlist_first(dlist); dlistelem != NULL;
@@ -241,13 +242,13 @@ int dlist_unit_test(Env *env)
       ensure(has_err, *data == elems_backup[size / 2 + 1]);
     }
 #endif
-    dlist_delete(dlist);
+    dlist_delete(dlist, env);
 
     /* test without compare function */
-    dlist = dlist_new(NULL);
+    dlist = dlist_new(NULL, env);
     ensure(has_err, !dlist_size(dlist));
     for (j = 0; j < size && !has_err; j++) {
-      dlist_add(dlist, elems + j);
+      dlist_add(dlist, elems + j, env);
       ensure(has_err, dlist_size(dlist) == j+1);
     }
     j = 0;
@@ -273,23 +274,23 @@ int dlist_unit_test(Env *env)
         ensure(has_err, *data == elems[size - 2]);
       }
     }
-    dlist_delete(dlist);
+    dlist_delete(dlist, env);
   }
 
   return has_err;
 }
 
-void dlist_delete(Dlist *dlist)
+void dlist_delete(Dlist *dlist, Env *env)
 {
   Dlistelem *elem;
   if (!dlist) return;
   elem = dlist->first;
   while (elem) {
-    free(elem->previous);
+    env_ma_free(elem->previous, env);
     elem = elem->next;
   }
-  free(dlist->last);
-  free(dlist);
+  env_ma_free(dlist->last, env);
+  env_ma_free(dlist, env);
 }
 
 Dlistelem* dlistelem_next(const Dlistelem *dlistelem)

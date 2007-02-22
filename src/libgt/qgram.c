@@ -38,19 +38,19 @@ unsigned long qgram_step(unsigned long current_code, char previous, char next,
 
 void qgram_compute(Array *qgrams, const char *encoded_seq,
                    unsigned long seqlen, unsigned long alpha_size,
-                   unsigned int q)
+                   unsigned int q, Env *env)
 {
   unsigned long i, code, alpha_size_raised_to_the_power_of_q_minus_1;
   assert(qgrams && encoded_seq && alpha_size && q);
   if (seqlen >= q) {
     alpha_size_raised_to_the_power_of_q_minus_1 = pow(alpha_size, q-1);
     code = qgram_encode(encoded_seq, q, alpha_size);
-    array_add(qgrams, code);
+    array_add(qgrams, code, env);
     i = 0;
     while (i + q < seqlen) {
       code = qgram_step(code, encoded_seq[i], encoded_seq[i+q], alpha_size,
                         alpha_size_raised_to_the_power_of_q_minus_1);
-      array_add(qgrams, code);
+      array_add(qgrams, code, env);
       i++;
     }
   }

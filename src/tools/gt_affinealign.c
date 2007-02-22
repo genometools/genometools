@@ -21,19 +21,19 @@ static OPrval parse_options(int *parsed_args, Costs *costs, int argc,
   env_error_check(env);
   op = option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Globally align each sequence in seq_file_1 with each "
-                         "sequence in seq_file_2 (affine gap costs).");
+                         "sequence in seq_file_2 (affine gap costs).", env);
   option = option_new_int("rep", "set replacement cost",
-                          &costs->replacement_cost, 1);
-  option_parser_add_option(op, option);
+                          &costs->replacement_cost, 1, env);
+  option_parser_add_option(op, option, env);
   option = option_new_int("gapopen", "set gap opening cost",
-                          &costs->gap_opening_cost, 3);
-  option_parser_add_option(op, option);
+                          &costs->gap_opening_cost, 3, env);
+  option_parser_add_option(op, option, env);
   option = option_new_int("gapext", "set gap extension cost",
-                          &costs->gap_extension_cost, 1);
-  option_parser_add_option(op, option);
+                          &costs->gap_extension_cost, 1, env);
+  option_parser_add_option(op, option, env);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 2, 2, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   return oprval;
 }
 
@@ -73,17 +73,17 @@ int gt_affinealign(int argc, char *argv[], Env *env)
                         bioseq_get_sequence(bioseq_2, j),
                         bioseq_get_sequence_length(bioseq_2, j),
                         costs.replacement_cost, costs.gap_opening_cost,
-                        costs.gap_extension_cost);
+                        costs.gap_extension_cost, env);
         alignment_show(a, stdout);
         xputchar('\n');
-        alignment_delete(a);
+        alignment_delete(a, env);
       }
     }
   }
 
   /* free */
-  bioseq_delete(bioseq_2);
-  bioseq_delete(bioseq_1);
+  bioseq_delete(bioseq_2, env);
+  bioseq_delete(bioseq_1, env);
 
   return has_err;
 }

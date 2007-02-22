@@ -24,49 +24,50 @@ static OPrval parse_options(int *parsed_args, Bioseq_arguments *arguments,
   env_error_check(env);
   op = option_parser_new("[option ...] sequence_file [...]",
                          "Construct the Biosequence files for the given "
-                         "sequence_file(s) (if necessary).");
+                         "sequence_file(s) (if necessary).", env);
 
   /* -recreate */
   option = option_new_bool("recreate", "recreate Biosequence files, even if "
-                           "they exist already", &arguments->recreate, false);
-  option_parser_add_option(op, option);
+                           "they exist already", &arguments->recreate, false,
+                           env);
+  option_parser_add_option(op, option, env);
 
   /* -showfasta */
   option_showfasta = option_new_bool("showfasta", "show sequences on stdout "
                                      "(in fasta format)", &arguments->showfasta,
-                                     false);
-  option_parser_add_option(op, option_showfasta);
+                                     false, env);
+  option_parser_add_option(op, option_showfasta, env);
 
   /* -showseqnum */
   option_showseqnum = option_new_ulong_min("showseqnum", "show sequence with "
                                            "given number on stdout (in fasta "
                                            "format)", &arguments->showseqnum,
-                                           UNDEFULONG, 1);
-  option_parser_add_option(op, option_showseqnum);
+                                           UNDEFULONG, 1, env);
+  option_parser_add_option(op, option_showseqnum, env);
 
   /* -stat */
   option_stat = option_new_bool("stat", "show sequence statistics",
-                                &arguments->stat, false);
-  option_parser_add_option(op, option_stat);
+                                &arguments->stat, false, env);
+  option_parser_add_option(op, option_stat, env);
 
   /* -width */
   option_width = option_new_ulong("width", "set output width for showing of "
                                   "sequences (0 disables formatting)",
-                                  &arguments->width, 0);
-  option_parser_add_option(op, option_width);
+                                  &arguments->width, 0, env);
+  option_parser_add_option(op, option_width, env);
 
   /* option implications */
-  option_imply_either_2(option_width, option_showfasta, option_showseqnum);
+  option_imply_either_2(option_width, option_showfasta, option_showseqnum, env);
 
   /* option exclusions */
-  option_exclude(option_showfasta, option_stat);
-  option_exclude(option_showfasta, option_showseqnum);
-  option_exclude(option_showseqnum, option_stat);
+  option_exclude(option_showfasta, option_stat, env);
+  option_exclude(option_showfasta, option_showseqnum, env);
+  option_exclude(option_showseqnum, option_stat, env);
 
   /* parse */
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
                                         versionfunc, 1, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
 
   return oprval;
 }
@@ -123,7 +124,7 @@ int gt_bioseq(int argc, char *argv[], Env *env)
       bioseq_show_stat(bioseq);
 
     /* free */
-    bioseq_delete(bioseq);
+    bioseq_delete(bioseq, env);
 
     parsed_args++;
   }

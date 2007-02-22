@@ -17,13 +17,14 @@ static OPrval parse_options(int *parsed_args, int *indelscore, int argc,
   env_error_check(env);
   op = option_parser_new("[option ...] scorematrix seq_file_1 seq_file_2",
                          "Locally align each sequence in seq_file_1 "
-                         "with each sequence in seq_file_2.");
+                         "with each sequence in seq_file_2.", env);
   o = option_new_int("indelscore", "set the score used for "
-                     "insertions/deletions", indelscore, DEFAULT_INDELSCORE);
-  option_parser_add_option(op, o);
+                     "insertions/deletions", indelscore, DEFAULT_INDELSCORE,
+                     env);
+  option_parser_add_option(op, o, env);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 3, 3, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   return oprval;
 }
 
@@ -49,7 +50,7 @@ int gt_swalign(int argc, char *argv[], Env *env)
   /* XXX: make this more flexible */
   scorematrix  = scorematrix_read_protein(argv[parsed_args], env);
   if (scorematrix) {
-    scorefunction = scorefunction_new(scorematrix, indelscore, indelscore);
+    scorefunction = scorefunction_new(scorematrix, indelscore, indelscore, env);
     bioseq_1 = bioseq_new(argv[parsed_args+1], env);
     if (!bioseq_1)
       has_err = -1;
@@ -63,12 +64,12 @@ int gt_swalign(int argc, char *argv[], Env *env)
       /* aligning all sequence combinations */
       for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
         for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
-          a = swalign(bioseq_get_seq(bioseq_1, i), bioseq_get_seq(bioseq_2, j),
-                      scorefunction);
+          a = swalign(bioseq_get_seq(bioseq_1, i, env),
+                      bioseq_get_seq(bioseq_2, j, env), scorefunction, env);
           if (a) {
             alignment_show(a, stdout);
             xputchar('\n');
-            alignment_delete(a);
+            alignment_delete(a, env);
           }
         }
       }
@@ -76,9 +77,9 @@ int gt_swalign(int argc, char *argv[], Env *env)
   }
 
   /* free */
-  bioseq_delete(bioseq_2);
-  bioseq_delete(bioseq_1);
-  scorefunction_delete(scorefunction);
+  bioseq_delete(bioseq_2, env);
+  bioseq_delete(bioseq_1, env);
+  scorefunction_delete(scorefunction, env);
 
   return has_err;
 }

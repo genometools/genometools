@@ -16,7 +16,7 @@
 struct GenomeNodeClass
 {
   size_t size;
-  void  (*free)(GenomeNode*);
+  void  (*free)(GenomeNode*, Env*);
   Str*  (*get_seqid)(GenomeNode*);
   Str*  (*get_idstr)(GenomeNode*);
   Range (*get_range)(GenomeNode*);
@@ -37,8 +37,7 @@ struct GenomeNode
   GenomeNodeInfo info;
 };
 
-void        genome_node_class_init(GenomeNodeClass*, size_t, ...);
 GenomeNode* genome_node_create(const GenomeNodeClass*, const char *filename,
-                               unsigned long line_number);
+                               unsigned long line_number, Env *env);
 
 #endif

@@ -33,13 +33,13 @@ bool          ranges_are_equal(const Array*, const Array*);
 
 /* takes a sorted array of ranges and runs the equivalent of uniq on it. The
    result is returned. */
-void          ranges_uniq(Array*, const Array*);
+void          ranges_uniq(Array*, const Array*, Env*);
 /* similar to the previous function, just in place */
-void          ranges_uniq_in_place(Array*);
+void          ranges_uniq_in_place(Array*, Env*);
 /* similar to ranges_uniq(), additionally returns an array which contains the
    counts of the occurrences of each elem in the original array */
-Array*        ranges_uniq_count(Array*, const Array*);
+Array*        ranges_uniq_count(Array*, const Array*, Env*);
 /* similar to the previous function, just in place */
-Array*        ranges_uniq_in_place_count(Array*);
+Array*        ranges_uniq_in_place_count(Array*, Env*);
 
 #endif

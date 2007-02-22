@@ -13,9 +13,9 @@ struct Log {
   FILE *logfp;
 };
 
-Log* log_new(void)
+Log* log_new(MA *ma)
 {
-  Log *l = xmalloc(sizeof (Log));
+  Log *l = ma_malloc(ma, sizeof (Log));
   l->logfp = stderr;
   return l;
 }
@@ -25,10 +25,16 @@ void log_log(Log *l, const char *format, ...)
   va_list ap;
   if (!l) return;
   va_start(ap, format);
+  log_vlog(l, format, ap);
+  va_end(ap);
+}
+
+void log_vlog(Log *l, const char *format, va_list ap)
+{
+  if (!l) return;
   fprintf(stderr, "debug: ");
   (void) vfprintf(stderr, format, ap);
   (void) putc('\n', stderr);
-  va_end(ap);
 }
 
 FILE* log_fp(Log *l)
@@ -37,8 +43,8 @@ FILE* log_fp(Log *l)
   return l->logfp;
 }
 
-void log_delete(Log *l)
+void log_delete(Log *l, MA *ma)
 {
   if (!l) return;
-  free(l);
+  ma_free(l, ma);
 }

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -21,10 +21,10 @@ struct Timer {
   Timerstate state;
 };
 
-Timer* timer_new(void)
+Timer* timer_new(Env *env)
 {
   Timer *t;
-  t = xmalloc(sizeof (Timer));
+  t = env_ma_malloc(env, sizeof (Timer));
   t->state = TIMER_RUNNING;
   return t;
 }
@@ -58,8 +58,8 @@ void timer_show(Timer *t, FILE *fp)
           t->stop_ru.ru_stime.tv_sec - t->stop_ru.ru_stime.tv_sec);
 }
 
-void timer_delete(Timer *t)
+void timer_delete(Timer *t, Env *env)
 {
   if (!t) return;
-  free(t);
+  env_ma_free(t, env);
 }

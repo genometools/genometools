@@ -123,7 +123,7 @@ static void traceback(unsigned long i, unsigned long j, int **E,
 static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
                               unsigned int l_min, unsigned int verbose,
                               ScoreMatrix *energy_function,
-                              Alpha *dna_alpha, FILE *fp)
+                              Alpha *dna_alpha, FILE *fp, Env *env)
 {
   unsigned long i;
   int **E;
@@ -150,7 +150,7 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
   }
 
   /* alloc space for the matrix E */
-  array2dim_calloc(E, rna_length+1, rna_length+1, int); /* XXX */
+  array2dim_calloc(E, rna_length+1, rna_length+1, int, env); /* XXX */
 
   /* compute matrix */
   compute_matrix(E, rna_sequence, rna_length, l_min, energy_function);
@@ -164,7 +164,7 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
   xfputc('\n', fp);
 
   /* free matrix E */
-  array2dim_delete(E);
+  array2dim_delete(E, env);
 }
 
 static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
@@ -174,10 +174,10 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
   env_error_check(env);
   op = option_parser_new("l_min alpha(G,C) alpha(A,U) alpha(G,U) RNA_sequence",
                          "Fold the supplied RNA sequence with the Nussinov "
-                         "algorithm.");
+                         "algorithm.", env);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 5, 5, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   return oprval;
 }
 
@@ -200,8 +200,8 @@ int gt_nussinov_rna_fold(int argc, char *argv[], Env *env)
   assert(parsed_args == 1);
 
   /* set DNA alphabet */
-  dna_alpha = alpha_new_dna();
-  energy_function = scorematrix_new(dna_alpha);
+  dna_alpha = alpha_new_dna(env);
+  energy_function = scorematrix_new(dna_alpha, env);
 
   /* init the energy function */
   for (i = 0; i < alpha_size(dna_alpha); i++) {
@@ -231,13 +231,13 @@ int gt_nussinov_rna_fold(int argc, char *argv[], Env *env)
 
     /* fold RNA sequence with Nussinov algorithm */
     nussinov_rna_fold(rna_sequence, rna_length, l_min, 1, energy_function,
-                      dna_alpha, stdout);
+                      dna_alpha, stdout, env);
   }
 
   /* free */
-  free(rna_sequence);
-  scorematrix_delete(energy_function);
-  alpha_delete(dna_alpha);
+  env_ma_free(rna_sequence, env);
+  scorematrix_delete(energy_function, env);
+  alpha_delete(dna_alpha, env);
 
   return has_err;
 }

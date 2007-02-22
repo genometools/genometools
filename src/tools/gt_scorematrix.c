@@ -12,10 +12,10 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
   OPrval oprval;
   env_error_check(env);
   op = option_parser_new("scorematrix_filename", "Parse the given protein "
-                         "score matrix and show it on stdout.");
+                         "score matrix and show it on stdout.", env);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 1, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   return oprval;
 }
 
@@ -38,7 +38,7 @@ int gt_scorematrix(int argc, char *argv[], Env *env)
     has_err = -1;
   if (!has_err)
     scorematrix_show(sm, stdout);
-  scorematrix_delete(sm);
+  scorematrix_delete(sm, env);
 
   return has_err;
 }

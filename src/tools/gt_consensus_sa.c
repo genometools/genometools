@@ -16,12 +16,12 @@ typedef struct {
   Array *exons; /* the exon ranges */
 } SplicedAlignment;
 
-static void initSplicedAlignment(SplicedAlignment *sa)
+static void initSplicedAlignment(SplicedAlignment *sa, Env *env)
 {
   assert(sa);
-  sa->id = str_new();
+  sa->id = str_new(env);
   sa->forward = true;
-  sa->exons = array_new(sizeof (Range));
+  sa->exons = array_new(sizeof (Range), env);
 }
 
 static int parse_input_line(SplicedAlignment *alignment, const char *line,
@@ -50,7 +50,7 @@ static int parse_input_line(SplicedAlignment *alignment, const char *line,
     }
     else {
       /* save this character of the reference id */
-      str_append_char(alignment->id, line[i]);
+      str_append_char(alignment->id, line[i], env);
     }
 
     /* increase counter */
@@ -87,7 +87,7 @@ static int parse_input_line(SplicedAlignment *alignment, const char *line,
       exon.end   = rightpos;
 
       /* save exon */
-      array_add(alignment->exons, exon);
+      array_add(alignment->exons, exon, env);
     }
     i++;
     if (i >= line_length)
@@ -109,24 +109,24 @@ static int parse_input_file(Array *spliced_alignments,
   Str *line;
   env_error_check(env);
 
-  line = str_new();
+  line = str_new(env);
   input_file = xfopen(file_name, "r");
 
-  while (!has_err && str_read_next_line(line, input_file) != EOF) {
+  while (!has_err && str_read_next_line(line, input_file, env) != EOF) {
     /* init new spliced alignment */
-    initSplicedAlignment(&sa);
+    initSplicedAlignment(&sa, env);
     /* parse input line and save result in spliced alignment */
     has_err = parse_input_line(&sa, str_get(line), str_length(line), env);
     if (!has_err) {
       /* store spliced alignment */
-      array_add(spliced_alignments, sa);
+      array_add(spliced_alignments, sa, env);
       /* reset array */
       str_reset(line);
     }
   }
 
   xfclose(input_file);
-  str_delete(line);
+  str_delete(line, env);
   return has_err;
 }
 
@@ -148,18 +148,19 @@ static Strand get_strand(const void *sa)
   return STRAND_REVERSE;
 }
 
-static void get_exons(Array *exon_ranges, const void *sa)
+static void get_exons(Array *exon_ranges, const void *sa, Env *env)
 {
   SplicedAlignment *alignment = (SplicedAlignment*) sa;
   assert(alignment);
-  array_add_array(exon_ranges, alignment->exons);
+  array_add_array(exon_ranges, alignment->exons, env);
 }
 
 static void process_splice_form(Array *spliced_alignments_in_form,
                                 /*@unused@*/ const void *set_of_sas,
                                 /*@unused@*/ unsigned long number_of_sas,
                                 /*@unused@*/ size_t size_of_sa,
-                                /*@unused@*/ void *userdata)
+                                /*@unused@*/ void *userdata,
+                                /*@unused@*/ Env *env)
 {
   unsigned long i;
 
@@ -205,10 +206,10 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
   env_error_check(env);
   op = option_parser_new("spliced_alignment_file", "Read file containing "
                          "spliced alingments, compute consensus spliced "
-                         "alignments,\nand print them to stdout.");
+                         "alignments,\nand print them to stdout.", env);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 1, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   return oprval;
 }
 
@@ -229,7 +230,7 @@ int gt_consensus_sa(int argc, char *argv[], Env *env)
   assert(parsed_args == 1);
 
   /* parse input file and store resuilts in the spliced alignment array */
-  spliced_alignments = array_new(sizeof (SplicedAlignment));
+  spliced_alignments = array_new(sizeof (SplicedAlignment), env);
   has_err = parse_input_file(spliced_alignments, argv[1], env);
 
   if (!has_err) {
@@ -241,16 +242,16 @@ int gt_consensus_sa(int argc, char *argv[], Env *env)
     consensus_sa(array_get_space(spliced_alignments),
                  array_size(spliced_alignments), sizeof (SplicedAlignment),
                  get_genomic_range, get_strand, get_exons, process_splice_form,
-                 NULL, NULL);
+                 NULL, env);
   }
 
   /* free */
   for (i = 0; i < array_size(spliced_alignments); i++) {
     sa = array_get(spliced_alignments, i);
-    str_delete(sa->id);
-    array_delete(sa->exons);
+    str_delete(sa->id, env);
+    array_delete(sa->exons, env);
   }
-  array_delete(spliced_alignments);
+  array_delete(spliced_alignments, env);
 
   return has_err;
 }

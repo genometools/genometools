@@ -48,7 +48,7 @@ static void fillDPtable(DPentry **dptable,
 }
 
 static Coordinate traceback(Alignment *a, DPentry **dptable,
-                            unsigned long i, unsigned long j)
+                            unsigned long i, unsigned long j, Env *env)
 {
   Coordinate start_coordinate;
   assert(a && dptable);
@@ -57,35 +57,36 @@ static Coordinate traceback(Alignment *a, DPentry **dptable,
     start_coordinate.x = i;
     start_coordinate.y = j;
     if (dptable[i][j].max_replacement) {
-      alignment_add_replacement(a);
+      alignment_add_replacement(a, env);
       i--;
       j--;
     }
     else if (dptable[i][j].max_deletion) {
-      alignment_add_deletion(a);
+      alignment_add_deletion(a, env);
       i--;;
     }
     else if (dptable[i][j].max_insertion) {
-      alignment_add_insertion(a);
+      alignment_add_insertion(a, env);
       j--;
     }
   }
   return start_coordinate;
 }
 
-Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf)
+Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf, Env *env)
 {
   Coordinate alignment_start, alignment_end;
   DPentry **dptable;
   Alignment *a = NULL;
   assert(u && v && sf);
-  array2dim_calloc(dptable, seq_length(u)+1, seq_length(v)+1, DPentry);
+  array2dim_calloc(dptable, seq_length(u)+1, seq_length(v)+1, DPentry, env);
   fillDPtable(dptable, seq_get_encoded(u), seq_length(u),
                        seq_get_encoded(v), seq_length(v), sf, &alignment_end);
   if (dptable[alignment_end.x][alignment_end.y].score) {
     /* construct only an alignment if a (positive) score was computed */
-    a = alignment_new();
-    alignment_start = traceback(a, dptable, alignment_end.x, alignment_end.y);
+    a = alignment_new(env);
+    alignment_start = traceback(a, dptable, alignment_end.x, alignment_end.y,
+                                env);
     /* transform the positions in the DP matrix to sequence positions */
     alignment_start.x--;
     alignment_start.y--;
@@ -98,6 +99,6 @@ Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf)
                        seq_get_orig(v) + alignment_start.y,
                        alignment_end.y - alignment_start.y + 1);
   }
-  array2dim_delete(dptable);
+  array2dim_delete(dptable, env);
   return a;
 }

@@ -15,12 +15,12 @@ static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
   env_error_check(env);
   op = option_parser_new("[option ...] seq_file_1 seq_file_2",
                          "Compute q-gram distance for each sequence "
-                         "combination.");
-  o = option_new_uint_min("q", "set q", q, 3, 1);
-  option_parser_add_option(op, o);
+                         "combination.", env);
+  o = option_new_uint_min("q", "set q", q, 3, 1, env);
+  option_parser_add_option(op, o, env);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 2, 2, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   return oprval;
 }
 
@@ -67,9 +67,9 @@ int gt_qgramdist(int argc, char *argv[], Env *env)
     /* compute q-gram distance for all sequence combinations */
     for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
       for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
-        seq_1 = bioseq_get_seq(bioseq_1, i);
-        seq_2 = bioseq_get_seq(bioseq_2, j);
-        dist = qgramdist(seq_1, seq_2, q);
+        seq_1 = bioseq_get_seq(bioseq_1, i, env);
+        seq_2 = bioseq_get_seq(bioseq_2, j, env);
+        dist = qgramdist(seq_1, seq_2, q, env);
         printf("qgramdist_%u_(", q);
         cstr_show(seq_get_orig(seq_1), seq_length(seq_1), stdout);
         xputchar(',');
@@ -80,8 +80,8 @@ int gt_qgramdist(int argc, char *argv[], Env *env)
   }
 
   /* free */
-  bioseq_delete(bioseq_2);
-  bioseq_delete(bioseq_1);
+  bioseq_delete(bioseq_2, env);
+  bioseq_delete(bioseq_1, env);
 
   return has_err;
 }

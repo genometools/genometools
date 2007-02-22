@@ -21,16 +21,16 @@ static OPrval parse_options(int *parsed_args, CDS_arguments *arguments,
   env_error_check(env);
   op = option_parser_new("[option ...] GFF3_file sequence_file",
                          "Add CDS features to exon features given in GFF3_file "
-                         "(which refers to sequence_file).");
+                         "(which refers to sequence_file).", env);
 
   /* -v */
-  option = option_new_verbose(&arguments->verbose);
-  option_parser_add_option(op, option);
+  option = option_new_verbose(&arguments->verbose, env);
+  option_parser_add_option(op, option, env);
 
   /* parse */
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 2, 2, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   return oprval;
 }
 
@@ -52,7 +52,7 @@ int gt_cds(int argc, char *argv[], Env *env)
   /* create gff3 input stream */
   assert(parsed_args < argc);
   gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
-                                             arguments.verbose);
+                                             arguments.verbose, env);
 
   /* create CDS stream */
   assert(parsed_args + 1 < argc);
@@ -63,18 +63,18 @@ int gt_cds(int argc, char *argv[], Env *env)
 
   /* create gff3 output stream */
   if (!has_err)
-    gff3_out_stream = gff3_out_stream_new(cds_stream, stdout);
+    gff3_out_stream = gff3_out_stream_new(cds_stream, stdout, env);
 
   /* pull the features through the stream and free them afterwards */
   while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
          gn) {
-    genome_node_rec_delete(gn);
+    genome_node_rec_delete(gn, env);
   }
 
   /* free */
-  genome_stream_delete(gff3_out_stream);
-  genome_stream_delete(cds_stream);
-  genome_stream_delete(gff3_in_stream);
+  genome_stream_delete(gff3_out_stream, env);
+  genome_stream_delete(cds_stream, env);
+  genome_stream_delete(gff3_in_stream, env);
 
   return has_err;
 }

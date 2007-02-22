@@ -109,7 +109,7 @@ static void fillDPtable(DPentry **dptable,
 }
 
 static void traceback(Alignment *a, DPentry **dptable,
-                      unsigned long i, unsigned long j)
+                      unsigned long i, unsigned long j, Env *env)
 {
   unsigned long minvalue;
   Edge edge;
@@ -128,20 +128,20 @@ static void traceback(Alignment *a, DPentry **dptable,
     switch (edge) {
       case R:
         assert(dptable[i][j].Rdist != ULONG_MAX);
-        alignment_add_replacement(a);
+        alignment_add_replacement(a, env);
         edge = dptable[i][j].Redge;
         /* assert(i && j); */
         i--;
         j--;
         break;
       case D:
-        alignment_add_deletion(a);
+        alignment_add_deletion(a, env);
         edge = dptable[i][j].Dedge;
         assert(i);
         i--;
         break;
       case I:
-        alignment_add_insertion(a);
+        alignment_add_insertion(a, env);
         edge = dptable[i][j].Iedge;
         assert(j);
         j--;
@@ -152,16 +152,16 @@ static void traceback(Alignment *a, DPentry **dptable,
 
 Alignment* affinealign(const char *u, unsigned long ulen,
                        const char *v, unsigned long vlen, int replacement_cost,
-                       int gap_opening_cost, int gap_extension_cost)
+                       int gap_opening_cost, int gap_extension_cost, Env *env)
 {
   DPentry **dptable;
   Alignment *a;
   assert(u && ulen && v && vlen);
-  array2dim_malloc(dptable, ulen+1, vlen+1, DPentry);
+  array2dim_malloc(dptable, ulen+1, vlen+1, DPentry, env);
   fillDPtable(dptable, u, ulen, v, vlen,
               replacement_cost, gap_opening_cost, gap_extension_cost);
-  a = alignment_new_with_seqs(u, ulen, v, vlen);
-  traceback(a, dptable, ulen, vlen);
-  array2dim_delete(dptable);
+  a = alignment_new_with_seqs(u, ulen, v, vlen, env);
+  traceback(a, dptable, ulen, vlen, env);
+  array2dim_delete(dptable, env);
   return a;
 }

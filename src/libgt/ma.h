@@ -16,7 +16,7 @@ MA*   ma_new(void);
 void* ma_malloc(MA*, size_t size);
 void* ma_calloc(MA*, size_t nmemb, size_t size);
 void* ma_realloc(MA*, void *ptr, size_t size);
-void  ma_free(MA*, void *ptr);
+void  ma_free(void *ptr, MA*);
 void  ma_delete(MA*);
 
 #endif

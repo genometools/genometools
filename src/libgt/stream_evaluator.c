@@ -70,66 +70,67 @@ typedef struct {
                 *wrong_mRNAs;
 } Process_predicted_feature_info;
 
-static Slot* slot_new(void)
+static Slot* slot_new(Env *env)
 {
-  Slot *s = xcalloc(sizeof (Slot), 1);
-  s->genes_forward = array_new(sizeof (GenomeNode*));
-  s->genes_reverse = array_new(sizeof (GenomeNode*));
-  s->mRNAs_forward = array_new(sizeof (GenomeNode*));
-  s->mRNAs_reverse = array_new(sizeof (GenomeNode*));
-  s->mRNA_exons_forward = array_new(sizeof (Range));
-  s->mRNA_exons_reverse = array_new(sizeof (Range));
-  s->CDS_exons_forward = array_new(sizeof (Range));
-  s->CDS_exons_reverse = array_new(sizeof (Range));
+  Slot *s = env_ma_calloc(env, 1, sizeof (Slot));
+  s->genes_forward = array_new(sizeof (GenomeNode*), env);
+  s->genes_reverse = array_new(sizeof (GenomeNode*), env);
+  s->mRNAs_forward = array_new(sizeof (GenomeNode*), env);
+  s->mRNAs_reverse = array_new(sizeof (GenomeNode*), env);
+  s->mRNA_exons_forward = array_new(sizeof (Range), env);
+  s->mRNA_exons_reverse = array_new(sizeof (Range), env);
+  s->CDS_exons_forward = array_new(sizeof (Range), env);
+  s->CDS_exons_reverse = array_new(sizeof (Range), env);
   return s;
 }
 
-static void slot_free(Slot *s)
+static void slot_free(Slot *s, Env *env)
 {
   unsigned long i;
   assert(s);
   for (i = 0; i < array_size(s->genes_forward); i++)
-    genome_node_rec_delete(*(GenomeNode**) array_get(s->genes_forward, i));
-  array_delete(s->genes_forward);
+    genome_node_rec_delete(*(GenomeNode**) array_get(s->genes_forward, i), env);
+  array_delete(s->genes_forward, env);
   for (i = 0; i < array_size(s->genes_reverse); i++)
-    genome_node_rec_delete(*(GenomeNode**) array_get(s->genes_reverse, i));
-  array_delete(s->genes_reverse);
+    genome_node_rec_delete(*(GenomeNode**) array_get(s->genes_reverse, i), env);
+  array_delete(s->genes_reverse, env);
   for (i = 0; i < array_size(s->mRNAs_forward); i++)
-    genome_node_rec_delete(*(GenomeNode**) array_get(s->mRNAs_forward, i));
-  array_delete(s->mRNAs_forward);
+    genome_node_rec_delete(*(GenomeNode**) array_get(s->mRNAs_forward, i), env);
+  array_delete(s->mRNAs_forward, env);
   for (i = 0; i < array_size(s->mRNAs_reverse); i++)
-    genome_node_rec_delete(*(GenomeNode**) array_get(s->mRNAs_reverse, i));
-  array_delete(s->mRNAs_reverse);
-  array_delete(s->mRNA_exons_forward);
-  array_delete(s->mRNA_exons_reverse);
-  array_delete(s->CDS_exons_forward);
-  array_delete(s->CDS_exons_reverse);
-  array_delete(s->true_mRNA_exons_forward);
-  array_delete(s->true_mRNA_exons_reverse);
-  array_delete(s->true_CDS_exons_forward);
-  array_delete(s->true_CDS_exons_reverse);
-  bittab_delete(s->true_genes_forward);
-  bittab_delete(s->true_genes_reverse);
-  bittab_delete(s->true_mRNAs_forward);
-  bittab_delete(s->true_mRNAs_reverse);
-  bittab_delete(s->overlapped_genes_forward);
-  bittab_delete(s->overlapped_genes_reverse);
-  bittab_delete(s->overlapped_mRNAs_forward);
-  bittab_delete(s->overlapped_mRNAs_reverse);
-  free(s);
+    genome_node_rec_delete(*(GenomeNode**) array_get(s->mRNAs_reverse, i), env);
+  array_delete(s->mRNAs_reverse, env);
+  array_delete(s->mRNA_exons_forward, env);
+  array_delete(s->mRNA_exons_reverse, env);
+  array_delete(s->CDS_exons_forward, env);
+  array_delete(s->CDS_exons_reverse, env);
+  array_delete(s->true_mRNA_exons_forward, env);
+  array_delete(s->true_mRNA_exons_reverse, env);
+  array_delete(s->true_CDS_exons_forward, env);
+  array_delete(s->true_CDS_exons_reverse, env);
+  bittab_delete(s->true_genes_forward, env);
+  bittab_delete(s->true_genes_reverse, env);
+  bittab_delete(s->true_mRNAs_forward, env);
+  bittab_delete(s->true_mRNAs_reverse, env);
+  bittab_delete(s->overlapped_genes_forward, env);
+  bittab_delete(s->overlapped_genes_reverse, env);
+  bittab_delete(s->overlapped_mRNAs_forward, env);
+  bittab_delete(s->overlapped_mRNAs_reverse, env);
+  env_ma_free(s, env);
 }
 
 StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
-                                      GenomeStream *prediction)
+                                      GenomeStream *prediction, Env *env)
 {
-  StreamEvaluator *evaluator = xmalloc(sizeof (StreamEvaluator));
+  StreamEvaluator *evaluator = env_ma_malloc(env, sizeof (StreamEvaluator));
   evaluator->reality = reality;
   evaluator->prediction = prediction;
-  evaluator->real_features = hashtable_new(HASH_STRING, NULL, (Free) slot_free);
-  evaluator->gene_evaluator = evaluator_new();
-  evaluator->mRNA_evaluator = evaluator_new();
-  evaluator->mRNA_exon_evaluator = evaluator_new();
-  evaluator->CDS_exon_evaluator = evaluator_new();
+  evaluator->real_features = hashtable_new(HASH_STRING, NULL,
+                                           (FreeFunc) slot_free, env);
+  evaluator->gene_evaluator = evaluator_new(env);
+  evaluator->mRNA_evaluator = evaluator_new(env);
+  evaluator->mRNA_exon_evaluator = evaluator_new(env);
+  evaluator->CDS_exon_evaluator = evaluator_new(env);
   evaluator->missing_genes = 0;
   evaluator->wrong_genes = 0;
   evaluator->missing_mRNAs = 0;
@@ -179,10 +180,14 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
   ranges_sort(s->CDS_exons_reverse);
 
   /* determine true exons */
-  s->true_mRNA_exons_forward= ranges_uniq_in_place_count(s->mRNA_exons_forward);
-  s->true_mRNA_exons_reverse= ranges_uniq_in_place_count(s->mRNA_exons_reverse);
-  s->true_CDS_exons_forward = ranges_uniq_in_place_count(s->CDS_exons_forward);
-  s->true_CDS_exons_reverse = ranges_uniq_in_place_count(s->CDS_exons_reverse);
+  s->true_mRNA_exons_forward= ranges_uniq_in_place_count(s->mRNA_exons_forward,
+                                                         env);
+  s->true_mRNA_exons_reverse= ranges_uniq_in_place_count(s->mRNA_exons_reverse,
+                                                         env);
+  s->true_CDS_exons_forward = ranges_uniq_in_place_count(s->CDS_exons_forward,
+                                                         env);
+  s->true_CDS_exons_reverse = ranges_uniq_in_place_count(s->CDS_exons_reverse,
+                                                         env);
 
   /* make sure that the genes are sorted */
   assert(genome_nodes_are_sorted(s->genes_forward));
@@ -200,26 +205,30 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
 
   /* init true bittabs */
   s->true_genes_forward = array_size(s->genes_forward)
-                          ? bittab_new(array_size(s->genes_forward)) : NULL;
+                          ? bittab_new(array_size(s->genes_forward), env)
+                          : NULL;
   s->true_genes_reverse = array_size(s->genes_reverse)
-                          ? bittab_new(array_size(s->genes_reverse)) : NULL;
+                          ? bittab_new(array_size(s->genes_reverse), env)
+                          : NULL;
   s->true_mRNAs_forward = array_size(s->mRNAs_forward)
-                          ? bittab_new(array_size(s->mRNAs_forward)) : NULL;
+                          ? bittab_new(array_size(s->mRNAs_forward), env)
+                          : NULL;
   s->true_mRNAs_reverse = array_size(s->mRNAs_reverse)
-                          ? bittab_new(array_size(s->mRNAs_reverse)) : NULL;
+                          ? bittab_new(array_size(s->mRNAs_reverse), env)
+                          : NULL;
 
   /* init overlap bittabs */
   s->overlapped_genes_forward = array_size(s->genes_forward)
-                                ? bittab_new(array_size(s->genes_forward))
+                                ? bittab_new(array_size(s->genes_forward), env)
                                 : NULL;
   s->overlapped_genes_reverse = array_size(s->genes_reverse)
-                                ? bittab_new(array_size(s->genes_reverse))
+                                ? bittab_new(array_size(s->genes_reverse), env)
                                 : NULL;
   s->overlapped_mRNAs_forward = array_size(s->mRNAs_forward)
-                                ? bittab_new(array_size(s->mRNAs_forward))
+                                ? bittab_new(array_size(s->mRNAs_forward), env)
                                 : NULL;
   s->overlapped_mRNAs_reverse = array_size(s->mRNAs_reverse)
-                                ? bittab_new(array_size(s->mRNAs_reverse))
+                                ? bittab_new(array_size(s->mRNAs_reverse), env)
                                 : NULL;
 
   return 0;
@@ -241,12 +250,14 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
     case gft_gene:
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
-          gn_ref = genome_node_rec_ref(gn);
-          array_add(process_real_feature_data->slot->genes_forward, gn_ref);
+          gn_ref = genome_node_rec_ref(gn, env);
+          array_add(process_real_feature_data->slot->genes_forward, gn_ref,
+                    env);
           break;
         case STRAND_REVERSE:
-          gn_ref = genome_node_rec_ref(gn);
-          array_add(process_real_feature_data->slot->genes_reverse, gn_ref);
+          gn_ref = genome_node_rec_ref(gn, env);
+          array_add(process_real_feature_data->slot->genes_reverse, gn_ref,
+                    env);
           break;
         default:
           if (process_real_feature_data->verbose) {
@@ -258,12 +269,14 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
     case gft_mRNA:
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
-          gn_ref = genome_node_rec_ref(gn);
-          array_add(process_real_feature_data->slot->mRNAs_forward, gn_ref);
+          gn_ref = genome_node_rec_ref(gn, env);
+          array_add(process_real_feature_data->slot->mRNAs_forward, gn_ref,
+                    env);
           break;
         case STRAND_REVERSE:
-          gn_ref = genome_node_rec_ref(gn);
-          array_add(process_real_feature_data->slot->mRNAs_reverse, gn_ref);
+          gn_ref = genome_node_rec_ref(gn, env);
+          array_add(process_real_feature_data->slot->mRNAs_reverse, gn_ref,
+                    env);
           break;
         default:
           if (process_real_feature_data->verbose) {
@@ -276,10 +289,12 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       range = genome_node_get_range(gn);
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
-          array_add(process_real_feature_data->slot->CDS_exons_forward, range);
+          array_add(process_real_feature_data->slot->CDS_exons_forward, range,
+                    env);
           break;
         case STRAND_REVERSE:
-          array_add(process_real_feature_data->slot->CDS_exons_reverse, range);
+          array_add(process_real_feature_data->slot->CDS_exons_reverse, range,
+                    env);
           break;
         default:
           if (process_real_feature_data->verbose) {
@@ -292,10 +307,12 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       range = genome_node_get_range(gn);
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
-          array_add(process_real_feature_data->slot->mRNA_exons_forward, range);
+          array_add(process_real_feature_data->slot->mRNA_exons_forward, range,
+                    env);
           break;
         case STRAND_REVERSE:
-          array_add(process_real_feature_data->slot->mRNA_exons_reverse, range);
+          array_add(process_real_feature_data->slot->mRNA_exons_reverse, range,
+                    env);
           break;
         default:
           if (process_real_feature_data->verbose) {
@@ -320,12 +337,12 @@ static int store_exon(GenomeNode *gn, void *data, Env *env)
   assert(gf && exons);
   if (genome_feature_get_type(gf) == gft_exon) {
     range = genome_node_get_range(gn);
-    array_add(exons, range);
+    array_add(exons, range, env);
   }
   return 0;
 }
 
-static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
+static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
 {
   Array *exons_1, *exons_2;
   bool equal;
@@ -334,8 +351,8 @@ static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   assert(gn_1 && gn_2);
 
   /* init */
-  exons_1 = array_new(sizeof (Range));
-  exons_2 = array_new(sizeof (Range));
+  exons_1 = array_new(sizeof (Range), env);
+  exons_2 = array_new(sizeof (Range), env);
 
   /* get exon ranges */
   has_err = genome_node_traverse_children(gn_1, exons_1, store_exon, false,
@@ -353,8 +370,8 @@ static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   equal = ranges_are_equal(exons_1, exons_2);
 
   /* free */
-  array_delete(exons_1);
-  array_delete(exons_2);
+  array_delete(exons_1, env);
+  array_delete(exons_2, env);
 
   return equal;
 }
@@ -374,11 +391,11 @@ static int store_gene_feature(GenomeNode *gn, void *data, Env *env)
   assert(gf && info);
   switch (genome_feature_get_type(gf)) {
     case gft_mRNA:
-      array_add(info->mRNAs, gf);
+      array_add(info->mRNAs, gf, env);
       break;
     case gft_exon:
       range = genome_node_get_range(gn);
-      array_add(info->exons, range);
+      array_add(info->exons, range, env);
       break;
     default:
       assert(1);
@@ -386,7 +403,7 @@ static int store_gene_feature(GenomeNode *gn, void *data, Env *env)
   return 0;
 }
 
-static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
+static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
 {
   Array *exons_1, *exons_2, *mRNAs_1, *mRNAs_2;
   Store_gene_feature_info info;
@@ -395,10 +412,10 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
   int has_err;
 
   /* init */
-  exons_1 = array_new(sizeof (Range));
-  exons_2 = array_new(sizeof (Range));
-  mRNAs_1 = array_new(sizeof (GenomeNode*));
-  mRNAs_2 = array_new(sizeof (GenomeNode*));
+  exons_1 = array_new(sizeof (Range), env);
+  exons_2 = array_new(sizeof (Range), env);
+  mRNAs_1 = array_new(sizeof (GenomeNode*), env);
+  mRNAs_2 = array_new(sizeof (GenomeNode*), env);
 
   /* get (direct) gene features */
   info.exons = exons_1;
@@ -427,17 +444,17 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
     for (i = 0; i < array_size(mRNAs_1); i++) {
       assert(equal);
       equal = mRNAs_are_equal(*(GenomeNode**) array_get(mRNAs_1, i),
-                              *(GenomeNode**) array_get(mRNAs_2, i));
+                              *(GenomeNode**) array_get(mRNAs_2, i), env);
       if (!equal)
         break;
     }
   }
 
   /* free */
-  array_delete(exons_1);
-  array_delete(exons_2);
-  array_delete(mRNAs_1);
-  array_delete(mRNAs_2);
+  array_delete(exons_1, env);
+  array_delete(exons_2, env);
+  array_delete(mRNAs_1, env);
+  array_delete(mRNAs_2, env);
 
   return equal;
 }
@@ -456,7 +473,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
 
   predicted_range = genome_node_get_range(gn);
   predicted_strand = genome_feature_get_strand((GenomeFeature*) gn);
-  real_genome_nodes = array_new(sizeof (GenomeNode**));
+  real_genome_nodes = array_new(sizeof (GenomeNode**), env);
 
   switch (genome_feature_get_type((GenomeFeature*) gn)) {
     case gft_gene:
@@ -476,12 +493,12 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                            sizeof (GenomeNode*), (Compare) genome_node_compare,
                            predicted_strand == STRAND_FORWARD
                            ? info->slot->overlapped_genes_forward
-                           : info->slot->overlapped_genes_reverse);
+                           : info->slot->overlapped_genes_reverse, env);
           if (array_size(real_genome_nodes)) {
             /* gene(s) with the same range found -> check if they are equal */
             for (i = 0; i < array_size(real_genome_nodes); i++) {
               real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
-              if (genes_are_equal(gn, *real_gn)) {
+              if (genes_are_equal(gn, *real_gn, env)) {
                 if (predicted_strand == STRAND_FORWARD) {
                   num = real_gn - (GenomeNode**)
                         array_get_space(info->slot->genes_forward);
@@ -543,12 +560,12 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                            sizeof (GenomeNode*), (Compare) genome_node_compare,
                            predicted_strand == STRAND_FORWARD
                            ? info->slot->overlapped_mRNAs_forward
-                           : info->slot->overlapped_mRNAs_reverse);
+                           : info->slot->overlapped_mRNAs_reverse, env);
           if (array_size(real_genome_nodes)) {
             /* mRNA(s) with the same range found -> check if they are equal */
             for (i = 0; i < array_size(real_genome_nodes); i++) {
               real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
-              if (mRNAs_are_equal(gn, *real_gn)) {
+              if (mRNAs_are_equal(gn, *real_gn, env)) {
                 if (predicted_strand == STRAND_FORWARD) {
                   num = real_gn - (GenomeNode**)
                         array_get_space(info->slot->mRNAs_forward);
@@ -689,7 +706,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
     default:
       assert(1); /* shut up compiler */
   }
-  array_delete(real_genome_nodes);
+  array_delete(real_genome_nodes, env);
   return 0;
 }
 
@@ -751,7 +768,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       if (!(slot = hashtable_get(se->real_features,
                                  str_get(genome_node_get_seqid(gn))))) {
 
-        slot = slot_new();
+        slot = slot_new(env);
         hashtable_add(se->real_features, str_get(genome_node_get_seqid(gn)),
                       slot);
       }
@@ -771,7 +788,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                                               NULL);
       assert(!has_err); /* cannot happen, process_real_feature() is sane */
     }
-    genome_node_rec_delete(gn);
+    genome_node_rec_delete(gn, env);
   }
 
   /* set the actuals and sort them */
@@ -804,7 +821,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                   "``reality''", str_get(genome_node_get_seqid(gn)));
         }
       }
-      genome_node_rec_delete(gn);
+      genome_node_rec_delete(gn, env);
     }
   }
 
@@ -854,15 +871,15 @@ void stream_evaluator_show(StreamEvaluator *se, FILE *outfp)
   xfputc('\n', outfp);
 }
 
-void stream_evaluator_delete(StreamEvaluator *se)
+void stream_evaluator_delete(StreamEvaluator *se, Env *env)
 {
   if (!se) return;
-  genome_stream_delete(se->reality);
-  genome_stream_delete(se->prediction);
-  hashtable_delete(se->real_features);
-  evaluator_delete(se->gene_evaluator);
-  evaluator_delete(se->mRNA_evaluator);
-  evaluator_delete(se->mRNA_exon_evaluator);
-  evaluator_delete(se->CDS_exon_evaluator);
-  free(se);
+  genome_stream_delete(se->reality, env);
+  genome_stream_delete(se->prediction, env);
+  hashtable_delete(se->real_features, env);
+  evaluator_delete(se->gene_evaluator, env);
+  evaluator_delete(se->mRNA_evaluator, env);
+  evaluator_delete(se->mRNA_exon_evaluator, env);
+  evaluator_delete(se->CDS_exon_evaluator, env);
+  env_ma_free(se, env);
 }

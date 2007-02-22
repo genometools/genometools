@@ -11,7 +11,7 @@
 #include "qgram.h"
 #include "xansi.h"
 
-unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q)
+unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q, Env *env)
 {
   unsigned long i, alphasize_to_the_power_of_q, *seq_a_profile, *seq_b_profile,
                 dist = 0;
@@ -27,14 +27,14 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q)
   seq_a_profile = xcalloc(alphasize_to_the_power_of_q, sizeof (unsigned long));
   seq_b_profile = xcalloc(alphasize_to_the_power_of_q, sizeof (unsigned long));
 
-  seq_a_qgrams = array_new(sizeof (unsigned long));
-  seq_b_qgrams = array_new(sizeof (unsigned long));
+  seq_a_qgrams = array_new(sizeof (unsigned long), env);
+  seq_b_qgrams = array_new(sizeof (unsigned long), env);
 
   qgram_compute(seq_a_qgrams, seq_get_encoded(seq_a), seq_length(seq_a),
-                alpha_size(alpha_a), q);
+                alpha_size(alpha_a), q, env);
   assert(array_size(seq_a_qgrams) == seq_length(seq_a) - q + 1);
   qgram_compute(seq_b_qgrams, seq_get_encoded(seq_b), seq_length(seq_b),
-                alpha_size(alpha_b), q);
+                alpha_size(alpha_b), q, env);
   assert(array_size(seq_b_qgrams) == seq_length(seq_b) - q + 1);
 
   for (i = 0; i < array_size(seq_a_qgrams); i++)
@@ -50,8 +50,8 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q)
       dist += seq_b_profile[i] - seq_a_profile[i];
   }
 
-  array_delete(seq_b_qgrams);
-  array_delete(seq_a_qgrams);
+  array_delete(seq_b_qgrams, env);
+  array_delete(seq_a_qgrams, env);
   free(seq_b_profile);
   free(seq_a_profile);
 

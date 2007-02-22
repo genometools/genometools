@@ -139,11 +139,11 @@ int range_unit_test(Env *env)
                   sizeof (counts)     / sizeof (counts[0]));
 
   /* test ranges_uniq() */
-  ranges = array_new(sizeof (Range));
-  tmp_ranges = array_new(sizeof (Range));
+  ranges = array_new(sizeof (Range), env);
+  tmp_ranges = array_new(sizeof (Range), env);
   for (i = 0; i < sizeof (ranges_in) / sizeof (ranges_in[0]) && !has_err; i++)
-    array_add(ranges, ranges_in[i]);
-  ranges_uniq(tmp_ranges, ranges);
+    array_add(ranges, ranges_in[i], env);
+  ranges_uniq(tmp_ranges, ranges, env);
   ensure(has_err, array_size(ranges) ==
                   sizeof (ranges_in) / sizeof (ranges_in[0]));
   ensure(has_err, array_size(tmp_ranges) ==
@@ -157,8 +157,8 @@ int range_unit_test(Env *env)
 
   /* test ranges_uniq_in_place() */
   array_set_size(tmp_ranges, 0);
-  array_add_array(tmp_ranges, ranges);
-  ranges_uniq_in_place(tmp_ranges);
+  array_add_array(tmp_ranges, ranges, env);
+  ranges_uniq_in_place(tmp_ranges, env);
   for (i = 0; i < array_size(tmp_ranges) && !has_err; i++) {
     ensure(has_err,
            ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
@@ -168,7 +168,7 @@ int range_unit_test(Env *env)
 
   /* test ranges_uniq_count() */
   array_set_size(tmp_ranges, 0);
-  ctr = ranges_uniq_count(tmp_ranges, ranges);
+  ctr = ranges_uniq_count(tmp_ranges, ranges, env);
   ensure(has_err, array_size(tmp_ranges) == array_size(ctr));
   ensure(has_err, array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
   for (i = 0; i < array_size(ctr) && !has_err; i++) {
@@ -178,10 +178,10 @@ int range_unit_test(Env *env)
     ensure(has_err,
            ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
   }
-  array_delete(ctr);
+  array_delete(ctr, env);
 
   /* test ranges_uniq_in_place_count() */
-  ctr = ranges_uniq_in_place_count(ranges);
+  ctr = ranges_uniq_in_place_count(ranges, env);
   ensure(has_err, array_size(ranges) == array_size(ctr));
   ensure(has_err, array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
   for (i = 0; i < array_size(ctr) && !has_err; i++) {
@@ -191,11 +191,11 @@ int range_unit_test(Env *env)
     ensure(has_err,
            ranges_out[i].end == (*(Range*) array_get(ranges, i)).end);
   }
-  array_delete(ctr);
+  array_delete(ctr, env);
 
   /* free */
-  array_delete(ranges);
-  array_delete(tmp_ranges);
+  array_delete(ranges, env);
+  array_delete(tmp_ranges, env);
   return has_err;
 }
 
@@ -269,7 +269,7 @@ bool ranges_are_equal(const Array *ranges_1, const Array *ranges_2)
 }
 
 static Array* generic_ranges_uniq(Array *out_ranges, const Array *in_ranges,
-                                  unsigned int count)
+                                  unsigned int count, Env *env)
 {
   unsigned long i, *ctr_ptr, ctr = 1;
   Array *count_array = NULL;
@@ -278,13 +278,13 @@ static Array* generic_ranges_uniq(Array *out_ranges, const Array *in_ranges,
   assert(out_ranges && in_ranges);
   assert(ranges_are_sorted(in_ranges));
   if (count)
-    count_array = array_new(sizeof (unsigned long));
+    count_array = array_new(sizeof (unsigned long), env);
   for (i = 0; i < array_size(in_ranges); i++) {
     cur = *(Range*) array_get(in_ranges, i);
     if (!i) {
-      array_add(out_ranges, cur);
+      array_add(out_ranges, cur, env);
       if (count)
-        array_add(count_array, ctr);
+        array_add(count_array, ctr, env);
     }
     else {
       if (prev.start == cur.start && prev.end == cur.end) {
@@ -294,9 +294,9 @@ static Array* generic_ranges_uniq(Array *out_ranges, const Array *in_ranges,
         }
       }
       else {
-        array_add(out_ranges, cur);
+        array_add(out_ranges, cur, env);
         if (count)
-          array_add(count_array, ctr);
+          array_add(count_array, ctr, env);
       }
     }
     prev = cur;
@@ -304,40 +304,42 @@ static Array* generic_ranges_uniq(Array *out_ranges, const Array *in_ranges,
   return count_array;
 }
 
-static Array* generic_ranges_uniq_in_place(Array *ranges, unsigned int count)
+static Array* generic_ranges_uniq_in_place(Array *ranges, unsigned int count,
+                                           Env *env)
 {
   Array *out_ranges, *count_array;
   assert(ranges);
-  out_ranges = array_new(sizeof (Range));
-  count_array = generic_ranges_uniq(out_ranges, ranges, count);
+  out_ranges = array_new(sizeof (Range), env);
+  count_array = generic_ranges_uniq(out_ranges, ranges, count, env);
   array_set_size(ranges, 0);
-  array_add_array(ranges, out_ranges); /* XXX: could be more efficient with
-                                          something like array_replace(ranges,
-                                          out_ranges) */
-  array_delete(out_ranges);
+  array_add_array(ranges, out_ranges, env ); /* XXX: could be more efficient
+                                                with something like
+                                                array_replace(ranges,
+                                                              out_ranges) */
+  array_delete(out_ranges, env);
   return count_array;
 }
 
-void ranges_uniq(Array *out_ranges, const Array *in_ranges)
+void ranges_uniq(Array *out_ranges, const Array *in_ranges, Env *env)
 {
   assert(out_ranges && in_ranges);
-  (void) generic_ranges_uniq(out_ranges, in_ranges, 0);
+  (void) generic_ranges_uniq(out_ranges, in_ranges, 0, env);
 }
 
-void ranges_uniq_in_place(Array *ranges)
+void ranges_uniq_in_place(Array *ranges, Env *env)
 {
   assert(ranges);
-  (void) generic_ranges_uniq_in_place(ranges, 0);
+  (void) generic_ranges_uniq_in_place(ranges, 0, env);
 }
 
-Array* ranges_uniq_count(Array *out_ranges, const Array *in_ranges)
+Array* ranges_uniq_count(Array *out_ranges, const Array *in_ranges, Env *env)
 {
   assert(out_ranges && in_ranges);
-  return generic_ranges_uniq(out_ranges, in_ranges, 1);
+  return generic_ranges_uniq(out_ranges, in_ranges, 1, env);
 }
 
-Array* ranges_uniq_in_place_count(Array *ranges)
+Array* ranges_uniq_in_place_count(Array *ranges, Env *env)
 {
   assert(ranges);
-  return generic_ranges_uniq_in_place(ranges, 1);
+  return generic_ranges_uniq_in_place(ranges, 1, env);
 }

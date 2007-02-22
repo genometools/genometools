@@ -17,7 +17,7 @@ Env* env_new(void)
 {
   Env *e = xcalloc(1, sizeof (Env));
   e->ma = ma_new();
-  e->error = error_new();
+  e->error = error_new(e->ma);
   return e;
 }
 
@@ -48,10 +48,17 @@ void env_set_log(Env *e, Log *log)
 void env_delete(Env *e)
 {
   if (!e) return;
+  log_delete(e->log, e->ma);
+  error_delete(e->error, e->ma);
   ma_delete(e->ma);
-  error_delete(e->error);
-  log_delete(e->log);
   free(e);
+}
+
+void env_ma_free(void *ptr, Env *env)
+{
+  assert(env);
+  if (!ptr) return;
+  ma_free(ptr, env_ma(env));
 }
 
 void env_error_set(Env *e, const char *format, ...)
@@ -60,5 +67,15 @@ void env_error_set(Env *e, const char *format, ...)
   assert(e && format);
   va_start(ap, format);
   error_vset(env_error(e), format, ap);
+  va_end(ap);
+}
+
+void env_log_log(Env *e, const char *format, ...)
+{
+  va_list ap;
+  assert(e && format);
+  if (!env_log(e)) return;
+  va_start(ap, format);
+  log_vlog(env_log(e), format, ap);
   va_end(ap);
 }

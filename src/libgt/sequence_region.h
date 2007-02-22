@@ -17,6 +17,6 @@ typedef struct SequenceRegion SequenceRegion;
 const GenomeNodeClass* sequence_region_class(void);
 GenomeNode*            sequence_region_new(Str *seqid, Range range,
                                            const char *filename,
-                                           unsigned long line_number);
+                                           unsigned long line_number, Env*);
 
 #endif

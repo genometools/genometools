@@ -20,7 +20,7 @@
 
 typedef struct GFF3Parser GFF3Parser;
 
-GFF3Parser* gff3parser_new(void);
+GFF3Parser* gff3parser_new(Env*);
 void        gff3parser_set_offset(GFF3Parser*, long);
 int         gff3parser_parse_genome_nodes(int *status_code, GFF3Parser*,
                                           Queue *genome_nodes,
@@ -29,6 +29,6 @@ int         gff3parser_parse_genome_nodes(int *status_code, GFF3Parser*,
                                           FILE *fpin, Env*);
 /* resets the GFF3 parser (necessary if the processed input file is switched) */
 void         gff3parser_reset(GFF3Parser*);
-void         gff3parser_delete(GFF3Parser*);
+void         gff3parser_delete(GFF3Parser*, Env*);
 
 #endif

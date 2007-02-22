@@ -120,7 +120,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
       for (i = 0; i < queue_size(is->genome_node_buffer); i++) {
         if (!genome_node_tree_is_sorted(&is->last_node, *(GenomeNode**)
                                         queue_get_elem(is->genome_node_buffer,
-                                                       i))) {
+                                                       i), env)) {
           assert(is->last_node);
           /* a sorted stream can have at most one input file */
           assert(array_size(is->files) == 0 || array_size(is->files) == 1);
@@ -143,13 +143,13 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return has_err;
 }
 
-static void gff3_in_stream_free(GenomeStream *gs)
+static void gff3_in_stream_free(GenomeStream *gs, Env *env)
 {
   GFF3InStream *gff3_in_stream = gff3_in_stream_cast(gs);
-  array_delete(gff3_in_stream->files);
-  queue_delete(gff3_in_stream->genome_node_buffer);
-  gff3parser_delete(gff3_in_stream->gff3_parser);
-  genome_node_delete(gff3_in_stream->last_node);
+  array_delete(gff3_in_stream->files, env);
+  queue_delete(gff3_in_stream->genome_node_buffer, env);
+  gff3parser_delete(gff3_in_stream->gff3_parser, env);
+  genome_node_delete(gff3_in_stream->last_node, env);
 }
 
 const GenomeStreamClass* gff3_in_stream_class(void)
@@ -161,7 +161,8 @@ const GenomeStreamClass* gff3_in_stream_class(void)
 }
 
 static GenomeStream* gff3_in_stream_new(Array *files, /* takes ownership */
-                                        bool ensure_sorting, bool be_verbose)
+                                        bool ensure_sorting, bool be_verbose,
+                                        Env *env)
 {
   GenomeStream *gs = genome_stream_create(gff3_in_stream_class(),
                                           ensure_sorting);
@@ -173,8 +174,8 @@ static GenomeStream* gff3_in_stream_new(Array *files, /* takes ownership */
   gff3_in_stream->non_stdin_file_is_open = false;
   gff3_in_stream->fpin                   = NULL;
   gff3_in_stream->line_number            = 0;
-  gff3_in_stream->genome_node_buffer     = queue_new(sizeof (GenomeNode*));
-  gff3_in_stream->gff3_parser            = gff3parser_new();
+  gff3_in_stream->genome_node_buffer     = queue_new(sizeof (GenomeNode*), env);
+  gff3_in_stream->gff3_parser            = gff3parser_new(env);
   gff3_in_stream->last_node              = NULL;
   gff3_in_stream->be_verbose             = be_verbose;
   return gs;
@@ -186,22 +187,21 @@ void gff3_in_stream_set_offset(GenomeStream *gs, long offset)
   gff3parser_set_offset(is->gff3_parser, offset);
 }
 
-GenomeStream* gff3_in_stream_new_unsorted(int num_of_files,
-                                           char **filenames,
-                                           bool be_verbose)
+GenomeStream* gff3_in_stream_new_unsorted(int num_of_files, char **filenames,
+                                          bool be_verbose, Env *env)
 {
   int i;
-  Array *files = array_new(sizeof (char*));
+  Array *files = array_new(sizeof (char*), env);
   for (i = 0; i < num_of_files; i++)
-    array_add(files, filenames[i]);
-  return gff3_in_stream_new(files, false, be_verbose);
+    array_add(files, filenames[i], env);
+  return gff3_in_stream_new(files, false, be_verbose, env);
 }
 
-GenomeStream* gff3_in_stream_new_sorted(char *filename,
-                                         bool be_verbose)
+GenomeStream* gff3_in_stream_new_sorted(char *filename, bool be_verbose,
+                                        Env *env)
 {
-  Array *files = array_new(sizeof (char*));
+  Array *files = array_new(sizeof (char*), env);
   if (filename)
-    array_add(files, filename);
-  return gff3_in_stream_new(files, true, be_verbose);
+    array_add(files, filename, env);
+  return gff3_in_stream_new(files, true, be_verbose, env);
 }

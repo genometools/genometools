@@ -14,6 +14,6 @@
 typedef struct MergeStream MergeStream;
 
 const GenomeStreamClass* merge_stream_class(void);
-GenomeStream*            merge_stream_new(const Array *genome_streams);
+GenomeStream*            merge_stream_new(const Array *genome_streams, Env*);
 
 #endif

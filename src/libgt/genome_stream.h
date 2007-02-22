@@ -17,6 +17,6 @@ typedef struct GenomeStream GenomeStream;
 
 int   genome_stream_next_tree(GenomeStream*, GenomeNode**, Env*);
 bool  genome_stream_is_sorted(GenomeStream*);
-void  genome_stream_delete(GenomeStream*);
+void  genome_stream_delete(GenomeStream*, Env*);
 
 #endif

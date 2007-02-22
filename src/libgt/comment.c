@@ -14,28 +14,25 @@ struct Comment
 {
   const GenomeNode parent_instance;
   char *comment;
+  Str *comment_str; /* used in comment_get_idstr() */
 };
 
 #define comment_cast(GN)\
         genome_node_cast(comment_class(), GN)
 
-static void comment_free(GenomeNode *gn)
+static void comment_free(GenomeNode *gn, Env *env)
 {
   Comment *c = comment_cast(gn);
   assert(c && c->comment);
   free(c->comment);
 }
 
-static Str* comment_get_idstr(/*@unused@*/ GenomeNode *gn)
+static Str* comment_get_idstr(GenomeNode *gn)
 {
-  static Str *comment_str;
-  static unsigned int initialized = 0;
-
-  if (!initialized) {
-    comment_str = str_new_cstr("");
-    initialized = 1;
-  }
-  return comment_str;
+  Comment *c;
+  assert(gn);
+  c = comment_cast(gn);
+  return c->comment_str;
 }
 
 static Range comment_get_range(/*@unused@*/ GenomeNode *gn)
@@ -69,14 +66,15 @@ const GenomeNodeClass* comment_class()
   return &gnc;
 }
 
-GenomeNode* comment_new(const char *comment,
-                         const char *filename,
-                         unsigned long line_number)
+GenomeNode* comment_new(const char *comment, const char *filename,
+                        unsigned long line_number, Env *env)
 {
-  GenomeNode *gn = genome_node_create(comment_class(), filename, line_number);
+  GenomeNode *gn = genome_node_create(comment_class(), filename, line_number,
+                                      env);
   Comment *c = comment_cast(gn);
   assert(comment);
   c->comment = xstrdup(comment);
+  c->comment_str = str_new_cstr("", env);
   return gn;
 }
 

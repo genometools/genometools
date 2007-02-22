@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -41,11 +41,11 @@ unsigned long cstr_array_size(char **cstr_array)
   return i;
 }
 
-void cstr_array_delete(char **cstr_array)
+void cstr_array_delete(char **cstr_array, Env *env)
 {
   unsigned long i = 0;
   if (!cstr_array) return;
   while (cstr_array[i])
-    free(cstr_array[i++]);
-  free(cstr_array);
+    env_ma_free(cstr_array[i++], env);
+  env_ma_free(cstr_array, env);
 }

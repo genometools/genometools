@@ -14,24 +14,19 @@ struct Queue {
   unsigned long current_index;
 };
 
-Queue* queue_new(size_t size_of_elem)
+Queue* queue_new(size_t size_of_elem, Env *env)
 {
   Queue *q = xmalloc(sizeof (Queue));
-
   assert(size_of_elem);
-
-  q->queue = array_new(size_of_elem);
+  q->queue = array_new(size_of_elem, env);
   q->current_index = 0;
-
   return q;
 }
 
 void* queue_get(Queue *q)
 {
   void *r;
-
   assert(q && q->current_index < array_size(q->queue));
-
   r = array_get(q->queue, q->current_index);
   q->current_index++;
   /* reset */
@@ -39,7 +34,6 @@ void* queue_get(Queue *q)
     array_set_size(q->queue, 0);
     q->current_index = 0;
   }
-
   return r;
 }
 
@@ -49,10 +43,10 @@ void* queue_get_elem(Queue *q, unsigned long idx)
   return array_get(q->queue, q->current_index + idx);
 }
 
-void queue_add_elem(Queue *q, void *elem, size_t size_of_elem)
+void queue_add_elem(Queue *q, void *elem, size_t size_of_elem, Env *env)
 {
   assert(q && elem && size_of_elem);
-  array_add_elem(q->queue, elem, size_of_elem);
+  array_add_elem(q->queue, elem, size_of_elem, env);
 }
 
 unsigned long queue_size(const Queue *q)
@@ -61,9 +55,9 @@ unsigned long queue_size(const Queue *q)
   return array_size(q->queue) - q->current_index;
 }
 
-void queue_delete(Queue *q)
+void queue_delete(Queue *q, Env *env)
 {
   if (!q) return;
-  array_delete(q->queue);
+  array_delete(q->queue, env);
   free(q);
 }

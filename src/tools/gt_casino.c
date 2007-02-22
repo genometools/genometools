@@ -13,10 +13,10 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
   env_error_check(env);
   op = option_parser_new("sequence_of_die_rolls", "Decode "
                          "'sequence_of_die_rolls' and show the result on "
-                         "stdout.");
+                         "stdout.", env);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 1, env);
-  option_parser_delete(op);
+  option_parser_delete(op, env);
   return oprval;
 }
 
@@ -37,7 +37,7 @@ int gt_casino(int argc, char *argv[], Env *env)
 
   /* save sequence */
   num_of_emissions = strlen(argv[1]);
-  emissions = xmalloc(sizeof (unsigned int) * num_of_emissions);
+  emissions = env_ma_malloc(env, sizeof (unsigned int) * num_of_emissions);
   for (i = 0; i < num_of_emissions; i++) {
     emissions[i] = argv[1][i];
     switch (emissions[i]) {
@@ -68,11 +68,12 @@ int gt_casino(int argc, char *argv[], Env *env)
 
   if (!has_err) {
     /* create the HMM */
-    hmm = dice_hmm_loaded();
+    hmm = dice_hmm_loaded(env);
 
     /* decoding */
-    state_sequence = xmalloc(sizeof (unsigned int) * num_of_emissions);
-    hmm_decode(hmm, state_sequence, emissions, num_of_emissions);
+    state_sequence = env_ma_malloc(env,
+                                   sizeof (unsigned int) * num_of_emissions);
+    hmm_decode(hmm, state_sequence, emissions, num_of_emissions, env);
 
     /* print most probable state sequence state sequence */
     for (i = 0 ; i < num_of_emissions; i++) {
@@ -90,9 +91,9 @@ int gt_casino(int argc, char *argv[], Env *env)
   }
 
   /* free */
-  hmm_delete(hmm);
-  free(emissions);
-  free(state_sequence);
+  hmm_delete(hmm, env);
+  env_ma_free(emissions, env);
+  env_ma_free(state_sequence, env);
 
   return has_err;
 }

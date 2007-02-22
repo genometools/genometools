@@ -88,15 +88,15 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
   env_error_check(env);
 
   /* parse the index file and fill the sequence to index mapping */
-  index_line = str_new();
+  index_line = str_new(env);
   index_file = xfopen(index_filename, "r");
 
-  while (!has_err && str_read_next_line(index_line, index_file) != EOF) {
+  while (!has_err && str_read_next_line(index_line, index_file, env) != EOF) {
     switch (line_number % 3) {
       case 1:
         /* process description */
         description = xstrdup(str_get(index_line));
-        array_add(bs->descriptions, description);
+        array_add(bs->descriptions, description, env);
         break;
       case 2:
         /* process sequence start */
@@ -115,7 +115,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
         }
         else {
           assert(range.start <= range.end); /* XXX */
-          array_add(bs->sequence_ranges, range);
+          array_add(bs->sequence_ranges, range, env);
         }
         break;
     }
@@ -131,7 +131,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
   }
 
   xfclose(index_file);
-  str_delete(index_line);
+  str_delete(index_line, env);
 
   return has_err;
 }
@@ -158,7 +158,7 @@ static int construct_bioseq_files(Str *bioseq_index_file, Str *bioseq_raw_file,
   fasta_reader = fasta_reader_new(sequence_file);
   has_err = fasta_reader_run(fasta_reader, proc_description, proc_character,
                    proc_sequence_length, &bioseq_files_info, env);
-  fasta_reader_delete(fasta_reader);
+  fasta_reader_delete(fasta_reader, env);
 
   /* unregister the signal handler */
   sig_unregister_all();
@@ -179,10 +179,10 @@ static int bioseq_fill(Bioseq *bs, bool recreate, Env *env)
   assert(!bs->raw_sequence);
 
   /* construct file names */
-  bioseq_index_file = str_clone(bs->sequence_file);
-  str_append_cstr(bioseq_index_file, GT_BIOSEQ_INDEX);
-  bioseq_raw_file = str_clone(bs->sequence_file);
-  str_append_cstr(bioseq_raw_file, GT_BIOSEQ_RAW);
+  bioseq_index_file = str_clone(bs->sequence_file, env);
+  str_append_cstr(bioseq_index_file, GT_BIOSEQ_INDEX, env);
+  bioseq_raw_file = str_clone(bs->sequence_file, env);
+  str_append_cstr(bioseq_raw_file, GT_BIOSEQ_RAW, env);
 
   /* construct the bioseq files if necessary */
   if (recreate ||
@@ -201,8 +201,8 @@ static int bioseq_fill(Bioseq *bs, bool recreate, Env *env)
   }
 
   /* free */
-  str_delete(bioseq_index_file);
-  str_delete(bioseq_raw_file);
+  str_delete(bioseq_index_file, env);
+  str_delete(bioseq_raw_file, env);
 
   return has_err;
 }
@@ -213,7 +213,7 @@ static Bioseq* bioseq_new_with_recreate(Str *sequence_file,
   Bioseq *bs;
   int has_err = 0;
   env_error_check(env);
-  bs = xcalloc(1, sizeof (Bioseq));
+  bs = env_ma_calloc(env, 1, sizeof (Bioseq));
   if (!file_exists(str_get(sequence_file))) {
     env_error_set(env, "sequence file \"%s\" does not exist or is not readable",
               str_get(sequence_file));
@@ -221,12 +221,12 @@ static Bioseq* bioseq_new_with_recreate(Str *sequence_file,
   }
   if (!has_err) {
     bs->sequence_file = str_ref(sequence_file);
-    bs->descriptions = array_new(sizeof (char*));
-    bs->sequence_ranges = array_new(sizeof (Range));
+    bs->descriptions = array_new(sizeof (char*), env);
+    bs->sequence_ranges = array_new(sizeof (Range), env);
     has_err = bioseq_fill(bs, recreate, env);
   }
   if (has_err) {
-    bioseq_delete(bs);
+    bioseq_delete(bs, env);
     return NULL;
   }
   return bs;
@@ -237,9 +237,9 @@ Bioseq* bioseq_new(const char *sequence_file, Env *env)
   Bioseq *bs;
   Str *seqfile;
   env_error_check(env);
-  seqfile = str_new_cstr(sequence_file);
+  seqfile = str_new_cstr(sequence_file, env);
   bs = bioseq_new_with_recreate(seqfile, false, env);
-  str_delete(seqfile);
+  str_delete(seqfile, env);
   return bs;
 }
 
@@ -248,9 +248,9 @@ Bioseq* bioseq_new_recreate(const char *sequence_file, Env *env)
   Bioseq *bs;
   Str *seqfile;
   env_error_check(env);
-  seqfile = str_new_cstr(sequence_file);
+  seqfile = str_new_cstr(sequence_file, env);
   bs = bioseq_new_with_recreate(seqfile, true, env);
-  str_delete(seqfile);
+  str_delete(seqfile, env);
   return bs;
 }
 
@@ -259,19 +259,20 @@ Bioseq* bioseq_new_str(Str *sequence_file, Env *env)
   return bioseq_new_with_recreate(sequence_file, false, env);
 }
 
-Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx)
+Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx, Env *env)
 {
   assert(bs);
   assert(idx < array_size(bs->descriptions));
   if (!bs->seqs)
-    bs->seqs = xcalloc(array_size(bs->descriptions), sizeof (Seq*));
+    bs->seqs = env_ma_calloc(env, array_size(bs->descriptions), sizeof (Seq*));
   if (!bs->alpha) {
     bs->alpha = alpha_guess(bioseq_get_raw_sequence(bs),
-                            bioseq_get_raw_sequence_length(bs));
+                            bioseq_get_raw_sequence_length(bs), env);
   }
   if (!bs->seqs[idx]) {
     bs->seqs[idx] = seq_new(bioseq_get_sequence(bs, idx),
-                            bioseq_get_sequence_length(bs, idx), bs->alpha);
+                            bioseq_get_sequence_length(bs, idx),
+                            bs->alpha, env);
     seq_set_description(bs->seqs[idx], bioseq_get_description(bs, idx));
   }
   return bs->seqs[idx];
@@ -297,16 +298,17 @@ const char* bioseq_get_raw_sequence(Bioseq *bs)
   return bs->raw_sequence;
 }
 
-static unsigned long get_seqnum_with_desc(Bioseq *bs, const char *description)
+static unsigned long get_seqnum_with_desc(Bioseq *bs, const char *description,
+                                          Env *env)
 {
   unsigned long i, seqnum = UNDEFULONG;
   Str *pattern;
   int has_err;
   bool match;
   assert(bs && description);
-  pattern = str_new();
-  str_append_char(pattern, '^');
-  str_append_cstr(pattern, description);
+  pattern = str_new(env);
+  str_append_char(pattern, '^', env);
+  str_append_cstr(pattern, description, env);
   for (i = 0; i < array_size(bs->descriptions); i++) {
     has_err = grep(&match, str_get(pattern),
                    *(char**) array_get(bs->descriptions, i), NULL);
@@ -316,16 +318,16 @@ static unsigned long get_seqnum_with_desc(Bioseq *bs, const char *description)
       break;
     }
   }
-  str_delete(pattern);
+  str_delete(pattern, env);
   return seqnum;
 }
 
 const char* bioseq_get_sequence_with_desc(Bioseq *bs, const char *description,
-                                          unsigned long *seqnum)
+                                          unsigned long *seqnum, Env *env)
 {
   unsigned long rseqnum;
   assert(bs && description);
-  rseqnum = get_seqnum_with_desc(bs, description);
+  rseqnum = get_seqnum_with_desc(bs, description, env);
   if (seqnum)
     *seqnum = rseqnum;
   if (rseqnum != UNDEFULONG)
@@ -353,31 +355,31 @@ unsigned long bioseq_number_of_sequences(Bioseq *bs)
   return array_size(bs->descriptions);
 }
 
-bool bioseq_contains_sequence(Bioseq *bs, /*@unused@*/ const char *sequence)
+bool bioseq_contains_sequence(Bioseq *bs, const char *sequence, Env *env)
 {
   assert(bs);
-  if (get_seqnum_with_desc(bs, sequence) != UNDEFULONG)
+  if (get_seqnum_with_desc(bs, sequence, env) != UNDEFULONG)
     return true;
   return false;
 }
 
-void bioseq_delete(Bioseq *bs)
+void bioseq_delete(Bioseq *bs, Env *env)
 {
   unsigned long i;
   if (!bs) return;
-  str_delete(bs->sequence_file);
+  str_delete(bs->sequence_file, env);
   if (bs->seqs) {
     for (i = 0; i < array_size(bs->descriptions); i++)
-      seq_delete(bs->seqs[i]);
-    free(bs->seqs);
+      seq_delete(bs->seqs[i], env);
+    env_ma_free(bs->seqs, env);
   }
   for (i = 0; i < array_size(bs->descriptions); i++)
     free(*(char**) array_get(bs->descriptions, i));
-  array_delete(bs->descriptions);
-  array_delete(bs->sequence_ranges);
+  array_delete(bs->descriptions, env);
+  array_delete(bs->sequence_ranges, env);
   xmunmap(bs->raw_sequence, bs->raw_sequence_length);
-  alpha_delete(bs->alpha);
-  free(bs);
+  alpha_delete(bs->alpha, env);
+  env_ma_free(bs, env);
 }
 
 void bioseq_show_as_fasta(Bioseq *bs, unsigned long width)

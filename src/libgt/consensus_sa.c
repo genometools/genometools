@@ -27,7 +27,7 @@ static unsigned int set_of_sas_is_sorted(const void *set_of_sas,
                                          unsigned long number_of_sas,
                                          size_t size_of_sa,
                                          GetGenomicRangeFunc
-                                         get_genomic_range, Log *l)
+                                         get_genomic_range, Env *env)
 {
   Range range_a, range_b;
   unsigned long max_end;
@@ -38,7 +38,7 @@ static unsigned int set_of_sas_is_sorted(const void *set_of_sas,
   /* get first range */
   range_a = get_genomic_range(set_of_sas);
 
-  log_log(l, "-from %lu", range_a.start);
+  env_log_log(env, "-from %lu", range_a.start);
   max_end = range_a.end;
 
   /* loop over the other ranges */
@@ -58,7 +58,7 @@ static unsigned int set_of_sas_is_sorted(const void *set_of_sas,
       max_end = range_a.end;
   }
 
-  log_log(l, "-to %lu", max_end);
+  env_log_log(env, "-to %lu", max_end);
 
   return 1;
 }
@@ -80,12 +80,11 @@ static Strand extract_strand(const Consensus_SA *csa, unsigned long sa)
   return strand;
 }
 
-static void extract_exons(const Consensus_SA *csa,
-                          Array *exon_ranges,
-                          unsigned long sa)
+static void extract_exons(const Consensus_SA *csa, Array *exon_ranges,
+                          unsigned long sa, Env *env)
 {
   assert(csa && exon_ranges && csa->set_of_sas && sa < csa->number_of_sas);
-  csa->get_exons(exon_ranges, csa->set_of_sas + csa->size_of_sa * sa);
+  csa->get_exons(exon_ranges, csa->set_of_sas + csa->size_of_sa * sa, env);
   assert(array_size(exon_ranges));
   assert(ranges_are_sorted_and_do_not_overlap(exon_ranges));
 }
@@ -107,7 +106,7 @@ static unsigned int has_acceptor_site(Array *gene, unsigned long exon)
 }
 
 static unsigned int compatible(const Consensus_SA *csa,
-                               unsigned long sa_1, unsigned long sa_2)
+                               unsigned long sa_1, unsigned long sa_2, Env *env)
 {
   Array *exons_sa_1, *exons_sa_2;
   Range range_sa_1, range_sa_2;
@@ -122,22 +121,22 @@ static unsigned int compatible(const Consensus_SA *csa,
   /* check strands */
   if (extract_strand(csa, sa_1) != extract_strand(csa, sa_2)) return 0;
 
-  exons_sa_1 = array_new(sizeof (Range));
-  exons_sa_2 = array_new(sizeof (Range));
+  exons_sa_1 = array_new(sizeof (Range), env);
+  exons_sa_2 = array_new(sizeof (Range), env);
 
   /* get ranges */
   range_sa_1 = extract_genomic_range(csa, sa_1);
   range_sa_2 = extract_genomic_range(csa, sa_2);
 
   if (!range_overlap(range_sa_1, range_sa_2)) {
-    array_delete(exons_sa_1);
-    array_delete(exons_sa_2);
+    array_delete(exons_sa_1, env);
+    array_delete(exons_sa_2, env);
     return 0;
   }
 
   /* get exons */
-  extract_exons(csa, exons_sa_1, sa_1);
-  extract_exons(csa, exons_sa_2, sa_2);
+  extract_exons(csa, exons_sa_1, sa_1, env);
+  extract_exons(csa, exons_sa_2, sa_2, env);
 
   /* determine the first overlapping exon pair */
   i = 0;
@@ -161,8 +160,8 @@ static unsigned int compatible(const Consensus_SA *csa,
   }
 
   if (!start_values_set) {
-    array_delete(exons_sa_1);
-    array_delete(exons_sa_2);
+    array_delete(exons_sa_1, env);
+    array_delete(exons_sa_2, env);
     return 0;
   }
 
@@ -171,8 +170,8 @@ static unsigned int compatible(const Consensus_SA *csa,
   assert(start_1 != UNDEFULONG && start_2 != UNDEFULONG);
   if (!(start_1 == 0 || start_2 == 0)) {
     /* no first segment could be maped */
-    array_delete(exons_sa_1);
-    array_delete(exons_sa_2);
+    array_delete(exons_sa_1, env);
+    array_delete(exons_sa_2, env);
     return 0;
   }
 
@@ -194,22 +193,22 @@ static unsigned int compatible(const Consensus_SA *csa,
             has_acceptor_site(exons_sa_2, start_2) &&
             range_sa_1.start!= range_sa_2.start) {
           /* the acceptor sites are different */
-          array_delete(exons_sa_1);
-          array_delete(exons_sa_2);
+          array_delete(exons_sa_1, env);
+          array_delete(exons_sa_2, env);
           return 0;
         }
         else if (has_acceptor_site(exons_sa_1, start_1) &&
                  range_sa_2.start + fuzzlength < range_sa_1.start) {
           /* not within fuzzlength */
-          array_delete(exons_sa_1);
-          array_delete(exons_sa_2);
+          array_delete(exons_sa_1, env);
+          array_delete(exons_sa_2, env);
           return 0;
         }
         else if (has_acceptor_site(exons_sa_2, start_2) &&
                  range_sa_1.start + fuzzlength < range_sa_2.start) {
           /* not within fuzzlength */
-          array_delete(exons_sa_1);
-          array_delete(exons_sa_2);
+          array_delete(exons_sa_1, env);
+          array_delete(exons_sa_2, env);
           return 0;
         }
       }
@@ -227,30 +226,30 @@ static unsigned int compatible(const Consensus_SA *csa,
             has_donor_site(exons_sa_2, start_2) &&
             range_sa_1.end != range_sa_2.end) {
           /* the donor sites are different */
-          array_delete(exons_sa_1);
-          array_delete(exons_sa_2);
+          array_delete(exons_sa_1, env);
+          array_delete(exons_sa_2, env);
           return 0;
         }
         else if (has_donor_site(exons_sa_1, start_1) &&
                  range_sa_2.end - fuzzlength > range_sa_1.end) {
           /* not within fuzzlength */
-          array_delete(exons_sa_1);
-          array_delete(exons_sa_2);
+          array_delete(exons_sa_1, env);
+          array_delete(exons_sa_2, env);
           return 0;
         }
         else if (has_donor_site(exons_sa_2, start_2) &&
                  range_sa_1.end - fuzzlength > range_sa_2.end) {
           /* not within fuzzlength */
-          array_delete(exons_sa_1);
-          array_delete(exons_sa_2);
+          array_delete(exons_sa_1, env);
+          array_delete(exons_sa_2, env);
           return 0;
         }
       }
     }
     else {
       /* no overlap: two ordered segments do not overlap each other */
-      array_delete(exons_sa_1);
-      array_delete(exons_sa_2);
+      array_delete(exons_sa_1, env);
+      array_delete(exons_sa_2, env);
       return 0;
     }
 
@@ -259,13 +258,13 @@ static unsigned int compatible(const Consensus_SA *csa,
   }
 
   /* passed all tests */
-  array_delete(exons_sa_1);
-  array_delete(exons_sa_2);
+  array_delete(exons_sa_1, env);
+  array_delete(exons_sa_2, env);
   return 1;
 }
 
 static unsigned int contains(const Consensus_SA *csa,
-                             unsigned long sa_1, unsigned long sa_2)
+                             unsigned long sa_1, unsigned long sa_2, Env *env)
 {
   Range range_sa_1, range_sa_2;
 
@@ -276,19 +275,19 @@ static unsigned int contains(const Consensus_SA *csa,
   range_sa_2 = extract_genomic_range(csa, sa_2);
 
   if (range_contains(range_sa_1, range_sa_2) &&
-      compatible(csa, sa_1, sa_2)) {
+      compatible(csa, sa_1, sa_2, env)) {
     return 1;
   }
   return 0;
 }
 
-static void compute_C(Bittab **C, const Consensus_SA *csa)
+static void compute_C(Bittab **C, const Consensus_SA *csa, Env *env)
 {
   unsigned long sa, sa_1;
   assert(csa);
   for (sa = 0; sa < csa->number_of_sas; sa++) {
     for (sa_1 = 0; sa_1 < csa->number_of_sas; sa_1++) {
-      if (contains(csa, sa, sa_1))
+      if (contains(csa, sa, sa_1, env))
         bittab_set_bit(C[sa], sa_1);
     }
     assert(bittab_bit_is_set(C[sa], sa));
@@ -300,13 +299,13 @@ static void compute_left_or_right(Bittab **left_or_right,
                                   unsigned int (*cmp_func)
                                                (const Consensus_SA *csa,
                                                 unsigned long sa_1,
-                                                unsigned long sa_2))
+                                                unsigned long sa_2), Env *env)
 {
   unsigned long sa, sa_1;
   assert(csa && left_or_right && *left_or_right);
   for (sa = 0; sa < csa->number_of_sas; sa++) {
     for (sa_1 = 0; sa_1 < csa->number_of_sas; sa_1++) {
-      if (cmp_func(csa, sa, sa_1) && compatible(csa, sa, sa_1))
+      if (cmp_func(csa, sa, sa_1) && compatible(csa, sa, sa_1, env))
         bittab_set_bit(left_or_right[sa], sa_1);
     }
   }
@@ -336,25 +335,25 @@ static unsigned int is_left_of(const Consensus_SA *csa,
   return 0;
 }
 
-static void compute_left(Bittab **left, const Consensus_SA *csa)
+static void compute_left(Bittab **left, const Consensus_SA *csa, Env *env)
 {
   assert(csa);
-  compute_left_or_right(left, csa, is_right_of);
+  compute_left_or_right(left, csa, is_right_of, env);
 }
 
-static void compute_right(Bittab **right, const Consensus_SA *csa)
+static void compute_right(Bittab **right, const Consensus_SA *csa, Env *env)
 {
   assert(csa);
-  compute_left_or_right(right, csa, is_left_of);
+  compute_left_or_right(right, csa, is_left_of, env);
 }
 
 static void compute_L(Bittab **L, Bittab **C, Bittab **left,
-                      unsigned long number_of_sas)
+                      unsigned long number_of_sas, Env *env)
 {
   unsigned long sa, sa_1, sa_2, sa_1_size = 0, sa_2_size;
   Bittab *tmpset;
 
-  tmpset = bittab_new(number_of_sas);
+  tmpset = bittab_new(number_of_sas, env);
 
   for (sa = 0; sa < number_of_sas; sa++) {
     sa_1 = UNDEFULONG;
@@ -389,17 +388,17 @@ static void compute_L(Bittab **L, Bittab **C, Bittab **left,
     }
   }
 
-  bittab_delete(tmpset);
+  bittab_delete(tmpset, env);
 }
 
 static void compute_R(Bittab **R, Bittab **C, Bittab **right,
-                      unsigned long number_of_sas)
+                      unsigned long number_of_sas, Env *env)
 {
   unsigned long sa_1, sa_2, sa_1_size = 0, sa_2_size;
   long sa;
   Bittab *tmpset;
 
-  tmpset = bittab_new(number_of_sas);
+  tmpset = bittab_new(number_of_sas, env);
 
   for (sa = number_of_sas-1; sa >= 0; sa--) {
     sa_1 = UNDEFULONG;
@@ -434,18 +433,18 @@ static void compute_R(Bittab **R, Bittab **C, Bittab **right,
     }
   }
 
-  bittab_delete(tmpset);
+  bittab_delete(tmpset, env);
 }
 
 #ifndef NDEBUG
-static unsigned int splice_form_is_valid(Bittab *SA_p,
-                                         const Consensus_SA *csa)
+static unsigned int splice_form_is_valid(Bittab *SA_p, const Consensus_SA *csa,
+                                         Env *env)
 {
   Bittab *SA_p_complement; /* SA \ SA_p */
   unsigned long sa, sa_prime;
   unsigned int incompatible_found;
 
-  SA_p_complement = bittab_new(csa->number_of_sas);
+  SA_p_complement = bittab_new(csa->number_of_sas, env);
   bittab_complement(SA_p_complement, SA_p);
 
   for (sa_prime  = bittab_get_first_bitnum(SA_p_complement);
@@ -455,23 +454,23 @@ static unsigned int splice_form_is_valid(Bittab *SA_p,
     for (sa  = bittab_get_first_bitnum(SA_p);
          sa != bittab_get_last_bitnum(SA_p);
          sa  = bittab_get_next_bitnum(SA_p, sa)) {
-      if (!compatible(csa, sa, sa_prime)) {
+      if (!compatible(csa, sa, sa_prime, env)) {
         incompatible_found = 1;
         break;
       }
     }
     if (!incompatible_found) {
-      bittab_delete(SA_p_complement);
+      bittab_delete(SA_p_complement, env);
       return 0;
     }
   }
 
-  bittab_delete(SA_p_complement);
+  bittab_delete(SA_p_complement, env);
   return 1;
 }
 #endif
 
-static void compute_csas(Consensus_SA *csa)
+static void compute_csas(Consensus_SA *csa, Env *env)
 {
   unsigned long i, sa_i, sa_i_size = 0, sa_prime, sa_prime_size;
   Array *splice_form;
@@ -490,32 +489,32 @@ static void compute_csas(Consensus_SA *csa)
   assert(csa && csa->set_of_sas);
 
   /* init sets */
-  C     = xmalloc(sizeof (Bittab*) * csa->number_of_sas);
-  left  = xmalloc(sizeof (Bittab*) * csa->number_of_sas);
-  right = xmalloc(sizeof (Bittab*) * csa->number_of_sas);
-  L     = xmalloc(sizeof (Bittab*) * csa->number_of_sas);
-  R     = xmalloc(sizeof (Bittab*) * csa->number_of_sas);
+  C     = env_ma_malloc(env, sizeof (Bittab*) * csa->number_of_sas);
+  left  = env_ma_malloc(env, sizeof (Bittab*) * csa->number_of_sas);
+  right = env_ma_malloc(env, sizeof (Bittab*) * csa->number_of_sas);
+  L     = env_ma_malloc(env, sizeof (Bittab*) * csa->number_of_sas);
+  R     = env_ma_malloc(env, sizeof (Bittab*) * csa->number_of_sas);
 
   for (i = 0; i < csa->number_of_sas; i++) {
-    C[i]     = bittab_new(csa->number_of_sas);
-    left[i]  = bittab_new(csa->number_of_sas);
-    right[i] = bittab_new(csa->number_of_sas);
-    L[i]     = bittab_new(csa->number_of_sas);
-    R[i]     = bittab_new(csa->number_of_sas);
+    C[i]     = bittab_new(csa->number_of_sas, env);
+    left[i]  = bittab_new(csa->number_of_sas, env);
+    right[i] = bittab_new(csa->number_of_sas, env);
+    L[i]     = bittab_new(csa->number_of_sas, env);
+    R[i]     = bittab_new(csa->number_of_sas, env);
   }
 
-  U_i      = bittab_new(csa->number_of_sas);
-  SA_i     = bittab_new(csa->number_of_sas);
-  SA_prime = bittab_new(csa->number_of_sas);
+  U_i      = bittab_new(csa->number_of_sas, env);
+  SA_i     = bittab_new(csa->number_of_sas, env);
+  SA_prime = bittab_new(csa->number_of_sas, env);
 
-  splice_form = array_new(sizeof (unsigned long));
+  splice_form = array_new(sizeof (unsigned long), env);
 
   /* compute sets */
-  compute_C(C, csa);
-  compute_left(left, csa);
-  compute_right(right, csa);
-  compute_L(L, C, left, csa->number_of_sas);
-  compute_R(R, C, right, csa->number_of_sas);
+  compute_C(C, csa, env);
+  compute_left(left, csa, env);
+  compute_right(right, csa, env);
+  compute_L(L, C, left, csa->number_of_sas, env);
+  compute_R(R, C, right, csa->number_of_sas, env);
 
   /* U_0 = SA */
   for (i = 0; i < csa->number_of_sas; i++)
@@ -547,14 +546,14 @@ static void compute_csas(Consensus_SA *csa)
     }
 
     /* make sure the computed splice form is maximal w.r.t. to compatibility */
-    assert(splice_form_is_valid(SA_i, csa));
+    assert(splice_form_is_valid(SA_i, csa, env));
 
     /* process splice form */
     if (csa->process_splice_form) {
       array_set_size(splice_form, 0);
-      bittab_get_all_bitnums(SA_i, splice_form);
+      bittab_get_all_bitnums(SA_i, splice_form, env);
       csa->process_splice_form(splice_form, csa->set_of_sas, csa->number_of_sas,
-                               csa->size_of_sa, csa->userdata);
+                               csa->size_of_sa, csa->userdata, env);
     }
 
     /* U_i = U_i-1 \ SA_i */
@@ -570,39 +569,39 @@ static void compute_csas(Consensus_SA *csa)
 
   /* free sets */
   for (i = 0; i < csa->number_of_sas; i++) {
-    bittab_delete(C[i]);
-    bittab_delete(left[i]);
-    bittab_delete(right[i]);
-    bittab_delete(L[i]);
-    bittab_delete(R[i]);
+    bittab_delete(C[i], env);
+    bittab_delete(left[i], env);
+    bittab_delete(right[i], env);
+    bittab_delete(L[i], env);
+    bittab_delete(R[i], env);
   }
-  free(C);
-  free(left);
-  free(right);
-  free(L);
-  free(R);
+  env_ma_free(C, env);
+  env_ma_free(left, env);
+  env_ma_free(right, env);
+  env_ma_free(L, env);
+  env_ma_free(R, env);
 
-  bittab_delete(U_i);
-  bittab_delete(SA_i);
-  bittab_delete(SA_prime);
+  bittab_delete(U_i, env);
+  bittab_delete(SA_i, env);
+  bittab_delete(SA_prime, env);
 
-  array_delete(splice_form);
+  array_delete(splice_form, env);
 }
 
 void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
                   size_t size_of_sa, GetGenomicRangeFunc get_genomic_range,
                   GetStrandFunc get_strand, GetExonsFunc get_exons,
                   ProcessSpliceFormFunc process_splice_form, void *userdata,
-                  Log *l)
+                  Env *env)
 {
   Consensus_SA csa;
 
   assert(set_of_sas && number_of_sas && size_of_sa);
   assert(get_genomic_range && get_strand && get_exons);
   assert(set_of_sas_is_sorted(set_of_sas, number_of_sas, size_of_sa,
-                              get_genomic_range, l));
+                              get_genomic_range, env));
 
-  log_log(l, "csa number_of_sas=%lu", number_of_sas);
+  env_log_log(env, "csa number_of_sas=%lu", number_of_sas);
 
   /* init */
   csa.set_of_sas          = set_of_sas;
@@ -615,7 +614,7 @@ void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
   csa.userdata            = userdata;
 
   /* computation */
-  compute_csas(&csa);
+  compute_csas(&csa, env);
 
-  log_log(l, "csa finished");
+  env_log_log(env, "csa finished");
 }

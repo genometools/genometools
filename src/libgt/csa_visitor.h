@@ -13,7 +13,7 @@ typedef struct CSAVisitor CSAVisitor;
 #include "genome_visitor.h"
 
 const GenomeVisitorClass* csa_visitor_class(void);
-GenomeVisitor*            csa_visitor_new(unsigned long join_length);
+GenomeVisitor*            csa_visitor_new(unsigned long join_length, Env*);
 unsigned long             csa_visitor_node_buffer_size(GenomeVisitor*);
 GenomeNode*               csa_visitor_get_node(GenomeVisitor*);
 void                      csa_visitor_process_cluster(GenomeVisitor*,

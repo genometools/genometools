@@ -11,12 +11,13 @@
 
 typedef struct Seq Seq;
 
-Seq*          seq_new(const char *seq, unsigned long seqlen, Alpha *seqalpha);
+Seq*          seq_new(const char *seq, unsigned long seqlen, Alpha *seqalpha,
+                      Env*);
 void          seq_set_description(Seq*, const char *desc);
 const char*   seq_get_orig(const Seq*); /* not '\0' terminated */
 const char*   seq_get_encoded(Seq*);
 const Alpha*  seq_get_alpha(const Seq*);
 unsigned long seq_length(const Seq*);
-void          seq_delete(Seq*);
+void          seq_delete(Seq*, Env*);
 
 #endif

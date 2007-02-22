@@ -44,21 +44,21 @@ static void fillDPtable(DPentry **dptable,
 }
 
 static void traceback(Alignment *a, DPentry **dptable,
-                      unsigned long i, unsigned long j)
+                      unsigned long i, unsigned long j, Env *env)
 {
   assert(a && dptable);
   while (i > 0 || j > 0) {
     if (dptable[i][j].min_replacement) {
-      alignment_add_replacement(a);
+      alignment_add_replacement(a, env);
       i--;
       j--;
     }
     else if (dptable[i][j].min_deletion) {
-      alignment_add_deletion(a);
+      alignment_add_deletion(a, env);
       i--;
     }
     else if (dptable[i][j].min_insertion) {
-      alignment_add_insertion(a);
+      alignment_add_insertion(a, env);
       j--;
     }
   }
@@ -69,27 +69,30 @@ static unsigned long traceback_all(Alignment *a, DPentry **dptable,
                                    unsigned long dist,
                                    void (*proc_alignment)(const Alignment*,
                                                           void *data),
-                                   void *data)
+                                   void *data, Env *env)
 {
   unsigned long aligns = 0;
   unsigned int backtrace = 0;
   assert(a && dptable);
   if (dptable[i][j].min_replacement) {
     backtrace = 1;
-    alignment_add_replacement(a);
-    aligns += traceback_all(a, dptable, i-1, j-1, dist, proc_alignment, data);
+    alignment_add_replacement(a, env);
+    aligns += traceback_all(a, dptable, i-1, j-1, dist, proc_alignment, data,
+                            env);
     alignment_remove_last(a);
   }
   if (dptable[i][j].min_deletion) {
     backtrace = 1;
-    alignment_add_deletion(a);
-    aligns += traceback_all(a, dptable, i-1, j, dist, proc_alignment, data);
+    alignment_add_deletion(a, env);
+    aligns += traceback_all(a, dptable, i-1, j, dist, proc_alignment, data,
+                            env);
     alignment_remove_last(a);
   }
   if (dptable[i][j].min_insertion) {
     backtrace = 1;
-    alignment_add_insertion(a);
-    aligns += traceback_all(a, dptable, i, j-1, dist, proc_alignment, data);
+    alignment_add_insertion(a, env);
+    aligns += traceback_all(a, dptable, i, j-1, dist, proc_alignment, data,
+                            env);
     alignment_remove_last(a);
   }
   if (!backtrace) {
@@ -102,36 +105,37 @@ static unsigned long traceback_all(Alignment *a, DPentry **dptable,
 }
 
 Alignment* align(const char *u, unsigned long ulen,
-                 const char *v, unsigned long vlen)
+                 const char *v, unsigned long vlen, Env *env)
 {
   DPentry **dptable;
   Alignment *a;
   assert(u && ulen && v && vlen);
-  array2dim_calloc(dptable, ulen+1, vlen+1, DPentry);
-  a = alignment_new_with_seqs(u, ulen, v, vlen);
+  array2dim_calloc(dptable, ulen+1, vlen+1, DPentry, env);
+  a = alignment_new_with_seqs(u, ulen, v, vlen, env);
   fillDPtable(dptable, u, ulen, v, vlen);
-  traceback(a, dptable, ulen, vlen);
+  traceback(a, dptable, ulen, vlen, env);
   assert(dptable[ulen][vlen].distvalue == alignment_eval(a));
-  array2dim_delete(dptable);
+  array2dim_delete(dptable, env);
   return a;
 }
 
 void align_all(const char *u, unsigned long ulen,
                const char *v, unsigned long vlen,
                void (*proc_alignment)(const Alignment*, void *data),
-               void (*proc_aligns)(unsigned long, void *data), void *data)
+               void (*proc_aligns)(unsigned long, void *data), void *data,
+               Env *env)
 {
   unsigned long aligns;
   DPentry **dptable;
   Alignment *a;
   assert(u && ulen && v && vlen);
-  array2dim_calloc(dptable, ulen+1, vlen+1, DPentry);
-  a = alignment_new_with_seqs(u, ulen, v, vlen);
+  array2dim_calloc(dptable, ulen+1, vlen+1, DPentry, env);
+  a = alignment_new_with_seqs(u, ulen, v, vlen, env);
   fillDPtable(dptable, u, ulen, v, vlen);
   aligns = traceback_all(a, dptable, ulen, vlen, dptable[ulen][vlen].distvalue,
-                         proc_alignment, data);
+                         proc_alignment, data, env);
   if (proc_aligns)
     proc_aligns(aligns, data);
-  alignment_delete(a);
-  array2dim_delete(dptable);
+  alignment_delete(a, env);
+  array2dim_delete(dptable, env);
 }

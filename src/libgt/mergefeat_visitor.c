@@ -19,11 +19,11 @@ struct MergefeatVisitor {
 #define mergefeat_visitor_cast(GV)\
         genome_visitor_cast(mergefeat_visitor_class(), GV)
 
-static void mergefeat_visitor_free(GenomeVisitor *gv)
+static void mergefeat_visitor_free(GenomeVisitor *gv, Env *env)
 {
   MergefeatVisitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
   assert(mergefeat_visitor);
-  hashtable_delete(mergefeat_visitor->ht);
+  hashtable_delete(mergefeat_visitor->ht, env);
 }
 
 static int mergefeat_in_children(GenomeNode *gn, void *data, Env *env)
@@ -49,14 +49,15 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, Env *env)
       genome_feature_set_score(previous_feature, UNDEFDOUBLE);
       assert(!genome_node_number_of_children((GenomeNode*) current_feature));
       /* XXX: */
-      genome_node_remove_leaf(v->current_tree, (GenomeNode*) current_feature);
+      genome_node_remove_leaf(v->current_tree, (GenomeNode*) current_feature,
+                              env);
 #if 0
       genome_node_delete((GenomeNode*) current_feature);
 #endif
     }
     /* remove previous feature */
     hashtable_remove(v->ht, (char*) genome_feature_type_get_cstr(
-                     genome_feature_get_type(previous_feature)));
+                     genome_feature_get_type(previous_feature)), env);
   }
   /* add current feature */
   hashtable_add(v->ht, (char*) genome_feature_type_get_cstr(
@@ -90,18 +91,18 @@ static int mergefeat_visitor_genome_feature(GenomeVisitor *gv,
 const GenomeVisitorClass* mergefeat_visitor_class()
 {
   static const GenomeVisitorClass gvc = { sizeof (MergefeatVisitor),
-                                            mergefeat_visitor_free,
-                                            NULL,
-                                            mergefeat_visitor_genome_feature,
-                                            NULL,
-                                            NULL };
+                                          mergefeat_visitor_free,
+                                          NULL,
+                                          mergefeat_visitor_genome_feature,
+                                          NULL,
+                                          NULL };
   return &gvc;
 }
 
-GenomeVisitor* mergefeat_visitor_new(void)
+GenomeVisitor* mergefeat_visitor_new(Env *env)
 {
   GenomeVisitor *gv = genome_visitor_create(mergefeat_visitor_class());
   MergefeatVisitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
-  mergefeat_visitor->ht = hashtable_new(HASH_STRING, NULL, NULL);
+  mergefeat_visitor->ht = hashtable_new(HASH_STRING, NULL, NULL, env);
   return gv;
 }

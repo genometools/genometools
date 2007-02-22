@@ -13,10 +13,10 @@ typedef struct StreamEvaluator StreamEvaluator;
 
 /* takes ownership of the given streams */
 StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
-                                      GenomeStream *prediction);
+                                      GenomeStream *prediction, Env*);
 int              stream_evaluator_evaluate(StreamEvaluator*, bool verbose,
                                            bool exondiff, Env*);
 void             stream_evaluator_show(StreamEvaluator*, FILE*);
-void             stream_evaluator_delete(StreamEvaluator*);
+void             stream_evaluator_delete(StreamEvaluator*, Env*);
 
 #endif

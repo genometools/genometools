@@ -7,12 +7,12 @@
 #include <assert.h>
 #include "coin_hmm.h"
 
-HMM* coin_hmm_loaded(void)
+HMM* coin_hmm_loaded(Env *env)
 {
   HMM *hmm;
 
   /* create the HMM */
-  hmm = hmm_new(COIN_NUM_OF_STATES, COIN_NUM_OF_SYMBOLS);
+  hmm = hmm_new(COIN_NUM_OF_STATES, COIN_NUM_OF_SYMBOLS, env);
 
   /* set emmission probabilities */
   hmm_set_emission_probability(hmm, COIN_FAIR, HEAD, 0.5);
@@ -29,12 +29,12 @@ HMM* coin_hmm_loaded(void)
   return hmm;
 }
 
-HMM* coin_hmm_fair(void)
+HMM* coin_hmm_fair(Env *env)
 {
   HMM *hmm;
 
   /* create the HMM */
-  hmm = hmm_new(COIN_NUM_OF_STATES, COIN_NUM_OF_SYMBOLS);
+  hmm = hmm_new(COIN_NUM_OF_STATES, COIN_NUM_OF_SYMBOLS, env);
 
   /* set emmission probabilities */
   hmm_set_emission_probability(hmm, COIN_FAIR, HEAD, 0.5);
@@ -51,9 +51,9 @@ HMM* coin_hmm_fair(void)
   return hmm;
 }
 
-Alpha* coin_hmm_alpha(void)
+Alpha* coin_hmm_alpha(Env *env)
 {
-  Alpha *a = alpha_new();
+  Alpha *a = alpha_new(env);
   alpha_add_mapping(a, "Hh");
   alpha_add_mapping(a, "Tt");
   assert(alpha_size(a) == 2);

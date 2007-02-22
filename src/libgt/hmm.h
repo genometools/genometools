@@ -12,7 +12,7 @@
 /* The Hidden Markov Model (HMM) class */
 typedef struct HMM HMM;
 
-HMM*   hmm_new(unsigned int num_of_states, unsigned int num_of_symbols);
+HMM*   hmm_new(unsigned int num_of_states, unsigned int num_of_symbols, Env*);
 void   hmm_set_initial_state_probability(HMM*, unsigned int state_num,
                                          double probability);
 double hmm_get_initial_state_probability(const HMM*, unsigned int state_num);
@@ -31,13 +31,14 @@ double hmm_get_emission_probability(const HMM*, unsigned int state_num,
 void   hmm_init_random(HMM*);
 /* Viterbi algorithm */
 void   hmm_decode(const HMM*, unsigned int *state_sequence,
-                  const unsigned int *emissions, unsigned int num_of_emissions);
+                  const unsigned int *emissions, unsigned int num_of_emissions,
+                  Env*);
 /* Forward algorithm, returns log(P(emissions)) */
 double hmm_forward(const HMM*, const unsigned int *emissions,
-                   unsigned int num_of_emissions);
+                   unsigned int num_of_emissions, Env*);
 /* Backward algorithm, returns log(P(emissions)) */
 double hmm_backward(const HMM*, const unsigned int *emissions,
-                    unsigned int num_of_emissions);
+                    unsigned int num_of_emissions, Env*);
 void   hmm_emit(HMM*, unsigned long num_of_emissions,
                 void (*proc_emission)(unsigned int symbol, void *data),
                 void *data);
@@ -46,6 +47,6 @@ bool   hmm_is_valid(const HMM*);
 double hmm_rmsd(const HMM*, const HMM*);
 void   hmm_show(const HMM*, FILE*);
 int    hmm_unit_test(Env*);
-void   hmm_delete(HMM*);
+void   hmm_delete(HMM*, Env*);
 
 #endif

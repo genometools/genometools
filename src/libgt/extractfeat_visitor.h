@@ -24,6 +24,7 @@ GenomeVisitor*            extractfeat_visitor_new_seqfile(Str *sequence_file,
 GenomeVisitor*            extractfeat_visitor_new_regionmapping(RegionMapping*,
                                                               GenomeFeatureType,
                                                                 bool join,
-                                                                bool translate);
+                                                                bool translate,
+                                                                Env*);
 
 #endif

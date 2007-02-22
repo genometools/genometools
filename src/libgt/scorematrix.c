@@ -20,14 +20,14 @@ struct ScoreMatrix {
   int **scores;
 };
 
-ScoreMatrix* scorematrix_new(Alpha *alpha)
+ScoreMatrix* scorematrix_new(Alpha *alpha, Env *env)
 {
   ScoreMatrix *s;
   assert(alpha);
-  s = xmalloc(sizeof (ScoreMatrix));
+  s = env_ma_malloc(env, sizeof (ScoreMatrix));
   s->alpha = alpha_ref(alpha);
   s->dimension = alpha_size(alpha);
-  array2dim_calloc(s->scores, s->dimension, s->dimension, int);
+  array2dim_calloc(s->scores, s->dimension, s->dimension, int, env);
   return s;
 }
 
@@ -40,7 +40,7 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
   env_error_check(env);
   assert(index_to_alpha_char_mapping && tz);
   assert(!array_size(index_to_alpha_char_mapping));
-  while ((token = tokenizer_get_token(tz))) {
+  while ((token = tokenizer_get_token(tz, env))) {
     if (str_length(token) > 2) {
       env_error_set(env,
                     "illegal character token '%s' on line %lu in file '%s'",
@@ -62,12 +62,12 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
     }
     parsed_characters[(int) amino_acid] = UNDEFCHAR;
     if (amino_acid == '\n') {
-      str_delete(token);
-      tokenizer_next_token(tz);
+      str_delete(token, env);
+      tokenizer_next_token(tz, env);
       assert(!has_err);
       return 0;
     }
-    array_add(index_to_alpha_char_mapping, amino_acid);
+    array_add(index_to_alpha_char_mapping, amino_acid, env);
     if (str_length(token) == 2) {
       if (tokenstr[1] != '\n') {
         env_error_set(env,
@@ -77,13 +77,13 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
         has_err = -1;
         break;
       }
-      str_delete(token);
-      tokenizer_next_token(tz);
+      str_delete(token, env);
+      tokenizer_next_token(tz, env);
       assert(!has_err);
       return 0;
     }
-    str_delete(token);
-    tokenizer_next_token(tz);
+    str_delete(token, env);
+    tokenizer_next_token(tz, env);
   }
   if (!has_err) {
     if (!array_size(index_to_alpha_char_mapping)) {
@@ -93,7 +93,7 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
     has_err = -1;
     }
   }
-  str_delete(token);
+  str_delete(token, env);
   return has_err;
 }
 
@@ -107,7 +107,7 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
   Str *token;
   assert(s && tz && index_to_alpha_char_mapping);
   env_error_check(env);
-  token = tokenizer_get_token(tz);
+  token = tokenizer_get_token(tz, env);
   assert(token);
   if (str_length(token) != 1) {
     env_error_set(env, "illegal character token '%s' on line %lu in file '%s'",
@@ -124,10 +124,10 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
     has_err = -1;
   }
   parsed_characters[(int) amino_acid] = UNDEFCHAR;
-  str_delete(token);
+  str_delete(token, env);
   if (!has_err) {
-    tokenizer_next_token(tz);
-    while ((token = tokenizer_get_token(tz))) {
+    tokenizer_next_token(tz, env);
+    while ((token = tokenizer_get_token(tz, env))) {
       has_err = parse_int(&score, str_get(token), tokenizer_get_line_number(tz),
                           tokenizer_get_filename(tz), env);
       if (has_err)
@@ -137,8 +137,8 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
                             (unsigned char) alpha_encode(s->alpha, *(char*)
                             array_get(index_to_alpha_char_mapping, i)), score);
       i++;
-      str_delete(token);
-      tokenizer_next_token(tz);
+      str_delete(token, env);
+      tokenizer_next_token(tz, env);
       if (tokenizer_line_start(tz))
           break;
     }
@@ -156,12 +156,12 @@ static int parse_scorematrix(ScoreMatrix *s, const char *path, Env *env)
   int has_err = 0;
   assert(s && path && s->alpha);
   env_error_check(env);
-  tz = tokenizer_new(io_new(path, "r"));
-  index_to_alpha_char_mapping = array_new(sizeof (char));
+  tz = tokenizer_new(io_new(path, "r", env), env);
+  index_to_alpha_char_mapping = array_new(sizeof (char), env);
   tokenizer_skip_comment_lines(tz);
   has_err = parse_alphabet_line(index_to_alpha_char_mapping, tz, env);
   if (!has_err) {
-    while (tokenizer_has_token(tz)) {
+    while (tokenizer_has_token(tz, env)) {
       has_err = parse_score_line(s, tz, index_to_alpha_char_mapping,
                                  parsed_characters, env);
       if (has_err)
@@ -177,8 +177,8 @@ static int parse_scorematrix(ScoreMatrix *s, const char *path, Env *env)
     has_err = -1;
   }
 
-  array_delete(index_to_alpha_char_mapping);
-  tokenizer_delete(tz);
+  array_delete(index_to_alpha_char_mapping, env);
+  tokenizer_delete(tz, env);
 
   return has_err;
 }
@@ -192,15 +192,15 @@ ScoreMatrix* scorematrix_read_protein(const char *path, Env *env)
   env_error_check(env);
 
   /* create score matrix */
-  protein_alpha = alpha_new_protein();
-  s = scorematrix_new(protein_alpha);
-  alpha_delete(protein_alpha);
+  protein_alpha = alpha_new_protein(env);
+  s = scorematrix_new(protein_alpha, env);
+  alpha_delete(protein_alpha, env);
 
   /* parse matrix file */
   has_err = parse_scorematrix(s, path, env);
 
   if (has_err) {
-    scorematrix_delete(s);
+    scorematrix_delete(s, env);
     return NULL;
   }
   return s;
@@ -240,9 +240,9 @@ void scorematrix_show(const ScoreMatrix *s, FILE *fp)
   }
 }
 
-void scorematrix_delete(ScoreMatrix *s)
+void scorematrix_delete(ScoreMatrix *s, Env *env)
 {
   if (!s) return;
-  array2dim_delete(s->scores);
-  free(s);
+  array2dim_delete(s->scores, env);
+  env_ma_free(s, env);
 }
