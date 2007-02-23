@@ -138,7 +138,7 @@ static int check_space_leak(void *key, void *value, void *data, Env *env)
   /* report only the first leak */
   if (!info->has_leak) {
     fprintf(stderr, "bug: %lu bytes memory leaked (allocated on line %u in "
-            "file \"%s\"\n", mainfo->size, mainfo->line, mainfo->filename);
+            "file \"%s\")\n", mainfo->size, mainfo->line, mainfo->filename);
     info->has_leak = true;
   }
   return 0;
