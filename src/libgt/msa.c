@@ -155,7 +155,7 @@ unsigned long msa_sum_of_pairwise_scores(const MSA *msa, Env *env)
     }
   }
 
-  free(msa_array);
+  env_ma_free(msa_array, env);
   return sum;
 }
 
