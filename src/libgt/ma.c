@@ -115,7 +115,7 @@ void ma_free_mem(void *ptr, MA *ma, const char *filename, unsigned int line)
     if (!hashtable_get(ma->allocated_pointer, ptr)) {
       fprintf(stderr, "bug: double free() attempted on line %u in file "
               "\"%s\"\n", line, filename);
-      exit(EXIT_FAILURE);
+      exit(2); /* programmer error */
     }
 #endif
     hashtable_remove(ma->allocated_pointer, ptr, ma->env);
