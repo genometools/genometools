@@ -243,6 +243,7 @@ void scorematrix_show(const ScoreMatrix *s, FILE *fp)
 void scorematrix_delete(ScoreMatrix *s, Env *env)
 {
   if (!s) return;
+  alpha_delete(s->alpha, env);
   array2dim_delete(s->scores, env);
   env_ma_free(s, env);
 }
