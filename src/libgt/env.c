@@ -59,7 +59,7 @@ int env_delete(Env *env)
   return rval;
 }
 
-void env_ma_free(void *ptr, Env *env)
+void env_ma_free_func(void *ptr, Env *env)
 {
   assert(env);
   if (!ptr) return;

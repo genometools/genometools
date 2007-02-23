@@ -23,14 +23,16 @@ int    env_delete(Env*);
 
 /* wrapper for memory functions */
 #define env_ma_malloc(env, size)\
-        ma_malloc(env_ma(env), size)
+        ma_malloc_mem(env_ma(env), size, __FILE__, __LINE__)
 #define env_ma_calloc(env, nmemb, size)\
-        ma_calloc(env_ma(env), nmemb, size)
+        ma_calloc_mem(env_ma(env), nmemb, size, __FILE__, __LINE__)
 #define env_ma_realloc(env, ptr, size)\
-        ma_realloc(env_ma(env), ptr, size)
+        ma_realloc_mem(env_ma(env), ptr, size, __FILE__, __LINE__)
+#define env_ma_free(ptr, env)\
+        ma_free_mem(ptr, env_ma(env), __FILE__, __LINE__)
 /* free functions get the data object (here the env object) _always_ as the
    last object */
-void    env_ma_free(void *ptr, Env*);
+void    env_ma_free_func(void *ptr, Env*);
 
 /* wrapper for error functions */
 void    env_error_set(Env*, const char *format, ...)

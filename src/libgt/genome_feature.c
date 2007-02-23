@@ -187,7 +187,8 @@ void genome_feature_add_attribute(GenomeFeature *gf, const char *attr_name,
 {
   assert(gf && attr_name && attr_value);
   if (!gf->attributes)
-    gf->attributes = hashtable_new(HASH_DIRECT, env_ma_free, env_ma_free, env);
+    gf->attributes = hashtable_new(HASH_DIRECT, env_ma_free_func,
+                                   env_ma_free_func, env);
   hashtable_add(gf->attributes, xstrdup(attr_name), xstrdup(attr_value), env);
 }
 

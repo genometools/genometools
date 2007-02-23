@@ -38,7 +38,7 @@ GFF3Parser* gff3parser_new(Env *env)
 {
   GFF3Parser *gff3_parser = env_ma_malloc(env, sizeof (GFF3Parser));
   gff3_parser->id_to_genome_node_mapping = hashtable_new(HASH_STRING,
-                                                         env_ma_free, NULL,
+                                                         env_ma_free_func, NULL,
                                                          env);
   gff3_parser->seqid_to_str_mapping = hashtable_new(HASH_STRING, NULL,
                                                     (FreeFunc) str_delete, env);

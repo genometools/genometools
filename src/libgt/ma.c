@@ -43,7 +43,8 @@ void ma_init(MA *ma, Env *env)
   ma->bookkeeping = true;
 }
 
-void* ma_malloc(MA *ma, size_t size)
+void* ma_malloc_mem(MA *ma, size_t size, const char *filename,
+                    unsigned int line)
 {
   MAInfo *mainfo;
   void *mem;
@@ -52,7 +53,8 @@ void* ma_malloc(MA *ma, size_t size)
     ma->bookkeeping = false;
     mainfo = xmalloc(sizeof (MAInfo));
     mainfo->size = size;
-    /* XXX */
+    mainfo->filename = filename;
+    mainfo->line = line;
     mem = xmalloc(size);
     hashtable_add(ma->allocated_pointer, mem, mainfo, ma->env);
     ma->bookkeeping = true;
@@ -61,7 +63,8 @@ void* ma_malloc(MA *ma, size_t size)
   return xmalloc(size);
 }
 
-void* ma_calloc(MA *ma, size_t nmemb, size_t size)
+void* ma_calloc_mem(MA *ma, size_t nmemb, size_t size, const char *filename,
+                    unsigned int line)
 {
   MAInfo *mainfo;
   void *mem;
@@ -70,7 +73,8 @@ void* ma_calloc(MA *ma, size_t nmemb, size_t size)
     ma->bookkeeping = false;
     mainfo = xmalloc(sizeof (MAInfo));
     mainfo->size = nmemb * size;
-    /* XXX */
+    mainfo->filename = filename;
+    mainfo->line = line;
     mem = xcalloc(nmemb, size);
     hashtable_add(ma->allocated_pointer, mem, mainfo, ma->env);
     ma->bookkeeping = true;
@@ -79,7 +83,8 @@ void* ma_calloc(MA *ma, size_t nmemb, size_t size)
   return xcalloc(nmemb, size);
 }
 
-void* ma_realloc(MA *ma, void *ptr, size_t size)
+void* ma_realloc_mem(MA *ma, void *ptr, size_t size, const char *filename,
+                     unsigned int line)
 {
   MAInfo *mainfo;
   void *mem;
@@ -90,7 +95,8 @@ void* ma_realloc(MA *ma, void *ptr, size_t size)
       hashtable_remove(ma->allocated_pointer, ptr, ma->env);
     mainfo = xmalloc(sizeof (MAInfo));
     mainfo->size = size;
-    /* XXX */
+    mainfo->filename = filename;
+    mainfo->line = line;
     mem = xrealloc(ptr, size);
     hashtable_add(ma->allocated_pointer, mem, mainfo, ma->env);
     ma->bookkeeping = true;
@@ -99,13 +105,19 @@ void* ma_realloc(MA *ma, void *ptr, size_t size)
   return xrealloc(ptr, size);
 }
 
-void ma_free(void *ptr, MA *ma)
+void ma_free_mem(void *ptr, MA *ma, const char *filename, unsigned int line)
 {
   assert(ma);
   if (!ptr) return;
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
-    assert(hashtable_get(ma->allocated_pointer, ptr));
+#ifndef NDEBUG
+    if (!hashtable_get(ma->allocated_pointer, ptr)) {
+      fprintf(stderr, "bug: double free() attempted on line %u in file "
+              "\"%s\"\n", line, filename);
+      exit(EXIT_FAILURE);
+    }
+#endif
     hashtable_remove(ma->allocated_pointer, ptr, ma->env);
     free(ptr);
     ma->bookkeeping = true;
@@ -124,7 +136,7 @@ int ma_check_space_leak(MA *ma)
 void ma_clean(MA *ma, Env *env)
 {
   assert(ma);
-  /*assert(ma->bookkeeping);*/
+  assert(ma->bookkeeping);
   ma->bookkeeping = false;
   hashtable_delete(ma->allocated_pointer, ma->env);
 }

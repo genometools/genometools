@@ -66,9 +66,10 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
 GTF_parser* gtf_parser_new(Env *env)
 {
   GTF_parser *parser = env_ma_malloc(env, sizeof (GTF_parser));
-  parser->sequence_region_to_range = hashtable_new(HASH_STRING, env_ma_free,
-                                                   env_ma_free, env);
-  parser->gene_id_hash = hashtable_new(HASH_STRING, env_ma_free,
+  parser->sequence_region_to_range = hashtable_new(HASH_STRING,
+                                                   env_ma_free_func,
+                                                   env_ma_free_func, env);
+  parser->gene_id_hash = hashtable_new(HASH_STRING, env_ma_free_func,
                                        (FreeFunc) hashtable_delete, env);
   parser->seqid_to_str_mapping = hashtable_new(HASH_STRING, NULL,
                                                (FreeFunc) str_delete, env);
@@ -397,7 +398,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       /* process the mandatory attributes */
       if (!(transcript_id_hash = hashtable_get(parser->gene_id_hash,
                                                gene_id))) {
-        transcript_id_hash = hashtable_new(HASH_STRING, env_ma_free,
+        transcript_id_hash = hashtable_new(HASH_STRING, env_ma_free_func,
                                            (FreeFunc) array_delete, env);
         hashtable_add(parser->gene_id_hash, xstrdup(gene_id),
                       transcript_id_hash, env);
