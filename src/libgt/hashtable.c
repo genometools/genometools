@@ -73,7 +73,7 @@ void hashtable_remove(Hashtable *ht, void *key, Env *env)
   if (ht->key_free)
     ht->key_free(key, env);
   if (ht->value_free)
-    ht->value_free(&value, env);
+    ht->value_free((void*) value, env);
 }
 
 static int st_iterfunc(void *key, void *value, void *data, Env *env)
