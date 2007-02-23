@@ -27,7 +27,7 @@ void*   ma_realloc_mem(MA*, void *ptr, size_t size, const char*, unsigned int);
         ma_free_mem(ptr, ma, __FILE__, __LINE__)
 void    ma_free_mem(void *ptr, MA*, const char*, unsigned int);
 /* check if all allocated memory has been freed, prints to stderr */
-int     ma_check_space_leak(MA*);
+int     ma_check_space_leak(MA*, Env*);
 void    ma_clean(MA*, Env*);
 void    ma_delete(MA*);
 

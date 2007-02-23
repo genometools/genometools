@@ -52,7 +52,7 @@ int env_delete(Env *env)
   assert(env);
   log_delete(env->log, env->ma);
   error_delete(env->error, env->ma);
-  rval = ma_check_space_leak(env->ma);
+  rval = ma_check_space_leak(env->ma, env);
   ma_clean(env->ma, env);
   ma_delete(env->ma);
   free(env);

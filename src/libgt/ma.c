@@ -22,6 +22,10 @@ typedef struct {
   unsigned int line;
 } MAInfo;
 
+typedef struct {
+  bool has_leak;
+} CheckSpaceLeakInfo;
+
 MA* ma_new(void)
 {
   return xcalloc(1, sizeof (MA));
@@ -126,10 +130,31 @@ void ma_free_mem(void *ptr, MA *ma, const char *filename, unsigned int line)
     free(ptr);
 }
 
-int ma_check_space_leak(MA *ma)
+static int check_space_leak(void *key, void *value, void *data, Env *env)
 {
+  CheckSpaceLeakInfo *info = (CheckSpaceLeakInfo*) data;
+  MAInfo *mainfo = (MAInfo*) value;
+  assert(key && value && data && env);
+  /* report only the first leak */
+  if (!info->has_leak) {
+    fprintf(stderr, "bug: %lu bytes memory leaked (allocated on line %u in "
+            "file \"%s\"\n", mainfo->size, mainfo->line, mainfo->filename);
+    info->has_leak = true;
+  }
+  return 0;
+}
+
+int ma_check_space_leak(MA *ma, Env *env)
+{
+  CheckSpaceLeakInfo info;
+  int has_err;
   assert(ma);
-  /* XXX */
+  info.has_leak = false;
+  has_err = hashtable_foreach(ma->allocated_pointer, check_space_leak, &info,
+                              env);
+  assert(!has_err); /* cannot happen, check_space_leak() is sane */
+  if (info.has_leak)
+    return -1;
   return 0;
 }
 
