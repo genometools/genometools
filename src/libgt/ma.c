@@ -86,7 +86,8 @@ void* ma_realloc(MA *ma, void *ptr, size_t size)
   assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
-    hashtable_remove(ma->allocated_pointer, ptr, ma->env);
+    if (ptr)
+      hashtable_remove(ma->allocated_pointer, ptr, ma->env);
     mainfo = xmalloc(sizeof (MAInfo));
     mainfo->size = size;
     /* XXX */
@@ -101,8 +102,10 @@ void* ma_realloc(MA *ma, void *ptr, size_t size)
 void ma_free(void *ptr, MA *ma)
 {
   assert(ma);
+  if (!ptr) return;
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
+    assert(hashtable_get(ma->allocated_pointer, ptr));
     hashtable_remove(ma->allocated_pointer, ptr, ma->env);
     free(ptr);
     ma->bookkeeping = true;
@@ -121,7 +124,7 @@ int ma_check_space_leak(MA *ma)
 void ma_clean(MA *ma, Env *env)
 {
   assert(ma);
-  assert(ma->bookkeeping);
+  /*assert(ma->bookkeeping);*/
   ma->bookkeeping = false;
   hashtable_delete(ma->allocated_pointer, ma->env);
 }

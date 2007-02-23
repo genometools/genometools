@@ -66,6 +66,7 @@ void hashtable_remove(Hashtable *ht, void *key, Env *env)
   st_data_t value = 0;
   st_data_t key_t = (st_data_t) key;
   assert(ht && key);
+  /*printf("hashtable_remove\n");*/
   (void) st_lookup(ht->st_table, (st_data_t) key, &value);
   /* the hashtable containes an element with this key already */
   assert(value);
