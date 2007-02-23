@@ -41,10 +41,8 @@ void str_set(Str *s, const char *cstr, Env *env)
   size_t cstrlen;
   char *sptr;
   assert(s);
-  if (!cstr) {
-    s->cstr = NULL;
+  if (!cstr)
     s->length = 0;
-  }
   else {
     cstrlen = strlen(cstr);
     s->cstr = dynalloc(s->cstr, &s->allocated, (cstrlen + 1) * sizeof (char),

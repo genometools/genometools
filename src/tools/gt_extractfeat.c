@@ -107,7 +107,7 @@ int gt_extractfeat(int argc, char *argv[], Env *env)
   /* determine type and make sure it is a valid one */
   if (genome_feature_type_get(&type, str_get(arguments.type)) == -1) {
     env_error_set(env, "\"%s\" is not a valid feature type",
-              str_get(arguments.type));
+                  str_get(arguments.type));
     has_err = -1;
   }
 
