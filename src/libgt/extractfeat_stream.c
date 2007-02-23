@@ -31,10 +31,16 @@ static int extractfeat_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   extractfeat_stream = extractfeat_stream_cast(gs);
   has_err = genome_stream_next_tree(extractfeat_stream->in_stream, gn, env);
   if (!has_err) {
-  assert(extractfeat_stream->extractfeat_visitor);
-  if (*gn)
-    has_err = genome_node_accept(*gn, extractfeat_stream->extractfeat_visitor,
-                                 env);
+    assert(extractfeat_stream->extractfeat_visitor);
+    if (*gn) {
+      has_err = genome_node_accept(*gn, extractfeat_stream->extractfeat_visitor,
+                                   env);
+      if (has_err) {
+        /* we own the node -> delete it */
+        genome_node_rec_delete(*gn, env);
+        *gn = NULL;
+      }
+    }
   }
   return has_err;
 }

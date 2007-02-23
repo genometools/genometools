@@ -49,8 +49,8 @@ static int compare_genome_nodes(GenomeNode *gn_a, GenomeNode *gn_b)
 }
 
 GenomeNode* genome_node_create(const GenomeNodeClass *gnc,
-                                const char *filename,
-                                unsigned long line_number, Env *env)
+                               const char *filename,
+                               unsigned long line_number, Env *env)
 {
   GenomeNode *gn;
   assert(gnc && gnc->size);
@@ -114,8 +114,6 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   Hashtable *traversed_nodes = NULL;
   bool has_node_with_multiple_parents = false;
   int has_err = 0;
-
-  env_error_check(env);
 
   if (!genome_node)
     return 0;
@@ -491,7 +489,6 @@ void genome_node_delete(GenomeNode *gn, Env *env)
 
 static int free_genome_node(GenomeNode *gn, /*@unused@*/ void *data, Env *env)
 {
-  env_error_check(env);
   genome_node_delete(gn, env);
   return 0;
 }
