@@ -5,7 +5,7 @@
 */
 
 #include <stdarg.h>
-#include "error.h"
+#include "env.h"
 #include "xansi.h"
 
 struct Error {

@@ -10,7 +10,6 @@
 #include <assert.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include "ma.h"
 
 /* the error class */
 typedef struct Error Error;

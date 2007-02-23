@@ -6,7 +6,6 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include "error.h"
 #include "fasta.h"
 #include "fasta_reader.h"
 #include "genfile.h"

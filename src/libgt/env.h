@@ -7,12 +7,12 @@
 #ifndef ENV_H
 #define ENV_H
 
-#include "error.h"
-#include "log.h"
-#include "ma.h"
-
 /* the enviroment class (creates and holds all singular objects) */
 typedef struct Env Env;
+
+#include "ma.h"
+#include "error.h"
+#include "log.h"
 
 Env*   env_new(void);
 MA*    env_ma(const Env*);    /* return the memory allocator */

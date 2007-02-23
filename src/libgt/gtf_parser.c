@@ -5,7 +5,6 @@
 */
 
 #include <assert.h>
-#include "error.h"
 #include "fptr.h"
 #include "genome_node.h"
 #include "gtf_parser.h"

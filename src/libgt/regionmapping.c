@@ -5,7 +5,6 @@
 */
 
 #include <assert.h>
-#include "error.h"
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"

@@ -11,6 +11,7 @@
 typedef struct FilterVisitor FilterVisitor;
 
 #include "genome_visitor.h"
+#include "env.h"
 
 const GenomeVisitorClass* filter_visitor_class(void);
 GenomeVisitor*            filter_visitor_new(Str *seqid, Str *typefilter,

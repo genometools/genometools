@@ -7,8 +7,6 @@
 #ifndef GENOME_VISITOR_H
 #define GENOME_VISITOR_H
 
-#include "log.h"
-
 /* the ``genome visitor'' interface, a visitor for genome nodes */
 typedef struct GenomeVisitorClass GenomeVisitorClass;
 typedef struct GenomeVisitor GenomeVisitor;

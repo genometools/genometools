@@ -5,7 +5,6 @@
 */
 
 #include <assert.h>
-#include "error.h"
 #include "reverse.h"
 #include "undef.h"
 

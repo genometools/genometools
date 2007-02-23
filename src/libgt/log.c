@@ -6,7 +6,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include "log.h"
+#include "env.h"
 #include "xansi.h"
 
 struct Log {

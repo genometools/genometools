@@ -6,7 +6,6 @@
 
 #include <assert.h>
 #include <string.h>
-#include "error.h"
 #include "fileutils.h"
 #include "gtdata.h"
 #include "lua.h"

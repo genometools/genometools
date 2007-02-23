@@ -9,7 +9,6 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include "ma.h"
 
 typedef struct Log Log;
 

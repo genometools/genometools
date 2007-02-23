@@ -15,45 +15,47 @@ struct Env {
 
 Env* env_new(void)
 {
-  Env *e = xcalloc(1, sizeof (Env));
-  e->ma = ma_new();
-  e->error = error_new(e->ma);
-  return e;
+  Env *env = xcalloc(1, sizeof (Env));
+  env->ma = ma_new();
+  ma_init(env->ma, env);
+  env->error = error_new(env->ma);
+  return env;
 }
 
-MA* env_ma(const Env *e)
+MA* env_ma(const Env *env)
 {
-  assert(e && e->ma);
-  return e->ma;
+  assert(env && env->ma);
+  return env->ma;
 }
 
-Error* env_error(const Env *e)
+Error* env_error(const Env *env)
 {
-  assert(e && e->error);
-  return e->error;
+  assert(env && env->error);
+  return env->error;
 }
 
-Log* env_log(const Env *e)
+Log* env_log(const Env *env)
 {
-  assert(e);
-  return e->log;
+  assert(env);
+  return env->log;
 }
 
-void env_set_log(Env *e, Log *log)
+void env_set_log(Env *env, Log *log)
 {
-  assert(e);
-  e->log = log;
+  assert(env);
+  env->log = log;
 }
 
-int env_delete(Env *e)
+int env_delete(Env *env)
 {
   int rval;
-  assert(e);
-  log_delete(e->log, e->ma);
-  error_delete(e->error, e->ma);
-  rval = ma_check_space_leak(e->ma);
-  ma_delete(e->ma);
-  free(e);
+  assert(env);
+  log_delete(env->log, env->ma);
+  error_delete(env->error, env->ma);
+  rval = ma_check_space_leak(env->ma);
+  ma_clean(env->ma, env);
+  ma_delete(env->ma);
+  free(env);
   return rval;
 }
 
@@ -64,21 +66,21 @@ void env_ma_free(void *ptr, Env *env)
   ma_free(ptr, env_ma(env));
 }
 
-void env_error_set(Env *e, const char *format, ...)
+void env_error_set(Env *env, const char *format, ...)
 {
   va_list ap;
-  assert(e && format);
+  assert(env && format);
   va_start(ap, format);
-  error_vset(env_error(e), format, ap);
+  error_vset(env_error(env), format, ap);
   va_end(ap);
 }
 
-void env_log_log(Env *e, const char *format, ...)
+void env_log_log(Env *env, const char *format, ...)
 {
   va_list ap;
-  assert(e && format);
-  if (!env_log(e)) return;
+  assert(env && format);
+  if (!env_log(env)) return;
   va_start(ap, format);
-  log_vlog(env_log(e), format, ap);
+  log_vlog(env_log(env), format, ap);
   va_end(ap);
 }

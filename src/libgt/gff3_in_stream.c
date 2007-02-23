@@ -6,7 +6,6 @@
 
 #include <assert.h>
 #include <string.h>
-#include "error.h"
 #include "fileutils.h"
 #include "genome_stream_rep.h"
 #include "gff3_in_stream.h"
