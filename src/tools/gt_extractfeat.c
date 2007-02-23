@@ -123,9 +123,11 @@ int gt_extractfeat(int argc, char *argv[], Env *env)
                                                 arguments.translate, env);
 
     /* set sequence source */
-    assert(str_get(arguments.seqfile) || str_get(arguments.regionmapping));
-    assert(!(str_get(arguments.seqfile) && str_get(arguments.regionmapping)));
-    if (str_get(arguments.seqfile)) {
+    assert(str_length(arguments.seqfile) ||
+           str_length(arguments.regionmapping));
+    assert(!(str_length(arguments.seqfile) &&
+             str_length(arguments.regionmapping)));
+    if (str_length(arguments.seqfile)) {
       has_err = extractfeat_stream_use_sequence_file(extractfeat_stream,
                                                      arguments.seqfile, env);
     }
