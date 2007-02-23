@@ -169,5 +169,5 @@ void msa_delete(MSA *msa, Env *env)
 {
   if (!msa) return;
   bioseq_delete(msa->bs, env);
-  free(msa);
+  env_ma_free(msa, env);
 }
