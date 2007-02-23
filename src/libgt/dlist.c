@@ -111,7 +111,7 @@ void dlist_add(Dlist *dlist, void *data, Env *env)
   dlist->size++;
 }
 
-void dlist_remove(Dlist *dlist, Dlistelem *dlistelem)
+void dlist_remove(Dlist *dlist, Dlistelem *dlistelem, Env *env)
 {
   assert(dlist && dlistelem);
   assert(!dlistelem->previous || dlistelem->previous->next == dlistelem);
@@ -125,7 +125,7 @@ void dlist_remove(Dlist *dlist, Dlistelem *dlistelem)
   if (dlistelem == dlist->last)
     dlist->last = dlistelem->previous;
   dlist->size--;
-  /* XXX: free(dlistelem); */
+  env_ma_free(dlistelem, env);
 }
 
 static int compare(const void *a, const void *b)
@@ -213,7 +213,7 @@ int dlist_unit_test(Env *env)
     }
     /* remove first element */
     if (dlist_size(dlist)) {
-      dlist_remove(dlist, dlist_first(dlist));
+      dlist_remove(dlist, dlist_first(dlist), env);
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_first(dlist));
         ensure(has_err, *data == elems_backup[1]);
@@ -221,7 +221,7 @@ int dlist_unit_test(Env *env)
     }
     /* remove last element */
     if (dlist_size(dlist)) {
-      dlist_remove(dlist, dlist_last(dlist));
+      dlist_remove(dlist, dlist_last(dlist), env);
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_last(dlist));
         ensure(has_err, *data == elems_backup[size - 2]);
@@ -234,7 +234,7 @@ int dlist_unit_test(Env *env)
       dlistelem = dlist_first(dlist);
       for (j = 1; j < dlist_size(dlist) / 2; j++)
         dlistelem = dlistelem_next(dlistelem);
-      dlist_remove(dlist, dlistelem);
+      dlist_remove(dlist, dlistelem, env);
       dlistelem = dlist_first(dlist);
       for (j = 1; j < dlist_size(dlist) / 2 + 1; j++)
         dlistelem = dlistelem_next(dlistelem);
@@ -260,7 +260,7 @@ int dlist_unit_test(Env *env)
     }
     /* remove first element */
     if (dlist_size(dlist)) {
-      dlist_remove(dlist, dlist_first(dlist));
+      dlist_remove(dlist, dlist_first(dlist), env);
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_first(dlist));
         ensure(has_err, *data == elems[1]);
@@ -268,7 +268,7 @@ int dlist_unit_test(Env *env)
     }
     /* remove last element */
     if (dlist_size(dlist)) {
-      dlist_remove(dlist, dlist_last(dlist));
+      dlist_remove(dlist, dlist_last(dlist), env);
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_last(dlist));
         ensure(has_err, *data == elems[size - 2]);

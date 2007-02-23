@@ -21,7 +21,8 @@ Dlistelem*    dlist_last(const Dlist*);
 unsigned long dlist_size(const Dlist*);
  /* usually: O(n) (O(1) if data is added in sorted order) */
 void          dlist_add(Dlist*, void *data, Env*);
-void          dlist_remove(Dlist*, Dlistelem*); /* XXX: frees the elem */
+/* frees the elem */
+void          dlist_remove(Dlist*, Dlistelem*, Env*);
 int           dlist_unit_test(Env*);
 void          dlist_delete(Dlist*, Env*);
 

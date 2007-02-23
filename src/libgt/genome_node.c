@@ -352,7 +352,7 @@ static int remove_leaf(GenomeNode *node, void *data, Env *env)
          dlistelem = dlistelem_next(dlistelem)) {
       child = (GenomeNode*) dlistelem_get_data(dlistelem);
       if (child == leaf) {
-        dlist_remove(node->children, dlistelem);
+        dlist_remove(node->children, dlistelem, env);
         break;
       }
     }
