@@ -46,7 +46,7 @@ void    env_error_set(Env*, const char *format, ...)
 /* make sure that the error is not set, has to be used at the beginning of
    every routine which has an Env* argument */
 #define env_error_check(env)\
-        assert(!env || !error_is_set(env_error(env)))
+        assert(!env || !env_error(env) || !error_is_set(env_error(env)))
 
 /* wrapper for log functions */
 void    env_log_log(Env*, const char *format, ...)
