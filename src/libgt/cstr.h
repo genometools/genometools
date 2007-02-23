@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include "env.h"
 
+void*         cstr_dup(const char*, Env*);
 void          cstr_show(const char*, unsigned long length, FILE*);
 
 /* use p and a blank as prefix for cstr_array[0] and return the result */

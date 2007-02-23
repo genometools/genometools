@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <stdio.h>
 #include "array.h"
+#include "cstr.h"
 #include "error.h"
 #include "mailaddress.h"
 #include "minmax.h"
@@ -119,8 +120,8 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
   assert(strlen(one_liner) && isupper(one_liner[0]));
   assert(one_liner[strlen(one_liner)-1] == '.');
   op->progname = NULL;
-  op->synopsis = xstrdup(synopsis);
-  op->one_liner = xstrdup(one_liner);
+  op->synopsis = cstr_dup(synopsis, env);
+  op->one_liner = cstr_dup(one_liner, env);
   op->options = array_new(sizeof (Option*), env);
   op->parser_called = false;
   op->comment_func = NULL;
@@ -394,7 +395,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc, char **argv,
   assert(op);
   assert(!op->parser_called); /* to avoid multiple adding of common options */
 
-  op->progname = xstrdup(argv[0]);
+  op->progname = cstr_dup(argv[0], env);
 
   /* add common options */
   option = option_new_help(env);

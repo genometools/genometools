@@ -5,6 +5,7 @@
 */
 
 #include <assert.h>
+#include "cstr.h"
 #include "dynalloc.h"
 #include "ensure.h"
 #include "str.h"
@@ -172,7 +173,7 @@ Str* str_clone(const Str *s, Env *env)
   Str *s_copy;
   assert(s);
   s_copy = env_ma_malloc(env, sizeof (Str));
-  s_copy->cstr = xstrdup(s->cstr);
+  s_copy->cstr = cstr_dup(s->cstr, env);
   s_copy->length = s_copy->allocated = s->length;
   s_copy->reference_count = 0;
   return s_copy;

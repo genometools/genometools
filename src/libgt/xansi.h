@@ -36,7 +36,6 @@ void   xputchar(int);
 void   xputs(const char*);
 void*  xrealloc(void *ptr, size_t size);
 void   xremove(const char*);
-char*  xstrdup(const char*);
 char*  xtmpnam(char*);
 void   xungetc(int, FILE*);
 

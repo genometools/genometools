@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "cstr.h"
 #include "fileutils.h"
 #include "splitter.h"
 #include "xansi.h"
@@ -82,7 +83,7 @@ int file_find_in_path(Str *path, const char *file, Env *env)
   /* 'file' has no dirname -> scan $PATH */
   pathvariable = getenv("PATH");
   if (pathvariable)
-    pathvariable = xstrdup(pathvariable); /* make writeable copy */
+    pathvariable = cstr_dup(pathvariable, env); /* make writeable copy */
   else {
     env_error_set(env, "environment variable $PATH is not defined");
     has_err = -1;

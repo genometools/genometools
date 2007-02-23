@@ -5,6 +5,7 @@
 */
 
 #include <assert.h>
+#include "cstr.h"
 #include "io.h"
 #include "xansi.h"
 
@@ -22,7 +23,7 @@ IO* io_new(const char *path, const char *mode, Env *env)
   assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
   io = env_ma_malloc(env, sizeof (IO));
   io->fp = xfopen(path, mode);
-  io->path = xstrdup(path);
+  io->path = cstr_dup(path, env);
   io->line_number = 1;
   io->line_start = true;
   return io;

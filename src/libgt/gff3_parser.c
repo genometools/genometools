@@ -11,6 +11,7 @@
 #include <string.h>
 #include "array.h"
 #include "comment.h"
+#include "cstr.h"
 #include "error.h"
 #include "fptr.h"
 #include "genome_feature.h"
@@ -166,7 +167,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
           has_err = -1;
           break;
         }
-        id = xstrdup(splitter_get_token(tmp_splitter, 1));
+        id = cstr_dup(splitter_get_token(tmp_splitter, 1), env);
       }
       else if (strncmp(token, PARENT_STRING, strlen(PARENT_STRING)) == 0) {
         splitter_reset(tmp_splitter);

@@ -7,6 +7,7 @@
 #include <assert.h>
 #include "array.h"
 #include "bioseq.h"
+#include "cstr.h"
 #include "error.h"
 #include "fasta.h"
 #include "fasta_reader.h"
@@ -95,7 +96,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
     switch (line_number % 3) {
       case 1:
         /* process description */
-        description = xstrdup(str_get(index_line));
+        description = cstr_dup(str_get(index_line), env);
         array_add(bs->descriptions, description, env);
         break;
       case 2:

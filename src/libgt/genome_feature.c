@@ -6,6 +6,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include "cstr.h"
 #include "genome_feature.h"
 #include "genome_feature_type.h"
 #include "genome_node_rep.h"
@@ -189,7 +190,8 @@ void genome_feature_add_attribute(GenomeFeature *gf, const char *attr_name,
   if (!gf->attributes)
     gf->attributes = hashtable_new(HASH_DIRECT, env_ma_free_func,
                                    env_ma_free_func, env);
-  hashtable_add(gf->attributes, xstrdup(attr_name), xstrdup(attr_value), env);
+  hashtable_add(gf->attributes, cstr_dup(attr_name, env),
+                cstr_dup(attr_value, env), env);
 }
 
 bool genome_feature_has_attribute(const GenomeFeature *gf)

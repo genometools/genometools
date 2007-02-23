@@ -159,17 +159,6 @@ void xremove(const char *path)
   }
 }
 
-char *xstrdup(const char *str)
-{
-  void *dup;
-  assert(str);
-  if ((dup = strdup(str)) == NULL) {
-    perror("cannot strdup");
-    exit(EXIT_FAILURE);
-  }
-  return dup;
-}
-
 char* xtmpnam(char *str)
 {
   char *fn;

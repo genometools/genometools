@@ -5,6 +5,7 @@
 */
 
 #include <assert.h>
+#include "cstr.h"
 #include "fptr.h"
 #include "genome_node.h"
 #include "gtf_parser.h"
@@ -330,7 +331,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         /* sequence region is not already defined -> define it */
         rangeptr = env_ma_malloc(env, sizeof (Range));
         *rangeptr = range;
-        hashtable_add(parser->sequence_region_to_range, xstrdup(seqname),
+        hashtable_add(parser->sequence_region_to_range, cstr_dup(seqname, env),
                       rangeptr, env);
       }
 
@@ -400,7 +401,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
                                                gene_id))) {
         transcript_id_hash = hashtable_new(HASH_STRING, env_ma_free_func,
                                            (FreeFunc) array_delete, env);
-        hashtable_add(parser->gene_id_hash, xstrdup(gene_id),
+        hashtable_add(parser->gene_id_hash, cstr_dup(gene_id, env),
                       transcript_id_hash, env);
       }
       assert(transcript_id_hash);
@@ -408,7 +409,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       if (!(genome_node_array = hashtable_get(transcript_id_hash,
                                               transcript_id))) {
         genome_node_array = array_new(sizeof (GenomeNode*), env);
-        hashtable_add(transcript_id_hash, xstrdup(transcript_id),
+        hashtable_add(transcript_id_hash, cstr_dup(transcript_id, env),
                       genome_node_array, env);
       }
       assert(genome_node_array);

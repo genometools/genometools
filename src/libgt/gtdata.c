@@ -6,6 +6,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include "cstr.h"
 #include "fileutils.h"
 #include "gtdata.h"
 #include "lua.h"
@@ -56,7 +57,7 @@ int gtdata_show_help(const char *progname, void *unused, Env *env)
   env_error_check(env);
   assert(progname);
 
-  prog = xstrdup(progname); /* create modifiable copy for splitter */
+  prog = cstr_dup(progname, env); /* create modifiable copy for splitter */
   splitter = splitter_new(env);
   splitter_split(splitter, prog, strlen(prog), ' ', env);
   doc_file = gtdata_get_path(splitter_get_token(splitter, 0), env);

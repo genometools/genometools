@@ -9,6 +9,17 @@
 #include "cstr.h"
 #include "xansi.h"
 
+void* cstr_dup(const char *cstr, Env *env)
+{
+  size_t size;
+  char *copy;
+  assert(cstr);
+  size = strlen(cstr + 1);
+  copy = env_ma_malloc(env, size);
+  memcpy(copy, cstr, size);
+  return copy;
+}
+
 void cstr_show(const char *cstr, unsigned long length, FILE *fp)
 {
   unsigned long i;
@@ -28,7 +39,7 @@ char** cstr_array_prefix_first(char **cstr_array, const char *p, Env *env)
   a[0] = env_ma_malloc(env, sizeof (char) * f_len);
   (void) snprintf(a[0], f_len, "%s %s", p, cstr_array[0]);
   for (i = 1; i < a_len; i++)
-    a[i] = xstrdup(cstr_array[i]);
+    a[i] = cstr_dup(cstr_array[i], env);
   a[a_len] = NULL;
   return a;
 }
