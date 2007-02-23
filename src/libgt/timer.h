@@ -19,6 +19,6 @@ Timer* timer_new(Env*);
 void   timer_start(Timer*);
 void   timer_stop(Timer*);
 void   timer_show(Timer*, FILE*);
-void   timer_delete(Timer*, Env*);
+void   timer_del(Timer*, Env*);
 
 #endif

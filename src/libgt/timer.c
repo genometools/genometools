@@ -58,7 +58,7 @@ void timer_show(Timer *t, FILE *fp)
           t->stop_ru.ru_stime.tv_sec - t->stop_ru.ru_stime.tv_sec);
 }
 
-void timer_delete(Timer *t, Env *env)
+void timer_del(Timer *t, Env *env)
 {
   if (!t) return;
   env_ma_free(t, env);
