@@ -14,7 +14,7 @@ void* cstr_dup(const char *cstr, Env *env)
   size_t size;
   char *copy;
   assert(cstr);
-  size = strlen(cstr + 1);
+  size = strlen(cstr) + 1;
   copy = env_ma_malloc(env, size);
   memcpy(copy, cstr, size);
   return copy;
