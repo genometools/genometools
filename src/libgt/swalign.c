@@ -80,8 +80,8 @@ Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf, Env *env)
   Alignment *a = NULL;
   assert(u && v && sf);
   array2dim_calloc(dptable, seq_length(u)+1, seq_length(v)+1, DPentry, env);
-  fillDPtable(dptable, seq_get_encoded(u), seq_length(u),
-                       seq_get_encoded(v), seq_length(v), sf, &alignment_end);
+  fillDPtable(dptable, seq_get_encoded(u, env), seq_length(u),
+              seq_get_encoded(v, env), seq_length(v), sf, &alignment_end);
   if (dptable[alignment_end.x][alignment_end.y].score) {
     /* construct only an alignment if a (positive) score was computed */
     a = alignment_new(env);

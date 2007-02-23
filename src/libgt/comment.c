@@ -24,7 +24,7 @@ static void comment_free(GenomeNode *gn, Env *env)
 {
   Comment *c = comment_cast(gn);
   assert(c && c->comment);
-  free(c->comment);
+  env_ma_free(c->comment, env);
 }
 
 static Str* comment_get_idstr(GenomeNode *gn)

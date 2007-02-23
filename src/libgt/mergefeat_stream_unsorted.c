@@ -48,7 +48,7 @@ const GenomeStreamClass* mergefeat_stream_unsorted_class(void)
 GenomeStream* mergefeat_stream_unsorted_new(GenomeStream *in_stream, Env *env)
 {
   GenomeStream *gs = genome_stream_create(mergefeat_stream_unsorted_class(),
-                                          false);
+                                          false, env);
   MergefeatStreamUnsorted *mfs = mergefeat_stream_unsorted_cast(gs);
   mfs->in_stream = in_stream;
   mfs->mergefeat_visitor = mergefeat_visitor_new(env);

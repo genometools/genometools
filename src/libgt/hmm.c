@@ -596,7 +596,7 @@ int hmm_unit_test(Env *env)
   loaded_hmm = coin_hmm_loaded(env);
   alpha = coin_hmm_alpha(env);
   size = sizeof (coin_tosses) / sizeof (coin_tosses[0]);
-  encoded_seq = xmalloc(sizeof (int) * strlen(coin_tosses[size-1]));
+  encoded_seq = env_ma_malloc(env, sizeof (int) * strlen(coin_tosses[size-1]));
 
   for (i = 0; i < size && !has_err; i++) {
     len = strlen(coin_tosses[i]);
@@ -628,7 +628,7 @@ int hmm_unit_test(Env *env)
   loaded_hmm = dice_hmm_loaded(env);
   alpha = dice_hmm_alpha(env);
   size = sizeof (dice_rolls) / sizeof (dice_rolls[0]);
-  encoded_seq = xmalloc(sizeof (int) * strlen(dice_rolls[size-1]));
+  encoded_seq = env_ma_malloc(env, sizeof (int) * strlen(dice_rolls[size-1]));
 
   for (i = 0; i < size && !has_err; i++) {
     len = strlen(dice_rolls[i]);

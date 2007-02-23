@@ -86,18 +86,18 @@ const GenomeVisitorClass* stat_visitor_class()
 GenomeVisitor* stat_visitor_new(bool gene_length_distri,
                                 bool gene_score_distri,
                                 bool exon_length_distri,
-                                bool intron_length_distri)
+                                bool intron_length_distri, Env *env)
 {
-  GenomeVisitor *gv = genome_visitor_create(stat_visitor_class());
+  GenomeVisitor *gv = genome_visitor_create(stat_visitor_class(), env);
   StatVisitor *stat_visitor = stat_visitor_cast(gv);
   if (gene_length_distri)
-    stat_visitor->gene_length_distribution = disc_distri_new();
+    stat_visitor->gene_length_distribution = disc_distri_new(env);
   if (gene_score_distri)
-    stat_visitor->gene_score_distribution = disc_distri_new();
+    stat_visitor->gene_score_distribution = disc_distri_new(env);
   if (exon_length_distri)
-    stat_visitor->exon_length_distribution = disc_distri_new();
+    stat_visitor->exon_length_distribution = disc_distri_new(env);
   if (intron_length_distri)
-    stat_visitor->intron_length_distribution = disc_distri_new();
+    stat_visitor->intron_length_distribution = disc_distri_new(env);
   return gv;
 }
 

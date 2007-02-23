@@ -54,7 +54,7 @@ static void gff3_visitor_free(GenomeVisitor *gv, Env *env)
 {
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gff3_visitor);
-  free(gff3_visitor->id_counter);
+  env_ma_free(gff3_visitor->id_counter, env);
   hashtable_delete(gff3_visitor->genome_feature_to_id_array, env);
   hashtable_delete(gff3_visitor->genome_feature_to_unique_id_str, env);
 }
@@ -258,11 +258,12 @@ const GenomeVisitorClass* gff3_visitor_class()
 
 GenomeVisitor* gff3_visitor_new(FILE *outfp, Env *env)
 {
-  GenomeVisitor *gv = genome_visitor_create(gff3_visitor_class());
+  GenomeVisitor *gv = genome_visitor_create(gff3_visitor_class(), env);
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   gff3_visitor->version_string_shown = 0;
-  gff3_visitor->id_counter = xcalloc(genome_feature_type_num_of_features(),
-                                     sizeof (unsigned long));
+  gff3_visitor->id_counter = env_ma_calloc(env,
+                                          genome_feature_type_num_of_features(),
+                                          sizeof (unsigned long));
   gff3_visitor->genome_feature_to_id_array = hashtable_new(HASH_DIRECT, NULL,
                                                            (FreeFunc)
                                                            array_delete, env);

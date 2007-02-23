@@ -511,10 +511,10 @@ void genome_nodes_sort(Array *nodes)
         (Compare) genome_node_compare);
 }
 
-void genome_nodes_sort_stable(Array *nodes)
+void genome_nodes_sort_stable(Array *nodes, Env *env)
 {
   msort(array_get_space(nodes), array_size(nodes), sizeof (GenomeNode*),
-        (Compare) genome_node_compare);
+        (Compare) genome_node_compare, env);
 
 }
 

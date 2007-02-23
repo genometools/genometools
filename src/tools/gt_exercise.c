@@ -118,7 +118,7 @@ int gt_exercise(int argc, char *argv[], Env *env)
 
   /* call exercise */
   if (!has_err) {
-    nargv = cstr_array_prefix_first(argv+parsed_args, argv[0]);
+    nargv = cstr_array_prefix_first(argv+parsed_args, argv[0], env);
     has_err = exercise(argc-parsed_args, nargv, env);
   }
 

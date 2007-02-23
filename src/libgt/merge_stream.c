@@ -119,7 +119,7 @@ static void merge_stream_free(GenomeStream *gs, Env *env)
 {
   MergeStream *ms = merge_stream_cast(gs);
   array_delete(ms->genome_streams, env);
-  free(ms->buffer);
+  env_ma_free(ms->buffer, env);
 }
 
 const GenomeStreamClass* merge_stream_class(void)
@@ -132,7 +132,7 @@ const GenomeStreamClass* merge_stream_class(void)
 
 GenomeStream* merge_stream_new(const Array *genome_streams, Env *env)
 {
-  GenomeStream *gs = genome_stream_create(merge_stream_class(), true);
+  GenomeStream *gs = genome_stream_create(merge_stream_class(), true, env);
   MergeStream *ms = merge_stream_cast(gs);
 #ifndef NDEBUG
   unsigned long i;
@@ -144,6 +144,7 @@ GenomeStream* merge_stream_new(const Array *genome_streams, Env *env)
   }
 #endif
   ms->genome_streams = array_clone(genome_streams, env);
-  ms->buffer = xcalloc(array_size(genome_streams), sizeof (GenomeNode*));
+  ms->buffer = env_ma_calloc(env, array_size(genome_streams),
+                             sizeof (GenomeNode*));
   return gs;
 }

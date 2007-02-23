@@ -209,7 +209,7 @@ int gtr_run(GTR *gtr, int argc, char **argv, Env *env)
     }
   }
   if (!has_err) {
-    nargv = cstr_array_prefix_first(argv+1, argv[0]);
+    nargv = cstr_array_prefix_first(argv+1, argv[0], env);
     has_err = tool(argc-1, nargv, env);
   }
   cstr_array_delete(nargv, env);

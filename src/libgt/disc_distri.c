@@ -15,9 +15,9 @@ struct DiscDistri {
   unsigned long num_of_occurrences;
 };
 
-DiscDistri* disc_distri_new(void)
+DiscDistri* disc_distri_new(Env *env)
 {
-  return xcalloc(1, sizeof (DiscDistri));
+  return env_ma_calloc(env, 1, sizeof (DiscDistri));
 }
 
 void disc_distri_add(DiscDistri *d, unsigned long value, Env *env)
@@ -56,5 +56,5 @@ void disc_distri_delete(DiscDistri *d, Env *env)
 {
   if (!d) return;
   array_delete(d->values, env);
-  free(d);
+  env_ma_free(d, env);
 }

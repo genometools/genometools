@@ -22,16 +22,17 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
   return oprval;
 }
 
-static double distfunc(unsigned long i, unsigned long j, void *data)
+static double distfunc(unsigned long i, unsigned long j, void *data, Env *env)
 {
   Bioseq *bioseq= (Bioseq*) data;
   return linearedist(bioseq_get_sequence(bioseq, i),
                      bioseq_get_sequence_length(bioseq, i),
                      bioseq_get_sequence(bioseq, j),
-                     bioseq_get_sequence_length(bioseq, j));
+                     bioseq_get_sequence_length(bioseq, j), env);
 }
 
-static double exampledistfunc(unsigned long i, unsigned long j, void *data)
+static double exampledistfunc(unsigned long i, unsigned long j, void *data,
+                              Env *env)
 {
   static const double exampledistances[5][5] =
     { {0.0   , 0.1715, 0.2147, 0.3091, 0.2326},

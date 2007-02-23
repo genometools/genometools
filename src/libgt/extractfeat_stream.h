@@ -20,7 +20,8 @@ const GenomeStreamClass* extractfeat_stream_class(void);
 /* create a plain ExtractFeatStream */
 GenomeStream*            extractfeat_stream_new(GenomeStream*,
                                                 GenomeFeatureType type,
-                                                bool join, bool translate);
+                                                bool join, bool translate,
+                                                Env*);
 
 /* exactly one of the following two functions has to be called to make an
    ExtractFeatStream usable */

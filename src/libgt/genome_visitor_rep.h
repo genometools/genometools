@@ -24,7 +24,7 @@ struct GenomeVisitor {
   const GenomeVisitorClass *c_class;
 };
 
-GenomeVisitor* genome_visitor_create(const GenomeVisitorClass*);
+GenomeVisitor* genome_visitor_create(const GenomeVisitorClass*, Env*);
 void*          genome_visitor_cast(const GenomeVisitorClass*, GenomeVisitor*);
 
 #endif

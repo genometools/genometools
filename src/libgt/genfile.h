@@ -7,6 +7,8 @@
 #ifndef GENFILE_H
 #define GENFILE_H
 
+#include "env.h"
+
 /*
   This class defines generic files.  A generic file is is a file which either
   uncompressed or compressed (with gzip/zlib). All I/O functions like fprintf(),
@@ -27,7 +29,8 @@ typedef enum
 GenFileMode genfilemode_determine(const char *path);
 
 /* create a new GenFile object and open the underlying file handle */
-GenFile*    genfile_xopen(GenFileMode, const char *path, const char *mode);
+GenFile*    genfile_xopen(GenFileMode, const char *path, const char *mode,
+                          Env*);
 
 /* read up to 'nbytes' and store result in 'buf', returns bytes read or EOF */
 int         genfile_xread(GenFile*, void *buf, size_t nbytes);
@@ -36,6 +39,6 @@ int         genfile_xread(GenFile*, void *buf, size_t nbytes);
 void        genfile_xrewind(GenFile*);
 
 /* close the underlying file handle and destroy the object */
-void        genfile_xclose(GenFile*);
+void        genfile_xclose(GenFile*, Env*);
 
 #endif

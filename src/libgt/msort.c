@@ -20,8 +20,8 @@
    02111-1307 USA.
 */
 
-#include <stdlib.h>
 #include <string.h>
+#include "msort.h"
 #include "xansi.h"
 
 static void msort_r_withbuf(void *base, size_t numofelems, size_t size,
@@ -68,12 +68,12 @@ static void msort_r_withbuf(void *base, size_t numofelems, size_t size,
 }
 
 void msort_r(void *base, size_t nmemb, size_t size, void *comparinfo,
-             int (*compar)(void *, const void *, const void *))
+             int (*compar)(void *, const void *, const void *), Env *env)
 {
   void *buf;
-  buf = xmalloc(size * nmemb);
+  buf = env_ma_malloc(env, size * nmemb);
   msort_r_withbuf (base, nmemb, size, comparinfo, compar, buf);
-  free(buf);
+  env_ma_free(buf, env);
 }
 
 int non_r_cmpfunc(void *compar, const void *a, const void *b)
@@ -84,7 +84,7 @@ int non_r_cmpfunc(void *compar, const void *a, const void *b)
 }
 
 void msort(void *base, size_t nmemb, size_t size,
-           int (*compar)(const void *, const void *))
+           int (*compar)(const void *, const void *), Env *env)
 {
-  msort_r(base, nmemb, size, compar, non_r_cmpfunc);
+  msort_r(base, nmemb, size, compar, non_r_cmpfunc, env);
 }

@@ -108,7 +108,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
 
     if (array_size(orfs)) {
       /* sort ORFs according to length */
-      ranges_sort_by_length_stable(orfs);
+      ranges_sort_by_length_stable(orfs, env);
 
       /* create CDS features from the longest ORF */
       orf = *(Range*) array_get(orfs, 0);
@@ -214,7 +214,7 @@ GenomeVisitor* cds_visitor_new(Str *sequence_file, Str *source, Env *env)
   GenomeVisitor *gv;
   CDSVisitor *cds_visitor;
   env_error_check(env);
-  gv = genome_visitor_create(cds_visitor_class());
+  gv = genome_visitor_create(cds_visitor_class(), env);
   cds_visitor = cds_visitor_cast(gv);
   cds_visitor->sequence_file = str_ref(sequence_file);
   cds_visitor->source = str_ref(source);

@@ -155,7 +155,7 @@ static int construct_bioseq_files(Str *bioseq_index_file, Str *bioseq_raw_file,
   sig_register_all(remove_bioseq_files);
 
   /* read fasta file */
-  fasta_reader = fasta_reader_new(sequence_file);
+  fasta_reader = fasta_reader_new(sequence_file, env);
   has_err = fasta_reader_run(fasta_reader, proc_description, proc_character,
                    proc_sequence_length, &bioseq_files_info, env);
   fasta_reader_delete(fasta_reader, env);
@@ -374,7 +374,7 @@ void bioseq_delete(Bioseq *bs, Env *env)
     env_ma_free(bs->seqs, env);
   }
   for (i = 0; i < array_size(bs->descriptions); i++)
-    free(*(char**) array_get(bs->descriptions, i));
+    env_ma_free(*(char**) array_get(bs->descriptions, i), env);
   array_delete(bs->descriptions, env);
   array_delete(bs->sequence_ranges, env);
   xmunmap(bs->raw_sequence, bs->raw_sequence_length);

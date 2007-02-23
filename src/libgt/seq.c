@@ -38,11 +38,11 @@ const char* seq_get_orig(const Seq *s)
   return s->seq;
 }
 
-const char* seq_get_encoded(Seq *s)
+const char* seq_get_encoded(Seq *s, Env *env)
 {
   assert(s);
   if (!s->encoded_seq) {
-    s->encoded_seq = xmalloc(sizeof (char) * (s->seqlen+1));
+    s->encoded_seq = env_ma_malloc(env, sizeof (char) * (s->seqlen+1));
     alpha_encode_seq(s->seqalpha, s->encoded_seq, (char*) s->seq, s->seqlen);
     s->encoded_seq[s->seqlen] = '\0';
   }

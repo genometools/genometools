@@ -72,7 +72,8 @@ GenomeStream* filter_stream_new(GenomeStream *in_stream,
                                 double min_gene_score, Env *env)
 {
   GenomeStream *gs = genome_stream_create(filter_stream_class(),
-                                           genome_stream_is_sorted(in_stream));
+                                          genome_stream_is_sorted(in_stream),
+                                          env);
   FilterStream *filter_stream = filter_stream_cast(gs);
   assert(in_stream);
   filter_stream->in_stream = in_stream;

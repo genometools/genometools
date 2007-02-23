@@ -46,7 +46,7 @@ const GenomeStreamClass* mergefeat_stream_sorted_class(void)
 GenomeStream* mergefeat_stream_sorted_new(GenomeStream *in_stream, Env *env)
 {
   GenomeStream *gs = genome_stream_create(mergefeat_stream_sorted_class(),
-                                          true);
+                                          true, env);
   MergefeatStreamSorted *mfs = mergefeat_stream_sorted_cast(gs);
   assert(in_stream && genome_stream_is_sorted(in_stream));
   mfs->mergefeat_stream_unsorted = mergefeat_stream_unsorted_new(in_stream,

@@ -38,7 +38,7 @@ typedef struct {
 Alignment* alignment_new(Env *env)
 {
   Alignment *a;
-  a = xcalloc(1, sizeof (Alignment));
+  a = env_ma_calloc(env, 1, sizeof (Alignment));
   a->eops = array_new(sizeof (Multieop), env);
   return a;
 }
@@ -315,5 +315,5 @@ void alignment_delete(Alignment *a, Env *env)
 {
   if (!a) return;
   array_delete(a->eops, env);
-  free(a);
+  env_ma_free(a, env);
 }

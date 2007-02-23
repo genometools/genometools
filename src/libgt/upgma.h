@@ -8,11 +8,13 @@
 #define UPGMA_H
 
 #include <stdio.h>
+#include "env.h"
 
 typedef struct UPGMA UPGMA;
 
-UPGMA* upgma_new(unsigned long num_of_taxa, void *data,
-                 double (*distfunc)(unsigned long, unsigned long, void *data),
+typedef double (*UPGMADistFunc)(unsigned long, unsigned long, void *data, Env*);
+
+UPGMA* upgma_new(unsigned long num_of_taxa, void *data, UPGMADistFunc distfunc,
                  Env*);
 void   upgma_show_tree(const UPGMA*, FILE*);
 void   upgma_delete(UPGMA*, Env*);

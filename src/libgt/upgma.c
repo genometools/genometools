@@ -26,8 +26,7 @@ struct UPGMA {
 };
 
 static void upgma_init(UPGMA *upgma, unsigned long num_of_taxa, void *data,
-                       double (*distfunc)(unsigned long, unsigned long, void*),
-                       Env *env)
+                       UPGMADistFunc distfunc, Env *env)
 {
   unsigned long i, j;
   double retval;
@@ -56,7 +55,7 @@ static void upgma_init(UPGMA *upgma, unsigned long num_of_taxa, void *data,
       upgma->clusters[i].distances = env_ma_malloc(env, sizeof (double) * i);
       for (j = 0; j < i; j++) {
         if (i < num_of_taxa) {
-          retval = distfunc(i, j, data);
+          retval = distfunc(i, j, data, env);
           /* the UPGMA distance function returns a value >= 0.0 */
           assert(retval >= 0.0);
           upgma->clusters[i].distances[j] = retval;
@@ -148,8 +147,7 @@ static void upgma_compute(UPGMA *upgma, Env *env)
   bittab_delete(clustertab, env);
 }
 
-UPGMA* upgma_new(unsigned long num_of_taxa, void *data,
-                 double (*distfunc)(unsigned long, unsigned long, void *data),
+UPGMA* upgma_new(unsigned long num_of_taxa, void *data, UPGMADistFunc distfunc,
                  Env *env)
 {
   UPGMA *upgma;

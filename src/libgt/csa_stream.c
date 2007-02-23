@@ -77,7 +77,8 @@ GenomeStream* csa_stream_new(GenomeStream *in_stream, unsigned long join_length,
                              Env *env)
 {
   GenomeStream *gs = genome_stream_create(csa_stream_class(),
-                                          genome_stream_is_sorted(in_stream));
+                                          genome_stream_is_sorted(in_stream),
+                                          env);
   CSAStream *cs = csa_stream_cast(gs);
   cs->in_stream = in_stream;
   cs->csa_visitor = csa_visitor_new(join_length, env);

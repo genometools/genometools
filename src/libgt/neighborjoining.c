@@ -29,9 +29,7 @@ struct NeighborJoining {
 };
 
 static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
-                                 void *data,
-                                 double (*distfunc)
-                                        (unsigned long, unsigned long, void*),
+                                 void *data, NeighborJoiningDistFunc distfunc,
                                  Env *env)
 {
   unsigned long i, j;
@@ -53,7 +51,7 @@ static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
       nj->nodes[i].distances = env_ma_malloc(env, sizeof (double) * i);
       for (j = 0; j < i; j++) {
         if (i < num_of_taxa) {
-          retval = distfunc(i, j, data);
+          retval = distfunc(i, j, data, env);
           /* the Neighbor-Joining distance function returns a value >= 0.0 */
           assert(retval >= 0.0);
           nj->nodes[i].distances[j] = retval;
@@ -175,9 +173,7 @@ static void neighborjoining_compute(NeighborJoining *nj, Env *env)
 }
 
 NeighborJoining* neighborjoining_new(unsigned long num_of_taxa, void *data,
-                                     double (*distfunc)
-                                     (unsigned long, unsigned long, void *data),
-                                     Env *env)
+                                     NeighborJoiningDistFunc distfunc, Env *env)
 {
   NeighborJoining *nj;
   assert(num_of_taxa && distfunc);

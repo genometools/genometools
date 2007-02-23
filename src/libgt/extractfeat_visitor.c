@@ -228,7 +228,7 @@ static GenomeVisitor* extractfeat_visitor_new(GenomeFeatureType type,
                                               bool join, bool translate,
                                               Env *env)
 {
-  GenomeVisitor *gv = genome_visitor_create(extractfeat_visitor_class());
+  GenomeVisitor *gv = genome_visitor_create(extractfeat_visitor_class(), env);
   ExtractFeatVisitor *efv= extractfeat_visitor_cast(gv);
   efv->description = str_new(env);
   efv->sequence = str_new(env);

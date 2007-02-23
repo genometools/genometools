@@ -24,13 +24,13 @@ typedef enum {
   READING_SEQUENCE
 } FastaReader_state;
 
-FastaReader* fasta_reader_new(Str *sequence_filename)
+FastaReader* fasta_reader_new(Str *sequence_filename, Env *env)
 {
-  FastaReader *fs = xmalloc(sizeof (FastaReader));
+  FastaReader *fs = env_ma_malloc(env, sizeof (FastaReader));
   fs->sequence_filename = str_ref(sequence_filename);
   fs->sequence_file =
     genfile_xopen(genfilemode_determine(str_get(sequence_filename)),
-                  str_get(sequence_filename), "r");
+                  str_get(sequence_filename), "r", env);
   return fs;
 }
 
@@ -151,6 +151,6 @@ void fasta_reader_delete(FastaReader *fr, Env *env)
 {
   if (!fr) return;
   str_delete(fr->sequence_filename, env);
-  genfile_xclose(fr->sequence_file);
+  genfile_xclose(fr->sequence_file, env);
   env_ma_free(fr, env);
 }

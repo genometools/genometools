@@ -34,7 +34,7 @@ static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
       array_add(sort_stream->trees, *gn, env);
     }
     if (!has_err) {
-      genome_nodes_sort_stable(sort_stream->trees);
+      genome_nodes_sort_stable(sort_stream->trees, env);
       sort_stream->sorted = true;
     }
   }
@@ -73,7 +73,7 @@ const GenomeStreamClass* sort_stream_class(void)
 
 GenomeStream* sort_stream_new(GenomeStream *in_stream, Env *env)
 {
-  GenomeStream *gs = genome_stream_create(sort_stream_class(), true);
+  GenomeStream *gs = genome_stream_create(sort_stream_class(), true, env);
   SortStream *sort_stream = sort_stream_cast(gs);
   assert(in_stream);
   sort_stream->in_stream = in_stream;

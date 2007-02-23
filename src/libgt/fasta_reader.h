@@ -18,7 +18,7 @@ typedef void (*FastaReader_proc_character)(char, void *data);
 /* gets called after a fasta entry has been read */
 typedef void (*FastaReader_proc_sequence_length)(unsigned long, void *data);
 
-FastaReader* fasta_reader_new(Str *sequence_filename);
+FastaReader* fasta_reader_new(Str *sequence_filename, Env*);
 int          fasta_reader_run(FastaReader*, FastaReader_proc_description,
                               FastaReader_proc_character,
                               FastaReader_proc_sequence_length, void *data,

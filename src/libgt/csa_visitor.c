@@ -128,7 +128,7 @@ const GenomeVisitorClass* csa_visitor_class()
 
 GenomeVisitor* csa_visitor_new(unsigned long join_length, Env *env)
 {
-  GenomeVisitor *gv = genome_visitor_create(csa_visitor_class());
+  GenomeVisitor *gv = genome_visitor_create(csa_visitor_class(), env);
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
   csa_visitor->genome_node_buffer = queue_new(sizeof (GenomeNode*), env);
   csa_visitor->join_length = join_length;

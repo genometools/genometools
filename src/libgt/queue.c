@@ -16,7 +16,7 @@ struct Queue {
 
 Queue* queue_new(size_t size_of_elem, Env *env)
 {
-  Queue *q = xmalloc(sizeof (Queue));
+  Queue *q = env_ma_malloc(env, sizeof (Queue));
   assert(size_of_elem);
   q->queue = array_new(size_of_elem, env);
   q->current_index = 0;
@@ -59,5 +59,5 @@ void queue_delete(Queue *q, Env *env)
 {
   if (!q) return;
   array_delete(q->queue, env);
-  free(q);
+  env_ma_free(q, env);
 }

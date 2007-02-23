@@ -12,7 +12,7 @@
 /* A descrete distribution */
 typedef struct DiscDistri DiscDistri;
 
-DiscDistri* disc_distri_new(void);
+DiscDistri* disc_distri_new(Env*);
 void        disc_distri_add(DiscDistri*, unsigned long, Env*);
 void        disc_distri_show(const DiscDistri*); /* on stdout */
 void        disc_distri_delete(DiscDistri*, Env*);

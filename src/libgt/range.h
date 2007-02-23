@@ -25,7 +25,7 @@ unsigned long range_length(Range);
 int           range_unit_test(Env*);
 
 void          ranges_sort(Array*);
-void          ranges_sort_by_length_stable(Array*);
+void          ranges_sort_by_length_stable(Array*, Env*);
 bool          ranges_are_sorted(const Array*);
 bool          ranges_do_not_overlap(const Array*);
 bool          ranges_are_sorted_and_do_not_overlap(const Array*);

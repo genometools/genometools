@@ -4,6 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#include "linearedist.h"
 #include "minmax.h"
 #include "xansi.h"
 
@@ -30,12 +31,12 @@ static void fillDPtable(unsigned long *dptable,
 }
 
 unsigned long linearedist(const char *u, unsigned long n,
-                          const char *v, unsigned long m)
+                          const char *v, unsigned long m, Env *env)
 {
   unsigned long *dptable, edist;
-  dptable = xmalloc(sizeof (unsigned long) * (MIN(n,m) + 1));
+  dptable = env_ma_malloc(env, sizeof (unsigned long) * (MIN(n,m) + 1));
   fillDPtable(dptable, n <= m ? u : v, MIN(n,m), n <= m ? v : u, MAX(n,m));
   edist = dptable[MIN(n,m)];
-  free(dptable);
+  env_ma_free(dptable, env);
   return edist;
 }

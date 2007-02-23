@@ -11,11 +11,11 @@
 #include "xansi.h"
 
 GenomeStream* genome_stream_create(const GenomeStreamClass *gsc,
-                                   bool ensure_sorting)
+                                   bool ensure_sorting, Env *env)
 {
   GenomeStream *gs;
   assert(gsc && gsc->size);
-  gs = xcalloc(1, gsc->size);
+  gs = env_ma_calloc(env, 1, gsc->size);
   gs->c_class = gsc;
   gs->ensure_sorting = ensure_sorting;
   return gs;
@@ -27,7 +27,7 @@ void genome_stream_delete(GenomeStream *gs, Env *env)
   assert(gs->c_class);
   if (gs->c_class->free) gs->c_class->free(gs, env);
   genome_node_delete(gs->last_node, env);
-  free(gs);
+  env_ma_free(gs, env);
 }
 
 int genome_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)

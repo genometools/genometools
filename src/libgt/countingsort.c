@@ -12,13 +12,14 @@
 
 void countingsort(void *out, const void *in, size_t elem_size,
                   unsigned long size, unsigned long max_elemvalue, void *data,
-                  unsigned long (*get_elemvalue)(const void *elem, void *data))
+                  unsigned long (*get_elemvalue)(const void *elem, void *data),
+                  Env *env)
 {
   unsigned long i, k, *c;
   assert(out && in && elem_size && size && max_elemvalue && get_elemvalue);
 
   /* allocate count array */
-  c = xcalloc(sizeof (unsigned long), max_elemvalue + 1);
+  c = env_ma_calloc(env, sizeof (unsigned long), max_elemvalue + 1);
 
   /* count number of elements of a given value */
   for (i = 0; i < size; i++) {
@@ -38,7 +39,7 @@ void countingsort(void *out, const void *in, size_t elem_size,
     c[k]--;
   }
 
-  free(c);
+  env_ma_free(c, env);
 }
 
 unsigned long countingsort_get_max(const void *in, size_t elem_size,
@@ -69,7 +70,7 @@ int countingsort_unit_test(Env *env)
   env_error_check(env);
   countingsort(numbers_out, numbers, sizeof (unsigned int), 5,
                countingsort_get_max(numbers, sizeof (unsigned int), 5, NULL,
-                                    get_int), NULL,  get_int);
+                                    get_int), NULL,  get_int, env);
   ensure(has_err,
          !memcmp(sorted_numbers, numbers_out, sizeof (unsigned int) * 5));
   return has_err;

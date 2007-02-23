@@ -102,7 +102,7 @@ const GenomeVisitorClass* mergefeat_visitor_class()
 
 GenomeVisitor* mergefeat_visitor_new(Env *env)
 {
-  GenomeVisitor *gv = genome_visitor_create(mergefeat_visitor_class());
+  GenomeVisitor *gv = genome_visitor_create(mergefeat_visitor_class(), env);
   MergefeatVisitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
   mergefeat_visitor->ht = hashtable_new(HASH_STRING, NULL, NULL, env);
   return gv;

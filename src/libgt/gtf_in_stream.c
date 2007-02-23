@@ -61,7 +61,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
 
   env_error_check(env);
 
-  gs = genome_stream_create(gtf_in_stream_class(), false);
+  gs = genome_stream_create(gtf_in_stream_class(), false, env);
   gtf_in_stream = gtf_in_stream_cast(gs);
   gtf_parser = gtf_parser_new(env);
 

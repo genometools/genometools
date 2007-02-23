@@ -102,7 +102,7 @@ GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
                                   unsigned long max_gene_num,
                                   double min_gene_score, Env *env)
 {
-  GenomeVisitor *gv = genome_visitor_create(filter_visitor_class());
+  GenomeVisitor *gv = genome_visitor_create(filter_visitor_class(), env);
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
   filter_visitor->genome_node_buffer = queue_new(sizeof (GenomeNode*), env);
   filter_visitor->seqid = str_ref(seqid);

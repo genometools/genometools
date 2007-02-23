@@ -49,7 +49,8 @@ GenomeStream* gff3_out_stream_new(GenomeStream *in_stream, FILE *outfp,
                                   Env *env)
 {
   GenomeStream *gs = genome_stream_create(gff3_out_stream_class(),
-                                          genome_stream_is_sorted(in_stream));
+                                          genome_stream_is_sorted(in_stream),
+                                          env);
   GFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
   gff3_out_stream->in_stream = in_stream;
   gff3_out_stream->first_genome_feature = true;

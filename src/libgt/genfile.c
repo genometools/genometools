@@ -27,11 +27,11 @@ GenFileMode genfilemode_determine(const char *path)
 }
 
 GenFile*  genfile_xopen(GenFileMode genfilemode, const char *path,
-                        const char *mode)
+                        const char *mode, Env *env)
 {
   GenFile *genfile;
   assert(path && mode);
-  genfile = xcalloc(1, sizeof (GenFile));
+  genfile = env_ma_calloc(env, 1, sizeof (GenFile));
   genfile->mode = genfilemode;
   switch (genfilemode) {
     case UNCOMPRESSED:
@@ -75,7 +75,7 @@ void genfile_xrewind(GenFile *genfile)
   }
 }
 
-void genfile_xclose(GenFile *genfile)
+void genfile_xclose(GenFile *genfile, Env *env)
 {
   if (!genfile) return;
   switch (genfile->mode) {
@@ -87,5 +87,5 @@ void genfile_xclose(GenFile *genfile)
       break;
     default: assert(0);
   }
-  free(genfile);
+  env_ma_free(genfile, env);
 }

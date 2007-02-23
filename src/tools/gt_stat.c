@@ -92,7 +92,8 @@ int gt_stat(int argc, char *argv[], Env *env)
   info.stat_visitor = stat_visitor_new(arguments.gene_length_distribution,
                                        arguments.gene_score_distribution,
                                        arguments.exon_length_distribution,
-                                       arguments.intron_length_distribution);
+                                       arguments.intron_length_distribution,
+                                       env);
 
   /* create a gff3 input stream */
   gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,

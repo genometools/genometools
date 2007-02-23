@@ -120,7 +120,7 @@ int gt_extractfeat(int argc, char *argv[], Env *env)
     /* create extract feature stream */
     extractfeat_stream = extractfeat_stream_new(gff3_in_stream,
                                                 type, arguments.join,
-                                                arguments.translate);
+                                                arguments.translate, env);
 
     /* set sequence source */
     assert(str_get(arguments.seqfile) || str_get(arguments.regionmapping));
