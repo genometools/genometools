@@ -48,7 +48,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   bool filter_node = false;
   env_error_check(env);
   fv = filter_visitor_cast(gv);
-  if (!str_get(fv->seqid) || /* no seqid was specified or seqids are equal */
+  if (!str_length(fv->seqid) || /* no seqid was specified or seqids are equal */
       !str_cmp(fv->seqid, genome_node_get_seqid((GenomeNode*) gf))) {
     /* enforce maximum gene length */
     /* XXX: we (spuriously) assume that genes are always root nodes */
@@ -87,11 +87,13 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
   FilterVisitor *filter_visitor;
   env_error_check(env);
   filter_visitor = filter_visitor_cast(gv);
-  if (!str_get(filter_visitor->seqid) || /* no seqid was specified */
+  if (!str_length(filter_visitor->seqid) || /* no seqid was specified */
       !str_cmp(filter_visitor->seqid,    /* or seqids are equal */
                genome_node_get_seqid((GenomeNode*) sr))) {
     queue_add(filter_visitor->genome_node_buffer, sr, env);
   }
+  else
+    genome_node_rec_delete((GenomeNode*) sr, env);
   return 0;
 }
 
