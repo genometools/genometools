@@ -7,10 +7,12 @@
 #include <assert.h>
 #include "addintrons_visitor.h"
 #include "genome_visitor_rep.h"
+#include "undef.h"
 
 struct AddIntronsVisitor {
   const GenomeVisitor parent_instance;
-  GenomeFeature *previous_feature;
+  GenomeFeature *parent_feature,
+                *previous_exon_feature;
 };
 
 #define addintrons_visitor_cast(GV)\
@@ -26,13 +28,45 @@ static int addintrons_in_children(GenomeNode *gn, void *data, Env *env)
 {
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
   GenomeFeature *current_feature;
+  GenomeNode *intron_node;
+  Range previous_range, current_range, intron_range;
+  Strand previous_strand, current_strand, intron_strand;
+  Str *parent_seqid;
   env_error_check(env);
   current_feature = genome_node_cast(genome_feature_class(), gn);
   assert(current_feature);
-  if (v->previous_feature) {
-    /* XXX: add introns here  (previous_feature -> previous_gene_feature) */
+  if (genome_feature_get_type(current_feature) == gft_exon) {
+    if (v->previous_exon_feature) {
+      /* determine intron range */
+      previous_range = genome_node_get_range((GenomeNode*)
+                                             v->previous_exon_feature);
+      current_range = genome_node_get_range(gn);
+      assert(previous_range.end < current_range.start);
+      intron_range.start = previous_range.end + 1;
+      intron_range.end = current_range.start - 1;
+
+      /* determine intron strand */
+      previous_strand = genome_feature_get_strand(v->previous_exon_feature);
+      current_strand = genome_feature_get_strand(current_feature);
+      assert(previous_strand == current_strand);
+      intron_strand = previous_strand;
+
+      /* determine sequence id */
+      parent_seqid = genome_node_get_seqid((GenomeNode*) v->parent_feature);
+      assert(!str_cmp(parent_seqid,
+             genome_node_get_seqid((GenomeNode*) v->previous_exon_feature)));
+      assert(!str_cmp(parent_seqid,
+             genome_node_get_seqid((GenomeNode*) current_feature)));
+
+      /* create intron */
+      intron_node = genome_feature_new(gft_intron, intron_range, intron_strand,
+                                       NULL, UNDEFULONG, env);
+      genome_node_set_seqid(intron_node, parent_seqid);
+      genome_node_is_part_of_genome_node((GenomeNode*) v->parent_feature,
+                                         intron_node, env);
+    }
+    v->previous_exon_feature = current_feature;
   }
-  v->previous_feature = current_feature;
   return 0;
 }
 
@@ -43,17 +77,18 @@ static int addintrons_if_necessary(GenomeNode *gn, void *data, Env *env)
   env_error_check(env);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
+  v->parent_feature = gf;
+  v->previous_exon_feature = NULL;
   return genome_node_traverse_direct_children(gn, v, addintrons_in_children,
                                               env);
 }
 
 static int addintrons_visitor_genome_feature(GenomeVisitor *gv,
-                                            GenomeFeature *gf, Env *env)
+                                             GenomeFeature *gf, Env *env)
 {
   AddIntronsVisitor *v;
   env_error_check(env);
   v = addintrons_visitor_cast(gv);
-  v->previous_feature = NULL;
   return genome_node_traverse_children((GenomeNode*) gf, v,
                                        addintrons_if_necessary, false, env);
 }

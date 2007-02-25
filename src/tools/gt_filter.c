@@ -36,6 +36,8 @@ static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
   /* -typefilter */
   option = option_new_string("typefilter", "filter out all features of the "
                              "given type", arguments->typefilter, NULL, env);
+  /* XXX */
+  option_is_development_option(option);
   option_parser_add_option(op, option, env);
 
   /* -maxgenelength */

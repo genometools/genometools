@@ -136,3 +136,10 @@ Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_fail_1.gff3", :retval => 1)
 end
+
+Name "gt gff3 test option -addintrons"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -addintrons #{$testdata}standard_gene_as_tree.gff3"
+  run "diff #{$last_stdout} #{$testdata}standard_gene_with_introns_as_tree.gff3"
+end

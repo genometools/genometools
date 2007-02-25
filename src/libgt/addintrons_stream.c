@@ -49,7 +49,7 @@ GenomeStream* addintrons_stream_new(GenomeStream *in_stream, Env *env)
 {
   GenomeStream *gs = genome_stream_create(addintrons_stream_class(), true, env);
   AddIntronsStream *ais = addintrons_stream_cast(gs);
-  assert(in_stream && genome_stream_is_sorted(in_stream));
+  assert(in_stream);
   ais->in_stream = in_stream;
   ais->addintrons_visitor = addintrons_visitor_new(env);
   return gs;

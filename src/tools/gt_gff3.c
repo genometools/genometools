@@ -44,7 +44,6 @@ static OPrval parse_options(int *parsed_args, Gff3_arguments *arguments,
   addintrons_option = option_new_bool("addintrons", "add intron features "
                                       "between existing exon features",
                                       &arguments->addintrons, false, env);
-  option_imply(addintrons_option, sort_option, env);
   option_parser_add_option(op, addintrons_option, env);
 
   /* -offset */
