@@ -8,6 +8,7 @@
 #define GT_H
 
 /* The GenomeTools library (libgt) header */
+#include <libgt/addintrons_stream.h>         /* add introns stream */
 #include <libgt/affinealign.h>               /* affine align module */
 #include <libgt/align.h>                     /* align module */
 #include <libgt/alignment.h>                 /* alignment class */
