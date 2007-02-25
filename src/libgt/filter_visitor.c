@@ -45,6 +45,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                          Env *env)
 {
   FilterVisitor *fv;
+  bool filter_node = false;
   env_error_check(env);
   fv = filter_visitor_cast(gv);
   if (!str_get(fv->seqid) || /* no seqid was specified or seqids are equal */
@@ -55,20 +56,28 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
       if (fv->max_gene_length != UNDEFULONG &&
           range_length(genome_node_get_range((GenomeNode*) gf)) >
           fv->max_gene_length) {
-        return 0;
+        filter_node = true;
       }
       else if (fv->max_gene_num != UNDEFULONG &&
                fv->gene_num >= fv->max_gene_num) {
-        return 0;
+        filter_node = true;
       }
       else if (fv->min_gene_score != UNDEFDOUBLE &&
                genome_feature_get_score(gf) < fv->min_gene_score) {
-        return 0;
+        filter_node = true;
       }
-      fv->gene_num++; /* gene passed filter */
+      if (!filter_node)
+        fv->gene_num++; /* gene passed filter */
     }
-    queue_add(fv->genome_node_buffer, gf, env);
   }
+  else
+    filter_node = true;
+
+  if (filter_node)
+    genome_node_rec_delete((GenomeNode*) gf, env);
+  else
+    queue_add(fv->genome_node_buffer, gf, env);
+
   return 0;
 }
 
