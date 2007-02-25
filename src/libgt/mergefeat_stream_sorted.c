@@ -13,7 +13,7 @@
 struct MergefeatStreamSorted {
   const GenomeStream parent_instance;
   GenomeStream *mergefeat_stream_unsorted,
-                *sort_stream;
+               *sort_stream;
 };
 
 #define mergefeat_stream_sorted_cast(GS)\

@@ -473,7 +473,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
 
   if (has_err) {
     while (queue_size(genome_nodes))
-      genome_node_rec_delete(*(GenomeNode**) queue_get(genome_nodes), env);  
+      genome_node_rec_delete(*(GenomeNode**) queue_get(genome_nodes), env);
   }
 
   str_delete(line_buffer, env);
