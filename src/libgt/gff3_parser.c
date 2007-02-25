@@ -239,6 +239,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
                     ID_STRING, id, line_number, filename,
                     genome_node_get_line_number(gn));
       has_err = -1;
+      env_ma_free(id, env);
     }
     else {
       out_node_complete = false;
@@ -246,6 +247,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
                     env);
     }
   }
+  else
+    env_ma_free(id, env);
 
   if (!has_err) {
     for (i = 0; i < splitter_size(parents_splitter); i++) {
