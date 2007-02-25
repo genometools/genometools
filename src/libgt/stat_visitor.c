@@ -28,6 +28,8 @@ static void stat_visitor_free(GenomeVisitor *gv, Env *env)
   StatVisitor *stat_visitor = stat_visitor_cast(gv);
   disc_distri_delete(stat_visitor->gene_length_distribution, env);
   disc_distri_delete(stat_visitor->gene_score_distribution, env);
+  disc_distri_delete(stat_visitor->exon_length_distribution, env);
+  disc_distri_delete(stat_visitor->intron_length_distribution, env);
 }
 
 static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
