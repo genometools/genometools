@@ -274,7 +274,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   else
     genome_node_delete(genome_feature, env);
 
-  if (gn)
+  if (!has_err && gn)
     queue_add(genome_nodes, gn, env);
   if (out_node_complete)
     *break_loop = true;
@@ -469,6 +469,11 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
         break;
     }
     str_reset(line_buffer);
+  }
+
+  if (has_err) {
+    while (queue_size(genome_nodes))
+      genome_node_rec_delete(*(GenomeNode**) queue_get(genome_nodes), env);  
   }
 
   str_delete(line_buffer, env);
