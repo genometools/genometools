@@ -60,7 +60,7 @@ static void add_size(MA* ma, unsigned long size)
 static void subtract_size(MA *ma, unsigned long size)
 {
   assert(ma);
-  assert(ma->current_size > size);
+  assert(ma->current_size >= size);
   ma->current_size -= size;
 }
 
@@ -78,10 +78,10 @@ void* ma_malloc_mem(MA *ma, size_t size, const char *filename,
     mainfo->line = line;
     mem = xmalloc(size);
     hashtable_add(ma->allocated_pointer, mem, mainfo, ma->env);
+    add_size(ma, size + sizeof (MAInfo));
     ma->bookkeeping = true;
     return mem;
   }
-  add_size(ma, size);
   return xmalloc(size);
 }
 
@@ -99,10 +99,10 @@ void* ma_calloc_mem(MA *ma, size_t nmemb, size_t size, const char *filename,
     mainfo->line = line;
     mem = xcalloc(nmemb, size);
     hashtable_add(ma->allocated_pointer, mem, mainfo, ma->env);
+    add_size(ma, nmemb * size + sizeof (MAInfo));
     ma->bookkeeping = true;
     return mem;
   }
-  add_size(ma, nmemb * size);
   return xcalloc(nmemb, size);
 }
 
@@ -116,7 +116,8 @@ void* ma_realloc_mem(MA *ma, void *ptr, size_t size, const char *filename,
     ma->bookkeeping = false;
     if (ptr) {
       mainfo = hashtable_get(ma->allocated_pointer, ptr);
-      subtract_size(ma, mainfo->size);
+      assert(mainfo);
+      subtract_size(ma, mainfo->size + sizeof (MAInfo));
       hashtable_remove(ma->allocated_pointer, ptr, ma->env);
     }
     mainfo = xmalloc(sizeof (MAInfo));
@@ -125,7 +126,7 @@ void* ma_realloc_mem(MA *ma, void *ptr, size_t size, const char *filename,
     mainfo->line = line;
     mem = xrealloc(ptr, size);
     hashtable_add(ma->allocated_pointer, mem, mainfo, ma->env);
-    add_size(ma, size);
+    add_size(ma, size + sizeof (MAInfo));
     ma->bookkeeping = true;
     return mem;
   }
@@ -134,6 +135,7 @@ void* ma_realloc_mem(MA *ma, void *ptr, size_t size, const char *filename,
 
 void ma_free_mem(void *ptr, MA *ma, const char *filename, unsigned int line)
 {
+  MAInfo *mainfo;
   assert(ma);
   if (!ptr) return;
   if (ma->bookkeeping) {
@@ -145,6 +147,9 @@ void ma_free_mem(void *ptr, MA *ma, const char *filename, unsigned int line)
       exit(2); /* programmer error */
     }
 #endif
+    mainfo = hashtable_get(ma->allocated_pointer, ptr);
+    assert(mainfo);
+    subtract_size(ma, mainfo->size + sizeof (MAInfo));
     hashtable_remove(ma->allocated_pointer, ptr, ma->env);
     free(ptr);
     ma->bookkeeping = true;
