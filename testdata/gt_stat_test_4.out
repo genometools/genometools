@@ -1,0 +1,8 @@
+parsed feature trees: 2
+genes: 1
+mRNAs: 3
+exons: 11
+intron length distribution:
+1097: 2 (prob=0.2500,cumulative=0.2500)
+1499: 5 (prob=0.6250,cumulative=0.8750)
+3499: 1 (prob=0.1250,cumulative=1.0000)
