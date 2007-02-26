@@ -6,6 +6,8 @@
 
 #include "gt.h"
 #include "gtr.h"
+#include "lua.h"
+#include "lauxlib.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_clean.h"
@@ -22,14 +24,20 @@
 
 struct GTR {
   bool test,
+       interactive,
        debug;
   Hashtable *tools,
             *unit_tests;
+  lua_State *L;
 };
 
 GTR* gtr_new(Env *env)
 {
-  return env_ma_calloc(env, 1, sizeof (GTR));
+  GTR *gtr = env_ma_calloc(env, 1, sizeof (GTR));
+  /* XXX */
+  gtr->L = luaL_newstate();
+  assert(gtr->L);
+  return gtr;
 }
 
 static int show_tool(void *key, void *value, void *data, Env *env)
@@ -81,6 +89,10 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, char **argv, Env *env)
   option_parser_set_comment_func(op, show_option_comments, gtr);
   o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false,
                       env);
+  option_parser_add_option(op, o, env);
+  o = option_new_bool("i", "enter interactive mode after executing 'tool'",
+                      &gtr->interactive, false, env);
+  option_is_development_option(o);
   option_parser_add_option(op, o, env);
   o = option_new_debug(&gtr->debug, env);
   option_parser_add_option(op, o, env);
@@ -197,22 +209,27 @@ int gtr_run(GTR *gtr, int argc, char **argv, Env *env)
   if (gtr->debug)
     env_set_log(env, log_new(env_ma(env)));
   assert(argc);
-  if (argc == 1) {
+  if (argc == 1 && !gtr->interactive) {
     env_error_set(env, "no tool specified; option -help lists possible tools");
     has_err = -1;
   }
-  if (!has_err) {
+  if (!has_err && argc > 1) {
     if (!gtr->tools || !(tool = hashtable_get(gtr->tools, argv[1]))) {
       env_error_set(env, "tool '%s' not found; option -help lists possible "
                          "tools", argv[1]);
       has_err = -1;
     }
   }
-  if (!has_err) {
+  if (!has_err && argc > 1) {
     nargv = cstr_array_prefix_first(argv+1, argv[0], env);
     has_err = tool(argc-1, nargv, env);
   }
   cstr_array_delete(nargv, env);
+  if (!has_err && gtr->interactive) {
+    /* XXX */
+    env_error_set(env, "interactive mode not implemented yet");
+    has_err = -1;
+  }
   if (has_err)
     return EXIT_FAILURE;
   return EXIT_SUCCESS;
@@ -223,5 +240,6 @@ void gtr_delete(GTR *gtr, Env *env)
   if (!gtr) return;
   hashtable_delete(gtr->tools, env);
   hashtable_delete(gtr->unit_tests, env);
+  if (gtr->L) lua_close(gtr->L);
   env_ma_free(gtr, env);
 }
