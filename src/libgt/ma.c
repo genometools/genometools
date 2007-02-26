@@ -14,6 +14,8 @@ struct MA {
   Hashtable *allocated_pointer;
   bool bookkeeping;
   Env *env;
+  unsigned long current_size,
+                max_size;
 };
 
 typedef struct {
@@ -47,6 +49,21 @@ void ma_init(MA *ma, Env *env)
   ma->bookkeeping = true;
 }
 
+static void add_size(MA* ma, unsigned long size)
+{
+  assert(ma);
+  ma->current_size += size;
+  if (ma->current_size > ma->max_size)
+    ma->max_size = ma->current_size;
+}
+
+static void subtract_size(MA *ma, unsigned long size)
+{
+  assert(ma);
+  assert(ma->current_size > size);
+  ma->current_size -= size;
+}
+
 void* ma_malloc_mem(MA *ma, size_t size, const char *filename,
                     unsigned int line)
 {
@@ -64,6 +81,7 @@ void* ma_malloc_mem(MA *ma, size_t size, const char *filename,
     ma->bookkeeping = true;
     return mem;
   }
+  add_size(ma, size);
   return xmalloc(size);
 }
 
@@ -84,6 +102,7 @@ void* ma_calloc_mem(MA *ma, size_t nmemb, size_t size, const char *filename,
     ma->bookkeeping = true;
     return mem;
   }
+  add_size(ma, nmemb * size);
   return xcalloc(nmemb, size);
 }
 
@@ -95,14 +114,18 @@ void* ma_realloc_mem(MA *ma, void *ptr, size_t size, const char *filename,
   assert(ma);
   if (ma->bookkeeping) {
     ma->bookkeeping = false;
-    if (ptr)
+    if (ptr) {
+      mainfo = hashtable_get(ma->allocated_pointer, ptr);
+      subtract_size(ma, mainfo->size);
       hashtable_remove(ma->allocated_pointer, ptr, ma->env);
+    }
     mainfo = xmalloc(sizeof (MAInfo));
     mainfo->size = size;
     mainfo->filename = filename;
     mainfo->line = line;
     mem = xrealloc(ptr, size);
     hashtable_add(ma->allocated_pointer, mem, mainfo, ma->env);
+    add_size(ma, size);
     ma->bookkeeping = true;
     return mem;
   }
@@ -142,6 +165,13 @@ static int check_space_leak(void *key, void *value, void *data, Env *env)
     info->has_leak = true;
   }
   return 0;
+}
+
+void ma_show_space_peak(MA *ma, FILE *fp)
+{
+  assert(ma);
+  fprintf(fp, "# space peak in megabytes: %.2f\n",
+          (double) ma->max_size / (1 << 20));
 }
 
 int ma_check_space_leak(MA *ma, Env *env)
