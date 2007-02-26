@@ -15,6 +15,8 @@ void          cstr_show(const char*, unsigned long length, FILE*);
 
 /* use p and a blank as prefix for cstr_array[0] and return the result */
 char**        cstr_array_prefix_first(char **cstr_array, const char *p, Env*);
+char**        cstr_array_preprend(char **cstr_array, const char *p, Env*);
+void          cstr_array_show(char **cstr_array, FILE*);
 unsigned long cstr_array_size(char **cstr_array); /* O(n) */
 void          cstr_array_delete(char **cstr_array, Env*);
 

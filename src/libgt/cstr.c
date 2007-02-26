@@ -44,6 +44,32 @@ char** cstr_array_prefix_first(char **cstr_array, const char *p, Env *env)
   return a;
 }
 
+char** cstr_array_preprend(char **cstr_array, const char *p, Env *env)
+{
+  unsigned long i, a_len;
+  char **a;
+  assert(cstr_array && p);
+  a_len = cstr_array_size(cstr_array);
+  a = env_ma_malloc(env, sizeof (char*) * (a_len + 2));
+  a[0] = cstr_dup(p, env);
+  for (i = 0; i < a_len; i++)
+    a[i+1] = cstr_dup(cstr_array[i], env);
+  a[a_len+1] = NULL;
+  return a;
+}
+
+void cstr_array_show(char **cstr_array, FILE *fp)
+{
+  unsigned long i = 0;
+  while (cstr_array[i]) {
+    if (i)
+      xfputc(' ', fp);
+    xfputs(cstr_array[i], fp);
+    i++;
+  }
+  xfputc('\n', fp);
+}
+
 unsigned long cstr_array_size(char **cstr_array)
 {
   unsigned long i = 0;
