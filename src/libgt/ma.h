@@ -7,6 +7,7 @@
 #ifndef MA_H
 #define MA_H
 
+#include <stdio.h>
 #include <stdlib.h>
 
 /* the memory allocator class */

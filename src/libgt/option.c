@@ -622,7 +622,8 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc, char **argv,
     has_err = check_mandatory_either_options(op, env);
 
   op->parser_called = true;
-  *parsed_args = argnum;
+  if (parsed_args)
+    *parsed_args = argnum;
 
   if (has_err)
     return OPTIONPARSER_ERROR;
