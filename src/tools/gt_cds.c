@@ -21,7 +21,7 @@ static OPrval parse_options(int *parsed_args, CDS_arguments *arguments,
   env_error_check(env);
   op = option_parser_new("[option ...] GFF3_file sequence_file",
                          "Add CDS features to exon features given in GFF3_file "
-                         "(which refers to sequence_file).", env);
+                         "(refers to sequence_file).", env);
 
   /* -v */
   option = option_new_verbose(&arguments->verbose, env);
