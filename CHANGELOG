@@ -2,6 +2,8 @@ changes in version 0.6.9:
 
 - `gt stat` has new options -exonlengthdistri and -intronlengthdistri
 - `gt gff3` has new option -addintrons
+- a singular environment object and a memory allocator have been introduced
+
 
 changes in version 0.6.8:
 
