@@ -18,6 +18,7 @@ typedef struct Dlistelem Dlistelem;
 Dlist*        dlist_new(Compare, Env*);
 Dlistelem*    dlist_first(const Dlist*);
 Dlistelem*    dlist_last(const Dlist*);
+Dlistelem*    dlist_find(const Dlist*, void*); /* O(n) */
 unsigned long dlist_size(const Dlist*);
  /* usually: O(n) (O(1) if data is added in sorted order) */
 void          dlist_add(Dlist*, void *data, Env*);

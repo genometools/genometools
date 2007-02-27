@@ -46,6 +46,22 @@ Dlistelem* dlist_last(const Dlist *dlist)
   return dlist->last;
 }
 
+Dlistelem* dlist_find(const Dlist *dlist, void *new_data)
+{
+  Dlistelem *dlistelem;
+  void *old_data;
+  assert(dlist);
+  for (dlistelem = dlist_first(dlist); dlistelem != NULL;
+       dlistelem = dlistelem_next(dlistelem)) {
+    old_data = dlistelem_get_data(dlistelem);
+    if (dlist->cmp_func && !dlist->cmp_func(old_data, new_data))
+      return dlistelem;
+    else if (old_data == new_data)
+      return dlistelem;
+  }
+  return NULL;
+}
+
 unsigned long dlist_size(const Dlist *dlist)
 {
   return dlist ? dlist->size : 0;
@@ -210,6 +226,12 @@ int dlist_unit_test(Env *env)
       data = dlistelem_get_data(dlistelem);
       ensure(has_err, *data == elems_backup[j]);
       j++;
+    }
+    /* test dlist_find() */
+    for (j = 0; j < size; j++) {
+      dlistelem = dlist_find(dlist, elems_backup + j);
+      ensure(has_err, dlistelem);
+      ensure(has_err, *(int*) dlistelem_get_data(dlistelem) == elems_backup[j]);
     }
     /* remove first element */
     if (dlist_size(dlist)) {
