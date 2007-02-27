@@ -28,6 +28,7 @@ struct GenomeFeature
   Phase phase;
   Hashtable *attributes; /* stores additional the attributes besides 'Parent'
                             and 'ID'; created on demand */
+  ExonType exontype;
 };
 
 #define genome_feature_cast(GN)\
@@ -116,6 +117,7 @@ GenomeNode* genome_feature_new(GenomeFeatureType type,
   gf->strand     = strand;
   gf->phase      = PHASE_UNDEFINED;
   gf->attributes = NULL;
+  gf->exontype   = EXONTYPE_UNDETERMINED;
   return gn;
 }
 
@@ -169,6 +171,60 @@ void genome_feature_get_exons(GenomeFeature *gf, Array *exon_features, Env *env)
   has_err = genome_node_traverse_children((GenomeNode*) gf, exon_features,
                                           save_exon, false, env);
   assert(!has_err); /* cannot happen, because save_exon() is sane */
+}
+
+static int determine_exontypes(GenomeNode *gn, void *data, Env *env)
+{
+  Array *exon_features = (Array*) data;
+  GenomeFeature *gf;
+  unsigned long i;
+  int has_err;
+  env_error_check(env);
+  assert(gn && exon_features);
+  /* reset exon_features */
+  array_set_size(exon_features, 0);
+  /* collect all direct children exons */
+  has_err = genome_node_traverse_direct_children(gn, exon_features, save_exon,
+                                                 env);
+  assert(!has_err); /* cannot happen, because save_exon() is sane */
+  /* set exon type, if necessary */
+  if (array_size(exon_features)) {
+    if (array_size(exon_features) == 1) {
+      gf = *(GenomeFeature**) array_get(exon_features, 0);
+      gf->exontype = EXONTYPE_SINGLE;
+    }
+    else {
+      gf = *(GenomeFeature**) array_get(exon_features, 0);
+      gf->exontype = EXONTYPE_INITIAL;
+      for (i = 1; i < array_size(exon_features) - 1; i++) {
+        gf = *(GenomeFeature**) array_get(exon_features, i);
+        gf->exontype = EXONTYPE_INTERNAL;
+      }
+      gf = *(GenomeFeature**) array_get(exon_features,
+                                        array_size(exon_features) - 1);
+      gf->exontype = EXONTYPE_TERMINAL;
+    }
+  }
+  return 0;
+}
+
+void genome_feature_determine_exontypes(GenomeFeature *gf, Env *env)
+{
+  Array *exon_features;
+  int has_err;
+  assert(gf);
+  exon_features = array_new(sizeof (GenomeFeature*), env);
+  has_err = genome_node_traverse_children((GenomeNode*) gf, exon_features,
+                                          determine_exontypes, false, env);
+  assert(!has_err); /* cannot happen, because determine_exontypes_for_children()
+                       is sane */
+  array_delete(exon_features, env);
+}
+
+ExonType genome_feature_get_exontype(GenomeFeature *gf)
+{
+  assert(gf);
+  return gf->exontype;
 }
 
 void genome_feature_set_end(GenomeFeature *gf, unsigned long end)
