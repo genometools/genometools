@@ -7,6 +7,7 @@
 #include <assert.h>
 #include "bittab.h"
 #include "bsearch.h"
+#include "dlist.h"
 #include "evaluator.h"
 #include "fptr.h"
 #include "gff3_output.h"
@@ -17,7 +18,7 @@
 
 struct StreamEvaluator {
   GenomeStream *reality,
-                *prediction;
+               *prediction;
   Hashtable *real_features; /* sequence name -> feature type hash */
   Evaluator *gene_evaluator,
             *mRNA_evaluator,
@@ -26,6 +27,11 @@ struct StreamEvaluator {
             *mRNA_exon_evaluator_initial,
             *mRNA_exon_evaluator_internal,
             *mRNA_exon_evaluator_terminal,
+            *mRNA_exon_evaluator_all_collapsed,
+            *mRNA_exon_evaluator_single_collapsed,
+            *mRNA_exon_evaluator_initial_collapsed,
+            *mRNA_exon_evaluator_internal_collapsed,
+            *mRNA_exon_evaluator_terminal_collapsed,
             *CDS_exon_evaluator;
   unsigned long missing_genes,
                 wrong_genes,
@@ -66,10 +72,30 @@ typedef struct {
          *true_genes_reverse,
          *true_mRNAs_forward,
          *true_mRNAs_reverse,
+         *true_mRNA_exons_forward_all_collapsed,
+         *true_mRNA_exons_forward_single_collapsed,
+         *true_mRNA_exons_forward_initial_collapsed,
+         *true_mRNA_exons_forward_internal_collapsed,
+         *true_mRNA_exons_forward_terminal_collapsed,
+         *true_mRNA_exons_reverse_all_collapsed,
+         *true_mRNA_exons_reverse_single_collapsed,
+         *true_mRNA_exons_reverse_initial_collapsed,
+         *true_mRNA_exons_reverse_internal_collapsed,
+         *true_mRNA_exons_reverse_terminal_collapsed,
          *overlapped_genes_forward,
          *overlapped_genes_reverse,
          *overlapped_mRNAs_forward,
          *overlapped_mRNAs_reverse;
+  Dlist *used_mRNA_exons_forward_all,
+        *used_mRNA_exons_forward_single,
+        *used_mRNA_exons_forward_initial,
+        *used_mRNA_exons_forward_internal,
+        *used_mRNA_exons_forward_terminal,
+        *used_mRNA_exons_reverse_all,
+        *used_mRNA_exons_reverse_single,
+        *used_mRNA_exons_reverse_initial,
+        *used_mRNA_exons_reverse_internal,
+        *used_mRNA_exons_reverse_terminal;
 } Slot;
 
 typedef struct
@@ -89,6 +115,11 @@ typedef struct {
             *mRNA_exon_evaluator_initial,
             *mRNA_exon_evaluator_internal,
             *mRNA_exon_evaluator_terminal,
+            *mRNA_exon_evaluator_all_collapsed,
+            *mRNA_exon_evaluator_single_collapsed,
+            *mRNA_exon_evaluator_initial_collapsed,
+            *mRNA_exon_evaluator_internal_collapsed,
+            *mRNA_exon_evaluator_terminal_collapsed,
             *CDS_exon_evaluator;
   unsigned long *wrong_genes,
                 *wrong_mRNAs;
@@ -113,10 +144,38 @@ static Slot* slot_new(Env *env)
   s->mRNA_exons_reverse_terminal = array_new(sizeof (Range), env);
   s->CDS_exons_forward = array_new(sizeof (Range), env);
   s->CDS_exons_reverse = array_new(sizeof (Range), env);
+  s->used_mRNA_exons_forward_all = dlist_new((Compare) range_compare_ptr, env);
+  s->used_mRNA_exons_forward_single = dlist_new((Compare) range_compare_ptr,
+                                                env);
+  s->used_mRNA_exons_forward_initial = dlist_new((Compare) range_compare_ptr,
+                                                 env);
+  s->used_mRNA_exons_forward_internal = dlist_new((Compare) range_compare_ptr,
+                                                  env);
+  s->used_mRNA_exons_forward_terminal = dlist_new((Compare) range_compare_ptr,
+                                                  env);
+  s->used_mRNA_exons_reverse_all = dlist_new((Compare) range_compare_ptr, env);
+  s->used_mRNA_exons_reverse_single = dlist_new((Compare) range_compare_ptr,
+                                                env);
+  s->used_mRNA_exons_reverse_initial = dlist_new((Compare) range_compare_ptr,
+                                                 env);
+  s->used_mRNA_exons_reverse_internal = dlist_new((Compare) range_compare_ptr,
+                                                  env);
+  s->used_mRNA_exons_reverse_terminal = dlist_new((Compare) range_compare_ptr,
+                                                  env);
   return s;
 }
 
-static void slot_free(Slot *s, Env *env)
+static void used_dlist_delete(Dlist *used_list, Env *env)
+{
+  Dlistelem *dlistelem;
+  for (dlistelem = dlist_first(used_list); dlistelem != NULL;
+       dlistelem = dlistelem_next(dlistelem)) {
+    env_ma_free(dlistelem_get_data(dlistelem), env);
+  }
+  dlist_delete(used_list, env);
+}
+
+static void slot_delete(Slot *s, Env *env)
 {
   unsigned long i;
   assert(s);
@@ -160,10 +219,30 @@ static void slot_free(Slot *s, Env *env)
   bittab_delete(s->true_genes_reverse, env);
   bittab_delete(s->true_mRNAs_forward, env);
   bittab_delete(s->true_mRNAs_reverse, env);
+  bittab_delete(s->true_mRNA_exons_forward_all_collapsed, env);
+  bittab_delete(s->true_mRNA_exons_forward_single_collapsed, env);
+  bittab_delete(s->true_mRNA_exons_forward_initial_collapsed, env);
+  bittab_delete(s->true_mRNA_exons_forward_internal_collapsed, env);
+  bittab_delete(s->true_mRNA_exons_forward_terminal_collapsed, env);
+  bittab_delete(s->true_mRNA_exons_reverse_all_collapsed, env);
+  bittab_delete(s->true_mRNA_exons_reverse_single_collapsed, env);
+  bittab_delete(s->true_mRNA_exons_reverse_initial_collapsed, env);
+  bittab_delete(s->true_mRNA_exons_reverse_internal_collapsed, env);
+  bittab_delete(s->true_mRNA_exons_reverse_terminal_collapsed, env);
   bittab_delete(s->overlapped_genes_forward, env);
   bittab_delete(s->overlapped_genes_reverse, env);
   bittab_delete(s->overlapped_mRNAs_forward, env);
   bittab_delete(s->overlapped_mRNAs_reverse, env);
+  used_dlist_delete(s->used_mRNA_exons_forward_all, env);
+  used_dlist_delete(s->used_mRNA_exons_forward_single, env);
+  used_dlist_delete(s->used_mRNA_exons_forward_initial, env);
+  used_dlist_delete(s->used_mRNA_exons_forward_internal, env);
+  used_dlist_delete(s->used_mRNA_exons_forward_terminal, env);
+  used_dlist_delete(s->used_mRNA_exons_reverse_all, env);
+  used_dlist_delete(s->used_mRNA_exons_reverse_single, env);
+  used_dlist_delete(s->used_mRNA_exons_reverse_initial, env);
+  used_dlist_delete(s->used_mRNA_exons_reverse_internal, env);
+  used_dlist_delete(s->used_mRNA_exons_reverse_terminal, env);
   env_ma_free(s, env);
 }
 
@@ -174,7 +253,7 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   evaluator->reality = reality;
   evaluator->prediction = prediction;
   evaluator->real_features = hashtable_new(HASH_STRING, NULL,
-                                           (FreeFunc) slot_free, env);
+                                           (FreeFunc) slot_delete, env);
   evaluator->gene_evaluator = evaluator_new(env);
   evaluator->mRNA_evaluator = evaluator_new(env);
   evaluator->mRNA_exon_evaluator_all = evaluator_new(env);
@@ -182,6 +261,11 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   evaluator->mRNA_exon_evaluator_initial = evaluator_new(env);
   evaluator->mRNA_exon_evaluator_internal = evaluator_new(env);
   evaluator->mRNA_exon_evaluator_terminal = evaluator_new(env);
+  evaluator->mRNA_exon_evaluator_all_collapsed = evaluator_new(env);
+  evaluator->mRNA_exon_evaluator_single_collapsed = evaluator_new(env);
+  evaluator->mRNA_exon_evaluator_initial_collapsed = evaluator_new(env);
+  evaluator->mRNA_exon_evaluator_internal_collapsed = evaluator_new(env);
+  evaluator->mRNA_exon_evaluator_terminal_collapsed = evaluator_new(env);
   evaluator->CDS_exon_evaluator = evaluator_new(env);
   evaluator->missing_genes = 0;
   evaluator->wrong_genes = 0;
@@ -281,6 +365,28 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
   s->true_CDS_exons_reverse = ranges_uniq_in_place_count(s->CDS_exons_reverse,
                                                          env);
 
+  /* set actual exons for the collapsed case (after uniq!) */
+  evaluator_add_actual(se->mRNA_exon_evaluator_all_collapsed,
+                       array_size(s->mRNA_exons_forward_all));
+  evaluator_add_actual(se->mRNA_exon_evaluator_all_collapsed,
+                       array_size(s->mRNA_exons_reverse_all));
+  evaluator_add_actual(se->mRNA_exon_evaluator_single_collapsed,
+                       array_size(s->mRNA_exons_forward_single));
+  evaluator_add_actual(se->mRNA_exon_evaluator_single_collapsed,
+                       array_size(s->mRNA_exons_reverse_single));
+  evaluator_add_actual(se->mRNA_exon_evaluator_initial_collapsed,
+                       array_size(s->mRNA_exons_forward_initial));
+  evaluator_add_actual(se->mRNA_exon_evaluator_initial_collapsed,
+                       array_size(s->mRNA_exons_reverse_initial));
+  evaluator_add_actual(se->mRNA_exon_evaluator_internal_collapsed,
+                       array_size(s->mRNA_exons_forward_internal));
+  evaluator_add_actual(se->mRNA_exon_evaluator_internal_collapsed,
+                       array_size(s->mRNA_exons_reverse_internal));
+  evaluator_add_actual(se->mRNA_exon_evaluator_terminal_collapsed,
+                       array_size(s->mRNA_exons_forward_terminal));
+  evaluator_add_actual(se->mRNA_exon_evaluator_terminal_collapsed,
+                       array_size(s->mRNA_exons_reverse_terminal));
+
   /* make sure that the genes are sorted */
   assert(genome_nodes_are_sorted(s->genes_forward));
   assert(genome_nodes_are_sorted(s->genes_reverse));
@@ -316,6 +422,48 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
   s->true_mRNAs_reverse = array_size(s->mRNAs_reverse)
                           ? bittab_new(array_size(s->mRNAs_reverse), env)
                           : NULL;
+
+  /* init true bittabs (for collapsed exons) */
+  s->true_mRNA_exons_forward_all_collapsed =
+    array_size(s->mRNA_exons_forward_all)
+    ?  bittab_new(array_size(s->mRNA_exons_forward_all), env)
+    : NULL;
+  s->true_mRNA_exons_reverse_all_collapsed =
+    array_size(s->mRNA_exons_reverse_all)
+    ? bittab_new(array_size(s->mRNA_exons_reverse_all), env)
+    : NULL;
+  s->true_mRNA_exons_forward_single_collapsed =
+    array_size(s->mRNA_exons_forward_single)
+    ?  bittab_new(array_size(s->mRNA_exons_forward_single), env)
+    : NULL;
+  s->true_mRNA_exons_reverse_single_collapsed =
+    array_size(s->mRNA_exons_reverse_single)
+    ? bittab_new(array_size(s->mRNA_exons_reverse_single), env)
+    : NULL;
+  s->true_mRNA_exons_forward_initial_collapsed =
+    array_size(s->mRNA_exons_forward_initial)
+    ?  bittab_new(array_size(s->mRNA_exons_forward_initial), env)
+    : NULL;
+  s->true_mRNA_exons_reverse_initial_collapsed =
+    array_size(s->mRNA_exons_reverse_initial)
+    ? bittab_new(array_size(s->mRNA_exons_reverse_initial), env)
+    : NULL;
+  s->true_mRNA_exons_forward_internal_collapsed =
+    array_size(s->mRNA_exons_forward_internal)
+    ?  bittab_new(array_size(s->mRNA_exons_forward_internal), env)
+    : NULL;
+  s->true_mRNA_exons_reverse_internal_collapsed =
+    array_size(s->mRNA_exons_reverse_internal)
+    ? bittab_new(array_size(s->mRNA_exons_reverse_internal), env)
+    : NULL;
+  s->true_mRNA_exons_forward_terminal_collapsed =
+    array_size(s->mRNA_exons_forward_terminal)
+    ?  bittab_new(array_size(s->mRNA_exons_forward_terminal), env)
+    : NULL;
+  s->true_mRNA_exons_reverse_terminal_collapsed =
+    array_size(s->mRNA_exons_reverse_terminal)
+    ? bittab_new(array_size(s->mRNA_exons_reverse_terminal), env)
+    : NULL;
 
   /* init overlap bittabs */
   s->overlapped_genes_forward = array_size(s->genes_forward)
@@ -597,13 +745,32 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   return equal;
 }
 
+static void store_predicted_exon_collapsed(Dlist *used_mRNA_exons_forward,
+                                           Range *predicted_range,
+                                           Evaluator
+                                           *mRNA_exon_evaluator_collapsed,
+                                           Env *env)
+{
+  Range *used_range;
+  if (!dlist_find(used_mRNA_exons_forward, predicted_range)) {
+    used_range = env_ma_malloc(env, sizeof (Range));
+    used_range->start = predicted_range->start;
+    used_range->end = predicted_range->end;
+    dlist_add(used_mRNA_exons_forward, used_range, env);
+    evaluator_add_predicted(mRNA_exon_evaluator_collapsed, 1);
+  }
+}
+
 void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
                          bool exondiff, Range *predicted_range,
                          Array *mRNA_exons_forward,
                          Array *mRNA_exons_reverse,
                          Array *true_mRNA_exons_forward,
                          Array *true_mRNA_exons_reverse,
-                         Evaluator *mRNA_exon_evaluator)
+                         Bittab *true_mRNA_exons_forward_collapsed,
+                         Bittab *true_mRNA_exons_reverse_collapsed,
+                         Evaluator *mRNA_exon_evaluator,
+                         Evaluator *mRNA_exon_evaluator_collapsed)
 {
   Range *actual_range;
   unsigned long num, *ctr_ptr;
@@ -623,6 +790,10 @@ void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
         (*ctr_ptr)--;
         evaluator_add_true(mRNA_exon_evaluator);
       }
+      if (!bittab_bit_is_set(true_mRNA_exons_forward_collapsed, num)) {
+        bittab_set_bit(true_mRNA_exons_forward_collapsed, num);
+        evaluator_add_true(mRNA_exon_evaluator_collapsed);
+      }
     }
     else {
       num = actual_range - (Range*) array_get_space(mRNA_exons_reverse);
@@ -630,6 +801,10 @@ void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
       if (*ctr_ptr) {
         (*ctr_ptr)--;
         evaluator_add_true(mRNA_exon_evaluator);
+      }
+      if (!bittab_bit_is_set(true_mRNA_exons_reverse_collapsed, num)) {
+        bittab_set_bit(true_mRNA_exons_reverse_collapsed, num);
+        evaluator_add_true(mRNA_exon_evaluator_collapsed);
       }
     }
   }
@@ -809,6 +984,48 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
           break;
         case EXONTYPE_UNDETERMINED: assert(0);
       }
+
+      /* store predicted exon (mRNA level, collapsed) */
+      store_predicted_exon_collapsed(info->slot->used_mRNA_exons_forward_all,
+                                     &predicted_range,
+                                     info->mRNA_exon_evaluator_all_collapsed,
+                                     env);
+      switch (genome_feature_get_exontype((GenomeFeature*) gn)) {
+        case EXONTYPE_SINGLE:
+          store_predicted_exon_collapsed(info->slot
+                                         ->used_mRNA_exons_forward_single,
+                                         &predicted_range,
+                                         info
+                                         ->mRNA_exon_evaluator_single_collapsed,
+                                         env);
+          break;
+        case EXONTYPE_INITIAL:
+          store_predicted_exon_collapsed(info->slot
+                                         ->used_mRNA_exons_forward_initial,
+                                         &predicted_range,
+                                         info
+                                        ->mRNA_exon_evaluator_initial_collapsed,
+                                         env);
+          break;
+        case EXONTYPE_INTERNAL:
+          store_predicted_exon_collapsed(info->slot
+                                         ->used_mRNA_exons_forward_internal,
+                                         &predicted_range,
+                                         info
+                                       ->mRNA_exon_evaluator_internal_collapsed,
+                                         env);
+          break;
+        case EXONTYPE_TERMINAL:
+          store_predicted_exon_collapsed(info->slot
+                                         ->used_mRNA_exons_forward_terminal,
+                                         &predicted_range,
+                                         info
+                                       ->mRNA_exon_evaluator_terminal_collapsed,
+                                         env);
+          break;
+        case EXONTYPE_UNDETERMINED: assert(0);
+      }
+
       /* determine true exon (mRNA level)*/
       switch (predicted_strand) {
         case STRAND_FORWARD:
@@ -819,7 +1036,10 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                               info->slot->mRNA_exons_reverse_all,
                               info->slot->true_mRNA_exons_forward_all,
                               info->slot->true_mRNA_exons_reverse_all,
-                              info->mRNA_exon_evaluator_all);
+                              info->slot->true_mRNA_exons_forward_all_collapsed,
+                              info->slot->true_mRNA_exons_reverse_all_collapsed,
+                              info->mRNA_exon_evaluator_all,
+                              info->mRNA_exon_evaluator_all_collapsed);
           switch (genome_feature_get_exontype((GenomeFeature*) gn)) {
             case EXONTYPE_SINGLE:
               determine_true_exon(gn, predicted_strand, info->exondiff,
@@ -828,7 +1048,10 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                   info->slot->mRNA_exons_reverse_single,
                                   info->slot->true_mRNA_exons_forward_single,
                                   info->slot->true_mRNA_exons_reverse_single,
-                                  info->mRNA_exon_evaluator_single);
+                           info->slot->true_mRNA_exons_forward_single_collapsed,
+                           info->slot->true_mRNA_exons_reverse_single_collapsed,
+                                  info->mRNA_exon_evaluator_single,
+                                  info->mRNA_exon_evaluator_single_collapsed);
               break;
             case EXONTYPE_INITIAL:
               determine_true_exon(gn, predicted_strand, info->exondiff,
@@ -837,7 +1060,10 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                   info->slot->mRNA_exons_reverse_initial,
                                   info->slot->true_mRNA_exons_forward_initial,
                                   info->slot->true_mRNA_exons_reverse_initial,
-                                  info->mRNA_exon_evaluator_initial);
+                          info->slot->true_mRNA_exons_forward_initial_collapsed,
+                          info->slot->true_mRNA_exons_reverse_initial_collapsed,
+                                  info->mRNA_exon_evaluator_initial,
+                                  info->mRNA_exon_evaluator_initial_collapsed);
               break;
             case EXONTYPE_INTERNAL:
               determine_true_exon(gn, predicted_strand, info->exondiff,
@@ -846,7 +1072,10 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                   info->slot->mRNA_exons_reverse_internal,
                                   info->slot->true_mRNA_exons_forward_internal,
                                   info->slot->true_mRNA_exons_reverse_internal,
-                                  info->mRNA_exon_evaluator_internal);
+                         info->slot->true_mRNA_exons_forward_internal_collapsed,
+                         info->slot->true_mRNA_exons_reverse_internal_collapsed,
+                                  info->mRNA_exon_evaluator_internal,
+                                  info->mRNA_exon_evaluator_internal_collapsed);
               break;
             case EXONTYPE_TERMINAL:
               determine_true_exon(gn, predicted_strand, info->exondiff,
@@ -855,7 +1084,10 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                   info->slot->mRNA_exons_reverse_terminal,
                                   info->slot->true_mRNA_exons_forward_terminal,
                                   info->slot->true_mRNA_exons_reverse_terminal,
-                                  info->mRNA_exon_evaluator_terminal);
+                         info->slot->true_mRNA_exons_forward_terminal_collapsed,
+                         info->slot->true_mRNA_exons_reverse_terminal_collapsed,
+                                  info->mRNA_exon_evaluator_terminal,
+                                  info->mRNA_exon_evaluator_terminal_collapsed);
               break;
             case EXONTYPE_UNDETERMINED: assert(0);
           }
@@ -968,6 +1200,16 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   info.mRNA_exon_evaluator_initial = se->mRNA_exon_evaluator_initial;
   info.mRNA_exon_evaluator_internal = se->mRNA_exon_evaluator_internal;
   info.mRNA_exon_evaluator_terminal = se->mRNA_exon_evaluator_terminal;
+  info.mRNA_exon_evaluator_all_collapsed =
+    se->mRNA_exon_evaluator_all_collapsed;
+  info.mRNA_exon_evaluator_single_collapsed =
+    se->mRNA_exon_evaluator_single_collapsed;
+  info.mRNA_exon_evaluator_initial_collapsed =
+    se->mRNA_exon_evaluator_initial_collapsed;
+  info.mRNA_exon_evaluator_internal_collapsed =
+    se->mRNA_exon_evaluator_internal_collapsed;
+  info.mRNA_exon_evaluator_terminal_collapsed =
+    se->mRNA_exon_evaluator_terminal_collapsed;
   info.CDS_exon_evaluator = se->CDS_exon_evaluator;
   info.wrong_genes = &se->wrong_genes;
   info.wrong_mRNAs = &se->wrong_mRNAs;
@@ -1108,6 +1350,46 @@ void stream_evaluator_show(StreamEvaluator *se, FILE *outfp)
   evaluator_show_specificity(se->mRNA_exon_evaluator_terminal, outfp);
   xfputc('\n', outfp);
 
+  fprintf(outfp, "exon sensitivity (mRNA level, all, collapsed): ");
+  evaluator_show_sensitivity(se->mRNA_exon_evaluator_all_collapsed, outfp);
+  xfputc('\n', outfp);
+
+  fprintf(outfp, "exon specificity (mRNA level, all, collapsed): ");
+  evaluator_show_specificity(se->mRNA_exon_evaluator_all_collapsed, outfp);
+  xfputc('\n', outfp);
+
+  fprintf(outfp, "exon sensitivity (mRNA level, single, collapsed): ");
+  evaluator_show_sensitivity(se->mRNA_exon_evaluator_single_collapsed, outfp);
+  xfputc('\n', outfp);
+
+  fprintf(outfp, "exon specificity (mRNA level, single, collapsed): ");
+  evaluator_show_specificity(se->mRNA_exon_evaluator_single_collapsed, outfp);
+  xfputc('\n', outfp);
+
+  fprintf(outfp, "exon sensitivity (mRNA level, initial, collapsed): ");
+  evaluator_show_sensitivity(se->mRNA_exon_evaluator_initial_collapsed, outfp);
+  xfputc('\n', outfp);
+
+  fprintf(outfp, "exon specificity (mRNA level, initial, collapsed): ");
+  evaluator_show_specificity(se->mRNA_exon_evaluator_initial_collapsed, outfp);
+  xfputc('\n', outfp);
+
+  fprintf(outfp, "exon sensitivity (mRNA level, internal, collapsed): ");
+  evaluator_show_sensitivity(se->mRNA_exon_evaluator_internal_collapsed, outfp);
+  xfputc('\n', outfp);
+
+  fprintf(outfp, "exon specificity (mRNA level, internal, collapsed): ");
+  evaluator_show_specificity(se->mRNA_exon_evaluator_internal_collapsed, outfp);
+  xfputc('\n', outfp);
+
+  fprintf(outfp, "exon sensitivity (mRNA level, terminal, collapsed): ");
+  evaluator_show_sensitivity(se->mRNA_exon_evaluator_terminal_collapsed, outfp);
+  xfputc('\n', outfp);
+
+  fprintf(outfp, "exon specificity (mRNA level, terminal, collapsed): ");
+  evaluator_show_specificity(se->mRNA_exon_evaluator_terminal_collapsed, outfp);
+  xfputc('\n', outfp);
+
   fprintf(outfp, "exon sensitivity (CDS level):  ");
   evaluator_show_sensitivity(se->CDS_exon_evaluator, outfp);
   xfputc('\n', outfp);
@@ -1130,6 +1412,11 @@ void stream_evaluator_delete(StreamEvaluator *se, Env *env)
   evaluator_delete(se->mRNA_exon_evaluator_initial, env);
   evaluator_delete(se->mRNA_exon_evaluator_internal, env);
   evaluator_delete(se->mRNA_exon_evaluator_terminal, env);
+  evaluator_delete(se->mRNA_exon_evaluator_all_collapsed, env);
+  evaluator_delete(se->mRNA_exon_evaluator_single_collapsed, env);
+  evaluator_delete(se->mRNA_exon_evaluator_initial_collapsed, env);
+  evaluator_delete(se->mRNA_exon_evaluator_internal_collapsed, env);
+  evaluator_delete(se->mRNA_exon_evaluator_terminal_collapsed, env);
   evaluator_delete(se->CDS_exon_evaluator, env);
   env_ma_free(se, env);
 }
