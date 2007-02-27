@@ -557,47 +557,47 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
         case STRAND_FORWARD:
           array_add(process_real_feature_data->slot->mRNA_exons_forward_all,
                     range, env);
-          switch (genome_feature_get_exontype(gf)) {
-            case EXONTYPE_SINGLE:
+          switch (genome_feature_get_transcriptfeaturetype(gf)) {
+            case TRANSCRIPT_FEATURE_TYPE_SINGLE:
               array_add(process_real_feature_data->slot
                         ->mRNA_exons_forward_single, range, env);
               break;
-            case EXONTYPE_INITIAL:
+            case TRANSCRIPT_FEATURE_TYPE_INITIAL:
               array_add(process_real_feature_data->slot
                         ->mRNA_exons_forward_initial, range, env);
               break;
-            case EXONTYPE_INTERNAL:
+            case TRANSCRIPT_FEATURE_TYPE_INTERNAL:
               array_add(process_real_feature_data->slot
                         ->mRNA_exons_forward_internal, range, env);
               break;
-            case EXONTYPE_TERMINAL:
+            case TRANSCRIPT_FEATURE_TYPE_TERMINAL:
               array_add(process_real_feature_data->slot
                         ->mRNA_exons_forward_terminal, range, env);
               break;
-            case EXONTYPE_UNDETERMINED: assert(0);
+            case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED: assert(0);
           }
           break;
         case STRAND_REVERSE:
           array_add(process_real_feature_data->slot->mRNA_exons_reverse_all,
                     range, env);
-          switch (genome_feature_get_exontype(gf)) {
-            case EXONTYPE_SINGLE:
+          switch (genome_feature_get_transcriptfeaturetype(gf)) {
+            case TRANSCRIPT_FEATURE_TYPE_SINGLE:
               array_add(process_real_feature_data->slot
                         ->mRNA_exons_reverse_single, range, env);
               break;
-            case EXONTYPE_INITIAL:
+            case TRANSCRIPT_FEATURE_TYPE_INITIAL:
               array_add(process_real_feature_data->slot
                         ->mRNA_exons_reverse_initial, range, env);
               break;
-            case EXONTYPE_INTERNAL:
+            case TRANSCRIPT_FEATURE_TYPE_INTERNAL:
               array_add(process_real_feature_data->slot
                         ->mRNA_exons_reverse_internal, range, env);
               break;
-            case EXONTYPE_TERMINAL:
+            case TRANSCRIPT_FEATURE_TYPE_TERMINAL:
               array_add(process_real_feature_data->slot
                         ->mRNA_exons_reverse_terminal, range, env);
               break;
-            case EXONTYPE_UNDETERMINED: assert(0);
+            case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED: assert(0);
           }
           break;
         default:
@@ -969,20 +969,20 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
     case gft_exon:
       /* store predicted exon (mRNA level)*/
       evaluator_add_predicted(info->mRNA_exon_evaluator_all, 1);
-      switch (genome_feature_get_exontype((GenomeFeature*) gn)) {
-        case EXONTYPE_SINGLE:
+      switch (genome_feature_get_transcriptfeaturetype((GenomeFeature*) gn)) {
+        case TRANSCRIPT_FEATURE_TYPE_SINGLE:
           evaluator_add_predicted(info->mRNA_exon_evaluator_single, 1);
           break;
-        case EXONTYPE_INITIAL:
+        case TRANSCRIPT_FEATURE_TYPE_INITIAL:
           evaluator_add_predicted(info->mRNA_exon_evaluator_initial, 1);
           break;
-        case EXONTYPE_INTERNAL:
+        case TRANSCRIPT_FEATURE_TYPE_INTERNAL:
           evaluator_add_predicted(info->mRNA_exon_evaluator_internal, 1);
           break;
-        case EXONTYPE_TERMINAL:
+        case TRANSCRIPT_FEATURE_TYPE_TERMINAL:
           evaluator_add_predicted(info->mRNA_exon_evaluator_terminal, 1);
           break;
-        case EXONTYPE_UNDETERMINED: assert(0);
+        case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED: assert(0);
       }
 
       /* store predicted exon (mRNA level, collapsed) */
@@ -990,8 +990,8 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                      &predicted_range,
                                      info->mRNA_exon_evaluator_all_collapsed,
                                      env);
-      switch (genome_feature_get_exontype((GenomeFeature*) gn)) {
-        case EXONTYPE_SINGLE:
+      switch (genome_feature_get_transcriptfeaturetype((GenomeFeature*) gn)) {
+        case TRANSCRIPT_FEATURE_TYPE_SINGLE:
           store_predicted_exon_collapsed(info->slot
                                          ->used_mRNA_exons_forward_single,
                                          &predicted_range,
@@ -999,7 +999,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                          ->mRNA_exon_evaluator_single_collapsed,
                                          env);
           break;
-        case EXONTYPE_INITIAL:
+        case TRANSCRIPT_FEATURE_TYPE_INITIAL:
           store_predicted_exon_collapsed(info->slot
                                          ->used_mRNA_exons_forward_initial,
                                          &predicted_range,
@@ -1007,7 +1007,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                         ->mRNA_exon_evaluator_initial_collapsed,
                                          env);
           break;
-        case EXONTYPE_INTERNAL:
+        case TRANSCRIPT_FEATURE_TYPE_INTERNAL:
           store_predicted_exon_collapsed(info->slot
                                          ->used_mRNA_exons_forward_internal,
                                          &predicted_range,
@@ -1015,7 +1015,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                        ->mRNA_exon_evaluator_internal_collapsed,
                                          env);
           break;
-        case EXONTYPE_TERMINAL:
+        case TRANSCRIPT_FEATURE_TYPE_TERMINAL:
           store_predicted_exon_collapsed(info->slot
                                          ->used_mRNA_exons_forward_terminal,
                                          &predicted_range,
@@ -1023,7 +1023,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                        ->mRNA_exon_evaluator_terminal_collapsed,
                                          env);
           break;
-        case EXONTYPE_UNDETERMINED: assert(0);
+        case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED: assert(0);
       }
 
       /* determine true exon (mRNA level)*/
@@ -1040,8 +1040,9 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                               info->slot->true_mRNA_exons_reverse_all_collapsed,
                               info->mRNA_exon_evaluator_all,
                               info->mRNA_exon_evaluator_all_collapsed);
-          switch (genome_feature_get_exontype((GenomeFeature*) gn)) {
-            case EXONTYPE_SINGLE:
+          switch (genome_feature_get_transcriptfeaturetype((GenomeFeature*)
+                                                           gn)) {
+            case TRANSCRIPT_FEATURE_TYPE_SINGLE:
               determine_true_exon(gn, predicted_strand, info->exondiff,
                                   &predicted_range,
                                   info->slot->mRNA_exons_forward_single,
@@ -1053,7 +1054,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                   info->mRNA_exon_evaluator_single,
                                   info->mRNA_exon_evaluator_single_collapsed);
               break;
-            case EXONTYPE_INITIAL:
+            case TRANSCRIPT_FEATURE_TYPE_INITIAL:
               determine_true_exon(gn, predicted_strand, info->exondiff,
                                   &predicted_range,
                                   info->slot->mRNA_exons_forward_initial,
@@ -1065,7 +1066,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                   info->mRNA_exon_evaluator_initial,
                                   info->mRNA_exon_evaluator_initial_collapsed);
               break;
-            case EXONTYPE_INTERNAL:
+            case TRANSCRIPT_FEATURE_TYPE_INTERNAL:
               determine_true_exon(gn, predicted_strand, info->exondiff,
                                   &predicted_range,
                                   info->slot->mRNA_exons_forward_internal,
@@ -1077,7 +1078,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                   info->mRNA_exon_evaluator_internal,
                                   info->mRNA_exon_evaluator_internal_collapsed);
               break;
-            case EXONTYPE_TERMINAL:
+            case TRANSCRIPT_FEATURE_TYPE_TERMINAL:
               determine_true_exon(gn, predicted_strand, info->exondiff,
                                   &predicted_range,
                                   info->slot->mRNA_exons_forward_terminal,
@@ -1089,7 +1090,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                   info->mRNA_exon_evaluator_terminal,
                                   info->mRNA_exon_evaluator_terminal_collapsed);
               break;
-            case EXONTYPE_UNDETERMINED: assert(0);
+            case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED: assert(0);
           }
           break;
         default:
@@ -1237,7 +1238,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       assert(slot);
       /* store the exons */
       process_real_feature_data.slot = slot;
-      genome_feature_determine_exontypes(gf, env);
+      genome_feature_determine_transcripttypes(gf, env);
       has_err = genome_node_traverse_children(gn, &process_real_feature_data,
                                               process_real_feature, false,
                                               env);
@@ -1264,7 +1265,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                              str_get(genome_node_get_seqid(gn)));
         if (slot) {
           info.slot = slot;
-          genome_feature_determine_exontypes(gf, env);
+          genome_feature_determine_transcripttypes(gf, env);
           has_err = genome_node_traverse_children(gn, &info,
                                                   process_predicted_feature,
                                                   false, env);

@@ -28,8 +28,13 @@ struct GenomeFeature
   Phase phase;
   Hashtable *attributes; /* stores additional the attributes besides 'Parent'
                             and 'ID'; created on demand */
-  ExonType exontype;
+  TranscriptFeatureType transcripttype;
 };
+
+typedef struct {
+  Array *exon_features,
+        *cds_features;
+} SaveExonAndCDSInfo;
 
 #define genome_feature_cast(GN)\
         genome_node_cast(genome_feature_class(), GN)
@@ -109,15 +114,15 @@ GenomeNode* genome_feature_new(GenomeFeatureType type,
                                       line_number, env);
   GenomeFeature *gf = genome_feature_cast(gn);
   assert(range.start <= range.end);
-  gf->seqid      = NULL;
-  gf->source     = NULL;
-  gf->type       = type;
-  gf->score      = UNDEFDOUBLE;
-  gf->range      = range;
-  gf->strand     = strand;
-  gf->phase      = PHASE_UNDEFINED;
-  gf->attributes = NULL;
-  gf->exontype   = EXONTYPE_UNDETERMINED;
+  gf->seqid          = NULL;
+  gf->source         = NULL;
+  gf->type           = type;
+  gf->score          = UNDEFDOUBLE;
+  gf->range          = range;
+  gf->strand         = strand;
+  gf->phase          = PHASE_UNDEFINED;
+  gf->attributes     = NULL;
+  gf->transcripttype = TRANSCRIPT_FEATURE_TYPE_UNDETERMINED;
   return gn;
 }
 
@@ -173,58 +178,83 @@ void genome_feature_get_exons(GenomeFeature *gf, Array *exon_features, Env *env)
   assert(!has_err); /* cannot happen, because save_exon() is sane */
 }
 
-static int determine_exontypes(GenomeNode *gn, void *data, Env *env)
+static int save_exons_and_cds(GenomeNode *gn, void *data, Env *env)
 {
-  Array *exon_features = (Array*) data;
+  SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
   GenomeFeature *gf;
-  unsigned long i;
-  int has_err;
   env_error_check(env);
-  assert(gn && exon_features);
-  /* reset exon_features */
-  array_set_size(exon_features, 0);
-  /* collect all direct children exons */
-  has_err = genome_node_traverse_direct_children(gn, exon_features, save_exon,
-                                                 env);
-  assert(!has_err); /* cannot happen, because save_exon() is sane */
-  /* set exon type, if necessary */
-  if (array_size(exon_features)) {
-    if (array_size(exon_features) == 1) {
-      gf = *(GenomeFeature**) array_get(exon_features, 0);
-      gf->exontype = EXONTYPE_SINGLE;
-    }
-    else {
-      gf = *(GenomeFeature**) array_get(exon_features, 0);
-      gf->exontype = EXONTYPE_INITIAL;
-      for (i = 1; i < array_size(exon_features) - 1; i++) {
-        gf = *(GenomeFeature**) array_get(exon_features, i);
-        gf->exontype = EXONTYPE_INTERNAL;
-      }
-      gf = *(GenomeFeature**) array_get(exon_features,
-                                        array_size(exon_features) - 1);
-      gf->exontype = EXONTYPE_TERMINAL;
-    }
-  }
+  gf = (GenomeFeature*) gn;
+  assert(gf && info);
+  if (genome_feature_get_type(gf) == gft_exon)
+    array_add(info->exon_features, gf, env);
+  else if (genome_feature_get_type(gf) == gft_CDS)
+    array_add(info->cds_features, gf, env);
   return 0;
 }
 
-void genome_feature_determine_exontypes(GenomeFeature *gf, Env *env)
+static void set_transcript_types(Array *features)
 {
-  Array *exon_features;
-  int has_err;
-  assert(gf);
-  exon_features = array_new(sizeof (GenomeFeature*), env);
-  has_err = genome_node_traverse_children((GenomeNode*) gf, exon_features,
-                                          determine_exontypes, false, env);
-  assert(!has_err); /* cannot happen, because determine_exontypes_for_children()
-                       is sane */
-  array_delete(exon_features, env);
+  GenomeFeature *gf;
+  unsigned long i;
+  assert(features);
+  if (array_size(features)) {
+    if (array_size(features) == 1) {
+      gf = *(GenomeFeature**) array_get(features, 0);
+      gf->transcripttype = TRANSCRIPT_FEATURE_TYPE_SINGLE;
+    }
+    else {
+      gf = *(GenomeFeature**) array_get(features, 0);
+      gf->transcripttype = TRANSCRIPT_FEATURE_TYPE_INITIAL;
+      for (i = 1; i < array_size(features) - 1; i++) {
+        gf = *(GenomeFeature**) array_get(features, i);
+        gf->transcripttype = TRANSCRIPT_FEATURE_TYPE_INTERNAL;
+      }
+      gf = *(GenomeFeature**) array_get(features, array_size(features) - 1);
+      gf->transcripttype = TRANSCRIPT_FEATURE_TYPE_TERMINAL;
+    }
+  }
 }
 
-ExonType genome_feature_get_exontype(GenomeFeature *gf)
+static int determine_transcripttypes(GenomeNode *gn, void *data, Env *env)
+{
+  SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
+  int has_err;
+  env_error_check(env);
+  assert(gn && info);
+  /* reset exon_features and cds_features */
+  array_set_size(info->exon_features, 0);
+  array_set_size(info->cds_features, 0);
+  /* collect all direct children exons */
+  has_err = genome_node_traverse_direct_children(gn, info, save_exons_and_cds,
+                                                 env);
+  assert(!has_err); /* cannot happen, because save_exon() is sane */
+  /* set transcript feature type, if necessary */
+  set_transcript_types(info->exon_features);
+  set_transcript_types(info->cds_features);
+  return 0;
+}
+
+void genome_feature_determine_transcripttypes(GenomeFeature *gf, Env *env)
+{
+  SaveExonAndCDSInfo info;
+  int has_err;
+  assert(gf);
+  info.exon_features = array_new(sizeof (GenomeFeature*), env);
+  info.cds_features = array_new(sizeof (GenomeFeature*), env);
+  has_err = genome_node_traverse_children((GenomeNode*) gf, &info,
+                                          determine_transcripttypes, false,
+                                          env);
+  assert(!has_err); /* cannot happen, because determine_transcripttypes() is
+                       sane */
+  array_delete(info.exon_features, env);
+  array_delete(info.cds_features, env);
+}
+
+TranscriptFeatureType genome_feature_get_transcriptfeaturetype(GenomeFeature
+                                                               *gf)
 {
   assert(gf);
-  return gf->exontype;
+  return gf->transcripttype;
 }
 
 void genome_feature_set_end(GenomeFeature *gf, unsigned long end)

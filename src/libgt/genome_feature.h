@@ -10,11 +10,11 @@
 /* implements the ``genome node'' interface */
 typedef struct GenomeFeature GenomeFeature;
 
-#include "exontype.h"
 #include "genome_node.h"
 #include "genome_feature_type.h"
 #include "phase.h"
 #include "range.h"
+#include "transcript_feature_type.h"
 #include "strand.h"
 
 typedef int (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
@@ -31,8 +31,9 @@ Strand                 genome_feature_get_strand(GenomeFeature*);
 Phase                  genome_feature_get_phase(GenomeFeature*);
 void                   genome_feature_get_exons(GenomeFeature*,
                                                 Array *exon_features, Env*);
-void                   genome_feature_determine_exontypes(GenomeFeature*, Env*);
-ExonType               genome_feature_get_exontype(GenomeFeature*);
+void                   genome_feature_determine_transcripttypes(GenomeFeature*,
+                                                                Env*);
+TranscriptFeatureType  genome_feature_get_transcriptfeaturetype(GenomeFeature*);
 void                   genome_feature_set_end(GenomeFeature*, unsigned long);
 void                   genome_feature_set_score(GenomeFeature*, double);
 void                   genome_feature_add_attribute(GenomeFeature*,
