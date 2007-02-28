@@ -269,7 +269,7 @@ bool ranges_are_equal(const Array *ranges_1, const Array *ranges_2)
 }
 
 static Array* generic_ranges_uniq(Array *out_ranges, const Array *in_ranges,
-                                  unsigned int count, Env *env)
+                                  bool count, Env *env)
 {
   unsigned long i, *ctr_ptr, ctr = 1;
   Array *count_array = NULL;
@@ -304,8 +304,7 @@ static Array* generic_ranges_uniq(Array *out_ranges, const Array *in_ranges,
   return count_array;
 }
 
-static Array* generic_ranges_uniq_in_place(Array *ranges, unsigned int count,
-                                           Env *env)
+static Array* generic_ranges_uniq_in_place(Array *ranges, bool count, Env *env)
 {
   Array *out_ranges, *count_array;
   assert(ranges);
@@ -323,23 +322,23 @@ static Array* generic_ranges_uniq_in_place(Array *ranges, unsigned int count,
 void ranges_uniq(Array *out_ranges, const Array *in_ranges, Env *env)
 {
   assert(out_ranges && in_ranges);
-  (void) generic_ranges_uniq(out_ranges, in_ranges, 0, env);
+  (void) generic_ranges_uniq(out_ranges, in_ranges, false, env);
 }
 
 void ranges_uniq_in_place(Array *ranges, Env *env)
 {
   assert(ranges);
-  (void) generic_ranges_uniq_in_place(ranges, 0, env);
+  (void) generic_ranges_uniq_in_place(ranges, false, env);
 }
 
 Array* ranges_uniq_count(Array *out_ranges, const Array *in_ranges, Env *env)
 {
   assert(out_ranges && in_ranges);
-  return generic_ranges_uniq(out_ranges, in_ranges, 1, env);
+  return generic_ranges_uniq(out_ranges, in_ranges, true, env);
 }
 
 Array* ranges_uniq_in_place_count(Array *ranges, Env *env)
 {
   assert(ranges);
-  return generic_ranges_uniq_in_place(ranges, 1, env);
+  return generic_ranges_uniq_in_place(ranges, true, env);
 }
