@@ -100,7 +100,7 @@ int gt_extractfeat(int argc, char *argv[], Env *env)
     gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
                                                arguments.verbose, env);
 
-    /* set sequence source */
+    /* create region mapping */
     assert(str_length(arguments.seqfile) ||
            str_length(arguments.regionmapping));
     assert(!(str_length(arguments.seqfile) &&
