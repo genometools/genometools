@@ -16,77 +16,77 @@ struct TranscriptCounts {
 
 TranscriptCounts* transcript_counts_new(Env *env)
 {
-  TranscriptCounts *te = env_ma_calloc(env, 1, sizeof (TranscriptCounts));
-  return te;
+  TranscriptCounts *tc = env_ma_calloc(env, 1, sizeof (TranscriptCounts));
+  return tc;
 }
 
-Array* transcript_counts_get_all(const TranscriptCounts *te)
+Array* transcript_counts_get_all(const TranscriptCounts *tc)
 {
-  assert(te);
-  return te->exon_array_all;
+  assert(tc);
+  return tc->exon_array_all;
 }
 
-void transcript_counts_set_all(TranscriptCounts *te, Array *counts)
+void transcript_counts_set_all(TranscriptCounts *tc, Array *counts)
 {
-  assert(te && counts);
-  te->exon_array_all = counts;
+  assert(tc && counts);
+  tc->exon_array_all = counts;
 }
 
-Array* transcript_counts_get_single(const TranscriptCounts *te)
+Array* transcript_counts_get_single(const TranscriptCounts *tc)
 {
-  assert(te);
-  return te->exon_array_single;
+  assert(tc);
+  return tc->exon_array_single;
 }
 
-void transcript_counts_set_single(TranscriptCounts *te, Array *counts)
+void transcript_counts_set_single(TranscriptCounts *tc, Array *counts)
 {
-  assert(te && counts);
-  te->exon_array_single = counts;
+  assert(tc && counts);
+  tc->exon_array_single = counts;
 }
 
-Array* transcript_counts_get_initial(const TranscriptCounts *te)
+Array* transcript_counts_get_initial(const TranscriptCounts *tc)
 {
-  assert(te);
-  return te->exon_array_initial;
+  assert(tc);
+  return tc->exon_array_initial;
 }
 
-void transcript_counts_set_initial(TranscriptCounts *te, Array *counts)
+void transcript_counts_set_initial(TranscriptCounts *tc, Array *counts)
 {
-  assert(te && counts);
-  te->exon_array_initial = counts;
+  assert(tc && counts);
+  tc->exon_array_initial = counts;
 }
 
-Array* transcript_counts_get_internal(const TranscriptCounts *te)
+Array* transcript_counts_get_internal(const TranscriptCounts *tc)
 {
-  assert(te);
-  return te->exon_array_internal;
+  assert(tc);
+  return tc->exon_array_internal;
 }
 
-void transcript_counts_set_internal(TranscriptCounts *te, Array *counts)
+void transcript_counts_set_internal(TranscriptCounts *tc, Array *counts)
 {
-  assert(te && counts);
-  te->exon_array_internal = counts;
+  assert(tc && counts);
+  tc->exon_array_internal = counts;
 }
 
-Array* transcript_counts_get_terminal(const TranscriptCounts *te)
+Array* transcript_counts_get_terminal(const TranscriptCounts *tc)
 {
-  assert(te);
-  return te->exon_array_terminal;
+  assert(tc);
+  return tc->exon_array_terminal;
 }
 
-void transcript_counts_set_terminal(TranscriptCounts *te, Array *counts)
+void transcript_counts_set_terminal(TranscriptCounts *tc, Array *counts)
 {
-  assert(te && counts);
-  te->exon_array_terminal = counts;
+  assert(tc && counts);
+  tc->exon_array_terminal = counts;
 }
 
-void transcript_counts_delete(TranscriptCounts *te, Env *env)
+void transcript_counts_delete(TranscriptCounts *tc, Env *env)
 {
-  if (!te) return;
-  array_delete(te->exon_array_all, env);
-  array_delete(te->exon_array_single, env);
-  array_delete(te->exon_array_initial, env);
-  array_delete(te->exon_array_internal, env);
-  array_delete(te->exon_array_terminal, env);
-  env_ma_free(te, env);
+  if (!tc) return;
+  array_delete(tc->exon_array_all, env);
+  array_delete(tc->exon_array_single, env);
+  array_delete(tc->exon_array_initial, env);
+  array_delete(tc->exon_array_internal, env);
+  array_delete(tc->exon_array_terminal, env);
+  env_ma_free(tc, env);
 }
