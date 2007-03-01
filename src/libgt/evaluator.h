@@ -8,6 +8,7 @@
 #define EVALUATOR_H
 
 #include <stdio.h>
+#include "env.h"
 
 typedef struct Evaluator Evaluator;
 
