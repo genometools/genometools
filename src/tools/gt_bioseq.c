@@ -99,7 +99,7 @@ int gt_bioseq(int argc, char *argv[], Env *env)
     if (arguments.recreate)
       bioseq = bioseq_new_recreate(argv[parsed_args], env);
     else
-      bioseq = bioseq_new_recreate(argv[parsed_args], env);
+      bioseq = bioseq_new(argv[parsed_args], env);
     if (!bioseq)
       has_err = -1;
 
