@@ -53,6 +53,7 @@
 #include <libgt/range.h>                     /* range class */
 #include <libgt/scorefunction.h>             /* score function class */
 #include <libgt/scorematrix.h>               /* score matrix class */
+#include <libgt/seqid2fileoptions.h>         /* seqid2fileoptions module */
 #include <libgt/sort_stream.h>               /* sort stream class */
 #include <libgt/splicedseq.h>                /* splicedseq class */
 #include <libgt/splitter.h>                  /* splitter class */

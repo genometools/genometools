@@ -19,7 +19,7 @@ static OPrval parse_options(int *parsed_args, ExtractFeatArguments *arguments,
                             int argc, char **argv, Env *env)
 {
   OptionParser *op;
-  Option *option, *seqfile_option, *regionmapping_option;
+  Option *option;
   OPrval oprval;
   env_error_check(env);
   op = option_parser_new("[option ...] GFF3_file",
@@ -44,24 +44,8 @@ static OPrval parse_options(int *parsed_args, ExtractFeatArguments *arguments,
                            false, env);
   option_parser_add_option(op, option, env);
 
-  /* -seqfile */
-  seqfile_option = option_new_string("seqfile", "set the sequence file from "
-                                     "which to extract the features",
-                                     arguments->seqfile, NULL, env);
-  option_parser_add_option(op, seqfile_option, env);
-
-  /* -regionmapping */
-  regionmapping_option = option_new_string("regionmapping", "set file "
-                                           "containing sequence-region to "
-                                           "sequence file mapping",
-                                           arguments->regionmapping, NULL, env);
-  option_parser_add_option(op, regionmapping_option, env);
-
-  /* either option -seqfile or -regionmapping is mandatory */
-  option_is_mandatory_either(seqfile_option, regionmapping_option);
-
-  /* the options -seqfile and -regionmapping exclude each other */
-  option_exclude(seqfile_option, regionmapping_option, env);
+  /* -seqfile and -regionmapping */
+  seqid2fileoptions(op, arguments->seqfile, arguments->regionmapping, env);
 
   /* -v */
   option = option_new_verbose(&arguments->verbose, env);
