@@ -40,6 +40,7 @@ Bittab* bittab_new(unsigned long num_of_bits, Env *env)
 
 void bittab_set_bit(Bittab *b, unsigned long bit)
 {
+  assert(b);
   b->tabptr[(bit >> 3) / sizeof (unsigned long)] |=
     1UL << (bit & (8UL * sizeof (unsigned long) - 1));
 }
@@ -165,6 +166,7 @@ void bittab_get_all_bitnums(const Bittab *b, Array *bitnums, Env *env)
 
 bool bittab_bit_is_set(const Bittab *b, unsigned long bit)
 {
+  assert(b);
   if (b->tabptr[(bit >> 3) / sizeof (unsigned long)] &
       1UL << (bit & (8UL * sizeof (unsigned long) - 1))) {
     return true;
@@ -265,6 +267,7 @@ unsigned long bittab_count_set_bits(Bittab *b)
                                                    4, 5, 5, 6, 5, 6, 6, 7, 5, 6,
                                                    6, 7, 6, 7, 7, 8 };
   unsigned long i, j, counter = 0;
+  assert(b);
   for (i = 0; i < b->tabsize; i++)
     for (j = 0; j < sizeof (unsigned long); j++)
       counter += bits_in_char[((b->tabptr[i] >> (j * 8)) & 0xffu)];
