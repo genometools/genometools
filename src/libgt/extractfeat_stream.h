@@ -17,23 +17,10 @@ typedef struct ExtractFeatStream ExtractFeatStream;
 
 const GenomeStreamClass* extractfeat_stream_class(void);
 
-/* create a plain ExtractFeatStream */
-GenomeStream*            extractfeat_stream_new(GenomeStream*,
+/* create a ExtractFeatStream, takes ownership of RegionMapping  */
+GenomeStream*            extractfeat_stream_new(GenomeStream*, RegionMapping*,
                                                 GenomeFeatureType type,
                                                 bool join, bool translate,
                                                 Env*);
-
-/* exactly one of the following two functions has to be called to make an
-   ExtractFeatStream usable */
-
-/* use the file named ``seqfile'' as sequence source */
-int                      extractfeat_stream_use_sequence_file(GenomeStream*,
-                                                              Str *seqfile,
-                                                              Env*);
-
-/* use the given RegionMapping (takes ownership) as sequence file source */
-void                     extractfeat_stream_use_region_mapping(GenomeStream*,
-                                                               RegionMapping*,
-                                                               Env*);
 
 #endif

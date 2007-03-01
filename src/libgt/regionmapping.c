@@ -12,12 +12,13 @@
 #include "xansi.h"
 
 struct RegionMapping {
-  Str *mapping_filename;
+  Str *mapping_filename,
+      *sequence_filename;
   lua_State *L;
   bool is_table;
 };
 
-RegionMapping* regionmapping_new(Str *mapping_filename, Env *env)
+RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Env *env)
 {
   RegionMapping *rm;
   int has_err = 0;
@@ -76,6 +77,15 @@ RegionMapping* regionmapping_new(Str *mapping_filename, Env *env)
     regionmapping_delete(rm, env);
     return NULL;
   }
+  return rm;
+}
+
+RegionMapping* regionmapping_new_seqfile(Str *sequence_filename, Env *env)
+{
+  RegionMapping *rm;
+  assert(sequence_filename && env);
+  rm = env_ma_calloc(env, 1, sizeof (RegionMapping));
+  rm->sequence_filename = str_ref(sequence_filename);
   return rm;
 }
 
@@ -142,7 +152,9 @@ Str* regionmapping_map(RegionMapping *rm, const char *sequence_region,
 {
   env_error_check(env);
   assert(rm && sequence_region);
-  if (rm->is_table)
+  if (rm->sequence_filename)
+    return str_ref(rm->sequence_filename);
+  else if (rm->is_table)
     return map_table(rm, sequence_region, env);
   else
     return map_function(rm, sequence_region, env);
@@ -152,6 +164,7 @@ void regionmapping_delete(RegionMapping *rm, Env *env)
 {
   if (!rm) return;
   str_delete(rm->mapping_filename, env);
+  str_delete(rm->sequence_filename, env);
   if (rm->L) lua_close(rm->L);
   env_ma_free(rm, env);
 }

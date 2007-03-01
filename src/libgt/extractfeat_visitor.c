@@ -161,27 +161,26 @@ static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
   int has_err = 0;
   env_error_check(env);
   efv = extractfeat_visitor_cast(gv);
-  if (efv->regionmapping) { /* region mapping used -> determine bioseq */
-    if (!efv->sequence_file ||
-        str_cmp(efv->sequence_name, genome_node_get_seqid((GenomeNode*) gf))) {
-      str_delete(efv->sequence_file, env);
-      efv->sequence_file = regionmapping_map(efv->regionmapping,
-                              str_get(genome_node_get_seqid((GenomeNode*) gf)),
-                                             env);
-      if (!efv->sequence_file)
+  assert(efv->regionmapping);
+  if (!efv->sequence_file ||
+      str_cmp(efv->sequence_name, genome_node_get_seqid((GenomeNode*) gf))) {
+    str_delete(efv->sequence_file, env);
+    efv->sequence_file = regionmapping_map(efv->regionmapping,
+                               str_get(genome_node_get_seqid((GenomeNode*) gf)),
+                                           env);
+    if (!efv->sequence_file)
+      has_err = -1;
+    else {
+      if (!efv->sequence_name)
+        efv->sequence_name = str_new(env);
+      else
+        str_reset(efv->sequence_name);
+      str_append_str(efv->sequence_name,
+                     genome_node_get_seqid((GenomeNode*) gf), env);
+      bioseq_delete(efv->bioseq, env);
+      efv->bioseq = bioseq_new_str(efv->sequence_file, env);
+      if (!efv->bioseq)
         has_err = -1;
-      else {
-        if (!efv->sequence_name)
-          efv->sequence_name = str_new(env);
-        else
-          str_reset(efv->sequence_name);
-        str_append_str(efv->sequence_name,
-                       genome_node_get_seqid((GenomeNode*) gf), env);
-        bioseq_delete(efv->bioseq, env);
-        efv->bioseq = bioseq_new_str(efv->sequence_file, env);
-        if (!efv->bioseq)
-          has_err = -1;
-      }
     }
   }
   if (!has_err) {
@@ -198,18 +197,6 @@ static int extractfeat_visitor_sequence_region(GenomeVisitor *gv,
   int has_err = 0;
   env_error_check(env);
   efv = extractfeat_visitor_cast(gv);
-  if (!efv->regionmapping) { /* we have only one bioseq */
-    /* check if the given sequence file contains this sequence (region) */
-    if (!bioseq_contains_sequence(efv->bioseq,
-                                  str_get(genome_node_get_seqid((GenomeNode*)
-                                                                sr)), env)) {
-      env_error_set(env,
-                    "sequence \"%s\" not contained in sequence file \"%s\"",
-                    str_get(genome_node_get_seqid((GenomeNode*) sr)),
-                    str_get(efv->sequence_file));
-      has_err = -1;
-    }
-  }
   return has_err;
 }
 
@@ -224,12 +211,15 @@ const GenomeVisitorClass* extractfeat_visitor_class()
   return &gvc;
 }
 
-static GenomeVisitor* extractfeat_visitor_new(GenomeFeatureType type,
-                                              bool join, bool translate,
-                                              Env *env)
+GenomeVisitor* extractfeat_visitor_new(RegionMapping *rm,
+                                       GenomeFeatureType type, bool join,
+                                       bool translate, Env *env)
 {
-  GenomeVisitor *gv = genome_visitor_create(extractfeat_visitor_class(), env);
-  ExtractFeatVisitor *efv= extractfeat_visitor_cast(gv);
+  GenomeVisitor *gv;
+  ExtractFeatVisitor *efv;
+  assert(rm);
+  gv = genome_visitor_create(extractfeat_visitor_class(), env);
+  efv= extractfeat_visitor_cast(gv);
   efv->description = str_new(env);
   efv->sequence = str_new(env);
   efv->protein = str_new(env);
@@ -237,38 +227,6 @@ static GenomeVisitor* extractfeat_visitor_new(GenomeFeatureType type,
   efv->join = join;
   efv->translate = translate;
   efv->fastaseq_counter = 0;
-  return gv;
-}
-
-GenomeVisitor* extractfeat_visitor_new_seqfile(Str *sequence_file,
-                                               GenomeFeatureType type,
-                                               bool join, bool translate,
-                                               Env *env)
-{
-  GenomeVisitor *gv;
-  ExtractFeatVisitor *efv;
-  env_error_check(env);
-  assert(sequence_file);
-  gv = extractfeat_visitor_new(type, join, translate, env);
-  efv = extractfeat_visitor_cast(gv);
-  efv->sequence_file = str_ref(sequence_file);
-  efv->bioseq = bioseq_new_str(sequence_file, env);
-  if (!efv->bioseq) {
-    extractfeat_visitor_free(gv, env);
-    return NULL;
-  }
-  return gv;
-}
-
-GenomeVisitor* extractfeat_visitor_new_regionmapping(RegionMapping *rm,
-                                                     GenomeFeatureType type,
-                                                     bool join, bool translate,
-                                                     Env *env)
-{
-  GenomeVisitor *gv;
-  ExtractFeatVisitor *efv;
-  gv = extractfeat_visitor_new(type, join, translate, env);
-  efv = extractfeat_visitor_cast(gv);
   efv->regionmapping = rm;
   return gv;
 }

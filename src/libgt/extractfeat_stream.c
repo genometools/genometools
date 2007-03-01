@@ -59,7 +59,7 @@ const GenomeStreamClass* extractfeat_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* extractfeat_stream_new(GenomeStream *in_stream,
+GenomeStream* extractfeat_stream_new(GenomeStream *in_stream, RegionMapping *rm,
                                      GenomeFeatureType type,
                                      bool join, bool translate, Env *env)
 {
@@ -70,32 +70,7 @@ GenomeStream* extractfeat_stream_new(GenomeStream *in_stream,
   efs->type = type;
   efs->join = join;
   efs->translate = translate;
+  efs->extractfeat_visitor = extractfeat_visitor_new(rm, efs->type, efs->join,
+                                                     efs->translate, env);
   return gs;
-}
-
-int extractfeat_stream_use_sequence_file(GenomeStream *gs, Str *seqfile,
-                                         Env *env)
-{
-  ExtractFeatStream *efs;
-  env_error_check(env);
-  efs = extractfeat_stream_cast(gs);
-  efs->extractfeat_visitor = extractfeat_visitor_new_seqfile(seqfile, efs->type,
-                                                             efs->join,
-                                                             efs->translate,
-                                                             env);
-  if (!efs->extractfeat_visitor)
-    return -1;
-  return 0;
-}
-
-void extractfeat_stream_use_region_mapping(GenomeStream *gs, RegionMapping *rm,
-                                           Env *env)
-{
-  ExtractFeatStream *efs = extractfeat_stream_cast(gs);
-  efs->extractfeat_visitor = extractfeat_visitor_new_regionmapping(rm,
-                                                                   efs->type,
-                                                                   efs->join,
-                                                                   efs
-                                                                   ->translate,
-                                                                   env);
 }

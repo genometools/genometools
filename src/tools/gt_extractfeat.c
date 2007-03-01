@@ -117,32 +117,26 @@ int gt_extractfeat(int argc, char *argv[], Env *env)
     gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
                                                arguments.verbose, env);
 
-    /* create extract feature stream */
-    extractfeat_stream = extractfeat_stream_new(gff3_in_stream,
-                                                type, arguments.join,
-                                                arguments.translate, env);
-
     /* set sequence source */
     assert(str_length(arguments.seqfile) ||
            str_length(arguments.regionmapping));
     assert(!(str_length(arguments.seqfile) &&
              str_length(arguments.regionmapping)));
-    if (str_length(arguments.seqfile)) {
-      has_err = extractfeat_stream_use_sequence_file(extractfeat_stream,
-                                                     arguments.seqfile, env);
-    }
-    else {
-      regionmapping = regionmapping_new(arguments.regionmapping, env);
-      if (!regionmapping)
-        has_err = -1;
-      else
-        extractfeat_stream_use_region_mapping(extractfeat_stream,
-                                              regionmapping, env);
-    }
+    if (str_length(arguments.seqfile))
+      regionmapping = regionmapping_new_seqfile(arguments.seqfile, env);
+    else
+      regionmapping = regionmapping_new_mapping(arguments.regionmapping, env);
+    if (!regionmapping)
+      has_err = -1;
   }
 
-  /* pull the features through the stream and free them afterwards */
   if (!has_err) {
+    /* create extract feature stream */
+    extractfeat_stream = extractfeat_stream_new(gff3_in_stream, regionmapping,
+                                                type, arguments.join,
+                                                arguments.translate, env);
+
+    /* pull the features through the stream and free them afterwards */
     while (!(has_err = genome_stream_next_tree(extractfeat_stream, &gn, env)) &&
            gn) {
       genome_node_rec_delete(gn, env);
