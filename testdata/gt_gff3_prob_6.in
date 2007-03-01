@@ -1,0 +1,41 @@
+##gff-version   3
+##sequence-region chrX 122459947 153939754
+chrX	ENCODE	gene	122459947	122480545	.	-	.	ID=gene1;Name=RP5-1189B24.5-003;Name2=THOC2
+chrX	ENCODE	exon	122459947	122460724	.	-	.	Parent=gene1
+chrX	ENCODE	exon	122470304	122470349	.	-	.	Parent=gene1
+chrX	ENCODE	exon	122470826	122470902	.	-	.	Parent=gene1
+chrX	ENCODE	exon	122472785	122472942	.	-	.	Parent=gene1
+chrX	ENCODE	exon	122473025	122473094	.	-	.	Parent=gene1
+chrX	ENCODE	exon	122473438	122473575	.	-	.	Parent=gene1
+chrX	ENCODE	exon	122478787	122478822	.	-	.	Parent=gene1
+chrX	ENCODE	exon	122480293	122480351	.	-	.	Parent=gene1
+chrX	ENCODE	exon	122480543	122480545	.	-	.	Parent=gene1
+chrX	ENCODE	gene	122459955	122482231	.	-	.	ID=gene2;Name=RP5-1189B24.5-009;Name2=THOC2
+chrX	ENCODE	exon	122459955	122463134	.	-	.	Parent=gene2
+chrX	ENCODE	exon	122470304	122470349	.	-	.	Parent=gene2
+chrX	ENCODE	CDS	122470324	122470349	.	-	.
+Parent=gene2
+chrX	ENCODE	exon	122470826	122470902	.	-	.	Parent=gene2
+chrX	ENCODE	CDS	122470826	122470902	.	-	.
+Parent=gene2
+chrX	ENCODE	exon	122472785	122472942	.	-	.	Parent=gene2
+chrX	ENCODE	CDS	122472785	122472942	.	-	.
+Parent=gene2
+chrX	ENCODE	exon	122473025	122473094	.	-	.	Parent=gene2
+chrX	ENCODE	CDS	122473025	122473094	.	-	.
+Parent=gene2
+chrX	ENCODE	exon	122473438	122473575	.	-	.	Parent=gene2
+chrX	ENCODE	CDS	122473438	122473575	.	-	.
+Parent=gene2
+chrX	ENCODE	exon	122478787	122478903	.	-	.	Parent=gene2
+chrX	ENCODE	CDS	122478787	122478903	.	-	.
+Parent=gene2
+chrX	ENCODE	exon	122480293	122480351	.	-	.	Parent=gene2
+chrX	ENCODE	CDS	122480293	122480351	.	-	.
+Parent=gene2
+chrX	ENCODE	exon	122480543	122480973	.	-	.	Parent=gene2
+chrX	ENCODE	CDS	122480543	122480973	.	-	.
+Parent=gene2
+chrX	ENCODE	exon	122482144	122482231	.	-	.	Parent=gene2
+chrX	ENCODE	CDS	122482144	122482231	.	-	.
+Parent=gene2

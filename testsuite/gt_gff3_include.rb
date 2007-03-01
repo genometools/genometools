@@ -46,6 +46,13 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_gff3_prob_5.out"
 end
 
+Name "gt gff3 prob 6"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 -sort #{$testdata}gt_gff3_prob_6.in", :retval => 1)
+  grep($last_stderr, /does not contain/);
+end
+
 Name "gt gff3 test 1.1"
 Keywords "gt_gff3"
 Test do
