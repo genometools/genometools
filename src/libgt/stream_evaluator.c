@@ -629,7 +629,8 @@ void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
         (*ctr_ptr)--;
         evaluator_add_true(mRNA_exon_evaluator);
       }
-      if (!bittab_bit_is_set(true_mRNA_exons_forward_collapsed, num)) {
+      if (true_mRNA_exons_forward_collapsed &&
+          !bittab_bit_is_set(true_mRNA_exons_forward_collapsed, num)) {
         bittab_set_bit(true_mRNA_exons_forward_collapsed, num);
         evaluator_add_true(mRNA_exon_evaluator_collapsed);
       }
@@ -641,7 +642,8 @@ void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
         (*ctr_ptr)--;
         evaluator_add_true(mRNA_exon_evaluator);
       }
-      if (!bittab_bit_is_set(true_mRNA_exons_reverse_collapsed, num)) {
+      if (true_mRNA_exons_reverse_collapsed &&
+          !bittab_bit_is_set(true_mRNA_exons_reverse_collapsed, num)) {
         bittab_set_bit(true_mRNA_exons_reverse_collapsed, num);
         evaluator_add_true(mRNA_exon_evaluator_collapsed);
       }
