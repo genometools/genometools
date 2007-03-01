@@ -733,8 +733,8 @@ static void store_true_exon(GenomeNode *gn, Strand predicted_strand,
 static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
 {
   Process_predicted_feature_info *info = (Process_predicted_feature_info*) data;
-  Range *actual_range, predicted_range;
-  unsigned long i, num, *ctr_ptr;
+  Range predicted_range;
+  unsigned long i, num;
   Strand predicted_strand;
   Array *real_genome_nodes;
   GenomeNode **real_gn;
@@ -931,45 +931,16 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
       switch (predicted_strand) {
         case STRAND_FORWARD:
         case STRAND_REVERSE:
-          if ((actual_range =
-               bsearch(&predicted_range,
-                       predicted_strand == STRAND_FORWARD
-                       ? array_get_space(transcript_exons_get_all(info->slot
-                                                           ->CDS_exons_forward))
-                       : array_get_space(transcript_exons_get_all(info->slot
-                                                          ->CDS_exons_reverse)),
-                       predicted_strand == STRAND_FORWARD
-                       ?  array_size(transcript_exons_get_all(info->slot
-                                                           ->CDS_exons_forward))
-                       :  array_size(transcript_exons_get_all(info->slot
-                                                          ->CDS_exons_reverse)),
-                       sizeof (Range),
-                       (Compare) range_compare_ptr))) {
-            if (predicted_strand == STRAND_FORWARD) {
-              num = actual_range -
-                    (Range*) array_get_space(transcript_exons_get_all(info
-                                                    ->slot->CDS_exons_forward));
-              ctr_ptr = array_get(transcript_counts_get_all(info->slot
-                                                ->CDS_counts_forward), num);
-              if (*ctr_ptr) {
-                (*ctr_ptr)--;
-                evaluator_add_true(transcript_evaluators_get_all(info
-                                                        ->CDS_exon_evaluators));
-              }
-            }
-            else {
-              num = actual_range -
-                    (Range*) array_get_space(transcript_exons_get_all(info
-                                                    ->slot->CDS_exons_reverse));
-              ctr_ptr = array_get(transcript_counts_get_all(info->slot
-                                                    ->CDS_counts_reverse), num);
-              if (*ctr_ptr) {
-                (*ctr_ptr)--;
-                evaluator_add_true(transcript_evaluators_get_all(info
-                                                        ->CDS_exon_evaluators));
-              }
-            }
-          }
+          store_true_exon(gn, predicted_strand, &predicted_range,
+                          info->exondiff,
+                          info->slot->CDS_exons_forward,
+                          info->slot->CDS_exons_reverse,
+                          info->slot->CDS_counts_forward,
+                          info->slot->CDS_counts_reverse,
+                          info->slot->CDS_exon_bittabs_forward,
+                          info->slot->CDS_exon_bittabs_reverse,
+                          info->CDS_exon_evaluators,
+                          info->CDS_exon_evaluators_collapsed);
           break;
         default:
           if (info->verbose) {
