@@ -66,8 +66,7 @@ int gt_extractfeat(int argc, char *argv[], Env *env)
   GenomeFeatureType type;
   ExtractFeatArguments arguments;
   RegionMapping *regionmapping;
-  int parsed_args;
-  int has_err = 0;
+  int parsed_args, has_err = 0;
   env_error_check(env);
 
   /* option parsing */
