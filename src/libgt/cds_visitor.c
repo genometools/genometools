@@ -5,7 +5,6 @@
 */
 
 #include <assert.h>
-#include "bioseq.h"
 #include "cds_visitor.h"
 #include "error.h"
 #include "fasta.h"
@@ -20,7 +19,7 @@ struct CDSVisitor {
   Str *source;
   Splicedseq *splicedseq; /* the (spliced) sequence of the currently considered
                              gene */
-  Bioseq *bioseq;
+  RegionMapping *regionmapping;
 };
 
 #define cds_visitor_cast(GV)\
@@ -32,16 +31,17 @@ static void cds_visitor_free(GenomeVisitor *gv, Env *env)
   assert(cds_visitor);
   str_delete(cds_visitor->source, env);
   splicedseq_delete(cds_visitor->splicedseq, env);
-  bioseq_delete(cds_visitor->bioseq, env);
+  regionmapping_delete(cds_visitor->regionmapping, env);
 }
 
 static int extract_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
 {
   CDSVisitor *v = (CDSVisitor*) data;
-  const char *sequence;
-  unsigned long seqnum;
   GenomeFeature *gf;
   Range range;
+  const char *raw_sequence;
+  unsigned long raw_sequence_length;
+  int has_err = 0;
 
   env_error_check(env);
   gf = genome_node_cast(genome_feature_class(), gn);
@@ -50,16 +50,23 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
   if (genome_feature_get_type(gf) == gft_exon &&
       (genome_feature_get_strand(gf) == STRAND_FORWARD ||
        genome_feature_get_strand(gf) == STRAND_REVERSE)) {
-    sequence = bioseq_get_sequence_with_desc(v->bioseq,
-                                             str_get(genome_node_get_seqid(gn)),
-                                             &seqnum, env);
-    range = genome_node_get_range(gn);
-    assert(range.start && range.end); /* 1-based coordinates */
-    assert(range.end <= bioseq_get_sequence_length(v->bioseq, seqnum));
-    splicedseq_add(v->splicedseq, range.start - 1, range.end - 1, sequence,
-                   env);
+    has_err = regionmapping_get_raw_sequence(v->regionmapping, &raw_sequence,
+                                             genome_node_get_seqid(gn), env);
+    if (!has_err) {
+      range = genome_node_get_range(gn);
+      assert(range.start && range.end); /* 1-based coordinates */
+      has_err = regionmapping_get_raw_sequence_length(v->regionmapping,
+                                                      &raw_sequence_length,
+                                                      genome_node_get_seqid(gn),
+                                                      env);
+    }
+    if (!has_err) {
+      assert(range.end <= raw_sequence_length);
+      splicedseq_add(v->splicedseq, range.start - 1, range.end - 1,
+                     raw_sequence, env);
+    }
   }
-  return 0;
+  return has_err;
 }
 
 static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
@@ -189,20 +196,17 @@ const GenomeVisitorClass* cds_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* cds_visitor_new(RegionMapping *rm, Str *source, Env *env)
+GenomeVisitor* cds_visitor_new(RegionMapping *regionmapping, Str *source,
+                               Env *env)
 {
   GenomeVisitor *gv;
   CDSVisitor *cds_visitor;
   env_error_check(env);
-  assert(rm);
+  assert(regionmapping);
   gv = genome_visitor_create(cds_visitor_class(), env);
   cds_visitor = cds_visitor_cast(gv);
   cds_visitor->source = str_ref(source);
   cds_visitor->splicedseq = splicedseq_new(env);
-  /* cds_visitor->bioseq = bioseq_new_str(sequence_file, env); */
-  if (!cds_visitor->bioseq) {
-    cds_visitor_free(gv, env);
-    return NULL;
-  }
+  cds_visitor->regionmapping = regionmapping;
   return gv;
 }

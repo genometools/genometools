@@ -34,7 +34,7 @@ static OPrval parse_options(int *parsed_args, CDS_arguments *arguments,
   /* parse */
   option_parser_set_comment_func(op, gtdata_show_help, NULL);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 2, 2, env);
+                                            versionfunc, 1, 1, env);
   option_parser_delete(op, env);
   return oprval;
 }

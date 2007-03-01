@@ -14,9 +14,11 @@ typedef struct RegionMapping RegionMapping;
 
 RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Env*);
 RegionMapping* regionmapping_new_seqfile(Str *sequence_filename, Env*);
-/* returns a new reference */
-Str*           regionmapping_map(RegionMapping*, const char *sequence_region,
-                                 Env*);
+int            regionmapping_get_raw_sequence(RegionMapping*, const char**,
+                                              Str *seqid, Env*);
+int            regionmapping_get_raw_sequence_length(RegionMapping*,
+                                                     unsigned long*,
+                                                     Str *seqid, Env*);
 void           regionmapping_delete(RegionMapping*, Env*);
 
 #endif

@@ -299,43 +299,6 @@ const char* bioseq_get_raw_sequence(Bioseq *bs)
   return bs->raw_sequence;
 }
 
-static unsigned long get_seqnum_with_desc(Bioseq *bs, const char *description,
-                                          Env *env)
-{
-  unsigned long i, seqnum = UNDEFULONG;
-  Str *pattern;
-  int has_err;
-  bool match;
-  assert(bs && description);
-  pattern = str_new(env);
-  str_append_char(pattern, '^', env);
-  str_append_cstr(pattern, description, env);
-  for (i = 0; i < array_size(bs->descriptions); i++) {
-    has_err = grep(&match, str_get(pattern),
-                   *(char**) array_get(bs->descriptions, i), NULL);
-    assert(!has_err);
-    if (match) {
-      seqnum = i;
-      break;
-    }
-  }
-  str_delete(pattern, env);
-  return seqnum;
-}
-
-const char* bioseq_get_sequence_with_desc(Bioseq *bs, const char *description,
-                                          unsigned long *seqnum, Env *env)
-{
-  unsigned long rseqnum;
-  assert(bs && description);
-  rseqnum = get_seqnum_with_desc(bs, description, env);
-  if (seqnum)
-    *seqnum = rseqnum;
-  if (rseqnum != UNDEFULONG)
-    return bioseq_get_sequence(bs, rseqnum);
-  return NULL;
-}
-
 unsigned long bioseq_get_sequence_length(Bioseq *bs, unsigned long idx)
 {
   Range sequence_range;
@@ -354,14 +317,6 @@ unsigned long bioseq_number_of_sequences(Bioseq *bs)
 {
   assert(bs);
   return array_size(bs->descriptions);
-}
-
-bool bioseq_contains_sequence(Bioseq *bs, const char *sequence, Env *env)
-{
-  assert(bs);
-  if (get_seqnum_with_desc(bs, sequence, env) != UNDEFULONG)
-    return true;
-  return false;
 }
 
 void bioseq_delete(Bioseq *bs, Env *env)

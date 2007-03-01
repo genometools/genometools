@@ -5,8 +5,7 @@
 */
 
 #include <assert.h>
-#include "bioseq.h"
-#include "error.h"
+#include "env.h"
 #include "extractfeat_visitor.h"
 #include "fasta.h"
 #include "genome_visitor_rep.h"
@@ -15,16 +14,13 @@
 
 struct ExtractFeatVisitor {
   const GenomeVisitor parent_instance;
-  Str *sequence_file, /* the (current) sequence file */
-      *sequence_name, /* the (current) sequence name */
-      *description,   /* the description of the currently extracted feature */
+  Str *description,   /* the description of the currently extracted feature */
       *sequence,      /* the sequence of the currently extracted feature */
       *protein;       /* the translated protein sequence (if applicable) */
   GenomeFeatureType type;
   bool join,
        translate,
        reverse_strand;
-  Bioseq *bioseq;
   unsigned long fastaseq_counter;
   RegionMapping *regionmapping;
 };
@@ -36,12 +32,9 @@ static void extractfeat_visitor_free(GenomeVisitor *gv, Env *env)
 {
   ExtractFeatVisitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
   assert(extractfeat_visitor);
-  str_delete(extractfeat_visitor->sequence_file, env);
-  str_delete(extractfeat_visitor->sequence_name, env);
   str_delete(extractfeat_visitor->description, env);
   str_delete(extractfeat_visitor->sequence, env);
   str_delete(extractfeat_visitor->protein, env);
-  bioseq_delete(extractfeat_visitor->bioseq, env);
   regionmapping_delete(extractfeat_visitor->regionmapping, env);
 }
 
@@ -50,8 +43,10 @@ static int extract_join_feature(GenomeNode *gn, void *data, Env *env)
   ExtractFeatVisitor *v = (ExtractFeatVisitor*) data;
   GenomeFeatureType gf_type;
   const char *raw_sequence;
+  unsigned long raw_sequence_length;
   GenomeFeature *gf;
   Range range;
+  int has_err = 0;
 
   env_error_check(env);
   gf = genome_node_cast(genome_feature_class(), gn);
@@ -59,16 +54,23 @@ static int extract_join_feature(GenomeNode *gn, void *data, Env *env)
   gf_type = genome_feature_get_type(gf);
 
   if (gf_type == v->type) {
-    raw_sequence = bioseq_get_raw_sequence(v->bioseq);
-    range = genome_node_get_range(gn);
-    assert(range.start); /* 1-based coordinates */
-    raw_sequence += range.start - 1;
-    assert(range.end <= bioseq_get_raw_sequence_length(v->bioseq));
+    has_err = regionmapping_get_raw_sequence(v->regionmapping, &raw_sequence,
+                                             genome_node_get_seqid(gn), env);
+    if (!has_err) {
+      range = genome_node_get_range(gn);
+      assert(range.start); /* 1-based coordinates */
+      raw_sequence += range.start - 1;
+      has_err = regionmapping_get_raw_sequence_length(v->regionmapping,
+                                                      &raw_sequence_length,
+                                                     genome_node_get_seqid(gn),
+                                                     env);
+    }
+    assert(range.end <= raw_sequence_length);
     str_append_cstr_nt(v->sequence, raw_sequence, range_length(range), env);
     if (genome_feature_get_strand(gf) == STRAND_REVERSE)
       v->reverse_strand = true;
   }
-  return 0;
+  return has_err;
 }
 
 static int extract_feature(GenomeNode *gn, void *data, Env *env)
@@ -77,6 +79,8 @@ static int extract_feature(GenomeNode *gn, void *data, Env *env)
   GenomeFeatureType gf_type;
   GenomeFeature *gf;
   Range range;
+  const char *raw_sequence;
+  unsigned long raw_sequence_length;
   int has_err = 0;
 
   env_error_check(env);
@@ -128,13 +132,23 @@ static int extract_feature(GenomeNode *gn, void *data, Env *env)
     /* otherwise we only have to look this feature */
     range = genome_node_get_range(gn);
     assert(range.start); /* 1-based coordinates */
-    assert(range.end <= bioseq_get_raw_sequence_length(v->bioseq));
-    str_reset(v->sequence);
-    str_append_cstr_nt(v->sequence, bioseq_get_raw_sequence(v->bioseq) +
-                       range.start - 1, range_length(range), env);
-    if (genome_feature_get_strand(gf) == STRAND_REVERSE) {
-      has_err = reverse_complement(str_get(v->sequence),
-                                   str_length(v->sequence), env);
+    has_err = regionmapping_get_raw_sequence_length(v->regionmapping,
+                                                    &raw_sequence_length,
+                                                    genome_node_get_seqid(gn),
+                                                    env);
+    if (!has_err) {
+      assert(range.end <= raw_sequence_length);
+      str_reset(v->sequence);
+      has_err = regionmapping_get_raw_sequence(v->regionmapping, &raw_sequence,
+                                               genome_node_get_seqid(gn), env);
+    }
+    if (!has_err) {
+      str_append_cstr_nt(v->sequence, raw_sequence + range.start - 1,
+                         range_length(range), env);
+      if (genome_feature_get_strand(gf) == STRAND_REVERSE) {
+        has_err = reverse_complement(str_get(v->sequence),
+                                     str_length(v->sequence), env);
+      }
     }
     if (!has_err) {
       if (v->translate) {
@@ -158,36 +172,11 @@ static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
                                               GenomeFeature *gf, Env *env)
 {
   ExtractFeatVisitor *efv;
-  int has_err = 0;
   env_error_check(env);
   efv = extractfeat_visitor_cast(gv);
   assert(efv->regionmapping);
-  if (!efv->sequence_file ||
-      str_cmp(efv->sequence_name, genome_node_get_seqid((GenomeNode*) gf))) {
-    str_delete(efv->sequence_file, env);
-    efv->sequence_file = regionmapping_map(efv->regionmapping,
-                               str_get(genome_node_get_seqid((GenomeNode*) gf)),
-                                           env);
-    if (!efv->sequence_file)
-      has_err = -1;
-    else {
-      if (!efv->sequence_name)
-        efv->sequence_name = str_new(env);
-      else
-        str_reset(efv->sequence_name);
-      str_append_str(efv->sequence_name,
-                     genome_node_get_seqid((GenomeNode*) gf), env);
-      bioseq_delete(efv->bioseq, env);
-      efv->bioseq = bioseq_new_str(efv->sequence_file, env);
-      if (!efv->bioseq)
-        has_err = -1;
-    }
-  }
-  if (!has_err) {
-    has_err = genome_node_traverse_children((GenomeNode*) gf, efv,
-                                            extract_feature, false, env);
-  }
-  return has_err;
+  return genome_node_traverse_children((GenomeNode*) gf, efv, extract_feature,
+                                       false, env);
 }
 
 const GenomeVisitorClass* extractfeat_visitor_class()

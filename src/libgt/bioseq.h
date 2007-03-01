@@ -26,13 +26,9 @@ Seq*          bioseq_get_seq(Bioseq*, unsigned long, Env*);
 const char*   bioseq_get_description(Bioseq*, unsigned long);
 const char*   bioseq_get_sequence(Bioseq*, unsigned long);
 const char*   bioseq_get_raw_sequence(Bioseq*);
-/* if seqnum is defined the sequence number of the returned sequence is saved */
-const char*   bioseq_get_sequence_with_desc(Bioseq*, const char *description,
-                                            unsigned long *seqnum, Env*);
 unsigned long bioseq_get_sequence_length(Bioseq*, unsigned long);
 unsigned long bioseq_get_raw_sequence_length(Bioseq*);
 unsigned long bioseq_number_of_sequences(Bioseq*);
-bool          bioseq_contains_sequence(Bioseq*, const char*, Env*);
 void          bioseq_delete(Bioseq*, Env*);
 
 /* shows a bioseq on stdout (in fasta format).

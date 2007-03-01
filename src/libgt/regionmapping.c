@@ -5,6 +5,7 @@
 */
 
 #include <assert.h>
+#include "bioseq.h"
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
@@ -13,9 +14,12 @@
 
 struct RegionMapping {
   Str *mapping_filename,
-      *sequence_filename;
+      *sequence_filename,
+      *sequence_file, /* the (current) sequence file */
+      *sequence_name; /* the (current) sequence name */
   lua_State *L;
   bool is_table;
+  Bioseq *bioseq; /* the current bioseq */
 };
 
 RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Env *env)
@@ -147,8 +151,8 @@ static Str* map_function(RegionMapping *rm, const char *sequence_region,
   return result;
 }
 
-Str* regionmapping_map(RegionMapping *rm, const char *sequence_region,
-                       Env *env)
+static Str* regionmapping_map(RegionMapping *rm, const char *sequence_region,
+                              Env *env)
 {
   env_error_check(env);
   assert(rm && sequence_region);
@@ -160,11 +164,64 @@ Str* regionmapping_map(RegionMapping *rm, const char *sequence_region,
     return map_function(rm, sequence_region, env);
 }
 
+static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Env *env)
+{
+  int has_err = 0;
+  env_error_check(env);
+  assert(rm && seqid);
+  if (!rm->sequence_file || str_cmp(rm->sequence_name, seqid)) {
+    str_delete(rm->sequence_file, env);
+    rm->sequence_file = regionmapping_map(rm, str_get(seqid), env);
+    if (!rm->sequence_file)
+      has_err = -1;
+    else {
+      if (!rm->sequence_name)
+        rm->sequence_name = str_new(env);
+      else
+        str_reset(rm->sequence_name);
+      str_append_str(rm->sequence_name, seqid, env);
+      bioseq_delete(rm->bioseq, env);
+      rm->bioseq = bioseq_new_str(rm->sequence_file, env);
+      if (!rm->bioseq)
+        has_err = -1;
+    }
+  }
+  return has_err;
+}
+
+int regionmapping_get_raw_sequence(RegionMapping *rm, const char **raw,
+                                   Str *seqid, Env *env)
+{
+  int has_err = 0;
+  env_error_check(env);
+  assert(rm && seqid);
+  has_err = update_bioseq_if_necessary(rm, seqid, env);
+  if (!has_err)
+    *raw = bioseq_get_raw_sequence(rm->bioseq);
+  return has_err;
+}
+
+int regionmapping_get_raw_sequence_length(RegionMapping *rm,
+                                          unsigned long *length, Str *seqid,
+                                          Env *env)
+{
+  int has_err = 0;
+  env_error_check(env);
+  assert(rm && seqid);
+  has_err = update_bioseq_if_necessary(rm, seqid, env);
+  if (!has_err)
+    *length = bioseq_get_raw_sequence_length(rm->bioseq);
+  return has_err;
+}
+
 void regionmapping_delete(RegionMapping *rm, Env *env)
 {
   if (!rm) return;
   str_delete(rm->mapping_filename, env);
   str_delete(rm->sequence_filename, env);
+  str_delete(rm->sequence_file, env);
+  str_delete(rm->sequence_name, env);
   if (rm->L) lua_close(rm->L);
+  bioseq_delete(rm->bioseq, env);
   env_ma_free(rm, env);
 }

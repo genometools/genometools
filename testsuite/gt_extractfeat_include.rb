@@ -64,21 +64,21 @@ end
 Name "gt extractfeat -regionmapping fail 3 (nil mapping)"
 Keywords "gt_extractfeat"
 Test do
-  run_test("#{$bin}gt extractfeat -type exon -regionmapping #{$testdata}/regionmapping_2.lua #{$testdata}/gt_extractfeat_succ_1.gff3", :retval => 1 )
+  run_test("#{$bin}gt extractfeat -type exon -regionmapping #{$testdata}/regionmapping_2.lua #{$testdata}/gt_extractfeat_succ_2.gff3", :retval => 1 )
   grep($last_stderr, "is nil");
 end
 
 Name "gt extractfeat -regionmapping fail 4 (non string mapping)"
 Keywords "gt_extractfeat"
 Test do
-  run_test("#{$bin}gt extractfeat -type exon -regionmapping #{$testdata}/regionmapping_3.lua #{$testdata}/gt_extractfeat_succ_1.gff3", :retval => 1 )
+  run_test("#{$bin}gt extractfeat -type exon -regionmapping #{$testdata}/regionmapping_3.lua #{$testdata}/gt_extractfeat_succ_2.gff3", :retval => 1 )
   grep($last_stderr, "is not a string");
 end
 
 Name "gt extractfeat -regionmapping fail 5 (function returns nil)"
 Keywords "gt_extractfeat"
 Test do
-  run_test("#{$bin}gt extractfeat -type exon -regionmapping #{$testdata}/regionmapping_5.lua #{$testdata}/gt_extractfeat_succ_1.gff3", :retval => 1 )
+  run_test("#{$bin}gt extractfeat -type exon -regionmapping #{$testdata}/regionmapping_5.lua #{$testdata}/gt_extractfeat_succ_2.gff3", :retval => 1 )
   grep($last_stderr, "function 'mapping' must return a string");
 end
 
