@@ -1144,6 +1144,7 @@ void stream_evaluator_show(StreamEvaluator *se, FILE *outfp)
 {
   assert(se);
 
+  /* gene level */
   fprintf(outfp, "gene sensitivity:              ");
   evaluator_show_sensitivity(se->gene_evaluator, outfp);
   fprintf(outfp, " (missing genes: %lu)\n", se->missing_genes);
@@ -1152,6 +1153,7 @@ void stream_evaluator_show(StreamEvaluator *se, FILE *outfp)
   evaluator_show_specificity(se->gene_evaluator, outfp);
   fprintf(outfp, " (wrong genes: %lu)\n", se->wrong_genes);
 
+  /* mRNA level */
   fprintf(outfp, "mRNA sensitivity:              ");
   evaluator_show_sensitivity(se->mRNA_evaluator, outfp);
   fprintf(outfp, " (missing mRNAs: %lu)\n", se->missing_mRNAs);
@@ -1160,19 +1162,15 @@ void stream_evaluator_show(StreamEvaluator *se, FILE *outfp)
   evaluator_show_specificity(se->mRNA_evaluator, outfp);
   fprintf(outfp, " (wrong mRNAs: %lu)\n", se->wrong_mRNAs);
 
+  /* mRNA exon level */
   show_transcript_values(se->mRNA_exon_evaluators, "mRNA", "", outfp);
   show_transcript_values(se->mRNA_exon_evaluators_collapsed, "mRNA",
                          ", collapsed", outfp);
 
-  fprintf(outfp, "exon sensitivity (CDS level):  ");
-  evaluator_show_sensitivity(transcript_evaluators_get_all(se
-                                                 ->CDS_exon_evaluators), outfp);
-  xfputc('\n', outfp);
-
-  fprintf(outfp, "exon specificity (CDS level):  ");
-  evaluator_show_specificity(transcript_evaluators_get_all(se
-                                                 ->CDS_exon_evaluators), outfp);
-  xfputc('\n', outfp);
+  /* CDS exon level */
+  show_transcript_values(se->CDS_exon_evaluators, "CDS", "", outfp);
+  show_transcript_values(se->CDS_exon_evaluators_collapsed, "CDS",
+                         ", collapsed", outfp);
 }
 
 void stream_evaluator_delete(StreamEvaluator *se, Env *env)
