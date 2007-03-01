@@ -600,52 +600,52 @@ static void store_predicted_exon_collapsed(TranscriptUsedExons *used_exons,
   }
 }
 
-void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
-                         bool exondiff, Range *predicted_range,
-                         Array *mRNA_exons_forward,
-                         Array *mRNA_exons_reverse,
-                         Array *true_mRNA_exons_forward,
-                         Array *true_mRNA_exons_reverse,
-                         Bittab *true_mRNA_exons_forward_collapsed,
-                         Bittab *true_mRNA_exons_reverse_collapsed,
-                         Evaluator *mRNA_exon_evaluator,
-                         Evaluator *mRNA_exon_evaluator_collapsed)
+static void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
+                                bool exondiff, Range *predicted_range,
+                                Array *exons_forward,
+                                Array *exons_reverse,
+                                Array *true_exons_forward,
+                                Array *true_exons_reverse,
+                                Bittab *true_exons_forward_collapsed,
+                                Bittab *true_exons_reverse_collapsed,
+                                Evaluator *exon_evaluator,
+                                Evaluator *exon_evaluator_collapsed)
 {
   Range *actual_range;
   unsigned long num, *ctr_ptr;
 
   if ((actual_range = bsearch(predicted_range,
                               predicted_strand == STRAND_FORWARD
-                              ? array_get_space(mRNA_exons_forward)
-                              : array_get_space(mRNA_exons_reverse),
+                              ? array_get_space(exons_forward)
+                              : array_get_space(exons_reverse),
                               predicted_strand == STRAND_FORWARD
-                              ? array_size(mRNA_exons_forward)
-                              : array_size(mRNA_exons_reverse), sizeof (Range),
+                              ? array_size(exons_forward)
+                              : array_size(exons_reverse), sizeof (Range),
                               (Compare) range_compare_ptr))) {
     if (predicted_strand == STRAND_FORWARD) {
-      num = actual_range - (Range*) array_get_space(mRNA_exons_forward);
-      ctr_ptr = array_get(true_mRNA_exons_forward, num);
+      num = actual_range - (Range*) array_get_space(exons_forward);
+      ctr_ptr = array_get(true_exons_forward, num);
       if (*ctr_ptr) {
         (*ctr_ptr)--;
-        evaluator_add_true(mRNA_exon_evaluator);
+        evaluator_add_true(exon_evaluator);
       }
-      if (true_mRNA_exons_forward_collapsed &&
-          !bittab_bit_is_set(true_mRNA_exons_forward_collapsed, num)) {
-        bittab_set_bit(true_mRNA_exons_forward_collapsed, num);
-        evaluator_add_true(mRNA_exon_evaluator_collapsed);
+      if (true_exons_forward_collapsed &&
+          !bittab_bit_is_set(true_exons_forward_collapsed, num)) {
+        bittab_set_bit(true_exons_forward_collapsed, num);
+        evaluator_add_true(exon_evaluator_collapsed);
       }
     }
     else {
-      num = actual_range - (Range*) array_get_space(mRNA_exons_reverse);
-      ctr_ptr = array_get(true_mRNA_exons_reverse, num);
+      num = actual_range - (Range*) array_get_space(exons_reverse);
+      ctr_ptr = array_get(true_exons_reverse, num);
       if (*ctr_ptr) {
         (*ctr_ptr)--;
-        evaluator_add_true(mRNA_exon_evaluator);
+        evaluator_add_true(exon_evaluator);
       }
-      if (true_mRNA_exons_reverse_collapsed &&
-          !bittab_bit_is_set(true_mRNA_exons_reverse_collapsed, num)) {
-        bittab_set_bit(true_mRNA_exons_reverse_collapsed, num);
-        evaluator_add_true(mRNA_exon_evaluator_collapsed);
+      if (true_exons_reverse_collapsed &&
+          !bittab_bit_is_set(true_exons_reverse_collapsed, num)) {
+        bittab_set_bit(true_exons_reverse_collapsed, num);
+        evaluator_add_true(exon_evaluator_collapsed);
       }
     }
   }
