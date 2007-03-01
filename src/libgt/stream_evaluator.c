@@ -656,6 +656,80 @@ void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
   }
 }
 
+static void store_true_exon(GenomeNode *gn, Strand predicted_strand,
+                            Range *predicted_range, bool exondiff,
+                            TranscriptExons *exons_forward,
+                            TranscriptExons *exons_reverse,
+                            TranscriptCounts *counts_forward,
+                            TranscriptCounts *counts_reverse,
+                            TranscriptBittabs *exon_bittabs_forward,
+                            TranscriptBittabs *exon_bittabs_reverse,
+                            TranscriptEvaluators *exon_evaluators,
+                            TranscriptEvaluators *exon_evaluators_collapsed)
+{
+  assert(gn && predicted_range && exons_forward && exons_reverse);
+  determine_true_exon(gn, predicted_strand, exondiff, predicted_range,
+                      transcript_exons_get_all(exons_forward),
+                      transcript_exons_get_all(exons_reverse),
+                      transcript_counts_get_all(counts_forward),
+                      transcript_counts_get_all(counts_reverse),
+                      transcript_bittabs_get_all(exon_bittabs_forward),
+                      transcript_bittabs_get_all(exon_bittabs_reverse),
+                      transcript_evaluators_get_all(exon_evaluators),
+                      transcript_evaluators_get_all(exon_evaluators_collapsed));
+  switch (genome_feature_get_transcriptfeaturetype((GenomeFeature*) gn)) {
+    case TRANSCRIPT_FEATURE_TYPE_SINGLE:
+      determine_true_exon(gn, predicted_strand, exondiff, predicted_range,
+                          transcript_exons_get_single(exons_forward),
+                          transcript_exons_get_single(exons_reverse),
+                          transcript_counts_get_single(counts_forward),
+                          transcript_counts_get_single(counts_reverse),
+                          transcript_bittabs_get_single(exon_bittabs_forward),
+                          transcript_bittabs_get_single(exon_bittabs_reverse),
+                          transcript_evaluators_get_single(exon_evaluators),
+                          transcript_evaluators_get_single(
+                            exon_evaluators_collapsed));
+      break;
+    case TRANSCRIPT_FEATURE_TYPE_INITIAL:
+      determine_true_exon(gn, predicted_strand, exondiff, predicted_range,
+                          transcript_exons_get_initial(exons_forward),
+                          transcript_exons_get_initial(exons_reverse),
+                          transcript_counts_get_initial(counts_forward),
+                          transcript_counts_get_initial(counts_reverse),
+                          transcript_bittabs_get_initial(exon_bittabs_forward),
+                          transcript_bittabs_get_initial(exon_bittabs_reverse),
+                          transcript_evaluators_get_initial(exon_evaluators),
+                          transcript_evaluators_get_initial(
+                            exon_evaluators_collapsed));
+      break;
+    case TRANSCRIPT_FEATURE_TYPE_INTERNAL:
+      determine_true_exon(gn, predicted_strand, exondiff, predicted_range,
+                          transcript_exons_get_internal(exons_forward),
+                          transcript_exons_get_internal(exons_reverse),
+                          transcript_counts_get_internal(counts_forward),
+                          transcript_counts_get_internal(counts_reverse),
+                          transcript_bittabs_get_internal(exon_bittabs_forward),
+                          transcript_bittabs_get_internal(exon_bittabs_reverse),
+                          transcript_evaluators_get_internal(exon_evaluators),
+                          transcript_evaluators_get_internal(
+                            exon_evaluators_collapsed));
+      break;
+    case TRANSCRIPT_FEATURE_TYPE_TERMINAL:
+      determine_true_exon(gn, predicted_strand, exondiff, predicted_range,
+                          transcript_exons_get_terminal(exons_forward),
+                          transcript_exons_get_terminal(exons_reverse),
+                          transcript_counts_get_terminal(counts_forward),
+                          transcript_counts_get_terminal(counts_reverse),
+                          transcript_bittabs_get_terminal(exon_bittabs_forward),
+                          transcript_bittabs_get_terminal(exon_bittabs_reverse),
+                          transcript_evaluators_get_terminal(exon_evaluators),
+                          transcript_evaluators_get_terminal(
+                            exon_evaluators_collapsed));
+      break;
+    case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED: assert(0);
+  }
+}
+
 static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
 {
   Process_predicted_feature_info *info = (Process_predicted_feature_info*) data;
@@ -823,81 +897,16 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
       switch (predicted_strand) {
         case STRAND_FORWARD:
         case STRAND_REVERSE:
-          determine_true_exon(gn, predicted_strand, info->exondiff,
-                              &predicted_range,
-            transcript_exons_get_all(info->slot->mRNA_exons_forward),
-            transcript_exons_get_all(info->slot->mRNA_exons_reverse),
-            transcript_counts_get_all(info->slot->mRNA_counts_forward),
-            transcript_counts_get_all(info->slot->mRNA_counts_reverse),
-            transcript_bittabs_get_all(info->slot->mRNA_exon_bittabs_forward),
-            transcript_bittabs_get_all(info->slot->mRNA_exon_bittabs_reverse),
-            transcript_evaluators_get_all(info->mRNA_exon_evaluators),
-            transcript_evaluators_get_all(info
-                                          ->mRNA_exon_evaluators_collapsed));
-          switch (genome_feature_get_transcriptfeaturetype((GenomeFeature*)
-                                                           gn)) {
-            case TRANSCRIPT_FEATURE_TYPE_SINGLE:
-              determine_true_exon(gn, predicted_strand, info->exondiff,
-                                  &predicted_range,
-                transcript_exons_get_single(info->slot->mRNA_exons_forward),
-                transcript_exons_get_single(info->slot->mRNA_exons_reverse),
-                transcript_counts_get_single(info->slot->mRNA_counts_forward),
-                transcript_counts_get_single(info->slot->mRNA_counts_reverse),
-                transcript_bittabs_get_single(info->slot
-                                              ->mRNA_exon_bittabs_forward),
-                transcript_bittabs_get_single(info->slot
-                                              ->mRNA_exon_bittabs_reverse),
-                transcript_evaluators_get_single(info->mRNA_exon_evaluators),
-                transcript_evaluators_get_single(info
-                                             ->mRNA_exon_evaluators_collapsed));
-              break;
-            case TRANSCRIPT_FEATURE_TYPE_INITIAL:
-              determine_true_exon(gn, predicted_strand, info->exondiff,
-                                  &predicted_range,
-                transcript_exons_get_initial(info->slot->mRNA_exons_forward),
-                transcript_exons_get_initial(info->slot->mRNA_exons_reverse),
-                transcript_counts_get_initial(info->slot->mRNA_counts_forward),
-                transcript_counts_get_initial(info->slot->mRNA_counts_reverse),
-                transcript_bittabs_get_initial(info->slot
-                                              ->mRNA_exon_bittabs_forward),
-                transcript_bittabs_get_initial(info->slot
-                                              ->mRNA_exon_bittabs_reverse),
-                transcript_evaluators_get_initial(info->mRNA_exon_evaluators),
-                transcript_evaluators_get_initial(info
-                                             ->mRNA_exon_evaluators_collapsed));
-              break;
-            case TRANSCRIPT_FEATURE_TYPE_INTERNAL:
-              determine_true_exon(gn, predicted_strand, info->exondiff,
-                                  &predicted_range,
-                transcript_exons_get_internal(info->slot->mRNA_exons_forward),
-                transcript_exons_get_internal(info->slot->mRNA_exons_reverse),
-                transcript_counts_get_internal(info->slot->mRNA_counts_forward),
-                transcript_counts_get_internal(info->slot->mRNA_counts_reverse),
-                transcript_bittabs_get_internal(info->slot
-                                              ->mRNA_exon_bittabs_forward),
-                transcript_bittabs_get_internal(info->slot
-                                              ->mRNA_exon_bittabs_reverse),
-                transcript_evaluators_get_internal(info->mRNA_exon_evaluators),
-                transcript_evaluators_get_internal(info
-                                             ->mRNA_exon_evaluators_collapsed));
-              break;
-            case TRANSCRIPT_FEATURE_TYPE_TERMINAL:
-              determine_true_exon(gn, predicted_strand, info->exondiff,
-                                  &predicted_range,
-                transcript_exons_get_terminal(info->slot->mRNA_exons_forward),
-                transcript_exons_get_terminal(info->slot->mRNA_exons_reverse),
-                transcript_counts_get_terminal(info->slot->mRNA_counts_forward),
-                transcript_counts_get_terminal(info->slot->mRNA_counts_reverse),
-                transcript_bittabs_get_terminal(info->slot
-                                              ->mRNA_exon_bittabs_forward),
-                transcript_bittabs_get_terminal(info->slot
-                                              ->mRNA_exon_bittabs_reverse),
-                transcript_evaluators_get_terminal(info->mRNA_exon_evaluators),
-                transcript_evaluators_get_terminal(info
-                                             ->mRNA_exon_evaluators_collapsed));
-              break;
-            case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED: assert(0);
-          }
+          store_true_exon(gn, predicted_strand, &predicted_range,
+                          info->exondiff,
+                          info->slot->mRNA_exons_forward,
+                          info->slot->mRNA_exons_reverse,
+                          info->slot->mRNA_counts_forward,
+                          info->slot->mRNA_counts_reverse,
+                          info->slot->mRNA_exon_bittabs_forward,
+                          info->slot->mRNA_exon_bittabs_reverse,
+                          info->mRNA_exon_evaluators,
+                          info->mRNA_exon_evaluators_collapsed);
           break;
         default:
           if (info->verbose) {
@@ -907,9 +916,17 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
       }
       break;
     case gft_CDS:
-      /* store predicted exon (CDS level) */
-      evaluator_add_predicted(transcript_evaluators_get_all(info
-                                                     ->CDS_exon_evaluators), 1);
+      /* store predicted exon (CDS level)*/
+      store_predicted_exon(info->CDS_exon_evaluators, (GenomeFeature*) gn);
+
+      /* store predicted exon (CDS level, collapsed) */
+      store_predicted_exon_collapsed(predicted_strand == STRAND_FORWARD
+                                     ? info->slot->used_CDS_exons_forward
+                                     : info->slot->used_CDS_exons_reverse,
+                                     &predicted_range,
+                                     info->CDS_exon_evaluators_collapsed,
+                                     (GenomeFeature*) gn, env);
+
       /* determine true exon (CDS level) */
       switch (predicted_strand) {
         case STRAND_FORWARD:
