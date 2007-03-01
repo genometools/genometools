@@ -116,4 +116,5 @@ void transcript_exons_delete(TranscriptExons *te, Env *env)
   array_delete(te->exon_array_initial, env);
   array_delete(te->exon_array_internal, env);
   array_delete(te->exon_array_terminal, env);
+  env_ma_free(te, env);
 }
