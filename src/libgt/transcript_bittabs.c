@@ -67,4 +67,5 @@ void transcript_bittabs_delete(TranscriptBittabs *tc, Env *env)
   bittab_delete(tc->bittab_initial, env);
   bittab_delete(tc->bittab_internal, env);
   bittab_delete(tc->bittab_terminal, env);
+  env_ma_free(tc, env);
 }
