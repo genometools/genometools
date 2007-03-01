@@ -276,9 +276,9 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
     transcript_exons_create_bittabs(s->mRNA_exons_forward, env);
   s->mRNA_exon_bittabs_reverse =
     transcript_exons_create_bittabs(s->mRNA_exons_reverse, env);
-  s->mRNA_exon_bittabs_forward =
+  s->CDS_exon_bittabs_forward =
     transcript_exons_create_bittabs(s->CDS_exons_forward, env);
-  s->mRNA_exon_bittabs_reverse =
+  s->CDS_exon_bittabs_reverse =
     transcript_exons_create_bittabs(s->CDS_exons_reverse, env);
 
   return 0;
