@@ -79,4 +79,5 @@ void transcript_evaluators_delete(TranscriptEvaluators *te, Env *env)
   evaluator_delete(te->exon_evaluator_initial, env);
   evaluator_delete(te->exon_evaluator_internal, env);
   evaluator_delete(te->exon_evaluator_terminal, env);
+  env_ma_free(te, env);
 }
