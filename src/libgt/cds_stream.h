@@ -9,14 +9,15 @@
 
 #include <stdio.h>
 #include "genome_stream.h"
+#include "regionmapping.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct CDSStream CDSStream;
 
 const GenomeStreamClass* cds_stream_class(void);
 
-GenomeStream*            cds_stream_new(GenomeStream*,
-                                        const char *sequence_file,
+/* create a CDSSTream, takes ownership of RegionMapping */
+GenomeStream*            cds_stream_new(GenomeStream*, RegionMapping*,
                                         const char *source, Env*);
 
 #endif

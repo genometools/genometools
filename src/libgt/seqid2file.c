@@ -4,9 +4,9 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "seqid2fileoptions.h"
+#include "seqid2file.h"
 
-void seqid2fileoptions(OptionParser *op, Str *seqfile, Str *regionmapping,
+void seqid2file_options(OptionParser *op, Str *seqfile, Str *regionmapping,
                        Env *env)
 {
   Option *seqfile_option, *regionmapping_option;
@@ -30,4 +30,18 @@ void seqid2fileoptions(OptionParser *op, Str *seqfile, Str *regionmapping,
 
   /* the options -seqfile and -regionmapping exclude each other */
   option_exclude(seqfile_option, regionmapping_option, env);
+}
+
+RegionMapping* seqid2file_regionmapping_new(Str *seqfile, Str *regionmapping,
+                                            Env *env)
+{
+  env_error_check(env);
+  assert(seqfile && regionmapping);
+  assert(str_length(seqfile) || str_length(regionmapping));
+  assert(!(str_length(seqfile) && str_length(regionmapping)));
+  /* create region mapping */
+  if (str_length(seqfile))
+    return regionmapping_new_seqfile(seqfile, env);
+  else
+    return regionmapping_new_mapping(regionmapping, env);
 }

@@ -11,9 +11,9 @@
 typedef struct CDSVisitor CDSVisitor;
 
 #include "genome_visitor.h"
+#include "regionmapping.h"
 
 const GenomeVisitorClass* cds_visitor_class(void);
-GenomeVisitor*            cds_visitor_new(Str *sequence_file, Str *source,
-                                          Env*);
+GenomeVisitor*            cds_visitor_new(RegionMapping* , Str *source, Env*);
 
 #endif

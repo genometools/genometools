@@ -45,7 +45,7 @@ static OPrval parse_options(int *parsed_args, ExtractFeatArguments *arguments,
   option_parser_add_option(op, option, env);
 
   /* -seqfile and -regionmapping */
-  seqid2fileoptions(op, arguments->seqfile, arguments->regionmapping, env);
+  seqid2file_options(op, arguments->seqfile, arguments->regionmapping, env);
 
   /* -v */
   option = option_new_verbose(&arguments->verbose, env);
@@ -101,14 +101,8 @@ int gt_extractfeat(int argc, char *argv[], Env *env)
                                                arguments.verbose, env);
 
     /* create region mapping */
-    assert(str_length(arguments.seqfile) ||
-           str_length(arguments.regionmapping));
-    assert(!(str_length(arguments.seqfile) &&
-             str_length(arguments.regionmapping)));
-    if (str_length(arguments.seqfile))
-      regionmapping = regionmapping_new_seqfile(arguments.seqfile, env);
-    else
-      regionmapping = regionmapping_new_mapping(arguments.regionmapping, env);
+    regionmapping = seqid2file_regionmapping_new(arguments.seqfile,
+                                                 arguments.regionmapping, env);
     if (!regionmapping)
       has_err = -1;
   }

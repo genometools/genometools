@@ -190,23 +190,13 @@ static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
   return has_err;
 }
 
-static int extractfeat_visitor_sequence_region(GenomeVisitor *gv,
-                                               SequenceRegion *sr, Env *env)
-{
-  ExtractFeatVisitor *efv;
-  int has_err = 0;
-  env_error_check(env);
-  efv = extractfeat_visitor_cast(gv);
-  return has_err;
-}
-
 const GenomeVisitorClass* extractfeat_visitor_class()
 {
   static const GenomeVisitorClass gvc = { sizeof (ExtractFeatVisitor),
                                           extractfeat_visitor_free,
                                           NULL,
                                           extractfeat_visitor_genome_feature,
-                                          extractfeat_visitor_sequence_region,
+                                          NULL,
                                           NULL };
   return &gvc;
 }

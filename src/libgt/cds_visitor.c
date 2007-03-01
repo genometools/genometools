@@ -17,8 +17,7 @@
 
 struct CDSVisitor {
   const GenomeVisitor parent_instance;
-  Str *sequence_file,
-      *source;
+  Str *source;
   Splicedseq *splicedseq; /* the (spliced) sequence of the currently considered
                              gene */
   Bioseq *bioseq;
@@ -31,7 +30,6 @@ static void cds_visitor_free(GenomeVisitor *gv, Env *env)
 {
   CDSVisitor *cds_visitor = cds_visitor_cast(gv);
   assert(cds_visitor);
-  str_delete(cds_visitor->sequence_file, env);
   str_delete(cds_visitor->source, env);
   splicedseq_delete(cds_visitor->splicedseq, env);
   bioseq_delete(cds_visitor->bioseq, env);
@@ -180,46 +178,28 @@ static int cds_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 
 }
 
-static int cds_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                       Env *env)
-{
-  CDSVisitor *cds_visitor;
-  env_error_check(env);
-  cds_visitor = cds_visitor_cast(gv);
-  /* check if the given sequence file contains this sequence (region) */
-  if (!bioseq_contains_sequence(cds_visitor->bioseq,
-                                str_get(genome_node_get_seqid((GenomeNode*)
-                                                              sr)), env)) {
-    env_error_set(env, "sequence \"%s\" not contained in sequence file \"%s\"",
-              str_get(genome_node_get_seqid((GenomeNode*) sr)),
-              str_get(cds_visitor->sequence_file));
-    return -1;
-  }
-  return 0;
-}
-
 const GenomeVisitorClass* cds_visitor_class()
 {
   static const GenomeVisitorClass gvc = { sizeof (CDSVisitor),
                                           cds_visitor_free,
                                           NULL,
                                           cds_visitor_genome_feature,
-                                          cds_visitor_sequence_region,
+                                          NULL,
                                           NULL };
   return &gvc;
 }
 
-GenomeVisitor* cds_visitor_new(Str *sequence_file, Str *source, Env *env)
+GenomeVisitor* cds_visitor_new(RegionMapping *rm, Str *source, Env *env)
 {
   GenomeVisitor *gv;
   CDSVisitor *cds_visitor;
   env_error_check(env);
+  assert(rm);
   gv = genome_visitor_create(cds_visitor_class(), env);
   cds_visitor = cds_visitor_cast(gv);
-  cds_visitor->sequence_file = str_ref(sequence_file);
   cds_visitor->source = str_ref(source);
   cds_visitor->splicedseq = splicedseq_new(env);
-  cds_visitor->bioseq = bioseq_new_str(sequence_file, env);
+  /* cds_visitor->bioseq = bioseq_new_str(sequence_file, env); */
   if (!cds_visitor->bioseq) {
     cds_visitor_free(gv, env);
     return NULL;
