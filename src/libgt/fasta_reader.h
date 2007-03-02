@@ -12,17 +12,18 @@
 typedef struct FastaReader FastaReader;
 
 /* gets called for each description (the start of a fasta entry) */
-typedef void (*FastaReader_proc_description)(Str*, void *data);
+typedef int (*FastaReaderProcDescription)(Str*, void *data, Env*);
 /* gets called for each character of a fasta entry */
-typedef void (*FastaReader_proc_character)(char, void *data);
+typedef int (*FastaReaderProcCharacter)(char, void *data, Env*);
 /* gets called after a fasta entry has been read */
-typedef void (*FastaReader_proc_sequence_length)(unsigned long, void *data);
+typedef int (*FastaReaderProcSequenceLength)(unsigned long, void *data, Env*);
 
+/* construct a new fasta reader for the file named <sequence_filename>, pass
+   NULL to read from stdin */
 FastaReader* fasta_reader_new(Str *sequence_filename, Env*);
-int          fasta_reader_run(FastaReader*, FastaReader_proc_description,
-                              FastaReader_proc_character,
-                              FastaReader_proc_sequence_length, void *data,
-                              Env*);
+int          fasta_reader_run(FastaReader*, FastaReaderProcDescription,
+                              FastaReaderProcCharacter,
+                              FastaReaderProcSequenceLength, void *data, Env*);
 void         fasta_reader_delete(FastaReader*, Env*);
 
 #endif

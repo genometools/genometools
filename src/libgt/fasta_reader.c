@@ -34,9 +34,9 @@ FastaReader* fasta_reader_new(Str *sequence_filename, Env *env)
 }
 
 int fasta_reader_run(FastaReader *fr,
-                     FastaReader_proc_description proc_description,
-                     FastaReader_proc_character proc_character,
-                     FastaReader_proc_sequence_length proc_sequence_length,
+                     FastaReaderProcDescription proc_description,
+                     FastaReaderProcCharacter proc_character,
+                     FastaReaderProcSequenceLength proc_sequence_length,
                      void *data, Env *env)
 {
   unsigned char cc;
@@ -73,12 +73,15 @@ int fasta_reader_run(FastaReader *fr,
       case READING_DESCRIPTION:
         if (cc == '\n') {
           if (proc_description) {
-            proc_description(description, data);
-            str_reset(description);
+            has_err = proc_description(description, data, env);
+            if (!has_err)
+              str_reset(description);
           }
-          sequence_length = 0;
-          line_counter++;
-          state = READING_SEQUENCE_AFTER_NEWLINE;
+          if (!has_err) {
+            sequence_length = 0;
+            line_counter++;
+            state = READING_SEQUENCE_AFTER_NEWLINE;
+          }
         }
         else if (proc_description)
           str_append_char(description, cc, env);
@@ -90,10 +93,13 @@ int fasta_reader_run(FastaReader *fr,
             env_error_set(env, "empty sequence after description given in line "
                           "%lu", line_counter - 1);
             has_err = -1;
+            break;
           }
           else {
             if (proc_sequence_length)
-              proc_sequence_length(sequence_length, data);
+              has_err = proc_sequence_length(sequence_length, data, env);
+            if (has_err)
+              break;
             state = READING_DESCRIPTION;
             continue;
           }
@@ -107,7 +113,7 @@ int fasta_reader_run(FastaReader *fr,
         else {
           sequence_length++;
           if (proc_character)
-            proc_character(cc, data);
+            has_err = proc_character(cc, data, env);
         }
         break;
     }
@@ -136,7 +142,7 @@ int fasta_reader_run(FastaReader *fr,
           has_err = -1;
         }
         else if (proc_sequence_length)
-          proc_sequence_length(sequence_length, data);
+          has_err = proc_sequence_length(sequence_length, data, env);
     }
   }
 

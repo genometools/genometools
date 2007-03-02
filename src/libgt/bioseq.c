@@ -8,6 +8,7 @@
 #include "array.h"
 #include "bioseq.h"
 #include "cstr.h"
+#include "dynalloc.h"
 #include "error.h"
 #include "fasta.h"
 #include "fasta_reader.h"
@@ -21,12 +22,14 @@
 #include "xposix.h"
 
 struct Bioseq {
+  bool use_stdin;
   Str *sequence_file;
   Seq **seqs;
   Array *descriptions,
         *sequence_ranges;
   char *raw_sequence;
-  size_t raw_sequence_length;
+  size_t raw_sequence_length,
+         allocated;
   Alpha *alpha;
 };
 
@@ -34,29 +37,59 @@ typedef struct {
   FILE *bioseq_index,
        *bioseq_raw;
   unsigned long offset;
+  Bioseq *bs;
 } Construct_bioseq_files_info;
 
-static void proc_description(Str *description, void *data)
+static int proc_description(Str *description, void *data, Env *env)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
-  if (str_length(description))
-    xfputs(str_get(description), info->bioseq_index);
-  xfputc('\n', info->bioseq_index);
+  char *description_cstr;
+  env_error_check(env);
+  if (info->bs->use_stdin) {
+    description = cstr_dup(str_get(description), env);
+    array_add(info->bs->descriptions, description_cstr, env);
+  }
+  else {
+    if (str_length(description))
+      xfputs(str_get(description), info->bioseq_index);
+    xfputc('\n', info->bioseq_index);
+  }
+  return 0;
 }
 
-static void proc_character(char character, void *data)
+static int proc_character(char character, void *data, Env *env)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
-  xfputc(character, info->bioseq_raw);
+  env_error_check(env);
+  if (info->bs->use_stdin) {
+    info->bs->raw_sequence = dynalloc(info->bs->raw_sequence,
+                                      &info->bs->allocated,
+                                      info->bs->raw_sequence_length + 1, env);
+    info->bs->raw_sequence[info->bs->raw_sequence_length++] == character;
+  }
+  else
+    xfputc(character, info->bioseq_raw);
+  return 0;
 }
 
-static void proc_sequence_length(unsigned long sequence_length, void *data)
+static int proc_sequence_length(unsigned long sequence_length, void *data,
+                                Env *env)
 {
   Construct_bioseq_files_info *info = (Construct_bioseq_files_info*) data;
-  fprintf(info->bioseq_index, "%lu\n", info->offset);
-  assert(sequence_length);
-  fprintf(info->bioseq_index, "%lu\n", info->offset + sequence_length - 1);
-  info->offset += sequence_length;
+  Range range;
+  env_error_check(env);
+  if (info->bs->use_stdin) {
+    range.start = info->offset;
+    range.end = info->offset + sequence_length - 1;
+    array_add(info->bs->sequence_ranges, range, env);
+  }
+  else {
+    fprintf(info->bioseq_index, "%lu\n", info->offset);
+    assert(sequence_length);
+    fprintf(info->bioseq_index, "%lu\n", info->offset + sequence_length - 1);
+    info->offset += sequence_length;
+  }
+  return 0;
 }
 
 /* this global variables are necessary for the signal handler below */
@@ -137,8 +170,8 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
   return has_err;
 }
 
-static int construct_bioseq_files(Str *bioseq_index_file, Str *bioseq_raw_file,
-                                  Str *sequence_file, Env *env)
+static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
+                                  Str *bioseq_raw_file, Env *env)
 {
   FastaReader *fasta_reader;
   int has_err;
@@ -146,56 +179,67 @@ static int construct_bioseq_files(Str *bioseq_index_file, Str *bioseq_raw_file,
   env_error_check(env);
 
   /* open files & init */
-  bioseq_files_info.bioseq_index = xfopen(str_get(bioseq_index_file), "w");
-  bioseq_files_info.bioseq_raw = xfopen(str_get(bioseq_raw_file), "w");
+  if (!bs->use_stdin) {
+    bioseq_files_info.bioseq_index = xfopen(str_get(bioseq_index_file), "w");
+    bioseq_files_info.bioseq_raw = xfopen(str_get(bioseq_raw_file), "w");
+  }
   bioseq_files_info.offset = 0;
+  bioseq_files_info.bs = bs;
 
   /* register the signal handler to remove incomplete files upon termination */
-  bioseq_index_filename = str_get(bioseq_index_file);
-  bioseq_raw_filename = str_get(bioseq_raw_file);
-  sig_register_all(remove_bioseq_files);
+  if (!bs->use_stdin) {
+    bioseq_index_filename = str_get(bioseq_index_file);
+    bioseq_raw_filename = str_get(bioseq_raw_file);
+    sig_register_all(remove_bioseq_files);
+  }
 
   /* read fasta file */
-  fasta_reader = fasta_reader_new(sequence_file, env);
+  fasta_reader = fasta_reader_new(bs->use_stdin ? NULL : bs->sequence_file,
+                                  env);
   has_err = fasta_reader_run(fasta_reader, proc_description, proc_character,
-                   proc_sequence_length, &bioseq_files_info, env);
+                             proc_sequence_length, &bioseq_files_info, env);
   fasta_reader_delete(fasta_reader, env);
 
   /* unregister the signal handler */
-  sig_unregister_all();
+  if (!bs->use_stdin)
+    sig_unregister_all();
 
   /* close files */
-  xfclose(bioseq_files_info.bioseq_index);
-  xfclose(bioseq_files_info.bioseq_raw);
+  if (!bs->use_stdin) {
+    xfclose(bioseq_files_info.bioseq_index);
+    xfclose(bioseq_files_info.bioseq_raw);
+  }
 
   return has_err;
 }
 
 static int bioseq_fill(Bioseq *bs, bool recreate, Env *env)
 {
-  Str *bioseq_index_file,
-      *bioseq_raw_file;
+  Str *bioseq_index_file = NULL,
+      *bioseq_raw_file = NULL;
   int has_err = 0;
 
   assert(!bs->raw_sequence);
 
   /* construct file names */
-  bioseq_index_file = str_clone(bs->sequence_file, env);
-  str_append_cstr(bioseq_index_file, GT_BIOSEQ_INDEX, env);
-  bioseq_raw_file = str_clone(bs->sequence_file, env);
-  str_append_cstr(bioseq_raw_file, GT_BIOSEQ_RAW, env);
+  if (!bs->use_stdin) {
+    bioseq_index_file = str_clone(bs->sequence_file, env);
+    str_append_cstr(bioseq_index_file, GT_BIOSEQ_INDEX, env);
+    bioseq_raw_file = str_clone(bs->sequence_file, env);
+    str_append_cstr(bioseq_raw_file, GT_BIOSEQ_RAW, env);
+  }
 
   /* construct the bioseq files if necessary */
-  if (recreate ||
+  if (recreate || bs->use_stdin ||
       !file_exists(str_get(bioseq_index_file)) ||
       !file_exists(str_get(bioseq_raw_file)) ||
       file_is_newer(str_get(bs->sequence_file), str_get(bioseq_index_file)) ||
       file_is_newer(str_get(bs->sequence_file), str_get(bioseq_raw_file))) {
-    has_err = construct_bioseq_files(bioseq_index_file, bioseq_raw_file,
-                                     bs->sequence_file, env);
+    has_err = construct_bioseq_files(bs, bioseq_index_file, bioseq_raw_file,
+                                     env);
   }
 
-  if (!has_err) {
+  if (!has_err && !bs->use_stdin) {
     /* fill the bioseq */
     has_err = fill_bioseq(bs, str_get(bioseq_index_file),
                           str_get(bioseq_raw_file), env);
@@ -208,14 +252,16 @@ static int bioseq_fill(Bioseq *bs, bool recreate, Env *env)
   return has_err;
 }
 
-static Bioseq* bioseq_new_with_recreate(Str *sequence_file,
-                                        bool recreate, Env *env)
+static Bioseq* bioseq_new_with_recreate(Str *sequence_file, bool recreate,
+                                        Env *env)
 {
   Bioseq *bs;
   int has_err = 0;
   env_error_check(env);
   bs = env_ma_calloc(env, 1, sizeof (Bioseq));
-  if (!file_exists(str_get(sequence_file))) {
+  if (!strcmp(str_get(sequence_file), "-"))
+    bs->use_stdin = true;
+  if (!bs->use_stdin && !file_exists(str_get(sequence_file))) {
     env_error_set(env, "sequence file \"%s\" does not exist or is not readable",
               str_get(sequence_file));
     has_err = -1;
@@ -333,7 +379,10 @@ void bioseq_delete(Bioseq *bs, Env *env)
     env_ma_free(*(char**) array_get(bs->descriptions, i), env);
   array_delete(bs->descriptions, env);
   array_delete(bs->sequence_ranges, env);
-  xmunmap(bs->raw_sequence, bs->raw_sequence_length);
+  if (bs->use_stdin)
+    env_ma_free(bs->raw_sequence, env);
+  else
+    xmunmap(bs->raw_sequence, bs->raw_sequence_length);
   alpha_delete(bs->alpha, env);
   env_ma_free(bs, env);
 }
