@@ -2,6 +2,7 @@ changes in version 0.7.0:
 
 - `gt eval` shows much more details
 - `gt cds` has new options -seqfile and -regionmapping (interface change)
+- `gt bioseq` can now read from stdin, too
 
 changes in version 0.6.9:
 

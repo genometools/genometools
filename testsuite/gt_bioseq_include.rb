@@ -13,6 +13,14 @@ end
   end
 end
 
+1.upto(7) do |i|
+  Name "gt bioseq fail #{i} (stdin)"
+  Keywords "gt_bioseq"
+  Test do
+    run_test("cat #{$testdata}gt_bioseq_fail_#{i}.fas | #{$bin}gt bioseq -recreate -", :retval => 1)
+  end
+end
+
 Name "gt bioseq test 1"
 Keywords "gt_bioseq"
 Test do
@@ -33,6 +41,12 @@ Test do
   if (old_bsi_mtime != new_bsi_mtime) or (old_bsr_mtime != new_bsr_mtime) then  
     raise TestFailed, "index files have been recreated"
   end
+end
+
+Name "gt bioseq test 1 (stdin)"
+Keywords "gt_bioseq"
+Test do
+  run_test "cat #{$testdata}gt_bioseq_succ_1.fas | #{$bin}gt bioseq -"
 end
 
 Name "gt bioseq test 2"
@@ -57,10 +71,23 @@ Test do
   end
 end
 
+Name "gt bioseq test 2 (stdin)"
+Keywords "gt_bioseq"
+Test do
+  run_test "cat #{$testdata}gt_bioseq_succ_2.fas | #{$bin}gt bioseq -"
+end
+
 Name "gt bioseq test 3"
 Keywords "gt_bioseq"
 Test do
   run_test "#{$bin}gt bioseq -recreate -showfasta -width 70 #{$testdata}gt_bioseq_succ_3.fas" 
+  run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.fas"
+end
+
+Name "gt bioseq test 3 (stdin)"
+Keywords "gt_bioseq"
+Test do
+  run_test "cat #{$testdata}gt_bioseq_succ_3.fas | #{$bin}gt bioseq -recreate -showfasta -width 70 -" 
   run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.fas"
 end
 
@@ -69,6 +96,15 @@ end
   Keywords "gt_bioseq"
   Test do
     run_test "#{$bin}gt bioseq -showseqnum #{i} -width 70 #{$testdata}gt_bioseq_succ_3.fas"
+    run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.out#{i}"
+  end
+end
+
+1.upto(3) do |i|
+  Name "gt bioseq test 3 out #{i} (stdint)"
+  Keywords "gt_bioseq"
+  Test do
+    run_test "cat #{$testdata}gt_bioseq_succ_3.fas | #{$bin}gt bioseq -showseqnum #{i} -width 70 -"
     run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.out#{i}"
   end
 end
@@ -86,9 +122,20 @@ Test do
   run_test "#{$bin}gt bioseq -stat #{$testdata}gt_bioseq_succ_3.fas"
 end
 
+Name "gt bioseq test 3 stat (stdin)"
+Keywords "gt_bioseq"
+Test do
+  run_test "cat #{$testdata}gt_bioseq_succ_3.fas | #{$bin}gt bioseq -stat -"
+end
+
 Name "gt bioseq test multiple sequence files"
 Keywords "gt_bioseq"
 Test do
   run_test "#{$bin}gt bioseq -recreate #{$testdata}gt_bioseq_succ_1.fas #{$testdata}gt_bioseq_succ_2.fas"
 end
 
+Name "gt bioseq test multiple sequence files (incl. stdin)"
+Keywords "gt_bioseq"
+Test do
+  run_test "cat #{$testdata}gt_bioseq_succ_2.fas | #{$bin}gt bioseq -recreate #{$testdata}gt_bioseq_succ_1.fas -"
+end

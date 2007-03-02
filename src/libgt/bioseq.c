@@ -46,7 +46,7 @@ static int proc_description(Str *description, void *data, Env *env)
   char *description_cstr;
   env_error_check(env);
   if (info->bs->use_stdin) {
-    description = cstr_dup(str_get(description), env);
+    description_cstr = cstr_dup(str_get(description), env);
     array_add(info->bs->descriptions, description_cstr, env);
   }
   else {
@@ -65,7 +65,7 @@ static int proc_character(char character, void *data, Env *env)
     info->bs->raw_sequence = dynalloc(info->bs->raw_sequence,
                                       &info->bs->allocated,
                                       info->bs->raw_sequence_length + 1, env);
-    info->bs->raw_sequence[info->bs->raw_sequence_length++] == character;
+    info->bs->raw_sequence[info->bs->raw_sequence_length++] = character;
   }
   else
     xfputc(character, info->bioseq_raw);
@@ -87,8 +87,8 @@ static int proc_sequence_length(unsigned long sequence_length, void *data,
     fprintf(info->bioseq_index, "%lu\n", info->offset);
     assert(sequence_length);
     fprintf(info->bioseq_index, "%lu\n", info->offset + sequence_length - 1);
-    info->offset += sequence_length;
   }
+  info->offset += sequence_length;
   return 0;
 }
 

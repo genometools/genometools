@@ -48,16 +48,19 @@ GenFile*  genfile_xopen(GenFileMode genfilemode, const char *path,
 int genfile_xread(GenFile *genfile, void *buf, size_t nbytes)
 {
   int rval;
-  assert(genfile);
-  switch (genfile->mode) {
-    case UNCOMPRESSED:
-      rval = xfread(buf, 1, nbytes, genfile->fileptr.file);
-      break;
-    case GZIP:
-      rval = xgzread(genfile->fileptr.gzfile, buf, nbytes);
-      break;
-    default: assert(0);
+  if (genfile) {
+    switch (genfile->mode) {
+      case UNCOMPRESSED:
+        rval = xfread(buf, 1, nbytes, genfile->fileptr.file);
+        break;
+      case GZIP:
+        rval = xgzread(genfile->fileptr.gzfile, buf, nbytes);
+        break;
+      default: assert(0);
+    }
   }
+  else
+    rval = xfread(buf, 1, nbytes, stdin);
   return rval;
 }
 
