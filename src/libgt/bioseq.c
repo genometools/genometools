@@ -13,6 +13,7 @@
 #include "fasta.h"
 #include "fasta_reader.h"
 #include "fileutils.h"
+#include "gc_content.h"
 #include "grep.h"
 #include "range.h"
 #include "sig.h"
@@ -306,16 +307,22 @@ Bioseq* bioseq_new_str(Str *sequence_file, Env *env)
   return bioseq_new_with_recreate(sequence_file, false, env);
 }
 
+static void determine_alpha_if_necessary(Bioseq *bs, Env *env)
+{
+  assert(bs);
+  if (!bs->alpha) {
+    bs->alpha = alpha_guess(bioseq_get_raw_sequence(bs),
+                            bioseq_get_raw_sequence_length(bs), env);
+  }
+}
+
 Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx, Env *env)
 {
   assert(bs);
   assert(idx < array_size(bs->descriptions));
   if (!bs->seqs)
     bs->seqs = env_ma_calloc(env, array_size(bs->descriptions), sizeof (Seq*));
-  if (!bs->alpha) {
-    bs->alpha = alpha_guess(bioseq_get_raw_sequence(bs),
-                            bioseq_get_raw_sequence_length(bs), env);
-  }
+  determine_alpha_if_necessary(bs, env);
   if (!bs->seqs[idx]) {
     bs->seqs[idx] = seq_new(bioseq_get_sequence(bs, idx),
                             bioseq_get_sequence_length(bs, idx),
@@ -409,6 +416,22 @@ void bioseq_show_sequence_as_fasta(Bioseq *bs, unsigned long seqnum,
                    bioseq_get_sequence(bs, seqnum),
                    bioseq_get_sequence_length(bs, seqnum), width);
 
+}
+
+void bioseq_show_gc_content(Bioseq *bs, Env *env)
+{
+  Alpha *dna_alpha;
+  env_error_check(env);
+  assert(bs);
+  determine_alpha_if_necessary(bs, env);
+  dna_alpha = alpha_new_dna(env);
+  if (alpha_is_compatible_with_alpha(bs->alpha, dna_alpha)) {
+    printf("showing GC-content for sequence file \"%s\"\n",
+           str_get(bs->sequence_file));
+    gc_content_show(bioseq_get_raw_sequence(bs),
+                    bioseq_get_raw_sequence_length(bs), bs->alpha, env);
+  }
+  alpha_delete(dna_alpha, env);
 }
 
 void bioseq_show_stat(Bioseq *bs)

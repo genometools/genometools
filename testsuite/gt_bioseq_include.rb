@@ -139,3 +139,11 @@ Keywords "gt_bioseq"
 Test do
   run_test "cat #{$testdata}gt_bioseq_succ_2.fas | #{$bin}gt bioseq -recreate #{$testdata}gt_bioseq_succ_1.fas -"
 end
+
+Name "gt bioseq test -gc-content"
+Keywords "gt_bioseq"
+Test do
+  run_test "cat #{$testdata}gt_bioseq_succ_3.fas | #{$bin}gt bioseq -gc-content -"
+  run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.gc"
+end
+

@@ -33,6 +33,7 @@
 #include <libgt/evaluator.h>                 /* evaluator class */
 #include <libgt/fileutils.h>                 /* file utilities module */
 #include <libgt/filter_stream.h>             /* filter stream class */
+#include <libgt/gc_content.h>                /* GC-content module */
 #include <libgt/gff3_in_stream.h>            /* GFF3 input stream class */
 #include <libgt/gff3_out_stream.h>           /* GFF3 output stream class */
 #include <libgt/gtdata.h>                    /* gtdata/ module */

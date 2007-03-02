@@ -9,6 +9,7 @@
 typedef struct {
   bool recreate,
        showfasta,
+       gc_content,
        stat;
   unsigned long showseqnum,
                 width;
@@ -44,6 +45,11 @@ static OPrval parse_options(int *parsed_args, Bioseq_arguments *arguments,
                                            "format)", &arguments->showseqnum,
                                            UNDEFULONG, 1, env);
   option_parser_add_option(op, option_showseqnum, env);
+
+  /* -gc-content */
+  option = option_new_bool("gc-content", "show GC-content on stdout (for DNA "
+                           "files)", &arguments->gc_content, false, env);
+  option_parser_add_option(op, option, env);
 
   /* -stat */
   option_stat = option_new_bool("stat", "show sequence statistics",
@@ -119,6 +125,9 @@ int gt_bioseq(int argc, char *argv[], Env *env)
                                       arguments.width);
       }
     }
+
+    if (!has_err && arguments.gc_content)
+      bioseq_show_gc_content(bioseq, env);
 
     if (!has_err && arguments.stat)
       bioseq_show_stat(bioseq);

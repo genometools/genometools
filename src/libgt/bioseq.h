@@ -40,7 +40,10 @@ void bioseq_show_as_fasta(Bioseq*, unsigned long width);
 void bioseq_show_sequence_as_fasta(Bioseq*, unsigned long seqnum,
                                    unsigned long width);
 
-/* shows bioseq bioseq statistics (on stdout) */
+/* shows GC-content on stdout (for DNA files */
+void bioseq_show_gc_content(Bioseq*, Env*);
+
+/* shows bioseq statistics (on stdout) */
 void bioseq_show_stat(Bioseq*);
 
 #endif
