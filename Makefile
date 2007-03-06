@@ -123,7 +123,7 @@ test: dirs bin/gt
 
 clean:
 	rm -rf obj
-	rm -rf testsuite/stest_testsuite testsuite/stest_stest_testsuite
+	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
 
 cleanup: clean
 	rm -rf lib bin
