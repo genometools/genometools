@@ -104,11 +104,9 @@ const GenomeNodeClass* genome_feature_class()
   return &gnc;
 }
 
-GenomeNode* genome_feature_new(GenomeFeatureType type,
-                                Range range,
-                                Strand strand,
-                                const char *filename,
-                                unsigned long line_number, Env *env)
+GenomeNode* genome_feature_new(GenomeFeatureType type, Range range,
+                               Strand strand, const char *filename,
+                               unsigned long line_number, Env *env)
 {
   GenomeNode *gn = genome_node_create(genome_feature_class(), filename,
                                       line_number, env);
