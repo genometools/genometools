@@ -32,6 +32,12 @@ void seq_set_description(Seq *s, const char *desc)
   s->description = desc;
 }
 
+const char* seq_get_description(Seq *s)
+{
+  assert(s);
+  return s->description;
+}
+
 const char* seq_get_orig(const Seq *s)
 {
   assert(s);

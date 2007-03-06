@@ -316,6 +316,15 @@ static void determine_alpha_if_necessary(Bioseq *bs, Env *env)
   }
 }
 
+Alpha* bioseq_get_alpha(Bioseq *bs, Env *env)
+{
+  env_error_check(env);
+  assert(bs);
+  determine_alpha_if_necessary(bs, env);
+  assert(bs->alpha);
+  return bs->alpha;
+}
+
 Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx, Env *env)
 {
   assert(bs);

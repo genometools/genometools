@@ -78,6 +78,11 @@ Option*        option_new_uint_min(const char *option_str,
                                    unsigned int *value,
                                    unsigned int default_value,
                                    unsigned int min_value, Env*);
+Option*        option_new_uint_max(const char *option_str,
+                                   const char *description,
+                                   unsigned int *value,
+                                   unsigned int default_value,
+                                   unsigned int max_value, Env*);
 Option*        option_new_long(const char *option_str, const char *description,
                                long *value, long default_value, Env*);
 Option*        option_new_ulong(const char *option_str, const char *description,

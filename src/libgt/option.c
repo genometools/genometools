@@ -63,10 +63,14 @@ struct Option {
     unsigned int ui;
     unsigned long ul;
   } min_value;
+  union {
+    unsigned int ui;
+  } max_value;
   bool is_set,
        is_mandatory,
        hide_default,
        min_value_set,
+       max_value_set,
        is_development_option;
   Array *implications, /* contains option arrays, from each array at least one
                           option needs to be set */
@@ -216,7 +220,7 @@ static int show_help(OptionParser *op, bool show_development_options,
                option->default_value.i);
       }
       else if (option->option_type == OPTION_UINT) {
-        printf("%*s  default: %ud\n", (int) max_option_length, "",
+        printf("%*s  default: %u\n", (int) max_option_length, "",
                option->default_value.ui);
       }
       else if (option->option_type == OPTION_LONG) {
@@ -514,6 +518,15 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc, char **argv,
                 }
               }
               if (!has_err) {
+                /* maximum value check */
+                if (option->max_value_set && int_value > option->max_value.ui) {
+                  env_error_set(env, "argument to option \"-%s\" must be an "
+                                "integer <= %u", str_get(option->option_str),
+                                option->max_value.ui);
+                  has_err = -1;
+                }
+              }
+              if (!has_err) {
                 *(unsigned int*) option->value = int_value;
                 option_parsed = true;
               }
@@ -765,10 +778,21 @@ Option* option_new_uint_min(const char *option_str, const char *description,
                             unsigned int *value, unsigned int default_value,
                             unsigned int min_value, Env *env)
 {
-  Option *o = option_new_int(option_str, description, (int*) value,
-                             default_value, env);
+  Option *o = option_new_uint(option_str, description, (int*) value,
+                              default_value, env);
   o->min_value_set = true;
   o->min_value.ui = min_value;
+  return o;
+}
+
+Option* option_new_uint_max(const char *option_str, const char *description,
+                            unsigned int *value, unsigned int default_value,
+                            unsigned int max_value, Env *env)
+{
+  Option *o = option_new_uint(option_str, description, (int*) value,
+                              default_value, env);
+  o->max_value_set = true;
+  o->max_value.ui = max_value;
   return o;
 }
 

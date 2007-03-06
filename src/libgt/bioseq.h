@@ -22,6 +22,7 @@ Bioseq*       bioseq_new(const char *sequence_file, Env*);
 /* construct a new bioseq object (and always create the the bioseq files) */
 Bioseq*       bioseq_new_recreate(const char *sequence_file, Env*);
 Bioseq*       bioseq_new_str(Str* sequence_file, Env*);
+Alpha*        bioseq_get_alpha(Bioseq*, Env*);
 Seq*          bioseq_get_seq(Bioseq*, unsigned long, Env*);
 const char*   bioseq_get_description(Bioseq*, unsigned long);
 const char*   bioseq_get_sequence(Bioseq*, unsigned long);
