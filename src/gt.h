@@ -31,6 +31,7 @@
 #include <libgt/env.h>                       /* environment class */
 #include <libgt/extractfeat_stream.h>        /* extract feature stream class */
 #include <libgt/evaluator.h>                 /* evaluator class */
+#include <libgt/fasta.h>                     /* fasta module */
 #include <libgt/fileutils.h>                 /* file utilities module */
 #include <libgt/filter_stream.h>             /* filter stream class */
 #include <libgt/gc_content.h>                /* GC-content module */
@@ -43,10 +44,12 @@
 #include <libgt/hashtable.h>                 /* hashtable class */
 #include <libgt/hmm.h>                       /* HMM class */
 #include <libgt/linearedist.h>               /* linear edit distance module */
+#include <libgt/mailaddress.h>               /* mailaddress module */
 #include <libgt/merge_stream.h>              /* merge stream class */
 #include <libgt/mergefeat_stream_sorted.h>   /* merge feat. stream class */
 #include <libgt/mergefeat_stream_unsorted.h> /* merge feat. stream class */
 #include <libgt/msa.h>                       /* multiple seq. alignment class */
+#include <libgt/mutate.h>                    /* mutate module */
 #include <libgt/neighborjoining.h>           /* the Neighbor-Joining class */
 #include <libgt/option.h>                    /* option parser class */
 #include <libgt/progressbar.h>               /* progressbar module */
