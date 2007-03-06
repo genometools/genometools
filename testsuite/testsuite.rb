@@ -5,7 +5,7 @@
 # See LICENSE file or http://genometools.org/license.html for license details.
 # 
 
-# the GenomeThreader test suite (employs ``stest'').
+# the GenomeTools test suite (employs ``stest'').
 
 if $0 == __FILE__
   require 'stest'
