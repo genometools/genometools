@@ -7,9 +7,9 @@
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
-#include "alpha.h"
-#include "undef.h"
-#include "xansi.h"
+#include <libgt/alpha.h>
+#include <libgt/undef.h>
+#include <libgt/xansi.h>
 
 #define DNA_WILDCARDS                "nsywrkvbdhmNSYWRKVBDHM"
 #define PROTEIN_CHARACTERS_UPPERCASE "LVIFKREDAGSTNQYWPHMC"

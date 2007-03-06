@@ -7,7 +7,7 @@
 
 #define ST_INCLUDED
 
-#include "env.h"
+#include <libgt/env.h>
 
 typedef unsigned long st_data_t;
 #define ST_DATA_T_DEFINED

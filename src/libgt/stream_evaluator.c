@@ -5,19 +5,19 @@
 */
 
 #include <assert.h>
-#include "bittab.h"
-#include "bsearch.h"
-#include "dlist.h"
-#include "evaluator.h"
-#include "fptr.h"
-#include "gff3_output.h"
-#include "hashtable.h"
-#include "stream_evaluator.h"
-#include "transcript_evaluators.h"
-#include "transcript_exons.h"
-#include "transcript_used_exons.h"
-#include "warning.h"
-#include "xansi.h"
+#include <libgt/bittab.h>
+#include <libgt/bsearch.h>
+#include <libgt/dlist.h>
+#include <libgt/evaluator.h>
+#include <libgt/fptr.h>
+#include <libgt/gff3_output.h>
+#include <libgt/hashtable.h>
+#include <libgt/stream_evaluator.h>
+#include <libgt/transcript_evaluators.h>
+#include <libgt/transcript_exons.h>
+#include <libgt/transcript_used_exons.h>
+#include <libgt/warning.h>
+#include <libgt/xansi.h>
 
 struct StreamEvaluator {
   GenomeStream *reality,

@@ -4,8 +4,8 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "fasta.h"
-#include "xansi.h"
+#include <libgt/fasta.h>
+#include <libgt/xansi.h>
 
 void fasta_show_entry(const char *description, const char *sequence,
                       unsigned long sequence_length, unsigned long width)

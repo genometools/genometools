@@ -7,7 +7,7 @@
 #ifndef DISC_DISTRI_H
 #define DISC_DISTRI_H
 
-#include "env.h"
+#include <libgt/env.h>
 
 /* A descrete distribution */
 typedef struct DiscDistri DiscDistri;

@@ -7,10 +7,10 @@
 #ifndef PARSEUTILS_H
 #define PARSEUTILS_H
 
-#include "env.h"
-#include "range.h"
-#include "phase.h"
-#include "strand.h"
+#include <libgt/env.h>
+#include <libgt/range.h>
+#include <libgt/phase.h>
+#include <libgt/strand.h>
 
 /* enforces that start <= end */
 int parse_range(Range*, const char *start, const char *end,

@@ -5,10 +5,10 @@
 */
 
 #include <assert.h>
-#include "genome_stream_rep.h"
-#include "merge_stream.h"
-#include "undef.h"
-#include "xansi.h"
+#include <libgt/genome_stream_rep.h>
+#include <libgt/merge_stream.h>
+#include <libgt/undef.h>
+#include <libgt/xansi.h>
 
 struct MergeStream {
   const GenomeStream parent_instance;

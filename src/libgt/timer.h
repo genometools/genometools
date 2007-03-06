@@ -10,7 +10,7 @@
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <stdio.h>
-#include "env.h"
+#include <libgt/env.h>
 
 /* the timer class */
 typedef struct Timer Timer;

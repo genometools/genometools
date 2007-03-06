@@ -9,7 +9,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include "str.h"
+#include <libgt/str.h>
 
 bool           file_exists(const char*);
 /* returns 1 if the file with path a has a later modification time then the file

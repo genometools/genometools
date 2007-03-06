@@ -6,13 +6,13 @@
 
 #include <assert.h>
 #include <string.h>
-#include "fileutils.h"
-#include "genome_stream_rep.h"
-#include "gff3_in_stream.h"
-#include "gff3_parser.h"
-#include "progressbar.h"
-#include "queue.h"
-#include "xansi.h"
+#include <libgt/fileutils.h>
+#include <libgt/genome_stream_rep.h>
+#include <libgt/gff3_in_stream.h>
+#include <libgt/gff3_parser.h>
+#include <libgt/progressbar.h>
+#include <libgt/queue.h>
+#include <libgt/xansi.h>
 
 struct GFF3InStream
 {

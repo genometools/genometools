@@ -7,8 +7,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "parseutils.h"
-#include "undef.h"
+#include <libgt/parseutils.h>
+#include <libgt/undef.h>
 
 int parse_range(Range *range, const char *start, const char *end,
                 unsigned long line_number, const char *filename, Env *env)

@@ -5,11 +5,11 @@
 */
 
 #include <stdio.h>
+#include <libgt/mailaddress.h>
 #include "gt_build.h"
 #include "gt_cc.h"
 #include "gt_cflags.h"
 #include "gt_version.h"
-#include "mailaddress.h"
 
 void versionfunc(const char *progname)
 {

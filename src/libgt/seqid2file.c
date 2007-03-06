@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "seqid2file.h"
+#include <libgt/seqid2file.h>
 
 void seqid2file_options(OptionParser *op, Str *seqfile, Str *regionmapping,
                        Env *env)

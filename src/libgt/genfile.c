@@ -7,9 +7,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "genfile.h"
-#include "xansi.h"
-#include "xzlib.h"
+#include <libgt/genfile.h>
+#include <libgt/xansi.h>
+#include <libgt/xzlib.h>
 
 struct GenFile {
   GenFileMode mode;

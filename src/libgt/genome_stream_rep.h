@@ -8,7 +8,7 @@
 #define GENOME_STREAM_REP_H
 
 #include <stdio.h>
-#include "genome_stream.h"
+#include <libgt/genome_stream.h>
 
 struct GenomeStreamClass
 {

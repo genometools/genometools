@@ -6,10 +6,10 @@
 
 #include <assert.h>
 #include <limits.h>
-#include "dlist.h"
-#include "ensure.h"
-#include "mathsupport.h"
-#include "xansi.h"
+#include <libgt/dlist.h>
+#include <libgt/ensure.h>
+#include <libgt/mathsupport.h>
+#include <libgt/xansi.h>
 
 #define NUM_OF_TESTS  100
 #define MAX_SIZE      1024

@@ -7,7 +7,7 @@
 #ifndef GTDATA_H
 #define GTDATA_H
 
-#include "str.h"
+#include <libgt/str.h>
 
 /* This module defines functions working on the ``gtdata'' directory */
 

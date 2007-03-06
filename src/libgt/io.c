@@ -5,9 +5,9 @@
 */
 
 #include <assert.h>
-#include "cstr.h"
-#include "io.h"
-#include "xansi.h"
+#include <libgt/cstr.h>
+#include <libgt/io.h>
+#include <libgt/xansi.h>
 
 struct IO {
   FILE *fp;

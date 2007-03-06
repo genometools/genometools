@@ -5,11 +5,11 @@
 */
 
 #include <assert.h>
-#include "cstr.h"
-#include "dynalloc.h"
-#include "ensure.h"
-#include "str.h"
-#include "xansi.h"
+#include <libgt/cstr.h>
+#include <libgt/dynalloc.h>
+#include <libgt/ensure.h>
+#include <libgt/str.h>
+#include <libgt/xansi.h>
 
 struct Str {
   char *cstr;           /* the actual string (always '\0' terminated) */

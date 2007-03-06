@@ -8,8 +8,8 @@
 #define CDS_STREAM_H
 
 #include <stdio.h>
-#include "genome_stream.h"
-#include "regionmapping.h"
+#include <libgt/genome_stream.h>
+#include <libgt/regionmapping.h>
 
 /* implements the ``genome_stream'' interface */
 typedef struct CDSStream CDSStream;

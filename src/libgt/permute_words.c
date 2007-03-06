@@ -6,7 +6,7 @@
 
 #include <assert.h>
 #include <string.h>
-#include "permute_words.h"
+#include <libgt/permute_words.h>
 
 void permute_word_init(char *w, unsigned long l)
 {

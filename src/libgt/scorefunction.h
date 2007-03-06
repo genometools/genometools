@@ -7,7 +7,7 @@
 #ifndef SCOREFUNCTION_H
 #define SCOREFUNCTION_H
 
-#include "scorematrix.h"
+#include <libgt/scorematrix.h>
 
 typedef struct ScoreFunction ScoreFunction;
 

@@ -9,7 +9,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include "array.h"
+#include <libgt/array.h>
 
 typedef struct Bittab Bittab;
 

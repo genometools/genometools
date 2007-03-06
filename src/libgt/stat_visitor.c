@@ -5,9 +5,9 @@
 */
 
 #include <assert.h>
-#include "disc_distri.h"
-#include "genome_visitor_rep.h"
-#include "stat_visitor.h"
+#include <libgt/disc_distri.h>
+#include <libgt/genome_visitor_rep.h>
+#include <libgt/stat_visitor.h>
 
 struct StatVisitor {
   const GenomeVisitor parent_instance;

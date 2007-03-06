@@ -10,7 +10,7 @@
 /* implements the ``genome visitor'' interface */
 typedef struct MergefeatVisitor MergefeatVisitor;
 
-#include "genome_visitor.h"
+#include <libgt/genome_visitor.h>
 
 const GenomeVisitorClass* mergefeat_visitor_class(void);
 GenomeVisitor*            mergefeat_visitor_new(Env*);

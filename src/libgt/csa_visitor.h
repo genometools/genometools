@@ -10,7 +10,7 @@
 /* implements the ``genome visitor'' interface */
 typedef struct CSAVisitor CSAVisitor;
 
-#include "genome_visitor.h"
+#include <libgt/genome_visitor.h>
 
 const GenomeVisitorClass* csa_visitor_class(void);
 GenomeVisitor*            csa_visitor_new(unsigned long join_length, Env*);

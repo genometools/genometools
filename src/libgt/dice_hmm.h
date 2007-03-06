@@ -6,8 +6,8 @@
 
 #ifndef DICE_HMM
 
-#include "alpha.h"
-#include "hmm.h"
+#include <libgt/alpha.h>
+#include <libgt/hmm.h>
 
 typedef enum {
   DICE_FAIR,

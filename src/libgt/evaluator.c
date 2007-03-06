@@ -6,9 +6,9 @@
 
 #include <assert.h>
 #include <string.h>
-#include "ensure.h"
-#include "evaluator.h"
-#include "xansi.h"
+#include <libgt/ensure.h>
+#include <libgt/evaluator.h>
+#include <libgt/xansi.h>
 
 struct Evaluator {
   unsigned long T, /* true */

@@ -5,9 +5,9 @@
 */
 
 #include <assert.h>
-#include "orf.h"
-#include "range.h"
-#include "undef.h"
+#include <libgt/orf.h>
+#include <libgt/range.h>
+#include <libgt/undef.h>
 
 #define CODONLENGTH 3
 #define START_AMINO 'M'

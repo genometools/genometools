@@ -10,8 +10,8 @@
 /* implements the ``genome visitor'' interface */
 typedef struct FilterVisitor FilterVisitor;
 
-#include "genome_visitor.h"
-#include "env.h"
+#include <libgt/genome_visitor.h>
+#include <libgt/env.h>
 
 const GenomeVisitorClass* filter_visitor_class(void);
 GenomeVisitor*            filter_visitor_new(Str *seqid, Str *typefilter,

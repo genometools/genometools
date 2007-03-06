@@ -7,8 +7,8 @@
 #ifndef TRANSCRIPT_BITTABS_H
 #define TRANSCRIPT_BITTABS_H
 
-#include "bittab.h"
-#include "env.h"
+#include <libgt/bittab.h>
+#include <libgt/env.h>
 
 /* a container class for transcript bittabs */
 typedef struct TranscriptBittabs TranscriptBittabs;

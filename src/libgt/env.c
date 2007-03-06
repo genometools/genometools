@@ -4,12 +4,12 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "cstr.h"
-#include "env.h"
-#include "option.h"
-#include "splitter.h"
-#include "versionfunc.h"
-#include "xansi.h"
+#include <libgt/cstr.h>
+#include <libgt/env.h>
+#include <libgt/option.h>
+#include <libgt/splitter.h>
+#include <libgt/versionfunc.h>
+#include <libgt/xansi.h>
 
 struct Env {
   MA *ma;

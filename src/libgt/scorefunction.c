@@ -5,8 +5,8 @@
 */
 
 #include <assert.h>
-#include "scorefunction.h"
-#include "xansi.h"
+#include <libgt/scorefunction.h>
+#include <libgt/xansi.h>
 
 struct ScoreFunction {
   ScoreMatrix *sm;

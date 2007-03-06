@@ -11,8 +11,8 @@
 typedef struct ExtractFeatVisitor ExtractFeatVisitor;
 
 #include <stdbool.h>
-#include "genome_visitor.h"
-#include "regionmapping.h"
+#include <libgt/genome_visitor.h>
+#include <libgt/regionmapping.h>
 
 const GenomeVisitorClass* extractfeat_visitor_class(void);
 GenomeVisitor*            extractfeat_visitor_new(RegionMapping *rm,

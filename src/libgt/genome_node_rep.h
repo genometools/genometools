@@ -8,9 +8,9 @@
 #define GENOME_NODE_REP_H
 
 #include <stdio.h>
-#include "dlist.h"
-#include "genome_node.h"
-#include "genome_node_info.h"
+#include <libgt/dlist.h>
+#include <libgt/genome_node.h>
+#include <libgt/genome_node_info.h>
 
 /* the ``genome node'' interface */
 struct GenomeNodeClass

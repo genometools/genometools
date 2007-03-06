@@ -13,7 +13,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "env.h"
+#include <libgt/env.h>
 
 /* sets 'match' to true if pattern matches line, to false otherwise */
 int  grep(bool *match, const char *pattern, const char *line, Env*);

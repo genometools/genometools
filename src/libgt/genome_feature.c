@@ -6,15 +6,15 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "cstr.h"
-#include "genome_feature.h"
-#include "genome_feature_type.h"
-#include "genome_node_rep.h"
-#include "hashtable.h"
-#include "range.h"
-#include "strand.h"
-#include "undef.h"
-#include "xansi.h"
+#include <libgt/cstr.h>
+#include <libgt/genome_feature.h>
+#include <libgt/genome_feature_type.h>
+#include <libgt/genome_node_rep.h>
+#include <libgt/hashtable.h>
+#include <libgt/range.h>
+#include <libgt/strand.h>
+#include <libgt/undef.h>
+#include <libgt/xansi.h>
 
 struct GenomeFeature
 {

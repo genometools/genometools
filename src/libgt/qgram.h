@@ -7,8 +7,8 @@
 #ifndef QGRAM_H
 #define QGRAM_H
 
-#include "alpha.h"
-#include "array.h"
+#include <libgt/alpha.h>
+#include <libgt/array.h>
 
 /* encodes a word w of length q over an alphabet of size alpha_size as a unique
    number */

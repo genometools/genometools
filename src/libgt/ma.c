@@ -5,9 +5,9 @@
 */
 
 #include <stdbool.h>
-#include "hashtable.h"
-#include "ma.h"
-#include "xansi.h"
+#include <libgt/hashtable.h>
+#include <libgt/ma.h>
+#include <libgt/xansi.h>
 
 /* the memory allocator class */
 struct MA {

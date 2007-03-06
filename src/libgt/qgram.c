@@ -6,7 +6,7 @@
 
 #include <assert.h>
 #include <math.h>
-#include "qgram.h"
+#include <libgt/qgram.h>
 
 unsigned long qgram_encode(const char *w, unsigned long q,
                            unsigned long alphabet_size)

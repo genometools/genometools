@@ -7,8 +7,8 @@
 #ifndef SCOREMATRIX_H
 #define SCOREMATRIX_H
 
-#include "alpha.h"
-#include "env.h"
+#include <libgt/alpha.h>
+#include <libgt/env.h>
 
 typedef struct ScoreMatrix ScoreMatrix;
 

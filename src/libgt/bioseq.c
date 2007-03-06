@@ -5,22 +5,22 @@
 */
 
 #include <assert.h>
-#include "array.h"
-#include "bioseq.h"
-#include "cstr.h"
-#include "dynalloc.h"
-#include "error.h"
-#include "fasta.h"
-#include "fasta_reader.h"
-#include "fileutils.h"
-#include "gc_content.h"
-#include "grep.h"
-#include "range.h"
-#include "sig.h"
-#include "str.h"
-#include "undef.h"
-#include "xansi.h"
-#include "xposix.h"
+#include <libgt/array.h>
+#include <libgt/bioseq.h>
+#include <libgt/cstr.h>
+#include <libgt/dynalloc.h>
+#include <libgt/error.h>
+#include <libgt/fasta.h>
+#include <libgt/fasta_reader.h>
+#include <libgt/fileutils.h>
+#include <libgt/gc_content.h>
+#include <libgt/grep.h>
+#include <libgt/range.h>
+#include <libgt/sig.h>
+#include <libgt/str.h>
+#include <libgt/undef.h>
+#include <libgt/xansi.h>
+#include <libgt/xposix.h>
 
 struct Bioseq {
   bool use_stdin;

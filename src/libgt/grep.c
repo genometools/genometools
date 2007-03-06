@@ -9,9 +9,9 @@
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "ensure.h"
-#include "error.h"
-#include "grep.h"
+#include <libgt/ensure.h>
+#include <libgt/error.h>
+#include <libgt/grep.h>
 
 static void grep_error(int errcode, regex_t *matcher, Env *env)
 {

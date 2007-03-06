@@ -6,9 +6,9 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include "array.h"
-#include "disc_distri.h"
-#include "xansi.h"
+#include <libgt/array.h>
+#include <libgt/disc_distri.h>
+#include <libgt/xansi.h>
 
 struct DiscDistri {
   Array *values;

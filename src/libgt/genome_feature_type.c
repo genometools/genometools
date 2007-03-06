@@ -7,8 +7,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include "compare.h"
-#include "genome_feature_type.h"
+#include <libgt/compare.h>
+#include <libgt/genome_feature_type.h>
 
 /*
   Keep in sync with ``genome_feature_type'' in ``genome_feature.h''!

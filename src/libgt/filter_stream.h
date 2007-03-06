@@ -7,7 +7,7 @@
 #ifndef FILTER_STREAM_H
 #define FILTER_STREAM_H
 
-#include "genome_stream.h"
+#include <libgt/genome_stream.h>
 
 /* implements the ``genome stream'' interface */
 typedef struct FilterStream FilterStream;

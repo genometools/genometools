@@ -5,10 +5,10 @@
 */
 
 #include <assert.h>
-#include "ensure.h"
-#include "hashtable.h"
-#include "st.h"
-#include "xansi.h"
+#include <libgt/ensure.h>
+#include <libgt/hashtable.h>
+#include <libgt/st.h>
+#include <libgt/xansi.h>
 
 struct Hashtable
 {

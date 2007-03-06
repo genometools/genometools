@@ -5,9 +5,9 @@
 */
 
 #include <assert.h>
-#include "fptr.h"
-#include "genome_stream_rep.h"
-#include "sort_stream.h"
+#include <libgt/fptr.h>
+#include <libgt/genome_stream_rep.h>
+#include <libgt/sort_stream.h>
 
 struct SortStream
 {

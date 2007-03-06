@@ -7,8 +7,8 @@
 #ifndef GFF3_PARSER_H
 #define GFF3_PARSER_H
 
-#include "env.h"
-#include "queue.h"
+#include <libgt/env.h>
+#include <libgt/queue.h>
 
 #define GFF_VERSION         3
 #define GFF_VERSION_PREFIX  "##gff-version"

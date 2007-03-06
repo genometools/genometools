@@ -4,8 +4,8 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "sig.h"
-#include "xposix.h"
+#include <libgt/sig.h>
+#include <libgt/xposix.h>
 
 void sig_register_all(void (*func)(int sigraised))
 {

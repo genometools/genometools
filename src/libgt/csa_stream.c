@@ -5,11 +5,11 @@
 */
 
 #include <assert.h>
-#include "csa_stream.h"
-#include "csa_visitor.h"
-#include "consensus_sa.h"
-#include "genome_stream_rep.h"
-#include "queue.h"
+#include <libgt/csa_stream.h>
+#include <libgt/csa_visitor.h>
+#include <libgt/consensus_sa.h>
+#include <libgt/genome_stream_rep.h>
+#include <libgt/queue.h>
 
 struct CSAStream {
   const GenomeStream parent_instance;

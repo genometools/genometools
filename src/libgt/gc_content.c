@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gc_content.h"
+#include <libgt/gc_content.h>
 
 void gc_content_show(const char *seq, unsigned long len, Alpha *alpha, Env *env)
 {

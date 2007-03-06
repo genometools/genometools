@@ -8,7 +8,7 @@
 #define GENOME_VISITOR_REP_H
 
 #include <stdio.h>
-#include "genome_visitor.h"
+#include <libgt/genome_visitor.h>
 
 /* the ``genome visitor'' interface */
 struct GenomeVisitorClass {

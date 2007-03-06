@@ -10,9 +10,9 @@
 /* the enviroment class (creates and holds all singular objects) */
 typedef struct Env Env;
 
-#include "ma.h"
-#include "error.h"
-#include "log.h"
+#include <libgt/ma.h>
+#include <libgt/error.h>
+#include <libgt/log.h>
 
 Env*   env_new(void);
 MA*    env_ma(const Env*);    /* return the memory allocator */

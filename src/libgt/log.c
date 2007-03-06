@@ -6,8 +6,8 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include "env.h"
-#include "xansi.h"
+#include <libgt/env.h>
+#include <libgt/xansi.h>
 
 struct Log {
   FILE *logfp;

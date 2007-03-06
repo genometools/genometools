@@ -6,9 +6,9 @@
 
 #include <assert.h>
 #include <limits.h>
-#include "affinealign.h"
-#include "array2dim.h"
-#include "minmax.h"
+#include <libgt/affinealign.h>
+#include <libgt/array2dim.h>
+#include <libgt/minmax.h>
 
 typedef enum {
   R,

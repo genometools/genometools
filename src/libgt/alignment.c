@@ -5,10 +5,10 @@
 */
 
 #include <assert.h>
-#include "alignment.h"
-#include "array.h"
-#include "ensure.h"
-#include "xansi.h"
+#include <libgt/alignment.h>
+#include <libgt/array.h>
+#include <libgt/ensure.h>
+#include <libgt/xansi.h>
 
 #define GAPSYMBOL      '-'
 #define MATCHSYMBOL    '|'

@@ -8,7 +8,7 @@
 #define OPTION_H
 
 #include <stdbool.h>
-#include "str.h"
+#include <libgt/str.h>
 
 /* the option parser class */
 typedef struct OptionParser OptionParser;

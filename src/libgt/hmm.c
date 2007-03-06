@@ -9,13 +9,13 @@
 #include <string.h>
 #include <assert.h>
 #include <math.h>
-#include "array2dim.h"
-#include "coin_hmm.h"
-#include "dice_hmm.h"
-#include "ensure.h"
-#include "hmm.h"
-#include "mathsupport.h"
-#include "xansi.h"
+#include <libgt/array2dim.h>
+#include <libgt/coin_hmm.h>
+#include <libgt/dice_hmm.h>
+#include <libgt/ensure.h>
+#include <libgt/hmm.h>
+#include <libgt/mathsupport.h>
+#include <libgt/xansi.h>
 
 /*
   The algorithms in this file are described in chapter 3 of the book

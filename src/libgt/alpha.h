@@ -9,7 +9,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include "env.h"
+#include <libgt/env.h>
 
 /* the alphabet class */
 typedef struct Alpha Alpha; /* XXX: Alpha -> Alphabet */

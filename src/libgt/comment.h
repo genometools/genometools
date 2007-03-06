@@ -7,12 +7,12 @@
 #ifndef COMMENT_H
 #define COMMENT_H
 
-#include "str.h"
+#include <libgt/str.h>
 
 /* implements the ``genome node'' interface */
 typedef struct Comment Comment;
 
-#include "genome_node.h"
+#include <libgt/genome_node.h>
 
 const GenomeNodeClass* comment_class(void);
 GenomeNode*            comment_new(const char *comment, const char *filename,

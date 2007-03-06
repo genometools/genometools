@@ -5,11 +5,11 @@
 */
 
 #include <assert.h>
-#include "genome_stream_rep.h"
-#include "gtf_in_stream.h"
-#include "gtf_parser.h"
-#include "queue.h"
-#include "xansi.h"
+#include <libgt/genome_stream_rep.h>
+#include <libgt/gtf_in_stream.h>
+#include <libgt/gtf_parser.h>
+#include <libgt/queue.h>
+#include <libgt/xansi.h>
 
 struct GTFInStream
 {

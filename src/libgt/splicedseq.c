@@ -4,12 +4,12 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "array.h"
-#include "ensure.h"
-#include "reverse.h"
-#include "splicedseq.h"
-#include "str.h"
-#include "xansi.h"
+#include <libgt/array.h>
+#include <libgt/ensure.h>
+#include <libgt/reverse.h>
+#include <libgt/splicedseq.h>
+#include <libgt/str.h>
+#include <libgt/xansi.h>
 
 struct Splicedseq {
   Str *splicedseq;

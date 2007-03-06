@@ -5,9 +5,9 @@
 */
 
 #include <assert.h>
-#include "genome_stream_rep.h"
-#include "addintrons_stream.h"
-#include "addintrons_visitor.h"
+#include <libgt/genome_stream_rep.h>
+#include <libgt/addintrons_stream.h>
+#include <libgt/addintrons_visitor.h>
 
 struct AddIntronsStream{
   const GenomeStream parent_instance;

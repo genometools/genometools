@@ -7,9 +7,9 @@
 #ifndef TRANSCRIPT_EXONS_H
 #define TRANSCRIPT_EXONS_H
 
-#include "array.h"
-#include "transcript_bittabs.h"
-#include "transcript_counts.h"
+#include <libgt/array.h>
+#include <libgt/transcript_bittabs.h>
+#include <libgt/transcript_counts.h>
 
 /* a container class for transcript exon arrays */
 typedef struct TranscriptExons TranscriptExons;

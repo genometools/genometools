@@ -6,10 +6,10 @@
 
 #include <assert.h>
 #include <limits.h>
-#include "array2dim.h"
-#include "coordinate.h"
-#include "minmax.h"
-#include "swalign.h"
+#include <libgt/array2dim.h>
+#include <libgt/coordinate.h>
+#include <libgt/minmax.h>
+#include <libgt/swalign.h>
 
 typedef struct {
   long score;

@@ -6,8 +6,8 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "genome_visitor_rep.h"
-#include "xansi.h"
+#include <libgt/genome_visitor_rep.h>
+#include <libgt/xansi.h>
 
 GenomeVisitor* genome_visitor_create(const GenomeVisitorClass *gvc, Env *env)
 {

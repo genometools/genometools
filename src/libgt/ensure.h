@@ -7,7 +7,7 @@
 #ifndef ENSURE_H
 #define ENSURE_H
 
-#include "env.h"
+#include <libgt/env.h>
 
 /* the ensure macro used for unit tests */
 #define ensure(has_err, e)                                                   \

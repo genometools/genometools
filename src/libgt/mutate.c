@@ -5,7 +5,7 @@
 */
 
 #include <assert.h>
-#include "mutate.h"
+#include <libgt/mutate.h>
 
 Seq* mutate(const char *description, const char *orig_seq, unsigned long len,
             Alpha *alpha, unsigned int rate, Env *env)

@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <math.h>
 #include <stdlib.h>
-#include "mathsupport.h"
+#include <libgt/mathsupport.h>
 
 #define EPSILON	0.0000000000001
 

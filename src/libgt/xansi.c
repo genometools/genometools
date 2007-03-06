@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "xansi.h"
+#include <libgt/xansi.h>
 
 void* xcalloc(size_t nmemb, size_t size)
 {

@@ -8,7 +8,7 @@
 #define MERGE_STREAM_H
 
 #include <stdio.h>
-#include "genome_stream.h"
+#include <libgt/genome_stream.h>
 
 /* implements the ``genome_stream'' interface */
 typedef struct MergeStream MergeStream;

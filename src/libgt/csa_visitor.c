@@ -5,11 +5,11 @@
 */
 
 #include <assert.h>
-#include "consensus_sa.h"
-#include "csa_visitor.h"
-#include "genome_visitor_rep.h"
-#include "queue.h"
-#include "undef.h"
+#include <libgt/consensus_sa.h>
+#include <libgt/csa_visitor.h>
+#include <libgt/genome_visitor_rep.h>
+#include <libgt/queue.h>
+#include <libgt/undef.h>
 
 #define GT_CSA_SOURCE_TAG "gt csa"
 

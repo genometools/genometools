@@ -6,7 +6,7 @@
 
 #include <assert.h>
 #include <string.h>
-#include "strand.h"
+#include <libgt/strand.h>
 
 Strand strand_get(char strand_char)
 {

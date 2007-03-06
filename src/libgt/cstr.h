@@ -8,7 +8,7 @@
 #define CSTR_H
 
 #include <stdio.h>
-#include "env.h"
+#include <libgt/env.h>
 
 void*         cstr_dup(const char*, Env*);
 void          cstr_show(const char*, unsigned long length, FILE*);

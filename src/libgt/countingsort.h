@@ -8,7 +8,7 @@
 #define COUNTINGSORT_H
 
 #include <stdlib.h>
-#include "env.h"
+#include <libgt/env.h>
 
 /*
   This module implements the counting sort algorithm. For a description see

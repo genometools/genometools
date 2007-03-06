@@ -6,12 +6,12 @@
 
 #include <assert.h>
 #include <limits.h>
-#include "array2dim.h"
-#include "bioseq.h"
-#include "error.h"
-#include "msa.h"
-#include "undef.h"
-#include "xansi.h"
+#include <libgt/array2dim.h>
+#include <libgt/bioseq.h>
+#include <libgt/error.h>
+#include <libgt/msa.h>
+#include <libgt/undef.h>
+#include <libgt/xansi.h>
 
 #define GAPSYMBOL '-'
 

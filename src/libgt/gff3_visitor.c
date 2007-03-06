@@ -7,16 +7,16 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include "fptr.h"
-#include "genome_node.h"
-#include "genome_visitor_rep.h"
-#include "gff3_output.h"
-#include "gff3_parser.h"
-#include "gff3_visitor.h"
-#include "hashtable.h"
-#include "str.h"
-#include "undef.h"
-#include "xansi.h"
+#include <libgt/fptr.h>
+#include <libgt/genome_node.h>
+#include <libgt/genome_visitor_rep.h>
+#include <libgt/gff3_output.h>
+#include <libgt/gff3_parser.h>
+#include <libgt/gff3_visitor.h>
+#include <libgt/hashtable.h>
+#include <libgt/str.h>
+#include <libgt/undef.h>
+#include <libgt/xansi.h>
 
 struct GFF3Visitor {
   const GenomeVisitor parent_instance;

@@ -7,7 +7,7 @@
 #ifndef ORF_H
 #define ORF_H
 
-#include "array.h"
+#include <libgt/array.h>
 
 /* the determined ORFs include the start and the stop codon */
 void determine_ORFs(Array *ranges, unsigned int framenum,

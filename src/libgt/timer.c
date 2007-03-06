@@ -4,9 +4,9 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "timer.h"
-#include "xansi.h"
-#include "xposix.h"
+#include <libgt/timer.h>
+#include <libgt/xansi.h>
+#include <libgt/xposix.h>
 
 typedef enum {
   TIMER_RUNNING,

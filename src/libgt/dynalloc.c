@@ -5,9 +5,9 @@
 */
 
 #include <assert.h>
-#include "dynalloc.h"
-#include "error.h"
-#include "xansi.h"
+#include <libgt/dynalloc.h>
+#include <libgt/error.h>
+#include <libgt/xansi.h>
 
 #define SIZE_MAX ((size_t) ~0UL)
 

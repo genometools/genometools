@@ -7,7 +7,7 @@
 #ifndef TRANSLATE_H
 #define TRANSLATE_H
 
-#include "str.h"
+#include <libgt/str.h>
 
 void translate_dna(Str*, const char*, unsigned long, unsigned int frame, Env*);
 

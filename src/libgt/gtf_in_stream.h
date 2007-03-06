@@ -8,8 +8,8 @@
 #define GTF_IN_STREAM_H
 
 #include <stdio.h>
-#include "env.h"
-#include "genome_stream.h"
+#include <libgt/env.h>
+#include <libgt/genome_stream.h>
 
 /* implements the ``genome_stream'' interface */
 typedef struct GTFInStream GTFInStream;

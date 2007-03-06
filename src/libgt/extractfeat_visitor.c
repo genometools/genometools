@@ -5,12 +5,12 @@
 */
 
 #include <assert.h>
-#include "env.h"
-#include "extractfeat_visitor.h"
-#include "fasta.h"
-#include "genome_visitor_rep.h"
-#include "reverse.h"
-#include "translate.h"
+#include <libgt/env.h>
+#include <libgt/extractfeat_visitor.h>
+#include <libgt/fasta.h>
+#include <libgt/genome_visitor_rep.h>
+#include <libgt/reverse.h>
+#include <libgt/translate.h>
 
 struct ExtractFeatVisitor {
   const GenomeVisitor parent_instance;

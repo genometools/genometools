@@ -7,8 +7,8 @@
 #ifndef BSEARCH_H
 #define BSEARCH_H
 
-#include "array.h"
-#include "bittab.h"
+#include <libgt/array.h>
+#include <libgt/bittab.h>
 
 /* similar interface to bsearch(3), except that all members which compare as
    equal are stored in the ``members'' array. The order in which the elements

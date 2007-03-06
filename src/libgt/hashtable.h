@@ -7,7 +7,7 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
-#include "fptr.h"
+#include <libgt/fptr.h>
 
 typedef struct Hashtable Hashtable;
 

@@ -5,11 +5,11 @@
 */
 
 #include <assert.h>
-#include "filter_stream.h"
-#include "filter_visitor.h"
-#include "genome_feature.h"
-#include "genome_stream_rep.h"
-#include "undef.h"
+#include <libgt/filter_stream.h>
+#include <libgt/filter_visitor.h>
+#include <libgt/genome_feature.h>
+#include <libgt/genome_stream_rep.h>
+#include <libgt/undef.h>
 
 struct FilterStream
 {

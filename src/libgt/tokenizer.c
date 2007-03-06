@@ -5,9 +5,9 @@
 */
 
 #include <assert.h>
-#include "ensure.h"
-#include "tokenizer.h"
-#include "xansi.h"
+#include <libgt/ensure.h>
+#include <libgt/tokenizer.h>
+#include <libgt/xansi.h>
 
 struct Tokenizer {
   IO *io;

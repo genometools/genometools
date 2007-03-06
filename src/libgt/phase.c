@@ -6,7 +6,7 @@
 
 #include <assert.h>
 #include <string.h>
-#include "phase.h"
+#include <libgt/phase.h>
 
 Phase phase_get(char phase_char)
 {

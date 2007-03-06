@@ -7,8 +7,8 @@
 #ifndef DLIST_H
 #define DLIST_H
 
-#include "env.h"
-#include "fptr.h"
+#include <libgt/env.h>
+#include <libgt/fptr.h>
 
 /* a double-linked list which is sorted according to a qsort(3)-like compare
    function (if one was supplied to the constructor) */

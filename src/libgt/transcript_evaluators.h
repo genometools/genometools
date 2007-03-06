@@ -7,8 +7,8 @@
 #ifndef TRANSCRIPT_EVALUATORS_H
 #define TRANSCRIPT_EVALUATORS_H
 
-#include "evaluator.h"
-#include "transcript_exons.h"
+#include <libgt/evaluator.h>
+#include <libgt/transcript_exons.h>
 
 /* a container class for transcript evaluators */
 typedef struct TranscriptEvaluators TranscriptEvaluators;

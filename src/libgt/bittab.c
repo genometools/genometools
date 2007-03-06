@@ -5,10 +5,10 @@
 */
 
 #include <assert.h>
-#include "bittab.h"
-#include "ensure.h"
-#include "undef.h"
-#include "xansi.h"
+#include <libgt/bittab.h>
+#include <libgt/ensure.h>
+#include <libgt/undef.h>
+#include <libgt/xansi.h>
 
 #define NUM_OF_TESTS	50
 #define MAX_SIZE	1024

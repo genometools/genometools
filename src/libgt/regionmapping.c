@@ -5,12 +5,12 @@
 */
 
 #include <assert.h>
-#include "bioseq.h"
+#include <libgt/bioseq.h>
+#include <libgt/regionmapping.h>
+#include <libgt/xansi.h>
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
-#include "regionmapping.h"
-#include "xansi.h"
 
 struct RegionMapping {
   Str *mapping_filename,

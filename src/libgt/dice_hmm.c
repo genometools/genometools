@@ -5,7 +5,7 @@
 */
 
 #include <assert.h>
-#include "dice_hmm.h"
+#include <libgt/dice_hmm.h>
 
 HMM* dice_hmm_loaded(Env *env)
 {

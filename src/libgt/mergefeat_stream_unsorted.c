@@ -5,9 +5,9 @@
 */
 
 #include <assert.h>
-#include "genome_stream_rep.h"
-#include "mergefeat_stream_unsorted.h"
-#include "mergefeat_visitor.h"
+#include <libgt/genome_stream_rep.h>
+#include <libgt/mergefeat_stream_unsorted.h>
+#include <libgt/mergefeat_visitor.h>
 
 struct MergefeatStreamUnsorted {
   const GenomeStream parent_instance;

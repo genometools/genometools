@@ -6,11 +6,11 @@
 
 #include <assert.h>
 #include <stdarg.h>
-#include "genome_node_rep.h"
-#include "hashtable.h"
-#include "msort.h"
-#include "queue.h"
-#include "xansi.h"
+#include <libgt/genome_node_rep.h>
+#include <libgt/hashtable.h>
+#include <libgt/msort.h>
+#include <libgt/queue.h>
+#include <libgt/xansi.h>
 
 typedef struct {
   GenomeNodeTraverseFunc func;

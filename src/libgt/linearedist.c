@@ -4,9 +4,9 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "linearedist.h"
-#include "minmax.h"
-#include "xansi.h"
+#include <libgt/linearedist.h>
+#include <libgt/minmax.h>
+#include <libgt/xansi.h>
 
 static void fillDPtable(unsigned long *dptable,
                         const char *u, unsigned long n,

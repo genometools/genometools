@@ -8,7 +8,7 @@
 #define UPGMA_H
 
 #include <stdio.h>
-#include "env.h"
+#include <libgt/env.h>
 
 typedef struct UPGMA UPGMA;
 

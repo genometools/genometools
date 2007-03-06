@@ -7,7 +7,7 @@
 #ifndef SEQ_H
 #define SEQ_H
 
-#include "alpha.h"
+#include <libgt/alpha.h>
 
 typedef struct Seq Seq;
 

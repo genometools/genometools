@@ -5,17 +5,17 @@
 */
 
 #include <assert.h>
-#include "cstr.h"
-#include "fptr.h"
-#include "genome_node.h"
-#include "gtf_parser.h"
-#include "hashtable.h"
-#include "parseutils.h"
-#include "splitter.h"
-#include "str.h"
-#include "undef.h"
-#include "warning.h"
-#include "xansi.h"
+#include <libgt/cstr.h>
+#include <libgt/fptr.h>
+#include <libgt/genome_node.h>
+#include <libgt/gtf_parser.h>
+#include <libgt/hashtable.h>
+#include <libgt/parseutils.h>
+#include <libgt/splitter.h>
+#include <libgt/str.h>
+#include <libgt/undef.h>
+#include <libgt/warning.h>
+#include <libgt/xansi.h>
 
 #define GENE_ID_ATTRIBUTE       "gene_id"
 #define TRANSCRIPT_ID_ATTRIBUTE "transcript_id"

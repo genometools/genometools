@@ -7,9 +7,9 @@
 #ifndef SWALIGN_H
 #define SWALIGN_H
 
-#include "alignment.h"
-#include "scorefunction.h"
-#include "seq.h"
+#include <libgt/alignment.h>
+#include <libgt/scorefunction.h>
+#include <libgt/seq.h>
 
 /* (locally) align u and v (Smith-Waterman algorithm ) with the given score
    function and return one optimal Alignment.

@@ -5,9 +5,9 @@
 */
 
 #include <assert.h>
-#include "gff3_output.h"
-#include "undef.h"
-#include "xansi.h"
+#include <libgt/gff3_output.h>
+#include <libgt/undef.h>
+#include <libgt/xansi.h>
 
 void gff3_output_leading(GenomeFeature *gf, FILE *outfp)
 {

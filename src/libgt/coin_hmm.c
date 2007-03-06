@@ -5,7 +5,7 @@
 */
 
 #include <assert.h>
-#include "coin_hmm.h"
+#include <libgt/coin_hmm.h>
 
 HMM* coin_hmm_loaded(Env *env)
 {

@@ -6,9 +6,9 @@
 
 #include <assert.h>
 #include <stdbool.h>
-#include "align.h"
-#include "array2dim.h"
-#include "minmax.h"
+#include <libgt/align.h>
+#include <libgt/array2dim.h>
+#include <libgt/minmax.h>
 
 typedef struct {
   unsigned long distvalue;

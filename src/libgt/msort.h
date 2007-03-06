@@ -2,7 +2,7 @@
 #define MSORT_H
 
 #include <stdlib.h>
-#include "env.h"
+#include <libgt/env.h>
 
 /* merge sort; the interface equals qsort(3) */
 void msort(void *base, size_t nmemb, size_t size,

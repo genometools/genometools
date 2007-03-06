@@ -8,8 +8,8 @@
 #define TOKENIZER_H
 
 #include <stdbool.h>
-#include "io.h"
-#include "str.h"
+#include <libgt/io.h>
+#include <libgt/str.h>
 
 typedef struct Tokenizer Tokenizer;
 

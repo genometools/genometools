@@ -7,7 +7,7 @@
 /* This implementation was heavily inspired by code from Stefan Kurtz. */
 
 #include <assert.h>
-#include "codon.h"
+#include <libgt/codon.h>
 
 #define T_CODE 0
 #define C_CODE 1

@@ -5,8 +5,8 @@
 */
 
 #include <assert.h>
-#include "seq.h"
-#include "xansi.h"
+#include <libgt/seq.h>
+#include <libgt/xansi.h>
 
 struct Seq {
   const char *seq, *description;

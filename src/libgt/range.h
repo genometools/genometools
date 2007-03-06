@@ -8,7 +8,7 @@
 #define RANGE_H
 
 #include <stdbool.h>
-#include "array.h"
+#include <libgt/array.h>
 
 typedef struct {
   unsigned long start,

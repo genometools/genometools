@@ -8,9 +8,9 @@
 #define EXTRACTFEAT_STREAM_H
 
 #include <stdio.h>
-#include "genome_stream.h"
-#include "regionmapping.h"
-#include "str.h"
+#include <libgt/genome_stream.h>
+#include <libgt/regionmapping.h>
+#include <libgt/str.h>
 
 /* implements the ``genome_stream'' interface */
 typedef struct ExtractFeatStream ExtractFeatStream;

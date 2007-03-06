@@ -7,10 +7,10 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "dynalloc.h"
-#include "ensure.h"
-#include "splitter.h"
-#include "xansi.h"
+#include <libgt/dynalloc.h>
+#include <libgt/ensure.h>
+#include <libgt/splitter.h>
+#include <libgt/xansi.h>
 
 struct Splitter {
   char **tokens;

@@ -9,7 +9,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include "env.h"
+#include <libgt/env.h>
 
 /* the I/O class */
 typedef struct IO IO;

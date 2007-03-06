@@ -4,8 +4,8 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "range.h"
-#include "transcript_exons.h"
+#include <libgt/range.h>
+#include <libgt/transcript_exons.h>
 
 struct TranscriptExons {
   Array *exon_array_all,

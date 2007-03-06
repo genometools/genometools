@@ -10,9 +10,9 @@
 /* implements the ``genome node'' interface */
 typedef struct SequenceRegion SequenceRegion;
 
-#include "genome_node.h"
-#include "range.h"
-#include "str.h"
+#include <libgt/genome_node.h>
+#include <libgt/range.h>
+#include <libgt/str.h>
 
 const GenomeNodeClass* sequence_region_class(void);
 GenomeNode*            sequence_region_new(Str *seqid, Range range,

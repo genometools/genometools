@@ -5,10 +5,10 @@
 */
 
 #include <assert.h>
-#include "bittab.h"
-#include "consensus_sa.h"
-#include "undef.h"
-#include "xansi.h"
+#include <libgt/bittab.h>
+#include <libgt/consensus_sa.h>
+#include <libgt/undef.h>
+#include <libgt/xansi.h>
 
 typedef struct
 {

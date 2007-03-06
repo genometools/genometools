@@ -5,14 +5,14 @@
 */
 
 #include <assert.h>
-#include "array.h"
-#include "array2dim.h"
-#include "parseutils.h"
-#include "scorematrix.h"
-#include "str.h"
-#include "tokenizer.h"
-#include "undef.h"
-#include "xansi.h"
+#include <libgt/array.h>
+#include <libgt/array2dim.h>
+#include <libgt/parseutils.h>
+#include <libgt/scorematrix.h>
+#include <libgt/str.h>
+#include <libgt/tokenizer.h>
+#include <libgt/undef.h>
+#include <libgt/xansi.h>
 
 struct ScoreMatrix {
   Alpha *alpha;

@@ -5,11 +5,11 @@
 */
 
 #include <assert.h>
-#include "ensure.h"
-#include "fptr.h"
-#include "msort.h"
-#include "range.h"
-#include "undef.h"
+#include <libgt/ensure.h>
+#include <libgt/fptr.h>
+#include <libgt/msort.h>
+#include <libgt/range.h>
+#include <libgt/undef.h>
 
 int range_compare(Range range_a, Range range_b)
 {

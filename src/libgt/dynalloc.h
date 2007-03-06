@@ -8,7 +8,7 @@
 #define DYNALLOC_H
 
 #include <stdlib.h>
-#include "env.h"
+#include <libgt/env.h>
 
 /*
   Do not use this function directly! It is only used internally to implement

@@ -6,9 +6,9 @@
 
 #include <assert.h>
 #include <string.h>
-#include "countingsort.h"
-#include "ensure.h"
-#include "xansi.h"
+#include <libgt/countingsort.h>
+#include <libgt/ensure.h>
+#include <libgt/xansi.h>
 
 void countingsort(void *out, const void *in, size_t elem_size,
                   unsigned long size, unsigned long max_elemvalue, void *data,

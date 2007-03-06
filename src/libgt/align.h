@@ -7,7 +7,7 @@
 #ifndef ALIGN_H
 #define ALIGN_H
 
-#include "alignment.h"
+#include <libgt/alignment.h>
 
 /* (globally) align u and v (unit cost) and return one optimal Alignment */
 Alignment* align(const char *u, unsigned long ulen,

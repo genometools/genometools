@@ -7,7 +7,7 @@
 #ifndef HMM_H
 #define HMM_H
 
-#include "env.h"
+#include <libgt/env.h>
 
 /* The Hidden Markov Model (HMM) class */
 typedef struct HMM HMM;

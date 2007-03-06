@@ -7,10 +7,10 @@
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
-#include "array.h"
-#include "dynalloc.h"
-#include "ensure.h"
-#include "xansi.h"
+#include <libgt/array.h>
+#include <libgt/dynalloc.h>
+#include <libgt/ensure.h>
+#include <libgt/xansi.h>
 
 #define NUM_OF_TESTS	100
 #define MAX_SIZE	1024

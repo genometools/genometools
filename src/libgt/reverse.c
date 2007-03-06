@@ -5,8 +5,8 @@
 */
 
 #include <assert.h>
-#include "reverse.h"
-#include "undef.h"
+#include <libgt/reverse.h>
+#include <libgt/undef.h>
 
 static int complement(char *reverse_char, char dna_char, Env *env)
 {

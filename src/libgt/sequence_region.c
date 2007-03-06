@@ -6,8 +6,8 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "sequence_region.h"
-#include "genome_node_rep.h"
+#include <libgt/sequence_region.h>
+#include <libgt/genome_node_rep.h>
 
 struct SequenceRegion
 {

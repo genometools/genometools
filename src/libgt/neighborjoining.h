@@ -8,7 +8,7 @@
 #define NEIGHBORJOINING_H
 
 #include <stdio.h>
-#include "env.h"
+#include <libgt/env.h>
 
 typedef struct NeighborJoining NeighborJoining;
 

@@ -7,15 +7,15 @@
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
-#include "array.h"
-#include "cstr.h"
-#include "error.h"
-#include "mailaddress.h"
-#include "minmax.h"
-#include "option.h"
-#include "str.h"
-#include "undef.h"
-#include "xansi.h"
+#include <libgt/array.h>
+#include <libgt/cstr.h>
+#include <libgt/error.h>
+#include <libgt/mailaddress.h>
+#include <libgt/minmax.h>
+#include <libgt/option.h>
+#include <libgt/str.h>
+#include <libgt/undef.h>
+#include <libgt/xansi.h>
 
 #define TERMINAL_WIDTH	80
 

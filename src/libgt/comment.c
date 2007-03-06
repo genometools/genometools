@@ -6,10 +6,10 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "comment.h"
-#include "cstr.h"
-#include "genome_node_rep.h"
-#include "xansi.h"
+#include <libgt/comment.h>
+#include <libgt/cstr.h>
+#include <libgt/genome_node_rep.h>
+#include <libgt/xansi.h>
 
 struct Comment
 {

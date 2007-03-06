@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "transcript_bittabs.h"
+#include <libgt/transcript_bittabs.h>
 
 struct TranscriptBittabs {
   Bittab *bittab_all,

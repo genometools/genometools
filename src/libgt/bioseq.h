@@ -7,9 +7,9 @@
 #ifndef BIOSEQ_H
 #define BIOSEQ_H
 
-#include "env.h"
-#include "seq.h"
-#include "str.h"
+#include <libgt/env.h>
+#include <libgt/seq.h>
+#include <libgt/str.h>
 
 /* Bioseq file endings */
 #define GT_BIOSEQ_INDEX ".gt_bsi"

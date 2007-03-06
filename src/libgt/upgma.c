@@ -4,10 +4,10 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "bittab.h"
-#include "undef.h"
-#include "upgma.h"
-#include "xansi.h"
+#include <libgt/bittab.h>
+#include <libgt/undef.h>
+#include <libgt/upgma.h>
+#include <libgt/xansi.h>
 
 #define INDENTFACTOR	10
 

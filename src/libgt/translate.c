@@ -5,8 +5,8 @@
 */
 
 #include <assert.h>
-#include "codon.h"
-#include "translate.h"
+#include <libgt/codon.h>
+#include <libgt/translate.h>
 
 void translate_dna(Str *protein, const char *dnaseq, unsigned long dnalen,
                    unsigned int frame, Env *env)

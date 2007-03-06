@@ -8,8 +8,8 @@
 #define GENOME_STREAM_H
 
 #include <stdbool.h>
-#include "env.h"
-#include "genome_node.h"
+#include <libgt/env.h>
+#include <libgt/genome_node.h>
 
 /* the ``genome stream'' interface */
 typedef struct GenomeStreamClass GenomeStreamClass;

@@ -5,8 +5,8 @@
 */
 
 #include <stdarg.h>
-#include "env.h"
-#include "xansi.h"
+#include <libgt/env.h>
+#include <libgt/xansi.h>
 
 struct Error {
   char error_string[BUFSIZ];

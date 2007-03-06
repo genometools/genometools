@@ -7,10 +7,10 @@
 #ifndef CONSENSUS_SA_H
 #define CONSENSUS_SA_H
 
-#include "array.h"
-#include "log.h"
-#include "range.h"
-#include "strand.h"
+#include <libgt/array.h>
+#include <libgt/log.h>
+#include <libgt/range.h>
+#include <libgt/strand.h>
 
 /*
   This module implements the method to construct consensus spliced alignments

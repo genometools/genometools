@@ -5,9 +5,9 @@
 */
 
 #include <assert.h>
-#include "array.h"
-#include "queue.h"
-#include "xansi.h"
+#include <libgt/array.h>
+#include <libgt/queue.h>
+#include <libgt/xansi.h>
 
 struct Queue {
   Array *queue;

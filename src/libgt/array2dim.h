@@ -7,7 +7,7 @@
 #ifndef ARRAY2DIM_H
 #define ARRAY2DIM_H
 
-#include "xansi.h"
+#include <libgt/xansi.h>
 
 #define array2dim_malloc(ARRAY2DIM, ROWS, COLUMNS, TYPE, ENV)               \
         {                                                                   \

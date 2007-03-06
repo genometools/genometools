@@ -12,7 +12,7 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <sys/termios.h>
-#include "xposix.h"
+#include <libgt/xposix.h>
 
 #define DEFAULT_WINDOW_SIZE	80
 #define UPDATE_INTERVAL 	1U  /* update the progress bar every second */

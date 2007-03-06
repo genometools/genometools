@@ -7,7 +7,7 @@
 #ifndef GENFILE_H
 #define GENFILE_H
 
-#include "env.h"
+#include <libgt/env.h>
 
 /*
   This class defines generic files.  A generic file is is a file which either

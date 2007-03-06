@@ -21,8 +21,8 @@
 */
 
 #include <string.h>
-#include "msort.h"
-#include "xansi.h"
+#include <libgt/msort.h>
+#include <libgt/xansi.h>
 
 static void msort_r_withbuf(void *base, size_t numofelems, size_t size,
                             void *cmpinfo,

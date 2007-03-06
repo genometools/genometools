@@ -6,9 +6,9 @@
 
 #include <assert.h>
 #include <stdarg.h>
-#include "fptr.h"
-#include "genome_stream_rep.h"
-#include "xansi.h"
+#include <libgt/fptr.h>
+#include <libgt/genome_stream_rep.h>
+#include <libgt/xansi.h>
 
 GenomeStream* genome_stream_create(const GenomeStreamClass *gsc,
                                    bool ensure_sorting, Env *env)

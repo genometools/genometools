@@ -7,7 +7,7 @@
 #ifndef AFFINEALIGN_H
 #define AFFINEALIGN_H
 
-#include "alignment.h"
+#include <libgt/alignment.h>
 
 /* (globally) align u and v (affine gap costs) and return one optimal
    Alignment */

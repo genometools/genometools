@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "xzlib.h"
+#include <libgt/xzlib.h>
 
 gzFile xgzopen(const char *path, const char *mode)
 {

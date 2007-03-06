@@ -6,8 +6,8 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include "cstr.h"
-#include "xansi.h"
+#include <libgt/cstr.h>
+#include <libgt/xansi.h>
 
 void* cstr_dup(const char *cstr, Env *env)
 {

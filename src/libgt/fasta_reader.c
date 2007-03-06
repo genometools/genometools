@@ -6,10 +6,10 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include "fasta.h"
-#include "fasta_reader.h"
-#include "genfile.h"
-#include "xansi.h"
+#include <libgt/fasta.h>
+#include <libgt/fasta_reader.h>
+#include <libgt/genfile.h>
+#include <libgt/xansi.h>
 
 struct FastaReader {
   Str *sequence_filename;

@@ -7,7 +7,7 @@
 #ifndef FASTA_READER_H
 #define FASTA_READER_H
 
-#include "str.h"
+#include <libgt/str.h>
 
 typedef struct FastaReader FastaReader;
 

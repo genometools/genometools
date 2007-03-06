@@ -8,7 +8,7 @@
 #define ARRAY_H
 
 #include <stdlib.h>
-#include "env.h"
+#include <libgt/env.h>
 
 typedef struct Array Array;
 

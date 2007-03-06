@@ -7,11 +7,11 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "cstr.h"
-#include "fileutils.h"
-#include "splitter.h"
-#include "xansi.h"
-#include "xposix.h"
+#include <libgt/cstr.h>
+#include <libgt/fileutils.h>
+#include <libgt/splitter.h>
+#include <libgt/xansi.h>
+#include <libgt/xposix.h>
 
 bool file_exists(const char *path)
 {

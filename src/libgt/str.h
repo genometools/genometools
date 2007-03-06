@@ -8,7 +8,7 @@
 #define STR_H
 
 #include <stdio.h>
-#include "env.h"
+#include <libgt/env.h>
 
 /* the string class, string objects are strings which grow on demand */
 typedef struct Str Str;

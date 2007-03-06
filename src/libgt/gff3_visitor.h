@@ -10,7 +10,7 @@
 /* implements the ``genome visitor'' interface */
 typedef struct GFF3Visitor GFF3Visitor;
 
-#include "genome_visitor.h"
+#include <libgt/genome_visitor.h>
 
 const GenomeVisitorClass* gff3_visitor_class(void);
 GenomeVisitor*            gff3_visitor_new(FILE*, Env*);

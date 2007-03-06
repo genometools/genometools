@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "xposix.h"
+#include <libgt/xposix.h>
 
 void xclose(int d)
 {

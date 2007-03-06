@@ -5,10 +5,10 @@
 */
 
 #include <assert.h>
-#include "mergefeat_visitor.h"
-#include "genome_visitor_rep.h"
-#include "hashtable.h"
-#include "undef.h"
+#include <libgt/mergefeat_visitor.h>
+#include <libgt/genome_visitor_rep.h>
+#include <libgt/hashtable.h>
+#include <libgt/undef.h>
 
 struct MergefeatVisitor {
   const GenomeVisitor parent_instance;

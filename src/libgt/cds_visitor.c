@@ -5,14 +5,14 @@
 */
 
 #include <assert.h>
-#include "cds_visitor.h"
-#include "error.h"
-#include "fasta.h"
-#include "genome_visitor_rep.h"
-#include "orf.h"
-#include "splicedseq.h"
-#include "translate.h"
-#include "undef.h"
+#include <libgt/cds_visitor.h>
+#include <libgt/error.h>
+#include <libgt/fasta.h>
+#include <libgt/genome_visitor_rep.h>
+#include <libgt/orf.h>
+#include <libgt/splicedseq.h>
+#include <libgt/translate.h>
+#include <libgt/undef.h>
 
 struct CDSVisitor {
   const GenomeVisitor parent_instance;

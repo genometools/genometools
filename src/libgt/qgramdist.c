@@ -6,10 +6,10 @@
 
 #include <assert.h>
 #include <math.h>
-#include "array.h"
-#include "qgramdist.h"
-#include "qgram.h"
-#include "xansi.h"
+#include <libgt/array.h>
+#include <libgt/qgramdist.h>
+#include <libgt/qgram.h>
+#include <libgt/xansi.h>
 
 unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q, Env *env)
 {
