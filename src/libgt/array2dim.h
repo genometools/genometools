@@ -13,24 +13,24 @@
         {                                                                   \
           unsigned long i;                                                  \
 	  ARRAY2DIM = env_ma_malloc(ENV, sizeof (TYPE*) * (ROWS));          \
-	  ARRAY2DIM[0] = env_ma_malloc(ENV,                                 \
+	  (ARRAY2DIM)[0] = env_ma_malloc(ENV,                               \
                                        sizeof (TYPE) * (ROWS) * (COLUMNS)); \
 	  for (i = 1; i < (ROWS); i++)                                      \
-            ARRAY2DIM[i] = ARRAY2DIM[i-1] + (COLUMNS);                      \
+            (ARRAY2DIM)[i] = (ARRAY2DIM)[i-1] + (COLUMNS);                  \
         }
 
 #define array2dim_calloc(ARRAY2DIM, ROWS, COLUMNS, TYPE, ENV)               \
         {                                                                   \
           unsigned long i;                                                  \
 	  ARRAY2DIM = env_ma_malloc(ENV, sizeof (TYPE*) * (ROWS));          \
-	  ARRAY2DIM[0] = env_ma_calloc(ENV, (ROWS) * (COLUMNS),             \
+	  (ARRAY2DIM)[0] = env_ma_calloc(ENV, (ROWS) * (COLUMNS),           \
                                        sizeof (TYPE));                      \
 	  for (i = 1; i < (ROWS); i++)                                      \
-            ARRAY2DIM[i] = ARRAY2DIM[i-1] + (COLUMNS);                      \
+            (ARRAY2DIM)[i] = (ARRAY2DIM)[i-1] + (COLUMNS);                  \
         }
 
 #define array2dim_delete(ARRAY2DIM, ENV)                                    \
-        env_ma_free(ARRAY2DIM[0], ENV);                                     \
+        env_ma_free((ARRAY2DIM)[0], ENV);                                   \
         env_ma_free(ARRAY2DIM, ENV);
 
 #if 0
