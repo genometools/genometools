@@ -101,7 +101,7 @@ end
 end
 
 1.upto(3) do |i|
-  Name "gt bioseq test 3 out #{i} (stdint)"
+  Name "gt bioseq test 3 out #{i} (stdin)"
   Keywords "gt_bioseq"
   Test do
     run_test "cat #{$testdata}gt_bioseq_succ_3.fas | #{$bin}gt bioseq -showseqnum #{i} -width 70 -"
