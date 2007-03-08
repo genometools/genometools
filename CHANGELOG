@@ -4,6 +4,7 @@ changes in version 0.7.0:
 - `gt cds` has new options -seqfile and -regionmapping (interface change)
 - `gt bioseq` can now read from stdin, too
 - `gt bioseq` has new option -gc-content
+- new tool `gt mutate` added
 
 changes in version 0.6.9:
 

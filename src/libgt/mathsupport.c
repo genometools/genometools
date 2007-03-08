@@ -34,15 +34,18 @@ bool double_equals_double(double d1, double d2)
 
 unsigned long rand_max(unsigned long maximal_value)
 {
+  unsigned long r;
   assert(maximal_value);
-  return ((double) rand() / RAND_MAX) * maximal_value;
+  r = ((double) rand() / ((double) RAND_MAX + 1) * (maximal_value + 1));
+  assert(r <= maximal_value);
+  return r;
 }
 
 double rand_max_double(double maximal_value)
 {
   double r;
   assert(maximal_value);
-  r = ((double) rand() / RAND_MAX) * maximal_value;
+  r = ((double) rand() / RAND_MAX) * maximal_value; /* XXX */
   assert(r >= 0.0 && r <= maximal_value);
   return r;
 }

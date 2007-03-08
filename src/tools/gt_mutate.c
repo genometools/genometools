@@ -26,6 +26,7 @@ static OPrval parse_options(int *parsed_args, MutateArguments *arguments,
   option_parser_add_option(op, o, env);
 
   /* parse */
+  option_parser_set_comment_func(op, gtdata_show_help, NULL);
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
                                         versionfunc, 1, env);
   option_parser_delete(op, env);
