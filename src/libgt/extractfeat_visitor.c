@@ -65,10 +65,12 @@ static int extract_join_feature(GenomeNode *gn, void *data, Env *env)
                                                      genome_node_get_seqid(gn),
                                                      env);
     }
-    assert(range.end <= raw_sequence_length);
-    str_append_cstr_nt(v->sequence, raw_sequence, range_length(range), env);
-    if (genome_feature_get_strand(gf) == STRAND_REVERSE)
-      v->reverse_strand = true;
+    if (!has_err) {
+      assert(range.end <= raw_sequence_length);
+      str_append_cstr_nt(v->sequence, raw_sequence, range_length(range), env);
+      if (genome_feature_get_strand(gf) == STRAND_REVERSE)
+        v->reverse_strand = true;
+    }
   }
   return has_err;
 }

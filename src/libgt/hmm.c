@@ -584,7 +584,7 @@ int hmm_unit_test(Env *env)
                                 "6366646623252441366166116325256246225526525226"
                                 "6435353336233121625364414432335163243633665562"
                                 "466662632666612355245242" };
-  int *encoded_seq;
+  unsigned int *encoded_seq;
   Alpha *alpha;
   size_t i, j, len, size;
   HMM *fair_hmm, *loaded_hmm;

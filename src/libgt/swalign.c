@@ -10,6 +10,7 @@
 #include <libgt/coordinate.h>
 #include <libgt/minmax.h>
 #include <libgt/swalign.h>
+#include <libgt/undef.h>
 
 typedef struct {
   long score;
@@ -50,7 +51,7 @@ static void fillDPtable(DPentry **dptable,
 static Coordinate traceback(Alignment *a, DPentry **dptable,
                             unsigned long i, unsigned long j, Env *env)
 {
-  Coordinate start_coordinate;
+  Coordinate start_coordinate = { UNDEFULONG, UNDEFULONG };
   assert(a && dptable);
   while (dptable[i][j].score) {
     assert(dptable[i][j].score > 0);
@@ -70,18 +71,22 @@ static Coordinate traceback(Alignment *a, DPentry **dptable,
       j--;
     }
   }
+  assert(start_coordinate.x != UNDEFULONG);
+  assert(start_coordinate.y != UNDEFULONG);
   return start_coordinate;
 }
 
 Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf, Env *env)
 {
-  Coordinate alignment_start, alignment_end;
+  Coordinate alignment_start, alignment_end = { UNDEFULONG, UNDEFULONG };
   DPentry **dptable;
   Alignment *a = NULL;
   assert(u && v && sf);
   array2dim_calloc(dptable, seq_length(u)+1, seq_length(v)+1, DPentry, env);
   fillDPtable(dptable, seq_get_encoded(u, env), seq_length(u),
               seq_get_encoded(v, env), seq_length(v), sf, &alignment_end);
+  assert(alignment_end.x != UNDEFULONG);
+  assert(alignment_end.y != UNDEFULONG);
   if (dptable[alignment_end.x][alignment_end.y].score) {
     /* construct only an alignment if a (positive) score was computed */
     a = alignment_new(env);

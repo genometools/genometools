@@ -778,8 +778,8 @@ Option* option_new_uint_min(const char *option_str, const char *description,
                             unsigned int *value, unsigned int default_value,
                             unsigned int min_value, Env *env)
 {
-  Option *o = option_new_uint(option_str, description, (int*) value,
-                              default_value, env);
+  Option *o = option_new_uint(option_str, description, value, default_value,
+                              env);
   o->min_value_set = true;
   o->min_value.ui = min_value;
   return o;
@@ -789,8 +789,8 @@ Option* option_new_uint_max(const char *option_str, const char *description,
                             unsigned int *value, unsigned int default_value,
                             unsigned int max_value, Env *env)
 {
-  Option *o = option_new_uint(option_str, description, (int*) value,
-                              default_value, env);
+  Option *o = option_new_uint(option_str, description, value, default_value,
+                              env);
   o->max_value_set = true;
   o->max_value.ui = max_value;
   return o;
