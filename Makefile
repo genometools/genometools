@@ -19,6 +19,8 @@ LIBGT_OBJ:=$(LIBGT_SRC:%.c=obj/%.o)
 TOOLS_SRC:=$(notdir $(wildcard src/tools/*.c))
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
 
+LIBEXPAT_OBJ:=obj/xmlparse.o obj/xmlrole.o obj/xmltok.o
+
 LIBLUA_OBJ=obj/lapi.o obj/lcode.o obj/ldebug.o obj/ldo.o obj/ldump.o \
            obj/lfunc.o obj/lgc.o obj/llex.o obj/lmem.o obj/lobject.o \
            obj/lopcodes.o obj/lparser.o obj/lstate.o obj/lstring.o   \
@@ -47,6 +49,12 @@ dirs:
 	@test -d obj     || mkdir -p obj 
 	@test -d lib     || mkdir -p lib 
 	@test -d bin     || mkdir -p bin 
+
+lib/libexpat.a: $(LIBEXPAT_OBJ)
+	ar ruv $@ $(LIBEXPAT_OBJ)
+ifdef RANLIB
+	$(RANLIB) $@
+endif
 
 lib/libgt.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h \
              $(LIBGT_OBJ) $(LIBLUA_OBJ)
@@ -80,6 +88,9 @@ obj/%.o: src/libgt/%.c
 obj/%.o: src/tools/%.c
 	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
+obj/%.o: src/expat-2.0.0/lib/%.c
+	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DHAVE_MEMMOVE -MT $@ -MMD -MP -MF $(@:.o=.d)
+
 obj/%.o: src/lua-5.1.1/src/%.c
 	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DLUA_USE_POSIX -MT $@ -MMD -MP -MF $(@:.o=.d)
 
@@ -102,7 +113,7 @@ release:
 
 gt: dirs bin/gt
 
-libgt: dirs lib/libgt.a
+libgt: dirs lib/libexpat.a lib/libgt.a
 
 install:
 	test -d $(prefix)/bin || mkdir -p $(prefix)/bin
