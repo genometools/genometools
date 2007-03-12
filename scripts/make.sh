@@ -6,4 +6,4 @@
 #
 
 # the make call normally used for development
-make CFLAGS=-Werror test
+gmake CFLAGS=-Werror test
