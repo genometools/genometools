@@ -1,0 +1,116 @@
+# RELAX NG for RELAX NG
+
+# $Id: relaxng.rnc,v 1.2 2004/01/04 23:20:00 dvd Exp $
+
+namespace local = ""
+default namespace rng = "http://relaxng.org/ns/structure/1.0"
+
+start = pattern
+pattern =
+  element element {
+    (attribute name { xsd:QName }
+     | open-name-class),
+    common-atts,
+    open-patterns
+  }
+  | element attribute {
+      common-atts,
+      (attribute name { xsd:QName }
+       | open-name-class),
+      (other & pattern?)
+    }
+  | element group { common-atts, open-patterns }
+  | element interleave { common-atts, open-patterns }
+  | element choice { common-atts, open-patterns }
+  | element optional { common-atts, open-patterns }
+  | element zeroOrMore { common-atts, open-patterns }
+  | element oneOrMore { common-atts, open-patterns }
+  | element list { common-atts, open-patterns }
+  | element mixed { common-atts, open-patterns }
+  | element ref {
+      attribute name { xsd:NCName },
+      common-atts,
+      other
+    }
+  | element parentRef {
+      attribute name { xsd:NCName },
+      common-atts,
+      other
+    }
+  | element empty { common-atts, other }
+  | element text { common-atts, other }
+  | element value {
+      attribute type { xsd:NCName }?,
+      common-atts,
+      text
+    }
+  | element data {
+      attribute type { xsd:NCName },
+      common-atts,
+      (other
+       & (element param {
+            attribute name { xsd:NCName },
+            common-atts,
+            text
+          }*,
+          element except { common-atts, open-patterns }?))
+    }
+  | element notAllowed { common-atts, other }
+  | element externalRef {
+      attribute href { xsd:anyURI },
+      common-atts,
+      other
+    }
+  | element grammar { common-atts, grammar-content }
+grammar-content =
+  other
+  & (start-element
+     | define-element
+     | element div { common-atts, grammar-content }
+     | element include {
+         attribute href { xsd:anyURI },
+         common-atts,
+         include-content
+       })*
+include-content =
+  other
+  & (start-element
+     | define-element
+     | element div { common-atts, include-content })*
+start-element = element start { combine-att, common-atts, open-pattern }
+define-element =
+  element define {
+    attribute name { xsd:NCName },
+    combine-att,
+    common-atts,
+    open-patterns
+  }
+combine-att = attribute combine { "choice" | "interleave" }?
+open-patterns = other & pattern+
+open-pattern = other & pattern
+name-class =
+  element name { common-atts, xsd:QName }
+  | element anyName { common-atts, except-name-class }
+  | element nsName { common-atts, except-name-class }
+  | element choice { common-atts, open-name-classes }
+except-name-class =
+  other
+  & element except { open-name-classes }?
+open-name-classes = other & name-class+
+open-name-class = other & name-class
+common-atts =
+  attribute ns { text }?,
+  attribute datatypeLibrary { xsd:anyURI }?,
+  attribute * - (rng:* | local:*) { text }*
+other =
+  element * - rng:* {
+    (attribute * { text }
+     | text
+     | any)*
+  }*
+any =
+  element * {
+    (attribute * { text }
+     | text
+     | any)*
+  }

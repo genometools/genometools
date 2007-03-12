@@ -1,0 +1,55 @@
+# $Id: src.txt,v 1.12 2004/01/20 23:17:58 dvd Exp $
+
+# source files
+
+xcl.c -- Expat-based command-line interface
+arx.c -- document and type association utility
+ll.h -- lengths of arrays
+erbit.h -- error classes
+er.c er.h -- low-level error output functions
+rnv.c rnv.h -- higher-level validator logic
+rn.c rn.h -- RNG patterns
+rnc.c rnc.h -- RNC loader
+rnd.c rnd.h -- second pass for RNC loader, restrictions and traits
+rnx.c rnx.h -- auxiliary functions for rn*
+drv.c drv.h -- derivative of RNG patterns, validation core
+xsd.c xsd.h -- xml schema datatypes
+xsd_tm.c xsd_tm.h -- dateTime datatype implementation
+dxl.c dxl.h -- executable datatypes
+dsl.c dsl.h -- scheme datatypes
+sc.c sc.h -- scope tables for rnc
+ht.c ht.h -- hash table  
+s.c s.h  -- common string operations
+m.c m.h  -- common memory operations
+xmlc.c xmlc.h -- xml character classifiers
+u.c u.h  -- utf-8 
+rx.c rx.h -- regular expressions engine
+rx_cls_u.c rx_cls_ranges.c -- auto-generated tables; included by rx.c
+
+# hierarchy
+
+... ht,s,m,xmlc,u,er -- used in many places
+
+xcl,arx,rvp
+. dsl
+. dxl
+. rnv
+... erbit.h
+... ll
+... rn
+.... ll
+... rnc
+.... sc
+..... ll
+... rnd
+... rnx
+.... ll
+... drv
+.... ll
+.... xsd
+..... erbit.h
+..... xsd_tm
+..... rx
+...... rx_cls_u
+...... rx_cls_ranges
+...... ll

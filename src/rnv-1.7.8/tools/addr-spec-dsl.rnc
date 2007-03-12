@@ -1,0 +1,20 @@
+# $Id: addr-spec-dsl.rnc,v 1.2 2004/01/30 12:21:21 dvd Exp $
+# RFC 2822 addr-spec
+
+datatypes dsl = "http://davidashen.net/relaxng/scheme-datatypes"
+
+start=element addr-spec {
+  dsl:token {
+    s-pattern="""
+      comment = "\(([^\(\)\\]|\\.)*\)"
+      atom = "[a-zA-Z0-9!#$%&'*+\-/=?\^_`{|}~]+"
+      atoms = atom "(\." atom ")*"
+      person = "\"([^\"\\]|\\.)*\""
+      location = "\[([^\[\]\\]|\\.)*\]"
+      local-part = "(" atom "|" person ")"
+      domain = "(" atoms "|" location ")"
+      start = "(" comment " )?" local-part "@" domain "( " comment ")?"
+    """
+  }
+}
+

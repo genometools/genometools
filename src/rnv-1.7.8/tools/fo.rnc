@@ -1,0 +1,1590 @@
+# This DTD has been developed in order to validate XSL FO documents 
+# conformant to XSL Recommendation of October 15, 2001. The namespace 
+# prefix is 
+# 
+#   xmlns:fo="http://www.w3.org/1999/XSL/Format".
+# 
+# This DTD also makes provision for few extensions to XSL Rec, put 
+# into a separate namespace: 
+# 
+#   xmlns:rx="http://www.renderx.com/XSL/Extensions".
+# 
+# Please e-mail your comments to Nikolai Grigoriev <grig@renderx.com>
+# Converted to Relax NG Compact Syntax using by David Tolpin <dvd@davidashen.net> using Trang, http://relaxng.org/
+# 
+# © RenderX, 1999-2002. 
+#
+# *******************************************************************
+# 
+# This DTD was written in mind to validate testcases for the new XSL FO 
+# draft. Therefore, it is restrictive with respect to the spec: some rare 
+# XSL FO features have been dropped in order to validate others more 
+# reliably. Unless a document intentionally uses some of the functionality 
+# listed below in the introductory notes, it shall be conformant to this 
+# DTD in order to be a valid XSL FO document. 
+# 
+# INTRODUCTORY NOTES
+# 
+# 1. XSL FO are hard to validate by a DTD: attributes are universally 
+# inheritable due to the adoption of the 'inherit' value from CSS2; and 
+# even for the content model, presence of universal wrappers like fo:wrapper 
+# makes it impossible to trace a neat distinction between inline-level and 
+# block-level content. Therefore, this version of the DTD cannot reliably
+# detect inconsistencies in attribute sets: real checks are performed 
+# only for empty inline elements and top-level elements (fo:layout-master-set 
+# and its descendants). 
+# 
+# 2. The contents of the fo:instream-foreign-object element is hardvired to
+# be an SVG graphic. To validate it, this DTD includes an SVG DTD as an 
+# external entity.
+# 
+# DEVIATIONS FROM THE DRAFT
+# 
+# 1. Content model for <fo:layout-master-set> is made more strict:
+# at least one fo:simple-page-master should be present. (I think this 
+# is more like a correction to the spec, rather than a deviation from it).
+# 
+# 2. In XSL 1.0, page and region-body margins may be expressed in terms
+# of space-*. This does not make any sense, as far as no stacked 
+# constraint may occur. For this reason, I have disabled spaces
+# in this context, leaving only plain old CSS margins.
+# 
+# 3. Attributes of elements inside fo:layout-master-set may have a value 
+# of 'inherit'. However, I have disabled the occurrence of such attributes
+# on parent elements: inheriting them buys us little in terms of 
+# conciseness, but is error-prone in the initial phase.
+# 
+# 4. Table-omit-{header|footer}-at-break is added a value of 'inherit',
+# to align it with the rest of table attributes. (If table-layout may have
+# it, why these two should not?)
+# 
+# 5. Text-align has a closed list of values, neglecting the <string> value
+# type. The reason is practical: many stylesheet writers are used to write 
+# "centered" and "justified", whereas the correct values for this version 
+# of the draft are "center" and "justify"; catching this error in the DTD
+# turned out to be useful. Moreover, <string> values are poorly described 
+# in the draft (nothing but a reference to CSS2), and are unlikely to be 
+# implemented soon. (Ultimate reason: changing the attribute value back to 
+# CDATA is a matter of few seconds ;-)).
+# 
+# 6. Only basic values for writing-mode are included. 
+# 
+# 7. "Reference-orientation" is given <angle> values, besides numeric
+#    ones described in the Recommendation. 
+# 
+# 8. Several extension elements and properties are added to enable 
+# functionality missing from the Recommendation:
+# 
+# rx:background-content-height (attribute)
+# rx:background-content-width (attribute)
+# rx:background-content-type (attribute)
+# rx:background-scaling (attribute)
+# 
+#    These properties are exact analogs of 'content-height', 'content-width'
+#    'content-type', and 'scaling' but apply to the background image.
+# 
+# rx:outline (element)
+# rx:bookmark (element)
+# rx:bookmark-label (element)
+# 
+#    These elements implement PDF bookmarks.
+# 
+# rx:meta-info (element)
+# rx:meta-field (element)
+# 
+#    These elements pass meta-information about the document.
+# 
+# rx:page-device (element) 
+# 
+#    This element permits passing parameters to setpagedevice
+#    operator in PostScript
+# 
+# rx:flow-section (element) 
+# 
+#    This element permits setting arbitrary number of columns
+#    in a sigle page.
+# 
+# rx:key (attribute)
+# rx:page-index (element)
+# 
+#    These elements implement page number lists in indexes.
+# 
+# 
+# ********************************************************************
+# ***************************************************************
+# Include external DTDs for foreign objects
+# ***************************************************************
+# Commented out for evaluation version 
+# 
+# <!ENTITY % instream-foreign-object-dtd SYSTEM "instream-foreign-object.dtd">
+# 
+# %instream-foreign-object-dtd; 
+#
+# ***************************************************************
+# Entity definitions for groups of formatting objects
+# ***************************************************************
+
+namespace fo="http://www.w3.org/1999/XSL/Format"
+namespace rx="http://www.renderx.com/XSL/Extensions"
+
+basic-inlines =
+  bidi-override
+  | character
+  | external-graphic
+  | instream-foreign-object
+  | inline
+  | inline-container
+  | leader
+  | page-number
+  | page-number-citation
+  | basic-link
+  | multi-toggle
+  | pinpoint
+  | page-index
+basic-blocks =
+  block | block-container | table-and-caption | table | list-block
+out-of-lines = footnote | float
+wrappers =
+  multi-switch | multi-properties | wrapper | marker | retrieve-marker
+inlines = text | basic-inlines | out-of-lines | wrappers
+blocks = basic-blocks | out-of-lines | wrappers
+mixed-level =
+  text | basic-inlines | basic-blocks | out-of-lines | wrappers
+# ***************************************************************
+# Entity definitions for common groups of properties
+# This grouping reflects properties cooccurrence, rather than
+# property semantics. It does not correspond to grouping in the
+# draft.
+# ***************************************************************
+# Accessibility Properties
+accessibility-properties =
+  attribute source-document { text }?,
+  attribute role { text }?
+# Relative Position Properties
+# 'position' shorthand property also makes part of this group
+relative-position-properties =
+  attribute relative-position {
+    "auto" | "static" | "relative" | "inherit"
+  }?,
+  attribute position {
+    "static" | "relative" | "absolute" | "fixed" | "inherit"
+  }?,
+  attribute top { text }?,
+  attribute right { text }?,
+  attribute bottom { text }?,
+  attribute left { text }?
+# Absolute or Relative Position Properties
+# There is no object that can be positioned only absolutely.
+# Therefore, absolute and relative positioning properties are
+# grouped together
+absolute-or-relative-position-properties =
+  attribute absolute-position {
+    "auto" | "absolute" | "fixed" | "inherit"
+  }?,
+  relative-position-properties
+# Aural Properties
+# 'cue' and 'pause' shorthand properties are also included
+aural-properties =
+  attribute azimuth { text }?,
+  attribute cue { text }?,
+  attribute cue-after { text }?,
+  attribute cue-before { text }?,
+  attribute elevation { text }?,
+  attribute pause { text }?,
+  attribute pause-after { text }?,
+  attribute pause-before { text }?,
+  attribute pitch { text }?,
+  attribute pitch-range { text }?,
+  attribute play-during { text }?,
+  attribute richness { text }?,
+  attribute speak { "normal" | "none" | "spell-out" | "inherit" }?,
+  attribute speak-header { "once" | "always" | "inherit" }?,
+  attribute speak-numeral { "digits" | "continuous" | "inherit" }?,
+  attribute speak-punctuation { "code" | "none" | "inherit" }?,
+  attribute speech-rate { text }?,
+  attribute stress { text }?,
+  attribute voice-family { text }?,
+  attribute volume { text }?
+# Common Border, Padding, and Background Properties
+# Relative shorthand properties are also included
+border-padding-background-properties =
+  attribute background { text }?,
+  attribute background-attachment { "scroll" | "fixed" | "inherit" }?,
+  attribute background-color { text }?,
+  attribute background-image { text }?,
+  attribute background-position { text }?,
+  attribute background-position-vertical { text }?,
+  attribute background-position-horizontal { text }?,
+  attribute background-repeat {
+    "repeat" | "repeat-x" | "repeat-y" | "no-repeat" | "inherit"
+  }?,
+  attribute rx:background-content-type { text }?,
+  attribute rx:background-content-height { text }?,
+  attribute rx:background-content-width { text }?,
+  attribute rx:background-scaling { "uniform" | "non-uniform" }?,
+  attribute border { text }?,
+  attribute border-after-color { text }?,
+  attribute border-after-style {
+    "none"
+    | "hidden"
+    | "dotted"
+    | "dashed"
+    | "solid"
+    | "double"
+    | "groove"
+    | "ridge"
+    | "inset"
+    | "outset"
+    | "inherit"
+  }?,
+  attribute border-after-width { text }?,
+  attribute border-after-width.length { text }?,
+  attribute border-after-width.conditionality { "discard" | "retain" }?,
+  attribute border-before-color { text }?,
+  attribute border-before-style {
+    "none"
+    | "hidden"
+    | "dotted"
+    | "dashed"
+    | "solid"
+    | "double"
+    | "groove"
+    | "ridge"
+    | "inset"
+    | "outset"
+    | "inherit"
+  }?,
+  attribute border-before-width { text }?,
+  attribute border-before-width.length { text }?,
+  attribute border-before-width.conditionality {
+    "discard" | "retain"
+  }?,
+  attribute border-bottom { text }?,
+  attribute border-bottom-color { text }?,
+  attribute border-bottom-style {
+    "none"
+    | "hidden"
+    | "dotted"
+    | "dashed"
+    | "solid"
+    | "double"
+    | "groove"
+    | "ridge"
+    | "inset"
+    | "outset"
+    | "inherit"
+  }?,
+  attribute border-bottom-width { text }?,
+  attribute border-bottom-width.length { text }?,
+  attribute border-bottom-width.conditionality {
+    "discard" | "retain"
+  }?,
+  attribute border-color { text }?,
+  attribute border-end-color { text }?,
+  attribute border-end-style {
+    "none"
+    | "hidden"
+    | "dotted"
+    | "dashed"
+    | "solid"
+    | "double"
+    | "groove"
+    | "ridge"
+    | "inset"
+    | "outset"
+    | "inherit"
+  }?,
+  attribute border-end-width { text }?,
+  attribute border-end-width.length { text }?,
+  attribute border-end-width.conditionality { "discard" | "retain" }?,
+  attribute border-left { text }?,
+  attribute border-left-color { text }?,
+  attribute border-left-style {
+    "none"
+    | "hidden"
+    | "dotted"
+    | "dashed"
+    | "solid"
+    | "double"
+    | "groove"
+    | "ridge"
+    | "inset"
+    | "outset"
+    | "inherit"
+  }?,
+  attribute border-left-width { text }?,
+  attribute border-left-width.length { text }?,
+  attribute border-left-width.conditionality { "discard" | "retain" }?,
+  attribute border-right { text }?,
+  attribute border-right-color { text }?,
+  attribute border-right-style {
+    "none"
+    | "hidden"
+    | "dotted"
+    | "dashed"
+    | "solid"
+    | "double"
+    | "groove"
+    | "ridge"
+    | "inset"
+    | "outset"
+    | "inherit"
+  }?,
+  attribute border-right-width { text }?,
+  attribute border-right-width.length { text }?,
+  attribute border-right-width.conditionality { "discard" | "retain" }?,
+  attribute border-start-color { text }?,
+  attribute border-start-style {
+    "none"
+    | "hidden"
+    | "dotted"
+    | "dashed"
+    | "solid"
+    | "double"
+    | "groove"
+    | "ridge"
+    | "inset"
+    | "outset"
+    | "inherit"
+  }?,
+  attribute border-start-width { text }?,
+  attribute border-start-width.length { text }?,
+  attribute border-start-width.conditionality { "discard" | "retain" }?,
+  attribute border-style { text }?,
+  attribute border-top { text }?,
+  attribute border-top-color { text }?,
+  attribute border-top-style {
+    "none"
+    | "hidden"
+    | "dotted"
+    | "dashed"
+    | "solid"
+    | "double"
+    | "groove"
+    | "ridge"
+    | "inset"
+    | "outset"
+    | "inherit"
+  }?,
+  attribute border-top-width { text }?,
+  attribute border-top-width.length { text }?,
+  attribute border-top-width.conditionality { "discard" | "retain" }?,
+  attribute border-width { text }?,
+  attribute padding { text }?,
+  attribute padding-after { text }?,
+  attribute padding-after.length { text }?,
+  attribute padding-after.conditionality { "discard" | "retain" }?,
+  attribute padding-before { text }?,
+  attribute padding-before.length { text }?,
+  attribute padding-before.conditionality { "discard" | "retain" }?,
+  attribute padding-bottom { text }?,
+  attribute padding-bottom.length { text }?,
+  attribute padding-bottom.conditionality { "discard" | "retain" }?,
+  attribute padding-end { text }?,
+  attribute padding-end.length { text }?,
+  attribute padding-end.conditionality { "discard" | "retain" }?,
+  attribute padding-left { text }?,
+  attribute padding-left.length { text }?,
+  attribute padding-left.conditionality { "discard" | "retain" }?,
+  attribute padding-right { text }?,
+  attribute padding-right.length { text }?,
+  attribute padding-right.conditionality { "discard" | "retain" }?,
+  attribute padding-start { text }?,
+  attribute padding-start.length { text }?,
+  attribute padding-start.conditionality { "discard" | "retain" }?,
+  attribute padding-top { text }?,
+  attribute padding-top.length { text }?,
+  attribute padding-top.conditionality { "discard" | "retain" }?
+# Border Precedence Properties for tables
+border-precedence-properties =
+  attribute border-after-precedence { text }?,
+  attribute border-before-precedence { text }?,
+  attribute border-end-precedence { text }?,
+  attribute border-start-precedence { text }?
+# Box Size Properties
+box-size-properties =
+  attribute height { text }?,
+  attribute min-height { text }?,
+  attribute max-height { text }?,
+  attribute width { text }?,
+  attribute min-width { text }?,
+  attribute max-width { text }?,
+  attribute inline-progression-dimension { text }?,
+  attribute inline-progression-dimension.minimum { text }?,
+  attribute inline-progression-dimension.optimum { text }?,
+  attribute inline-progression-dimension.maximum { text }?,
+  attribute block-progression-dimension { text }?,
+  attribute block-progression-dimension.minimum { text }?,
+  attribute block-progression-dimension.optimum { text }?,
+  attribute block-progression-dimension.maximum { text }?
+# Common Area Properties
+area-properties =
+  attribute clip { text }?,
+  attribute overflow {
+    "visible"
+    | "hidden"
+    | "scroll"
+    | "auto"
+    | "error-if-overflow"
+    | "inherit"
+  }?,
+  attribute display-align {
+    "auto" | "before" | "center" | "after" | "inherit"
+  }?,
+  attribute reference-orientation {
+    "0"
+    | "90"
+    | "180"
+    | "270"
+    | "-90"
+    | "-180"
+    | "-270"
+    | "0deg"
+    | "90deg"
+    | "180deg"
+    | "270deg"
+    | "-90deg"
+    | "-180deg"
+    | "-270deg"
+    | "inherit"
+  }?,
+  attribute writing-mode {
+    "lr-tb" | "rl-tb" | "tb-rl" | "lr" | "rl" | "tb" | "inherit"
+  }?
+# Common Font Properties
+# 'font' shorthand property is also included
+font-properties =
+  attribute font { text }?,
+  attribute font-selection-strategy {
+    "auto" | "character-by-character" | "inherit"
+  }?,
+  attribute font-family { text }?,
+  attribute font-size { text }?,
+  attribute font-size-adjust { text }?,
+  attribute font-stretch {
+    "normal"
+    | "wider"
+    | "narrower"
+    | "ultra-condensed"
+    | "extra-condensed"
+    | "condensed"
+    | "semi-condensed"
+    | "semi-expanded"
+    | "expanded"
+    | "extra-expanded"
+    | "ultra-expanded"
+    | "inherit"
+  }?,
+  attribute font-style {
+    "normal" | "italic" | "oblique" | "backslant" | "inherit"
+  }?,
+  attribute font-variant { "normal" | "small-caps" | "inherit" }?,
+  attribute font-weight {
+    "normal"
+    | "bold"
+    | "bolder"
+    | "lighter"
+    | "inherit"
+    | "100"
+    | "200"
+    | "300"
+    | "400"
+    | "500"
+    | "600"
+    | "700"
+    | "800"
+    | "900"
+  }?
+# Common Hyphenation Properties - Inline
+# 'xml:lang' shorthand property is also included
+hyphenation-properties-inline =
+  attribute country { text }?,
+  attribute language { text }?,
+  attribute script { text }?,
+  attribute xml:lang { text }?,
+  attribute hyphenate { "false" | "true" | "inherit" }?,
+  attribute hyphenation-character { text }?,
+  attribute hyphenation-push-character-count { text }?,
+  attribute hyphenation-remain-character-count { text }?
+# Common Hyphenation Properties - Block
+hyphenation-properties-block =
+  attribute hyphenation-keep {
+    "auto" | "column" | "page" | "inherit"
+  }?,
+  attribute hyphenation-ladder-count { text }?,
+  hyphenation-properties-inline
+# Common CSS Margin Properties
+# 'margin' shorthand property is also included
+margin-properties-CSS =
+  attribute margin { text }?,
+  attribute margin-bottom { text }?,
+  attribute margin-left { text }?,
+  attribute margin-right { text }?,
+  attribute margin-top { text }?
+# Common Margin Properties - Block
+margin-properties-block =
+  margin-properties-CSS,
+  attribute space-after { text }?,
+  attribute space-after.minimum { text }?,
+  attribute space-after.optimum { text }?,
+  attribute space-after.maximum { text }?,
+  attribute space-after.precedence { text }?,
+  attribute space-after.conditionality { "retain" | "discard" }?,
+  attribute space-before { text }?,
+  attribute space-before.minimum { text }?,
+  attribute space-before.optimum { text }?,
+  attribute space-before.maximum { text }?,
+  attribute space-before.precedence { text }?,
+  attribute space-before.conditionality { "retain" | "discard" }?,
+  attribute start-indent { text }?,
+  attribute end-indent { text }?
+# Common Margin Properties - Inline
+margin-properties-inline =
+  margin-properties-block,
+  attribute space-start { text }?,
+  attribute space-start.minimum { text }?,
+  attribute space-start.optimum { text }?,
+  attribute space-start.maximum { text }?,
+  attribute space-start.precedence { text }?,
+  attribute space-start.conditionality { "retain" | "discard" }?,
+  attribute space-end { text }?,
+  attribute space-end.minimum { text }?,
+  attribute space-end.optimum { text }?,
+  attribute space-end.maximum { text }?,
+  attribute space-end.precedence { text }?,
+  attribute space-end.conditionality { "retain" | "discard" }?
+# Area Alignment Properties - inline
+# 'vertical-align' shorthand is added
+area-alignment-properties-inline =
+  attribute alignment-adjust { text }?,
+  attribute alignment-baseline {
+    "auto"
+    | "baseline"
+    | "before-edge"
+    | "text-before-edge"
+    | "middle"
+    | "central"
+    | "after-edge"
+    | "text-after-edge"
+    | "top"
+    | "text-top"
+    | "bottom"
+    | "text-bottom"
+    | "ideographic"
+    | "alphabetic"
+    | "hanging"
+    | "mathematical"
+    | "inherit"
+  }?,
+  attribute baseline-shift { text }?,
+  attribute dominant-baseline {
+    "auto"
+    | "use-script"
+    | "no-change"
+    | "reset-size"
+    | "ideographic"
+    | "alphabetic"
+    | "hanging"
+    | "mathematical"
+    | "central"
+    | "middle"
+    | "text-after-edge"
+    | "text-before-edge"
+    | "inherit"
+  }?,
+  attribute vertical-align { text }?
+# Line Height Properties
+line-height-properties =
+  attribute line-height { text }?,
+  attribute line-height.minimum { text }?,
+  attribute line-height.optimum { text }?,
+  attribute line-height.maximum { text }?,
+  attribute line-height.precedence { text }?,
+  attribute line-height.conditionality { "retain" | "discard" }?,
+  attribute line-height-shift-adjustment { text }?
+# Line Related Properties
+# [!] <string> values are temporarily excluded from text-align
+line-related-properties =
+  attribute text-align {
+    "start"
+    | "center"
+    | "end"
+    | "justify"
+    | "inside"
+    | "outside"
+    | "left"
+    | "right"
+    | "inherit"
+  }?,
+  attribute text-align-last {
+    "relative"
+    | "start"
+    | "center"
+    | "end"
+    | "justify"
+    | "inside"
+    | "outside"
+    | "left"
+    | "right"
+    | "inherit"
+  }?,
+  attribute text-indent { text }?,
+  attribute last-line-end-indent { text }?,
+  attribute line-stacking-strategy {
+    "line-height" | "font-height" | "max-height" | "inherit"
+  }?,
+  attribute linefeed-treatment {
+    "ignore"
+    | "preserve"
+    | "treat-as-space"
+    | "treat-as-zero-width-space"
+    | "inherit"
+  }?,
+  attribute white-space { "normal" | "pre" | "nowrap" | "inherit" }?,
+  attribute white-space-treatment {
+    "ignore"
+    | "preserve"
+    | "ignore-if-before-linefeed"
+    | "ignore-if-after-linefeed"
+    | "ignore-if-surrounding-linefeed"
+    | "inherit"
+  }?,
+  attribute white-space-collapse { "false" | "true" | "inherit" }?,
+  attribute wrap-option { "no-wrap" | "wrap" | "inherit" }?,
+  attribute unicode-bidi {
+    "normal" | "embed" | "bidi-override" | "inherit"
+  }?,
+  attribute direction { "ltr" | "rtl" | "inherit" }?
+# Character Properties
+character-properties =
+  attribute letter-spacing { text }?,
+  attribute letter-spacing.minimum { text }?,
+  attribute letter-spacing.optimum { text }?,
+  attribute letter-spacing.maximum { text }?,
+  attribute letter-spacing.precedence { text }?,
+  attribute letter-spacing.conditionality { "retain" | "discard" }?,
+  attribute word-spacing { text }?,
+  attribute word-spacing.minimum { text }?,
+  attribute word-spacing.optimum { text }?,
+  attribute word-spacing.maximum { text }?,
+  attribute word-spacing.precedence { text }?,
+  attribute word-spacing.conditionality { "retain" | "discard" }?,
+  attribute treat-as-word-space {
+    "auto" | "true" | "false" | "inherit"
+  }?,
+  attribute text-decoration { xsd:NMTOKENS }?,
+  attribute score-spaces { "true" | "false" | "inherit" }?,
+  attribute text-shadow { text }?,
+  attribute text-transform {
+    "capitalize" | "uppercase" | "lowercase" | "none" | "inherit"
+  }?,
+  attribute suppress-at-line-break {
+    "auto" | "suppress" | "retain" | "inherit"
+  }?,
+  attribute text-altitude { text }?,
+  attribute text-depth { text }?,
+  attribute glyph-orientation-horizontal {
+    "0"
+    | "90"
+    | "180"
+    | "270"
+    | "-90"
+    | "-180"
+    | "-270"
+    | "0deg"
+    | "90deg"
+    | "180deg"
+    | "270deg"
+    | "-90deg"
+    | "-180deg"
+    | "-270deg"
+    | "inherit"
+  }?,
+  attribute glyph-orientation-vertical {
+    "0"
+    | "90"
+    | "180"
+    | "270"
+    | "-90"
+    | "-180"
+    | "-270"
+    | "0deg"
+    | "90deg"
+    | "180deg"
+    | "270deg"
+    | "-90deg"
+    | "-180deg"
+    | "-270deg"
+    | "inherit"
+  }?,
+  font-properties,
+  line-height-properties
+# Common Keeps and Breaks Properties - Atomic objects
+# 'page-break-*' shorthand properties are also included
+keeps-and-breaks-properties-atomic =
+  attribute break-after {
+    "auto" | "column" | "page" | "even-page" | "odd-page" | "inherit"
+  }?,
+  attribute break-before {
+    "auto" | "column" | "page" | "even-page" | "odd-page" | "inherit"
+  }?,
+  attribute keep-with-next { text }?,
+  attribute keep-with-next.within-line { text }?,
+  attribute keep-with-next.within-column { text }?,
+  attribute keep-with-next.within-page { text }?,
+  attribute keep-with-previous { text }?,
+  attribute keep-with-previous.within-line { text }?,
+  attribute keep-with-previous.within-column { text }?,
+  attribute keep-with-previous.within-page { text }?,
+  attribute page-break-after {
+    "auto" | "always" | "avoid" | "left" | "right" | "inherit"
+  }?,
+  attribute page-break-before {
+    "auto" | "always" | "avoid" | "left" | "right" | "inherit"
+  }?
+# Common Keeps and Breaks Properties - Inline
+# 'page-break-inside' shorthand property is also included
+keeps-and-breaks-properties-inline =
+  keeps-and-breaks-properties-atomic,
+  attribute keep-together { text }?,
+  attribute keep-together.within-line { text }?,
+  attribute keep-together.within-column { text }?,
+  attribute keep-together.within-page { text }?,
+  attribute page-break-inside { "avoid" | "auto" | "inherit" }?
+# Common Keeps and Breaks Properties - Block
+keeps-and-breaks-properties-block =
+  keeps-and-breaks-properties-inline,
+  attribute orphans { text }?,
+  attribute widows { text }?
+# Leader and Rule Properties
+leader-properties =
+  attribute leader-alignment {
+    "none" | "reference-area" | "page" | "inherit"
+  }?,
+  attribute leader-pattern {
+    "space" | "rule" | "dots" | "use-content" | "inherit"
+  }?,
+  attribute leader-pattern-width { text }?,
+  attribute leader-length { text }?,
+  attribute leader-length.minimum { text }?,
+  attribute leader-length.optimum { text }?,
+  attribute leader-length.maximum { text }?,
+  attribute rule-style {
+    "none"
+    | "dotted"
+    | "dashed"
+    | "solid"
+    | "double"
+    | "groove"
+    | "ridge"
+    | "inherit"
+  }?,
+  attribute rule-thickness { text }?
+# Table Properties
+# 'border-spacing' shorthand property is also included
+# 'inherit' property added to table-omit-...er-at-break
+table-properties =
+  attribute border-collapse {
+    "collapse" | "collapse-with-precedence" | "separate" | "inherit"
+  }?,
+  attribute border-spacing { text }?,
+  attribute border-separation { text }?,
+  attribute border-separation.inline-progression-direction { text }?,
+  attribute border-separation.block-progression-direction { text }?,
+  attribute caption-side {
+    "before"
+    | "after"
+    | "start"
+    | "end"
+    | "top"
+    | "bottom"
+    | "left"
+    | "right"
+    | "inherit"
+  }?,
+  attribute empty-cells { "show" | "hide" | "inherit" }?,
+  attribute table-layout { "auto" | "fixed" | "inherit" }?,
+  attribute table-omit-header-at-break {
+    "true" | "false" | "inherit"
+  }?,
+  attribute table-omit-footer-at-break { "true" | "false" | "inherit" }?
+# List Properties
+list-properties =
+  attribute provisional-distance-between-starts { text }?,
+  attribute provisional-label-separation { text }?
+# Float Properties
+float-properties =
+  attribute float {
+    "before" | "start" | "end" | "left" | "right" | "none" | "inherit"
+  }?,
+  attribute clear {
+    "start" | "end" | "left" | "right" | "both" | "none" | "inherit"
+  }?,
+  attribute intrusion-displace {
+    "auto" | "none" | "line" | "indent" | "block" | "inherit"
+  }?
+# Visibility Properties
+visibility-properties =
+  attribute visibility {
+    "visible" | "hidden" | "collapse" | "inherit"
+  }?,
+  attribute z-index { text }?
+# ===============================================================
+# Set of all inheritable properties. This includes attributes
+# marked as inheritable in the spec, as well as all features that
+# may assume a value of "inherit" (because all such features are
+# also permitted at parent elements). By XSL design, this set
+# comprises nearly all attributes.
+# ===============================================================
+inheritable-properties =
+  attribute color { text }?,
+  attribute relative-align { "before" | "baseline" | "inherit" }?,
+  attribute span { "none" | "all" | "inherit" }?,
+  accessibility-properties,
+  absolute-or-relative-position-properties,
+  border-padding-background-properties,
+  border-precedence-properties,
+  aural-properties,
+  box-size-properties,
+  margin-properties-inline,
+  area-properties,
+  area-alignment-properties-inline,
+  character-properties,
+  table-properties,
+  list-properties,
+  float-properties,
+  line-related-properties,
+  leader-properties,
+  keeps-and-breaks-properties-block,
+  hyphenation-properties-block,
+  visibility-properties
+# ===============================================================
+# Common property subsets.
+# ===============================================================
+# Properties for every block that may contain text children
+block-properties =
+  attribute id { text }?,
+  attribute rx:key { text }?,
+  inheritable-properties
+# Properties for nonempty inline elements
+inline-properties =
+  attribute id { text }?,
+  attribute rx:key { text }?,
+  inheritable-properties
+# Properties for empty inline elements that contain characters
+empty-inline-properties =
+  attribute id { text }?,
+  attribute rx:key { text }?,
+  attribute color { text }?,
+  accessibility-properties,
+  aural-properties,
+  relative-position-properties,
+  area-alignment-properties-inline,
+  character-properties,
+  border-padding-background-properties,
+  hyphenation-properties-inline,
+  visibility-properties
+# Properties for graphical inline elements
+graphic-properties =
+  attribute id { text }?,
+  attribute rx:key { text }?,
+  attribute content-type { text }?,
+  accessibility-properties,
+  relative-position-properties,
+  aural-properties,
+  border-padding-background-properties,
+  margin-properties-inline,
+  area-alignment-properties-inline,
+  box-size-properties,
+  font-properties,
+  line-height-properties,
+  keeps-and-breaks-properties-atomic,
+  attribute content-height { text }?,
+  attribute content-width { text }?,
+  attribute display-align {
+    "auto" | "before" | "center" | "after" | "inherit"
+  }?,
+  attribute overflow {
+    "visible"
+    | "hidden"
+    | "scroll"
+    | "auto"
+    | "error-if-overflow"
+    | "inherit"
+  }?,
+  attribute scaling { "uniform" | "non-uniform" | "inherit" }?,
+  attribute scaling-method {
+    "auto" | "integer-pixels" | "resample-any-method" | "inherit"
+  }?,
+  attribute text-align {
+    "start"
+    | "center"
+    | "end"
+    | "justify"
+    | "inside"
+    | "outside"
+    | "left"
+    | "right"
+    | "inherit"
+  }?
+# ***************************************************************
+# Content models and attributes
+#
+# A. Element structure for top-level elements
+# ***************************************************************
+# ===============================================================
+# Root element. Contains everything, generates nothing. It has an
+# id, a FO namespace prefix declaration, and other namespace
+# declarations if used. It can also bear inheritable properties,
+# passed further to fo:flows/fo:static-contents. Inheritable
+# properties from fo:layout-master-set are banned in this version
+# of the DTD.
+# ===============================================================
+root =
+  element fo:root {
+    root-attlist,
+    meta-info?,
+    page-device?,
+    layout-master-set,
+    declarations?,
+    outline?,
+    page-sequence+
+  }
+root-attlist &=
+  attribute media-usage {
+    "auto" | "paginate" | "bounded-in-one-dimension" | "unbounded"
+  }?,
+  inheritable-properties
+# ===============================================================
+# Document meta information - RenderX extension
+# ===============================================================
+meta-info = element rx:meta-info { meta-info-attlist, meta-field+ }
+meta-info-attlist &= empty
+meta-field = element rx:meta-field { meta-field-attlist, empty }
+meta-field-attlist &=
+  attribute name { text },
+  attribute value { text }
+page-device = element rx:page-device { page-device-attlist, empty }
+page-device-attlist &=
+  attribute input-tray { text }?,
+  attribute output-tray { text }?,
+  attribute manual-feed { "true" | "false" }?,
+  attribute duplex { "true" | "false" }?,
+  attribute mirror-print { "true" | "false" }?,
+  attribute negative-print { "true" | "false" }?,
+  attribute collate { "true" | "false" }?,
+  attribute number-copies { text }?
+# ===============================================================
+# Color profile declarations
+# ===============================================================
+declarations =
+  element fo:declarations { declarations-attlist, color-profile+ }
+declarations-attlist &= empty
+color-profile =
+  element fo:color-profile { color-profile-attlist, empty }
+color-profile-attlist &=
+  attribute src { text },
+  attribute color-profile-name { text },
+  attribute rendering-intent { text }?
+# ===============================================================
+# Bookmarks - RenderX extension
+# ===============================================================
+outline = element rx:outline { outline-attlist, bookmark+ }
+outline-attlist &= empty
+bookmark =
+  element rx:bookmark { bookmark-attlist, bookmark-label, bookmark* }
+bookmark-attlist &=
+  attribute internal-destination { text }?,
+  attribute external-destination { text }?,
+  attribute collapse-subtree { "true" | "false" }?
+bookmark-label =
+  element rx:bookmark-label { bookmark-label-attlist, text }
+bookmark-label-attlist &= empty
+# ===============================================================
+# Layout-master-set. Contains a set of page-masters. Neither of
+# its descendants generates any area, so no inherited elements
+# can be specified on it or on its children.
+# Content model made more strict than in the draft, to enforce
+# that a page-sequence-master be always accompanied by at least
+# one simple-page-master.
+# ===============================================================
+layout-master-set =
+  element fo:layout-master-set {
+    layout-master-set-attlist,
+    page-sequence-master*,
+    simple-page-master,
+    (simple-page-master | page-sequence-master)*
+  }
+layout-master-set-attlist &= empty
+# ===============================================================
+# Page sequence master
+# ===============================================================
+page-sequence-master =
+  element fo:page-sequence-master {
+    page-sequence-master-attlist,
+    (single-page-master-reference
+     | repeatable-page-master-reference
+     | repeatable-page-master-alternatives)+
+  }
+page-sequence-master-attlist &= attribute master-name { text }
+# ===============================================================
+# Sequence specifiers are predefined sequences of page masters
+# that are used by page sequence master to construct a desired
+# page collection.
+# ===============================================================
+single-page-master-reference =
+  element fo:single-page-master-reference {
+    single-page-master-reference-attlist, empty
+  }
+single-page-master-reference-attlist &=
+  attribute master-reference { text }
+repeatable-page-master-reference =
+  element fo:repeatable-page-master-reference {
+    repeatable-page-master-reference-attlist, empty
+  }
+repeatable-page-master-reference-attlist &=
+  attribute master-reference { text },
+  attribute maximum-repeats { text }?
+repeatable-page-master-alternatives =
+  element fo:repeatable-page-master-alternatives {
+    repeatable-page-master-alternatives-attlist,
+    conditional-page-master-reference+
+  }
+repeatable-page-master-alternatives-attlist &=
+  attribute maximum-repeats { text }?
+conditional-page-master-reference =
+  element fo:conditional-page-master-reference {
+    conditional-page-master-reference-attlist, empty
+  }
+conditional-page-master-reference-attlist &=
+  attribute master-reference { text },
+  attribute page-position {
+    "first" | "last" | "rest" | "any" | "inherit"
+  }?,
+  attribute odd-or-even { "odd" | "even" | "any" | "inherit" }?,
+  attribute blank-or-not-blank {
+    "blank" | "not-blank" | "any" | "inherit"
+  }?
+# ===============================================================
+# Simple page master defines a page layout. It does not
+# explicitly generate any content. Most of its properties are
+# local except for writing-mode and reference-orientation that
+# are inherited by the underlying region-* objects.
+# ===============================================================
+# NOTE. We could think about a common background/padding/border
+# for every page instance generated by the page master. For such
+# a scope, we may add borders/padding/background to its features.
+# However, in the current version this is ruled out explicitly by
+# the XSL specs.
+simple-page-master =
+  element fo:simple-page-master {
+    simple-page-master-attlist,
+    region-body,
+    region-before?,
+    region-after?,
+    region-start?,
+    region-end?
+  }
+simple-page-master-attlist &=
+  margin-properties-CSS,
+  attribute master-name { text },
+  attribute page-height { text }?,
+  attribute page-width { text }?,
+  attribute size { text }?,
+  attribute reference-orientation {
+    "0"
+    | "90"
+    | "180"
+    | "270"
+    | "-90"
+    | "-180"
+    | "-270"
+    | "0deg"
+    | "90deg"
+    | "180deg"
+    | "270deg"
+    | "-90deg"
+    | "-180deg"
+    | "-270deg"
+    | "inherit"
+  }?,
+  attribute writing-mode {
+    "lr-tb" | "rl-tb" | "tb-rl" | "lr" | "rl" | "tb" | "inherit"
+  }?
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Regions. The page instance is divided into subareas, whose
+# properties are described by the five region-* elements. These
+# elements by themselves do not generate any content.
+# Reference-orientation and writing-mode may be inherited from
+# the page master; all other features are local.
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+region-properties =
+  border-padding-background-properties,
+  area-properties,
+  attribute region-name { text }?
+# ===============================================================
+# Body region: middle of the page. Unlike side regions, this one
+# may have multiple columns.
+# [!] We have restricted margin properties to be margin-only,
+# allowing no spaces. This is done because no clear semantics
+# can be ascribed to single components of a space vector.
+# ===============================================================
+region-body = element fo:region-body { region-body-attlist, empty }
+region-body-attlist &=
+  region-properties,
+  margin-properties-CSS,
+  attribute column-count { text }?,
+  attribute column-gap { text }?
+# ===============================================================
+# Side regions: page edges. These regions have extent and
+# precedence that is used to arbitrate corner conflicts. Side
+# regions are viewed as frames, and may not have margins.
+# Extent made obligatory: its default value of 0.0pt does not
+# make much sense.
+# ===============================================================
+side-region-properties =
+  region-properties,
+  attribute extent { text },
+  attribute precedence { "true" | "false" | "inherit" }?
+region-before =
+  element fo:region-before { region-before-attlist, empty }
+region-before-attlist &= side-region-properties
+region-after = element fo:region-after { region-after-attlist, empty }
+region-after-attlist &= side-region-properties
+region-start = element fo:region-start { region-start-attlist, empty }
+region-start-attlist &= side-region-properties
+region-end = element fo:region-end { region-end-attlist, empty }
+region-end-attlist &= side-region-properties
+# ===============================================================
+# Page sequence defines the order of choosing page masters to
+# accomodate all the contents generated by its fo:flow and
+# fo:static-content children, and the way of numbering them.
+# ===============================================================
+page-sequence =
+  element fo:page-sequence {
+    page-sequence-attlist, title?, static-content*, flow
+  }
+page-sequence-attlist &=
+  attribute id { text }?,
+  attribute rx:key { text }?,
+  attribute master-reference { text },
+  attribute initial-page-number { text }?,
+  attribute force-page-count {
+    "auto"
+    | "even"
+    | "odd"
+    | "end-on-even"
+    | "end-on-odd"
+    | "no-force"
+    | "inherit"
+  }?,
+  attribute format { text }?,
+  attribute letter-value { "auto" | "alphabetic" | "traditional" }?,
+  attribute grouping-separator { text }?,
+  attribute grouping-size { text }?,
+  inheritable-properties
+# ===============================================================
+# Title may not contain out-of-lines.
+# ===============================================================
+title =
+  element fo:title { title-attlist, (text | basic-inlines | wrappers)* }
+title-attlist &= inheritable-properties
+# ***************************************************************
+# B. Element structure for content-bearing elements
+# ***************************************************************
+# ===============================================================
+# Flows. They are just sequences of blocks. 'flow-name' feature
+# defines linkage of the flow to a region in the page master.
+# ===============================================================
+# ===============================================================
+# An extension element, fo:flow-section, has been added in order
+# to overcome limitations on multicolumn layout imposed by XSL FO
+# ===============================================================
+flow-properties =
+  attribute id { text }?,
+  attribute rx:key { text }?,
+  attribute flow-name { text },
+  inheritable-properties
+static-content =
+  element fo:static-content { static-content-attlist, blocks+ }
+static-content-attlist &= flow-properties
+flow = element fo:flow { flow-attlist, (blocks | flow-section)+ }
+flow-attlist &= flow-properties
+# Extension element. Acts like a top-level block
+# with multiple columns.
+flow-section = element rx:flow-section { flow-section-attlist, blocks+ }
+flow-section-attlist &=
+  attribute column-count { text }?,
+  attribute column-gap { text }?,
+  block-properties
+# ===============================================================
+# Block is the base element for all content areas. Besides
+# properties used to format the block itself, it also conveys
+# formatting information to its inline-level children.
+# ===============================================================
+block =
+  element fo:block {
+    block-attlist,
+    (text
+     | initial-property-set
+     | basic-inlines
+     | basic-blocks
+     | out-of-lines
+     | wrappers)*
+  }
+block-attlist &= block-properties
+# ===============================================================
+# Block container
+# ===============================================================
+block-container =
+  element fo:block-container { block-container-attlist, blocks+ }
+block-container-attlist &= block-properties
+# ***************************************************************
+# Inline elements
+# ***************************************************************
+# ===============================================================
+# Unicode bidi-override
+# ===============================================================
+bidi-override =
+  element fo:bidi-override { bidi-override-attlist, inlines* }
+bidi-override-attlist &= inline-properties
+# ===============================================================
+# Single character
+# ===============================================================
+character = element fo:character { character-attlist, empty }
+character-attlist &=
+  attribute character { text },
+  empty-inline-properties
+# ===============================================================
+# Initial property set specifies properties for one or more lines
+# ===============================================================
+initial-property-set =
+  element fo:initial-property-set {
+    initial-property-set-attlist, empty
+  }
+initial-property-set-attlist &= empty-inline-properties
+# ===============================================================
+# External graphic
+# ===============================================================
+external-graphic =
+  element fo:external-graphic { external-graphic-attlist, empty }
+external-graphic-attlist &=
+  graphic-properties,
+  attribute src { text }?
+# ===============================================================
+# In-stream graphic
+# ===============================================================
+instream-foreign-object =
+  element fo:instream-foreign-object {
+    instream-foreign-object-attlist, any
+  }
+instream-foreign-object-attlist &= graphic-properties
+# ===============================================================
+#  An element to mark a point in the XML output (RenderX extension)
+# ===============================================================
+pinpoint = element rx:pinpoint { pinpoint-attlist, empty }
+pinpoint-attlist &=
+  attribute value { text },
+  accessibility-properties,
+  relative-position-properties,
+  area-alignment-properties-inline,
+  keeps-and-breaks-properties-atomic
+# ===============================================================
+# Inline
+# ===============================================================
+inline = element fo:inline { inline-attlist, mixed-level* }
+inline-attlist &= inline-properties
+# ===============================================================
+# Inline container
+# ===============================================================
+inline-container =
+  element fo:inline-container { inline-container-attlist, blocks* }
+inline-container-attlist &= inline-properties
+# ===============================================================
+# Leader
+# ===============================================================
+leader = element fo:leader { leader-attlist, inlines* }
+leader-attlist &= inline-properties
+# ===============================================================
+# Page Number
+# ===============================================================
+page-number = element fo:page-number { page-number-attlist, empty }
+page-number-attlist &= empty-inline-properties
+# ===============================================================
+# Page number citation
+# ===============================================================
+page-number-citation =
+  element fo:page-number-citation {
+    page-number-citation-attlist, empty
+  }
+page-number-citation-attlist &=
+  empty-inline-properties,
+  attribute ref-id { text }
+# ===============================================================
+# Page number list - index entry
+# ===============================================================
+page-index = element rx:page-index { page-index-attlist, empty }
+page-index-attlist &=
+  empty-inline-properties,
+  attribute ref-key { text },
+  attribute list-separator { text }?,
+  attribute range-separator { text }?,
+  attribute merge-subsequent-page-numbers { text }?
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Formatting objects for tables.
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# ===============================================================
+# Table & Caption is a wrapper to all the stuff pertinent to a
+# given table. It generates a block consisting of two subblocks:
+# one for the caption, another one for the table itself. The
+# placement of these two blocks is controlled by the
+# 'caption-side' property: if  caption-side="before"|"after" (or
+# their absolute orientation equivalents), the two blocks are
+# drawn one after another; if it is "start"|"end", then the
+# caption is displayed on the correspondent side of the table.
+# In this case, the relative alignment of the two blocks is given
+# by the 'relative-align'/'display-align' property.
+#
+# ===============================================================
+table-and-caption =
+  element fo:table-and-caption {
+    table-and-caption-attlist, table-caption?, table
+  }
+table-and-caption-attlist &= block-properties
+# ===============================================================
+# Table caption is an area container.
+# ===============================================================
+table-caption =
+  element fo:table-caption { table-caption-attlist, blocks+ }
+table-caption-attlist &= block-properties
+# ===============================================================
+# fo:table is the basic element for all tables. All the contents
+# placed inside it is distributed over a single rectangular grid
+# of rows and columns.
+# ===============================================================
+table =
+  element fo:table {
+    table-attlist,
+    table-column*,
+    table-header?,
+    table-footer?,
+    table-body+
+  }
+table-attlist &= block-properties
+# ===============================================================
+# Table column specifies common properties to ascribe to all
+# cells in a column *or a group of columns*. Note that, if both
+# 'number-columns-repeated' and 'number-columns-spanned' exceed
+# 1, the column counter is increased by 'number-columns-spanned'.
+# it means that you only set properties for columns:
+# 'column-number'
+# 'column-number' + 'number-columns-spanned'
+# 'column-number' + 2 * 'number-columns-spanned'
+# and so on, leaving default properties for intermediate columns.
+# ===============================================================
+table-column = element fo:table-column { table-column-attlist, empty }
+table-column-attlist &=
+  attribute column-number { text }?,
+  attribute column-width { text }?,
+  attribute number-columns-repeated { text }?,
+  attribute number-columns-spanned { text }?,
+  inheritable-properties
+# ===============================================================
+# Table header, table footer, and table body are wrappers for
+# groups of rows. They contain either one or more fo:table-rows,
+# or one or more fo:table-cells; in the latter case, row breaks
+# are specified in the cells by 'starts-row'/'ends-row'.
+# All these elements are identical both in the content structure
+# and in the attributes.
+# ===============================================================
+row-group = table-row+ | table-cell+
+table-header =
+  element fo:table-header { table-header-attlist, row-group }
+table-header-attlist &=
+  attribute id { text }?,
+  attribute rx:key { text }?,
+  inheritable-properties
+table-footer =
+  element fo:table-footer { table-footer-attlist, row-group }
+table-footer-attlist &=
+  attribute id { text }?,
+  attribute rx:key { text }?,
+  inheritable-properties
+table-body = element fo:table-body { table-body-attlist, row-group }
+table-body-attlist &=
+  attribute id { text }?,
+  attribute rx:key { text }?,
+  inheritable-properties
+# ===============================================================
+# Table row.
+# ===============================================================
+table-row = element fo:table-row { table-row-attlist, table-cell+ }
+table-row-attlist &=
+  attribute id { text }?,
+  attribute rx:key { text }?,
+  inheritable-properties
+# ===============================================================
+# Table cell.
+# ===============================================================
+table-cell = element fo:table-cell { table-cell-attlist, blocks+ }
+table-cell-attlist &=
+  block-properties,
+  attribute column-number { text }?,
+  attribute ends-row { "true" | "false" }?,
+  attribute number-columns-spanned { text }?,
+  attribute number-rows-spanned { text }?,
+  attribute starts-row { "true" | "false" }?
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Formatting objects for lists.
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# ===============================================================
+# List block is a block, with some extra features to control the
+# disposition of list items.
+# ===============================================================
+list-block = element fo:list-block { list-block-attlist, list-item+ }
+list-block-attlist &= block-properties
+# ===============================================================
+# List item is a coupling of item label and item body.
+# ===============================================================
+list-item =
+  element fo:list-item {
+    list-item-attlist, list-item-label, list-item-body
+  }
+list-item-attlist &= block-properties
+# ===============================================================
+# List item label and list item body
+# ===============================================================
+list-item-label =
+  element fo:list-item-label { list-item-label-attlist, blocks+ }
+list-item-label-attlist &= block-properties
+list-item-body =
+  element fo:list-item-body { list-item-body-attlist, blocks+ }
+list-item-body-attlist &= block-properties
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Out-of-lines.
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# ===============================================================
+# Floats and footnotes resemble containers. Accordingly, we treat
+# them as block sequences.
+# ===============================================================
+float = element fo:float { float-attlist, blocks+ }
+float-attlist &= block-properties
+footnote =
+  element fo:footnote { footnote-attlist, inline, footnote-body }
+footnote-attlist &= block-properties
+footnote-body =
+  element fo:footnote-body { footnote-body-attlist, blocks+ }
+footnote-body-attlist &= block-properties
+# ===============================================================
+# Simple link. From the formatting point of view, it's nothing
+# but a regular inline sequence.
+# ===============================================================
+basic-link = element fo:basic-link { basic-link-attlist, mixed-level* }
+basic-link-attlist &=
+  inline-properties,
+  attribute external-destination { text }?,
+  attribute internal-destination { text }?,
+  attribute indicate-destination { "true" | "false" }?,
+  attribute show-destination { "replace" | "new" }?,
+  attribute destination-placement-offset { text }?,
+  attribute target-processing-context { text }?,
+  attribute target-presentation-context { text }?,
+  attribute target-stylesheet { text }?
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Wrappers and Markers.
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# ===============================================================
+# Wrapper. This may be useful but breaks every effort to validate
+# content models for blocks and inlines.
+# ===============================================================
+wrapper = element fo:wrapper { wrapper-attlist, mixed-level* }
+wrapper-attlist &=
+  attribute id { text }?,
+  attribute rx:key { text }?,
+  inheritable-properties
+# ===============================================================
+# Marker. This element may embrace any content but cannot pass
+# properties to its children; so, it may not have features other
+# than marker-class-name.
+# ===============================================================
+marker = element fo:marker { marker-attlist, mixed-level* }
+marker-attlist &= attribute marker-class-name { text }?
+# ===============================================================
+# Marker retrieval.
+# ===============================================================
+retrieve-marker =
+  element fo:retrieve-marker { retrieve-marker-attlist, empty }
+retrieve-marker-attlist &=
+  attribute retrieve-class-name { text }?,
+  attribute retrieve-position {
+    "first-starting-within-page"
+    | "first-including-carryover"
+    | "last-starting-within-page"
+    | "last-ending-within-page"
+  }?,
+  attribute retrieve-boundary { "page" | "page-sequence" | "document" }?
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# Multistate stuff. This section is the least developed in the
+# whole DTD, and most solutions are arbitrary. We beg thy pardon.
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+# ===============================================================
+# Switch. This is a pure logical operator; no formatting may be
+# conveyed through it.
+# ===============================================================
+multi-switch =
+  element fo:multi-switch { multi-switch-attlist, multi-case+ }
+multi-switch-attlist &=
+  inheritable-properties,
+  attribute id { text }?,
+  attribute rx:key { text }?,
+  attribute auto-restore { "true" | "false" }?
+# ===============================================================
+# Single case. Block-level formatting may be conveyed.
+# ===============================================================
+multi-case = element fo:multi-case { multi-case-attlist, mixed-level* }
+multi-case-attlist &=
+  inheritable-properties,
+  attribute id { text }?,
+  attribute rx:key { text }?,
+  attribute starting-state { text }?,
+  attribute case-name { text }?,
+  attribute case-title { text }?
+# ===============================================================
+# Toggle. This is a typical inline.
+# ===============================================================
+multi-toggle =
+  element fo:multi-toggle { multi-toggle-attlist, inlines* }
+multi-toggle-attlist &=
+  inheritable-properties,
+  attribute id { text }?,
+  attribute rx:key { text }?,
+  attribute switch-to { text }?
+# ===============================================================
+# Multi-properties is listed among block-level elements.
+# Formatting common to all property sets can be specified here;
+# we expect it to be block-level only.
+# ===============================================================
+multi-properties =
+  element fo:multi-properties {
+    multi-properties-attlist, multi-property-set+, wrapper
+  }
+multi-properties-attlist &= block-properties
+# ===============================================================
+# Multi property set. Since these are properties of a
+# fo:multi-properties that is considered a block, we accept only
+# block properties here.
+# ===============================================================
+multi-property-set =
+  element fo:multi-property-set { multi-property-set-attlist, empty }
+multi-property-set-attlist &=
+  block-properties,
+  attribute active-state {
+    "link" | "visited" | "active" | "hover" | "focus"
+  }
+start = root
+any =
+  (element * {
+     attribute * { text }*,
+     any
+   }
+   | text)*

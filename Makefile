@@ -7,7 +7,8 @@
 CCACHE:= $(shell type ccache >/dev/null && echo ccache)
 CC:=$(CCACHE) gcc
 LD:=gcc
-INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj -I$(CURDIR)/src/lua-5.1.1/src
+INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj -I$(CURDIR)/src/lua-5.1.1/src \
+             -I$(CURDIR)/src/expat-2.0.0/lib
 CFLAGS:=
 GT_CFLAGS:= -Wall $(INCLUDEOPT)
 LDFLAGS:=
@@ -29,6 +30,10 @@ LIBLUA_OBJ=obj/lapi.o obj/lcode.o obj/ldebug.o obj/ldo.o obj/ldump.o \
            obj/lmathlib.o obj/loslib.o obj/ltablib.o obj/lstrlib.o   \
            obj/loadlib.o obj/linit.o
 
+LIBRNV_OBJ := obj/rn.o obj/rnc.o obj/rnd.o obj/rnl.o obj/rnv.o obj/rnx.o obj/drv.o  \
+              obj/ary.o obj/xsd.o obj/xsd_tm.o obj/dxl.o obj/dsl.o obj/sc.o obj/u.o \
+              obj/ht.o obj/er.o obj/xmlc.o obj/s.o obj/m.o obj/rx.o
+
 # process arguments
 ifeq ($(opt),no)
   GT_CFLAGS += -g
@@ -43,7 +48,7 @@ endif
 # set prefix for install target
 prefix ?= /usr/local
 
-all: dirs lib/libgt.a bin/gt
+all: dirs lib/libgt.a bin/gt bin/rnv
 
 dirs:
 	@test -d obj     || mkdir -p obj 
@@ -63,8 +68,17 @@ ifdef RANLIB
 	$(RANLIB) $@
 endif
 
+lib/librnv.a: $(LIBRNV_OBJ)
+	ar ruv $@ $(LIBRNV_OBJ)
+ifdef RANLIB
+	$(RANLIB) $@
+endif
+
 bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgt.a
 	$(LD) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+bin/rnv: obj/xcl.o lib/librnv.a lib/libexpat.a
+	$(LD) $(LDFLAGS) $^ -o $@
 
 obj/gt_build.h:
 	@date +'#define GT_BUILT "%Y-%m-%d %H:%M:%S"' > $@
@@ -89,10 +103,17 @@ obj/%.o: src/tools/%.c
 	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 obj/%.o: src/expat-2.0.0/lib/%.c
-	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DHAVE_MEMMOVE -MT $@ -MMD -MP -MF $(@:.o=.d)
+	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DHAVE_MEMMOVE -MT $@ -MMD \
+        -MP -MF $(@:.o=.d)
 
 obj/%.o: src/lua-5.1.1/src/%.c
-	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DLUA_USE_POSIX -MT $@ -MMD -MP -MF $(@:.o=.d)
+	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DLUA_USE_POSIX -MT $@ -MMD \
+        -MP -MF $(@:.o=.d)
+
+obj/%.o: src/rnv-1.7.8/%.c
+	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DUNISTD_H="<unistd.h>" \
+        -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\"" -MT $@ -MMD -MP   \
+        -MF $(@:.o=.d)
 
 # read deps
 -include obj/*.d

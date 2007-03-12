@@ -1,0 +1,16 @@
+#!/bin/sh
+
+CONF=/usr/local/share/rng-c/arx.conf
+
+files=$*
+
+if [ -z "$files" ] ; then
+  cat > /tmp/xck.$$
+  files=/tmp/xck.$$
+fi
+
+for x in $files
+do
+  xx $x | rnv -q `arx $x $CONF`
+done
+rm /tmp/xck.$$ 2>/dev/null

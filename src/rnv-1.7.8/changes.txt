@@ -1,0 +1,245 @@
+/* $Id: changes.txt,v 1.75 2006/11/02 08:56:53 dvd Exp $ */
+
+1.7.8 Thu Nov  2 12:52:18 AMT 2006
+dvd: build script for OpenVMS by Jim Duff, http://eight-cubed.com/
+
+1.7.7 Sun Jan 29 11:13:23 PST 2006
+dvd: rnv exits with non-zero return code if validation fails.
+
+1.7.6 Fri Jan  7 01:07:37 AMT 2005
+dvd: base64: I hope I got it right this time.
+
+Thu Jan  6 15:46:55 AMT 2005
+dvd: base64 regular expression checks full syntax of RFC2045.
+
+1.7.5 Thu Jan  6 02:18:51 AMT 2005
+dvd: build error fixed
+
+1.7.4 Wed Jan  5 13:55:41 AMT 2005
+dvd: unit tests for s.c and xsd.c. 
+
+1.7.3 Wed Jan  5 05:57:55 AMT 2005
+dvd: bug in xsd.c:b64cmpn fixed (thanks to Sridhar Guthula), 
+     tiny code cleanup in comparison routines. 
+
+1.7.2 Tue Nov  9 15:28:23 AMT 2004
+dvd: fixed a bug in rvp.py, didn't update the current pattern after
+     text or mixed
+
+1.7.1 Thu Aug 19 00:58:58 AMST 2004
+dvd: discovered and fixed a bug with parsing of builtin datatypes,
+     noone seems to use them explicitely.
+
+1.7.0 Sat Mar 27 19:26:39 AMT 2004
+dvd: entities are not expanded, use XX if you need to.
+     error messages have the same syntax as Jing's.
+
+1.6.6 Sun Mar 21 22:41:10 AMT 2004
+dvd: turned on parsing of external parameter entities;
+     with the next next release rnv will be split in two;
+     the core utility will just validate an XML stream, an optional
+     preprocessor will handle entities, dtds and xinclude
+
+1.6.5 Sat Mar 13 21:24:31 AMT 2004
+dvd: continued overhaul of rn.c and other places
+
+1.6.4 Fri Mar 12 13:15:33 AMT 2004
+dvd: looked again at the code in rn.c and rnl.c, streamlined and simplified
+     many things
+
+Fri Mar 12 04:44:17 AMT 2004
+dvd: better logics in mark_p
+
+1.6.3 Thu Mar 11 22:47:17 AMT 2004
+dvd: Bug fix in mark_p -- no more dangling references to unused patterns.
+
+1.6.2 Mon Mar  8 13:22:52 AMT 2004
+dvd: Added processing of davidashen-net-xg-file and -pos PIs to
+     work with xg.
+
+1.6.1 Mon Mar  1 12:55:48 AMT 2004
+dvd: Added ranlib to Makefile to make rnv build smoothly on Mac OS X.
+
+1.6.0 Thu Feb 26 21:14:39 AMT 2004
+dvd: fixed mixed to be interleave, not choice. The test for this
+     was wrong.
+
+Wed Feb 25 03:59:45 AMT 2004
+dvd: got rid of ##; prone to name conflicts
+
+1.5.8 Wed Feb 18 16:53:05 AMT 2004
+dvd: enhanced diagnostics: first required elements and attributes
+     are reported, then optional
+
+1.5.7 Mon Feb 16 20:03:13 AMT 2004
+dvd: rewrote the pattern space compression algorithm -- it should
+     be correct now, and if it is still not, debugging should be
+     much easier
+
+1.5.6 Tue Feb 10 19:37:07 AMT 2004
+dvd: actually turned path checks on
+
+1.5.5 Fri Jan 30 11:07:01 AMT 2004
+dvd: added check for recursion in structured regexps
+
+1.5.4 Fri Jan 30 00:10:32 AMT 2004
+dvd: implemented structured regexps for scheme-datatypes
+
+1.5.3 Thu Jan 29 03:19:29 AMT 2004
+dvd: made it compile on SunOS 5.8 (name clashes)
+
+1.5.2 Wed Jan 28 15:35:38 AMT 2004
+dvd: added handler for external system entities
+     Makefile.bcc is back; people still need win32, and cygwin is bulky.
+
+Wed Jan 28 01:43:42 AMT 2004
+dvd: removed static pointers from rnv and qualified name passed
+     from Expat is modified instead. This is safe.
+
+Mon Jan 26 21:13:30 AMT 2004
+dvd: ++ moved out of assert in xsd_tm.c
+
+1.5.1 Mon Jan 26 01:25:42 AMT 2004
+dvd: Internal release, regexp in Scheme implemented
+
+Sat Jan 24 22:42:58 AMT 2004
+dvd: fixed rx.c: upper bound in quantifier
+
+Fri Jan 23 21:51:34 AMT 2004
+dvd: newRef+1 is initialized to 0 (bugfix, integrity check in ht)
+
+Wed Jan 21 02:38:09 AMT 2004
+dvd: SCM is now working as embedded engine; it was not obvious
+     that the initialization call had to be lower on the stack
+     than all other calls to SCM;
+     static mode added to m, if M_STATIC is non-zero it is the
+     size of available memory in bytes -- good for debugging.
+     
+Tue Jan 20 22:24:50 AMT 2004
+dvd: changed rx to conform to XSD errata (- is not a valid range)
+     added -d and -e to rnv; I was not sure for a long time whether
+     I should do it.
+
+Tue Jan 20 04:45:39 AMT 2004
+dvd: rearranged a lot of things; put error reporting through a single
+     function er_vprintf, useful for interfacing to scripting languages;
+     some success with dsl -- dsl-equal? works
+
+Tue Jan 20 00:24:56 AMT 2004
+dvd: renamed strops to s, memops to m, functions has s_ and m_ prefixes
+
+Mon Jan 19 13:43:57 AMT 2004
+dvd: fixed typo in diagnostics when literal is missing after ~
+
+Thu Jan 15 18:10:02 AMT 2004
+dvd: added -d command to rvp to load external type checker;
+     dxl.c dxl.h implement
+     http://davidashen.net/relaxng/pluggable-datatypes datatype;
+     xsdck makes xsd: pluggable.
+
+1.4.1 Tue Jan 13 14:29:08 AMT 2004
+dvd: added sys/types.h where appropriate; fixed Makefile.bcc
+     to include rnl.{c,h,obj}
+
+1.4.0 Mon Jan 12 17:39:58 AMT 2004
+dvd: changed rvp.py to use os.read|os.write for performance
+
+Mon Jan 12 03:53:56 AMT 2004
+dvd: rvp is implemented; reads validation events from input, sends diagnostics
+     to output; embedding examples in perl and python
+
+Sat Jan 10 03:18:12 AMT 2004
+dvd: factored out loading of rnc into rnl; now, instead of calling rnc
+     and rnd separately, rnl_(fn|fd|s) is called.
+
+1.3.5 Tue Jan  6 11:56:06 AMT 2004
+dvd: learned that UTF-8 BOM is reality, added processing; fixed check for name
+     characters in arx, made it >0x7f||nmtoken  (no good reason to process unicode);
+     added end-of-line to error messages from Expat
+
+1.3.4 Mon Jan  5 22:43:05 AMT 2004
+dvd: grammar samples added to the distribution, entries for other grammars
+     commented out in tools/arx.conf
+
+Mon Jan  5 17:00:57 AMT 2004
+dvd: isany is now ary_isany (ary is helpers for arx)
+
+Mon Jan  5 00:56:25 AMT 2004
+dvd: rnx_isany is added. It is used by arx and checks for a pattern that matches any element;
+     should be written as
+	      any = (element * {any}|attribute * {text}|text)*
+     (triple choice, elements in any order)
+
+Sun Jan  4 03:38:10 AMT 2004
+dvd: Renamings
+
+1.3.3 Sat Jan  3 18:58:36 AMT 2004
+dvd: arx, a grammar (and not just grammar) association utility has been added;
+     performance improvements, Makefile.bcc to compile the binaries under
+     win32+Borland C/C++ builder
+
+1.3.2 Fri Jan  2 04:30:30 AMT 2004
+dvd: multiple cleanups and speedups; ht_deli added
+
+Tue Dec 30 23:40:59 AMT 2003
+dvd: uri2rnc.pl and rnv.vim as a proof-of-concept; learned a lot of things
+     about vim
+
+Tue Dec 30 17:24:05 AMT 2003
+dvd: added warning about include in includeContent
+
+Tue Dec 30 04:19:22 AMT 2003
+dvd: expected now correctly returns attributes behind elements
+
+Mon Dec 29 20:26:01 AMT 2003
+dvd: error handling refactored, validation logic separated from command-line interface
+
+1.3.1 Mon Dec 29 01:58:38 AMT 2003
+dvd: invalid elements are correctly skipped (they were supposed to before), but the code
+     contained a fallout that prevented them from doing so
+
+1.3.0 Mon Dec 29 01:57:46 AMT 2003
+dvd: pattern pools are now one-dimensional, pointer arithmetics is a little more
+     complex, but performance and memory use are better; besides, this makes pattern
+     datatype extensible, which is a good thing
+
+1.2.1 Fri Dec 26 15:50:49 AMT 2003
+dvd: error reporting redone; errors for xsd and rx are routed through validation
+     errors' handler
+
+Fri Dec 26 01:55:37 AMT 2003
+dvd: debugged on NIST tests; the only tests which don't pass when they should
+     are those with doubles due to overflow and underflow.
+
+Thu Dec 25 19:30:55 AMT 2003
+dvd: added puorg_nr to implement attribute_open correctly;
+     empty elements are correctly validated against data and values;
+     equality and ordering for dateTime (and its partial variants) implemented;
+     rx,xsd use overloadable error handlers with variable lists.
+
+1.2.0 Wed Dec 24 04:40:25 AMT 2003
+dvd: XML Schema Part 2: regular expressions and datatypes. many things are
+     implemented, with exception of context-dependent checks and a calendar
+     library; optimizations and cleanups.
+
+Fri Dec 19 22:19:05 AMT 2003
+dvd: rn_params joined with rn_string
+
+1.1.0 Fri Dec 19 03:56:46 AMT 2003
+dvd: drv_attribute_open|drv_attribute_close and memoization implemented;
+     hash values are multiplied by large primes - helps with current hashing
+     algorithms; garbage collection added to rn (rn_compress,
+     rn_compress_last); compact mode implemented for validation, the buffer for
+     memoized patterns does not exceed a limit when the validator runs in
+     compact mode.
+
+1.0.9 Wed Dec 17 23:36:05 AMT 2003
+dvd: drv_mixed_text added, results memoized; code cleanups to compile easier;
+     added targets for static and shared libraries to the Makefile, many small
+     touch-ups
+
+1.0.8; Tue Dec 16 14:05:16 AMT 2003
+dvd: memory for error message in rnv.c is allocated properly
+
+1.0.7; Tue Dec 16 00:12:04 AMT 2003
+dvd: added reporting of attribute value for invalid attributes

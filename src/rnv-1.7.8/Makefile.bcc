@@ -1,0 +1,114 @@
+# $Id: Makefile.bcc,v 1.30 2006/01/29 19:02:56 dvd Exp $
+#
+VERSION=1.7.7
+CC=bcc32
+
+EXPAT_H="<expat.h>"
+UNISTD_H="<io.h>"
+
+INC=-I. -Ic:\\expat\\source\\lib -Ic:\\borland\\bcc55\\include
+LBL=-L. -Lc:\\borland\\bcc55\\lib
+
+DEF=-DEXPAT_H=${EXPAT_H} -DUNISTD_H=${UNISTD_H} -DRNV_VERSION="\"${VERSION}\"" -DARX_VERSION="\"${VERSION}\""
+WARN=-w-pia- -w-par- -w-aus- -w-ccc-
+OPT=-O2
+
+CFLAGS=${INC} ${DEF} ${WARN} ${OPT}
+LFLAGS=${OPT} ${LBL}
+
+LIBEXPAT=libexpats_mtd.lib
+LIB=${LIBEXPAT}
+
+SRC=\
+ll.h \
+erbit.h \
+xcl.c \
+arx.c \
+test.c \
+ary.c ary.h \
+rn.c rn.h \
+rnc.c rnc.h \
+rnd.c rnd.h \
+rnl.c rnc.h \
+rnv.c rnv.h \
+rnx.c rnx.h \
+drv.c drv.h \
+xsd.c xsd.h \
+dsl.c dsl.h \
+dxl.c dxl.h \
+xsd_tm.c xsd_tm.h \
+sc.c sc.h \
+ht.c ht.h \
+er.c er.h \
+u.c u.h \
+xmlc.c xmlc.h \
+s.c s.h \
+m.c m.h \
+rx.c rx.h \
+rx_cls_u.c \
+rx_cls_ranges.c
+
+OBJ=\
+rn.obj \
+rnc.obj \
+rnd.obj \
+rnl.obj \
+rnv.obj \
+rnx.obj \
+drv.obj \
+ary.obj \
+xsd.obj \
+dsl.obj \
+dxl.obj \
+xsd_tm.obj \
+sc.obj \
+ht.obj \
+er.obj \
+u.obj \
+xmlc.obj \
+s.obj \
+m.obj \
+rx.obj
+
+.SUFFIXES: .c .obj
+
+.c.obj:
+	${CC} ${CFLAGS} -c -o$@ $<
+
+all: rnv.exe arx.exe test.exe
+
+rnv.exe: xcl.obj ${OBJ}
+	${CC} ${LFLAGS} -ernv.exe xcl.obj ${OBJ} ${LIB}
+
+arx.exe: arx.obj ${OBJ}
+	${CC} ${LFLAGS} -earx.exe arx.obj ${OBJ} ${LIB}
+
+test.exe: test.obj ${OBJ}
+	${CC} ${LFLAGS} -etest.exe test.obj ${OBJ} ${LIB}
+
+clean:
+	-rm -f *.obj *.exe
+	-del *.obj *.exe
+	
+xcl.obj: m.h erbit.h rnl.h rnv.h rnx.h er.h ll.h
+arx.obj: u.h m.h s.h xmlc.h ht.h erbit.h rnl.h rnv.h rx.h er.h ary.h
+ary.obj: rn.h ary.h
+rn.obj: m.h s.h ht.h ll.h rn.h
+rnc.obj: u.h xmlc.h m.h s.h rn.h sc.h er.h rnc.h
+rnd.obj: m.h rn.h rnx.h ll.h er.h rnd.h
+rnl.obj: erbit.h rn.h rnc.h rnd.h rnl.h
+rnv.obj: m.h xmlc.h erbit.h drv.h er.h rnv.h
+rnx.obj: m.h s.h rn.h ll.h rnx.h
+drv.obj: xmlc.h m.h s.h ht.h rn.h xsd.h ll.h erbit.h er.h drv.h
+xsd.obj: u.h xmlc.h s.h erbit.h rx.h xsd_tm.h er.h xsd.h
+xsd_tm.obj: xsd_tm.h
+dxl.obj: m.h er.h dxl.h
+dsl.obj: dsl.h
+sc.obj: m.h ll.h sc.h
+ht.obj: m.h ht.h
+er.obj: er.h
+u.obj: u.h
+xmlc.obj: u.h xmlc.h
+s.obj: xmlc.h m.h s.h
+m.obj: er.h m.h
+rx.obj: u.h xmlc.h m.h s.h ht.h ll.h er.h rx.h rx_cls_u.c rx_cls_ranges.c
