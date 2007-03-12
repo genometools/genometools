@@ -3,9 +3,9 @@
 #include <stdlib.h>
 #include "dsl.h"
 
-static char *dsl_scm=NULL;
-
 #if DSL_SCM
+
+static char *dsl_scm=NULL;
 
 #include <string.h>
 #include <assert.h>
