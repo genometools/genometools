@@ -70,8 +70,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   double score_value;
   Phase phase_value;
   Range range;
-  char *id = NULL, *seqid, *source, *type, *start, *end, *score, *strand,
-       *phase, *attributes, *token, *tmp_token, **tokens;
+  char *id = NULL, *seqid = NULL, *source = NULL, *type, *start, *end, *score,
+       *strand, *phase, *attributes, *token, *tmp_token, **tokens;
   bool out_node_complete = true, is_child = false;
   unsigned long i;
   int has_err = 0;
