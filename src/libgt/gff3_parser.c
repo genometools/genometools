@@ -432,7 +432,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
 
     if (*line_number == 1) {
       if (strncmp(line, GFF_VERSION_PREFIX, strlen(GFF_VERSION_PREFIX))) {
-        env_error_set(env, "line %lu in file \"%s\" does begin with \"%s\"",
+        env_error_set(env, "line %lu in file \"%s\" does not begin with \"%s\"",
                   *line_number, filename, GFF_VERSION_PREFIX);
         has_err = -1;
         break;
