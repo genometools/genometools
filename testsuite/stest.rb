@@ -14,16 +14,24 @@ class Test
   @@prefix = "stest"
   @@failed = 0
   @@errors = 0
+  @@feature_check = nil
   def self.prefix(str)
     @@prefix = str
+  end
+  def self.have_features(&bl)
+    @@feature_check = bl
   end
 
   def initialize(str)
     @name = str
     @id = @@id
     @@id += 1
+    @requirements = nil
   end
 
+  def requires(str)
+    @requirements = str
+  end
   def keywords(str)
     @keywords ||= nil
     @did_run ||= nil
@@ -75,13 +83,25 @@ class Test
       end
     end
     if selection
-      if not selection["#{@id}"]
+      if not selection[@id]
         return
+      end
+    end
+    if @requirements
+      if @@feature_check
+        ok, info = @@feature_check.call(@requirements)
+        if not ok
+          if info then
+            STDOUT.printf "%3d: %-60s: #{info}\n", @id, @name
+          end
+          return
+        end
       end
     end
 
     pid = fork do
-      printf "%3d: %-60s: ", @id, @name
+      STDOUT.printf "%3d: %-60s: ", @id, @name
+      STDOUT.flush
       e_info = nil
       e_code = 0
       begin
@@ -100,7 +120,8 @@ class Test
         i = "failed"
         if e_code != 1 then i = "error" end
         puts i
-        puts "     [ problem: #{e_info.message} ]"
+        puts "     [ problem: #{e_info.message}"
+        puts "       in: #{Dir.pwd} ]"
         File.open("stest_error", "w") do |f|
           f.puts("Test #{@id} '#{@name}': #{i}:")
           f.puts("#{e_info.message}:")
@@ -138,6 +159,8 @@ def Test.exec(cmd, env, out_filename, err_filename, cmd_filename, max_t)
         env.each do |k, v|
           f.print "#{k}=#{v} "
         end
+        # help for debugging failed tests:
+        f.print "$CMD_PREFIX "
         f.puts(*cmd)
       end
       f_out = File.new(out_filename, "w")
@@ -419,6 +442,11 @@ def Keywords(str)
   t.keywords(str)
 end
 
+def Requires(str)
+  t = $curr_test
+  t.requires(str)
+end
+
 def Test(&block)
   t = $curr_test
   t.test($arguments["keywords"], $arguments["select"],
@@ -446,7 +474,7 @@ if ARGV.size > 0
   i = 0
   while i < ARGV.size do
     a = ARGV[i]
-    if a[0] == ?- then # ???: ?-
+    if a[0] == ?- then
       v = ARGV[i + 1]
       k = a[1..a.size]
       $arguments[k] ||= ""
@@ -468,23 +496,6 @@ end
 
 # Handle built-in options
 
-if $arguments["help"]
-  printf "Usage: #{$0}"
-  if $0 == __FILE__ then
-    printf " test_file\nRuns tests specified in test_file.\n"
-  else
-    printf "\nRuns the specified tests.\n"
-  end
-  print <<OPTS
-
-built-in options:
--keywords k   run only tests whose keywords match `k'
--select s     run only tests whose id is given in `s'
--name n       run only tests whose name matches regular expression `n'
--help         show this help and exit
-OPTS
-  exit
-end
 if $arguments["keywords"]
   keywords = $arguments["keywords"]
   $arguments["keywords"] = Keywords.new(keywords)
@@ -492,8 +503,14 @@ end
 if $arguments["select"]
   sel = $arguments["select"]
   $arguments["select"] = {}
-  sel.split.each do |id|
-    $arguments["select"][id] = true
+  if sel =~ /(\d+)\.\.(\d+)/
+    Range.new(Integer($1), Integer($2)).each do |id|
+      $arguments["select"][Integer(id)] = true
+    end
+  else
+    sel.split.each do |id|
+      $arguments["select"][Integer(id)] = true
+    end
   end
 end
 if $arguments["name"]

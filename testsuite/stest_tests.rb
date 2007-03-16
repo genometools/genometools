@@ -1,4 +1,3 @@
-#!/usr/bin/env ruby
 
 # Patrick Maass, 2006
 
@@ -25,9 +24,9 @@ end
 
 def run_stest(fn, str, args = [], opts = {})
   tfn = "#{fn}.rb"
-    File.open(tfn, "w") do |f|
-      f.print(str)
-    end unless !str or str.length == 0 
+  File.open(tfn, "w") do |f|
+    f.print(str)
+  end
   run "ruby #{$runpath}/stest.rb #{tfn} #{args.join(" ")}", opts
 end
 
@@ -144,7 +143,9 @@ Test do
   }
   File.open("stest_tt/test1/run_1") do |f|
     l = f.readlines
-    failtest "invalid command stored" if l[0].chomp != "echo hello"
+    if l[0].chomp != "$CMD_PREFIX echo hello"
+      failtest "invalid command stored"
+    end
   end
 end
 
@@ -332,10 +333,44 @@ Test do
   grep $last_stdout, /did not finish on time/
 end
 
-
-Name "Help"
-Keywords "basics--help"
+Name "Range Selection"
+Keywords "selection--ranges"
 Test do
-  run_stest "tt", nil , %w{-help}
-  grep($last_stdout, /-help/)
+  run_stest "tt", %{
+    Name "foo"
+    Test {}
+    Name "bar"
+    Test {}
+    Name "baz"
+    Test {}
+  }, %w{-select 2..3}
+  grep $last_stdout, "bar"
+  grep $last_stdout, "baz"
+  grep $last_stdout, "foo", true
 end
+
+Name "Require/Provide"
+Keywords "basics--require"
+Test do
+  run_stest "tt", %{
+    Test.have_features do |str|
+      if str =~ /^x/
+        true
+      else
+        [ false, "skipped" ]
+      end
+    end
+    Name "foo"
+    Requires "x y v"
+    Test do
+      run "echo"
+    end
+    Name "bar"
+    Requires "k y v"
+    Test do
+      run "echo"
+    end
+  }
+  grep $last_stdout, /1:.*: ok/
+end
+
