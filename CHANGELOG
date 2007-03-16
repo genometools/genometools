@@ -5,6 +5,7 @@ changes in version 0.7.0:
 - `gt bioseq` can now read from stdin, too
 - `gt bioseq` has new option -gc-content
 - new tool `gt mutate` added
+- libgt has been split up into libgtcore and libgtext
 
 changes in version 0.6.9:
 

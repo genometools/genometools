@@ -1,0 +1,59 @@
+/* This is a public domain general purpose hash table package written by Peter
+   Moore @ UCB. */
+
+/* @(#) st.h 5.1 89/12/14 */
+
+#ifndef ST_INCLUDED
+
+#define ST_INCLUDED
+
+#include <libgtcore/env.h>
+
+typedef unsigned long st_data_t;
+#define ST_DATA_T_DEFINED
+
+typedef struct st_table st_table;
+
+struct st_hash_type {
+    int (*compare)();
+    int (*hash)();
+};
+
+struct st_table {
+    struct st_hash_type *type;
+    int num_bins;
+    int num_entries;
+    struct st_table_entry **bins;
+};
+
+#define st_is_member(table,key) st_lookup(table,key,(st_data_t *)0)
+
+enum st_retval {ST_CONTINUE, ST_STOP, ST_DELETE, ST_CHECK};
+
+typedef int (*st_iterfunc_type)(void *key, void *value, void *data, Env*);
+
+st_table* st_init_table(struct st_hash_type*, Env*);
+st_table* st_init_table_with_size(struct st_hash_type*, int, Env*);
+st_table* st_init_numtable(Env*);
+st_table* st_init_numtable_with_size(int, Env*);
+st_table* st_init_strtable(Env*);
+st_table* st_init_strtable_with_size(int, Env*);
+int       st_delete(st_table*, st_data_t*, st_data_t*, Env*);
+int       st_delete_safe(st_table*, st_data_t*, st_data_t*, st_data_t);
+int       st_insert(st_table*, st_data_t, st_data_t, Env*);
+int       st_lookup(st_table*, st_data_t, st_data_t*);
+int       st_foreach(st_table*, st_iterfunc_type, st_data_t, Env*);
+void      st_add_direct(st_table*, st_data_t, st_data_t, Env*);
+void      st_free_table(st_table*, Env*);
+void      st_cleanup_safe(st_table*, st_data_t, Env*);
+st_table* st_copy(st_table*, Env*);
+
+#define ST_NUMCMP	((int (*)()) 0)
+#define ST_NUMHASH	((int (*)()) -2)
+
+#define st_numcmp	ST_NUMCMP
+#define st_numhash	ST_NUMHASH
+
+int st_strhash(void);
+
+#endif /* ST_INCLUDED */
