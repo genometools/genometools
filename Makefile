@@ -6,8 +6,9 @@
 
 CC:=gcc
 LD:=gcc
-INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj -I$(CURDIR)/src/lua-5.1.1/src \
-             -I$(CURDIR)/src/expat-2.0.0/lib
+INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
+             -I$(CURDIR)/src/external/lua-5.1.1/src \
+             -I$(CURDIR)/src/external/expat-2.0.0/lib
 CFLAGS:=
 GT_CFLAGS:= -Wall $(INCLUDEOPT)
 LDFLAGS:=
@@ -101,15 +102,15 @@ obj/%.o: src/libgt/%.c
 obj/%.o: src/tools/%.c
 	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
-obj/%.o: src/expat-2.0.0/lib/%.c
+obj/%.o: src/external/expat-2.0.0/lib/%.c
 	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DHAVE_MEMMOVE -MT $@ -MMD \
         -MP -MF $(@:.o=.d)
 
-obj/%.o: src/lua-5.1.1/src/%.c
+obj/%.o: src/external/lua-5.1.1/src/%.c
 	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DLUA_USE_POSIX -MT $@ -MMD \
         -MP -MF $(@:.o=.d)
 
-obj/%.o: src/rnv-1.7.8/%.c
+obj/%.o: src/external/rnv-1.7.8/%.c
 	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DUNISTD_H="<unistd.h>" \
         -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\"" -MT $@ -MMD -MP   \
         -MF $(@:.o=.d)

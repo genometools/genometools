@@ -11,8 +11,8 @@ It is based on a C library named ``libgt''.
 gtdata/        data needed by gt (during runtime)
 scripts/       scripts used for development
 src/           the C source code gt itself and the runtime
+src/external   all C source code from external sources (different license!)
 src/libgt      the C source code for the ``libgt''
-src/lua-5.1.1  the C source code for Lua
 src/tools      the C source code for all tools
 testdata/      the test data necessary for the test suite
 testdata/      the test suite
