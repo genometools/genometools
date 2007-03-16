@@ -167,7 +167,8 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
   array2dim_delete(E, env);
 }
 
-static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
+static OPrval parse_options(int *parsed_args, int argc, const char **argv,
+                            Env *env)
 {
   OptionParser *op;
   OPrval oprval;
@@ -181,7 +182,7 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
   return oprval;
 }
 
-int gt_nussinov_rna_fold(int argc, char *argv[], Env *env)
+int gt_nussinov_rna_fold(int argc, const char **argv, Env *env)
 {
   unsigned long i, j, rna_length;
   unsigned int l_min;

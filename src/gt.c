@@ -16,11 +16,11 @@ int main(int argc, char *argv[])
   env = env_new();
   gtr = gtr_new(env);
   gtr_register_components(gtr, env);
-  switch (gtr_parse(gtr, &rval, argc, argv, env)) {
+  switch (gtr_parse(gtr, &rval, argc, (const char**) argv, env)) {
     case OPTIONPARSER_OK:
       argc -= rval;
       argv += rval;
-      rval = gtr_run(gtr, argc, argv, env);
+      rval = gtr_run(gtr, argc, (const char**) argv, env);
       break;
     case OPTIONPARSER_ERROR:
       rval = 1; /* user error */

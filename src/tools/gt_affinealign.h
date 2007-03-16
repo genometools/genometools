@@ -8,6 +8,6 @@
 #define GT_AFFINEALIGN_H
 
 /* the align tool (affine gap costs) */
-int gt_affinealign(int argc, char **argv, Env*);
+int gt_affinealign(int argc, const char **argv, Env*);
 
 #endif

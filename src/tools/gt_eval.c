@@ -12,7 +12,7 @@ typedef struct {
 } EvalArguments;
 
 static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
-                            int argc, char **argv, Env *env)
+                            int argc, const char **argv, Env *env)
 {
   OptionParser *op;
   Option *option;
@@ -39,7 +39,7 @@ static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
   return oprval;
 }
 
-int gt_eval(int argc, char *argv[], Env *env)
+int gt_eval(int argc, const char **argv, Env *env)
 {
   GenomeStream *reality_stream,
                 *prediction_stream;

@@ -7,7 +7,7 @@
 #include "gt.h"
 
 static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
-                            char **argv, Env *env)
+                            const char **argv, Env *env)
 {
   OptionParser *op;
   Option *o;
@@ -24,7 +24,7 @@ static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
   return oprval;
 }
 
-int gt_qgramdist(int argc, char *argv[], Env *env)
+int gt_qgramdist(int argc, const char **argv, Env *env)
 {
   Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
   unsigned long i, j, dist;

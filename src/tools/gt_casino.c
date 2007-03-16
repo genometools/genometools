@@ -6,7 +6,8 @@
 
 #include "gt.h"
 
-static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
+static OPrval parse_options(int *parsed_args, int argc, const char **argv,
+                            Env *env)
 {
   OptionParser *op;
   OPrval oprval;
@@ -20,7 +21,7 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
   return oprval;
 }
 
-int gt_casino(int argc, char *argv[], Env *env)
+int gt_casino(int argc, const char **argv, Env *env)
 {
   unsigned int i, *emissions, *state_sequence = NULL, num_of_emissions;
   int parsed_args, has_err = 0;

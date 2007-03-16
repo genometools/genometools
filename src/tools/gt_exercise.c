@@ -54,7 +54,7 @@ static int show_exercise_tools(const char *progname, void *data, Env *env)
   return 0;
 }
 
-static OPrval parse_options(int *parsed_args, int argc, char **argv,
+static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Hashtable *exercise_tools, Env *env)
 {
   OptionParser *op;
@@ -87,7 +87,7 @@ void register_exercises(Hashtable *exercise_tools, Env *env)
   hashtable_add(exercise_tools, "upgma", gt_upgma, env);
 }
 
-int gt_exercise(int argc, char *argv[], Env *env)
+int gt_exercise(int argc, const char **argv, Env *env)
 {
   Hashtable *exercise_tools;
   int (*exercise)(int, char**, Env*);

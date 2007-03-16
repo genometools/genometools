@@ -8,6 +8,6 @@
 #define GT_EVAL_H
 
 /* the evaluation tool */
-int gt_eval(int argc, char **argv, Env*);
+int gt_eval(int argc, const char **argv, Env*);
 
 #endif

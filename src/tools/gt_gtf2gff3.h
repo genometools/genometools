@@ -8,6 +8,6 @@
 #define GT_GTF2GFF3_H
 
 /* the GTF to GFF3 tool */
-int gt_gtf2gff3(int argc, char **argv, Env*);
+int gt_gtf2gff3(int argc, const char **argv, Env*);
 
 #endif

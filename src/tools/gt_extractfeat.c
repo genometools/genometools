@@ -16,7 +16,7 @@ typedef struct {
 } ExtractFeatArguments;
 
 static OPrval parse_options(int *parsed_args, ExtractFeatArguments *arguments,
-                            int argc, char **argv, Env *env)
+                            int argc, const char **argv, Env *env)
 {
   OptionParser *op;
   Option *option;
@@ -59,7 +59,7 @@ static OPrval parse_options(int *parsed_args, ExtractFeatArguments *arguments,
   return oprval;
 }
 
-int gt_extractfeat(int argc, char *argv[], Env *env)
+int gt_extractfeat(int argc, const char **argv, Env *env)
 {
   GenomeStream *gff3_in_stream = NULL, *extractfeat_stream = NULL;
   GenomeNode *gn;

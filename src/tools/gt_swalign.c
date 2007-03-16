@@ -9,7 +9,7 @@
 #define DEFAULT_INDELSCORE -3
 
 static OPrval parse_options(int *parsed_args, int *indelscore, int argc,
-                            char **argv, Env *env)
+                            const char **argv, Env *env)
 {
   OptionParser *op;
   Option *o;
@@ -28,7 +28,7 @@ static OPrval parse_options(int *parsed_args, int *indelscore, int argc,
   return oprval;
 }
 
-int gt_swalign(int argc, char *argv[], Env *env)
+int gt_swalign(int argc, const char **argv, Env *env)
 {
   Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
   ScoreFunction *scorefunction = NULL;

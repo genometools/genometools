@@ -17,7 +17,7 @@ typedef struct {
 } FilterArgumentss;
 
 static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
-                            int argc, char **argv, Env *env)
+                            int argc, const char **argv, Env *env)
 {
   OptionParser *op;
   Option *option;
@@ -73,7 +73,7 @@ static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
   return oprval;
 }
 
-int gt_filter(int argc, char *argv[], Env *env)
+int gt_filter(int argc, const char **argv, Env *env)
 {
   GenomeStream *gff3_in_stream, *filter_stream, *gff3_out_stream;
   GenomeNode *gn;

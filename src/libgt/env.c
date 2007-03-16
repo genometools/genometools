@@ -18,7 +18,7 @@ struct Env {
   bool spacepeak;
 };
 
-static OPrval parse_env_options(int argc, char **argv, Env *env)
+static OPrval parse_env_options(int argc, const char **argv, Env *env)
 {
   OptionParser *op;
   Option *o;
@@ -50,10 +50,11 @@ static void proc_gt_env_options(Env *env)
   splitter = splitter_new(env);
   splitter_split(splitter, env_options, strlen(env_options), ' ', env);
   argc = splitter_size(splitter);
-  argv = cstr_array_preprend(splitter_get_tokens(splitter), "env", env);
+  argv = cstr_array_preprend((const char**) splitter_get_tokens(splitter),
+                             "env", env);
   argc++;
   /* parse options contained in $GT_ENV_OPTIONS */
-  switch (parse_env_options(argc, argv, env)) {
+  switch (parse_env_options(argc, (const char**) argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       fprintf(stderr, "error parsing $GT_ENV_OPTIONS: %s\n",

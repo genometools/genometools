@@ -8,6 +8,6 @@
 #define GT_EXTRACTFEAT_H
 
 /* the extract feature tool */
-int gt_extractfeat(int argc, char **argv, Env*);
+int gt_extractfeat(int argc, const char **argv, Env*);
 
 #endif

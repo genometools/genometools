@@ -8,6 +8,6 @@
 #define GT_MMAPANDREAD_H
 
 /* the mmap(2) and read tool */
-int gt_mmapandread(int argc, char **argv, Env*);
+int gt_mmapandread(int argc, const char **argv, Env*);
 
 #endif

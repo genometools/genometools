@@ -15,7 +15,7 @@ typedef struct {
 } CDS_arguments;
 
 static OPrval parse_options(int *parsed_args, CDS_arguments *arguments,
-                            int argc, char **argv, Env *env)
+                            int argc, const char **argv, Env *env)
 {
   OptionParser *op;
   Option *option;
@@ -39,7 +39,7 @@ static OPrval parse_options(int *parsed_args, CDS_arguments *arguments,
   return oprval;
 }
 
-int gt_cds(int argc, char *argv[], Env *env)
+int gt_cds(int argc, const char **argv, Env *env)
 {
   GenomeStream *gff3_in_stream, *cds_stream = NULL, *gff3_out_stream = NULL;
   GenomeNode *gn;

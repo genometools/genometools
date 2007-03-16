@@ -15,7 +15,7 @@ typedef struct {
 } Csa_arguments;
 
 static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
-                            int argc, char *argv[], Env *env)
+                            int argc, const char **argv, Env *env)
 {
   OptionParser *op = option_parser_new("[option ...] [GFF3_file]",
                                        "Replace spliced alignments with "
@@ -47,7 +47,7 @@ static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
   return oprval;
 }
 
-int gt_csa(int argc, char *argv[], Env *env)
+int gt_csa(int argc, const char **argv, Env *env)
 {
   GenomeStream *gff3_in_stream,
                 *csa_stream,

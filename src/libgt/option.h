@@ -34,20 +34,20 @@ void          option_parser_add_option(OptionParser*, Option*, Env*);
 void          option_parser_set_comment_func(OptionParser*, ShowCommentFunc,
                                              void* data);
 OPrval        option_parser_parse(OptionParser*, int *parsed_args, int argc,
-                                  char **argv, ShowVersionFunc, Env*);
+                                  const char **argv, ShowVersionFunc, Env*);
 OPrval        option_parser_parse_min_args(OptionParser*, int *parsed_args,
-                                           int argc, char **argv,
+                                           int argc, const char **argv,
                                            ShowVersionFunc,
                                            unsigned int
                                            min_additional_arguments, Env*);
 OPrval        option_parser_parse_max_args(OptionParser*, int *parsed_args,
-                                           int argc, char **argv,
+                                           int argc, const char **argv,
                                            ShowVersionFunc,
                                            unsigned int
                                            max_additional_arguments, Env*);
 OPrval        option_parser_parse_min_max_args(OptionParser*, int *parsed_args,
-                                               int argc,
-                                               char **argv, ShowVersionFunc,
+                                               int argc, const char **argv,
+                                               ShowVersionFunc,
                                                unsigned int
                                                min_additional_arguments,
                                                unsigned int

@@ -382,7 +382,8 @@ static int check_mandatory_either_options(OptionParser *op, Env *env)
   return 0;
 }
 
-static OPrval parse(OptionParser *op, int *parsed_args, int argc, char **argv,
+static OPrval parse(OptionParser *op, int *parsed_args, int argc,
+                    const char **argv,
                     ShowVersionFunc versionfunc,
                     unsigned int min_additional_arguments,
                     unsigned int max_additional_arguments, Env *env)
@@ -644,7 +645,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc, char **argv,
 }
 
 OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
-                           char **argv, ShowVersionFunc versionfunc,
+                           const char **argv, ShowVersionFunc versionfunc,
                            Env *env)
 {
   env_error_check(env);
@@ -653,7 +654,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
 }
 
 OPrval option_parser_parse_min_args(OptionParser *op, int *parsed_args,
-                                    int argc, char **argv,
+                                    int argc, const char **argv,
                                     ShowVersionFunc versionfunc,
                                     unsigned int min_additional_arguments,
                                     Env *env)
@@ -664,7 +665,7 @@ OPrval option_parser_parse_min_args(OptionParser *op, int *parsed_args,
 }
 
 OPrval option_parser_parse_max_args(OptionParser *op, int *parsed_args,
-                                    int argc, char **argv,
+                                    int argc, const char **argv,
                                     ShowVersionFunc versionfunc,
                                     unsigned int max_additional_arguments,
                                     Env *env)
@@ -675,7 +676,7 @@ OPrval option_parser_parse_max_args(OptionParser *op, int *parsed_args,
 }
 
 OPrval option_parser_parse_min_max_args(OptionParser *op, int *parsed_args,
-                                        int argc, char **argv,
+                                        int argc, const char **argv,
                                         ShowVersionFunc versionfunc,
                                         unsigned int min_additional_arguments,
                                         unsigned int max_additional_arguments,

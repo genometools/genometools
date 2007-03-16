@@ -199,7 +199,8 @@ static int compare_spliced_alignment(const void *a, const void *b)
   return range_compare_long_first(range_a, range_b);
 }
 
-static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
+static OPrval parse_options(int *parsed_args, int argc, const char **argv,
+                            Env *env)
 {
   OptionParser *op;
   OPrval oprval;
@@ -213,7 +214,7 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
   return oprval;
 }
 
-int gt_consensus_sa(int argc, char *argv[], Env *env)
+int gt_consensus_sa(int argc, const char **argv, Env *env)
 {
   Array *spliced_alignments;
   SplicedAlignment *sa;

@@ -8,6 +8,6 @@
 #define GT_CONSENSUS_SA_H
 
 /* the exercise consensus spliced alignment (csa) tool */
-int gt_consensus_sa(int argc, char **argv, Env*);
+int gt_consensus_sa(int argc, const char **argv, Env*);
 
 #endif

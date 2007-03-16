@@ -8,6 +8,6 @@
 #define GT_BIOSEQ_H
 
 /* the biosequence tool */
-int gt_bioseq(int argc, char **argv, Env*);
+int gt_bioseq(int argc, const char **argv, Env*);
 
 #endif

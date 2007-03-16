@@ -28,7 +28,7 @@ void cstr_show(const char *cstr, unsigned long length, FILE *fp)
     xfputc(cstr[i], fp);
 }
 
-char** cstr_array_prefix_first(char **cstr_array, const char *p, Env *env)
+char** cstr_array_prefix_first(const char **cstr_array, const char *p, Env *env)
 {
   unsigned long i, a_len, f_len;
   char **a;
@@ -44,7 +44,7 @@ char** cstr_array_prefix_first(char **cstr_array, const char *p, Env *env)
   return a;
 }
 
-char** cstr_array_preprend(char **cstr_array, const char *p, Env *env)
+char** cstr_array_preprend(const char **cstr_array, const char *p, Env *env)
 {
   unsigned long i, a_len;
   char **a;
@@ -70,7 +70,7 @@ void cstr_array_show(char **cstr_array, FILE *fp)
   xfputc('\n', fp);
 }
 
-unsigned long cstr_array_size(char **cstr_array)
+unsigned long cstr_array_size(const char **cstr_array)
 {
   unsigned long i = 0;
   while (cstr_array[i])

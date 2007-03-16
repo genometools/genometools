@@ -11,7 +11,7 @@ typedef struct {
 } MutateArguments;
 
 static OPrval parse_options(int *parsed_args, MutateArguments *arguments,
-                            int argc, char **argv, Env *env)
+                            int argc, const char **argv, Env *env)
 {
   OptionParser *op;
   Option *o;
@@ -33,7 +33,7 @@ static OPrval parse_options(int *parsed_args, MutateArguments *arguments,
   return oprval;
 }
 
-int gt_mutate(int argc, char *argv[], Env *env)
+int gt_mutate(int argc, const char **argv, Env *env)
 {
   MutateArguments arguments;
   Bioseq *bioseq;

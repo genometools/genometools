@@ -8,6 +8,6 @@
 #define GT_UPGMA_H
 
 /* the UPGMA tool */
-int gt_upgma(int argc, char **argv, Env*);
+int gt_upgma(int argc, const char **argv, Env*);
 
 #endif

@@ -13,7 +13,7 @@ typedef struct {
 } Costs;
 
 static OPrval parse_options(int *parsed_args, Costs *costs, int argc,
-                            char **argv, Env *env)
+                            const char **argv, Env *env)
 {
   OptionParser *op;
   Option *option;
@@ -37,7 +37,7 @@ static OPrval parse_options(int *parsed_args, Costs *costs, int argc,
   return oprval;
 }
 
-int gt_affinealign(int argc, char *argv[], Env *env)
+int gt_affinealign(int argc, const char **argv, Env *env)
 {
   Bioseq *bioseq_1, *bioseq_2 = NULL;
   unsigned long i, j;

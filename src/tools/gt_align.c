@@ -6,8 +6,8 @@
 
 #include "gt.h"
 
-static OPrval parse_options(int *parsed_args, bool *all, int argc, char **argv,
-                            Env *env)
+static OPrval parse_options(int *parsed_args, bool *all, int argc,
+                            const char **argv, Env *env)
 {
   OptionParser *op;
   Option *option;
@@ -38,7 +38,7 @@ void show_aligns(unsigned long aligns, void *data)
   printf("number of optimal alignments: %lu\n\n", aligns);
 }
 
-int gt_align(int argc, char *argv[], Env *env)
+int gt_align(int argc, const char **argv, Env *env)
 {
   Bioseq *bioseq_1, *bioseq_2 = NULL;
   unsigned long i, j;

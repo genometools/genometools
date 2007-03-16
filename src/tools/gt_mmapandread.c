@@ -6,7 +6,8 @@
 
 #include "gt.h"
 
-static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
+static OPrval parse_options(int *parsed_args, int argc, const char **argv,
+                            Env *env)
 {
   OptionParser *op;
   OPrval oprval;
@@ -19,7 +20,7 @@ static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
   return oprval;
 }
 
-int gt_mmapandread(int argc, char *argv[], Env *env)
+int gt_mmapandread(int argc, const char **argv, Env *env)
 {
   int i, fd, parsed_args;
   void *map;

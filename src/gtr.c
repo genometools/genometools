@@ -77,7 +77,8 @@ static int show_option_comments(const char *progname, void *data, Env *env)
   return 0;
 }
 
-OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, char **argv, Env *env)
+OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
+                 Env *env)
 {
   OptionParser *op;
   Option *o;
@@ -198,7 +199,7 @@ static int run_tests(GTR *gtr, Env *env)
   return EXIT_SUCCESS;
 }
 
-int gtr_run(GTR *gtr, int argc, char **argv, Env *env)
+int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
 {
   int (*tool)(int, char**, Env*) = NULL;
   char **nargv = NULL;

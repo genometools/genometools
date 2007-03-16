@@ -8,6 +8,6 @@
 #define GT_NUSSINOV_RNA_FOLD_H
 
 /* the Nussinov RNA folding tool */
-int gt_nussinov_rna_fold(int argc, char **argv, Env*);
+int gt_nussinov_rna_fold(int argc, const char **argv, Env*);
 
 #endif

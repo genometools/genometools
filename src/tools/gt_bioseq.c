@@ -16,7 +16,7 @@ typedef struct {
 } Bioseq_arguments;
 
 static OPrval parse_options(int *parsed_args, Bioseq_arguments *arguments,
-                            int argc, char **argv, Env *env)
+                            int argc, const char **argv, Env *env)
 {
   Option *option, *option_showfasta, *option_showseqnum, *option_width,
          *option_stat;
@@ -78,7 +78,7 @@ static OPrval parse_options(int *parsed_args, Bioseq_arguments *arguments,
   return oprval;
 }
 
-int gt_bioseq(int argc, char *argv[], Env *env)
+int gt_bioseq(int argc, const char **argv, Env *env)
 {
   Bioseq_arguments arguments;
   Bioseq *bioseq;

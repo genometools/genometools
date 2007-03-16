@@ -16,7 +16,7 @@ typedef struct {
 } Gff3_arguments;
 
 static OPrval parse_options(int *parsed_args, Gff3_arguments *arguments,
-                            int argc, char **argv, Env *env)
+                            int argc, const char **argv, Env *env)
 {
   OptionParser *op;
   Option *sort_option, *mergefeat_option, *addintrons_option, *option;
@@ -64,7 +64,7 @@ static OPrval parse_options(int *parsed_args, Gff3_arguments *arguments,
   return oprval;
 }
 
-int gt_gff3(int argc, char *argv[], Env *env)
+int gt_gff3(int argc, const char **argv, Env *env)
 {
   GenomeStream *gff3_in_stream,
                *sort_stream = NULL,

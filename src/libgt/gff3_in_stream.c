@@ -186,7 +186,8 @@ void gff3_in_stream_set_offset(GenomeStream *gs, long offset)
   gff3parser_set_offset(is->gff3_parser, offset);
 }
 
-GenomeStream* gff3_in_stream_new_unsorted(int num_of_files, char **filenames,
+GenomeStream* gff3_in_stream_new_unsorted(int num_of_files,
+                                          const char **filenames,
                                           bool be_verbose, Env *env)
 {
   int i;
@@ -196,7 +197,7 @@ GenomeStream* gff3_in_stream_new_unsorted(int num_of_files, char **filenames,
   return gff3_in_stream_new(files, false, be_verbose, env);
 }
 
-GenomeStream* gff3_in_stream_new_sorted(char *filename, bool be_verbose,
+GenomeStream* gff3_in_stream_new_sorted(const char *filename, bool be_verbose,
                                         Env *env)
 {
   Array *files = array_new(sizeof (char*), env);

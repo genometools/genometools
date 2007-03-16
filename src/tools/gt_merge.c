@@ -7,7 +7,7 @@
 #include "gt.h"
 
 static OPrval parse_options(int *parsed_args, FILE **outfp, int argc,
-                            char **argv, Env *env)
+                            const char **argv, Env *env)
 {
   OptionParser *op;
   Option *option;
@@ -22,7 +22,7 @@ static OPrval parse_options(int *parsed_args, FILE **outfp, int argc,
   return oprval;
 }
 
-int gt_merge(int argc, char *argv[], Env *env)
+int gt_merge(int argc, const char **argv, Env *env)
 {
   GenomeStream *gff3_in_stream,
                 *merge_stream,

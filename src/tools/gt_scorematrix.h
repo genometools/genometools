@@ -8,6 +8,6 @@
 #define GT_SCOREMATRIX_H
 
 /* the scorematrix tool */
-int gt_scorematrix(int argc, char**argv, Env*);
+int gt_scorematrix(int argc, const char **argv, Env*);
 
 #endif

@@ -6,7 +6,8 @@
 
 #include "gt.h"
 
-static OPrval parse_options(int *parsed_args, int argc, char **argv, Env *env)
+static OPrval parse_options(int *parsed_args, int argc, const char **argv,
+                            Env *env)
 {
   OptionParser *op;
   OPrval oprval;
@@ -45,7 +46,7 @@ static void remove_pattern_in_current_dir(const char *pattern, Env *env)
   str_delete(path, env);
 }
 
-int gt_clean(int argc, char *argv[], Env *env)
+int gt_clean(int argc, const char **argv, Env *env)
 {
   int parsed_args;
   env_error_check(env);

@@ -8,6 +8,6 @@
 #define GT_NEIGHBORJOINING_H
 
 /* the Neighbor-Joining tool */
-int gt_neighborjoining(int argc, char **argv, Env*);
+int gt_neighborjoining(int argc, const char **argv, Env*);
 
 #endif

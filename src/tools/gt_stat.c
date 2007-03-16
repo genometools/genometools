@@ -20,7 +20,7 @@ typedef struct {
 } StatInfo;
 
 static OPrval parse_options(int *parsed_args, Stat_arguments *arguments,
-                            int argc, char **argv, Env *env)
+                            int argc, const char **argv, Env *env)
 {
   OptionParser *op;
   Option *option;
@@ -71,7 +71,7 @@ static int compute_statistics(GenomeNode *gn, void *data, Env *env)
   return genome_node_accept(gn, info->stat_visitor, env);
 }
 
-int gt_stat(int argc, char *argv[], Env *env)
+int gt_stat(int argc, const char **argv, Env *env)
 {
   GenomeStream *gff3_in_stream;
   GenomeNode *gn;
