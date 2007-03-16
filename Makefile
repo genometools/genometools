@@ -148,7 +148,7 @@ install:
 splint:
 	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) $(CURDIR)/src/*.c
 
-test: dirs bin/gt
+test: all
 	bin/gt -test
 	cd testsuite && env -i ruby -I. testsuite.rb -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin
 
