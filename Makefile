@@ -4,8 +4,7 @@
 # See LICENSE file or http://genometools.org/license.html for license details
 #
 
-CCACHE:= $(shell type ccache >/dev/null && echo ccache)
-CC:=$(CCACHE) gcc
+CC:=gcc
 LD:=gcc
 INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj -I$(CURDIR)/src/lua-5.1.1/src \
              -I$(CURDIR)/src/expat-2.0.0/lib

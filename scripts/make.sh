@@ -6,4 +6,4 @@
 #
 
 # the make call normally used for development
-gmake CFLAGS=-Werror test
+gmake CC='ccache gcc' CFLAGS=-Werror test
