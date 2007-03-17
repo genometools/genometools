@@ -61,35 +61,41 @@ dirs:
 	@test -d bin     || mkdir -p bin 
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
-	ar ruv $@ $(LIBEXPAT_OBJ)
+	@echo "[link $@]"
+	@ar ru $@ $(LIBEXPAT_OBJ)
 ifdef RANLIB
-	$(RANLIB) $@
+	@$(RANLIB) $@
 endif
 
 lib/libgtcore.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h \
                  $(LIBGTCORE_OBJ)
-	ar ruv $@ $(LIBGTCORE_OBJ)
+	@echo "[link $@]"
+	@ar ru $@ $(LIBGTCORE_OBJ)
 ifdef RANLIB
-	$(RANLIB) $@
+	@$(RANLIB) $@
 endif
 
 lib/libgtext.a: $(LIBGTEXT_OBJ) $(LIBLUA_OBJ)
-	ar ruv $@ $(LIBGTEXT_OBJ) $(LIBLUA_OBJ)
+	@echo "[link $@]"
+	@ar ru $@ $(LIBGTEXT_OBJ) $(LIBLUA_OBJ)
 ifdef RANLIB
-	$(RANLIB) $@
+	@$(RANLIB) $@
 endif
 
 lib/librnv.a: $(LIBRNV_OBJ)
-	ar ruv $@ $(LIBRNV_OBJ)
+	@echo "[link $@]"
+	@ar ru $@ $(LIBRNV_OBJ)
 ifdef RANLIB
-	$(RANLIB) $@
+	@$(RANLIB) $@
 endif
 
 bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgtext.a lib/libgtcore.a
-	$(LD) $(LDFLAGS) $^ $(LDLIBS) -o $@
+	@echo "[link $@]"
+	@$(LD) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 bin/rnv: obj/xcl.o lib/librnv.a lib/libexpat.a
-	$(LD) $(LDFLAGS) $^ -o $@
+	@$(LD) $(LDFLAGS) $^ -o $@
+	@echo "[link $@]"
 
 obj/gt_build.h:
 	@date +'#define GT_BUILT "%Y-%m-%d %H:%M:%S"' > $@
@@ -105,27 +111,34 @@ obj/gt_version.h: VERSION
 
 # we create the dependency files on the fly
 obj/%.o: src/%.c
-	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+	@echo "[compile $@]"
+	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 obj/%.o: src/libgtcore/%.c
-	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+	@echo "[compile $@]"
+	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 obj/%.o: src/libgtext/%.c
-	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+	@echo "[compile $@]"
+	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 obj/%.o: src/tools/%.c
-	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+	@echo "[compile $@]"
+	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 obj/%.o: src/external/expat-2.0.0/lib/%.c
-	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DHAVE_MEMMOVE -MT $@ -MMD \
+	@echo "[compile $@]"
+	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DHAVE_MEMMOVE -MT $@ -MMD \
         -MP -MF $(@:.o=.d)
 
 obj/%.o: src/external/lua-5.1.1/src/%.c
-	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DLUA_USE_POSIX -MT $@ -MMD \
+	@echo "[compile $@]"
+	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DLUA_USE_POSIX -MT $@ -MMD \
         -MP -MF $(@:.o=.d)
 
 obj/%.o: src/external/rnv-1.7.8/%.c
-	$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DUNISTD_H="<unistd.h>" \
+	@echo "[compile $@]"
+	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DUNISTD_H="<unistd.h>" \
         -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\"" -MT $@ -MMD -MP   \
         -MF $(@:.o=.d)
 
