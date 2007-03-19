@@ -8,7 +8,8 @@ CC:=gcc
 LD:=gcc
 INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
              -I$(CURDIR)/src/external/lua-5.1.1/src \
-             -I$(CURDIR)/src/external/expat-2.0.0/lib
+             -I$(CURDIR)/src/external/expat-2.0.0/lib\
+             -I$(CURDIR)/src/external/bzip2-1.0.4
 CFLAGS:=
 GT_CFLAGS:= -Wall $(INCLUDEOPT)
 LDFLAGS:=
@@ -39,6 +40,9 @@ LIBRNV_OBJ := obj/rn.o obj/rnc.o obj/rnd.o obj/rnl.o obj/rnv.o obj/rnx.o obj/drv
               obj/ary.o obj/xsd.o obj/xsd_tm.o obj/dxl.o obj/dsl.o obj/sc.o obj/u.o \
               obj/ht.o obj/er.o obj/xmlc.o obj/s.o obj/m.o obj/rx.o
 
+LIBBZ2_OBJ := obj/blocksort.o obj/huffman.o obj/crctable.o obj/randtable.o \
+              obj/compress.o obj/decompress.o obj/bzlib.o
+
 # process arguments
 ifeq ($(opt),no)
   GT_CFLAGS += -g
@@ -67,6 +71,13 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
+lib/libbz2.a: $(LIBBZ2_OBJ)
+	@echo "[link $@]"
+	@ar ru $@ $(LIBBZ2_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
 lib/libgtcore.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h \
                  $(LIBGTCORE_OBJ)
 	@echo "[link $@]"
@@ -89,7 +100,8 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgtext.a lib/libgtcore.a
+bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgtext.a lib/libgtcore.a\
+        lib/libbz2.a
 	@echo "[link $@]"
 	@$(LD) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
@@ -123,6 +135,10 @@ obj/%.o: src/libgtext/%.c
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 obj/%.o: src/tools/%.c
+	@echo "[compile $@]"
+	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+
+obj/%.o: src/external/bzip2-1.0.4/%.c
 	@echo "[compile $@]"
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
