@@ -34,6 +34,9 @@ GenFileMode genfilemode_determine(const char *path);
 GenFile*    genfile_xopen(GenFileMode, const char *path, const char *mode,
                           Env*);
 
+/* create a new GenFile object from a normal file pointer */
+GenFile*    genfile_new(FILE*, Env*);
+
 int         genfile_putc(int c, GenFile*);
 
 /* printf(3) for generic files */
@@ -45,6 +48,9 @@ int         genfile_xread(GenFile*, void *buf, size_t nbytes);
 
 /* rewind the file */
 void        genfile_xrewind(GenFile*);
+
+/* destroy the file handle object, but do not close the underlying handle */
+void        genfile_delete(GenFile*, Env*);
 
 /* close the underlying file handle and destroy the object */
 void        genfile_xclose(GenFile*, Env*);

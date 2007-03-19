@@ -56,6 +56,17 @@ GenFile* genfile_xopen(GenFileMode genfilemode, const char *path,
   return genfile;
 }
 
+GenFile* genfile_new(FILE *fp, Env *env)
+{
+  GenFile *genfile;
+  env_error_check(env);
+  assert(fp);
+  genfile = env_ma_calloc(env, 1, sizeof (GenFile));
+  genfile->mode = GFM_UNCOMPRESSED;
+  genfile->fileptr.file = fp;
+  return genfile;
+}
+
 static int bzputc(BZFILE *bzfile, int c)
 {
   char cc = (char) c; /* required for big endian systems */
@@ -169,6 +180,14 @@ void genfile_xrewind(GenFile *genfile)
   }
 }
 
+void genfile_delete(GenFile *genfile, Env *env)
+{
+  if (!genfile) return;
+  env_ma_free(genfile->orig_path, env);
+  env_ma_free(genfile->orig_mode, env);
+  env_ma_free(genfile, env);
+}
+
 void genfile_xclose(GenFile *genfile, Env *env)
 {
   if (!genfile) return;
@@ -184,7 +203,5 @@ void genfile_xclose(GenFile *genfile, Env *env)
       break;
     default: assert(0);
   }
-  env_ma_free(genfile->orig_path, env);
-  env_ma_free(genfile->orig_mode, env);
-  env_ma_free(genfile, env);
+  genfile_delete(genfile, env);
 }
