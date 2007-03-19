@@ -33,8 +33,8 @@ GenFileMode genfilemode_determine(const char *path)
   return GFM_UNCOMPRESSED;
 }
 
-GenFile*  genfile_xopen(GenFileMode genfilemode, const char *path,
-                        const char *mode, Env *env)
+GenFile* genfile_xopen(GenFileMode genfilemode, const char *path,
+                       const char *mode, Env *env)
 {
   GenFile *genfile;
   assert(path && mode);
@@ -54,6 +54,27 @@ GenFile*  genfile_xopen(GenFileMode genfilemode, const char *path,
     default: assert(0);
   }
   return genfile;
+}
+
+static int bzputc(BZFILE *bzfile, int c)
+{
+  char cc = (char) c; /* required for big endian systems */
+  return BZ2_bzwrite(bzfile, &cc, 1) == 1 ? cc : -1;
+}
+
+int genfile_putc(int c, GenFile *genfile)
+{
+  if (!genfile)
+    return putc(c, stdout);
+  switch (genfile->mode) {
+    case GFM_UNCOMPRESSED:
+      return putc(c, genfile->fileptr.file);
+    case GFM_GZIP:
+      return gzputc(genfile->fileptr.gzfile, c);
+    case GFM_BZIP2:
+      return bzputc(genfile->fileptr.bzfile, c);
+    default: assert(0);
+  }
 }
 
 static int vgzprintf(gzFile file, const char *format, va_list va)
