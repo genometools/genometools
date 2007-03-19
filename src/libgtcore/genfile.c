@@ -27,10 +27,10 @@ struct GenFile {
 GenFileMode genfilemode_determine(const char *path)
 {
   if (!strcmp(".gz", path + strlen(path) - 3))
-    return GZIP;
+    return GFM_GZIP;
   if (!strcmp(".bz2", path + strlen(path) - 4))
-    return BZIP2;
-  return UNCOMPRESSED;
+    return GFM_BZIP2;
+  return GFM_UNCOMPRESSED;
 }
 
 GenFile*  genfile_xopen(GenFileMode genfilemode, const char *path,
@@ -41,13 +41,13 @@ GenFile*  genfile_xopen(GenFileMode genfilemode, const char *path,
   genfile = env_ma_calloc(env, 1, sizeof (GenFile));
   genfile->mode = genfilemode;
   switch (genfilemode) {
-    case UNCOMPRESSED:
+    case GFM_UNCOMPRESSED:
       genfile->fileptr.file = xfopen(path, mode);
       break;
-    case GZIP:
+    case GFM_GZIP:
       genfile->fileptr.gzfile = xgzopen(path, mode);
       break;
-    case BZIP2:
+    case GFM_BZIP2:
       genfile->fileptr.bzfile = xbzopen(path, mode);
       genfile->orig_path = cstr_dup(path, env);
       genfile->orig_mode = cstr_dup(path, env);
@@ -61,13 +61,13 @@ int genfile_xread(GenFile *genfile, void *buf, size_t nbytes)
   int rval;
   if (genfile) {
     switch (genfile->mode) {
-      case UNCOMPRESSED:
+      case GFM_UNCOMPRESSED:
         rval = xfread(buf, 1, nbytes, genfile->fileptr.file);
         break;
-      case GZIP:
+      case GFM_GZIP:
         rval = xgzread(genfile->fileptr.gzfile, buf, nbytes);
         break;
-      case BZIP2:
+      case GFM_BZIP2:
         rval = xbzread(genfile->fileptr.bzfile, buf, nbytes);
         break;
       default: assert(0);
@@ -82,13 +82,13 @@ void genfile_xrewind(GenFile *genfile)
 {
   assert(genfile);
   switch (genfile->mode) {
-    case UNCOMPRESSED:
+    case GFM_UNCOMPRESSED:
       rewind(genfile->fileptr.file);
       break;
-    case GZIP:
+    case GFM_GZIP:
       xgzrewind(genfile->fileptr.gzfile);
       break;
-    case BZIP2:
+    case GFM_BZIP2:
       xbzrewind(&genfile->fileptr.bzfile, genfile->orig_path,
                 genfile->orig_mode);
       break;
@@ -100,13 +100,13 @@ void genfile_xclose(GenFile *genfile, Env *env)
 {
   if (!genfile) return;
   switch (genfile->mode) {
-    case UNCOMPRESSED:
+    case GFM_UNCOMPRESSED:
       xfclose(genfile->fileptr.file);
       break;
-    case GZIP:
+    case GFM_GZIP:
       xgzclose(genfile->fileptr.gzfile);
       break;
-    case BZIP2:
+    case GFM_BZIP2:
       BZ2_bzclose(genfile->fileptr.bzfile);
       break;
     default: assert(0);
