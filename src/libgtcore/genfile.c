@@ -56,6 +56,58 @@ GenFile*  genfile_xopen(GenFileMode genfilemode, const char *path,
   return genfile;
 }
 
+static int vgzprintf(gzFile file, const char *format, va_list va)
+{
+  char buf[BUFSIZ];
+  int len;
+  len = vsnprintf(buf, sizeof (buf), format, va);
+  assert(len <= BUFSIZ);
+  return gzwrite(file, buf, (unsigned) len);
+}
+
+static int vbzprintf(BZFILE *file, const char *format, va_list va)
+{
+  char buf[BUFSIZ];
+  int len;
+  len = vsnprintf(buf, sizeof (buf), format, va);
+  assert(len <= BUFSIZ);
+  return BZ2_bzwrite(file, buf, len);
+}
+
+static int xvprintf(GenFile *genfile, const char *format, va_list va)
+{
+  int rval;
+
+  if (!genfile) /* implies stdout */
+    rval = vfprintf(stdout, format, va);
+  else {
+    switch (genfile->mode) {
+      case GFM_UNCOMPRESSED:
+        rval = vfprintf(genfile->fileptr.file, format, va);
+        break;
+      case GFM_GZIP:
+        rval = vgzprintf(genfile->fileptr.gzfile, format, va);
+        break;
+      case GFM_BZIP2:
+        rval = vbzprintf(genfile->fileptr.bzfile, format, va);
+        break;
+      default: assert(0);
+    }
+  }
+  return rval;
+}
+
+void genfile_xprintf(GenFile *genfile, const char *format, ...)
+{
+  va_list va;
+  va_start(va, format);
+  if (xvprintf(genfile, format, va) < 0) {
+    fprintf(stderr, "genfile_xprintf(): xvprintf() returned negative value\n");
+    exit(EXIT_FAILURE);
+  }
+  va_end(va);
+}
+
 int genfile_xread(GenFile *genfile, void *buf, size_t nbytes)
 {
   int rval;

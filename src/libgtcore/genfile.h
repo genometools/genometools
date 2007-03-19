@@ -34,6 +34,10 @@ GenFileMode genfilemode_determine(const char *path);
 GenFile*    genfile_xopen(GenFileMode, const char *path, const char *mode,
                           Env*);
 
+/* printf(3) for generic files */
+void        genfile_xprintf(GenFile*, const char *format, ...)
+  __attribute__ ((format (printf, 2, 3)));
+
 /* read up to 'nbytes' and store result in 'buf', returns bytes read or EOF */
 int         genfile_xread(GenFile*, void *buf, size_t nbytes);
 
