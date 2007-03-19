@@ -22,10 +22,12 @@ typedef struct GenFile GenFile;
 typedef enum
 {
   UNCOMPRESSED,
-  GZIP
+  GZIP,
+  BZIP2
 } GenFileMode;
 
-/* returns GZIP if file with 'path' ends with '.gz', UNCOMPRESSED otherwise */
+/* returns GZIP if file with 'path' ends with '.gz', BZIP2 if it ends with
+   '.bz2', andUNCOMPRESSED otherwise */
 GenFileMode genfilemode_determine(const char *path);
 
 /* create a new GenFile object and open the underlying file handle */
