@@ -13,10 +13,11 @@
 /* A descrete distribution */
 typedef struct DiscDistri DiscDistri;
 
-DiscDistri* disc_distri_new(Env*);
-void        disc_distri_add(DiscDistri*, unsigned long, Env*);
-void        disc_distri_show(const DiscDistri*); /* on stdout */
-void        disc_distri_show_generic(const DiscDistri*, GenFile*);
-void        disc_distri_delete(DiscDistri*, Env*);
+DiscDistri*   disc_distri_new(Env*);
+void          disc_distri_add(DiscDistri*, unsigned long, Env*);
+unsigned long disc_distri_get(const DiscDistri*, unsigned long);
+void          disc_distri_show(const DiscDistri*); /* on stdout */
+void          disc_distri_show_generic(const DiscDistri*, GenFile*);
+void          disc_distri_delete(DiscDistri*, Env*);
 
 #endif
