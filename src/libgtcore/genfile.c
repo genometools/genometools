@@ -33,6 +33,41 @@ GenFileMode genfilemode_determine(const char *path)
   return GFM_UNCOMPRESSED;
 }
 
+GenFile* genfile_open(GenFileMode genfilemode, const char *path,
+                      const char *mode, Env *env)
+{
+  GenFile *genfile;
+  assert(path && mode);
+  genfile = env_ma_calloc(env, 1, sizeof (GenFile));
+  genfile->mode = genfilemode;
+  switch (genfilemode) {
+    case GFM_UNCOMPRESSED:
+      genfile->fileptr.file = fopen(path, mode);
+      if (!genfile->fileptr.file) {
+        genfile_delete(genfile, env);
+        return NULL;
+      }
+      break;
+    case GFM_GZIP:
+      genfile->fileptr.gzfile = gzopen(path, mode);
+      if (!genfile->fileptr.gzfile) {
+        genfile_delete(genfile, env);
+        return NULL;
+      }
+      break;
+    case GFM_BZIP2:
+      genfile->fileptr.bzfile = BZ2_bzopen(path, mode);
+      if (!genfile->fileptr.bzfile) {
+        genfile_delete(genfile, env);
+        return NULL;
+      }
+      genfile->orig_path = cstr_dup(path, env);
+      genfile->orig_mode = cstr_dup(path, env);
+    default: assert(0);
+  }
+  return genfile;
+}
+
 GenFile* genfile_xopen(GenFileMode genfilemode, const char *path,
                        const char *mode, Env *env)
 {

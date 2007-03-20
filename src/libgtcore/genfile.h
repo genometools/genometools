@@ -30,7 +30,12 @@ typedef enum
    with '.bz2', and GFM_UNCOMPRESSED otherwise */
 GenFileMode genfilemode_determine(const char *path);
 
-/* create a new GenFile object and open the underlying file handle */
+/* create a new GenFile object and open the underlying file handle, return NULL
+   if the file <path> does not exist */
+GenFile*    genfile_open(GenFileMode, const char *path, const char *mode, Env*);
+
+/* create a new GenFile object and open the underlying file handle, abort if the
+   file <path> does not exist */
 GenFile*    genfile_xopen(GenFileMode, const char *path, const char *mode,
                           Env*);
 
