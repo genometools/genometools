@@ -67,6 +67,12 @@ GenFile* genfile_new(FILE *fp, Env *env)
   return genfile;
 }
 
+GenFileMode genfile_mode(GenFile *genfile)
+{
+  assert(genfile);
+  return genfile->mode;
+}
+
 static int bzgetc(BZFILE *bzfile)
 {
   char c;
