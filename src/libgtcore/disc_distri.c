@@ -38,6 +38,12 @@ void disc_distri_add(DiscDistri *d, unsigned long value, Env *env)
 
 void disc_distri_show(const DiscDistri *d)
 {
+  assert(d);
+  disc_distri_show_generic(d, NULL);
+}
+
+void disc_distri_show_generic(const DiscDistri *d, GenFile *genfile)
+{
   unsigned long value, occurrences;
   double probability, cumulative_probability = 0.0;
   assert(d);
@@ -47,8 +53,8 @@ void disc_distri_show(const DiscDistri *d)
     probability = (double) occurrences / d->num_of_occurrences;
     cumulative_probability += probability;
     if (occurrences)
-      printf("%lu: %lu (prob=%.4f,cumulative=%.4f)\n", value, occurrences,
-             probability, cumulative_probability);
+      genfile_xprintf(genfile, "%lu: %lu (prob=%.4f,cumulative=%.4f)\n", value,
+                      occurrences, probability, cumulative_probability);
   }
 }
 

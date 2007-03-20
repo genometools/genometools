@@ -8,6 +8,7 @@
 #define DISC_DISTRI_H
 
 #include <libgtcore/env.h>
+#include <libgtcore/genfile.h>
 
 /* A descrete distribution */
 typedef struct DiscDistri DiscDistri;
@@ -15,6 +16,7 @@ typedef struct DiscDistri DiscDistri;
 DiscDistri* disc_distri_new(Env*);
 void        disc_distri_add(DiscDistri*, unsigned long, Env*);
 void        disc_distri_show(const DiscDistri*); /* on stdout */
+void        disc_distri_show_generic(const DiscDistri*, GenFile*);
 void        disc_distri_delete(DiscDistri*, Env*);
 
 #endif
