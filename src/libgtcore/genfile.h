@@ -37,6 +37,7 @@ GenFile*    genfile_xopen(GenFileMode, const char *path, const char *mode,
 /* create a new GenFile object from a normal file pointer */
 GenFile*    genfile_new(FILE*, Env*);
 
+int         genfile_getc(GenFile*);
 int         genfile_putc(int c, GenFile*);
 
 /* printf(3) for generic files */

@@ -67,6 +67,26 @@ GenFile* genfile_new(FILE *fp, Env *env)
   return genfile;
 }
 
+static int bzgetc(BZFILE *bzfile)
+{
+  char c;
+  return BZ2_bzread(bzfile, &c, 1) == 1 ? (int) c : -1;
+}
+
+int genfile_getc(GenFile *genfile)
+{
+  assert(genfile);
+  switch (genfile->mode) {
+    case GFM_UNCOMPRESSED:
+      return fgetc(genfile->fileptr.file);
+    case GFM_GZIP:
+      return gzgetc(genfile->fileptr.gzfile);
+    case GFM_BZIP2:
+      return bzgetc(genfile->fileptr.bzfile);
+    default: assert(0);
+  }
+}
+
 static int bzputc(BZFILE *bzfile, int c)
 {
   char cc = (char) c; /* required for big endian systems */

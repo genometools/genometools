@@ -184,6 +184,7 @@ Str* str_ref(Str *s)
   return s;
 }
 
+/* XXX: remove code duplication */
 int str_read_next_line(Str *s, FILE *fpin, Env *env)
 {
   int cc;
@@ -196,6 +197,31 @@ int str_read_next_line(Str *s, FILE *fpin, Env *env)
         perror("cannot read char");
         exit(EXIT_FAILURE);
       }
+      return EOF;
+    }
+    if (cc == '\n') {
+      if ((s->length+1) * sizeof (char) > s->allocated)
+        s->cstr = dynalloc(s->cstr, &s->allocated, (s->length+1)*sizeof (char),
+                           env);
+      s->cstr[s->length] = '\0';
+      return 0;
+    }
+    c = cc;
+    if ((s->length+2) * sizeof (char) > s->allocated)
+      s->cstr = dynalloc(s->cstr, &s->allocated, (s->length+2)*sizeof (char),
+                         env);
+    s->cstr[s->length++] = c;
+  }
+}
+
+int str_read_next_line_generic(Str *s, GenFile *fpin, Env *env)
+{
+  int cc;
+  char c;
+  assert(s && fpin);
+  for (;;) {
+    cc = genfile_getc(fpin); /* XXX: use xgetc */
+    if (cc == EOF) {
       return EOF;
     }
     if (cc == '\n') {
