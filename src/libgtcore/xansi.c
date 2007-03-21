@@ -159,16 +159,6 @@ void xremove(const char *path)
   }
 }
 
-char* xtmpnam(char *str)
-{
-  char *fn;
-  if ((fn = tmpnam(str)) == NULL) {
-    perror("cannot tmpnam");
-    exit(EXIT_FAILURE);
-  }
-  return fn;
-}
-
 void xungetc(int c, FILE *stream)
 {
   if (ungetc(c, stream) == EOF) {

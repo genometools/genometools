@@ -8,6 +8,7 @@
 #include <libgtcore/ensure.h>
 #include <libgtcore/tokenizer.h>
 #include <libgtcore/xansi.h>
+#include <libgtcore/xtmpfile.h>
 
 struct Tokenizer {
   IO *io;
@@ -108,7 +109,7 @@ const char* tokenizer_get_filename(const Tokenizer *t)
 
 int tokenizer_unit_test(Env *env)
 {
-  const char *tmpfilename;
+  Str *tmpfilename;
   Tokenizer *t;
   FILE *tmpfp;
   Str *token;
@@ -116,22 +117,23 @@ int tokenizer_unit_test(Env *env)
   env_error_check(env);
 
   /* empty file (except comment line) */
-  tmpfilename = xtmpnam(NULL);
-  tmpfp = xfopen(tmpfilename, "w");
+  tmpfilename = str_new_cstr(XTMPFILE_TEMPLATE, env);
+  tmpfp = xtmpfile(str_get(tmpfilename));
   fprintf(tmpfp, "# comment line\n");
   xfclose(tmpfp);
-  t = tokenizer_new(io_new(tmpfilename, "r", env), env);
+  t = tokenizer_new(io_new(str_get(tmpfilename), "r", env), env);
   tokenizer_skip_comment_lines(t);
   ensure(has_err, !tokenizer_has_token(t, env));
   tokenizer_delete(t, env);
-  xremove(tmpfilename);
+  xremove(str_get(tmpfilename));
 
   /* larger test */
-  tmpfilename = xtmpnam(NULL);
-  tmpfp = xfopen(tmpfilename, "w");
+  str_reset(tmpfilename);
+  str_append_cstr(tmpfilename, XTMPFILE_TEMPLATE, env);
+  tmpfp = xfopen(str_get(tmpfilename), "w");
   fprintf(tmpfp, " a bb ccc\ndddd -5");
   xfclose(tmpfp);
-  t = tokenizer_new(io_new(tmpfilename, "r", env), env);
+  t = tokenizer_new(io_new(str_get(tmpfilename), "r", env), env);
 
   token = tokenizer_get_token(t, env);
   ensure(has_err, !strcmp(str_get(token), "a"));
@@ -160,7 +162,8 @@ int tokenizer_unit_test(Env *env)
   tokenizer_next_token(t, env);
   ensure(has_err, !tokenizer_has_token(t, env));
   tokenizer_delete(t, env);
-  xremove(tmpfilename);
+  xremove(str_get(tmpfilename));
+  str_delete(tmpfilename, env);
 
   return has_err;
 }

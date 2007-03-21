@@ -14,6 +14,16 @@ void xclose(int d)
   }
 }
 
+FILE* xfdopen(int filedes, const char *mode)
+{
+  FILE *fp;
+  if (!(fp = fdopen(filedes, mode))) {
+    perror("cannot fdopen");
+    exit(EXIT_FAILURE);
+  }
+  return fp;
+}
+
 void xfstat(int fd, struct stat *sb)
 {
   if (fstat(fd, sb)) {
@@ -65,6 +75,16 @@ int xopen(const char *path, int flags, mode_t mode)
     exit(EXIT_FAILURE);
   }
 
+  return fd;
+}
+
+int xmkstemp(char *template)
+{
+  int fd;
+  if ((fd = mkstemp(template)) == -1) {
+    perror("cannot mkstemp");
+    exit(EXIT_FAILURE);
+  }
   return fd;
 }
 
