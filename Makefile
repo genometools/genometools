@@ -15,6 +15,12 @@ GT_CFLAGS:= -Wall $(INCLUDEOPT)
 LDFLAGS:=
 LDLIBS:=-lm -lz
 
+# try to set RANLIB automatically
+SYSTEM:=$(shell uname -s)
+ifeq ($(SYSTEM),Darwin)
+  RANLIB:=ranlib
+endif
+
 # the core GenomeTools library (no other dependencies)
 LIBGTCORE_SRC:=$(notdir $(wildcard src/libgtcore/*.c))
 LIBGTCORE_OBJ:=$(LIBGTCORE_SRC:%.c=obj/%.o)
