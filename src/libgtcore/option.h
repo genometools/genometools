@@ -10,6 +10,8 @@
 #include <stdbool.h>
 #include <libgtcore/str.h>
 
+#define TERMINAL_WIDTH  80
+
 /* the option parser class */
 typedef struct OptionParser OptionParser;
 /* the option class */
@@ -55,7 +57,11 @@ OPrval        option_parser_parse_min_max_args(OptionParser*, int *parsed_args,
                                                Env*);
 void          option_parser_delete(OptionParser*, Env*);
 
-/* the options */
+/* the options
+
+   option descriptions are automatically formatted to TERMINAL_WIDTH, but it is
+   possible to embed newlines into the descriptions to manually affect the
+   formating */
 Option*        option_new_outputfile(FILE**, Env*);
 Option*        option_new_verbose(bool *value, Env*);
 Option*        option_new_debug(bool *value, Env*);

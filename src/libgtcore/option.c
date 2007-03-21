@@ -17,8 +17,6 @@
 #include <libgtcore/undef.h>
 #include <libgtcore/xansi.h>
 
-#define TERMINAL_WIDTH	80
-
 typedef enum {
   OPTION_BOOL,
   OPTION_DOUBLE,
@@ -147,32 +145,65 @@ void option_parser_set_comment_func(OptionParser *op,
   op->comment_func_data = data;
 }
 
-/* XXX: undebugged garbage */
-#if 0
 static void show_long_description(unsigned long initial_space,
                                   const char *desc, unsigned long len)
 {
-  const unsigned long width = TERMINAL_WIDTH - initial_space + 1;
+  const unsigned long width = TERMINAL_WIDTH - initial_space;
   const char *tmp_ptr, *desc_ptr = desc;
   unsigned long i;
+  bool continue_while = false;
 
+  /* got space to show option */
   assert(initial_space < TERMINAL_WIDTH);
 
   while (desc_ptr < desc + len) {
-    for (tmp_ptr = MIN(desc_ptr + width - 1, desc + len - 1);
-         tmp_ptr >= desc_ptr;
-         tmp_ptr--)
-      if (*tmp_ptr == ' ' || *tmp_ptr == '\n') break;
-    for (; desc_ptr < tmp_ptr; desc_ptr++)
-      putchar(*desc_ptr);
+    /* break, if the rest of the description fits on one line */
+    if (desc_ptr + width - 1 >= desc + len - 1)
+      break;
+    /* go backwards to find a point to break description */
+    for (tmp_ptr = desc_ptr + width; tmp_ptr >= desc_ptr; tmp_ptr--) {
+      if (*tmp_ptr == ' ' || *tmp_ptr == '\n')
+        break;
+    }
+    /* break point found, show description up to that point */
+    for (; desc_ptr < tmp_ptr; desc_ptr++) {
+      xputchar(*desc_ptr);
+      if (*desc_ptr == '\n') {
+        /* show leading spaces */
+        for  (i = 0; i < initial_space; i++)
+          xputchar(' ');
+        desc_ptr++;
+        continue_while = true;
+        break;
+      }
+    }
+    if (continue_while) {
+      continue_while = false;
+      continue;
+    }
+    /* we are at the break point now */
+    assert(*desc_ptr == ' ' || *desc_ptr == '\n');
+    /* show newline for break point */
     desc_ptr++;
-    assert(*desc_ptr == ' ' || desc_ptr == desc + len - 1);
-    putchar('\n');
+    xputchar('\n');
+    /* show leading spaces */
     for  (i = 0; i < initial_space; i++)
-      putchar(' ');
+      xputchar(' ');
   }
+  /* show final line */
+  while (desc_ptr < desc + len) {
+    xputchar(*desc_ptr);
+    if (*desc_ptr == '\n') {
+      /* show leading spaces */
+      for  (i = 0; i < initial_space; i++)
+        xputchar(' ');
+      desc_ptr++;
+      continue;
+    }
+    desc_ptr++;
+  }
+  xputchar('\n');
 }
-#endif
 
 static int show_help(OptionParser *op, bool show_development_options,
                      Env *env)
@@ -203,12 +234,9 @@ static int show_help(OptionParser *op, bool show_development_options,
     if (str_length(option->description) >
         TERMINAL_WIDTH - max_option_length - 2) {
       /* option description is too long to fit in one line without wrapping */
-      assert(0);
-#if 0
       show_long_description(max_option_length + 2,
                             str_get(option->description),
                             str_length(option->description));
-#endif
     }
     else
       xputs(str_get(option->description));
