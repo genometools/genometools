@@ -1,3 +1,9 @@
+changes in version 0.7.1
+
+- compilation output shortened
+- new functions added to libgtcore
+
+
 changes in version 0.7.0:
 
 - `gt eval` shows much more details
