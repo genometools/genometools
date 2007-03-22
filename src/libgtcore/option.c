@@ -945,6 +945,12 @@ void option_hide_default(Option *o)
   o->hide_default = true;
 }
 
+bool option_is_set(const Option *o)
+{
+  assert(o);
+  return o->is_set;
+}
+
 void option_delete(Option *o, Env *env)
 {
   unsigned long i;
