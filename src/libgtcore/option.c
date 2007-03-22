@@ -70,7 +70,8 @@ struct Option {
        hide_default,
        min_value_set,
        max_value_set,
-       is_development_option;
+       is_development_option,
+       argument_is_optional;
   Array *implications, /* contains option arrays, from each array at least one
                           option needs to be set */
         *exclusions;
@@ -285,6 +286,17 @@ static int show_help(OptionParser *op, bool show_development_options,
   return has_err;
 }
 
+static bool optional_arg(Option *o, int argnum, int argc, const char **argv)
+{
+  assert(o);
+  if (o->argument_is_optional &&
+      (argnum + 1 >= argc || argv[argnum + 1][0] == '-' ||
+       !strcmp(argv[argnum + 1], "--"))) {
+    return true;
+  }
+  return false;
+}
+
 static int check_missing_argument(int argnum, int argc, Str *option, Env *env)
 {
   env_error_check(env);
@@ -450,8 +462,10 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   option_parser_add_option(op, option, env);
 
   for (argnum = 1; argnum < argc; argnum++) {
-    if (!(argv[argnum] && argv[argnum][0] == '-' && strlen(argv[argnum]) > 1))
+    if (!(argv[argnum] && argv[argnum][0] == '-' && strlen(argv[argnum]) > 1) ||
+        !strcmp(argv[argnum], "--")) {
       break;
+    }
 
     /* look for matching option */
     option_parsed = false;
@@ -477,6 +491,10 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
               option_parsed = true;
               break;
             case OPTION_DOUBLE:
+              if (optional_arg(option, argnum, argc, argv)) {
+                option_parsed = true;
+                break;
+              }
               has_err = check_missing_argument(argnum, argc, option->option_str,
                                                env);
               if (!has_err) {
@@ -511,6 +529,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
               }
               break;
             case OPTION_INT:
+              assert(!option->argument_is_optional);
               has_err = check_missing_argument(argnum, argc, option->option_str,
                                                env);
               if (!has_err) {
@@ -536,6 +555,10 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
               }
               break;
             case OPTION_UINT:
+              if (optional_arg(option, argnum, argc, argv)) {
+                option_parsed = true;
+                break;
+              }
               has_err = check_missing_argument(argnum, argc, option->option_str,
                                                env);
               if (!has_err) {
@@ -572,6 +595,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
               }
               break;
             case OPTION_LONG:
+              assert(!option->argument_is_optional);
               has_err = check_missing_argument(argnum, argc, option->option_str,
                         env);
               if (!has_err) {
@@ -588,6 +612,10 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
               }
               break;
             case OPTION_ULONG:
+              if (optional_arg(option, argnum, argc, argv)) {
+                option_parsed = true;
+                break;
+              }
               has_err = check_missing_argument(argnum, argc, option->option_str,
                                                env);
               if (!has_err) {
@@ -616,6 +644,10 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
               }
               break;
             case OPTION_STRING:
+              if (optional_arg(option, argnum, argc, argv)) {
+                option_parsed = true;
+                break;
+              }
               has_err = check_missing_argument(argnum, argc, option->option_str,
                         env);
               if (!has_err) {
@@ -647,6 +679,10 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
     has_err = -1;
     break;
   }
+
+  /* skip "--" if necessary */
+  if (argnum < argc && !strcmp(argv[argnum], "--"))
+    argnum++;
 
   /* check for minimum number of additional arguments, if necessary */
   if (!has_err && min_additional_arguments != UNDEFUINT &&
@@ -943,6 +979,12 @@ void option_hide_default(Option *o)
 {
   assert(o);
   o->hide_default = true;
+}
+
+void option_argument_is_optional(Option *o)
+{
+  assert(o);
+  o->argument_is_optional = true;
 }
 
 bool option_is_set(const Option *o)

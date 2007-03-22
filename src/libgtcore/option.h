@@ -114,6 +114,7 @@ void           option_imply_either_2(Option*, const Option*, const Option*,
                                      Env*);
 void           option_exclude(Option*, Option*, Env*);
 void           option_hide_default(Option*);
+void           option_argument_is_optional(Option*);
 bool           option_is_set(const Option*);
 void           option_delete(Option*, Env*);
 
