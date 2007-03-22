@@ -12,7 +12,8 @@
 #include <libgtcore/xansi.h>
 
 struct Env {
-  MA *ma;
+  MA *ma; /* the memory allocator */
+  FA *fa; /* the file allocator */
   Error *error;
   Log *log;
   bool spacepeak;
@@ -73,6 +74,7 @@ Env* env_new(void)
   Env *env = xcalloc(1, sizeof (Env));
   env->ma = ma_new();
   ma_init(env->ma, env);
+  env->fa = fa_new(env);
   env->error = error_new(env->ma);
   proc_gt_env_options(env);
   return env;
@@ -104,18 +106,21 @@ void env_set_log(Env *env, Log *log)
 
 int env_delete(Env *env)
 {
-  int rval;
+  int fa_fptr_rval, fa_mmap_rval, ma_rval;
   assert(env);
   log_delete(env->log, env->ma);
   error_delete(env->error, env->ma);
   env->error = NULL;
+  fa_fptr_rval = fa_check_fptr_leak(env->fa, env);
+  fa_mmap_rval = fa_check_mmap_leak(env->fa, env);
+  fa_delete(env->fa, env);
   if (env->spacepeak)
     ma_show_space_peak(env->ma, stdout);
-  rval = ma_check_space_leak(env->ma, env);
+  ma_rval = ma_check_space_leak(env->ma, env);
   ma_clean(env->ma, env);
   ma_delete(env->ma);
   free(env);
-  return rval;
+  return fa_fptr_rval || fa_mmap_rval || ma_rval;
 }
 
 void env_ma_free_func(void *ptr, Env *env)

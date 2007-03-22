@@ -12,6 +12,7 @@ typedef struct Env Env;
 
 #include <libgtcore/ma.h>
 #include <libgtcore/error.h>
+#include <libgtcore/fa.h>
 #include <libgtcore/log.h>
 
 Env*   env_new(void);
