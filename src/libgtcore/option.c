@@ -484,9 +484,22 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
         if (!has_err) {
           switch (option->option_type) {
             case OPTION_BOOL:
-              /* XXX: the next argument (if any) is an option
-                 (boolean parsing not implemented yet) */
-              /* assert(!argv[argnum+1] || argv[argnum+1][0] == '-'); */
+              if (argv[argnum+1] && argv[argnum+1][0] != '-') {
+                if (!strcmp(argv[argnum+1], "yes") ||
+                    !strcmp(argv[argnum+1], "true")) {
+                  argnum++;
+                  *(bool*) option->value = true;
+                  option_parsed = true;
+                  break;
+                }
+                else if (!strcmp(argv[argnum+1], "no") ||
+                         !strcmp(argv[argnum+1], "false")) {
+                  argnum++;
+                  *(bool*) option->value = false;
+                  option_parsed = true;
+                  break;
+                }
+              }
               *(bool*) option->value = true;
               option_parsed = true;
               break;
