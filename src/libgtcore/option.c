@@ -253,7 +253,11 @@ static int show_help(OptionParser *op, bool show_development_options,
 
     /* show default value for some types of options */
     if (!option->hide_default) {
-      if (option->option_type == OPTION_INT) {
+      if (option->option_type == OPTION_BOOL) {
+        printf("%*s  default: %s\n", (int) max_option_length, "",
+               option->default_value.b ? "yes" : "no");
+      }
+      else if (option->option_type == OPTION_INT) {
         printf("%*s  default: %d\n", (int) max_option_length, "",
                option->default_value.i);
       }
