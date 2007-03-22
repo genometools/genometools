@@ -39,6 +39,7 @@ struct OptionParser {
   bool parser_called;
   ShowCommentFunc comment_func;
   void *comment_func_data;
+  const char *mailaddress;
 };
 
 struct Option {
@@ -128,6 +129,7 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
   op->parser_called = false;
   op->comment_func = NULL;
   op->comment_func_data = NULL;
+  op->mailaddress = NULL;
   return op;
 }
 
@@ -143,6 +145,12 @@ void option_parser_set_comment_func(OptionParser *op,
   assert(op);
   op->comment_func = comment_func;
   op->comment_func_data = data;
+}
+
+void option_parser_set_mailaddress(OptionParser *op, const char *address)
+{
+  assert(op && address);
+  op->mailaddress = address;
 }
 
 static void show_long_description(unsigned long initial_space,
@@ -269,8 +277,10 @@ static int show_help(OptionParser *op, bool show_development_options,
   }
   if (op->comment_func)
     has_err = op->comment_func(op->progname, op->comment_func_data, env);
-  if (!has_err)
-    printf("\nReport bugs to %s.\n", MAILADDRESS);
+  if (!has_err) {
+    printf("\nReport bugs to %s.\n",
+           op->mailaddress ? op->mailaddress : MAILADDRESS);
+  }
   return has_err;
 }
 

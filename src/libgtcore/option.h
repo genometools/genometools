@@ -35,6 +35,9 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
 void          option_parser_add_option(OptionParser*, Option*, Env*);
 void          option_parser_set_comment_func(OptionParser*, ShowCommentFunc,
                                              void* data);
+/* set the mailadress used in the final ``Report bugs to'' line of the -help
+   output to <address>. It should be of the form "<bill@microsoft.com>" */
+void          option_parser_set_mailaddress(OptionParser*, const char *address);
 OPrval        option_parser_parse(OptionParser*, int *parsed_args, int argc,
                                   const char **argv, ShowVersionFunc, Env*);
 OPrval        option_parser_parse_min_args(OptionParser*, int *parsed_args,
