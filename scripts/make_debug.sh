@@ -6,4 +6,4 @@
 #
 
 # the make call used to compile a development version
-make cleanup && make opt=no CFLAGS=-Werror
+gmake cleanup && gmake opt=no CC='ccache gcc' CFLAGS=-Werror
