@@ -18,7 +18,7 @@ static void *mmap_generic(const char *path, size_t *len, int prot)
   void *map;
   assert(path && len);
   fd = open(path, O_RDONLY, 0);
-  if (!fd)
+  if (fd == -1)
     return NULL;
   xfstat(fd, &sb);
   map = mmap(0, sb.st_size, prot, MAP_PRIVATE, fd, 0);
