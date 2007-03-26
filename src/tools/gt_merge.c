@@ -78,7 +78,7 @@ int gt_merge(int argc, const char **argv, Env *env)
     genome_stream_delete(*(GenomeStream**) array_get(genome_streams, i), env);
   array_delete(genome_streams, env);
   if (outfp != stdout)
-    xfclose(outfp);
+    env_fa_xfclose(outfp, env);
 
   return has_err;
 }

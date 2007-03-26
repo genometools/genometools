@@ -22,7 +22,7 @@ IO* io_new(const char *path, const char *mode, Env *env)
   assert(path && mode);
   assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
   io = env_ma_malloc(env, sizeof (IO));
-  io->fp = xfopen(path, mode);
+  io->fp = env_fa_xfopen(env, path, mode);
   io->path = cstr_dup(path, env);
   io->line_number = 1;
   io->line_start = true;
@@ -73,7 +73,7 @@ const char* io_get_filename(const IO *io)
 void io_delete(IO *io, Env *env)
 {
   if (!io) return;
-  xfclose(io->fp);
+  env_fa_xfclose(io->fp, env);
   env_ma_free(io->path, env);
   env_ma_free(io, env);
 }

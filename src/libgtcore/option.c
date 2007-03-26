@@ -541,7 +541,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                                                env);
               if (!has_err) {
                 argnum++;
-                *(FILE**) option->value = xfopen(argv[argnum] , "w");
+                *(FILE**) option->value = env_fa_xfopen(env, argv[argnum], "w");
                 option_parsed = true;
               }
               break;

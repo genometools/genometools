@@ -82,7 +82,7 @@ int gt_csa(int argc, const char **argv, Env *env)
   genome_stream_delete(csa_stream, env);
   genome_stream_delete(gff3_in_stream, env);
   if (arguments.outfp != stdout)
-    xfclose(arguments.outfp);
+    env_fa_xfclose(arguments.outfp, env);
 
   return has_err;
 }

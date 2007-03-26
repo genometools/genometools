@@ -122,7 +122,7 @@ int gt_filter(int argc, const char **argv, Env *env)
   genome_stream_delete(filter_stream, env);
   genome_stream_delete(gff3_in_stream, env);
   if (arguments.outfp != stdout)
-    xfclose(arguments.outfp);
+    env_fa_xfclose(arguments.outfp, env);
   str_delete(arguments.seqid, env);
   str_delete(arguments.typefilter, env);
 

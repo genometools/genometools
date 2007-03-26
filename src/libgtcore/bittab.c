@@ -376,7 +376,7 @@ int bittab_unit_test(Env *env)
   }
 
   /* test bittab_show */
-  fp = xfopen("/dev/null", "w");
+  fp = env_fa_xfopen(env, "/dev/null", "w");
   b = bittab_new(80, env);
   for (i = 0; i < 80; i++) {
     if (i % 2)
@@ -384,7 +384,7 @@ int bittab_unit_test(Env *env)
   }
   bittab_show(b, fp);
   bittab_delete(b, env);
-  xfclose(fp);
+  env_fa_xfclose(fp, env);
 
   /* test bittab_shift_left_equal() */
   b = bittab_new(125, env);

@@ -110,7 +110,7 @@ static int parse_input_file(Array *spliced_alignments,
   env_error_check(env);
 
   line = str_new(env);
-  input_file = xfopen(file_name, "r");
+  input_file = env_fa_xfopen(env, file_name, "r");
 
   while (!has_err && str_read_next_line(line, input_file, env) != EOF) {
     /* init new spliced alignment */
@@ -125,7 +125,7 @@ static int parse_input_file(Array *spliced_alignments,
     }
   }
 
-  xfclose(input_file);
+  env_fa_xfclose(input_file, env);
   str_delete(line, env);
   return has_err;
 }
