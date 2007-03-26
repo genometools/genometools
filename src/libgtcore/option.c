@@ -76,7 +76,6 @@ struct Option {
                           option needs to be set */
         *exclusions;
   const Option *mandatory_either_option;
-  unsigned int reference_count;
 };
 
 static Option *option_new(const char *option_str, const char *description,
@@ -931,13 +930,6 @@ Option* option_new_string(const char *option_str, const char *description,
   return o;
 }
 
-Option* option_new_ref(Option *o)
-{
-  assert(o);
-  o->reference_count++;
-  return o;
-}
-
 void option_is_mandatory(Option *o)
 {
   assert(o);
@@ -1014,10 +1006,6 @@ void option_delete(Option *o, Env *env)
 {
   unsigned long i;
   if (!o) return;
-  if (o->reference_count) {
-    o->reference_count--;
-    return;
-  }
   str_delete(o->option_str, env);
   str_delete(o->description, env);
   for (i = 0; i < array_size(o->implications); i++)

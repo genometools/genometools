@@ -105,7 +105,6 @@ Option*        option_new_ulong_min(const char *option_str,
 Option*        option_new_string(const char *option_str,
                                  const char *description,
                                  Str *value, const char *default_value, Env*);
-Option*        option_ref(Option*);
 void           option_is_mandatory(Option*);
 void           option_is_mandatory_either(Option*, const Option*);
 void           option_is_development_option(Option*);
