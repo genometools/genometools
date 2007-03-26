@@ -36,12 +36,12 @@ typedef struct {
 
 static void free_FAFileInfo(FAFileInfo *fileinfo, Env *env)
 {
-  free(fileinfo);
+  env_ma_free(fileinfo, env);
 }
 
 static void free_FAMapInfo(FAMapInfo *mapinfo, Env *env)
 {
-  free(mapinfo);
+  env_ma_free(mapinfo, env);
 }
 
 FA* fa_new(Env *env)

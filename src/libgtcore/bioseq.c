@@ -124,7 +124,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
 
   /* parse the index file and fill the sequence to index mapping */
   index_line = str_new(env);
-  index_file = xfopen(index_filename, "r");
+  index_file = env_fa_xfopen(env, index_filename, "r");
 
   while (!has_err && str_read_next_line(index_line, index_file, env) != EOF) {
     switch (line_number % 3) {
@@ -165,7 +165,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
     bs->raw_sequence = xmap_read(raw_filename, &bs->raw_sequence_length);
   }
 
-  xfclose(index_file);
+  env_fa_xfclose(index_file, env);
   str_delete(index_line, env);
 
   return has_err;
@@ -181,8 +181,11 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
 
   /* open files & init */
   if (!bs->use_stdin) {
-    bioseq_files_info.bioseq_index = xfopen(str_get(bioseq_index_file), "w");
-    bioseq_files_info.bioseq_raw = xfopen(str_get(bioseq_raw_file), "w");
+    bioseq_files_info.bioseq_index = env_fa_xfopen(env,
+                                                   str_get(bioseq_index_file),
+                                                   "w");
+    bioseq_files_info.bioseq_raw = env_fa_xfopen(env, str_get(bioseq_raw_file),
+                                                 "w");
   }
   bioseq_files_info.offset = 0;
   bioseq_files_info.bs = bs;
@@ -207,8 +210,8 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
 
   /* close files */
   if (!bs->use_stdin) {
-    xfclose(bioseq_files_info.bioseq_index);
-    xfclose(bioseq_files_info.bioseq_raw);
+    env_fa_xfclose(bioseq_files_info.bioseq_index, env);
+    env_fa_xfclose(bioseq_files_info.bioseq_raw, env);
   }
 
   return has_err;

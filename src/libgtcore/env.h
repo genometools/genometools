@@ -37,30 +37,30 @@ int    env_delete(Env*);
 void    env_ma_free_func(void *ptr, Env*);
 
 /* wrapper for file functions */
-#define env_fa_fopen(path, mode)\
+#define env_fa_fopen(env, path, mode)\
         fa_fopen(env_fa(env), path, mode, __FILE__, __LINE__)
-#define env_fa_xfopen(path, mode)\
+#define env_fa_xfopen(env, path, mode)\
         fa_xfopen(env_fa(env), path, mode, __FILE__, __LINE__)
 void    env_fa_xfclose(FILE *stream, Env*);
 
-#define env_fa_gzopen(path, mode)\
+#define env_fa_gzopen(env, path, mode)\
         fa_gzopen(env_fa(env), path, mode, __FILE__, __LINE__)
-#define env_fa_xgzopen(path, mode)\
+#define env_fa_xgzopen(env, path, mode)\
         fa_xgzopen(env_fa(env), path, mode, __FILE__, __LINE__)
 void    env_fa_xgzclose(gzFile stream, Env*);
 
-#define env_fa_bzopen(path, mode)\
+#define env_fa_bzopen(env, path, mode)\
         fa_bzopen(env_fa(env), path, mode, __FILE__, __LINE__)
-#define env_fa_xbzopen(path, mode)\
+#define env_fa_xbzopen(env, path, mode)\
         fa_xbzopen(env_fa(env), path, mode, __FILE__, __LINE__)
 void    env_fa_xbzclose(BZFILE *stream, Env*);
 
-#define env_fa_xtmpfile(template)\
+#define env_fa_xtmpfile(env, template)\
         fa_xtmpfile(env_fa(env), template, __FILE__, __LINE__)
 
-#define env_fa_map_read(filename, len)\
+#define env_fa_map_read(env, filename, len)\
         fa_map_read(env_fa(env), filename, len, __FILE__, __LINE__)
-#define env_fa_map_write(filename, len)\
+#define env_fa_map_write(env, filename, len)\
         fa_map_write(env_fa(env), filename, len, __FILE__, __LINE__)
 void    env_fa_munmap(void *addr, Env*);
 
