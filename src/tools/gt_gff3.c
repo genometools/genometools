@@ -49,7 +49,7 @@ static OPrval parse_options(int *parsed_args, Gff3_arguments *arguments,
   /* -offset */
   option = option_new_long("offset",
                            "transform all features by the given offset",
-                           &arguments->offset, UNDEFLONG, env);
+                           &arguments->offset, UNDEF_LONG, env);
   /* XXX: do not make this a ``normal option'' until the necessary envor checks
      have been added to range_offset() in range.c */
   option_is_development_option(option);
@@ -92,7 +92,7 @@ int gt_gff3(int argc, const char **argv, Env *env)
   last_stream = gff3_in_stream;
 
   /* set offset (if necessary) */
-  if (arguments.offset != UNDEFLONG)
+  if (arguments.offset != UNDEF_LONG)
     gff3_in_stream_set_offset(gff3_in_stream, arguments.offset);
 
   /* create sort stream (if necessary) */

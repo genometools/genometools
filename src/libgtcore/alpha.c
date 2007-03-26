@@ -29,8 +29,8 @@ struct Alpha {
 Alpha* alpha_new(Env *env)
 {
   Alpha *a = env_ma_calloc(env, 1, sizeof (Alpha));
-  memset(a->code_to_character_map, UNDEFUCHAR, UCHAR_MAX);
-  memset(a->character_to_code_map, UNDEFUCHAR, UCHAR_MAX);
+  memset(a->code_to_character_map, UNDEF_UCHAR, UCHAR_MAX);
+  memset(a->character_to_code_map, UNDEF_UCHAR, UCHAR_MAX);
   return a;
 }
 
@@ -119,14 +119,14 @@ void alpha_add_mapping(Alpha *a, const char *characters)
 char alpha_decode(const Alpha *a, unsigned int c)
 {
   assert(a);
-  assert(a->code_to_character_map[c] != UNDEFUCHAR);
+  assert(a->code_to_character_map[c] != UNDEF_UCHAR);
   return a->code_to_character_map[c];
 }
 
 unsigned int alpha_encode(const Alpha *a, char c)
 {
   assert(a);
-  assert(a->character_to_code_map[(int) c] != UNDEFUCHAR);
+  assert(a->character_to_code_map[(int) c] != UNDEF_UCHAR);
   return a->character_to_code_map[(int) c];
 }
 
@@ -135,7 +135,7 @@ void alpha_decode_seq(const Alpha *a, char *out, char *in, unsigned long length)
   unsigned long i;
   assert(a && out && in);
   for (i = 0; i < length; i++) {
-    assert(a->code_to_character_map[(int) in[i]] != UNDEFUCHAR);
+    assert(a->code_to_character_map[(int) in[i]] != UNDEF_UCHAR);
     out[i] = a->code_to_character_map[(int) in[i]];
   }
 }
@@ -145,7 +145,7 @@ void alpha_encode_seq(const Alpha *a, char *out, char *in, unsigned long length)
   unsigned long i;
   assert(a && out && in);
   for (i = 0; i < length; i++) {
-    assert(a->character_to_code_map[(int) in[i]] != UNDEFUCHAR);
+    assert(a->character_to_code_map[(int) in[i]] != UNDEF_UCHAR);
     out[i] = a->character_to_code_map[(int) in[i]];
   }
 }

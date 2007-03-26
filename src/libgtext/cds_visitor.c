@@ -123,7 +123,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
       /*printf("%lu, %lu\n", cds.start, cds.end);*/
       cds_feature = genome_feature_new(gft_CDS, cds,
                                        genome_feature_get_strand(gf), NULL,
-                                       UNDEFULONG, env);
+                                       UNDEF_ULONG, env);
       genome_node_set_source(cds_feature, v->source);
       genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
       genome_node_set_phase(cds_feature, 0);
@@ -146,7 +146,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
                                    ? orf.end : orf.start) + 1;
           cds_feature = genome_feature_new(gft_CDS, cds,
                                            genome_feature_get_strand(gf), NULL,
-                                           UNDEFULONG, env);
+                                           UNDEF_ULONG, env);
           genome_node_set_source(cds_feature, v->source);
           genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
           /* XXX correct this */

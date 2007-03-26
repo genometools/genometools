@@ -44,7 +44,7 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, Env *env)
       /* merge nodes */
       genome_feature_set_end(previous_feature, current_range.end);
       /* XXX: compute average score ? */
-      genome_feature_set_score(previous_feature, UNDEFDOUBLE);
+      genome_feature_set_score(previous_feature, UNDEF_DOUBLE);
       assert(!genome_node_number_of_children((GenomeNode*) current_feature));
       /* XXX: */
       genome_node_remove_leaf(v->current_tree, (GenomeNode*) current_feature,

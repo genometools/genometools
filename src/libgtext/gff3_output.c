@@ -22,7 +22,7 @@ void gff3_output_leading(GenomeFeature *gf, FILE *outfp)
           genome_feature_get_source(gf), genome_feature_type_get_cstr(type),
           genome_node_get_start(gn), genome_node_get_end(gn));
   score = genome_feature_get_score(gf);
-  if (score == UNDEFDOUBLE)
+  if (score == UNDEF_DOUBLE)
     xfputc('.', outfp);
   else
     fprintf(outfp, "%f", score);

@@ -60,7 +60,7 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
       has_err = -1;
       break;
     }
-    parsed_characters[(int) amino_acid] = UNDEFCHAR;
+    parsed_characters[(int) amino_acid] = UNDEF_CHAR;
     if (amino_acid == '\n') {
       str_delete(token, env);
       tokenizer_next_token(tz, env);
@@ -123,7 +123,7 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
               tokenizer_get_filename(tz));
     has_err = -1;
   }
-  parsed_characters[(int) amino_acid] = UNDEFCHAR;
+  parsed_characters[(int) amino_acid] = UNDEF_CHAR;
   str_delete(token, env);
   if (!has_err) {
     tokenizer_next_token(tz, env);

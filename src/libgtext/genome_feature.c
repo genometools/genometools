@@ -109,7 +109,7 @@ GenomeNode* genome_feature_new(GenomeFeatureType type, Range range,
   gf->seqid          = NULL;
   gf->source         = NULL;
   gf->type           = type;
-  gf->score          = UNDEFDOUBLE;
+  gf->score          = UNDEF_DOUBLE;
   gf->range          = range;
   gf->strand         = strand;
   gf->phase          = PHASE_UNDEFINED;

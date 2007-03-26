@@ -43,20 +43,20 @@ static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
   /* -maxgenelength */
   option = option_new_ulong_min("maxgenelength", "the maximum length a gene "
                                 "can have to pass the filter",
-                                &arguments->max_gene_length, UNDEFULONG, 1,
+                                &arguments->max_gene_length, UNDEF_ULONG, 1,
                                 env);
   option_parser_add_option(op, option, env);
 
   /* -maxgenenum */
   option = option_new_ulong("maxgenenum", "the maximum number of genes which "
                             "can pass the filter", &arguments->max_gene_num,
-                            UNDEFULONG, env);
+                            UNDEF_ULONG, env);
   option_parser_add_option(op, option, env);
 
   /* -mingenescore */
   option = option_new_double("mingenescore", "the minimum score a gene must "
                              "have to pass the filter",
-                             &arguments->min_gene_score, UNDEFDOUBLE, env);
+                             &arguments->min_gene_score, UNDEF_DOUBLE, env);
   option_parser_add_option(op, option, env);
 
   /* -o */

@@ -34,7 +34,7 @@ GFF3Parser* gff3parser_new(Env *env)
   gff3_parser->source_to_str_mapping = hashtable_new(HASH_STRING, NULL,
                                                      (FreeFunc) str_delete,
                                                      env);
-  gff3_parser->offset = UNDEFLONG;
+  gff3_parser->offset = UNDEF_LONG;
   return gff3_parser;
 }
 
@@ -103,7 +103,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   if (!has_err)
     has_err = parse_range(&range, start, end, line_number, filename, env);
 
-  if (!has_err && gff3_parser->offset != UNDEFLONG)
+  if (!has_err && gff3_parser->offset != UNDEF_LONG)
     range = range_offset(range, gff3_parser->offset, line_number);
 
   /* parse the score */
@@ -213,7 +213,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
     genome_node_set_source(genome_feature, source_str);
   }
 
-  if (!has_err && score_value != UNDEFDOUBLE)
+  if (!has_err && score_value != UNDEF_DOUBLE)
     genome_feature_set_score((GenomeFeature*) genome_feature, score_value);
   if (!has_err && phase_value != PHASE_UNDEFINED)
     genome_node_set_phase(genome_feature, phase_value);
@@ -359,7 +359,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
       has_err = -1;
     }
     if (!has_err) {
-      if (gff3_parser->offset != UNDEFLONG)
+      if (gff3_parser->offset != UNDEF_LONG)
         range = range_offset(range, gff3_parser->offset, line_number);
       /* now we can create a sequence region node */
       assert(seqid);

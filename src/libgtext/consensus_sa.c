@@ -108,8 +108,8 @@ static unsigned int compatible(const Consensus_SA *csa,
   Array *exons_sa_1, *exons_sa_2;
   Range range_sa_1, range_sa_2;
   unsigned long i, j, num_of_exons_1, num_of_exons_2,
-       start_1 = UNDEFULONG,
-       start_2 = UNDEFULONG;
+       start_1 = UNDEF_ULONG,
+       start_2 = UNDEF_ULONG;
   unsigned int start_values_set = 0;
   const unsigned long fuzzlength = 0; /* XXX */
 
@@ -164,7 +164,7 @@ static unsigned int compatible(const Consensus_SA *csa,
 
   /* from now on the start values are set */
 
-  assert(start_1 != UNDEFULONG && start_2 != UNDEFULONG);
+  assert(start_1 != UNDEF_ULONG && start_2 != UNDEF_ULONG);
   if (!(start_1 == 0 || start_2 == 0)) {
     /* no first segment could be maped */
     array_delete(exons_sa_1, env);
@@ -353,7 +353,7 @@ static void compute_L(Bittab **L, Bittab **C, Bittab **left,
   tmpset = bittab_new(number_of_sas, env);
 
   for (sa = 0; sa < number_of_sas; sa++) {
-    sa_1 = UNDEFULONG;
+    sa_1 = UNDEF_ULONG;
 
     if (!bittab_is_true(left[sa])) {
       /* bittab is empty */
@@ -363,7 +363,7 @@ static void compute_L(Bittab **L, Bittab **C, Bittab **left,
       for (sa_2  = bittab_get_first_bitnum(left[sa]);
            sa_2 != bittab_get_last_bitnum(left[sa]);
            sa_2  = bittab_get_next_bitnum(left[sa], sa_2)) {
-        if (sa_1 == UNDEFULONG) {
+        if (sa_1 == UNDEF_ULONG) {
           sa_1 = sa_2;
 
           bittab_or(tmpset, L[sa_1], C[sa]);
@@ -380,7 +380,7 @@ static void compute_L(Bittab **L, Bittab **C, Bittab **left,
         }
       }
 
-      assert(sa_1 != UNDEFULONG);
+      assert(sa_1 != UNDEF_ULONG);
       bittab_or(L[sa], L[sa_1], C[sa]);
     }
   }
@@ -398,7 +398,7 @@ static void compute_R(Bittab **R, Bittab **C, Bittab **right,
   tmpset = bittab_new(number_of_sas, env);
 
   for (sa = number_of_sas-1; sa >= 0; sa--) {
-    sa_1 = UNDEFULONG;
+    sa_1 = UNDEF_ULONG;
 
     if (!bittab_is_true(right[sa])) {
       /* bittab is empty */
@@ -408,7 +408,7 @@ static void compute_R(Bittab **R, Bittab **C, Bittab **right,
       for (sa_2  = bittab_get_first_bitnum(right[sa]);
            sa_2 != bittab_get_last_bitnum(right[sa]);
            sa_2  = bittab_get_next_bitnum(right[sa], sa_2)) {
-        if (sa_1 == UNDEFULONG) {
+        if (sa_1 == UNDEF_ULONG) {
           sa_1 = sa_2;
 
           bittab_or(tmpset, R[sa_1], C[sa]);
@@ -425,7 +425,7 @@ static void compute_R(Bittab **R, Bittab **C, Bittab **right,
         }
       }
 
-      assert(sa_1 != UNDEFULONG);
+      assert(sa_1 != UNDEF_ULONG);
       bittab_or(R[sa], R[sa_1], C[sa]);
     }
   }
@@ -522,11 +522,11 @@ static void compute_csas(Consensus_SA *csa, Env *env)
   u_i_minus_1_size = bittab_count_set_bits(U_i);
 #endif
   while (bittab_is_true(U_i)) {
-    sa_i = UNDEFULONG;
+    sa_i = UNDEF_ULONG;
     for (sa_prime  = bittab_get_first_bitnum(U_i);
          sa_prime != bittab_get_last_bitnum(U_i);
          sa_prime  = bittab_get_next_bitnum(U_i, sa_prime)) {
-      if (sa_i == UNDEFULONG) {
+      if (sa_i == UNDEF_ULONG) {
         sa_i = sa_prime;
         bittab_or(SA_i, L[sa_i], R[sa_i]);
         sa_i_size = bittab_count_set_bits(SA_i);

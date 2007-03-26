@@ -36,16 +36,16 @@ static void upgma_init(UPGMA *upgma, unsigned long num_of_taxa, void *data,
                                        upgma->num_of_clusters);
 
   for (i = 0; i < upgma->num_of_clusters; i++) {
-    upgma->clusters[i].leftdaughter  = UNDEFULONG;
-    upgma->clusters[i].rightdaughter = UNDEFULONG;
+    upgma->clusters[i].leftdaughter  = UNDEF_ULONG;
+    upgma->clusters[i].rightdaughter = UNDEF_ULONG;
 
     if (i < num_of_taxa) {
       upgma->clusters[i].clustersize = 1;
       upgma->clusters[i].height      = 0.0;
     }
     else {
-      upgma->clusters[i].clustersize = UNDEFULONG;
-      upgma->clusters[i].height      = UNDEFDOUBLE;
+      upgma->clusters[i].clustersize = UNDEF_ULONG;
+      upgma->clusters[i].height      = UNDEF_DOUBLE;
     }
 
     if ((i > 0) && (i < upgma->num_of_clusters - 1)) {
@@ -58,7 +58,7 @@ static void upgma_init(UPGMA *upgma, unsigned long num_of_taxa, void *data,
           upgma->clusters[i].distances[j] = retval;
         }
         else
-          upgma->clusters[i].distances[j] = UNDEFDOUBLE;
+          upgma->clusters[i].distances[j] = UNDEF_DOUBLE;
       }
     }
   }
@@ -78,7 +78,7 @@ static double distance(const UPGMA *upgma, unsigned long i, unsigned long j)
 
 static void upgma_compute(UPGMA *upgma, Env *env)
 {
-  unsigned long i, j, k, step, min_i = UNDEFULONG, min_j = UNDEFULONG,
+  unsigned long i, j, k, step, min_i = UNDEF_ULONG, min_j = UNDEF_ULONG,
                 newclusternum = upgma->num_of_taxa; /* denoted 'l' in script */
   double mindist;
   Bittab *clustertab;
@@ -162,7 +162,7 @@ static void upgma_show_node(const UPGMA *upgma, unsigned long nodenum,
   /* indent according to level */
   fprintf(fp, "%*s", level * INDENTFACTOR, "");
   fprintf(fp, "%lu, %.4f\n", nodenum, upgma->clusters[nodenum].height);
-  if (upgma->clusters[nodenum].leftdaughter != UNDEFULONG) {
+  if (upgma->clusters[nodenum].leftdaughter != UNDEF_ULONG) {
     /* in this case the node has always two daughters, show them recursively */
     upgma_show_node(upgma, upgma->clusters[nodenum].leftdaughter, level+1, fp);
     upgma_show_node(upgma, upgma->clusters[nodenum].rightdaughter, level+1, fp);

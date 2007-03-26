@@ -51,16 +51,16 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
     /* enforce maximum gene length */
     /* XXX: we (spuriously) assume that genes are always root nodes */
     if (gf && genome_feature_get_type(gf) == gft_gene) {
-      if (fv->max_gene_length != UNDEFULONG &&
+      if (fv->max_gene_length != UNDEF_ULONG &&
           range_length(genome_node_get_range((GenomeNode*) gf)) >
           fv->max_gene_length) {
         filter_node = true;
       }
-      else if (fv->max_gene_num != UNDEFULONG &&
+      else if (fv->max_gene_num != UNDEF_ULONG &&
                fv->gene_num >= fv->max_gene_num) {
         filter_node = true;
       }
-      else if (fv->min_gene_score != UNDEFDOUBLE &&
+      else if (fv->min_gene_score != UNDEF_DOUBLE &&
                genome_feature_get_score(gf) < fv->min_gene_score) {
         filter_node = true;
       }

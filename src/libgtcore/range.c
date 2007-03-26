@@ -273,8 +273,8 @@ static Array* generic_ranges_uniq(Array *out_ranges, const Array *in_ranges,
 {
   unsigned long i, *ctr_ptr, ctr = 1;
   Array *count_array = NULL;
-  Range cur  = { UNDEFULONG, UNDEFULONG },
-        prev = { UNDEFULONG, UNDEFULONG };
+  Range cur  = { UNDEF_ULONG, UNDEF_ULONG },
+        prev = { UNDEF_ULONG, UNDEF_ULONG };
   assert(out_ranges && in_ranges);
   assert(ranges_are_sorted(in_ranges));
   if (count)

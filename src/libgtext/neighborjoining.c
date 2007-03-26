@@ -34,15 +34,15 @@ static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
 
   nj->num_of_taxa  = num_of_taxa;
   nj->numofnodes = 2 * num_of_taxa - 2;
-  nj->finalnodeA = UNDEFULONG;
-  nj->finalnodeB = UNDEFULONG;
+  nj->finalnodeA = UNDEF_ULONG;
+  nj->finalnodeB = UNDEF_ULONG;
   nj->nodes      = env_ma_malloc(env, sizeof (NJnode) * nj->numofnodes);
 
   for (i = 0; i < nj->numofnodes; i++) {
-    nj->nodes[i].leftdaughter  = UNDEFULONG;
-    nj->nodes[i].rightdaughter = UNDEFULONG;
-    nj->nodes[i].leftdist      = UNDEFDOUBLE;
-    nj->nodes[i].rightdist     = UNDEFDOUBLE;
+    nj->nodes[i].leftdaughter  = UNDEF_ULONG;
+    nj->nodes[i].rightdaughter = UNDEF_ULONG;
+    nj->nodes[i].leftdist      = UNDEF_DOUBLE;
+    nj->nodes[i].rightdist     = UNDEF_DOUBLE;
 
     if (i > 0) {
       nj->nodes[i].distances = env_ma_malloc(env, sizeof (double) * i);
@@ -54,7 +54,7 @@ static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
           nj->nodes[i].distances[j] = retval;
         }
         else
-          nj->nodes[i].distances[j] = UNDEFDOUBLE;
+          nj->nodes[i].distances[j] = UNDEF_DOUBLE;
       }
     }
   }
@@ -92,7 +92,7 @@ static void updatertab(double *rtab, Bittab *nodetab, unsigned long activenodes,
 
 static void neighborjoining_compute(NeighborJoining *nj, Env *env)
 {
-  unsigned long i, j, min_i = UNDEFULONG, min_j = UNDEFULONG, step,
+  unsigned long i, j, min_i = UNDEF_ULONG, min_j = UNDEF_ULONG, step,
                 newnodenum = nj->num_of_taxa,
                 activenodes; /* |L| */
   Bittab *nodetab; /* L */
@@ -129,8 +129,8 @@ static void neighborjoining_compute(NeighborJoining *nj, Env *env)
     }
 
     /* add new node to L and remove the daughters */
-    assert(min_i != UNDEFULONG);
-    assert(min_j != UNDEFULONG);
+    assert(min_i != UNDEF_ULONG);
+    assert(min_j != UNDEF_ULONG);
     bittab_set_bit(nodetab, newnodenum);
     bittab_unset_bit(nodetab, min_i);
     bittab_unset_bit(nodetab, min_j);
@@ -190,9 +190,9 @@ static void neighborjoining_show_node(const NeighborJoining *nj,
           leftdaughter , nj->nodes[nodenum].leftdist);
   fprintf(fp, "edge from node %lu to node %lu with distance %f\n", nodenum,
           rightdaughter, nj->nodes[nodenum].rightdist);
-  if (nj->nodes[leftdaughter].leftdaughter != UNDEFULONG)
+  if (nj->nodes[leftdaughter].leftdaughter != UNDEF_ULONG)
     neighborjoining_show_node(nj, leftdaughter, fp);
-  if (nj->nodes[rightdaughter].leftdaughter != UNDEFULONG)
+  if (nj->nodes[rightdaughter].leftdaughter != UNDEF_ULONG)
     neighborjoining_show_node(nj, rightdaughter, fp);
 }
 
@@ -201,9 +201,9 @@ void neighborjoining_show_tree(const NeighborJoining *nj, FILE *fp)
   assert(nj);
   fprintf(fp, "edge from node %lu to node %lu with distance %f\n",
           nj->finalnodeA, nj->finalnodeB, nj->finaldist);
-  if (nj->nodes[nj->finalnodeA].leftdaughter != UNDEFULONG)
+  if (nj->nodes[nj->finalnodeA].leftdaughter != UNDEF_ULONG)
     neighborjoining_show_node(nj, nj->finalnodeA, fp);
-  if (nj->nodes[nj->finalnodeB].leftdaughter != UNDEFULONG)
+  if (nj->nodes[nj->finalnodeB].leftdaughter != UNDEF_ULONG)
     neighborjoining_show_node(nj, nj->finalnodeB, fp);
 }
 

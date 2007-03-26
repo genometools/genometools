@@ -53,7 +53,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
   MergeStream *ms;
   GenomeNode *min_node = NULL;
-  unsigned long i, j, min_i = UNDEFULONG;
+  unsigned long i, j, min_i = UNDEF_ULONG;
   unsigned int genome_node_consolidated;
   int has_err = 0;
 
@@ -96,14 +96,14 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   if (!has_err) {
     for (i = 0; i < array_size(ms->genome_streams); i++) {
       if (ms->buffer[i]) {
-        if (min_i != UNDEFULONG) {
+        if (min_i != UNDEF_ULONG) {
           if (genome_node_compare(ms->buffer + i, ms->buffer + min_i) < 0)
             min_i = i;
         }
         else min_i = i;
       }
     }
-    if (min_i != UNDEFULONG) {
+    if (min_i != UNDEF_ULONG) {
       min_node = ms->buffer[min_i];
       ms->buffer[min_i] = NULL;
     }

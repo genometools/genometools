@@ -204,14 +204,14 @@ unsigned long bittab_size(Bittab *b)
 
 unsigned long bittab_get_first_bitnum(const Bittab *b)
 {
-  unsigned long i, rval = UNDEFULONG;
+  unsigned long i, rval = UNDEF_ULONG;
   assert(b);
   for (i = 0; i < b->num_of_bits; i++)
     if (bittab_bit_is_set(b, i)) {
       rval = i;
       break;
     }
-  if (rval == UNDEFULONG)
+  if (rval == UNDEF_ULONG)
     return b->num_of_bits;
   return rval;
 }
@@ -224,7 +224,7 @@ unsigned long bittab_get_last_bitnum(const Bittab *b)
 
 unsigned long bittab_get_next_bitnum(const Bittab *b, unsigned long curnum)
 {
-  unsigned long i, rval = UNDEFULONG;
+  unsigned long i, rval = UNDEF_ULONG;
 
   assert(b);
   assert(curnum < b->num_of_bits);
@@ -233,7 +233,7 @@ unsigned long bittab_get_next_bitnum(const Bittab *b, unsigned long curnum)
       rval = i;
       break;
     }
-  if (rval == UNDEFULONG)
+  if (rval == UNDEF_ULONG)
     return b->num_of_bits;
   return rval;
 }

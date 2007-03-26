@@ -43,7 +43,7 @@ static OPrval parse_options(int *parsed_args, Bioseq_arguments *arguments,
   option_showseqnum = option_new_ulong_min("showseqnum", "show sequence with "
                                            "given number on stdout (in fasta "
                                            "format)", &arguments->showseqnum,
-                                           UNDEFULONG, 1, env);
+                                           UNDEF_ULONG, 1, env);
   option_parser_add_option(op, option_showseqnum, env);
 
   /* -gc-content */
@@ -94,7 +94,7 @@ int gt_bioseq(int argc, const char **argv, Env *env)
   assert(parsed_args < argc);
 
   /* option -showseqnum makes only sense if we got a single sequence file */
-  if (arguments.showseqnum != UNDEFULONG && parsed_args + 1 != argc) {
+  if (arguments.showseqnum != UNDEF_ULONG && parsed_args + 1 != argc) {
     env_error_set(env, "option '-showseqnum' makes only sense with a single "
                    "sequence_file");
     has_err = -1;
@@ -113,7 +113,7 @@ int gt_bioseq(int argc, const char **argv, Env *env)
     if (!has_err && arguments.showfasta)
       bioseq_show_as_fasta(bioseq, arguments.width);
 
-    if (!has_err && arguments.showseqnum != UNDEFULONG) {
+    if (!has_err && arguments.showseqnum != UNDEF_ULONG) {
       if (arguments.showseqnum > bioseq_number_of_sequences(bioseq)) {
         env_error_set(env, "argument '%lu' to option '-showseqnum' is too "
                       "large. The Biosequence contains only '%lu' sequences.",

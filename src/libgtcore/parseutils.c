@@ -19,8 +19,8 @@ int parse_range(Range *range, const char *start, const char *end,
   assert(start && end && line_number && filename);
   env_error_check(env);
 
-  range->start = UNDEFULONG;
-  range->end = UNDEFULONG;
+  range->start = UNDEF_ULONG;
+  range->end = UNDEF_ULONG;
 
   /* parse and check start */
   if ((rval = sscanf(start, "%ld", &start_val)) != 1) {
@@ -69,7 +69,7 @@ int parse_score(double *score_value, const char *score,
   env_error_check(env);
 
   if (strlen(score) == 1 && score[0] == '.')
-    *score_value = UNDEFDOUBLE;
+    *score_value = UNDEF_DOUBLE;
   else if ((rval = sscanf(score, "%lf", score_value)) != 1) {
     env_error_set(env, "could not parse score '%s' on line %lu in file '%s'",
               score, line_number, filename);

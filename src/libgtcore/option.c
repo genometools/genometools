@@ -267,14 +267,14 @@ static int show_help(OptionParser *op, bool show_development_options,
       }
       else if (option->option_type == OPTION_LONG) {
         printf("%*s  default: ", (int) max_option_length, "");
-        if (option->default_value.ul == UNDEFLONG)
+        if (option->default_value.ul == UNDEF_LONG)
           xputs("undefined");
         else
           printf("%ld\n", option->default_value.l);
       }
       else if (option->option_type == OPTION_ULONG) {
         printf("%*s  default: ", (int) max_option_length, "");
-        if (option->default_value.ul == UNDEFULONG)
+        if (option->default_value.ul == UNDEF_ULONG)
           xputs("undefined");
         else
           printf("%lu\n", option->default_value.ul);
@@ -702,7 +702,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
     argnum++;
 
   /* check for minimum number of additional arguments, if necessary */
-  if (!has_err && min_additional_arguments != UNDEFUINT &&
+  if (!has_err && min_additional_arguments != UNDEF_UINT &&
       argc - argnum < min_additional_arguments) {
     env_error_set(env, "missing argument\nUsage: %s %s", op->progname,
               op->synopsis);
@@ -710,7 +710,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   }
 
   /* check for maximal number of additional arguments, if necessary */
-  if (!has_err && max_additional_arguments != UNDEFUINT &&
+  if (!has_err && max_additional_arguments != UNDEF_UINT &&
       argc - argnum > max_additional_arguments) {
     env_error_set(env, "superfluous argument \"%s\"\nUsage: %s %s",
               argv[argnum + max_additional_arguments],
@@ -741,7 +741,7 @@ OPrval option_parser_parse(OptionParser *op, int *parsed_args, int argc,
                            Env *env)
 {
   env_error_check(env);
-  return parse(op, parsed_args, argc, argv, versionfunc, UNDEFUINT, UNDEFUINT,
+  return parse(op, parsed_args, argc, argv, versionfunc, UNDEF_UINT, UNDEF_UINT,
                env);
 }
 
@@ -753,7 +753,7 @@ OPrval option_parser_parse_min_args(OptionParser *op, int *parsed_args,
 {
   env_error_check(env);
   return parse(op, parsed_args, argc, argv, versionfunc,
-               min_additional_arguments, UNDEFUINT, env);
+               min_additional_arguments, UNDEF_UINT, env);
 }
 
 OPrval option_parser_parse_max_args(OptionParser *op, int *parsed_args,
@@ -763,7 +763,7 @@ OPrval option_parser_parse_max_args(OptionParser *op, int *parsed_args,
                                     Env *env)
 {
   env_error_check(env);
-  return parse(op, parsed_args, argc, argv, versionfunc, UNDEFUINT,
+  return parse(op, parsed_args, argc, argv, versionfunc, UNDEF_UINT,
                max_additional_arguments, env);
 }
 

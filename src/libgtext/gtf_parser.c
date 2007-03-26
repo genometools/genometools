@@ -429,7 +429,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       assert(source_str);
       genome_node_set_source(gn, source_str);
 
-      if (score_value != UNDEFDOUBLE)
+      if (score_value != UNDEF_DOUBLE)
         genome_feature_set_score((GenomeFeature*) gn, score_value);
       if (phase_value != PHASE_UNDEFINED)
         genome_node_set_phase(gn, phase_value);

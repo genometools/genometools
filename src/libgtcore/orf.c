@@ -19,9 +19,9 @@ void determine_ORFs(Array *ranges, unsigned int framenum,
   unsigned long i;
   Range orf;
   assert(ranges && framenum < 3 && frame);
-  orf.start = UNDEFULONG;
+  orf.start = UNDEF_ULONG;
   for (i = 0; i < framelen; i++) {
-    if (orf.start == UNDEFULONG) {
+    if (orf.start == UNDEF_ULONG) {
       if (frame[i] == START_AMINO)
         orf.start = i * CODONLENGTH + framenum;
     }
@@ -29,7 +29,7 @@ void determine_ORFs(Array *ranges, unsigned int framenum,
       if (frame[i] == STOP_AMINO) {
         orf.end = i * CODONLENGTH + framenum + 2;
         array_add(ranges, orf, env);
-        orf.start = UNDEFULONG;
+        orf.start = UNDEF_ULONG;
       }
     }
   }

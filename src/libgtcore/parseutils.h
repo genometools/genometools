@@ -16,7 +16,7 @@
 int parse_range(Range*, const char *start, const char *end,
                 unsigned long line_number, const char *filename, Env*);
 
-/* sets 'score_value' to UNDEFDOUBLE if strcmp(score, ".") == 0 */
+/* sets 'score_value' to UNDEF_DOUBLE if strcmp(score, ".") == 0 */
 int parse_score(double *score_value, const char *score,
                 unsigned long line_number, const char *filename, Env*);
 

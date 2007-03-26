@@ -10,12 +10,12 @@
 #include <float.h>
 #include <limits.h>
 
-#define UNDEFCHAR       CHAR_MAX
-#define UNDEFDOUBLE     DBL_MAX
-#define UNDEFINT        ~0
-#define UNDEFUCHAR      UCHAR_MAX
-#define UNDEFUINT       ~0U
-#define UNDEFLONG       ~0L
-#define UNDEFULONG      ~0UL
+#define UNDEF_CHAR       CHAR_MAX
+#define UNDEF_DOUBLE     DBL_MAX
+#define UNDEF_INT        ~0
+#define UNDEF_UCHAR      UCHAR_MAX
+#define UNDEF_UINT       ~0U
+#define UNDEF_LONG       ~0L
+#define UNDEF_ULONG      ~0UL
 
 #endif
