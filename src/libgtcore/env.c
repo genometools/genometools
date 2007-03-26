@@ -86,6 +86,12 @@ MA* env_ma(const Env *env)
   return env->ma;
 }
 
+FA* env_fa(const Env *env)
+{
+  assert(env && env->fa);
+  return env->fa;
+}
+
 Error* env_error(const Env *env)
 {
   assert(env);
@@ -128,6 +134,34 @@ void env_ma_free_func(void *ptr, Env *env)
   assert(env);
   if (!ptr) return;
   ma_free(ptr, env_ma(env));
+}
+
+void env_fa_xfclose(FILE *stream, Env *env)
+{
+  assert(env);
+  if (!stream) return;
+  fa_xfclose(stream, env_fa(env));
+}
+
+void env_fa_xgzclose(gzFile stream, Env *env)
+{
+  assert(env);
+  if (!stream) return;
+  fa_xgzclose(stream, env_fa(env));
+}
+
+void env_fa_xbzclose(BZFILE *stream, Env *env)
+{
+  assert(env);
+  if (!stream) return;
+  fa_xbzclose(stream, env_fa(env));
+}
+
+void env_fa_munmap(void *addr, Env *env)
+{
+  assert(env);
+  if (!addr) return;
+  fa_munmap(addr, env_fa(env));
 }
 
 void env_error_set(Env *env, const char *format, ...)

@@ -40,7 +40,9 @@ int    xmkstemp(char *template);
 /* low level wrappers for the mmap() and munmap() routines */
 void*  xmmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset);
 /* high level routine for memory mapping of files (read only) */
-void*  xmap_read(const char *filename, size_t *len);
+void*  xmap_read(const char *path, size_t *len);
+/* high level routine for memory mapping of files (write only) */
+void*  xmap_write(const char *path, size_t *len);
 /* generic unmapping routine */
 void   xmunmap(void *addr, size_t len);
 void   xraise(int sig);

@@ -98,17 +98,30 @@ void* xmmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset)
   return map;
 }
 
-void* xmap_read(const char *filename, size_t *len)
+static void *xmap_generic(const char *path, size_t *len, int prot)
 {
   int fd;
   struct stat sb;
   void *map;
-  assert(filename && len);
-  fd = xopen(filename, O_RDONLY, 0);
+  assert(path && len);
+  fd = xopen(path, O_RDONLY, 0);
   xfstat(fd, &sb);
-  map = xmmap(0, sb.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
+  map = xmmap(0, sb.st_size, prot, MAP_PRIVATE, fd, 0);
   *len = sb.st_size;
+  xclose(fd);
   return map;
+}
+
+void* xmap_read(const char *path, size_t *len)
+{
+  assert(path && len);
+  return xmap_generic(path, len, PROT_READ);
+}
+
+void* xmap_write(const char *path, size_t *len)
+{
+  assert(path && len);
+  return xmap_generic(path, len, PROT_WRITE);
 }
 
 void xmunmap(void *addr, size_t len)

@@ -4,8 +4,13 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#include <libgtcore/genfile.h>
 #include <libgtcore/hashtable.h>
 #include <libgtcore/fa.h>
+#include <libgtcore/xansi.h>
+#include <libgtcore/xbzlib.h>
+#include <libgtcore/xtmpfile.h>
+#include <libgtcore/xzlib.h>
 
 /* the file allocator class */
 struct FA {
@@ -50,6 +55,158 @@ FA* fa_new(Env *env)
                                   (FreeFunc) free_FAMapInfo, env);
   fa->env = env;
   return fa;
+}
+
+static void* fileopen_generic(FA *fa, const char *path, const char *mode,
+                              GenFileMode genfilemode, bool x,
+                              const char *filename, unsigned int line)
+{
+  void  *fp;
+  FAFileInfo *fileinfo;
+  assert(fa && path && mode);
+  fileinfo = env_ma_malloc(fa->env, sizeof (FAFileInfo));
+  fileinfo->filename = filename;
+  fileinfo->line = line;
+  switch (genfilemode) {
+    case GFM_UNCOMPRESSED:
+      fp = x ? xfopen(path, mode) : fopen(path, mode);
+      break;
+    case GFM_GZIP:
+      fp = x ? xgzopen(path, mode) : gzopen(path, mode);
+      break;
+    case GFM_BZIP2:
+      fp = x ? xbzopen(path, mode) : BZ2_bzopen(path, mode);
+      break;
+    default: assert(0);
+  }
+  if (fp)
+    hashtable_add(fa->file_pointer, fp, fileinfo, fa->env);
+  else
+    env_ma_free(fileinfo, fa->env);
+  return fp;
+}
+
+static void xfclose_generic(void *stream, GenFileMode genfilemode, FA *fa)
+{
+  FAFileInfo *fileinfo;
+  assert(stream && fa);
+  fileinfo = hashtable_get(fa->file_pointer, stream);
+  assert(fileinfo);
+  hashtable_remove(fa->file_pointer, stream, fa->env);
+  switch (genfilemode) {
+    case GFM_UNCOMPRESSED:
+      xfclose(stream);
+      break;
+    case GFM_GZIP:
+      xgzclose(stream);
+      break;
+    case GFM_BZIP2:
+      BZ2_bzclose(stream);
+      break;
+    default: assert(0);
+  }
+}
+
+FILE* fa_fopen(FA *fa, const char *path, const char *mode,
+               const char *filename, unsigned int line)
+{
+  assert(fa && path && mode);
+  return fileopen_generic(fa, path, mode, GFM_UNCOMPRESSED, false, filename,
+                          line);
+}
+
+FILE* fa_xfopen(FA *fa, const char *path, const char *mode,
+                const char *filename, unsigned int line)
+{
+  assert(fa && path && mode);
+  return fileopen_generic(fa, path, mode, GFM_UNCOMPRESSED, true, filename,
+                          line);
+}
+
+void fa_xfclose(FILE *stream, FA *fa)
+{
+  assert(fa);
+  if (!stream) return;
+  xfclose_generic(stream, GFM_UNCOMPRESSED, fa);
+}
+
+gzFile fa_gzopen(FA *fa, const char *path, const char *mode,
+                 const char *filename, unsigned int line)
+{
+  assert(fa && path && mode);
+  return fileopen_generic(fa, path, mode, GFM_GZIP, false, filename, line);
+}
+
+gzFile fa_xgzopen(FA *fa, const char *path, const char *mode,
+                   const char *filename, unsigned int line)
+{
+  assert(fa && path && mode);
+  return fileopen_generic(fa, path, mode, GFM_GZIP, true, filename, line);
+}
+
+void fa_xgzclose(gzFile stream, FA *fa)
+{
+  assert(fa);
+  if (!stream) return;
+  xfclose_generic(stream, GFM_GZIP, fa);
+}
+
+BZFILE* fa_bzopen(FA *fa, const char *path, const char *mode,
+                  const char *filename, unsigned int line)
+{
+  assert(fa && path && mode);
+  return fileopen_generic(fa, path, mode, GFM_BZIP2, false, filename, line);
+
+}
+
+BZFILE* fa_xbzopen(FA *fa, const char *path, const char *mode,
+                   const char *filename, unsigned int line)
+{
+  assert(fa && path && mode);
+  return fileopen_generic(fa, path, mode, GFM_BZIP2, true, filename, line);
+}
+
+void fa_xbzclose(BZFILE *stream, FA *fa)
+{
+  assert(fa);
+  if (!stream) return;
+  xfclose_generic(stream, GFM_BZIP2, fa);
+}
+
+FILE* fa_xtmpfile(FA *fa, char *template,
+                  const char *filename, unsigned int line)
+{
+  FAFileInfo *fileinfo;
+  FILE *fp;
+  assert(fa && template);
+  fileinfo = env_ma_malloc(fa->env, sizeof (FAFileInfo));
+  fileinfo->filename = filename;
+  fileinfo->line = line;
+  fp = xtmpfile(template);
+  assert(fp);
+  hashtable_add(fa->file_pointer, fp, fileinfo, fa->env);
+  return fp;
+}
+
+void* fa_map_read(FA *fa, const char *path, size_t *len,
+                  const char *filename, unsigned int line)
+{
+  assert(fa && path);
+  assert(0); /* XXX */
+}
+
+void* fa_map_write(FA *fa, const char *path, size_t *len,
+                   const char *filename, unsigned int line)
+{
+  assert(fa && path);
+  assert(0); /* XXX */
+}
+
+void fa_munmap(void *addr, FA *fa)
+{
+  assert(fa);
+  if (!addr) return;
+  assert(0); /* XXX */
 }
 
 static int check_fptr_leak(void *key, void *value, void *data, Env *env)
