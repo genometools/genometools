@@ -108,6 +108,8 @@ Option*        option_new_string(const char *option_str,
 void           option_is_mandatory(Option*);
 void           option_is_mandatory_either(Option*, const Option*);
 void           option_is_extended_option(Option *o);
+/* if this function was called, <o> is only shown in the output of -help+ */
+void           option_is_extended_option(Option *o);
 /* if this function was called, <o> is only shown in the output of -helpdev */
 void           option_is_development_option(Option *o);
 void           option_imply(Option*, const Option*, Env*);

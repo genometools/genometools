@@ -21,6 +21,7 @@ typedef enum {
   OPTION_BOOL,
   OPTION_DOUBLE,
   OPTION_HELP,
+  OPTION_HELPPLUS,
   OPTION_HELPDEV,
   OPTION_OUTPUTFILE,
   OPTION_INT,
@@ -70,6 +71,7 @@ struct Option {
        hide_default,
        min_value_set,
        max_value_set,
+       is_extended_option,
        is_development_option,
        argument_is_optional;
   Array *implications, /* contains option arrays, from each array at least one
@@ -89,11 +91,26 @@ static Option *option_new(const char *option_str, const char *description,
   return o;
 }
 
-static Option* option_new_help(Env *env)
+static Option* option_new_help(bool has_extended_options, Env *env)
 {
-  Option *o = option_new("help", "display help and exit", NULL, env);
+  Option *o;
+  if (has_extended_options) {
+    o = option_new("help", "display help for basic options and exit", NULL,
+                   env);
+  }
+  else
+    o = option_new("help", "display help and exit", NULL, env);
   o->option_type = OPTION_HELP;
-  o->default_value.b = 0;
+  o->default_value.b = false;
+  return o;
+}
+
+static Option* option_new_helpplus(Env *env)
+{
+  Option *o = option_new("help+", "display help for all options and exit", NULL,
+                         env);
+  o->option_type = OPTION_HELPPLUS;
+  o->default_value.b = false;
   return o;
 }
 
@@ -214,28 +231,37 @@ static void show_long_description(unsigned long initial_space,
   xputchar('\n');
 }
 
-static int show_help(OptionParser *op, bool show_development_options,
-                     Env *env)
+static int show_help(OptionParser *op, Option_type optiontype, Env *env)
 {
   unsigned long i, max_option_length = 0;
   Option *option;
   int has_err = 0;
   env_error_check(env);
+  assert(optiontype == OPTION_HELP || optiontype == OPTION_HELPPLUS ||
+         optiontype == OPTION_HELPDEV);
 
   /* determine maximum option length */
   for (i = 0; i < array_size(op->options); i++) {
     option = *(Option**) array_get(op->options, i);
+    /* skip option if necessary */
+    if ((optiontype == OPTION_HELP && option->is_extended_option) ||
+        (optiontype == OPTION_HELPDEV && !option->is_development_option) ||
+        (!(optiontype == OPTION_HELPDEV) && option->is_development_option)) {
+      continue;
+    }
     if (str_length(option->option_str) > max_option_length)
       max_option_length = str_length(option->option_str);
   }
+  assert(max_option_length);
 
   printf("Usage: %s %s\n", op->progname, op->synopsis);
   printf("%s\n\n", op->one_liner);
   for (i = 0; i < array_size(op->options); i++) {
     option = *(Option**) array_get(op->options, i);
     /* skip option if necessary */
-    if ((show_development_options && !option->is_development_option) ||
-        (!show_development_options && option->is_development_option)) {
+    if ((optiontype == OPTION_HELP && option->is_extended_option) ||
+        (optiontype == OPTION_HELPDEV && !option->is_development_option) ||
+        (!(optiontype == OPTION_HELPDEV) && option->is_development_option)) {
       continue;
     }
     printf("-%s%*s ", str_get(option->option_str),
@@ -436,6 +462,19 @@ static int check_mandatory_either_options(OptionParser *op, Env *env)
   return 0;
 }
 
+static bool has_extended_option(Array *options)
+{
+  unsigned long i;
+  Option *option;
+  assert(options);
+  for (i = 0; i < array_size(options); i++) {
+    option = *(Option**) array_get(options, i);
+    if (option->is_extended_option)
+      return true;
+  }
+  return false;
+}
+
 static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                     const char **argv,
                     ShowVersionFunc versionfunc,
@@ -446,7 +485,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   unsigned long i;
   double double_value;
   Option *option;
-  bool option_parsed;
+  bool has_extended_options, option_parsed;
   long long_value;
   int has_err = 0;
 
@@ -457,8 +496,13 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   op->progname = cstr_dup(argv[0], env);
 
   /* add common options */
-  option = option_new_help(env);
+  has_extended_options = has_extended_option(op->options);
+  option = option_new_help(has_extended_options, env);
   option_parser_add_option(op, option, env);
+  if (has_extended_options) {
+    option = option_new_helpplus(env);
+    option_parser_add_option(op, option, env);
+  }
   option = option_new_helpdev(env);
   option_parser_add_option(op, option, env);
   option = option_new_version(versionfunc, env);
@@ -528,11 +572,15 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
               }
               break;
             case OPTION_HELP:
-              if (show_help(op, false, env))
+              if (show_help(op, OPTION_HELP, env))
+                return OPTIONPARSER_ERROR;
+              return OPTIONPARSER_REQUESTS_EXIT;
+            case OPTION_HELPPLUS:
+              if (show_help(op, OPTION_HELPPLUS, env))
                 return OPTIONPARSER_ERROR;
               return OPTIONPARSER_REQUESTS_EXIT;
             case OPTION_HELPDEV:
-              if (show_help(op, true, env))
+              if (show_help(op, OPTION_HELPDEV, env))
                 return OPTIONPARSER_ERROR;
               return OPTIONPARSER_REQUESTS_EXIT;
             case OPTION_OUTPUTFILE:
@@ -941,6 +989,12 @@ void option_is_mandatory_either(Option *o, const Option *meo)
   assert(o && meo);
   assert(!o->mandatory_either_option);
   o->mandatory_either_option = meo;
+}
+
+void option_is_extended_option(Option *o)
+{
+  assert(o);
+  o->is_extended_option = true;
 }
 
 void option_is_development_option(Option *o)
