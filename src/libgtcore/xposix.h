@@ -37,12 +37,9 @@ void   xglob(const char *pattern, int flags,
              int (*errfunc)(const char*, int), glob_t *pglob);
 int    xopen(const char *path, int flags, mode_t mode);
 int    xmkstemp(char *template);
-/* low level wrappers for the mmap() and munmap() routines */
+/* low level wrappers for the mmap() and munmap() routines, see mmap.h for high
+   level routines */
 void*  xmmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset);
-/* high level routine for memory mapping of files (read only) */
-void*  xmap_read(const char *path, size_t *len);
-/* high level routine for memory mapping of files (write only) */
-void*  xmap_write(const char *path, size_t *len);
 /* generic unmapping routine */
 void   xmunmap(void *addr, size_t len);
 void   xraise(int sig);

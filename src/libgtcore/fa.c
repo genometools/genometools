@@ -7,6 +7,7 @@
 #include <libgtcore/genfile.h>
 #include <libgtcore/hashtable.h>
 #include <libgtcore/fa.h>
+#include <libgtcore/mmap.h>
 #include <libgtcore/xansi.h>
 #include <libgtcore/xbzlib.h>
 #include <libgtcore/xposix.h>
@@ -189,8 +190,8 @@ FILE* fa_xtmpfile(FA *fa, char *template,
   return fp;
 }
 
-static void* xmap_generic(FA *fa, const char *path, size_t *len, bool write,
-                          const char *filename, unsigned int line)
+static void* mmap_generic(FA *fa, const char *path, size_t *len, bool write,
+                          bool x, const char *filename, unsigned int line)
 {
   FAMapInfo *mapinfo;
   void *map;
@@ -198,29 +199,48 @@ static void* xmap_generic(FA *fa, const char *path, size_t *len, bool write,
   mapinfo = env_ma_malloc(fa->env, sizeof (FAMapInfo));
   mapinfo->filename = filename;
   mapinfo->line = line;
-  if (write)
-    map = xmap_write(path, &mapinfo->len);
+  if (write) {
+    map = x ? xmmap_write(path, &mapinfo->len)
+            : mmap_write(path, &mapinfo->len);
+  }
   else
-    map = xmap_read(path, &mapinfo->len);
-  assert(map);
-  hashtable_add(fa->memory_maps, map, mapinfo, fa->env);
-  if (len)
-    *len = mapinfo->len;
+    map = x ? xmmap_read(path, &mapinfo->len) : mmap_read(path, &mapinfo->len);
+  if (map) {
+    hashtable_add(fa->memory_maps, map, mapinfo, fa->env);
+    if (len)
+      *len = mapinfo->len;
+  }
+  else
+    env_ma_free(mapinfo, fa->env);
   return map;
 }
 
-void* fa_xmap_read(FA *fa, const char *path, size_t *len,
-                  const char *filename, unsigned int line)
-{
-  assert(fa && path);
-  return xmap_generic(fa, path, len, false, filename, line);
-}
-
-void* fa_xmap_write(FA *fa, const char *path, size_t *len,
+void* fa_mmap_read(FA *fa, const char *path, size_t *len,
                    const char *filename, unsigned int line)
 {
   assert(fa && path);
-  return xmap_generic(fa, path, len, true, filename, line);
+  return mmap_generic(fa, path, len, false, false, filename, line);
+}
+
+void* fa_mmap_write(FA *fa, const char *path, size_t *len,
+                    const char *filename, unsigned int line)
+{
+  assert(fa && path);
+  return mmap_generic(fa, path, len, true, false, filename, line);
+}
+
+void* fa_xmmap_read(FA *fa, const char *path, size_t *len,
+                    const char *filename, unsigned int line)
+{
+  assert(fa && path);
+  return mmap_generic(fa, path, len, false, true, filename, line);
+}
+
+void* fa_xmmap_write(FA *fa, const char *path, size_t *len,
+                     const char *filename, unsigned int line)
+{
+  assert(fa && path);
+  return mmap_generic(fa, path, len, true, true, filename, line);
 }
 
 void fa_xmunmap(void *addr, FA *fa)

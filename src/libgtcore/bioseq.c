@@ -162,8 +162,8 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
     /* the number of descriptions equals the number of sequence ranges */
     assert(array_size(bs->descriptions) == array_size(bs->sequence_ranges));
     /* map the raw file */
-    bs->raw_sequence = env_fa_xmap_read(env, raw_filename,
-                                        &bs->raw_sequence_length);
+    bs->raw_sequence = env_fa_xmmap_read(env, raw_filename,
+                                         &bs->raw_sequence_length);
   }
 
   env_fa_xfclose(index_file, env);
