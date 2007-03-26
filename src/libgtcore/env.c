@@ -157,11 +157,11 @@ void env_fa_xbzclose(BZFILE *stream, Env *env)
   fa_xbzclose(stream, env_fa(env));
 }
 
-void env_fa_munmap(void *addr, Env *env)
+void env_fa_xmunmap(void *addr, Env *env)
 {
   assert(env);
   if (!addr) return;
-  fa_munmap(addr, env_fa(env));
+  fa_xmunmap(addr, env_fa(env));
 }
 
 void env_error_set(Env *env, const char *format, ...)

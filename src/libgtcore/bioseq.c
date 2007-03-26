@@ -162,7 +162,8 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
     /* the number of descriptions equals the number of sequence ranges */
     assert(array_size(bs->descriptions) == array_size(bs->sequence_ranges));
     /* map the raw file */
-    bs->raw_sequence = xmap_read(raw_filename, &bs->raw_sequence_length);
+    bs->raw_sequence = env_fa_xmap_read(env, raw_filename,
+                                        &bs->raw_sequence_length);
   }
 
   env_fa_xfclose(index_file, env);
@@ -401,7 +402,7 @@ void bioseq_delete(Bioseq *bs, Env *env)
   if (bs->use_stdin)
     env_ma_free(bs->raw_sequence, env);
   else
-    xmunmap(bs->raw_sequence, bs->raw_sequence_length);
+    env_fa_xmunmap(bs->raw_sequence, env);
   alpha_delete(bs->alpha, env);
   env_ma_free(bs, env);
 }

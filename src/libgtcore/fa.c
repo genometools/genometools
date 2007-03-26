@@ -9,6 +9,7 @@
 #include <libgtcore/fa.h>
 #include <libgtcore/xansi.h>
 #include <libgtcore/xbzlib.h>
+#include <libgtcore/xposix.h>
 #include <libgtcore/xtmpfile.h>
 #include <libgtcore/xzlib.h>
 
@@ -188,25 +189,49 @@ FILE* fa_xtmpfile(FA *fa, char *template,
   return fp;
 }
 
-void* fa_map_read(FA *fa, const char *path, size_t *len,
+static void* xmap_generic(FA *fa, const char *path, size_t *len, bool write,
+                          const char *filename, unsigned int line)
+{
+  FAMapInfo *mapinfo;
+  void *map;
+  assert(fa && path);
+  mapinfo = env_ma_malloc(fa->env, sizeof (FAMapInfo));
+  mapinfo->filename = filename;
+  mapinfo->line = line;
+  if (write)
+    map = xmap_write(path, &mapinfo->len);
+  else
+    map = xmap_read(path, &mapinfo->len);
+  assert(map);
+  hashtable_add(fa->memory_maps, map, mapinfo, fa->env);
+  if (len)
+    *len = mapinfo->len;
+  return map;
+}
+
+void* fa_xmap_read(FA *fa, const char *path, size_t *len,
                   const char *filename, unsigned int line)
 {
   assert(fa && path);
-  assert(0); /* XXX */
+  return xmap_generic(fa, path, len, false, filename, line);
 }
 
-void* fa_map_write(FA *fa, const char *path, size_t *len,
+void* fa_xmap_write(FA *fa, const char *path, size_t *len,
                    const char *filename, unsigned int line)
 {
   assert(fa && path);
-  assert(0); /* XXX */
+  return xmap_generic(fa, path, len, true, filename, line);
 }
 
-void fa_munmap(void *addr, FA *fa)
+void fa_xmunmap(void *addr, FA *fa)
 {
+  FAMapInfo *mapinfo;
   assert(fa);
   if (!addr) return;
-  assert(0); /* XXX */
+  mapinfo = hashtable_get(fa->memory_maps, addr);
+  assert(mapinfo);
+  xmunmap(addr, mapinfo->len);
+  hashtable_remove(fa->memory_maps, addr, fa->env);
 }
 
 static int check_fptr_leak(void *key, void *value, void *data, Env *env)

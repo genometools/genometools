@@ -58,11 +58,11 @@ void    env_fa_xbzclose(BZFILE *stream, Env*);
 #define env_fa_xtmpfile(env, template)\
         fa_xtmpfile(env_fa(env), template, __FILE__, __LINE__)
 
-#define env_fa_map_read(env, filename, len)\
-        fa_map_read(env_fa(env), filename, len, __FILE__, __LINE__)
-#define env_fa_map_write(env, filename, len)\
-        fa_map_write(env_fa(env), filename, len, __FILE__, __LINE__)
-void    env_fa_munmap(void *addr, Env*);
+#define env_fa_xmap_read(env, filename, len)\
+        fa_xmap_read(env_fa(env), filename, len, __FILE__, __LINE__)
+#define env_fa_xmap_write(env, filename, len)\
+        fa_xmap_write(env_fa(env), filename, len, __FILE__, __LINE__)
+void    env_fa_xmunmap(void *addr, Env*);
 
 /* wrapper for error functions */
 void    env_error_set(Env*, const char *format, ...)

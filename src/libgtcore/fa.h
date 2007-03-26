@@ -42,11 +42,11 @@ void    fa_xbzclose(BZFILE *stream, FA*);
 FILE*   fa_xtmpfile(FA*, char *template, const char*, unsigned int);
 
 /* memory map functions */
-void*   fa_map_read(FA*, const char *path, size_t *len,
+void*   fa_xmap_read(FA*, const char *path, size_t *len,
                     const char*, unsigned int);
-void*   fa_map_write(FA*, const char *path, size_t *len,
+void*   fa_xmap_write(FA*, const char *path, size_t *len,
                      const char*, unsigned int);
-void    fa_munmap(void *addr, FA*);
+void    fa_xmunmap(void *addr, FA*);
 
 /* check if all allocated file pointer have been released, prints to stderr */
 int     fa_check_fptr_leak(FA*, Env*);
