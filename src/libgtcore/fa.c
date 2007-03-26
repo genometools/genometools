@@ -63,7 +63,7 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
                               GenFileMode genfilemode, bool x,
                               const char *filename, unsigned int line)
 {
-  void  *fp;
+  void  *fp = NULL;
   FAFileInfo *fileinfo;
   assert(fa && path && mode);
   fileinfo = env_ma_malloc(fa->env, sizeof (FAFileInfo));

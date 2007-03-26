@@ -448,7 +448,7 @@ static void advance(struct rnc_source *sp) {
 	int i=0;
 	getv(sp);
 	if(sp->v==q) {getv(sp);
-	  if(sp->v==q) { // triply quoted string
+	  if(sp->v==q) { /* triply quoted string */
 	    triple=1; getv(sp);
 	  } else {
 	    NXT(sp).s[0]='\0'; NXT(sp).sym=SYM_LITERAL; return;

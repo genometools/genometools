@@ -116,16 +116,21 @@ static int bzgetc(BZFILE *bzfile)
 
 int genfile_getc(GenFile *genfile)
 {
+  int c = -1;
   assert(genfile);
   switch (genfile->mode) {
     case GFM_UNCOMPRESSED:
-      return fgetc(genfile->fileptr.file);
+      c = fgetc(genfile->fileptr.file);
+      break;
     case GFM_GZIP:
-      return gzgetc(genfile->fileptr.gzfile);
+      c = gzgetc(genfile->fileptr.gzfile);
+      break;
     case GFM_BZIP2:
-      return bzgetc(genfile->fileptr.bzfile);
+      c = bzgetc(genfile->fileptr.bzfile);
+      break;
     default: assert(0);
   }
+  return c;
 }
 
 static int bzputc(BZFILE *bzfile, int c)
@@ -136,17 +141,22 @@ static int bzputc(BZFILE *bzfile, int c)
 
 int genfile_putc(int c, GenFile *genfile)
 {
+  int rval = -1;
   if (!genfile)
     return putc(c, stdout);
   switch (genfile->mode) {
     case GFM_UNCOMPRESSED:
-      return putc(c, genfile->fileptr.file);
+      rval = putc(c, genfile->fileptr.file);
+      break;
     case GFM_GZIP:
-      return gzputc(genfile->fileptr.gzfile, c);
+      rval = gzputc(genfile->fileptr.gzfile, c);
+      break;
     case GFM_BZIP2:
-      return bzputc(genfile->fileptr.bzfile, c);
+      rval = bzputc(genfile->fileptr.bzfile, c);
+      break;
     default: assert(0);
   }
+  return rval;
 }
 
 static int vgzprintf(gzFile file, const char *format, va_list va)
@@ -169,7 +179,7 @@ static int vbzprintf(BZFILE *file, const char *format, va_list va)
 
 static int xvprintf(GenFile *genfile, const char *format, va_list va)
 {
-  int rval;
+  int rval = -1;
 
   if (!genfile) /* implies stdout */
     rval = vfprintf(stdout, format, va);
@@ -203,7 +213,7 @@ void genfile_xprintf(GenFile *genfile, const char *format, ...)
 
 int genfile_xread(GenFile *genfile, void *buf, size_t nbytes)
 {
-  int rval;
+  int rval = -1;
   if (genfile) {
     switch (genfile->mode) {
       case GFM_UNCOMPRESSED:

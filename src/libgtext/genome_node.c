@@ -407,17 +407,21 @@ bool genome_node_direct_children_do_not_overlap(GenomeNode *gn, Env *env)
 
 bool genome_node_is_tree(GenomeNode *gn)
 {
+  bool status = false;
   assert(gn);
   switch (genome_node_info_get_tree_status(&gn->info)) {
     case GENOME_NODE_IS_TREE:
-      return true;
+      status = true;
+      break;
     case GENOME_NODE_IS_NOT_A_TREE:
-      return false;
+      status = false;
+      break;
     case GENOME_NODE_TREE_STATUS_UNDETERMINED:
       /* not implemented, the tree status must have been determined by a
          previous genome_node_traverse_children() invocation */
     default: assert(0);
   }
+  return status;
 }
 
 bool genome_node_tree_is_sorted(GenomeNode **buffer, GenomeNode *current_node,

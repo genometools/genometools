@@ -44,16 +44,21 @@ bool genome_node_info_multiple_parents(GenomeNodeInfo *info)
 
 GenomeNodeTreeStatus genome_node_info_get_tree_status(GenomeNodeInfo *info)
 {
+  GenomeNodeTreeStatus status = GENOME_NODE_TREE_STATUS_UNDETERMINED;
   assert(info);
   switch (*info & TREE_MASK) {
     case TREE_UNDETERMINED:
-      return GENOME_NODE_TREE_STATUS_UNDETERMINED;
+      status = GENOME_NODE_TREE_STATUS_UNDETERMINED;
+      break;
     case TREE_YES:
-      return GENOME_NODE_IS_TREE;
+      status = GENOME_NODE_IS_TREE;
+      break;
     case TREE_NO:
-      return GENOME_NODE_IS_NOT_A_TREE;
+      status = GENOME_NODE_IS_NOT_A_TREE;
+      break;
     default: assert(0);
   }
+  return status;
 }
 
 void genome_node_info_set_tree_status(GenomeNodeInfo *info,
