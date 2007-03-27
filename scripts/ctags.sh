@@ -6,4 +6,4 @@
 #
 
 # make a new tags file
-ctags src/*.[ch] src/libgt/*.[ch] src/lua-5.1.1/src/*.[ch] src/tools/*.[ch]
+ctags src/*.[ch] src/libgtcore/*.[ch] src/libgtext/*.[ch] src/tools/*.[ch]
