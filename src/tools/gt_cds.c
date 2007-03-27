@@ -84,8 +84,9 @@ int gt_cds(int argc, const char **argv, Env *env)
   }
 
   /* create gff3 output stream */
+  /* XXX: replace NULL with proper outfile */
   if (!has_err)
-    gff3_out_stream = gff3_out_stream_new(cds_stream, stdout, env);
+    gff3_out_stream = gff3_out_stream_new(cds_stream, NULL, env);
 
   /* pull the features through the stream and free them afterwards */
   while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&

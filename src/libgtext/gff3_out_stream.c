@@ -45,7 +45,7 @@ const GenomeStreamClass* gff3_out_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* gff3_out_stream_new(GenomeStream *in_stream, FILE *outfp,
+GenomeStream* gff3_out_stream_new(GenomeStream *in_stream, GenFile *outfp,
                                   Env *env)
 {
   GenomeStream *gs = genome_stream_create(gff3_out_stream_class(),

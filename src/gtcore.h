@@ -28,6 +28,7 @@
 #include <libgtcore/minmax.h>        /* min/max module */
 #include <libgtcore/msort.h>         /* msort module */
 #include <libgtcore/option.h>        /* option parser class */
+#include <libgtcore/outputfile.h>    /* outputfile module */
 #include <libgtcore/orf.h>           /* ORF module */
 #include <libgtcore/parseutils.h>    /* parse utilities module */
 #include <libgtcore/phase.h>         /* phase module */

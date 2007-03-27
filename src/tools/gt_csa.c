@@ -11,19 +11,24 @@
 typedef struct {
   bool verbose;
   unsigned long join_length;
-  FILE *outfp;
+  GenFile *outfp;
 } Csa_arguments;
 
 static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
                             int argc, const char **argv, Env *env)
 {
-  OptionParser *op = option_parser_new("[option ...] [GFF3_file]",
-                                       "Replace spliced alignments with "
-                                       "computed consensus spliced "
-                                       "alignments.", env);
+  OptionParser *op;
+  OutputFileInfo *ofi;
   Option *option;
   OPrval oprval;
   env_error_check(env);
+
+  /* init */
+  op = option_parser_new("[option ...] [GFF3_file]",
+                                       "Replace spliced alignments with "
+                                       "computed consensus spliced "
+                                       "alignments.", env);
+  ofi = outputfileinfo_new(env);
 
   /* -join-length */
   option = option_new_ulong("join-length", "set join length for the spliced "
@@ -31,17 +36,19 @@ static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
                             DEFAULT_JOINLENGTH, env);
   option_parser_add_option(op, option, env);
 
-  /* -o */
-  option = option_new_outputfile(&arguments->outfp, env);
-  option_parser_add_option(op, option, env);
-
   /* -v */
   option = option_new_verbose(&arguments->verbose, env);
   option_parser_add_option(op, option, env);
 
-  /* parse */
+  /* output file options */
+  outputfile_register_options(op, &arguments->outfp, ofi, env);
+
+  /* parse options */
   oprval = option_parser_parse_max_args(op, parsed_args, argc, argv,
                                         versionfunc, 1, env);
+
+  /* free */
+  outputfileinfo_delete(ofi, env);
   option_parser_delete(op, env);
 
   return oprval;
@@ -67,7 +74,7 @@ int gt_csa(int argc, const char **argv, Env *env)
   /* create the streams */
   gff3_in_stream  = gff3_in_stream_new_sorted(argv[parsed_args],
                                               arguments.verbose &&
-                                              arguments.outfp != stdout, env);
+                                              arguments.outfp, env);
   csa_stream      = csa_stream_new(gff3_in_stream, arguments.join_length, env);
   gff3_out_stream = gff3_out_stream_new(csa_stream, arguments.outfp, env);
 
@@ -81,8 +88,7 @@ int gt_csa(int argc, const char **argv, Env *env)
   genome_stream_delete(gff3_out_stream, env);
   genome_stream_delete(csa_stream, env);
   genome_stream_delete(gff3_in_stream, env);
-  if (arguments.outfp != stdout)
-    env_fa_xfclose(arguments.outfp, env);
+  genfile_xclose(arguments.outfp, env);
 
   return has_err;
 }

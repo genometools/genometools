@@ -45,11 +45,14 @@ GenFile*    genfile_new(FILE*, Env*);
 GenFileMode genfile_mode(GenFile*);
 
 int         genfile_getc(GenFile*);
-int         genfile_putc(int c, GenFile*);
+int         genfile_putc(int c, GenFile*); /* XXX: remove */
 
 /* printf(3) for generic files */
 void        genfile_xprintf(GenFile*, const char *format, ...)
   __attribute__ ((format (printf, 2, 3)));
+
+void        genfile_xfputc(int c, GenFile*);
+void        genfile_xfputs(const char *str, GenFile*);
 
 /* read up to 'nbytes' and store result in 'buf', returns bytes read or EOF */
 int         genfile_xread(GenFile*, void *buf, size_t nbytes);

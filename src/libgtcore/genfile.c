@@ -133,12 +133,6 @@ int genfile_getc(GenFile *genfile)
   return c;
 }
 
-static int bzputc(BZFILE *bzfile, int c)
-{
-  char cc = (char) c; /* required for big endian systems */
-  return BZ2_bzwrite(bzfile, &cc, 1) == 1 ? cc : -1;
-}
-
 int genfile_putc(int c, GenFile *genfile)
 {
   int rval = -1;
@@ -152,7 +146,7 @@ int genfile_putc(int c, GenFile *genfile)
       rval = gzputc(genfile->fileptr.gzfile, c);
       break;
     case GFM_BZIP2:
-      rval = bzputc(genfile->fileptr.bzfile, c);
+      rval = bzputc(c, genfile->fileptr.bzfile);
       break;
     default: assert(0);
   }
@@ -209,6 +203,42 @@ void genfile_xprintf(GenFile *genfile, const char *format, ...)
     exit(EXIT_FAILURE);
   }
   va_end(va);
+}
+
+void genfile_xfputc(int c, GenFile *genfile)
+{
+  if (!genfile)
+    return xfputc(c, stdout);
+  switch (genfile->mode) {
+    case GFM_UNCOMPRESSED:
+      xfputc(c, genfile->fileptr.file);
+      break;
+    case GFM_GZIP:
+      xgzfputc(c, genfile->fileptr.gzfile);
+      break;
+    case GFM_BZIP2:
+      xbzfputc(c, genfile->fileptr.bzfile);
+      break;
+    default: assert(0);
+  }
+}
+
+void genfile_xfputs(const char *str, GenFile *genfile)
+{
+  if (!genfile)
+    return xfputs(str, stdout);
+  switch (genfile->mode) {
+    case GFM_UNCOMPRESSED:
+      xfputs(str, genfile->fileptr.file);
+      break;
+    case GFM_GZIP:
+      xgzfputs(str, genfile->fileptr.gzfile);
+      break;
+    case GFM_BZIP2:
+      xbzfputs(str, genfile->fileptr.bzfile);
+      break;
+    default: assert(0);
+  }
 }
 
 int genfile_xread(GenFile *genfile, void *buf, size_t nbytes)

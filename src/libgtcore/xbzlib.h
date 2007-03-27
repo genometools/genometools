@@ -16,6 +16,9 @@
 */
 
 BZFILE* xbzopen(const char *path, const char *mode);
+int     bzputc(int, BZFILE*); /* XXX: remove */
+void    xbzfputc(int, BZFILE*);
+void    xbzfputs(const char*, BZFILE*);
         /* returns num of read bytes */
 int     xbzread(BZFILE*, void *buf, unsigned len);
 void    xbzrewind(BZFILE**, const char *orig_path, const char *orig_mode);

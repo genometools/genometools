@@ -47,7 +47,8 @@ int gt_gtf2gff3(int argc, const char **argv, Env *env)
 
   if (!has_err) {
     /* create a gff3 output stream */
-    gff3_out_stream = gff3_out_stream_new(gtf_in_stream, stdout, env);
+    /* XXX: use proper genfile */
+    gff3_out_stream = gff3_out_stream_new(gtf_in_stream, NULL, env);
 
     /* pull the features through the stream and free them afterwards */
     while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&

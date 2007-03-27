@@ -56,7 +56,7 @@ end
 Name "gt gff3 test 1.1"
 Keywords "gt_gff3"
 Test do
-  run_test "#{$bin}gt gff3 -o /dev/null -v #{$testdata}gt_gff3_test_1.in"
+  run_test "#{$bin}gt gff3 -o /dev/null -force -v #{$testdata}gt_gff3_test_1.in"
 end
 
 Name "gt gff3 test 1.2"

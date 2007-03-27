@@ -13,19 +13,22 @@ typedef struct {
   unsigned long max_gene_length,
                 max_gene_num;
   double min_gene_score;
-  FILE *outfp;
+  GenFile *outfp;
 } FilterArgumentss;
 
 static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
                             int argc, const char **argv, Env *env)
 {
   OptionParser *op;
+  OutputFileInfo *ofi;
   Option *option;
   OPrval oprval;
   env_error_check(env);
 
+  /* init */
   op = option_parser_new("[option ...] [GFF3_file ...]", "Filter GFF3 files.",
                          env);
+  ofi = outputfileinfo_new(env);
 
   /* -seqid */
   option = option_new_string("seqid", "seqid a feature must have to pass the "
@@ -59,17 +62,20 @@ static OPrval parse_options(int *parsed_args, FilterArgumentss *arguments,
                              &arguments->min_gene_score, UNDEF_DOUBLE, env);
   option_parser_add_option(op, option, env);
 
-  /* -o */
-  option = option_new_outputfile(&arguments->outfp, env);
-  option_parser_add_option(op, option, env);
-
   /* -v */
   option = option_new_verbose(&arguments->verbose, env);
   option_parser_add_option(op, option, env);
 
-  /* parse */
+  /* output file options */
+  outputfile_register_options(op, &arguments->outfp, ofi, env);
+
+  /* parse options */
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
+
+  /* free */
+  outputfileinfo_delete(ofi, env);
   option_parser_delete(op, env);
+
   return oprval;
 }
 
@@ -99,7 +105,7 @@ int gt_filter(int argc, const char **argv, Env *env)
   gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
                                                argv + parsed_args,
                                                arguments.verbose &&
-                                               arguments.outfp != stdout, env);
+                                               arguments.outfp, env);
 
   /* create a filter stream */
   filter_stream = filter_stream_new(gff3_in_stream, arguments.seqid,
@@ -121,8 +127,7 @@ int gt_filter(int argc, const char **argv, Env *env)
   genome_stream_delete(gff3_out_stream, env);
   genome_stream_delete(filter_stream, env);
   genome_stream_delete(gff3_in_stream, env);
-  if (arguments.outfp != stdout)
-    env_fa_xfclose(arguments.outfp, env);
+  genfile_xclose(arguments.outfp, env);
   str_delete(arguments.seqid, env);
   str_delete(arguments.typefilter, env);
 

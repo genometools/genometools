@@ -6,18 +6,19 @@
 
 #include "gt.h"
 
-static OPrval parse_options(int *parsed_args, FILE **outfp, int argc,
+static OPrval parse_options(int *parsed_args, GenFile **outfp, int argc,
                             const char **argv, Env *env)
 {
   OptionParser *op;
-  Option *option;
+  OutputFileInfo *ofi;
   OPrval oprval;
   env_error_check(env);
   op = option_parser_new("[option ...] [GFF3_file ...]",
                          "Merge sorted GFF3 files in sorted fashion.", env);
-  option = option_new_outputfile(outfp, env);
-  option_parser_add_option(op, option, env);
+  ofi = outputfileinfo_new(env);
+  outputfile_register_options(op, outfp, ofi, env);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
+  outputfileinfo_delete(ofi, env);
   option_parser_delete(op, env);
   return oprval;
 }
@@ -31,7 +32,7 @@ int gt_merge(int argc, const char **argv, Env *env)
   GenomeNode *gn;
   unsigned long i;
   int parsed_args, has_err;
-  FILE *outfp;
+  GenFile *outfp;
 
   /* alloc */
   genome_streams = array_new(sizeof (GenomeStream*), env);
@@ -77,8 +78,7 @@ int gt_merge(int argc, const char **argv, Env *env)
   for (i = 0; i < array_size(genome_streams); i++)
     genome_stream_delete(*(GenomeStream**) array_get(genome_streams, i), env);
   array_delete(genome_streams, env);
-  if (outfp != stdout)
-    env_fa_xfclose(outfp, env);
+  genfile_xclose(outfp, env);
 
   return has_err;
 }

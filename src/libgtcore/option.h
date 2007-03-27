@@ -9,6 +9,7 @@
 
 #include <stdbool.h>
 #include <libgtcore/str.h>
+#include <libgtcore/strarray.h>
 
 #define TERMINAL_WIDTH  80
 
@@ -27,6 +28,7 @@ typedef enum {
 
 typedef void (*ShowVersionFunc)(const char *progname);
 typedef int  (*ShowCommentFunc)(const char *progname, void *data, Env*);
+typedef int  (*OptionParserHookFunc)(void *data, Env*);
 
 /* the option parser */
 OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
@@ -38,6 +40,8 @@ void          option_parser_set_comment_func(OptionParser*, ShowCommentFunc,
 /* set the mailadress used in the final ``Report bugs to'' line of the -help
    output to <address>. It should be of the form "<bill@microsoft.com>" */
 void          option_parser_set_mailaddress(OptionParser*, const char *address);
+void          option_parser_register_hook(OptionParser*, OptionParserHookFunc,
+                                          void *data, Env*);
 OPrval        option_parser_parse(OptionParser*, int *parsed_args, int argc,
                                   const char **argv, ShowVersionFunc, Env*);
 OPrval        option_parser_parse_min_args(OptionParser*, int *parsed_args,
@@ -65,7 +69,7 @@ void          option_parser_delete(OptionParser*, Env*);
    option descriptions are automatically formatted to TERMINAL_WIDTH, but it is
    possible to embed newlines into the descriptions to manually affect the
    formating */
-Option*        option_new_outputfile(FILE**, Env*);
+Option*        option_new_outputfile(FILE**, Env*); /* XXX */
 Option*        option_new_verbose(bool *value, Env*);
 Option*        option_new_debug(bool *value, Env*);
 Option*        option_new_bool(const char *option_str, const char *description,
@@ -105,6 +109,11 @@ Option*        option_new_ulong_min(const char *option_str,
 Option*        option_new_string(const char *option_str,
                                  const char *description,
                                  Str *value, const char *default_value, Env*);
+Option*        option_new_filename(const char *option_str,
+                                   const char *description, Str*, Env*);
+Option*        option_new_filenamearray(const char *option_str,
+                                        const char *description,
+                                        StrArray*, Env*);
 void           option_is_mandatory(Option*);
 void           option_is_mandatory_either(Option*, const Option*);
 void           option_is_extended_option(Option *o);

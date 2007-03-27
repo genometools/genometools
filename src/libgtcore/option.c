@@ -32,11 +32,17 @@ typedef enum {
   OPTION_VERSION
 } Option_type;
 
+typedef struct {
+  OptionParserHookFunc hook;
+  void *data;
+} HookInfo;
+
 struct OptionParser {
   char *progname,
        *synopsis,
        *one_liner;
-  Array *options;
+  Array *options,
+        *hooks;
   bool parser_called;
   ShowCommentFunc comment_func;
   void *comment_func_data;
@@ -144,6 +150,7 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
   op->synopsis = cstr_dup(synopsis, env);
   op->one_liner = cstr_dup(one_liner, env);
   op->options = array_new(sizeof (Option*), env);
+  op->hooks = NULL;
   op->parser_called = false;
   op->comment_func = NULL;
   op->comment_func_data = NULL;
@@ -163,6 +170,19 @@ void option_parser_set_comment_func(OptionParser *op,
   assert(op);
   op->comment_func = comment_func;
   op->comment_func_data = data;
+}
+
+void option_parser_register_hook(OptionParser *op, OptionParserHookFunc hook,
+                                 void *data, Env *env)
+{
+  HookInfo hookinfo;
+  env_error_check(env);
+  assert(op && hook);
+  if (!op->hooks)
+    op->hooks = array_new(sizeof (HookInfo), env);
+  hookinfo.hook = hook;
+  hookinfo.data = data;
+  array_add(op->hooks, hookinfo, env);
 }
 
 void option_parser_set_mailaddress(OptionParser *op, const char *address)
@@ -484,6 +504,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   int argnum, int_value;
   unsigned long i;
   double double_value;
+  HookInfo *hookinfo;
   Option *option;
   bool has_extended_options, option_parsed;
   long long_value;
@@ -774,6 +795,12 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   if (!has_err)
     has_err = check_mandatory_either_options(op, env);
 
+  /* call hooks */
+  for (i = 0; !has_err && i < array_size(op->hooks); i++) {
+    hookinfo = array_get(op->hooks, i);
+    has_err = hookinfo->hook(hookinfo->data, env);
+  }
+
   op->parser_called = true;
   if (parsed_args)
     *parsed_args = argnum;
@@ -836,6 +863,7 @@ void option_parser_delete(OptionParser *op, Env *env)
   for (i = 0; i < array_size(op->options); i++)
     option_delete(*(Option**) array_get(op->options, i), env);
   array_delete(op->options, env);
+  array_delete(op->hooks, env);
   env_ma_free(op, env);
 }
 

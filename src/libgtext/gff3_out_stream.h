@@ -13,6 +13,6 @@
 typedef struct GFF3OutStream GFF3OutStream;
 
 const GenomeStreamClass* gff3_out_stream_class(void);
-GenomeStream*            gff3_out_stream_new(GenomeStream*, FILE*, Env*);
+GenomeStream*            gff3_out_stream_new(GenomeStream*, GenFile*, Env*);
 
 #endif

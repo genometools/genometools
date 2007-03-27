@@ -20,6 +20,22 @@ gzFile xgzopen(const char *path, const char *mode)
   return file;
 }
 
+void xgzfputc(int c, gzFile stream)
+{
+  if (gzputc(stream, c) == -1) {
+    fprintf(stderr, "cannot put character to compressed file\n");
+    exit(EXIT_FAILURE);
+  }
+}
+
+void xgzfputs(const char *str, gzFile stream)
+{
+  if (gzputs(stream, str) == -1) {
+    fprintf(stderr, "cannot put string to compressed file\n");
+    exit(EXIT_FAILURE);
+  }
+}
+
 int xgzread(gzFile file, void *buf, unsigned len)
 {
   int rval;

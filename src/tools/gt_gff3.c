@@ -12,19 +12,23 @@ typedef struct {
        addintrons,
        verbose;
   long offset;
-  FILE *outfp;
+  GenFile *outfp;
 } Gff3_arguments;
 
 static OPrval parse_options(int *parsed_args, Gff3_arguments *arguments,
                             int argc, const char **argv, Env *env)
 {
   OptionParser *op;
+  OutputFileInfo *ofi;
   Option *sort_option, *mergefeat_option, *addintrons_option, *option;
   OPrval oprval;
   env_error_check(env);
+
+  /* init */
   op = option_parser_new("[option ...] [GFF3_file ...]",
                          "Parse, possibly transform, and output GFF3 files.",
                          env);
+  ofi = outputfileinfo_new(env);
 
   /* -sort */
   sort_option = option_new_bool("sort", "sort the GFF3 features (memory "
@@ -55,12 +59,20 @@ static OPrval parse_options(int *parsed_args, Gff3_arguments *arguments,
   option_is_development_option(option);
   option_parser_add_option(op, option, env);
 
-  option = option_new_outputfile(&arguments->outfp, env);
-  option_parser_add_option(op, option, env);
+  /* -v */
   option = option_new_verbose(&arguments->verbose, env);
   option_parser_add_option(op, option, env);
+
+  /* output file options */
+  outputfile_register_options(op, &arguments->outfp, ofi, env);
+
+  /* parse options */
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
+
+  /* free */
+  outputfileinfo_delete(ofi, env);
   option_parser_delete(op, env);
+
   return oprval;
 }
 
@@ -88,7 +100,7 @@ int gt_gff3(int argc, const char **argv, Env *env)
   gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
                                                argv + parsed_args,
                                                arguments.verbose &&
-                                               arguments.outfp != stdout, env);
+                                               arguments.outfp, env);
   last_stream = gff3_in_stream;
 
   /* set offset (if necessary) */
@@ -130,8 +142,7 @@ int gt_gff3(int argc, const char **argv, Env *env)
   genome_stream_delete(mergefeat_stream, env);
   genome_stream_delete(addintrons_stream, env);
   genome_stream_delete(gff3_in_stream, env);
-  if (arguments.outfp != stdout)
-    env_fa_xfclose(arguments.outfp, env);
+  genfile_xclose(arguments.outfp, env);
 
   return has_err;
 }

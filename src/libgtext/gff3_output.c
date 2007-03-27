@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <libgtext/gff3_output.h>
 
-void gff3_output_leading(GenomeFeature *gf, FILE *outfp)
+void gff3_output_leading(GenomeFeature *gf, GenFile *outfp)
 {
   GenomeNode *gn;
   GenomeFeatureType type;
@@ -18,14 +18,18 @@ void gff3_output_leading(GenomeFeature *gf, FILE *outfp)
   gn = (GenomeNode*) gf;
   type = genome_feature_get_type(gf);
 
-  fprintf(outfp, "%s\t%s\t%s\t%lu\t%lu\t", str_get(genome_node_get_seqid(gn)),
-          genome_feature_get_source(gf), genome_feature_type_get_cstr(type),
-          genome_node_get_start(gn), genome_node_get_end(gn));
+  genfile_xprintf(outfp, "%s\t%s\t%s\t%lu\t%lu\t",
+                  str_get(genome_node_get_seqid(gn)),
+                  genome_feature_get_source(gf),
+                  genome_feature_type_get_cstr(type),
+                  genome_node_get_start(gn),
+                  genome_node_get_end(gn));
   score = genome_feature_get_score(gf);
   if (score == UNDEF_DOUBLE)
-    xfputc('.', outfp);
+    genfile_xfputc('.', outfp);
   else
-    fprintf(outfp, "%f", score);
-  fprintf(outfp, "\t%c\t%c\t", STRANDCHARS[genome_feature_get_strand(gf)],
-          PHASECHARS[genome_feature_get_phase(gf)]);
+    genfile_xprintf(outfp, "%f", score);
+  genfile_xprintf(outfp, "\t%c\t%c\t",
+                  STRANDCHARS[genome_feature_get_strand(gf)],
+                  PHASECHARS[genome_feature_get_phase(gf)]);
 }
