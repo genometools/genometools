@@ -84,6 +84,10 @@ void outputfile_register_options(OptionParser *op, GenFile **outfp,
   option_parser_add_option(op, optforce, env);
   /* options -gzip and -bzip2 exclude each other */
   option_exclude(optgzip, optbzip2, env);
+  /* option implications */
+  option_imply(optgzip, opto, env);
+  option_imply(optbzip2, opto, env);
+  option_imply(optforce, opto, env);
   /* set hook function to determine <outfp> */
   option_parser_register_hook(op, determine_outfp, ofi, env);
 }
