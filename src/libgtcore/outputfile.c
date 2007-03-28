@@ -31,6 +31,7 @@ static int determine_outfp(void *data, Env *env)
   OutputFileInfo *ofi = (OutputFileInfo*) data;
   GenFileMode genfilemode;
   int has_err = 0;
+  env_error_check(env);
   assert(ofi);
   if (!str_length(ofi->output_filename)) /* no output file given -> use stdin */
     *ofi->outfp = NULL;
