@@ -77,6 +77,18 @@ Option*        option_new_bool(const char *option_str, const char *description,
 Option*        option_new_double(const char *option_str,
                                  const char *description, double *value,
                                  double default_value, Env*);
+Option*        option_new_double_min(const char *option_str,
+                                     const char *description, double *value,
+                                     double default_value, double min_value,
+                                     Env*);
+Option*        option_new_double_min_max(const char *option_str,
+                                         const char *description, double *value,
+                                         double default_value, double min_value,
+                                         double max_value, Env*);
+/* enforces that the given argument is >= 0.0 and <= 1.0 */
+Option*        option_new_probability(const char *option_str,
+                                      const char *description , double *value,
+                                      double default_value, Env*);
 Option*        option_new_int(const char *option_str,
                               const char *description,
                               int *value, int default_value, Env*);
@@ -116,7 +128,6 @@ Option*        option_new_filenamearray(const char *option_str,
                                         StrArray*, Env*);
 void           option_is_mandatory(Option*);
 void           option_is_mandatory_either(Option*, const Option*);
-void           option_is_extended_option(Option *o);
 /* if this function was called, <o> is only shown in the output of -help+ */
 void           option_is_extended_option(Option *o);
 /* if this function was called, <o> is only shown in the output of -helpdev */
