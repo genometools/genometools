@@ -1,4 +1,9 @@
-changes in version 0.7.1
+changes in version 0.7.2:
+
+- splitfasta tool added
+
+
+changes in version 0.7.1:
 
 - compilation output shortened
 - new functions added to libgtcore
@@ -12,6 +17,7 @@ changes in version 0.7.0:
 - `gt bioseq` has new option -gc-content
 - new tool `gt mutate` added
 - libgt has been split up into libgtcore and libgtext
+
 
 changes in version 0.6.9:
 

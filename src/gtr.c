@@ -21,6 +21,7 @@
 #include "tools/gt_merge.h"
 #include "tools/gt_mmapandread.h"
 #include "tools/gt_mutate.h"
+#include "tools/gt_splitfasta.h"
 #include "tools/gt_stat.h"
 
 struct GTR {
@@ -123,6 +124,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->tools, "merge", gt_merge, env);
   hashtable_add(gtr->tools, "mmapandread", gt_mmapandread, env);
   hashtable_add(gtr->tools, "mutate", gt_mutate, env);
+  hashtable_add(gtr->tools, "splitfasta", gt_splitfasta, env);
   hashtable_add(gtr->tools, "stat", gt_stat, env);
   /* add unit tests */
   hashtable_delete(gtr->unit_tests, env);
