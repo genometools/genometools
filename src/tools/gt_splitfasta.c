@@ -18,8 +18,8 @@ static OPrval parse_options(int *parsed_args, unsigned long *max_filesize_in_MB,
   o = option_new_ulong_min("targetsize", "set the target file size in MB",
                            max_filesize_in_MB, 50, 1, env);
   option_parser_add_option(op, o, env);
-  oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, 1, env);
+  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
+                                            versionfunc, 1, 1, env);
   option_parser_delete(op, env);
   return oprval;
 }
