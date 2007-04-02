@@ -35,6 +35,7 @@
 #include <libgtcore/progressbar.h>   /* progressbar module */
 #include <libgtcore/queue.h>         /* queue class */
 #include <libgtcore/range.h>         /* range class */
+#include <libgtcore/safeop.h>        /* safe operations module */
 #include <libgtcore/scorefunction.h> /* score function class */
 #include <libgtcore/scorematrix.h>   /* score matrix class */
 #include <libgtcore/splitter.h>      /* splitter class */
