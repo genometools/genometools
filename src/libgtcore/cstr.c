@@ -9,7 +9,7 @@
 #include <libgtcore/cstr.h>
 #include <libgtcore/xansi.h>
 
-void* cstr_dup(const char *cstr, Env *env)
+char* cstr_dup(const char *cstr, Env *env)
 {
   size_t size;
   char *copy;
