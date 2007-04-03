@@ -11,14 +11,16 @@ int tooldriver(int(*tool)(int argc, const char **argv, Env*),
                int argc, char *argv[])
 {
   Env *env;
-  int rval;
+  int has_err;
   env = env_new();
-  rval = tool(argc, (const char**) argv, env);
+  has_err = tool(argc, (const char**) argv, env);
   if (env_error_is_set(env)) {
     fprintf(stderr, "error: %s\n", env_error_get(env));
-    assert(rval);
+    assert(has_err);
   }
   if (env_delete(env))
     return 2; /* programmer error */
-  return rval;
+  if (has_err)
+    return EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }
