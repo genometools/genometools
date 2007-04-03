@@ -70,6 +70,18 @@ void cstr_array_show(char **cstr_array, FILE *fp)
   xfputc('\n', fp);
 }
 
+void cstr_array_show_genfile(const char **cstr_array, GenFile *fp)
+{
+  unsigned long i = 0;
+  while (cstr_array[i]) {
+    if (i)
+      genfile_xfputc(' ', fp);
+    genfile_xfputs(cstr_array[i], fp);
+    i++;
+  }
+  genfile_xfputc('\n', fp);
+}
+
 unsigned long cstr_array_size(const char **cstr_array)
 {
   unsigned long i = 0;

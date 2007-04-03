@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <libgtcore/env.h>
+#include <libgtcore/genfile.h>
 
 char*         cstr_dup(const char*, Env*);
 void          cstr_show(const char*, unsigned long length, FILE*);
@@ -18,6 +19,7 @@ char**        cstr_array_prefix_first(const char **cstr_array, const char *p,
                                       Env*);
 char**        cstr_array_preprend(const char **cstr_array, const char *p, Env*);
 void          cstr_array_show(char **cstr_array, FILE*);
+void          cstr_array_show_genfile(const char **cstr_array, GenFile*);
 unsigned long cstr_array_size(const char **cstr_array); /* O(n) */
 void          cstr_array_delete(char **cstr_array, Env*);
 
