@@ -21,7 +21,7 @@ void          alignment_set_seqs(Alignment*, const char *u, unsigned long ulen,
 void          alignment_add_replacement(Alignment*, Env*);
 void          alignment_add_deletion(Alignment*, Env*);
 void          alignment_add_insertion(Alignment*, Env*);
-void          alignment_remove_last(Alignment*); /* undo last add opteration */
+void          alignment_remove_last(Alignment*); /* undo last add operation */
 unsigned long alignment_eval(const Alignment*); /* returns unit cost */
 void          alignment_show(const Alignment*, FILE*);
 void          alignment_show_multieop_list(const Alignment*, FILE*);
