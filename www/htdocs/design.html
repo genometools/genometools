@@ -1,0 +1,394 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>The GenomeTools Design</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<h1>The <i>GenomeTools</i> design</h1>
+<p>
+The <i>GenomeTools</i> C code is split into components plus the
+runtime and the main program. There are the following types of components: 
+</p>
+<ul>
+<li> classes
+<li> modules
+<li> unit tests
+<li> tools
+</ul>
+<p>
+It is assumed that the reader is familiar with the terminology of object oriented
+software design.
+<!--XXX: add references to OO literature here -->
+</p>
+<h2>The runtime</h2>
+<p>
+The runtime class <a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/gtr.h;hb=HEAD"><code>gtr.h</code></a>/<a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/gtr.c;hb=HEAD"><code>gtr.c</code></a> is the nucleus of the <i>GenomeTools</i>
+system. An object of this class is the place of execution in <i>GenomeTools</i>,
+like a process in an operating system. A new runtime object can be created with
+the <code>gtr_new()</code> function. <code>gtr_register_components()</code> registers
+all build in components to the runtime, and <code>gtr_run()</code> starts it.
+</p>
+
+<h3>Rationale</h3>
+<p>
+Having an explicit runtime class unifies the design &mdash; a runtime instance is just
+another object. In theory, this would allow to start multiple instances of the
+runtime class in parallel. For example, in threads.
+</p>
+
+<h3>Further directions</h3>
+<p>
+The runtime class would be the place to start an embedded script language
+interpreter, like <a href="http://www.lua.org/">Lua</a>.
+This would allow to load new components during runtime.
+</p>
+
+
+<h2>The main program</h2>
+<p>
+The <i>GenomeTools</i> main program given in the file <a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/gt.c;hb=HEAD"><code>gt.c</code></a> simply
+creates a new runtime object and starts it.
+</p>
+
+<h2>Classes</h2>
+<p>
+The central component type in <i>GenomeTools</i> is the class.
+Structuring the C code into classes and modules gives us a unified design
+approach which simplifies the thinking about design issues and avoids that the
+codebase becomes monolithic, a problem often encountered in C programs.
+<!--XXX: add references to OO literature here -->
+</p>
+
+<h3>Simple classes</h3>
+<p>
+For most classes, a simple class suffices. A simple class is a class which does
+not inherit from other clases and from which no other classes inherit. Using
+mostly simple classes avoids the problems of large class hierarchies, namely the
+interdependence of classes which inherit from one another.
+The major advantage of simple classes over simple C <code>struct</code>s is 
+<a href="http://en.wikipedia.org/wiki/Information_hiding">information hiding</a>.
+</p>
+
+<h4>Implementing simple classes</h4>
+<p>
+We describe now how to implement a simple classes using the string class <code>str.[ch]</code>
+of <i>GenomeTools</i> as an example. The interface to a class is always given in
+the <code>.h</code> header file
+(<a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/str.h;hb=HEAD"<code>str.h</code></a> in our example). To achieve information hiding the header file
+cannot contain implementation details of the class. The implementation can
+always be found in the corresponding <code>.c</code> file (<a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/str.c;hb=HEAD"><code>str.c</code></a> in our example).
+Therefore, we start with the following C construct to define our <code>Str</code>
+class in <code>str.h</code>:
+</p>
+<pre>
+typedef struct Str Str;
+</pre>
+<p>
+This seldomly known feature of C introduces a new data type named
+<code>Str</code> which is a synoym for the <code>struct Str</code> data type,
+<b>which needs not to be known at this point</b>. In the scope of the header
+file, the new data type <code>Str</code> cannot be used, since it's size is
+unknown to the compiler at this point. Nevertheless, pointers of type
+<code>Str</code> can still be defined, because in C all pointers have the same
+size, regardless of it's type. Using this fact, we can define a constructor
+function:
+</p>
+<pre>
+Str*          str_new(void);
+</pre>
+<p>
+which returns a new string object and a destructor function
+</p>
+<pre>
+void          str_free(Str*);
+</pre>
+<p>
+which destroys a given string object.
+This gives us the basic structure of the string class header file: A new data
+type (which represents the class and it's objects), a constructor function, and
+a destructor function.
+</p>
+<pre>
+#ifndef STR_H
+#define STR_H
+
+/* the string class, string objects are strings which grow on demand */
+typedef struct Str Str;
+
+Str*          str_new(void);
+void          str_free(Str*);
+
+#endif
+</pre>
+<p>
+Now we look at the implementation side of the story, which can be found in the
+<a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/str.c;hb=HEAD"><code>str.c</code></a> file. At first, we include the <code>str.h</code> header file to make
+sure that the newly defined data type is known:
+</p>
+<pre>
+#include "str.h"
+</pre>
+<p>
+Then we define <code>struct Str</code> which contains the actual data of a
+string object (the member variables in OO lingo).
+</p>
+<pre>
+struct Str {
+  char *cstr;           /* the actual string (always '\0' terminated) */
+  unsigned long length; /* currently used length (without trailing '\0') */
+  size_t allocated;     /* currently allocated memory */
+};
+</pre>
+<p>
+Finally, we code the constructor
+</p>
+<pre>
+Str* str_new(void)
+{
+  Str *s = xmalloc(sizeof(Str));      /* create new string object */
+  s-&gt;cstr = xcalloc(1, sizeof(char)); /* init the string with '\0' */
+  s-&gt;length = 0;                      /* set the initial length */
+  s-&gt;allocated = 1;                   /* set the initially allocated space */
+  return s;                           /* return the new string object */
+}
+</pre>
+<p>
+and the destructor
+</p>
+<pre>
+void str_free(Str *s)
+{
+  if (!s) return;           /* return without action if 's' is NULL */
+  free(s-&gt;cstr);            /* free the stored the C string */
+  free(s);                  /* free the actual string object */
+}
+</pre>
+<p>
+Our string class implementation so far looks like this
+</p>
+<pre>
+#include "str.h"
+#include "xansi.h"
+
+struct Str {
+  char *cstr;           /* the actual string (always '\0' terminated) */
+  unsigned long length; /* currently used length (without trailing '\0') */
+  size_t allocated;     /* currently allocated memory */
+};
+
+Str* str_new(void)
+{
+  Str *s = xmalloc(sizeof(Str));      /* create new string object */
+  s-&gt;cstr = xcalloc(1, sizeof(char)); /* init the string with '\0' */
+  s-&gt;length = 0;                      /* set the initial length */
+  s-&gt;allocated = 1;                   /* set the initially allocated space */
+  return s;                           /* return the new string object */
+}
+
+void str_free(Str *s)
+{
+  if (!s) return;           /* return without action if 's' is NULL */
+  free(s-&gt;cstr);            /* free the stored the C string */
+  free(s);                  /* free the actual string object */
+}
+</pre>
+<p>
+Since this string objects are pretty much useless so far, we define a couple
+more 
+(object) <a href="http://en.wikipedia.org/wiki/Method_%28computer_science%29">
+methods</a> in the header file <a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/str.h;hb=HEAD"<code>str.h</code></a>.
+</p>
+<p>
+Because C does not allow the traditional
+<code>object.methodname</code> syntax often used in object-oriented programming,
+we use the convention to pass the object always as the first argument to the
+function (<code>methodname(object, ...)</code>). To make it clear that a
+function is a method of a particular class <code>classname</code>, we prefix the
+method name with <code>classname_</code>. That is, we get
+<code>classname_methodname(object, ...)</code> as the generic form of method
+names in C. The constructor is always called <code>classname_new()</code> and
+the destructor <code>classname_free()</code>.
+See <a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/str.c;hb=HEAD"<code>str.c</code></a>
+for examples.
+</p>
+
+<h4>Reference counting</h4>
+<p>
+Adding <a href="http://en.wikipedia.org/wiki/Reference_counting">reference
+counting</a> to our newly created string class is pretty simple. At first we add
+a new function to the header file, which returns a new reference to the given
+object:
+</p>
+<pre>
+Str*          str_ref(Str*);
+</pre>
+<p>
+To implement this object, we add a new <code>reference_count</code> member variable in to the <code>Str</code> implementation
+</p>
+<pre>
+struct Str {
+  char *cstr;           /* the actual string (always '\0' terminated) */
+  unsigned long length; /* currently used length (without trailing '\0') */
+  size_t allocated;     /* currently allocated memory */
+  unsigned int reference_count;
+};
+</pre>
+<p>
+implement the <code>str_ref()</code> function
+</P
+<pre>
+Str* str_ref(Str *s)
+{
+  if (!s) return NULL;
+  s-&gt;reference_count++; /* increase the reference counter */
+  return s;
+}
+</pre>
+<p>
+and finally modify the destructor to take care of reference counting:
+</p>
+<pre>
+void str_free(Str *s)
+{
+  if (!s) return;           /* return without action if 's' is NULL */
+  if (s-&gt;reference_count) { /* there are multiple references to this string */
+    s-&gt;reference_count--;   /* decrement the reference counter */
+    return;                 /* return without freeing the object */
+  }
+  free(s-&gt;cstr);            /* free the stored the C string */
+  free(s);                  /* free the actual string object */
+}
+</pre>
+
+
+<!-- XXX
+<h3>Interfaces</h3>
+-->
+
+
+<h2>Modules</h2>
+<p>
+Modules bundle related functions which do not belong to a class. Examples:
+</p>
+<ul>
+<li> <a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/dynalloc.h;hb=HEAD"><code>dynalloc.h</code></a>,
+the low level module for dynamic allocation, e.g., used to implement arrays in <a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/array.c;hb=HEAD"><code>array.c</code></a>
+and the above-mentioned strings
+<li> <a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/sig.h;hb=HEAD"><code>sig.h</code></a>,
+bundles signal related functions (high level)
+<li> <a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/xansi.h;hb=HEAD"><code>xansi.h</code></a>,
+contains wrappers for the standard ANSI C library
+
+<li> <a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/xposix.h;hb=HEAD"><code>xposix.h</code></a>,
+contains wrappers for POSIX functions we use
+</ul>
+<p>
+When desiging new code, it is not very often the case that one has to introduce
+new modules. Usually defining a new class is the better approach.
+</p>
+
+<h2>The <code>gt.h</code> header file</h2>
+<p>
+The <a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/gt.h;hb=HEAD"><code>gt.h</code></a>
+header file includes all other header files of the <i>GenomeTools</i> library.
+That is, to write programs employing the library, it suffices to include the
+<code>gt.h</code> header file.
+</p>
+
+<h2>Unit tests</h2>
+<p>
+Many classes and modules contain a <code>*_unit_test(void)</code> function which performs a
+<a href="http://en.wikipedia.org/wiki/Unit_test">unit test</a> of the 
+class/module and returns <code>EXIT_SUCCESS</code> in case of success and
+<code>EXIT_FAILURE</code> in case of failure.
+
+The unit test components are loaded into the
+<i>GenomeTools</i> runtime in the function <a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/gtr.c;hb=HEAD"><code>gtr_register_components()</code></a>
+and can be executed on the command line with:
+</p>
+<pre>
+$ gt -test
+</pre>
+
+
+
+
+<h2>Tools</h2>
+<p>
+A ``tool'' is the most high-level type of component <i>GenomeTools</i> has to
+ offer. We consider the ``eval'' tool here as an example. It evaluates a gene
+prediction against a given annotation.
+In principle a tool could be compiled as a single binary linking against the
+``libgt''. Therefore the header files <code>gt_*.h</code> for tools only contain
+ a single function which resemble a <code>main()</code> function (see <a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/tools/gt_eval.h;hb=HEAD"><code>gt_eval.h</code></a>)
+and the <code>gt_*.c</code> files include only the <code>gt.h</code> header file
+(see <a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/tools/gt_eval.c;hb=HEAD"><code>gt_eval.c</code></a>).
+For coolness reasons all tools are linked into the single <code>gt</code> binary,
+though. They are also loaded into the runtime via the <a
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/tools/gtr.c;hb=HEAD"><code>gtr_register_components()</code></a>
+function. All tools can be called like the eval tool in the following example:
+</p>
+<pre>
+$ gt eval
+</pre>
+
+<h2>Getting started</h2>
+<p>
+To get started with <i>GenomeTools</i> development yourself, I recommend the following:
+</p>
+<ol>
+<li> Install the <a href="http://git.or.cz/">Git</a> version control system.
+<li> Read the Git <a
+href="http://www.kernel.org/pub/software/scm/git/docs/">documentation</a>.
+<li> Clone the <i>GenomeTools</i> Git repository with:
+<pre>
+$ git clone http://genometools.org/genometools.git
+</pre>
+<li> Start hacking on your own feature branch: 
+<pre>
+$ cd genometools
+$ git checkout -b my_feature_branch_name
+</pre>
+<li> Have fun!
+</ol>
+
+<h2>Acknowledgment</h2>
+<p>
+I want to thank Patrick Maa&szlig; for introducing me to some techniques
+described in this document.
+</p>
+
+<hr>
+<p>
+<small>
+Copyright &copy; 2007 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a> Last
+update: 2007-02-09
+</small>
+</p>
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-301256-4";
+urchinTracker();
+</script>
+</body>
+</html>

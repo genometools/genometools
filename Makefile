@@ -49,6 +49,9 @@ LIBRNV_OBJ := obj/rn.o obj/rnc.o obj/rnd.o obj/rnl.o obj/rnv.o obj/rnx.o obj/drv
 LIBBZ2_OBJ := obj/blocksort.o obj/huffman.o obj/crctable.o obj/randtable.o \
               obj/compress.o obj/decompress.o obj/bzlib.o
 
+SERVER=gordon@genomethreader.org
+WWWBASEDIR=/var/www/servers/genometools.org
+
 # process arguments
 ifeq ($(opt),no)
   GT_CFLAGS += -g
@@ -179,7 +182,11 @@ srcdist:
 release:
 	git tag "v`cat VERSION`"
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
-        gzip -9 > genometools-`cat VERSION`.tar.gz 
+        gzip -9 > genometools-`cat VERSION`.tar.gz
+	scp genometools-`cat VERSION`.tar.gz $(SERVER):$(WWWBASEDIR)/htdocs/pub
+
+installwww:
+	rsync -rv www/ $(SERVER):$(WWWBASEDIR)
 
 gt: dirs bin/gt
 
