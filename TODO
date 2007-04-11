@@ -25,3 +25,7 @@ feature requests:
 - range check
 - check for circles
 - sort attributes
+
+from Stefan:
+
+- add get_space_peak() function to env class
