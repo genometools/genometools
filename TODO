@@ -1,0 +1,25 @@
+bugs:
+-----
+
+
+feature requests:
+-----------------
+
+- implement skiplist class
+- replace msort() routine with a routine covered by LICENSE
+- replace the st (hashtable) implementation with own implementation
+- replace sscanf calls
+- consensus_sa: fuzzlength, undetermined strand
+- glob() -> fnmatch()
+- coverage tests
+- use tool from tridge to find functions which are are not used
+- write check script to check for error_check()
+- EXIT_SUCCESS und EXIT_FAILURE only in gtr.c and gt.c
+- no exit() calls inside library
+- fix queue implementation
+- write extractseq tool
+- update design.html, Interface Vererbung beschreiben
+- check random number generation
+- range check
+- check for circles
+- sort attributes
