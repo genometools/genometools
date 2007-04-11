@@ -10,6 +10,7 @@
 #include "gt_casino.h"
 #include "gt_coin.h"
 #include "gt_consensus_sa.h"
+#include "gt_linearalign.h"
 #include "gt_msaparse.h"
 #include "gt_neighborjoining.h"
 #include "gt_nussinov_rna_fold.h"
@@ -43,6 +44,7 @@ void register_exercises(Toolbox *exercise_toolbox, Env *env)
   toolbox_add(exercise_toolbox, "coin", gt_coin, env);
   toolbox_add(exercise_toolbox, "consensus_sa", gt_consensus_sa, env);
   toolbox_add(exercise_toolbox, "msaparse", gt_msaparse, env);
+  toolbox_add(exercise_toolbox, "linearalign", gt_linearalign, env);
   toolbox_add(exercise_toolbox, "neighborjoining", gt_neighborjoining, env);
   toolbox_add(exercise_toolbox, "nussinov_rna_fold", gt_nussinov_rna_fold, env);
   toolbox_add(exercise_toolbox, "qgramdist", gt_qgramdist, env);

@@ -26,6 +26,13 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_align_test.out"
 end
 
+Name "gt exercise linearalign test"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise linearalign #{$testdata}gt_align_test.in1 #{$testdata}gt_align_test.in2"
+  run "diff #{$last_stdout} #{$testdata}gt_align_test.out"
+end
+
 Name "gt exercise align -all test"
 Keywords "gt_exercise"
 Test do

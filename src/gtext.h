@@ -28,6 +28,7 @@
 #include <libgtext/gtf_in_stream.h>             /* GTF input stream class */
 #include <libgtext/genome_stream.h>             /* genome stream class */
 #include <libgtext/hmm.h>                       /* HMM class */
+#include <libgtext/linearalign.h>               /* linear alignment module */
 #include <libgtext/linearedist.h>               /* linear edit distance mod. */
 #include <libgtext/merge_stream.h>              /* merge stream class */
 #include <libgtext/mergefeat_stream_sorted.h>   /* merge feat. stream class */
