@@ -18,7 +18,7 @@ feature requests:
 - no exit() calls inside library
 - fix queue implementation
 - write extractseq tool
-- update design.html, Interface Vererbung beschreiben
+- update design.html, describe interface inheritance
 - check random number generation
 - range check
 - check for circles
