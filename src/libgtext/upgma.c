@@ -160,7 +160,7 @@ static void upgma_show_node(const UPGMA *upgma, unsigned long nodenum,
 {
   assert(upgma);
   /* indent according to level */
-  fprintf(fp, "%*s", level * INDENTFACTOR, "");
+  fprintf(fp, "%*s", (int) level * INDENTFACTOR, "");
   fprintf(fp, "%lu, %.4f\n", nodenum, upgma->clusters[nodenum].height);
   if (upgma->clusters[nodenum].leftdaughter != UNDEF_ULONG) {
     /* in this case the node has always two daughters, show them recursively */

@@ -104,7 +104,7 @@ void alignment_remove_last(Alignment *a)
   meop_ptr = array_get_last(a->eops);
   assert(meop_ptr->steps);
   if (meop_ptr->steps == 1)
-    array_pop(a->eops);
+    (void) array_pop(a->eops);
   else
     meop_ptr->steps--;
 }

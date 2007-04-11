@@ -22,8 +22,7 @@
        }
 
 static int computeEentry(unsigned long i, unsigned long j, int **E,
-                         char *rna_sequence, unsigned long rna_length,
-                         ScoreMatrix *energy_function)
+                         char *rna_sequence, ScoreMatrix *energy_function)
 {
   unsigned long k;
   int minvalue, value, alphavalue;
@@ -78,8 +77,7 @@ static void compute_matrix(int **E, char *rna_sequence,
       if (j - i <= l_min)
         E[i][j] = 0;
       else
-        E[i][j] = computeEentry(i, j, E, rna_sequence, rna_length,
-                                energy_function);
+        E[i][j] = computeEentry(i, j, E, rna_sequence, energy_function);
     }
   }
 }

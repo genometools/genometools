@@ -10,6 +10,6 @@
 #include <gtcore.h>
 
 /* reverse 'dna_seq' of length 'seqlen' in place */
-int reverse_complement(char *dna_seq, unsigned long seqlen, Env *err);
+int reverse_complement(char *dna_seq, unsigned long seqlen, Env*);
 
 #endif

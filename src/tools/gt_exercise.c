@@ -30,7 +30,8 @@ static int save_exercise_name(void *key, void *value, void *data, Env *env)
   return 0;
 }
 
-static int show_exercise_tools(const char *progname, void *data, Env *env)
+static int show_exercise_tools(/*@unused@*/ const char *progname, void *data,
+                               Env *env)
 {
   Hashtable *exercise_tools;
   Array *exercisenames;
@@ -48,7 +49,7 @@ static int show_exercise_tools(const char *progname, void *data, Env *env)
   qsort(array_get_space(exercisenames), array_size(exercisenames),
         array_elem_size(exercisenames), compare);
   for (i = 0; i < array_size(exercisenames); i++) {
-    puts(*(const char**) array_get(exercisenames, i));
+    xputs(*(const char**) array_get(exercisenames, i));
   }
   array_delete(exercisenames, env);
   return 0;

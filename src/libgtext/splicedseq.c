@@ -110,9 +110,10 @@ static int check_splicedseq(Splicedseq *ss, Env *env)
 
 int splicedseq_unit_test(Env *env)
 {
+  Splicedseq *ss;
   int has_err = 0;
   env_error_check(env);
-  Splicedseq *ss = splicedseq_new(env);
+  ss = splicedseq_new(env);
   has_err = check_splicedseq(ss, env);
   if (!has_err) {
     splicedseq_reset(ss);

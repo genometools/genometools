@@ -42,7 +42,7 @@ Str* gtdata_get_path(const char *prog, Env *env)
   return path;
 }
 
-int gtdata_show_help(const char *progname, void *unused, Env *env)
+int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
 {
   Splitter *splitter;
   Str *doc_file;

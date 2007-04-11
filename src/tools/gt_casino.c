@@ -80,15 +80,15 @@ int gt_casino(int argc, const char **argv, Env *env)
     for (i = 0 ; i < num_of_emissions; i++) {
       switch (state_sequence[i]) {
         case DICE_FAIR:
-          putchar('F');
+          xputchar('F');
           break;
         case DICE_LOADED:
-          putchar('L');
+          xputchar('L');
           break;
         default: assert(0);
       }
     }
-    putchar('\n');
+    xputchar('\n');
   }
 
   /* free */

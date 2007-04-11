@@ -5,6 +5,7 @@
 */
 
 #include <assert.h>
+#include <libgtext/compare.h>
 #include <libgtext/genome_node.h>
 #include <libgtext/gtf_parser.h>
 
@@ -27,11 +28,6 @@ typedef enum {
 static const char *GTF_feature_type_strings[] = { "CDS",
                                                   "exon",
                                                   "stop_codon" };
-
-static int compare (const void *a, const void *b)
-{
-  return strcmp(*((char**) a), *((char**) b));
-}
 
 static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
 {

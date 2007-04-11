@@ -33,8 +33,9 @@ static double distfunc(unsigned long i, unsigned long j, void *data, Env *env)
                      bioseq_get_sequence_length(bioseq, j), env);
 }
 
-static double exampledistfunc(unsigned long i, unsigned long j, void *data,
-                              Env *env)
+static double exampledistfunc(unsigned long i, unsigned long j,
+                              /*@unused@*/ void *data,
+                              /*@unused@*/ Env *env)
 {
   static const double exampledistances[5][5] =
     { {0.0   , 0.1715, 0.2147, 0.3091, 0.2326},

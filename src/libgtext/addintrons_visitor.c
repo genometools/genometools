@@ -18,7 +18,7 @@ struct AddIntronsVisitor {
 #define addintrons_visitor_cast(GV)\
         genome_visitor_cast(addintrons_visitor_class(), GV)
 
-static void addintrons_visitor_free(GenomeVisitor *gv, Env *env)
+static void addintrons_visitor_free(GenomeVisitor *gv, /*@unused@*/ Env *env)
 {
   AddIntronsVisitor *addintrons_visitor = addintrons_visitor_cast(gv);
   assert(addintrons_visitor);

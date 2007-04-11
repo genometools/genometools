@@ -18,7 +18,7 @@ static char* mutate_description(const char *description, unsigned int rate,
   int rval;
   env_error_check(env);
   assert(description);
-  assert(rate >= 0 && rate <= 100);
+  assert(rate <= 100);
   mutated_description_len = strlen(description) + strlen(MUTATED_DESC_PRIMER)
                             + 3  /* for the rate */
                             + 1  /* terminal ']' */
@@ -47,7 +47,7 @@ static char* mutate_seq(const char *seq, unsigned long len, Alpha *alpha,
   char *mutated_seq;
   env_error_check(env);
   assert(seq && alpha);
-  assert(rate >= 0 && rate <= 100);
+  assert(rate <= 100);
   mutate_prob = (double) rate / 100.0;
   allocated = len * 2; /* XXX: possibly reduce this memory consumption */
   mutated_seq = env_ma_malloc(env, sizeof (char) * allocated);
@@ -91,7 +91,7 @@ Seq* mutate(const char *description, const char *orig_seq, unsigned long len,
   Seq *seq;
   env_error_check(env);
   assert(description && orig_seq && alpha);
-  assert(rate >= 0 && rate <= 100);
+  assert(rate <= 100);
   mutated_description = mutate_description(description, rate, env);
   mutated_seq = mutate_seq(orig_seq, len, alpha, rate, env);
   seq = seq_new_own(mutated_seq, strlen(mutated_seq), alpha, env);

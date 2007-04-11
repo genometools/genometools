@@ -167,7 +167,7 @@ static void process_splice_form(Array *spliced_alignments_in_form,
   printf("contains [");
   for (i = 0; i < array_size(spliced_alignments_in_form); i++) {
     if (i)
-      putchar(',');
+      xputchar(',');
     printf("%lu", *((unsigned long*) array_get(spliced_alignments_in_form, i)));
   }
   printf("]\n");

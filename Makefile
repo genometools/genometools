@@ -209,7 +209,9 @@ install:
 	
 splint:
 	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) $(CURDIR)/src/*.c \
-        $(CURDIR)/src/libgtcore/*.c
+        $(CURDIR)/src/libgtcore/*.c \
+        $(CURDIR)/src/libgtext/*.c \
+        $(CURDIR)/src/tools/*.c
 
 test: all
 	bin/gt -test
