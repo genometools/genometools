@@ -275,9 +275,11 @@ static int check_mmap_leak(void *key, void *value, void *data, Env *env)
   assert(key && value && data && env);
   /* report only the first leak */
   if (!info->has_leak) {
+    /*@ignore@*/
     fprintf(stderr, "bug: memory map of length %zu leaked (opened on line %u "
             "in file \"%s\")\n", mapinfo->len, mapinfo->line,
             mapinfo->filename);
+    /*@end@*/
     info->has_leak = true;
   }
   return 0;

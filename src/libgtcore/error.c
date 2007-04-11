@@ -6,6 +6,7 @@
 
 #include <stdarg.h>
 #include <libgtcore/env.h>
+#include <libgtcore/error.h>
 #include <libgtcore/xansi.h>
 
 struct Error {

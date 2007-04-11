@@ -63,6 +63,7 @@ GenFile* genfile_open(GenFileMode genfilemode, const char *path,
       }
       genfile->orig_path = cstr_dup(path, env);
       genfile->orig_mode = cstr_dup(path, env);
+      break;
     default: assert(0);
   }
   return genfile;
@@ -86,6 +87,7 @@ GenFile* genfile_xopen(GenFileMode genfilemode, const char *path,
       genfile->fileptr.bzfile = env_fa_xbzopen(env, path, mode);
       genfile->orig_path = cstr_dup(path, env);
       genfile->orig_mode = cstr_dup(path, env);
+      break;
     default: assert(0);
   }
   return genfile;

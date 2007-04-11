@@ -60,7 +60,7 @@ void xglob(const char *pattern, int flags,
     if (errno)
       fprintf(stderr, " (%s)\n", strerror(errno));
     else
-      fputc('\n', stderr);
+      (void) fputc('\n', stderr);
     exit(EXIT_FAILURE);
   }
 }

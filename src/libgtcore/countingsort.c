@@ -56,7 +56,7 @@ unsigned long countingsort_get_max(const void *in, size_t elem_size,
   return max_value;
 }
 
-static unsigned long get_int(const void *elem, void *data)
+static unsigned long get_int(const void *elem, /*@unused@*/ void *data)
 {
   assert(elem);
   return *(unsigned int*) elem;

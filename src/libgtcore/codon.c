@@ -59,7 +59,7 @@ char codon2amino(char n0, char n1, char n2)
     case 't':
     case 'U':
     case 'u':
-      code += T_CODE << 2;
+      /* code += T_CODE << 2; */
       break;
     default: assert(0); /* XXX */
   }

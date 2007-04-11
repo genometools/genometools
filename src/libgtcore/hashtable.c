@@ -77,7 +77,8 @@ void hashtable_remove(Hashtable *ht, void *key, Env *env)
     ht->value_free((void*) value, env);
 }
 
-static int st_iterfunc(void *key, void *value, void *data, Env *env)
+static int st_iterfunc(void *key, void *value, void *data,
+                       /*@unused@*/ Env *env)
 {
   St_iterfunc_info *info = (St_iterfunc_info*) data;
   assert(info->iterfunc);

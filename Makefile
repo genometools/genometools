@@ -208,7 +208,8 @@ install:
 	cp lib/libgtext.a $(prefix)/lib
 	
 splint:
-	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) $(CURDIR)/src/*.c
+	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) $(CURDIR)/src/*.c \
+        $(CURDIR)/src/libgtcore/*.c
 
 test: all
 	bin/gt -test

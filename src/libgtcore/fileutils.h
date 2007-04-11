@@ -17,11 +17,11 @@ bool           file_exists(const char*);
 bool           file_is_newer(const char *a, const char *b);
 unsigned long  file_number_of_lines(FILE*);
 
-/* set 'dirname' to the dirname of 'file', if it has one, to "" otherwise */
-void           file_dirname(Str *dirname, const char *file, Env*);
+/* set <path> to the dirname of <file>, if it has one, to "" otherwise */
+void           file_dirname(Str *path, const char *file, Env*);
 
 /* find 'file' in $PATH, if it has no dirname; set 'path' to dirname otherwise.
    sets 'path' to the empty string if 'file' could not be found in $PATH. */
-int            file_find_in_path(Str *path, const char *file, Env *err);
+int            file_find_in_path(Str *path, const char *file, Env*);
 
 #endif

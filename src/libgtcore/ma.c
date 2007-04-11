@@ -33,7 +33,7 @@ MA* ma_new(void)
   return xcalloc(1, sizeof (MA));
 }
 
-static void free_MAInfo(MAInfo *mainfo, Env *env)
+static void free_MAInfo(MAInfo *mainfo, /*@unused@*/ Env *env)
 {
   free(mainfo);
 }
@@ -165,8 +165,10 @@ static int check_space_leak(void *key, void *value, void *data, Env *env)
   assert(key && value && data && env);
   /* report only the first leak */
   if (!info->has_leak) {
+    /*@ignore@*/
     fprintf(stderr, "bug: %zu bytes memory leaked (allocated on line %u in "
             "file \"%s\")\n", mainfo->size, mainfo->line, mainfo->filename);
+    /*@end@*/
     info->has_leak = true;
   }
   return 0;
@@ -199,7 +201,7 @@ int ma_check_space_leak(MA *ma, Env *env)
   return 0;
 }
 
-void ma_clean(MA *ma, Env *env)
+void ma_clean(MA *ma, /*@unused@*/ Env *env)
 {
   assert(ma);
   assert(ma->bookkeeping);

@@ -54,7 +54,8 @@ static int show_tool(void *key, void *value, void *data, Env *env)
   return 0;
 }
 
-static int show_option_comments(const char *progname, void *data, Env *env)
+static int show_option_comments(/*@unused@*/ const char *progname, void *data,
+                                Env *env)
 {
   Array *toolnames;
   unsigned long i;

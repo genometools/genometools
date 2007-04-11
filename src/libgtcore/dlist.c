@@ -144,7 +144,7 @@ void dlist_remove(Dlist *dlist, Dlistelem *dlistelem, Env *env)
   env_ma_free(dlistelem, env);
 }
 
-static int compare(const void *a, const void *b)
+static int intcompare(const void *a, const void *b)
 {
   return *(int*) a - *(int*) b;
 }
@@ -162,7 +162,7 @@ int dlist_unit_test(Env *env)
   env_error_check(env);
 
   /* boundary case: empty dlist */
-  dlist = dlist_new(compare, env);
+  dlist = dlist_new(intcompare, env);
   ensure(has_err, !dlist_size(dlist));
   dlist_delete(dlist, env);
 
@@ -171,7 +171,7 @@ int dlist_unit_test(Env *env)
   dlist_delete(dlist, env);
 
   /* boundary case: dlist containing one element */
-  dlist = dlist_new(compare, env);
+  dlist = dlist_new(intcompare, env);
   dlist_add(dlist, &elem_a, env);
   ensure(has_err, dlist_size(dlist) == 1);
   ensure(has_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
@@ -184,7 +184,7 @@ int dlist_unit_test(Env *env)
   dlist_delete(dlist, env);
 
   /* boundary case: dlist containing two elements */
-  dlist = dlist_new(compare, env);
+  dlist = dlist_new(intcompare, env);
   dlist_add(dlist, &elem_a, env);
   dlist_add(dlist, &elem_b, env);
   ensure(has_err, dlist_size(dlist) == 2);
@@ -207,10 +207,10 @@ int dlist_unit_test(Env *env)
     }
 
     /* sort the backup elements */
-    qsort(elems_backup, size, sizeof (int), compare);
+    qsort(elems_backup, size, sizeof (int), intcompare);
 
     /* test with compare function */
-    dlist = dlist_new(compare, env);
+    dlist = dlist_new(intcompare, env);
     ensure(has_err, !dlist_size(dlist));
     for (j = 0; j < size && !has_err; j++) {
       dlist_add(dlist, elems + j, env);
