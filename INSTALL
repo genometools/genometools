@@ -3,7 +3,7 @@ Building GenomeTools
 
 Invoke GNU make, e.g.:
 
-$ make [argument ...] 
+$ make [argument ...]
 
 to build GenomeTools.
 
@@ -27,7 +27,7 @@ Call
 $ make test
 
 to make sure your GenomeTools build went fine.
-This step requires an installed Ruby interpreter (see 
+This step requires an installed Ruby interpreter (see
 http://www.ruby-lang.org/en/ for informations on Ruby).
 
 
