@@ -35,6 +35,8 @@ int    env_delete(Env*);
 /* free functions get the data object (here the env object) _always_ as the
    last object */
 void    env_ma_free_func(void *ptr, Env*);
+#define env_ma_get_space_peak(env)\
+        ma_get_space_peak(env_ma(env))
 
 /* wrapper for file functions */
 #define env_fa_fopen(env, path, mode)\

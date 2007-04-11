@@ -26,7 +26,3 @@ feature requests:
 - check for circles
 - sort attributes
 - `gt eval`: measure nucleotide level
-
-from Stefan:
-
-- add get_space_peak() function to env class

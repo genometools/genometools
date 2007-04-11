@@ -172,6 +172,12 @@ static int check_space_leak(void *key, void *value, void *data, Env *env)
   return 0;
 }
 
+unsigned long ma_get_space_peak(const MA *ma)
+{
+  assert(ma);
+  return ma->max_size;
+}
+
 void ma_show_space_peak(MA *ma, FILE *fp)
 {
   assert(ma);
