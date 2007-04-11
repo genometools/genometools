@@ -146,18 +146,34 @@ static unsigned long computeCtab(const char *u, unsigned long ulen,
   return dist;
 }
 
-static Alignment* reconstructalignment(unsigned long *Ctab,
+static Alignment* reconstructalignment(const unsigned long *Ctab,
                                        const char *u, unsigned long ulen,
                                        const char *v, unsigned long vlen,
                                        Env *env)
 {
-  unsigned long row = ulen, col = vlen;
+  unsigned long row, col = vlen;
   Alignment *alignment;
   env_error_check(env);
   assert(Ctab && u && ulen && v && vlen);
   alignment = alignment_new_with_seqs(u, ulen, v, vlen, env);
-  while (row || col) {
+  row = Ctab[col];
+  /* process columns */
+  while (col) {
+    assert(Ctab[col-1] <= row);
+    if (Ctab[col-1] == row)
+      alignment_add_insertion(alignment, env);
+    else if (Ctab[col-1] + 1 == row)
+      alignment_add_replacement(alignment, env);
+    else {
+      while (Ctab[col-1] + 1 < row--)
+        alignment_add_deletion(alignment, env);
+      alignment_add_replacement(alignment, env);
+    }
+    row = Ctab[--col];
   }
+  /* process first column */
+  while (row--)
+    alignment_add_deletion(alignment, env);
   return alignment;
 }
 

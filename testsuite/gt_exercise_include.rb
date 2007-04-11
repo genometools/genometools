@@ -26,13 +26,6 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_align_test.out"
 end
 
-Name "gt exercise linearalign test"
-Keywords "gt_exercise"
-Test do
-  run_test "#{$bin}gt exercise linearalign #{$testdata}gt_align_test.in1 #{$testdata}gt_align_test.in2"
-  run "diff #{$last_stdout} #{$testdata}gt_align_test.out"
-end
-
 Name "gt exercise align -all test"
 Keywords "gt_exercise"
 Test do
@@ -101,6 +94,13 @@ Keywords "gt_exercise"
 Test do
   run_test "#{$bin}gt exercise qgramdist -q 3 #{$testdata}gt_qgramdist_test_seq1.fas #{$testdata}gt_qgramdist_test_seq2.fas"
   run "diff #{$last_stdout} #{$testdata}gt_qgramdist_test_q3.out"
+end
+
+Name "gt exercise linearalign test"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise linearalign #{$testdata}gt_align_test.in1 #{$testdata}gt_align_test.in2"
+  run "diff #{$last_stdout} #{$testdata}gt_linearalign_test.out"
 end
 
 Name "gt exercise nussinov_rna_fold test (tRNA glutamine)"
