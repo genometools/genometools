@@ -4,6 +4,14 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+/*
+  The algorithms in this file are described in chapter 3 of the book
+
+  [DEKM98] R. Durbin, S.R. Eddy, A. Krogh, and G. Mitchison.
+  Biological sequence analysis: probabilistic models of proteins and nucleic
+  acids. Cambridge University Press, 1998.
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,14 +21,6 @@
 #include <libgtext/coin_hmm.h>
 #include <libgtext/dice_hmm.h>
 #include <libgtext/hmm.h>
-
-/*
-  The algorithms in this file are described in chapter 3 of the book
-
-  [DEKM98] R. Durbin, S.R. Eddy, A. Krogh, and G. Mitchison.
-  Biological sequence analysis: probabilistic models of proteins and nucleic
-  acids. Cambridge University Press, 1998.
-*/
 
 #define MINUSINFINITY   -99999.0
 #define PSEUDOCOUNT     1
