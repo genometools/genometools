@@ -87,7 +87,8 @@ static unsigned long evaluatecrosspoints(const char *u, unsigned long ulen,
   assert(u && v && EDtabcolumn && Rtabcolumn && Ctab);
   if (vlen >= 2) {
     midcol = vlen / 2;
-    dist= evaluateallcolumns(EDtabcolumn, Rtabcolumn, midcol, u, ulen, v, vlen);
+    dist = evaluateallcolumns(EDtabcolumn, Rtabcolumn, midcol, u, ulen, v,
+                              vlen);
     midrow = Rtabcolumn[ulen];
     Ctab[midcol] = rowoffset + midrow;
     evaluatecrosspoints(u, midrow, v, midcol, EDtabcolumn, Rtabcolumn, Ctab,
