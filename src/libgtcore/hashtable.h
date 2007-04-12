@@ -16,7 +16,7 @@ typedef enum {
   HASH_STRING
 } Hash_type;
 
-typedef int  (*Hashiteratorfunc)(void *key, void *value, void *data, Env*);
+typedef int (*Hashiteratorfunc)(void *key, void *value, void *data, Env*);
 
 Hashtable* hashtable_new(Hash_type, FreeFunc keyfree, FreeFunc valuefree, Env*);
 void*      hashtable_get(Hashtable*, const void*);
