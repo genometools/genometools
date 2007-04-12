@@ -18,45 +18,8 @@
 #include "gt_swalign.h"
 #include "gt_upgma.h"
 
-static int save_exercise_name(void *key, void *value, void *data, Env *env)
-{
-  const char *exercisename;
-  Array *exercisenames;
-  env_error_check(env);
-  assert(key && value && data);
-  exercisename = (const char*) key;
-  exercisenames = (Array*) data;
-  array_add(exercisenames, exercisename, env);
-  return 0;
-}
-
-static int show_exercise_tools(/*@unused@*/ const char *progname, void *data,
-                               Env *env)
-{
-  Hashtable *exercise_tools;
-  Array *exercisenames;
-  unsigned long i;
-  int has_err;
-  env_error_check(env);
-  assert(data);
-  exercise_tools = (Hashtable*) data;
-  exercisenames = array_new(sizeof (const char*), env);
-  has_err = hashtable_foreach(exercise_tools, save_exercise_name, exercisenames,
-                              env);
-  assert(!has_err); /* cannot happen, save_exercise_name() is sane */
-  printf("\nExercise tools:\n\n");
-  assert(array_size(exercisenames));
-  qsort(array_get_space(exercisenames), array_size(exercisenames),
-        array_elem_size(exercisenames), compare);
-  for (i = 0; i < array_size(exercisenames); i++) {
-    xputs(*(const char**) array_get(exercisenames, i));
-  }
-  array_delete(exercisenames, env);
-  return 0;
-}
-
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
-                            Hashtable *exercise_tools, Env *env)
+                            Toolbox *exercise_toolbox, Env *env)
 {
   OptionParser *op;
   OPrval oprval;
@@ -64,54 +27,54 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   op = option_parser_new("[option ...] exercise_tool_name [argument ...]",
                          "Call exercise tool with name exercise_tool_name and "
                          "pass argument(s) to it.", env);
-  option_parser_set_comment_func(op, show_exercise_tools, exercise_tools);
+  option_parser_set_comment_func(op, toolbox_show, exercise_toolbox);
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
                                         versionfunc, 1, env);
   option_parser_delete(op, env);
   return oprval;
 }
 
-void register_exercises(Hashtable *exercise_tools, Env *env)
+void register_exercises(Toolbox *exercise_toolbox, Env *env)
 {
-  assert(exercise_tools);
-  hashtable_add(exercise_tools, "affinealign", gt_affinealign, env);
-  hashtable_add(exercise_tools, "align", gt_align, env);
-  hashtable_add(exercise_tools, "casino", gt_casino, env);
-  hashtable_add(exercise_tools, "coin", gt_coin, env);
-  hashtable_add(exercise_tools, "consensus_sa", gt_consensus_sa, env);
-  hashtable_add(exercise_tools, "msaparse", gt_msaparse, env);
-  hashtable_add(exercise_tools, "neighborjoining", gt_neighborjoining, env);
-  hashtable_add(exercise_tools, "nussinov_rna_fold", gt_nussinov_rna_fold, env);
-  hashtable_add(exercise_tools, "qgramdist", gt_qgramdist, env);
-  hashtable_add(exercise_tools, "scorematrix", gt_scorematrix, env);
-  hashtable_add(exercise_tools, "swalign", gt_swalign, env);
-  hashtable_add(exercise_tools, "upgma", gt_upgma, env);
+  assert(exercise_toolbox);
+  toolbox_add(exercise_toolbox, "affinealign", gt_affinealign, env);
+  toolbox_add(exercise_toolbox, "align", gt_align, env);
+  toolbox_add(exercise_toolbox, "casino", gt_casino, env);
+  toolbox_add(exercise_toolbox, "coin", gt_coin, env);
+  toolbox_add(exercise_toolbox, "consensus_sa", gt_consensus_sa, env);
+  toolbox_add(exercise_toolbox, "msaparse", gt_msaparse, env);
+  toolbox_add(exercise_toolbox, "neighborjoining", gt_neighborjoining, env);
+  toolbox_add(exercise_toolbox, "nussinov_rna_fold", gt_nussinov_rna_fold, env);
+  toolbox_add(exercise_toolbox, "qgramdist", gt_qgramdist, env);
+  toolbox_add(exercise_toolbox, "scorematrix", gt_scorematrix, env);
+  toolbox_add(exercise_toolbox, "swalign", gt_swalign, env);
+  toolbox_add(exercise_toolbox, "upgma", gt_upgma, env);
 }
 
 int gt_exercise(int argc, const char **argv, Env *env)
 {
-  Hashtable *exercise_tools;
-  int (*exercise)(int, char**, Env*);
+  Toolbox *exercise_toolbox;
+  Tool exercise;
   int parsed_args, has_err = 0;
   char **nargv = NULL;
   env_error_check(env);
 
   /* option parsing */
-  exercise_tools = hashtable_new(HASH_STRING, NULL, NULL, env);
-  register_exercises(exercise_tools, env);
-  switch (parse_options(&parsed_args, argc, argv, exercise_tools, env)) {
+  exercise_toolbox = toolbox_new(env);
+  register_exercises(exercise_toolbox, env);
+  switch (parse_options(&parsed_args, argc, argv, exercise_toolbox, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      hashtable_delete(exercise_tools, env);
+      toolbox_delete(exercise_toolbox, env);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      hashtable_delete(exercise_tools, env);
+      toolbox_delete(exercise_toolbox, env);
       return 0;
   }
   assert(parsed_args < argc);
 
   /* get exercise */
-  if (!(exercise = hashtable_get(exercise_tools, argv[1]))) {
+  if (!(exercise = toolbox_get(exercise_toolbox, argv[1]))) {
     env_error_set(env, "exercise '%s' not found; option -help lists possible "
                   "tools", argv[1]);
     has_err = -1;
@@ -120,12 +83,12 @@ int gt_exercise(int argc, const char **argv, Env *env)
   /* call exercise */
   if (!has_err) {
     nargv = cstr_array_prefix_first(argv+parsed_args, argv[0], env);
-    has_err = exercise(argc-parsed_args, nargv, env);
+    has_err = exercise(argc-parsed_args, (const char**) nargv, env);
   }
 
   /* free */
   cstr_array_delete(nargv, env);
-  hashtable_delete(exercise_tools, env);
+  toolbox_delete(exercise_toolbox, env);
 
   return has_err;
 }

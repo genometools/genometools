@@ -42,6 +42,7 @@
 #include <libgtext/stat_visitor.h>              /* status visitor class */
 #include <libgtext/stream_evaluator.h>          /* string class */
 #include <libgtext/swalign.h>                   /* Smith-Waterman align. mod. */
+#include <libgtext/toolbox.h>                   /* toolbox class */
 #include <libgtext/upgma.h>                     /* UPGMA class */
 
 #endif

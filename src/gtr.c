@@ -28,8 +28,8 @@ struct GTR {
   bool test,
        interactive,
        debug;
-  Hashtable *tools,
-            *unit_tests;
+  Toolbox *toolbox;
+  Hashtable *unit_tests;
   lua_State *L;
 };
 
@@ -40,43 +40,6 @@ GTR* gtr_new(Env *env)
   gtr->L = luaL_newstate();
   assert(gtr->L);
   return gtr;
-}
-
-static int show_tool(void *key, void *value, void *data, Env *env)
-{
-  const char *toolname;
-  Array *toolnames;
-  env_error_check(env);
-  assert(key && value && data);
-  toolname = (const char*) key;
-  toolnames = (Array*) data;
-  array_add(toolnames, toolname, env);
-  return 0;
-}
-
-static int show_option_comments(/*@unused@*/ const char *progname, void *data,
-                                Env *env)
-{
-  Array *toolnames;
-  unsigned long i;
-  int has_err;
-  GTR *gtr;
-  env_error_check(env);
-  assert(data);
-  gtr = (GTR*) data;
-  toolnames = array_new(sizeof (const char*), env);
-  if (gtr->tools) {
-    has_err = hashtable_foreach(gtr->tools, show_tool, toolnames, env);
-    assert(!has_err); /* cannot happen, show_tool() is sane */
-    printf("\nTools:\n\n");
-    assert(array_size(toolnames));
-    qsort(array_get_space(toolnames), array_size(toolnames),
-          array_elem_size(toolnames), compare);
-    for (i = 0; i < array_size(toolnames); i++)
-      xputs(*(const char**) array_get(toolnames, i));
-  }
-  array_delete(toolnames, env);
-  return 0;
 }
 
 OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
@@ -90,7 +53,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   op = option_parser_new("[option ...] [tool ...] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
                           "(http://genometools.org).", env);
-  option_parser_set_comment_func(op, show_option_comments, gtr);
+  option_parser_set_comment_func(op, toolbox_show, gtr->toolbox);
   o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false,
                       env);
   option_parser_add_option(op, o, env);
@@ -110,23 +73,23 @@ void gtr_register_components(GTR *gtr, Env *env)
 {
   assert(gtr);
   /* add tools */
-  hashtable_delete(gtr->tools, env);
-  gtr->tools = hashtable_new(HASH_STRING, NULL, NULL, env);
-  hashtable_add(gtr->tools, "bioseq", gt_bioseq, env);
-  hashtable_add(gtr->tools, "cds", gt_cds, env);
-  hashtable_add(gtr->tools, "clean", gt_clean, env);
-  hashtable_add(gtr->tools, "csa", gt_csa, env);
-  hashtable_add(gtr->tools, "eval", gt_eval, env);
-  hashtable_add(gtr->tools, "exercise", gt_exercise, env);
-  hashtable_add(gtr->tools, "extractfeat", gt_extractfeat, env);
-  hashtable_add(gtr->tools, "filter", gt_filter, env);
-  hashtable_add(gtr->tools, "gff3", gt_gff3, env);
-  hashtable_add(gtr->tools, "gtf2gff3", gt_gtf2gff3, env);
-  hashtable_add(gtr->tools, "merge", gt_merge, env);
-  hashtable_add(gtr->tools, "mmapandread", gt_mmapandread, env);
-  hashtable_add(gtr->tools, "mutate", gt_mutate, env);
-  hashtable_add(gtr->tools, "splitfasta", gt_splitfasta, env);
-  hashtable_add(gtr->tools, "stat", gt_stat, env);
+  toolbox_delete(gtr->toolbox, env);
+  gtr->toolbox = toolbox_new(env);
+  toolbox_add(gtr->toolbox, "bioseq", gt_bioseq, env);
+  toolbox_add(gtr->toolbox, "cds", gt_cds, env);
+  toolbox_add(gtr->toolbox, "clean", gt_clean, env);
+  toolbox_add(gtr->toolbox, "csa", gt_csa, env);
+  toolbox_add(gtr->toolbox, "eval", gt_eval, env);
+  toolbox_add(gtr->toolbox, "exercise", gt_exercise, env);
+  toolbox_add(gtr->toolbox, "extractfeat", gt_extractfeat, env);
+  toolbox_add(gtr->toolbox, "filter", gt_filter, env);
+  toolbox_add(gtr->toolbox, "gff3", gt_gff3, env);
+  toolbox_add(gtr->toolbox, "gtf2gff3", gt_gtf2gff3, env);
+  toolbox_add(gtr->toolbox, "merge", gt_merge, env);
+  toolbox_add(gtr->toolbox, "mmapandread", gt_mmapandread, env);
+  toolbox_add(gtr->toolbox, "mutate", gt_mutate, env);
+  toolbox_add(gtr->toolbox, "splitfasta", gt_splitfasta, env);
+  toolbox_add(gtr->toolbox, "stat", gt_stat, env);
   /* add unit tests */
   hashtable_delete(gtr->unit_tests, env);
   gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL, env);
@@ -204,7 +167,7 @@ static int run_tests(GTR *gtr, Env *env)
 
 int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
 {
-  int (*tool)(int, char**, Env*) = NULL;
+  Tool tool = NULL;
   char **nargv = NULL;
   int has_err = 0;
   env_error_check(env);
@@ -220,7 +183,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
     has_err = -1;
   }
   if (!has_err && argc > 1) {
-    if (!gtr->tools || !(tool = hashtable_get(gtr->tools, argv[1]))) {
+    if (!gtr->toolbox || !(tool = toolbox_get(gtr->toolbox, argv[1]))) {
       env_error_set(env, "tool '%s' not found; option -help lists possible "
                          "tools", argv[1]);
       has_err = -1;
@@ -228,7 +191,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
   }
   if (!has_err && argc > 1) {
     nargv = cstr_array_prefix_first(argv+1, argv[0], env);
-    has_err = tool(argc-1, nargv, env);
+    has_err = tool(argc-1, (const char**) nargv, env);
   }
   cstr_array_delete(nargv, env);
   if (!has_err && gtr->interactive) {
@@ -244,7 +207,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
 void gtr_delete(GTR *gtr, Env *env)
 {
   if (!gtr) return;
-  hashtable_delete(gtr->tools, env);
+  toolbox_delete(gtr->toolbox, env);
   hashtable_delete(gtr->unit_tests, env);
   if (gtr->L) lua_close(gtr->L);
   env_ma_free(gtr, env);
