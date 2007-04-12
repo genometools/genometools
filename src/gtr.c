@@ -12,6 +12,7 @@
 #include "tools/gt_cds.h"
 #include "tools/gt_clean.h"
 #include "tools/gt_csa.h"
+#include "tools/gt_dev.h"
 #include "tools/gt_eval.h"
 #include "tools/gt_exercise.h"
 #include "tools/gt_extractfeat.h"
@@ -79,6 +80,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "cds", gt_cds, env);
   toolbox_add(gtr->toolbox, "clean", gt_clean, env);
   toolbox_add(gtr->toolbox, "csa", gt_csa, env);
+  toolbox_add(gtr->toolbox, "dev", gt_dev, env);
   toolbox_add(gtr->toolbox, "eval", gt_eval, env);
   toolbox_add(gtr->toolbox, "exercise", gt_exercise, env);
   toolbox_add(gtr->toolbox, "extractfeat", gt_extractfeat, env);

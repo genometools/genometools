@@ -17,6 +17,7 @@ typedef int (*Tool)(int argc, const char **argv, Env*);
 Toolbox* toolbox_new(Env*);
 void     toolbox_add(Toolbox*, const char *toolname, Tool, Env*);
 Tool     toolbox_get(const Toolbox*, const char *toolname);
+/* shows all tools except tools with toolname ``dev'' */
 int      toolbox_show(/*@unused@*/ const char *progname, void *toolbox, Env*);
 void     toolbox_delete(Toolbox*, Env*);
 

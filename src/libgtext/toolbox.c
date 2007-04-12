@@ -42,7 +42,8 @@ static int save_tool_name(void *key, void *value, void *data, Env *env)
   assert(key && value && data);
   tool_name = (const char*) key;
   tool_names = (Array*) data;
-  array_add(tool_names, tool_name, env);
+  if (strcmp(tool_name, "dev"))
+    array_add(tool_names, tool_name, env);
   return 0;
 }
 
