@@ -26,3 +26,5 @@ feature requests:
 - check for circles
 - sort attributes
 - `gt eval`: measure nucleotide level
+- extend error messages for xmalloc(), xcalloc(), and xrealloc(): show requested
+  memory sizes and maybe line number and file name)
