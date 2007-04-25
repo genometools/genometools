@@ -197,12 +197,12 @@ install:
 	cp bin/gt $(prefix)/bin
 	cp -r gtdata $(prefix)/bin
 	test -d $(prefix)/include/libgtcore || mkdir -p $(prefix)/include/libgtcore
-	cp src/gtcore.h $(prefix)/include	
+	cp src/gtcore.h $(prefix)/include
 	cp src/libgtcore/*.h $(prefix)/include/libgtcore
 	test -d $(prefix)/include/libgtext || mkdir -p $(prefix)/include/libgtext
-	cp src/gtext.h $(prefix)/include	
+	cp src/gtext.h $(prefix)/include
 	cp src/libgtext/*.h $(prefix)/include/libgtext
-	cp src/gt.h $(prefix)/include	
+	cp src/gt.h $(prefix)/include
 	test -d $(prefix)/lib || mkdir -p $(prefix)/lib
 	cp lib/libgtcore.a $(prefix)/lib
 	cp lib/libgtext.a $(prefix)/lib
