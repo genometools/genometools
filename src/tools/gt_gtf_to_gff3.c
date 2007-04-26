@@ -25,7 +25,7 @@ static OPrval parse_options(int *parsed_args, bool *be_tolerant, int argc,
   return oprval;
 }
 
-int gt_gtf2gff3(int argc, const char **argv, Env *env)
+int gt_gtf_to_gff3(int argc, const char **argv, Env *env)
 {
   GenomeStream *gtf_in_stream = NULL, *gff3_out_stream = NULL;
   GenomeNode *gn;

@@ -18,7 +18,7 @@
 #include "tools/gt_extractfeat.h"
 #include "tools/gt_filter.h"
 #include "tools/gt_gff3.h"
-#include "tools/gt_gtf2gff3.h"
+#include "tools/gt_gtf_to_gff3.h"
 #include "tools/gt_merge.h"
 #include "tools/gt_mmapandread.h"
 #include "tools/gt_mutate.h"
@@ -86,7 +86,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "extractfeat", gt_extractfeat, env);
   toolbox_add(gtr->toolbox, "filter", gt_filter, env);
   toolbox_add(gtr->toolbox, "gff3", gt_gff3, env);
-  toolbox_add(gtr->toolbox, "gtf2gff3", gt_gtf2gff3, env);
+  toolbox_add(gtr->toolbox, "gtf_to_gff3", gt_gtf_to_gff3, env);
   toolbox_add(gtr->toolbox, "merge", gt_merge, env);
   toolbox_add(gtr->toolbox, "mmapandread", gt_mmapandread, env);
   toolbox_add(gtr->toolbox, "mutate", gt_mutate, env);

@@ -1,3 +1,8 @@
+changes in version 0.7.4:
+
+- `gt gtf2gff3` has been renamed to `gt gtf_to_gff3`
+
+
 changes in version 0.7.3:
 
 - new exercise `gt exercise linearalign` added
