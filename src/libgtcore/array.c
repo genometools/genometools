@@ -127,6 +127,12 @@ void array_set_size(Array *a, unsigned long size)
   a->next_free = size;
 }
 
+void array_reset(Array *a)
+{
+  assert(a);
+  a->next_free = 0;
+}
+
 Array* array_clone(const Array *a, Env *env)
 {
   Array *a_copy;
