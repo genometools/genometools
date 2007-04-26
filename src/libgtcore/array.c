@@ -12,8 +12,8 @@
 #include <libgtcore/ensure.h>
 #include <libgtcore/xansi.h>
 
-#define NUM_OF_TESTS	100
-#define MAX_SIZE	1024
+#define NUM_OF_TESTS    100
+#define MAX_SIZE        1024
 
 struct Array {
   void *space;
