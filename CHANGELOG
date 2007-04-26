@@ -1,6 +1,7 @@
 changes in version 0.7.4:
 
 - `gt gtf2gff3` has been renamed to `gt gtf_to_gff3`
+- new tool `gt gff3_to_gtf` has been added
 
 
 changes in version 0.7.3:
