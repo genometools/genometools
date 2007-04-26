@@ -137,7 +137,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
       gn = *(GenomeNode**) array_pop(node_stack);
     else
       gn = *(GenomeNode**) queue_get(node_queue);
-    array_set_size(list_of_children, 0);
+    array_reset(list_of_children);
     if (gn->children) {
       /* a backup of the children array is necessary if traverse() frees the
          node */

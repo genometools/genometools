@@ -55,7 +55,7 @@ static int gtf_show_transcript(GenomeNode *gn, GTFVisitor *gtf_visitor,
   int has_err;
   env_error_check(env);
   assert(gn && gtf_visitor);
-  array_set_size(gtf_visitor->exon_features, 0);
+  array_reset(gtf_visitor->exon_features);
   has_err = genome_node_traverse_direct_children(gn, gtf_visitor,
                                                  save_exon_node, env);
   return has_err;

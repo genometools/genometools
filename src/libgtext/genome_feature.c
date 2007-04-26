@@ -214,8 +214,8 @@ static int determine_transcripttypes(GenomeNode *gn, void *data, Env *env)
   env_error_check(env);
   assert(gn && info);
   /* reset exon_features and cds_features */
-  array_set_size(info->exon_features, 0);
-  array_set_size(info->cds_features, 0);
+  array_reset(info->exon_features);
+  array_reset(info->cds_features);
   /* collect all direct children exons */
   has_err = genome_node_traverse_direct_children(gn, info, save_exons_and_cds,
                                                  env);

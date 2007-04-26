@@ -48,7 +48,7 @@ static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   }
 
   if (!has_err) {
-    array_set_size(sort_stream->trees, 0);
+    array_reset(sort_stream->trees);
     *gn = NULL;
   }
 

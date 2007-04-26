@@ -169,8 +169,8 @@ int array_unit_test(Env *env)
   for (i = 0; i < NUM_OF_TESTS && !has_err; i++) {
     size = ((double) rand() / RAND_MAX) * MAX_SIZE;
 
-    array_set_size(char_array, 0);
-    array_set_size(int_array, 0);
+    array_reset(char_array);
+    array_reset(int_array);
 
     ensure(has_err, array_size(char_array) == 0);
     ensure(has_err, array_size(int_array) == 0);

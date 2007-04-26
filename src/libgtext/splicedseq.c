@@ -88,7 +88,7 @@ void splicedseq_reset(Splicedseq *ss)
 {
   assert(ss);
   str_reset(ss->splicedseq);
-  array_set_size(ss->positionmapping, 0);
+  array_reset(ss->positionmapping);
   ss->forward = true;
 }
 

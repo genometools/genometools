@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -31,7 +31,7 @@ void* queue_get(Queue *q)
   q->current_index++;
   /* reset */
   if (q->current_index == array_size(q->queue)) {
-    array_set_size(q->queue, 0);
+    array_reset(q->queue);
     q->current_index = 0;
   }
   return r;

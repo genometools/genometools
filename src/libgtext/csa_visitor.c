@@ -444,5 +444,5 @@ void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster,
     genome_node_rec_delete(*(GenomeNode**) array_get(csa_visitor->cluster, i),
                            env);
   }
-  array_set_size(csa_visitor->cluster, 0);
+  array_reset(csa_visitor->cluster);
 }
