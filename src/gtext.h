@@ -26,6 +26,7 @@
 #include <libgtext/gff3_out_stream.h>           /* GFF3 output stream class */
 #include <libgtext/gtdata.h>                    /* gtdata/ module */
 #include <libgtext/gtf_in_stream.h>             /* GTF input stream class */
+#include <libgtext/gtf_out_stream.h>            /* GTF output stream class */
 #include <libgtext/genome_stream.h>             /* genome stream class */
 #include <libgtext/hmm.h>                       /* HMM class */
 #include <libgtext/linearalign.h>               /* linear alignment module */
