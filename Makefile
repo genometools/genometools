@@ -11,7 +11,7 @@ INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
              -I$(CURDIR)/src/external/expat-2.0.0/lib\
              -I$(CURDIR)/src/external/bzip2-1.0.4
 CFLAGS:=
-GT_CFLAGS:= -Wall -pipe $(INCLUDEOPT)
+GT_CFLAGS:= -g -Wall -pipe $(INCLUDEOPT)
 LDFLAGS:=
 LDLIBS:=-lm -lz
 
@@ -53,9 +53,7 @@ SERVER=gordon@genomethreader.org
 WWWBASEDIR=/var/www/servers/genometools.org
 
 # process arguments
-ifeq ($(opt),no)
-  GT_CFLAGS += -g
-else
+ifneq ($(opt),no)
   GT_CFLAGS += -Os
 endif
 
