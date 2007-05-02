@@ -9,15 +9,15 @@
 
 #include <stdio.h>
 #include <libgtext/genome_stream.h>
-#include <libgtext/genome_stream.h>
 #include <libgtcore/hashtable.h>
+#include <libgtext/feature_index.h>
 
 /* implements the ``genome_stream'' interface */
 typedef struct FeatureStream FeatureStream;
 
 const GenomeStreamClass* feature_stream_class(void);
 
-/* create a FeatureStream which writes to Hashtable "features" */
-GenomeStream*            feature_stream_new(GenomeStream*, Hashtable *features, Env*);
+/* create a FeatureStream which writes to FeatureIndex */
+GenomeStream*            feature_stream_new(GenomeStream*, FeatureIndex*, Env*);
 
 #endif

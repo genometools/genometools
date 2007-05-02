@@ -11,8 +11,9 @@
 typedef struct FeatureVisitor FeatureVisitor;
 
 #include <libgtext/genome_visitor.h>
+#include <libgtext/feature_index.h>
 
 const GenomeVisitorClass* feature_visitor_class(void);
-GenomeVisitor*            feature_visitor_new(Hashtable* , Env*);
+GenomeVisitor*            feature_visitor_new(FeatureIndex* , Env*);
 
 #endif

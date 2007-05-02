@@ -7,6 +7,7 @@
 #include <gtcore.h>
 #include <libgtext/feature_stream.h>
 #include <libgtext/feature_visitor.h>
+#include <libgtext/feature_index.h>
 #include <libgtext/genome_stream_rep.h>
 
 struct FeatureStream
@@ -14,7 +15,6 @@ struct FeatureStream
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
   GenomeVisitor *feature_visitor;
-	Hashtable *features;
 };
 
 #define feature_stream_cast(GS)\
@@ -47,7 +47,7 @@ const GenomeStreamClass* feature_stream_class(void)
 }
 
 GenomeStream* feature_stream_new(GenomeStream *in_stream,
-                             Hashtable *features, Env *env)
+                             FeatureIndex *fi, Env *env)
 {
   GenomeStream *gs;
   FeatureStream *feature_stream;
@@ -56,9 +56,8 @@ GenomeStream* feature_stream_new(GenomeStream *in_stream,
   gs = genome_stream_create(feature_stream_class(), true, env);
   feature_stream = feature_stream_cast(gs);
   feature_stream->in_stream = in_stream;
-	feature_stream->features = features;
 	
-  feature_stream->feature_visitor = feature_visitor_new(features, env);
+  feature_stream->feature_visitor = feature_visitor_new(fi, env);
   
 	if (!feature_stream->feature_visitor)
     has_err = -1;

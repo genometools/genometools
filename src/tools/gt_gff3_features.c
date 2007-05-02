@@ -5,6 +5,7 @@
 */
 
 #include "gt.h"
+#include <libgtext/feature_index.h>
 
 typedef struct {
   bool verbose;
@@ -57,10 +58,9 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
 {
   GenomeStream *gff3_in_stream,
 							 *feature_stream = NULL;
-/*               *gff3_out_stream; */
   Gff3_features_arguments arguments;
   GenomeNode *gn;
-	Hashtable *features = NULL;
+	FeatureIndex *features = NULL;
   int parsed_args, has_err;
   env_error_check(env);
 
@@ -81,10 +81,9 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
   /* set offset (if necessary) */
   if (arguments.offset != UNDEF_LONG)
     gff3_in_stream_set_offset(gff3_in_stream, arguments.offset);
-
 	
-	/* create feature stream */
-		features = hashtable_new(HASH_STRING, NULL, (FreeFunc) array_delete, env);
+	/* create feature index and stream */
+		features = feature_index_new(env);
     feature_stream = feature_stream_new(gff3_in_stream, features, env);
 
   /* create gff3 output stream */
@@ -98,9 +97,9 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
 
   /* free */
 /*   genome_stream_delete(gff3_out_stream, env); */
-  genome_stream_delete(feature_stream, env);
+  feature_index_delete(features, env);
+	genome_stream_delete(feature_stream, env);
   genome_stream_delete(gff3_in_stream, env);
-	hashtable_delete(features, env);
   genfile_xclose(arguments.outfp, env);
 
   return has_err;
