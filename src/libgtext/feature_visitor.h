@@ -13,6 +13,6 @@ typedef struct FeatureVisitor FeatureVisitor;
 #include <libgtext/genome_visitor.h>
 
 const GenomeVisitorClass* feature_visitor_class(void);
-GenomeVisitor*            feature_visitor_new(, Env*);
+GenomeVisitor*            feature_visitor_new(Hashtable* , Env*);
 
 #endif

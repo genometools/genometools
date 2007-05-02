@@ -51,16 +51,14 @@ GenomeStream* feature_stream_new(GenomeStream *in_stream,
 {
   GenomeStream *gs;
   FeatureStream *feature_stream;
-  Hashtable *features;
   int has_err = 0;
   env_error_check(env);
   gs = genome_stream_create(feature_stream_class(), true, env);
   feature_stream = feature_stream_cast(gs);
-	/* features = hashtable_new(HASH_STRING, env_ma_free_func, env_ma_free_func, env); */
-  feature_stream->feature_stream = in_stream;
+  feature_stream->in_stream = in_stream;
 	feature_stream->features = features;
 	
-  feature_stream->feature_visitor = feature_visitor_new();
+  feature_stream->feature_visitor = feature_visitor_new(features, env);
   
 	if (!feature_stream->feature_visitor)
     has_err = -1;

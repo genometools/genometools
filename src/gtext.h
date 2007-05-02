@@ -45,5 +45,6 @@
 #include <libgtext/swalign.h>                   /* Smith-Waterman align. mod. */
 #include <libgtext/toolbox.h>                   /* toolbox class */
 #include <libgtext/upgma.h>                     /* UPGMA class */
+#include <libgtext/feature_stream.h>						/* Feature stream class */
 
 #endif
