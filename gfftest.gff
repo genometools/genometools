@@ -1,0 +1,7 @@
+##gff-version   3
+##sequence-region   ctg123 1 19972
+##sequence-region   ctg223 19999 1497228
+ctg123	.	gene	1000	9000	.	+	.	ID=gene1
+ctg123	.	gene	10000	19000	.	+	.	ID=gene2
+ctg223	.	gene	19999	22000	.	+	.	ID=gene3
+#
