@@ -18,10 +18,10 @@
   Press: Cambridge, MA, 1990.
 */
 
-/* sort the array of elements pointed to by 'in' containing 'size' many elements
-   of size 'elem_size' and store the result in the array 'out' of the same size.
-   'max_elemvalue' denotes the maximum value an element can have.
-   'get_elemvalue' should return an integer value for the given element 'elem'.
+/* sort the array of elements pointed to by <in> containing <size> many elements
+   of size <elem_size> and store the result in the array <out> of the same size.
+   <max_elemvalue> denotes the maximum value an element can have.
+   <get_elemvalue> should return an integer value for the given element <elem>.
 */
 void          countingsort(void *out, const void *in, size_t elem_size,
                            unsigned long size, unsigned long max_elemvalue,
@@ -29,7 +29,7 @@ void          countingsort(void *out, const void *in, size_t elem_size,
                            unsigned long (*get_elemvalue)(const void *elem,
                                                           void *data), Env*);
 
-/* if 'max_elemvalue' is not known, it can be determined with this function */
+/* if <max_elemvalue> is not known, it can be determined with this function */
 unsigned long countingsort_get_max(const void *in, size_t elem_size,
                                    unsigned long size, void *data,
                                    unsigned long (*get_elemvalue)
