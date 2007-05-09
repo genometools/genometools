@@ -1,6 +1,8 @@
 #include <libgtcore/hashtable.h>
+#include <libgtcore/range.h>
 #include <libgtext/feature_index.h>
 #include <libgtext/genome_node.h>
+#include <libgtext/bsearch.h>
 
 struct FeatureIndex
 {
@@ -98,8 +100,8 @@ void feature_index_add_genome_feature_for_seqid(FeatureIndex *fi, GenomeFeature*
 	
 	/* Add node to the appropriate array in the hashtable. */
 	array_add(hashtable_get(fi->features, seqid),
-	        	gf_new, 
-		  		  env);
+	        	 gf_new, 
+		  		 env);
 }
 
 /*
@@ -107,36 +109,61 @@ Returns an array of GenomeNodes for a given sequence region identifier.
 */
 Array* feature_index_get_features_for_seqid(FeatureIndex* fi, char* seqid)
 {
-	int has_err = 0;
-	if(seqid == NULL || fi == NULL) 
-	{
-		has_err = -1; 
-	} 
-	else 
-	{
-		return (Array*) hashtable_get(fi->features, seqid);
-	}	
+	return (Array*) hashtable_get(fi->features, seqid);	
 }
 
+
+static int compare_for_overlap(const void* gn1, const void* gn2)
+{
+  Range range1, range2;
+  range1 = genome_node_get_range((GenomeNode*) gn1);
+  range2 = genome_node_get_range(*(GenomeNode**) gn2);
+  if(range_overlap(range1 ,range2))
+    return 0;
+  if(range1.end < range2.start)
+    return -1;
+  return 1;
+}
 
 
 /*
 
 */
-int feature_index_get_features_for_range(FeatureIndex *fi, unsigned long *start_out,
-                     unsigned long *end_out, char* seqid, unsigned long range_start, unsigned long range_end)
+int feature_index_get_features_for_range(FeatureIndex *fi, Array* results, char* seqid, unsigned long range_start, unsigned long range_end, Env* env)
 {
+ Array* base = feature_index_get_features_for_seqid(fi, seqid);
+ GenomeNode* key;
+ int has_err = 0;
  
+ Range qry_range, tmp_range;
+ qry_range.start = range_start;
+ qry_range.end = range_end;
  
- return 0;
+ key = genome_feature_new(gft_gene, qry_range, STRAND_UNKNOWN,
+                                          NULL, UNDEF_ULONG, env);
+ tmp_range = genome_node_get_range(key);                                        
+ printf("tmp start: %lu, end: %lu\n", tmp_range.start, tmp_range.end);
+ 
+ bsearch_all(results, 
+             key, 
+             array_get_space(base), 
+             array_size(base), 
+             sizeof(GenomeNode*),
+             compare_for_overlap, 
+             env);
+ 
+ genome_node_delete(key, env);
+ return has_err;
 }
+
+
 
 /* 
 Outputs a row in a hashtable, with the key being a cstring and the value an Array.
 Output will be "<key> -> <number of elements in array>".
 Meant to be used in hashtable_foreach().
 */
-int print_index_row(void* key, void* value, void* data, Env* env)
+static int print_index_row(void* key, void* value, void* data, Env* env)
 {
   printf("%s -> %lu\n", (char*) key, array_size((Array*) value));
   return 0;

@@ -61,7 +61,7 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
   GenomeNode *gn;
   FeatureIndex *features = NULL;
   int parsed_args, has_err;
-  unsigned long start, end;
+  Array *results;
   env_error_check(env);
 
 
@@ -102,8 +102,15 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   feature_index_print_contents(features, env); 
+  
+  results = array_new(sizeof(GenomeNode*), env);
+  
+  feature_index_get_features_for_range(features, results, "chr16", 4000, 16000,  env);
 
+  printf("# of results: %lu\n", array_size(results));
+  
   /* free */
+  array_delete(results, env);
   feature_index_delete(features, env);
   genome_stream_delete(feature_stream, env);
   genome_stream_delete(sort_stream, env);
