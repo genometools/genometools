@@ -56,13 +56,14 @@ static OPrval parse_options(int *parsed_args, Gff3_features_arguments *arguments
 
 int gt_gff3_features(int argc, const char **argv, Env *env)
 {
-  GenomeStream *gff3_in_stream,
-							 *feature_stream = NULL;
+  GenomeStream *sort_stream, *gff3_in_stream, *feature_stream = NULL;
   Gff3_features_arguments arguments;
   GenomeNode *gn;
-	FeatureIndex *features = NULL;
+  FeatureIndex *features = NULL;
   int parsed_args, has_err;
+  unsigned long start, end;
   env_error_check(env);
+
 
   /* option parsing */
   switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
@@ -82,9 +83,12 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
   if (arguments.offset != UNDEF_LONG)
     gff3_in_stream_set_offset(gff3_in_stream, arguments.offset);
 	
-	/* create feature index and stream */
-		features = feature_index_new(env);
-    feature_stream = feature_stream_new(gff3_in_stream, features, env);
+  /*  create sort stream */
+  sort_stream = sort_stream_new(gff3_in_stream, env);
+  
+  /* create feature index and stream */
+  features = feature_index_new(env);
+  feature_stream = feature_stream_new(sort_stream, features, env);
 
   /* create gff3 output stream */
   /* gff3_out_stream = gff3_out_stream_new(feature_stream, arguments.outfp, env); */
@@ -95,10 +99,14 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
     genome_node_rec_delete(gn, env);
   }
 
+  env_error_check(env);
+
+  feature_index_print_contents(features, env); 
+
   /* free */
-/*   genome_stream_delete(gff3_out_stream, env); */
   feature_index_delete(features, env);
-	genome_stream_delete(feature_stream, env);
+  genome_stream_delete(feature_stream, env);
+  genome_stream_delete(sort_stream, env);
   genome_stream_delete(gff3_in_stream, env);
   genfile_xclose(arguments.outfp, env);
 
