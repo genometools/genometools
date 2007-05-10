@@ -58,7 +58,7 @@ GenomeStream* feature_stream_new(GenomeStream *in_stream,
   feature_stream->in_stream = in_stream;
 	
   feature_stream->feature_visitor = feature_visitor_new(fi, env);
-  
+
 	if (!feature_stream->feature_visitor)
     has_err = -1;
   if (has_err) {

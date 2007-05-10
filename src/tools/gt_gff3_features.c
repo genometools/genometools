@@ -75,6 +75,7 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
   GenomeNode *gn;
   FeatureIndex *features = NULL;
   int parsed_args, has_err;
+  unsigned long i;
   Range qry_range;
   Array *results;
   env_error_check(env);
@@ -112,20 +113,42 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
 
   env_error_check(env);
 
-  feature_index_print_contents(features, env); 
+/*  feature_index_print_contents(features, env);   */
   
-  results = array_new(sizeof(GenomeNode*), env);
+  if(feature_index_has_seqid(features, str_get(arguments.seqid), env))
+  {
+    printf("there is a FeatureIndex key %s\n", str_get(arguments.seqid));
+    results = array_new(sizeof(GenomeNode*), env);
   
-  qry_range.start = arguments.start;
-  qry_range.end = arguments.end;
+    qry_range.start = arguments.start;
+    qry_range.end = arguments.end;
   
-  feature_index_get_features_for_range(features, 
+    feature_index_get_features_for_range(features, 
                                        results, 
                                        str_get(arguments.seqid), 
                                        qry_range, 
                                        env);
 
-  printf("# of results: %lu\n", array_size(results));
+    printf("# of results: %lu\n", array_size(results));
+  }  
+  else
+  {
+    printf("there is no FeatureIndex key %s\n", str_get(arguments.seqid));
+    has_err = 1;
+  }
+  
+  
+  for(i=0;i<array_size(results);i++)
+  {
+    GenomeFeature *gf= *(GenomeFeature**) array_get(results, i);
+    GenomeNode *gn = (GenomeNode*) gf;
+    genome_node_traverse_children(gn,
+                                  NULL,
+                                  genome_node_print_feature_children,
+                                  true,
+                                  env);
+  }
+
   
   /* free */
   str_delete(arguments.seqid,env);
