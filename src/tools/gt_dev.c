@@ -5,6 +5,7 @@
 */
 
 #include "gt.h"
+#include "gt_gff3_features.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Toolbox *dev_toolbox, Env *env)
@@ -25,6 +26,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 void register_devtools(Toolbox *dev_toolbox, Env *env)
 {
   assert(dev_toolbox);
+  toolbox_add(dev_toolbox, "view", gt_gff3_features, env);  
   /* XXX
   toolbox_add(dev_toolbox, "affinealign", gt_affinealign, env);
   */

@@ -9,7 +9,8 @@
 
 typedef struct {
   bool verbose;
-  long offset;
+  Str *seqid;
+  unsigned long start, end;  
   GenFile *outfp;
 } Gff3_features_arguments;
 
@@ -28,19 +29,32 @@ static OPrval parse_options(int *parsed_args, Gff3_features_arguments *arguments
                          env);
   ofi = outputfileinfo_new(env);
 
-  /* -offset */
-  option = option_new_long("offset",
-                           "transform all features by the given offset",
-                           &arguments->offset, UNDEF_LONG, env);
-  /* XXX: do not make this a ``normal option'' until the necessary envor checks
-     have been added to range_offset() in range.c */
-  option_is_development_option(option);
-  option_parser_add_option(op, option, env);
-
   /* -v */
   option = option_new_verbose(&arguments->verbose, env);
   option_parser_add_option(op, option, env);
+  
+  /* -seqid */
+  arguments->seqid = str_new(env);
+  option = option_new_string("seqid", "sequence region identifier", 
+                            arguments->seqid,
+                            "", env);
+  option_parser_add_option(op, option, env);
+  option_is_mandatory(option);  
+  
+  /* -start */
+  option = option_new_ulong("start", "start position", 
+                            &arguments->start,
+                            1, env);
+  option_parser_add_option(op, option, env);
+  option_is_mandatory(option);
 
+  /* -end */
+  option = option_new_ulong("end", "end position", 
+                            &arguments->end,
+                            1, env);
+  option_parser_add_option(op, option, env);
+  option_is_mandatory(option);
+  
   /* output file options */
   outputfile_register_options(op, &arguments->outfp, ofi, env);
 
@@ -61,6 +75,7 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
   GenomeNode *gn;
   FeatureIndex *features = NULL;
   int parsed_args, has_err;
+  Range qry_range;
   Array *results;
   env_error_check(env);
 
@@ -68,8 +83,12 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
   /* option parsing */
   switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
-    case OPTIONPARSER_ERROR: return -1;
-    case OPTIONPARSER_REQUESTS_EXIT: return 0;
+    case OPTIONPARSER_ERROR: 
+      str_delete(arguments.seqid,env); 
+      return -1;
+    case OPTIONPARSER_REQUESTS_EXIT: 
+      str_delete(arguments.seqid,env); 
+      return 0;
   }
 
   /* create a gff3 input stream */
@@ -78,20 +97,12 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
                                                arguments.verbose &&
                                                arguments.outfp, env);
 
-
-  /* set offset (if necessary) */
-  if (arguments.offset != UNDEF_LONG)
-    gff3_in_stream_set_offset(gff3_in_stream, arguments.offset);
-	
   /*  create sort stream */
   sort_stream = sort_stream_new(gff3_in_stream, env);
   
   /* create feature index and stream */
   features = feature_index_new(env);
   feature_stream = feature_stream_new(sort_stream, features, env);
-
-  /* create gff3 output stream */
-  /* gff3_out_stream = gff3_out_stream_new(feature_stream, arguments.outfp, env); */
 
   /* pull the features through the stream and free them afterwards */
   while (!(has_err = genome_stream_next_tree(feature_stream, &gn, env)) &&
@@ -105,11 +116,19 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
   
   results = array_new(sizeof(GenomeNode*), env);
   
-  feature_index_get_features_for_range(features, results, "chr16", 4000, 16000,  env);
+  qry_range.start = arguments.start;
+  qry_range.end = arguments.end;
+  
+  feature_index_get_features_for_range(features, 
+                                       results, 
+                                       str_get(arguments.seqid), 
+                                       qry_range, 
+                                       env);
 
   printf("# of results: %lu\n", array_size(results));
   
   /* free */
+  str_delete(arguments.seqid,env);
   array_delete(results, env);
   feature_index_delete(features, env);
   genome_stream_delete(feature_stream, env);
