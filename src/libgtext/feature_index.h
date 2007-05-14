@@ -12,7 +12,7 @@ FeatureIndex* 	feature_index_new(Env*);
 void	  feature_index_delete(FeatureIndex*,
                              Env*);
 int     feature_index_add_sequence_region(FeatureIndex*,
-                                             SequenceRegion*,
+                                             char*,
                                              Env*);
 void	  feature_index_add_genome_feature_for_seqid(FeatureIndex*,
                                                    GenomeFeature*,
@@ -31,5 +31,6 @@ bool feature_index_has_seqid(FeatureIndex*,
                              Env* env);
                                      
 int genome_node_print_feature_children(GenomeNode*, void*, Env*);
+int feature_index_unit_test(Env*);
 
 #endif

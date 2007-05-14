@@ -103,6 +103,7 @@ void gtr_register_components(GTR *gtr, Env *env)
                 env);
   hashtable_add(gtr->unit_tests, "dlist class", dlist_unit_test, env);
   hashtable_add(gtr->unit_tests, "evaluator class", evaluator_unit_test, env);
+  hashtable_add(gtr->unit_tests, "feature index class", feature_index_unit_test, env);
   hashtable_add(gtr->unit_tests, "grep module", grep_unit_test, env);
   hashtable_add(gtr->unit_tests, "hashtable class", hashtable_unit_test, env);
   hashtable_add(gtr->unit_tests, "hmm class", hmm_unit_test, env);

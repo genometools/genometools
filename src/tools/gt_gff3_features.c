@@ -39,7 +39,8 @@ static OPrval parse_options(int *parsed_args, Gff3_features_arguments *arguments
                             arguments->seqid,
                             "", env);
   option_parser_add_option(op, option, env);
-  option_is_mandatory(option);  
+  option_is_mandatory(option);
+  option_hide_default(option);
   
   /* -start */
   option = option_new_ulong("start", "start position", 
@@ -47,6 +48,7 @@ static OPrval parse_options(int *parsed_args, Gff3_features_arguments *arguments
                             1, env);
   option_parser_add_option(op, option, env);
   option_is_mandatory(option);
+  option_hide_default(option);
 
   /* -end */
   option = option_new_ulong("end", "end position", 
@@ -54,6 +56,7 @@ static OPrval parse_options(int *parsed_args, Gff3_features_arguments *arguments
                             1, env);
   option_parser_add_option(op, option, env);
   option_is_mandatory(option);
+  option_hide_default(option);
   
   /* output file options */
   outputfile_register_options(op, &arguments->outfp, ofi, env);
@@ -77,7 +80,7 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
   int parsed_args, has_err;
   unsigned long i;
   Range qry_range;
-  Array *results;
+  Array *results = NULL;
   env_error_check(env);
 
 
@@ -111,13 +114,19 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
     genome_node_rec_delete(gn, env);
   }
 
-  env_error_check(env);
+  /* sequence region id does not exist in gff file */
+  if (!has_err && !feature_index_has_seqid(features, str_get(arguments.seqid), env)) {
+    env_error_set(env, "sequence region '%s' does not exist in GFF file.", str_get(arguments.seqid));
+    has_err = -1;
+  }
 
-/*  feature_index_print_contents(features, env);   */
-  
-  if(feature_index_has_seqid(features, str_get(arguments.seqid), env))
-  {
-    printf("there is a FeatureIndex key %s\n", str_get(arguments.seqid));
+  /* range end < range start */
+  if (!has_err && (arguments.end < arguments.start)) {
+    env_error_set(env, "end of query range precedes start of query range.");
+    has_err = -1;
+  }
+
+  if(!has_err) {
     results = array_new(sizeof(GenomeNode*), env);
   
     qry_range.start = arguments.start;
@@ -129,30 +138,25 @@ int gt_gff3_features(int argc, const char **argv, Env *env)
                                        qry_range, 
                                        env);
 
-    printf("# of results: %lu\n", array_size(results));
-  }  
-  else
-  {
-    printf("there is no FeatureIndex key %s\n", str_get(arguments.seqid));
-    has_err = 1;
-  }
+    printf("# of results: %lu\n", array_size(results)); 
   
-  
-  for(i=0;i<array_size(results);i++)
-  {
-    GenomeFeature *gf= *(GenomeFeature**) array_get(results, i);
-    GenomeNode *gn = (GenomeNode*) gf;
-    genome_node_traverse_children(gn,
+    for(i=0;i<array_size(results);i++)
+    {
+      GenomeFeature *gf= **(GenomeFeature***) array_get(results, i);
+      GenomeNode *gn = (GenomeNode*) gf;
+      genome_node_traverse_children(gn,
                                   NULL,
                                   genome_node_print_feature_children,
                                   true,
-                                  env);
-  }
+                                  env); 
+		  printf("------\n");
+    }
 
-  
+    array_delete(results, env);  
+	}
+	
   /* free */
   str_delete(arguments.seqid,env);
-  array_delete(results, env);
   feature_index_delete(features, env);
   genome_stream_delete(feature_stream, env);
   genome_stream_delete(sort_stream, env);

@@ -46,7 +46,9 @@ static int feature_visitor_sequence_region(GenomeVisitor *gv,
   int has_err = 0;
   env_error_check(env);
 
-  has_err = feature_index_add_sequence_region(v->features, sr, env);
+  has_err = feature_index_add_sequence_region(v->features, 
+	                                            str_get(genome_node_get_seqid((GenomeNode*) sr)), 
+																							env);
 
   return has_err;
 }

@@ -45,8 +45,7 @@ Can be used as an iterator function for subtree traversal.
 */
 int genome_node_print_feature_children(GenomeNode* gn, void* data, Env *env)
 {
-/*  assert(gn);
-  env_error_check(env); */
+  assert(gn);
   printf("%s, %lu - %lu \n", genome_feature_type_get_cstr(
            genome_feature_get_type((GenomeFeature*) gn)),
            genome_node_get_start(gn),
@@ -68,7 +67,6 @@ int delete_FI_row(void* key, void* value, void* data, Env* env)
 {
   unsigned long i=0;
   Array *arr = (Array*) value;
-  env_error_check(env);
   for (i=0;i<array_size(arr);i++)
   {
   	genome_node_rec_delete(*(GenomeNode**) array_get(arr, i), env);
@@ -86,7 +84,6 @@ Deletes a FeatureIndex object.
 void feature_index_delete(FeatureIndex *fi, Env *env)
 {
   assert(fi);
-  env_error_check(env);
   hashtable_foreach(fi->features, delete_FI_row, NULL, env);
   hashtable_delete(fi->features, env);
   env_ma_free(fi, env);
@@ -100,13 +97,13 @@ Creates a new table entry for some sequence region.
 \return Status code: 0 if ok, -1 otherwise.
 */
 int feature_index_add_sequence_region(FeatureIndex *fi,
-                                      SequenceRegion *sr,
+                                      char* seqid,
                                       Env *env)
 {
-  assert(fi && sr);
+  assert(fi && seqid);
   int has_err = 0;
   env_error_check(env);
-  if (fi == NULL || sr == NULL)
+  if (fi == NULL || seqid == NULL)
   {
     has_err = -1;
   }
@@ -115,7 +112,7 @@ int feature_index_add_sequence_region(FeatureIndex *fi,
     /* initialize new Array of subtree nodes for this sequence
        region and register in HT */
     hashtable_add(fi->features,
-         str_get(genome_node_get_seqid((GenomeNode*) sr)),
+         seqid,
          array_new(sizeof (GenomeNode*),env),
          env);
   }
@@ -145,6 +142,12 @@ void feature_index_add_genome_feature_for_seqid(FeatureIndex *fi,
 
   /* get sequence region for given GenomeFeature */
   seqid = str_get(genome_node_get_seqid(gn));
+
+  /* create key if it is not there yet */
+  if(!feature_index_has_seqid(fi, seqid, env))
+	{
+	  feature_index_add_sequence_region(fi, seqid, env);
+	}
 
   /* Add node to the appropriate array in the hashtable. */
   array_add(hashtable_get(fi->features, seqid),
@@ -178,7 +181,7 @@ static int compare_for_overlap(const void* gn1, const void* gn2)
 {
   assert(gn1 && gn2);
   Range range1, range2;
-  range1 = genome_node_get_range((GenomeNode*) gn1);
+  range1 = genome_node_get_range(*(GenomeNode**) gn1);
   range2 = genome_node_get_range(*(GenomeNode**) gn2);
   if (range_overlap(range1 ,range2))
     return 0;
@@ -212,10 +215,10 @@ assert(fi && results && seqid && (qry_range.start < qry_range.end));
                                           NULL, UNDEF_ULONG, env);
 
  bsearch_all(results,
-             key,
+             &key,
              array_get_space(base),
              array_size(base),
-             sizeof (GenomeNode*),
+             sizeof (GenomeFeature*),
              compare_for_overlap,
              env);
 
@@ -235,8 +238,9 @@ static int print_index_row(void* key, void* value, void* data, Env* env)
   return 0;
 }
 
-/*
-Simple output of hashtable counts for debugging reasons.
+/*!
+Simple output of array counts for all sequence regions in a FI.
+\param fi FeatureIndex object to lookup in.
 */
 void feature_index_print_contents(FeatureIndex *fi, Env* env)
 {
@@ -274,4 +278,82 @@ bool feature_index_has_seqid(FeatureIndex* fi, char* seqid, Env* env)
   hashtable_foreach(fi->features, search_hashtable_key, &params, env); 
   
   return params.found;
+}
+
+
+int feature_index_unit_test(Env* env)
+{
+	GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
+	FeatureIndex *fi;
+	Range r1, r2, r3, r4, r5;
+	Str *seqid1, *seqid2;
+	int has_err=0;
+	
+	r1.start=100; r1.end=1000;
+	r2.start=100; r2.end=300;
+	r3.start=500; r3.end=1000;
+	r4.start=600; r4.end=1200;
+	r5.start=600; r5.end=1000;
+	
+	seqid1 = str_new_cstr("test1", env);
+	seqid2 = str_new_cstr("test2", env);
+		
+	gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN,
+                                          NULL, UNDEF_ULONG, env);
+	genome_node_set_seqid((GenomeNode*) gn1, seqid1);
+	
+	gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN,
+                                          NULL, UNDEF_ULONG, env);
+	genome_node_set_seqid((GenomeNode*) gn2, seqid2);
+	
+	ex1 = genome_feature_new(gft_exon, r2, STRAND_UNKNOWN,
+                                          NULL, UNDEF_ULONG, env);
+  genome_node_set_seqid((GenomeNode*) ex1, seqid1);
+	
+	ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN,
+                                          NULL, UNDEF_ULONG, env);
+  genome_node_set_seqid((GenomeNode*) ex2, seqid1);
+	
+	ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN,
+                                          NULL, UNDEF_ULONG, env);
+	genome_node_set_seqid((GenomeNode*) ex3, seqid2);
+																					
+  cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN,
+                                          NULL, UNDEF_ULONG, env);
+	genome_node_set_seqid((GenomeNode*) cds1, seqid2);
+																					
+	genome_node_is_part_of_genome_node(gn1, ex1, env);
+	genome_node_is_part_of_genome_node(gn1, ex2, env);
+	genome_node_is_part_of_genome_node(gn2, ex3, env);
+	genome_node_is_part_of_genome_node(gn2, cds1, env);
+
+  fi  = feature_index_new(env);
+
+  ensure(has_err, fi);
+  ensure(has_err, !feature_index_has_seqid(fi, "test1", env));
+  ensure(has_err, !feature_index_has_seqid(fi, "test2", env));
+	
+	feature_index_add_sequence_region(fi, "test1", env);
+  ensure(has_err, feature_index_has_seqid(fi, "test1", env));
+
+	feature_index_add_sequence_region(fi, "test2", env);
+  ensure(has_err, feature_index_has_seqid(fi, "test2", env));
+  
+	ensure(has_err, feature_index_get_features_for_seqid(fi, "test1"));
+	ensure(has_err, feature_index_get_features_for_seqid(fi, "test2"));
+	ensure(has_err, array_size(feature_index_get_features_for_seqid(fi, "test1")) == 0);
+	ensure(has_err, array_size(feature_index_get_features_for_seqid(fi, "test2")) == 0);
+	
+	feature_index_add_genome_feature_for_seqid(fi, (GenomeFeature*) gn1, env);
+	ensure(has_err, array_size(feature_index_get_features_for_seqid(fi, "test1")) == 1);
+
+	feature_index_add_genome_feature_for_seqid(fi, (GenomeFeature*) gn2, env);
+	ensure(has_err, array_size(feature_index_get_features_for_seqid(fi, "test2")) == 1);
+	
+	feature_index_delete(fi, env);
+	genome_node_rec_delete(gn1, env);
+	genome_node_rec_delete(gn2, env);
+	str_delete(seqid1, env);
+	str_delete(seqid2, env);
+  return has_err;
 }

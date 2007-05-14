@@ -22,6 +22,7 @@
 #include <libgtext/extractfeat_stream.h>        /* extract feat. stream class */
 #include <libgtext/evaluator.h>                 /* evaluator class */
 #include <libgtext/filter_stream.h>             /* filter stream class */
+#include <libgtext/feature_index.h>             /* feature index class */
 #include <libgtext/gff3_in_stream.h>            /* GFF3 input stream class */
 #include <libgtext/gff3_out_stream.h>           /* GFF3 output stream class */
 #include <libgtext/gtdata.h>                    /* gtdata/ module */
