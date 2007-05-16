@@ -280,25 +280,35 @@ bool feature_index_has_seqid(FeatureIndex* fi, char* seqid, Env* env)
   return params.found;
 }
 
+/*!
+tests all public functions from feature_index.
+\param env Pointer to Environment object.
+\return 0 if ok.
+*/
 int feature_index_unit_test(Env* env)
 {
+	/* First we have to create some objects that we can use for testing. */
 	GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
 	FeatureIndex *fi;
 	Range r1, r2, r3, r4, r5;
 	Str *seqid1, *seqid2;
 	int has_err=0;
-
+	
+	/* Generating some ranges */
 	r1.start=100; r1.end=1000;
 	r2.start=100; r2.end=300;
 	r3.start=500; r3.end=1000;
 	r4.start=600; r4.end=1200;
 	r5.start=600; r5.end=1000;
-
+	
+	/* Generating sequnce ids as c-strings */
 	seqid1 = str_new_cstr("test1", env);
 	seqid2 = str_new_cstr("test2", env);
-
+		
+	/* Generating a new genome_feature with the property gft_gene an the range r1 ... */
 	gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN,
                                           NULL, UNDEF_ULONG, env);
+	/* ... and assign a sequence id to the new genome_feature-object. */				  
 	genome_node_set_seqid((GenomeNode*) gn1, seqid1);
 
 	gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN,
@@ -312,32 +322,36 @@ int feature_index_unit_test(Env* env)
 	ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN,
                                           NULL, UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) ex2, seqid1);
-
+	
 	ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN,
                                           NULL, UNDEF_ULONG, env);
 	genome_node_set_seqid((GenomeNode*) ex3, seqid2);
-
+																					
   cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN,
                                           NULL, UNDEF_ULONG, env);
 	genome_node_set_seqid((GenomeNode*) cds1, seqid2);
-
+	
+	/* Determine the structure of our feature tree */																				
 	genome_node_is_part_of_genome_node(gn1, ex1, env);
 	genome_node_is_part_of_genome_node(gn1, ex2, env);
 	genome_node_is_part_of_genome_node(gn2, ex3, env);
 	genome_node_is_part_of_genome_node(gn2, cds1, env);
 
+  /*Create a new feature index on which we can perfom some tests*/
   fi  = feature_index_new(env);
 
   ensure(has_err, fi);
   ensure(has_err, !feature_index_has_seqid(fi, "test1", env));
   ensure(has_err, !feature_index_has_seqid(fi, "test2", env));
-
+	
+	/*Add a sequence region the fetaure index and test if it has really been added*/
 	feature_index_add_sequence_region(fi, "test1", env);
   ensure(has_err, feature_index_has_seqid(fi, "test1", env));
 
 	feature_index_add_sequence_region(fi, "test2", env);
   ensure(has_err, feature_index_has_seqid(fi, "test2", env));
-
+  
+  /*Tests if we get a empty data structure for every added sequence region*/
 	ensure(has_err, feature_index_get_features_for_seqid(fi, "test1"));
 	ensure(has_err, feature_index_get_features_for_seqid(fi, "test2"));
 	ensure(has_err, array_size(feature_index_get_features_for_seqid(fi,
@@ -346,17 +360,23 @@ int feature_index_unit_test(Env* env)
 	ensure(has_err, array_size(feature_index_get_features_for_seqid(fi,
 	                                                                "test2")
 																																	) == 0);
-
+	
+	/*Add features to every sequence region and test if the according 
+	datastructures are not empty anymore. As we have added one 
+	genome_feature to every sequence region the size has to be one.
+	*/
 	feature_index_add_genome_feature_for_seqid(fi, (GenomeFeature*) gn1, env);
 	ensure(has_err, array_size(feature_index_get_features_for_seqid(fi,
 	                                                                "test1")
 																																	) == 1);
 
 	feature_index_add_genome_feature_for_seqid(fi, (GenomeFeature*) gn2, env);
+
 	ensure(has_err, array_size(feature_index_get_features_for_seqid(fi,
 	                                                                "test2")
 																																	) == 1);
-
+	
+	/*delete all generated objects*/
 	feature_index_delete(fi, env);
 	genome_node_rec_delete(gn1, env);
 	genome_node_rec_delete(gn2, env);
