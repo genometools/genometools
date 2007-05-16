@@ -29,7 +29,7 @@ void 	  feature_index_print_contents(FeatureIndex*,
 bool feature_index_has_seqid(FeatureIndex*,
                              char* seqid,
                              Env* env);
-                                     
+
 int genome_node_print_feature_children(GenomeNode*, void*, Env*);
 int feature_index_unit_test(Env*);
 
