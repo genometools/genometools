@@ -92,7 +92,6 @@ int hashtable_foreach(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
                       Env *env)
 {
   St_iterfunc_info info;
-  env_error_check(env);
   assert(ht && iterfunc);
   info.iterfunc = iterfunc;
   info.data = data;
