@@ -7,7 +7,7 @@
 CC:=gcc
 LD:=gcc
 INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
-             -I$(CURDIR)/src/external/lua-5.1.1/src \
+             -I$(CURDIR)/src/external/lua-5.1.2/src \
              -I$(CURDIR)/src/external/expat-2.0.0/lib\
              -I$(CURDIR)/src/external/bzip2-1.0.4
 CFLAGS:=
@@ -154,7 +154,7 @@ obj/%.o: src/external/expat-2.0.0/lib/%.c
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DHAVE_MEMMOVE -MT $@ -MMD \
         -MP -MF $(@:.o=.d)
 
-obj/%.o: src/external/lua-5.1.1/src/%.c
+obj/%.o: src/external/lua-5.1.2/src/%.c
 	@echo "[compile $@]"
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DLUA_USE_POSIX -MT $@ -MMD \
         -MP -MF $(@:.o=.d)
