@@ -204,7 +204,7 @@ install:
 	test -d $(prefix)/lib || mkdir -p $(prefix)/lib
 	cp lib/libgtcore.a $(prefix)/lib
 	cp lib/libgtext.a $(prefix)/lib
-	
+
 splint:
 	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) $(CURDIR)/src/*.c \
         $(CURDIR)/src/libgtcore/*.c \
