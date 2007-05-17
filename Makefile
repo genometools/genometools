@@ -203,7 +203,13 @@ install:
 	cp src/gt.h $(prefix)/include
 	test -d $(prefix)/lib || mkdir -p $(prefix)/lib
 	cp lib/libgtcore.a $(prefix)/lib
+ifdef RANLIB
+	$(RANLIB) $(prefix)/lib/libgtcore.a
+endif
 	cp lib/libgtext.a $(prefix)/lib
+ifdef RANLIB
+	$(RANLIB) $(prefix)/lib/libgtext.a
+endif
 
 splint:
 	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) $(CURDIR)/src/*.c \
