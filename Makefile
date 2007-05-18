@@ -11,7 +11,7 @@ INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
              -I$(CURDIR)/src/external/expat-2.0.0/lib\
              -I$(CURDIR)/src/external/bzip2-1.0.4
 CFLAGS:=
-GT_CFLAGS:= -g -Wall -pipe $(INCLUDEOPT)
+GT_CFLAGS:= -g -Wall -Werror -pipe $(INCLUDEOPT)
 LDFLAGS:=
 LDLIBS:=-lm -lz
 
