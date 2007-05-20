@@ -24,13 +24,26 @@ static OPrval parse_options(int *parsed_args, unsigned long *max_filesize_in_MB,
   return oprval;
 }
 
+static unsigned long buf_contains_separator(char *buf)
+{
+  char *cc;
+  assert(buf);
+  for (cc = buf; cc < buf + BUFSIZ; cc++) {
+    if (*cc == '>')
+      return cc - buf + 1;
+  }
+  return 0;
+}
+
 int gt_splitfasta(int argc, const char **argv, Env *env)
 {
-  FILE *srcfp = NULL, *destfp = NULL;
+  GenFile *srcfp = NULL;
+  FILE *destfp = NULL;
   Str *destfilename = NULL;
   unsigned long filenum = 0, bytecount = 0, max_filesize_in_bytes,
-                max_filesize_in_MB;
-  int cc, parsed_args, has_err = 0;
+                max_filesize_in_MB, separator_pos;
+  int read_bytes, parsed_args, has_err = 0;
+  char buf[BUFSIZ];
 
   /* option parsing */
   switch (parse_options(&parsed_args, &max_filesize_in_MB, argc, argv, env)) {
@@ -42,17 +55,19 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
   max_filesize_in_bytes = max_filesize_in_MB << 20;
 
   /* open source file */
-  srcfp = env_fa_xfopen(env, argv[parsed_args], "r");
+  srcfp = genfile_xopen(genfilemode_determine(argv[parsed_args]),
+                        argv[parsed_args], "r", env);
   assert(srcfp);
 
-  /* read first character */
-  if ((cc = getc(srcfp)) ==  EOF) {
+  /* read start characters */
+  if ((read_bytes = genfile_xread(srcfp, buf, BUFSIZ)) == 0) {
     env_error_set(env, "file \"%s\" is empty", argv[parsed_args]);
     has_err = -1;
   }
-  bytecount++;
+  bytecount += read_bytes;
 
-  if (!has_err && cc != '>') {
+  /* make sure the file is in fasta format */
+  if (!has_err && buf[0] != '>') {
     env_error_set(env, "file is not in FASTA format");
     has_err = -1;
   }
@@ -63,13 +78,16 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
     str_append_char(destfilename, '.', env);
     str_append_ulong(destfilename, ++filenum, env);
     destfp = env_fa_xfopen(env, str_get(destfilename), "w");
-    xfputc(cc, destfp);
+    xfwrite(buf, 1, read_bytes, destfp);
 
-    /* XXX: this could me done more efficiently by reading and writing larger
-       buffers instead of single characters */
-    while ((cc = xfgetc(srcfp)) != EOF) {
-      bytecount++;
-      if (cc == '>' && bytecount > max_filesize_in_bytes) {
+    while ((read_bytes = genfile_xread(srcfp, buf, BUFSIZ)) != 0) {
+      bytecount += read_bytes;
+      if (bytecount > max_filesize_in_bytes &&
+          (separator_pos = buf_contains_separator(buf))) {
+        separator_pos--;
+        assert(separator_pos < BUFSIZ);
+        if (separator_pos)
+          xfwrite(buf, 1, separator_pos, destfp);
         /* close current file */
         env_fa_xfclose(destfp, env);
         /* open new file */
@@ -79,8 +97,11 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
         str_append_ulong(destfilename, ++filenum, env);
         destfp = env_fa_xfopen(env, str_get(destfilename), "w");
         bytecount = 0;
+        assert(buf[separator_pos] == '>');
+        xfwrite(buf+separator_pos, 1, read_bytes-separator_pos, destfp);
       }
-      xfputc(cc, destfp);
+      else
+        xfwrite(buf, 1, read_bytes, destfp);
     }
   }
 
@@ -91,7 +112,7 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
   env_fa_xfclose(destfp, env);
 
   /* close source file */
-  env_fa_xfclose(srcfp, env);
+  genfile_xclose(srcfp, env);
 
   return has_err;
 }
