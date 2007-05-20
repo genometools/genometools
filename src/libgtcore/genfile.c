@@ -26,11 +26,24 @@ struct GenFile {
 
 GenFileMode genfilemode_determine(const char *path)
 {
+  assert(path);
   if (!strcmp(".gz", path + strlen(path) - 3))
     return GFM_GZIP;
   if (!strcmp(".bz2", path + strlen(path) - 4))
     return GFM_BZIP2;
   return GFM_UNCOMPRESSED;
+}
+
+size_t genfile_basename_length(const char *path)
+{
+  size_t path_length;
+  assert(path);
+  path_length = strlen(path);
+  if (!strcmp(".gz", path + path_length - 3))
+    return path_length - 3;
+  if (!strcmp(".bz2", path + path_length - 4))
+    return path_length - 4;
+  return path_length;
 }
 
 GenFile* genfile_open(GenFileMode genfilemode, const char *path,
