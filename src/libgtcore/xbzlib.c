@@ -48,7 +48,7 @@ void xbzfputs(const char *str, BZFILE *bzfile)
   }
 }
 
-int xbzread(BZFILE* file, void *buf, unsigned len)
+int xbzread(BZFILE *file, void *buf, unsigned len)
 {
   int rval;
   if ((rval = BZ2_bzread(file, buf, len)) == -1) {
