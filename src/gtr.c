@@ -58,6 +58,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   option_parser_set_comment_func(op, toolbox_show, gtr->toolbox);
   o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false,
                       env);
+  option_hide_default(o);
   option_parser_add_option(op, o, env);
   o = option_new_bool("i", "enter interactive mode after executing 'tool'",
                       &gtr->interactive, false, env);
