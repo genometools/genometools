@@ -26,7 +26,7 @@ typedef enum
   GFM_BZIP2
 } GenFileMode;
 
-/* returns GFM_GZIP if file with 'path' ends with '.gz', GFM_BZIP2 if it ends
+/* returns GFM_GZIP if file with <path> ends with '.gz', GFM_BZIP2 if it ends
    with '.bz2', and GFM_UNCOMPRESSED otherwise */
 GenFileMode genfilemode_determine(const char *path);
 
@@ -54,7 +54,7 @@ void        genfile_xprintf(GenFile*, const char *format, ...)
 void        genfile_xfputc(int c, GenFile*);
 void        genfile_xfputs(const char *str, GenFile*);
 
-/* read up to 'nbytes' and store result in 'buf', returns bytes read or EOF */
+/* read up to <nbytes> and store result in <buf>, returns bytes read or EOF */
 int         genfile_xread(GenFile*, void *buf, size_t nbytes);
 
 /* rewind the file */
