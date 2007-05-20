@@ -265,6 +265,26 @@ int genfile_xread(GenFile *genfile, void *buf, size_t nbytes)
   return rval;
 }
 
+void genfile_xwrite(GenFile *genfile, void *buf, size_t nbytes)
+{
+  if (!genfile) {
+    xfwrite(buf, 1, nbytes, stdout);
+    return;
+  }
+  switch (genfile->mode) {
+    case GFM_UNCOMPRESSED:
+      xfwrite(buf, 1, nbytes, genfile->fileptr.file);
+      break;
+    case GFM_GZIP:
+      xgzwrite(genfile->fileptr.gzfile, buf, nbytes);
+      break;
+    case GFM_BZIP2:
+      xbzwrite(genfile->fileptr.bzfile, buf, nbytes);
+      break;
+    default: assert(0);
+  }
+}
+
 void genfile_xrewind(GenFile *genfile)
 {
   assert(genfile);

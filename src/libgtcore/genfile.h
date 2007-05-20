@@ -57,6 +57,9 @@ void        genfile_xfputs(const char *str, GenFile*);
 /* read up to <nbytes> and store result in <buf>, returns bytes read or EOF */
 int         genfile_xread(GenFile*, void *buf, size_t nbytes);
 
+/* write <nbytes> from <buf> to given generic file */
+void        genfile_xwrite(GenFile*, void *buf, size_t nbytes);
+
 /* rewind the file */
 void        genfile_xrewind(GenFile*);
 
