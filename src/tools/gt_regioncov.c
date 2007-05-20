@@ -38,6 +38,7 @@ static OPrval parse_options(int *parsed_args, RegionCovArguments *arguments,
 
 int gt_regioncov(int argc, const char **argv, Env *env)
 {
+  GenomeVisitor *regioncov_visitor;
   GenomeStream *gff3_in_stream;
   GenomeNode *gn;
   RegionCovArguments arguments;
@@ -58,12 +59,21 @@ int gt_regioncov(int argc, const char **argv, Env *env)
   gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
                                              arguments.verbose, env);
 
+  /* create region coverage visitor */
+  regioncov_visitor = regioncov_visitor_new(arguments.max_feature_dist, env);
+
   /* pull the features through the stream and free them afterwards */
   while (!(has_err = genome_stream_next_tree(gff3_in_stream, &gn, env)) && gn) {
+      has_err = genome_node_accept(gn, regioncov_visitor, env);
       genome_node_rec_delete(gn, env);
   }
 
+  /* show region coverage */
+  if (!has_err)
+    regioncov_visitor_show_coverage(regioncov_visitor);
+
   /* free */
+  genome_visitor_delete(regioncov_visitor, env);
   genome_stream_delete(gff3_in_stream, env);
 
   return has_err;

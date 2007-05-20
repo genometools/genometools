@@ -38,6 +38,7 @@
 #include <libgtext/mutate.h>                    /* mutate module */
 #include <libgtext/neighborjoining.h>           /* the Neighbor-Joining class */
 #include <libgtext/qgramdist.h>                 /* q-gram distance module */
+#include <libgtext/regioncov_visitor.h>         /* regioncov visitor class */
 #include <libgtext/seqid2file.h>                /* seqid2file module */
 #include <libgtext/sort_stream.h>               /* sort stream class */
 #include <libgtext/splicedseq.h>                /* splicedseq class */
