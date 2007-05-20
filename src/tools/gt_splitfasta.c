@@ -74,7 +74,9 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
 
   if (!has_err) {
     /* open destination file */
-    destfilename = str_new_cstr(argv[parsed_args], env);
+    destfilename = str_new(env);
+    str_append_cstr_nt(destfilename, argv[parsed_args],
+                       genfile_basename_length(argv[parsed_args]), env);
     str_append_char(destfilename, '.', env);
     str_append_ulong(destfilename, ++filenum, env);
     destfp = env_fa_xfopen(env, str_get(destfilename), "w");
@@ -92,7 +94,8 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
         env_fa_xfclose(destfp, env);
         /* open new file */
         str_reset(destfilename);
-        str_append_cstr(destfilename, argv[parsed_args], env);
+        str_append_cstr_nt(destfilename, argv[parsed_args],
+                           genfile_basename_length(argv[parsed_args]), env);
         str_append_char(destfilename, '.', env);
         str_append_ulong(destfilename, ++filenum, env);
         destfp = env_fa_xfopen(env, str_get(destfilename), "w");
