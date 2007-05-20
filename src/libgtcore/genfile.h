@@ -54,7 +54,7 @@ void        genfile_xprintf(GenFile*, const char *format, ...)
 void        genfile_xfputc(int c, GenFile*);
 void        genfile_xfputs(const char *str, GenFile*);
 
-/* read up to <nbytes> and store result in <buf>, returns bytes read or EOF */
+/* read up to <nbytes> and store result in <buf>, returns bytes read */
 int         genfile_xread(GenFile*, void *buf, size_t nbytes);
 
 /* write <nbytes> from <buf> to given generic file */
