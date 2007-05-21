@@ -162,7 +162,7 @@ static int run_tests(GTR *gtr, Env *env)
   ensure(has_err, sizeof (unsigned long long) == 8);
 
   if (gtr->unit_tests) {
-    has_err = hashtable_foreach(gtr->unit_tests, run_test, &had_err, env);
+    has_err = hashtable_foreach_ao(gtr->unit_tests, run_test, &had_err, env);
     assert(!has_err); /* cannot happen, run_test() is sane */
   }
   if (had_err)
