@@ -45,14 +45,11 @@ static int show_tool_name(void *key, void *value, void *data, Env *env)
 int toolbox_show(const char *progname, void *toolbox, Env *env)
 {
   Toolbox *tb;
-  Array *tool_names;
   env_error_check(env);
   assert(toolbox);
   tb = (Toolbox*) toolbox;
-  tool_names = array_new(sizeof (const char*), env);
   printf("\nTools:\n\n");
   hashtable_foreach_ao(tb->tools, show_tool_name, NULL, env);
-  array_delete(tool_names, env);
   return 0;
 }
 
