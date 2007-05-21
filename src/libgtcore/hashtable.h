@@ -14,11 +14,11 @@ typedef struct Hashtable Hashtable;
 typedef enum {
   HASH_DIRECT,
   HASH_STRING
-} Hash_type;
+} HashType;
 
 typedef int (*Hashiteratorfunc)(void *key, void *value, void *data, Env*);
 
-Hashtable* hashtable_new(Hash_type, FreeFunc keyfree, FreeFunc valuefree, Env*);
+Hashtable* hashtable_new(HashType, FreeFunc keyfree, FreeFunc valuefree, Env*);
 void*      hashtable_get(Hashtable*, const void*);
 void       hashtable_add(Hashtable*, void*, void*, Env*);
 void       hashtable_remove(Hashtable*, void*, Env*);

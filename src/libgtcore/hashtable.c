@@ -12,7 +12,7 @@
 
 struct Hashtable
 {
-  Hash_type hash_type;
+  HashType hash_type;
   FreeFunc key_free;
   FreeFunc value_free;
   st_table *st_table;
@@ -25,7 +25,7 @@ typedef struct {
   int has_err;
 } St_iterfunc_info;
 
-Hashtable* hashtable_new(Hash_type hash_type, FreeFunc keyfree,
+Hashtable* hashtable_new(HashType hash_type, FreeFunc keyfree,
                          FreeFunc valuefree, Env *env)
 {
   Hashtable *ht = env_ma_malloc(env, sizeof (Hashtable));
@@ -118,7 +118,7 @@ void hashtable_reset(Hashtable *ht, Env *env)
   (void) st_foreach(ht->st_table, remove_key_value_pair, (st_data_t) ht, env);
 }
 
-static int hashtable_test(Hash_type hash_type, Env *env)
+static int hashtable_test(HashType hash_type, Env *env)
 {
   char *s1 = "foo", *s2 = "bar";
   Hashtable *ht;
