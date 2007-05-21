@@ -8,6 +8,6 @@ end
 Name "gt regioncov test 2 (-maxfeaturedist)"
 Keywords "gt_regioncov"
 Test do
-  run "#{$bin}gt dev regioncov -maxfeaturedist 1000 #{$testdata}encode_known_genes.gff3"
+  run "#{$bin}gt dev regioncov -maxfeaturedist 220000 #{$testdata}encode_known_genes.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_regioncov_test_2.out"
 end

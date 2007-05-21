@@ -27,9 +27,27 @@ static void regioncov_visitor_free(GenomeVisitor *gv, Env *env)
 static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
                                             GenomeFeature *gf, Env *env)
 {
+  Range *old_range_ptr, old_range, new_range;
+  Array *ranges;
   RegionCovVisitor *regioncov_visitor;
   env_error_check(env);
   regioncov_visitor = regioncov_visitor_cast(gv);
+  ranges = hashtable_get(regioncov_visitor->region2rangelist,
+                         str_get(genome_node_get_seqid((GenomeNode*) gf)));
+  assert(ranges);
+  new_range = genome_node_get_range((GenomeNode*) gf);
+  if (!array_size(ranges))
+    array_add(ranges, new_range, env);
+  else {
+    old_range_ptr = array_get_last(ranges);
+    old_range = *old_range_ptr;
+    old_range.end += regioncov_visitor->max_feature_dist;
+    if (range_overlap(old_range, new_range)) {
+      old_range_ptr->end = MAX(old_range_ptr->end, new_range.end);
+    }
+    else
+      array_add(ranges, new_range, env);
+  }
   return 0;
 }
 
@@ -70,18 +88,29 @@ GenomeVisitor* regioncov_visitor_new(unsigned long max_feature_dist, Env *env)
   return gv;
 }
 
-void regioncov_visitor_show_coverage(GenomeVisitor *gv)
+static int show_rangelist(void *key, void *value, void *data, Env *env)
 {
-  /*RegionCovVisitor *regioncov_visitor = regioncov_visitor_cast(gv); */
-  printf("region coverage:\n");
-  /*
-  hashtable_foreach(regioncov_visitor->region2rangelist, show_rangelist, NULL,
-                    env);
-  */
+  unsigned long i;
+  Array *rangelist;
+  Range *rangeptr;
+  env_error_check(env);
+  assert(key && value);
+  rangelist = (Array*) value;
+  if (array_size(rangelist)) {
+    assert(ranges_are_sorted_and_do_not_overlap(rangelist));
+    printf("%s:\n", (char*) key);
+    for (i = 0; i < array_size(rangelist); i++) {
+      rangeptr = array_get(rangelist, i);
+      printf("%lu, %lu\n", rangeptr->start, rangeptr->end);
+    }
+  }
+  return 0;
+}
 
-  /* XXX:
-    - save all sequence region & range list pairs
-    - sort them
-    - show them
-  */
+void regioncov_visitor_show_coverage(GenomeVisitor *gv, Env *env)
+{
+  RegionCovVisitor *regioncov_visitor = regioncov_visitor_cast(gv);
+  env_error_check(env);
+  hashtable_foreach_ao(regioncov_visitor->region2rangelist, show_rangelist,
+                       NULL, env);
 }
