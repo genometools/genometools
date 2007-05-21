@@ -5,6 +5,7 @@
 */
 
 #include <assert.h>
+#include <libgtcore/array.h>
 #include <libgtcore/ensure.h>
 #include <libgtcore/hashtable.h>
 #include <libgtcore/st.h>
@@ -99,6 +100,54 @@ int hashtable_foreach(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
   info.has_err = 0;
   (void) st_foreach(ht->st_table, st_iterfunc, (st_data_t) &info, env);
   return info.has_err;
+}
+
+typedef struct {
+  void *key,
+       *value;
+} HashEntry;
+
+static int save_hash_entry(void *key, void *value, void *data, Env *env)
+{
+  Array *hash_entries;
+  HashEntry he;
+  env_error_check(env);
+  assert(key && value && data);
+  hash_entries = (Array*) data;
+  he.key = key;
+  he.value = value;
+  array_add(hash_entries, he, env);
+  return 0;
+}
+
+int compare_hash_entries(const void *a, const void *b)
+{
+  HashEntry *he_a = (HashEntry*) a, *he_b = (HashEntry*) b;
+  assert(he_a && he_b);
+  return strcmp(he_a->key, he_b->key);
+}
+
+int hashtable_foreach_ao(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
+                         Env *env)
+{
+  Array *hash_entries;
+  HashEntry *he;
+  unsigned long i;
+  int has_err;
+  assert(ht && iterfunc);
+  assert(ht->hash_type == HASH_STRING);
+  hash_entries = array_new(sizeof (HashEntry), env);
+  has_err = hashtable_foreach(ht, save_hash_entry, hash_entries, env);
+  if (!has_err) {
+    qsort(array_get_space(hash_entries), array_size(hash_entries),
+          array_elem_size(hash_entries), compare_hash_entries);
+    for (i = 0; !has_err && i < array_size(hash_entries); i++) {
+      he = array_get(hash_entries, i);
+      has_err = iterfunc(he->key, he->value, data, env);
+    }
+  }
+  array_delete(hash_entries, env);
+  return has_err;
 }
 
 static int remove_key_value_pair(void *key, void *value, void *data, Env *env)
