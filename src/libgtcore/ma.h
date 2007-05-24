@@ -17,18 +17,16 @@ MA*           ma_new(void);
 void          ma_init(MA*, Env*);
 #define       ma_malloc(ma, size)\
               ma_malloc_mem(ma, size, __FILE__, __LINE__)
-void*         ma_malloc_mem(MA*, size_t size, const char*, unsigned int);
+void*         ma_malloc_mem(MA*, size_t size, const char*, int);
 #define       ma_calloc(ma, nmemb, size)\
               ma_calloc_mem(ma, nmemb, size, __FILE__, __LINE__)
-void*         ma_calloc_mem(MA*, size_t nmemb, size_t size, const char*,
-                            unsigned int);
+void*         ma_calloc_mem(MA*, size_t nmemb, size_t size, const char*, int);
 #define       ma_realloc(ma, ptr, size)\
               ma_realloc_mem(ma, ptr, size, __FILE, __LINE__)
-void*         ma_realloc_mem(MA*, void *ptr, size_t size, const char*,
-                             unsigned int);
+void*         ma_realloc_mem(MA*, void *ptr, size_t size, const char*, int);
 #define       ma_free(ptr, ma)\
               ma_free_mem(ptr, ma, __FILE__, __LINE__)
-void          ma_free_mem(void *ptr, MA*, const char*, unsigned int);
+void          ma_free_mem(void *ptr, MA*, const char*, int);
 unsigned long ma_get_space_peak(const MA*); /* in bytes */
 void          ma_show_space_peak(MA*, FILE*);
 /* check if all allocated memory has been freed, prints to stderr */

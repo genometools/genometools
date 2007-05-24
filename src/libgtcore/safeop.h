@@ -9,10 +9,10 @@
 
 #define       safe_cast_to_long(ulong)\
               safe_cast_to_long_type(ulong, __FILE__, __LINE__)
-long          safe_cast_to_long_type(unsigned long, const char*, unsigned int);
+long          safe_cast_to_long_type(unsigned long, const char*, int);
 
 #define       safe_cast_to_ulong(slong)\
               safe_cast_to_ulong_type(slong, __FILE__, __LINE__)
-unsigned long safe_cast_to_ulong_type(long, const char*, unsigned int);
+unsigned long safe_cast_to_ulong_type(long, const char*, int);
 
 #endif
