@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) Sascha Steinbiss, Malte Mader, Christin Schaerfer
   Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -12,9 +12,9 @@ typedef struct {
   Str *seqid;
   unsigned long start, end;  
   GenFile *outfp;
-} Gff3_features_arguments;
+} Gff3_view_arguments;
 
-static OPrval parse_options(int *parsed_args, Gff3_features_arguments *arguments,
+static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
                             int argc, const char **argv, Env *env)
 {
   OptionParser *op;
@@ -71,11 +71,11 @@ static OPrval parse_options(int *parsed_args, Gff3_features_arguments *arguments
   return oprval;
 }
 
-int gt_gff3_features(int argc, const char **argv, Env *env)
+int gt_view(int argc, const char **argv, Env *env)
 {
   GenomeStream *sort_stream, *gff3_in_stream, *feature_stream = NULL;
-  Gff3_features_arguments arguments;
-  GenomeNode *gn;
+  Gff3_view_arguments arguments;
+  GenomeNode *gn = NULL;
   FeatureIndex *features = NULL;
   int parsed_args, has_err;
   unsigned long i;
