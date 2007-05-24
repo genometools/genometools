@@ -248,18 +248,6 @@ void feature_index_print_contents(FeatureIndex *fi, Env* env)
   hashtable_foreach(fi->features, print_index_row, NULL, env);
 }
 
-static int search_hashtable_key(void* key, void* value, void* data, Env* env)
-{
-  ht_search_params *params = (ht_search_params*) data;
-  char* searchstring = params->searchkey;
-  if (strcmp(searchstring, (char*) key) == 0)
-  {
-    params->found = true;
-    return 0;
-  }
-  return 0;
-}
-
 /*!
 Checks whether a given cstr is a key in the FeatureIndex.
 \param fi FeatureIndex object to lookup in.
@@ -271,13 +259,7 @@ bool feature_index_has_seqid(FeatureIndex* fi, char* seqid, Env* env)
 {
   assert(fi && seqid);
 
-  ht_search_params params;
-  params.searchkey = seqid;
-  params.found = false;
-
-  hashtable_foreach(fi->features, search_hashtable_key, &params, env);
-
-  return params.found;
+  return (hashtable_get(fi->features, seqid) != NULL);
 }
 
 /*!
