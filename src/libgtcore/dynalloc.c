@@ -10,7 +10,7 @@
 #include <libgtcore/xansi.h>
 
 #ifndef SIZE_MAX
-#define SIZE_MAX ((size_t) ~0UL)
+#define SIZE_MAX ~(size_t)0
 #endif
 
 void* dynalloc(void *ptr, size_t *allocated, size_t size, Env *env)
