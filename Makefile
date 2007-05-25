@@ -5,13 +5,17 @@
 #
 
 CC:=gcc
+CXX:=g++
 LD:=gcc
 INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
              -I$(CURDIR)/src/external/lua-5.1.2/src \
              -I$(CURDIR)/src/external/expat-2.0.0/lib\
-             -I$(CURDIR)/src/external/bzip2-1.0.4
+             -I$(CURDIR)/src/external/bzip2-1.0.4\
+             -I$(CURDIR)/src/external/agg-2.4/include
 CFLAGS:=
+CXXFLAGS:=
 GT_CFLAGS:= -g -Wall -Werror -pipe $(INCLUDEOPT)
+GT_CXXFLAGS:= -g -pipe $(INCLUDEOPT)
 LDFLAGS:=
 LDLIBS:=-lm -lz
 
@@ -31,6 +35,9 @@ LIBGTEXT_OBJ:=$(LIBGTEXT_SRC:%.c=obj/%.o)
 
 TOOLS_SRC:=$(notdir $(wildcard src/tools/*.c))
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
+
+LIBAGG_SRC:=$(notdir $(wildcard src/external/agg-2.4/src/*.cpp src/external/agg-2.4/src/ctrl/*.cpp))
+LIBAGG_OBJ:=$(LIBAGG_SRC:%.cpp=obj/%.o)
 
 LIBEXPAT_OBJ:=obj/xmlparse.o obj/xmlrole.o obj/xmltok.o
 
@@ -55,10 +62,12 @@ WWWBASEDIR=/var/www/servers/genometools.org
 # process arguments
 ifneq ($(opt),no)
   GT_CFLAGS += -Os
+  GT_CXXFLAGS += -Os
 endif
 
 ifeq ($(assert),no)
   GT_CFLAGS += -DNDEBUG
+  GT_CXXFLAGS += -DNDEBUG
 endif
 
 # set prefix for install target
@@ -74,6 +83,13 @@ dirs:
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $@]"
 	@ar ru $@ $(LIBEXPAT_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
+lib/libagg.a: $(LIBAGG_OBJ)
+	@echo "[link $@]"
+	@ar ru $@ $(LIBAGG_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -108,7 +124,7 @@ ifdef RANLIB
 endif
 
 bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgtext.a lib/libgtcore.a\
-        lib/libbz2.a
+        lib/libbz2.a lib/libagg.a
 	@echo "[link $@]"
 	@$(LD) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
@@ -144,6 +160,14 @@ obj/%.o: src/libgtext/%.c
 obj/%.o: src/tools/%.c
 	@echo "[compile $@]"
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+
+obj/%.o: src/external/agg-2.4/src/%.cpp
+	@echo "[compile $@]"
+	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+
+obj/%.o: src/external/agg-2.4/src/ctrl/%.cpp
+	@echo "[compile $@]"
+	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 obj/%.o: src/external/bzip2-1.0.4/%.c
 	@echo "[compile $@]"
