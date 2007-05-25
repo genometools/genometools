@@ -27,6 +27,21 @@ License 2.1 given in the file doc/lgpl.txt.
 
 --------------------------------------------------------------------------------
 
+The source in src/external/agg-2.4/* is covered by the following license:
+
+Anti-Grain Geometry Public License
+====================================================
+
+Anti-Grain Geometry - Version 2.4
+Copyright (C) 2002-2005 Maxim Shemanarev (McSeem)
+
+Permission to copy, use, modify, sell and distribute this software
+is granted provided this copyright notice appears in all copies.
+This software is provided "as is" without express or implied
+warranty, and with no claim as to its suitability for any purpose.
+
+--------------------------------------------------------------------------------
+
 The source in src/external/bzip2-1.0.4/* is covered by the following license:
 
 This program, "bzip2", the associated library "libbzip2", and all
