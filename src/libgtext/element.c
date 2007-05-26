@@ -9,18 +9,18 @@
 #include <libgtext/genome_feature_type.h>
 #include <libgtext/element.h>
 
-struct Element
-{
-  GenomeFeatureType type;
-  Range range;
-  ArrowStatus arrow_status;
-  Config* cfg;
-};
-
 enum ArrowStatus{
   Left = 1,
   Right = 2,
   NoArrow = 3,
+};
+
+struct Element
+{
+  GenomeFeatureType type;
+  Range range;
+  int arrow_status;
+  Config* cfg;
 };
 
 /*!
@@ -37,9 +37,9 @@ Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
 
   env_error_check(env);
   element = env_ma_malloc(env, sizeof (Element));
-  element.type = genome_feature_get_type(gf);
-  element.range = genome_node_get_range(gn);
-  element.arrow_status = NoArrow;
+  element->type = genome_feature_get_type(gf);
+  element->range = genome_node_get_range(gn);
+  element->arrow_status = NoArrow;
   element->cfg = cfg;
   return element;
 }
@@ -79,7 +79,7 @@ Delets Element
 \param element Pointer to Element object to delete
 \param env Pointer to Environment object
 */
-void element_delete(Element *elelemt,
+void element_delete(Element *element,
                     Env *env)
 {
   if(!element) return;

@@ -22,8 +22,8 @@ void track_insert_element(Track* track,
 			  Config* cfg, 
 			  Env* env);
 Str* track_get_title(Track* track);
-Line* get_next_free_line(Array* lines,
-                         GenomeNode* gn);
+Line* get_next_free_line(Track* track,
+                         GenomeNode *gn);
 Array* track_get_lines(Track* track);
 void track_delete(Track* track,
                   Env* env);

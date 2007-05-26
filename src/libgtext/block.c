@@ -55,11 +55,11 @@ Range block_get_range(Block *block)
    Range r1, r2;
    int i;
 
-   r1 = element_get_range((Element*) array_get(block->elements, 0));
+   r1 = element_get_range(*(Element**) array_get(block->elements, 0));
 
    for(i=1; i<array_size(block->elements); i++)
    {
-     r2 = element_get_range((Element*) array_get(block->elements, i));
+     r2 = element_get_range(*(Element**) array_get(block->elements, i));
      r1 = range_join(r1, r2);
    }
 
@@ -90,7 +90,7 @@ void block_delete(Block *block,
 
   for(i=0; i<array_size(block->elements); i++)
   {
-    element_delete((Element*) array_get(block->elements, i), env);
+    element_delete(*(Element**) array_get(block->elements, i), env);
   }
 
   array_delete(block->elements, env);

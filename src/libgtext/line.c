@@ -42,7 +42,7 @@ void line_insert_element(Line *line,
   Block *block;
 
   block = block_new(env);
-  array_add(lines->blocks, block, env);
+  array_add(line->blocks, block, env);
 
   block_insert_element(block, gn, cfg, env);
 }
@@ -62,7 +62,7 @@ bool line_is_occupied(Line *line, GenomeNode *gn)
 
    for(i=0; i<array_size(line->blocks); i++)
    {
-     r2 = (Block*) array_get(line->blocks, i);
+     r2 = block_get_range(*(Block**)  array_get(line->blocks, i));
      if(!range_overlap(r1, r2))
      {
        return true;
@@ -96,7 +96,7 @@ void line_delete(Line *line,
 
   for(i=0; i<array_size(line->blocks); i++)
   {
-    block_delete((Block*) array_get(line->blocks, i));
+    block_delete(*(Block**) array_get(line->blocks, i), env);
   }
 
   array_delete(line->blocks, env);

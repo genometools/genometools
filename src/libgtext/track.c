@@ -43,7 +43,7 @@ void track_insert_element(Track *track,
 {
   Line *line;
 
-  line = get_next_free_line(track->lines, gn);
+  line = get_next_free_line(track, gn);
 
   if(line == NULL)
   {
@@ -70,15 +70,15 @@ Gets the next unoccupied Line object
 \param gn Pointer to GenomeNode object
 \return Pointer to unoccupied Line object
 */
-Line* get_next_free_line(Array *lines, GenomeNode *gn)
+Line* get_next_free_line(Track* track, GenomeNode *gn)
 {
   int i;
 
-  for(i=0; i<array_size(lines); i++)
+  for(i=0; i<array_size(track->lines); i++)
   {
-    if(!line_is_occupied((Line*) array_get(lines, i), gn))
+    if(!line_is_occupied(*(Line**) array_get(track->lines, i), gn))
     {
-      return (Line*) array_get(lines, i);
+      return *(Line**) array_get(track->lines, i);
     }
   }
   return NULL;
@@ -109,7 +109,7 @@ void track_delete(Track *track,
 
   for(i=0; i<array_size(track->lines); i++)
   {
-    line_delete((Line*) array_get(track->lines, i));
+    line_delete(*(Line**) array_get(track->lines, i), env);
   }
 
   array_delete(track->lines, env);
