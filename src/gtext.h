@@ -14,6 +14,7 @@
 #include <libgtext/alignment.h>                 /* alignment class */
 #include <libgtext/bsearch.h>                   /* bsearch module */
 #include <libgtext/cds_stream.h>                /* CDS stream */
+#include <libgtext/config.h>                /* config class */
 #include <libgtext/consensus_sa.h>              /* consensus spl. align. mod. */
 #include <libgtext/csa_stream.h>                /* consensus spl. align. str. */
 #include <libgtext/coin_hmm.h>                  /* the coin HMM class */

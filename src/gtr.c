@@ -99,6 +99,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "array class", array_unit_test, env);
   hashtable_add(gtr->unit_tests, "bittab class", bittab_unit_test, env);
   hashtable_add(gtr->unit_tests, "bsearch module", bsearch_unit_test, env);
+  hashtable_add(gtr->unit_tests, "config class", config_unit_test, env);
   hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test,
                 env);
   hashtable_add(gtr->unit_tests, "dlist class", dlist_unit_test, env);
