@@ -58,12 +58,12 @@ bool line_is_occupied(Line *line, GenomeNode *gn)
    int i;
    Range r1, r2;
 
-   r1 = genome_node_get_range(gn);
+   r2 = genome_node_get_range(gn);
 
    for(i=0; i<array_size(line->blocks); i++)
    {
-     r2 = block_get_range(*(Block**)  array_get(line->blocks, i));
-     if(!range_overlap(r1, r2))
+     r1 = block_get_range(*(Block**)  array_get(line->blocks, i));
+     if(range_overlap(r1, r2))
      {
        return true;
      }
@@ -120,7 +120,7 @@ void print_line(Line* line)
 }
 
 /*!
-Tests Block Class
+Tests Line Class
 \param env Pointer to Environment object
 */
 int line_unit_test(Env* env)

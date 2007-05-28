@@ -23,11 +23,13 @@ void track_insert_element(Track* track,
 			  Env* env);
 Str* track_get_title(Track* track);
 Line* get_next_free_line(Track* track,
-                         GenomeNode *gn);
+                         GenomeNode *gn,
+			 Env* env);
 Array* track_get_lines(Track* track);
 void track_delete(Track* track,
                   Env* env);
 void print_track(Track* track);
+int track_unit_test(Env* env);
 
 #endif
 

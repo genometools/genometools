@@ -43,14 +43,7 @@ void track_insert_element(Track *track,
 {
   Line *line;
 
-  line = get_next_free_line(track, gn);
-
-  if(line == NULL)
-  {
-    line = line_new(env);
-    array_add(track->lines, line, env);
-  }
-  
+  line = get_next_free_line(track, gn, env);
   line_insert_element(line, gn, cfg, env);
 }
 
@@ -70,18 +63,22 @@ Gets the next unoccupied Line object
 \param gn Pointer to GenomeNode object
 \return Pointer to unoccupied Line object
 */
-Line* get_next_free_line(Track* track, GenomeNode *gn)
+Line* get_next_free_line(Track* track, GenomeNode *gn, Env* env)
 {
   int i;
+  Line* line;
 
   for(i=0; i<array_size(track->lines); i++)
   {
-    if(!line_is_occupied(*(Line**) array_get(track->lines, i), gn))
+    line = *(Line**) array_get(track->lines, i);
+    if(!line_is_occupied(line, gn))
     {
-      return *(Line**) array_get(track->lines, i);
+      return line;
     }
   }
-  return NULL;
+  line = line_new(env);
+  array_add(track->lines, line, env);
+  return line;
 }
 
 /*!
@@ -131,4 +128,73 @@ void print_track(Track* track)
    }
 }
 
+/*!
+ * Tests Track Class
+ * \param env Pointer to Environment object
+ * */
+int track_unit_test(Env* env)
+{
+  Range r1, r2, r3; 
+  Array* lines;
+  int has_err = 0;
+
+  r1.start = 10;
+  r1.end = 50;
+
+  r2.start = 60;
+  r2.end = 80;
+
+  r3.start = 70;
+  r3.end = 100;
+
+  GenomeNode* gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0, env);
+  GenomeNode* gn2 = genome_feature_new(gft_intron, r2, STRAND_FORWARD, NULL, 0, env);
+  GenomeNode* gn3 = genome_feature_new(gft_intron, r3, STRAND_FORWARD, NULL, 0, env);
+			                    
+  Line* l1 = line_new(env);
+  Line* l2 = line_new(env);
+
+  Str* title = str_new(env);
+  str_set(title, "exon", env);
+  Str* s = str_new(env);
+  str_set(s, "foo", env);
+
+  Track* t = track_new(title, env);
+  Track* t2 = track_new(s, env);
+
+  /* test track_insert_elements 
+     (implicit test of get_next_free_line) */
+  ensure(has_err, (0 == array_size(track_get_lines(t))));
+  track_insert_element(t, gn1, NULL, env);
+  ensure(has_err, (1 == array_size(track_get_lines(t))));
+  track_insert_element(t, gn2, NULL, env);
+  ensure(has_err, (1 == array_size(track_get_lines(t))));
+  track_insert_element(t, gn3, NULL, env);
+  ensure(has_err, (2 == array_size(track_get_lines(t))));
+
+  /* test track_get_title */
+  ensure(has_err, (0 == str_cmp(title, track_get_title(t))));
+  ensure(has_err, !(0 == str_cmp(s, track_get_title(t))));
+
+  /* test track_get_lines */
+  lines = track_get_lines(t2);
+  ensure(has_err, (0 == array_size(lines)));
+  track_insert_element(t2, gn1, NULL, env);
+  lines = track_get_lines(t2);
+  ensure(has_err, (1 == array_size(lines)));
+  lines = track_get_lines(t);
+  ensure(has_err, (2 == array_size(lines)));
+
+  line_delete(l1, env);
+  line_delete(l2, env);
+  track_delete(t, env);
+  track_delete(t2, env);
+  str_delete(title, env);
+  str_delete(s, env);
+  genome_node_delete(gn1, env);
+  genome_node_delete(gn2, env);
+  genome_node_delete(gn3, env);
+
+  return has_err;
+}
 
