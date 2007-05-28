@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2007 Sascha Steinbiss, Christin Schaerfer, Malte Mader
+   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>   
    Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
    See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -7,6 +7,8 @@
 #include <libgtcore/array.h>
 #include <libgtext/genome_feature.h>
 #include <libgtext/genome_feature_type.h>
+#include <libgtcore/ensure.h>
+#include <libgtcore/strand.h>
 #include <libgtext/element.h>
 
 enum ArrowStatus{
@@ -85,5 +87,88 @@ void element_delete(Element *element,
   if(!element) return;
 
   env_ma_free(element, env);
+}
+
+/*!
+Prints Element type and range
+\param element Pointer to Element object to print
+*/
+void print_element(Element* element)
+{
+  printf("%s, %lu - %lu", genome_feature_type_get_cstr(element->type),
+                            element->range.start, element->range.end);
+}
+
+/*!
+Checks if two Element objects are equal
+\param e1 Pointer to Element object
+\param e2 Pointer to Element object
+\returns true if e1 and e2 are equal
+*/
+bool elements_are_equal(Element* e1,
+                        Element* e2)
+{
+  
+  if((0 == strcmp(genome_feature_type_get_cstr(e1->type), genome_feature_type_get_cstr(e2->type)))
+     && (0 == range_compare(e1->range, e2->range))
+     && (e1->arrow_status == e2->arrow_status))
+    return true;
+  else 
+    return false;
+}
+
+/*!
+Unit Test for Element Class
+\param env Pointer to Environment object
+*/
+int element_unit_test(Env* env)
+{
+  Range r1, r2, r_temp;
+  int as1, as2, as_temp;
+  int has_err = 0;
+
+  r1.start = 10;
+  r1.end = 50;
+
+  r2.start = 20;
+  r2.end = 50;
+
+  as1 = NoArrow;
+  as2 = Right;
+
+  GenomeNode* gn = genome_feature_new(gft_exon, r1, STRAND_BOTH, NULL, 0, env);
+  GenomeNode* gn2 = genome_feature_new(gft_exon, r2, STRAND_BOTH, NULL, 0, env);
+
+  Element* e = element_new(gn, NULL, env);
+  Element* e2 = element_new(gn, NULL, env);
+  Element* e3 = element_new(gn2, NULL, env);
+
+  r_temp = element_get_range(e);
+  ensure(has_err, (0 == range_compare(r1, r_temp)));
+  ensure(has_err, (1 == range_compare(r2, r_temp)));
+
+  as_temp = element_get_arrow_status(e);
+  ensure(has_err, (as1 == as_temp));
+  ensure(has_err, !(as2 == as_temp));
+
+  element_set_arrow_status(e, as2);
+  element_set_arrow_status(e2, as2);
+  element_set_arrow_status(e3, as2);
+  as_temp = element_get_arrow_status(e);
+  ensure(has_err, (as2 == as_temp));
+  ensure(has_err, !(as1 == as_temp));
+
+  ensure(has_err, elements_are_equal(e, e2));
+  ensure(has_err, !elements_are_equal(e, e3));
+  ensure(has_err, !elements_are_equal(e2, e3));
+
+  element_delete(e, env);
+  element_delete(e2, env);
+  element_delete(e3, env);
+  genome_node_delete(gn, env);
+  genome_node_delete(gn2, env);
+
+  return has_err;
+
 }
 

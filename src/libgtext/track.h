@@ -1,6 +1,6 @@
 /*
-   Copyright (c) Sascha Steinbiss, Malte Mader, Christin Schaerfer
-   Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
+   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
    See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -27,6 +27,7 @@ Line* get_next_free_line(Track* track,
 Array* track_get_lines(Track* track);
 void track_delete(Track* track,
                   Env* env);
+void print_track(Track* track);
 
 #endif
 

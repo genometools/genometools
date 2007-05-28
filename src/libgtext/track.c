@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2007 Sascha Steinbiss, Christin Schaerfer, Malte Mader
+   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
    Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
    See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -115,4 +115,20 @@ void track_delete(Track *track,
   array_delete(track->lines, env);
   env_ma_free(track, env);
 }
+
+/*!
+Prints all Lines of a Track object
+uparam track Pointer to Track object to print
+*/
+void print_track(Track* track)
+{ 
+  int i;
+    
+  for(i=0; i<array_size(track->lines); i++)
+  { 
+    print_line(*(Line**) array_get(track->lines, i));
+    printf("\n");
+   }
+}
+
 
