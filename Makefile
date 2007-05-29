@@ -49,6 +49,11 @@ LIBLUA_OBJ=obj/lapi.o obj/lcode.o obj/ldebug.o obj/ldo.o obj/ldump.o \
            obj/lmathlib.o obj/loslib.o obj/ltablib.o obj/lstrlib.o   \
            obj/loadlib.o obj/linit.o
 
+LIBPNG_OBJ=obj/png.o obj/pngset.o obj/pngget.o obj/pngrutil.o obj/pngtrans.o \
+           obj/pngwutil.o obj/pngread.o obj/pngrio.o obj/pngwio.o            \
+           obj/pngwrite.o obj/pngrtran.o obj/pngwtran.o obj/pngmem.o         \
+           obj/pngerror.o obj/pngpread.o
+
 LIBRNV_OBJ := obj/rn.o obj/rnc.o obj/rnd.o obj/rnl.o obj/rnv.o obj/rnx.o obj/drv.o  \
               obj/ary.o obj/xsd.o obj/xsd_tm.o obj/dxl.o obj/dsl.o obj/sc.o obj/u.o \
               obj/ht.o obj/er.o obj/xmlc.o obj/s.o obj/m.o obj/rx.o
@@ -116,6 +121,13 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
+lib/libpng.a: $(LIBPNG_OBJ)
+	@echo "[link $@]"
+	@ar ru $@ $(LIBPNG_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
 lib/librnv.a: $(LIBRNV_OBJ)
 	@echo "[link $@]"
 	@ar ru $@ $(LIBRNV_OBJ)
@@ -124,7 +136,7 @@ ifdef RANLIB
 endif
 
 bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgtext.a lib/libgtcore.a\
-        lib/libbz2.a lib/libagg.a
+        lib/libbz2.a lib/libagg.a lib/libpng.a
 	@echo "[link $@]"
 	@$(LD) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
@@ -182,6 +194,10 @@ obj/%.o: src/external/lua-5.1.2/src/%.c
 	@echo "[compile $@]"
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DLUA_USE_POSIX -MT $@ -MMD \
         -MP -MF $(@:.o=.d)
+
+obj/%.o: src/external/libpng-1.2.18/%.c
+	@echo "[compile $@]"
+	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 obj/%.o: src/external/rnv-1.7.8/%.c
 	@echo "[compile $@]"
