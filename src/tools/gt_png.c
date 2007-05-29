@@ -88,7 +88,7 @@ static OPrval parse_options(int *parsed_args, Png_info *info, int argc,
 
 int gt_png(int argc, const char **argv, Env *env)
 {
-  GenomeStream *gff3_in_stream, *cairo_stream, *gff3_out_stream = NULL;
+  GenomeStream *gff3_in_stream, *png_stream, *gff3_out_stream = NULL;
   GenomeNode *gn;
   int parsed_args, has_err;
   Png_info info;
@@ -111,28 +111,28 @@ int gt_png(int argc, const char **argv, Env *env)
                                              info.verbose && !info.pipe, env);
 
   /* create a cairo stream */
-  cairo_stream = cairo_stream_new(gff3_in_stream, info.sequence_region_id,
+  png_stream = png_stream_new(gff3_in_stream, info.sequence_region_id,
                                   info.from, info.to, argv[parsed_args],
                                   info.width, env);
 
   /* create gff3 output stream if -pipe was used */
   if (info.pipe)
-    gff3_out_stream = gff3_out_stream_new(cairo_stream, NULL, env);
+    gff3_out_stream = gff3_out_stream_new(png_stream, NULL, env);
 
   /* pull the features through the stream and free them afterwards */
   while (!(has_err = genome_stream_next_tree(info.pipe ? gff3_out_stream
-                                                       : cairo_stream,
+                                                       : png_stream,
                                              &gn, env))) {
     genome_node_rec_delete(gn, env);
   }
 
   /* draw */
   if (!has_err)
-    cairo_stream_draw((CairoStream*) cairo_stream, info.verbose, NULL);
+    png_stream_draw((PNGStream*) png_stream, info.verbose, NULL);
 
   /* free */
   genome_stream_delete(gff3_out_stream, env);
-  genome_stream_delete(cairo_stream, env);
+  genome_stream_delete(png_stream, env);
   genome_stream_delete(gff3_in_stream, env);
   str_delete(info.sequence_region_id, env);
 

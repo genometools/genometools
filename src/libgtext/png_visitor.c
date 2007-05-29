@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <cairo.h>
 #include <gtcore.h>
-#include "cairo_visitor.h"
+#include "png_visitor.h"
 #include "genome_visitor_rep.h"
 
 #define TRACK_HEIGHT            50
@@ -18,7 +18,7 @@
 #define EXON_HEIGHT             10
 #define EXON_ARROW_WIDTH        8
 
-struct CairoVisitor {
+struct PNGVisitor {
   const GenomeVisitor parent_instance;
   int width,
       height,
@@ -36,17 +36,17 @@ struct CairoVisitor {
 };
 
 typedef struct {
-  CairoVisitor *cv;
+  PNGVisitor *cv;
   unsigned int children_overlap : 1;
   int local_track_number;
 } Show_children_info;
 
-#define cairo_visitor_cast(GV)\
-        genome_visitor_cast(cairo_visitor_class(), GV)
+#define png_visitor_cast(GV)\
+        genome_visitor_cast(png_visitor_class(), GV)
 
-static void cairo_visitor_free(GenomeVisitor *gv, Env *env)
+static void png_visitor_free(GenomeVisitor *gv, Env *env)
 {
-  CairoVisitor *cv = cairo_visitor_cast(gv);
+  PNGVisitor *cv = png_visitor_cast(gv);
   assert(cv->png_filename);
   assert(cv->width); /* the width has to be positive */
   assert(cv->height); /* the height has to be positive */
@@ -57,7 +57,7 @@ static void cairo_visitor_free(GenomeVisitor *gv, Env *env)
   cairo_destroy(cv->cr);
 }
 
-static void draw_exon_box(CairoVisitor *cv, GenomeFeature *gf, double width,
+static void draw_exon_box(PNGVisitor *cv, GenomeFeature *gf, double width,
                           int track_number)
 {
   Range feature_range = genome_node_get_range((GenomeNode*) gf);
@@ -169,10 +169,10 @@ static int show_children(GenomeNode *gn, void *data, Env *env)
   return 0;
 }
 
-static int cairo_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
+static int png_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                          Env *env)
 {
-  CairoVisitor *cv = cairo_visitor_cast(gv);
+  PNGVisitor *cv = png_visitor_cast(gv);
   Show_children_info info;
   Range feature_range;
   char buf[BUFSIZ];
@@ -255,10 +255,10 @@ static int cairo_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   return 0;
 }
 
-static int cairo_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
+static int png_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
                                          Env *env)
 {
-  CairoVisitor *cv = cairo_visitor_cast(gv);
+  PNGVisitor *cv = png_visitor_cast(gv);
   Range sr_range;
   char buf[BUFSIZ];
 
@@ -294,29 +294,29 @@ static int cairo_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
   return 0;
 }
 
-const GenomeVisitorClass* cairo_visitor_class()
+const GenomeVisitorClass* png_visitor_class()
 {
-  static GenomeVisitorClass gvc = { sizeof (CairoVisitor),
-                                    cairo_visitor_free,
+  static GenomeVisitorClass gvc = { sizeof (PNGVisitor),
+                                    png_visitor_free,
                                     NULL,
-                                    cairo_visitor_genome_feature,
-                                    cairo_visitor_sequence_region,
+                                    png_visitor_genome_feature,
+                                    png_visitor_sequence_region,
                                     NULL };
   return &gvc;
 }
 
-GenomeVisitor* cairo_visitor_new(char *png_filename, int width,
+GenomeVisitor* png_visitor_new(char *png_filename, int width,
                                  unsigned int number_of_tracks,
                                  unsigned long from, unsigned long to, Env *env)
 {
   GenomeVisitor *gv;
-  CairoVisitor *cv;
+  PNGVisitor *cv;
 
   env_error_check(env);
   assert(png_filename && width != UNDEF_INT);
 
-  gv = genome_visitor_create(cairo_visitor_class(), env);
-  cv = cairo_visitor_cast(gv);
+  gv = genome_visitor_create(png_visitor_class(), env);
+  cv = png_visitor_cast(gv);
 
   cv->number_of_tracks = number_of_tracks;
   cv->from = from;

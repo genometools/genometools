@@ -13,7 +13,6 @@
 #include <libgtext/align.h>                     /* align module */
 #include <libgtext/alignment.h>                 /* alignment class */
 #include <libgtext/bsearch.h>                   /* bsearch module */
-#include <libgtext/cairo_stream.h>              /* cairo stream */
 #include <libgtext/cds_stream.h>                /* CDS stream */
 #include <libgtext/consensus_sa.h>              /* consensus spl. align. mod. */
 #include <libgtext/csa_stream.h>                /* consensus spl. align. str. */
@@ -38,6 +37,7 @@
 #include <libgtext/msa.h>                       /* multiple seq. align. class */
 #include <libgtext/mutate.h>                    /* mutate module */
 #include <libgtext/neighborjoining.h>           /* the Neighbor-Joining class */
+#include <libgtext/png_stream.h>                /* PNG stream */
 #include <libgtext/qgramdist.h>                 /* q-gram distance module */
 #include <libgtext/regioncov_visitor.h>         /* regioncov visitor class */
 #include <libgtext/seqid2file.h>                /* seqid2file module */
