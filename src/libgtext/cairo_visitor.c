@@ -1,38 +1,25 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
-
-  Permission to use, copy, modify, and distribute this software for any
-  purpose with or without fee is hereby granted, provided that the above
-  copyright notice and this permission notice appear in all copies.
-
-  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
-  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
-  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
-  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
-  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
-  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
-  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
 */
 
 #include <assert.h>
 #include <cairo.h>
+#include <gtcore.h>
 #include "cairo_visitor.h"
 #include "genome_visitor_rep.h"
-#include "minmax.h"
-#include "undef.h"
-#include "xansi.h"
 
-#define TRACK_HEIGHT 		50
-#define SPACE        		.05
-#define ROOM         		.9
-#define TEXT_POSITION   	20
-#define FEATURE_POSITION	30
-#define EXON_HEIGHT		10
+#define TRACK_HEIGHT            50
+#define SPACE                   .05
+#define ROOM                    .9
+#define TEXT_POSITION           20
+#define FEATURE_POSITION        30
+#define EXON_HEIGHT             10
 #define EXON_ARROW_WIDTH        8
 
-struct _Cairo_visitor {
-  const Genome_visitor parent_instance;
+struct CairoVisitor {
+  const GenomeVisitor parent_instance;
   int width,
       height,
       global_track_number;
@@ -49,7 +36,7 @@ struct _Cairo_visitor {
 };
 
 typedef struct {
-  Cairo_visitor *cv;
+  CairoVisitor *cv;
   unsigned int children_overlap : 1;
   int local_track_number;
 } Show_children_info;
@@ -57,9 +44,9 @@ typedef struct {
 #define cairo_visitor_cast(GV)\
         genome_visitor_cast(cairo_visitor_class(), GV)
 
-static void cairo_visitor_free(Genome_visitor *gv)
+static void cairo_visitor_free(GenomeVisitor *gv, Env *env)
 {
-  Cairo_visitor *cv = cairo_visitor_cast(gv);
+  CairoVisitor *cv = cairo_visitor_cast(gv);
   assert(cv->png_filename);
   assert(cv->width); /* the width has to be positive */
   assert(cv->height); /* the height has to be positive */
@@ -70,10 +57,10 @@ static void cairo_visitor_free(Genome_visitor *gv)
   cairo_destroy(cv->cr);
 }
 
-static void draw_exon_box(Cairo_visitor *cv, Genome_feature *gf, double width,
+static void draw_exon_box(CairoVisitor *cv, GenomeFeature *gf, double width,
                           int track_number)
 {
-  Range feature_range = genome_node_get_range((Genome_node*) gf);
+  Range feature_range = genome_node_get_range((GenomeNode*) gf);
   Strand feature_strand = genome_feature_get_strand(gf);
   double x, y, height;
 
@@ -115,15 +102,16 @@ static void draw_exon_box(Cairo_visitor *cv, Genome_feature *gf, double width,
    cairo_stroke(cv->cr);
 }
 
-static void show_children(Genome_node *gn, void *data)
+static int show_children(GenomeNode *gn, void *data, Env *env)
 {
-  Genome_feature *gf = (Genome_feature*) gn;
+  GenomeFeature *gf = (GenomeFeature*) gn;
   Range feature_range = genome_node_get_range(gn);
   Show_children_info *info = (Show_children_info*) data,
                      local_info;
   char buf[BUFSIZ];
   double x_left, x_right, width, text_y;
 
+  env_error_check(env);
   assert(info->cv->drawed_sequence_range_is_defined);
   assert(info->local_track_number < info->cv->number_of_tracks);
 
@@ -162,12 +150,12 @@ static void show_children(Genome_node *gn, void *data)
   if (genome_node_has_children(gn)) {
     local_info.cv = info->cv;
     local_info.children_overlap =
-      !genome_node_direct_children_do_not_overlap(gn);
+      !genome_node_direct_children_do_not_overlap(gn, env);
     local_info.local_track_number = info->local_track_number;
     if (!info->children_overlap)
       local_info.local_track_number++;
 
-    genome_node_traverse_direct_children(gn, &local_info, show_children);
+    genome_node_traverse_direct_children(gn, &local_info, show_children, env);
 
     if (!local_info.children_overlap)
       local_info.local_track_number++;
@@ -178,13 +166,13 @@ static void show_children(Genome_node *gn, void *data)
   if (!info->children_overlap)
     info->local_track_number--;
   }
+  return 0;
 }
 
-static void cairo_visitor_genome_feature(Genome_visitor *gv,
-                                         Genome_feature *gf,
-                                         /*@unused@*/ Log *l)
+static int cairo_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
+                                         Env *env)
 {
-  Cairo_visitor *cv = cairo_visitor_cast(gv);
+  CairoVisitor *cv = cairo_visitor_cast(gv);
   Show_children_info info;
   Range feature_range;
   char buf[BUFSIZ];
@@ -192,7 +180,7 @@ static void cairo_visitor_genome_feature(Genome_visitor *gv,
 
   assert(cv->drawed_sequence_range_is_defined);
 
-  feature_range = genome_node_get_range((Genome_node*) gf);
+  feature_range = genome_node_get_range((GenomeNode*) gf);
 
   /* reset track number if necessary */
   if (cv->last_range_is_defined &&
@@ -222,7 +210,7 @@ static void cairo_visitor_genome_feature(Genome_visitor *gv,
   cairo_set_source_rgb(cv->cr, 0, 0, 0);
   /* show <start --- feature_type --- end> */
   cairo_move_to(cv->cr, x_left, text_y);
-  (void) snprintf(buf, BUFSIZ, "%lu", genome_node_get_start((Genome_node*) gf));
+  (void) snprintf(buf, BUFSIZ, "%lu", genome_node_get_start((GenomeNode*) gf));
   cairo_show_text(cv->cr, buf);
 
   cairo_move_to(cv->cr, x_left + width / 2, text_y);
@@ -230,7 +218,7 @@ static void cairo_visitor_genome_feature(Genome_visitor *gv,
                   genome_feature_type_get_cstr(genome_feature_get_type(gf)));
 
   cairo_move_to(cv->cr, x_right, text_y);
-  (void) snprintf(buf, BUFSIZ, "%lu", genome_node_get_end((Genome_node*) gf));
+  (void) snprintf(buf, BUFSIZ, "%lu", genome_node_get_end((GenomeNode*) gf));
   cairo_show_text(cv->cr, buf);
   /* draw feature line */
   cairo_move_to(cv->cr, x_left,
@@ -240,13 +228,13 @@ static void cairo_visitor_genome_feature(Genome_visitor *gv,
 
   cv->global_track_number++;
 
-  if (genome_node_has_children((Genome_node*) gf)) {
+  if (genome_node_has_children((GenomeNode*) gf)) {
     info.cv = cv;
     info.children_overlap =
-      !genome_node_direct_children_do_not_overlap((Genome_node*) gf);
+      !genome_node_direct_children_do_not_overlap((GenomeNode*) gf, env);
     info.local_track_number = cv->global_track_number;
-    genome_node_traverse_direct_children((Genome_node*) gf, &info,
-                                         show_children);
+    genome_node_traverse_direct_children((GenomeNode*) gf, &info,
+                                         show_children, env);
     if (!info.children_overlap)
       info.local_track_number++;
     assert(info.local_track_number >= cv->global_track_number);
@@ -263,19 +251,21 @@ static void cairo_visitor_genome_feature(Genome_visitor *gv,
     cv->last_range = feature_range;
   }
   cv->last_range_is_defined = 1;
+
+  return 0;
 }
 
-static void cairo_visitor_sequence_region(Genome_visitor *gv,
-                                          Sequence_region *sr,
-                                          /*@unused@*/ Log *l)
+static int cairo_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
+                                         Env *env)
 {
-  Cairo_visitor *cv = cairo_visitor_cast(gv);
+  CairoVisitor *cv = cairo_visitor_cast(gv);
   Range sr_range;
   char buf[BUFSIZ];
 
+  env_error_check(env);
   assert(!cv->drawed_sequence_range_is_defined);
 
-  sr_range = genome_node_get_range((Genome_node*) sr);
+  sr_range = genome_node_get_range((GenomeNode*) sr);
   cv->drawed_sequence_range.start = MAX(sr_range.start, cv->from);
   cv->drawed_sequence_range.end = MIN(sr_range.end, cv->to);
   cv->drawed_sequence_range_is_defined = 1;
@@ -289,7 +279,7 @@ static void cairo_visitor_sequence_region(Genome_visitor *gv,
   cairo_show_text(cv->cr, buf);
   cairo_move_to(cv->cr, cv->width * (SPACE + ROOM / 2),
                 cv->global_track_number * TRACK_HEIGHT + TEXT_POSITION);
-  cairo_show_text(cv->cr, str_get(genome_node_get_seqid((Genome_node*) sr)));
+  cairo_show_text(cv->cr, str_get(genome_node_get_seqid((GenomeNode*) sr)));
   cairo_move_to(cv->cr, cv->width * (SPACE + ROOM),
                 cv->global_track_number * TRACK_HEIGHT + TEXT_POSITION);
   (void) snprintf(buf, BUFSIZ, "%lu", cv->drawed_sequence_range.end);
@@ -301,27 +291,32 @@ static void cairo_visitor_sequence_region(Genome_visitor *gv,
   cairo_stroke(cv->cr);
 
   cv->global_track_number++;
+  return 0;
 }
 
-const Genome_visitor_class* cairo_visitor_class()
+const GenomeVisitorClass* cairo_visitor_class()
 {
-  static Genome_visitor_class gvc = { sizeof (Cairo_visitor),
-                                      cairo_visitor_free,
-                                      NULL,
-                                      cairo_visitor_genome_feature,
-                                      cairo_visitor_sequence_region,
-                                      NULL };
+  static GenomeVisitorClass gvc = { sizeof (CairoVisitor),
+                                    cairo_visitor_free,
+                                    NULL,
+                                    cairo_visitor_genome_feature,
+                                    cairo_visitor_sequence_region,
+                                    NULL };
   return &gvc;
 }
 
-Genome_visitor* cairo_visitor_new(char *png_filename, int width,
-                                  unsigned int number_of_tracks,
-                                  unsigned long from, unsigned long to)
+GenomeVisitor* cairo_visitor_new(char *png_filename, int width,
+                                 unsigned int number_of_tracks,
+                                 unsigned long from, unsigned long to, Env *env)
 {
-  Genome_visitor *gv = genome_visitor_create(cairo_visitor_class());
-  Cairo_visitor *cv = cairo_visitor_cast(gv);
+  GenomeVisitor *gv;
+  CairoVisitor *cv;
 
-  assert(png_filename && width != UNDEFINT);
+  env_error_check(env);
+  assert(png_filename && width != UNDEF_INT);
+
+  gv = genome_visitor_create(cairo_visitor_class(), env);
+  cv = cairo_visitor_cast(gv);
 
   cv->number_of_tracks = number_of_tracks;
   cv->from = from;

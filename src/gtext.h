@@ -13,6 +13,7 @@
 #include <libgtext/align.h>                     /* align module */
 #include <libgtext/alignment.h>                 /* alignment class */
 #include <libgtext/bsearch.h>                   /* bsearch module */
+#include <libgtext/cairo_stream.h>              /* cairo stream */
 #include <libgtext/cds_stream.h>                /* CDS stream */
 #include <libgtext/consensus_sa.h>              /* consensus spl. align. mod. */
 #include <libgtext/csa_stream.h>                /* consensus spl. align. str. */

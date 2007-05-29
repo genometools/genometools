@@ -5,6 +5,7 @@
 */
 
 #include "gt.h"
+#include "gt_png.h"
 #include "gt_regioncov.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
@@ -28,6 +29,7 @@ void register_devtools(Toolbox *dev_toolbox, Env *env)
   assert(dev_toolbox);
   /* add development tools here with a function call like this:
      toolbox_add(dev_toolbox, "devtool", gt_devtool, env); */
+  toolbox_add(dev_toolbox, "png", gt_png, env);
   toolbox_add(dev_toolbox, "regioncov", gt_regioncov, env);
 }
 
