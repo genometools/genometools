@@ -36,7 +36,7 @@ struct PNGVisitor {
 };
 
 typedef struct {
-  PNGVisitor *cv;
+  PNGVisitor *pngv;
   bool children_overlap;
   int local_track_number;
 } Show_children_info;
@@ -46,63 +46,63 @@ typedef struct {
 
 static void png_visitor_free(GenomeVisitor *gv, Env *env)
 {
-  PNGVisitor *cv = png_visitor_cast(gv);
-  assert(cv->png_filename);
-  assert(cv->width); /* the width has to be positive */
-  assert(cv->height); /* the height has to be positive */
-  (void) cairo_surface_write_to_png(cv->graphics->surf, cv->png_filename);
-  cairo_surface_destroy(cv->graphics->surf); /* reference counted */
+  PNGVisitor *pngv = png_visitor_cast(gv);
+  assert(pngv->png_filename);
+  assert(pngv->width); /* the width has to be positive */
+  assert(pngv->height); /* the height has to be positive */
+  (void) cairo_surface_write_to_png(pngv->graphics->surf, pngv->png_filename);
+  cairo_surface_destroy(pngv->graphics->surf); /* reference counted */
   /* we check this after writing the png to simplify debugging */
-  assert(cv->global_track_number <= cv->number_of_tracks);
-  graphics_delete(cv->graphics, env);
+  assert(pngv->global_track_number <= pngv->number_of_tracks);
+  graphics_delete(pngv->graphics, env);
 }
 
-static void draw_exon_box(PNGVisitor *cv, GenomeFeature *gf, double width,
+static void draw_exon_box(PNGVisitor *pngv, GenomeFeature *gf, double width,
                           int track_number)
 {
   Range feature_range = genome_node_get_range((GenomeNode*) gf);
   Strand feature_strand = genome_feature_get_strand(gf);
   double x, y, height;
 
-  x =  cv->width * SPACE + cv->width * ROOM *
-       ((double) (feature_range.start - cv->drawed_sequence_range.start + 1) /
-        (double) range_length(cv->drawed_sequence_range));
+  x =  pngv->width * SPACE + pngv->width * ROOM *
+       ((double) (feature_range.start - pngv->drawed_sequence_range.start + 1) /
+        (double) range_length(pngv->drawed_sequence_range));
   y = track_number * TRACK_HEIGHT + FEATURE_POSITION;
   height = EXON_HEIGHT;
 
-  cairo_set_source_rgb(cv->graphics->cr, 0, 0, 1);
+  cairo_set_source_rgb(pngv->graphics->cr, 0, 0, 1);
   switch (feature_strand) {
     case STRAND_FORWARD:
-      cairo_move_to(cv->graphics->cr, x, y);
+      cairo_move_to(pngv->graphics->cr, x, y);
       if (width - EXON_ARROW_WIDTH > 0)
-        cairo_rel_line_to(cv->graphics->cr, width - EXON_ARROW_WIDTH, 0);
-      cairo_line_to(cv->graphics->cr, x + width, y + height / 2);
+        cairo_rel_line_to(pngv->graphics->cr, width - EXON_ARROW_WIDTH, 0);
+      cairo_line_to(pngv->graphics->cr, x + width, y + height / 2);
       if (width - EXON_ARROW_WIDTH > 0) {
-        cairo_line_to(cv->graphics->cr, x + width - EXON_ARROW_WIDTH,
+        cairo_line_to(pngv->graphics->cr, x + width - EXON_ARROW_WIDTH,
                       y + height);
       }
-      cairo_line_to(cv->graphics->cr, x, y + height);
-      cairo_close_path(cv->graphics->cr);
+      cairo_line_to(pngv->graphics->cr, x, y + height);
+      cairo_close_path(pngv->graphics->cr);
       break;
     case STRAND_REVERSE:
-      cairo_move_to(cv->graphics->cr, x + width, y);
+      cairo_move_to(pngv->graphics->cr, x + width, y);
       if (width - EXON_ARROW_WIDTH > 0)
-        cairo_rel_line_to(cv->graphics->cr, -(width - EXON_ARROW_WIDTH), 0);
-      cairo_line_to(cv->graphics->cr, x, y + height / 2);
-      cairo_line_to(cv->graphics->cr, x + MIN(width, EXON_ARROW_WIDTH),
+        cairo_rel_line_to(pngv->graphics->cr, -(width - EXON_ARROW_WIDTH), 0);
+      cairo_line_to(pngv->graphics->cr, x, y + height / 2);
+      cairo_line_to(pngv->graphics->cr, x + MIN(width, EXON_ARROW_WIDTH),
                     y + height);
       if (width - EXON_ARROW_WIDTH > 0)
-        cairo_line_to(cv->graphics->cr, x + width, y + height);
-      cairo_close_path(cv->graphics->cr);
+        cairo_line_to(pngv->graphics->cr, x + width, y + height);
+      cairo_close_path(pngv->graphics->cr);
       break;
     case STRAND_BOTH:
     case STRAND_UNKNOWN:
-      cairo_rectangle(cv->graphics->cr, x, y, width, height);
+      cairo_rectangle(pngv->graphics->cr, x, y, width, height);
    }
 
-   cairo_fill_preserve(cv->graphics->cr);
-   cairo_set_source_rgb(cv->graphics->cr, 0, 0, 0);
-   cairo_stroke(cv->graphics->cr);
+   cairo_fill_preserve(pngv->graphics->cr);
+   cairo_set_source_rgb(pngv->graphics->cr, 0, 0, 0);
+   cairo_stroke(pngv->graphics->cr);
 }
 
 static int show_children(GenomeNode *gn, void *data, Env *env)
@@ -115,43 +115,43 @@ static int show_children(GenomeNode *gn, void *data, Env *env)
   double x_left, x_right, width, text_y;
 
   env_error_check(env);
-  assert(info->cv->drawed_sequence_range_is_defined);
-  assert(info->local_track_number < info->cv->number_of_tracks);
+  assert(info->pngv->drawed_sequence_range_is_defined);
+  assert(info->local_track_number < info->pngv->number_of_tracks);
 
   text_y = info->local_track_number * TRACK_HEIGHT + TEXT_POSITION;
-  x_left = info->cv->width * SPACE + info->cv->width * ROOM *
+  x_left = info->pngv->width * SPACE + info->pngv->width * ROOM *
            ((double) (feature_range.start -
-                      info->cv->drawed_sequence_range.start + 1) /
-            (double) range_length(info->cv->drawed_sequence_range));
-  x_right = info->cv->width * SPACE + info->cv->width * ROOM *
+                      info->pngv->drawed_sequence_range.start + 1) /
+            (double) range_length(info->pngv->drawed_sequence_range));
+  x_right = info->pngv->width * SPACE + info->pngv->width * ROOM *
             ((double) (feature_range.end -
-                       info->cv->drawed_sequence_range.start + 1) /
-             (double) range_length(info->cv->drawed_sequence_range));
-  width = info->cv->width * ROOM *
+                       info->pngv->drawed_sequence_range.start + 1) /
+             (double) range_length(info->pngv->drawed_sequence_range));
+  width = info->pngv->width * ROOM *
           ((double) range_length(feature_range) /
-           (double) range_length(info->cv->drawed_sequence_range));
+           (double) range_length(info->pngv->drawed_sequence_range));
 
-  cairo_set_source_rgb(info->cv->graphics->cr, 0, 0, 0);
+  cairo_set_source_rgb(info->pngv->graphics->cr, 0, 0, 0);
 
-  cairo_move_to(info->cv->graphics->cr, x_left, text_y);
+  cairo_move_to(info->pngv->graphics->cr, x_left, text_y);
   (void) snprintf(buf, BUFSIZ, "%lu", feature_range.start);
-  cairo_show_text(info->cv->graphics->cr, buf);
+  cairo_show_text(info->pngv->graphics->cr, buf);
 
-  cairo_move_to(info->cv->graphics->cr, x_left + width / 2, text_y);
-  cairo_show_text(info->cv->graphics->cr,
+  cairo_move_to(info->pngv->graphics->cr, x_left + width / 2, text_y);
+  cairo_show_text(info->pngv->graphics->cr,
                   genome_feature_type_get_cstr(genome_feature_get_type(gf)));
 
-  cairo_move_to(info->cv->graphics->cr, x_right, text_y);
+  cairo_move_to(info->pngv->graphics->cr, x_right, text_y);
   (void) snprintf(buf, BUFSIZ, "%lu", feature_range.end);
-  cairo_show_text(info->cv->graphics->cr, buf);
+  cairo_show_text(info->pngv->graphics->cr, buf);
 
-  draw_exon_box(info->cv, gf, width, info->local_track_number);
+  draw_exon_box(info->pngv, gf, width, info->local_track_number);
 
   if (info->children_overlap)
     info->local_track_number++;
 
   if (genome_node_has_children(gn)) {
-    local_info.cv = info->cv;
+    local_info.pngv = info->pngv;
     local_info.children_overlap =
       !genome_node_direct_children_do_not_overlap(gn, env);
     local_info.local_track_number = info->local_track_number;
@@ -175,85 +175,85 @@ static int show_children(GenomeNode *gn, void *data, Env *env)
 static int png_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                          Env *env)
 {
-  PNGVisitor *cv = png_visitor_cast(gv);
+  PNGVisitor *pngv = png_visitor_cast(gv);
   Show_children_info info;
   Range feature_range;
   char buf[BUFSIZ];
   double x_left, x_right, width, text_y;
 
-  assert(cv->drawed_sequence_range_is_defined);
+  assert(pngv->drawed_sequence_range_is_defined);
 
   feature_range = genome_node_get_range((GenomeNode*) gf);
 
   /* reset track number if necessary */
-  if (cv->last_range_is_defined &&
-      !range_overlap(cv->last_range, feature_range)) {
-    cv->global_track_number = 1;
-    cv->last_range_is_defined = false;
+  if (pngv->last_range_is_defined &&
+      !range_overlap(pngv->last_range, feature_range)) {
+    pngv->global_track_number = 1;
+    pngv->last_range_is_defined = false;
   }
 
-  assert(cv->global_track_number < cv->number_of_tracks);
+  assert(pngv->global_track_number < pngv->number_of_tracks);
 
   /* calculate coordinates */
-  x_left = cv->width * SPACE +
-           cv->width * ROOM *
+  x_left = pngv->width * SPACE +
+           pngv->width * ROOM *
            ((double) (feature_range.start -
-                      cv->drawed_sequence_range.start + 1)/
-            (double) range_length(cv->drawed_sequence_range));
-  x_right = cv->width * SPACE +
-            cv->width * ROOM *
+                      pngv->drawed_sequence_range.start + 1)/
+            (double) range_length(pngv->drawed_sequence_range));
+  x_right = pngv->width * SPACE +
+            pngv->width * ROOM *
             ((double) (feature_range.end -
-                       cv->drawed_sequence_range.start + 1)/
-             (double) range_length(cv->drawed_sequence_range)),
-  width = cv->width * ROOM *
+                       pngv->drawed_sequence_range.start + 1)/
+             (double) range_length(pngv->drawed_sequence_range)),
+  width = pngv->width * ROOM *
           ((double) range_length(feature_range) /
-           (double) range_length(cv->drawed_sequence_range));
-  text_y = cv->global_track_number * TRACK_HEIGHT + TEXT_POSITION;
+           (double) range_length(pngv->drawed_sequence_range));
+  text_y = pngv->global_track_number * TRACK_HEIGHT + TEXT_POSITION;
 
-  cairo_set_source_rgb(cv->graphics->cr, 0, 0, 0);
+  cairo_set_source_rgb(pngv->graphics->cr, 0, 0, 0);
   /* show <start --- feature_type --- end> */
-  cairo_move_to(cv->graphics->cr, x_left, text_y);
+  cairo_move_to(pngv->graphics->cr, x_left, text_y);
   (void) snprintf(buf, BUFSIZ, "%lu", genome_node_get_start((GenomeNode*) gf));
-  cairo_show_text(cv->graphics->cr, buf);
+  cairo_show_text(pngv->graphics->cr, buf);
 
-  cairo_move_to(cv->graphics->cr, x_left + width / 2, text_y);
-  cairo_show_text(cv->graphics->cr,
+  cairo_move_to(pngv->graphics->cr, x_left + width / 2, text_y);
+  cairo_show_text(pngv->graphics->cr,
                   genome_feature_type_get_cstr(genome_feature_get_type(gf)));
 
-  cairo_move_to(cv->graphics->cr, x_right, text_y);
+  cairo_move_to(pngv->graphics->cr, x_right, text_y);
   (void) snprintf(buf, BUFSIZ, "%lu", genome_node_get_end((GenomeNode*) gf));
-  cairo_show_text(cv->graphics->cr, buf);
+  cairo_show_text(pngv->graphics->cr, buf);
   /* draw feature line */
-  cairo_move_to(cv->graphics->cr, x_left,
-                cv->global_track_number * TRACK_HEIGHT + FEATURE_POSITION);
-  cairo_rel_line_to(cv->graphics->cr, width, 0);
-  cairo_stroke(cv->graphics->cr);
+  cairo_move_to(pngv->graphics->cr, x_left,
+                pngv->global_track_number * TRACK_HEIGHT + FEATURE_POSITION);
+  cairo_rel_line_to(pngv->graphics->cr, width, 0);
+  cairo_stroke(pngv->graphics->cr);
 
-  cv->global_track_number++;
+  pngv->global_track_number++;
 
   if (genome_node_has_children((GenomeNode*) gf)) {
-    info.cv = cv;
+    info.pngv = pngv;
     info.children_overlap =
       !genome_node_direct_children_do_not_overlap((GenomeNode*) gf, env);
-    info.local_track_number = cv->global_track_number;
+    info.local_track_number = pngv->global_track_number;
     genome_node_traverse_direct_children((GenomeNode*) gf, &info,
                                          show_children, env);
     if (!info.children_overlap)
       info.local_track_number++;
-    assert(info.local_track_number >= cv->global_track_number);
-    cv->global_track_number = info.local_track_number;
+    assert(info.local_track_number >= pngv->global_track_number);
+    pngv->global_track_number = info.local_track_number;
   }
 
   /* store range for later use */
-  if (cv->last_range_is_defined) {
-    assert(feature_range.start >= cv->last_range.start);
-    if (feature_range.end > cv->last_range.end)
-      cv->last_range.end = feature_range.end;
+  if (pngv->last_range_is_defined) {
+    assert(feature_range.start >= pngv->last_range.start);
+    if (feature_range.end > pngv->last_range.end)
+      pngv->last_range.end = feature_range.end;
   }
   else {
-    cv->last_range = feature_range;
+    pngv->last_range = feature_range;
   }
-  cv->last_range_is_defined = true;
+  pngv->last_range_is_defined = true;
 
   return 0;
 }
@@ -261,40 +261,40 @@ static int png_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 static int png_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
                                          Env *env)
 {
-  PNGVisitor *cv = png_visitor_cast(gv);
+  PNGVisitor *pngv = png_visitor_cast(gv);
   Range sr_range;
   char buf[BUFSIZ];
 
   env_error_check(env);
-  assert(!cv->drawed_sequence_range_is_defined);
+  assert(!pngv->drawed_sequence_range_is_defined);
 
   sr_range = genome_node_get_range((GenomeNode*) sr);
-  cv->drawed_sequence_range.start = MAX(sr_range.start, cv->from);
-  cv->drawed_sequence_range.end = MIN(sr_range.end, cv->to);
-  cv->drawed_sequence_range_is_defined = true;
+  pngv->drawed_sequence_range.start = MAX(sr_range.start, pngv->from);
+  pngv->drawed_sequence_range.end = MIN(sr_range.end, pngv->to);
+  pngv->drawed_sequence_range_is_defined = true;
 
-  assert(!cv->global_track_number);
-  cairo_set_source_rgb(cv->graphics->cr, 0, 0, 0);
+  assert(!pngv->global_track_number);
+  cairo_set_source_rgb(pngv->graphics->cr, 0, 0, 0);
   /* show <start --- sequence id --- end> */
-  cairo_move_to(cv->graphics->cr, cv->width * SPACE,
-                cv->global_track_number * TRACK_HEIGHT + TEXT_POSITION);
-  (void) snprintf(buf, BUFSIZ, "%lu", cv->drawed_sequence_range.start);
-  cairo_show_text(cv->graphics->cr, buf);
-  cairo_move_to(cv->graphics->cr, cv->width * (SPACE + ROOM / 2),
-                cv->global_track_number * TRACK_HEIGHT + TEXT_POSITION);
-  cairo_show_text(cv->graphics->cr,
+  cairo_move_to(pngv->graphics->cr, pngv->width * SPACE,
+                pngv->global_track_number * TRACK_HEIGHT + TEXT_POSITION);
+  (void) snprintf(buf, BUFSIZ, "%lu", pngv->drawed_sequence_range.start);
+  cairo_show_text(pngv->graphics->cr, buf);
+  cairo_move_to(pngv->graphics->cr, pngv->width * (SPACE + ROOM / 2),
+                pngv->global_track_number * TRACK_HEIGHT + TEXT_POSITION);
+  cairo_show_text(pngv->graphics->cr,
                   str_get(genome_node_get_seqid((GenomeNode*) sr)));
-  cairo_move_to(cv->graphics->cr, cv->width * (SPACE + ROOM),
-                cv->global_track_number * TRACK_HEIGHT + TEXT_POSITION);
-  (void) snprintf(buf, BUFSIZ, "%lu", cv->drawed_sequence_range.end);
-  cairo_show_text(cv->graphics->cr, buf);
+  cairo_move_to(pngv->graphics->cr, pngv->width * (SPACE + ROOM),
+                pngv->global_track_number * TRACK_HEIGHT + TEXT_POSITION);
+  (void) snprintf(buf, BUFSIZ, "%lu", pngv->drawed_sequence_range.end);
+  cairo_show_text(pngv->graphics->cr, buf);
   /* draw sequence line */
-  cairo_move_to(cv->graphics->cr, cv->width * SPACE,
-                cv->global_track_number * TRACK_HEIGHT + FEATURE_POSITION);
-  cairo_rel_line_to(cv->graphics->cr, cv->width * ROOM, 0);
-  cairo_stroke(cv->graphics->cr);
+  cairo_move_to(pngv->graphics->cr, pngv->width * SPACE,
+                pngv->global_track_number * TRACK_HEIGHT + FEATURE_POSITION);
+  cairo_rel_line_to(pngv->graphics->cr, pngv->width * ROOM, 0);
+  cairo_stroke(pngv->graphics->cr);
 
-  cv->global_track_number++;
+  pngv->global_track_number++;
   return 0;
 }
 
@@ -314,23 +314,23 @@ GenomeVisitor* png_visitor_new(char *png_filename, int width,
                                unsigned long from, unsigned long to, Env *env)
 {
   GenomeVisitor *gv;
-  PNGVisitor *cv;
+  PNGVisitor *pngv;
 
   env_error_check(env);
   assert(png_filename && width != UNDEF_INT);
 
   gv = genome_visitor_create(png_visitor_class(), env);
-  cv = png_visitor_cast(gv);
+  pngv = png_visitor_cast(gv);
 
-  cv->number_of_tracks = number_of_tracks;
-  cv->from = from;
-  cv->to = to;
-  cv->width = width ;
-  cv->height = cv->number_of_tracks * TRACK_HEIGHT;
-  cv->global_track_number = 0;
-  cv->graphics = graphics_new(cv->width, cv->height, env);
-  cv->png_filename = png_filename;
-  cv->drawed_sequence_range_is_defined = false;
-  cv->last_range_is_defined = false;
+  pngv->number_of_tracks = number_of_tracks;
+  pngv->from = from;
+  pngv->to = to;
+  pngv->width = width ;
+  pngv->height = pngv->number_of_tracks * TRACK_HEIGHT;
+  pngv->global_track_number = 0;
+  pngv->graphics = graphics_new(pngv->width, pngv->height, env);
+  pngv->png_filename = png_filename;
+  pngv->drawed_sequence_range_is_defined = false;
+  pngv->last_range_is_defined = false;
   return gv;
 }
