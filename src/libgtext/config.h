@@ -12,7 +12,7 @@
 
 typedef struct Config Config;
 
-Config*      config_new(Env*);
+Config*      config_new(Env*, bool*);
 void         config_delete(Config*, Env*);
 void         config_load_file(Config*, Str*, Env*);
 void         config_reload(Config*, Env*);

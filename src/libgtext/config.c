@@ -7,7 +7,7 @@
 #include <libgtext/config.h>
 #include <assert.h>
 #include <string.h>
-#include <libgtcore/log.h>
+#include <libgtcore/warning.h>
 #include <libgtcore/ensure.h>
 #include <libgtext/config.h>
 #include "lua.h"
@@ -18,6 +18,7 @@ struct Config
 {
 	lua_State *L;
   Str *fn;
+	bool* verbose;
 };
 
 static void gtlua_new_table(lua_State *L, const char *key)
@@ -49,15 +50,13 @@ Creates a Config object.
 \param env Pointer to Environment object.
 \return Pointer to the new object.
 */
-Config* config_new(Env *env)
+Config* config_new(Env *env, bool* verbose)
 {
 	Config *cfg;
   env_error_check(env);
-	/* open and assign log facility */
-	Log* log = log_new(env_ma(env));
-	env_set_log(env, log);
   cfg = env_ma_malloc(env, sizeof (Config));
 	cfg->fn = NULL;
+	cfg->verbose = verbose;
   cfg->L = luaL_newstate();
   if (!cfg->L)
   {
@@ -165,14 +164,14 @@ static int config_find_section_for_getting(Config* cfg,
 	lua_getglobal(cfg->L, "config");
 	if (lua_isnil(cfg->L, -1))
 	{
-	  env_log_log(env, "'config' is not defined");
+	  if (*cfg->verbose) warning("'config' is not defined");
 		lua_pop(cfg->L, 1);
 	  return -1;
 	} else depth++;
 	lua_getfield(cfg->L, -1, section);
 	if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1))
 	{
-    env_log_log(env, "section '%s' is not defined", section);
+    if (*cfg->verbose) warning("section '%s' is not defined", section);
 		lua_pop(cfg->L, 1);
 		return -1;
 	} else depth++;
@@ -255,8 +254,8 @@ const char* config_get_cstr(Config *cfg,
   lua_getfield(cfg->L, -1, key);
 	if (lua_isnil(cfg->L, -1) || !lua_isstring(cfg->L, -1))
 	{
-    env_log_log(env, "no value is defined for key '%s'",
-		            key);
+    if (*cfg->verbose) warning("no value is defined for key '%s'",
+		                          key);
 		lua_pop(cfg->L, 1);
 		return str;
   } else i++;
@@ -290,8 +289,8 @@ Color config_get_color(Config *cfg, const char *key, Env* env)
   lua_getfield(cfg->L, -1, key);
 	if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1))
 	{
-    env_log_log(env, "no colors are defined for type '%s', will use defaults",
-		            key);
+    if (*cfg->verbose) warning("no colors are defined for type '%s', will use defaults",
+														  key);
 		lua_pop(cfg->L, 1);
 		return color;
   } else i++;
@@ -326,10 +325,13 @@ int config_unit_test(Env* env)
 	Config *cfg;
 	const char* test1 = "mRNA";
 	const char* test2 = "gene";
-  const char* str;
+  const char* str = NULL;
 	Str *luafile = str_new_cstr("config.lua",env);
 	Color col1, col2, col, defcol, tmpcol;
-
+  
+	/* do not show warnings during the unit test */
+	bool verbose = false;
+	
   /* example colors */
   col1.red=.1;col1.green=.2;col1.blue=.3;
   col2.red=.4;col2.green=.5;col2.blue=.6;
@@ -337,7 +339,7 @@ int config_unit_test(Env* env)
 	defcol.red=.8;defcol.green=.8;defcol.blue=.8;
 
   /* instantiate new config object */
-	cfg = config_new(env);
+	cfg = config_new(env, &verbose);
 
 	/* at the beginning, all values are defaults, since nothing is defined */
   tmpcol = config_get_color(cfg, "exon", env);
