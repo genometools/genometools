@@ -306,8 +306,8 @@ const GenomeVisitorClass* png_visitor_class()
 }
 
 GenomeVisitor* png_visitor_new(char *png_filename, int width,
-                                 unsigned int number_of_tracks,
-                                 unsigned long from, unsigned long to, Env *env)
+                               unsigned int number_of_tracks,
+                               unsigned long from, unsigned long to, Env *env)
 {
   GenomeVisitor *gv;
   PNGVisitor *cv;
