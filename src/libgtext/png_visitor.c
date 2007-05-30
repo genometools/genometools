@@ -17,7 +17,6 @@
 #define TEXT_POSITION           20
 #define FEATURE_POSITION        30
 #define EXON_HEIGHT             10
-#define EXON_ARROW_WIDTH        8
 
 struct PNGVisitor {
   const GenomeVisitor parent_instance;
@@ -69,39 +68,7 @@ static void draw_exon_box(PNGVisitor *pngv, GenomeFeature *gf, double width,
   y = track_number * TRACK_HEIGHT + FEATURE_POSITION;
   height = EXON_HEIGHT;
 
-  cairo_set_source_rgb(pngv->graphics->cr, 0, 0, 1);
-  switch (feature_strand) {
-    case STRAND_FORWARD:
-      cairo_move_to(pngv->graphics->cr, x, y);
-      if (width - EXON_ARROW_WIDTH > 0)
-        cairo_rel_line_to(pngv->graphics->cr, width - EXON_ARROW_WIDTH, 0);
-      cairo_line_to(pngv->graphics->cr, x + width, y + height / 2);
-      if (width - EXON_ARROW_WIDTH > 0) {
-        cairo_line_to(pngv->graphics->cr, x + width - EXON_ARROW_WIDTH,
-                      y + height);
-      }
-      cairo_line_to(pngv->graphics->cr, x, y + height);
-      cairo_close_path(pngv->graphics->cr);
-      break;
-    case STRAND_REVERSE:
-      cairo_move_to(pngv->graphics->cr, x + width, y);
-      if (width - EXON_ARROW_WIDTH > 0)
-        cairo_rel_line_to(pngv->graphics->cr, -(width - EXON_ARROW_WIDTH), 0);
-      cairo_line_to(pngv->graphics->cr, x, y + height / 2);
-      cairo_line_to(pngv->graphics->cr, x + MIN(width, EXON_ARROW_WIDTH),
-                    y + height);
-      if (width - EXON_ARROW_WIDTH > 0)
-        cairo_line_to(pngv->graphics->cr, x + width, y + height);
-      cairo_close_path(pngv->graphics->cr);
-      break;
-    case STRAND_BOTH:
-    case STRAND_UNKNOWN:
-      cairo_rectangle(pngv->graphics->cr, x, y, width, height);
-   }
-
-   cairo_fill_preserve(pngv->graphics->cr);
-   cairo_set_source_rgb(pngv->graphics->cr, 0, 0, 0);
-   cairo_stroke(pngv->graphics->cr);
+  graphics_draw_exon_box(pngv->graphics, x, y, width, height, feature_strand);
 }
 
 static int show_children(GenomeNode *gn, void *data, Env *env)
