@@ -7,8 +7,9 @@
 #include <assert.h>
 #include <cairo.h>
 #include <gtcore.h>
-#include "png_visitor.h"
-#include "genome_visitor_rep.h"
+#include <libgtext/genome_visitor_rep.h>
+#include <libgtext/graphics.h>
+#include <libgtext/png_visitor.h>
 
 #define TRACK_HEIGHT            50
 #define SPACE                   .05
@@ -26,8 +27,7 @@ struct PNGVisitor {
   unsigned int number_of_tracks;
   unsigned long from,
                 to;
-  cairo_t *cr;
-  cairo_surface_t *surf;
+  Graphics *graphics;
   char *png_filename;
   Range drawed_sequence_range,
         last_range;
@@ -50,11 +50,11 @@ static void png_visitor_free(GenomeVisitor *gv, Env *env)
   assert(cv->png_filename);
   assert(cv->width); /* the width has to be positive */
   assert(cv->height); /* the height has to be positive */
-  (void) cairo_surface_write_to_png(cv->surf, cv->png_filename);
-  cairo_surface_destroy(cv->surf); /* reference counted */
+  (void) cairo_surface_write_to_png(cv->graphics->surf, cv->png_filename);
+  cairo_surface_destroy(cv->graphics->surf); /* reference counted */
   /* we check this after writing the png to simplify debugging */
   assert(cv->global_track_number <= cv->number_of_tracks);
-  cairo_destroy(cv->cr);
+  graphics_delete(cv->graphics, env);
 }
 
 static void draw_exon_box(PNGVisitor *cv, GenomeFeature *gf, double width,
@@ -70,36 +70,39 @@ static void draw_exon_box(PNGVisitor *cv, GenomeFeature *gf, double width,
   y = track_number * TRACK_HEIGHT + FEATURE_POSITION;
   height = EXON_HEIGHT;
 
-  cairo_set_source_rgb(cv->cr, 0, 0, 1);
+  cairo_set_source_rgb(cv->graphics->cr, 0, 0, 1);
   switch (feature_strand) {
     case STRAND_FORWARD:
-      cairo_move_to(cv->cr, x, y);
+      cairo_move_to(cv->graphics->cr, x, y);
       if (width - EXON_ARROW_WIDTH > 0)
-        cairo_rel_line_to(cv->cr, width - EXON_ARROW_WIDTH, 0);
-      cairo_line_to(cv->cr, x + width, y + height / 2);
-      if (width - EXON_ARROW_WIDTH > 0)
-        cairo_line_to(cv->cr, x + width - EXON_ARROW_WIDTH, y + height);
-      cairo_line_to(cv->cr, x, y + height);
-      cairo_close_path(cv->cr);
+        cairo_rel_line_to(cv->graphics->cr, width - EXON_ARROW_WIDTH, 0);
+      cairo_line_to(cv->graphics->cr, x + width, y + height / 2);
+      if (width - EXON_ARROW_WIDTH > 0) {
+        cairo_line_to(cv->graphics->cr, x + width - EXON_ARROW_WIDTH,
+                      y + height);
+      }
+      cairo_line_to(cv->graphics->cr, x, y + height);
+      cairo_close_path(cv->graphics->cr);
       break;
     case STRAND_REVERSE:
-      cairo_move_to(cv->cr, x + width, y);
+      cairo_move_to(cv->graphics->cr, x + width, y);
       if (width - EXON_ARROW_WIDTH > 0)
-        cairo_rel_line_to(cv->cr, -(width - EXON_ARROW_WIDTH), 0);
-      cairo_line_to(cv->cr, x, y + height / 2);
-      cairo_line_to(cv->cr, x + MIN(width, EXON_ARROW_WIDTH), y + height);
+        cairo_rel_line_to(cv->graphics->cr, -(width - EXON_ARROW_WIDTH), 0);
+      cairo_line_to(cv->graphics->cr, x, y + height / 2);
+      cairo_line_to(cv->graphics->cr, x + MIN(width, EXON_ARROW_WIDTH),
+                    y + height);
       if (width - EXON_ARROW_WIDTH > 0)
-        cairo_line_to(cv->cr, x + width, y + height);
-      cairo_close_path(cv->cr);
+        cairo_line_to(cv->graphics->cr, x + width, y + height);
+      cairo_close_path(cv->graphics->cr);
       break;
     case STRAND_BOTH:
     case STRAND_UNKNOWN:
-      cairo_rectangle(cv->cr, x, y, width, height);
+      cairo_rectangle(cv->graphics->cr, x, y, width, height);
    }
 
-   cairo_fill_preserve(cv->cr);
-   cairo_set_source_rgb(cv->cr, 0, 0, 0);
-   cairo_stroke(cv->cr);
+   cairo_fill_preserve(cv->graphics->cr);
+   cairo_set_source_rgb(cv->graphics->cr, 0, 0, 0);
+   cairo_stroke(cv->graphics->cr);
 }
 
 static int show_children(GenomeNode *gn, void *data, Env *env)
@@ -128,19 +131,19 @@ static int show_children(GenomeNode *gn, void *data, Env *env)
           ((double) range_length(feature_range) /
            (double) range_length(info->cv->drawed_sequence_range));
 
-  cairo_set_source_rgb(info->cv->cr, 0, 0, 0);
+  cairo_set_source_rgb(info->cv->graphics->cr, 0, 0, 0);
 
-  cairo_move_to(info->cv->cr, x_left, text_y);
+  cairo_move_to(info->cv->graphics->cr, x_left, text_y);
   (void) snprintf(buf, BUFSIZ, "%lu", feature_range.start);
-  cairo_show_text(info->cv->cr, buf);
+  cairo_show_text(info->cv->graphics->cr, buf);
 
-  cairo_move_to(info->cv->cr, x_left + width / 2, text_y);
-  cairo_show_text(info->cv->cr,
+  cairo_move_to(info->cv->graphics->cr, x_left + width / 2, text_y);
+  cairo_show_text(info->cv->graphics->cr,
                   genome_feature_type_get_cstr(genome_feature_get_type(gf)));
 
-  cairo_move_to(info->cv->cr, x_right, text_y);
+  cairo_move_to(info->cv->graphics->cr, x_right, text_y);
   (void) snprintf(buf, BUFSIZ, "%lu", feature_range.end);
-  cairo_show_text(info->cv->cr, buf);
+  cairo_show_text(info->cv->graphics->cr, buf);
 
   draw_exon_box(info->cv, gf, width, info->local_track_number);
 
@@ -207,24 +210,24 @@ static int png_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
            (double) range_length(cv->drawed_sequence_range));
   text_y = cv->global_track_number * TRACK_HEIGHT + TEXT_POSITION;
 
-  cairo_set_source_rgb(cv->cr, 0, 0, 0);
+  cairo_set_source_rgb(cv->graphics->cr, 0, 0, 0);
   /* show <start --- feature_type --- end> */
-  cairo_move_to(cv->cr, x_left, text_y);
+  cairo_move_to(cv->graphics->cr, x_left, text_y);
   (void) snprintf(buf, BUFSIZ, "%lu", genome_node_get_start((GenomeNode*) gf));
-  cairo_show_text(cv->cr, buf);
+  cairo_show_text(cv->graphics->cr, buf);
 
-  cairo_move_to(cv->cr, x_left + width / 2, text_y);
-  cairo_show_text(cv->cr,
+  cairo_move_to(cv->graphics->cr, x_left + width / 2, text_y);
+  cairo_show_text(cv->graphics->cr,
                   genome_feature_type_get_cstr(genome_feature_get_type(gf)));
 
-  cairo_move_to(cv->cr, x_right, text_y);
+  cairo_move_to(cv->graphics->cr, x_right, text_y);
   (void) snprintf(buf, BUFSIZ, "%lu", genome_node_get_end((GenomeNode*) gf));
-  cairo_show_text(cv->cr, buf);
+  cairo_show_text(cv->graphics->cr, buf);
   /* draw feature line */
-  cairo_move_to(cv->cr, x_left,
+  cairo_move_to(cv->graphics->cr, x_left,
                 cv->global_track_number * TRACK_HEIGHT + FEATURE_POSITION);
-  cairo_rel_line_to(cv->cr, width, 0);
-  cairo_stroke(cv->cr);
+  cairo_rel_line_to(cv->graphics->cr, width, 0);
+  cairo_stroke(cv->graphics->cr);
 
   cv->global_track_number++;
 
@@ -271,24 +274,25 @@ static int png_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
   cv->drawed_sequence_range_is_defined = true;
 
   assert(!cv->global_track_number);
-  cairo_set_source_rgb(cv->cr, 0, 0, 0);
+  cairo_set_source_rgb(cv->graphics->cr, 0, 0, 0);
   /* show <start --- sequence id --- end> */
-  cairo_move_to(cv->cr, cv->width * SPACE,
+  cairo_move_to(cv->graphics->cr, cv->width * SPACE,
                 cv->global_track_number * TRACK_HEIGHT + TEXT_POSITION);
   (void) snprintf(buf, BUFSIZ, "%lu", cv->drawed_sequence_range.start);
-  cairo_show_text(cv->cr, buf);
-  cairo_move_to(cv->cr, cv->width * (SPACE + ROOM / 2),
+  cairo_show_text(cv->graphics->cr, buf);
+  cairo_move_to(cv->graphics->cr, cv->width * (SPACE + ROOM / 2),
                 cv->global_track_number * TRACK_HEIGHT + TEXT_POSITION);
-  cairo_show_text(cv->cr, str_get(genome_node_get_seqid((GenomeNode*) sr)));
-  cairo_move_to(cv->cr, cv->width * (SPACE + ROOM),
+  cairo_show_text(cv->graphics->cr,
+                  str_get(genome_node_get_seqid((GenomeNode*) sr)));
+  cairo_move_to(cv->graphics->cr, cv->width * (SPACE + ROOM),
                 cv->global_track_number * TRACK_HEIGHT + TEXT_POSITION);
   (void) snprintf(buf, BUFSIZ, "%lu", cv->drawed_sequence_range.end);
-  cairo_show_text(cv->cr, buf);
+  cairo_show_text(cv->graphics->cr, buf);
   /* draw sequence line */
-  cairo_move_to(cv->cr, cv->width * SPACE,
+  cairo_move_to(cv->graphics->cr, cv->width * SPACE,
                 cv->global_track_number * TRACK_HEIGHT + FEATURE_POSITION);
-  cairo_rel_line_to(cv->cr, cv->width * ROOM, 0);
-  cairo_stroke(cv->cr);
+  cairo_rel_line_to(cv->graphics->cr, cv->width * ROOM, 0);
+  cairo_stroke(cv->graphics->cr);
 
   cv->global_track_number++;
   return 0;
@@ -324,17 +328,9 @@ GenomeVisitor* png_visitor_new(char *png_filename, int width,
   cv->width = width ;
   cv->height = cv->number_of_tracks * TRACK_HEIGHT;
   cv->global_track_number = 0;
-  cv->surf = cairo_image_surface_create(CAIRO_FORMAT_RGB24, cv->width,
-                                        cv->height);
-  cv->cr = cairo_create(cv->surf);
-  assert(cairo_status(cv->cr) == CAIRO_STATUS_SUCCESS);
+  cv->graphics = graphics_new(cv->width, cv->height, env);
   cv->png_filename = png_filename;
   cv->drawed_sequence_range_is_defined = false;
   cv->last_range_is_defined = false;
-
-  cairo_set_source_rgb(cv->cr, 1, 1, 1);
-  cairo_set_operator(cv->cr, CAIRO_OPERATOR_SOURCE);
-  cairo_paint(cv->cr);
-
   return gv;
 }
