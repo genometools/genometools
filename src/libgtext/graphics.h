@@ -18,7 +18,7 @@ void      graphics_draw_exon_box(Graphics *g, double x, double y, double width,
 void      graphics_draw_horizontal_line(Graphics *g, double x, double y,
                                         double width);
 void      graphics_draw_text(Graphics *g, double x, double y, const char *text);
-void      graphics_save_as_png(const Graphics*, const char *path);
+void      graphics_save_as_png(const Graphics*, const char *path, Env*);
 void      graphics_delete(Graphics*, Env*);
 
 #endif
