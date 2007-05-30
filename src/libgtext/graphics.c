@@ -58,6 +58,15 @@ void graphics_draw_exon_box(Graphics *g, double x, double y, double width,
    cairo_stroke(g->cr);
 }
 
+void graphics_draw_horizontal_line(Graphics *g, double x, double y,
+                                   double width)
+{
+  assert(g);
+  cairo_move_to(g->cr, x, y);
+  cairo_rel_line_to(g->cr, width, 0);
+  cairo_stroke(g->cr);
+}
+
 void graphics_draw_text(Graphics *g, double x, double y, const char *text)
 {
   assert(g && text);

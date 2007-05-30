@@ -186,10 +186,9 @@ static int png_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   cairo_show_text(pngv->graphics->cr, buf);
 
   /* draw feature line */
-  cairo_move_to(pngv->graphics->cr, x_left,
-                pngv->global_track_number * TRACK_HEIGHT + FEATURE_POSITION);
-  cairo_rel_line_to(pngv->graphics->cr, width, 0);
-  cairo_stroke(pngv->graphics->cr);
+  graphics_draw_horizontal_line(pngv->graphics, x_left,
+                                pngv->global_track_number *
+                                TRACK_HEIGHT + FEATURE_POSITION, width);
 
   pngv->global_track_number++;
 
