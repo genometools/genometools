@@ -1,0 +1,8 @@
+##gff-version   3
+##sequence-region   NC_003070 1 4294967295
+NC_003070	gth	gene	5867996	5869531	.	-	.	ID=gene486
+###
+NC_003070	gth	gene	5868674	5869264	.	+	.	ID=gene487
+###
+NC_003070	gth	gene	5869883	5872798	.	+	.	ID=gene488
+###

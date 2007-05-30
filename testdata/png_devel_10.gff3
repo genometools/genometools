@@ -1,0 +1,16 @@
+##gff-version   3
+##sequence-region   NC_003070 1 4294967295
+NC_003070	gth	gene	197812	198446	.	+	.	ID=gene20
+NC_003070	gth	mRNA	197812	198446	.	+	.	ID=mRNA20;Parent=gene20
+NC_003070	gth	exon	197812	197904	0.946237	+	.	Parent=mRNA20
+NC_003070	gth	exon	197974	198183	0.985714	+	.	Parent=mRNA20
+NC_003070	gth	exon	198267	198446	0.872222	+	.	Parent=mRNA20
+###
+NC_003070	gth	gene	197884	198811	.	-	.	ID=gene21
+NC_003070	gth	mRNA	197884	198811	.	-	.	ID=mRNA21;Parent=gene21
+NC_003070	gth	exon	197884	198005	1.000000	-	.	Parent=mRNA21
+NC_003070	gth	exon	198078	198185	1.000000	-	.	Parent=mRNA21
+NC_003070	gth	exon	198283	198414	1.000000	-	.	Parent=mRNA21
+NC_003070	gth	exon	198523	198579	1.000000	-	.	Parent=mRNA21
+NC_003070	gth	exon	198724	198811	1.000000	-	.	Parent=mRNA21
+###

@@ -1,0 +1,8 @@
+##gff-version   3
+##sequence-region   NC_003070 1 4294967295
+NC_003070	gth	gene	5867996	5869531	.	-	.	ID=gene486
+NC_003070	gth	mRNA	5867996	5869531	.	-	.	ID=mRNA518;Parent=gene486
+NC_003070	gth	exon	5867996	5868302	1.000000	-	.	Parent=mRNA518
+NC_003070	gth	exon	5868511	5868590	1.000000	-	.	Parent=mRNA518
+NC_003070	gth	exon	5869124	5869531	1.000000	-	.	Parent=mRNA518
+###
