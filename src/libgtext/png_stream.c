@@ -65,7 +65,7 @@ static int png_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   png_stream = png_stream_cast(gs);
   has_err = genome_stream_next_tree(png_stream->in_stream, gn, env);
 
-  if (!has_err) {
+  if (!has_err && *gn) {
     /* take the first one, if a seqid hasn't been defined already */
     if (!str_length(png_stream->seqid)) {
       str_delete(png_stream->seqid, env);

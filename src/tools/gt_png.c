@@ -122,13 +122,13 @@ int gt_png(int argc, const char **argv, Env *env)
   /* pull the features through the stream and free them afterwards */
   while (!(has_err = genome_stream_next_tree(info.pipe ? gff3_out_stream
                                                        : png_stream,
-                                             &gn, env))) {
+                                             &gn, env)) && gn) {
     genome_node_rec_delete(gn, env);
   }
 
   /* draw */
   if (!has_err)
-    png_stream_draw((PNGStream*) png_stream, info.verbose, NULL);
+    png_stream_draw((PNGStream*) png_stream, info.verbose, env);
 
   /* free */
   genome_stream_delete(gff3_out_stream, env);
