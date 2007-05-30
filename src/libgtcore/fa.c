@@ -175,16 +175,15 @@ void fa_xbzclose(BZFILE *stream, FA *fa)
   xfclose_generic(stream, GFM_BZIP2, fa);
 }
 
-FILE* fa_xtmpfile(FA *fa, char *template,
-                  const char *filename, int line)
+FILE* fa_xtmpfile(FA *fa, char *temp, const char *filename, int line)
 {
   FAFileInfo *fileinfo;
   FILE *fp;
-  assert(fa && template);
+  assert(fa && temp);
   fileinfo = env_ma_malloc(fa->env, sizeof (FAFileInfo));
   fileinfo->filename = filename;
   fileinfo->line = line;
-  fp = xtmpfile(template);
+  fp = xtmpfile(temp);
   assert(fp);
   hashtable_add(fa->file_pointer, fp, fileinfo, fa->env);
   return fp;

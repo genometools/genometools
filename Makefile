@@ -6,7 +6,6 @@
 
 CC:=gcc
 CXX:=g++
-LD:=gcc
 INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
              -I$(CURDIR)/src/external/lua-5.1.2/src \
              -I$(CURDIR)/src/external/expat-2.0.0/lib\
@@ -30,8 +29,10 @@ LIBGTCORE_SRC:=$(notdir $(wildcard src/libgtcore/*.c))
 LIBGTCORE_OBJ:=$(LIBGTCORE_SRC:%.c=obj/%.o)
 
 # the extended GenomeTools library (e.g., depends on Lua)
-LIBGTEXT_SRC:=$(notdir $(wildcard src/libgtext/*.c))
-LIBGTEXT_OBJ:=$(LIBGTEXT_SRC:%.c=obj/%.o)
+LIBGTEXT_C_SRC:=$(notdir $(wildcard src/libgtext/*.c))
+LIBGTEXT_C_OBJ:=$(LIBGTEXT_C_SRC:%.c=obj/%.o)
+LIBGTEXT_CXX_SRC:=$(notdir $(wildcard src/libgtext/*.cxx))
+LIBGTEXT_CXX_OBJ:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.o)
 
 TOOLS_SRC:=$(notdir $(wildcard src/tools/*.c))
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
@@ -114,9 +115,9 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgtext.a: $(LIBGTEXT_OBJ) $(LIBLUA_OBJ)
+lib/libgtext.a: $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $@]"
-	@ar ru $@ $(LIBGTEXT_OBJ) $(LIBLUA_OBJ)
+	@ar ru $@ $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -138,10 +139,10 @@ endif
 bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgtext.a lib/libgtcore.a\
         lib/libbz2.a lib/libagg.a lib/libpng.a
 	@echo "[link $@]"
-	@$(LD) $(LDFLAGS) $^ $(LDLIBS) -o $@
+	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 bin/rnv: obj/xcl.o lib/librnv.a lib/libexpat.a
-	@$(LD) $(LDFLAGS) $^ -o $@
+	@$(CC) $(LDFLAGS) $^ -o $@
 	@echo "[link $@]"
 
 obj/gt_build.h:
@@ -168,6 +169,10 @@ obj/%.o: src/libgtcore/%.c
 obj/%.o: src/libgtext/%.c
 	@echo "[compile $@]"
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+
+obj/%.o: src/libgtext/%.cxx
+	@echo "[compile $@]"
+	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 obj/%.o: src/tools/%.c
 	@echo "[compile $@]"

@@ -32,8 +32,8 @@ BZFILE* fa_bzopen(FA*, const char *path, const char *mode, const char*, int);
 BZFILE* fa_xbzopen(FA*, const char *path, const char *mode, const char*, int);
 void    fa_xbzclose(BZFILE *stream, FA*);
 
-/* create a tmp file using <template> as a template analog to mkstemp(3) */
-FILE*   fa_xtmpfile(FA*, char *template, const char*, int);
+/* create a tmp file using <temp> as a template analog to mkstemp(3) */
+FILE*   fa_xtmpfile(FA*, char *temp, const char*, int);
 
 /* memory map functions */
 void*   fa_mmap_read(FA*, const char *path, size_t *len, const char*, int);
