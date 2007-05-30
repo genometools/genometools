@@ -31,13 +31,13 @@ struct PNGVisitor {
   char *png_filename;
   Range drawed_sequence_range,
         last_range;
-  unsigned int drawed_sequence_range_is_defined : 1,
-               last_range_is_defined            : 1;
+  bool drawed_sequence_range_is_defined,
+       last_range_is_defined;
 };
 
 typedef struct {
   PNGVisitor *cv;
-  unsigned int children_overlap : 1;
+  bool children_overlap;
   int local_track_number;
 } Show_children_info;
 
@@ -186,7 +186,7 @@ static int png_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   if (cv->last_range_is_defined &&
       !range_overlap(cv->last_range, feature_range)) {
     cv->global_track_number = 1;
-    cv->last_range_is_defined = 0;
+    cv->last_range_is_defined = false;
   }
 
   assert(cv->global_track_number < cv->number_of_tracks);
@@ -250,7 +250,7 @@ static int png_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   else {
     cv->last_range = feature_range;
   }
-  cv->last_range_is_defined = 1;
+  cv->last_range_is_defined = true;
 
   return 0;
 }
@@ -268,7 +268,7 @@ static int png_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
   sr_range = genome_node_get_range((GenomeNode*) sr);
   cv->drawed_sequence_range.start = MAX(sr_range.start, cv->from);
   cv->drawed_sequence_range.end = MIN(sr_range.end, cv->to);
-  cv->drawed_sequence_range_is_defined = 1;
+  cv->drawed_sequence_range_is_defined = true;
 
   assert(!cv->global_track_number);
   cairo_set_source_rgb(cv->cr, 0, 0, 0);
@@ -329,8 +329,8 @@ GenomeVisitor* png_visitor_new(char *png_filename, int width,
   cv->cr = cairo_create(cv->surf);
   assert(cairo_status(cv->cr) == CAIRO_STATUS_SUCCESS);
   cv->png_filename = png_filename;
-  cv->drawed_sequence_range_is_defined = 0;
-  cv->last_range_is_defined = 0;
+  cv->drawed_sequence_range_is_defined = false;
+  cv->last_range_is_defined = false;
 
   cairo_set_source_rgb(cv->cr, 1, 1, 1);
   cairo_set_operator(cv->cr, CAIRO_OPERATOR_SOURCE);
