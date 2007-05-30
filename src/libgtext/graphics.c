@@ -58,6 +58,14 @@ void graphics_draw_exon_box(Graphics *g, double x, double y, double width,
    cairo_stroke(g->cr);
 }
 
+void graphics_draw_text(Graphics *g, double x, double y, const char *text)
+{
+  assert(g && text);
+  cairo_set_source_rgb(g->cr, 0, 0, 0);
+  cairo_move_to(g->cr, x, y);
+  cairo_show_text(g->cr, text);
+}
+
 void graphics_save_as_png(const Graphics *g, const char *path)
 {
   assert(g);

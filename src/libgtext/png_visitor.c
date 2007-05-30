@@ -176,19 +176,15 @@ static int png_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
            (double) range_length(pngv->drawed_sequence_range));
   text_y = pngv->global_track_number * TRACK_HEIGHT + TEXT_POSITION;
 
-  cairo_set_source_rgb(pngv->graphics->cr, 0, 0, 0);
   /* show <start --- feature_type --- end> */
-  cairo_move_to(pngv->graphics->cr, x_left, text_y);
   (void) snprintf(buf, BUFSIZ, "%lu", genome_node_get_start((GenomeNode*) gf));
-  cairo_show_text(pngv->graphics->cr, buf);
-
-  cairo_move_to(pngv->graphics->cr, x_left + width / 2, text_y);
-  cairo_show_text(pngv->graphics->cr,
-                  genome_feature_type_get_cstr(genome_feature_get_type(gf)));
-
-  cairo_move_to(pngv->graphics->cr, x_right, text_y);
+  graphics_draw_text(pngv->graphics, x_left, text_y, buf);
+  graphics_draw_text(pngv->graphics, x_left + width / 2, text_y,
+                     genome_feature_type_get_cstr(genome_feature_get_type(gf)));
+  graphics_draw_text(pngv->graphics, x_right, text_y, buf);
   (void) snprintf(buf, BUFSIZ, "%lu", genome_node_get_end((GenomeNode*) gf));
   cairo_show_text(pngv->graphics->cr, buf);
+
   /* draw feature line */
   cairo_move_to(pngv->graphics->cr, x_left,
                 pngv->global_track_number * TRACK_HEIGHT + FEATURE_POSITION);
