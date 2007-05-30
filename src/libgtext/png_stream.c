@@ -13,8 +13,8 @@
 struct PNGStream {
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
-  unsigned int sequence_region_added : 1,
-               last_range_is_defined : 1;
+  bool sequence_region_added,
+       last_range_is_defined;
   Range last_range;
   Str *seqid; /* the id of the sequence region which is drawn */
   unsigned long from,
@@ -99,7 +99,7 @@ static int png_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
           /* only this feature */
           png_stream->current_depth = 1;
         }
-        png_stream->last_range_is_defined = 0;
+        png_stream->last_range_is_defined = false;
       }
       has_err = determine_number_of_tracks(gn_ref,
                                            &png_stream->current_depth, env);
@@ -117,9 +117,9 @@ static int png_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
         else if (png_stream->sequence_region_added) {
           /* save range */
           png_stream->last_range = gn_range;
-          png_stream->last_range_is_defined = 1;
+          png_stream->last_range_is_defined = true;
         }
-        png_stream->sequence_region_added = 1;
+        png_stream->sequence_region_added = true;
       }
     }
   }
@@ -153,12 +153,9 @@ const GenomeStreamClass* png_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* png_stream_new(GenomeStream *in_stream,
-                                Str *seqid,
-                                unsigned long from,
-                                unsigned long to,
-                                const char *png_filename,
-                                int width, Env *env)
+GenomeStream* png_stream_new(GenomeStream *in_stream, Str *seqid,
+                             unsigned long from, unsigned long to,
+                             const char *png_filename, int width, Env *env)
 {
   PNGStream *png_stream;
   GenomeStream *gs;
@@ -169,8 +166,8 @@ GenomeStream* png_stream_new(GenomeStream *in_stream,
                             genome_stream_is_sorted(in_stream), env);
   png_stream = png_stream_cast(gs);
   png_stream->in_stream = in_stream;
-  png_stream->sequence_region_added = 0;
-  png_stream->last_range_is_defined = 0;
+  png_stream->sequence_region_added = false;
+  png_stream->last_range_is_defined = false;
   png_stream->seqid = str_ref(seqid);
   png_stream->from = from;
   png_stream->to = to;
@@ -191,10 +188,8 @@ void png_stream_draw(PNGStream *png_stream, bool verbose, Env *env)
   env_error_check(env);
   assert(png_stream);
 
-  png_visitor = png_visitor_new(png_stream->png_filename,
-                                png_stream->width,
-                                png_stream->number_of_tracks,
-                                png_stream->from,
+  png_visitor = png_visitor_new(png_stream->png_filename, png_stream->width,
+                                png_stream->number_of_tracks, png_stream->from,
                                 png_stream->to, env);
 
   /* init */
