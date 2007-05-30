@@ -9,6 +9,11 @@
 
 #define EXON_ARROW_WIDTH        8
 
+struct Graphics {
+  cairo_t *cr;
+  cairo_surface_t *surf;
+};
+
 Graphics* graphics_new(unsigned int width, unsigned int height, Env *env)
 {
   Graphics *g = env_ma_malloc(env, sizeof (Graphics));

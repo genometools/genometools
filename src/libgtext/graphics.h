@@ -7,14 +7,10 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-#include <cairo.h>
 #include <gtcore.h>
 
 /* the graphics class */
-typedef struct {
-  cairo_t *cr;
-  cairo_surface_t *surf;
-} Graphics;
+typedef struct Graphics Graphics;
 
 Graphics* graphics_new(unsigned int width, unsigned int height, Env*);
 void      graphics_draw_exon_box(Graphics *g, double x, double y, double width,
