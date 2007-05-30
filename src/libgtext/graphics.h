@@ -7,6 +7,7 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
+#include <cairo.h>
 #include <gtcore.h>
 
 /* the graphics class */

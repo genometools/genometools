@@ -5,7 +5,6 @@
 */
 
 #include <assert.h>
-#include <cairo.h>
 #include <gtcore.h>
 #include <libgtext/genome_visitor_rep.h>
 #include <libgtext/graphics.h>
@@ -227,25 +226,25 @@ static int png_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
   pngv->drawed_sequence_range_is_defined = true;
 
   assert(!pngv->global_track_number);
-  cairo_set_source_rgb(pngv->graphics->cr, 0, 0, 0);
+
   /* show <start --- sequence id --- end> */
-  cairo_move_to(pngv->graphics->cr, pngv->width * SPACE,
-                pngv->global_track_number * TRACK_HEIGHT + TEXT_POSITION);
   (void) snprintf(buf, BUFSIZ, "%lu", pngv->drawed_sequence_range.start);
-  cairo_show_text(pngv->graphics->cr, buf);
-  cairo_move_to(pngv->graphics->cr, pngv->width * (SPACE + ROOM / 2),
-                pngv->global_track_number * TRACK_HEIGHT + TEXT_POSITION);
-  cairo_show_text(pngv->graphics->cr,
-                  str_get(genome_node_get_seqid((GenomeNode*) sr)));
-  cairo_move_to(pngv->graphics->cr, pngv->width * (SPACE + ROOM),
-                pngv->global_track_number * TRACK_HEIGHT + TEXT_POSITION);
+  graphics_draw_text(pngv->graphics, pngv->width * SPACE,
+                     pngv->global_track_number * TRACK_HEIGHT + TEXT_POSITION,
+                     buf);
+  graphics_draw_text(pngv->graphics, pngv->width * (SPACE + ROOM / 2),
+                     pngv->global_track_number * TRACK_HEIGHT + TEXT_POSITION,
+                     str_get(genome_node_get_seqid((GenomeNode*) sr)));
   (void) snprintf(buf, BUFSIZ, "%lu", pngv->drawed_sequence_range.end);
-  cairo_show_text(pngv->graphics->cr, buf);
+  graphics_draw_text(pngv->graphics, pngv->width * (SPACE + ROOM),
+                     pngv->global_track_number * TRACK_HEIGHT + TEXT_POSITION,
+                     buf);
+
   /* draw sequence line */
-  cairo_move_to(pngv->graphics->cr, pngv->width * SPACE,
-                pngv->global_track_number * TRACK_HEIGHT + FEATURE_POSITION);
-  cairo_rel_line_to(pngv->graphics->cr, pngv->width * ROOM, 0);
-  cairo_stroke(pngv->graphics->cr);
+  graphics_draw_horizontal_line(pngv->graphics, pngv->width * SPACE,
+                                pngv->global_track_number *
+                                TRACK_HEIGHT + FEATURE_POSITION,
+                                pngv->width * ROOM);
 
   pngv->global_track_number++;
   return 0;
