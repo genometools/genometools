@@ -19,7 +19,8 @@ Track* track_new(Str* title,
                  Env* env);
 void track_insert_element(Track* track, 
                           GenomeNode* gn, 
-			  Config* cfg, 
+			  Config* cfg,
+			  GenomeNode* parent,
 			  Env* env);
 Str* track_get_title(Track* track);
 Line* get_next_free_line(Track* track,

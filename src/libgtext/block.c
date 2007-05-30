@@ -67,19 +67,6 @@ Returns range of a Block object
 */
 Range block_get_range(Block *block)
 {  
-
-   /* Range r1, r2;
-   int i;
-
-   r1 = element_get_range(*(Element**) array_get(block->elements, 0));
-
-   for(i=1; i<array_size(block->elements); i++)
-   {
-     r2 = element_get_range(*(Element**) array_get(block->elements, i));
-     r1 = range_join(r1, r2);
-   }
-
-   return r1; */
    return block->range;
 }
 

@@ -16,7 +16,8 @@ typedef struct Line Line;
 Line* line_new(Env* env);
 void line_insert_element(Line* line, 
                           GenomeNode* gn, 
-			  Config* cfg, 
+			  Config* cfg,
+			  GenomeNode* parent,
 			  Env* env);
 bool line_is_occupied(Line* line,
                       GenomeNode* gn);

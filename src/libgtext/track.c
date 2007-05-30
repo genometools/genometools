@@ -39,12 +39,13 @@ Inserts an element into a Track object
 void track_insert_element(Track *track,
                           GenomeNode *gn,
 			  Config *cfg,
+			  GenomeNode *parent,
 			  Env *env)
 {
   Line *line;
 
   line = get_next_free_line(track, gn, env);
-  line_insert_element(line, gn, cfg, env);
+  line_insert_element(line, gn, cfg, parent, env);
 }
 
 /*!
@@ -165,11 +166,11 @@ int track_unit_test(Env* env)
   /* test track_insert_elements 
      (implicit test of get_next_free_line) */
   ensure(has_err, (0 == array_size(track_get_lines(t))));
-  track_insert_element(t, gn1, NULL, env);
+  track_insert_element(t, gn1, NULL, NULL, env);
   ensure(has_err, (1 == array_size(track_get_lines(t))));
-  track_insert_element(t, gn2, NULL, env);
+  track_insert_element(t, gn2, NULL, NULL, env);
   ensure(has_err, (1 == array_size(track_get_lines(t))));
-  track_insert_element(t, gn3, NULL, env);
+  track_insert_element(t, gn3, NULL, NULL, env);
   ensure(has_err, (2 == array_size(track_get_lines(t))));
 
   /* test track_get_title */
@@ -179,7 +180,7 @@ int track_unit_test(Env* env)
   /* test track_get_lines */
   lines = track_get_lines(t2);
   ensure(has_err, (0 == array_size(lines)));
-  track_insert_element(t2, gn1, NULL, env);
+  track_insert_element(t2, gn1, NULL, NULL, env);
   lines = track_get_lines(t2);
   ensure(has_err, (1 == array_size(lines)));
   lines = track_get_lines(t);
