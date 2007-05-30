@@ -19,8 +19,16 @@ Graphics* graphics_new(unsigned int width, unsigned int height, Env *env)
   return g;
 }
 
+void graphics_save_as_png(const Graphics *g, const char *path)
+{
+  assert(g);
+  cairo_surface_write_to_png(g->surf, path);
+}
+
 void graphics_delete(Graphics *g, Env *env)
 {
   if (!g) return;
+  cairo_surface_destroy(g->surf); /* reference counted */
+  cairo_destroy(g->cr);
   env_ma_free(g, env);
 }

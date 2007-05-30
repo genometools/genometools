@@ -16,6 +16,7 @@ typedef struct {
 } Graphics;
 
 Graphics* graphics_new(unsigned int width, unsigned int height, Env*);
+void      graphics_save_as_png(const Graphics*, const char *path);
 void      graphics_delete(Graphics*, Env*);
 
 #endif

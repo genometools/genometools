@@ -50,8 +50,7 @@ static void png_visitor_free(GenomeVisitor *gv, Env *env)
   assert(pngv->png_filename);
   assert(pngv->width); /* the width has to be positive */
   assert(pngv->height); /* the height has to be positive */
-  (void) cairo_surface_write_to_png(pngv->graphics->surf, pngv->png_filename);
-  cairo_surface_destroy(pngv->graphics->surf); /* reference counted */
+  graphics_save_as_png(pngv->graphics, pngv->png_filename);
   /* we check this after writing the png to simplify debugging */
   assert(pngv->global_track_number <= pngv->number_of_tracks);
   graphics_delete(pngv->graphics, env);
