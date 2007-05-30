@@ -97,19 +97,12 @@ static int show_children(GenomeNode *gn, void *data, Env *env)
           ((double) range_length(feature_range) /
            (double) range_length(info->pngv->drawed_sequence_range));
 
-  cairo_set_source_rgb(info->pngv->graphics->cr, 0, 0, 0);
-
-  cairo_move_to(info->pngv->graphics->cr, x_left, text_y);
   (void) snprintf(buf, BUFSIZ, "%lu", feature_range.start);
-  cairo_show_text(info->pngv->graphics->cr, buf);
-
-  cairo_move_to(info->pngv->graphics->cr, x_left + width / 2, text_y);
-  cairo_show_text(info->pngv->graphics->cr,
-                  genome_feature_type_get_cstr(genome_feature_get_type(gf)));
-
-  cairo_move_to(info->pngv->graphics->cr, x_right, text_y);
+  graphics_draw_text(info->pngv->graphics, x_left, text_y, buf);
+  graphics_draw_text(info->pngv->graphics, x_left + width / 2, text_y,
+                     genome_feature_type_get_cstr(genome_feature_get_type(gf)));
   (void) snprintf(buf, BUFSIZ, "%lu", feature_range.end);
-  cairo_show_text(info->pngv->graphics->cr, buf);
+  graphics_draw_text(info->pngv->graphics, x_right, text_y, buf);
 
   draw_exon_box(info->pngv, gf, width, info->local_track_number);
 
@@ -181,9 +174,8 @@ static int png_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   graphics_draw_text(pngv->graphics, x_left, text_y, buf);
   graphics_draw_text(pngv->graphics, x_left + width / 2, text_y,
                      genome_feature_type_get_cstr(genome_feature_get_type(gf)));
-  graphics_draw_text(pngv->graphics, x_right, text_y, buf);
   (void) snprintf(buf, BUFSIZ, "%lu", genome_node_get_end((GenomeNode*) gf));
-  cairo_show_text(pngv->graphics->cr, buf);
+  graphics_draw_text(pngv->graphics, x_right, text_y, buf);
 
   /* draw feature line */
   graphics_draw_horizontal_line(pngv->graphics, x_left,
