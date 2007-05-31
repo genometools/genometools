@@ -27,6 +27,12 @@ const char*  config_get_cstr(Config *cfg,
                              const char* section,
 														 const char *key,
 														 Env* env);
+bool         config_cstr_in_list(Config *cfg,
+                            const char* section,
+														const char* key,
+														const char* checkstr,
+														Env* env);
+
 int          config_unit_test(Env*);
 
 #endif

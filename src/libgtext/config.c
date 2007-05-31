@@ -289,7 +289,8 @@ Color config_get_color(Config *cfg, const char *key, Env* env)
   lua_getfield(cfg->L, -1, key);
 	if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1))
 	{
-    if (*cfg->verbose) warning("no colors are defined for type '%s', will use defaults",
+    if (*cfg->verbose) warning("no colors are defined for type '%s', "
+		                           "will use defaults",
 														  key);
 		lua_pop(cfg->L, 1);
 		return color;
@@ -315,6 +316,62 @@ void config_reload(Config *cfg, Env *env)
 }
 
 /*!
+Checks whether a given string appears in a list of strings
+in the configuration settings.
+\param cfg Config object to search in.
+\param cfg Section object to search in.
+\param key Key (e.g. feature) to te list to be checked.
+\param checkstr String whose membership is to be determined.
+\param env Pointer to Environment object.
+\return TRUE if checkstr is in list, FALSE otherwise
+*/
+bool config_cstr_in_list(Config *cfg,
+                    const char* section,
+										const char* key,
+										const char* checkstr,
+										Env* env)
+{
+  assert(cfg && key && section && checkstr);
+	int i = 0, has_err = 0;
+	bool ret = false;
+	env_error_check(env);
+	/* get section */
+	i = config_find_section_for_getting(cfg, section, env);
+	lua_getfield(cfg->L, -1, key);
+	i++;
+	if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1))
+	{
+    if (*cfg->verbose) warning("key '%s' is not set or not a table",
+														  key);
+		lua_pop(cfg->L, 1);
+		has_err = -1;
+  }
+  if (!has_err)
+	{
+  	/* table is in the stack at index 't' */
+    lua_pushnil(cfg->L);  /* first key */
+    while (lua_next(cfg->L, -2) != 0) {
+      /* uses 'key' (at index -2) and 'value' (at index -1) */
+  		if (lua_isnil(cfg->L, -1) || !lua_isstring(cfg->L, -1))
+  	  {
+        if (*cfg->verbose) warning("non-string value in section %s, key %s",
+	  		          								  section, key);
+ 		    lua_pop(cfg->L, 1);
+      } else {
+        if (strcmp(checkstr, lua_tostring(cfg->L, -1)) == 0)
+		  	{
+			    ret = true;
+		  	}
+    		/* removes 'value'; keeps 'key' for next iteration */
+				lua_pop(cfg->L, 1);
+      }
+    }
+  }
+	lua_pop(cfg->L, i);
+	return ret;
+}
+
+/*!
 Unit tests for the Config class.
 \param env Pointer to Environment object.
 \return Error status.
@@ -324,14 +381,13 @@ int config_unit_test(Env* env)
   int has_err = 0;
 	Config *cfg;
 	const char* test1 = "mRNA";
-	const char* test2 = "gene";
   const char* str = NULL;
 	Str *luafile = str_new_cstr("config.lua",env);
 	Color col1, col2, col, defcol, tmpcol;
-  
+
 	/* do not show warnings during the unit test */
 	bool verbose = false;
-	
+
   /* example colors */
   col1.red=.1;col1.green=.2;col1.blue=.3;
   col2.red=.4;col2.green=.5;col2.blue=.6;
@@ -363,25 +419,17 @@ int config_unit_test(Env* env)
   ensure(has_err, color_equals(tmpcol,col2));
 	tmpcol = config_get_color(cfg, "foo", env);
   ensure(has_err, color_equals(tmpcol,defcol));
-  str = config_get_cstr(cfg, "collapse", "exon", env);
-  ensure(has_err, (str != NULL));
-  ensure(has_err, (strcmp(str,test1)==0));
 	str = config_get_cstr(cfg, "bar", "baz", env);
   ensure(has_err, (str == NULL));
 
   /* change some values... */
   config_set_color(cfg, "exon", col, env);
-  config_set_cstr(cfg, "collapse", "exon", test2, env);
 
 	/* is it saved correctly? */
   tmpcol = config_get_color(cfg, "exon", env);
   ensure(has_err, !color_equals(tmpcol,defcol));
   tmpcol = config_get_color(cfg, "exon", env);
   ensure(has_err, color_equals(tmpcol,col));
-  str = config_get_cstr(cfg, "collapse", "exon", env);
-  ensure(has_err, (str != NULL));
-  ensure(has_err, !(strcmp(str,test1)==0));
-  ensure(has_err, (strcmp(str,test2)==0));
 
   /* create a new color definition */
   config_set_color(cfg, "foo", col, env);
@@ -397,6 +445,9 @@ int config_unit_test(Env* env)
   ensure(has_err, (strcmp(str,test1)==0));
 	str = config_get_cstr(cfg, "bar", "test", env);
   ensure(has_err, (str == NULL));
+
+  ensure(has_err, !config_cstr_in_list(cfg, "collapse","exon","", env));
+  ensure(has_err, config_cstr_in_list(cfg, "collapse","exon","gene", env));
 
   /* mem cleanup */
   str_delete(luafile, env);
