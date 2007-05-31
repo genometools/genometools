@@ -12,8 +12,8 @@
 #include <libgtcore/ensure.h>
 #include <libgtcore/xansi.h>
 
-#define NUM_OF_TESTS	100
-#define MAX_SIZE	1024
+#define NUM_OF_TESTS    100
+#define MAX_SIZE        1024
 
 struct Array {
   void *space;
@@ -127,6 +127,12 @@ void array_set_size(Array *a, unsigned long size)
   a->next_free = size;
 }
 
+void array_reset(Array *a)
+{
+  assert(a);
+  a->next_free = 0;
+}
+
 Array* array_clone(const Array *a, Env *env)
 {
   Array *a_copy;
@@ -163,8 +169,8 @@ int array_unit_test(Env *env)
   for (i = 0; i < NUM_OF_TESTS && !has_err; i++) {
     size = ((double) rand() / RAND_MAX) * MAX_SIZE;
 
-    array_set_size(char_array, 0);
-    array_set_size(int_array, 0);
+    array_reset(char_array);
+    array_reset(int_array);
 
     ensure(has_err, array_size(char_array) == 0);
     ensure(has_err, array_size(int_array) == 0);

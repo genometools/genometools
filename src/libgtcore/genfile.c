@@ -26,11 +26,24 @@ struct GenFile {
 
 GenFileMode genfilemode_determine(const char *path)
 {
+  assert(path);
   if (!strcmp(".gz", path + strlen(path) - 3))
     return GFM_GZIP;
   if (!strcmp(".bz2", path + strlen(path) - 4))
     return GFM_BZIP2;
   return GFM_UNCOMPRESSED;
+}
+
+size_t genfile_basename_length(const char *path)
+{
+  size_t path_length;
+  assert(path);
+  path_length = strlen(path);
+  if (!strcmp(".gz", path + path_length - 3))
+    return path_length - 3;
+  if (!strcmp(".bz2", path + path_length - 4))
+    return path_length - 4;
+  return path_length;
 }
 
 GenFile* genfile_open(GenFileMode genfilemode, const char *path,
@@ -263,6 +276,26 @@ int genfile_xread(GenFile *genfile, void *buf, size_t nbytes)
   else
     rval = xfread(buf, 1, nbytes, stdin);
   return rval;
+}
+
+void genfile_xwrite(GenFile *genfile, void *buf, size_t nbytes)
+{
+  if (!genfile) {
+    xfwrite(buf, 1, nbytes, stdout);
+    return;
+  }
+  switch (genfile->mode) {
+    case GFM_UNCOMPRESSED:
+      xfwrite(buf, 1, nbytes, genfile->fileptr.file);
+      break;
+    case GFM_GZIP:
+      xgzwrite(genfile->fileptr.gzfile, buf, nbytes);
+      break;
+    case GFM_BZIP2:
+      xbzwrite(genfile->fileptr.bzfile, buf, nbytes);
+      break;
+    default: assert(0);
+  }
 }
 
 void genfile_xrewind(GenFile *genfile)

@@ -452,7 +452,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   splitter_delete(attribute_splitter, env);
   str_delete(line_buffer, env);
 
-  return 0;
+  return has_err;
 }
 
 void gtf_parser_delete(GTF_parser *parser, Env *env)

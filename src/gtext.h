@@ -30,6 +30,7 @@
 #include <libgtext/gff3_out_stream.h>           /* GFF3 output stream class */
 #include <libgtext/gtdata.h>                    /* gtdata/ module */
 #include <libgtext/gtf_in_stream.h>             /* GTF input stream class */
+#include <libgtext/gtf_out_stream.h>            /* GTF output stream class */
 #include <libgtext/genome_stream.h>             /* genome stream class */
 #include <libgtext/hmm.h>                       /* HMM class */
 #include <libgtext/line.h>                      /* line class */
@@ -41,7 +42,9 @@
 #include <libgtext/msa.h>                       /* multiple seq. align. class */
 #include <libgtext/mutate.h>                    /* mutate module */
 #include <libgtext/neighborjoining.h>           /* the Neighbor-Joining class */
+#include <libgtext/png_stream.h>                /* PNG stream */
 #include <libgtext/qgramdist.h>                 /* q-gram distance module */
+#include <libgtext/regioncov_visitor.h>         /* regioncov visitor class */
 #include <libgtext/seqid2file.h>                /* seqid2file module */
 #include <libgtext/sort_stream.h>               /* sort stream class */
 #include <libgtext/splicedseq.h>                /* splicedseq class */

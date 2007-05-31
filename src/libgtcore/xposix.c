@@ -78,10 +78,10 @@ int xopen(const char *path, int flags, mode_t mode)
   return fd;
 }
 
-int xmkstemp(char *template)
+int xmkstemp(char *temp)
 {
   int fd;
-  if ((fd = mkstemp(template)) == -1) {
+  if ((fd = mkstemp(temp)) == -1) {
     perror("cannot mkstemp");
     exit(EXIT_FAILURE);
   }

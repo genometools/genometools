@@ -5,13 +5,17 @@
 #
 
 CC:=gcc
-LD:=gcc
+CXX:=g++
 INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
-             -I$(CURDIR)/src/external/lua-5.1.1/src \
+             -I$(CURDIR)/src/external/lua-5.1.2/src \
              -I$(CURDIR)/src/external/expat-2.0.0/lib\
-             -I$(CURDIR)/src/external/bzip2-1.0.4
+             -I$(CURDIR)/src/external/bzip2-1.0.4\
+             -I$(CURDIR)/src/external/agg-2.4/include\
+             -I$(CURDIR)/src/external/libpng-1.2.18
 CFLAGS:=
-GT_CFLAGS:= -Wall -pipe $(INCLUDEOPT)
+CXXFLAGS:=
+GT_CFLAGS:= -g -Wall -Werror -pipe $(INCLUDEOPT)
+GT_CXXFLAGS:= -g -pipe $(INCLUDEOPT)
 LDFLAGS:=
 LDLIBS:=-lm -lz
 
@@ -26,11 +30,16 @@ LIBGTCORE_SRC:=$(notdir $(wildcard src/libgtcore/*.c))
 LIBGTCORE_OBJ:=$(LIBGTCORE_SRC:%.c=obj/%.o)
 
 # the extended GenomeTools library (e.g., depends on Lua)
-LIBGTEXT_SRC:=$(notdir $(wildcard src/libgtext/*.c))
-LIBGTEXT_OBJ:=$(LIBGTEXT_SRC:%.c=obj/%.o)
+LIBGTEXT_C_SRC:=$(notdir $(wildcard src/libgtext/*.c))
+LIBGTEXT_C_OBJ:=$(LIBGTEXT_C_SRC:%.c=obj/%.o)
+LIBGTEXT_CXX_SRC:=$(notdir $(wildcard src/libgtext/*.cxx))
+LIBGTEXT_CXX_OBJ:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.o)
 
 TOOLS_SRC:=$(notdir $(wildcard src/tools/*.c))
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
+
+LIBAGG_SRC:=$(notdir $(wildcard src/external/agg-2.4/src/*.cpp src/external/agg-2.4/src/ctrl/*.cpp))
+LIBAGG_OBJ:=$(LIBAGG_SRC:%.cpp=obj/%.o)
 
 LIBEXPAT_OBJ:=obj/xmlparse.o obj/xmlrole.o obj/xmltok.o
 
@@ -41,6 +50,11 @@ LIBLUA_OBJ=obj/lapi.o obj/lcode.o obj/ldebug.o obj/ldo.o obj/ldump.o \
            obj/lauxlib.o obj/lbaselib.o obj/ldblib.o obj/liolib.o    \
            obj/lmathlib.o obj/loslib.o obj/ltablib.o obj/lstrlib.o   \
            obj/loadlib.o obj/linit.o
+
+LIBPNG_OBJ=obj/png.o obj/pngset.o obj/pngget.o obj/pngrutil.o obj/pngtrans.o \
+           obj/pngwutil.o obj/pngread.o obj/pngrio.o obj/pngwio.o            \
+           obj/pngwrite.o obj/pngrtran.o obj/pngwtran.o obj/pngmem.o         \
+           obj/pngerror.o obj/pngpread.o
 
 LIBRNV_OBJ := obj/rn.o obj/rnc.o obj/rnd.o obj/rnl.o obj/rnv.o obj/rnx.o obj/drv.o  \
               obj/ary.o obj/xsd.o obj/xsd_tm.o obj/dxl.o obj/dsl.o obj/sc.o obj/u.o \
@@ -53,14 +67,14 @@ SERVER=gordon@genomethreader.org
 WWWBASEDIR=/var/www/servers/genometools.org
 
 # process arguments
-ifeq ($(opt),no)
-  GT_CFLAGS += -g
-else
+ifneq ($(opt),no)
   GT_CFLAGS += -Os
+  GT_CXXFLAGS += -Os
 endif
 
 ifeq ($(assert),no)
   GT_CFLAGS += -DNDEBUG
+  GT_CXXFLAGS += -DNDEBUG
 endif
 
 # set prefix for install target
@@ -80,6 +94,13 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
+lib/libagg.a: $(LIBAGG_OBJ)
+	@echo "[link $@]"
+	@ar ru $@ $(LIBAGG_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
 lib/libbz2.a: $(LIBBZ2_OBJ)
 	@echo "[link $@]"
 	@ar ru $@ $(LIBBZ2_OBJ)
@@ -95,9 +116,16 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgtext.a: $(LIBGTEXT_OBJ) $(LIBLUA_OBJ)
+lib/libgtext.a: $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $@]"
-	@ar ru $@ $(LIBGTEXT_OBJ) $(LIBLUA_OBJ)
+	@ar ru $@ $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
+lib/libpng.a: $(LIBPNG_OBJ)
+	@echo "[link $@]"
+	@ar ru $@ $(LIBPNG_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -110,12 +138,12 @@ ifdef RANLIB
 endif
 
 bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgtext.a lib/libgtcore.a\
-        lib/libbz2.a
+        lib/libbz2.a lib/libagg.a lib/libpng.a
 	@echo "[link $@]"
-	@$(LD) $(LDFLAGS) $^ $(LDLIBS) -o $@
+	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 bin/rnv: obj/xcl.o lib/librnv.a lib/libexpat.a
-	@$(LD) $(LDFLAGS) $^ -o $@
+	@$(CC) $(LDFLAGS) $^ -o $@
 	@echo "[link $@]"
 
 obj/gt_build.h:
@@ -143,9 +171,21 @@ obj/%.o: src/libgtext/%.c
 	@echo "[compile $@]"
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
+obj/%.o: src/libgtext/%.cxx
+	@echo "[compile $@]"
+	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+
 obj/%.o: src/tools/%.c
 	@echo "[compile $@]"
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+
+obj/%.o: src/external/agg-2.4/src/%.cpp
+	@echo "[compile $@]"
+	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+
+obj/%.o: src/external/agg-2.4/src/ctrl/%.cpp
+	@echo "[compile $@]"
+	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 obj/%.o: src/external/bzip2-1.0.4/%.c
 	@echo "[compile $@]"
@@ -156,10 +196,14 @@ obj/%.o: src/external/expat-2.0.0/lib/%.c
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DHAVE_MEMMOVE -MT $@ -MMD \
         -MP -MF $(@:.o=.d)
 
-obj/%.o: src/external/lua-5.1.1/src/%.c
+obj/%.o: src/external/lua-5.1.2/src/%.c
 	@echo "[compile $@]"
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DLUA_USE_POSIX -MT $@ -MMD \
         -MP -MF $(@:.o=.d)
+
+obj/%.o: src/external/libpng-1.2.18/%.c
+	@echo "[compile $@]"
+	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 obj/%.o: src/external/rnv-1.7.8/%.c
 	@echo "[compile $@]"
@@ -205,8 +249,14 @@ install:
 	cp src/gt.h $(prefix)/include
 	test -d $(prefix)/lib || mkdir -p $(prefix)/lib
 	cp lib/libgtcore.a $(prefix)/lib
+ifdef RANLIB
+	$(RANLIB) $(prefix)/lib/libgtcore.a
+endif
 	cp lib/libgtext.a $(prefix)/lib
-	
+ifdef RANLIB
+	$(RANLIB) $(prefix)/lib/libgtext.a
+endif
+
 splint:
 	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) $(CURDIR)/src/*.c \
         $(CURDIR)/src/libgtcore/*.c \

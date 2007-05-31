@@ -80,10 +80,10 @@ We describe now how to implement a simple classes using the string class <code>s
 of <i>GenomeTools</i> as an example. The interface to a class is always given in
 the <code>.h</code> header file
 (<a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/str.h;hb=HEAD"<code>str.h</code></a> in our example). To achieve information hiding the header file
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.h;hb=HEAD"<code>str.h</code></a> in our example). To achieve information hiding the header file
 cannot contain implementation details of the class. The implementation can
 always be found in the corresponding <code>.c</code> file (<a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/str.c;hb=HEAD"><code>str.c</code></a> in our example).
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.c;hb=HEAD"><code>str.c</code></a> in our example).
 Therefore, we start with the following C construct to define our <code>Str</code>
 class in <code>str.h</code>:
 </p>
@@ -130,7 +130,7 @@ void          str_free(Str*);
 <p>
 Now we look at the implementation side of the story, which can be found in the
 <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/str.c;hb=HEAD"><code>str.c</code></a> file. At first, we include the <code>str.h</code> header file to make
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.c;hb=HEAD"><code>str.c</code></a> file. At first, we include the <code>str.h</code> header file to make
 sure that the newly defined data type is known:
 </p>
 <pre>
@@ -205,7 +205,7 @@ Since this string objects are pretty much useless so far, we define a couple
 more 
 (object) <a href="http://en.wikipedia.org/wiki/Method_%28computer_science%29">
 methods</a> in the header file <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/str.h;hb=HEAD"<code>str.h</code></a>.
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.h;hb=HEAD"<code>str.h</code></a>.
 </p>
 <p>
 Because C does not allow the traditional
@@ -218,7 +218,7 @@ method name with <code>classname_</code>. That is, we get
 names in C. The constructor is always called <code>classname_new()</code> and
 the destructor <code>classname_free()</code>.
 See <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/str.c;hb=HEAD"<code>str.c</code></a>
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.c;hb=HEAD"<code>str.c</code></a>
 for examples.
 </p>
 
@@ -282,19 +282,19 @@ Modules bundle related functions which do not belong to a class. Examples:
 </p>
 <ul>
 <li> <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/dynalloc.h;hb=HEAD"><code>dynalloc.h</code></a>,
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/dynalloc.h;hb=HEAD"><code>dynalloc.h</code></a>,
 the low level module for dynamic allocation, e.g., used to implement arrays in <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/array.c;hb=HEAD"><code>array.c</code></a>
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/array.c;hb=HEAD"><code>array.c</code></a>
 and the above-mentioned strings
 <li> <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/sig.h;hb=HEAD"><code>sig.h</code></a>,
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/sig.h;hb=HEAD"><code>sig.h</code></a>,
 bundles signal related functions (high level)
 <li> <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/xansi.h;hb=HEAD"><code>xansi.h</code></a>,
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/xansi.h;hb=HEAD"><code>xansi.h</code></a>,
 contains wrappers for the standard ANSI C library
 
 <li> <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgt/xposix.h;hb=HEAD"><code>xposix.h</code></a>,
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/xposix.h;hb=HEAD"><code>xposix.h</code></a>,
 contains wrappers for POSIX functions we use
 </ul>
 <p>
@@ -381,7 +381,7 @@ described in this document.
 <p>
 <small>
 Copyright &copy; 2007 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a> Last
-update: 2007-02-09
+update: 2007-05-29
 </small>
 </p>
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">

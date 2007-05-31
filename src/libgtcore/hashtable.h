@@ -14,15 +14,18 @@ typedef struct Hashtable Hashtable;
 typedef enum {
   HASH_DIRECT,
   HASH_STRING
-} Hash_type;
+} HashType;
 
 typedef int (*Hashiteratorfunc)(void *key, void *value, void *data, Env*);
 
-Hashtable* hashtable_new(Hash_type, FreeFunc keyfree, FreeFunc valuefree, Env*);
+Hashtable* hashtable_new(HashType, FreeFunc keyfree, FreeFunc valuefree, Env*);
 void*      hashtable_get(Hashtable*, const void*);
 void       hashtable_add(Hashtable*, void*, void*, Env*);
 void       hashtable_remove(Hashtable*, void*, Env*);
 int        hashtable_foreach(Hashtable*, Hashiteratorfunc, void*, Env*);
+/* iterate over the hashtable in alphabetical order. Requires that the hashtable
+   has the HashType HASH_STRING. */
+int        hashtable_foreach_ao(Hashtable*, Hashiteratorfunc, void*, Env*);
 void       hashtable_reset(Hashtable*, Env*);
 int        hashtable_unit_test(Env*);
 void       hashtable_delete(Hashtable*, Env*);

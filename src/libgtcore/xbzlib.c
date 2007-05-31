@@ -4,6 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -48,7 +49,7 @@ void xbzfputs(const char *str, BZFILE *bzfile)
   }
 }
 
-int xbzread(BZFILE* file, void *buf, unsigned len)
+int xbzread(BZFILE *file, void *buf, unsigned len)
 {
   int rval;
   if ((rval = BZ2_bzread(file, buf, len)) == -1) {
@@ -56,6 +57,15 @@ int xbzread(BZFILE* file, void *buf, unsigned len)
     exit(EXIT_FAILURE);
   }
   return rval;
+}
+
+void xbzwrite(BZFILE *file, void *buf, unsigned len)
+{
+  assert(buf && len);
+  if (BZ2_bzwrite(file, buf, len) != len) {
+    fprintf(stderr, "cannot write it compressed file\n");
+    exit(EXIT_FAILURE);
+  }
 }
 
 void xbzrewind(BZFILE **file, const char *orig_path, const char *orig_mode)

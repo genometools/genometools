@@ -1,0 +1,237 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.5 [en]C-CCK-MCD {Sony}  (Win98; U) [Netscape]">
+   <title>GTF2.2: A Gene Annotation Format</title>
+</head>
+<body bgcolor="#336666" text="#ffffff" link="#ffffcc" vlink="#ffcc99" leftmargin="10" topmargin="0" marginwidth="10" marginheight="30">        
+
+<a name="top"/>
+<center>
+<h1>
+GTF2.2: A Gene Annotation Format</h1>
+
+<h3>
+(Revised Ensembl GTF)</h3></center>
+
+<h3>Contents</h3>
+<ul>
+<li><a href="#intro">Introduction</a>
+<li><a href="#fields">GTF Field Definitions</a>
+<li><a href="#examples">Examples</a>
+<li><a href="#resources">Scripts and Resources</a>
+</ul>
+
+<a name="intro" /><h3> Introduction </h3>
+GTF stands for Gene transfer format. It borrows from <a href="http://www.sanger.ac.uk/Software/formats/GFF/GFF_Spec.shtml" target="_blank">GFF</a>,
+but has additional structure that warrants a separate definition and format
+name.
+
+
+<p>Structure is as <a href="http://www.sanger.ac.uk/Software/formats/GFF/GFF_Spec.shtml" target="_blank">GFF</a>,
+so the fields are:
+<br>&lt;seqname> &lt;source> &lt;feature> &lt;start> &lt;end> &lt;score>
+
+&lt;strand> &lt;frame> [attributes] [comments]
+<p>Here is a simple example with 3 translated exons. Order of rows is not
+important.
+<pre>381 Twinscan&nbsp; CDS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 380&nbsp;&nbsp; 401&nbsp;&nbsp; .&nbsp;&nbsp; +&nbsp;&nbsp; 0&nbsp; gene_id "001"; transcript_id "001.1";
+381 Twinscan&nbsp; CDS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 501&nbsp;&nbsp; 650&nbsp;&nbsp; .&nbsp;&nbsp; +&nbsp;&nbsp; 2&nbsp; gene_id "001"; transcript_id "001.1";
+381 Twinscan&nbsp; CDS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 700&nbsp;&nbsp; 707&nbsp;&nbsp; .&nbsp;&nbsp; +&nbsp;&nbsp; 2&nbsp; gene_id "001"; transcript_id "001.1";
+381 Twinscan&nbsp; start_codon&nbsp; 380&nbsp;&nbsp; 382&nbsp;&nbsp; .&nbsp;&nbsp; +&nbsp;&nbsp; 0&nbsp; gene_id "001"; transcript_id "001.1";
+381 Twinscan&nbsp; stop_codon&nbsp;&nbsp; 708&nbsp;&nbsp; 710&nbsp;&nbsp; .&nbsp;&nbsp; +&nbsp;&nbsp; 0&nbsp; gene_id "001"; transcript_id "001.1";</pre>
+
+The whitespace in this example is provided only for readability. In GTF,
+fields must be separated by a single TAB and no white space.
+<p><a href="#top">Top</a></p>
+
+<a name="fields" /><h3> GTF Field Definitions </h3>
+<p><b>&lt;seqname></b>
+<br>The name of the sequence.  Commonly, this is the chromosome ID or contig ID.  Note that the coordinates used must be unique within each sequence name in all GTFs for an annotation set.
+<p><b>&lt;source></b>
+<br>The source column should be a unique label indicating where the annotations
+came from --- typically the name of either a prediction program or a public
+database.
+<p><b>&lt;feature></b>
+<br>The following feature types are required: "CDS", "start_codon", "stop_codon".  The features "5UTR", "3UTR", "inter", "inter_CNS", "intron_CNS" and "exon" are optional.  All other features will be ignored.  The types must have the correct capitalization shown here.
+
+<p>CDS represents the coding sequence starting with the first translated
+codon and proceeding to the last translated codon. Unlike Genbank annotation,
+the stop codon is not included in the CDS for the terminal exon.
+The optional feature "5UTR" represents regions from the transcription start site or beginning of the known 5' UTR to the base before the start codon of the transcript.  If this region is interrupted by introns then each exon or partial exon is annotated as a separate 5UTR feature.  Similarly, "3UTR" represents regions after the stop codon and before the polyadenylation site or end of the known 3' untranslated region.  Note that the UTR features can only be used to annotate portions of mRNA genes, not non-coding RNA genes.</p>
+
+<p>The feature "exon" more generically describes any transcribed exon.  Therefore, exon boundaries will be the transcription start site, splice donor, splice acceptor and poly-adenylation site.  The start or stop codon will not necessarily lie on an exon boundary.</p>
+
+<p>The "start_codon" feature is up to 3bp long in total and is included in the coordinates for the "CDS" features.  The "stop_codon" feature similarly is up to 3bp long and is included in the coordinates for the "3UTR" features, if used.
+
+<p>The "start_codon" and "stop_codon" features are not required to be atomic; they may be interrupted by valid splice sites.  A split start or stop codon appears as two distinct features.  All "start_codon" and "stop_codon" features must have a 0,1,2 in the &lt;frame> field indicating which part of the codon is represented by this feature. Contiguous start and stop codons will always have frame 0.
+
+<p>The "inter" feature describes an intergenic region, one which is by almost all accounts not transcribed.  The "inter_CNS" feature describes an intergenic conserved noncoding sequence region.  All of these should have an empty transcript_id attribute, since they are not transcribed and do not belong to any transcript.  The "intron_CNS" feature describes a conserved noncoding sequence region within an intron of a transcript, and should have a transcript_id associated with it.</p>
+
+<p><b>&lt;start> &lt;end></b>
+<br>Integer start and end coordinates of the feature relative to the beginning
+of the sequence named in &lt;seqname>.&nbsp; &lt;start> must be less than
+or equal to &lt;end>. Sequence numbering starts at 1. Values of &lt;start>
+and &lt;end> that extend outside the reference sequence are technically
+acceptable, but they are discouraged.
+
+<p><b>&lt;score></b>
+<br>The score field indicates a degree of confidence in the feature's existence and coordinates.  The value of this field has no global scale but may have relative significance when the &lt;source> field indicates the prediction program used to create this annotation.  It may be a floating point number or integer, and not necessary and may be replaced with a dot. 
+<p><b>&lt;frame></b>
+<br>
+
+0 indicates that the feature begins with a whole codon at the 5' most base. 
+1 means that there is one extra base (the third base of a codon) 
+before the first whole codon  
+and 2 means that there are two extra bases (the second and third bases of the codon) before the first codon.  Note that for reverse strand features, the 5' most base is the &lt;end> coordinate.<br>
+
+<p>Here are the details excised from the <a href="http://www.sanger.ac.uk/Software/formats/GFF/GFF_Spec.shtml" target="_blank">GFF
+spec</a>. <b>Important: Note comment on reverse strand.</b>
+<blockquote>'0' indicates that the specified region is in frame, i.e. that
+its first base corresponds to the first base of a codon. '1' indicates
+that there is one extra base, i.e. that the second base of the region corresponds
+to the first base of a codon, and '2' means that the third base of the
+region is the first base of a codon. <b>If the strand is '-', then the
+first base of the region is value of &lt;end></b>, because the corresponding
+coding region will run from &lt;end> to &lt;start> on the reverse strand.</blockquote>
+
+<p>Frame is calculated as (3 - ((length-frame) mod 3)) mod 3.</p>
+
+<ul>
+<li> (length-frame) is the length of the previous feature starting at the first whole codon (and thus the frame subtracted out).
+<li> (length-frame) mod 3 is the number of bases on the 3' end beyond the last whole codon of the previous feature.
+<li> 3-((length-frame) mod 3) is the number of bases left in the codon after removing those that are represented at the 3' end of the feature.
+<li> (3-((length-frame) mod 3)) mod 3 changes a 3 to a 0, since three bases makes a whole codon, and 1 and 2 are left unchanged.
+</ul>
+
+<b>[attributes]</b>
+<br>All nine features have the same two mandatory attributes at the end
+of the record:
+<ul>
+<li>
+<i>gene_id value;</i>&nbsp;&nbsp;&nbsp;&nbsp; A globally unique identifier
+for the genomic locus of the transcript.  If empty, no gene is associated with this feature.</li>
+
+<li>
+<i>transcript_id value;</i>&nbsp;&nbsp;&nbsp;&nbsp; A globally unique identifier
+for the predicted transcript.  If empty, no transcript is associated with this feature.</li>
+</ul>
+These attributes are designed for handling multiple transcripts from the
+same genomic region. Any other attributes or comments must appear after
+these two and will be ignored.
+
+<p>Attributes must end in a semicolon which must then be separated from
+the start of any subsequent attribute by exactly one space character (NOT
+a tab character).
+<p>Textual attributes should be surrounded by doublequotes.
+<p>These attributes are required even for non-mRNA transcribed regions such as "inter" and "inter_CNS" features.
+
+<p><b>[comments]</b>
+<br>Comments begin with a hash ('#') and continue to the end of the line.  Nothing beyond a hash will be parsed.  These may occur anywhere in the file, including at the end of a feature line.
+<p><a href="#top">Top</a></p>
+
+<a name="examples" /><h3> Examples </h3>
+
+<p>Here is an example of a gene on the negative strand including UTR regions.  Larger coordinates are 5' of smaller coordinates. Thus, the start codon is 3 bp with largest coordinates among all those bp that fall within the CDS regions. Similarly, the stop codon is the 3 bp with coordinates just less than the smallest coordinates within the CDS regions and the largest coordenates among all those within the 3UTR regions.
+<p><tt>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;inter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;5141&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8522&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"";&nbsp;transcript_id&nbsp;"";<br>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;inter_CNS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;8523&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9711&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"";&nbsp;transcript_id&nbsp;"";<br>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;inter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;9712&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;13182&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"";&nbsp;transcript_id&nbsp;"";<br>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;3UTR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;65149&nbsp;&nbsp;&nbsp;&nbsp;65487&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;3UTR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;66823&nbsp;&nbsp;&nbsp;&nbsp;66995&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;stop_codon&nbsp;&nbsp;&nbsp;&nbsp;66993&nbsp;&nbsp;&nbsp;&nbsp;66995&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;CDS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;66996&nbsp;&nbsp;&nbsp;&nbsp;66999&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;intron_CNS&nbsp;&nbsp;&nbsp;&nbsp;70103&nbsp;&nbsp;&nbsp;&nbsp;70151&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;CDS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;70207&nbsp;&nbsp;&nbsp;&nbsp;70294&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;CDS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;71696&nbsp;&nbsp;&nbsp;&nbsp;71807&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;start_codon&nbsp;&nbsp;&nbsp;71805&nbsp;&nbsp;&nbsp;&nbsp;71806&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;start_codon&nbsp;&nbsp;&nbsp;73222&nbsp;&nbsp;&nbsp;&nbsp;73222&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;2&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;CDS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;73222&nbsp;&nbsp;&nbsp;&nbsp;73222&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
+140&nbsp;&nbsp;&nbsp;&nbsp;Twinscan&nbsp;&nbsp;&nbsp;&nbsp;5UTR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;73223&nbsp;&nbsp;&nbsp;&nbsp;73504&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;&nbsp;&nbsp;&nbsp;.&nbsp;&nbsp;&nbsp;&nbsp;gene_id&nbsp;"140.000";&nbsp;transcript_id&nbsp;"140.000.1";<br>
+</tt></p>
+<p>Note the frames of the coding exons. For example:
+<ol>
+<li>
+The first CDS (from 71807 to 71696) always has frame zero.</li>
+
+<li>
+Frame of the 1st CDS =0, length =112.&nbsp; (3-((length - frame) mod 3)) mod 3&nbsp; =
+2, the frame of the 2nd CDS.</li>
+
+<li>
+Frame of the 2nd CDS=2, length=88. (3-((length - frame) mod 3)) mod 3&nbsp; = 1, the
+frame of the terminal CDS.</li>
+
+<li>
+Alternatively, the frame of terminal CDS can be calculated without the
+rest of the gene. Length of the terminal CDS=4. length mod 3 =1, the frame
+of the terminal CDS.</li>
+
+</ol>
+<p>Note the split start codon.  The second start codon region has a frame of 2, since it is the second base, and has an accompanying CDS feature, since CDS always includes the start codon.</p>
+<p>Here is an example in which the "exon" feature is used. It is a 5 exon
+gene with 3 translated exons.</p>
+<p><tt>381 Twinscan&nbsp; exon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+150&nbsp;&nbsp; 200&nbsp;&nbsp; .&nbsp;&nbsp; +&nbsp;&nbsp; .&nbsp; gene_id
+"381.000"; transcript_id "381.000.1"; 
+<br>381 Twinscan&nbsp; exon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+300&nbsp;&nbsp; 401&nbsp;&nbsp; .&nbsp;&nbsp; +&nbsp;&nbsp; .&nbsp; gene_id
+"381.000"; transcript_id "381.000.1";
+<br>381 Twinscan&nbsp; CDS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 380&nbsp;&nbsp; 401&nbsp;&nbsp; .&nbsp;&nbsp; +&nbsp;&nbsp; 0&nbsp; gene_id
+"381.000"; transcript_id "381.000.1";
+<br>381 Twinscan&nbsp; exon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+501&nbsp;&nbsp; 650&nbsp;&nbsp; .&nbsp;&nbsp; +&nbsp;&nbsp; .&nbsp; gene_id
+"381.000"; transcript_id "381.000.1";
+<br>381 Twinscan&nbsp; CDS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+501&nbsp;&nbsp; 650&nbsp;&nbsp; .&nbsp;&nbsp; +&nbsp;&nbsp; 2&nbsp; gene_id
+"381.000"; transcript_id "381.000.1";
+<br>381 Twinscan&nbsp; exon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+700&nbsp;&nbsp; 800&nbsp;&nbsp; .&nbsp;&nbsp; +&nbsp;&nbsp; .&nbsp; gene_id
+"381.000"; transcript_id "381.000.1";
+<br>381 Twinscan&nbsp; CDS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+700&nbsp;&nbsp; 707&nbsp;&nbsp; .&nbsp;&nbsp; +&nbsp;&nbsp; 2&nbsp; gene_id
+"381.000"; transcript_id "381.000.1";
+<br>381 Twinscan&nbsp; exon&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+900&nbsp; 1000&nbsp;&nbsp; .&nbsp;&nbsp; +&nbsp;&nbsp; .&nbsp; gene_id
+"381.000"; transcript_id "381.000.1";
+<br>381 Twinscan&nbsp; start_codon&nbsp; 380&nbsp;&nbsp; 382&nbsp;&nbsp;
+.&nbsp;&nbsp; +&nbsp;&nbsp; 0&nbsp; gene_id "381.000"; transcript_id
+"381.000.1";
+<br>381 Twinscan&nbsp; stop_codon&nbsp;&nbsp; 708&nbsp;&nbsp;
+710&nbsp;&nbsp; .&nbsp;&nbsp; +&nbsp;&nbsp; 0&nbsp; gene_id "381.000";
+transcript_id "381.000.1";</tt>
+<p><a href="#top">Top</a></p>
+
+<a name="resources" /><h3> Scripts and Resources </h3>
+
+<p>Several Perl scripts have been written for checking, parsing, correcting, and comparing GTF-formatted annotations.  Most of the important ones are included the Eval package, which comes equipped with a GTF parsing Perl package GTF.pm.  
+
+<ul>
+<li> <a href="http://genes.cs.wustl.edu/cgi-bin/license.cgi?software=eval">Eval Software</a>
+<li> <a href="http://genes.cs.wustl.edu/eval/eval-documentation.pdf">Eval Documentation</a>
+</ul>
+
+The Eval documentation contains a complete code-level documentation of GTF.pm, suitable for able Perl programmers to create and parse GTF files.<br><br>
+
+The script <samp>validate_gtf.pl</samp> included in the Eval package is particularly useful for checking that your GTF annotation is consistent and well-formed.  This can also be done over the web:
+
+<ul>
+<li><a href="http://genes.cs.wustl.edu/cgi-bin/gtf_parser.cgi">Web-based GTF Validator</a>
+</ul>
+
+Here are some more useful links:
+
+<ul>
+<li><a href="http://www.sanger.ac.uk/Software/formats/GFF/GFF_Spec.shtml">GFF Specification at Sanger</a>
+<li><a href="http://genes.cs.wustl.edu/eval/main.html">Eval Homepage</a>
+<li><a href="http://genes.cs.wustl.edu">Brent Lab Homepage</a>
+</ul>
+
+<p><a href="#top">Top</a></p>
+
+<br>&nbsp;
+<br>&nbsp;
+<br>&nbsp;
+</body>
+</html>
