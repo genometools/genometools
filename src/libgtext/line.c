@@ -44,15 +44,13 @@ void line_insert_element(Line *line,
 			 GenomeNode *parent,
 			 Env *env)
 {
-  assert(line && gn);
+  assert(line && gn && cfg);
   Block *block;
 
   int type = genome_feature_get_type((GenomeFeature* ) gn);
 
-
   if((last_parent != NULL)
-     && ((0 == strcmp("exon", genome_feature_type_get_cstr(type)))
-        || (0 == strcmp("CDS", genome_feature_type_get_cstr(type))))
+     && (config_cstr_in_list(cfg, "collapse", "to_parent", genome_feature_type_get_cstr(type), env))
      && (0 == genome_node_compare(&parent, &last_parent)))
   {
     block = *(Block**) array_get(line->blocks, (array_size(line->blocks) -1));
@@ -152,6 +150,14 @@ int line_unit_test(Env* env)
   Array* blocks;
   Str *seqid1, *seqid2;
   int has_err = 0;
+  Config *cfg;
+  Str *luafile = str_new_cstr("config.lua",env);
+
+  /* do not show warnings during the unit test */
+  bool verbose = false;
+
+  cfg = config_new(env, &verbose);
+  config_load_file(cfg, luafile, env);
 
   r_parent.start = 10;
   r_parent.end = 80;
@@ -183,11 +189,11 @@ int line_unit_test(Env* env)
 			    
   /* test line_insert_elements */
   ensure(has_err, (0 == array_size(line_get_blocks(l1))));
-  line_insert_element(l1, gn1, NULL, parent, env);
+  line_insert_element(l1, gn1, cfg, parent, env);
   ensure(has_err, (1 == array_size(line_get_blocks(l1))));
-  line_insert_element(l1, gn2, NULL, parent, env);
+  line_insert_element(l1, gn2, cfg, parent, env);
   ensure(has_err, (1 == array_size(line_get_blocks(l1))));
-  line_insert_element(l1, gn3, NULL, gn1, env);
+  line_insert_element(l1, gn3, cfg, gn1, env);
   ensure(has_err, (2 == array_size(line_get_blocks(l1))));
 
   /* test line_is_occupied */
@@ -198,6 +204,8 @@ int line_unit_test(Env* env)
   blocks = line_get_blocks(l1);
   ensure(has_err, (2 == array_size(blocks)));
 
+  config_delete(cfg, env);
+  str_delete(luafile, env);
   str_delete(seqid1, env);
   str_delete(seqid2, env);
   line_delete(l1, env);

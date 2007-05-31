@@ -22,6 +22,6 @@ config =
   collapse = 
   {
     exon = {"mRNA","gene"},
-    to_parent = {"exon"}
+    to_parent = {"exon", "CDS"}
   }
 } 

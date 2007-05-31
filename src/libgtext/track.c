@@ -155,6 +155,15 @@ int track_unit_test(Env* env)
   Array* lines;
   int has_err = 0;
 
+  Config *cfg;
+  Str *luafile = str_new_cstr("config.lua",env);
+
+  /* do not show warnings during the unit test */
+  bool verbose = false;
+
+  cfg = config_new(env, &verbose);
+  config_load_file(cfg, luafile, env);
+
   r1.start = 10;
   r1.end = 50;
 
@@ -182,11 +191,11 @@ int track_unit_test(Env* env)
   /* test track_insert_elements 
      (implicit test of get_next_free_line) */
   ensure(has_err, (0 == array_size(track_get_lines(t))));
-  track_insert_element(t, gn1, NULL, NULL, env);
+  track_insert_element(t, gn1, cfg, NULL, env);
   ensure(has_err, (1 == array_size(track_get_lines(t))));
-  track_insert_element(t, gn2, NULL, NULL, env);
+  track_insert_element(t, gn2, cfg, NULL, env);
   ensure(has_err, (1 == array_size(track_get_lines(t))));
-  track_insert_element(t, gn3, NULL, NULL, env);
+  track_insert_element(t, gn3, cfg, NULL, env);
   ensure(has_err, (2 == array_size(track_get_lines(t))));
 
   /* test track_get_title */
@@ -196,12 +205,14 @@ int track_unit_test(Env* env)
   /* test track_get_lines */
   lines = track_get_lines(t2);
   ensure(has_err, (0 == array_size(lines)));
-  track_insert_element(t2, gn1, NULL, NULL, env);
+  track_insert_element(t2, gn1, cfg, NULL, env);
   lines = track_get_lines(t2);
   ensure(has_err, (1 == array_size(lines)));
   lines = track_get_lines(t);
   ensure(has_err, (2 == array_size(lines)));
 
+  config_delete(cfg, env);
+  str_delete(luafile, env);
   line_delete(l1, env);
   line_delete(l2, env);
   track_delete(t, env);
