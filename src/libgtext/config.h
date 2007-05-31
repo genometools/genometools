@@ -12,7 +12,7 @@
 
 typedef struct Config Config;
 
-Config*      config_new(Env*);
+Config*      config_new(Env*, bool*);
 void         config_delete(Config*, Env*);
 void         config_load_file(Config*, Str*, Env*);
 void         config_reload(Config*, Env*);
@@ -27,6 +27,12 @@ const char*  config_get_cstr(Config *cfg,
                              const char* section,
 														 const char *key,
 														 Env* env);
+bool         config_cstr_in_list(Config *cfg,
+                            const char* section,
+														const char* key,
+														const char* checkstr,
+														Env* env);
+
 int          config_unit_test(Env*);
 
 #endif
