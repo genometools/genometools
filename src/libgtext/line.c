@@ -50,6 +50,7 @@ void line_insert_element(Line *line,
   int type = genome_feature_get_type((GenomeFeature* ) gn);
 
   if((last_parent != NULL)
+     && (parent != NULL)
      && (config_cstr_in_list(cfg, "collapse", "to_parent", genome_feature_type_get_cstr(type), env))
      && (0 == genome_node_compare(&parent, &last_parent)))
   {
