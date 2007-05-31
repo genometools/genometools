@@ -48,7 +48,7 @@ static void png_visitor_free(GenomeVisitor *gv, Env *env)
   assert(pngv->png_filename);
   assert(pngv->width); /* the width has to be positive */
   assert(pngv->height); /* the height has to be positive */
-  graphics_save_as_png(pngv->graphics, pngv->png_filename, env);
+  graphics_save_as_png(pngv->graphics, pngv->png_filename);
   /* we check this after writing the png to simplify debugging */
   assert(pngv->global_track_number <= pngv->number_of_tracks);
   graphics_delete(pngv->graphics, env);
