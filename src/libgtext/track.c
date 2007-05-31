@@ -105,6 +105,18 @@ Array* track_get_lines(Track* track)
   return track->lines;
 }
 
+/*!
+Returns Number of Lines of a Track object
+\param track Pointer to Track object
+*/
+int track_get_number_of_lines(Track *track)
+{
+  assert(track);
+
+  int nof_tracks;
+  nof_tracks = array_size(track->lines);
+  return nof_tracks;
+}
 
 /*!
 Delets Track
@@ -202,14 +214,17 @@ int track_unit_test(Env* env)
   ensure(has_err, (0 == str_cmp(title, track_get_title(t))));
   ensure(has_err, !(0 == str_cmp(s, track_get_title(t))));
 
-  /* test track_get_lines */
+  /* test track_get_lines and track_get_number_of_lines */
   lines = track_get_lines(t2);
   ensure(has_err, (0 == array_size(lines)));
+  ensure(has_err, (0 == track_get_number_of_lines(t2)));
   track_insert_element(t2, gn1, cfg, NULL, env);
   lines = track_get_lines(t2);
   ensure(has_err, (1 == array_size(lines)));
+  ensure(has_err, (1 == track_get_number_of_lines(t2)));
   lines = track_get_lines(t);
   ensure(has_err, (2 == array_size(lines)));
+  ensure(has_err, (2 == track_get_number_of_lines(t)));
 
   config_delete(cfg, env);
   str_delete(luafile, env);

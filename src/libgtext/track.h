@@ -27,6 +27,7 @@ Line* get_next_free_line(Track* track,
                          GenomeNode *gn,
 			 Env* env);
 Array* track_get_lines(Track* track);
+int track_get_number_of_lines(Track* track);
 void track_delete(Track* track,
                   Env* env);
 void print_track(Track* track);
