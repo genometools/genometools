@@ -21,11 +21,16 @@ Creates a new Track object.
 Track* track_new(Str *title,
                  Env *env)
 {
+  assert(title);
+
   Track *track;
   env_error_check(env);
   track = env_ma_malloc(env, sizeof (Track));
-  track->title = title;
+  Str* t = str_ref(title);  
+  track->title = t;
   track->lines = array_new(sizeof (Line*), env);
+
+  assert(track);
   return track;
 }
 
@@ -42,6 +47,7 @@ void track_insert_element(Track *track,
 			  GenomeNode *parent,
 			  Env *env)
 {
+  assert(track && gn);
   Line *line;
 
   line = get_next_free_line(track, gn, env);
@@ -55,6 +61,9 @@ Returns Track title
 */
 Str* track_get_title(Track *track)
 {
+  assert(track);
+
+  assert(track->title);
   return track->title;
 }
 
@@ -66,6 +75,8 @@ Gets the next unoccupied Line object
 */
 Line* get_next_free_line(Track* track, GenomeNode *gn, Env* env)
 {
+  assert(track && gn);
+
   int i;
   Line* line;
 
@@ -79,6 +90,8 @@ Line* get_next_free_line(Track* track, GenomeNode *gn, Env* env)
   }
   line = line_new(env);
   array_add(track->lines, line, env);
+  
+  assert(line);
   return line;
 }
 
@@ -111,6 +124,7 @@ void track_delete(Track *track,
   }
 
   array_delete(track->lines, env);
+  str_delete(track->title, env);
   env_ma_free(track, env);
 }
 
@@ -119,7 +133,9 @@ Prints all Lines of a Track object
 uparam track Pointer to Track object to print
 */
 void print_track(Track* track)
-{ 
+{
+  assert(track);
+
   int i;
     
   for(i=0; i<array_size(track->lines); i++)

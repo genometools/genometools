@@ -26,6 +26,8 @@ Line* line_new(Env *env)
   env_error_check(env);
   line = env_ma_malloc(env, sizeof (Line));
   line->blocks = array_new(sizeof (Block*), env);
+
+  assert(line);
   return line;
 }
 
@@ -42,6 +44,7 @@ void line_insert_element(Line *line,
 			 GenomeNode *parent,
 			 Env *env)
 {
+  assert(line && gn);
   Block *block;
 
   int type = genome_feature_get_type((GenomeFeature* ) gn);
@@ -72,6 +75,8 @@ Checks if Line is occupied
 */
 bool line_is_occupied(Line *line, GenomeNode *gn)
 {
+   assert(line && gn);
+
    int i;
    Range r1, r2;
 
@@ -126,6 +131,7 @@ Prints all Blocks of a Line object
 */
 void print_line(Line* line)
 {
+  assert(line);
   int i;
 
   for(i=0; i<array_size(line->blocks); i++)
