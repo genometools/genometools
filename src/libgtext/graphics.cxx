@@ -5,19 +5,44 @@
 */
 
 #define AGG_RENDERING_BUFFER row_ptr_cache<int8u>
-#include <agg_rendering_buffer.h>
+#include <agg_path_storage.h>
+#include <agg_pixfmt_rgba.h>
+#include <agg_rasterizer_scanline_aa.h>
+#include <agg_renderer_base.h>
+#include <agg_renderer_scanline.h>
+#include <agg_scanline_p.h>
+#include <agg_gsv_text.h>
 #include <png.h>
 extern "C" {
 #include <libgtext/graphics.h>
 }
 
-#define EXON_ARROW_WIDTH        8
+#define EXON_ARROW_WIDTH  8
+
+/* the used pixel format */
+typedef agg::pixfmt_rgba32 PixelFormat;
+
+/* the used base renderer */
+typedef agg::renderer_base<PixelFormat> RendererBase;
+
+/* the used solid renderer */
+typedef agg::renderer_scanline_aa_solid<RendererBase> RendererSolid;
 
 struct Graphics {
   unsigned int width,
                height;
-  unsigned char *pixbuf;
-  agg::rendering_buffer *rbuf;
+  unsigned char *pixel_buffer; /* the actual pixel buffer */
+  /* the AGG stuff */
+  agg::rendering_buffer *rendering_buffer; /* the AGG rendering buffer (is
+                                              attached to the <pixel_buffer>) */
+  agg::rasterizer_scanline_aa<> *rasterizer_scanline;
+  PixelFormat *pixel_format;               /* the AGG pixel format (is attached
+                                              to the <rendering_buffer> */
+  RendererBase *renderer_base;             /* the AGG base renderer (is attached
+                                              to the <pixel_format> */
+  RendererSolid *renderer_solid;           /* the AGG solid renderer (is
+                                              attached to the <renderer_base> */
+  agg::scanline_p8 *scanline;
 };
 
 Graphics* graphics_new(unsigned int width, unsigned int height, Env *env)
@@ -25,11 +50,29 @@ Graphics* graphics_new(unsigned int width, unsigned int height, Env *env)
   Graphics *g = (Graphics*) env_ma_malloc(env, sizeof (Graphics));
   g->width = width;
   g->height = height;
-  g->pixbuf = (unsigned char*) env_ma_malloc(env, width * height * 4);
-  memset(g->pixbuf, 255, width * height * 4);
-  g->rbuf = new agg::rendering_buffer;
-  assert(g->rbuf);
-  g->rbuf->attach(g->pixbuf, width, height, width * 4);
+  /* init the AGG stuff */
+  g->pixel_buffer = (unsigned char*) env_ma_malloc(env, width * height * 4);
+  g->rendering_buffer = new agg::rendering_buffer;
+  assert(g->rendering_buffer);
+  g->rendering_buffer->attach(g->pixel_buffer, width, height, width * 4);
+  g->rasterizer_scanline = new agg::rasterizer_scanline_aa<>;
+  assert(g->rasterizer_scanline);
+  g->pixel_format = new PixelFormat(*g->rendering_buffer);
+  assert(g->pixel_format);
+  g->renderer_base = new RendererBase;
+  assert(g->renderer_base);
+  g->renderer_base->attach(*g->pixel_format);
+  g->renderer_solid = new RendererSolid;
+  assert(g->renderer_solid);
+  g->renderer_solid->attach(*g->renderer_base);
+  g->scanline = new agg::scanline_p8;
+  assert(g->scanline);
+
+  /* set white background */
+  g->rasterizer_scanline->clip_box(0, 0, g->renderer_base->width(),
+                                   g->renderer_base->height());
+  g->renderer_base->clear(agg::rgba(1, 1, 1, 1));
+
   return g;
 }
 
@@ -72,15 +115,33 @@ void graphics_draw_exon_box(Graphics *g, double x, double y, double width,
 #endif
 }
 
+static void graphics_set_color(Graphics *g)
+{
+  assert(g);
+  g->renderer_solid->color(agg::rgba(0, 0, 0)); /* set to black */
+}
+
+static void graphics_render(Graphics *g)
+{
+  assert(g);
+  agg::render_scanlines(*g->rasterizer_scanline, *g->scanline, *g->renderer_solid);
+}
+
 void graphics_draw_horizontal_line(Graphics *g, double x, double y,
                                    double width)
 {
+  agg::path_storage path_storage;
   assert(g);
-#if 0
-  cairo_move_to(g->cr, x, y);
-  cairo_rel_line_to(g->cr, width, 0);
-  cairo_stroke(g->cr);
-#endif
+  path_storage.move_to(x, y);
+  path_storage.line_to(x + width, y);
+  agg::conv_stroke<agg::path_storage> sp(path_storage);
+  sp.line_cap(agg::round_cap);
+  sp.line_join(agg::round_join);
+  sp.width(2);
+  g->rasterizer_scanline->add_path(sp);
+
+  graphics_set_color(g);
+  graphics_render(g);
 }
 
 void graphics_draw_text(Graphics *g, double x, double y, const char *text)
@@ -104,7 +165,7 @@ void graphics_save_as_png(const Graphics *g, const char *path, Env *env)
   env_error_check(env);
   assert(g && path);
 
-  rows = (png_byte**) g->rbuf->rows();
+  rows = (png_byte**) g->rendering_buffer->rows();
   outfp = env_fa_xfopen(env, path, "w");
 
   png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -133,7 +194,12 @@ void graphics_save_as_png(const Graphics *g, const char *path, Env *env)
 void graphics_delete(Graphics *g, Env *env)
 {
   if (!g) return;
-  env_ma_free(g->pixbuf, env);
-  delete g->rbuf;
+  delete g->scanline;
+  delete g->renderer_solid;
+  delete g->renderer_base;
+  delete g->pixel_format;
+  delete g->rasterizer_scanline;
+  delete g->rendering_buffer;
+  env_ma_free(g->pixel_buffer, env);
   env_ma_free(g, env);
 }
