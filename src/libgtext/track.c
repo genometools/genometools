@@ -21,11 +21,16 @@ Creates a new Track object.
 Track* track_new(Str *title,
                  Env *env)
 {
+  assert(title);
+
   Track *track;
   env_error_check(env);
   track = env_ma_malloc(env, sizeof (Track));
-  track->title = title;
+  Str* t = str_ref(title);  
+  track->title = t;
   track->lines = array_new(sizeof (Line*), env);
+
+  assert(track);
   return track;
 }
 
@@ -39,12 +44,14 @@ Inserts an element into a Track object
 void track_insert_element(Track *track,
                           GenomeNode *gn,
 			  Config *cfg,
+			  GenomeNode *parent,
 			  Env *env)
 {
+  assert(track && gn);
   Line *line;
 
   line = get_next_free_line(track, gn, env);
-  line_insert_element(line, gn, cfg, env);
+  line_insert_element(line, gn, cfg, parent, env);
 }
 
 /*!
@@ -54,6 +61,9 @@ Returns Track title
 */
 Str* track_get_title(Track *track)
 {
+  assert(track);
+
+  assert(track->title);
   return track->title;
 }
 
@@ -65,6 +75,8 @@ Gets the next unoccupied Line object
 */
 Line* get_next_free_line(Track* track, GenomeNode *gn, Env* env)
 {
+  assert(track && gn);
+
   int i;
   Line* line;
 
@@ -78,6 +90,8 @@ Line* get_next_free_line(Track* track, GenomeNode *gn, Env* env)
   }
   line = line_new(env);
   array_add(track->lines, line, env);
+  
+  assert(line);
   return line;
 }
 
@@ -110,6 +124,7 @@ void track_delete(Track *track,
   }
 
   array_delete(track->lines, env);
+  str_delete(track->title, env);
   env_ma_free(track, env);
 }
 
@@ -118,7 +133,9 @@ Prints all Lines of a Track object
 uparam track Pointer to Track object to print
 */
 void print_track(Track* track)
-{ 
+{
+  assert(track);
+
   int i;
     
   for(i=0; i<array_size(track->lines); i++)
@@ -137,6 +154,15 @@ int track_unit_test(Env* env)
   Range r1, r2, r3; 
   Array* lines;
   int has_err = 0;
+
+  Config *cfg;
+  Str *luafile = str_new_cstr("config.lua",env);
+
+  /* do not show warnings during the unit test */
+  bool verbose = false;
+
+  cfg = config_new(env, &verbose);
+  config_load_file(cfg, luafile, env);
 
   r1.start = 10;
   r1.end = 50;
@@ -165,11 +191,11 @@ int track_unit_test(Env* env)
   /* test track_insert_elements 
      (implicit test of get_next_free_line) */
   ensure(has_err, (0 == array_size(track_get_lines(t))));
-  track_insert_element(t, gn1, NULL, env);
+  track_insert_element(t, gn1, cfg, NULL, env);
   ensure(has_err, (1 == array_size(track_get_lines(t))));
-  track_insert_element(t, gn2, NULL, env);
+  track_insert_element(t, gn2, cfg, NULL, env);
   ensure(has_err, (1 == array_size(track_get_lines(t))));
-  track_insert_element(t, gn3, NULL, env);
+  track_insert_element(t, gn3, cfg, NULL, env);
   ensure(has_err, (2 == array_size(track_get_lines(t))));
 
   /* test track_get_title */
@@ -179,12 +205,14 @@ int track_unit_test(Env* env)
   /* test track_get_lines */
   lines = track_get_lines(t2);
   ensure(has_err, (0 == array_size(lines)));
-  track_insert_element(t2, gn1, NULL, env);
+  track_insert_element(t2, gn1, cfg, NULL, env);
   lines = track_get_lines(t2);
   ensure(has_err, (1 == array_size(lines)));
   lines = track_get_lines(t);
   ensure(has_err, (2 == array_size(lines)));
 
+  config_delete(cfg, env);
+  str_delete(luafile, env);
   line_delete(l1, env);
   line_delete(l2, env);
   track_delete(t, env);

@@ -8,6 +8,8 @@
 #include <libgtext/block.h>
 #include <libgtext/line.h>
 
+GenomeNode* last_parent = NULL;
+
 struct Line
 {
   Array *blocks;
@@ -24,6 +26,8 @@ Line* line_new(Env *env)
   env_error_check(env);
   line = env_ma_malloc(env, sizeof (Line));
   line->blocks = array_new(sizeof (Block*), env);
+
+  assert(line);
   return line;
 }
 
@@ -37,14 +41,28 @@ Inserts an element into a Line object
 void line_insert_element(Line *line,
                          GenomeNode *gn,
 			 Config *cfg,
+			 GenomeNode *parent,
 			 Env *env)
 {
+  assert(line && gn && cfg);
   Block *block;
 
-  block = block_new(env);
-  array_add(line->blocks, block, env);
+  int type = genome_feature_get_type((GenomeFeature* ) gn);
+
+  if((last_parent != NULL)
+     && (config_cstr_in_list(cfg, "collapse", "to_parent", genome_feature_type_get_cstr(type), env))
+     && (0 == genome_node_compare(&parent, &last_parent)))
+  {
+    block = *(Block**) array_get(line->blocks, (array_size(line->blocks) -1));
+  }
+  else
+  {
+    block = block_new(env);
+    array_add(line->blocks, block, env);
+  }
 
   block_insert_element(block, gn, cfg, env);
+  last_parent = parent;
 }
 
 /*!
@@ -55,6 +73,8 @@ Checks if Line is occupied
 */
 bool line_is_occupied(Line *line, GenomeNode *gn)
 {
+   assert(line && gn);
+
    int i;
    Range r1, r2;
 
@@ -109,6 +129,7 @@ Prints all Blocks of a Line object
 */
 void print_line(Line* line)
 {
+  assert(line);
   int i;
 
   for(i=0; i<array_size(line->blocks); i++)
@@ -125,31 +146,54 @@ Tests Line Class
 */
 int line_unit_test(Env* env)
 {
-  Range r1, r2, r3; 
+  Range r1, r2, r3, r_parent;
   Array* blocks;
+  Str *seqid1, *seqid2;
   int has_err = 0;
+  Config *cfg;
+  Str *luafile = str_new_cstr("config.lua",env);
 
+  /* do not show warnings during the unit test */
+  bool verbose = false;
+
+  cfg = config_new(env, &verbose);
+  config_load_file(cfg, luafile, env);
+
+  r_parent.start = 10;
+  r_parent.end = 80;
+  
   r1.start = 10;
   r1.end = 50;
 
-  r2.start = 60;
+  r2.start = 51;
   r2.end = 80;
 
   r3.start = 70;
   r3.end = 100;
 
+  seqid1 = str_new_cstr("test1", env);
+  seqid2 = str_new_cstr("test2", env);
+
+  GenomeNode* parent = genome_feature_new(gft_gene, r_parent, STRAND_FORWARD, NULL, 0, env);
   GenomeNode* gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0, env);
-  GenomeNode* gn2 = genome_feature_new(gft_intron, r2, STRAND_FORWARD, NULL, 0, env);
-  GenomeNode* gn3 = genome_feature_new(gft_intron, r3, STRAND_FORWARD, NULL, 0, env);
-		    
+  GenomeNode* gn2 = genome_feature_new(gft_exon, r2, STRAND_FORWARD, NULL, 0, env);
+  GenomeNode* gn3 = genome_feature_new(gft_exon, r3, STRAND_FORWARD, NULL, 0, env);
+
+  genome_node_set_seqid((GenomeNode*) parent, seqid1);
+  genome_node_set_seqid((GenomeNode*) gn1, seqid1);
+  genome_node_set_seqid((GenomeNode*) gn2, seqid1);
+  genome_node_set_seqid((GenomeNode*) gn3, seqid2);
+
   Line* l1 = line_new(env);
   Line* l2 = line_new(env);
 			    
   /* test line_insert_elements */
   ensure(has_err, (0 == array_size(line_get_blocks(l1))));
-  line_insert_element(l1, gn1, NULL, env);
+  line_insert_element(l1, gn1, cfg, parent, env);
   ensure(has_err, (1 == array_size(line_get_blocks(l1))));
-  line_insert_element(l1, gn2, NULL, env);
+  line_insert_element(l1, gn2, cfg, parent, env);
+  ensure(has_err, (1 == array_size(line_get_blocks(l1))));
+  line_insert_element(l1, gn3, cfg, gn1, env);
   ensure(has_err, (2 == array_size(line_get_blocks(l1))));
 
   /* test line_is_occupied */
@@ -160,8 +204,13 @@ int line_unit_test(Env* env)
   blocks = line_get_blocks(l1);
   ensure(has_err, (2 == array_size(blocks)));
 
+  config_delete(cfg, env);
+  str_delete(luafile, env);
+  str_delete(seqid1, env);
+  str_delete(seqid2, env);
   line_delete(l1, env);
   line_delete(l2, env);
+  genome_node_delete(parent, env);
   genome_node_delete(gn1, env);
   genome_node_delete(gn2, env);
   genome_node_delete(gn3, env);

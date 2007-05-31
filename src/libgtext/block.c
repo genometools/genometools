@@ -28,6 +28,8 @@ Block* block_new(Env *env)
   r.start = 0;
   r.end = 0;
   block->range = r;
+
+  assert(block);
   return block;
 }
 
@@ -43,6 +45,8 @@ void block_insert_element(Block *block,
 			  Config *cfg,
 			  Env *env)
 {
+  assert(block && gn);
+
   Element *element;
   Range r;
 
@@ -67,19 +71,9 @@ Returns range of a Block object
 */
 Range block_get_range(Block *block)
 {  
+   assert(block);
 
-   /* Range r1, r2;
-   int i;
-
-   r1 = element_get_range(*(Element**) array_get(block->elements, 0));
-
-   for(i=1; i<array_size(block->elements); i++)
-   {
-     r2 = element_get_range(*(Element**) array_get(block->elements, i));
-     r1 = range_join(r1, r2);
-   }
-
-   return r1; */
+   assert(block->range.start && block->range.end);
    return block->range;
 }
 
@@ -120,6 +114,8 @@ Prints all Elements of a Block object
 */
 void print_block(Block* block)
 {
+  assert(block);
+
   int i;
 
   for(i=0; i<array_size(block->elements); i++)
