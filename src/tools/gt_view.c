@@ -6,6 +6,7 @@
 
 #include "gt.h"
 #include <libgtext/feature_index.h>
+#include <libgtext/config.h>
 
 typedef struct {
   bool verbose;
@@ -83,7 +84,6 @@ int gt_view(int argc, const char **argv, Env *env)
   Array *results = NULL;
   env_error_check(env);
 
-
   /* option parsing */
   switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
@@ -115,14 +115,20 @@ int gt_view(int argc, const char **argv, Env *env)
   }
 
   /* sequence region id does not exist in gff file */
-  if (!has_err && !feature_index_has_seqid(features, str_get(arguments.seqid), env)) {
-    env_error_set(env, "sequence region '%s' does not exist in GFF file.", str_get(arguments.seqid));
+  if (!has_err && !feature_index_has_seqid(features, 
+	                                         str_get(arguments.seqid), 
+																					 env)) 
+	{
+    env_error_set(env, "sequence region '%s' does not exist in GFF input file",
+		              str_get(arguments.seqid));
     has_err = -1;
   }
 
-  /* range end < range start */
+  /* check for correct order: range end < range start */
   if (!has_err && (arguments.end < arguments.start)) {
-    env_error_set(env, "end of query range precedes start of query range.");
+    env_error_set(env, "end of query range (%lu) precedes "
+		                   "start of query range (%lu)", 
+		                   arguments.end, arguments.start);
     has_err = -1;
   }
 
