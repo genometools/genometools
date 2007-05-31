@@ -18,7 +18,8 @@
 #include "tools/gt_extractfeat.h"
 #include "tools/gt_filter.h"
 #include "tools/gt_gff3.h"
-#include "tools/gt_gtf2gff3.h"
+#include "tools/gt_gff3_to_gtf.h"
+#include "tools/gt_gtf_to_gff3.h"
 #include "tools/gt_merge.h"
 #include "tools/gt_mmapandread.h"
 #include "tools/gt_mutate.h"
@@ -57,6 +58,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   option_parser_set_comment_func(op, toolbox_show, gtr->toolbox);
   o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false,
                       env);
+  option_hide_default(o);
   option_parser_add_option(op, o, env);
   o = option_new_bool("i", "enter interactive mode after executing 'tool'",
                       &gtr->interactive, false, env);
@@ -86,7 +88,8 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "extractfeat", gt_extractfeat, env);
   toolbox_add(gtr->toolbox, "filter", gt_filter, env);
   toolbox_add(gtr->toolbox, "gff3", gt_gff3, env);
-  toolbox_add(gtr->toolbox, "gtf2gff3", gt_gtf2gff3, env);
+  toolbox_add(gtr->toolbox, "gff3_to_gtf", gt_gff3_to_gtf, env);
+  toolbox_add(gtr->toolbox, "gtf_to_gff3", gt_gtf_to_gff3, env);
   toolbox_add(gtr->toolbox, "merge", gt_merge, env);
   toolbox_add(gtr->toolbox, "mmapandread", gt_mmapandread, env);
   toolbox_add(gtr->toolbox, "mutate", gt_mutate, env);
@@ -166,7 +169,7 @@ static int run_tests(GTR *gtr, Env *env)
   ensure(has_err, sizeof (unsigned long long) == 8);
 
   if (gtr->unit_tests) {
-    has_err = hashtable_foreach(gtr->unit_tests, run_test, &had_err, env);
+    has_err = hashtable_foreach_ao(gtr->unit_tests, run_test, &had_err, env);
     assert(!has_err); /* cannot happen, run_test() is sane */
   }
   if (had_err)

@@ -26,6 +26,7 @@ void          array_add_array(Array*, const Array*, Env*);
 void          array_rem(Array*, unsigned long); /* O(n) */
 void          array_reverse(Array*, Env*);
 void          array_set_size(Array*, unsigned long);
+void          array_reset(Array*);
 size_t        array_elem_size(const Array*);
 unsigned long array_size(const Array*);
 int           array_unit_test(Env*);

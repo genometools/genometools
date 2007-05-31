@@ -15,7 +15,7 @@
 
 struct GFF3Visitor {
   const GenomeVisitor parent_instance;
-  unsigned int version_string_shown;
+  bool version_string_shown;
   unsigned long *id_counter;
   Hashtable *genome_feature_to_id_array,
             *genome_feature_to_unique_id_str;
@@ -42,7 +42,7 @@ static void gff3_version_string(GenomeVisitor *gv)
   if (!gff3_visitor->version_string_shown) {
     genfile_xprintf(gff3_visitor->outfp, "%s   %u\n", GFF_VERSION_PREFIX,
                     GFF_VERSION);
-    gff3_visitor->version_string_shown = 1;
+    gff3_visitor->version_string_shown = true;
   }
 }
 
@@ -254,7 +254,7 @@ GenomeVisitor* gff3_visitor_new(GenFile *outfp, Env *env)
 {
   GenomeVisitor *gv = genome_visitor_create(gff3_visitor_class(), env);
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
-  gff3_visitor->version_string_shown = 0;
+  gff3_visitor->version_string_shown = false;
   gff3_visitor->id_counter = env_ma_calloc(env,
                                           genome_feature_type_num_of_features(),
                                           sizeof (unsigned long));

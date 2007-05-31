@@ -34,15 +34,15 @@ int gt_merge(int argc, const char **argv, Env *env)
   int parsed_args, has_err;
   GenFile *outfp;
 
-  /* alloc */
-  genome_streams = array_new(sizeof (GenomeStream*), env);
-
   /* option parsing */
   switch (parse_options(&parsed_args, &outfp, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
+
+  /* alloc */
+  genome_streams = array_new(sizeof (GenomeStream*), env);
 
   /* XXX: check for multiple specification of '-' */
 

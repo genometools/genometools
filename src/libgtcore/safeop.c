@@ -8,11 +8,10 @@
 #include <stdlib.h>
 #include <libgtcore/safeop.h>
 
-long safe_cast_to_long_type(unsigned long ulong, const char *filename,
-                            unsigned int line)
+long safe_cast_to_long_type(unsigned long ulong, const char *filename, int line)
 {
   if (ulong > ~(1UL << ((8UL * sizeof (unsigned long)) - 1))) {
-    fprintf(stderr, "%s, l.%u: illegal cast to long (ulong=%lu)\n",
+    fprintf(stderr, "%s, l.%d: illegal cast to long (ulong=%lu)\n",
             filename, line, ulong);
     exit(EXIT_FAILURE);
   }
@@ -20,10 +19,10 @@ long safe_cast_to_long_type(unsigned long ulong, const char *filename,
 }
 
 unsigned long safe_cast_to_ulong_type(long slong, const char *filename,
-                                      unsigned int line)
+                                      int line)
 {
   if (slong < 0) {
-    fprintf(stderr, "%s, l.%u: illegal cast to unsigned long (slong=%ld)\n",
+    fprintf(stderr, "%s, l.%d: illegal cast to unsigned long (slong=%ld)\n",
             filename, line, slong);
     exit(EXIT_FAILURE);
   }

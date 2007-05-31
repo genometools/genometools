@@ -547,7 +547,7 @@ static void compute_csas(Consensus_SA *csa, Env *env)
 
     /* process splice form */
     if (csa->process_splice_form) {
-      array_set_size(splice_form, 0);
+      array_reset(splice_form);
       bittab_get_all_bitnums(SA_i, splice_form, env);
       csa->process_splice_form(splice_form, csa->set_of_sas, csa->number_of_sas,
                                csa->size_of_sa, csa->userdata, env);

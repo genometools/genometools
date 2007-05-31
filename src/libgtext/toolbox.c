@@ -34,39 +34,22 @@ Tool toolbox_get(const Toolbox *tb, const char *toolname)
   return hashtable_get(tb->tools, toolname);
 }
 
-static int save_tool_name(void *key, void *value, void *data, Env *env)
+static int show_tool_name(void *key, void *value, void *data, Env *env)
 {
-  const char *tool_name;
-  Array *tool_names;
   env_error_check(env);
-  assert(key && value && data);
-  tool_name = (const char*) key;
-  tool_names = (Array*) data;
-  if (strcmp(tool_name, "dev"))
-    array_add(tool_names, tool_name, env);
+  assert(key && value);
+  xputs(key);
   return 0;
 }
 
 int toolbox_show(const char *progname, void *toolbox, Env *env)
 {
   Toolbox *tb;
-  Array *tool_names;
-  unsigned long i;
-  int has_err;
   env_error_check(env);
   assert(toolbox);
   tb = (Toolbox*) toolbox;
-  tool_names = array_new(sizeof (const char*), env);
-  has_err = hashtable_foreach(tb->tools, save_tool_name, tool_names, env);
-  assert(!has_err); /* cannot happen, save_tool_name() is sane */
   printf("\nTools:\n\n");
-  assert(array_size(tool_names));
-  qsort(array_get_space(tool_names), array_size(tool_names),
-        array_elem_size(tool_names), compare);
-  for (i = 0; i < array_size(tool_names); i++) {
-    xputs(*(const char**) array_get(tool_names, i));
-  }
-  array_delete(tool_names, env);
+  hashtable_foreach_ao(tb->tools, show_tool_name, NULL, env);
   return 0;
 }
 

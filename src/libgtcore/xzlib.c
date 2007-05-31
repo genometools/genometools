@@ -4,6 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,6 +45,15 @@ int xgzread(gzFile file, void *buf, unsigned len)
     exit(EXIT_FAILURE);
   }
   return rval;
+}
+
+void xgzwrite(gzFile file, void *buf, unsigned len)
+{
+  assert(buf && len);
+  if (gzwrite(file, buf, len) != len) {
+    fprintf(stderr, "cannod write to compressed file\n");
+    exit(EXIT_FAILURE);
+  }
 }
 
 void xgzrewind(gzFile file)

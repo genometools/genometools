@@ -21,7 +21,7 @@ struct MA {
 typedef struct {
   size_t size;
   const char *filename;
-  unsigned int line;
+  int line;
 } MAInfo;
 
 typedef struct {
@@ -64,8 +64,7 @@ static void subtract_size(MA *ma, unsigned long size)
   ma->current_size -= size;
 }
 
-void* ma_malloc_mem(MA *ma, size_t size, const char *filename,
-                    unsigned int line)
+void* ma_malloc_mem(MA *ma, size_t size, const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
@@ -85,8 +84,8 @@ void* ma_malloc_mem(MA *ma, size_t size, const char *filename,
   return xmalloc(size);
 }
 
-void* ma_calloc_mem(MA *ma, size_t nmemb, size_t size, const char *filename,
-                    unsigned int line)
+void* ma_calloc_mem(MA *ma, size_t nmemb, size_t size,
+                    const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
@@ -106,8 +105,8 @@ void* ma_calloc_mem(MA *ma, size_t nmemb, size_t size, const char *filename,
   return xcalloc(nmemb, size);
 }
 
-void* ma_realloc_mem(MA *ma, void *ptr, size_t size, const char *filename,
-                     unsigned int line)
+void* ma_realloc_mem(MA *ma, void *ptr, size_t size,
+                     const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
@@ -133,7 +132,7 @@ void* ma_realloc_mem(MA *ma, void *ptr, size_t size, const char *filename,
   return xrealloc(ptr, size);
 }
 
-void ma_free_mem(void *ptr, MA *ma, const char *filename, unsigned int line)
+void ma_free_mem(void *ptr, MA *ma, const char *filename, int line)
 {
   MAInfo *mainfo;
   assert(ma);
@@ -142,7 +141,7 @@ void ma_free_mem(void *ptr, MA *ma, const char *filename, unsigned int line)
     ma->bookkeeping = false;
 #ifndef NDEBUG
     if (!hashtable_get(ma->allocated_pointer, ptr)) {
-      fprintf(stderr, "bug: double free() attempted on line %u in file "
+      fprintf(stderr, "bug: double free() attempted on line %d in file "
               "\"%s\"\n", line, filename);
       exit(2); /* programmer error */
     }
@@ -166,7 +165,7 @@ static int check_space_leak(void *key, void *value, void *data, Env *env)
   /* report only the first leak */
   if (!info->has_leak) {
     /*@ignore@*/
-    fprintf(stderr, "bug: %zu bytes memory leaked (allocated on line %u in "
+    fprintf(stderr, "bug: %zu bytes memory leaked (allocated on line %d in "
             "file \"%s\")\n", mainfo->size, mainfo->line, mainfo->filename);
     /*@end@*/
     info->has_leak = true;

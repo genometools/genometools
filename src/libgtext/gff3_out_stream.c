@@ -11,7 +11,6 @@
 struct GFF3OutStream {
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
-  bool first_genome_feature;
   GenomeVisitor *gff3_visitor;
 };
 
@@ -53,7 +52,6 @@ GenomeStream* gff3_out_stream_new(GenomeStream *in_stream, GenFile *outfp,
                                           env);
   GFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
   gff3_out_stream->in_stream = in_stream;
-  gff3_out_stream->first_genome_feature = true;
   gff3_out_stream->gff3_visitor = gff3_visitor_new(outfp, env);
   return gs;
 }

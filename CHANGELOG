@@ -1,3 +1,14 @@
+changes in version 0.7.5:
+
+- `gt splitfasta` runs faster and can process compressed files
+
+
+changes in version 0.7.4:
+
+- `gt gtf2gff3` has been renamed to `gt gtf_to_gff3`
+- new tool `gt gff3_to_gtf` has been added
+
+
 changes in version 0.7.3:
 
 - new exercise `gt exercise linearalign` added
@@ -5,7 +16,7 @@ changes in version 0.7.3:
 
 changes in version 0.7.2:
 
-- splitfasta tool added
+- `gt splitfasta` tool added
 
 
 changes in version 0.7.1:

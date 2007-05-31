@@ -6,4 +6,4 @@
 #
 
 # the make call normally used for development
-gmake CC='ccache gcc' CFLAGS='-Werror -ansi' test
+gmake CFLAGS='-ansi' test
