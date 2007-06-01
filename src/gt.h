@@ -7,7 +7,8 @@
 #ifndef GT_H
 #define GT_H
 
-#include "gtcore.h" /* the core GenomeTools library (libgthcore) */
-#include "gtext.h"  /* include extended GenomeTools library (libgtext) */
+#include "gtcore.h"  /* the core GenomeTools library (libgthcore) */
+#include "gtext.h"   /* include extended GenomeTools library (libgtext) */
+#include "gtmatch.h" /* include GenomeTools matching library (libgtmatch) */
 
 #endif

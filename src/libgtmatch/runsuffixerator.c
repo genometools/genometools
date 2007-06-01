@@ -13,7 +13,6 @@
 #include "megabytes.h"
 #include "alphadef.h"
 #include "sfx-optdef.h"
-#include "env-errout.h"
 #include "encseq-def.h"
 #include "measure-time-if.h"
 
