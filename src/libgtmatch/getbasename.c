@@ -1,4 +1,10 @@
 /*
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
+*/
+
+/*
   Copyright by Stefan Kurtz (C) 2000-2003
   =====================================
   You may use, copy and distribute this file freely as long as you
