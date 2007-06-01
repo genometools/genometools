@@ -1,0 +1,19 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int fillmapspecstartptr(Assignmapspec assignmapspec,
+                        void **mappeduserptr,
+                        void *assignmapinfo,
+                        const char *tmpfilename,
+                        Uint expectedsize,
+                        Env *env);
+
+int flushtheindex2file(FILE *fp,
+                       Assignmapspec assignmapspec,
+                       void *assignmapinfo,
+                       Uint expectedsize,
+                       Env *env);
+
+#ifdef __cplusplus
+}
+#endif

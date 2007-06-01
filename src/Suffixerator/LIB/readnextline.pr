@@ -1,0 +1,8 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int readnextline(FILE *fpin,ArrayUchar *line,Env *env);
+
+#ifdef __cplusplus
+}
+#endif

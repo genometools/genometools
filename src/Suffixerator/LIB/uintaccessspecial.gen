@@ -1,0 +1,39 @@
+#define NOENDPTR
+static Sint ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
+                                       Fastabufferstate *fbs,
+                                       Env *env)
+#include "scanspecial.gen"
+#undef NOENDPTR
+
+#include "binsearchspecial.gen"
+
+static bool ADDTYPE(checkspecial64)(const Encodedsequence *encseq,Uint64 pos)
+{
+  return ADDTYPE(binarysearchpage)(ACCESSENCSEQ(encseq,specialpositions),
+                                   ACCESSENCSEQ(encseq,specialpositions) +
+                                   encseq->numofspecialstostore - 1,
+                                   pos);
+}
+
+static bool ADDTYPE(checkspecialrange64)(const Encodedsequence *encseq,
+                                         Uint64 pos)
+{
+  SPECIALTYPE *found, *start;
+
+  start = ACCESSENCSEQ(encseq,specialpositions);
+  found = ADDTYPE(binarysearchpreviousequal)(start,
+                                             start +
+                                             encseq->numofspecialstostore - 1,
+                                             pos);
+  if (found != NULL)
+  {
+    Uint64 rangeend
+             = *found +
+               (Uint64) encseq->specialrangelength[(Uint) (found - start)];
+    if (rangeend > pos)
+    {
+      return true;
+    }
+  }
+  return false;
+}

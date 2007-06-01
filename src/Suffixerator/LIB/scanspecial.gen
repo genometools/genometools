@@ -1,0 +1,87 @@
+{
+  Uchar cc;
+  Uint64 pos;
+  Sint retval;
+  Uint currentspecialchar = 0, bitwise = 0, lastspeciallength = 0;
+#ifndef NOENDPTR
+  Uint *endptrUint, endspecialcells;
+  Uint64 nextcheck;
+#endif
+  DECLARESEQBUFFER(encseq->fourcharsinonebyte);
+
+  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,specialpositions),NULL,SPECIALTYPE,
+                   encseq->numofspecialstostore);
+  ALLOCASSIGNSPACE(encseq->specialrangelength,NULL,Uchar,
+                   encseq->numofspecialstostore);
+#ifndef NOENDPTR
+  endspecialcells = (Uint) (encseq->totallength/MAXSPECIALTYPE + 1);
+  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,endspecialsubsUint),NULL,Uint,
+                   endspecialcells);
+  nextcheck = (Uint64) MAXSPECIALTYPE;
+  endptrUint = ACCESSENCSEQ(encseq,endspecialsubsUint);
+#endif
+
+  for (pos=0; /* Nothing */; pos++)
+  {
+    retval = readnextUchar(&cc,fbs,env);
+    if (retval < 0)
+    {
+      return -1;
+    }
+    if (retval == 0)
+    {
+      if (lastspeciallength > 0)
+      {
+	encseq->specialrangelength[currentspecialchar-1] = lastspeciallength;
+      }
+      break;
+    }
+    if (ISSPECIAL(cc))
+    {
+      if (lastspeciallength == 0)
+      {
+	ACCESSENCSEQ(encseq,specialpositions)[currentspecialchar++]
+#ifndef NOENDPTR
+	  = (SPECIALTYPE) (pos & MAXSPECIALTYPE);
+#else
+          = pos;
+#endif
+	lastspeciallength = UintConst(1);
+      } else
+      {
+	if (lastspeciallength == (Uint) (UCHAR_MAX-1))
+	{
+	  encseq->specialrangelength[currentspecialchar-1]
+	    = lastspeciallength+1;
+	  lastspeciallength = 0;
+	} else
+	{
+	  lastspeciallength++;
+	}
+      }
+    } else
+    {
+      if (lastspeciallength > 0)
+      {
+	encseq->specialrangelength[currentspecialchar-1] = lastspeciallength;
+	lastspeciallength = 0;
+      }
+    }
+#ifndef NOENDPTR
+    if (pos == nextcheck)
+    {
+      *endptrUint++ = currentspecialchar;
+      nextcheck += (Uint64) (MAXSPECIALTYPE+1);
+    }
+#endif
+    UPDATESEQBUFFER(encseq->fourcharsinonebyte,cc);
+  }
+  UPDATESEQBUFFERFINAL(encseq->fourcharsinonebyte);
+#ifndef NOENDPTR
+  while (endptrUint < ACCESSENCSEQ(encseq,endspecialsubsUint) + endspecialcells)
+  {
+    *endptrUint++ = currentspecialchar;
+  }
+#endif
+  return 0;
+}

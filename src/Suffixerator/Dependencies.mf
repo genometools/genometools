@@ -1,0 +1,504 @@
+
+${COMPILEDIR}guessprot-mn.o: guessprot-mn.c LIB/types.h LIB/guessprot.pr 
+
+${COMPILEDIR}alphabet.o: LIB/alphabet.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/arraydef.h LIB/spacedef.h LIB/chardef.h LIB/alphadef.h \
+LIB/guessprot.pr LIB/scanpaths.pr LIB/readnextline.pr 
+
+${COMPILEDIR}bentleysedgewick.o: LIB/bentleysedgewick.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/chardef.h LIB/arraydef.h LIB/spacedef.h LIB/divmodmul.h \
+LIB/minmax.h LIB/codespec.h LIB/encseq-def.h LIB/alphadef.h 
+
+${COMPILEDIR}checkgzip.o: LIB/checkgzip.c 
+
+${COMPILEDIR}compfilenm.o: LIB/compfilenm.c LIB/types.h LIB/spacedef.h \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h 
+
+${COMPILEDIR}completespecials.o: LIB/completespecials.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/encseq-def.h LIB/alphadef.h 
+
+${COMPILEDIR}dstrdup.o: LIB/dstrdup.c LIB/types.h LIB/spacedef.h \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h 
+
+${COMPILEDIR}encodedseq.o: LIB/encodedseq.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/intbits.h LIB/spacedef.h LIB/alphadef.h LIB/chardef.h \
+LIB/divmodmul.h LIB/genstream.h LIB/mapspec-def.h LIB/arraydef.h \
+LIB/encseq-def.h LIB/fbs-def.h LIB/compfilenm.pr LIB/genericstream.pr \
+LIB/alphabet.pr LIB/mapspec-gen.pr LIB/fbsadv.pr LIB/opensfxfile.pr \
+LIB/readnextUchar.gen LIB/accessspecial.gen LIB/scanspecial.gen \
+LIB/binsearchspecial.gen LIB/checkspecial.gen LIB/checkspecialrange.gen \
+LIB/accessspecial64.gen LIB/uintaccessspecial.gen 
+
+${COMPILEDIR}endianess.o: LIB/endianess.c 
+
+${COMPILEDIR}fbsadv.o: LIB/fbsadv.c /home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/fbs-def.h \
+LIB/types.h LIB/genstream.h LIB/inputsymbol.h LIB/spacedef.h \
+LIB/chardef.h LIB/genericstream.pr 
+
+${COMPILEDIR}genericstream.o: LIB/genericstream.c LIB/types.h LIB/genstream.h \
+LIB/checkgzip.pr 
+
+${COMPILEDIR}getbasename.o: LIB/getbasename.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h 
+
+${COMPILEDIR}guessprot.o: LIB/guessprot.c LIB/types.h LIB/inputsymbol.h \
+LIB/genstream.h LIB/genericstream.pr 
+
+${COMPILEDIR}kmer2string.o: LIB/kmer2string.c LIB/types.h 
+
+${COMPILEDIR}makeprj.o: LIB/makeprj.c /home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/genstream.h LIB/inputsymbol.h LIB/chardef.h LIB/spacedef.h \
+LIB/arraydef.h LIB/fbs-def.h LIB/genericstream.pr LIB/fbsadv.pr \
+LIB/readnextUchar.gen 
+
+${COMPILEDIR}mappedstr.o: LIB/mappedstr.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/chardef.h LIB/inputsymbol.h LIB/spacedef.h LIB/genstream.h \
+LIB/encseq-def.h LIB/alphadef.h LIB/genericstream.pr 
+
+${COMPILEDIR}mapspec-gen.o: LIB/mapspec-gen.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/mapspec-def.h LIB/arraydef.h LIB/spacedef.h 
+
+${COMPILEDIR}measure-time.o: LIB/measure-time.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/measure-time-if.h 
+
+${COMPILEDIR}opensfxfile.o: LIB/opensfxfile.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/spacedef.h LIB/compfilenm.pr 
+
+${COMPILEDIR}outprjfile.o: LIB/outprjfile.c LIB/types.h LIB/spacedef.h \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/endianess.pr \
+LIB/compfilenm.pr 
+
+${COMPILEDIR}partssuf.o: LIB/partssuf.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/divmodmul.h LIB/spacedef.h LIB/partssuf-def.h 
+
+${COMPILEDIR}readnextline.o: LIB/readnextline.c LIB/types.h LIB/arraydef.h \
+LIB/spacedef.h /home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h 
+
+${COMPILEDIR}runsuffixerator.o: LIB/runsuffixerator.c LIB/types.h LIB/spacedef.h \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/megabytes.h \
+LIB/alphadef.h LIB/sfx-optdef.h \
+/home/kurtz/genometools/include/libgtcore/str.h \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/genfile.h LIB/env-errout.h \
+LIB/encseq-def.h LIB/measure-time-if.h LIB/alphabet.pr LIB/makeprj.pr \
+LIB/sfx-opt.pr LIB/measure-time.pr LIB/outprjfile.pr \
+LIB/suffixerator.pr LIB/opensfxfile.pr 
+
+${COMPILEDIR}scanpaths.o: LIB/scanpaths.c LIB/types.h LIB/spacedef.h \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/dstrdup.pr \
+LIB/compfilenm.pr 
+
+${COMPILEDIR}sfxmap.o: LIB/sfxmap.c /home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/arraydef.h LIB/spacedef.h LIB/sarr-def.h LIB/alphadef.h \
+LIB/encseq-def.h LIB/readnextline.pr LIB/compfilenm.pr LIB/endianess.pr \
+LIB/alphabet.pr LIB/dstrdup.pr 
+
+${COMPILEDIR}sfx-opt.o: LIB/sfx-opt.c /home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h \
+/home/kurtz/genometools/include/libgtcore/str.h \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/genfile.h \
+/home/kurtz/genometools/include/libgtcore/option.h \
+/home/kurtz/genometools/include/libgtcore/str.h \
+/home/kurtz/genometools/include/libgtcore/strarray.h LIB/sfx-optdef.h \
+LIB/getbasename.pr 
+
+${COMPILEDIR}suffixerator.o: LIB/suffixerator.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/spacedef.h LIB/arraydef.h LIB/intbits.h LIB/divmodmul.h \
+LIB/codespec.h LIB/measure-time-if.h LIB/partssuf-def.h \
+LIB/encseq-def.h LIB/alphadef.h LIB/measure-time.pr LIB/mappedstr.pr \
+LIB/partssuf.pr LIB/bentleysedgewick.pr LIB/completespecials.pr 
+
+${COMPILEDIR}suftaborder.o: LIB/suftaborder.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/chardef.h LIB/minmax.h LIB/intbits.h LIB/spacedef.h \
+LIB/encseq-def.h LIB/alphadef.h 
+
+${COMPILEDIR}test-encseq.o: LIB/test-encseq.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/spacedef.h LIB/encseq-def.h LIB/alphadef.h LIB/fbs-def.h \
+LIB/genstream.h LIB/fbsadv.pr LIB/readnextUchar.gen 
+
+${COMPILEDIR}test-mappedstr.o: LIB/test-mappedstr.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/arraydef.h LIB/spacedef.h LIB/alphadef.h LIB/chardef.h \
+LIB/addnextchar.h LIB/divmodmul.h LIB/encseq-def.h LIB/sarr-def.h \
+LIB/kmer2string.pr LIB/compfilenm.pr LIB/mappedstr.pr LIB/alphabet.pr \
+LIB/sfxmap.pr 
+
+${COMPILEDIR}sfxmap-mn.o: sfxmap-mn.c /home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/env-errout.h \
+LIB/sarr-def.h LIB/types.h LIB/alphadef.h LIB/encseq-def.h \
+LIB/alphabet.pr LIB/sfxmap.pr LIB/suftaborder.pr LIB/test-mappedstr.c \
+/home/kurtz/genometools/include/libgtcore/env.h LIB/arraydef.h \
+LIB/spacedef.h LIB/chardef.h LIB/addnextchar.h LIB/divmodmul.h \
+LIB/sarr-def.h LIB/kmer2string.pr LIB/compfilenm.pr LIB/mappedstr.pr \
+LIB/alphabet.pr LIB/sfxmap.pr LIB/test-encseq.c LIB/fbs-def.h \
+LIB/genstream.h LIB/fbsadv.pr LIB/readnextUchar.gen LIB/encodedseq.pr 
+
+${COMPILEDIR}suffixerator-mn.o: suffixerator-mn.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/env-errout.h \
+LIB/runsuffixerator.pr 
+
+${COMPILEDIR}guessprot-mn.dbg.o: guessprot-mn.c LIB/types.h LIB/guessprot.pr 
+
+${COMPILEDIR}alphabet.dbg.o: LIB/alphabet.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/arraydef.h LIB/spacedef.h LIB/chardef.h LIB/alphadef.h \
+LIB/guessprot.pr LIB/scanpaths.pr LIB/readnextline.pr 
+
+${COMPILEDIR}bentleysedgewick.dbg.o: LIB/bentleysedgewick.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/chardef.h LIB/arraydef.h LIB/spacedef.h LIB/divmodmul.h \
+LIB/minmax.h LIB/codespec.h LIB/encseq-def.h LIB/alphadef.h 
+
+${COMPILEDIR}checkgzip.dbg.o: LIB/checkgzip.c 
+
+${COMPILEDIR}compfilenm.dbg.o: LIB/compfilenm.c LIB/types.h LIB/spacedef.h \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h 
+
+${COMPILEDIR}completespecials.dbg.o: LIB/completespecials.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/encseq-def.h LIB/alphadef.h 
+
+${COMPILEDIR}dstrdup.dbg.o: LIB/dstrdup.c LIB/types.h LIB/spacedef.h \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h 
+
+${COMPILEDIR}encodedseq.dbg.o: LIB/encodedseq.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/intbits.h LIB/spacedef.h LIB/alphadef.h LIB/chardef.h \
+LIB/divmodmul.h LIB/genstream.h LIB/mapspec-def.h LIB/arraydef.h \
+LIB/encseq-def.h LIB/fbs-def.h LIB/compfilenm.pr LIB/genericstream.pr \
+LIB/alphabet.pr LIB/mapspec-gen.pr LIB/fbsadv.pr LIB/opensfxfile.pr \
+LIB/readnextUchar.gen LIB/accessspecial.gen LIB/scanspecial.gen \
+LIB/binsearchspecial.gen LIB/checkspecial.gen LIB/checkspecialrange.gen \
+LIB/accessspecial64.gen LIB/uintaccessspecial.gen 
+
+${COMPILEDIR}endianess.dbg.o: LIB/endianess.c 
+
+${COMPILEDIR}fbsadv.dbg.o: LIB/fbsadv.c /home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/fbs-def.h \
+LIB/types.h LIB/genstream.h LIB/inputsymbol.h LIB/spacedef.h \
+LIB/chardef.h LIB/genericstream.pr 
+
+${COMPILEDIR}genericstream.dbg.o: LIB/genericstream.c LIB/types.h LIB/genstream.h \
+LIB/checkgzip.pr 
+
+${COMPILEDIR}getbasename.dbg.o: LIB/getbasename.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h 
+
+${COMPILEDIR}guessprot.dbg.o: LIB/guessprot.c LIB/types.h LIB/inputsymbol.h \
+LIB/genstream.h LIB/genericstream.pr 
+
+${COMPILEDIR}kmer2string.dbg.o: LIB/kmer2string.c LIB/types.h 
+
+${COMPILEDIR}makeprj.dbg.o: LIB/makeprj.c /home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/genstream.h LIB/inputsymbol.h LIB/chardef.h LIB/spacedef.h \
+LIB/arraydef.h LIB/fbs-def.h LIB/genericstream.pr LIB/fbsadv.pr \
+LIB/readnextUchar.gen 
+
+${COMPILEDIR}mappedstr.dbg.o: LIB/mappedstr.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/chardef.h LIB/inputsymbol.h LIB/spacedef.h LIB/genstream.h \
+LIB/encseq-def.h LIB/alphadef.h LIB/genericstream.pr 
+
+${COMPILEDIR}mapspec-gen.dbg.o: LIB/mapspec-gen.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/mapspec-def.h LIB/arraydef.h LIB/spacedef.h 
+
+${COMPILEDIR}measure-time.dbg.o: LIB/measure-time.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/measure-time-if.h 
+
+${COMPILEDIR}opensfxfile.dbg.o: LIB/opensfxfile.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/spacedef.h LIB/compfilenm.pr 
+
+${COMPILEDIR}outprjfile.dbg.o: LIB/outprjfile.c LIB/types.h LIB/spacedef.h \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/endianess.pr \
+LIB/compfilenm.pr 
+
+${COMPILEDIR}partssuf.dbg.o: LIB/partssuf.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/divmodmul.h LIB/spacedef.h LIB/partssuf-def.h 
+
+${COMPILEDIR}readnextline.dbg.o: LIB/readnextline.c LIB/types.h LIB/arraydef.h \
+LIB/spacedef.h /home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h 
+
+${COMPILEDIR}runsuffixerator.dbg.o: LIB/runsuffixerator.c LIB/types.h LIB/spacedef.h \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/megabytes.h \
+LIB/alphadef.h LIB/sfx-optdef.h \
+/home/kurtz/genometools/include/libgtcore/str.h \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/genfile.h LIB/env-errout.h \
+LIB/encseq-def.h LIB/measure-time-if.h LIB/alphabet.pr LIB/makeprj.pr \
+LIB/sfx-opt.pr LIB/measure-time.pr LIB/outprjfile.pr \
+LIB/suffixerator.pr LIB/opensfxfile.pr 
+
+${COMPILEDIR}scanpaths.dbg.o: LIB/scanpaths.c LIB/types.h LIB/spacedef.h \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/dstrdup.pr \
+LIB/compfilenm.pr 
+
+${COMPILEDIR}sfxmap.dbg.o: LIB/sfxmap.c /home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/arraydef.h LIB/spacedef.h LIB/sarr-def.h LIB/alphadef.h \
+LIB/encseq-def.h LIB/readnextline.pr LIB/compfilenm.pr LIB/endianess.pr \
+LIB/alphabet.pr LIB/dstrdup.pr 
+
+${COMPILEDIR}sfx-opt.dbg.o: LIB/sfx-opt.c /home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h \
+/home/kurtz/genometools/include/libgtcore/str.h \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/genfile.h \
+/home/kurtz/genometools/include/libgtcore/option.h \
+/home/kurtz/genometools/include/libgtcore/str.h \
+/home/kurtz/genometools/include/libgtcore/strarray.h LIB/sfx-optdef.h \
+LIB/getbasename.pr 
+
+${COMPILEDIR}suffixerator.dbg.o: LIB/suffixerator.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/spacedef.h LIB/arraydef.h LIB/intbits.h LIB/divmodmul.h \
+LIB/codespec.h LIB/measure-time-if.h LIB/partssuf-def.h \
+LIB/encseq-def.h LIB/alphadef.h LIB/measure-time.pr LIB/mappedstr.pr \
+LIB/partssuf.pr LIB/bentleysedgewick.pr LIB/completespecials.pr 
+
+${COMPILEDIR}suftaborder.dbg.o: LIB/suftaborder.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/chardef.h LIB/minmax.h LIB/intbits.h LIB/spacedef.h \
+LIB/encseq-def.h LIB/alphadef.h 
+
+${COMPILEDIR}test-encseq.dbg.o: LIB/test-encseq.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/spacedef.h LIB/encseq-def.h LIB/alphadef.h LIB/fbs-def.h \
+LIB/genstream.h LIB/fbsadv.pr LIB/readnextUchar.gen 
+
+${COMPILEDIR}test-mappedstr.dbg.o: LIB/test-mappedstr.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/types.h \
+LIB/arraydef.h LIB/spacedef.h LIB/alphadef.h LIB/chardef.h \
+LIB/addnextchar.h LIB/divmodmul.h LIB/encseq-def.h LIB/sarr-def.h \
+LIB/kmer2string.pr LIB/compfilenm.pr LIB/mappedstr.pr LIB/alphabet.pr \
+LIB/sfxmap.pr 
+
+${COMPILEDIR}sfxmap-mn.dbg.o: sfxmap-mn.c /home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/env-errout.h \
+LIB/sarr-def.h LIB/types.h LIB/alphadef.h LIB/encseq-def.h \
+LIB/alphabet.pr LIB/sfxmap.pr LIB/suftaborder.pr LIB/test-mappedstr.c \
+/home/kurtz/genometools/include/libgtcore/env.h LIB/arraydef.h \
+LIB/spacedef.h LIB/chardef.h LIB/addnextchar.h LIB/divmodmul.h \
+LIB/sarr-def.h LIB/kmer2string.pr LIB/compfilenm.pr LIB/mappedstr.pr \
+LIB/alphabet.pr LIB/sfxmap.pr LIB/test-encseq.c LIB/fbs-def.h \
+LIB/genstream.h LIB/fbsadv.pr LIB/readnextUchar.gen LIB/encodedseq.pr 
+
+${COMPILEDIR}suffixerator-mn.dbg.o: suffixerator-mn.c \
+/home/kurtz/genometools/include/libgtcore/env.h \
+/home/kurtz/genometools/include/libgtcore/ma.h \
+/home/kurtz/genometools/include/libgtcore/error.h \
+/home/kurtz/genometools/include/libgtcore/fa.h \
+/home/kurtz/genometools/include/libgtcore/log.h LIB/env-errout.h \
+LIB/runsuffixerator.pr 

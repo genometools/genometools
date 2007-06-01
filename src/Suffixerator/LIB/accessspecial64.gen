@@ -1,0 +1,6 @@
+static bool ADDTYPE(checkspecial64)(const Encodedsequence *encseq,Uint64 pos)
+#include "checkspecial.gen"
+
+static bool ADDTYPE(checkspecialrange64)(const Encodedsequence *encseq,
+                                         Uint64 pos)
+#include "checkspecialrange.gen"

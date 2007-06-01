@@ -1,0 +1,34 @@
+store the special code information on a file and perform
+prefixlength many iterations to insert the suffixes: PRIO-low
+
+show space of different parts relative to all parts: PRIO-high
+
+add type Sequencelength: allows for small and large sequences in 32 bit mode.
+unsigned long in 64-bit mode: PRIO low
+
+use flexible fixed bits type to store integers: PRIO low
+
+use test sequence of length n where n % 4 \in [0,1,2,3]
+
+do not force -pl to be a mandatory argument, if left out, then
+it determined automatically.
+
+instead of determining the parts, the user should define a
+maximum amount of memory to be used. Then the number of
+parts are chosen such that this boundary is not exceeded.
+
+add advancement display, see Gordon's lib: 0% 1% ... 100%
+
+implement distribution via hashtables or red-black trees.
+
+check why the program reports 0.61 bits/symbol for the human genome
+
+Sometimes I cannot set a default value when specifying the option,
+because the default value is determined after all other options
+are known and maybe some file is input
+
+replacing timer by some method which does not produce overflows.
+
+use encseq->totallength instead of the parameter totallength
+
+output the ranges in sorted order w.r.t. the length

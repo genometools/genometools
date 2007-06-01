@@ -1,0 +1,10 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+void inittheclock(Measuretime **mtime,const char *event,Env *env);
+
+void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent,Env *env);
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,0 +1,9 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+/*@null@*/ FILE *opensfxfile(const char *indexname,
+                             const char *suffix,Env *env);
+
+#ifdef __cplusplus
+}
+#endif

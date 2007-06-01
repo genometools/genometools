@@ -1,0 +1,437 @@
+suffixerator.x -tis -bwt -pl 11 -parts 15 -indexname human
+/projects/biodata/genomes/H_sapiens2003/chr*.fa.gz
+# indexname="human"
+# prefixlength=11
+# parts=15
+# inputfile[0]=/projects/biodata/genomes/H_sapiens2003/chr10.fa.gz
+# inputfile[1]=/projects/biodata/genomes/H_sapiens2003/chr11.fa.gz
+# inputfile[2]=/projects/biodata/genomes/H_sapiens2003/chr12.fa.gz
+# inputfile[3]=/projects/biodata/genomes/H_sapiens2003/chr13.fa.gz
+# inputfile[4]=/projects/biodata/genomes/H_sapiens2003/chr14.fa.gz
+# inputfile[5]=/projects/biodata/genomes/H_sapiens2003/chr15.fa.gz
+# inputfile[6]=/projects/biodata/genomes/H_sapiens2003/chr16.fa.gz
+# inputfile[7]=/projects/biodata/genomes/H_sapiens2003/chr17.fa.gz
+# inputfile[8]=/projects/biodata/genomes/H_sapiens2003/chr18.fa.gz
+# inputfile[9]=/projects/biodata/genomes/H_sapiens2003/chr19.fa.gz
+# inputfile[10]=/projects/biodata/genomes/H_sapiens2003/chr1.fa.gz
+# inputfile[11]=/projects/biodata/genomes/H_sapiens2003/chr20.fa.gz
+# inputfile[12]=/projects/biodata/genomes/H_sapiens2003/chr21.fa.gz
+# inputfile[13]=/projects/biodata/genomes/H_sapiens2003/chr22.fa.gz
+# inputfile[14]=/projects/biodata/genomes/H_sapiens2003/chr2.fa.gz
+# inputfile[15]=/projects/biodata/genomes/H_sapiens2003/chr3.fa.gz
+# inputfile[16]=/projects/biodata/genomes/H_sapiens2003/chr4.fa.gz
+# inputfile[17]=/projects/biodata/genomes/H_sapiens2003/chr5.fa.gz
+# inputfile[18]=/projects/biodata/genomes/H_sapiens2003/chr6.fa.gz
+# inputfile[19]=/projects/biodata/genomes/H_sapiens2003/chr7.fa.gz
+# inputfile[20]=/projects/biodata/genomes/H_sapiens2003/chr8.fa.gz
+# inputfile[21]=/projects/biodata/genomes/H_sapiens2003/chr9.fa.gz
+# inputfile[22]=/projects/biodata/genomes/H_sapiens2003/chrX.fa.gz
+# inputfile[23]=/projects/biodata/genomes/H_sapiens2003/chrY.fa.gz
+# specialranges of length 1: 60
+# specialranges of length 2: 4
+# specialranges of length 3: 1
+# specialranges of length 10: 4
+# specialranges of length 20: 1
+# specialranges of length 21: 1
+# specialranges of length 50: 2
+# specialranges of length 51: 2
+# specialranges of length 52: 1
+# specialranges of length 56: 1
+# specialranges of length 100: 17
+# specialranges of length 169: 1
+# specialranges of length 652: 1
+# specialranges of length 829: 1
+# specialranges of length 851: 1
+# specialranges of length 10002
+# specialranges of length 1900: 1
+# specialranges of length 2000: 1
+# specialranges of length 4100: 1
+# specialranges of length 5000: 30
+# specialranges of length 6000: 2
+# specialranges of length 7000: 1
+# specialranges of length 8001: 1
+# specialranges of length 10000: 8
+# specialranges of length 10001: 2
+# specialranges of length 12500: 1
+# specialranges of length 13000: 1
+# specialranges of length 14000: 1
+# specialranges of length 14828: 1
+# specialranges of length 15000: 1
+# specialranges of length 15500: 1
+# specialranges of length 16000: 1
+# specialranges of length 17000: 1
+# specialranges of length 17500: 1
+# specialranges of length 18000: 1
+# specialranges of length 20000: 9
+# specialranges of length 22000: 2
+# specialranges of length 23000: 1
+# specialranges of length 23108: 1
+# specialranges of length 24000: 1
+# specialranges of length 25000: 2
+# specialranges of length 25001: 1
+# specialranges of length 25361: 1
+# specialranges of length 27050: 1
+# specialranges of length 27922: 1
+# specialranges of length 28000: 1
+# specialranges of length 30000: 5
+# specialranges of length 40000: 5
+# specialranges of length 43000: 1
+# specialranges of length 44000: 1
+# specialranges of length 45000: 1
+# specialranges of length 47000: 2
+# specialranges of length 50000: 138
+# specialranges of length 50001: 4
+# specialranges of length 51000: 1
+# specialranges of length 54000: 1
+# specialranges of length 55000: 4
+# specialranges of length 57000: 1
+# specialranges of length 59000: 2
+# specialranges of length 60000: 10
+# specialranges of length 62000: 1
+# specialranges of length 64000: 1
+# specialranges of length 65000: 1
+# specialranges of length 66000: 1
+# specialranges of length 70000: 2
+# specialranges of length 73000: 1
+# specialranges of length 75000: 2
+# specialranges of length 77000: 1
+# specialranges of length 80000: 2
+# specialranges of length 87000: 3
+# specialranges of length 90000: 1
+# specialranges of length 100000: 38
+# specialranges of length 100001: 3
+# specialranges of length 101000: 1
+# specialranges of length 104000: 1
+# specialranges of length 105001: 1
+# specialranges of length 108000: 1
+# specialranges of length 111000: 1
+# specialranges of length 120000: 3
+# specialranges of length 121979: 1
+# specialranges of length 142000: 1
+# specialranges of length 144000: 1
+# specialranges of length 150000: 32
+# specialranges of length 153000: 1
+# specialranges of length 161308: 1
+# specialranges of length 173479: 1
+# specialranges of length 175000: 1
+# specialranges of length 180000: 1
+# specialranges of length 200000: 4
+# specialranges of length 200001: 1
+# specialranges of length 250000: 2
+# specialranges of length 260000: 1
+# specialranges of length 263001: 1
+# specialranges of length 300000: 2
+# specialranges of length 400000: 1
+# specialranges of length 450000: 2
+# specialranges of length 500000: 2
+# specialranges of length 1000000: 2
+# specialranges of length 2500001: 1
+# specialranges of length 3000000: 9
+# specialranges of length 3050000: 3
+# specialranges of length 3100000: 3
+# specialranges of length 4700000: 1
+# specialranges of length 8000000: 1
+# specialranges of length 9800000: 1
+# specialranges of length 9928623: 1
+# specialranges of length 14430001: 1
+# specialranges of length 17200000: 1
+# specialranges of length 18010001: 1
+# specialranges of length 18090001: 1
+# specialranges of length 18310001: 1
+# specialranges of length 21050000: 1
+# specialranges of length 22000000: 1
+TIME determining sequence length and number of special symbols 639.03
+# init character encoding (ushort,770622777 bytes,0.61 bits/symbol)
+# deliverchar=delivercharViaushorttablesSpecialrange
+# deliverchar64=delivercharViaushorttables64Specialrange
+# call ushortfillspecialtables
+# flushtheindex2file(encseq->satcharptr,size=1,elems=1) at byteoffset 0
+# flushtheindex2file(encseq->fourcharsinonebyte,size=1,elems=767630285) at
+# byteoffset 1
+# flushtheindex2file(encseq->ushortspecialpositions,size=2,elems=935025) at
+# byteoffset 767630286
+# flushtheindex2file(encseq->specialrangelength,size=1,elems=935025) at
+# byteoffset 769500336
+# flushtheindex2file(encseq->ushortendspecialsubsUint,size=4,elems=46854) at
+# byteoffset 770435361
+# specialcharacters=238337840
+# specialranges=935025
+TIME computing sequence encoding 736.51
+# totallength=3070521139
+TIME counting prefix distribution 610.99
+TIME inserting suffixes into buckets 235.43
+# simulating output of 204702577 elements of the bwttab
+TIME sorting the buckets 394.31
+TIME inserting suffixes into buckets 235.28
+# simulating output of 204701891 elements of the bwttab
+TIME sorting the buckets 377.35
+TIME inserting suffixes into buckets 240.41
+# simulating output of 204702548 elements of the bwttab
+TIME sorting the buckets 387.55
+TIME inserting suffixes into buckets 245.68
+# simulating output of 204701051 elements of the bwttab
+TIME sorting the buckets 370.18
+TIME inserting suffixes into buckets 245.87
+# simulating output of 204699426 elements of the bwttab
+TIME sorting the buckets 394.46
+TIME inserting suffixes into buckets 254.70
+# simulating output of 204702049 elements of the bwttab
+TIME sorting the buckets 399.40
+TIME inserting suffixes into buckets 252.65
+# simulating output of 204701259 elements of the bwttab
+TIME sorting the buckets 390.54
+TIME inserting suffixes into buckets 254.64
+# simulating output of 204701498 elements of the bwttab
+TIME sorting the buckets 383.26
+TIME inserting suffixes into buckets 255.31
+# simulating output of 204701016 elements of the bwttab
+TIME sorting the buckets 400.58
+TIME inserting suffixes into buckets 250.03
+# simulating output of 204702753 elements of the bwttab
+TIME sorting the buckets 370.28
+TIME inserting suffixes into buckets 245.65
+# simulating output of 204700160 elements of the bwttab
+TIME sorting the buckets 369.20
+TIME inserting suffixes into buckets 241.22
+# simulating output of 204731476 elements of the bwttab
+TIME sorting the buckets 390.40
+TIME inserting suffixes into buckets 235.97
+# simulating output of 204671210 elements of the bwttab
+TIME sorting the buckets 386.80
+TIME inserting suffixes into buckets 220.90
+# simulating output of 409402226 elements of the bwttab
+TIME sorting the buckets 356.38
+TIME inserting suffixes into buckets 167.48
+# simulating output of 0 elements of the bwttab
+TIME sorting the buckets 0.36
+TIME overall -1946.10
+# space peak in megabytes: 2323.82
+
+Computation time on roma: 3 hours.
+
+Mon May 14 20:06:36 CEST 2007
+# indexname="human"
+# prefixlength=11
+# parts=15
+# inputfile[0]=/projects/biodata/genomes/H_sapiens2003/chr10.fa.gz
+# inputfile[1]=/projects/biodata/genomes/H_sapiens2003/chr11.fa.gz
+# inputfile[2]=/projects/biodata/genomes/H_sapiens2003/chr12.fa.gz
+# inputfile[3]=/projects/biodata/genomes/H_sapiens2003/chr13.fa.gz
+# inputfile[4]=/projects/biodata/genomes/H_sapiens2003/chr14.fa.gz
+# inputfile[5]=/projects/biodata/genomes/H_sapiens2003/chr15.fa.gz
+# inputfile[6]=/projects/biodata/genomes/H_sapiens2003/chr16.fa.gz
+# inputfile[7]=/projects/biodata/genomes/H_sapiens2003/chr17.fa.gz
+# inputfile[8]=/projects/biodata/genomes/H_sapiens2003/chr18.fa.gz
+# inputfile[9]=/projects/biodata/genomes/H_sapiens2003/chr19.fa.gz
+# inputfile[10]=/projects/biodata/genomes/H_sapiens2003/chr1.fa.gz
+# inputfile[11]=/projects/biodata/genomes/H_sapiens2003/chr20.fa.gz
+# inputfile[12]=/projects/biodata/genomes/H_sapiens2003/chr21.fa.gz
+# inputfile[13]=/projects/biodata/genomes/H_sapiens2003/chr22.fa.gz
+# inputfile[14]=/projects/biodata/genomes/H_sapiens2003/chr2.fa.gz
+# inputfile[15]=/projects/biodata/genomes/H_sapiens2003/chr3.fa.gz
+# inputfile[16]=/projects/biodata/genomes/H_sapiens2003/chr4.fa.gz
+# inputfile[17]=/projects/biodata/genomes/H_sapiens2003/chr5.fa.gz
+# inputfile[18]=/projects/biodata/genomes/H_sapiens2003/chr6.fa.gz
+# inputfile[19]=/projects/biodata/genomes/H_sapiens2003/chr7.fa.gz
+# inputfile[20]=/projects/biodata/genomes/H_sapiens2003/chr8.fa.gz
+# inputfile[21]=/projects/biodata/genomes/H_sapiens2003/chr9.fa.gz
+# inputfile[22]=/projects/biodata/genomes/H_sapiens2003/chrX.fa.gz
+# inputfile[23]=/projects/biodata/genomes/H_sapiens2003/chrY.fa.gz
+specialranges of length 2500001: 1
+specialranges of length 1900: 1
+specialranges of length 57000: 1
+specialranges of length 17500: 1
+specialranges of length 20: 1
+specialranges of length 1: 60
+specialranges of length 65000: 1
+specialranges of length 54000: 1
+specialranges of length 21: 1
+specialranges of length 111000: 1
+specialranges of length 16000: 1
+specialranges of length 73000: 1
+specialranges of length 8001: 1
+specialranges of length 2: 4
+specialranges of length 9928623: 1
+specialranges of length 17200000: 1
+specialranges of length 24000: 1
+specialranges of length 263001: 1
+specialranges of length 43000: 1
+specialranges of length 3: 1
+specialranges of length 100000: 38
+specialranges of length 5000: 30
+specialranges of length 62000: 1
+specialranges of length 13000: 1
+specialranges of length 51000: 1
+specialranges of length 260000: 1
+specialranges of length 108000: 1
+specialranges of length 23108: 1
+specialranges of length 70000: 2
+specialranges of length 450000: 2
+specialranges of length 100001: 3
+specialranges of length 2000: 1
+specialranges of length 40000: 5
+specialranges of length 59000: 2
+specialranges of length 18310001: 1
+specialranges of length 100: 17
+specialranges of length 200000: 4
+specialranges of length 3050000: 3
+specialranges of length 18090001: 1
+specialranges of length 652: 1
+specialranges of length 10000: 8
+specialranges of length 105001: 1
+specialranges of length 18000: 1
+specialranges of length 200001: 1
+specialranges of length 75000: 2
+specialranges of length 10001: 2
+specialranges of length 7000: 1
+specialranges of length 4700000: 1
+specialranges of length 64000: 1
+specialranges of length 45000: 1
+specialranges of length 14828: 1
+specialranges of length 173479: 1
+specialranges of length 300000: 2
+specialranges of length 15000: 1
+specialranges of length 9800000: 1
+specialranges of length 23000: 1
+specialranges of length 175000: 1
+specialranges of length 80000: 2
+specialranges of length 10: 4
+specialranges of length 27922: 1
+specialranges of length 50000: 138
+specialranges of length 1000000: 2
+specialranges of length 77000: 1
+specialranges of length 50: 2
+specialranges of length 829: 1
+specialranges of length 1000: 2
+specialranges of length 8000000: 1
+specialranges of length 400000: 1
+specialranges of length 50001: 4
+specialranges of length 20000: 9
+specialranges of length 153000: 1
+specialranges of length 180000: 1
+specialranges of length 66000: 1
+specialranges of length 51: 2
+specialranges of length 142000: 1
+specialranges of length 47000: 2
+specialranges of length 104000: 1
+specialranges of length 28000: 1
+specialranges of length 27050: 1
+specialranges of length 22000000: 1
+specialranges of length 17000: 1
+specialranges of length 52: 1
+specialranges of length 150000: 32
+specialranges of length 21050000: 1
+specialranges of length 3000000: 9
+specialranges of length 14430001: 1
+specialranges of length 55000: 4
+specialranges of length 4100: 1
+specialranges of length 120000: 3
+specialranges of length 15500: 1
+specialranges of length 851: 1
+specialranges of length 25000: 2
+specialranges of length 18010001: 1
+specialranges of length 101000: 1
+specialranges of length 500000: 2
+specialranges of length 25361: 1
+specialranges of length 6000: 2
+specialranges of length 44000: 1
+specialranges of length 25001: 1
+specialranges of length 90000: 1
+specialranges of length 14000: 1
+specialranges of length 169: 1
+specialranges of length 12500: 1
+specialranges of length 60000: 10
+specialranges of length 161308: 1
+specialranges of length 250000: 2
+specialranges of length 3100000: 3
+specialranges of length 22000: 2
+specialranges of length 87000: 3
+specialranges of length 144000: 1
+specialranges of length 30000: 5
+specialranges of length 56: 1
+specialranges of length 121979: 1
+TIME determining sequence length and number of special symbols 685.15
+# init character encoding (ushort,770622777 bytes,2.01 bits/symbol)
+# deliverchar=delivercharViaushorttablesSpecialrange
+# deliverchar64=delivercharViaushorttables64Specialrange
+# call ushortfillspecialtables
+# flushtheindex2file(encseq->satcharptr,size=1,elems=1) at byteoffset 0
+# flushtheindex2file(encseq->fourcharsinonebyte,size=1,elems=767630285) at
+# byteoffset 1
+# flushtheindex2file(encseq->ushortspecialpositions,size=2,elems=935025) at
+# byteoffset 767630286
+# flushtheindex2file(encseq->specialrangelength,size=1,elems=935025) at
+# byteoffset 769500336
+# flushtheindex2file(encseq->ushortendspecialsubsUint,size=4,elems=46854) at
+# byteoffset 770435361
+# specialcharacters=238337840
+# specialranges=935025
+TIME computing sequence encoding 696.71
+# numofsuffixestoinsert=2832183299
+widthofpart[0]=188813787
+widthofpart[1]=188812919
+widthofpart[2]=188810147
+widthofpart[3]=188817516
+widthofpart[4]=188822486
+widthofpart[5]=188796498
+widthofpart[6]=188812506
+widthofpart[7]=188812012
+widthofpart[8]=188813346
+widthofpart[9]=188811611
+widthofpart[10]=188812260
+widthofpart[11]=188813673
+widthofpart[12]=188810115
+widthofpart[13]=188822038
+widthofpart[14]=188802385
+sumofwidth = 2832183299, numofsuffixestoinsert = 2832183299
+TIME counting prefix distribution 609.94
+TIME inserting suffixes into buckets 225.49
+# simulating output of 188813787 elements of the bwttab
+TIME sorting the buckets 366.39
+TIME inserting suffixes into buckets 262.55
+# simulating output of 188812919 elements of the bwttab
+TIME sorting the buckets 349.15
+TIME inserting suffixes into buckets 268.24
+# simulating output of 188810147 elements of the bwttab
+TIME sorting the buckets 353.21
+TIME inserting suffixes into buckets 244.41
+# simulating output of 188817516 elements of the bwttab
+TIME sorting the buckets 341.63
+TIME inserting suffixes into buckets 241.79
+# simulating output of 188822486 elements of the bwttab
+TIME sorting the buckets 356.67
+TIME inserting suffixes into buckets 244.17
+# simulating output of 188796498 elements of the bwttab
+TIME sorting the buckets 363.57
+TIME inserting suffixes into buckets 247.72
+# simulating output of 188812506 elements of the bwttab
+TIME sorting the buckets 366.06
+TIME inserting suffixes into buckets 251.25
+# simulating output of 188812012 elements of the bwttab
+TIME sorting the buckets 346.53
+TIME inserting suffixes into buckets 247.28
+# simulating output of 188813346 elements of the bwttab
+TIME sorting the buckets 364.21
+TIME inserting suffixes into buckets 247.73
+# simulating output of 188811611 elements of the bwttab
+TIME sorting the buckets 355.76
+TIME inserting suffixes into buckets 243.05
+# simulating output of 188812260 elements of the bwttab
+TIME sorting the buckets 341.82
+TIME inserting suffixes into buckets 242.34
+# simulating output of 188813673 elements of the bwttab
+TIME sorting the buckets 341.41
+TIME inserting suffixes into buckets 235.13
+# simulating output of 188810115 elements of the bwttab
+TIME sorting the buckets 355.78
+TIME inserting suffixes into buckets 233.13
+# simulating output of 188822038 elements of the bwttab
+TIME sorting the buckets 351.94
+TIME inserting suffixes into buckets 223.41
+# simulating output of 188802385 elements of the bwttab
+# simulating output of 188822486 elements of the bwttab
+# simulating output of 49515355 elements of the bwttab
+TIME sorting the buckets 385.12
+TIME overall -1896.16
+# space peak in megabytes: 1482.38
+Mon May 14 23:10:30 CEST 2007

@@ -1,0 +1,10 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+bool guessifproteinsequence(const Uchar *input,Uint inputlen);
+
+bool guessifproteinsequencestream(const char *inputfile);
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,0 +1,26 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int scanfastasequence(
+        Uint *numofsequences,
+        Uint64 *totallength,
+        Specialcharinfo *specialcharinfo,
+        const char **filenametab,
+        unsigned int numoffiles,
+        PairUint **filelengthtab,
+        const Uchar *symbolmap,
+        Env *env);
+
+int scanfastasequence2(
+        Uint *numofsequences,
+        Uint *totallength,
+        PairUint **filelengthtab,
+        Specialcharinfo *specialcharinfo,
+        const char **filenametab,
+        unsigned int numoffiles,
+        const Uchar *symbolmap,
+        Env *env);
+
+#ifdef __cplusplus
+}
+#endif

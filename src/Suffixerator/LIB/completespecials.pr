@@ -1,0 +1,11 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+Uint determinefullspecials(const Encodedsequence *encseq,
+                           Uint64 totallength,
+                           unsigned int prefixlength,
+                           Env *env);
+
+#ifdef __cplusplus
+}
+#endif

@@ -1,0 +1,12 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int testencodedsequence(const char **filenametab,
+                        unsigned int numoffiles,
+                        const Encodedsequence *encseq,
+                        const Uchar *symbolmap,
+                        Env *env);
+
+#ifdef __cplusplus
+}
+#endif

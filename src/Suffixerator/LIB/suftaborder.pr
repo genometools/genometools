@@ -1,0 +1,30 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+void checkifprefixesareidentical(const Encodedsequence *encseq,
+                                 const Uchar *characters,
+                                 const Uint *suftab,
+                                 unsigned int prefixlength,
+                                 Uint64 totallength,
+                                 Uint depth,
+                                 Uint left,
+                                 Uint right);
+
+void showentiresuftab(const Encodedsequence *encseq,
+                      const Uchar *characters,
+                      const Uint *suftab,
+                      Uint depth,
+                      Uint totallength);
+
+void checkentiresuftab(const Encodedsequence *encseq,
+                       const Uchar *characters,
+                       const Uint *suftab,
+                       bool specialsareequal,
+                       bool specialsareequalatdepth0,
+                       Uint64 totallength,
+                       Uint depth,
+                       Env *env);
+
+#ifdef __cplusplus
+}
+#endif

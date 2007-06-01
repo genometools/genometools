@@ -1,0 +1,65 @@
+SPLINTALL=\
+  guessprot-mn.splint\
+  LIB/alphabet.splint\
+  LIB/bentleysedgewick.splint\
+  LIB/checkgzip.splint\
+  LIB/compfilenm.splint\
+  LIB/completespecials.splint\
+  LIB/dstrdup.splint\
+  LIB/encodedseq.splint\
+  LIB/endianess.splint\
+  LIB/fbsadv.splint\
+  LIB/genericstream.splint\
+  LIB/getbasename.splint\
+  LIB/guessprot.splint\
+  LIB/kmer2string.splint\
+  LIB/makeprj.splint\
+  LIB/mappedstr.splint\
+  LIB/mapspec-gen.splint\
+  LIB/measure-time.splint\
+  LIB/opensfxfile.splint\
+  LIB/outprjfile.splint\
+  LIB/partssuf.splint\
+  LIB/readnextline.splint\
+  LIB/runsuffixerator.splint\
+  LIB/scanpaths.splint\
+  LIB/sfxmap.splint\
+  LIB/sfx-opt.splint\
+  LIB/suffixerator.splint\
+  LIB/suftaborder.splint\
+  LIB/test-encseq.splint\
+  LIB/test-mappedstr.splint\
+  sfxmap-mn.splint\
+  suffixerator-mn.splint
+
+cleanbuild:
+	rm -f ${COMPILEDIR}*.[ox]
+
+${COMPILEDIR}%.o:%.c
+	${CC} ${CFLAGS} -c $< -o $@
+
+${COMPILEDIR}%.dbg.o:%.c
+	${CC} ${CFLAGS} -DDEBUG -c $< -o $@
+
+%.so:%.c
+	${CC} ${CFLAGS} ${SHARED} $< -o $@
+
+%.prepro:%.c
+	${CC} -E -g3 ${CFLAGS} -DDEBUG -c $< -o $@
+	indent $@
+
+%.pr:%.c
+	skproto.x $< > $@
+
+%.splint:%.c
+	splint ${SPLINTFLAGS} $<
+	touch $*.splint
+
+splintall:${SPLINTALL}
+
+splintclean:
+	rm -f *.splint
+
+.PHONY:mkdircompiledir
+mkdircompiledir:
+	mkdir -p ${COMPILEDIR}

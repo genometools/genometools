@@ -1,0 +1,18 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+void sortallbuckets(Uint *suftabptr,
+                    const Encodedsequence *encseq,
+                    const Uint *leftborder,
+                    const Uint *countspecialcodes,
+                    Uint totallength,
+                    Uint numofchars,
+                    unsigned int prefixlength,
+                    Uint mincode,
+                    Uint maxcode,
+                    Uint widthofpart,
+                    Env *env);
+
+#ifdef __cplusplus
+}
+#endif

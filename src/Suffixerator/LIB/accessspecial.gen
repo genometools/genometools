@@ -1,0 +1,48 @@
+static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
+                                      Fastabufferstate *fbs,
+                                      Env *env)
+#include "scanspecial.gen"
+
+#include "binsearchspecial.gen"
+
+#ifdef DIRECTBINSEARCH
+
+static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Uint pos)
+{
+  return ADDTYPE(binarysearchpage)(ACCESSENCSEQ(encseq,specialpositions),
+                                   ACCESSENCSEQ(encseq,specialpositions) +
+                                   encseq->numofspecialstostore - 1,
+                                   pos);
+}
+
+static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Uint pos)
+{
+  SPECIALTYPE *found, *start;
+
+  start = ACCESSENCSEQ(encseq,specialpositions);
+  found = ADDTYPE(binarysearchpreviousequal)(start,
+                                             start +
+                                             encseq->numofspecialstostore - 1,
+                                             pos);
+  if (found != NULL)
+  {
+    Uint rangeend = *found +
+                    (Uint) encseq->specialrangelength[(Uint) (found - start)];
+    if (rangeend > pos)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+#else
+
+static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Uint pos)
+#include "checkspecial.gen"
+
+static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Uint pos)
+#include "checkspecialrange.gen"
+
+#endif
+

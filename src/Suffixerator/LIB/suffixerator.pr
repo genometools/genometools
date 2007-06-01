@@ -1,0 +1,18 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
+                 void *processsuftabinfo,
+                 Uint64 totallength,
+                 Uint specialcharacters,
+                 Uint specialranges,
+                 const Encodedsequence *encseq,
+                 Uint numofchars,
+                 unsigned int prefixlength,
+                 Uint numofparts,
+                 Measuretime *mtime,
+                 Env *env);
+
+#ifdef __cplusplus
+}
+#endif
