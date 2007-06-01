@@ -4,8 +4,8 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#ifndef GT_SUFFIXERATOR_H
-#define GT_SUFFIXERATOR_H
+#ifndef GT_SFXMAP_H
+#define GT_SFXMAP_H
 
 /* the sfxmap tool */
 int gt_sfxmap(int argc, const char **argv, Env*);
