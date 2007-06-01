@@ -4,25 +4,32 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#if 0
 #include <cairo.h>
+#endif
 #include <libgtext/graphics.h>
 
 #define EXON_ARROW_WIDTH        8
 
 struct Graphics {
+#if 0
   cairo_t *cr;
   cairo_surface_t *surf;
+#endif
+  int placeholder;
 };
 
 Graphics* graphics_new(unsigned int width, unsigned int height, Env *env)
 {
   Graphics *g = env_ma_malloc(env, sizeof (Graphics));
+#if 0
   g->surf = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
   g->cr = cairo_create(g->surf);
   assert(cairo_status(g->cr) == CAIRO_STATUS_SUCCESS);
   cairo_set_source_rgb(g->cr, 1, 1, 1);
   cairo_set_operator(g->cr, CAIRO_OPERATOR_SOURCE);
   cairo_paint(g->cr);
+#endif
   return g;
 }
 
@@ -30,7 +37,7 @@ void graphics_draw_exon_box(Graphics *g, double x, double y, double width,
                             double height, Strand strand)
 {
   assert(g);
-
+#if 0
   cairo_set_source_rgb(g->cr, 0, 0, 1);
   switch (strand) {
     case STRAND_FORWARD:
@@ -61,35 +68,44 @@ void graphics_draw_exon_box(Graphics *g, double x, double y, double width,
    cairo_fill_preserve(g->cr);
    cairo_set_source_rgb(g->cr, 0, 0, 0);
    cairo_stroke(g->cr);
+#endif
 }
 
 void graphics_draw_horizontal_line(Graphics *g, double x, double y,
                                    double width)
 {
   assert(g);
+#if 0
   cairo_move_to(g->cr, x, y);
   cairo_rel_line_to(g->cr, width, 0);
   cairo_stroke(g->cr);
+#endif
 }
 
 void graphics_draw_text(Graphics *g, double x, double y, const char *text)
 {
   assert(g && text);
+#if 0
   cairo_set_source_rgb(g->cr, 0, 0, 0);
   cairo_move_to(g->cr, x, y);
   cairo_show_text(g->cr, text);
+#endif
 }
 
 void graphics_save_as_png(const Graphics *g, const char *path)
 {
   assert(g);
+#if 0
   cairo_surface_write_to_png(g->surf, path);
+#endif
 }
 
 void graphics_delete(Graphics *g, Env *env)
 {
   if (!g) return;
+#if 0
   cairo_surface_destroy(g->surf); /* reference counted */
   cairo_destroy(g->cr);
+#endif
   env_ma_free(g, env);
 }
