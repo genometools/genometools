@@ -12,8 +12,8 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   OptionParser *op;
   OPrval oprval;
   env_error_check(env);
-  /* XXX: add one liner to describe this tool */
-  op = option_parser_new("indexname", "ADD ONE LINER.", env);
+  op = option_parser_new("indexname", "Map <indexname> and check consistency.",
+                         env);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 1, env);
   option_parser_delete(op, env);
