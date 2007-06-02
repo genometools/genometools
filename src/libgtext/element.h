@@ -13,6 +13,12 @@
 
 typedef struct Element Element;
 
+enum ArrowStatus{
+  Left = 1,
+  Right = 2,
+  NoArrow = 3,
+};
+
 Element* element_new(GenomeNode *gn,
                      Config *cfg,
 		     Env* env);

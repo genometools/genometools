@@ -8,6 +8,8 @@
 #define GRAPHICS_H
 
 #include <gtcore.h>
+#include <libgtext/color.h>
+#include <libgtext/element.h>
 
 /* the graphics class */
 typedef struct Graphics Graphics;
@@ -20,5 +22,34 @@ void      graphics_draw_horizontal_line(Graphics *g, double x, double y,
 void      graphics_draw_text(Graphics *g, double x, double y, const char *text);
 void      graphics_save_as_png(const Graphics*, const char *path);
 void      graphics_delete(Graphics*, Env*);
+
+/* new interface functions, ssteinbiss */
+Graphics* graphics_new_png(const char *fname, unsigned int width,
+                           unsigned int height, Env*);
+Graphics* graphics_new_pdf(const char *fname, unsigned int width,
+                           unsigned int height, Env*);
+Graphics* graphics_new_ps(const char *fname, unsigned int width,
+                           unsigned int height, Env*);
+void      graphics_draw_vertical_line(Graphics *g, double x, double y,
+                                 double length);
+void      graphics_draw_box(Graphics *g, double x, double y, double width,
+                            double height, Color color, int arrow_status,
+                            double arrow_width, double stroke_width,
+                            Color stroke_color);
+void      graphics_draw_dashes(Graphics *g, double x, double y, double width,
+                               double height, int arrow_status,
+                               double arrow_width, double stroke_width,
+                               Color stroke_color);
+void      graphics_draw_caret(Graphics *g, double x, double y, double width,
+                              double height, int arrow_status,
+                              double arrow_width,  double stroke_width,
+                              Color stroke_color);
+#define   graphics_draw_text_left(g,x,y,t) \
+          graphics_draw_text(g,x,y,t);
+void      graphics_draw_text_centered(Graphics *g, double x, double y,
+                                      const char *text);
+void      graphics_draw_text_right(Graphics *g, double x, double y,
+                                      const char *text);
+void      graphics_save(const Graphics*);
 
 #endif

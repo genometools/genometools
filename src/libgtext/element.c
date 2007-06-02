@@ -11,12 +11,6 @@
 #include <libgtcore/strand.h>
 #include <libgtext/element.h>
 
-enum ArrowStatus{
-  Left = 1,
-  Right = 2,
-  NoArrow = 3,
-};
-
 struct Element
 {
   GenomeFeatureType type;
