@@ -109,16 +109,16 @@ int gt_view(int argc, const char **argv, Env *env)
   feature_stream = feature_stream_new(sort_stream, features, env);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(has_err = genome_stream_next_tree(feature_stream, &gn, env)) &&
-         gn) {
+  while (!(has_err = genome_stream_next_tree(feature_stream, &gn, env)) && gn) 
+  {
     genome_node_rec_delete(gn, env);
   }
 
   /* sequence region id does not exist in gff file */
-  if (!has_err && !feature_index_has_seqid(features, 
-	                                         str_get(arguments.seqid), 
-																					 env)) 
-	{
+  if (!has_err && !feature_index_has_seqid(features,
+                                           str_get(arguments.seqid),
+                                           env)) 
+  {
     env_error_set(env, "sequence region '%s' does not exist in GFF input file",
 		              str_get(arguments.seqid));
     has_err = -1;
@@ -159,7 +159,7 @@ int gt_view(int argc, const char **argv, Env *env)
     }
 
     array_delete(results, env);  
-	}
+  }
 	
   /* free */
   str_delete(arguments.seqid,env);
@@ -168,6 +168,6 @@ int gt_view(int argc, const char **argv, Env *env)
   genome_stream_delete(sort_stream, env);
   genome_stream_delete(gff3_in_stream, env);
   genfile_xclose(arguments.outfp, env);
-
+  
   return has_err;
 }
