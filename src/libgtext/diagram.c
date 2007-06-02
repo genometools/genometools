@@ -20,6 +20,18 @@ struct Diagram
 };
 
 /*
+Fetching the number of lines from a track object and add number of lines to data.
+*/
+static int diagram_add_tracklines(void *key, void *value, void *data,
+                                     Env* env)
+{
+  int* add;
+  add = data; 
+  *add += track_get_number_of_lines(value);
+  return 0;
+}
+
+/*
 deletes every given track object.
 */
 static int diagram_track_delete(void *key, void *value, void *data, Env* env)
@@ -148,21 +160,18 @@ Hashtable* diagram_get_tracks(Diagram* diagram)
   return diagram->tracks;
 }
 
-static void diagram_count_tracklines(void *key, void *value, void *data,
-                                     Env* env)
-{
-  data += track_get_number_of_lines(value);
-}
-
 /*
 Returns the number of all lines in the diagram.
+\param pointer to the diagram object.
+\param env Pointer to Environment object.
 */
 int* diagram_get_total_lines(Diagram* diagram, Env* env)
 {
-  int* total_lines;
-  hashtable_foreach(diagram->tracks, (void*) diagram_count_tracklines, total_lines,
-                    env);
-  return total_lines;
+  int total_lines;
+  total_lines = 0;
+  hashtable_foreach(diagram->tracks, diagram_add_tracklines, &total_lines,
+                    env);	    
+  return (int*) total_lines;
 }
 
 /*
@@ -273,6 +282,7 @@ int diagram_unit_test(Env* env)
   ensure(has_err, hashtable_get(dia->tracks,"exon") != NULL);
   /*ensure(has_err, hashtable_get(dia->tracks,"CDS") != NULL);*/
   
+  diagram_get_total_lines(dia,env);
     
   /*delete all generated objects*/
   str_delete(luafile, env);
