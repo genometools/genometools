@@ -120,6 +120,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "block class", block_unit_test, env);
   hashtable_add(gtr->unit_tests, "line class", line_unit_test, env);
   hashtable_add(gtr->unit_tests, "track class", track_unit_test, env);
+  hashtable_add(gtr->unit_tests, "diagram class", diagram_unit_test, env);
 }
 
 int run_test(void *key, void *value, void *data, Env *env)

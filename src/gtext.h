@@ -22,6 +22,7 @@
 #include <libgtext/compare.h>                   /* compare module */
 #include <libgtext/dice_hmm.h>                  /* the dice HMM class */
 #include <libgtext/element.h>                   /* element class */
+#include <libgtext/diagram.h>                   /* diagram class */
 #include <libgtext/extractfeat_stream.h>        /* extract feat. stream class */
 #include <libgtext/evaluator.h>                 /* evaluator class */
 #include <libgtext/filter_stream.h>             /* filter stream class */

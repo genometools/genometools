@@ -223,7 +223,7 @@ assert(fi && results && seqid && (qry_range.start < qry_range.end));
              env);
 
  genome_node_delete(key, env);
-  
+ 
  return has_err;
 }
 
