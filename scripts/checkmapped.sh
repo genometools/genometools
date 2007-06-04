@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if test $# -lt 3
 then
@@ -20,7 +20,7 @@ function checkerror()
 
 function checksfxmap()
 {
-  cmd="sfxmap.x $1"
+  cmd="${GTDIR}/bin/gt dev sfxmap $1"
   TMPFILE=`mktemp TMP.XXXXXX` || exit 1
   ${cmd} > ${TMPFILE}
   if test $? -ne 0
@@ -33,5 +33,5 @@ function checksfxmap()
   checkerror "cmp -s $1.prj $1-sfx.prj"
 }
 
-checkerror "suffixerator.x -tis -suf -indexname sfx $*"
-checkerror "checksfxmap sfx"
+checkerror "${GTDIR}/bin/gt suffixerator -tis -suf -indexname /tmp/sfx $*"
+checkerror "checksfxmap /tmp/sfx"
