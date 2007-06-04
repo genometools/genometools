@@ -9,6 +9,7 @@
 
 #include <libgtcore/range.h>
 #include <libgtext/genome_node.h>
+#include <libgtext/genome_feature_type.h>
 #include <libgtext/config.h>
 
 typedef struct Element Element;
@@ -21,8 +22,9 @@ enum ArrowStatus{
 
 Element* element_new(GenomeNode *gn,
                      Config *cfg,
-		     Env* env);
+		                 Env* env);
 Range element_get_range(Element* element);
+GenomeFeatureType element_get_type(Element* element);
 void element_set_arrow_status(Element* element,
                               int status);
 int element_get_arrow_status(Element* element);

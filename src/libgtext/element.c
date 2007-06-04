@@ -45,13 +45,24 @@ Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
 }
 
 /*!
+Returns Type of an Element object
+\param element Pointer to Element object
+\return GenomeFeatureType
+*/
+GenomeFeatureType element_get_type(Element *element)
+{
+  assert(element);
+  return element->type;
+}
+
+/*!
 Sets ArrowStatus of an Element object
 \param element Element on which status to set.
 \param status ArrowStatus.
 */
 void element_set_arrow_status(Element *element, int status)
 {
-  assert(element && status);
+  assert(element);
   element->arrow_status = status;
 }
 
@@ -76,8 +87,9 @@ Returns range of an Element object
 Range element_get_range(Element *element)
 {
   assert(element);
-
-  assert(element->range.start && element->range.end);
+  
+/* this works only with pointers!! */
+/* assert(element->range.start && element->range.end); */
   return element->range;
 }
 

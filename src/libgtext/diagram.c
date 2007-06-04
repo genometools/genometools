@@ -15,9 +15,16 @@
 struct Diagram
 {
   Hashtable *tracks;
+  int nof_tracks;
   Config *config;
   Range range;
 };
+
+Range diagram_get_range(Diagram* diagram)
+{
+  assert(diagram);
+  return diagram->range;
+}
 
 /*
 Fetching the number of lines from a track object and add number of lines to data.
@@ -82,13 +89,14 @@ static int visit_child(GenomeNode* gn, void* diagram, Env* env)
   }
 
   /*deliver the genome node to the track with the corresponding type.
-  If the track doesn't exit, generate it.*/
+  If the track does not exist, generate it.*/
   if (hashtable_get(d->tracks, feature_type) == NULL)
   {
     track_type = str_new_cstr((char*) feature_type, env);
-    track = track_new(track_type, env); 
+    track = track_new(track_type, env);
     track_insert_element(track, gn, d->config, NULL, env);
     hashtable_add(d->tracks, (char*) feature_type, track, env);
+    d->nof_tracks++;
     str_delete(track_type,env);
   }
   else
@@ -115,7 +123,7 @@ static void diagram_build(Diagram* diagram, Array* features, Env* env)
                                                               i),
 				  diagram,
                                   visit_child,
-				  true,
+				  false,
 				  env);
   }
 }
@@ -133,6 +141,7 @@ Diagram* diagram_new(Array* features, Range range, Config* config, Env* env)
   env_error_check(env);
   diagram = env_ma_malloc(env, sizeof (Diagram));
   diagram->tracks = hashtable_new(HASH_STRING, NULL, NULL, env);
+  diagram->nof_tracks = 0;
   diagram->config = config;
   diagram->range = range;
   diagram_build(diagram, features, env);
@@ -165,13 +174,25 @@ Returns the number of all lines in the diagram.
 \param pointer to the diagram object.
 \param env Pointer to Environment object.
 */
-int* diagram_get_total_lines(Diagram* diagram, Env* env)
+int diagram_get_total_lines(Diagram* diagram, Env* env)
 {
+  assert(diagram && env);
   int total_lines;
   total_lines = 0;
   hashtable_foreach(diagram->tracks, diagram_add_tracklines, &total_lines,
                     env);	    
-  return (int*) total_lines;
+  return total_lines;
+}
+
+/*
+Returns the number of all lines in the diagram.
+\param pointer to the diagram object.
+\param env Pointer to Environment object.
+*/
+int diagram_get_number_of_tracks(Diagram* diagram)
+{
+  assert(diagram);
+  return diagram->nof_tracks;
 }
 
 /*

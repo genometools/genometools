@@ -127,6 +127,7 @@ static int config_find_section_for_setting(Config* cfg,
   assert(cfg && section);
   env_error_check(env);
   lua_getglobal(cfg->L, "config");
+  depth++;
   if (lua_isnil(cfg->L, -1))
   {
     lua_newtable(cfg->L);
@@ -270,6 +271,7 @@ double config_get_num(Config *cfg,
   i = config_find_section_for_getting(cfg, section, env);
   /* could not get section, return default */
   if (i < 0) {
+    lua_pop(cfg->L, i);
     return 0;
   }
   /* lookup entry for given key */
@@ -278,7 +280,7 @@ double config_get_num(Config *cfg,
   {
     if (*cfg->verbose) warning("no or non-numeric value found for key '%s'",
                                key);
-    lua_pop(cfg->L, 1);
+    lua_pop(cfg->L, i+1);
     return 0;
   } else i++;
   /* retrieve value */
@@ -309,6 +311,7 @@ const char* config_get_cstr(Config *cfg,
   i = config_find_section_for_getting(cfg, section, env);
   /* could not get section, return default */
   if (i < 0) {
+    lua_pop(cfg->L, i);
     return str;
   }
   /* lookup entry for given key */
@@ -317,7 +320,7 @@ const char* config_get_cstr(Config *cfg,
   {
     if (*cfg->verbose) warning("no value is defined for key '%s'",
                                key);
-    lua_pop(cfg->L, 1);
+    lua_pop(cfg->L, i+1);
     return str;
   } else i++;
   /* retrieve string */
@@ -345,15 +348,19 @@ Color config_get_color(Config *cfg, const char *key, Env* env)
   /* get section */
   i = config_find_section_for_getting(cfg, "colors", env);
   /* could not get section, return default */
-  if (i < 0) return color;
+  if (i < 0)
+  {
+    lua_pop(cfg->L, i);
+    return color;
+  }
   /* lookup color entry for given feature */
   lua_getfield(cfg->L, -1, key);
   if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1))
   {
     if (*cfg->verbose) warning("no colors are defined for type '%s', "
-                               "will use defaults",
+                               "will use defaults.",
                                key);
-    lua_pop(cfg->L, 1);
+    lua_pop(cfg->L, 3);
     return color;
   } else i++;
   /* update color struct */
@@ -432,6 +439,18 @@ bool config_cstr_in_list(Config *cfg,
   /* remove temporary stack items */
   lua_pop(cfg->L, i);
   return ret;
+}
+
+/*!
+Returns verbosity flag.
+\param cfg Pointer to Config object.
+\return Verbosity status as bool
+*/
+bool config_get_verbose(Config *cfg)
+{
+  bool verb;
+  verb = *(cfg->verbose);
+  return verb;
 }
 
 /*!

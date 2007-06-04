@@ -41,7 +41,7 @@ bool         config_cstr_in_list(Config *cfg,
                                  const char* key,
                                  const char* checkstr,
                                  Env* env);
-
+bool         config_get_verbose(Config *cfg);
 int          config_unit_test(Env*);
 
 #endif
