@@ -127,9 +127,9 @@ static int config_find_section_for_setting(Config* cfg,
   assert(cfg && section);
   env_error_check(env);
   lua_getglobal(cfg->L, "config");
-  depth++;
   if (lua_isnil(cfg->L, -1))
   {
+	  lua_pop(cfg->L, 1);
     lua_newtable(cfg->L);
     lua_setglobal(cfg->L, "config");
     lua_getglobal(cfg->L, "config");
