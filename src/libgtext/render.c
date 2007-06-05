@@ -34,7 +34,8 @@ int print_tracks(void* key, void* value, void* data, Env* env)
 
 unsigned int render_calculate_height(Render *r, Env* env)
 {
-  int height =  diagram_get_total_lines(r->dia, env);
+  assert(r && env);
+  unsigned int height =  diagram_get_total_lines(r->dia, env);
   /* obtain line height and spacer from configuration settings */
   unsigned int line_height = ((unsigned int) config_get_num(r->cfg,
                                                             "format",
@@ -72,6 +73,7 @@ void render_delete(Render *r, Env *env)
 
 void render_line(Render *r, Line *line, Env *env)
 {
+  assert(r && line && env);
   int i;
   Array *blocks = line_get_blocks(line);
   double margins = config_get_num(r->cfg, "format", "margins", env);
@@ -187,6 +189,7 @@ void render_line(Render *r, Line *line, Env *env)
 
 int render_track(void *key, void* value, void *data, Env *env)
 {
+  assert(value && key && data && env);
   Render* r = (Render*) data;
   Track* track = (Track*) value;
   Array* lines = track_get_lines(track);
@@ -212,7 +215,7 @@ int render_track(void *key, void* value, void *data, Env *env)
 
 void render_to_png(Render *r, char *fn, unsigned int width, Env *env)
 {
-  assert(r && fn && env);
+  assert(r && fn && env && width > 0);
   unsigned int height = render_calculate_height(r, env);
   
   /* set initial margins, header, target width */
