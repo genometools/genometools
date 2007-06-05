@@ -280,16 +280,26 @@ int diagram_unit_test(Env* env)
   ensure(has_err, dia->range.end == 900);
   ensure(has_err, hashtable_get(dia->tracks,"gene") != NULL);
   ensure(has_err, hashtable_get(dia->tracks,"exon") != NULL);
-  /*ensure(has_err, hashtable_get(dia->tracks,"CDS") != NULL);*/
   
-  diagram_get_total_lines(dia,env);
-    
+  
+  Array *features2;
+  features2 = array_new(sizeof(GenomeFeature*), env);
+  feature_index_get_features_for_range(fi,features,"test2",dr1,env);
+  
+  Diagram *dia2;
+  dia2 = diagram_new(features2,dr1,cfg,env);
+ /* ensure(has_err, hashtable_get(dia2->tracks,"gene") != NULL);
+  ensure(has_err, hashtable_get(dia2->tracks,"exon") != NULL);
+  ensure(has_err, hashtable_get(dia2->tracks,"CDS") != NULL); 
+ */   
   /*delete all generated objects*/
   str_delete(luafile, env);
   config_delete(cfg, env);
   diagram_delete(dia,env);
+  diagram_delete(dia2,env);
   feature_index_delete(fi, env);
   array_delete(features,env);
+  array_delete(features2,env);
   genome_node_rec_delete(gn1, env);
   genome_node_rec_delete(gn2, env);
   str_delete(seqid1, env);
