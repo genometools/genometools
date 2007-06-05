@@ -6,15 +6,19 @@ See LICENSE file or http://genometools.org/license.html for license details.
 
 The GenomeTools genome analysis system is a collection of bioinformatics tools
 (in the realm of genome informatics) combined into a single binary.
-It is based on a C library named ``libgt''.
+It is based on a C library named ``libgt'' which consists of two parts:
+``libgtcore'' (the core library) and ``libgtext'' (the extended library).
 
-gtdata/        data needed by gt (during runtime)
-scripts/       scripts used for development
-src/           the C source code gt itself and the runtime
-src/external   all C source code from external sources (different license!)
-src/libgt      the C source code for the ``libgt''
-src/tools      the C source code for all tools
-testdata/      the test data necessary for the test suite
-testdata/      the test suite
+doc/            some documentation
+gtdata/         data needed by gt (during runtime)
+scripts/        scripts used for development
+src/            the C source code gt itself and the runtime
+src/external/   all C source code from external sources (different license!)
+src/libgtcore/  the C source code for the ``libgtcore''
+src/libgtext/   the C source code for the ``libgtext''
+src/tools/      the C source code for all tools
+testdata/       the test data necessary for the test suite
+testsuite/      the test suite
+www/            the web site
 
 See INSTALL file for installation guidelines.

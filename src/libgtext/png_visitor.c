@@ -48,7 +48,7 @@ static void png_visitor_free(GenomeVisitor *gv, Env *env)
   assert(pngv->png_filename);
   assert(pngv->width); /* the width has to be positive */
   assert(pngv->height); /* the height has to be positive */
-  graphics_save_as_png(pngv->graphics, pngv->png_filename, env);
+  graphics_save_as_png(pngv->graphics, pngv->png_filename);
   /* we check this after writing the png to simplify debugging */
   assert(pngv->global_track_number <= pngv->number_of_tracks);
   graphics_delete(pngv->graphics, env);
@@ -97,11 +97,11 @@ static int show_children(GenomeNode *gn, void *data, Env *env)
            (double) range_length(info->pngv->drawed_sequence_range));
 
   (void) snprintf(buf, BUFSIZ, "%lu", feature_range.start);
-  graphics_draw_text(info->pngv->graphics, x_left, text_y, buf);
-  graphics_draw_text(info->pngv->graphics, x_left + width / 2, text_y,
+  graphics_draw_text_left(info->pngv->graphics, x_left, text_y, buf);
+  graphics_draw_text_centered(info->pngv->graphics, x_left + width / 2, text_y,
                      genome_feature_type_get_cstr(genome_feature_get_type(gf)));
   (void) snprintf(buf, BUFSIZ, "%lu", feature_range.end);
-  graphics_draw_text(info->pngv->graphics, x_right, text_y, buf);
+  graphics_draw_text_right(info->pngv->graphics, x_right, text_y, buf);
 
   draw_exon_box(info->pngv, gf, width, info->local_track_number);
 
@@ -170,11 +170,11 @@ static int png_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
 
   /* show <start --- feature_type --- end> */
   (void) snprintf(buf, BUFSIZ, "%lu", genome_node_get_start((GenomeNode*) gf));
-  graphics_draw_text(pngv->graphics, x_left, text_y, buf);
-  graphics_draw_text(pngv->graphics, x_left + width / 2, text_y,
+  graphics_draw_text_left(pngv->graphics, x_left, text_y, buf);
+  graphics_draw_text_centered(pngv->graphics, x_left + width / 2, text_y,
                      genome_feature_type_get_cstr(genome_feature_get_type(gf)));
   (void) snprintf(buf, BUFSIZ, "%lu", genome_node_get_end((GenomeNode*) gf));
-  graphics_draw_text(pngv->graphics, x_right, text_y, buf);
+  graphics_draw_text_right(pngv->graphics, x_right, text_y, buf);
 
   /* draw feature line */
   graphics_draw_horizontal_line(pngv->graphics, x_left,
@@ -229,14 +229,14 @@ static int png_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
 
   /* show <start --- sequence id --- end> */
   (void) snprintf(buf, BUFSIZ, "%lu", pngv->drawed_sequence_range.start);
-  graphics_draw_text(pngv->graphics, pngv->width * SPACE,
+  graphics_draw_text_left(pngv->graphics, pngv->width * SPACE,
                      pngv->global_track_number * TRACK_HEIGHT + TEXT_POSITION,
                      buf);
-  graphics_draw_text(pngv->graphics, pngv->width * (SPACE + ROOM / 2),
+  graphics_draw_text_centered(pngv->graphics, pngv->width * (SPACE + ROOM / 2),
                      pngv->global_track_number * TRACK_HEIGHT + TEXT_POSITION,
                      str_get(genome_node_get_seqid((GenomeNode*) sr)));
   (void) snprintf(buf, BUFSIZ, "%lu", pngv->drawed_sequence_range.end);
-  graphics_draw_text(pngv->graphics, pngv->width * (SPACE + ROOM),
+  graphics_draw_text_right(pngv->graphics, pngv->width * (SPACE + ROOM),
                      pngv->global_track_number * TRACK_HEIGHT + TEXT_POSITION,
                      buf);
 

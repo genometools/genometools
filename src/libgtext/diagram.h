@@ -12,14 +12,15 @@
 #include <libgtcore/range.h>
 #include <libgtcore/hashtable.h>
 
-
 typedef struct Diagram Diagram;
 
-Diagram* diagram_new(Array*,Range,Config*,Env*);
-void diagram_set_config(Diagram*,Config*,Env*);
-Hashtable* diagram_get_tracks(Diagram*);
-int* diagram_get_total_lines(Diagram*, Env*);
-void diagram_delete(Diagram*,Env*);
-int diagram_unit_test(Env*);
+Diagram*    diagram_new(Array*,Range,Config*,Env*);
+Range       diagram_get_range(Diagram* diagram);
+void        diagram_set_config(Diagram*,Config*,Env*);
+Hashtable*  diagram_get_tracks(Diagram*);
+int         diagram_get_total_lines(Diagram*, Env*);
+int         diagram_get_number_of_tracks(Diagram *diagram);
+void        diagram_delete(Diagram*,Env*);
+int         diagram_unit_test(Env*);
 
 #endif
