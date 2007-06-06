@@ -46,23 +46,33 @@ void line_insert_element(Line *line,
 {
   assert(line && gn && cfg);
   Block *block;
-
-  int type = genome_feature_get_type((GenomeFeature* ) gn);
+  Str* caption;
 
   if((last_parent != NULL)
      && (parent != NULL)
-     && (config_cstr_in_list(cfg, "collapse", "to_parent", genome_feature_type_get_cstr(type), env))
      && (0 == genome_node_compare(&parent, &last_parent)))
   {
     block = *(Block**) array_get(line->blocks, (array_size(line->blocks) -1));
+    if(!range_overlap(genome_node_get_range(gn), block_get_range(block)))
+    {
+      caption = genome_node_get_idstr(parent);
+    }
+    else
+    {
+      block = block_new(env);
+      array_add(line->blocks, block, env);
+      caption = genome_node_get_idstr(gn);
+    }
   }
   else
   {
     block = block_new(env);
     array_add(line->blocks, block, env);
+    caption = genome_node_get_idstr(gn);
   }
 
   block_insert_element(block, gn, cfg, env);
+  block_set_caption(block, caption);
   last_parent = parent;
 }
 
@@ -149,7 +159,7 @@ int line_unit_test(Env* env)
 {
   Range r1, r2, r3, r_parent;
   Array* blocks;
-  Str *seqid1, *seqid2;
+  Str *seqid1, *seqid2, *seqid3;
   int has_err = 0;
   Config *cfg;
   Str *luafile = str_new_cstr("config.lua",env);
@@ -174,6 +184,7 @@ int line_unit_test(Env* env)
 
   seqid1 = str_new_cstr("test1", env);
   seqid2 = str_new_cstr("test2", env);
+  seqid3 = str_new_cstr("foo", env);
 
   GenomeNode* parent = genome_feature_new(gft_gene, r_parent, STRAND_FORWARD, NULL, 0, env);
   GenomeNode* gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0, env);
@@ -181,8 +192,8 @@ int line_unit_test(Env* env)
   GenomeNode* gn3 = genome_feature_new(gft_exon, r3, STRAND_FORWARD, NULL, 0, env);
 
   genome_node_set_seqid((GenomeNode*) parent, seqid1);
-  genome_node_set_seqid((GenomeNode*) gn1, seqid1);
-  genome_node_set_seqid((GenomeNode*) gn2, seqid1);
+  genome_node_set_seqid((GenomeNode*) gn1, seqid3);
+  genome_node_set_seqid((GenomeNode*) gn2, seqid3);
   genome_node_set_seqid((GenomeNode*) gn3, seqid2);
 
   Line* l1 = line_new(env);
@@ -193,9 +204,15 @@ int line_unit_test(Env* env)
   line_insert_element(l1, gn1, cfg, parent, env);
   ensure(has_err, (1 == array_size(line_get_blocks(l1))));
   line_insert_element(l1, gn2, cfg, parent, env);
-  ensure(has_err, (1 == array_size(line_get_blocks(l1))));
+  blocks = line_get_blocks(l1);
+  ensure(has_err, (1 == array_size(blocks)));
+  Block* b = *(Block**) array_get(blocks, 0);
+  ensure(has_err, (0 == str_cmp(block_get_caption(b), genome_node_get_idstr(parent))));
   line_insert_element(l1, gn3, cfg, gn1, env);
-  ensure(has_err, (2 == array_size(line_get_blocks(l1))));
+  blocks = line_get_blocks(l1);
+  ensure(has_err, (2 == array_size(blocks)));
+  b = *(Block**) array_get(blocks, 1);
+  ensure(has_err, (0 == str_cmp(block_get_caption(b), genome_node_get_idstr(gn3))));
 
   /* test line_is_occupied */
   ensure(has_err, !line_is_occupied(l2, gn3));
@@ -209,6 +226,7 @@ int line_unit_test(Env* env)
   str_delete(luafile, env);
   str_delete(seqid1, env);
   str_delete(seqid2, env);
+  str_delete(seqid3, env);
   line_delete(l1, env);
   line_delete(l2, env);
   genome_node_delete(parent, env);
