@@ -7,7 +7,7 @@
 {
   Uchar cc;
   Uint64 pos;
-  Sint retval;
+  int retval;
   Uint currentspecialchar = 0, bitwise = 0, lastspeciallength = 0;
 #ifndef NOENDPTR
   Uint *endptrUint, endspecialcells;

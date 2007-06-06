@@ -191,6 +191,16 @@ obj/%.o: src/libgtmatch/%.c
 	@echo "[compile $@]"
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
+obj/%.prepro: src/libgtmatch/%.c
+	@echo "[generate $@]"
+	${CC} -c $< -o $@ ${CFLAGS} ${GT_CFLAGS} -E -g3
+	indent $@
+
+obj/%.splint: src/libgtmatch/%.c
+	@echo "[generate $@]"
+	@splint -f $(CURDIR)/testdata/SKsplintoptions -I$(CURDIR)/src -I$(CURDIR)/obj $<
+	@touch $@
+
 obj/%.o: src/tools/%.c
 	@echo "[compile $@]"
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
@@ -278,6 +288,8 @@ splint:
         $(CURDIR)/src/libgtcore/*.c \
         $(CURDIR)/src/libgtext/*.c \
         $(CURDIR)/src/tools/*.c
+
+splint-gtmatch:${addprefix obj/,${notdir ${subst .c,.splint,${wildcard ${CURDIR}/src/libgtmatch/*.c}}}}
 
 test: all
 	bin/gt -test

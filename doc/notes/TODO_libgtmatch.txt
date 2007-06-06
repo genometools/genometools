@@ -19,16 +19,21 @@ parts are chosen such that this boundary is not exceeded.
 
 add advancement display, see Gordon's lib: 0% 1% ... 100%
 
-implement distribution via hashtables or red-black trees.
-
-check why the program reports 0.61 bits/symbol for the human genome
-
 Sometimes I cannot set a default value when specifying the option,
 because the default value is determined after all other options
 are known and maybe some file is input
 
 replacing timer by some method which does not produce overflows.
 
-use encseq->totallength instead of the parameter totallength
+use encseq->totallength instead of the parameter totallength in
+bentleysedgewick
 
 output the ranges in sorted order w.r.t. the length
+
+add function to count the number of wildcards in a range.
+
+remove exits in library.
+
+add splintgoal for libgtmatch
+
+add prepro goal for libgtmatch

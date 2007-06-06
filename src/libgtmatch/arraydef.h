@@ -121,10 +121,7 @@ DECLAREARRAYSTRUCT(Ushort);
 DECLAREARRAYSTRUCT(char);
 DECLAREARRAYSTRUCT(Uint);
 DECLAREARRAYSTRUCT(Uint64);
-DECLAREARRAYSTRUCT(Sint);
 DECLAREARRAYSTRUCT(PairUint);
-DECLAREARRAYSTRUCT(ThreeUint);
-DECLAREARRAYSTRUCT(Fileinfo);
 
 /*
   And some type synonyms.
@@ -132,21 +129,5 @@ DECLAREARRAYSTRUCT(Fileinfo);
 
 typedef ArrayUint  ArrayPosition;       /* \Typedef{ArrayPosition} */
 typedef ArrayUchar ArrayCharacters;     /* \Typedef{ArrayCharacters} */
-
-/*
-  The following array type has some extra components. However, it can be
-  manipulated by the macros above since the record-components
-  \texttt{spaceStrings}, \texttt{nextfreeStrings}, and
-  \texttt{allocatedStrings} is declared appropriately.
-*/
-
-typedef struct
-{
-  Stringtype *spaceStrings;
-  Uchar *stringbuffer;
-  Uint stringbufferlength,
-       nextfreeStrings,
-       allocatedStrings;
-} ArrayStrings;   /* \Typedef{ArrayStrings} */
 
 #endif

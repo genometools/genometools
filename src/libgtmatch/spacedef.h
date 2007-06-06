@@ -34,10 +34,10 @@
 #else
 #define ALLOCASSIGNSPACEGENERIC(FILENAME,LINENUM,V,S,T,N)\
         V = ma_realloc_mem(env_ma(env), S, sizeof (T) * (N), FILENAME,\
-                           (unsigned int) (LINENUM))
+                           LINENUM)
 
 #define ALLOCASSIGNSPACE(V,S,T,N)\
-        ALLOCASSIGNSPACEGENERIC(__FILE__,(unsigned int) __LINE__,V,S,T,N)
+        ALLOCASSIGNSPACEGENERIC(__FILE__,__LINE__,V,S,T,N)
 
 /*
   The macro \texttt{FREESPACE} frees the space pointed to by \texttt{P},

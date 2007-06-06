@@ -16,37 +16,36 @@
 #include "encseq-def.h"
 
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
-#define UNIQUEINT(P)    ((Sint) ((P) + COMPAREOFFSET))
+#define UNIQUEINT(P)    ((Uint) ((P) + COMPAREOFFSET))
 #define ACCESSCHAR(T)   getencodedchar(encseq,T)
 #define ISNOTEND(P)     ((P) < totallength && ISNOTSPECIAL(ACCESSCHAR(P)))
 
 #define DECLARETMPC Uchar tmpsvar, tmptvar
 #define GENDEREF(VAR,A,S)\
         (((A) < totallength && ISNOTSPECIAL(VAR = ACCESSCHAR(S))) ?\
-        ((Sint) VAR) : UNIQUEINT(S))
+        ((Uint) VAR) : UNIQUEINT(S))
 #define DEREF(VAR,S)   GENDEREF(VAR,S,S)
 
 #define PTR2INT(VAR,I) GENDEREF(VAR,cptr = *(I)+depth,cptr)
 
-#define STRINGCOMPARE(S,T,OFFSET,SC)\
+#define STRINGCOMPARE(S,T,OFFSET)\
         for (sptr = (S)+(OFFSET), tptr = (T)+(OFFSET); /* Nothing */;\
              sptr++, tptr++)\
         {\
-          SC = DEREF(tmpsvar,sptr) - DEREF(tmptvar,tptr);\
-          if ((SC) != 0)\
+          ccs = DEREF(tmpsvar,sptr);\
+          cct = DEREF(tmptvar,tptr);\
+          if(ccs != cct)\
           {\
             break;\
           }\
         }
 
 #define SWAP(A,B)\
+        if ((A) != (B))\
         {\
-          if ((A) != (B))\
-          {\
-            temp = *(A);\
-            *(A) = *(B);\
-            *(B) = temp;\
-          }\
+          temp = *(A);\
+          *(A) = *(B);\
+          *(B) = temp;\
         }
 
 #define VECSWAP(A,B,N)\
@@ -92,22 +91,22 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
                             Suffixptr *c)
 {
   Suffixptr cptr;
-  Sint va, vb, vc;
+  Uint vala, valb, valc;
   Uchar tmpsvar, tmptvar;
 
-  va = PTR2INT(tmpsvar,a);
-  vb = PTR2INT(tmptvar,b);
-  if (va == vb)
+  vala = PTR2INT(tmpsvar,a);
+  valb = PTR2INT(tmptvar,b);
+  if (vala == valb)
   {
     return a;
   }
-  if ((vc = PTR2INT(tmpsvar,c)) == va || vc == vb)
+  if ((valc = PTR2INT(tmpsvar,c)) == vala || valc == valb)
   {
     return c;
   }
-  return va < vb ?
-        (vb < vc ? b : (va < vc ? c : a))
-      : (vb > vc ? b : (va < vc ? a : c));
+  return vala < valb ?
+        (valb < valc ? b : (vala < valc ? c : a))
+      : (valb > valc ? b : (vala < valc ? a : c));
 }
 
 static void insertionsort(const Encodedsequence *encseq,
@@ -118,15 +117,15 @@ static void insertionsort(const Encodedsequence *encseq,
 {
   Suffixptr sptr, tptr;
   Suffixptr *pi, *pj, temp;
-  Sint sortresult;
+  Uint ccs, cct;
   Uchar tmpsvar, tmptvar;
 
   for (pi = left + 1; pi <= right; pi++)
   {
     for (pj = pi; pj > left; pj--)
     {
-      STRINGCOMPARE(*(pj-1),*pj,depth,sortresult);
-      if (sortresult < 0)
+      STRINGCOMPARE(*(pj-1),*pj,depth);
+      if (ccs < cct)
       {
         break;
       }
@@ -151,7 +150,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              Env *env)
 {
   Suffixptr *left, *right, *leftplusw;
-  Sint val, w, partval;
+  Uint w, val, partval;
   Uint depth, offset, doubleoffset, width;
   Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
   Uchar tmpsvar;
@@ -222,17 +221,23 @@ static void bentleysedgewick(const Encodedsequence *encseq,
       pc--;
     }
 
-    w = MIN((Sint) (pa-left),(Sint) (pb-pa));
+    assert(pa >= left);
+    assert(pb >= pa);
+    w = MIN((Uint) (pa-left),(Uint) (pb-pa));
     VECSWAP(left,  pb-w, w);
     pr = right + 1;
-    w = MIN((Sint) (pd-pc), (Sint) (pr-pd-1));
+    assert(pd >= pc);
+    assert(pr > pd);
+    w = MIN((Uint) (pd-pc), (Uint) (pr-pd-1));
     VECSWAP(pb, pr-w, w);
 
-    if ((w = (Sint) (pd-pc)) > 0)
+    assert(pd >= pc);
+    if ((w = (Uint) (pd-pc)) > 0)
     {
-      SUBSORT(w,(Sint) (SMALLSIZE),right-w+1,right,depth);
+      SUBSORT(w,(Uint) (SMALLSIZE),right-w+1,right,depth);
     }
-    w = (Sint) (pb-pa);
+    assert(pb >= pa);
+    w = (Uint) (pb-pa);
     leftplusw = left + w;
     cptr = *leftplusw + depth;
     if (ISNOTEND(cptr))
@@ -243,7 +248,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     }
     if (w > 0)
     {
-      SUBSORT(w,(Sint) (SMALLSIZE),left,leftplusw-1,depth);
+      SUBSORT(w,(Uint) (SMALLSIZE),left,leftplusw-1,depth);
     }
     if (mkvauxstack->nextfreeMKVstack == 0)
     {

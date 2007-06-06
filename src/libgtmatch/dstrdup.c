@@ -13,7 +13,7 @@
   \texttt{source}.
 */
 
-/*@notnull@*/ char *dynamicstrdup(const char *file,Uint linenum,
+/*@notnull@*/ char *dynamicstrdup(const char *file,int linenum,
                                   const char *source,Env *env)
 {
   Uint sourcelength;

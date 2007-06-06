@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 
 /*
   Some rules about types:
@@ -18,11 +19,17 @@
   - do not use the constants, UINT_MAX, INT_MAX and INT_MIN
   The following are the assumptions about the types:
   - size(Uint) >= 4
-  - size(Sint) >= 4
   - size(Ushort) = 2
   - size(Sshort) = 2
   No other assumptions are to be made.
 */
+
+/*
+  Show a boolean value as a string or as a character 0 or 1.
+*/
+
+#define SHOWBOOL(B) ((B) ? "true" : "false")
+#define SHOWBIT(B)  ((B) ? '1' : '0')
 
 /*
   This file contains some basic type definition.
@@ -36,25 +43,28 @@ typedef unsigned short Ushort;        /* \Typedef{Ushort} */
   code for 32 bit integers and 64 bit integers.
 */
 
-#ifdef SIXTYFOURBITS
+#if __WORDSIZE == 64
 
-typedef unsigned long  Uint;          /* \Typedef{Uint} */
-typedef signed   long  Sint;          /* \Typedef{Sint} */
 #define LOGWORDSIZE    6              /* base 2 logarithm of wordsize */
 #define UintConst(N)   (N##UL)        /* unsigned integer constant */
-#define SintConst(N)   (N##L)         /* signed integer constant */
-#define CHECKIFFITS32BITS(VAL) /* Nothing */
+typedef unsigned long  Uint;          /* \Typedef{Uint} */
+typedef signed long ScanUint64;       /* \Typedef{Scaninteger} */
+typedef unsigned long Uint64;         /* \Typedef{Uint64} */
+#define FormatUint64     "%lu"
+#define FormatScanUint64 "%ld"
+#define CHECKIFFITS32BITS(VAL)        /* Nothing */
 
 #else
 
-typedef unsigned int  Uint;          /* \Typedef{Uint} */
-typedef signed   int  Sint;          /* \Typedef{Sint} */
 #define LOGWORDSIZE   5              /* base 2 logarithm of wordsize */
 #define UintConst(N)  (N##U)         /* unsigned integer constant */
-#define SintConst(N)  (N)            /* signed integer constant */
+typedef unsigned int  Uint;          /* \Typedef{Uint} */
+typedef signed long long ScanUint64; /* \Typedef{Scaninteger} */
+typedef unsigned long long Uint64;   /* \Typedef{Uint64} */
+#define FormatUint64     "%llu"
+#define FormatScanUint64 "%lld"
 #define MAXUintValue  UINT_MAX       /* only possible in 32 bit mode */
 
-#ifndef SIXTYFOURBITS
 #define CHECKIFFITS32BITS(VAL)\
         if ((VAL) > (Uint64) MAXUintValue)\
         {\
@@ -65,7 +75,6 @@ typedef signed   int  Sint;          /* \Typedef{Sint} */
           /*@end@*/\
           exit(EXIT_FAILURE);\
         }
-#endif
 #endif
 
 /*
@@ -162,83 +171,37 @@ typedef int Getrlimitreturntype;    /* \Typedef{Getrlimitreturntype} */
   type of error flag for gzerror
 */
 
-typedef int Gzerrorflagtype;
-
-/*
-  This is the type for option numbers
-*/
-
-typedef int Optionnumbertype;
-
-/*
-  This is the type for the xdrop scores.
-*/
-
-typedef Sint Xdropscore;        /* \Typedef{Xdropscore} */
+typedef int Gzerrorflagtype;   /* \Typedef{Gzerrorflagtype} */
 
 /*
   This is the type of the third argument of the function gzread
 */
 
-typedef unsigned int Gzreadthirdarg;
+typedef unsigned int Gzreadthirdarg;  /* \Typedef{Gzreadthirdarg} */
 
 /*
   This is the return type of fclose like functions
 */
 
-typedef int Fclosereturntype;
+typedef int Fclosereturntype;  /* \Typedef{Fclosereturntype} */
 
 /*
   This is the return type of fprintf like functions
 */
 
-typedef int Fprintfreturntype;
+typedef int Fprintfreturntype;   /* \Typedef{Fprintfreturntype} */
 
 /*
   This is the return value of the function regcomp and regexec
 */
 
-typedef int Regexreturntype;
-
-/*
-  We have output functions of different arity, all accepting integer values
-*/
-
-typedef Sint(*Outputfunction1)(void *,Uint);
-typedef Sint(*Outputfunction2)(void *,Uint,Uint);
-typedef Sint(*Outputfunction)(void *,Uint,Uint,Uint);
-
-/*
-  The following type is used for function processing a parsed sequence
-*/
-
-typedef Sint(*Processbioseq)(void *applyinfo,
-                             const Uchar *seq,
-                             Uint seqlen,
-                             const Uchar *desc,
-                             Uint desclen);
+typedef int Regexreturntype;    /* \Typedef{Regexreturntype} */
 
 /*
   This is the type of arguments for function sysconf.
 */
 
 typedef int Sysconfargtype;         /* \Typedef{Sysconfargtype} */
-
-#ifndef __cplusplus
-int mkstemp(char *);
-#endif
-
-/*
-  A type for boolean values defined as a constant to allow
-  checking if it has been defined previously.
-*/
-
-/*
-  Show a boolean value as a string or as a character 0 or 1.
-*/
-
-#define SHOWBOOL(B) ((B) ? "true" : "false")
-#define SHOWBIT(B)  ((B) ? '1' : '0')
 
 /*
   The following structure stores information about special characters.
@@ -258,34 +221,9 @@ typedef struct
 
 typedef struct
 {
-  Uint uint0, uint1;
+  Uint uint0, 
+       uint1;
 } PairUint;                /* \Typedef{PairUint} */
-
-typedef struct
-{
-  Uint uint0, uint1, uint2;
-} ThreeUint;               /* \Typedef{ThreeUint} */
-
-typedef struct
-{
-  Uint uint0, uint1, uint2, uint3;
-} FourUint;                /* \Typedef{FourUint} */
-
-/*
-  A list is stored with its start position in some space block
-  and its length.
-*/
-
-typedef struct
-{
-  Uint start, length;
-} Listtype;                /* \Typedef{Listtype} */
-
-/*
-  A string is just a list.
-*/
-
-typedef Listtype Stringtype;    /* \Typedef{Stringtype} */
 
 /*
   The following type stores an unsigned character only if defined is True
@@ -348,17 +286,6 @@ typedef unsigned long long DPbitvector;
 #endif
 
 /*
-  The following type stores filenames and the length of the corresponding
-  files.
-*/
-
-typedef struct
-{
-  char *filenamebuf;    /* pointer to a copy of a filename */
-  Uint filelength;      /* the length of the corresponding file */
-} Fileinfo;             /* \Typedef{Fileinfo} */
-
-/*
   The following is the type of the comparison function
   to be provided to the function \texttt{qsort}.
 */
@@ -372,36 +299,14 @@ typedef int (*Qsortcomparefunction)(const void *,const void *);
 
 typedef void (*Showverbose)(char *);
 
-/*
-  The following are 64 bit integers for 32 and 64 bits platforms.
-*/
-
-#ifdef SIXTYFOURBITS
-typedef signed long ScanUint64;    /* \Typedef{Scaninteger} */
-typedef unsigned long Uint64;      /* \Typedef{Uint64} */
-#define FormatUint64     "%lu"
-#define FormatScanUint64 "%ld"
-#else
-typedef signed long long ScanUint64;/* \Typedef{Scaninteger} */
-typedef unsigned long long Uint64;  /* \Typedef{Uint64} */
-#define FormatUint64     "%llu"
-#define FormatScanUint64 "%lld"
-#endif
-
 typedef struct
 {
   Uint64 uint0,
          uint1;
-} PairUint64;                /* \Typedef{PairUint} */
+} PairUint64;                /* \Typedef{PairUint64} */
 
 /*
   The following type stores an unsigned integer only of defined is True
 */
-
-typedef struct
-{
-  Uint64 uint64value;
-  bool defined;
-} DefinedUint64;   /* \Typedef{DefinedUint} */
 
 #endif

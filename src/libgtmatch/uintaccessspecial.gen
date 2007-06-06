@@ -5,9 +5,9 @@
 */
 
 #define NOENDPTR
-static Sint ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
-                                       Fastabufferstate *fbs,
-                                       Env *env)
+static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
+                                      Fastabufferstate *fbs,
+                                      Env *env)
 #include "scanspecial.gen"
 #undef NOENDPTR
 

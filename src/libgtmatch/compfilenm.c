@@ -10,7 +10,7 @@
 #include "spacedef.h"
 
 /*@notnull@*/ char *composefilenamegeneric(const char *file,
-                                           Uint linenum,
+                                           int linenum,
                                            const char *filename,
                                            char sep,
                                            const char *suffix,
@@ -40,7 +40,7 @@
 }
 
 /*@notnull@*/ char *composefilename(const char *file,
-                                    Uint linenum,
+                                    int linenum,
                                     const char *filename,
                                     const char *suffix,
                                     Env *env)

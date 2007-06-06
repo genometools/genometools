@@ -37,21 +37,12 @@ static Uint64 expectedindexsize(const ArrayMapspecification *mapspectable)
   Mapspecification *mapspecptr;
 
   for (mapspecptr = mapspectable->spaceMapspecification;
-      mapspecptr < mapspectable->spaceMapspecification +
-                   mapspectable->nextfreeMapspecification; mapspecptr++)
+       mapspecptr < mapspectable->spaceMapspecification +
+                    mapspectable->nextfreeMapspecification; mapspecptr++)
   {
     sumup += (Uint64) mapspecptr->sizeofunit * (Uint64) mapspecptr->numofunits;
   }
-#ifndef SIXTYFOURBITS
-  if (sumup > (Uint64) MAXUintValue)
-  {
-    /*@ignore@*/
-    fprintf(stderr,"Cannot store/map more than " FormatUint64 " bytes\n",
-                    sumup);
-    /*@end@*/
-    exit(EXIT_FAILURE);
-  }
-#endif
+  CHECKIFFITS32BITS(sumup);
   return sumup;
 }
 
