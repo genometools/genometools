@@ -76,8 +76,8 @@ static int scanuintintline(unsigned int *lengthofkey,
   if (!found)
   {
     env_error_set(env,"missing equality symbol in \"%*.*s\"",
-                       linebuffer->nextfreeUchar,
-                       linebuffer->nextfreeUchar,
+                       (Fieldwidthtype) linebuffer->nextfreeUchar,
+                       (Fieldwidthtype) linebuffer->nextfreeUchar,
                        linebuffer->spaceUchar);
     return -2;
   }

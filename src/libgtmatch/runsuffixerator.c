@@ -200,8 +200,10 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   }
   if (!haserr)
   {
-    printf("# specialcharacters=%u\n",specialcharinfo.specialcharacters);
-    printf("# specialranges=%u\n",specialcharinfo.specialranges);
+    printf("# specialcharacters=%lu\n",
+           (Showuint) specialcharinfo.specialcharacters);
+    printf("# specialranges=%lu\n",
+           (Showuint) specialcharinfo.specialranges);
     if (so->outsuftab || so->outbwttab)
     {
       if (suffixerator(suftab2file,

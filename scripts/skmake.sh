@@ -6,4 +6,5 @@
 #
 
 # the make call normally used for development
-gmake CC='ccache gcc' CFLAGS=-Werror
+SIZEFLAGS=-m32
+gmake CC='ccache gcc' 'CFLAGS=-Werror ${SIZEFLAGS}' 'LDFLAGS=${SIZEFLAGS}'

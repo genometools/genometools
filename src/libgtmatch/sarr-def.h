@@ -17,7 +17,7 @@ typedef struct
   char **filenametab;
   PairUint *filelengthtab;
   unsigned int numoffiles;
-  unsigned int prefixlength;
+  Uint prefixlength;
   const Uint *suftab;
   Encodedsequence *encseq;
   Specialcharinfo specialcharinfo;

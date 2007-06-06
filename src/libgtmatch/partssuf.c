@@ -124,8 +124,8 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
         suftabparts->components[part].suftaboffset
           = (Uint64) leftborder[suftabparts->components[part-1].nextcode];
       }
-      printf("widthofpart[%u]=%u\n",part,
-              suftabparts->components[part].widthofpart);
+      printf("widthofpart[%u]=%lu\n",part,
+              (Showuint) suftabparts->components[part].widthofpart);
       if (suftabparts->largestwidth <
          suftabparts->components[part].widthofpart)
       {
@@ -135,8 +135,6 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
       sumofwidth += (Uint64) suftabparts->components[part].widthofpart;
       suftabparts->components[part].sumofwidth = sumofwidth;
     }
-    printf("sumofwidth = %u, numofsuffixestoinsert = %u\n",(Uint) sumofwidth,
-                        (Uint) numofsuffixestoinsert);
     assert(sumofwidth == numofsuffixestoinsert);
   }
   return suftabparts;
