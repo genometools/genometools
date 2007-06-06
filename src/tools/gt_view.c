@@ -12,29 +12,35 @@
 
 typedef struct {
   bool verbose;
-  Str *seqid;
+  Str *seqid, *outfile;
   unsigned long start, end;
-  GenFile *outfp;
+  unsigned int width;
 } Gff3_view_arguments;
 
 static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
                             int argc, const char **argv, Env *env)
 {
   OptionParser *op;
-  OutputFileInfo *ofi;
   Option  *option;
   OPrval oprval;
   env_error_check(env);
 
   /* init */
   op = option_parser_new("[option ...] [GFF3_file ...]",
-                         "Work with and test GFF3 feature indexes.",
+                         "Create visual representations of GFF annotations.",
                          env);
-  ofi = outputfileinfo_new(env);
-
+                         
   /* -v */
   option = option_new_verbose(&arguments->verbose, env);
   option_parser_add_option(op, option, env);
+
+  /* -o */
+  arguments->outfile = str_new(env);
+  option = option_new_string("o", "output file",
+                            arguments->outfile,
+                            "out.png", env);
+  option_parser_add_option(op, option, env);
+  option_is_mandatory(option);
 
   /* -seqid */
   arguments->seqid = str_new(env);
@@ -52,7 +58,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   option_parser_add_option(op, option, env);
   option_is_mandatory(option);
   option_hide_default(option);
-
+	
   /* -end */
   option = option_new_ulong("end", "end position",
                             &arguments->end,
@@ -61,14 +67,19 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   option_is_mandatory(option);
   option_hide_default(option);
 
+	/* -width */
+  option = option_new_uint("width", "image width",
+                            &arguments->width,
+                            600, env);
+  option_parser_add_option(op, option, env);
+
   /* output file options */
-  outputfile_register_options(op, &arguments->outfp, ofi, env);
+ /* outputfile_register_options(op, &arguments->outfp, ofi, env); */
 
   /* parse options */
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
 
   /* free */
-  outputfileinfo_delete(ofi, env);
   option_parser_delete(op, env);
 
   return oprval;
@@ -93,9 +104,11 @@ int gt_view(int argc, const char **argv, Env *env)
   switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
+      str_delete(arguments.outfile,env);
       str_delete(arguments.seqid,env);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
+      str_delete(arguments.outfile,env);
       str_delete(arguments.seqid,env);
       return 0;
   }
@@ -104,7 +117,7 @@ int gt_view(int argc, const char **argv, Env *env)
   gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
                                                argv + parsed_args,
                                                arguments.verbose &&
-                                               arguments.outfp, env);
+                                               NULL, env);
 
   /*  create sort stream */
   sort_stream = sort_stream_new(gff3_in_stream, env);
@@ -177,7 +190,7 @@ int gt_view(int argc, const char **argv, Env *env)
     Diagram* d = diagram_new(results, qry_range, cfg, env);
     Render* r = render_new(d, cfg, env);
 
-    render_to_png(r, "test.png", 700, env);
+    render_to_png(r, str_get(arguments.outfile), arguments.width, env);
 
     render_delete(r, env);
     config_delete(cfg, env);
@@ -189,12 +202,12 @@ int gt_view(int argc, const char **argv, Env *env)
 
   /* free */
   str_delete(arguments.seqid,env);
+	str_delete(arguments.outfile,env);
   feature_index_delete(features, env);
   genome_stream_delete(feature_stream, env);
   genome_stream_delete(addintrons_stream, env);
   genome_stream_delete(sort_stream, env);
   genome_stream_delete(gff3_in_stream, env);
-  genfile_xclose(arguments.outfp, env);
 
   return has_err;
 }

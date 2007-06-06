@@ -50,6 +50,11 @@ void      graphics_draw_text_centered(Graphics *g, double x, double y,
                                       const char *text);
 void      graphics_draw_text_right(Graphics *g, double x, double y,
                                       const char *text);
+void      graphics_draw_scale(Graphics *g, double x, double y, double width,
+                              Color stroke_color, int arrow_status,
+											     	  double stroke_width, double arrow_height,
+												      double arrow_width);
+double    graphics_get_text_height(Graphics *g);
 void      graphics_save(const Graphics*);
 
 #endif

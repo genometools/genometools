@@ -51,7 +51,7 @@ unsigned int render_calculate_height(Render *r, Env* env)
   height += diagram_get_number_of_tracks(r->dia)
               * config_get_num(r->cfg, "format","track_vspace",env);
   /* add header space and footer */
-  height += 70 + 30;
+  height += 70 + 40;
   return height;
 }
 
@@ -200,7 +200,7 @@ int render_track(void *key, void* value, void *data, Env *env)
   
   /* draw track title */
   graphics_draw_text(r->g, r->info.dx, r->info.dy, (const char*) key);
-  r->info.dy += 10;
+  r->info.dy += graphics_get_text_height(r->g) + 5;
   
   /* render each line */
   for (i=0; i<array_size(lines); i++)
@@ -217,6 +217,7 @@ void render_to_png(Render *r, char *fn, unsigned int width, Env *env)
 {
   assert(r && fn && env && width > 0);
   unsigned int height = render_calculate_height(r, env);
+	char str[32];
   
   /* set initial margins, header, target width */
   r->info.dx = config_get_num(r->cfg, "format", "margins", env);
@@ -224,11 +225,23 @@ void render_to_png(Render *r, char *fn, unsigned int width, Env *env)
   r->info.width = width;
   
   /* create new Graphics backend */
-  r->g = graphics_new_png(fn,
-                          width,
-                          height,
-                          env);
-  
+  r->g = graphics_new_png(fn, width, height, env);
+  sprintf(str, "%lu", r->info.range.start);
+	graphics_draw_text_left(r->g, config_get_num(r->cfg, "format", "margins", env), 20,str) ;
+	sprintf(str, "%lu", r->info.range.end);
+	graphics_draw_text_right(r->g, width-config_get_num(r->cfg, "format", "margins", env), 20,str) ;
+	
+	/* draw scale and location info */
+	graphics_draw_scale(r->g,
+	                    config_get_num(r->cfg, "format", "margins", env),
+											30,
+											width-2*config_get_num(r->cfg, "format", "margins", env),
+											config_get_color(r->cfg, "stroke", env),
+											Both,
+                      config_get_num(r->cfg, "format", "stroke_width", env),
+											config_get_num(r->cfg, "format", "scale_arrow_height", env),
+											config_get_num(r->cfg, "format", "scale_arrow_width", env));
+	
   /* process (render) each track */
   Hashtable *tracks = diagram_get_tracks(r->dia);
   hashtable_foreach(tracks, render_track, r, env);

@@ -27,6 +27,7 @@ config =
     mRNA            ={red=0.4,green=0.5,blue=0.6},
     TF_binding_site ={red=0.4,green=0.5,blue=0.6},
     gene            ={red=0.8,green=0.4,blue=0.4},
+		intron          ={red=0.9,green=0.9,blue=0.0},
   },
   -- Defines how a feature is drawn. 
   -- Possible choices: "line", "box", "caret", "dashes"
@@ -37,6 +38,7 @@ config =
     TF_binding_site = "box",
     mRNA            = "box",
     gene            = "box",
+		intron          = "caret",
   },
   -- Defines how the free space in a collapsing feature track is drawn. 
   -- Possible choices: "line", "box", "caret", "dashes"
@@ -49,7 +51,7 @@ config =
   -- feature's track.
   collapse = 
   {
-    to_parent = {"exon", "CDS"},
+    to_parent = {"exon", "CDS","intron"},
   },
   -- Defines various format options for drawing.
   format =
@@ -58,7 +60,9 @@ config =
     bar_height = 15,   -- height of a feature bar, in pixels
     bar_vspace = 10,   -- space between feature bars, in pixels
     track_vspace = 20, -- space between tracks, in pixels
-    arrow_width = 6,   -- width of arrowheads, in pixels
+    scale_arrow_width = 6,   -- width of scale arrowheads, in pixels
+		scale_arrow_height = 10,   -- height of scale arrowheads, in pixels
+		arrow_width = 6,   -- width of feature arrowheads, in pixels
     stroke_width = 1,  -- width of outlines, in pixels
   },
 } 
