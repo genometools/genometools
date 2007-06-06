@@ -11,6 +11,7 @@ struct Block
 {
   Array *elements;
   Range range;
+  Str* caption;
 };
 
 /*!
@@ -28,6 +29,7 @@ Block* block_new(Env *env)
   r.start = 0;
   r.end = 0;
   block->range = r;
+  block->caption = NULL;
 
   assert(block);
   return block;
@@ -75,6 +77,30 @@ Range block_get_range(Block *block)
 
    assert(block->range.start && block->range.end);
    return block->range;
+}
+
+/*!
+Sets caption of a Block object
+\param block Pointer to Block object to set caption
+\param caption Pointer to String object
+*/
+void block_set_caption(Block *block,
+                       Str* caption)
+{
+  assert(block);
+  block->caption = caption;
+}
+
+/*!
+Gets caption of a Block object
+\param block Pointer to Block object 
+\return caption Pointer to String object
+*/
+Str* block_get_caption(Block *block)
+{
+  assert(block);
+
+  return block->caption;
 }
 
 /*!
@@ -151,6 +177,9 @@ int block_unit_test(Env* env)
 
   Block* b = block_new(env);
 
+  Str* caption1 = str_new_cstr("foo", env);
+  Str* caption2 = str_new_cstr("bar", env);
+
   /* test block_insert_elements */
   ensure(has_err, (0 == array_size(block_get_elements(b))));
   block_insert_element(b, gn1, NULL, env);
@@ -170,10 +199,18 @@ int block_unit_test(Env* env)
   r_temp = range_join(r1, r2);
   ensure(has_err, (0 == range_compare(b_range, r_temp)));
   ensure(has_err, (1 == range_compare(r2, r_temp)));
+
+  /* tests block_set_caption 
+     & block_get_caption */
+  block_set_caption(b, caption1);
+  ensure(has_err, (0 == str_cmp(block_get_caption(b), caption1)));
+  ensure(has_err, (0 != str_cmp(block_get_caption(b), caption2)));
 	      
   element_delete(e1, env);
   element_delete(e2, env);
   block_delete(b, env);
+  str_delete(caption1, env);
+  str_delete(caption2, env);
   genome_node_delete(gn1, env);
   genome_node_delete(gn2, env);
 	      
