@@ -30,6 +30,11 @@ Graphics* graphics_new_pdf(const char *fname, unsigned int width,
                            unsigned int height, Env*);
 Graphics* graphics_new_ps(const char *fname, unsigned int width,
                            unsigned int height, Env*);
+void      graphics_set_margins(Graphics *g,
+                               double margin_x,
+															 double margin_y,
+															 double width,
+															 double height);
 void      graphics_draw_vertical_line(Graphics *g, double x, double y,
                                  double length);
 void      graphics_draw_box(Graphics *g, double x, double y, double width,
@@ -50,6 +55,16 @@ void      graphics_draw_text_centered(Graphics *g, double x, double y,
                                       const char *text);
 void      graphics_draw_text_right(Graphics *g, double x, double y,
                                       const char *text);
+void      graphics_draw_colored_text(Graphics *g,
+                                     double x,
+								      	 						 double y,
+																     Color color,
+																     const char *text);
+void      graphics_draw_scale(Graphics *g, double x, double y, double width,
+                              Color stroke_color, int arrow_status,
+											     	  double stroke_width, double arrow_height,
+												      double arrow_width);
+double    graphics_get_text_height(Graphics *g);
 void      graphics_save(const Graphics*);
 
 #endif

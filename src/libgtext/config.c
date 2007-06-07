@@ -256,15 +256,16 @@ Retrieves a numeric value from the configuration.
 \param section Section to get a key from.
 \param key Key to get a value from.
 \param env Pointer to Environment object.
-\return double result, default is 0.
+\return double result, defaults to argument
 */
 double config_get_num(Config *cfg,
-                      const char* section,
+                      const char *section,
                       const char *key,
+                      double deflt,
                       Env* env)
 {
   assert(cfg && key && section);
-  double num = 0;
+  double num = deflt;
   int i = 0;
   env_error_check(env);
   /* get section */
@@ -272,7 +273,7 @@ double config_get_num(Config *cfg,
   /* could not get section, return default */
   if (i < 0) {
     lua_pop(cfg->L, i);
-    return 0;
+    return deflt;
   }
   /* lookup entry for given key */
   lua_getfield(cfg->L, -1, key);
@@ -281,7 +282,7 @@ double config_get_num(Config *cfg,
     if (*cfg->verbose) warning("no or non-numeric value found for key '%s'",
                                key);
     lua_pop(cfg->L, i+1);
-    return 0;
+    return deflt;
   } else i++;
   /* retrieve value */
   num = lua_tonumber(cfg->L, -1);
@@ -296,15 +297,16 @@ Retrieves a string value from the configuration.
 \param section Section to get a key from.
 \param key Key to get a value from.
 \param env Pointer to Environment object.
-\return string pointer to result, default is empty string.
+\return string pointer to result, defaults to argument
 */
 const char* config_get_cstr(Config *cfg,
-                            const char* section,
+                            const char *section,
                             const char *key,
+                            const char *deflt,
                             Env* env)
 {
   assert(cfg && key && section);
-  const char* str = "";
+  const char* str = deflt;
   int i = 0;
   env_error_check(env);
   /* get section */
@@ -312,7 +314,7 @@ const char* config_get_cstr(Config *cfg,
   /* could not get section, return default */
   if (i < 0) {
     lua_pop(cfg->L, i);
-    return str;
+    return deflt;
   }
   /* lookup entry for given key */
   lua_getfield(cfg->L, -1, key);
@@ -321,7 +323,7 @@ const char* config_get_cstr(Config *cfg,
     if (*cfg->verbose) warning("no value is defined for key '%s'",
                                key);
     lua_pop(cfg->L, i+1);
-    return str;
+    return deflt;
   } else i++;
   /* retrieve string */
   str = lua_tostring(cfg->L, -1);
@@ -487,9 +489,9 @@ int config_unit_test(Env* env)
   ensure(has_err, color_equals(tmpcol,defcol));
   tmpcol = config_get_color(cfg, "foo", env);
   ensure(has_err, color_equals(tmpcol,defcol));
-  num = config_get_num(cfg,"format", "margins", env);
-  ensure(has_err, num == 0);
-  str = config_get_cstr(cfg, "collapse", "exon", env);
+  num = config_get_num(cfg,"format", "margins", 10, env);
+  ensure(has_err, num == 10);
+  str = config_get_cstr(cfg, "collapse", "exon", "", env);
   ensure(has_err, (str == ""));
 
   /* execute the config file */
@@ -519,9 +521,9 @@ int config_unit_test(Env* env)
   ensure(has_err, !color_equals(tmpcol,defcol));
   tmpcol = config_get_color(cfg, "exon", env);
   ensure(has_err, color_equals(tmpcol,col));
-  num = config_get_num(cfg,"format", "margins", env);
+  num = config_get_num(cfg,"format", "margins", 10,  env);
   ensure(has_err, num == 11);
-  num = config_get_num(cfg,"format", "foo", env);
+  num = config_get_num(cfg,"format", "foo", 10, env);
   ensure(has_err, num == 2);
 
   /* create a new color definition */
@@ -533,10 +535,10 @@ int config_unit_test(Env* env)
   ensure(has_err, !color_equals(tmpcol,defcol));
   tmpcol = config_get_color(cfg, "foo", env);
   ensure(has_err, color_equals(tmpcol,col));
-  str = config_get_cstr(cfg, "bar", "baz", env);
+  str = config_get_cstr(cfg, "bar", "baz", "", env);
   ensure(has_err, (str != ""));
   ensure(has_err, (strcmp(str,test1)==0));
-  str = config_get_cstr(cfg, "bar", "test", env);
+  str = config_get_cstr(cfg, "bar", "test", "", env);
   ensure(has_err, (str == ""));
 
   /*

@@ -42,6 +42,12 @@ static void genome_feature_free(GenomeNode *gn, Env *env)
   hashtable_delete(gf->attributes, env);
 }
 
+const char* genome_feature_get_attribute(GenomeNode *gn, const char *attr_name)
+{
+  GenomeFeature *gf = genome_feature_cast(gn);
+	return (const char*) hashtable_get(gf->attributes, attr_name);
+}
+
 static Str* genome_feature_get_seqid(GenomeNode *gn)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
