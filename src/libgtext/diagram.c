@@ -20,6 +20,13 @@ struct Diagram
   Range range;
 };
 
+typedef struct
+  {
+    GenomeNode *parent;
+    Diagram *diagram;
+    
+  } GenomeNodeChildren;
+  
 Range diagram_get_range(Diagram* diagram)
 {
   assert(diagram);
@@ -47,6 +54,36 @@ static int diagram_track_delete(void *key, void *value, void *data, Env* env)
   return 0;
 }
 
+static void insert_genome_node_into_track(GenomeNode* gn, GenomeNode* parent, Diagram* d, Env* env)
+{
+  const char* feature_type;
+  GenomeFeatureType type;
+  GenomeFeature* gf = (GenomeFeature*) gn;
+  Track* track;
+  Str* track_type;
+  
+  /*fetch the type of the given genome node*/
+  type = genome_feature_get_type(gf);
+  feature_type = genome_feature_type_get_cstr(type);
+  
+  /*deliver the genome node to the track with the corresponding type.
+  If the track does not exist, generate it.*/
+  if (hashtable_get(d->tracks, feature_type) == NULL)
+  {
+    track_type = str_new_cstr((char*) feature_type, env);
+    track = track_new(track_type, env);
+    track_insert_element(track, gn, d->config, parent, env);
+    hashtable_add(d->tracks, (char*) feature_type, track, env);
+    d->nof_tracks++;
+    str_delete(track_type,env);
+  }
+  else
+  {	
+    track = hashtable_get(d->tracks, feature_type);
+    track_insert_element(track, gn, d->config, parent, env);
+  }
+}
+
 /*!
 Check if a genome node is in the given Range of the diagram. If yes, hand it
 over to the corresponding track object. If the track doesn't exist, generate
@@ -55,54 +92,54 @@ it.
 \param pointer to the array of genome nodes.
 \param env Pointer to Environment object.
 */
-static int visit_child(GenomeNode* gn, void* diagram, Env* env)
+static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
 {
-  const char* feature_type;
-  Diagram* d = (Diagram*) diagram;
-  GenomeFeatureType type;
-  GenomeFeature* gf = (GenomeFeature*) gn;
-  Track* track;
-  Range gn_range;
-  Str* track_type;
-
-  /*fetch the type of the given genome node*/
-  type = genome_feature_get_type(gf);
-  feature_type = genome_feature_type_get_cstr(type);
-
-  gn_range = genome_node_get_range(gn);
-
-  /*Check the Range of the genome node. If the start of the gn
-  is before the start of the diagram or the end of the gn is after
-  the end of the digram, set the corresponding value of the gn node
-  to the value of the diagram.*/
-  if (gn_range.end < d->range.start || gn_range.start > d->range.end)
-  {
-    return 0;
+   
+  GenomeNodeChildren* genome_node_info;
+  genome_node_info = (GenomeNodeChildren*) genome_node_children;
+  
+  if (genome_node_has_children(gn))
+  {	 	
+    printf("%s, %lu - %lu \n", genome_feature_type_get_cstr(
+           genome_feature_get_type((GenomeFeature*) gn)),
+           genome_node_get_start(gn),
+           genome_node_get_end(gn));	  
+    insert_genome_node_into_track(gn, genome_node_info->parent, genome_node_info->diagram, env);
+    genome_node_info->parent = gn;
+    genome_node_traverse_direct_children(gn,
+                                         genome_node_info,
+                                         visit_child,
+                                         env);
+					 
   }
-  else if (gn_range.start < d->range.start)
+  else 
   {
-    gn_range.start = d->range.start;
-  }
-  else if (gn_range.end > d->range.end)
-  {
-    gn_range.end = d->range.end;
-  }
+    printf("%s, %lu - %lu \n", genome_feature_type_get_cstr(
+           genome_feature_get_type((GenomeFeature*) gn)),
+           genome_node_get_start(gn),
+           genome_node_get_end(gn));
+  insert_genome_node_into_track(gn, genome_node_info->parent, genome_node_info->diagram, env);
+  } 
+  return 0;
 
-  /*deliver the genome node to the track with the corresponding type.
-  If the track does not exist, generate it.*/
-  if (hashtable_get(d->tracks, feature_type) == NULL)
-  {
-    track_type = str_new_cstr((char*) feature_type, env);
-    track = track_new(track_type, env);
-    track_insert_element(track, gn, d->config, NULL, env);
-    hashtable_add(d->tracks, (char*) feature_type, track, env);
-    d->nof_tracks++;
-    str_delete(track_type,env);
+}
+
+static int traverse_genome_nodes(GenomeNode* gn, void* genome_node_children, Env* env)
+{ 
+  GenomeNodeChildren* genome_node_info;
+  genome_node_info = (GenomeNodeChildren*) genome_node_children;
+  genome_node_info->parent = gn;
+  
+  if (genome_node_has_children(gn))
+  {			  
+    genome_node_traverse_direct_children(gn,
+                                         genome_node_info,
+                                         visit_child,
+                                         env); 
   }
   else
-  {	
-    track = hashtable_get(d->tracks, feature_type);
-    track_insert_element(track, gn, d->config, NULL, env);
+  {
+    return 0;
   }
   return 0;
 }
@@ -116,15 +153,29 @@ trees. Calling the function genome node with the current genome node.
 */
 static void diagram_build(Diagram* diagram, Array* features, Env* env)
 {
+  GenomeNodeChildren genome_node_children;
+  genome_node_children.diagram = diagram;
   int i=0;
   for (i=0;i<array_size(features);i++)
   {
-    genome_node_traverse_children(**(GenomeNode***) array_get(features,
-                                                              i),
+      
+    GenomeNode *current_root = **(GenomeNode***) array_get(features,i);
+    insert_genome_node_into_track(current_root,
+                                  NULL,
 				  diagram,
-                                  visit_child,
-				  false,
 				  env);
+				  
+				   printf("%s, %lu - %lu \n", genome_feature_type_get_cstr(
+           genome_feature_get_type((GenomeFeature*) current_root)),
+           genome_node_get_start(current_root),
+           genome_node_get_end(current_root));
+				  
+    traverse_genome_nodes(current_root, &genome_node_children, env);				  
+    /*genome_node_traverse_children(current_root,
+				  &genome_node_children,
+                                  traverse_genome_nodes,
+				  false,
+				  env);*/
   }
 }
 
@@ -158,7 +209,6 @@ void diagram_set_config(Diagram* diagram, Config* config, Env* env)
 {
   diagram->config = config;
 }
-
 
 /*
 Delivers the hashtable with the stored tracks.
@@ -255,13 +305,13 @@ int diagram_unit_test(Env* env)
                            env);
 			   
   genome_node_set_seqid((GenomeNode*) ex3, seqid2);
-																					
+  
   cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN, NULL, UNDEF_ULONG,
                             env);
 			    
   genome_node_set_seqid((GenomeNode*) cds1, seqid2);
 	
-  /* Determine the structure of our feature tree */																				
+  /* Determine the structure of our feature tree */
   genome_node_is_part_of_genome_node(gn1, ex1, env);
   genome_node_is_part_of_genome_node(gn1, ex2, env);
   genome_node_is_part_of_genome_node(gn2, ex3, env);
@@ -327,4 +377,3 @@ int diagram_unit_test(Env* env)
   str_delete(seqid2, env);
 return has_err;
 }
-	
