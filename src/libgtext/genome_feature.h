@@ -40,7 +40,6 @@ void                   genome_feature_add_attribute(GenomeFeature*,
                                                     const char *attr_name,
                                                     const char *attr_value,
                                                     Env*);
-bool                   genome_feature_has_attribute(const GenomeFeature*);
 int                    genome_feature_foreach_attribute(GenomeFeature*,
                                                         AttributeIterFunc,
                                                         void *data, Env*);

@@ -185,6 +185,10 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
           has_err = -1;
           break;
         }
+      }
+      if (!has_err) {
+        /* save all attributes, although the ID and Parent attributes are
+           generated */
         genome_feature_add_attribute((GenomeFeature*) genome_feature,
                                      splitter_get_token(tmp_splitter, 0),
                                      splitter_get_token(tmp_splitter, 1), env);

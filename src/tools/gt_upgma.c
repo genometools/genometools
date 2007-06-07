@@ -60,13 +60,13 @@ int gt_upgma(int argc, const char **argv, Env *env)
   }
   assert(parsed_args == 1);
 
-  if (!strcmp(argv[1], "example"))
+  if (!strcmp(argv[parsed_args], "example"))
     use_hard_coded_example = true;
 
   if (use_hard_coded_example)
     upgma = upgma_new(5, NULL, exampledistfunc, env);
   else {
-    bioseq = bioseq_new(argv[1], env);
+    bioseq = bioseq_new(argv[parsed_args], env);
     if (!bioseq)
       has_err = -1;
     if (!has_err)

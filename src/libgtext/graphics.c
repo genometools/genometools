@@ -41,7 +41,6 @@ void graphics_draw_exon_box(Graphics *g, double x, double y, double width,
                             double height, Strand strand)
 {
   assert(g);
-
   cairo_set_source_rgb(g->cr, 0, 0, 1);
   switch (strand) {
     case STRAND_FORWARD:

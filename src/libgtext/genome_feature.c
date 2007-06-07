@@ -273,27 +273,22 @@ void genome_feature_add_attribute(GenomeFeature *gf, const char *attr_name,
 {
   assert(gf && attr_name && attr_value);
   if (!gf->attributes)
-    gf->attributes = hashtable_new(HASH_DIRECT, env_ma_free_func,
+    gf->attributes = hashtable_new(HASH_STRING, env_ma_free_func,
                                    env_ma_free_func, env);
   hashtable_add(gf->attributes, cstr_dup(attr_name, env),
                 cstr_dup(attr_value, env), env);
-}
-
-bool genome_feature_has_attribute(const GenomeFeature *gf)
-{
-  assert(gf);
-  if (gf->attributes)
-    return true;
-  return false;
 }
 
 int genome_feature_foreach_attribute(GenomeFeature *gf,
                                      AttributeIterFunc iterfunc, void *data,
                                      Env *env)
 {
+  int has_err = 0;
   env_error_check(env);
   assert(gf && iterfunc);
-  assert(genome_feature_has_attribute(gf));
-  return hashtable_foreach(gf->attributes, (Hashiteratorfunc) iterfunc, data,
-                           env);
+  if (gf->attributes) {
+    has_err = hashtable_foreach_ao(gf->attributes, (Hashiteratorfunc) iterfunc,
+                                   data, env);
+  }
+  return has_err;
 }

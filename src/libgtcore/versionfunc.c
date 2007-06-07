@@ -5,7 +5,6 @@
 */
 
 #include <stdio.h>
-#include <libgtcore/mailaddress.h>
 #include "gt_build.h"
 #include "gt_cc.h"
 #include "gt_cflags.h"
@@ -14,7 +13,8 @@
 void versionfunc(const char *progname)
 {
   printf("%s (GenomeTools) %s (%s)\n", progname, GT_VERSION, GT_BUILT);
-  printf("Copyright (c) 2003-2007 Gordon Gremme %s\n", MAILADDRESS);
+  printf("Copyright (c) 2003-2007 Gordon Gremme and contributors (see "
+         "CONTRIBUTORS file)\n");
   printf("Copyright (c) 2003-2007 Center for Bioinformatics, University of "
          "Hamburg\n");
   printf("See LICENSE file or http://genometools.org/license.html for license "
