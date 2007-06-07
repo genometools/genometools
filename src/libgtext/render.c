@@ -18,6 +18,20 @@ typedef struct {
   unsigned int width;
 } RenderInfo;
 
+enum ClipType
+{
+  CLIPPED_RIGHT = 1,
+	CLIPPED_LEFT = 2,
+	CLIPPED_NONE = 3,
+	CLIPPED_BOTH = 4
+};
+
+typedef struct
+{
+  double start, end;
+	int clip;
+} DrawingRange;
+
 struct Render {
   Diagram* dia;
   Config* cfg;
@@ -92,21 +106,20 @@ void render_delete(Render *r, Env *env)
 Range render_convert_coords(Render *r,
                             Range node_range,
                             double factor,
-                            bool ensure_borders,
+                            bool ensure_caption,
                             Env *env)
 {
  Range converted_range;
  double margins = config_get_num(r->cfg, "format", "margins", 10, env);
  /* calculate coordinates for drawing */
  long unscaled_start = ((long) node_range.start - (long) r->info.range.start);
- long unscaled_end   = ((long) node_range.end - (long) r->info.range.start);
- 
+ long unscaled_end   = ((long) node_range.end - (long) r->info.range.start); 
  /* scale coordinates to target image width, clip to margins if needed */
- if (ensure_borders && unscaled_start < (long) r->info.range.start )
+ if (ensure_caption && (long) node_range.start < (long) r->info.range.start )
    converted_range.start = (unsigned int) margins;
  else
    converted_range.start = (unsigned int) (unscaled_start * factor);
- if (ensure_borders && unscaled_end > (long) r->info.range.end)
+ if (ensure_caption && (long) node_range.end > (long) r->info.range.end)
    converted_range.end = (unsigned int) (r->info.width - margins);
  else
    converted_range.end = (unsigned int) (unscaled_end * factor);
@@ -118,13 +131,17 @@ void render_line(Render *r, Line *line, Env *env)
   assert(r && line && env);
   int i;
   Array *blocks = line_get_blocks(line);
-
   /* obtain scaling factor for target image width */
-  double factor = ((double) r->info.width-(2*config_get_num(r->cfg, "format", "margins", 10, env))) / (double) (r->info.range.end -
-                                                     r->info.range.start);
+  double factor = ((double) r->info.width
+                            -(2*config_get_num(r->cfg,
+                                               "format",
+                                               "margins",
+                                               10, env))) 
+                    / (double) (r->info.range.end 
+                                 - r->info.range.start);
   if (config_get_verbose(r->cfg))
      printf("scaling factor is %f\n",factor);
-
+  /* begin drawing block */
   for (i=0; i<array_size(blocks); i++)
   {
     int j;
@@ -132,11 +149,16 @@ void render_line(Render *r, Line *line, Env *env)
     Array *elems = block_get_elements(block);
     Range block_range = block_get_range(block),
           draw_range;
-
+    const char* caption;
+    /* draw block caption */
     draw_range = render_convert_coords(r, block_range, factor, true, env);
-    printf("text position start: %f\n", (double) draw_range.start);
-    graphics_draw_text(r->g, MAX(10,(double) draw_range.start), r->info.dy-graphics_get_text_height(r->g)+3, block_get_caption(block));
-
+    caption = block_get_caption(block);
+    if (!caption) caption="foo"; 
+    graphics_draw_text(r->g,
+                       MAX(10,(double) draw_range.start),
+                       r->info.dy-graphics_get_text_height(r->g)+3,
+                       caption);
+    /* draw elements in block */
     for (j=0;j<array_size(elems); j++)
     {
       Element *elem = *(Element**) array_get(elems, j);
@@ -154,9 +176,9 @@ void render_line(Render *r, Line *line, Env *env)
       elem_width = draw_range.end - draw_range.start;
 
       if (config_get_verbose(r->cfg))
-        printf("drawing element from %.2f to %.2f\n",
-               (double) draw_range.start,
-               (double) draw_range.end);
+        printf("drawing element from %lu to %lu\n",
+               draw_range.start,
+               draw_range.end);
 
       /* draw each element according to style set in the config */
       const char* type = genome_feature_type_get_cstr(element_get_type(elem));
