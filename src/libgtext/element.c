@@ -41,7 +41,11 @@ Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
   element->range = genome_node_get_range(gn);
   element->arrow_status = NoArrow;
   element->cfg = cfg;
-  caption = genome_node_get_idstr(gn);
+  caption = genome_feature_get_attribute(gf, "Name");
+  if(caption == NULL)
+  {
+    caption = genome_feature_get_attribute(gf, "ID"); 
+  }
   element->caption = caption;
 
   assert(element);

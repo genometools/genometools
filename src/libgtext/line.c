@@ -47,28 +47,43 @@ void line_insert_element(Line *line,
   assert(line && gn && cfg);
   Block *block;
   Str* caption;
+  GenomeFeature *gf = (GenomeFeature*) gn;
+  GenomeFeature *gf_parent = (GenomeFeature*) parent;
+  
 
   if((last_parent != NULL)
      && (parent != NULL)
      && (0 == genome_node_compare(&parent, &last_parent)))
   {
-    block = *(Block**) array_get(line->blocks, (array_size(line->blocks) -1));
+    block = *(Block**) array_get_last(line->blocks);
     if(!range_overlap(genome_node_get_range(gn), block_get_range(block)))
     {
-      caption = genome_node_get_idstr(parent);
+      caption = genome_feature_get_attribute(gf_parent, "Name");
+      if(caption == NULL)
+      {
+        caption = genome_feature_get_attribute(gf_parent, "ID");
+      }
     }
     else
     {
       block = block_new(env);
       array_add(line->blocks, block, env);
-      caption = genome_node_get_idstr(gn);
+      caption = genome_feature_get_attribute(gf, "Name");
+      if(caption == NULL)
+      {
+        caption = genome_feature_get_attribute(gf, "ID");
+      }
     }
   }
   else
   {
     block = block_new(env);
     array_add(line->blocks, block, env);
-    caption = genome_node_get_idstr(gn);
+    caption = genome_feature_get_attribute(gf, "Name");
+    if(caption == NULL)
+    {
+      caption = genome_feature_get_attribute(gf, "ID");
+    }
   }
 
   block_insert_element(block, gn, cfg, env);
