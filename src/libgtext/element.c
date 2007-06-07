@@ -17,7 +17,7 @@ struct Element
   Range range;
   int arrow_status;
   Config* cfg;
-  Str* caption;
+  const char* caption;
 };
 
 /*!
@@ -33,7 +33,7 @@ Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
 
   Element *element;
   GenomeFeature *gf = (GenomeFeature*) gn;
-  Str* caption;
+  const char* caption;
 
   env_error_check(env);
   element = env_ma_malloc(env, sizeof (Element));
@@ -41,10 +41,10 @@ Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
   element->range = genome_node_get_range(gn);
   element->arrow_status = NoArrow;
   element->cfg = cfg;
-  caption = genome_feature_get_attribute(gf, "Name");
+  caption = genome_feature_get_attribute(gn, "Name");
   if(caption == NULL)
   {
-    caption = genome_feature_get_attribute(gf, "ID"); 
+    caption = genome_feature_get_attribute(gn, "ID"); 
   }
   element->caption = caption;
 
@@ -112,7 +112,7 @@ Sets caption of an Element object
 \param caption Pointer to String object
 */
 void element_set_caption(Element *element,
-                         Str *caption)
+                         const char *caption)
 {
   assert(element && caption);
 
@@ -124,7 +124,7 @@ Gets caption of an element
 \param element Pointer to Element object to get caption
 \return caption Pointer to String object
 */
-Str* element_get_caption(Element *element)
+const char* element_get_caption(Element *element)
 {
   assert(element);
  
@@ -199,8 +199,8 @@ int element_unit_test(Env* env)
   Element* e2 = element_new(gn, NULL, env);
   Element* e3 = element_new(gn2, NULL, env);
 
-  Str* caption1 = str_new_cstr("foo", env);
-  Str* caption2 = str_new_cstr("bar", env);
+  const char* caption1 = "foo";
+  const char* caption2 = "bar";
 
   /* tests element_get_range */
   r_temp = element_get_range(e);
@@ -232,14 +232,12 @@ int element_unit_test(Env* env)
   /* tests element_set_caption 
      & element_get_caption */
   element_set_caption(e, caption1);
-  ensure(has_err, (0 == str_cmp(element_get_caption(e), caption1)));
-  ensure(has_err, (0 != str_cmp(element_get_caption(e), caption2)));
+  ensure(has_err, (0 == strcmp(element_get_caption(e), caption1)));
+  ensure(has_err, (0 != strcmp(element_get_caption(e), caption2)));
 
   element_delete(e, env);
   element_delete(e2, env);
   element_delete(e3, env);
-  str_delete(caption1, env);
-  str_delete(caption2, env);
   genome_node_delete(gn, env);
   genome_node_delete(gn2, env);
 

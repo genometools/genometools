@@ -135,7 +135,7 @@ void render_line(Render *r, Line *line, Env *env)
 
     draw_range = render_convert_coords(r, block_range, factor, true, env);
     printf("text position start: %f\n", (double) draw_range.start);
-    graphics_draw_text(r->g, MAX(10,(double) draw_range.start), r->info.dy-graphics_get_text_height(r->g)+3, str_get(block_get_caption(block)));
+    graphics_draw_text(r->g, MAX(10,(double) draw_range.start), r->info.dy-graphics_get_text_height(r->g)+3, block_get_caption(block));
 
     for (j=0;j<array_size(elems); j++)
     {

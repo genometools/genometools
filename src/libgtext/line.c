@@ -46,10 +46,7 @@ void line_insert_element(Line *line,
 {
   assert(line && gn && cfg);
   Block *block;
-  Str* caption;
-  GenomeFeature *gf = (GenomeFeature*) gn;
-  GenomeFeature *gf_parent = (GenomeFeature*) parent;
-  
+  const char* caption;
 
   if((last_parent != NULL)
      && (parent != NULL)
@@ -58,20 +55,20 @@ void line_insert_element(Line *line,
     block = *(Block**) array_get_last(line->blocks);
     if(!range_overlap(genome_node_get_range(gn), block_get_range(block)))
     {
-      caption = genome_feature_get_attribute(gf_parent, "Name");
+      caption = genome_feature_get_attribute(parent, "Name");
       if(caption == NULL)
       {
-        caption = genome_feature_get_attribute(gf_parent, "ID");
+        caption = genome_feature_get_attribute(parent, "ID");
       }
     }
     else
     {
       block = block_new(env);
       array_add(line->blocks, block, env);
-      caption = genome_feature_get_attribute(gf, "Name");
+      caption = genome_feature_get_attribute(gn, "Name");
       if(caption == NULL)
       {
-        caption = genome_feature_get_attribute(gf, "ID");
+        caption = genome_feature_get_attribute(gn, "ID");
       }
     }
   }
@@ -79,10 +76,10 @@ void line_insert_element(Line *line,
   {
     block = block_new(env);
     array_add(line->blocks, block, env);
-    caption = genome_feature_get_attribute(gf, "Name");
+    caption = genome_feature_get_attribute(gn, "Name");
     if(caption == NULL)
     {
-      caption = genome_feature_get_attribute(gf, "ID");
+      caption = genome_feature_get_attribute(gn, "ID");
     }
   }
 
@@ -222,12 +219,12 @@ int line_unit_test(Env* env)
   blocks = line_get_blocks(l1);
   ensure(has_err, (1 == array_size(blocks)));
   Block* b = *(Block**) array_get(blocks, 0);
-  ensure(has_err, (0 == str_cmp(block_get_caption(b), genome_node_get_idstr(parent))));
+  ensure(has_err, (0 == strcmp(block_get_caption(b), genome_feature_get_attribute(parent, "Name"))));
   line_insert_element(l1, gn3, cfg, gn1, env);
   blocks = line_get_blocks(l1);
   ensure(has_err, (2 == array_size(blocks)));
   b = *(Block**) array_get(blocks, 1);
-  ensure(has_err, (0 == str_cmp(block_get_caption(b), genome_node_get_idstr(gn3))));
+  ensure(has_err, (0 == strcmp(block_get_caption(b), genome_feature_get_attribute(gn3, "Name"))));
 
   /* test line_is_occupied */
   ensure(has_err, !line_is_occupied(l2, gn3));

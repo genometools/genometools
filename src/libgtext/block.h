@@ -22,8 +22,8 @@ void block_insert_element(Block* block,
 			  Env* env);
 Range block_get_range(Block* block);
 void block_set_caption(Block* block,
-                       Str* caption);
-Str* block_get_caption(Block* block);
+                       const char* caption);
+const char* block_get_caption(Block* block);
 Array* block_get_elements(Block* block);
 void block_delete(Block* block,
                   Env* env);

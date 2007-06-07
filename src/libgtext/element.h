@@ -30,8 +30,8 @@ void element_set_arrow_status(Element* element,
                               int status);
 int element_get_arrow_status(Element* element);
 void element_set_caption(Element* element,
-                         Str* caption);
-Str* element_get_caption(Element *element);
+                         const char* caption);
+const char* element_get_caption(Element *element);
 void element_delete(Element* element,
                     Env* env);
 void print_element(Element* element);
