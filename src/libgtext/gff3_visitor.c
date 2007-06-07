@@ -87,11 +87,13 @@ static int show_attribute(const char *attr_name, const char *attr_value,
   ShowAttributeInfo *info = (ShowAttributeInfo*) data;
   env_error_check(env);
   assert(attr_name && attr_value && info);
-  if (info->attribute_shown)
-    genfile_xfputc(';', info->outfp);
-  else
-    info->attribute_shown = true;
-  genfile_xprintf(info->outfp, "%s=%s", attr_name, attr_value);
+  if (strcmp(attr_name, ID_STRING) && strcmp(attr_name, PARENT_STRING)) {
+    if (info->attribute_shown)
+      genfile_xfputc(';', info->outfp);
+    else
+      info->attribute_shown = true;
+    genfile_xprintf(info->outfp, "%s=%s", attr_name, attr_value);
+  }
   return 0;
 }
 
@@ -135,13 +137,9 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data, Env *env)
   }
 
   /* show missing part of attributes */
-  if (genome_feature_has_attribute(gf)) {
-    if (part_shown)
-      genfile_xfputc(';', gff3_visitor->outfp);
-    info.attribute_shown = false;
-    info.outfp = gff3_visitor->outfp;
-    has_err = genome_feature_foreach_attribute(gf, show_attribute, &info, env);
-  }
+  info.attribute_shown = part_shown;
+  info.outfp = gff3_visitor->outfp;
+  has_err = genome_feature_foreach_attribute(gf, show_attribute, &info, env);
 
   /* show terminal newline */
   genfile_xfputc('\n', gff3_visitor->outfp);
