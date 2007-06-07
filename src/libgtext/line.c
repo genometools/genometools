@@ -228,12 +228,12 @@ int line_unit_test(Env* env)
   blocks = line_get_blocks(l1);
   ensure(has_err, (1 == array_size(blocks)));
   Block* b = *(Block**) array_get(blocks, 0);
-  /* ensure(has_err, (0 == strcmp(block_get_caption(b), genome_feature_get_attribute(parent, "Name")))); */
+  ensure(has_err, (0 == strcmp(block_get_caption(b), genome_feature_get_attribute(parent, "Name"))));
   line_insert_element(l1, gn3, cfg, gn1, env);
   blocks = line_get_blocks(l1);
   ensure(has_err, (2 == array_size(blocks)));
   b = *(Block**) array_get(blocks, 1);
-  /* ensure(has_err, (0 == strcmp(block_get_caption(b), genome_feature_get_attribute(gn3, "Name")))); */
+  ensure(has_err, (0 == strcmp(block_get_caption(b), genome_feature_get_attribute(gn3, "Name"))));
 
   /* test line_is_occupied */
   ensure(has_err, !line_is_occupied(l2, gn3));

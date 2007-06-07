@@ -156,10 +156,6 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
           break;
         }
         id = cstr_dup(splitter_get_token(tmp_splitter, 1), env);
-				/* IDs are added to attributes table for later output to image */
-				genome_feature_add_attribute((GenomeFeature*) genome_feature,
-                                     splitter_get_token(tmp_splitter, 0),
-                                     splitter_get_token(tmp_splitter, 1), env);
       }
       else if (strncmp(token, PARENT_STRING, strlen(PARENT_STRING)) == 0) {
         splitter_reset(tmp_splitter);
