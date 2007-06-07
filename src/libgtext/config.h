@@ -19,17 +19,19 @@ void         config_reload(Config*, Env*);
 Color        config_get_color(Config*, const char*, Env*);
 void         config_set_color(Config*, const char*, Color, Env*);
 void         config_set_cstr(Config *cfg,
-                             const char* section,
+                             const char *section,
                              const char *key,
-                             const char* str,
+                             const char *str,
                              Env* env);
 const char*  config_get_cstr(Config *cfg,
-                             const char* section,
+                             const char *section,
                              const char *key,
+                             const char *deflt,
                              Env* env);
 double       config_get_num(Config *cfg,
-                            const char* section,
+                            const char *section,
                             const char *key,
+                            double deflt,
                             Env* env);
 void         config_set_num(Config *cfg,
                             const char* section,
@@ -37,9 +39,9 @@ void         config_set_num(Config *cfg,
                             double number,
                             Env* env);
 bool         config_cstr_in_list(Config *cfg,
-                                 const char* section,
-                                 const char* key,
-                                 const char* checkstr,
+                                 const char *section,
+                                 const char *key,
+                                 const char *checkstr,
                                  Env* env);
 bool         config_get_verbose(Config *cfg);
 int          config_unit_test(Env*);
