@@ -18,6 +18,7 @@ enum ArrowStatus{
   Left = 1,
   Right = 2,
   NoArrow = 3,
+  Both = 4,
 };
 
 Element* element_new(GenomeNode *gn,
@@ -28,6 +29,9 @@ GenomeFeatureType element_get_type(Element* element);
 void element_set_arrow_status(Element* element,
                               int status);
 int element_get_arrow_status(Element* element);
+void element_set_caption(Element* element,
+                         const char* caption);
+const char* element_get_caption(Element *element);
 void element_delete(Element* element,
                     Env* env);
 void print_element(Element* element);

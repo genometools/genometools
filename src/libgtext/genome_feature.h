@@ -23,6 +23,8 @@ GenomeNode*            genome_feature_new(GenomeFeatureType, Range, Strand,
                                           const char *filename,
                                           unsigned long line_number, Env*);
 const char*            genome_feature_get_source(GenomeFeature*);
+const char*            genome_feature_get_attribute(GenomeNode *gn,
+                                                    const char *attr_name);
 GenomeFeatureType      genome_feature_get_type(GenomeFeature*);
 double                 genome_feature_get_score(GenomeFeature*);
 Strand                 genome_feature_get_strand(GenomeFeature*);
@@ -38,7 +40,6 @@ void                   genome_feature_add_attribute(GenomeFeature*,
                                                     const char *attr_name,
                                                     const char *attr_value,
                                                     Env*);
-bool                   genome_feature_has_attribute(const GenomeFeature*);
 int                    genome_feature_foreach_attribute(GenomeFeature*,
                                                         AttributeIterFunc,
                                                         void *data, Env*);

@@ -17,6 +17,7 @@ struct Element
   Range range;
   int arrow_status;
   Config* cfg;
+  const char* caption;
 };
 
 /*!
@@ -32,6 +33,7 @@ Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
 
   Element *element;
   GenomeFeature *gf = (GenomeFeature*) gn;
+  const char* caption;
 
   env_error_check(env);
   element = env_ma_malloc(env, sizeof (Element));
@@ -39,6 +41,12 @@ Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
   element->range = genome_node_get_range(gn);
   element->arrow_status = NoArrow;
   element->cfg = cfg;
+  caption = genome_feature_get_attribute(gn, "Name");
+  if(caption == NULL)
+  {
+    caption = genome_feature_get_attribute(gn, "ID"); 
+  }
+  element->caption = caption;
 
   assert(element);
   return element;
@@ -60,9 +68,14 @@ Sets ArrowStatus of an Element object
 \param element Element on which status to set.
 \param status ArrowStatus.
 */
-void element_set_arrow_status(Element *element, int status)
+void element_set_arrow_status(Element *element,
+                              int status)
 {
   assert(element);
+  assert((status == Left) 
+          || (status == Right) 
+          || (status == NoArrow)
+	  || (status == Both));
   element->arrow_status = status;
 }
 
@@ -91,6 +104,31 @@ Range element_get_range(Element *element)
 /* this works only with pointers!! */
 /* assert(element->range.start && element->range.end); */
   return element->range;
+}
+
+/*!
+Sets caption of an Element object
+\param element Pointer to Element object to set caption
+\param caption Pointer to String object
+*/
+void element_set_caption(Element *element,
+                         const char *caption)
+{
+  assert(element && caption);
+
+  element->caption = caption;
+}
+
+/*!
+Gets caption of an element
+\param element Pointer to Element object to get caption
+\return caption Pointer to String object
+*/
+const char* element_get_caption(Element *element)
+{
+  assert(element);
+ 
+  return element->caption;
 }
 
 /*!
@@ -161,6 +199,9 @@ int element_unit_test(Env* env)
   Element* e2 = element_new(gn, NULL, env);
   Element* e3 = element_new(gn2, NULL, env);
 
+  const char* caption1 = "foo";
+  const char* caption2 = "bar";
+
   /* tests element_get_range */
   r_temp = element_get_range(e);
   ensure(has_err, (0 == range_compare(r1, r_temp)));
@@ -170,6 +211,10 @@ int element_unit_test(Env* env)
   as_temp = element_get_arrow_status(e);
   ensure(has_err, (as1 == as_temp));
   ensure(has_err, !(as2 == as_temp));
+
+  /* tests element_get_type */
+  ensure(has_err, (gft_exon == element_get_type(e)));
+  ensure(has_err, (gft_intron != element_get_type(e)));
 
   /* tests element_set_arrow_status */
   element_set_arrow_status(e, as2);
@@ -183,6 +228,12 @@ int element_unit_test(Env* env)
   ensure(has_err, elements_are_equal(e, e2));
   ensure(has_err, !elements_are_equal(e, e3));
   ensure(has_err, !elements_are_equal(e2, e3));
+
+  /* tests element_set_caption 
+     & element_get_caption */
+  element_set_caption(e, caption1);
+  ensure(has_err, (0 == strcmp(element_get_caption(e), caption1)));
+  ensure(has_err, (0 != strcmp(element_get_caption(e), caption2)));
 
   element_delete(e, env);
   element_delete(e2, env);
