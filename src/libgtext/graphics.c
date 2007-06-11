@@ -330,6 +330,7 @@ void graphics_draw_vertical_line(Graphics *g, double x, double y,
 {
   assert(g);
   cairo_move_to(g->cr, x, y);
+  cairo_set_source_rgb(g->cr, .9, .9, .9);
   cairo_rel_line_to(g->cr, 0, length);
   cairo_stroke(g->cr);
 }
