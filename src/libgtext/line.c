@@ -241,7 +241,8 @@ int line_unit_test(Env* env)
   genome_feature_add_attribute((GenomeFeature*) gn2, "Name", bar, env);
   genome_feature_add_attribute((GenomeFeature*) gn3, "Name", blub, env);
   genome_feature_add_attribute((GenomeFeature*) gn4, "Name", bar, env);
-			    
+  
+  last_parent = NULL;			    
   /* test line_insert_elements */
   ensure(has_err, (0 == array_size(line_get_blocks(l1))));
   line_insert_element(l1, gn1, cfg, parent, env);
