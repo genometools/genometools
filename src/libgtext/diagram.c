@@ -56,6 +56,7 @@ static int diagram_track_delete(void *key, void *value, void *data, Env* env)
 
 static void insert_genome_node_into_track(GenomeNode* gn, GenomeNode* parent, Diagram* d, Env* env)
 {
+  assert(parent);
   const char* feature_type;
   GenomeFeatureType type;
   GenomeFeature* gf = (GenomeFeature*) gn;
@@ -99,11 +100,7 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
   genome_node_info = (GenomeNodeChildren*) genome_node_children;
   
   if (genome_node_has_children(gn))
-  {	 	
-    printf("%s, %lu - %lu \n", genome_feature_type_get_cstr(
-           genome_feature_get_type((GenomeFeature*) gn)),
-           genome_node_get_start(gn),
-           genome_node_get_end(gn));	  
+  {	 		  
     insert_genome_node_into_track(gn, genome_node_info->parent, genome_node_info->diagram, env);
     genome_node_info->parent = gn;
     genome_node_traverse_direct_children(gn,
@@ -114,10 +111,6 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
   }
   else 
   {
-    printf("%s, %lu - %lu \n", genome_feature_type_get_cstr(
-           genome_feature_get_type((GenomeFeature*) gn)),
-           genome_node_get_start(gn),
-           genome_node_get_end(gn));
   insert_genome_node_into_track(gn, genome_node_info->parent, genome_node_info->diagram, env);
   } 
   return 0;
@@ -164,11 +157,6 @@ static void diagram_build(Diagram* diagram, Array* features, Env* env)
                                   NULL,
 				  diagram,
 				  env);
-				  
-				   printf("%s, %lu - %lu \n", genome_feature_type_get_cstr(
-           genome_feature_get_type((GenomeFeature*) current_root)),
-           genome_node_get_start(current_root),
-           genome_node_get_end(current_root));
 				  
     traverse_genome_nodes(current_root, &genome_node_children, env);				  
     /*genome_node_traverse_children(current_root,
