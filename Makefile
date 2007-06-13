@@ -14,7 +14,8 @@ INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
              -I$(CURDIR)/src/external/libpng-1.2.18
 CFLAGS:=
 CXXFLAGS:=
-GT_CFLAGS:= -g -Wall -Werror -pipe $(INCLUDEOPT)
+GT_CFLAGS:= -g -Wall -Werror -pipe -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
+            $(INCLUDEOPT)
 GT_CXXFLAGS:= -g -pipe $(INCLUDEOPT)
 LDFLAGS:=
 LDLIBS:=-lm -lz
