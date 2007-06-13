@@ -20,6 +20,13 @@ struct Diagram
   Range range;
 };
 
+typedef struct
+  {
+    GenomeNode *parent;
+    Diagram *diagram;
+    
+  } GenomeNodeChildren;
+  
 Range diagram_get_range(Diagram* diagram)
 {
   assert(diagram);
@@ -48,53 +55,32 @@ static int diagram_track_delete(void *key, void *value, void *data, Env* env)
 }
 
 /*!
-Check if a genome node is in the given Range of the diagram. If yes, hand it
-over to the corresponding track object. If the track doesn't exist, generate
-it.
-\param pointer to the diagram object.
-\param pointer to the array of genome nodes.
+Insert a genome node into a track. If the track to a corresponding genome type does'nt exist,
+create a new track.
+\param gn pointer to a genome node object.
+\param parent pointer the parent of the genome node object.
+\param d pointer to the diagram object.
 \param env Pointer to Environment object.
 */
-static int visit_child(GenomeNode* gn, void* diagram, Env* env)
+static void insert_genome_node_into_track(GenomeNode* gn, GenomeNode* parent, Diagram* d, Env* env)
 {
   const char* feature_type;
-  Diagram* d = (Diagram*) diagram;
   GenomeFeatureType type;
   GenomeFeature* gf = (GenomeFeature*) gn;
   Track* track;
-  Range gn_range;
   Str* track_type;
-
+  
   /*fetch the type of the given genome node*/
   type = genome_feature_get_type(gf);
   feature_type = genome_feature_type_get_cstr(type);
-
-  gn_range = genome_node_get_range(gn);
-
-  /*Check the Range of the genome node. If the start of the gn
-  is before the start of the diagram or the end of the gn is after
-  the end of the digram, set the corresponding value of the gn node
-  to the value of the diagram.*/
-  if (gn_range.end < d->range.start || gn_range.start > d->range.end)
-  {
-    return 0;
-  }
-  else if (gn_range.start < d->range.start)
-  {
-    gn_range.start = d->range.start;
-  }
-  else if (gn_range.end > d->range.end)
-  {
-    gn_range.end = d->range.end;
-  }
-
+  
   /*deliver the genome node to the track with the corresponding type.
   If the track does not exist, generate it.*/
   if (hashtable_get(d->tracks, feature_type) == NULL)
   {
     track_type = str_new_cstr((char*) feature_type, env);
     track = track_new(track_type, env);
-    track_insert_element(track, gn, d->config, NULL, env);
+    track_insert_element(track, gn, d->config, parent, env);
     hashtable_add(d->tracks, (char*) feature_type, track, env);
     d->nof_tracks++;
     str_delete(track_type,env);
@@ -102,37 +88,98 @@ static int visit_child(GenomeNode* gn, void* diagram, Env* env)
   else
   {	
     track = hashtable_get(d->tracks, feature_type);
-    track_insert_element(track, gn, d->config, NULL, env);
+    track_insert_element(track, gn, d->config, parent, env);
+  }
+}
+
+/*!
+insert a genome node into a track. If the genome node has children,
+ insert them with a recursiv call of visit_child.
+\param gn pointer to the diagram object.
+\param genome_node_children struct, containing pointers to a genome node and a diagram.
+\param env Pointer to Environment object.
+*/
+static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
+{
+   
+  GenomeNodeChildren* genome_node_info;
+  genome_node_info = (GenomeNodeChildren*) genome_node_children;
+  
+  if (genome_node_has_children(gn))
+  {	 		  
+    insert_genome_node_into_track(gn, genome_node_info->parent, genome_node_info->diagram, env);
+    genome_node_info->parent = gn;
+    genome_node_traverse_direct_children(gn,
+                                         genome_node_info,
+                                         visit_child,
+                                         env);
+					 
+  }
+  else 
+  {
+  insert_genome_node_into_track(gn, genome_node_info->parent, genome_node_info->diagram, env);
+  } 
+  return 0;
+
+}
+
+/*!
+Travering a genome node tree with depth first search. Furthermore the parent of a genome
+node is known.
+\param gn pointer to the diagram object.
+\param genome_node_children struct, containing pointers to a genome node and a diagram.
+\param env Pointer to Environment object.
+*/
+static int traverse_genome_nodes(GenomeNode* gn, void* genome_node_children, Env* env)
+{ 
+  GenomeNodeChildren* genome_node_info;
+  genome_node_info = (GenomeNodeChildren*) genome_node_children;
+  genome_node_info->parent = gn;
+  
+  if (genome_node_has_children(gn))
+  {			  
+    genome_node_traverse_direct_children(gn,
+                                         genome_node_info,
+                                         visit_child,
+                                         env); 
+  }
+  else
+  {
+    return 0;
   }
   return 0;
 }
 
 /*!
 Iterating through the array of genome nodes and traversing the genome node
-trees. Calling the function genome node with the current genome node.
+trees and insert always the first root node into a track.
 \param pointer to the diagram object.
 \param pointer to the array of genome nodes.
 \param env Pointer to Environment object.
 */
 static void diagram_build(Diagram* diagram, Array* features, Env* env)
 {
+  GenomeNodeChildren genome_node_children;
+  genome_node_children.diagram = diagram;
   int i=0;
   for (i=0;i<array_size(features);i++)
   {
-    genome_node_traverse_children(**(GenomeNode***) array_get(features,
-                                                              i),
+      
+    GenomeNode *current_root = **(GenomeNode***) array_get(features,i);
+    insert_genome_node_into_track(current_root,
+                                  NULL,
 				  diagram,
-                                  visit_child,
-				  false,
 				  env);
+				  
+    traverse_genome_nodes(current_root, &genome_node_children, env);
   }
 }
 
 /*
 Initialize a new diagram object.
-\param pointer to the array of genome nodes.
-\param the given range of the diagam.
-\param pointer to the configuration object.
+\param features pointer to the array of genome nodes.
+\param range the given range of the diagam.
+\param config pointer to the configuration object.
 \param env Pointer to Environment object.
 */
 Diagram* diagram_new(Array* features, Range range, Config* config, Env* env)
@@ -150,8 +197,8 @@ Diagram* diagram_new(Array* features, Range range, Config* config, Env* env)
 
 /*
 Update the configuration object with new settings.
-\param pointer to the diagram object.
-\param pointer to the configuration object.
+\param diagram pointer to the diagram object.
+\param config pointer to the configuration object.
 \param env Pointer to Environment object.
 */
 void diagram_set_config(Diagram* diagram, Config* config, Env* env)
@@ -159,10 +206,9 @@ void diagram_set_config(Diagram* diagram, Config* config, Env* env)
   diagram->config = config;
 }
 
-
 /*
 Delivers the hashtable with the stored tracks.
-\param pointer to the diagram object.
+\param diagram pointer to the diagram object.
 */
 Hashtable* diagram_get_tracks(Diagram* diagram)
 {
@@ -171,7 +217,7 @@ Hashtable* diagram_get_tracks(Diagram* diagram)
 
 /*
 Returns the number of all lines in the diagram.
-\param pointer to the diagram object.
+\param diagram pointer to the diagram object.
 \param env Pointer to Environment object.
 */
 int diagram_get_total_lines(Diagram* diagram, Env* env)
@@ -186,7 +232,7 @@ int diagram_get_total_lines(Diagram* diagram, Env* env)
 
 /*
 Returns the number of all lines in the diagram.
-\param pointer to the diagram object.
+\param diagram pointer to the diagram object.
 \param env Pointer to Environment object.
 */
 int diagram_get_number_of_tracks(Diagram* diagram)
@@ -197,7 +243,7 @@ int diagram_get_number_of_tracks(Diagram* diagram)
 
 /*
 Delete the diagram object.
-\param pointer to the diagram object.
+\param diagram pointer to the diagram object.
 \param env Pointer to Environment object.
 */
 void diagram_delete(Diagram* diagram, Env* env)
@@ -207,7 +253,9 @@ void diagram_delete(Diagram* diagram, Env* env)
   env_ma_free(diagram, env);
 }
 
-
+/*
+generate a feature index test structure and test the diagram functions.
+*/
 int diagram_unit_test(Env* env)
 {
 
@@ -255,13 +303,13 @@ int diagram_unit_test(Env* env)
                            env);
 			   
   genome_node_set_seqid((GenomeNode*) ex3, seqid2);
-																					
+  
   cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN, NULL, UNDEF_ULONG,
                             env);
 			    
   genome_node_set_seqid((GenomeNode*) cds1, seqid2);
 	
-  /* Determine the structure of our feature tree */																				
+  /* Determine the structure of our feature tree */
   genome_node_is_part_of_genome_node(gn1, ex1, env);
   genome_node_is_part_of_genome_node(gn1, ex2, env);
   genome_node_is_part_of_genome_node(gn2, ex3, env);
@@ -280,19 +328,22 @@ int diagram_unit_test(Env* env)
   feature_index_add_genome_feature_for_seqid(fi, (GenomeFeature*) gn1, env);
   feature_index_add_genome_feature_for_seqid(fi, (GenomeFeature*) gn2, env);	
  
-  /* Generating the Range for the diagram*/
-  
+  /* Generating the Range for the diagram*/  
   dr1.start=400; dr1.end=900;
+  
+  /*get the features for the test1 sequence region*/
   Array *features;
   features = array_new(sizeof(GenomeFeature*), env);
   feature_index_get_features_for_range(fi,features,"test1",dr1,env);
 
+  /*create a config object*/
   Config *cfg;
   Str *luafile = str_new_cstr("config.lua",env);
   bool verbose = false;
   cfg = config_new(env, &verbose);
   config_load_file(cfg, luafile, env);
 
+  /*create a diagram object and test it*/
   Diagram *dia;
   dia = diagram_new(features,dr1,cfg,env);
   
@@ -301,20 +352,32 @@ int diagram_unit_test(Env* env)
   ensure(has_err, dia->range.end == 900);
   ensure(has_err, hashtable_get(dia->tracks,"gene") != NULL);
   ensure(has_err, hashtable_get(dia->tracks,"exon") != NULL);
-  /*ensure(has_err, hashtable_get(dia->tracks,"CDS") != NULL);*/
-  
-  diagram_get_total_lines(dia,env);
     
+  /*get the features for the test2 sequence region*/
+  Array *features2;
+  features2 = array_new(sizeof(GenomeFeature*), env);
+  feature_index_get_features_for_range(fi,features2,"test2",dr1,env);
+  
+  /*create a diagram object and test it*/
+  Diagram *dia2;
+  dia2 = diagram_new(features2,dr1,cfg,env);
+  ensure(has_err, dia->range.start == 400);
+  ensure(has_err, dia->range.end == 900);
+  ensure(has_err, hashtable_get(dia2->tracks,"gene") != NULL);
+  ensure(has_err, hashtable_get(dia2->tracks,"exon") != NULL);
+  ensure(has_err, hashtable_get(dia2->tracks,"CDS") != NULL);   
+ 
   /*delete all generated objects*/
   str_delete(luafile, env);
   config_delete(cfg, env);
   diagram_delete(dia,env);
+  diagram_delete(dia2,env);
   feature_index_delete(fi, env);
   array_delete(features,env);
+  array_delete(features2,env);
   genome_node_rec_delete(gn1, env);
   genome_node_rec_delete(gn2, env);
   str_delete(seqid1, env);
   str_delete(seqid2, env);
 return has_err;
 }
-	
