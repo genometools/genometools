@@ -65,6 +65,7 @@ void      graphics_draw_scale(Graphics *g, double x, double y, double width,
 											     	  double stroke_width, double arrow_height,
 												      double arrow_width);
 double    graphics_get_text_height(Graphics *g);
+double    graphics_get_text_width(Graphics *g);
 void      graphics_save(const Graphics*);
 
 #endif

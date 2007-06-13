@@ -168,7 +168,7 @@ void render_line(Render *r, Line *line, Env *env)
     /* draw block caption */
     draw_range = render_convert_coords(r, block_range, factor, true, env);
     caption = block_get_caption(block);
-    if (!caption) caption=""; 
+    if (!caption) caption="<unnamed>"; 
     graphics_draw_text(r->g,
                        draw_range.start,
                        r->dy-graphics_get_text_height(r->g)+3,
@@ -301,6 +301,7 @@ void render_to_png(Render *r, char *fn, unsigned int width, Env *env)
 {
   assert(r && fn && env && width > 0);
   unsigned int height = render_calculate_height(r, env);
+	unsigned int base_range, step;
   long i;
   char str[32];
 
@@ -312,25 +313,44 @@ void render_to_png(Render *r, char *fn, unsigned int width, Env *env)
   /* create new Graphics backend */
   r->g = graphics_new_png(fn, width, height, env);
   graphics_set_margins(r->g, r->margins, 0, width, height);
-    
+  
+	/* determine range and step of the scale */
+  base_range = r->range.end - r->range.start;
+	if(base_range < 100)
+	  step = 10;
+  else if (base_range < 1000)
+	  step = 100;
+	else if (base_range < 10000)
+	  step = 1000;
+		
+	
   /* draw grid, still to be improved -- ssteinbiss */ 
-  for(i = r->range.start - (r->range.start % 1000);
-      i<=r->range.end - (r->range.start % 100);
-      i+=100)
+  for(i = r->range.start - (r->range.start % step);
+      i<=r->range.end + step;
+      i+=step)
   {
     long x = i - (long) r->range.start;
     double factor = ((double) r->width
                             -(2*r->margins)) 
                  / (double) (r->range.end 
                             - r->range.start);
-    graphics_draw_vertical_line(r->g, x * factor, 0, height);
+    graphics_draw_vertical_line(r->g, x * factor, 30, height-30);
+
+		if (base_range > 1000 && i >= 1000)
+		  sprintf(str, "%lik", i/1000);
+		else
+		  sprintf(str, "%li", i);
+		
+		graphics_draw_text_centered(r->g, x* factor, 20, str);
   }
-	
+
+
 	sprintf(str, "%lu", r->range.start);
 	graphics_draw_text_left(r->g, r->margins, 20, str);
+/*
 	sprintf(str, "%lu", r->range.end);
 	graphics_draw_text_right(r->g, width-r->margins, 20, str);
-
+*/
   
 	/* draw scale and location info */
 	graphics_draw_scale(r->g,

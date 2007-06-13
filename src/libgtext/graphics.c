@@ -384,6 +384,15 @@ double graphics_get_text_height(Graphics *g)
 	return ext.height; 
 }
 
+double graphics_get_text_width(Graphics *g)
+{
+  cairo_text_extents_t ext;
+  assert(g);
+  /* get text extents */
+  cairo_text_extents(g->cr, "A", &ext);
+	return ext.width; 
+}
+
 void graphics_draw_colored_text(Graphics *g,
                                 double x,
 																double y,
