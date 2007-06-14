@@ -50,14 +50,7 @@ void track_insert_element(Track *track,
   assert(track && gn);
   Line *line;
 
-  if(parent != NULL)
-  {
-    line = get_next_free_line(track, parent, env);
-  }
-  else
-  {
-    line = get_next_free_line(track, gn, env);
-  }
+  line = get_next_free_line(track, gn, env);
   line_insert_element(line, gn, cfg, parent, env);
 }
 
