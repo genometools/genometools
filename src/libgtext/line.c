@@ -8,7 +8,7 @@
 #include <libgtext/block.h>
 #include <libgtext/line.h>
 
-GenomeNode* last_parent = NULL;
+/* GenomeNode* last_parent = NULL; */
 
 struct Line
 {
@@ -38,7 +38,7 @@ Inserts an element into a Line object
 \param cfg Pointer to Config file
 \param env Pointer to Environment object
 */
-void line_insert_element(Line *line,
+/* void line_insert_element(Line *line,
                          GenomeNode *gn,
 			 Config *cfg,
 			 GenomeNode *parent,
@@ -102,6 +102,16 @@ void line_insert_element(Line *line,
   block_insert_element(block, gn, cfg, env);
   block_set_caption(block, caption);
   last_parent = parent;
+}*/
+
+/*!
+
+*/
+void line_insert_block(Line *line, Block *block, Env *env)
+{
+  assert(line && block);
+
+  array_add(line->blocks, block, env);
 }
 
 /*!
@@ -110,19 +120,17 @@ Checks if Line is occupied
 \param gn Pointer to GenomeNode object
 \return True or False
 */
-bool line_is_occupied(Line *line, GenomeNode *gn)
+bool line_is_occupied(Line *line, Range r)
 {
-   assert(line && gn);
+   assert(line);
 
    int i;
-   Range r1, r2;
-
-   r2 = genome_node_get_range(gn);
+   Range r1;
 
    for(i=0; i<array_size(line->blocks); i++)
    {
      r1 = block_get_range(*(Block**)  array_get(line->blocks, i));
-     if(range_overlap(r1, r2))
+     if(range_overlap(r1, r))
      {
        return true;
      }
@@ -242,9 +250,16 @@ int line_unit_test(Env* env)
   genome_feature_add_attribute((GenomeFeature*) gn3, "Name", blub, env);
   genome_feature_add_attribute((GenomeFeature*) gn4, "Name", bar, env);
   
-  last_parent = NULL;			    
+  /* last_parent = NULL;			     */
+  
+  Block* b1 = block_new(env);
+  Block* b2 = block_new(env);
+
+  block_insert_element(b1, gn1, NULL, env);
+  block_insert_element(b2, gn2, NULL, env);
+  
   /* test line_insert_elements */
-  ensure(has_err, (0 == array_size(line_get_blocks(l1))));
+  /* ensure(has_err, (0 == array_size(line_get_blocks(l1))));
   line_insert_element(l1, gn1, cfg, parent, env);
   ensure(has_err, (1 == array_size(line_get_blocks(l1))));
   line_insert_element(l1, gn2, cfg, parent, env);
@@ -259,15 +274,22 @@ int line_unit_test(Env* env)
   ensure(has_err, (0 == strcmp(block_get_caption(b), genome_feature_get_attribute(gn3, "Name"))));
   line_insert_element(l1, gn4, cfg, parent, env);
   blocks = line_get_blocks(l1);
-  ensure(has_err, (3 == array_size(blocks)));
+  ensure(has_err, (3 == array_size(blocks))); */
+
+  /* test line_insert_block */
+  ensure(has_err,  (0 == array_size(line_get_blocks(l1))));
+  line_insert_block(l1, b1, env);
+  ensure(has_err,  (1 == array_size(line_get_blocks(l1))));
+  line_insert_block(l1, b2, env);
+  ensure(has_err,  (2 == array_size(line_get_blocks(l1))));
 
   /* test line_is_occupied */
-  ensure(has_err, !line_is_occupied(l2, gn3));
-  ensure(has_err, line_is_occupied(l1, gn3));
+  ensure(has_err, !line_is_occupied(l2, r3));
+  ensure(has_err, line_is_occupied(l1, r3));
 
   /* test line_get_blocks */
   blocks = line_get_blocks(l1);
-  ensure(has_err, (3 == array_size(blocks)));
+  ensure(has_err, (2 == array_size(blocks)));
 
   config_delete(cfg, env);
   str_delete(luafile, env);
