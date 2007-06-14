@@ -173,6 +173,20 @@ void render_line(Render *r, Line *line, Env *env)
                        draw_range.start,
                        r->dy-graphics_get_text_height(r->g)+3,
                        caption);
+											 
+		/* DEBUG */
+         graphics_draw_box(r->g,
+                       draw_range.start,
+                       r->dy,
+                       draw_range.end - draw_range.start,
+                       config_get_num(r->cfg, "format", "bar_height", 15, env),
+                       config_get_color(r->cfg, "foo", env),
+                       NoArrow,
+                       config_get_num(r->cfg, "format", "arrow_width", 6, env),
+                       config_get_num(r->cfg, "format", "stroke_width", 1, env),
+                       config_get_color(r->cfg, "stroke", env));
+					/* DEBUG */
+					
     /* draw elements in block */
     for (j=0;j<array_size(elems); j++)
     {
