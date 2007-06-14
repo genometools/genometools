@@ -10,6 +10,7 @@
 #include <libgtcore/array.h>
 #include <libgtext/genome_node.h>
 #include <libgtext/config.h>
+#include <libgtext/block.h>
 
 typedef struct Line Line;
 
@@ -19,8 +20,11 @@ void line_insert_element(Line* line,
 			  Config* cfg,
 			  GenomeNode* parent,
 			  Env* env);
+void line_insert_block(Line* line,
+                       Block* block,
+		       Env* env);
 bool line_is_occupied(Line* line,
-                      GenomeNode* gn);
+                      Range r);
 Array* line_get_blocks(Line* line);
 void line_delete(Line* line,
                  Env* env);
