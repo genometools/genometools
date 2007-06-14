@@ -135,6 +135,15 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
 
 }
 
+/*
+creates Lines for each track, iterator function
+*/
+static int finish_track(void *key, void *value, void *data, Env* env)
+{
+  track_finish((Track*) value, env);
+  return 0;
+}
+
 /*!
 Travering a genome node tree with depth first search.
  Furthermore the parent of a genome node is known.
@@ -184,12 +193,13 @@ static void diagram_build(Diagram* diagram, Array* features, Env* env)
     GenomeNode *current_root = **(GenomeNode***) array_get(features,i);
     insert_genome_node_into_track(current_root,
                                   NULL,
-				  diagram,
-				  env);
+				                          diagram,
+				                          env);
 
     traverse_genome_nodes(current_root, &genome_node_children, env);
   }
-
+	/* create lines for each track in diagram */
+  hashtable_foreach(diagram->tracks, finish_track, NULL, env);
 }
 
 /*
