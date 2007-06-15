@@ -4,9 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <assert.h>
-#include <stdlib.h>
-#include <gt.h>
+#include "gt.h"
 
 typedef struct {
   Str *sequence_region_id;
