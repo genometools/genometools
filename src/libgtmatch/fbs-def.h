@@ -20,11 +20,11 @@ typedef struct
        firstoverallseq,
        firstseqinfile,
        complete;
-  Uint linenum;
+  unsigned int linenum;
   Genericstream inputstream;
   bool nextfile;
-  Uint nextread,
-       nextfree;
+  unsigned int nextread,
+               nextfree;
   Uchar bufspace[FILEBUFFERSIZE];
   Uint64 totaloffset;
   const char **filenametab;

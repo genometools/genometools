@@ -4,9 +4,10 @@ extern "C" {
 int getfastastreamkmers(
         const char **filenametab,
         unsigned int numoffiles,
-        void(*processkmercode)(void *,Uint,Uint64,const DefinedUint *,Env *),
+        void(*processkmercode)(void *,Codetype,Uint64,
+                               const Firstspecialpos *,Env *),
         void *processkmercodeinfo,
-        Uint numofchars,
+        unsigned int numofchars,
         unsigned int kmersize,
         const Uchar *symbolmap,
         Env *env);
@@ -14,9 +15,10 @@ int getfastastreamkmers(
 void getencseqkmers(
         const Encodedsequence *encseq,
         Uint64 totallength,
-        void(*processkmercode)(void *,Uint,Uint64,const DefinedUint *,Env *),
+        void(*processkmercode)(void *,Codetype,Uint64,
+                               const Firstspecialpos *,Env *),
         void *processkmercodeinfo,
-        Uint numofchars,
+        unsigned int numofchars,
         unsigned int kmersize,
         Env *env);
 

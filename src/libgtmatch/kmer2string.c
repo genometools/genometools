@@ -8,16 +8,17 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
-#include "types.h"
+#include "intcode-def.h"
 
 void kmercode2string(char *buffer,
-                     Uint code,
-                     Uint numofchars,
+                     Codetype code,
+                     unsigned int numofchars,
                      unsigned int kmersize,
                      const char *characters)
 {
   int i;
-  Uint cc, tmpcode = code;
+  unsigned int cc; 
+  Codetype tmpcode = code;
 
   buffer[kmersize] = '\0';
   for (i=(int) (kmersize-1); i>=0; i--)

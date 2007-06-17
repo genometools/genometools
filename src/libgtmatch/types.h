@@ -204,6 +204,10 @@ typedef int Regexreturntype;    /* \Typedef{Regexreturntype} */
 typedef int Sysconfargtype;         /* \Typedef{Sysconfargtype} */
 
 /*
+  This is the type for integer codes for strings of some fixed length
+*/
+
+/*
   The following structure stores information about special characters.
 */
 

@@ -39,13 +39,14 @@ void initfastabufferstate(Fastabufferstate *fbs,
 int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
 {
   Fgetcreturntype currentchar;
-  Uint currentposition = 0, currentfileadd = 0, currentfileread = 0;
+  unsigned int currentposition = 0;
+  Uint currentfileadd = 0, currentfileread = 0;
   Uchar charcode;
 
   env_error_check(env);
   while (true)
   {
-    if (currentposition >= (Uint) FILEBUFFERSIZE)
+    if (currentposition >= (unsigned int) FILEBUFFERSIZE)
     {
       fbs->filelengthtab[fbs->filenum].uint0 += currentfileread;
       fbs->filelengthtab[fbs->filenum].uint1 += currentfileadd;
@@ -60,7 +61,7 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       fbs->firstseqinfile = true;
       currentfileadd = 0;
       currentfileread = 0;
-      fbs->linenum = UintConst(1);
+      fbs->linenum = (unsigned int) 1;
       opengenericstream(&fbs->inputstream,fbs->filenametab[fbs->filenum]);
     } else
     {
@@ -122,10 +123,10 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
               if (charcode == (Uchar) UNDEFCHAR)
               {
                 env_error_set(env,"illegal character '%c':"
-                                  " file \"%s\", line %lu",
+                                  " file \"%s\", line %u",
                               currentchar,
                               fbs->filenametab[fbs->filenum],
-                              (Showuint) fbs->linenum);
+                              fbs->linenum);
                 return -1;
               }
               if (ISSPECIAL(charcode))
@@ -146,7 +147,7 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       }
     }
   }
-  fbs->totaloffset += currentposition;
+  fbs->totaloffset += (Uint) currentposition;
   if (fbs->firstoverallseq)
   {
     env_error_set(env,"no sequences in multiple fasta file(s) %s ...",

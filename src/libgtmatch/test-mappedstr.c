@@ -15,6 +15,7 @@
 #include "chardef.h"
 #include "addnextchar.h"
 #include "encseq-def.h"
+#include "intcode-def.h"
 #include "sarr-def.h"
 
 #include "kmer2string.pr"
@@ -82,8 +83,8 @@ static Uint qgram2codefillspecial(Uint numofchars,
 static void outkmeroccurrence(void *processinfo,
                               Uint code,
                               /*@unused@*/ Uint64 position,
-                              /*@unused@*/ const DefinedUint
-                                                   *firstspecialposition,
+                              /*@unused@*/ const Firstspecialpos
+                                                 *firstspecialposition,
                               Env *env)
 {
   ArrayUint *codelist = (ArrayUint *) processinfo;

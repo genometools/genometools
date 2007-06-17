@@ -17,6 +17,7 @@
 #include "codespec.h"
 #include "measure-time-if.h"
 #include "partssuf-def.h"
+#include "intcode-def.h"
 #include "encseq-def.h"
 
 #include "measure-time.pr"
@@ -33,7 +34,7 @@ typedef struct
 {
   unsigned int maxprefixlen:PREFIXLENBITS;
   unsigned int code:(INTWORDSIZE-PREFIXLENBITS);
-  Uint position; /* get rid of this by using information from encseq */
+  Codetype position; /* get rid of this by using information from encseq */
 } Codeatposition;
 
 DECLAREARRAYSTRUCT(Codeatposition);
@@ -43,11 +44,11 @@ DECLAREARRAYSTRUCT(Codeatposition);
 typedef struct
 {
   bool storespecials;
-  Uint currentmincode,
-       currentmaxcode,
-       *basepower,
-       *filltable,
-       *leftborder,
+  Codetype currentmincode,
+           currentmaxcode;
+  unsigned int *filltable,
+               *basepower;
+  Uint *leftborder,
        *countspecialcodes,
        *suftab,
        *suftabptr;
@@ -55,19 +56,19 @@ typedef struct
   Uint nextfreeCodeatposition;
 } Collectedsuffixes;
 
-static int initbasepower(Uint **basepower,
-                         Uint **filltable,
-                         Uint base,
-                         Uint len,
+static int initbasepower(unsigned int **basepower,
+                         unsigned int **filltable,
+                         unsigned int base,
+                         unsigned int len,
                          Env *env)
 {
-  Uint thepower = UintConst(1), i, minfailure;
+  unsigned int thepower = (unsigned int) 1, i, minfailure;
   bool haserr = false;
 
   env_error_check(env);
   ALLOCASSIGNSPACE(*basepower,NULL,Uint,len+1);
   ALLOCASSIGNSPACE(*filltable,NULL,Uint,len);
-  minfailure = (~UintConst(0))/base;
+  minfailure = (~(unsigned int) 0)/base;
   for (i=0; /* Nothing */; i++)
   {
     (*basepower)[i] = thepower;
@@ -77,9 +78,7 @@ static int initbasepower(Uint **basepower,
     }
     if (thepower >= minfailure)
     {
-      env_error_set(env,"overflow when computing %lu * %lu\n",
-                    (Showuint) thepower,
-                    (Showuint) base);
+      env_error_set(env,"overflow when computing %u * %u\n",thepower,base);
       haserr = true;
       break;
     }
@@ -102,9 +101,9 @@ static int initbasepower(Uint **basepower,
 }
 
 static void updatekmercount(void *processinfo,
-                            Uint code,
+                            Codetype code,
                             Uint64 position,
-                            const DefinedUint *firstspecial,
+                            const Firstspecialpos *firstspecial,
                             Env *env)
 {
   Collectedsuffixes *csf = (Collectedsuffixes *) processinfo;
@@ -115,21 +114,21 @@ static void updatekmercount(void *processinfo,
     {
       env_error_check(env);
 
-      if (firstspecial->uintvalue > 0)
+      if (firstspecial->specialpos > 0)
       {
         Codeatposition cp;
 
         cp.code = code;
-        cp.maxprefixlen = firstspecial->uintvalue;
-        CHECKIFFITS32BITS(position + (Uint64) firstspecial->uintvalue);
-        cp.position = (Uint) (position + firstspecial->uintvalue);
+        cp.maxprefixlen = firstspecial->specialpos;
+        CHECKIFFITS32BITS(position + (Uint64) firstspecial->specialpos);
+        cp.position = (Uint) (position + firstspecial->specialpos);
         csf->spaceCodeatposition[csf->nextfreeCodeatposition++] = cp;
         csf->storespecials = false;
         csf->leftborder[code]++;
       }
     } else
     {
-      if(firstspecial->uintvalue > 0)
+      if(firstspecial->specialpos > 0)
       {
         csf->leftborder[code]++;
       } else
@@ -144,9 +143,9 @@ static void updatekmercount(void *processinfo,
 }
 
 static void insertwithoutspecial(void *processinfo,
-                                 Uint code,
+                                 Codetype code,
                                  Uint64 position,
-                                 const DefinedUint *firstspecial,
+                                 const Firstspecialpos *firstspecial,
                                  /*@unused@*/ Env *env)
 {
   if (!firstspecial->defined)
@@ -174,8 +173,8 @@ static void reversespecialcodes(Codeatposition *spaceCodeatposition,
   Codeatposition *front, *back, tmp;
 
   for (front = spaceCodeatposition,
-      back = spaceCodeatposition + nextfreeCodeatposition - 1;
-      front < back; front++, back--)
+       back = spaceCodeatposition + nextfreeCodeatposition - 1;
+       front < back; front++, back--)
   {
     tmp = *front;
     *front = *back;
@@ -183,13 +182,13 @@ static void reversespecialcodes(Codeatposition *spaceCodeatposition,
   }
 }
 
-static Uint codedownscale(const Uint *filltable,
-                          const Uint *basepower,
-                          Uint code,
-                          Uint prefixindex,
-                          Uint maxprefixlen)
+static Codetype codedownscale(const unsigned int *filltable,
+                              const unsigned int *basepower,
+                              Codetype code,
+                              unsigned int prefixindex,
+                              unsigned int maxprefixlen)
 {
-  Uint remain;
+  unsigned int remain;
 
   code -= filltable[maxprefixlen];
   remain = maxprefixlen-prefixindex;
@@ -201,13 +200,15 @@ static Uint codedownscale(const Uint *filltable,
 
 static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
                                /*@unused@*/ Uint64 totallength,
-                               Uint numofchars,
+                               unsigned int numofchars,
                                unsigned int prefixlength,
                                Collectedsuffixes *csf,
                                bool deletevalues,
                                /*@unused@*/ Env *env)
 {
-  Uint insertindex, code, j, prefixindex, stidx;
+  Codetype code;
+  unsigned int prefixindex;
+  Uint insertindex, j, stidx;
 
   for (prefixindex=0; prefixindex < prefixlength; prefixindex++)
   {
@@ -358,7 +359,8 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
                  Measuretime *mtime,
                  Env *env)
 {
-  Uint numofallcodes, numofspecialcodes, *optr, part;
+  unsigned int numofallcodes, numofspecialcodes;
+  Uint *optr, part;
   Collectedsuffixes csf;
   Suftabparts *suftabparts = NULL;
   bool haserr = false;
@@ -380,8 +382,10 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
     haserr = true;
   }
   if (!haserr && initbasepower(&csf.basepower,
-                              &csf.filltable,
-                              numofchars,prefixlength,env) != 0)
+                               &csf.filltable,
+                               numofchars,
+                               prefixlength,
+                               env) != 0)
   {
     haserr = true;
   }
@@ -392,9 +396,10 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
     if (numofallcodes-1 > MAXCODEVALUE)
     {
       env_error_set(env,
-                    "alphasize^prefixlength-1 = %lu does not fit into "
+                    "alphasize^prefixlength-1 = %u does not fit into "
                     " %lu bits: choose smaller value for prefixlength",
-                    (Showuint) (numofallcodes-1),(Showuint) CODEBITS);
+                    numofallcodes-1,
+                    (Showuint) CODEBITS);
       haserr = true;
     }
   }
@@ -408,7 +413,7 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
     memset(csf.leftborder,0,
            sizeof (*csf.leftborder) * (size_t) numofallcodes);
     ALLOCASSIGNSPACE(csf.countspecialcodes,NULL,Uint,
-                     numofspecialcodes);
+                     (Uint) numofspecialcodes);
     memset(csf.countspecialcodes,0,
            sizeof (*csf.countspecialcodes) *
                   (size_t) numofspecialcodes);
@@ -425,7 +430,7 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
     assert(csf.filltable != NULL);
     assert(csf.leftborder != NULL);
     for (optr = csf.leftborder + 1;
-        optr < csf.leftborder + numofallcodes; optr++)
+         optr < csf.leftborder + numofallcodes; optr++)
     {
       *optr += *(optr-1);
     }

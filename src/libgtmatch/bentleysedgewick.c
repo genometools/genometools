@@ -13,6 +13,7 @@
 #include "divmodmul.h"
 #include "minmax.h"
 #include "codespec.h"
+#include "intcode-def.h"
 #include "encseq-def.h"
 
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
@@ -263,14 +264,16 @@ void sortallbuckets(Uint *suftabptr,
                     const Uint *leftborder,
                     const Uint *countspecialcodes,
                     Uint totallength,
-                    Uint numofchars,
+                    unsigned int numofchars,
                     unsigned int prefixlength,
-                    Uint mincode,
-                    Uint maxcode,
+                    Codetype mincode,
+                    Codetype maxcode,
                     Uint widthofpart,
                     Env *env)
 {
-  Uint code, left, right, rightchar = mincode % numofchars, specialcodes;
+  Codetype code;
+  unsigned int rightchar = mincode % numofchars;
+  Uint left, right, specialcodes;
   ArrayMKVstack mkvauxstack;
 
   INITARRAY(&mkvauxstack,MKVstack);
