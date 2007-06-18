@@ -333,6 +333,13 @@ static int show_help(OptionParser *op, Option_type optiontype, Env *env)
         else
           printf("%lu\n", option->default_value.ul);
       }
+      else if (option->option_type == OPTION_STRING) {
+        printf("%*s  default: ", (int) max_option_length, "");
+        if (!option->default_value.s || !strlen(option->default_value.s))
+          xputs("undefined");
+        else
+          xputs(option->default_value.s);
+      }
     }
   }
   if (op->comment_func)
