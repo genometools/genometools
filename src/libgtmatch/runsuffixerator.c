@@ -82,7 +82,8 @@ static int outal1file(const char *indexname,const Alphabet *alpha,Env *env)
 
 static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
 {
-  Uint numofchars = 0, numofsequences;
+  unsigned char numofchars = 0;
+  Uint numofsequences;
   Uint64 totallength;
   Alphabet *alpha;
   Specialcharinfo specialcharinfo;

@@ -17,14 +17,14 @@
 
 static void showprjinfo(FILE *outprj,
                         const char **filenametab,
-                        Uint numoffiles,
+                        unsigned int numoffiles,
                         const PairUint *filelengthtab,
                         Uint64 totallength,
                         Uint numofsequences,
                         const Specialcharinfo *specialcharinfo,
                         unsigned int prefixlength)
 {
-  Uint i;
+  unsigned int i;
 
   assert(numoffiles > 0);
   assert(filelengthtab != NULL);
@@ -50,7 +50,7 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"numofdbsequences=%lu\n",(Showuint) numofsequences);
   fprintf(outprj,"numofquerysequences=0\n");
   fprintf(outprj,"prefixlength=%lu\n",(Showuint) prefixlength);
-  fprintf(outprj,"integersize=%ld\n",(Showsint) (sizeof (Uint) * CHAR_BIT));
+  fprintf(outprj,"integersize=%lu\n",(Showuint) (sizeof (Uint) * CHAR_BIT));
   fprintf(outprj,"littleendian=%c\n",islittleendian() ? '1' : '0');
 }
 

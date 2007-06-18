@@ -7,12 +7,11 @@
 #include <ctype.h>
 #include "libgtcore/env.h"
 #include "fbs-def.h"
-#include "inputsymbol.h"
 #include "spacedef.h"
+#include "inputsymbol.h"
 #include "chardef.h"
 
 #include "genericstream.pr"
-#define ADDAMOUNT 128
 
 void initfastabufferstate(Fastabufferstate *fbs,
                           const char **filenametab,
@@ -119,7 +118,7 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
               fbs->indesc = true;
             } else
             {
-              charcode = fbs->symbolmap[(Uint) currentchar];
+              charcode = fbs->symbolmap[(unsigned int) currentchar];
               if (charcode == (Uchar) UNDEFCHAR)
               {
                 env_error_set(env,"illegal character '%c':"

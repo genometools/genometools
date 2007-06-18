@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "types.h"
+#include <stdlib.h>
 #include "genstream.h"
 #include "checkgzip.pr"
 
@@ -33,7 +33,7 @@ void opengenericstream(Genericstream *inputstream,const char *inputfile)
 
 void closegenericstream(Genericstream *inputstream,const char *inputfile)
 {
-  Fclosereturntype retval;
+  int retval;
 
   if (inputstream->isgzippedstream)
   {

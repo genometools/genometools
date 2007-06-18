@@ -151,8 +151,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
                              Env *env)
 {
   Suffixptr *left, *right, *leftplusw;
-  Uint w, val, partval;
-  Uint depth, offset, doubleoffset, width;
+  Uint w, val, partval, depth, offset, doubleoffset, width;
   Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
   Uchar tmpsvar;
 

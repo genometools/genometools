@@ -48,12 +48,12 @@ typedef struct
            currentmaxcode;
   unsigned int *filltable,
                *basepower;
-  Uint *leftborder,
+  Uint nextfreeCodeatposition,
+       *leftborder,
        *countspecialcodes,
        *suftab,
        *suftabptr;
   Codeatposition *spaceCodeatposition;
-  Uint nextfreeCodeatposition;
 } Collectedsuffixes;
 
 static int initbasepower(unsigned int **basepower,
@@ -66,8 +66,8 @@ static int initbasepower(unsigned int **basepower,
   bool haserr = false;
 
   env_error_check(env);
-  ALLOCASSIGNSPACE(*basepower,NULL,Uint,len+1);
-  ALLOCASSIGNSPACE(*filltable,NULL,Uint,len);
+  ALLOCASSIGNSPACE(*basepower,NULL,unsigned int,len+1);
+  ALLOCASSIGNSPACE(*filltable,NULL,unsigned int,len);
   minfailure = (~(unsigned int) 0)/base;
   for (i=0; /* Nothing */; i++)
   {
@@ -263,8 +263,7 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
 typedef struct
 {
   Uint64 totallength;
-  Uint nextfreeUint, allocatedUint;
-  Uint *spaceUint;
+  Uint nextfreeUint, allocatedUint, *spaceUint;
   int(*processsuftab)(void *,const Uint *,Uint,Env *);
   void *processsuftabinfo;
   Env *env;
@@ -353,14 +352,14 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
                  Uint specialcharacters,
                  Uint specialranges,
                  const Encodedsequence *encseq,
-                 Uint numofchars,
+                 unsigned int numofchars,
                  unsigned int prefixlength,
-                 Uint numofparts,
+                 unsigned int numofparts,
                  Measuretime *mtime,
                  Env *env)
 {
-  unsigned int numofallcodes, numofspecialcodes;
-  Uint *optr, part;
+  unsigned int numofallcodes, numofspecialcodes, part;
+  Uint *optr;
   Collectedsuffixes csf;
   Suftabparts *suftabparts = NULL;
   bool haserr = false;
@@ -405,15 +404,15 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
   }
   if (!haserr)
   {
-    Uint specialcode, largestwidth;
+    Codetype specialcode;
+    Uint largestwidth;
 
     assert(csf.basepower != NULL);
     numofspecialcodes = csf.basepower[prefixlength-1];
     ALLOCASSIGNSPACE(csf.leftborder,NULL,Uint,numofallcodes+1);
     memset(csf.leftborder,0,
            sizeof (*csf.leftborder) * (size_t) numofallcodes);
-    ALLOCASSIGNSPACE(csf.countspecialcodes,NULL,Uint,
-                     (Uint) numofspecialcodes);
+    ALLOCASSIGNSPACE(csf.countspecialcodes,NULL,Uint,numofspecialcodes);
     memset(csf.countspecialcodes,0,
            sizeof (*csf.countspecialcodes) *
                   (size_t) numofspecialcodes);

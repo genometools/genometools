@@ -43,7 +43,7 @@ typedef unsigned short Ushort;        /* \Typedef{Ushort} */
   code for 32 bit integers and 64 bit integers.
 */
 
-#if __WORDSIZE == 64
+#ifdef _LP64
 
 #define LOGWORDSIZE    6              /* base 2 logarithm of wordsize */
 #define UintConst(N)   (N##UL)        /* unsigned integer constant */

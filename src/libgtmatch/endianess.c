@@ -4,8 +4,6 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdbool.h>
 
 bool islittleendian(void)

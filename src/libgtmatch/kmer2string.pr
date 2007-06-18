@@ -2,8 +2,8 @@
 extern "C" {
 #endif
 void kmercode2string(char *buffer,
-                     Uint code,
-                     Uint numofchars,
+                     Codetype code,
+                     unsigned int numofchars,
                      unsigned int kmersize,
                      const char *characters);
 

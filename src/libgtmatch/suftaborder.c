@@ -25,7 +25,7 @@ static int comparetwoprefixes(const Encodedsequence *encseq,
   Uchar cc1, cc2;
   Uint pos1, pos2, end1, end2;
 
-  end1 = end2 = (Uint) totallength;
+  end1 = end2 = totallength;
   if (depth > 0)
   {
     if (end1 > start1 + depth)

@@ -7,7 +7,6 @@
 #include <limits.h>
 #include <stdio.h>
 #include <assert.h>
-#include "types.h"
 #include "spacedef.h"
 #include "libgtcore/env.h"
 

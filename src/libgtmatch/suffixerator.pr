@@ -7,9 +7,9 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
                  Uint specialcharacters,
                  Uint specialranges,
                  const Encodedsequence *encseq,
-                 Uint numofchars,
+                 unsigned int numofchars,
                  unsigned int prefixlength,
-                 Uint numofparts,
+                 unsigned int numofparts,
                  Measuretime *mtime,
                  Env *env);
 

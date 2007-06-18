@@ -24,13 +24,13 @@
 #include "alphabet.pr"
 #include "sfxmap.pr"
 
-static Uint qgram2codefillspecial(Uint numofchars,
-                                  unsigned int kmersize,
-                                  const Encodedsequence *encseq,
-                                  Uint64 startpos,
-                                  Uint64 totallength)
+static Codetype qgram2codefillspecial(unsigned int numofchars,
+                                      unsigned int kmersize,
+                                      const Encodedsequence *encseq,
+                                      Uint64 startpos,
+                                      Uint64 totallength)
 {
-  Uint integercode;
+  Codetype integercode;
   Uint64 pos;
   bool foundspecial;
   Uchar cc;
@@ -48,7 +48,7 @@ static Uint qgram2codefillspecial(Uint numofchars,
       foundspecial = true;
     } else
     {
-      integercode = (Uint) cc;
+      integercode = (Codetype) cc;
       foundspecial = false;
     }
   }
@@ -80,27 +80,29 @@ static Uint qgram2codefillspecial(Uint numofchars,
   return integercode;
 }
 
+DECLAREARRAYSTRUCT(Codetype);
+
 static void outkmeroccurrence(void *processinfo,
-                              Uint code,
+                              Codetype code,
                               /*@unused@*/ Uint64 position,
                               /*@unused@*/ const Firstspecialpos
                                                  *firstspecialposition,
                               Env *env)
 {
-  ArrayUint *codelist = (ArrayUint *) processinfo;
+  ArrayCodetype *codelist = (ArrayCodetype *) processinfo;
 
-  STOREINARRAY(codelist,Uint,1024,code);
+  STOREINARRAY(codelist,Codetype,1024,code);
 }
 
-static void collectkmercode(ArrayUint *codelist,
+static void collectkmercode(ArrayCodetype *codelist,
                             const Encodedsequence *encseq,
                             unsigned int kmersize,
-                            Uint numofchars,
+                            unsigned int numofchars,
                             Uint64 stringtotallength,
                             Env *env)
 {
   Uint64 offset;
-  Uint code;
+  Codetype code;
 
   for (offset=0; offset<=stringtotallength; offset++)
   {
@@ -109,39 +111,39 @@ static void collectkmercode(ArrayUint *codelist,
                                  encseq,
                                  offset,
                                  stringtotallength);
-    STOREINARRAY(codelist,Uint,1024,code);
+    STOREINARRAY(codelist,Codetype,1024,code);
   }
 }
 
-static int comparecodelists(const ArrayUint *codeliststream,
-                            const ArrayUint *codeliststring,
+static int comparecodelists(const ArrayCodetype *codeliststream,
+                            const ArrayCodetype *codeliststring,
                             unsigned int kmersize,
-                            Uint numofchars,
+                            unsigned int numofchars,
                             const char *characters,
                             Env *env)
 {
   Uint i;
   char buffer1[64+1], buffer2[64+1];
 
-  if (codeliststream->nextfreeUint != codeliststring->nextfreeUint)
+  if (codeliststream->nextfreeCodetype != codeliststring->nextfreeCodetype)
   {
     env_error_set(env,
                   "length codeliststream= %lu != %lu =length codeliststring",
-                  (Showuint) codeliststream->nextfreeUint,
-                  (Showuint) codeliststring->nextfreeUint);
+                  (Showuint) codeliststream->nextfreeCodetype,
+                  (Showuint) codeliststring->nextfreeCodetype);
     return -1;
   }
-  for (i=0; i<codeliststream->nextfreeUint; i++)
+  for (i=0; i<codeliststream->nextfreeCodetype; i++)
   {
-    if (codeliststream->spaceUint[i] != codeliststring->spaceUint[i])
+    if (codeliststream->spaceCodetype[i] != codeliststring->spaceCodetype[i])
     {
       kmercode2string(buffer1,
-                      codeliststream->spaceUint[i],
+                      codeliststream->spaceCodetype[i],
                       numofchars,
                       kmersize,
                       characters);
       kmercode2string(buffer2,
-                      codeliststring->spaceUint[i],
+                      codeliststring->spaceCodetype[i],
                       numofchars,
                       kmersize,
                       characters);
@@ -149,8 +151,8 @@ static int comparecodelists(const ArrayUint *codeliststream,
                     "codeliststream[%lu] = %lu != %lu = "
                     "codeliststring[%lu]\n%s != %s",
                     (Showuint) i,
-                    (Showuint) codeliststream->spaceUint[i],
-                    (Showuint) codeliststring->spaceUint[i],
+                    (Showuint) codeliststream->spaceCodetype[i],
+                    (Showuint) codeliststring->spaceCodetype[i],
                     (Showuint) i,
                     buffer1,
                     buffer2);
@@ -163,15 +165,15 @@ static int comparecodelists(const ArrayUint *codeliststream,
 static int verifycodelists(const Encodedsequence *encseq,
                            const Uchar *characters,
                            unsigned int kmersize,
-                           Uint numofchars,
+                           unsigned int numofchars,
                            Uint64 stringtotallength,
-                           const ArrayUint *codeliststream,
+                           const ArrayCodetype *codeliststream,
                            Env *env)
 {
   bool haserr = false;
-  ArrayUint codeliststring;
+  ArrayCodetype codeliststring;
 
-  INITARRAY(&codeliststring,Uint);
+  INITARRAY(&codeliststring,Codetype);
   collectkmercode(&codeliststring,
                   encseq,
                   kmersize,
@@ -187,18 +189,18 @@ static int verifycodelists(const Encodedsequence *encseq,
   {
     haserr = true;
   }
-  FREEARRAY(&codeliststring,Uint);
+  FREEARRAY(&codeliststring,Codetype);
   return haserr ? -1 : 0;
 }
 
 int verifymappedstr(const Suffixarray *suffixarray,Env *env)
 {
-  Uint numofchars;
-  ArrayUint codeliststream;
+  unsigned int numofchars;
+  ArrayCodetype codeliststream;
   bool haserr = false;
 
   numofchars = getnumofcharsAlphabet(suffixarray->alpha);
-  INITARRAY(&codeliststream,Uint);
+  INITARRAY(&codeliststream,Codetype);
   if (getfastastreamkmers((const char **) suffixarray->filenametab,
                           suffixarray->numoffiles,
                           outkmeroccurrence,
@@ -223,6 +225,6 @@ int verifymappedstr(const Suffixarray *suffixarray,Env *env)
       haserr = true;
     }
   }
-  FREEARRAY(&codeliststream,Uint);
+  FREEARRAY(&codeliststream,Codetype);
   return haserr ? -1 : 0;
 }

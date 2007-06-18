@@ -5,7 +5,6 @@
 */
 
 #include <assert.h>
-#include "types.h"
 #include "spacedef.h"
 
 /*EE
@@ -16,11 +15,11 @@
 /*@notnull@*/ char *dynamicstrdup(const char *file,int linenum,
                                   const char *source,Env *env)
 {
-  Uint sourcelength;
+  size_t sourcelength;
   char *dest;
 
   assert(source != NULL);
-  sourcelength = (Uint) strlen(source);
+  sourcelength = strlen(source);
   ALLOCASSIGNSPACEGENERIC(file,linenum,dest,NULL,char,sourcelength+1);
   strcpy(dest,source);
   return dest;

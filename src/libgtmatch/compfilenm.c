@@ -16,13 +16,13 @@
                                            const char *suffix,
                                            Env *env)
 {
-  Uint i, lenfilename, lensuffix, totalsize;
+  size_t i, lenfilename, lensuffix, totalsize;
   char *dest;
 
   assert(filename != NULL);
-  lenfilename = (Uint) strlen(filename);
+  lenfilename = strlen(filename);
   assert(suffix != NULL);
-  lensuffix = (Uint) strlen(suffix);
+  lensuffix = strlen(suffix);
   totalsize = lenfilename+lensuffix+1+1;
   ALLOCASSIGNSPACEGENERIC(file,linenum,dest,NULL,char,totalsize);
   assert(dest != NULL);

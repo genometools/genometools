@@ -38,8 +38,7 @@ static Uint currentrangevalue(Uint i,Uint distvalue)
 static int updatesumranges(void *key, void *value, void *data,
                            /*@unused@*/ Env *env)
 {
-  Uint keyvalue, distvalue;
-  Uint *specialrangesptr = (Uint *) data;
+  Uint keyvalue, distvalue, *specialrangesptr = (Uint *) data;
 
   keyvalue = (Uint) key;
   distvalue = *((Uint *) value);
@@ -147,11 +146,12 @@ int scanfastasequence2(
         const Uchar *symbolmap,
         Env *env)
 {
-  unsigned int filenum;
+  unsigned int filenum, linenum = (unsigned int) 1;
   Fgetcreturntype currentchar;
   bool indesc, firstseq = true, specialprefix = true;
-  Uint linenum = UintConst(1), currentposition,
-       countreadcharacters, lastspeciallength = 0;
+  Uint currentposition,
+       countreadcharacters,
+       lastspeciallength = 0;
   Genericstream inputstream;
   Uchar charcode;
 
@@ -162,7 +162,7 @@ int scanfastasequence2(
   specialcharinfo->specialranges = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
-  ALLOCASSIGNSPACE(*filelengthtab,NULL,PairUint,(Uint) numoffiles);
+  ALLOCASSIGNSPACE(*filelengthtab,NULL,PairUint,numoffiles);
   for (filenum = 0; filenum < numoffiles; filenum++)
   {
     opengenericstream(&inputstream,filenametab[filenum]);
@@ -212,7 +212,7 @@ int scanfastasequence2(
 	    indesc = true;
 	  } else
 	  {
-	    charcode = symbolmap[(Uint) currentchar];
+	    charcode = symbolmap[(unsigned int) currentchar];
 	    if (charcode == (Uchar) UNDEFCHAR)
 	    {
               env_error_set(env,"illegal character '%c': file \"%s\", line %lu",

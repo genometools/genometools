@@ -70,7 +70,7 @@
     } else
     {
       if (ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-2] <
-         ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1])
+          ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1])
       {
         Uint i;
         Uint64 rangeend;

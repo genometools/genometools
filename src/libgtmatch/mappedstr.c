@@ -184,7 +184,7 @@ static void specialemptyqueue(Specialpositions *spos,unsigned int queuesize,
                               Env *env)
 {
   env_error_check(env);
-  ALLOCASSIGNSPACE(spos->queuespace,NULL,Queueelem,(Uint) queuesize);
+  ALLOCASSIGNSPACE(spos->queuespace,NULL,Queueelem,queuesize);
   spos->noofelements = 0;
   spos->queuesize = queuesize;
   spos->dequeueindex = spos->enqueueindex = queuesize - 1;

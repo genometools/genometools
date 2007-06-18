@@ -80,7 +80,7 @@
             bitwise |= 1;\
           }\
         }\
-        if (widthbuffer == UintConst(3))\
+        if (widthbuffer == (unsigned int) 3)\
         {\
           TABLE[j] = bitwise;\
           j++;\
@@ -92,19 +92,19 @@
         }
 
 #define UPDATESEQBUFFERFINAL(TABLE)\
-        if (widthbuffer == UintConst(1))\
+        if (widthbuffer == (unsigned int) 1)\
         {\
           bitwise <<= UintConst(6);\
           TABLE[j] = bitwise;\
         } else\
         {\
-          if (widthbuffer == UintConst(2))\
+          if (widthbuffer == (unsigned int) 2)\
           {\
             bitwise <<= UintConst(4);\
             TABLE[j] = bitwise;\
           } else\
           {\
-            if (widthbuffer == UintConst(3))\
+            if (widthbuffer == (unsigned int) 3)\
             {\
               bitwise <<= UintConst(2);\
               TABLE[j] = bitwise;\
@@ -131,7 +131,7 @@ typedef enum
   Uchar *characters;
   Uchar *satcharptr;
   Positionaccesstype sat;
-  Uint mapsize;
+  unsigned int mapsize;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   Uint numofspecialstostore;
   Uint64 totallength;
@@ -910,13 +910,13 @@ static Uchar delivercharViauint64tablesSpecialrange(
 
 static int fillplainseq(Encodedsequence *encseq,Fastabufferstate *fbs,Env *env)
 {
-  Uint i;
+  Uint pos;
   int retval;
   Uchar cc;
 
   env_error_check(env);
   ALLOCASSIGNSPACE(encseq->plainseq,NULL,Uchar,(Uint) encseq->totallength);
-  for (i=0; /* Nothing */; i++)
+  for (pos=0; /* Nothing */; pos++)
   {
     retval = readnextUchar(&cc,fbs,env);
     if (retval < 0)
@@ -928,7 +928,7 @@ static int fillplainseq(Encodedsequence *encseq,Fastabufferstate *fbs,Env *env)
     {
       break;
     }
-    encseq->plainseq[i] = cc;
+    encseq->plainseq[pos] = cc;
   }
   return 0;
 }

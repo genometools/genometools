@@ -88,7 +88,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
          suftaboffset = 0;
     Uint64 sumofwidth = 0;
     ALLOCASSIGNSPACE(suftabparts->components,NULL,Suftabpartcomponent,
-                     (Uint) numofparts);
+                     numofparts);
     CHECKIFFITS32BITS(numofsuffixestoinsert/(Uint64) numofparts);
     widthofsuftabpart = (Uint) (numofsuffixestoinsert/(Uint64) numofparts);
     remainder = (Uint) (numofsuffixestoinsert % (Uint64) numofparts);
@@ -137,10 +137,6 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
       sumofwidth += (Uint64) suftabparts->components[part].widthofpart;
       suftabparts->components[part].sumofwidth = sumofwidth;
     }
-    /*
-    printf("sumofwidth = %u, numofsuffixestoinsert = %u\n",(Uint) sumofwidth,
-                        (Uint) numofsuffixestoinsert);
-    */
     assert(sumofwidth == numofsuffixestoinsert);
   }
   return suftabparts;

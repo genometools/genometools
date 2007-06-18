@@ -2,14 +2,14 @@
 extern "C" {
 #endif
 /*@notnull@*/ char *composefilenamegeneric(const char *file,
-                                           Uint linenum,
+                                           int linenum,
                                            const char *filename,
                                            char sep,
                                            const char *suffix,
                                            Env *env);
 
 /*@notnull@*/ char *composefilename(const char *file,
-                                    Uint linenum,
+                                    int linenum,
                                     const char *filename,
                                     const char *suffix,
                                     Env *env);

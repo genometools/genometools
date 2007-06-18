@@ -25,7 +25,7 @@ static void freevalue(void *ptr,Env *env)
 Distribution *initdistribution(Env *env)
 {
   Distribution *dist;
-  ALLOCASSIGNSPACE(dist,NULL,Distribution,UintConst(1));
+  ALLOCASSIGNSPACE(dist,NULL,Distribution,1);
   dist->hashdist = hashtable_new(HASH_DIRECT, NULL, freevalue, env);
   return dist;
 }
@@ -36,6 +36,8 @@ void freedistribution(Distribution **dist,Env *env)
   FREESPACE(*dist);
 }
 
+/* XXX: allow howmany to be of type Uint64 */
+
 void addmultidistribution(Distribution *dist,Uint ind,Uint howmany,Env *env)
 {
   void *result;
@@ -45,7 +47,7 @@ void addmultidistribution(Distribution *dist,Uint ind,Uint howmany,Env *env)
   {
     Uint *newvalueptr;
 
-    ALLOCASSIGNSPACE(newvalueptr,NULL,Uint,UintConst(1));
+    ALLOCASSIGNSPACE(newvalueptr,NULL,Uint,1);
     *newvalueptr = howmany;
     hashtable_add(dist->hashdist,(void *) ind,newvalueptr,env);
   } else

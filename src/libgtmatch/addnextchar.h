@@ -11,10 +11,10 @@
 #define ADDNEXTCHAR(CODE,CC,NUMOFCHARS)\
         if ((NUMOFCHARS) == DNAALPHASIZE)\
         {\
-          CODE = MULT4(CODE) | ((Uint) (CC));\
+          CODE = MULT4(CODE) | ((Codetype) (CC));\
         } else\
         {\
-          CODE = ((CODE) * (NUMOFCHARS)) + (Uint) (CC);\
+          CODE = ((CODE) * (NUMOFCHARS)) + (Codetype) (CC);\
         }
 
 #endif
