@@ -194,8 +194,8 @@ void option_parser_set_mailaddress(OptionParser *op, const char *address)
   op->mailaddress = address;
 }
 
-static void show_long_description(unsigned long initial_space,
-                                  const char *desc, unsigned long len)
+static void show_description(unsigned long initial_space, const char *desc,
+                             unsigned long len)
 {
   const unsigned long width = TERMINAL_WIDTH - initial_space;
   const char *tmp_ptr, *desc_ptr = desc;
@@ -289,15 +289,8 @@ static int show_help(OptionParser *op, Option_type optiontype, Env *env)
     }
     printf("-%s%*s ", str_get(option->option_str),
            (int) (max_option_length - str_length(option->option_str)), "");
-    if (str_length(option->description) >
-        TERMINAL_WIDTH - max_option_length - 2) {
-      /* option description is too long to fit in one line without wrapping */
-      show_long_description(max_option_length + 2,
-                            str_get(option->description),
-                            str_length(option->description));
-    }
-    else
-      xputs(str_get(option->description));
+    show_description(max_option_length + 2, str_get(option->description),
+                     str_length(option->description));
 
     /* show default value for some types of options */
     if (!option->hide_default) {
