@@ -34,7 +34,7 @@ void splitter_split(Splitter *s, char *string, unsigned long length,
   /* splitting */
   while (string_index < string + length &&
          (end_of_token = strchr(string_index, delimiter))) {
-    assert(end_of_token != NULL);
+    assert(end_of_token);
     *end_of_token = '\0';
     if ((s->num_of_tokens + 1) * sizeof (char*) > s->allocated)
       s->tokens = dynalloc(s->tokens, &s->allocated,
