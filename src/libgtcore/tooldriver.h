@@ -13,7 +13,8 @@
    is mostly useful for legacy applications like GenomeThreader.
    The tool driver creates an Env object, calls <tool>, and reports errors.
    See below for example code to create a separate binary for the eval tool.
-   XXX: change example to reflect the real gth application */
+   XXX: change example to reflect the real gth application
+*/
 int tooldriver(int(*tool)(int argc, const char **argv, Env*),
                int argc, char *argv[]);
 
