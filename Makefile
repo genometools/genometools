@@ -222,7 +222,7 @@ dist: all
 
 srcdist:
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
-        gzip -9 > genometools-`cat VERSION`.tar.gz 
+        gzip -9 > genometools-`cat VERSION`.tar.gz
 
 release:
 	git tag "v`cat VERSION`"
