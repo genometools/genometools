@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <errno.h>
+#include "libgtcore/strarray.h"
 #include "types.h"
 #include "spacedef.h"
 
@@ -16,22 +17,20 @@
 #include "opensfxfile.pr"
 
 static void showprjinfo(FILE *outprj,
-                        const char **filenametab,
-                        unsigned int numoffiles,
+                        const StrArray *filenametab,
                         const PairUint *filelengthtab,
                         Uint64 totallength,
                         Uint numofsequences,
                         const Specialcharinfo *specialcharinfo,
                         unsigned int prefixlength)
 {
-  unsigned int i;
+  unsigned long i;
 
-  assert(numoffiles > 0);
   assert(filelengthtab != NULL);
   assert(filenametab != NULL);
-  for (i=0; i<numoffiles; i++)
+  for (i=0; i<strarray_size(filenametab); i++)
   {
-    fprintf(outprj,"dbfile=%s %lu %lu\n",filenametab[i],
+    fprintf(outprj,"dbfile=%s %lu %lu\n",strarray_get(filenametab,i),
                                          (Showuint) filelengthtab[i].uint0,
                                          (Showuint) filelengthtab[i].uint1);
   }
@@ -55,8 +54,7 @@ static void showprjinfo(FILE *outprj,
 }
 
 int outprjfile(const char *indexname,
-               const char **filenamelist,
-               unsigned int numoffiles,
+               const StrArray *filenametab,
                const PairUint *filelengthtab,
                Uint64 totallength,
                Uint numofsequences,
@@ -76,8 +74,7 @@ int outprjfile(const char *indexname,
   if (!haserr)
   {
     showprjinfo(prjfp,
-                filenamelist,
-                numoffiles,
+                filenametab,
                 filelengthtab,
                 totallength,
                 numofsequences,

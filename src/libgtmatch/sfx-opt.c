@@ -28,9 +28,13 @@ static OPrval parse_options(int *parsed_args,
   OPrval oprval;
 
   env_error_check(env);
-  op = option_parser_new("[option ...] seq_file_1 ...",
-                         "Compute suffix array.", env);
+  op = option_parser_new("options",
+                         "Compute enhanced suffix array.", env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
+  option = option_new_filenamearray("db","specify database files (mandatory)",
+                                     so->filenametab,env);
+  option_parser_add_option(op, option, env);
+
   optionsmap = option_new_string("smap",
                                  "specify file containing a symbol mapping",
                                  so->str_smap, NULL, env);
@@ -103,20 +107,18 @@ static OPrval parse_options(int *parsed_args,
                                         versionfunc, (unsigned int) 1, env);
   if (oprval == OPTIONPARSER_OK)
   {
-    so->filenamelist = argv + *parsed_args;
-    so->numoffiles = (unsigned int) (argc - *parsed_args);
     if (!option_is_set(optionindexname))
     {
       char *basenameptr;
 
-      if (so->numoffiles > (unsigned int) 1)
+      if (strarray_size(so->filenametab) > (unsigned long) 1)
       {
         env_error_set(env,"if more than one input file is given, then "
                           "option -indexname is mandatory");
         oprval = OPTIONPARSER_ERROR;
       } else
       {
-        basenameptr = getbasename(so->filenamelist[0],env);
+        basenameptr = getbasename(strarray_get(so->filenametab,0),env);
         str_set(so->str_indexname,basenameptr,env);
         env_ma_free(basenameptr,env);
       }
@@ -128,7 +130,7 @@ static OPrval parse_options(int *parsed_args,
 
 static void showoptions(const Suffixeratoroptions *so)
 {
-  unsigned int i;
+  unsigned long i;
 
   if (str_length(so->str_smap) > 0)
   {
@@ -148,9 +150,9 @@ static void showoptions(const Suffixeratoroptions *so)
     printf("# prefixlength=%u\n",so->prefixlength);
   }
   printf("# parts=%u\n",so->numofparts);
-  for (i=0; i<so->numoffiles; i++)
+  for (i=0; i<strarray_size(so->filenametab); i++)
   {
-    printf("# inputfile[%u]=%s\n",i,so->filenamelist[i]);
+    printf("# inputfile[%lu]=%s\n",i,strarray_get(so->filenametab,i));
   }
 }
 
@@ -160,6 +162,7 @@ void wrapsfxoptions(Suffixeratoroptions *so,Env *env)
   str_delete(so->str_indexname,env);
   str_delete(so->str_smap,env);
   str_delete(so->str_sat,env);
+  strarray_delete(so->filenametab,env);
 }
 
 int suffixeratoroptions(Suffixeratoroptions *so,
@@ -174,6 +177,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->isdna = false;
   so->isprotein = false;
   so->str_indexname = str_new(env);
+  so->filenametab = strarray_new(env);
   so->str_smap = str_new(env);
   so->str_sat = str_new(env);
   rval = parse_options(&parsed_args, so, argc, argv, env);

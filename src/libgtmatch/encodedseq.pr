@@ -27,8 +27,7 @@ int overallspecialranges(const Encodedsequence *encseq,
                          Env *env);
 
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
-                                           const char **filenametab,
-                                           unsigned int numoffiles,
+                                           const StrArray *filenametab,
                                            const char *indexname,
                                            Uint64 totallength,
                                            const Specialcharinfo

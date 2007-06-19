@@ -10,7 +10,7 @@ def checksfx(parts,pl,withsmap,sat,filelist)
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run "#{$bin}gt suffixerator -parts #{parts} -pl #{pl} #{extra} -tis -suf -indexname sfx " +
+  run "#{$bin}gt suffixerator -parts #{parts} -pl #{pl} #{extra} -tis -suf -indexname sfx -db " +
        filearg
   run "#{$bin}gt dev sfxmap sfx"
   run "grep -v '^#' #{$last_stdout}"
@@ -23,7 +23,7 @@ end
   Name "gt suffixerator uint64"
   Keywords "gt_suffixerator"
   Test do
-    run "#{$bin}gt suffixerator -tis -indexname sfx -sat uint64 -pl 3 " +
+    run "#{$bin}gt suffixerator -tis -indexname sfx -sat uint64 -pl 3 -db " +
         "#{$testdata}#{filename}"
   end
 end

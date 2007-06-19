@@ -2,8 +2,7 @@
 extern "C" {
 #endif
 int outprjfile(const char *indexname,
-               const char **filenamelist,
-               unsigned int numoffiles,
+               const StrArray *filenametab,
                const PairUint *filelengthtab,
                Uint64 totallength,
                Uint numofsequences,

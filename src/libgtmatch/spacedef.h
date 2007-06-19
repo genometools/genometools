@@ -22,7 +22,7 @@
         }
 
 #define ALLOCASSIGNSPACE(V,S,T,N)\
-        ALLOCASSIGNSPACEGENERIC(__FILE__,(unsigned int) __LINE__,V,S,T,N)\
+        ALLOCASSIGNSPACEGENERIC(__FILE__,__LINE__,V,S,T,N)\
 
 #define FREESPACE(P)\
         if ((P) != NULL)\
@@ -61,13 +61,12 @@
 */
 
 #define ASSIGNDYNAMICSTRDUP(V,S)\
-        V = dynamicstrdup(__FILE__,(unsigned int) __LINE__,S,env)
+        V = dynamicstrdup(__FILE__,__LINE__,S,env)
 
 #define COMPOSEFILENAME(FILENAME,SUFFIX)\
-        composefilename(__FILE__,(unsigned int) __LINE__,FILENAME,SUFFIX,env)
+        composefilename(__FILE__,__LINE__,FILENAME,SUFFIX,env)
 
 #define COMPOSEFILENAMEGENERIC(FILENAME,SEP,SUFFIX)\
-        composefilenamegeneric(__FILE__,(unsigned int) __LINE__,FILENAME,SEP,\
-                               SUFFIX,env)
+        composefilenamegeneric(__FILE__,__LINE__,FILENAME,SEP,SUFFIX,env)
 
 #endif

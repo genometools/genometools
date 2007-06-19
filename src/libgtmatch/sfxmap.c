@@ -117,7 +117,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
 {
   ArrayUchar linebuffer;
   Uint uintvalue, numofsequences, integersize, littleendian;
-  unsigned int linenum, lengthofkey, i, numofallocatedfiles = 0;
+  unsigned int linenum, lengthofkey, i;
+  unsigned long numoffiles = 0, numofallocatedfiles = 0;
   size_t dbfilelen = strlen(DBFILEKEY);
   int retval;
   bool found, haserr = false;
@@ -150,9 +151,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                       &littleendian,env);
   assert(rik.spaceReadintkeys != NULL);
   INITARRAY(&linebuffer,Uchar);
-  suffixarray->filenametab = NULL;
+  suffixarray->filenametab = strarray_new(env);
   suffixarray->filelengthtab = NULL;
-  suffixarray->numoffiles = 0;
   for (linenum = 0; /* Nothing */; linenum++)
   {
     linebuffer.nextfreeUchar = 0;
@@ -166,15 +166,12 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       char *tmpfilename;
       Scaninteger readint1, readint2;
 
-      if (suffixarray->numoffiles >= numofallocatedfiles)
+      if (numoffiles >= numofallocatedfiles)
       {
         numofallocatedfiles += 2;
-        ALLOCASSIGNSPACE(suffixarray->filenametab,suffixarray->filenametab,
-                         char *,numofallocatedfiles);
         ALLOCASSIGNSPACE(suffixarray->filelengthtab,suffixarray->filelengthtab,
                          PairUint,numofallocatedfiles);
       }
-      assert(suffixarray->filenametab != NULL);
       assert(suffixarray->filelengthtab != NULL);
       ALLOCASSIGNSPACE(tmpfilename,NULL,char,linebuffer.nextfreeUchar);
       if (sscanf((const char *) linebuffer.spaceUchar,"dbfile=%s %ld %ld\n",
@@ -200,19 +197,17 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
       if (!haserr)
       {
-        suffixarray->filenametab[suffixarray->numoffiles] = tmpfilename;
-        suffixarray->filelengthtab[suffixarray->numoffiles].uint0
-          = (Uint) readint1;
-        suffixarray->filelengthtab[suffixarray->numoffiles].uint1
-          = (Uint) readint2;
+        strarray_add_cstr(suffixarray->filenametab,tmpfilename,env);
+        suffixarray->filelengthtab[numoffiles].uint0 = (Uint) readint1;
+        suffixarray->filelengthtab[numoffiles].uint1 = (Uint) readint2;
         printf("%s%s %lu %lu\n",
                 DBFILEKEY,
-                suffixarray->filenametab[suffixarray->numoffiles],
+                strarray_get(suffixarray->filenametab,numoffiles),
                 (Showuint)
-                suffixarray->filelengthtab[suffixarray->numoffiles].uint0,
+                suffixarray->filelengthtab[numoffiles].uint0,
                 (Showuint)
-                suffixarray->filelengthtab[suffixarray->numoffiles].uint1);
-        suffixarray->numoffiles++;
+                suffixarray->filelengthtab[numoffiles].uint1);
+        numoffiles++;
       }
     } else
     {
@@ -345,7 +340,6 @@ int mapsuffixarray(Suffixarray *suffixarray,
   {
     suffixarray->encseq = initencodedseq(true,
 					 NULL,
-					 0,
 					 indexname,
 					 (Uint64) totallength,
 					 &suffixarray->specialcharinfo,
@@ -385,16 +379,9 @@ int mapsuffixarray(Suffixarray *suffixarray,
 
 void freesuffixarray(Suffixarray *suffixarray,Env *env)
 {
-  unsigned int i;
-
   env_fa_xmunmap((void *) suffixarray->suftab,env);
   freeAlphabet(&suffixarray->alpha,env);
-  for (i=0; i<suffixarray->numoffiles; i++)
-  {
-    FREESPACE(suffixarray->filenametab[i]);
-    suffixarray->filenametab[i] = NULL;
-  }
   freeEncodedsequence(&suffixarray->encseq,env);
-  FREESPACE(suffixarray->filenametab);
+  strarray_delete(suffixarray->filenametab,env);
   FREESPACE(suffixarray->filelengthtab);
 }

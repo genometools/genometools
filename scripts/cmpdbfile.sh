@@ -18,6 +18,6 @@ function checkerror()
   fi
 }
 
-checkerror "${GTDIR}/bin/gt suffixerator -tis -indexname /tmp/idx-sfx -pl 1 $*"
+checkerror "${GTDIR}/bin/gt suffixerator -tis -indexname /tmp/idx-sfx -pl 1 -db $*"
 checkerror "mkvtree.sh -tis -indexname /tmp/idx-mkv -dna -pl 1 -db $*"
 checkerror "cmp -s /tmp/idx-mkv.prj /tmp/idx-sfx.prj"

@@ -6,6 +6,7 @@
 
 #include <ctype.h>
 #include "libgtcore/env.h"
+#include "libgtcore/strarray.h"
 #include "fbs-def.h"
 #include "spacedef.h"
 #include "inputsymbol.h"
@@ -14,8 +15,7 @@
 #include "genericstream.pr"
 
 void initfastabufferstate(Fastabufferstate *fbs,
-                          const char **filenametab,
-                          unsigned int numoffiles,
+                          const StrArray *filenametab,
                           const Uchar *symbolmap,
                           PairUint **filelengthtab,
                           Env *env)
@@ -26,12 +26,11 @@ void initfastabufferstate(Fastabufferstate *fbs,
   fbs->nextfile = true;
   fbs->nextread = fbs->nextfree = 0;
   fbs->filenametab = filenametab;
-  fbs->numoffiles = numoffiles;
   fbs->symbolmap = symbolmap;
   fbs->complete = false;
   fbs->totaloffset = 0;
   fbs->lastspeciallength = 0;
-  ALLOCASSIGNSPACE(*filelengthtab,NULL,PairUint,numoffiles);
+  ALLOCASSIGNSPACE(*filelengthtab,NULL,PairUint,strarray_size(filenametab));
   fbs->filelengthtab = *filelengthtab;
 }
 
@@ -61,7 +60,8 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       currentfileadd = 0;
       currentfileread = 0;
       fbs->linenum = (unsigned int) 1;
-      opengenericstream(&fbs->inputstream,fbs->filenametab[fbs->filenum]);
+      opengenericstream(&fbs->inputstream,strarray_get(fbs->filenametab,
+                                                       fbs->filenum));
     } else
     {
       if (fbs->inputstream.isgzippedstream)
@@ -73,10 +73,11 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       }
       if (currentchar == EOF)
       {
-        closegenericstream(&fbs->inputstream,fbs->filenametab[fbs->filenum]);
+        closegenericstream(&fbs->inputstream,strarray_get(fbs->filenametab,
+                                                          fbs->filenum));
         fbs->filelengthtab[fbs->filenum].uint0 += currentfileread;
         fbs->filelengthtab[fbs->filenum].uint1 += currentfileadd;
-        if (fbs->filenum == fbs->numoffiles - 1)
+        if (fbs->filenum == strarray_size(fbs->filenametab) - 1)
         {
           fbs->complete = true;
           break;
@@ -124,7 +125,7 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
                 env_error_set(env,"illegal character '%c':"
                                   " file \"%s\", line %u",
                               currentchar,
-                              fbs->filenametab[fbs->filenum],
+                              strarray_get(fbs->filenametab,fbs->filenum),
                               fbs->linenum);
                 return -1;
               }
@@ -150,7 +151,7 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
   if (fbs->firstoverallseq)
   {
     env_error_set(env,"no sequences in multiple fasta file(s) %s ...",
-                  fbs->filenametab[0]);
+                  strarray_get(fbs->filenametab,0));
     return -2;
   }
   fbs->nextfree = currentposition;

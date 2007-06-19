@@ -8,18 +8,18 @@
 #define SFX_OPTDEF_H
 
 #include "libgtcore/str.h"
+#include "libgtcore/strarray.h"
 
 #define PREFIXLENGTH_AUTOMATIC 0
 
 typedef struct
 {
-  const char **filenamelist;
-  unsigned int numoffiles,
-               numofparts,
+  unsigned int numofparts,
                prefixlength;
   Str *str_indexname,
       *str_smap,
       *str_sat;
+  StrArray *filenametab;
   bool isdna,
        isprotein,
        outsuftab,

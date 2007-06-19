@@ -2,8 +2,7 @@
 extern "C" {
 #endif
 int getfastastreamkmers(
-        const char **filenametab,
-        unsigned int numoffiles,
+        const StrArray *filenametab,
         void(*processkmercode)(void *,Codetype,Uint64,
                                const Firstspecialpos *,Env *),
         void *processkmercodeinfo,

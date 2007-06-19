@@ -14,9 +14,8 @@
 typedef struct
 {
   Uint numofdbsequences;
-  char **filenametab;
+  StrArray *filenametab;
   PairUint *filelengthtab;
-  unsigned int numoffiles;
   Uint prefixlength;
   const Uint *suftab;
   Encodedsequence *encseq;

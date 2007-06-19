@@ -1513,8 +1513,7 @@ static int readsatfromfile(const char *indexname,Env *env)
           = encodedseqfunctab[(int) sat].seqdeliverchar64##NAME.funcname
 
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
-                                           const char **filenametab,
-                                           unsigned int numoffiles,
+                                           const StrArray *filenametab,
                                            const char *indexname,
                                            Uint64 totallength,
                                            const Specialcharinfo
@@ -1677,7 +1676,6 @@ static int readsatfromfile(const char *indexname,Env *env)
   
       initfastabufferstate(&fbs,
                            filenametab,
-                           numoffiles,
                            getsymbolmapAlphabet(alphabet),
                            &filelengthtab,
                            env);

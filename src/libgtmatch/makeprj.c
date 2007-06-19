@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include "libgtcore/env.h"
+#include "libgtcore/strarray.h"
 #include "types.h"
 #include "genstream.h"
 #include "inputsymbol.h"
@@ -52,8 +53,7 @@ int scanfastasequence(
         Uint *numofsequences,
         Uint64 *totallength,
         Specialcharinfo *specialcharinfo,
-        const char **filenametab,
-        unsigned int numoffiles,
+        const StrArray *filenametab,
         PairUint **filelengthtab,
         const Uchar *symbolmap,
         Env *env)
@@ -73,7 +73,6 @@ int scanfastasequence(
 
   initfastabufferstate(&fbs,
                        filenametab,
-                       numoffiles,
                        symbolmap,
                        filelengthtab,
                        env);
@@ -141,12 +140,12 @@ int scanfastasequence2(
         Uint *totallength,
         PairUint **filelengthtab,
         Specialcharinfo *specialcharinfo,
-        const char **filenametab,
-        unsigned int numoffiles,
+        const StrArray *filenametab,
         const Uchar *symbolmap,
         Env *env)
 {
-  unsigned int filenum, linenum = (unsigned int) 1;
+  unsigned long filenum;
+  unsigned int linenum = (unsigned int) 1;
   Fgetcreturntype currentchar;
   bool indesc, firstseq = true, specialprefix = true;
   Uint currentposition,
@@ -162,10 +161,10 @@ int scanfastasequence2(
   specialcharinfo->specialranges = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
-  ALLOCASSIGNSPACE(*filelengthtab,NULL,PairUint,numoffiles);
-  for (filenum = 0; filenum < numoffiles; filenum++)
+  ALLOCASSIGNSPACE(*filelengthtab,NULL,PairUint,strarray_size(filenametab));
+  for (filenum = 0; filenum < strarray_size(filenametab); filenum++)
   {
-    opengenericstream(&inputstream,filenametab[filenum]);
+    opengenericstream(&inputstream,strarray_get(filenametab,filenum));
     indesc = false;
     currentposition = 0;
     countreadcharacters = 0;
@@ -217,7 +216,7 @@ int scanfastasequence2(
 	    {
               env_error_set(env,"illegal character '%c': file \"%s\", line %lu",
 			    currentchar,
-			    filenametab[filenum],
+			    strarray_get(filenametab,filenum),
 			    (Showuint) linenum);
 	      return -1;
 	    }
@@ -252,13 +251,13 @@ int scanfastasequence2(
     (*filelengthtab)[filenum].uint0 = countreadcharacters;
     (*filelengthtab)[filenum].uint1 = currentposition;
     *totallength += currentposition;
-    closegenericstream(&inputstream,filenametab[filenum]);
+    closegenericstream(&inputstream,strarray_get(filenametab,filenum));
   }
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
   if (firstseq)
   {
     env_error_set(env,"no sequences in multiple fasta file(s) %s ...",
-                  filenametab[0]);
+                  strarray_get(filenametab,0));
     return -2;
   }
   return 0;

@@ -8,6 +8,7 @@
 #define ENCSEQDEF_H
 #include "types.h"
 #include "alphadef.h"
+#include "libgtcore/strarray.h"
 
 typedef struct _Encodedsequence Encodedsequence;
 typedef struct _Encodedsequencescanstate Encodedsequencescanstate;
@@ -38,8 +39,7 @@ int overallspecialranges(const Encodedsequence *encseq,
                          Env *env);
 
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
-                                           const char **filenametab,
-                                           unsigned int numoffiles,
+                                           const StrArray *filenametab,
                                            const char *indexname,
                                            Uint64 totallength,
                                            const Specialcharinfo

@@ -45,11 +45,10 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
 
   if (!haserr)
   {
-    if (testencodedsequence((const char **) suffixarray.filenametab,
-                           suffixarray.numoffiles,
-                           suffixarray.encseq,
-                           getsymbolmapAlphabet(suffixarray.alpha),
-                           env) != 0)
+    if (testencodedsequence(suffixarray.filenametab,
+                            suffixarray.encseq,
+                            getsymbolmapAlphabet(suffixarray.alpha),
+                            env) != 0)
     {
       haserr = true;
     }

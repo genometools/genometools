@@ -104,7 +104,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
                               str_length(so->str_smap) > 0
                                   ? str_get(so->str_smap)
                                   : NULL,
-                              so->filenamelist[0],
+                              strarray_get(so->filenametab,0),
                               env);
   if (alpha == NULL)
   {
@@ -115,8 +115,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
     if (scanfastasequence(&numofsequences,
                           &totallength,
                           &specialcharinfo,
-                          so->filenamelist,
-                          so->numoffiles,
+                          so->filenametab,
                           &filelengthtab,
                           getsymbolmapAlphabet(alpha), env) != 0)
     {
@@ -127,8 +126,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   {
     assert(so->prefixlength > 0);
     if (outprjfile(str_get(so->str_indexname),
-                   so->filenamelist,
-                   so->numoffiles,
+                   so->filenametab,
                    filelengthtab,
                    totallength,
                    numofsequences,
@@ -175,8 +173,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   {
     deliverthetime(stdout,mtime,"computing sequence encoding",env);
     encseq = initencodedseq(true,
-                            so->filenamelist,
-                            so->numoffiles,
+                            so->filenametab,
                             NULL,
                             (Uint64) totallength,
                             &specialcharinfo,

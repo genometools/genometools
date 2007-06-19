@@ -17,4 +17,4 @@ do
 done
 
 # the make call normally used for development
-make CC='gcc' CFLAGS='-O3 -m32' LDFLAGS='-m32'
+make CC='ccache gcc' CFLAGS='-O3 -m32' LDFLAGS='-m32'

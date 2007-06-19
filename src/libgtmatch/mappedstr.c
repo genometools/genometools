@@ -12,6 +12,7 @@
 #define NDEBUG
 #include <assert.h>
 #include "libgtcore/env.h"
+#include "libgtcore/strarray.h"
 #include "types.h"
 #include "chardef.h"
 #include "inputsymbol.h"
@@ -430,8 +431,7 @@ static void filllargestchartable(unsigned int **filltable,
 }
 
 int getfastastreamkmers(
-        const char **filenametab,
-        unsigned int numoffiles,
+        const StrArray *filenametab,
         void(*processkmercode)(void *,Codetype,Uint64,
                                const Firstspecialpos *,Env *),
         void *processkmercodeinfo,
@@ -440,7 +440,7 @@ int getfastastreamkmers(
         const Uchar *symbolmap,
         Env *env)
 {
-  unsigned int filenum;
+  unsigned long filenum;
   Fgetcreturntype currentchar;
   bool indesc, firstseq = true;
   unsigned int overshoot;
@@ -451,7 +451,6 @@ int getfastastreamkmers(
   Uchar charcode;
 
   env_error_check(env);
-  assert(numoffiles > 0);
   initmultimappower(&spwp.multimappower,numofchars,kmersize,env);
   spwp.lengthwithoutspecial = 0;
   spwp.codewithoutspecial = 0;
@@ -462,9 +461,9 @@ int getfastastreamkmers(
   ALLOCASSIGNSPACE(spwp.cyclicwindow,NULL,Uchar,kmersize);
   specialemptyqueue(&spwp.spos,kmersize,env);
   filllargestchartable(&spwp.filltable,numofchars,kmersize,env);
-  for (filenum = 0; filenum < numoffiles; filenum++)
+  for (filenum = 0; filenum < strarray_size(filenametab); filenum++)
   {
-    opengenericstream(&inputstream,filenametab[filenum]);
+    opengenericstream(&inputstream,strarray_get(filenametab,filenum));
     indesc = false;
     for (;;)
     {
@@ -511,7 +510,7 @@ int getfastastreamkmers(
               env_error_set(env,
                             "illegal character '%c': file \"%s\", line %lu",
                             currentchar,
-                            filenametab[filenum],
+                            strarray_get(filenametab,filenum),
                             (Showuint) linenum);
               return -1;
             }
@@ -522,7 +521,7 @@ int getfastastreamkmers(
         }
       }
     }
-    closegenericstream(&inputstream,filenametab[filenum]);
+    closegenericstream(&inputstream,strarray_get(filenametab,filenum));
   }
   for (overshoot=0; overshoot<kmersize; overshoot++)
   {
@@ -536,7 +535,7 @@ int getfastastreamkmers(
   if (firstseq)
   {
     env_error_set(env,"no sequences in multiple fasta file(s) %s ...",
-                  filenametab[0]);
+                  strarray_get(filenametab,0));
     return -2;
   }
   return 0;

@@ -13,8 +13,7 @@
 #include "fbsadv.pr"
 #include "readnextUchar.gen"
 
-int testencodedsequence(const char **filenametab,
-                        unsigned int numoffiles,
+int testencodedsequence(const StrArray *filenametab,
                         const Encodedsequence *encseq,
                         const Uchar *symbolmap,
                         Env *env)
@@ -30,7 +29,6 @@ int testencodedsequence(const char **filenametab,
   env_error_check(env);
   initfastabufferstate(&fbs,
                        filenametab,
-                       numoffiles,
                        symbolmap,
                        &filelengthtab,
                        env);

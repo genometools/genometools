@@ -5,8 +5,7 @@ int scanfastasequence(
         Uint *numofsequences,
         Uint64 *totallength,
         Specialcharinfo *specialcharinfo,
-        const char **filenametab,
-        unsigned int numoffiles,
+        const StrArray *filenametab,
         PairUint **filelengthtab,
         const Uchar *symbolmap,
         Env *env);
@@ -16,8 +15,7 @@ int scanfastasequence2(
         Uint *totallength,
         PairUint **filelengthtab,
         Specialcharinfo *specialcharinfo,
-        const char **filenametab,
-        unsigned int numoffiles,
+        const StrArray *filenametab,
         const Uchar *symbolmap,
         Env *env);
 

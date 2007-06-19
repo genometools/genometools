@@ -201,8 +201,7 @@ int verifymappedstr(const Suffixarray *suffixarray,Env *env)
 
   numofchars = getnumofcharsAlphabet(suffixarray->alpha);
   INITARRAY(&codeliststream,Codetype);
-  if (getfastastreamkmers((const char **) suffixarray->filenametab,
-                          suffixarray->numoffiles,
+  if (getfastastreamkmers(suffixarray->filenametab,
                           outkmeroccurrence,
                           &codeliststream,
                           numofchars,

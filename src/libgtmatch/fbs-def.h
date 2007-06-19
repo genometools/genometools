@@ -7,6 +7,7 @@
 #ifndef FBS_DEF_H
 #define FBS_DEF_H
 #include <stdbool.h>
+#include "libgtcore/strarray.h"
 #include "types.h"
 #include "genstream.h"
 
@@ -14,8 +15,7 @@
 
 typedef struct
 {
-  unsigned int filenum;
-  unsigned int numoffiles;
+  unsigned long filenum;
   bool indesc,
        firstoverallseq,
        firstseqinfile,
@@ -27,7 +27,7 @@ typedef struct
                nextfree;
   Uchar bufspace[FILEBUFFERSIZE];
   Uint64 totaloffset;
-  const char **filenametab;
+  const StrArray *filenametab;
   const Uchar *symbolmap;
   Uint lastspeciallength;
   PairUint *filelengthtab;
