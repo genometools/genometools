@@ -26,15 +26,15 @@
 #include "bentleysedgewick.pr"
 
 #define PREFIXLENBITS   4
-#define CODEBITS        (INTWORDSIZE-PREFIXLENBITS)
+#define CODEBITS        (32-PREFIXLENBITS)
 #define MAXPREFIXLENGTH ((((unsigned int) 1) << PREFIXLENBITS) - 1)
 #define MAXCODEVALUE    ((((unsigned int) 1) << CODEBITS) - 1)
 
 typedef struct
 {
   unsigned int maxprefixlen:PREFIXLENBITS;
-  unsigned int code:(INTWORDSIZE-PREFIXLENBITS);
-  Codetype position; /* get rid of this by using information from encseq */
+  unsigned int code:CODEBITS;
+  Uint position; /* get rid of this by using information from encseq */
 } Codeatposition;
 
 DECLAREARRAYSTRUCT(Codeatposition);
