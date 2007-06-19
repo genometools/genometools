@@ -218,7 +218,7 @@ obj/%.o: src/external/rnv-1.7.8/%.c
 .PHONY: dist srcdist release gt libgt install splint test clean cleanup
 
 dist: all
-	tar cvzf gt-`cat VERSION`.tar.gz bin/gt_*
+	tar cvzf gt-`cat VERSION`.tar.gz bin/gt
 
 srcdist:
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
