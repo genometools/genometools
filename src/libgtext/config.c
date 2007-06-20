@@ -28,11 +28,6 @@ static void gtlua_new_table(lua_State *L, const char *key)
   lua_settable(L, -3);
 }
 
-#define ADDCOLOR(rgb) \
-  lua_pushstring(cfg->L, #rgb); \
-  lua_pushnumber(cfg->L, color.rgb); \
-  lua_settable(cfg->L, -3);
-
 #define GET_AND_SET_COLOR_VALUE(rgb) \
   lua_getfield(cfg->L, -1, #rgb); \
   if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1)) { \
@@ -221,9 +216,15 @@ void config_set_color(Config *cfg, const char *key, Color color, Env* env)
     gtlua_new_table(cfg->L, key);
     lua_getfield(cfg->L, -1, key);
   }
-  ADDCOLOR(red);
-  ADDCOLOR(green);
-  ADDCOLOR(blue);
+  lua_pushstring(cfg->L, "red");
+  lua_pushnumber(cfg->L, color.red);
+  lua_settable(cfg->L, -3);
+  lua_pushstring(cfg->L, "green");
+  lua_pushnumber(cfg->L, color.green);
+  lua_settable(cfg->L, -3);
+  lua_pushstring(cfg->L, "blue");
+  lua_pushnumber(cfg->L, color.blue);
+  lua_settable(cfg->L, -3);
   lua_pop(cfg->L, i);
 }
 
@@ -413,7 +414,7 @@ bool config_cstr_in_list(Config *cfg,
   {
     if (cfg->verbose) warning("key '%s' is not set or not a table",
                                key);
-    lua_pop(cfg->L, 1);
+    /*lua_pop(cfg->L, 1);*/
     has_err = -1;
   }
   if (!has_err)
@@ -454,6 +455,37 @@ bool config_get_verbose(Config *cfg)
 }
 
 /*!
+Compares two GenomeFeatureTypes w.r.t. their order as
+defined in the config object.
+\param cfg Pointer to Config object.
+\param ft1 GFT to check
+\param ft2 GFT to check
+\param cfg Pointer to Environment object.
+\return 1 if ft1 dominates ft2, -1 if ft2 dominates ft1, 0 if same
+        or not specified
+*/
+int config_dominates(Config* cfg, GenomeFeatureType ft1,
+                      GenomeFeatureType ft2, Env* env)
+{
+  assert(cfg && env);
+  char *fts1, *fts2;
+  
+  fts1 = (char*) genome_feature_type_get_cstr(ft1);
+  fts2 = (char*) genome_feature_type_get_cstr(ft2);
+  if (fts1 == NULL || fts2 == NULL) 
+    return 0;
+  else
+  {
+    if (config_cstr_in_list(cfg, "dominate",fts1, fts2, env))
+      return 1;
+    else if (config_cstr_in_list(cfg, "dominate",fts2, fts1, env))
+      return -1;
+    else
+      return 0;
+  }
+}
+
+/*!
 Unit tests for the Config class.
 \param env Pointer to Environment object.
 \return Error status.
@@ -490,7 +522,13 @@ int config_unit_test(Env* env)
   ensure(has_err, (str == ""));
 
   /* execute the config file */
-  /* config_load_file(cfg, luafile, env); */
+/*  config_load_file(cfg, luafile, env);
+   
+  ensure(has_err, config_dominates(cfg, gft_exon, gft_gene, env) == 1); 
+  ensure(has_err, config_dominates(cfg, gft_gene, gft_exon, env) == -1);
+  ensure(has_err, config_dominates(cfg, gft_exon, gft_exon, env) == 0);
+  ensure(has_err, config_dominates(cfg, gft_TF_binding_site, gft_CDS, env) == 0);
+*/   
 
   /* now we expect the values to exist and have certain values */
 /*  tmpcol = config_get_color(cfg, "exon", env);
@@ -535,11 +573,6 @@ int config_unit_test(Env* env)
   ensure(has_err, (strcmp(str,test1)==0));
   str = config_get_cstr(cfg, "bar", "test", "", env);
   ensure(has_err, (str == ""));
-
-  /*
-  ensure(has_err, !config_cstr_in_list(cfg, "collapse","to_parent","foo", env));
-  ensure(has_err, config_cstr_in_list(cfg, "collapse","to_parent","exon", env));
-  */
 
   /* mem cleanup */
   str_delete(luafile, env);

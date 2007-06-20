@@ -15,10 +15,10 @@
 
 enum ClipType
 {
-  CLIPPED_RIGHT = 1,
-	CLIPPED_LEFT = 2,
-	CLIPPED_NONE = 0,
-	CLIPPED_BOTH = 3
+  CLIPPED_RIGHT,
+	CLIPPED_LEFT,
+	CLIPPED_NONE,
+	CLIPPED_BOTH
 };
 
 typedef struct
@@ -33,7 +33,7 @@ struct Render
   Config* cfg;
   Graphics* g;
   Range range;
-  double dy, margins, factor;
+  double y, margins, factor;
   unsigned int width;
 };
 
@@ -121,15 +121,29 @@ DrawingRange render_convert_coords(Render *r,
   converted_range.clip = CLIPPED_NONE;
 
   /* scale coordinates to target image width */
+	/* first, check if left side has to be clipped */
   if ((long) node_range.start < (long) r->range.start )
-    converted_range.clip = CLIPPED_LEFT;
-  converted_range.start = render_convert_point(r, node_range.start);
+	{
+	  converted_range.clip = CLIPPED_LEFT;
+		converted_range.start = MAX(0, r->margins-5);
+	} 
+	else
+  {
+    converted_range.start = render_convert_point(r, node_range.start);
+  }
   
+	/* then, check right side. */
   if ((long) node_range.end > (long) r->range.end)
+	{
     converted_range.clip = (converted_range.clip == CLIPPED_LEFT ?
                                                       CLIPPED_BOTH : 
                                                       CLIPPED_RIGHT);
-  converted_range.end = render_convert_point(r, node_range.end);
+		converted_range.end = r->width - r->margins+5;
+	}
+	else
+	{
+    converted_range.end = render_convert_point(r, node_range.end);
+	}
   return converted_range;
 }
 
@@ -164,13 +178,13 @@ void render_line(Render *r, Line *line, Env *env)
     if (!caption) caption="<unnamed>"; 
     graphics_draw_text(r->g,
                        MAX(r->margins, draw_range.start),
-                       r->dy-graphics_get_text_height(r->g)+3,
+                       r->y-graphics_get_text_height(r->g)+3,
                        caption);
 											 
 		/* DEBUG */
          graphics_draw_box(r->g,
                        draw_range.start,
-                       r->dy,
+                       r->y,
                        draw_range.end - draw_range.start,
                        config_get_num(r->cfg, "format", "bar_height", 15, env),
                        config_get_color(r->cfg, "foo", env),
@@ -217,7 +231,7 @@ void render_line(Render *r, Line *line, Env *env)
       {
         graphics_draw_box(r->g,
                        elem_start,
-                       r->dy,
+                       r->y,
                        elem_width,
                        bar_height,
                        config_get_color(r->cfg, type, env),
@@ -230,7 +244,7 @@ void render_line(Render *r, Line *line, Env *env)
       {
         graphics_draw_caret(r->g,
                        elem_start,
-                       r->dy,
+                       r->y,
                        elem_width,
                        bar_height,
                        element_get_arrow_status(elem),
@@ -242,7 +256,7 @@ void render_line(Render *r, Line *line, Env *env)
       {
         graphics_draw_dashes(r->g,
                        elem_start,
-                       r->dy,
+                       r->y,
                        elem_width,
                        bar_height,
                        element_get_arrow_status(elem),
@@ -254,14 +268,14 @@ void render_line(Render *r, Line *line, Env *env)
       {
         graphics_draw_horizontal_line(r->g,
                        elem_start,
-                       r->dy,
+                       r->y,
                        elem_width);
       }
       else
       {
          graphics_draw_box(r->g,
                        elem_start,
-                       r->dy,
+                       r->y,
                        elem_width,
                        bar_height,
                        config_get_color(r->cfg, type, env),
@@ -273,14 +287,14 @@ void render_line(Render *r, Line *line, Env *env)
       
       /* draw arrowheads at clipped margins */
       if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)
-          graphics_draw_arrowhead(r->g, r->margins-10, r->dy+((bar_height-8)/2), grey, Left);
+          graphics_draw_arrowhead(r->g, r->margins-10, r->y+((bar_height-8)/2), grey, Left);
       if (draw_range.clip == CLIPPED_RIGHT || draw_range.clip == CLIPPED_BOTH)
-          graphics_draw_arrowhead(r->g, r->width-r->margins+10, r->dy+((bar_height-8)/2), grey, Right);
+          graphics_draw_arrowhead(r->g, r->width-r->margins+10, r->y+((bar_height-8)/2), grey, Right);
     }
   }
   /* do not add line spacing after the last line of a track */
   if (i!=array_size(blocks)-1)
-    r->dy += config_get_num(r->cfg, "format", "bar_height", 15, env) +
+    r->y += config_get_num(r->cfg, "format", "bar_height", 15, env) +
                config_get_num(r->cfg, "format", "bar_vspace", 10, env) +
                graphics_get_text_height(r->g);
 }
@@ -307,10 +321,10 @@ int render_track(void *key, void* value, void *data, Env *env)
   /* draw track title */
   graphics_draw_colored_text(r->g,
 	                           r->margins,
-														 r->dy,
+														 r->y,
 														 config_get_color(r->cfg, "track_title", env),
 														 (const char*) key);
-  r->dy += graphics_get_text_height(r->g) + 10;
+  r->y += graphics_get_text_height(r->g) + 10;
 
   /* render each line */
   for (i=0; i<array_size(lines); i++)
@@ -319,7 +333,7 @@ int render_track(void *key, void* value, void *data, Env *env)
   }
 
   /* put track spacer after track */
-  r->dy += config_get_num(r->cfg, "format", "track_vspace", 10, env);
+  r->y += config_get_num(r->cfg, "format", "track_vspace", 10, env);
   return 0;
 }
 
@@ -345,7 +359,7 @@ void render_to_png(Render *r, char *fn, unsigned int width, Env *env)
   char str[BUFSIZ];
 
   /* set initial margins, header, target width */
-  r->dy = 70;
+  r->y = 70;
   r->width = width;
   height = render_calculate_height(r, env);
   
@@ -362,25 +376,19 @@ void render_to_png(Render *r, char *fn, unsigned int width, Env *env)
 	/* determine range and step of the scale */
   base_length = r->range.end - r->range.start;
 
-
-
-  /* XXX fix this */
-
+  /* determine tick steps */
   step = pow(10,ceil(log10(base_length))-1);
-  printf("step:%f\n", step);
+/*  printf("step:%f\n", step); */
   minorstep = step/4.0;
-  printf("minorstep:%f\n", minorstep);
+/*  printf("minorstep:%f\n", minorstep); */
     
   vminor = (double) (floor(r->range.start / minorstep))*minorstep;
   vmajor = (double) (floor(r->range.start / step))*step;
-  
-   printf("vminor:%f\n", vminor);
-   printf("vmajor:%f\n", vmajor);
 
   for(tick = vmajor; tick <= r->range.end; tick += step)
   {
     graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 30, 10);
-    printf("drawing major tick at:%li\n", tick);
+/*  printf("drawing major tick at:%li\n", tick); */
     format_ruler_label(str, tick);
     graphics_draw_text_centered(r->g, render_convert_point(r, tick), 20, str);
   }
@@ -391,10 +399,7 @@ void render_to_png(Render *r, char *fn, unsigned int width, Env *env)
       graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 30, 5);
     }
   }
-  
-  /*  fix above */
-  
-  
+
   /* process (render) each track */
   Hashtable *tracks = diagram_get_tracks(r->dia);
   hashtable_foreach(tracks, render_track, r, env);

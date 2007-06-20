@@ -9,6 +9,7 @@
 
 #include <libgtcore/str.h>
 #include <libgtext/color.h>
+#include <libgtext/genome_feature_type.h>
 
 typedef struct Config Config;
 
@@ -43,6 +44,11 @@ bool         config_cstr_in_list(Config *cfg,
                                  const char *checkstr,
                                  Env* env);
 bool         config_get_verbose(Config *cfg);
+int          config_dominates(Config *cfg,
+                              GenomeFeatureType gft1,
+                              GenomeFeatureType gft2,
+                              Env* env);
+
 int          config_unit_test(Env*);
 void         config_delete(Config*, Env*);
 
