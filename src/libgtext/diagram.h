@@ -14,7 +14,7 @@
 
 typedef struct Diagram Diagram;
 
-Diagram*    diagram_new(Array*,Range,Config*,Env*);
+Diagram*    diagram_new(Array* features,Range,Config*,Env*);
 Range       diagram_get_range(Diagram* diagram);
 void        diagram_set_config(Diagram*,Config*,Env*);
 Hashtable*  diagram_get_tracks(Diagram*);

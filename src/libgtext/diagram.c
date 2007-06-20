@@ -1,5 +1,7 @@
 /*
-  Copyright (c) 2007 Sascha Steinbiss, Christin Schaerfer, Malte Mader
+  Copyright (c) 2007 Malte Mader mmader@zbh.uni-hamburg.de,
+                     Sascha Steinbiss ssteinbiss@zbh.uni-hamburg.de,
+                     Christin Schaerfer cschaerfer@zbh.uni-hamburg.de,
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -38,7 +40,7 @@ Fetching the number of lines from a track object and add number
  of lines to data.
 */
 static int diagram_add_tracklines(void *key, void *value, void *data,
-                                     Env* env)
+                                  Env* env)
 {
   int* add;
   add = data;
@@ -66,8 +68,8 @@ create a new track.
 */
 static void insert_genome_node_into_track(GenomeNode* gn,
                                           GenomeNode* parent,
-					  Diagram* d,
-					  Env* env)
+                                          Diagram* d,
+                                          Env* env)
 {
   const char* feature_type;
   GenomeFeatureType type;
@@ -78,12 +80,20 @@ static void insert_genome_node_into_track(GenomeNode* gn,
 
   /* discard elements that do not overlap with visible range */
   elem_range = genome_node_get_range(gn);
-  if(!range_overlap(d->range, elem_range)) return;
+  if (!range_overlap(d->range, elem_range)) return;
 
   /* fetch the type of the given genome node */
   type = genome_feature_get_type(gf);
   feature_type = genome_feature_type_get_cstr(type);
-
+		
+		
+	 if (config_cstr_in_list(d->config,"collapse","to_parent",feature_type,
+                             env))
+  {  
+		  type = genome_feature_get_type((GenomeFeature*) parent);
+    feature_type = genome_feature_type_get_cstr(type);
+  }
+  
   /* deliver the genome node to the track with the corresponding type.
   ** If the track does not exist, generate it.
    */
@@ -108,7 +118,7 @@ Insert a genome node into a track. If the genome node has children,
 insert them with a recursiv call of visit_child.
 \param gn pointer to the diagram object.
 \param genome_node_children struct, containing pointers
-                            to a genome node and a diagram.
+       to a genome node and a diagram.
 \param env Pointer to Environment object.
 */
 static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
@@ -121,8 +131,8 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
   {
     insert_genome_node_into_track(gn,
                                   genome_node_info->parent,
-				  genome_node_info->diagram,
-				  env);
+				                              genome_node_info->diagram,
+				                              env);
     genome_node_info->parent = gn;
     genome_node_traverse_direct_children(gn,
                                          genome_node_info,
@@ -134,8 +144,8 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
   {
   insert_genome_node_into_track(gn,
                                 genome_node_info->parent,
-			        genome_node_info->diagram,
-			        env);
+			                             genome_node_info->diagram,
+			                             env);
   }
   return 0;
 
@@ -199,8 +209,8 @@ static void diagram_build(Diagram* diagram, Array* features, Env* env)
     GenomeNode *current_root = **(GenomeNode***) array_get(features,i);
     insert_genome_node_into_track(current_root,
                                   NULL,
-				                          diagram,
-				                          env);
+                                  diagram,
+				                              env);
 
     traverse_genome_nodes(current_root, &genome_node_children, env);
   }
