@@ -5,6 +5,7 @@
 */
 
 #include "libgtcore/env.h"
+#include "libgtcore/str.h"
 #include "types.h"
 #include "mapspec-def.h"
 
@@ -100,7 +101,7 @@ static int assigncorrecttype(Mapspecification *mapspec,
 int fillmapspecstartptr(Assignmapspec assignmapspec,
                         void **mappeduserptr,
                         void *assignmapinfo,
-                        const char *tmpfilename,
+                        const Str *tmpfilename,
                         Uint expectedsize,
                         Env *env)
 {
@@ -115,10 +116,10 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
   env_error_check(env);
   INITARRAY(&mapspectable,Mapspecification);
   assignmapspec(&mapspectable,assignmapinfo,env);
-  mapptr = env_fa_mmap_read(env,tmpfilename, &numofbytes);
+  mapptr = env_fa_mmap_read(env,str_get(tmpfilename), &numofbytes);
   if (mapptr == NULL)
   {
-    env_error_set(env,"could not map datafile %s",tmpfilename);
+    env_error_set(env,"could not map datafile %s",str_get(tmpfilename));
     haserr = true;
   }
   *mappeduserptr = mapptr;
@@ -136,7 +137,8 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
     if ((Uint64) numofbytes != expected)
     {
       env_error_set(env,"%lu bytes read from %s, but %lu expected",
-                         (Showuint) numofbytes,tmpfilename,(Showuint) expected);
+                         (Showuint) numofbytes,str_get(tmpfilename),
+                         (Showuint) expected);
       haserr = true;
     }
   }

@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <limits.h>
 #include "libgtcore/env.h"
+#include "libgtcore/str.h"
 #include "types.h"
 #include "arraydef.h"
 #include "chardef.h"
@@ -120,7 +121,7 @@
 
 static int readsymbolmapviafp(Alphabet *alpha,
                               Uchar wildcard,
-                              const char *mapfile,
+                              const Str *mapfile,
                               FILE *fpin,
                               Env *env)
 {
@@ -189,7 +190,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
             }
             env_error_set(env,
                           "illegal character '%c' in line %u of mapfile %s",
-                          cc,linecount,mapfile);
+                          cc,linecount,str_get(mapfile));
             return -2;
           }
         }
@@ -200,7 +201,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
             env_error_set(env,
                           "illegal character '%c' at the end of "
                           "line %u in mapfile %s",
-                          LINE(column+1),linecount,mapfile);
+                          LINE(column+1),linecount,str_get(mapfile));
             return -3;
           }
           /* use next character to display character */
@@ -245,7 +246,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
 */
 
 static int readsymbolmap(Alphabet *alpha,Uchar wildcard,
-                         const char *mapfile,Env *env)
+                         const Str *mapfile,Env *env)
 {
   FILE *fpin;
 
@@ -393,7 +394,7 @@ static void assignProteinorDNAalphabet(Alphabet *alpha,const char *inputfile)
 
 /*@null@*/ Alphabet *assigninputalphabet(bool isdna,
                                          bool isprotein,
-                                         const char *smapfile,
+                                         const Str *smapfile,
                                          const char *sequencefilename,
                                          Env *env)
 {
@@ -411,7 +412,7 @@ static void assignProteinorDNAalphabet(Alphabet *alpha,const char *inputfile)
       assignProteinalphabet(alpha);
     } else
     {
-      if (smapfile != NULL)
+      if (str_length(smapfile) > 0)
       {
         if (readsymbolmap(alpha,
                          (Uchar) WILDCARD,

@@ -3,7 +3,7 @@ extern "C" {
 #endif
 /*@null@*/ Alphabet *assigninputalphabet(bool isdna,
                                          bool isprotein,
-                                         const char *smapfile,
+                                         const Str *smapfile,
                                          const char *sequencefilename,
                                          Env *env);
 

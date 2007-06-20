@@ -9,30 +9,32 @@
 #include <assert.h>
 #include "spacedef.h"
 #include "libgtcore/env.h"
+#include "libgtcore/str.h"
 
 #include "dstrdup.pr"
-#include "compfilenm.pr"
 
 typedef struct
 {
-  char *filename;
+  Str *filename;
   FILE *fpin;
 } Fopeninfo;
 
 static int callfileopen(void *info,const char *path,Env *env)
 {
   Fopeninfo *fileopeninfo = (Fopeninfo *) info;
-  char *tmpfilename;
+  Str *tmpfilename;
 
   env_error_check(env);
-  tmpfilename = COMPOSEFILENAMEGENERIC(path,'/',fileopeninfo->filename);
-  fileopeninfo->fpin = env_fa_fopen(env,tmpfilename,"rb");
+  tmpfilename = str_new_cstr(path,env);
+  str_append_char(tmpfilename,'/',env);
+  str_append_str(tmpfilename,fileopeninfo->filename,env); 
+  fileopeninfo->fpin = env_fa_fopen(env,str_get(tmpfilename),"rb");
   if (fileopeninfo->fpin != NULL)
   {
-    FREESPACE(tmpfilename);
+    str_delete(tmpfilename,env);
     return 1;
   }
-  FREESPACE(tmpfilename);
+  str_delete(tmpfilename,env);
   return 0;
 }
 
@@ -84,37 +86,37 @@ static int evalpathlist(const char *envarname,void *info,
  }
 
 /*@null@*/ FILE *scanpathsforfile(const char *envstring,
-                                  const char *filename,
+                                  const Str *filename,
                                   Env *env)
 {
   Fopeninfo fileopeninfo;
 
   env_error_check(env);
-  fileopeninfo.fpin = env_fa_fopen(env,filename,"rb");
+  fileopeninfo.fpin = env_fa_fopen(env,str_get(filename),"rb");
   if (fileopeninfo.fpin != NULL)
   {
     return fileopeninfo.fpin;
   }
-  if (strchr(filename,'/') != NULL)
+  if (strchr(str_get(filename),'/') != NULL)
   {
     env_error_set(env,
                   "filename \"%s\" contains illegal symbol '/': the path list "
                   "specified by environment variable \"%s\" cannot be searched "
-                  "for it",filename,envstring);
+                  "for it",str_get(filename),envstring);
     return NULL;
   }
-  ASSIGNDYNAMICSTRDUP(fileopeninfo.filename,filename);
+  fileopeninfo.filename = str_clone(filename,env);
   if (evalpathlist(envstring,(void *) &fileopeninfo,callfileopen,env) != 0)
   {
-    FREESPACE(fileopeninfo.filename);
+    str_delete(fileopeninfo.filename,env);
     return NULL;
   }
   if (fileopeninfo.fpin == NULL)
   {
-    FREESPACE(fileopeninfo.filename);
-    env_error_set(env,"cannot find file \"%s\"",filename);
+    str_delete(fileopeninfo.filename,env);
+    env_error_set(env,"cannot find file \"%s\"",str_get(filename));
     return NULL;
   }
-  FREESPACE(fileopeninfo.filename);
+  str_delete(fileopeninfo.filename,env);
   return fileopeninfo.fpin;
 }

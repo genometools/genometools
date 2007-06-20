@@ -5,26 +5,24 @@
 */
 
 #include <errno.h>
+#include <string.h>
 #include "libgtcore/env.h"
-#include "types.h"
-#include "spacedef.h"
+#include "libgtcore/str.h"
 
-#include "compfilenm.pr"
-
-/*@null@*/ FILE *opensfxfile(const char *indexname,
+/*@null@*/ FILE *opensfxfile(const Str *indexname,
                              const char *suffix,Env *env)
 {
-  char *tmpfilename;
+  Str *tmpfilename;
   FILE *fp;
 
-  tmpfilename = COMPOSEFILENAME(indexname,suffix);
-  fp = env_fa_fopen(env,tmpfilename,"wb");
+  tmpfilename = str_clone(indexname,env);
+  str_append_cstr(tmpfilename,suffix,env);
+  fp = env_fa_fopen(env,str_get(tmpfilename),"wb");
   if (fp == NULL)
   {
-    env_error_set(env,"cannot open file \"%s\": %s\n",tmpfilename,
+    env_error_set(env,"cannot open file \"%s\": %s\n",str_get(tmpfilename),
                                                       strerror(errno));
   }
-  FREESPACE(tmpfilename);
+  str_delete(tmpfilename,env);
   return fp;
 }
-

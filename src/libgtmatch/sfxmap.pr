@@ -4,7 +4,7 @@ extern "C" {
 int mapsuffixarray(Suffixarray *suffixarray,
                    bool withsuftab,
                    bool withencseq,
-                   const char *indexname,
+                   const Str *indexname,
                    Env *env);
 
 void freesuffixarray(Suffixarray *suffixarray,Env *env);

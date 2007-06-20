@@ -4,7 +4,7 @@ extern "C" {
 int fillmapspecstartptr(Assignmapspec assignmapspec,
                         void **mappeduserptr,
                         void *assignmapinfo,
-                        const char *tmpfilename,
+                        const Str *tmpfilename,
                         Uint expectedsize,
                         Env *env);
 

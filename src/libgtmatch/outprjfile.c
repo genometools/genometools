@@ -9,11 +9,11 @@
 #include <stdbool.h>
 #include <errno.h>
 #include "libgtcore/strarray.h"
+#include "libgtcore/str.h"
 #include "types.h"
 #include "spacedef.h"
 
 #include "endianess.pr"
-#include "compfilenm.pr"
 #include "opensfxfile.pr"
 
 static void showprjinfo(FILE *outprj,
@@ -53,7 +53,7 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"littleendian=%c\n",islittleendian() ? '1' : '0');
 }
 
-int outprjfile(const char *indexname,
+int outprjfile(const Str *indexname,
                const StrArray *filenametab,
                const PairUint *filelengthtab,
                Uint64 totallength,
@@ -66,7 +66,7 @@ int outprjfile(const char *indexname,
   bool haserr = false;
 
   env_error_check(env);
-  prjfp = opensfxfile(indexname,"prj",env);
+  prjfp = opensfxfile(indexname,".prj",env);
   if (prjfp == NULL)
   {
     haserr = true;

@@ -11,7 +11,7 @@ Uchar sequentialgetencodedchar64(const Encodedsequence *encseq,
                                  Encodedsequencescanstate *esr,
                                  Uint64 pos);
 
-int flushencseqfile(const char *indexname,Encodedsequence *encseq,Env *env);
+int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
 
 void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
 
@@ -28,7 +28,7 @@ int overallspecialranges(const Encodedsequence *encseq,
 
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
                                            const StrArray *filenametab,
-                                           const char *indexname,
+                                           const Str *indexname,
                                            Uint64 totallength,
                                            const Specialcharinfo
                                                  *specialcharinfo,

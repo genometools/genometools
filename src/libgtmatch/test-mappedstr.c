@@ -19,7 +19,6 @@
 #include "sarr-def.h"
 
 #include "kmer2string.pr"
-#include "compfilenm.pr"
 #include "mappedstr.pr"
 #include "alphabet.pr"
 #include "sfxmap.pr"

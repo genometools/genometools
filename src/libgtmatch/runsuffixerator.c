@@ -61,13 +61,13 @@ static int suftab2file(void *info,
   return 0;
 }
 
-static int outal1file(const char *indexname,const Alphabet *alpha,Env *env)
+static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
 {
   FILE *al1fp;
   bool haserr = false;
 
   env_error_check(env);
-  al1fp = opensfxfile(indexname,"al1",env);
+  al1fp = opensfxfile(indexname,".al1",env);
   if(al1fp == NULL)
   {
     haserr = true;
@@ -101,9 +101,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   outfileinfo.outfpbwttab = NULL;
   alpha = assigninputalphabet(so->isdna,
                               so->isprotein,
-                              str_length(so->str_smap) > 0
-                                  ? str_get(so->str_smap)
-                                  : NULL,
+                              so->str_smap,
                               strarray_get(so->filenametab,0),
                               env);
   if (alpha == NULL)
@@ -125,7 +123,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   if (!haserr)
   {
     assert(so->prefixlength > 0);
-    if (outprjfile(str_get(so->str_indexname),
+    if (outprjfile(so->str_indexname,
                    so->filenametab,
                    filelengthtab,
                    totallength,
@@ -140,7 +138,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   if (!haserr)
   {
     numofchars = getnumofcharsAlphabet(alpha);
-    if (outal1file(str_get(so->str_indexname),alpha,env) != 0)
+    if (outal1file(so->str_indexname,alpha,env) != 0)
     {
       haserr = true;
     }
@@ -149,8 +147,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   {
     if(so->outsuftab)
     {
-      outfileinfo.outfpsuftab 
-        = opensfxfile(str_get(so->str_indexname),"suf",env);
+      outfileinfo.outfpsuftab = opensfxfile(so->str_indexname,".suf",env);
       if(outfileinfo.outfpsuftab == NULL)
       {
         haserr = true;
@@ -162,7 +159,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
     if(so->outbwttab)
     {
       outfileinfo.outfpbwttab 
-        = opensfxfile(str_get(so->str_indexname),"bwt",env);
+        = opensfxfile(so->str_indexname,".bwt",env);
       if(outfileinfo.outfpbwttab == NULL)
       {
         haserr = true;
@@ -189,7 +186,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
     {
       if (so->outtistab)
       {
-        if (flushencseqfile(str_get(so->str_indexname),encseq,env) != 0)
+        if (flushencseqfile(so->str_indexname,encseq,env) != 0)
         {
           haserr = true;
         }

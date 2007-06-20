@@ -9,6 +9,7 @@
 #include <errno.h>
 #include <ctype.h>
 #include "libgtcore/env.h"
+#include "libgtcore/str.h"
 #include "types.h"
 #include "intbits.h"
 #include "alphadef.h"
@@ -19,7 +20,6 @@
 #include "encseq-def.h"
 #include "fbs-def.h"
 
-#include "compfilenm.pr"
 #include "genericstream.pr"
 #include "alphabet.pr"
 #include "mapspec-gen.pr"
@@ -376,7 +376,7 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   }
 }
 
-int flushencseqfile(const char *indexname,Encodedsequence *encseq,Env *env)
+int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
 {
   Encodedsequencewithoptions encseqwithoptions;
   FILE *fp;
@@ -385,7 +385,7 @@ int flushencseqfile(const char *indexname,Encodedsequence *encseq,Env *env)
   env_error_check(env);
   encseqwithoptions.encseq = encseq;
   encseqwithoptions.writemode = true;
-  fp = opensfxfile(indexname,"esq",env);
+  fp = opensfxfile(indexname,".esq",env);
   if (fp == NULL)
   {
     haserr = true;
@@ -407,15 +407,16 @@ int flushencseqfile(const char *indexname,Encodedsequence *encseq,Env *env)
 }
 
 static int fillencseqmapspecstartptr(Encodedsequence *encseq,
-                                     const char *indexname,
+                                     const Str *indexname,
                                      Env *env)
 {
   Encodedsequencewithoptions encseqwithoptions;
-  char *tmpfilename;
   bool haserr = false;
+  Str *tmpfilename;
 
   env_error_check(env);
-  tmpfilename = COMPOSEFILENAME(indexname,"esq");
+  tmpfilename = str_clone(indexname,env);
+  str_append_cstr(tmpfilename,".esq",env);
   encseqwithoptions.encseq = encseq;
   encseqwithoptions.writemode = false;
   if (fillmapspecstartptr(assignencseqmapspecification,
@@ -427,7 +428,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
   {
     haserr = true;
   }
-  FREESPACE(tmpfilename);
+  str_delete(tmpfilename,env);
   return haserr ? -1 : 0;
 }
 
@@ -1459,19 +1460,20 @@ static void determineencseqkeyvalues(Encodedsequence *encseq,
           encseq->name,(Showuint) encseq->sizeofrep,spaceinbitsperchar);
 }
 
-static int readsatfromfile(const char *indexname,Env *env)
+static int readsatfromfile(const Str *indexname,Env *env)
 {
   FILE *fp;
-  char *tmpfilename; 
+  Str *tmpfilename; 
   int cc = 0;
   bool haserr = false;
 
-  tmpfilename = COMPOSEFILENAME(indexname,"esq");
-  fp = env_fa_fopen(env,tmpfilename,"rb");
+  tmpfilename = str_clone(indexname,env);
+  str_append_cstr(tmpfilename,".esq",env);
+  fp = env_fa_fopen(env,str_get(tmpfilename),"rb");
   if (fp == NULL)
   {
-    env_error_set(env,"cannot open file \"%s\": %s",tmpfilename,
-                                                      strerror(errno));
+    env_error_set(env,"cannot open file \"%s\": %s",str_get(tmpfilename),
+                                                    strerror(errno));
     haserr = true;
   }
   if(!haserr)
@@ -1479,7 +1481,7 @@ static int readsatfromfile(const char *indexname,Env *env)
     cc = fgetc(fp);
     if(cc == EOF)
     {
-      env_error_set(env,"illegal EOF symbol in \"%s\"",tmpfilename);
+      env_error_set(env,"illegal EOF symbol in \"%s\"",str_get(tmpfilename));
       haserr = true;
     }
   }
@@ -1487,12 +1489,12 @@ static int readsatfromfile(const char *indexname,Env *env)
   {
     if(cc < 0 || cc >= (int) Undefpositionaccesstype)
     {
-      env_error_set(env,"illegal type %d in \"%s\"",cc,tmpfilename);
+      env_error_set(env,"illegal type %d in \"%s\"",cc,str_get(tmpfilename));
       haserr = true;
     }
   }
   env_fa_xfclose(fp,env);
-  FREESPACE(tmpfilename);
+  str_delete(tmpfilename,env);
   return haserr ? -1 : cc;
 }
 
@@ -1514,7 +1516,7 @@ static int readsatfromfile(const char *indexname,Env *env)
 
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
                                            const StrArray *filenametab,
-                                           const char *indexname,
+                                           const Str *indexname,
                                            Uint64 totallength,
                                            const Specialcharinfo
                                                  *specialcharinfo,
@@ -1606,7 +1608,7 @@ static int readsatfromfile(const char *indexname,Env *env)
   {
     if(str_sat == NULL)
     {
-      if(indexname == NULL)
+      if(str_length(indexname) == 0)
       {
         sat = determinesmallestrep(totallength,
                                    specialcharinfo);

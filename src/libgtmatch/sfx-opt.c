@@ -24,16 +24,17 @@ static OPrval parse_options(int *parsed_args,
 {
   OptionParser *op;
   Option *option, *optionsmap, *optiondna, *optionprotein,
-         *optionpl, *optionindexname;
+         *optionpl, *optionindexname, *optiondb;
   OPrval oprval;
 
   env_error_check(env);
   op = option_parser_new("options",
                          "Compute enhanced suffix array.", env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  option = option_new_filenamearray("db","specify database files (mandatory)",
-                                     so->filenametab,env);
-  option_parser_add_option(op, option, env);
+  optiondb = option_new_filenamearray("db","specify database files (mandatory)",
+                                      so->filenametab,env);
+  option_is_mandatory(optiondb);
+  option_parser_add_option(op, optiondb, env);
 
   optionsmap = option_new_string("smap",
                                  "specify file containing a symbol mapping",
@@ -103,8 +104,7 @@ static OPrval parse_options(int *parsed_args,
   option_exclude(optionsmap, optiondna, env);
   option_exclude(optionsmap, optionprotein, env);
   option_exclude(optiondna, optionprotein, env);
-  oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, 0, env);
+  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
   if (oprval == OPTIONPARSER_OK)
   {
     if (!option_is_set(optionindexname))
@@ -149,7 +149,7 @@ static void showoptions(const Suffixeratoroptions *so)
   {
     printf("# prefixlength=%u\n",so->prefixlength);
   }
-  // printf("# parts=%u\n",so->numofparts);
+  printf("# parts=%u\n",so->numofparts);
   for (i=0; i<strarray_size(so->filenametab); i++)
   {
     printf("# inputfile[%lu]=%s\n",i,strarray_get(so->filenametab,i));

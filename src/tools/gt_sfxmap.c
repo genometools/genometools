@@ -22,7 +22,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 
 int gt_sfxmap(int argc, const char **argv, Env *env)
 {
-  const char *indexname;
+  Str *indexname;
   bool haserr = false;
   Suffixarray suffixarray;
   int parsed_args;
@@ -36,12 +36,12 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   }
   assert(parsed_args == 1);
 
-  indexname = argv[parsed_args];
-
+  indexname = str_new_cstr(argv[parsed_args],env);
   if (mapsuffixarray(&suffixarray,true,true,indexname,env) != 0)
   {
     haserr = true;
   }
+  str_delete(indexname,env);
 
   if (!haserr)
   {

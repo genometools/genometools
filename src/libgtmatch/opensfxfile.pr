@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/*@null@*/ FILE *opensfxfile(const char *indexname,
+/*@null@*/ FILE *opensfxfile(const Str *indexname,
                              const char *suffix,Env *env);
 
 #ifdef __cplusplus

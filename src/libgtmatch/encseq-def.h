@@ -8,6 +8,7 @@
 #define ENCSEQDEF_H
 #include "types.h"
 #include "alphadef.h"
+#include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
 
 typedef struct _Encodedsequence Encodedsequence;
@@ -19,7 +20,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,Uint pos);
 
 Uchar getencodedchar64(const Encodedsequence *encseq,Uint64 pos);
 
-int flushencseqfile(const char *indexname,Encodedsequence *encseq,Env *env);
+int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
 
 void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
 
@@ -40,7 +41,7 @@ int overallspecialranges(const Encodedsequence *encseq,
 
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
                                            const StrArray *filenametab,
-                                           const char *indexname,
+                                           const Str *indexname,
                                            Uint64 totallength,
                                            const Specialcharinfo
                                                  *specialcharinfo,

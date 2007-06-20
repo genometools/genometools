@@ -14,7 +14,6 @@
 #include "encseq-def.h"
 
 #include "readnextline.pr"
-#include "compfilenm.pr"
 #include "endianess.pr"
 #include "alphabet.pr"
 #include "dstrdup.pr"
@@ -84,7 +83,7 @@ static int scanuintintline(unsigned int *lengthofkey,
   return 0;
 }
 
-static int allkeysdefined(const char *prjfile,const ArrayReadintkeys *rik,
+static int allkeysdefined(const Str *prjfile,const ArrayReadintkeys *rik,
                           Env *env)
 {
   Uint i;
@@ -95,7 +94,7 @@ static int allkeysdefined(const char *prjfile,const ArrayReadintkeys *rik,
     if (!rik->spaceReadintkeys[i].found)
     {
       env_error_set(env,"file %s: missing line beginning with \"%s=\"",
-                         prjfile,
+                         str_get(prjfile),
                          rik->spaceReadintkeys[i].keystring);
       return -1;
     }
@@ -113,7 +112,7 @@ static int allkeysdefined(const char *prjfile,const ArrayReadintkeys *rik,
 
 static int scanprjfileviafileptr(Suffixarray *suffixarray,
                                  Uint *totallength,
-                                 const char *prjfile,FILE *fpin,Env *env)
+                                 const Str *prjfile,FILE *fpin,Env *env)
 {
   ArrayUchar linebuffer;
   Uint uintvalue, numofsequences, integersize, littleendian;
@@ -240,7 +239,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       if (!found)
       {
         env_error_set(env,"file %s, line %u: cannot find key for \"%*.*s\"",
-                           prjfile,
+                           str_get(prjfile),
                            linenum,
                            (Fieldwidthtype) lengthofkey,
                            (Fieldwidthtype) lengthofkey,
@@ -257,7 +256,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   if (!haserr && integersize != UintConst(32) && integersize != UintConst(64))
   {
     env_error_set(env,"%s contains illegal line defining the integer size",
-                  prjfile);
+                  str_get(prjfile));
     haserr = true;
   }
   if (!haserr && integersize != (Uint) (sizeof (Uint) * CHAR_BIT))
@@ -297,10 +296,10 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
 int mapsuffixarray(Suffixarray *suffixarray,
                    bool withsuftab,
                    bool withencseq,
-                   const char *indexname,
+                   const Str *indexname,
                    Env *env)
 {
-  char *filename;
+  Str *tmpfilename;
   FILE *fp;
   bool haserr = false;
   Uint totallength;
@@ -308,34 +307,36 @@ int mapsuffixarray(Suffixarray *suffixarray,
   env_error_check(env);
   suffixarray->suftab = NULL;
   suffixarray->alpha = NULL;
-  filename = COMPOSEFILENAME(indexname,"prj");
-  fp = env_fa_fopen(env,filename,"rb");
+  tmpfilename = str_clone(indexname,env);
+  str_append_cstr(tmpfilename,".prj",env);
+  fp = env_fa_fopen(env,str_get(tmpfilename),"rb");
   if (fp == NULL)
   {
-    env_error_set(env,"cannot open file \"%s\": %s",filename,
+    env_error_set(env,"cannot open file \"%s\": %s",str_get(tmpfilename),
                                                     strerror(errno));
     haserr = true;
   }
   if (!haserr && scanprjfileviafileptr(suffixarray,&totallength,
-                                      filename,fp,env) != 0)
+                                      tmpfilename,fp,env) != 0)
   {
     haserr = true;
   }
   env_fa_xfclose(fp,env);
-  FREESPACE(filename);
+  str_delete(tmpfilename,env);
   if (!haserr)
   {
-    filename = COMPOSEFILENAME(indexname,"al1");
+    tmpfilename = str_clone(indexname,env);
+    str_append_cstr(tmpfilename,".al1",env);
     suffixarray->alpha = assigninputalphabet(false,
                                              false,
-                                             filename,
+                                             tmpfilename,
                                              NULL,
                                              env);
     if (suffixarray->alpha == NULL)
     {
       haserr = true;
     }
-    FREESPACE(filename);
+    str_delete(tmpfilename,env);
   }
   if (!haserr && withencseq)
   {
@@ -356,11 +357,14 @@ int mapsuffixarray(Suffixarray *suffixarray,
   {
     size_t numofbytes;
 
-    filename = COMPOSEFILENAME(indexname,"suf");
-    suffixarray->suftab = env_fa_mmap_read(env,filename,&numofbytes);
+    tmpfilename = str_clone(indexname,env);
+    str_append_cstr(tmpfilename,".suf",env);
+    suffixarray->suftab = env_fa_mmap_read(env,str_get(tmpfilename),
+                                           &numofbytes);
     if (suffixarray->suftab == NULL)
     {
-      env_error_set(env,"cannot map file \"%s\": %s",filename,strerror(errno));
+      env_error_set(env,"cannot map file \"%s\": %s",str_get(tmpfilename),
+                    strerror(errno));
       haserr = true;
     }
     if (!haserr &&
@@ -373,7 +377,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
       env_fa_xmunmap((void *) suffixarray->suftab,env);
       haserr = true;
     }
-    FREESPACE(filename);
+    str_delete(tmpfilename,env);
   }
   return haserr ? -1 : 0;
 }
