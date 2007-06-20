@@ -22,13 +22,13 @@ static int mergefeat_stream_unsorted_next_tree(GenomeStream *gs,
                                                GenomeNode **gn, Env *env)
 {
   MergefeatStreamUnsorted *mfs;
-  int has_err;
+  int had_err;
   env_error_check(env);
   mfs = mergefeat_stream_unsorted_cast(gs);
-  has_err = genome_stream_next_tree(mfs->in_stream, gn, env);
-  if (!has_err && *gn)
-    has_err = genome_node_accept(*gn, mfs->mergefeat_visitor, env);
-  return has_err;
+  had_err = genome_stream_next_tree(mfs->in_stream, gn, env);
+  if (!had_err && *gn)
+    had_err = genome_node_accept(*gn, mfs->mergefeat_visitor, env);
+  return had_err;
 }
 
 static void mergefeat_stream_unsorted_free(GenomeStream *gs, Env *env)

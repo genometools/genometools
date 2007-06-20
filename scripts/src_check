@@ -37,6 +37,9 @@ if [ $? -eq 0 ]; then echo "C++ style comment"; err=1; fi
 grep -n '^ *,' $*
 if [ $? -eq 0 ]; then echo "illegal ',' at beginning of line"; err=1; fi
 
+grep -n ' has_err' $*
+if [ $? -eq 0 ]; then echo "illegal variable name 'has_err', use 'had_err' instread"; err=1; fi
+
 dir=`dirname $0`
 $dir/two_empty_lines $*
 if [ $? -ne 0 ]; then err=1; fi

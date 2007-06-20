@@ -21,13 +21,13 @@ static int gff3_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                                      Env *env)
 {
   GFF3OutStream *gff3_out_stream;
-  int has_err;
+  int had_err;
   env_error_check(env);
   gff3_out_stream = gff3_out_stream_cast(gs);
-  has_err = genome_stream_next_tree(gff3_out_stream->in_stream, gn, env);
-  if (!has_err && *gn)
-    has_err = genome_node_accept(*gn, gff3_out_stream->gff3_visitor, env);
-  return has_err;
+  had_err = genome_stream_next_tree(gff3_out_stream->in_stream, gn, env);
+  if (!had_err && *gn)
+    had_err = genome_node_accept(*gn, gff3_out_stream->gff3_visitor, env);
+  return had_err;
 }
 
 static void gff3_out_stream_free(GenomeStream *gs, Env *env)

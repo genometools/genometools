@@ -75,7 +75,7 @@ int gt_stat(int argc, const char **argv, Env *env)
 {
   GenomeStream *gff3_in_stream;
   GenomeNode *gn;
-  int has_err, parsed_args;
+  int had_err, parsed_args;
   Stat_arguments arguments;
   StatInfo info;
   env_error_check(env);
@@ -102,17 +102,17 @@ int gt_stat(int argc, const char **argv, Env *env)
 
   /* pull the features through the stream , compute the statistics, and free
      them afterwards */
-  while (!(has_err = genome_stream_next_tree(gff3_in_stream, &gn, env)) && gn) {
+  while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn, env)) && gn) {
     info.number_of_trees++;
-    has_err = genome_node_traverse_children(gn, &info, compute_statistics, true,
+    had_err = genome_node_traverse_children(gn, &info, compute_statistics, true,
                                             env);
     genome_node_rec_delete(gn, env);
-    if (has_err)
+    if (had_err)
       break;
   }
 
   /* show statistics */
-  if (!has_err) {
+  if (!had_err) {
     printf("parsed feature trees: %lu\n", info.number_of_trees);
     stat_visitor_show_stats(info.stat_visitor);
   }
@@ -121,5 +121,5 @@ int gt_stat(int argc, const char **argv, Env *env)
   genome_visitor_delete(info.stat_visitor, env);
   genome_stream_delete(gff3_in_stream, env);
 
-  return has_err;
+  return had_err;
 }

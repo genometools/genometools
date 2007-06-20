@@ -23,7 +23,7 @@ typedef struct {
   Hashiteratorfunc iterfunc;
   void *data;
   Env *env;
-  int has_err;
+  int had_err;
 } St_iterfunc_info;
 
 Hashtable* hashtable_new(HashType hash_type, FreeFunc keyfree,
@@ -83,8 +83,8 @@ static int st_iterfunc(void *key, void *value, void *data,
 {
   St_iterfunc_info *info = (St_iterfunc_info*) data;
   assert(info->iterfunc);
-  info->has_err = info->iterfunc(key, value, info->data, info->env);
-  if (info->has_err)
+  info->had_err = info->iterfunc(key, value, info->data, info->env);
+  if (info->had_err)
     return ST_STOP;
   return ST_CONTINUE;
 }
@@ -97,9 +97,9 @@ int hashtable_foreach(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
   info.iterfunc = iterfunc;
   info.data = data;
   info.env = env;
-  info.has_err = 0;
+  info.had_err = 0;
   (void) st_foreach(ht->st_table, st_iterfunc, (st_data_t) &info, env);
-  return info.has_err;
+  return info.had_err;
 }
 
 typedef struct {
@@ -133,21 +133,21 @@ int hashtable_foreach_ao(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
   Array *hash_entries;
   HashEntry *he;
   unsigned long i;
-  int has_err;
+  int had_err;
   assert(ht && iterfunc);
   assert(ht->hash_type == HASH_STRING);
   hash_entries = array_new(sizeof (HashEntry), env);
-  has_err = hashtable_foreach(ht, save_hash_entry, hash_entries, env);
-  if (!has_err) {
+  had_err = hashtable_foreach(ht, save_hash_entry, hash_entries, env);
+  if (!had_err) {
     qsort(array_get_space(hash_entries), array_size(hash_entries),
           array_elem_size(hash_entries), compare_hash_entries);
-    for (i = 0; !has_err && i < array_size(hash_entries); i++) {
+    for (i = 0; !had_err && i < array_size(hash_entries); i++) {
       he = array_get(hash_entries, i);
-      has_err = iterfunc(he->key, he->value, data, env);
+      had_err = iterfunc(he->key, he->value, data, env);
     }
   }
   array_delete(hash_entries, env);
-  return has_err;
+  return had_err;
 }
 
 static int remove_key_value_pair(void *key, void *value, void *data, Env *env)
@@ -171,7 +171,7 @@ static int hashtable_test(HashType hash_type, Env *env)
 {
   char *s1 = "foo", *s2 = "bar";
   Hashtable *ht;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
 
   /* empty hash */
@@ -186,34 +186,34 @@ static int hashtable_test(HashType hash_type, Env *env)
   /* hashes containing one element */
   ht = hashtable_new(hash_type, NULL, NULL, env);
   hashtable_add(ht, s1, s2, env);
-  ensure(has_err, hashtable_get(ht, s1) == s2);
-  ensure(has_err, !hashtable_get(ht, s2));
+  ensure(had_err, hashtable_get(ht, s1) == s2);
+  ensure(had_err, !hashtable_get(ht, s2));
   hashtable_delete(ht, env);
 
   /* hashes containing two elements */
   ht = hashtable_new(hash_type, NULL, NULL, env);
   hashtable_add(ht, s1, s2, env);
   hashtable_add(ht, s2, s1, env);
-  ensure(has_err, hashtable_get(ht, s1) == s2);
-  ensure(has_err, hashtable_get(ht, s2) == s1);
+  ensure(had_err, hashtable_get(ht, s1) == s2);
+  ensure(had_err, hashtable_get(ht, s2) == s1);
   hashtable_delete(ht, env);
 
-  return has_err;
+  return had_err;
 }
 
 int hashtable_unit_test(Env *env)
 {
-  int has_err;
+  int had_err;
   env_error_check(env);
 
   /* direct hash */
-  has_err = hashtable_test(HASH_DIRECT, env);
+  had_err = hashtable_test(HASH_DIRECT, env);
 
   /* string hash */
-  if (!has_err)
-    has_err = hashtable_test(HASH_STRING, env);
+  if (!had_err)
+    had_err = hashtable_test(HASH_STRING, env);
 
-  return has_err;
+  return had_err;
 }
 
 void hashtable_delete(Hashtable *ht, Env *env)

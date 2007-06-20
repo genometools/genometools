@@ -105,7 +105,7 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data, Env *env)
   Array *parent_features = NULL;
   ShowAttributeInfo info;
   unsigned long i;
-  int has_err = 0;
+  int had_err = 0;
   Str *id;
 
   env_error_check(env);
@@ -139,12 +139,12 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data, Env *env)
   /* show missing part of attributes */
   info.attribute_shown = part_shown;
   info.outfp = gff3_visitor->outfp;
-  has_err = genome_feature_foreach_attribute(gf, show_attribute, &info, env);
+  had_err = genome_feature_foreach_attribute(gf, show_attribute, &info, env);
 
   /* show terminal newline */
   genfile_xfputc('\n', gff3_visitor->outfp);
 
-  return has_err;
+  return had_err;
 }
 
 static int store_ids(GenomeNode *gn, void *data, Env *env)
@@ -153,7 +153,7 @@ static int store_ids(GenomeNode *gn, void *data, Env *env)
   GenomeFeature *gf = (GenomeFeature*) gn;
   GenomeFeatureType type;
   Add_id_info add_id_info;
-  int has_err = 0;
+  int had_err = 0;
   Str *id;
 
   env_error_check(env);
@@ -175,34 +175,34 @@ static int store_ids(GenomeNode *gn, void *data, Env *env)
     add_id_info.genome_feature_to_id_array =
       gff3_visitor->genome_feature_to_id_array,
     add_id_info.id = str_get(id);
-    has_err = genome_node_traverse_direct_children(gn, &add_id_info, add_id,
+    had_err = genome_node_traverse_direct_children(gn, &add_id_info, add_id,
                                                    env);
   }
-  return has_err;
+  return had_err;
 }
 
 static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                        Env *env)
 {
   GFF3Visitor *gff3_visitor;
-  int has_err;
+  int had_err;
   env_error_check(env);
   gff3_visitor = gff3_visitor_cast(gv);
 
   gff3_version_string(gv);
 
-  has_err = genome_node_traverse_children((GenomeNode*) gf, gff3_visitor,
+  had_err = genome_node_traverse_children((GenomeNode*) gf, gff3_visitor,
                                           store_ids, true, env);
-  if (!has_err) {
+  if (!had_err) {
     if (genome_node_is_tree((GenomeNode*) gf)) {
-      has_err = genome_node_traverse_children((GenomeNode*) gf, gff3_visitor,
+      had_err = genome_node_traverse_children((GenomeNode*) gf, gff3_visitor,
                                               gff3_show_genome_feature, true,
                                               env);
     }
     else {
       /* got a DAG -> traverse bin breadth first fashion to make sure that the
          'Parent' attributes are shown in correct order */
-      has_err = genome_node_traverse_children_breadth((GenomeNode*) gf,
+      had_err = genome_node_traverse_children_breadth((GenomeNode*) gf,
                                                       gff3_visitor,
                                                       gff3_show_genome_feature,
                                                       true, env);
@@ -216,7 +216,7 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   /* terminator */
   genfile_xfputs("###\n", gff3_visitor->outfp);
 
-  return has_err;
+  return had_err;
 }
 
 static int gff3_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,

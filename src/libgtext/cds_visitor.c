@@ -37,7 +37,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
   Range range;
   const char *raw_sequence;
   unsigned long raw_sequence_length;
-  int has_err = 0;
+  int had_err = 0;
 
   env_error_check(env);
   gf = genome_node_cast(genome_feature_class(), gn);
@@ -46,23 +46,23 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
   if (genome_feature_get_type(gf) == gft_exon &&
       (genome_feature_get_strand(gf) == STRAND_FORWARD ||
        genome_feature_get_strand(gf) == STRAND_REVERSE)) {
-    has_err = regionmapping_get_raw_sequence(v->regionmapping, &raw_sequence,
+    had_err = regionmapping_get_raw_sequence(v->regionmapping, &raw_sequence,
                                              genome_node_get_seqid(gn), env);
-    if (!has_err) {
+    if (!had_err) {
       range = genome_node_get_range(gn);
       assert(range.start && range.end); /* 1-based coordinates */
-      has_err = regionmapping_get_raw_sequence_length(v->regionmapping,
+      had_err = regionmapping_get_raw_sequence_length(v->regionmapping,
                                                       &raw_sequence_length,
                                                       genome_node_get_seqid(gn),
                                                       env);
     }
-    if (!has_err) {
+    if (!had_err) {
       assert(range.end <= raw_sequence_length);
       splicedseq_add(v->splicedseq, range.start - 1, range.end - 1,
                      raw_sequence, env);
     }
   }
-  return has_err;
+  return had_err;
 }
 
 static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
@@ -75,7 +75,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
   Array *orfs;
   Range orf, cds;
   Strand strand;
-  int has_err;
+  int had_err;
 
   env_error_check(env);
   gf = genome_node_cast(genome_feature_class(), gn);
@@ -83,9 +83,9 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
 
   /* traverse the direct children */
   splicedseq_reset(v->splicedseq);
-  has_err = genome_node_traverse_direct_children(gn, v,
+  had_err = genome_node_traverse_direct_children(gn, v,
                                                  extract_cds_if_necessary, env);
-  if (!has_err && splicedseq_length(v->splicedseq) > 2) {
+  if (!had_err && splicedseq_length(v->splicedseq) > 2) {
     strand = genome_feature_get_strand(gf);
     if (strand == STRAND_REVERSE) {
       if (splicedseq_reverse(v->splicedseq, env))
@@ -168,7 +168,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
     str_delete(pr_1, env);
     str_delete(pr_0, env);
   }
-  return has_err;
+  return had_err;
 }
 
 static int cds_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,

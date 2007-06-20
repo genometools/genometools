@@ -105,19 +105,19 @@ static int parse_input_file(Array *spliced_alignments,
 {
   FILE *input_file;
   SplicedAlignment sa;
-  int has_err = 0;
+  int had_err = 0;
   Str *line;
   env_error_check(env);
 
   line = str_new(env);
   input_file = env_fa_xfopen(env, file_name, "r");
 
-  while (!has_err && str_read_next_line(line, input_file, env) != EOF) {
+  while (!had_err && str_read_next_line(line, input_file, env) != EOF) {
     /* init new spliced alignment */
     initSplicedAlignment(&sa, env);
     /* parse input line and save result in spliced alignment */
-    has_err = parse_input_line(&sa, str_get(line), str_length(line), env);
-    if (!has_err) {
+    had_err = parse_input_line(&sa, str_get(line), str_length(line), env);
+    if (!had_err) {
       /* store spliced alignment */
       array_add(spliced_alignments, sa, env);
       /* reset array */
@@ -127,7 +127,7 @@ static int parse_input_file(Array *spliced_alignments,
 
   env_fa_xfclose(input_file, env);
   str_delete(line, env);
-  return has_err;
+  return had_err;
 }
 
 static Range get_genomic_range(const void *sa)
@@ -219,7 +219,7 @@ int gt_consensus_sa(int argc, const char **argv, Env *env)
   Array *spliced_alignments;
   SplicedAlignment *sa;
   unsigned long i;
-  int parsed_args, has_err = 0;
+  int parsed_args, had_err = 0;
   env_error_check(env);
 
   /* option parsing */
@@ -232,9 +232,9 @@ int gt_consensus_sa(int argc, const char **argv, Env *env)
 
   /* parse input file and store resuilts in the spliced alignment array */
   spliced_alignments = array_new(sizeof (SplicedAlignment), env);
-  has_err = parse_input_file(spliced_alignments, argv[1], env);
+  had_err = parse_input_file(spliced_alignments, argv[1], env);
 
-  if (!has_err) {
+  if (!had_err) {
     /* sort spliced alignments */
     qsort(array_get_space(spliced_alignments), array_size(spliced_alignments),
           sizeof (SplicedAlignment), compare_spliced_alignment);
@@ -254,5 +254,5 @@ int gt_consensus_sa(int argc, const char **argv, Env *env)
   }
   array_delete(spliced_alignments, env);
 
-  return has_err;
+  return had_err;
 }

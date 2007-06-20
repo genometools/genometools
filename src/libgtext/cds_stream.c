@@ -22,13 +22,13 @@ struct CDSStream
 static int cds_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
   CDSStream *cds_stream;
-  int has_err;
+  int had_err;
   env_error_check(env);
   cds_stream = cds_stream_cast(gs);
-  has_err = genome_stream_next_tree(cds_stream->in_stream, gn, env);
-  if (!has_err && *gn)
-    has_err = genome_node_accept(*gn, cds_stream->cds_visitor, env);
-  return has_err;
+  had_err = genome_stream_next_tree(cds_stream->in_stream, gn, env);
+  if (!had_err && *gn)
+    had_err = genome_node_accept(*gn, cds_stream->cds_visitor, env);
+  return had_err;
 }
 
 static void cds_stream_free(GenomeStream *gs, Env *env)
@@ -51,7 +51,7 @@ GenomeStream* cds_stream_new(GenomeStream *in_stream, RegionMapping *rm,
   GenomeStream *gs;
   CDSStream *cds_stream;
   Str *source_str;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   gs = genome_stream_create(cds_stream_class(), true, env);
   cds_stream = cds_stream_cast(gs);
@@ -59,9 +59,9 @@ GenomeStream* cds_stream_new(GenomeStream *in_stream, RegionMapping *rm,
   cds_stream->in_stream = in_stream;
   cds_stream->cds_visitor = cds_visitor_new(rm, source_str, env);
   if (!cds_stream->cds_visitor)
-    has_err = -1;
+    had_err = -1;
   str_delete(source_str, env);
-  if (has_err) {
+  if (had_err) {
     cds_stream_free(gs, env);
     return NULL;
   }

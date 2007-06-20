@@ -132,26 +132,26 @@ int range_unit_test(Env *env)
                              2, 2, 2, 2 };
   Array *ranges, *tmp_ranges, *ctr;
   unsigned long i;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
 
-  ensure(has_err, sizeof (ranges_out) / sizeof (ranges_out[0]) ==
+  ensure(had_err, sizeof (ranges_out) / sizeof (ranges_out[0]) ==
                   sizeof (counts)     / sizeof (counts[0]));
 
   /* test ranges_uniq() */
   ranges = array_new(sizeof (Range), env);
   tmp_ranges = array_new(sizeof (Range), env);
-  for (i = 0; i < sizeof (ranges_in) / sizeof (ranges_in[0]) && !has_err; i++)
+  for (i = 0; i < sizeof (ranges_in) / sizeof (ranges_in[0]) && !had_err; i++)
     array_add(ranges, ranges_in[i], env);
   ranges_uniq(tmp_ranges, ranges, env);
-  ensure(has_err, array_size(ranges) ==
+  ensure(had_err, array_size(ranges) ==
                   sizeof (ranges_in) / sizeof (ranges_in[0]));
-  ensure(has_err, array_size(tmp_ranges) ==
+  ensure(had_err, array_size(tmp_ranges) ==
                   sizeof (ranges_out) / sizeof (ranges_out[0]));
-  for (i = 0; i < array_size(tmp_ranges) && !has_err; i++) {
-    ensure(has_err,
+  for (i = 0; i < array_size(tmp_ranges) && !had_err; i++) {
+    ensure(had_err,
            ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
-    ensure(has_err,
+    ensure(had_err,
            ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
   }
 
@@ -159,36 +159,36 @@ int range_unit_test(Env *env)
   array_reset(tmp_ranges);
   array_add_array(tmp_ranges, ranges, env);
   ranges_uniq_in_place(tmp_ranges, env);
-  for (i = 0; i < array_size(tmp_ranges) && !has_err; i++) {
-    ensure(has_err,
+  for (i = 0; i < array_size(tmp_ranges) && !had_err; i++) {
+    ensure(had_err,
            ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
-    ensure(has_err,
+    ensure(had_err,
            ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
   }
 
   /* test ranges_uniq_count() */
   array_reset(tmp_ranges);
   ctr = ranges_uniq_count(tmp_ranges, ranges, env);
-  ensure(has_err, array_size(tmp_ranges) == array_size(ctr));
-  ensure(has_err, array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
-  for (i = 0; i < array_size(ctr) && !has_err; i++) {
-    ensure(has_err, counts[i] == *(unsigned long*) array_get(ctr, i));
-    ensure(has_err,
+  ensure(had_err, array_size(tmp_ranges) == array_size(ctr));
+  ensure(had_err, array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
+  for (i = 0; i < array_size(ctr) && !had_err; i++) {
+    ensure(had_err, counts[i] == *(unsigned long*) array_get(ctr, i));
+    ensure(had_err,
            ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
-    ensure(has_err,
+    ensure(had_err,
            ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
   }
   array_delete(ctr, env);
 
   /* test ranges_uniq_in_place_count() */
   ctr = ranges_uniq_in_place_count(ranges, env);
-  ensure(has_err, array_size(ranges) == array_size(ctr));
-  ensure(has_err, array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
-  for (i = 0; i < array_size(ctr) && !has_err; i++) {
-    ensure(has_err, counts[i] == *(unsigned long*) array_get(ctr, i));
-    ensure(has_err,
+  ensure(had_err, array_size(ranges) == array_size(ctr));
+  ensure(had_err, array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
+  for (i = 0; i < array_size(ctr) && !had_err; i++) {
+    ensure(had_err, counts[i] == *(unsigned long*) array_get(ctr, i));
+    ensure(had_err,
            ranges_out[i].start == (*(Range*) array_get(ranges, i)).start);
-    ensure(has_err,
+    ensure(had_err,
            ranges_out[i].end == (*(Range*) array_get(ranges, i)).end);
   }
   array_delete(ctr, env);
@@ -196,7 +196,7 @@ int range_unit_test(Env *env)
   /* free */
   array_delete(ranges, env);
   array_delete(tmp_ranges, env);
-  return has_err;
+  return had_err;
 }
 
 void ranges_sort(Array *ranges)

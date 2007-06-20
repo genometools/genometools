@@ -33,7 +33,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   unsigned long i;
-  int has_err = 0, status_code;
+  int had_err = 0, status_code;
 
   env_error_check(env);
 
@@ -57,7 +57,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
           if (is->stdin_argument) {
             env_error_set(env,
                           "multiple specification of argument file \"-\"\n");
-            has_err = -1;
+            had_err = -1;
             break;
           }
           is->fpin = stdin;
@@ -83,7 +83,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 
     assert(is->fpin); /* file is open */
 
-    has_err = gff3parser_parse_genome_nodes(&status_code, is->gff3_parser,
+    had_err = gff3parser_parse_genome_nodes(&status_code, is->gff3_parser,
                                             is->genome_node_buffer,
                                             array_size(is->files)
                                             ? *(char**)
@@ -91,7 +91,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
                                                         is->next_file-1)
                                             : "stdin",
                                             &is->line_number, is->fpin, env);
-    if (has_err)
+    if (had_err)
       break;
 
     if (status_code == EOF) {
@@ -126,17 +126,17 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
                     genome_node_get_line_number(is->last_node),
                     genome_node_get_line_number(*(GenomeNode**)
                                     queue_get_elem(is->genome_node_buffer, i)));
-          has_err = -1;
+          had_err = -1;
           break;
         }
       }
     }
-    if (!has_err)
+    if (!had_err)
       *gn = *(GenomeNode**) queue_get(is->genome_node_buffer);
-    return has_err;
+    return had_err;
   }
   *gn = NULL;
-  return has_err;
+  return had_err;
 }
 
 static void gff3_in_stream_free(GenomeStream *gs, Env *env)

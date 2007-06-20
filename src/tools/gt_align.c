@@ -42,7 +42,7 @@ int gt_align(int argc, const char **argv, Env *env)
 {
   Bioseq *bioseq_1, *bioseq_2 = NULL;
   unsigned long i, j;
-  int parsed_args, has_err = 0;
+  int parsed_args, had_err = 0;
   Alignment *a;
   bool all;
   env_error_check(env);
@@ -58,15 +58,15 @@ int gt_align(int argc, const char **argv, Env *env)
   /* init */
   bioseq_1 = bioseq_new(argv[parsed_args], env);
   if (!bioseq_1)
-    has_err = -1;
-  if (!has_err) {
+    had_err = -1;
+  if (!had_err) {
     bioseq_2 = bioseq_new(argv[parsed_args+1], env);
     if (!bioseq_2)
-      has_err = -1;
+      had_err = -1;
   }
 
   /* aligning all sequence combinations */
-  if (!has_err) {
+  if (!had_err) {
     for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
       for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
         if (all) {
@@ -93,5 +93,5 @@ int gt_align(int argc, const char **argv, Env *env)
   bioseq_delete(bioseq_2, env);
   bioseq_delete(bioseq_1, env);
 
-  return has_err;
+  return had_err;
 }

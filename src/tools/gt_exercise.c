@@ -59,7 +59,7 @@ int gt_exercise(int argc, const char **argv, Env *env)
 {
   Toolbox *exercise_toolbox;
   Tool exercise;
-  int parsed_args, has_err = 0;
+  int parsed_args, had_err = 0;
   char **nargv = NULL;
   env_error_check(env);
 
@@ -81,18 +81,18 @@ int gt_exercise(int argc, const char **argv, Env *env)
   if (!(exercise = toolbox_get(exercise_toolbox, argv[1]))) {
     env_error_set(env, "exercise '%s' not found; option -help lists possible "
                   "tools", argv[1]);
-    has_err = -1;
+    had_err = -1;
   }
 
   /* call exercise */
-  if (!has_err) {
+  if (!had_err) {
     nargv = cstr_array_prefix_first(argv+parsed_args, argv[0], env);
-    has_err = exercise(argc-parsed_args, (const char**) nargv, env);
+    had_err = exercise(argc-parsed_args, (const char**) nargv, env);
   }
 
   /* free */
   cstr_array_delete(nargv, env);
   toolbox_delete(exercise_toolbox, env);
 
-  return has_err;
+  return had_err;
 }

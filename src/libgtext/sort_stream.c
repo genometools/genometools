@@ -23,22 +23,22 @@ struct SortStream
 static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
   SortStream *sort_stream;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   sort_stream = sort_stream_cast(gs);
 
   if (!sort_stream->sorted) {
-    while (!(has_err = genome_stream_next_tree(sort_stream->in_stream, gn,
+    while (!(had_err = genome_stream_next_tree(sort_stream->in_stream, gn,
              env)) && *gn) {
       array_add(sort_stream->trees, *gn, env);
     }
-    if (!has_err) {
+    if (!had_err) {
       genome_nodes_sort_stable(sort_stream->trees, env);
       sort_stream->sorted = true;
     }
   }
 
-  if (!has_err) {
+  if (!had_err) {
     assert(sort_stream->sorted);
     if (sort_stream->idx < array_size(sort_stream->trees)) {
       *gn = *(GenomeNode**) array_get(sort_stream->trees, sort_stream->idx);
@@ -47,12 +47,12 @@ static int sort_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
     }
   }
 
-  if (!has_err) {
+  if (!had_err) {
     array_reset(sort_stream->trees);
     *gn = NULL;
   }
 
-  return has_err;
+  return had_err;
 }
 
 static void sort_stream_free(GenomeStream *gs, Env *env)

@@ -71,7 +71,7 @@ int file_find_in_path(Str *path, const char *file, Env *env)
   char *pathvariable, *pathcomponent = NULL;
   Splitter *splitter = NULL;
   unsigned long i;
-  int has_err = 0;
+  int had_err = 0;
 
   env_error_check(env);
   assert(file);
@@ -79,17 +79,17 @@ int file_find_in_path(Str *path, const char *file, Env *env)
   /* check if 'file' has dirname */
   file_dirname(path, file, env);
   if (str_length(path))
-    return has_err;
+    return had_err;
   /* 'file' has no dirname -> scan $PATH */
   pathvariable = getenv("PATH");
   if (pathvariable)
     pathvariable = cstr_dup(pathvariable, env); /* make writeable copy */
   else {
     env_error_set(env, "environment variable $PATH is not defined");
-    has_err = -1;
+    had_err = -1;
   }
 
-  if (!has_err) {
+  if (!had_err) {
     splitter = splitter_new(env);
     splitter_split(splitter, pathvariable, strlen(pathvariable), ':', env);
     for (i = 0; i < splitter_size(splitter); i++) {
@@ -116,5 +116,5 @@ int file_find_in_path(Str *path, const char *file, Env *env)
   env_ma_free(pathvariable, env);
   splitter_delete(splitter, env);
 
-  return has_err;
+  return had_err;
 }
