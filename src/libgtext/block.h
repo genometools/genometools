@@ -21,6 +21,8 @@ void block_insert_element(Block* block,
 			  Config* cfg, 
 			  Env* env);
 Range block_get_range(Block* block);
+void block_set_range(Block* block,
+                     Range r);
 void block_set_caption(Block* block,
                        const char* caption);
 const char* block_get_caption(Block* block);

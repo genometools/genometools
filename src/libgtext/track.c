@@ -65,6 +65,7 @@ void track_insert_element(Track *track,
       caption = genome_feature_get_attribute(gn, "ID");
     }
     block_set_caption(block, caption);
+    block_set_range(block, genome_node_get_range(gn));
   }
   else
   {
@@ -79,6 +80,7 @@ void track_insert_element(Track *track,
          caption = genome_feature_get_attribute(parent, "ID");
       }
       block_set_caption(block, caption);
+      block_set_range(block, genome_node_get_range(parent));
     }
   }
   block_insert_element(block, gn, cfg, env);

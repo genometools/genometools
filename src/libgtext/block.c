@@ -50,20 +50,9 @@ void block_insert_element(Block *block,
   assert(block && gn);
 
   Element *element;
-  Range r;
 
   element = element_new(gn, cfg, env);
   array_add(block->elements, element, env);
-  r = element_get_range(element);
-  if(1 == array_size(block->elements))
-  {
-    block->range = element_get_range(element);
-  }
-  else 
-  {
-    block->range = range_join(r, block->range);
-  }
-
 }
 
 /*!
@@ -75,8 +64,19 @@ Range block_get_range(Block *block)
 {  
    assert(block);
 
-   assert(block->range.start && block->range.end);
    return block->range;
+}
+
+/*!
+Sets range of a Block object
+\param block Pointer to Block object to set range
+\param r Range to set
+*/
+void block_set_range(Block *block, Range r)
+{
+  assert(block && r.start && r.end);
+
+  block->range = r;
 }
 
 /*!
@@ -194,9 +194,10 @@ int block_unit_test(Env* env)
   ensure(has_err, !elements_are_equal(e2, *(Element**) array_get(elements, 0)));
   ensure(has_err, elements_are_equal(e2, *(Element**) array_get(elements, 1)));
 
-  /* test block_get_range */ 
-  b_range = block_get_range(b);
+  /* test block_set_range & block_get_range */
   r_temp = range_join(r1, r2);
+  block_set_range(b, r_temp);
+  b_range = block_get_range(b);
   ensure(has_err, (0 == range_compare(b_range, r_temp)));
   ensure(has_err, (1 == range_compare(r2, r_temp)));
 
