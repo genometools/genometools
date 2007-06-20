@@ -41,7 +41,6 @@ static void csa_visitor_free(GenomeVisitor *gv, Env *env)
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
   queue_delete(csa_visitor->genome_node_buffer, env);
   array_delete(csa_visitor->cluster, env);
-  assert(!csa_visitor->buffered_feature);
   str_delete(csa_visitor->gth_csa_source_str, env);
 }
 
