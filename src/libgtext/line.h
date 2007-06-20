@@ -15,11 +15,6 @@
 typedef struct Line Line;
 
 Line* line_new(Env* env);
-void line_insert_element(Line* line, 
-                          GenomeNode* gn, 
-			  Config* cfg,
-			  GenomeNode* parent,
-			  Env* env);
 void line_insert_block(Line* line,
                        Block* block,
 		       Env* env);

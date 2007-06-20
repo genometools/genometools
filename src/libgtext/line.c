@@ -32,80 +32,10 @@ Line* line_new(Env *env)
 }
 
 /*!
-Inserts an element into a Line object
-\param line Line in which the element shall be insert
-\param gn Pointer to GenomeNode object
-\param cfg Pointer to Config file
-\param env Pointer to Environment object
-*/
-/* void line_insert_element(Line *line,
-                         GenomeNode *gn,
-			 Config *cfg,
-			 GenomeNode *parent,
-			 Env *env)
-{
-  assert(line && gn && cfg);
-  Block *block;
-  Element *element;
-  const char* caption;
-
-  if((last_parent != NULL)
-     && (parent != NULL)
-     && (0 == genome_node_compare(&parent, &last_parent)))
-  {
-    if(array_size(line->blocks) != 0)
-    {
-      block = *(Block**) array_get_last(line->blocks);
-      element = *(Element**) array_get_last(block_get_elements(block));
-      if((element_get_type(element) == genome_feature_get_type((GenomeFeature*) gn))
-         && (!range_overlap(genome_node_get_range(gn), block_get_range(block))))
-      {
-        caption = genome_feature_get_attribute(parent, "Name");
-        if(caption == NULL)
-        {
-          caption = genome_feature_get_attribute(parent, "ID");
-        }
-      }
-      else 
-      {
-        block = block_new(env);
-        array_add(line->blocks, block, env);
-        caption = genome_feature_get_attribute(gn, "Name");
-        if(caption == NULL)
-        {
-          caption = genome_feature_get_attribute(gn, "ID");
-        }
-      }
-    }
-    else
-    {
-      block = block_new(env);
-      array_add(line->blocks, block, env);
-      caption = genome_feature_get_attribute(gn, "Name");
-      if(caption == NULL)
-      {
-        caption = genome_feature_get_attribute(gn, "ID");
-      }
-    }
-  }
-  else
-  {
-    block = block_new(env);
-    array_add(line->blocks, block, env);
-    caption = genome_feature_get_attribute(gn, "Name");
-    if(caption == NULL)
-    {
-      caption = genome_feature_get_attribute(gn, "ID");
-    }
-  }
-
-  block_insert_element(block, gn, cfg, env);
-  block_set_caption(block, caption);
-  last_parent = parent;
-}*/
-
-/*!
-
+insert Block object in Line object
+\param line Pointer to Line object
+\param block Pointer to Block object to instert
+\param env Pointer to environment object
 */
 void line_insert_block(Line *line, Block *block, Env *env)
 {
@@ -254,25 +184,9 @@ int line_unit_test(Env* env)
 
   block_insert_element(b1, gn1, NULL, env);
   block_insert_element(b2, gn2, NULL, env);
+  block_set_range(b1, r1);
+  block_set_range(b2, r2);
   
-  /* test line_insert_elements */
-  /* ensure(has_err, (0 == array_size(line_get_blocks(l1))));
-  line_insert_element(l1, gn1, cfg, parent, env);
-  ensure(has_err, (1 == array_size(line_get_blocks(l1))));
-  line_insert_element(l1, gn2, cfg, parent, env);
-  blocks = line_get_blocks(l1);
-  ensure(has_err, (1 == array_size(blocks)));
-  Block* b = *(Block**) array_get(blocks, 0);
-  ensure(has_err, (0 == strcmp(block_get_caption(b), genome_feature_get_attribute(parent, "Name"))));
-  line_insert_element(l1, gn3, cfg, gn1, env);
-  blocks = line_get_blocks(l1);
-  ensure(has_err, (2 == array_size(blocks)));
-  b = *(Block**) array_get(blocks, 1);
-  ensure(has_err, (0 == strcmp(block_get_caption(b), genome_feature_get_attribute(gn3, "Name"))));
-  line_insert_element(l1, gn4, cfg, parent, env);
-  blocks = line_get_blocks(l1);
-  ensure(has_err, (3 == array_size(blocks))); */
-
   /* test line_insert_block */
   ensure(has_err,  (0 == array_size(line_get_blocks(l1))));
   line_insert_block(l1, b1, env);

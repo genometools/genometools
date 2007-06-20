@@ -12,7 +12,7 @@ struct Track
 {
   Str *title;
   Array *lines;
-  Array *blocks;
+  Hashtable *blocks;
 };
 
 /*!
@@ -32,7 +32,7 @@ Track* track_new(Str *title,
   Str* t = str_ref(title);  
   track->title = t;
   track->lines = array_new(sizeof (Line*), env);
-  track->blocks = array_new(sizeof (Block*), env);
+  track->blocks = hashtable_new(HASH_DIRECT, NULL, NULL, env);
 
   assert(track);
   return track;
@@ -53,69 +53,37 @@ void track_insert_element(Track *track,
 {
   assert(track && gn && cfg);
   Block *block;
-  Element *element;
   const char* caption;
 
-  if((last_parent != NULL)
-     && (parent != NULL)
-     && (0 == genome_node_compare(&parent, &last_parent)))
-  {
-    if(array_size(track->blocks) != 0)
-    {
-      block = *(Block**) array_get_last(track->blocks);
-      element = *(Element**) array_get_last(block_get_elements(block));
-      if((element_get_type(element) == genome_feature_get_type((GenomeFeature*) gn))
-         && (!range_overlap(genome_node_get_range(gn), block_get_range(block))))
-      {
-        caption = genome_feature_get_attribute(parent, "Name");
-        if(caption == NULL)
-        {
-          caption = genome_feature_get_attribute(parent, "ID");
-        }
-      }
-      else
-      {
-        block = block_new(env);
-        array_add(track->blocks, block, env);
-        caption = genome_feature_get_attribute(gn, "Name");
-        if(caption == NULL)
-        {
-          caption = genome_feature_get_attribute(gn, "ID");
-        }
-      }
-    }
-    else
-    {
-      block = block_new(env);
-      array_add(track->blocks, block, env);
-      caption = genome_feature_get_attribute(gn, "Name");
-      if(caption == NULL)
-      {
-        caption = genome_feature_get_attribute(gn, "ID");
-      }
-    }
-  }
-  else
+  if(parent == NULL)
   {
     block = block_new(env);
-    array_add(track->blocks, block, env);
+    hashtable_add(track->blocks, gn, block, env);
     caption = genome_feature_get_attribute(gn, "Name");
     if(caption == NULL)
     {
       caption = genome_feature_get_attribute(gn, "ID");
     }
+    block_set_caption(block, caption);
+    block_set_range(block, genome_node_get_range(gn));
+  }
+  else
+  {
+    block = (Block*) hashtable_get(track->blocks, parent);
+    if(block == NULL)
+    {
+      block = block_new(env);
+      hashtable_add(track->blocks, parent, block, env);
+      caption = genome_feature_get_attribute(parent, "Name");
+      if(caption == NULL)
+      {
+         caption = genome_feature_get_attribute(parent, "ID");
+      }
+      block_set_caption(block, caption);
+      block_set_range(block, genome_node_get_range(parent));
+    }
   }
   block_insert_element(block, gn, cfg, env);
-  block_set_caption(block, caption);
-  last_parent = parent;
-
-  /*assert(track && gn);
-
-  block_insert_element();
-  Line *line;
-
-  line = get_next_free_line(track, gn, env);
-  line_insert_element(line, gn, cfg, parent, env); */
 }
 
 /*!
@@ -183,23 +151,60 @@ int track_get_number_of_lines(Track *track)
 }
 
 /*!
+ * foreach function to track_get_number_of_blocks
+ * */
+int track_add_block(void *parent , void *block, void *nof_blocks, Env *env)
+{
+  int *add;
 
+  add = nof_blocks;
+  *add += 1;
+
+  return 0;
+}
+
+/*!
+Returns number of Blocks of a Track object
+\param track Pointer to Track object
+\param env Pointer to Environment object
+*/
+int track_get_number_of_blocks(Track *track, Env *env)
+{
+  assert(track);
+  int nof_blocks;
+  nof_blocks = 0;
+  hashtable_foreach(track->blocks, track_add_block, &nof_blocks, env);
+
+  return nof_blocks;
+}
+
+/*!
+Sort block into free line
+*/
+int process_block(void *parent, void *block, void *track, Env *env)
+{
+  Range r;
+  Line *line;
+  Block *cur_block = (Block*) block;
+  Track *t = (Track*) track;
+
+  r = block_get_range(cur_block);
+  line = get_next_free_line(t, r, env);
+  line_insert_block(line, cur_block, env);
+
+  return 0;
+}
+
+/*!
+Sort all blocks into lines
+\param track Pointer to Track object
+\param env Pointer to Environment object
 */
 void track_finish(Track *track, Env *env)
 {
-  int i;
-  Line *line;
-  Range r;
-  Block *block;
+  hashtable_foreach(track->blocks, process_block, track, env);
 
-  for(i=0; i<array_size(track->blocks); i++)
-  {
-    block = *(Block**) array_get(track->blocks, i);
-    r = block_get_range(block);
-    line = get_next_free_line(track, r, env);
-    line_insert_block(line, block, env);
-  }
-  array_delete(track->blocks, env);
+  hashtable_delete(track->blocks, env);
 }
 
 /*!
@@ -308,13 +313,18 @@ int track_unit_test(Env* env)
 
   /* test track_insert_elements
      (implicit test of get_next_free_line) */
-  ensure(has_err, (0 == array_size(t->blocks)));
+  int nof_blocks;
+  nof_blocks = track_get_number_of_blocks(t, env);
+  ensure(has_err, (0 == nof_blocks));
   track_insert_element(t, gn1, cfg, parent, env);
-  ensure(has_err, (1 == array_size(t->blocks)));
+  nof_blocks = track_get_number_of_blocks(t, env);
+  ensure(has_err, (1 == nof_blocks));
   track_insert_element(t, gn2, cfg, parent, env);
-  ensure(has_err, (1 == array_size(t->blocks)));
+  nof_blocks = track_get_number_of_blocks(t, env);
+  ensure(has_err, (1 == nof_blocks));
   track_insert_element(t, gn3, cfg, gn1, env);
-  ensure(has_err, (2 == array_size(t->blocks)));
+  nof_blocks = track_get_number_of_blocks(t, env);
+  ensure(has_err, (2 == nof_blocks));
 
   /* test track_finish*/
   ensure(has_err, (0 == array_size(track_get_lines(t))));
