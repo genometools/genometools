@@ -1,14 +1,12 @@
 /*
-  Copyright (c) Sascha Steinbiss, Malte Mader, Christin Schaerfer
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2007 Malte Mader <mmader@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
 #include "gt.h"
-#include <libgtext/feature_index.h>
-#include <libgtext/config.h>
-#include <libgtext/graphics.h>
-#include <libgtext/render.h>
 
 typedef struct {
   bool verbose;
@@ -73,9 +71,6 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
                             600, env);
   option_parser_add_option(op, option, env);
 
-  /* output file options */
- /* outputfile_register_options(op, &arguments->outfp, ofi, env); */
-
   /* parse options */
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
 
@@ -87,17 +82,18 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
 
 int gt_view(int argc, const char **argv, Env *env)
 {
-  GenomeStream *sort_stream = NULL,
-               *gff3_in_stream = NULL,
-               *feature_stream = NULL,
-               *addintrons_stream = NULL;
+  GenomeStream *gff3_in_stream = NULL,
+               *feature_stream = NULL;
   Gff3_view_arguments arguments;
   GenomeNode *gn = NULL;
   FeatureIndex *features = NULL;
-  int parsed_args, has_err;
+  int parsed_args, has_err=0;
   unsigned long i;
   Range qry_range;
   Array *results = NULL;
+  Config *cfg;
+  Str *config_file;
+  
   env_error_check(env);
 
   /* option parsing */
@@ -114,25 +110,30 @@ int gt_view(int argc, const char **argv, Env *env)
   }
 
   /* create a gff3 input stream */
-  gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
-                                               argv + parsed_args,
-                                               arguments.verbose &&
-                                               NULL, env);
-
-  /*  create sort stream */
-  sort_stream = sort_stream_new(gff3_in_stream, env);
-
-  /* create addintrons stream */
-  addintrons_stream = addintrons_stream_new(sort_stream, env);
+  gff3_in_stream = gff3_in_stream_new_sorted(*(argv + parsed_args),
+                                             arguments.verbose &&
+                                             NULL, env);
 
   /* create feature index and stream */
   features = feature_index_new(env);
-  feature_stream = feature_stream_new(addintrons_stream, features, env);
+  feature_stream = feature_stream_new(gff3_in_stream, features, env);
 
-  /* pull the features through the stream and free them afterwards */
-  while (!(has_err = genome_stream_next_tree(feature_stream, &gn, env)) && gn)
+  /* check for correct order: range end < range start */
+  if (!has_err && (arguments.end < arguments.start))
   {
-    genome_node_rec_delete(gn, env);
+    env_error_set(env, "end of query range (%lu) precedes "
+		                   "start of query range (%lu)",
+		                   arguments.end, arguments.start);
+    has_err = -1;
+  }
+
+  if(!has_err)
+  {
+    /* pull the features through the stream and free them afterwards */
+    while (!(has_err = genome_stream_next_tree(feature_stream, &gn, env)) && gn)
+    {
+      genome_node_rec_delete(gn, env);
+    }
   }
 
   /* sequence region id does not exist in gff file */
@@ -142,14 +143,6 @@ int gt_view(int argc, const char **argv, Env *env)
   {
     env_error_set(env, "sequence region '%s' does not exist in GFF input file",
 		              str_get(arguments.seqid));
-    has_err = -1;
-  }
-
-  /* check for correct order: range end < range start */
-  if (!has_err && (arguments.end < arguments.start)) {
-    env_error_set(env, "end of query range (%lu) precedes "
-		                   "start of query range (%lu)",
-		                   arguments.end, arguments.start);
     has_err = -1;
   }
 
@@ -181,11 +174,11 @@ int gt_view(int argc, const char **argv, Env *env)
 	  	  printf("------\n");
       }
     }
-/* VVVVVVVVVVVVVVVVVVVV */
-    Config *cfg;
-    Str *luafile = str_new_cstr("config.lua",env);
-    cfg = config_new(env, &arguments.verbose);
-    config_load_file(cfg, luafile, env);
+
+    config_file = str_new_cstr("config.lua", env);
+    
+    cfg = config_new(env, arguments.verbose);
+    config_load_file(cfg, config_file, env);
 
     Diagram* d = diagram_new(results, qry_range, cfg, env);
     Render* r = render_new(d, cfg, env);
@@ -194,19 +187,16 @@ int gt_view(int argc, const char **argv, Env *env)
 
     render_delete(r, env);
     config_delete(cfg, env);
-    str_delete(luafile, env);
+    str_delete(config_file, env);
     diagram_delete(d, env);
     array_delete(results, env);
   }
-	/* ^^^^^^^^^^^^^^^^^^^^^^^^ */
 
   /* free */
   str_delete(arguments.seqid,env);
 	str_delete(arguments.outfile,env);
   feature_index_delete(features, env);
   genome_stream_delete(feature_stream, env);
-  genome_stream_delete(addintrons_stream, env);
-  genome_stream_delete(sort_stream, env);
   genome_stream_delete(gff3_in_stream, env);
 
   return has_err;

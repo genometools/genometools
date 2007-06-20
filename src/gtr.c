@@ -25,6 +25,7 @@
 #include "tools/gt_mutate.h"
 #include "tools/gt_splitfasta.h"
 #include "tools/gt_stat.h"
+#include "tools/gt_view.h"
 
 struct GTR {
   bool test,

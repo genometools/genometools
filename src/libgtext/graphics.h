@@ -21,14 +21,9 @@ void      graphics_draw_horizontal_line(Graphics *g, double x, double y,
                                         double width);
 void      graphics_draw_text(Graphics *g, double x, double y, const char *text);
 void      graphics_save_as_png(const Graphics*, const char *path);
-void      graphics_delete(Graphics*, Env*);
 
 /* new interface functions, ssteinbiss */
 Graphics* graphics_new_png(const char *fname, unsigned int width,
-                           unsigned int height, Env*);
-Graphics* graphics_new_pdf(const char *fname, unsigned int width,
-                           unsigned int height, Env*);
-Graphics* graphics_new_ps(const char *fname, unsigned int width,
                            unsigned int height, Env*);
 void      graphics_set_margins(Graphics *g,
                                double margin_x,
@@ -60,12 +55,11 @@ void      graphics_draw_colored_text(Graphics *g,
 								      	 						 double y,
 																     Color color,
 																     const char *text);
-void      graphics_draw_scale(Graphics *g, double x, double y, double width,
-                              Color stroke_color, int arrow_status,
-											     	  double stroke_width, double arrow_height,
-												      double arrow_width);
+void      graphics_draw_arrowhead(Graphics *g, double x, double y,
+                                  Color color, int arrow_status);
 double    graphics_get_text_height(Graphics *g);
-double    graphics_get_text_width(Graphics *g);
+double    graphics_get_text_width(Graphics *g, const char *text);
 void      graphics_save(const Graphics*);
+void      graphics_delete(Graphics*, Env*);
 
 #endif

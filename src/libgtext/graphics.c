@@ -117,36 +117,8 @@ Graphics* graphics_new_png(const char *fname, unsigned int width,
   cairo_set_source_rgb(g->cr, 1, 1, 1);
   cairo_set_operator(g->cr, CAIRO_OPERATOR_SOURCE);
   cairo_paint(g->cr);
-  return g;
-}
-
-Graphics* graphics_new_pdf(const char *fname, unsigned int width,
-                           unsigned int height, Env *env)
-{
-  Graphics *g = env_ma_malloc(env, sizeof (Graphics));
-  g->surf = cairo_pdf_surface_create(fname, width, height);
-  g->surf_type = PDF;
-  g->fn = fname;
-  g->cr = cairo_create(g->surf);
-  assert(cairo_status(g->cr) == CAIRO_STATUS_SUCCESS);
-  cairo_set_source_rgb(g->cr, 1, 1, 1);
-  cairo_set_operator(g->cr, CAIRO_OPERATOR_SOURCE);
-  cairo_paint(g->cr);
-  return g;
-}
-
-Graphics* graphics_new_ps(const char *fname, unsigned int width,
-                          unsigned int height, Env *env)
-{
-  Graphics *g = env_ma_malloc(env, sizeof (Graphics));
-  g->surf = cairo_ps_surface_create(fname, width, height);
-  g->surf_type = PS;
-  g->fn = fname;
-  g->cr = cairo_create(g->surf);
-  assert(cairo_status(g->cr) == CAIRO_STATUS_SUCCESS);
-  cairo_set_source_rgb(g->cr, 1, 1, 1);
-  cairo_set_operator(g->cr, CAIRO_OPERATOR_SOURCE);
-  cairo_paint(g->cr);
+  cairo_set_line_join(g->cr, CAIRO_LINE_JOIN_ROUND);
+  cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);  
   return g;
 }
 
@@ -209,8 +181,6 @@ void graphics_draw_dashes(Graphics *g, double x, double y, double width,
   /* save cairo context */
   cairo_save(g->cr);
   cairo_set_line_width(g->cr, stroke_width);
-  cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);
-  cairo_set_line_width(g->cr, stroke_width);
   cairo_set_source_rgb(g->cr, stroke_color.red,
                               stroke_color.green,
                               stroke_color.blue);
@@ -252,8 +222,6 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
   assert(g);
   /* save cairo context */
   cairo_save(g->cr);
-  cairo_set_line_join(g->cr, CAIRO_LINE_JOIN_ROUND);
-  cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);
   /* create caret path */
   switch (arrow_status)
   {
@@ -335,46 +303,6 @@ void graphics_draw_vertical_line(Graphics *g, double x, double y,
   cairo_stroke(g->cr);
 }
 
-void graphics_draw_scale(Graphics *g, double x, double y, double width,
-                         Color stroke_color, int arrow_status,
-												 double stroke_width, double arrow_height,
-												 double arrow_width)
-{
-  assert(g);
-  /* save cairo context */
-  cairo_save(g->cr);
-  cairo_set_line_join(g->cr, CAIRO_LINE_JOIN_ROUND);
-  cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);   
-	cairo_set_line_width(g->cr, stroke_width);
-	cairo_set_source_rgb(g->cr, stroke_color.red,
-                              stroke_color.green,
-                              stroke_color.blue);
-  
-	if(arrow_status == Left || arrow_status == Both)
-	{
-	  cairo_move_to(g->cr, x+arrow_width, y);
-		cairo_line_to(g->cr, x, y+(arrow_height/2));
-		cairo_line_to(g->cr, x+arrow_width, y+arrow_height);
-		cairo_close_path(g->cr); 
-	  /* fill area */
-    cairo_fill_preserve(g->cr);
-  	cairo_stroke(g->cr);
-	}
-	if(arrow_status == Right || arrow_status == Both)
-	{
-	  cairo_move_to(g->cr, x+width-arrow_width, y);
-		cairo_line_to(g->cr, x+width, y+(arrow_height/2));
-		cairo_line_to(g->cr, x+width-arrow_width, y+arrow_height);
-		cairo_close_path(g->cr); 
-	  /* fill area */
-    cairo_fill_preserve(g->cr);
-  	cairo_stroke(g->cr);
-	}
-	  graphics_draw_horizontal_line(g, x+arrow_width, y+arrow_height/2, width-2*arrow_width);
-    /* restore cairo context */
-    cairo_restore(g->cr);
-}
-
 double graphics_get_text_height(Graphics *g)
 {
   cairo_text_extents_t ext;
@@ -384,12 +312,12 @@ double graphics_get_text_height(Graphics *g)
 	return ext.height; 
 }
 
-double graphics_get_text_width(Graphics *g)
+double graphics_get_text_width(Graphics *g, const char* text)
 {
   cairo_text_extents_t ext;
   assert(g);
   /* get text extents */
-  cairo_text_extents(g->cr, "A", &ext);
+  cairo_text_extents(g->cr, text, &ext);
 	return ext.width; 
 }
 
@@ -406,6 +334,42 @@ void graphics_draw_colored_text(Graphics *g,
 											 color.blue);
   cairo_move_to(g->cr, x, y);
   cairo_show_text(g->cr, text);
+}
+
+void graphics_draw_arrowhead(Graphics *g, double x, double y, 
+                             Color color, int arrow_status)
+{
+  assert(g);
+  double arrow_height = 8, arrow_width = 5;
+
+   /* save cairo context */
+  cairo_save(g->cr);
+  cairo_reset_clip(g->cr);
+	cairo_set_source_rgb(g->cr, color.red,
+                              color.green,
+                              color.blue);
+	if(arrow_status == Left)
+	{
+	  cairo_move_to(g->cr, x+arrow_width, y);
+		cairo_line_to(g->cr, x, y+(arrow_height/2));
+		cairo_line_to(g->cr, x+arrow_width, y+arrow_height);
+		cairo_close_path(g->cr); 
+	  /* fill area */
+    cairo_fill_preserve(g->cr);
+  	cairo_stroke(g->cr);
+	}
+	if(arrow_status == Right)
+	{
+	  cairo_move_to(g->cr, x, y);
+		cairo_line_to(g->cr, x+arrow_width, y+(arrow_height/2));
+		cairo_line_to(g->cr, x, y+arrow_height);
+		cairo_close_path(g->cr); 
+	  /* fill area */
+    cairo_fill_preserve(g->cr);
+  	cairo_stroke(g->cr);
+	}
+  /* restore cairo context */
+  cairo_restore(g->cr);
 }
 
 void graphics_set_margins(Graphics *g, double margin_x, double margin_y, double width, double height)

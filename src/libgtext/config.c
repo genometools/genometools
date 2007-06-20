@@ -17,8 +17,8 @@
 struct Config
 {
   lua_State *L;
-  Str *fn;
-  bool* verbose;
+  Str *filename;
+  bool verbose;
 };
 
 static void gtlua_new_table(lua_State *L, const char *key)
@@ -36,7 +36,7 @@ static void gtlua_new_table(lua_State *L, const char *key)
 #define GET_AND_SET_COLOR_VALUE(rgb) \
   lua_getfield(cfg->L, -1, #rgb); \
   if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1)) { \
-    if (*cfg->verbose) warning("%s  value for type '%s' is undefined or" \
+    if (cfg->verbose) warning("%s  value for type '%s' is undefined or" \
                                " not numeric, using default",#rgb, key); \
   } \
   else \
@@ -50,12 +50,12 @@ Creates a Config object.
 \param env Pointer to Environment object.
 \return Pointer to the new object.
 */
-Config* config_new(Env *env, bool* verbose)
+Config* config_new(Env *env, bool verbose)
 {
   Config *cfg;
   env_error_check(env);
   cfg = env_ma_malloc(env, sizeof (Config));
-  cfg->fn = NULL;
+  cfg->filename = NULL;
   cfg->verbose = verbose;
   cfg->L = luaL_newstate();
   if (!cfg->L)
@@ -74,7 +74,7 @@ void config_delete(Config *cfg, Env *env)
 {
   assert(cfg);
   if (cfg->L) lua_close(cfg->L);
-  if (cfg->fn) str_delete(cfg->fn,env);
+  if (cfg->filename) str_delete(cfg->filename,env);
   env_ma_free(cfg, env);
 }
 
@@ -90,7 +90,7 @@ void config_load_file(Config *cfg, Str *fn, Env* env)
   int has_err = 0;
   env_error_check(env);
   assert(cfg && cfg->L && fn);
-  cfg->fn = str_ref(fn);
+  cfg->filename = str_ref(fn);
   if (luaL_loadfile(cfg->L, str_get(fn)) ||
       lua_pcall(cfg->L, 0, 0, 0))
   {
@@ -164,14 +164,14 @@ static int config_find_section_for_getting(Config* cfg,
   lua_getglobal(cfg->L, "config");
   if (lua_isnil(cfg->L, -1))
   {
-    if (*cfg->verbose) warning("'config' is not defined");
+    if (cfg->verbose) warning("'config' is not defined");
     lua_pop(cfg->L, 1);
     return -1;
   } else depth++;
   lua_getfield(cfg->L, -1, section);
   if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1))
   {
-    if (*cfg->verbose) warning("section '%s' is not defined", section);
+    if (cfg->verbose) warning("section '%s' is not defined", section);
     lua_pop(cfg->L, 1);
     return -1;
   } else depth++;
@@ -279,7 +279,7 @@ double config_get_num(Config *cfg,
   lua_getfield(cfg->L, -1, key);
   if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1))
   {
-    if (*cfg->verbose) warning("no or non-numeric value found for key '%s'",
+    if (cfg->verbose) warning("no or non-numeric value found for key '%s'",
                                key);
     lua_pop(cfg->L, i+1);
     return deflt;
@@ -320,7 +320,7 @@ const char* config_get_cstr(Config *cfg,
   lua_getfield(cfg->L, -1, key);
   if (lua_isnil(cfg->L, -1) || !lua_isstring(cfg->L, -1))
   {
-    if (*cfg->verbose) warning("no value is defined for key '%s'",
+    if (cfg->verbose) warning("no value is defined for key '%s'",
                                key);
     lua_pop(cfg->L, i+1);
     return deflt;
@@ -359,7 +359,7 @@ Color config_get_color(Config *cfg, const char *key, Env* env)
   lua_getfield(cfg->L, -1, key);
   if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1))
   {
-    if (*cfg->verbose) warning("no colors are defined for type '%s', "
+    if (cfg->verbose) warning("no colors are defined for type '%s', "
                                "will use defaults.",
                                key);
     lua_pop(cfg->L, 3);
@@ -381,8 +381,8 @@ Reloads the Lua configuration file.
 */
 void config_reload(Config *cfg, Env *env)
 {
-  assert(cfg && cfg->fn);
-  config_load_file(cfg, cfg->fn, env);
+  assert(cfg && cfg->filename);
+  config_load_file(cfg, cfg->filename, env);
 }
 
 /*!
@@ -411,7 +411,7 @@ bool config_cstr_in_list(Config *cfg,
   i++;
   if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1))
   {
-    if (*cfg->verbose) warning("key '%s' is not set or not a table",
+    if (cfg->verbose) warning("key '%s' is not set or not a table",
                                key);
     lua_pop(cfg->L, 1);
     has_err = -1;
@@ -424,7 +424,7 @@ bool config_cstr_in_list(Config *cfg,
       /* uses 'key' (at index -2) and 'value' (at index -1) */
       if (lua_isnil(cfg->L, -1) || !lua_isstring(cfg->L, -1))
       {
-        if (*cfg->verbose) warning("non-string value in section %s, key %s",
+        if (cfg->verbose) warning("non-string value in section %s, key %s",
                                    section, key);
         lua_pop(cfg->L, 1);
       } else {
@@ -450,9 +450,7 @@ Returns verbosity flag.
 */
 bool config_get_verbose(Config *cfg)
 {
-  bool verb;
-  verb = *(cfg->verbose);
-  return verb;
+  return cfg->verbose;
 }
 
 /*!
@@ -470,9 +468,6 @@ int config_unit_test(Env* env)
   Color col1, col2, col, defcol, tmpcol;
   double num;
 
-  /* do not show warnings during the unit test */
-  bool verbose = false;
-
   /* example colors */
   col1.red=.1;col1.green=.2;col1.blue=.3;
   col2.red=.4;col2.green=.5;col2.blue=.6;
@@ -480,7 +475,7 @@ int config_unit_test(Env* env)
   defcol.red=.8;defcol.green=.8;defcol.blue=.8;
 
   /* instantiate new config object */
-  cfg = config_new(env, &verbose);
+  cfg = config_new(env, false);
 
   /* at the beginning, all values are defaults, since nothing is defined */
   tmpcol = config_get_color(cfg, "exon", env);

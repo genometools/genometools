@@ -26,7 +26,7 @@ config =
   colors = 
   {
     stroke          ={red=0.0,green=0.0,blue=0.0},
-    track_title     ={red=0.6,green=0.6,blue=0.7},
+    track_title     ={red=0.6,green=0.6,blue=0.6},
     exon            ={red=0.7,green=0.7,blue=0.9},
     cds             ={red=0.9,green=0.9,blue=0.2},
     mRNA            ={red=0.4,green=0.5,blue=0.6},
@@ -54,7 +54,7 @@ config =
   -- Defines various format options for drawing.
   format =
   {
-    margins = 30,      -- space left and right of diagram, in pixels
+    margins = 10,      -- space left and right of diagram, in pixels
     bar_height = 15,   -- height of a feature bar, in pixels
     bar_vspace = 10,   -- space between feature bars, in pixels
     track_vspace = 10, -- space between tracks, in pixels

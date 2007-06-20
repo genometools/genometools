@@ -28,11 +28,11 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 void register_devtools(Toolbox *dev_toolbox, Env *env)
 {
   assert(dev_toolbox);
-  toolbox_add(dev_toolbox, "view", gt_view, env);  
   /* add development tools here with a function call like this:
      toolbox_add(dev_toolbox, "devtool", gt_devtool, env); */
   toolbox_add(dev_toolbox, "png", gt_png, env);
   toolbox_add(dev_toolbox, "regioncov", gt_regioncov, env);
+  toolbox_add(dev_toolbox, "view", gt_view, env);
 }
 
 int gt_dev(int argc, const char **argv, Env *env)

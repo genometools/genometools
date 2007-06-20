@@ -12,8 +12,7 @@
 
 typedef struct Config Config;
 
-Config*      config_new(Env*, bool* verbose);
-void         config_delete(Config*, Env*);
+Config*      config_new(Env*, bool verbose);
 void         config_load_file(Config*, Str*, Env*);
 void         config_reload(Config*, Env*);
 Color        config_get_color(Config*, const char*, Env*);
@@ -45,5 +44,6 @@ bool         config_cstr_in_list(Config *cfg,
                                  Env* env);
 bool         config_get_verbose(Config *cfg);
 int          config_unit_test(Env*);
+void         config_delete(Config*, Env*);
 
 #endif

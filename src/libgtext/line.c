@@ -200,10 +200,7 @@ int line_unit_test(Env* env)
   Config *cfg;
   Str *luafile = str_new_cstr("config.lua",env);
 
-  /* do not show warnings during the unit test */
-  bool verbose = false;
-
-  cfg = config_new(env, &verbose);
+  cfg = config_new(env, false);
   config_load_file(cfg, luafile, env);
 
   r_parent.start = 10;

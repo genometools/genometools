@@ -74,13 +74,19 @@ static void insert_genome_node_into_track(GenomeNode* gn,
   GenomeFeature* gf = (GenomeFeature*) gn;
   Track* track;
   Str* track_type;
+  Range elem_range;
 
-  /*fetch the type of the given genome node*/
+  /* discard elements that do not overlap with visible range */
+  elem_range = genome_node_get_range(gn);
+  if(!range_overlap(d->range, elem_range)) return;
+
+  /* fetch the type of the given genome node */
   type = genome_feature_get_type(gf);
   feature_type = genome_feature_type_get_cstr(type);
 
-  /*deliver the genome node to the track with the corresponding type.
-  If the track does not exist, generate it.*/
+  /* deliver the genome node to the track with the corresponding type.
+  ** If the track does not exist, generate it.
+   */
   if (hashtable_get(d->tracks, feature_type) == NULL)
   {
     track_type = str_new_cstr((char*) feature_type, env);
@@ -98,11 +104,11 @@ static void insert_genome_node_into_track(GenomeNode* gn,
 }
 
 /*!
-insert a genome node into a track. If the genome node has children,
- insert them with a recursiv call of visit_child.
+Insert a genome node into a track. If the genome node has children,
+insert them with a recursiv call of visit_child.
 \param gn pointer to the diagram object.
 \param genome_node_children struct, containing pointers
- to a genome node and a diagram.
+                            to a genome node and a diagram.
 \param env Pointer to Environment object.
 */
 static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
@@ -369,8 +375,7 @@ int diagram_unit_test(Env* env)
   /*create a config object*/
   Config *cfg;
   Str *luafile = str_new_cstr("config.lua",env);
-  bool verbose = false;
-  cfg = config_new(env, &verbose);
+  cfg = config_new(env, false);
   config_load_file(cfg, luafile, env);
 
   /*create a diagram object and test it*/
