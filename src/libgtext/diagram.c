@@ -69,7 +69,7 @@ create a new track.
 static void insert_genome_node_into_track(GenomeNode* gn,
                                           GenomeNode* parent,
                                           Diagram* d,
-					                                     Env* env)
+                                          Env* env)
 {
   const char* feature_type;
   GenomeFeatureType type;
@@ -80,12 +80,20 @@ static void insert_genome_node_into_track(GenomeNode* gn,
 
   /* discard elements that do not overlap with visible range */
   elem_range = genome_node_get_range(gn);
-  if(!range_overlap(d->range, elem_range)) return;
+  if (!range_overlap(d->range, elem_range)) return;
 
   /* fetch the type of the given genome node */
   type = genome_feature_get_type(gf);
   feature_type = genome_feature_type_get_cstr(type);
-
+		
+		
+	 if (config_cstr_in_list(d->config,"collapse","to_parent",feature_type,
+                             env))
+  {  
+		  type = genome_feature_get_type((GenomeFeature*) parent);
+    feature_type = genome_feature_type_get_cstr(type);
+  }
+  
   /* deliver the genome node to the track with the corresponding type.
   ** If the track does not exist, generate it.
    */

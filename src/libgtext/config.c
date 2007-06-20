@@ -413,7 +413,7 @@ bool config_cstr_in_list(Config *cfg,
   {
     if (cfg->verbose) warning("key '%s' is not set or not a table",
                                key);
-    lua_pop(cfg->L, 1);
+    /*lua_pop(cfg->L, 1);*/
     has_err = -1;
   }
   if (!has_err)

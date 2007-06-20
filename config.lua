@@ -28,7 +28,7 @@ config =
     stroke          ={red=0.0,green=0.0,blue=0.0},
     track_title     ={red=0.6,green=0.6,blue=0.7},
     exon            ={red=0.7,green=0.7,blue=0.9},
-    cds             ={red=0.9,green=0.9,blue=0.2},
+    CDS             ={red=0.9,green=0.9,blue=0.2},
     mRNA            ={red=0.4,green=0.5,blue=0.6},
     TF_binding_site ={red=0.4,green=0.5,blue=0.6},
     gene            ={red=0.8,green=0.4,blue=0.4},
@@ -50,6 +50,7 @@ config =
   collapse = 
   {
     -- let here be track -> track mappings
+    -- to_parent={"exon","intron"},
   },
   -- Defines various format options for drawing.
   format =
