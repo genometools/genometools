@@ -198,6 +198,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       if (!haserr)
       {
         strarray_add_cstr(suffixarray->filenametab,tmpfilename,env);
+        FREESPACE(tmpfilename);
         suffixarray->filelengthtab[numoffiles].uint0 = (Uint) readint1;
         suffixarray->filelengthtab[numoffiles].uint1 = (Uint) readint2;
         printf("%s%s %lu %lu\n",

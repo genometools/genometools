@@ -9,11 +9,11 @@ set -e -x
 
 # the make call normally used for development
 cd testsuite
-checkmapped.sh -parts 3 -pl 8 ${ATK} ${AT} ${GRUMBACH}/*.fna
-checkmapped.sh -parts 1 -pl 3 ${SWK} ${SW}
-checkmapped.sh -parts 3 -pl 3 ${SWK} ${SW}
-checkmapped.sh -parts 2 -pl 7 -smap TransDNA ${AT}
-checkmapped.sh -parts 1 -pl 3 -smap TransProt11 ${SWK}
+checkmapped.sh -db ${ATK} ${AT} ${GRUMBACH}/*.fna -parts 3 -pl 8 
+checkmapped.sh -parts 1 -pl 3 -db ${SWK} ${SW}
+checkmapped.sh -db ${SWK} ${SW} -parts 3 -pl 3 
+checkmapped.sh -parts 2 -pl 7 -smap TransDNA -db ${AT}
+checkmapped.sh -db ${SWK} -parts 1 -pl 3 -smap TransProt11 
 cmpdbfile.sh ../testdata/Random-Small.fna
 cmpdbfile.sh ../testdata/Random.fna
 cmpdbfile.sh ../testdata/Atinsert.fna ../testdata/Random.fna

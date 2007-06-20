@@ -367,6 +367,7 @@ static int check_missing_argument(int argnum, int argc, Str *option, Env *env)
   env_error_check(env);
   if (argnum + 1 >= argc) {
     env_error_set(env, "missing argument to option \"-%s\"", str_get(option));
+    printf("check_missing_argument fails\n");
     return -1;
   }
   return 0;

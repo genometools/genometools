@@ -104,7 +104,7 @@ static OPrval parse_options(int *parsed_args,
   option_exclude(optionsmap, optionprotein, env);
   option_exclude(optiondna, optionprotein, env);
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                        versionfunc, (unsigned int) 1, env);
+                                        versionfunc, 0, env);
   if (oprval == OPTIONPARSER_OK)
   {
     if (!option_is_set(optionindexname))
@@ -149,7 +149,7 @@ static void showoptions(const Suffixeratoroptions *so)
   {
     printf("# prefixlength=%u\n",so->prefixlength);
   }
-  printf("# parts=%u\n",so->numofparts);
+  // printf("# parts=%u\n",so->numofparts);
   for (i=0; i<strarray_size(so->filenametab); i++)
   {
     printf("# inputfile[%lu]=%s\n",i,strarray_get(so->filenametab,i));
