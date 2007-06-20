@@ -9,10 +9,24 @@
 
 struct Block
 {
-  Array *elements;
+  Dlist *elements;
   Range range;
   const char* caption;
 };
+
+/*!
+
+*/
+int elemcmp(const void *a, const void *b)
+{
+  Element *elem_a = (Element*) a;
+  Element *elem_b = (Element*) b;
+
+  Range ra = element_get_range(elem_a);
+  Range rb = element_get_range(elem_b);
+
+  return range_compare(ra, rb);
+}
 
 /*!
 Creates a new Block object.
@@ -24,7 +38,7 @@ Block* block_new(Env *env)
   Block *block;
   env_error_check(env);
   block = env_ma_malloc(env, sizeof (Block));
-  block->elements = array_new(sizeof (Element*), env);
+  block->elements = dlist_new(elemcmp, env);
   Range r;
   r.start = 0;
   r.end = 0;
@@ -52,7 +66,7 @@ void block_insert_element(Block *block,
   Element *element;
 
   element = element_new(gn, cfg, env);
-  array_add(block->elements, element, env);
+  dlist_add(block->elements, element, env);
 }
 
 /*!
@@ -108,7 +122,7 @@ Returns Array with Pointer to Element objects
 \param block Pointer to Block object
 \return Pointer to Array
 */
-Array* block_get_elements(Block* block)
+Dlist* block_get_elements(Block* block)
 {
   return block->elements;
 }
@@ -121,16 +135,17 @@ Delets Block
 void block_delete(Block *block,
                   Env *env)
 {
-  int i;
+  Dlistelem *delem;
 
   if(!block) return;
 
-  for(i=0; i<array_size(block->elements); i++)
+  for(delem = dlist_first(block->elements); delem != NULL;
+      delem = dlistelem_next(delem))
   {
-    element_delete(*(Element**) array_get(block->elements, i), env);
+    Element* elem = (Element*) dlistelem_get_data(delem);
+    element_delete(elem, env);
   }
-
-  array_delete(block->elements, env);
+  dlist_delete(block->elements, env);
   env_ma_free(block, env);
 }
 
@@ -142,12 +157,14 @@ void print_block(Block* block)
 {
   assert(block);
 
-  int i;
+  Dlistelem *elem;
 
-  for(i=0; i<array_size(block->elements); i++)
+  for(elem = dlist_first(block->elements); elem != NULL;
+      elem = dlistelem_next(elem))
   {
+    Element *element = (Element*) dlistelem_get_data(elem);
     printf("[");
-    print_element(*(Element**) array_get(block->elements, i));
+    print_element(element);
     printf("]");
   }
 }
@@ -159,7 +176,7 @@ void print_block(Block* block)
 int block_unit_test(Env* env)
 {
   Range r1, r2, r_temp, b_range;
-  Array* elements;
+  Dlist* elements;
   int has_err = 0;
 
   r1.start = 10;
@@ -181,18 +198,20 @@ int block_unit_test(Env* env)
   const char* caption2 = "bar";
 
   /* test block_insert_elements */
-  ensure(has_err, (0 == array_size(block_get_elements(b))));
+  ensure(has_err, (0 == dlist_size(block_get_elements(b))));
   block_insert_element(b, gn1, NULL, env);
-  ensure(has_err, (1 == array_size(block_get_elements(b))));
+  ensure(has_err, (1 == dlist_size(block_get_elements(b))));
   block_insert_element(b, gn2, NULL, env);
-  ensure(has_err, (2 == array_size(block_get_elements(b))));
+  ensure(has_err, (2 == dlist_size(block_get_elements(b))));
 
   /* test block_get_elements */
   elements = block_get_elements(b);
-  ensure(has_err, elements_are_equal(e1, *(Element**) array_get(elements, 0)));
-  ensure(has_err, !elements_are_equal(e1, *(Element**) array_get(elements, 1)));
-  ensure(has_err, !elements_are_equal(e2, *(Element**) array_get(elements, 0)));
-  ensure(has_err, elements_are_equal(e2, *(Element**) array_get(elements, 1)));
+  Element *elem = (Element*) dlistelem_get_data(dlist_first(elements));
+  ensure(has_err, elements_are_equal(e1, elem));
+  ensure(has_err, !elements_are_equal(e2, (Element*) dlist_first(elements)));
+  elem = (Element*) dlistelem_get_data(dlist_last(elements));
+  ensure(has_err, !elements_are_equal(e1, elem));
+  ensure(has_err, elements_are_equal(e2, elem));
 
   /* test block_set_range & block_get_range */
   r_temp = range_join(r1, r2);

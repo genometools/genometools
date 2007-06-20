@@ -151,9 +151,9 @@ void render_line(Render *r, Line *line, Env *env)
   /* begin drawing block */
   for (i=0; i<array_size(blocks); i++)
   {
-    int j;
+    Dlistelem *delem;
     Block *block = *(Block**) array_get(blocks, i);
-    Array *elems = block_get_elements(block);
+    Dlist *elems = block_get_elements(block);
     Range block_range = block_get_range(block);
     DrawingRange draw_range;
     const char* caption;
@@ -181,9 +181,9 @@ void render_line(Render *r, Line *line, Env *env)
 		/* DEBUG */
 					
     /* draw elements in block */
-    for (j=0;j<array_size(elems); j++)
+    for(delem = dlist_first(elems); delem != NULL; delem = dlistelem_next(delem))
     {
-      Element *elem = *(Element**) array_get(elems, j);
+      Element *elem = (Element*) dlistelem_get_data(delem);
       Range elem_range = element_get_range(elem);
       DrawingRange draw_range;
       double elem_start, elem_width, bar_height;

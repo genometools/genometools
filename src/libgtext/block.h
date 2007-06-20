@@ -26,7 +26,7 @@ void block_set_range(Block* block,
 void block_set_caption(Block* block,
                        const char* caption);
 const char* block_get_caption(Block* block);
-Array* block_get_elements(Block* block);
+Dlist* block_get_elements(Block* block);
 void block_delete(Block* block,
                   Env* env);
 void print_block(Block* block);
