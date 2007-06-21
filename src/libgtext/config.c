@@ -527,9 +527,12 @@ int config_unit_test(Env* env)
    
   ensure(has_err, config_dominates(cfg, gft_exon, gft_gene, env) == DOMINATES_FIRST); 
   ensure(has_err, config_dominates(cfg, gft_gene, gft_exon, env) == DOMINATES_SECOND);
+  ensure(has_err, config_dominates(cfg, gft_mRNA, gft_exon, env) == DOMINATES_SECOND);
+  ensure(has_err, config_dominates(cfg, gft_mRNA, gft_CDS, env) == DOMINATES_SECOND);
   ensure(has_err, config_dominates(cfg, gft_exon, gft_exon, env) == DOMINATES_EQUAL);
-  ensure(has_err, config_dominates(cfg, gft_TF_binding_site, gft_CDS, env) == DOMINATES_NOT_SPECIFIED);
-   */
+  ensure(has_err, config_dominates(cfg, gft_TF_binding_site, gft_exon, env) == DOMINATES_NOT_SPECIFIED);
+  */
+
 
   /* now we expect the values to exist and have certain values */
 /*  tmpcol = config_get_color(cfg, "exon", env);

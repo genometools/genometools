@@ -119,11 +119,11 @@ int gt_view(int argc, const char **argv, Env *env)
   feature_stream = feature_stream_new(gff3_in_stream, features, env);
 
   /* check for correct order: range end < range start */
-  if (!has_err && (arguments.end < arguments.start))
+  if (!has_err && !(arguments.start < arguments.end))
   {
-    env_error_set(env, "end of query range (%lu) precedes "
-		                   "start of query range (%lu)",
-		                   arguments.end, arguments.start);
+    env_error_set(env, "start of query range (%lu) must be before "
+		                   "end of query range (%lu)",
+		                   arguments.start, arguments.end);
     has_err = -1;
   }
 

@@ -49,11 +49,11 @@ config =
   -- feature's track.
   collapse = 
   {
-    to_parent = {"exon","intron"},
+    to_parent = {"exon","intron","CDS"},
   },
   dominate = 
   {
-    CDS = {"exon"},
+    CDS = {"exon","intron","mRNA","gene"},
     exon = {"mRNA","gene"},
     intron = {"mRNA", "gene"},
   },
@@ -68,6 +68,6 @@ config =
     scale_arrow_height = 10,   -- height of scale arrowheads, in pixels
     arrow_width = 6,   -- width of feature arrowheads, in pixels
     stroke_width = 1,  -- width of outlines, in pixels
-    show_grid = "yes",
+    show_grid = "yes", -- shows horizontal lines
   },
 } 
