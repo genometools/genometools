@@ -85,17 +85,21 @@ static void insert_genome_node_into_track(GenomeNode* gn,
   /* fetch the type of the given genome node */
   type = genome_feature_get_type(gf);
   feature_type = genome_feature_type_get_cstr(type);
-		
-		
-	 if (config_cstr_in_list(d->config,"collapse","to_parent",feature_type,
+
+  /* coming soon:
+  if ( hide_always(feature_type) ||
+      (type_range(feature_type) < d->range.start - d->range.start) ) return;
+  */
+
+  if (config_cstr_in_list(d->config,"collapse","to_parent",feature_type,
                              env))
-  {  
-		  type = genome_feature_get_type((GenomeFeature*) parent);
+  {
+    type = genome_feature_get_type((GenomeFeature*) parent);
     feature_type = genome_feature_type_get_cstr(type);
   }
-  
+
   /* deliver the genome node to the track with the corresponding type.
-  ** If the track does not exist, generate it.
+   If the track does not exist, generate it.
    */
   if (hashtable_get(d->tracks, feature_type) == NULL)
   {
@@ -131,8 +135,8 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
   {
     insert_genome_node_into_track(gn,
                                   genome_node_info->parent,
-				                              genome_node_info->diagram,
-				                              env);
+                                  genome_node_info->diagram,
+                                  env);
     genome_node_info->parent = gn;
     genome_node_traverse_direct_children(gn,
                                          genome_node_info,
@@ -144,8 +148,8 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
   {
   insert_genome_node_into_track(gn,
                                 genome_node_info->parent,
-			                             genome_node_info->diagram,
-			                             env);
+                                genome_node_info->diagram,
+                                env);
   }
   return 0;
 
@@ -210,7 +214,7 @@ static void diagram_build(Diagram* diagram, Array* features, Env* env)
     insert_genome_node_into_track(current_root,
                                   NULL,
                                   diagram,
-				                              env);
+                                  env);
 
     traverse_genome_nodes(current_root, &genome_node_children, env);
   }
@@ -395,9 +399,17 @@ int diagram_unit_test(Env* env)
   ensure(has_err, dia->config != NULL);
   ensure(has_err, dia->range.start == 400);
   ensure(has_err, dia->range.end == 900);
+  if (!config_cstr_in_list(dia->config,"collapse","to_parent","gene",
+                             env))
+  {
   ensure(has_err, hashtable_get(dia->tracks,"gene") != NULL);
+  }
+
+  if (!config_cstr_in_list(dia->config,"collapse","to_parent","exon",
+                             env))
+  {
   ensure(has_err, hashtable_get(dia->tracks,"exon") != NULL);
-  ensure(has_err, diagram_get_number_of_tracks(dia) == 2);
+  }
   ensure(has_err, range_compare(diagram_get_range(dia),dr1) == 0);
 
   /*get the features for the test2 sequence region*/
@@ -410,10 +422,25 @@ int diagram_unit_test(Env* env)
   dia2 = diagram_new(features2,dr1,cfg,env);
   ensure(has_err, dia->range.start == 400);
   ensure(has_err, dia->range.end == 900);
+
+  if (!config_cstr_in_list(dia2->config,"collapse","to_parent","gene",
+                             env))
+  {
   ensure(has_err, hashtable_get(dia2->tracks,"gene") != NULL);
+  }
+
+  if (!config_cstr_in_list(dia2->config,"collapse","to_parent","exon",
+                             env))
+  {
   ensure(has_err, hashtable_get(dia2->tracks,"exon") != NULL);
+  }
+
+  if (!config_cstr_in_list(dia2->config,"collapse","to_parent","CDS",
+                             env))
+
+  {
   ensure(has_err, hashtable_get(dia2->tracks,"CDS") != NULL);
-  ensure(has_err, diagram_get_number_of_tracks(dia2) == 3);
+  }
   ensure(has_err, range_compare(diagram_get_range(dia),dr1) == 0)
 
   /*delete all generated objects*/

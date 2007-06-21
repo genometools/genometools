@@ -49,7 +49,7 @@ config =
   -- feature's track.
   collapse = 
   {
-    -- to_parent = {"exon","intron"},
+    to_parent = {"exon","intron"},
   },
   dominate = 
   {
