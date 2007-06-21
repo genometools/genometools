@@ -470,8 +470,7 @@ defined in the config object.
 \param ft1 GFT to check
 \param ft2 GFT to check
 \param cfg Pointer to Environment object.
-\return 1 if ft1 dominates ft2, -1 if ft2 dominates ft1, 0 if same
-        or not specified
+\return DominateStatus enum value
 */
 int config_dominates(Config* cfg, GenomeFeatureType ft1,
                       GenomeFeatureType ft2, Env* env)

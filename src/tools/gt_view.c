@@ -164,7 +164,7 @@ int gt_view(int argc, const char **argv, Env *env)
       printf("# of results: %lu\n", array_size(results));
       for (i=0;i<array_size(results);i++)
       {
-        GenomeFeature *gf= **(GenomeFeature***) array_get(results, i);
+        GenomeFeature *gf= *(GenomeFeature**) array_get(results, i);
         GenomeNode *gn = (GenomeNode*) gf;
         genome_node_traverse_children(gn,
                                       NULL,

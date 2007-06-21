@@ -177,18 +177,25 @@ Comparator for GenomeNodes. Overlaps are treated as equality.
 \return 0 if nodes overlap, -1 if gn1
 ends strictly left of gn2, 1 if gn2 starts strictly right of gn1.
 */
-static int compare_for_overlap(const void* gn1, const void* gn2)
+/*static int compare_for_overlap(const void* gn1, const void* gn2)
 {
   assert(gn1 && gn2);
   Range range1, range2;
   range1 = genome_node_get_range(*(GenomeNode**) gn1);
   range2 = genome_node_get_range(*(GenomeNode**) gn2);
+  printf("checking node %lu - %lu...", range2.start, range2.end);
   if (range_overlap(range1 ,range2))
+  {
+    printf("overlaps!\n");
     return 0;
-  if (range1.end < range2.start)
-    return -1;
-  return 1;
-}
+  }
+  else
+  { 
+    int ret = range_compare(range1, range2);
+    printf("did not overlap, search %d\n", ret);
+    return ret;
+  }
+} */
 
 /*!
 Looks up relevant GenomeFeatures in a given range inside of a given
@@ -207,21 +214,36 @@ int feature_index_get_features_for_range(FeatureIndex *fi,
 {
  Array* base = feature_index_get_features_for_seqid(fi, seqid);
  GenomeNode* key;
- int has_err = 0;
+ int has_err = 0, i = 0;
 
 assert(fi && results && seqid && (qry_range.start < qry_range.end));
 
  key = genome_feature_new(gft_gene, qry_range, STRAND_UNKNOWN,
                                           NULL, UNDEF_ULONG, env);
 
+ /* binary search removed due to unwanted effects 
+  * maybe later to be replaced by interval tree (or sqlite)
+  */
+ 
+ /*
  bsearch_all(results,
              &key,
              array_get_space(base),
              array_size(base),
              sizeof (GenomeFeature*),
              compare_for_overlap,
-             env);
+             env); */
 
+ for(i=0; i<array_size(base);i++)
+ {
+   GenomeNode *gn = *(GenomeNode**) array_get(base, i);
+   Range r = genome_node_get_range(gn);
+   if(range_overlap(r, qry_range))
+   {
+     array_add(results, gn, env);
+   }
+ }
+ 
  genome_node_delete(key, env);
  
  return has_err;
@@ -235,7 +257,16 @@ Meant to be used in hashtable_foreach().
 */
 static int print_index_row(void* key, void* value, void* data, Env* env)
 {
+  int i;
   printf("%s -> %lu\n", (char*) key, array_size((Array*) value));
+  for(i=0;i<array_size((Array*) value);i++)
+  {
+    GenomeNode* gn = *(GenomeNode**) array_get((Array*) value, i);
+    Range r = genome_node_get_range(gn);
+    printf("%s, %s: %lu - %lu \n", (char*) key,
+      genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature* )gn)),
+                          r.start, r.end);
+  }
   return 0;
 }
 

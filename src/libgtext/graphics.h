@@ -31,7 +31,7 @@ void      graphics_set_margins(Graphics *g,
 															 double width,
 															 double height);
 void      graphics_draw_vertical_line(Graphics *g, double x, double y,
-                                 double length);
+                                      Color color, double length);
 void      graphics_draw_box(Graphics *g, double x, double y, double width,
                             double height, Color color, int arrow_status,
                             double arrow_width, double stroke_width,

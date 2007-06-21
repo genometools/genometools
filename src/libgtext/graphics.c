@@ -11,17 +11,9 @@
 
 #define EXON_ARROW_WIDTH        6
 
-enum ImageSurfaceType
-{
-  PNG = 1,
-  PDF = 2,
-  PS = 3
-};
-
 struct Graphics {
   cairo_t *cr;
   cairo_surface_t *surf;
-  int surf_type;
   const char* fn;
 };
 
@@ -110,7 +102,6 @@ Graphics* graphics_new_png(const char *fname, unsigned int width,
 {
   Graphics *g = env_ma_malloc(env, sizeof (Graphics));
   g->surf = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
-  g->surf_type = PNG;
   g->fn = fname;
   g->cr = cairo_create(g->surf);
   assert(cairo_status(g->cr) == CAIRO_STATUS_SUCCESS);
@@ -271,6 +262,8 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
 void graphics_draw_text_centered(Graphics *g, double x, double y,
                                  const char *text)
 {
+  cairo_save(g->cr);
+  cairo_reset_clip(g->cr);
   cairo_text_extents_t ext;
   assert(g && text);
   cairo_set_source_rgb(g->cr, 0, 0, 0);
@@ -279,10 +272,13 @@ void graphics_draw_text_centered(Graphics *g, double x, double y,
   /* draw text w/ its center at the given coords */
   cairo_move_to(g->cr, x-(ext.width/2)-1, y);
   cairo_show_text(g->cr, text);
+	cairo_restore(g->cr);
 }
 
 void graphics_draw_text_right(Graphics *g, double x, double y, const char *text)
 {
+  cairo_save(g->cr);
+  cairo_reset_clip(g->cr);
   cairo_text_extents_t ext;
   assert(g && text);
   cairo_set_source_rgb(g->cr, 0, 0, 0);
@@ -291,14 +287,15 @@ void graphics_draw_text_right(Graphics *g, double x, double y, const char *text)
   /* draw text w/ its right end at the given coords */
   cairo_move_to(g->cr, x-(ext.width)-1, y);
   cairo_show_text(g->cr, text);
+  cairo_restore(g->cr);
 }
 
 void graphics_draw_vertical_line(Graphics *g, double x, double y,
-                                 double length)
+                                 Color color, double length)
 {
   assert(g);
   cairo_move_to(g->cr, x, y);
-  cairo_set_source_rgb(g->cr, .9, .9, .9);
+  cairo_set_source_rgb(g->cr, color.red, color.green, color.blue);
   cairo_rel_line_to(g->cr, 0, length);
   cairo_stroke(g->cr);
 }
@@ -382,15 +379,5 @@ void graphics_set_margins(Graphics *g, double margin_x, double margin_y, double 
 void graphics_save(const Graphics *g)
 {
   assert(g);
-  switch (g->surf_type)
-  {
-    case PNG:
-      cairo_surface_write_to_png(g->surf, g->fn);
-      break;
-    case PDF:
-    case PS:
-      cairo_show_page(g->cr);
-      cairo_surface_flush(g->surf);
-      break;
-  }
+  cairo_surface_write_to_png(g->surf, g->fn);
 }

@@ -206,7 +206,7 @@ static void diagram_build(Diagram* diagram, Array* features, Env* env)
   for (i=0;i<array_size(features);i++)
   {
 
-    GenomeNode *current_root = **(GenomeNode***) array_get(features,i);
+    GenomeNode *current_root = *(GenomeNode**) array_get(features,i);
     insert_genome_node_into_track(current_root,
                                   NULL,
                                   diagram,

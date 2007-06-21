@@ -34,7 +34,7 @@ struct Render
   Graphics* g;
   Range range;
   double y, margins, factor;
-  unsigned int width;
+  unsigned int width, height;
 };
 
 /*!
@@ -102,7 +102,7 @@ void render_delete(Render *r, Env *env)
 
 double render_convert_point(Render *r, long pos)
 {
-  return (double) ((r->factor * (pos-(long) r->range.start)) + r->margins);
+  return (double) ((r->factor * MAX(0,(pos-(long) r->range.start))) + r->margins);
 }
 
 /*!
@@ -344,61 +344,77 @@ Formats a given position number for short display in the ruler.
 */
 void format_ruler_label(char* txt, long pos)
 {
-  if (pos >= 1000)
+/*  if (pos >= 1000)
 	  sprintf(txt, "%.1lfk", pos/1000.0);
-  else
+  else */
     sprintf(txt, "%li", pos);
+}
+
+void render_ruler(Render *r, Env* env)
+{
+  double step, minorstep, vmajor, vminor;
+  long base_length, tick;
+	Color rulercol, gridcol;
+	char str[BUFSIZ];
+	
+	rulercol.red = rulercol.green = rulercol.blue = .2;
+	gridcol.red = gridcol.green = gridcol.blue = .9;
+	
+	/* determine range and step of the scale */
+  base_length = range_length(r->range);
+
+  /* determine tick steps */
+  step = pow(10,ceil(log10(base_length))-1);
+  minorstep = step/4.0;
+
+  /* calculate starting positions */
+  vminor = (double) (floor(r->range.start / minorstep))*minorstep;
+  vmajor = (double) (floor(r->range.start / step))*step;
+
+  /* draw major ticks */
+  for(tick = vmajor; tick <= r->range.end; tick += step)
+  {
+	  if (tick < r->range.start) continue;
+    graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 30, rulercol, 10);
+    format_ruler_label(str, tick);
+    graphics_draw_text_centered(r->g, render_convert_point(r, tick), 20, str);
+  }
+	
+	/* draw minor ticks */
+  if (minorstep >= 1)
+  {
+    for(tick = vminor; tick <= r->range.end; tick += minorstep)
+    {
+		  if (tick < r->range.start) continue;
+			if(strcmp(config_get_cstr(r->cfg, "format","show_grid", "no", env), "yes") == 0)
+			  graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 40, gridcol, r->height);
+			graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 35, rulercol, 5);
+    }
+  }
 }
 
 void render_to_png(Render *r, char *fn, unsigned int width, Env *env)
 {
   assert(r && fn && env && width > 0);
-  unsigned int height;
-  double step, minorstep, vmajor, vminor;
-  long base_length, tick;
-  char str[BUFSIZ];
+  unsigned int height;  
 
   /* set initial margins, header, target width */
   r->y = 70;
   r->width = width;
   height = render_calculate_height(r, env);
-  
+  r->height = height;
+	
   /* calculate scaling factor */
   r->factor = ((double) r->width
                  -(2*r->margins)) 
-               / (double) (r->range.end 
+               / (r->range.end 
                  - r->range.start);
 
   /* create new Graphics backend */
   r->g = graphics_new_png(fn, width, height, env);
   graphics_set_margins(r->g, r->margins, 0, width, height);
   
-	/* determine range and step of the scale */
-  base_length = r->range.end - r->range.start;
-
-  /* determine tick steps */
-  step = pow(10,ceil(log10(base_length))-1);
-/*  printf("step:%f\n", step); */
-  minorstep = step/4.0;
-/*  printf("minorstep:%f\n", minorstep); */
-    
-  vminor = (double) (floor(r->range.start / minorstep))*minorstep;
-  vmajor = (double) (floor(r->range.start / step))*step;
-
-  for(tick = vmajor; tick <= r->range.end; tick += step)
-  {
-    graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 30, 10);
-/*  printf("drawing major tick at:%li\n", tick); */
-    format_ruler_label(str, tick);
-    graphics_draw_text_centered(r->g, render_convert_point(r, tick), 20, str);
-  }
-  if (minorstep >= 1)
-  {
-    for(tick = vminor; tick <= r->range.end; tick += minorstep)
-    {
-      graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 30, 5);
-    }
-  }
+  render_ruler(r, env);
 
   /* process (render) each track */
   Hashtable *tracks = diagram_get_tracks(r->dia);

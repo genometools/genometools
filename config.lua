@@ -67,5 +67,6 @@ config =
     scale_arrow_height = 10,   -- height of scale arrowheads, in pixels
     arrow_width = 6,   -- width of feature arrowheads, in pixels
     stroke_width = 1,  -- width of outlines, in pixels
+    show_grid = "yes",
   },
 } 
