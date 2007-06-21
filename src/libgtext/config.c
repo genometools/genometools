@@ -21,6 +21,15 @@ struct Config
   bool verbose;
 };
 
+enum DominateStatus
+{
+  DOMINATES_FIRST,
+	DOMINATES_SECOND,
+	DOMINATES_EQUAL,
+	DOMINATES_NOT_SPECIFIED,
+  DOMINATES_UNKNOWN_TYPE
+};
+
 static void gtlua_new_table(lua_State *L, const char *key)
 {
   lua_pushstring(L, key);
@@ -470,18 +479,20 @@ int config_dominates(Config* cfg, GenomeFeatureType ft1,
   assert(cfg && env);
   char *fts1, *fts2;
   
+  if(ft1 == ft2)
+    return DOMINATES_EQUAL;
   fts1 = (char*) genome_feature_type_get_cstr(ft1);
   fts2 = (char*) genome_feature_type_get_cstr(ft2);
   if (fts1 == NULL || fts2 == NULL) 
-    return 0;
+    return DOMINATES_UNKNOWN_TYPE;
   else
   {
     if (config_cstr_in_list(cfg, "dominate",fts1, fts2, env))
-      return 1;
+      return DOMINATES_FIRST;
     else if (config_cstr_in_list(cfg, "dominate",fts2, fts1, env))
-      return -1;
+      return DOMINATES_SECOND;
     else
-      return 0;
+      return DOMINATES_NOT_SPECIFIED;
   }
 }
 
@@ -522,13 +533,13 @@ int config_unit_test(Env* env)
   ensure(has_err, (str == ""));
 
   /* execute the config file */
-/*  config_load_file(cfg, luafile, env);
+  /*config_load_file(cfg, luafile, env);
    
-  ensure(has_err, config_dominates(cfg, gft_exon, gft_gene, env) == 1); 
-  ensure(has_err, config_dominates(cfg, gft_gene, gft_exon, env) == -1);
-  ensure(has_err, config_dominates(cfg, gft_exon, gft_exon, env) == 0);
-  ensure(has_err, config_dominates(cfg, gft_TF_binding_site, gft_CDS, env) == 0);
-*/   
+  ensure(has_err, config_dominates(cfg, gft_exon, gft_gene, env) == DOMINATES_FIRST); 
+  ensure(has_err, config_dominates(cfg, gft_gene, gft_exon, env) == DOMINATES_SECOND);
+  ensure(has_err, config_dominates(cfg, gft_exon, gft_exon, env) == DOMINATES_EQUAL);
+  ensure(has_err, config_dominates(cfg, gft_TF_binding_site, gft_CDS, env) == DOMINATES_NOT_SPECIFIED);
+   */
 
   /* now we expect the values to exist and have certain values */
 /*  tmpcol = config_get_color(cfg, "exon", env);

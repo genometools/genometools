@@ -20,6 +20,7 @@ config =
     -- e.g. exon = 10000
     -- means exon elements are nor displayed when
     -- a range > 10000 is viewed
+    exon = 100000,
   },
   -- Defines a color for a certain feature type.
   colors = 
@@ -48,7 +49,7 @@ config =
   -- feature's track.
   collapse = 
   {
-    --to_parent = {"exon","intron"},
+    -- to_parent = {"exon","intron"},
   },
   dominate = 
   {
