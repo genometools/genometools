@@ -185,16 +185,9 @@ ends strictly left of gn2, 1 if gn2 starts strictly right of gn1.
   range2 = genome_node_get_range(*(GenomeNode**) gn2);
   printf("checking node %lu - %lu...", range2.start, range2.end);
   if (range_overlap(range1 ,range2))
-  {
-    printf("overlaps!\n");
     return 0;
-  }
   else
-  { 
-    int ret = range_compare(range1, range2);
-    printf("did not overlap, search %d\n", ret);
-    return ret;
-  }
+    return range_compare(range1, range2);
 } */
 
 /*!
