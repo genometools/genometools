@@ -49,12 +49,13 @@ config =
   -- feature's track.
   collapse = 
   {
-    -- to_parent = {"exon","intron"},
+     to_parent = {"exon","intron"},
   },
   dominate = 
   {
     CDS = {"exon"},
     exon = {"mRNA","gene"},
+    intron = {"mRNA", "gene"},
   },
   -- Defines various format options for drawing.
   format =
