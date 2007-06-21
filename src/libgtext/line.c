@@ -182,8 +182,8 @@ int line_unit_test(Env* env)
   Block* b1 = block_new(env);
   Block* b2 = block_new(env);
 
-  block_insert_element(b1, gn1, NULL, env);
-  block_insert_element(b2, gn2, NULL, env);
+  block_insert_element(b1, gn1, cfg, env);
+  block_insert_element(b2, gn2, cfg, env);
   block_set_range(b1, r1);
   block_set_range(b2, r2);
   

@@ -11,6 +11,15 @@
 #include <libgtext/color.h>
 #include <libgtext/genome_feature_type.h>
 
+enum DominateStatus
+{
+  DOMINATES_FIRST,
+  DOMINATES_SECOND,
+  DOMINATES_EQUAL,
+  DOMINATES_NOT_SPECIFIED,
+  DOMINATES_UNKNOWN_TYPE
+};
+
 typedef struct Config Config;
 
 Config*      config_new(Env*, bool verbose);

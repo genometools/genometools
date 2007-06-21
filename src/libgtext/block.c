@@ -61,12 +61,142 @@ void block_insert_element(Block *block,
 			  Config *cfg,
 			  Env *env)
 {
-  assert(block && gn);
+  assert(block && gn && cfg);
+
+  Dlistelem *elem;
+  Range elem_r, gn_r;
+  int dominates;
+  int count = 0;
+  Element *element, *e;
+  GenomeFeatureType gn_type, e_type;
+
+  gn_r = genome_node_get_range(gn);
+  gn_type = genome_feature_get_type((GenomeFeature*) gn);
+
+  for(elem = dlist_first(block->elements); elem != NULL;
+      elem = dlistelem_next(elem))
+  {
+    element = (Element*) dlistelem_get_data(elem);
+    elem_r = element_get_range(element);
+
+    if(range_overlap(elem_r, gn_r))
+    {
+      count += 1;
+      e_type = element_get_type(element);
+
+      dominates = config_dominates(cfg, e_type, gn_type, env);
+    
+      /* Fall:    -------------------
+                  ---------- */
+      if(gn_r.start == elem_r.start && gn_r.end < elem_r.end)
+      {
+        switch(dominates)
+        {
+          case DOMINATES_FIRST:
+	    break;
+	  case DOMINATES_SECOND:
+            elem_r.start = gn_r.end;
+	    element_set_range(element, elem_r);
+	    e = element_new(gn, cfg, env);
+	    dlist_add(block->elements, e, env);
+	    break;
+        }
+      }
+
+      /* Fall:  --------------
+                   -----------  */
+      if(gn_r.start >= elem_r.start && gn_r.end == elem_r.end)
+      {
+        switch(dominates)
+	{
+          case DOMINATES_FIRST:
+	    gn_r.start = elem_r.end;
+	    break;
+	  case DOMINATES_SECOND:
+	    elem_r.end = gn_r.start;
+	    if(elem_r.start == elem_r.end)
+	    {
+              dlist_remove(block->elements, elem, env);
+	    }
+	    else
+	    {
+              element_set_range(element, elem_r);
+	    }
+	    e = element_new(gn, cfg, env);
+	    dlist_add(block->elements, e, env);
+	    break;
+	}
+      }
+      
+      /* Fall: ----------
+               -------------- */
+      if(elem_r.start <= gn_r.start && elem_r.end < gn_r.end)
+      {
+        switch(dominates)
+	{
+          case DOMINATES_FIRST:
+            gn_r.start = elem_r.end;
+	    break;
+	  case DOMINATES_SECOND:
+            elem_r.end = gn_r.start;
+	    if(elem_r.start == elem_r.end)
+	    {
+              dlist_remove(block->elements, elem, env);
+	    }
+	    else
+            {
+	      element_set_range(element, elem_r);
+	    }
+	    Range gnnew_r = gn_r;
+	    gnnew_r.end = elem_r.end;
+	    e = element_new_empty(cfg, env);
+	    element_set_range(e, gnnew_r);
+	    element_set_type(e, gn_type);
+	    dlist_add(block->elements, e, env);
+	    gn_r.start = elem_r.end;
+	    break;
+	}
+      }
+
+      /* Fall: -------------
+                  ------      */
+      if(elem_r.start < gn_r.start && gn_r.end < elem_r.end)
+      {
+        Range elemnew_r;
+
+        switch(dominates)
+	{
+          case DOMINATES_FIRST:
+	    break;
+	  case DOMINATES_SECOND:
+            elemnew_r = elem_r;
+	    elem_r.end = gn_r.start;
+	    element_set_range(element, elem_r);
+	    elemnew_r.start = gn_r.end;
+            Element *elemnew = element_new_empty(cfg, env);
+	    element_set_range(elemnew, elemnew_r);
+	    element_set_type(elemnew, e_type);
+	    e = element_new(gn, cfg, env);
+	    dlist_add(block->elements, elemnew, env);
+	    dlist_add(block->elements, e, env);
+	    break;
+	}
+      }
+
+    }  
+
+  }
+  if(count == 0)
+  {
+    e = element_new(gn, cfg, env);
+    dlist_add(block->elements, e, env);
+  }
+  /* assert(block && gn);
 
   Element *element;
 
   element = element_new(gn, cfg, env);
-  dlist_add(block->elements, element, env);
+  dlist_add(block->elements, element, env); */
 }
 
 /*!
@@ -179,18 +309,24 @@ int block_unit_test(Env* env)
   Dlist* elements;
   int has_err = 0;
 
+  Config *cfg;
+  Str *luafile = str_new_cstr("config.lua",env);
+      
+  cfg = config_new(env, false);
+  config_load_file(cfg, luafile, env);
+
   r1.start = 10;
   r1.end = 50;
 
-  r2.start = 50;
+  r2.start = 51;
   r2.end = 80;
 
 
   GenomeNode* gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0, env);
   GenomeNode* gn2 = genome_feature_new(gft_intron, r2, STRAND_FORWARD, NULL, 0, env);
 
-  Element* e1 = element_new(gn1, NULL, env);
-  Element* e2 = element_new(gn2, NULL, env);
+  Element* e1 = element_new(gn1, cfg, env);
+  Element* e2 = element_new(gn2, cfg, env);
 
   Block* b = block_new(env);
 
@@ -199,9 +335,9 @@ int block_unit_test(Env* env)
 
   /* test block_insert_elements */
   ensure(has_err, (0 == dlist_size(block_get_elements(b))));
-  block_insert_element(b, gn1, NULL, env);
+  block_insert_element(b, gn1, cfg, env);
   ensure(has_err, (1 == dlist_size(block_get_elements(b))));
-  block_insert_element(b, gn2, NULL, env);
+  block_insert_element(b, gn2, cfg, env);
   ensure(has_err, (2 == dlist_size(block_get_elements(b))));
 
   /* test block_get_elements */

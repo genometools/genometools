@@ -21,15 +21,6 @@ struct Config
   bool verbose;
 };
 
-enum DominateStatus
-{
-  DOMINATES_FIRST,
-	DOMINATES_SECOND,
-	DOMINATES_EQUAL,
-	DOMINATES_NOT_SPECIFIED,
-  DOMINATES_UNKNOWN_TYPE
-};
-
 static void gtlua_new_table(lua_State *L, const char *key)
 {
   lua_pushstring(L, key);

@@ -55,6 +55,7 @@ config =
   {
     CDS = {"exon"},
     exon = {"mRNA","gene"},
+    intron = {"mRNA", "gene"},
   },
   -- Defines various format options for drawing.
   format =

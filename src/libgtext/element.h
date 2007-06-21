@@ -23,15 +23,18 @@ enum ArrowStatus{
 
 Element* element_new(GenomeNode *gn,
                      Config *cfg,
-		                 Env* env);
+		     Env* env);
+Element* element_new_empty(Config* cfg,
+                           Env* env);
 Range element_get_range(Element* element);
+void element_set_range(Element* element,
+                       Range r);
 GenomeFeatureType element_get_type(Element* element);
+void element_set_type(Element *element,
+                      GenomeFeatureType type);
 void element_set_arrow_status(Element* element,
                               int status);
 int element_get_arrow_status(Element* element);
-void element_set_caption(Element* element,
-                         const char* caption);
-const char* element_get_caption(Element *element);
 void element_delete(Element* element,
                     Env* env);
 void print_element(Element* element);
