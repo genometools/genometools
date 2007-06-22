@@ -6,6 +6,26 @@
 #
 
 localpath=src/libgtmatch
+usage="Usage: $0 [icc,64]"
+
+if test $# -eq 0
+then
+  icc=0
+  do64=0
+else
+  if test $# -eq 1
+  then
+    case $1 in
+     "icc") icc=1;;
+     "64")  do64=0;;
+     *) echo $usage
+        exit 1;;
+    esac
+  else
+    echo $usage
+    exit 1
+  fi
+fi
 
 for filename in `ls ${localpath}/*.c`
 do
@@ -16,5 +36,9 @@ do
   fi
 done
 
-# the make call normally used for development
-make CC='ccache gcc' CFLAGS='-O3 -m32' LDFLAGS='-m32'
+if test $icc -eq 1
+then
+  make CC='icc' CFLAGS='-O3'
+else
+  make CC='ccache gcc' CFLAGS='-O3 -m32' LDFLAGS='-m32'
+fi

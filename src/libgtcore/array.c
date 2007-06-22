@@ -14,6 +14,8 @@
 
 #define NUM_OF_TESTS    100
 #define MAX_SIZE        1024
+#define UCCAST(PTR)             ((unsigned char *) (PTR))
+#define MAKEPTR(PTR,ELEM,SIZE)  (UCCAST(PTR) + (ELEM) * (SIZE))
 
 struct Array {
   void *space;
@@ -33,7 +35,7 @@ Array* array_new(size_t size_of_elem, Env *env)
 void* array_get(const Array *a, unsigned long idx)
 {
   assert(a && idx < a->next_free);
-  return a->space + idx * a->size_of_elem;
+  return MAKEPTR(a->space,idx,a->size_of_elem);
 }
 
 void* array_get_first(const Array *a)
@@ -51,7 +53,7 @@ void* array_pop(Array *a)
 {
   assert(a && a->next_free);
   a->next_free--;
-  return a->space + a->next_free * a->size_of_elem;
+  return MAKEPTR(a->space,a->next_free,a->size_of_elem);
 }
 
 void array_rem(Array *a, unsigned long idx)
@@ -60,7 +62,8 @@ void array_rem(Array *a, unsigned long idx)
   assert(a && idx < a->next_free);
   /* move elements */
   for (i = idx+1; i < a->next_free; i++) {
-    memcpy(a->space + (i-1) * a->size_of_elem, a->space + i * a->size_of_elem,
+    memcpy(MAKEPTR(a->space,(i-1),a->size_of_elem),
+           MAKEPTR(a->space,i,a->size_of_elem),
            a->size_of_elem);
   }
   /* remove last (now duplicated) element */
@@ -72,8 +75,10 @@ void array_reverse(Array *a, Env *env)
   void *front, *back, *tmp;
   assert(a);
   tmp = env_ma_malloc(env, sizeof (a->size_of_elem));
-  for (front = a->space, back = a->space + (a->next_free-1) * a->size_of_elem;
-       front < back; front += a->size_of_elem, back -= a->size_of_elem) {
+  for (front = a->space, 
+       back = MAKEPTR(a->space,a->next_free-1,a->size_of_elem);
+       front < back; 
+       UCCAST(front) += a->size_of_elem, UCCCAST(back) -= a->size_of_elem) {
     memcpy(tmp, front, a->size_of_elem);
     memcpy(front, back, a->size_of_elem);
     memcpy(back, tmp, a->size_of_elem);
