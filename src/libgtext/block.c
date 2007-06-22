@@ -105,7 +105,7 @@ void block_insert_element(Block *block,
 
       /* Fall:  --------------
                    -----------  */
-      if(gn_r.start >= elem_r.start && gn_r.end == elem_r.end)
+      else if(gn_r.start >= elem_r.start && gn_r.end == elem_r.end)
       {
         switch(dominates)
 	{
@@ -117,6 +117,7 @@ void block_insert_element(Block *block,
 	    if(elem_r.start == elem_r.end)
 	    {
               dlist_remove(block->elements, elem, env);
+	      element_delete(element, env);
 	    }
 	    else
 	    {
@@ -124,14 +125,16 @@ void block_insert_element(Block *block,
 	    }
 	    e = element_new(gn, cfg, env);
 	    dlist_add(block->elements, e, env);
+	    elem = dlist_find(block->elements, e);
 	    break;
 	}
       }
       
       /* Fall: ----------
                -------------- */
-      if(elem_r.start <= gn_r.start && elem_r.end < gn_r.end)
+      else if(elem_r.start <= gn_r.start && elem_r.end < gn_r.end)
       {
+        bool removed = false;
         switch(dominates)
 	{
           case DOMINATES_FIRST:
@@ -142,6 +145,8 @@ void block_insert_element(Block *block,
 	    if(elem_r.start == elem_r.end)
 	    {
               dlist_remove(block->elements, elem, env);
+	      element_delete(element, env);
+	      removed = true;
 	    }
 	    else
             {
@@ -154,13 +159,17 @@ void block_insert_element(Block *block,
 	    element_set_type(e, gn_type);
 	    dlist_add(block->elements, e, env);
 	    gn_r.start = elem_r.end;
+	    if(removed)
+	    {
+              elem = dlist_find(block->elements, e);
+	    }
 	    break;
 	}
       }
 
       /* Fall: -------------
                   ------      */
-      if(elem_r.start < gn_r.start && gn_r.end < elem_r.end)
+      else if(elem_r.start < gn_r.start && gn_r.end < elem_r.end)
       {
         Range elemnew_r;
 
@@ -361,7 +370,9 @@ int block_unit_test(Env* env)
   block_set_caption(b, caption1);
   ensure(has_err, (0 == strcmp(block_get_caption(b), caption1)));
   ensure(has_err, (0 != strcmp(block_get_caption(b), caption2)));
-	      
+
+  config_delete(cfg, env);
+  str_delete(luafile, env);
   element_delete(e1, env);
   element_delete(e2, env);
   block_delete(b, env);
