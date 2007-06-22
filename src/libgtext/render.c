@@ -29,9 +29,9 @@ typedef struct
 
 struct Render 
 {
-  Diagram* dia;
-  Config* cfg;
-  Graphics* g;
+  Diagram *dia;
+  Config *cfg;
+  Graphics *g;
   Range range;
   double y, margins, factor;
   unsigned int width, height;
@@ -43,7 +43,7 @@ Calculates the final height of the image to be created.
 \param env Pointer to Environment object.
 \return Height of the image in pixels.
 */
-unsigned int render_calculate_height(Render *r, Env* env)
+unsigned int render_calculate_height(Render *r, Env *env)
 {
   assert(r && env);
   unsigned int lines = diagram_get_total_lines(r->dia, env);
@@ -307,7 +307,7 @@ Renders a track.
 \param data Render object.
 \param env Pointer to Environment object.
 */
-int render_track(void *key, void* value, void *data, Env *env)
+int render_track(void *key, void *value, void *data, Env *env)
 {
   assert(value && key && data && env);
   Render* r = (Render*) data;
@@ -342,7 +342,7 @@ Formats a given position number for short display in the ruler.
 \param txt String to write result into.
 \param pos Position.
 */
-void format_ruler_label(char* txt, long pos)
+void format_ruler_label(char *txt, long pos)
 {
 /*  if (pos >= 1000)
 	  sprintf(txt, "%.1lfk", pos/1000.0);
