@@ -54,6 +54,7 @@ void track_insert_element(Track *track,
   assert(track && gn && cfg);
   Block *block;
   const char* caption;
+  const char* parent_caption;
 
   if(parent == NULL)
   {
@@ -77,9 +78,15 @@ void track_insert_element(Track *track,
       caption = genome_feature_get_attribute(parent, "Name");
       if(caption == NULL)
       {
-         caption = genome_feature_get_attribute(parent, "ID");
+         caption = genome_feature_get_attribute(gn, "ID");
       }
       block_set_caption(block, caption);
+      parent_caption =  genome_feature_get_attribute(gn, "Name");
+      if(parent_caption == NULL)
+      {
+        parent_caption = genome_feature_get_attribute(parent, "ID");
+      }
+      block_set_parent_caption(block, parent_caption);
       block_set_range(block, genome_node_get_range(parent));
     }
   }

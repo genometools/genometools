@@ -12,6 +12,7 @@ struct Block
   Dlist *elements;
   Range range;
   const char* caption;
+  const char* parent_caption;
   Strand strand;
 };
 
@@ -45,6 +46,7 @@ Block* block_new(Env *env)
   r.end = 0;
   block->range = r;
   block->caption = NULL;
+  block->parent_caption = NULL;
   block->strand = STRAND_UNKNOWN;
 
   assert(block);
@@ -250,6 +252,30 @@ const char* block_get_caption(Block *block)
   assert(block);
 
   return block->caption;
+}
+
+/*!
+Sets parent_caption of a Block object
+\param block Pointer to Block object to set caption
+\param caption Pointer to String object
+*/
+void block_set_parent_caption(Block *block,
+                       const char* caption)
+{
+  assert(block);
+  block->parent_caption = caption;
+			   }
+
+/*!
+Gets parent_caption of a Block object
+\param block Pointer to Block object 
+\return caption Pointer to String object
+*/
+const char* block_get_parent_caption(Block *block)
+{
+  assert(block);
+		       
+  return block->parent_caption;
 }
 
 /*!
