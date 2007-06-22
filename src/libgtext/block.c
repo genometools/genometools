@@ -95,7 +95,7 @@ void block_insert_element(Block *block,
           case DOMINATES_FIRST:
 	    break;
 	  case DOMINATES_SECOND:
-            elem_r.start = gn_r.end;
+            elem_r.start = gn_r.end+1;
 	    element_set_range(element, elem_r);
 	    e = element_new(gn, cfg, env);
 	    dlist_add(block->elements, e, env);
@@ -113,8 +113,8 @@ void block_insert_element(Block *block,
 	    gn_r.start = elem_r.end;
 	    break;
 	  case DOMINATES_SECOND:
-	    elem_r.end = gn_r.start;
-	    if(elem_r.start == elem_r.end)
+	    elem_r.end = gn_r.start-1;
+	    if(elem_r.start == elem_r.end+1)
 	    {
               dlist_remove(block->elements, elem, env);
 	      element_delete(element, env);
@@ -138,11 +138,11 @@ void block_insert_element(Block *block,
         switch(dominates)
 	{
           case DOMINATES_FIRST:
-            gn_r.start = elem_r.end;
+            gn_r.start = elem_r.end+1;
 	    break;
 	  case DOMINATES_SECOND:
-            elem_r.end = gn_r.start;
-	    if(elem_r.start == elem_r.end)
+            elem_r.end = gn_r.start-1;
+	    if(elem_r.start == elem_r.end+1)
 	    {
               dlist_remove(block->elements, elem, env);
 	      element_delete(element, env);
@@ -158,7 +158,7 @@ void block_insert_element(Block *block,
 	    element_set_range(e, gnnew_r);
 	    element_set_type(e, gn_type);
 	    dlist_add(block->elements, e, env);
-	    gn_r.start = elem_r.end;
+	    gn_r.start = elem_r.end+1;
 	    if(removed)
 	    {
               elem = dlist_find(block->elements, e);
@@ -179,9 +179,9 @@ void block_insert_element(Block *block,
 	    break;
 	  case DOMINATES_SECOND:
             elemnew_r = elem_r;
-	    elem_r.end = gn_r.start;
+	    elem_r.end = gn_r.start-1;
 	    element_set_range(element, elem_r);
-	    elemnew_r.start = gn_r.end;
+	    elemnew_r.start = gn_r.end+1;
             Element *elemnew = element_new_empty(cfg, env);
 	    element_set_range(elemnew, elemnew_r);
 	    element_set_type(elemnew, e_type);
