@@ -6,12 +6,13 @@
 --      <name> = {red=<val>,green=<val>,blue=<val>}
 -- where <val> is a decimal value between 0 and 1.
 
-config = 
+config =
 {
   -- Defines which tracks are shown, independent of view range
   tracks =
   {
-    hide_always = {},
+    order = {},
+    hide = {},
   },
   threshold =
   {
@@ -23,7 +24,7 @@ config =
     exon = 100000,
   },
   -- Defines a color for a certain feature type.
-  colors = 
+  colors =
   {
     stroke          ={red=0.0,green=0.0,blue=0.0},
     track_title     ={red=0.6,green=0.6,blue=0.7},
@@ -36,7 +37,7 @@ config =
   },
   -- Defines how a feature is drawn. 
   -- Possible choices: "line", "box", "caret", "dashes"
-  feature_styles = 
+  feature_styles =
   {
     exon            = "box",
     CDS             = "box",
@@ -47,11 +48,14 @@ config =
   },
   -- Defines which feature types are displayed in another 
   -- feature's track.
-  collapse = 
+  collapse =
   {
     to_parent = {"exon","intron","CDS"},
   },
-  dominate = 
+  -- Defines precedence of feature types when overlapping
+  -- in a collapsed parent track.
+  -- read "=" as ">" or "dominates"
+  dominate =
   {
     CDS = {"exon","intron","mRNA","gene"},
     exon = {"mRNA","gene"},
@@ -67,7 +71,7 @@ config =
     scale_arrow_width = 6,     -- width of scale arrowheads, in pixels
     scale_arrow_height = 10,   -- height of scale arrowheads, in pixels
     arrow_width = 6,   -- width of feature arrowheads, in pixels
-    stroke_width = 1,  -- width of outlines, in pixels
-    show_grid = "yes", -- shows horizontal lines
+    stroke_width = .5,  -- width of outlines, in pixels
+    show_grid = "yes", -- shows light vertical lines for orientation
   },
-} 
+}
