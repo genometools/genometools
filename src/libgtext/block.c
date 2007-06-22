@@ -12,10 +12,11 @@ struct Block
   Dlist *elements;
   Range range;
   const char* caption;
+  Strand strand;
 };
 
 /*!
-
+Compare function to insert Elements into dlist
 */
 int elemcmp(const void *a, const void *b)
 {
@@ -44,6 +45,7 @@ Block* block_new(Env *env)
   r.end = 0;
   block->range = r;
   block->caption = NULL;
+  block->strand = STRAND_UNKNOWN;
 
   assert(block);
   return block;
@@ -200,12 +202,6 @@ void block_insert_element(Block *block,
     e = element_new(gn, cfg, env);
     dlist_add(block->elements, e, env);
   }
-  /* assert(block && gn);
-
-  Element *element;
-
-  element = element_new(gn, cfg, env);
-  dlist_add(block->elements, element, env); */
 }
 
 /*!
@@ -257,11 +253,36 @@ const char* block_get_caption(Block *block)
 }
 
 /*!
+Sets strand of a Block object
+\param block Block to set strand
+\param strand Strand to set
+*/
+void block_set_strand(Block *block,
+                      Strand strand)
+{
+  assert(block);
+
+  block->strand = strand;
+}
+
+/*!
+Gets strand of a Block object
+\param block Pointer to Block object
+\return strand Strand 
+*/
+Strand block_get_strand(Block *block)
+{
+  assert(block);
+
+  return block->strand;
+}
+
+/*!
 Returns Array with Pointer to Element objects
 \param block Pointer to Block object
 \return Pointer to Array
 */
-Dlist* block_get_elements(Block* block)
+Dlist* block_get_elements(Block *block)
 {
   return block->elements;
 }
@@ -317,6 +338,7 @@ int block_unit_test(Env* env)
   Range r1, r2, r_temp, b_range;
   Dlist* elements;
   int has_err = 0;
+  Strand s;
 
   Config *cfg;
   Str *luafile = str_new_cstr("config.lua",env);
@@ -329,7 +351,6 @@ int block_unit_test(Env* env)
 
   r2.start = 51;
   r2.end = 80;
-
 
   GenomeNode* gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0, env);
   GenomeNode* gn2 = genome_feature_new(gft_intron, r2, STRAND_FORWARD, NULL, 0, env);
@@ -370,6 +391,14 @@ int block_unit_test(Env* env)
   block_set_caption(b, caption1);
   ensure(has_err, (0 == strcmp(block_get_caption(b), caption1)));
   ensure(has_err, (0 != strcmp(block_get_caption(b), caption2)));
+
+  /* tests block_set_strand
+     & block_get_range */
+  s = block_get_strand(b);
+  ensure(has_err, (STRAND_UNKNOWN == s));
+  block_set_strand(b, STRAND_FORWARD);
+  s = block_get_strand(b);
+  ensure(has_err, (STRAND_FORWARD == s));
 
   config_delete(cfg, env);
   str_delete(luafile, env);

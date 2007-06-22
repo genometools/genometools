@@ -11,6 +11,14 @@
 #include <libgtext/color.h>
 #include <libgtext/element.h>
 
+enum 
+{
+  ARROW_LEFT,
+  ARROW_RIGHT,
+  ARROW_BOTH,
+  ARROW_NONE
+} ArrowStatus;
+
 /* the graphics class */
 typedef struct Graphics Graphics;
 
