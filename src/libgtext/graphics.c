@@ -109,7 +109,7 @@ Graphics* graphics_new_png(const char *fname, unsigned int width,
   cairo_set_operator(g->cr, CAIRO_OPERATOR_SOURCE);
   cairo_paint(g->cr);
   cairo_set_line_join(g->cr, CAIRO_LINE_JOIN_ROUND);
-  cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);  
+  cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);
   return g;
 }
 
@@ -306,7 +306,7 @@ double graphics_get_text_height(Graphics *g)
   assert(g);
   /* get text extents */
   cairo_text_extents(g->cr, "A", &ext);
-	return ext.height; 
+	return ext.height;
 }
 
 double graphics_get_text_width(Graphics *g, const char* text)
@@ -315,25 +315,25 @@ double graphics_get_text_width(Graphics *g, const char* text)
   assert(g);
   /* get text extents */
   cairo_text_extents(g->cr, text, &ext);
-	return ext.width; 
+	return ext.width;
 }
 
 void graphics_draw_colored_text(Graphics *g,
                                 double x,
-																double y,
-																Color color,
-																const char *text)
+                                double y,
+                                Color color,
+                                const char *text)
 {
   assert(g && text);
   cairo_set_source_rgb(g->cr,
-	                     color.red,
-											 color.green,
-											 color.blue);
+                       color.red,
+                       color.green,
+                       color.blue);
   cairo_move_to(g->cr, x, y);
   cairo_show_text(g->cr, text);
 }
 
-void graphics_draw_arrowhead(Graphics *g, double x, double y, 
+void graphics_draw_arrowhead(Graphics *g, double x, double y,
                              Color color, int arrow_status)
 {
   assert(g);
@@ -345,22 +345,22 @@ void graphics_draw_arrowhead(Graphics *g, double x, double y,
 	cairo_set_source_rgb(g->cr, color.red,
                               color.green,
                               color.blue);
-	if(arrow_status == ARROW_LEFT)
+	if (arrow_status == ARROW_LEFT)
 	{
 	  cairo_move_to(g->cr, x+arrow_width, y);
 		cairo_line_to(g->cr, x, y+(arrow_height/2));
 		cairo_line_to(g->cr, x+arrow_width, y+arrow_height);
-		cairo_close_path(g->cr); 
+		cairo_close_path(g->cr);
 	  /* fill area */
     cairo_fill_preserve(g->cr);
   	cairo_stroke(g->cr);
 	}
-	if(arrow_status == ARROW_RIGHT)
+	if (arrow_status == ARROW_RIGHT)
 	{
 	  cairo_move_to(g->cr, x, y);
 		cairo_line_to(g->cr, x+arrow_width, y+(arrow_height/2));
 		cairo_line_to(g->cr, x, y+arrow_height);
-		cairo_close_path(g->cr); 
+		cairo_close_path(g->cr);
 	  /* fill area */
     cairo_fill_preserve(g->cr);
   	cairo_stroke(g->cr);

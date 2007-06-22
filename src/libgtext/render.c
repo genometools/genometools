@@ -27,7 +27,7 @@ typedef struct
   enum ClipType clip;
 } DrawingRange;
 
-struct Render 
+struct Render
 {
   Diagram *dia;
   Config *cfg;
@@ -123,27 +123,27 @@ DrawingRange render_convert_coords(Render *r,
   /* scale coordinates to target image width */
 	/* first, check if left side has to be clipped */
   if ((long) node_range.start < (long) r->range.start )
-	{
-	  converted_range.clip = CLIPPED_LEFT;
-		converted_range.start = MAX(0, r->margins-5);
-	} 
-	else
+  {
+    converted_range.clip = CLIPPED_LEFT;
+    converted_range.start = MAX(0, r->margins-5);
+  }
+  else
   {
     converted_range.start = render_convert_point(r, node_range.start);
   }
-  
-	/* then, check right side. */
+
+  /* then, check right side. */
   if ((long) node_range.end > (long) r->range.end)
-	{
+  {
     converted_range.clip = (converted_range.clip == CLIPPED_LEFT ?
-                                                      CLIPPED_BOTH : 
+                                                      CLIPPED_BOTH :
                                                       CLIPPED_RIGHT);
-		converted_range.end = r->width - r->margins+5;
-	}
-	else
-	{
+    converted_range.end = r->width - r->margins+5;
+  }
+  else
+  {
     converted_range.end = render_convert_point(r, node_range.end);
-	}
+  }
   return converted_range;
 }
 
@@ -161,7 +161,7 @@ void render_line(Render *r, Line *line, Env *env)
 
   if (config_get_verbose(r->cfg))
      printf("scaling factor is %f\n",r->factor);
-     
+
   /* begin drawing block */
   for (i=0; i<array_size(blocks); i++)
   {
@@ -172,17 +172,17 @@ void render_line(Render *r, Line *line, Env *env)
     DrawingRange draw_range;
     const char* caption;
     /* Strand strand = block_get_strand(block); */
-    int arrow_status = ARROW_NONE;    
-     
+    int arrow_status = ARROW_NONE;
+
     /* draw block caption */
     draw_range = render_convert_coords(r, block_range, env);
     caption = block_get_caption(block);
-    if (!caption) caption="<unnamed>"; 
+    if (!caption) caption="<unnamed>";
     graphics_draw_text(r->g,
                        MAX(r->margins, draw_range.start),
                        r->y-graphics_get_text_height(r->g)+3,
                        caption);
-											 
+
 		/* DEBUG */
          graphics_draw_box(r->g,
                        draw_range.start,
@@ -195,16 +195,16 @@ void render_line(Render *r, Line *line, Env *env)
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
                        config_get_color(r->cfg, "stroke", env));
 		/* DEBUG */
-					
+
     /* draw elements in block */
-    for(delem = dlist_first(elems); delem != NULL; delem = dlistelem_next(delem))
+    for (delem = dlist_first(elems); delem != NULL; delem = dlistelem_next(delem))
     {
       Element *elem = (Element*) dlistelem_get_data(delem);
       Range elem_range = element_get_range(elem);
       DrawingRange draw_range;
       double elem_start, elem_width, bar_height;
       Color grey;
-      
+
       grey.red=grey.green=grey.blue=.8;
       bar_height = config_get_num(r->cfg, "format", "bar_height", 15, env);
 
@@ -286,12 +286,20 @@ void render_line(Render *r, Line *line, Env *env)
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
                        config_get_color(r->cfg, "stroke", env));
       }
-      
+
       /* draw arrowheads at clipped margins */
       if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)
-          graphics_draw_arrowhead(r->g, r->margins-10, r->y+((bar_height-8)/2), grey, ARROW_LEFT);
+          graphics_draw_arrowhead(r->g,
+                                  r->margins-10,
+                                  r->y+((bar_height-8)/2),
+                                  grey,
+                                  ARROW_LEFT);
       if (draw_range.clip == CLIPPED_RIGHT || draw_range.clip == CLIPPED_BOTH)
-          graphics_draw_arrowhead(r->g, r->width-r->margins+10, r->y+((bar_height-8)/2), grey, ARROW_RIGHT);
+          graphics_draw_arrowhead(r->g,
+                                  r->width-r->margins+10,
+                                  r->y+((bar_height-8)/2),
+                                  grey,
+                                  ARROW_RIGHT);
     }
   }
   /* do not add line spacing after the last line of a track */
@@ -322,10 +330,10 @@ int render_track(void *key, void *value, void *data, Env *env)
 
   /* draw track title */
   graphics_draw_colored_text(r->g,
-	                           r->margins,
-														 r->y,
-														 config_get_color(r->cfg, "track_title", env),
-														 (const char*) key);
+                             r->margins,
+                             r->y,
+                             config_get_color(r->cfg, "track_title", env),
+                             (const char*) key);
   r->y += graphics_get_text_height(r->g) + 10;
 
   /* render each line */
@@ -356,13 +364,13 @@ void render_ruler(Render *r, Env* env)
 {
   double step, minorstep, vmajor, vminor;
   long base_length, tick;
-	Color rulercol, gridcol;
-	char str[BUFSIZ];
-	
-	rulercol.red = rulercol.green = rulercol.blue = .2;
-	gridcol.red = gridcol.green = gridcol.blue = .9;
-	
-	/* determine range and step of the scale */
+  Color rulercol, gridcol;
+  char str[BUFSIZ];
+
+  rulercol.red = rulercol.green = rulercol.blue = .2;
+  gridcol.red = gridcol.green = gridcol.blue = .9;
+
+  /* determine range and step of the scale */
   base_length = range_length(r->range);
 
   /* determine tick steps */
@@ -374,23 +382,22 @@ void render_ruler(Render *r, Env* env)
   vmajor = (double) (floor(r->range.start / step))*step;
 
   /* draw major ticks */
-  for(tick = vmajor; tick <= r->range.end; tick += step)
+  for (tick = vmajor; tick <= r->range.end; tick += step)
   {
-	  if (tick < r->range.start) continue;
+    if (tick < r->range.start) continue;
     graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 30, rulercol, 10);
     format_ruler_label(str, tick);
     graphics_draw_text_centered(r->g, render_convert_point(r, tick), 20, str);
   }
-	
-	/* draw minor ticks */
+  /* draw minor ticks */
   if (minorstep >= 1)
   {
-    for(tick = vminor; tick <= r->range.end; tick += minorstep)
+    for (tick = vminor; tick <= r->range.end; tick += minorstep)
     {
-		  if (tick < r->range.start) continue;
-			if(strcmp(config_get_cstr(r->cfg, "format","show_grid", "no", env), "yes") == 0)
-			  graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 40, gridcol, r->height);
-			graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 35, rulercol, 5);
+      if (tick < r->range.start) continue;
+      if (strcmp(config_get_cstr(r->cfg, "format","show_grid", "no", env), "yes") == 0)
+        graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 40, gridcol, r->height);
+      graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 35, rulercol, 5);
     }
   }
 }
@@ -398,24 +405,24 @@ void render_ruler(Render *r, Env* env)
 void render_to_png(Render *r, char *fn, unsigned int width, Env *env)
 {
   assert(r && fn && env && width > 0);
-  unsigned int height;  
+  unsigned int height;
 
   /* set initial margins, header, target width */
   r->y = 70;
   r->width = width;
   height = render_calculate_height(r, env);
   r->height = height;
-	
+
   /* calculate scaling factor */
   r->factor = ((double) r->width
-                 -(2*r->margins)) 
-               / (r->range.end 
+                 -(2*r->margins))
+               / (r->range.end
                  - r->range.start);
 
   /* create new Graphics backend */
   r->g = graphics_new_png(fn, width, height, env);
   graphics_set_margins(r->g, r->margins, 0, width, height);
-  
+
   render_ruler(r, env);
 
   /* process (render) each track */

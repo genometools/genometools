@@ -11,7 +11,7 @@
 #include <libgtext/color.h>
 #include <libgtext/element.h>
 
-enum 
+enum
 {
   ARROW_LEFT,
   ARROW_RIGHT,
