@@ -89,6 +89,12 @@ void block_insert_element(Block *block,
       e_type = element_get_type(element);
 
       dominates = config_dominates(cfg, e_type, gn_type, env);
+      if(dominates == DOMINATES_EQUAL
+         || dominates == DOMINATES_NOT_SPECIFIED
+	 || dominates == DOMINATES_UNKNOWN_TYPE)
+      {
+        dominates = DOMINATES_SECOND;
+      }
     
       /* Fall:    -------------------
                   ---------- */
