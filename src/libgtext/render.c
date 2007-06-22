@@ -16,15 +16,15 @@
 enum ClipType
 {
   CLIPPED_RIGHT,
-	CLIPPED_LEFT,
-	CLIPPED_NONE,
-	CLIPPED_BOTH
+  CLIPPED_LEFT,
+  CLIPPED_NONE,
+  CLIPPED_BOTH
 };
 
 typedef struct
 {
   double start, end;
-	enum ClipType clip;
+  enum ClipType clip;
 } DrawingRange;
 
 struct Render 
@@ -171,7 +171,9 @@ void render_line(Render *r, Line *line, Env *env)
     Range block_range = block_get_range(block);
     DrawingRange draw_range;
     const char* caption;
-    
+    /* Strand strand = block_get_strand(block); */
+    int arrow_status = ARROW_NONE;    
+     
     /* draw block caption */
     draw_range = render_convert_coords(r, block_range, env);
     caption = block_get_caption(block);
@@ -188,7 +190,7 @@ void render_line(Render *r, Line *line, Env *env)
                        draw_range.end - draw_range.start,
                        config_get_num(r->cfg, "format", "bar_height", 15, env),
                        config_get_color(r->cfg, "foo", env),
-                       NoArrow,
+                       ARROW_NONE,
                        config_get_num(r->cfg, "format", "arrow_width", 6, env),
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
                        config_get_color(r->cfg, "stroke", env));
@@ -235,7 +237,7 @@ void render_line(Render *r, Line *line, Env *env)
                        elem_width,
                        bar_height,
                        config_get_color(r->cfg, type, env),
-                       element_get_arrow_status(elem),
+                       arrow_status,
                        config_get_num(r->cfg, "format", "arrow_width", 6, env),
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
                        config_get_color(r->cfg, "stroke", env));
@@ -247,7 +249,7 @@ void render_line(Render *r, Line *line, Env *env)
                        r->y,
                        elem_width,
                        bar_height,
-                       element_get_arrow_status(elem),
+                       arrow_status,
                        config_get_num(r->cfg, "format", "arrow_width", 6, env),
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
                        config_get_color(r->cfg, "stroke", env));
@@ -259,7 +261,7 @@ void render_line(Render *r, Line *line, Env *env)
                        r->y,
                        elem_width,
                        bar_height,
-                       element_get_arrow_status(elem),
+                       arrow_status,
                        config_get_num(r->cfg, "format", "arrow_width", 6, env),
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
                        config_get_color(r->cfg, "stroke", env));
@@ -279,7 +281,7 @@ void render_line(Render *r, Line *line, Env *env)
                        elem_width,
                        bar_height,
                        config_get_color(r->cfg, type, env),
-                       element_get_arrow_status(elem),
+                       arrow_status,
                        config_get_num(r->cfg, "format", "arrow_width", 6, env),
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
                        config_get_color(r->cfg, "stroke", env));
@@ -287,9 +289,9 @@ void render_line(Render *r, Line *line, Env *env)
       
       /* draw arrowheads at clipped margins */
       if (draw_range.clip == CLIPPED_LEFT || draw_range.clip == CLIPPED_BOTH)
-          graphics_draw_arrowhead(r->g, r->margins-10, r->y+((bar_height-8)/2), grey, Left);
+          graphics_draw_arrowhead(r->g, r->margins-10, r->y+((bar_height-8)/2), grey, ARROW_LEFT);
       if (draw_range.clip == CLIPPED_RIGHT || draw_range.clip == CLIPPED_BOTH)
-          graphics_draw_arrowhead(r->g, r->width-r->margins+10, r->y+((bar_height-8)/2), grey, Right);
+          graphics_draw_arrowhead(r->g, r->width-r->margins+10, r->y+((bar_height-8)/2), grey, ARROW_RIGHT);
     }
   }
   /* do not add line spacing after the last line of a track */

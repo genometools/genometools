@@ -124,7 +124,7 @@ void graphics_draw_box(Graphics *g, double x, double y, double width,
   /* construct shape of the box or arrow */
   switch (arrow_status)
   {
-    case Right:
+    case ARROW_RIGHT:
       cairo_move_to(g->cr, x, y);
       if (width - arrow_width > 0)
         cairo_rel_line_to(g->cr, width - arrow_width, 0);
@@ -134,7 +134,7 @@ void graphics_draw_box(Graphics *g, double x, double y, double width,
       cairo_line_to(g->cr, x, y + height);
       cairo_close_path(g->cr);
       break;
-    case Left:
+    case ARROW_LEFT:
       cairo_move_to(g->cr, x + width, y);
       if (width - arrow_width > 0)
         cairo_rel_line_to(g->cr, -(width - arrow_width), 0);
@@ -144,7 +144,7 @@ void graphics_draw_box(Graphics *g, double x, double y, double width,
         cairo_line_to(g->cr, x + width, y + height);
       cairo_close_path(g->cr);
       break;
-    case NoArrow:
+    case ARROW_NONE:
       cairo_rectangle(g->cr, x, y, width, height);
    }
    /* fill area */
@@ -180,14 +180,14 @@ void graphics_draw_dashes(Graphics *g, double x, double y, double width,
   {
     switch (arrow_status)
     {
-      case Right:
+      case ARROW_RIGHT:
         cairo_move_to(g->cr, x + width - arrow_width, y);
         cairo_line_to(g->cr, x + width, y + height / 2);
         cairo_line_to(g->cr, x + width - arrow_width, y + height);
         /* draw arrowhead */
         cairo_stroke(g->cr);
         break;
-      case Left:
+      case ARROW_LEFT:
         cairo_move_to(g->cr, width - arrow_width, y);
         cairo_line_to(g->cr, x + width, y + height / 2);
         cairo_line_to(g->cr, x + width - arrow_width, y + height);
@@ -216,7 +216,7 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
   /* create caret path */
   switch (arrow_status)
   {
-    case Right:
+    case ARROW_RIGHT:
       if (width - arrow_width > 0)
       {
         width -= arrow_width;
@@ -230,7 +230,7 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
         cairo_line_to(g->cr, x + width, y + height);
       }
       break;
-    case Left:
+    case ARROW_LEFT:
       if (width - arrow_width > 0)
       {
         width -= arrow_width;
@@ -244,7 +244,7 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
         cairo_line_to(g->cr, x + arrow_width + width, y + (height/2));
       }
       break;
-    case NoArrow:
+    case ARROW_NONE:
      cairo_move_to(g->cr, x, y + (height/2));
      cairo_line_to(g->cr, x + (width/2), y);
      cairo_line_to(g->cr, x + width, y + (height/2));
@@ -345,7 +345,7 @@ void graphics_draw_arrowhead(Graphics *g, double x, double y,
 	cairo_set_source_rgb(g->cr, color.red,
                               color.green,
                               color.blue);
-	if(arrow_status == Left)
+	if(arrow_status == ARROW_LEFT)
 	{
 	  cairo_move_to(g->cr, x+arrow_width, y);
 		cairo_line_to(g->cr, x, y+(arrow_height/2));
@@ -355,7 +355,7 @@ void graphics_draw_arrowhead(Graphics *g, double x, double y,
     cairo_fill_preserve(g->cr);
   	cairo_stroke(g->cr);
 	}
-	if(arrow_status == Right)
+	if(arrow_status == ARROW_RIGHT)
 	{
 	  cairo_move_to(g->cr, x, y);
 		cairo_line_to(g->cr, x+arrow_width, y+(arrow_height/2));

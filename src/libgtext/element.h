@@ -14,13 +14,6 @@
 
 typedef struct Element Element;
 
-enum ArrowStatus{
-  Left = 1,
-  Right = 2,
-  NoArrow = 3,
-  Both = 4,
-};
-
 Element* element_new(GenomeNode *gn,
                      Config *cfg,
 		     Env* env);
@@ -32,9 +25,6 @@ void element_set_range(Element* element,
 GenomeFeatureType element_get_type(Element* element);
 void element_set_type(Element *element,
                       GenomeFeatureType type);
-void element_set_arrow_status(Element* element,
-                              int status);
-int element_get_arrow_status(Element* element);
 void element_delete(Element* element,
                     Env* env);
 void print_element(Element* element);

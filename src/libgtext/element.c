@@ -15,7 +15,6 @@ struct Element
 {
   GenomeFeatureType type;
   Range range;
-  int arrow_status;
   Config* cfg;
 };
 
@@ -37,13 +36,20 @@ Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
   element = env_ma_malloc(env, sizeof (Element));
   element->type = genome_feature_get_type(gf);
   element->range = genome_node_get_range(gn);
-  element->arrow_status = NoArrow;
   element->cfg = cfg;
 
   assert(element);
   return element;
 }
 
+/*!
+Creates a new Element object.
+range and type have to be set afterwards with
+element_set_range and element_set_type
+\param cfg Pointer to Config object.
+\param env Pointer to Environment object.
+\return Pointer to a new Element object.
+*/
 Element* element_new_empty(Config *cfg,
                            Env *env)
 {
@@ -51,7 +57,6 @@ Element* element_new_empty(Config *cfg,
 
   env_error_check(env);
   element = env_ma_malloc(env, sizeof (Element));
-  element->arrow_status = NoArrow;
   element->cfg = cfg;
 
   assert(element);
@@ -69,40 +74,16 @@ GenomeFeatureType element_get_type(Element *element)
   return element->type;
 }
 
+/*!
+Sets Type of an Element object
+\param element Element to set type
+\param type GenomeFeatureType to set
+*/
 void element_set_type(Element *element,
                       GenomeFeatureType type)
 {
   assert(element);
   element->type = type;
-}
-
-/*!
-Sets ArrowStatus of an Element object
-\param element Element on which status to set.
-\param status ArrowStatus.
-*/
-void element_set_arrow_status(Element *element,
-                              int status)
-{
-  assert(element);
-  assert((status == Left) 
-          || (status == Right) 
-          || (status == NoArrow)
-	  || (status == Both));
-  element->arrow_status = status;
-}
-
-/*!
-Returns ArrowStatus of an Element object
-\param element Pointer to Element object
-\return ArrowStatus
-*/
-int element_get_arrow_status(Element *element)
-{
-  assert(element);
-
-  assert(element->arrow_status);
-  return element->arrow_status;
 }
 
 /*!
@@ -114,8 +95,6 @@ Range element_get_range(Element *element)
 {
   assert(element);
   
-/* this works only with pointers!! */
-/* assert(element->range.start && element->range.end); */
   return element->range;
 }
 
@@ -162,8 +141,7 @@ bool elements_are_equal(Element* e1,
 {
   assert(e1 && e2);
   if((0 == strcmp(genome_feature_type_get_cstr(e1->type), genome_feature_type_get_cstr(e2->type)))
-     && (0 == range_compare(e1->range, e2->range))
-     && (e1->arrow_status == e2->arrow_status))
+     && (0 == range_compare(e1->range, e2->range)))
     return true;
   else 
     return false;
@@ -176,7 +154,6 @@ Unit Test for Element Class
 int element_unit_test(Env* env)
 {
   Range r1, r2, r_temp;
-  int as1, as2, as_temp;
   int has_err = 0;
 
   r1.start = 10;
@@ -184,9 +161,6 @@ int element_unit_test(Env* env)
 
   r2.start = 20;
   r2.end = 50;
-
-  as1 = NoArrow;
-  as2 = Right;
 
   GenomeNode* gn = genome_feature_new(gft_exon, r1, STRAND_BOTH, NULL, 0, env);
   GenomeNode* gn2 = genome_feature_new(gft_exon, r2, STRAND_BOTH, NULL, 0, env);
@@ -200,23 +174,13 @@ int element_unit_test(Env* env)
   ensure(has_err, (0 == range_compare(r1, r_temp)));
   ensure(has_err, (1 == range_compare(r2, r_temp)));
 
-  /* tests element_get_arrow_status */
-  as_temp = element_get_arrow_status(e);
-  ensure(has_err, (as1 == as_temp));
-  ensure(has_err, !(as2 == as_temp));
-
-  /* tests element_get_type */
+  /* tests element_get_type and element_set_type*/
   ensure(has_err, (gft_exon == element_get_type(e)));
   ensure(has_err, (gft_intron != element_get_type(e)));
+  element_set_type(e, gft_intron);
+  ensure(has_err, (gft_intron == element_get_type(e)));
+  element_set_type(e2, gft_intron);
 
-  /* tests element_set_arrow_status */
-  element_set_arrow_status(e, as2);
-  element_set_arrow_status(e2, as2);
-  element_set_arrow_status(e3, as2);
-  as_temp = element_get_arrow_status(e);
-  ensure(has_err, (as2 == as_temp));
-  ensure(has_err, !(as1 == as_temp));
- 
   /* tests elements_are_equal */
   ensure(has_err, elements_are_equal(e, e2));
   ensure(has_err, !elements_are_equal(e, e3));
