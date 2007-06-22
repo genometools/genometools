@@ -7,6 +7,8 @@
 #include <assert.h>
 #include "spacedef.h"
 
+/* obsolete code */
+
 /*EE
   The following function makes a copy of a 0-terminated string pointed to by
   \texttt{source}.

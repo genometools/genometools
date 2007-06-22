@@ -19,13 +19,13 @@ typedef struct
   FILE *fpin;
 } Fopeninfo;
 
-static int callfileopen(void *info,const char *path,Env *env)
+static int callfileopen(void *info,const Str *path,Env *env)
 {
   Fopeninfo *fileopeninfo = (Fopeninfo *) info;
   Str *tmpfilename;
 
   env_error_check(env);
-  tmpfilename = str_new_cstr(path,env);
+  tmpfilename = str_clone(path,env);
   str_append_char(tmpfilename,'/',env);
   str_append_str(tmpfilename,fileopeninfo->filename,env); 
   fileopeninfo->fpin = env_fa_fopen(env,str_get(tmpfilename),"rb");
@@ -39,39 +39,41 @@ static int callfileopen(void *info,const char *path,Env *env)
 }
 
 static int evalpathlist(const char *envarname,void *info,
-                        int(*applypath)(void *,const char *,Env *),
+                        int(*applypath)(void *,const Str *,Env *),
                         Env *env)
 {
-  char *envptr = getenv(envarname);
+  const char *envptr = getenv(envarname);
 
   env_error_check(env);
   if (envptr != NULL)
   {
-    char *start, *ptr, *envstring;
+    unsigned long currentpos, startpos;
+    Str *start = str_new(env);
     int ret;
 
-    ASSIGNDYNAMICSTRDUP(envstring,envptr);
-    start = envstring;
-    for (ptr = envstring; /* Nothing */ ; ptr++)
+    startpos = 0;
+    for (currentpos=0; /* Nothing */ ; currentpos++)
     {
-      assert(ptr != NULL);
-      if (*ptr == '\0')
+      if (envptr[currentpos] == '\0')
       {
+        str_reset(start);
+        str_append_cstr_nt(start,envptr + startpos,currentpos - startpos,env);
         if (applypath(info,start,env) < 0)
         {
-          FREESPACE(envstring);
+          str_delete(start,env);
           return -1;
         }
         break;
       }
-      if (*ptr == ':')
+      if (envptr[currentpos] == ':')
       {
-        *ptr = '\0';
+        str_reset(start);
+        str_append_cstr_nt(start,envptr + startpos,currentpos - startpos,env);
         ret = applypath(info,start,env);
-        start = ptr + 1;
+        startpos = currentpos + 1;
         if (ret < 0)
         {
-          FREESPACE(envstring);
+          str_delete(start,env);
           return -2;
         }
         if (ret == 1) /* stop */
@@ -80,10 +82,10 @@ static int evalpathlist(const char *envarname,void *info,
         }
       }
     }
-    FREESPACE(envstring);
+    str_delete(start,env);
   }
    return 0;
- }
+}
 
 /*@null@*/ FILE *scanpathsforfile(const char *envstring,
                                   const Str *filename,

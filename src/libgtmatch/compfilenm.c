@@ -9,6 +9,8 @@
 #include "types.h"
 #include "spacedef.h"
 
+/* obsolete code */
+
 /*@notnull@*/ char *composefilenamegeneric(const char *file,
                                            int linenum,
                                            const char *filename,

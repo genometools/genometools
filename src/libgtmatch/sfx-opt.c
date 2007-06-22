@@ -109,8 +109,6 @@ static OPrval parse_options(int *parsed_args,
   {
     if (!option_is_set(optionindexname))
     {
-      char *basenameptr;
-
       if (strarray_size(so->filenametab) > (unsigned long) 1)
       {
         env_error_set(env,"if more than one input file is given, then "
@@ -118,6 +116,8 @@ static OPrval parse_options(int *parsed_args,
         oprval = OPTIONPARSER_ERROR;
       } else
       {
+        char *basenameptr;
+
         basenameptr = getbasename(strarray_get(so->filenametab,0),env);
         str_set(so->str_indexname,basenameptr,env);
         env_ma_free(basenameptr,env);
