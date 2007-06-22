@@ -60,6 +60,8 @@
   appears.
 */
 
+/* Some obsolete macros
+
 #define ASSIGNDYNAMICSTRDUP(V,S)\
         V = dynamicstrdup(__FILE__,__LINE__,S,env)
 
@@ -68,5 +70,7 @@
 
 #define COMPOSEFILENAMEGENERIC(FILENAME,SEP,SUFFIX)\
         composefilenamegeneric(__FILE__,__LINE__,FILENAME,SEP,SUFFIX,env)
+
+*/
 
 #endif

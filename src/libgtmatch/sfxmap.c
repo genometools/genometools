@@ -16,7 +16,6 @@
 #include "readnextline.pr"
 #include "endianess.pr"
 #include "alphabet.pr"
-#include "dstrdup.pr"
 
 #define DBFILEKEY "dbfile="
 

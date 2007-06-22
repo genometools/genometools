@@ -7,11 +7,9 @@
 #include <limits.h>
 #include <stdio.h>
 #include <assert.h>
-#include "spacedef.h"
+#include <string.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
-
-#include "dstrdup.pr"
 
 typedef struct
 {
