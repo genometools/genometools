@@ -55,6 +55,16 @@ void track_insert_element(Track *track,
   Block *block;
   const char* caption;
   const char* parent_caption;
+  Range gn_range/*, block_range*/;
+  GenomeFeatureType gn_type/*, block_type*/;
+  Strand gn_strand;
+  Strand parent_strand;
+  const char* feature_type;
+
+  gn_type = genome_feature_get_type((GenomeFeature*) gn);
+  feature_type = genome_feature_type_get_cstr(gn_type);
+  gn_range = genome_node_get_range(gn);
+  gn_strand = genome_feature_get_strand((GenomeFeature*) gn);
 
   if(parent == NULL)
   {
@@ -67,14 +77,24 @@ void track_insert_element(Track *track,
     }
     block_set_caption(block, caption);
     block_set_range(block, genome_node_get_range(gn));
+    block_set_type(block, gn_type);
+    block_set_strand(block, gn_strand);
   }
   else
   {
+    parent_strand = genome_feature_get_strand((GenomeFeature*) parent);
     block = (Block*) hashtable_get(track->blocks, parent);
     if(block == NULL)
     {
       block = block_new(env);
-      hashtable_add(track->blocks, parent, block, env);
+      if(gn_type == gft_mRNA)
+      {
+        hashtable_add(track->blocks, gn, block, env);
+      }
+      else
+      {
+        hashtable_add(track->blocks, parent, block, env);
+      }
       caption = genome_feature_get_attribute(gn, "Name");
       if(caption == NULL)
       {
@@ -88,7 +108,35 @@ void track_insert_element(Track *track,
       }
       block_set_parent_caption(block, parent_caption);
       block_set_range(block, genome_node_get_range(parent));
+      block_set_type(block, gn_type);
+      block_set_strand(block, parent_strand);
     }
+    /* else 
+    {
+      block_range = block_get_range(block);
+      block_type = block_get_type(block);
+      if((range_overlap(gn_range, block_range))
+          && (!config_cstr_in_list(cfg,"collapse","to_parent",feature_type, env)))
+      {
+         block = block_new(env);
+	 hashtable_add(track->blocks, gn, block, env);
+	 caption = genome_feature_get_attribute(gn, "Name");
+	 if(caption == NULL)
+	 {
+	   caption = genome_feature_get_attribute(gn, "ID");
+	 }
+	 block_set_caption(block, caption);
+	 parent_caption =  genome_feature_get_attribute(parent, "Name");
+	 if(parent_caption == NULL)
+	 {
+	   parent_caption = genome_feature_get_attribute(parent, "ID");
+	 }
+	 block_set_parent_caption(block, parent_caption);
+	 block_set_range(block, genome_node_get_range(parent));
+	 block_set_type(block, gn_type);
+	 block_set_strand(block, parent_strand);
+      }
+    }*/
   }
   block_insert_element(block, gn, cfg, env);
 }
@@ -230,7 +278,6 @@ void track_delete(Track *track,
   {
     line_delete(*(Line**) array_get(track->lines, i), env);
   }
-
   array_delete(track->lines, env);
   str_delete(track->title, env);
   env_ma_free(track, env);
@@ -259,7 +306,7 @@ void print_track(Track* track)
  * */
 int track_unit_test(Env* env)
 {
-  Range r1, r2, r3, r_parent; 
+  Range r1, r2, r3, r_parent, r_mRNA1, r_mRNA2; 
   Str *seqid1, *seqid2, *seqid3;
   Array* lines;
   int has_err = 0;
@@ -282,6 +329,8 @@ int track_unit_test(Env* env)
   r3.start = 70;
   r3.end = 100;
 
+  r_mRNA1 = r_mRNA2 = r_parent;
+
   seqid1 = str_new_cstr("test1", env);
   seqid2 = str_new_cstr("test2", env);
   seqid3 = str_new_cstr("foo", env);
@@ -290,11 +339,17 @@ int track_unit_test(Env* env)
   GenomeNode* gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0, env);
   GenomeNode* gn2 = genome_feature_new(gft_exon, r2, STRAND_FORWARD, NULL, 0, env);
   GenomeNode* gn3 = genome_feature_new(gft_intron, r3, STRAND_FORWARD, NULL, 0, env);
+  GenomeNode* mRNA1 = genome_feature_new(gft_mRNA, r_mRNA1, STRAND_FORWARD, NULL, 0, env);
+  GenomeNode* mRNA2 = genome_feature_new(gft_mRNA, r_mRNA2, STRAND_FORWARD, NULL, 0, env);
+
+
 
   genome_node_set_seqid((GenomeNode*) parent, seqid1);
   genome_node_set_seqid((GenomeNode*) gn1, seqid3);
   genome_node_set_seqid((GenomeNode*) gn2, seqid3);
   genome_node_set_seqid((GenomeNode*) gn3, seqid2);
+  genome_node_set_seqid((GenomeNode*) mRNA1, seqid2);
+  genome_node_set_seqid((GenomeNode*) mRNA2, seqid2);
 
   Line* l1 = line_new(env);
   Line* l2 = line_new(env);
@@ -307,7 +362,9 @@ int track_unit_test(Env* env)
   genome_feature_add_attribute((GenomeFeature*) gn1, "Name", bar, env);
   genome_feature_add_attribute((GenomeFeature*) gn2, "Name", bar, env);
   genome_feature_add_attribute((GenomeFeature*) gn3, "Name", blub, env);
-  
+  genome_feature_add_attribute((GenomeFeature*) mRNA1, "Name", blub, env);
+  genome_feature_add_attribute((GenomeFeature*) mRNA2, "Name", blub, env);
+
   Str* title = str_new(env);
   str_set(title, "exon", env);
   Str* s = str_new(env);
@@ -315,8 +372,7 @@ int track_unit_test(Env* env)
 
   Track* t = track_new(title, env);
   Track* t2 = track_new(s, env);
-
-  last_parent = NULL;
+  Track* t3 = track_new(s, env);
 
   /* test track_insert_elements
      (implicit test of get_next_free_line) */
@@ -332,6 +388,16 @@ int track_unit_test(Env* env)
   track_insert_element(t, gn3, cfg, gn1, env);
   nof_blocks = track_get_number_of_blocks(t, env);
   ensure(has_err, (2 == nof_blocks));
+  nof_blocks = track_get_number_of_blocks(t3, env);
+  ensure(has_err, (0 == nof_blocks));
+  track_insert_element(t3, mRNA1, cfg, parent, env);
+  nof_blocks = track_get_number_of_blocks(t3, env);
+  ensure(has_err, (1 == nof_blocks));
+  track_insert_element(t3, mRNA2, cfg, parent, env);
+  nof_blocks = track_get_number_of_blocks(t3, env);
+  ensure(has_err, (2 == nof_blocks));
+  track_finish(t3, env);
+
 
   /* test track_finish*/
   ensure(has_err, (0 == array_size(track_get_lines(t))));
@@ -361,6 +427,7 @@ int track_unit_test(Env* env)
   line_delete(l2, env);
   track_delete(t, env);
   track_delete(t2, env);
+  track_delete(t3, env);
   str_delete(title, env);
   str_delete(s, env);
   str_delete(seqid1, env);
@@ -370,6 +437,8 @@ int track_unit_test(Env* env)
   genome_node_delete(gn1, env);
   genome_node_delete(gn2, env);
   genome_node_delete(gn3, env);
+  genome_node_delete(mRNA1, env);
+  genome_node_delete(mRNA2, env);
 
   return has_err;
 }

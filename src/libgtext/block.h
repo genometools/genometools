@@ -32,6 +32,9 @@ const char* block_get_parent_caption(Block* block);
 void block_set_strand(Block* block,
                       Strand strand);
 Strand block_get_strand(Block* block);
+void block_set_type(Block* block,
+                    GenomeFeatureType type);
+GenomeFeatureType block_get_type(Block* block);
 Dlist* block_get_elements(Block* block);
 void block_delete(Block* block,
                   Env* env);

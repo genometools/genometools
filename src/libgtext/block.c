@@ -14,6 +14,7 @@ struct Block
   const char* caption;
   const char* parent_caption;
   Strand strand;
+  GenomeFeatureType type;
 };
 
 /*!
@@ -307,6 +308,31 @@ Strand block_get_strand(Block *block)
   assert(block);
 
   return block->strand;
+}
+
+/*!
+Sets type of a Block object
+\param block Block to set type
+\param type GenomeFeatureType to set
+*/
+void block_set_type(Block *block,
+                    GenomeFeatureType type)
+{
+  assert(block);
+
+  block->type = type;
+}
+
+/*!
+Gets type of a Block object
+\param block Pointer to Block object
+\returen GenomeFeature Type
+*/
+GenomeFeatureType block_get_type(Block *block)
+{
+  assert(block);
+
+  return block->type;
 }
 
 /*!
