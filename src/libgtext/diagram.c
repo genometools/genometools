@@ -1,7 +1,7 @@
 /*
-  Copyright (c) 2007 Malte Mader mmader@zbh.uni-hamburg.de,
-                     Sascha Steinbiss ssteinbiss@zbh.uni-hamburg.de,
-                     Christin Schaerfer cschaerfer@zbh.uni-hamburg.de,
+  Copyright (c) 2007 Malte Mader <mmader@zbh.uni-hamburg.de>
+                     Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+                     Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -59,8 +59,7 @@ static int diagram_track_delete(void *key, void *value, void *data, Env* env)
 
 /*!
 Insert a genome node into a track. If the track to a
- corresponding genome type doesn't exist,
-create a new track.
+ corresponding genome type does not exist, create a new track.
 \param gn pointer to a genome node object.
 \param parent pointer the parent of the genome node object.
 \param d pointer to the diagram object.
@@ -130,9 +129,10 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
 
   GenomeNodeChildren* genome_node_info;
   genome_node_info = (GenomeNodeChildren*) genome_node_children;
-
+  
   if (genome_node_has_children(gn))
   {
+    GenomeNode *oldparent = genome_node_info->parent;
     insert_genome_node_into_track(gn,
                                   genome_node_info->parent,
                                   genome_node_info->diagram,
@@ -142,7 +142,7 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
                                          genome_node_info,
                                          visit_child,
                                          env);
-
+    genome_node_info->parent = oldparent;
   }
   else
   {

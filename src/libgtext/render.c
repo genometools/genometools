@@ -171,8 +171,7 @@ void render_line(Render *r, Line *line, Env *env)
     Range block_range = block_get_range(block);
     DrawingRange draw_range;
     const char* caption;
-    /* Strand strand = block_get_strand(block); */
-    int arrow_status = ARROW_NONE;
+    Strand strand = block_get_strand(block); 
 
     /* draw block caption */
     draw_range = render_convert_coords(r, block_range, env);
@@ -204,23 +203,30 @@ void render_line(Render *r, Line *line, Env *env)
       DrawingRange draw_range;
       double elem_start, elem_width, bar_height;
       Color grey;
+      int arrow_status = ARROW_NONE;
+      if((strand == STRAND_REVERSE || strand == STRAND_BOTH) && delem == dlist_first(elems))
+        arrow_status = ARROW_LEFT;
+      if((strand == STRAND_FORWARD || strand == STRAND_BOTH) && dlistelem_next(delem) == NULL)
+        arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
 
       grey.red=grey.green=grey.blue=.8;
       bar_height = config_get_num(r->cfg, "format", "bar_height", 15, env);
 
       if (config_get_verbose(r->cfg))
-        printf("processing element from %lu to %lu\n",
+        printf("processing element from %lu to %lu, strand %d\n",
                elem_range.start,
-               elem_range.end);
+               elem_range.end,
+               strand);
 
       draw_range = render_convert_coords(r, elem_range, env);
       elem_start = draw_range.start;
       elem_width = draw_range.end - draw_range.start;
 
       if (config_get_verbose(r->cfg))
-        printf("drawing element from %f to %f\n",
+        printf("drawing element from %f to %f, arrow status: %d\n",
                draw_range.start,
-               draw_range.end);
+               draw_range.end,
+               arrow_status);
 
       /* draw each element according to style set in the config */
       const char* type = genome_feature_type_get_cstr(element_get_type(elem));

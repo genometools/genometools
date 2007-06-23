@@ -50,7 +50,7 @@ config =
   -- feature's track.
   collapse =
   {
-    to_parent = {"exon","intron","CDS"},
+    to_parent = {"exon","intron"},
   },
   -- Defines precedence of feature types when overlapping
   -- in a collapsed parent track.
