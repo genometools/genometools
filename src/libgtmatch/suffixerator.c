@@ -358,7 +358,7 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
                  Measuretime *mtime,
                  Env *env)
 {
-  unsigned int numofallcodes, numofspecialcodes, part;
+  unsigned int numofallcodes = 0, numofspecialcodes, part;
   Uint *optr;
   Collectedsuffixes csf;
   Suftabparts *suftabparts = NULL;

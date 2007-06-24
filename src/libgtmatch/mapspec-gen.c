@@ -107,7 +107,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
 {
   void *mapptr;
   Uint64 expected;
-  Uint byteoffset;
+  Uint byteoffset = 0;
   size_t numofbytes;
   ArrayMapspecification mapspectable;
   Mapspecification *mapspecptr;

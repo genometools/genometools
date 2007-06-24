@@ -72,16 +72,18 @@ void array_rem(Array *a, unsigned long idx)
 
 void array_reverse(Array *a, Env *env)
 {
-  unsigned char *front, *back, *tmp;
+  unsigned char *front, *back;
+  void *tmp;
+
   assert(a);
   tmp = env_ma_malloc(env, sizeof (a->size_of_elem));
   for (front = UCCAST(a->space), 
        back = MAKEPTR(a->space,a->next_free-1,a->size_of_elem);
        front < back; 
        front += a->size_of_elem, back -= a->size_of_elem) {
-    memcpy(tmp, front, a->size_of_elem);
-    memcpy(front, back, a->size_of_elem);
-    memcpy(back, tmp, a->size_of_elem);
+    memcpy(tmp, (void *) front, a->size_of_elem);
+    memcpy((void *) front, (void *) back, a->size_of_elem);
+    memcpy((void *) back, tmp, a->size_of_elem);
   }
   env_ma_free(tmp, env);
 }
@@ -158,6 +160,7 @@ int array_unit_test(Env *env)
   int ci, *int_array_test;
   unsigned long i, j, size;
   int has_err = 0;
+  size_t slen;
   env_error_check(env);
 
   /* testing an empty array */
@@ -181,8 +184,10 @@ int array_unit_test(Env *env)
     ensure(has_err, array_size(int_array) == 0);
 
     for (i = 0; i < size && !has_err; i++) {
-      cc = (unsigned char) ((double) rand() / RAND_MAX) * CHAR_MAX;
-      ci = (unsigned long) ((double) rand() / RAND_MAX) * INT_MAX;
+      ci = (int) ((double) rand() / RAND_MAX) * CHAR_MAX;
+      assert(ci <= CHAR_MAX);
+      cc = (char) ci;
+      ci = (int) ((double) rand() / RAND_MAX) * INT_MAX;
 
       array_add(char_array, cc, env);
       array_add(int_array, ci, env);
@@ -210,8 +215,9 @@ int array_unit_test(Env *env)
       char_array_test[i+1]= '\0';
       int_array_test[i] = ci;
 
+      slen = strlen(char_array_test);
       ensure(has_err, strncmp(array_get_space(char_array), char_array_test,
-                              strlen(char_array_test)) == 0);
+                              slen) == 0);
 
       for (j = 0; j <= i && !has_err; j++)
         ensure(has_err, *(int*) array_get(int_array, j) == int_array_test[j]);

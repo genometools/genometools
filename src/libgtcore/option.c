@@ -147,7 +147,7 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
   OptionParser *op = env_ma_malloc(env, sizeof (OptionParser));
   assert(synopsis && one_liner);
   /* enforce upper case letter at start and '.' at end of one line desc. */
-  assert(strlen(one_liner) && isupper(one_liner[0]));
+  assert(strlen(one_liner) && isupper((int) one_liner[0]));
   assert(one_liner[strlen(one_liner)-1] == '.');
   op->progname = NULL;
   op->synopsis = cstr_dup(synopsis, env);

@@ -17,7 +17,7 @@ else
   then
     case $1 in
      "icc") icc=1;;
-     "64")  do64=0;;
+     "64")  do64=1;;
      *) echo $usage
         exit 1;;
     esac
