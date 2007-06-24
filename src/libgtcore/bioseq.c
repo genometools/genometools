@@ -183,7 +183,7 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
   /* open files & init */
   if (!bs->use_stdin) {
     bioseq_files_info.bioseq_index = env_fa_xfopen(env,
-                                                   str_get(bioseq_index_file),
+                                                   (const char *) str_get(bioseq_index_file),
                                                    "w");
     bioseq_files_info.bioseq_raw = env_fa_xfopen(env, str_get(bioseq_raw_file),
                                                  "w");

@@ -152,7 +152,7 @@ endif
 bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgtext.a lib/libgtcore.a\
         lib/libgtmatch.a lib/libbz2.a lib/libagg.a lib/libpng.a
 	@echo "[link $@]"
-	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
+	$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 bin/rnv: obj/xcl.o lib/librnv.a lib/libexpat.a
 	@$(CC) $(LDFLAGS) $^ -o $@
