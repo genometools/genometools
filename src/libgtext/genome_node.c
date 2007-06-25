@@ -81,19 +81,19 @@ static int increase_reference_count(GenomeNode *gn, /*@unused@*/ void *data,
 
 static GenomeNode* genome_node_ref(GenomeNode *gn)
 {
-  int has_err;
-  has_err = increase_reference_count(gn, NULL, NULL);
-  assert(!has_err); /* cannot happen, increase_reference_count() is sane */
+  int had_err;
+  had_err = increase_reference_count(gn, NULL, NULL);
+  assert(!had_err); /* cannot happen, increase_reference_count() is sane */
   return gn;
 }
 
 GenomeNode* genome_node_rec_ref(GenomeNode *gn, Env *env)
 {
-  int has_err;
+  int had_err;
   assert(gn);
-  has_err = genome_node_traverse_children(gn, NULL, increase_reference_count,
+  had_err = genome_node_traverse_children(gn, NULL, increase_reference_count,
                                           true, env);
-  assert(!has_err); /* cannot happen, increase_reference_count() is sane */
+  assert(!had_err); /* cannot happen, increase_reference_count() is sane */
   return gn;
 }
 
@@ -110,7 +110,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   unsigned long i;
   Hashtable *traversed_nodes = NULL;
   bool has_node_with_multiple_parents = false;
-  int has_err = 0;
+  int had_err = 0;
 
   if (!genome_node)
     return 0;
@@ -152,8 +152,8 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
       has_node_with_multiple_parents = true;
     /* call traverse function */
     if (traverse) {
-      has_err = traverse(gn, data, env);
-      if (has_err)
+      had_err = traverse(gn, data, env);
+      if (had_err)
         break;
     }
     for (i = 0; i < array_size(list_of_children); i++) {
@@ -181,7 +181,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   }
 
   /* save the tree status of the genome node */
-  if (!has_err) {
+  if (!had_err) {
     if (has_node_with_multiple_parents) {
       genome_node_info_set_tree_status(&gn_ref->info,
                                        GENOME_NODE_IS_NOT_A_TREE);
@@ -203,7 +203,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   array_delete(node_stack, env);
   queue_delete(node_queue, env);
 
-  return has_err;
+  return had_err;
 }
 
 int genome_node_traverse_children(GenomeNode *genome_node, void *data,
@@ -229,20 +229,20 @@ int genome_node_traverse_direct_children(GenomeNode *gn,
                                          Env *env)
 {
   Dlistelem *dlistelem;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   if (!gn || !traverse)
     return 0;
   if (gn->children) {
     for (dlistelem = dlist_first(gn->children); dlistelem != NULL;
          dlistelem = dlistelem_next(dlistelem)) {
-      has_err = traverse((GenomeNode*) dlistelem_get_data(dlistelem),
+      had_err = traverse((GenomeNode*) dlistelem_get_data(dlistelem),
                           traverse_func_data, env);
-      if (has_err)
+      if (had_err)
         break;
     }
   }
-  return has_err;
+  return had_err;
 }
 
 const char* genome_node_get_filename(const GenomeNode *gn)
@@ -359,11 +359,11 @@ static int remove_leaf(GenomeNode *node, void *data, Env *env)
 
 void genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn, Env *env)
 {
-  int has_err;
+  int had_err;
   assert(tree && leafn);
   assert(!genome_node_number_of_children(leafn));
-  has_err = genome_node_traverse_children(tree, leafn, remove_leaf, true, env);
-  assert(!has_err); /* cannot happen, remove_leaf() is sane */
+  had_err = genome_node_traverse_children(tree, leafn, remove_leaf, true, env);
+  assert(!had_err); /* cannot happen, remove_leaf() is sane */
 }
 
 bool genome_node_has_children(GenomeNode *gn)
@@ -496,11 +496,11 @@ static int free_genome_node(GenomeNode *gn, /*@unused@*/ void *data, Env *env)
 
 void genome_node_rec_delete(GenomeNode *gn, Env *env)
 {
-  int has_err;
+  int had_err;
   if (!gn) return;
-  has_err = genome_node_traverse_children(gn, NULL, free_genome_node, true,
+  had_err = genome_node_traverse_children(gn, NULL, free_genome_node, true,
                                           env);
-  assert(!has_err); /* cannot happen, free_genome_node() is sane */
+  assert(!had_err); /* cannot happen, free_genome_node() is sane */
 }
 
 void genome_nodes_sort(Array *nodes)

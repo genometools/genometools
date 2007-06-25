@@ -66,7 +66,7 @@ int gt_extractfeat(int argc, const char **argv, Env *env)
   GenomeFeatureType type;
   ExtractFeatArguments arguments;
   RegionMapping *regionmapping;
-  int parsed_args, has_err = 0;
+  int parsed_args, had_err = 0;
   env_error_check(env);
 
   /* option parsing */
@@ -91,10 +91,10 @@ int gt_extractfeat(int argc, const char **argv, Env *env)
   if (genome_feature_type_get(&type, str_get(arguments.type)) == -1) {
     env_error_set(env, "\"%s\" is not a valid feature type",
                   str_get(arguments.type));
-    has_err = -1;
+    had_err = -1;
   }
 
-  if (!has_err) {
+  if (!had_err) {
     /* create gff3 input stream */
     assert(parsed_args < argc);
     gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
@@ -104,17 +104,17 @@ int gt_extractfeat(int argc, const char **argv, Env *env)
     regionmapping = seqid2file_regionmapping_new(arguments.seqfile,
                                                  arguments.regionmapping, env);
     if (!regionmapping)
-      has_err = -1;
+      had_err = -1;
   }
 
-  if (!has_err) {
+  if (!had_err) {
     /* create extract feature stream */
     extractfeat_stream = extractfeat_stream_new(gff3_in_stream, regionmapping,
                                                 type, arguments.join,
                                                 arguments.translate, env);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(has_err = genome_stream_next_tree(extractfeat_stream, &gn, env)) &&
+    while (!(had_err = genome_stream_next_tree(extractfeat_stream, &gn, env)) &&
            gn) {
       genome_node_rec_delete(gn, env);
     }
@@ -127,5 +127,5 @@ int gt_extractfeat(int argc, const char **argv, Env *env)
   str_delete(arguments.seqfile, env);
   str_delete(arguments.type, env);
 
-  return has_err;
+  return had_err;
 }

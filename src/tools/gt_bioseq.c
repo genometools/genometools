@@ -82,7 +82,7 @@ int gt_bioseq(int argc, const char **argv, Env *env)
 {
   Bioseq_arguments arguments;
   Bioseq *bioseq;
-  int parsed_args, has_err = 0;
+  int parsed_args, had_err = 0;
   env_error_check(env);
 
   /* option parsing */
@@ -97,39 +97,39 @@ int gt_bioseq(int argc, const char **argv, Env *env)
   if (arguments.showseqnum != UNDEF_ULONG && parsed_args + 1 != argc) {
     env_error_set(env, "option '-showseqnum' makes only sense with a single "
                    "sequence_file");
-    has_err = -1;
+    had_err = -1;
   }
 
-  while (!has_err && parsed_args < argc) {
+  while (!had_err && parsed_args < argc) {
     /* bioseq construction */
     if (arguments.recreate)
       bioseq = bioseq_new_recreate(argv[parsed_args], env);
     else
       bioseq = bioseq_new(argv[parsed_args], env);
     if (!bioseq)
-      has_err = -1;
+      had_err = -1;
 
     /* output */
-    if (!has_err && arguments.showfasta)
+    if (!had_err && arguments.showfasta)
       bioseq_show_as_fasta(bioseq, arguments.width);
 
-    if (!has_err && arguments.showseqnum != UNDEF_ULONG) {
+    if (!had_err && arguments.showseqnum != UNDEF_ULONG) {
       if (arguments.showseqnum > bioseq_number_of_sequences(bioseq)) {
         env_error_set(env, "argument '%lu' to option '-showseqnum' is too "
                       "large. The Biosequence contains only '%lu' sequences.",
                       arguments.showseqnum, bioseq_number_of_sequences(bioseq));
-        has_err = -1;
+        had_err = -1;
       }
-      if (!has_err) {
+      if (!had_err) {
         bioseq_show_sequence_as_fasta(bioseq, arguments.showseqnum - 1,
                                       arguments.width);
       }
     }
 
-    if (!has_err && arguments.gc_content)
+    if (!had_err && arguments.gc_content)
       bioseq_show_gc_content(bioseq, env);
 
-    if (!has_err && arguments.stat)
+    if (!had_err && arguments.stat)
       bioseq_show_stat(bioseq);
 
     /* free */
@@ -138,5 +138,5 @@ int gt_bioseq(int argc, const char **argv, Env *env)
     parsed_args++;
   }
 
-  return has_err;
+  return had_err;
 }

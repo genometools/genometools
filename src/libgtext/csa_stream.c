@@ -22,7 +22,7 @@ struct CSAStream {
 int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
   CSAStream *cs;
-  int has_err;
+  int had_err;
   env_error_check(env);
   cs = csa_stream_cast(gs);
 
@@ -33,10 +33,10 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   }
 
   /* no nodes in the buffer -> get new nodes */
-  while (!(has_err = genome_stream_next_tree(cs->in_stream, gn, env)) && *gn) {
-    assert(*gn && !has_err);
-    has_err = genome_node_accept(*gn, cs->csa_visitor, env);
-    if (has_err)
+  while (!(had_err = genome_stream_next_tree(cs->in_stream, gn, env)) && *gn) {
+    assert(*gn && !had_err);
+    had_err = genome_node_accept(*gn, cs->csa_visitor, env);
+    if (had_err)
       break;
     if (csa_visitor_node_buffer_size(cs->csa_visitor)) {
       *gn = csa_visitor_get_node(cs->csa_visitor);
@@ -45,17 +45,17 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   }
 
   /* either we have an error or no new node */
-  assert(has_err || !*gn);
+  assert(had_err || !*gn);
 
   /* if we have no error, process the last cluster */
-  if (!has_err) {
+  if (!had_err) {
     csa_visitor_process_cluster(cs->csa_visitor, true, env);
     if (csa_visitor_node_buffer_size(cs->csa_visitor)) {
       *gn = csa_visitor_get_node(cs->csa_visitor);
       return 0;
     }
   }
-  return has_err;
+  return had_err;
 }
 
 static void csa_stream_free(GenomeStream *gs, Env *env)

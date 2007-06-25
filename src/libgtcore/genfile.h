@@ -30,6 +30,10 @@ typedef enum
    with '.bz2', and GFM_UNCOMPRESSED otherwise */
 GenFileMode genfilemode_determine(const char *path);
 
+/* returns ".gz" if <mode> is GFM_GZIP, ".bz2" if <mode> is GFM_BZIP2, and ""
+   otherwise */
+const char* genfilemode_suffix(GenFileMode mode);
+
 /* returns the length of the ``basename'' of <path>. That is, the length of path
    without '.gz' or '.bz2' suffixes */
 size_t      genfile_basename_length(const char *path);

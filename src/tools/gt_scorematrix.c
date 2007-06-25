@@ -23,7 +23,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 int gt_scorematrix(int argc, const char **argv, Env *env)
 {
   ScoreMatrix *sm;
-  int parsed_args, has_err = 0;
+  int parsed_args, had_err = 0;
   env_error_check(env);
 
   /* option parsing */
@@ -36,10 +36,10 @@ int gt_scorematrix(int argc, const char **argv, Env *env)
 
   sm = scorematrix_read_protein(argv[1], env);
   if (!sm)
-    has_err = -1;
-  if (!has_err)
+    had_err = -1;
+  if (!had_err)
     scorematrix_show(sm, stdout);
   scorematrix_delete(sm, env);
 
-  return has_err;
+  return had_err;
 }

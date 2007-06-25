@@ -55,7 +55,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   GenomeNode *min_node = NULL;
   unsigned long i, j, min_i = UNDEF_ULONG;
   unsigned int genome_node_consolidated;
-  int has_err = 0;
+  int had_err = 0;
 
   env_error_check(env);
 
@@ -64,16 +64,16 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   /* fill buffers */
   for (i = 0; i < array_size(ms->genome_streams); i++) {
     if (!ms->buffer[i]) {
-      has_err = genome_stream_next_tree(*(GenomeStream**)
+      had_err = genome_stream_next_tree(*(GenomeStream**)
                                         array_get(ms->genome_streams, i),
                                         ms->buffer + i, env);
-      if (has_err)
+      if (had_err)
         break;
     }
   }
 
   /* consolidate sequence regions (to avoid duplicates) */
-  if (!has_err) {
+  if (!had_err) {
     for (;;) {
       genome_node_consolidated = 0;
       for (i = 0; i < array_size(ms->genome_streams); i++) {
@@ -93,7 +93,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   }
 
   /* find minimal node */
-  if (!has_err) {
+  if (!had_err) {
     for (i = 0; i < array_size(ms->genome_streams); i++) {
       if (ms->buffer[i]) {
         if (min_i != UNDEF_ULONG) {
@@ -110,7 +110,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   }
 
   *gn = min_node;
-  return has_err;
+  return had_err;
 }
 
 static void merge_stream_free(GenomeStream *gs, Env *env)

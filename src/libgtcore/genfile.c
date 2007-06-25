@@ -34,6 +34,19 @@ GenFileMode genfilemode_determine(const char *path)
   return GFM_UNCOMPRESSED;
 }
 
+const char* genfilemode_suffix(GenFileMode mode)
+{
+  switch (mode) {
+    case GFM_UNCOMPRESSED:
+      return "";
+    case GFM_GZIP:
+      return ".gz";
+    case GFM_BZIP2:
+      return ".bz2";
+    default: assert(0);
+  }
+}
+
 size_t genfile_basename_length(const char *path)
 {
   size_t path_length;

@@ -29,7 +29,7 @@ int gt_qgramdist(int argc, const char **argv, Env *env)
   Bioseq *bioseq_1 = NULL, *bioseq_2 = NULL;
   unsigned long i, j, dist;
   Seq *seq_1, *seq_2;
-  int parsed_args, has_err = 0;
+  int parsed_args, had_err = 0;
   unsigned int q;
   env_error_check(env);
 
@@ -44,24 +44,24 @@ int gt_qgramdist(int argc, const char **argv, Env *env)
   /* make sure seq_file_1 exists */
   if (!file_exists(argv[parsed_args])) {
     env_error_set(env, "seq_file_1 \"%s\" does not exist", argv[parsed_args]);
-    has_err = -1;
+    had_err = -1;
   }
 
   /* make sure seq_file_2 exists */
-  if (!has_err && !file_exists(argv[parsed_args+1])) {
+  if (!had_err && !file_exists(argv[parsed_args+1])) {
     env_error_set(env, "seq_file_2 \"%s\" does not exist", argv[parsed_args+1]);
-    has_err = -1;
+    had_err = -1;
   }
 
   /* init */
-  if (!has_err) {
+  if (!had_err) {
     bioseq_1 = bioseq_new(argv[parsed_args], env);
     if (!bioseq_1)
-      has_err = -1;
-    if (!has_err) {
+      had_err = -1;
+    if (!had_err) {
       bioseq_2 = bioseq_new(argv[parsed_args+1], env);
       if (!bioseq_2)
-        has_err = -1;
+        had_err = -1;
     }
 
     /* compute q-gram distance for all sequence combinations */
@@ -83,5 +83,5 @@ int gt_qgramdist(int argc, const char **argv, Env *env)
   bioseq_delete(bioseq_2, env);
   bioseq_delete(bioseq_1, env);
 
-  return has_err;
+  return had_err;
 }

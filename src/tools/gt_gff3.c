@@ -86,7 +86,7 @@ int gt_gff3(int argc, const char **argv, Env *env)
                *last_stream;
   Gff3_arguments arguments;
   GenomeNode *gn;
-  int parsed_args, has_err;
+  int parsed_args, had_err;
   env_error_check(env);
 
   /* option parsing */
@@ -131,7 +131,7 @@ int gt_gff3(int argc, const char **argv, Env *env)
   gff3_out_stream = gff3_out_stream_new(last_stream, arguments.outfp, env);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
+  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
          gn) {
     genome_node_rec_delete(gn, env);
   }
@@ -144,5 +144,5 @@ int gt_gff3(int argc, const char **argv, Env *env)
   genome_stream_delete(gff3_in_stream, env);
   genfile_xclose(arguments.outfp, env);
 
-  return has_err;
+  return had_err;
 }

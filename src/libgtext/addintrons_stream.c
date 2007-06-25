@@ -22,13 +22,13 @@ static int addintrons_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                                              Env *env)
 {
   AddIntronsStream *ais;
-  int has_err;
+  int had_err;
   env_error_check(env);
   ais = addintrons_stream_cast(gs);
-  has_err = genome_stream_next_tree(ais->in_stream, gn, env);
-  if (!has_err && *gn)
-    has_err = genome_node_accept(*gn, ais->addintrons_visitor, env);
-  return has_err;
+  had_err = genome_stream_next_tree(ais->in_stream, gn, env);
+  if (!had_err && *gn)
+    had_err = genome_node_accept(*gn, ais->addintrons_visitor, env);
+  return had_err;
 }
 
 static void addintrons_stream_free(GenomeStream *gs, Env *env)

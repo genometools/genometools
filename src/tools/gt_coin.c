@@ -25,7 +25,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 int gt_coin(int argc, const char **argv, Env *env)
 {
   unsigned int i, *emissions, *state_sequence = NULL, num_of_emissions;
-  int parsed_args, has_err = 0;
+  int parsed_args, had_err = 0;
   HMM *hmm = NULL;
   env_error_check(env);
 
@@ -52,11 +52,11 @@ int gt_coin(int argc, const char **argv, Env *env)
       default:
         env_error_set(env, "emissions[%u]=%c is not a valid character (only "
                       "`H' and `T' allowed)", i, emissions[i]);
-        has_err = -1;
+        had_err = -1;
     }
   }
 
-  if (!has_err) {
+  if (!had_err) {
     /* create the HMM */
     hmm = coin_hmm_loaded(env);
 
@@ -85,5 +85,5 @@ int gt_coin(int argc, const char **argv, Env *env)
   env_ma_free(emissions, env);
   env_ma_free(state_sequence, env);
 
-  return has_err;
+  return had_err;
 }

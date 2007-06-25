@@ -12,6 +12,7 @@
 #include "gt_consensus_sa.h"
 #include "gt_linearalign.h"
 #include "gt_msaparse.h"
+#include "gt_multiset_matching.h"
 #include "gt_neighborjoining.h"
 #include "gt_nussinov_rna_fold.h"
 #include "gt_qgramdist.h"
@@ -44,6 +45,7 @@ void register_exercises(Toolbox *exercise_toolbox, Env *env)
   toolbox_add(exercise_toolbox, "coin", gt_coin, env);
   toolbox_add(exercise_toolbox, "consensus_sa", gt_consensus_sa, env);
   toolbox_add(exercise_toolbox, "msaparse", gt_msaparse, env);
+  toolbox_add(exercise_toolbox, "msmatch", gt_multiset_matching, env);
   toolbox_add(exercise_toolbox, "linearalign", gt_linearalign, env);
   toolbox_add(exercise_toolbox, "neighborjoining", gt_neighborjoining, env);
   toolbox_add(exercise_toolbox, "nussinov_rna_fold", gt_nussinov_rna_fold, env);
@@ -57,7 +59,7 @@ int gt_exercise(int argc, const char **argv, Env *env)
 {
   Toolbox *exercise_toolbox;
   Tool exercise;
-  int parsed_args, has_err = 0;
+  int parsed_args, had_err = 0;
   char **nargv = NULL;
   env_error_check(env);
 
@@ -79,18 +81,18 @@ int gt_exercise(int argc, const char **argv, Env *env)
   if (!(exercise = toolbox_get(exercise_toolbox, argv[1]))) {
     env_error_set(env, "exercise '%s' not found; option -help lists possible "
                   "tools", argv[1]);
-    has_err = -1;
+    had_err = -1;
   }
 
   /* call exercise */
-  if (!has_err) {
+  if (!had_err) {
     nargv = cstr_array_prefix_first(argv+parsed_args, argv[0], env);
-    has_err = exercise(argc-parsed_args, (const char**) nargv, env);
+    had_err = exercise(argc-parsed_args, (const char**) nargv, env);
   }
 
   /* free */
   cstr_array_delete(nargv, env);
   toolbox_delete(exercise_toolbox, env);
 
-  return has_err;
+  return had_err;
 }

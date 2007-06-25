@@ -412,7 +412,7 @@ static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
 {
   Array *exons_1, *exons_2;
   bool equal;
-  int has_err;
+  int had_err;
 
   assert(gn_1 && gn_2);
 
@@ -421,12 +421,12 @@ static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   exons_2 = array_new(sizeof (Range), env);
 
   /* get exon ranges */
-  has_err = genome_node_traverse_children(gn_1, exons_1, store_exon, false,
+  had_err = genome_node_traverse_children(gn_1, exons_1, store_exon, false,
                                           env);
-  assert(!has_err); /* cannot happen, store_exon() is sane */
-  has_err = genome_node_traverse_children(gn_2, exons_2, store_exon, false,
+  assert(!had_err); /* cannot happen, store_exon() is sane */
+  had_err = genome_node_traverse_children(gn_2, exons_2, store_exon, false,
                                           env);
-  assert(!has_err); /* cannot happen, store_exon() is sane */
+  assert(!had_err); /* cannot happen, store_exon() is sane */
 
   /* sort exon ranges */
   ranges_sort(exons_1);
@@ -475,7 +475,7 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   Store_gene_feature_info info;
   unsigned long i;
   bool equal;
-  int has_err;
+  int had_err;
 
   /* init */
   exons_1 = array_new(sizeof (Range), env);
@@ -486,14 +486,14 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   /* get (direct) gene features */
   info.exons = exons_1;
   info.mRNAs = mRNAs_1;
-  has_err = genome_node_traverse_direct_children(gn_1, &info,
+  had_err = genome_node_traverse_direct_children(gn_1, &info,
                                                  store_gene_feature, env);
-  assert(!has_err); /* cannot happen, store_gene_feature() is sane */
+  assert(!had_err); /* cannot happen, store_gene_feature() is sane */
   info.exons = exons_2;
   info.mRNAs = mRNAs_2;
-  has_err = genome_node_traverse_direct_children(gn_2, &info,
+  had_err = genome_node_traverse_direct_children(gn_2, &info,
                                                  store_gene_feature, env);
-  assert(!has_err); /* cannot happen, store_gene_feature() is sane */
+  assert(!had_err); /* cannot happen, store_gene_feature() is sane */
 
   /* sort exon ranges */
   ranges_sort(exons_1);
@@ -984,7 +984,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   Slot *slot;
   Process_real_feature_data process_real_feature_data;
   Process_predicted_feature_info info;
-  int has_err;
+  int had_err;
 
   assert(se);
   env_error_check(env);
@@ -1003,7 +1003,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   info.wrong_mRNAs = &se->wrong_mRNAs;
 
   /* process the reality stream completely */
-  while (!(has_err = genome_stream_next_tree(se->reality, &gn, env)) && gn) {
+  while (!(had_err = genome_stream_next_tree(se->reality, &gn, env)) && gn) {
     sr = genome_node_cast(sequence_region_class(), gn);
     if (sr) {
       /* each sequence region gets its own ``slot'' */
@@ -1026,23 +1026,23 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       /* store the exons */
       process_real_feature_data.slot = slot;
       genome_feature_determine_transcripttypes(gf, env);
-      has_err = genome_node_traverse_children(gn, &process_real_feature_data,
+      had_err = genome_node_traverse_children(gn, &process_real_feature_data,
                                               process_real_feature, false,
                                               env);
-      assert(!has_err); /* cannot happen, process_real_feature() is sane */
+      assert(!had_err); /* cannot happen, process_real_feature() is sane */
     }
     genome_node_rec_delete(gn, env);
   }
 
   /* set the actuals and sort them */
-  if (!has_err) {
-    has_err = hashtable_foreach(se->real_features, set_actuals_and_sort_them,
+  if (!had_err) {
+    had_err = hashtable_foreach(se->real_features, set_actuals_and_sort_them,
                                 se, env);
   }
 
   /* process the prediction stream */
-  if (!has_err) {
-    while (!(has_err = genome_stream_next_tree(se->prediction, &gn, env)) &&
+  if (!had_err) {
+    while (!(had_err = genome_stream_next_tree(se->prediction, &gn, env)) &&
            gn) {
       gf = genome_node_cast(genome_feature_class(), gn);
       /* we consider only genome features */
@@ -1053,10 +1053,10 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
         if (slot) {
           info.slot = slot;
           genome_feature_determine_transcripttypes(gf, env);
-          has_err = genome_node_traverse_children(gn, &info,
+          had_err = genome_node_traverse_children(gn, &info,
                                                   process_predicted_feature,
                                                   false, env);
-          assert(!has_err); /* cannot happen, process_predicted_feature() is
+          assert(!had_err); /* cannot happen, process_predicted_feature() is
                                sane */
         }
         else {
@@ -1070,12 +1070,12 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   }
 
   /* determine the missing mRNAs */
-  if (!has_err) {
-    has_err = hashtable_foreach(se->real_features, determine_missing_features,
+  if (!had_err) {
+    had_err = hashtable_foreach(se->real_features, determine_missing_features,
                                 se, env);
   }
 
-  return has_err;
+  return had_err;
 }
 
 static void show_transcript_values(TranscriptEvaluators *te, const char *level,

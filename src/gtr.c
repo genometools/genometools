@@ -122,7 +122,7 @@ int run_test(void *key, void *value, void *data, Env *env)
 {
   const char *testname;
   int (*test)(Env*);
-  int has_err, *had_errp;
+  int had_err, *had_errp;
   env_error_check(env);
   assert(key && value && data);
   testname = (const char*) key;
@@ -130,10 +130,10 @@ int run_test(void *key, void *value, void *data, Env *env)
   had_errp = (int*) data;
   printf("%s...", testname);
   xfflush(stdout);
-  has_err = test(env);
-  if (has_err) {
+  had_err = test(env);
+  if (had_err) {
     xputs("error");
-    *had_errp = has_err;
+    *had_errp = had_err;
     fprintf(stderr, "first error: %s\n", env_error_get(env));
     env_error_unset(env);
     xfflush(stderr);
@@ -146,28 +146,28 @@ int run_test(void *key, void *value, void *data, Env *env)
 
 static int run_tests(GTR *gtr, Env *env)
 {
-  int had_err = 0, has_err = 0;
+  int test_err = 0, had_err = 0;
   env_error_check(env);
   assert(gtr);
 
   /* The following type assumptions are made in the GenomeTools library. */
-  ensure(has_err, sizeof (char) == 1);
-  ensure(has_err, sizeof (unsigned char) == 1);
-  ensure(has_err, sizeof (short) == 2);
-  ensure(has_err, sizeof (unsigned short) == 2);
-  ensure(has_err, sizeof (int) == 4);
-  ensure(has_err, sizeof (unsigned int) == 4);
-  ensure(has_err, sizeof (long) == 4 || sizeof (long) == 8);
-  ensure(has_err, sizeof (unsigned long) == 4 || sizeof (unsigned long) == 8);
-  ensure(has_err, sizeof (unsigned long) >= sizeof (size_t));
-  ensure(has_err, sizeof (long long) == 8);
-  ensure(has_err, sizeof (unsigned long long) == 8);
+  ensure(had_err, sizeof (char) == 1);
+  ensure(had_err, sizeof (unsigned char) == 1);
+  ensure(had_err, sizeof (short) == 2);
+  ensure(had_err, sizeof (unsigned short) == 2);
+  ensure(had_err, sizeof (int) == 4);
+  ensure(had_err, sizeof (unsigned int) == 4);
+  ensure(had_err, sizeof (long) == 4 || sizeof (long) == 8);
+  ensure(had_err, sizeof (unsigned long) == 4 || sizeof (unsigned long) == 8);
+  ensure(had_err, sizeof (unsigned long) >= sizeof (size_t));
+  ensure(had_err, sizeof (long long) == 8);
+  ensure(had_err, sizeof (unsigned long long) == 8);
 
   if (gtr->unit_tests) {
-    has_err = hashtable_foreach_ao(gtr->unit_tests, run_test, &had_err, env);
-    assert(!has_err); /* cannot happen, run_test() is sane */
+    had_err = hashtable_foreach_ao(gtr->unit_tests, run_test, &test_err, env);
+    assert(!had_err); /* cannot happen, run_test() is sane */
   }
-  if (had_err)
+  if (test_err)
     return EXIT_FAILURE;
   return EXIT_SUCCESS;
 }
@@ -176,7 +176,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
 {
   Tool tool = NULL;
   char **nargv = NULL;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   assert(gtr);
   if (gtr->test) {
@@ -187,26 +187,26 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
   assert(argc);
   if (argc == 1 && !gtr->interactive) {
     env_error_set(env, "no tool specified; option -help lists possible tools");
-    has_err = -1;
+    had_err = -1;
   }
-  if (!has_err && argc > 1) {
+  if (!had_err && argc > 1) {
     if (!gtr->toolbox || !(tool = toolbox_get(gtr->toolbox, argv[1]))) {
       env_error_set(env, "tool '%s' not found; option -help lists possible "
                          "tools", argv[1]);
-      has_err = -1;
+      had_err = -1;
     }
   }
-  if (!has_err && argc > 1) {
+  if (!had_err && argc > 1) {
     nargv = cstr_array_prefix_first(argv+1, argv[0], env);
-    has_err = tool(argc-1, (const char**) nargv, env);
+    had_err = tool(argc-1, (const char**) nargv, env);
   }
   cstr_array_delete(nargv, env);
-  if (!has_err && gtr->interactive) {
+  if (!had_err && gtr->interactive) {
     /* XXX */
     env_error_set(env, "interactive mode not implemented yet");
-    has_err = -1;
+    had_err = -1;
   }
-  if (has_err)
+  if (had_err)
     return EXIT_FAILURE;
   return EXIT_SUCCESS;
 }

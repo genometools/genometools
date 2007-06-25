@@ -4,9 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <assert.h>
-#include <stdlib.h>
-#include <gt.h>
+#include "gt.h"
 
 typedef struct {
   Str *sequence_region_id;
@@ -90,7 +88,7 @@ int gt_png(int argc, const char **argv, Env *env)
 {
   GenomeStream *gff3_in_stream, *png_stream, *gff3_out_stream = NULL;
   GenomeNode *gn;
-  int parsed_args, has_err;
+  int parsed_args, had_err;
   Png_info info;
 
   /* option parsing */
@@ -120,14 +118,14 @@ int gt_png(int argc, const char **argv, Env *env)
     gff3_out_stream = gff3_out_stream_new(png_stream, NULL, env);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(has_err = genome_stream_next_tree(info.pipe ? gff3_out_stream
+  while (!(had_err = genome_stream_next_tree(info.pipe ? gff3_out_stream
                                                        : png_stream,
                                              &gn, env)) && gn) {
     genome_node_rec_delete(gn, env);
   }
 
   /* draw */
-  if (!has_err)
+  if (!had_err)
     png_stream_draw((PNGStream*) png_stream, info.verbose, env);
 
   /* free */
@@ -136,5 +134,5 @@ int gt_png(int argc, const char **argv, Env *env)
   genome_stream_delete(gff3_in_stream, env);
   str_delete(info.sequence_region_id, env);
 
-  return has_err;
+  return had_err;
 }

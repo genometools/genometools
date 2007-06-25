@@ -30,7 +30,7 @@ static int determine_outfp(void *data, Env *env)
 {
   OutputFileInfo *ofi = (OutputFileInfo*) data;
   GenFileMode genfilemode;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   assert(ofi);
   if (!str_length(ofi->output_filename)) /* no output file given -> use stdin */
@@ -40,9 +40,9 @@ static int determine_outfp(void *data, Env *env)
         env_error_set(env, "file \"%s\" exists already, use option -%s to "
                       "overwrite", str_get(ofi->output_filename),
                       FORCE_OPT_CSTR);
-        has_err = -1;
+        had_err = -1;
     }
-    if (!has_err) {
+    if (!had_err) {
       assert(!(ofi->gzip && ofi->bzip2));
       if (ofi->gzip)
         genfilemode = GFM_GZIP;
@@ -56,7 +56,7 @@ static int determine_outfp(void *data, Env *env)
       assert(*ofi->outfp);
     }
   }
-  return has_err;
+  return had_err;
 }
 
 void outputfile_register_options(OptionParser *op, GenFile **outfp,

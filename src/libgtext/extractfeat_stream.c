@@ -26,23 +26,23 @@ static int extractfeat_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                                         Env *env)
 {
   ExtractFeatStream *extractfeat_stream;
-  int has_err;
+  int had_err;
   env_error_check(env);
   extractfeat_stream = extractfeat_stream_cast(gs);
-  has_err = genome_stream_next_tree(extractfeat_stream->in_stream, gn, env);
-  if (!has_err) {
+  had_err = genome_stream_next_tree(extractfeat_stream->in_stream, gn, env);
+  if (!had_err) {
     assert(extractfeat_stream->extractfeat_visitor);
     if (*gn) {
-      has_err = genome_node_accept(*gn, extractfeat_stream->extractfeat_visitor,
+      had_err = genome_node_accept(*gn, extractfeat_stream->extractfeat_visitor,
                                    env);
-      if (has_err) {
+      if (had_err) {
         /* we own the node -> delete it */
         genome_node_rec_delete(*gn, env);
         *gn = NULL;
       }
     }
   }
-  return has_err;
+  return had_err;
 }
 
 static void extractfeat_stream_free(GenomeStream *gs, Env *env)

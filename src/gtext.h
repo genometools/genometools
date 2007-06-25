@@ -35,6 +35,7 @@
 #include <libgtext/mergefeat_stream_sorted.h>   /* merge feat. stream class */
 #include <libgtext/mergefeat_stream_unsorted.h> /* merge feat. stream class */
 #include <libgtext/msa.h>                       /* multiple seq. align. class */
+#include <libgtext/multiset_matching.h>         /* multiset matching module */
 #include <libgtext/mutate.h>                    /* mutate module */
 #include <libgtext/neighborjoining.h>           /* the Neighbor-Joining class */
 #include <libgtext/png_stream.h>                /* PNG stream */

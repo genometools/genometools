@@ -73,15 +73,15 @@ unsigned long splicedseq_length(const Splicedseq *ss)
 
 int splicedseq_reverse(Splicedseq *ss, Env *env)
 {
-  int has_err;
+  int had_err;
   assert(ss);
-  has_err = reverse_complement(str_get(ss->splicedseq),
+  had_err = reverse_complement(str_get(ss->splicedseq),
                                str_length(ss->splicedseq), env);
-  if (!has_err) {
+  if (!had_err) {
     array_reverse(ss->positionmapping, env);
     ss->forward = !ss->forward;
   }
-  return has_err;
+  return had_err;
 }
 
 void splicedseq_reset(Splicedseq *ss)
@@ -95,32 +95,32 @@ void splicedseq_reset(Splicedseq *ss)
 static int check_splicedseq(Splicedseq *ss, Env *env)
 {                       /*0123456789*/
   static char *origseq = "aaccaagtga", *splicedseq = "ccgtg";
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   splicedseq_add(ss, 2, 3, origseq, env);
   splicedseq_add(ss, 6, 8, origseq, env);
-  ensure(has_err, strcmp(splicedseq_get(ss), splicedseq) == 0);
-  ensure(has_err, !splicedseq_pos_is_border(ss, 0));
-  ensure(has_err,  splicedseq_pos_is_border(ss, 1));
-  ensure(has_err, !splicedseq_pos_is_border(ss, 2));
-  ensure(has_err, !splicedseq_pos_is_border(ss, 3));
-  ensure(has_err, !splicedseq_pos_is_border(ss, 4));
-  return has_err;
+  ensure(had_err, strcmp(splicedseq_get(ss), splicedseq) == 0);
+  ensure(had_err, !splicedseq_pos_is_border(ss, 0));
+  ensure(had_err,  splicedseq_pos_is_border(ss, 1));
+  ensure(had_err, !splicedseq_pos_is_border(ss, 2));
+  ensure(had_err, !splicedseq_pos_is_border(ss, 3));
+  ensure(had_err, !splicedseq_pos_is_border(ss, 4));
+  return had_err;
 }
 
 int splicedseq_unit_test(Env *env)
 {
   Splicedseq *ss;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   ss = splicedseq_new(env);
-  has_err = check_splicedseq(ss, env);
-  if (!has_err) {
+  had_err = check_splicedseq(ss, env);
+  if (!had_err) {
     splicedseq_reset(ss);
-    has_err = check_splicedseq(ss, env);
+    had_err = check_splicedseq(ss, env);
   }
   splicedseq_delete(ss, env);
-  return has_err;
+  return had_err;
 }
 
 void splicedseq_delete(Splicedseq *ss, Env *env)

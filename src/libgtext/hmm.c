@@ -585,7 +585,7 @@ int hmm_unit_test(Env *env)
   Alpha *alpha;
   size_t i, j, len, size;
   HMM *fair_hmm, *loaded_hmm;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
 
   /* test the HMM class with the coin HMMs */
@@ -595,17 +595,17 @@ int hmm_unit_test(Env *env)
   size = sizeof (coin_tosses) / sizeof (coin_tosses[0]);
   encoded_seq = env_ma_malloc(env, sizeof (int) * strlen(coin_tosses[size-1]));
 
-  for (i = 0; i < size && !has_err; i++) {
+  for (i = 0; i < size && !had_err; i++) {
     len = strlen(coin_tosses[i]);
     for (j = 0; j < len; j++)
       encoded_seq[j] = alpha_encode(alpha, coin_tosses[i][j]);
     /* XXX: remove exp() calls */
-    ensure(has_err,
+    ensure(had_err,
            double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len,
                                                 env)),
                                 exp(hmm_backward(fair_hmm, encoded_seq, len,
                                                  env))));
-    ensure(has_err,
+    ensure(had_err,
            double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len,
                                                 env)),
                                 exp(hmm_backward(loaded_hmm, encoded_seq, len,
@@ -615,8 +615,8 @@ int hmm_unit_test(Env *env)
 
   env_ma_free(encoded_seq, env);
   alpha_delete(alpha, env);
-  ensure(has_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
-  ensure(has_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
+  ensure(had_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
+  ensure(had_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
   hmm_delete(loaded_hmm, env);
   hmm_delete(fair_hmm, env);
 
@@ -627,18 +627,18 @@ int hmm_unit_test(Env *env)
   size = sizeof (dice_rolls) / sizeof (dice_rolls[0]);
   encoded_seq = env_ma_malloc(env, sizeof (int) * strlen(dice_rolls[size-1]));
 
-  for (i = 0; i < size && !has_err; i++) {
+  for (i = 0; i < size && !had_err; i++) {
     len = strlen(dice_rolls[i]);
     for (j = 0; j < len; j++) {
       encoded_seq[j] = alpha_encode(alpha, dice_rolls[i][j]);
     }
     /* XXX: remove exp() calls */
-    ensure(has_err,
+    ensure(had_err,
            double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len,
                                                 env)),
                                 exp(hmm_backward(fair_hmm, encoded_seq, len,
                                                  env))));
-    ensure(has_err,
+    ensure(had_err,
            double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len,
                                                 env)),
                                 exp(hmm_backward(loaded_hmm, encoded_seq, len,
@@ -648,12 +648,12 @@ int hmm_unit_test(Env *env)
 
   env_ma_free(encoded_seq, env);
   alpha_delete(alpha, env);
-  ensure(has_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
-  ensure(has_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
+  ensure(had_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
+  ensure(had_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
   hmm_delete(loaded_hmm, env);
   hmm_delete(fair_hmm, env);
 
-  return has_err;
+  return had_err;
 }
 
 void hmm_delete(HMM *hmm, Env *env)
