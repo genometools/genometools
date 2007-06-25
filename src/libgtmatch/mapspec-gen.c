@@ -43,7 +43,7 @@ static Uint64 expectedindexsize(const ArrayMapspecification *mapspectable)
   {
     sumup += (Uint64) mapspecptr->sizeofunit * (Uint64) mapspecptr->numofunits;
   }
-  CHECKIFFITS32BITS(sumup);
+  CHECKUint64Cast(sumup);
   return sumup;
 }
 

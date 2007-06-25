@@ -8,20 +8,20 @@
 localpath=src/libgtmatch
 usage="Usage: $0 [icc,64]"
 
-if test $# -eq 0
+icc=0
+do64=0
+
+if test $# -eq 1
 then
-  icc=0
-  do64=0
+  case $1 in
+   "icc") icc=1;;
+   "64")  do64=1;;
+   *) echo $usage
+      exit 1;;
+  esac
 else
-  if test $# -eq 1
+  if test $# -ne 0
   then
-    case $1 in
-     "icc") icc=1;;
-     "64")  do64=1;;
-     *) echo $usage
-        exit 1;;
-    esac
-  else
     echo $usage
     exit 1
   fi
@@ -38,7 +38,7 @@ done
 
 if test $icc -eq 1
 then
-  make CC='icc' CFLAGS='-O3 -wd1418,869,981' LD='icc' CXX='icc'
+  make CC='ccache icc' CFLAGS='-O3 -wd1418,869,981' LD='icc' CXX='icc'
 else
   if test $do64 -eq 1
   then

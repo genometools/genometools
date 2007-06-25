@@ -120,7 +120,7 @@ static void updatekmercount(void *processinfo,
 
         cp.code = code;
         cp.maxprefixlen = firstspecial->specialpos;
-        CHECKIFFITS32BITS(position + (Uint64) firstspecial->specialpos);
+        CHECKUint64Cast(position + (Uint64) firstspecial->specialpos);
         cp.position = (Uint) (position + firstspecial->specialpos);
         csf->spaceCodeatposition[csf->nextfreeCodeatposition++] = cp;
         csf->storespecials = false;
@@ -161,7 +161,7 @@ static void insertwithoutspecial(void *processinfo,
       printf("insert suffix %lu at location %lu\n",(Showuint) position,
                                                    (Showuint) stidx);
 #endif
-      CHECKIFFITS32BITS(position);
+      CHECKUint64Cast(position);
       csf->suftabptr[stidx] = (Uint) position;
     }
   }
@@ -297,7 +297,7 @@ static int insertfullspecialpair(void *info,
 {
   InsertCompletespecials *ics = (InsertCompletespecials *) info;
 
-  CHECKIFFITS32BITS(pair->uint1);
+  CHECKUint64Cast(pair->uint1);
   if(insertfullspecialrange(ics,(Uint) pair->uint0,(Uint) pair->uint1) != 0)
   {
     return -1;
@@ -327,7 +327,7 @@ static int insertallfullspecials(
   {
     return -1;
   }
-  CHECKIFFITS32BITS(totallength+1);
+  CHECKUint64Cast(totallength+1);
   if(insertfullspecialrange(&ics,(Uint) totallength,
                             (Uint) (totallength+1)) != 0)
   {
@@ -365,7 +365,7 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
   bool haserr = false;
 
   env_error_check(env);
-  CHECKIFFITS32BITS(totallength);
+  CHECKUint64Cast(totallength);
   ALLOCASSIGNSPACE(csf.spaceCodeatposition,NULL,
                    Codeatposition,specialranges+1);
   csf.nextfreeCodeatposition = 0;
@@ -466,7 +466,7 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
                      prefixlength,
                      env);
       deliverthetime(stdout,mtime,"sorting the buckets",env);
-      CHECKIFFITS32BITS(totallength); 
+      CHECKUint64Cast(totallength); 
       sortallbuckets(csf.suftabptr,
                      encseq,
                      csf.leftborder,

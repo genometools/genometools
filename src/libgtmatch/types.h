@@ -51,7 +51,17 @@ typedef signed long ScanUint64;       /* \Typedef{Scaninteger} */
 typedef unsigned long Uint64;         /* \Typedef{Uint64} */
 #define FormatUint64     "%lu"
 #define FormatScanUint64 "%ld"
-#define CHECKIFFITS32BITS(VAL)        /* Nothing */
+#define CHECKUint64Cast(VAL)        /* Nothing */
+
+#define CHECKUintCast(VAL)\
+        if ((VAL) > ~UintConst(0))\
+        {\
+          /*@ignore@*/\
+          fprintf(stderr,"%s, %d: %lu cannot be stored in unsigned int",\
+                         __FILE__,__LINE__,(Showuint) (VAL));\
+          /*@end@*/\
+          exit(EXIT_FAILURE);\
+        }
 
 #else
 
@@ -64,7 +74,8 @@ typedef unsigned long long Uint64;   /* \Typedef{Uint64} */
 #define FormatScanUint64 "%lld"
 #define MAXUintValue  UINT_MAX       /* only possible in 32 bit mode */
 
-#define CHECKIFFITS32BITS(VAL)\
+#define CHECKUintCast(VAL)           /* Nothing */
+#define CHECKUint64Cast(VAL)\
         if ((VAL) > (Uint64) MAXUintValue)\
         {\
           /*@ignore@*/\

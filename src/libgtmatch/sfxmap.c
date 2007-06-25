@@ -121,6 +121,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   int retval;
   bool found, haserr = false;
   ArrayReadintkeys rik;
+  Uint prefixlength;
 
   env_error_check(env);
   INITARRAY(&rik,Readintkeys);
@@ -142,7 +143,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   setreadintkeys(&rik,"numofquerysequences",
                          NULL,env);
   setreadintkeys(&rik,"prefixlength",
-                         &suffixarray->prefixlength,env);
+                         &prefixlength,env);
   setreadintkeys(&rik,"integersize",
                          &integersize,env);
   setreadintkeys(&rik,"littleendian",
@@ -252,6 +253,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   {
     haserr = true;
   }
+  CHECKUintCast(prefixlength);
+  suffixarray->prefixlength = (unsigned int) prefixlength;
   if (!haserr && integersize != UintConst(32) && integersize != UintConst(64))
   {
     env_error_set(env,"%s contains illegal line defining the integer size",

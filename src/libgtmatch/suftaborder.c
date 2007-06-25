@@ -159,7 +159,7 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
   Uint maxlcp;
   int cmp;
 
-  CHECKIFFITS32BITS(totallength);
+  CHECKUint64Cast(totallength);
   for (ptr = suftab + left; ptr < suftab + right; ptr++)
   {
     cmp = comparetwoprefixes(encseq,
@@ -214,7 +214,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
   int cmp;
 
   assert(!specialsareequal || specialsareequalatdepth0);
-  CHECKIFFITS32BITS(totallength+1);
+  CHECKUint64Cast(totallength+1);
   INITBITTAB(startposoccurs,(Uint) (totallength+1));
   for (ptr = suftab; ptr <= suftab + totallength; ptr++)
   {

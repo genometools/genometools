@@ -16,7 +16,7 @@ typedef struct
   Uint numofdbsequences;
   StrArray *filenametab;
   PairUint *filelengthtab;
-  Uint prefixlength;
+  unsigned int prefixlength;
   const Uint *suftab;
   Encodedsequence *encseq;
   Specialcharinfo specialcharinfo;

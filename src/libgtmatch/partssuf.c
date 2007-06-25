@@ -89,7 +89,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
     Uint64 sumofwidth = 0;
     ALLOCASSIGNSPACE(suftabparts->components,NULL,Suftabpartcomponent,
                      numofparts);
-    CHECKIFFITS32BITS(numofsuffixestoinsert/(Uint64) numofparts);
+    CHECKUint64Cast(numofsuffixestoinsert/(Uint64) numofparts);
     widthofsuftabpart = (Uint) (numofsuffixestoinsert/(Uint64) numofparts);
     remainder = (Uint) (numofsuffixestoinsert % (Uint64) numofparts);
     suftabparts->largestwidth = 0;

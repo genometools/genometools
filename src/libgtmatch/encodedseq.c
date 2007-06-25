@@ -290,7 +290,7 @@ static Uint detsizeoffourcharsinonebyte(Uint64 totallength)
     return UintConst(1);
   }
   fourcharssize = (Uint64) 1 + DIV4(totallength - 1);
-  CHECKIFFITS32BITS(fourcharssize);
+  CHECKUint64Cast(fourcharssize);
   return (Uint) fourcharssize;
 }
 
