@@ -39,7 +39,7 @@ int gt_mutate(int argc, const char **argv, Env *env)
   Bioseq *bioseq;
   unsigned long i;
   Seq *mutated_seq;
-  int parsed_args, has_err = 0;
+  int parsed_args, had_err = 0;
   env_error_check(env);
 
   /* option parsing */
@@ -50,11 +50,11 @@ int gt_mutate(int argc, const char **argv, Env *env)
   }
   assert(parsed_args < argc);
 
-  while (!has_err && parsed_args < argc) {
+  while (!had_err && parsed_args < argc) {
     bioseq = bioseq_new(argv[parsed_args], env);
     if (!bioseq)
-      has_err = -1;
-    if (!has_err) {
+      had_err = -1;
+    if (!had_err) {
       for (i = 0; i < bioseq_number_of_sequences(bioseq); i++) {
         mutated_seq = mutate(bioseq_get_description(bioseq, i),
                              bioseq_get_sequence(bioseq, i),
@@ -70,5 +70,5 @@ int gt_mutate(int argc, const char **argv, Env *env)
     parsed_args++;
   }
 
-  return has_err;
+  return had_err;
 }

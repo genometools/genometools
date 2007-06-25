@@ -58,14 +58,14 @@ static int png_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   PNGStream *png_stream;
   GenomeNode *gn_ref;
   Range gn_range;
-  int has_err;
+  int had_err;
 
   env_error_check(env);
 
   png_stream = png_stream_cast(gs);
-  has_err = genome_stream_next_tree(png_stream->in_stream, gn, env);
+  had_err = genome_stream_next_tree(png_stream->in_stream, gn, env);
 
-  if (!has_err && *gn) {
+  if (!had_err && *gn) {
     /* take the first one, if a seqid hasn't been defined already */
     if (!str_length(png_stream->seqid)) {
       str_delete(png_stream->seqid, env);
@@ -101,9 +101,9 @@ static int png_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
         }
         png_stream->last_range_is_defined = false;
       }
-      has_err = determine_number_of_tracks(gn_ref,
+      had_err = determine_number_of_tracks(gn_ref,
                                            &png_stream->current_depth, env);
-      if (!has_err) {
+      if (!had_err) {
         if (png_stream->current_depth > png_stream->number_of_tracks)
           png_stream->number_of_tracks = png_stream->current_depth;
 
@@ -126,7 +126,7 @@ static int png_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 
   assert(png_stream->number_of_tracks >= png_stream->current_depth);
 
-  return has_err;
+  return had_err;
 }
 
 static void png_stream_free(GenomeStream *gs, Env *env)

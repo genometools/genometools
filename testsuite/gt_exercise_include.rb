@@ -159,6 +159,27 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_msaparse_test_2.sop"
 end
 
+Name "gt exercise msmatch test 1"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise msmatch `cat #{$testdata}test_1_multiset.txt` `cat #{$testdata}test_1_text.txt`"
+  run "diff #{$last_stdout} #{$testdata}test_1_result.txt"
+end
+
+Name "gt exercise msmatch test 2"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise msmatch `cat #{$testdata}test_2_multiset.txt` `cat #{$testdata}test_2_text.txt`"
+  run "diff #{$last_stdout} #{$testdata}test_2_result.txt"
+end
+
+Name "gt exercise msmatch test 3"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise msmatch `cat #{$testdata}test_3_multiset.txt` `cat #{$testdata}test_3_text.txt`"
+  run "diff #{$last_stdout} #{$testdata}test_3_result.txt"
+end
+
 Name "gt exercise scorematrix test BLOSUM62"
 Keywords "gt_exercise"
 Test do

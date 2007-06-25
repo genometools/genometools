@@ -44,7 +44,7 @@ static OPrval parse_options(int *parsed_args, MSAparse_arguments *arguments,
 int gt_msaparse(int argc, const char **argv, Env *env)
 {
   MSAparse_arguments arguments;
-  int parsed_args, has_err = 0;
+  int parsed_args, had_err = 0;
   MSA *msa = NULL;
   env_error_check(env);
 
@@ -59,17 +59,17 @@ int gt_msaparse(int argc, const char **argv, Env *env)
   assert(parsed_args < argc);
   if (!file_exists(argv[parsed_args])) {
     env_error_set(env, "MSA_file '%s' does not exist", argv[parsed_args]);
-    has_err = -1;
+    had_err = -1;
   }
 
-  if (!has_err) {
+  if (!had_err) {
     /* multiple sequence alignment construction */
     msa = msa_new(argv[parsed_args], env);
     if (!msa)
-      has_err = -1;
+      had_err = -1;
   }
 
-  if (!has_err) {
+  if (!had_err) {
     /* output */
     if (arguments.show)
       msa_show(msa);
@@ -84,5 +84,5 @@ int gt_msaparse(int argc, const char **argv, Env *env)
   /* free */
   msa_delete(msa, env);
 
-  return has_err;
+  return had_err;
 }

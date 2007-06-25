@@ -34,7 +34,7 @@ int gt_swalign(int argc, const char **argv, Env *env)
   ScoreFunction *scorefunction = NULL;
   ScoreMatrix *scorematrix;
   unsigned long i, j;
-  int parsed_args, indelscore, has_err = 0;
+  int parsed_args, indelscore, had_err = 0;
   Alignment *a;
   env_error_check(env);
 
@@ -53,14 +53,14 @@ int gt_swalign(int argc, const char **argv, Env *env)
     scorefunction = scorefunction_new(scorematrix, indelscore, indelscore, env);
     bioseq_1 = bioseq_new(argv[parsed_args+1], env);
     if (!bioseq_1)
-      has_err = -1;
-    if (!has_err) {
+      had_err = -1;
+    if (!had_err) {
       bioseq_2 = bioseq_new(argv[parsed_args+2], env);
       if (!bioseq_2)
-        has_err = -1;
+        had_err = -1;
     }
 
-    if (!has_err) {
+    if (!had_err) {
       /* aligning all sequence combinations */
       for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
         for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
@@ -81,5 +81,5 @@ int gt_swalign(int argc, const char **argv, Env *env)
   bioseq_delete(bioseq_1, env);
   scorefunction_delete(scorefunction, env);
 
-  return has_err;
+  return had_err;
 }

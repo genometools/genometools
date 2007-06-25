@@ -287,11 +287,11 @@ static int check_mmap_leak(void *key, void *value, void *data, Env *env)
 int fa_check_fptr_leak(FA *fa, Env *env)
 {
   CheckLeakInfo info;
-  int has_err;
+  int had_err;
   assert(fa);
   info.has_leak = false;
-  has_err = hashtable_foreach(fa->file_pointer, check_fptr_leak, &info, env);
-  assert(!has_err); /* cannot happen, check_fptr_leak() is sane */
+  had_err = hashtable_foreach(fa->file_pointer, check_fptr_leak, &info, env);
+  assert(!had_err); /* cannot happen, check_fptr_leak() is sane */
   if (info.has_leak)
     return -1;
   return 0;
@@ -300,11 +300,11 @@ int fa_check_fptr_leak(FA *fa, Env *env)
 int fa_check_mmap_leak(FA *fa, Env *env)
 {
   CheckLeakInfo info;
-  int has_err;
+  int had_err;
   assert(fa);
   info.has_leak = false;
-  has_err = hashtable_foreach(fa->memory_maps, check_mmap_leak, &info, env);
-  assert(!has_err); /* cannot happen, check_mmap_leak() is sane */
+  had_err = hashtable_foreach(fa->memory_maps, check_mmap_leak, &info, env);
+  assert(!had_err); /* cannot happen, check_mmap_leak() is sane */
   if (info.has_leak)
     return -1;
   return 0;

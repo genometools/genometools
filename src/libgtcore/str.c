@@ -243,76 +243,76 @@ int str_unit_test(Env *env)
 {
   Str *s, *s1, *s2;
   static char cstring_1[] = "test_string"; /* l=11 */
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
 
   /* the empty string */
   s1 = str_new(env);
-  ensure(has_err, str_length(s1) == 0);
+  ensure(had_err, str_length(s1) == 0);
   str_delete(s1, env);
 
   /* string testing */
   s1 = str_new(env);
   str_set(s1, cstring_1, env);
-  ensure(has_err, str_length(s1) == 11);
-  ensure(has_err, strcmp(str_get(s1), cstring_1) == 0);
+  ensure(had_err, str_length(s1) == 11);
+  ensure(had_err, strcmp(str_get(s1), cstring_1) == 0);
   str_delete(s1, env);
 
   s1 = str_new_cstr(cstring_1, env);
-  ensure(has_err, str_length(s1) == 11);
+  ensure(had_err, str_length(s1) == 11);
   str_delete(s1, env);
 
   s1 = str_new(env);
   s2 = str_new_cstr("foo", env);
-  ensure(has_err, str_length(s2) == 3);
+  ensure(had_err, str_length(s2) == 3);
   str_append_str(s1, s2, env);
-  ensure(has_err, str_length(s1) == 3);
+  ensure(had_err, str_length(s1) == 3);
   str_append_cstr(s1, "bar", env);
-  ensure(has_err, str_length(s1) == 6);
+  ensure(had_err, str_length(s1) == 6);
   str_append_char(s1, 'b', env);
   str_append_char(s1, 'a', env);
   str_append_char(s1, 'z', env);
-  ensure(has_err, str_length(s1) == 9);
-  ensure(has_err, strcmp("foobarbaz", str_get(s1)) == 0);
-  ensure(has_err, strcmp("foo", str_get(s2)) == 0);
+  ensure(had_err, str_length(s1) == 9);
+  ensure(had_err, strcmp("foobarbaz", str_get(s1)) == 0);
+  ensure(had_err, strcmp("foo", str_get(s2)) == 0);
   str_append_ulong(s1, 1984, env);
-  ensure(has_err, strcmp("foobarbaz1984", str_get(s1)) == 0);
+  ensure(had_err, strcmp("foobarbaz1984", str_get(s1)) == 0);
   str_delete(s1, env);
   str_delete(s2, env);
 
   /* testing str_append_ulong() and str_set_length() */
   s = str_new(env);
   str_append_ulong(s, 0, env);
-  ensure(has_err, strcmp("0", str_get(s)) == 0);
+  ensure(had_err, strcmp("0", str_get(s)) == 0);
   str_reset(s);
-  ensure(has_err, strcmp("", str_get(s)) == 0);
+  ensure(had_err, strcmp("", str_get(s)) == 0);
   str_append_ulong(s, 6, env);
-  ensure(has_err, strcmp("6", str_get(s)) == 0);
+  ensure(had_err, strcmp("6", str_get(s)) == 0);
   str_append_ulong(s, 16, env);
-  ensure(has_err, strcmp("616", str_get(s)) == 0);
+  ensure(had_err, strcmp("616", str_get(s)) == 0);
   str_delete(s, env);
 
   /* make sure that str_get never returns NULL */
   s = str_new(env);
-  ensure(has_err, str_get(s));
-  ensure(has_err, str_length(s) == 0);
-  ensure(has_err, strlen(str_get(s)) == 0);
+  ensure(had_err, str_get(s));
+  ensure(had_err, str_length(s) == 0);
+  ensure(had_err, strlen(str_get(s)) == 0);
   str_delete(s, env);
 
   s = str_new_cstr(NULL, env);
-  ensure(has_err, str_get(s));
-  ensure(has_err, str_length(s) == 0);
-  ensure(has_err, strlen(str_get(s)) == 0);
+  ensure(had_err, str_get(s));
+  ensure(had_err, str_length(s) == 0);
+  ensure(had_err, strlen(str_get(s)) == 0);
   str_delete(s, env);
 
   /* test str_new(env) followed by str_append_cstr_nt() */
   s = str_new(env);
   str_append_cstr_nt(s, "foo", 3, env);
-  ensure(has_err, strcmp("foo", str_get(s)) == 0);
-  ensure(has_err, str_length(s) == 3);
+  ensure(had_err, strcmp("foo", str_get(s)) == 0);
+  ensure(had_err, str_length(s) == 3);
   str_delete(s, env);
 
-  return has_err;
+  return had_err;
 }
 
 void str_delete(Str *s, Env *env)

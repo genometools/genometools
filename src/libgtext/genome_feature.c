@@ -163,11 +163,11 @@ static int save_exon(GenomeNode *gn, void *data, Env *env)
 
 void genome_feature_get_exons(GenomeFeature *gf, Array *exon_features, Env *env)
 {
-  int has_err;
+  int had_err;
   assert(gf && exon_features && !array_size(exon_features));
-  has_err = genome_node_traverse_children((GenomeNode*) gf, exon_features,
+  had_err = genome_node_traverse_children((GenomeNode*) gf, exon_features,
                                           save_exon, false, env);
-  assert(!has_err); /* cannot happen, because save_exon() is sane */
+  assert(!had_err); /* cannot happen, because save_exon() is sane */
 }
 
 static int save_exons_and_cds(GenomeNode *gn, void *data, Env *env)
@@ -210,16 +210,16 @@ static void set_transcript_types(Array *features)
 static int determine_transcripttypes(GenomeNode *gn, void *data, Env *env)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
-  int has_err;
+  int had_err;
   env_error_check(env);
   assert(gn && info);
   /* reset exon_features and cds_features */
   array_reset(info->exon_features);
   array_reset(info->cds_features);
   /* collect all direct children exons */
-  has_err = genome_node_traverse_direct_children(gn, info, save_exons_and_cds,
+  had_err = genome_node_traverse_direct_children(gn, info, save_exons_and_cds,
                                                  env);
-  assert(!has_err); /* cannot happen, because save_exon() is sane */
+  assert(!had_err); /* cannot happen, because save_exon() is sane */
   /* set transcript feature type, if necessary */
   set_transcript_types(info->exon_features);
   set_transcript_types(info->cds_features);
@@ -229,14 +229,14 @@ static int determine_transcripttypes(GenomeNode *gn, void *data, Env *env)
 void genome_feature_determine_transcripttypes(GenomeFeature *gf, Env *env)
 {
   SaveExonAndCDSInfo info;
-  int has_err;
+  int had_err;
   assert(gf);
   info.exon_features = array_new(sizeof (GenomeFeature*), env);
   info.cds_features = array_new(sizeof (GenomeFeature*), env);
-  has_err = genome_node_traverse_children((GenomeNode*) gf, &info,
+  had_err = genome_node_traverse_children((GenomeNode*) gf, &info,
                                           determine_transcripttypes, false,
                                           env);
-  assert(!has_err); /* cannot happen, because determine_transcripttypes() is
+  assert(!had_err); /* cannot happen, because determine_transcripttypes() is
                        sane */
   array_delete(info.exon_features, env);
   array_delete(info.cds_features, env);
@@ -266,27 +266,22 @@ void genome_feature_add_attribute(GenomeFeature *gf, const char *attr_name,
 {
   assert(gf && attr_name && attr_value);
   if (!gf->attributes)
-    gf->attributes = hashtable_new(HASH_DIRECT, env_ma_free_func,
+    gf->attributes = hashtable_new(HASH_STRING, env_ma_free_func,
                                    env_ma_free_func, env);
   hashtable_add(gf->attributes, cstr_dup(attr_name, env),
                 cstr_dup(attr_value, env), env);
-}
-
-bool genome_feature_has_attribute(const GenomeFeature *gf)
-{
-  assert(gf);
-  if (gf->attributes)
-    return true;
-  return false;
 }
 
 int genome_feature_foreach_attribute(GenomeFeature *gf,
                                      AttributeIterFunc iterfunc, void *data,
                                      Env *env)
 {
+  int had_err = 0;
   env_error_check(env);
   assert(gf && iterfunc);
-  assert(genome_feature_has_attribute(gf));
-  return hashtable_foreach(gf->attributes, (Hashiteratorfunc) iterfunc, data,
-                           env);
+  if (gf->attributes) {
+    had_err = hashtable_foreach_ao(gf->attributes, (Hashiteratorfunc) iterfunc,
+                                   data, env);
+  }
+  return had_err;
 }

@@ -28,59 +28,59 @@ static void grep_error(int errcode, regex_t *matcher, Env *env)
 int grep(bool *match, const char *pattern, const char *line, Env *env)
 {
   regex_t matcher;
-  int rval, has_err = 0;
+  int rval, had_err = 0;
   env_error_check(env);
   assert(pattern && line);
   if ((rval = regcomp(&matcher, pattern, REG_EXTENDED | REG_NOSUB))) {
     grep_error(rval, &matcher, env);
-    has_err = -1;
+    had_err = -1;
   }
-  if (!has_err) {
+  if (!had_err) {
     rval = regexec(&matcher, line, 0, NULL, 0);
     if (rval && rval != REG_NOMATCH) {
       grep_error(rval, &matcher, env);
-      has_err = -1;
+      had_err = -1;
     }
   }
   regfree(&matcher);
-  if (!has_err) {
+  if (!had_err) {
     if (rval)
       *match = false;
     else
       *match = true;
   }
-  return has_err;
+  return had_err;
 }
 
 int grep_unit_test(Env *env)
 {
   bool match;
-  int grep_err, has_err = 0;
+  int grep_err, had_err = 0;
   env_error_check(env);
 
   grep_err = grep(&match, "a", "a", NULL);
-  ensure(has_err, !grep_err);
-  ensure(has_err, match);
+  ensure(had_err, !grep_err);
+  ensure(had_err, match);
 
   grep_err = grep(&match, "b", "a", NULL);
-  ensure(has_err, !grep_err);
-  ensure(has_err, !match);
+  ensure(had_err, !grep_err);
+  ensure(had_err, !match);
 
   grep_err =  grep(&match, "aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA", NULL);
-  ensure(has_err, !grep_err);
-  ensure(has_err, match);
+  ensure(had_err, !grep_err);
+  ensure(had_err, match);
 
   grep_err = grep(&match, "aba", "wenbapzbpqSayhzzaBaZZqyghaAAahhaA", NULL);
-  ensure(has_err, !grep_err);
-  ensure(has_err, !match);
+  ensure(had_err, !grep_err);
+  ensure(had_err, !match);
 
   grep_err = grep(&match, "^aba", "abawenbapzbpqSayhzzZZqyghaAAahhaA", NULL);
-  ensure(has_err, !grep_err);
-  ensure(has_err, match);
+  ensure(had_err, !grep_err);
+  ensure(had_err, match);
 
   grep_err = grep(&match, "^aba", "wenbapzbpqSayhzzabaZZqyghaAAahhaA", NULL);
-  ensure(has_err, !grep_err);
-  ensure(has_err, !match);
+  ensure(had_err, !grep_err);
+  ensure(had_err, !match);
 
-  return has_err;
+  return had_err;
 }

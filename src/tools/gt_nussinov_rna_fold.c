@@ -7,12 +7,12 @@
 #include "gt.h"
 
 #define SCAN_ALPHA_VALUE(NUM, CHAR_1, CHAR_2)                                  \
-        if (!has_err && (sscanf(argv[NUM], "%d", &rval) != 1 || rval > 0)) {   \
+        if (!had_err && (sscanf(argv[NUM], "%d", &rval) != 1 || rval > 0)) {   \
           env_error_set(env, "argument for alpha(%c,%c) must be non-positive " \
                          "integer", CHAR_1, CHAR_2);                           \
-          has_err = -1;                                                        \
+          had_err = -1;                                                        \
         }                                                                      \
-        if (!has_err) {                                                        \
+        if (!had_err) {                                                        \
           scorematrix_set_score(energy_function, alpha_encode(dna_alpha,       \
                                 CHAR_1), alpha_encode(dna_alpha, CHAR_2),      \
                                 rval);                                         \
@@ -188,7 +188,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, Env *env)
   unsigned long i, j, rna_length;
   unsigned int l_min;
   char *rna_sequence = NULL;
-  int parsed_args, rval, has_err = 0;
+  int parsed_args, rval, had_err = 0;
   Alpha *dna_alpha;
   ScoreMatrix *energy_function; /* alpha */
   env_error_check(env);
@@ -215,7 +215,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, Env *env)
   /* save l_min value */
   if (sscanf(argv[1], "%d", &rval) != 1 || rval <= 0) {
     env_error_set(env, "argument for l_min must be positive integer");
-    has_err = -1;
+    had_err = -1;
   }
   else
     l_min = (unsigned int) rval;
@@ -225,7 +225,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, Env *env)
   SCAN_ALPHA_VALUE(3, 'A', 'U');
   SCAN_ALPHA_VALUE(4, 'G', 'U');
 
-  if (!has_err) {
+  if (!had_err) {
     /* save RNA sequence */
     rna_length = strlen(argv[5]);
     rna_sequence = cstr_dup(argv[5], env);
@@ -241,5 +241,5 @@ int gt_nussinov_rna_fold(int argc, const char **argv, Env *env)
   scorematrix_delete(energy_function, env);
   alpha_delete(dna_alpha, env);
 
-  return has_err;
+  return had_err;
 }

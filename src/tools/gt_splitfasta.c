@@ -42,7 +42,7 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
   Str *destfilename = NULL;
   unsigned long filenum = 0, bytecount = 0, max_filesize_in_bytes,
                 max_filesize_in_MB, separator_pos;
-  int read_bytes, parsed_args, has_err = 0;
+  int read_bytes, parsed_args, had_err = 0;
   char buf[BUFSIZ];
 
   /* option parsing */
@@ -62,17 +62,17 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
   /* read start characters */
   if ((read_bytes = genfile_xread(srcfp, buf, BUFSIZ)) == 0) {
     env_error_set(env, "file \"%s\" is empty", argv[parsed_args]);
-    has_err = -1;
+    had_err = -1;
   }
   bytecount += read_bytes;
 
   /* make sure the file is in fasta format */
-  if (!has_err && buf[0] != '>') {
+  if (!had_err && buf[0] != '>') {
     env_error_set(env, "file is not in FASTA format");
-    has_err = -1;
+    had_err = -1;
   }
 
-  if (!has_err) {
+  if (!had_err) {
     /* open destination file */
     destfilename = str_new(env);
     str_append_cstr_nt(destfilename, argv[parsed_args],
@@ -117,5 +117,5 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
   /* close source file */
   genfile_xclose(srcfp, env);
 
-  return has_err;
+  return had_err;
 }
