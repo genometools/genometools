@@ -78,6 +78,10 @@ ifeq ($(assert),no)
   GT_CXXFLAGS += -DNDEBUG
 endif
 
+ifeq ($(static),yes)
+  LDFLAGS += -static
+endif
+
 # set prefix for install target
 prefix ?= /usr/local
 
