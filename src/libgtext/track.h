@@ -17,8 +17,8 @@ typedef struct Track Track;
 
 Track* track_new(Str* title,
                  Env* env);
-void track_insert_element(Track* track, 
-                          GenomeNode* gn, 
+void track_insert_element(Track* track,
+                          GenomeNode* gn,
 			  Config* cfg,
 			  GenomeNode* parent,
 			  Env* env);

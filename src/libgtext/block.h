@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>   
+   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
    Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
    See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -16,9 +16,9 @@
 typedef struct Block Block;
 
 Block* block_new(Env* env);
-void block_insert_element(Block* block, 
-                          GenomeNode* gn, 
-			  Config* cfg, 
+void block_insert_element(Block* block,
+                          GenomeNode* gn,
+			  Config* cfg,
 			  Env* env);
 Range block_get_range(Block* block);
 void block_set_range(Block* block,

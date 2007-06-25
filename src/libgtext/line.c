@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>   
+   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
    Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
    See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -57,10 +57,10 @@ bool line_is_occupied(Line *line, Range r)
    int i;
    Range r1;
 
-   for(i=0; i<array_size(line->blocks); i++)
+   for (i=0; i<array_size(line->blocks); i++)
    {
      r1 = block_get_range(*(Block**)  array_get(line->blocks, i));
-     if(range_overlap(r1, r))
+     if (range_overlap(r1, r))
      {
        return true;
      }
@@ -89,9 +89,9 @@ void line_delete(Line *line,
 {
   int i;
 
-  if(!line) return;
+  if (!line) return;
 
-  for(i=0; i<array_size(line->blocks); i++)
+  for (i=0; i<array_size(line->blocks); i++)
   {
     block_delete(*(Block**) array_get(line->blocks, i), env);
   }
@@ -109,7 +109,7 @@ void print_line(Line* line)
   assert(line);
   int i;
 
-  for(i=0; i<array_size(line->blocks); i++)
+  for (i=0; i<array_size(line->blocks); i++)
   {
     printf("(");
     print_block(*(Block**) array_get(line->blocks, i));
@@ -135,7 +135,7 @@ int line_unit_test(Env* env)
 
   r_parent.start = 10;
   r_parent.end = 80;
-  
+
   r1.start = 10;
   r1.end = 50;
 
@@ -176,9 +176,9 @@ int line_unit_test(Env* env)
   genome_feature_add_attribute((GenomeFeature*) gn2, "Name", bar, env);
   genome_feature_add_attribute((GenomeFeature*) gn3, "Name", blub, env);
   genome_feature_add_attribute((GenomeFeature*) gn4, "Name", bar, env);
-  
+
   /* last_parent = NULL;			     */
-  
+
   Block* b1 = block_new(env);
   Block* b2 = block_new(env);
 
@@ -186,7 +186,7 @@ int line_unit_test(Env* env)
   block_insert_element(b2, gn2, cfg, env);
   block_set_range(b1, r1);
   block_set_range(b2, r2);
-  
+
   /* test line_insert_block */
   ensure(has_err,  (0 == array_size(line_get_blocks(l1))));
   line_insert_block(l1, b1, env);

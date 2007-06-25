@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>   
+   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
    Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
    See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -78,30 +78,30 @@ void block_insert_element(Block *block,
   gn_r = genome_node_get_range(gn);
   gn_type = genome_feature_get_type((GenomeFeature*) gn);
 
-  for(elem = dlist_first(block->elements); elem != NULL;
+  for (elem = dlist_first(block->elements); elem != NULL;
       elem = dlistelem_next(elem))
   {
     element = (Element*) dlistelem_get_data(elem);
     elem_r = element_get_range(element);
 
-    if(range_overlap(elem_r, gn_r))
+    if (range_overlap(elem_r, gn_r))
     {
       count += 1;
       e_type = element_get_type(element);
 
       dominates = config_dominates(cfg, e_type, gn_type, env);
-      if(dominates == DOMINATES_EQUAL
+      if (dominates == DOMINATES_EQUAL
          || dominates == DOMINATES_NOT_SPECIFIED
 	 || dominates == DOMINATES_UNKNOWN_TYPE)
       {
         dominates = DOMINATES_SECOND;
       }
-    
+
       /* Fall:    -------------------
                   ---------- */
-      if(gn_r.start == elem_r.start && gn_r.end < elem_r.end)
+      if (gn_r.start == elem_r.start && gn_r.end < elem_r.end)
       {
-        switch(dominates)
+        switch (dominates)
         {
           case DOMINATES_FIRST:
 	    break;
@@ -116,16 +116,16 @@ void block_insert_element(Block *block,
 
       /* Fall:  --------------
                    -----------  */
-      else if(gn_r.start >= elem_r.start && gn_r.end == elem_r.end)
+      else if (gn_r.start >= elem_r.start && gn_r.end == elem_r.end)
       {
-        switch(dominates)
+        switch (dominates)
 	{
           case DOMINATES_FIRST:
 	    gn_r.start = elem_r.end;
 	    break;
 	  case DOMINATES_SECOND:
 	    elem_r.end = gn_r.start-1;
-	    if(elem_r.start == elem_r.end+1)
+	    if (elem_r.start == elem_r.end+1)
 	    {
               dlist_remove(block->elements, elem, env);
 	      element_delete(element, env);
@@ -140,20 +140,20 @@ void block_insert_element(Block *block,
 	    break;
 	}
       }
-      
+
       /* Fall: ----------
                -------------- */
-      else if(elem_r.start <= gn_r.start && elem_r.end < gn_r.end)
+      else if (elem_r.start <= gn_r.start && elem_r.end < gn_r.end)
       {
         bool removed = false;
-        switch(dominates)
+        switch (dominates)
 	{
           case DOMINATES_FIRST:
             gn_r.start = elem_r.end+1;
 	    break;
 	  case DOMINATES_SECOND:
             elem_r.end = gn_r.start-1;
-	    if(elem_r.start == elem_r.end+1)
+	    if (elem_r.start == elem_r.end+1)
 	    {
               dlist_remove(block->elements, elem, env);
 	      element_delete(element, env);
@@ -170,7 +170,7 @@ void block_insert_element(Block *block,
 	    element_set_type(e, gn_type);
 	    dlist_add(block->elements, e, env);
 	    gn_r.start = elem_r.end+1;
-	    if(removed)
+	    if (removed)
 	    {
               elem = dlist_find(block->elements, e);
 	    }
@@ -180,11 +180,11 @@ void block_insert_element(Block *block,
 
       /* Fall: -------------
                   ------      */
-      else if(elem_r.start < gn_r.start && gn_r.end < elem_r.end)
+      else if (elem_r.start < gn_r.start && gn_r.end < elem_r.end)
       {
         Range elemnew_r;
 
-        switch(dominates)
+        switch (dominates)
 	{
           case DOMINATES_FIRST:
 	    break;
@@ -203,10 +203,10 @@ void block_insert_element(Block *block,
 	}
       }
 
-    }  
+    }
 
   }
-  if(count == 0)
+  if (count == 0)
   {
     e = element_new(gn, cfg, env);
     dlist_add(block->elements, e, env);
@@ -219,7 +219,7 @@ Returns range of a Block object
 \return Pointer to Range object
 */
 Range block_get_range(Block *block)
-{  
+{
    assert(block);
 
    return block->range;
@@ -251,7 +251,7 @@ void block_set_caption(Block *block,
 
 /*!
 Gets caption of a Block object
-\param block Pointer to Block object 
+\param block Pointer to Block object
 \return caption Pointer to String object
 */
 const char* block_get_caption(Block *block)
@@ -275,13 +275,13 @@ void block_set_parent_caption(Block *block,
 
 /*!
 Gets parent_caption of a Block object
-\param block Pointer to Block object 
+\param block Pointer to Block object
 \return caption Pointer to String object
 */
 const char* block_get_parent_caption(Block *block)
 {
   assert(block);
-		       
+
   return block->parent_caption;
 }
 
@@ -301,7 +301,7 @@ void block_set_strand(Block *block,
 /*!
 Gets strand of a Block object
 \param block Pointer to Block object
-\return strand Strand 
+\return strand Strand
 */
 Strand block_get_strand(Block *block)
 {
@@ -355,9 +355,9 @@ void block_delete(Block *block,
 {
   Dlistelem *delem;
 
-  if(!block) return;
+  if (!block) return;
 
-  for(delem = dlist_first(block->elements); delem != NULL;
+  for (delem = dlist_first(block->elements); delem != NULL;
       delem = dlistelem_next(delem))
   {
     Element* elem = (Element*) dlistelem_get_data(delem);
@@ -377,7 +377,7 @@ void print_block(Block* block)
 
   Dlistelem *elem;
 
-  for(elem = dlist_first(block->elements); elem != NULL;
+  for (elem = dlist_first(block->elements); elem != NULL;
       elem = dlistelem_next(elem))
   {
     Element *element = (Element*) dlistelem_get_data(elem);
@@ -400,7 +400,7 @@ int block_unit_test(Env* env)
 
   Config *cfg;
   Str *luafile = str_new_cstr("config.lua",env);
-      
+
   cfg = config_new(env, false);
   config_load_file(cfg, luafile, env);
 
@@ -444,7 +444,7 @@ int block_unit_test(Env* env)
   ensure(has_err, (0 == range_compare(b_range, r_temp)));
   ensure(has_err, (1 == range_compare(r2, r_temp)));
 
-  /* tests block_set_caption 
+  /* tests block_set_caption
      & block_get_caption */
   block_set_caption(b, caption1);
   ensure(has_err, (0 == strcmp(block_get_caption(b), caption1)));
@@ -465,7 +465,7 @@ int block_unit_test(Env* env)
   block_delete(b, env);
   genome_node_delete(gn1, env);
   genome_node_delete(gn2, env);
-	      
+
   return has_err;
 }
 

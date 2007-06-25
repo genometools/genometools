@@ -102,7 +102,7 @@ static void insert_genome_node_into_track(GenomeNode* gn,
    */
   if (hashtable_get(d->tracks, feature_type) == NULL)
   {
-    track_type = str_new_cstr((char*) feature_type, env);
+    track_type = str_new(env);
     track = track_new(track_type, env);
     track_insert_element(track, gn, d->config, parent, env);
     hashtable_add(d->tracks, (char*) feature_type, track, env);
@@ -129,7 +129,7 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
 
   GenomeNodeChildren* genome_node_info;
   genome_node_info = (GenomeNodeChildren*) genome_node_children;
-  
+
   if (genome_node_has_children(gn))
   {
     GenomeNode *oldparent = genome_node_info->parent;

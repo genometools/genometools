@@ -34,7 +34,7 @@ struct Render
   Graphics *g;
   Range range;
   double y, margins, factor;
-  unsigned int width, height;
+  unsigned int width, height, cur_track;
 };
 
 /*!
@@ -58,16 +58,15 @@ unsigned int render_calculate_height(Render *r, Env *env)
                                                             "format",
                                                             "bar_vspace",
                                                             10,
-                                                            env));
+                                                            env)) + 15;
   /* get total height of all lines */
   height = lines * line_height;
-  /* add track spacers */
+  /* add track caption height and spacer */
   height += diagram_get_number_of_tracks(r->dia)
-              * (config_get_num(r->cfg, "format","track_vspace", 20, env));
-  /* add space for captions above each line */
-  height += lines * 10;
+              * ((config_get_num(r->cfg, "format","track_vspace", 20, env))+15);
   /* add header space and footer */
   height += 70 + 40;
+  printf("calculated height: %u\n", height);
   return height;
 }
 
@@ -102,7 +101,8 @@ void render_delete(Render *r, Env *env)
 
 double render_convert_point(Render *r, long pos)
 {
-  return (double) ((r->factor * MAX(0,(pos-(long) r->range.start))) + r->margins);
+  return (double) ((r->factor * MAX(0,(pos-(long) r->range.start)))
+                      + r->margins);
 }
 
 /*!
@@ -171,24 +171,24 @@ void render_line(Render *r, Line *line, Env *env)
     Range block_range = block_get_range(block);
     DrawingRange draw_range;
     const char* caption;
-    Strand strand = block_get_strand(block); 
+    Strand strand = block_get_strand(block);
 
     /* draw block caption */
     draw_range = render_convert_coords(r, block_range, env);
     caption = block_get_caption(block);
-    if (!caption) caption="<unnamed>";
+    if (!caption) caption = block_get_parent_caption(block);
+    if (!caption) caption = "";
     graphics_draw_text(r->g,
                        MAX(r->margins, draw_range.start),
-                       r->y-graphics_get_text_height(r->g)+3,
+                       r->y-6,
                        caption);
 
 		/* DEBUG */
-         graphics_draw_box(r->g,
+         graphics_draw_dashes(r->g,
                        draw_range.start,
                        r->y,
                        draw_range.end - draw_range.start,
                        config_get_num(r->cfg, "format", "bar_height", 15, env),
-                       config_get_color(r->cfg, "foo", env),
                        ARROW_NONE,
                        config_get_num(r->cfg, "format", "arrow_width", 6, env),
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
@@ -196,7 +196,8 @@ void render_line(Render *r, Line *line, Env *env)
 		/* DEBUG */
 
     /* draw elements in block */
-    for (delem = dlist_first(elems); delem != NULL; delem = dlistelem_next(delem))
+    for (delem = dlist_first(elems); delem != NULL;
+           delem = dlistelem_next(delem))
     {
       Element *elem = (Element*) dlistelem_get_data(delem);
       Range elem_range = element_get_range(elem);
@@ -204,12 +205,16 @@ void render_line(Render *r, Line *line, Env *env)
       double elem_start, elem_width, bar_height;
       Color grey;
       int arrow_status = ARROW_NONE;
-      if((strand == STRAND_REVERSE || strand == STRAND_BOTH) && delem == dlist_first(elems))
+      const char* type = genome_feature_type_get_cstr(element_get_type(elem));
+
+      if ((strand == STRAND_REVERSE || strand == STRAND_BOTH)
+             && delem == dlist_first(elems))
         arrow_status = ARROW_LEFT;
-      if((strand == STRAND_FORWARD || strand == STRAND_BOTH) && dlistelem_next(delem) == NULL)
+      if ((strand == STRAND_FORWARD || strand == STRAND_BOTH)
+             && dlistelem_next(delem) == NULL)
         arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
 
-      grey.red=grey.green=grey.blue=.8;
+      grey.red=grey.green=grey.blue=.85;
       bar_height = config_get_num(r->cfg, "format", "bar_height", 15, env);
 
       if (config_get_verbose(r->cfg))
@@ -229,7 +234,7 @@ void render_line(Render *r, Line *line, Env *env)
                arrow_status);
 
       /* draw each element according to style set in the config */
-      const char* type = genome_feature_type_get_cstr(element_get_type(elem));
+
       const char* style = config_get_cstr(r->cfg,
                                           "feature_styles",
                                           type,
@@ -311,8 +316,7 @@ void render_line(Render *r, Line *line, Env *env)
   /* do not add line spacing after the last line of a track */
   if (i!=array_size(blocks)-1)
     r->y += config_get_num(r->cfg, "format", "bar_height", 15, env) +
-               config_get_num(r->cfg, "format", "bar_vspace", 10, env) +
-               graphics_get_text_height(r->g);
+               config_get_num(r->cfg, "format", "bar_vspace", 10, env) + 15;
 }
 
 /*!
@@ -337,10 +341,10 @@ int render_track(void *key, void *value, void *data, Env *env)
   /* draw track title */
   graphics_draw_colored_text(r->g,
                              r->margins,
-                             r->y,
+                             r->y-6,
                              config_get_color(r->cfg, "track_title", env),
-                             (const char*) key);
-  r->y += graphics_get_text_height(r->g) + 10;
+                             str_get(track_get_title(track)));
+  r->y += 15;
 
   /* render each line */
   for (i=0; i<array_size(lines); i++)
@@ -348,8 +352,9 @@ int render_track(void *key, void *value, void *data, Env *env)
     render_line(r, *(Line**) array_get(lines, i), env);
   }
 
-  /* put track spacer after track */
-  r->y += config_get_num(r->cfg, "format", "track_vspace", 10, env);
+  /* put track spacer after track, except if at last track */
+  if (r->cur_track++ != diagram_get_number_of_tracks(r->dia))
+    r->y += config_get_num(r->cfg, "format", "track_vspace", 20, env);
   return 0;
 }
 
@@ -366,6 +371,9 @@ void format_ruler_label(char *txt, long pos)
     sprintf(txt, "%li", pos);
 }
 
+/*!
+Renders a ruler with dynamic scale labeling and optional grid.
+*/
 void render_ruler(Render *r, Env* env)
 {
   double step, minorstep, vmajor, vminor;
@@ -391,9 +399,16 @@ void render_ruler(Render *r, Env* env)
   for (tick = vmajor; tick <= r->range.end; tick += step)
   {
     if (tick < r->range.start) continue;
-    graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 30, rulercol, 10);
+    graphics_draw_vertical_line(r->g,
+                                render_convert_point(r, tick),
+                                30,
+                                rulercol,
+                                10);
     format_ruler_label(str, tick);
-    graphics_draw_text_centered(r->g, render_convert_point(r, tick), 20, str);
+    graphics_draw_text_centered(r->g,
+                                render_convert_point(r, tick),
+                                20,
+                                str);
   }
   /* draw minor ticks */
   if (minorstep >= 1)
@@ -401,11 +416,31 @@ void render_ruler(Render *r, Env* env)
     for (tick = vminor; tick <= r->range.end; tick += minorstep)
     {
       if (tick < r->range.start) continue;
-      if (strcmp(config_get_cstr(r->cfg, "format","show_grid", "no", env), "yes") == 0)
-        graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 40, gridcol, r->height);
-      graphics_draw_vertical_line(r->g, render_convert_point(r, tick), 35, rulercol, 5);
+      if (strcmp(config_get_cstr(r->cfg, "format","show_grid", "no", env),
+                 "yes") == 0)
+        graphics_draw_vertical_line(r->g,
+                                    render_convert_point(r, tick),
+                                    40,
+                                    gridcol,
+                                    r->height);
+      graphics_draw_vertical_line(r->g,
+                                  render_convert_point(r, tick),
+                                  35,
+                                  rulercol,
+                                  5);
     }
   }
+  /* draw ruler line */
+  graphics_draw_horizontal_line(r->g, r->margins, 40, r->width-2*r->margins);
+  /* put 3' and 5' captions at the ends */
+  graphics_draw_text_centered(r->g,
+                              r->margins-10,
+                              45-(graphics_get_text_height(r->g)/2),
+                              "5'");
+  graphics_draw_text_centered(r->g,
+                              r->width-r->margins+10,
+                              45-(graphics_get_text_height(r->g)/2),
+                              "3'");
 }
 
 void render_to_png(Render *r, char *fn, unsigned int width, Env *env)
@@ -432,8 +467,11 @@ void render_to_png(Render *r, char *fn, unsigned int width, Env *env)
   render_ruler(r, env);
 
   /* process (render) each track */
+  r->cur_track = 0;
   Hashtable *tracks = diagram_get_tracks(r->dia);
   hashtable_foreach(tracks, render_track, r, env);
+
+  printf("actual used height: %f\n", r->y);
 
   /* write out result file */
   graphics_save(r->g);

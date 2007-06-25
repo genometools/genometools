@@ -14,6 +14,7 @@
 struct Graphics {
   cairo_t *cr;
   cairo_surface_t *surf;
+  double margin_x, margin_y, height, width;
   const char* fn;
 };
 
@@ -105,6 +106,9 @@ Graphics* graphics_new_png(const char *fname, unsigned int width,
   g->fn = fname;
   g->cr = cairo_create(g->surf);
   assert(cairo_status(g->cr) == CAIRO_STATUS_SUCCESS);
+  g->width = width;
+  g->height = height;
+  g->margin_x = g->margin_y = 20;
   cairo_set_source_rgb(g->cr, 1, 1, 1);
   cairo_set_operator(g->cr, CAIRO_OPERATOR_SOURCE);
   cairo_paint(g->cr);
@@ -121,6 +125,9 @@ void graphics_draw_box(Graphics *g, double x, double y, double width,
   assert(g);
   /* save cairo context */
   cairo_save(g->cr);
+  cairo_rectangle(g->cr, g->margin_x, g->margin_y,
+                  g->width-2*g->margin_x, g->height-2*g->margin_y);
+	cairo_clip(g->cr);
   /* construct shape of the box or arrow */
   switch (arrow_status)
   {
@@ -165,12 +172,15 @@ void graphics_draw_box(Graphics *g, double x, double y, double width,
 void graphics_draw_dashes(Graphics *g, double x, double y, double width,
                           double height, int arrow_status,
                           double arrow_width, double stroke_width,
-			  Color stroke_color)
+			                    Color stroke_color)
 {
   const double dashes[] = {5.0};
   assert(g);
   /* save cairo context */
   cairo_save(g->cr);
+  cairo_rectangle(g->cr, g->margin_x, g->margin_y,
+                  g->width-2*g->margin_x, g->height-2*g->margin_y);
+	cairo_clip(g->cr);
   cairo_set_line_width(g->cr, stroke_width);
   cairo_set_source_rgb(g->cr, stroke_color.red,
                               stroke_color.green,
@@ -191,7 +201,7 @@ void graphics_draw_dashes(Graphics *g, double x, double y, double width,
         cairo_move_to(g->cr, width - arrow_width, y);
         cairo_line_to(g->cr, x + width, y + height / 2);
         cairo_line_to(g->cr, x + width - arrow_width, y + height);
-	/* draw arrowhead */
+	      /* draw arrowhead */
         cairo_stroke(g->cr);
         break;
     }
@@ -213,6 +223,9 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
   assert(g);
   /* save cairo context */
   cairo_save(g->cr);
+  cairo_rectangle(g->cr, g->margin_x, g->margin_y,
+                  g->width-2*g->margin_x, g->height-2*g->margin_y);
+	cairo_clip(g->cr);
   /* create caret path */
   switch (arrow_status)
   {
@@ -224,7 +237,7 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
         cairo_line_to(g->cr, x + (width/2), y);
         cairo_line_to(g->cr, x + width, y + (height/2));
         cairo_line_to(g->cr, x + width + arrow_width, y + (height/2));
-        /* draw arrowhead */
+        /* add arrowhead */
         cairo_move_to(g->cr, x + width, y);
         cairo_line_to(g->cr, x + width + arrow_width, y + height / 2);
         cairo_line_to(g->cr, x + width, y + height);
@@ -262,8 +275,6 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
 void graphics_draw_text_centered(Graphics *g, double x, double y,
                                  const char *text)
 {
-  cairo_save(g->cr);
-  cairo_reset_clip(g->cr);
   cairo_text_extents_t ext;
   assert(g && text);
   cairo_set_source_rgb(g->cr, 0, 0, 0);
@@ -272,13 +283,10 @@ void graphics_draw_text_centered(Graphics *g, double x, double y,
   /* draw text w/ its center at the given coords */
   cairo_move_to(g->cr, x-(ext.width/2)-1, y);
   cairo_show_text(g->cr, text);
-	cairo_restore(g->cr);
 }
 
 void graphics_draw_text_right(Graphics *g, double x, double y, const char *text)
 {
-  cairo_save(g->cr);
-  cairo_reset_clip(g->cr);
   cairo_text_extents_t ext;
   assert(g && text);
   cairo_set_source_rgb(g->cr, 0, 0, 0);
@@ -287,7 +295,6 @@ void graphics_draw_text_right(Graphics *g, double x, double y, const char *text)
   /* draw text w/ its right end at the given coords */
   cairo_move_to(g->cr, x-(ext.width)-1, y);
   cairo_show_text(g->cr, text);
-  cairo_restore(g->cr);
 }
 
 void graphics_draw_vertical_line(Graphics *g, double x, double y,
@@ -339,7 +346,7 @@ void graphics_draw_arrowhead(Graphics *g, double x, double y,
   assert(g);
   double arrow_height = 8, arrow_width = 5;
 
-   /* save cairo context */
+  /* save cairo context */
   cairo_save(g->cr);
   cairo_reset_clip(g->cr);
 	cairo_set_source_rgb(g->cr, color.red,
@@ -369,11 +376,11 @@ void graphics_draw_arrowhead(Graphics *g, double x, double y,
   cairo_restore(g->cr);
 }
 
-void graphics_set_margins(Graphics *g, double margin_x, double margin_y, double width, double height)
+void graphics_set_margins(Graphics *g, double margin_x, double margin_y,
+                          double width, double height)
 {
-  cairo_reset_clip(g->cr);
-  cairo_rectangle(g->cr, margin_x, margin_y, width-2*margin_x, height-2*margin_y);
-	cairo_clip(g->cr);
+  g->margin_x = margin_x;
+  g->margin_y = margin_y;
 }
 
 void graphics_save(const Graphics *g)

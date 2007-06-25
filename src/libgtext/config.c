@@ -468,12 +468,12 @@ int config_dominates(Config* cfg, GenomeFeatureType ft1,
 {
   assert(cfg && env);
   char *fts1, *fts2;
-  
-  if(ft1 == ft2)
+
+  if (ft1 == ft2)
     return DOMINATES_EQUAL;
   fts1 = (char*) genome_feature_type_get_cstr(ft1);
   fts2 = (char*) genome_feature_type_get_cstr(ft2);
-  if (fts1 == NULL || fts2 == NULL) 
+  if (fts1 == NULL || fts2 == NULL)
     return DOMINATES_UNKNOWN_TYPE;
   else
   {
@@ -524,8 +524,8 @@ int config_unit_test(Env* env)
 
   /* execute the config file */
   /*config_load_file(cfg, luafile, env);
-   
-  ensure(has_err, config_dominates(cfg, gft_exon, gft_gene, env) == DOMINATES_FIRST); 
+
+  ensure(has_err, config_dominates(cfg, gft_exon, gft_gene, env) == DOMINATES_FIRST);
   ensure(has_err, config_dominates(cfg, gft_gene, gft_exon, env) == DOMINATES_SECOND);
   ensure(has_err, config_dominates(cfg, gft_mRNA, gft_exon, env) == DOMINATES_SECOND);
   ensure(has_err, config_dominates(cfg, gft_mRNA, gft_CDS, env) == DOMINATES_SECOND);

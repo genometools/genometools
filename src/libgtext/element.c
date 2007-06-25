@@ -1,5 +1,5 @@
 /*
-   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>   
+   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
    Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
    See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -26,7 +26,7 @@ Creates a new Element object.
 \return Pointer to a new Element object.
 */
 Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
-{ 
+{
   assert(gn);
 
   Element *element;
@@ -94,7 +94,7 @@ Returns range of an Element object
 Range element_get_range(Element *element)
 {
   assert(element);
-  
+
   return element->range;
 }
 
@@ -114,7 +114,7 @@ Delets Element
 void element_delete(Element *element,
                     Env *env)
 {
-  if(!element) return;
+  if (!element) return;
 
   env_ma_free(element, env);
 }
@@ -140,10 +140,10 @@ bool elements_are_equal(Element* e1,
                         Element* e2)
 {
   assert(e1 && e2);
-  if((0 == strcmp(genome_feature_type_get_cstr(e1->type), genome_feature_type_get_cstr(e2->type)))
+  if ((0 == strcmp(genome_feature_type_get_cstr(e1->type), genome_feature_type_get_cstr(e2->type)))
      && (0 == range_compare(e1->range, e2->range)))
     return true;
-  else 
+  else
     return false;
 }
 
