@@ -10,5 +10,6 @@ dist
 obj
 lib
 tags
+.ccache
 testsuite/stest_testsuite
 testsuite/stest_stest_tests

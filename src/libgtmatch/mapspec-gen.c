@@ -28,10 +28,6 @@
           haserr = true;\
         }
 
-#define STAMP\
-        printf("STAMP(%lu,%s)\n",(Showuint) __LINE__,__FILE__);\
-        (void) fflush(stdout)
-
 static Uint64 expectedindexsize(const ArrayMapspecification *mapspectable)
 {
   Uint64 sumup = 0;

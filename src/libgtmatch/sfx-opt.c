@@ -8,6 +8,7 @@
 #include "libgtcore/str.h"
 #include "libgtcore/option.h"
 #include "sfx-optdef.h"
+#include "stamp.h"
 
 #include "getbasename.pr"
 
@@ -109,6 +110,7 @@ static OPrval parse_options(int *parsed_args,
   {
     if (!option_is_set(optionindexname))
     {
+      STAMP;
       if (strarray_size(so->filenametab) > (unsigned long) 1)
       {
         env_error_set(env,"if more than one input file is given, then "
@@ -122,6 +124,7 @@ static OPrval parse_options(int *parsed_args,
         str_set(so->str_indexname,basenameptr,env);
         env_ma_free(basenameptr,env);
       }
+      STAMP;
     }
   }
   option_parser_delete(op, env);
@@ -150,10 +153,12 @@ static void showoptions(const Suffixeratoroptions *so)
     printf("# prefixlength=%u\n",so->prefixlength);
   }
   printf("# parts=%u\n",so->numofparts);
+      STAMP;
   for (i=0; i<strarray_size(so->filenametab); i++)
   {
     printf("# inputfile[%lu]=%s\n",i,strarray_get(so->filenametab,i));
   }
+      STAMP;
 }
 
 void wrapsfxoptions(Suffixeratoroptions *so,Env *env)

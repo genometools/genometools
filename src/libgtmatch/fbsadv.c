@@ -11,6 +11,7 @@
 #include "spacedef.h"
 #include "inputsymbol.h"
 #include "chardef.h"
+#include "stamp.h"
 
 #include "genericstream.pr"
 
@@ -30,7 +31,9 @@ void initfastabufferstate(Fastabufferstate *fbs,
   fbs->complete = false;
   fbs->totaloffset = 0;
   fbs->lastspeciallength = 0;
+  STAMP;
   ALLOCASSIGNSPACE(*filelengthtab,NULL,PairUint,strarray_size(filenametab));
+  STAMP;
   fbs->filelengthtab = *filelengthtab;
 }
 
@@ -77,11 +80,14 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
                                                           fbs->filenum));
         fbs->filelengthtab[fbs->filenum].uint0 += currentfileread;
         fbs->filelengthtab[fbs->filenum].uint1 += currentfileadd;
+        STAMP;
         if (fbs->filenum == strarray_size(fbs->filenametab) - 1)
         {
           fbs->complete = true;
+        STAMP;
           break;
         }
+        STAMP;
         fbs->filenum++;
         fbs->nextfile = true;
       } else

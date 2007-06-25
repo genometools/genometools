@@ -46,6 +46,7 @@ typedef unsigned short Ushort;        /* \Typedef{Ushort} */
 
 #define LOGWORDSIZE    6              /* base 2 logarithm of wordsize */
 #define UintConst(N)   (N##UL)        /* unsigned integer constant */
+#undef Uintequalsunsignedint 0
 typedef unsigned long  Uint;          /* \Typedef{Uint} */
 typedef signed long ScanUint64;       /* \Typedef{Scaninteger} */
 typedef unsigned long Uint64;         /* \Typedef{Uint64} */
@@ -53,28 +54,23 @@ typedef unsigned long Uint64;         /* \Typedef{Uint64} */
 #define FormatScanUint64 "%ld"
 #define CHECKUint64Cast(VAL)        /* Nothing */
 
-#define CHECKUintCast(VAL)\
-        if ((VAL) > ~UintConst(0))\
-        {\
-          /*@ignore@*/\
-          fprintf(stderr,"%s, %d: %lu cannot be stored in unsigned int",\
-                         __FILE__,__LINE__,(Showuint) (VAL));\
-          /*@end@*/\
-          exit(EXIT_FAILURE);\
-        }
-
 #else
 
 #define LOGWORDSIZE   5              /* base 2 logarithm of wordsize */
+#ifdef BIGNUM32
+#define UintConst(N)  (N##UL)         /* unsigned integer constant */
+typedef unsigned long long  Uint;     /* \Typedef{Uint} */
+#undef Uintequalsunsignedint
+#else
 #define UintConst(N)  (N##U)         /* unsigned integer constant */
 typedef unsigned int  Uint;          /* \Typedef{Uint} */
+#define Uintequalsunsignedint
+#endif
 typedef signed long long ScanUint64; /* \Typedef{Scaninteger} */
 typedef unsigned long long Uint64;   /* \Typedef{Uint64} */
 #define FormatUint64     "%llu"
 #define FormatScanUint64 "%lld"
 #define MAXUintValue  UINT_MAX       /* only possible in 32 bit mode */
-
-#define CHECKUintCast(VAL)           /* Nothing */
 #define CHECKUint64Cast(VAL)\
         if ((VAL) > (Uint64) MAXUintValue)\
         {\
@@ -86,6 +82,21 @@ typedef unsigned long long Uint64;   /* \Typedef{Uint64} */
           exit(EXIT_FAILURE);\
         }
 #endif
+
+#ifdef Uintequalsunsignedint
+#define CHECKUintCast(VAL)           /* Nothing */
+#else
+#define CHECKUintCast(VAL)\
+        if ((VAL) > ~UintConst(0))\
+        {\
+          /*@ignore@*/\
+          fprintf(stderr,"%s, %d: %lu cannot be stored in unsigned int",\
+                         __FILE__,__LINE__,(Showuint) (VAL));\
+          /*@end@*/\
+          exit(EXIT_FAILURE);\
+        }
+#endif
+
 
 /*
   Type of unsigned integer in \texttt{printf}.

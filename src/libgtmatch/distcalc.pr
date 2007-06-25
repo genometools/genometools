@@ -5,9 +5,10 @@ Distribution *initdistribution(Env *env);
 
 void freedistribution(Distribution **dist,Env *env);
 
-void addmultidistribution(Distribution *dist,Uint ind,Uint howmany,Env *env);
+void addmultidistribution(Distribution *dist,unsigned long ind,
+                          unsigned long howmany,Env *env);
 
-void adddistribution(Distribution *dist,Uint ind,Env *env);
+void adddistribution(Distribution *dist,unsigned long ind,Env *env);
 
 int foreachdistributionvalue(Distribution *dist,
                              int (*hashiter)(void *key, void *value,

@@ -20,4 +20,8 @@ function checkerror()
 
 checkerror "${GTDIR}/bin/gt suffixerator -tis -indexname /tmp/idx-sfx -pl 1 -db $*"
 checkerror "mkvtree.sh -tis -indexname /tmp/idx-mkv -dna -pl 1 -db $*"
-checkerror "cmp -s /tmp/idx-mkv.prj /tmp/idx-sfx.prj"
+TMPFILE1=`mktemp TMP.XXXXXX` || exit 1
+grep -v 'integersize=' /tmp/idx-mkv.prj > ${TMPFILE1}
+TMPFILE2=`mktemp TMP.XXXXXX` || exit 1
+grep -v 'integersize=' /tmp/idx-sfx.prj > ${TMPFILE2}
+checkerror "cmp -s ${TMPFILE1} ${TMPFILE2}"

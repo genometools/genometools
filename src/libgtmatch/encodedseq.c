@@ -19,6 +19,7 @@
 #include "mapspec-def.h"
 #include "encseq-def.h"
 #include "fbs-def.h"
+#include "stamp.h"
 
 #include "genericstream.pr"
 #include "alphabet.pr"
@@ -27,10 +28,6 @@
 #include "opensfxfile.pr"
 
 #include "readnextUchar.gen"
-
-#define STAMP\
-        printf("STAMP(%lu,%s)\n",(Showuint) __LINE__,__FILE__);\
-        (void) fflush(stdout)
 
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
         ((ESEQ[DIV4(IDX)] >> (UintConst(6) - MULT2(MOD4(IDX)))) & UintConst(3))
@@ -1676,11 +1673,13 @@ static int readsatfromfile(const Str *indexname,Env *env)
       Fastabufferstate fbs;
       encseq->mappedptr = NULL;
   
+      STAMP;
       initfastabufferstate(&fbs,
                            filenametab,
                            getsymbolmapAlphabet(alphabet),
                            &filelengthtab,
                            env);
+      STAMP;
       printf("# call %s\n",
              encodedseqfunctab[(int) sat].fillpos.funcname);
       if (encodedseqfunctab[(int) sat].fillpos.function(encseq,&fbs,env)

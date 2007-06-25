@@ -20,6 +20,7 @@
 #include "genstream.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
+#include "stamp.h"
 #ifndef NDEBUG
 #include "addnextchar.h"
 #endif
@@ -461,8 +462,10 @@ int getfastastreamkmers(
   ALLOCASSIGNSPACE(spwp.cyclicwindow,NULL,Uchar,kmersize);
   specialemptyqueue(&spwp.spos,kmersize,env);
   filllargestchartable(&spwp.filltable,numofchars,kmersize,env);
+  STAMP;
   for (filenum = 0; filenum < strarray_size(filenametab); filenum++)
   {
+      STAMP;
     opengenericstream(&inputstream,strarray_get(filenametab,filenum));
     indesc = false;
     for (;;)

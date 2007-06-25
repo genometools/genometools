@@ -12,6 +12,7 @@
 #include "libgtcore/str.h"
 #include "types.h"
 #include "spacedef.h"
+#include "stamp.h"
 
 #include "endianess.pr"
 #include "opensfxfile.pr"
@@ -28,12 +29,14 @@ static void showprjinfo(FILE *outprj,
 
   assert(filelengthtab != NULL);
   assert(filenametab != NULL);
+  STAMP;
   for (i=0; i<strarray_size(filenametab); i++)
   {
     fprintf(outprj,"dbfile=%s %lu %lu\n",strarray_get(filenametab,i),
                                          (Showuint) filelengthtab[i].uint0,
                                          (Showuint) filelengthtab[i].uint1);
   }
+  STAMP;
   /*@ignore@*/
   fprintf(outprj,"totallength=" FormatUint64 "\n",totallength);
   /*@end@*/
