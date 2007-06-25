@@ -8,7 +8,8 @@
   Uchar cc;
   Uint64 pos;
   int retval;
-  Uint currentspecialchar = 0, bitwise = 0, lastspeciallength = 0;
+  Uint currentspecialchar = 0, bitwise = 0;
+  Uchar lastspeciallength = 0;
 #ifndef NOENDPTR
   Uint *endptrUint, endspecialcells;
   Uint64 nextcheck;
@@ -52,13 +53,13 @@
 #else
           = pos;
 #endif
-	lastspeciallength = UintConst(1);
+	lastspeciallength = (Uchar) 1;
       } else
       {
-	if (lastspeciallength == (Uint) (UCHAR_MAX-1))
+	if (lastspeciallength == (Uchar) (UCHAR_MAX-1))
 	{
 	  encseq->specialrangelength[currentspecialchar-1]
-	    = lastspeciallength+1;
+	    = (Uchar) UCHAR_MAX;
 	  lastspeciallength = 0;
 	} else
 	{

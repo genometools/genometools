@@ -38,7 +38,12 @@ done
 
 if test $icc -eq 1
 then
-  make CC='icc' CFLAGS='-O3' LD='icc' CXX='icc'
+  make CC='icc' CFLAGS='-O3 -wd1418,869,981' LD='icc' CXX='icc'
 else
-  make CC='ccache gcc' CFLAGS='-O3 -m32' LDFLAGS='-m32'
+  if test $do64 -eq 1
+  then
+    make CC='ccache gcc' CFLAGS='-O3 -m64' LDFLAGS='-m64'
+  else
+    make CC='ccache gcc' CFLAGS='-O3 -m32' LDFLAGS='-m32'
+  fi
 fi

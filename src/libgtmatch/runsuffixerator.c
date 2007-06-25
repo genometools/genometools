@@ -137,7 +137,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   }
   if (!haserr)
   {
-    numofchars = getnumofcharsAlphabet(alpha);
+    numofchars = (unsigned char) getnumofcharsAlphabet(alpha);
     if (outal1file(so->str_indexname,alpha,env) != 0)
     {
       haserr = true;

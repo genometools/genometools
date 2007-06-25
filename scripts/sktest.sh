@@ -5,6 +5,10 @@
 # See LICENSE file or http://genometools.org/license.html for license details.
 #
 
+# Current Problems: MKVTREESMAPDIR  must be set
+# Current Problems: for icc compiled version add 
+# /usr/local/zbh/intel/cc/9.1/lib
+
 set -e -x
 
 # the make call normally used for development

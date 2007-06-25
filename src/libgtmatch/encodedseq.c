@@ -77,12 +77,12 @@
         {\
           if ((CC) == SEPARATOR)\
           {\
-            bitwise |= 1;\
+            bitwise |= UintConst(1);\
           }\
         }\
         if (widthbuffer == (unsigned int) 3)\
         {\
-          TABLE[j] = bitwise;\
+          TABLE[j] = (Uchar) bitwise;\
           j++;\
           widthbuffer = 0;\
           bitwise = 0;\
@@ -94,20 +94,20 @@
 #define UPDATESEQBUFFERFINAL(TABLE)\
         if (widthbuffer == (unsigned int) 1)\
         {\
-          bitwise <<= UintConst(6);\
-          TABLE[j] = bitwise;\
+          bitwise <<= 6;\
+          TABLE[j] = (Uchar) bitwise;\
         } else\
         {\
           if (widthbuffer == (unsigned int) 2)\
           {\
-            bitwise <<= UintConst(4);\
-            TABLE[j] = bitwise;\
+            bitwise <<= 4;\
+            TABLE[j] = (Uchar) bitwise;\
           } else\
           {\
             if (widthbuffer == (unsigned int) 3)\
             {\
-              bitwise <<= UintConst(2);\
-              TABLE[j] = bitwise;\
+              bitwise <<= 2;\
+              TABLE[j] = (Uchar) bitwise;\
             }\
           }\
         }
@@ -640,13 +640,13 @@ static Uchar delivercharViadirectaccess64(const Encodedsequence *encseq,
 static Uchar deliverfromfourchars64(const Encodedsequence *encseq,
                                     Uint64 pos)
 {
-  return EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar deliverfromfourchars(const Encodedsequence *encseq,
                                   Uint pos)
 {
-  return EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
 /* Viabitaccess */
@@ -662,7 +662,7 @@ static Uchar delivercharViabitaccessSpecial(const Encodedsequence *encseq,
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar delivercharViabitaccess64Special(const Encodedsequence *encseq,
@@ -676,7 +676,7 @@ static Uchar delivercharViabitaccess64Special(const Encodedsequence *encseq,
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
 }
 
 /* Viauchartables */
@@ -693,7 +693,7 @@ static Uchar delivercharViauchartables64Specialfirst(
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar delivercharViauchartables64Specialrange(
@@ -708,7 +708,7 @@ static Uchar delivercharViauchartables64Specialrange(
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar delivercharViauchartablesSpecialfirst(
@@ -723,7 +723,7 @@ static Uchar delivercharViauchartablesSpecialfirst(
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar delivercharViauchartablesSpecialrange(
@@ -738,7 +738,7 @@ static Uchar delivercharViauchartablesSpecialrange(
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
 /* Viaushorttables */
@@ -755,7 +755,7 @@ static Uchar delivercharViaushorttables64Specialfirst(
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar delivercharViaushorttables64Specialrange(
@@ -770,7 +770,7 @@ static Uchar delivercharViaushorttables64Specialrange(
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar delivercharViaushorttablesSpecialfirst(
@@ -785,7 +785,7 @@ static Uchar delivercharViaushorttablesSpecialfirst(
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar delivercharViaushorttablesSpecialrange(
@@ -800,7 +800,7 @@ static Uchar delivercharViaushorttablesSpecialrange(
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
 /* Viauinttables */
@@ -817,7 +817,7 @@ static Uchar delivercharViauinttables64Specialfirst(
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar delivercharViauinttables64Specialrange(
@@ -832,7 +832,7 @@ static Uchar delivercharViauinttables64Specialrange(
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar delivercharViauinttablesSpecialfirst(const Encodedsequence *encseq,
@@ -846,7 +846,7 @@ static Uchar delivercharViauinttablesSpecialfirst(const Encodedsequence *encseq,
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar delivercharViauinttablesSpecialrange(const Encodedsequence *encseq,
@@ -860,7 +860,7 @@ static Uchar delivercharViauinttablesSpecialrange(const Encodedsequence *encseq,
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
 /* Viauint64tables */
@@ -877,7 +877,7 @@ static Uchar delivercharViauint64tables64Specialfirst(
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar delivercharViauint64tables64Specialrange(
@@ -892,7 +892,7 @@ static Uchar delivercharViauint64tables64Specialrange(
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar delivercharViauint64tablesSpecialfirst(
@@ -1271,7 +1271,7 @@ static Uchar seqdelivercharnoSpecial64(
                         /*@unused@*/ Encodedsequencescanstate *esr,
                         Uint64 pos)
 {
-  return EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar seqdelivercharViabitaccess64Special(
@@ -1287,7 +1287,7 @@ static Uchar seqdelivercharViabitaccess64Special(
     }
     return (Uchar) WILDCARD;
   }
-  return EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
 }
 
 static Uchar seqdelivercharSpecial64(const Encodedsequence *encseq,
@@ -1315,7 +1315,7 @@ static Uchar seqdelivercharSpecial64(const Encodedsequence *encseq,
       advanceEncodedseqstate(encseq,esr);
     }
   }
-  return EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
+  return (Uchar) EXTRACTENCODEDCHARUint64(encseq->fourcharsinonebyte,pos);
 }
 
 static int overallspecialrangesdirectorbitaccess(

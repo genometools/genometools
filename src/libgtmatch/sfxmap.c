@@ -64,7 +64,7 @@ static int scanuintintline(unsigned int *lengthofkey,
         env_error_set(env,"cannot find non-negative integer in \"%*.*s\"",
                            (Fieldwidthtype) (linebuffer->nextfreeUchar - (i+1)),
                            (Fieldwidthtype) (linebuffer->nextfreeUchar - (i+1)),
-                           linebuffer->spaceUchar + i + 1);
+                           (const char *) (linebuffer->spaceUchar + i + 1));
         return -1;
       }
       *value = (Uint) readint;
@@ -76,7 +76,7 @@ static int scanuintintline(unsigned int *lengthofkey,
     env_error_set(env,"missing equality symbol in \"%*.*s\"",
                        (Fieldwidthtype) linebuffer->nextfreeUchar,
                        (Fieldwidthtype) linebuffer->nextfreeUchar,
-                       linebuffer->spaceUchar);
+                       (const char *) linebuffer->spaceUchar);
     return -2;
   }
   return 0;

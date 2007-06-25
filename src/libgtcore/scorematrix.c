@@ -133,8 +133,8 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
       if (has_err)
         break;
       scorematrix_set_score(s,
-                            (unsigned char) alpha_encode(s->alpha, amino_acid),
-                            (unsigned char) alpha_encode(s->alpha, *(char*)
+                            alpha_encode(s->alpha, amino_acid),
+                            alpha_encode(s->alpha, *(char*)
                             array_get(index_to_alpha_char_mapping, i)), score);
       i++;
       str_delete(token, env);
@@ -207,7 +207,7 @@ ScoreMatrix* scorematrix_read_protein(const char *path, Env *env)
 }
 
 int scorematrix_get_score(const ScoreMatrix *s,
-                          unsigned char idx1, unsigned char idx2)
+                          unsigned int idx1, unsigned int idx2)
 {
   assert(s);
   assert(idx1 < s->dimension && idx2 < s->dimension); /* indices are valid */
@@ -215,7 +215,7 @@ int scorematrix_get_score(const ScoreMatrix *s,
 }
 
 void scorematrix_set_score(ScoreMatrix *s,
-                           unsigned char idx1, unsigned char idx2, int score)
+                           unsigned int idx1, unsigned int idx2, int score)
 {
   assert(s);
   assert(idx1 < s->dimension && idx2 < s->dimension); /* indices are valid */

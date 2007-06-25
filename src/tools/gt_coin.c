@@ -51,7 +51,7 @@ int gt_coin(int argc, const char **argv, Env *env)
         break;
       default:
         env_error_set(env, "emissions[%u]=%c is not a valid character (only "
-                      "`H' and `T' allowed)", i, emissions[i]);
+                      "`H' and `T' allowed)", i, (char) emissions[i]);
         has_err = -1;
     }
   }
