@@ -14,7 +14,7 @@
 typedef struct
 {
   Codetype nextcode;
-  Uint widthofpart;
+  Seqpos widthofpart;
   Uint64 suftaboffset, 
          sumofwidth;
 } Suftabpartcomponent;
@@ -23,12 +23,12 @@ typedef struct
 {
   Suftabpartcomponent *components;
   unsigned int numofparts;
-  Uint largestwidth;
+  Seqpos largestwidth;
 };
 
-static Codetype findfirstlarger(const Uint *leftborder,
+static Codetype findfirstlarger(const Seqpos *leftborder,
                                 Codetype numofallcodes,
-                                Uint suftaboffset)
+                                Seqpos suftaboffset)
 {
   Codetype left = 0, right = numofallcodes, mid, found = numofallcodes;
 
@@ -52,10 +52,10 @@ static Codetype findfirstlarger(const Uint *leftborder,
 }
 
 Suftabparts *newsuftabparts(unsigned int numofparts,
-                            const Uint *leftborder,
+                            const Seqpos *leftborder,
                             Codetype numofallcodes,
                             Uint64 numofsuffixestoinsert,
-                            Uint fullspecials,
+                            Seqpos fullspecials,
                             Env *env)
 {
   Suftabparts *suftabparts;
@@ -174,12 +174,12 @@ Uint64 stpgetcurrentsumofwdith(unsigned int part,
   return suftabparts->components[part].sumofwidth;
 }
 
-Uint stpgetcurrentwidtofpart(unsigned int part,const Suftabparts *suftabparts)
+Seqpos stpgetcurrentwidtofpart(unsigned int part,const Suftabparts *suftabparts)
 {
   return suftabparts->components[part].widthofpart;
 }
 
-Uint stpgetlargestwidth(const Suftabparts *suftabparts)
+Seqpos stpgetlargestwidth(const Suftabparts *suftabparts)
 {
   return suftabparts->largestwidth;
 }

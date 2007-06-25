@@ -13,7 +13,7 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
 
 #ifdef DIRECTBINSEARCH
 
-static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Uint pos)
+static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
 {
   return ADDTYPE(binarysearchpage)(ACCESSENCSEQ(encseq,specialpositions),
                                    ACCESSENCSEQ(encseq,specialpositions) +
@@ -21,7 +21,7 @@ static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Uint pos)
                                    pos);
 }
 
-static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Uint pos)
+static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
 {
   SPECIALTYPE *found, *start;
 
@@ -32,8 +32,9 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Uint pos)
                                              pos);
   if (found != NULL)
   {
-    Uint rangeend = *found +
-                    (Uint) encseq->specialrangelength[(Uint) (found - start)];
+    Seqpos rangeend 
+             = *found +
+               (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)];
     if (rangeend > pos)
     {
       return true;
@@ -44,10 +45,10 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Uint pos)
 
 #else
 
-static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Uint pos)
+static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
 #include "checkspecial.gen"
 
-static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Uint pos)
+static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
 #include "checkspecialrange.gen"
 
 #endif

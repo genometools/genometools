@@ -53,11 +53,11 @@ static int updatesumranges(void *key, void *value, void *data,
 }
 
 int scanfastasequence(
-        Uint *numofsequences,
+        unsigned long *numofsequences,
         Uint64 *totallength,
         Specialcharinfo *specialcharinfo,
         const StrArray *filenametab,
-        PairUint **filelengthtab,
+        PairSeqpos **filelengthtab,
         const Uchar *symbolmap,
         Env *env)
 {
@@ -66,7 +66,7 @@ int scanfastasequence(
   Uint64 pos;
   int retval;
   bool specialprefix = true;
-  Uint lastspeciallength = 0;
+  Seqpos lastspeciallength = 0;
   Distribution *specialrangelengths;
 
   *numofsequences = 0;
@@ -104,7 +104,7 @@ int scanfastasequence(
       specialcharinfo->specialcharacters++;
       if (lastspeciallength == 0)
       {
-        lastspeciallength = UintConst(1);
+        lastspeciallength = (Seqpos) 1;
       } else
       {
         lastspeciallength++;
@@ -139,9 +139,9 @@ int scanfastasequence(
 /* the following function is obsolete */
 
 int scanfastasequence2(
-        Uint *numofsequences,
-        Uint *totallength,
-        PairUint **filelengthtab,
+        unsigned long *numofsequences,
+        Seqpos *totallength,
+        PairSeqpos **filelengthtab,
         Specialcharinfo *specialcharinfo,
         const StrArray *filenametab,
         const Uchar *symbolmap,
@@ -151,7 +151,7 @@ int scanfastasequence2(
   unsigned int linenum = (unsigned int) 1;
   Fgetcreturntype currentchar;
   bool indesc, firstseq = true, specialprefix = true;
-  Uint currentposition,
+  Seqpos currentposition,
        countreadcharacters,
        lastspeciallength = 0;
   Genericstream inputstream;
@@ -165,7 +165,8 @@ int scanfastasequence2(
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
   STAMP;
-  ALLOCASSIGNSPACE(*filelengthtab,NULL,PairUint,strarray_size(filenametab));
+  ALLOCASSIGNSPACE(*filelengthtab,NULL,PairSeqpos,
+                   strarray_size(filenametab));
   STAMP;
   for (filenum = 0; filenum < strarray_size(filenametab); filenum++)
   {
@@ -210,7 +211,7 @@ int scanfastasequence2(
               if (lastspeciallength == 0)
               {
                 specialcharinfo->specialranges++;
-                lastspeciallength = UintConst(1);
+                lastspeciallength = (Seqpos) 1;
               }
 	      currentposition++;
 	    }
@@ -237,7 +238,7 @@ int scanfastasequence2(
               if (lastspeciallength == 0)
               {
                 specialcharinfo->specialranges++;
-                lastspeciallength = UintConst(1);
+                lastspeciallength = (Seqpos) 1;
               } else
               {
                 lastspeciallength++;

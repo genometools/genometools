@@ -8,7 +8,6 @@
 #define MAPSPECDEF_H
 
 #include "libgtcore/env.h"
-#include "types.h"
 #include "arraydef.h"
 
 #define NEWMAPSPEC(PTR,TYPE,ELEMS)\
@@ -16,7 +15,7 @@
         mapspecptr->typespec = TYPE ## Type;\
         mapspecptr->startptr = &(PTR);\
         mapspecptr->sizeofunit = sizeof (TYPE);\
-        mapspecptr->numofunits = (Uint) ELEMS;\
+        mapspecptr->numofunits = ELEMS;\
         mapspecptr->name = #PTR
 
 typedef enum
@@ -24,7 +23,7 @@ typedef enum
   UcharType,
   UshortType,
   UintType,
-  PairUintType,
+  PairSeqposType,
   Uint64Type,
   PairUint64Type
 } Typespec;
@@ -35,7 +34,7 @@ typedef struct
   char *name;
   void *startptr;
   size_t sizeofunit;
-  Uint numofunits;
+  unsigned long numofunits;
 } Mapspecification;
 
  DECLAREARRAYSTRUCT(Mapspecification);

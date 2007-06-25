@@ -176,8 +176,8 @@ typedef struct
                kmersize,
                windowwidth,
                firstindex,
-               *filltable;
-  Uint lengthwithoutspecial;
+               *filltable,
+               lengthwithoutspecial;
   Codetype codewithoutspecial,
            **multimappower;
 } Streamstate;

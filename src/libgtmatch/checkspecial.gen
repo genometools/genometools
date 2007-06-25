@@ -23,7 +23,7 @@
   } else
   {
     if (ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] <
-       ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber])
+        ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber])
     {
       if (ADDTYPE(binarysearchpage)(
                ACCESSENCSEQ(encseq,specialpositions) +

@@ -47,30 +47,33 @@ typedef unsigned short Ushort;        /* \Typedef{Ushort} */
 #define LOGWORDSIZE    6              /* base 2 logarithm of wordsize */
 #define UintConst(N)   (N##UL)        /* unsigned integer constant */
 #undef Uintequalsunsignedint 0
-typedef unsigned long  Uint;          /* \Typedef{Uint} */
+typedef unsigned long Uint;           /* \Typedef{Uint} */
+typedef unsigned long Seqpos;         /* \Typedef{Seqpos} */
 typedef signed long ScanUint64;       /* \Typedef{Scaninteger} */
 typedef unsigned long Uint64;         /* \Typedef{Uint64} */
 #define FormatUint64     "%lu"
 #define FormatScanUint64 "%ld"
-#define CHECKUint64Cast(VAL)        /* Nothing */
+#define CHECKUint64Cast(VAL)          /* Nothing */
 
 #else
 
-#define LOGWORDSIZE   5              /* base 2 logarithm of wordsize */
+#define LOGWORDSIZE   5               /* base 2 logarithm of wordsize */
 #ifdef BIGNUM32
 #define UintConst(N)  (N##UL)         /* unsigned integer constant */
 typedef unsigned long long  Uint;     /* \Typedef{Uint} */
+typedef unsigned long long Seqpos;    /* \Typedef{Seqpos} */
 #undef Uintequalsunsignedint
 #else
-#define UintConst(N)  (N##U)         /* unsigned integer constant */
-typedef unsigned int  Uint;          /* \Typedef{Uint} */
+#define UintConst(N)  (N##U)          /* unsigned integer constant */
+typedef unsigned int  Uint;           /* \Typedef{Uint} */
+typedef unsigned int  Seqpos;         /* \Typedef{Seqpos} */
 #define Uintequalsunsignedint
 #endif
-typedef signed long long ScanUint64; /* \Typedef{Scaninteger} */
-typedef unsigned long long Uint64;   /* \Typedef{Uint64} */
+typedef signed long long ScanUint64;  /* \Typedef{Scaninteger} */
+typedef unsigned long long Uint64;    /* \Typedef{Uint64} */
 #define FormatUint64     "%llu"
 #define FormatScanUint64 "%lld"
-#define MAXUintValue  UINT_MAX       /* only possible in 32 bit mode */
+#define MAXUintValue  UINT_MAX        /* only possible in 32 bit mode */
 #define CHECKUint64Cast(VAL)\
         if ((VAL) > (Uint64) MAXUintValue)\
         {\

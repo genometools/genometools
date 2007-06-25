@@ -18,7 +18,7 @@
 void initfastabufferstate(Fastabufferstate *fbs,
                           const StrArray *filenametab,
                           const Uchar *symbolmap,
-                          PairUint **filelengthtab,
+                          PairSeqpos **filelengthtab,
                           Env *env)
 {
   fbs->filenum = 0;
@@ -32,7 +32,7 @@ void initfastabufferstate(Fastabufferstate *fbs,
   fbs->totaloffset = 0;
   fbs->lastspeciallength = 0;
   STAMP;
-  ALLOCASSIGNSPACE(*filelengthtab,NULL,PairUint,strarray_size(filenametab));
+  ALLOCASSIGNSPACE(*filelengthtab,NULL,PairSeqpos,strarray_size(filenametab));
   STAMP;
   fbs->filelengthtab = *filelengthtab;
 }
@@ -41,7 +41,7 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
 {
   Fgetcreturntype currentchar;
   unsigned int currentposition = 0;
-  Uint currentfileadd = 0, currentfileread = 0;
+  Seqpos currentfileadd = 0, currentfileread = 0;
   Uchar charcode;
 
   env_error_check(env);
@@ -153,7 +153,7 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       }
     }
   }
-  fbs->totaloffset += (Uint) currentposition;
+  fbs->totaloffset += (Seqpos) currentposition;
   if (fbs->firstoverallseq)
   {
     env_error_set(env,"no sequences in multiple fasta file(s) %s ...",

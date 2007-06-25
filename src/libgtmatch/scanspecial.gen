@@ -8,7 +8,8 @@
   Uchar cc;
   Uint64 pos;
   int retval;
-  Uint currentspecialchar = 0, bitwise = 0;
+  Seqpos currentspecialchar = 0;
+  Uint bitwise = 0;
   Uchar lastspeciallength = 0;
 #ifndef NOENDPTR
   Uint *endptrUint, endspecialcells;

@@ -29,8 +29,8 @@ typedef struct
   Uint64 totaloffset;
   const StrArray *filenametab;
   const Uchar *symbolmap;
-  Uint lastspeciallength;
-  PairUint *filelengthtab;
+  Seqpos lastspeciallength;
+  PairSeqpos *filelengthtab;
 } Fastabufferstate;
 
 #endif

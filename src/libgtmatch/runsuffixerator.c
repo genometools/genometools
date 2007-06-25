@@ -31,8 +31,8 @@ typedef struct
 } Outfileinfo;
 
 static int suftab2file(void *info,
-                       const Uint *suftab,
-                       Uint widthofpart,
+                       const Seqpos *suftab,
+                       Seqpos widthofpart,
                        Env *env)
 {
   Outfileinfo *outfileinfo = (Outfileinfo *) info;
@@ -83,11 +83,11 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
 static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
 {
   unsigned char numofchars = 0;
-  Uint numofsequences;
+  unsigned long numofsequences;
   Uint64 totallength;
   Alphabet *alpha;
   Specialcharinfo specialcharinfo;
-  PairUint *filelengthtab = NULL;
+  PairSeqpos *filelengthtab = NULL;
   Outfileinfo outfileinfo;
   bool haserr = false;
   Encodedsequence *encseq;

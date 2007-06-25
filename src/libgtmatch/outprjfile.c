@@ -19,9 +19,9 @@
 
 static void showprjinfo(FILE *outprj,
                         const StrArray *filenametab,
-                        const PairUint *filelengthtab,
+                        const PairSeqpos *filelengthtab,
                         Uint64 totallength,
-                        Uint numofsequences,
+                        unsigned long numofsequences,
                         const Specialcharinfo *specialcharinfo,
                         unsigned int prefixlength)
 {
@@ -52,15 +52,15 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"numofdbsequences=%lu\n",(Showuint) numofsequences);
   fprintf(outprj,"numofquerysequences=0\n");
   fprintf(outprj,"prefixlength=%lu\n",(Showuint) prefixlength);
-  fprintf(outprj,"integersize=%lu\n",(Showuint) (sizeof (Uint) * CHAR_BIT));
+  fprintf(outprj,"integersize=%lu\n",(Showuint) (sizeof (Seqpos) * CHAR_BIT));
   fprintf(outprj,"littleendian=%c\n",islittleendian() ? '1' : '0');
 }
 
 int outprjfile(const Str *indexname,
                const StrArray *filenametab,
-               const PairUint *filelengthtab,
+               const PairSeqpos *filelengthtab,
                Uint64 totallength,
-               Uint numofsequences,
+               unsigned long numofsequences,
                const Specialcharinfo *specialcharinfo,
                unsigned int prefixlength,
                Env *env)

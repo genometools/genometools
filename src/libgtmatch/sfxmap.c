@@ -22,7 +22,12 @@
 typedef struct
 {
   const char *keystring;
-  Uint *valueptr;
+  union 
+  {
+    unsigned long long *bigvalue;
+    unsigned int *smallvalue;
+  } value;
+  size_t sizeval;
   bool found;
 } Readintkeys;
 
@@ -30,19 +35,36 @@ DECLAREARRAYSTRUCT(Readintkeys);
 
 static void setreadintkeys(ArrayReadintkeys *riktab,
                            const char *keystring,
-                           Uint *valueptr,
+                           void *valueptr,
+                           size_t sizeval,
                            Env *env)
 {
   Readintkeys *riktabptr;
 
   GETNEXTFREEINARRAY(riktabptr,riktab,Readintkeys,1);
   riktabptr->keystring = keystring;
-  riktabptr->valueptr = valueptr;
+  riktabptr->sizeval = sizeval;
+  if(sizeval == (size_t) 4)
+  {
+    assert(sizeof(unsigned int) == 4);
+    riktabptr->value.smallvalue = (unsigned int *) valueptr;
+  } else
+  {
+    if(sizeval == (size_t) 8)
+    {
+      assert(sizeof(unsigned long long) == 8);
+      riktabptr->value.bigvalue = (unsigned long long *) valueptr;
+    } else
+    {
+      fprintf(stderr,"sizeval must be 4 or 8\n");
+      exit(EXIT_FAILURE);
+    }
+  }
   riktabptr->found = false;
 }
 
 static int scanuintintline(unsigned int *lengthofkey,
-                           Uint *value,
+                           void *value,
                            const ArrayUchar *linebuffer,
                            Env *env)
 {
@@ -109,8 +131,17 @@ static int allkeysdefined(const Str *prjfile,const ArrayReadintkeys *rik,
   return 0;
 }
 
+#define SETREADINTKEYS(VALNAME,VAL)
+        if((VAL) == NULL)\
+        {\
+          setreadintkeys(&rik,VALNAME,VAL,(size_t) 4,env);\
+        } else\
+        {\
+          setreadintkeys(&rik,VALNAME,VAL,sizeof(*(VAL)),env);\
+        }
+
 static int scanprjfileviafileptr(Suffixarray *suffixarray,
-                                 Uint *totallength,
+                                 Seqpos *totallength,
                                  const Str *prjfile,FILE *fpin,Env *env)
 {
   ArrayUchar linebuffer;
@@ -121,33 +152,30 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   int retval;
   bool found, haserr = false;
   ArrayReadintkeys rik;
-  Uint prefixlength;
 
   env_error_check(env);
   INITARRAY(&rik,Readintkeys);
-  setreadintkeys(&rik,"totallength",totallength,env);
-  setreadintkeys(&rik,"specialcharacters",
-                         &suffixarray->specialcharinfo.specialcharacters,env);
-  setreadintkeys(&rik,"specialranges",
-                         &suffixarray->specialcharinfo.specialranges,env);
-  setreadintkeys(&rik,"lengthofspecialprefix",
-                         &suffixarray->specialcharinfo.lengthofspecialprefix,
-                         env);
-  setreadintkeys(&rik,"lengthofspecialsuffix",
-                         &suffixarray->specialcharinfo.lengthofspecialsuffix,
-                         env);
-  setreadintkeys(&rik,"numofsequences",
-                         &numofsequences,env);
-  setreadintkeys(&rik,"numofdbsequences",
-                         &suffixarray->numofdbsequences,env);
-  setreadintkeys(&rik,"numofquerysequences",
-                         NULL,env);
-  setreadintkeys(&rik,"prefixlength",
-                         &prefixlength,env);
-  setreadintkeys(&rik,"integersize",
-                         &integersize,env);
-  setreadintkeys(&rik,"littleendian",
-                      &littleendian,env);
+  SETREADINTKEYS("totallength",totallength);
+  SETREADINTKEYS("specialcharacters",
+                 &suffixarray->specialcharinfo.specialcharacters);
+  SETREADINTKEYS("specialranges",
+                 &suffixarray->specialcharinfo.specialranges);
+  SETREADINTKEYS("lengthofspecialprefix",
+                 &suffixarray->specialcharinfo.lengthofspecialprefix);
+  SETREADINTKEYS("lengthofspecialsuffix",
+                 &suffixarray->specialcharinfo.lengthofspecialsuffix);
+  SETREADINTKEYS("numofsequences",
+                 &numofsequences);
+  SETREADINTKEYS("numofdbsequences",
+                 &suffixarray->numofdbsequences);
+  SETREADINTKEYS("numofquerysequences",
+                 NULL);
+  SETREADINTKEYS("prefixlength",
+                 &suffixarray->prefixlength);
+  SETREADINTKEYS("integersize",
+                 &integersize);
+  SETREADINTKEYS("littleendian",
+                 &littleendian);
   assert(rik.spaceReadintkeys != NULL);
   INITARRAY(&linebuffer,Uchar);
   suffixarray->filenametab = strarray_new(env);
@@ -304,7 +332,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
   Str *tmpfilename;
   FILE *fp;
   bool haserr = false;
-  Uint totallength;
+  Seqpos totallength;
 
   env_error_check(env);
   suffixarray->suftab = NULL;
@@ -345,7 +373,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
     suffixarray->encseq = initencodedseq(true,
 					 NULL,
 					 indexname,
-					 (Uint64) totallength,
+					 totallength,
 					 &suffixarray->specialcharinfo,
 					 suffixarray->alpha,
                                          NULL,
@@ -369,8 +397,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
                     strerror(errno));
       haserr = true;
     }
-    if (!haserr &&
-       (Uint) (numofbytes/sizeof (Uint)) != totallength + 1)
+    if (!haserr && totallength + 1 != (Seqpos) (numofbytes/sizeof (Uint)))
     {
       env_error_set(env,"number of mapped integers = %lu != %lu = "
                         "expected number of integers",
