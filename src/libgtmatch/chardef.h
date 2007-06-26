@@ -7,6 +7,7 @@
 #ifndef CHARDEF_H
 #define CHARDEF_H
 #include <limits.h>
+#include "types.h"
 
 /*
   This file defines some character values used when storing
@@ -35,13 +36,13 @@
   either WILDCARD or SEPARATOR
 */
 
-#define ISSPECIAL(C)    ((C) >= (unsigned char) WILDCARD)
+#define ISSPECIAL(C)    ((C) >= (Uchar) WILDCARD)
 
 /*
   neither WILDCARD nor SEPARATOR
 */
 
-#define ISNOTSPECIAL(C) ((C) < (unsigned char) WILDCARD)
+#define ISNOTSPECIAL(C) ((C) < (Uchar) WILDCARD)
 
 /*
   undefined character, only to be used in conjunction with the Burrows-Wheeler
@@ -54,7 +55,7 @@
   Either special character or UNDEFBWTCHAR
 */
 
-#define ISBWTSPECIAL(C)    ((C) >= (unsigned char) UNDEFBWTCHAR)
+#define ISBWTSPECIAL(C)    ((C) >= (Uchar) UNDEFBWTCHAR)
 
 /*
   the size of the DNA alphabet

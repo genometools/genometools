@@ -19,11 +19,11 @@ int testencodedsequence(const StrArray *filenametab,
                         const Uchar *symbolmap,
                         Env *env)
 {
-  Uint64 pos;
+  Seqpos pos;
   Uchar cc0, cc1;
   Fastabufferstate fbs;
   int retval;
-  PairUint *filelengthtab = NULL;
+  PairSeqpos *filelengthtab = NULL;
   bool haserr = false;
   Encodedsequencescanstate *esr;
 
@@ -48,29 +48,29 @@ int testencodedsequence(const StrArray *filenametab,
     {
       break;
     }
-    cc1 = getencodedchar64(encseq,pos);
+    cc1 = getencodedchar(encseq,pos);
     if (cc0 != cc1)
     {
       /*@ignore@*/
-      env_error_set(env,"position " FormatUint64 
-                        ": correct = %lu != %lu = cc1 (getencodedchar64)",
+      env_error_set(env,"position " FormatSeqpos
+                        ": correct = %u != %u = cc1 (getencodedchar64)",
                          pos,
-                         (Showuint) cc0,
-                         (Showuint) cc1);
+                         (unsigned int) cc0,
+                         (unsigned int) cc1);
       /*@end@*/
       haserr = true;
       break;
     }
-    cc1 = sequentialgetencodedchar64(encseq,esr,pos);
+    cc1 = sequentialgetencodedchar(encseq,esr,pos);
     if (cc0 != cc1)
     {
       /*@ignore@*/
-      env_error_set(env,"position " FormatUint64 
-                        ": correct = %lu != %lu = cc1 "
-                        "(sequentialgetencodedchar64)",
+      env_error_set(env,"position " FormatSeqpos
+                        ": correct = %u != %u = cc1 "
+                        "(sequentialgetencodedchar)",
                          pos,
-                         (Showuint) cc0,
-                         (Showuint) cc1);
+                         (unsigned int) cc0,
+                         (unsigned int) cc1);
       /*@end@*/
       haserr = true;
       break;
@@ -80,8 +80,9 @@ int testencodedsequence(const StrArray *filenametab,
   {
     if (pos != getencseqtotallength(encseq))
     {
-      env_error_set(env,"sequence length must be " FormatUint64 " but is "
-                         FormatUint64,getencseqtotallength(encseq),pos);
+      env_error_set(env,"sequence length must be " FormatSeqpos " but is "
+                         FormatSeqpos,
+                         getencseqtotallength(encseq),pos);
       haserr = true;
     }
   }

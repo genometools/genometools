@@ -15,7 +15,7 @@
 
 typedef struct
 {
-  unsigned long filenum;
+  unsigned int filenum;
   bool indesc,
        firstoverallseq,
        firstseqinfile,
@@ -26,7 +26,7 @@ typedef struct
   unsigned int nextread,
                nextfree;
   Uchar bufspace[FILEBUFFERSIZE];
-  Uint64 totaloffset;
+  Seqpos totaloffset;
   const StrArray *filenametab;
   const Uchar *symbolmap;
   Seqpos lastspeciallength;

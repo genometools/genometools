@@ -1,11 +1,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
+int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
                  void *processsuftabinfo,
-                 Uint64 totallength,
-                 Uint specialcharacters,
-                 Uint specialranges,
+                 Seqpos totallength,
+                 Seqpos specialcharacters,
+                 Seqpos specialranges,
                  const Encodedsequence *encseq,
                  unsigned int numofchars,
                  unsigned int prefixlength,

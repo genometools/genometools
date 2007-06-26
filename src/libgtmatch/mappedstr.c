@@ -43,15 +43,15 @@
           CODE = MULT4((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) | (CC);\
         } else\
         {\
-          CODE = ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) * (NUMOFCHARS)\
-                  + (CC);\
+          CODE = (Codetype) ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) *\
+                            (NUMOFCHARS) + (CC);\
         }
 #else
 #define SUBTRACTLCHARANDSHIFT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER)\
         CODE = ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) * (NUMOFCHARS)
 
 #define SUBTRACTLCHARSHIFTADDNEXT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER,CC)\
-        CODE = ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) * (NUMOFCHARS) + (CC)
+        CODE = (Codetype) (((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) * (NUMOFCHARS) + (CC))
 #endif
 
 #define ARRAY2DIMMALLOC(ARRAY2DIM, ROWS, COLUMNS, TYPE)\
@@ -287,8 +287,10 @@ static void updatespecialpositions(Streamstate *spwp,
   {
     if (spwp->lengthwithoutspecial == spwp->kmersize)
     {
-      SUBTRACTLCHARSHIFTADDNEXT(spwp->codewithoutspecial,lchar,
-                                spwp->numofchars,spwp->multimappower[0],
+      SUBTRACTLCHARSHIFTADDNEXT(spwp->codewithoutspecial,
+                                lchar,
+                                spwp->numofchars,
+                                spwp->multimappower[0],
                                 charcode);
     } else
     {
@@ -300,11 +302,11 @@ static void updatespecialpositions(Streamstate *spwp,
 }
 
 static void shiftrightwithchar(
-               void(*processkmercode)(void *,Codetype,Uint64,
+               void(*processkmercode)(void *,Codetype,Seqpos,
                                       const Firstspecialpos *,Env *),
                void *processkmercodeinfo,
                Streamstate *spwp,
-               Uint64 currentposition,
+               Seqpos currentposition,
                Uchar charcode,
                Env *env)
 {
@@ -433,7 +435,7 @@ static void filllargestchartable(unsigned int **filltable,
 
 int getfastastreamkmers(
         const StrArray *filenametab,
-        void(*processkmercode)(void *,Codetype,Uint64,
+        void(*processkmercode)(void *,Codetype,Seqpos,
                                const Firstspecialpos *,Env *),
         void *processkmercodeinfo,
         unsigned int numofchars,
@@ -446,7 +448,7 @@ int getfastastreamkmers(
   bool indesc, firstseq = true;
   unsigned int overshoot;
   unsigned int linenum = (unsigned int) 1;
-  Uint64 currentposition = 0;
+  Seqpos currentposition = 0;
   Streamstate spwp;
   Genericstream inputstream;
   Uchar charcode;
@@ -546,8 +548,8 @@ int getfastastreamkmers(
 
 void getencseqkmers(
         const Encodedsequence *encseq,
-        Uint64 totallength,
-        void(*processkmercode)(void *,Codetype,Uint64,
+        Seqpos totallength,
+        void(*processkmercode)(void *,Codetype,Seqpos,
                                const Firstspecialpos *,Env *),
         void *processkmercodeinfo,
         unsigned int numofchars,
@@ -555,7 +557,7 @@ void getencseqkmers(
         Env *env)
 {
   unsigned int overshoot;
-  Uint64 currentposition;
+  Seqpos currentposition;
   Streamstate spwp;
   Uchar charcode;
   Encodedsequencescanstate *esr;
@@ -574,7 +576,7 @@ void getencseqkmers(
   esr = initEncodedsequencescanstate(encseq,env);
   for (currentposition = 0; currentposition<totallength; currentposition++)
   {
-    charcode = sequentialgetencodedchar64(encseq,esr,currentposition);
+    charcode = sequentialgetencodedchar(encseq,esr,currentposition);
     shiftrightwithchar(processkmercode,processkmercodeinfo,
                        &spwp,currentposition,charcode,env);
   }

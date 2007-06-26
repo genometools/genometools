@@ -26,11 +26,11 @@
 static Codetype qgram2codefillspecial(unsigned int numofchars,
                                       unsigned int kmersize,
                                       const Encodedsequence *encseq,
-                                      Uint64 startpos,
-                                      Uint64 totallength)
+                                      Seqpos startpos,
+                                      Seqpos totallength)
 {
   Codetype integercode;
-  Uint64 pos;
+  Seqpos pos;
   bool foundspecial;
   Uchar cc;
 
@@ -40,7 +40,7 @@ static Codetype qgram2codefillspecial(unsigned int numofchars,
     foundspecial = true;
   } else
   {
-    cc = getencodedchar64(encseq,startpos);
+    cc = getencodedchar(encseq,startpos);
     if (ISSPECIAL(cc))
     {
       integercode = numofchars - 1;
@@ -51,7 +51,7 @@ static Codetype qgram2codefillspecial(unsigned int numofchars,
       foundspecial = false;
     }
   }
-  for (pos = startpos + (Uint64) 1; pos< startpos + (Uint64) kmersize; pos++)
+  for (pos = startpos + 1; pos < startpos + kmersize; pos++)
   {
     if (foundspecial)
     {
@@ -64,7 +64,7 @@ static Codetype qgram2codefillspecial(unsigned int numofchars,
         foundspecial = true;
       } else
       {
-        cc = getencodedchar64(encseq,pos);
+        cc = getencodedchar(encseq,pos);
         if (ISSPECIAL(cc))
         {
           ADDNEXTCHAR(integercode,numofchars-1,numofchars);
@@ -83,7 +83,7 @@ DECLAREARRAYSTRUCT(Codetype);
 
 static void outkmeroccurrence(void *processinfo,
                               Codetype code,
-                              /*@unused@*/ Uint64 position,
+                              /*@unused@*/ Seqpos position,
                               /*@unused@*/ const Firstspecialpos
                                                  *firstspecialposition,
                               Env *env)
@@ -97,10 +97,10 @@ static void collectkmercode(ArrayCodetype *codelist,
                             const Encodedsequence *encseq,
                             unsigned int kmersize,
                             unsigned int numofchars,
-                            Uint64 stringtotallength,
+                            Seqpos stringtotallength,
                             Env *env)
 {
-  Uint64 offset;
+  Seqpos offset;
   Codetype code;
 
   for (offset=0; offset<=stringtotallength; offset++)
@@ -121,7 +121,7 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
                             const char *characters,
                             Env *env)
 {
-  Uint i;
+  unsigned long i;
   char buffer1[64+1], buffer2[64+1];
 
   if (codeliststream->nextfreeCodetype != codeliststring->nextfreeCodetype)
@@ -147,12 +147,12 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
                       kmersize,
                       characters);
       env_error_set(env,
-                    "codeliststream[%lu] = %lu != %lu = "
+                    "codeliststream[%lu] = %u != %u = "
                     "codeliststring[%lu]\n%s != %s",
-                    (Showuint) i,
-                    (Showuint) codeliststream->spaceCodetype[i],
-                    (Showuint) codeliststring->spaceCodetype[i],
-                    (Showuint) i,
+                    i,
+                    codeliststream->spaceCodetype[i],
+                    codeliststring->spaceCodetype[i],
+                    i,
                     buffer1,
                     buffer2);
       return -1;
@@ -165,7 +165,7 @@ static int verifycodelists(const Encodedsequence *encseq,
                            const Uchar *characters,
                            unsigned int kmersize,
                            unsigned int numofchars,
-                           Uint64 stringtotallength,
+                           Seqpos stringtotallength,
                            const ArrayCodetype *codeliststream,
                            Env *env)
 {

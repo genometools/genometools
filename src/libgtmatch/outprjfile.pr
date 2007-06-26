@@ -3,9 +3,9 @@ extern "C" {
 #endif
 int outprjfile(const Str *indexname,
                const StrArray *filenametab,
-               const PairUint *filelengthtab,
-               Uint64 totallength,
-               Uint numofsequences,
+               const PairSeqpos *filelengthtab,
+               Seqpos totallength,
+               unsigned long numofsequences,
                const Specialcharinfo *specialcharinfo,
                unsigned int prefixlength,
                Env *env);

@@ -22,10 +22,11 @@ typedef enum
 {
   UcharType,
   UshortType,
-  UintType,
-  PairSeqposType,
+  Uint32Type,
   Uint64Type,
-  PairUint64Type
+  BitstringType,
+  SeqposType,
+  PairSeqposType
 } Typespec;
 
 typedef struct

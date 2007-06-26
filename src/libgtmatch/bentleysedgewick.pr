@@ -1,16 +1,16 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void sortallbuckets(Uint *suftabptr,
+void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
-                    const Uint *leftborder,
-                    const Uint *countspecialcodes,
-                    Uint totallength,
+                    const Seqpos *leftborder,
+                    const Seqpos *countspecialcodes,
+                    Seqpos totallength,
                     unsigned int numofchars,
                     unsigned int prefixlength,
                     Codetype mincode,
                     Codetype maxcode,
-                    Uint widthofpart,
+                    uint64_t widthofpart,
                     Env *env);
 
 #ifdef __cplusplus

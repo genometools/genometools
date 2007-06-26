@@ -28,7 +28,7 @@ do
   fi
 done
 
-bignum=-DBIGNUM32
+#bignum=-DBIGNUM32
 if test $icc -eq 1
 then
   make CC='ccache icc' CFLAGS='-O3 ${bignum} -wd1418,869,981' LD='icc' CXX='icc' $*
@@ -40,3 +40,5 @@ else
     make CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum}" LDFLAGS="-m32" $*
   fi
 fi
+
+#make splint-gtmatch

@@ -13,7 +13,7 @@
 
 typedef struct
 {
-  unsigned long numofdbsequences;
+  unsigned int numofdbsequences;
   StrArray *filenametab;
   PairSeqpos *filelengthtab;
   unsigned int prefixlength;

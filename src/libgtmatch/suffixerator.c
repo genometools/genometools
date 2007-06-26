@@ -27,14 +27,14 @@
 
 #define PREFIXLENBITS   4
 #define CODEBITS        (32-PREFIXLENBITS)
-#define MAXPREFIXLENGTH ((((unsigned int) 1) << PREFIXLENBITS) - 1)
-#define MAXCODEVALUE    ((((unsigned int) 1) << CODEBITS) - 1)
+#define MAXPREFIXLENGTH ((((int32_t) 1) << PREFIXLENBITS) - 1)
+#define MAXCODEVALUE    ((((int32_t) 1) << CODEBITS) - 1)
 
 typedef struct
 {
-  unsigned int maxprefixlen:PREFIXLENBITS;
-  unsigned int code:CODEBITS;
-  Uint position; /* get rid of this by using information from encseq */
+  int32_t maxprefixlen:PREFIXLENBITS;
+  int32_t code:CODEBITS;
+  Seqpos position; /* get rid of this by using information from encseq */
 } Codeatposition;
 
 DECLAREARRAYSTRUCT(Codeatposition);
@@ -46,29 +46,40 @@ typedef struct
   bool storespecials;
   Codetype currentmincode,
            currentmaxcode;
-  unsigned int *filltable,
-               *basepower;
-  Uint nextfreeCodeatposition,
-       *leftborder,
-       *countspecialcodes,
-       *suftab,
-       *suftabptr;
+  int32_t *filltable,
+          *basepower;
+  Seqpos *leftborder,
+         *countspecialcodes,
+         *suftab,
+         *suftabptr;
+  unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
 } Collectedsuffixes;
 
-static int initbasepower(unsigned int **basepower,
-                         unsigned int **filltable,
-                         unsigned int base,
-                         unsigned int len,
+typedef struct
+{
+  Seqpos totallength,
+         *spacesuffixstarts;
+  unsigned long nextfreeUint, allocatedUint; 
+  int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *);
+  void *processsuftabinfo;
+  Env *env;
+} InsertCompletespecials;
+
+
+static int initbasepower(int32_t **basepower,
+                         int32_t **filltable,
+                         int32_t base,
+                         int32_t len,
                          Env *env)
 {
-  unsigned int thepower = (unsigned int) 1, i, minfailure;
+  int32_t thepower = (int32_t) 1, i, minfailure;
   bool haserr = false;
 
   env_error_check(env);
-  ALLOCASSIGNSPACE(*basepower,NULL,unsigned int,len+1);
-  ALLOCASSIGNSPACE(*filltable,NULL,unsigned int,len);
-  minfailure = (~(unsigned int) 0)/base;
+  ALLOCASSIGNSPACE(*basepower,NULL,int32_t,len+1);
+  ALLOCASSIGNSPACE(*filltable,NULL,int32_t,len);
+  minfailure = INT32_MAX/base;
   for (i=0; /* Nothing */; i++)
   {
     (*basepower)[i] = thepower;
@@ -102,7 +113,7 @@ static int initbasepower(unsigned int **basepower,
 
 static void updatekmercount(void *processinfo,
                             Codetype code,
-                            Uint64 position,
+                            Seqpos position,
                             const Firstspecialpos *firstspecial,
                             Env *env)
 {
@@ -120,8 +131,7 @@ static void updatekmercount(void *processinfo,
 
         cp.code = code;
         cp.maxprefixlen = firstspecial->specialpos;
-        CHECKUint64Cast(position + (Uint64) firstspecial->specialpos);
-        cp.position = (Uint) (position + firstspecial->specialpos);
+        cp.position = (Seqpos) (position + firstspecial->specialpos);
         csf->spaceCodeatposition[csf->nextfreeCodeatposition++] = cp;
         csf->storespecials = false;
         csf->leftborder[code]++;
@@ -144,7 +154,7 @@ static void updatekmercount(void *processinfo,
 
 static void insertwithoutspecial(void *processinfo,
                                  Codetype code,
-                                 Uint64 position,
+                                 Seqpos position,
                                  const Firstspecialpos *firstspecial,
                                  /*@unused@*/ Env *env)
 {
@@ -154,21 +164,20 @@ static void insertwithoutspecial(void *processinfo,
 
     if (code >= csf->currentmincode && code <= csf->currentmaxcode)
     {
-      Uint stidx;
+      Seqpos stidx;
 
       stidx = --csf->leftborder[code];
 #ifdef LONGOUTPUT
       printf("insert suffix %lu at location %lu\n",(Showuint) position,
                                                    (Showuint) stidx);
 #endif
-      CHECKUint64Cast(position);
-      csf->suftabptr[stidx] = (Uint) position;
+      csf->suftabptr[stidx] = position;
     }
   }
 }
 
 static void reversespecialcodes(Codeatposition *spaceCodeatposition,
-                                Uint nextfreeCodeatposition)
+                                unsigned long nextfreeCodeatposition)
 {
   Codeatposition *front, *back, tmp;
 
@@ -182,13 +191,13 @@ static void reversespecialcodes(Codeatposition *spaceCodeatposition,
   }
 }
 
-static Codetype codedownscale(const unsigned int *filltable,
-                              const unsigned int *basepower,
+static Codetype codedownscale(const int32_t *filltable,
+                              const int32_t *basepower,
                               Codetype code,
-                              unsigned int prefixindex,
-                              unsigned int maxprefixlen)
+                              int32_t prefixindex,
+                              int32_t maxprefixlen)
 {
-  unsigned int remain;
+  int32_t remain;
 
   code -= filltable[maxprefixlen];
   remain = maxprefixlen-prefixindex;
@@ -199,7 +208,7 @@ static Codetype codedownscale(const unsigned int *filltable,
 }
 
 static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
-                               /*@unused@*/ Uint64 totallength,
+                               /*@unused@*/ Seqpos totallength,
                                unsigned int numofchars,
                                unsigned int prefixlength,
                                Collectedsuffixes *csf,
@@ -208,7 +217,7 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
 {
   Codetype code;
   unsigned int prefixindex;
-  Uint insertindex, j, stidx;
+  unsigned long insertindex, j, stidx;
 
   for (prefixindex=0; prefixindex < prefixlength; prefixindex++)
   {
@@ -260,45 +269,36 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
   }
 }
 
-typedef struct
-{
-  Uint64 totallength;
-  Uint nextfreeUint, allocatedUint, *spaceUint;
-  int(*processsuftab)(void *,const Uint *,Uint,Env *);
-  void *processsuftabinfo;
-  Env *env;
-} InsertCompletespecials;
-
 static int insertfullspecialrange(InsertCompletespecials *ics,
-                                   Uint startpos,
-                                   Uint endpos)
+                                  Seqpos startpos,
+                                  Seqpos endpos)
 {
-  Uint pos;
+  Seqpos pos;
 
   for (pos = startpos; pos < endpos; pos++)
   {
     if(ics->nextfreeUint >= ics->allocatedUint)
     {
       if (ics->processsuftab(ics->processsuftabinfo,
-                             ics->spaceUint,
-                             ics->nextfreeUint,
+                             ics->spacesuffixstarts,
+                             (Seqpos) ics->nextfreeUint,
                              ics->env) != 0)
       {
         return -1;
       }
       ics->nextfreeUint = 0;
     }
-    ics->spaceUint[ics->nextfreeUint++] = pos;
+    ics->spacesuffixstarts[ics->nextfreeUint++] = pos;
   }
   return 0;
 }
+
 static int insertfullspecialpair(void *info,
-                                 const PairUint64 *pair,/*@unused@*/ Env *env)
+                                 const PairSeqpos *pair,/*@unused@*/ Env *env)
 {
   InsertCompletespecials *ics = (InsertCompletespecials *) info;
 
-  CHECKUint64Cast(pair->uint1);
-  if(insertfullspecialrange(ics,(Uint) pair->uint0,(Uint) pair->uint1) != 0)
+  if(insertfullspecialrange(ics,pair->uint0,pair->uint1) != 0)
   {
     return -1;
   }
@@ -307,17 +307,17 @@ static int insertfullspecialpair(void *info,
 
 static int insertallfullspecials(
                 const Encodedsequence *encseq,
-                Uint64 totallength,
-                Uint largestwidth,
-                Uint *suftab,
-                int(*processsuftab)(void *,const Uint *,Uint,Env *),
+                Seqpos totallength,
+                unsigned long largestwidth,
+                Seqpos *suftab,
+                int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
                 void *processsuftabinfo,
                 Env *env)
 {
   InsertCompletespecials ics;
 
   ics.totallength = totallength;
-  ics.spaceUint = suftab;
+  ics.spacesuffixstarts = suftab;
   ics.allocatedUint = largestwidth;
   ics.nextfreeUint = 0;
   ics.processsuftab = processsuftab;
@@ -327,17 +327,15 @@ static int insertallfullspecials(
   {
     return -1;
   }
-  CHECKUint64Cast(totallength+1);
-  if(insertfullspecialrange(&ics,(Uint) totallength,
-                            (Uint) (totallength+1)) != 0)
+  if(insertfullspecialrange(&ics,totallength,totallength+1) != 0)
   {
     return -1;
   }
   if(ics.nextfreeUint > 0)
   {
     if (ics.processsuftab(ics.processsuftabinfo,
-                          ics.spaceUint,
-                          ics.nextfreeUint,
+                          ics.spacesuffixstarts,
+                          (Seqpos) ics.nextfreeUint,
                           env) != 0)
     {
       return -1;
@@ -346,11 +344,11 @@ static int insertallfullspecials(
   return 0;
 }
 
-int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
+int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
                  void *processsuftabinfo,
-                 Uint64 totallength,
-                 Uint specialcharacters,
-                 Uint specialranges,
+                 Seqpos totallength,
+                 Seqpos specialcharacters,
+                 Seqpos specialranges,
                  const Encodedsequence *encseq,
                  unsigned int numofchars,
                  unsigned int prefixlength,
@@ -359,13 +357,12 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
                  Env *env)
 {
   unsigned int numofallcodes = 0, numofspecialcodes, part;
-  Uint *optr;
+  Seqpos *optr;
   Collectedsuffixes csf;
   Suftabparts *suftabparts = NULL;
   bool haserr = false;
 
   env_error_check(env);
-  CHECKUint64Cast(totallength);
   ALLOCASSIGNSPACE(csf.spaceCodeatposition,NULL,
                    Codeatposition,specialranges+1);
   csf.nextfreeCodeatposition = 0;
@@ -405,14 +402,14 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
   if (!haserr)
   {
     Codetype specialcode;
-    Uint largestwidth;
+    Seqpos largestwidth;
 
     assert(csf.basepower != NULL);
     numofspecialcodes = csf.basepower[prefixlength-1];
-    ALLOCASSIGNSPACE(csf.leftborder,NULL,Uint,numofallcodes+1);
+    ALLOCASSIGNSPACE(csf.leftborder,NULL,Seqpos,numofallcodes+1);
     memset(csf.leftborder,0,
            sizeof (*csf.leftborder) * (size_t) numofallcodes);
-    ALLOCASSIGNSPACE(csf.countspecialcodes,NULL,Uint,numofspecialcodes);
+    ALLOCASSIGNSPACE(csf.countspecialcodes,NULL,Seqpos,numofspecialcodes);
     memset(csf.countspecialcodes,0,
            sizeof (*csf.countspecialcodes) *
                   (size_t) numofspecialcodes);
@@ -433,16 +430,16 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
     {
       *optr += *(optr-1);
     }
-    csf.leftborder[numofallcodes] = (Uint) (totallength-specialcharacters);
+    csf.leftborder[numofallcodes] = (Seqpos) (totallength-specialcharacters);
     suftabparts = newsuftabparts(numofparts,
                                  csf.leftborder,
                                  numofallcodes,
                                  totallength - specialcharacters,
-                                 specialcharacters + UintConst(1),
+                                 specialcharacters + 1,
                                  env);
     assert(suftabparts != NULL);
     largestwidth = stpgetlargestwidth(suftabparts);
-    ALLOCASSIGNSPACE(csf.suftab,NULL,Uint,largestwidth);
+    ALLOCASSIGNSPACE(csf.suftab,NULL,Seqpos,largestwidth);
     reversespecialcodes(csf.spaceCodeatposition,csf.nextfreeCodeatposition);
     for (part = 0; part < stpgetnumofparts(suftabparts); part++)
     {
@@ -450,11 +447,11 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
       csf.suftabptr = csf.suftab - stpgetcurrentsuftaboffset(part,suftabparts);
       csf.currentmaxcode = stpgetcurrentmaxcode(part,suftabparts);
       derivespecialcodes(encseq,
-                         (Uint64) totallength,
+                         totallength,
                          numofchars,
                          prefixlength,
                          &csf,
-                         stpgetnumofparts(suftabparts) == UintConst(1) 
+                         (stpgetnumofparts(suftabparts) == (unsigned int) 1)
                            ? true : false,
                          env);
       deliverthetime(stdout,mtime,"inserting suffixes into buckets",env);
@@ -466,17 +463,16 @@ int suffixerator(int(*processsuftab)(void *,const Uint *,Uint,Env *),
                      prefixlength,
                      env);
       deliverthetime(stdout,mtime,"sorting the buckets",env);
-      CHECKUint64Cast(totallength); 
       sortallbuckets(csf.suftabptr,
                      encseq,
                      csf.leftborder,
                      csf.countspecialcodes,
-                     (Uint) totallength,
+                     totallength,
                      numofchars,
                      prefixlength,
                      csf.currentmincode,
                      csf.currentmaxcode,
-                     (Uint) stpgetcurrentsumofwdith(part,suftabparts),
+                     stpgetcurrentsumofwdith(part,suftabparts),
                      env);
       if (processsuftab != NULL)
       {

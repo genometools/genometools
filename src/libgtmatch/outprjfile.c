@@ -20,7 +20,7 @@
 static void showprjinfo(FILE *outprj,
                         const StrArray *filenametab,
                         const PairSeqpos *filelengthtab,
-                        Uint64 totallength,
+                        /*@unused@*/ Seqpos totallength,
                         unsigned long numofsequences,
                         const Specialcharinfo *specialcharinfo,
                         unsigned int prefixlength)
@@ -37,9 +37,9 @@ static void showprjinfo(FILE *outprj,
                                          (Showuint) filelengthtab[i].uint1);
   }
   STAMP;
-  /*@ignore@*/
-  fprintf(outprj,"totallength=" FormatUint64 "\n",totallength);
-  /*@end@*/
+#ifndef S_SPLINT_S
+  fprintf(outprj,"totallength=" FormatSeqpos "\n",totallength);
+#endif
   fprintf(outprj,"specialcharacters=%lu\n",
                   (Showuint) specialcharinfo->specialcharacters);
   fprintf(outprj,"specialranges=%lu\n",
@@ -59,7 +59,7 @@ static void showprjinfo(FILE *outprj,
 int outprjfile(const Str *indexname,
                const StrArray *filenametab,
                const PairSeqpos *filelengthtab,
-               Uint64 totallength,
+               Seqpos totallength,
                unsigned long numofsequences,
                const Specialcharinfo *specialcharinfo,
                unsigned int prefixlength,

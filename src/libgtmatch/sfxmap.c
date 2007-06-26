@@ -19,16 +19,28 @@
 
 #define DBFILEKEY "dbfile="
 
+#define SETREADINTKEYS(VALNAME,VAL)\
+        if((VAL) == NULL)\
+        {\
+          setreadintkeys(&rik,VALNAME,VAL,0,env);\
+        } else\
+        {\
+          setreadintkeys(&rik,VALNAME,VAL,sizeof(*(VAL)),env);\
+        }
+
+
+typedef union
+{
+  uint32_t smallvalue;
+  uint64_t bigvalue;
+} Smallorbigint;
+
 typedef struct
 {
   const char *keystring;
-  union 
-  {
-    unsigned long long *bigvalue;
-    unsigned int *smallvalue;
-  } value;
-  size_t sizeval;
-  bool found;
+  uint32_t *smallvalueptr;
+  uint64_t *bigvalueptr;
+  bool ptrdefined, found;
 } Readintkeys;
 
 DECLAREARRAYSTRUCT(Readintkeys);
@@ -43,45 +55,51 @@ static void setreadintkeys(ArrayReadintkeys *riktab,
 
   GETNEXTFREEINARRAY(riktabptr,riktab,Readintkeys,1);
   riktabptr->keystring = keystring;
-  riktabptr->sizeval = sizeval;
-  if(sizeval == (size_t) 4)
+  switch(sizeval)
   {
-    assert(sizeof(unsigned int) == 4);
-    riktabptr->value.smallvalue = (unsigned int *) valueptr;
-  } else
-  {
-    if(sizeval == (size_t) 8)
-    {
-      assert(sizeof(unsigned long long) == 8);
-      riktabptr->value.bigvalue = (unsigned long long *) valueptr;
-    } else
-    {
-      fprintf(stderr,"sizeval must be 4 or 8\n");
-      exit(EXIT_FAILURE);
-    }
+    case 0: riktabptr->smallvalueptr = NULL;
+            riktabptr->bigvalueptr = NULL;
+            riktabptr->ptrdefined = false;
+            break;
+    case 4: assert(sizeof(uint32_t) == (size_t) 4);
+            riktabptr->smallvalueptr = valueptr;
+            riktabptr->bigvalueptr = NULL;
+            riktabptr->ptrdefined = true;
+            break;
+    case 8: assert(sizeof(uint64_t) == (size_t) 8);
+            riktabptr->bigvalueptr = valueptr;
+            riktabptr->smallvalueptr = NULL;
+            riktabptr->ptrdefined = true;
+            break;
+    default: fprintf(stderr,"sizeval must be 0 or 4 or 8\n");
+             exit(EXIT_FAILURE);
   }
   riktabptr->found = false;
 }
 
 static int scanuintintline(unsigned int *lengthofkey,
-                           void *value,
+                           Smallorbigint *smallorbigint,
                            const ArrayUchar *linebuffer,
                            Env *env)
 {
-  Scaninteger readint;
-  unsigned int i;
+  int64_t readint;
+  unsigned long i;
   bool found = false;
+  int retval = 0;
 
   env_error_check(env);
-  for (i=0; i<(unsigned int) linebuffer->nextfreeUchar; i++)
+  for (i=0; i<linebuffer->nextfreeUchar; i++)
   {
     if (linebuffer->spaceUchar[i] == '=')
     {
-      *lengthofkey = i;
+      *lengthofkey = (unsigned int) i;
       found = true;
-      if (sscanf((char *) (linebuffer->spaceUchar + i + 1),"%ld",
-                &readint) != 1 ||
-         readint < (Scaninteger) 0)
+
+#ifndef S_SPLINT_S
+      if (sscanf((const char *) (linebuffer->spaceUchar + i + 1),
+                 "%020" SCNd64,
+                 &readint) != 1 ||
+         readint < (int64_t) 0)
       {
         env_error_set(env,"cannot find non-negative integer in \"%*.*s\"",
                            (Fieldwidthtype) (linebuffer->nextfreeUchar - (i+1)),
@@ -89,7 +107,16 @@ static int scanuintintline(unsigned int *lengthofkey,
                            (const char *) (linebuffer->spaceUchar + i + 1));
         return -1;
       }
-      *value = (Uint) readint;
+#endif
+      if(readint <= (int64_t) UINT32_MAX)
+      {
+        smallorbigint->smallvalue = (uint32_t) readint;
+        retval = 0;
+      } else
+      {
+        smallorbigint->bigvalue = (uint64_t) readint;
+        retval = 1;
+      }
       break;
     }
   }
@@ -101,13 +128,13 @@ static int scanuintintline(unsigned int *lengthofkey,
                        (const char *) linebuffer->spaceUchar);
     return -2;
   }
-  return 0;
+  return retval;
 }
 
 static int allkeysdefined(const Str *prjfile,const ArrayReadintkeys *rik,
                           Env *env)
 {
-  Uint i;
+  unsigned long i;
 
   env_error_check(env);
   for (i=0; i<rik->nextfreeReadintkeys; i++)
@@ -119,38 +146,47 @@ static int allkeysdefined(const Str *prjfile,const ArrayReadintkeys *rik,
                          rik->spaceReadintkeys[i].keystring);
       return -1;
     }
-    if (rik->spaceReadintkeys[i].valueptr == NULL)
+    printf("%s=",rik->spaceReadintkeys[i].keystring);
+    if (rik->spaceReadintkeys[i].ptrdefined)
     {
-      printf("%s=0\n",rik->spaceReadintkeys[i].keystring);
+      if (rik->spaceReadintkeys[i].smallvalueptr != NULL)
+      {
+#ifndef S_SPLINT_S
+        printf("%020" PRIu32 "\n",
+               *(rik->spaceReadintkeys[i].smallvalueptr));
+#endif
+      } else
+      {
+        if (rik->spaceReadintkeys[i].bigvalueptr != NULL)
+        {
+#ifndef S_SPLINT_S
+          printf("%020" PRIu64 "\n",
+                 *(rik->spaceReadintkeys[i].bigvalueptr));
+#endif
+        } else
+        {
+          assert(false);
+        }
+      }
     } else
     {
-      printf("%s=%lu\n",rik->spaceReadintkeys[i].keystring,
-                        (Showuint) *(rik->spaceReadintkeys[i].valueptr));
+      printf("0\n");
     }
   }
   return 0;
 }
-
-#define SETREADINTKEYS(VALNAME,VAL)
-        if((VAL) == NULL)\
-        {\
-          setreadintkeys(&rik,VALNAME,VAL,(size_t) 4,env);\
-        } else\
-        {\
-          setreadintkeys(&rik,VALNAME,VAL,sizeof(*(VAL)),env);\
-        }
 
 static int scanprjfileviafileptr(Suffixarray *suffixarray,
                                  Seqpos *totallength,
                                  const Str *prjfile,FILE *fpin,Env *env)
 {
   ArrayUchar linebuffer;
-  Uint uintvalue, numofsequences, integersize, littleendian;
-  unsigned int linenum, lengthofkey, i;
-  unsigned long numoffiles = 0, numofallocatedfiles = 0;
+  unsigned int integersize, littleendian, linenum, lengthofkey;
+  unsigned long i, numofsequences, numoffiles = 0, numofallocatedfiles = 0;
   size_t dbfilelen = strlen(DBFILEKEY);
   int retval;
   bool found, haserr = false;
+  Smallorbigint smallorbigint;
   ArrayReadintkeys rik;
 
   env_error_check(env);
@@ -191,17 +227,19 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
        memcmp(DBFILEKEY,linebuffer.spaceUchar,dbfilelen) == 0)
     {
       char *tmpfilename;
-      Scaninteger readint1, readint2;
+      int64_t readint1, readint2;
 
       if (numoffiles >= numofallocatedfiles)
       {
         numofallocatedfiles += 2;
         ALLOCASSIGNSPACE(suffixarray->filelengthtab,suffixarray->filelengthtab,
-                         PairUint,numofallocatedfiles);
+                         PairSeqpos,numofallocatedfiles);
       }
       assert(suffixarray->filelengthtab != NULL);
       ALLOCASSIGNSPACE(tmpfilename,NULL,char,linebuffer.nextfreeUchar);
-      if (sscanf((const char *) linebuffer.spaceUchar,"dbfile=%s %ld %ld\n",
+#ifndef S_SPLINT_S
+      if (sscanf((const char *) linebuffer.spaceUchar,
+                  "dbfile=%s %020" SCNd64 " %020" SCNd64 "\n",
                    tmpfilename,
                    &readint1,
                    &readint2) != 3)
@@ -214,7 +252,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         haserr = true;
         break;
       }
-      if (readint1 < (Scaninteger) 1 || readint2 < (Scaninteger) 1)
+#endif
+      if (readint1 < (int64_t) 1 || readint2 < (int64_t) 1)
       {
         env_error_set(env,"need positive integers in line %*.*s",
                           (int) linebuffer.nextfreeUchar,
@@ -226,8 +265,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       {
         strarray_add_cstr(suffixarray->filenametab,tmpfilename,env);
         FREESPACE(tmpfilename);
-        suffixarray->filelengthtab[numoffiles].uint0 = (Uint) readint1;
-        suffixarray->filelengthtab[numoffiles].uint1 = (Uint) readint2;
+        suffixarray->filelengthtab[numoffiles].uint0 = (Seqpos) readint1;
+        suffixarray->filelengthtab[numoffiles].uint1 = (Seqpos) readint2;
         printf("%s%s %lu %lu\n",
                 DBFILEKEY,
                 strarray_get(suffixarray->filenametab,numoffiles),
@@ -240,7 +279,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     } else
     {
       retval = scanuintintline(&lengthofkey,
-                               &uintvalue,
+                               &smallorbigint,
                                &linebuffer,
                                env);
       if (retval < 0)
@@ -252,13 +291,35 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       for (i=0; i<rik.nextfreeReadintkeys; i++)
       {
         if (memcmp(linebuffer.spaceUchar,
-                  rik.spaceReadintkeys[i].keystring,
-                  (size_t) lengthofkey) == 0)
+                   rik.spaceReadintkeys[i].keystring,
+                   (size_t) lengthofkey) == 0)
         {
           rik.spaceReadintkeys[i].found = true;
-          if (rik.spaceReadintkeys[i].valueptr != NULL)
+          if (rik.spaceReadintkeys[i].ptrdefined)
           {
-            *(rik.spaceReadintkeys[i].valueptr) = uintvalue;
+            if(rik.spaceReadintkeys[i].smallvalueptr != NULL)
+            {
+              if(retval == 1)
+              {
+                env_error_set(env,"bigvalue %llu does not fit into %s",
+                              smallorbigint.bigvalue,
+                              rik.spaceReadintkeys[i].keystring);
+                haserr = true;
+                break;
+              }
+              *(rik.spaceReadintkeys[i].smallvalueptr) 
+                = smallorbigint.smallvalue;
+            } else
+            {
+              if(retval == 1)
+              {
+                *(rik.spaceReadintkeys[i].bigvalueptr) = smallorbigint.bigvalue;
+              } else
+              {
+                *(rik.spaceReadintkeys[i].bigvalueptr) 
+                  = (uint64_t) smallorbigint.smallvalue;
+              }
+            }
           }
           found = true;
           break;
@@ -281,27 +342,27 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   {
     haserr = true;
   }
-  CHECKUintCast(prefixlength);
-  suffixarray->prefixlength = (unsigned int) prefixlength;
-  if (!haserr && integersize != UintConst(32) && integersize != UintConst(64))
+  if (!haserr && 
+      integersize != (unsigned int) 32 && 
+      integersize != (unsigned int) 64)
   {
     env_error_set(env,"%s contains illegal line defining the integer size",
                   str_get(prjfile));
     haserr = true;
   }
-  if (!haserr && integersize != (Uint) (sizeof (Uint) * CHAR_BIT))
+  if (!haserr && integersize != (unsigned int) (sizeof (Seqpos) * CHAR_BIT))
   {
     env_error_set(env,"index was generated for %lu-bit integers while "
                       "this program uses %lu-bit integers",
                       (Showuint) integersize,
-                      (Showuint) (sizeof (Uint) * CHAR_BIT));
+                      (Showuint) (sizeof (Seqpos) * CHAR_BIT));
     haserr = true;
   }
   if (!haserr)
   {
     if (islittleendian())
     {
-      if (littleendian != UintConst(1))
+      if (littleendian != (unsigned int) 1)
       {
         env_error_set(env,"computer has little endian byte order, while index "
                           "was build on computer with big endian byte order");
@@ -309,7 +370,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
     } else
     {
-      if (littleendian == UintConst(1))
+      if (littleendian == (unsigned int) 1)
       {
         env_error_set(env,"computer has big endian byte order, while index "
                           "was build on computer with little endian byte "
@@ -397,11 +458,11 @@ int mapsuffixarray(Suffixarray *suffixarray,
                     strerror(errno));
       haserr = true;
     }
-    if (!haserr && totallength + 1 != (Seqpos) (numofbytes/sizeof (Uint)))
+    if (!haserr && totallength + 1 != (Seqpos) (numofbytes/sizeof (Seqpos)))
     {
       env_error_set(env,"number of mapped integers = %lu != %lu = "
                         "expected number of integers",
-                         (Showuint) (numofbytes/sizeof (Uint)),
+                         (Showuint) (numofbytes/sizeof (Seqpos)),
                          (Showuint) (totallength + 1));
       env_fa_xmunmap((void *) suffixarray->suftab,env);
       haserr = true;

@@ -6,14 +6,14 @@
 
 {
   Uchar cc;
-  Uint64 pos;
+  Seqpos pos;
   int retval;
   Seqpos currentspecialchar = 0;
-  Uint bitwise = 0;
+  Bitstring bitwise = 0;
   Uchar lastspeciallength = 0;
 #ifndef NOENDPTR
-  Uint *endptrUint, endspecialcells;
-  Uint64 nextcheck;
+  Seqpos *endptrUint, endspecialcells;
+  Seqpos nextcheck;
 #endif
   DECLARESEQBUFFER(encseq->fourcharsinonebyte);
 
@@ -22,10 +22,10 @@
   ALLOCASSIGNSPACE(encseq->specialrangelength,NULL,Uchar,
                    encseq->numofspecialstostore);
 #ifndef NOENDPTR
-  endspecialcells = (Uint) (encseq->totallength/MAXSPECIALTYPE + 1);
-  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,endspecialsubsUint),NULL,Uint,
-                   endspecialcells);
-  nextcheck = (Uint64) MAXSPECIALTYPE;
+  endspecialcells = (Seqpos) (encseq->totallength/MAXSPECIALTYPE + 1);
+  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,endspecialsubsUint),NULL,uintptr_t,
+                   (size_t) endspecialcells);
+  nextcheck = (Seqpos) MAXSPECIALTYPE;
   endptrUint = ACCESSENCSEQ(encseq,endspecialsubsUint);
 #endif
 
@@ -79,7 +79,7 @@
     if (pos == nextcheck)
     {
       *endptrUint++ = currentspecialchar;
-      nextcheck += (Uint64) (MAXSPECIALTYPE+1);
+      nextcheck += (Seqpos) (MAXSPECIALTYPE+1);
     }
 #endif
     UPDATESEQBUFFER(encseq->fourcharsinonebyte,cc);

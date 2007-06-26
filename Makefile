@@ -199,7 +199,7 @@ obj/%.prepro: src/libgtmatch/%.c
 
 obj/%.splint: src/libgtmatch/%.c
 	@echo "[generate $@]"
-	@splint -f $(CURDIR)/testdata/SKsplintoptions -DBIGNUM32 -I$(CURDIR)/src -I$(CURDIR)/obj $<
+	@splint -f $(CURDIR)/testdata/SKsplintoptions -I$(CURDIR)/src -I$(CURDIR)/obj $<
 	@touch $@
 
 obj/%.o: src/tools/%.c

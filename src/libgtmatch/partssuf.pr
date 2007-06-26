@@ -2,27 +2,28 @@
 extern "C" {
 #endif
 Suftabparts *newsuftabparts(unsigned int numofparts,
-                            const Uint *leftborder,
+                            const Seqpos *leftborder,
                             Codetype numofallcodes,
-                            Uint64 numofsuffixestoinsert,
-                            Uint fullspecials,
+                            uint64_t numofsuffixestoinsert,
+                            Seqpos fullspecials,
                             Env *env);
 
 Codetype stpgetcurrentmincode(unsigned int part,
                               const Suftabparts *suftabparts);
 
-Uint64 stpgetcurrentsuftaboffset(unsigned int part,
-                                 const Suftabparts *suftabparts);
+uint64_t stpgetcurrentsuftaboffset(unsigned int part,
+                                   const Suftabparts *suftabparts);
 
 Codetype stpgetcurrentmaxcode(unsigned int part,
                               const Suftabparts *suftabparts);
 
-Uint64 stpgetcurrentsumofwdith(unsigned int part,
+uint64_t stpgetcurrentsumofwdith(unsigned int part,
+                                 const Suftabparts *suftabparts);
+
+Seqpos stpgetcurrentwidtofpart(unsigned int part,
                                const Suftabparts *suftabparts);
 
-Uint stpgetcurrentwidtofpart(unsigned int part,const Suftabparts *suftabparts);
-
-Uint stpgetlargestwidth(const Suftabparts *suftabparts);
+Seqpos stpgetlargestwidth(const Suftabparts *suftabparts);
 
 unsigned int stpgetnumofparts(const Suftabparts *suftabparts);
 

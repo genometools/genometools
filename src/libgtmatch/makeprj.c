@@ -54,7 +54,7 @@ static int updatesumranges(void *key, void *value, void *data,
 
 int scanfastasequence(
         unsigned long *numofsequences,
-        Uint64 *totallength,
+        Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
         const StrArray *filenametab,
         PairSeqpos **filelengthtab,
@@ -63,7 +63,7 @@ int scanfastasequence(
 {
   Fastabufferstate fbs;
   Uchar charcode;
-  Uint64 pos;
+  Seqpos pos;
   int retval;
   bool specialprefix = true;
   Seqpos lastspeciallength = 0;
@@ -91,7 +91,9 @@ int scanfastasequence(
     {
       if (lastspeciallength > 0)
       {
-        adddistribution(specialrangelengths,lastspeciallength,env);
+        CHECKSEQPOSCAST(lastspeciallength);
+        adddistribution(specialrangelengths,
+                        (unsigned long) lastspeciallength,env);
       }
       break;
     }
@@ -109,7 +111,7 @@ int scanfastasequence(
       {
         lastspeciallength++;
       }
-      if (charcode == SEPARATOR)
+      if (charcode == (Uchar) SEPARATOR)
       {
         (*numofsequences)++;
       }
@@ -121,7 +123,9 @@ int scanfastasequence(
       }
       if (lastspeciallength > 0)
       {
-        adddistribution(specialrangelengths,lastspeciallength,env);
+        CHECKSEQPOSCAST(lastspeciallength);
+        adddistribution(specialrangelengths,
+                        (unsigned long) lastspeciallength,env);
         lastspeciallength = 0;
       }
     }

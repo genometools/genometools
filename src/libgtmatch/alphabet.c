@@ -128,7 +128,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
   Uchar cc;
   unsigned cnum, linecount = 0;
   ArrayUchar line;
-  Uint column;
+  unsigned long column;
   bool blankfound, ignore, preamble = true;
 
   env_error_check(env);
@@ -171,11 +171,11 @@ static int readsymbolmapviafp(Alphabet *alpha,
           {
             if (alpha->symbolmap[(unsigned int) cc] != (Uchar) UNDEFCHAR)
             {
-              env_error_set(env,"cannot map symbol '%c' to %lu: "
-                            "it is already mapped to %lu",
+              env_error_set(env,"cannot map symbol '%c' to %u: "
+                            "it is already mapped to %u",
                              cc,
-                             (Showuint) alpha->mapsize,
-                             (Showuint) alpha->symbolmap[(unsigned int) cc]);
+                             alpha->mapsize,
+                             (unsigned int) alpha->symbolmap[(unsigned int) cc]);
               return -1;
             }
             /* get same value */
@@ -479,7 +479,7 @@ void outputalphabet(FILE *fpout,const Alphabet *alpha)
       {
         if (firstinline != alpha->characters[linenum])
         {
-          fprintf(fpout," %c",alpha->characters[linenum]);
+          fprintf(fpout," %c",(int) alpha->characters[linenum]);
         }
         (void) putc('\n',fpout);
         afternewline = true;
@@ -498,7 +498,7 @@ void outputalphabet(FILE *fpout,const Alphabet *alpha)
   }
   if (firstinline != alpha->characters[linenum])
   {
-    fprintf(fpout," %c",alpha->characters[linenum]);
+    fprintf(fpout," %c",(int) alpha->characters[linenum]);
   }
   (void) putc((Fputcfirstargtype) '\n',fpout);
 }

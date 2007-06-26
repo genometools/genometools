@@ -84,7 +84,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
 {
   unsigned char numofchars = 0;
   unsigned long numofsequences;
-  Uint64 totallength;
+  Seqpos totallength;
   Alphabet *alpha;
   Specialcharinfo specialcharinfo;
   PairSeqpos *filelengthtab = NULL;
@@ -172,7 +172,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
     encseq = initencodedseq(true,
                             so->filenametab,
                             NULL,
-                            (Uint64) totallength,
+                            totallength,
                             &specialcharinfo,
                             alpha,
                             str_length(so->str_sat) > 0

@@ -267,7 +267,7 @@ void sortallbuckets(Seqpos *suftabptr,
                     unsigned int prefixlength,
                     Codetype mincode,
                     Codetype maxcode,
-                    Seqpos widthofpart,
+                    uint64_t widthofpart,
                     Env *env)
 {
   Codetype code;
@@ -315,7 +315,7 @@ void sortallbuckets(Seqpos *suftabptr,
                        &mkvauxstack,
                        suftabptr + left,
                        suftabptr + right,
-                       prefixlength,
+                       (Seqpos) prefixlength,
                        env);
     }
   }

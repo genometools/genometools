@@ -63,8 +63,9 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       currentfileadd = 0;
       currentfileread = 0;
       fbs->linenum = (unsigned int) 1;
-      opengenericstream(&fbs->inputstream,strarray_get(fbs->filenametab,
-                                                       fbs->filenum));
+      opengenericstream(&fbs->inputstream,
+                        strarray_get(fbs->filenametab,
+                        (unsigned long) fbs->filenum));
     } else
     {
       if (fbs->inputstream.isgzippedstream)
@@ -76,12 +77,13 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       }
       if (currentchar == EOF)
       {
-        closegenericstream(&fbs->inputstream,strarray_get(fbs->filenametab,
-                                                          fbs->filenum));
+        closegenericstream(&fbs->inputstream,
+                           strarray_get(fbs->filenametab,
+                                        (unsigned long) fbs->filenum));
         fbs->filelengthtab[fbs->filenum].uint0 += currentfileread;
         fbs->filelengthtab[fbs->filenum].uint1 += currentfileadd;
         STAMP;
-        if (fbs->filenum == strarray_size(fbs->filenametab) - 1)
+        if ((unsigned long) fbs->filenum == strarray_size(fbs->filenametab) - 1)
         {
           fbs->complete = true;
         STAMP;
@@ -119,7 +121,7 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
                 {
                   currentfileadd++;
                 }
-                fbs->bufspace[currentposition++] = SEPARATOR;
+                fbs->bufspace[currentposition++] = (Uchar) SEPARATOR;
                 fbs->lastspeciallength++;
               }
               fbs->indesc = true;
@@ -131,7 +133,8 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
                 env_error_set(env,"illegal character '%c':"
                                   " file \"%s\", line %u",
                               currentchar,
-                              strarray_get(fbs->filenametab,fbs->filenum),
+                              strarray_get(fbs->filenametab,
+                                           (unsigned long) fbs->filenum),
                               fbs->linenum);
                 return -1;
               }
