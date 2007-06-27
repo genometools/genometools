@@ -8,11 +8,11 @@
 #define INTCODE_DEF_H
 #include <stdbool.h>
 
-typedef unsigned int Codetype;      /* \Typedef{Codetype} */
+typedef int32_t Codetype;      /* \Typedef{Codetype} */
 
 typedef struct
 {
-  unsigned int specialpos;
+  int32_t specialpos;
   bool defined;
 } Firstspecialpos;
 
