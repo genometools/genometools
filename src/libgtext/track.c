@@ -94,13 +94,13 @@ void track_insert_element(Track *track,
     if (block == NULL)
     {
       block = block_new(env);
-      if (gn_type == gft_mRNA) /* XXX still ugly */
+      if (genome_node_direct_children_do_not_overlap(parent, env))
       {
-        hashtable_add(track->blocks, gn, block, env);
+        hashtable_add(track->blocks, parent, block, env);
       }
       else
       {
-        hashtable_add(track->blocks, parent, block, env);
+        hashtable_add(track->blocks, gn, block, env);
       }
       caption = genome_feature_get_attribute(gn, "Name");
       if (caption == NULL)
@@ -377,6 +377,9 @@ int track_unit_test(Env* env)
   genome_node_set_seqid((GenomeNode*) mRNA1, seqid2);
   genome_node_set_seqid((GenomeNode*) mRNA2, seqid2);
 
+  genome_node_is_part_of_genome_node(parent, mRNA1, env);
+  genome_node_is_part_of_genome_node(parent, mRNA2, env);
+
   Line* l1 = line_new(env);
   Line* l2 = line_new(env);
 
@@ -405,10 +408,10 @@ int track_unit_test(Env* env)
   int nof_blocks;
   nof_blocks = track_get_number_of_blocks(t, env);
   ensure(has_err, (0 == nof_blocks));
-  track_insert_element(t, gn1, cfg, parent, env);
+  track_insert_element(t, gn1, cfg, mRNA1, env);
   nof_blocks = track_get_number_of_blocks(t, env);
   ensure(has_err, (1 == nof_blocks));
-  track_insert_element(t, gn2, cfg, parent, env);
+  track_insert_element(t, gn2, cfg, mRNA1, env);
   nof_blocks = track_get_number_of_blocks(t, env);
   ensure(has_err, (1 == nof_blocks));
   track_insert_element(t, gn3, cfg, gn1, env);
