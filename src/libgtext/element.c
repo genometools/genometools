@@ -18,13 +18,6 @@ struct Element
   Config* cfg;
 };
 
-/*!
-Creates a new Element object.
-\param gn Pointer to GenomeNode object.
-\param cfg Pointer to Config object.
-\param env Pointer to Environment object.
-\return Pointer to a new Element object.
-*/
 Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
 {
   assert(gn);
@@ -42,14 +35,6 @@ Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
   return element;
 }
 
-/*!
-Creates a new Element object.
-range and type have to be set afterwards with
-element_set_range and element_set_type
-\param cfg Pointer to Config object.
-\param env Pointer to Environment object.
-\return Pointer to a new Element object.
-*/
 Element* element_new_empty(Config *cfg,
                            Env *env)
 {
@@ -63,22 +48,12 @@ Element* element_new_empty(Config *cfg,
   return element;
 }
 
-/*!
-Returns Type of an Element object
-\param element Pointer to Element object
-\return GenomeFeatureType
-*/
 GenomeFeatureType element_get_type(Element *element)
 {
   assert(element);
   return element->type;
 }
 
-/*!
-Sets Type of an Element object
-\param element Element to set type
-\param type GenomeFeatureType to set
-*/
 void element_set_type(Element *element,
                       GenomeFeatureType type)
 {
@@ -86,11 +61,6 @@ void element_set_type(Element *element,
   element->type = type;
 }
 
-/*!
-Returns range of an Element object
-\param block Pointer to Element object
-\return Pointer to Range object
-*/
 Range element_get_range(Element *element)
 {
   assert(element);
@@ -106,36 +76,6 @@ void element_set_range(Element *element,
   element->range = r;
 }
 
-/*!
-Delets Element
-\param element Pointer to Element object to delete
-\param env Pointer to Environment object
-*/
-void element_delete(Element *element,
-                    Env *env)
-{
-  if (!element) return;
-
-  env_ma_free(element, env);
-}
-
-/*!
-Prints Element type and range
-\param element Pointer to Element object to print
-*/
-void print_element(Element* element)
-{
-  assert(element);
-  printf("%s, %lu - %lu", genome_feature_type_get_cstr(element->type),
-                            element->range.start, element->range.end);
-}
-
-/*!
-Checks if two Element objects are equal
-\param e1 Pointer to Element object
-\param e2 Pointer to Element object
-\returns true if e1 and e2 are equal
-*/
 bool elements_are_equal(Element* e1,
                         Element* e2)
 {
@@ -147,10 +87,6 @@ bool elements_are_equal(Element* e1,
     return false;
 }
 
-/*!
-Unit Test for Element Class
-\param env Pointer to Environment object
-*/
 int element_unit_test(Env* env)
 {
   Range r1, r2, r_temp;
@@ -194,5 +130,13 @@ int element_unit_test(Env* env)
 
   return has_err;
 
+}
+
+void element_delete(Element *element,
+                    Env *env)
+{
+  if (!element) return;
+
+  env_ma_free(element, env);
 }
 

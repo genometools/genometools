@@ -8,18 +8,11 @@
 #include <libgtext/block.h>
 #include <libgtext/line.h>
 
-/* GenomeNode* last_parent = NULL; */
-
 struct Line
 {
   Array *blocks;
 };
 
-/*!
-Creates a new Line object.
-\param env Pointer to Environment object.
-\return Pointer to a new Line object.
-*/
 Line* line_new(Env *env)
 {
   Line *line;
@@ -31,12 +24,6 @@ Line* line_new(Env *env)
   return line;
 }
 
-/*!
-insert Block object in Line object
-\param line Pointer to Line object
-\param block Pointer to Block object to instert
-\param env Pointer to environment object
-*/
 void line_insert_block(Line *line, Block *block, Env *env)
 {
   assert(line && block);
@@ -44,12 +31,6 @@ void line_insert_block(Line *line, Block *block, Env *env)
   array_add(line->blocks, block, env);
 }
 
-/*!
-Checks if Line is occupied
-\param line Line object to check
-\param gn Pointer to GenomeNode object
-\return True or False
-*/
 bool line_is_occupied(Line *line, Range r)
 {
    assert(line);
@@ -68,59 +49,11 @@ bool line_is_occupied(Line *line, Range r)
    return false;
 }
 
-/*!
-Returns Array with Pointer to Block objects
-\param line Pointer to Line object
-\return Pointer to Array
-*/
 Array* line_get_blocks(Line* line)
 {
   return line->blocks;
 }
 
-
-/*!
-Delets Line
-\param line Pointer to Line object to delete
-\param env Pointer to Environment object
-*/
-void line_delete(Line *line,
-                 Env *env)
-{
-  int i;
-
-  if (!line) return;
-
-  for (i=0; i<array_size(line->blocks); i++)
-  {
-    block_delete(*(Block**) array_get(line->blocks, i), env);
-  }
-
-  array_delete(line->blocks, env);
-  env_ma_free(line, env);
-}
-
-/*!
-Prints all Blocks of a Line object
-\param line Pointer to Line object
-*/
-void print_line(Line* line)
-{
-  assert(line);
-  int i;
-
-  for (i=0; i<array_size(line->blocks); i++)
-  {
-    printf("(");
-    print_block(*(Block**) array_get(line->blocks, i));
-    printf(")");
-  }
-}
-
-/*!
-Tests Line Class
-\param env Pointer to Environment object
-*/
 int line_unit_test(Env* env)
 {
   Range r1, r2, r3, r4, r_parent;
@@ -218,4 +151,19 @@ int line_unit_test(Env* env)
   return has_err;
 }
 
+void line_delete(Line *line,
+                 Env *env)
+{ 
+  int i;
+  
+  if (!line) return;
+  
+  for (i=0; i<array_size(line->blocks); i++)
+  {
+    block_delete(*(Block**) array_get(line->blocks, i), env);
+  }
+  
+  array_delete(line->blocks, env);
+  env_ma_free(line, env);
+} 
 

@@ -17,7 +17,7 @@ struct Block
   GenomeFeatureType type;
 };
 
-/*!
+/*
 Compare function to insert Elements into dlist
 */
 int elemcmp(const void *a, const void *b)
@@ -31,11 +31,6 @@ int elemcmp(const void *a, const void *b)
   return range_compare(ra, rb);
 }
 
-/*!
-Creates a new Block object.
-\param env Pointer to Environment object.
-\return Pointer to a new Block object.
-*/
 Block* block_new(Env *env)
 {
   Block *block;
@@ -54,13 +49,6 @@ Block* block_new(Env *env)
   return block;
 }
 
-/*!
-Inserts an element into a Block object
-\param block Block in which the element shall be insert
-\param gn Pointer to GenomeNode object
-\param cfg Pointer to Config file
-\param env Pointer to Environment object
-*/
 void block_insert_element(Block *block,
                           GenomeNode *gn,
 			  Config *cfg,
@@ -213,11 +201,6 @@ void block_insert_element(Block *block,
   }
 }
 
-/*!
-Returns range of a Block object
-\param block Pointer to Block object
-\return Pointer to Range object
-*/
 Range block_get_range(Block *block)
 {
    assert(block);
@@ -225,11 +208,6 @@ Range block_get_range(Block *block)
    return block->range;
 }
 
-/*!
-Sets range of a Block object
-\param block Pointer to Block object to set range
-\param r Range to set
-*/
 void block_set_range(Block *block, Range r)
 {
   assert(block && r.start && r.end);
@@ -237,11 +215,6 @@ void block_set_range(Block *block, Range r)
   block->range = r;
 }
 
-/*!
-Sets caption of a Block object
-\param block Pointer to Block object to set caption
-\param caption Pointer to String object
-*/
 void block_set_caption(Block *block,
                        const char* caption)
 {
@@ -249,11 +222,6 @@ void block_set_caption(Block *block,
   block->caption = caption;
 }
 
-/*!
-Gets caption of a Block object
-\param block Pointer to Block object
-\return caption Pointer to String object
-*/
 const char* block_get_caption(Block *block)
 {
   assert(block);
@@ -261,23 +229,13 @@ const char* block_get_caption(Block *block)
   return block->caption;
 }
 
-/*!
-Sets parent_caption of a Block object
-\param block Pointer to Block object to set caption
-\param caption Pointer to String object
-*/
 void block_set_parent_caption(Block *block,
                        const char* caption)
 {
   assert(block);
   block->parent_caption = caption;
-			   }
+}
 
-/*!
-Gets parent_caption of a Block object
-\param block Pointer to Block object
-\return caption Pointer to String object
-*/
 const char* block_get_parent_caption(Block *block)
 {
   assert(block);
@@ -285,11 +243,6 @@ const char* block_get_parent_caption(Block *block)
   return block->parent_caption;
 }
 
-/*!
-Sets strand of a Block object
-\param block Block to set strand
-\param strand Strand to set
-*/
 void block_set_strand(Block *block,
                       Strand strand)
 {
@@ -298,11 +251,6 @@ void block_set_strand(Block *block,
   block->strand = strand;
 }
 
-/*!
-Gets strand of a Block object
-\param block Pointer to Block object
-\return strand Strand
-*/
 Strand block_get_strand(Block *block)
 {
   assert(block);
@@ -310,11 +258,6 @@ Strand block_get_strand(Block *block)
   return block->strand;
 }
 
-/*!
-Sets type of a Block object
-\param block Block to set type
-\param type GenomeFeatureType to set
-*/
 void block_set_type(Block *block,
                     GenomeFeatureType type)
 {
@@ -323,11 +266,6 @@ void block_set_type(Block *block,
   block->type = type;
 }
 
-/*!
-Gets type of a Block object
-\param block Pointer to Block object
-\returen GenomeFeature Type
-*/
 GenomeFeatureType block_get_type(Block *block)
 {
   assert(block);
@@ -335,62 +273,11 @@ GenomeFeatureType block_get_type(Block *block)
   return block->type;
 }
 
-/*!
-Returns Array with Pointer to Element objects
-\param block Pointer to Block object
-\return Pointer to Array
-*/
 Dlist* block_get_elements(Block *block)
 {
   return block->elements;
 }
 
-/*!
-Delets Block
-\param block Pointer to Block object to delete
-\param env Pointer to Environment object
-*/
-void block_delete(Block *block,
-                  Env *env)
-{
-  Dlistelem *delem;
-
-  if (!block) return;
-
-  for (delem = dlist_first(block->elements); delem != NULL;
-      delem = dlistelem_next(delem))
-  {
-    Element* elem = (Element*) dlistelem_get_data(delem);
-    element_delete(elem, env);
-  }
-  dlist_delete(block->elements, env);
-  env_ma_free(block, env);
-}
-
-/*!
-Prints all Elements of a Block object
-\param block Pointer to Block object
-*/
-void print_block(Block* block)
-{
-  assert(block);
-
-  Dlistelem *elem;
-
-  for (elem = dlist_first(block->elements); elem != NULL;
-      elem = dlistelem_next(elem))
-  {
-    Element *element = (Element*) dlistelem_get_data(elem);
-    printf("[");
-    print_element(element);
-    printf("]");
-  }
-}
-
-/*!
- * Unit Test for Block Class
- * \param env Pointer to Environment object
- * */
 int block_unit_test(Env* env)
 {
   Range r1, r2, r_temp, b_range;
@@ -467,5 +354,22 @@ int block_unit_test(Env* env)
   genome_node_delete(gn2, env);
 
   return has_err;
+}
+
+void block_delete(Block *block,
+                  Env *env)
+{
+  Dlistelem *delem;
+
+  if (!block) return;
+
+  for (delem = dlist_first(block->elements); delem != NULL;
+      delem = dlistelem_next(delem))
+  {
+    Element* elem = (Element*) dlistelem_get_data(delem);
+    element_delete(elem, env);
+  }
+  dlist_delete(block->elements, env);
+  env_ma_free(block, env);
 }
 
