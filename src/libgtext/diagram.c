@@ -85,11 +85,6 @@ static void insert_genome_node_into_track(GenomeNode* gn,
   type = genome_feature_get_type(gf);
   feature_type = genome_feature_type_get_cstr(type);
 
-  /* coming soon:
-  if ( hide_always(feature_type) ||
-      (type_range(feature_type) < d->range.start - d->range.start) ) return;
-  */
-
   if (config_cstr_in_list(d->config,"collapse","to_parent",feature_type,
                              env))
   {
@@ -222,13 +217,6 @@ static void diagram_build(Diagram* diagram, Array* features, Env* env)
   hashtable_foreach(diagram->tracks, finish_track, NULL, env);
 }
 
-/*
-Initialize a new diagram object.
-\param features pointer to the array of genome nodes.
-\param range the given range of the diagam.
-\param config pointer to the configuration object.
-\param env Pointer to Environment object.
-*/
 Diagram* diagram_new(Array* features, Range range, Config* config, Env* env)
 {
   Diagram *diagram;
@@ -242,33 +230,18 @@ Diagram* diagram_new(Array* features, Range range, Config* config, Env* env)
   return diagram;
 }
 
-/*
-Update the configuration object with new settings.
-\param diagram pointer to the diagram object.
-\param config pointer to the configuration object.
-\param env Pointer to Environment object.
-*/
 void diagram_set_config(Diagram* diagram, Config* config, Env* env)
 {
   assert(diagram && config && env);
   diagram->config = config;
 }
 
-/*
-Delivers the hashtable with the stored tracks.
-\param diagram pointer to the diagram object.
-*/
 Hashtable* diagram_get_tracks(Diagram* diagram)
 {
   assert(diagram);
   return diagram->tracks;
 }
 
-/*
-Returns the number of all lines in the diagram.
-\param diagram pointer to the diagram object.
-\param env Pointer to Environment object.
-*/
 int diagram_get_total_lines(Diagram* diagram, Env* env)
 {
   assert(diagram && env);
@@ -279,22 +252,12 @@ int diagram_get_total_lines(Diagram* diagram, Env* env)
   return total_lines;
 }
 
-/*
-Returns the number of all lines in the diagram.
-\param diagram pointer to the diagram object.
-\param env Pointer to Environment object.
-*/
 int diagram_get_number_of_tracks(Diagram* diagram)
 {
   assert(diagram);
   return diagram->nof_tracks;
 }
 
-/*
-Delete the diagram object.
-\param diagram pointer to the diagram object.
-\param env Pointer to Environment object.
-*/
 void diagram_delete(Diagram* diagram, Env* env)
 {
   assert(diagram && env);
@@ -303,9 +266,6 @@ void diagram_delete(Diagram* diagram, Env* env)
   env_ma_free(diagram, env);
 }
 
-/*
-generate a feature index test structure and test the diagram functions.
-*/
 int diagram_unit_test(Env* env)
 {
 
