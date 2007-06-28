@@ -65,7 +65,7 @@ unsigned int render_calculate_height(Render *r, Env *env)
   height += diagram_get_number_of_tracks(r->dia)
               * ((config_get_num(r->cfg, "format","track_vspace", 20, env))+15);
   /* add header space and footer */
-  height += 70 + 40;
+  height += 70 + 20;
   if (config_get_verbose(r->cfg))
     printf("calculated height: %u\n", height);
   return height;

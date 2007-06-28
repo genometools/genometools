@@ -27,7 +27,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   op = option_parser_new("[option ...] [GFF3_file ...]",
                          "Create visual representations of GFF annotations.",
                          env);
-                         
+
   /* -v */
   option = option_new_verbose(&arguments->verbose, env);
   option_parser_add_option(op, option, env);
