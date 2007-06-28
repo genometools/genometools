@@ -123,6 +123,7 @@ void block_insert_element(Block *block,
               element_set_range(element, elem_r);
 	    }
 	    e = element_new(gn, cfg, env);
+            element_set_range(e, gn_r);
 	    dlist_add(block->elements, e, env);
 	    elem = dlist_find(block->elements, e);
 	    break;
