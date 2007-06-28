@@ -17,34 +17,34 @@ struct MSA {
 MSA* msa_new(const char *MSA_filename, Env *env)
 {
   unsigned long i, firstseqlen;
-  int has_err = 0;
+  int had_err = 0;
   MSA *msa;
   env_error_check(env);
   msa = env_ma_malloc(env, sizeof (MSA));
   msa->bs = bioseq_new(MSA_filename, env);
   if (!msa->bs)
-    has_err = -1;
-  if (!has_err) {
+    had_err = -1;
+  if (!had_err) {
     /* make sure that the MSA contains at least two sequences */
     if (bioseq_number_of_sequences(msa->bs) < 2) {
       env_error_set(env, "the MSA file '%s' contains less then 2 sequences",
                 MSA_filename);
-      has_err = -1;
+      had_err = -1;
     }
   }
-  if (!has_err) {
+  if (!had_err) {
     /* make sure that all sequences have the same length */
     firstseqlen = bioseq_get_sequence_length(msa->bs, 0);
     for (i = 1; i < bioseq_number_of_sequences(msa->bs); i++) {
       if (bioseq_get_sequence_length(msa->bs, i) != firstseqlen) {
         env_error_set(env, "length of sequence %lu in the MSA file '%s' "
                       "differs from the first", i, MSA_filename);
-        has_err = -1;
+        had_err = -1;
         break;
       }
     }
   }
-  if (has_err) {
+  if (had_err) {
     msa_delete(msa, env);
     return NULL;
   }

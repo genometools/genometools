@@ -158,47 +158,47 @@ int dlist_unit_test(Env *env)
       elem_b = 6,
       elems[MAX_SIZE],
       elems_backup[MAX_SIZE],
-      has_err = 0;
+      had_err = 0;
   env_error_check(env);
 
   /* boundary case: empty dlist */
   dlist = dlist_new(intcompare, env);
-  ensure(has_err, !dlist_size(dlist));
+  ensure(had_err, !dlist_size(dlist));
   dlist_delete(dlist, env);
 
   dlist = dlist_new(NULL, env);
-  ensure(has_err, !dlist_size(dlist));
+  ensure(had_err, !dlist_size(dlist));
   dlist_delete(dlist, env);
 
   /* boundary case: dlist containing one element */
   dlist = dlist_new(intcompare, env);
   dlist_add(dlist, &elem_a, env);
-  ensure(has_err, dlist_size(dlist) == 1);
-  ensure(has_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
+  ensure(had_err, dlist_size(dlist) == 1);
+  ensure(had_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
   dlist_delete(dlist, env);
 
   dlist = dlist_new(NULL, env);
   dlist_add(dlist, &elem_a, env);
-  ensure(has_err, dlist_size(dlist) == 1);
-  ensure(has_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
+  ensure(had_err, dlist_size(dlist) == 1);
+  ensure(had_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
   dlist_delete(dlist, env);
 
   /* boundary case: dlist containing two elements */
   dlist = dlist_new(intcompare, env);
   dlist_add(dlist, &elem_a, env);
   dlist_add(dlist, &elem_b, env);
-  ensure(has_err, dlist_size(dlist) == 2);
-  ensure(has_err, elem_b == *(int*) dlistelem_get_data(dlist_first(dlist)));
+  ensure(had_err, dlist_size(dlist) == 2);
+  ensure(had_err, elem_b == *(int*) dlistelem_get_data(dlist_first(dlist)));
   dlist_delete(dlist, env);
 
   dlist = dlist_new(NULL, env);
   dlist_add(dlist, &elem_a, env);
   dlist_add(dlist, &elem_b, env);
-  ensure(has_err, dlist_size(dlist) == 2);
-  ensure(has_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
+  ensure(had_err, dlist_size(dlist) == 2);
+  ensure(had_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
   dlist_delete(dlist, env);
 
-  for (i = 0; i < NUM_OF_TESTS && !has_err; i++) {
+  for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
     /* construct the random elements for the list */
     size = rand_max(MAX_SIZE);
     for (j = 0; j < size; j++) {
@@ -211,10 +211,10 @@ int dlist_unit_test(Env *env)
 
     /* test with compare function */
     dlist = dlist_new(intcompare, env);
-    ensure(has_err, !dlist_size(dlist));
-    for (j = 0; j < size && !has_err; j++) {
+    ensure(had_err, !dlist_size(dlist));
+    for (j = 0; j < size && !had_err; j++) {
       dlist_add(dlist, elems + j, env);
-      ensure(has_err, dlist_size(dlist) == j+1);
+      ensure(had_err, dlist_size(dlist) == j+1);
 
       for (dlistelem = dlist_first(dlist); dlistelem != NULL;
            dlistelem = dlistelem_next(dlistelem)) {
@@ -224,21 +224,21 @@ int dlist_unit_test(Env *env)
     for (dlistelem = dlist_first(dlist); dlistelem != NULL;
          dlistelem = dlistelem_next(dlistelem)) {
       data = dlistelem_get_data(dlistelem);
-      ensure(has_err, *data == elems_backup[j]);
+      ensure(had_err, *data == elems_backup[j]);
       j++;
     }
     /* test dlist_find() */
     for (j = 0; j < size; j++) {
       dlistelem = dlist_find(dlist, elems_backup + j);
-      ensure(has_err, dlistelem);
-      ensure(has_err, *(int*) dlistelem_get_data(dlistelem) == elems_backup[j]);
+      ensure(had_err, dlistelem);
+      ensure(had_err, *(int*) dlistelem_get_data(dlistelem) == elems_backup[j]);
     }
     /* remove first element */
     if (dlist_size(dlist)) {
       dlist_remove(dlist, dlist_first(dlist), env);
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_first(dlist));
-        ensure(has_err, *data == elems_backup[1]);
+        ensure(had_err, *data == elems_backup[1]);
       }
     }
     /* remove last element */
@@ -246,7 +246,7 @@ int dlist_unit_test(Env *env)
       dlist_remove(dlist, dlist_last(dlist), env);
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_last(dlist));
-        ensure(has_err, *data == elems_backup[size - 2]);
+        ensure(had_err, *data == elems_backup[size - 2]);
       }
     }
     /* XXX: fix this */
@@ -261,23 +261,23 @@ int dlist_unit_test(Env *env)
       for (j = 1; j < dlist_size(dlist) / 2 + 1; j++)
         dlistelem = dlistelem_next(dlistelem);
       data = dlistelem_get_data(dlist_last(dlist));
-      ensure(has_err, *data == elems_backup[size / 2 + 1]);
+      ensure(had_err, *data == elems_backup[size / 2 + 1]);
     }
 #endif
     dlist_delete(dlist, env);
 
     /* test without compare function */
     dlist = dlist_new(NULL, env);
-    ensure(has_err, !dlist_size(dlist));
-    for (j = 0; j < size && !has_err; j++) {
+    ensure(had_err, !dlist_size(dlist));
+    for (j = 0; j < size && !had_err; j++) {
       dlist_add(dlist, elems + j, env);
-      ensure(has_err, dlist_size(dlist) == j+1);
+      ensure(had_err, dlist_size(dlist) == j+1);
     }
     j = 0;
     for (dlistelem = dlist_first(dlist); dlistelem != NULL;
          dlistelem = dlistelem_next(dlistelem)) {
       data = dlistelem_get_data(dlistelem);
-      ensure(has_err, *data == elems[j]);
+      ensure(had_err, *data == elems[j]);
       j++;
     }
     /* remove first element */
@@ -285,7 +285,7 @@ int dlist_unit_test(Env *env)
       dlist_remove(dlist, dlist_first(dlist), env);
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_first(dlist));
-        ensure(has_err, *data == elems[1]);
+        ensure(had_err, *data == elems[1]);
       }
     }
     /* remove last element */
@@ -293,13 +293,13 @@ int dlist_unit_test(Env *env)
       dlist_remove(dlist, dlist_last(dlist), env);
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_last(dlist));
-        ensure(has_err, *data == elems[size - 2]);
+        ensure(had_err, *data == elems[size - 2]);
       }
     }
     dlist_delete(dlist, env);
   }
 
-  return has_err;
+  return had_err;
 }
 
 void dlist_delete(Dlist *dlist, Env *env)

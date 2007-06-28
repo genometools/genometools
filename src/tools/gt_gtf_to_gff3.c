@@ -29,7 +29,7 @@ int gt_gtf_to_gff3(int argc, const char **argv, Env *env)
 {
   GenomeStream *gtf_in_stream = NULL, *gff3_out_stream = NULL;
   GenomeNode *gn;
-  int parsed_args, has_err = 0;
+  int parsed_args, had_err = 0;
   bool be_tolerant;
   env_error_check(env);
 
@@ -43,15 +43,15 @@ int gt_gtf_to_gff3(int argc, const char **argv, Env *env)
   /* create a gtf input stream */
   gtf_in_stream = gtf_in_stream_new(argv[parsed_args], be_tolerant, env);
   if (!gtf_in_stream)
-    has_err = -1;
+    had_err = -1;
 
-  if (!has_err) {
+  if (!had_err) {
     /* create a gff3 output stream */
     /* XXX: use proper genfile */
     gff3_out_stream = gff3_out_stream_new(gtf_in_stream, NULL, env);
 
     /* pull the features through the stream and free them afterwards */
-    while (!(has_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
+    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
            gn) {
       genome_node_rec_delete(gn, env);
     }
@@ -61,5 +61,5 @@ int gt_gtf_to_gff3(int argc, const char **argv, Env *env)
   genome_stream_delete(gff3_out_stream, env);
   genome_stream_delete(gtf_in_stream, env);
 
-  return has_err;
+  return had_err;
 }

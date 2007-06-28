@@ -29,19 +29,19 @@ static int complement(char *reverse_char, char dna_char, Env *env)
 int reverse_complement(char *dna_seq, unsigned long seqlen, Env *env)
 {
   char *front_char, *back_char, tmp_char;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   assert(dna_seq);
   for (front_char = dna_seq, back_char = dna_seq + seqlen - 1;
        front_char <= back_char;
        front_char++, back_char--) {
-    has_err = complement(&tmp_char, *front_char, env);
-    if (!has_err)
-      has_err = complement(front_char, *back_char, env);
-    if (!has_err)
+    had_err = complement(&tmp_char, *front_char, env);
+    if (!had_err)
+      had_err = complement(front_char, *back_char, env);
+    if (!had_err)
       *back_char = tmp_char;
-    if (has_err)
+    if (had_err)
       break;
   }
-  return has_err;
+  return had_err;
 }

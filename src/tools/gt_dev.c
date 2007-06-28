@@ -39,7 +39,7 @@ int gt_dev(int argc, const char **argv, Env *env)
 {
   Toolbox *dev_toolbox;
   Tool devtool;
-  int parsed_args, has_err = 0;
+  int parsed_args, had_err = 0;
   char **nargv = NULL;
   env_error_check(env);
 
@@ -61,18 +61,18 @@ int gt_dev(int argc, const char **argv, Env *env)
   if (!(devtool = toolbox_get(dev_toolbox, argv[1]))) {
     env_error_set(env, "development tool '%s' not found; option -help lists "
                   "possible tools", argv[1]);
-    has_err = -1;
+    had_err = -1;
   }
 
   /* call development tool */
-  if (!has_err) {
+  if (!had_err) {
     nargv = cstr_array_prefix_first(argv+parsed_args, argv[0], env);
-    has_err = devtool(argc-parsed_args, (const char**) nargv, env);
+    had_err = devtool(argc-parsed_args, (const char**) nargv, env);
   }
 
   /* free */
   cstr_array_delete(nargv, env);
   toolbox_delete(dev_toolbox, env);
 
-  return has_err;
+  return had_err;
 }

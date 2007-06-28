@@ -41,7 +41,6 @@ static void csa_visitor_free(GenomeVisitor *gv, Env *env)
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
   queue_delete(csa_visitor->genome_node_buffer, env);
   array_delete(csa_visitor->cluster, env);
-  assert(!csa_visitor->buffered_feature);
   str_delete(csa_visitor->gth_csa_source_str, env);
 }
 
@@ -180,12 +179,12 @@ static int save_exon(GenomeNode *gn, void *data, Env *env)
 static void get_exons(Array *exon_ranges, const void *sa, Env *env)
 {
   GenomeFeature *gf = *(GenomeFeature**) sa;
-  int has_err;
+  int had_err;
   assert(exon_ranges && gf && genome_feature_get_type(gf) == gft_gene);
-  has_err = genome_node_traverse_children((GenomeNode*) gf, exon_ranges,
+  had_err = genome_node_traverse_children((GenomeNode*) gf, exon_ranges,
                                           save_exon, false, env);
   /* we cannot have an error here, because save_exon() doesn't produces one. */
-  assert(!has_err);
+  assert(!had_err);
   /* we got at least one exon */
   assert(array_size(exon_ranges));
   assert(ranges_are_sorted_and_do_not_overlap(exon_ranges));

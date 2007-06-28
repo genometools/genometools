@@ -23,7 +23,7 @@ struct RegionMapping {
 RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Env *env)
 {
   RegionMapping *rm;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   assert(mapping_filename);
   /* alloc */
@@ -34,39 +34,39 @@ RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Env *env)
   if (!rm->L) {
     /* XXX: -> assert? */
     env_error_set(env, "out of memory (cannot create new lua state)");
-    has_err = -1;
+    had_err = -1;
   }
   /* load the standard libs into the lua interpreter */
-  if (!has_err)
+  if (!had_err)
     luaL_openlibs(rm->L);
   /* try to load & run mapping file */
-  if (!has_err) {
+  if (!had_err) {
     if (luaL_loadfile(rm->L, str_get(mapping_filename)) ||
         lua_pcall(rm->L, 0, 0, 0)) {
 			env_error_set(env, "cannot run mapping file: %s",
                     lua_tostring(rm->L, -1));
-      has_err = -1;
+      had_err = -1;
     }
   }
   /* make sure a global 'mapping' variable is defined */
-  if (!has_err) {
+  if (!had_err) {
     lua_getglobal(rm->L, "mapping");
     if (lua_isnil(rm->L, -1)) {
       env_error_set(env, "'mapping' is not defined in \"%s\"",
                 str_get(mapping_filename));
-      has_err = -1;
+      had_err = -1;
     }
   }
   /* make sure it is either a table or a function */
-  if (!has_err) {
+  if (!had_err) {
     if (!(lua_istable(rm->L, -1) || lua_isfunction(rm->L, -1))) {
       env_error_set(env, "'mapping' must be either a table or a function "
                     "(defined in \"%s\")", str_get(mapping_filename));
-      has_err = -1;
+      had_err = -1;
     }
   }
   /* remember if it is a table or a function */
-  if (!has_err) {
+  if (!had_err) {
     if (lua_istable(rm->L, -1))
       rm->is_table = true;
     else {
@@ -75,7 +75,7 @@ RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Env *env)
     }
   }
   /* return */
-  if (has_err) {
+  if (had_err) {
     regionmapping_delete(rm, env);
     return NULL;
   }
@@ -95,7 +95,7 @@ static Str* map_table(RegionMapping *rm, const char *sequence_region,
                       Env *env)
 {
   Str *result = NULL;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   assert(rm && sequence_region);
   lua_pushstring(rm->L, sequence_region);
@@ -104,17 +104,17 @@ static Str* map_table(RegionMapping *rm, const char *sequence_region,
   if (lua_isnil(rm->L, -1)) {
     env_error_set(env, "mapping[%s] is nil (defined in \"%s\")",
                   sequence_region, str_get(rm->mapping_filename));
-    has_err = -1;
+    had_err = -1;
   }
   /* make sure mapping[sequence_region] is a string */
-  if (!has_err) {
+  if (!had_err) {
     if (!(lua_isstring(rm->L, -1))) {
       env_error_set(env, "mapping[%s] is not a string (defined in \"%s\")",
                 sequence_region, str_get(rm->mapping_filename));
-      has_err = -1;
+      had_err = -1;
     }
   }
-  if (!has_err)
+  if (!had_err)
     result = str_new_cstr(lua_tostring(rm->L, -1), env);
   lua_pop(rm->L, 1); /* pop result */
   return result;
@@ -124,7 +124,7 @@ static Str* map_function(RegionMapping *rm, const char *sequence_region,
                          Env *env)
 {
   Str *result = NULL;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   assert(rm && sequence_region);
   lua_getglobal(rm->L, "mapping");
@@ -133,16 +133,16 @@ static Str* map_function(RegionMapping *rm, const char *sequence_region,
   if (lua_pcall(rm->L, 1, 1, 0)) {
     env_error_set(env, "running function 'mapping': %s",
                   lua_tostring(rm->L, -1));
-    has_err = -1;
+    had_err = -1;
   }
   /* make sure the result is a string */
-  if (!has_err) {
+  if (!had_err) {
     if (!lua_isstring(rm->L, -1)) {
       env_error_set(env, "function 'mapping' must return a string (defined in "
                 "\"%s\")", str_get(rm->mapping_filename));
-      has_err = -1;
+      had_err = -1;
     }
-    if (!has_err)
+    if (!had_err)
       result = str_new_cstr(lua_tostring(rm->L, -1), env);
     lua_pop(rm->L, 1); /* pop result */
   }
@@ -164,14 +164,14 @@ static Str* regionmapping_map(RegionMapping *rm, const char *sequence_region,
 
 static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Env *env)
 {
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   assert(rm && seqid);
   if (!rm->sequence_file || str_cmp(rm->sequence_name, seqid)) {
     str_delete(rm->sequence_file, env);
     rm->sequence_file = regionmapping_map(rm, str_get(seqid), env);
     if (!rm->sequence_file)
-      has_err = -1;
+      had_err = -1;
     else {
       if (!rm->sequence_name)
         rm->sequence_name = str_new(env);
@@ -181,35 +181,35 @@ static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Env *env)
       bioseq_delete(rm->bioseq, env);
       rm->bioseq = bioseq_new_str(rm->sequence_file, env);
       if (!rm->bioseq)
-        has_err = -1;
+        had_err = -1;
     }
   }
-  return has_err;
+  return had_err;
 }
 
 int regionmapping_get_raw_sequence(RegionMapping *rm, const char **raw,
                                    Str *seqid, Env *env)
 {
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   assert(rm && seqid);
-  has_err = update_bioseq_if_necessary(rm, seqid, env);
-  if (!has_err)
+  had_err = update_bioseq_if_necessary(rm, seqid, env);
+  if (!had_err)
     *raw = bioseq_get_raw_sequence(rm->bioseq);
-  return has_err;
+  return had_err;
 }
 
 int regionmapping_get_raw_sequence_length(RegionMapping *rm,
                                           unsigned long *length, Str *seqid,
                                           Env *env)
 {
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   assert(rm && seqid);
-  has_err = update_bioseq_if_necessary(rm, seqid, env);
-  if (!has_err)
+  had_err = update_bioseq_if_necessary(rm, seqid, env);
+  if (!had_err)
     *length = bioseq_get_raw_sequence_length(rm->bioseq);
-  return has_err;
+  return had_err;
 }
 
 void regionmapping_delete(RegionMapping *rm, Env *env)

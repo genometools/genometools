@@ -81,7 +81,7 @@ int bsearch_unit_test(Env *env)
   Array *elements, *members;
   int key, element, *member_ptr;
   Bittab *b;
-  int has_err = 0;
+  int had_err = 0;
 
   env_error_check(env);
 
@@ -91,7 +91,7 @@ int bsearch_unit_test(Env *env)
   /* the empty case */
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof (int), cmp, env);
-  ensure(has_err, !array_size(members)); /* no member found */
+  ensure(had_err, !array_size(members)); /* no member found */
 
   /* 1 element */
   key = 7;
@@ -99,55 +99,55 @@ int bsearch_unit_test(Env *env)
   array_add(elements, element, env);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof (int), cmp, env);
-  ensure(has_err, array_size(members) == 1); /* one member found */
+  ensure(had_err, array_size(members) == 1); /* one member found */
   member_ptr = *(int**) array_get(members, 0);
-  ensure(has_err, *member_ptr == element);
+  ensure(had_err, *member_ptr == element);
 
   key = -7;
   array_reset(members);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof (int), cmp, env);
-  ensure(has_err, !array_size(members)); /* no member found */
+  ensure(had_err, !array_size(members)); /* no member found */
 
   /* 2 elements */
   key = 7;
   array_reset(members);
   array_add(elements, element, env);
-  ensure(has_err, array_size(elements) == 2);
+  ensure(had_err, array_size(elements) == 2);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof (int), cmp, env);
-  ensure(has_err, array_size(members) == 2); /* two members found */
+  ensure(had_err, array_size(members) == 2); /* two members found */
   member_ptr = *(int**) array_get(members, 0);
-  ensure(has_err, *member_ptr == element);
+  ensure(had_err, *member_ptr == element);
   member_ptr = *(int**) array_get(members, 1);
-  ensure(has_err, *member_ptr == element);
+  ensure(had_err, *member_ptr == element);
 
   key = -7;
   array_reset(members);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof (int), cmp, env);
-  ensure(has_err, !array_size(members)); /* no member found */
+  ensure(had_err, !array_size(members)); /* no member found */
 
   /* 3 elements */
   key = 7;
   array_reset(members);
   array_add(elements, element, env);
-  ensure(has_err, array_size(elements) == 3);
+  ensure(had_err, array_size(elements) == 3);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof (int), cmp, env);
-  ensure(has_err, array_size(members) == 3); /* three members found */
+  ensure(had_err, array_size(members) == 3); /* three members found */
   member_ptr = *(int**) array_get(members, 0);
-  ensure(has_err, *member_ptr == element);
+  ensure(had_err, *member_ptr == element);
   member_ptr = *(int**) array_get(members, 1);
-  ensure(has_err, *member_ptr == element);
+  ensure(had_err, *member_ptr == element);
   member_ptr = *(int**) array_get(members, 2);
-  ensure(has_err, *member_ptr == element);
+  ensure(had_err, *member_ptr == element);
 
   key = -7;
   array_reset(members);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof (int), cmp, env);
-  ensure(has_err, !array_size(members)); /* no member found */
+  ensure(had_err, !array_size(members)); /* no member found */
 
   /* large case: -10 -5 -3 -3 -3 0 1 2 3 */
   array_reset(elements);
@@ -167,41 +167,41 @@ int bsearch_unit_test(Env *env)
   array_add(elements, element, env);
   element = 3;
   array_add(elements, element, env);
-  ensure(has_err, array_size(elements) == 9);
+  ensure(had_err, array_size(elements) == 9);
   key = -3;
   array_reset(members);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof (int), cmp, env);
-  ensure(has_err, array_size(members) == 3); /* three members found */
+  ensure(had_err, array_size(members) == 3); /* three members found */
   member_ptr = *(int**) array_get(members, 0);
-  ensure(has_err, *member_ptr == -3);
+  ensure(had_err, *member_ptr == -3);
   member_ptr = *(int**) array_get(members, 1);
-  ensure(has_err, *member_ptr == -3);
+  ensure(had_err, *member_ptr == -3);
   member_ptr = *(int**) array_get(members, 2);
-  ensure(has_err, *member_ptr == -3);
+  ensure(had_err, *member_ptr == -3);
 
   /* test bsearch_all_mark() with large case */
   array_reset(members);
   b = bittab_new(array_size(elements), env);
   bsearch_all_mark(members, &key, array_get_space(elements),
                    array_size(elements), sizeof (int), cmp, b, env);
-  ensure(has_err, array_size(members) == 3); /* three members found */
+  ensure(had_err, array_size(members) == 3); /* three members found */
   member_ptr = *(int**) array_get(members, 0);
-  ensure(has_err, *member_ptr == -3);
+  ensure(had_err, *member_ptr == -3);
   member_ptr = *(int**) array_get(members, 1);
-  ensure(has_err, *member_ptr == -3);
+  ensure(had_err, *member_ptr == -3);
   member_ptr = *(int**) array_get(members, 2);
-  ensure(has_err, *member_ptr == -3);
+  ensure(had_err, *member_ptr == -3);
   /* the correct elements are marked (and only these) */
-  ensure(has_err, bittab_bit_is_set(b, 2));
-  ensure(has_err, bittab_bit_is_set(b, 3));
-  ensure(has_err, bittab_bit_is_set(b, 4));
-  ensure(has_err, bittab_count_set_bits(b) == 3);
+  ensure(had_err, bittab_bit_is_set(b, 2));
+  ensure(had_err, bittab_bit_is_set(b, 3));
+  ensure(had_err, bittab_bit_is_set(b, 4));
+  ensure(had_err, bittab_count_set_bits(b) == 3);
 
   /* free */
   array_delete(elements, env);
   array_delete(members, env);
   bittab_delete(b, env);
 
-  return has_err;
+  return had_err;
 }

@@ -66,12 +66,12 @@ int countingsort_unit_test(Env *env)
 {
   unsigned int numbers[]        = { 1, 2, 1, 2, 0 }, numbers_out[5],
                sorted_numbers[] = { 0, 1, 1, 2, 2 };
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   countingsort(numbers_out, numbers, sizeof (unsigned int), 5,
                countingsort_get_max(numbers, sizeof (unsigned int), 5, NULL,
                                     get_int), NULL,  get_int, env);
-  ensure(has_err,
+  ensure(had_err,
          !memcmp(sorted_numbers, numbers_out, sizeof (unsigned int) * 5));
-  return has_err;
+  return had_err;
 }

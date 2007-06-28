@@ -92,7 +92,7 @@ static int construct_mRNAs(void *key, void *value, void *data, Env *env)
   Range mRNA_range;
   Str *mRNA_seqid;
   unsigned long i;
-  int has_err = 0;
+  int had_err = 0;
 
   env_error_check(env);
   assert(key && value && data);
@@ -116,12 +116,12 @@ static int construct_mRNAs(void *key, void *value, void *data, Env *env)
                 "gene IDs (``gene_id'') which must be globally unique",
                 genome_node_get_line_number(first_node),
                 genome_node_get_line_number(gn));
-      has_err = -1;
+      had_err = -1;
       break;
     }
   }
 
-  if (!has_err) {
+  if (!had_err) {
     mRNA_node = genome_feature_new(gft_mRNA, mRNA_range, mRNA_strand, NULL, 0,
                                    env);
     genome_node_set_seqid(mRNA_node, mRNA_seqid);
@@ -136,7 +136,7 @@ static int construct_mRNAs(void *key, void *value, void *data, Env *env)
     array_add(mRNAs, mRNA_node, env);
   }
 
-  return has_err;
+  return had_err;
 }
 
 static int construct_genes(void *key, void *value, void *data, Env *env)
@@ -149,13 +149,13 @@ static int construct_genes(void *key, void *value, void *data, Env *env)
   Range gene_range;
   Str *gene_seqid;
   unsigned long i;
-  int has_err = 0;
+  int had_err = 0;
 
   env_error_check(env);
   assert(key && value && data);
 
-  has_err = hashtable_foreach(transcript_id_hash, construct_mRNAs, mRNAs, env);
-  if (!has_err) {
+  had_err = hashtable_foreach(transcript_id_hash, construct_mRNAs, mRNAs, env);
+  if (!had_err) {
     assert(array_size(mRNAs)); /* at least one mRNA constructed */
 
     /* determine the range and the strand of the gene */
@@ -188,7 +188,7 @@ static int construct_genes(void *key, void *value, void *data, Env *env)
     array_delete(mRNAs, env);
   }
 
-  return has_err;
+  return had_err;
 }
 
 int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
@@ -224,7 +224,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   GTF_feature_type gtf_feature_type;
   /* abuse gft_TF_binding_site as an undefined value */
   GenomeFeatureType gff_feature_type = gft_TF_binding_site;
-  int has_err = 0;
+  int had_err = 0;
 
   assert(parser && genome_nodes && filename && fpin);
   env_error_check(env);
@@ -235,16 +235,16 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   attribute_splitter = splitter_new(env);
 
 #define HANDLE_ERROR                                                    \
-        if (has_err) {                                                  \
+        if (had_err) {                                                  \
           if (be_tolerant) {                                            \
             fprintf(stderr, "skipping line: %s\n", env_error_get(env)); \
             env_error_unset(env);                                       \
             str_reset(line_buffer);                                     \
-            has_err = 0;                                                \
+            had_err = 0;                                                \
             continue;                                                   \
           }                                                             \
           else {                                                        \
-            has_err = -1;                                               \
+            had_err = -1;                                               \
             break;                                                      \
           }                                                             \
         }
@@ -253,7 +253,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
     line = str_get(line_buffer);
     line_length = str_length(line_buffer);
     line_number++;
-    has_err = 0;
+    had_err = 0;
 
     if (line_length == 0)
       warning("skipping blank line %lu in file \"%s\"", line_number, filename);
@@ -270,7 +270,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         env_error_set(env, "line %lu in file \"%s\" contains %lu tab (\\t) "
                   "separated fields instead of 9", line_number, filename,
                   splitter_size(splitter));
-        has_err = -1;
+        had_err = -1;
         break;
       }
       tokens = splitter_get_tokens(splitter);
@@ -305,7 +305,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       assert(gff_feature_type != gft_TF_binding_site);
 
       /* parse the range */
-      has_err = parse_range(&range, start, end, line_number, filename, env);
+      had_err = parse_range(&range, start, end, line_number, filename, env);
       HANDLE_ERROR;
 
       /* process seqname (we have to do it here because we need the range) */
@@ -323,15 +323,15 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       }
 
       /* parse the score */
-      has_err = parse_score(&score_value, score, line_number, filename, env);
+      had_err = parse_score(&score_value, score, line_number, filename, env);
       HANDLE_ERROR;
 
       /* parse the strand */
-      has_err = parse_strand(&strand_value, strand, line_number, filename, env);
+      had_err = parse_strand(&strand_value, strand, line_number, filename, env);
       HANDLE_ERROR;
 
       /* parse the frame */
-      has_err = parse_phase(&phase_value, frame, line_number, filename, env);
+      had_err = parse_phase(&phase_value, frame, line_number, filename, env);
       HANDLE_ERROR;
 
       /* parse the attributes */
@@ -351,7 +351,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
             env_error_set(env, "missing value to attribute \"%s\" on line %lu "
                           "in file \"%s\"", GENE_ID_ATTRIBUTE, line_number,
                           filename);
-            has_err = -1;
+            had_err = -1;
           }
           HANDLE_ERROR;
           gene_id = token + strlen(GENE_ID_ATTRIBUTE) + 1;
@@ -362,7 +362,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
             env_error_set(env, "missing value to attribute \"%s\" on line %lu "
                           "in file \"%s\"", TRANSCRIPT_ID_ATTRIBUTE,
                           line_number, filename);
-            has_err = -1;
+            had_err = -1;
           }
           HANDLE_ERROR;
           transcript_id = token + strlen(TRANSCRIPT_ID_ATTRIBUTE) + 1;
@@ -373,13 +373,13 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       if (!gene_id) {
         env_error_set(env, "missing attribute \"%s\" on line %lu in file "
                       "\"%s\"", GENE_ID_ATTRIBUTE, line_number, filename);
-        has_err = -1;
+        had_err = -1;
       }
       HANDLE_ERROR;
       if (!transcript_id) {
         env_error_set(env, "missing attribute \"%s\" on line %lu in file "
                       "\"%s\"", TRANSCRIPT_ID_ATTRIBUTE, line_number, filename);
-        has_err = -1;
+        had_err = -1;
       }
       HANDLE_ERROR;
 
@@ -436,14 +436,14 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   }
 
   /* process all comments features */
-  if (!has_err) {
-    has_err = hashtable_foreach(parser->sequence_region_to_range,
+  if (!had_err) {
+    had_err = hashtable_foreach(parser->sequence_region_to_range,
                                 construct_sequence_regions, genome_nodes, env);
   }
 
   /* process all genome_features */
-  if (!has_err) {
-    has_err = hashtable_foreach(parser->gene_id_hash, construct_genes,
+  if (!had_err) {
+    had_err = hashtable_foreach(parser->gene_id_hash, construct_genes,
                                 genome_nodes, env);
   }
 
@@ -452,7 +452,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   splitter_delete(attribute_splitter, env);
   str_delete(line_buffer, env);
 
-  return has_err;
+  return had_err;
 }
 
 void gtf_parser_delete(GTF_parser *parser, Env *env)

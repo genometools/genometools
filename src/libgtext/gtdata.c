@@ -17,12 +17,12 @@
 Str* gtdata_get_path(const char *prog, Env *env)
 {
   Str *path;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   assert(prog);
   path = str_new(env);
-  has_err = file_find_in_path(path, prog, env);
-  if (!has_err) {
+  had_err = file_find_in_path(path, prog, env);
+  if (!had_err) {
     assert(str_length(path));
     str_append_cstr(path, GTDATADIR, env);
     if (file_exists(str_get(path)))
@@ -32,10 +32,10 @@ Str* gtdata_get_path(const char *prog, Env *env)
     str_append_cstr(path, GTDATADIR, env);
     if (!file_exists(str_get(path))) {
       env_error_set(env, "could not find gtdata/ directory");
-      has_err = -1;
+      had_err = -1;
     }
   }
-  if (has_err) {
+  if (had_err) {
     str_delete(path, env);
     return NULL;
   }
@@ -48,7 +48,7 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
   Str *doc_file;
   lua_State *L = NULL;
   char *prog;
-  int has_err = 0;
+  int had_err = 0;
 
   env_error_check(env);
   assert(progname);
@@ -58,19 +58,19 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
   splitter_split(splitter, prog, strlen(prog), ' ', env);
   doc_file = gtdata_get_path(splitter_get_token(splitter, 0), env);
   if (!doc_file)
-    has_err = -1;
+    had_err = -1;
 
-  if (!has_err) {
+  if (!had_err) {
     str_append_cstr(doc_file, "/doc/", env);
     /* create Lua & push gtdata_doc_dir to Lua */
     L = luaL_newstate();
     if (!L) {
       env_error_set(env, "out of memory (cannot create new lua state)");
-      has_err = -1;
+      had_err = -1;
     }
   }
 
-  if (!has_err) {
+  if (!had_err) {
     luaL_openlibs(L);
     lua_pushstring(L, str_get(doc_file));
     lua_setglobal(L, "gtdata_doc_dir");
@@ -82,7 +82,7 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
     /* execute doc_file */
     if (luaL_loadfile(L, str_get(doc_file)) || lua_pcall(L, 0, 0, 0)) {
       env_error_set(env, "cannot run doc file: %s", lua_tostring(L, -1));
-      has_err = -1;
+      had_err = -1;
     }
   }
 
@@ -92,5 +92,5 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
   splitter_delete(splitter, env);
   env_ma_free(prog, env);
 
-  return has_err;
+  return had_err;
 }

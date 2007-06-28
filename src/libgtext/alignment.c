@@ -271,7 +271,7 @@ int alignment_unit_test(Env *env)
   static char u[] = "acgtagatatatagat",
               v[] = "agaaagaggtaagaggga";
   Alignment *a;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
 
   /* construct the following alignment (backwards):
@@ -302,11 +302,11 @@ int alignment_unit_test(Env *env)
   alignment_add_replacement(a, env);
   alignment_add_replacement(a, env);
 
-  ensure(has_err, alignment_eval(a) == 10);
+  ensure(had_err, alignment_eval(a) == 10);
 
   alignment_delete(a, env);
 
-  return has_err;
+  return had_err;
 }
 
 void alignment_delete(Alignment *a, Env *env)
