@@ -12,32 +12,23 @@
 #include <libgtext/affinealign.h>               /* affine align module */
 #include <libgtext/align.h>                     /* align module */
 #include <libgtext/alignment.h>                 /* alignment class */
-#include <libgtext/block.h>                     /* block class */
 #include <libgtext/bsearch.h>                   /* bsearch module */
 #include <libgtext/cds_stream.h>                /* CDS stream */
-#include <libgtext/config.h>                    /* config class */
 #include <libgtext/consensus_sa.h>              /* consensus spl. align. mod. */
 #include <libgtext/csa_stream.h>                /* consensus spl. align. str. */
 #include <libgtext/coin_hmm.h>                  /* the coin HMM class */
 #include <libgtext/compare.h>                   /* compare module */
-#include <libgtext/config.h>                    /* config class */
 #include <libgtext/dice_hmm.h>                  /* the dice HMM class */
-#include <libgtext/element.h>                   /* element class */
-#include <libgtext/diagram.h>                   /* diagram class */
 #include <libgtext/extractfeat_stream.h>        /* extract feat. stream class */
 #include <libgtext/evaluator.h>                 /* evaluator class */
 #include <libgtext/filter_stream.h>             /* filter stream class */
-#include <libgtext/feature_index.h>             /* feature index class */
-#include <libgtext/feature_stream.h>						/* Feature stream class */
 #include <libgtext/genome_stream.h>             /* genome stream class */
 #include <libgtext/gff3_in_stream.h>            /* GFF3 input stream class */
 #include <libgtext/gff3_out_stream.h>           /* GFF3 output stream class */
-#include <libgtext/graphics.h>                  /* graphics wrapper class */
 #include <libgtext/gtdata.h>                    /* gtdata/ module */
 #include <libgtext/gtf_in_stream.h>             /* GTF input stream class */
 #include <libgtext/gtf_out_stream.h>            /* GTF output stream class */
 #include <libgtext/hmm.h>                       /* HMM class */
-#include <libgtext/line.h>                      /* line class */
 #include <libgtext/linearalign.h>               /* linear alignment module */
 #include <libgtext/linearedist.h>               /* linear edit distance mod. */
 #include <libgtext/merge_stream.h>              /* merge stream class */
@@ -50,7 +41,6 @@
 #include <libgtext/png_stream.h>                /* PNG stream */
 #include <libgtext/qgramdist.h>                 /* q-gram distance module */
 #include <libgtext/regioncov_visitor.h>         /* regioncov visitor class */
-#include <libgtext/render.h>                    /* renderer class */
 #include <libgtext/seqid2file.h>                /* seqid2file module */
 #include <libgtext/sort_stream.h>               /* sort stream class */
 #include <libgtext/splicedseq.h>                /* splicedseq class */
@@ -58,7 +48,6 @@
 #include <libgtext/stream_evaluator.h>          /* string class */
 #include <libgtext/swalign.h>                   /* Smith-Waterman align. mod. */
 #include <libgtext/toolbox.h>                   /* toolbox class */
-#include <libgtext/track.h>                     /* track class */
 #include <libgtext/upgma.h>                     /* UPGMA class */
 
 #endif

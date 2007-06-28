@@ -5,8 +5,8 @@
 */
 
 #include <libgtcore/range.h>
-#include <libgtext/block.h>
-#include <libgtext/line.h>
+#include <libgtview/block.h>
+#include <libgtview/line.h>
 
 struct Line
 {

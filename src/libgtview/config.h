@@ -8,7 +8,7 @@
 #define CONFIG_H
 
 #include <libgtcore/str.h>
-#include <libgtext/color.h>
+#include <libgtview/color.h>
 #include <libgtext/genome_feature_type.h>
 
 /* Represents domination status of an ordered pair.

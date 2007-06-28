@@ -5,9 +5,9 @@
 */
 
 #include <gtcore.h>
-#include <libgtext/feature_stream.h>
-#include <libgtext/feature_visitor.h>
-#include <libgtext/feature_index.h>
+#include <libgtview/feature_stream.h>
+#include <libgtview/feature_visitor.h>
+#include <libgtview/feature_index.h>
 #include <libgtext/genome_stream_rep.h>
 
 struct FeatureStream

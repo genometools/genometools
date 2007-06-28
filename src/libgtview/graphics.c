@@ -1,5 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>,
+                     Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -7,7 +8,7 @@
 #include <cairo.h>
 #include <cairo-pdf.h>
 #include <cairo-ps.h>
-#include <libgtext/graphics.h>
+#include <libgtview/graphics.h>
 
 #define EXON_ARROW_WIDTH        6
 

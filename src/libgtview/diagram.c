@@ -6,13 +6,13 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <libgtext/diagram.h>
-#include <libgtext/track.h>
+#include <libgtview/diagram.h>
+#include <libgtview/track.h>
 #include <libgtext/genome_node.h>
 #include <libgtcore/str.h>
 #include <libgtext/genome_feature_type.h>
 #include <libgtext/genome_feature.h>
-#include <libgtext/feature_index.h>
+#include <libgtview/feature_index.h>
 
 struct Diagram
 {

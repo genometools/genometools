@@ -1,5 +1,6 @@
 /*
-  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>,
+                     Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -8,8 +9,8 @@
 #define GRAPHICS_H
 
 #include <gtcore.h>
-#include <libgtext/color.h>
-#include <libgtext/element.h>
+#include <libgtview/color.h>
+#include <libgtview/element.h>
 
 /* specifies arrowhead directions on elements */
 enum

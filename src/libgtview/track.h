@@ -10,8 +10,8 @@
 #include <libgtcore/str.h>
 #include <libgtcore/array.h>
 #include <libgtext/genome_node.h>
-#include <libgtext/config.h>
-#include <libgtext/line.h>
+#include <libgtview/config.h>
+#include <libgtview/line.h>
 
 /*! 
 Track interface

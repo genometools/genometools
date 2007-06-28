@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <libgtext/color.h>
+#include <libgtview/color.h>
 
 bool color_equals(Color c1, Color c2)
 {

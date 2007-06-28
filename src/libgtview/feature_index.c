@@ -6,7 +6,7 @@
 
 #include <libgtcore/hashtable.h>
 #include <libgtcore/range.h>
-#include <libgtext/feature_index.h>
+#include <libgtview/feature_index.h>
 #include <libgtext/genome_node.h>
 #include <libgtext/bsearch.h>
 

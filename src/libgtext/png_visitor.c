@@ -7,7 +7,7 @@
 #include <assert.h>
 #include <gtcore.h>
 #include <libgtext/genome_visitor_rep.h>
-#include <libgtext/graphics.h>
+#include <libgtview/graphics.h>
 #include <libgtext/png_visitor.h>
 
 #define TRACK_HEIGHT            50

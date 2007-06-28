@@ -10,7 +10,7 @@
 #include <libgtcore/range.h>
 #include <libgtext/genome_node.h>
 #include <libgtext/genome_feature_type.h>
-#include <libgtext/config.h>
+#include <libgtview/config.h>
 
 /*!
 Element interface

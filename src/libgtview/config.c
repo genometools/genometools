@@ -4,12 +4,12 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <libgtext/config.h>
+#include <libgtview/config.h>
 #include <assert.h>
 #include <string.h>
 #include <libgtcore/warning.h>
 #include <libgtcore/ensure.h>
-#include <libgtext/config.h>
+#include <libgtview/config.h>
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"

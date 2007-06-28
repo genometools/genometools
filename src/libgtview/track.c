@@ -4,7 +4,7 @@
    See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <libgtext/track.h>
+#include <libgtview/track.h>
 
 GenomeNode* last_parent = NULL;
 

@@ -10,8 +10,8 @@
 #include <libgtcore/range.h>
 #include <libgtext/genome_node.h>
 #include <libgtcore/array.h>
-#include <libgtext/element.h>
-#include <libgtext/config.h>
+#include <libgtview/element.h>
+#include <libgtview/config.h>
 
 /*!
 Block interface

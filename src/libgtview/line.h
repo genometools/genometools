@@ -9,8 +9,8 @@
 
 #include <libgtcore/array.h>
 #include <libgtext/genome_node.h>
-#include <libgtext/config.h>
-#include <libgtext/block.h>
+#include <libgtview/config.h>
+#include <libgtview/block.h>
 
 
 /*!

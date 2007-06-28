@@ -5,13 +5,13 @@
 */
 
 #include <math.h>
-#include <libgtext/render.h>
-#include <libgtext/graphics.h>
-#include <libgtext/element.h>
-#include <libgtext/feature_index.h>
-#include <libgtext/track.h>
-#include <libgtext/line.h>
-#include <libgtext/block.h>
+#include <libgtview/render.h>
+#include <libgtview/graphics.h>
+#include <libgtview/element.h>
+#include <libgtview/feature_index.h>
+#include <libgtview/track.h>
+#include <libgtview/line.h>
+#include <libgtview/block.h>
 
 enum ClipType
 {

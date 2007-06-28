@@ -4,8 +4,8 @@
    See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <libgtext/block.h>
-#include <libgtext/element.h>
+#include <libgtview/block.h>
+#include <libgtview/element.h>
 
 struct Block
 {

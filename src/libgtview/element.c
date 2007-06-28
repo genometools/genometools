@@ -9,7 +9,7 @@
 #include <libgtext/genome_feature_type.h>
 #include <libgtcore/ensure.h>
 #include <libgtcore/strand.h>
-#include <libgtext/element.h>
+#include <libgtview/element.h>
 
 struct Element
 {
