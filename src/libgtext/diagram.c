@@ -388,9 +388,7 @@ int diagram_unit_test(Env* env)
 
   /*create a config object*/
   Config *cfg;
-  Str *luafile = str_new_cstr("config.lua",env);
   cfg = config_new(env, false);
-  config_load_file(cfg, luafile, env);
 
   /*create a diagram object and test it*/
   Diagram *dia;
@@ -444,7 +442,6 @@ int diagram_unit_test(Env* env)
   ensure(has_err, range_compare(diagram_get_range(dia),dr1) == 0)
 
   /*delete all generated objects*/
-  str_delete(luafile, env);
   config_delete(cfg, env);
   diagram_delete(dia,env);
   diagram_delete(dia2,env);

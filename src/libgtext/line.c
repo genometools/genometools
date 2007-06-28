@@ -128,11 +128,9 @@ int line_unit_test(Env* env)
   Str *seqid1, *seqid2, *seqid3;
   int has_err = 0;
   Config *cfg;
-  Str *luafile = str_new_cstr("config.lua",env);
 
   cfg = config_new(env, false);
-  config_load_file(cfg, luafile, env);
-
+  
   r_parent.start = 10;
   r_parent.end = 80;
 
@@ -177,8 +175,6 @@ int line_unit_test(Env* env)
   genome_feature_add_attribute((GenomeFeature*) gn3, "Name", blub, env);
   genome_feature_add_attribute((GenomeFeature*) gn4, "Name", bar, env);
 
-  /* last_parent = NULL;			     */
-
   Block* b1 = block_new(env);
   Block* b2 = block_new(env);
 
@@ -203,7 +199,6 @@ int line_unit_test(Env* env)
   ensure(has_err, (2 == array_size(blocks)));
 
   config_delete(cfg, env);
-  str_delete(luafile, env);
   str_delete(seqid1, env);
   str_delete(seqid2, env);
   str_delete(seqid3, env);

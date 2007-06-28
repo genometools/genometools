@@ -38,7 +38,6 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
                             arguments->outfile,
                             "out.png", env);
   option_parser_add_option(op, option, env);
-  option_is_mandatory(option);
 
   /* -seqid */
   arguments->seqid = str_new(env);
@@ -66,11 +65,14 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   option_hide_default(option);
 
 	/* -width */
-  option = option_new_uint("width", "image width",
+  option = option_new_uint("width", "target image width",
                             &arguments->width,
-                            600, env);
+                            800, env);
   option_parser_add_option(op, option, env);
-
+  
+  /* set contact mailaddress */
+  option_parser_set_mailaddress(op, "<ssteinbiss@zbh.uni-hamburg.de>");
+  
   /* parse options */
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
 
@@ -88,7 +90,6 @@ int gt_view(int argc, const char **argv, Env *env)
   GenomeNode *gn = NULL;
   FeatureIndex *features = NULL;
   int parsed_args, has_err=0;
-  unsigned long i;
   Range qry_range;
   Array *results = NULL;
   Config *cfg;
@@ -160,23 +161,11 @@ int gt_view(int argc, const char **argv, Env *env)
 
     /* Silence is golden. */
     if (arguments.verbose)
-    {
       printf("# of results: %lu\n", array_size(results));
-      for (i=0;i<array_size(results);i++)
-      {
-        GenomeFeature *gf= *(GenomeFeature**) array_get(results, i);
-        GenomeNode *gn = (GenomeNode*) gf;
-        genome_node_traverse_children(gn,
-                                      NULL,
-                                      genome_node_print_feature_children,
-                                      true,
-                                      env);
-	  	  printf("------\n");
-      }
-    }
 
-    config_file = str_new_cstr("config.lua", env);
-    
+    /* find and load configuration file */
+    config_file = gtdata_get_path(argv[0], env);
+    str_append_cstr(config_file, "/config/view.lua", env);
     cfg = config_new(env, arguments.verbose);
     config_load_file(cfg, config_file, env);
 

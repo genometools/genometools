@@ -11,6 +11,9 @@
 #include <libgtext/color.h>
 #include <libgtext/genome_feature_type.h>
 
+/* Represents domination status of an ordered pair.
+   Used when two different types collapse into the same parent
+   to determine splitting precedence. */
 enum DominateStatus
 {
   DOMINATES_FIRST,
@@ -20,6 +23,7 @@ enum DominateStatus
   DOMINATES_UNKNOWN_TYPE
 };
 
+/* Holds configuration info for the gtview classes. */
 typedef struct Config Config;
 
 Config*      config_new(Env*, bool verbose);

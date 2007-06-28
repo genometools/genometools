@@ -75,7 +75,7 @@ void config_delete(Config *cfg, Env *env)
 
 /*!
 Loads and executes a Lua configuration file.
-This file must contain a table called 'config'.
+This file must contain a global table called 'config'.
 \param cfg Config object to load into.
 \param fn Filename of the script to execute.
 \param env Pointer to Environment object.
@@ -86,6 +86,8 @@ void config_load_file(Config *cfg, Str *fn, Env* env)
   env_error_check(env);
   assert(cfg && cfg->L && fn);
   cfg->filename = str_ref(fn);
+  if(config_get_verbose(cfg))
+    printf("Trying to load config file: %s...\n", str_get(fn));
   if (luaL_loadfile(cfg->L, str_get(fn)) ||
       lua_pcall(cfg->L, 0, 0, 0))
   {
@@ -408,6 +410,11 @@ bool config_cstr_in_list(Config *cfg,
   env_error_check(env);
   /* get section */
   i = config_find_section_for_getting(cfg, section, env);
+  if (i < 0)
+  {
+    lua_pop(cfg->L, i);
+    return false;
+  }
   lua_getfield(cfg->L, -1, key);
   i++;
   if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1))

@@ -334,10 +334,8 @@ int track_unit_test(Env* env)
   int has_err = 0;
 
   Config *cfg;
-  Str *luafile = str_new_cstr("config.lua",env);
 
   cfg = config_new(env, false);
-  config_load_file(cfg, luafile, env);
 
   r_parent.start = 10;
   r_parent.end = 80;
@@ -447,7 +445,6 @@ int track_unit_test(Env* env)
   ensure(has_err, (2 == track_get_number_of_lines(t)));
 
   config_delete(cfg, env);
-  str_delete(luafile, env);
   line_delete(l1, env);
   line_delete(l2, env);
   track_delete(t, env);
