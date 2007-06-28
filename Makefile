@@ -36,6 +36,10 @@ LIBGTEXT_C_OBJ:=$(LIBGTEXT_C_SRC:%.c=obj/%.o)
 LIBGTEXT_CXX_SRC:=$(notdir $(wildcard src/libgtext/*.cxx))
 LIBGTEXT_CXX_OBJ:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.o)
 
+# the GenomeTools view library
+LIBGTVIEW_C_SRC:=$(notdir $(wildcard src/libgtview/*.c))
+LIBGTVIEW_C_OBJ:=$(LIBGTVIEW_C_SRC:%.c=obj/%.o)
+
 TOOLS_SRC:=$(notdir $(wildcard src/tools/*.c))
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
 
@@ -85,7 +89,7 @@ endif
 # set prefix for install target
 prefix ?= /usr/local
 
-all: dirs lib/libgtcore.a lib/libgtext.a bin/gt bin/rnv
+all: dirs lib/libgtcore.a lib/libgtext.a lib/libgtview.a bin/gt bin/rnv
 
 dirs:
 	@test -d obj     || mkdir -p obj 
@@ -128,6 +132,13 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
+lib/libgtview.a: $(LIBGTVIEW_C_OBJ)
+	@echo "[link $@]"
+	@ar ru $@ $(LIBGTVIEW_C_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
 lib/libpng.a: $(LIBPNG_OBJ)
 	@echo "[link $@]"
 	@ar ru $@ $(LIBPNG_OBJ)
@@ -142,7 +153,7 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgtext.a lib/libgtcore.a\
+bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgtview.a lib/libgtext.a lib/libgtcore.a\
         lib/libbz2.a lib/libagg.a lib/libpng.a
 	@echo "[link $@]"
 	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
@@ -179,6 +190,10 @@ obj/%.o: src/libgtext/%.c
 obj/%.o: src/libgtext/%.cxx
 	@echo "[compile $@]"
 	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+
+obj/%.o: src/libgtview/%.c
+	@echo "[compile $@]"
+	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 obj/%.o: src/tools/%.c
 	@echo "[compile $@]"
@@ -240,7 +255,7 @@ installwww:
 
 gt: dirs bin/gt
 
-libgt: dirs lib/libexpat.a lib/libgtcore.a lib/libgtext.a
+libgt: dirs lib/libexpat.a lib/libgtcore.a lib/libgtext.a lib/libgtview.a
 
 install:
 	test -d $(prefix)/bin || mkdir -p $(prefix)/bin
