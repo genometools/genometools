@@ -66,33 +66,21 @@ unsigned int render_calculate_height(Render *r, Env *env)
               * ((config_get_num(r->cfg, "format","track_vspace", 20, env))+15);
   /* add header space and footer */
   height += 70 + 40;
-  printf("calculated height: %u\n", height);
+  if (config_get_verbose(r->cfg))
+    printf("calculated height: %u\n", height);
   return height;
 }
 
-/*!
-Creates a new Render object.
-\param d Diagram to render
-\param cfg Pointer to Config object.
-\param env Pointer to Environment object.
-\return Newly creates Render object.
-*/
-Render* render_new(Diagram *d, Config *cfg, Env *env)
+Render* render_new(Config *cfg, Env *env)
 {
-  assert(d && cfg && env);
+  assert(cfg && env);
   Render *r = env_ma_malloc(env, sizeof (Render));
-  r->dia = d;
+  r->dia = NULL;
   r->cfg = cfg;
-  r->range = diagram_get_range(d);
   r->margins = config_get_num(r->cfg, "format", "margins", 10, env);
   return r;
 }
 
-/*!
-Deletes a Render object
-\param r Render object
-\param env Pointer to Environment object.
-*/
 void render_delete(Render *r, Env *env)
 {
   assert(r && env);
@@ -158,9 +146,6 @@ void render_line(Render *r, Line *line, Env *env)
   assert(r && line && env);
   int i;
   Array *blocks = line_get_blocks(line);
-
-  if (config_get_verbose(r->cfg))
-     printf("scaling factor is %f\n",r->factor);
 
   /* begin drawing block */
   for (i=0; i<array_size(blocks); i++)
@@ -360,8 +345,6 @@ int render_track(void *key, void *value, void *data, Env *env)
 
 /*!
 Formats a given position number for short display in the ruler.
-\param txt String to write result into.
-\param pos Position.
 */
 void format_ruler_label(char *txt, long pos)
 {
@@ -443,27 +426,32 @@ void render_ruler(Render *r, Env* env)
                               "3'");
 }
 
-void render_to_png(Render *r, char *fn, unsigned int width, Env *env)
+void render_to_png(Render *r, Diagram *d,
+                   char *fn, unsigned int width, Env *env)
 {
   assert(r && fn && env && width > 0);
   unsigned int height;
 
-  /* set initial margins, header, target width */
+  /* set initial image-specific values */
   r->y = 70;
   r->width = width;
-  height = render_calculate_height(r, env);
-  r->height = height;
+  r->dia = d;
+  r->range = diagram_get_range(d);
+  r->height = height = render_calculate_height(r, env);
 
   /* calculate scaling factor */
   r->factor = ((double) r->width
                  -(2*r->margins))
                / (r->range.end
                  - r->range.start);
+  if (config_get_verbose(r->cfg))
+     printf("scaling factor is %f\n",r->factor);
 
   /* create new Graphics backend */
   r->g = graphics_new_png(fn, width, height, env);
   graphics_set_margins(r->g, r->margins, 0, width, height);
 
+  /* Add ruler/scale to the image */
   render_ruler(r, env);
 
   /* process (render) each track */
@@ -471,7 +459,8 @@ void render_to_png(Render *r, char *fn, unsigned int width, Env *env)
   Hashtable *tracks = diagram_get_tracks(r->dia);
   hashtable_foreach(tracks, render_track, r, env);
 
-  printf("actual used height: %f\n", r->y);
+  if (config_get_verbose(r->cfg))
+    printf("actual used height: %f\n", r->y);
 
   /* write out result file */
   graphics_save(r->g);

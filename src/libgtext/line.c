@@ -130,7 +130,7 @@ int line_unit_test(Env* env)
   Config *cfg;
 
   cfg = config_new(env, false);
-  
+
   r_parent.start = 10;
   r_parent.end = 80;
 

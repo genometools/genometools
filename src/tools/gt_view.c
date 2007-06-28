@@ -170,9 +170,9 @@ int gt_view(int argc, const char **argv, Env *env)
     config_load_file(cfg, config_file, env);
 
     Diagram* d = diagram_new(results, qry_range, cfg, env);
-    Render* r = render_new(d, cfg, env);
+    Render* r = render_new(cfg, env);
 
-    render_to_png(r, str_get(arguments.outfile), arguments.width, env);
+    render_to_png(r, d, str_get(arguments.outfile), arguments.width, env);
 
     render_delete(r, env);
     config_delete(cfg, env);
