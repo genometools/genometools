@@ -36,7 +36,7 @@ typedef uint16_t Ushort;        /* \Typedef{Ushort} */
 #define PRINTSeqposcast(X)  ((unsigned long) (X))
 #define PRINTuint64_tcast(X) ((unsigned long) (X))
 #else
-#define Formatuint64_t "%020" PRIu64
+#define Formatuint64_t "%" PRIu64
 #define Scanuint64_tcast(X) (X)
 #define PRINTSeqposcast(X)  (X)
 #define PRINTuint64_tcast(X) (X)
@@ -53,7 +53,7 @@ typedef uint64_t Seqpos;         /* \Typedef{Seqpos} */
 #ifdef S_SPLINT_S
 #define FormatSeqpos "%lu"
 #else
-#define FormatSeqpos   "%020" PRIu64
+#define FormatSeqpos   "%" PRIu64
 #endif
 
 #else
@@ -61,7 +61,7 @@ typedef uint64_t Seqpos;         /* \Typedef{Seqpos} */
 #ifdef S_SPLINT_S
 #define FormatSeqpos "%lu"
 #else
-#define Formatuint64_t "%020" PRIu64
+#define Formatuint64_t "%" PRIu64
 #endif
 
 #ifdef BIGNUM32
@@ -69,14 +69,14 @@ typedef uint64_t Seqpos;         /* \Typedef{Seqpos} */
 #ifdef S_SPLINT_S
 #define FormatSeqpos "%lu"
 #else
-#define FormatSeqpos "%020" PRIu64
+#define FormatSeqpos "%" PRIu64
 #endif
 #else
 typedef uint32_t Seqpos;         /* \Typedef{Seqpos} */
 #ifdef S_SPLINT_S
 #define FormatSeqpos "%lu"
 #else
-#define FormatSeqpos "%020" PRIu32
+#define FormatSeqpos "%" PRIu32
 #endif
 #define Seqposequalsunsignedint
 #endif /* BIGNUM32 */

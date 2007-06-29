@@ -86,7 +86,7 @@ endif
 prefix ?= /usr/local
 
 all: dirs lib/libgtcore.a lib/libgtext.a lib/libgtmatch.a bin/gt bin/rnv
-	echo "CC=${CC} CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS}"
+	@echo "CC=${CC} CFLAGS=${CFLAGS} LDFLAGS=${LDFLAGS}"
 
 dirs:
 	@test -d obj     || mkdir -p obj 

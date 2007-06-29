@@ -308,7 +308,8 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       NEWMAPSPEC(encseq->fourcharsinonebyte,Uchar,fourcharssize);
       if (encseq->numofspecialstostore > 0)
       {
-        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,encseq->totallength);
+        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
+                                  NUMOFINTSFORBITS(encseq->totallength));
         NEWMAPSPEC(encseq->specialbits,Bitstring,numofunits);
       }
       break;
