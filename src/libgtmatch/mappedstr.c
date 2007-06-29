@@ -513,10 +513,10 @@ int getfastastreamkmers(
             if (charcode == (Uchar) UNDEFCHAR)
             {
               env_error_set(env,
-                            "illegal character '%c': file \"%s\", line %lu",
+                            "illegal character '%c': file \"%s\", line %u",
                             currentchar,
                             strarray_get(filenametab,filenum),
-                            (Showuint) linenum);
+                            (unsigned int) linenum);
               return -1;
             }
             shiftrightwithchar(processkmercode,processkmercodeinfo,

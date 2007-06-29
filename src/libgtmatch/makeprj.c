@@ -48,8 +48,7 @@ static int updatesumranges(void *key, void *value, void *data,
   keyvalue = (unsigned long) key;
   distvalue = *((unsigned long *) value);
   (*specialrangesptr) += currentrangevalue(keyvalue,distvalue);
-  printf("specialranges of length %lu: %lu\n",
-         (Showuint) keyvalue,(Showuint) distvalue);
+  printf("specialranges of length %lu: %lu\n",keyvalue,distvalue);
   return 0;
 }
 
@@ -227,10 +226,10 @@ int scanfastasequence2(
 	    charcode = symbolmap[(uint32_t) currentchar];
 	    if (charcode == (Uchar) UNDEFCHAR)
 	    {
-              env_error_set(env,"illegal character '%c': file \"%s\", line %lu",
+              env_error_set(env,"illegal character '%c': file \"%s\", line %u",
 			    currentchar,
 			    strarray_get(filenametab,filenum),
-			    (Showuint) linenum);
+			    (unsigned int) linenum);
 	      return -1;
 	    }
 	    currentposition++;

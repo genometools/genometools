@@ -482,7 +482,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          }
          break;
     default:
-         fprintf(stderr,"detsizeencseq(%lu) undefined\n",(Showuint) sat);
+         fprintf(stderr,"detsizeencseq(%d) undefined\n",(int) sat);
          exit(EXIT_FAILURE);
   }
   return sum + 1;
@@ -985,12 +985,6 @@ static bool nextnonemptypage(const Encodedsequence *encseq,
       {
         esr->firstcell = 0;
         esr->lastcell = endpos0;
-#ifdef DEBUG
-        printf("pagenumber=%lu,firstcell=%lu,lastcell=%lu\n",
-               (Showuint) esr->pagenumber,
-               (Showuint) esr->firstcell,
-               (Showuint) esr->lastcell);
-#endif
         esr->pagenumber++;
         return true;
       }
@@ -1002,12 +996,6 @@ static bool nextnonemptypage(const Encodedsequence *encseq,
       {
         esr->firstcell = endpos0;
         esr->lastcell = endpos1;
-#ifdef DEBUG
-        printf("pagenumber=%lu,firstcell=%lu,lastcell=%lu\n",
-               (Showuint) esr->pagenumber,
-               (Showuint) esr->firstcell,
-               (Showuint) esr->lastcell);
-#endif
         esr->pagenumber++;
         esr->pageoffset += (esr->maxspecialtype+1);
         return true;
@@ -1293,8 +1281,9 @@ static void determineencseqkeyvalues(Encodedsequence *encseq,
   encseq->satcharptr = NULL;
   encseq->numofspecialstostore = specialcharinfo->specialranges;
   encseq->totallength = totallength;
-  encseq->sizeofrep 
-    = (unsigned long) detsizeencseq(sat,totallength,specialcharinfo);
+  encseq->sizeofrep = CALLCASTFUNC(uint64_t,unsigned_long,
+                                   detsizeencseq(sat,totallength,
+                                                 specialcharinfo));
   encseq->name = accesstype2name(sat);
   encseq->deliverchar = NULL;
   encseq->delivercharname = NULL;
@@ -1315,7 +1304,7 @@ static void determineencseqkeyvalues(Encodedsequence *encseq,
       (double) totallength;
   printf("# init character encoding (%s,%lu"
          " bytes,%.2f bits/symbol)\n",
-          encseq->name,(Showuint) encseq->sizeofrep,spaceinbitsperchar);
+          encseq->name,encseq->sizeofrep,spaceinbitsperchar);
 }
 
 static int readsatfromfile(const Str *indexname,Env *env)
