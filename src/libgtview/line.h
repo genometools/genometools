@@ -12,7 +12,6 @@
 #include <libgtview/config.h>
 #include <libgtview/block.h>
 
-
 /*!
 Line interface
 A line contains block objects

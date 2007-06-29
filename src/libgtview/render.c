@@ -67,7 +67,7 @@ unsigned int render_calculate_height(Render *r, Env *env)
   /* add header space and footer */
   height += 70 + 20;
   if (config_get_verbose(r->cfg))
-    printf("calculated height: %u\n", height);
+    fprintf(stderr, "calculated height: %u\n", height);
   return height;
 }
 
@@ -203,20 +203,20 @@ void render_line(Render *r, Line *line, Env *env)
       bar_height = config_get_num(r->cfg, "format", "bar_height", 15, env);
 
       if (config_get_verbose(r->cfg))
-        printf("processing element from %lu to %lu, strand %d\n",
-               elem_range.start,
-               elem_range.end,
-               strand);
+        fprintf(stderr, "processing element from %lu to %lu, strand %d\n",
+                elem_range.start,
+                elem_range.end,
+                strand);
 
       draw_range = render_convert_coords(r, elem_range, env);
       elem_start = draw_range.start;
       elem_width = draw_range.end - draw_range.start;
 
       if (config_get_verbose(r->cfg))
-        printf("drawing element from %f to %f, arrow status: %d\n",
-               draw_range.start,
-               draw_range.end,
-               arrow_status);
+        fprintf(stderr, "drawing element from %f to %f, arrow status: %d\n",
+                draw_range.start,
+                draw_range.end,
+                arrow_status);
 
       /* draw each element according to style set in the config */
 
@@ -321,7 +321,7 @@ int render_track(void *key, void *value, void *data, Env *env)
   int i;
 
   if (config_get_verbose(r->cfg))
-    printf("processing track %s\n", (const char*) key);
+    fprintf(stderr, "processing track %s\n", (const char*) key);
 
   /* draw track title */
   graphics_draw_colored_text(r->g,
@@ -351,7 +351,7 @@ void format_ruler_label(char *txt, long pos)
 /*  if (pos >= 1000)
 	  sprintf(txt, "%.1lfk", pos/1000.0);
   else */
-    sprintf(txt, "%li", pos);
+    (void) snprintf(txt, BUFSIZ, "%li", pos);
 }
 
 /*!
@@ -445,7 +445,7 @@ void render_to_png(Render *r, Diagram *d,
                / (r->range.end
                  - r->range.start);
   if (config_get_verbose(r->cfg))
-     printf("scaling factor is %f\n",r->factor);
+     fprintf( stderr, "scaling factor is %f\n",r->factor);
 
   /* create new Graphics backend */
   r->g = graphics_new_png(fn, width, height, env);
@@ -460,7 +460,7 @@ void render_to_png(Render *r, Diagram *d,
   hashtable_foreach(tracks, render_track, r, env);
 
   if (config_get_verbose(r->cfg))
-    printf("actual used height: %f\n", r->y);
+    fprintf(stderr, "actual used height: %f\n", r->y);
 
   /* write out result file */
   graphics_save(r->g);

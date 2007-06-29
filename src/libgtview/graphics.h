@@ -46,7 +46,7 @@ This constructor creates a Graphics that can be written out as a PNG file.
 */
 Graphics* graphics_new_png(const char *fname, unsigned int width,
                            unsigned int height, Env*);
-                           
+
 /*!
 Sets margins (space to the image boundaries that are clear of elements)
 in the graphics.
@@ -86,7 +86,7 @@ parameters.
 \param color Color of the line.
 \param arrow_status Arrow status, of ArrowStatus enum type.
 \param arrow_width Width of the arrowhead, in pixels.
-\param stroke_width Outline width, in pixels 
+\param stroke_width Outline width, in pixels
                     (can be a decimal subpixel value).
 \param stroke_color Outline color
 */
@@ -105,7 +105,7 @@ parameters.
 \param height Height of the box with arrowhead, in pixels.
 \param arrow_status Arrow status, of ArrowStatus enum type.
 \param arrow_width Width of the arrowhead, in pixels.
-\param stroke_width Outline width, in pixels 
+\param stroke_width Outline width, in pixels
                     (can be a decimal subpixel value).
 \param stroke_color Outline color
 */
@@ -124,7 +124,7 @@ parameters.
 \param height Height of the box, in pixels.
 \param arrow_status Arrow status, of ArrowStatus enum type.
 \param arrow_width Width of the arrowhead, in pixels.
-\param stroke_width Outline width, in pixels 
+\param stroke_width Outline width, in pixels
                     (can be a decimal subpixel value).
 \param stroke_color Outline color
 */
@@ -142,7 +142,7 @@ Draws the given string to the right of the given coordinates.
 */
 #define   graphics_draw_text_left(g,x,y,t) \
           graphics_draw_text(g,x,y,t);
-          
+
 /*!
 Draws the given string centered over the given coordinates.
 \param g Graphics object to modify.

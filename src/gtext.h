@@ -38,7 +38,6 @@
 #include <libgtext/multiset_matching.h>         /* multiset matching module */
 #include <libgtext/mutate.h>                    /* mutate module */
 #include <libgtext/neighborjoining.h>           /* the Neighbor-Joining class */
-#include <libgtext/png_stream.h>                /* PNG stream */
 #include <libgtext/qgramdist.h>                 /* q-gram distance module */
 #include <libgtext/regioncov_visitor.h>         /* regioncov visitor class */
 #include <libgtext/seqid2file.h>                /* seqid2file module */

@@ -43,15 +43,15 @@ static int feature_visitor_sequence_region(GenomeVisitor *gv,
                                            Env *env)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
 
-  has_err = feature_index_add_sequence_region(v->features,
+  had_err = feature_index_add_sequence_region(v->features,
 	                                            str_get(genome_node_get_seqid(
 																							                     (GenomeNode*) sr)),
 																							env);
 
-  return has_err;
+  return had_err;
 }
 
 const GenomeVisitorClass* feature_visitor_class()

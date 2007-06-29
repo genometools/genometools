@@ -23,13 +23,13 @@ struct FeatureStream
 static int feature_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
   FeatureStream *feature_stream;
-  int has_err;
+  int had_err;
   env_error_check(env);
   feature_stream = feature_stream_cast(gs);
-  has_err = genome_stream_next_tree(feature_stream->in_stream, gn, env);
-  if (!has_err && *gn)
-    has_err = genome_node_accept(*gn, feature_stream->feature_visitor, env);
-  return has_err;
+  had_err = genome_stream_next_tree(feature_stream->in_stream, gn, env);
+  if (!had_err && *gn)
+    had_err = genome_node_accept(*gn, feature_stream->feature_visitor, env);
+  return had_err;
 }
 
 static void feature_stream_free(GenomeStream *gs, Env *env)
@@ -51,7 +51,7 @@ GenomeStream* feature_stream_new(GenomeStream *in_stream,
 {
   GenomeStream *gs;
   FeatureStream *feature_stream;
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   gs = genome_stream_create(feature_stream_class(), true, env);
   feature_stream = feature_stream_cast(gs);
@@ -60,8 +60,8 @@ GenomeStream* feature_stream_new(GenomeStream *in_stream,
   feature_stream->feature_visitor = feature_visitor_new(fi, env);
 
 	if (!feature_stream->feature_visitor)
-    has_err = -1;
-  if (has_err) {
+    had_err = -1;
+  if (had_err) {
     feature_stream_free(gs, env);
     return NULL;
   }

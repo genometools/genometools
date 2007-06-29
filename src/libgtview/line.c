@@ -59,7 +59,7 @@ int line_unit_test(Env* env)
   Range r1, r2, r3, r4, r_parent;
   Array* blocks;
   Str *seqid1, *seqid2, *seqid3;
-  int has_err = 0;
+  int had_err = 0;
   Config *cfg;
 
   cfg = config_new(env, false);
@@ -83,11 +83,16 @@ int line_unit_test(Env* env)
   seqid2 = str_new_cstr("test2", env);
   seqid3 = str_new_cstr("foo", env);
 
-  GenomeNode* parent = genome_feature_new(gft_gene, r_parent, STRAND_FORWARD, NULL, 0, env);
-  GenomeNode* gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0, env);
-  GenomeNode* gn2 = genome_feature_new(gft_exon, r2, STRAND_FORWARD, NULL, 0, env);
-  GenomeNode* gn3 = genome_feature_new(gft_exon, r3, STRAND_FORWARD, NULL, 0, env);
-  GenomeNode* gn4 = genome_feature_new(gft_TF_binding_site, r4, STRAND_FORWARD, NULL, 0, env);
+  GenomeNode* parent = genome_feature_new(gft_gene, r_parent,
+                                          STRAND_FORWARD, NULL, 0, env);
+  GenomeNode* gn1 = genome_feature_new(gft_exon, r1,
+                                       STRAND_FORWARD, NULL, 0, env);
+  GenomeNode* gn2 = genome_feature_new(gft_exon, r2,
+                                       STRAND_FORWARD, NULL, 0, env);
+  GenomeNode* gn3 = genome_feature_new(gft_exon, r3,
+                                       STRAND_FORWARD, NULL, 0, env);
+  GenomeNode* gn4 = genome_feature_new(gft_TF_binding_site, r4,
+                                       STRAND_FORWARD, NULL, 0, env);
 
   genome_node_set_seqid((GenomeNode*) parent, seqid1);
   genome_node_set_seqid((GenomeNode*) gn1, seqid3);
@@ -117,19 +122,19 @@ int line_unit_test(Env* env)
   block_set_range(b2, r2);
 
   /* test line_insert_block */
-  ensure(has_err,  (0 == array_size(line_get_blocks(l1))));
+  ensure(had_err,  (0 == array_size(line_get_blocks(l1))));
   line_insert_block(l1, b1, env);
-  ensure(has_err,  (1 == array_size(line_get_blocks(l1))));
+  ensure(had_err,  (1 == array_size(line_get_blocks(l1))));
   line_insert_block(l1, b2, env);
-  ensure(has_err,  (2 == array_size(line_get_blocks(l1))));
+  ensure(had_err,  (2 == array_size(line_get_blocks(l1))));
 
   /* test line_is_occupied */
-  ensure(has_err, !line_is_occupied(l2, r3));
-  ensure(has_err, line_is_occupied(l1, r3));
+  ensure(had_err, !line_is_occupied(l2, r3));
+  ensure(had_err, line_is_occupied(l1, r3));
 
   /* test line_get_blocks */
   blocks = line_get_blocks(l1);
-  ensure(has_err, (2 == array_size(blocks)));
+  ensure(had_err, (2 == array_size(blocks)));
 
   config_delete(cfg, env);
   str_delete(seqid1, env);
@@ -143,22 +148,22 @@ int line_unit_test(Env* env)
   genome_node_delete(gn3, env);
   genome_node_delete(gn4, env);
 
-  return has_err;
+  return had_err;
 }
 
 void line_delete(Line *line,
                  Env *env)
-{ 
+{
   int i;
-  
+
   if (!line) return;
-  
+
   for (i=0; i<array_size(line->blocks); i++)
   {
     block_delete(*(Block**) array_get(line->blocks, i), env);
   }
-  
+
   array_delete(line->blocks, env);
   env_ma_free(line, env);
-} 
+}
 

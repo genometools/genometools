@@ -9,7 +9,7 @@
 #ifndef GTVIEW_H
 #define GTVIEW_H
 
-/* The GenomeTools Viewer (libgtview) header */
+/* The GenomeTools Viewer library (libgtview) header */
 #include <libgtview/block.h>
 #include <libgtview/color.h>
 #include <libgtview/config.h>
@@ -20,6 +20,7 @@
 #include <libgtview/feature_visitor.h>
 #include <libgtview/graphics.h>
 #include <libgtview/line.h>
+#include <libgtview/png_stream.h>
 #include <libgtview/render.h>
 #include <libgtview/track.h>
 

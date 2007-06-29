@@ -40,7 +40,7 @@ void block_insert_element(Block* block,
 			  Env* env);
 
 /*!
-Returns range of a Block object 
+Returns range of a Block object
 \param block Pointer to Block object
 \return Pointer to Range object
 */

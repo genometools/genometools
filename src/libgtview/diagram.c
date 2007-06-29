@@ -273,7 +273,7 @@ int diagram_unit_test(Env* env)
   FeatureIndex *fi;
   Range r1, r2, r3, r4, r5, dr1;
   Str *seqid1, *seqid2;
-  int has_err=0;
+  int had_err=0;
 
   /* Generating some ranges */
   r1.start=100; r1.end=1000;
@@ -354,21 +354,21 @@ int diagram_unit_test(Env* env)
   Diagram *dia;
   dia = diagram_new(features,dr1,cfg,env);
 
-  ensure(has_err, dia->config != NULL);
-  ensure(has_err, dia->range.start == 400);
-  ensure(has_err, dia->range.end == 900);
+  ensure(had_err, dia->config != NULL);
+  ensure(had_err, dia->range.start == 400);
+  ensure(had_err, dia->range.end == 900);
   if (!config_cstr_in_list(dia->config,"collapse","to_parent","gene",
                              env))
   {
-  ensure(has_err, hashtable_get(dia->tracks,"gene") != NULL);
+  ensure(had_err, hashtable_get(dia->tracks,"gene") != NULL);
   }
 
   if (!config_cstr_in_list(dia->config,"collapse","to_parent","exon",
                              env))
   {
-  ensure(has_err, hashtable_get(dia->tracks,"exon") != NULL);
+  ensure(had_err, hashtable_get(dia->tracks,"exon") != NULL);
   }
-  ensure(has_err, range_compare(diagram_get_range(dia),dr1) == 0);
+  ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
 
   /*get the features for the test2 sequence region*/
   Array *features2;
@@ -378,28 +378,28 @@ int diagram_unit_test(Env* env)
   /*create a diagram object and test it*/
   Diagram *dia2;
   dia2 = diagram_new(features2,dr1,cfg,env);
-  ensure(has_err, dia->range.start == 400);
-  ensure(has_err, dia->range.end == 900);
+  ensure(had_err, dia->range.start == 400);
+  ensure(had_err, dia->range.end == 900);
 
   if (!config_cstr_in_list(dia2->config,"collapse","to_parent","gene",
                              env))
   {
-  ensure(has_err, hashtable_get(dia2->tracks,"gene") != NULL);
+  ensure(had_err, hashtable_get(dia2->tracks,"gene") != NULL);
   }
 
   if (!config_cstr_in_list(dia2->config,"collapse","to_parent","exon",
                              env))
   {
-  ensure(has_err, hashtable_get(dia2->tracks,"exon") != NULL);
+  ensure(had_err, hashtable_get(dia2->tracks,"exon") != NULL);
   }
 
   if (!config_cstr_in_list(dia2->config,"collapse","to_parent","CDS",
                              env))
 
   {
-  ensure(has_err, hashtable_get(dia2->tracks,"CDS") != NULL);
+  ensure(had_err, hashtable_get(dia2->tracks,"CDS") != NULL);
   }
-  ensure(has_err, range_compare(diagram_get_range(dia),dr1) == 0)
+  ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0)
 
   /*delete all generated objects*/
   config_delete(cfg, env);
@@ -412,5 +412,5 @@ int diagram_unit_test(Env* env)
   genome_node_rec_delete(gn2, env);
   str_delete(seqid1, env);
   str_delete(seqid2, env);
-return has_err;
+return had_err;
 }

@@ -219,7 +219,7 @@ int track_unit_test(Env* env)
   Range r1, r2, r3, r_parent, r_mRNA1, r_mRNA2;
   Str *seqid1, *seqid2, *seqid3;
   Array* lines;
-  int has_err = 0;
+  int had_err = 0;
 
   Config *cfg;
 
@@ -293,47 +293,47 @@ int track_unit_test(Env* env)
      (implicit test of get_next_free_line) */
   int nof_blocks;
   nof_blocks = track_get_number_of_blocks(t, env);
-  ensure(has_err, (0 == nof_blocks));
+  ensure(had_err, (0 == nof_blocks));
   track_insert_element(t, gn1, cfg, mRNA1, env);
   nof_blocks = track_get_number_of_blocks(t, env);
-  ensure(has_err, (1 == nof_blocks));
+  ensure(had_err, (1 == nof_blocks));
   track_insert_element(t, gn2, cfg, mRNA1, env);
   nof_blocks = track_get_number_of_blocks(t, env);
-  ensure(has_err, (1 == nof_blocks));
+  ensure(had_err, (1 == nof_blocks));
   track_insert_element(t, gn3, cfg, gn1, env);
   nof_blocks = track_get_number_of_blocks(t, env);
-  ensure(has_err, (2 == nof_blocks));
+  ensure(had_err, (2 == nof_blocks));
   nof_blocks = track_get_number_of_blocks(t3, env);
-  ensure(has_err, (0 == nof_blocks));
+  ensure(had_err, (0 == nof_blocks));
   track_insert_element(t3, mRNA1, cfg, parent, env);
   nof_blocks = track_get_number_of_blocks(t3, env);
-  ensure(has_err, (1 == nof_blocks));
+  ensure(had_err, (1 == nof_blocks));
   track_insert_element(t3, mRNA2, cfg, parent, env);
   nof_blocks = track_get_number_of_blocks(t3, env);
-  ensure(has_err, (2 == nof_blocks));
+  ensure(had_err, (2 == nof_blocks));
   track_finish(t3, env);
 
   /* test track_finish*/
-  ensure(has_err, (0 == array_size(track_get_lines(t))));
+  ensure(had_err, (0 == array_size(track_get_lines(t))));
   track_finish(t, env);
-  ensure(has_err, (2 == array_size(track_get_lines(t))));
+  ensure(had_err, (2 == array_size(track_get_lines(t))));
 
   /* test track_get_title */
-  ensure(has_err, (0 == str_cmp(title, track_get_title(t))));
-  ensure(has_err, !(0 == str_cmp(s, track_get_title(t))));
+  ensure(had_err, (0 == str_cmp(title, track_get_title(t))));
+  ensure(had_err, !(0 == str_cmp(s, track_get_title(t))));
 
   /* test track_get_lines and track_get_number_of_lines */
   lines = track_get_lines(t2);
-  ensure(has_err, (0 == array_size(lines)));
-  ensure(has_err, (0 == track_get_number_of_lines(t2)));
+  ensure(had_err, (0 == array_size(lines)));
+  ensure(had_err, (0 == track_get_number_of_lines(t2)));
   track_insert_element(t2, gn1, cfg, NULL, env);
   track_finish(t2, env);
   lines = track_get_lines(t2);
-  ensure(has_err, (1 == array_size(lines)));
-  ensure(has_err, (1 == track_get_number_of_lines(t2)));
+  ensure(had_err, (1 == array_size(lines)));
+  ensure(had_err, (1 == track_get_number_of_lines(t2)));
   lines = track_get_lines(t);
-  ensure(has_err, (2 == array_size(lines)));
-  ensure(has_err, (2 == track_get_number_of_lines(t)));
+  ensure(had_err, (2 == array_size(lines)));
+  ensure(had_err, (2 == track_get_number_of_lines(t)));
 
   config_delete(cfg, env);
   line_delete(l1, env);
@@ -353,7 +353,7 @@ int track_unit_test(Env* env)
   genome_node_delete(mRNA1, env);
   genome_node_delete(mRNA2, env);
 
-  return has_err;
+  return had_err;
 }
 
 void track_delete(Track *track,

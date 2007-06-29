@@ -8,7 +8,7 @@
 #include <gtcore.h>
 #include <libgtext/genome_visitor_rep.h>
 #include <libgtview/graphics.h>
-#include <libgtext/png_visitor.h>
+#include <libgtview/png_visitor.h>
 
 #define TRACK_HEIGHT            50
 #define SPACE                   .05

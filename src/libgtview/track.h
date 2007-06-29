@@ -13,7 +13,7 @@
 #include <libgtview/config.h>
 #include <libgtview/line.h>
 
-/*! 
+/*!
 Track interface
 A track has a title and a type und contains
 line objects

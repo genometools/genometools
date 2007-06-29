@@ -283,14 +283,12 @@ int block_unit_test(Env* env)
 {
   Range r1, r2, r_temp, b_range;
   Dlist* elements;
-  int has_err = 0;
+  int had_err = 0;
   Strand s;
 
   Config *cfg;
-  Str *luafile = str_new_cstr("config.lua",env);
 
   cfg = config_new(env, false);
-  config_load_file(cfg, luafile, env);
 
   r1.start = 10;
   r1.end = 50;
@@ -298,8 +296,10 @@ int block_unit_test(Env* env)
   r2.start = 51;
   r2.end = 80;
 
-  GenomeNode* gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0, env);
-  GenomeNode* gn2 = genome_feature_new(gft_intron, r2, STRAND_FORWARD, NULL, 0, env);
+  GenomeNode* gn1 = genome_feature_new(gft_exon, r1,
+                                       STRAND_FORWARD, NULL, 0, env);
+  GenomeNode* gn2 = genome_feature_new(gft_intron, r2,
+                                       STRAND_FORWARD, NULL, 0, env);
 
   Element* e1 = element_new(gn1, cfg, env);
   Element* e2 = element_new(gn2, cfg, env);
@@ -310,51 +310,50 @@ int block_unit_test(Env* env)
   const char* caption2 = "bar";
 
   /* test block_insert_elements */
-  ensure(has_err, (0 == dlist_size(block_get_elements(b))));
+  ensure(had_err, (0 == dlist_size(block_get_elements(b))));
   block_insert_element(b, gn1, cfg, env);
-  ensure(has_err, (1 == dlist_size(block_get_elements(b))));
+  ensure(had_err, (1 == dlist_size(block_get_elements(b))));
   block_insert_element(b, gn2, cfg, env);
-  ensure(has_err, (2 == dlist_size(block_get_elements(b))));
+  ensure(had_err, (2 == dlist_size(block_get_elements(b))));
 
   /* test block_get_elements */
   elements = block_get_elements(b);
   Element *elem = (Element*) dlistelem_get_data(dlist_first(elements));
-  ensure(has_err, elements_are_equal(e1, elem));
-  ensure(has_err, !elements_are_equal(e2, (Element*) dlist_first(elements)));
+  ensure(had_err, elements_are_equal(e1, elem));
+  ensure(had_err, !elements_are_equal(e2, (Element*) dlist_first(elements)));
   elem = (Element*) dlistelem_get_data(dlist_last(elements));
-  ensure(has_err, !elements_are_equal(e1, elem));
-  ensure(has_err, elements_are_equal(e2, elem));
+  ensure(had_err, !elements_are_equal(e1, elem));
+  ensure(had_err, elements_are_equal(e2, elem));
 
   /* test block_set_range & block_get_range */
   r_temp = range_join(r1, r2);
   block_set_range(b, r_temp);
   b_range = block_get_range(b);
-  ensure(has_err, (0 == range_compare(b_range, r_temp)));
-  ensure(has_err, (1 == range_compare(r2, r_temp)));
+  ensure(had_err, (0 == range_compare(b_range, r_temp)));
+  ensure(had_err, (1 == range_compare(r2, r_temp)));
 
   /* tests block_set_caption
      & block_get_caption */
   block_set_caption(b, caption1);
-  ensure(has_err, (0 == strcmp(block_get_caption(b), caption1)));
-  ensure(has_err, (0 != strcmp(block_get_caption(b), caption2)));
+  ensure(had_err, (0 == strcmp(block_get_caption(b), caption1)));
+  ensure(had_err, (0 != strcmp(block_get_caption(b), caption2)));
 
   /* tests block_set_strand
      & block_get_range */
   s = block_get_strand(b);
-  ensure(has_err, (STRAND_UNKNOWN == s));
+  ensure(had_err, (STRAND_UNKNOWN == s));
   block_set_strand(b, STRAND_FORWARD);
   s = block_get_strand(b);
-  ensure(has_err, (STRAND_FORWARD == s));
+  ensure(had_err, (STRAND_FORWARD == s));
 
   config_delete(cfg, env);
-  str_delete(luafile, env);
   element_delete(e1, env);
   element_delete(e2, env);
   block_delete(b, env);
   genome_node_delete(gn1, env);
   genome_node_delete(gn2, env);
 
-  return has_err;
+  return had_err;
 }
 
 void block_delete(Block *block,

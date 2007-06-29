@@ -53,20 +53,20 @@ void config_delete(Config *cfg, Env *env)
 
 void config_load_file(Config *cfg, Str *fn, Env* env)
 {
-  int has_err = 0;
+  int had_err = 0;
   env_error_check(env);
   assert(cfg && cfg->L && fn);
   cfg->filename = str_ref(fn);
   if (config_get_verbose(cfg))
-    printf("Trying to load config file: %s...\n", str_get(fn));
+    fprintf(stderr, "Trying to load config file: %s...\n", str_get(fn));
   if (luaL_loadfile(cfg->L, str_get(fn)) ||
       lua_pcall(cfg->L, 0, 0, 0))
   {
     env_error_set(env, "cannot run configuration file: %s",
                   lua_tostring(cfg->L, -1));
-    has_err = -1;
+    had_err = -1;
   }
-  if (!has_err)
+  if (!had_err)
   {
     lua_getglobal(cfg->L, "config");
     if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1))
@@ -223,7 +223,7 @@ double config_get_num(Config *cfg,
   if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1))
   {
     if (cfg->verbose) warning("no or non-numeric value found for key '%s'",
-                               key);
+                              key);
     lua_pop(cfg->L, i+1);
     return deflt;
   } else i++;
@@ -345,7 +345,7 @@ bool config_cstr_in_list(Config *cfg,
                     Env* env)
 {
   assert(cfg && key && section && checkstr);
-  int i = 0, has_err = 0;
+  int i = 0, had_err = 0;
   bool ret = false;
   env_error_check(env);
   /* get section */
@@ -362,9 +362,9 @@ bool config_cstr_in_list(Config *cfg,
 /*    if (cfg->verbose) warning("key '%s' is not set or not a table",
                                key);
     lua_pop(cfg->L, 1);*/
-    has_err = -1;
+    had_err = -1;
   }
-  if (!has_err)
+  if (!had_err)
   {
     /* table is at the top position in the stack */
     lua_pushnil(cfg->L);  /* first key */
@@ -426,7 +426,7 @@ Unit tests for the Config class.
 */
 int config_unit_test(Env* env)
 {
-  int has_err = 0;
+  int had_err = 0;
   Config *cfg;
   const char* test1 = "mRNA";
   const char* str = NULL;
@@ -445,15 +445,15 @@ int config_unit_test(Env* env)
 
   /* at the beginning, all values are defaults, since nothing is defined */
   tmpcol = config_get_color(cfg, "exon", env);
-  ensure(has_err, color_equals(tmpcol,defcol));
+  ensure(had_err, color_equals(tmpcol,defcol));
   tmpcol = config_get_color(cfg, "cds", env);
-  ensure(has_err, color_equals(tmpcol,defcol));
+  ensure(had_err, color_equals(tmpcol,defcol));
   tmpcol = config_get_color(cfg, "foo", env);
-  ensure(has_err, color_equals(tmpcol,defcol));
+  ensure(had_err, color_equals(tmpcol,defcol));
   num = config_get_num(cfg,"format", "margins", 10, env);
-  ensure(has_err, num == 10);
+  ensure(had_err, num == 10);
   str = config_get_cstr(cfg, "collapse", "exon", "", env);
-  ensure(has_err, (str == ""));
+  ensure(had_err, (str == ""));
 
   /* change some values... */
   config_set_color(cfg, "exon", col, env);
@@ -462,13 +462,13 @@ int config_unit_test(Env* env)
 
   /* is it saved correctly? */
   tmpcol = config_get_color(cfg, "exon", env);
-  ensure(has_err, !color_equals(tmpcol,defcol));
+  ensure(had_err, !color_equals(tmpcol,defcol));
   tmpcol = config_get_color(cfg, "exon", env);
-  ensure(has_err, color_equals(tmpcol,col));
+  ensure(had_err, color_equals(tmpcol,col));
   num = config_get_num(cfg,"format", "margins", 10,  env);
-  ensure(has_err, num == 11);
+  ensure(had_err, num == 11);
   num = config_get_num(cfg,"format", "foo", 10, env);
-  ensure(has_err, num == 2);
+  ensure(had_err, num == 2);
 
   /* create a new color definition */
   config_set_color(cfg, "foo", col, env);
@@ -476,18 +476,18 @@ int config_unit_test(Env* env)
 
   /* is it saved correctly? */
   tmpcol = config_get_color(cfg, "foo", env);
-  ensure(has_err, !color_equals(tmpcol,defcol));
+  ensure(had_err, !color_equals(tmpcol,defcol));
   tmpcol = config_get_color(cfg, "foo", env);
-  ensure(has_err, color_equals(tmpcol,col));
+  ensure(had_err, color_equals(tmpcol,col));
   str = config_get_cstr(cfg, "bar", "baz", "", env);
-  ensure(has_err, (str != ""));
-  ensure(has_err, (strcmp(str,test1)==0));
+  ensure(had_err, (str != ""));
+  ensure(had_err, (strcmp(str,test1)==0));
   str = config_get_cstr(cfg, "bar", "test", "", env);
-  ensure(has_err, (str == ""));
+  ensure(had_err, (str == ""));
 
   /* mem cleanup */
   str_delete(luafile, env);
   config_delete(cfg, env);
 
-  return has_err;
+  return had_err;
 }

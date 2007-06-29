@@ -80,7 +80,8 @@ bool elements_are_equal(Element* e1,
                         Element* e2)
 {
   assert(e1 && e2);
-  if ((0 == strcmp(genome_feature_type_get_cstr(e1->type), genome_feature_type_get_cstr(e2->type)))
+  if ((0 == strcmp(genome_feature_type_get_cstr(e1->type),
+                   genome_feature_type_get_cstr(e2->type)))
      && (0 == range_compare(e1->range, e2->range)))
     return true;
   else
@@ -90,7 +91,7 @@ bool elements_are_equal(Element* e1,
 int element_unit_test(Env* env)
 {
   Range r1, r2, r_temp;
-  int has_err = 0;
+  int had_err = 0;
 
   r1.start = 10;
   r1.end = 50;
@@ -98,8 +99,10 @@ int element_unit_test(Env* env)
   r2.start = 20;
   r2.end = 50;
 
-  GenomeNode* gn = genome_feature_new(gft_exon, r1, STRAND_BOTH, NULL, 0, env);
-  GenomeNode* gn2 = genome_feature_new(gft_exon, r2, STRAND_BOTH, NULL, 0, env);
+  GenomeNode* gn = genome_feature_new(gft_exon, r1,
+                                      STRAND_BOTH, NULL, 0, env);
+  GenomeNode* gn2 = genome_feature_new(gft_exon, r2,
+                                       STRAND_BOTH, NULL, 0, env);
 
   Element* e = element_new(gn, NULL, env);
   Element* e2 = element_new(gn, NULL, env);
@@ -107,20 +110,20 @@ int element_unit_test(Env* env)
 
   /* tests element_get_range */
   r_temp = element_get_range(e);
-  ensure(has_err, (0 == range_compare(r1, r_temp)));
-  ensure(has_err, (1 == range_compare(r2, r_temp)));
+  ensure(had_err, (0 == range_compare(r1, r_temp)));
+  ensure(had_err, (1 == range_compare(r2, r_temp)));
 
   /* tests element_get_type and element_set_type*/
-  ensure(has_err, (gft_exon == element_get_type(e)));
-  ensure(has_err, (gft_intron != element_get_type(e)));
+  ensure(had_err, (gft_exon == element_get_type(e)));
+  ensure(had_err, (gft_intron != element_get_type(e)));
   element_set_type(e, gft_intron);
-  ensure(has_err, (gft_intron == element_get_type(e)));
+  ensure(had_err, (gft_intron == element_get_type(e)));
   element_set_type(e2, gft_intron);
 
   /* tests elements_are_equal */
-  ensure(has_err, elements_are_equal(e, e2));
-  ensure(has_err, !elements_are_equal(e, e3));
-  ensure(has_err, !elements_are_equal(e2, e3));
+  ensure(had_err, elements_are_equal(e, e2));
+  ensure(had_err, !elements_are_equal(e, e3));
+  ensure(had_err, !elements_are_equal(e2, e3));
 
   element_delete(e, env);
   element_delete(e2, env);
@@ -128,7 +131,7 @@ int element_unit_test(Env* env)
   genome_node_delete(gn, env);
   genome_node_delete(gn2, env);
 
-  return has_err;
+  return had_err;
 
 }
 

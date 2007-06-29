@@ -96,6 +96,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "mutate", gt_mutate, env);
   toolbox_add(gtr->toolbox, "splitfasta", gt_splitfasta, env);
   toolbox_add(gtr->toolbox, "stat", gt_stat, env);
+  toolbox_add(gtr->toolbox, "view", gt_view, env);
   /* add unit tests */
   hashtable_delete(gtr->unit_tests, env);
   gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL, env);
