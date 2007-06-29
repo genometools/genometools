@@ -20,14 +20,13 @@
 #define DBFILEKEY "dbfile="
 
 #define SETREADINTKEYS(VALNAME,VAL)\
-        if((VAL) == NULL)\
-        {\
-          setreadintkeys(&rik,VALNAME,VAL,0,env);\
-        } else\
-        {\
-          setreadintkeys(&rik,VALNAME,VAL,sizeof(*(VAL)),env);\
-        }
+        setreadintkeys(&rik,VALNAME,VAL,sizeof(*(VAL)),env)
 
+#ifdef S_SPLINT_S
+#define FormatScanint64_t "%lu"
+#else
+#define FormatScanint64_t "%020" SCNd64
+#endif
 
 typedef union
 {
@@ -77,7 +76,7 @@ static void setreadintkeys(ArrayReadintkeys *riktab,
   riktabptr->found = false;
 }
 
-static int scanuintintline(unsigned int *lengthofkey,
+static int scanuintintline(uint32_t *lengthofkey,
                            Smallorbigint *smallorbigint,
                            const ArrayUchar *linebuffer,
                            Env *env)
@@ -92,13 +91,12 @@ static int scanuintintline(unsigned int *lengthofkey,
   {
     if (linebuffer->spaceUchar[i] == '=')
     {
-      *lengthofkey = (unsigned int) i;
+      *lengthofkey = (uint32_t) i;
       found = true;
 
-#ifndef S_SPLINT_S
       if (sscanf((const char *) (linebuffer->spaceUchar + i + 1),
-                 "%020" SCNd64,
-                 &readint) != 1 ||
+                 FormatScanint64_t,
+                 Scanuint64_tcast(&readint)) != 1 ||
          readint < (int64_t) 0)
       {
         env_error_set(env,"cannot find non-negative integer in \"%*.*s\"",
@@ -107,7 +105,6 @@ static int scanuintintline(unsigned int *lengthofkey,
                            (const char *) (linebuffer->spaceUchar + i + 1));
         return -1;
       }
-#endif
       if(readint <= (int64_t) UINT32_MAX)
       {
         smallorbigint->smallvalue = (uint32_t) readint;
@@ -151,18 +148,13 @@ static int allkeysdefined(const Str *prjfile,const ArrayReadintkeys *rik,
     {
       if (rik->spaceReadintkeys[i].smallvalueptr != NULL)
       {
-#ifndef S_SPLINT_S
-        printf("%020" PRIu32 "\n",
-               *(rik->spaceReadintkeys[i].smallvalueptr));
-#endif
+        printf("%u\n",(unsigned int) *(rik->spaceReadintkeys[i].smallvalueptr));
       } else
       {
         if (rik->spaceReadintkeys[i].bigvalueptr != NULL)
         {
-#ifndef S_SPLINT_S
-          printf("%020" PRIu64 "\n",
-                 *(rik->spaceReadintkeys[i].bigvalueptr));
-#endif
+          printf(Formatuint64_t "\n",
+                 PRINTuint64_tcast(*(rik->spaceReadintkeys[i].bigvalueptr)));
         } else
         {
           assert(false);
@@ -181,7 +173,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                                  const Str *prjfile,FILE *fpin,Env *env)
 {
   ArrayUchar linebuffer;
-  unsigned int integersize, littleendian, linenum, lengthofkey;
+  uint32_t integersize, littleendian, linenum, lengthofkey;
   unsigned long i, numofsequences, numoffiles = 0, numofallocatedfiles = 0;
   size_t dbfilelen = strlen(DBFILEKEY);
   int retval;
@@ -204,8 +196,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                  &numofsequences);
   SETREADINTKEYS("numofdbsequences",
                  &suffixarray->numofdbsequences);
-  SETREADINTKEYS("numofquerysequences",
-                 NULL);
+  setreadintkeys(&rik,"numofquerysequences",&suffixarray->numofdbsequences,
+                 0,env);
   SETREADINTKEYS("prefixlength",
                  &suffixarray->prefixlength);
   SETREADINTKEYS("integersize",
@@ -237,12 +229,11 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
       assert(suffixarray->filelengthtab != NULL);
       ALLOCASSIGNSPACE(tmpfilename,NULL,char,linebuffer.nextfreeUchar);
-#ifndef S_SPLINT_S
       if (sscanf((const char *) linebuffer.spaceUchar,
-                  "dbfile=%s %020" SCNd64 " %020" SCNd64 "\n",
+                  "dbfile=%s " FormatScanint64_t " " FormatScanint64_t "\n",
                    tmpfilename,
-                   &readint1,
-                   &readint2) != 3)
+                   Scanuint64_tcast(&readint1),
+                   Scanuint64_tcast(&readint2)) != 3)
       {
         env_error_set(env,"cannot parse line %*.*s",
                           (int) linebuffer.nextfreeUchar,
@@ -252,7 +243,6 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         haserr = true;
         break;
       }
-#endif
       if (readint1 < (int64_t) 1 || readint2 < (int64_t) 1)
       {
         env_error_set(env,"need positive integers in line %*.*s",
@@ -343,14 +333,14 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     haserr = true;
   }
   if (!haserr && 
-      integersize != (unsigned int) 32 && 
-      integersize != (unsigned int) 64)
+      integersize != (uint32_t) 32 && 
+      integersize != (uint32_t) 64)
   {
     env_error_set(env,"%s contains illegal line defining the integer size",
                   str_get(prjfile));
     haserr = true;
   }
-  if (!haserr && integersize != (unsigned int) (sizeof (Seqpos) * CHAR_BIT))
+  if (!haserr && integersize != (uint32_t) (sizeof (Seqpos) * CHAR_BIT))
   {
     env_error_set(env,"index was generated for %lu-bit integers while "
                       "this program uses %lu-bit integers",
@@ -362,7 +352,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   {
     if (islittleendian())
     {
-      if (littleendian != (unsigned int) 1)
+      if (littleendian != (uint32_t) 1)
       {
         env_error_set(env,"computer has little endian byte order, while index "
                           "was build on computer with big endian byte order");
@@ -370,7 +360,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
     } else
     {
-      if (littleendian == (unsigned int) 1)
+      if (littleendian == (uint32_t) 1)
       {
         env_error_set(env,"computer has big endian byte order, while index "
                           "was build on computer with little endian byte "

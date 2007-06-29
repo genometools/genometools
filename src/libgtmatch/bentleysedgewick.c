@@ -263,15 +263,15 @@ void sortallbuckets(Seqpos *suftabptr,
                     const Seqpos *leftborder,
                     const Seqpos *countspecialcodes,
                     Seqpos totallength,
-                    unsigned int numofchars,
-                    unsigned int prefixlength,
+                    uint32_t numofchars,
+                    uint32_t prefixlength,
                     Codetype mincode,
                     Codetype maxcode,
                     uint64_t widthofpart,
                     Env *env)
 {
   Codetype code;
-  unsigned int rightchar = mincode % numofchars;
+  uint32_t rightchar = mincode % numofchars;
   Seqpos left, right, specialcodes;
   ArrayMKVstack mkvauxstack;
 

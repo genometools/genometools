@@ -136,12 +136,11 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
     expected = expectedindexsize(&mapspectable);
     if (expected != (uint64_t) numofbytes)
     {
-#ifndef S_SPLINT_S
-      env_error_set(env,"%lu bytes read from %s, but %020" PRIu64 " expected",
+      env_error_set(env,"%lu bytes read from %s, but " Formatuint64_t 
+                         " expected",
                          (Showuint) numofbytes,
                          str_get(tmpfilename),
                          expected);
-#endif
       haserr = true;
     }
   }

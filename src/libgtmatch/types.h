@@ -30,50 +30,59 @@ typedef uint16_t Ushort;        /* \Typedef{Ushort} */
 #define Uint32Const(N)   (N##U)  /* uint32_t constant */
 #define Uint64Const(N)   (N##UL) /* uint64_t constant */
 
+#ifdef S_SPLINT_S
+#define Formatuint64_t "%lu"
+#define Scanuint64_tcast(X) ((unsigned long *) (X))
+#define PRINTSeqposcast(X)  ((unsigned long) (X))
+#define PRINTuint64_tcast(X) ((unsigned long) (X))
+#else
+#define Formatuint64_t "%020" PRIu64
+#define Scanuint64_tcast(X) (X)
+#define PRINTSeqposcast(X)  (X)
+#define PRINTuint64_tcast(X) (X)
+#endif
+
 /*
   The following is the central case distinction to accomodate
   code for 32 bit integers and 64 bit integers.
 */
 
-#ifdef S_SPLINT_S
-#define CHECK64CAST(EXPR) /*  Nothing */
-#else
-#define CHECK64CAST(EXPR)\
-        if ((EXPR) > (uint64_t) UINT32_MAX)\
-        {\
-          fprintf(stderr,"%s, %d: %020" PRIu64 " cannot be stored in 32bit word",\
-                         __FILE__,__LINE__,EXPR);\
-          exit(EXIT_FAILURE);\
-        }
-#endif
-
 #ifdef _LP64
 
 typedef uint64_t Seqpos;         /* \Typedef{Seqpos} */
-#define FormatSeqpos "%020" PRIu64
-#define CHECK64to32Cast(EXPR) /* Nothing */
+#ifdef S_SPLINT_S
+#define FormatSeqpos "%lu"
+#else
+#define FormatSeqpos   "%020" PRIu64
+#endif
 
 #else
+
+#ifdef S_SPLINT_S
+#define FormatSeqpos "%lu"
+#else
+#define Formatuint64_t "%020" PRIu64
+#endif
 
 #ifdef BIGNUM32
 typedef uint64_t Seqpos;         /* \Typedef{Seqpos} */
+#ifdef S_SPLINT_S
+#define FormatSeqpos "%lu"
+#else
 #define FormatSeqpos "%020" PRIu64
+#endif
 #else
 typedef uint32_t Seqpos;         /* \Typedef{Seqpos} */
+#ifdef S_SPLINT_S
+#define FormatSeqpos "%lu"
+#else
 #define FormatSeqpos "%020" PRIu32
+#endif
 #define Seqposequalsunsignedint
 #endif /* BIGNUM32 */
 
-#define CHECK64to32Cast(EXPR) CHECK64CAST(EXPR)
 #endif /* _LP64 */
 
-#ifdef Seqposequalsunsignedint
-#define CHECKSEQPOSCAST(VAL)           /* Nothing */
-#define CHECK64toSeqposCast(EXPR) CHECK64CAST(EXPR)
-#else
-#define CHECKSEQPOSCAST(EXPR)     CHECK64CAST(EXPR)
-#define CHECK64toSeqposCast(EXPR) /* Nothing */
-#endif /* Seqposequalsunsignedint */
 
 /*
   Type of unsigned integer in \texttt{printf}.

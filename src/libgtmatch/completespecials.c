@@ -12,7 +12,7 @@
 
 typedef struct
 {
-  unsigned int prefixlength;
+  uint32_t prefixlength;
   Seqpos totallength,
          countspecialmaxprefixlen0;
 } CountCompletespecials;
@@ -20,7 +20,7 @@ typedef struct
 static int lengthofspecialranges(/*@unused@*/ void *info,
                                  const PairSeqpos *pair,/*@unused@*/ Env *env)
 {
-  unsigned int len = (unsigned int) (pair->uint1 - pair->uint0);
+  uint32_t len = (uint32_t) (pair->uint1 - pair->uint0);
   CountCompletespecials *csp = (CountCompletespecials *) info;
 
   if (pair->uint0 == 0)
@@ -39,7 +39,7 @@ static int lengthofspecialranges(/*@unused@*/ void *info,
       csp->countspecialmaxprefixlen0 += len;
     } else
     {
-      if (len >= (unsigned int) 2)
+      if (len >= (uint32_t) 2)
       {
         csp->countspecialmaxprefixlen0 += (len - 1);
       }
@@ -50,7 +50,7 @@ static int lengthofspecialranges(/*@unused@*/ void *info,
 
 Seqpos determinefullspecials(const Encodedsequence *encseq,
                              Seqpos totallength,
-                             unsigned int prefixlength,
+                             uint32_t prefixlength,
                              Env *env)
 {
   CountCompletespecials csp;

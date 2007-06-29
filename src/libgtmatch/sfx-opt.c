@@ -4,6 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#include <inttypes.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/option.h"

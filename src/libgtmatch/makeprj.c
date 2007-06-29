@@ -16,6 +16,7 @@
 #include "arraydef.h"
 #include "fbs-def.h"
 #include "dist-if.h"
+#include "safecast-gen.h"
 #include "stamp.h"
 
 #include "distcalc.pr"
@@ -52,6 +53,8 @@ static int updatesumranges(void *key, void *value, void *data,
   return 0;
 }
 
+ DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
+
 int scanfastasequence(
         unsigned long *numofsequences,
         Seqpos *totallength,
@@ -68,6 +71,7 @@ int scanfastasequence(
   bool specialprefix = true;
   Seqpos lastspeciallength = 0;
   Distribution *specialrangelengths;
+  unsigned long idx;
 
   *numofsequences = 0;
   specialcharinfo->specialcharacters = 0;
@@ -91,9 +95,8 @@ int scanfastasequence(
     {
       if (lastspeciallength > 0)
       {
-        CHECKSEQPOSCAST(lastspeciallength);
-        adddistribution(specialrangelengths,
-                        (unsigned long) lastspeciallength,env);
+        idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+        adddistribution(specialrangelengths,idx,env);
       }
       break;
     }
@@ -123,9 +126,8 @@ int scanfastasequence(
       }
       if (lastspeciallength > 0)
       {
-        CHECKSEQPOSCAST(lastspeciallength);
-        adddistribution(specialrangelengths,
-                        (unsigned long) lastspeciallength,env);
+        idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+        adddistribution(specialrangelengths,idx,env);
         lastspeciallength = 0;
       }
     }
@@ -152,7 +154,7 @@ int scanfastasequence2(
         Env *env)
 {
   unsigned long filenum;
-  unsigned int linenum = (unsigned int) 1;
+  uint32_t linenum = (uint32_t) 1;
   Fgetcreturntype currentchar;
   bool indesc, firstseq = true, specialprefix = true;
   Seqpos currentposition,
@@ -222,7 +224,7 @@ int scanfastasequence2(
 	    indesc = true;
 	  } else
 	  {
-	    charcode = symbolmap[(unsigned int) currentchar];
+	    charcode = symbolmap[(uint32_t) currentchar];
 	    if (charcode == (Uchar) UNDEFCHAR)
 	    {
               env_error_set(env,"illegal character '%c': file \"%s\", line %lu",

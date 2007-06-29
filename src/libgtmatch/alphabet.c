@@ -27,10 +27,10 @@
   Uchar characters[UCHAR_MAX+1],     /* array of characters to show */
         mapdomain[UCHAR_MAX+1],      /* list of characters mapped */
         symbolmap[UCHAR_MAX+1];      /* mapping of the symbols */
-  unsigned int domainsize,           /* size of domain of symbolmap */
-               mapsize,              /* size of image of map, i.e. */
+  uint32_t domainsize,                /* size of domain of symbolmap */
+           mapsize,                   /* size of image of map, i.e. */
                                      /* mapping to [0..mapsize-1] */
-               mappedwildcards;      /* number of mapped wildcards */
+           mappedwildcards;           /* number of mapped wildcards */
 };
 
 /*EE
@@ -43,11 +43,11 @@
 
 #define DNABASES                     "aAcCgGtTuU"
 #define DNAWILDCARDS                 "nsywrkvbdhmNSYWRKVBDHM"
-#define MAPSIZEDNA                   ((unsigned int) 5)
+#define MAPSIZEDNA                   ((uint32_t) 5)
 #define DNAALPHABETDOMAIN            DNABASES DNAWILDCARDS
 #define PROTEINUPPERAMINOACIDS       "LVIFKREDAGSTNQYWPHMC"
 #define PROTEINLOWERAMINOACIDS       "lvifkredagstnqywphmc"
-#define MAPSIZEPROTEIN               ((unsigned int) 21)
+#define MAPSIZEPROTEIN               ((uint32_t) 21)
 #define PROTEINWILDCARDS             "XUBZ*-"
 #define PROTEINALPHABETDOMAIN        PROTEINUPPERAMINOACIDS PROTEINWILDCARDS
 
@@ -169,17 +169,17 @@ static int readsymbolmapviafp(Alphabet *alpha,
           if (ispunct((Ctypeargumenttype) cc) ||
               isalnum((Ctypeargumenttype) cc))
           {
-            if (alpha->symbolmap[(unsigned int) cc] != (Uchar) UNDEFCHAR)
+            if (alpha->symbolmap[(uint32_t) cc] != (Uchar) UNDEFCHAR)
             {
               env_error_set(env,"cannot map symbol '%c' to %u: "
                             "it is already mapped to %u",
                              cc,
                              alpha->mapsize,
-                             (unsigned int) alpha->symbolmap[(unsigned int) cc]);
+                             (uint32_t) alpha->symbolmap[(uint32_t) cc]);
               return -1;
             }
             /* get same value */
-            alpha->symbolmap[(unsigned int) cc] = (Uchar) alpha->mapsize;
+            alpha->symbolmap[(uint32_t) cc] = (Uchar) alpha->mapsize;
             alpha->mapdomain[alpha->domainsize++] = cc;
           } else
           {
@@ -227,7 +227,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
   }
   if (wildcard > 0)
   {
-    alpha->characters[(unsigned int) wildcard] 
+    alpha->characters[(uint32_t) wildcard] 
       = alpha->characters[alpha->mapsize-1];
   }
   FREEARRAY(&line,Uchar);
@@ -266,25 +266,25 @@ static int readsymbolmap(Alphabet *alpha,Uchar wildcard,
 
 static void assignDNAsymbolmap(Uchar *symbolmap)
 {
-  unsigned int cnum;
+  uint32_t cnum;
 
-  for (cnum=0; cnum<=UCHAR_MAX; cnum++)
+  for (cnum=0; cnum<=(uint32_t) UCHAR_MAX; cnum++)
   {
     symbolmap[cnum] = (Uchar) UNDEFCHAR;
   }
-  symbolmap[(unsigned int) 'a'] = (Uchar) 0;
-  symbolmap[(unsigned int) 'A'] = (Uchar) 0;
-  symbolmap[(unsigned int) 'c'] = (Uchar) 1;
-  symbolmap[(unsigned int) 'C'] = (Uchar) 1;
-  symbolmap[(unsigned int) 'g'] = (Uchar) 2;
-  symbolmap[(unsigned int) 'G'] = (Uchar) 2;
-  symbolmap[(unsigned int) 't'] = (Uchar) 3;
-  symbolmap[(unsigned int) 'T'] = (Uchar) 3;
-  symbolmap[(unsigned int) 'u'] = (Uchar) 3;
-  symbolmap[(unsigned int) 'U'] = (Uchar) 3;
+  symbolmap[(uint32_t) 'a'] = (Uchar) 0;
+  symbolmap[(uint32_t) 'A'] = (Uchar) 0;
+  symbolmap[(uint32_t) 'c'] = (Uchar) 1;
+  symbolmap[(uint32_t) 'C'] = (Uchar) 1;
+  symbolmap[(uint32_t) 'g'] = (Uchar) 2;
+  symbolmap[(uint32_t) 'G'] = (Uchar) 2;
+  symbolmap[(uint32_t) 't'] = (Uchar) 3;
+  symbolmap[(uint32_t) 'T'] = (Uchar) 3;
+  symbolmap[(uint32_t) 'u'] = (Uchar) 3;
+  symbolmap[(uint32_t) 'U'] = (Uchar) 3;
   for (cnum=0; DNAWILDCARDS[cnum] != '\0'; cnum++)
   {
-    symbolmap[(unsigned int) DNAWILDCARDS[cnum]] = (Uchar) WILDCARD;
+    symbolmap[(uint32_t) DNAWILDCARDS[cnum]] = (Uchar) WILDCARD;
   }
 }
 
@@ -306,8 +306,8 @@ static void assignDNAsymbolmap(Uchar *symbolmap)
 
 static void assignDNAalphabet(Alphabet *alpha)
 {
-  alpha->domainsize = (unsigned int) strlen(DNAALPHABETDOMAIN);
-  alpha->mappedwildcards = (unsigned int) strlen(DNAWILDCARDS);
+  alpha->domainsize = (uint32_t) strlen(DNAALPHABETDOMAIN);
+  alpha->mappedwildcards = (uint32_t) strlen(DNAWILDCARDS);
   memcpy(alpha->mapdomain,
          (Uchar *) DNAALPHABETDOMAIN,
          (size_t) alpha->domainsize);
@@ -320,19 +320,19 @@ static void assignDNAalphabet(Alphabet *alpha)
 
 static void assignproteinsymbolmap(Uchar *symbolmap)
 {
-  unsigned int cnum;
+  uint32_t cnum;
 
-  for (cnum=0; cnum<=UCHAR_MAX; cnum++)
+  for (cnum=0; cnum<=(uint32_t) UCHAR_MAX; cnum++)
   {
     symbolmap[cnum] = (Uchar) UNDEFCHAR;
   }
   for (cnum=0; PROTEINUPPERAMINOACIDS[cnum] != '\0'; cnum++)
   {
-    symbolmap[(unsigned int) PROTEINUPPERAMINOACIDS[cnum]] = (Uchar) cnum;
+    symbolmap[(uint32_t) PROTEINUPPERAMINOACIDS[cnum]] = (Uchar) cnum;
   }
   for (cnum=0; PROTEINWILDCARDS[cnum] != '\0'; cnum++)
   {
-    symbolmap[(unsigned int) PROTEINWILDCARDS[cnum]] = (Uchar) WILDCARD;
+    symbolmap[(uint32_t) PROTEINWILDCARDS[cnum]] = (Uchar) WILDCARD;
   }
 }
 
@@ -370,8 +370,8 @@ static void assignproteinsymbolmap(Uchar *symbolmap)
 
 static void assignProteinalphabet(Alphabet *alpha)
 {
-  alpha->domainsize = (unsigned int) strlen(PROTEINALPHABETDOMAIN);
-  alpha->mappedwildcards = (unsigned int) strlen(PROTEINWILDCARDS);
+  alpha->domainsize = (uint32_t) strlen(PROTEINALPHABETDOMAIN);
+  alpha->mappedwildcards = (uint32_t) strlen(PROTEINWILDCARDS);
   memcpy(alpha->mapdomain,
          (Uchar *) PROTEINALPHABETDOMAIN,(size_t) alpha->domainsize);
   alpha->mapsize = MAPSIZEPROTEIN;
@@ -435,12 +435,12 @@ const Uchar *getsymbolmapAlphabet(const Alphabet *alpha)
   return alpha->symbolmap;
 }
 
-unsigned int getnumofcharsAlphabet(const Alphabet *alpha)
+uint32_t getnumofcharsAlphabet(const Alphabet *alpha)
 {
   return alpha->mapsize-1;
 }
 
-unsigned int getmapsizeAlphabet(const Alphabet *alpha)
+uint32_t getmapsizeAlphabet(const Alphabet *alpha)
 {
   return alpha->mapsize;
 }
@@ -467,7 +467,7 @@ void freeAlphabet(Alphabet **alpha,Env *env)
 void outputalphabet(FILE *fpout,const Alphabet *alpha)
 {
   Uchar currentcc, previouscc = 0, firstinline = 0;
-  unsigned int cnum, linenum = 0;
+  uint32_t cnum, linenum = 0;
   bool afternewline = true;
 
   for (cnum=0; cnum < alpha->domainsize; cnum++)

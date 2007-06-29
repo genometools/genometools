@@ -129,7 +129,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
                    totallength,
                    numofsequences,
                    &specialcharinfo,
-                   so->prefixlength,
+                   (uint32_t) so->prefixlength,
                    env) != 0)
     {
       haserr = true;
@@ -207,9 +207,9 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
                        specialcharinfo.specialcharacters,
                        specialcharinfo.specialranges,
                        encseq,
-                       numofchars,
-                       so->prefixlength,
-                       so->numofparts,
+                       (uint32_t) numofchars,
+                       (uint32_t) so->prefixlength,
+                       (uint32_t) so->numofparts,
                        mtime,
                        env) != 0)
       {

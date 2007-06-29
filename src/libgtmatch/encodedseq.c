@@ -19,6 +19,7 @@
 #include "mapspec-def.h"
 #include "encseq-def.h"
 #include "fbs-def.h"
+#include "safecast-gen.h"
 #include "stamp.h"
 
 #include "genericstream.pr"
@@ -60,7 +61,7 @@
 #define DECLARESEQBUFFER(TABLE)\
         unsigned long fourcharssize\
           = detsizeoffourcharsinonebyte(encseq->totallength);\
-        unsigned int widthbuffer = 0, j = 0;\
+        uint32_t widthbuffer = 0, j = 0;\
         ALLOCASSIGNSPACE(TABLE,NULL,Uchar,fourcharssize)
 
 #define UPDATESEQBUFFER(TABLE,CC)\
@@ -75,7 +76,7 @@
             bitwise |= (Bitstring) 1;\
           }\
         }\
-        if (widthbuffer == (unsigned int) 3)\
+        if (widthbuffer == (uint32_t) 3)\
         {\
           TABLE[j] = (Uchar) bitwise;\
           j++;\
@@ -87,19 +88,19 @@
         }
 
 #define UPDATESEQBUFFERFINAL(TABLE)\
-        if (widthbuffer == (unsigned int) 1)\
+        if (widthbuffer == (uint32_t) 1)\
         {\
           bitwise <<= 6;\
           TABLE[j] = (Uchar) bitwise;\
         } else\
         {\
-          if (widthbuffer == (unsigned int) 2)\
+          if (widthbuffer == (uint32_t) 2)\
           {\
             bitwise <<= 4;\
             TABLE[j] = (Uchar) bitwise;\
           } else\
           {\
-            if (widthbuffer == (unsigned int) 3)\
+            if (widthbuffer == (uint32_t) 3)\
             {\
               bitwise <<= 2;\
               TABLE[j] = (Uchar) bitwise;\
@@ -129,7 +130,7 @@ typedef uint64_t Uint64;
   Uchar *characters;
   Uchar *satcharptr;
   Positionaccesstype sat;
-  unsigned int mapsize;
+  uint32_t mapsize;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   Seqpos numofspecialstostore;
   Seqpos totallength;
@@ -263,6 +264,9 @@ static WrittenPositionaccesstype wpa[] = {
   return Undefpositionaccesstype;
 }
 
+ DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
+ DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
+
 static unsigned long detsizeoffourcharsinonebyte(Seqpos totallength)
 {
   uint64_t fourcharssize;
@@ -272,8 +276,7 @@ static unsigned long detsizeoffourcharsinonebyte(Seqpos totallength)
     return (unsigned long) 1;
   }
   fourcharssize = (uint64_t) 1 + DIV4(totallength - 1);
-  CHECK64to32Cast(fourcharssize);
-  return (unsigned long) fourcharssize;
+  return CALLCASTFUNC(uint64_t,unsigned_long,fourcharssize);
 }
 
 static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
@@ -284,7 +287,7 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
     = (Encodedsequencewithoptions *) voidinfo;
   Encodedsequence *encseq;
   Mapspecification *mapspecptr;
-  unsigned long fourcharssize;
+  unsigned long fourcharssize, numofunits;
 
   env_error_check(env);
   encseq = encseqwithoptions->encseq;
@@ -298,68 +301,65 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   switch (encseq->sat)
   {
     case Viadirectaccess:
-      CHECKSEQPOSCAST(encseq->totallength);
-      NEWMAPSPEC(encseq->plainseq,Uchar,(unsigned long) encseq->totallength);
+      numofunits = CALLCASTFUNC(Seqpos,unsigned_long,encseq->totallength);
+      NEWMAPSPEC(encseq->plainseq,Uchar,numofunits);
       break;
     case Viabitaccess:
       NEWMAPSPEC(encseq->fourcharsinonebyte,Uchar,fourcharssize);
       if (encseq->numofspecialstostore > 0)
       {
-        NEWMAPSPEC(encseq->specialbits,Bitstring,
-                   (unsigned long) NUMOFINTSFORBITS(encseq->totallength));
+        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,encseq->totallength);
+        NEWMAPSPEC(encseq->specialbits,Bitstring,numofunits);
       }
       break;
     case Viauchartables:
       NEWMAPSPEC(encseq->fourcharsinonebyte,Uchar,fourcharssize);
       if (encseq->numofspecialstostore > 0)
       {
-        CHECKSEQPOSCAST(encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->ucharspecialpositions,Uchar,
-                   (unsigned long) encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->specialrangelength,Uchar,
-                   (unsigned long) encseq->numofspecialstostore);
-        CHECKSEQPOSCAST(encseq->totallength/UCHAR_MAX+1);
-        NEWMAPSPEC(encseq->ucharendspecialsubsUint,Seqpos,
-                   (unsigned long) (encseq->totallength/UCHAR_MAX+1));
+        
+        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
+                                  encseq->numofspecialstostore);
+        NEWMAPSPEC(encseq->ucharspecialpositions,Uchar,numofunits);
+        NEWMAPSPEC(encseq->specialrangelength,Uchar,numofunits);
+        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
+                                  encseq->totallength/UCHAR_MAX+1);
+        NEWMAPSPEC(encseq->ucharendspecialsubsUint,Seqpos,numofunits);
       }
       break;
     case Viaushorttables:
       NEWMAPSPEC(encseq->fourcharsinonebyte,Uchar,fourcharssize);
       if (encseq->numofspecialstostore > 0)
       {
-        CHECKSEQPOSCAST(encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->ushortspecialpositions,Ushort,
-                   (unsigned long) encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->specialrangelength,Uchar,
-                   (unsigned long) encseq->numofspecialstostore);
-        CHECKSEQPOSCAST(encseq->totallength/USHRT_MAX+1);
-        NEWMAPSPEC(encseq->ushortendspecialsubsUint,Seqpos,
-                   (unsigned long) (encseq->totallength/USHRT_MAX+1));
+        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
+                                  encseq->numofspecialstostore);
+        NEWMAPSPEC(encseq->ushortspecialpositions,Ushort,numofunits);
+        NEWMAPSPEC(encseq->specialrangelength,Uchar,numofunits);
+        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
+                                  encseq->totallength/USHRT_MAX+1);
+        NEWMAPSPEC(encseq->ushortendspecialsubsUint,Seqpos,numofunits);
       }
       break;
     case Viauint32tables:
       NEWMAPSPEC(encseq->fourcharsinonebyte,Uchar,fourcharssize);
       if (encseq->numofspecialstostore > 0)
       {
-        CHECKSEQPOSCAST(encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->uint32specialpositions,Uint32,
-                   (unsigned long) encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->specialrangelength,Uchar,
-                   (unsigned long) encseq->numofspecialstostore);
-        CHECKSEQPOSCAST(encseq->totallength/UINT32_MAX+1);
-        NEWMAPSPEC(encseq->uint32endspecialsubsUint,Seqpos,
-                   (unsigned long) (encseq->totallength/UINT32_MAX+1));
+        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
+                                  encseq->numofspecialstostore);
+        NEWMAPSPEC(encseq->uint32specialpositions,Uint32,numofunits);
+        NEWMAPSPEC(encseq->specialrangelength,Uchar,numofunits);
+        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
+                                  encseq->totallength/UINT32_MAX+1);
+        NEWMAPSPEC(encseq->uint32endspecialsubsUint,Seqpos,numofunits);
       }
       break;
     case Viauint64tables:
       NEWMAPSPEC(encseq->fourcharsinonebyte,Uchar,fourcharssize);
       if (encseq->numofspecialstostore > 0)
       {
-        CHECKSEQPOSCAST(encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->uint64specialpositions,Uint64,
-                   (unsigned long) encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->specialrangelength,Uchar,
-                   (unsigned long) encseq->numofspecialstostore);
+        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
+                                  encseq->numofspecialstostore);
+        NEWMAPSPEC(encseq->uint64specialpositions,Uint64,numofunits);
+        NEWMAPSPEC(encseq->specialrangelength,Uchar,numofunits);
       }
       break;
     default: break;
@@ -898,36 +898,30 @@ static uint32_t sat2maxspecialtype(Positionaccesstype sat)
 
 #ifdef DEBUG
 static void ucharshowspecialpositions(const Encodedsequence *encseq,
-                                      Uint pagenumber,
-                                      Uint64 offset,
-                                      Uint first,
-                                      Uint last)
+                                      Seqpos pagenumber,
+                                      Seqpos offset,
+                                      Seqpos first,
+                                      Seqpos last)
 {
-  Uint idx;
-  Uint64 startpos;
+  Seqpos idx, startpos;
 
-#ifndef S_SPLINT_S
-  printf("page %lu: %lu elems at offset " FormatUint64 "\n",
-          (Showuint) pagenumber,
-          (Showuint) (last - first + 1),
-          offset);
-#endif
+  printf("page " FormatSeqpos ": " FormatSeqpos " elems at offset " 
+         FormatSeqpos "\n",
+          PRINTSeqposcast(pagenumber),
+          PRINTSeqposcast(last - first + 1),
+          PRINTSeqposcast(offset));
   for (idx=first; idx<=last; idx++)
   {
     startpos = accessspecialpositions(encseq,idx);
     if (encseq->specialrangelength[idx] == UintConst(1))
     {
-      /*@ignore@*/
-      printf(FormatUint64 "\n",offset + startpos);
-      /*@end@*/
+      printf(FormatSeqpos "\n",offset + startpos);
     } else
     {
-       /*@ignore@*/
-      printf("[" FormatUint64 "," FormatUint64 "]\n",
-               offset + startpos,
-               offset + startpos
-                      + (Uint64) (encseq->specialrangelength[idx] - 1));
-      /*@end@*/
+      printf("[" FormatSeqpos "," FormatSeqpos "]\n",
+               PRINTSeqposcast(offset + startpos),
+               PRINTSeqposcast(offset + startpos + 
+                              (Seqpos) (encseq->specialrangelength[idx] - 1)));
     }
   }
 }
@@ -936,7 +930,7 @@ static void ucharshowallspecialpositions(const Encodedsequence *encseq)
 {
   uint32_t maxspecialtype;
   Seqpos endspecialcells, pagenumber, endpos0, endpos1;
-  uint64_t offset = 0;
+  Seqpos offset = 0;
 
   maxspecialtype = sat2maxspecialtype(encseq->sat);
   endspecialcells = (Uint) (encseq->totallength/maxspecialtype + 1);
@@ -958,7 +952,7 @@ static void ucharshowallspecialpositions(const Encodedsequence *encseq)
         ucharshowspecialpositions(encseq,pagenumber,offset,endpos0,endpos1-1);
       }
     }
-    offset += (Uint64) (maxspecialtype+1);
+    offset += (Seqpos) (maxspecialtype+1);
   }
 }
 #endif
@@ -1160,9 +1154,9 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
 {
 #ifdef DEBUG
   printf("pos=" FormatSeqpos ",previous=(" FormatSeqpos "," FormatSeqpos ")\n",
-          pos,
-          esr->previousucharrange.uint0,
-          esr->previousucharrange.uint1);
+          PRINTSeqposcast(pos),
+          PRINTSeqposcast(esr->previousucharrange.uint0),
+          PRINTseqposcast(es->previousucharrange.uint1));
 #endif
   if (pos >= esr->previousucharrange.uint0)
   {

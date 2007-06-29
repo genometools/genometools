@@ -23,8 +23,8 @@
 #include "alphabet.pr"
 #include "sfxmap.pr"
 
-static Codetype qgram2codefillspecial(unsigned int numofchars,
-                                      unsigned int kmersize,
+static Codetype qgram2codefillspecial(uint32_t numofchars,
+                                      uint32_t kmersize,
                                       const Encodedsequence *encseq,
                                       Seqpos startpos,
                                       Seqpos totallength)
@@ -95,8 +95,8 @@ static void outkmeroccurrence(void *processinfo,
 
 static void collectkmercode(ArrayCodetype *codelist,
                             const Encodedsequence *encseq,
-                            unsigned int kmersize,
-                            unsigned int numofchars,
+                            uint32_t kmersize,
+                            uint32_t numofchars,
                             Seqpos stringtotallength,
                             Env *env)
 {
@@ -116,8 +116,8 @@ static void collectkmercode(ArrayCodetype *codelist,
 
 static int comparecodelists(const ArrayCodetype *codeliststream,
                             const ArrayCodetype *codeliststring,
-                            unsigned int kmersize,
-                            unsigned int numofchars,
+                            uint32_t kmersize,
+                            uint32_t numofchars,
                             const char *characters,
                             Env *env)
 {
@@ -163,8 +163,8 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
 
 static int verifycodelists(const Encodedsequence *encseq,
                            const Uchar *characters,
-                           unsigned int kmersize,
-                           unsigned int numofchars,
+                           uint32_t kmersize,
+                           uint32_t numofchars,
                            Seqpos stringtotallength,
                            const ArrayCodetype *codeliststream,
                            Env *env)
@@ -194,7 +194,7 @@ static int verifycodelists(const Encodedsequence *encseq,
 
 int verifymappedstr(const Suffixarray *suffixarray,Env *env)
 {
-  unsigned int numofchars;
+  uint32_t numofchars;
   ArrayCodetype codeliststream;
   bool haserr = false;
 

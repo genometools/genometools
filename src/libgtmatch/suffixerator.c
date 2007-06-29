@@ -19,6 +19,7 @@
 #include "partssuf-def.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
+#include "safecast-gen.h"
 
 #include "measure-time.pr"
 #include "mappedstr.pr"
@@ -27,13 +28,13 @@
 
 #define PREFIXLENBITS   4
 #define CODEBITS        (32-PREFIXLENBITS)
-#define MAXPREFIXLENGTH ((((int32_t) 1) << PREFIXLENBITS) - 1)
-#define MAXCODEVALUE    ((((int32_t) 1) << CODEBITS) - 1)
+#define MAXPREFIXLENGTH ((((uint32_t) 1) << PREFIXLENBITS) - 1)
+#define MAXCODEVALUE    ((((uint32_t) 1) << CODEBITS) - 1)
 
 typedef struct
 {
-  int32_t maxprefixlen:PREFIXLENBITS;
-  int32_t code:CODEBITS;
+  uint32_t maxprefixlen:PREFIXLENBITS;
+  uint32_t code:CODEBITS;
   Seqpos position; /* get rid of this by using information from encseq */
 } Codeatposition;
 
@@ -46,8 +47,8 @@ typedef struct
   bool storespecials;
   Codetype currentmincode,
            currentmaxcode;
-  int32_t *filltable,
-          *basepower;
+  uint32_t *filltable,
+           *basepower;
   Seqpos *leftborder,
          *countspecialcodes,
          *suftab,
@@ -60,25 +61,26 @@ typedef struct
 {
   Seqpos totallength,
          *spacesuffixstarts;
-  unsigned long nextfreeUint, allocatedUint; 
+  unsigned long nextfreeUint, 
+                allocatedUint; 
   int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *);
   void *processsuftabinfo;
   Env *env;
 } InsertCompletespecials;
 
 
-static int initbasepower(int32_t **basepower,
-                         int32_t **filltable,
-                         int32_t base,
-                         int32_t len,
+static int initbasepower(uint32_t **basepower,
+                         uint32_t **filltable,
+                         uint32_t base,
+                         uint32_t len,
                          Env *env)
 {
-  int32_t thepower = (int32_t) 1, i, minfailure;
+  uint32_t thepower = (uint32_t) 1, i, minfailure;
   bool haserr = false;
 
   env_error_check(env);
-  ALLOCASSIGNSPACE(*basepower,NULL,int32_t,len+1);
-  ALLOCASSIGNSPACE(*filltable,NULL,int32_t,len);
+  ALLOCASSIGNSPACE(*basepower,NULL,uint32_t,len+1);
+  ALLOCASSIGNSPACE(*filltable,NULL,uint32_t,len);
   minfailure = INT32_MAX/base;
   for (i=0; /* Nothing */; i++)
   {
@@ -191,13 +193,13 @@ static void reversespecialcodes(Codeatposition *spaceCodeatposition,
   }
 }
 
-static Codetype codedownscale(const int32_t *filltable,
-                              const int32_t *basepower,
+static Codetype codedownscale(const uint32_t *filltable,
+                              const uint32_t *basepower,
                               Codetype code,
-                              int32_t prefixindex,
-                              int32_t maxprefixlen)
+                              uint32_t prefixindex,
+                              uint32_t maxprefixlen)
 {
-  int32_t remain;
+  uint32_t remain;
 
   code -= filltable[maxprefixlen];
   remain = maxprefixlen-prefixindex;
@@ -209,15 +211,16 @@ static Codetype codedownscale(const int32_t *filltable,
 
 static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
                                /*@unused@*/ Seqpos totallength,
-                               unsigned int numofchars,
-                               unsigned int prefixlength,
+                               uint32_t numofchars,
+                               uint32_t prefixlength,
                                Collectedsuffixes *csf,
                                bool deletevalues,
                                /*@unused@*/ Env *env)
 {
   Codetype code;
-  unsigned int prefixindex;
-  unsigned long insertindex, j, stidx;
+  uint32_t prefixindex;
+  unsigned long insertindex, j;
+  Seqpos stidx;
 
   for (prefixindex=0; prefixindex < prefixlength; prefixindex++)
   {
@@ -305,10 +308,12 @@ static int insertfullspecialpair(void *info,
   return 0;
 }
 
+ DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
+
 static int insertallfullspecials(
                 const Encodedsequence *encseq,
                 Seqpos totallength,
-                unsigned long largestwidth,
+                Seqpos largestwidth,
                 Seqpos *suftab,
                 int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
                 void *processsuftabinfo,
@@ -318,7 +323,7 @@ static int insertallfullspecials(
 
   ics.totallength = totallength;
   ics.spacesuffixstarts = suftab;
-  ics.allocatedUint = largestwidth;
+  ics.allocatedUint = CALLCASTFUNC(Seqpos,unsigned_long,largestwidth);
   ics.nextfreeUint = 0;
   ics.processsuftab = processsuftab;
   ics.processsuftabinfo = processsuftabinfo;
@@ -350,13 +355,13 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
                  Seqpos specialcharacters,
                  Seqpos specialranges,
                  const Encodedsequence *encseq,
-                 unsigned int numofchars,
-                 unsigned int prefixlength,
-                 unsigned int numofparts,
+                 uint32_t numofchars,
+                 uint32_t prefixlength,
+                 uint32_t numofparts,
                  Measuretime *mtime,
                  Env *env)
 {
-  unsigned int numofallcodes = 0, numofspecialcodes, part;
+  uint32_t numofallcodes = 0, numofspecialcodes, part;
   Seqpos *optr;
   Collectedsuffixes csf;
   Suftabparts *suftabparts = NULL;
@@ -422,7 +427,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
                    numofchars,
                    prefixlength,
                    env);
-    assert(csf.nextfreeCodeatposition <= specialranges+1);
+    assert(specialranges+1 >= (Seqpos) csf.nextfreeCodeatposition);
     assert(csf.filltable != NULL);
     assert(csf.leftborder != NULL);
     for (optr = csf.leftborder + 1;
@@ -451,7 +456,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
                          numofchars,
                          prefixlength,
                          &csf,
-                         (stpgetnumofparts(suftabparts) == (unsigned int) 1)
+                         (stpgetnumofparts(suftabparts) == (uint32_t) 1)
                            ? true : false,
                          env);
       deliverthetime(stdout,mtime,"inserting suffixes into buckets",env);

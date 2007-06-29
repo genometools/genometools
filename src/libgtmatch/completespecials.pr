@@ -3,7 +3,7 @@ extern "C" {
 #endif
 Seqpos determinefullspecials(const Encodedsequence *encseq,
                              Seqpos totallength,
-                             unsigned int prefixlength,
+                             uint32_t prefixlength,
                              Env *env);
 
 #ifdef __cplusplus

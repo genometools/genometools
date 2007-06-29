@@ -23,7 +23,7 @@ static void showprjinfo(FILE *outprj,
                         /*@unused@*/ Seqpos totallength,
                         unsigned long numofsequences,
                         const Specialcharinfo *specialcharinfo,
-                        unsigned int prefixlength)
+                        uint32_t prefixlength)
 {
   unsigned long i;
 
@@ -37,9 +37,7 @@ static void showprjinfo(FILE *outprj,
                                          (Showuint) filelengthtab[i].uint1);
   }
   STAMP;
-#ifndef S_SPLINT_S
-  fprintf(outprj,"totallength=" FormatSeqpos "\n",totallength);
-#endif
+  fprintf(outprj,"totallength=" FormatSeqpos "\n",PRINTSeqposcast(totallength));
   fprintf(outprj,"specialcharacters=%lu\n",
                   (Showuint) specialcharinfo->specialcharacters);
   fprintf(outprj,"specialranges=%lu\n",
@@ -62,7 +60,7 @@ int outprjfile(const Str *indexname,
                Seqpos totallength,
                unsigned long numofsequences,
                const Specialcharinfo *specialcharinfo,
-               unsigned int prefixlength,
+               uint32_t prefixlength,
                Env *env)
 {
   FILE *prjfp;

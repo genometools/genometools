@@ -8,7 +8,7 @@
 for filename in `ls src/*.c src/libgtmatch/*.c`
 do
   headfile="obj/`basename ${filename} .c`"
-  rm -f ${headfile}.o ${headfile}.d
+  rm -f ${headfile}.o ${headfile}.d ${headfile}.splint
 done
 
 rm -f lib/libgtmatch.a

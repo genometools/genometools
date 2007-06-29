@@ -51,27 +51,23 @@ int testencodedsequence(const StrArray *filenametab,
     cc1 = getencodedchar(encseq,pos);
     if (cc0 != cc1)
     {
-      /*@ignore@*/
       env_error_set(env,"position " FormatSeqpos
                         ": correct = %u != %u = cc1 (getencodedchar64)",
                          pos,
-                         (unsigned int) cc0,
-                         (unsigned int) cc1);
-      /*@end@*/
+                         (uint32_t) cc0,
+                         (uint32_t) cc1);
       haserr = true;
       break;
     }
     cc1 = sequentialgetencodedchar(encseq,esr,pos);
     if (cc0 != cc1)
     {
-      /*@ignore@*/
       env_error_set(env,"position " FormatSeqpos
                         ": correct = %u != %u = cc1 "
                         "(sequentialgetencodedchar)",
                          pos,
-                         (unsigned int) cc0,
-                         (unsigned int) cc1);
-      /*@end@*/
+                         (uint32_t) cc0,
+                         (uint32_t) cc1);
       haserr = true;
       break;
     }

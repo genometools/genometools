@@ -49,3 +49,4 @@
 -shiftnegative
 -shiftimplementation
 +posixlib
+-duplicatequals

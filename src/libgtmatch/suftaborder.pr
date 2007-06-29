@@ -4,7 +4,7 @@ extern "C" {
 void checkifprefixesareidentical(const Encodedsequence *encseq,
                                  const Uchar *characters,
                                  const Seqpos *suftab,
-                                 unsigned int prefixlength,
+                                 uint32_t prefixlength,
                                  Seqpos totallength,
                                  Seqpos depth,
                                  Seqpos left,
