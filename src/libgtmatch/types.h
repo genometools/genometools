@@ -64,7 +64,7 @@ typedef uint64_t Seqpos;         /* \Typedef{Seqpos} */
 #define Formatuint64_t "%" PRIu64
 #endif
 
-#ifdef BIGNUM32
+#ifdef BIGSEQPOS
 typedef uint64_t Seqpos;         /* \Typedef{Seqpos} */
 #ifdef S_SPLINT_S
 #define FormatSeqpos "%lu"
@@ -79,16 +79,9 @@ typedef uint32_t Seqpos;         /* \Typedef{Seqpos} */
 #define FormatSeqpos "%" PRIu32
 #endif
 #define Seqposequalsunsignedint
-#endif /* BIGNUM32 */
+#endif /* BIGSEQPOS */
 
 #endif /* _LP64 */
-
-
-/*
-  Type of unsigned integer in \texttt{printf}.
-*/
-
-typedef unsigned long Showuint;     /* \Typedef{Showuint} */
 
 /*
   Argument of a function from \texttt{ctype.h}.

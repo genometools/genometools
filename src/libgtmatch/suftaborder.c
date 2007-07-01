@@ -134,16 +134,19 @@ static void showcomparisonfailure(const char *where,
                                   int cmp,
                                   Seqpos maxlcp)
 {
-  fprintf(stderr,"ERROR: %s(%lu vs %lu: %lu=\"",
+  fprintf(stderr,"ERROR: %s(" FormatSeqpos " vs " FormatSeqpos 
+                 " " FormatSeqpos "=\"",
                        where,
-                       (Showuint) (ptr1 - suftab),
-                       (Showuint) (ptr2 - suftab),
-                       (Showuint) *ptr1);
+                       PRINTSeqposcast((Seqpos) (ptr1 - suftab)),
+                       PRINTSeqposcast((Seqpos) (ptr2 - suftab)),
+                       PRINTSeqposcast(*ptr1));
   showlocalsuffix(stderr,encseq,characters,*ptr1,depth,totallength);
   fprintf(stderr,"\",\"");
   showlocalsuffix(stderr,encseq,characters,*ptr2,depth,totallength);
-  fprintf(stderr,"\"=%lu)=%d with maxlcp %lu\n",
-              (Showuint) *ptr2,cmp,(Showuint) maxlcp);
+  fprintf(stderr,"\"=" FormatSeqpos ")=%d with maxlcp " FormatSeqpos "\n",
+              PRINTSeqposcast(*ptr2),
+              cmp,
+              PRINTSeqposcast(maxlcp));
 }
 
 void checkifprefixesareidentical(const Encodedsequence *encseq,
@@ -193,7 +196,9 @@ void showentiresuftab(const Encodedsequence *encseq,
 
   for (ptr = suftab; ptr <= suftab + totallength; ptr++)
   {
-    printf("suftab[%lu]=%lu ",(Showuint) (ptr-suftab),(Showuint) *ptr);
+    printf("suftab[" FormatSeqpos "]=" FormatSeqpos " ",
+            PRINTSeqposcast((Seqpos) (ptr-suftab)),
+            PRINTSeqposcast(*ptr));
     showlocalsuffix(stdout,encseq,characters,*ptr,depth,totallength);
     printf("\n");
   }
@@ -219,8 +224,9 @@ void checkentiresuftab(const Encodedsequence *encseq,
   {
     if (ISIBITSET(startposoccurs,*ptr))
     {
-      fprintf(stderr,"ERROR: suffix with startpos %lu already occurs\n",
-                      (Showuint) *ptr);
+      fprintf(stderr,"ERROR: suffix with startpos " FormatSeqpos 
+                     " already occurs\n",
+                      PRINTSeqposcast(*ptr));
       exit(EXIT_FAILURE);
     }
     SETIBIT(startposoccurs,*ptr);

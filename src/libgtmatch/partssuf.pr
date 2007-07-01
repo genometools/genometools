@@ -4,7 +4,7 @@ extern "C" {
 Suftabparts *newsuftabparts(uint32_t numofparts,
                             const Seqpos *leftborder,
                             Codetype numofallcodes,
-                            uint64_t numofsuffixestoinsert,
+                            Seqpos numofsuffixestoinsert,
                             Seqpos fullspecials,
                             Env *env);
 

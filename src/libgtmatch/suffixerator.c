@@ -133,7 +133,7 @@ static void updatekmercount(void *processinfo,
 
         cp.code = code;
         cp.maxprefixlen = firstspecial->specialpos;
-        cp.position = (Seqpos) (position + firstspecial->specialpos);
+        cp.position = position + firstspecial->specialpos;
         csf->spaceCodeatposition[csf->nextfreeCodeatposition++] = cp;
         csf->storespecials = false;
         csf->leftborder[code]++;
@@ -170,8 +170,9 @@ static void insertwithoutspecial(void *processinfo,
 
       stidx = --csf->leftborder[code];
 #ifdef LONGOUTPUT
-      printf("insert suffix %lu at location %lu\n",(Showuint) position,
-                                                   (Showuint) stidx);
+      printf("insert suffix " FormatSeqpos " at location " FormatSeqpos "\n",
+              PRINTSeqposcast(position),
+              PRINTSeqposcast(stidx));
 #endif
       csf->suftabptr[stidx] = position;
     }
@@ -241,10 +242,12 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
             csf->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)]++;
             stidx = --csf->leftborder[code];
 #ifdef LONGOUTPUT
-            printf("insert special_suffix %lu (code %u) at location %lu\n",
-                   (Showuint) csf->spaceCodeatposition[j].position - prefixindex,
-                   code,
-                   (Showuint) stidx);
+            printf("insert special_suffix " FormatSeqpos 
+                   " (code %u) at location " FormatSeqpos "\n",
+                   PRINTSeqposcast(csf->spaceCodeatposition[j].position - 
+                                   prefixindex),
+                   (unsigned int) code,
+                   PRINTSeqposcast(stidx));
 #endif
             csf->suftabptr[stidx] = csf->spaceCodeatposition[j].position -
                                     prefixindex;
@@ -398,9 +401,9 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
     {
       env_error_set(env,
                     "alphasize^prefixlength-1 = %u does not fit into "
-                    " %lu bits: choose smaller value for prefixlength",
+                    " %u bits: choose smaller value for prefixlength",
                     numofallcodes-1,
-                    (Showuint) CODEBITS);
+                    (unsigned int) CODEBITS);
       haserr = true;
     }
   }

@@ -28,7 +28,7 @@ do
   fi
 done
 
-#bignum=-DBIGNUM32
+bignum=-DBIGSEQPOS
 if test $icc -eq 1
 then
   make CC='ccache icc' CFLAGS='-O3 ${bignum} -wd1418,869,981' LD='icc' CXX='icc' $*

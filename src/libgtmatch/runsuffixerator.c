@@ -46,17 +46,18 @@ static int suftab2file(void *info,
               outfileinfo->outfpsuftab)
               != (size_t) widthofpart)
     {
-      env_error_set(env,"cannot write %lu items of size %lu: errormsg=\"%s\"",
-           (Showuint) widthofpart,
-           (Showuint) sizeof (*suftab),
+      env_error_set(env,"cannot write " FormatSeqpos " items of size %u: "
+                    "errormsg=\"%s\"",
+           PRINTSeqposcast(widthofpart),
+           (unsigned int) sizeof (*suftab),
            strerror(errno));
       return -1;
     }
   }
   if (outfileinfo->outfpbwttab != NULL)
   {
-    printf("# simulating output of %lu elements of the bwttab\n",
-            (Showuint) widthofpart);
+    printf("# simulating output of " FormatSeqpos " elements of the bwttab\n",
+            PRINTSeqposcast(widthofpart));
   }
   return 0;
 }
@@ -195,10 +196,10 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   }
   if (!haserr)
   {
-    printf("# specialcharacters=%lu\n",
-           (Showuint) specialcharinfo.specialcharacters);
-    printf("# specialranges=%lu\n",
-           (Showuint) specialcharinfo.specialranges);
+    printf("# specialcharacters=" FormatSeqpos "\n",
+           PRINTSeqposcast(specialcharinfo.specialcharacters));
+    printf("# specialranges=" FormatSeqpos "\n",
+           PRINTSeqposcast(specialcharinfo.specialranges));
     if (so->outsuftab || so->outbwttab)
     {
       if (suffixerator(suftab2file,

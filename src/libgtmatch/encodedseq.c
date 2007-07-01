@@ -35,7 +35,7 @@
         ((ESEQ[DIV4(IDX)] >> (Uint32Const(6) - MULT2(MOD4(IDX)))) & Uint32Const(3))
 #else
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
-        ((ESEQ[(Seqpos) DIV4(IDX)] >> (Uin64tConst(6) - (uint64_t) MULT2(MOD4(IDX))))\
+        ((ESEQ[(Seqpos) DIV4(IDX)] >> (Uint64Const(6) - (uint64_t) MULT2(MOD4(IDX))))\
          & Uint64Const(3))
 #endif
 

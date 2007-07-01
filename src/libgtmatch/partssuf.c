@@ -54,7 +54,7 @@ static Codetype findfirstlarger(const Seqpos *leftborder,
 Suftabparts *newsuftabparts(uint32_t numofparts,
                             const Seqpos *leftborder,
                             Codetype numofallcodes,
-                            uint64_t numofsuffixestoinsert,
+                            Seqpos numofsuffixestoinsert,
                             Seqpos fullspecials,
                             Env *env)
 {
@@ -68,7 +68,7 @@ Suftabparts *newsuftabparts(uint32_t numofparts,
     suftabparts->numofparts = 0;
   } else
   {
-    if (numofsuffixestoinsert < (uint64_t) numofparts)
+    if (numofsuffixestoinsert < (Seqpos) numofparts)
     {
       suftabparts->numofparts = (uint32_t) 1;
     } else
@@ -88,10 +88,11 @@ Suftabparts *newsuftabparts(uint32_t numofparts,
              sumofwidth = 0;
     ALLOCASSIGNSPACE(suftabparts->components,NULL,Suftabpartcomponent,
                      numofparts);
-    widthofsuftabpart = numofsuffixestoinsert/(uint64_t) numofparts;
-    remainder = (uint32_t) (numofsuffixestoinsert % (uint64_t) numofparts);
+    widthofsuftabpart = (uint64_t) numofsuffixestoinsert/numofparts;
+    remainder = (uint32_t) (numofsuffixestoinsert % (Seqpos) numofparts);
     suftabparts->largestwidth = 0;
-    printf("# numofsuffixestoinsert=%lu\n",(Showuint) numofsuffixestoinsert);
+    printf("# numofsuffixestoinsert=" FormatSeqpos "\n",
+           PRINTSeqposcast(numofsuffixestoinsert));
     for (part=0; part < numofparts; part++)
     {
       if (remainder > 0)
@@ -124,9 +125,9 @@ Suftabparts *newsuftabparts(uint32_t numofparts,
         suftabparts->components[part].suftaboffset
           = (uint64_t) leftborder[suftabparts->components[part-1].nextcode];
       }
-      printf("widthofpart[%u]=%lu\n",
+      printf("widthofpart[%u]=" FormatSeqpos "\n",
               (unsigned int) part,
-              (Showuint) suftabparts->components[part].widthofpart);
+              PRINTSeqposcast(suftabparts->components[part].widthofpart));
       if (suftabparts->largestwidth <
          suftabparts->components[part].widthofpart)
       {

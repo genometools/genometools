@@ -128,8 +128,8 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
   {
     env_error_set(env,
                   "length codeliststream= %lu != %lu =length codeliststring",
-                  (Showuint) codeliststream->nextfreeCodetype,
-                  (Showuint) codeliststring->nextfreeCodetype);
+                  (unsigned long) codeliststream->nextfreeCodetype,
+                  (unsigned long) codeliststring->nextfreeCodetype);
     return -1;
   }
   for (i=0; i<codeliststream->nextfreeCodetype; i++)

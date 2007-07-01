@@ -257,13 +257,11 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         FREESPACE(tmpfilename);
         suffixarray->filelengthtab[numoffiles].uint0 = (Seqpos) readint1;
         suffixarray->filelengthtab[numoffiles].uint1 = (Seqpos) readint2;
-        printf("%s%s %lu %lu\n",
+        printf("%s%s " FormatSeqpos " " FormatSeqpos "\n",
                 DBFILEKEY,
                 strarray_get(suffixarray->filenametab,numoffiles),
-                (Showuint)
-                suffixarray->filelengthtab[numoffiles].uint0,
-                (Showuint)
-                suffixarray->filelengthtab[numoffiles].uint1);
+                PRINTSeqposcast(suffixarray->filelengthtab[numoffiles].uint0),
+                PRINTSeqposcast(suffixarray->filelengthtab[numoffiles].uint1));
         numoffiles++;
       }
     } else
@@ -342,10 +340,10 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   }
   if (!haserr && integersize != (uint32_t) (sizeof (Seqpos) * CHAR_BIT))
   {
-    env_error_set(env,"index was generated for %lu-bit integers while "
-                      "this program uses %lu-bit integers",
-                      (Showuint) integersize,
-                      (Showuint) (sizeof (Seqpos) * CHAR_BIT));
+    env_error_set(env,"index was generated for %u-bit integers while "
+                      "this program uses %u-bit integers",
+                      (unsigned int) integersize,
+                      (unsigned int) (sizeof (Seqpos) * CHAR_BIT));
     haserr = true;
   }
   if (!haserr)
@@ -450,10 +448,10 @@ int mapsuffixarray(Suffixarray *suffixarray,
     }
     if (!haserr && totallength + 1 != (Seqpos) (numofbytes/sizeof (Seqpos)))
     {
-      env_error_set(env,"number of mapped integers = %lu != %lu = "
-                        "expected number of integers",
-                         (Showuint) (numofbytes/sizeof (Seqpos)),
-                         (Showuint) (totallength + 1));
+      env_error_set(env,"number of mapped integers = %lu != " FormatSeqpos
+                        " = expected number of integers",
+                         (unsigned long) (numofbytes/sizeof (Seqpos)),
+                         PRINTSeqposcast(totallength + 1));
       env_fa_xmunmap((void *) suffixarray->suftab,env);
       haserr = true;
     }
