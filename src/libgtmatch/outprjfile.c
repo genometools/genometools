@@ -33,7 +33,6 @@ static void showprjinfo(FILE *outprj,
 
   assert(filelengthtab != NULL);
   assert(filenametab != NULL);
-  STAMP;
   for (i=0; i<strarray_size(filenametab); i++)
   {
     fprintf(outprj,"dbfile=%s " FormatSeqpos " " FormatSeqpos "\n",
@@ -41,7 +40,6 @@ static void showprjinfo(FILE *outprj,
                     PRINTSeqposcast(filelengthtab[i].uint0),
                     PRINTSeqposcast(filelengthtab[i].uint1));
   }
-  STAMP;
   fprintf(outprj,"totallength=" FormatSeqpos "\n",
                  PRINTSeqposcast(totallength));
   PRJSPECIALOUT(specialcharacters);

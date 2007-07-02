@@ -22,10 +22,8 @@
                    encseq->numofspecialstostore);
 #ifndef NOENDPTR
   endspecialcells = (Seqpos) (encseq->totallength/MAXSPECIALTYPE + 1);
-  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,endspecialsubsUint),NULL,uintptr_t,
+  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,endspecialsubsUint),NULL,Seqpos,
                    (size_t) endspecialcells);
-  printf("endspecialcells=" FormatSeqpos "\n",
-          PRINTSeqposcast(endspecialcells));
   nextcheck = (Seqpos) MAXSPECIALTYPE;
   endptrUint = ACCESSENCSEQ(encseq,endspecialsubsUint);
 #endif
@@ -79,7 +77,6 @@
 #ifndef NOENDPTR
     if (pos == nextcheck)
     {
-      printf("setend %u\n",(unsigned int) currentspecialchar);
       *endptrUint++ = currentspecialchar;
       nextcheck += (Seqpos) (MAXSPECIALTYPE+1);
     }
@@ -88,10 +85,8 @@
   }
   UPDATESEQBUFFERFINAL(encseq->fourcharsinonebyte);
 #ifndef NOENDPTR
-  printf("endspecialcells=" FormatSeqpos "\n",PRINTSeqposcast(endspecialcells));
   while (endptrUint < ACCESSENCSEQ(encseq,endspecialsubsUint) + endspecialcells)
   {
-    printf("setend %u\n",(unsigned int) currentspecialchar);
     *endptrUint++ = currentspecialchar;
   }
 #endif

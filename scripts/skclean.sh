@@ -12,3 +12,4 @@ do
 done
 
 rm -f lib/libgtmatch.a
+rm -f testsuite/TMP.[A-Z0-9]*

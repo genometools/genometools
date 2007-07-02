@@ -169,13 +169,10 @@ int scanfastasequence2(
   specialcharinfo->specialranges = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
-  STAMP;
   ALLOCASSIGNSPACE(*filelengthtab,NULL,PairSeqpos,
                    strarray_size(filenametab));
-  STAMP;
   for (filenum = 0; filenum < strarray_size(filenametab); filenum++)
   {
-  STAMP;
     opengenericstream(&inputstream,strarray_get(filenametab,filenum));
     indesc = false;
     currentposition = 0;

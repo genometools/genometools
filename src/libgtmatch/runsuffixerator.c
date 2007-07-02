@@ -233,6 +233,7 @@ int parseargsandcallsuffixerator(int argc,const char *argv[],Env *env)
   int retval;
   bool haserr = false;
 
+  printf("# sizeof(Seqpos)=%u\n",sizeof(Seqpos) * CHAR_BIT);
   retval = suffixeratoroptions(&so,argc,argv,env);
   if (retval == 0)
   {

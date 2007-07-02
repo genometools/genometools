@@ -452,7 +452,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          {
            sum += (uint64_t) sizeof (Uchar) * numofspecialstostore +
                   (uint64_t) sizeof (Uchar) * numofspecialstostore +
-                  (uint64_t) sizeof (uintptr_t) * (totallength/UCHAR_MAX+1);
+                  (uint64_t) sizeof (Seqpos) * (totallength/UCHAR_MAX+1);
          }
          break;
     case Viaushorttables:
@@ -461,7 +461,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          {
            sum += (uint64_t) sizeof (Ushort) * numofspecialstostore +
                   (uint64_t) sizeof (Uchar) * numofspecialstostore +
-                  (uint64_t) sizeof (uintptr_t) * (totallength/USHRT_MAX+1);
+                  (uint64_t) sizeof (Seqpos) * (totallength/USHRT_MAX+1);
          }
          break;
     case Viauint32tables:
@@ -470,7 +470,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          {
            sum += (uint64_t) sizeof (uint32_t) * numofspecialstostore +
                   (uint64_t) sizeof (Uchar) * numofspecialstostore +
-                  (uint64_t) sizeof (uintptr_t) * (totallength/UINT32_MAX+1);
+                  (uint64_t) sizeof (Seqpos) * (totallength/UINT32_MAX+1);
          }
          break;
     case Viauint64tables:
@@ -1500,13 +1500,11 @@ static int readsatfromfile(const Str *indexname,Env *env)
       Fastabufferstate fbs;
       encseq->mappedptr = NULL;
   
-      STAMP;
       initfastabufferstate(&fbs,
                            filenametab,
                            getsymbolmapAlphabet(alphabet),
                            &filelengthtab,
                            env);
-      STAMP;
       printf("# call %s\n",
              encodedseqfunctab[(int) sat].fillpos.funcname);
       if (encodedseqfunctab[(int) sat].fillpos.function(encseq,&fbs,env)

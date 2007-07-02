@@ -8,6 +8,7 @@
 localpath=src/libgtmatch
 icc=0
 do64=0
+big=0
 
 if test $# -ge 1
 then
@@ -15,6 +16,8 @@ then
    "-icc") icc=1
            shift;;
    "-m64")  do64=1
+            shift;;
+   "-big")  big=1
             shift;;
   esac
 fi
@@ -28,7 +31,13 @@ do
   fi
 done
 
-bignum=-DBIGSEQPOS
+if test $big -eq 1
+then
+  bignum=-DBIGSEQPOS
+else
+  bignum=
+fi
+
 if test $icc -eq 1
 then
   make CC='ccache icc' CFLAGS='-O3 ${bignum} -wd1418,869,981' LD='icc' CXX='icc' $*
