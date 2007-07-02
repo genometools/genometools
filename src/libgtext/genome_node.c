@@ -374,25 +374,36 @@ bool genome_node_has_children(GenomeNode *gn)
   return true;
 }
 
-bool genome_node_direct_children_do_not_overlap(GenomeNode *gn, Env *env)
+bool genome_node_direct_children_do_not_overlap_generic(GenomeNode *parent,
+                                                        GenomeNode *child,
+                                                        Env *env)
 {
   Array *children_ranges = array_new(sizeof (Range), env);
   Dlistelem *dlistelem;
+  GenomeFeature *gf = NULL, *child_gf;
   Range range;
   bool rval;
 
-  assert(gn);
+  assert(parent);
 
-  if (!gn->children)
-    return 1;
+  if (child)
+    gf = genome_node_cast(genome_feature_class(), child);
+
+  if (!parent->children)
+    return true;
 
   /* get children ranges */
-  if (gn->children) {
-    for (dlistelem = dlist_first(gn->children); dlistelem != NULL;
+  if (parent->children) {
+    for (dlistelem = dlist_first(parent->children); dlistelem != NULL;
          dlistelem = dlistelem_next(dlistelem)) {
-      range = genome_node_get_range((GenomeNode*)
-                                    dlistelem_get_data(dlistelem));
-      array_add(children_ranges, range, env);
+      if (!gf ||
+          ((child_gf = genome_node_cast(genome_feature_class(),
+                                        dlistelem_get_data(dlistelem))) &&
+           genome_feature_get_type(gf) == genome_feature_get_type(child_gf))) {
+        range = genome_node_get_range((GenomeNode*)
+                                      dlistelem_get_data(dlistelem));
+        array_add(children_ranges, range, env);
+      }
     }
   }
 
@@ -403,6 +414,17 @@ bool genome_node_direct_children_do_not_overlap(GenomeNode *gn, Env *env)
   array_delete(children_ranges, env);
 
   return rval;
+}
+
+bool genome_node_direct_children_do_not_overlap(GenomeNode *gn, Env *env)
+{
+  return genome_node_direct_children_do_not_overlap_generic(gn, NULL, env);
+}
+
+bool genome_node_direct_children_do_not_overlap_st(GenomeNode *parent,
+                                                   GenomeNode *child, Env *env)
+{
+  return genome_node_direct_children_do_not_overlap_generic(parent, child, env);
 }
 
 bool genome_node_is_tree(GenomeNode *gn)
