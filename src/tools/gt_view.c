@@ -115,7 +115,7 @@ int gt_view(int argc, const char **argv, Env *env)
   }
 
   /* create a gff3 input stream */
-  gff3_in_stream = gff3_in_stream_new_sorted(*(argv + parsed_args + 1),
+  gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args + 1],
                                              arguments.verbose &&
                                              NULL, env);
 
