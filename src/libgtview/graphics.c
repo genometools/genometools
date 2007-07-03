@@ -175,7 +175,7 @@ void graphics_draw_dashes(Graphics *g, double x, double y, double width,
                           double arrow_width, double stroke_width,
 			                    Color stroke_color)
 {
-  const double dashes[] = {5.0};
+  double dashes[] = {5.0};
   assert(g);
   /* save cairo context */
   cairo_save(g->cr);
