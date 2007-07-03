@@ -89,7 +89,7 @@ endif
 # set prefix for install target
 prefix ?= /usr/local
 
-all: dirs lib/libgtcore.a lib/libgtext.a lib/libgtview.a bin/gt bin/rnv
+all: dirs lib/libgtcore.a lib/libgtext.a lib/libgtview.a bin/skproto bin/gt bin/rnv
 
 dirs:
 	@test -d obj     || mkdir -p obj 
@@ -152,6 +152,10 @@ lib/librnv.a: $(LIBRNV_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
+
+bin/skproto: obj/skproto.o obj/gt_skproto.o lib/libgtcore.a lib/libbz2.a
+	@echo "[link $@]"
+	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgtview.a lib/libgtext.a lib/libgtcore.a\
         lib/libbz2.a lib/libagg.a lib/libpng.a
