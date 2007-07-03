@@ -410,7 +410,6 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
   str_append_cstr(tmpfilename,".esq",env);
   encseqwithoptions.encseq = encseq;
   encseqwithoptions.writemode = false;
-  STAMP;
   if (fillmapspecstartptr(assignencseqmapspecification,
                           &encseq->mappedptr,
                           &encseqwithoptions,
@@ -420,9 +419,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
   {
     haserr = true;
   }
-  STAMP;
   str_delete(tmpfilename,env);
-  STAMP;
   return haserr ? -1 : 0;
 }
 
@@ -860,20 +857,14 @@ static Seqpos accessspecialpositions(const Encodedsequence *encseq,Seqpos idx)
 static Seqpos accessendspecialsubsUint(const Encodedsequence *encseq,
                                        Seqpos idx)
 {
- STAMP;
   if (encseq->sat == Viauchartables)
   {
     return encseq->ucharendspecialsubsUint[idx];
   }
- STAMP;
   if (encseq->sat == Viaushorttables)
   {
- STAMP;
-    printf("idx=%u\n",idx);
- STAMP;
     return encseq->ushortendspecialsubsUint[idx];
   }
- STAMP;
   if (encseq->sat == Viauint32tables)
   {
     return encseq->uint32endspecialsubsUint[idx];
@@ -985,15 +976,11 @@ static bool nextnonemptypage(const Encodedsequence *encseq,
 {
   Seqpos endpos0, endpos1;
 
- STAMP;
   while (esr->pagenumber < esr->numofspecialcells)
   {
- STAMP;
     if (esr->pagenumber == 0)
     {
- STAMP;
       endpos0 = accessendspecialsubsUint(encseq,0);
- STAMP;
       if (endpos0 >= (Seqpos) 1)
       {
         esr->firstcell = 0;
@@ -1003,14 +990,10 @@ static bool nextnonemptypage(const Encodedsequence *encseq,
       }
     } else
     {
- STAMP;
       endpos0 = accessendspecialsubsUint(encseq,esr->pagenumber-1);
- STAMP;
       endpos1 = accessendspecialsubsUint(encseq,esr->pagenumber);
- STAMP;
       if (endpos0 < endpos1)
       {
- STAMP;
         esr->firstcell = endpos0;
         esr->lastcell = endpos1;
         esr->pagenumber++;
@@ -1024,67 +1007,50 @@ static bool nextnonemptypage(const Encodedsequence *encseq,
     }
     esr->pagenumber++;
   }
- STAMP;
   return false;
 }
 
 static void advanceEncodedseqstate(const Encodedsequence *encseq,
                                    Encodedsequencescanstate *esr)
 {
- STAMP;
   while (true)
   {
- STAMP;
     if (esr->hascurrent)
     {
- STAMP;
       esr->previousucharrange = esr->currentucharrange;
       esr->hascurrent = false;
- STAMP;
     }
- STAMP;
     esr->firstcell++;
- STAMP;
     if (esr->firstcell < esr->lastcell ||
         (encseq->sat != Viauint64tables && nextnonemptypage(encseq,esr)))
     {
- STAMP;
       esr->currentucharrange.uint0
         = esr->pageoffset + accessspecialpositions(encseq,esr->firstcell);
       esr->currentucharrange.uint1
         = esr->currentucharrange.uint0
           + encseq->specialrangelength[esr->firstcell];
       esr->hasrange = true;
- STAMP;
     } else
     {
- STAMP;
       esr->hasrange = false;
       break;
     }
- STAMP;
     if (esr->hasprevious)
     {
- STAMP;
       if (esr->previousucharrange.uint1 == esr->currentucharrange.uint0)
       {
- STAMP;
         esr->previousucharrange.uint1 = esr->currentucharrange.uint1;
         esr->hascurrent = false;
- STAMP;
       } else
       {
- STAMP;
         esr->hascurrent = true;
         break;
       }
     } else
     {
- STAMP;
       esr->previousucharrange = esr->currentucharrange;
       esr->hasprevious = true;
       esr->hascurrent = false;
- STAMP;
     }
   }
 }
@@ -1095,26 +1061,21 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
 {
   Encodedsequencescanstate *esr;
 
-  STAMP;
   if(encseq->sat == Viauchartables ||
      encseq->sat == Viaushorttables ||
      encseq->sat == Viauint32tables ||
      encseq->sat == Viauint64tables)
   {
-  STAMP;
     ALLOCASSIGNSPACE(esr,NULL,Encodedsequencescanstate,(size_t) 1);
     esr->pageoffset = 0;
     esr->hasprevious = false;
     esr->hascurrent = false;
     esr->firstcell = 0;
-  STAMP;
     if(encseq->sat == Viauint64tables)
     {
-  STAMP;
       esr->lastcell = encseq->numofspecialstostore;
       if(esr->lastcell > 0)
       {
-  STAMP;
         esr->previousucharrange.uint0 = accessspecialpositions(encseq,0);
         esr->previousucharrange.uint1
           = esr->previousucharrange.uint0 + encseq->specialrangelength[0];
@@ -1122,26 +1083,20 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
       } else
       {
         esr->hasrange = false;
-  STAMP;
       }
     } else
     {
-  STAMP;
       esr->pagenumber = 0;
       esr->maxspecialtype = sat2maxspecialtype(encseq->sat);
       esr->numofspecialcells
         = (Seqpos) (encseq->totallength/esr->maxspecialtype + 1);
       esr->lastcell = 0;
-  STAMP;
       advanceEncodedseqstate(encseq,esr);
-  STAMP;
     }
   } else
   {
-  STAMP;
     esr = NULL;
   }
-  STAMP;
   return esr;
 }
 
@@ -1536,12 +1491,9 @@ static int readsatfromfile(const Str *indexname,Env *env)
                                     indexname,
                                     env) != 0)
       {
-      STAMP;
         haserr = true;
         freeEncodedsequence(&encseq,env);
-      STAMP;
       }
-      STAMP;
     } else
     {
       PairSeqpos *filelengthtab;
@@ -1563,7 +1515,6 @@ static int readsatfromfile(const Str *indexname,Env *env)
       }
       FREESPACE(filelengthtab);
     }
-      STAMP;
   }
 #ifdef DEBUG
   if (!haserr && encseq->sat == Viauchartables &&
@@ -1572,6 +1523,5 @@ static int readsatfromfile(const Str *indexname,Env *env)
     ucharshowallspecialpositions(encseq);
   }
 #endif
-      STAMP;
   return haserr ? NULL : encseq;
 }

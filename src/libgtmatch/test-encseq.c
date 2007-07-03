@@ -27,17 +27,13 @@ int testencodedsequence(const StrArray *filenametab,
   bool haserr = false;
   Encodedsequencescanstate *esr;
 
-  STAMP;
   env_error_check(env);
-  STAMP;
   initfastabufferstate(&fbs,
                        filenametab,
                        symbolmap,
                        &filelengthtab,
                        env);
-  STAMP;
   esr = initEncodedsequencescanstate(encseq,env);
-  STAMP;
   for (pos=0; /* Nothing */; pos++)
   {
     retval = readnextUchar(&cc0,&fbs,env);
@@ -54,7 +50,7 @@ int testencodedsequence(const StrArray *filenametab,
     if (cc0 != cc1)
     {
       env_error_set(env,"position " FormatSeqpos
-                        ": correct = %u != %u = cc1 (getencodedchar64)",
+                        ": correct = %u != %u = cc1 (getencodedchar)",
                          pos,
                          (uint32_t) cc0,
                          (uint32_t) cc1);
@@ -74,7 +70,6 @@ int testencodedsequence(const StrArray *filenametab,
       break;
     }
   }
-  STAMP;
   if (!haserr)
   {
     if (pos != getencseqtotallength(encseq))
@@ -85,9 +80,7 @@ int testencodedsequence(const StrArray *filenametab,
       haserr = true;
     }
   }
-  STAMP;
   freeEncodedsequencescanstate(&esr,env);
   FREESPACE(filelengthtab);
-  STAMP;
   return haserr ? -1 : 0;
 }

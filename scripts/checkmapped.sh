@@ -29,6 +29,8 @@ function checksfxmap()
   then
     echo "failure: ${cmd}"
     exit 1
+  else
+    echo "success: ${cmd}"
   fi
   grep -v '^#' ${TMPFILE} > $1-sfx.prj
   rm -f ${TMPFILE}
