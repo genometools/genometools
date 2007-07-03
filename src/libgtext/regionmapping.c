@@ -43,7 +43,7 @@ RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Env *env)
   if (!had_err) {
     if (luaL_loadfile(rm->L, str_get(mapping_filename)) ||
         lua_pcall(rm->L, 0, 0, 0)) {
-      env_error_set(env, "cannot run mapping file: %s",
+			env_error_set(env, "cannot run mapping file: %s",
                     lua_tostring(rm->L, -1));
       had_err = -1;
     }

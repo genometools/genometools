@@ -25,6 +25,7 @@
 #include "tools/gt_mutate.h"
 #include "tools/gt_splitfasta.h"
 #include "tools/gt_stat.h"
+#include "tools/gt_view.h"
 
 struct GTR {
   bool test,
@@ -95,6 +96,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "mutate", gt_mutate, env);
   toolbox_add(gtr->toolbox, "splitfasta", gt_splitfasta, env);
   toolbox_add(gtr->toolbox, "stat", gt_stat, env);
+  toolbox_add(gtr->toolbox, "view", gt_view, env);
   /* add unit tests */
   hashtable_delete(gtr->unit_tests, env);
   gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL, env);
@@ -102,10 +104,12 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "array class", array_unit_test, env);
   hashtable_add(gtr->unit_tests, "bittab class", bittab_unit_test, env);
   hashtable_add(gtr->unit_tests, "bsearch module", bsearch_unit_test, env);
+  hashtable_add(gtr->unit_tests, "config class", config_unit_test, env);
   hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test,
                 env);
   hashtable_add(gtr->unit_tests, "dlist class", dlist_unit_test, env);
   hashtable_add(gtr->unit_tests, "evaluator class", evaluator_unit_test, env);
+  hashtable_add(gtr->unit_tests, "feature index class", feature_index_unit_test, env);
   hashtable_add(gtr->unit_tests, "grep module", grep_unit_test, env);
   hashtable_add(gtr->unit_tests, "hashtable class", hashtable_unit_test, env);
   hashtable_add(gtr->unit_tests, "hmm class", hmm_unit_test, env);
@@ -114,6 +118,11 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "splitter class", splitter_unit_test, env);
   hashtable_add(gtr->unit_tests, "string class", str_unit_test, env);
   hashtable_add(gtr->unit_tests, "tokenizer class", tokenizer_unit_test, env);
+  hashtable_add(gtr->unit_tests, "element class", element_unit_test, env);
+  hashtable_add(gtr->unit_tests, "block class", block_unit_test, env);
+  hashtable_add(gtr->unit_tests, "line class", line_unit_test, env);
+  hashtable_add(gtr->unit_tests, "track class", track_unit_test, env);
+  hashtable_add(gtr->unit_tests, "diagram class", diagram_unit_test, env);
 }
 
 int run_test(void *key, void *value, void *data, Env *env)
