@@ -378,7 +378,7 @@ bool genome_node_direct_children_do_not_overlap_generic(GenomeNode *parent,
                                                         GenomeNode *child,
                                                         Env *env)
 {
-  Array *children_ranges = array_new(sizeof (Range), env);
+  Array *children_ranges;
   Dlistelem *dlistelem;
   GenomeFeature *gf = NULL, *child_gf;
   Range range;
@@ -393,17 +393,17 @@ bool genome_node_direct_children_do_not_overlap_generic(GenomeNode *parent,
     return true;
 
   /* get children ranges */
-  if (parent->children) {
-    for (dlistelem = dlist_first(parent->children); dlistelem != NULL;
-         dlistelem = dlistelem_next(dlistelem)) {
-      if (!gf ||
-          ((child_gf = genome_node_cast(genome_feature_class(),
-                                        dlistelem_get_data(dlistelem))) &&
-           genome_feature_get_type(gf) == genome_feature_get_type(child_gf))) {
-        range = genome_node_get_range((GenomeNode*)
-                                      dlistelem_get_data(dlistelem));
-        array_add(children_ranges, range, env);
-      }
+  children_ranges = array_new(sizeof (Range), env);
+  assert(parent->children);
+  for (dlistelem = dlist_first(parent->children); dlistelem != NULL;
+       dlistelem = dlistelem_next(dlistelem)) {
+    if (!gf ||
+        ((child_gf = genome_node_cast(genome_feature_class(),
+                                      dlistelem_get_data(dlistelem))) &&
+         genome_feature_get_type(gf) == genome_feature_get_type(child_gf))) {
+      range = genome_node_get_range((GenomeNode*)
+                                    dlistelem_get_data(dlistelem));
+      array_add(children_ranges, range, env);
     }
   }
 
