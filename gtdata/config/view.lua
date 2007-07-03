@@ -1,38 +1,23 @@
 -- This is the GenomeTools annotation viewer config file.
 -- All options must be set inside the 'config' table.
 -- All items in this table must be tables, called 'sections'.
--- The items in the 'colors' section must be given in
--- the following form:
---      <name> = {red=<val>,green=<val>,blue=<val>}
--- where <val> is a decimal value between 0 and 1.
 
 config =
 {
-  -- Defines which tracks are shown, independent of view range
-  tracks =
-  {
-    order = {},
-    hide = {},
-  },
-  threshold =
-  {
-    -- TODO: let here be thresholds for view ranges
-    -- and the types still displayed in this view
-    -- e.g. exon = 10000
-    -- means exon elements are nor displayed when
-    -- a range > 10000 is viewed
-    exon = 100000,
-  },
   -- Defines a color for a certain feature type.
+  -- The items in the 'colors' section must be given in
+  -- the following form:
+  --      <name> = {red=<val>,green=<val>,blue=<val>}
+  -- where <val> is a decimal value between 0 and 1.
   colors =
   {
     stroke          ={red=0.0,green=0.0,blue=0.0},
     track_title     ={red=0.6,green=0.6,blue=0.7},
-    exon            ={red=0.7,green=0.7,blue=0.9},
+    exon            ={red=0.6,green=0.6,blue=0.9},
     CDS             ={red=0.9,green=0.9,blue=0.2},
     mRNA            ={red=0.4,green=0.5,blue=0.6},
     TF_binding_site ={red=0.8,green=0.6,blue=0.6},
-    gene            ={red=0.8,green=0.2,blue=0.2},
+    gene            ={red=0.9,green=0.9,blue=1.0},
     intron          ={red=0.2,green=0.2,blue=0.6},
   },
   -- Defines how a feature is drawn. 

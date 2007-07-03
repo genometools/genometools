@@ -158,7 +158,6 @@ void render_line(Render *r, Line *line, Env *env)
     const char* caption;
     Strand strand = block_get_strand(block);
 
-    
     /* draw block caption */
     draw_range = render_convert_coords(r, block_range, env);
     if (block_caption_is_visible(block))
@@ -177,10 +176,13 @@ void render_line(Render *r, Line *line, Env *env)
                          draw_range.start,
                          r->y,
                          draw_range.end - draw_range.start,
-                         config_get_num(r->cfg, "format", "bar_height", 15, env),
+                         config_get_num(r->cfg, "format",
+                                        "bar_height", 15, env),
                          ARROW_NONE,
-                         config_get_num(r->cfg, "format", "arrow_width", 6, env),
-                         config_get_num(r->cfg, "format", "stroke_width", 1, env),
+                         config_get_num(r->cfg, "format",
+                                        "arrow_width", 6, env),
+                         config_get_num(r->cfg, "format",
+                                        "stroke_width", 1, env),
                          config_get_color(r->cfg, "stroke", env));
 
     /* draw elements in block */
@@ -306,7 +308,6 @@ void render_line(Render *r, Line *line, Env *env)
                config_get_num(r->cfg, "format", "bar_vspace", 10, env) + 15;
 }
 
-
 /*
   This function disables captions for blocks if they overlap with
   neighboring captions.
@@ -328,36 +329,39 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
       if (!caption) caption = block_get_parent_caption(this_block);
       if (!caption) caption = "";
       cur_range.start = render_convert_point(r, block_range.start);
-      cur_range.end   = cur_range.start + graphics_get_text_width(r->g, caption);
-      for(j = i-1; j >=0;j--)
+      cur_range.end   = cur_range.start
+                          + graphics_get_text_width(r->g, caption);
+      for (j = i-1; j >=0;j--)
       {
         Block *left_block = *(Block**) array_get(blocks, j);
-        Range chk_range = block_get_range(left_block); 
+        Range chk_range = block_get_range(left_block);
         caption = block_get_caption(left_block);
         if (!caption) caption = block_get_parent_caption(left_block);
         if (!caption) caption = "";
         chk_range.start = render_convert_point(r, chk_range.start);
-        chk_range.end   = chk_range.start + graphics_get_text_width(r->g, caption);
+        chk_range.end   = chk_range.start
+                            + graphics_get_text_width(r->g, caption);
         if (chk_range.end < cur_range.start)
           break;
-        if(range_overlap(chk_range, cur_range))
+        if (range_overlap(chk_range, cur_range))
         {
           block_set_caption_visibility(this_block, false);
           block_set_caption_visibility(left_block, false);
         }
       }
-      for(j = i+1; j < array_size(blocks);j++)
+      for (j = i+1; j < array_size(blocks);j++)
       {
         Block *right_block = *(Block**) array_get(blocks, j);
-        Range chk_range = block_get_range(right_block); 
+        Range chk_range = block_get_range(right_block);
         caption = block_get_caption(right_block);
         if (!caption) caption = block_get_parent_caption(right_block);
         if (!caption) caption = "";
         chk_range.start = render_convert_point(r, chk_range.start);
-        chk_range.end   = chk_range.start + graphics_get_text_width(r->g, caption);        
+        chk_range.end   = chk_range.start
+                            + graphics_get_text_width(r->g, caption);
         if (chk_range.start > cur_range.end)
           break;
-        if(range_overlap(chk_range, cur_range))
+        if (range_overlap(chk_range, cur_range))
         {
           block_set_caption_visibility(this_block, false);
           block_set_caption_visibility(right_block, false);
@@ -366,9 +370,6 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
     }
   }
 }
-
-
-
 
 /*!
 Renders a track.
