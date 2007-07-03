@@ -58,19 +58,18 @@ static int suftab2file(void *info,
   }
   if (outfileinfo->outfpbwttab != NULL)
   {
-    Seqpos pos;
+    Seqpos pos, startpos;
     Uchar cc;
 
-    printf("# simulating output of " FormatSeqpos " elements of the bwttab\n",
-            PRINTSeqposcast(widthofpart));
     for(pos=0; pos < widthofpart; pos++)
     {
-      if(suftab[pos] == 0)
+      startpos = suftab[pos];
+      if(startpos == 0)
       {
         cc = UNDEFBWTCHAR;
       } else
       {
-        cc = getencodedchar(outfileinfo->encseq,pos);
+        cc = getencodedchar(outfileinfo->encseq,startpos - 1);
       }
       if (fwrite(&cc,sizeof(Uchar),(size_t) 1,outfileinfo->outfpbwttab) 
                   != (size_t) 1)
