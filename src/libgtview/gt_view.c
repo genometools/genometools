@@ -40,23 +40,23 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   option_parser_add_option(op, option, env);
 
   /* -seqid */
-  option = option_new_string("seqid", "sequence region identifier"
-                                      " (default: first one in file)",
+  option = option_new_string("seqid", "sequence region identifier\n"
+                                      "default: first one in file",
                             arguments->seqid,
                             NULL, env);
   option_parser_add_option(op, option, env);
   option_hide_default(option);
 
   /* -start */
-  option = option_new_ulong_min("start", "start position"
-                                         " (default: region start)",
+  option = option_new_ulong_min("start", "start position\n"
+                                         "default: first region start",
                             &arguments->start,
                             UNDEF_ULONG, 1, env);
   option_parser_add_option(op, option, env);
   option_hide_default(option);
 
   /* -end */
-  option2 = option_new_ulong("end", "end position (default: region end)",
+  option2 = option_new_ulong("end", "end position\ndefault: last region end",
                             &arguments->end,
                             UNDEF_ULONG, env);
   option_parser_add_option(op, option2, env);
