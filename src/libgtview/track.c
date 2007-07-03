@@ -81,13 +81,13 @@ void track_insert_element(Track *track,
     if (block == NULL)
     {
       block = block_new(env);
-      if (gn_type == gft_mRNA)
+      if (genome_node_direct_children_do_not_overlap_st(parent, gn, env))
       {
-        hashtable_add(track->blocks, gn, block, env);
+        hashtable_add(track->blocks, parent, block, env);
       }
       else
       {
-        hashtable_add(track->blocks, parent, block, env);
+        hashtable_add(track->blocks, gn, block, env);
       }
       caption = genome_feature_get_attribute(gn, "Name");
       if (caption == NULL)
