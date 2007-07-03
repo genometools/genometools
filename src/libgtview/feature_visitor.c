@@ -33,7 +33,7 @@ static int feature_visitor_genome_feature(GenomeVisitor *gv,
   FeatureVisitor *v = feature_visitor_cast(gv);
   env_error_check(env);
 
-  feature_index_add_genome_feature_for_seqid(v->features, gf, env);
+  feature_index_add_genome_feature(v->features, gf, env);
 
   return 0;
 }
@@ -44,8 +44,7 @@ static int feature_visitor_sequence_region(GenomeVisitor *gv,
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
   env_error_check(env);
-  return feature_index_add_sequence_region(v->features,
-                         str_get(genome_node_get_seqid((GenomeNode*) sr)), env);
+  return feature_index_add_sequence_region(v->features, sr, env);
 }
 
 const GenomeVisitorClass* feature_visitor_class()
