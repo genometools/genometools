@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2007 Malte Mader <mmader@zbh.uni-hamburg.de>
-                     Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
-                     Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -167,9 +167,8 @@ Travering a genome node tree with depth first search.
  to a genome node and a diagram.
 \param env Pointer to Environment object.
 */
-static int traverse_genome_nodes(GenomeNode* gn,
-                                 void* genome_node_children,
-				 Env* env)
+static int traverse_genome_nodes(GenomeNode* gn, void* genome_node_children,
+                                 Env* env)
 {
   assert(genome_node_children);
   GenomeNodeChildren* genome_node_info;
@@ -213,7 +212,7 @@ static void diagram_build(Diagram* diagram, Array* features, Env* env)
 
     traverse_genome_nodes(current_root, &genome_node_children, env);
   }
-	/* create lines for each track in diagram */
+  /* create lines for each track in diagram */
   hashtable_foreach(diagram->tracks, finish_track, NULL, env);
 }
 

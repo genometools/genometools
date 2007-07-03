@@ -1,6 +1,6 @@
 /*
+  Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>,
-                     Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -58,11 +58,8 @@ in the graphics.
 \param env Pointer to Environment object.
 \return Pointer to new Graphics object.
 */
-void      graphics_set_margins(Graphics *g,
-                               double margin_x,
-															 double margin_y,
-															 double width,
-															 double height);
+void      graphics_set_margins(Graphics *g, double margin_x, double margin_y,
+                               double width, double height);
 
 /*!
 Draws a vertical line beginning at the given coordinates downwards.
@@ -172,11 +169,8 @@ Accepts a color for the text.
 \param color Color for the text.
 \param text String to draw.
 */
-void      graphics_draw_colored_text(Graphics *g,
-                                     double x,
-								      	 						 double y,
-																     Color color,
-																     const char *text);
+void      graphics_draw_colored_text(Graphics *g, double x, double y,
+                                     Color color, const char *text);
 
 /*!
 Draws a single arrowhead.

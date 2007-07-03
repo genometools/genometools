@@ -36,8 +36,8 @@ Inserts an element into a Block object
 */
 void block_insert_element(Block* block,
                           GenomeNode* gn,
-			  Config* cfg,
-			  Env* env);
+                          Config* cfg,
+                          Env* env);
 
 /*!
 Returns range of a Block object

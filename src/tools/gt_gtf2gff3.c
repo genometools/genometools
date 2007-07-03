@@ -43,7 +43,7 @@ int gt_gtf2gff3(int argc, const char **argv, Env *env)
   /* create a gtf input stream */
   gtf_in_stream = gtf_in_stream_new(argv[parsed_args], be_tolerant, env);
   if (!gtf_in_stream)
-    hds_err = -1;
+    had_err = -1;
 
   if (!had_err) {
     /* create a gff3 output stream */

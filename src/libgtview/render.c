@@ -109,7 +109,7 @@ DrawingRange render_convert_coords(Render *r,
   converted_range.clip = CLIPPED_NONE;
 
   /* scale coordinates to target image width */
-	/* first, check if left side has to be clipped */
+  /* first, check if left side has to be clipped */
   if ((long) node_range.start < (long) r->range.start )
   {
     converted_range.clip = CLIPPED_LEFT;
@@ -171,7 +171,7 @@ void render_line(Render *r, Line *line, Env *env)
                          caption);
     }
 
-		/* draw parent block boundaries */
+    /* draw parent block boundaries */
     graphics_draw_dashes(r->g,
                          draw_range.start,
                          r->y,
@@ -417,10 +417,7 @@ Formats a given position number for short display in the ruler.
 */
 void format_ruler_label(char *txt, long pos)
 {
-/*  if (pos >= 1000)
-	  sprintf(txt, "%.1lfk", pos/1000.0);
-  else */
-    snprintf(txt, BUFSIZ, "%li", pos);
+  snprintf(txt, BUFSIZ, "%li", pos);
 }
 
 /*!

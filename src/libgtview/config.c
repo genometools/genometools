@@ -1,6 +1,6 @@
 /*
   Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
-  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -87,9 +87,8 @@ it on the Lua stack (at the top).
 \param env Pointer to Environment object.
 \return Total number of items pushed on the stack by this function.
 */
-static int config_find_section_for_setting(Config* cfg,
-                                           const char* section,
-																					 Env* env)
+static int config_find_section_for_setting(Config* cfg, const char* section,
+                                           Env* env)
 {
   int depth = 0;
   assert(cfg && section);
@@ -97,7 +96,7 @@ static int config_find_section_for_setting(Config* cfg,
   lua_getglobal(cfg->L, "config");
   if (lua_isnil(cfg->L, -1))
   {
-	  lua_pop(cfg->L, 1);
+    lua_pop(cfg->L, 1);
     lua_newtable(cfg->L);
     lua_setglobal(cfg->L, "config");
     lua_getglobal(cfg->L, "config");
@@ -123,9 +122,8 @@ returning if it is not found.
 \return -1 if not found, otherwise number of items
         pushed on the stack by this function.
 */
-static int config_find_section_for_getting(Config* cfg,
-                                           const char* section,
-																					 Env* env)
+static int config_find_section_for_getting(Config* cfg, const char* section,
+                                           Env* env)
 {
   int depth = 0;
   assert(cfg && section);

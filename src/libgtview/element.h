@@ -27,7 +27,7 @@ Creates a new Element object.
 */
 Element* element_new(GenomeNode *gn,
                      Config *cfg,
-		     Env* env);
+                     Env* env);
 
 /*!
 Creates a new Element object.

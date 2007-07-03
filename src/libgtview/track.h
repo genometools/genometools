@@ -38,9 +38,9 @@ Inserts an element into a Track object
 */
 void track_insert_element(Track* track,
                           GenomeNode* gn,
-			  Config* cfg,
-			  GenomeNode* parent,
-			  Env* env);
+                          Config* cfg,
+                          GenomeNode* parent,
+                          Env* env);
 
 /*!
 Returns Track title
@@ -57,7 +57,7 @@ Gets the next unoccupied Line object
 */
 Line* get_next_free_line(Track* track,
                          Range r,
-			 Env* env);
+                         Env* env);
 
 /*!
 Returns Array with Pointer to Line objects

@@ -151,8 +151,7 @@ int line_unit_test(Env* env)
   return had_err;
 }
 
-void line_delete(Line *line,
-                 Env *env)
+void line_delete(Line *line, Env *env)
 {
   int i;
 

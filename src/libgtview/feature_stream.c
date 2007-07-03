@@ -51,19 +51,10 @@ GenomeStream* feature_stream_new(GenomeStream *in_stream,
 {
   GenomeStream *gs;
   FeatureStream *feature_stream;
-  int had_err = 0;
   env_error_check(env);
   gs = genome_stream_create(feature_stream_class(), true, env);
   feature_stream = feature_stream_cast(gs);
   feature_stream->in_stream = in_stream;
-
   feature_stream->feature_visitor = feature_visitor_new(fi, env);
-
-	if (!feature_stream->feature_visitor)
-    had_err = -1;
-  if (had_err) {
-    feature_stream_free(gs, env);
-    return NULL;
-  }
   return gs;
 }

@@ -33,7 +33,7 @@ insert Block object in Line object
 */
 void line_insert_block(Line* line,
                        Block* block,
-		       Env* env);
+                       Env* env);
 
 /*!
 Checks if Line is occupied

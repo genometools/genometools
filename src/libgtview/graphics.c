@@ -1,6 +1,6 @@
 /*
+  Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>,
-                     Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -128,7 +128,7 @@ void graphics_draw_box(Graphics *g, double x, double y, double width,
   cairo_save(g->cr);
   cairo_rectangle(g->cr, g->margin_x, g->margin_y,
                   g->width-2*g->margin_x, g->height-2*g->margin_y);
-	cairo_clip(g->cr);
+  cairo_clip(g->cr);
   /* construct shape of the box or arrow */
   switch (arrow_status)
   {
@@ -173,7 +173,7 @@ void graphics_draw_box(Graphics *g, double x, double y, double width,
 void graphics_draw_dashes(Graphics *g, double x, double y, double width,
                           double height, int arrow_status,
                           double arrow_width, double stroke_width,
-			                    Color stroke_color)
+                          Color stroke_color)
 {
   double dashes[] = {5.0};
   assert(g);
@@ -181,7 +181,7 @@ void graphics_draw_dashes(Graphics *g, double x, double y, double width,
   cairo_save(g->cr);
   cairo_rectangle(g->cr, g->margin_x, g->margin_y,
                   g->width-2*g->margin_x, g->height-2*g->margin_y);
-	cairo_clip(g->cr);
+  cairo_clip(g->cr);
   cairo_set_line_width(g->cr, stroke_width);
   cairo_set_source_rgb(g->cr, stroke_color.red,
                               stroke_color.green,
@@ -202,7 +202,7 @@ void graphics_draw_dashes(Graphics *g, double x, double y, double width,
         cairo_move_to(g->cr, width - arrow_width, y);
         cairo_line_to(g->cr, x + width, y + height / 2);
         cairo_line_to(g->cr, x + width - arrow_width, y + height);
-	      /* draw arrowhead */
+        /* draw arrowhead */
         cairo_stroke(g->cr);
         break;
     }
@@ -217,16 +217,16 @@ void graphics_draw_dashes(Graphics *g, double x, double y, double width,
 }
 
 void graphics_draw_caret(Graphics *g, double x, double y, double width,
-                          double height, int arrow_status,
-                          double arrow_width, double stroke_width,
-			  Color stroke_color)
+                         double height, int arrow_status,
+                         double arrow_width, double stroke_width,
+                         Color stroke_color)
 {
   assert(g);
   /* save cairo context */
   cairo_save(g->cr);
   cairo_rectangle(g->cr, g->margin_x, g->margin_y,
                   g->width-2*g->margin_x, g->height-2*g->margin_y);
-	cairo_clip(g->cr);
+  cairo_clip(g->cr);
   /* create caret path */
   switch (arrow_status)
   {
@@ -350,29 +350,25 @@ void graphics_draw_arrowhead(Graphics *g, double x, double y,
   /* save cairo context */
   cairo_save(g->cr);
   cairo_reset_clip(g->cr);
-	cairo_set_source_rgb(g->cr, color.red,
-                              color.green,
-                              color.blue);
-	if (arrow_status == ARROW_LEFT)
-	{
-	  cairo_move_to(g->cr, x+arrow_width, y);
-		cairo_line_to(g->cr, x, y+(arrow_height/2));
-		cairo_line_to(g->cr, x+arrow_width, y+arrow_height);
-		cairo_close_path(g->cr);
-	  /* fill area */
+  cairo_set_source_rgb(g->cr, color.red, color.green, color.blue);
+  if (arrow_status == ARROW_LEFT) {
+    cairo_move_to(g->cr, x+arrow_width, y);
+    cairo_line_to(g->cr, x, y+(arrow_height/2));
+    cairo_line_to(g->cr, x+arrow_width, y+arrow_height);
+    cairo_close_path(g->cr);
+    /* fill area */
     cairo_fill_preserve(g->cr);
-  	cairo_stroke(g->cr);
-	}
-	if (arrow_status == ARROW_RIGHT)
-	{
-	  cairo_move_to(g->cr, x, y);
-		cairo_line_to(g->cr, x+arrow_width, y+(arrow_height/2));
-		cairo_line_to(g->cr, x, y+arrow_height);
-		cairo_close_path(g->cr);
-	  /* fill area */
+    cairo_stroke(g->cr);
+  }
+  if (arrow_status == ARROW_RIGHT) {
+    cairo_move_to(g->cr, x, y);
+    cairo_line_to(g->cr, x+arrow_width, y+(arrow_height/2));
+    cairo_line_to(g->cr, x, y+arrow_height);
+    cairo_close_path(g->cr);
+    /* fill area */
     cairo_fill_preserve(g->cr);
-  	cairo_stroke(g->cr);
-	}
+    cairo_stroke(g->cr);
+  }
   /* restore cairo context */
   cairo_restore(g->cr);
 }

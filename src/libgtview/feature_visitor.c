@@ -13,7 +13,7 @@
 
 struct FeatureVisitor {
   const GenomeVisitor parent_instance;
-	FeatureIndex *features;
+        FeatureIndex *features;
 };
 
 #define feature_visitor_cast(GV)\
@@ -43,15 +43,9 @@ static int feature_visitor_sequence_region(GenomeVisitor *gv,
                                            Env *env)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
-  int had_err = 0;
   env_error_check(env);
-
-  had_err = feature_index_add_sequence_region(v->features,
-	                                            str_get(genome_node_get_seqid(
-																							                     (GenomeNode*) sr)),
-																							env);
-
-  return had_err;
+  return feature_index_add_sequence_region(v->features,
+                         str_get(genome_node_get_seqid((GenomeNode*) sr)), env);
 }
 
 const GenomeVisitorClass* feature_visitor_class()

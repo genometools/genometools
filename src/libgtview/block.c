@@ -65,8 +65,8 @@ Block* block_new(Env *env)
 
 void block_insert_element(Block *block,
                           GenomeNode *gn,
-			  Config *cfg,
-			  Env *env)
+                          Config *cfg,
+                          Env *env)
 {
   assert(block && gn && cfg);
 
@@ -94,7 +94,7 @@ void block_insert_element(Block *block,
       dominates = config_dominates(cfg, e_type, gn_type, env);
       if (dominates == DOMINATES_EQUAL
          || dominates == DOMINATES_NOT_SPECIFIED
-	 || dominates == DOMINATES_UNKNOWN_TYPE)
+         || dominates == DOMINATES_UNKNOWN_TYPE)
       {
         dominates = DOMINATES_SECOND;
       }
@@ -106,13 +106,13 @@ void block_insert_element(Block *block,
         switch (dominates)
         {
           case DOMINATES_FIRST:
-	    break;
-	  case DOMINATES_SECOND:
+            break;
+          case DOMINATES_SECOND:
             elem_r.start = gn_r.end+1;
-	    element_set_range(element, elem_r);
-	    e = element_new(gn, cfg, env);
-	    dlist_add(block->elements, e, env);
-	    break;
+            element_set_range(element, elem_r);
+            e = element_new(gn, cfg, env);
+            dlist_add(block->elements, e, env);
+            break;
         }
       }
 
@@ -121,27 +121,27 @@ void block_insert_element(Block *block,
       else if (gn_r.start >= elem_r.start && gn_r.end == elem_r.end)
       {
         switch (dominates)
-	{
+        {
           case DOMINATES_FIRST:
-	    gn_r.start = elem_r.end;
-	    break;
-	  case DOMINATES_SECOND:
-	    elem_r.end = gn_r.start-1;
-	    if (elem_r.start == elem_r.end+1)
-	    {
+            gn_r.start = elem_r.end;
+            break;
+          case DOMINATES_SECOND:
+            elem_r.end = gn_r.start-1;
+            if (elem_r.start == elem_r.end+1)
+            {
               dlist_remove(block->elements, elem, env);
-	      element_delete(element, env);
-	    }
-	    else
-	    {
+              element_delete(element, env);
+            }
+            else
+            {
               element_set_range(element, elem_r);
-	    }
-	    e = element_new(gn, cfg, env);
+            }
+            e = element_new(gn, cfg, env);
             element_set_range(e, gn_r);
-	    dlist_add(block->elements, e, env);
-	    elem = dlist_find(block->elements, e);
-	    break;
-	}
+            dlist_add(block->elements, e, env);
+            elem = dlist_find(block->elements, e);
+            break;
+        }
       }
 
       /* Fall: ----------
@@ -150,35 +150,35 @@ void block_insert_element(Block *block,
       {
         bool removed = false;
         switch (dominates)
-	{
+        {
           case DOMINATES_FIRST:
             gn_r.start = elem_r.end+1;
-	    break;
-	  case DOMINATES_SECOND:
+            break;
+          case DOMINATES_SECOND:
             elem_r.end = gn_r.start-1;
-	    if (elem_r.start == elem_r.end+1)
-	    {
-              dlist_remove(block->elements, elem, env);
-	      element_delete(element, env);
-	      removed = true;
-	    }
-	    else
+            if (elem_r.start == elem_r.end+1)
             {
-	      element_set_range(element, elem_r);
-	    }
-	    Range gnnew_r = gn_r;
-	    gnnew_r.end = elem_r.end;
-	    e = element_new_empty(cfg, env);
-	    element_set_range(e, gnnew_r);
-	    element_set_type(e, gn_type);
-	    dlist_add(block->elements, e, env);
-	    gn_r.start = elem_r.end+1;
-	    if (removed)
-	    {
+              dlist_remove(block->elements, elem, env);
+              element_delete(element, env);
+              removed = true;
+            }
+            else
+            {
+              element_set_range(element, elem_r);
+            }
+            Range gnnew_r = gn_r;
+            gnnew_r.end = elem_r.end;
+            e = element_new_empty(cfg, env);
+            element_set_range(e, gnnew_r);
+            element_set_type(e, gn_type);
+            dlist_add(block->elements, e, env);
+            gn_r.start = elem_r.end+1;
+            if (removed)
+            {
               elem = dlist_find(block->elements, e);
-	    }
-	    break;
-	}
+            }
+            break;
+        }
       }
 
       /* Fall: -------------
@@ -188,22 +188,22 @@ void block_insert_element(Block *block,
         Range elemnew_r;
 
         switch (dominates)
-	{
+        {
           case DOMINATES_FIRST:
-	    break;
-	  case DOMINATES_SECOND:
+            break;
+          case DOMINATES_SECOND:
             elemnew_r = elem_r;
-	    elem_r.end = gn_r.start-1;
-	    element_set_range(element, elem_r);
-	    elemnew_r.start = gn_r.end+1;
+            elem_r.end = gn_r.start-1;
+            element_set_range(element, elem_r);
+            elemnew_r.start = gn_r.end+1;
             Element *elemnew = element_new_empty(cfg, env);
-	    element_set_range(elemnew, elemnew_r);
-	    element_set_type(elemnew, e_type);
-	    e = element_new(gn, cfg, env);
-	    dlist_add(block->elements, elemnew, env);
-	    dlist_add(block->elements, e, env);
-	    break;
-	}
+            element_set_range(elemnew, elemnew_r);
+            element_set_type(elemnew, e_type);
+            e = element_new(gn, cfg, env);
+            dlist_add(block->elements, elemnew, env);
+            dlist_add(block->elements, e, env);
+            break;
+        }
       }
 
     }
