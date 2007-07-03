@@ -13,9 +13,22 @@ struct Block
   Range range;
   const char* caption;
   const char* parent_caption;
+  bool show_caption;
   Strand strand;
   GenomeFeatureType type;
 };
+
+void block_set_caption_visibility(Block *b, bool val)
+{
+  assert(b);
+  b->show_caption = val;
+}
+
+bool block_caption_is_visible(Block *b)
+{
+  assert(b);
+  return b->show_caption;
+}
 
 /*
 Compare function to insert Elements into dlist
@@ -43,6 +56,7 @@ Block* block_new(Env *env)
   block->range = r;
   block->caption = NULL;
   block->parent_caption = NULL;
+  block->show_caption = true;
   block->strand = STRAND_UNKNOWN;
 
   assert(block);

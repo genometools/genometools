@@ -158,27 +158,30 @@ void render_line(Render *r, Line *line, Env *env)
     const char* caption;
     Strand strand = block_get_strand(block);
 
+    
     /* draw block caption */
     draw_range = render_convert_coords(r, block_range, env);
-    caption = block_get_caption(block);
-    if (!caption) caption = block_get_parent_caption(block);
-    if (!caption) caption = "";
-    graphics_draw_text(r->g,
-                       MAX(r->margins, draw_range.start),
-                       r->y-6,
-                       caption);
+    if (block_caption_is_visible(block))
+    {
+      caption = block_get_caption(block);
+      if (!caption) caption = block_get_parent_caption(block);
+      if (!caption) caption = "";
+      graphics_draw_text(r->g,
+                         MAX(r->margins, draw_range.start),
+                         r->y-6,
+                         caption);
+    }
 
-		/* DEBUG */
-         graphics_draw_dashes(r->g,
-                       draw_range.start,
-                       r->y,
-                       draw_range.end - draw_range.start,
-                       config_get_num(r->cfg, "format", "bar_height", 15, env),
-                       ARROW_NONE,
-                       config_get_num(r->cfg, "format", "arrow_width", 6, env),
-                       config_get_num(r->cfg, "format", "stroke_width", 1, env),
-                       config_get_color(r->cfg, "stroke", env));
-		/* DEBUG */
+		/* draw parent block boundaries */
+    graphics_draw_dashes(r->g,
+                         draw_range.start,
+                         r->y,
+                         draw_range.end - draw_range.start,
+                         config_get_num(r->cfg, "format", "bar_height", 15, env),
+                         ARROW_NONE,
+                         config_get_num(r->cfg, "format", "arrow_width", 6, env),
+                         config_get_num(r->cfg, "format", "stroke_width", 1, env),
+                         config_get_color(r->cfg, "stroke", env));
 
     /* draw elements in block */
     for (delem = dlist_first(elems); delem != NULL;
@@ -219,7 +222,6 @@ void render_line(Render *r, Line *line, Env *env)
                 arrow_status);
 
       /* draw each element according to style set in the config */
-
       const char* style = config_get_cstr(r->cfg,
                                           "feature_styles",
                                           type,
@@ -304,6 +306,70 @@ void render_line(Render *r, Line *line, Env *env)
                config_get_num(r->cfg, "format", "bar_vspace", 10, env) + 15;
 }
 
+
+/*
+  This function disables captions for blocks if they overlap with
+  neighboring captions.
+*/
+static void mark_caption_collisions(Render *r, Line *line, Env* env)
+{
+  assert(r && line && env);
+  int i, j;
+  Array *blocks = line_get_blocks(line);
+  for (i=0; i<array_size(blocks)-1; i++)
+  {
+    Block *this_block = *(Block**) array_get(blocks, i);
+    if (block_caption_is_visible(this_block))
+    {
+      Range block_range = block_get_range(this_block);
+      const char *caption;
+      Range cur_range;
+      caption = block_get_caption(this_block);
+      if (!caption) caption = block_get_parent_caption(this_block);
+      if (!caption) caption = "";
+      cur_range.start = render_convert_point(r, block_range.start);
+      cur_range.end   = cur_range.start + graphics_get_text_width(r->g, caption);
+      for(j = i-1; j >=0;j--)
+      {
+        Block *left_block = *(Block**) array_get(blocks, j);
+        Range chk_range = block_get_range(left_block); 
+        caption = block_get_caption(left_block);
+        if (!caption) caption = block_get_parent_caption(left_block);
+        if (!caption) caption = "";
+        chk_range.start = render_convert_point(r, chk_range.start);
+        chk_range.end   = chk_range.start + graphics_get_text_width(r->g, caption);
+        if (chk_range.end < cur_range.start)
+          break;
+        if(range_overlap(chk_range, cur_range))
+        {
+          block_set_caption_visibility(this_block, false);
+          block_set_caption_visibility(left_block, false);
+        }
+      }
+      for(j = i+1; j < array_size(blocks);j++)
+      {
+        Block *right_block = *(Block**) array_get(blocks, j);
+        Range chk_range = block_get_range(right_block); 
+        caption = block_get_caption(right_block);
+        if (!caption) caption = block_get_parent_caption(right_block);
+        if (!caption) caption = "";
+        chk_range.start = render_convert_point(r, chk_range.start);
+        chk_range.end   = chk_range.start + graphics_get_text_width(r->g, caption);        
+        if (chk_range.start > cur_range.end)
+          break;
+        if(range_overlap(chk_range, cur_range))
+        {
+          block_set_caption_visibility(this_block, false);
+          block_set_caption_visibility(right_block, false);
+        }
+      }
+    }
+  }
+}
+
+
+
+
 /*!
 Renders a track.
 \param r Render object
@@ -334,7 +400,9 @@ int render_track(void *key, void *value, void *data, Env *env)
   /* render each line */
   for (i=0; i<array_size(lines); i++)
   {
-    render_line(r, *(Line**) array_get(lines, i), env);
+    Line* line = *(Line**) array_get(lines, i);
+    mark_caption_collisions(r, line, env);
+    render_line(r, line, env);
   }
 
   /* put track spacer after track, except if at last track */
@@ -351,7 +419,7 @@ void format_ruler_label(char *txt, long pos)
 /*  if (pos >= 1000)
 	  sprintf(txt, "%.1lfk", pos/1000.0);
   else */
-    (void) snprintf(txt, BUFSIZ, "%li", pos);
+    snprintf(txt, BUFSIZ, "%li", pos);
 }
 
 /*!

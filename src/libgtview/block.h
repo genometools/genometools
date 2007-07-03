@@ -55,6 +55,20 @@ void block_set_range(Block* block,
                      Range r);
 
 /*!
+Sets whether a block caption should be displayed or not.
+\param block Pointer to Block object to set visibility for.
+\param val TRUE to show caption, FALSE to disable
+*/
+void block_set_caption_visibility(Block* block, bool val);
+
+/*!
+Returns block caption visibility setting.
+\param block Pointer to Block object to query.
+\return TRUE if visible, FALSE otherwise.
+*/
+bool block_caption_is_visible(Block* block);
+
+/*!
 Sets caption of a Block object
 \param block Pointer to Block object to set caption
 \param caption Pointer to String object
