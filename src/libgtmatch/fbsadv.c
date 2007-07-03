@@ -31,8 +31,14 @@ void initfastabufferstate(Fastabufferstate *fbs,
   fbs->complete = false;
   fbs->totaloffset = 0;
   fbs->lastspeciallength = 0;
-  ALLOCASSIGNSPACE(*filelengthtab,NULL,PairSeqpos,strarray_size(filenametab));
-  fbs->filelengthtab = *filelengthtab;
+  if(filelengthtab != NULL)
+  {
+    ALLOCASSIGNSPACE(*filelengthtab,NULL,PairSeqpos,strarray_size(filenametab));
+    fbs->filelengthtab = *filelengthtab;
+  } else
+  {
+    fbs->filelengthtab = NULL;
+  }
 }
 
 int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
@@ -47,14 +53,20 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
   {
     if (currentposition >= (uint32_t) FILEBUFFERSIZE)
     {
-      fbs->filelengthtab[fbs->filenum].uint0 += currentfileread;
-      fbs->filelengthtab[fbs->filenum].uint1 += currentfileadd;
+      if(fbs->filelengthtab != NULL)
+      {
+        fbs->filelengthtab[fbs->filenum].uint0 += currentfileread;
+        fbs->filelengthtab[fbs->filenum].uint1 += currentfileadd;
+      }
       break;
     }
     if (fbs->nextfile)
     {
-      fbs->filelengthtab[fbs->filenum].uint0 = 0;
-      fbs->filelengthtab[fbs->filenum].uint1 = 0;
+      if(fbs->filelengthtab != NULL)
+      {
+        fbs->filelengthtab[fbs->filenum].uint0 = 0;
+        fbs->filelengthtab[fbs->filenum].uint1 = 0;
+      }
       fbs->nextfile = false;
       fbs->indesc = false;
       fbs->firstseqinfile = true;
@@ -78,8 +90,11 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
         closegenericstream(&fbs->inputstream,
                            strarray_get(fbs->filenametab,
                                         (unsigned long) fbs->filenum));
-        fbs->filelengthtab[fbs->filenum].uint0 += currentfileread;
-        fbs->filelengthtab[fbs->filenum].uint1 += currentfileadd;
+        if(fbs->filelengthtab != NULL)
+        {
+          fbs->filelengthtab[fbs->filenum].uint0 += currentfileread;
+          fbs->filelengthtab[fbs->filenum].uint1 += currentfileadd;
+        }
         if ((unsigned long) fbs->filenum == strarray_size(fbs->filenametab) - 1)
         {
           fbs->complete = true;
@@ -122,28 +137,34 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
               fbs->indesc = true;
             } else
             {
-              charcode = fbs->symbolmap[(uint32_t) currentchar];
-              if (charcode == (Uchar) UNDEFCHAR)
+              if(fbs->symbolmap == NULL)
               {
-                env_error_set(env,"illegal character '%c':"
-                                  " file \"%s\", line %u",
-                              currentchar,
-                              strarray_get(fbs->filenametab,
-                                           (unsigned long) fbs->filenum),
-                              fbs->linenum);
-                return -1;
-              }
-              if (ISSPECIAL(charcode))
-              {
-                fbs->lastspeciallength++;
+                fbs->bufspace[currentposition++] = (Uchar) currentchar;
               } else
               {
-                if (fbs->lastspeciallength > 0)
+                charcode = fbs->symbolmap[(uint32_t) currentchar];
+                if (charcode == (Uchar) UNDEFCHAR)
                 {
-                  fbs->lastspeciallength = 0;
+                  env_error_set(env,"illegal character '%c':"
+                                    " file \"%s\", line %u",
+                                currentchar,
+                                strarray_get(fbs->filenametab,
+                                             (unsigned long) fbs->filenum),
+                                fbs->linenum);
+                  return -1;
                 }
+                if (ISSPECIAL(charcode))
+                {
+                  fbs->lastspeciallength++;
+                } else
+                {
+                  if (fbs->lastspeciallength > 0)
+                  {
+                    fbs->lastspeciallength = 0;
+                  }
+                }
+                fbs->bufspace[currentposition++] = charcode;
               }
-              fbs->bufspace[currentposition++] = charcode;
               currentfileadd++;
             }
           }

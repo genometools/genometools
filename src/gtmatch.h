@@ -7,7 +7,7 @@
 #ifndef GTMATCH_H
 #define GTMATCH_H
 
-/* The GenomeTools matchin library (libgtmatch) header */
+/* The GenomeTools matching library (libgtmatch) header */
 #include <libgtmatch/sarr-def.h>
 
 #include <libgtmatch/alphabet.pr>

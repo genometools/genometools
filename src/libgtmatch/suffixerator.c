@@ -211,7 +211,6 @@ static Codetype codedownscale(const uint32_t *filltable,
 }
 
 static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
-                               /*@unused@*/ Seqpos totallength,
                                uint32_t numofchars,
                                uint32_t prefixlength,
                                Collectedsuffixes *csf,
@@ -315,7 +314,6 @@ static int insertfullspecialpair(void *info,
 
 static int insertallfullspecials(
                 const Encodedsequence *encseq,
-                Seqpos totallength,
                 Seqpos largestwidth,
                 Seqpos *suftab,
                 int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
@@ -324,7 +322,7 @@ static int insertallfullspecials(
 {
   InsertCompletespecials ics;
 
-  ics.totallength = totallength;
+  ics.totallength = getencseqtotallength(encseq);
   ics.spacesuffixstarts = suftab;
   ics.allocatedUint = CALLCASTFUNC(Seqpos,unsigned_long,largestwidth);
   ics.nextfreeUint = 0;
@@ -335,7 +333,7 @@ static int insertallfullspecials(
   {
     return -1;
   }
-  if(insertfullspecialrange(&ics,totallength,totallength+1) != 0)
+  if(insertfullspecialrange(&ics,ics.totallength,ics.totallength+1) != 0)
   {
     return -1;
   }
@@ -354,7 +352,6 @@ static int insertallfullspecials(
 
 int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
                  void *processsuftabinfo,
-                 Seqpos totallength,
                  Seqpos specialcharacters,
                  Seqpos specialranges,
                  const Encodedsequence *encseq,
@@ -424,7 +421,6 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
     csf.storespecials = true;
     deliverthetime(stdout,mtime,"counting prefix distribution",env);
     getencseqkmers(encseq,
-                   totallength,
                    updatekmercount,
                    &csf,
                    numofchars,
@@ -438,11 +434,13 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
     {
       *optr += *(optr-1);
     }
-    csf.leftborder[numofallcodes] = (Seqpos) (totallength-specialcharacters);
+    csf.leftborder[numofallcodes] 
+      = getencseqtotallength(encseq) - specialcharacters;
     suftabparts = newsuftabparts(numofparts,
                                  csf.leftborder,
                                  numofallcodes,
-                                 totallength - specialcharacters,
+                                 getencseqtotallength(encseq)
+                                   - specialcharacters,
                                  specialcharacters + 1,
                                  env);
     assert(suftabparts != NULL);
@@ -455,7 +453,6 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
       csf.suftabptr = csf.suftab - stpgetcurrentsuftaboffset(part,suftabparts);
       csf.currentmaxcode = stpgetcurrentmaxcode(part,suftabparts);
       derivespecialcodes(encseq,
-                         totallength,
                          numofchars,
                          prefixlength,
                          &csf,
@@ -464,7 +461,6 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
                          env);
       deliverthetime(stdout,mtime,"inserting suffixes into buckets",env);
       getencseqkmers(encseq,
-                     totallength,
                      insertwithoutspecial,
                      &csf,
                      numofchars,
@@ -475,7 +471,6 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
                      encseq,
                      csf.leftborder,
                      csf.countspecialcodes,
-                     totallength,
                      numofchars,
                      prefixlength,
                      csf.currentmincode,
@@ -495,7 +490,6 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
       }
     }
     if (insertallfullspecials(encseq,
-                              totallength,
                               largestwidth,
                               csf.suftab,
                               processsuftab,

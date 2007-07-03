@@ -9,8 +9,6 @@
 #include "libgtcore/env.h"
 #include "libgtcore/strarray.h"
 #include "types.h"
-#include "genstream.h"
-#include "inputsymbol.h"
 #include "chardef.h"
 #include "spacedef.h"
 #include "arraydef.h"
@@ -20,7 +18,6 @@
 #include "stamp.h"
 
 #include "distcalc.pr"
-#include "genericstream.pr"
 #include "fbsadv.pr"
 
 #include "readnextUchar.gen"
@@ -138,136 +135,5 @@ int scanfastasequence(
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
   (*numofsequences)++;
   *totallength = pos;
-  return 0;
-}
-
-/* the following function is obsolete */
-
-int scanfastasequence2(
-        unsigned long *numofsequences,
-        Seqpos *totallength,
-        PairSeqpos **filelengthtab,
-        Specialcharinfo *specialcharinfo,
-        const StrArray *filenametab,
-        const Uchar *symbolmap,
-        Env *env)
-{
-  unsigned long filenum;
-  uint32_t linenum = (uint32_t) 1;
-  Fgetcreturntype currentchar;
-  bool indesc, firstseq = true, specialprefix = true;
-  Seqpos currentposition,
-       countreadcharacters,
-       lastspeciallength = 0;
-  Genericstream inputstream;
-  Uchar charcode;
-
-  env_error_check(env);
-  *numofsequences = 0;
-  *totallength = 0;
-  specialcharinfo->specialcharacters = 0;
-  specialcharinfo->specialranges = 0;
-  specialcharinfo->lengthofspecialprefix = 0;
-  specialcharinfo->lengthofspecialsuffix = 0;
-  ALLOCASSIGNSPACE(*filelengthtab,NULL,PairSeqpos,
-                   strarray_size(filenametab));
-  for (filenum = 0; filenum < strarray_size(filenametab); filenum++)
-  {
-    opengenericstream(&inputstream,strarray_get(filenametab,filenum));
-    indesc = false;
-    currentposition = 0;
-    countreadcharacters = 0;
-    for (countreadcharacters = 0; /* Nothing */; countreadcharacters++)
-    {
-      if (inputstream.isgzippedstream)
-      {
-	currentchar = gzgetc(inputstream.stream.gzippedstream);
-      } else
-      {
-	currentchar = fgetc(inputstream.stream.fopenstream);
-      }
-      if (currentchar == EOF)
-      {
-	break;
-      }
-      if (indesc)
-      {
-	if (currentchar == NEWLINESYMBOL)
-	{
-	  linenum++;
-	  indesc = false;
-	}
-      } else
-      {
-	if (!isspace((Ctypeargumenttype) currentchar))
-	{
-	  if (currentchar == FASTASEPARATOR)
-	  {
-            (*numofsequences)++;
-	    if (firstseq)
-	    {
-	      firstseq = false;
-	    } else
-	    {
-              specialcharinfo->specialcharacters++;
-              if (lastspeciallength == 0)
-              {
-                specialcharinfo->specialranges++;
-                lastspeciallength = (Seqpos) 1;
-              }
-	      currentposition++;
-	    }
-	    indesc = true;
-	  } else
-	  {
-	    charcode = symbolmap[(uint32_t) currentchar];
-	    if (charcode == (Uchar) UNDEFCHAR)
-	    {
-              env_error_set(env,"illegal character '%c': file \"%s\", line %u",
-			    currentchar,
-			    strarray_get(filenametab,filenum),
-			    (unsigned int) linenum);
-	      return -1;
-	    }
-	    currentposition++;
-	    if (ISSPECIAL(charcode))
-	    {
-              if (specialprefix)
-              {
-                specialcharinfo->lengthofspecialprefix++;
-              }
-              specialcharinfo->specialcharacters++;
-              if (lastspeciallength == 0)
-              {
-                specialcharinfo->specialranges++;
-                lastspeciallength = (Seqpos) 1;
-              } else
-              {
-                lastspeciallength++;
-              }
-	    } else
-            {
-              specialprefix = false;
-              if (lastspeciallength > 0)
-              {
-                lastspeciallength = 0;
-              }
-            }
-	  }
-	}
-      }
-    }
-    (*filelengthtab)[filenum].uint0 = countreadcharacters;
-    (*filelengthtab)[filenum].uint1 = currentposition;
-    *totallength += currentposition;
-    closegenericstream(&inputstream,strarray_get(filenametab,filenum));
-  }
-  specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-  if (firstseq)
-  {
-    env_error_set(env,"no sequences in multiple fasta file(s) %s ...",
-                  strarray_get(filenametab,0));
-    return -2;
-  }
   return 0;
 }

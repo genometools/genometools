@@ -13,6 +13,7 @@
 #include <limits.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
+#include "libgtcore/strarray.h"
 #include "types.h"
 #include "arraydef.h"
 #include "chardef.h"
@@ -381,21 +382,28 @@ static void assignProteinalphabet(Alphabet *alpha)
   assignproteinsymbolmap(alpha->symbolmap);
 }
 
-static void assignProteinorDNAalphabet(Alphabet *alpha,const char *inputfile)
+static int assignProteinorDNAalphabet(Alphabet *alpha,
+                                      const StrArray *filenametab,Env *env)
 {
-  if (guessifproteinsequencestream(inputfile))
+  int retval = guessifproteinsequencestream(filenametab,env);
+  if(retval < 0)
+  {
+    return -1;
+  }
+  if (retval == 1)
   {
     assignProteinalphabet(alpha);
   } else
   {
     assignDNAalphabet(alpha);
   }
+  return 0;
 }
 
 /*@null@*/ Alphabet *assigninputalphabet(bool isdna,
                                          bool isprotein,
                                          const Str *smapfile,
-                                         const char *sequencefilename,
+                                         const StrArray *filenametab,
                                          Env *env)
 {
   Alphabet *alpha;
@@ -423,7 +431,10 @@ static void assignProteinorDNAalphabet(Alphabet *alpha,const char *inputfile)
         }
       } else
       {
-        assignProteinorDNAalphabet(alpha,sequencefilename);
+        if(assignProteinorDNAalphabet(alpha,filenametab,env) != 0)
+        {
+          return NULL;
+        }
       }
     }
   }

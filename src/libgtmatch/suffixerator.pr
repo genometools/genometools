@@ -3,7 +3,6 @@ extern "C" {
 #endif
 int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
                  void *processsuftabinfo,
-                 Seqpos totallength,
                  Seqpos specialcharacters,
                  Seqpos specialranges,
                  const Encodedsequence *encseq,

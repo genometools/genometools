@@ -13,16 +13,19 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   OPrval oprval;
   env_error_check(env);
   /* XXX: add one liner to describe this tool */
-  op = option_parser_new("filename", "ADD ONE LINER.", env);
-  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 1, env);
+  op = option_parser_new("filenames", 
+                         "guess if sequence in filenames is protein or DNA.",
+                          env);
+  oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
+                                            versionfunc, 1, env);
   option_parser_delete(op, env);
   return oprval;
 }
 
 int gt_guessprot(int argc, const char **argv, Env *env)
 {
-  int parsed_args;
+  int i, parsed_args, retval;
+  StrArray *filenametab;
 
   env_error_check(env);
 
@@ -31,9 +34,18 @@ int gt_guessprot(int argc, const char **argv, Env *env)
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  assert(parsed_args == 1);
 
-  if (guessifproteinsequencestream(argv[parsed_args]))
+  filenametab = strarray_new(env);
+  for(i=parsed_args; i < argc; i++)
+  {
+    strarray_add_cstr(filenametab,argv[i],env);
+  }
+  retval = guessifproteinsequencestream(filenametab,env);
+  if(retval < 0)
+  {
+    return -1;
+  }
+  if(retval == 1)
   {
     exit(1); /* XXX */
   } else

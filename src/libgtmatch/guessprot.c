@@ -6,78 +6,65 @@
 
 #include <ctype.h>
 #include <stdbool.h>
+#include "libgtcore/env.h"
+#include "libgtcore/str.h"
 #include "types.h"
 #include "inputsymbol.h"
 #include "genstream.h"
+#include "fbs-def.h"
 
 #include "genericstream.pr"
 
-bool guessifproteinsequence(const Uchar *input,Seqpos inputlen)
-{
-  Uchar current;
-  const Uchar *inputptr;
-  Seqpos countnonbases = 0,
-         countcharacters = 0,
-         readnumoffirstcharacters,
-         leastnumofnonbases;
-  bool indesc = false;
+#include "fbsadv.pr"
 
-  if (inputlen < (Seqpos) 1000)
+#include "readnextUchar.gen"
+
+int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
+{
+  Seqpos countnonbases = 0,
+         currentposition;
+  Uchar currentchar;
+  Fastabufferstate fbs;
+  int retval;
+
+  initfastabufferstate(&fbs,
+                       filenametab,
+                       NULL,
+                       NULL,
+                       env);
+  for (currentposition = 0; currentposition < (Seqpos) 1000; currentposition++)
   {
-    readnumoffirstcharacters = inputlen;
-  } else
-  {
-    readnumoffirstcharacters = (Seqpos) 1000;
-  }
-  leastnumofnonbases = readnumoffirstcharacters/10;
-  for (inputptr = input; countnonbases < leastnumofnonbases &&
-                        countcharacters < readnumoffirstcharacters &&
-                        inputptr < input + inputlen; inputptr++)
-  {
-    current = *inputptr;
-    if (indesc)
+    retval = readnextUchar(&currentchar,&fbs,env);
+    if (retval < 0)
     {
-      if (current == NEWLINESYMBOL)
-      {
-        indesc = false;
-      }
-    } else
+      return -1;
+    }
+    if (retval == 0)
     {
-      if (current == FASTASEPARATOR)
-      {
-        indesc = true;
-      } else
-      {
-        if (!isspace((Ctypeargumenttype) current))
-        {
-          countcharacters++;
-          switch (current)
-          {
-            case 'L':
-            case 'I':
-            case 'F':
-            case 'E':
-            case 'Q':
-            case 'P':
-            case 'X':
-            case 'Z':
-              countnonbases++;
-              break;
-            default:
-              break;
-          }
-        }
-      }
+      break;
+    }
+    switch (currentchar)
+    {
+      case 'L':
+      case 'I':
+      case 'F':
+      case 'E':
+      case 'Q':
+      case 'P':
+      case 'X':
+      case 'Z': countnonbases++;
+                break;
+      default:  break;
     }
   }
-  if (countnonbases >= leastnumofnonbases)
+  if (countnonbases >= currentposition/10)
   {
-    return true;
+    return 1;
   }
-  return false;
+  return 0;
 }
 
-bool guessifproteinsequencestream(const char *inputfile)
+bool guessifproteinsequencestream2(const char *inputfile)
 {
   Fgetcreturntype currentchar;
   Seqpos countnonbases = 0,
