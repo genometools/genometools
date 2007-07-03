@@ -1,6 +1,6 @@
 changes in version 1.0.0:
 
-- `gt view` tool added
+- `gt view` tool added (optional: compile with `make libgtview=yes`)
 - from here on release numbers are synced with GenomeTools
 
 
