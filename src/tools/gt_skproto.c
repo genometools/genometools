@@ -67,8 +67,11 @@ static void removecomments(Str *line, int *incomment, Env *env)
         pos++;
     }
     else {
-      if (str_get(line)[pos] == '/' && str_get(line)[pos+1] == '/')
+      if (str_length(line)     >  2   &&
+          str_get(line)[pos]   == '/' &&
+          str_get(line)[pos+1] == '/') {
         break;
+      }
       else if (!strncmp(str_get(line) + pos, "/*", 2) &&
                (pos + 2 >= str_length(line) || str_get(line)[pos+2] != '@')) {
         *incomment=1;
@@ -134,6 +137,7 @@ static void skproto(const char *filename, FILE *fpin, Env *env)
         putchar('\n');
       }
     }
+    str_reset(line);
   }
 
   str_delete(line, env);
