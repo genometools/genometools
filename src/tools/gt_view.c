@@ -78,7 +78,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   option_parser_add_option(op, option, env);
 
   /* set contact mailaddress */
-  option_parser_set_mailaddress(op, "<ssteinbiss@zbh.uni-hamburg.de>");
+  option_parser_set_mailaddress(op, "<ssteinbiss@stud.zbh.uni-hamburg.de>");
 
   /* parse options */
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
