@@ -15,6 +15,7 @@
 #include "sfx-optdef.h"
 #include "encseq-def.h"
 #include "measure-time-if.h"
+#include "chardef.h"
 
 #include "alphabet.pr"
 #include "makeprj.pr"
@@ -28,6 +29,7 @@ typedef struct
 {
   FILE *outfpsuftab,
        *outfpbwttab;
+  const Encodedsequence *encseq;
 } Outfileinfo;
 
 static int suftab2file(void *info,
@@ -56,8 +58,30 @@ static int suftab2file(void *info,
   }
   if (outfileinfo->outfpbwttab != NULL)
   {
+    Seqpos pos;
+    Uchar cc;
+
     printf("# simulating output of " FormatSeqpos " elements of the bwttab\n",
             PRINTSeqposcast(widthofpart));
+    for(pos=0; pos < widthofpart; pos++)
+    {
+      if(suftab[pos] == 0)
+      {
+        cc = UNDEFBWTCHAR;
+      } else
+      {
+        cc = getencodedchar(outfileinfo->encseq,pos);
+      }
+      if (fwrite(&cc,sizeof(Uchar),(size_t) 1,outfileinfo->outfpbwttab) 
+                  != (size_t) 1)
+      {
+        env_error_set(env,"cannot write 1 item of size %lu: "\
+                          "errormsg=\"%s\"",\
+                        (unsigned long) sizeof(Uchar),\
+                        strerror(errno));\
+        return -2;
+      }
+    }
   }
   return 0;
 }
@@ -146,29 +170,6 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   }
   if (!haserr)
   {
-    if(so->outsuftab)
-    {
-      outfileinfo.outfpsuftab = opensfxfile(so->str_indexname,".suf",env);
-      if(outfileinfo.outfpsuftab == NULL)
-      {
-        haserr = true;
-      }
-    }
-  }
-  if (!haserr)
-  {
-    if(so->outbwttab)
-    {
-      outfileinfo.outfpbwttab 
-        = opensfxfile(so->str_indexname,".bwt",env);
-      if(outfileinfo.outfpbwttab == NULL)
-      {
-        haserr = true;
-      }
-    }
-  }
-  if (!haserr)
-  {
     deliverthetime(stdout,mtime,"computing sequence encoding",env);
     encseq = initencodedseq(true,
                             so->filenametab,
@@ -191,6 +192,29 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
         {
           haserr = true;
         }
+      }
+    }
+  }
+  if (!haserr)
+  {
+    if(so->outsuftab)
+    {
+      outfileinfo.outfpsuftab = opensfxfile(so->str_indexname,".suf",env);
+      if(outfileinfo.outfpsuftab == NULL)
+      {
+        haserr = true;
+      }
+    }
+  }
+  if (!haserr)
+  {
+    if(so->outbwttab)
+    {
+      outfileinfo.outfpbwttab = opensfxfile(so->str_indexname,".bwt",env);
+      outfileinfo.encseq = encseq;
+      if(outfileinfo.outfpbwttab == NULL)
+      {
+        haserr = true;
       }
     }
   }
