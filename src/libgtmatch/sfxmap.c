@@ -289,8 +289,9 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
             {
               if(retval == 1)
               {
-                env_error_set(env,"bigvalue %llu does not fit into %s",
-                              smallorbigint.bigvalue,
+                env_error_set(env,"bigvalue " Formatuint64_t 
+                                  " does not fit into %s",
+                              PRINTuint64_tcast(smallorbigint.bigvalue),
                               rik.spaceReadintkeys[i].keystring);
                 haserr = true;
                 break;
