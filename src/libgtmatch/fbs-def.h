@@ -15,22 +15,22 @@
 
 typedef struct
 {
-  unsigned long filenum;
+  uint32_t filenum,
+           linenum,
+           nextread,
+           nextfree;
   bool indesc,
        firstoverallseq,
        firstseqinfile,
-       complete;
-  unsigned int linenum;
+       complete,
+       nextfile;
   Genericstream inputstream;
-  bool nextfile;
-  unsigned int nextread,
-               nextfree;
   Uchar bufspace[FILEBUFFERSIZE];
-  Uint64 totaloffset;
+  Seqpos totaloffset;
+  Seqpos lastspeciallength;
+  PairSeqpos *filelengthtab;
   const StrArray *filenametab;
   const Uchar *symbolmap;
-  Uint lastspeciallength;
-  PairUint *filelengthtab;
 } Fastabufferstate;
 
 #endif

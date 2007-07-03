@@ -11,17 +11,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-
-/*
-  Some rules about types:
-  - do not use Ulong, these are not portable.
-  - do not use the constants, UINT_MAX, INT_MAX and INT_MIN
-  The following are the assumptions about the types:
-  - size(Uint) >= 4
-  - size(Ushort) = 2
-  - size(Sshort) = 2
-  No other assumptions are to be made.
-*/
+#include <inttypes.h>
 
 /*
   Show a boolean value as a string or as a character 0 or 1.
@@ -34,8 +24,23 @@
   This file contains some basic type definition.
 */
 
-typedef unsigned char  Uchar;         /* \Typedef{Uchar} */
-typedef unsigned short Ushort;        /* \Typedef{Ushort} */
+typedef uint8_t Uchar;         /* \Typedef{Uchar} */
+typedef uint16_t Ushort;        /* \Typedef{Ushort} */
+
+#define Uint32Const(N)   (N##U)  /* uint32_t constant */
+#define Uint64Const(N)   (N##UL) /* uint64_t constant */
+
+#ifdef S_SPLINT_S
+#define Formatuint64_t "%lu"
+#define Scanuint64_tcast(X) ((unsigned long *) (X))
+#define PRINTSeqposcast(X)  ((unsigned long) (X))
+#define PRINTuint64_tcast(X) ((unsigned long) (X))
+#else
+#define Formatuint64_t "%" PRIu64
+#define Scanuint64_tcast(X) (X)
+#define PRINTSeqposcast(X)  (X)
+#define PRINTuint64_tcast(X) (X)
+#endif
 
 /*
   The following is the central case distinction to accomodate
@@ -44,66 +49,39 @@ typedef unsigned short Ushort;        /* \Typedef{Ushort} */
 
 #ifdef _LP64
 
-#define LOGWORDSIZE    6              /* base 2 logarithm of wordsize */
-#define UintConst(N)   (N##UL)        /* unsigned integer constant */
-typedef unsigned long  Uint;          /* \Typedef{Uint} */
-typedef signed long ScanUint64;       /* \Typedef{Scaninteger} */
-typedef unsigned long Uint64;         /* \Typedef{Uint64} */
-#define FormatUint64     "%lu"
-#define FormatScanUint64 "%ld"
-#define CHECKUint64Cast(VAL)        /* Nothing */
-
-#define CHECKUintCast(VAL)\
-        if ((VAL) > ~UintConst(0))\
-        {\
-          /*@ignore@*/\
-          fprintf(stderr,"%s, %d: %lu cannot be stored in unsigned int",\
-                         __FILE__,__LINE__,(Showuint) (VAL));\
-          /*@end@*/\
-          exit(EXIT_FAILURE);\
-        }
+typedef uint64_t Seqpos;         /* \Typedef{Seqpos} */
+#ifdef S_SPLINT_S
+#define FormatSeqpos "%lu"
+#else
+#define FormatSeqpos   "%" PRIu64
+#endif
 
 #else
 
-#define LOGWORDSIZE   5              /* base 2 logarithm of wordsize */
-#define UintConst(N)  (N##U)         /* unsigned integer constant */
-typedef unsigned int  Uint;          /* \Typedef{Uint} */
-typedef signed long long ScanUint64; /* \Typedef{Scaninteger} */
-typedef unsigned long long Uint64;   /* \Typedef{Uint64} */
-#define FormatUint64     "%llu"
-#define FormatScanUint64 "%lld"
-#define MAXUintValue  UINT_MAX       /* only possible in 32 bit mode */
-
-#define CHECKUintCast(VAL)           /* Nothing */
-#define CHECKUint64Cast(VAL)\
-        if ((VAL) > (Uint64) MAXUintValue)\
-        {\
-          /*@ignore@*/\
-          fprintf(stderr,"%s, %d: " FormatUint64\
-                         "cannot be stored in 32bit word",\
-                         __FILE__,__LINE__,VAL);\
-          /*@end@*/\
-          exit(EXIT_FAILURE);\
-        }
+#ifdef S_SPLINT_S
+#define FormatSeqpos "%lu"
+#else
+#define Formatuint64_t "%" PRIu64
 #endif
 
-/*
-  Type of unsigned integer in \texttt{printf}.
-*/
+#ifdef BIGSEQPOS
+typedef uint64_t Seqpos;         /* \Typedef{Seqpos} */
+#ifdef S_SPLINT_S
+#define FormatSeqpos "%lu"
+#else
+#define FormatSeqpos "%" PRIu64
+#endif
+#else
+typedef uint32_t Seqpos;         /* \Typedef{Seqpos} */
+#ifdef S_SPLINT_S
+#define FormatSeqpos "%lu"
+#else
+#define FormatSeqpos "%" PRIu32
+#endif
+#define Seqposequalsunsignedint
+#endif /* BIGSEQPOS */
 
-typedef unsigned long Showuint;     /* \Typedef{Showuint} */
-
-/*
-  Type of signed integer in \texttt{printf}.
-*/
-
-typedef signed long Showsint;       /* \Typedef{Showsint} */
-
-/*
-  Type of integer in \texttt{scanf}.
-*/
-
-typedef signed long Scaninteger;         /* \Typedef{Scaninteger} */
+#endif /* _LP64 */
 
 /*
   Argument of a function from \texttt{ctype.h}.
@@ -223,81 +201,11 @@ typedef int Sysconfargtype;         /* \Typedef{Sysconfargtype} */
 
 typedef struct
 {
-  Uint specialcharacters,      /* total number of special syms */
-       specialranges,          /* number of ranges with special syms */
-       lengthofspecialprefix,  /* number of specials at beginning of sequence */
-       lengthofspecialsuffix;  /* number of specials at end of sequence */
+  Seqpos specialcharacters,      /* total number of special syms */
+         specialranges,          /* number of ranges with special syms */
+         lengthofspecialprefix,  /* number of specials at start of sequence */
+         lengthofspecialsuffix;  /* number of specials at end of sequence */
 } Specialcharinfo;
-
-/*
-  Pairs, triples, and quadruples of unsigned integers.
-*/
-
-typedef struct
-{
-  Uint uint0, 
-       uint1;
-} PairUint;                /* \Typedef{PairUint} */
-
-/*
-  The following type stores an unsigned character only if defined is True
-*/
-
-typedef struct
-{
-  Uchar ucharvalue;
-  bool defined;
-} DefinedUchar;   /* \Typedef{DefinedUchar} */
-
-/*
-  The following type stores an unsigned integer only if defined is True
-*/
-
-typedef struct
-{
-  Uint uintvalue;
-  bool defined;
-} DefinedUint;   /* \Typedef{DefinedUint} */
-
-/*
-  The following type stores a double only if defined is True
-*/
-
-typedef struct
-{
-  double doublevalue;
-  bool defined;
-} Defineddouble;   /* \Typedef{Defineddouble} */
-
-/*
-  The default number of bytes in a bitvector used for dynamic programming
-  is 4.
-*/
-
-#ifndef DPBYTESINWORD
-#define DPBYTESINWORD 4
-#endif
-
-/*
-  The number of bytes in a dynamic programming bitvector determines the type
-  of integers, the dp-bits are stored in.
-*/
-
-#if DPBYTESINWORD == 1
-typedef unsigned char DPbitvector;          /* \Typedef{DPbitvector} */
-#else
-#if DPBYTESINWORD == 2
-typedef unsigned short DPbitvector;
-#else
-#if DPBYTESINWORD == 4
-typedef unsigned int DPbitvector;
-#else
-#if DPBYTESINWORD == 8
-typedef unsigned long long DPbitvector;
-#endif
-#endif
-#endif
-#endif
 
 /*
   The following is the type of the comparison function
@@ -315,9 +223,9 @@ typedef void (*Showverbose)(char *);
 
 typedef struct
 {
-  Uint64 uint0,
+  Seqpos uint0,
          uint1;
-} PairUint64;                /* \Typedef{PairUint64} */
+} PairSeqpos;                /* \Typedef{PairSeqpos} */
 
 /*
   The following type stores an unsigned integer only of defined is True

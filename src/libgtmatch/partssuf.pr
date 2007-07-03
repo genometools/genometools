@@ -1,30 +1,31 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-Suftabparts *newsuftabparts(unsigned int numofparts,
-                            const Uint *leftborder,
+Suftabparts *newsuftabparts(uint32_t numofparts,
+                            const Seqpos *leftborder,
                             Codetype numofallcodes,
-                            Uint64 numofsuffixestoinsert,
-                            Uint fullspecials,
+                            Seqpos numofsuffixestoinsert,
+                            Seqpos fullspecials,
                             Env *env);
 
-Codetype stpgetcurrentmincode(unsigned int part,
+Codetype stpgetcurrentmincode(uint32_t part,
                               const Suftabparts *suftabparts);
 
-Uint64 stpgetcurrentsuftaboffset(unsigned int part,
+uint64_t stpgetcurrentsuftaboffset(uint32_t part,
+                                   const Suftabparts *suftabparts);
+
+Codetype stpgetcurrentmaxcode(uint32_t part,
+                              const Suftabparts *suftabparts);
+
+uint64_t stpgetcurrentsumofwdith(uint32_t part,
                                  const Suftabparts *suftabparts);
 
-Codetype stpgetcurrentmaxcode(unsigned int part,
-                              const Suftabparts *suftabparts);
-
-Uint64 stpgetcurrentsumofwdith(unsigned int part,
+Seqpos stpgetcurrentwidtofpart(uint32_t part,
                                const Suftabparts *suftabparts);
 
-Uint stpgetcurrentwidtofpart(unsigned int part,const Suftabparts *suftabparts);
+Seqpos stpgetlargestwidth(const Suftabparts *suftabparts);
 
-Uint stpgetlargestwidth(const Suftabparts *suftabparts);
-
-unsigned int stpgetnumofparts(const Suftabparts *suftabparts);
+uint32_t stpgetnumofparts(const Suftabparts *suftabparts);
 
 void freesuftabparts(Suftabparts *suftabparts,Env *env);
 

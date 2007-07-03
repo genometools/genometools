@@ -12,46 +12,46 @@
 
 typedef struct
 {
-  unsigned int prefixlength;
-  Uint64 totallength;
-  Uint countspecialmaxprefixlen0;
+  uint32_t prefixlength;
+  Seqpos totallength,
+         countspecialmaxprefixlen0;
 } CountCompletespecials;
 
 static int lengthofspecialranges(/*@unused@*/ void *info,
-                                 const PairUint64 *pair,/*@unused@*/ Env *env)
+                                 const PairSeqpos *pair,/*@unused@*/ Env *env)
 {
-  unsigned int len = (unsigned int) (pair->uint1 - pair->uint0);
+  uint32_t len = (uint32_t) (pair->uint1 - pair->uint0);
   CountCompletespecials *csp = (CountCompletespecials *) info;
 
   if (pair->uint0 == 0)
   {
     if (pair->uint1 == csp->totallength)
     {
-      csp->countspecialmaxprefixlen0 += (Uint) (len+1);
+      csp->countspecialmaxprefixlen0 += (len+1);
     } else
     {
-      csp->countspecialmaxprefixlen0 += (Uint) len;
+      csp->countspecialmaxprefixlen0 += len;
     }
   } else
   {
     if (pair->uint1 == csp->totallength)
     {
-      csp->countspecialmaxprefixlen0 += (Uint) len;
+      csp->countspecialmaxprefixlen0 += len;
     } else
     {
-      if (len >= (unsigned int) 2)
+      if (len >= (uint32_t) 2)
       {
-        csp->countspecialmaxprefixlen0 += (Uint) (len - 1);
+        csp->countspecialmaxprefixlen0 += (len - 1);
       }
     }
   }
   return 0;
 }
 
-Uint determinefullspecials(const Encodedsequence *encseq,
-                           Uint64 totallength,
-                           unsigned int prefixlength,
-                           Env *env)
+Seqpos determinefullspecials(const Encodedsequence *encseq,
+                             Seqpos totallength,
+                             uint32_t prefixlength,
+                             Env *env)
 {
   CountCompletespecials csp;
 

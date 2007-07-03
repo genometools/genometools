@@ -5,12 +5,12 @@
 */
 
 {
-  Uint pagenumber = (Uint) DIVMAXSPECIALTYPE(pos);
+  unsigned long pagenumber = (unsigned long) DIVMAXSPECIALTYPE(pos);
   SPECIALTYPE *found, *start;
 
   if (pagenumber == 0)
   {
-    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] >= UintConst(1))
+    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] >= (Seqpos) 1)
     {
       start = ACCESSENCSEQ(encseq,specialpositions);
       found = ADDTYPE(binarysearchpreviousequal)(
@@ -19,10 +19,10 @@
                         (SPECIALTYPE) pos);
       if (found != NULL)
       {
-        Uint64 rangeend
-               = (Uint64) *found +
-                 (Uint64) encseq->specialrangelength[(Uint) (found - start)];
-        if (rangeend > (Uint64) pos)
+        uint64_t rangeend
+               = (uint64_t) *found +
+                 (uint64_t) encseq->specialrangelength[(Seqpos) (found - start)];
+        if (rangeend > (uint64_t) pos)
         {
           return true;
         }
@@ -42,27 +42,28 @@
                     (SPECIALTYPE) pos);
       if (found != NULL)
       {
-        Uint64 rangeend
-               = (Uint64) ((MAXSPECIALTYPE+1) * pagenumber) +
-                 (Uint64) *found +
-                 (Uint64) encseq->specialrangelength[(Uint) (found - start)];
-        if (rangeend >  (Uint64) pos)
+        uint64_t rangeend
+               = (uint64_t) ((MAXSPECIALTYPE+1) * pagenumber) +
+                 (uint64_t) *found +
+                 (uint64_t) encseq->specialrangelength[(Seqpos) 
+                                                       (found - start)];
+        if (rangeend >  (uint64_t) pos)
         {
           return true;
         }
       }
     }
-    if (pagenumber == UintConst(1))
+    if (pagenumber == (unsigned long) 1)
     {
-      if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] > UintConst(1))
+      if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] > (Seqpos) 1)
       {
-        Uint i;
-        Uint64 rangeend;
+        Seqpos i;
+        uint64_t rangeend;
 
         i = ACCESSENCSEQ(encseq,endspecialsubsUint)[0] - 1;
-        rangeend = (Uint64) ACCESSENCSEQ(encseq,specialpositions)[i] +
-                   (Uint64) encseq->specialrangelength[i];
-        if (rangeend > (Uint64) pos)
+        rangeend = (uint64_t) ACCESSENCSEQ(encseq,specialpositions)[i] +
+                   (uint64_t) encseq->specialrangelength[i];
+        if (rangeend > (uint64_t) pos)
         {
           return true;
         }
@@ -72,14 +73,14 @@
       if (ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-2] <
           ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1])
       {
-        Uint i;
-        Uint64 rangeend;
+        Seqpos i;
+        uint64_t rangeend;
 
         i = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] - 1;
-        rangeend = (Uint64) ((MAXSPECIALTYPE+1) * (pagenumber-1)) +
-                   (Uint64) ACCESSENCSEQ(encseq,specialpositions)[i] +
-                   (Uint64) encseq->specialrangelength[i];
-        if (rangeend > (Uint64) pos)
+        rangeend = (uint64_t) ((MAXSPECIALTYPE+1) * (pagenumber-1)) +
+                   (uint64_t) ACCESSENCSEQ(encseq,specialpositions)[i] +
+                   (uint64_t) encseq->specialrangelength[i];
+        if (rangeend > (uint64_t) pos)
         {
           return true;
         }

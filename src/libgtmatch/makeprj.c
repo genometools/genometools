@@ -16,6 +16,8 @@
 #include "arraydef.h"
 #include "fbs-def.h"
 #include "dist-if.h"
+#include "safecast-gen.h"
+#include "stamp.h"
 
 #include "distcalc.pr"
 #include "genericstream.pr"
@@ -23,7 +25,7 @@
 
 #include "readnextUchar.gen"
 
-static Uint currentrangevalue(Uint i,Uint distvalue)
+static unsigned long currentrangevalue(unsigned long i,unsigned long distvalue)
 {
   if (i <= UCHAR_MAX)
   {
@@ -33,38 +35,42 @@ static Uint currentrangevalue(Uint i,Uint distvalue)
   {
     return i/UCHAR_MAX * distvalue;
   }
-  return (UintConst(1) + i/UCHAR_MAX) * distvalue;
+  return (((unsigned long) 1) + i/UCHAR_MAX) * distvalue;
 }
 
 static int updatesumranges(void *key, void *value, void *data,
                            /*@unused@*/ Env *env)
 {
-  Uint keyvalue, distvalue, *specialrangesptr = (Uint *) data;
+  unsigned long keyvalue, 
+                distvalue, 
+                *specialrangesptr = (unsigned long *) data;
 
-  keyvalue = (Uint) key;
-  distvalue = *((Uint *) value);
+  keyvalue = (unsigned long) key;
+  distvalue = *((unsigned long *) value);
   (*specialrangesptr) += currentrangevalue(keyvalue,distvalue);
-  printf("specialranges of length %lu: %lu\n",
-         (Showuint) keyvalue,(Showuint) distvalue);
+  printf("specialranges of length %lu: %lu\n",keyvalue,distvalue);
   return 0;
 }
 
+ DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
+
 int scanfastasequence(
-        Uint *numofsequences,
-        Uint64 *totallength,
+        unsigned long *numofsequences,
+        Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
         const StrArray *filenametab,
-        PairUint **filelengthtab,
+        PairSeqpos **filelengthtab,
         const Uchar *symbolmap,
         Env *env)
 {
   Fastabufferstate fbs;
   Uchar charcode;
-  Uint64 pos;
+  Seqpos pos;
   int retval;
   bool specialprefix = true;
-  Uint lastspeciallength = 0;
+  Seqpos lastspeciallength = 0;
   Distribution *specialrangelengths;
+  unsigned long idx;
 
   *numofsequences = 0;
   specialcharinfo->specialcharacters = 0;
@@ -88,7 +94,8 @@ int scanfastasequence(
     {
       if (lastspeciallength > 0)
       {
-        adddistribution(specialrangelengths,lastspeciallength,env);
+        idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+        adddistribution(specialrangelengths,idx,env);
       }
       break;
     }
@@ -101,12 +108,12 @@ int scanfastasequence(
       specialcharinfo->specialcharacters++;
       if (lastspeciallength == 0)
       {
-        lastspeciallength = UintConst(1);
+        lastspeciallength = (Seqpos) 1;
       } else
       {
         lastspeciallength++;
       }
-      if (charcode == SEPARATOR)
+      if (charcode == (Uchar) SEPARATOR)
       {
         (*numofsequences)++;
       }
@@ -118,7 +125,8 @@ int scanfastasequence(
       }
       if (lastspeciallength > 0)
       {
-        adddistribution(specialrangelengths,lastspeciallength,env);
+        idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+        adddistribution(specialrangelengths,idx,env);
         lastspeciallength = 0;
       }
     }
@@ -136,19 +144,19 @@ int scanfastasequence(
 /* the following function is obsolete */
 
 int scanfastasequence2(
-        Uint *numofsequences,
-        Uint *totallength,
-        PairUint **filelengthtab,
+        unsigned long *numofsequences,
+        Seqpos *totallength,
+        PairSeqpos **filelengthtab,
         Specialcharinfo *specialcharinfo,
         const StrArray *filenametab,
         const Uchar *symbolmap,
         Env *env)
 {
   unsigned long filenum;
-  unsigned int linenum = (unsigned int) 1;
+  uint32_t linenum = (uint32_t) 1;
   Fgetcreturntype currentchar;
   bool indesc, firstseq = true, specialprefix = true;
-  Uint currentposition,
+  Seqpos currentposition,
        countreadcharacters,
        lastspeciallength = 0;
   Genericstream inputstream;
@@ -161,7 +169,8 @@ int scanfastasequence2(
   specialcharinfo->specialranges = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
-  ALLOCASSIGNSPACE(*filelengthtab,NULL,PairUint,strarray_size(filenametab));
+  ALLOCASSIGNSPACE(*filelengthtab,NULL,PairSeqpos,
+                   strarray_size(filenametab));
   for (filenum = 0; filenum < strarray_size(filenametab); filenum++)
   {
     opengenericstream(&inputstream,strarray_get(filenametab,filenum));
@@ -204,20 +213,20 @@ int scanfastasequence2(
               if (lastspeciallength == 0)
               {
                 specialcharinfo->specialranges++;
-                lastspeciallength = UintConst(1);
+                lastspeciallength = (Seqpos) 1;
               }
 	      currentposition++;
 	    }
 	    indesc = true;
 	  } else
 	  {
-	    charcode = symbolmap[(unsigned int) currentchar];
+	    charcode = symbolmap[(uint32_t) currentchar];
 	    if (charcode == (Uchar) UNDEFCHAR)
 	    {
-              env_error_set(env,"illegal character '%c': file \"%s\", line %lu",
+              env_error_set(env,"illegal character '%c': file \"%s\", line %u",
 			    currentchar,
 			    strarray_get(filenametab,filenum),
-			    (Showuint) linenum);
+			    (unsigned int) linenum);
 	      return -1;
 	    }
 	    currentposition++;
@@ -231,7 +240,7 @@ int scanfastasequence2(
               if (lastspeciallength == 0)
               {
                 specialcharinfo->specialranges++;
-                lastspeciallength = UintConst(1);
+                lastspeciallength = (Seqpos) 1;
               } else
               {
                 lastspeciallength++;

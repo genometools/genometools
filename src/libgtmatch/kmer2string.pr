@@ -3,8 +3,8 @@ extern "C" {
 #endif
 void kmercode2string(char *buffer,
                      Codetype code,
-                     unsigned int numofchars,
-                     unsigned int kmersize,
+                     uint32_t numofchars,
+                     uint32_t kmersize,
                      const char *characters);
 
 #ifdef __cplusplus

@@ -38,29 +38,30 @@ void freedistribution(Distribution **dist,Env *env)
 
 /* XXX: allow howmany to be of type Uint64 */
 
-void addmultidistribution(Distribution *dist,Uint ind,Uint howmany,Env *env)
+void addmultidistribution(Distribution *dist,unsigned long ind,
+                          unsigned long howmany,Env *env)
 {
   void *result;
 
   result = hashtable_get(dist->hashdist,(void *) ind);
   if(result == NULL)
   {
-    Uint *newvalueptr;
+    unsigned long *newvalueptr;
 
-    ALLOCASSIGNSPACE(newvalueptr,NULL,Uint,1);
+    ALLOCASSIGNSPACE(newvalueptr,NULL,unsigned long,1);
     *newvalueptr = howmany;
     hashtable_add(dist->hashdist,(void *) ind,newvalueptr,env);
   } else
   {
-    Uint *valueptr = (Uint *) result;
+    unsigned long *valueptr = (unsigned long *) result;
 
     (*valueptr) += howmany;
   }
 }
 
-void adddistribution(Distribution *dist,Uint ind,Env *env)
+void adddistribution(Distribution *dist,unsigned long ind,Env *env)
 {
-  addmultidistribution(dist,ind,UintConst(1),env);
+  addmultidistribution(dist,ind,(unsigned long) 1,env);
 }
 
 int foreachdistributionvalue(Distribution *dist,

@@ -6,25 +6,20 @@
 #
 
 localpath=src/libgtmatch
-usage="Usage: $0 [icc,64]"
-
 icc=0
 do64=0
+big=0
 
-if test $# -eq 1
+if test $# -ge 1
 then
   case $1 in
-   "icc") icc=1;;
-   "64")  do64=1;;
-   *) echo $usage
-      exit 1;;
+   "-icc") icc=1
+           shift;;
+   "-m64")  do64=1
+            shift;;
+   "-big")  big=1
+            shift;;
   esac
-else
-  if test $# -ne 0
-  then
-    echo $usage
-    exit 1
-  fi
 fi
 
 for filename in `ls ${localpath}/*.c`
@@ -36,14 +31,23 @@ do
   fi
 done
 
+if test $big -eq 1
+then
+  bignum=-DBIGSEQPOS
+else
+  bignum=
+fi
+
 if test $icc -eq 1
 then
-  make CC='ccache icc' CFLAGS='-O3 -wd1418,869,981' LD='icc' CXX='icc'
+  make CC='ccache icc' CFLAGS='-O3 ${bignum} -wd1418,869,981' LD='icc' CXX='icc' $*
 else
   if test $do64 -eq 1
   then
-    make CC='ccache gcc' CFLAGS='-O3 -m64' LDFLAGS='-m64'
+    make CC="ccache gcc" CFLAGS="-O3 -m64" LDFLAGS="-m64" $*
   else
-    make CC='ccache gcc' CFLAGS='-O3 -m32' LDFLAGS='-m32'
+    make CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum}" LDFLAGS="-m32" $*
   fi
 fi
+
+#make splint-gtmatch

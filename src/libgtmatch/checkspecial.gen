@@ -5,11 +5,11 @@
 */
 
 {
-  Uint pagenumber = (Uint) DIVMAXSPECIALTYPE(pos);
+  unsigned long pagenumber = (unsigned long) DIVMAXSPECIALTYPE(pos);
 
   if (pagenumber == 0)
   {
-    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] >= UintConst(1))
+    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] >= (Seqpos) 1)
     {
       if (ADDTYPE(binarysearchpage)(ACCESSENCSEQ(encseq,specialpositions),
                                     ACCESSENCSEQ(encseq,specialpositions) +
@@ -23,7 +23,7 @@
   } else
   {
     if (ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] <
-       ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber])
+        ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber])
     {
       if (ADDTYPE(binarysearchpage)(
                ACCESSENCSEQ(encseq,specialpositions) +

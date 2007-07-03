@@ -6,13 +6,14 @@
 
 #ifndef INTCODE_DEF_H
 #define INTCODE_DEF_H
+#include <inttypes.h>
 #include <stdbool.h>
 
-typedef unsigned int Codetype;      /* \Typedef{Codetype} */
+typedef uint32_t Codetype;      /* \Typedef{Codetype} */
 
 typedef struct
 {
-  unsigned int specialpos;
+  uint32_t specialpos;
   bool defined;
 } Firstspecialpos;
 

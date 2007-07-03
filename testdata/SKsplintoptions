@@ -46,3 +46,7 @@
 -sefuncon
 -nullret
 -sysunrecog
+-shiftnegative
+-shiftimplementation
++posixlib
+-duplicatequals

@@ -12,7 +12,7 @@ static bool ADDTYPE(binarysearchpage)(SPECIALTYPE *leftptr,
 
   while (leftptr <= rightptr)
   {
-    midptr = leftptr + DIV2((Uint) (rightptr-leftptr));
+    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
     if (pos == *midptr)
     {
       return true;
@@ -38,7 +38,7 @@ static bool ADDTYPE(binarysearchpage)(SPECIALTYPE *leftptr,
 
   while (leftptr <= rightptr)
   {
-    midptr = leftptr + DIV2((Uint) (rightptr-leftptr));
+    midptr = leftptr + DIV2((unsigned long) (rightptr-leftptr));
     if (pos == *midptr)
     {
       found = midptr;

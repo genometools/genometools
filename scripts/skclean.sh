@@ -5,12 +5,11 @@
 # See LICENSE file or http://genometools.org/license.html for license details.
 #
 
-localpath=src/libgtmatch
-
-for filename in `ls ${localpath}/*.c`
+for filename in `ls src/*.c src/libgtmatch/*.c`
 do
-  objfile="obj/`basename ${filename} .c`.o"
-  rm -f $objfile
+  headfile="obj/`basename ${filename} .c`"
+  rm -f ${headfile}.o ${headfile}.d ${headfile}.splint
 done
 
 rm -f lib/libgtmatch.a
+rm -f testsuite/TMP.[a-zA-Z0-9]*

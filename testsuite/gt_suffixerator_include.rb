@@ -10,16 +10,33 @@ def checksfx(parts,pl,withsmap,sat,filelist)
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run "#{$bin}gt suffixerator -parts #{parts} -pl #{pl} #{extra} -tis -suf -indexname sfx -db " +
+  run "#{$bin}gt suffixerator -parts #{parts} -pl #{pl} #{extra} -tis -suf -bwt -indexname sfx -db " +
        filearg
   run "#{$bin}gt dev sfxmap sfx"
   run "grep -v '^#' #{$last_stdout}"
   run "cmp -s sfx.prj #{$last_stdout}"
 end
 
-["RandomN.fna","Random.fna","Atinsert.fna",
- "TTT-small.fna","trna_glutamine.fna",
- "Atinsert.fna","Random-Small.fna"].each do |filename|
+def checkbwt(filelist)
+  filearg=""
+  filelist.each do |filename|
+    filearg += "#{$testdata}#{filename} "
+  end
+  run "#{$bin}gt suffixerator -pl 3 -tis -suf -bwt -indexname sfx -db " +
+       filearg
+end
+
+allfiles = ["RandomN.fna","Random.fna","Atinsert.fna",
+            "TTT-small.fna","trna_glutamine.fna",
+            "Atinsert.fna","Random-Small.fna"]
+
+Name "gt suffixerator bwt"
+Keywords "gt_suffixerator"
+Test do
+  checkbwt(allfiles)
+end
+
+allfiles.each do |filename|
   Name "gt suffixerator uint64"
   Keywords "gt_suffixerator"
   Test do
@@ -42,6 +59,7 @@ end
     end
   end
 end
+
 
 1.upto(2) do |parts|
   ["direct", "bit", "uchar", "ushort", "uint"].each do |sat|

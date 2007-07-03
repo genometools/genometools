@@ -13,11 +13,11 @@
 
 typedef struct
 {
-  Uint numofdbsequences;
+  uint32_t numofdbsequences;
   StrArray *filenametab;
-  PairUint *filelengthtab;
-  unsigned int prefixlength;
-  const Uint *suftab;
+  PairSeqpos *filelengthtab;
+  uint32_t prefixlength;
+  const Seqpos *suftab;
   Encodedsequence *encseq;
   Specialcharinfo specialcharinfo;
   Alphabet *alpha;

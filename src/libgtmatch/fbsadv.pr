@@ -4,7 +4,7 @@ extern "C" {
 void initfastabufferstate(Fastabufferstate *fbs,
                           const StrArray *filenametab,
                           const Uchar *symbolmap,
-                          PairUint **filelengthtab,
+                          PairSeqpos **filelengthtab,
                           Env *env);
 
 int advanceFastabufferstate(Fastabufferstate *fbs,Env *env);

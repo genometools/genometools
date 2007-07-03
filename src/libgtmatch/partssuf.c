@@ -14,21 +14,21 @@
 typedef struct
 {
   Codetype nextcode;
-  Uint widthofpart;
-  Uint64 suftaboffset, 
-         sumofwidth;
+  Seqpos widthofpart;
+  uint64_t suftaboffset, 
+           sumofwidth;
 } Suftabpartcomponent;
 
  struct _Suftabparts
 {
   Suftabpartcomponent *components;
-  unsigned int numofparts;
-  Uint largestwidth;
+  uint32_t numofparts;
+  Seqpos largestwidth;
 };
 
-static Codetype findfirstlarger(const Uint *leftborder,
+static Codetype findfirstlarger(const Seqpos *leftborder,
                                 Codetype numofallcodes,
-                                Uint suftaboffset)
+                                Seqpos suftaboffset)
 {
   Codetype left = 0, right = numofallcodes, mid, found = numofallcodes;
 
@@ -51,11 +51,11 @@ static Codetype findfirstlarger(const Uint *leftborder,
   return found;
 }
 
-Suftabparts *newsuftabparts(unsigned int numofparts,
-                            const Uint *leftborder,
+Suftabparts *newsuftabparts(uint32_t numofparts,
+                            const Seqpos *leftborder,
                             Codetype numofallcodes,
-                            Uint64 numofsuffixestoinsert,
-                            Uint fullspecials,
+                            Seqpos numofsuffixestoinsert,
+                            Seqpos fullspecials,
                             Env *env)
 {
   Suftabparts *suftabparts;
@@ -68,9 +68,9 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
     suftabparts->numofparts = 0;
   } else
   {
-    if (numofsuffixestoinsert < (Uint64) numofparts)
+    if (numofsuffixestoinsert < (Seqpos) numofparts)
     {
-      suftabparts->numofparts = (unsigned int) 1;
+      suftabparts->numofparts = (uint32_t) 1;
     } else
     {
       suftabparts->numofparts = numofparts;
@@ -82,18 +82,17 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
     suftabparts->components = NULL;
   } else
   {
-    unsigned int part;
-    Uint remainder,
-         widthofsuftabpart,
-         suftaboffset = 0;
-    Uint64 sumofwidth = 0;
+    uint32_t part, remainder;
+    uint64_t widthofsuftabpart,
+             suftaboffset = 0,
+             sumofwidth = 0;
     ALLOCASSIGNSPACE(suftabparts->components,NULL,Suftabpartcomponent,
                      numofparts);
-    CHECKUint64Cast(numofsuffixestoinsert/(Uint64) numofparts);
-    widthofsuftabpart = (Uint) (numofsuffixestoinsert/(Uint64) numofparts);
-    remainder = (Uint) (numofsuffixestoinsert % (Uint64) numofparts);
+    widthofsuftabpart = (uint64_t) numofsuffixestoinsert/numofparts;
+    remainder = (uint32_t) (numofsuffixestoinsert % (Seqpos) numofparts);
     suftabparts->largestwidth = 0;
-    printf("# numofsuffixestoinsert=%lu\n",(Showuint) numofsuffixestoinsert);
+    printf("# numofsuffixestoinsert=" FormatSeqpos "\n",
+           PRINTSeqposcast(numofsuffixestoinsert));
     for (part=0; part < numofparts; part++)
     {
       if (remainder > 0)
@@ -124,17 +123,18 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
           = leftborder[suftabparts->components[part].nextcode] -
             leftborder[suftabparts->components[part-1].nextcode];
         suftabparts->components[part].suftaboffset
-          = (Uint64) leftborder[suftabparts->components[part-1].nextcode];
+          = (uint64_t) leftborder[suftabparts->components[part-1].nextcode];
       }
-      printf("widthofpart[%u]=%lu\n",part,
-              (Showuint) suftabparts->components[part].widthofpart);
+      printf("widthofpart[%u]=" FormatSeqpos "\n",
+              (unsigned int) part,
+              PRINTSeqposcast(suftabparts->components[part].widthofpart));
       if (suftabparts->largestwidth <
          suftabparts->components[part].widthofpart)
       {
         suftabparts->largestwidth
           = suftabparts->components[part].widthofpart;
       }
-      sumofwidth += (Uint64) suftabparts->components[part].widthofpart;
+      sumofwidth += (uint64_t) suftabparts->components[part].widthofpart;
       suftabparts->components[part].sumofwidth = sumofwidth;
     }
     assert(sumofwidth == numofsuffixestoinsert);
@@ -142,7 +142,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
   return suftabparts;
 }
 
-Codetype stpgetcurrentmincode(unsigned int part,
+Codetype stpgetcurrentmincode(uint32_t part,
                               const Suftabparts *suftabparts)
 {
   if (part == 0)
@@ -152,13 +152,13 @@ Codetype stpgetcurrentmincode(unsigned int part,
   return suftabparts->components[part-1].nextcode + 1;
 }
 
-Uint64 stpgetcurrentsuftaboffset(unsigned int part,
-                                 const Suftabparts *suftabparts)
+uint64_t stpgetcurrentsuftaboffset(uint32_t part,
+                                   const Suftabparts *suftabparts)
 {
   return suftabparts->components[part].suftaboffset;
 }
 
-Codetype stpgetcurrentmaxcode(unsigned int part,
+Codetype stpgetcurrentmaxcode(uint32_t part,
                               const Suftabparts *suftabparts)
 {
   if (part == suftabparts->numofparts - 1)
@@ -168,23 +168,24 @@ Codetype stpgetcurrentmaxcode(unsigned int part,
   return suftabparts->components[part].nextcode;
 }
 
-Uint64 stpgetcurrentsumofwdith(unsigned int part,
-                               const Suftabparts *suftabparts)
+uint64_t stpgetcurrentsumofwdith(uint32_t part,
+                                 const Suftabparts *suftabparts)
 {
   return suftabparts->components[part].sumofwidth;
 }
 
-Uint stpgetcurrentwidtofpart(unsigned int part,const Suftabparts *suftabparts)
+Seqpos stpgetcurrentwidtofpart(uint32_t part,
+                               const Suftabparts *suftabparts)
 {
   return suftabparts->components[part].widthofpart;
 }
 
-Uint stpgetlargestwidth(const Suftabparts *suftabparts)
+Seqpos stpgetlargestwidth(const Suftabparts *suftabparts)
 {
   return suftabparts->largestwidth;
 }
 
-unsigned int stpgetnumofparts(const Suftabparts *suftabparts)
+uint32_t stpgetnumofparts(const Suftabparts *suftabparts)
 {
   return suftabparts->numofparts;
 }

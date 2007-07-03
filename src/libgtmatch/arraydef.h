@@ -19,7 +19,7 @@
   \texttt{space\#\#T} is a pointer to the space block of type \texttt{T}
   allocated for the array.
   \item
-  \texttt{allocated\#\#T} is an \texttt{Uint} storing the number
+  \texttt{allocated\#\#T} is an \texttt{unsigned long}-value storing the number
   of entries in the array currently allocated.
   \item
   \texttt{nextfree\#\#T} holds the smallest index of the array where no
@@ -34,7 +34,7 @@
         typedef struct\
         {\
           TYPE *space##TYPE;\
-          Uint allocated##TYPE, nextfree##TYPE;\
+          unsigned long allocated##TYPE, nextfree##TYPE;\
         } Array##TYPE
 
 /*
@@ -119,15 +119,5 @@
 DECLAREARRAYSTRUCT(Uchar);
 DECLAREARRAYSTRUCT(Ushort);
 DECLAREARRAYSTRUCT(char);
-DECLAREARRAYSTRUCT(Uint);
-DECLAREARRAYSTRUCT(Uint64);
-DECLAREARRAYSTRUCT(PairUint);
-
-/*
-  And some type synonyms.
-*/
-
-typedef ArrayUint  ArrayPosition;       /* \Typedef{ArrayPosition} */
-typedef ArrayUchar ArrayCharacters;     /* \Typedef{ArrayCharacters} */
 
 #endif

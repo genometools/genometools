@@ -12,22 +12,22 @@
 
 #include "genericstream.pr"
 
-bool guessifproteinsequence(const Uchar *input,Uint inputlen)
+bool guessifproteinsequence(const Uchar *input,Seqpos inputlen)
 {
   Uchar current;
   const Uchar *inputptr;
-  Uint countnonbases = 0,
-       countcharacters = 0,
-       readnumoffirstcharacters,
-       leastnumofnonbases;
+  Seqpos countnonbases = 0,
+         countcharacters = 0,
+         readnumoffirstcharacters,
+         leastnumofnonbases;
   bool indesc = false;
 
-  if (inputlen < UintConst(1000))
+  if (inputlen < (Seqpos) 1000)
   {
     readnumoffirstcharacters = inputlen;
   } else
   {
-    readnumoffirstcharacters = UintConst(1000);
+    readnumoffirstcharacters = (Seqpos) 1000;
   }
   leastnumofnonbases = readnumoffirstcharacters/10;
   for (inputptr = input; countnonbases < leastnumofnonbases &&
@@ -80,8 +80,8 @@ bool guessifproteinsequence(const Uchar *input,Uint inputlen)
 bool guessifproteinsequencestream(const char *inputfile)
 {
   Fgetcreturntype currentchar;
-  Uint countnonbases = 0,
-       countcharacters = 0;
+  Seqpos countnonbases = 0,
+         countcharacters = 0;
   bool indesc = false;
   Genericstream inputstream;
 
@@ -129,7 +129,7 @@ bool guessifproteinsequencestream(const char *inputfile)
         }
       }
     }
-    if (countcharacters >= UintConst(1000))
+    if (countcharacters >= (Seqpos) 1000)
     {
       break;
     }

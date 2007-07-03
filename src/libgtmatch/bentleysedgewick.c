@@ -17,14 +17,14 @@
 #include "encseq-def.h"
 
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
-#define UNIQUEINT(P)    ((Uint) ((P) + COMPAREOFFSET))
+#define UNIQUEINT(P)    ((Seqpos) ((P) + COMPAREOFFSET))
 #define ACCESSCHAR(T)   getencodedchar(encseq,T)
 #define ISNOTEND(P)     ((P) < totallength && ISNOTSPECIAL(ACCESSCHAR(P)))
 
 #define DECLARETMPC Uchar tmpsvar, tmptvar
 #define GENDEREF(VAR,A,S)\
         (((A) < totallength && ISNOTSPECIAL(VAR = ACCESSCHAR(S))) ?\
-        ((Uint) VAR) : UNIQUEINT(S))
+        ((Seqpos) VAR) : UNIQUEINT(S))
 #define DEREF(VAR,S)   GENDEREF(VAR,S,S)
 
 #define PTR2INT(VAR,I) GENDEREF(VAR,cptr = *(I)+depth,cptr)
@@ -80,19 +80,19 @@
         L = mkvauxstack->spaceMKVstack[--mkvauxstack->nextfreeMKVstack].left;\
         R = mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].right;\
         D = mkvauxstack->spaceMKVstack[mkvauxstack->nextfreeMKVstack].depth;\
-        width = (Uint) ((R) - (L) + 1)
+        width = (Seqpos) ((R) - (L) + 1)
 
-typedef Uint Suffixptr;
+typedef Seqpos Suffixptr;
 
 static Suffixptr *medianof3(const Encodedsequence *encseq,
-                            Uint totallength,
-                            Uint depth,
+                            Seqpos totallength,
+                            Seqpos depth,
                             Suffixptr *a,
                             Suffixptr *b,
                             Suffixptr *c)
 {
   Suffixptr cptr;
-  Uint vala, valb, valc;
+  Seqpos vala, valb, valc;
   Uchar tmpsvar, tmptvar;
 
   vala = PTR2INT(tmpsvar,a);
@@ -111,14 +111,14 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
 }
 
 static void insertionsort(const Encodedsequence *encseq,
-                          Uint totallength,
-                          Uint depth,
+                          Seqpos totallength,
+                          Seqpos depth,
                           Suffixptr *left,
                           Suffixptr *right)
 {
   Suffixptr sptr, tptr;
   Suffixptr *pi, *pj, temp;
-  Uint ccs, cct;
+  Seqpos ccs, cct;
   Uchar tmpsvar, tmptvar;
 
   for (pi = left + 1; pi <= right; pi++)
@@ -139,24 +139,24 @@ typedef struct
 {
   Suffixptr *left,
             *right;
-  Uint depth;
+  Seqpos depth;
 } MKVstack;
 
 DECLAREARRAYSTRUCT(MKVstack);
 
 static void bentleysedgewick(const Encodedsequence *encseq,
-                             Uint totallength,
+                             Seqpos totallength,
                              ArrayMKVstack *mkvauxstack,
-                             Suffixptr *l,Suffixptr *r,Uint d,
+                             Suffixptr *l,Suffixptr *r,Seqpos d,
                              Env *env)
 {
   Suffixptr *left, *right, *leftplusw;
-  Uint w, val, partval, depth, offset, doubleoffset, width;
+  Seqpos w, val, partval, depth, offset, doubleoffset, width;
   Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
   Uchar tmpsvar;
 
-  width = (Uint) (r - l + 1);
-  if (width <= (Uint) (SMALLSIZE))
+  width = (Seqpos) (r - l + 1);
+  if (width <= (Seqpos) (SMALLSIZE))
   {
     insertionsort(encseq,totallength,d,l,r);
     return;
@@ -171,7 +171,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     pl = left;
     pm = left + DIV2(width);
     pr = right;
-    if (width > UintConst(30))
+    if (width > (Seqpos) 30)
     { /* On big arrays, pseudomedian of 9 */
       offset = DIV8(width);
       doubleoffset = MULT2(offset);
@@ -223,32 +223,32 @@ static void bentleysedgewick(const Encodedsequence *encseq,
 
     assert(pa >= left);
     assert(pb >= pa);
-    w = MIN((Uint) (pa-left),(Uint) (pb-pa));
+    w = MIN((Seqpos) (pa-left),(Seqpos) (pb-pa));
     VECSWAP(left,  pb-w, w);
     pr = right + 1;
     assert(pd >= pc);
     assert(pr > pd);
-    w = MIN((Uint) (pd-pc), (Uint) (pr-pd-1));
+    w = MIN((Seqpos) (pd-pc), (Seqpos) (pr-pd-1));
     VECSWAP(pb, pr-w, w);
 
     assert(pd >= pc);
-    if ((w = (Uint) (pd-pc)) > 0)
+    if ((w = (Seqpos) (pd-pc)) > 0)
     {
-      SUBSORT(w,(Uint) (SMALLSIZE),right-w+1,right,depth);
+      SUBSORT(w,(Seqpos) (SMALLSIZE),right-w+1,right,depth);
     }
     assert(pb >= pa);
-    w = (Uint) (pb-pa);
+    w = (Seqpos) (pb-pa);
     leftplusw = left + w;
     cptr = *leftplusw + depth;
     if (ISNOTEND(cptr))
     {
       right -= (pd-pb);
-      width = (Uint) (right-leftplusw);
-      SUBSORT(width,(Uint) (SMALLSIZE),leftplusw,right-1,depth+1);
+      width = (Seqpos) (right-leftplusw);
+      SUBSORT(width,(Seqpos) (SMALLSIZE),leftplusw,right-1,depth+1);
     }
     if (w > 0)
     {
-      SUBSORT(w,(Uint) (SMALLSIZE),left,leftplusw-1,depth);
+      SUBSORT(w,(Seqpos) (SMALLSIZE),left,leftplusw-1,depth);
     }
     if (mkvauxstack->nextfreeMKVstack == 0)
     {
@@ -258,21 +258,21 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   }
 }
 
-void sortallbuckets(Uint *suftabptr,
+void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
-                    const Uint *leftborder,
-                    const Uint *countspecialcodes,
-                    Uint totallength,
-                    unsigned int numofchars,
-                    unsigned int prefixlength,
+                    const Seqpos *leftborder,
+                    const Seqpos *countspecialcodes,
+                    Seqpos totallength,
+                    uint32_t numofchars,
+                    uint32_t prefixlength,
                     Codetype mincode,
                     Codetype maxcode,
-                    Uint widthofpart,
+                    uint64_t widthofpart,
                     Env *env)
 {
   Codetype code;
-  unsigned int rightchar = mincode % numofchars;
-  Uint left, right, specialcodes;
+  uint32_t rightchar = mincode % numofchars;
+  Seqpos left, right, specialcodes;
   ArrayMKVstack mkvauxstack;
 
   INITARRAY(&mkvauxstack,MKVstack);
@@ -315,7 +315,7 @@ void sortallbuckets(Uint *suftabptr,
                        &mkvauxstack,
                        suftabptr + left,
                        suftabptr + right,
-                       prefixlength,
+                       (Seqpos) prefixlength,
                        env);
     }
   }

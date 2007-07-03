@@ -13,7 +13,7 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
 
 #include "binsearchspecial.gen"
 
-static bool ADDTYPE(checkspecial64)(const Encodedsequence *encseq,Uint64 pos)
+static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
 {
   return ADDTYPE(binarysearchpage)(ACCESSENCSEQ(encseq,specialpositions),
                                    ACCESSENCSEQ(encseq,specialpositions) +
@@ -21,8 +21,8 @@ static bool ADDTYPE(checkspecial64)(const Encodedsequence *encseq,Uint64 pos)
                                    pos);
 }
 
-static bool ADDTYPE(checkspecialrange64)(const Encodedsequence *encseq,
-                                         Uint64 pos)
+static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,
+                                       Seqpos pos)
 {
   SPECIALTYPE *found, *start;
 
@@ -33,10 +33,10 @@ static bool ADDTYPE(checkspecialrange64)(const Encodedsequence *encseq,
                                              pos);
   if (found != NULL)
   {
-    Uint64 rangeend
+    uint64_t rangeend
              = *found +
-               (Uint64) encseq->specialrangelength[(Uint) (found - start)];
-    if (rangeend > pos)
+               (uint64_t) encseq->specialrangelength[(Seqpos) (found - start)];
+    if (rangeend > (uint64_t) pos)
     {
       return true;
     }

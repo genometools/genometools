@@ -18,20 +18,24 @@ function checkerror()
   fi
 }
 
+#VALGRIND=valgrind.sh
+
 function checksfxmap()
 {
-  cmd="${GTDIR}/bin/gt dev sfxmap $1"
+  cmd="${VALGRIND} ${GTDIR}/bin/gt dev sfxmap $1"
   TMPFILE=`mktemp TMP.XXXXXX` || exit 1
   ${cmd} > ${TMPFILE}
   if test $? -ne 0
   then
-    echo "failure: sfxmap.x ${1}"
+    echo "failure: ${cmd}"
     exit 1
+  else
+    echo "success: ${cmd}"
   fi
   grep -v '^#' ${TMPFILE} > $1-sfx.prj
   rm -f ${TMPFILE}
   checkerror "cmp -s $1.prj $1-sfx.prj"
 }
 
-checkerror "${GTDIR}/bin/gt suffixerator -tis -suf -indexname /tmp/sfx $*"
+checkerror "${VALGRIND} ${GTDIR}/bin/gt suffixerator -tis -suf -indexname /tmp/sfx $*"
 checkerror "checksfxmap /tmp/sfx"

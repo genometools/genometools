@@ -5,13 +5,13 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
                         void **mappeduserptr,
                         void *assignmapinfo,
                         const Str *tmpfilename,
-                        Uint expectedsize,
+                        unsigned long expectedsize,
                         Env *env);
 
 int flushtheindex2file(FILE *fp,
                        Assignmapspec assignmapspec,
                        void *assignmapinfo,
-                       Uint expectedsize,
+                       unsigned long expectedsize,
                        Env *env);
 
 #ifdef __cplusplus

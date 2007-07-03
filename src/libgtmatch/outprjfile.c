@@ -12,17 +12,22 @@
 #include "libgtcore/str.h"
 #include "types.h"
 #include "spacedef.h"
+#include "stamp.h"
 
 #include "endianess.pr"
 #include "opensfxfile.pr"
 
+#define PRJSPECIALOUT(VAL)\
+        fprintf(outprj,"%s=" FormatSeqpos "\n",#VAL,\
+                PRINTSeqposcast(specialcharinfo->VAL))
+
 static void showprjinfo(FILE *outprj,
                         const StrArray *filenametab,
-                        const PairUint *filelengthtab,
-                        Uint64 totallength,
-                        Uint numofsequences,
+                        const PairSeqpos *filelengthtab,
+                        /*@unused@*/ Seqpos totallength,
+                        unsigned long numofsequences,
                         const Specialcharinfo *specialcharinfo,
-                        unsigned int prefixlength)
+                        uint32_t prefixlength)
 {
   unsigned long i;
 
@@ -30,36 +35,33 @@ static void showprjinfo(FILE *outprj,
   assert(filenametab != NULL);
   for (i=0; i<strarray_size(filenametab); i++)
   {
-    fprintf(outprj,"dbfile=%s %lu %lu\n",strarray_get(filenametab,i),
-                                         (Showuint) filelengthtab[i].uint0,
-                                         (Showuint) filelengthtab[i].uint1);
+    fprintf(outprj,"dbfile=%s " FormatSeqpos " " FormatSeqpos "\n",
+                    strarray_get(filenametab,i),
+                    PRINTSeqposcast(filelengthtab[i].uint0),
+                    PRINTSeqposcast(filelengthtab[i].uint1));
   }
-  /*@ignore@*/
-  fprintf(outprj,"totallength=" FormatUint64 "\n",totallength);
-  /*@end@*/
-  fprintf(outprj,"specialcharacters=%lu\n",
-                  (Showuint) specialcharinfo->specialcharacters);
-  fprintf(outprj,"specialranges=%lu\n",
-                 (Showuint) specialcharinfo->specialranges);
-  fprintf(outprj,"lengthofspecialprefix=%lu\n",
-                 (Showuint) specialcharinfo->lengthofspecialprefix);
-  fprintf(outprj,"lengthofspecialsuffix=%lu\n",
-                 (Showuint) specialcharinfo->lengthofspecialsuffix);
-  fprintf(outprj,"numofsequences=%lu\n",(Showuint) numofsequences);
-  fprintf(outprj,"numofdbsequences=%lu\n",(Showuint) numofsequences);
+  fprintf(outprj,"totallength=" FormatSeqpos "\n",
+                 PRINTSeqposcast(totallength));
+  PRJSPECIALOUT(specialcharacters);
+  PRJSPECIALOUT(specialranges);
+  PRJSPECIALOUT(lengthofspecialprefix);
+  PRJSPECIALOUT(lengthofspecialsuffix);
+  fprintf(outprj,"numofsequences=%lu\n",numofsequences);
+  fprintf(outprj,"numofdbsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofquerysequences=0\n");
-  fprintf(outprj,"prefixlength=%lu\n",(Showuint) prefixlength);
-  fprintf(outprj,"integersize=%lu\n",(Showuint) (sizeof (Uint) * CHAR_BIT));
+  fprintf(outprj,"prefixlength=%u\n",(unsigned int) prefixlength);
+  fprintf(outprj,"integersize=%u\n",
+                  (unsigned int) (sizeof (Seqpos) * CHAR_BIT));
   fprintf(outprj,"littleendian=%c\n",islittleendian() ? '1' : '0');
 }
 
 int outprjfile(const Str *indexname,
                const StrArray *filenametab,
-               const PairUint *filelengthtab,
-               Uint64 totallength,
-               Uint numofsequences,
+               const PairSeqpos *filelengthtab,
+               Seqpos totallength,
+               unsigned long numofsequences,
                const Specialcharinfo *specialcharinfo,
-               unsigned int prefixlength,
+               uint32_t prefixlength,
                Env *env)
 {
   FILE *prjfp;

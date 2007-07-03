@@ -4,9 +4,9 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-static bool ADDTYPE(checkspecial64)(const Encodedsequence *encseq,Uint64 pos)
+static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
 #include "checkspecial.gen"
 
-static bool ADDTYPE(checkspecialrange64)(const Encodedsequence *encseq,
-                                         Uint64 pos)
+static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,
+                                       Seqpos pos)
 #include "checkspecialrange.gen"

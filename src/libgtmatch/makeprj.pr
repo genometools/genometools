@@ -2,18 +2,18 @@
 extern "C" {
 #endif
 int scanfastasequence(
-        Uint *numofsequences,
-        Uint64 *totallength,
+        unsigned long *numofsequences,
+        Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
         const StrArray *filenametab,
-        PairUint **filelengthtab,
+        PairSeqpos **filelengthtab,
         const Uchar *symbolmap,
         Env *env);
 
 int scanfastasequence2(
-        Uint *numofsequences,
-        Uint *totallength,
-        PairUint **filelengthtab,
+        unsigned long *numofsequences,
+        Seqpos *totallength,
+        PairSeqpos **filelengthtab,
         Specialcharinfo *specialcharinfo,
         const StrArray *filenametab,
         const Uchar *symbolmap,

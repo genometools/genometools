@@ -49,6 +49,7 @@
 +matchanyintegral
 -fcnuse
 -shiftimplementation
+-shiftnegative
 -predboolothers
 -aliasunique
 -type

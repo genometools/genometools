@@ -20,6 +20,7 @@
 #include "genstream.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
+#include "stamp.h"
 #ifndef NDEBUG
 #include "addnextchar.h"
 #endif
@@ -30,35 +31,35 @@
 #define SUBTRACTLCHARANDSHIFT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER)\
         if ((NUMOFCHARS) == DNAALPHASIZE)\
         {\
-          CODE = MULT4((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]);\
+          CODE = MULT4((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]);\
         } else\
         {\
-          CODE = ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) * (NUMOFCHARS);\
+          CODE = ((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]) * (NUMOFCHARS);\
         }
 
 #define SUBTRACTLCHARSHIFTADDNEXT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER,CC)\
         if ((NUMOFCHARS) == DNAALPHASIZE)\
         {\
-          CODE = MULT4((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) | (CC);\
+          CODE = MULT4((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]) | (CC);\
         } else\
         {\
-          CODE = ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) * (NUMOFCHARS)\
-                  + (CC);\
+          CODE = (Codetype) ((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]) *\
+                            (NUMOFCHARS) + (CC);\
         }
 #else
 #define SUBTRACTLCHARANDSHIFT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER)\
-        CODE = ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) * (NUMOFCHARS)
+        CODE = ((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]) * (NUMOFCHARS)
 
 #define SUBTRACTLCHARSHIFTADDNEXT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER,CC)\
-        CODE = ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) * (NUMOFCHARS) + (CC)
+        CODE = (Codetype) (((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]) * (NUMOFCHARS) + (CC))
 #endif
 
 #define ARRAY2DIMMALLOC(ARRAY2DIM, ROWS, COLUMNS, TYPE)\
         {\
-          unsigned int rownumber;\
+          uint32_t rownumber;\
           ALLOCASSIGNSPACE(ARRAY2DIM,NULL,TYPE *,ROWS);\
           ALLOCASSIGNSPACE((ARRAY2DIM)[0],NULL,TYPE,(ROWS) * (COLUMNS));\
-          for (rownumber = (unsigned int) 1; rownumber < (ROWS); rownumber++)\
+          for (rownumber = (uint32_t) 1; rownumber < (ROWS); rownumber++)\
           {\
             (ARRAY2DIM)[rownumber] = (ARRAY2DIM)[rownumber-1] + (COLUMNS);\
           }\
@@ -69,12 +70,12 @@
         FREESPACE(ARRAY2DIM)
 
 #ifndef NDEBUG
-static Codetype windowkmer2code(unsigned int numofchars,
-                                unsigned int kmersize,
+static Codetype windowkmer2code(uint32_t numofchars,
+                                uint32_t kmersize,
                                 const Uchar *cyclicwindow,
-                                unsigned int firstindex)
+                                uint32_t firstindex)
 {
-  unsigned int i;
+  uint32_t i;
   Codetype integercode;
   Uchar cc;
   bool foundspecial;
@@ -89,7 +90,7 @@ static Codetype windowkmer2code(unsigned int numofchars,
     integercode = (Codetype) cc;
     foundspecial = false;
   }
-  for (i=(unsigned int) 1; i < kmersize; i++)
+  for (i=(uint32_t) 1; i < kmersize; i++)
   {
     if (foundspecial)
     {
@@ -110,13 +111,13 @@ static Codetype windowkmer2code(unsigned int numofchars,
   return integercode;
 }
 
-static Codetype prefixwindowkmer2code(unsigned int firstspecialpos,
-                                      unsigned int kmersize,
+static Codetype prefixwindowkmer2code(uint32_t firstspecialpos,
+                                      uint32_t kmersize,
                                       Codetype **multimappower,
                                       const Uchar *cyclicwindow,
-                                      unsigned int firstindex)
+                                      uint32_t firstindex)
 {
-  unsigned int i;
+  uint32_t i;
   Codetype integercode = 0;
   Uchar cc;
 
@@ -128,12 +129,12 @@ static Codetype prefixwindowkmer2code(unsigned int firstspecialpos,
   return integercode;
 }
 
-static Firstspecialpos determinefirstspecialposition(unsigned int windowwidth,
-                                                     unsigned int kmersize,
+static Firstspecialpos determinefirstspecialposition(uint32_t windowwidth,
+                                                     uint32_t kmersize,
                                                      const Uchar *cyclicwindow,
-                                                     unsigned int firstindex)
+                                                     uint32_t firstindex)
 {
-  unsigned int i;
+  uint32_t i;
   Firstspecialpos fsp;
 
   for (i=0; i < windowwidth; i++)
@@ -153,14 +154,14 @@ static Firstspecialpos determinefirstspecialposition(unsigned int windowwidth,
 
 typedef struct
 {
-  unsigned int distvalue;
+  uint32_t distvalue;
   Codetype codeforleftcontext;
 } Queueelem;
 
 typedef struct
 {
   Queueelem *queuespace;  /* the space to store the queue elements */
-  unsigned int enqueueindex,  /* entry into which element is to be enqued */
+  uint32_t enqueueindex,  /* entry into which element is to be enqued */
                dequeueindex,  /* last element of queue */
                queuesize,     /* size of the queue */
                noofelements;  /* no ofelements between enqueueindex+1 and 
@@ -171,17 +172,17 @@ typedef struct
 {
   Specialpositions spos;
   Uchar *cyclicwindow;
-  unsigned int numofchars,
+  uint32_t numofchars,
                kmersize,
                windowwidth,
                firstindex,
-               *filltable;
-  Uint lengthwithoutspecial;
+               *filltable,
+               lengthwithoutspecial;
   Codetype codewithoutspecial,
            **multimappower;
 } Streamstate;
 
-static void specialemptyqueue(Specialpositions *spos,unsigned int queuesize,
+static void specialemptyqueue(Specialpositions *spos,uint32_t queuesize,
                               Env *env)
 {
   env_error_check(env);
@@ -286,8 +287,10 @@ static void updatespecialpositions(Streamstate *spwp,
   {
     if (spwp->lengthwithoutspecial == spwp->kmersize)
     {
-      SUBTRACTLCHARSHIFTADDNEXT(spwp->codewithoutspecial,lchar,
-                                spwp->numofchars,spwp->multimappower[0],
+      SUBTRACTLCHARSHIFTADDNEXT(spwp->codewithoutspecial,
+                                lchar,
+                                spwp->numofchars,
+                                spwp->multimappower[0],
                                 charcode);
     } else
     {
@@ -299,11 +302,11 @@ static void updatespecialpositions(Streamstate *spwp,
 }
 
 static void shiftrightwithchar(
-               void(*processkmercode)(void *,Codetype,Uint64,
+               void(*processkmercode)(void *,Codetype,Seqpos,
                                       const Firstspecialpos *,Env *),
                void *processkmercodeinfo,
                Streamstate *spwp,
-               Uint64 currentposition,
+               Seqpos currentposition,
                Uchar charcode,
                Env *env)
 {
@@ -389,22 +392,22 @@ static void shiftrightwithchar(
   }
 }
 
-static void initmultimappower(unsigned int ***multimappower,
-                              unsigned int numofchars,
-                              unsigned int kmersize,
+static void initmultimappower(uint32_t ***multimappower,
+                              uint32_t numofchars,
+                              uint32_t kmersize,
                               Env *env)
 {
   int offset;
-  unsigned int thepower, mapindex, *mmptr;
+  uint32_t thepower, mapindex, *mmptr;
 
   env_error_check(env);
-  ARRAY2DIMMALLOC(*multimappower,kmersize,numofchars,unsigned int);
-  thepower = (unsigned int) 1;
+  ARRAY2DIMMALLOC(*multimappower,kmersize,numofchars,uint32_t);
+  thepower = (uint32_t) 1;
   for (offset=(int) (kmersize - 1); offset>=0; offset--)
   {
     mmptr = (*multimappower)[offset];
     mmptr[0] = 0;
-    for (mapindex = (unsigned int) 1; mapindex < numofchars; mapindex++)
+    for (mapindex = (uint32_t) 1; mapindex < numofchars; mapindex++)
     {
       mmptr[mapindex] = mmptr[mapindex-1] + thepower;
     }
@@ -412,16 +415,16 @@ static void initmultimappower(unsigned int ***multimappower,
   }
 }
 
-static void filllargestchartable(unsigned int **filltable,
-                                 unsigned int numofchars,
-                                 unsigned int kmersize,
+static void filllargestchartable(uint32_t **filltable,
+                                 uint32_t numofchars,
+                                 uint32_t kmersize,
                                  Env *env)
 {
-  unsigned int *ptr;
+  uint32_t *ptr;
   Codetype code;
 
   env_error_check(env);
-  ALLOCASSIGNSPACE(*filltable,NULL,unsigned int,kmersize);
+  ALLOCASSIGNSPACE(*filltable,NULL,uint32_t,kmersize);
   code = numofchars;
   for (ptr = *filltable + kmersize - 1; ptr >= *filltable; ptr--)
   {
@@ -432,20 +435,20 @@ static void filllargestchartable(unsigned int **filltable,
 
 int getfastastreamkmers(
         const StrArray *filenametab,
-        void(*processkmercode)(void *,Codetype,Uint64,
+        void(*processkmercode)(void *,Codetype,Seqpos,
                                const Firstspecialpos *,Env *),
         void *processkmercodeinfo,
-        unsigned int numofchars,
-        unsigned int kmersize,
+        uint32_t numofchars,
+        uint32_t kmersize,
         const Uchar *symbolmap,
         Env *env)
 {
   unsigned long filenum;
   Fgetcreturntype currentchar;
   bool indesc, firstseq = true;
-  unsigned int overshoot;
-  unsigned int linenum = (unsigned int) 1;
-  Uint64 currentposition = 0;
+  uint32_t overshoot;
+  uint32_t linenum = (uint32_t) 1;
+  Seqpos currentposition = 0;
   Streamstate spwp;
   Genericstream inputstream;
   Uchar charcode;
@@ -504,14 +507,14 @@ int getfastastreamkmers(
             indesc = true;
           } else
           {
-            charcode = symbolmap[(unsigned int) currentchar];
+            charcode = symbolmap[(uint32_t) currentchar];
             if (charcode == (Uchar) UNDEFCHAR)
             {
               env_error_set(env,
-                            "illegal character '%c': file \"%s\", line %lu",
+                            "illegal character '%c': file \"%s\", line %u",
                             currentchar,
                             strarray_get(filenametab,filenum),
-                            (Showuint) linenum);
+                            (unsigned int) linenum);
               return -1;
             }
             shiftrightwithchar(processkmercode,processkmercodeinfo,
@@ -543,16 +546,16 @@ int getfastastreamkmers(
 
 void getencseqkmers(
         const Encodedsequence *encseq,
-        Uint64 totallength,
-        void(*processkmercode)(void *,Codetype,Uint64,
+        Seqpos totallength,
+        void(*processkmercode)(void *,Codetype,Seqpos,
                                const Firstspecialpos *,Env *),
         void *processkmercodeinfo,
-        unsigned int numofchars,
-        unsigned int kmersize,
+        uint32_t numofchars,
+        uint32_t kmersize,
         Env *env)
 {
-  unsigned int overshoot;
-  Uint64 currentposition;
+  uint32_t overshoot;
+  Seqpos currentposition;
   Streamstate spwp;
   Uchar charcode;
   Encodedsequencescanstate *esr;
@@ -571,7 +574,7 @@ void getencseqkmers(
   esr = initEncodedsequencescanstate(encseq,env);
   for (currentposition = 0; currentposition<totallength; currentposition++)
   {
-    charcode = sequentialgetencodedchar64(encseq,esr,currentposition);
+    charcode = sequentialgetencodedchar(encseq,esr,currentposition);
     shiftrightwithchar(processkmercode,processkmercodeinfo,
                        &spwp,currentposition,charcode,env);
   }
