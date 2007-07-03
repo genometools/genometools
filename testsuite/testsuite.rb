@@ -68,4 +68,7 @@ require 'gt_mutate_include'
 require 'gt_regioncov_include'
 require 'gt_stat_include'
 require 'gt_suffixerator_include'
+if $arguments["libgtview"] then
+  require 'gt_view_include'
+end
 require 'gt_env_options_include'

@@ -6,9 +6,13 @@
 
 #include "gt.h"
 #include "gt_guessprot.h"
-#include "gt_png.h"
 #include "gt_regioncov.h"
 #include "gt_sfxmap.h"
+#include "gt_skproto.h"
+
+#ifdef LIBGTVIEW
+#include <libgtview/gt_png.h>
+#endif
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Toolbox *dev_toolbox, Env *env)
@@ -32,9 +36,12 @@ void register_devtools(Toolbox *dev_toolbox, Env *env)
   /* add development tools here with a function call like this:
      toolbox_add(dev_toolbox, "devtool", gt_devtool, env); */
   toolbox_add(dev_toolbox, "guessprot", gt_guessprot, env);
+#ifdef LIBGTVIEW
   toolbox_add(dev_toolbox, "png", gt_png, env);
+#endif
   toolbox_add(dev_toolbox, "regioncov", gt_regioncov, env);
   toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap, env);
+  toolbox_add(dev_toolbox, "skproto", gt_skproto, env);
 }
 
 int gt_dev(int argc, const char **argv, Env *env)

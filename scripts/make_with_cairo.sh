@@ -6,4 +6,4 @@
 #
 
 # the make which links cairo
-gmake CFLAGS=-I/usr/local/include/cairo LDFLAGS='-L/usr/local/lib -L/usr/X11R6/lib' LDLIBS='-lm -lz -lcairo' $*
+gmake opt=no libgtview=yes CFLAGS='-I/usr/include/cairo -I/usr/local/include/cairo' LDFLAGS='-L/usr/local/lib -L/usr/X11R6/lib' LDLIBS='-lm -lz -lcairo' $*

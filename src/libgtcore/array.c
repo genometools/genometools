@@ -77,9 +77,9 @@ void array_reverse(Array *a, Env *env)
 
   assert(a);
   tmp = env_ma_malloc(env, sizeof (a->size_of_elem));
-  for (front = UCCAST(a->space), 
+  for (front = UCCAST(a->space),
        back = MAKEPTR(a->space,a->next_free-1,a->size_of_elem);
-       front < back; 
+       front < back;
        front += a->size_of_elem, back -= a->size_of_elem) {
     memcpy(tmp, (void *) front, a->size_of_elem);
     memcpy((void *) front, (void *) back, a->size_of_elem);

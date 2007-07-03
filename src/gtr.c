@@ -27,6 +27,10 @@
 #include "tools/gt_stat.h"
 #include "tools/gt_suffixerator.h"
 
+#ifdef LIBGTVIEW
+#include "libgtview/gt_view.h"
+#endif
+
 struct GTR {
   bool test,
        interactive,
@@ -97,6 +101,9 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "splitfasta", gt_splitfasta, env);
   toolbox_add(gtr->toolbox, "stat", gt_stat, env);
   toolbox_add(gtr->toolbox, "suffixerator", gt_suffixerator, env);
+#ifdef LIBGTVIEW
+  toolbox_add(gtr->toolbox, "view", gt_view, env);
+#endif
   /* add unit tests */
   hashtable_delete(gtr->unit_tests, env);
   gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL, env);
@@ -116,6 +123,16 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "splitter class", splitter_unit_test, env);
   hashtable_add(gtr->unit_tests, "string class", str_unit_test, env);
   hashtable_add(gtr->unit_tests, "tokenizer class", tokenizer_unit_test, env);
+#ifdef LIBGTVIEW
+  hashtable_add(gtr->unit_tests, "block class", block_unit_test, env);
+  hashtable_add(gtr->unit_tests, "config class", config_unit_test, env);
+  hashtable_add(gtr->unit_tests, "diagram class", diagram_unit_test, env);
+  hashtable_add(gtr->unit_tests, "element class", element_unit_test, env);
+  hashtable_add(gtr->unit_tests, "feature index class", feature_index_unit_test,
+                env);
+  hashtable_add(gtr->unit_tests, "line class", line_unit_test, env);
+  hashtable_add(gtr->unit_tests, "track class", track_unit_test, env);
+#endif
 }
 
 int run_test(void *key, void *value, void *data, Env *env)
