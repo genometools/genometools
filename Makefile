@@ -92,9 +92,9 @@ prefix ?= /usr/local
 all: dirs lib/libgtcore.a lib/libgtext.a lib/libgtview.a bin/skproto bin/gt bin/rnv
 
 dirs:
-	@test -d obj     || mkdir -p obj 
-	@test -d lib     || mkdir -p lib 
-	@test -d bin     || mkdir -p bin 
+	@test -d obj     || mkdir -p obj
+	@test -d lib     || mkdir -p lib
+	@test -d bin     || mkdir -p bin
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $@]"
