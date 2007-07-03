@@ -21,6 +21,7 @@ void initfastabufferstate(Fastabufferstate *fbs,
                           PairSeqpos **filelengthtab,
                           Env *env)
 {
+  STAMP;
   fbs->filenum = 0;
   fbs->firstoverallseq = true;
   fbs->firstseqinfile = true;
@@ -33,6 +34,7 @@ void initfastabufferstate(Fastabufferstate *fbs,
   fbs->lastspeciallength = 0;
   ALLOCASSIGNSPACE(*filelengthtab,NULL,PairSeqpos,strarray_size(filenametab));
   fbs->filelengthtab = *filelengthtab;
+  STAMP;
 }
 
 int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)

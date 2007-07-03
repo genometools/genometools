@@ -12,6 +12,7 @@
 #include "arraydef.h"
 #include "sarr-def.h"
 #include "encseq-def.h"
+#include "stamp.h"
 
 #include "readnextline.pr"
 #include "endianess.pr"
@@ -432,6 +433,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
     {
       haserr = true;
     }
+    STAMP;
   }
   if (!haserr && withsuftab)
   {
@@ -458,14 +460,17 @@ int mapsuffixarray(Suffixarray *suffixarray,
     }
     str_delete(tmpfilename,env);
   }
+    STAMP;
   return haserr ? -1 : 0;
 }
 
 void freesuffixarray(Suffixarray *suffixarray,Env *env)
 {
+    STAMP;
   env_fa_xmunmap((void *) suffixarray->suftab,env);
   freeAlphabet(&suffixarray->alpha,env);
   freeEncodedsequence(&suffixarray->encseq,env);
   strarray_delete(suffixarray->filenametab,env);
   FREESPACE(suffixarray->filelengthtab);
+    STAMP;
 }

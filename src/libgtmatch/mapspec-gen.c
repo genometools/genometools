@@ -10,6 +10,7 @@
 #include "intbits.h"
 #include "safecast-gen.h"
 #include "mapspec-def.h"
+#include "stamp.h"
 
 #define ASSIGNPTR2STARTPTR(TYPE)\
         if (mapspec->numofunits == 0)\
@@ -17,9 +18,17 @@
           *((TYPE **) mapspec->startptr) = NULL;\
         } else\
         {\
-          voidptr = (((Uchar *) ptr) + byteoffset);\
+          unsigned long i, addup = 0;\
+          voidptr = (((void *) ptr) + byteoffset);\
           *((TYPE **) mapspec->startptr) = voidptr;\
+          for(i=0; i<mapspec->numofunits; i++)\
+          {\
+            addup += (*((TYPE **) mapspec->startptr))[i];\
+          }\
+          printf("%lu\n",addup);\
         }
+
+#define ALIGNSIZE sizeof(void *)
 
 #define WRITEACTIONWITHTYPE(TYPE)\
         if (fwrite(*((TYPE **) mapspecptr->startptr),\
@@ -27,10 +36,17 @@
                    (size_t) mapspecptr->numofunits, fp) !=\
                     (size_t) mapspecptr->numofunits)\
         {\
+          env_error_set(env,"cannot write %lu items of size %u: "\
+                            "errormsg=\"%s\"",\
+                        (unsigned long) mapspecptr->numofunits,\
+                        (unsigned int) mapspecptr->sizeofunit,\
+                        strerror(errno));\
           haserr = true;\
         }
 
-static uint64_t expectedindexsize(const ArrayMapspecification *mapspectable)
+
+static uint64_t detexpectedaccordingtomapspec(const ArrayMapspecification 
+                                              *mapspectable)
 {
   uint64_t sumup = 0;
   Mapspecification *mapspecptr;
@@ -41,6 +57,10 @@ static uint64_t expectedindexsize(const ArrayMapspecification *mapspectable)
   {
     sumup += (uint64_t) mapspecptr->sizeofunit * 
              (uint64_t) mapspecptr->numofunits;
+    if(sumup % ALIGNSIZE > 0)
+    {
+      sumup += ALIGNSIZE - (sumup % ALIGNSIZE);
+    }
   }
   return sumup;
 }
@@ -61,25 +81,32 @@ static int assigncorrecttype(Mapspecification *mapspec,
   void *voidptr;
   bool haserr = false;
 
+  STAMP;
   env_error_check(env);
   switch (mapspec->typespec)
   {
     case UcharType:
+      STAMP;
       ASSIGNPTR2STARTPTR(Uchar);
       break;
     case UshortType:
+      STAMP;
       ASSIGNPTR2STARTPTR(Ushort);
       break;
     case Uint32Type:
+      STAMP;
       ASSIGNPTR2STARTPTR(uint32_t);
       break;
     case Uint64Type:
+      STAMP;
       ASSIGNPTR2STARTPTR(uint64_t);
       break;
     case BitstringType:
+      STAMP;
       ASSIGNPTR2STARTPTR(Bitstring);
       break;
     case SeqposType:
+      STAMP;
       ASSIGNPTR2STARTPTR(Seqpos);
       break;
     case PairSeqposType:
@@ -92,9 +119,11 @@ static int assigncorrecttype(Mapspecification *mapspec,
   }
   if (!haserr)
   {
+    STAMP;
     printf("# assign pointer");
     showmapspec(mapspec);
     printf(" at byteoffset %lu\n",byteoffset);
+    STAMP;
   }
   return haserr ? -1 : 0;
 }
@@ -109,7 +138,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
                         Env *env)
 {
   void *mapptr;
-  uint64_t expected;
+  uint64_t expectedaccordingtomapspec;
   unsigned long byteoffset = 0;
   size_t numofbytes;
   ArrayMapspecification mapspectable;
@@ -136,8 +165,8 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
   }
   if (!haserr)
   {
-    expected = expectedindexsize(&mapspectable);
-    if (expected != (uint64_t) numofbytes)
+    expectedaccordingtomapspec = detexpectedaccordingtomapspec(&mapspectable);
+    if (expectedaccordingtomapspec != (uint64_t) numofbytes)
     {
       env_error_set(env,"%lu bytes read from %s, but " Formatuint64_t 
                          " expected",
@@ -147,6 +176,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
       haserr = true;
     }
   }
+  STAMP;
   if (!haserr)
   {
     mapspecptr = mapspectable.spaceMapspecification;
@@ -158,17 +188,21 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
          mapspecptr < mapspectable.spaceMapspecification +
                       mapspectable.nextfreeMapspecification; mapspecptr++)
     {
+  STAMP;
       if (assigncorrecttype(mapspecptr,mapptr,byteoffset,env) != 0)
       {
         haserr = true;
         break;
       }
+  STAMP;
       byteoffset = CALLCASTFUNC(uint64_t,unsigned_long,
                                 (uint64_t) (byteoffset + 
                                             mapspecptr->sizeofunit * 
                                             mapspecptr->numofunits));
+  STAMP;
     }
   }
+  STAMP;
   if (!haserr)
   {
     if (expectedsize != byteoffset)
@@ -179,7 +213,9 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
       haserr = true;
     }
   }
+  STAMP;
   FREEARRAY(&mapspectable,Mapspecification);
+  STAMP;
   return haserr ? -1 : 0;
 }
 
@@ -193,6 +229,7 @@ int flushtheindex2file(FILE *fp,
   Mapspecification *mapspecptr;
   unsigned long byteoffset = 0;
   bool haserr = false;
+  char padbuffer[ALIGNSIZE-1] = {0};
 
   env_error_check(env);
   INITARRAY(&mapspectable,Mapspecification);
@@ -245,6 +282,20 @@ int flushtheindex2file(FILE *fp,
                               (uint64_t) (byteoffset + 
                                           mapspecptr->sizeofunit * 
                                           mapspecptr->numofunits));
+    if(byteoffset % (unsigned long) ALIGNSIZE > 0)
+    {
+      size_t padunits = ALIGNSIZE - (byteoffset % ALIGNSIZE);
+      if(fwrite(padbuffer,
+                sizeof(Uchar),padunits) != padunits)
+      {
+        env_error_set(env,"cannot write %lu items of size %u: "
+                          "errormsg=\"%s\"",
+                           (unsigned long) padunits,
+                           (unsigned int) sizeof(Uchar),
+                           strerror(errno));
+        haserr = true; 
+      }
+    }
   }
   if (!haserr)
   {
