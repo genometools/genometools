@@ -97,6 +97,8 @@ int gt_view(int argc, const char **argv, Env *env)
   Array *results = NULL;
   Config *cfg;
   Str *config_file;
+  char *prog;
+  Splitter *splitter;
 
   env_error_check(env);
 
@@ -186,9 +188,16 @@ int gt_view(int argc, const char **argv, Env *env)
       fprintf(stderr, "# of results: %lu\n", array_size(results));
 
     /* find and load configuration file */
-    config_file = gtdata_get_path(argv[0], env);
+    prog = cstr_dup(argv[0], env); /* create modifiable copy for splitter */
+    /* XXX: remove the ugly splitter stuff */
+    splitter = splitter_new(env);
+    splitter_split(splitter, prog, strlen(prog), ' ', env);
+    config_file = gtdata_get_path(splitter_get_token(splitter, 0), env);
+    splitter_delete(splitter, env);
+    env_ma_free(prog, env);
     str_append_cstr(config_file, "/config/view.lua", env);
     cfg = config_new(env, arguments.verbose);
+    assert(cfg);
     config_load_file(cfg, config_file, env);
 
     /* create and write image file */
