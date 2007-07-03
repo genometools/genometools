@@ -65,7 +65,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   option_imply(option2, option ,env);
   option_hide_default(option2);
 
-	/* -width */
+  /* -width */
   option = option_new_uint_min("width", "target image width",
                             &arguments->width,
                             800, 1, env);

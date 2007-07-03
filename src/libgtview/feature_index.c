@@ -326,7 +326,8 @@ int feature_index_unit_test(Env* env)
   seqid1 = str_new_cstr("test1", env);
   seqid2 = str_new_cstr("test2", env);
 
-  /* Generating a new genome_feature with the property gft_gene and the range r1 ... */
+  /* Generating a new genome_feature with the property gft_gene and the range r1
+     ... */
   gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN,
                                             NULL, UNDEF_ULONG, env);
   /* ... and assign a sequence id to the new genome_feature-object. */
@@ -365,26 +366,33 @@ int feature_index_unit_test(Env* env)
   ensure(had_err, !feature_index_has_seqid(fi, "test1", env));
   ensure(had_err, !feature_index_has_seqid(fi, "test2", env));
 
-  /*Add a sequence region the fetaure index and test if it has really been added*/
+  /* Add a sequence region to the feature index and test if it has really been
+     added */
   feature_index_add_sequence_region(fi, "test1", env);
   ensure(had_err, feature_index_has_seqid(fi, "test1", env));
 
   feature_index_add_sequence_region(fi, "test2", env);
   ensure(had_err, feature_index_has_seqid(fi, "test2", env));
 
-  /*Tests if we get a empty data structure for every added sequence region*/
+  /* Tests if we get a empty data structure for every added sequence region*/
   ensure(had_err, feature_index_get_features_for_seqid(fi, "test1"));
   ensure(had_err, feature_index_get_features_for_seqid(fi, "test2"));
-  ensure(had_err, array_size(feature_index_get_features_for_seqid(fi, "test1")) == 0);
-  ensure(had_err, array_size(feature_index_get_features_for_seqid(fi, "test2")) == 0);
+  ensure(had_err,
+         array_size(feature_index_get_features_for_seqid(fi, "test1")) == 0);
+  ensure(had_err,
+         array_size(feature_index_get_features_for_seqid(fi, "test2")) == 0);
 
-  /*Add features to every sequence region and test if the according datastructures are not empty anymore. As we have added one genome_feature to every sequence region the size has to be one. */
+  /* Add features to every sequence region and test if the according
+     datastructures are not empty anymore. As we have added one genome_feature
+     to every sequence region the size has to be one. */
   feature_index_add_genome_feature_for_seqid(fi, (GenomeFeature*) gn1, env);
-  ensure(had_err, array_size(feature_index_get_features_for_seqid(fi, "test1")) == 1);
+  ensure(had_err,
+         array_size(feature_index_get_features_for_seqid(fi, "test1")) == 1);
 
   feature_index_add_genome_feature_for_seqid(fi, (GenomeFeature*) gn2, env);
 
-  ensure(had_err, array_size(feature_index_get_features_for_seqid(fi, "test2")) == 1);
+  ensure(had_err,
+         array_size(feature_index_get_features_for_seqid(fi, "test2")) == 1);
 
   /* test feature_index_get_first_seqid() */
   ensure(had_err, feature_index_get_first_seqid(fi));
@@ -393,7 +401,7 @@ int feature_index_unit_test(Env* env)
   check_range = feature_index_get_range_for_seqid(fi, "test1");
   ensure(had_err, check_range.start == 100 && check_range.end == 1000);
 
-  /*delete all generated objects*/
+  /* delete all generated objects */
   feature_index_delete(fi, env);
   genome_node_rec_delete(gn1, env);
   genome_node_rec_delete(gn2, env);
