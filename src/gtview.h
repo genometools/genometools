@@ -9,7 +9,7 @@
 #ifndef GTVIEW_H
 #define GTVIEW_H
 
-/* The GenomeTools Viewer library (libgtview) header */
+/* The GenomeTools viewer library (libgtview) header */
 #include <libgtview/block.h>
 #include <libgtview/color.h>
 #include <libgtview/config.h>

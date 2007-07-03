@@ -1,7 +1,7 @@
 /*
   Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
-                     Malte Mader <mmader@stud.zbh.uni-hamburg.de>
-                     Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2007 Malte Mader <mmader@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -154,10 +154,9 @@ int gt_view(int argc, const char **argv, Env *env)
      seqid = feature_index_get_first_seqid(features);
   else if (!had_err && !feature_index_has_seqid(features,
                                            str_get(arguments.seqid),
-                                           env))
-  {
+                                           env)) {
     env_error_set(env, "sequence region '%s' does not exist in GFF input file",
-		              str_get(arguments.seqid));
+                  str_get(arguments.seqid));
     had_err = -1;
   }
   else if (!had_err)
@@ -205,7 +204,7 @@ int gt_view(int argc, const char **argv, Env *env)
   }
 
   /* free */
-	str_delete(arguments.seqid,env);
+  str_delete(arguments.seqid,env);
   feature_index_delete(features, env);
   genome_stream_delete(feature_stream, env);
   genome_stream_delete(gff3_in_stream, env);
