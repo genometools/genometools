@@ -314,9 +314,9 @@ That is, to write programs employing the library, it suffices to include the
 <h2>Unit tests</h2>
 <p>
 Many classes and modules contain a <code>*_unit_test(void)</code> function which performs a
-<a href="http://en.wikipedia.org/wiki/Unit_test">unit test</a> of the 
-class/module and returns <code>EXIT_SUCCESS</code> in case of success and
-<code>EXIT_FAILURE</code> in case of failure.
+<a href="http://en.wikipedia.org/wiki/Unit_test">unit test</a> of the
+class/module and returns <code>0</code> in case of success and <code>-1</code>
+in case of failure.
 
 The unit test components are loaded into the
 <i>GenomeTools</i> runtime in the function <a
@@ -381,7 +381,7 @@ described in this document.
 <p>
 <small>
 Copyright &copy; 2007 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a> Last
-update: 2007-05-29
+update: 2007-07-04
 </small>
 </p>
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
