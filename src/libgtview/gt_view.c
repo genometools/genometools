@@ -46,23 +46,23 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   option_parser_add_option(op, option, env);
 
   /* -seqid */
-  option = option_new_string("seqid", "sequence region identifier"
-                                      " (default: first one in file)",
+  option = option_new_string("seqid", "sequence region identifier\n"
+                                      "default: first one in file",
                             arguments->seqid,
                             NULL, env);
   option_parser_add_option(op, option, env);
   option_hide_default(option);
 
   /* -start */
-  option = option_new_ulong_min("start", "start position"
-                                         " (default: region start)",
+  option = option_new_ulong_min("start", "start position\n"
+                                         "default: first region start",
                             &arguments->start,
                             UNDEF_ULONG, 1, env);
   option_parser_add_option(op, option, env);
   option_hide_default(option);
 
   /* -end */
-  option2 = option_new_ulong("end", "end position (default: region end)",
+  option2 = option_new_ulong("end", "end position\ndefault: last region end",
                             &arguments->end,
                             UNDEF_ULONG, env);
   option_parser_add_option(op, option2, env);
@@ -89,7 +89,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
                   "overwrite", argv[*parsed_args]);
     oprval = OPTIONPARSER_ERROR;
   }
-  
+
   /* free */
   option_parser_delete(op, env);
 
@@ -105,7 +105,7 @@ int gt_view(int argc, const char **argv, Env *env)
   GenomeNode *gn = NULL;
   FeatureIndex *features = NULL;
   int parsed_args, had_err=0;
-  char *seqid;
+  char *seqid = NULL;
   Range qry_range, sequence_region_range;
   Array *results = NULL;
   Config *cfg;
@@ -176,7 +176,7 @@ int gt_view(int argc, const char **argv, Env *env)
   }
   else if (!had_err && !feature_index_has_seqid(features,
                                                 str_get(arguments.seqid),
-                                                env)) 
+                                                env))
   {
     env_error_set(env, "sequence region '%s' does not exist in GFF input file",
                   str_get(arguments.seqid));
