@@ -32,7 +32,6 @@ static bool set_of_sas_is_sorted(const void *set_of_sas,
 
   /* get first range */
   range_a = get_genomic_range(set_of_sas);
-
   env_log_log(env, "-from %lu", range_a.start);
   max_end = range_a.end;
 
@@ -52,9 +51,7 @@ static bool set_of_sas_is_sorted(const void *set_of_sas,
     if (range_a.end > max_end)
       max_end = range_a.end;
   }
-
   env_log_log(env, "-to %lu", max_end);
-
   return true;
 }
 #endif
@@ -114,6 +111,7 @@ static bool compatible(const ConsensusSA *csa,
   /* check strands */
   if (extract_strand(csa, sa_1) != extract_strand(csa, sa_2)) return false;
 
+  /* init */
   exons_sa_1 = array_new(sizeof (Range), env);
   exons_sa_2 = array_new(sizeof (Range), env);
 
@@ -151,13 +149,11 @@ static bool compatible(const ConsensusSA *csa,
     else
       j++;
   }
-
   if (!start_values_set) {
     array_delete(exons_sa_1, env);
     array_delete(exons_sa_2, env);
     return false;
   }
-
   /* from now on the start values are set */
 
   assert(start_1 != UNDEF_ULONG && start_2 != UNDEF_ULONG);
@@ -178,8 +174,7 @@ static bool compatible(const ConsensusSA *csa,
       /* see if at least one exon has a acceptor site (on the left).
          in this case additional checks have to be performed.
          Otherwise, this exons are compatible (on the left side)
-         because they overlap
-      */
+         because they overlap */
       if (has_acceptor_site(exons_sa_1, start_1) ||
           has_acceptor_site(exons_sa_2, start_2)) {
         if (has_acceptor_site(exons_sa_1, start_1) &&
@@ -205,14 +200,12 @@ static bool compatible(const ConsensusSA *csa,
           return false;
         }
       }
-
       /* analyze donor sites */
 
       /* see if at least one exon has a donor site (on the right).
          in this case additional checks have to be performed.
          Otherwise, this exons are compatible (on the right side)
-         because they overlap
-      */
+         because they overlap */
       if (has_donor_site(exons_sa_1, start_1) ||
           has_donor_site(exons_sa_2, start_2)) {
         if (has_donor_site(exons_sa_1, start_1) &&
@@ -245,7 +238,6 @@ static bool compatible(const ConsensusSA *csa,
       array_delete(exons_sa_2, env);
       return false;
     }
-
     start_1++;
     start_2++;
   }
@@ -260,7 +252,6 @@ static bool contains(const ConsensusSA *csa,
                      unsigned long sa_1, unsigned long sa_2, Env *env)
 {
   Range range_sa_1, range_sa_2;
-
   assert(csa);
 
   /* get ranges */
@@ -344,9 +335,7 @@ static void compute_L(Bittab **L, Bittab **C, Bittab **left,
                       unsigned long number_of_sas, Env *env)
 {
   unsigned long sa, sa_1, sa_2, sa_1_size = 0, sa_2_size;
-  Bittab *tmpset;
-
-  tmpset = bittab_new(number_of_sas, env);
+  Bittab *tmpset = bittab_new(number_of_sas, env);
 
   for (sa = 0; sa < number_of_sas; sa++) {
     sa_1 = UNDEF_ULONG;
@@ -380,7 +369,6 @@ static void compute_L(Bittab **L, Bittab **C, Bittab **left,
       bittab_or(L[sa], L[sa_1], C[sa]);
     }
   }
-
   bittab_delete(tmpset, env);
 }
 
@@ -389,9 +377,7 @@ static void compute_R(Bittab **R, Bittab **C, Bittab **right,
 {
   unsigned long sa_1, sa_2, sa_1_size = 0, sa_2_size;
   long sa;
-  Bittab *tmpset;
-
-  tmpset = bittab_new(number_of_sas, env);
+  Bittab *tmpset = bittab_new(number_of_sas, env);
 
   for (sa = number_of_sas-1; sa >= 0; sa--) {
     sa_1 = UNDEF_ULONG;
@@ -420,12 +406,10 @@ static void compute_R(Bittab **R, Bittab **C, Bittab **right,
           }
         }
       }
-
       assert(sa_1 != UNDEF_ULONG);
       bittab_or(R[sa], R[sa_1], C[sa]);
     }
   }
-
   bittab_delete(tmpset, env);
 }
 
@@ -457,7 +441,6 @@ static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa,
       return false;
     }
   }
-
   bittab_delete(SA_p_complement, env);
   return true;
 }
@@ -467,19 +450,11 @@ static void compute_csas(ConsensusSA *csa, Env *env)
 {
   unsigned long i, sa_i, sa_i_size = 0, sa_prime, sa_prime_size;
   Array *splice_form;
-  Bittab **C,
-         **left,
-         **right,
-         **L,
-         **R,
-         *U_i,
-         *SA_i,
-         *SA_prime;
+  Bittab **C, **left, **right, **L, **R, *U_i, *SA_i, *SA_prime;
 #ifndef NDEBUG
   unsigned long u_i_size, u_i_minus_1_size;
-#endif
-
   assert(csa && csa->set_of_sas);
+#endif
 
   /* init sets */
   C     = env_ma_malloc(env, sizeof (Bittab*) * csa->number_of_sas);
@@ -573,11 +548,9 @@ static void compute_csas(ConsensusSA *csa, Env *env)
   env_ma_free(right, env);
   env_ma_free(L, env);
   env_ma_free(R, env);
-
   bittab_delete(U_i, env);
   bittab_delete(SA_i, env);
   bittab_delete(SA_prime, env);
-
   array_delete(splice_form, env);
 }
 
@@ -588,12 +561,10 @@ void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
                   Env *env)
 {
   ConsensusSA csa;
-
   assert(set_of_sas && number_of_sas && size_of_sa);
   assert(get_genomic_range && get_strand && get_exons);
   assert(set_of_sas_is_sorted(set_of_sas, number_of_sas, size_of_sa,
                               get_genomic_range, env));
-
   env_log_log(env, "csa number_of_sas=%lu", number_of_sas);
 
   /* init */
