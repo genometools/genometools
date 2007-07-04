@@ -328,7 +328,7 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
       caption = block_get_caption(this_block);
       if (!caption) caption = block_get_parent_caption(this_block);
       if (!caption) caption = "";
-      cur_range.start = MAX(r->margins, 
+      cur_range.start = MAX(r->margins,
                             render_convert_point(r, block_range.start));
       cur_range.end   = cur_range.start
                           + graphics_get_text_width(r->g, caption);

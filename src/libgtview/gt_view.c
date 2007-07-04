@@ -89,7 +89,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
                   "overwrite", argv[*parsed_args]);
     oprval = OPTIONPARSER_ERROR;
   }
-  
+
   /* free */
   option_parser_delete(op, env);
 
@@ -105,7 +105,7 @@ int gt_view(int argc, const char **argv, Env *env)
   GenomeNode *gn = NULL;
   FeatureIndex *features = NULL;
   int parsed_args, had_err=0;
-  char *seqid;
+  char *seqid = NULL;
   Range qry_range, sequence_region_range;
   Array *results = NULL;
   Config *cfg;
@@ -176,7 +176,7 @@ int gt_view(int argc, const char **argv, Env *env)
   }
   else if (!had_err && !feature_index_has_seqid(features,
                                                 str_get(arguments.seqid),
-                                                env)) 
+                                                env))
   {
     env_error_set(env, "sequence region '%s' does not exist in GFF input file",
                   str_get(arguments.seqid));

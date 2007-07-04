@@ -91,9 +91,9 @@ int feature_index_add_sequence_region(FeatureIndex *fi,
   int had_err = 0;
   char *seqid;
   Range *range;
-  
+
   seqid = str_get(genome_node_get_seqid((GenomeNode*) sr));
-  
+
   if (fi == NULL || seqid == NULL)
   {
     had_err = -1;
@@ -104,7 +104,7 @@ int feature_index_add_sequence_region(FeatureIndex *fi,
   /* claim another reference */
     sr = (SequenceRegion*) genome_node_rec_ref((GenomeNode*) sr, env);
     /* initialize new dynamic range */
-    range = env_ma_malloc(env, sizeof(Range));
+    range = env_ma_malloc(env, sizeof (Range));
     range->start = ~0UL;
     range->end = 0;
     /* initialize new Array of subtree nodes for this sequence
@@ -145,7 +145,7 @@ void feature_index_add_genome_feature(FeatureIndex *fi,
   GenomeFeature *gf_new;
   char* seqid;
   Range *seqid_range, node_range;
-  
+
   env_error_check(env);
 
   gn = genome_node_rec_ref((GenomeNode*) gf, env);
@@ -250,7 +250,7 @@ Range feature_index_get_range_for_seqid(FeatureIndex *fi,
 {
   assert(fi && seqid);
   Range ret, *range;
-  
+
   range = (Range*) hashtable_get(fi->ranges, seqid);
   if (range && (range->start != ~0UL && range->end != 0))
   {
@@ -262,7 +262,7 @@ Range feature_index_get_range_for_seqid(FeatureIndex *fi,
     GenomeNode *sr;
     sr = (GenomeNode*) hashtable_get(fi->regions, seqid);
     return genome_node_get_range(sr);
-  } 
+  }
   return ret;
 }
 
