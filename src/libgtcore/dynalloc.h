@@ -16,10 +16,10 @@
   It dynamically re-/allocates memory. Thereby, usually more memory
   is allocated than what was asked for (to avoid frequent realloc calls).
 
-  ptr: the previously allocated memory
-  allocated: allocated memory size before and after the call
-  size: requested memory size
-  env: the environment object
+  <ptr> the previously allocated memory
+  <allocated> allocated memory size before and after the call
+  <size> requested memory size
+  <env> the environment object
 */
 
 void* dynalloc(void *ptr, size_t *allocated, size_t size, Env *env);
