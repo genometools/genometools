@@ -38,7 +38,6 @@ requiredUInt32Bits(uint32_t v)
   return r;
 }
 
-#ifdef HAVE_64BIT_TYPE
 /* FIXME: this needs some serious rework for 64-bit */
 int
 requiredUInt64Bits(uint64_t v)
@@ -60,11 +59,11 @@ requiredUInt64Bits(uint64_t v)
   r = MultiplyDeBruijnBitPosition[(v * 0x26752B916FC7B0DULL) >> 58];
   return r;
 }
-#endif /* HAVE_64BIT_TYPE */
+
 #if 0
 /**
  * This function was used to compute the 64-bit DeBruijn table shown
- * above.
+ * above. The multiplicator can be gathered from diverse web sources.
  */
 static void
 computeDeBruijn()

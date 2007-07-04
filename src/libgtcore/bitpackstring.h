@@ -18,6 +18,8 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
+#include <libgtcore/env.h>
+
 /* Caution: sizeof(bitElem) <= sizeof(uint_fast32_t) must be met */
 typedef unsigned char bitElem;
 typedef bitElem *bitString;
@@ -435,6 +437,52 @@ bsGetUniformInt64Array(const bitString str, bitOffset offset, unsigned numBits,
 extern int
 bsCompare(const bitString a, bitOffset offsetA, bitOffset numBitsA,
           const bitString b, bitOffset offsetB, bitOffset numBitsB);
+
+/**
+ * Meta-Unit test function for bitPackString, calls all functions
+ * mentioned below.
+ * @return 0 on success, -1 on error.
+ */
+extern int
+bitPackString_unit_test(Env *env);
+/**
+ * Unit test function for bitPackString, integer functions.
+ * @return 0 on success, -1 on error.
+ */
+extern int
+bitPackStringInt_unit_test(Env *env);
+/**
+ * Unit test function for bitPackString, unsigned functions.
+ * @return 0 on success, -1 on error.
+ */
+extern int
+bitPackStringUInt_unit_test(Env *env);
+/**
+ * Unit test function for bitPackString, 8-bit functions.
+ * @return 0 on success, -1 on error.
+ */
+extern int
+bitPackString8_unit_test(Env *env);
+/**
+ * Unit test function for bitPackString, 16-bit functions.
+ * @return 0 on success, -1 on error.
+ */
+extern int
+bitPackString16_unit_test(Env *env);
+/**
+ * Unit test function for bitPackString, 32-bit functions.
+ * @return 0 on success, -1 on error.
+ */
+extern int
+bitPackString32_unit_test(Env *env);
+/**
+ * Unit test function for bitPackString, 64-bit functions.
+ * @return 0 on success, -1 on error.
+ */
+extern int
+bitPackString64_unit_test(Env *env);
+
+
 
 #include "bitpackstringsimpleop.h"
 

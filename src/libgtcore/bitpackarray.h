@@ -122,4 +122,11 @@ bpaGetUInt64(struct bitPackArray *array, bitOffset index)
                      array->bitsPerElem);
 }
 
+/**
+ * Unit test function for bitPackArray.
+ * @return 0 on success, -1 on error.
+ */
+extern int
+bitPackArray_unit_test(Env *env);
+
 #endif /* BITPACKARRAY_H_INCLUDED */
