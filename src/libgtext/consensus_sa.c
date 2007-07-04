@@ -7,8 +7,7 @@
 #include <assert.h>
 #include <libgtext/consensus_sa.h>
 
-typedef struct
-{
+typedef struct {
   const void *set_of_sas;
   unsigned long number_of_sas;
   size_t size_of_sa;
@@ -17,7 +16,7 @@ typedef struct
   GetExonsFunc get_exons;
   ProcessSpliceFormFunc process_splice_form;
   void *userdata;
-} Consensus_SA;
+} ConsensusSA;
 
 #ifndef NDEBUG
 static bool set_of_sas_is_sorted(const void *set_of_sas,
@@ -60,14 +59,13 @@ static bool set_of_sas_is_sorted(const void *set_of_sas,
 }
 #endif
 
-static Range extract_genomic_range(const Consensus_SA *csa,
-                                   unsigned long sa)
+static Range extract_genomic_range(const ConsensusSA *csa, unsigned long sa)
 {
   assert(csa && csa->set_of_sas && sa < csa->number_of_sas);
   return csa->get_genomic_range(csa->set_of_sas + csa->size_of_sa * sa);
 }
 
-static Strand extract_strand(const Consensus_SA *csa, unsigned long sa)
+static Strand extract_strand(const ConsensusSA *csa, unsigned long sa)
 {
   Strand strand;
   assert(csa && csa->set_of_sas && sa < csa->number_of_sas);
@@ -76,7 +74,7 @@ static Strand extract_strand(const Consensus_SA *csa, unsigned long sa)
   return strand;
 }
 
-static void extract_exons(const Consensus_SA *csa, Array *exon_ranges,
+static void extract_exons(const ConsensusSA *csa, Array *exon_ranges,
                           unsigned long sa, Env *env)
 {
   assert(csa && exon_ranges && csa->set_of_sas && sa < csa->number_of_sas);
@@ -101,7 +99,7 @@ static bool has_acceptor_site(Array *gene, unsigned long exon)
   return true;
 }
 
-static bool compatible(const Consensus_SA *csa,
+static bool compatible(const ConsensusSA *csa,
                        unsigned long sa_1, unsigned long sa_2, Env *env)
 {
   Array *exons_sa_1, *exons_sa_2;
@@ -258,7 +256,7 @@ static bool compatible(const Consensus_SA *csa,
   return true;
 }
 
-static bool contains(const Consensus_SA *csa,
+static bool contains(const ConsensusSA *csa,
                      unsigned long sa_1, unsigned long sa_2, Env *env)
 {
   Range range_sa_1, range_sa_2;
@@ -276,7 +274,7 @@ static bool contains(const Consensus_SA *csa,
   return false;
 }
 
-static void compute_C(Bittab **C, const Consensus_SA *csa, Env *env)
+static void compute_C(Bittab **C, const ConsensusSA *csa, Env *env)
 {
   unsigned long sa, sa_1;
   assert(csa);
@@ -290,8 +288,8 @@ static void compute_C(Bittab **C, const Consensus_SA *csa, Env *env)
 }
 
 static void compute_left_or_right(Bittab **left_or_right,
-                                  const Consensus_SA *csa,
-                                  bool (*cmp_func) (const Consensus_SA *csa,
+                                  const ConsensusSA *csa,
+                                  bool (*cmp_func) (const ConsensusSA *csa,
                                                     unsigned long sa_1,
                                                     unsigned long sa_2),
                                                     Env *env)
@@ -306,7 +304,7 @@ static void compute_left_or_right(Bittab **left_or_right,
   }
 }
 
-static bool is_right_of(const Consensus_SA *csa,
+static bool is_right_of(const ConsensusSA *csa,
                         unsigned long sa_1, unsigned long sa_2)
 {
   Range range_sa_1, range_sa_2;
@@ -318,7 +316,7 @@ static bool is_right_of(const Consensus_SA *csa,
   return false;
 }
 
-static bool is_left_of(const Consensus_SA *csa,
+static bool is_left_of(const ConsensusSA *csa,
                        unsigned long sa_1, unsigned long sa_2)
 {
   Range range_sa_1, range_sa_2;
@@ -330,13 +328,13 @@ static bool is_left_of(const Consensus_SA *csa,
   return false;
 }
 
-static void compute_left(Bittab **left, const Consensus_SA *csa, Env *env)
+static void compute_left(Bittab **left, const ConsensusSA *csa, Env *env)
 {
   assert(csa);
   compute_left_or_right(left, csa, is_right_of, env);
 }
 
-static void compute_right(Bittab **right, const Consensus_SA *csa, Env *env)
+static void compute_right(Bittab **right, const ConsensusSA *csa, Env *env)
 {
   assert(csa);
   compute_left_or_right(right, csa, is_left_of, env);
@@ -432,8 +430,8 @@ static void compute_R(Bittab **R, Bittab **C, Bittab **right,
 }
 
 #ifndef NDEBUG
-static bool splice_form_is_valid(Bittab *SA_p, const Consensus_SA *csa,
-                                         Env *env)
+static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa,
+                                 Env *env)
 {
   Bittab *SA_p_complement; /* SA \ SA_p */
   unsigned long sa, sa_prime;
@@ -465,7 +463,7 @@ static bool splice_form_is_valid(Bittab *SA_p, const Consensus_SA *csa,
 }
 #endif
 
-static void compute_csas(Consensus_SA *csa, Env *env)
+static void compute_csas(ConsensusSA *csa, Env *env)
 {
   unsigned long i, sa_i, sa_i_size = 0, sa_prime, sa_prime_size;
   Array *splice_form;
@@ -589,7 +587,7 @@ void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
                   ProcessSpliceFormFunc process_splice_form, void *userdata,
                   Env *env)
 {
-  Consensus_SA csa;
+  ConsensusSA csa;
 
   assert(set_of_sas && number_of_sas && size_of_sa);
   assert(get_genomic_range && get_strand && get_exons);
