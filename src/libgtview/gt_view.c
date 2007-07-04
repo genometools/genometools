@@ -23,6 +23,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   OptionParser *op;
   Option  *option, *option2;
   OPrval oprval;
+  bool force;
   env_error_check(env);
 
   /* init */
@@ -39,24 +40,29 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
                            "features on stdout)", &arguments->pipe, false, env);
   option_parser_add_option(op, option, env);
 
+  /* -force */
+  option = option_new_bool("force", "force writing to output file", &force,
+                           false, env);
+  option_parser_add_option(op, option, env);
+
   /* -seqid */
-  option = option_new_string("seqid", "sequence region identifier"
-                                      " (default: first one in file)",
+  option = option_new_string("seqid", "sequence region identifier\n"
+                                      "default: first one in file",
                             arguments->seqid,
                             NULL, env);
   option_parser_add_option(op, option, env);
   option_hide_default(option);
 
   /* -start */
-  option = option_new_ulong_min("start", "start position"
-                                         " (default: region start)",
+  option = option_new_ulong_min("start", "start position\n"
+                                         "default: first region start",
                             &arguments->start,
                             UNDEF_ULONG, 1, env);
   option_parser_add_option(op, option, env);
   option_hide_default(option);
 
   /* -end */
-  option2 = option_new_ulong("end", "end position (default: region end)",
+  option2 = option_new_ulong("end", "end position\ndefault: last region end",
                             &arguments->end,
                             UNDEF_ULONG, env);
   option_parser_add_option(op, option2, env);
@@ -72,11 +78,18 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   option_parser_add_option(op, option, env);
 
   /* set contact mailaddress */
-  option_parser_set_mailaddress(op, "<ssteinbiss@zbh.uni-hamburg.de>");
+  option_parser_set_mailaddress(op, "<ssteinbiss@stud.zbh.uni-hamburg.de>");
 
   /* parse options */
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 2, env);
+
+  if (oprval == OPTIONPARSER_OK && !force && file_exists(argv[*parsed_args])) {
+    env_error_set(env, "file \"%s\" exists already. use option -force to "
+                  "overwrite", argv[*parsed_args]);
+    oprval = OPTIONPARSER_ERROR;
+  }
+
   /* free */
   option_parser_delete(op, env);
 
@@ -92,8 +105,8 @@ int gt_view(int argc, const char **argv, Env *env)
   GenomeNode *gn = NULL;
   FeatureIndex *features = NULL;
   int parsed_args, had_err=0;
-  char *seqid;
-  Range qry_range;
+  char *seqid = NULL;
+  Range qry_range, sequence_region_range;
   Array *results = NULL;
   Config *cfg;
   Str *config_file;
@@ -153,10 +166,18 @@ int gt_view(int argc, const char **argv, Env *env)
 
   /* if seqid is empty, take first one added to index */
   if (!had_err && strcmp(str_get(arguments.seqid),"") == 0)
-     seqid = feature_index_get_first_seqid(features);
+  {
+    seqid = feature_index_get_first_seqid(features);
+    if (seqid == NULL)
+    {
+      env_error_set(env, "GFF input file must contain a sequence region!");
+      had_err = -1;
+    }
+  }
   else if (!had_err && !feature_index_has_seqid(features,
-                                           str_get(arguments.seqid),
-                                           env)) {
+                                                str_get(arguments.seqid),
+                                                env))
+  {
     env_error_set(env, "sequence region '%s' does not exist in GFF input file",
                   str_get(arguments.seqid));
     had_err = -1;
@@ -166,10 +187,9 @@ int gt_view(int argc, const char **argv, Env *env)
     seqid = str_get(arguments.seqid);
   }
 
-  if (!had_err) {
-    Range sequence_region_range;
-    results = array_new(sizeof (GenomeNode*), env);
-
+  results = array_new(sizeof (GenomeNode*), env);
+  if (!had_err)
+  {
     sequence_region_range = feature_index_get_range_for_seqid(features, seqid);
     qry_range.start = (arguments.start == UNDEF_ULONG ?
                          sequence_region_range.start :
@@ -179,11 +199,14 @@ int gt_view(int argc, const char **argv, Env *env)
                          arguments.end);
 
     feature_index_get_features_for_range(features,
-                                       results,
-                                       seqid,
-                                       qry_range,
-                                       env);
+                                         results,
+                                         seqid,
+                                         qry_range,
+                                         env);
+  }
 
+  if (!had_err)
+  {
     if (arguments.verbose)
       fprintf(stderr, "# of results: %lu\n", array_size(results));
 
@@ -198,7 +221,8 @@ int gt_view(int argc, const char **argv, Env *env)
     str_append_cstr(config_file, "/config/view.lua", env);
     cfg = config_new(env, arguments.verbose);
     assert(cfg);
-    config_load_file(cfg, config_file, env);
+    if (file_exists(str_get(config_file)))
+      config_load_file(cfg, config_file, env);
 
     /* create and write image file */
     Diagram* d = diagram_new(results, qry_range, cfg, env);
@@ -209,11 +233,11 @@ int gt_view(int argc, const char **argv, Env *env)
     config_delete(cfg, env);
     str_delete(config_file, env);
     diagram_delete(d, env);
-    array_delete(results, env);
   }
 
   /* free */
   str_delete(arguments.seqid,env);
+  array_delete(results, env);
   feature_index_delete(features, env);
   genome_stream_delete(feature_stream, env);
   genome_stream_delete(gff3_in_stream, env);
