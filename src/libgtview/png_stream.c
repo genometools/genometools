@@ -6,9 +6,9 @@
 
 #include <assert.h>
 #include <gtcore.h>
-#include "png_stream.h"
-#include "png_visitor.h"
-#include "genome_stream_rep.h"
+#include <libgtview/png_stream.h>
+#include <libgtview/png_visitor.h>
+#include <libgtext/genome_stream_rep.h>
 
 struct PNGStream {
   const GenomeStream parent_instance;

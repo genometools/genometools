@@ -19,6 +19,12 @@ is called ``gmake'':
 $ gmake assert=no
 
 
+Building GenomeTools with the view tool (requires installed cairo library):
+---------------------------------------------------------------------------
+
+invoke make as above with the argument libgtview=yes
+
+
 Testing GenomeTools (optional)
 ------------------------------
 

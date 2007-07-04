@@ -1,3 +1,9 @@
+changes in version 1.0.0:
+
+- `gt view` tool added (optional: compile with `make libgtview=yes`)
+- from here on release numbers are synced with GenomeTools
+
+
 changes in version 0.7.5:
 
 - `gt splitfasta` runs faster and can process compressed files

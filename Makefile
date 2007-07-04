@@ -11,13 +11,17 @@ INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
              -I$(CURDIR)/src/external/expat-2.0.0/lib\
              -I$(CURDIR)/src/external/bzip2-1.0.4\
              -I$(CURDIR)/src/external/agg-2.4/include\
-             -I$(CURDIR)/src/external/libpng-1.2.18
+             -I$(CURDIR)/src/external/libpng-1.2.18\
+             -I/usr/include/cairo\
+             -I/usr/local/include/cairo
+
 CFLAGS:=
 CXXFLAGS:=
 GT_CFLAGS:= -g -Wall -Werror -pipe -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
             $(INCLUDEOPT)
 GT_CXXFLAGS:= -g -pipe $(INCLUDEOPT)
-LDFLAGS:=
+STEST_FLAGS:=
+LDFLAGS:=-L/usr/local/lib -L/usr/X11R6/lib
 LDLIBS:=-lm -lz
 
 # try to set RANLIB automatically
@@ -25,6 +29,11 @@ SYSTEM:=$(shell uname -s)
 ifeq ($(SYSTEM),Darwin)
   RANLIB:=ranlib
 endif
+
+# the default GenomeTools libraries which are build
+GTLIBS:=lib/libgtext.a\
+        lib/libgtcore.a\
+        lib/libbz2.a
 
 # the core GenomeTools library (no other dependencies)
 LIBGTCORE_SRC:=$(notdir $(wildcard src/libgtcore/*.c))
@@ -86,15 +95,22 @@ ifeq ($(static),yes)
   LDFLAGS += -static
 endif
 
+ifeq ($(libgtview),yes)
+  GTLIBS := $(GTLIBS) lib/libgtview.a
+  GT_CFLAGS += -DLIBGTVIEW
+  LDLIBS += -lcairo
+  STEST_FLAGS += -libgtview
+endif
+
 # set prefix for install target
 prefix ?= /usr/local
 
-all: dirs lib/libgtcore.a lib/libgtext.a lib/libgtview.a bin/gt bin/rnv
+all: dirs $(GTLIBS) bin/skproto bin/gt bin/rnv
 
 dirs:
-	@test -d obj     || mkdir -p obj 
-	@test -d lib     || mkdir -p lib 
-	@test -d bin     || mkdir -p bin 
+	@test -d obj     || mkdir -p obj
+	@test -d lib     || mkdir -p lib
+	@test -d bin     || mkdir -p bin
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $@]"
@@ -153,8 +169,11 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) lib/libgtview.a lib/libgtext.a lib/libgtcore.a\
-        lib/libbz2.a lib/libagg.a lib/libpng.a
+bin/skproto: obj/skproto.o obj/gt_skproto.o lib/libgtcore.a lib/libbz2.a
+	@echo "[link $@]"
+	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
+
+bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) $(GTLIBS)
 	@echo "[link $@]"
 	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
@@ -234,7 +253,7 @@ obj/%.o: src/external/rnv-1.7.8/%.c
 # read deps
 -include obj/*.d
 
-.PHONY: dist srcdist release gt libgt install splint test clean cleanup
+.PHONY: dist srcdist release gt install splint test clean cleanup
 
 dist: all
 	tar cvzf gt-`cat VERSION`.tar.gz bin/gt
@@ -254,8 +273,6 @@ installwww:
 	rsync -rv www/ $(SERVER):$(WWWBASEDIR)
 
 gt: dirs bin/gt
-
-libgt: dirs lib/libexpat.a lib/libgtcore.a lib/libgtext.a lib/libgtview.a
 
 install:
 	test -d $(prefix)/bin || mkdir -p $(prefix)/bin
@@ -286,7 +303,7 @@ splint:
 
 test: all
 	bin/gt -test
-	cd testsuite && env -i ruby -I. testsuite.rb -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin
+	cd testsuite && env -i ruby -I. testsuite.rb -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin $(STEST_FLAGS)
 
 clean:
 	rm -rf obj

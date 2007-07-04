@@ -50,6 +50,11 @@ void          genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn,
                                       Env*);
 bool          genome_node_has_children(GenomeNode*);
 bool          genome_node_direct_children_do_not_overlap(GenomeNode*, Env*);
+/* returns true if all direct childred of <parent> with the same type (s.t.) as
+   <child> do not overlap */
+bool          genome_node_direct_children_do_not_overlap_st(GenomeNode *parent,
+                                                            GenomeNode *child,
+                                                            Env*);
 bool          genome_node_is_tree(GenomeNode*);
 bool          genome_node_tree_is_sorted(GenomeNode **buffer,
                                          GenomeNode *current_node, Env*);

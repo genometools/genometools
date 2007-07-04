@@ -29,3 +29,12 @@ feature requests:
 - `gt eval`: measure nucleotide level
 - extend error messages for xmalloc(), xcalloc(), and xrealloc(): show requested
   memory sizes and maybe line number and file name)
+
+
+view tool:
+----------
+
+- fix bug (see testsuite)
+- add option -force which allows to overwrite PNG_file (default: no)
+- unify: ssteinbiss@zbh.uni-hamburg.de      and
+         ssteinbiss@stud.zbh.uni-hamburg.de
