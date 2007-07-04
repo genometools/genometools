@@ -3,8 +3,6 @@ extern "C" {
 #endif
 int guessifproteinsequencestream(const StrArray *filenametab,Env *env);
 
-bool guessifproteinsequencestream2(const char *inputfile);
-
 #ifdef __cplusplus
 }
 #endif

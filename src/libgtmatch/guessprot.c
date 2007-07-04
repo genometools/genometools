@@ -9,11 +9,8 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "types.h"
-#include "inputsymbol.h"
-#include "genstream.h"
 #include "fbs-def.h"
-
-#include "genericstream.pr"
+#include "stamp.h"
 
 #include "fbsadv.pr"
 
@@ -57,74 +54,9 @@ int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
       default:  break;
     }
   }
-  if (countnonbases >= currentposition/10)
+  if (countnonbases > 0 && countnonbases >= currentposition/10)
   {
     return 1;
   }
   return 0;
-}
-
-bool guessifproteinsequencestream2(const char *inputfile)
-{
-  Fgetcreturntype currentchar;
-  Seqpos countnonbases = 0,
-         countcharacters = 0;
-  bool indesc = false;
-  Genericstream inputstream;
-
-  opengenericstream(&inputstream,inputfile);
-  for (;;)
-  {
-    if (inputstream.isgzippedstream)
-    {
-      currentchar = gzgetc(inputstream.stream.gzippedstream);
-    } else
-    {
-      currentchar = fgetc(inputstream.stream.fopenstream);
-    }
-    if (indesc)
-    {
-      if (currentchar == NEWLINESYMBOL)
-      {
-        indesc = false;
-      }
-    } else
-    {
-      if (currentchar == FASTASEPARATOR)
-      {
-        indesc = true;
-      } else
-      {
-        if (!isspace((Ctypeargumenttype) currentchar))
-        {
-          countcharacters++;
-          switch (currentchar)
-          {
-            case 'L':
-            case 'I':
-            case 'F':
-            case 'E':
-            case 'Q':
-            case 'P':
-            case 'X':
-            case 'Z':
-              countnonbases++;
-              break;
-            default:
-              break;
-          }
-        }
-      }
-    }
-    if (countcharacters >= (Seqpos) 1000)
-    {
-      break;
-    }
-  }
-  closegenericstream(&inputstream,inputfile);
-  if (countnonbases >= countcharacters/10)
-  {
-    return true;
-  }
-  return false;
 }

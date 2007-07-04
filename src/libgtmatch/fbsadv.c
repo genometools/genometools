@@ -9,11 +9,13 @@
 #include "libgtcore/strarray.h"
 #include "fbs-def.h"
 #include "spacedef.h"
-#include "inputsymbol.h"
 #include "chardef.h"
 #include "stamp.h"
 
 #include "genericstream.pr"
+
+#define FASTASEPARATOR '>'
+#define NEWLINESYMBOL  '\n'
 
 void initfastabufferstate(Fastabufferstate *fbs,
                           const StrArray *filenametab,

@@ -435,3 +435,71 @@ bool guessifproteinsequence(const Uchar *input,Seqpos inputlen)
   return false;
 }
 */
+
+/* from guessprot.c
+
+bool guessifproteinsequencestream2(const char *inputfile)
+{
+  Fgetcreturntype currentchar;
+  Seqpos countnonbases = 0,
+         countcharacters = 0;
+  bool indesc = false;
+  Genericstream inputstream;
+
+  opengenericstream(&inputstream,inputfile);
+  for (;;)
+  {
+    if (inputstream.isgzippedstream)
+    {
+      currentchar = gzgetc(inputstream.stream.gzippedstream);
+    } else
+    {
+      currentchar = fgetc(inputstream.stream.fopenstream);
+    }
+    if (indesc)
+    {
+      if (currentchar == NEWLINESYMBOL)
+      {
+        indesc = false;
+      }
+    } else
+    {
+      if (currentchar == FASTASEPARATOR)
+      {
+        indesc = true;
+      } else
+      {
+        if (!isspace((Ctypeargumenttype) currentchar))
+        {
+          countcharacters++;
+          switch (currentchar)
+          {
+            case 'L':
+            case 'I':
+            case 'F':
+            case 'E':
+            case 'Q':
+            case 'P':
+            case 'X':
+            case 'Z':
+              countnonbases++;
+              break;
+            default:
+              break;
+          }
+        }
+      }
+    }
+    if (countcharacters >= (Seqpos) 1000)
+    {
+      break;
+    }
+  }
+  closegenericstream(&inputstream,inputfile);
+  if (countnonbases > 0 && countnonbases >= countcharacters/10)
+  {
+    return true;
+  }
+  return false;
+}
+*/

@@ -139,7 +139,8 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
                           &specialcharinfo,
                           so->filenametab,
                           &filelengthtab,
-                          getsymbolmapAlphabet(alpha), env) != 0)
+                          getsymbolmapAlphabet(alpha), 
+                          env) != 0)
     {
       haserr = true;
     }
