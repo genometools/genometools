@@ -20,11 +20,10 @@ typedef struct
 } Consensus_SA;
 
 #ifndef NDEBUG
-static unsigned int set_of_sas_is_sorted(const void *set_of_sas,
-                                         unsigned long number_of_sas,
-                                         size_t size_of_sa,
-                                         GetGenomicRangeFunc
-                                         get_genomic_range, Env *env)
+static bool set_of_sas_is_sorted(const void *set_of_sas,
+                                 unsigned long number_of_sas,
+                                 size_t size_of_sa, GetGenomicRangeFunc
+                                 get_genomic_range, Env *env)
 {
   Range range_a, range_b;
   unsigned long max_end;
@@ -47,7 +46,7 @@ static unsigned int set_of_sas_is_sorted(const void *set_of_sas,
 
     /* compare */
     if (!(range_a.start <= range_b.start))
-      return 0;
+      return false;
 
     /* make the second range the first */
     range_a = range_b;
@@ -57,7 +56,7 @@ static unsigned int set_of_sas_is_sorted(const void *set_of_sas,
 
   env_log_log(env, "-to %lu", max_end);
 
-  return 1;
+  return true;
 }
 #endif
 
@@ -86,37 +85,36 @@ static void extract_exons(const Consensus_SA *csa, Array *exon_ranges,
   assert(ranges_are_sorted_and_do_not_overlap(exon_ranges));
 }
 
-static unsigned int has_donor_site(Array *gene, unsigned long exon)
+static bool has_donor_site(Array *gene, unsigned long exon)
 {
   assert(exon < array_size(gene));
   if (exon == array_size(gene) - 1)
-    return 0;
-  return 1;
+    return false;
+  return true;
 }
 
-static unsigned int has_acceptor_site(Array *gene, unsigned long exon)
+static bool has_acceptor_site(Array *gene, unsigned long exon)
 {
   assert(exon < array_size(gene));
   if (exon == 0)
-    return 0;
-  return 1;
+    return false;
+  return true;
 }
 
-static unsigned int compatible(const Consensus_SA *csa,
-                               unsigned long sa_1, unsigned long sa_2, Env *env)
+static bool compatible(const Consensus_SA *csa,
+                       unsigned long sa_1, unsigned long sa_2, Env *env)
 {
   Array *exons_sa_1, *exons_sa_2;
   Range range_sa_1, range_sa_2;
   unsigned long i, j, num_of_exons_1, num_of_exons_2,
-       start_1 = UNDEF_ULONG,
-       start_2 = UNDEF_ULONG;
-  unsigned int start_values_set = 0;
+                start_1 = UNDEF_ULONG, start_2 = UNDEF_ULONG;
+  bool start_values_set = false;
   const unsigned long fuzzlength = 0; /* XXX */
 
   assert(csa);
 
   /* check strands */
-  if (extract_strand(csa, sa_1) != extract_strand(csa, sa_2)) return 0;
+  if (extract_strand(csa, sa_1) != extract_strand(csa, sa_2)) return false;
 
   exons_sa_1 = array_new(sizeof (Range), env);
   exons_sa_2 = array_new(sizeof (Range), env);
@@ -128,7 +126,7 @@ static unsigned int compatible(const Consensus_SA *csa,
   if (!range_overlap(range_sa_1, range_sa_2)) {
     array_delete(exons_sa_1, env);
     array_delete(exons_sa_2, env);
-    return 0;
+    return false;
   }
 
   /* get exons */
@@ -145,7 +143,7 @@ static unsigned int compatible(const Consensus_SA *csa,
                       *(Range*) array_get(exons_sa_2, j))) {
       start_1 = i;
       start_2 = j;
-      start_values_set = 1;
+      start_values_set = true;
       break;
     }
     if (((Range*) array_get(exons_sa_1, i))->start <
@@ -159,7 +157,7 @@ static unsigned int compatible(const Consensus_SA *csa,
   if (!start_values_set) {
     array_delete(exons_sa_1, env);
     array_delete(exons_sa_2, env);
-    return 0;
+    return false;
   }
 
   /* from now on the start values are set */
@@ -169,7 +167,7 @@ static unsigned int compatible(const Consensus_SA *csa,
     /* no first segment could be maped */
     array_delete(exons_sa_1, env);
     array_delete(exons_sa_2, env);
-    return 0;
+    return false;
   }
 
   while (start_1 < num_of_exons_1 && start_2 < num_of_exons_2) {
@@ -192,21 +190,21 @@ static unsigned int compatible(const Consensus_SA *csa,
           /* the acceptor sites are different */
           array_delete(exons_sa_1, env);
           array_delete(exons_sa_2, env);
-          return 0;
+          return false;
         }
         else if (has_acceptor_site(exons_sa_1, start_1) &&
                  range_sa_2.start + fuzzlength < range_sa_1.start) {
           /* not within fuzzlength */
           array_delete(exons_sa_1, env);
           array_delete(exons_sa_2, env);
-          return 0;
+          return false;
         }
         else if (has_acceptor_site(exons_sa_2, start_2) &&
                  range_sa_1.start + fuzzlength < range_sa_2.start) {
           /* not within fuzzlength */
           array_delete(exons_sa_1, env);
           array_delete(exons_sa_2, env);
-          return 0;
+          return false;
         }
       }
 
@@ -225,21 +223,21 @@ static unsigned int compatible(const Consensus_SA *csa,
           /* the donor sites are different */
           array_delete(exons_sa_1, env);
           array_delete(exons_sa_2, env);
-          return 0;
+          return false;
         }
         else if (has_donor_site(exons_sa_1, start_1) &&
                  range_sa_2.end - fuzzlength > range_sa_1.end) {
           /* not within fuzzlength */
           array_delete(exons_sa_1, env);
           array_delete(exons_sa_2, env);
-          return 0;
+          return false;
         }
         else if (has_donor_site(exons_sa_2, start_2) &&
                  range_sa_1.end - fuzzlength > range_sa_2.end) {
           /* not within fuzzlength */
           array_delete(exons_sa_1, env);
           array_delete(exons_sa_2, env);
-          return 0;
+          return false;
         }
       }
     }
@@ -247,7 +245,7 @@ static unsigned int compatible(const Consensus_SA *csa,
       /* no overlap: two ordered segments do not overlap each other */
       array_delete(exons_sa_1, env);
       array_delete(exons_sa_2, env);
-      return 0;
+      return false;
     }
 
     start_1++;
@@ -257,11 +255,11 @@ static unsigned int compatible(const Consensus_SA *csa,
   /* passed all tests */
   array_delete(exons_sa_1, env);
   array_delete(exons_sa_2, env);
-  return 1;
+  return true;
 }
 
-static unsigned int contains(const Consensus_SA *csa,
-                             unsigned long sa_1, unsigned long sa_2, Env *env)
+static bool contains(const Consensus_SA *csa,
+                     unsigned long sa_1, unsigned long sa_2, Env *env)
 {
   Range range_sa_1, range_sa_2;
 
@@ -273,9 +271,9 @@ static unsigned int contains(const Consensus_SA *csa,
 
   if (range_contains(range_sa_1, range_sa_2) &&
       compatible(csa, sa_1, sa_2, env)) {
-    return 1;
+    return true;
   }
-  return 0;
+  return false;
 }
 
 static void compute_C(Bittab **C, const Consensus_SA *csa, Env *env)
@@ -293,10 +291,10 @@ static void compute_C(Bittab **C, const Consensus_SA *csa, Env *env)
 
 static void compute_left_or_right(Bittab **left_or_right,
                                   const Consensus_SA *csa,
-                                  unsigned int (*cmp_func)
-                                               (const Consensus_SA *csa,
-                                                unsigned long sa_1,
-                                                unsigned long sa_2), Env *env)
+                                  bool (*cmp_func) (const Consensus_SA *csa,
+                                                    unsigned long sa_1,
+                                                    unsigned long sa_2),
+                                                    Env *env)
 {
   unsigned long sa, sa_1;
   assert(csa && left_or_right && *left_or_right);
@@ -308,28 +306,28 @@ static void compute_left_or_right(Bittab **left_or_right,
   }
 }
 
-static unsigned int is_right_of(const Consensus_SA *csa,
-                                unsigned long sa_1, unsigned long sa_2)
+static bool is_right_of(const Consensus_SA *csa,
+                        unsigned long sa_1, unsigned long sa_2)
 {
   Range range_sa_1, range_sa_2;
   assert(csa);
   range_sa_1 = extract_genomic_range(csa, sa_1);
   range_sa_2 = extract_genomic_range(csa, sa_2);
   if (range_sa_1.start  > range_sa_2.start && range_sa_1.end > range_sa_2.end)
-    return 1;
-  return 0;
+    return true;
+  return false;
 }
 
-static unsigned int is_left_of(const Consensus_SA *csa,
-                               unsigned long sa_1, unsigned long sa_2)
+static bool is_left_of(const Consensus_SA *csa,
+                       unsigned long sa_1, unsigned long sa_2)
 {
   Range range_sa_1, range_sa_2;
   assert(csa);
   range_sa_1 = extract_genomic_range(csa, sa_1);
   range_sa_2 = extract_genomic_range(csa, sa_2);
   if (range_sa_1.start  < range_sa_2.start && range_sa_1.end < range_sa_2.end)
-    return 1;
-  return 0;
+    return true;
+  return false;
 }
 
 static void compute_left(Bittab **left, const Consensus_SA *csa, Env *env)
@@ -434,12 +432,12 @@ static void compute_R(Bittab **R, Bittab **C, Bittab **right,
 }
 
 #ifndef NDEBUG
-static unsigned int splice_form_is_valid(Bittab *SA_p, const Consensus_SA *csa,
+static bool splice_form_is_valid(Bittab *SA_p, const Consensus_SA *csa,
                                          Env *env)
 {
   Bittab *SA_p_complement; /* SA \ SA_p */
   unsigned long sa, sa_prime;
-  unsigned int incompatible_found;
+  bool incompatible_found;
 
   SA_p_complement = bittab_new(csa->number_of_sas, env);
   bittab_complement(SA_p_complement, SA_p);
@@ -458,12 +456,12 @@ static unsigned int splice_form_is_valid(Bittab *SA_p, const Consensus_SA *csa,
     }
     if (!incompatible_found) {
       bittab_delete(SA_p_complement, env);
-      return 0;
+      return false;
     }
   }
 
   bittab_delete(SA_p_complement, env);
-  return 1;
+  return true;
 }
 #endif
 
