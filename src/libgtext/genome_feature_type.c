@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
@@ -16,11 +16,17 @@
 */
 
 static const char *genome_feature_type_strings[] = { "CDS",
+                                                     "LTR_retrotransposon",
                                                      "TF_binding_site",
                                                      "exon",
                                                      "gene",
                                                      "intron",
-                                                     "mRNA" };
+                                                     "inverted_repeat",
+                                                     "long_terminal_repeat",
+                                                     "mRNA",
+                                                     "repeat_region",
+                                                     "target_site_duplication"
+                                                   };
 
 int genome_feature_type_get(GenomeFeatureType *type, char *gft_string)
 {
