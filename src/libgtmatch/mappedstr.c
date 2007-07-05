@@ -15,17 +15,18 @@
 #include "libgtcore/strarray.h"
 #include "types.h"
 #include "chardef.h"
-#include "inputsymbol.h"
 #include "spacedef.h"
-#include "genstream.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
+#include "fbs-def.h"
 #include "stamp.h"
 #ifndef NDEBUG
 #include "addnextchar.h"
 #endif
 
-#include "genericstream.pr"
+#include "fbsadv.pr"
+
+#include "readnextUchar.gen"
 
 #ifdef SPECIALCASE4
 #define SUBTRACTLCHARANDSHIFT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER)\
@@ -433,6 +434,83 @@ static void filllargestchartable(uint32_t **filltable,
   }
 }
 
+int getencseqkmersgeneric(
+        const Encodedsequence *encseq,
+        const StrArray *filenametab,
+        void(*processkmercode)(void *,Codetype,Seqpos,
+                               const Firstspecialpos *,Env *),
+        void *processkmercodeinfo,
+        uint32_t numofchars,
+        uint32_t kmersize,
+        const Uchar *symbolmap,
+        Env *env)
+{
+  uint32_t overshoot;
+  Seqpos currentposition;
+  Streamstate spwp;
+  Uchar charcode;
+
+  env_error_check(env);
+  initmultimappower(&spwp.multimappower,numofchars,kmersize,env);
+  spwp.lengthwithoutspecial = 0;
+  spwp.codewithoutspecial = 0;
+  spwp.kmersize = kmersize;
+  spwp.numofchars = numofchars;
+  spwp.windowwidth = 0;
+  spwp.firstindex = 0;
+  ALLOCASSIGNSPACE(spwp.cyclicwindow,NULL,Uchar,kmersize);
+  specialemptyqueue(&spwp.spos,kmersize,env);
+  filllargestchartable(&spwp.filltable,numofchars,kmersize,env);
+  if(encseq != NULL)
+  {
+    Encodedsequencescanstate *esr;
+    Seqpos totallength = getencseqtotallength(encseq);
+
+    esr = initEncodedsequencescanstate(encseq,env);
+    for (currentposition = 0; currentposition<totallength; currentposition++)
+    {
+      charcode = sequentialgetencodedchar(encseq,esr,currentposition);
+      shiftrightwithchar(processkmercode,processkmercodeinfo,
+                         &spwp,currentposition,charcode,env);
+    }
+    freeEncodedsequencescanstate(&esr,env);
+  } else
+  {
+    Fastabufferstate fbs;
+    int retval;
+
+    initfastabufferstate(&fbs,
+                         filenametab,
+                         symbolmap,
+                         NULL,
+                         env);
+    for (currentposition = 0; /* Nothing */; currentposition++)
+    {
+      retval = readnextUchar(&charcode,&fbs,env);
+      if (retval < 0)
+      {
+        return -1;
+      }
+      if (retval == 0)
+      {
+        break;
+      }
+      shiftrightwithchar(processkmercode,processkmercodeinfo,
+                         &spwp,currentposition,charcode,env);
+    }
+  }
+  for (overshoot=0; overshoot<kmersize; overshoot++)
+  {
+    shiftrightwithchar(processkmercode,processkmercodeinfo,&spwp,
+                       currentposition + overshoot,(Uchar) WILDCARD,env);
+  }
+  FREESPACE(spwp.cyclicwindow);
+  FREESPACE(spwp.filltable);
+  ARRAY2DIMFREE(spwp.multimappower);
+  specialwrapqueue(&spwp.spos,env);
+  return 0;
+}
+
 int getfastastreamkmers(
         const StrArray *filenametab,
         void(*processkmercode)(void *,Codetype,Seqpos,
@@ -443,110 +521,18 @@ int getfastastreamkmers(
         const Uchar *symbolmap,
         Env *env)
 {
-  unsigned long filenum;
-  Fgetcreturntype currentchar;
-  bool indesc, firstseq = true;
-  uint32_t overshoot;
-  uint32_t linenum = (uint32_t) 1;
-  Seqpos currentposition = 0;
-  Streamstate spwp;
-  Genericstream inputstream;
-  Uchar charcode;
-
-  env_error_check(env);
-  initmultimappower(&spwp.multimappower,numofchars,kmersize,env);
-  spwp.lengthwithoutspecial = 0;
-  spwp.codewithoutspecial = 0;
-  spwp.kmersize = kmersize;
-  spwp.numofchars = numofchars;
-  spwp.windowwidth = 0;
-  spwp.firstindex = 0;
-  ALLOCASSIGNSPACE(spwp.cyclicwindow,NULL,Uchar,kmersize);
-  specialemptyqueue(&spwp.spos,kmersize,env);
-  filllargestchartable(&spwp.filltable,numofchars,kmersize,env);
-  for (filenum = 0; filenum < strarray_size(filenametab); filenum++)
-  {
-    opengenericstream(&inputstream,strarray_get(filenametab,filenum));
-    indesc = false;
-    for (;;)
-    {
-      if (inputstream.isgzippedstream)
-      {
-        currentchar = gzgetc(inputstream.stream.gzippedstream);
-      } else
-      {
-        currentchar = fgetc(inputstream.stream.fopenstream);
-      }
-      if (currentchar == EOF)
-      {
-        break;
-      }
-      if (indesc)
-      {
-        if (currentchar == NEWLINESYMBOL)
-        {
-          linenum++;
-          indesc = false;
-        }
-      } else
-      {
-        if (!isspace((Ctypeargumenttype) currentchar))
-        {
-          if (currentchar == FASTASEPARATOR)
-          {
-            if (firstseq)
-            {
-              firstseq = false;
-            } else
-            {
-              /* first separator symbol */
-              shiftrightwithchar(processkmercode,processkmercodeinfo,
-                                 &spwp,currentposition,(Uchar) SEPARATOR,env);
-              currentposition++;
-            }
-            indesc = true;
-          } else
-          {
-            charcode = symbolmap[(uint32_t) currentchar];
-            if (charcode == (Uchar) UNDEFCHAR)
-            {
-              env_error_set(env,
-                            "illegal character '%c': file \"%s\", line %u",
-                            currentchar,
-                            strarray_get(filenametab,filenum),
-                            (unsigned int) linenum);
-              return -1;
-            }
-            shiftrightwithchar(processkmercode,processkmercodeinfo,
-                               &spwp,currentposition,charcode,env);
-            currentposition++;
-          }
-        }
-      }
-    }
-    closegenericstream(&inputstream,strarray_get(filenametab,filenum));
-  }
-  for (overshoot=0; overshoot<kmersize; overshoot++)
-  {
-    shiftrightwithchar(processkmercode,processkmercodeinfo,&spwp,
-                       currentposition + overshoot,(Uchar) WILDCARD,env);
-  }
-  FREESPACE(spwp.cyclicwindow);
-  FREESPACE(spwp.filltable);
-  ARRAY2DIMFREE(spwp.multimappower);
-  specialwrapqueue(&spwp.spos,env);
-  if (firstseq)
-  {
-    env_error_set(env,"no sequences in multiple fasta file(s) %s ...",
-                  strarray_get(filenametab,0));
-    return -2;
-  }
-  return 0;
+  return getencseqkmersgeneric(NULL,
+                               filenametab,
+                               processkmercode,
+                               processkmercodeinfo,
+                               numofchars,
+                               kmersize,
+                               symbolmap,
+                               env);
 }
 
 void getencseqkmers(
         const Encodedsequence *encseq,
-        Seqpos totallength,
         void(*processkmercode)(void *,Codetype,Seqpos,
                                const Firstspecialpos *,Env *),
         void *processkmercodeinfo,
@@ -554,38 +540,12 @@ void getencseqkmers(
         uint32_t kmersize,
         Env *env)
 {
-  uint32_t overshoot;
-  Seqpos currentposition;
-  Streamstate spwp;
-  Uchar charcode;
-  Encodedsequencescanstate *esr;
-
-  env_error_check(env);
-  initmultimappower(&spwp.multimappower,numofchars,kmersize,env);
-  spwp.lengthwithoutspecial = 0;
-  spwp.codewithoutspecial = 0;
-  spwp.kmersize = kmersize;
-  spwp.numofchars = numofchars;
-  spwp.windowwidth = 0;
-  spwp.firstindex = 0;
-  ALLOCASSIGNSPACE(spwp.cyclicwindow,NULL,Uchar,kmersize);
-  specialemptyqueue(&spwp.spos,kmersize,env);
-  filllargestchartable(&spwp.filltable,numofchars,kmersize,env);
-  esr = initEncodedsequencescanstate(encseq,env);
-  for (currentposition = 0; currentposition<totallength; currentposition++)
-  {
-    charcode = sequentialgetencodedchar(encseq,esr,currentposition);
-    shiftrightwithchar(processkmercode,processkmercodeinfo,
-                       &spwp,currentposition,charcode,env);
-  }
-  freeEncodedsequencescanstate(&esr,env);
-  for (overshoot=0; overshoot<kmersize; overshoot++)
-  {
-    shiftrightwithchar(processkmercode,processkmercodeinfo,&spwp,
-                       currentposition + overshoot,(Uchar) WILDCARD,env);
-  }
-  FREESPACE(spwp.cyclicwindow);
-  FREESPACE(spwp.filltable);
-  ARRAY2DIMFREE(spwp.multimappower);
-  specialwrapqueue(&spwp.spos,env);
+  (void) getencseqkmersgeneric(encseq,
+                               NULL,
+                               processkmercode,
+                               processkmercodeinfo,
+                               numofchars,
+                               kmersize,
+                               NULL,
+                               env);
 }

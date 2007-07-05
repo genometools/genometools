@@ -1,9 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-bool guessifproteinsequence(const Uchar *input,Seqpos inputlen);
-
-bool guessifproteinsequencestream(const char *inputfile);
+int guessifproteinsequencestream(const StrArray *filenametab,Env *env);
 
 #ifdef __cplusplus
 }

@@ -13,6 +13,7 @@
 #include <limits.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
+#include "libgtcore/strarray.h"
 #include "types.h"
 #include "arraydef.h"
 #include "chardef.h"
@@ -27,10 +28,10 @@
   Uchar characters[UCHAR_MAX+1],     /* array of characters to show */
         mapdomain[UCHAR_MAX+1],      /* list of characters mapped */
         symbolmap[UCHAR_MAX+1];      /* mapping of the symbols */
-  uint32_t domainsize,                /* size of domain of symbolmap */
-           mapsize,                   /* size of image of map, i.e. */
-                                     /* mapping to [0..mapsize-1] */
-           mappedwildcards;           /* number of mapped wildcards */
+  uint32_t domainsize,               /* size of domain of symbolmap */
+           mapsize,                  /* size of image of map, i.e. */
+                                     /* mapping to [0..mapsize-2] */
+           mappedwildcards;          /* number of mapped wildcards */
 };
 
 /*EE
@@ -381,21 +382,28 @@ static void assignProteinalphabet(Alphabet *alpha)
   assignproteinsymbolmap(alpha->symbolmap);
 }
 
-static void assignProteinorDNAalphabet(Alphabet *alpha,const char *inputfile)
+static int assignProteinorDNAalphabet(Alphabet *alpha,
+                                      const StrArray *filenametab,Env *env)
 {
-  if (guessifproteinsequencestream(inputfile))
+  int retval = guessifproteinsequencestream(filenametab,env);
+  if(retval < 0)
+  {
+    return -1;
+  }
+  if (retval == 1)
   {
     assignProteinalphabet(alpha);
   } else
   {
     assignDNAalphabet(alpha);
   }
+  return 0;
 }
 
 /*@null@*/ Alphabet *assigninputalphabet(bool isdna,
                                          bool isprotein,
                                          const Str *smapfile,
-                                         const char *sequencefilename,
+                                         const StrArray *filenametab,
                                          Env *env)
 {
   Alphabet *alpha;
@@ -423,7 +431,10 @@ static void assignProteinorDNAalphabet(Alphabet *alpha,const char *inputfile)
         }
       } else
       {
-        assignProteinorDNAalphabet(alpha,sequencefilename);
+        if(assignProteinorDNAalphabet(alpha,filenametab,env) != 0)
+        {
+          return NULL;
+        }
       }
     }
   }

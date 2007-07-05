@@ -10,15 +10,6 @@ int scanfastasequence(
         const Uchar *symbolmap,
         Env *env);
 
-int scanfastasequence2(
-        unsigned long *numofsequences,
-        Seqpos *totallength,
-        PairSeqpos **filelengthtab,
-        Specialcharinfo *specialcharinfo,
-        const StrArray *filenametab,
-        const Uchar *symbolmap,
-        Env *env);
-
 #ifdef __cplusplus
 }
 #endif

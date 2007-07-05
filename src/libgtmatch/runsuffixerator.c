@@ -66,7 +66,7 @@ static int suftab2file(void *info,
       startpos = suftab[pos];
       if(startpos == 0)
       {
-        cc = UNDEFBWTCHAR;
+        cc = (Uchar) UNDEFBWTCHAR;
       } else
       {
         cc = getencodedchar(outfileinfo->encseq,startpos - 1);
@@ -126,7 +126,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   alpha = assigninputalphabet(so->isdna,
                               so->isprotein,
                               so->str_smap,
-                              strarray_get(so->filenametab,0),
+                              so->filenametab,
                               env);
   if (alpha == NULL)
   {
@@ -139,7 +139,8 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
                           &specialcharinfo,
                           so->filenametab,
                           &filelengthtab,
-                          getsymbolmapAlphabet(alpha), env) != 0)
+                          getsymbolmapAlphabet(alpha), 
+                          env) != 0)
     {
       haserr = true;
     }
@@ -227,7 +228,6 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
     {
       if (suffixerator(suftab2file,
                        &outfileinfo,
-                       totallength,
                        specialcharinfo.specialcharacters,
                        specialcharinfo.specialranges,
                        encseq,

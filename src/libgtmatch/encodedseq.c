@@ -15,14 +15,12 @@
 #include "alphadef.h"
 #include "chardef.h"
 #include "divmodmul.h"
-#include "genstream.h"
 #include "mapspec-def.h"
 #include "encseq-def.h"
 #include "fbs-def.h"
 #include "safecast-gen.h"
 #include "stamp.h"
 
-#include "genericstream.pr"
 #include "alphabet.pr"
 #include "mapspec-gen.pr"
 #include "fbsadv.pr"
@@ -1496,14 +1494,13 @@ static int readsatfromfile(const Str *indexname,Env *env)
       }
     } else
     {
-      PairSeqpos *filelengthtab;
       Fastabufferstate fbs;
       encseq->mappedptr = NULL;
   
       initfastabufferstate(&fbs,
                            filenametab,
                            getsymbolmapAlphabet(alphabet),
-                           &filelengthtab,
+                           NULL,
                            env);
       printf("# call %s\n",
              encodedseqfunctab[(int) sat].fillpos.funcname);
@@ -1513,7 +1510,6 @@ static int readsatfromfile(const Str *indexname,Env *env)
         freeEncodedsequence(&encseq,env);
         haserr = true;
       }
-      FREESPACE(filelengthtab);
     }
   }
 #ifdef DEBUG

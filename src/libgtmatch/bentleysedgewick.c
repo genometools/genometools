@@ -262,7 +262,6 @@ void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
                     const Seqpos *leftborder,
                     const Seqpos *countspecialcodes,
-                    Seqpos totallength,
                     uint32_t numofchars,
                     uint32_t prefixlength,
                     Codetype mincode,
@@ -274,6 +273,7 @@ void sortallbuckets(Seqpos *suftabptr,
   uint32_t rightchar = mincode % numofchars;
   Seqpos left, right, specialcodes;
   ArrayMKVstack mkvauxstack;
+  Seqpos totallength = getencseqtotallength(encseq);
 
   INITARRAY(&mkvauxstack,MKVstack);
   for (code=mincode; code<=maxcode; code++)
