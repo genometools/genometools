@@ -1,7 +1,7 @@
 The following contributors helped to develop GenomeTools. Please drop a note to
 gremme@zbh.uni-hamburg.de if I left someone out or missed something.
 
-- Thomas Jahns (patches)
+- Thomas Jahns (BitPackArray and BitPackString class, patches)
 - Malte Mader (libgtview)
 - Christin Schaerfer (libgtview)
 - Sascha Steinbiss (libgtview)
