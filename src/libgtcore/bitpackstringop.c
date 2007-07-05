@@ -104,13 +104,13 @@ computeDeBruijn()
  * @return 0 for equality, \f$-1\f$ if \f$a < b\f$, \f$1\f$ if \f$b > a\f$
  */
 extern int
-bsCompare(const bitString a, bitOffset offsetA, bitOffset numBitsA,
-          const bitString b, bitOffset offsetB, bitOffset numBitsB)
+bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
+          const BitString b, BitOffset offsetB, BitOffset numBitsB)
 {
-  bitOffset totalBitsLeftA = numBitsA, totalBitsLeftB = numBitsB,
+  BitOffset totalBitsLeftA = numBitsA, totalBitsLeftB = numBitsB,
     elemStartA = offsetA/bitElemBits, elemStartB = offsetB/bitElemBits;
   unsigned bitTopA = offsetA%bitElemBits, bitTopB = offsetB%bitElemBits;
-  const bitElem *pA = a + elemStartA, *pB = b + elemStartB;
+  const BitElem *pA = a + elemStartA, *pB = b + elemStartB;
   uint32_t accumA = 0, accumB = 0;
   unsigned bitsInAccumA, bitsInAccumB;
   assert(a && b);

@@ -23,12 +23,12 @@ enum {
 int
 bitPackStringUInt_unit_test(Env *env)
 {
-  bitElem *bitStore = NULL;
+  BitElem *bitStore = NULL;
   int *randSrc = NULL; /*< create random ints here for input as bit
                             *  store */
   int *randCmp = NULL; /*< used for random ints read back */
   size_t i, numRnd;
-  bitOffset offsetStart, offset;
+  BitOffset offsetStart, offset;
   unsigned long seedval;
   int had_err = 0;
   {
@@ -47,7 +47,7 @@ bitPackStringUInt_unit_test(Env *env)
              env_ma_malloc(env,
                            bitElemsAllocSize(sizeof(int)
                                              *CHAR_BIT*numRnd + offsetStart)
-                           * sizeof(bitElem)))
+                           * sizeof(BitElem)))
          && (randCmp = env_ma_malloc(env, sizeof(int)*numRnd)));
   if(had_err)
   {

@@ -25,20 +25,20 @@
 
 
 /**
- * Computes number of bitElem objects needed to store requested number
+ * Computes number of BitElem objects needed to store requested number
  * of consecutive bits.
  * @param numBits number of bits to be stored in total
- * @return number of bitElem objects needed to store numBits
+ * @return number of BitElem objects needed to store numBits
  * consecutive bits
  */
 static inline size_t
-bitElemsAllocSize(bitOffset numBits)
+bitElemsAllocSize(BitOffset numBits)
 {
   return numBits/bitElemBits + ((numBits%bitElemBits)?1:0);
 }
 
 static inline int8_t
-bsGetInt8(bitString str, bitOffset offset, unsigned numBits)
+bsGetInt8(BitString str, BitOffset offset, unsigned numBits)
 {
   // requires sign extension
   int8_t m = 1 << (numBits - 1);
@@ -46,7 +46,7 @@ bsGetInt8(bitString str, bitOffset offset, unsigned numBits)
 }
 
 static inline int16_t
-bsGetInt16(bitString str, bitOffset offset, unsigned numBits)
+bsGetInt16(BitString str, BitOffset offset, unsigned numBits)
 {
   // requires sign extension
   int16_t m = 1 << (numBits - 1);
@@ -54,7 +54,7 @@ bsGetInt16(bitString str, bitOffset offset, unsigned numBits)
 }
 
 static inline int32_t
-bsGetInt32(bitString str, bitOffset offset, unsigned numBits)
+bsGetInt32(BitString str, BitOffset offset, unsigned numBits)
 {
   // requires sign extension
   int32_t m = 1 << (numBits - 1);
@@ -62,7 +62,7 @@ bsGetInt32(bitString str, bitOffset offset, unsigned numBits)
 }
 
 static inline int64_t
-bsGetInt64(bitString str, bitOffset offset, unsigned numBits)
+bsGetInt64(BitString str, BitOffset offset, unsigned numBits)
 {
   // requires sign extension
   int64_t m = (int64_t)1 << (numBits - 1);
@@ -70,25 +70,25 @@ bsGetInt64(bitString str, bitOffset offset, unsigned numBits)
 }
 
 static inline void
-bsStoreInt8(bitString str, bitOffset offset, unsigned numBits, uint8_t val)
+bsStoreInt8(BitString str, BitOffset offset, unsigned numBits, uint8_t val)
 {
   bsStoreUInt8(str, offset, numBits,  val);
 }
 
 static inline void
-bsStoreInt16(bitString str, bitOffset offset, unsigned numBits, uint16_t val)
+bsStoreInt16(BitString str, BitOffset offset, unsigned numBits, uint16_t val)
 {
   bsStoreUInt16(str, offset, numBits,  val);
 }
 
 static inline void
-bsStoreInt32(bitString str, bitOffset offset, unsigned numBits, uint32_t val)
+bsStoreInt32(BitString str, BitOffset offset, unsigned numBits, uint32_t val)
 {
   bsStoreUInt32(str, offset, numBits,  val);
 }
 
 static inline void
-bsStoreInt64(bitString str, bitOffset offset, unsigned numBits, uint64_t val)
+bsStoreInt64(BitString str, BitOffset offset, unsigned numBits, uint64_t val)
 {
   bsStoreUInt64(str, offset, numBits,  val);
 }
@@ -146,7 +146,7 @@ requiredInt64Bits(int64_t v)
 }
 
 static inline void
-bsStoreUniformInt8Array(bitString str, bitOffset offset, unsigned numBits,
+bsStoreUniformInt8Array(BitString str, BitOffset offset, unsigned numBits,
                        size_t numValues, const int8_t val[])
 {
   bsStoreUniformUInt8Array(str, offset, numBits, numValues,
@@ -154,7 +154,7 @@ bsStoreUniformInt8Array(bitString str, bitOffset offset, unsigned numBits,
 }
 
 static inline void
-bsStoreUniformInt16Array(bitString str, bitOffset offset, unsigned numBits,
+bsStoreUniformInt16Array(BitString str, BitOffset offset, unsigned numBits,
                        size_t numValues, const int16_t val[])
 {
   bsStoreUniformUInt16Array(str, offset, numBits, numValues,
@@ -162,7 +162,7 @@ bsStoreUniformInt16Array(bitString str, bitOffset offset, unsigned numBits,
 }
 
 static inline void
-bsStoreUniformInt32Array(bitString str, bitOffset offset, unsigned numBits,
+bsStoreUniformInt32Array(BitString str, BitOffset offset, unsigned numBits,
                        size_t numValues, const int32_t val[])
 {
   bsStoreUniformUInt32Array(str, offset, numBits, numValues,
@@ -170,7 +170,7 @@ bsStoreUniformInt32Array(bitString str, bitOffset offset, unsigned numBits,
 }
 
 static inline void
-bsStoreUniformInt64Array(bitString str, bitOffset offset, unsigned numBits,
+bsStoreUniformInt64Array(BitString str, BitOffset offset, unsigned numBits,
                        size_t numValues, const int64_t val[])
 {
   bsStoreUniformUInt64Array(str, offset, numBits, numValues,
@@ -215,7 +215,7 @@ bsSignExpandArray64(int64_t val[], size_t numValues, unsigned numBits)
 
 
 static inline void
-bsGetUniformInt8Array(const bitString str, bitOffset offset, unsigned numBits,
+bsGetUniformInt8Array(const BitString str, BitOffset offset, unsigned numBits,
                      size_t numValues, int8_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
@@ -223,7 +223,7 @@ bsGetUniformInt8Array(const bitString str, bitOffset offset, unsigned numBits,
   /* the factor (16) is completely arbitrary and needs some profiling */
   int8_t *blockPtr = val;
   size_t revIndex = numValues;
-  bitOffset offsetTemp = offset;
+  BitOffset offsetTemp = offset;
   while(revIndex > blockSize)
   {
     bsGetUniformUInt8Array(str, offsetTemp, numBits,
@@ -239,7 +239,7 @@ bsGetUniformInt8Array(const bitString str, bitOffset offset, unsigned numBits,
 }
 
 static inline void
-bsGetUniformInt16Array(const bitString str, bitOffset offset, unsigned numBits,
+bsGetUniformInt16Array(const BitString str, BitOffset offset, unsigned numBits,
                      size_t numValues, int16_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
@@ -247,7 +247,7 @@ bsGetUniformInt16Array(const bitString str, bitOffset offset, unsigned numBits,
   /* the factor (16) is completely arbitrary and needs some profiling */
   int16_t *blockPtr = val;
   size_t revIndex = numValues;
-  bitOffset offsetTemp = offset;
+  BitOffset offsetTemp = offset;
   while(revIndex > blockSize)
   {
     bsGetUniformUInt16Array(str, offsetTemp, numBits,
@@ -263,7 +263,7 @@ bsGetUniformInt16Array(const bitString str, bitOffset offset, unsigned numBits,
 }
 
 static inline void
-bsGetUniformInt32Array(const bitString str, bitOffset offset, unsigned numBits,
+bsGetUniformInt32Array(const BitString str, BitOffset offset, unsigned numBits,
                      size_t numValues, int32_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
@@ -271,7 +271,7 @@ bsGetUniformInt32Array(const bitString str, bitOffset offset, unsigned numBits,
   /* the factor (16) is completely arbitrary and needs some profiling */
   int32_t *blockPtr = val;
   size_t revIndex = numValues;
-  bitOffset offsetTemp = offset;
+  BitOffset offsetTemp = offset;
   while(revIndex > blockSize)
   {
     bsGetUniformUInt32Array(str, offsetTemp, numBits,
@@ -287,7 +287,7 @@ bsGetUniformInt32Array(const bitString str, bitOffset offset, unsigned numBits,
 }
 
 static inline void
-bsGetUniformInt64Array(const bitString str, bitOffset offset, unsigned numBits,
+bsGetUniformInt64Array(const BitString str, BitOffset offset, unsigned numBits,
                      size_t numValues, int64_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
@@ -295,7 +295,7 @@ bsGetUniformInt64Array(const bitString str, bitOffset offset, unsigned numBits,
   /* the factor (16) is completely arbitrary and needs some profiling */
   int64_t *blockPtr = val;
   size_t revIndex = numValues;
-  bitOffset offsetTemp = offset;
+  BitOffset offsetTemp = offset;
   while(revIndex > blockSize)
   {
     bsGetUniformUInt64Array(str, offsetTemp, numBits,

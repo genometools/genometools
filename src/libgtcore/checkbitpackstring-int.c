@@ -34,12 +34,12 @@ icmp(unsigned a, unsigned b)
 int
 bitPackStringInt_unit_test(Env *env)
 {
-  bitElem *bitStore = NULL;
+  BitElem *bitStore = NULL;
   unsigned *randSrc = NULL; /*< create random ints here for input as bit
                       *  store */
   unsigned *randCmp = NULL; /*< used for random ints read back */
   size_t i, numRnd;
-  bitOffset offsetStart, offset;
+  BitOffset offsetStart, offset;
   unsigned long seedval;
   int had_err = 0;
   {
@@ -54,11 +54,11 @@ bitPackStringInt_unit_test(Env *env)
           (long unsigned)offsetStart, (long unsigned)numRnd);
 #endif /* VERBOSE_UNIT_TEST */
   {
-    bitOffset numBits = sizeof(unsigned) * CHAR_BIT * numRnd + offsetStart;
+    BitOffset numBits = sizeof(unsigned) * CHAR_BIT * numRnd + offsetStart;
     ensure(had_err,
            (randSrc = env_ma_malloc(env, sizeof(unsigned)*numRnd))
            && (bitStore = 
-               env_ma_malloc(env, bitElemsAllocSize(numBits) * sizeof(bitElem)))
+               env_ma_malloc(env, bitElemsAllocSize(numBits) * sizeof(BitElem)))
            && (randCmp = env_ma_malloc(env, sizeof(unsigned)*numRnd)));
   }
   if(had_err)
