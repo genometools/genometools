@@ -1,0 +1,91 @@
+/*
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
+*/
+
+{
+  unsigned long pagenumber = (unsigned long) DIVMAXSPECIALTYPE(pos);
+  SPECIALTYPE *found, *start;
+
+  if (pagenumber == 0)
+  {
+    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] >= (Seqpos) 1)
+    {
+      start = ACCESSENCSEQ(encseq,specialpositions);
+      found = ADDTYPE(binarysearchpreviousequal)(
+                        start,
+                        start + ACCESSENCSEQ(encseq,endspecialsubsUint)[0] - 1,
+                        (SPECIALTYPE) pos);
+      if (found != NULL)
+      {
+        uint64_t rangeend
+               = (uint64_t) *found +
+                 (uint64_t) encseq->specialrangelength[(Seqpos) (found - start)];
+        if (rangeend > (uint64_t) pos)
+        {
+          return true;
+        }
+      }
+    }
+  } else
+  {
+    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] <
+        ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber])
+    {
+      start = ACCESSENCSEQ(encseq,specialpositions);
+      found = ADDTYPE(binarysearchpreviousequal)(
+                    start +
+                    ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1],
+                    start +
+                    ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber] - 1,
+                    (SPECIALTYPE) pos);
+      if (found != NULL)
+      {
+        uint64_t rangeend
+               = (uint64_t) ((MAXSPECIALTYPE+1) * pagenumber) +
+                 (uint64_t) *found +
+                 (uint64_t) encseq->specialrangelength[(Seqpos) 
+                                                       (found - start)];
+        if (rangeend >  (uint64_t) pos)
+        {
+          return true;
+        }
+      }
+    }
+    if (pagenumber == (unsigned long) 1)
+    {
+      if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] > (Seqpos) 1)
+      {
+        Seqpos i;
+        uint64_t rangeend;
+
+        i = ACCESSENCSEQ(encseq,endspecialsubsUint)[0] - 1;
+        rangeend = (uint64_t) ACCESSENCSEQ(encseq,specialpositions)[i] +
+                   (uint64_t) encseq->specialrangelength[i];
+        if (rangeend > (uint64_t) pos)
+        {
+          return true;
+        }
+      }
+    } else
+    {
+      if (ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-2] <
+          ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1])
+      {
+        Seqpos i;
+        uint64_t rangeend;
+
+        i = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] - 1;
+        rangeend = (uint64_t) ((MAXSPECIALTYPE+1) * (pagenumber-1)) +
+                   (uint64_t) ACCESSENCSEQ(encseq,specialpositions)[i] +
+                   (uint64_t) encseq->specialrangelength[i];
+        if (rangeend > (uint64_t) pos)
+        {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}

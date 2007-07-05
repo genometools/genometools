@@ -1,0 +1,19 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+/*@notnull@*/ char *composefilenamegeneric(const char *file,
+                                           int linenum,
+                                           const char *filename,
+                                           char sep,
+                                           const char *suffix,
+                                           Env *env);
+
+/*@notnull@*/ char *composefilename(const char *file,
+                                    int linenum,
+                                    const char *filename,
+                                    const char *suffix,
+                                    Env *env);
+
+#ifdef __cplusplus
+}
+#endif

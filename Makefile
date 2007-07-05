@@ -33,6 +33,7 @@ endif
 # the default GenomeTools libraries which are build
 GTLIBS:=lib/libgtext.a\
         lib/libgtcore.a\
+        lib/libgtmatch.a\
         lib/libbz2.a
 
 # the core GenomeTools library (no other dependencies)
@@ -44,6 +45,10 @@ LIBGTEXT_C_SRC:=$(notdir $(wildcard src/libgtext/*.c))
 LIBGTEXT_C_OBJ:=$(LIBGTEXT_C_SRC:%.c=obj/%.o)
 LIBGTEXT_CXX_SRC:=$(notdir $(wildcard src/libgtext/*.cxx))
 LIBGTEXT_CXX_OBJ:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.o)
+
+# the GenomeTools matching library
+LIBGTMATCH_SRC:=$(notdir $(wildcard src/libgtmatch/*.c))
+LIBGTMATCH_OBJ:=$(LIBGTMATCH_SRC:%.c=obj/%.o)
 
 # the GenomeTools view library
 LIBGTVIEW_C_SRC:=$(notdir $(wildcard src/libgtview/*.c))
@@ -148,9 +153,16 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
+lib/libgtmatch.a: $(LIBGTMATCH_OBJ)
+	@echo "[link $@]"
+	@ar ru $@ $(LIBGTMATCH_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
 lib/libgtview.a: $(LIBGTVIEW_C_OBJ)
 	@echo "[link $@]"
-	@ar ru $@ $(LIBGTVIEW_C_OBJ)
+	@ar ru $@ $(LIBGTVIEW_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -246,6 +258,20 @@ obj/%.o: src/libgtview/%.c
 	@echo "[compile $@]"
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
+obj/%.o: src/libgtmatch/%.c
+	@echo "[compile $@]"
+	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+
+obj/%.prepro: src/libgtmatch/%.c
+	@echo "[generate $@]"
+	${CC} -c $< -o $@ ${CFLAGS} ${GT_CFLAGS} -E -g3
+	indent $@
+
+obj/%.splint: src/libgtmatch/%.c
+	@echo "[generate $@]"
+	@splint -f $(CURDIR)/testdata/SKsplintoptions -I$(CURDIR)/src -I$(CURDIR)/obj $<
+	@touch $@
+
 obj/%.o: src/tools/%.c
 	@echo "[compile $@]"
 	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
@@ -332,6 +358,8 @@ splint:
         $(CURDIR)/src/libgtcore/*.c \
         $(CURDIR)/src/libgtext/*.c \
         $(CURDIR)/src/tools/*.c
+
+splint-gtmatch:${addprefix obj/,${notdir ${subst .c,.splint,${wildcard ${CURDIR}/src/libgtmatch/*.c}}}}
 
 test: all
 	bin/gt -test

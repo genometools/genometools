@@ -1,0 +1,26 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+/*@null@*/ Alphabet *assigninputalphabet(bool isdna,
+                                         bool isprotein,
+                                         const Str *smapfile,
+                                         const StrArray *filenametab,
+                                         Env *env);
+
+const Uchar *getsymbolmapAlphabet(const Alphabet *alpha);
+
+uint32_t getnumofcharsAlphabet(const Alphabet *alpha);
+
+uint32_t getmapsizeAlphabet(const Alphabet *alpha);
+
+const Uchar *getcharactersAlphabet(const Alphabet *alpha);
+
+Uchar *copycharactersAlphabet(const Alphabet *alpha,Env *env);
+
+void freeAlphabet(Alphabet **alpha,Env *env);
+
+void outputalphabet(FILE *fpout,const Alphabet *alpha);
+
+#ifdef __cplusplus
+}
+#endif

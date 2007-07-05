@@ -26,7 +26,7 @@ int gt_mmapandread(int argc, const char **argv, Env *env)
   void *map;
   struct stat sb;
   unsigned long j;
-  char byte = 0;
+  unsigned int byte = 0;
   env_error_check(env);
 
   /* option parsing */
@@ -57,7 +57,7 @@ int gt_mmapandread(int argc, const char **argv, Env *env)
       j = 0;
       progressbar_start(&j, (unsigned long) sb.st_size);
       for (; j < (unsigned long) sb.st_size; j++)
-        byte |= ((char*) map)[j];
+        byte |= (unsigned int) ((char*) map)[j];
       progressbar_stop();
 
       /* unmap file */

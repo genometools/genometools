@@ -1,0 +1,15 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int outprjfile(const Str *indexname,
+               const StrArray *filenametab,
+               const PairSeqpos *filelengthtab,
+               Seqpos totallength,
+               unsigned long numofsequences,
+               const Specialcharinfo *specialcharinfo,
+               uint32_t prefixlength,
+               Env *env);
+
+#ifdef __cplusplus
+}
+#endif

@@ -45,6 +45,10 @@ const char* genfilemode_suffix(GenFileMode mode)
       return ".bz2";
     default: assert(0);
   }
+  /* due do warning on solaris:
+     warning: control reaches end of non-void function
+  */
+  return "";
 }
 
 size_t genfile_basename_length(const char *path)

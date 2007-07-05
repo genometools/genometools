@@ -1,0 +1,8 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+unsigned char checkgzipsuffix(const char *filename);
+
+#ifdef __cplusplus
+}
+#endif

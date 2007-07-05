@@ -147,7 +147,7 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
   OptionParser *op = env_ma_malloc(env, sizeof (OptionParser));
   assert(synopsis && one_liner);
   /* enforce upper case letter at start and '.' at end of one line desc. */
-  assert(strlen(one_liner) && isupper(one_liner[0]));
+  assert(strlen(one_liner) && isupper((int) one_liner[0]));
   assert(one_liner[strlen(one_liner)-1] == '.');
   op->progname = NULL;
   op->synopsis = cstr_dup(synopsis, env);
@@ -367,6 +367,7 @@ static int check_missing_argument(int argnum, int argc, Str *option, Env *env)
   env_error_check(env);
   if (argnum + 1 >= argc) {
     env_error_set(env, "missing argument to option \"-%s\"", str_get(option));
+    printf("check_missing_argument fails\n");
     return -1;
   }
   return 0;

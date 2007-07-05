@@ -146,7 +146,7 @@ void alpha_encode_seq(const Alpha *a, char *out, char *in, unsigned long length)
   assert(a && out && in);
   for (i = 0; i < length; i++) {
     assert(a->character_to_code_map[(int) in[i]] != UNDEF_UCHAR);
-    out[i] = a->character_to_code_map[(int) in[i]];
+    out[i] = (char) a->character_to_code_map[(int) in[i]];
   }
 }
 

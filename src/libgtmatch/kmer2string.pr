@@ -1,0 +1,12 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+void kmercode2string(char *buffer,
+                     Codetype code,
+                     uint32_t numofchars,
+                     uint32_t kmersize,
+                     const char *characters);
+
+#ifdef __cplusplus
+}
+#endif

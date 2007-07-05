@@ -62,7 +62,7 @@ int gt_casino(int argc, const char **argv, Env *env)
         break;
       default:
         env_error_set(env, "emissions[%u]=%c is not a valid character (only "
-                      "`1' to `6' allowed)", i, emissions[i]);
+                      "`1' to `6' allowed)", i, (char) emissions[i]);
         had_err = -1;
     }
   }

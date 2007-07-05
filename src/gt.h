@@ -9,6 +9,7 @@
 
 #include "gtcore.h" /* the core GenomeTools library (libgthcore) */
 #include "gtext.h"  /* include extended GenomeTools library (libgtext) */
+#include "gtmatch.h" /* include GenomeTools matching library (libgtmatch) */
 #ifdef LIBGTVIEW
 #include "gtview.h"  /* include GenomeTools Viewer library (libgtview) */
 #endif

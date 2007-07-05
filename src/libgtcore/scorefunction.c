@@ -27,7 +27,7 @@ ScoreFunction* scorefunction_new(ScoreMatrix *sm, int deletion_score,
 }
 
 int scorefunction_get_score(const ScoreFunction *s,
-                            unsigned char idx1, unsigned char idx2)
+                            unsigned int idx1, unsigned int idx2)
 {
   assert(s);
   return scorematrix_get_score(s->sm, idx1, idx2);

@@ -17,9 +17,9 @@ ScoreMatrix* scorematrix_new(Alpha*, Env*);
 /* reads in a protein scorematrix from the given path and returns it */
 ScoreMatrix* scorematrix_read_protein(const char *path, Env*);
 int          scorematrix_get_score(const ScoreMatrix*,
-                                   unsigned char, unsigned char);
+                                   unsigned int, unsigned int);
 void         scorematrix_set_score(ScoreMatrix*,
-                                   unsigned char, unsigned char, int);
+                                   unsigned int, unsigned int, int);
 void         scorematrix_show(const ScoreMatrix*, FILE*);
 void         scorematrix_delete(ScoreMatrix*, Env*);
 

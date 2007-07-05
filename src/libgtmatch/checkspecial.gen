@@ -1,0 +1,40 @@
+/*
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
+*/
+
+{
+  unsigned long pagenumber = (unsigned long) DIVMAXSPECIALTYPE(pos);
+
+  if (pagenumber == 0)
+  {
+    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] >= (Seqpos) 1)
+    {
+      if (ADDTYPE(binarysearchpage)(ACCESSENCSEQ(encseq,specialpositions),
+                                    ACCESSENCSEQ(encseq,specialpositions) +
+                                    ACCESSENCSEQ(encseq,endspecialsubsUint)[0]
+                                    - 1,
+                                    (SPECIALTYPE) pos))
+      {
+        return true;
+      }
+    }
+  } else
+  {
+    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] <
+        ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber])
+    {
+      if (ADDTYPE(binarysearchpage)(
+               ACCESSENCSEQ(encseq,specialpositions) +
+               ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1],
+               ACCESSENCSEQ(encseq,specialpositions) +
+               ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber] - 1,
+               (SPECIALTYPE) pos))
+      {
+        return true;
+      }
+    }
+  }
+  return false;
+}

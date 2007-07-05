@@ -16,6 +16,7 @@ src/            the C source code gt itself and the runtime
 src/external/   all C source code from external sources (different license!)
 src/libgtcore/  the C source code for the ``libgtcore''
 src/libgtext/   the C source code for the ``libgtext''
+src/libgtmatch/ the C source code for the ``libgtmatch''
 src/tools/      the C source code for all tools
 testdata/       the test data necessary for the test suite
 testsuite/      the test suite

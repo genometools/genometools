@@ -1,0 +1,34 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+Suftabparts *newsuftabparts(uint32_t numofparts,
+                            const Seqpos *leftborder,
+                            Codetype numofallcodes,
+                            Seqpos numofsuffixestoinsert,
+                            Seqpos fullspecials,
+                            Env *env);
+
+Codetype stpgetcurrentmincode(uint32_t part,
+                              const Suftabparts *suftabparts);
+
+uint64_t stpgetcurrentsuftaboffset(uint32_t part,
+                                   const Suftabparts *suftabparts);
+
+Codetype stpgetcurrentmaxcode(uint32_t part,
+                              const Suftabparts *suftabparts);
+
+uint64_t stpgetcurrentsumofwdith(uint32_t part,
+                                 const Suftabparts *suftabparts);
+
+Seqpos stpgetcurrentwidtofpart(uint32_t part,
+                               const Suftabparts *suftabparts);
+
+Seqpos stpgetlargestwidth(const Suftabparts *suftabparts);
+
+uint32_t stpgetnumofparts(const Suftabparts *suftabparts);
+
+void freesuftabparts(Suftabparts *suftabparts,Env *env);
+
+#ifdef __cplusplus
+}
+#endif

@@ -25,6 +25,7 @@
 #include "tools/gt_mutate.h"
 #include "tools/gt_splitfasta.h"
 #include "tools/gt_stat.h"
+#include "tools/gt_suffixerator.h"
 
 #ifdef LIBGTVIEW
 #include "libgtview/gt_view.h"
@@ -99,6 +100,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "mutate", gt_mutate, env);
   toolbox_add(gtr->toolbox, "splitfasta", gt_splitfasta, env);
   toolbox_add(gtr->toolbox, "stat", gt_stat, env);
+  toolbox_add(gtr->toolbox, "suffixerator", gt_suffixerator, env);
 #ifdef LIBGTVIEW
   toolbox_add(gtr->toolbox, "view", gt_view, env);
 #endif
@@ -145,7 +147,7 @@ int run_test(void *key, void *value, void *data, Env *env)
   env_error_check(env);
   assert(key && value && data);
   testname = (const char*) key;
-  test = value;
+  test = (int (*)(Env *)) value;
   had_errp = (int*) data;
   printf("%s...", testname);
   xfflush(stdout);

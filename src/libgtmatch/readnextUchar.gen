@@ -1,0 +1,27 @@
+/*
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
+*/
+
+static int readnextUchar(Uchar *val,Fastabufferstate *fbs,Env *env)
+{
+  if (fbs->nextread >= fbs->nextfree)
+  {
+    if (fbs->complete)
+    {
+      return 0;
+    }
+    if (advanceFastabufferstate(fbs,env) != 0)
+    {
+      return -1;
+    }
+    fbs->nextread = 0;
+    if (fbs->nextfree == 0)
+    {
+      return 0;
+    }
+  }
+  *val = fbs->bufspace[fbs->nextread++];
+  return 1;
+}

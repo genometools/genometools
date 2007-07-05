@@ -1,0 +1,55 @@
+/*
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
+*/
+
+static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
+                                      Fastabufferstate *fbs,
+                                      Env *env)
+#include "scanspecial.gen"
+
+#include "binsearchspecial.gen"
+
+#ifdef DIRECTBINSEARCH
+
+static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
+{
+  return ADDTYPE(binarysearchpage)(ACCESSENCSEQ(encseq,specialpositions),
+                                   ACCESSENCSEQ(encseq,specialpositions) +
+                                   encseq->numofspecialstostore - 1,
+                                   pos);
+}
+
+static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
+{
+  SPECIALTYPE *found, *start;
+
+  start = ACCESSENCSEQ(encseq,specialpositions);
+  found = ADDTYPE(binarysearchpreviousequal)(start,
+                                             start +
+                                             encseq->numofspecialstostore - 1,
+                                             pos);
+  if (found != NULL)
+  {
+    Seqpos rangeend 
+             = *found +
+               (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)];
+    if (rangeend > pos)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+#else
+
+static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
+#include "checkspecial.gen"
+
+static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
+#include "checkspecialrange.gen"
+
+#endif
+

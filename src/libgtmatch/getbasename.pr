@@ -1,0 +1,8 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+/*@null@*/ char *getbasename(const char *path,Env *env);
+
+#ifdef __cplusplus
+}
+#endif

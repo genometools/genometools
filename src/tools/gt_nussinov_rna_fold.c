@@ -136,13 +136,16 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
     fprintf(fp, "using the following parameters:\n");
     fprintf(fp, "l_min =  %u\n", l_min);
     fprintf(fp, "alpha(G,C) = alpha(C,G) = %d\n",
-            scorematrix_get_score(energy_function, alpha_encode(dna_alpha, 'G'),
+            scorematrix_get_score(energy_function,
+                                  alpha_encode(dna_alpha, 'G'),
                                   alpha_encode(dna_alpha, 'C')));
     fprintf(fp, "alpha(A,U) = alpha(U,A) = %d\n",
-            scorematrix_get_score(energy_function, alpha_encode(dna_alpha, 'A'),
+            scorematrix_get_score(energy_function,
+                                  alpha_encode(dna_alpha, 'A'),
                                   alpha_encode(dna_alpha, 'U')));
     fprintf(fp, "alpha(G,U) = alpha(U,G) = %d\n",
-            scorematrix_get_score(energy_function, alpha_encode(dna_alpha, 'U'),
+            scorematrix_get_score(energy_function,
+                                  alpha_encode(dna_alpha, 'U'),
                                   alpha_encode(dna_alpha, 'G')));
     fprintf(fp, "all other alpha values have been set to infinity\n");
   }

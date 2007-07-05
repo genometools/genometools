@@ -1,0 +1,12 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+void opengenericstream(Genericstream *inputstream,const char *inputfile);
+
+void closegenericstream(Genericstream *inputstream,const char *inputfile);
+
+void rewindgenericstream(Genericstream *inputstream);
+
+#ifdef __cplusplus
+}
+#endif
