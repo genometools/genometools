@@ -13,7 +13,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   OPrval oprval;
   env_error_check(env);
   /* XXX: add one liner to describe this tool */
-  op = option_parser_new("filenames", 
+  op = option_parser_new("filenames",
                          "guess if sequence in filenames is protein or DNA.",
                           env);
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
@@ -36,16 +36,16 @@ int gt_guessprot(int argc, const char **argv, Env *env)
   }
 
   filenametab = strarray_new(env);
-  for(i=parsed_args; i < argc; i++)
+  for (i=parsed_args; i < argc; i++)
   {
     strarray_add_cstr(filenametab,argv[i],env);
   }
   retval = guessifproteinsequencestream(filenametab,env);
-  if(retval < 0)
+  if (retval < 0)
   {
     return -1;
   }
-  if(retval == 1)
+  if (retval == 1)
   {
     exit(1); /* XXX */
   } else
