@@ -41,6 +41,7 @@ int gt_guessprot(int argc, const char **argv, Env *env)
     strarray_add_cstr(filenametab,argv[i],env);
   }
   retval = guessifproteinsequencestream(filenametab,env);
+  strarray_delete(filenametab,env);
   if (retval < 0)
   {
     return -1;
