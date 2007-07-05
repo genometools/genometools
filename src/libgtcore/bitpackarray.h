@@ -20,27 +20,29 @@
 #include "bitpackstring.h"
 #include "libgtcore/env.h"
 
-struct bitPackArray
+struct BitPackArray
 {
-  bitString store;
-  size_t numElems;
-  int bitsPerElem;
+  BitString store;
+  BitOffset numElems;
+  unsigned bitsPerElem;
 };
 
+typedef struct BitPackArray BitPackArray;
+
 /**
- * Create new bitPackArray structure.
+ * Create new BitPackArray structure.
  * @param bits number of bits to encode each value stored with
  * @param numValues number of values to store
- * @return pointer to new bitPackArray structure or NULL on failure
+ * @return pointer to new BitPackArray structure or NULL on failure
  */
-static inline struct bitPackArray *
-newBitPackArray(bitOffset bits, bitOffset numValues, Env *env)
+static inline BitPackArray *
+newBitPackArray(unsigned bits, BitOffset numValues, Env *env)
 {
-  struct bitPackArray *newBPA = env_ma_malloc(env, sizeof(*newBPA));
+  BitPackArray *newBPA = env_ma_malloc(env, sizeof(*newBPA));
   if(newBPA)
   {
     if(!(newBPA->store = env_ma_malloc(env, bitElemsAllocSize(bits*numValues)
-                                       * sizeof(bitElem))))
+                                       * sizeof(BitElem))))
     {
       env_ma_free(newBPA, env);
       return NULL;
@@ -52,21 +54,21 @@ newBitPackArray(bitOffset bits, bitOffset numValues, Env *env)
 }
 
 static inline void
-deleteBitPackArray(struct bitPackArray *bpa, Env *env)
+deleteBitPackArray(BitPackArray *bpa, Env *env)
 {
   env_ma_free(bpa->store, env);
   env_ma_free(bpa, env);
 }
 
 /**
- * Stores unsigned integer in bitPackArray at given index.
+ * Stores unsigned integer in BitPackArray at given index.
  * @param bparray array to use
  * @param index index to store value at.
  * @param val value to store (only as many bits as specified on
- * bitPackArray construction are stored).
+ * BitPackArray construction are stored).
  */
 static inline void
-bpaStoreUInt32(struct bitPackArray *array, bitOffset index, uint32_t val)
+bpaStoreUInt32(BitPackArray *array, BitOffset index, uint32_t val)
 {
   assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof(val)*CHAR_BIT);
@@ -75,14 +77,14 @@ bpaStoreUInt32(struct bitPackArray *array, bitOffset index, uint32_t val)
 }
 
 /**
- * Stores unsigned integer in bitPackArray at given index.
+ * Stores unsigned integer in BitPackArray at given index.
  * @param bparray array to use
  * @param index index to store value at.
  * @param val value to store (only as many bits as specified on
- * bitPackArray construction are stored).
+ * BitPackArray construction are stored).
  */
 static inline uint32_t
-bpaGetUInt32(struct bitPackArray *array, bitOffset index)
+bpaGetUInt32(const BitPackArray *array, BitOffset index)
 {
   assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof(uint32_t)*CHAR_BIT);
@@ -91,14 +93,14 @@ bpaGetUInt32(struct bitPackArray *array, bitOffset index)
 }
 
 /**
- * Stores unsigned integer in bitPackArray at given index.
+ * Stores unsigned integer in BitPackArray at given index.
  * @param bparray array to use
  * @param index index to store value at.
  * @param val value to store (only as many bits as specified on
- * bitPackArray construction are stored).
+ * BitPackArray construction are stored).
  */
 static inline void
-bpaStoreUInt64(struct bitPackArray *array, bitOffset index, uint64_t val)
+bpaStoreUInt64(BitPackArray *array, BitOffset index, uint64_t val)
 {
   assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof(val)*CHAR_BIT);
@@ -107,14 +109,14 @@ bpaStoreUInt64(struct bitPackArray *array, bitOffset index, uint64_t val)
 }
 
 /**
- * Stores unsigned integer in bitPackArray at given index.
+ * Stores unsigned integer in BitPackArray at given index.
  * @param bparray array to use
  * @param index index to store value at.
  * @param val value to store (only as many bits as specified on
- * bitPackArray construction are stored).
+ * BitPackArray construction are stored).
  */
 static inline uint64_t
-bpaGetUInt64(struct bitPackArray *array, bitOffset index)
+bpaGetUInt64(const BitPackArray *array, BitOffset index)
 {
   assert(array && index < array->numElems
          && array->bitsPerElem <= sizeof(uint64_t)*CHAR_BIT);
@@ -123,7 +125,7 @@ bpaGetUInt64(struct bitPackArray *array, bitOffset index)
 }
 
 /**
- * Unit test function for bitPackArray.
+ * Unit test function for BitPackArray.
  * @return 0 on success, -1 on error.
  */
 extern int

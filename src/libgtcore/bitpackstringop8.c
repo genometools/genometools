@@ -22,12 +22,12 @@
  * @return value read
  */
 uint8_t
-bsGetUInt8(const bitString str, bitOffset offset, unsigned numBits)
+bsGetUInt8(const BitString str, BitOffset offset, unsigned numBits)
 {
   uint_fast32_t accum = 0;
   unsigned bitsLeft = numBits, bitTop = offset%bitElemBits;
   size_t elemStart = offset/bitElemBits;
-  const bitElem *p = str + elemStart;
+  const BitElem *p = str + elemStart;
   assert(str);
 #ifndef NDEBUG
   if(numBits > sizeof(accum)*CHAR_BIT)
@@ -63,13 +63,13 @@ bsGetUInt8(const bitString str, bitOffset offset, unsigned numBits)
  * @param numBits number of bits composing integer to be written
  */
 void
-bsStoreUInt8(bitString str, bitOffset offset,
+bsStoreUInt8(BitString str, BitOffset offset,
                  unsigned numBits, uint8_t val)
 {
   unsigned bitsLeft = numBits,
     bitTop = offset%bitElemBits;
   size_t elemStart = offset/bitElemBits;
-  bitElem *p = str + elemStart;
+  BitElem *p = str + elemStart;
   assert(str);
   assert(numBits <= sizeof(val)*CHAR_BIT);
   /* set bits of first element, accounting for bits to be preserved */
@@ -106,7 +106,7 @@ bsStoreUInt8(bitString str, bitOffset offset,
   while(bitsLeft >= bitElemBits)
   {
     bitsLeft -= bitElemBits;    
-    *p++ = (bitElem)(val >> bitsLeft);
+    *p++ = val >> bitsLeft;
   }
   /* set bits for last elem */
   {
@@ -136,17 +136,17 @@ bsStoreUInt8(bitString str, bitOffset offset,
 /**************************************************************************/
 
 void
-bsGetUniformUInt8Array(const bitString str, bitOffset offset, unsigned numBits,
+bsGetUniformUInt8Array(const BitString str, BitOffset offset, unsigned numBits,
                            size_t numValues, uint8_t val[])
 {
   /* idea: read as much as possible from str in each iteration,
    * accumulate if bitsLeft < numBits */
   size_t j = 0;
-  bitOffset totalBitsLeft = numValues * numBits;
+  BitOffset totalBitsLeft = numValues * numBits;
   size_t elemStart = offset/bitElemBits;
   unsigned bitTop = offset%bitElemBits,
     bitsRead = 0; /*< how many bits in current *p are read */
-  const bitElem *p = str + elemStart;
+  const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
   uint_fast32_t accum = 0, valMask = ~(uint_fast32_t)0;
   if(numBits < (sizeof(val[0])*CHAR_BIT))
@@ -197,16 +197,16 @@ bsGetUniformUInt8Array(const bitString str, bitOffset offset, unsigned numBits,
 }
 
 void
-bsStoreUniformUInt8Array(bitString str, bitOffset offset, unsigned numBits,
+bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
                              size_t numValues, const uint8_t val[])
 {
   /* idea: read as much as possible from val in each iteration,
    * accumulate if bitsInAccum < bitElemBits */
   size_t j = 0;
-  bitOffset totalBitsLeft = numValues * numBits;
+  BitOffset totalBitsLeft = numValues * numBits;
   unsigned bitTop = offset%bitElemBits,
     bitsLeft; /*< how many bits in currentVal == val[j] are left */
-  bitElem *p = str + offset/bitElemBits;
+  BitElem *p = str + offset/bitElemBits;
   unsigned bitsInAccum;
   uint_fast32_t accum, valMask = ~(uint_fast32_t)0, currentVal;
   if(numBits < (sizeof(val[0])*CHAR_BIT))
@@ -233,7 +233,7 @@ bsStoreUniformUInt8Array(bitString str, bitOffset offset, unsigned numBits,
   /* set bits of first element if not aligned */
   if(bitTop)
   {
-    bitElem mask = ~(~(uint_fast32_t)0 << (bitElemBits - bitTop));
+    BitElem mask = ~(~(uint_fast32_t)0 << (bitElemBits - bitTop));
     while((totalBitsLeft || bitsLeft) && bitsInAccum < bitElemBits - bitTop)
     {
       unsigned bits2Read, bitsFree = sizeof(accum)*CHAR_BIT - bitsInAccum;
@@ -252,7 +252,7 @@ bsStoreUniformUInt8Array(bitString str, bitOffset offset, unsigned numBits,
         currentVal = val[++j] & valMask, totalBitsLeft -= bitsLeft = numBits;
     }
     /* at this point accum holds as many bits as we could get
-     * to fill the first bitElem in str, but did we get enough? */
+     * to fill the first BitElem in str, but did we get enough? */
     if(bitsInAccum < bitElemBits - bitTop)
     {
       /* no there's not enough */

@@ -20,7 +20,7 @@ enum {
 
 int bitPackArray_unit_test(Env *env)
 {
-  struct bitPackArray *bitStore = NULL;
+  struct BitPackArray *bitStore = NULL;
   unsigned long seedval;
   struct timeval seed;
   int had_err = 0;

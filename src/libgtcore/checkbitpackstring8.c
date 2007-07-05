@@ -36,12 +36,12 @@ icmp(uint8_t a, uint8_t b)
 int
 bitPackString8_unit_test(Env *env)
 {
-  bitElem *bitStore = NULL;
+  BitElem *bitStore = NULL;
   uint8_t *randSrc = NULL; /*< create random ints here for input as bit
                                 *  store */
   uint8_t *randCmp = NULL; /*< used for random ints read back */
   size_t i, numRnd;
-  bitOffset offsetStart, offset;
+  BitOffset offsetStart, offset;
   unsigned long seedval;
   int had_err = 0;
   {
@@ -56,10 +56,10 @@ bitPackString8_unit_test(Env *env)
           (long unsigned)offsetStart, (long unsigned)numRnd);
 #endif /* VERBOSE_UNIT_TEST */
   {
-    bitOffset numBits = sizeof(uint8_t) * CHAR_BIT * numRnd + offsetStart;
+    BitOffset numBits = sizeof(uint8_t) * CHAR_BIT * numRnd + offsetStart;
     ensure(had_err, (randSrc = env_ma_malloc(env, sizeof(uint8_t)*numRnd))
            && (bitStore = env_ma_malloc(env, bitElemsAllocSize(numBits)
-                                  * sizeof(bitElem)))
+                                  * sizeof(BitElem)))
            && (randCmp = env_ma_malloc(env, sizeof(uint8_t)*numRnd)));
   }
   if(had_err)
