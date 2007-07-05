@@ -1,0 +1,3 @@
+ma_get_space_peak() und das Makro
+env_ma_get_space_peak() die den space peak in Bytes zur"uckliefern.
+
