@@ -270,8 +270,9 @@ int diagram_unit_test(Env* env)
 
   GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   FeatureIndex *fi;
-  Range r1, r2, r3, r4, r5, dr1;
+  Range r1, r2, r3, r4, r5, dr1, rs;
   Str *seqid1, *seqid2;
+  SequenceRegion *sr1, *sr2;
   int had_err=0;
 
   /* Generating some ranges */
@@ -280,10 +281,14 @@ int diagram_unit_test(Env* env)
   r3.start=500; r3.end=1000;
   r4.start=600; r4.end=1200;
   r5.start=600; r5.end=1000;
+  rs.start=100; rs.end=1200;
 
   /* Generating sequnce ids as c-strings */
   seqid1 = str_new_cstr("test1", env);
   seqid2 = str_new_cstr("test2", env);
+
+  sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, NULL, 0, env);
+  sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, NULL, 0, env);
 
   /* Generating a new genome_feature with the property gft_gene and
    the range r1 ... */
@@ -329,13 +334,13 @@ int diagram_unit_test(Env* env)
 
   /*Add a sequence region the feature index and test if
    it has really been added*/
-  feature_index_add_sequence_region(fi, "test1", env);
+  feature_index_add_sequence_region(fi, sr1, env);
 
-  feature_index_add_sequence_region(fi, "test2", env);
+  feature_index_add_sequence_region(fi, sr2, env);
 
   /*Add features to every sequence region.*/
-  feature_index_add_genome_feature_for_seqid(fi, (GenomeFeature*) gn1, env);
-  feature_index_add_genome_feature_for_seqid(fi, (GenomeFeature*) gn2, env);
+  feature_index_add_genome_feature(fi, (GenomeFeature*) gn1, env);
+  feature_index_add_genome_feature(fi, (GenomeFeature*) gn2, env);
 
   /* Generating the Range for the diagram*/
   dr1.start=400; dr1.end=900;
@@ -409,6 +414,8 @@ int diagram_unit_test(Env* env)
   array_delete(features2,env);
   genome_node_rec_delete(gn1, env);
   genome_node_rec_delete(gn2, env);
+  genome_node_rec_delete((GenomeNode*) sr1, env);
+  genome_node_rec_delete((GenomeNode*) sr2, env);
   str_delete(seqid1, env);
   str_delete(seqid2, env);
 return had_err;

@@ -328,7 +328,8 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
       caption = block_get_caption(this_block);
       if (!caption) caption = block_get_parent_caption(this_block);
       if (!caption) caption = "";
-      cur_range.start = render_convert_point(r, block_range.start);
+      cur_range.start = MAX(r->margins,
+                            render_convert_point(r, block_range.start));
       cur_range.end   = cur_range.start
                           + graphics_get_text_width(r->g, caption);
       for (j = i-1; j >=0;j--)
@@ -341,8 +342,6 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
         chk_range.start = render_convert_point(r, chk_range.start);
         chk_range.end   = chk_range.start
                             + graphics_get_text_width(r->g, caption);
-        if (chk_range.end < cur_range.start)
-          break;
         if (range_overlap(chk_range, cur_range))
         {
           block_set_caption_visibility(this_block, false);
@@ -359,8 +358,6 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
         chk_range.start = render_convert_point(r, chk_range.start);
         chk_range.end   = chk_range.start
                             + graphics_get_text_width(r->g, caption);
-        if (chk_range.start > cur_range.end)
-          break;
         if (range_overlap(chk_range, cur_range))
         {
           block_set_caption_visibility(this_block, false);
@@ -506,10 +503,9 @@ void render_to_png(Render *r, Diagram *d,
   r->height = height = render_calculate_height(r, env);
 
   /* calculate scaling factor */
-  r->factor = ((double) r->width
+    r->factor = ((double) r->width
                  -(2*r->margins))
-               / (r->range.end
-                 - r->range.start);
+               / range_length(r->range);
   if (config_get_verbose(r->cfg))
      fprintf( stderr, "scaling factor is %f\n",r->factor);
 
@@ -520,10 +516,13 @@ void render_to_png(Render *r, Diagram *d,
   /* Add ruler/scale to the image */
   render_ruler(r, env);
 
-  /* process (render) each track */
   r->cur_track = 0;
-  Hashtable *tracks = diagram_get_tracks(r->dia);
-  hashtable_foreach(tracks, render_track, r, env);
+  if (diagram_get_number_of_tracks(r->dia) > 0)
+  {
+    /* process (render) each track */
+    Hashtable *tracks = diagram_get_tracks(r->dia);
+    hashtable_foreach(tracks, render_track, r, env);
+  }
 
   if (config_get_verbose(r->cfg))
     fprintf(stderr, "actual used height: %f\n", r->y);

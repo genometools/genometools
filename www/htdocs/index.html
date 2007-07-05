@@ -24,14 +24,28 @@ code.
 <i>GenomeTools</i> has been designed to run on every
 <a href="http://en.wikipedia.org/wiki/POSIX">POSIX</a> compliant
 <a href="http://en.wikipedia.org/wiki/UNIX">UNIX</a> system. For example, Linux,
-Mac OS X, and OpenBSD. <b>It it probably not easy to get it to compile and run
+Mac OS X, and OpenBSD. <b>It is probably not easy to get it to compile and run
 on Windows.</b>
+</p>
+<p>
+<h2>Visualization</h2>
+<p>
+With the new <tt>gt view</tt> tool of <i>GenomeTools</i> you can produce PNG
+representations out of <a href="http://song.sourceforge.net/gff3.shtml">GFF3</a>
+annotation files. The picture below was produced with the following command:
+</p>
+<pre>
+gt view -start 148185083 -end 148245014 -width 1024 annotation.png <a
+href="annotation.gff3">annotation.gff3</a>
+</pre>
+<p>
+<img src="annotation.png" alt="[Genome Annotation]" border="1"/>
 </p>
 <hr>
 <p>
 <small>
 Copyright &copy; 2006-2007
-<a href="mailto:gremme@gmail.com">Gordon Gremme.</a> Last update: 2007-06-20
+<a href="mailto:gremme@gmail.com">Gordon Gremme.</a> Last update: 2007-07-04
 </small>
 </p>
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
