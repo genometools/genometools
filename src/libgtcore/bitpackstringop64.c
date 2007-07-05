@@ -3,9 +3,9 @@
 */
 /*
 ** Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
-**  
+**
 ** See LICENSE file or http://genometools.org/license.html for license details.
-** 
+**
 */
 #include <assert.h>
 #include <inttypes.h>
@@ -44,7 +44,7 @@ bsGetUInt64(const BitString str, BitOffset offset, unsigned numBits)
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
     mask = (~((~(uint_fast64_t)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
-    bitsLeft -= bits2Read;    
+    bitsLeft -= bits2Read;
   }
   /* get bits from intervening elems */
   while(bitsLeft >= bitElemBits)
@@ -53,7 +53,7 @@ bsGetUInt64(const BitString str, BitOffset offset, unsigned numBits)
     bitsLeft -= bitElemBits;
   }
   /* get bits from last elem */
-  accum = accum << bitsLeft | 
+  accum = accum << bitsLeft |
     (((*p) & ((~(uint_fast64_t)0)<<(bitElemBits - bitsLeft)))
      >>(bitElemBits - bitsLeft));
   return accum;
@@ -88,14 +88,12 @@ bsStoreUInt64(BitString str, BitOffset offset,
       mask = 0;
     }
     mask = (~mask) >> bitTop;
-/*     unsigned mask = ~((~0U)<<bitElemBits) >> bitTop; */
-    // unsigned mask = (((~0U)&~((~0U)<<bitElemBits)) >> bitTop);
     if(numBits < bitElemBits - bitTop)
     {
       unsigned backShift = bitElemBits - numBits - bitTop;
       mask &= ~(uint_fast64_t)0 << backShift;
       *p = (*p & ~mask) | ((val << backShift) & mask);
-      // TODO: try wether  r = a ^ ((a ^ b) & mask) is faster, see below
+      /* TODO: try wether  r = a ^ ((a ^ b) & mask) is faster, see below */
       return;
     }
     else
@@ -108,7 +106,7 @@ bsStoreUInt64(BitString str, BitOffset offset,
   /* set bits for intervening elems */
   while(bitsLeft >= bitElemBits)
   {
-    bitsLeft -= bitElemBits;    
+    bitsLeft -= bitElemBits;
     *p++ = val >> bitsLeft;
   }
   /* set bits for last elem */
@@ -240,7 +238,7 @@ bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
     while((totalBitsLeft || bitsLeft) && bitsInAccum < bitElemBits - bitTop)
     {
       unsigned bits2Read, bitsFree = sizeof(accum)*CHAR_BIT - bitsInAccum;
-      
+
       if((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof(accum)*CHAR_BIT)
       {
         accum = accum << bits2Read
@@ -248,7 +246,7 @@ bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
       }
       else
         accum = currentVal;
-          
+
       /* all of val[j] consumed? */
       bitsInAccum += bits2Read;
       if(!(bits2Read -= bitsLeft))
@@ -273,7 +271,7 @@ bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
       bitsInAccum -= bitElemBits - bitTop;
     }
   }
-    
+
   while(totalBitsLeft || (bitsInAccum + bitsLeft) > bitElemBits)
   {
     while((totalBitsLeft || bitsLeft)

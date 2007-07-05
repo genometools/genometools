@@ -1,8 +1,8 @@
 /*
 ** Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
-**  
+**
 ** See LICENSE file or http://genometools.org/license.html for license details.
-** 
+**
 */
 #include <assert.h>
 #include <inttypes.h>
@@ -18,17 +18,15 @@
 #define MIN(a, b) (((a)<(b))?(a):(b))
 #define MIN3(a, b, c) (((a)<(b))?((a)<(c)?(a):(c)):((b)<(c)?(b):(c)))
 
-
-
 int
 requiredUInt32Bits(uint32_t v)
 {
   int r;
   static const int MultiplyDeBruijnBitPosition[32] = {
-    1, 2, 29, 3, 30, 15, 25, 4, 31, 23, 21, 16, 26, 18, 5, 9, 
+    1, 2, 29, 3, 30, 15, 25, 4, 31, 23, 21, 16, 26, 18, 5, 9,
     32, 28, 14, 24, 22, 20, 17, 8, 27, 13, 19, 7, 12, 6, 11, 10
   };
-  v |= v >> 1; // first round down to power of 2 
+  v |= v >> 1; /* first round down to power of 2 */
   v |= v >> 2;
   v |= v >> 4;
   v |= v >> 8;
@@ -49,7 +47,7 @@ requiredUInt64Bits(uint64_t v)
     64, 56, 32, 46, 29, 20, 7, 11, 62, 18, 16, 23, 53, 36, 25, 39,
     55, 45, 28, 10, 61, 15, 52, 38, 44, 27, 14, 51, 43, 50, 42, 41
   };
-  v |= v >> 1; // first round down to power of 2 
+  v |= v >> 1; /* first round down to power of 2 */
   v |= v >> 2;
   v |= v >> 4;
   v |= v >> 8;
@@ -94,7 +92,7 @@ computeDeBruijn()
  * most-significant bit set in only one of the strings the comparision
  * can terminate.
  *
- * This function treats two sub-bitstrings as 
+ * This function treats two sub-bitstrings as
  * @param a first bitstring to compare
  * @param offsetA corresponding start position
  * @param numBitsA length of substring \f$a'\f$ in a to use for comparison.
@@ -145,7 +143,7 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
         uint32_t mask;
         bits2Read = MIN3(bitsFree, bitElemBits, comparePreBits);
         mask = ~((~(uint32_t)0) << bits2Read);
-        accumB = accumB << bits2Read 
+        accumB = accumB << bits2Read
           | (((*pB) >> (bitElemBits - bits2Read)) & mask);
         bitsInAccumB += bits2Read;
         totalBitsLeftB -= bits2Read;
@@ -190,7 +188,7 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
       uint32_t mask;
       bits2Read = MIN3(bitsFree, bitElemBits, totalBitsLeftA);
       mask = (~((~(uint32_t)0) << bits2Read));
-      accumA = accumA << bits2Read 
+      accumA = accumA << bits2Read
         | (((*pA) >> (bitElemBits - bits2Read)) & mask);
       bitsInAccumA += bits2Read;
       totalBitsLeftA -= bits2Read;
@@ -207,7 +205,7 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
       uint32_t mask;
       bits2Read = MIN3(bitsFree, bitElemBits, totalBitsLeftB);
       mask = (~((~(uint32_t)0) << bits2Read));
-      accumB = accumB << bits2Read 
+      accumB = accumB << bits2Read
         | (((*pB) >> (bitElemBits - bits2Read)) & mask);
       bitsInAccumB += bits2Read;
       totalBitsLeftB -= bits2Read;

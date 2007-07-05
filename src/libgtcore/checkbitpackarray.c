@@ -1,8 +1,8 @@
 /*
 ** Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
-**  
+**
 ** See LICENSE file or http://genometools.org/license.html for license details.
-** 
+**
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,7 +39,7 @@ int bitPackArray_unit_test(Env *env)
       mask = ~(uint32_t)0;
     else
       mask = ~((~(uint32_t)0)<<bits);
-    
+
 #ifdef VERBOSE_UNIT_TEST
     fprintf(stderr, "seedval = %lu, numRnd=%lu\n", seedval,
             (long unsigned)numRnd);
@@ -114,7 +114,7 @@ int bitPackArray_unit_test(Env *env)
       if(randCmp)
         env_ma_free(randCmp, env);
       if(bitStore)
-        deleteBitPackArray(bitStore, env);      
+        deleteBitPackArray(bitStore, env);
       return had_err;
     }
     for(i = 0; i < numRnd; ++i)

@@ -1,8 +1,8 @@
 /*
 ** Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
-**  
+**
 ** See LICENSE file or http://genometools.org/license.html for license details.
-** 
+**
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,10 +14,9 @@
 #include <libgtcore/env.h>
 #include <libgtcore/ensure.h>
 
-
 enum {
 /*   MAX_RND_NUMS = 10, */
-  MAX_RND_NUMS = 10000000,
+  MAX_RND_NUMS = 10000,
 };
 
 int
@@ -162,7 +161,7 @@ bitPackStringUInt_unit_test(Env *env)
         env_ma_free(bitStore, env);
         return had_err;
       }
-    }    
+    }
 #ifdef VERBOSE_UNIT_TEST
     fputs("bsStoreUniformIntArray/bsGetUniformIntArray: passed\n", stderr);
 #endif /* VERBOSE_UNIT_TEST */
