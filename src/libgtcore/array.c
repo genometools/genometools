@@ -14,8 +14,6 @@
 
 #define NUM_OF_TESTS    100
 #define MAX_SIZE        1024
-#define UCCAST(PTR)             ((unsigned char *) (PTR))
-#define MAKEPTR(PTR,ELEM,SIZE)  (UCCAST(PTR) + (ELEM) * (SIZE))
 
 struct Array {
   void *space;
@@ -35,7 +33,7 @@ Array* array_new(size_t size_of_elem, Env *env)
 void* array_get(const Array *a, unsigned long idx)
 {
   assert(a && idx < a->next_free);
-  return MAKEPTR(a->space,idx,a->size_of_elem);
+  return a->space + idx * a->size_of_elem;
 }
 
 void* array_get_first(const Array *a)
@@ -53,7 +51,7 @@ void* array_pop(Array *a)
 {
   assert(a && a->next_free);
   a->next_free--;
-  return MAKEPTR(a->space,a->next_free,a->size_of_elem);
+  return a->space + a->next_free * a->size_of_elem;
 }
 
 void array_rem(Array *a, unsigned long idx)
@@ -62,8 +60,7 @@ void array_rem(Array *a, unsigned long idx)
   assert(a && idx < a->next_free);
   /* move elements */
   for (i = idx+1; i < a->next_free; i++) {
-    memcpy(MAKEPTR(a->space,(i-1),a->size_of_elem),
-           MAKEPTR(a->space,i,a->size_of_elem),
+    memcpy(a->space + (i-1) * a->size_of_elem, a->space + i * a->size_of_elem,
            a->size_of_elem);
   }
   /* remove last (now duplicated) element */
@@ -72,18 +69,14 @@ void array_rem(Array *a, unsigned long idx)
 
 void array_reverse(Array *a, Env *env)
 {
-  unsigned char *front, *back;
-  void *tmp;
-
+  void *front, *back, *tmp;
   assert(a);
   tmp = env_ma_malloc(env, sizeof (a->size_of_elem));
-  for (front = UCCAST(a->space),
-       back = MAKEPTR(a->space,a->next_free-1,a->size_of_elem);
-       front < back;
-       front += a->size_of_elem, back -= a->size_of_elem) {
-    memcpy(tmp, (void *) front, a->size_of_elem);
-    memcpy((void *) front, (void *) back, a->size_of_elem);
-    memcpy((void *) back, tmp, a->size_of_elem);
+  for (front = a->space, back = a->space + (a->next_free-1) * a->size_of_elem;
+       front < back; front += a->size_of_elem, back -= a->size_of_elem) {
+    memcpy(tmp, front, a->size_of_elem);
+    memcpy(front, back, a->size_of_elem);
+    memcpy(back, tmp, a->size_of_elem);
   }
   env_ma_free(tmp, env);
 }
@@ -104,7 +97,7 @@ void array_add_elem(Array *a, void *elem, size_t size_of_elem, Env *env)
     a->space = dynalloc(a->space, &a->allocated,
                         (a->next_free + 1) * a->size_of_elem, env);
   /* add */
-  memcpy(MAKEPTR(a->space,a->next_free,a->size_of_elem),elem,a->size_of_elem);
+  memcpy(a->space + a->next_free * a->size_of_elem, elem, a->size_of_elem);
   a->next_free++;
 }
 
@@ -174,7 +167,8 @@ int array_unit_test(Env *env)
   int_array_test = env_ma_malloc(env, MAX_SIZE * sizeof (int));
 
   for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
-    size = (unsigned long) ((double) rand() / RAND_MAX) * MAX_SIZE;
+    size = ((double) rand() / RAND_MAX) * MAX_SIZE;
+
     array_reset(char_array);
     array_reset(int_array);
 
@@ -182,10 +176,8 @@ int array_unit_test(Env *env)
     ensure(had_err, array_size(int_array) == 0);
 
     for (i = 0; i < size && !had_err; i++) {
-      ci = (int) ((double) rand() / RAND_MAX) * CHAR_MAX;
-      assert(ci <= CHAR_MAX);
-      cc = (char) ci;
-      ci = (int) ((double) rand() / RAND_MAX) * INT_MAX;
+      cc = ((double) rand() / RAND_MAX) * CHAR_MAX;
+      ci = ((double) rand() / RAND_MAX) * INT_MAX;
 
       array_add(char_array, cc, env);
       array_add(int_array, ci, env);
