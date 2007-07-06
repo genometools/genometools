@@ -1,8 +1,8 @@
 /*
 ** Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
-**  
+**
 ** See LICENSE file or http://genometools.org/license.html for license details.
-** 
+**
 */
 #include <assert.h>
 #include <inttypes.h>
@@ -23,7 +23,10 @@
  * functions work.
  */
 
-
+/* imitate llabs for platforms which don't have it */
+#ifndef HAVE_LLABS
+#define llabs(i) (((i) < 0)?-i:i)
+#endif
 /**
  * Computes number of BitElem objects needed to store requested number
  * of consecutive bits.
@@ -40,7 +43,7 @@ bitElemsAllocSize(BitOffset numBits)
 static inline int8_t
 bsGetInt8(BitString str, BitOffset offset, unsigned numBits)
 {
-  // requires sign extension
+  /* requires sign extension */
   int8_t m = 1 << (numBits - 1);
   return (bsGetUInt8(str, offset, numBits) ^ m) - m;
 }
@@ -48,7 +51,7 @@ bsGetInt8(BitString str, BitOffset offset, unsigned numBits)
 static inline int16_t
 bsGetInt16(BitString str, BitOffset offset, unsigned numBits)
 {
-  // requires sign extension
+  /* requires sign extension */
   int16_t m = 1 << (numBits - 1);
   return (bsGetUInt16(str, offset, numBits) ^ m) - m;
 }
@@ -56,7 +59,7 @@ bsGetInt16(BitString str, BitOffset offset, unsigned numBits)
 static inline int32_t
 bsGetInt32(BitString str, BitOffset offset, unsigned numBits)
 {
-  // requires sign extension
+  /* requires sign extension */
   int32_t m = 1 << (numBits - 1);
   return (bsGetUInt32(str, offset, numBits) ^ m) - m;
 }
@@ -64,7 +67,7 @@ bsGetInt32(BitString str, BitOffset offset, unsigned numBits)
 static inline int64_t
 bsGetInt64(BitString str, BitOffset offset, unsigned numBits)
 {
-  // requires sign extension
+  /* requires sign extension */
   int64_t m = (int64_t)1 << (numBits - 1);
   return (bsGetUInt64(str, offset, numBits) ^ m) - m;
 }
@@ -111,7 +114,7 @@ requiredInt8Bits(int8_t v)
   if(v == INT8_MIN)
     return sizeof(v)*CHAR_BIT;
   else
-    // one extra for sign bit
+    /* one extra for sign bit */
     return requiredUInt32Bits(abs(v)) + 1;
 }
 
@@ -121,7 +124,7 @@ requiredInt16Bits(int16_t v)
   if(v == INT16_MIN)
     return sizeof(v)*CHAR_BIT;
   else
-    // one extra for sign bit
+    /* one extra for sign bit */
     return requiredUInt32Bits(abs(v)) + 1;
 }
 
@@ -131,7 +134,7 @@ requiredInt32Bits(int32_t v)
   if(v == INT32_MIN)
     return sizeof(v)*CHAR_BIT;
   else
-    // one extra for sign bit
+    /* one extra for sign bit */
     return requiredUInt32Bits(labs(v)) + 1;
 }
 
@@ -141,7 +144,7 @@ requiredInt64Bits(int64_t v)
   if(v == INT64_MIN)
     return sizeof(v)*CHAR_BIT;
   else
-    // one extra for sign bit
+    /* one extra for sign bit */
     return requiredUInt64Bits(llabs(v)) + 1;
 }
 
@@ -212,7 +215,6 @@ bsSignExpandArray64(int64_t val[], size_t numValues, unsigned numBits)
   for(i = 0; i < numValues; ++i)
     val[i] = (val[i] ^ m) - m;
 }
-
 
 static inline void
 bsGetUniformInt8Array(const BitString str, BitOffset offset, unsigned numBits,

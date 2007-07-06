@@ -1,8 +1,8 @@
 /*
 ** Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
-**  
+**
 ** See LICENSE file or http://genometools.org/license.html for license details.
-** 
+**
 */
 #ifndef BITPACKSTRING_H_INCLUDED
 #define BITPACKSTRING_H_INCLUDED
@@ -115,8 +115,8 @@ requiredInt32Bits(int32_t val);
  * Computes \f$\log_2v + 2\f$, where \f$v\f$ is of signed 64-bit type.
  * An integer \f$v\f$ can be represented in this many bits.
  * @param val value to find log2 of.
- * @return \f$\left\lfloor{}log_2|v|\right\rfloor + 2\f$ (Special case: INT64_MIN
- * is representable in 64 bits)
+ * @return \f$\left\lfloor{}log_2|v|\right\rfloor + 2\f$
+ * (Special case: INT64_MIN is representable in 64 bits)
  */
 static inline int
 requiredInt64Bits(int64_t val);
@@ -481,8 +481,6 @@ bitPackString32_unit_test(Env *env);
  */
 extern int
 bitPackString64_unit_test(Env *env);
-
-
 
 #include "bitpackstringsimpleop.h"
 

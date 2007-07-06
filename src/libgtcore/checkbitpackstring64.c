@@ -3,9 +3,9 @@
 */
 /*
 ** Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
-**  
+**
 ** See LICENSE file or http://genometools.org/license.html for license details.
-** 
+**
 */
 #include <assert.h>
 #include <limits.h>
@@ -22,7 +22,7 @@
 
 enum {
 /*   MAX_RND_NUMS = 10, */
-  MAX_RND_NUMS = 10000000,
+  MAX_RND_NUMS = 10000,
 };
 
 static inline int
@@ -226,7 +226,7 @@ bitPackString64_unit_test(Env *env)
         env_ma_free(bitStore, env);
         return had_err;
       }
-    }    
+    }
 #ifdef VERBOSE_UNIT_TEST
     fputs(": bsStoreUniformUInt64Array/bsGetUniformUInt64Array:"
           " passed\n", stderr);
@@ -341,7 +341,7 @@ bitPackString64_unit_test(Env *env)
         env_ma_free(bitStore, env);
         return had_err;
       }
-    }    
+    }
 #ifdef VERBOSE_UNIT_TEST
     fputs(": bsStoreUniformInt64Array/bsGetUniformInt64Array:"
           " passed\n", stderr);
