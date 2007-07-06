@@ -3,6 +3,10 @@
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
+/**
+ * \file png_visitor.h
+ * \author Gordon Gremme <gremme@zbh.uni-hamburg.de>
+ */
 
 #ifndef PNG_VISITOR_H
 #define PNG_VISITOR_H

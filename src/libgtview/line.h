@@ -3,6 +3,10 @@
    Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
    See LICENSE file or http://genometools.org/license.html for license details.
 */
+/**
+ * \file line.h
+ * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
+ */
 
 #ifndef LINE_H
 #define LINE_H

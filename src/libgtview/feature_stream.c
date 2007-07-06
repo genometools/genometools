@@ -3,6 +3,10 @@
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
+/**
+ * \file feature_stream.c
+ * \author Gordon Gremme <gremme@zbh.uni-hamburg.de>
+ */
 
 #include <gtcore.h>
 #include <libgtview/feature_stream.h>
