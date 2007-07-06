@@ -23,7 +23,10 @@
  * functions work.
  */
 
+/* imitate llabs for platforms which don't have it */
+#ifndef HAVE_LLABS
 #define llabs(i) (((i) < 0)?-i:i)
+#endif
 /**
  * Computes number of BitElem objects needed to store requested number
  * of consecutive bits.

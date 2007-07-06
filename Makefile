@@ -28,6 +28,10 @@ LDLIBS:=-lm -lz
 SYSTEM:=$(shell uname -s)
 ifeq ($(SYSTEM),Darwin)
   RANLIB:=ranlib
+  GT_CFLAGS+=-DHAVE_LLABS
+endif
+ifeq ($(SYSTEM),Linux)
+  GT_CLAGS+=-D_ISOC99_SOURCE -D_XOPEN_SOURCE=600 -DHAVE_LLABS
 endif
 
 # the default GenomeTools libraries which are build
