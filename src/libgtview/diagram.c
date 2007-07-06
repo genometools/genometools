@@ -403,7 +403,7 @@ int diagram_unit_test(Env* env)
   {
   ensure(had_err, hashtable_get(dia2->tracks,"CDS") != NULL);
   }
-  ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0)
+  ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
 
   /*delete all generated objects*/
   config_delete(cfg, env);
