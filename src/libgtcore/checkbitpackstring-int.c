@@ -1,8 +1,8 @@
 /*
 ** Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
-**  
+**
 ** See LICENSE file or http://genometools.org/license.html for license details.
-** 
+**
 */
 #include <assert.h>
 #include <stdio.h>
@@ -57,7 +57,7 @@ bitPackStringInt_unit_test(Env *env)
     BitOffset numBits = sizeof(unsigned) * CHAR_BIT * numRnd + offsetStart;
     ensure(had_err,
            (randSrc = env_ma_malloc(env, sizeof(unsigned)*numRnd))
-           && (bitStore = 
+           && (bitStore =
                env_ma_malloc(env, bitElemsAllocSize(numBits) * sizeof(BitElem)))
            && (randCmp = env_ma_malloc(env, sizeof(unsigned)*numRnd)));
   }
@@ -193,7 +193,7 @@ bitPackStringInt_unit_test(Env *env)
 #endif /* VERBOSE_UNIT_TEST */
         return had_err;
       }
-    }    
+    }
 #ifdef VERBOSE_UNIT_TEST
     fputs("bsStoreUniformUIntArray/bsGetUniformUIntArray: passed\n", stderr);
 #endif /* VERBOSE_UNIT_TEST */

@@ -1,8 +1,8 @@
 /*
 ** Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
-**  
+**
 ** See LICENSE file or http://genometools.org/license.html for license details.
-** 
+**
 */
 #include <assert.h>
 #include <stdio.h>
