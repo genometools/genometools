@@ -5,6 +5,7 @@
 */
 
 #include <assert.h>
+#include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <libgtcore/parseutils.h>
@@ -14,7 +15,7 @@ int parse_range(Range *range, const char *start, const char *end,
                 unsigned long line_number, const char *filename, Env *env)
 {
   long start_val, end_val;
-  int rval;
+  char *ep;
 
   assert(start && end && line_number && filename);
   env_error_check(env);
@@ -23,9 +24,16 @@ int parse_range(Range *range, const char *start, const char *end,
   range->end = UNDEF_ULONG;
 
   /* parse and check start */
-  if ((rval = sscanf(start, "%ld", &start_val)) != 1) {
-    env_error_set(env, "could not parse start '%s' on line %lu in file '%s'",
-              start, line_number, filename);
+  errno = 0;
+  start_val = strtol(start, &ep, 10);
+  if (start[0] == '\0' || *ep != '\0') {
+    env_error_set(env, "could not parse number '%s$' on line %lu in file '%s'",
+                  start, line_number, filename);
+    return -1;
+  }
+  if (errno == ERANGE && (start_val == LONG_MAX || start_val == LONG_MIN)) {
+    env_error_set(env, "number '%s' out of range on line %lu in file '%s'",
+                  start, line_number, filename);
     return -1;
   }
   if (start_val < 0) {
@@ -35,14 +43,21 @@ int parse_range(Range *range, const char *start, const char *end,
   }
 
   /* parse and check end */
-  if ((rval = sscanf(end, "%ld", &end_val)) != 1) {
-    env_error_set(env, "could not parse end '%s' on line %lu in file '%s'",
-              end, line_number, filename);
+  errno = 0;
+  end_val = strtol(end, &ep, 10);
+  if (end[0] == '\0' || *ep != '\0') {
+    env_error_set(env, "could not parse number '%s$' on line %lu in file '%s'",
+                  end, line_number, filename);
+    return -1;
+  }
+  if (errno == ERANGE && (end_val == LONG_MAX || end_val == LONG_MIN)) {
+    env_error_set(env, "number '%s' out of range on line %lu in file '%s'",
+                  end, line_number, filename);
     return -1;
   }
   if (end_val < 0) {
-    env_error_set(env, "end '%s' is negative on line %lu in file '%s'", end,
-              line_number, filename);
+    env_error_set(env, "end '%s' is negative on line %lu in file '%s'",
+                  end, line_number, filename);
     return -1;
   }
 
