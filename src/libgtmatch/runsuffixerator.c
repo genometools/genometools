@@ -24,11 +24,15 @@
 #include "outprjfile.pr"
 #include "suffixerator.pr"
 #include "opensfxfile.pr"
+#include "cmpsuffixes.pr"
 
 typedef struct
 {
   FILE *outfpsuftab,
+       *outfplcptab,
        *outfpbwttab;
+  bool firstpart;
+  Seqpos lastsuftabentryofpreviouspart;
   const Encodedsequence *encseq;
 } Outfileinfo;
 
@@ -55,6 +59,26 @@ static int suftab2file(void *info,
            strerror(errno));
       return -1;
     }
+  }
+  if (outfileinfo->outfplcptab != NULL)
+  {
+    if(outfileinfo->firstpart)
+    {
+      outfileinfo->firstpart = false;
+    } else
+    {
+      Seqpos lcpvalue;
+      int cmp;
+      cmp = comparetwosuffixes(outfileinfo->encseq,
+                               &lcpvalue,
+                               false,
+                               false,
+                               0,
+                               outfileinfo->lastsuftabentryofpreviouspart,
+                               suftab[0]);
+      assert(cmp <= 0);
+    }
+    outfileinfo->lastsuftabentryofpreviouspart = suftab[widthofpart-1];
   }
   if (outfileinfo->outfpbwttab != NULL)
   {
@@ -104,6 +128,17 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
   return haserr ? -1 : 0;
 }
 
+#define INITOUTFILEPTR(PTR,FLAG,SUFFIX)\
+        if (!haserr && FLAG)\
+        {\
+          outfileinfo.encseq = encseq;\
+          PTR = opensfxfile(so->str_indexname,"." SUFFIX,env);\
+          if((PTR) == NULL)\
+          {\
+            haserr = true;\
+          }\
+        }
+
 static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
 {
   unsigned char numofchars = 0;
@@ -122,7 +157,10 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
                "determining sequence length and number of special symbols",
                env);
   outfileinfo.outfpsuftab = NULL;
+  outfileinfo.outfplcptab = NULL;
   outfileinfo.outfpbwttab = NULL;
+  outfileinfo.firstpart = NULL;
+  outfileinfo.lastsuftabentryofpreviouspart = 0;
   alpha = assigninputalphabet(so->isdna,
                               so->isprotein,
                               so->str_smap,
@@ -195,36 +233,16 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
       }
     }
   }
-  if (!haserr)
-  {
-    if(so->outsuftab)
-    {
-      outfileinfo.outfpsuftab = opensfxfile(so->str_indexname,".suf",env);
-      if(outfileinfo.outfpsuftab == NULL)
-      {
-        haserr = true;
-      }
-    }
-  }
-  if (!haserr)
-  {
-    if(so->outbwttab)
-    {
-      outfileinfo.outfpbwttab = opensfxfile(so->str_indexname,".bwt",env);
-      outfileinfo.encseq = encseq;
-      if(outfileinfo.outfpbwttab == NULL)
-      {
-        haserr = true;
-      }
-    }
-  }
+  INITOUTFILEPTR(outfileinfo.outfpsuftab,so->outsuftab,"suf");
+  INITOUTFILEPTR(outfileinfo.outfplcptab,so->outlcptab,"lcp");
+  INITOUTFILEPTR(outfileinfo.outfpbwttab,so->outbwttab,"bwt");
   if (!haserr)
   {
     printf("# specialcharacters=" FormatSeqpos "\n",
            PRINTSeqposcast(specialcharinfo.specialcharacters));
     printf("# specialranges=" FormatSeqpos "\n",
            PRINTSeqposcast(specialcharinfo.specialranges));
-    if (so->outsuftab || so->outbwttab)
+    if (so->outsuftab || so->outbwttab || so->outlcptab)
     {
       if (suffixerator(suftab2file,
                        &outfileinfo,

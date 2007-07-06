@@ -40,7 +40,7 @@ fi
 
 if test $icc -eq 1
 then
-  make CC='ccache icc' CFLAGS='-O3 ${bignum} -wd1418,869,981' LD='icc' CXX='icc' $*
+  make CC='ccache icc' CFLAGS='-O3 ${bignum} -wd1418,869,981,1338' LD='icc' CXX='icc' $*
 else
   if test $do64 -eq 1
   then

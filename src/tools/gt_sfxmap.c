@@ -67,7 +67,6 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
                       suffixarray.suftab,
                       false, /* specialsareequal  */
                       true,  /* specialsareequalatdepth0 */
-                      getencseqtotallength(suffixarray.encseq),
                       0,
                       env);
   }

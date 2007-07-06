@@ -13,89 +13,15 @@
 #include "intbits-tab.h"
 #include "encseq-def.h"
 
-static int comparetwoprefixes(const Encodedsequence *encseq,
-                              Seqpos *maxlcp,
-                              bool specialsareequal,
-                              bool specialsareequalatdepth0,
-                              Seqpos totallength,
-                              Seqpos depth,
-                              Seqpos start1,
-                              Seqpos start2)
-{
-  Uchar cc1, cc2;
-  Seqpos pos1, pos2, end1, end2;
-
-  end1 = end2 = totallength;
-  if (depth > 0)
-  {
-    if (end1 > start1 + depth)
-    {
-      end1 = start1 + depth;
-    }
-    if (end2 > start2 + depth)
-    {
-      end2 = start2 + depth;
-    }
-  }
-  for (pos1=start1, pos2=start2; pos1 < end1 && pos2 < end2; pos1++, pos2++)
-  {
-    cc1 = getencodedchar(encseq,pos1);
-    cc2 = getencodedchar(encseq,pos2);
-    if (ISSPECIAL(cc1))
-    {
-      if (ISSPECIAL(cc2))
-      {
-        if (specialsareequal || (pos1 == start1 && specialsareequalatdepth0))
-        {
-          *maxlcp = pos1 - start1 + 1;
-          return 0;
-        }
-        if (pos1 < pos2)
-        {
-          *maxlcp = pos1  - start1;
-          return -1; /* a < b */
-        }
-        if (pos1 > pos2)
-        {
-          *maxlcp = pos1 - start1;
-          return 1; /* a > b */
-        }
-        *maxlcp = pos1 - start1 + 1;
-        return 0; /* a = b */
-      }
-      *maxlcp = pos1 - start1;
-      return 1; /* a > b */
-    } else
-    {
-      if (ISSPECIAL(cc2))
-      {
-        *maxlcp = pos1 - start1;
-        return -1; /* a < b */
-      }
-      if (cc1 < cc2)
-      {
-        *maxlcp = pos1 - start1;
-        return -1;
-      }
-      if (cc1 > cc2)
-      {
-        *maxlcp = pos1 - start1;
-        return 1;
-      }
-    }
-  }
-  *maxlcp = pos1 - start1;
-  return 0;
-}
+#include "cmpsuffixes.pr"
 
 static void showlocalsuffix(FILE *fpout,
                             const Encodedsequence *encseq,
                             const Uchar *characters,
                             Seqpos start,
-                            Seqpos depth,
-                            Seqpos totallength)
+                            Seqpos depth)
 {
-  Seqpos i, end;
+  Seqpos i, end, totallength = getencseqtotallength(encseq);
   Uchar cc;
   const Seqpos maxshow = (Seqpos) 30;
 
@@ -128,7 +54,6 @@ static void showcomparisonfailure(const char *where,
                                   const Uchar *characters,
                                   const Seqpos *suftab,
                                   Seqpos depth,
-                                  Seqpos totallength,
                                   const Seqpos *ptr1,
                                   const Seqpos *ptr2,
                                   int cmp,
@@ -140,9 +65,9 @@ static void showcomparisonfailure(const char *where,
                        PRINTSeqposcast((Seqpos) (ptr1 - suftab)),
                        PRINTSeqposcast((Seqpos) (ptr2 - suftab)),
                        PRINTSeqposcast(*ptr1));
-  showlocalsuffix(stderr,encseq,characters,*ptr1,depth,totallength);
+  showlocalsuffix(stderr,encseq,characters,*ptr1,depth);
   fprintf(stderr,"\",\"");
-  showlocalsuffix(stderr,encseq,characters,*ptr2,depth,totallength);
+  showlocalsuffix(stderr,encseq,characters,*ptr2,depth);
   fprintf(stderr,"\"=" FormatSeqpos ")=%d with maxlcp " FormatSeqpos "\n",
               PRINTSeqposcast(*ptr2),
               cmp,
@@ -153,7 +78,6 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
                                  const Uchar *characters,
                                  const Seqpos *suftab,
                                  uint32_t prefixlength,
-                                 Seqpos totallength,
                                  Seqpos depth,
                                  Seqpos left,
                                  Seqpos right)
@@ -164,11 +88,10 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
 
   for (ptr = suftab + left; ptr < suftab + right; ptr++)
   {
-    cmp = comparetwoprefixes(encseq,
+    cmp = comparetwosuffixes(encseq,
                              &maxlcp,
                              false,
                              true,
-                             totallength,
                              depth,
                              *ptr,
                              *(ptr+1));
@@ -179,7 +102,6 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
                             characters,
                             suftab,
                             depth,
-                            totallength,
                             ptr,ptr+1,cmp,maxlcp);
       exit(EXIT_FAILURE);
     }
@@ -189,17 +111,17 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
 void showentiresuftab(const Encodedsequence *encseq,
                       const Uchar *characters,
                       const Seqpos *suftab,
-                      Seqpos depth,
-                      Seqpos totallength)
+                      Seqpos depth)
 {
   const Seqpos *ptr;
+  Seqpos totallength = getencseqtotallength(encseq);
 
   for (ptr = suftab; ptr <= suftab + totallength; ptr++)
   {
     printf("suftab[" FormatSeqpos "]=" FormatSeqpos " ",
             PRINTSeqposcast((Seqpos) (ptr-suftab)),
             PRINTSeqposcast(*ptr));
-    showlocalsuffix(stdout,encseq,characters,*ptr,depth,totallength);
+    showlocalsuffix(stdout,encseq,characters,*ptr,depth);
     printf("\n");
   }
 }
@@ -209,13 +131,12 @@ void checkentiresuftab(const Encodedsequence *encseq,
                        const Seqpos *suftab,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,
-                       Seqpos totallength,
                        Seqpos depth,
                        Env *env)
 {
   const Seqpos *ptr;
   Bitstring *startposoccurs;
-  Seqpos maxlcp, countbitsset = 0;
+  Seqpos maxlcp, countbitsset = 0, totallength = getencseqtotallength(encseq);
   int cmp;
 
   assert(!specialsareequal || specialsareequalatdepth0);
@@ -240,11 +161,10 @@ void checkentiresuftab(const Encodedsequence *encseq,
   FREESPACE(startposoccurs);
   for (ptr = suftab + 1; ptr <= suftab + totallength; ptr++)
   {
-    cmp = comparetwoprefixes(encseq,
+    cmp = comparetwosuffixes(encseq,
                              &maxlcp,
                              specialsareequal,
                              specialsareequalatdepth0,
-                             totallength,
                              depth,
                              *(ptr-1),
                              *ptr);
@@ -255,7 +175,6 @@ void checkentiresuftab(const Encodedsequence *encseq,
                             characters,
                             suftab,
                             depth,
-                            totallength,
                             ptr-1,
                             ptr,
                             cmp,
