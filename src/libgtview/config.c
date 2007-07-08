@@ -45,7 +45,8 @@ Config* config_new(Env *env, bool verbose)
 
 void config_delete(Config *cfg, Env *env)
 {
-  assert(cfg);
+  assert(env);
+  if (!cfg) return;
   if (cfg->L) lua_close(cfg->L);
   if (cfg->filename) str_delete(cfg->filename,env);
   env_ma_free(cfg, env);
