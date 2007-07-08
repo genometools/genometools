@@ -83,7 +83,7 @@ Render* render_new(Config *cfg, Env *env)
 
 void render_delete(Render *r, Env *env)
 {
-  assert(r && env);
+  if (!r) return;
   env_ma_free(r, env);
 }
 

@@ -259,7 +259,8 @@ int diagram_get_number_of_tracks(Diagram* diagram)
 
 void diagram_delete(Diagram* diagram, Env* env)
 {
-  assert(diagram && env);
+  assert(env);
+  if (!diagram) return;
   hashtable_foreach(diagram->tracks, diagram_track_delete, NULL, env);
   hashtable_delete(diagram->tracks, env);
   env_ma_free(diagram, env);

@@ -51,7 +51,7 @@ void config_delete(Config *cfg, Env *env)
   env_ma_free(cfg, env);
 }
 
-void config_load_file(Config *cfg, Str *fn, Env* env)
+int config_load_file(Config *cfg, Str *fn, Env* env)
 {
   int had_err = 0;
   env_error_check(env);
@@ -76,6 +76,7 @@ void config_load_file(Config *cfg, Str *fn, Env* env)
     }
     lua_pop(cfg->L, 1);
   }
+  return had_err;
 }
 
 /*!

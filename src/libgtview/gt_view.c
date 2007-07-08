@@ -108,10 +108,12 @@ int gt_view(int argc, const char **argv, Env *env)
   char *seqid = NULL;
   Range qry_range, sequence_region_range;
   Array *results = NULL;
-  Config *cfg;
-  Str *config_file;
+  Config *cfg = NULL;
+  Str *config_file = NULL;
   char *prog;
   Splitter *splitter;
+  Diagram *d = NULL;
+  Render *r = NULL;
 
   env_error_check(env);
 
@@ -222,18 +224,22 @@ int gt_view(int argc, const char **argv, Env *env)
     cfg = config_new(env, arguments.verbose);
     assert(cfg);
     if (file_exists(str_get(config_file)))
-      config_load_file(cfg, config_file, env);
-
-    /* create and write image file */
-    Diagram* d = diagram_new(results, qry_range, cfg, env);
-    Render* r = render_new(cfg, env);
-    render_to_png(r, d, (char*) argv[parsed_args], arguments.width, env);
-
-    render_delete(r, env);
-    config_delete(cfg, env);
-    str_delete(config_file, env);
-    diagram_delete(d, env);
+      had_err = config_load_file(cfg, config_file, env);
   }
+  
+  if (!had_err)
+  {
+    /* create and write image file */
+    d = diagram_new(results, qry_range, cfg, env);
+    r = render_new(cfg, env);
+    render_to_png(r, d, (char*) argv[parsed_args], arguments.width, env);
+  }
+  
+  render_delete(r, env);
+  config_delete(cfg, env);
+  str_delete(config_file, env);
+  diagram_delete(d, env);
+  
 
   /* free */
   str_delete(arguments.seqid,env);
