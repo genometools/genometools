@@ -226,7 +226,7 @@ int gt_view(int argc, const char **argv, Env *env)
     if (file_exists(str_get(config_file)))
       had_err = config_load_file(cfg, config_file, env);
   }
-  
+
   if (!had_err)
   {
     /* create and write image file */
@@ -234,12 +234,11 @@ int gt_view(int argc, const char **argv, Env *env)
     r = render_new(cfg, env);
     render_to_png(r, d, (char*) argv[parsed_args], arguments.width, env);
   }
-  
+
   render_delete(r, env);
   config_delete(cfg, env);
   str_delete(config_file, env);
   diagram_delete(d, env);
-  
 
   /* free */
   str_delete(arguments.seqid,env);
