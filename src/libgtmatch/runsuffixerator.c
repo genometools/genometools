@@ -31,8 +31,7 @@ typedef struct
   FILE *outfpsuftab,
        *outfplcptab,
        *outfpbwttab;
-  bool firstpart;
-  Seqpos lastsuftabentryofpreviouspart;
+  Seqpos lastsuftabentryofpreviouspart, absolutepos;
   const Encodedsequence *encseq;
 } Outfileinfo;
 
@@ -62,23 +61,39 @@ static int suftab2file(void *info,
   }
   if (outfileinfo->outfplcptab != NULL)
   {
-    if(outfileinfo->firstpart)
+    Seqpos pos, lcpvalue;
+    Uchar outvalue
+    int cmp;
+
+    for(pos=0; pos<widthofpart; pos++)
     {
-      outfileinfo->firstpart = false;
-    } else
-    {
-      Seqpos lcpvalue;
-      int cmp;
-      cmp = comparetwosuffixes(outfileinfo->encseq,
-                               &lcpvalue,
-                               false,
-                               false,
-                               0,
-                               outfileinfo->lastsuftabentryofpreviouspart,
-                               suftab[0]);
-      assert(cmp <= 0);
+      if(pos > 0 || outfileinfo->absolutepos > 0)
+      {
+        cmp = comparetwosuffixes(outfileinfo->encseq,
+                                 &lcpvalue,
+                                 false,
+                                 false,
+                                 0,
+                                 pos > 0 ? suftab[pos-1] 
+                                         : outfileinfo->
+                                           lastsuftabentryofpreviouspart,
+                                 suftab[pos]);
+        assert(cmp <= 0);
+        if(lcpvalue > UCHAR_MAX)
+        {
+          
+        if (fwrite(&lcpvaluec,sizeof(Uchar),(size_t) 1,outfileinfo->outfpbwttab) 
+                  != (size_t) 1)
+      {
+        env_error_set(env,"cannot write 1 item of size %lu: "\
+                          "errormsg=\"%s\"",\
+                        (unsigned long) sizeof(Uchar),\
+                        strerror(errno));\
+        
+      }
     }
     outfileinfo->lastsuftabentryofpreviouspart = suftab[widthofpart-1];
+    outfileinfo->absolutepos += widthofpart;
   }
   if (outfileinfo->outfpbwttab != NULL)
   {
@@ -129,7 +144,7 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
 }
 
 #define INITOUTFILEPTR(PTR,FLAG,SUFFIX)\
-        if (!haserr && FLAG)\
+        if (!haserr && (FLAG))\
         {\
           outfileinfo.encseq = encseq;\
           PTR = opensfxfile(so->str_indexname,"." SUFFIX,env);\
@@ -159,7 +174,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   outfileinfo.outfpsuftab = NULL;
   outfileinfo.outfplcptab = NULL;
   outfileinfo.outfpbwttab = NULL;
-  outfileinfo.firstpart = NULL;
+  outfileinfo.absolutepos = 0;
   outfileinfo.lastsuftabentryofpreviouspart = 0;
   alpha = assigninputalphabet(so->isdna,
                               so->isprotein,
