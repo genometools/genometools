@@ -33,3 +33,11 @@ feature requests:
 
 view tool:
 ----------
+
+
+BitPackArray/BitPackClass:
+--------------------------
+
+- make source and header files src_check clean
+- use naming conventions (e.g., bitpackarray_new instead of newBitPackArray)
+- shorten necessary compute time for unit tests

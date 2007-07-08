@@ -32,7 +32,7 @@ ScoreMatrix* scorematrix_new(Alpha *alpha, Env *env)
 }
 
 static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
-                                Tokenizer *tz, Env *env)
+                               Tokenizer *tz, Env *env)
 {
   Str *token;
   char *tokenstr, amino_acid, parsed_characters[UCHAR_MAX] = { 0 };

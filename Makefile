@@ -28,6 +28,10 @@ LDLIBS:=-lm -lz
 SYSTEM:=$(shell uname -s)
 ifeq ($(SYSTEM),Darwin)
   RANLIB:=ranlib
+  GT_CFLAGS+=-DHAVE_LLABS
+endif
+ifeq ($(SYSTEM),Linux)
+  GT_CLAGS+=-D_ISOC99_SOURCE -D_XOPEN_SOURCE=600 -DHAVE_LLABS
 endif
 
 # the default GenomeTools libraries which are build
@@ -192,6 +196,38 @@ obj/gt_cflags.h:
 
 obj/gt_version.h: VERSION
 	@echo '#define GT_VERSION "'`cat VERSION`\" > $@
+
+src/libgtcore/bitpackstringop8.c: src/libgtcore/bitpackstringop.template
+	@echo '[rebuild $@]'
+	@scripts/template2c.pl $^
+
+src/libgtcore/checkbitpackstring8.c: src/libgtcore/checkbitpackstring.template
+	@echo '[rebuild $@]'
+	@scripts/template2c.pl $^
+
+src/libgtcore/bitpackstringop16.c: src/libgtcore/bitpackstringop.template
+	@echo '[rebuild $@]'
+	@scripts/template2c.pl $^
+
+src/libgtcore/checkbitpackstring16.c: src/libgtcore/checkbitpackstring.template
+	@echo '[rebuild $@]'
+	@scripts/template2c.pl $^
+
+src/libgtcore/bitpackstringop32.c: src/libgtcore/bitpackstringop.template
+	@echo '[rebuild $@]'
+	@scripts/template2c.pl $^
+
+src/libgtcore/checkbitpackstring32.c: src/libgtcore/checkbitpackstring.template
+	@echo '[rebuild $@]'
+	@scripts/template2c.pl $^
+
+src/libgtcore/bitpackstringop64.c: src/libgtcore/bitpackstringop.template
+	@echo '[rebuild $@]'
+	@scripts/template2c.pl $^
+
+src/libgtcore/checkbitpackstring64.c: src/libgtcore/checkbitpackstring.template
+	@echo '[rebuild $@]'
+	@scripts/template2c.pl $^
 
 # we create the dependency files on the fly
 obj/%.o: src/%.c

@@ -33,14 +33,10 @@ typedef void   (*ProcessSpliceFormFunc)(Array *spliced_alignments_in_form,
                                         size_t size_of_sa,
                                         void *userdata, Env*);
 
-void consensus_sa(const void *set_of_sas,
-                  unsigned long number_of_sas,
-                  size_t size_of_sa,
-                  GetGenomicRangeFunc get_genomic_range,
-                  GetStrandFunc get_strand,
-                  GetExonsFunc get_exons,
-                  ProcessSpliceFormFunc process_splice_form,
-                  void *userdata,
+void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
+                  size_t size_of_sa, GetGenomicRangeFunc get_genomic_range,
+                  GetStrandFunc get_strand, GetExonsFunc get_exons,
+                  ProcessSpliceFormFunc process_splice_form, void *userdata,
                   Env *env);
 
 #endif

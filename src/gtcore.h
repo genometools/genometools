@@ -13,6 +13,8 @@
 #include <libgtcore/array2dim.h>     /* 2-dimensional array class */
 #include <libgtcore/bioseq.h>        /* biosequence class */
 #include <libgtcore/bittab.h>        /* bittab class */
+#include <libgtcore/bitpackarray.h>  /* packed integer array class */
+#include <libgtcore/bitpackstring.h> /* packed integer module */
 #include <libgtcore/countingsort.h>  /* countingsort module */
 #include <libgtcore/cstr.h>          /* C-string class */
 #include <libgtcore/disc_distri.h>   /* discrete distribution class */
