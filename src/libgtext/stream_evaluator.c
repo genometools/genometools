@@ -78,6 +78,7 @@ typedef struct {
   Slot *slot;
   bool verbose,
        exondiff;
+  unsigned long LTRdelta;
   Evaluator *gene_evaluator,
             *mRNA_evaluator,
             *LTR_evaluator;
@@ -165,7 +166,6 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   evaluator->reality = reality;
   evaluator->prediction = prediction;
   evaluator->evalLTR = evalLTR;
-  evaluator->LTRdelta = LTRdelta;
   evaluator->real_features = hashtable_new(HASH_STRING, NULL,
                                            (FreeFunc) slot_delete, env);
   evaluator->gene_evaluator = evaluator_new(env);
@@ -566,7 +566,8 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   return equal;
 }
 
-static bool LTRs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
+static bool LTRs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2,
+                           unsigned long LTRdelta)
 {
   Range range_1, range_2;
   assert(gn_1 && gn_2);
@@ -926,7 +927,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                     "(line %lu)\n", genome_node_get_line_number(gn));
           }
       }
-    break;
+      break;
     case gft_LTR_retrotransposon:
       /* store predicted LTR */
       evaluator_add_predicted(info->LTR_evaluator, 1);
@@ -941,7 +942,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
         /* LTR(s) with the same range found -> check if they are equal */
         for (i = 0; i < array_size(real_genome_nodes); i++) {
           real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
-          if (LTRs_are_equal(gn, *real_gn)) {
+          if (LTRs_are_equal(gn, *real_gn, info->LTRdelta)) {
             num = real_gn - (GenomeNode**)
                             array_get_space(info->slot->LTRs);
             if (!bittab_bit_is_set(info->slot->true_LTRs, num)) {
@@ -1059,7 +1060,7 @@ int determine_missing_features(void *key, void *value, void *data, Env *env)
                          bittab_count_set_bits(slot->overlapped_mRNAs_reverse);
   }
   if (slot->overlapped_LTRs) {
-    se->missing_mRNAs += bittab_size(slot->overlapped_LTRs) -
+    se->missing_LTRs  += bittab_size(slot->overlapped_LTRs) -
                          bittab_count_set_bits(slot->overlapped_LTRs);
   }
   return 0;
@@ -1083,6 +1084,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   process_real_feature_data.verbose = verbose;
   info.verbose = verbose;
   info.exondiff = exondiff;
+  info.LTRdelta = se->LTRdelta;
   info.gene_evaluator = se->gene_evaluator;
   info.mRNA_evaluator = se->mRNA_evaluator;
   info.LTR_evaluator  = se->LTR_evaluator;
@@ -1262,11 +1264,11 @@ void stream_evaluator_show(StreamEvaluator *se, FILE *outfp)
   else {
     /* LTR_retrotransposon prediction */
     fprintf(outfp, "LTR_retrotransposon sensitivity: ");
-    evaluator_show_sensitivity(se->gene_evaluator, outfp);
+    evaluator_show_sensitivity(se->LTR_evaluator, outfp);
     fprintf(outfp, " (missing LTRs: %lu)\n", se->missing_LTRs);
 
     fprintf(outfp, "LTR_retrotransposon specificity: ");
-    evaluator_show_specificity(se->gene_evaluator, outfp);
+    evaluator_show_specificity(se->LTR_evaluator, outfp);
     fprintf(outfp, " (wrong LTRs: %lu)\n", se->wrong_LTRs);
   }
 }

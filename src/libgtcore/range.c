@@ -1,12 +1,13 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
 #include <assert.h>
 #include <libgtcore/ensure.h>
 #include <libgtcore/fptr.h>
+#include <libgtcore/minmax.h>
 #include <libgtcore/msort.h>
 #include <libgtcore/range.h>
 #include <libgtcore/undef.h>
@@ -57,6 +58,19 @@ bool range_contains(Range range_a, Range range_b)
   assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
 
   if (range_a.start <= range_b.start && range_a.end >= range_b.end)
+    return true;
+  return false;
+}
+
+bool range_equal_with_delta(Range range_a, Range range_b, unsigned long delta)
+{
+  unsigned long start_min, start_max, end_min, end_max;
+  assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
+  start_min = MIN(range_a.start, range_b.start);
+  start_max = MAX(range_a.start, range_b.start);
+  end_min   = MIN(range_a.end, range_b.end);
+  end_max   = MAX(range_a.end, range_b.end);
+  if (start_max - start_min <= delta && end_max - end_min <= delta)
     return true;
   return false;
 }
