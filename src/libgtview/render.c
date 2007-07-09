@@ -87,7 +87,7 @@ Render* render_new(Config *cfg, Env *env)
 
 void render_delete(Render *r, Env *env)
 {
-  assert(r && env);
+  if (!r) return;
   env_ma_free(r, env);
 }
 
@@ -347,10 +347,7 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
         chk_range.end   = chk_range.start
                             + graphics_get_text_width(r->g, caption);
         if (range_overlap(chk_range, cur_range))
-        {
-          block_set_caption_visibility(this_block, false);
           block_set_caption_visibility(left_block, false);
-        }
       }
       for (j = i+1; j < array_size(blocks);j++)
       {
@@ -363,10 +360,7 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
         chk_range.end   = chk_range.start
                             + graphics_get_text_width(r->g, caption);
         if (range_overlap(chk_range, cur_range))
-        {
-          block_set_caption_visibility(this_block, false);
           block_set_caption_visibility(right_block, false);
-        }
       }
     }
   }

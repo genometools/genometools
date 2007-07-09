@@ -48,13 +48,14 @@ Config* config_new(Env *env, bool verbose)
 
 void config_delete(Config *cfg, Env *env)
 {
-  assert(cfg);
+  assert(env);
+  if (!cfg) return;
   if (cfg->L) lua_close(cfg->L);
   if (cfg->filename) str_delete(cfg->filename,env);
   env_ma_free(cfg, env);
 }
 
-void config_load_file(Config *cfg, Str *fn, Env* env)
+int config_load_file(Config *cfg, Str *fn, Env* env)
 {
   int had_err = 0;
   env_error_check(env);
@@ -79,6 +80,7 @@ void config_load_file(Config *cfg, Str *fn, Env* env)
     }
     lua_pop(cfg->L, 1);
   }
+  return had_err;
 }
 
 /*!

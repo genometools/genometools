@@ -43,8 +43,9 @@ This file must contain a global table called 'config'.
 \param cfg Config object to load into.
 \param fn Filename of the script to execute.
 \param env Pointer to Environment object.
+\return error status
 */
-void         config_load_file(Config *cfg, Str *fn, Env *env);
+int          config_load_file(Config *cfg, Str *fn, Env *env);
 
 /*!
 Reloads the Lua configuration file.
