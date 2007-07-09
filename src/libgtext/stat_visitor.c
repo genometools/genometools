@@ -13,7 +13,8 @@ struct StatVisitor {
   const GenomeVisitor parent_instance;
   unsigned long number_of_genes,
                 number_of_mRNAs,
-                number_of_exons;
+                number_of_exons,
+                number_of_LTR_retrotransposons;
   DiscDistri *gene_length_distribution,
              *gene_score_distribution,
              *exon_length_distribution,
@@ -69,6 +70,9 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                         env);
       }
       break;
+    case gft_LTR_retrotransposon:
+      stat_visitor->number_of_LTR_retrotransposons++;
+      break;
     default: assert(1); /* nothing to do for all other types */
   }
   return 0;
@@ -112,6 +116,10 @@ void stat_visitor_show_stats(GenomeVisitor *gv)
     printf("mRNAs: %lu\n", stat_visitor->number_of_mRNAs);
   if (stat_visitor->number_of_exons)
     printf("exons: %lu\n", stat_visitor->number_of_exons);
+  if (stat_visitor->number_of_LTR_retrotransposons) {
+    printf("LTR_retrotransposons: %lu\n",
+           stat_visitor->number_of_LTR_retrotransposons);
+  }
   if (stat_visitor->gene_length_distribution) {
     printf("gene length distribution:\n");
     disc_distri_show(stat_visitor->gene_length_distribution);
