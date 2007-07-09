@@ -310,7 +310,7 @@ release: apidoc
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD \
 	>genometools-`cat VERSION`.tar
 	tar -r -f genometools-`cat VERSION`.tar doc/api
-        gzip -9 genometools-`cat VERSION`.tar
+	gzip -9 genometools-`cat VERSION`.tar
 	scp genometools-`cat VERSION`.tar.gz $(SERVER):$(WWWBASEDIR)/htdocs/pub
 	rsync -rv doc/api $(SERVER):$(WWWBASEDIR)/apidoc
 	git push --tags
