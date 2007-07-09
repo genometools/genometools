@@ -6,12 +6,23 @@
 
 #ifndef FBS_DEF_H
 #define FBS_DEF_H
+#include <stdio.h>
 #include <stdbool.h>
+#include <zlib.h>
 #include "libgtcore/strarray.h"
 #include "types.h"
-#include "genstream.h"
 
 #define FILEBUFFERSIZE 65536
+
+typedef struct
+{
+  bool isgzippedstream;
+  union
+  {
+    FILE *fopenstream;
+    gzFile gzippedstream;
+  } stream;
+} Genericstream;
 
 typedef struct
 {

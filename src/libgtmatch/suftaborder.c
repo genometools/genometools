@@ -7,9 +7,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "libgtcore/env.h"
+#include "libgtcore/minmax.h"
 #include "types.h"
 #include "chardef.h"
-#include "minmax.h"
 #include "intbits-tab.h"
 #include "encseq-def.h"
 

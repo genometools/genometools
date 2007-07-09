@@ -10,7 +10,6 @@
 #include <errno.h>
 #include "types.h"
 #include "spacedef.h"
-#include "megabytes.h"
 #include "alphadef.h"
 #include "sfx-optdef.h"
 #include "encseq-def.h"
@@ -30,6 +29,7 @@ typedef struct
 {
   FILE *outfpsuftab,
        *outfplcptab,
+       *outfpllvtab,
        *outfpbwttab;
   Seqpos lastsuftabentryofpreviouspart, absolutepos;
   const Encodedsequence *encseq;
@@ -41,6 +41,7 @@ static int suftab2file(void *info,
                        Env *env)
 {
   Outfileinfo *outfileinfo = (Outfileinfo *) info;
+  bool haserr = false;
 
   env_error_check(env);
   if (outfileinfo->outfpsuftab != NULL)
@@ -56,13 +57,14 @@ static int suftab2file(void *info,
            PRINTSeqposcast(widthofpart),
            (unsigned int) sizeof (*suftab),
            strerror(errno));
-      return -1;
+      haserr = true;
     }
   }
-  if (outfileinfo->outfplcptab != NULL)
+  if (!haserr && outfileinfo->outfplcptab != NULL)
   {
     Seqpos pos, lcpvalue;
-    Uchar outvalue
+    Uchar outvalue;
+    Largelcpvalue largelcpvalue;
     int cmp;
 
     for(pos=0; pos<widthofpart; pos++)
@@ -81,21 +83,41 @@ static int suftab2file(void *info,
         assert(cmp <= 0);
         if(lcpvalue > UCHAR_MAX)
         {
-          
-        if (fwrite(&lcpvaluec,sizeof(Uchar),(size_t) 1,outfileinfo->outfpbwttab) 
-                  != (size_t) 1)
-      {
-        env_error_set(env,"cannot write 1 item of size %lu: "\
-                          "errormsg=\"%s\"",\
-                        (unsigned long) sizeof(Uchar),\
-                        strerror(errno));\
-        
+          largelcpvalue.position = outfileinfo->absolutepos + pos;
+          largelcpvalue.value = lcpvalue;
+          if (fwrite(&largelcpvalue,sizeof(Largelcpvalue),(size_t) 1,
+                     outfileinfo->outfpllvtab) != (size_t) 1)
+          {
+            env_error_set(env,"cannot write 1 item of size %lu: "
+                              "errormsg=\"%s\"",
+                              (unsigned long) sizeof(Largelcpvalue),
+                              strerror(errno));
+            haserr = true;
+            break;
+          }
+          outvalue = UCHAR_MAX; 
+        } else
+        {
+          outvalue = (Uchar) lcpvalue;
+        }
+        if (!haserr && fwrite(&outvalue,sizeof(Uchar),(size_t) 1,
+                   outfileinfo->outfplcptab) != (size_t) 1)
+        {
+          env_error_set(env,"cannot write 1 item of size %lu: errormsg=\"%s\"",
+                          (unsigned long) sizeof(Uchar),
+                          strerror(errno));
+          haserr = true;
+          break;
+        }
       }
     }
-    outfileinfo->lastsuftabentryofpreviouspart = suftab[widthofpart-1];
-    outfileinfo->absolutepos += widthofpart;
+    if(!haserr)
+    {
+      outfileinfo->lastsuftabentryofpreviouspart = suftab[widthofpart-1];
+      outfileinfo->absolutepos += widthofpart;
+    }
   }
-  if (outfileinfo->outfpbwttab != NULL)
+  if (!haserr && outfileinfo->outfpbwttab != NULL)
   {
     Seqpos pos, startpos;
     Uchar cc;
@@ -117,11 +139,12 @@ static int suftab2file(void *info,
                           "errormsg=\"%s\"",\
                         (unsigned long) sizeof(Uchar),\
                         strerror(errno));\
-        return -2;
+        haserr = true;
+        break;
       }
     }
   }
-  return 0;
+  return haserr ? -1 : 0;
 }
 
 static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
@@ -173,6 +196,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
                env);
   outfileinfo.outfpsuftab = NULL;
   outfileinfo.outfplcptab = NULL;
+  outfileinfo.outfpllvtab = NULL;
   outfileinfo.outfpbwttab = NULL;
   outfileinfo.absolutepos = 0;
   outfileinfo.lastsuftabentryofpreviouspart = 0;
@@ -250,6 +274,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   }
   INITOUTFILEPTR(outfileinfo.outfpsuftab,so->outsuftab,"suf");
   INITOUTFILEPTR(outfileinfo.outfplcptab,so->outlcptab,"lcp");
+  INITOUTFILEPTR(outfileinfo.outfpllvtab,so->outlcptab,"llv");
   INITOUTFILEPTR(outfileinfo.outfpbwttab,so->outbwttab,"bwt");
   if (!haserr)
   {
@@ -275,6 +300,8 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
     }
   }
   env_fa_xfclose(outfileinfo.outfpsuftab,env);
+  env_fa_xfclose(outfileinfo.outfplcptab,env);
+  env_fa_xfclose(outfileinfo.outfpllvtab,env);
   env_fa_xfclose(outfileinfo.outfpbwttab,env);
   FREESPACE(filelengthtab);
   freeAlphabet(&alpha,env);

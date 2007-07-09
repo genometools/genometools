@@ -227,8 +227,10 @@ typedef struct
          uint1;
 } PairSeqpos;                /* \Typedef{PairSeqpos} */
 
-/*
-  The following type stores an unsigned integer only of defined is True
-*/
+typedef struct
+{
+  Seqpos position,
+         value;
+} Largelcpvalue;
 
 #endif

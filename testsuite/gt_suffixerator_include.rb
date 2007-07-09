@@ -1,3 +1,7 @@
+def outoptions()
+  return "-tis -suf -bwt -lcp -indexname sfx"
+end
+
 def checksfx(parts,pl,withsmap,sat,filelist)
   if withsmap == 0
     extra=""
@@ -10,7 +14,7 @@ def checksfx(parts,pl,withsmap,sat,filelist)
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run "#{$bin}gt suffixerator -parts #{parts} -pl #{pl} #{extra} -tis -suf -bwt -indexname sfx -db " +
+  run "#{$bin}gt suffixerator -parts #{parts} -pl #{pl} #{extra} #{outoptions()}  -db " +
        filearg
   run "#{$bin}gt dev sfxmap sfx"
   run "grep -v '^#' #{$last_stdout}"
@@ -22,8 +26,7 @@ def checkbwt(filelist)
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run "#{$bin}gt suffixerator -pl 3 -tis -suf -bwt -indexname sfx -db " +
-       filearg
+  run "#{$bin}gt suffixerator -pl 3 #{outoptions()} -db " + filearg
 end
 
 allfiles = ["RandomN.fna","Random.fna","Atinsert.fna",

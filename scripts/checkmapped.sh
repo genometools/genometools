@@ -37,5 +37,5 @@ function checksfxmap()
   checkerror "cmp -s $1.prj $1-sfx.prj"
 }
 
-checkerror "${VALGRIND} ${GTDIR}/bin/gt suffixerator -tis -suf -indexname /tmp/sfx $*"
+checkerror "${VALGRIND} ${GTDIR}/bin/gt suffixerator -tis -suf -bwt -lcp -indexname /tmp/sfx $*"
 checkerror "checksfxmap /tmp/sfx"

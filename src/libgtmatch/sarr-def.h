@@ -11,6 +11,7 @@
 #include "alphadef.h"
 #include "encseq-def.h"
 
+
 typedef struct
 {
   uint32_t numofdbsequences;
