@@ -4,6 +4,10 @@
    See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+/**
+ * \file block.h
+ * \author Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
+ */
 #ifndef BLOCK_H
 #define BLOCK_H
 
