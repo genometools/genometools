@@ -16,9 +16,12 @@
 struct StreamEvaluator {
   GenomeStream *reality,
                *prediction;
+  bool evalLTR;
+  unsigned long LTRdelta;
   Hashtable *real_features; /* sequence name -> feature type hash */
   Evaluator *gene_evaluator,
-            *mRNA_evaluator;
+            *mRNA_evaluator,
+            *LTR_evaluator;
   TranscriptEvaluators *mRNA_exon_evaluators,
                        *mRNA_exon_evaluators_collapsed,
                        *CDS_exon_evaluators,
@@ -26,14 +29,17 @@ struct StreamEvaluator {
   unsigned long missing_genes,
                 wrong_genes,
                 missing_mRNAs,
-                wrong_mRNAs;
+                wrong_mRNAs,
+                missing_LTRs,
+                wrong_LTRs;
 };
 
 typedef struct {
   Array *genes_forward,
         *genes_reverse,
         *mRNAs_forward,
-        *mRNAs_reverse;
+        *mRNAs_reverse,
+        *LTRs;
   TranscriptExons *mRNA_exons_forward,
                   *mRNA_exons_reverse,
                   *CDS_exons_forward,
@@ -46,10 +52,12 @@ typedef struct {
          *true_genes_reverse,
          *true_mRNAs_forward,
          *true_mRNAs_reverse,
+         *true_LTRs,
          *overlapped_genes_forward,
          *overlapped_genes_reverse,
          *overlapped_mRNAs_forward,
-         *overlapped_mRNAs_reverse;
+         *overlapped_mRNAs_reverse,
+         *overlapped_LTRs;
   TranscriptBittabs *mRNA_exon_bittabs_forward,
                     *mRNA_exon_bittabs_reverse,
                     *CDS_exon_bittabs_forward,
@@ -71,13 +79,15 @@ typedef struct {
   bool verbose,
        exondiff;
   Evaluator *gene_evaluator,
-            *mRNA_evaluator;
+            *mRNA_evaluator,
+            *LTR_evaluator;
   TranscriptEvaluators *mRNA_exon_evaluators,
                        *mRNA_exon_evaluators_collapsed,
                        *CDS_exon_evaluators,
                        *CDS_exon_evaluators_collapsed;
   unsigned long *wrong_genes,
-                *wrong_mRNAs;
+                *wrong_mRNAs,
+                *wrong_LTRs;
 } Process_predicted_feature_info;
 
 static Slot* slot_new(Env *env)
@@ -87,6 +97,7 @@ static Slot* slot_new(Env *env)
   s->genes_reverse = array_new(sizeof (GenomeNode*), env);
   s->mRNAs_forward = array_new(sizeof (GenomeNode*), env);
   s->mRNAs_reverse = array_new(sizeof (GenomeNode*), env);
+  s->LTRs          = array_new(sizeof (GenomeNode*), env);
   s->mRNA_exons_forward = transcript_exons_new(env);
   s->mRNA_exons_reverse = transcript_exons_new(env);
   s->CDS_exons_forward = transcript_exons_new(env);
@@ -114,6 +125,9 @@ static void slot_delete(Slot *s, Env *env)
   for (i = 0; i < array_size(s->mRNAs_reverse); i++)
     genome_node_rec_delete(*(GenomeNode**) array_get(s->mRNAs_reverse, i), env);
   array_delete(s->mRNAs_reverse, env);
+  for (i = 0; i < array_size(s->LTRs); i++)
+    genome_node_rec_delete(*(GenomeNode**) array_get(s->LTRs, i), env);
+  array_delete(s->LTRs, env);
   transcript_exons_delete(s->mRNA_exons_forward, env);
   transcript_exons_delete(s->mRNA_exons_reverse, env);
   transcript_exons_delete(s->CDS_exons_forward, env);
@@ -126,10 +140,12 @@ static void slot_delete(Slot *s, Env *env)
   bittab_delete(s->true_genes_reverse, env);
   bittab_delete(s->true_mRNAs_forward, env);
   bittab_delete(s->true_mRNAs_reverse, env);
+  bittab_delete(s->true_LTRs, env);
   bittab_delete(s->overlapped_genes_forward, env);
   bittab_delete(s->overlapped_genes_reverse, env);
   bittab_delete(s->overlapped_mRNAs_forward, env);
   bittab_delete(s->overlapped_mRNAs_reverse, env);
+  bittab_delete(s->overlapped_LTRs, env);
   transcript_bittabs_delete(s->mRNA_exon_bittabs_forward, env);
   transcript_bittabs_delete(s->mRNA_exon_bittabs_reverse, env);
   transcript_bittabs_delete(s->CDS_exon_bittabs_forward, env);
@@ -142,15 +158,19 @@ static void slot_delete(Slot *s, Env *env)
 }
 
 StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
-                                      GenomeStream *prediction, Env *env)
+                                      GenomeStream *prediction, bool evalLTR,
+                                      unsigned long LTRdelta, Env *env)
 {
   StreamEvaluator *evaluator = env_ma_malloc(env, sizeof (StreamEvaluator));
   evaluator->reality = reality;
   evaluator->prediction = prediction;
+  evaluator->evalLTR = evalLTR;
+  evaluator->LTRdelta = LTRdelta;
   evaluator->real_features = hashtable_new(HASH_STRING, NULL,
                                            (FreeFunc) slot_delete, env);
   evaluator->gene_evaluator = evaluator_new(env);
   evaluator->mRNA_evaluator = evaluator_new(env);
+  evaluator->LTR_evaluator = evaluator_new(env);
   evaluator->mRNA_exon_evaluators = transcript_evaluators_new(env);
   evaluator->mRNA_exon_evaluators_collapsed = transcript_evaluators_new(env);
   evaluator->CDS_exon_evaluators = transcript_evaluators_new(env);
@@ -159,6 +179,8 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   evaluator->wrong_genes = 0;
   evaluator->missing_mRNAs = 0;
   evaluator->wrong_mRNAs = 0;
+  evaluator->missing_LTRs = 0;
+  evaluator->wrong_LTRs = 0;
   return evaluator;
 }
 
@@ -179,6 +201,9 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
   evaluator_add_actual(se->mRNA_evaluator, array_size(s->mRNAs_forward));
   evaluator_add_actual(se->mRNA_evaluator, array_size(s->mRNAs_reverse));
 
+  /* set actual LTRs */
+  evaluator_add_actual(se->LTR_evaluator, array_size(s->LTRs));
+
   /* set actual exons (before uniq!) */
   transcript_evaluators_add_actuals(se->mRNA_exon_evaluators,
                                     s->mRNA_exons_forward);
@@ -196,6 +221,9 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
   /* sort mRNAs */
   genome_nodes_sort(s->mRNAs_forward);
   genome_nodes_sort(s->mRNAs_reverse);
+
+  /* sort LTRs */
+  genome_nodes_sort(s->LTRs);
 
   /* sort exons */
   transcript_exons_sort(s->mRNA_exons_forward);
@@ -231,6 +259,9 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
   assert(genome_nodes_are_sorted(s->mRNAs_forward));
   assert(genome_nodes_are_sorted(s->mRNAs_reverse));
 
+  /* make sure that the LTRs are sorted */
+  assert(genome_nodes_are_sorted(s->LTRs));
+
   /* make sure that the exons are sorted */
   assert(transcript_exons_are_sorted(s->mRNA_exons_forward));
   assert(transcript_exons_are_sorted(s->mRNA_exons_reverse));
@@ -250,6 +281,9 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
   s->true_mRNAs_reverse = array_size(s->mRNAs_reverse)
                           ? bittab_new(array_size(s->mRNAs_reverse), env)
                           : NULL;
+  s->true_LTRs          = array_size(s->LTRs)
+                          ? bittab_new(array_size(s->LTRs), env)
+                          : NULL;
 
   /* init overlap bittabs */
   s->overlapped_genes_forward = array_size(s->genes_forward)
@@ -263,6 +297,9 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
                                 : NULL;
   s->overlapped_mRNAs_reverse = array_size(s->mRNAs_reverse)
                                 ? bittab_new(array_size(s->mRNAs_reverse), env)
+                                : NULL;
+  s->overlapped_LTRs          = array_size(s->LTRs)
+                                ? bittab_new(array_size(s->LTRs), env)
                                 : NULL;
 
   /* init bittabs (for collapsed exons) */
@@ -350,6 +387,10 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
                     "(line %lu)\n", genome_node_get_line_number(gn));
           }
       }
+      break;
+    case gft_LTR_retrotransposon:
+      gn_ref = genome_node_rec_ref(gn, env);
+      array_add(process_real_feature_data->slot->LTRs, gn_ref, env);
       break;
     case gft_CDS:
       range = genome_node_get_range(gn);
@@ -523,6 +564,17 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   array_delete(mRNAs_2, env);
 
   return equal;
+}
+
+static bool LTRs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
+{
+  Range range_1, range_2;
+  assert(gn_1 && gn_2);
+  range_1 = genome_node_get_range(gn_1);
+  range_2 = genome_node_get_range(gn_2);
+  if (!range_compare(range_1, range_2))
+    return true;
+  return false;
 }
 
 static void store_predicted_exon(TranscriptEvaluators *te, GenomeFeature *gf)
@@ -875,6 +927,40 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
           }
       }
     break;
+    case gft_LTR_retrotransposon:
+      /* store predicted LTR */
+      evaluator_add_predicted(info->LTR_evaluator, 1);
+      /* determine true LTR */
+      bsearch_all_mark(real_genome_nodes, &gn,
+                       array_get_space(info->slot->LTRs),
+                       array_size(info->slot->LTRs), sizeof (GenomeNode*),
+                       (Compare) genome_node_compare,
+                       info->slot->overlapped_LTRs, env);
+
+      if (array_size(real_genome_nodes)) {
+        /* LTR(s) with the same range found -> check if they are equal */
+        for (i = 0; i < array_size(real_genome_nodes); i++) {
+          real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
+          if (LTRs_are_equal(gn, *real_gn)) {
+            num = real_gn - (GenomeNode**)
+                            array_get_space(info->slot->LTRs);
+            if (!bittab_bit_is_set(info->slot->true_LTRs, num)) {
+              bittab_set_bit(info->slot->true_LTRs, num);
+              evaluator_add_true(info->LTR_evaluator);
+              /*@loopbreak@*/
+              break;
+            }
+          }
+        }
+      }
+      else {
+        /* no LTR with the same range found -> check if this is a wrong LTR */
+        if (!genome_node_overlaps_nodes_mark(gn, info->slot->LTRs,
+                                             info->slot->overlapped_LTRs)) {
+          (*info->wrong_LTRs)++;
+        }
+      }
+      break;
     case gft_exon:
       /* store predicted exon (mRNA level)*/
       store_predicted_exon(info->mRNA_exon_evaluators, (GenomeFeature*) gn);
@@ -972,6 +1058,10 @@ int determine_missing_features(void *key, void *value, void *data, Env *env)
     se->missing_mRNAs += bittab_size(slot->overlapped_mRNAs_reverse) -
                          bittab_count_set_bits(slot->overlapped_mRNAs_reverse);
   }
+  if (slot->overlapped_LTRs) {
+    se->missing_mRNAs += bittab_size(slot->overlapped_LTRs) -
+                         bittab_count_set_bits(slot->overlapped_LTRs);
+  }
   return 0;
 }
 
@@ -986,8 +1076,8 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   Process_predicted_feature_info info;
   int had_err;
 
-  assert(se);
   env_error_check(env);
+  assert(se);
 
   /* init */
   process_real_feature_data.verbose = verbose;
@@ -995,12 +1085,14 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   info.exondiff = exondiff;
   info.gene_evaluator = se->gene_evaluator;
   info.mRNA_evaluator = se->mRNA_evaluator;
+  info.LTR_evaluator  = se->LTR_evaluator;
   info.mRNA_exon_evaluators = se->mRNA_exon_evaluators;
   info.mRNA_exon_evaluators_collapsed = se->mRNA_exon_evaluators_collapsed;
   info.CDS_exon_evaluators = se->CDS_exon_evaluators;
   info.CDS_exon_evaluators_collapsed = se->CDS_exon_evaluators_collapsed;
   info.wrong_genes = &se->wrong_genes;
   info.wrong_mRNAs = &se->wrong_mRNAs;
+  info.wrong_LTRs  = &se->wrong_LTRs;
 
   /* process the reality stream completely */
   while (!(had_err = genome_stream_next_tree(se->reality, &gn, env)) && gn) {
@@ -1138,33 +1230,45 @@ void stream_evaluator_show(StreamEvaluator *se, FILE *outfp)
 {
   assert(se);
 
-  /* gene level */
-  fprintf(outfp, "gene sensitivity:              ");
-  evaluator_show_sensitivity(se->gene_evaluator, outfp);
-  fprintf(outfp, " (missing genes: %lu)\n", se->missing_genes);
+  if (!se->evalLTR) {
+    /* gene level */
+    fprintf(outfp, "gene sensitivity:              ");
+    evaluator_show_sensitivity(se->gene_evaluator, outfp);
+    fprintf(outfp, " (missing genes: %lu)\n", se->missing_genes);
 
-  fprintf(outfp, "gene specificity:              ");
-  evaluator_show_specificity(se->gene_evaluator, outfp);
-  fprintf(outfp, " (wrong genes: %lu)\n", se->wrong_genes);
+    fprintf(outfp, "gene specificity:              ");
+    evaluator_show_specificity(se->gene_evaluator, outfp);
+    fprintf(outfp, " (wrong genes: %lu)\n", se->wrong_genes);
 
-  /* mRNA level */
-  fprintf(outfp, "mRNA sensitivity:              ");
-  evaluator_show_sensitivity(se->mRNA_evaluator, outfp);
-  fprintf(outfp, " (missing mRNAs: %lu)\n", se->missing_mRNAs);
+    /* mRNA level */
+    fprintf(outfp, "mRNA sensitivity:              ");
+    evaluator_show_sensitivity(se->mRNA_evaluator, outfp);
+    fprintf(outfp, " (missing mRNAs: %lu)\n", se->missing_mRNAs);
 
-  fprintf(outfp, "mRNA specificity:              ");
-  evaluator_show_specificity(se->mRNA_evaluator, outfp);
-  fprintf(outfp, " (wrong mRNAs: %lu)\n", se->wrong_mRNAs);
+    fprintf(outfp, "mRNA specificity:              ");
+    evaluator_show_specificity(se->mRNA_evaluator, outfp);
+    fprintf(outfp, " (wrong mRNAs: %lu)\n", se->wrong_mRNAs);
 
-  /* mRNA exon level */
-  show_transcript_values(se->mRNA_exon_evaluators, "mRNA", "", outfp);
-  show_transcript_values(se->mRNA_exon_evaluators_collapsed, "mRNA",
-                         ", collapsed", outfp);
+    /* mRNA exon level */
+    show_transcript_values(se->mRNA_exon_evaluators, "mRNA", "", outfp);
+    show_transcript_values(se->mRNA_exon_evaluators_collapsed, "mRNA",
+                           ", collapsed", outfp);
 
-  /* CDS exon level */
-  show_transcript_values(se->CDS_exon_evaluators, "CDS", "", outfp);
-  show_transcript_values(se->CDS_exon_evaluators_collapsed, "CDS",
-                         ", collapsed", outfp);
+    /* CDS exon level */
+    show_transcript_values(se->CDS_exon_evaluators, "CDS", "", outfp);
+    show_transcript_values(se->CDS_exon_evaluators_collapsed, "CDS",
+                           ", collapsed", outfp);
+  }
+  else {
+    /* LTR_retrotransposon prediction */
+    fprintf(outfp, "LTR_retrotransposon sensitivity: ");
+    evaluator_show_sensitivity(se->gene_evaluator, outfp);
+    fprintf(outfp, " (missing LTRs: %lu)\n", se->missing_LTRs);
+
+    fprintf(outfp, "LTR_retrotransposon specificity: ");
+    evaluator_show_specificity(se->gene_evaluator, outfp);
+    fprintf(outfp, " (wrong LTRs: %lu)\n", se->wrong_LTRs);
+  }
 }
 
 void stream_evaluator_delete(StreamEvaluator *se, Env *env)
@@ -1175,6 +1279,7 @@ void stream_evaluator_delete(StreamEvaluator *se, Env *env)
   hashtable_delete(se->real_features, env);
   evaluator_delete(se->gene_evaluator, env);
   evaluator_delete(se->mRNA_evaluator, env);
+  evaluator_delete(se->LTR_evaluator, env);
   transcript_evaluators_delete(se->mRNA_exon_evaluators, env);
   transcript_evaluators_delete(se->mRNA_exon_evaluators_collapsed, env);
   transcript_evaluators_delete(se->CDS_exon_evaluators, env);
