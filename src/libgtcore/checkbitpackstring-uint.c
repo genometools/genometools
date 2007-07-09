@@ -16,7 +16,7 @@
 
 enum {
 /*   MAX_RND_NUMS = 10, */
-  MAX_RND_NUMS = 10000,
+  MAX_RND_NUMS = 100000,
 };
 
 int
