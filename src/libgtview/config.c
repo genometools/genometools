@@ -3,7 +3,10 @@
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
-
+/**
+ * \file config.c
+ * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
+ */
 #include <libgtview/config.h>
 #include <assert.h>
 #include <string.h>

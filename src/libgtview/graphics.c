@@ -4,6 +4,11 @@
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
+/**
+ * \if INTERNAL \file graphics.c \endif
+ * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
+ * \author Gordon Gremme <gremme@zbh.uni-hamburg.de>
+ */
 
 #include <cairo.h>
 #include <cairo-pdf.h>

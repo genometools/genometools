@@ -17,6 +17,7 @@
  * \file bitpackstringsimpleop.h
  * \brief Trivial (i.e. inlined) operations on bitstrings.
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
+ 
  * The contents of this file is to be considered private
  * implementation detail but is exposed to the compiler solely for
  * performance reasons. Just pretend you didn't know how these
@@ -27,13 +28,6 @@
 #ifndef HAVE_LLABS
 #define llabs(i) (((i) < 0)?-i:i)
 #endif
-/**
- * Computes number of BitElem objects needed to store requested number
- * of consecutive bits.
- * @param numBits number of bits to be stored in total
- * @return number of BitElem objects needed to store numBits
- * consecutive bits
- */
 static inline size_t
 bitElemsAllocSize(BitOffset numBits)
 {

@@ -17,13 +17,6 @@
 #define MIN(a, b) (((a)<(b))?(a):(b))
 #define MIN3(a, b, c) (((a)<(b))?((a)<(c)?(a):(c)):((b)<(c)?(b):(c)))
 
-/**
- * Retrieve unsigned integer of specified length from bitstring at given position.
- * @param str bitstring to read from
- * @param offset position to start reading at (bit exact)
- * @param numBits number of bits composing integer to be read
- * @return value read
- */
 uint64_t
 bsGetUInt64(const BitString str, BitOffset offset, unsigned numBits)
 {
@@ -59,12 +52,6 @@ bsGetUInt64(const BitString str, BitOffset offset, unsigned numBits)
   return accum;
 }
 
-/**
- * Store unsigned integer of specified length in bitstring at given position.
- * @param str bitstring to write to
- * @param offset position to start writing at (bit exact)
- * @param numBits number of bits composing integer to be written
- */
 void
 bsStoreUInt64(BitString str, BitOffset offset,
                  unsigned numBits, uint64_t val)
@@ -137,8 +124,9 @@ bsStoreUInt64(BitString str, BitOffset offset,
 /**************************************************************************/
 
 void
-bsGetUniformUInt64Array(const BitString str, BitOffset offset, unsigned numBits,
-                           size_t numValues, uint64_t val[])
+bsGetUniformUInt64Array(const BitString str, BitOffset offset,
+                           unsigned numBits, size_t numValues,
+                           uint64_t val[])
 {
   /* idea: read as much as possible from str in each iteration,
    * accumulate if bitsLeft < numBits */
@@ -260,7 +248,7 @@ bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
       unsigned backShift = bitElemBits - bitsInAccum - bitTop;
       mask &= ~(uint_fast64_t)0 << backShift;
       *p = (*p & ~mask) | ((accum << backShift) & mask);
-      // TODO: try wether  r = a ^ ((a ^ b) & mask) is faster, see below
+      /* TODO: try wether  r = a ^ ((a ^ b) & mask) is faster, see below */
       return; /* if we couldn't gather more bits, there's none left */
     }
     else

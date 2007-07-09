@@ -209,6 +209,10 @@ obj/gt_cflags.h:
 obj/gt_version.h: VERSION
 	@echo '#define GT_VERSION "'`cat VERSION`\" > $@
 
+Doxyfile: Doxyfile.in VERSION
+	@echo '[rebuild $@]'
+	@sed -e "s/@VERSION@/`cat VERSION`/g" <$< >$@
+
 src/libgtcore/bitpackstringop8.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl $^
@@ -315,7 +319,7 @@ obj/%.o: src/external/rnv-1.7.8/%.c
 # read deps
 -include obj/*.d
 
-.PHONY: dist srcdist release gt install splint test clean cleanup
+.PHONY: dist srcdist release gt install splint test clean cleanup apidoc
 
 dist: all
 	tar cvzf gt-`cat VERSION`.tar.gz bin/gt
@@ -324,11 +328,17 @@ srcdist:
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
         gzip -9 > genometools-`cat VERSION`.tar.gz
 
-release:
+apidoc: Doxyfile
+	doxygen
+
+release: apidoc
 	git tag "v`cat VERSION`"
-	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
-        gzip -9 > genometools-`cat VERSION`.tar.gz
+	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD \
+	>genometools-`cat VERSION`.tar
+	tar -r -f genometools-`cat VERSION`.tar doc/api
+	gzip -9 genometools-`cat VERSION`.tar
 	scp genometools-`cat VERSION`.tar.gz $(SERVER):$(WWWBASEDIR)/htdocs/pub
+	rsync -rv doc/api $(SERVER):$(WWWBASEDIR)/apidoc
 	git push --tags
 
 installwww:
@@ -374,4 +384,4 @@ clean:
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
 
 cleanup: clean
-	rm -rf lib bin
+	rm -rf lib bin Doxyfile doc/api
