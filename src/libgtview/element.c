@@ -3,7 +3,10 @@
    Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
    See LICENSE file or http://genometools.org/license.html for license details.
 */
-
+/**
+ * \file element.c
+ * \author Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
+ */
 #include <libgtcore/array.h>
 #include <libgtext/genome_feature.h>
 #include <libgtext/genome_feature_type.h>

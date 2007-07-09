@@ -5,6 +5,12 @@
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
+/**
+ * \file feature_index.c
+ * \author Malte Mader <mmader@zbh.uni-hamburg.de>
+ * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
+ * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
+ */
 
 #include <libgtcore/hashtable.h>
 #include <libgtcore/range.h>

@@ -15,7 +15,7 @@
 
 enum {
 /*   MAX_RND_NUMS = 10, */
-  MAX_RND_NUMS = 10000000,
+  MAX_RND_NUMS = 100000,
 };
 
 int bitPackArray_unit_test(Env *env)

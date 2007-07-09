@@ -121,13 +121,10 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "splitter class", splitter_unit_test, env);
   hashtable_add(gtr->unit_tests, "string class", str_unit_test, env);
   hashtable_add(gtr->unit_tests, "tokenizer class", tokenizer_unit_test, env);
-  /* XXX: include unit tests */
-#if 0
   hashtable_add(gtr->unit_tests, "bit pack array class",
                 bitPackArray_unit_test, env);
   hashtable_add(gtr->unit_tests, "bit pack string module",
                 bitPackString_unit_test, env);
-#endif
 #ifdef LIBGTVIEW
   hashtable_add(gtr->unit_tests, "block class", block_unit_test, env);
   hashtable_add(gtr->unit_tests, "config class", config_unit_test, env);

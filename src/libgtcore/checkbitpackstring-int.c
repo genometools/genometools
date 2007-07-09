@@ -17,7 +17,7 @@
 
 enum {
 /*   MAX_RND_NUMS = 10, */
-  MAX_RND_NUMS = 10000000,
+  MAX_RND_NUMS = 100000,
 };
 
 static inline int

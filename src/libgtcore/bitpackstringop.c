@@ -32,7 +32,7 @@ requiredUInt32Bits(uint32_t v)
   v |= v >> 8;
   v |= v >> 16;
   v = (v >> 1) + 1;
-  r = MultiplyDeBruijnBitPosition[(v * 0x077CB531UL) >> 27];
+  r = MultiplyDeBruijnBitPosition[(v * (uint32_t)0x077CB531UL) >> 27];
   return r;
 }
 
@@ -54,7 +54,7 @@ requiredUInt64Bits(uint64_t v)
   v |= v >> 16;
   v |= v >> 32;
   v = (v >> 1) + 1;
-  r = MultiplyDeBruijnBitPosition[(v * 0x26752B916FC7B0DULL) >> 58];
+  r = MultiplyDeBruijnBitPosition[(v * (uint64_t)0x26752B916FC7B0DULL) >> 58];
   return r;
 }
 
