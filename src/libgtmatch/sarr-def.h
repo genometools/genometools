@@ -11,14 +11,17 @@
 #include "alphadef.h"
 #include "encseq-def.h"
 
-
 typedef struct
 {
   uint32_t numofdbsequences;
   StrArray *filenametab;
-  PairSeqpos *filelengthtab;
+  Filelengthvalues *filelengthtab;
   uint32_t prefixlength;
   const Seqpos *suftab;
+  const Uchar *lcptab;
+  const Largelcpvalue *llvtab;
+  const Uchar *bwttab;
+  Seqpos numoflargelcpvalues;
   Encodedsequence *encseq;
   Specialcharinfo specialcharinfo;
   Alphabet *alpha;

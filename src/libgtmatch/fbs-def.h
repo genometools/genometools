@@ -39,7 +39,7 @@ typedef struct
   Uchar bufspace[FILEBUFFERSIZE];
   Seqpos totaloffset;
   Seqpos lastspeciallength;
-  PairSeqpos *filelengthtab;
+  Filelengthvalues *filelengthtab;
   const StrArray *filenametab;
   const Uchar *symbolmap;
 } Fastabufferstate;

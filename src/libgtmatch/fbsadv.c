@@ -73,7 +73,7 @@ static void closegenericstream(Genericstream *inputstream,const char *inputfile)
 void initfastabufferstate(Fastabufferstate *fbs,
                           const StrArray *filenametab,
                           const Uchar *symbolmap,
-                          PairSeqpos **filelengthtab,
+                          Filelengthvalues **filelengthtab,
                           Env *env)
 {
   fbs->filenum = 0;
@@ -88,7 +88,7 @@ void initfastabufferstate(Fastabufferstate *fbs,
   fbs->lastspeciallength = 0;
   if(filelengthtab != NULL)
   {
-    ALLOCASSIGNSPACE(*filelengthtab,NULL,PairSeqpos,strarray_size(filenametab));
+    ALLOCASSIGNSPACE(*filelengthtab,NULL,Filelengthvalues,strarray_size(filenametab));
     fbs->filelengthtab = *filelengthtab;
   } else
   {
@@ -110,8 +110,8 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
     {
       if(fbs->filelengthtab != NULL)
       {
-        fbs->filelengthtab[fbs->filenum].uint0 += currentfileread;
-        fbs->filelengthtab[fbs->filenum].uint1 += currentfileadd;
+        fbs->filelengthtab[fbs->filenum].length += currentfileread;
+        fbs->filelengthtab[fbs->filenum].effectivelength += currentfileadd;
       }
       break;
     }
@@ -119,8 +119,8 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
     {
       if(fbs->filelengthtab != NULL)
       {
-        fbs->filelengthtab[fbs->filenum].uint0 = 0;
-        fbs->filelengthtab[fbs->filenum].uint1 = 0;
+        fbs->filelengthtab[fbs->filenum].length = 0;
+        fbs->filelengthtab[fbs->filenum].effectivelength = 0;
       }
       fbs->nextfile = false;
       fbs->indesc = false;
@@ -147,8 +147,8 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
                                         (unsigned long) fbs->filenum));
         if(fbs->filelengthtab != NULL)
         {
-          fbs->filelengthtab[fbs->filenum].uint0 += currentfileread;
-          fbs->filelengthtab[fbs->filenum].uint1 += currentfileadd;
+          fbs->filelengthtab[fbs->filenum].length += currentfileread;
+          fbs->filelengthtab[fbs->filenum].effectivelength += currentfileadd;
         }
         if ((unsigned long) fbs->filenum == strarray_size(fbs->filenametab) - 1)
         {

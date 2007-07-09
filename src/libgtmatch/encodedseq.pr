@@ -20,7 +20,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
 
 int overallspecialranges(const Encodedsequence *encseq,
-                         int(*process)(void *,const PairSeqpos *,Env *),
+                         int(*process)(void *,const Sequencerange *,Env *),
                          void *processinfo,
                          Env *env);
 

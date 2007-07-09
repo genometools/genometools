@@ -20,8 +20,8 @@
 
 #define DBFILEKEY "dbfile="
 
-#define SETREADINTKEYS(VALNAME,VAL)\
-        setreadintkeys(&rik,VALNAME,VAL,sizeof(*(VAL)),env)
+#define SETREADINTKEYS(VALNAME,VAL,FORCEREAD)\
+        setreadintkeys(&rik,VALNAME,VAL,sizeof(*(VAL)),FORCEREAD,env)
 
 #ifdef S_SPLINT_S
 #define FormatScanint64_t "%lu"
@@ -40,7 +40,9 @@ typedef struct
   const char *keystring;
   uint32_t *smallvalueptr;
   uint64_t *bigvalueptr;
-  bool ptrdefined, found;
+  bool ptrdefined, 
+       found,
+       forceread;
 } Readintkeys;
 
 DECLAREARRAYSTRUCT(Readintkeys);
@@ -49,12 +51,14 @@ static void setreadintkeys(ArrayReadintkeys *riktab,
                            const char *keystring,
                            void *valueptr,
                            size_t sizeval,
+                           bool forceread,
                            Env *env)
 {
   Readintkeys *riktabptr;
 
   GETNEXTFREEINARRAY(riktabptr,riktab,Readintkeys,1);
   riktabptr->keystring = keystring;
+  riktabptr->forceread = forceread;
   switch(sizeval)
   {
     case 0: riktabptr->smallvalueptr = NULL;
@@ -137,33 +141,37 @@ static int allkeysdefined(const Str *prjfile,const ArrayReadintkeys *rik,
   env_error_check(env);
   for (i=0; i<rik->nextfreeReadintkeys; i++)
   {
-    if (!rik->spaceReadintkeys[i].found)
+    if (rik->spaceReadintkeys[i].forceread && !rik->spaceReadintkeys[i].found)
     {
       env_error_set(env,"file %s: missing line beginning with \"%s=\"",
                          str_get(prjfile),
                          rik->spaceReadintkeys[i].keystring);
       return -1;
     }
-    printf("%s=",rik->spaceReadintkeys[i].keystring);
-    if (rik->spaceReadintkeys[i].ptrdefined)
+    if(rik->spaceReadintkeys[i].found)
     {
-      if (rik->spaceReadintkeys[i].smallvalueptr != NULL)
+      printf("%s=",rik->spaceReadintkeys[i].keystring);
+      if (rik->spaceReadintkeys[i].ptrdefined)
       {
-        printf("%u\n",(unsigned int) *(rik->spaceReadintkeys[i].smallvalueptr));
-      } else
-      {
-        if (rik->spaceReadintkeys[i].bigvalueptr != NULL)
+        if (rik->spaceReadintkeys[i].smallvalueptr != NULL)
         {
-          printf(Formatuint64_t "\n",
-                 PRINTuint64_tcast(*(rik->spaceReadintkeys[i].bigvalueptr)));
+          printf("%u\n",
+                 (unsigned int) *(rik->spaceReadintkeys[i].smallvalueptr));
         } else
         {
-          assert(false);
+          if (rik->spaceReadintkeys[i].bigvalueptr != NULL)
+          {
+            printf(Formatuint64_t "\n",
+                   PRINTuint64_tcast(*(rik->spaceReadintkeys[i].bigvalueptr)));
+          } else
+          {
+            assert(false);
+          }
         }
+      } else
+      {
+        printf("0\n");
       }
-    } else
-    {
-      printf("0\n");
     }
   }
   return 0;
@@ -176,6 +184,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   ArrayUchar linebuffer;
   uint32_t integersize, littleendian, linenum, lengthofkey;
   unsigned long i, numofsequences, numoffiles = 0, numofallocatedfiles = 0;
+  Seqpos maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
   int retval;
   bool found, haserr = false;
@@ -184,27 +193,30 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
 
   env_error_check(env);
   INITARRAY(&rik,Readintkeys);
-  SETREADINTKEYS("totallength",totallength);
+  SETREADINTKEYS("totallength",totallength,true);
   SETREADINTKEYS("specialcharacters",
-                 &suffixarray->specialcharinfo.specialcharacters);
+                 &suffixarray->specialcharinfo.specialcharacters,true);
   SETREADINTKEYS("specialranges",
-                 &suffixarray->specialcharinfo.specialranges);
+                 &suffixarray->specialcharinfo.specialranges,true);
   SETREADINTKEYS("lengthofspecialprefix",
-                 &suffixarray->specialcharinfo.lengthofspecialprefix);
+                 &suffixarray->specialcharinfo.lengthofspecialprefix,true);
   SETREADINTKEYS("lengthofspecialsuffix",
-                 &suffixarray->specialcharinfo.lengthofspecialsuffix);
+                 &suffixarray->specialcharinfo.lengthofspecialsuffix,true);
   SETREADINTKEYS("numofsequences",
-                 &numofsequences);
+                 &numofsequences,true);
   SETREADINTKEYS("numofdbsequences",
-                 &suffixarray->numofdbsequences);
+                 &suffixarray->numofdbsequences,true);
   setreadintkeys(&rik,"numofquerysequences",&suffixarray->numofdbsequences,
-                 0,env);
+                 0,true,env);
   SETREADINTKEYS("prefixlength",
-                 &suffixarray->prefixlength);
+                 &suffixarray->prefixlength,true);
+  SETREADINTKEYS("largelcpvalues",
+                 &suffixarray->numoflargelcpvalues,false);
+  SETREADINTKEYS("maxbranchdepth",&maxbranchdepth,false);
   SETREADINTKEYS("integersize",
-                 &integersize);
+                 &integersize,true);
   SETREADINTKEYS("littleendian",
-                 &littleendian);
+                 &littleendian,true);
   assert(rik.spaceReadintkeys != NULL);
   INITARRAY(&linebuffer,Uchar);
   suffixarray->filenametab = strarray_new(env);
@@ -226,7 +238,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       {
         numofallocatedfiles += 2;
         ALLOCASSIGNSPACE(suffixarray->filelengthtab,suffixarray->filelengthtab,
-                         PairSeqpos,numofallocatedfiles);
+                         Filelengthvalues,numofallocatedfiles);
       }
       assert(suffixarray->filelengthtab != NULL);
       ALLOCASSIGNSPACE(tmpfilename,NULL,char,linebuffer.nextfreeUchar);
@@ -241,6 +253,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                           (int) linebuffer.nextfreeUchar,
                           (const char *) linebuffer.spaceUchar);
         FREESPACE(tmpfilename);
+        FREESPACE(suffixarray->filelengthtab);
         haserr = true;
         break;
       }
@@ -250,19 +263,23 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                           (int) linebuffer.nextfreeUchar,
                           (int) linebuffer.nextfreeUchar,
                           (const char *) linebuffer.spaceUchar);
+        FREESPACE(tmpfilename);
+        FREESPACE(suffixarray->filelengthtab);
         haserr = true;
       }
       if (!haserr)
       {
         strarray_add_cstr(suffixarray->filenametab,tmpfilename,env);
         FREESPACE(tmpfilename);
-        suffixarray->filelengthtab[numoffiles].uint0 = (Seqpos) readint1;
-        suffixarray->filelengthtab[numoffiles].uint1 = (Seqpos) readint2;
+        suffixarray->filelengthtab[numoffiles].length = (Seqpos) readint1;
+        suffixarray->filelengthtab[numoffiles].effectivelength 
+                                               = (Seqpos) readint2;
         printf("%s%s " FormatSeqpos " " FormatSeqpos "\n",
                 DBFILEKEY,
                 strarray_get(suffixarray->filenametab,numoffiles),
-                PRINTSeqposcast(suffixarray->filelengthtab[numoffiles].uint0),
-                PRINTSeqposcast(suffixarray->filelengthtab[numoffiles].uint1));
+                PRINTSeqposcast(suffixarray->filelengthtab[numoffiles].length),
+                PRINTSeqposcast(suffixarray->filelengthtab[numoffiles].
+                                effectivelength));
         numoffiles++;
       }
     } else
@@ -374,9 +391,41 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   return haserr ? -1 : 0;
 }
 
+static void *genericmaptable(const Str *indexname,const char *suffix,
+                             Seqpos expectedunits,size_t sizeofunit,
+                             Env *env)
+{
+  size_t numofbytes;
+  Str *tmpfilename;
+  void *ptr;
+  bool haserr = false;
+
+  tmpfilename = str_clone(indexname,env);
+  str_append_cstr(tmpfilename,suffix,env);
+  ptr = env_fa_mmap_read(env,str_get(tmpfilename),&numofbytes);
+  if (ptr == NULL)
+  {
+    env_error_set(env,"cannot map file \"%s\": %s",str_get(tmpfilename),
+                  strerror(errno));
+    haserr = true;
+  }
+  if (!haserr && expectedunits != (Seqpos) (numofbytes/sizeofunit))
+  {
+    env_error_set(env,"number of mapped integers = %lu != " FormatSeqpos
+                      " = expected number of integers",
+                         (unsigned long) (numofbytes/sizeofunit),
+                         PRINTSeqposcast(expectedunits));
+    haserr = true;
+  }
+  str_delete(tmpfilename,env);
+  return haserr ? NULL : ptr;
+}
+
 int mapsuffixarray(Suffixarray *suffixarray,
-                   bool withsuftab,
                    bool withencseq,
+                   bool withsuftab,
+                   bool withlcptab,
+                   bool withbwttab,
                    const Str *indexname,
                    Env *env)
 {
@@ -387,6 +436,9 @@ int mapsuffixarray(Suffixarray *suffixarray,
 
   env_error_check(env);
   suffixarray->suftab = NULL;
+  suffixarray->lcptab = NULL;
+  suffixarray->llvtab = NULL;
+  suffixarray->bwttab = NULL;
   suffixarray->alpha = NULL;
   tmpfilename = str_clone(indexname,env);
   str_append_cstr(tmpfilename,".prj",env);
@@ -436,28 +488,36 @@ int mapsuffixarray(Suffixarray *suffixarray,
   }
   if (!haserr && withsuftab)
   {
-    size_t numofbytes;
-
-    tmpfilename = str_clone(indexname,env);
-    str_append_cstr(tmpfilename,".suf",env);
-    suffixarray->suftab = env_fa_mmap_read(env,str_get(tmpfilename),
-                                           &numofbytes);
+    suffixarray->suftab = genericmaptable(indexname,".suf",
+                                          totallength+1,
+                                          sizeof(Seqpos),
+                                          env);
     if (suffixarray->suftab == NULL)
     {
-      env_error_set(env,"cannot map file \"%s\": %s",str_get(tmpfilename),
-                    strerror(errno));
       haserr = true;
     }
-    if (!haserr && totallength + 1 != (Seqpos) (numofbytes/sizeof (Seqpos)))
+  }
+  if (!haserr && withlcptab)
+  {
+    suffixarray->lcptab = genericmaptable(indexname,".lcp",
+                                          totallength+1,
+                                          sizeof(Uchar),
+                                          env);
+    if (suffixarray->lcptab == NULL)
     {
-      env_error_set(env,"number of mapped integers = %lu != " FormatSeqpos
-                        " = expected number of integers",
-                         (unsigned long) (numofbytes/sizeof (Seqpos)),
-                         PRINTSeqposcast(totallength + 1));
-      env_fa_xmunmap((void *) suffixarray->suftab,env);
       haserr = true;
     }
-    str_delete(tmpfilename,env);
+  }
+  if (!haserr && withbwttab)
+  {
+    suffixarray->bwttab = genericmaptable(indexname,".bwt",
+                                          totallength+1,
+                                          sizeof(Uchar),
+                                          env);
+    if (suffixarray->bwttab == NULL)
+    {
+      haserr = true;
+    }
   }
   return haserr ? -1 : 0;
 }
@@ -465,6 +525,9 @@ int mapsuffixarray(Suffixarray *suffixarray,
 void freesuffixarray(Suffixarray *suffixarray,Env *env)
 {
   env_fa_xmunmap((void *) suffixarray->suftab,env);
+  env_fa_xmunmap((void *) suffixarray->lcptab,env);
+  env_fa_xmunmap((void *) suffixarray->llvtab,env);
+  env_fa_xmunmap((void *) suffixarray->bwttab,env);
   freeAlphabet(&suffixarray->alpha,env);
   freeEncodedsequence(&suffixarray->encseq,env);
   strarray_delete(suffixarray->filenametab,env);

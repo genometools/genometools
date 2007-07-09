@@ -223,14 +223,14 @@ typedef void (*Showverbose)(char *);
 
 typedef struct
 {
-  Seqpos uint0,
-         uint1;
-} PairSeqpos;                /* \Typedef{PairSeqpos} */
-
-typedef struct
-{
   Seqpos position,
          value;
 } Largelcpvalue;
+
+typedef struct
+{
+  Seqpos length,
+         effectivelength;
+} Filelengthvalues;
 
 #endif

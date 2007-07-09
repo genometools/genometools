@@ -23,11 +23,13 @@
 
 static void showprjinfo(FILE *outprj,
                         const StrArray *filenametab,
-                        const PairSeqpos *filelengthtab,
+                        const Filelengthvalues *filelengthtab,
                         /*@unused@*/ Seqpos totallength,
                         unsigned long numofsequences,
                         const Specialcharinfo *specialcharinfo,
-                        uint32_t prefixlength)
+                        uint32_t prefixlength,
+                        Seqpos numoflargelcpvalues,
+                        Seqpos maxbranchdepth)
 {
   unsigned long i;
 
@@ -37,8 +39,8 @@ static void showprjinfo(FILE *outprj,
   {
     fprintf(outprj,"dbfile=%s " FormatSeqpos " " FormatSeqpos "\n",
                     strarray_get(filenametab,i),
-                    PRINTSeqposcast(filelengthtab[i].uint0),
-                    PRINTSeqposcast(filelengthtab[i].uint1));
+                    PRINTSeqposcast(filelengthtab[i].length),
+                    PRINTSeqposcast(filelengthtab[i].effectivelength));
   }
   fprintf(outprj,"totallength=" FormatSeqpos "\n",
                  PRINTSeqposcast(totallength));
@@ -50,6 +52,16 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"numofdbsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofquerysequences=0\n");
   fprintf(outprj,"prefixlength=%u\n",(unsigned int) prefixlength);
+  if(numoflargelcpvalues > 0)
+  {
+    fprintf(outprj,"largelcpvalues=" FormatSeqpos "\n",
+                   PRINTSeqposcast(numoflargelcpvalues));
+  }
+  if(maxbranchdepth > 0)
+  {
+    fprintf(outprj,"maxbranchdepth=" FormatSeqpos "\n",
+                   PRINTSeqposcast(maxbranchdepth));
+  }
   fprintf(outprj,"integersize=%u\n",
                   (unsigned int) (sizeof (Seqpos) * CHAR_BIT));
   fprintf(outprj,"littleendian=%c\n",islittleendian() ? '1' : '0');
@@ -57,11 +69,13 @@ static void showprjinfo(FILE *outprj,
 
 int outprjfile(const Str *indexname,
                const StrArray *filenametab,
-               const PairSeqpos *filelengthtab,
+               const Filelengthvalues *filelengthtab,
                Seqpos totallength,
                unsigned long numofsequences,
                const Specialcharinfo *specialcharinfo,
                uint32_t prefixlength,
+               Seqpos numoflargelcpvalues,
+               Seqpos maxbranchdepth,
                Env *env)
 {
   FILE *prjfp;
@@ -81,7 +95,9 @@ int outprjfile(const Str *indexname,
                 totallength,
                 numofsequences,
                 specialcharinfo,
-                prefixlength);
+                prefixlength,
+                numoflargelcpvalues,
+                maxbranchdepth);
     env_fa_xfclose(prjfp,env);
   }
   return haserr ? -1 : 0;
