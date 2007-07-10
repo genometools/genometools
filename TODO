@@ -34,6 +34,9 @@ feature requests:
 view tool:
 ----------
 
+- add multilevel collapsing
+- add (full) Lua bindings
+
 
 BitPackArray/BitPackClass:
 --------------------------
