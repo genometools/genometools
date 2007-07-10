@@ -264,7 +264,8 @@ int diagram_get_number_of_tracks(Diagram* diagram)
 
 void diagram_delete(Diagram* diagram, Env* env)
 {
-  assert(diagram && env);
+  assert(env);
+  if (!diagram) return;
   hashtable_foreach(diagram->tracks, diagram_track_delete, NULL, env);
   hashtable_delete(diagram->tracks, env);
   env_ma_free(diagram, env);
@@ -408,7 +409,7 @@ int diagram_unit_test(Env* env)
   {
   ensure(had_err, hashtable_get(dia2->tracks,"CDS") != NULL);
   }
-  ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0)
+  ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
 
   /*delete all generated objects*/
   config_delete(cfg, env);
