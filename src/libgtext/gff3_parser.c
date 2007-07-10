@@ -388,7 +388,11 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     *break_loop = true;
   }
   else if (strcmp(line, GFF_TERMINATOR) == 0) { /* terminator */
-    *break_loop = true;
+    if (queue_size(genome_nodes)) {
+      /* we can only stop the parsing if another feature has already been
+         created, otherwise this would lead to a premature stop */
+      *break_loop = true;
+    }
   }
   else {
     warning("skipping unknown meta line %lu in file \"%s\": %s", line_number,
