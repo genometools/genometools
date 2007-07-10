@@ -65,6 +65,12 @@ Test do
   run_test("#{$bin}gt gff3 - - < #{$testdata}gt_gff3_test_1.in", :retval => 1)
 end
 
+Name "gt gff3 test 1.3"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_1.in | #{$bin}gt gff3"
+end
+
 Name "gt gff3 test 2"
 Keywords "gt_gff3"
 Test do
