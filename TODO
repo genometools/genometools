@@ -36,6 +36,12 @@ view tool:
 
 - add multilevel collapsing
 - add (full) Lua bindings
+- allow to specify the ``type order'' of tracks in config file
+- allow multiple files as input to `gt view` (as discussed with Sascha):
+  - each track has a filename (additionally to the type)
+  - allow to sort tracks by type and then by filename (in the order specified
+    on the command line) or the other way round (one is the default, one is
+    switched on by a command line option)
 
 
 BitPackArray/BitPackClass:
