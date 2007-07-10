@@ -21,7 +21,7 @@ Test do
   run "diff #{$last_stdout} #{$testdata}/gt_eval_ltr_test_1.out"
 end
 
-2.upto(7) do |i|
+2.upto(9) do |i|
   Name "gt eval -ltr test #{i}"
   Keywords "gt_eval"
   Test do
