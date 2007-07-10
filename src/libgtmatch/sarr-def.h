@@ -21,8 +21,9 @@ typedef struct
   const Uchar *lcptab;
   const Largelcpvalue *llvtab;
   const Uchar *bwttab;
-  Seqpos numoflargelcpvalues;
+  DefinedSeqpos numoflargelcpvalues;
   Encodedsequence *encseq;
+  DefinedSeqpos longest;
   Specialcharinfo specialcharinfo;
   Alphabet *alpha;
 } Suffixarray;

@@ -42,7 +42,7 @@ typedef struct
   uint64_t *bigvalueptr;
   bool ptrdefined, 
        found,
-       forceread;
+       *readflag;
 } Readintkeys;
 
 DECLAREARRAYSTRUCT(Readintkeys);
@@ -51,14 +51,14 @@ static void setreadintkeys(ArrayReadintkeys *riktab,
                            const char *keystring,
                            void *valueptr,
                            size_t sizeval,
-                           bool forceread,
+                           bool *readflag,
                            Env *env)
 {
   Readintkeys *riktabptr;
 
   GETNEXTFREEINARRAY(riktabptr,riktab,Readintkeys,1);
   riktabptr->keystring = keystring;
-  riktabptr->forceread = forceread;
+  riktabptr->readflag = readflag;
   switch(sizeval)
   {
     case 0: riktabptr->smallvalueptr = NULL;
@@ -141,13 +141,6 @@ static int allkeysdefined(const Str *prjfile,const ArrayReadintkeys *rik,
   env_error_check(env);
   for (i=0; i<rik->nextfreeReadintkeys; i++)
   {
-    if (rik->spaceReadintkeys[i].forceread && !rik->spaceReadintkeys[i].found)
-    {
-      env_error_set(env,"file %s: missing line beginning with \"%s=\"",
-                         str_get(prjfile),
-                         rik->spaceReadintkeys[i].keystring);
-      return -1;
-    }
     if(rik->spaceReadintkeys[i].found)
     {
       printf("%s=",rik->spaceReadintkeys[i].keystring);
@@ -172,6 +165,20 @@ static int allkeysdefined(const Str *prjfile,const ArrayReadintkeys *rik,
       {
         printf("0\n");
       }
+      if(rik->spaceReadintkeys[i].readflag != NULL)
+      {
+        *(rik->spaceReadintkeys[i].readflag) = true;
+      }
+    } else
+    {
+      if (rik->spaceReadintkeys[i].readflag == NULL)
+      {
+        env_error_set(env,"file %s: missing line beginning with \"%s=\"",
+                           str_get(prjfile),
+                           rik->spaceReadintkeys[i].keystring);
+        return -1;
+      }
+      *(rik->spaceReadintkeys[i].readflag) = false;
     }
   }
   return 0;
@@ -184,7 +191,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   ArrayUchar linebuffer;
   uint32_t integersize, littleendian, linenum, lengthofkey;
   unsigned long i, numofsequences, numoffiles = 0, numofallocatedfiles = 0;
-  Seqpos maxbranchdepth;
+  DefinedSeqpos maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
   int retval;
   bool found, haserr = false;
@@ -193,30 +200,28 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
 
   env_error_check(env);
   INITARRAY(&rik,Readintkeys);
-  SETREADINTKEYS("totallength",totallength,true);
+  SETREADINTKEYS("totallength",totallength,NULL);
   SETREADINTKEYS("specialcharacters",
-                 &suffixarray->specialcharinfo.specialcharacters,true);
+                 &suffixarray->specialcharinfo.specialcharacters,NULL);
   SETREADINTKEYS("specialranges",
-                 &suffixarray->specialcharinfo.specialranges,true);
+                 &suffixarray->specialcharinfo.specialranges,NULL);
   SETREADINTKEYS("lengthofspecialprefix",
-                 &suffixarray->specialcharinfo.lengthofspecialprefix,true);
+                 &suffixarray->specialcharinfo.lengthofspecialprefix,NULL);
   SETREADINTKEYS("lengthofspecialsuffix",
-                 &suffixarray->specialcharinfo.lengthofspecialsuffix,true);
-  SETREADINTKEYS("numofsequences",
-                 &numofsequences,true);
-  SETREADINTKEYS("numofdbsequences",
-                 &suffixarray->numofdbsequences,true);
+                 &suffixarray->specialcharinfo.lengthofspecialsuffix,NULL);
+  SETREADINTKEYS("numofsequences",&numofsequences,NULL);
+  SETREADINTKEYS("numofdbsequences",&suffixarray->numofdbsequences,NULL);
   setreadintkeys(&rik,"numofquerysequences",&suffixarray->numofdbsequences,
-                 0,true,env);
-  SETREADINTKEYS("prefixlength",
-                 &suffixarray->prefixlength,true);
-  SETREADINTKEYS("largelcpvalues",
-                 &suffixarray->numoflargelcpvalues,false);
-  SETREADINTKEYS("maxbranchdepth",&maxbranchdepth,false);
-  SETREADINTKEYS("integersize",
-                 &integersize,true);
-  SETREADINTKEYS("littleendian",
-                 &littleendian,true);
+                 0,NULL,env);
+  SETREADINTKEYS("longest",&suffixarray->longest.value,
+                           &suffixarray->longest.defined);
+  SETREADINTKEYS("prefixlength",&suffixarray->prefixlength,NULL);
+  SETREADINTKEYS("largelcpvalues",&suffixarray->numoflargelcpvalues.value,
+                 &suffixarray->numoflargelcpvalues.defined);
+  SETREADINTKEYS("maxbranchdepth",&maxbranchdepth.value,
+                 &maxbranchdepth.defined);
+  SETREADINTKEYS("integersize",&integersize,NULL);
+  SETREADINTKEYS("littleendian",&littleendian,NULL);
   assert(rik.spaceReadintkeys != NULL);
   INITARRAY(&linebuffer,Uchar);
   suffixarray->filenametab = strarray_new(env);
@@ -271,6 +276,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       {
         strarray_add_cstr(suffixarray->filenametab,tmpfilename,env);
         FREESPACE(tmpfilename);
+        assert(suffixarray->filelengthtab != NULL);
         suffixarray->filelengthtab[numoffiles].length = (Seqpos) readint1;
         suffixarray->filelengthtab[numoffiles].effectivelength 
                                                = (Seqpos) readint2;

@@ -233,4 +233,10 @@ typedef struct
          effectivelength;
 } Filelengthvalues;
 
+typedef struct
+{
+  bool defined;
+  Seqpos value;
+} DefinedSeqpos;
+
 #endif

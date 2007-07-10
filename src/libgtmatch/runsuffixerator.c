@@ -36,6 +36,7 @@ typedef struct
          numoflargelcpvalues,
          maxbranchdepth;
   const Encodedsequence *encseq;
+  DefinedSeqpos longest;
 } Outfileinfo;
 
 static void initoutfileinfo(Outfileinfo *outfileinfo)
@@ -48,6 +49,8 @@ static void initoutfileinfo(Outfileinfo *outfileinfo)
   outfileinfo->lastsuftabentryofpreviouspart = 0;
   outfileinfo->numoflargelcpvalues = 0;
   outfileinfo->maxbranchdepth = 0;
+  outfileinfo->longest.defined = false;
+  outfileinfo->longest.value = 0;
 }
 
 static int suftab2file(void *info,
@@ -57,6 +60,7 @@ static int suftab2file(void *info,
 {
   Outfileinfo *outfileinfo = (Outfileinfo *) info;
   bool haserr = false;
+  Seqpos pos;
 
   env_error_check(env);
   if (outfileinfo->outfpsuftab != NULL)
@@ -75,9 +79,21 @@ static int suftab2file(void *info,
       haserr = true;
     }
   }
+  if(!outfileinfo->longest.defined)
+  {
+    for(pos=0; pos<widthofpart; pos++)
+    {
+      if(suftab[pos] == 0)
+      {
+        outfileinfo->longest.defined = true;
+        outfileinfo->longest.value = outfileinfo->absolutepos + pos;
+        break;
+      }
+    }
+  }
   if (!haserr && outfileinfo->outfplcptab != NULL)
   {
-    Seqpos pos, lcpvalue;
+    Seqpos lcpvalue;
     Uchar outvalue;
     Largelcpvalue largelcpvalue;
     int cmp;
@@ -148,12 +164,15 @@ static int suftab2file(void *info,
     if(!haserr)
     {
       outfileinfo->lastsuftabentryofpreviouspart = suftab[widthofpart-1];
-      outfileinfo->absolutepos += widthofpart;
     }
+  }
+  if(!haserr)
+  {
+    outfileinfo->absolutepos += widthofpart;
   }
   if (!haserr && outfileinfo->outfpbwttab != NULL)
   {
-    Seqpos pos, startpos;
+    Seqpos startpos;
     Uchar cc;
 
     for(pos=0; pos < widthofpart; pos++)
@@ -329,6 +348,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
                    (uint32_t) so->prefixlength,
                    outfileinfo.numoflargelcpvalues,
                    outfileinfo.maxbranchdepth,
+                   &outfileinfo.longest,
                    env) != 0)
     {
       haserr = true;

@@ -29,7 +29,8 @@ static void showprjinfo(FILE *outprj,
                         const Specialcharinfo *specialcharinfo,
                         uint32_t prefixlength,
                         Seqpos numoflargelcpvalues,
-                        Seqpos maxbranchdepth)
+                        Seqpos maxbranchdepth,
+                        const DefinedSeqpos *longest)
 {
   unsigned long i;
 
@@ -51,17 +52,16 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"numofsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofdbsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofquerysequences=0\n");
+  if(longest->defined)
+  {
+    fprintf(outprj,"longest=" FormatSeqpos "\n",
+            PRINTSeqposcast(longest->value));
+  }
   fprintf(outprj,"prefixlength=%u\n",(unsigned int) prefixlength);
-  if(numoflargelcpvalues > 0)
-  {
-    fprintf(outprj,"largelcpvalues=" FormatSeqpos "\n",
+  fprintf(outprj,"largelcpvalues=" FormatSeqpos "\n",
                    PRINTSeqposcast(numoflargelcpvalues));
-  }
-  if(maxbranchdepth > 0)
-  {
-    fprintf(outprj,"maxbranchdepth=" FormatSeqpos "\n",
+  fprintf(outprj,"maxbranchdepth=" FormatSeqpos "\n",
                    PRINTSeqposcast(maxbranchdepth));
-  }
   fprintf(outprj,"integersize=%u\n",
                   (unsigned int) (sizeof (Seqpos) * CHAR_BIT));
   fprintf(outprj,"littleendian=%c\n",islittleendian() ? '1' : '0');
@@ -76,6 +76,7 @@ int outprjfile(const Str *indexname,
                uint32_t prefixlength,
                Seqpos numoflargelcpvalues,
                Seqpos maxbranchdepth,
+               const DefinedSeqpos *longest,
                Env *env)
 {
   FILE *prjfp;
@@ -97,7 +98,8 @@ int outprjfile(const Str *indexname,
                 specialcharinfo,
                 prefixlength,
                 numoflargelcpvalues,
-                maxbranchdepth);
+                maxbranchdepth,
+                longest);
     env_fa_xfclose(prjfp,env);
   }
   return haserr ? -1 : 0;

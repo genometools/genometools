@@ -10,6 +10,7 @@ int outprjfile(const Str *indexname,
                uint32_t prefixlength,
                Seqpos numoflargelcpvalues,
                Seqpos maxbranchdepth,
+               const DefinedSeqpos *longest,
                Env *env);
 
 #ifdef __cplusplus
