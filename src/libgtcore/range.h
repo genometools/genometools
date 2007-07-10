@@ -17,9 +17,9 @@ typedef struct {
 
 int           range_compare(Range, Range);
 int           range_compare_ptr(const Range*, const Range*);
+int           range_compare_with_delta(Range, Range, unsigned long delta);
 bool          range_overlap(Range, Range);
 bool          range_contains(Range, Range);
-bool          range_equal_with_delta(Range, Range, unsigned long delta);
 Range         range_join(Range, Range);
 Range         range_offset(Range, long offset, unsigned long line_number);
 unsigned long range_length(Range);

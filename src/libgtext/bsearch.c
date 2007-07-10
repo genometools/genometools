@@ -9,15 +9,16 @@
 
 void bsearch_all(Array *members, const void *key, const void *base,
                  size_t nmemb, size_t size,
-                 int (*compar) (const void *, const void *), Env *env)
+                 int (*compar)(const void*, const void*, const void*),
+                 void *data, Env *env)
 {
-  bsearch_all_mark(members, key, base, nmemb, size, compar, NULL, env);
+  bsearch_all_mark(members, key, base, nmemb, size, compar, data, NULL, env);
 }
 
 void bsearch_all_mark(Array *members, const void *key, const void *base,
                       size_t nmemb, size_t size,
-                      int (*compar) (const void *, const void *), Bittab *b,
-                      Env *env)
+                      int (*compar)(const void*, const void*, const void*),
+                      void *data, Bittab *b, Env *env)
 {
   const void *baseptr = base;
   const void *ptr, /* the current element we consider */
@@ -30,14 +31,14 @@ void bsearch_all_mark(Array *members, const void *key, const void *base,
   /* the actual binary search */
   for (limit = nmemb; limit != 0; limit >>= 1) {
     ptr = baseptr + (limit >> 1) * size;
-    if ((rval = compar(key, ptr)) == 0) {
+    if ((rval = compar(key, ptr, data)) == 0) {
       /* element found */
       array_add(members, ptr, env);
       if (b)
         bittab_set_bit(b, (ptr - base) / size); /* mark found element */
       /* looking left for equal elements */
       for (tmp_ptr = ptr - size;
-           tmp_ptr >= base && !compar(key, tmp_ptr);
+           tmp_ptr >= base && !compar(key, tmp_ptr, data);
            tmp_ptr -= size) {
         array_add(members, tmp_ptr, env);
         if (b)
@@ -45,7 +46,7 @@ void bsearch_all_mark(Array *members, const void *key, const void *base,
       }
       /* looking right for equal elements */
       for (tmp_ptr = ptr + size;
-           tmp_ptr < base + nmemb * size && !compar(key, tmp_ptr);
+           tmp_ptr < base + nmemb * size && !compar(key, tmp_ptr, data);
            tmp_ptr += size) {
         array_add(members, tmp_ptr, env);
         if (b)
@@ -60,7 +61,7 @@ void bsearch_all_mark(Array *members, const void *key, const void *base,
   }
 }
 
-static int cmp(const void *a_ptr, const void *b_ptr)
+static int cmp(const void *a_ptr, const void *b_ptr, const void *unsused)
 {
   int a, b;
   assert(a_ptr && b_ptr);
@@ -90,7 +91,7 @@ int bsearch_unit_test(Env *env)
 
   /* the empty case */
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
-              sizeof (int), cmp, env);
+              sizeof (int), cmp, NULL, env);
   ensure(had_err, !array_size(members)); /* no member found */
 
   /* 1 element */
@@ -98,7 +99,7 @@ int bsearch_unit_test(Env *env)
   element = 7;
   array_add(elements, element, env);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
-              sizeof (int), cmp, env);
+              sizeof (int), cmp, NULL, env);
   ensure(had_err, array_size(members) == 1); /* one member found */
   member_ptr = *(int**) array_get(members, 0);
   ensure(had_err, *member_ptr == element);
@@ -106,7 +107,7 @@ int bsearch_unit_test(Env *env)
   key = -7;
   array_reset(members);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
-              sizeof (int), cmp, env);
+              sizeof (int), cmp, NULL, env);
   ensure(had_err, !array_size(members)); /* no member found */
 
   /* 2 elements */
@@ -115,7 +116,7 @@ int bsearch_unit_test(Env *env)
   array_add(elements, element, env);
   ensure(had_err, array_size(elements) == 2);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
-              sizeof (int), cmp, env);
+              sizeof (int), cmp, NULL, env);
   ensure(had_err, array_size(members) == 2); /* two members found */
   member_ptr = *(int**) array_get(members, 0);
   ensure(had_err, *member_ptr == element);
@@ -125,7 +126,7 @@ int bsearch_unit_test(Env *env)
   key = -7;
   array_reset(members);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
-              sizeof (int), cmp, env);
+              sizeof (int), cmp, NULL, env);
   ensure(had_err, !array_size(members)); /* no member found */
 
   /* 3 elements */
@@ -134,7 +135,7 @@ int bsearch_unit_test(Env *env)
   array_add(elements, element, env);
   ensure(had_err, array_size(elements) == 3);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
-              sizeof (int), cmp, env);
+              sizeof (int), cmp, NULL, env);
   ensure(had_err, array_size(members) == 3); /* three members found */
   member_ptr = *(int**) array_get(members, 0);
   ensure(had_err, *member_ptr == element);
@@ -146,7 +147,7 @@ int bsearch_unit_test(Env *env)
   key = -7;
   array_reset(members);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
-              sizeof (int), cmp, env);
+              sizeof (int), cmp, NULL, env);
   ensure(had_err, !array_size(members)); /* no member found */
 
   /* large case: -10 -5 -3 -3 -3 0 1 2 3 */
@@ -171,7 +172,7 @@ int bsearch_unit_test(Env *env)
   key = -3;
   array_reset(members);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
-              sizeof (int), cmp, env);
+              sizeof (int), cmp, NULL, env);
   ensure(had_err, array_size(members) == 3); /* three members found */
   member_ptr = *(int**) array_get(members, 0);
   ensure(had_err, *member_ptr == -3);
@@ -184,7 +185,7 @@ int bsearch_unit_test(Env *env)
   array_reset(members);
   b = bittab_new(array_size(elements), env);
   bsearch_all_mark(members, &key, array_get_space(elements),
-                   array_size(elements), sizeof (int), cmp, b, env);
+                   array_size(elements), sizeof (int), cmp, NULL, b, env);
   ensure(had_err, array_size(members) == 3); /* three members found */
   member_ptr = *(int**) array_get(members, 0);
   ensure(had_err, *member_ptr == -3);

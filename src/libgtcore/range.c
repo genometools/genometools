@@ -31,6 +31,27 @@ int range_compare_ptr(const Range *range_a, const Range *range_b)
   return range_compare(*range_a, *range_b);
 }
 
+int range_compare_with_delta(Range range_a, Range range_b, unsigned long delta)
+{
+  unsigned long start_min, start_max, end_min, end_max;
+
+  assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
+
+  start_min = MIN(range_a.start, range_b.start);
+  start_max = MAX(range_a.start, range_b.start);
+  end_min   = MIN(range_a.end, range_b.end);
+  end_max   = MAX(range_a.end, range_b.end);
+
+  if (start_max - start_min <= delta && end_max - end_min <= delta)
+    return 0; /* range_a == range_b */
+
+  if ((range_a.start < range_b.start) ||
+      ((range_a.start == range_b.start) && (range_a.end < range_b.end)))
+    return -1; /* range_a < range_b */
+
+  return 1; /* range_a > range_b */
+}
+
 int range_compare_by_length_ptr(const Range *range_a, const Range *range_b)
 {
   unsigned long range_a_length, range_b_length;
@@ -58,19 +79,6 @@ bool range_contains(Range range_a, Range range_b)
   assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
 
   if (range_a.start <= range_b.start && range_a.end >= range_b.end)
-    return true;
-  return false;
-}
-
-bool range_equal_with_delta(Range range_a, Range range_b, unsigned long delta)
-{
-  unsigned long start_min, start_max, end_min, end_max;
-  assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
-  start_min = MIN(range_a.start, range_b.start);
-  start_max = MAX(range_a.start, range_b.start);
-  end_min   = MIN(range_a.end, range_b.end);
-  end_max   = MAX(range_a.end, range_b.end);
-  if (start_max - start_min <= delta && end_max - end_min <= delta)
     return true;
   return false;
 }

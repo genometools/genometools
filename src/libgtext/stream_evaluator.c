@@ -166,6 +166,7 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   evaluator->reality = reality;
   evaluator->prediction = prediction;
   evaluator->evalLTR = evalLTR;
+  evaluator->LTRdelta = LTRdelta;
   evaluator->real_features = hashtable_new(HASH_STRING, NULL,
                                            (FreeFunc) slot_delete, env);
   evaluator->gene_evaluator = evaluator_new(env);
@@ -566,6 +567,7 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   return equal;
 }
 
+#if 0
 static bool LTRs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2,
                            unsigned long LTRdelta)
 {
@@ -573,10 +575,11 @@ static bool LTRs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2,
   assert(gn_1 && gn_2);
   range_1 = genome_node_get_range(gn_1);
   range_2 = genome_node_get_range(gn_2);
-  if (!range_compare(range_1, range_2))
+  if (!range_compare_with_delta(range_1, range_2, LTRdelta))
     return true;
   return false;
 }
+#endif
 
 static void store_predicted_exon(TranscriptEvaluators *te, GenomeFeature *gf)
 {
@@ -808,7 +811,9 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                            predicted_strand == STRAND_FORWARD
                            ? array_size(info->slot->genes_forward)
                            : array_size(info->slot->genes_reverse),
-                           sizeof (GenomeNode*), (Compare) genome_node_compare,
+                           sizeof (GenomeNode*),
+                           (CompareWithData) genome_node_compare_with_data,
+                           NULL,
                            predicted_strand == STRAND_FORWARD
                            ? info->slot->overlapped_genes_forward
                            : info->slot->overlapped_genes_reverse, env);
@@ -875,7 +880,9 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                            predicted_strand == STRAND_FORWARD
                            ? array_size(info->slot->mRNAs_forward)
                            : array_size(info->slot->mRNAs_reverse),
-                           sizeof (GenomeNode*), (Compare) genome_node_compare,
+                           sizeof (GenomeNode*),
+                           (CompareWithData) genome_node_compare_with_data,
+                           NULL,
                            predicted_strand == STRAND_FORWARD
                            ? info->slot->overlapped_mRNAs_forward
                            : info->slot->overlapped_mRNAs_reverse, env);
@@ -935,10 +942,11 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
       bsearch_all_mark(real_genome_nodes, &gn,
                        array_get_space(info->slot->LTRs),
                        array_size(info->slot->LTRs), sizeof (GenomeNode*),
-                       (Compare) genome_node_compare,
-                       info->slot->overlapped_LTRs, env);
+                       (CompareWithData) genome_node_compare_delta,
+                       &info->LTRdelta, info->slot->overlapped_LTRs, env);
 
       if (array_size(real_genome_nodes)) {
+#if 0
         /* LTR(s) with the same range found -> check if they are equal */
         for (i = 0; i < array_size(real_genome_nodes); i++) {
           real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
@@ -953,6 +961,18 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
             }
           }
         }
+#else
+        for (i = 0; i < array_size(real_genome_nodes); i++) {
+          real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
+          num = real_gn - (GenomeNode**) array_get_space(info->slot->LTRs);
+          if (!bittab_bit_is_set(info->slot->true_LTRs, num)) {
+            bittab_set_bit(info->slot->true_LTRs, num);
+            evaluator_add_true(info->LTR_evaluator);
+            /*@loopbreak@*/
+            break;
+          }
+        }
+#endif
       }
       else {
         /* no LTR with the same range found -> check if this is a wrong LTR */

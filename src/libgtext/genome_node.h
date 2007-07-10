@@ -66,6 +66,11 @@ bool          genome_node_overlaps_nodes(GenomeNode*, Array*);
    to overlapped nodes are marked (i.e., set) */
 bool          genome_node_overlaps_nodes_mark(GenomeNode*, Array*, Bittab*);
 int           genome_node_compare(GenomeNode**, GenomeNode**);
+int           genome_node_compare_with_data(GenomeNode**, GenomeNode**,
+                                            void *unused);
+/* <delta> has to point to a variable of type unsigned long */
+int           genome_node_compare_delta(GenomeNode**, GenomeNode**,
+                                        void *delta);
 void          genome_node_delete(GenomeNode*, Env*);
 void          genome_node_rec_delete(GenomeNode*, Env*);
 
