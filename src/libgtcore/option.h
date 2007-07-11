@@ -40,12 +40,6 @@ void          option_parser_set_comment_func(OptionParser*, ShowCommentFunc,
 /* set the mailadress used in the final ``Report bugs to'' line of the -help
    output to <address>. It should be of the form "<bill@microsoft.com>" */
 void          option_parser_set_mailaddress(OptionParser*, const char *address);
-/* register a hook function. All registered hook functions are called at the end
-   of option_parser_parse().
-   This allows to have a module which registers a bunch of options in the option
-   parser and automatically performs necessary postprocessing after the option
-   parsing has been done via a hook function (see outputfile.[ch] for an
-   example). */
 void          option_parser_register_hook(OptionParser*, OptionParserHookFunc,
                                           void *data, Env*);
 OPrval        option_parser_parse(OptionParser*, int *parsed_args, int argc,
@@ -127,6 +121,9 @@ Option*        option_new_ulong_min(const char *option_str,
 Option*        option_new_string(const char *option_str,
                                  const char *description,
                                  Str *value, const char *default_value, Env*);
+Option* option_new_choice(const char *option_str, const char *description,
+                          Str *value, unsigned long default_value,
+                          const char** domain, Env*);
 Option*        option_new_filename(const char *option_str,
                                    const char *description, Str*, Env*);
 Option*        option_new_filenamearray(const char *option_str,
