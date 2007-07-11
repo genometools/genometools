@@ -21,4 +21,4 @@
         }                                                                    \
   } while (0)
 
-#endif /* ENSURE_H */
+#endif
