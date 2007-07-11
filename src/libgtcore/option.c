@@ -31,7 +31,7 @@ typedef enum {
   OPTION_STRING,
   OPTION_STRINGARRAY,
   OPTION_VERSION
-} Option_type;
+} OptionType;
 
 typedef struct {
   OptionParserHookFunc hook;
@@ -51,7 +51,7 @@ struct OptionParser {
 };
 
 struct Option {
-  Option_type option_type;
+  OptionType option_type;
   Str *option_str,
       *description;
   void *value;
@@ -254,7 +254,7 @@ static void show_description(unsigned long initial_space, const char *desc,
   xputchar('\n');
 }
 
-static int show_help(OptionParser *op, Option_type optiontype, Env *env)
+static int show_help(OptionParser *op, OptionType optiontype, Env *env)
 {
   unsigned long i, max_option_length = 0;
   Option *option;

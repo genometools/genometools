@@ -1,12 +1,13 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
 #include <assert.h>
 #include <libgtcore/ensure.h>
 #include <libgtcore/fptr.h>
+#include <libgtcore/minmax.h>
 #include <libgtcore/msort.h>
 #include <libgtcore/range.h>
 #include <libgtcore/undef.h>
@@ -28,6 +29,27 @@ int range_compare(Range range_a, Range range_b)
 int range_compare_ptr(const Range *range_a, const Range *range_b)
 {
   return range_compare(*range_a, *range_b);
+}
+
+int range_compare_with_delta(Range range_a, Range range_b, unsigned long delta)
+{
+  unsigned long start_min, start_max, end_min, end_max;
+
+  assert(range_a.start <= range_a.end && range_b.start <= range_b.end);
+
+  start_min = MIN(range_a.start, range_b.start);
+  start_max = MAX(range_a.start, range_b.start);
+  end_min   = MIN(range_a.end, range_b.end);
+  end_max   = MAX(range_a.end, range_b.end);
+
+  if (start_max - start_min <= delta && end_max - end_min <= delta)
+    return 0; /* range_a == range_b */
+
+  if ((range_a.start < range_b.start) ||
+      ((range_a.start == range_b.start) && (range_a.end < range_b.end)))
+    return -1; /* range_a < range_b */
+
+  return 1; /* range_a > range_b */
 }
 
 int range_compare_by_length_ptr(const Range *range_a, const Range *range_b)

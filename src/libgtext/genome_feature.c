@@ -45,8 +45,9 @@ static void genome_feature_free(GenomeNode *gn, Env *env)
 const char* genome_feature_get_attribute(GenomeNode *gn, const char *attr_name)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
-	if (!gf->attributes) return NULL;
-	return (const char*) hashtable_get(gf->attributes, attr_name);
+  if (!gf->attributes)
+    return NULL;
+  return hashtable_get(gf->attributes, attr_name);
 }
 
 static Str* genome_feature_get_seqid(GenomeNode *gn)

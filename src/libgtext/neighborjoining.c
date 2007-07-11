@@ -190,22 +190,9 @@ static void neighborjoining_show_node(const NeighborJoining *nj,
           leftdaughter , nj->nodes[nodenum].leftdist);
   fprintf(fp, "edge from node %lu to node %lu with distance %f\n", nodenum,
           rightdaughter, nj->nodes[nodenum].rightdist);
-  if (nj->nodes[leftdaughter].leftdaughter  != UNDEF_ULONG &&
-      nj->nodes[rightdaughter].leftdaughter != UNDEF_ULONG) {
-
-    if (nj->nodes[leftdaughter].leftdaughter <
-        nj->nodes[rightdaughter].leftdaughter) {
-      neighborjoining_show_node(nj, leftdaughter, fp);
-      neighborjoining_show_node(nj, rightdaughter, fp);
-    }
-    else {
-      neighborjoining_show_node(nj, rightdaughter, fp);
-      neighborjoining_show_node(nj, leftdaughter, fp);
-    }
-  }
-  else if (nj->nodes[leftdaughter].leftdaughter != UNDEF_ULONG)
+  if (nj->nodes[leftdaughter].leftdaughter != UNDEF_ULONG)
     neighborjoining_show_node(nj, leftdaughter, fp);
-  else if (nj->nodes[rightdaughter].leftdaughter != UNDEF_ULONG)
+  if (nj->nodes[rightdaughter].leftdaughter != UNDEF_ULONG)
     neighborjoining_show_node(nj, rightdaughter, fp);
 }
 
@@ -214,21 +201,9 @@ void neighborjoining_show_tree(const NeighborJoining *nj, FILE *fp)
   assert(nj);
   fprintf(fp, "edge from node %lu to node %lu with distance %f\n",
           nj->finalnodeA, nj->finalnodeB, nj->finaldist);
-  if (nj->nodes[nj->finalnodeA].leftdaughter != UNDEF_ULONG &&
-      nj->nodes[nj->finalnodeB].leftdaughter != UNDEF_ULONG) {
-    if (nj->nodes[nj->finalnodeA].leftdaughter <
-        nj->nodes[nj->finalnodeB].leftdaughter ) {
-      neighborjoining_show_node(nj, nj->finalnodeA, fp);
-      neighborjoining_show_node(nj, nj->finalnodeB, fp);
-    }
-    else {
-      neighborjoining_show_node(nj, nj->finalnodeB, fp);
-      neighborjoining_show_node(nj, nj->finalnodeA, fp);
-    }
-  }
-  else if (nj->nodes[nj->finalnodeA].leftdaughter != UNDEF_ULONG)
+  if (nj->nodes[nj->finalnodeA].leftdaughter != UNDEF_ULONG)
     neighborjoining_show_node(nj, nj->finalnodeA, fp);
-  else if (nj->nodes[nj->finalnodeB].leftdaughter != UNDEF_ULONG)
+  if (nj->nodes[nj->finalnodeB].leftdaughter != UNDEF_ULONG)
     neighborjoining_show_node(nj, nj->finalnodeB, fp);
 }
 

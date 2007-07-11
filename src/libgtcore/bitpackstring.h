@@ -20,13 +20,13 @@
 
 #include <libgtcore/env.h>
 
-/* Caution: sizeof(BitElem) <= sizeof(uint_fast32_t) must be met */
+/* Caution: sizeof (BitElem) <= sizeof (uint_fast32_t) must be met */
 typedef unsigned char BitElem;
 typedef BitElem *BitString;
 typedef unsigned long long BitOffset;
 
 enum {
-  bitElemBits = sizeof(BitElem)*CHAR_BIT,
+  bitElemBits = sizeof (BitElem)*CHAR_BIT,
 };
 
 #define requiredUIntBits(val) requiredUInt32Bits(val)

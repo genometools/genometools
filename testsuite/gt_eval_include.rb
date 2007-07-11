@@ -8,8 +8,24 @@ end
 2.upto(8) do |i|
   Name "gt eval test #{i}"
   Keywords "gt_eval"
-  Test do 
+  Test do
     run_test "#{$bin}gt eval #{$testdata}/gt_eval_test_#{i}.reality #{$testdata}/gt_eval_test_#{i}.prediction"
-    run "diff #{$last_stdout} #{$testdata}/gt_eval_test_#{i}.out" 
+    run "diff #{$last_stdout} #{$testdata}/gt_eval_test_#{i}.out"
+  end
+end
+
+Name "gt eval -ltr test 1"
+Keywords "gt_eval"
+Test do
+  run_test "#{$bin}gt eval -ltr #{$testdata}/gt_eval_ltr_test_1.in #{$testdata}/gt_eval_ltr_test_1.in"
+  run "diff #{$last_stdout} #{$testdata}/gt_eval_ltr_test_1.out"
+end
+
+2.upto(9) do |i|
+  Name "gt eval -ltr test #{i}"
+  Keywords "gt_eval"
+  Test do
+    run_test "#{$bin}gt eval -ltr #{$testdata}/gt_eval_ltr_test_#{i}.reality #{$testdata}/gt_eval_ltr_test_#{i}.prediction"
+    run "diff #{$last_stdout} #{$testdata}/gt_eval_ltr_test_#{i}.out"
   end
 end
