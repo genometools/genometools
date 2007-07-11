@@ -69,7 +69,7 @@ computeDeBruijn()
   unsigned prod, i;
   unsigned long long v;
   int MultiplyDeBruijnBitPosition[64];
-  for(v = 1, i = 1; i <= 64; ++i, v <<= 1)
+  for (v = 1, i = 1; i <= 64; ++i, v <<= 1)
   {
     prod = ((unsigned long long)v * 0x26752B916FC7B0DULL) >> 58;
     printf("v = %llu, i = %u, prod = %u\n", v, i, prod);
@@ -77,7 +77,7 @@ computeDeBruijn()
     MultiplyDeBruijnBitPosition[prod] = i;
   }
   fputs("int MultiplyDeBruijnBitPosition[64] = { ", stdout);
-  for(i = 0; i < 63; ++i)
+  for (i = 0; i < 63; ++i)
     printf("%d, ", MultiplyDeBruijnBitPosition[i]);
   printf("%d };\n", MultiplyDeBruijnBitPosition[i]);
 }
@@ -113,19 +113,19 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
   unsigned bitsInAccumA, bitsInAccumB;
   assert(a && b);
   /* user requested zero length comparison, treat as equality */
-  if(!numBitsA && !numBitsB)
+  if (!numBitsA && !numBitsB)
   {
     return 0;
   }
-  if(numBitsA > numBitsB)
+  if (numBitsA > numBitsB)
     return -1 * bsCompare(b, offsetB, numBitsB, a, offsetA, numBitsA);
-  if(numBitsB > numBitsA)
+  if (numBitsB > numBitsA)
   {
     /* B is longer and thus compared with virtual zeros in A */
     unsigned comparePreBits = numBitsB - numBitsA;
     do {
       bitsInAccumB = 0;
-      if(bitTopB)
+      if (bitTopB)
       {
         uint32_t mask; /*< all of the bits we want to get from *pB */
         unsigned bits2Read = MIN(bitElemBits - bitTopB, comparePreBits);
@@ -136,10 +136,10 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
         totalBitsLeftB -= bits2Read;
         comparePreBits -= bits2Read;
       }
-      while(bitsInAccumB < CHAR_BIT * sizeof(accumB) && comparePreBits)
+      while (bitsInAccumB < CHAR_BIT * sizeof (accumB) && comparePreBits)
       {
         unsigned bits2Read,
-          bitsFree = (CHAR_BIT * sizeof(accumA)) - bitsInAccumB;
+          bitsFree = (CHAR_BIT * sizeof (accumA)) - bitsInAccumB;
         uint32_t mask;
         bits2Read = MIN3(bitsFree, bitElemBits, comparePreBits);
         mask = ~((~(uint32_t)0) << bits2Read);
@@ -149,19 +149,19 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
         totalBitsLeftB -= bits2Read;
         comparePreBits -= bits2Read;
         /* all of *pB consumed? */
-        if(bits2Read == bitElemBits)
+        if (bits2Read == bitElemBits)
           ++pB, bitTopB = 0;
         else
           bitTopB = bits2Read;
       }
-    } while(accumB == 0 && comparePreBits);
-    if(accumB > 0)
+    } while (accumB == 0 && comparePreBits);
+    if (accumB > 0)
       return -1;
   }
   do {
     bitsInAccumB = bitsInAccumA = 0;
     /* get bits of first element if not aligned */
-    if(bitTopA)
+    if (bitTopA)
     {
       uint32_t mask; /*< all of the bits we want to get from *pA */
       unsigned bits2Read = MIN(bitElemBits - bitTopA, totalBitsLeftA);
@@ -172,7 +172,7 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
       totalBitsLeftA -= bits2Read;
     }
     /* get bits of first element if not aligned */
-    if(bitTopB)
+    if (bitTopB)
     {
       uint32_t mask; /*< all of the bits we want to get from *pB */
       unsigned bits2Read = MIN(bitElemBits - bitTopB, totalBitsLeftB);
@@ -182,9 +182,10 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
       bitsInAccumB += bits2Read;
       totalBitsLeftB -= bits2Read;
     }
-    while(bitsInAccumA < (CHAR_BIT * sizeof(accumA)) && totalBitsLeftA)
+    while (bitsInAccumA < (CHAR_BIT * sizeof (accumA)) && totalBitsLeftA)
     {
-      unsigned bits2Read, bitsFree = (CHAR_BIT * sizeof(accumA)) - bitsInAccumA;
+      unsigned bits2Read,
+               bitsFree = (CHAR_BIT * sizeof (accumA)) - bitsInAccumA;
       uint32_t mask;
       bits2Read = MIN3(bitsFree, bitElemBits, totalBitsLeftA);
       mask = (~((~(uint32_t)0) << bits2Read));
@@ -193,15 +194,15 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
       bitsInAccumA += bits2Read;
       totalBitsLeftA -= bits2Read;
       /* all of *pA consumed? */
-      if(bits2Read == bitElemBits)
+      if (bits2Read == bitElemBits)
         ++pA, bitTopA = 0;
       else
         bitTopA = bits2Read;
     }
-    while(bitsInAccumB < (CHAR_BIT * sizeof(accumA)) && totalBitsLeftB)
+    while (bitsInAccumB < (CHAR_BIT * sizeof (accumA)) && totalBitsLeftB)
     {
       unsigned bits2Read,
-        bitsFree = (CHAR_BIT * sizeof(accumA)) - bitsInAccumB;
+        bitsFree = (CHAR_BIT * sizeof (accumA)) - bitsInAccumB;
       uint32_t mask;
       bits2Read = MIN3(bitsFree, bitElemBits, totalBitsLeftB);
       mask = (~((~(uint32_t)0) << bits2Read));
@@ -210,12 +211,12 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
       bitsInAccumB += bits2Read;
       totalBitsLeftB -= bits2Read;
       /* all of *pB consumed? */
-      if(bits2Read == bitElemBits)
+      if (bits2Read == bitElemBits)
         ++pB, bitTopB = 0;
       else
         bitTopB = bits2Read;
     }
-  } while(accumA == accumB && totalBitsLeftA);
+  } while (accumA == accumB && totalBitsLeftA);
   return accumA > accumB?1:(accumA < accumB?-1:0);
 }
 

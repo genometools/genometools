@@ -23,11 +23,11 @@ enum {
 static inline int
 icmp(unsigned a, unsigned b)
 {
-  if(a > b)
+  if (a > b)
     return 1;
-  else if(a < b)
+  else if (a < b)
     return -1;
-  else /* if(a == b) */
+  else /* if (a == b) */
     return 0;
 }
 
@@ -47,34 +47,34 @@ bitPackStringInt_unit_test(Env *env)
     gettimeofday(&seed, NULL);
     srandom(seedval = seed.tv_sec + seed.tv_usec);
   }
-  offset = offsetStart = random()%(sizeof(unsigned) * CHAR_BIT);
+  offset = offsetStart = random()%(sizeof (unsigned) * CHAR_BIT);
   numRnd = random() % MAX_RND_NUMS + 1;
 #ifdef VERBOSE_UNIT_TEST
   fprintf(stderr, "seedval = %lu, offset=%lu, numRnd=%lu\n", seedval,
           (long unsigned)offsetStart, (long unsigned)numRnd);
 #endif /* VERBOSE_UNIT_TEST */
   {
-    BitOffset numBits = sizeof(unsigned) * CHAR_BIT * numRnd + offsetStart;
+    BitOffset numBits = sizeof (unsigned) * CHAR_BIT * numRnd + offsetStart;
     ensure(had_err,
-           (randSrc = env_ma_malloc(env, sizeof(unsigned)*numRnd))
+           (randSrc = env_ma_malloc(env, sizeof (unsigned)*numRnd))
            && (bitStore =
-               env_ma_malloc(env, bitElemsAllocSize(numBits) * sizeof(BitElem)))
-           && (randCmp = env_ma_malloc(env, sizeof(unsigned)*numRnd)));
+              env_ma_malloc(env, bitElemsAllocSize(numBits) * sizeof (BitElem)))
+           && (randCmp = env_ma_malloc(env, sizeof (unsigned)*numRnd)));
   }
-  if(had_err)
+  if (had_err)
   {
-    if(randSrc)
+    if (randSrc)
       env_ma_free(randSrc, env);
-    if(randCmp)
+    if (randCmp)
       env_ma_free(randCmp, env);
-    if(bitStore)
+    if (bitStore)
       env_ma_free(bitStore, env);
 #ifdef VERBOSE_UNIT_TEST
     perror("Storage allocations failed");
 #endif /* VERBOSE_UNIT_TEST */
     return had_err;
   }
-  for(i = 0; i < numRnd; ++i)
+  for (i = 0; i < numRnd; ++i)
   {
     unsigned v = randSrc[i] = random();
     int bits = requiredUIntBits(v);
@@ -82,13 +82,13 @@ bitPackStringInt_unit_test(Env *env)
     offset += bits;
   }
   offset = offsetStart;
-  for(i = 0; i < numRnd; ++i)
+  for (i = 0; i < numRnd; ++i)
   {
     unsigned v = randSrc[i];
     int bits = requiredUIntBits(v);
     unsigned r = bsGetUInt(bitStore, offset, bits);
     ensure(had_err, r == v);
-    if(had_err)
+    if (had_err)
     {
 #ifdef VERBOSE_UNIT_TEST
       fprintf(stderr, "bsStoreUInt/bsGetUInt: "
@@ -108,7 +108,7 @@ bitPackStringInt_unit_test(Env *env)
     unsigned r0;
     offset = offsetStart;
     r0 = bsGetUInt(bitStore, offset, bits0);
-    for(i = 1; i < numRnd; ++i)
+    for (i = 1; i < numRnd; ++i)
     {
       unsigned v1 = randSrc[i];
       int bits1 = requiredUIntBits(v1);
@@ -118,7 +118,7 @@ bitPackStringInt_unit_test(Env *env)
       ensure(had_err, icmp(v0, v1) ==
              (result = bsCompare(bitStore, offset, bits0,
                                  bitStore, offset + bits0, bits1)));
-      if(had_err)
+      if (had_err)
       {
 #ifdef VERBOSE_UNIT_TEST
         fprintf(stderr, "bsCompare: "
@@ -136,18 +136,18 @@ bitPackStringInt_unit_test(Env *env)
     }
   }
   {
-    int numBits = random()%(sizeof(unsigned)*CHAR_BIT) + 1;
+    int numBits = random()%(sizeof (unsigned)*CHAR_BIT) + 1;
     unsigned mask = ~0U;
-    if(numBits < sizeof(unsigned)*CHAR_BIT)
+    if (numBits < sizeof (unsigned)*CHAR_BIT)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniformUIntArray(bitStore, offset, numBits, numRnd, randSrc);
-    for(i = 0; i < numRnd; ++i)
+    for (i = 0; i < numRnd; ++i)
     {
       unsigned v = randSrc[i] & mask;
       unsigned r = bsGetUInt(bitStore, offset, numBits);
       ensure(had_err, r == v);
-      if(had_err)
+      if (had_err)
       {
 #ifdef VERBOSE_UNIT_TEST
         fprintf(stderr, "bsStoreUniformUIntArray/bsGetUInt: "
@@ -163,12 +163,12 @@ bitPackStringInt_unit_test(Env *env)
 #endif /* VERBOSE_UNIT_TEST */
     bsGetUniformUIntArray(bitStore, offset = offsetStart,
                           numBits, numRnd, randCmp);
-    for(i = 0; i < numRnd; ++i)
+    for (i = 0; i < numRnd; ++i)
     {
       unsigned v = randSrc[i] & mask;
       unsigned r = randCmp[i];
       ensure(had_err, r == v);
-      if(had_err)
+      if (had_err)
       {
 #ifdef VERBOSE_UNIT_TEST
         fprintf(stderr, "bsStoreUniformUIntArray/bsGetUniformUIntArray: "
@@ -184,7 +184,7 @@ bitPackStringInt_unit_test(Env *env)
       bsGetUniformUIntArray(bitStore, offsetStart,
                             numBits, 1, &r);
       ensure(had_err, r == v);
-      if(had_err)
+      if (had_err)
       {
 #ifdef VERBOSE_UNIT_TEST
         fprintf(stderr, "bsStoreUniformUIntArray/bsGetUniformUIntArray: "
