@@ -17,7 +17,7 @@
  * \file bitpackstringsimpleop.h
  * \brief Trivial (i.e. inlined) operations on bitstrings.
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
-
+ 
  * The contents of this file is to be considered private
  * implementation detail but is exposed to the compiler solely for
  * performance reasons. Just pretend you didn't know how these
@@ -105,8 +105,8 @@ requiredUInt16Bits(uint16_t v)
 static inline int
 requiredInt8Bits(int8_t v)
 {
-  if (v == INT8_MIN)
-    return sizeof (v)*CHAR_BIT;
+  if(v == INT8_MIN)
+    return sizeof(v)*CHAR_BIT;
   else
     /* one extra for sign bit */
     return requiredUInt32Bits(abs(v)) + 1;
@@ -115,8 +115,8 @@ requiredInt8Bits(int8_t v)
 static inline int
 requiredInt16Bits(int16_t v)
 {
-  if (v == INT16_MIN)
-    return sizeof (v)*CHAR_BIT;
+  if(v == INT16_MIN)
+    return sizeof(v)*CHAR_BIT;
   else
     /* one extra for sign bit */
     return requiredUInt32Bits(abs(v)) + 1;
@@ -125,8 +125,8 @@ requiredInt16Bits(int16_t v)
 static inline int
 requiredInt32Bits(int32_t v)
 {
-  if (v == INT32_MIN)
-    return sizeof (v)*CHAR_BIT;
+  if(v == INT32_MIN)
+    return sizeof(v)*CHAR_BIT;
   else
     /* one extra for sign bit */
     return requiredUInt32Bits(labs(v)) + 1;
@@ -135,8 +135,8 @@ requiredInt32Bits(int32_t v)
 static inline int
 requiredInt64Bits(int64_t v)
 {
-  if (v == INT64_MIN)
-    return sizeof (v)*CHAR_BIT;
+  if(v == INT64_MIN)
+    return sizeof(v)*CHAR_BIT;
   else
     /* one extra for sign bit */
     return requiredUInt64Bits(llabs(v)) + 1;
@@ -179,7 +179,7 @@ bsSignExpandArray8(int8_t val[], size_t numValues, unsigned numBits)
 {
   int8_t m = 1 << (numBits - 1);
   size_t i;
-  for (i = 0; i < numValues; ++i)
+  for(i = 0; i < numValues; ++i)
     val[i] = (val[i] ^ m) - m;
 }
 
@@ -188,7 +188,7 @@ bsSignExpandArray16(int16_t val[], size_t numValues, unsigned numBits)
 {
   int16_t m = 1 << (numBits - 1);
   size_t i;
-  for (i = 0; i < numValues; ++i)
+  for(i = 0; i < numValues; ++i)
     val[i] = (val[i] ^ m) - m;
 }
 
@@ -197,7 +197,7 @@ bsSignExpandArray32(int32_t val[], size_t numValues, unsigned numBits)
 {
   int32_t m = ((int32_t)1) << (numBits - 1);
   size_t i;
-  for (i = 0; i < numValues; ++i)
+  for(i = 0; i < numValues; ++i)
     val[i] = (val[i] ^ m) - m;
 }
 
@@ -206,7 +206,7 @@ bsSignExpandArray64(int64_t val[], size_t numValues, unsigned numBits)
 {
   int64_t m = ((int64_t)1) << (numBits - 1);
   size_t i;
-  for (i = 0; i < numValues; ++i)
+  for(i = 0; i < numValues; ++i)
     val[i] = (val[i] ^ m) - m;
 }
 
@@ -215,12 +215,12 @@ bsGetUniformInt8Array(const BitString str, BitOffset offset, unsigned numBits,
                      size_t numValues, int8_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
-  int blockSize = 16 * getpagesize() / sizeof (val[0]);
+  int blockSize = 16 * getpagesize() / sizeof(val[0]);
   /* the factor (16) is completely arbitrary and needs some profiling */
   int8_t *blockPtr = val;
   size_t revIndex = numValues;
   BitOffset offsetTemp = offset;
-  while (revIndex > blockSize)
+  while(revIndex > blockSize)
   {
     bsGetUniformUInt8Array(str, offsetTemp, numBits,
                             blockSize, (uint8_t *)blockPtr);
@@ -239,12 +239,12 @@ bsGetUniformInt16Array(const BitString str, BitOffset offset, unsigned numBits,
                      size_t numValues, int16_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
-  int blockSize = 16 * getpagesize() / sizeof (val[0]);
+  int blockSize = 16 * getpagesize() / sizeof(val[0]);
   /* the factor (16) is completely arbitrary and needs some profiling */
   int16_t *blockPtr = val;
   size_t revIndex = numValues;
   BitOffset offsetTemp = offset;
-  while (revIndex > blockSize)
+  while(revIndex > blockSize)
   {
     bsGetUniformUInt16Array(str, offsetTemp, numBits,
                             blockSize, (uint16_t *)blockPtr);
@@ -263,12 +263,12 @@ bsGetUniformInt32Array(const BitString str, BitOffset offset, unsigned numBits,
                      size_t numValues, int32_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
-  int blockSize = 16 * getpagesize() / sizeof (val[0]);
+  int blockSize = 16 * getpagesize() / sizeof(val[0]);
   /* the factor (16) is completely arbitrary and needs some profiling */
   int32_t *blockPtr = val;
   size_t revIndex = numValues;
   BitOffset offsetTemp = offset;
-  while (revIndex > blockSize)
+  while(revIndex > blockSize)
   {
     bsGetUniformUInt32Array(str, offsetTemp, numBits,
                             blockSize, (uint32_t *)blockPtr);
@@ -287,12 +287,12 @@ bsGetUniformInt64Array(const BitString str, BitOffset offset, unsigned numBits,
                      size_t numValues, int64_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
-  int blockSize = 16 * getpagesize() / sizeof (val[0]);
+  int blockSize = 16 * getpagesize() / sizeof(val[0]);
   /* the factor (16) is completely arbitrary and needs some profiling */
   int64_t *blockPtr = val;
   size_t revIndex = numValues;
   BitOffset offsetTemp = offset;
-  while (revIndex > blockSize)
+  while(revIndex > blockSize)
   {
     bsGetUniformUInt64Array(str, offsetTemp, numBits,
                             blockSize, (uint64_t *)blockPtr);

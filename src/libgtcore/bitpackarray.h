@@ -38,11 +38,11 @@ typedef struct BitPackArray BitPackArray;
 static inline BitPackArray *
 newBitPackArray(unsigned bits, BitOffset numValues, Env *env)
 {
-  BitPackArray *newBPA = env_ma_malloc(env, sizeof (*newBPA));
-  if (newBPA)
+  BitPackArray *newBPA = env_ma_malloc(env, sizeof(*newBPA));
+  if(newBPA)
   {
-    if (!(newBPA->store = env_ma_malloc(env, bitElemsAllocSize(bits*numValues)
-                                       * sizeof (BitElem))))
+    if(!(newBPA->store = env_ma_malloc(env, bitElemsAllocSize(bits*numValues)
+                                       * sizeof(BitElem))))
     {
       env_ma_free(newBPA, env);
       return NULL;
@@ -71,7 +71,7 @@ static inline void
 bpaStoreUInt32(BitPackArray *array, BitOffset index, uint32_t val)
 {
   assert(array && index < array->numElems
-         && array->bitsPerElem <= sizeof (val)*CHAR_BIT);
+         && array->bitsPerElem <= sizeof(val)*CHAR_BIT);
   bsStoreUInt32(array->store, array->bitsPerElem * index,
                 array->bitsPerElem, val);
 }
@@ -87,7 +87,7 @@ static inline uint32_t
 bpaGetUInt32(const BitPackArray *array, BitOffset index)
 {
   assert(array && index < array->numElems
-         && array->bitsPerElem <= sizeof (uint32_t)*CHAR_BIT);
+         && array->bitsPerElem <= sizeof(uint32_t)*CHAR_BIT);
   return bsGetUInt32(array->store, array->bitsPerElem * index,
                      array->bitsPerElem);
 }
@@ -103,7 +103,7 @@ static inline void
 bpaStoreUInt64(BitPackArray *array, BitOffset index, uint64_t val)
 {
   assert(array && index < array->numElems
-         && array->bitsPerElem <= sizeof (val)*CHAR_BIT);
+         && array->bitsPerElem <= sizeof(val)*CHAR_BIT);
   bsStoreUInt64(array->store, array->bitsPerElem * index,
                 array->bitsPerElem, val);
 }
@@ -119,7 +119,7 @@ static inline uint64_t
 bpaGetUInt64(const BitPackArray *array, BitOffset index)
 {
   assert(array && index < array->numElems
-         && array->bitsPerElem <= sizeof (uint64_t)*CHAR_BIT);
+         && array->bitsPerElem <= sizeof(uint64_t)*CHAR_BIT);
   return bsGetUInt64(array->store, array->bitsPerElem * index,
                      array->bitsPerElem);
 }

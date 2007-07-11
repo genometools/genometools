@@ -26,11 +26,11 @@ bsGetUInt8(const BitString str, BitOffset offset, unsigned numBits)
   const BitElem *p = str + elemStart;
   assert(str);
 #ifndef NDEBUG
-  if (numBits > sizeof (accum)*CHAR_BIT)
+  if(numBits > sizeof(accum)*CHAR_BIT)
     fprintf(stderr, "numBits = %u\n", numBits);
 #endif
-  assert(numBits <= sizeof (accum)*CHAR_BIT);
-  if (bitTop)
+  assert(numBits <= sizeof(accum)*CHAR_BIT);
+  if(bitTop)
   {
     uint_fast32_t mask;
     unsigned bits2Read = MIN(bitElemBits - bitTop, bitsLeft);
@@ -40,7 +40,7 @@ bsGetUInt8(const BitString str, BitOffset offset, unsigned numBits)
     bitsLeft -= bits2Read;
   }
   /* get bits from intervening elems */
-  while (bitsLeft >= bitElemBits)
+  while(bitsLeft >= bitElemBits)
   {
     accum = accum << bitElemBits | (*p++);
     bitsLeft -= bitElemBits;
@@ -61,12 +61,12 @@ bsStoreUInt8(BitString str, BitOffset offset,
   size_t elemStart = offset/bitElemBits;
   BitElem *p = str + elemStart;
   assert(str);
-  assert(numBits <= sizeof (val)*CHAR_BIT);
+  assert(numBits <= sizeof(val)*CHAR_BIT);
   /* set bits of first element, accounting for bits to be preserved */
-  if (bitTop)
+  if(bitTop)
   {
     uint_fast32_t mask = ~(uint_fast32_t)0;
-    if (bitElemBits < (sizeof (uint_fast32_t)*CHAR_BIT))
+    if(bitElemBits < (sizeof(uint_fast32_t)*CHAR_BIT))
     {
       mask <<= bitElemBits;
     }
@@ -75,7 +75,7 @@ bsStoreUInt8(BitString str, BitOffset offset,
       mask = 0;
     }
     mask = (~mask) >> bitTop;
-    if (numBits < bitElemBits - bitTop)
+    if(numBits < bitElemBits - bitTop)
     {
       unsigned backShift = bitElemBits - numBits - bitTop;
       mask &= ~(uint_fast32_t)0 << backShift;
@@ -91,7 +91,7 @@ bsStoreUInt8(BitString str, BitOffset offset,
     }
   }
   /* set bits for intervening elems */
-  while (bitsLeft >= bitElemBits)
+  while(bitsLeft >= bitElemBits)
   {
     bitsLeft -= bitElemBits;
     *p++ = val >> bitsLeft;
@@ -99,7 +99,7 @@ bsStoreUInt8(BitString str, BitOffset offset,
   /* set bits for last elem */
   {
     uint_fast32_t mask = ((~(uint_fast32_t)0)<<(bitElemBits - bitsLeft));
-    if (bitElemBits < (sizeof (uint8_t)*CHAR_BIT))
+    if(bitElemBits < (sizeof(uint8_t)*CHAR_BIT))
       mask &= (~(~(uint_fast32_t)0<<bitElemBits));
     *p = (*p & ~mask) | ((val << (bitElemBits - bitsLeft)) & mask);
   }
@@ -108,11 +108,11 @@ bsStoreUInt8(BitString str, BitOffset offset,
 /**************************************************************************/
 /* Merge bits from two values according to a mask                         */
 /*                                                                        */
-/* unsigned int a;       value to merge in non-masked bits                */
-/* unsigned int b;       value to merge in masked bits                    */
-/* unsigned int mask;    1 where bits from b should be selected;          */
-/*                       0 where from a.                                  */
-/* unsigned int r;       result of (a & ~mask) | (b & mask) goes here     */
+/* unsigned int a;    // value to merge in non-masked bits                */
+/* unsigned int b;    // value to merge in masked bits                    */
+/* unsigned int mask; // 1 where bits from b should be selected;          */
+/*                    // 0 where from a.                                  */
+/* unsigned int r;    // result of (a & ~mask) | (b & mask) goes here     */
 /*                                                                        */
 /* r = a ^ ((a ^ b) & mask);                                              */
 /*                                                                        */
@@ -138,17 +138,17 @@ bsGetUniformUInt8Array(const BitString str, BitOffset offset,
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
   uint_fast32_t accum = 0, valMask = ~(uint_fast32_t)0;
-  if (numBits < (sizeof (val[0])*CHAR_BIT))
+  if(numBits < (sizeof(val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
   assert(str && val);
-  assert(numBits <= sizeof (val[0])*CHAR_BIT);
+  assert(numBits <= sizeof(val[0])*CHAR_BIT);
   /* user requested zero values, ugly but must be handled, since legal */
-  if (!totalBitsLeft)
+  if(!totalBitsLeft)
   {
     return;
   }
   /* get bits of first element if not aligned */
-  if (bitTop)
+  if(bitTop)
   {
     uint_fast32_t mask; /*< all of the bits we want to get from *p */
     unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
@@ -158,11 +158,11 @@ bsGetUniformUInt8Array(const BitString str, BitOffset offset,
     bitsInAccum += bits2Read;
     totalBitsLeft -= bits2Read;
   }
-  while (j < numValues)
+  while(j < numValues)
   {
-    while (bitsInAccum < numBits && totalBitsLeft)
+    while(bitsInAccum < numBits && totalBitsLeft)
     {
-      unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
+      unsigned bits2Read, bitsFree = sizeof(accum)*CHAR_BIT - bitsInAccum;
       uint_fast32_t mask;
       bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
       mask = (~((~(uint_fast32_t)0) << bits2Read));
@@ -171,13 +171,13 @@ bsGetUniformUInt8Array(const BitString str, BitOffset offset,
       bitsInAccum += bits2Read;
       totalBitsLeft -= bits2Read;
       /* all of *p consumed? */
-      if ((bitsRead += bits2Read) == bitElemBits)
+      if((bitsRead += bits2Read) == bitElemBits)
       {
         ++p, bitsRead = 0;
       }
     }
     /* now we have enough bits in accum */
-    while (bitsInAccum >= numBits)
+    while(bitsInAccum >= numBits)
     {
       val[j++] = ((accum >> (bitsInAccum - numBits)) & valMask );
       bitsInAccum -= numBits;
@@ -198,18 +198,18 @@ bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
   BitElem *p = str + offset/bitElemBits;
   unsigned bitsInAccum;
   uint_fast32_t accum, valMask = ~(uint_fast32_t)0, currentVal;
-  if (numBits < (sizeof (val[0])*CHAR_BIT))
+  if(numBits < (sizeof(val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
   assert(str && val);
-  assert(numBits <= sizeof (val[0])*CHAR_BIT);
+  assert(numBits <= sizeof(val[0])*CHAR_BIT);
   /* user requested zero values, ugly but must be handled, since legal */
-  if (!totalBitsLeft)
+  if(!totalBitsLeft)
   {
     return;
   }
   accum = val[0] & valMask;
   totalBitsLeft -= bitsInAccum = numBits;
-  if (totalBitsLeft)
+  if(totalBitsLeft)
   {
     currentVal = val[++j] & valMask;
     totalBitsLeft -= bitsLeft = numBits;
@@ -220,14 +220,14 @@ bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
     bitsLeft = 0;
   }
   /* set bits of first element if not aligned */
-  if (bitTop)
+  if(bitTop)
   {
     BitElem mask = ~(~(uint_fast32_t)0 << (bitElemBits - bitTop));
-    while ((totalBitsLeft || bitsLeft) && bitsInAccum < bitElemBits - bitTop)
+    while((totalBitsLeft || bitsLeft) && bitsInAccum < bitElemBits - bitTop)
     {
-      unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
+      unsigned bits2Read, bitsFree = sizeof(accum)*CHAR_BIT - bitsInAccum;
 
-      if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
+      if((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof(accum)*CHAR_BIT)
       {
         accum = accum << bits2Read
           | ((currentVal) >> (bitsLeft - bits2Read));
@@ -237,12 +237,12 @@ bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
 
       /* all of val[j] consumed? */
       bitsInAccum += bits2Read;
-      if (!(bits2Read -= bitsLeft))
+      if(!(bits2Read -= bitsLeft))
         currentVal = val[++j] & valMask, totalBitsLeft -= bitsLeft = numBits;
     }
     /* at this point accum holds as many bits as we could get
      * to fill the first BitElem in str, but did we get enough? */
-    if (bitsInAccum < bitElemBits - bitTop)
+    if(bitsInAccum < bitElemBits - bitTop)
     {
       /* no there's not enough */
       unsigned backShift = bitElemBits - bitsInAccum - bitTop;
@@ -260,14 +260,14 @@ bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
     }
   }
 
-  while (totalBitsLeft || (bitsInAccum + bitsLeft) > bitElemBits)
+  while(totalBitsLeft || (bitsInAccum + bitsLeft) > bitElemBits)
   {
-    while ((totalBitsLeft || bitsLeft)
+    while((totalBitsLeft || bitsLeft)
           && ((bitsInAccum < bitElemBits)
-              || (bitsLeft < sizeof (accum)*CHAR_BIT - bitsInAccum)))
+              || (bitsLeft < sizeof(accum)*CHAR_BIT - bitsInAccum)))
     {
-      unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
-      if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
+      unsigned bits2Read, bitsFree = sizeof(accum)*CHAR_BIT - bitsInAccum;
+      if((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof(accum)*CHAR_BIT)
       {
         uint_fast32_t mask = ~((~(uint_fast32_t)0) << bits2Read);
         accum = accum << bits2Read
@@ -277,13 +277,13 @@ bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
         accum = currentVal;
       bitsInAccum += bits2Read;
       /* all of currentVal == val[j] consumed? */
-      if (bits2Read == bitsLeft && totalBitsLeft)
+      if(bits2Read == bitsLeft && totalBitsLeft)
         currentVal = val[++j] & valMask, totalBitsLeft -= bitsLeft = numBits;
       else
         bitsLeft -= bits2Read;
     }
     /* now we have enough bits in accum */
-    while (bitsInAccum >= bitElemBits)
+    while(bitsInAccum >= bitElemBits)
     {
       *p++ = accum >> (bitsInAccum - bitElemBits);
       bitsInAccum -= bitElemBits;
@@ -293,12 +293,12 @@ bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
   accum = (accum << bitsLeft)
     | (currentVal & (valMask >> (numBits - bitsLeft)));
   bitsInAccum += bitsLeft;
-  while (bitsInAccum >= bitElemBits)
+  while(bitsInAccum >= bitElemBits)
   {
     *p++ = accum >> (bitsInAccum - bitElemBits);
     bitsInAccum -= bitElemBits;
   }
-  if (bitsInAccum)
+  if(bitsInAccum)
   {
     uint_fast32_t mask = ~(uint_fast32_t)0 << (bitElemBits - bitsInAccum);
     *p = (*p & ~mask) | ((accum << (bitElemBits - bitsInAccum))& mask);

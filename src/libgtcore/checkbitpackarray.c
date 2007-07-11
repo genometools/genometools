@@ -34,8 +34,8 @@ int bitPackArray_unit_test(Env *env)
     size_t i, numRnd;
     unsigned bits;
     numRnd = random() % MAX_RND_NUMS + 1;
-    bits = random() % (sizeof (randSrc[0]) * CHAR_BIT + 1);
-    if (bits == 32)
+    bits = random() % (sizeof(randSrc[0]) * CHAR_BIT + 1);
+    if(bits == 32)
       mask = ~(uint32_t)0;
     else
       mask = ~((~(uint32_t)0)<<bits);
@@ -45,31 +45,31 @@ int bitPackArray_unit_test(Env *env)
             (long unsigned)numRnd);
 #endif
     ensure(had_err,
-           ((randSrc = env_ma_malloc(env, sizeof (uint32_t)*numRnd))
+           ((randSrc = env_ma_malloc(env, sizeof(uint32_t)*numRnd))
             && (bitStore = newBitPackArray(bits, numRnd, env))
-            && (randCmp = env_ma_malloc(env, sizeof (uint32_t)*numRnd))));
-    if (had_err)
+            && (randCmp = env_ma_malloc(env, sizeof(uint32_t)*numRnd))));
+    if(had_err)
     {
       perror("Storage allocations failed");
-      if (randSrc)
+      if(randSrc)
         env_ma_free(randSrc, env);
-      if (randCmp)
+      if(randCmp)
         env_ma_free(randCmp, env);
-      if (bitStore)
+      if(bitStore)
         deleteBitPackArray(bitStore, env);
       return had_err;
     }
-    for (i = 0; i < numRnd; ++i)
+    for(i = 0; i < numRnd; ++i)
     {
       uint32_t v = randSrc[i] = random();
       bpaStoreUInt32(bitStore, i, v);
     }
-    for (i = 0; i < numRnd; ++i)
+    for(i = 0; i < numRnd; ++i)
     {
       uint32_t v = randSrc[i];
       uint32_t r = bpaGetUInt32(bitStore, i);
       ensure(had_err, (v & mask) == r);
-      if (had_err)
+      if(had_err)
       {
 #ifdef VERBOSE_UNIT_TEST
         fprintf(stderr, "bsStoreUInt32/bpaGetUInt32: "
@@ -97,37 +97,37 @@ int bitPackArray_unit_test(Env *env)
     size_t i, numRnd;
     unsigned bits;
     numRnd = random() % MAX_RND_NUMS + 1;
-    bits = random() % (sizeof (randSrc[0]) * CHAR_BIT + 1);
-    if (bits == (sizeof (randSrc[0]) * CHAR_BIT))
+    bits = random() % (sizeof(randSrc[0]) * CHAR_BIT + 1);
+    if(bits == (sizeof(randSrc[0]) * CHAR_BIT))
       mask = ~(uint64_t)0;
     else
       mask = ~((~(uint64_t)0)<<bits);
     ensure(had_err,
-           (randSrc = env_ma_malloc(env, sizeof (uint64_t)*numRnd))
+           (randSrc = env_ma_malloc(env, sizeof(uint64_t)*numRnd))
            && (bitStore = newBitPackArray(bits, numRnd, env))
-           && (randCmp = env_ma_malloc(env, sizeof (uint64_t)*numRnd)));
-    if (had_err)
+           && (randCmp = env_ma_malloc(env, sizeof(uint64_t)*numRnd)));
+    if(had_err)
     {
       perror("Storage allocations failed");
-      if (randSrc)
+      if(randSrc)
         env_ma_free(randSrc, env);
-      if (randCmp)
+      if(randCmp)
         env_ma_free(randCmp, env);
-      if (bitStore)
+      if(bitStore)
         deleteBitPackArray(bitStore, env);
       return had_err;
     }
-    for (i = 0; i < numRnd; ++i)
+    for(i = 0; i < numRnd; ++i)
     {
       uint64_t v = randSrc[i] = ((uint64_t)random() << 32 | random());
       bpaStoreUInt64(bitStore, i, v);
     }
-    for (i = 0; i < numRnd; ++i)
+    for(i = 0; i < numRnd; ++i)
     {
       uint64_t v = randSrc[i];
       uint64_t r = bpaGetUInt64(bitStore, i);
       ensure(had_err, (v & mask) == r);
-      if (had_err)
+      if(had_err)
       {
 #ifdef VERBOSE_UNIT_TEST
         fprintf(stderr, "bsStoreUInt64/bpaGetUInt64: "

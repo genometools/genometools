@@ -19,6 +19,6 @@
             had_err = -1;                                                    \
           }                                                                  \
         }                                                                    \
-  } while (0)
+  } while(0)
 
-#endif
+#endif /* ENSURE_H */
