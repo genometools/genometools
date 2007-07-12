@@ -300,6 +300,14 @@ static int show_help(OptionParser *op, OptionType optiontype, Env *env)
         printf("%*s  default: %s\n", (int) max_option_length, "",
                option->default_value.b ? "yes" : "no");
       }
+      else if (option->option_type == OPTION_CHOICE) {
+        printf("%*s  default: ", (int) max_option_length, "");
+        if (!option->default_value.s || !strlen(option->default_value.s))
+          xputs("undefined");
+        else
+          xputs(option->default_value.s);
+      }
+
       else if (option->option_type == OPTION_DOUBLE) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (option->default_value.d == UNDEF_DOUBLE)
@@ -342,14 +350,6 @@ static int show_help(OptionParser *op, OptionType optiontype, Env *env)
         else
           xputs(option->default_value.s);
       }
-      else if (option->option_type == OPTION_CHOICE) {
-        printf("%*s  default: ", (int) max_option_length, "");
-        if (!option->default_value.s || !strlen(option->default_value.s))
-          xputs("undefined");
-        else
-          xputs(option->default_value.s);
-      }
-
     }
   }
   if (op->comment_func)
@@ -599,6 +599,44 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
               *(bool*) option->value = true;
               option_parsed = true;
               break;
+            case OPTION_CHOICE:
+              if (optional_arg(option, argnum, argc, argv)) {
+                option_parsed = true;
+                break;
+              }
+              assert (option->domain[0]);
+              had_err = check_missing_argument(argnum, argc, option->option_str,
+                        env);
+              if (!had_err) {
+                argnum++;
+                if (strcmp(argv[argnum], option->domain[0])) {
+                  error_str = str_new_cstr(option->domain[0], env);
+                  i = 1;
+                  while (option->domain[i] != NULL) {
+                    if (!strcmp(argv[argnum], option->domain[i])) {
+                      str_set(option->value, option->domain[i], env);
+                      break;
+                    }
+                    str_append_cstr(error_str, ", ", env);
+                    str_append_cstr(error_str, option->domain[i], env);
+                    i++;
+                  }
+                  if (option->domain[i] == NULL) {
+                    env_error_set(env, "argument to option \"-%s\" must be one "
+                                  "of: %s", str_get(option->option_str),
+                                  str_get(error_str));
+                    had_err = -1;
+                  }
+                  str_delete(error_str, env);
+                }
+                else {
+                  str_set(option->value, option->domain[0], env);
+                }
+              }
+              if (!had_err) {
+                option_parsed = true;
+              }
+              break;
             case OPTION_DOUBLE:
               if (optional_arg(option, argnum, argc, argv)) {
                 option_parsed = true;
@@ -806,44 +844,6 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 }
                 else
                   break;
-              }
-              break;
-            case OPTION_CHOICE:
-              if (optional_arg(option, argnum, argc, argv)) {
-                option_parsed = true;
-                break;
-              }
-              assert (option->domain[0]);
-              had_err = check_missing_argument(argnum, argc, option->option_str,
-                        env);
-              if (!had_err) {
-                argnum++;
-                if (strcmp(argv[argnum], option->domain[0])) {
-                  error_str = str_new_cstr(option->domain[0], env);
-                  i = 1;
-                  while (option->domain[i] != NULL) {
-                    if (!strcmp(argv[argnum], option->domain[i])) {
-                      str_set(option->value, option->domain[i], env);
-                      break;
-                    }
-                    str_append_cstr(error_str, ", ", env);
-                    str_append_cstr(error_str, option->domain[i], env);
-                    i++;
-                  }
-                  if (option->domain[i] == NULL) {
-                    env_error_set(env, "argument to option \"-%s\" must be one "
-                                  "of: %s", str_get(option->option_str),
-                                  str_get(error_str));
-                    had_err = -1;
-                  }
-                  str_delete(error_str, env);
-                }
-                else {
-                  str_set(option->value, option->domain[0], env);
-                }
-              }
-              if (!had_err) {
-                option_parsed = true;
               }
               break;
             case OPTION_VERSION:
@@ -1165,17 +1165,13 @@ Option* option_new_choice(const char *option_str, const char *description,
 {
   Option *o;
   const char* default_choice = NULL;
-
-  #ifndef NDEBUG
+#ifndef NDEBUG
   unsigned long domain_size = 0;
-
-  while (domain[domain_size] != NULL) {
+  while (domain[domain_size] != NULL)
     domain_size++;
-  }
   domain_size++;
-  #endif
-
-  assert (default_value <= domain_size);
+  assert(default_value <= domain_size);
+#endif
 
   if (default_value > 0) {
     default_value--;
