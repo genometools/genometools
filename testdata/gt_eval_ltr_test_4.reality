@@ -1,0 +1,4 @@
+##gff-version   3
+##sequence-region   gDNA 1 1000
+gDNA	.	repeat_region	100	200	.	-	.	ID=repeat_region
+gDNA	.	LTR_retrotransposon	100	200	.	-	.	ID=mRNA;Parent=repeat_region

@@ -6,4 +6,4 @@
 #
 
 # the make call normally used for development
-gmake CFLAGS='-ansi' test
+gmake libgtview=yes test

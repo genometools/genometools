@@ -1,0 +1,31 @@
+##gff-version 3
+##sequence-region seq0 1 135606
+# CH478465
+seq0	Genbank	LTR_retrotransposon	3874	4142	.	?	.	ID=LTRret0
+seq0	Genbank	LTR_retrotransposon	57759	59137	.	?	.	ID=LTRret1
+seq0	Genbank	LTR_retrotransposon	58703	63379	.	?	.	ID=LTRret2
+seq0	Genbank	LTR_retrotransposon	63362	63799	.	?	.	ID=LTRret3
+seq0	Genbank	LTR_retrotransposon	63793	64472	.	?	.	ID=LTRret4
+seq0	Genbank	LTR_retrotransposon	82889	83299	.	?	.	ID=LTRret5
+seq0	Genbank	LTR_retrotransposon	83296	84549	.	?	.	ID=LTRret6
+seq0	Genbank	LTR_retrotransposon	84542	87203	.	?	.	ID=LTRret7
+seq0	Genbank	LTR_retrotransposon	119186	123973	.	?	.	ID=LTRret8
+##sequence-region seq1 1 163182
+# CH478464
+seq1	Genbank	LTR_retrotransposon	67057	67156	.	?	.	ID=LTRret9
+seq1	Genbank	LTR_retrotransposon	74405	74533	.	?	.	ID=LTRret10
+seq1	Genbank	LTR_retrotransposon	74817	74954	.	?	.	ID=LTRret11
+seq1	Genbank	LTR_retrotransposon	83694	84311	.	?	.	ID=LTRret12
+seq1	Genbank	LTR_retrotransposon	106946	107130	.	?	.	ID=LTRret13
+seq1	Genbank	LTR_retrotransposon	114751	115665	.	?	.	ID=LTRret14
+seq1	Genbank	LTR_retrotransposon	117806	117952	.	?	.	ID=LTRret15
+seq1	Genbank	LTR_retrotransposon	121320	121492	.	?	.	ID=LTRret16
+seq1	Genbank	LTR_retrotransposon	129429	129553	.	?	.	ID=LTRret17
+seq1	Genbank	LTR_retrotransposon	129536	129703	.	?	.	ID=LTRret18
+seq1	Genbank	LTR_retrotransposon	129694	129847	.	?	.	ID=LTRret19
+seq1	Genbank	LTR_retrotransposon	138908	139082	.	?	.	ID=LTRret20
+seq1	Genbank	LTR_retrotransposon	147916	148117	.	?	.	ID=LTRret21
+seq1	Genbank	LTR_retrotransposon	149265	149964	.	?	.	ID=LTRret22
+seq1	Genbank	LTR_retrotransposon	153048	153242	.	?	.	ID=LTRret23
+seq1	Genbank	LTR_retrotransposon	153232	153342	.	?	.	ID=LTRret24
+seq1	Genbank	LTR_retrotransposon	153809	154103	.	?	.	ID=LTRret25

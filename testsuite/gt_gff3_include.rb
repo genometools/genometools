@@ -53,6 +53,20 @@ Test do
   grep($last_stderr, /does not contain/);
 end
 
+Name "gt gff3 prob 7 (unsorted)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_prob_7.in | #{$bin}gt gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_prob_7.unsorted"
+end
+
+Name "gt gff3 prob 7 (sorted)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -sort #{$testdata}gt_gff3_prob_7.in | #{$bin}gt gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_prob_7.sorted"
+end
+
 Name "gt gff3 test 1.1"
 Keywords "gt_gff3"
 Test do
@@ -63,6 +77,12 @@ Name "gt gff3 test 1.2"
 Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 - - < #{$testdata}gt_gff3_test_1.in", :retval => 1)
+end
+
+Name "gt gff3 test 1.3"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_1.in | #{$bin}gt gff3"
 end
 
 Name "gt gff3 test 2"

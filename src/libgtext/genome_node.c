@@ -45,6 +45,24 @@ static int compare_genome_nodes(GenomeNode *gn_a, GenomeNode *gn_b)
                        genome_node_get_range(gn_b));
 }
 
+static int compare_genome_nodes_with_delta(GenomeNode *gn_a, GenomeNode *gn_b,
+                                           unsigned long delta)
+{
+  int rval;
+  assert(gn_a && gn_b);
+  /* ensure that sequence regions come first, otherwise we don't get a valid
+     gff3 stream */
+  if ((rval = compare_genome_node_type(gn_a, gn_b)))
+    return rval;
+
+  if ((rval = str_cmp(genome_node_get_idstr(gn_a),
+                      genome_node_get_idstr(gn_b)))) {
+    return rval;
+  }
+  return range_compare_with_delta(genome_node_get_range(gn_a),
+                                  genome_node_get_range(gn_b), delta);
+}
+
 GenomeNode* genome_node_create(const GenomeNodeClass *gnc,
                                const char *filename,
                                unsigned long line_number, Env *env)
@@ -498,6 +516,20 @@ bool genome_node_overlaps_nodes_mark(GenomeNode *gn, Array *nodes,
 int genome_node_compare(GenomeNode **gn_a, GenomeNode **gn_b)
 {
   return compare_genome_nodes(*gn_a, *gn_b);
+}
+
+int genome_node_compare_with_data(GenomeNode **gn_a, GenomeNode **gn_b,
+                                  void *unused)
+{
+  return compare_genome_nodes(*gn_a, *gn_b);
+}
+
+int genome_node_compare_delta(GenomeNode **gn_a, GenomeNode **gn_b,
+                              void *delta)
+{
+  unsigned long *deltaptr = delta;
+  assert(delta);
+  return compare_genome_nodes_with_delta(*gn_a, *gn_b, *deltaptr);
 }
 
 void genome_node_delete(GenomeNode *gn, Env *env)
