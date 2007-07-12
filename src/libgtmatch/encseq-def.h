@@ -14,6 +14,12 @@
 typedef struct _Encodedsequence Encodedsequence;
 typedef struct _Encodedsequencescanstate Encodedsequencescanstate;
 
+typedef struct
+{
+  Seqpos leftpos,
+         rightpos;
+} Sequencerange;          /* \Typedef{Sequencerange} */
+
 Seqpos getencseqtotallength(const Encodedsequence *encseq);
 
 Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos);
@@ -33,7 +39,7 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Seqpos pos);
 
 int overallspecialranges(const Encodedsequence *encseq,
-                         int(*process)(void *,const PairSeqpos *,Env *),
+                         int(*process)(void *,const Sequencerange *,Env *),
                          void *processinfo,
                          Env *env);
 

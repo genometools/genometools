@@ -102,11 +102,6 @@ static int assigncorrecttype(Mapspecification *mapspec,
     case SeqposType:
       ASSIGNPTR2STARTPTR(Seqpos);
       break;
-    /*
-    case PairSeqposType:
-      ASSIGNPTR2STARTPTR(PairSeqpos);
-      break;
-    */
     default:
       env_error_set(env,"no assignment specification for size %lu",
                     (unsigned long) mapspec->sizeofunit);
@@ -265,11 +260,6 @@ int flushtheindex2file(FILE *fp,
         case SeqposType:
           WRITEACTIONWITHTYPE(Seqpos);
           break;
-        /*
-        case PairSeqposType:
-          WRITEACTIONWITHTYPE(PairSeqpos);
-          break;
-        */
         default:
            env_error_set(env,"no map specification for size %lu",
                          (unsigned long) mapspecptr->sizeofunit);

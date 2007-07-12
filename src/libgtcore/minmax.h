@@ -1,11 +1,16 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
 #ifndef MINMAX_H
 #define MINMAX_H
+
+/*
+  This file defines macros for maximum and minimum computation,
+  if they are not already defined.
+*/
 
 #ifndef MAX
 #define MAX(X,Y) (((X) > (Y)) ? (X) : (Y))

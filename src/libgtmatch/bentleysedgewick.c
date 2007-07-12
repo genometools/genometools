@@ -7,11 +7,11 @@
 #include <limits.h>
 #include <assert.h>
 #include "libgtcore/env.h"
+#include "libgtcore/minmax.h"
 #include "types.h"
 #include "chardef.h"
 #include "arraydef.h"
 #include "divmodmul.h"
-#include "minmax.h"
 #include "codespec.h"
 #include "intcode-def.h"
 #include "encseq-def.h"

@@ -96,6 +96,12 @@ static OPrval parse_options(int *parsed_args,
                            false,env);
   option_parser_add_option(op, option, env);
 
+  option = option_new_bool("lcp",
+                           "output lcp table (lcptab) to file",
+                           &so->outlcptab,
+                           false,env);
+  option_parser_add_option(op, option, env);
+
   option = option_new_bool("bwt",
                            "output Burrows-Wheeler Transformation "
                            "(bwttab) to file",

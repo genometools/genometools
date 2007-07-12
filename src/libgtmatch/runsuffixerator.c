@@ -10,7 +10,6 @@
 #include <errno.h>
 #include "types.h"
 #include "spacedef.h"
-#include "megabytes.h"
 #include "alphadef.h"
 #include "sfx-optdef.h"
 #include "encseq-def.h"
@@ -24,13 +23,35 @@
 #include "outprjfile.pr"
 #include "suffixerator.pr"
 #include "opensfxfile.pr"
+#include "cmpsuffixes.pr"
 
 typedef struct
 {
   FILE *outfpsuftab,
+       *outfplcptab,
+       *outfpllvtab,
        *outfpbwttab;
+  Seqpos lastsuftabentryofpreviouspart, 
+         absolutepos,
+         numoflargelcpvalues,
+         maxbranchdepth;
   const Encodedsequence *encseq;
+  DefinedSeqpos longest;
 } Outfileinfo;
+
+static void initoutfileinfo(Outfileinfo *outfileinfo)
+{
+  outfileinfo->outfpsuftab = NULL;
+  outfileinfo->outfplcptab = NULL;
+  outfileinfo->outfpllvtab = NULL;
+  outfileinfo->outfpbwttab = NULL;
+  outfileinfo->absolutepos = 0;
+  outfileinfo->lastsuftabentryofpreviouspart = 0;
+  outfileinfo->numoflargelcpvalues = 0;
+  outfileinfo->maxbranchdepth = 0;
+  outfileinfo->longest.defined = false;
+  outfileinfo->longest.value = 0;
+}
 
 static int suftab2file(void *info,
                        const Seqpos *suftab,
@@ -38,6 +59,8 @@ static int suftab2file(void *info,
                        Env *env)
 {
   Outfileinfo *outfileinfo = (Outfileinfo *) info;
+  bool haserr = false;
+  Seqpos pos;
 
   env_error_check(env);
   if (outfileinfo->outfpsuftab != NULL)
@@ -53,12 +76,103 @@ static int suftab2file(void *info,
            PRINTSeqposcast(widthofpart),
            (unsigned int) sizeof (*suftab),
            strerror(errno));
-      return -1;
+      haserr = true;
     }
   }
-  if (outfileinfo->outfpbwttab != NULL)
+  if(!outfileinfo->longest.defined)
   {
-    Seqpos pos, startpos;
+    for(pos=0; pos<widthofpart; pos++)
+    {
+      if(suftab[pos] == 0)
+      {
+        outfileinfo->longest.defined = true;
+        outfileinfo->longest.value = outfileinfo->absolutepos + pos;
+        break;
+      }
+    }
+  }
+  if (!haserr && outfileinfo->outfplcptab != NULL)
+  {
+    Seqpos lcpvalue;
+    Uchar outvalue;
+    Largelcpvalue largelcpvalue;
+    int cmp;
+
+    outvalue = (Uchar) 0; 
+    if (outfileinfo->absolutepos == 0 &&
+        fwrite(&outvalue,sizeof(Uchar),(size_t) 1,
+               outfileinfo->outfplcptab) != (size_t) 1)
+    {
+      env_error_set(env,"cannot write 1 item of size %lu: errormsg=\"%s\"",
+                         (unsigned long) sizeof(Uchar),
+                         strerror(errno));
+      haserr = true;
+    }
+    if(!haserr)
+    {
+      for(pos=0; pos<widthofpart; pos++)
+      {
+        if(pos > 0 || outfileinfo->absolutepos > 0)
+        {
+          cmp = comparetwosuffixes(outfileinfo->encseq,
+                                   &lcpvalue,
+                                   false,
+                                   false,
+                                   0,
+                                   pos > 0 ? suftab[pos-1] 
+                                           : outfileinfo->
+                                             lastsuftabentryofpreviouspart,
+                                   suftab[pos]);
+          assert(cmp <= 0);
+          if(outfileinfo->maxbranchdepth < lcpvalue)
+          {
+            outfileinfo->maxbranchdepth = lcpvalue;
+          }
+          if(lcpvalue >= (Seqpos) UCHAR_MAX)
+          {
+            outfileinfo->numoflargelcpvalues++;
+            largelcpvalue.position = outfileinfo->absolutepos + pos;
+            largelcpvalue.value = lcpvalue;
+            if (fwrite(&largelcpvalue,sizeof(Largelcpvalue),(size_t) 1,
+                       outfileinfo->outfpllvtab) != (size_t) 1)
+            {
+              env_error_set(env,"cannot write 1 item of size %lu: "
+                                "errormsg=\"%s\"",
+                                (unsigned long) sizeof(Largelcpvalue),
+                                strerror(errno));
+              haserr = true;
+              break;
+            }
+            outvalue = (Uchar) UCHAR_MAX; 
+          } else
+          {
+            outvalue = (Uchar) lcpvalue;
+          }
+          if (!haserr && fwrite(&outvalue,sizeof(Uchar),(size_t) 1,
+                                outfileinfo->outfplcptab) != (size_t) 1)
+          {
+            env_error_set(env,"cannot write 1 item of size %lu: "
+                              "errormsg=\"%s\"",
+                              (unsigned long) sizeof(Uchar),
+                              strerror(errno));
+            haserr = true;
+            break;
+          }
+        }
+      }
+    }
+    if(!haserr)
+    {
+      outfileinfo->lastsuftabentryofpreviouspart = suftab[widthofpart-1];
+    }
+  }
+  if(!haserr)
+  {
+    outfileinfo->absolutepos += widthofpart;
+  }
+  if (!haserr && outfileinfo->outfpbwttab != NULL)
+  {
+    Seqpos startpos;
     Uchar cc;
 
     for(pos=0; pos < widthofpart; pos++)
@@ -78,11 +192,12 @@ static int suftab2file(void *info,
                           "errormsg=\"%s\"",\
                         (unsigned long) sizeof(Uchar),\
                         strerror(errno));\
-        return -2;
+        haserr = true;
+        break;
       }
     }
   }
-  return 0;
+  return haserr ? -1 : 0;
 }
 
 static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
@@ -104,6 +219,17 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
   return haserr ? -1 : 0;
 }
 
+#define INITOUTFILEPTR(PTR,FLAG,SUFFIX)\
+        if (!haserr && (FLAG))\
+        {\
+          outfileinfo.encseq = encseq;\
+          PTR = opensfxfile(so->str_indexname,"." SUFFIX,env);\
+          if((PTR) == NULL)\
+          {\
+            haserr = true;\
+          }\
+        }
+
 static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
 {
   unsigned char numofchars = 0;
@@ -111,7 +237,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   Seqpos totallength;
   Alphabet *alpha;
   Specialcharinfo specialcharinfo;
-  PairSeqpos *filelengthtab = NULL;
+  Filelengthvalues *filelengthtab = NULL;
   Outfileinfo outfileinfo;
   bool haserr = false;
   Encodedsequence *encseq;
@@ -121,8 +247,6 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   inittheclock(&mtime,
                "determining sequence length and number of special symbols",
                env);
-  outfileinfo.outfpsuftab = NULL;
-  outfileinfo.outfpbwttab = NULL;
   alpha = assigninputalphabet(so->isdna,
                               so->isprotein,
                               so->str_smap,
@@ -141,21 +265,6 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
                           &filelengthtab,
                           getsymbolmapAlphabet(alpha), 
                           env) != 0)
-    {
-      haserr = true;
-    }
-  }
-  if (!haserr)
-  {
-    assert(so->prefixlength > 0);
-    if (outprjfile(so->str_indexname,
-                   so->filenametab,
-                   filelengthtab,
-                   totallength,
-                   numofsequences,
-                   &specialcharinfo,
-                   (uint32_t) so->prefixlength,
-                   env) != 0)
     {
       haserr = true;
     }
@@ -195,36 +304,18 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
       }
     }
   }
-  if (!haserr)
-  {
-    if(so->outsuftab)
-    {
-      outfileinfo.outfpsuftab = opensfxfile(so->str_indexname,".suf",env);
-      if(outfileinfo.outfpsuftab == NULL)
-      {
-        haserr = true;
-      }
-    }
-  }
-  if (!haserr)
-  {
-    if(so->outbwttab)
-    {
-      outfileinfo.outfpbwttab = opensfxfile(so->str_indexname,".bwt",env);
-      outfileinfo.encseq = encseq;
-      if(outfileinfo.outfpbwttab == NULL)
-      {
-        haserr = true;
-      }
-    }
-  }
+  initoutfileinfo(&outfileinfo);
+  INITOUTFILEPTR(outfileinfo.outfpsuftab,so->outsuftab,"suf");
+  INITOUTFILEPTR(outfileinfo.outfplcptab,so->outlcptab,"lcp");
+  INITOUTFILEPTR(outfileinfo.outfpllvtab,so->outlcptab,"llv");
+  INITOUTFILEPTR(outfileinfo.outfpbwttab,so->outbwttab,"bwt");
   if (!haserr)
   {
     printf("# specialcharacters=" FormatSeqpos "\n",
            PRINTSeqposcast(specialcharinfo.specialcharacters));
     printf("# specialranges=" FormatSeqpos "\n",
            PRINTSeqposcast(specialcharinfo.specialranges));
-    if (so->outsuftab || so->outbwttab)
+    if (so->outsuftab || so->outbwttab || so->outlcptab)
     {
       if (suffixerator(suftab2file,
                        &outfileinfo,
@@ -242,7 +333,27 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
     }
   }
   env_fa_xfclose(outfileinfo.outfpsuftab,env);
+  env_fa_xfclose(outfileinfo.outfplcptab,env);
+  env_fa_xfclose(outfileinfo.outfpllvtab,env);
   env_fa_xfclose(outfileinfo.outfpbwttab,env);
+  if (!haserr)
+  {
+    assert(so->prefixlength > 0);
+    if (outprjfile(so->str_indexname,
+                   so->filenametab,
+                   filelengthtab,
+                   totallength,
+                   numofsequences,
+                   &specialcharinfo,
+                   (uint32_t) so->prefixlength,
+                   outfileinfo.numoflargelcpvalues,
+                   outfileinfo.maxbranchdepth,
+                   &outfileinfo.longest,
+                   env) != 0)
+    {
+      haserr = true;
+    }
+  }
   FREESPACE(filelengthtab);
   freeAlphabet(&alpha,env);
   freeEncodedsequence(&encseq,env);
@@ -256,8 +367,8 @@ int parseargsandcallsuffixerator(int argc,const char *argv[],Env *env)
   int retval;
   bool haserr = false;
 
-  printf("# sizeof(Seqpos)=%lu\n",(unsigned long) (sizeof(Seqpos) * CHAR_BIT));
   retval = suffixeratoroptions(&so,argc,argv,env);
+  printf("# sizeof(Seqpos)=%lu\n",(unsigned long) (sizeof(Seqpos) * CHAR_BIT));
   if (retval == 0)
   {
     if (runsuffixerator(&so,env) < 0)

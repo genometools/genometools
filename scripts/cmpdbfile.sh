@@ -18,10 +18,12 @@ function checkerror()
   fi
 }
 
-checkerror "${GTDIR}/bin/gt suffixerator -tis -indexname /tmp/idx-sfx -pl 1 -db $*"
-checkerror "mkvtree.sh -tis -indexname /tmp/idx-mkv -dna -pl 1 -db $*"
-TMPFILE1=`mktemp TMP.XXXXXX` || exit 1
-grep -v 'integersize=' /tmp/idx-mkv.prj > ${TMPFILE1}
-TMPFILE2=`mktemp TMP.XXXXXX` || exit 1
-grep -v 'integersize=' /tmp/idx-sfx.prj > ${TMPFILE2}
-checkerror "cmp -s ${TMPFILE1} ${TMPFILE2}"
+options="$*"
+
+checkerror "${GTDIR}/bin/gt suffixerator -indexname /tmp/idx-sfx ${options}"
+checkerror "mkvtree.sh -indexname /tmp/idx-mkv -dna ${options}"
+#TMPFILE1=`mktemp TMP.XXXXXX` || exit 1
+#grep -v 'integersize=' /tmp/idx-mkv.prj > ${TMPFILE1}
+#TMPFILE2=`mktemp TMP.XXXXXX` || exit 1
+#grep -v 'integersize=' /tmp/idx-sfx.prj > ${TMPFILE2}
+checkerror "cmp -s /tmp/idx-mkv.prj /tmp/idx-sfx.prj"

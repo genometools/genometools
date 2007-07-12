@@ -503,3 +503,17 @@ bool guessifproteinsequencestream2(const char *inputfile)
   return false;
 }
 */
+
+/* from genericstream
+
+void rewindgenericstream(Genericstream *inputstream)
+{
+  if (inputstream->isgzippedstream)
+  {
+    (void) gzrewind(inputstream->stream.gzippedstream);
+  } else
+  {
+    rewind(inputstream->stream.fopenstream);
+  }
+}
+*/

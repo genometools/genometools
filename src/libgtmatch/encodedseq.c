@@ -963,8 +963,8 @@ static void ucharshowallspecialpositions(const Encodedsequence *encseq)
          pagenumber,
          numofspecialcells;
   uint32_t maxspecialtype;
-  PairSeqpos previousucharrange,
-             currentucharrange;
+  Sequencerange previousucharrange,
+                currentucharrange;
   uint64_t pageoffset;
   bool hasrange, hasprevious, hascurrent;
 };
@@ -1022,10 +1022,10 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
     if (esr->firstcell < esr->lastcell ||
         (encseq->sat != Viauint64tables && nextnonemptypage(encseq,esr)))
     {
-      esr->currentucharrange.uint0
+      esr->currentucharrange.leftpos
         = esr->pageoffset + accessspecialpositions(encseq,esr->firstcell);
-      esr->currentucharrange.uint1
-        = esr->currentucharrange.uint0
+      esr->currentucharrange.rightpos
+        = esr->currentucharrange.leftpos
           + encseq->specialrangelength[esr->firstcell];
       esr->hasrange = true;
     } else
@@ -1035,9 +1035,9 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
     }
     if (esr->hasprevious)
     {
-      if (esr->previousucharrange.uint1 == esr->currentucharrange.uint0)
+      if (esr->previousucharrange.rightpos == esr->currentucharrange.leftpos)
       {
-        esr->previousucharrange.uint1 = esr->currentucharrange.uint1;
+        esr->previousucharrange.rightpos = esr->currentucharrange.rightpos;
         esr->hascurrent = false;
       } else
       {
@@ -1074,9 +1074,9 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
       esr->lastcell = encseq->numofspecialstostore;
       if(esr->lastcell > 0)
       {
-        esr->previousucharrange.uint0 = accessspecialpositions(encseq,0);
-        esr->previousucharrange.uint1
-          = esr->previousucharrange.uint0 + encseq->specialrangelength[0];
+        esr->previousucharrange.leftpos = accessspecialpositions(encseq,0);
+        esr->previousucharrange.rightpos
+          = esr->previousucharrange.leftpos + encseq->specialrangelength[0];
         esr->hasrange = true;
       } else
       {
@@ -1142,12 +1142,12 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
 #ifdef DEBUG
   printf("pos=" FormatSeqpos ",previous=(" FormatSeqpos "," FormatSeqpos ")\n",
           PRINTSeqposcast(pos),
-          PRINTSeqposcast(esr->previousucharrange.uint0),
-          PRINTseqposcast(es->previousucharrange.uint1));
+          PRINTSeqposcast(esr->previousucharrange.leftpos),
+          PRINTseqposcast(es->previousucharrange.rightpos));
 #endif
-  if (pos >= esr->previousucharrange.uint0)
+  if (pos >= esr->previousucharrange.leftpos)
   {
-    if (pos < esr->previousucharrange.uint1)
+    if (pos < esr->previousucharrange.rightpos)
     {
       if(EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
       {
@@ -1166,12 +1166,12 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
 static int overallspecialrangesdirectorbitaccess(
                 bool direct,
                 const Encodedsequence *encseq,
-                int(*process)(void *,const PairSeqpos *,Env *),
+                int(*process)(void *,const Sequencerange *,Env *),
                 void *processinfo,
                 Env *env)
 {
   Seqpos pos;
-  PairSeqpos range;
+  Sequencerange range;
   Seqpos specialrangelength = 0;
   bool isspecialchar;
 
@@ -1191,8 +1191,8 @@ static int overallspecialrangesdirectorbitaccess(
     {
       if(specialrangelength > 0)
       {
-        range.uint0 = (uint64_t) (pos - specialrangelength);
-        range.uint1 = (uint64_t) pos;
+        range.leftpos = pos - specialrangelength;
+        range.rightpos = pos;
         if(process(processinfo,&range,env) != 0)
         {
           return -1;
@@ -1203,8 +1203,8 @@ static int overallspecialrangesdirectorbitaccess(
   }
   if(specialrangelength > 0)
   {
-    range.uint0 = (uint64_t) (pos - specialrangelength);
-    range.uint1 = (uint64_t) pos;
+    range.leftpos = pos - specialrangelength;
+    range.rightpos = pos;
     if(process(processinfo,&range,env) != 0)
     {
       return -1;
@@ -1214,7 +1214,7 @@ static int overallspecialrangesdirectorbitaccess(
 }
 
 int overallspecialranges(const Encodedsequence *encseq,
-                         int(*process)(void *,const PairSeqpos *,Env *),
+                         int(*process)(void *,const Sequencerange *,Env *),
                          void *processinfo,
                          Env *env)
 {

@@ -15,10 +15,15 @@ typedef struct
 {
   uint32_t numofdbsequences;
   StrArray *filenametab;
-  PairSeqpos *filelengthtab;
+  Filelengthvalues *filelengthtab;
   uint32_t prefixlength;
   const Seqpos *suftab;
+  const Uchar *lcptab;
+  const Largelcpvalue *llvtab;
+  const Uchar *bwttab;
+  DefinedSeqpos numoflargelcpvalues;
   Encodedsequence *encseq;
+  DefinedSeqpos longest;
   Specialcharinfo specialcharinfo;
   Alphabet *alpha;
 } Suffixarray;

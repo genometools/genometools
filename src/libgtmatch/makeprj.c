@@ -56,7 +56,7 @@ int scanfastasequence(
         Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
         const StrArray *filenametab,
-        PairSeqpos **filelengthtab,
+        Filelengthvalues **filelengthtab,
         const Uchar *symbolmap,
         Env *env)
 {

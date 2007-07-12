@@ -299,11 +299,12 @@ static int insertfullspecialrange(InsertCompletespecials *ics,
 }
 
 static int insertfullspecialpair(void *info,
-                                 const PairSeqpos *pair,/*@unused@*/ Env *env)
+                                 const Sequencerange *pair,
+                                 /*@unused@*/ Env *env)
 {
   InsertCompletespecials *ics = (InsertCompletespecials *) info;
 
-  if(insertfullspecialrange(ics,pair->uint0,pair->uint1) != 0)
+  if(insertfullspecialrange(ics,pair->leftpos,pair->rightpos) != 0)
   {
     return -1;
   }

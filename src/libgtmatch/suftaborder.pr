@@ -5,7 +5,6 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
                                  const Uchar *characters,
                                  const Seqpos *suftab,
                                  uint32_t prefixlength,
-                                 Seqpos totallength,
                                  Seqpos depth,
                                  Seqpos left,
                                  Seqpos right);
@@ -13,15 +12,13 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
 void showentiresuftab(const Encodedsequence *encseq,
                       const Uchar *characters,
                       const Seqpos *suftab,
-                      Seqpos depth,
-                      Seqpos totallength);
+                      Seqpos depth);
 
 void checkentiresuftab(const Encodedsequence *encseq,
                        const Uchar *characters,
                        const Seqpos *suftab,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,
-                       Seqpos totallength,
                        Seqpos depth,
                        Env *env);
 

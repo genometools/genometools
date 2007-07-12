@@ -25,8 +25,7 @@ typedef enum
   Uint32Type,
   Uint64Type,
   BitstringType,
-  SeqposType,
-  PairSeqposType
+  SeqposType
 } Typespec;
 
 typedef struct

@@ -28,10 +28,10 @@
   Uchar characters[UCHAR_MAX+1],     /* array of characters to show */
         mapdomain[UCHAR_MAX+1],      /* list of characters mapped */
         symbolmap[UCHAR_MAX+1];      /* mapping of the symbols */
-  uint32_t domainsize,                /* size of domain of symbolmap */
-           mapsize,                   /* size of image of map, i.e. */
+  uint32_t domainsize,               /* size of domain of symbolmap */
+           mapsize,                  /* size of image of map, i.e. */
                                      /* mapping to [0..mapsize-1] */
-           mappedwildcards;           /* number of mapped wildcards */
+           mappedwildcards;          /* number of mapped wildcards */
 };
 
 /*EE

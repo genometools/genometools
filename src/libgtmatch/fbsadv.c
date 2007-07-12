@@ -12,15 +12,68 @@
 #include "chardef.h"
 #include "stamp.h"
 
-#include "genericstream.pr"
+#define GZIPSUFFIX        ".gz"
+#define GZIPSUFFIXLENGTH  (sizeof (GZIPSUFFIX)-1)
+#define FASTASEPARATOR    '>'
+#define NEWLINESYMBOL     '\n'
 
-#define FASTASEPARATOR '>'
-#define NEWLINESYMBOL  '\n'
+static unsigned char checkgzipsuffix(const char *filename)
+{
+  size_t filenamelength = strlen (filename);
+
+  if (filenamelength < GZIPSUFFIXLENGTH ||
+      strcmp (filename + filenamelength - GZIPSUFFIXLENGTH, GZIPSUFFIX) != 0)
+  {
+    return 0;
+  }
+  return (unsigned char) 1;
+}
+
+static void opengenericstream(Genericstream *inputstream,const char *inputfile)
+{
+  if (checkgzipsuffix(inputfile))
+  {
+    inputstream->stream.gzippedstream = gzopen(inputfile,"rb");
+    if (inputstream->stream.gzippedstream == NULL)
+    {
+      fprintf(stderr,"cannot open file \"%s\"\n",inputfile);
+      exit(EXIT_FAILURE);
+    }
+    inputstream->isgzippedstream = true;
+  } else
+  {
+    inputstream->stream.fopenstream = fopen(inputfile,"rb");
+    if (inputstream->stream.fopenstream == NULL)
+    {
+      fprintf(stderr,"cannot open file \"%s\"\n",inputfile);
+      exit(EXIT_FAILURE);
+    }
+    inputstream->isgzippedstream = false;
+  }
+}
+
+static void closegenericstream(Genericstream *inputstream,const char *inputfile)
+{
+  int retval;
+
+  if (inputstream->isgzippedstream)
+  {
+    retval = gzclose(inputstream->stream.gzippedstream);
+  } else
+  {
+    retval = fclose(inputstream->stream.fopenstream);
+  }
+  if (retval != 0)
+  {
+    fprintf(stderr,"cannot close file \"%s\"\n",inputfile);
+    exit(EXIT_FAILURE);
+  }
+}
 
 void initfastabufferstate(Fastabufferstate *fbs,
                           const StrArray *filenametab,
                           const Uchar *symbolmap,
-                          PairSeqpos **filelengthtab,
+                          Filelengthvalues **filelengthtab,
                           Env *env)
 {
   fbs->filenum = 0;
@@ -35,7 +88,7 @@ void initfastabufferstate(Fastabufferstate *fbs,
   fbs->lastspeciallength = 0;
   if(filelengthtab != NULL)
   {
-    ALLOCASSIGNSPACE(*filelengthtab,NULL,PairSeqpos,strarray_size(filenametab));
+    ALLOCASSIGNSPACE(*filelengthtab,NULL,Filelengthvalues,strarray_size(filenametab));
     fbs->filelengthtab = *filelengthtab;
   } else
   {
@@ -57,8 +110,8 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
     {
       if(fbs->filelengthtab != NULL)
       {
-        fbs->filelengthtab[fbs->filenum].uint0 += currentfileread;
-        fbs->filelengthtab[fbs->filenum].uint1 += currentfileadd;
+        fbs->filelengthtab[fbs->filenum].length += currentfileread;
+        fbs->filelengthtab[fbs->filenum].effectivelength += currentfileadd;
       }
       break;
     }
@@ -66,8 +119,8 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
     {
       if(fbs->filelengthtab != NULL)
       {
-        fbs->filelengthtab[fbs->filenum].uint0 = 0;
-        fbs->filelengthtab[fbs->filenum].uint1 = 0;
+        fbs->filelengthtab[fbs->filenum].length = 0;
+        fbs->filelengthtab[fbs->filenum].effectivelength = 0;
       }
       fbs->nextfile = false;
       fbs->indesc = false;
@@ -94,8 +147,8 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
                                         (unsigned long) fbs->filenum));
         if(fbs->filelengthtab != NULL)
         {
-          fbs->filelengthtab[fbs->filenum].uint0 += currentfileread;
-          fbs->filelengthtab[fbs->filenum].uint1 += currentfileadd;
+          fbs->filelengthtab[fbs->filenum].length += currentfileread;
+          fbs->filelengthtab[fbs->filenum].effectivelength += currentfileadd;
         }
         if ((unsigned long) fbs->filenum == strarray_size(fbs->filenametab) - 1)
         {

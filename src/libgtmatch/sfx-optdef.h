@@ -22,9 +22,10 @@ typedef struct
   StrArray *filenametab;
   bool isdna,
        isprotein,
+       outtistab,
        outsuftab,
-       outbwttab,
-       outtistab;
+       outlcptab,
+       outbwttab;
 } Suffixeratoroptions;
 
 #endif

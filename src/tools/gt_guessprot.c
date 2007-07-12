@@ -12,7 +12,6 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   OptionParser *op;
   OPrval oprval;
   env_error_check(env);
-  /* XXX: add one liner to describe this tool */
   op = option_parser_new("filenames",
                          "guess if sequence in filenames is protein or DNA.",
                           env);

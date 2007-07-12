@@ -223,12 +223,20 @@ typedef void (*Showverbose)(char *);
 
 typedef struct
 {
-  Seqpos uint0,
-         uint1;
-} PairSeqpos;                /* \Typedef{PairSeqpos} */
+  Seqpos position,
+         value;
+} Largelcpvalue;
 
-/*
-  The following type stores an unsigned integer only of defined is True
-*/
+typedef struct
+{
+  Seqpos length,
+         effectivelength;
+} Filelengthvalues;
+
+typedef struct
+{
+  bool defined;
+  Seqpos value;
+} DefinedSeqpos;
 
 #endif
