@@ -1,7 +1,9 @@
 changes in version 1.0.0:
 
 - `gt view` tool added (optional: compile with `make libgtview=yes`)
-- from here on release numbers are synced with GenomeThreader
+- `gt eval` has new options -ltr and -ltrdelta which allow to evaluate LTR
+  retrotransposon predictions instead of gene predictions
+- (from here on release numbers are synced with GenomeThreader)
 
 
 changes in version 0.7.5:

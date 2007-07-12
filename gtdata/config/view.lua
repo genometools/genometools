@@ -19,6 +19,9 @@ config =
     TF_binding_site ={red=0.8,green=0.6,blue=0.6},
     gene            ={red=0.9,green=0.9,blue=1.0},
     intron          ={red=0.2,green=0.2,blue=0.6},
+    repeat_region   ={red=0.8,green=0.3,blue=0.3},
+    long_terminal_repeat ={red=0.9,green=0.9,blue=0.4},
+    LTR_retrotransposon  ={red=0.8,green=0.5,blue=0.5},
   },
   -- Defines how a feature is drawn. 
   -- Possible choices: "line", "box", "caret", "dashes"
