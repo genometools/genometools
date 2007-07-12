@@ -121,9 +121,12 @@ Option*        option_new_ulong_min(const char *option_str,
 Option*        option_new_string(const char *option_str,
                                  const char *description,
                                  Str *value, const char *default_value, Env*);
-Option* option_new_choice(const char *option_str, const char *description,
-                          Str *value, unsigned long default_value,
-                          const char** domain, Env*);
+/* add an option which allows only arguments given in the NULL terminated
+   <domain> (<default_value> denotes an index in <domain>) */
+Option*        option_new_choice(const char *option_str,
+                                 const char *description,
+                                 Str *value, unsigned long default_value,
+                                 const char** domain, Env*);
 Option*        option_new_filename(const char *option_str,
                                    const char *description, Str*, Env*);
 Option*        option_new_filenamearray(const char *option_str,
