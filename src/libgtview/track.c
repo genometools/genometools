@@ -10,7 +10,11 @@
 
 #include <libgtview/track.h>
 
-GenomeNode* last_parent = NULL;
+typedef struct
+{
+  void *ptr;
+  bool collapse_target;
+} CollapseCheckInfo;
 
 struct Track
 {
@@ -35,6 +39,19 @@ Track* track_new(Str *title,
   track->types = hashtable_new(HASH_STRING, NULL, NULL, env);
   assert(track);
   return track;
+}
+
+static int check_children_for_collapse(GenomeNode *gn, void *info, Env *env)
+{
+  CollapseCheckInfo *check_info;
+  check_info = (CollapseCheckInfo *) info;
+  const char *feature_type;
+  GenomeFeatureType gn_type;
+  gn_type = genome_feature_get_type((GenomeFeature*) gn);
+  feature_type = genome_feature_type_get_cstr(gn_type);
+  if (config_cstr_in_list(check_info->ptr, "collapse","to_parent", feature_type, env)) 
+    check_info->collapse_target = true;
+  return 0;
 }
 
 void track_insert_element(Track *track,
@@ -87,7 +104,19 @@ void track_insert_element(Track *track,
       block = block_new(env);
       if (genome_node_direct_children_do_not_overlap_st(parent, gn, env))
       {
-        hashtable_add(track->blocks, parent, block, env);
+        CollapseCheckInfo info;
+        info.collapse_target = false;
+        info.ptr = (void *) cfg;
+        genome_node_traverse_direct_children(gn, &info,
+                                             check_children_for_collapse, env);
+        if (info.collapse_target)
+        {
+          hashtable_add(track->blocks, gn, block, env);
+        }
+        else
+        {
+          hashtable_add(track->blocks, parent, block, env);
+        }
       }
       else
       {
