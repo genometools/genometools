@@ -510,7 +510,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
   {
     return;
   }
-  FREESPACE(encseq->characters);
+  env_ma_free(encseq->characters, env);
   if (encseq->mappedptr != NULL)
   {
     env_fa_xmunmap(encseq->mappedptr,env);
