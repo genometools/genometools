@@ -446,6 +446,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
   suffixarray->llvtab = NULL;
   suffixarray->bwttab = NULL;
   suffixarray->alpha = NULL;
+  suffixarray->encseq = NULL;
   tmpfilename = str_clone(indexname,env);
   str_append_cstr(tmpfilename,".prj",env);
   fp = env_fa_fopen(env,str_get(tmpfilename),"rb");
@@ -535,7 +536,8 @@ void freesuffixarray(Suffixarray *suffixarray,Env *env)
   env_fa_xmunmap((void *) suffixarray->llvtab,env);
   env_fa_xmunmap((void *) suffixarray->bwttab,env);
   freeAlphabet(&suffixarray->alpha,env);
-  freeEncodedsequence(&suffixarray->encseq,env);
+  if(suffixarray->encseq)
+    freeEncodedsequence(&suffixarray->encseq,env);
   strarray_delete(suffixarray->filenametab,env);
   FREESPACE(suffixarray->filelengthtab);
 }
