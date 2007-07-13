@@ -107,6 +107,10 @@ void gtr_register_components(GTR *gtr, Env *env)
   gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL, env);
   hashtable_add(gtr->unit_tests, "alignment class", alignment_unit_test, env);
   hashtable_add(gtr->unit_tests, "array class", array_unit_test, env);
+  hashtable_add(gtr->unit_tests, "bit pack array class",
+                bitPackArray_unit_test, env);
+  hashtable_add(gtr->unit_tests, "bit pack string module",
+                bitPackString_unit_test, env);
   hashtable_add(gtr->unit_tests, "bittab class", bittab_unit_test, env);
   hashtable_add(gtr->unit_tests, "bsearch module", bsearch_unit_test, env);
   hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test,
@@ -121,13 +125,6 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "splitter class", splitter_unit_test, env);
   hashtable_add(gtr->unit_tests, "string class", str_unit_test, env);
   hashtable_add(gtr->unit_tests, "tokenizer class", tokenizer_unit_test, env);
-  /* XXX: add unit tests if they have been fixed */
-#if 0
-  hashtable_add(gtr->unit_tests, "bit pack array class",
-                bitPackArray_unit_test, env);
-  hashtable_add(gtr->unit_tests, "bit pack string module",
-                bitPackString_unit_test, env);
-#endif
 #ifdef LIBGTVIEW
   hashtable_add(gtr->unit_tests, "block class", block_unit_test, env);
   hashtable_add(gtr->unit_tests, "config class", config_unit_test, env);
