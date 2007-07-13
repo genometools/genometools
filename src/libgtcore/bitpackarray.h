@@ -42,7 +42,7 @@ newBitPackArray(unsigned bits, BitOffset numValues, Env *env)
   if (newBPA)
   {
     if (!(newBPA->store = env_ma_malloc(env, bitElemsAllocSize(bits*numValues)
-                                       * sizeof (BitElem))))
+                                        * sizeof (BitElem))))
     {
       env_ma_free(newBPA, env);
       return NULL;
