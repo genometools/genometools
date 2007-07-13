@@ -333,12 +333,10 @@ apidoc: Doxyfile
 
 release: apidoc
 	git tag "v`cat VERSION`"
-	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD \
-	>genometools-`cat VERSION`.tar
-	tar -r -f genometools-`cat VERSION`.tar doc/api
-	gzip -9 genometools-`cat VERSION`.tar
+	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
+	gzip -9 > genometools-`cat VERSION`.tar.gz
 	scp genometools-`cat VERSION`.tar.gz $(SERVER):$(WWWBASEDIR)/htdocs/pub
-	rsync -rv doc/api $(SERVER):$(WWWBASEDIR)/apidoc
+	rsync -rv doc/api/html/ $(SERVER):$(WWWBASEDIR)/htdocs/apidoc
 	git push --tags
 
 installwww:

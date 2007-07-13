@@ -40,14 +40,12 @@ static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
                               "(all LTR_retrotransposon elements are "
                               "considered to have an undetermined strand)",
                               &arguments->evalLTR, false, env);
-  option_is_development_option(ltroption);
   option_parser_add_option(op, ltroption, env);
 
   /* -ltrdelta */
   ltrdeltaoption = option_new_ulong("ltrdelta", "set allowed delta for LTR "
                                     "borders to be considered equal",
                                     &arguments->LTRdelta, 20, env);
-  option_is_development_option(ltrdeltaoption);
   option_parser_add_option(op, ltrdeltaoption, env);
 
   /* option implications */

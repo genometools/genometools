@@ -46,9 +46,12 @@ bsGetUInt16(const BitString str, BitOffset offset, unsigned numBits)
     bitsLeft -= bitElemBits;
   }
   /* get bits from last elem */
-  accum = accum << bitsLeft |
-    (((*p) & ((~(uint_fast32_t)0)<<(bitElemBits - bitsLeft)))
-     >>(bitElemBits - bitsLeft));
+  if (bitsLeft)
+  {
+    accum = accum << bitsLeft |
+      (((*p) & ((~(uint_fast32_t)0)<<(bitElemBits - bitsLeft)))
+       >>(bitElemBits - bitsLeft));
+  }
   return accum;
 }
 
@@ -97,6 +100,7 @@ bsStoreUInt16(BitString str, BitOffset offset,
     *p++ = val >> bitsLeft;
   }
   /* set bits for last elem */
+  if (bitsLeft)
   {
     uint_fast32_t mask = ((~(uint_fast32_t)0)<<(bitElemBits - bitsLeft));
     if (bitElemBits < (sizeof (uint16_t)*CHAR_BIT))

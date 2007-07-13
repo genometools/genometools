@@ -43,9 +43,12 @@ bsGetUInt@LEN@(const BitString str, BitOffset offset, unsigned numBits)
     bitsLeft -= bitElemBits;
   }
   /* get bits from last elem */
-  accum = accum << bitsLeft |
-    (((*p) & ((~(@AccumType@)0)<<(bitElemBits - bitsLeft)))
-     >>(bitElemBits - bitsLeft));
+  if (bitsLeft)
+  {
+    accum = accum << bitsLeft |
+      (((*p) & ((~(@AccumType@)0)<<(bitElemBits - bitsLeft)))
+       >>(bitElemBits - bitsLeft));
+  }
   return accum;
 }
 
@@ -94,6 +97,7 @@ bsStoreUInt@LEN@(BitString str, BitOffset offset,
     *p++ = val >> bitsLeft;
   }
   /* set bits for last elem */
+  if (bitsLeft)
   {
     @AccumType@ mask = ((~(@AccumType@)0)<<(bitElemBits - bitsLeft));
     if (bitElemBits < (sizeof (uint@LEN@_t)*CHAR_BIT))
