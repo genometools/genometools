@@ -122,7 +122,7 @@ Option*        option_new_string(const char *option_str,
                                  const char *description,
                                  Str *value, const char *default_value, Env*);
 Option* option_new_choice(const char *option_str, const char *description,
-                          Str *value, unsigned long default_value,
+                          Str *value, const char*,
                           const char** domain, Env*);
 Option*        option_new_filename(const char *option_str,
                                    const char *description, Str*, Env*);

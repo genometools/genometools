@@ -1159,33 +1159,35 @@ Option* option_new_filenamearray(const char *option_str,
 }
 
 Option* option_new_choice(const char *option_str, const char *description,
-                          Str *value, unsigned long default_value,
+                          Str *value, const char* default_value,
                           const char** domain,
                           Env *env)
 {
   Option *o;
-  const char* default_choice = NULL;
 
   #ifndef NDEBUG
-  unsigned long domain_size = 0;
+  unsigned long in_domain = 1;
 
-  while (domain[domain_size] != NULL) {
-    domain_size++;
+  if (default_value != NULL) {
+    while (domain[(in_domain - 1)] != NULL) {
+      if (domain[(in_domain - 1)] == default_value) {
+        in_domain = 0;
+        break;
+      }
+      in_domain++;    
+    }
   }
-  domain_size++;
+  else {
+    in_domain = 0;
+  }
   #endif
 
-  assert (default_value <= domain_size);
-
-  if (default_value > 0) {
-    default_value--;
-    default_choice = domain[default_value];
-  }
+  assert (!in_domain);
 
   o = option_new_string(option_str,
                         description,
                         value,
-                        default_choice,
+                        default_value,
                         env);
 
   o->option_type = OPTION_CHOICE;
