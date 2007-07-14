@@ -32,7 +32,7 @@ typedef enum {
   OPTION_STRING,
   OPTION_STRINGARRAY,
   OPTION_VERSION,
-} Option_type;
+} OptionType;
 
 typedef struct {
   OptionParserHookFunc hook;
@@ -52,7 +52,7 @@ struct OptionParser {
 };
 
 struct Option {
-  Option_type option_type;
+  OptionType option_type;
   Str *option_str,
       *description;
   void *value;
@@ -256,7 +256,7 @@ static void show_description(unsigned long initial_space, const char *desc,
   xputchar('\n');
 }
 
-static int show_help(OptionParser *op, Option_type optiontype, Env *env)
+static int show_help(OptionParser *op, OptionType optiontype, Env *env)
 {
   unsigned long i, max_option_length = 0;
   Option *option;
@@ -300,6 +300,14 @@ static int show_help(OptionParser *op, Option_type optiontype, Env *env)
         printf("%*s  default: %s\n", (int) max_option_length, "",
                option->default_value.b ? "yes" : "no");
       }
+      else if (option->option_type == OPTION_CHOICE) {
+        printf("%*s  default: ", (int) max_option_length, "");
+        if (!option->default_value.s || !strlen(option->default_value.s))
+          xputs("undefined");
+        else
+          xputs(option->default_value.s);
+      }
+
       else if (option->option_type == OPTION_DOUBLE) {
         printf("%*s  default: ", (int) max_option_length, "");
         if (option->default_value.d == UNDEF_DOUBLE)
@@ -341,15 +349,7 @@ static int show_help(OptionParser *op, Option_type optiontype, Env *env)
           xputs("undefined");
         else
           xputs(option->default_value.s);
-      }      
-      else if (option->option_type == OPTION_CHOICE) {
-        printf("%*s  default: ", (int) max_option_length, "");
-        if (!option->default_value.s || !strlen(option->default_value.s))
-          xputs("undefined");
-        else
-          xputs(option->default_value.s);
       }
-
     }
   }
   if (op->comment_func)
@@ -599,6 +599,44 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
               *(bool*) option->value = true;
               option_parsed = true;
               break;
+            case OPTION_CHOICE:
+              if (optional_arg(option, argnum, argc, argv)) {
+                option_parsed = true;
+                break;
+              }
+              assert (option->domain[0]);
+              had_err = check_missing_argument(argnum, argc, option->option_str,
+                        env);
+              if (!had_err) {
+                argnum++;
+                if (strcmp(argv[argnum], option->domain[0])) {
+                  error_str = str_new_cstr(option->domain[0], env);
+                  i = 1;
+                  while (option->domain[i] != NULL) {
+                    if (!strcmp(argv[argnum], option->domain[i])) {
+                      str_set(option->value, option->domain[i], env);
+                      break;
+                    }
+                    str_append_cstr(error_str, ", ", env);
+                    str_append_cstr(error_str, option->domain[i], env);
+                    i++;
+                  }
+                  if (option->domain[i] == NULL) {
+                    env_error_set(env, "argument to option \"-%s\" must be one "
+                                  "of: %s", str_get(option->option_str),
+                                  str_get(error_str));
+                    had_err = -1;
+                  }
+                  str_delete(error_str, env);
+                }
+                else {
+                  str_set(option->value, option->domain[0], env);
+                }
+              }
+              if (!had_err) {
+                option_parsed = true;
+              }
+              break;
             case OPTION_DOUBLE:
               if (optional_arg(option, argnum, argc, argv)) {
                 option_parsed = true;
@@ -806,44 +844,6 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 }
                 else
                   break;
-              }
-              break;
-            case OPTION_CHOICE:
-              if (optional_arg(option, argnum, argc, argv)) {
-                option_parsed = true;
-                break;
-              }
-              assert (option->domain[0]);
-              had_err = check_missing_argument(argnum, argc, option->option_str,
-                        env);
-              if (!had_err) {
-                argnum++;
-                if (strcmp(argv[argnum], option->domain[0])) {
-                  error_str = str_new_cstr(option->domain[0], env);
-                  i = 1;
-                  while (option->domain[i] != NULL) {
-                    if (!strcmp(argv[argnum], option->domain[i])) {
-                      str_set(option->value, option->domain[i], env);
-                      break;
-                    }
-                    str_append_cstr(error_str, ", ", env);
-                    str_append_cstr(error_str, option->domain[i], env);
-                    i++;
-                  }
-                  if (option->domain[i] == NULL) {
-                    env_error_set(env, "argument to option \"-%s\" must be one "
-                                  "of: %s", str_get(option->option_str),
-                                  str_get(error_str));
-                    had_err = -1;           
-                  }
-                  str_delete(error_str, env);
-                }
-                else {
-                  str_set(option->value, option->domain[0], env);
-                }
-              }
-              if (!had_err) {
-                option_parsed = true;
               }
               break;
             case OPTION_VERSION:

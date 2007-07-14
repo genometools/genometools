@@ -49,8 +49,10 @@ static int check_children_for_collapse(GenomeNode *gn, void *info, Env *env)
   GenomeFeatureType gn_type;
   gn_type = genome_feature_get_type((GenomeFeature*) gn);
   feature_type = genome_feature_type_get_cstr(gn_type);
-  if (config_cstr_in_list(check_info->ptr, "collapse","to_parent", feature_type, env)) 
+  if (config_cstr_in_list(check_info->ptr, "collapse","to_parent", feature_type,
+                          env)) {
     check_info->collapse_target = true;
+  }
   return 0;
 }
 
