@@ -1,3 +1,9 @@
+changes in version 1.0.1:
+
+- new feature types added
+- bug fixes
+
+
 changes in version 1.0.0:
 
 - `gt view` tool added (optional: compile with `make libgtview=yes`)
