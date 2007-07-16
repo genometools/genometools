@@ -604,7 +604,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 option_parsed = true;
                 break;
               }
-              assert (option->domain[0]);
+              assert(option->domain[0]);
               had_err = check_missing_argument(argnum, argc, option->option_str,
                         env);
               if (!had_err) {
@@ -1160,38 +1160,27 @@ Option* option_new_filenamearray(const char *option_str,
 
 Option* option_new_choice(const char *option_str, const char *description,
                           Str *value, const char* default_value,
-                          const char** domain,
-                          Env *env)
+                          const char** domain, Env *env)
 {
   Option *o;
-
-  #ifndef NDEBUG
+#ifndef NDEBUG
   unsigned long in_domain = 1;
-
-  if (default_value != NULL) {
+  if (default_value) {
     while (domain[(in_domain - 1)] != NULL) {
       if (domain[(in_domain - 1)] == default_value) {
         in_domain = 0;
         break;
       }
-      in_domain++;    
+      in_domain++;
     }
   }
-  else {
+  else
     in_domain = 0;
-  }
-  #endif
+  assert(!in_domain);
+#endif
 
-  assert (!in_domain);
-
-  o = option_new_string(option_str,
-                        description,
-                        value,
-                        default_value,
-                        env);
-
+  o = option_new_string(option_str, description, value, default_value, env);
   o->option_type = OPTION_CHOICE;
-
   o->domain = domain;
 
   return o;
