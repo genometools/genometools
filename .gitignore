@@ -13,3 +13,6 @@ tags
 testsuite/stest_testsuite
 testsuite/stest_stest_tests
 *~
+gthlicense.aux
+gthlicense.log
+gthlicense.pdf
