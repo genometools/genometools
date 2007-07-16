@@ -16,14 +16,17 @@
 */
 
 static const char *genome_feature_type_strings[] = { "CDS",
+                                                     "EST_match",
                                                      "LTR_retrotransposon",
                                                      "TF_binding_site",
+                                                     "cDNA_match",
                                                      "exon",
                                                      "gene",
                                                      "intron",
                                                      "inverted_repeat",
                                                      "long_terminal_repeat",
                                                      "mRNA",
+                                                     "protein_match",
                                                      "repeat_region",
                                                      "target_site_duplication"
                                                    };

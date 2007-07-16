@@ -14,14 +14,17 @@
 
 typedef enum {
   gft_CDS,
+  gft_EST_match,
   gft_LTR_retrotransposon,
   gft_TF_binding_site,
+  gft_cDNA_match,
   gft_exon,
   gft_gene,
   gft_intron,
   gft_inverted_repeat,
   gft_long_terminal_repeat,
   gft_mRNA,
+  gft_protein_match,
   gft_repeat_region,
   gft_target_site_duplication,
 } GenomeFeatureType;
