@@ -314,7 +314,7 @@ release: apidoc
 	git push --tags
 
 installwww:
-	rsync -rv www/ $(SERVER):$(WWWBASEDIR)
+	rsync -rv www/genometools.org/ $(SERVER):$(WWWBASEDIR)
 
 gt: dirs bin/gt
 
