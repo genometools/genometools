@@ -43,7 +43,9 @@ const char* genfilemode_suffix(GenFileMode mode)
       return ".gz";
     case GFM_BZIP2:
       return ".bz2";
-    default: assert(0);
+    default:
+      assert(0);
+      return "";
   }
 }
 
