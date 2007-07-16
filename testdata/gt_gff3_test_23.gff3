@@ -1,0 +1,7 @@
+##gff-version   3
+##sequence-region   gDNA 1 1000
+gDNA	.	LTR_retrotransposon	100	200	.	-	.	.
+gDNA	.	LTR_retrotransposon	300	400	.	-	.	.
+gDNA	.	LTR_retrotransposon	500	600	.	-	.	.
+gDNA	.	LTR_retrotransposon	700	800	.	-	.	.
+gDNA	.	LTR_retrotransposon	900	1000	.	-	.	.
