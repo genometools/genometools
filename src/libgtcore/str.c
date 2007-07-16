@@ -4,6 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#include <math.h>
 #include <assert.h>
 #include <libgtcore/cstr.h>
 #include <libgtcore/dynalloc.h>
@@ -129,6 +130,34 @@ void str_append_char(Str *dest, char c, Env *env)
                         (dest->length + 2) * sizeof (char), env);
   dest->cstr[dest->length++] = c;
   dest->cstr[dest->length] = '\0';
+}
+
+void str_append_double(Str *dest, double d, int precision, Env *env)
+{
+   unsigned long q;
+  assert(dest);
+  assert(precision <= 8);
+
+  /* handle negative numbers */
+  if (d < 0) {
+     str_append_char (dest, '-', env);
+     d *= (-1);
+  }
+
+  /* handle numbers before decimal point */
+  q = (unsigned long) floor(d);
+  str_append_ulong (dest, q, env);
+
+  /* decimal point */
+  if (precision > 0) {
+     str_append_char (dest, '.', env);
+  }
+
+  /* decimals */
+  d -= q;
+  precision = (int) floor(pow(10, precision));
+  q = (unsigned long) floor(d * precision);
+  str_append_ulong (dest, q, env);
 }
 
 char* str_get(const Str *s)
