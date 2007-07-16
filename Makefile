@@ -82,7 +82,7 @@ LIBBZ2_OBJ := obj/blocksort.o obj/huffman.o obj/crctable.o obj/randtable.o \
               obj/compress.o obj/decompress.o obj/bzlib.o
 
 SERVER=gordon@genometools.org
-WWWBASEDIR=/var/www/servers/genometools.org
+WWWBASEDIR=/var/www/servers
 
 # process arguments
 ifneq ($(opt),no)
@@ -309,13 +309,13 @@ release: apidoc
 	git tag "v`cat VERSION`"
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
 	gzip -9 > genometools-`cat VERSION`.tar.gz
-	scp genometools-`cat VERSION`.tar.gz $(SERVER):$(WWWBASEDIR)/htdocs/pub
-	rsync -rv doc/api/html/ $(SERVER):$(WWWBASEDIR)/htdocs/apidoc
+	scp genometools-`cat VERSION`.tar.gz $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/pub
+	rsync -rv doc/api/html/ $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/apidoc
 	git push --tags
 
 installwww:
 # install genometools.org website
-	rsync -rv www/genometools.org/ $(SERVER):$(WWWBASEDIR)
+	rsync -rv www/genometools.org/ $(SERVER):$(WWWBASEDIR)/genometools.org
 
 gt: dirs bin/gt
 
