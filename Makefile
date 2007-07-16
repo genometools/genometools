@@ -81,7 +81,7 @@ LIBRNV_OBJ := obj/rn.o obj/rnc.o obj/rnd.o obj/rnl.o obj/rnv.o obj/rnx.o obj/drv
 LIBBZ2_OBJ := obj/blocksort.o obj/huffman.o obj/crctable.o obj/randtable.o \
               obj/compress.o obj/decompress.o obj/bzlib.o
 
-SERVER=gordon@genomethreader.org
+SERVER=gordon@genometools.org
 WWWBASEDIR=/var/www/servers/genometools.org
 
 # process arguments
@@ -314,6 +314,7 @@ release: apidoc
 	git push --tags
 
 installwww:
+# install genometools.org website
 	rsync -rv www/genometools.org/ $(SERVER):$(WWWBASEDIR)
 
 gt: dirs bin/gt
