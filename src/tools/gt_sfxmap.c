@@ -37,7 +37,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   assert(parsed_args == 1);
 
   indexname = str_new_cstr(argv[parsed_args],env);
-  if (mapsuffixarray(&suffixarray,true,true,true,true,indexname,env) != 0)
+  if (mapsuffixarray(&suffixarray,true,true,true,true,true,indexname,env) != 0)
   {
     haserr = true;
   }

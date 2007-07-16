@@ -23,6 +23,21 @@
 #define SETREADINTKEYS(VALNAME,VAL,FORCEREAD)\
         setreadintkeys(&rik,VALNAME,VAL,sizeof(*(VAL)),FORCEREAD,env)
 
+#define INITBufferedfile(INDEXNAME,STREAM,SUFFIX)\
+        tmpfilename = str_clone(INDEXNAME,env);\
+        str_append_cstr(tmpfilename,SUFFIX,env);\
+        (STREAM)->fp = env_fa_fopen(env,str_get(tmpfilename),"rb");\
+        if((STREAM)->fp == NULL)\
+        {\
+          env_error_set(env,"cannot open file \"%s\": %s",\
+                             str_get(tmpfilename),\
+                             strerror(errno));\
+          return -1;\
+        }\
+        (STREAM)->nextread = 0;\
+        (STREAM)->nextfree = 0;\
+        str_delete(tmpfilename,env)
+
 #ifdef S_SPLINT_S
 #define FormatScanint64_t "%lu"
 #else
@@ -427,7 +442,18 @@ static void *genericmaptable(const Str *indexname,const char *suffix,
   return haserr ? NULL : ptr;
 }
 
+int initUcharBufferedfile(UcharBufferedfile *stream,
+                          const Str *indexname,
+                          const char *suffix,Env *env)
+{
+  Str *tmpfilename;
+
+  INITBufferedfile(indexname,stream,suffix);
+  return 0;
+}
+
 int mapsuffixarray(Suffixarray *suffixarray,
+                   bool mappedinput,
                    bool withencseq,
                    bool withsuftab,
                    bool withlcptab,
@@ -446,6 +472,10 @@ int mapsuffixarray(Suffixarray *suffixarray,
   suffixarray->llvtab = NULL;
   suffixarray->bwttab = NULL;
   suffixarray->alpha = NULL;
+  suffixarray->bwttabstream.fp = NULL;
+  suffixarray->suftabstream.fp = NULL;
+  suffixarray->llvtabstream.fp = NULL;
+  suffixarray->lcptabstream.fp = NULL;
   tmpfilename = str_clone(indexname,env);
   str_append_cstr(tmpfilename,".prj",env);
   fp = env_fa_fopen(env,str_get(tmpfilename),"rb");

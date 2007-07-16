@@ -1,7 +1,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+int initUcharBufferedfile(UcharBufferedfile *stream,
+                          const Str *indexname,
+                          const char *suffix,Env *env);
+
 int mapsuffixarray(Suffixarray *suffixarray,
+                   bool mappedinput,
                    bool withencseq,
                    bool withsuftab,
                    bool withlcptab,
