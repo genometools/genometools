@@ -21,6 +21,7 @@ static const char *genome_feature_type_strings[] = { "CDS",
                                                      "TF_binding_site",
                                                      "cDNA_match",
                                                      "exon",
+                                                     "five_prime_UTR",
                                                      "gene",
                                                      "intron",
                                                      "inverted_repeat",
@@ -28,7 +29,9 @@ static const char *genome_feature_type_strings[] = { "CDS",
                                                      "mRNA",
                                                      "protein_match",
                                                      "repeat_region",
-                                                     "target_site_duplication"
+                                                     "target_site_duplication",
+                                                     "three_prime_UTR",
+                                                     "transcript"
                                                    };
 
 int genome_feature_type_get(GenomeFeatureType *type, char *gft_string)

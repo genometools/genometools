@@ -19,6 +19,7 @@ typedef enum {
   gft_TF_binding_site,
   gft_cDNA_match,
   gft_exon,
+  gft_five_prime_UTR,
   gft_gene,
   gft_intron,
   gft_inverted_repeat,
@@ -27,6 +28,8 @@ typedef enum {
   gft_protein_match,
   gft_repeat_region,
   gft_target_site_duplication,
+  gft_three_prime_UTR,
+  gft_transcript,
 } GenomeFeatureType;
 
 /*
