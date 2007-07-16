@@ -20,6 +20,7 @@ struct GFF3Parser {
   Hashtable *id_to_genome_node_mapping,
             *seqid_to_str_mapping,
             *source_to_str_mapping;
+  bool incomplete_node; /* at least on node is potentially incomplete */
   long offset;
 };
 
@@ -34,6 +35,7 @@ GFF3Parser* gff3parser_new(Env *env)
   gff3_parser->source_to_str_mapping = hashtable_new(HASH_STRING, NULL,
                                                      (FreeFunc) str_delete,
                                                      env);
+  gff3_parser->incomplete_node = false;
   gff3_parser->offset = UNDEF_LONG;
   return gff3_parser;
 }
@@ -44,11 +46,10 @@ void gff3parser_set_offset(GFF3Parser *gff3_parser, long offset)
   gff3_parser->offset = offset;
 }
 
-static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
-                                   Queue *genome_nodes, char *line,
-                                   size_t line_length, const char *filename,
-                                   unsigned long line_number,
-                                   bool *break_loop, Env *env)
+static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
+                                   char *line, size_t line_length,
+                                   const char *filename,
+                                   unsigned long line_number, Env *env)
 {
   GenomeNode *gn = NULL, *genome_feature = NULL, *parent_gf;
   GenomeFeatureType gft;
@@ -60,7 +61,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
   Range range;
   char *id = NULL, *seqid = NULL, *source = NULL, *type, *start, *end, *score,
        *strand, *phase, *attributes, *token, *tmp_token, **tokens;
-  bool out_node_complete = true, is_child = false;
+  bool is_child = false;
   unsigned long i;
   int had_err = 0;
 
@@ -234,7 +235,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
       env_ma_free(id, env);
     }
     else {
-      out_node_complete = false;
+      gff3_parser->incomplete_node = true;
       hashtable_add(gff3_parser->id_to_genome_node_mapping, id, genome_feature,
                     env);
     }
@@ -254,8 +255,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
         had_err = -1;
       }
       else {
+        assert(gff3_parser->incomplete_node);
         genome_node_is_part_of_genome_node(parent_gf, genome_feature, env);
-        out_node_complete = false;
         is_child = true;
       }
     }
@@ -268,8 +269,6 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
 
   if (!had_err && gn)
     queue_add(genome_nodes, gn, env);
-  if (out_node_complete)
-    *break_loop = true;
 
   /* free */
   splitter_delete(splitter, env);
@@ -282,9 +281,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser,
 
 static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                                 char *line, size_t line_length,
-                                const char *filename,
-                                unsigned long line_number,
-                                bool *break_loop, Env *env)
+                                const char *filename, unsigned long line_number,
+                                Env *env)
 {
   char *tmpline, *tmplineend, *seqid = NULL;
   GenomeNode *gn;
@@ -299,7 +297,6 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     /* storing comment */
     gn = comment_new(line+1, filename, line_number, env);
     queue_add(genome_nodes, gn, env);
-    *break_loop = true;
   }
   else if ((strncmp(line, GFF_SEQUENCE_REGION,
                     strlen(GFF_SEQUENCE_REGION)) == 0)) {
@@ -385,14 +382,10 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
       gn = sequence_region_new(seqid_str, range, filename, line_number, env);
       queue_add(genome_nodes, gn, env);
     }
-    *break_loop = true;
   }
   else if (strcmp(line, GFF_TERMINATOR) == 0) { /* terminator */
-    if (queue_size(genome_nodes)) {
-      /* we can only stop the parsing if another feature has already been
-         created, otherwise this would lead to a premature stop */
-      *break_loop = true;
-    }
+    /* now all nodes are complete */
+    gff3_parser->incomplete_node = false;
   }
   else {
     warning("skipping unknown meta line %lu in file \"%s\": %s", line_number,
@@ -407,7 +400,6 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
                                   unsigned long *line_number,
                                   FILE *fpin, Env *env)
 {
-  bool break_loop = false;
   size_t line_length;
   Str *line_buffer;
   char *line;
@@ -452,17 +444,20 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
       warning("skipping blank line %lu in file \"%s\"", *line_number, filename);
     else if (line[0] == '#') {
       had_err = parse_meta_gff3_line(gff3_parser, genome_nodes, line,
-                                     line_length, filename, *line_number,
-                                     &break_loop, env);
-      if (had_err || break_loop)
+                                     line_length, filename, *line_number, env);
+      if (had_err ||
+          (!gff3_parser->incomplete_node && queue_size(genome_nodes))) {
         break;
+      }
     }
     else {
       had_err = parse_regular_gff3_line(gff3_parser, genome_nodes, line,
                                         line_length, filename, *line_number,
-                                        &break_loop, env);
-      if (had_err || break_loop)
+                                        env);
+      if (had_err ||
+          (!gff3_parser->incomplete_node && queue_size(genome_nodes))) {
         break;
+      }
     }
     str_reset(line_buffer);
   }

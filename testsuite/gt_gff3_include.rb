@@ -67,6 +67,20 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gt_gff3_prob_7.sorted"
 end
 
+Name "gt gff3 prob 8"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_prob_8.in"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_prob_8.out"
+end
+
+Name "gt gff3 prob 9"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_prob_9.in"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_prob_9.out"
+end
+
 Name "gt gff3 test 1.1"
 Keywords "gt_gff3"
 Test do
