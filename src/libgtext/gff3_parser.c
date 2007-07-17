@@ -308,8 +308,8 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     while (tmpline[0] == ' ')
       tmpline++;
     if (tmpline > tmplineend) {
-      env_error_set(env, "missing sequence region on line %lu in file \"%s\"",
-                line_number, filename);
+      env_error_set(env, "missing sequence region name on line %lu in file "
+                         "\"%s\"", line_number, filename);
       had_err = -1;
     }
     if (!had_err) {
@@ -367,8 +367,8 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
       seqid_str = hashtable_get(gff3_parser->seqid_to_str_mapping, seqid);
       if (seqid_str) {
         env_error_set(env, "the sequence region \"%s\" on line %lu in file "
-                  "\"%s\" is already defined", str_get(seqid_str), line_number,
-                  filename);
+                      "\"%s\" has already been defined", str_get(seqid_str),
+                      line_number, filename);
         had_err = -1;
       }
       else {
