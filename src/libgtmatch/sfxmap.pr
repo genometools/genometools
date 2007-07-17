@@ -6,13 +6,20 @@ int initUcharBufferedfile(UcharBufferedfile *stream,
                           const char *suffix,Env *env);
 
 int mapsuffixarray(Suffixarray *suffixarray,
-                   bool mappedinput,
                    bool withencseq,
                    bool withsuftab,
                    bool withlcptab,
                    bool withbwttab,
                    const Str *indexname,
                    Env *env);
+
+int streamsuffixarray(Suffixarray *suffixarray,
+                      bool withencseq,
+                      bool withsuftab,
+                      bool withlcptab,
+                      bool withbwttab,
+                      const Str *indexname,
+                      Env *env);
 
 void freesuffixarray(Suffixarray *suffixarray,Env *env);
 

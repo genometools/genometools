@@ -18,7 +18,7 @@
         typedef struct\
         {\
           uint32_t nextfree,\
-                  nextread;\
+                   nextread;\
           TYPE bufspace[FILEBUFFERSIZE];\
           FILE *fp;\
         } TYPE ## Bufferedfile
@@ -28,30 +28,6 @@ DECLAREBufferedfiletype(Seqpos);
 DECLAREBufferedfiletype(Uchar);
 
 DECLAREBufferedfiletype(Largelcpvalue);
-
-typedef struct
-{
-  uint32_t numofdbsequences;
-  StrArray *filenametab;
-  Filelengthvalues *filelengthtab;
-  uint32_t prefixlength;
-  DefinedSeqpos numoflargelcpvalues;
-  Encodedsequence *encseq;
-  DefinedSeqpos longest;
-  Specialcharinfo specialcharinfo;
-  Alphabet *alpha;
-  bool mappedinput;
-  /* either with mapped input */
-  const Seqpos *suftab;
-  const Uchar *lcptab;
-  const Largelcpvalue *llvtab;
-  const Uchar *bwttab;
-  /* or with streams */
-  SeqposBufferedfile suftabstream;
-  UcharBufferedfile bwttabstream,
-                    lcptabstream;
-  Largelcpvalue llvtabstream;
-} Suffixarray;
 
 #define DECLAREREADFUNCTION(TYPE)\
         static int readnext ## TYPE ## fromstream(TYPE *val,\
@@ -78,4 +54,29 @@ typedef struct
           return 1;\
         }
 
+typedef struct
+{
+  uint32_t numofdbsequences;
+  StrArray *filenametab;
+  Filelengthvalues *filelengthtab;
+  uint32_t prefixlength;
+  DefinedSeqpos numoflargelcpvalues;
+  Encodedsequence *encseq;
+  DefinedSeqpos longest;
+  Specialcharinfo specialcharinfo;
+  Alphabet *alpha;
+  bool mappedinput;
+  /* either with mapped input */
+  const Seqpos *suftab;
+  const Uchar *lcptab;
+  const Largelcpvalue *llvtab;
+  const Uchar *bwttab;
+  /* or with streams */
+  SeqposBufferedfile suftabstream;
+  UcharBufferedfile bwttabstream,
+                    lcptabstream;
+  LargelcpvalueBufferedfile llvtabstream;
+} Suffixarray;
+
 #endif
+
