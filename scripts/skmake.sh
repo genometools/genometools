@@ -46,7 +46,7 @@ else
   then
     make CC="ccache gcc" CFLAGS="-O3 -m64" LDFLAGS="-m64" $*
   else
-    make CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum}" LDFLAGS="-m32" $*
+    make CC="ccache gcc" CFLAGS="-O3 -m32 -DWITHREL ${bignum}" LDFLAGS="-m32" $*
   fi
 fi
 
