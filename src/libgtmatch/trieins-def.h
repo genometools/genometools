@@ -15,7 +15,7 @@ typedef struct
 {
   Seqpos idx,
          startpos;
-#ifdef WITHREL
+#ifdef WITHTRIEIDENT
   unsigned int ident;
 #endif
 } Suffixinfo;

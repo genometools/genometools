@@ -15,7 +15,7 @@
 #include "trieins-def.h"
 
 #define ISLEAF(NODE) ((NODE)->firstchild == NULL)
-#ifdef WITHREL
+#ifdef WITHTRIEIDENT
 #define SHOWNODERELATIONS(NODE)\
         shownoderelations(__LINE__,#NODE,NODE)
 #else
@@ -93,7 +93,7 @@ static int comparecharacters(Uchar cc1,Seqpos idx1,Uchar cc2,Seqpos idx2)
   }
 }
 
-#ifdef WITHREL
+#ifdef WITHTRIEIDENT
 static void showtrie2(const Trierep *trierep,
                       const Uchar *characters,
                       uint32_t level,
@@ -299,7 +299,7 @@ void showallnoderelations(const Trienode *node)
 
 static Trienode *newTrienode(Trierep *trierep)
 {
-#ifdef WITHREL
+#ifdef WITHTRIEIDENT
   printf("# available trie nodes: %u; ",
           trierep->allocatedTrienode - trierep->nextfreeTrienode);
   printf("unused trie nodes: %u\n",trierep->nextunused);
@@ -321,7 +321,7 @@ static Trienode *makenewleaf(Trierep *trierep,Suffixinfo *suffixinfo)
 {
   Trienode *newleaf;
 
-#ifdef WITHREL
+#ifdef WITHTRIEIDENT
   printf("makenewleaf(%d)\n",suffixinfo->ident);
 #endif
   newleaf = newTrienode(trierep);
@@ -336,7 +336,7 @@ static Trienode *makeroot(Trierep *trierep,Suffixinfo *suffixinfo)
 {
   Trienode *root, *newleaf;
 
-#ifdef WITHREL
+#ifdef WITHTRIEIDENT
   printf("makeroot(%d)\n",suffixinfo->ident);
 #endif
   root = newTrienode(trierep);
@@ -369,7 +369,7 @@ static Trienode *makenewbranch(Trierep *trierep,
   Uchar cc1, cc2;
   Encodedsequence *encseq = trierep->encseqtable[suffixinfo->idx];
 
-#ifdef WITHREL
+#ifdef WITHTRIEIDENT
   printf("makenewbranch(ident=%d)\n",suffixinfo->ident);
 #endif
   newbranch = newTrienode(trierep);
@@ -577,7 +577,7 @@ void deletesmallestpath(Trienode *smallest,Trierep *trierep)
       son->rightsibling = NULL;
       SETFIRSTCHILDNULL(son);
     }
-#ifdef WITHREL
+#ifdef WITHTRIEIDENT
     printf("delete %s %d\n",
              ISLEAF(son) ? "leaf" : "branch",
              son->suffixinfo.ident);
