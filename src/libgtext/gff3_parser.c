@@ -395,10 +395,9 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
 }
 
 int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
-                                  Queue *genome_nodes,
-                                  const char *filename,
-                                  unsigned long *line_number,
-                                  FILE *fpin, Env *env)
+                                  Queue *genome_nodes, const char *filename,
+                                  unsigned long *line_number, FILE *fpin,
+                                  Env *env)
 {
   size_t line_length;
   Str *line_buffer;
