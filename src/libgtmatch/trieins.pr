@@ -4,7 +4,8 @@ extern "C" {
 void showtrie(const Trierep *trierep,
               const Uchar *characters);
 
-void checktrie(Trierep *trierep,uint32_t numberofleaves,Env *env);
+void checktrie(Trierep *trierep,uint32_t numberofleaves,
+               uint32_t maxleafnum,Env *env);
 
 void showallnoderelations(const Trienode *node);
 

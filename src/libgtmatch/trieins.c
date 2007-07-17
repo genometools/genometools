@@ -16,8 +16,12 @@
 
 #define ISLEAF(NODE) ((NODE)->firstchild == NULL)
 #ifdef WITHTRIEIDENT
+#ifdef WITHTRIESHOW
 #define SHOWNODERELATIONS(NODE)\
         shownoderelations(__LINE__,#NODE,NODE)
+#else
+#define SHOWNODERELATIONS(NODE) /* Nothing */
+#endif
 #else
 #define SHOWNODERELATIONS(NODE) /* Nothing */
 #endif
@@ -229,18 +233,19 @@ static void checktrie2(Trierep *trierep,
   }
 }
 
-void checktrie(Trierep *trierep,uint32_t numberofleaves,Env *env)
+void checktrie(Trierep *trierep,uint32_t numberofleaves,
+               uint32_t maxleafnum,Env *env)
 {
   if(trierep->root != NULL)
   {
     Bitstring *leafused; 
     uint32_t numberofbitsset = 0;
 
-    INITBITTAB(leafused,numberofleaves);
+    INITBITTAB(leafused,maxleafnum+1);
     checktrie2(trierep,trierep->root,NULL,leafused,&numberofbitsset);
     if(numberofbitsset != numberofleaves)
     {
-      fprintf(stderr,"numberofbitsset = %d != %d = numberofleaves\n",
+      fprintf(stderr,"numberofbitsset = %u != %u = numberofleaves\n",
                       (unsigned int) numberofbitsset,
                       (unsigned int) numberofleaves);
       exit(EXIT_FAILURE);
@@ -249,6 +254,7 @@ void checktrie(Trierep *trierep,uint32_t numberofleaves,Env *env)
   }
 }
 
+#ifdef WITHTRIESHOW
 static void shownode(const Trienode *node)
 {
   if(node == NULL)
@@ -296,13 +302,16 @@ void showallnoderelations(const Trienode *node)
   }
 }
 #endif
+#endif
 
 static Trienode *newTrienode(Trierep *trierep)
 {
 #ifdef WITHTRIEIDENT
+#ifdef WITHTRIESHOW
   printf("# available trie nodes: %u; ",
           trierep->allocatedTrienode - trierep->nextfreeTrienode);
   printf("unused trie nodes: %u\n",trierep->nextunused);
+#endif
 #endif
   if(trierep->nextfreeTrienode >= trierep->allocatedTrienode)
   {
@@ -322,7 +331,9 @@ static Trienode *makenewleaf(Trierep *trierep,Suffixinfo *suffixinfo)
   Trienode *newleaf;
 
 #ifdef WITHTRIEIDENT
+#ifdef WITHTRIESHOW
   printf("makenewleaf(%d)\n",suffixinfo->ident);
+#endif
 #endif
   newleaf = newTrienode(trierep);
   newleaf->suffixinfo = *suffixinfo;
@@ -337,7 +348,9 @@ static Trienode *makeroot(Trierep *trierep,Suffixinfo *suffixinfo)
   Trienode *root, *newleaf;
 
 #ifdef WITHTRIEIDENT
+#ifdef WITHTRIESHOW
   printf("makeroot(%d)\n",suffixinfo->ident);
+#endif
 #endif
   root = newTrienode(trierep);
   root->parent = NULL;
@@ -370,7 +383,9 @@ static Trienode *makenewbranch(Trierep *trierep,
   Encodedsequence *encseq = trierep->encseqtable[suffixinfo->idx];
 
 #ifdef WITHTRIEIDENT
+#ifdef WITHTRIESHOW
   printf("makenewbranch(ident=%d)\n",suffixinfo->ident);
+#endif
 #endif
   newbranch = newTrienode(trierep);
   newbranch->suffixinfo = *suffixinfo;
@@ -578,9 +593,11 @@ void deletesmallestpath(Trienode *smallest,Trierep *trierep)
       SETFIRSTCHILDNULL(son);
     }
 #ifdef WITHTRIEIDENT
+#ifdef WITHTRIESHOW
     printf("delete %s %d\n",
              ISLEAF(son) ? "leaf" : "branch",
              son->suffixinfo.ident);
+#endif
 #endif
     trierep->unusedTrienodes[trierep->nextunused++] = son;
   }

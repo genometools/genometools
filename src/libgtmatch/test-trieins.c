@@ -21,7 +21,7 @@ static void maketrie(Trierep *trierep,
   Suffixinfo suffixinfo;
 
   suffixinfo.idx = 0;
-#ifdef WITHIDENT
+#ifdef WITHTRIEIDENT
   suffixinfo.ident = 0;
 #endif
   for(suffixinfo.startpos = 0; 
@@ -29,9 +29,10 @@ static void maketrie(Trierep *trierep,
       suffixinfo.startpos++)
   {
     insertsuffixintotrie(trierep,trierep->root,&suffixinfo);
-#ifdef DEBUG
-    DEBUG1(4,"\n\nstep%lu:\n",(Showuint) suffixinfo.startpos);
+#ifdef WITHTRIEIDENT
+#ifdef WITHTRIESHOW
     showtrie(trierep,characters);
+#endif
     suffixinfo.ident++;
 #endif
   }
@@ -44,7 +45,8 @@ static void successivelydeletesmallest(Trierep *trierep,
 {
   Trienode *smallest;
 #ifdef WITHTRIEIDENT
-  Seqpos numberofleaves = seqlen;
+  uint32_t numberofleaves = (uint32_t) seqlen+1;
+  uint32_t maxleafnum = (uint32_t) seqlen;
 #endif
 
   while(trierep->root != NULL && trierep->root->firstchild != NULL)
@@ -52,9 +54,11 @@ static void successivelydeletesmallest(Trierep *trierep,
     smallest = findsmallestnodeintrie(trierep);
     deletesmallestpath(smallest,trierep);
 #ifdef WITHTRIEIDENT
+#ifdef WITHTRIESHOW
     showtrie(trierep,characters);
-    checktrie(trierep,numberofleaves,env);
+#endif
     numberofleaves--;
+    checktrie(trierep,numberofleaves,maxleafnum,env);
 #endif
   }
 }
@@ -63,7 +67,7 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
 {
   Suffixarray suffixarray;
   Trierep trierep;
-  bool haserr = true;
+  bool haserr = false;
   Seqpos totallength;
   const Uchar *characters;
 
@@ -86,13 +90,19 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
     maketrie(&trierep,characters,totallength);
     if(onlyins)
     {
-#ifdef WITHTRIEINS
+#ifdef WITHTRIEIDENT
+#ifdef WITHTRIESHOW
       showtrie(&trierep,characters);
-      checktrie(&trierep,totallength+1);
+#endif
+      checktrie(&trierep,totallength+1,totallength,env);
 #endif
     } else
     {
+#ifdef WITHTRIEIDENT
+#ifdef WITHTRIESHOW
       showallnoderelations(trierep.root);
+#endif
+#endif
       successivelydeletesmallest(&trierep,totallength,characters,env);
     }
     freetrierep(&trierep,env);
