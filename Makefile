@@ -293,6 +293,7 @@ obj/%.o: src/external/rnv-1.7.8/%.c
 # read deps
 -include obj/*.d
 
+.SUFFIXES:
 .PHONY: dist srcdist release gt install splint test clean cleanup apidoc
 
 dist: all
