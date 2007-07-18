@@ -276,7 +276,8 @@ obj/%.o: %.cxx
 	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 # read deps
--include obj/*.d
+DEPENDENCIES:=$(shell find obj -name '*.d')
+-include $(DEPENDENCIES)
 
 .SUFFIXES:
 .PHONY: dist srcdist release gt install splint test clean cleanup apidoc
