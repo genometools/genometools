@@ -61,3 +61,55 @@ static int inputthesequences(Seqpos *nextpostable,
   }
   return 0;
 }
+
+static int insertfirstsuffixes(Trierep *trierep,
+                               Seqpos *nextpostable,
+                               Suffixarray *suffixarraytable,
+                               uint32_t numofindexes)
+{
+  uint32_t idx;
+  Seqpos suftabvalue;
+  int retval;
+
+  for(idx=0; idx<numofindexes; idx++)
+  {
+    retval = readnextSeqpostfromstream(&suftabvalue,
+                                       &suffixarraytab[idx].suftabstream,
+                                       env);
+    if(retval < 0)
+    {
+      return -1; 
+    }
+    if(retval == 0)
+    {
+      ERROREOF("suftab");
+      env_error_set(env,"file %s: line %d: unexpected end of file when "
+                        "reading suftab",__FILE__,__LINE__);
+      return -2;
+    }
+    nextpostable[idx]++;
+    fillandinsert(trierep,
+                  idx,
+                  suftabvalue,
+                  trierep->root,
+                  (uint64_t) idx);
+  }
+  return 0;
+}
+
+/*@null@*/ static Trienode *findlargestnodeleqlcpvalue(Trienode *smallest,
+                                                       Seqpos lcpvalue)
+{
+  Trienode *tmp;
+
+  for(tmp = smallest->parent; tmp != NULL; tmp = tmp->parent)
+  {
+    if(tmp->depth <= lcpvalue)
+    {
+      return tmp;
+    }
+  }
+  ERROR1("path does not contain a node of depth <= %lu",
+          (Showuint) lcpvalue);
+  return NULL;
+}
