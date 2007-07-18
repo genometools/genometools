@@ -48,7 +48,12 @@
 #include "tools/gt_stat.h"
 
 #ifdef LIBGTVIEW
+#include "libgtview/block.h"
+#include "libgtview/config.h"
+#include "libgtview/diagram.h"
+#include "libgtview/feature_index.h"
 #include "libgtview/gt_view.h"
+#include "libgtview/track.h"
 #endif
 
 struct GTR {
