@@ -8,6 +8,8 @@
 #define GTR_H
 
 #include <stdio.h>
+#include "libgtcore/env.h"
+#include "libgtcore/option.h"
 
 /* The GenomeTools runtime (gtr) */
 typedef struct GTR GTR;
