@@ -276,7 +276,6 @@ void diagram_delete(Diagram* diagram, Env* env)
 
 int diagram_unit_test(Env* env)
 {
-
   GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   FeatureIndex *fi;
   Range r1, r2, r3, r4, r5, dr1, rs;
@@ -370,16 +369,12 @@ int diagram_unit_test(Env* env)
   ensure(had_err, dia->config != NULL);
   ensure(had_err, dia->range.start == 400);
   ensure(had_err, dia->range.end == 900);
-  if (!config_cstr_in_list(dia->config,"collapse","to_parent","gene",
-                             env))
-  {
-  ensure(had_err, hashtable_get(dia->tracks,"gene") != NULL);
+  if (!config_cstr_in_list(dia->config,"collapse","to_parent","gene", env)) {
+    ensure(had_err, hashtable_get(dia->tracks,"gene") != NULL);
   }
 
-  if (!config_cstr_in_list(dia->config,"collapse","to_parent","exon",
-                             env))
-  {
-  ensure(had_err, hashtable_get(dia->tracks,"exon") != NULL);
+  if (!config_cstr_in_list(dia->config,"collapse","to_parent","exon", env)) {
+    ensure(had_err, hashtable_get(dia->tracks,"exon") != NULL);
   }
   ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
 
@@ -394,23 +389,16 @@ int diagram_unit_test(Env* env)
   ensure(had_err, dia->range.start == 400);
   ensure(had_err, dia->range.end == 900);
 
-  if (!config_cstr_in_list(dia2->config,"collapse","to_parent","gene",
-                             env))
-  {
-  ensure(had_err, hashtable_get(dia2->tracks,"gene") != NULL);
+  if (!config_cstr_in_list(dia2->config,"collapse","to_parent","gene", env)) {
+    ensure(had_err, hashtable_get(dia2->tracks,"gene") != NULL);
   }
 
-  if (!config_cstr_in_list(dia2->config,"collapse","to_parent","exon",
-                             env))
-  {
-  ensure(had_err, hashtable_get(dia2->tracks,"exon") != NULL);
+  if (!config_cstr_in_list(dia2->config,"collapse","to_parent","exon", env)) {
+    ensure(had_err, hashtable_get(dia2->tracks,"exon") != NULL);
   }
 
-  if (!config_cstr_in_list(dia2->config,"collapse","to_parent","CDS",
-                             env))
-
-  {
-  ensure(had_err, hashtable_get(dia2->tracks,"CDS") != NULL);
+  if (!config_cstr_in_list(dia2->config,"collapse","to_parent","CDS", env)) {
+    ensure(had_err, hashtable_get(dia2->tracks,"CDS") != NULL);
   }
   ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
 
@@ -427,5 +415,6 @@ int diagram_unit_test(Env* env)
   genome_node_rec_delete((GenomeNode*) sr2, env);
   str_delete(seqid1, env);
   str_delete(seqid2, env);
-return had_err;
+
+  return had_err;
 }
