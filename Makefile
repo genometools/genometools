@@ -133,15 +133,11 @@ endif
 # set prefix for install target
 prefix ?= /usr/local
 
-all: dirs $(GTLIBS) bin/skproto bin/gt bin/rnv
-
-dirs:
-	@test -d obj     || mkdir -p obj
-	@test -d lib     || mkdir -p lib
-	@test -d bin     || mkdir -p bin
+all: $(GTLIBS) bin/skproto bin/gt bin/rnv
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $@]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBEXPAT_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
@@ -149,6 +145,7 @@ endif
 
 lib/libagg.a: $(LIBAGG_OBJ)
 	@echo "[link $@]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBAGG_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
@@ -156,6 +153,7 @@ endif
 
 lib/libbz2.a: $(LIBBZ2_OBJ)
 	@echo "[link $@]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBBZ2_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
@@ -164,6 +162,7 @@ endif
 lib/libgtcore.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h \
                  $(LIBGTCORE_OBJ)
 	@echo "[link $@]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBGTCORE_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
@@ -171,6 +170,7 @@ endif
 
 lib/libgtext.a: $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $@]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
@@ -178,6 +178,7 @@ endif
 
 lib/libgtview.a: $(LIBGTVIEW_C_OBJ)
 	@echo "[link $@]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBGTVIEW_C_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
@@ -185,6 +186,7 @@ endif
 
 lib/libpng.a: $(LIBPNG_OBJ)
 	@echo "[link $@]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBPNG_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
@@ -192,6 +194,7 @@ endif
 
 lib/librnv.a: $(LIBRNV_OBJ)
 	@echo "[link $@]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBRNV_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
@@ -199,15 +202,18 @@ endif
 
 bin/skproto: obj/src/skproto.o obj/src/tools/gt_skproto.o lib/libgtcore.a lib/libbz2.a
 	@echo "[link $@]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 bin/gt: obj/src/gt.o obj/src/gtr.o $(TOOLS_OBJ) $(GTLIBS)
 	@echo "[link $@]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 bin/rnv: obj/$(RNV_DIR)/xcl.o lib/librnv.a lib/libexpat.a
-	@$(CC) $(LDFLAGS) $^ -o $@
 	@echo "[link $@]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@$(CC) $(LDFLAGS) $^ -o $@
 
 obj/gt_build.h:
 	@date +'#define GT_BUILT "%Y-%m-%d %H:%M:%S"' > $@
@@ -297,7 +303,7 @@ installwww:
 # install genometools.org website
 	rsync -rv www/genometools.org/ $(SERVER):$(WWWBASEDIR)/genometools.org
 
-gt: dirs bin/gt
+gt: bin/gt
 
 install:
 	test -d $(prefix)/bin || mkdir -p $(prefix)/bin
