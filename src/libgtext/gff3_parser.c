@@ -9,12 +9,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gtcore.h>
-#include <libgtext/comment.h>
-#include <libgtext/genome_feature.h>
-#include <libgtext/genome_node.h>
-#include <libgtext/gff3_parser.h>
-#include <libgtext/sequence_region.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/hashtable.h"
+#include "libgtcore/parseutils.h"
+#include "libgtcore/splitter.h"
+#include "libgtcore/undef.h"
+#include "libgtcore/warning.h"
+#include "libgtext/comment.h"
+#include "libgtext/genome_feature.h"
+#include "libgtext/genome_node.h"
+#include "libgtext/gff3_parser.h"
+#include "libgtext/sequence_region.h"
 
 struct GFF3Parser {
   Hashtable *id_to_genome_node_mapping,

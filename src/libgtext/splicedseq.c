@@ -4,6 +4,10 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#include <string.h>
+#include "libgtcore/array.h"
+#include "libgtcore/ensure.h"
+#include "libgtcore/str.h"
 #include <libgtext/reverse.h>
 #include <libgtext/splicedseq.h>
 

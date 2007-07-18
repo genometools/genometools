@@ -7,7 +7,7 @@
 #ifndef QGRAMDIST_H
 #define QGRAMDIST_H
 
-#include <gtcore.h>
+#include "libgtcore/seq.h"
 
 /* returns the q-gram distance of two Seqs. The alphabets of the given Seqs have
    to be compatible */

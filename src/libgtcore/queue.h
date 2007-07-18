@@ -8,6 +8,7 @@
 #define QUEUE_H
 
 #include <stdio.h>
+#include "libgtcore/env.h"
 
 /* A simple queue implementation (based on arrays). Only memory efficient if
    the queue becomes empty regularly during usage (see implementation for

@@ -5,6 +5,13 @@
 */
 
 #include <assert.h>
+#include <string.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/hashtable.h"
+#include "libgtcore/parseutils.h"
+#include "libgtcore/splitter.h"
+#include "libgtcore/undef.h"
+#include "libgtcore/warning.h"
 #include <libgtext/compare.h>
 #include <libgtext/genome_node.h>
 #include <libgtext/gtf_parser.h>

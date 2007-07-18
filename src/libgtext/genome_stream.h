@@ -8,7 +8,7 @@
 #define GENOME_STREAM_H
 
 #include <stdbool.h>
-#include <gtcore.h>
+
 #include <libgtext/genome_node.h>
 
 /* the ``genome stream'' interface */

@@ -7,6 +7,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include "libgtcore/fptr.h"
+#include "libgtcore/warning.h"
 #include <libgtext/genome_node.h>
 #include <libgtext/genome_visitor_rep.h>
 #include <libgtext/gff3_output.h>

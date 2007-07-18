@@ -10,10 +10,12 @@
 /* implements the ``genome node'' interface */
 typedef struct GenomeFeature GenomeFeature;
 
-#include <gtcore.h>
-#include <libgtext/genome_node.h>
-#include <libgtext/genome_feature_type.h>
-#include <libgtext/transcript_feature_type.h>
+#include "libgtcore/range.h"
+#include "libgtcore/phase.h"
+#include "libgtcore/strand.h"
+#include "libgtext/genome_node.h"
+#include "libgtext/genome_feature_type.h"
+#include "libgtext/transcript_feature_type.h"
 
 typedef int (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
                                  void *data, Env*);

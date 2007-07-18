@@ -4,7 +4,8 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <libgtext/transcript_used_exons.h>
+#include "libgtcore/range.h"
+#include "libgtext/transcript_used_exons.h"
 
 struct TranscriptUsedExons {
   Dlist *used_exons_all,

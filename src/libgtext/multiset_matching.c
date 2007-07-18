@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <gtcore.h>
+#include "libgtcore/undef.h"
 #include <libgtext/multiset_matching.h>
 
 void multiset_matching(unsigned char *multiset_string,

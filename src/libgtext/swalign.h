@@ -7,6 +7,8 @@
 #ifndef SWALIGN_H
 #define SWALIGN_H
 
+#include "libgtcore/scorefunction.h"
+#include "libgtcore/seq.h"
 #include <libgtext/alignment.h>
 
 /* (locally) align <u> and <v> (Smith-Waterman algorithm ) with the given score

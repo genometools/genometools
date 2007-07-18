@@ -5,9 +5,11 @@
 */
 
 #include <assert.h>
-#include <libgtext/extractfeat_visitor.h>
-#include <libgtext/genome_visitor_rep.h>
-#include <libgtext/reverse.h>
+#include "libgtcore/fasta.h"
+#include "libgtcore/translate.h"
+#include "libgtext/extractfeat_visitor.h"
+#include "libgtext/genome_visitor_rep.h"
+#include "libgtext/reverse.h"
 
 struct ExtractFeatVisitor {
   const GenomeVisitor parent_instance;

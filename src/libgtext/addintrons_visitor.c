@@ -5,9 +5,9 @@
 */
 
 #include <assert.h>
-#include <gtcore.h>
-#include <libgtext/addintrons_visitor.h>
-#include <libgtext/genome_visitor_rep.h>
+#include "libgtcore/undef.h"
+#include "libgtext/addintrons_visitor.h"
+#include "libgtext/genome_visitor_rep.h"
 
 struct AddIntronsVisitor {
   const GenomeVisitor parent_instance;

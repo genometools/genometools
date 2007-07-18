@@ -7,6 +7,8 @@
 #ifndef GFF3_PARSER_H
 #define GFF3_PARSER_H
 
+#include "libgtcore/queue.h"
+
 #define GFF_VERSION         3
 #define GFF_VERSION_PREFIX  "##gff-version"
 #define GFF_SEQUENCE_REGION "##sequence-region"

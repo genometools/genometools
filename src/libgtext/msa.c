@@ -6,6 +6,8 @@
 
 #include <assert.h>
 #include <limits.h>
+#include "libgtcore/array2dim.h"
+#include "libgtcore/bioseq.h"
 #include <libgtext/msa.h>
 
 #define GAPSYMBOL '-'

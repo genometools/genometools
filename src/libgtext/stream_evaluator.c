@@ -5,6 +5,9 @@
 */
 
 #include <assert.h>
+#include "libgtcore/hashtable.h"
+#include "libgtcore/warning.h"
+#include "libgtcore/xansi.h"
 #include <libgtext/bsearch.h>
 #include <libgtext/evaluator.h>
 #include <libgtext/gff3_output.h>

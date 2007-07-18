@@ -7,7 +7,8 @@
 #ifndef CONSENSUS_SA_H
 #define CONSENSUS_SA_H
 
-#include <gtcore.h>
+#include "libgtcore/range.h"
+#include "libgtcore/strand.h"
 
 /*
   This module implements the method to construct consensus spliced alignments

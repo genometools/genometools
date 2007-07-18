@@ -5,7 +5,7 @@
 */
 
 #include <assert.h>
-#include <gtcore.h>
+#include "libgtcore/disc_distri.h"
 #include <libgtext/genome_visitor_rep.h>
 #include <libgtext/stat_visitor.h>
 

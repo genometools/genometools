@@ -7,6 +7,8 @@
 #ifndef SPLITTER_H
 #define SPLITTER_H
 
+#include "libgtcore/env.h"
+
 typedef struct Splitter Splitter;
 
 Splitter*     splitter_new(Env *env);

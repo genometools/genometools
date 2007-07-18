@@ -6,8 +6,10 @@
 
 #include <assert.h>
 #include <stdarg.h>
-#include <gtcore.h>
-#include <libgtext/genome_node_rep.h>
+#include "libgtcore/hashtable.h"
+#include "libgtcore/msort.h"
+#include "libgtcore/queue.h"
+#include "libgtext/genome_node_rep.h"
 
 typedef struct {
   GenomeNodeTraverseFunc func;

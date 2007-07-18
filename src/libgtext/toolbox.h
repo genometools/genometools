@@ -7,7 +7,7 @@
 #ifndef TOOLBOX_H
 #define TOOLBOX_H
 
-#include <gtcore.h>
+#include "libgtcore/env.h"
 
 /* the toolbox class */
 typedef struct Toolbox Toolbox;
