@@ -85,7 +85,7 @@ static int outputsuflcpllv(void *processinfo,
     for(i=0; i<lastindex; i++)
     {
       lcpvalue = buf->lcptabstore[i];
-      if(lcpvalue < UCHAR_MAX)
+      if(lcpvalue < (Seqpos) UCHAR_MAX)
       {
         smallvalue = (Uchar) lcpvalue;
       } else
@@ -101,7 +101,7 @@ static int outputsuflcpllv(void *processinfo,
           haserr = true;
           break;
         }
-        smallvalue = UCHAR_MAX;
+        smallvalue = (Uchar) UCHAR_MAX;
       }
       if(fwrite(&smallvalue,sizeof(Uchar),(size_t) 1,
                 mergeoutinfo->outlcp.fp) != (size_t) 1)
@@ -173,116 +173,35 @@ static int mergeandstoreindex(const Str *storeindex,
   return haserr ? -1 : 0;
 }
 
-/*
-
-static int dothemerging(Mergeesacallinfo *mergeesacallinfo)
+int performtheindexmerging(const Str *storeindex,
+                           const StrArray *indexnametab,
+                           Env *env)
 {
   Emissionmergedesa emmesa;
-  Uint demand;
+  unsigned int demand = SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB;
+  bool haserr = false;
 
-  if(mergeesacallinfo->numofindexes == UintConst(1) &&
-     mergeesacallinfo->userdefinedminlength.defined)
-  {
-    demand = BWTTABSTREAM | SUFTABSTREAM | LCPTABSTREAM;
-  } else
-  {
-    demand = TISTABSTREAM | SUFTABSTREAM | LCPTABSTREAM;
-  }
   if(initEmissionmergedesa(&emmesa,
-                           (const char **) mergeesacallinfo->indexnamelist,
-                           mergeesacallinfo->numofindexes,
-                           demand) != 0)
+                           indexnametab,
+                           demand,
+                           env) != 0)
   {
-    return -1;
+    haserr = true;
   }
-  if(mergeesacallinfo->storeindex != NULL)
+  if(!haserr)
   {
-    if(mergeesacallinfo->numofindexes > UintConst(1))
+    if(strarray_size(indexnametab) > (unsigned long) 1)
     {
-      if(mergeandstoreindex(mergeesacallinfo->is32bit,
-                            mergeesacallinfo->storeindex,&emmesa) != 0)
+      if(mergeandstoreindex(storeindex,&emmesa,env) != 0)
       {
-        return -2;
+        haserr = true;
       }
     } else
     {
-      ERROR0("merging requires more than one index");
-      return -3;
-    }
-  } else
-  {
-    if(mergeesacallinfo->maxuniquelength > 0)
-    {
-      if(mergeesacallinfo->numofindexes > UintConst(1))
-      {
-        if(multienumuniquedist(&emmesa,
-                               mergeesacallinfo->minuniquelength,
-                               mergeesacallinfo->maxuniquelength) != 0)
-        {
-          return -4;
-        }
-      } else
-      {
-        if(singleenumuniquedist(&emmesa.encseqtable[0],
-                                &emmesa.esastreamtable[0],
-                                mergeesacallinfo->minuniquelength,
-                                mergeesacallinfo->maxuniquelength) != 0)
-        {
-          return -5;
-        }
-      }
-    } else
-    {
-      if(mergeesacallinfo->userdefinedminlength.defined)
-      {
-        if(mergeesacallinfo->numofindexes > UintConst(1))
-        {
-          Specialcharinfo specialcharinfo;
-          Uint64 *sequenceoffsettable, 
-                 totallength; 
-
-          sequenceoffsettable 
-            = encseqtable2seqoffsets(mergeesacallinfo->is32bit,
-                                     &totallength,
-                                     &specialcharinfo,
-                                     emmesa.encseqtable,
-                                     emmesa.numofindexes);
-          if(sequenceoffsettable == NULL)
-          {
-            return -2;
-          }
-          if(mergevmatmaxoutdynamic(
-                      &emmesa,
-                      UintConst(1),
-                      mergeesacallinfo->userdefinedminlength.uintvalue,
-                      NULL,
-                      (void *) sequenceoffsettable,
-                      (void *) mergesimpleexactselfmatchoutput) != 0)
-          {
-            return -6;
-          }
-          FREESPACE(sequenceoffsettable);
-        } else
-        {
-          if(strmvmatmaxoutdynamic(
-                  &emmesa.esastreamtable[0],
-                  UintConst(1),
-                  mergeesacallinfo->userdefinedminlength.uintvalue,
-                  NULL,
-                  NULL,
-                  (void *) simpleexactselfmatchoutput) != 0)
-          {
-            return -7;
-          }
-        }
-      }
-      {
-         printf("# construct the fmindex \"%s\"\n",
-                    mergeesacallinfo->storefmindex);
-      }
+      env_error_set(env,"merging requires more than one index");
+      haserr = true;
     }
   }
-  wraptEmissionmergedesa(&emmesa);
-  return 0;
+  wraptEmissionmergedesa(&emmesa,env);
+  return haserr ? -1 : 0;
 }
-*/

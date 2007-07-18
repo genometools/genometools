@@ -455,6 +455,9 @@ int initUcharBufferedfile(UcharBufferedfile *stream,
 
 static void initsuffixarray(Suffixarray *suffixarray)
 {
+  suffixarray->filelengthtab = NULL;
+  suffixarray->filenametab = NULL;
+  suffixarray->encseq = NULL;
   suffixarray->suftab = NULL;
   suffixarray->lcptab = NULL;
   suffixarray->llvtab = NULL;
@@ -583,7 +586,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
   }
   if(!haserr && (demand & SARR_BWTTAB))
   {
-    suffixarray->bwttab = genericmaptable(indexname,".bwt",
+    suffixarray->bwttab = genericmaptable(indexname,BWTTABSUFFIX,
                                           totallength+1,
                                           sizeof(Uchar),
                                           env);
@@ -637,7 +640,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
   }
   if(!haserr && (demand & SARR_BWTTAB))
   {
-    INITBufferedfile(indexname,&suffixarray->bwttabstream,".bwt");
+    INITBufferedfile(indexname,&suffixarray->bwttabstream,BWTTABSUFFIX);
   }
   if(!haserr && (demand & SARR_LCPTAB))
   {
