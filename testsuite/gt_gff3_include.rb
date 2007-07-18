@@ -111,12 +111,19 @@ Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_3.gff3"
 end
 
-4.upto(15) do |i|
+4.upto(14) do |i|
   Name "gt gff3 test #{i}"
   Keywords "gt_gff3"
   Test do
     run_test("#{$bin}gt gff3 #{$testdata}/gt_gff3_test_#{i}.gff3", :retval => 1)
   end
+end
+
+Name "gt gff3 test 15"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_15.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_test_15.out"
 end
 
 Name "gt gff3 test 16"
@@ -184,6 +191,19 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_24.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_gff3_test_23.gff3"
+end
+
+Name "gt gff3 test 25"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_test_25.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_test_25.out"
+end
+
+Name "gt gff3 test 26"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_test_26.gff3", :retval => 1)
 end
 
 Name "gt gff3 fail 1"
