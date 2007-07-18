@@ -72,10 +72,7 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
   const Uchar *characters;
 
   if(streamsuffixarray(&suffixarray,
-                       true,
-                       false,
-                       false,
-                       false,
+                       SARR_ESQTAB,
                        indexname,
                        env) != 0)
   {
