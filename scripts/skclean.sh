@@ -5,10 +5,10 @@
 # See LICENSE file or http://genometools.org/license.html for license details.
 #
 
-SKTOOLS=src/tools/gt_suffixerator.c\
-        src/tools/gt_sfxmap.c\
-        src/tools/gt_trieins.c\
-        src/tools/gt_mergeesa.c
+SKTOOLS='src/tools/gt_suffixerator.c
+        src/tools/gt_sfxmap.c
+        src/tools/gt_trieins.c
+        src/tools/gt_mergeesa.c'
 
 for filename in `ls ${SKTOOLS} src/libgtmatch/*.c`
 do
