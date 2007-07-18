@@ -47,27 +47,34 @@ GTLIBS:=lib/libgtext.a\
 # the core GenomeTools library (no other dependencies)
 LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
 LIBGTCORE_OBJ:=$(LIBGTCORE_SRC:%.c=obj/%.o)
+LIBGTCORE_DEP:=$(LIBGTCORE_SRC:%.c=obj/%.d)
 
 # the extended GenomeTools library (e.g., depends on Lua)
 LIBGTEXT_C_SRC:=$(wildcard src/libgtext/*.c)
 LIBGTEXT_C_OBJ:=$(LIBGTEXT_C_SRC:%.c=obj/%.o)
+LIBGTEXT_C_DEP:=$(LIBGTEXT_C_SRC:%.c=obj/%.d)
 LIBGTEXT_CXX_SRC:=$(wildcard src/libgtext/*.cxx)
 LIBGTEXT_CXX_OBJ:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.o)
+LIBGTEXT_CXX_DEP:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.d)
 
 # the GenomeTools view library
 LIBGTVIEW_C_SRC:=$(wildcard src/libgtview/*.c)
 LIBGTVIEW_C_OBJ:=$(LIBGTVIEW_C_SRC:%.c=obj/%.o)
+LIBGTVIEW_C_DEP:=$(LIBGTVIEW_C_SRC:%.c=obj/%.d)
 
 TOOLS_SRC:=$(wildcard src/tools/*.c)
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
+TOOLS_DEP:=$(TOOLS_SRC:%.c=obj/%.d)
 
 LIBAGG_SRC:=$(wildcard src/external/agg-2.4/src/*.cpp src/external/agg-2.4/src/ctrl/*.cpp)
 LIBAGG_OBJ:=$(LIBAGG_SRC:%.cpp=obj/%.o)
+LIBAGG_DEP:=$(LIBAGG_SRC:%.cpp=obj/%.d)
 
 EXPAT_DIR:=src/external/expat-2.0.0/lib
 LIBEXPAT_SRC:=$(EXPAT_DIR)/xmlparse.c $(EXPAT_DIR)/xmlrole.c \
               $(EXPAT_DIR)/xmltok.c
 LIBEXPAT_OBJ:=$(LIBEXPAT_SRC:%.c=obj/%.o)
+LIBEXPAT_DEP:=$(LIBEXPAT_SRC:%.c=obj/%.d)
 
 LUA_DIR:=src/external/lua-5.1.2/src
 LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
@@ -81,6 +88,7 @@ LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
            $(LUA_DIR)/loslib.c $(LUA_DIR)/ltablib.c $(LUA_DIR)/lstrlib.c \
            $(LUA_DIR)/loadlib.c $(LUA_DIR)/linit.c
 LIBLUA_OBJ:=$(LIBLUA_SRC:%.c=obj/%.o)
+LIBLUA_DEP:=$(LIBLUA_SRC:%.c=obj/%.d)
 
 PNG_DIR:=external/libpng-1.2.18
 LIBPNG_SRC:=$(PNG_DIR)/png.o $(PNG_DIR)/pngset.o $(PNG_DIR)/pngget.o \
@@ -89,6 +97,7 @@ LIBPNG_SRC:=$(PNG_DIR)/png.o $(PNG_DIR)/pngset.o $(PNG_DIR)/pngget.o \
             $(PNG_DIR)/pngwrite.o $(PNG_DIR)/pngrtran.o $(PNG_DIR)/pngwtran.o \
             $(PNG_DIR)/pngmem.o $(PNG_DIR)/pngerror.o $(PNG_DIR)/pngpread.o
 LIBPNG_OBJ:=$(LIBPNG_SRC:%.c=obj/%.o)
+LIBPNG_DEP:=$(LIBPNG_SRC:%.c=obj/%.d)
 
 RNV_DIR:=src/external/rnv-1.7.8
 LIBRNV_SRC:=$(RNV_DIR)/rn.c $(RNV_DIR)/rnc.c $(RNV_DIR)/rnd.c $(RNV_DIR)/rnl.c \
@@ -98,12 +107,14 @@ LIBRNV_SRC:=$(RNV_DIR)/rn.c $(RNV_DIR)/rnc.c $(RNV_DIR)/rnd.c $(RNV_DIR)/rnl.c \
             $(RNV_DIR)/ht.c $(RNV_DIR)/er.c $(RNV_DIR)/xmlc.c $(RNV_DIR)/s.c \
             $(RNV_DIR)/m.c $(RNV_DIR)/rx.c
 LIBRNV_OBJ:=$(LIBRNV_SRC:%.c=obj/%.o)
+LIBRNV_DEP:=$(LIBRNV_SRC:%.c=obj/%.d)
 
 BZ2_DIR:=src/external/bzip2-1.0.4
 LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
             $(BZ2_DIR)/randtable.c $(BZ2_DIR)/compress.c \
             $(BZ2_DIR)/decompress.c $(BZ2_DIR)/bzlib.c
 LIBBZ2_OBJ:=$(LIBBZ2_SRC:%.c=obj/%.o)
+LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.o)
 
 SERVER=gordon@genometools.org
 WWWBASEDIR=/var/www/servers
@@ -276,8 +287,9 @@ obj/%.o: %.cxx
 	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 # read deps
-DEPENDENCIES:=$(shell find obj -name '*.d')
--include $(DEPENDENCIES)
+-include $(LIBGTCORE_DEP) $(LIBGTEXT_C_DEP) $(LIBGTEXT_CXX_DEP) \
+         $(LIBGTVIEW_C_DEP) $(TOOLS_DEP) $(LIBAGG_DEP) $(LIBEXPAT_DEP) \
+         $(LIBLUA_DEP) $(LIBPNG_DEP) $(LIBRNV_DEP) $(LIBBBZ2_DEP)
 
 .SUFFIXES:
 .PHONY: dist srcdist release gt install splint test clean cleanup apidoc
