@@ -10,7 +10,7 @@
 /* implements the ``genome visitor'' interface */
 typedef struct AddIntronsVisitor AddIntronsVisitor;
 
-#include <libgtext/genome_visitor.h>
+#include "libgtext/genome_visitor.h"
 
 const GenomeVisitorClass* addintrons_visitor_class(void);
 GenomeVisitor*            addintrons_visitor_new(Env*);

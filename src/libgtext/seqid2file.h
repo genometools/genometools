@@ -8,7 +8,7 @@
 #define SEQID2FILEOPTIONS_H
 
 #include "libgtcore/option.h"
-#include <libgtext/regionmapping.h>
+#include "libgtext/regionmapping.h"
 
 /* add the options -seqfile and -regionmapping to the given option parser */
 void           seqid2file_options(OptionParser*, Str *seqfile,

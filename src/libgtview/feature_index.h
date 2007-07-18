@@ -17,8 +17,8 @@
 
 #include <libgtcore/array.h>
 #include <libgtcore/str.h>
-#include <libgtext/sequence_region.h>
-#include <libgtext/genome_feature.h>
+#include "libgtext/sequence_region.h"
+#include "libgtext/genome_feature.h"
 
 typedef struct FeatureIndex FeatureIndex;
 

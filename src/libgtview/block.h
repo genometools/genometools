@@ -12,7 +12,7 @@
 #define BLOCK_H
 
 #include <libgtcore/range.h>
-#include <libgtext/genome_node.h>
+#include "libgtext/genome_node.h"
 #include <libgtcore/array.h>
 #include <libgtview/element.h>
 #include <libgtview/config.h>

@@ -6,7 +6,7 @@
 
 #include "libgtcore/bittab.h"
 #include "libgtcore/undef.h"
-#include <libgtext/upgma.h>
+#include "libgtext/upgma.h"
 
 #define INDENTFACTOR    10
 

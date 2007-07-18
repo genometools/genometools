@@ -9,7 +9,7 @@
 
 #include <stdbool.h>
 
-#include <libgtext/genome_node.h>
+#include "libgtext/genome_node.h"
 
 /* the ``genome stream'' interface */
 typedef struct GenomeStreamClass GenomeStreamClass;

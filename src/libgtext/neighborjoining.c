@@ -6,7 +6,7 @@
 
 #include "libgtcore/bittab.h"
 #include "libgtcore/undef.h"
-#include <libgtext/neighborjoining.h>
+#include "libgtext/neighborjoining.h"
 
 #define INDENTFACTOR    10
 

@@ -12,7 +12,7 @@
 #define LINE_H
 
 #include <libgtcore/array.h>
-#include <libgtext/genome_node.h>
+#include "libgtext/genome_node.h"
 #include <libgtview/config.h>
 #include <libgtview/block.h>
 

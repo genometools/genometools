@@ -8,13 +8,13 @@
 #include "libgtcore/hashtable.h"
 #include "libgtcore/warning.h"
 #include "libgtcore/xansi.h"
-#include <libgtext/bsearch.h>
-#include <libgtext/evaluator.h>
-#include <libgtext/gff3_output.h>
-#include <libgtext/stream_evaluator.h>
-#include <libgtext/transcript_evaluators.h>
-#include <libgtext/transcript_exons.h>
-#include <libgtext/transcript_used_exons.h>
+#include "libgtext/bsearch.h"
+#include "libgtext/evaluator.h"
+#include "libgtext/gff3_output.h"
+#include "libgtext/stream_evaluator.h"
+#include "libgtext/transcript_evaluators.h"
+#include "libgtext/transcript_exons.h"
+#include "libgtext/transcript_used_exons.h"
 
 struct StreamEvaluator {
   GenomeStream *reality,

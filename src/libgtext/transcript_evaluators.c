@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <libgtext/transcript_evaluators.h>
+#include "libgtext/transcript_evaluators.h"
 
 struct TranscriptEvaluators {
   Evaluator *exon_evaluator_all,

@@ -10,7 +10,7 @@
 
 #include <assert.h>
 #include <gtcore.h>
-#include <libgtext/genome_visitor_rep.h>
+#include "libgtext/genome_visitor_rep.h"
 #include <libgtview/graphics.h>
 #include <libgtview/png_visitor.h>
 

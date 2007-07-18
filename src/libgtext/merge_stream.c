@@ -6,8 +6,8 @@
 
 #include <assert.h>
 #include "libgtcore/undef.h"
-#include <libgtext/genome_stream_rep.h>
-#include <libgtext/merge_stream.h>
+#include "libgtext/genome_stream_rep.h"
+#include "libgtext/merge_stream.h"
 
 struct MergeStream {
   const GenomeStream parent_instance;

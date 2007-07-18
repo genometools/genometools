@@ -8,8 +8,8 @@
  * \author Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
  */
 #include <libgtcore/array.h>
-#include <libgtext/genome_feature.h>
-#include <libgtext/genome_feature_type.h>
+#include "libgtext/genome_feature.h"
+#include "libgtext/genome_feature_type.h"
 #include <libgtcore/ensure.h>
 #include <libgtcore/strand.h>
 #include <libgtview/element.h>

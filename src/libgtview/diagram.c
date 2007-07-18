@@ -13,10 +13,10 @@
  */
 #include <libgtview/diagram.h>
 #include <libgtview/track.h>
-#include <libgtext/genome_node.h>
+#include "libgtext/genome_node.h"
 #include <libgtcore/str.h>
-#include <libgtext/genome_feature_type.h>
-#include <libgtext/genome_feature.h>
+#include "libgtext/genome_feature_type.h"
+#include "libgtext/genome_feature.h"
 #include <libgtview/feature_index.h>
 
 struct Diagram

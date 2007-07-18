@@ -8,11 +8,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "libgtcore/hashtable.h"
-#include <libgtext/genome_node.h>
-#include <libgtext/genome_visitor_rep.h>
-#include <libgtext/gff3_output.h>
-#include <libgtext/gff3_parser.h>
-#include <libgtext/gff3_visitor.h>
+#include "libgtext/genome_node.h"
+#include "libgtext/genome_visitor_rep.h"
+#include "libgtext/gff3_output.h"
+#include "libgtext/gff3_parser.h"
+#include "libgtext/gff3_visitor.h"
 
 struct GFF3Visitor {
   const GenomeVisitor parent_instance;

@@ -12,7 +12,7 @@
 #define FEATURE_STREAM_H
 
 #include <stdio.h>
-#include <libgtext/genome_stream.h>
+#include "libgtext/genome_stream.h"
 #include <libgtcore/hashtable.h>
 #include <libgtview/feature_index.h>
 

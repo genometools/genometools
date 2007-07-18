@@ -12,8 +12,8 @@
 #define ELEMENT_H
 
 #include <libgtcore/range.h>
-#include <libgtext/genome_node.h>
-#include <libgtext/genome_feature_type.h>
+#include "libgtext/genome_node.h"
+#include "libgtext/genome_feature_type.h"
 #include <libgtview/config.h>
 
 /*!

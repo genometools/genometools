@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <libgtext/linearalign.h>
+#include "libgtext/linearalign.h"
 
 static void firstEDtabRtabcolumn(unsigned long *EDtabcolumn,
                                  unsigned long *Rtabcolumn, unsigned long ulen)

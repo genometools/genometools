@@ -14,7 +14,7 @@
 /* implements the ``genome visitor'' interface */
 typedef struct PNGVisitor PNGVisitor;
 
-#include <libgtext/genome_visitor.h>
+#include "libgtext/genome_visitor.h"
 
 const GenomeVisitorClass* png_visitor_class(void);
 GenomeVisitor*            png_visitor_new(char *png_filename, int width,

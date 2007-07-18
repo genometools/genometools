@@ -5,7 +5,7 @@
 */
 
 #include "libgtcore/minmax.h"
-#include <libgtext/linearedist.h>
+#include "libgtext/linearedist.h"
 
 static void fillDPtable(unsigned long *dptable,
                         const char *u, unsigned long n,

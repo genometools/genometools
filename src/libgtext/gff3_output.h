@@ -7,7 +7,7 @@
 #ifndef GFF3_OUTPUT_H
 #define GFF3_OUTPUT_H
 
-#include <libgtext/genome_feature.h>
+#include "libgtext/genome_feature.h"
 
 /* output the leading part of a genome feature in GFF3 format (i.e., the part
    up to the attributes) */

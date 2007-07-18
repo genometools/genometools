@@ -16,8 +16,8 @@
 #include <libgtcore/range.h>
 #include <libgtcore/env.h>
 #include <libgtview/feature_index.h>
-#include <libgtext/genome_node.h>
-#include <libgtext/bsearch.h>
+#include "libgtext/genome_node.h"
+#include "libgtext/bsearch.h"
 
 struct FeatureIndex
 {

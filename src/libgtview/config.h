@@ -12,7 +12,7 @@
 
 #include <libgtcore/str.h>
 #include <libgtview/color.h>
-#include <libgtext/genome_feature_type.h>
+#include "libgtext/genome_feature_type.h"
 
 /* Represents domination status of an ordered pair.
    Used when two different types collapse into the same parent

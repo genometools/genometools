@@ -8,8 +8,8 @@
 #include "libgtcore/array.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/str.h"
-#include <libgtext/reverse.h>
-#include <libgtext/splicedseq.h>
+#include "libgtext/reverse.h"
+#include "libgtext/splicedseq.h"
 
 struct Splicedseq {
   Str *splicedseq;

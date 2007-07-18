@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <libgtext/transcript_counts.h>
+#include "libgtext/transcript_counts.h"
 
 struct TranscriptCounts {
   Array *exon_array_all,

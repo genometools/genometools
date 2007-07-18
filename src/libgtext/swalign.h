@@ -9,7 +9,7 @@
 
 #include "libgtcore/scorefunction.h"
 #include "libgtcore/seq.h"
-#include <libgtext/alignment.h>
+#include "libgtext/alignment.h"
 
 /* (locally) align <u> and <v> (Smith-Waterman algorithm ) with the given score
    function and return one optimal Alignment.

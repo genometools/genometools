@@ -9,10 +9,10 @@
 #include <string.h>
 #include "libgtcore/fptr.h"
 #include "libgtcore/warning.h"
-#include <libgtext/genome_node.h>
-#include <libgtext/genome_visitor_rep.h>
-#include <libgtext/gff3_output.h>
-#include <libgtext/gtf_visitor.h>
+#include "libgtext/genome_node.h"
+#include "libgtext/genome_visitor_rep.h"
+#include "libgtext/gff3_output.h"
+#include "libgtext/gtf_visitor.h"
 
 struct GTFVisitor {
   const GenomeVisitor parent_instance;
