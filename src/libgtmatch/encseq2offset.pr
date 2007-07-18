@@ -1,0 +1,15 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+DECLARESAFECASTFUNCTION(uint64_t,uint64_t,Seqpos,Seqpos);
+
+/*@null@*/ uint64_t *encseqtable2seqoffsets(
+                                uint64_t *totallength,
+                                Specialcharinfo *specialcharinfo,
+                                const Suffixarray *suffixarraytable,
+                                uint32_t numofindexes,
+                                Env *env);
+
+#ifdef __cplusplus
+}
+#endif
