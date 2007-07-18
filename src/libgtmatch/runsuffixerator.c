@@ -14,6 +14,7 @@
 #include "sfx-optdef.h"
 #include "encseq-def.h"
 #include "measure-time-if.h"
+#include "esafileend.h"
 #include "chardef.h"
 
 #include "alphabet.pr"
@@ -223,7 +224,7 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
         if (!haserr && (FLAG))\
         {\
           outfileinfo.encseq = encseq;\
-          PTR = opensfxfile(so->str_indexname,"." SUFFIX,env);\
+          PTR = opensfxfile(so->str_indexname,SUFFIX,env);\
           if((PTR) == NULL)\
           {\
             haserr = true;\
@@ -305,10 +306,10 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
     }
   }
   initoutfileinfo(&outfileinfo);
-  INITOUTFILEPTR(outfileinfo.outfpsuftab,so->outsuftab,"suf");
-  INITOUTFILEPTR(outfileinfo.outfplcptab,so->outlcptab,"lcp");
-  INITOUTFILEPTR(outfileinfo.outfpllvtab,so->outlcptab,"llv");
-  INITOUTFILEPTR(outfileinfo.outfpbwttab,so->outbwttab,"bwt");
+  INITOUTFILEPTR(outfileinfo.outfpsuftab,so->outsuftab,SUFTABSUFFIX);
+  INITOUTFILEPTR(outfileinfo.outfplcptab,so->outlcptab,LCPTABSUFFIX);
+  INITOUTFILEPTR(outfileinfo.outfpllvtab,so->outlcptab,LARGELCPTABSUFFIX);
+  INITOUTFILEPTR(outfileinfo.outfpbwttab,so->outbwttab,BWTTABSUFFIX);
   if (!haserr)
   {
     printf("# specialcharacters=" FormatSeqpos "\n",

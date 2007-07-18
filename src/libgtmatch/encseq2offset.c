@@ -10,24 +10,23 @@
 #include "sarr-def.h"
 #include "safecast-gen.h"
 
-DECLARESAFECASTFUNCTION(uint64_t,uint64_t,Seqpos,Seqpos)
+ DECLARESAFECASTFUNCTION(uint64_t,uint64_t,Seqpos,Seqpos)
 
-/*@null@*/ uint64_t *encseqtable2seqoffsets(
-                                uint64_t *totallength,
-                                Specialcharinfo *specialcharinfo,
-                                const Suffixarray *suffixarraytable,
-                                uint32_t numofindexes,
-                                Env *env)
+Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
+                               Specialcharinfo *specialcharinfo,
+                               const Suffixarray *suffixarraytable,
+                               uint32_t numofindexes,
+                               Env *env)
 {
   uint32_t idx;
   Uchar lastofprevious, firstofcurrent;
-  Seqpos tmplength;
-  uint64_t *sequenceoffsettable,
-           tmpspecialcharacters, 
+  Seqpos tmplength, *sequenceoffsettable;
+  uint64_t tmpspecialcharacters, 
            tmpspecialranges,
            tmplarge;
 
-  ALLOCASSIGNSPACE(sequenceoffsettable,NULL,uint64_t,numofindexes);
+  assert(numofindexes > 0);
+  ALLOCASSIGNSPACE(sequenceoffsettable,NULL,Seqpos,numofindexes);
   tmpspecialcharacters = (uint64_t) (numofindexes-1);
   tmpspecialranges = 0;
   for(idx=0; idx<numofindexes; idx++)
@@ -40,7 +39,7 @@ DECLARESAFECASTFUNCTION(uint64_t,uint64_t,Seqpos,Seqpos)
     {
       tmplength = getencseqtotallength(suffixarraytable[idx - 1].encseq);
       sequenceoffsettable[idx] 
-	= sequenceoffsettable[idx-1] + (uint64_t) tmplength + (uint64_t) 1;
+	= sequenceoffsettable[idx-1] + tmplength + (Seqpos) 1;
     }
     tmpspecialcharacters 
       += (uint64_t) suffixarraytable[idx].specialcharinfo.specialcharacters;
@@ -65,9 +64,8 @@ DECLARESAFECASTFUNCTION(uint64_t,uint64_t,Seqpos,Seqpos)
         }
       }
     }
-    tmplarge = sequenceoffsettable[idx] + 
+    tmplarge = (uint64_t) sequenceoffsettable[idx] + 
                (uint64_t) getencseqtotallength(suffixarraytable[idx].encseq);
-
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmplarge);
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmpspecialcharacters);
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmpspecialranges);

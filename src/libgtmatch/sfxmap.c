@@ -12,6 +12,7 @@
 #include "arraydef.h"
 #include "sarr-def.h"
 #include "encseq-def.h"
+#include "esafileend.h"
 #include "stamp.h"
 
 #include "readnextline.pr"
@@ -543,7 +544,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
   }
   if (!haserr && (demand & SARR_SUFTAB))
   {
-    suffixarray->suftab = genericmaptable(indexname,".suf",
+    suffixarray->suftab = genericmaptable(indexname,SUFTABSUFFIX,
                                           totallength+1,
                                           sizeof(Seqpos),
                                           env);
@@ -554,7 +555,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
   }
   if(!haserr && (demand & SARR_LCPTAB))
   {
-    suffixarray->lcptab = genericmaptable(indexname,".lcp",
+    suffixarray->lcptab = genericmaptable(indexname,LCPTABSUFFIX,
                                           totallength+1,
                                           sizeof(Uchar),
                                           env);
@@ -569,7 +570,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
     }
     if(!haserr && suffixarray->numoflargelcpvalues.value > 0)
     {
-      suffixarray->llvtab = genericmaptable(indexname,".llv",
+      suffixarray->llvtab = genericmaptable(indexname,LARGELCPTABSUFFIX,
                                             suffixarray->numoflargelcpvalues.
                                             value,
                                             sizeof(Largelcpvalue),
@@ -627,7 +628,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
   }
   if (!haserr && (demand & SARR_SUFTAB))
   {
-    INITBufferedfile(indexname,&suffixarray->suftabstream,".suf");
+    INITBufferedfile(indexname,&suffixarray->suftabstream,SUFTABSUFFIX);
     if(!suffixarray->longest.defined)
     {
       env_error_set(env,"longest not defined");
@@ -640,7 +641,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
   }
   if(!haserr && (demand & SARR_LCPTAB))
   {
-    INITBufferedfile(indexname,&suffixarray->lcptabstream,".lcp");
+    INITBufferedfile(indexname,&suffixarray->lcptabstream,LCPTABSUFFIX);
     if(fseek(suffixarray->lcptabstream.fp,(long) sizeof(Uchar),SEEK_SET) != 0)
     {
       env_error_set(env,"fseek(esastream) failed: %s",strerror(errno));
@@ -653,7 +654,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
     }
     if(!haserr && suffixarray->numoflargelcpvalues.value > 0)
     {
-      INITBufferedfile(indexname,&suffixarray->llvtabstream,".llv");
+      INITBufferedfile(indexname,&suffixarray->llvtabstream,LARGELCPTABSUFFIX);
     } 
   }
   return haserr ? -1 : 0;
