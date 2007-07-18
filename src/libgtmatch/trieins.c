@@ -140,11 +140,9 @@ static void showtrie2(const Trierep *trierep,
       }
     } else
     {
-      printf(" d=" FormatSeqpos ",i=%d",
+      printf(" d=" FormatSeqpos ",i=" Formatuint64_t "\n",
             PRINTSeqposcast(current->depth),
-            current->suffixinfo.ident
-            );
-      printf("\n");
+            PRINTuint64_tcast(current->suffixinfo.ident));
       showtrie2(trierep,characters,level+1,current);
     }
   }
@@ -262,8 +260,8 @@ static void shownode(const Trienode *node)
     printf("NULL");
   } else
   {
-    printf("%s %d",ISLEAF(node) ? "leaf" : "branch",
-                   node->suffixinfo.ident);
+    printf("%s " Formatuint64_t,ISLEAF(node) ? "leaf" : "branch",
+                   PRINTuint64_tcast(node->suffixinfo.ident));
   }
 }
 
@@ -332,7 +330,8 @@ static Trienode *makenewleaf(Trierep *trierep,Suffixinfo *suffixinfo)
 
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
-  printf("makenewleaf(%d)\n",suffixinfo->ident);
+  printf("makenewleaf(" Formatuint64_t ")\n",
+         PRINTuint64_tcast(suffixinfo->ident));
 #endif
 #endif
   newleaf = newTrienode(trierep);
@@ -349,7 +348,7 @@ static Trienode *makeroot(Trierep *trierep,Suffixinfo *suffixinfo)
 
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
-  printf("makeroot(%d)\n",suffixinfo->ident);
+  printf("makeroot(" Formatuint64_t ")\n",PRINTuint64_tcast(suffixinfo->ident));
 #endif
 #endif
   root = newTrienode(trierep);
@@ -384,7 +383,8 @@ static Trienode *makenewbranch(Trierep *trierep,
 
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
-  printf("makenewbranch(ident=%d)\n",suffixinfo->ident);
+  printf("makenewbranch(ident=" Formatuint64_t ")\n",
+          PRINTuint64_tcast(suffixinfo->ident));
 #endif
 #endif
   newbranch = newTrienode(trierep);
@@ -594,9 +594,9 @@ void deletesmallestpath(Trienode *smallest,Trierep *trierep)
     }
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
-    printf("delete %s %d\n",
+    printf("delete %s " Formatuint64_t "\n",
              ISLEAF(son) ? "leaf" : "branch",
-             son->suffixinfo.ident);
+             PRINTuint64_tcast(son->suffixinfo.ident));
 #endif
 #endif
     trierep->unusedTrienodes[trierep->nextunused++] = son;

@@ -512,10 +512,7 @@ static bool scanal1file(Suffixarray *suffixarray,const Str *indexname,Env *env)
 }
 
 int mapsuffixarray(Suffixarray *suffixarray,
-                   bool withencseq,
-                   bool withsuftab,
-                   bool withlcptab,
-                   bool withbwttab,
+                   unsigned int demand,
                    const Str *indexname,
                    Env *env)
 {
@@ -529,7 +526,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
   {
     haserr = scanal1file(suffixarray,indexname,env);
   }
-  if (!haserr && withencseq)
+  if (!haserr && (demand & SARR_ESQTAB))
   {
     suffixarray->encseq = initencodedseq(true,
 					 NULL,
@@ -544,7 +541,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
       haserr = true;
     }
   }
-  if (!haserr && withsuftab)
+  if (!haserr && (demand & SARR_SUFTAB))
   {
     suffixarray->suftab = genericmaptable(indexname,".suf",
                                           totallength+1,
@@ -555,7 +552,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
       haserr = true;
     }
   }
-  if (!haserr && withlcptab)
+  if(!haserr && (demand & SARR_LCPTAB))
   {
     suffixarray->lcptab = genericmaptable(indexname,".lcp",
                                           totallength+1,
@@ -583,7 +580,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
       }
     }
   }
-  if (!haserr && withbwttab)
+  if(!haserr && (demand & SARR_BWTTAB))
   {
     suffixarray->bwttab = genericmaptable(indexname,".bwt",
                                           totallength+1,
@@ -598,10 +595,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
 }
 
 int streamsuffixarray(Suffixarray *suffixarray,
-                      bool withencseq,
-                      bool withsuftab,
-                      bool withlcptab,
-                      bool withbwttab,
+                      unsigned int demand,
                       const Str *indexname,
                       Env *env)
 {
@@ -616,7 +610,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
   {
     haserr = scanal1file(suffixarray,indexname,env);
   }
-  if (!haserr && withencseq)
+  if (!haserr && (demand & SARR_ESQTAB))
   {
     suffixarray->encseq = initencodedseq(true,
 					 NULL,
@@ -631,7 +625,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
       haserr = true;
     }
   }
-  if (!haserr && withsuftab)
+  if (!haserr && (demand & SARR_SUFTAB))
   {
     INITBufferedfile(indexname,&suffixarray->suftabstream,".suf");
     if(!suffixarray->longest.defined)
@@ -640,11 +634,11 @@ int streamsuffixarray(Suffixarray *suffixarray,
       haserr = true;
     }
   }
-  if(!haserr && withbwttab)
+  if(!haserr && (demand & SARR_BWTTAB))
   {
     INITBufferedfile(indexname,&suffixarray->bwttabstream,".bwt");
   }
-  if(!haserr && withlcptab)
+  if(!haserr && (demand & SARR_LCPTAB))
   {
     INITBufferedfile(indexname,&suffixarray->lcptabstream,".lcp");
     if(fseek(suffixarray->lcptabstream.fp,(long) sizeof(Uchar),SEEK_SET) != 0)

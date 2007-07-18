@@ -16,7 +16,7 @@ typedef struct
   Seqpos idx,
          startpos;
 #ifdef WITHTRIEIDENT
-  unsigned int ident;
+  uint64_t  ident;
 #endif
 } Suffixinfo;
 

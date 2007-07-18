@@ -6,18 +6,12 @@ int initUcharBufferedfile(UcharBufferedfile *stream,
                           const char *suffix,Env *env);
 
 int mapsuffixarray(Suffixarray *suffixarray,
-                   bool withencseq,
-                   bool withsuftab,
-                   bool withlcptab,
-                   bool withbwttab,
+                   unsigned int demand,
                    const Str *indexname,
                    Env *env);
 
 int streamsuffixarray(Suffixarray *suffixarray,
-                      bool withencseq,
-                      bool withsuftab,
-                      bool withlcptab,
-                      bool withbwttab,
+                      unsigned int demand,
                       const Str *indexname,
                       Env *env);
 
