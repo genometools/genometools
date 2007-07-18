@@ -4,9 +4,15 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include "libgtcore/bioseq.h"
+#include "libgtcore/option.h"
+#include "libgtcore/scorefunction.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/xansi.h"
+#include "libgtext/alignment.h"
+#include "libgtext/swalign.h"
 
-#define DEFAULT_INDELSCORE -3
+#define DEFAULT_INDELSCORE  -3
 
 static OPrval parse_options(int *parsed_args, int *indelscore, int argc,
                             const char **argv, Env *env)

@@ -8,7 +8,9 @@
  * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
  */
 
-#include <libgtview/track.h>
+#include "libgtcore/ensure.h"
+#include "libgtcore/hashtable.h"
+#include "libgtview/track.h"
 
 typedef struct
 {

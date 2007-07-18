@@ -11,13 +11,16 @@
  * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
  * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
  */
-#include <libgtview/diagram.h>
-#include <libgtview/track.h>
+
+#include "libgtcore/ensure.h"
+#include "libgtcore/str.h"
+#include "libgtcore/undef.h"
 #include "libgtext/genome_node.h"
-#include <libgtcore/str.h>
-#include "libgtext/genome_feature_type.h"
 #include "libgtext/genome_feature.h"
-#include <libgtview/feature_index.h>
+#include "libgtext/genome_feature_type.h"
+#include "libgtview/diagram.h"
+#include "libgtview/feature_index.h"
+#include "libgtview/track.h"
 
 struct Diagram
 {

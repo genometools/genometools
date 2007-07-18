@@ -15,8 +15,8 @@
 #ifndef FEATUREINDEX_H
 #define FEATUREINDEX_H
 
-#include <libgtcore/array.h>
-#include <libgtcore/str.h>
+#include "libgtcore/array.h"
+#include "libgtcore/str.h"
 #include "libgtext/sequence_region.h"
 #include "libgtext/genome_feature.h"
 

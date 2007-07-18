@@ -7,12 +7,12 @@
  * \file config.c
  * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
  */
-#include <libgtview/config.h>
+#include "libgtview/config.h"
 #include <assert.h>
 #include <string.h>
-#include <libgtcore/warning.h>
-#include <libgtcore/ensure.h>
-#include <libgtview/config.h>
+#include "libgtcore/warning.h"
+#include "libgtcore/ensure.h"
+#include "libgtview/config.h"
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"

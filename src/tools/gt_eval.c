@@ -4,7 +4,11 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtext/gff3_in_stream.h"
+#include "libgtext/gtdata.h"
+#include "libgtext/stream_evaluator.h"
 
 typedef struct {
   bool verbose,
@@ -62,7 +66,7 @@ static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
 int gt_eval(int argc, const char **argv, Env *env)
 {
   GenomeStream *reality_stream,
-                *prediction_stream;
+               *prediction_stream;
   StreamEvaluator *evaluator;
   EvalArguments arguments;
   int had_err, parsed_args;

@@ -13,8 +13,8 @@
 
 #include <stdio.h>
 #include "libgtext/genome_stream.h"
-#include <libgtcore/hashtable.h>
-#include <libgtview/feature_index.h>
+#include "libgtcore/hashtable.h"
+#include "libgtview/feature_index.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct FeatureStream FeatureStream;

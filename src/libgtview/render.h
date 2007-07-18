@@ -11,9 +11,8 @@
 #ifndef RENDER_H
 #define RENDER_H
 
-#include <gtcore.h>
-#include <libgtview/diagram.h>
-#include <libgtview/config.h>
+#include "libgtview/diagram.h"
+#include "libgtview/config.h"
 
 /* the Render class
    contains methods for Diagram->Image conversion */

@@ -15,10 +15,10 @@
 #ifndef DIAGRAM_H
 #define DIAGRAM_H
 
-#include <libgtcore/array.h>
-#include <libgtview/config.h>
-#include <libgtcore/range.h>
-#include <libgtcore/hashtable.h>
+#include "libgtcore/array.h"
+#include "libgtview/config.h"
+#include "libgtcore/range.h"
+#include "libgtcore/hashtable.h"
 
 typedef struct Diagram Diagram;
 

@@ -5,6 +5,7 @@
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
+
 /**
  * \file gt_view.c
  * \author Malte Mader <mmader@zbh.uni-hamburg.de>
@@ -12,7 +13,21 @@
  * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
  */
 
-#include "gt.h"
+#include <string.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/fileutils.h"
+#include "libgtcore/option.h"
+#include "libgtcore/splitter.h"
+#include "libgtcore/undef.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtext/gff3_in_stream.h"
+#include "libgtext/gff3_out_stream.h"
+#include "libgtext/gtdata.h"
+#include "libgtview/config.h"
+#include "libgtview/diagram.h"
+#include "libgtview/feature_index.h"
+#include "libgtview/feature_stream.h"
+#include "libgtview/render.h"
 
 typedef struct {
   bool pipe,

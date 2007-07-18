@@ -8,8 +8,10 @@
  * \author Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
  */
 
-#include <libgtview/block.h>
-#include <libgtview/element.h>
+#include <string.h>
+#include "libgtcore/ensure.h"
+#include "libgtview/block.h"
+#include "libgtview/element.h"
 
 struct Block
 {
