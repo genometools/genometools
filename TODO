@@ -29,6 +29,8 @@ feature requests:
 - extend error messages for xmalloc(), xcalloc(), and xrealloc(): show requested
   memory sizes and maybe line number and file name)
 
+- remove GT_ENV_OPTIONS environment variable, do settings via gtdata/ dir
+
 
 view tool:
 ----------
