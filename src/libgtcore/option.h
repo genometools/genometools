@@ -125,11 +125,11 @@ Option*        option_new_ulong_min(const char *option_str,
                                     unsigned long default_value,
                                     unsigned long min_value, Env*);
 Option*        option_new_ulong_min_max(const char *option_str,
-                                 const char *description,
-                                 unsigned long *value,
-                                 unsigned long default_value,
-                                 unsigned long min_value,
-                                 unsigned long max_value, Env *env);
+                                        const char *description,
+                                        unsigned long *value,
+                                        unsigned long default_value,
+                                        unsigned long min_value,
+                                        unsigned long max_value, Env *env);
 Option*        option_new_string(const char *option_str,
                                  const char *description,
                                  Str *value, const char *default_value, Env*);

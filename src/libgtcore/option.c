@@ -1151,7 +1151,7 @@ Option *option_new_ulong_min_max(const char *option_str,
                                  unsigned long max_value, Env *env)
 {
   Option *o = option_new_ulong(option_str, description, value, default_value,
-                                env);
+                               env);
   o->min_value_set = true;
   o->min_value.ul = min_value;
   o->max_value_set = true;
