@@ -281,6 +281,7 @@ void wraptEmissionmergedesa(Emissionmergedesa *emmesa,Env *env)
   {
     freesuffixarray(emmesa->suffixarraytable + idx,env);
   }
+  FREESPACE(emmesa->suffixarraytable);
   FREESPACE(emmesa->trierep.encseqtable);
   if(emmesa->numofindexes > (uint32_t) 1)
   {

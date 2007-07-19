@@ -15,6 +15,12 @@ outoptions="-tis -lcp -suf -bwt"
 
 # the make call normally used for development
 cd testsuite
+num=2
+while test ${num} -lt 10 
+do
+  iterrunmerge.sh ${num}
+  num=`expr ${num} + 1`
+done
 for options in `alloutputoptions.rb`
 do
   cmpdbfile.sh ${options} -pl 1 -db ${ATK}

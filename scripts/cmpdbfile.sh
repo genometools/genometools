@@ -22,8 +22,4 @@ options="$*"
 
 checkerror "${GTDIR}/bin/gt suffixerator -indexname /tmp/idx-sfx ${options}"
 checkerror "mkvtree.sh -indexname /tmp/idx-mkv -dna ${options}"
-#TMPFILE1=`mktemp TMP.XXXXXX` || exit 1
-#grep -v 'integersize=' /tmp/idx-mkv.prj > ${TMPFILE1}
-#TMPFILE2=`mktemp TMP.XXXXXX` || exit 1
-#grep -v 'integersize=' /tmp/idx-sfx.prj > ${TMPFILE2}
 checkerror "cmp -s /tmp/idx-mkv.prj /tmp/idx-sfx.prj"
