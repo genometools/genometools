@@ -142,7 +142,7 @@ void str_append_double(Str *dest, double d, int precision, Env *env)
 
   assert (write < BUFSIZ);
 
-     str_append_cstr(dest, buf, env);
+  str_append_cstr(dest, buf, env);
 }
 
 char* str_get(const Str *s)
