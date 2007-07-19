@@ -39,3 +39,4 @@ function checksfxmap()
 
 checkerror "${VALGRIND} ${GTDIR}/bin/gt suffixerator -tis -suf -bwt -lcp -indexname /tmp/sfx $*"
 checkerror "checksfxmap /tmp/sfx"
+checkerror "${GTDIR}/bin/gt dev sfxmap -stream /tmp/sfx"

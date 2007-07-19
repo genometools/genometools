@@ -4,15 +4,10 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#ifndef STAMP_H
-#define STAMP_H
+#ifndef GT_TRIEINS_H
+#define GT_TRIEINS_H
 
-#define STAMP\
-        printf("STAMP(%d,%s)\n",__LINE__,__FILE__);\
-        (void) fflush(stdout)
-
-#ifndef STAMP
-#define STAMP
-#endif
+/* the trieins tool */
+int gt_trieins(int argc, const char **argv, Env *env);
 
 #endif

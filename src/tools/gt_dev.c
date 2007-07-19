@@ -11,6 +11,7 @@
 #include "gt_guessprot.h"
 #include "gt_regioncov.h"
 #include "gt_sfxmap.h"
+#include "gt_trieins.h"
 #include "gt_skproto.h"
 
 #ifdef LIBGTVIEW
@@ -44,6 +45,7 @@ void register_devtools(Toolbox *dev_toolbox, Env *env)
 #endif
   toolbox_add(dev_toolbox, "regioncov", gt_regioncov, env);
   toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap, env);
+  toolbox_add(dev_toolbox, "trieins", gt_trieins, env);
   toolbox_add(dev_toolbox, "skproto", gt_skproto, env);
 }
 

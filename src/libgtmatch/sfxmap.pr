@@ -1,6 +1,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+int initUcharBufferedfile(UcharBufferedfile *stream,
+                          const Str *indexname,
+                          const char *suffix,Env *env);
+
 int mapsuffixarray(Suffixarray *suffixarray,
                    bool withencseq,
                    bool withsuftab,
@@ -8,6 +12,14 @@ int mapsuffixarray(Suffixarray *suffixarray,
                    bool withbwttab,
                    const Str *indexname,
                    Env *env);
+
+int streamsuffixarray(Suffixarray *suffixarray,
+                      bool withencseq,
+                      bool withsuftab,
+                      bool withlcptab,
+                      bool withbwttab,
+                      const Str *indexname,
+                      Env *env);
 
 void freesuffixarray(Suffixarray *suffixarray,Env *env);
 

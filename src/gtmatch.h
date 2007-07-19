@@ -17,5 +17,6 @@
 #include <libgtmatch/suftaborder.pr>
 #include <libgtmatch/test-encseq.pr>
 #include <libgtmatch/test-mappedstr.pr>
+#include <libgtmatch/test-trieins.pr>
 
 #endif

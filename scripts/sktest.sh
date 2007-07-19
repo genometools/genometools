@@ -30,4 +30,5 @@ cmpdbfile.sh ${outoptions} -pl 1 -db ../testdata/Atinsert.fna ../testdata/Random
 cmpdbfile.sh ${outoptions} -pl 1 -db ../testdata/TTT-small.fna
 cmpdbfile.sh ${outoptions} -pl 1 -db ${ATK} ${AT} ${GRUMBACH}/*.fna
 testsuite.rb -keywords gt_suffixerator
+testsuite.rb -keywords gt_trieins
 cd ..
