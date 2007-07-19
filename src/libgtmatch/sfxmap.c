@@ -501,7 +501,7 @@ static bool scanal1file(Suffixarray *suffixarray,const Str *indexname,Env *env)
   bool haserr = false;
 
   tmpfilename = str_clone(indexname,env);
-  str_append_cstr(tmpfilename,".al1",env);
+  str_append_cstr(tmpfilename,ALPHATABSUFFIX,env);
   suffixarray->alpha = assigninputalphabet(false,
                                            false,
                                            tmpfilename,

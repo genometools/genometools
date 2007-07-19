@@ -51,4 +51,10 @@
 
 #define BCKTABSUFFIX  ".bck"
 
+/*
+  The following defines the suffix of a file to store alphabet.
+*/
+
+#define ALPHATABSUFFIX ".al1"
+
 #endif

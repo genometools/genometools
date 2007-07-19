@@ -207,7 +207,7 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
   bool haserr = false;
 
   env_error_check(env);
-  al1fp = opensfxfile(indexname,".al1",env);
+  al1fp = opensfxfile(indexname,ALPHATABSUFFIX,env);
   if(al1fp == NULL)
   {
     haserr = true;

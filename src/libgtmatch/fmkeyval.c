@@ -1,3 +1,9 @@
+/*
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
+*/
+
 #include <math.h>
 #include "types.h"
 #include "divmodmul.h"
@@ -5,7 +11,7 @@
 #include "alphadef.h"
 #include "safecast-gen.h"
 
-static Seqpos determinenumofcodes(uint32_t numofchars,uint32_t prefixlength)
+Seqpos determinenumofcodes(uint32_t numofchars,uint32_t prefixlength)
 {
   return (Seqpos) pow((double) numofchars,(double) prefixlength);
 }

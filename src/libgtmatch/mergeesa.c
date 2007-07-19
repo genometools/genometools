@@ -12,7 +12,6 @@
 
 #include "trieins.pr"
 #include "sfxmap.pr"
-#include "alphabet.pr"
 
  DECLAREREADFUNCTION(Seqpos);
 
@@ -36,7 +35,8 @@ static void fillandinsert(Trierep *trierep,
   insertsuffixintotrie(trierep,node,&sinfo);
 }
 
-static int inputthesequences(Seqpos *nextpostable,
+static int inputthesequences(Alphabet **alpha,
+                             Seqpos *nextpostable,
                              Suffixarray *suffixarraytable,
                              const StrArray *indexnametab,
                              unsigned int demand,
@@ -55,6 +55,10 @@ static int inputthesequences(Seqpos *nextpostable,
     {
       str_delete(indexname,env);
       return -1;
+    }
+    if(idx == 0)
+    {
+      *alpha = suffixarraytable[idx].alpha;
     }
     str_delete(indexname,env);
     nextpostable[idx] = 0;
@@ -235,7 +239,8 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
   emmesa->trierep.encseqtable = NULL;
   ALLOCASSIGNSPACE(emmesa->suffixarraytable,NULL,Suffixarray,numofindexes);
   ALLOCASSIGNSPACE(emmesa->nextpostable,NULL,Seqpos,numofindexes);
-  if(inputthesequences(emmesa->nextpostable,
+  if(inputthesequences(&emmesa->alpha,
+                       emmesa->nextpostable,
                        emmesa->suffixarraytable,
                        indexnametab,
                        demand,
