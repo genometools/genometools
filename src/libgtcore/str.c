@@ -134,30 +134,15 @@ void str_append_char(Str *dest, char c, Env *env)
 
 void str_append_double(Str *dest, double d, int precision, Env *env)
 {
-   unsigned long q;
+  char buf[BUFSIZ];
+  int write = 0;
   assert(dest);
-  assert(precision <= 8);
 
-  /* handle negative numbers */
-  if (d < 0) {
-     str_append_char (dest, '-', env);
-     d *= (-1);
-  }
+  write = snprintf (buf, BUFSIZ, "%.*f", precision, d);
 
-  /* handle numbers before decimal point */
-  q = (unsigned long) floor(d);
-  str_append_ulong (dest, q, env);
+  assert (write < BUFSIZ);
 
-  /* decimal point */
-  if (precision > 0) {
-     str_append_char (dest, '.', env);
-  }
-
-  /* decimals */
-  d -= q;
-  precision = (int) floor(pow(10, precision));
-  q = (unsigned long) floor(d * precision);
-  str_append_ulong (dest, q, env);
+     str_append_cstr(dest, buf, env);
 }
 
 char* str_get(const Str *s)
