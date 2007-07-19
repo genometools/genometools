@@ -59,7 +59,7 @@ LIBGTEXT_CXX_OBJ:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.o)
 LIBGTEXT_CXX_DEP:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.d)
 
 # the GenomeTools matching library
-LIBGTMATCH_SRC:=$(notdir $(wildcard src/libgtmatch/*.c))
+LIBGTMATCH_SRC:=$(wildcard src/libgtmatch/*.c)
 LIBGTMATCH_OBJ:=$(LIBGTMATCH_SRC:%.c=obj/%.o)
 
 # the GenomeTools view library
