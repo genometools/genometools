@@ -249,8 +249,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         seqid_str_created = true;
         auto_sr->sequence_region = sequence_region_new(seqid_str, range,
                                  "[feature was automatically created]", 0, env);
-        hashtable_add(gff3_parser->undefined_sequence_regions, seqid, auto_sr,
-                      env);
+        hashtable_add(gff3_parser->undefined_sequence_regions,
+                      str_get(seqid_str), auto_sr, env);
       }
       else {
         /* get seqid string */
@@ -384,6 +384,15 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         tmpline++;
       /* terminate seqid */
       *tmpline++ = '\0';
+      if (hashtable_get(gff3_parser->undefined_sequence_regions, seqid)) {
+        env_error_set(env, "sequence feature with id \"%s\" has been defined "
+                      "before the corresponding \"%s\" definition on line %lu "
+                      "in file \"%s\"", seqid, GFF_SEQUENCE_REGION, line_number,
+                      filename);
+        had_err = -1;
+      }
+    }
+    if (!had_err) {
       /* skip blanks */
       while (tmpline < tmplineend && tmpline[0] == ' ')
         tmpline++;

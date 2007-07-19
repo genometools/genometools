@@ -206,6 +206,13 @@ Test do
   run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_test_26.gff3", :retval => 1)
 end
 
+Name "gt gff3 test 27"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_test_27.gff3", :retval => 1)
+  grep($last_stderr, /before the corresponding/);
+end
+
 Name "gt gff3 fail 1"
 Keywords "gt_gff3"
 Test do
