@@ -117,7 +117,7 @@ size_t array_elem_size(const Array *a)
 
 unsigned long array_size(const Array *a)
 {
-  return a ? a->next_free :0;
+  return a ? a->next_free : 0;
 }
 
 void array_set_size(Array *a, unsigned long size)
