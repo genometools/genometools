@@ -4,7 +4,6 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <errno.h>
 #include "emimergeesa.h"
 #include "esafileend.h"
 #include "fmindex.h"
@@ -18,6 +17,7 @@
 #include "fmkeyval.pr"
 #include "mapspecfm.pr"
 #include "alphabet.pr"
+#include "opensfxfile.pr"
 
  DECLAREREADFUNCTION(Uchar);
 
@@ -267,13 +267,9 @@ int sufbwt2fmindex(Fmindex *fm,
     {
       longest.defined = false;
       longest.value = 0;
-      tmpfilename = str_clone(outfmindex,env);
-      str_append_cstr(tmpfilename,BWTTABSUFFIX,env);
-      outbwt = env_fa_fopen(env,str_get(tmpfilename),"wb");
+      outbwt = opensfxfile(outfmindex,BWTTABSUFFIX,"wb",env);
       if (outbwt == NULL)
       {
-        env_error_set(env,"cannot open file \"%s\": %s",str_get(tmpfilename),
-                                                        strerror(errno));
         haserr = true;
       }
     }

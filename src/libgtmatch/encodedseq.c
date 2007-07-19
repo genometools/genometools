@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 #include <limits.h>
-#include <errno.h>
 #include <ctype.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
@@ -375,7 +374,7 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
   env_error_check(env);
   encseqwithoptions.encseq = encseq;
   encseqwithoptions.writemode = true;
-  fp = opensfxfile(indexname,ENCODEDSEQINDEX,env);
+  fp = opensfxfile(indexname,ENCODEDSEQINDEX,"wb",env);
   if (fp == NULL)
   {
     haserr = true;
@@ -1309,17 +1308,12 @@ static void determineencseqkeyvalues(Encodedsequence *encseq,
 static int readsatfromfile(const Str *indexname,Env *env)
 {
   FILE *fp;
-  Str *tmpfilename; 
   int cc = 0;
   bool haserr = false;
 
-  tmpfilename = str_clone(indexname,env);
-  str_append_cstr(tmpfilename,ENCODEDSEQINDEX,env);
-  fp = env_fa_fopen(env,str_get(tmpfilename),"rb");
+  fp = opensfxfile(indexname,ENCODEDSEQINDEX,"rb",env);
   if (fp == NULL)
   {
-    env_error_set(env,"cannot open file \"%s\": %s",str_get(tmpfilename),
-                                                    strerror(errno));
     haserr = true;
   }
   if(!haserr)
@@ -1327,7 +1321,8 @@ static int readsatfromfile(const Str *indexname,Env *env)
     cc = fgetc(fp);
     if(cc == EOF)
     {
-      env_error_set(env,"illegal EOF symbol in \"%s\"",str_get(tmpfilename));
+      env_error_set(env,"illegal EOF symbol in \"%s%s\"",
+                     str_get(indexname),ENCODEDSEQINDEX);
       haserr = true;
     }
   }
@@ -1335,12 +1330,12 @@ static int readsatfromfile(const Str *indexname,Env *env)
   {
     if(cc < 0 || cc >= (int) Undefpositionaccesstype)
     {
-      env_error_set(env,"illegal type %d in \"%s\"",cc,str_get(tmpfilename));
+      env_error_set(env,"illegal type %d in \"%s%s\"",cc,
+                         str_get(indexname),ENCODEDSEQINDEX);
       haserr = true;
     }
   }
   env_fa_xfclose(fp,env);
-  str_delete(tmpfilename,env);
   return haserr ? -1 : cc;
 }
 

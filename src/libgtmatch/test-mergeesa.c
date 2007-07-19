@@ -27,7 +27,7 @@ typedef struct
          absstartpostable[SIZEOFMERGERESULTBUFFER];
 } Mergeoutinfo;
 
-static void initNameandFILE(NameandFILE *nf,
+static int initNameandFILE(NameandFILE *nf,
                             const Str *outindex,
                             const char *suffix,
                             Env *env)
@@ -35,6 +35,13 @@ static void initNameandFILE(NameandFILE *nf,
   nf->outfilename = str_clone(outindex,env);
   str_append_cstr(nf->outfilename,suffix,env);
   nf->fp = env_fa_fopen(env,str_get(nf->outfilename),"wb");
+  if(nf->fp == NULL)
+  {
+    env_error_set(env,"cannot open file \"%s\": %s\n",str_get(nf->outfilename),
+                                                      strerror(errno));
+    return -1;
+  }
+  return 0;
 }
 
 static void freeNameandFILE(NameandFILE *nf,Env *env)
@@ -128,12 +135,28 @@ static int mergeandstoreindex(const Str *storeindex,
   Seqpos *sequenceoffsettable, totallength; 
   bool haserr = false;
 
-  initNameandFILE(&mergeoutinfo.outsuf,storeindex,SUFTABSUFFIX,env);
-  initNameandFILE(&mergeoutinfo.outlcp,storeindex,LCPTABSUFFIX,env);
-  initNameandFILE(&mergeoutinfo.outllv,storeindex,LARGELCPTABSUFFIX,env);
+  if(initNameandFILE(&mergeoutinfo.outsuf,storeindex,SUFTABSUFFIX,env) != 0)
+  {
+    haserr = true;
+  }
+  if(!haserr)
+  {
+    if(initNameandFILE(&mergeoutinfo.outlcp,storeindex,LCPTABSUFFIX,env) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if(!haserr)
+  {
+    if(initNameandFILE(&mergeoutinfo.outllv,storeindex,LARGELCPTABSUFFIX,
+                       env) != 0)
+    {
+      haserr = true;
+    }
+  }
   smalllcpvalue = 0;
-  if(fwrite(&smalllcpvalue,sizeof(Uchar),(size_t) 1,
-            mergeoutinfo.outlcp.fp) != (size_t) 1)
+  if(!haserr && fwrite(&smalllcpvalue,sizeof(Uchar),(size_t) 1,
+                mergeoutinfo.outlcp.fp) != (size_t) 1)
   {
     env_error_set(env,"fwrite(%s) failed: %s",
                   str_get(mergeoutinfo.outlcp.outfilename),

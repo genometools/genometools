@@ -207,7 +207,7 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
   bool haserr = false;
 
   env_error_check(env);
-  al1fp = opensfxfile(indexname,ALPHATABSUFFIX,env);
+  al1fp = opensfxfile(indexname,ALPHATABSUFFIX,"wb",env);
   if(al1fp == NULL)
   {
     haserr = true;
@@ -224,7 +224,7 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
         if (!haserr && (FLAG))\
         {\
           outfileinfo.encseq = encseq;\
-          PTR = opensfxfile(so->str_indexname,SUFFIX,env);\
+          PTR = opensfxfile(so->str_indexname,SUFFIX,"wb",env);\
           if((PTR) == NULL)\
           {\
             haserr = true;\

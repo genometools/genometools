@@ -7,7 +7,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
-#include <errno.h>
 #include "libgtcore/strarray.h"
 #include "libgtcore/str.h"
 #include "types.h"
@@ -83,7 +82,7 @@ int outprjfile(const Str *indexname,
   bool haserr = false;
 
   env_error_check(env);
-  prjfp = opensfxfile(indexname,".prj",env);
+  prjfp = opensfxfile(indexname,".prj","wb",env);
   if (prjfp == NULL)
   {
     haserr = true;

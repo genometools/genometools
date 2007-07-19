@@ -36,9 +36,9 @@ static void assignfmmapspecification(ArrayMapspecification *mapspectable,
 }
 
 int flushfmindex2file(FILE *fp,
-                       Fmindex *fm,
-                       bool storeindexpos,
-                       Env *env)
+                      Fmindex *fm,
+                      bool storeindexpos,
+                      Env *env)
 {
   Fmindexwithoptions fmwithoptions;
 
@@ -48,7 +48,8 @@ int flushfmindex2file(FILE *fp,
                             (void *) &fmwithoptions,fm->sizeofindex,env);
 }
 
-int fillfmmapspecstartptr(Fmindex *fm,bool storeindexpos,
+int fillfmmapspecstartptr(Fmindex *fm,
+                          bool storeindexpos,
                           const Str *tmpfilename,
                           Env *env)
 {

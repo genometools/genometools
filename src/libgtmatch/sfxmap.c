@@ -18,6 +18,7 @@
 #include "readnextline.pr"
 #include "endianess.pr"
 #include "alphabet.pr"
+#include "opensfxfile.pr"
 
 #define DBFILEKEY "dbfile="
 
@@ -25,19 +26,13 @@
         setreadintkeys(&rik,VALNAME,VAL,sizeof(*(VAL)),FORCEREAD,env)
 
 #define INITBufferedfile(INDEXNAME,STREAM,SUFFIX)\
-        tmpfilename = str_clone(INDEXNAME,env);\
-        str_append_cstr(tmpfilename,SUFFIX,env);\
-        (STREAM)->fp = env_fa_fopen(env,str_get(tmpfilename),"rb");\
+        (STREAM)->fp = opensfxfile(INDEXNAME,SUFFIX,"rb",env);\
         if((STREAM)->fp == NULL)\
         {\
-          env_error_set(env,"cannot open file \"%s\": %s",\
-                             str_get(tmpfilename),\
-                             strerror(errno));\
           return -1;\
         }\
         (STREAM)->nextread = 0;\
-        (STREAM)->nextfree = 0;\
-        str_delete(tmpfilename,env)
+        (STREAM)->nextfree = 0
 
 #ifdef S_SPLINT_S
 #define FormatScanint64_t "%lu"
@@ -447,8 +442,6 @@ int initUcharBufferedfile(UcharBufferedfile *stream,
                           const Str *indexname,
                           const char *suffix,Env *env)
 {
-  Str *tmpfilename;
-
   INITBufferedfile(indexname,stream,suffix);
   return 0;
 }
@@ -603,7 +596,6 @@ int streamsuffixarray(Suffixarray *suffixarray,
                       const Str *indexname,
                       Env *env)
 {
-  Str *tmpfilename;
   bool haserr = false;
   Seqpos totallength;
 
