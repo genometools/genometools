@@ -16,6 +16,7 @@ INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
              -I/usr/local/include/cairo
 
 CFLAGS:=
+LDFLAGS:=
 CXXFLAGS:=
 GT_CFLAGS:= -g -Wall -Werror -pipe -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
             $(INCLUDEOPT)
@@ -26,7 +27,7 @@ EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DUNISTD_H="<unistd.h>" \
             -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\""
 GT_CXXFLAGS:= -g -pipe $(INCLUDEOPT)
 STEST_FLAGS:=
-LDFLAGS:=-L/usr/local/lib -L/usr/X11R6/lib
+GT_LDFLAGS:=-L/usr/local/lib -L/usr/X11R6/lib
 LDLIBS:=-lm -lz
 
 # try to set RANLIB automatically
@@ -131,7 +132,7 @@ ifeq ($(assert),no)
 endif
 
 ifeq ($(static),yes)
-  LDFLAGS += -static
+  GT_LDFLAGS += -static
 endif
 
 ifeq ($(libgtview),yes)
@@ -214,17 +215,17 @@ endif
 bin/skproto: obj/src/skproto.o obj/src/tools/gt_skproto.o lib/libgtcore.a lib/libbz2.a
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
+	@$(CXX) $(LDFLAGS) $(GT_LDFLAGS) $^ $(LDLIBS) -o $@
 
 bin/gt: obj/src/gt.o obj/src/gtr.o $(TOOLS_OBJ) $(GTLIBS)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
+	@$(CXX) $(LDFLAGS) $(GT_LDFLAGS) $^ $(LDLIBS) -o $@
 
 bin/rnv: obj/$(RNV_DIR)/xcl.o lib/librnv.a lib/libexpat.a
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(LDFLAGS) $^ -o $@
+	@$(CC) $(LDFLAGS) $(GT_LDFLAGS) $^ -o $@
 
 obj/gt_build.h:
 	@date +'#define GT_BUILT "%Y-%m-%d %H:%M:%S"' > $@
