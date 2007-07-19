@@ -8,9 +8,10 @@ fi
 
 numofsequences=$1
 
+INDEXNAME=../testdata/at1MB
 TMPFILE=`mktemp TMP.XXXXXX` || exit 1
-mkvtree.sh -db ${AT} -dna -pl -ois -tis
-runVmatchprog.sh vseqselect -randomnum ${numofsequences} at1MB > ${TMPFILE}
+mkvtree.sh -indexname ${INDEXNAME} -db ${AT} -dna -pl -ois -tis
+runVmatchprog.sh vseqselect -randomnum ${numofsequences} ${INDEXNAME} > ${TMPFILE}
 splitmultifasta.pl TMP 60 0 ${TMPFILE}
 
 filelist=`ls TMP-*`

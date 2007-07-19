@@ -20,6 +20,6 @@ function checkerror()
 
 options="$*"
 
-checkerror "${GTDIR}/bin/gt suffixerator -indexname /tmp/idx-sfx ${options}"
+checkerror "../bin/gt suffixerator -indexname /tmp/idx-sfx ${options}"
 checkerror "mkvtree.sh -indexname /tmp/idx-mkv -dna ${options}"
 checkerror "cmp -s /tmp/idx-mkv.prj /tmp/idx-sfx.prj"

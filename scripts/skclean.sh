@@ -16,9 +16,10 @@ do
   rm -f ${headfile}.o ${headfile}.d ${headfile}.splint
 done
 
-rm -f testsuite/*.lcp testsuite/*.llv testsuite/*.prj testsuite/*.suf 
-rm -f testsuite/*.al1 testsuite/*.esq
-rm -f testsuite/at1MB.*
+rm -f testdata/*.lcp testdata/*.llv testdata/*.prj testdata/*.suf 
+rm -f testdata/*.al1 testdata/*.esq testdata/*.bwt 
+rm -f testdata/fm-all.fm[bd]
+rm -f testdata/at1MB.*
 
 rm -f lib/libgtmatch.a
 rm -f testsuite/TMP.[a-zA-Z0-9]*
