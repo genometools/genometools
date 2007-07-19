@@ -144,7 +144,7 @@ static int scanuintintline(uint32_t *lengthofkey,
   return retval;
 }
 
-static int allkeysdefined(const Str *prjfile,const ArrayReadintkeys *rik,
+static int allkeysdefined(const Str *indexname,const ArrayReadintkeys *rik,
                           Env *env)
 {
   unsigned long i;
@@ -184,8 +184,9 @@ static int allkeysdefined(const Str *prjfile,const ArrayReadintkeys *rik,
     {
       if (rik->spaceReadintkeys[i].readflag == NULL)
       {
-        env_error_set(env,"file %s: missing line beginning with \"%s=\"",
-                           str_get(prjfile),
+        env_error_set(env,"file %s%s: missing line beginning with \"%s=\"",
+                           str_get(indexname),
+                           ".prj",
                            rik->spaceReadintkeys[i].keystring);
         return -1;
       }
@@ -197,7 +198,7 @@ static int allkeysdefined(const Str *prjfile,const ArrayReadintkeys *rik,
 
 static int scanprjfileviafileptr(Suffixarray *suffixarray,
                                  Seqpos *totallength,
-                                 const Str *prjfile,FILE *fpin,Env *env)
+                                 const Str *indexname,FILE *fpin,Env *env)
 {
   ArrayUchar linebuffer;
   uint32_t integersize, littleendian, linenum, lengthofkey;
@@ -351,8 +352,9 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
       if (!found)
       {
-        env_error_set(env,"file %s, line %u: cannot find key for \"%*.*s\"",
-                           str_get(prjfile),
+        env_error_set(env,"file %s%s, line %u: cannot find key for \"%*.*s\"",
+                           str_get(indexname),
+                           ".prj",
                            linenum,
                            (Fieldwidthtype) lengthofkey,
                            (Fieldwidthtype) lengthofkey,
@@ -362,7 +364,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
     }
   }
-  if (!haserr && allkeysdefined(prjfile,&rik,env) != 0)
+  if (!haserr && allkeysdefined(indexname,&rik,env) != 0)
   {
     haserr = true;
   }
@@ -370,8 +372,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       integersize != (uint32_t) 32 && 
       integersize != (uint32_t) 64)
   {
-    env_error_set(env,"%s contains illegal line defining the integer size",
-                  str_get(prjfile));
+    env_error_set(env,"%s%s contains illegal line defining the integer size",
+                  str_get(indexname),".prj");
     haserr = true;
   }
   if (!haserr && integersize != (uint32_t) (sizeof (Seqpos) * CHAR_BIT))
@@ -465,26 +467,20 @@ static void initsuffixarray(Suffixarray *suffixarray)
 static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
                         const Str *indexname,Env *env)
 {
-  Str *tmpfilename;
   bool haserr = false;
   FILE *fp;
 
-  tmpfilename = str_clone(indexname,env);
-  str_append_cstr(tmpfilename,".prj",env);
-  fp = env_fa_fopen(env,str_get(tmpfilename),"rb");
+  fp = opensfxfile(indexname,".prj","rb",env);
   if (fp == NULL)
   {
-    env_error_set(env,"cannot open file \"%s\": %s",str_get(tmpfilename),
-                                                    strerror(errno));
     haserr = true;
   }
   if (!haserr && scanprjfileviafileptr(suffixarray,totallength,
-                                      tmpfilename,fp,env) != 0)
+                                       indexname,fp,env) != 0)
   {
     haserr = true;
   }
   env_fa_xfclose(fp,env);
-  str_delete(tmpfilename,env);
   return haserr;
 }
 

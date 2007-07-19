@@ -181,14 +181,14 @@ int sufbwt2fmindex(Fmindex *fm,
          totallength, 
          suftabvalue, 
          *sequenceoffsettable = NULL,
-         firstignorespecial,
+         firstignorespecial = 0,
          nextmark, 
          *markptr, 
          nextprogress, 
          tmpsuftabvalue, 
          stepprogress;
-  uint32_t mapsize, 
-           suffixlength,
+  uint32_t mapsize = 0, 
+           suffixlength = 0,
            numofindexes; 
   int retval;
   DefinedSeqpos longest;
