@@ -7,7 +7,7 @@
 #ifndef TRANSCRIPT_USED_EXONS_H
 #define TRANSCRIPT_USED_EXONS_H
 
-#include <gtcore.h>
+#include "libgtcore/dlist.h"
 
 typedef struct TranscriptUsedExons TranscriptUsedExons;
 

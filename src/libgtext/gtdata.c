@@ -6,10 +6,13 @@
 
 #include <assert.h>
 #include <string.h>
-#include <libgtext/gtdata.h>
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
+#include "libgtcore/cstr.h"
+#include "libgtcore/fileutils.h"
+#include "libgtcore/splitter.h"
+#include "libgtext/gtdata.h"
 
 #define GTDATADIR "/gtdata"
 #define UPDIR     "/.."

@@ -3,12 +3,18 @@
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
+
 /**
  * \file gt_png.c
  * \author Gordon Gremme <gremme@zbh.uni-hamburg.de>
  */
 
-#include "gt.h"
+#include "libgtcore/fileutils.h"
+#include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtext/gff3_in_stream.h"
+#include "libgtext/gff3_out_stream.h"
+#include "libgtview/png_stream.h"
 
 typedef struct {
   Str *sequence_region_id;

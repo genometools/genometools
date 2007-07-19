@@ -7,7 +7,7 @@
 #ifndef TRANSCRIPT_BITTABS_H
 #define TRANSCRIPT_BITTABS_H
 
-#include <gtcore.h>
+#include "libgtcore/bittab.h"
 
 /* a container class for transcript bittabs */
 typedef struct TranscriptBittabs TranscriptBittabs;

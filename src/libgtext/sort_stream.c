@@ -5,8 +5,8 @@
 */
 
 #include <assert.h>
-#include <libgtext/genome_stream_rep.h>
-#include <libgtext/sort_stream.h>
+#include "libgtext/genome_stream_rep.h"
+#include "libgtext/sort_stream.h"
 
 struct SortStream
 {

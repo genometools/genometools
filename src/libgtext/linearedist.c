@@ -4,7 +4,8 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <libgtext/linearedist.h>
+#include "libgtcore/minmax.h"
+#include "libgtext/linearedist.h"
 
 static void fillDPtable(unsigned long *dptable,
                         const char *u, unsigned long n,

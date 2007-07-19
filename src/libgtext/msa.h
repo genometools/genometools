@@ -7,7 +7,7 @@
 #ifndef MSA_H
 #define MSA_H
 
-#include <gtcore.h>
+#include "libgtcore/env.h"
 
 /* the multiple sequence alignment (MSA) class */
 typedef struct MSA MSA;

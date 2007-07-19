@@ -8,7 +8,7 @@
 #define ALIGNMENT_H
 
 #include <stdio.h>
-#include <gtcore.h>
+#include "libgtcore/env.h"
 
 /* the Alignment class (an Alignment object has to be contructed backwards) */
 typedef struct Alignment Alignment;

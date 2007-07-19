@@ -4,7 +4,12 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include "libgtcore/bioseq.h"
+#include "libgtcore/fasta.h"
+#include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtext/gtdata.h"
+#include "libgtext/mutate.h"
 
 typedef struct {
   unsigned int rate; /* the mutate rate */

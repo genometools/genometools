@@ -11,8 +11,11 @@
 typedef struct GenomeNodeClass GenomeNodeClass;
 typedef struct GenomeNode GenomeNode;
 
-#include <gtcore.h>
-#include <libgtext/genome_visitor.h>
+#include "libgtcore/bittab.h"
+#include "libgtcore/phase.h"
+#include "libgtcore/range.h"
+#include "libgtcore/str.h"
+#include "libgtext/genome_visitor.h"
 
 typedef int (*GenomeNodeTraverseFunc)(GenomeNode*, void*, Env*);
 

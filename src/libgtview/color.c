@@ -9,7 +9,7 @@
  * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
  */
 
-#include <libgtview/color.h>
+#include "libgtview/color.h"
 
 bool color_equals(Color c1, Color c2)
 {

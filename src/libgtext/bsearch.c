@@ -5,7 +5,8 @@
 */
 
 #include <assert.h>
-#include <libgtext/bsearch.h>
+#include "libgtcore/ensure.h"
+#include "libgtext/bsearch.h"
 
 void bsearch_all(Array *members, const void *key, const void *base,
                  size_t nmemb, size_t size,

@@ -7,11 +7,12 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <libgtext/genome_node.h>
-#include <libgtext/genome_visitor_rep.h>
-#include <libgtext/gff3_output.h>
-#include <libgtext/gff3_parser.h>
-#include <libgtext/gff3_visitor.h>
+#include "libgtcore/hashtable.h"
+#include "libgtext/genome_node.h"
+#include "libgtext/genome_visitor_rep.h"
+#include "libgtext/gff3_output.h"
+#include "libgtext/gff3_parser.h"
+#include "libgtext/gff3_visitor.h"
 
 struct GFF3Visitor {
   const GenomeVisitor parent_instance;
@@ -217,8 +218,10 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   hashtable_reset(gff3_visitor->genome_feature_to_id_array, env);
   hashtable_reset(gff3_visitor->genome_feature_to_unique_id_str, env);
 
-  /* terminator */
-  genfile_xfputs("###\n", gff3_visitor->outfp);
+  /* show terminator, if the feature has children (otherwise it is clear that
+     the feature is complete, because no ID attribute has been shown) */
+  if (genome_node_has_children((GenomeNode*) gf))
+    genfile_xfputs("###\n", gff3_visitor->outfp);
 
   return had_err;
 }

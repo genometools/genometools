@@ -5,10 +5,12 @@
 */
 
 #include <assert.h>
-#include <gtcore.h>
-#include <libgtext/cds_visitor.h>
-#include <libgtext/genome_visitor_rep.h>
-#include <libgtext/splicedseq.h>
+#include "libgtcore/orf.h"
+#include "libgtcore/translate.h"
+#include "libgtcore/undef.h"
+#include "libgtext/cds_visitor.h"
+#include "libgtext/genome_visitor_rep.h"
+#include "libgtext/splicedseq.h"
 
 struct CDSVisitor {
   const GenomeVisitor parent_instance;

@@ -2,8 +2,6 @@ bugs:
 -----
 
 - does not compile on Mac OS X 10.3 (glob(3) is not fully POSIX compliant)
-- gt eval gt_gtf_to_gff3_test.gff3 gt_gtf_to_gff3_test.gff3 leaks memory (fix
-  with valgrind)
 
 
 feature requests:
@@ -47,6 +45,4 @@ view tool:
 BitPackArray/BitPackClass:
 --------------------------
 
-- make source and header files src_check clean
 - use naming conventions (e.g., bitpackarray_new instead of newBitPackArray)
-- shorten necessary compute time for unit tests

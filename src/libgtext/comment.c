@@ -6,8 +6,9 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <libgtext/comment.h>
-#include <libgtext/genome_node_rep.h>
+#include "libgtcore/cstr.h"
+#include "libgtext/comment.h"
+#include "libgtext/genome_node_rep.h"
 
 struct Comment
 {

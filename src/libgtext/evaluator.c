@@ -6,7 +6,8 @@
 
 #include <assert.h>
 #include <string.h>
-#include <libgtext/evaluator.h>
+#include "libgtcore/ensure.h"
+#include "libgtext/evaluator.h"
 
 struct Evaluator {
   unsigned long T, /* true */

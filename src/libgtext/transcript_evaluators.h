@@ -7,8 +7,8 @@
 #ifndef TRANSCRIPT_EVALUATORS_H
 #define TRANSCRIPT_EVALUATORS_H
 
-#include <libgtext/evaluator.h>
-#include <libgtext/transcript_exons.h>
+#include "libgtext/evaluator.h"
+#include "libgtext/transcript_exons.h"
 
 /* a container class for transcript evaluators */
 typedef struct TranscriptEvaluators TranscriptEvaluators;

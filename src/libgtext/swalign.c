@@ -6,8 +6,11 @@
 
 #include <assert.h>
 #include <limits.h>
-#include <libgtext/coordinate.h>
-#include <libgtext/swalign.h>
+#include "libgtcore/array2dim.h"
+#include "libgtcore/minmax.h"
+#include "libgtcore/undef.h"
+#include "libgtext/coordinate.h"
+#include "libgtext/swalign.h"
 
 typedef struct {
   long score;

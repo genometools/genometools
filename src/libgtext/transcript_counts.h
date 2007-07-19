@@ -7,7 +7,7 @@
 #ifndef TRANSCRIPT_COUNTS_H
 #define TRANSCRIPT_COUNTS_H
 
-#include <gtcore.h>
+#include "libgtcore/array.h"
 
 /* a container class for transcript count arrays */
 typedef struct TranscriptCounts TranscriptCounts;

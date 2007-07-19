@@ -6,7 +6,7 @@
 
 #include <assert.h>
 #include <stdarg.h>
-#include <libgtext/genome_stream_rep.h>
+#include "libgtext/genome_stream_rep.h"
 
 GenomeStream* genome_stream_create(const GenomeStreamClass *gsc,
                                    bool ensure_sorting, Env *env)

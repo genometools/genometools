@@ -7,7 +7,7 @@
 #ifndef LINEARALIGN_H
 #define LINEARALIGN_H
 
-#include <libgtext/alignment.h>
+#include "libgtext/alignment.h"
 
 /* (globally) align <u> and <v> in linear space (unit cost) and return one
    optimal Alignment */

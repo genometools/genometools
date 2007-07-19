@@ -7,12 +7,14 @@
  * \file element.c
  * \author Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
  */
-#include <libgtcore/array.h>
-#include <libgtext/genome_feature.h>
-#include <libgtext/genome_feature_type.h>
-#include <libgtcore/ensure.h>
-#include <libgtcore/strand.h>
-#include <libgtview/element.h>
+
+#include <string.h>
+#include "libgtcore/array.h"
+#include "libgtcore/ensure.h"
+#include "libgtcore/strand.h"
+#include "libgtext/genome_feature.h"
+#include "libgtext/genome_feature_type.h"
+#include "libgtview/element.h"
 
 struct Element
 {

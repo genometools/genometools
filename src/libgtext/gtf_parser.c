@@ -5,9 +5,16 @@
 */
 
 #include <assert.h>
-#include <libgtext/compare.h>
-#include <libgtext/genome_node.h>
-#include <libgtext/gtf_parser.h>
+#include <string.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/hashtable.h"
+#include "libgtcore/parseutils.h"
+#include "libgtcore/splitter.h"
+#include "libgtcore/undef.h"
+#include "libgtcore/warning.h"
+#include "libgtext/compare.h"
+#include "libgtext/genome_node.h"
+#include "libgtext/gtf_parser.h"
 
 #define GENE_ID_ATTRIBUTE       "gene_id"
 #define TRANSCRIPT_ID_ATTRIBUTE "transcript_id"

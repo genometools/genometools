@@ -9,11 +9,11 @@
  */
 
 #include <assert.h>
-#include <gtcore.h>
-#include <libgtview/feature_visitor.h>
-#include <libgtview/feature_index.h>
-#include <libgtext/genome_visitor_rep.h>
-#include <libgtext/sequence_region.h>
+
+#include "libgtview/feature_visitor.h"
+#include "libgtview/feature_index.h"
+#include "libgtext/genome_visitor_rep.h"
+#include "libgtext/sequence_region.h"
 
 struct FeatureVisitor {
   const GenomeVisitor parent_instance;

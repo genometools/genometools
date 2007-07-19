@@ -9,39 +9,41 @@
 
   <tr>
     <th bgcolor="99ccff" align="LEFT" valign="TOP" width="25%">
-	<img src="/images/so-logo.gif" border="0" align="CENTER" alt="SO">
+	<img src="images/black_so_logo.gif" border="0" align="CENTER" alt="SO">
     <p>
-    <b><a href="http://song.sourceforge.net/">Home Page</a></b><BR>
-    <b><a href="http://song.sourceforge.net/so.shtml">Description of SO</a></b>
-    <p>
+    <b><a href="http://www.sequenceontology.org">Home Page</a></b><BR>
+    <b><a href="http://www.sequenceontology.org/so.shtml">Description of SO</a></b>
+<b><BR><a href="view_SO.shtml">Views of SO</a></b>
+ 
+   <p>
     Resources
     <ul>
-			<li><a href="newsbrief.shtml">News</a></li>
-			<li><a href="http://sourceforge.net/project/showfiles.php?group_id=72703&package_id=118027">Releases</a></li>
-      <li><a href="http://sourceforge.net/mail/?group_id=72703">Mailing List</a></li>
-      <li><a href="http://sourceforge.net/projects/song">Developers Pages</a></li>
-      <li><a href="/cvs.shtml">Anonymous CVS download</a></li>
-	    <li><a href="http://song.cvs.sourceforge.net">Browse CVS directories</a></li>	   
-			<li><a href="SoStyleGuide.shtml">SO Style Guide</a></li> 
-			<li><a href="SOPresentations.shtml">SO presentations</a></li>
-			<li><a href="so_publications.shtml">SO publications</a></li>
-			<li><a href="SO_meeting.shtml">SO meetings</a></li>
+	<li><a href="http://sourceforge.net/project/showfiles.php?group_id=72703&package_id=118027">Releases</a></li>
+	<li><a href="http://sourceforge.net/mail/?group_id=72703">Mailing List</a></li>
+	<li><a href="http://sourceforge.net/projects/song">Developers Pages</a></li>
+	<li><a href="http://sourceforge.net/tracker/?group_id=72703&atid=810408">Request a term</a></li>      
+	<li><a href="cvs.shtml">Anonymous CVS download</a></li>
+	<li><a href="http://song.cvs.sourceforge.net">Browse CVS directories</a></li>	   
+	<li><a href="SoStyleGuide.shtml">SO Style Guide</a></li> 
+	<li><a href="SOPresentations.shtml">SO presentations</a></li>
+	<li><a href="so_publications.shtml">SO publications</a></li>
+	<li><a href="SO_meeting.shtml">SO meetings</a></li>
 			
-<li><a href="so_groups.shtml">Groups using SO</a></li>			
-			<li><a href="so_compliant_formats.shtml">SO Compliant formats</a></li>
-			    <ul>
-			      <li><a href="gff3.shtml">GFF3</a></li>
-			      <li><a href="http://www.gmod.org/schema">Chado</a></li>
-			      <li><a href="http://www.fruitfly.org/chaos-xml/">Chaos-xml</a></li>
-			    </ul>
-			<li><a href="so_compliant_software.shtml">SO Compliant Software</a></li>
-			<li><a href="so_mappings.shtml">SO mappings</a></li>
-			<li><a href="so_how_to.shtml">How to...</a></li>
-			<li><a href="SOFAQ.shtml">FAQ</a></li>
-			
-	  </ul>
-      </li>
-    </ul>
+	<li><a href="so_groups.shtml">Groups using SO</a></li>			
+	<li><a href="so_compliant_formats.shtml">SO Compliant formats</a></li>
+	<ul>
+		<li><a href = "gff3.shtml">GFF3</a></li>
+		<li><a href = "http://www.gmod.org/schema">Chado</a></li>
+		<li><a href = "http://www.fruitfly.org/chaos-xml">Chaos</a></li>
+	</ul>
+	<li><a href="so_compliant_software.shtml">SO Compliant Software</a></li>
+	<li><a href="so_mappings.shtml">SO mappings</a></li>
+	<li><a href="so_how_to.shtml">How to...</a></li>
+	<li><a href="SOFAQ.shtml">FAQ</a></li>
+	<li><a href="credits.shtml">Acknowledgements</a></li>
+		
+</ul>
+
 
     <p>
     Related Projects

@@ -4,7 +4,9 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/xansi.h"
 
 static OPrval parse_options(int *parsed_args, unsigned long *max_filesize_in_MB,
                             int argc, const char **argv, Env *env)

@@ -5,7 +5,10 @@
 */
 
 #include <ctype.h>
-#include "gt.h"
+#include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/xansi.h"
+#include "libgtext/coin_hmm.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Env *env)

@@ -7,8 +7,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
-#include <libgtext/compare.h>
-#include <libgtext/genome_feature_type.h>
+#include "libgtext/compare.h"
+#include "libgtext/genome_feature_type.h"
 
 /*
   Keep in sync with ``genome_feature_type'' in ``genome_feature.h''!
@@ -16,16 +16,22 @@
 */
 
 static const char *genome_feature_type_strings[] = { "CDS",
+                                                     "EST_match",
                                                      "LTR_retrotransposon",
                                                      "TF_binding_site",
+                                                     "cDNA_match",
                                                      "exon",
+                                                     "five_prime_UTR",
                                                      "gene",
                                                      "intron",
                                                      "inverted_repeat",
                                                      "long_terminal_repeat",
                                                      "mRNA",
+                                                     "protein_match",
                                                      "repeat_region",
-                                                     "target_site_duplication"
+                                                     "target_site_duplication",
+                                                     "three_prime_UTR",
+                                                     "transcript"
                                                    };
 
 int genome_feature_type_get(GenomeFeatureType *type, char *gft_string)

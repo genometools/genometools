@@ -5,10 +5,11 @@
 */
 
 #include <assert.h>
-#include <libgtext/regionmapping.h>
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
+#include "libgtcore/bioseq.h"
+#include "libgtext/regionmapping.h"
 
 struct RegionMapping {
   Str *mapping_filename,

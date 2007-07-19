@@ -25,6 +25,7 @@ void          str_append_cstr(Str*, const char*, Env*);
 /* appends an unterminated cstr */
 void          str_append_cstr_nt(Str*, const char*, unsigned long, Env*);
 void          str_append_char(Str*, char, Env*);
+void          str_append_double(Str*, double, int precision, Env*);
 void          str_append_ulong(Str*, unsigned long, Env*);
 void          str_set_length(Str*, unsigned long);
 void          str_reset(Str*);

@@ -5,9 +5,9 @@
 */
 
 #include <assert.h>
-#include <libgtext/extractfeat_stream.h>
-#include <libgtext/extractfeat_visitor.h>
-#include <libgtext/genome_stream_rep.h>
+#include "libgtext/extractfeat_stream.h"
+#include "libgtext/extractfeat_visitor.h"
+#include "libgtext/genome_stream_rep.h"
 
 struct ExtractFeatStream
 {

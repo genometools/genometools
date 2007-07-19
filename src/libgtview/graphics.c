@@ -13,7 +13,8 @@
 #include <cairo.h>
 #include <cairo-pdf.h>
 #include <cairo-ps.h>
-#include <libgtview/graphics.h>
+#include "libgtcore/minmax.h"
+#include "libgtview/graphics.h"
 
 #define EXON_ARROW_WIDTH        6
 

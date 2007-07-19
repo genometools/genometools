@@ -4,7 +4,13 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include <limits.h>
+#include "libgtcore/array2dim.h"
+#include "libgtcore/cstr.h"
+#include "libgtcore/option.h"
+#include "libgtcore/scorematrix.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/xansi.h"
 
 #define SCAN_ALPHA_VALUE(NUM, CHAR_1, CHAR_2)                                  \
         if (!had_err && (sscanf(argv[NUM], "%d", &rval) != 1 || rval > 0)) {   \

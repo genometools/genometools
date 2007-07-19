@@ -6,8 +6,8 @@
 
 #ifndef COIN_HMM
 
-#include <gtcore.h>
-#include <libgtext/hmm.h>
+#include "libgtcore/alpha.h"
+#include "libgtext/hmm.h"
 
 typedef enum {
   COIN_FAIR,
