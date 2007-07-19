@@ -501,6 +501,9 @@ extern int
 bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
           const BitString b, BitOffset offsetB, BitOffset numBitsB);
 
+extern void
+bsCopy(const BitString src, BitOffset offsetSrc, 
+       const BitString dest, BitOffset offsetDest, BitOffset numBits);
 /**
  * \brief Meta-Unit test function for bitPackString, calls all functions
  * mentioned below.
