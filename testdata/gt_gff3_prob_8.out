@@ -1,0 +1,6 @@
+##gff-version   3
+##sequence-region   gDNA 1 1000
+gDNA	.	gene	100	200	.	-	.	ID=gene1
+gDNA	.	exon	100	200	.	-	.	Parent=gene1
+###
+##sequence-region   cause_prob 1 1000

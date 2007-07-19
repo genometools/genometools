@@ -5,10 +5,10 @@
 */
 
 #include <assert.h>
-#include <libgtext/genome_stream_rep.h>
-#include <libgtext/mergefeat_stream_sorted.h>
-#include <libgtext/mergefeat_stream_unsorted.h>
-#include <libgtext/sort_stream.h>
+#include "libgtext/genome_stream_rep.h"
+#include "libgtext/mergefeat_stream_sorted.h"
+#include "libgtext/mergefeat_stream_unsorted.h"
+#include "libgtext/sort_stream.h"
 
 struct MergefeatStreamSorted {
   const GenomeStream parent_instance;

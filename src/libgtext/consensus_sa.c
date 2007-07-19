@@ -5,7 +5,9 @@
 */
 
 #include <assert.h>
-#include <libgtext/consensus_sa.h>
+#include "libgtcore/bittab.h"
+#include "libgtcore/undef.h"
+#include "libgtext/consensus_sa.h"
 
 typedef struct {
   const void *set_of_sas;

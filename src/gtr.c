@@ -4,10 +4,31 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
 #include "gtr.h"
 #include "lua.h"
 #include "lauxlib.h"
+#include "libgtcore/array.h"
+#include "libgtcore/bitpackarray.h"
+#include "libgtcore/bitpackstring.h"
+#include "libgtcore/bittab.h"
+#include "libgtcore/countingsort.h"
+#include "libgtcore/cstr.h"
+#include "libgtcore/dlist.h"
+#include "libgtcore/ensure.h"
+#include "libgtcore/env.h"
+#include "libgtcore/grep.h"
+#include "libgtcore/hashtable.h"
+#include "libgtcore/range.h"
+#include "libgtcore/splitter.h"
+#include "libgtcore/tokenizer.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/xansi.h"
+#include "libgtext/alignment.h"
+#include "libgtext/bsearch.h"
+#include "libgtext/evaluator.h"
+#include "libgtext/hmm.h"
+#include "libgtext/splicedseq.h"
+#include "libgtext/toolbox.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_clean.h"
@@ -27,7 +48,12 @@
 #include "tools/gt_stat.h"
 
 #ifdef LIBGTVIEW
+#include "libgtview/block.h"
+#include "libgtview/config.h"
+#include "libgtview/diagram.h"
+#include "libgtview/feature_index.h"
 #include "libgtview/gt_view.h"
+#include "libgtview/track.h"
 #endif
 
 struct GTR {
@@ -107,6 +133,10 @@ void gtr_register_components(GTR *gtr, Env *env)
   gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL, env);
   hashtable_add(gtr->unit_tests, "alignment class", alignment_unit_test, env);
   hashtable_add(gtr->unit_tests, "array class", array_unit_test, env);
+  hashtable_add(gtr->unit_tests, "bit pack array class",
+                bitPackArray_unit_test, env);
+  hashtable_add(gtr->unit_tests, "bit pack string module",
+                bitPackString_unit_test, env);
   hashtable_add(gtr->unit_tests, "bittab class", bittab_unit_test, env);
   hashtable_add(gtr->unit_tests, "bsearch module", bsearch_unit_test, env);
   hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test,
@@ -121,13 +151,6 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "splitter class", splitter_unit_test, env);
   hashtable_add(gtr->unit_tests, "string class", str_unit_test, env);
   hashtable_add(gtr->unit_tests, "tokenizer class", tokenizer_unit_test, env);
-  /* XXX: add unit tests if they have been fixed */
-#if 0
-  hashtable_add(gtr->unit_tests, "bit pack array class",
-                bitPackArray_unit_test, env);
-  hashtable_add(gtr->unit_tests, "bit pack string module",
-                bitPackString_unit_test, env);
-#endif
 #ifdef LIBGTVIEW
   hashtable_add(gtr->unit_tests, "block class", block_unit_test, env);
   hashtable_add(gtr->unit_tests, "config class", config_unit_test, env);

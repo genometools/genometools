@@ -7,7 +7,7 @@
 #ifndef STREAM_EVALUATOR_H
 #define STREAM_EVALUATOR_H
 
-#include <libgtext/genome_stream.h>
+#include "libgtext/genome_stream.h"
 
 typedef struct StreamEvaluator StreamEvaluator;
 

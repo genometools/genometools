@@ -19,6 +19,11 @@ CFLAGS:=
 CXXFLAGS:=
 GT_CFLAGS:= -g -Wall -Werror -pipe -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
             $(INCLUDEOPT)
+# expat needs -DHAVE_MEMMOVE
+# lua needs -DLUA_USE_POSIX
+# rnv needs -DUNISTD_H="<unistd.h>" -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\""
+EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DUNISTD_H="<unistd.h>" \
+            -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\""
 GT_CXXFLAGS:= -g -pipe $(INCLUDEOPT)
 STEST_FLAGS:=
 LDFLAGS:=-L/usr/local/lib -L/usr/X11R6/lib
@@ -40,49 +45,79 @@ GTLIBS:=lib/libgtext.a\
         lib/libbz2.a
 
 # the core GenomeTools library (no other dependencies)
-LIBGTCORE_SRC:=$(notdir $(wildcard src/libgtcore/*.c))
+LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
 LIBGTCORE_OBJ:=$(LIBGTCORE_SRC:%.c=obj/%.o)
+LIBGTCORE_DEP:=$(LIBGTCORE_SRC:%.c=obj/%.d)
 
 # the extended GenomeTools library (e.g., depends on Lua)
-LIBGTEXT_C_SRC:=$(notdir $(wildcard src/libgtext/*.c))
+LIBGTEXT_C_SRC:=$(wildcard src/libgtext/*.c)
 LIBGTEXT_C_OBJ:=$(LIBGTEXT_C_SRC:%.c=obj/%.o)
-LIBGTEXT_CXX_SRC:=$(notdir $(wildcard src/libgtext/*.cxx))
+LIBGTEXT_C_DEP:=$(LIBGTEXT_C_SRC:%.c=obj/%.d)
+LIBGTEXT_CXX_SRC:=$(wildcard src/libgtext/*.cxx)
 LIBGTEXT_CXX_OBJ:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.o)
+LIBGTEXT_CXX_DEP:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.d)
 
 # the GenomeTools view library
-LIBGTVIEW_C_SRC:=$(notdir $(wildcard src/libgtview/*.c))
+LIBGTVIEW_C_SRC:=$(wildcard src/libgtview/*.c)
 LIBGTVIEW_C_OBJ:=$(LIBGTVIEW_C_SRC:%.c=obj/%.o)
+LIBGTVIEW_C_DEP:=$(LIBGTVIEW_C_SRC:%.c=obj/%.d)
 
-TOOLS_SRC:=$(notdir $(wildcard src/tools/*.c))
+TOOLS_SRC:=$(wildcard src/tools/*.c)
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
+TOOLS_DEP:=$(TOOLS_SRC:%.c=obj/%.d)
 
-LIBAGG_SRC:=$(notdir $(wildcard src/external/agg-2.4/src/*.cpp src/external/agg-2.4/src/ctrl/*.cpp))
+LIBAGG_SRC:=$(wildcard src/external/agg-2.4/src/*.cpp src/external/agg-2.4/src/ctrl/*.cpp)
 LIBAGG_OBJ:=$(LIBAGG_SRC:%.cpp=obj/%.o)
+LIBAGG_DEP:=$(LIBAGG_SRC:%.cpp=obj/%.d)
 
-LIBEXPAT_OBJ:=obj/xmlparse.o obj/xmlrole.o obj/xmltok.o
+EXPAT_DIR:=src/external/expat-2.0.0/lib
+LIBEXPAT_SRC:=$(EXPAT_DIR)/xmlparse.c $(EXPAT_DIR)/xmlrole.c \
+              $(EXPAT_DIR)/xmltok.c
+LIBEXPAT_OBJ:=$(LIBEXPAT_SRC:%.c=obj/%.o)
+LIBEXPAT_DEP:=$(LIBEXPAT_SRC:%.c=obj/%.d)
 
-LIBLUA_OBJ=obj/lapi.o obj/lcode.o obj/ldebug.o obj/ldo.o obj/ldump.o \
-           obj/lfunc.o obj/lgc.o obj/llex.o obj/lmem.o obj/lobject.o \
-           obj/lopcodes.o obj/lparser.o obj/lstate.o obj/lstring.o   \
-           obj/ltable.o obj/ltm.o obj/lundump.o obj/lvm.o obj/lzio.o \
-           obj/lauxlib.o obj/lbaselib.o obj/ldblib.o obj/liolib.o    \
-           obj/lmathlib.o obj/loslib.o obj/ltablib.o obj/lstrlib.o   \
-           obj/loadlib.o obj/linit.o
+LUA_DIR:=src/external/lua-5.1.2/src
+LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
+           $(LUA_DIR)/ldo.c $(LUA_DIR)/ldump.c $(LUA_DIR)/lfunc.c \
+           $(LUA_DIR)/lgc.c $(LUA_DIR)/llex.c $(LUA_DIR)/lmem.c \
+           $(LUA_DIR)/lobject.c $(LUA_DIR)/lopcodes.c $(LUA_DIR)/lparser.c \
+           $(LUA_DIR)/lstate.c $(LUA_DIR)/lstring.c $(LUA_DIR)/ltable.c \
+           $(LUA_DIR)/ltm.c $(LUA_DIR)/lundump.c $(LUA_DIR)/lvm.c \
+           $(LUA_DIR)/lzio.c $(LUA_DIR)/lauxlib.c $(LUA_DIR)/lbaselib.c \
+           $(LUA_DIR)/ldblib.c $(LUA_DIR)/liolib.c $(LUA_DIR)/lmathlib.c \
+           $(LUA_DIR)/loslib.c $(LUA_DIR)/ltablib.c $(LUA_DIR)/lstrlib.c \
+           $(LUA_DIR)/loadlib.c $(LUA_DIR)/linit.c
+LIBLUA_OBJ:=$(LIBLUA_SRC:%.c=obj/%.o)
+LIBLUA_DEP:=$(LIBLUA_SRC:%.c=obj/%.d)
 
-LIBPNG_OBJ=obj/png.o obj/pngset.o obj/pngget.o obj/pngrutil.o obj/pngtrans.o \
-           obj/pngwutil.o obj/pngread.o obj/pngrio.o obj/pngwio.o            \
-           obj/pngwrite.o obj/pngrtran.o obj/pngwtran.o obj/pngmem.o         \
-           obj/pngerror.o obj/pngpread.o
+PNG_DIR:=external/libpng-1.2.18
+LIBPNG_SRC:=$(PNG_DIR)/png.o $(PNG_DIR)/pngset.o $(PNG_DIR)/pngget.o \
+            $(PNG_DIR)/pngrutil.o $(PNG_DIR)/pngtrans.o $(PNG_DIR)/pngwutil.o \
+            $(PNG_DIR)/pngread.o $(PNG_DIR)/pngrio.o $(PNG_DIR)/pngwio.o \
+            $(PNG_DIR)/pngwrite.o $(PNG_DIR)/pngrtran.o $(PNG_DIR)/pngwtran.o \
+            $(PNG_DIR)/pngmem.o $(PNG_DIR)/pngerror.o $(PNG_DIR)/pngpread.o
+LIBPNG_OBJ:=$(LIBPNG_SRC:%.c=obj/%.o)
+LIBPNG_DEP:=$(LIBPNG_SRC:%.c=obj/%.d)
 
-LIBRNV_OBJ := obj/rn.o obj/rnc.o obj/rnd.o obj/rnl.o obj/rnv.o obj/rnx.o obj/drv.o  \
-              obj/ary.o obj/xsd.o obj/xsd_tm.o obj/dxl.o obj/dsl.o obj/sc.o obj/u.o \
-              obj/ht.o obj/er.o obj/xmlc.o obj/s.o obj/m.o obj/rx.o
+RNV_DIR:=src/external/rnv-1.7.8
+LIBRNV_SRC:=$(RNV_DIR)/rn.c $(RNV_DIR)/rnc.c $(RNV_DIR)/rnd.c $(RNV_DIR)/rnl.c \
+            $(RNV_DIR)/rnv.c $(RNV_DIR)/rnx.c $(RNV_DIR)/drv.c \
+            $(RNV_DIR)/ary.c $(RNV_DIR)/xsd.c $(RNV_DIR)/xsd_tm.c \
+            $(RNV_DIR)/dxl.c $(RNV_DIR)/dsl.c $(RNV_DIR)/sc.c $(RNV_DIR)/u.c \
+            $(RNV_DIR)/ht.c $(RNV_DIR)/er.c $(RNV_DIR)/xmlc.c $(RNV_DIR)/s.c \
+            $(RNV_DIR)/m.c $(RNV_DIR)/rx.c
+LIBRNV_OBJ:=$(LIBRNV_SRC:%.c=obj/%.o)
+LIBRNV_DEP:=$(LIBRNV_SRC:%.c=obj/%.d)
 
-LIBBZ2_OBJ := obj/blocksort.o obj/huffman.o obj/crctable.o obj/randtable.o \
-              obj/compress.o obj/decompress.o obj/bzlib.o
+BZ2_DIR:=src/external/bzip2-1.0.4
+LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
+            $(BZ2_DIR)/randtable.c $(BZ2_DIR)/compress.c \
+            $(BZ2_DIR)/decompress.c $(BZ2_DIR)/bzlib.c
+LIBBZ2_OBJ:=$(LIBBZ2_SRC:%.c=obj/%.o)
+LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.o)
 
-SERVER=gordon@genomethreader.org
-WWWBASEDIR=/var/www/servers/genometools.org
+SERVER=gordon@genometools.org
+WWWBASEDIR=/var/www/servers
 
 # process arguments
 ifneq ($(opt),no)
@@ -109,29 +144,27 @@ endif
 # set prefix for install target
 prefix ?= /usr/local
 
-all: dirs $(GTLIBS) bin/skproto bin/gt bin/rnv
-
-dirs:
-	@test -d obj     || mkdir -p obj
-	@test -d lib     || mkdir -p lib
-	@test -d bin     || mkdir -p bin
+all: $(GTLIBS) bin/skproto bin/gt bin/rnv
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
-	@echo "[link $@]"
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBEXPAT_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
 lib/libagg.a: $(LIBAGG_OBJ)
-	@echo "[link $@]"
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBAGG_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
 lib/libbz2.a: $(LIBBZ2_OBJ)
-	@echo "[link $@]"
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBBZ2_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
@@ -139,51 +172,59 @@ endif
 
 lib/libgtcore.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h \
                  $(LIBGTCORE_OBJ)
-	@echo "[link $@]"
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBGTCORE_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
 lib/libgtext.a: $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
-	@echo "[link $@]"
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBGTEXT_C_OBJ) $(LIBGTEXT_CXX_OBJ) $(LIBLUA_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
 lib/libgtview.a: $(LIBGTVIEW_C_OBJ)
-	@echo "[link $@]"
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBGTVIEW_C_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
 lib/libpng.a: $(LIBPNG_OBJ)
-	@echo "[link $@]"
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBPNG_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
 lib/librnv.a: $(LIBRNV_OBJ)
-	@echo "[link $@]"
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBRNV_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-bin/skproto: obj/skproto.o obj/gt_skproto.o lib/libgtcore.a lib/libbz2.a
-	@echo "[link $@]"
+bin/skproto: obj/src/skproto.o obj/src/tools/gt_skproto.o lib/libgtcore.a lib/libbz2.a
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
-bin/gt: obj/gt.o obj/gtr.o $(TOOLS_OBJ) $(GTLIBS)
-	@echo "[link $@]"
+bin/gt: obj/src/gt.o obj/src/gtr.o $(TOOLS_OBJ) $(GTLIBS)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
-bin/rnv: obj/xcl.o lib/librnv.a lib/libexpat.a
+bin/rnv: obj/$(RNV_DIR)/xcl.o lib/librnv.a lib/libexpat.a
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(LDFLAGS) $^ -o $@
-	@echo "[link $@]"
 
 obj/gt_build.h:
 	@date +'#define GT_BUILT "%Y-%m-%d %H:%M:%S"' > $@
@@ -234,65 +275,23 @@ src/libgtcore/checkbitpackstring64.c: src/libgtcore/checkbitpackstring.template
 	@scripts/template2c.pl $^
 
 # we create the dependency files on the fly
-obj/%.o: src/%.c
-	@echo "[compile $@]"
-	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+obj/%.o: %.c
+	@echo "[compile $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) $(EXT_FLAGS) \
+        -MT $@ -MMD -MP -MF $(@:.o=.d)
 
-obj/%.o: src/libgtcore/%.c
+obj/%.o: %.cxx
 	@echo "[compile $@]"
-	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
-
-obj/%.o: src/libgtext/%.c
-	@echo "[compile $@]"
-	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
-
-obj/%.o: src/libgtext/%.cxx
-	@echo "[compile $@]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
-
-obj/%.o: src/libgtview/%.c
-	@echo "[compile $@]"
-	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
-
-obj/%.o: src/tools/%.c
-	@echo "[compile $@]"
-	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
-
-obj/%.o: src/external/agg-2.4/src/%.cpp
-	@echo "[compile $@]"
-	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
-
-obj/%.o: src/external/agg-2.4/src/ctrl/%.cpp
-	@echo "[compile $@]"
-	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
-
-obj/%.o: src/external/bzip2-1.0.4/%.c
-	@echo "[compile $@]"
-	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
-
-obj/%.o: src/external/expat-2.0.0/lib/%.c
-	@echo "[compile $@]"
-	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DHAVE_MEMMOVE -MT $@ -MMD \
-        -MP -MF $(@:.o=.d)
-
-obj/%.o: src/external/lua-5.1.2/src/%.c
-	@echo "[compile $@]"
-	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DLUA_USE_POSIX -MT $@ -MMD \
-        -MP -MF $(@:.o=.d)
-
-obj/%.o: src/external/libpng-1.2.18/%.c
-	@echo "[compile $@]"
-	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
-
-obj/%.o: src/external/rnv-1.7.8/%.c
-	@echo "[compile $@]"
-	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) -DUNISTD_H="<unistd.h>" \
-        -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\"" -MT $@ -MMD -MP   \
-        -MF $(@:.o=.d)
 
 # read deps
--include obj/*.d
+-include $(LIBGTCORE_DEP) $(LIBGTEXT_C_DEP) $(LIBGTEXT_CXX_DEP) \
+         $(LIBGTVIEW_C_DEP) $(TOOLS_DEP) $(LIBAGG_DEP) $(LIBEXPAT_DEP) \
+         $(LIBLUA_DEP) $(LIBPNG_DEP) $(LIBRNV_DEP) $(LIBBBZ2_DEP)
 
+.SUFFIXES:
 .PHONY: dist srcdist release gt install splint test clean cleanup apidoc
 
 dist: all
@@ -309,14 +308,15 @@ release: apidoc
 	git tag "v`cat VERSION`"
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
 	gzip -9 > genometools-`cat VERSION`.tar.gz
-	scp genometools-`cat VERSION`.tar.gz $(SERVER):$(WWWBASEDIR)/htdocs/pub
-	rsync -rv doc/api/html/ $(SERVER):$(WWWBASEDIR)/htdocs/apidoc
+	scp genometools-`cat VERSION`.tar.gz $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/pub
+	rsync -rv doc/api/html/ $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/apidoc
 	git push --tags
 
 installwww:
-	rsync -rv www/ $(SERVER):$(WWWBASEDIR)
+# install genometools.org website
+	rsync -rv www/genometools.org/ $(SERVER):$(WWWBASEDIR)/genometools.org
 
-gt: dirs bin/gt
+gt: bin/gt
 
 install:
 	test -d $(prefix)/bin || mkdir -p $(prefix)/bin

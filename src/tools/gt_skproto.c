@@ -6,7 +6,10 @@
 */
 
 #include <ctype.h>
-#include "gt.h"
+#include <string.h>
+#include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/warning.h"
 
 #define MAX_LINE_LENGTH  80
 

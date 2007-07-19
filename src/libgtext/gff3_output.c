@@ -5,7 +5,8 @@
 */
 
 #include <assert.h>
-#include <libgtext/gff3_output.h>
+#include "libgtcore/undef.h"
+#include "libgtext/gff3_output.h"
 
 void gff3_output_leading(GenomeFeature *gf, GenFile *outfp)
 {

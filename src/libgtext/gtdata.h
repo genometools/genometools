@@ -8,8 +8,7 @@
 #define GTDATA_H
 
 /* This module defines functions working on the ``gtdata'' directory */
-
-#include <gtcore.h>
+#include "libgtcore/str.h"
 
 /* get the path to the gtdata/ directory (including it) for the given 'prog' */
 Str* gtdata_get_path(const char *prog, Env*);

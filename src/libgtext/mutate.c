@@ -6,7 +6,8 @@
 
 #include <assert.h>
 #include <string.h>
-#include <libgtext/mutate.h>
+#include "libgtcore/mathsupport.h"
+#include "libgtext/mutate.h"
 
 #define MUTATED_DESC_PRIMER " [mutated with rate "
 

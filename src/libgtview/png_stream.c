@@ -9,10 +9,11 @@
  */
 
 #include <assert.h>
-#include <gtcore.h>
-#include <libgtview/png_stream.h>
-#include <libgtview/png_visitor.h>
-#include <libgtext/genome_stream_rep.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/progressbar.h"
+#include "libgtext/genome_stream_rep.h"
+#include "libgtview/png_stream.h"
+#include "libgtview/png_visitor.h"
 
 struct PNGStream {
   const GenomeStream parent_instance;

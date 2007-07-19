@@ -4,10 +4,9 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <gtcore.h>
-#include <libgtext/cds_stream.h>
-#include <libgtext/cds_visitor.h>
-#include <libgtext/genome_stream_rep.h>
+#include "libgtext/cds_stream.h"
+#include "libgtext/cds_visitor.h"
+#include "libgtext/genome_stream_rep.h"
 
 struct CDSStream
 {

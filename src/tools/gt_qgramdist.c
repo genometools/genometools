@@ -4,7 +4,13 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include "libgtcore/bioseq.h"
+#include "libgtcore/cstr.h"
+#include "libgtcore/fileutils.h"
+#include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/xansi.h"
+#include "libgtext/qgramdist.h"
 
 static OPrval parse_options(int *parsed_args, unsigned int *q, int argc,
                             const char **argv, Env *env)

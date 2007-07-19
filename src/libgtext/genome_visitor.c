@@ -6,7 +6,7 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <libgtext/genome_visitor_rep.h>
+#include "libgtext/genome_visitor_rep.h"
 
 GenomeVisitor* genome_visitor_create(const GenomeVisitorClass *gvc, Env *env)
 {

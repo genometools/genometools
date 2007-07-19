@@ -4,7 +4,10 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include "libgtcore/bioseq.h"
+#include "libgtcore/option.h"
+#include "libgtcore/undef.h"
+#include "libgtcore/versionfunc.h"
 
 typedef struct {
   bool recreate,

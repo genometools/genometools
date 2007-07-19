@@ -4,7 +4,13 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include "libgtcore/option.h"
+#include "libgtcore/outputfile.h"
+#include "libgtcore/undef.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtext/filter_stream.h"
+#include "libgtext/gff3_in_stream.h"
+#include "libgtext/gff3_out_stream.h"
 
 typedef struct {
   bool verbose;

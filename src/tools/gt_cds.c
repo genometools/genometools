@@ -4,7 +4,13 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtext/cds_stream.h"
+#include "libgtext/gff3_in_stream.h"
+#include "libgtext/gff3_out_stream.h"
+#include "libgtext/gtdata.h"
+#include "libgtext/seqid2file.h"
 
 #define GT_CDS_SOURCE_TAG "gt cds"
 

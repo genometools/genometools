@@ -13,9 +13,8 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-#include <gtcore.h>
-#include <libgtview/color.h>
-#include <libgtview/element.h>
+#include "libgtview/color.h"
+#include "libgtview/element.h"
 
 /* specifies arrowhead directions on elements */
 enum

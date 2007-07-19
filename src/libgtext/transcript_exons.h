@@ -7,8 +7,8 @@
 #ifndef TRANSCRIPT_EXONS_H
 #define TRANSCRIPT_EXONS_H
 
-#include <libgtext/transcript_bittabs.h>
-#include <libgtext/transcript_counts.h>
+#include "libgtext/transcript_bittabs.h"
+#include "libgtext/transcript_counts.h"
 
 /* a container class for transcript exon arrays */
 typedef struct TranscriptExons TranscriptExons;

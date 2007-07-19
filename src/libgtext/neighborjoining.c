@@ -4,9 +4,11 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <libgtext/neighborjoining.h>
+#include "libgtcore/bittab.h"
+#include "libgtcore/undef.h"
+#include "libgtext/neighborjoining.h"
 
-#define INDENTFACTOR	10
+#define INDENTFACTOR    10
 
 typedef struct {
   unsigned long leftdaughter,  /* reference to the left  daughter */

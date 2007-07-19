@@ -5,7 +5,7 @@
 */
 
 #include <assert.h>
-#include <libgtext/reverse.h>
+#include "libgtext/reverse.h"
 
 static int complement(char *reverse_char, char dna_char, Env *env)
 {

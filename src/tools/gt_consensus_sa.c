@@ -4,7 +4,14 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include "libgtcore/array.h"
+#include "libgtcore/option.h"
+#include "libgtcore/range.h"
+#include "libgtcore/str.h"
+#include "libgtcore/strand.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/xansi.h"
+#include "libgtext/consensus_sa.h"
 
 #define DELIMITER         ','
 #define FORWARDSTRANDCHAR '+'
@@ -14,9 +21,9 @@ typedef struct {
   Str* id;
   bool forward;
   Array *exons; /* the exon ranges */
-} SplicedAlignment;
+} SimpleSplicedAlignment;
 
-static void initSplicedAlignment(SplicedAlignment *sa, Env *env)
+static void initSimpleSplicedAlignment(SimpleSplicedAlignment *sa, Env *env)
 {
   assert(sa);
   sa->id = str_new(env);
@@ -24,7 +31,7 @@ static void initSplicedAlignment(SplicedAlignment *sa, Env *env)
   sa->exons = array_new(sizeof (Range), env);
 }
 
-static int parse_input_line(SplicedAlignment *alignment, const char *line,
+static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
                             unsigned long line_length, Env *env)
 {
   long leftpos, rightpos;
@@ -104,7 +111,7 @@ static int parse_input_file(Array *spliced_alignments,
                              const char *file_name, Env *env)
 {
   FILE *input_file;
-  SplicedAlignment sa;
+  SimpleSplicedAlignment sa;
   int had_err = 0;
   Str *line;
   env_error_check(env);
@@ -114,7 +121,7 @@ static int parse_input_file(Array *spliced_alignments,
 
   while (!had_err && str_read_next_line(line, input_file, env) != EOF) {
     /* init new spliced alignment */
-    initSplicedAlignment(&sa, env);
+    initSimpleSplicedAlignment(&sa, env);
     /* parse input line and save result in spliced alignment */
     had_err = parse_input_line(&sa, str_get(line), str_length(line), env);
     if (!had_err) {
@@ -132,7 +139,7 @@ static int parse_input_file(Array *spliced_alignments,
 
 static Range get_genomic_range(const void *sa)
 {
-  SplicedAlignment *alignment = (SplicedAlignment*) sa;
+  SimpleSplicedAlignment *alignment = (SimpleSplicedAlignment*) sa;
   Range range;
   assert(alignment);
   range.start = ((Range*) array_get_first(alignment->exons))->start;
@@ -142,7 +149,7 @@ static Range get_genomic_range(const void *sa)
 
 static Strand get_strand(const void *sa)
 {
-  SplicedAlignment *alignment = (SplicedAlignment*) sa;
+  SimpleSplicedAlignment *alignment = (SimpleSplicedAlignment*) sa;
   if (alignment->forward)
     return STRAND_FORWARD;
   return STRAND_REVERSE;
@@ -150,7 +157,7 @@ static Strand get_strand(const void *sa)
 
 static void get_exons(Array *exon_ranges, const void *sa, Env *env)
 {
-  SplicedAlignment *alignment = (SplicedAlignment*) sa;
+  SimpleSplicedAlignment *alignment = (SimpleSplicedAlignment*) sa;
   assert(alignment);
   array_add_array(exon_ranges, alignment->exons, env);
 }
@@ -189,8 +196,8 @@ static int range_compare_long_first(Range range_a, Range range_b)
 
 static int compare_spliced_alignment(const void *a, const void *b)
 {
-  SplicedAlignment *sa_a = (SplicedAlignment*) a,
-                   *sa_b = (SplicedAlignment*) b;
+  SimpleSplicedAlignment *sa_a = (SimpleSplicedAlignment*) a,
+                   *sa_b = (SimpleSplicedAlignment*) b;
   Range range_a, range_b;
   range_a.start = ((Range*) array_get_first(sa_a->exons))->start;
   range_a.end   = ((Range*) array_get_last(sa_a->exons))->end;
@@ -217,7 +224,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 int gt_consensus_sa(int argc, const char **argv, Env *env)
 {
   Array *spliced_alignments;
-  SplicedAlignment *sa;
+  SimpleSplicedAlignment *sa;
   unsigned long i;
   int parsed_args, had_err = 0;
   env_error_check(env);
@@ -231,19 +238,19 @@ int gt_consensus_sa(int argc, const char **argv, Env *env)
   assert(parsed_args == 1);
 
   /* parse input file and store resuilts in the spliced alignment array */
-  spliced_alignments = array_new(sizeof (SplicedAlignment), env);
+  spliced_alignments = array_new(sizeof (SimpleSplicedAlignment), env);
   had_err = parse_input_file(spliced_alignments, argv[1], env);
 
   if (!had_err) {
     /* sort spliced alignments */
     qsort(array_get_space(spliced_alignments), array_size(spliced_alignments),
-          sizeof (SplicedAlignment), compare_spliced_alignment);
+          sizeof (SimpleSplicedAlignment), compare_spliced_alignment);
 
     /* compute the consensus spliced alignments */
     consensus_sa(array_get_space(spliced_alignments),
-                 array_size(spliced_alignments), sizeof (SplicedAlignment),
-                 get_genomic_range, get_strand, get_exons, process_splice_form,
-                 NULL, env);
+                 array_size(spliced_alignments),
+                 sizeof (SimpleSplicedAlignment), get_genomic_range, get_strand,
+                 get_exons, process_splice_form, NULL, env);
   }
 
   /* free */
