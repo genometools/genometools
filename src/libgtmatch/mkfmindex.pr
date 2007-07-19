@@ -1,0 +1,8 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int parseargsandcallmkfmindex(int argc,const char **argv,Env *env);
+
+#ifdef __cplusplus
+}
+#endif

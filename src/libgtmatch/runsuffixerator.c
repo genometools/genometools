@@ -362,7 +362,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   return haserr ? -1 : 0;
 }
 
-int parseargsandcallsuffixerator(int argc,const char *argv[],Env *env)
+int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
 {
   Suffixeratoroptions so;
   int retval;

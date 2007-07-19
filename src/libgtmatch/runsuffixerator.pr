@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int parseargsandcallsuffixerator(int argc,const char *argv[],Env *env);
+int parseargsandcallsuffixerator(int argc,const char **argv,Env *env);
 
 #ifdef __cplusplus
 }

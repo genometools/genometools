@@ -13,6 +13,7 @@
 #include <libgtmatch/alphabet.pr>
 #include <libgtmatch/guessprot.pr>
 #include <libgtmatch/runsuffixerator.pr>
+#include <libgtmatch/mkfmindex.pr>
 #include <libgtmatch/sfxmap.pr>
 #include <libgtmatch/suftaborder.pr>
 #include <libgtmatch/test-encseq.pr>
