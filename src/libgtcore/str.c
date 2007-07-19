@@ -135,13 +135,10 @@ void str_append_char(Str *dest, char c, Env *env)
 void str_append_double(Str *dest, double d, int precision, Env *env)
 {
   char buf[BUFSIZ];
-  int write = 0;
+  int rval;
   assert(dest);
-
-  write = snprintf (buf, BUFSIZ, "%.*f", precision, d);
-
-  assert (write < BUFSIZ);
-
+  rval = snprintf(buf, BUFSIZ, "%.*f", precision, d);
+  assert(rval < BUFSIZ);
   str_append_cstr(dest, buf, env);
 }
 
