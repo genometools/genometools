@@ -21,8 +21,8 @@
 #include <libgtcore/ensure.h>
 
 enum {
-  MAX_RND_NUMS = 10,
-/*   MAX_RND_NUMS = 100000, */
+/*   MAX_RND_NUMS = 10, */
+  MAX_RND_NUMS = 100000,
 };
 
 static inline int
@@ -172,8 +172,8 @@ bitPackString8_unit_test(Env *env)
     }
 #ifdef VERBOSE_UNIT_TEST
     fputs("passed\n", stderr);
-  }
 #endif /* VERBOSE_UNIT_TEST */
+  }
 #ifdef VERBOSE_UNIT_TEST
   fputs("bsStoreUniformUInt8Array/bsGetUInt8: ", stderr);
 #endif /* VERBOSE_UNIT_TEST */
@@ -401,4 +401,3 @@ bitPackString8_unit_test(Env *env)
   }
   freeResourcesAndReturn(had_err);
 }
-
