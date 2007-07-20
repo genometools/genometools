@@ -8,6 +8,7 @@ int scanfastasequence(
         const StrArray *filenametab,
         Filelengthvalues **filelengthtab,
         const Uchar *symbolmap,
+        bool plainformat,
         Env *env);
 
 #ifdef __cplusplus

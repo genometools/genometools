@@ -527,6 +527,8 @@ int mapsuffixarray(Suffixarray *suffixarray,
 					 totallength,
 					 &suffixarray->specialcharinfo,
 					 suffixarray->alpha,
+                                         false,  /* not relevant, since
+                                                 indexname != NULL*/
                                          NULL,
 					 env);
     if (suffixarray->encseq == NULL)
@@ -610,6 +612,8 @@ int streamsuffixarray(Suffixarray *suffixarray,
 					 totallength,
 					 &suffixarray->specialcharinfo,
 					 suffixarray->alpha,
+                                         false, /* not relevant since 
+                                                   indexname != NULL */
                                          NULL,
 					 env);
     if (suffixarray->encseq == NULL)

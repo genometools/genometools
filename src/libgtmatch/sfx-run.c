@@ -241,7 +241,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   Filelengthvalues *filelengthtab = NULL;
   Outfileinfo outfileinfo;
   bool haserr = false;
-  Encodedsequence *encseq;
+  Encodedsequence *encseq = NULL;
   Measuretime *mtime;
 
   env_error_check(env);
@@ -265,6 +265,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
                           so->filenametab,
                           &filelengthtab,
                           getsymbolmapAlphabet(alpha), 
+                          so->isplain,
                           env) != 0)
     {
       haserr = true;
@@ -287,6 +288,7 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
                             totallength,
                             &specialcharinfo,
                             alpha,
+                            so->isplain,
                             str_length(so->str_sat) > 0
                                   ? str_get(so->str_sat)
                                   : NULL,

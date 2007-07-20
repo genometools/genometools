@@ -22,6 +22,7 @@ typedef struct
   StrArray *filenametab;
   bool isdna,
        isprotein,
+       isplain,
        outtistab,
        outsuftab,
        outlcptab,

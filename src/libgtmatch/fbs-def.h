@@ -42,6 +42,7 @@ typedef struct
   Filelengthvalues *filelengthtab;
   const StrArray *filenametab;
   const Uchar *symbolmap;
+  bool plainformat;
 } Fastabufferstate;
 
 #endif

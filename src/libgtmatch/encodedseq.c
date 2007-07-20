@@ -1358,6 +1358,7 @@ static int readsatfromfile(const Str *indexname,Env *env)
                                            const Specialcharinfo
                                                  *specialcharinfo,
                                            const Alphabet *alphabet,
+                                           bool plainformat,
                                            const char *str_sat,
                                            Env *env)
 {
@@ -1493,11 +1494,12 @@ static int readsatfromfile(const Str *indexname,Env *env)
       Fastabufferstate fbs;
       encseq->mappedptr = NULL;
   
-      initfastabufferstate(&fbs,
-                           filenametab,
-                           getsymbolmapAlphabet(alphabet),
-                           NULL,
-                           env);
+      initformatbufferstate(&fbs,
+                            filenametab,
+                            plainformat ? NULL : getsymbolmapAlphabet(alphabet),
+                            plainformat,
+                            NULL,
+                            env);
       printf("# call %s\n",
              encodedseqfunctab[(int) sat].fillpos.funcname);
       if (encodedseqfunctab[(int) sat].fillpos.function(encseq,&fbs,env)

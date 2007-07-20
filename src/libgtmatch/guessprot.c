@@ -24,11 +24,12 @@ int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
   Fastabufferstate fbs;
   int retval;
 
-  initfastabufferstate(&fbs,
-                       filenametab,
-                       NULL,
-                       NULL,
-                       env);
+  initformatbufferstate(&fbs,
+                        filenametab,
+                        NULL,
+                        false,
+                        NULL,
+                        env);
   for (currentposition = 0; currentposition < (Seqpos) 1000; currentposition++)
   {
     retval = readnextUchar(&currentchar,&fbs,env);

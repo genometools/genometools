@@ -58,6 +58,7 @@ int scanfastasequence(
         const StrArray *filenametab,
         Filelengthvalues **filelengthtab,
         const Uchar *symbolmap,
+        bool plainformat,
         Env *env)
 {
   Fastabufferstate fbs;
@@ -74,11 +75,12 @@ int scanfastasequence(
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
 
-  initfastabufferstate(&fbs,
-                       filenametab,
-                       symbolmap,
-                       filelengthtab,
-                       env);
+  initformatbufferstate(&fbs,
+                        filenametab,
+                        symbolmap,
+                        plainformat,
+                        filelengthtab,
+                        env);
   specialrangelengths = initdistribution(env);
   for (pos = 0; /* Nothing */; pos++)
   {

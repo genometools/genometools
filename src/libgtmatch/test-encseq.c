@@ -27,11 +27,12 @@ int testencodedsequence(const StrArray *filenametab,
   Encodedsequencescanstate *esr;
 
   env_error_check(env);
-  initfastabufferstate(&fbs,
-                       filenametab,
-                       symbolmap,
-                       NULL,
-                       env);
+  initformatbufferstate(&fbs,
+                        filenametab,
+                        symbolmap,
+                        false,
+                        NULL,
+                        env);
   esr = initEncodedsequencescanstate(encseq,env);
   for (pos=0; /* Nothing */; pos++)
   {

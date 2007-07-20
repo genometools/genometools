@@ -25,8 +25,14 @@ static OPrval parse_options(int *parsed_args,
                             int argc, const char **argv, Env *env)
 {
   OptionParser *op;
-  Option *option, *optionsmap, *optiondna, *optionprotein,
-         *optionpl, *optionindexname, *optiondb;
+  Option *option, 
+         *optionsmap, 
+         *optiondna, 
+         *optionprotein, 
+         *optionplain,
+         *optionpl, 
+         *optionindexname, 
+         *optiondb;
   OPrval oprval;
 
   env_error_check(env);
@@ -50,6 +56,10 @@ static OPrval parse_options(int *parsed_args,
   optionprotein = option_new_bool("protein","input is Protein sequence",
                                   &so->isprotein,false,env);
   option_parser_add_option(op, optionprotein, env);
+
+  optionplain = option_new_bool("plain","process as plain text",
+                                &so->isplain,false,env);
+  option_parser_add_option(op, optionplain, env);
 
   optionindexname = option_new_string("indexname",
                                       "specify name for index to be generated",
@@ -132,6 +142,20 @@ static OPrval parse_options(int *parsed_args,
       }
     }
   }
+  if (oprval == OPTIONPARSER_OK)
+  {
+    if (option_is_set(optionplain))
+    {
+      if(!option_is_set(optiondna) && 
+         !option_is_set(optionprotein) && 
+         !option_is_set(optionsmap))
+      {
+        env_error_set(env,"if option -plain is used, then any of the options "
+                          "-dna, -protein, or -smap is mandatory");
+        oprval = OPTIONPARSER_ERROR;
+      }
+    }
+  }
   option_parser_delete(op, env);
   return oprval;
 }
@@ -151,6 +175,10 @@ static void showoptions(const Suffixeratoroptions *so)
   if (so->isprotein)
   {
     printf("# protein=yes\n");
+  }
+  if(so->isplain)
+  {
+    printf("# plain=yes\n");
   }
   printf("# indexname=\"%s\"\n",str_get(so->str_indexname));
   if (so->prefixlength != UNDEFPREFIXLENGTH)

@@ -443,6 +443,7 @@ int getencseqkmersgeneric(
         uint32_t numofchars,
         uint32_t kmersize,
         const Uchar *symbolmap,
+        bool plainformat,
         Env *env)
 {
   uint32_t overshoot;
@@ -479,11 +480,12 @@ int getencseqkmersgeneric(
     Fastabufferstate fbs;
     int retval;
 
-    initfastabufferstate(&fbs,
-                         filenametab,
-                         symbolmap,
-                         NULL,
-                         env);
+    initformatbufferstate(&fbs,
+                          filenametab,
+                          symbolmap,
+                          plainformat,
+                          NULL,
+                          env);
     for (currentposition = 0; /* Nothing */; currentposition++)
     {
       retval = readnextUchar(&charcode,&fbs,env);
@@ -519,6 +521,7 @@ int getfastastreamkmers(
         uint32_t numofchars,
         uint32_t kmersize,
         const Uchar *symbolmap,
+        bool plainformat,
         Env *env)
 {
   return getencseqkmersgeneric(NULL,
@@ -528,6 +531,7 @@ int getfastastreamkmers(
                                numofchars,
                                kmersize,
                                symbolmap,
+                               plainformat,
                                env);
 }
 
@@ -547,5 +551,6 @@ void getencseqkmers(
                                numofchars,
                                kmersize,
                                NULL,
+                               false,
                                env);
 }

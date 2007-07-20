@@ -50,6 +50,7 @@ int overallspecialranges(const Encodedsequence *encseq,
                                            const Specialcharinfo
                                                  *specialcharinfo,
                                            const Alphabet *alphabet,
+                                           bool plainformat,
                                            const char *str_sat,
                                            Env *env);
 

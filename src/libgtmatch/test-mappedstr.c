@@ -206,6 +206,7 @@ int verifymappedstr(const Suffixarray *suffixarray,Env *env)
                           numofchars,
                           suffixarray->prefixlength,
                           getsymbolmapAlphabet(suffixarray->alpha),
+                          false,
                           env) != 0)
   {
     haserr = true;

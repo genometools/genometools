@@ -12,7 +12,7 @@ static int readnextUchar(Uchar *val,Fastabufferstate *fbs,Env *env)
     {
       return 0;
     }
-    if (advanceFastabufferstate(fbs,env) != 0)
+    if (advanceformatbufferstate(fbs,env) != 0)
     {
       return -1;
     }

@@ -10,6 +10,7 @@ int getencseqkmersgeneric(
         uint32_t numofchars,
         uint32_t kmersize,
         const Uchar *symbolmap,
+        bool plainformat,
         Env *env);
 
 int getfastastreamkmers(
@@ -20,6 +21,7 @@ int getfastastreamkmers(
         uint32_t numofchars,
         uint32_t kmersize,
         const Uchar *symbolmap,
+        bool plainformat,
         Env *env);
 
 void getencseqkmers(
