@@ -1,4 +1,4 @@
-/*
+  /*
   Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
@@ -454,9 +454,9 @@ int config_unit_test(Env* env)
   tmpcol = config_get_color(cfg, "foo", env);
   ensure(had_err, color_equals(tmpcol,defcol));
   num = config_get_num(cfg,"format", "margins", 10, env);
-  ensure(had_err, num == 10);
+  ensure(had_err, num == 10.0);
   str = config_get_cstr(cfg, "collapse", "exon", "", env);
-  ensure(had_err, (str == ""));
+  ensure(had_err, (strcmp(str,"")==0));
 
   /* change some values... */
   config_set_color(cfg, "exon", col, env);
@@ -469,9 +469,9 @@ int config_unit_test(Env* env)
   tmpcol = config_get_color(cfg, "exon", env);
   ensure(had_err, color_equals(tmpcol,col));
   num = config_get_num(cfg,"format", "margins", 10,  env);
-  ensure(had_err, num == 11);
+  ensure(had_err, num == 11.0);
   num = config_get_num(cfg,"format", "foo", 10, env);
-  ensure(had_err, num == 2);
+  ensure(had_err, num == 2.0);
 
   /* create a new color definition */
   config_set_color(cfg, "foo", col, env);
@@ -483,11 +483,11 @@ int config_unit_test(Env* env)
   tmpcol = config_get_color(cfg, "foo", env);
   ensure(had_err, color_equals(tmpcol,col));
   str = config_get_cstr(cfg, "bar", "baz", "", env);
-  ensure(had_err, (str != ""));
+  ensure(had_err, (strcmp(str,"")!=0));
   ensure(had_err, (strcmp(str,test1)==0));
   str = config_get_cstr(cfg, "bar", "test", "", env);
-  ensure(had_err, (str == ""));
-
+  ensure(had_err, (strcmp(str,"")==0));
+  
   /* mem cleanup */
   str_delete(luafile, env);
   config_delete(cfg, env);
