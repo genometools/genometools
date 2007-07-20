@@ -501,6 +501,15 @@ extern int
 bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
           const BitString b, BitOffset offsetB, BitOffset numBitsB);
 
+/**
+ * \brief copy (sub-)bitstring to another position (in same or other
+ * bitstring)
+ * @param src bitsring to copy from
+ * @param offsetSrc bit position in src to start copying from
+ * @param dest bitstring to copy to
+ * @param offsetDest bit position in dest to start writing at
+ * @param numBits number of bits to copy
+ */
 extern void
 bsCopy(const BitString src, BitOffset offsetSrc, 
        const BitString dest, BitOffset offsetDest, BitOffset numBits);

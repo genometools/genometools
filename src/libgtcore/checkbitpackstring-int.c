@@ -113,7 +113,9 @@ bitPackStringInt_unit_test(Env *env)
       unsigned v1 = randSrc[i];
       int bits1 = requiredUIntBits(v1);
       unsigned r1 = bsGetUInt(bitStore, offset + bits0, bits1);
-      int result;
+      int result = -2; /*< -2 is not a return value of bsCompare, thus
+                        *   if it is displayed, there was an earlier
+                        *   error. */
       ensure(had_err, r0 == v0 && r1 == v1);
       ensure(had_err, icmp(v0, v1) ==
              (result = bsCompare(bitStore, offset, bits0,
