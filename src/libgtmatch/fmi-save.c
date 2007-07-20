@@ -27,16 +27,15 @@ static int writefmascii (const Str *indexname,
   fprintf (prjfp, "longest=" FormatSeqpos "\n",
                    PRINTSeqposcast(fm->longestsuffixpos));
   fprintf (prjfp, "storeindexpos=%d\n", storeindexpos ? 1 : 0);
-  fprintf (prjfp, "log blocksize=%u\n", (unsigned int) fm->log2bsize);
-  fprintf (prjfp, "log markdistance=%u\n", (unsigned int) fm->log2markdist);
-  fprintf (prjfp, "specialcharacters=" 
-                   FormatSeqpos " " 
-                   FormatSeqpos " " 
-                   FormatSeqpos " " 
-                   FormatSeqpos "\n",
-                  PRINTSeqposcast(fm->specialcharinfo.specialcharacters),
-                  PRINTSeqposcast(fm->specialcharinfo.specialranges),
-                  PRINTSeqposcast(fm->specialcharinfo.lengthofspecialprefix),
+  fprintf (prjfp, "log2blocksize=%u\n", (unsigned int) fm->log2bsize);
+  fprintf (prjfp, "log2markdistance=%u\n", (unsigned int) fm->log2markdist);
+  fprintf (prjfp, "specialcharacters=" FormatSeqpos "\n",
+                  PRINTSeqposcast(fm->specialcharinfo.specialcharacters));
+  fprintf (prjfp, "specialranges=" FormatSeqpos "\n",
+                  PRINTSeqposcast(fm->specialcharinfo.specialranges));
+  fprintf (prjfp, "lengthofspecialprefix=" FormatSeqpos "\n",
+                  PRINTSeqposcast(fm->specialcharinfo.lengthofspecialprefix));
+  fprintf (prjfp, "lengthofspecialsuffix=" FormatSeqpos "\n",
                   PRINTSeqposcast(fm->specialcharinfo.lengthofspecialsuffix));
   fprintf (prjfp, "suffixlength=%u\n", (unsigned int) fm->suffixlength);
   env_fa_xfclose(prjfp, env);

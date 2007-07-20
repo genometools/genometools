@@ -27,7 +27,7 @@ do
   prfile="${localpath}/`basename ${filename} .c`.pr"
   if test ${filename} -nt ${prfile}
   then
-    skproto.x ${filename} > ${prfile}
+    bin/gt dev skproto ${filename} > ${prfile}
   fi
 done
 

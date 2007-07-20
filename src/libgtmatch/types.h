@@ -83,6 +83,12 @@ typedef uint32_t Seqpos;         /* \Typedef{Seqpos} */
 
 #endif /* _LP64 */
 
+#ifdef S_SPLINT_S
+#define FormatScanint64_t "%lu"
+#else
+#define FormatScanint64_t "%020" SCNd64
+#endif
+
 /*
   Argument of a function from \texttt{ctype.h}.
 */
@@ -238,5 +244,11 @@ typedef struct
   bool defined;
   Seqpos value;
 } DefinedSeqpos;
+
+typedef union
+{
+  uint32_t smallvalue;
+  uint64_t bigvalue;
+} Smallorbigint;
 
 #endif
