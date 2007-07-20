@@ -10,7 +10,7 @@
 /* implements the ``genome visitor'' interface */
 typedef struct RegionCovVisitor RegionCovVisitor;
 
-#include <libgtext/genome_visitor.h>
+#include "libgtext/genome_visitor.h"
 
 const GenomeVisitorClass* regioncov_visitor_class(void);
 GenomeVisitor*            regioncov_visitor_new(unsigned long max_feature_dist,

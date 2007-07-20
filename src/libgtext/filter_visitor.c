@@ -5,8 +5,10 @@
 */
 
 #include <string.h>
-#include <libgtext/filter_visitor.h>
-#include <libgtext/genome_visitor_rep.h>
+#include "libgtcore/queue.h"
+#include "libgtcore/undef.h"
+#include "libgtext/filter_visitor.h"
+#include "libgtext/genome_visitor_rep.h"
 
 struct FilterVisitor {
   const GenomeVisitor parent_instance;

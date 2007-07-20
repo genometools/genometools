@@ -5,9 +5,11 @@
 */
 
 #include <assert.h>
-#include <gtcore.h>
-#include <libgtext/genome_visitor_rep.h>
-#include <libgtext/regioncov_visitor.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/hashtable.h"
+#include "libgtcore/minmax.h"
+#include "libgtext/genome_visitor_rep.h"
+#include "libgtext/regioncov_visitor.h"
 
 struct RegionCovVisitor {
   const GenomeVisitor parent_instance;

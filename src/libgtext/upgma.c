@@ -4,9 +4,11 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <libgtext/upgma.h>
+#include "libgtcore/bittab.h"
+#include "libgtcore/undef.h"
+#include "libgtext/upgma.h"
 
-#define INDENTFACTOR	10
+#define INDENTFACTOR    10
 
 typedef struct {
   unsigned long leftdaughter,   /* reference to the left  daughter */

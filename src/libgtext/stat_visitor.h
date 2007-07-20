@@ -10,7 +10,7 @@
 /* implements the ``genome visitor'' interface, gathers statistics */
 typedef struct StatVisitor StatVisitor;
 
-#include <libgtext/genome_visitor.h>
+#include "libgtext/genome_visitor.h"
 
 const GenomeVisitorClass* stat_visitor_class(void);
 GenomeVisitor*            stat_visitor_new(bool gene_length_distri,

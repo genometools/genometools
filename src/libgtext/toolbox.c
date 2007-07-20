@@ -4,9 +4,11 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <gtcore.h>
-#include <libgtext/compare.h>
-#include <libgtext/toolbox.h>
+#include <string.h>
+#include "libgtcore/hashtable.h"
+#include "libgtcore/xansi.h"
+#include "libgtext/compare.h"
+#include "libgtext/toolbox.h"
 
 struct Toolbox {
   Hashtable *tools;

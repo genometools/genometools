@@ -5,9 +5,9 @@
 */
 
 #include <assert.h>
-#include <libgtext/genome_stream_rep.h>
-#include <libgtext/gtf_in_stream.h>
-#include <libgtext/gtf_parser.h>
+#include "libgtext/genome_stream_rep.h"
+#include "libgtext/gtf_in_stream.h"
+#include "libgtext/gtf_parser.h"
 
 struct GTFInStream
 {

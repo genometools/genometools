@@ -4,7 +4,10 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtext/gff3_out_stream.h"
+#include "libgtext/gtf_in_stream.h"
 
 static OPrval parse_options(int *parsed_args, bool *be_tolerant, int argc,
                             const char **argv, Env *env)

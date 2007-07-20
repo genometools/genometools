@@ -8,7 +8,7 @@
 #define CSA_STREAM_H
 
 #include <stdio.h>
-#include <libgtext/genome_stream.h>
+#include "libgtext/genome_stream.h"
 
 /* implements the ``genome_stream'' interface */
 typedef struct CSAStream CSAStream;

@@ -5,7 +5,7 @@
 */
 
 #include <string.h>
-#include <libgtext/compare.h>
+#include "libgtext/compare.h"
 
 int compare(const void *a, const void *b)
 {

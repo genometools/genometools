@@ -11,11 +11,12 @@
 #ifndef BLOCK_H
 #define BLOCK_H
 
-#include <libgtcore/range.h>
-#include <libgtext/genome_node.h>
-#include <libgtcore/array.h>
-#include <libgtview/element.h>
-#include <libgtview/config.h>
+#include "libgtcore/dlist.h"
+#include "libgtcore/range.h"
+#include "libgtcore/array.h"
+#include "libgtext/genome_node.h"
+#include "libgtview/element.h"
+#include "libgtview/config.h"
 
 /*!
 Block interface

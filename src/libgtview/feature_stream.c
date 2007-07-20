@@ -8,11 +8,10 @@
  * \author Gordon Gremme <gremme@zbh.uni-hamburg.de>
  */
 
-#include <gtcore.h>
-#include <libgtview/feature_stream.h>
-#include <libgtview/feature_visitor.h>
-#include <libgtview/feature_index.h>
-#include <libgtext/genome_stream_rep.h>
+#include "libgtview/feature_stream.h"
+#include "libgtview/feature_visitor.h"
+#include "libgtview/feature_index.h"
+#include "libgtext/genome_stream_rep.h"
 
 struct FeatureStream
 {

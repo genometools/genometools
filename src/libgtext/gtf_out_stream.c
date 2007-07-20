@@ -4,9 +4,9 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <libgtext/genome_stream_rep.h>
-#include <libgtext/gtf_out_stream.h>
-#include <libgtext/gtf_visitor.h>
+#include "libgtext/genome_stream_rep.h"
+#include "libgtext/gtf_out_stream.h"
+#include "libgtext/gtf_visitor.h"
 
 struct GTFOutStream {
   const GenomeStream parent_instance;

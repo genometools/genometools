@@ -8,9 +8,10 @@
  * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
  */
 
-#include <libgtcore/range.h>
-#include <libgtview/block.h>
-#include <libgtview/line.h>
+#include "libgtcore/ensure.h"
+#include "libgtcore/range.h"
+#include "libgtview/block.h"
+#include "libgtview/line.h"
 
 struct Line
 {

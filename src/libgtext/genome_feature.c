@@ -6,9 +6,12 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <libgtext/genome_feature.h>
-#include <libgtext/genome_feature_type.h>
-#include <libgtext/genome_node_rep.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/hashtable.h"
+#include "libgtcore/undef.h"
+#include "libgtext/genome_feature.h"
+#include "libgtext/genome_feature_type.h"
+#include "libgtext/genome_node_rep.h"
 
 struct GenomeFeature
 {

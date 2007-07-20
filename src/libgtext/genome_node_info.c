@@ -5,7 +5,7 @@
 */
 
 #include <assert.h>
-#include <libgtext/genome_node_info.h>
+#include "libgtext/genome_node_info.h"
 
 #define PARENT_MASK             0x0f
 #define PARENT_NO_PARENT        0x00 /* the node has not parent */

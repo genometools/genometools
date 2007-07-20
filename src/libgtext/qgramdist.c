@@ -6,8 +6,8 @@
 
 #include <assert.h>
 #include <math.h>
-#include <libgtext/qgramdist.h>
-#include <libgtext/qgram.h>
+#include "libgtext/qgramdist.h"
+#include "libgtext/qgram.h"
 
 unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q, Env *env)
 {

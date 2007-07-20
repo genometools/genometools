@@ -4,10 +4,31 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
 #include "gtr.h"
 #include "lua.h"
 #include "lauxlib.h"
+#include "libgtcore/array.h"
+#include "libgtcore/bitpackarray.h"
+#include "libgtcore/bitpackstring.h"
+#include "libgtcore/bittab.h"
+#include "libgtcore/countingsort.h"
+#include "libgtcore/cstr.h"
+#include "libgtcore/dlist.h"
+#include "libgtcore/ensure.h"
+#include "libgtcore/env.h"
+#include "libgtcore/grep.h"
+#include "libgtcore/hashtable.h"
+#include "libgtcore/range.h"
+#include "libgtcore/splitter.h"
+#include "libgtcore/tokenizer.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/xansi.h"
+#include "libgtext/alignment.h"
+#include "libgtext/bsearch.h"
+#include "libgtext/evaluator.h"
+#include "libgtext/hmm.h"
+#include "libgtext/splicedseq.h"
+#include "libgtext/toolbox.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_clean.h"
@@ -27,7 +48,12 @@
 #include "tools/gt_stat.h"
 
 #ifdef LIBGTVIEW
+#include "libgtview/block.h"
+#include "libgtview/config.h"
+#include "libgtview/diagram.h"
+#include "libgtview/feature_index.h"
 #include "libgtview/gt_view.h"
+#include "libgtview/track.h"
 #endif
 
 struct GTR {

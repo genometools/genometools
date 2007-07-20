@@ -4,7 +4,10 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include "libgtcore/cstr.h"
+#include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtext/toolbox.h"
 #include "gt_affinealign.h"
 #include "gt_align.h"
 #include "gt_casino.h"

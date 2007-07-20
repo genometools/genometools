@@ -4,6 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#include <math.h>
 #include <assert.h>
 #include <libgtcore/cstr.h>
 #include <libgtcore/dynalloc.h>
@@ -129,6 +130,16 @@ void str_append_char(Str *dest, char c, Env *env)
                         (dest->length + 2) * sizeof (char), env);
   dest->cstr[dest->length++] = c;
   dest->cstr[dest->length] = '\0';
+}
+
+void str_append_double(Str *dest, double d, int precision, Env *env)
+{
+  char buf[BUFSIZ];
+  int rval;
+  assert(dest);
+  rval = snprintf(buf, BUFSIZ, "%.*f", precision, d);
+  assert(rval < BUFSIZ);
+  str_append_cstr(dest, buf, env);
 }
 
 char* str_get(const Str *s)

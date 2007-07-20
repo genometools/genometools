@@ -7,7 +7,7 @@
 #ifndef QGRAM_H
 #define QGRAM_H
 
-#include <gtcore.h>
+#include "libgtcore/array.h"
 
 /* encodes a word w of length q over an alphabet of size alpha_size as a unique
    number */

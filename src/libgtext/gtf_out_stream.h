@@ -7,7 +7,7 @@
 #ifndef GTF_OUT_STREAM_H
 #define GTF_OUT_STREAM_H
 
-#include <libgtext/genome_stream.h>
+#include "libgtext/genome_stream.h"
 
 /* implements the ``genome stream'' interface */
 typedef struct GTFOutStream GTFOutStream;

@@ -11,11 +11,11 @@
 #ifndef TRACK_H
 #define TRACK_H
 
-#include <libgtcore/str.h>
-#include <libgtcore/array.h>
-#include <libgtext/genome_node.h>
-#include <libgtview/config.h>
-#include <libgtview/line.h>
+#include "libgtcore/str.h"
+#include "libgtcore/array.h"
+#include "libgtext/genome_node.h"
+#include "libgtview/config.h"
+#include "libgtview/line.h"
 
 /*!
 Track interface

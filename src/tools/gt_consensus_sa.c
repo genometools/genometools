@@ -4,7 +4,14 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include "libgtcore/array.h"
+#include "libgtcore/option.h"
+#include "libgtcore/range.h"
+#include "libgtcore/str.h"
+#include "libgtcore/strand.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/xansi.h"
+#include "libgtext/consensus_sa.h"
 
 #define DELIMITER         ','
 #define FORWARDSTRANDCHAR '+'

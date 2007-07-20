@@ -5,7 +5,7 @@
 */
 
 #include <assert.h>
-#include <libgtext/dice_hmm.h>
+#include "libgtext/dice_hmm.h"
 
 HMM* dice_hmm_loaded(Env *env)
 {

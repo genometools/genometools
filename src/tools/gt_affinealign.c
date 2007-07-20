@@ -4,7 +4,12 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "gt.h"
+#include "libgtcore/bioseq.h"
+#include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/xansi.h"
+#include "libgtext/affinealign.h"
+#include "libgtext/alignment.h"
 
 typedef struct {
   int replacement_cost,

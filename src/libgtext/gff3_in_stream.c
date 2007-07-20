@@ -6,9 +6,11 @@
 
 #include <assert.h>
 #include <string.h>
-#include <libgtext/genome_stream_rep.h>
-#include <libgtext/gff3_in_stream.h>
-#include <libgtext/gff3_parser.h>
+#include "libgtcore/fileutils.h"
+#include "libgtcore/progressbar.h"
+#include "libgtext/genome_stream_rep.h"
+#include "libgtext/gff3_in_stream.h"
+#include "libgtext/gff3_parser.h"
 
 struct GFF3InStream
 {

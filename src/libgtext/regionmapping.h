@@ -7,7 +7,7 @@
 #ifndef REGIONMAPPING_H
 #define REGIONMAPPING_H
 
-#include <gtcore.h>
+#include "libgtcore/str.h"
 
 /* maps a sequence-region to a sequence file */
 typedef struct RegionMapping RegionMapping;

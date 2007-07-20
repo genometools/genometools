@@ -7,7 +7,7 @@
 #ifndef MUTATE_H
 #define MUTATE_H
 
-#include <gtcore.h>
+#include "libgtcore/seq.h"
 
 /* returns a Seq which is the mutated sequence <orig_seq> of length <len> over
    alphabet <alpha>. <rate> denotes the error rate (must be >=0 && <= 100) */

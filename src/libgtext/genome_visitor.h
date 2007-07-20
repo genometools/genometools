@@ -11,9 +11,9 @@
 typedef struct GenomeVisitorClass GenomeVisitorClass;
 typedef struct GenomeVisitor GenomeVisitor;
 
-#include <libgtext/comment.h>
-#include <libgtext/genome_feature.h>
-#include <libgtext/sequence_region.h>
+#include "libgtext/comment.h"
+#include "libgtext/genome_feature.h"
+#include "libgtext/sequence_region.h"
 
 int  genome_visitor_visit_comment(GenomeVisitor*, Comment*, Env*);
 int  genome_visitor_visit_genome_feature(GenomeVisitor*, GenomeFeature*, Env*);
