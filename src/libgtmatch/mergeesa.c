@@ -11,7 +11,7 @@
 #include "trieins-def.h"
 
 #include "trieins.pr"
-#include "sfxmap.pr"
+#include "sfx-map.pr"
 
  DECLAREREADFUNCTION(Seqpos);
 

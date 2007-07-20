@@ -8,7 +8,7 @@
 
 #include "fmindex.h"
 
-#include "mapspecfm.pr"
+#include "fmi-mapspec.pr"
 #include "opensfxfile.pr"
 
 static int writefmascii (const Str *indexname,

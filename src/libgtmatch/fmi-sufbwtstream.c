@@ -11,11 +11,11 @@
 #include "chardef.h"
 
 #include "mergeesa.pr"
-#include "sfxmap.pr"
+#include "sfx-map.pr"
 #include "encseq2offset.pr"
-#include "mkidxfilecpy.pr"
-#include "fmkeyval.pr"
-#include "mapspecfm.pr"
+#include "fmi-mkidxcpy.pr"
+#include "fmi-keyval.pr"
+#include "fmi-mapspec.pr"
 #include "alphabet.pr"
 #include "opensfxfile.pr"
 

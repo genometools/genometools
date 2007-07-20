@@ -13,7 +13,7 @@
 #include "intbits-tab.h"
 #include "encseq-def.h"
 
-#include "cmpsuffixes.pr"
+#include "sfx-cmpsuf.pr"
 
 static void showlocalsuffix(FILE *fpout,
                             const Encodedsequence *encseq,

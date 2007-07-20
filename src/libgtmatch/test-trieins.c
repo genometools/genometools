@@ -11,8 +11,8 @@
 #include "encseq-def.h"
 
 #include "trieins.pr"
-#include "sfxmap.pr"
 #include "alphabet.pr"
+#include "sfx-map.pr"
 
 static void maketrie(Trierep *trierep,
                      /*@unused@*/ const Uchar *characters,

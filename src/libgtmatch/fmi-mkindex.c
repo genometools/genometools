@@ -9,9 +9,9 @@
 #include "sarr-def.h"
 #include "fmindex.h"
 
-#include "fmsave.pr"
-#include "fmkeyval.pr"
-#include "sufbwtstream.pr"
+#include "fmi-save.pr"
+#include "fmi-keyval.pr"
+#include "fmi-sufbwtstream.pr"
 #include "getbasename.pr"
 
 typedef struct

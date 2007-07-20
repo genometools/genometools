@@ -8,7 +8,7 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "types.h"
-#include "bwtbound.h"
+#include "fmi-bwtbound.h"
 #include "intbits.h"
 #include "safecast-gen.h"
 #include "mapspec-def.h"

@@ -9,7 +9,7 @@
 #include "divmodmul.h"
 #include "spacedef.h"
 #include "intcode-def.h"
-#include "partssuf-def.h"
+#include "sfx-partssuf-def.h"
 
 typedef struct
 {

@@ -12,7 +12,7 @@
 #include "chardef.h"
 #include "arraydef.h"
 #include "divmodmul.h"
-#include "codespec.h"
+#include "sfx-codespec.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
 

@@ -18,13 +18,13 @@
 #include "chardef.h"
 
 #include "alphabet.pr"
-#include "makeprj.pr"
-#include "sfx-opt.pr"
 #include "measure-time.pr"
-#include "outprjfile.pr"
-#include "suffixerator.pr"
 #include "opensfxfile.pr"
-#include "cmpsuffixes.pr"
+#include "sfx-cmpsuf.pr"
+#include "sfx-makeprj.pr"
+#include "sfx-opt.pr"
+#include "sfx-outprj.pr"
+#include "sfx-suffixer.pr"
 
 typedef struct
 {

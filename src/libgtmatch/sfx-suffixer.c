@@ -13,17 +13,17 @@
 #include "arraydef.h"
 #include "intbits.h"
 #include "divmodmul.h"
-#include "codespec.h"
 #include "measure-time-if.h"
-#include "partssuf-def.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
 #include "safecast-gen.h"
+#include "sfx-codespec.h"
+#include "sfx-partssuf-def.h"
 
 #include "measure-time.pr"
-#include "mappedstr.pr"
-#include "partssuf.pr"
-#include "bentleysedgewick.pr"
+#include "sfx-mappedstr.pr"
+#include "sfx-partssuf.pr"
+#include "sfx-bentsedg.pr"
 
 #define PREFIXLENBITS   4
 #define CODEBITS        (32-PREFIXLENBITS)

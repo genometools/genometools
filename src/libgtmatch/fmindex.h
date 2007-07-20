@@ -12,7 +12,7 @@
 #include "alphadef.h"
 #include "sarr-def.h"
 #include "encseq-def.h"
-#include "bwtbound.h"
+#include "fmi-bwtbound.h"
 
 /*
   TO DO:
