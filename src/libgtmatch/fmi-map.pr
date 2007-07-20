@@ -1,0 +1,10 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int scanfmprjfileviafileptr(Fmindex *fmindex,
+                                   Seqpos *totallength,
+                                   const Str *indexname,FILE *fpin,Env *env);
+
+#ifdef __cplusplus
+}
+#endif

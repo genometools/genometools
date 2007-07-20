@@ -12,18 +12,6 @@ struct Readintkeys
 };
 size_t sizeofReadintkeys(void);
 
-const char *keystringreadintkeys(const Readintkeys *rikptr);
-
-void setfoundreadintkeys(Readintkeys *rikptr);
-
-bool ptrdefinedreadintkeys(const Readintkeys *rikptr);
-
-bool smallvalueptrisnullreadintkeys(const Readintkeys *rikptr);
-
-void setbigvalueptrreadintkeys(Readintkeys *rikptr,uint64_t bigvalue);
-
-void setsmallvalueptrreadintkeys(Readintkeys *rikptr,uint32_t smallvalue);
-
 void setreadintkeys(Array *riktab,
                     const char *keystring,
                     void *valueptr,
@@ -31,13 +19,14 @@ void setreadintkeys(Array *riktab,
                     bool *readflag,
                     Env *env);
 
-int scanuintintline(uint32_t *lengthofkey,
-                    Smallorbigint *smallorbigint,
+int allkeysdefined(const Str *indexname,const Array *riktab,Env *env);
+
+int analyzeuintline(const Str *indexname,
+                    uint32_t linenum,
                     const Uchar *linebuffer,
                     unsigned long linelength,
+                    Array *riktab,
                     Env *env);
-
-int allkeysdefined(const Str *indexname,const Array *riktab,Env *env);
 
 #ifdef __cplusplus
 }

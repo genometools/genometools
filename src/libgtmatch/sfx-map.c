@@ -39,15 +39,12 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                                  const Str *indexname,FILE *fpin,Env *env)
 {
   ArrayUchar linebuffer;
-  uint32_t integersize, littleendian, linenum, lengthofkey;
-  unsigned long i, numofsequences, numoffiles = 0, numofallocatedfiles = 0;
+  uint32_t integersize, littleendian, linenum;
+  unsigned long numofsequences, numoffiles = 0, numofallocatedfiles = 0;
   DefinedSeqpos maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
-  int retval;
-  bool found, haserr = false;
-  Smallorbigint smallorbigint;
+  bool haserr = false;
   Array *riktab;
-  Readintkeys *rikptr;
 
   env_error_check(env);
   riktab = array_new(sizeofReadintkeys(),env);
@@ -140,64 +137,13 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
     } else
     {
-      retval = scanuintintline(&lengthofkey,
-                               &smallorbigint,
-                               linebuffer.spaceUchar,
-                               linebuffer.nextfreeUchar,
-                               env);
-      if (retval < 0)
+      if(analyzeuintline(indexname,
+                         linenum, 
+                         linebuffer.spaceUchar,
+                         linebuffer.nextfreeUchar,
+                         riktab,
+                         env) != 0)
       {
-        haserr = true;
-        break;
-      }
-      found = false;
-      for (i=0; i<array_size(riktab); i++)
-      {
-        rikptr = array_get(riktab,i);
-        if (memcmp(linebuffer.spaceUchar,
-                   keystringreadintkeys(rikptr),
-                   (size_t) lengthofkey) == 0)
-        {
-          setfoundreadintkeys(rikptr);
-          if (ptrdefinedreadintkeys(rikptr))
-          {
-            if(smallvalueptrisnullreadintkeys(rikptr))
-            {
-              if(retval == 1)
-              {
-               setbigvalueptrreadintkeys(rikptr,smallorbigint.bigvalue);
-              } else
-              {
-               setbigvalueptrreadintkeys(rikptr,
-                                         (uint64_t) smallorbigint.smallvalue);
-              }
-           } else
-           {
-              if(retval == 1)
-              {
-                env_error_set(env,"bigvalue " Formatuint64_t 
-                                  " does not fit into %s",
-                              PRINTuint64_tcast(smallorbigint.bigvalue),
-                              keystringreadintkeys(rikptr));
-                haserr = true;
-                break;
-              }
-              setsmallvalueptrreadintkeys(rikptr,smallorbigint.smallvalue);
-            } 
-          }
-          found = true;
-          break;
-        }
-      }
-      if (!found)
-      {
-        env_error_set(env,"file %s%s, line %u: cannot find key for \"%*.*s\"",
-                           str_get(indexname),
-                           ".prj",
-                           linenum,
-                           (Fieldwidthtype) lengthofkey,
-                           (Fieldwidthtype) lengthofkey,
-                           (char  *) linebuffer.spaceUchar);
         haserr = true;
         break;
       }

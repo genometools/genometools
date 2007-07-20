@@ -5,12 +5,19 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 #include <inttypes.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/array.h"
 #include "types.h"
 #include "sfx-ri-def.h"
+
+typedef union
+{
+  uint32_t smallvalue;
+  uint64_t bigvalue;
+} Smallorbigint;
 
 struct Readintkeys
 {
@@ -25,36 +32,6 @@ struct Readintkeys
 size_t sizeofReadintkeys(void)
 {
   return sizeof(Readintkeys);
-}
-
-const char *keystringreadintkeys(const Readintkeys *rikptr)
-{
-  return rikptr->keystring;
-}
-
-void setfoundreadintkeys(Readintkeys *rikptr)
-{
-  rikptr->found = true;
-}
-
-bool ptrdefinedreadintkeys(const Readintkeys *rikptr)
-{
-  return rikptr->ptrdefined;
-}
-
-bool smallvalueptrisnullreadintkeys(const Readintkeys *rikptr)
-{
-   return (rikptr->smallvalueptr == NULL) ? true : false;
-}
-
-void setbigvalueptrreadintkeys(Readintkeys *rikptr,uint64_t bigvalue)
-{
-  *(rikptr->bigvalueptr) = bigvalue;
-}
-
-void setsmallvalueptrreadintkeys(Readintkeys *rikptr,uint32_t smallvalue)
-{
-  *(rikptr->smallvalueptr) = smallvalue;
 }
 
 void setreadintkeys(Array *riktab,
@@ -91,11 +68,11 @@ void setreadintkeys(Array *riktab,
   array_add_elem(riktab,&rikvalue,sizeof(Readintkeys),env);
 }
 
-int scanuintintline(uint32_t *lengthofkey,
-                    Smallorbigint *smallorbigint,
-                    const Uchar *linebuffer,
-                    unsigned long linelength,
-                    Env *env)
+static int scanuintintline(uint32_t *lengthofkey,
+                           Smallorbigint *smallorbigint,
+                           const Uchar *linebuffer,
+                           unsigned long linelength,
+                           Env *env)
 {
   int64_t readint;
   unsigned long i;
@@ -194,4 +171,80 @@ int allkeysdefined(const Str *indexname,const Array *riktab,Env *env)
     }
   }
   return 0;
+}
+
+int analyzeuintline(const Str *indexname,
+                    uint32_t linenum, 
+                    const Uchar *linebuffer,
+                    unsigned long linelength,
+                    Array *riktab,
+                    Env *env)
+{
+  Readintkeys *rikptr;
+  bool found = false, haserr = false;
+  unsigned long i;
+  int retval;
+  Smallorbigint smallorbigint;
+  uint32_t lengthofkey;
+
+  retval = scanuintintline(&lengthofkey,
+                           &smallorbigint,
+                           linebuffer,
+                           linelength,
+                           env);
+  if (retval < 0)
+  {
+    haserr = true;
+  } else
+  {
+    for (i=0; i<array_size(riktab); i++)
+    {
+      rikptr = array_get(riktab,i);
+      if (memcmp(linebuffer,
+		 rikptr->keystring,
+		 (size_t) lengthofkey) == 0)
+      {
+	rikptr->found = true;
+	if (rikptr->ptrdefined)
+	{
+	  if(rikptr->smallvalueptr == NULL)
+	  {
+	    if(retval == 1)
+	    {
+              *(rikptr->bigvalueptr) = smallorbigint.bigvalue;
+	    } else
+	    {
+              *(rikptr->bigvalueptr) = (uint64_t) smallorbigint.smallvalue;
+	    }
+	  } else
+	  {
+	    if(retval == 1)
+	    {
+	      env_error_set(env,"bigvalue " Formatuint64_t 
+				" does not fit into %s",
+			    PRINTuint64_tcast(smallorbigint.bigvalue),
+			    rikptr->keystring);
+	      haserr = true;
+	      break;
+	    }
+            *(rikptr->smallvalueptr) = smallorbigint.smallvalue;
+	  } 
+	}
+	found = true;
+	break;
+      }
+    }
+    if (!found)
+    {
+      env_error_set(env,"file %s%s, line %u: cannot find key for \"%*.*s\"",
+			 str_get(indexname),
+			 ".prj",
+			 linenum,
+			 (Fieldwidthtype) lengthofkey,
+			 (Fieldwidthtype) lengthofkey,
+			 (char  *) linebuffer);
+      haserr = true;
+    }
+  }
+  return haserr ? -1 : 0;
 }

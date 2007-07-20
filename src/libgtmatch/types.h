@@ -245,10 +245,4 @@ typedef struct
   Seqpos value;
 } DefinedSeqpos;
 
-typedef union
-{
-  uint32_t smallvalue;
-  uint64_t bigvalue;
-} Smallorbigint;
-
 #endif
