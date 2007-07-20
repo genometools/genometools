@@ -241,7 +241,7 @@ bsStoreUniformUInt32Array(BitString str, BitOffset offset, unsigned numBits,
 
       /* all of val[j] consumed? */
       bitsInAccum += bits2Read;
-      if (!(bits2Read -= bitsLeft))
+      if (!(bitsLeft -= bits2Read) && totalBitsLeft)
         currentVal = val[++j] & valMask, totalBitsLeft -= bitsLeft = numBits;
     }
     /* at this point accum holds as many bits as we could get

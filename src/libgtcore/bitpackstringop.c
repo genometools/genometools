@@ -122,7 +122,7 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
     return -1 * bsCompare(b, offsetB, numBitsB, a, offsetA, numBitsA);
   if (numBitsB > numBitsA)
   {
-    /* B is longer and thus compared with virtual zeros in A */
+    /* B is longer and thus compared with virtual zeros prepended to A */
     unsigned comparePreBits = numBitsB - numBitsA;
     do {
       bitsInAccumB = 0;
@@ -172,6 +172,8 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
       bitsInAccumA += bits2Read;
       totalBitsLeftA -= bits2Read;
     }
+    else
+      accumA = 0;
     /* get bits of first element if not aligned */
     if (bitTopB)
     {
@@ -183,6 +185,8 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
       bitsInAccumB += bits2Read;
       totalBitsLeftB -= bits2Read;
     }
+    else
+      accumB = 0;
     while (bitsInAccumA < (CHAR_BIT * sizeof (accumA)) && totalBitsLeftA)
     {
       unsigned bits2Read,
@@ -274,7 +278,7 @@ bsCopy(const BitString src, BitOffset offsetSrc,
     {
       if (bitTopSrc)
       {
-        uint_fast32_t mask = (~(BitElem)0) >> bitTopSrc;
+        uint_fast32_t mask;
         unsigned bits2Read = MIN3(bitElemBits - bitTopSrc, bitsLeft,
                                   sizeof (accum) * CHAR_BIT - bitsInAccum);
         unsigned unreadRightBits = (bitElemBits - bitTopSrc - bits2Read);
@@ -287,21 +291,24 @@ bsCopy(const BitString src, BitOffset offsetSrc,
       }
       if (bitTopDest)
       {
+        unsigned bits2Write = MIN(bitsLeft + bitsInAccum,
+                                  bitElemBits - bitTopDest);
         while (bitsLeft >= bitElemBits
-               && sizeof (accum) - bitsInAccum > bitElemBits)
+               && sizeof (accum) * CHAR_BIT - bitsInAccum > bitElemBits)
         {
           accum = accum << bitElemBits | (*p++);
           bitsLeft -= bitElemBits;
           bitsInAccum += bitElemBits;
         }
-        if (bitElemBits - bitTopDest > bitsInAccum)
+        if (bits2Write > bitsInAccum)
         {
           /* very inconvinient: we have to take all the bits we can get
            * just to fill the first incomplete element */
+          while (bitsInAccum < bits2Write)
           {
             uint_fast32_t mask;
-            unsigned bits2Read = MIN(sizeof (accum)*CHAR_BIT - bitsInAccum,
-                                     bitsLeft);
+            unsigned bits2Read = MIN3(sizeof (accum) * CHAR_BIT - bitsInAccum,
+                                      bitsLeft, bitElemBits);
             unsigned unreadRightBits = (bitElemBits - bits2Read);
             mask = (~((~(uint_fast32_t)0) << bits2Read)) << unreadRightBits;
             accum = (accum << bits2Read) | ((*p) & mask) >> unreadRightBits;
@@ -309,24 +316,22 @@ bsCopy(const BitString src, BitOffset offsetSrc,
             bitsInAccum += bits2Read;
             bitTopSrc = bits2Read;
           }
-          {
-            unsigned bits2Write = bitElemBits - bitTopDest;
-            uint_fast32_t mask =
-              ~((~(uint_fast32_t)0) << bits2Write);
-            *q = (*q & ~mask) | ((accum >> (bitsInAccum - bits2Write)) & mask);
-            bitsInAccum -= bits2Write;
-          }
         }
-        else
+        /* accum holds enough bits to fill incomplete region at dest start */
         {
-          /* accum holds enough bits to fill incomplete region at dest start */
-          unsigned bits2Write = bitElemBits - bitTopDest;
+          unsigned unwrittenRightBits = bitElemBits
+            - bitTopDest - bits2Write;
           uint_fast32_t mask =
-            ~((~(uint_fast32_t)0) << bits2Write);
-          *q = (*q & ~mask) | ((accum >> (bitsInAccum - bits2Write)) & mask);
-          ++q;
-          bitsInAccum -= bits2Write;
-          bitTopDest = 0;
+            (~((~(uint_fast32_t)0) << bits2Write)) << unwrittenRightBits;
+          *q = (*q & ~mask)
+            | (((accum >> (bitsInAccum -= bits2Write))
+                << unwrittenRightBits) & mask);
+          if ((bitTopDest += bits2Write) == bitElemBits)
+            ++q, bitTopDest = 0;
+        }
+        while (bitsInAccum >= bitElemBits)
+        {
+          *q++ = accum >> (bitsInAccum -= bitElemBits);
         }
       }
     }
@@ -335,7 +340,7 @@ bsCopy(const BitString src, BitOffset offsetSrc,
     {
       /* fill accumulator */
       while (bitsLeft >= bitElemBits
-             && sizeof (accum) - bitsInAccum > bitElemBits)
+             && sizeof (accum) * CHAR_BIT - bitsInAccum > bitElemBits)
       {
         accum = accum << bitElemBits | (*p++);
         bitsInAccum += bitElemBits;
@@ -349,18 +354,20 @@ bsCopy(const BitString src, BitOffset offsetSrc,
     }
     while (bitsLeft >= bitElemBits);
     /* write remaining (trailing) bits */
-    while (bitsLeft)
+    while (bitsLeft || bitsInAccum)
     {
+      while(bitsLeft && bitsInAccum < sizeof (accum) * CHAR_BIT)
       {
-        unsigned bits2Read = MIN(bitsLeft,
-                                 sizeof (accum) * CHAR_BIT - bitsInAccum);
-        unsigned unreadRightBits = (bitElemBits - bits2Read);
+        unsigned bits2Read = MIN3(bitsLeft, bitElemBits - bitTopSrc,
+                                  sizeof (accum) * CHAR_BIT - bitsInAccum);
+        unsigned unreadRightBits = (bitElemBits - bitTopSrc - bits2Read);
         uint_fast32_t mask =
           (~((~(uint_fast32_t)0) << bits2Read)) << unreadRightBits;
         accum = (accum << bits2Read) | ((*p) & mask) >> unreadRightBits;
         bitsLeft -= bits2Read;
         bitsInAccum += bits2Read;
-        bitTopSrc = bits2Read;
+        if((bitTopSrc += bits2Read) == bitElemBits)
+          ++p, bitTopSrc = 0;
       }
       while (bitsInAccum)
       {
@@ -369,10 +376,11 @@ bsCopy(const BitString src, BitOffset offsetSrc,
         uint_fast32_t mask = (~(uint_fast32_t)0);
         if (bits2Write != bitElemBits)
         {
-          mask = ~(mask << bits2Write);
+          mask = (~(mask << bits2Write)) << unreadRightBits;
         }
         *q = (*q & ~mask) |
-          (((accum >> (bitsInAccum - bits2Write)) & mask) << unreadRightBits);
+            (((accum >> (bitsInAccum -= bits2Write))
+              << unreadRightBits) & mask);
         if ((bitTopDest += bits2Write) == bitElemBits)
           bitTopDest = 0, ++q;
       }
