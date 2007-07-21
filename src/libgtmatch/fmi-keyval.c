@@ -72,6 +72,7 @@ void computefmkeyvalues (Fmindex *fm,
                          bool storeindexpos,
                          const Specialcharinfo *specialcharinfo)
 {
+  fm->mappedptr = NULL;
   fm->log2bsize = log2bsize;
   fm->log2markdist = log2markdist;
   fm->bwtlength = bwtlength;

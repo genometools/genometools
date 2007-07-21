@@ -11,6 +11,7 @@
 #include "libgtcore/str.h"
 #include "types.h"
 #include "spacedef.h"
+#include "esafileend.h"
 #include "stamp.h"
 
 #include "endianess.pr"
@@ -54,7 +55,7 @@ static void showprjinfo(FILE *outprj,
   if(longest->defined)
   {
     fprintf(outprj,"longest=" FormatSeqpos "\n",
-            PRINTSeqposcast(longest->value));
+            PRINTSeqposcast(longest->valueseqpos));
   }
   fprintf(outprj,"prefixlength=%u\n",(unsigned int) prefixlength);
   fprintf(outprj,"largelcpvalues=" FormatSeqpos "\n",
@@ -82,7 +83,7 @@ int outprjfile(const Str *indexname,
   bool haserr = false;
 
   env_error_check(env);
-  prjfp = opensfxfile(indexname,".prj","wb",env);
+  prjfp = opensfxfile(indexname,PROJECTFILESUFFIX,"wb",env);
   if (prjfp == NULL)
   {
     haserr = true;

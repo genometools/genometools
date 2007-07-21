@@ -48,9 +48,8 @@
                             flexible kombination von Optionen
 */ 
 
-#define FMASCIIFILESUFFIX ".fmb"
+#define FMASCIIFILESUFFIX ".fma"
 #define FMDATAFILESUFFIX  ".fmd"
-#define FMINDEXSUFFIX     ".fm"
 
 #define MARKPOSTABLELENGTH(BWTLENGTH,MARKDIST)\
         (1 + ((BWTLENGTH) - 1) / (MARKDIST))

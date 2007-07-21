@@ -14,6 +14,7 @@
 #include <libgtmatch/guessprot.pr>
 #include <libgtmatch/sfx-run.pr>
 #include <libgtmatch/fmi-mkindex.pr>
+#include <libgtmatch/fmi-uniquesub.pr>
 #include <libgtmatch/sfx-map.pr>
 #include <libgtmatch/sfx-suftaborder.pr>
 #include <libgtmatch/test-encseq.pr>

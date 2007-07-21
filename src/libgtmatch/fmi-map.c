@@ -15,11 +15,14 @@
 #include "sfx-ri-def.h"
 #include "esafileend.h"
 #include "fmindex.h"
+#include "sarr-def.h"
+#include "stamp.h"
 
 #include "readnextline.pr"
 #include "opensfxfile.pr"
 #include "alphabet.pr"
 #include "sfx-readint.pr"
+#include "sfx-map.pr"
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 
@@ -36,11 +39,11 @@ bool fmindexexists(const Str *indexname,Env *env)
   return true;
 }
 
-static int scanfmprjfileviafileptr(Fmindex *fmindex,
-                                   bool *storeindexpos,
-                                   const Str *indexname,
-                                   FILE *fpin,
-                                   Env *env)
+static int scanfmafileviafileptr(Fmindex *fmindex,
+                                 bool *storeindexpos,
+                                 const Str *indexname,
+                                 FILE *fpin,
+                                 Env *env)
 {
   ArrayUchar linebuffer;
   bool haserr = false;
@@ -74,6 +77,7 @@ static int scanfmprjfileviafileptr(Fmindex *fmindex,
       break;
     }
     if(analyzeuintline(indexname,
+                       FMASCIIFILESUFFIX,
                        linenum, 
                        linebuffer.spaceUchar,
                        linebuffer.nextfreeUchar,
@@ -84,7 +88,7 @@ static int scanfmprjfileviafileptr(Fmindex *fmindex,
       break;
     }
   }
-  if (!haserr && allkeysdefined(indexname,riktab,env) != 0)
+  if (!haserr && allkeysdefined(indexname,FMASCIIFILESUFFIX,riktab,env) != 0)
   {
     haserr = true;
   }
@@ -112,8 +116,38 @@ static int scanfmprjfileviafileptr(Fmindex *fmindex,
 
 void freefmindex(Fmindex *fmindex,Env *env)
 {
-  env_fa_xmunmap(fmindex->mappedptr,env);
-  freeEncodedsequence(&fmindex->bwtformatching,env);
+  if(fmindex->mappedptr != NULL)
+  {
+    env_fa_xmunmap(fmindex->mappedptr,env);
+  }
+  if(fmindex->bwtformatching != NULL)
+  {
+    freeEncodedsequence(&fmindex->bwtformatching,env);
+  }
+  if(fmindex->alphabet != NULL)
+  {
+    freeAlphabet(&fmindex->alphabet,env);
+  }
+}
+
+static Encodedsequence *mapbwtencoding(const Str *indexname,Env *env)
+{
+  Suffixarray suffixarray;
+  bool haserr = false;
+
+  if(mapsuffixarray(&suffixarray,SARR_ESQTAB,indexname,env) != 0)
+  {
+    haserr = true;
+  }
+  freeAlphabet(&suffixarray.alpha,env);
+  strarray_delete(suffixarray.filenametab,env);
+  FREESPACE(suffixarray.filelengthtab);
+  if(haserr)
+  {
+    freeEncodedsequence(&suffixarray.encseq,env);
+    return NULL;
+  }
+  return suffixarray.encseq;
 }
 
 int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env)
@@ -121,18 +155,20 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env)
   FILE *fpin = NULL;
   bool haserr = false, storeindexpos = true;
 
-  fpin = opensfxfile(indexname,FMINDEXSUFFIX FMASCIIFILESUFFIX,"rb",env);
+  fmindex->mappedptr = NULL;
+  fmindex->bwtformatching = NULL;
+  fpin = opensfxfile(indexname,FMASCIIFILESUFFIX,"rb",env);
   if(fpin == NULL)
   {
     haserr = true;
   }
   if(!haserr)
   {
-    if(scanfmprjfileviafileptr(fmindex,
-                               &storeindexpos,
-                               indexname,
-                               fpin,
-                               env) != 0)
+    if(scanfmafileviafileptr(fmindex,
+                             &storeindexpos,
+                             indexname,
+                             fpin,
+                             env) != 0)
     {
       haserr = true;
     }
@@ -148,7 +184,7 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env)
     fmindex->specpos.spacePairBwtidx = NULL;
     fmindex->specpos.allocatedPairBwtidx = 0;
     tmpfilename = str_clone(indexname,env);
-    str_append_cstr(tmpfilename,ALPHATABSUFFIX,env);
+    str_append_cstr(tmpfilename,ALPHABETFILESUFFIX,env);
     fmindex->alphabet = assigninputalphabet(false,
                                             false,
                                             tmpfilename,
@@ -162,17 +198,8 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env)
   }
   if(!haserr)
   {
-    fmindex->bwtformatching = initencodedseq(true,
-					     NULL,
-					     indexname,
-					     fmindex->bwtlength,
-					     &fmindex->specialcharinfo,
-					     fmindex->alphabet,
-                                             false, /* not relevant since 
-                                                   indexname != NULL */
-                                             NULL,
-					     env);
-    if (fmindex->bwtformatching == NULL)
+    fmindex->bwtformatching = mapbwtencoding(indexname,env);
+    if(fmindex->bwtformatching == NULL)
     {
       haserr = true;
     }

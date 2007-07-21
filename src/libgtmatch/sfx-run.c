@@ -51,7 +51,7 @@ static void initoutfileinfo(Outfileinfo *outfileinfo)
   outfileinfo->numoflargelcpvalues = 0;
   outfileinfo->maxbranchdepth = 0;
   outfileinfo->longest.defined = false;
-  outfileinfo->longest.value = 0;
+  outfileinfo->longest.valueseqpos = 0;
 }
 
 static int suftab2file(void *info,
@@ -87,7 +87,7 @@ static int suftab2file(void *info,
       if(suftab[pos] == 0)
       {
         outfileinfo->longest.defined = true;
-        outfileinfo->longest.value = outfileinfo->absolutepos + pos;
+        outfileinfo->longest.valueseqpos = outfileinfo->absolutepos + pos;
         break;
       }
     }
@@ -207,7 +207,7 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
   bool haserr = false;
 
   env_error_check(env);
-  al1fp = opensfxfile(indexname,ALPHATABSUFFIX,"wb",env);
+  al1fp = opensfxfile(indexname,ALPHABETFILESUFFIX,"wb",env);
   if(al1fp == NULL)
   {
     haserr = true;
@@ -371,7 +371,11 @@ int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
   bool haserr = false;
 
   retval = suffixeratoroptions(&so,argc,argv,env);
-  printf("# sizeof(Seqpos)=%lu\n",(unsigned long) (sizeof(Seqpos) * CHAR_BIT));
+  if(retval == 0)
+  {
+    printf("# sizeof(Seqpos)=%lu\n",
+            (unsigned long) (sizeof(Seqpos) * CHAR_BIT));
+  }
   if (retval == 0)
   {
     if (runsuffixerator(&so,env) < 0)

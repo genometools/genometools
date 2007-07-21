@@ -16,29 +16,29 @@ static int writefmascii (const Str *indexname,
                          bool storeindexpos,
                          Env *env)
 {
-  FILE *prjfp;
+  FILE *fmafp;
 
-  if ((prjfp = opensfxfile (indexname, FMASCIIFILESUFFIX,"wb",env)) == NULL)
+  if ((fmafp = opensfxfile (indexname, FMASCIIFILESUFFIX,"wb",env)) == NULL)
   {
     return -1;
   }
-  fprintf (prjfp, "bwtlength=" FormatSeqpos "\n",
+  fprintf (fmafp, "bwtlength=" FormatSeqpos "\n",
            PRINTSeqposcast(fm->bwtlength));
-  fprintf (prjfp, "longest=" FormatSeqpos "\n",
+  fprintf (fmafp, "longest=" FormatSeqpos "\n",
                    PRINTSeqposcast(fm->longestsuffixpos));
-  fprintf (prjfp, "storeindexpos=%d\n", storeindexpos ? 1 : 0);
-  fprintf (prjfp, "log2blocksize=%u\n", (unsigned int) fm->log2bsize);
-  fprintf (prjfp, "log2markdistance=%u\n", (unsigned int) fm->log2markdist);
-  fprintf (prjfp, "specialcharacters=" FormatSeqpos "\n",
+  fprintf (fmafp, "storeindexpos=%d\n", storeindexpos ? 1 : 0);
+  fprintf (fmafp, "log2blocksize=%u\n", (unsigned int) fm->log2bsize);
+  fprintf (fmafp, "log2markdist=%u\n", (unsigned int) fm->log2markdist);
+  fprintf (fmafp, "specialcharacters=" FormatSeqpos "\n",
                   PRINTSeqposcast(fm->specialcharinfo.specialcharacters));
-  fprintf (prjfp, "specialranges=" FormatSeqpos "\n",
+  fprintf (fmafp, "specialranges=" FormatSeqpos "\n",
                   PRINTSeqposcast(fm->specialcharinfo.specialranges));
-  fprintf (prjfp, "lengthofspecialprefix=" FormatSeqpos "\n",
+  fprintf (fmafp, "lengthofspecialprefix=" FormatSeqpos "\n",
                   PRINTSeqposcast(fm->specialcharinfo.lengthofspecialprefix));
-  fprintf (prjfp, "lengthofspecialsuffix=" FormatSeqpos "\n",
+  fprintf (fmafp, "lengthofspecialsuffix=" FormatSeqpos "\n",
                   PRINTSeqposcast(fm->specialcharinfo.lengthofspecialsuffix));
-  fprintf (prjfp, "suffixlength=%u\n", (unsigned int) fm->suffixlength);
-  env_fa_xfclose(prjfp, env);
+  fprintf (fmafp, "suffixlength=%u\n", (unsigned int) fm->suffixlength);
+  env_fa_xfclose(fmafp, env);
   return 0;
 }
 

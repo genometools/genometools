@@ -7,8 +7,6 @@
 #ifndef ESAFILEEND_H
 #define ESAFILEEND_H
 
-#define ENCODEDSEQINDEX     ".esq"
-
 /*
   The following defines the suffix of an indexname to be used for an
   reverse complemented index. The length is also defined
@@ -61,6 +59,12 @@
   The following defines the suffix of a file to store alphabet.
 */
 
-#define ALPHATABSUFFIX ".al1"
+#define ALPHABETFILESUFFIX ".al1"
+
+/*
+  The following defines the suffix of the project file.
+*/
+
+#define PROJECTFILESUFFIX ".prj"
 
 #endif

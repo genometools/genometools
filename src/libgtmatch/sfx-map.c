@@ -61,12 +61,12 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   SETREADINTKEYS("numofdbsequences",&suffixarray->numofdbsequences,NULL);
   setreadintkeys(riktab,"numofquerysequences",&suffixarray->numofdbsequences,
                  0,NULL,env);
-  SETREADINTKEYS("longest",&suffixarray->longest.value,
+  SETREADINTKEYS("longest",&suffixarray->longest.valueseqpos,
                            &suffixarray->longest.defined);
   SETREADINTKEYS("prefixlength",&suffixarray->prefixlength,NULL);
-  SETREADINTKEYS("largelcpvalues",&suffixarray->numoflargelcpvalues.value,
+  SETREADINTKEYS("largelcpvalues",&suffixarray->numoflargelcpvalues.valueseqpos,
                  &suffixarray->numoflargelcpvalues.defined);
-  SETREADINTKEYS("maxbranchdepth",&maxbranchdepth.value,
+  SETREADINTKEYS("maxbranchdepth",&maxbranchdepth.valueseqpos,
                  &maxbranchdepth.defined);
   SETREADINTKEYS("integersize",&integersize,NULL);
   SETREADINTKEYS("littleendian",&littleendian,NULL);
@@ -138,6 +138,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     } else
     {
       if(analyzeuintline(indexname,
+                         PROJECTFILESUFFIX,
                          linenum, 
                          linebuffer.spaceUchar,
                          linebuffer.nextfreeUchar,
@@ -149,7 +150,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
     }
   }
-  if (!haserr && allkeysdefined(indexname,riktab,env) != 0)
+  if (!haserr && allkeysdefined(indexname,PROJECTFILESUFFIX,riktab,env) != 0)
   {
     haserr = true;
   }
@@ -158,7 +159,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       integersize != (uint32_t) 64)
   {
     env_error_set(env,"%s%s contains illegal line defining the integer size",
-                  str_get(indexname),".prj");
+                  str_get(indexname),PROJECTFILESUFFIX);
     haserr = true;
   }
   if (!haserr && integersize != (uint32_t) (sizeof (Seqpos) * CHAR_BIT))
@@ -255,7 +256,7 @@ static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
   bool haserr = false;
   FILE *fp;
 
-  fp = opensfxfile(indexname,".prj","rb",env);
+  fp = opensfxfile(indexname,PROJECTFILESUFFIX,"rb",env);
   if (fp == NULL)
   {
     haserr = true;
@@ -275,7 +276,7 @@ static bool scanal1file(Suffixarray *suffixarray,const Str *indexname,Env *env)
   bool haserr = false;
 
   tmpfilename = str_clone(indexname,env);
-  str_append_cstr(tmpfilename,ALPHATABSUFFIX,env);
+  str_append_cstr(tmpfilename,ALPHABETFILESUFFIX,env);
   suffixarray->alpha = assigninputalphabet(false,
                                            false,
                                            tmpfilename,
@@ -347,11 +348,11 @@ int mapsuffixarray(Suffixarray *suffixarray,
       env_error_set(env,"numoflargelcpvalues not defined");
       haserr = true;
     }
-    if(!haserr && suffixarray->numoflargelcpvalues.value > 0)
+    if(!haserr && suffixarray->numoflargelcpvalues.valueseqpos > 0)
     {
       suffixarray->llvtab = genericmaptable(indexname,LARGELCPTABSUFFIX,
                                             suffixarray->numoflargelcpvalues.
-                                            value,
+                                            valueseqpos,
                                             sizeof(Largelcpvalue),
                                             env);
       if (suffixarray->llvtab == NULL)
@@ -432,7 +433,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
       env_error_set(env,"numoflargelcpvalues not defined");
       haserr = true;
     }
-    if(!haserr && suffixarray->numoflargelcpvalues.value > 0)
+    if(!haserr && suffixarray->numoflargelcpvalues.valueseqpos > 0)
     {
       INITBufferedfile(indexname,&suffixarray->llvtabstream,LARGELCPTABSUFFIX);
     } 

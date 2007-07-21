@@ -41,8 +41,7 @@ static void versionfunc(const char *progname)
   printf("%s version 0.1\n",progname);
 }
 
-static OPrval parsemkfmindex(int *parsed_args,
-                             Mkfmcallinfo *mkfmcallinfo,
+static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
                              int argc, 
                              const char **argv, 
                              Env *env)
@@ -50,6 +49,7 @@ static OPrval parsemkfmindex(int *parsed_args,
   OptionParser *op;
   Option *option, *optionfmout;
   OPrval oprval;
+  int parsed_args;
 
   env_error_check(env);
   mkfmcallinfo->indexnametab = strarray_new(env);
@@ -82,7 +82,7 @@ static OPrval parsemkfmindex(int *parsed_args,
                            &mkfmcallinfo->noindexpos,false,env);
   option_parser_add_option(op, option, env);
 
-  oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
+  oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc, env);
   if (oprval == OPTIONPARSER_OK)
   {
     if (!option_is_set(optionfmout))
@@ -104,6 +104,11 @@ static OPrval parsemkfmindex(int *parsed_args,
     }
   }
   option_parser_delete(op, env);
+  if(oprval == OPTIONPARSER_OK && parsed_args != argc)
+  {
+    env_error_set(env,"superfluous program parameters");
+    oprval = OPTIONPARSER_ERROR;
+  }
   return oprval;
 }
 
@@ -149,11 +154,10 @@ static void freeconstructedfmindex(Fmindex *fm,Env *env)
 static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
                             int argc,const char **argv,Env *env)
 {
-  int parsed_args;
   OPrval rval;
   int retval = 0;
 
-  rval = parsemkfmindex(&parsed_args,mkfmcallinfo,argc,argv,env);
+  rval = parsemkfmindex(mkfmcallinfo,argc,argv,env);
   if (rval == OPTIONPARSER_ERROR)
   {
     retval = -1;

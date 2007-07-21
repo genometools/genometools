@@ -6,9 +6,9 @@ def checksfx(parts,pl,withsmap,sat,filelist)
   if withsmap == 0
     extra=""
   elsif withsmap == 1
-    extra="-smap TransDNA"
+    extra="-smap #{$transdir}TransDNA"
   else
-    extra="-smap TransProt11"
+    extra="-smap #{$transdir}TransProt11"
   end
   filearg=""
   filelist.each do |filename|
@@ -51,11 +51,13 @@ end
 1.upto(3) do |parts|
   [0,2].each do |withsmap|
     if withsmap == 0
-      extra="-smap TransProt11"
+      extra="-smap #{$transdir}TransProt11"
+      extraname="-smap TransProt11"
     else
       extra=""
+      extraname=""
     end
-    Name "gt suffixerator protein #{extra} #{parts} parts"
+    Name "gt suffixerator protein #{extraname} #{parts} parts"
     Keywords "gt_suffixerator"
     Test do
       checksfx(parts,3,extra,"direct",["sw100K1.fna","sw100K2.fna"])

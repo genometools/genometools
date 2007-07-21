@@ -11,6 +11,8 @@
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
 
+#define ENCSEQFILESUFFIX     ".esq"
+
 typedef struct _Encodedsequence Encodedsequence;
 typedef struct _Encodedsequencescanstate Encodedsequencescanstate;
 

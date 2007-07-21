@@ -123,6 +123,10 @@ static OPrval parse_options(int *parsed_args,
   option_exclude(optionsmap, optionprotein, env);
   option_exclude(optiondna, optionprotein, env);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
+  if(oprval == OPTIONPARSER_ERROR && strarray_size(so->filenametab) == 0)
+  {
+    env_error_set(env,"missing arguments to option -db");
+  }
   if (oprval == OPTIONPARSER_OK)
   {
     if (!option_is_set(optionindexname))
@@ -157,6 +161,11 @@ static OPrval parse_options(int *parsed_args,
     }
   }
   option_parser_delete(op, env);
+  if(oprval == OPTIONPARSER_OK && *parsed_args != argc)
+  {
+    env_error_set(env,"superfluous program parameters");
+    oprval = OPTIONPARSER_ERROR;
+  }
   return oprval;
 }
 

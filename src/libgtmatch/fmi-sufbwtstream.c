@@ -146,11 +146,11 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
       if(longest->defined)
       {
         env_error_set(env,"longest is already defined as " FormatSeqpos,
-                      longest->value);
+                      longest->valueseqpos);
         return -2;
       }
       longest->defined = true;
-      longest->value = bwtpos;
+      longest->valueseqpos = bwtpos;
       *bwtvalue = (Uchar) UNDEFBWTCHAR;
     } else
     {
@@ -166,7 +166,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
   return 1;
 }
 
-int sufbwt2fmindex(Fmindex *fm,
+int sufbwt2fmindex(Fmindex *fmindex,
                    uint32_t log2bsize,
                    uint32_t log2markdist,
                    const Str *outfmindex,
@@ -215,7 +215,7 @@ int sufbwt2fmindex(Fmindex *fm,
       mapsize = getmapsizeAlphabet(suffixarray.alpha);
       specialcharinfo = suffixarray.specialcharinfo;
       firstignorespecial = totallength - specialcharinfo.specialcharacters;
-      if(makeindexfilecopy(outfmindex,indexname,ALPHATABSUFFIX,0,env) != 0)
+      if(makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,env) != 0)
       {
         haserr = true;
       }
@@ -245,7 +245,7 @@ int sufbwt2fmindex(Fmindex *fm,
     {
       Str *indexname = str_new_cstr(strarray_get(indexnametab,0),env);
       suffixlength = 0;
-      if(makeindexfilecopy(outfmindex,indexname,ALPHATABSUFFIX,0,env) != 0)
+      if(makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,env) != 0)
       {
         haserr = true;
       }
@@ -266,7 +266,7 @@ int sufbwt2fmindex(Fmindex *fm,
     if(!haserr)
     {
       longest.defined = false;
-      longest.value = 0;
+      longest.valueseqpos = 0;
       outbwt = opensfxfile(outfmindex,BWTTABSUFFIX,"wb",env);
       if (outbwt == NULL)
       {
@@ -283,7 +283,7 @@ int sufbwt2fmindex(Fmindex *fm,
   {
     printf("# firstignorespecial=" FormatSeqpos "\n",
               PRINTSeqposcast(firstignorespecial));
-    computefmkeyvalues (fm,
+    computefmkeyvalues (fmindex,
                         totallength+1,
                         log2bsize,
                         log2markdist,
@@ -293,15 +293,15 @@ int sufbwt2fmindex(Fmindex *fm,
                         &specialcharinfo);
     showconstructionmessage(outfmindex,
                             totallength,
-                            fm->sizeofindex,
+                            fmindex->sizeofindex,
                             log2bsize,
                             log2markdist,
                             mapsize);
-    allocatefmtables(fm,storeindexpos,env);
-    set0frequencies(fm);
+    allocatefmtables(fmindex,storeindexpos,env);
+    set0frequencies(fmindex);
     if(storeindexpos)
     {
-      markptr = fm->markpostable;
+      markptr = fmindex->markpostable;
     } else
     {
       markptr = NULL;
@@ -374,59 +374,58 @@ int sufbwt2fmindex(Fmindex *fm,
       if(storeindexpos && bwtpos == nextmark)
       {
         *markptr++ = suftabvalue;
-        nextmark += fm->markdist;
+        nextmark += fmindex->markdist;
       }
       if(ISBWTSPECIAL(cc))
       {
-        if (bwtpos < firstignorespecial)
+        if (storeindexpos && bwtpos < firstignorespecial)
         {
-          if(storeindexpos)
+          pairptr = fmindex->specpos.spacePairBwtidx +
+                    fmindex->specpos.nextfreePairBwtidx++;
+          if(pairptr >= fmindex->specpos.spacePairBwtidx + 
+                        fmindex->specpos.allocatedPairBwtidx)
           {
-            pairptr = fm->specpos.spacePairBwtidx +
-                      fm->specpos.nextfreePairBwtidx++;
-            if(pairptr >= fm->specpos.spacePairBwtidx + 
-                          fm->specpos.allocatedPairBwtidx)
-            {
-              env_error_set(env,"program error: not enough space for specpos");
-              haserr = true;
-              break;
-            }
-            pairptr->bwtpos = bwtpos;
-            pairptr->suftabvalue = suftabvalue;
+            env_error_set(env,"program error: not enough space for specpos");
+            haserr = true;
+            break;
           }
+          pairptr->bwtpos = bwtpos;
+          pairptr->suftabvalue = suftabvalue;
         }
       } else
       {
-        fm->tfreq[cc+1]++;
-        fm->bfreq[(cc * fm->nofblocks) + (bwtpos >> fm->log2bsize)]++;
-        fm->superbfreq[(cc * fm->nofsuperblocks) +
-                       (bwtpos >> fm->log2superbsize) + 1]++;
+        fmindex->tfreq[cc+1]++;
+        fmindex->bfreq[(cc * fmindex->nofblocks) + 
+                       (bwtpos >> fmindex->log2bsize)]++;
+        fmindex->superbfreq[(cc * fmindex->nofsuperblocks) +
+                       (bwtpos >> fmindex->log2superbsize) + 1]++;
       }
     }
   }
   if(!haserr)
   {
     if(storeindexpos && 
-       fm->specpos.allocatedPairBwtidx != fm->specpos.nextfreePairBwtidx)
+       fmindex->specpos.allocatedPairBwtidx != 
+       fmindex->specpos.nextfreePairBwtidx)
     {
       env_error_set(env,"program error: too much space for specpos: "
              "allocated = %lu != %lu = used",
-             fm->specpos.allocatedPairBwtidx,
-             fm->specpos.nextfreePairBwtidx);
+             fmindex->specpos.allocatedPairBwtidx,
+             fmindex->specpos.nextfreePairBwtidx);
       haserr = true;
     }
   }
   if(!haserr)
   {
     (void) putchar('\n');
-    finalizefmfrequencies(fm);
-    if(fm->suffixlength > 0)
+    finalizefmfrequencies(fmindex);
+    if(fmindex->suffixlength > 0)
     {
-      ALLOCASSIGNSPACE(fm->boundarray,NULL,Bwtbound,fm->numofcodes);
+      ALLOCASSIGNSPACE(fmindex->boundarray,NULL,Bwtbound,fmindex->numofcodes);
     }
     if(numofindexes == (uint32_t) 1)
     {
-      fm->longestsuffixpos = suffixarray.longest.value;
+      fmindex->longestsuffixpos = suffixarray.longest.valueseqpos;
       freesuffixarray(&suffixarray,env);
     } else
     {
@@ -437,7 +436,7 @@ int sufbwt2fmindex(Fmindex *fm,
       }
       if(!haserr)
       {
-        fm->longestsuffixpos = longest.value;
+        fmindex->longestsuffixpos = longest.valueseqpos;
       }
       env_fa_xfclose(outbwt, env);
       wraptEmissionmergedesa(&emmesa,env);

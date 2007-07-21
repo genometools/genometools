@@ -121,7 +121,8 @@ static int scanuintintline(uint32_t *lengthofkey,
   return retval;
 }
 
-int allkeysdefined(const Str *indexname,const Array *riktab,Env *env)
+int allkeysdefined(const Str *indexname,const char *suffix,
+                   const Array *riktab,Env *env)
 {
   unsigned long i;
   Readintkeys *rikptr;
@@ -163,7 +164,7 @@ int allkeysdefined(const Str *indexname,const Array *riktab,Env *env)
       {
         env_error_set(env,"file %s%s: missing line beginning with \"%s=\"",
                            str_get(indexname),
-                           ".prj",
+                           suffix,
                            rikptr->keystring);
         return -1;
       }
@@ -174,6 +175,7 @@ int allkeysdefined(const Str *indexname,const Array *riktab,Env *env)
 }
 
 int analyzeuintline(const Str *indexname,
+                    const char *suffix,
                     uint32_t linenum, 
                     const Uchar *linebuffer,
                     unsigned long linelength,
@@ -238,7 +240,7 @@ int analyzeuintline(const Str *indexname,
     {
       env_error_set(env,"file %s%s, line %u: cannot find key for \"%*.*s\"",
 			 str_get(indexname),
-			 ".prj",
+			 suffix,
 			 linenum,
 			 (Fieldwidthtype) lengthofkey,
 			 (Fieldwidthtype) lengthofkey,

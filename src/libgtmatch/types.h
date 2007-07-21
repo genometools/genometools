@@ -242,7 +242,13 @@ typedef struct
 typedef struct
 {
   bool defined;
-  Seqpos value;
+  Seqpos valueseqpos;
 } DefinedSeqpos;
+
+typedef struct
+{
+  bool defined;
+  unsigned long valueunsignedlong;
+} Definedunsignedlong;
 
 #endif

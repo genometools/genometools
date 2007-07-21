@@ -4,10 +4,6 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
-
 #include "intcode-def.h"
 
 void kmercode2string(char *buffer,

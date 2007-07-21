@@ -374,7 +374,7 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
   env_error_check(env);
   encseqwithoptions.encseq = encseq;
   encseqwithoptions.writemode = true;
-  fp = opensfxfile(indexname,ENCODEDSEQINDEX,"wb",env);
+  fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"wb",env);
   if (fp == NULL)
   {
     haserr = true;
@@ -405,7 +405,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
 
   env_error_check(env);
   tmpfilename = str_clone(indexname,env);
-  str_append_cstr(tmpfilename,ENCODEDSEQINDEX,env);
+  str_append_cstr(tmpfilename,ENCSEQFILESUFFIX,env);
   encseqwithoptions.encseq = encseq;
   encseqwithoptions.writemode = false;
   if (fillmapspecstartptr(assignencseqmapspecification,
@@ -423,8 +423,8 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
 
 
 static uint64_t detsizeencseq(Positionaccesstype sat,
-                              Seqpos totallength,
-                              const Specialcharinfo *specialcharinfo)
+  Seqpos totallength,
+  const Specialcharinfo *specialcharinfo)
 {
   uint64_t sum,
            fourcharssize = (uint64_t) detsizeoffourcharsinonebyte(totallength);
@@ -1311,7 +1311,7 @@ static int readsatfromfile(const Str *indexname,Env *env)
   int cc = 0;
   bool haserr = false;
 
-  fp = opensfxfile(indexname,ENCODEDSEQINDEX,"rb",env);
+  fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"rb",env);
   if (fp == NULL)
   {
     haserr = true;
@@ -1322,7 +1322,7 @@ static int readsatfromfile(const Str *indexname,Env *env)
     if(cc == EOF)
     {
       env_error_set(env,"illegal EOF symbol in \"%s%s\"",
-                     str_get(indexname),ENCODEDSEQINDEX);
+                     str_get(indexname),ENCSEQFILESUFFIX);
       haserr = true;
     }
   }
@@ -1331,7 +1331,7 @@ static int readsatfromfile(const Str *indexname,Env *env)
     if(cc < 0 || cc >= (int) Undefpositionaccesstype)
     {
       env_error_set(env,"illegal type %d in \"%s%s\"",cc,
-                         str_get(indexname),ENCODEDSEQINDEX);
+                         str_get(indexname),ENCSEQFILESUFFIX);
       haserr = true;
     }
   }
