@@ -6,6 +6,9 @@
 
 #include <errno.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 
@@ -26,4 +29,21 @@
   }
   str_delete(tmpfilename,env);
   return fp;
+}
+
+bool indexfilealreadyexists(const Str *indexname,const char *suffix,Env *env)
+{
+  struct stat statbuf;
+  Str *tmpfilename;
+
+  tmpfilename = str_clone(indexname,env);
+  str_append_cstr(tmpfilename,suffix,env);
+
+  if(stat(str_get(tmpfilename),&statbuf) == 0)
+  {
+    str_delete(tmpfilename,env);
+    return true;
+  }
+  str_delete(tmpfilename,env);
+  return false;
 }

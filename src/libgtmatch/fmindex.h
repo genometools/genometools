@@ -10,7 +10,6 @@
 #include "types.h"
 #include "arraydef.h"
 #include "alphadef.h"
-#include "sarr-def.h"
 #include "encseq-def.h"
 #include "fmi-bwtbound.h"
 
@@ -69,23 +68,21 @@ typedef int(*FMprocessqhit)(void *,Seqpos,Seqpos);
 
 typedef struct
 {
-  Alphabet *alphabet;
-  Encodedsequence *bwtformatching;   // only for matching
-#ifdef CHECKBWT
-  Uchar *bwtext;           // only for debugging
-#endif
+  Encodedsequence *bwtformatching;
   Uchar *bfreq;            // bfreq[c][i] = #c in block i
-  Specialcharinfo specialcharinfo;
-  Seqpos bwtlength,        // length of bwtext (also totallength+1)
-         longestsuffixpos, // longest suffix
+  Seqpos bwtlength,        // also totallength + 1
          *tfreq,           // tfreq[c] = #characters < c in text
          *superbfreq,      // superbfreq[c][i] = #c in all superblocks 
                            // which are previous to superblock i
          *markpostable,    // sampling of entries from suffix array
+         longestsuffixpos,
          negatebsizeones,
          negatesuperbsizeones,
          markdistminus1;   // markdist - 1
+  Specialcharinfo specialcharinfo;
   ArrayPairBwtidx specpos; // positions of special characters
+  Alphabet *alphabet;
+  void *mappedptr; /* NULL or pointer to the mapped space block */
   
   uint32_t mapsize,          // copy of alphabet.mapsize, used for searching
            bsize,            // size of block

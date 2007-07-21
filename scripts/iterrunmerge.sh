@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+set -e -x
 
 if test $# -ne 1
 then

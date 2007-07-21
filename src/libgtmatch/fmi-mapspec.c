@@ -15,53 +15,54 @@ static void assignfmmapspecification(ArrayMapspecification *mapspectable,
                                      Env *env)
 {
   Fmindexwithoptions *fmwithoptions = (Fmindexwithoptions *) voidinfo;
-  Fmindex *fm;
+  Fmindex *fmindex;
   Mapspecification *mapspecptr;
 
-  fm = fmwithoptions->fmptr;
-  NEWMAPSPEC(fm->tfreq,Seqpos,(unsigned long) TFREQSIZE(fm->mapsize));
-  NEWMAPSPEC(fm->superbfreq,Seqpos,
-             (unsigned long) SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks));
-  NEWMAPSPEC(fm->markpostable,Seqpos,
+  fmindex = fmwithoptions->fmptr;
+  NEWMAPSPEC(fmindex->tfreq,Seqpos,(unsigned long) TFREQSIZE(fmindex->mapsize));
+  NEWMAPSPEC(fmindex->superbfreq,Seqpos,
+             (unsigned long) SUPERBFREQSIZE(fmindex->mapsize,
+                                            fmindex->nofsuperblocks));
+  NEWMAPSPEC(fmindex->markpostable,Seqpos,
              fmwithoptions->storeindexpos
-             ? (unsigned long) MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist)
+             ? (unsigned long) MARKPOSTABLELENGTH(fmindex->bwtlength,
+                                                  fmindex->markdist)
              : 0);
-  NEWMAPSPEC(fm->boundarray,Bwtbound,(unsigned long) fm->numofcodes);
-  NEWMAPSPEC(fm->specpos.spacePairBwtidx,PairBwtidx,
+  NEWMAPSPEC(fmindex->boundarray,Bwtbound,(unsigned long) fmindex->numofcodes);
+  NEWMAPSPEC(fmindex->specpos.spacePairBwtidx,PairBwtidx,
              fmwithoptions->storeindexpos 
-             ? fm->specpos.nextfreePairBwtidx
+             ? fmindex->specpos.nextfreePairBwtidx
              : 0);
-  NEWMAPSPEC(fm->bfreq,Uchar,
-             (unsigned long) BFREQSIZE(fm->mapsize,fm->nofblocks));
+  NEWMAPSPEC(fmindex->bfreq,Uchar,
+             (unsigned long) BFREQSIZE(fmindex->mapsize,fmindex->nofblocks));
 }
 
 int flushfmindex2file(FILE *fp,
-                      Fmindex *fm,
+                      Fmindex *fmindex,
                       bool storeindexpos,
                       Env *env)
 {
   Fmindexwithoptions fmwithoptions;
 
-  fmwithoptions.fmptr = fm;
+  fmwithoptions.fmptr = fmindex;
   fmwithoptions.storeindexpos = storeindexpos;
   return flushtheindex2file(fp,assignfmmapspecification,
-                            (void *) &fmwithoptions,fm->sizeofindex,env);
+                            (void *) &fmwithoptions,fmindex->sizeofindex,env);
 }
 
-int fillfmmapspecstartptr(Fmindex *fm,
+int fillfmmapspecstartptr(Fmindex *fmindex,
                           bool storeindexpos,
                           const Str *tmpfilename,
                           Env *env)
 {
   Fmindexwithoptions fmwithoptions;
-  void *mappedusrptr;
 
-  fmwithoptions.fmptr = fm;
+  fmwithoptions.fmptr = fmindex;
   fmwithoptions.storeindexpos = storeindexpos;
   return fillmapspecstartptr(assignfmmapspecification,
-                             &mappedusrptr,
+                             &fmindex->mappedptr,
                              (void *) &fmwithoptions,
                              tmpfilename,
-                             fm->sizeofindex,
+                             fmindex->sizeofindex,
                              env);
 }

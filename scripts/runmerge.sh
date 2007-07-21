@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e -x
 
@@ -24,4 +24,4 @@ cmp ${PREFIX}/midx-all.suf ${PREFIX}/all.suf
 cmp ${PREFIX}/midx-all.lcp ${PREFIX}/all.lcp
 cmp ${PREFIX}/midx-all.llv ${PREFIX}/all.llv
 ../bin/gt mkfmindex -fmout ${PREFIX}/fm-all -ii ${indexlist}
-../bin/gt suffixerator -dna -tis -pl 1 -db ${PREFIX}/fm-all.bwt
+../bin/gt suffixerator -plain -smap ${PREFIX}/fm-all.al1 -tis -pl 1 -db ${PREFIX}/fm-all.bwt

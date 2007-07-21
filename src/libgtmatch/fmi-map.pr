@@ -1,9 +1,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int scanfmprjfileviafileptr(Fmindex *fmindex,
-                                   Seqpos *totallength,
-                                   const Str *indexname,FILE *fpin,Env *env);
+bool fmindexexists(const Str *indexname,Env *env);
+
+void freefmindex(Fmindex *fmindex,Env *env);
+
+int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env);
 
 #ifdef __cplusplus
 }

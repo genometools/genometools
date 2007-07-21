@@ -5,6 +5,8 @@ extern "C" {
                              const char *suffix,
                              const char *mode,Env *env);
 
+bool indexfilealreadyexists(const Str *indexname,const char *suffix,Env *env);
+
 #ifdef __cplusplus
 }
 #endif

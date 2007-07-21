@@ -6,7 +6,6 @@
 
 #include "libgtcore/option.h"
 #include "divmodmul.h"
-#include "sarr-def.h"
 #include "fmindex.h"
 
 #include "fmi-save.pr"

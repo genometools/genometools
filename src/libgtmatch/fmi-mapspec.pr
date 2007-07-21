@@ -2,11 +2,11 @@
 extern "C" {
 #endif
 int flushfmindex2file(FILE *fp,
-                      Fmindex *fm,
+                      Fmindex *fmindex,
                       bool storeindexpos,
                       Env *env);
 
-int fillfmmapspecstartptr(Fmindex *fm,
+int fillfmmapspecstartptr(Fmindex *fmindex,
                           bool storeindexpos,
                           const Str *tmpfilename,
                           Env *env);
