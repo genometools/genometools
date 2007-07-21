@@ -513,3 +513,32 @@ void outputalphabet(FILE *fpout,const Alphabet *alpha)
   }
   (void) putc((Fputcfirstargtype) '\n',fpout);
 }
+
+/*
+  Suppose the string \texttt{w} of length \texttt{wlen} 
+  was transformed according to the alphabet \texttt{alpha}.
+  The following function shows each character in \texttt{w}
+  as the characters specified in the transformation.
+  The output goes to the given file pointer.
+ */
+
+void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
+                             const Uchar *w,unsigned long wlen)
+{
+  unsigned long i;
+ 
+  for(i = 0; i < wlen; i++)
+  {
+    (void) putc((Fputcfirstargtype) alpha->characters[(int) w[i]],fpout);
+  }
+}
+
+/*
+  The following function is a special case of the previous
+  function showing the output on stdout.
+*/
+
+void showsymbolstring(const Alphabet *alpha,const Uchar *w,unsigned long wlen)
+{
+  showsymbolstringgeneric(stdout,alpha,w,wlen);
+}
