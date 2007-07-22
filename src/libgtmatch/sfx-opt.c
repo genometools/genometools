@@ -13,8 +13,6 @@
 
 #include "getbasename.pr"
 
-#define UNDEFPREFIXLENGTH 0
-
 static void versionfunc(const char *progname)
 {
   printf("%s version 0.1\n",progname);
@@ -66,18 +64,16 @@ static OPrval parse_options(int *parsed_args,
                                       so->str_indexname, NULL, env);
   option_parser_add_option(op, optionindexname, env);
 
-  so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   optionpl = option_new_uint_min("pl",
                                  "specify prefix length for bucket sort\n"
                                  "recommendation: use without argument;\n"
                                  "then a reasonable prefix length is "
                                  "automatically determined",
                                  &so->prefixlength,
-                                 UNDEFPREFIXLENGTH,
+                                 PREFIXLENGTH_AUTOMATIC,
                                  (unsigned int) 1,
                                  env);
   option_argument_is_optional(optionpl);
-  option_is_mandatory(optionpl);
   option_parser_add_option(op, optionpl, env);
 
   option = option_new_uint_min("parts",
@@ -190,7 +186,10 @@ static void showoptions(const Suffixeratoroptions *so)
     printf("# plain=yes\n");
   }
   printf("# indexname=\"%s\"\n",str_get(so->str_indexname));
-  if (so->prefixlength != UNDEFPREFIXLENGTH)
+  if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
+  {
+    printf("# prefixlength=automatic\n");
+  } else
   {
     printf("# prefixlength=%u\n",so->prefixlength);
   }
@@ -225,6 +224,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->filenametab = strarray_new(env);
   so->str_smap = str_new(env);
   so->str_sat = str_new(env);
+  so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   rval = parse_options(&parsed_args, so, argc, argv, env);
   if (rval == OPTIONPARSER_ERROR)
   {

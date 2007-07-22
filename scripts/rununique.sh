@@ -26,7 +26,7 @@ function mkfmindex()
 
 function plain() 
 {
-  cerr "../bin/gt suffixerator -plain -tis -pl 1 -indexname $1 -smap $2 -db $3"
+  cerr "../bin/gt suffixerator -plain -tis -indexname $1 -smap $2 -db $3"
 }
 
 function suffixerator
@@ -67,7 +67,7 @@ then
   if test ! -f ${IDIR}/mkv-single.prj ||
      test ${rfiles} -nt ${IDIR}/mkv-single.prj   
   then
-    suffixerator -indexname ${IDIR}/mkv-single -db ${rfiles} -bwt -pl 8
+    suffixerator -indexname ${IDIR}/mkv-single -db ${rfiles} -bwt -pl
   else
     echo "# ${IDIR}/mkv-single is up to date"
   fi
@@ -87,7 +87,7 @@ else
     if test ! -f ${IDIR}/midx${fn}.prj || 
        test ${rfile} -nt ${IDIR}/midx${fn}.prj
     then
-      suffixerator -indexname ${IDIR}/midx${fn} -db ${rfile} -suf -lcp -tis -pl 1
+      suffixerator -indexname ${IDIR}/midx${fn} -db ${rfile} -suf -lcp -tis -pl
       runmkfm=1
     else
       echo "# ${IDIR}/midx${fn} is up to date"

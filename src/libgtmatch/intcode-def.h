@@ -9,6 +9,8 @@
 #include <inttypes.h>
 #include <stdbool.h>
 
+#define PREFIXLENBITS   4
+
 typedef uint32_t Codetype;      /* \Typedef{Codetype} */
 
 typedef struct

@@ -14,6 +14,7 @@
 #include "encseq-def.h"
 #include "measure-time-if.h"
 #include "esafileend.h"
+#include "intcode-def.h"
 #include "filelength-def.h"
 #include "chardef.h"
 
@@ -25,6 +26,7 @@
 #include "sfx-opt.pr"
 #include "sfx-outprj.pr"
 #include "sfx-suffixer.pr"
+#include "sfx-apfxlen.pr"
 
 typedef struct
 {
@@ -231,7 +233,9 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
           }\
         }
 
-static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
+#define SIZEOFBCKENTRY (2 * sizeof(Seqpos))
+
+static int runsuffixerator(Suffixeratoroptions *so,Env *env)
 {
   unsigned char numofchars = 0;
   unsigned long numofsequences;
@@ -320,18 +324,49 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
            PRINTSeqposcast(specialcharinfo.specialranges));
     if (so->outsuftab || so->outbwttab || so->outlcptab)
     {
-      if (suffixerator(suftab2file,
-                       &outfileinfo,
-                       specialcharinfo.specialcharacters,
-                       specialcharinfo.specialranges,
-                       encseq,
-                       (uint32_t) numofchars,
-                       (uint32_t) so->prefixlength,
-                       (uint32_t) so->numofparts,
-                       mtime,
-                       env) != 0)
+      if(so->prefixlength == PREFIXLENGTH_AUTOMATIC)
       {
-        haserr = true;
+        so->prefixlength = recommendedprefixlength(numofchars,
+                                                   totallength,
+                                                   SIZEOFBCKENTRY);
+        printf("# automatically determined prefixlength = %u\n",
+                so->prefixlength);
+      } else
+      {
+        unsigned int maxprefixlen;
+
+        maxprefixlen 
+          = whatisthemaximalprefixlength(numofchars,
+                                         totallength,
+                                         SIZEOFBCKENTRY,
+                                         (unsigned int) PREFIXLENBITS);
+        if(checkprefixlength(maxprefixlen,so->prefixlength,env) != 0)
+        {
+          haserr = true;
+        } else
+        {
+          showmaximalprefixlength(maxprefixlen,
+                                  recommendedprefixlength(
+                                  numofchars,
+                                  totallength,
+                                  SIZEOFBCKENTRY));
+        }
+      }
+      if(!haserr)
+      {
+        if (suffixerator(suftab2file,
+                         &outfileinfo,
+                         specialcharinfo.specialcharacters,
+                         specialcharinfo.specialranges,
+                         encseq,
+                         (uint32_t) numofchars,
+                         (uint32_t) so->prefixlength,
+                         (uint32_t) so->numofparts,
+                         mtime,
+                         env) != 0)
+        {
+          haserr = true;
+        }
       }
     }
   }
@@ -341,7 +376,6 @@ static int runsuffixerator(const Suffixeratoroptions *so,Env *env)
   env_fa_xfclose(outfileinfo.outfpbwttab,env);
   if (!haserr)
   {
-    assert(so->prefixlength > 0);
     if (outprjfile(so->str_indexname,
                    so->filenametab,
                    filelengthtab,

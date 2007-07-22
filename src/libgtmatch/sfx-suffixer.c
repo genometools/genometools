@@ -24,7 +24,6 @@
 #include "sfx-partssuf.pr"
 #include "sfx-bentsedg.pr"
 
-#define PREFIXLENBITS   4
 #define CODEBITS        (32-PREFIXLENBITS)
 #define MAXPREFIXLENGTH ((((uint32_t) 1) << PREFIXLENBITS) - 1)
 #define MAXCODEVALUE    ((((uint32_t) 1) << CODEBITS) - 1)

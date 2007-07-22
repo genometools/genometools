@@ -1,0 +1,21 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+unsigned int recommendedprefixlength(unsigned int numofchars,
+                                     Seqpos totallength,
+                                     size_t sizeofbckentry);
+
+unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
+                                          Seqpos totallength,
+                                          size_t sizeofbckentry,
+                                          unsigned int prefixlenbits);
+
+int checkprefixlength(unsigned int maxprefixlen,
+                      unsigned int prefixlength,Env *env);
+
+void showmaximalprefixlength(unsigned int maxprefixlen,
+                             unsigned int recommended);
+
+#ifdef __cplusplus
+}
+#endif

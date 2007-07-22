@@ -45,7 +45,7 @@ static int updatesumranges(void *key, void *value, void *data,
   keyvalue = (unsigned long) key;
   distvalue = *((unsigned long *) value);
   (*specialrangesptr) += currentrangevalue(keyvalue,distvalue);
-  printf("specialranges of length %lu: %lu\n",keyvalue,distvalue);
+  printf("# specialranges of length %lu: %lu\n",keyvalue,distvalue);
   return 0;
 }
 
