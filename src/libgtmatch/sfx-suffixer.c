@@ -8,7 +8,6 @@
 #include <stdio.h>
 #include <assert.h>
 #include "libgtcore/env.h"
-#include "types.h"
 #include "spacedef.h"
 #include "arraydef.h"
 #include "intbits.h"

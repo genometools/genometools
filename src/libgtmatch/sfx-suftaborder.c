@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include "libgtcore/env.h"
 #include "libgtcore/minmax.h"
-#include "types.h"
 #include "chardef.h"
 #include "intbits-tab.h"
 #include "encseq-def.h"
@@ -45,7 +44,7 @@ static void showlocalsuffix(FILE *fpout,
       (void) putc('~',fpout);
       break;
     }
-    (void) putc((Fputcfirstargtype) characters[(int) cc],fpout);
+    (void) putc((int) characters[(int) cc],fpout);
   }
 }
 

@@ -1,6 +1,6 @@
 #define ACCESSBWTTEXT(POS) getencodedchar(fm->bwtformatching,POS)
 
-static Seqpos skfmocc (const Fmindex *fm,Uchar cc,Seqpos pos)
+static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
 {
   Seqpos bwtidx,
          bwtlastidx,

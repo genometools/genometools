@@ -5,6 +5,7 @@
 */
 
 #include <errno.h>
+#include <limits.h>
 #include "sarr-def.h"
 #include "emimergeesa.h"
 #include "esafileend.h"

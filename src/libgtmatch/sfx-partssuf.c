@@ -5,7 +5,7 @@
 */
 
 #include "libgtcore/env.h"
-#include "types.h"
+#include "seqpos-def.h"
 #include "divmodmul.h"
 #include "spacedef.h"
 #include "intcode-def.h"

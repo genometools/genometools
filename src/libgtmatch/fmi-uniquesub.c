@@ -7,7 +7,6 @@
 #include <inttypes.h>
 #include "libgtcore/option.h"
 #include "fmindex.h"
-#include "stamp.h"
 
 #include "alphabet.pr"
 #include "fmi-map.pr"
@@ -15,6 +14,12 @@
 
 #define SHOWSEQUENCE   ((uint32_t) 1)
 #define SHOWQUERYPOS   (((uint32_t) 1) << 1)
+
+typedef struct
+{
+  bool defined;
+  unsigned long valueunsignedlong;
+} Definedunsignedlong;
 
 typedef struct
 {
@@ -34,35 +39,26 @@ typedef struct
 
 typedef struct
 {
-  Seqpos querysubstringstart;
-} Uniqueposinfo;
-
- DECLAREARRAYSTRUCT(Uniqueposinfo);
-
-typedef struct
-{
-  char *name;
+  const char *name;
   uint32_t bitmask;
 } Optionargmodedesc;
 
 typedef int (*Preprocessuniquelength)(unsigned long,void *,const char *);
 typedef int (*Processuniquelength)(const Alphabet *,
                                    const Uchar *,
-                                   Seqpos,
+                                   unsigned long,
                                    unsigned long,
                                    void *);
 typedef int (*Postprocessuniquelength)(const Alphabet *,
                                        const char *,
                                        unsigned long,
                                        const Uchar *,
-                                       Seqpos,
+                                       unsigned long,
                                        void *);
 
 typedef struct
 {
-  const Alphabet *alphabet;
-  void *indexinfo;
-  Seqpos referencetotallength;
+  Fmindex *fmindex;
   Preprocessuniquelength preprocessuniquelength;
   Processuniquelength processuniquelength;
   Postprocessuniquelength postprocessuniquelength;
@@ -157,7 +153,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   option_parser_add_option(op, optionfmindex, env);
 
   optionquery = option_new_string("query",
-                                  "specify queryfiles (mandatory)",
+                                  "specify queryfile (mandatory)",
                                   uniquesubcallinfo->queryfilename,
                                   NULL,env);
   option_is_mandatory(optionquery);
@@ -229,6 +225,206 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   return oprval;
 }
 
+int uniqueposinsinglesequence(void *info, 
+                                     unsigned long unitnum,
+                                     const Uchar *start,
+                                     const char *desc,
+                                     unsigned long len)
+{
+  Substringinfo *substringinfo = (Substringinfo *) info;
+  const Uchar *query;
+  unsigned long uniquelength, remaining;
+
+  if(substringinfo->preprocessuniquelength != NULL &&
+     substringinfo->preprocessuniquelength(unitnum,
+                                           substringinfo->processinfo,
+                                           desc) != 0)
+  {
+    return -1;
+  }
+  for(query = start, remaining = len; remaining > 0; query++, remaining--)
+  {
+    uniquelength = skfmuniqueforward (substringinfo->fmindex,query,start+len);
+    if(uniquelength > 0)
+    {
+      if(substringinfo->processuniquelength(substringinfo->fmindex->alphabet,
+                                            start,
+                                            uniquelength,
+                                            (unsigned long) (query-start),
+                                            substringinfo->processinfo) != 0)
+      {
+        return -2;
+      }
+    }
+  }
+  if(substringinfo->postprocessuniquelength != NULL &&
+     substringinfo->postprocessuniquelength(substringinfo->fmindex->alphabet,
+                                            desc,
+                                            unitnum,
+                                            start,
+                                            len,
+                                            substringinfo->processinfo) != 0)
+  {
+    return -3;
+  }
+  return 0;
+}
+
+static int showunitnum(unsigned long unitnum,
+                       /*@unused@*/ void *info,
+                       const char *desc)
+{
+  printf("unitnum=%lu",unitnum);
+  if(desc != NULL)
+  {
+    printf(" (%s)",desc);
+  }
+  printf("\n");
+  return 0;
+}
+
+static int showifinlengthrange(const Alphabet *alphabet,
+                               const Uchar *start,
+                               unsigned long uniquelength,
+                               unsigned long querystart,
+                               void *info)
+{
+  Rangespecinfo *rangespecinfo = (Rangespecinfo *) info;
+
+  if((!rangespecinfo->minlength.defined ||
+      uniquelength >= rangespecinfo->minlength.valueunsignedlong) &&
+     (!rangespecinfo->maxlength.defined ||
+      uniquelength <= rangespecinfo->maxlength.valueunsignedlong))
+  {
+    if(rangespecinfo->showmode & SHOWQUERYPOS)
+    {
+      printf("%lu ",querystart);
+    }
+    printf("%lu",uniquelength);
+    if(rangespecinfo->showmode & SHOWSEQUENCE)
+    {
+      (void) putchar(' ');
+      showsymbolstring(alphabet,
+                       start + querystart,
+                       uniquelength);
+    }
+    (void) putchar('\n');
+  }
+  return 0;
+}
+
+static int findsubquerymatch(Fmindex *fmindex,
+                             /*@unused@*/ const Str *queryfilename,
+                             Definedunsignedlong minlength,
+                             Definedunsignedlong maxlength,
+                             uint32_t showmode,
+                             /*@unused@*/ Env *env)
+{
+  Substringinfo substringinfo;
+  Rangespecinfo rangespecinfo;
+
+  substringinfo.fmindex = fmindex;
+  rangespecinfo.minlength = minlength;
+  rangespecinfo.maxlength = maxlength;
+  rangespecinfo.showmode = showmode;
+  substringinfo.preprocessuniquelength = showunitnum;
+  substringinfo.processuniquelength = showifinlengthrange;
+  substringinfo.postprocessuniquelength = NULL;
+  substringinfo.processinfo = &rangespecinfo;
+  /*
+  if(overallsequences(False,
+                      querymultiseq,
+                      &substringinfo,
+                      uniqueposinsinglesequence) != 0)
+  {
+    return (Sint) -2;
+  }
+  */
+  return 0;
+}
+
+/*
+int overallquerysequence(
+        const StrArray *filenametab,
+        const Uchar *symbolmap,
+        Env *env)
+{
+  Fastabufferstate fbs;
+  Uchar charcode;
+  int retval;
+  unsigned long idx;
+
+  *numofsequences = 0;
+  specialcharinfo->specialcharacters = 0;
+  specialcharinfo->lengthofspecialprefix = 0;
+  specialcharinfo->lengthofspecialsuffix = 0;
+
+  initformatbufferstate(&fbs,
+                        filenametab,
+                        symbolmap,
+                        plainformat,
+                        filelengthtab,
+                        env);
+  specialrangelengths = initdistribution(env);
+  for (pos = 0; ; pos++)
+  {
+    retval = readnextUchar(&charcode,&fbs,env);
+    if (retval < 0)
+    {
+      return -1;
+    }
+    if (retval == 0)
+    {
+      if (lastspeciallength > 0)
+      {
+        idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+        adddistribution(specialrangelengths,idx,env);
+      }
+      break;
+    }
+    if (ISSPECIAL(charcode))
+    {
+      if (specialprefix)
+      {
+        specialcharinfo->lengthofspecialprefix++;
+      }
+      specialcharinfo->specialcharacters++;
+      if (lastspeciallength == 0)
+      {
+        lastspeciallength = (Seqpos) 1;
+      } else
+      {
+        lastspeciallength++;
+      }
+      if (charcode == (Uchar) SEPARATOR)
+      {
+        (*numofsequences)++;
+      }
+    } else
+    {
+      if (specialprefix)
+      {
+        specialprefix = false;
+      }
+      if (lastspeciallength > 0)
+      {
+        idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+        adddistribution(specialrangelengths,idx,env);
+        lastspeciallength = 0;
+      }
+    }
+  }
+  specialcharinfo->specialranges = 0;
+  (void) foreachdistributionvalue(specialrangelengths,updatesumranges,
+                                  &specialcharinfo->specialranges,env);
+  freedistribution(&specialrangelengths,env);
+  specialcharinfo->lengthofspecialsuffix = lastspeciallength;
+  (*numofsequences)++;
+  *totallength = pos;
+  return 0;
+}
+*/
+
 int findminuniquesubstrings(int argc,const char **argv,Env *env)
 {
   Uniquesubcallinfo uniquesubcallinfo;
@@ -259,132 +455,19 @@ int findminuniquesubstrings(int argc,const char **argv,Env *env)
       haserr = true;
     } else
     {
+      if(findsubquerymatch(&fmindex,
+                           uniquesubcallinfo.queryfilename,
+                           uniquesubcallinfo.minlength,
+                           uniquesubcallinfo.maxlength,
+                           uniquesubcallinfo.showmode,
+                           env) != 0)
+      {
+        haserr = true;
+      }
       freefmindex(&fmindex,env);
     }
   }
   str_delete(uniquesubcallinfo.fmindexname,env);
   str_delete(uniquesubcallinfo.queryfilename,env);
   return haserr ? -1 : 0;
-}
-
-static int uniqueposinsinglesequence(void *info, 
-                                     unsigned long unitnum,
-                                     const Uchar *start,
-                                     const char *desc,
-                                     Seqpos len)
-{
-  Substringinfo *substringinfo = (Substringinfo *) info;
-  const Uchar *query;
-  Seqpos remaining, uniquelength;
-
-  if(substringinfo->preprocessuniquelength != NULL &&
-     substringinfo->preprocessuniquelength(unitnum,
-                                           substringinfo->processinfo,
-                                           desc) != 0)
-  {
-    return -1;
-  }
-  for(query = start, remaining = len; remaining > 0; query++, remaining--)
-  {
-    uniquelength = skfmuniqueforward ((Fmindex *) substringinfo->indexinfo,
-                                      query,start+len);
-    if(uniquelength > 0)
-    {
-      if(substringinfo->processuniquelength(substringinfo->alphabet,
-                                            start,
-                                            uniquelength,
-                                            (Seqpos) (query-start),
-                                            substringinfo->processinfo) != 0)
-      {
-        return -2;
-      }
-    }
-  }
-  if(substringinfo->postprocessuniquelength != NULL &&
-     substringinfo->postprocessuniquelength(substringinfo->alphabet,
-                                            desc,
-                                            unitnum,
-                                            start,
-                                            len,
-                                            substringinfo->processinfo) != 0)
-  {
-    return -3;
-  }
-  return 0;
-}
-
-static int showunitnum(unsigned long unitnum,
-                       /*@unused@*/ void *info,
-                       const char *desc)
-{
-  printf("unitnum=%lu",unitnum);
-  if(desc != NULL)
-  {
-    printf(" (%s)",desc);
-  }
-  printf("\n");
-  return 0;
-}
-
-static int showifinlengthrange(const Alphabet *alphabet,
-                               const Uchar *start,
-                               Seqpos uniquelength,
-                               unsigned long querystart,
-                               void *info)
-{
-  Rangespecinfo *rangespecinfo = (Rangespecinfo *) info;
-
-  if((!rangespecinfo->minlength.defined ||
-      uniquelength >= rangespecinfo->minlength.valueunsignedlong) &&
-     (!rangespecinfo->maxlength.defined ||
-      uniquelength <= rangespecinfo->maxlength.valueunsignedlong))
-  {
-    if(rangespecinfo->showmode & SHOWQUERYPOS)
-    {
-      printf("%lu ",querystart);
-    }
-    printf(FormatSeqpos,PRINTSeqposcast(uniquelength));
-    if(rangespecinfo->showmode & SHOWSEQUENCE)
-    {
-      (void) putchar(' ');
-      showsymbolstring(alphabet,
-                       start + querystart,
-                       uniquelength);
-    }
-    (void) putchar('\n');
-  }
-  return 0;
-}
-
-static int findsubquerymatch(const Alphabet *alphabet,
-                              void *indexinfo,
-                              Seqpos referencetotallength,
-                              Definedunsignedlong minlength,
-                              Definedunsignedlong maxlength,
-                              uint32_t showmode,
-                              Env *env)
-{
-  Substringinfo substringinfo;
-  Rangespecinfo rangespecinfo;
-
-  substringinfo.alphabet = alphabet;
-  substringinfo.indexinfo = indexinfo;
-  substringinfo.referencetotallength = referencetotallength;
-  rangespecinfo.minlength = minlength;
-  rangespecinfo.maxlength = maxlength;
-  rangespecinfo.showmode = showmode;
-  substringinfo.preprocessuniquelength = showunitnum;
-  substringinfo.processuniquelength = showifinlengthrange;
-  substringinfo.postprocessuniquelength = NULL;
-  substringinfo.processinfo = &rangespecinfo;
-  /*
-  if(overallsequences(False,
-                      querymultiseq,
-                      &substringinfo,
-                      uniqueposinsinglesequence) != 0)
-  {
-    return (Sint) -2;
-  }
-  */
-  return 0;
 }

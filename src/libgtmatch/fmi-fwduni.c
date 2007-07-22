@@ -5,9 +5,9 @@
 
 #include "fmi-occ.gen"
 
-Seqpos skfmuniqueforward (const Fmindex *fm,
-                          const Uchar *qstart,
-                          const Uchar *qend)
+unsigned long skfmuniqueforward (const Fmindex *fmindex,
+                                 const Uchar *qstart,
+                                 const Uchar *qend)
 {
   Uchar cc;
   const Uchar *qptr;
@@ -19,8 +19,8 @@ Seqpos skfmuniqueforward (const Fmindex *fm,
   {
     return 0;
   }
-  bwtbound.lbound = fm->tfreq[cc];
-  bwtbound.ubound = fm->tfreq[cc+1];
+  bwtbound.lbound = fmindex->tfreq[cc];
+  bwtbound.ubound = fmindex->tfreq[cc+1];
   while (qptr < qend && bwtbound.lbound + 1 < bwtbound.ubound)
   {
     cc = *qptr;
@@ -28,13 +28,15 @@ Seqpos skfmuniqueforward (const Fmindex *fm,
     {
       return 0;
     }
-    bwtbound.lbound = fm->tfreq[cc] + skfmocc (fm, cc, bwtbound.lbound);
-    bwtbound.ubound = fm->tfreq[cc] + skfmocc (fm, cc, bwtbound.ubound);
+    bwtbound.lbound = fmindex->tfreq[cc] + 
+                      fmoccurrence (fmindex, cc, bwtbound.lbound);
+    bwtbound.ubound = fmindex->tfreq[cc] + 
+                      fmoccurrence (fmindex, cc, bwtbound.ubound);
     qptr++;
   }
   if(bwtbound.lbound + 1 == bwtbound.ubound)
   {
-    return (Seqpos) (qptr - qstart);
+    return (unsigned long) (qptr - qstart);
   }
   return 0;
 }

@@ -5,6 +5,7 @@
 */
 
 #include <stdio.h>
+#include <limits.h>
 #include "sarr-def.h"
 #include "emimergeesa.h"
 #include "encseq-def.h"

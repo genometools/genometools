@@ -6,7 +6,6 @@
 
 #ifndef INTBITS_TAB_H
 #define INTBITS_TAB_H
-#include <limits.h>
 #include "intbits.h"
 #include "spacedef.h"
 

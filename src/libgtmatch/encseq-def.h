@@ -6,7 +6,8 @@
 
 #ifndef ENCSEQDEF_H
 #define ENCSEQDEF_H
-#include "types.h"
+#include "symboldef.h"
+#include "seqpos-def.h"
 #include "alphadef.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"

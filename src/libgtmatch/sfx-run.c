@@ -8,13 +8,13 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <errno.h>
-#include "types.h"
 #include "spacedef.h"
 #include "alphadef.h"
 #include "sfx-optdef.h"
 #include "encseq-def.h"
 #include "measure-time-if.h"
 #include "esafileend.h"
+#include "filelength-def.h"
 #include "chardef.h"
 
 #include "alphabet.pr"

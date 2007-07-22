@@ -4,24 +4,14 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#ifndef BWTBOUND_H
-#define BWTBOUND_H
-
-#include "seqpos-def.h"
-#include "arraydef.h"
+#ifndef FILELENGTH_DEF_H
+#define FILELENGTH_DEF_H
+#include <inttypes.h>
 
 typedef struct
 {
-  Seqpos lbound, 
-         ubound;
-} Bwtbound;
-
-typedef struct
-{
-  Seqpos bwtpos, 
-         suftabvalue;
-} PairBwtidx;
-
-DECLAREARRAYSTRUCT(PairBwtidx);
+  uint64_t length,
+           effectivelength;
+} Filelengthvalues;
 
 #endif

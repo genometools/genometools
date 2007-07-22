@@ -1,9 +1,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-Seqpos skfmuniqueforward (const Fmindex *fm,
-                          const Uchar *qstart,
-                          const Uchar *qend);
+unsigned long skfmuniqueforward (const Fmindex *fmindex,
+                                 const Uchar *qstart,
+                                 const Uchar *qend);
 
 #ifdef __cplusplus
 }

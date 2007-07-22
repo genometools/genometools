@@ -10,7 +10,8 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/array.h"
-#include "types.h"
+#include "symboldef.h"
+#include "format64.h"
 #include "sfx-ri-def.h"
 
 typedef union
@@ -93,8 +94,8 @@ static int scanuintintline(uint32_t *lengthofkey,
          readint < (int64_t) 0)
       {
         env_error_set(env,"cannot find non-negative integer in \"%*.*s\"",
-                           (Fieldwidthtype) (linelength - (i+1)),
-                           (Fieldwidthtype) (linelength - (i+1)),
+                           (int) (linelength - (i+1)),
+                           (int) (linelength - (i+1)),
                            (const char *) (linebuffer + i + 1));
         return -1;
       }
@@ -113,8 +114,8 @@ static int scanuintintline(uint32_t *lengthofkey,
   if (!found)
   {
     env_error_set(env,"missing equality symbol in \"%*.*s\"",
-                       (Fieldwidthtype) linelength,
-                       (Fieldwidthtype) linelength,
+                       (int) linelength,
+                       (int) linelength,
                        linebuffer);
     return -2;
   }
@@ -242,8 +243,8 @@ int analyzeuintline(const Str *indexname,
 			 str_get(indexname),
 			 suffix,
 			 linenum,
-			 (Fieldwidthtype) lengthofkey,
-			 (Fieldwidthtype) lengthofkey,
+			 (int) lengthofkey,
+			 (int) lengthofkey,
 			 (char  *) linebuffer);
       haserr = true;
     }

@@ -6,8 +6,8 @@
 
 #ifndef ARRAYDEF_H
 #define ARRAYDEF_H
-#include "types.h"
 #include "spacedef.h"
+#include "symboldef.h"
 
 /*
   This file defines macros to conveniently declare and
@@ -117,7 +117,6 @@
 */
 
 DECLAREARRAYSTRUCT(Uchar);
-DECLAREARRAYSTRUCT(Ushort);
 DECLAREARRAYSTRUCT(char);
 
 #endif

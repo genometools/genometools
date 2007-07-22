@@ -7,9 +7,10 @@
 #include <stdio.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <limits.h>
 #include "libgtcore/env.h"
 #include "libgtcore/array.h"
-#include "types.h"
+#include "format64.h"
 #include "arraydef.h"
 #include "sarr-def.h"
 #include "encseq-def.h"
@@ -127,12 +128,13 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         suffixarray->filelengthtab[numoffiles].length = (Seqpos) readint1;
         suffixarray->filelengthtab[numoffiles].effectivelength 
                                                = (Seqpos) readint2;
-        printf("%s%s " FormatSeqpos " " FormatSeqpos "\n",
+        printf("%s%s " Formatuint64_t " " Formatuint64_t "\n",
                 DBFILEKEY,
                 strarray_get(suffixarray->filenametab,numoffiles),
-                PRINTSeqposcast(suffixarray->filelengthtab[numoffiles].length),
-                PRINTSeqposcast(suffixarray->filelengthtab[numoffiles].
-                                effectivelength));
+                PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
+                                  length),
+                PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
+                                  effectivelength));
         numoffiles++;
       }
     } else

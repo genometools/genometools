@@ -5,7 +5,6 @@
 */
 
 #include <math.h>
-#include "types.h"
 #include "divmodmul.h"
 #include "fmindex.h"
 #include "alphadef.h"

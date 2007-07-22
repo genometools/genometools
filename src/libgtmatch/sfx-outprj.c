@@ -7,10 +7,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <limits.h>
 #include "libgtcore/strarray.h"
 #include "libgtcore/str.h"
-#include "types.h"
+#include "seqpos-def.h"
+#include "format64.h"
 #include "spacedef.h"
+#include "filelength-def.h"
 #include "esafileend.h"
 #include "stamp.h"
 
@@ -24,7 +27,7 @@
 static void showprjinfo(FILE *outprj,
                         const StrArray *filenametab,
                         const Filelengthvalues *filelengthtab,
-                        /*@unused@*/ Seqpos totallength,
+                        Seqpos totallength,
                         unsigned long numofsequences,
                         const Specialcharinfo *specialcharinfo,
                         uint32_t prefixlength,
@@ -38,13 +41,12 @@ static void showprjinfo(FILE *outprj,
   assert(filenametab != NULL);
   for (i=0; i<strarray_size(filenametab); i++)
   {
-    fprintf(outprj,"dbfile=%s " FormatSeqpos " " FormatSeqpos "\n",
+    fprintf(outprj,"dbfile=%s " Formatuint64_t " " Formatuint64_t "\n",
                     strarray_get(filenametab,i),
-                    PRINTSeqposcast(filelengthtab[i].length),
-                    PRINTSeqposcast(filelengthtab[i].effectivelength));
+                    PRINTuint64_tcast(filelengthtab[i].length),
+                    PRINTuint64_tcast(filelengthtab[i].effectivelength));
   }
-  fprintf(outprj,"totallength=" FormatSeqpos "\n",
-                 PRINTSeqposcast(totallength));
+  fprintf(outprj,"totallength=" FormatSeqpos "\n",PRINTSeqposcast(totallength));
   PRJSPECIALOUT(specialcharacters);
   PRJSPECIALOUT(specialranges);
   PRJSPECIALOUT(lengthofspecialprefix);

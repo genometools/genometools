@@ -9,7 +9,8 @@
 #include <ctype.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
-#include "types.h"
+#include "seqpos-def.h"
+#include "ushort-def.h"
 #include "intbits-tab.h"
 #include "alphadef.h"
 #include "chardef.h"
@@ -28,10 +29,13 @@
 
 #include "readnextUchar.gen"
 
+
 #ifdef Seqposequalsunsignedint
+#define Uint32Const(N)   (N##U)  /* uint32_t constant */
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
         ((ESEQ[DIV4(IDX)] >> (Uint32Const(6) - MULT2(MOD4(IDX)))) & Uint32Const(3))
 #else
+#define Uint64Const(N)   (N##UL) /* uint64_t constant */
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
         ((ESEQ[(Seqpos) DIV4(IDX)] >> (Uint64Const(6) - (uint64_t) MULT2(MOD4(IDX))))\
          & Uint64Const(3))

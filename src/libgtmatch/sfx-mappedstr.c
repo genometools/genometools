@@ -13,7 +13,6 @@
 #include <assert.h>
 #include "libgtcore/env.h"
 #include "libgtcore/strarray.h"
-#include "types.h"
 #include "chardef.h"
 #include "spacedef.h"
 #include "intcode-def.h"

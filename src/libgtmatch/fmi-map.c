@@ -10,7 +10,6 @@
 #include "libgtcore/env.h"
 #include "libgtcore/array.h"
 #include "libgtcore/str.h"
-#include "types.h"
 #include "arraydef.h"
 #include "sfx-ri-def.h"
 #include "esafileend.h"

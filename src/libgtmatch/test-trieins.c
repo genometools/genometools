@@ -4,7 +4,6 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "types.h"
 #include "spacedef.h"
 #include "sarr-def.h"
 #include "trieins-def.h"

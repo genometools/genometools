@@ -5,7 +5,6 @@
 */
 
 #include "libgtcore/env.h"
-#include "types.h"
 #include "spacedef.h"
 #include "encseq-def.h"
 #include "fbs-def.h"

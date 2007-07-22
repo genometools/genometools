@@ -8,7 +8,7 @@
 #include <ctype.h>
 #include "libgtcore/env.h"
 #include "libgtcore/strarray.h"
-#include "types.h"
+#include "seqpos-def.h"
 #include "chardef.h"
 #include "spacedef.h"
 #include "arraydef.h"

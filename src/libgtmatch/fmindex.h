@@ -7,7 +7,7 @@
 #ifndef FMINDEX_H
 #define FMINDEX_H
 
-#include "types.h"
+#include "seqpos-def.h"
 #include "arraydef.h"
 #include "alphadef.h"
 #include "encseq-def.h"

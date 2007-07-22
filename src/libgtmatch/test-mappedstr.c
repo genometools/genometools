@@ -8,7 +8,6 @@
 #include <string.h>
 #include <stdbool.h>
 #include "libgtcore/env.h"
-#include "types.h"
 #include "arraydef.h"
 #include "spacedef.h"
 #include "alphadef.h"
