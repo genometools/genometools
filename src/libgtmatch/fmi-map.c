@@ -133,8 +133,9 @@ static Encodedsequence *mapbwtencoding(const Str *indexname,Env *env)
 {
   Suffixarray suffixarray;
   bool haserr = false;
+  Seqpos totallength;
 
-  if(mapsuffixarray(&suffixarray,SARR_ESQTAB,indexname,env) != 0)
+  if(mapsuffixarray(&suffixarray,&totallength,SARR_ESQTAB,indexname,env) != 0)
   {
     haserr = true;
   }

@@ -42,13 +42,13 @@ fi
 
 if test $icc -eq 1
 then
-  make CC='ccache icc' CFLAGS='-O3 ${bignum} -wd1418,869,981,1338' LD='icc' CXX='icc' $*
+  make assert=no CC='ccache icc' CFLAGS='-O3 ${bignum} -wd1418,869,981,1338' LD='icc' CXX='icc' $*
 else
   if test $do64 -eq 1
   then
-    make CC="ccache gcc" CFLAGS="-O3 -m64" LDFLAGS="-m64" $*
+    make assert=no CC="ccache gcc" CFLAGS="-O3 -m64" LDFLAGS="-m64" $*
   else
-    make CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum}" LDFLAGS="-m32" $*
+    make assert=no CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum}" LDFLAGS="-m32" $*
   fi
 fi
 

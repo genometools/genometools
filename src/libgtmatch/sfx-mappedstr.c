@@ -9,7 +9,9 @@
 #include <ctype.h>
 #include <zlib.h>
 #include <stdbool.h>
+#ifndef NDEBUG
 #define NDEBUG
+#endif
 #include <assert.h>
 #include "libgtcore/env.h"
 #include "libgtcore/strarray.h"

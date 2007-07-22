@@ -89,7 +89,7 @@ static int initbasepower(uint32_t **basepower,
     }
     if (thepower >= minfailure)
     {
-      env_error_set(env,"overflow when computing %u * %u\n",thepower,base);
+      env_error_set(env,"overflow when computing %u * %u",thepower,base);
       haserr = true;
       break;
     }

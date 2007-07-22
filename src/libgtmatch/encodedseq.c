@@ -427,8 +427,8 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
 
 
 static uint64_t detsizeencseq(Positionaccesstype sat,
-  Seqpos totallength,
-  const Specialcharinfo *specialcharinfo)
+                              Seqpos totallength,
+                              const Specialcharinfo *specialcharinfo)
 {
   uint64_t sum,
            fourcharssize = (uint64_t) detsizeoffourcharsinonebyte(totallength);

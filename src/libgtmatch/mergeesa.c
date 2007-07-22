@@ -45,11 +45,13 @@ static int inputthesequences(Alphabet **alpha,
 {
   unsigned long idx;
   Str *indexname;
+  Seqpos totallength;
   
   for(idx=0; idx<strarray_size(indexnametab); idx++)
   {
     indexname = str_new_cstr(strarray_get(indexnametab,idx),env);
     if(streamsuffixarray(&suffixarraytable[idx],
+                         &totallength,
                          demand,
                          indexname,
                          env) != 0)

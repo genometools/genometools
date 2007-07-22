@@ -292,17 +292,33 @@ static bool scanal1file(Suffixarray *suffixarray,const Str *indexname,Env *env)
   return haserr;
 }
 
+void freesuffixarray(Suffixarray *suffixarray,Env *env)
+{
+  env_fa_xmunmap((void *) suffixarray->suftab,env);
+  env_fa_xmunmap((void *) suffixarray->lcptab,env);
+  env_fa_xmunmap((void *) suffixarray->llvtab,env);
+  env_fa_xmunmap((void *) suffixarray->bwttab,env);
+  env_fa_xfclose(suffixarray->suftabstream.fp,env);
+  env_fa_xfclose(suffixarray->lcptabstream.fp,env);
+  env_fa_xfclose(suffixarray->llvtabstream.fp,env);
+  env_fa_xfclose(suffixarray->bwttabstream.fp,env);
+  freeAlphabet(&suffixarray->alpha,env);
+  freeEncodedsequence(&suffixarray->encseq,env);
+  strarray_delete(suffixarray->filenametab,env);
+  FREESPACE(suffixarray->filelengthtab);
+}
+
 int mapsuffixarray(Suffixarray *suffixarray,
+                   Seqpos *totallength,
                    unsigned int demand,
                    const Str *indexname,
                    Env *env)
 {
   bool haserr = false;
-  Seqpos totallength;
 
   env_error_check(env);
   initsuffixarray(suffixarray);
-  haserr = scanprjfile(suffixarray,&totallength,indexname,env);
+  haserr = scanprjfile(suffixarray,totallength,indexname,env);
   if (!haserr)
   {
     haserr = scanal1file(suffixarray,indexname,env);
@@ -312,7 +328,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
     suffixarray->encseq = initencodedseq(true,
 					 NULL,
 					 indexname,
-					 totallength,
+					 *totallength,
 					 &suffixarray->specialcharinfo,
 					 suffixarray->alpha,
                                          false,  /* not relevant, since
@@ -327,7 +343,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
   if (!haserr && (demand & SARR_SUFTAB))
   {
     suffixarray->suftab = genericmaptable(indexname,SUFTABSUFFIX,
-                                          totallength+1,
+                                          (*totallength)+1,
                                           sizeof(Seqpos),
                                           env);
     if (suffixarray->suftab == NULL)
@@ -338,7 +354,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
   if(!haserr && (demand & SARR_LCPTAB))
   {
     suffixarray->lcptab = genericmaptable(indexname,LCPTABSUFFIX,
-                                          totallength+1,
+                                          (*totallength)+1,
                                           sizeof(Uchar),
                                           env);
     if (suffixarray->lcptab == NULL)
@@ -366,7 +382,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
   if(!haserr && (demand & SARR_BWTTAB))
   {
     suffixarray->bwttab = genericmaptable(indexname,BWTTABSUFFIX,
-                                          totallength+1,
+                                          (*totallength)+1,
                                           sizeof(Uchar),
                                           env);
     if (suffixarray->bwttab == NULL)
@@ -374,20 +390,24 @@ int mapsuffixarray(Suffixarray *suffixarray,
       haserr = true;
     }
   }
+  if(haserr)
+  {
+    freesuffixarray(suffixarray,env);
+  }
   return haserr ? -1 : 0;
 }
 
 int streamsuffixarray(Suffixarray *suffixarray,
+                      Seqpos *totallength,
                       unsigned int demand,
                       const Str *indexname,
                       Env *env)
 {
   bool haserr = false;
-  Seqpos totallength;
 
   env_error_check(env);
   initsuffixarray(suffixarray);
-  haserr = scanprjfile(suffixarray,&totallength,indexname,env);
+  haserr = scanprjfile(suffixarray,totallength,indexname,env);
   if (!haserr)
   {
     haserr = scanal1file(suffixarray,indexname,env);
@@ -397,7 +417,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
     suffixarray->encseq = initencodedseq(true,
 					 NULL,
 					 indexname,
-					 totallength,
+					 *totallength,
 					 &suffixarray->specialcharinfo,
 					 suffixarray->alpha,
                                          false, /* not relevant since 
@@ -440,21 +460,10 @@ int streamsuffixarray(Suffixarray *suffixarray,
       INITBufferedfile(indexname,&suffixarray->llvtabstream,LARGELCPTABSUFFIX);
     } 
   }
+  if(haserr)
+  {
+    freesuffixarray(suffixarray,env);
+  }
   return haserr ? -1 : 0;
 }
 
-void freesuffixarray(Suffixarray *suffixarray,Env *env)
-{
-  env_fa_xmunmap((void *) suffixarray->suftab,env);
-  env_fa_xmunmap((void *) suffixarray->lcptab,env);
-  env_fa_xmunmap((void *) suffixarray->llvtab,env);
-  env_fa_xmunmap((void *) suffixarray->bwttab,env);
-  env_fa_xfclose(suffixarray->suftabstream.fp,env);
-  env_fa_xfclose(suffixarray->lcptabstream.fp,env);
-  env_fa_xfclose(suffixarray->llvtabstream.fp,env);
-  env_fa_xfclose(suffixarray->bwttabstream.fp,env);
-  freeAlphabet(&suffixarray->alpha,env);
-  freeEncodedsequence(&suffixarray->encseq,env);
-  strarray_delete(suffixarray->filenametab,env);
-  FREESPACE(suffixarray->filelengthtab);
-}

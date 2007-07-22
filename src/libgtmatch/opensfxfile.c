@@ -24,8 +24,8 @@
   fp = env_fa_fopen(env,str_get(tmpfilename),mode);
   if (fp == NULL)
   {
-    env_error_set(env,"cannot open file \"%s\": %s\n",str_get(tmpfilename),
-                                                      strerror(errno));
+    env_error_set(env,"cannot open file \"%s\": %s",str_get(tmpfilename),
+                                                    strerror(errno));
   }
   str_delete(tmpfilename,env);
   return fp;

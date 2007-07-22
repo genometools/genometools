@@ -71,6 +71,7 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
   const Uchar *characters;
 
   if(streamsuffixarray(&suffixarray,
+                       &totallength,
                        SARR_ESQTAB,
                        indexname,
                        env) != 0)
@@ -80,7 +81,6 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
   if(!haserr)
   {
     trierep.encseqtable = &suffixarray.encseq;
-    totallength = getencseqtotallength(suffixarray.encseq);
     characters = getcharactersAlphabet(suffixarray.alpha);
     inittrienodetable(&trierep,totallength,(uint32_t) 1,env);
     maketrie(&trierep,characters,totallength);

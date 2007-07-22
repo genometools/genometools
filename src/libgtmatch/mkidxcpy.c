@@ -34,6 +34,8 @@ int makeindexfilecopy(const Str *destindex,
       haserr = true;
     }
   }
+  printf("# cp %s%s %s%s\n",
+           str_get(sourceindex),suffix,str_get(destindex),suffix);
   if(!haserr)
   {
     if(maxlength == 0)

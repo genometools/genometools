@@ -32,23 +32,24 @@ static void allocatefmtables(Fmindex *fm,bool storeindexpos,Env *env)
   {
     ALLOCASSIGNSPACE (fm->markpostable,NULL,Seqpos,
                       MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist));
+    fm->specpos.nextfreePairBwtidx = 0;
+    fm->specpos.allocatedPairBwtidx
+      = (unsigned long) determinenumberofspecialstostore(&fm->specialcharinfo);
+    printf("# %lu wildcards in the last " FormatSeqpos 
+           " characters (%.2f)\n",
+            (unsigned long) (fm->specialcharinfo.specialcharacters - 
+                            fm->specpos.allocatedPairBwtidx),
+            PRINTSeqposcast(fm->specialcharinfo.specialcharacters),
+            (double) (fm->specialcharinfo.specialcharacters - 
+                      fm->specpos.allocatedPairBwtidx)/
+                          fm->specialcharinfo.specialcharacters);
+    ALLOCASSIGNSPACE(fm->specpos.spacePairBwtidx,NULL,PairBwtidx,
+                     fm->specpos.allocatedPairBwtidx);
   } else
   {
+    INITARRAY(&fm->specpos,PairBwtidx);
     fm->markpostable = NULL;
   }
-  fm->specpos.nextfreePairBwtidx = 0;
-  fm->specpos.allocatedPairBwtidx
-    = (unsigned long) determinenumberofspecialstostore(&fm->specialcharinfo);
-  printf("# %lu wildcards in the last " FormatSeqpos 
-         " characters (%.2f)\n",
-          (unsigned long) (fm->specialcharinfo.specialcharacters - 
-                          fm->specpos.allocatedPairBwtidx),
-          PRINTSeqposcast(fm->specialcharinfo.specialcharacters),
-          (double) (fm->specialcharinfo.specialcharacters - 
-                    fm->specpos.allocatedPairBwtidx)/
-                        fm->specialcharinfo.specialcharacters);
-  ALLOCASSIGNSPACE(fm->specpos.spacePairBwtidx,NULL,PairBwtidx,
-                   fm->specpos.allocatedPairBwtidx);
   ALLOCASSIGNSPACE (fm->bfreq, NULL, Uchar,
                     BFREQSIZE(fm->mapsize,fm->nofblocks));
 }
@@ -179,7 +180,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
   Uchar cc;
   Seqpos bwtpos, 
          totallength, 
-         suftabvalue, 
+         suftabvalue = 0, 
          *sequenceoffsettable = NULL,
          firstignorespecial = 0,
          nextmark, 
@@ -202,8 +203,10 @@ int sufbwt2fmindex(Fmindex *fmindex,
   if(numofindexes == (uint32_t) 1)
   {
     Str *indexname = str_new_cstr(strarray_get(indexnametab,0),env);
+
     if(streamsuffixarray(&suffixarray,
-                         SARR_SUFTAB | SARR_BWTTAB,
+                         &totallength,
+                         SARR_BWTTAB | (storeindexpos ? SARR_SUFTAB : 0),
                          indexname,
                          env) != 0)
     {
@@ -211,18 +214,20 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if(!haserr)
     {
-      totallength = getencseqtotallength(suffixarray.encseq);
       mapsize = getmapsizeAlphabet(suffixarray.alpha);
       specialcharinfo = suffixarray.specialcharinfo;
       firstignorespecial = totallength - specialcharinfo.specialcharacters;
+      /*
       if(makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,env) != 0)
       {
         haserr = true;
       }
+      */
     }
     if(!haserr)
     {
       /* XXX is this necessary? */
+      /*
       if(makeindexfilecopy(outfmindex,
                            indexname,
                            BWTTABSUFFIX,
@@ -231,6 +236,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
       {
         haserr = true;
       }
+      */
     }
     str_delete(indexname,env);
   } else
@@ -312,19 +318,22 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       if(numofindexes == (uint32_t) 1)
       {
-        retval = readnextSeqposfromstream(&tmpsuftabvalue,
-                                          &suffixarray.suftabstream,
-                                          env);
-        if(retval < 0)
+        if(storeindexpos)
         {
-          haserr = true;
-          break;
-        } 
-        if(retval == 0)
-        {
-          break;
+          retval = readnextSeqposfromstream(&tmpsuftabvalue,
+                                            &suffixarray.suftabstream,
+                                            env);
+          if(retval < 0)
+          {
+            haserr = true;
+            break;
+          } 
+          if(retval == 0)
+          {
+            break;
+          }
+          suftabvalue = (Seqpos) tmpsuftabvalue;
         }
-        suftabvalue = (Seqpos) tmpsuftabvalue;
         retval = readnextUcharfromstream(&cc,&suffixarray.bwttabstream,env);
         if(retval < 0)
         {

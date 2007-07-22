@@ -7,6 +7,7 @@
 #include "libgtcore/option.h"
 #include "divmodmul.h"
 #include "fmindex.h"
+#include "stamp.h"
 
 #include "fmi-save.pr"
 #include "fmi-keyval.pr"
@@ -178,6 +179,13 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
            log2markdist; 
   bool haserr = false;
   
+  INITARRAY(&fm.specpos, PairBwtidx);
+  fm.bfreq = NULL;
+  fm.superbfreq = NULL;
+  fm.tfreq = NULL;
+  fm.markpostable = NULL;
+  fm.boundarray = NULL;
+  fm.suffixlength = 0;
   if(levedescl2levelnum(str_get(mkfmcallinfo->leveldesc),
                         &log2bsize,
                         &log2markdist) != 0)

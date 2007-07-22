@@ -20,7 +20,9 @@ struct AddIntronsVisitor {
 
 static void addintrons_visitor_free(GenomeVisitor *gv, /*@unused@*/ Env *env)
 {
+#ifndef NDEBUG
   AddIntronsVisitor *addintrons_visitor = addintrons_visitor_cast(gv);
+#endif
   assert(addintrons_visitor);
 }
 
