@@ -11,6 +11,7 @@
 #include "alphabet.pr"
 #include "fmi-map.pr"
 #include "fmi-fwduni.pr"
+#include "iterseq.pr"
 
 #define SHOWSEQUENCE   ((uint32_t) 1)
 #define SHOWQUERYPOS   (((uint32_t) 1) << 1)
@@ -33,8 +34,8 @@ typedef struct
   Definedunsignedlong minlength,
                       maxlength;
   uint32_t showmode;
-  Str *fmindexname,
-      *queryfilename;
+  Str *fmindexname;
+  StrArray *queryfilenames;
 } Uniquesubcallinfo;
 
 typedef struct
@@ -119,7 +120,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   uniquesubcallinfo->maxlength.defined = false;
   uniquesubcallinfo->showmode = 0;
   uniquesubcallinfo->fmindexname = str_new(env);
-  uniquesubcallinfo->queryfilename = str_new(env);
+  uniquesubcallinfo->queryfilenames = strarray_new(env);
   flagsoutputoption = strarray_new(env);
 
   op = option_parser_new("options",
@@ -152,14 +153,18 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   option_is_mandatory(optionfmindex);
   option_parser_add_option(op, optionfmindex, env);
 
-  optionquery = option_new_string("query",
-                                  "specify queryfile (mandatory)",
-                                  uniquesubcallinfo->queryfilename,
-                                  NULL,env);
+  optionquery = option_new_filenamearray("query",
+                                         "specify queryfiles (mandatory)",
+                                         uniquesubcallinfo->queryfilenames,env);
   option_is_mandatory(optionquery);
   option_parser_add_option(op, optionquery, env);
 
   oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc, env);
+  if(oprval == OPTIONPARSER_ERROR &&
+     strarray_size(uniquesubcallinfo->queryfilenames) == 0)
+  {
+    env_error_set(env,"missing arguments to option -query");
+  }
   if (oprval == OPTIONPARSER_OK)
   {
     if (option_is_set(optionmin))
@@ -225,7 +230,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   return oprval;
 }
 
-int uniqueposinsinglesequence(void *info, 
+static int uniqueposinsinglesequence(void *info, 
                                      unsigned long unitnum,
                                      const Uchar *start,
                                      const char *desc,
@@ -314,7 +319,7 @@ static int showifinlengthrange(const Alphabet *alphabet,
 }
 
 static int findsubquerymatch(Fmindex *fmindex,
-                             /*@unused@*/ const Str *queryfilename,
+                             const StrArray *queryfilenames,
                              Definedunsignedlong minlength,
                              Definedunsignedlong maxlength,
                              uint32_t showmode,
@@ -322,6 +327,7 @@ static int findsubquerymatch(Fmindex *fmindex,
 {
   Substringinfo substringinfo;
   Rangespecinfo rangespecinfo;
+  ArrayUchar sequencebuffer;
 
   substringinfo.fmindex = fmindex;
   rangespecinfo.minlength = minlength;
@@ -331,99 +337,19 @@ static int findsubquerymatch(Fmindex *fmindex,
   substringinfo.processuniquelength = showifinlengthrange;
   substringinfo.postprocessuniquelength = NULL;
   substringinfo.processinfo = &rangespecinfo;
-  /*
-  if(overallsequences(False,
-                      querymultiseq,
-                      &substringinfo,
-                      uniqueposinsinglesequence) != 0)
+  INITARRAY(&sequencebuffer,Uchar);
+  if(overallquerysequences(uniqueposinsinglesequence,
+                           &substringinfo,
+                           &sequencebuffer,
+                           queryfilenames,
+                           getsymbolmapAlphabet(fmindex->alphabet),
+                           env) != 0)
   {
-    return (Sint) -2;
+    return -2;
   }
-  */
+  FREEARRAY(&sequencebuffer,Uchar);
   return 0;
 }
-
-/*
-int overallquerysequence(
-        const StrArray *filenametab,
-        const Uchar *symbolmap,
-        Env *env)
-{
-  Fastabufferstate fbs;
-  Uchar charcode;
-  int retval;
-  unsigned long idx;
-
-  *numofsequences = 0;
-  specialcharinfo->specialcharacters = 0;
-  specialcharinfo->lengthofspecialprefix = 0;
-  specialcharinfo->lengthofspecialsuffix = 0;
-
-  initformatbufferstate(&fbs,
-                        filenametab,
-                        symbolmap,
-                        plainformat,
-                        filelengthtab,
-                        env);
-  specialrangelengths = initdistribution(env);
-  for (pos = 0; ; pos++)
-  {
-    retval = readnextUchar(&charcode,&fbs,env);
-    if (retval < 0)
-    {
-      return -1;
-    }
-    if (retval == 0)
-    {
-      if (lastspeciallength > 0)
-      {
-        idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-        adddistribution(specialrangelengths,idx,env);
-      }
-      break;
-    }
-    if (ISSPECIAL(charcode))
-    {
-      if (specialprefix)
-      {
-        specialcharinfo->lengthofspecialprefix++;
-      }
-      specialcharinfo->specialcharacters++;
-      if (lastspeciallength == 0)
-      {
-        lastspeciallength = (Seqpos) 1;
-      } else
-      {
-        lastspeciallength++;
-      }
-      if (charcode == (Uchar) SEPARATOR)
-      {
-        (*numofsequences)++;
-      }
-    } else
-    {
-      if (specialprefix)
-      {
-        specialprefix = false;
-      }
-      if (lastspeciallength > 0)
-      {
-        idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-        adddistribution(specialrangelengths,idx,env);
-        lastspeciallength = 0;
-      }
-    }
-  }
-  specialcharinfo->specialranges = 0;
-  (void) foreachdistributionvalue(specialrangelengths,updatesumranges,
-                                  &specialcharinfo->specialranges,env);
-  freedistribution(&specialrangelengths,env);
-  specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-  (*numofsequences)++;
-  *totallength = pos;
-  return 0;
-}
-*/
 
 int findminuniquesubstrings(int argc,const char **argv,Env *env)
 {
@@ -456,7 +382,7 @@ int findminuniquesubstrings(int argc,const char **argv,Env *env)
     } else
     {
       if(findsubquerymatch(&fmindex,
-                           uniquesubcallinfo.queryfilename,
+                           uniquesubcallinfo.queryfilenames,
                            uniquesubcallinfo.minlength,
                            uniquesubcallinfo.maxlength,
                            uniquesubcallinfo.showmode,
@@ -468,6 +394,6 @@ int findminuniquesubstrings(int argc,const char **argv,Env *env)
     }
   }
   str_delete(uniquesubcallinfo.fmindexname,env);
-  str_delete(uniquesubcallinfo.queryfilename,env);
+  strarray_delete(uniquesubcallinfo.queryfilenames,env);
   return haserr ? -1 : 0;
 }

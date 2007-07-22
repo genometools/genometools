@@ -38,6 +38,8 @@ else
   bignum=
 fi
 
+#-DWITHTRIEIDENT
+
 if test $icc -eq 1
 then
   make CC='ccache icc' CFLAGS='-O3 ${bignum} -wd1418,869,981,1338' LD='icc' CXX='icc' $*
@@ -46,7 +48,7 @@ else
   then
     make CC="ccache gcc" CFLAGS="-O3 -m64" LDFLAGS="-m64" $*
   else
-    make CC="ccache gcc" CFLAGS="-O3 -m32 -DWITHTRIEIDENT ${bignum}" LDFLAGS="-m32" $*
+    make CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum}" LDFLAGS="-m32" $*
   fi
 fi
 

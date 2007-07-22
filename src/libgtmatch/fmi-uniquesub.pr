@@ -1,12 +1,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int uniqueposinsinglesequence(void *info,
-                                     unsigned long unitnum,
-                                     const Uchar *start,
-                                     const char *desc,
-                                     unsigned long len);
-
 int findminuniquesubstrings(int argc,const char **argv,Env *env);
 
 #ifdef __cplusplus
