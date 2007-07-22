@@ -13,11 +13,11 @@
 #include "mergeesa.pr"
 #include "sfx-map.pr"
 #include "encseq2offset.pr"
-#include "fmi-mkidxcpy.pr"
-#include "fmi-keyval.pr"
-#include "fmi-mapspec.pr"
 #include "alphabet.pr"
 #include "opensfxfile.pr"
+#include "mkidxcpy.pr"
+#include "fmi-keyval.pr"
+#include "fmi-mapspec.pr"
 
  DECLAREREADFUNCTION(Uchar);
 
@@ -222,6 +222,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if(!haserr)
     {
+      /* XXX is this necessary? */
       if(makeindexfilecopy(outfmindex,
                            indexname,
                            BWTTABSUFFIX,
