@@ -1,52 +1,107 @@
 #!/usr/bin/env bash
 
-set -e -x
-
 if test $# -lt 4
 then
   echo "Usage: $0 <min> <max> <queryfile> <file1> <file2> ..."
   exit 1
 fi
 
-INDEXDIR=../indexdir
+function cerr() 
+{
+  $1
+  if test $? -ne 0
+  then
+    echo "failure: ${1}"
+    exit 1
+  fi
+}
 
-mkdir -p ${INDEXDIR}
+function mkfmindex() 
+{
+  indexname=$1
+  shift
+  iiargs=$*
+  cerr "../bin/gt mkfmindex -noindexpos -fmout ${indexname} -ii ${iiargs}"
+}
 
-minvalue=$1
-maxvalue=$2
+function plain() 
+{
+  cerr "../bin/gt suffixerator -plain -tis -pl 1 -indexname $1 -smap $2 -db $3"
+}
+
+function suffixerator
+{
+  cerr "../bin/gt suffixerator $*"
+}
+
+function uniquesub
+{
+  cerr "../bin/gt uniquesub -output sequence querypos $*"
+}
+
+IDIR=../indexdir
+mkdir -p ${IDIR}
+
+minval=$1
+maxval=$2
 queryfile=$3
 shift
 shift
 shift
-referencefiles=$*
+rfiles=$*
 
-numofreferencefiles=0
-for referencefile in ${referencefiles}
+numofrfiles=0
+for rfile in ${rfiles}
 do
-  if test -f ${referencefile}
+  if test -f ${rfile}
   then
-    numofreferencefiles=`expr ${numofreferencefiles} + 1`
+    numofrfiles=`expr ${numofrfiles} + 1`
   else
-    echo "$0: file \"${referencefile}\" does not exist"
+    echo "# $0: file \"${rfile}\" does not exist"
     exit 1
   fi
 done
 
-if test ${numofreferencefiles} -eq 1
+if test ${numofrfiles} -eq 1
 then
-  ../bin/gt suffixerator -indexname ${INDEXDIR}/mkv-single -db ${referencefiles} -bwt  -pl 8
-  ../bin/gt mkfmindex -noindexpos -fmout ${INDEXDIR}/fm-single -ii ${INDEXDIR}/mkv-single
-  ../bin/gt suffixerator -indexname ${INDEXDIR}/fm-single -plain -smap ${INDEXDIR}/mkv-single.al1 -tis -pl 1 -db ${INDEXDIR}/mkv-single.bwt
-  fmindexname=${INDEXDIR}/fm-single
+  if test ! -f ${IDIR}/mkv-single.prj ||
+     test ${rfiles} -nt ${IDIR}/mkv-single.prj   
+  then
+    suffixerator -indexname ${IDIR}/mkv-single -db ${rfiles} -bwt -pl 8
+  else
+    echo "# ${IDIR}/mkv-single is up to date"
+  fi
+  if test ! -f ${IDIR}/fmidx.fma ||
+     test ${IDIR}/mkv-single.prj -nt ${IDIR}/fmidx.fma
+  then
+    mkfmindex ${IDIR}/fmidx ${IDIR}/mkv-single
+    plain ${IDIR}/fmidx ${IDIR}/mkv-single.al1 ${IDIR}/mkv-single.bwt
+  else
+    echo "# ${IDIR}/fmidx is up to date"
+  fi
 else
-  for referencefile in ${referencefiles}
+  runmkfm=0
+  fn=0
+  for rfile in ${rfiles}
   do
-    ../bin/gt suffixerator -indexname ${INDEXDIR}/midx${num} -db ${referencefile} -suf -lcp -tis -pl 1
-    indexlist="${indexlist} ${INDEXDIR}/midx${num}"
-    num=`expr ${num} + 1`
+    if test ! -f ${IDIR}/midx${fn}.prj || 
+       test ${rfile} -nt ${IDIR}/midx${fn}.prj
+    then
+      suffixerator -indexname ${IDIR}/midx${fn} -db ${rfile} -suf -lcp -tis -pl 1
+      runmkfm=1
+    else
+      echo "# ${IDIR}/midx${fn} is up to date"
+    fi
+    indexlist="${indexlist} ${IDIR}/midx${fn}"
+    fn=`expr ${fn} + 1`
   done
-  ../bin/gt mkfmindex -noindexpos -fmout ${INDEXDIR}/fm-all -ii ${indexlist}
-  ../bin/gt suffixerator -indexname ${INDEXDIR}/fm-all -plain -smap ${INDEXDIR}/fm-all.al1 -tis -pl 1 -db ${INDEXDIR}/fm-all.bwt
-  fmindexname=${INDEXDIR}/fm-all
+  if test ${runmkfm} -eq 1
+  then
+    mkfmindex ${IDIR}/fmidx ${indexlist}
+    plain ${IDIR}/fmidx ${IDIR}/fmidx.al1 ${IDIR}/fmidx.bwt
+  else
+    echo "# ${IDIR}/fmidx is up to date"
+  fi
 fi
-../bin/gt uniquesub -fmi ${fmindexname} -query ${queryfile} -output sequence querypos -min ${minvalue} -max ${maxvalue}
+fmindexname=${IDIR}/fmidx
+uniquesub -fmi ${fmindexname} -query ${queryfile} -min ${minval} -max ${maxval}
