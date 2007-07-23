@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 /**
- * \file render.c
+ * \if INTERNAL \file render.c \endif
  * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
  */
 

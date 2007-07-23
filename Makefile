@@ -245,35 +245,39 @@ Doxyfile: Doxyfile.in VERSION
 
 src/libgtcore/bitpackstringop8.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 8 $^
 
 src/libgtcore/checkbitpackstring8.c: src/libgtcore/checkbitpackstring.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 8 $^
 
 src/libgtcore/bitpackstringop16.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 16 $^
 
 src/libgtcore/checkbitpackstring16.c: src/libgtcore/checkbitpackstring.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 16 $^
 
 src/libgtcore/bitpackstringop32.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 32 $^
 
 src/libgtcore/checkbitpackstring32.c: src/libgtcore/checkbitpackstring.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 32 $^
 
 src/libgtcore/bitpackstringop64.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 64 $^
 
 src/libgtcore/checkbitpackstring64.c: src/libgtcore/checkbitpackstring.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 64 $^
+
+src/libgtcore/checkbitpackstring-int.c: src/libgtcore/checkbitpackstring.template
+	@echo '[rebuild $@]'
+	@scripts/template2c.pl '-int' $^
 
 # we create the dependency files on the fly
 obj/%.o: %.c
@@ -307,9 +311,15 @@ apidoc: Doxyfile
 
 release: apidoc
 	git tag "v`cat VERSION`"
-	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
-	gzip -9 > genometools-`cat VERSION`.tar.gz
-	scp genometools-`cat VERSION`.tar.gz $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/pub
+	git archive --format=tar --prefix="genometools-`cat VERSION`"/ HEAD \
+	>"genometools-`cat VERSION`.tar"
+	mkdir -p "genometools-`cat VERSION`/doc"
+	rsync -a doc/api "genometools-`cat VERSION`/doc/"
+	tar -r -f "genometools-`cat VERSION`.tar" \
+		"genometools-`cat VERSION`/doc/api"
+	rm -rf "genometools-`cat VERSION`"
+	gzip -9 "genometools-`cat VERSION`.tar"
+	scp "genometools-`cat VERSION`.tar.gz" $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/pub
 	rsync -rv doc/api/html/ $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/apidoc
 	git push --tags
 

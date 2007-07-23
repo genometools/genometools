@@ -6,7 +6,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 /**
- * \file feature_index.c
+ * \if INTERNAL \file feature_index.c \endif
  * \author Malte Mader <mmader@zbh.uni-hamburg.de>
  * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
  * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>

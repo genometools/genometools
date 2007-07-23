@@ -16,9 +16,9 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include <libgtcore/bitpackstring.h>
-#include <libgtcore/env.h>
-#include <libgtcore/ensure.h>
+#include "libgtcore/bitpackstring.h"
+#include "libgtcore/env.h"
+#include "libgtcore/ensure.h"
 
 enum {
 /*   MAX_RND_NUMS = 10, */
@@ -36,10 +36,21 @@ icmp(uint64_t a, uint64_t b)
     return 0;
 }
 
+#define freeResourcesAndReturn(retval) \
+  do {                                 \
+    env_ma_free(randSrc, env);         \
+    env_ma_free(randCmp, env);         \
+    env_ma_free(bitStore, env);        \
+    env_ma_free(bitStoreCopy, env);    \
+    return retval;                     \
+  } while(0)
+
+
 int
-bitPackString64_unit_test(Env *env)
+bitPackStringInt64_unit_test(Env *env)
 {
-  BitElem *bitStore = NULL;
+  BitString bitStore = NULL;
+  BitString bitStoreCopy = NULL;
   uint64_t *randSrc = NULL; /*< create random ints here for input as bit
                                 *  store */
   uint64_t *randCmp = NULL; /*< used for random ints read back */
@@ -50,35 +61,24 @@ bitPackString64_unit_test(Env *env)
   {
     struct timeval seed;
     gettimeofday(&seed, NULL);
-    srandom(seedval = seed.tv_sec + seed.tv_usec);
+    seedval = seed.tv_sec + seed.tv_usec;
+    srandom(seedval);
   }
   offset = offsetStart = random()%(sizeof (uint64_t) * CHAR_BIT);
-  numRnd = random() % MAX_RND_NUMS + 1;
-#ifdef VERBOSE_UNIT_TEST
-  fprintf(stderr, "seedval = %lu, offset=%lu, numRnd=%lu\n", seedval,
-          (long unsigned)offsetStart, (long unsigned)numRnd);
-#endif /* VERBOSE_UNIT_TEST */
+  numRnd = random() % (MAX_RND_NUMS + 1);
+  env_log_log(env, "seedval = %lu, offset=%lu, numRnd=%lu\n", seedval,
+              (long unsigned)offsetStart, (long unsigned)numRnd);
   {
     BitOffset numBits = sizeof (uint64_t) * CHAR_BIT * numRnd + offsetStart;
-    ensure(had_err, (randSrc = env_ma_malloc(env, sizeof (uint64_t)*numRnd))
-           && (bitStore = env_ma_malloc(env, bitElemsAllocSize(numBits)
-                                  * sizeof (BitElem)))
-           && (randCmp = env_ma_malloc(env, sizeof (uint64_t)*numRnd)));
-  }
-  if (had_err)
-  {
-    if (randSrc)
-      env_ma_free(randSrc, env);
-    if (randCmp)
-      env_ma_free(randCmp, env);
-    if (bitStore)
-      env_ma_free(bitStore, env);
-#ifdef VERBOSE_UNIT_TEST
-    perror("Storage allocations failed");
-#endif /* VERBOSE_UNIT_TEST */
-    return had_err;
+    randSrc = env_ma_malloc(env, sizeof (uint64_t)*numRnd);
+    bitStore = env_ma_malloc(env, bitElemsAllocSize(numBits)
+                             * sizeof (BitElem));
+    bitStoreCopy = env_ma_calloc(env, bitElemsAllocSize(numBits),
+                                 sizeof (BitElem));
+    randCmp = env_ma_malloc(env, sizeof (uint64_t)*numRnd);
   }
   /* first test unsigned types */
+  env_log_log(env, "bsStoreUInt64/bsGetUInt64: ");
   for (i = 0; i < numRnd; ++i)
   {
 #if 64 > 32 && LONG_BIT < 64
@@ -99,66 +99,58 @@ bitPackString64_unit_test(Env *env)
     ensure(had_err, r == v);
     if (had_err)
     {
-#ifdef VERBOSE_UNIT_TEST
-      fprintf(stderr, "bsStoreUInt64/bsGetUInt64: "
-              "Expected %"PRIu64", got %"PRIu64", seed = %lu, i = %lu\n",
-              v, r, seedval, (unsigned long)i);
-#endif /* VERBOSE_UNIT_TEST */
-      env_ma_free(randSrc, env);
-      env_ma_free(randCmp, env);
-      env_ma_free(bitStore, env);
-      return had_err;
+      env_log_log(env, "Expected %"PRIu64", got %"PRIu64
+                  ", seed = %lu, i = %lu\n",
+                  v, r, seedval, (unsigned long)i);
+      freeResourcesAndReturn(had_err);
     }
     offset += bits;
   }
-#ifdef VERBOSE_UNIT_TEST
-  fputs("bsStoreUInt64/bsGetUInt64: passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "passed\n");
+  if(numRnd > 1)
   {
-    uint64_t v0 = randSrc[0];
-    int bits0 = requiredUInt64Bits(v0);
-    uint64_t r0;
-    offset = offsetStart;
-    r0 = bsGetUInt64(bitStore, offset, bits0);
-    for (i = 1; i < numRnd; ++i)
+    env_log_log(env, "bsCompare: ");
     {
-      uint64_t v1 = randSrc[i];
-      int bits1 = requiredUInt64Bits(v1);
-      uint64_t r1 = bsGetUInt64(bitStore, offset + bits0, bits1);
-      int result;
-      ensure(had_err, r0 == v0 && r1 == v1);
-      ensure(had_err, icmp(v0, v1) ==
-             (result = bsCompare(bitStore, offset, bits0,
-                                 bitStore, offset + bits0, bits1)));
-      if (had_err)
+      uint64_t v0 = randSrc[0];
+      int bits0 = requiredUInt64Bits(v0);
+      uint64_t r0;
+      offset = offsetStart;
+      r0 = bsGetUInt64(bitStore, offset, bits0);
+      for (i = 1; i < numRnd; ++i)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "bsCompare: "
-                "Expected v0 %s v1, got v0 %s v1,\n for v0=%"PRIu64
-                " and v1=%"PRIu64",\n"
-                "seed = %lu, i = %lu, bits0=%u, bits1=%u\n",
-                (v0 > v1?">":(v0 < v1?"<":"==")),
-                (result > 0?">":(result < 0?"<":"==")), v0, v1,
-                seedval, (unsigned long)i, bits0, bits1);
-#endif /* VERBOSE_UNIT_TEST */
-        env_ma_free(randSrc, env);
-        env_ma_free(randCmp, env);
-        env_ma_free(bitStore, env);
-        return had_err;
+        uint64_t v1 = randSrc[i];
+        int bits1 = requiredUInt64Bits(v1);
+        uint64_t r1 = bsGetUInt64(bitStore, offset + bits0, bits1);
+        int result = -2;   /*< -2 is not a return value of bsCompare, thus
+                            *   if it is displayed, there was an earlier
+                            *   error. */
+        ensure(had_err, r0 == v0 && r1 == v1);
+        ensure(had_err, icmp(v0, v1) ==
+               (result = bsCompare(bitStore, offset, bits0,
+                                   bitStore, offset + bits0, bits1)));
+        if (had_err)
+        {
+          env_log_log(env, "Expected v0 %s v1, got v0 %s v1,\n for v0=%"
+                      PRIu64" and v1=%"PRIu64",\n"
+                      "seed = %lu, i = %lu, bits0=%u, bits1=%u\n",
+                      (v0 > v1?">":(v0 < v1?"<":"==")),
+                      (result > 0?">":(result < 0?"<":"==")), v0, v1,
+                      seedval, (unsigned long)i, bits0, bits1);
+          freeResourcesAndReturn(had_err);
+        }
+        offset += bits0;
+        bits0 = bits1;
+        v0 = v1;
+        r0 = r1;
       }
-      offset += bits0;
-      bits0 = bits1;
-      v0 = v1;
-      r0 = r1;
     }
+    env_log_log(env, "passed\n");
   }
-#ifdef VERBOSE_UNIT_TEST
-  fputs("bsCompare: passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "bsStoreUniformUInt64Array/bsGetUInt64: ");
   {
     unsigned numBits = random()%(sizeof (uint64_t)*CHAR_BIT) + 1;
     uint64_t mask = ~(uint64_t)0;
-    if (numBits < 64)
+    if (numBits < sizeof (uint64_t)*CHAR_BIT)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniformUInt64Array(bitStore, offset, numBits, numRnd, randSrc);
@@ -169,22 +161,16 @@ bitPackString64_unit_test(Env *env)
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "bsStoreUniformUInt64Array/bsGetUInt64: "
-                "Expected %"PRIu64", got %"PRIu64",\n seed = %lu,"
-                " i = %lu, bits=%u\n",
-                v, r, seedval, (unsigned long)i, numBits);
-#endif /* VERBOSE_UNIT_TEST */
-        env_ma_free(randSrc, env);
-        env_ma_free(randCmp, env);
-        env_ma_free(bitStore, env);
-        return had_err;
+        env_log_log(env, "Expected %"PRIu64", got %"PRIu64",\n"
+                    "seed = %lu, i = %lu, bits=%u\n",
+                    v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
       }
       offset += numBits;
     }
-#ifdef VERBOSE_UNIT_TEST
-    fputs("bsStoreUniformUInt64Array/bsGetUInt64: passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, "passed\n");
+    env_log_log(env,
+                "bsStoreUniformUInt64Array/bsGetUniformUInt64Array: ");
     bsGetUniformUInt64Array(bitStore, offset = offsetStart,
                                numBits, numRnd, randCmp);
     for (i = 0; i < numRnd; ++i)
@@ -194,45 +180,32 @@ bitPackString64_unit_test(Env *env)
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr,
-                "bsStoreUniformUInt64Array/bsGetUniformUInt64Array: "
-                "Expected %"PRIu64", got %"PRIu64",\n seed = %lu,"
-                " i = %lu, bits=%u\n",
-                v, r, seedval, (unsigned long)i, numBits);
-#endif /* VERBOSE_UNIT_TEST */
-        env_ma_free(randSrc, env);
-        env_ma_free(randCmp, env);
-        env_ma_free(bitStore, env);
-        return had_err;
+        env_log_log(env,
+                    "Expected %"PRIu64", got %"PRIu64",\n seed = %lu,"
+                    " i = %lu, bits=%u\n",
+                    v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
       }
     }
+    if (numRnd > 1)
     {
       uint64_t v = randSrc[0] & mask;
       uint64_t r;
       bsGetUniformUInt64Array(bitStore, offsetStart,
-                            numBits, 1, &r);
+                                 numBits, 1, &r);
       if (r != v)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr,
-                "bsStoreUniformUInt64Array/bsGetUniformUInt64Array: "
-                "Expected %"PRIu64", got %"PRIu64", seed = %lu,"
-                " one value extraction\n",
-                v, r, seedval);
-#endif /* VERBOSE_UNIT_TEST */
-        env_ma_free(randSrc, env);
-        env_ma_free(randCmp, env);
-        env_ma_free(bitStore, env);
-        return had_err;
+        env_log_log(env,
+                    "Expected %"PRIu64", got %"PRIu64", seed = %lu,"
+                    " one value extraction\n",
+                    v, r, seedval);
+        freeResourcesAndReturn(had_err);
       }
     }
-#ifdef VERBOSE_UNIT_TEST
-    fputs(": bsStoreUniformUInt64Array/bsGetUniformUInt64Array:"
-          " passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, " passed\n");
   }
   /* int types */
+  env_log_log(env, "bsStoreInt64/bsGetInt64: ");
   for (i = 0; i < numRnd; ++i)
   {
     int64_t v = (int64_t)randSrc[i];
@@ -249,26 +222,19 @@ bitPackString64_unit_test(Env *env)
     ensure(had_err, r == v);
     if (had_err)
     {
-#ifdef VERBOSE_UNIT_TEST
-      fprintf(stderr, "bsStoreInt64/bsGetInt64: "
-              "Expected %"PRId64", got %"PRId64",\n"
-              "seed = %lu, i = %lu, bits=%u\n",
-              v, r, seedval, (unsigned long)i, bits);
-#endif /* VERBOSE_UNIT_TEST */
-      env_ma_free(randSrc, env);
-      env_ma_free(randCmp, env);
-      env_ma_free(bitStore, env);
-      return had_err;
+      env_log_log(env, "Expected %"PRId64", got %"PRId64",\n"
+                  "seed = %lu, i = %lu, bits=%u\n",
+                  v, r, seedval, (unsigned long)i, bits);
+      freeResourcesAndReturn(had_err);
     }
     offset += bits;
   }
-#ifdef VERBOSE_UNIT_TEST
-  fputs(": bsStoreInt64/bsGetInt64: passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "passed\n");
+  env_log_log(env, "bsStoreUniformInt64Array/bsGetInt64: ");
   {
     unsigned numBits = random()%(sizeof (int64_t)*CHAR_BIT) + 1;
     int64_t mask = ~(int64_t)0;
-    if (numBits < 64)
+    if (numBits < sizeof (int64_t)*CHAR_BIT)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniformInt64Array(bitStore, offset, numBits, numRnd,
@@ -281,22 +247,15 @@ bitPackString64_unit_test(Env *env)
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "bsStoreUniformInt64Array/bsGetInt64: "
-                "Expected %"PRId64", got %"PRId64",\n"
-                "seed = %lu, i = %lu, numBits=%u\n",
-                v, r, seedval, (unsigned long)i, numBits);
-#endif /* VERBOSE_UNIT_TEST */
-        env_ma_free(randSrc, env);
-        env_ma_free(randCmp, env);
-        env_ma_free(bitStore, env);
-        return had_err;
+        env_log_log(env, "Expected %"PRId64", got %"PRId64",\n"
+                    "seed = %lu, i = %lu, numBits=%u\n",
+                    v, r, seedval, (unsigned long)i, numBits);
+        freeResourcesAndReturn(had_err);
       }
       offset += numBits;
     }
-#ifdef VERBOSE_UNIT_TEST
-    fputs("bsStoreUniformInt64Array/bsGetInt64: passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, "passed\n");
+    env_log_log(env, "bsStoreUniformInt64Array/bsGetUniformInt64Array: ");
     bsGetUniformInt64Array(bitStore, offset = offsetStart,
                               numBits, numRnd, (int64_t *)randCmp);
     for (i = 0; i < numRnd; ++i)
@@ -307,19 +266,13 @@ bitPackString64_unit_test(Env *env)
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr,
-                "bsStoreUniformInt64Array/bsGetUniformInt64Array: "
-                "Expected %"PRId64", got %"PRId64
-                ", seed = %lu, i = %lu\n",
-                v, r, seedval, (unsigned long)i);
-#endif /* VERBOSE_UNIT_TEST */
-        env_ma_free(randSrc, env);
-        env_ma_free(randCmp, env);
-        env_ma_free(bitStore, env);
-        return had_err;
+        env_log_log(env, "Expected %"PRId64", got %"PRId64
+                    ", seed = %lu, i = %lu\n",
+                    v, r, seedval, (unsigned long)i);
+        freeResourcesAndReturn(had_err);
       }
     }
+    if(numRnd > 0)
     {
       int64_t m = (int64_t)1 << (numBits - 1);
       int64_t v = (int64_t)((randSrc[0] & mask) ^ m) - m;
@@ -329,27 +282,61 @@ bitPackString64_unit_test(Env *env)
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr,
-                "bsStoreUniformInt64Array/bsGetUniformInt64Array: "
-                "Expected %"PRId64", got %"PRId64
-                ", seed = %lu, one value extraction\n",
-                v, r, seedval);
-#endif /* VERBOSE_UNIT_TEST */
-        env_ma_free(randSrc, env);
-        env_ma_free(randCmp, env);
-        env_ma_free(bitStore, env);
-        return had_err;
+        env_log_log(env, "Expected %"PRId64", got %"PRId64
+                    ", seed = %lu, one value extraction\n",
+                    v, r, seedval);
+        freeResourcesAndReturn(had_err);
       }
     }
-#ifdef VERBOSE_UNIT_TEST
-    fputs(": bsStoreUniformInt64Array/bsGetUniformInt64Array:"
-          " passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, "passed\n");
   }
-  env_ma_free(randSrc, env);
-  env_ma_free(randCmp, env);
-  env_ma_free(bitStore, env);
-  return had_err;
+  if(numRnd > 0)
+  {
+    env_log_log(env, "bsCopy: ");
+    {
+      /* first decide how many of the values to use and at which to start */
+      size_t numValueCopies, copyStart;
+      BitOffset numCopyBits = 0, destOffset;
+      unsigned numBits = random()%(sizeof (uint64_t)*CHAR_BIT) + 1;
+      uint64_t mask = ~(uint64_t)0;
+      if (numBits < 64)
+        mask = ~(mask << numBits);
+      if (random()&1)
+      {
+        numValueCopies = random()%(numRnd + 1);
+        copyStart = random()%(numRnd - numValueCopies + 1);
+      }
+      else
+      {
+        copyStart = random() % numRnd;
+        numValueCopies = random()%(numRnd - copyStart) + 1;
+      }
+      assert(copyStart + numValueCopies <= numRnd);
+      offset = offsetStart + (BitOffset)copyStart * numBits;
+      destOffset = random()%
+        (offsetStart
+         + (sizeof (uint64_t)*CHAR_BIT)
+         * (BitOffset)(numRnd - numValueCopies) + 1);
+      numCopyBits = (BitOffset)numBits * numValueCopies;
+      /* the following bsCopy should be equivalent to:
+       * bsStoreUniformUInt64Array(bitStoreCopy, destOffset,
+       *                              numBits, numValueCopies, randSrc); */
+      bsCopy(bitStore, offset, bitStoreCopy, destOffset, numCopyBits);
+      ensure(had_err,
+             bsCompare(bitStore, offset, numCopyBits,
+                       bitStoreCopy, destOffset, numCopyBits) == 0);
+      if (had_err)
+      {
+        env_log_log(env, "Expected equality on bitstrings\n"
+                    "seed = %lu, offset = %llu, destOffset = %llu,"
+                    " numCopyBits=%llu\n",
+                    seedval, (unsigned long long)offset,
+                    (unsigned long long)destOffset, (unsigned long long)numCopyBits);
+        /* FIXME: implement bitstring output function */
+        freeResourcesAndReturn(had_err);
+      }
+      env_log_log(env, "passed\n");
+    }
+  }
+  freeResourcesAndReturn(had_err);
 }
-

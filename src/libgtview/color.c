@@ -5,7 +5,7 @@
 */
 
 /**
- * \file color.c
+ * \if INTERNAL \file color.c \endif
  * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
  */
 

@@ -11,18 +11,17 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include <libgtcore/bitpackstring.h>
-#include <libgtcore/env.h>
-#include <libgtcore/ensure.h>
+#include "libgtcore/bitpackstring.h"
+#include "libgtcore/env.h"
+#include "libgtcore/ensure.h"
 
 int
 bitPackString_unit_test(Env *env)
 {
   return bitPackStringInt_unit_test(env)
-    || bitPackStringUInt_unit_test(env)
-    || bitPackString8_unit_test(env)
-    || bitPackString16_unit_test(env)
-    || bitPackString32_unit_test(env)
-    || bitPackString64_unit_test(env);
+    || bitPackStringInt8_unit_test(env)
+    || bitPackStringInt16_unit_test(env)
+    || bitPackStringInt32_unit_test(env)
+    || bitPackStringInt64_unit_test(env);
 }
 
