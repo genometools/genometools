@@ -16,9 +16,9 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include <libgtcore/bitpackstring.h>
-#include <libgtcore/env.h>
-#include <libgtcore/ensure.h>
+#include "libgtcore/bitpackstring.h"
+#include "libgtcore/env.h"
+#include "libgtcore/ensure.h"
 
 enum {
 /*   MAX_RND_NUMS = 10, */

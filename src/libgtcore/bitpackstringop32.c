@@ -12,10 +12,9 @@
 #include <limits.h>
 #include <stdio.h>
 
-#include "bitpackstring.h"
+#include "libgtcore/minmax.h"
+#include "libgtcore/bitpackstring.h"
 
-#define MIN(a, b) (((a)<(b))?(a):(b))
-#define MIN3(a, b, c) (((a)<(b))?((a)<(c)?(a):(c)):((b)<(c)?(b):(c)))
 
 uint32_t
 bsGetUInt32(const BitString str, BitOffset offset, unsigned numBits)

@@ -10,8 +10,8 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include <libgtcore/ensure.h>
-#include <libgtcore/bitpackarray.h>
+#include "libgtcore/ensure.h"
+#include "libgtcore/bitpackarray.h"
 
 enum {
 /*   MAX_RND_NUMS = 10, */

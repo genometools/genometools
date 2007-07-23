@@ -18,7 +18,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
-#include <libgtcore/env.h>
+#include "libgtcore/env.h"
 
 /* Caution: sizeof (BitElem) <= sizeof (uint_fast32_t) must be met */
 typedef unsigned char BitElem;

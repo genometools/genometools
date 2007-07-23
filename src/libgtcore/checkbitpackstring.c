@@ -11,9 +11,9 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include <libgtcore/bitpackstring.h>
-#include <libgtcore/env.h>
-#include <libgtcore/ensure.h>
+#include "libgtcore/bitpackstring.h"
+#include "libgtcore/env.h"
+#include "libgtcore/ensure.h"
 
 int
 bitPackString_unit_test(Env *env)

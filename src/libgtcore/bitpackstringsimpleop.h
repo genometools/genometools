@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "bitpackstring.h"
+#include "libgtcore/bitpackstring.h"
 
 /**
  * \file bitpackstringsimpleop.h

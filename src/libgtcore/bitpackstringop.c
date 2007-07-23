@@ -9,15 +9,13 @@
 #include <limits.h>
 #include <string.h>
 
-#include "bitpackstring.h"
-
+#include "libgtcore/bitpackstring.h"
+#include "libgtcore/minmax.h"
 /**
  * \file bitpackstringop.c
  * Involved (i.e. not inlined) operations on bitstrings.
  */
 
-#define MIN(a, b) (((a)<(b))?(a):(b))
-#define MIN3(a, b, c) (((a)<(b))?((a)<(c)?(a):(c)):((b)<(c)?(b):(c)))
 /*
  * Both requiredUInt{32|64}Bits functions are based on the concepts
  * presented at 
