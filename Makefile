@@ -16,6 +16,7 @@ INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
              -I/usr/local/include/cairo
 
 CFLAGS:=
+LDFLAGS:=
 CXXFLAGS:=
 GT_CFLAGS:= -g -Wall -Werror -pipe -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
             $(INCLUDEOPT)
@@ -26,7 +27,7 @@ EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DUNISTD_H="<unistd.h>" \
             -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\""
 GT_CXXFLAGS:= -g -pipe $(INCLUDEOPT)
 STEST_FLAGS:=
-LDFLAGS:=-L/usr/local/lib -L/usr/X11R6/lib
+GT_LDFLAGS:=-L/usr/local/lib -L/usr/X11R6/lib
 LDLIBS:=-lm -lz
 
 # try to set RANLIB automatically
@@ -136,7 +137,7 @@ ifeq ($(assert),no)
 endif
 
 ifeq ($(static),yes)
-  LDFLAGS += -static
+  GT_LDFLAGS += -static
 endif
 
 ifeq ($(libgtview),yes)
@@ -226,17 +227,17 @@ endif
 bin/skproto: obj/src/skproto.o obj/src/tools/gt_skproto.o lib/libgtcore.a lib/libbz2.a
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
+	@$(CXX) $(LDFLAGS) $(GT_LDFLAGS) $^ $(LDLIBS) -o $@
 
 bin/gt: obj/src/gt.o obj/src/gtr.o $(TOOLS_OBJ) $(GTLIBS)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CXX) $(LDFLAGS) $^ $(LDLIBS) -o $@
+	@$(CXX) $(LDFLAGS) $(GT_LDFLAGS) $^ $(LDLIBS) -o $@
 
 bin/rnv: obj/$(RNV_DIR)/xcl.o lib/librnv.a lib/libexpat.a
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(LDFLAGS) $^ -o $@
+	@$(CC) $(LDFLAGS) $(GT_LDFLAGS) $^ -o $@
 
 obj/gt_build.h:
 	@date +'#define GT_BUILT "%Y-%m-%d %H:%M:%S"' > $@
@@ -256,35 +257,39 @@ Doxyfile: Doxyfile.in VERSION
 
 src/libgtcore/bitpackstringop8.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 8 $^
 
 src/libgtcore/checkbitpackstring8.c: src/libgtcore/checkbitpackstring.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 8 $^
 
 src/libgtcore/bitpackstringop16.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 16 $^
 
 src/libgtcore/checkbitpackstring16.c: src/libgtcore/checkbitpackstring.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 16 $^
 
 src/libgtcore/bitpackstringop32.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 32 $^
 
 src/libgtcore/checkbitpackstring32.c: src/libgtcore/checkbitpackstring.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 32 $^
 
 src/libgtcore/bitpackstringop64.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 64 $^
 
 src/libgtcore/checkbitpackstring64.c: src/libgtcore/checkbitpackstring.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 64 $^
+
+src/libgtcore/checkbitpackstring-int.c: src/libgtcore/checkbitpackstring.template
+	@echo '[rebuild $@]'
+	@scripts/template2c.pl '-int' $^
 
 # we create the dependency files on the fly
 obj/%.o: %.c
@@ -318,9 +323,15 @@ apidoc: Doxyfile
 
 release: apidoc
 	git tag "v`cat VERSION`"
-	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
-	gzip -9 > genometools-`cat VERSION`.tar.gz
-	scp genometools-`cat VERSION`.tar.gz $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/pub
+	git archive --format=tar --prefix="genometools-`cat VERSION`"/ HEAD \
+	>"genometools-`cat VERSION`.tar"
+	mkdir -p "genometools-`cat VERSION`/doc"
+	rsync -a doc/api "genometools-`cat VERSION`/doc/"
+	tar -r -f "genometools-`cat VERSION`.tar" \
+		"genometools-`cat VERSION`/doc/api"
+	rm -rf "genometools-`cat VERSION`"
+	gzip -9 "genometools-`cat VERSION`.tar"
+	scp "genometools-`cat VERSION`.tar.gz" $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/pub
 	rsync -rv doc/api/html/ $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/apidoc
 	git push --tags
 

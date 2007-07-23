@@ -20,4 +20,8 @@
 #define MIN(X,Y) (((X) < (Y)) ? (X) : (Y))
 #endif
 
+#ifndef MIN3
+#define MIN3(a, b, c) (((a)<(b))?((a)<(c)?(a):(c)):((b)<(c)?(b):(c)))
+#endif
+
 #endif

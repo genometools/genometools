@@ -2,35 +2,52 @@
 use strict;
 use warnings;
 
-my @lengthTags = qw(8 16 32 64);
+my @lengthTags = ('8', '16', '32', '64', '-int');
+my @bitSizes = ('8', '16', '32', '64', '32');
 my @valueTypes = qw(uint8_t uint16_t uint32_t uint64_t);
 my @accumTypes = qw(uint_fast32_t uint_fast32_t uint_fast32_t uint_fast64_t);
+# allow for signed and unsigned operand types
+my @uOpTypes = qw(uint8_t uint16_t uint32_t uint64_t unsigned);
+my @iOpTypes = qw(int8_t int16_t int32_t int64_t int);
+my @uTypeTags = ('UInt8', 'UInt16', 'UInt32', 'UInt64', 'UInt');
+my @iTypeTags = ('Int8', 'Int16', 'Int32', 'Int64', 'Int');
+my @uOpPRI = ('PRIu8', 'PRIu16', 'PRIu32', 'PRIu64', '"u"');
+my @iOpPRI = ('PRId8', 'PRId16', 'PRId32', 'PRId64', '"d"');
 
-my @inputs = @ARGV;
-
+my ($lengthTag, @inputs) = @ARGV;
+my $i;
+for($i = 0; $i < @lengthTags; ++$i)
+{
+    last if($lengthTags[$i] eq $lengthTag);
+}
+die('desired type/length tag not found') if($i >= @lengthTags);
 my @autogenheader = <DATA>;
 
 foreach my $input (@inputs)
 {
     open(INPUT, '<', $input)
         or die('Failed to open ', $input, ' for reading: ');
-    for(my $i = 0; $i < @lengthTags; ++$i)
+    my $output = $input;
+    $output =~ s/\.template$/$lengthTags[$i]\.c/;
+    open(OUTPUT, '>', $output)
+        or die('Failed to open ', $output, ' for writing: ');
+    print OUTPUT @autogenheader;
+    while(<INPUT>)
     {
-        my $output = $input;
-        $output =~ s/\.template$/$lengthTags[$i]\.c/;
-        open(OUTPUT, '>', $output)
-            or die('Failed to open ', $output, ' for writing: ');
-        print OUTPUT @autogenheader;
-        while(<INPUT>)
-        {
-            s/\@LEN\@/$lengthTags[$i]/g;
-            s/\@ValueType\@/$valueTypes[$i]/g;
-            s/\@AccumType\@/$accumTypes[$i]/g;
-            print(OUTPUT $_);
-        }
-        close(OUTPUT);
-        seek(INPUT, 0, 0);
+        s/\@LEN\@/$lengthTags[$i]/g;
+        s/\@bitSize\@/$bitSizes[$i]/g;
+        s/\@ValueType\@/$valueTypes[$i]/g;
+        s/\@AccumType\@/$accumTypes[$i]/g;
+        s/\@uOpType\@/$uOpTypes[$i]/g;
+        s/\@iOpType\@/$iOpTypes[$i]/g;
+        s/\@uTypeTag\@/$uTypeTags[$i]/g;
+        s/\@iTypeTag\@/$iTypeTags[$i]/g;
+        s/\@uOpPRI\@/$uOpPRI[$i]/g;
+        s/\@dOpPRI\@/$iOpPRI[$i]/g;
+        print(OUTPUT $_);
     }
+    close(OUTPUT);
+    seek(INPUT, 0, 0);
 }
 
 __DATA__

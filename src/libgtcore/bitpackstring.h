@@ -18,7 +18,7 @@
 #include <inttypes.h>
 #include <stdlib.h>
 
-#include <libgtcore/env.h>
+#include "libgtcore/env.h"
 
 /* Caution: sizeof (BitElem) <= sizeof (uint_fast32_t) must be met */
 typedef unsigned char BitElem;
@@ -502,6 +502,18 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
           const BitString b, BitOffset offsetB, BitOffset numBitsB);
 
 /**
+ * \brief copy (sub-)bitstring to another position (in same or other
+ * bitstring)
+ * @param src bitsring to copy from
+ * @param offsetSrc bit position in src to start copying from
+ * @param dest bitstring to copy to
+ * @param offsetDest bit position in dest to start writing at
+ * @param numBits number of bits to copy
+ */
+extern void
+bsCopy(const BitString src, BitOffset offsetSrc, 
+       const BitString dest, BitOffset offsetDest, BitOffset numBits);
+/**
  * \brief Meta-Unit test function for bitPackString, calls all functions
  * mentioned below.
  * @return 0 on success, -1 on error.
@@ -525,25 +537,25 @@ bitPackStringUInt_unit_test(Env *env);
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackString8_unit_test(Env *env);
+bitPackStringInt8_unit_test(Env *env);
 /**
  * \brief Unit test function for bitPackString, 16-bit functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackString16_unit_test(Env *env);
+bitPackStringInt16_unit_test(Env *env);
 /**
  * \brief Unit test function for bitPackString, 32-bit functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackString32_unit_test(Env *env);
+bitPackStringInt32_unit_test(Env *env);
 /**
  * \brief Unit test function for bitPackString, 64-bit functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackString64_unit_test(Env *env);
+bitPackStringInt64_unit_test(Env *env);
 
 #include "bitpackstringsimpleop.h"
 

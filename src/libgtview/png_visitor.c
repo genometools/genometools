@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 /**
- * \file png_visitor.c
+ * \if INTERNAL \file png_visitor.c \endif
  * \author Gordon Gremme <gremme@zbh.uni-hamburg.de>
  */
 

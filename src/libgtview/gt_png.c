@@ -5,7 +5,7 @@
 */
 
 /**
- * \file gt_png.c
+ * \if INTERNAL \file gt_png.c \endif
  * \author Gordon Gremme <gremme@zbh.uni-hamburg.de>
  */
 
