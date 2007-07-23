@@ -12,7 +12,7 @@
 #include "libgtcore/bitpackstring.h"
 #include "libgtcore/minmax.h"
 /**
- * \file bitpackstringop.c
+ * \if INTERNAL \file bitpackstringop.c \endif
  * Involved (i.e. not inlined) operations on bitstrings.
  */
 

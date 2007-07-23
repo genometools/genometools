@@ -7,7 +7,7 @@
 */
 
 /**
- * \file gt_view.c
+ * \if INTERNAL \file gt_view.c \endif
  * \author Malte Mader <mmader@zbh.uni-hamburg.de>
  * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
  * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>

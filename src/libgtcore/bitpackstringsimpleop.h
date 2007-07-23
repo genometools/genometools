@@ -14,7 +14,7 @@
 #include "libgtcore/bitpackstring.h"
 
 /**
- * \file bitpackstringsimpleop.h
+ * \if INTERNAL \file bitpackstringsimpleop.h \endif
  * \brief Trivial (i.e. inlined) operations on bitstrings.
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
 

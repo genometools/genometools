@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 /**
- * \file config.c
+ * \if INTERNAL \file config.c \endif
  * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
  */
 #include "libgtview/config.h"
