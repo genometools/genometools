@@ -76,6 +76,7 @@ struct Option {
   union {
     double d;
     unsigned int ui;
+    unsigned long ul;
   } max_value;
   bool is_set,
        is_mandatory,
@@ -812,6 +813,16 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 }
               }
               if (!had_err) {
+                /* maximum value check */
+                if (option->max_value_set &&
+                    long_value > option->max_value.ul) {
+                  env_error_set(env, "argument to option \"-%s\" must be an "
+                            "integer <= %lu", str_get(option->option_str),
+                            option->max_value.ul);
+                  had_err = -1;
+                }
+              }
+              if (!had_err) {
                 *(unsigned long*) option->value = long_value;
                 option_parsed = true;
               }
@@ -1130,6 +1141,21 @@ Option* option_new_ulong_min(const char *option_str, const char *description,
                                env);
   o->min_value_set = true;
   o->min_value.ul = min_value;
+  return o;
+}
+
+Option *option_new_ulong_min_max(const char *option_str,
+                                 const char *description, unsigned long *value,
+                                 unsigned long default_value,
+                                 unsigned long min_value,
+                                 unsigned long max_value, Env *env)
+{
+  Option *o = option_new_ulong(option_str, description, value, default_value,
+                               env);
+  o->min_value_set = true;
+  o->min_value.ul = min_value;
+  o->max_value_set = true;
+  o->max_value.ul = max_value;
   return o;
 }
 
