@@ -15,7 +15,7 @@
 #define MIN3(a, b, c) (((a)<(b))?((a)<(c)?(a):(c)):((b)<(c)?(b):(c)))
 
 @ValueType@
-bsGetUInt@LEN@(const BitString str, BitOffset offset, unsigned numBits)
+bsGet@uTypeTag@(const BitString str, BitOffset offset, unsigned numBits)
 {
   @AccumType@ accum = 0;
   unsigned bitsLeft = numBits, bitTop = offset%bitElemBits;
@@ -53,7 +53,7 @@ bsGetUInt@LEN@(const BitString str, BitOffset offset, unsigned numBits)
 }
 
 void
-bsStoreUInt@LEN@(BitString str, BitOffset offset,
+bsStore@uTypeTag@(BitString str, BitOffset offset,
                  unsigned numBits, @ValueType@ val)
 {
   unsigned bitsLeft = numBits,
@@ -100,7 +100,7 @@ bsStoreUInt@LEN@(BitString str, BitOffset offset,
   if (bitsLeft)
   {
     @AccumType@ mask = ((~(@AccumType@)0)<<(bitElemBits - bitsLeft));
-    if (bitElemBits < (sizeof (uint@LEN@_t)*CHAR_BIT))
+    if (bitElemBits < (sizeof (@AccumType@)*CHAR_BIT))
       mask &= (~(~(@AccumType@)0<<bitElemBits));
     *p = (*p & ~mask) | ((val << (bitElemBits - bitsLeft)) & mask);
   }
@@ -125,7 +125,7 @@ bsStoreUInt@LEN@(BitString str, BitOffset offset,
 /**************************************************************************/
 
 void
-bsGetUniformUInt@LEN@Array(const BitString str, BitOffset offset,
+bsGetUniform@uTypeTag@Array(const BitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,
                            @ValueType@ val[])
 {
@@ -187,7 +187,7 @@ bsGetUniformUInt@LEN@Array(const BitString str, BitOffset offset,
 }
 
 void
-bsStoreUniformUInt@LEN@Array(BitString str, BitOffset offset, unsigned numBits,
+bsStoreUniform@uTypeTag@Array(BitString str, BitOffset offset, unsigned numBits,
                              size_t numValues, const @ValueType@ val[])
 {
   /* idea: read as much as possible from val in each iteration,

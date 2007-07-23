@@ -103,7 +103,7 @@ bsStoreUInt8(BitString str, BitOffset offset,
   if (bitsLeft)
   {
     uint_fast32_t mask = ((~(uint_fast32_t)0)<<(bitElemBits - bitsLeft));
-    if (bitElemBits < (sizeof (uint8_t)*CHAR_BIT))
+    if (bitElemBits < (sizeof (uint_fast32_t)*CHAR_BIT))
       mask &= (~(~(uint_fast32_t)0<<bitElemBits));
     *p = (*p & ~mask) | ((val << (bitElemBits - bitsLeft)) & mask);
   }

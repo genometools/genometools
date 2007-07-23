@@ -103,7 +103,7 @@ bsStoreUInt64(BitString str, BitOffset offset,
   if (bitsLeft)
   {
     uint_fast64_t mask = ((~(uint_fast64_t)0)<<(bitElemBits - bitsLeft));
-    if (bitElemBits < (sizeof (uint64_t)*CHAR_BIT))
+    if (bitElemBits < (sizeof (uint_fast64_t)*CHAR_BIT))
       mask &= (~(~(uint_fast64_t)0<<bitElemBits));
     *p = (*p & ~mask) | ((val << (bitElemBits - bitsLeft)) & mask);
   }

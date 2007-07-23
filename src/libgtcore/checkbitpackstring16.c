@@ -47,7 +47,7 @@ icmp(uint16_t a, uint16_t b)
 
 
 int
-bitPackString16_unit_test(Env *env)
+bitPackStringInt16_unit_test(Env *env)
 {
   BitString bitStore = NULL;
   BitString bitStoreCopy = NULL;
@@ -66,38 +66,19 @@ bitPackString16_unit_test(Env *env)
   }
   offset = offsetStart = random()%(sizeof (uint16_t) * CHAR_BIT);
   numRnd = random() % (MAX_RND_NUMS + 1);
-#ifdef VERBOSE_UNIT_TEST
-  fprintf(stderr, "seedval = %lu, offset=%lu, numRnd=%lu\n", seedval,
-          (long unsigned)offsetStart, (long unsigned)numRnd);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "seedval = %lu, offset=%lu, numRnd=%lu\n", seedval,
+              (long unsigned)offsetStart, (long unsigned)numRnd);
   {
     BitOffset numBits = sizeof (uint16_t) * CHAR_BIT * numRnd + offsetStart;
-    ensure(had_err, (randSrc = env_ma_malloc(env, sizeof (uint16_t)*numRnd))
-           && (bitStore = env_ma_malloc(env, bitElemsAllocSize(numBits)
-                                        * sizeof (BitElem)))
-           && (bitStoreCopy = env_ma_calloc(env, bitElemsAllocSize(numBits),
-                                            sizeof (BitElem)))
-           && (randCmp = env_ma_malloc(env, sizeof (uint16_t)*numRnd)));
-  }
-  if (had_err)
-  {
-    if (randSrc)
-      env_ma_free(randSrc, env);
-    if (randCmp)
-      env_ma_free(randCmp, env);
-    if (bitStore)
-      env_ma_free(bitStore, env);
-    if (bitStoreCopy)
-      env_ma_free(bitStoreCopy, env);
-#ifdef VERBOSE_UNIT_TEST
-    perror("Storage allocations failed");
-#endif /* VERBOSE_UNIT_TEST */
-    return had_err;
+    randSrc = env_ma_malloc(env, sizeof (uint16_t)*numRnd);
+    bitStore = env_ma_malloc(env, bitElemsAllocSize(numBits)
+                             * sizeof (BitElem));
+    bitStoreCopy = env_ma_calloc(env, bitElemsAllocSize(numBits),
+                                 sizeof (BitElem));
+    randCmp = env_ma_malloc(env, sizeof (uint16_t)*numRnd);
   }
   /* first test unsigned types */
-#ifdef VERBOSE_UNIT_TEST
-  fputs("bsStoreUInt16/bsGetUInt16: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "bsStoreUInt16/bsGetUInt16: ");
   for (i = 0; i < numRnd; ++i)
   {
 #if 16 > 32 && LONG_BIT < 16
@@ -118,22 +99,17 @@ bitPackString16_unit_test(Env *env)
     ensure(had_err, r == v);
     if (had_err)
     {
-#ifdef VERBOSE_UNIT_TEST
-      fprintf(stderr, "Expected %"PRIu16", got %"PRIu16", seed = %lu, i = %lu\n",
-              v, r, seedval, (unsigned long)i);
-#endif /* VERBOSE_UNIT_TEST */
+      env_log_log(env, "Expected %"PRIu16", got %"PRIu16
+                  ", seed = %lu, i = %lu\n",
+                  v, r, seedval, (unsigned long)i);
       freeResourcesAndReturn(had_err);
     }
     offset += bits;
   }
-#ifdef VERBOSE_UNIT_TEST
-  fputs("passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "passed\n");
   if(numRnd > 1)
   {
-#ifdef VERBOSE_UNIT_TEST
-    fputs("bsCompare: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, "bsCompare: ");
     {
       uint16_t v0 = randSrc[0];
       int bits0 = requiredUInt16Bits(v0);
@@ -154,14 +130,12 @@ bitPackString16_unit_test(Env *env)
                                    bitStore, offset + bits0, bits1)));
         if (had_err)
         {
-#ifdef VERBOSE_UNIT_TEST
-          fprintf(stderr, "Expected v0 %s v1, got v0 %s v1,\n for v0=%"
-                  PRIu16" and v1=%"PRIu16",\n"
-                  "seed = %lu, i = %lu, bits0=%u, bits1=%u\n",
-                  (v0 > v1?">":(v0 < v1?"<":"==")),
-                  (result > 0?">":(result < 0?"<":"==")), v0, v1,
-                  seedval, (unsigned long)i, bits0, bits1);
-#endif /* VERBOSE_UNIT_TEST */
+          env_log_log(env, "Expected v0 %s v1, got v0 %s v1,\n for v0=%"
+                      PRIu16" and v1=%"PRIu16",\n"
+                      "seed = %lu, i = %lu, bits0=%u, bits1=%u\n",
+                      (v0 > v1?">":(v0 < v1?"<":"==")),
+                      (result > 0?">":(result < 0?"<":"==")), v0, v1,
+                      seedval, (unsigned long)i, bits0, bits1);
           freeResourcesAndReturn(had_err);
         }
         offset += bits0;
@@ -170,17 +144,13 @@ bitPackString16_unit_test(Env *env)
         r0 = r1;
       }
     }
-#ifdef VERBOSE_UNIT_TEST
-    fputs("passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, "passed\n");
   }
-#ifdef VERBOSE_UNIT_TEST
-  fputs("bsStoreUniformUInt16Array/bsGetUInt16: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "bsStoreUniformUInt16Array/bsGetUInt16: ");
   {
     unsigned numBits = random()%(sizeof (uint16_t)*CHAR_BIT) + 1;
     uint16_t mask = ~(uint16_t)0;
-    if (numBits < 16)
+    if (numBits < sizeof (uint16_t)*CHAR_BIT)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniformUInt16Array(bitStore, offset, numBits, numRnd, randSrc);
@@ -191,19 +161,16 @@ bitPackString16_unit_test(Env *env)
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "Expected %"PRIu16", got %"PRIu16",\n seed = %lu,"
-                " i = %lu, bits=%u\n",
-                v, r, seedval, (unsigned long)i, numBits);
-#endif /* VERBOSE_UNIT_TEST */
+        env_log_log(env, "Expected %"PRIu16", got %"PRIu16",\n"
+                    "seed = %lu, i = %lu, bits=%u\n",
+                    v, r, seedval, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
     }
-#ifdef VERBOSE_UNIT_TEST
-    fputs("passed\n", stderr);
-    fputs("bsStoreUniformUInt16Array/bsGetUniformUInt16Array: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, "passed\n");
+    env_log_log(env,
+                "bsStoreUniformUInt16Array/bsGetUniformUInt16Array: ");
     bsGetUniformUInt16Array(bitStore, offset = offsetStart,
                                numBits, numRnd, randCmp);
     for (i = 0; i < numRnd; ++i)
@@ -213,12 +180,10 @@ bitPackString16_unit_test(Env *env)
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr,
-                "Expected %"PRIu16", got %"PRIu16",\n seed = %lu,"
-                " i = %lu, bits=%u\n",
-                v, r, seedval, (unsigned long)i, numBits);
-#endif /* VERBOSE_UNIT_TEST */
+        env_log_log(env,
+                    "Expected %"PRIu16", got %"PRIu16",\n seed = %lu,"
+                    " i = %lu, bits=%u\n",
+                    v, r, seedval, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -230,23 +195,17 @@ bitPackString16_unit_test(Env *env)
                                  numBits, 1, &r);
       if (r != v)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr,
-                "Expected %"PRIu16", got %"PRIu16", seed = %lu,"
-                " one value extraction\n",
-                v, r, seedval);
-#endif /* VERBOSE_UNIT_TEST */
+        env_log_log(env,
+                    "Expected %"PRIu16", got %"PRIu16", seed = %lu,"
+                    " one value extraction\n",
+                    v, r, seedval);
         freeResourcesAndReturn(had_err);
       }
     }
-#ifdef VERBOSE_UNIT_TEST
-    fputs(" passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, " passed\n");
   }
   /* int types */
-#ifdef VERBOSE_UNIT_TEST
-  fputs("bsStoreInt16/bsGetInt16: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */  
+  env_log_log(env, "bsStoreInt16/bsGetInt16: ");
   for (i = 0; i < numRnd; ++i)
   {
     int16_t v = (int16_t)randSrc[i];
@@ -263,23 +222,19 @@ bitPackString16_unit_test(Env *env)
     ensure(had_err, r == v);
     if (had_err)
     {
-#ifdef VERBOSE_UNIT_TEST
-      fprintf(stderr, "Expected %"PRId16", got %"PRId16",\n"
-              "seed = %lu, i = %lu, bits=%u\n",
-              v, r, seedval, (unsigned long)i, bits);
-#endif /* VERBOSE_UNIT_TEST */
+      env_log_log(env, "Expected %"PRId16", got %"PRId16",\n"
+                  "seed = %lu, i = %lu, bits=%u\n",
+                  v, r, seedval, (unsigned long)i, bits);
       freeResourcesAndReturn(had_err);
     }
     offset += bits;
   }
-#ifdef VERBOSE_UNIT_TEST
-  fputs("passed\n", stderr);
-  fputs("bsStoreUniformInt16Array/bsGetInt16: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "passed\n");
+  env_log_log(env, "bsStoreUniformInt16Array/bsGetInt16: ");
   {
     unsigned numBits = random()%(sizeof (int16_t)*CHAR_BIT) + 1;
     int16_t mask = ~(int16_t)0;
-    if (numBits < 16)
+    if (numBits < sizeof (int16_t)*CHAR_BIT)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniformInt16Array(bitStore, offset, numBits, numRnd,
@@ -292,19 +247,15 @@ bitPackString16_unit_test(Env *env)
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "Expected %"PRId16", got %"PRId16",\n"
-                "seed = %lu, i = %lu, numBits=%u\n",
-                v, r, seedval, (unsigned long)i, numBits);
-#endif /* VERBOSE_UNIT_TEST */
+        env_log_log(env, "Expected %"PRId16", got %"PRId16",\n"
+                    "seed = %lu, i = %lu, numBits=%u\n",
+                    v, r, seedval, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
     }
-#ifdef VERBOSE_UNIT_TEST
-    fputs("passed\n", stderr);
-    fputs("bsStoreUniformInt16Array/bsGetUniformInt16Array: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, "passed\n");
+    env_log_log(env, "bsStoreUniformInt16Array/bsGetUniformInt16Array: ");
     bsGetUniformInt16Array(bitStore, offset = offsetStart,
                               numBits, numRnd, (int16_t *)randCmp);
     for (i = 0; i < numRnd; ++i)
@@ -315,11 +266,9 @@ bitPackString16_unit_test(Env *env)
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "Expected %"PRId16", got %"PRId16
-                ", seed = %lu, i = %lu\n",
-                v, r, seedval, (unsigned long)i);
-#endif /* VERBOSE_UNIT_TEST */
+        env_log_log(env, "Expected %"PRId16", got %"PRId16
+                    ", seed = %lu, i = %lu\n",
+                    v, r, seedval, (unsigned long)i);
         freeResourcesAndReturn(had_err);
       }
     }
@@ -333,23 +282,17 @@ bitPackString16_unit_test(Env *env)
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "Expected %"PRId16", got %"PRId16
-                ", seed = %lu, one value extraction\n",
-                v, r, seedval);
-#endif /* VERBOSE_UNIT_TEST */
+        env_log_log(env, "Expected %"PRId16", got %"PRId16
+                    ", seed = %lu, one value extraction\n",
+                    v, r, seedval);
         freeResourcesAndReturn(had_err);
       }
     }
-#ifdef VERBOSE_UNIT_TEST
-    fputs("passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, "passed\n");
   }
   if(numRnd > 0)
   {
-#ifdef VERBOSE_UNIT_TEST
-    fputs("bsCopy: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, "bsCopy: ");
     {
       /* first decide how many of the values to use and at which to start */
       size_t numValueCopies, copyStart;
@@ -384,19 +327,15 @@ bitPackString16_unit_test(Env *env)
                        bitStoreCopy, destOffset, numCopyBits) == 0);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "Expected equality on bitstrings\n"
-                "seed = %lu, offset = %llu, destOffset = %llu,"
-                " numCopyBits=%llu\n",
-                seedval, (unsigned long long)offset,
-                (unsigned long long)destOffset, (unsigned long long)numCopyBits);
+        env_log_log(env, "Expected equality on bitstrings\n"
+                    "seed = %lu, offset = %llu, destOffset = %llu,"
+                    " numCopyBits=%llu\n",
+                    seedval, (unsigned long long)offset,
+                    (unsigned long long)destOffset, (unsigned long long)numCopyBits);
         /* FIXME: implement bitstring output function */
-#endif /* VERBOSE_UNIT_TEST */
         freeResourcesAndReturn(had_err);
       }
-#ifdef VERBOSE_UNIT_TEST
-      fputs("passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+      env_log_log(env, "passed\n");
     }
   }
   freeResourcesAndReturn(had_err);

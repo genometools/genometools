@@ -537,25 +537,25 @@ bitPackStringUInt_unit_test(Env *env);
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackString8_unit_test(Env *env);
+bitPackStringInt8_unit_test(Env *env);
 /**
  * \brief Unit test function for bitPackString, 16-bit functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackString16_unit_test(Env *env);
+bitPackStringInt16_unit_test(Env *env);
 /**
  * \brief Unit test function for bitPackString, 32-bit functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackString32_unit_test(Env *env);
+bitPackStringInt32_unit_test(Env *env);
 /**
  * \brief Unit test function for bitPackString, 64-bit functions.
  * @return 0 on success, -1 on error.
  */
 extern int
-bitPackString64_unit_test(Env *env);
+bitPackStringInt64_unit_test(Env *env);
 
 #include "bitpackstringsimpleop.h"
 

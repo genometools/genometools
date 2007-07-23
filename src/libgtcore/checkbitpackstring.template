@@ -23,7 +23,7 @@ enum {
 };
 
 static inline int
-icmp(uint@LEN@_t a, uint@LEN@_t b)
+icmp(@uOpType@ a, @uOpType@ b)
 {
   if (a > b)
     return 1;
@@ -44,13 +44,13 @@ icmp(uint@LEN@_t a, uint@LEN@_t b)
 
 
 int
-bitPackString@LEN@_unit_test(Env *env)
+bitPackString@iTypeTag@_unit_test(Env *env)
 {
   BitString bitStore = NULL;
   BitString bitStoreCopy = NULL;
-  uint@LEN@_t *randSrc = NULL; /*< create random ints here for input as bit
+  @uOpType@ *randSrc = NULL; /*< create random ints here for input as bit
                                 *  store */
-  uint@LEN@_t *randCmp = NULL; /*< used for random ints read back */
+  @uOpType@ *randCmp = NULL; /*< used for random ints read back */
   size_t i, numRnd;
   BitOffset offsetStart, offset;
   unsigned long seedval;
@@ -61,87 +61,63 @@ bitPackString@LEN@_unit_test(Env *env)
     seedval = seed.tv_sec + seed.tv_usec;
     srandom(seedval);
   }
-  offset = offsetStart = random()%(sizeof (uint@LEN@_t) * CHAR_BIT);
+  offset = offsetStart = random()%(sizeof (@uOpType@) * CHAR_BIT);
   numRnd = random() % (MAX_RND_NUMS + 1);
-#ifdef VERBOSE_UNIT_TEST
-  fprintf(stderr, "seedval = %lu, offset=%lu, numRnd=%lu\n", seedval,
-          (long unsigned)offsetStart, (long unsigned)numRnd);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "seedval = %lu, offset=%lu, numRnd=%lu\n", seedval,
+              (long unsigned)offsetStart, (long unsigned)numRnd);
   {
-    BitOffset numBits = sizeof (uint@LEN@_t) * CHAR_BIT * numRnd + offsetStart;
-    ensure(had_err, (randSrc = env_ma_malloc(env, sizeof (uint@LEN@_t)*numRnd))
-           && (bitStore = env_ma_malloc(env, bitElemsAllocSize(numBits)
-                                        * sizeof (BitElem)))
-           && (bitStoreCopy = env_ma_calloc(env, bitElemsAllocSize(numBits),
-                                            sizeof (BitElem)))
-           && (randCmp = env_ma_malloc(env, sizeof (uint@LEN@_t)*numRnd)));
-  }
-  if (had_err)
-  {
-    if (randSrc)
-      env_ma_free(randSrc, env);
-    if (randCmp)
-      env_ma_free(randCmp, env);
-    if (bitStore)
-      env_ma_free(bitStore, env);
-    if (bitStoreCopy)
-      env_ma_free(bitStoreCopy, env);
-#ifdef VERBOSE_UNIT_TEST
-    perror("Storage allocations failed");
-#endif /* VERBOSE_UNIT_TEST */
-    return had_err;
+    BitOffset numBits = sizeof (@uOpType@) * CHAR_BIT * numRnd + offsetStart;
+    randSrc = env_ma_malloc(env, sizeof (@uOpType@)*numRnd);
+    bitStore = env_ma_malloc(env, bitElemsAllocSize(numBits)
+                             * sizeof (BitElem));
+    bitStoreCopy = env_ma_calloc(env, bitElemsAllocSize(numBits),
+                                 sizeof (BitElem));
+    randCmp = env_ma_malloc(env, sizeof (@uOpType@)*numRnd);
   }
   /* first test unsigned types */
-#ifdef VERBOSE_UNIT_TEST
-  fputs("bsStoreUInt@LEN@/bsGetUInt@LEN@: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "bsStore@uTypeTag@/bsGet@uTypeTag@: ");
   for (i = 0; i < numRnd; ++i)
   {
-#if @LEN@ > 32 && LONG_BIT < @LEN@
-    uint@LEN@_t v = randSrc[i] = (uint@LEN@_t)random() << 32 | random();
-#else /* @LEN@ > 32 && LONG_BIT < @LEN@ */
-    uint@LEN@_t v = randSrc[i] = random();
-#endif /* @LEN@ > 32 && LONG_BIT < @LEN@ */
-    int bits = requiredUInt@LEN@Bits(v);
-    bsStoreUInt@LEN@(bitStore, offset, bits, v);
+#if @bitSize@ > 32 && LONG_BIT < @bitSize@
+    @uOpType@ v = randSrc[i] = (@uOpType@)random() << 32 | random();
+#else /* @bitSize@ > 32 && LONG_BIT < @bitSize@ */
+    @uOpType@ v = randSrc[i] = random();
+#endif /* @bitSize@ > 32 && LONG_BIT < @bitSize@ */
+    int bits = required@uTypeTag@Bits(v);
+    bsStore@uTypeTag@(bitStore, offset, bits, v);
     offset += bits;
   }
   offset = offsetStart;
   for (i = 0; i < numRnd; ++i)
   {
-    uint@LEN@_t v = randSrc[i];
-    int bits = requiredUInt@LEN@Bits(v);
-    uint@LEN@_t r = bsGetUInt@LEN@(bitStore, offset, bits);
+    @uOpType@ v = randSrc[i];
+    int bits = required@uTypeTag@Bits(v);
+    @uOpType@ r = bsGet@uTypeTag@(bitStore, offset, bits);
     ensure(had_err, r == v);
     if (had_err)
     {
-#ifdef VERBOSE_UNIT_TEST
-      fprintf(stderr, "Expected %"PRIu@LEN@", got %"PRIu@LEN@", seed = %lu, i = %lu\n",
-              v, r, seedval, (unsigned long)i);
-#endif /* VERBOSE_UNIT_TEST */
+      env_log_log(env, "Expected %"@uOpPRI@", got %"@uOpPRI@
+                  ", seed = %lu, i = %lu\n",
+                  v, r, seedval, (unsigned long)i);
       freeResourcesAndReturn(had_err);
     }
     offset += bits;
   }
-#ifdef VERBOSE_UNIT_TEST
-  fputs("passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "passed\n");
   if(numRnd > 1)
   {
-#ifdef VERBOSE_UNIT_TEST
-    fputs("bsCompare: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, "bsCompare: ");
     {
-      uint@LEN@_t v0 = randSrc[0];
-      int bits0 = requiredUInt@LEN@Bits(v0);
-      uint@LEN@_t r0;
+      @uOpType@ v0 = randSrc[0];
+      int bits0 = required@uTypeTag@Bits(v0);
+      @uOpType@ r0;
       offset = offsetStart;
-      r0 = bsGetUInt@LEN@(bitStore, offset, bits0);
+      r0 = bsGet@uTypeTag@(bitStore, offset, bits0);
       for (i = 1; i < numRnd; ++i)
       {
-        uint@LEN@_t v1 = randSrc[i];
-        int bits1 = requiredUInt@LEN@Bits(v1);
-        uint@LEN@_t r1 = bsGetUInt@LEN@(bitStore, offset + bits0, bits1);
+        @uOpType@ v1 = randSrc[i];
+        int bits1 = required@uTypeTag@Bits(v1);
+        @uOpType@ r1 = bsGet@uTypeTag@(bitStore, offset + bits0, bits1);
         int result = -2;   /*< -2 is not a return value of bsCompare, thus
                             *   if it is displayed, there was an earlier
                             *   error. */
@@ -151,14 +127,12 @@ bitPackString@LEN@_unit_test(Env *env)
                                    bitStore, offset + bits0, bits1)));
         if (had_err)
         {
-#ifdef VERBOSE_UNIT_TEST
-          fprintf(stderr, "Expected v0 %s v1, got v0 %s v1,\n for v0=%"
-                  PRIu@LEN@" and v1=%"PRIu@LEN@",\n"
-                  "seed = %lu, i = %lu, bits0=%u, bits1=%u\n",
-                  (v0 > v1?">":(v0 < v1?"<":"==")),
-                  (result > 0?">":(result < 0?"<":"==")), v0, v1,
-                  seedval, (unsigned long)i, bits0, bits1);
-#endif /* VERBOSE_UNIT_TEST */
+          env_log_log(env, "Expected v0 %s v1, got v0 %s v1,\n for v0=%"
+                      @uOpPRI@" and v1=%"@uOpPRI@",\n"
+                      "seed = %lu, i = %lu, bits0=%u, bits1=%u\n",
+                      (v0 > v1?">":(v0 < v1?"<":"==")),
+                      (result > 0?">":(result < 0?"<":"==")), v0, v1,
+                      seedval, (unsigned long)i, bits0, bits1);
           freeResourcesAndReturn(had_err);
         }
         offset += bits0;
@@ -167,193 +141,162 @@ bitPackString@LEN@_unit_test(Env *env)
         r0 = r1;
       }
     }
-#ifdef VERBOSE_UNIT_TEST
-    fputs("passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, "passed\n");
   }
-#ifdef VERBOSE_UNIT_TEST
-  fputs("bsStoreUniformUInt@LEN@Array/bsGetUInt@LEN@: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "bsStoreUniform@uTypeTag@Array/bsGet@uTypeTag@: ");
   {
-    unsigned numBits = random()%(sizeof (uint@LEN@_t)*CHAR_BIT) + 1;
-    uint@LEN@_t mask = ~(uint@LEN@_t)0;
-    if (numBits < @LEN@)
+    unsigned numBits = random()%(sizeof (@uOpType@)*CHAR_BIT) + 1;
+    @uOpType@ mask = ~(@uOpType@)0;
+    if (numBits < sizeof (@uOpType@)*CHAR_BIT)
       mask = ~(mask << numBits);
     offset = offsetStart;
-    bsStoreUniformUInt@LEN@Array(bitStore, offset, numBits, numRnd, randSrc);
+    bsStoreUniform@uTypeTag@Array(bitStore, offset, numBits, numRnd, randSrc);
     for (i = 0; i < numRnd; ++i)
     {
-      uint@LEN@_t v = randSrc[i] & mask;
-      uint@LEN@_t r = bsGetUInt@LEN@(bitStore, offset, numBits);
+      @uOpType@ v = randSrc[i] & mask;
+      @uOpType@ r = bsGet@uTypeTag@(bitStore, offset, numBits);
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "Expected %"PRIu@LEN@", got %"PRIu@LEN@",\n seed = %lu,"
-                " i = %lu, bits=%u\n",
-                v, r, seedval, (unsigned long)i, numBits);
-#endif /* VERBOSE_UNIT_TEST */
+        env_log_log(env, "Expected %"@uOpPRI@", got %"@uOpPRI@",\n"
+                    "seed = %lu, i = %lu, bits=%u\n",
+                    v, r, seedval, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
     }
-#ifdef VERBOSE_UNIT_TEST
-    fputs("passed\n", stderr);
-    fputs("bsStoreUniformUInt@LEN@Array/bsGetUniformUInt@LEN@Array: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */
-    bsGetUniformUInt@LEN@Array(bitStore, offset = offsetStart,
+    env_log_log(env, "passed\n");
+    env_log_log(env,
+                "bsStoreUniform@uTypeTag@Array/bsGetUniform@uTypeTag@Array: ");
+    bsGetUniform@uTypeTag@Array(bitStore, offset = offsetStart,
                                numBits, numRnd, randCmp);
     for (i = 0; i < numRnd; ++i)
     {
-      uint@LEN@_t v = randSrc[i] & mask;
-      uint@LEN@_t r = randCmp[i];
+      @uOpType@ v = randSrc[i] & mask;
+      @uOpType@ r = randCmp[i];
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr,
-                "Expected %"PRIu@LEN@", got %"PRIu@LEN@",\n seed = %lu,"
-                " i = %lu, bits=%u\n",
-                v, r, seedval, (unsigned long)i, numBits);
-#endif /* VERBOSE_UNIT_TEST */
+        env_log_log(env,
+                    "Expected %"@uOpPRI@", got %"@uOpPRI@",\n seed = %lu,"
+                    " i = %lu, bits=%u\n",
+                    v, r, seedval, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
     }
     if (numRnd > 1)
     {
-      uint@LEN@_t v = randSrc[0] & mask;
-      uint@LEN@_t r;
-      bsGetUniformUInt@LEN@Array(bitStore, offsetStart,
+      @uOpType@ v = randSrc[0] & mask;
+      @uOpType@ r;
+      bsGetUniform@uTypeTag@Array(bitStore, offsetStart,
                                  numBits, 1, &r);
       if (r != v)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr,
-                "Expected %"PRIu@LEN@", got %"PRIu@LEN@", seed = %lu,"
-                " one value extraction\n",
-                v, r, seedval);
-#endif /* VERBOSE_UNIT_TEST */
+        env_log_log(env,
+                    "Expected %"@uOpPRI@", got %"@uOpPRI@", seed = %lu,"
+                    " one value extraction\n",
+                    v, r, seedval);
         freeResourcesAndReturn(had_err);
       }
     }
-#ifdef VERBOSE_UNIT_TEST
-    fputs(" passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, " passed\n");
   }
   /* int types */
-#ifdef VERBOSE_UNIT_TEST
-  fputs("bsStoreInt@LEN@/bsGetInt@LEN@: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */  
+  env_log_log(env, "bsStore@iTypeTag@/bsGet@iTypeTag@: ");
   for (i = 0; i < numRnd; ++i)
   {
-    int@LEN@_t v = (int@LEN@_t)randSrc[i];
-    unsigned bits = requiredInt@LEN@Bits(v);
-    bsStoreInt@LEN@(bitStore, offset, bits, v);
+    @iOpType@ v = (@iOpType@)randSrc[i];
+    unsigned bits = required@iTypeTag@Bits(v);
+    bsStore@iTypeTag@(bitStore, offset, bits, v);
     offset += bits;
   }
   offset = offsetStart;
   for (i = 0; i < numRnd; ++i)
   {
-    int@LEN@_t v = randSrc[i];
-    unsigned bits = requiredInt@LEN@Bits(v);
-    int@LEN@_t r = bsGetInt@LEN@(bitStore, offset, bits);
+    @iOpType@ v = randSrc[i];
+    unsigned bits = required@iTypeTag@Bits(v);
+    @iOpType@ r = bsGet@iTypeTag@(bitStore, offset, bits);
     ensure(had_err, r == v);
     if (had_err)
     {
-#ifdef VERBOSE_UNIT_TEST
-      fprintf(stderr, "Expected %"PRId@LEN@", got %"PRId@LEN@",\n"
-              "seed = %lu, i = %lu, bits=%u\n",
-              v, r, seedval, (unsigned long)i, bits);
-#endif /* VERBOSE_UNIT_TEST */
+      env_log_log(env, "Expected %"@dOpPRI@", got %"@dOpPRI@",\n"
+                  "seed = %lu, i = %lu, bits=%u\n",
+                  v, r, seedval, (unsigned long)i, bits);
       freeResourcesAndReturn(had_err);
     }
     offset += bits;
   }
-#ifdef VERBOSE_UNIT_TEST
-  fputs("passed\n", stderr);
-  fputs("bsStoreUniformInt@LEN@Array/bsGetInt@LEN@: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "passed\n");
+  env_log_log(env, "bsStoreUniform@iTypeTag@Array/bsGet@iTypeTag@: ");
   {
-    unsigned numBits = random()%(sizeof (int@LEN@_t)*CHAR_BIT) + 1;
-    int@LEN@_t mask = ~(int@LEN@_t)0;
-    if (numBits < @LEN@)
+    unsigned numBits = random()%(sizeof (@iOpType@)*CHAR_BIT) + 1;
+    @iOpType@ mask = ~(@iOpType@)0;
+    if (numBits < sizeof (@iOpType@)*CHAR_BIT)
       mask = ~(mask << numBits);
     offset = offsetStart;
-    bsStoreUniformInt@LEN@Array(bitStore, offset, numBits, numRnd,
-                                (int@LEN@_t *)randSrc);
+    bsStoreUniform@iTypeTag@Array(bitStore, offset, numBits, numRnd,
+                                (@iOpType@ *)randSrc);
     for (i = 0; i < numRnd; ++i)
     {
-      int@LEN@_t m = (int@LEN@_t)1 << (numBits - 1);
-      int@LEN@_t v = (int@LEN@_t)((randSrc[i] & mask) ^ m) - m;
-      int@LEN@_t r = bsGetInt@LEN@(bitStore, offset, numBits);
+      @iOpType@ m = (@iOpType@)1 << (numBits - 1);
+      @iOpType@ v = (@iOpType@)((randSrc[i] & mask) ^ m) - m;
+      @iOpType@ r = bsGet@iTypeTag@(bitStore, offset, numBits);
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "Expected %"PRId@LEN@", got %"PRId@LEN@",\n"
-                "seed = %lu, i = %lu, numBits=%u\n",
-                v, r, seedval, (unsigned long)i, numBits);
-#endif /* VERBOSE_UNIT_TEST */
+        env_log_log(env, "Expected %"@dOpPRI@", got %"@dOpPRI@",\n"
+                    "seed = %lu, i = %lu, numBits=%u\n",
+                    v, r, seedval, (unsigned long)i, numBits);
         freeResourcesAndReturn(had_err);
       }
       offset += numBits;
     }
-#ifdef VERBOSE_UNIT_TEST
-    fputs("passed\n", stderr);
-    fputs("bsStoreUniformInt@LEN@Array/bsGetUniformInt@LEN@Array: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */
-    bsGetUniformInt@LEN@Array(bitStore, offset = offsetStart,
-                              numBits, numRnd, (int@LEN@_t *)randCmp);
+    env_log_log(env, "passed\n");
+    env_log_log(env, "bsStoreUniform@iTypeTag@Array/bsGetUniform@iTypeTag@Array: ");
+    bsGetUniform@iTypeTag@Array(bitStore, offset = offsetStart,
+                              numBits, numRnd, (@iOpType@ *)randCmp);
     for (i = 0; i < numRnd; ++i)
     {
-      int@LEN@_t m = (int@LEN@_t)1 << (numBits - 1);
-      int@LEN@_t v = (int@LEN@_t)((randSrc[i] & mask) ^ m) - m;
-      int@LEN@_t r = randCmp[i];
+      @iOpType@ m = (@iOpType@)1 << (numBits - 1);
+      @iOpType@ v = (@iOpType@)((randSrc[i] & mask) ^ m) - m;
+      @iOpType@ r = randCmp[i];
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "Expected %"PRId@LEN@", got %"PRId@LEN@
-                ", seed = %lu, i = %lu\n",
-                v, r, seedval, (unsigned long)i);
-#endif /* VERBOSE_UNIT_TEST */
+        env_log_log(env, "Expected %"@dOpPRI@", got %"@dOpPRI@
+                    ", seed = %lu, i = %lu\n",
+                    v, r, seedval, (unsigned long)i);
         freeResourcesAndReturn(had_err);
       }
     }
     if(numRnd > 0)
     {
-      int@LEN@_t m = (int@LEN@_t)1 << (numBits - 1);
-      int@LEN@_t v = (int@LEN@_t)((randSrc[0] & mask) ^ m) - m;
-      int@LEN@_t r;
-      bsGetUniformInt@LEN@Array(bitStore, offsetStart,
+      @iOpType@ m = (@iOpType@)1 << (numBits - 1);
+      @iOpType@ v = (@iOpType@)((randSrc[0] & mask) ^ m) - m;
+      @iOpType@ r;
+      bsGetUniform@iTypeTag@Array(bitStore, offsetStart,
                                 numBits, 1, &r);
       ensure(had_err, r == v);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "Expected %"PRId@LEN@", got %"PRId@LEN@
-                ", seed = %lu, one value extraction\n",
-                v, r, seedval);
-#endif /* VERBOSE_UNIT_TEST */
+        env_log_log(env, "Expected %"@dOpPRI@", got %"@dOpPRI@
+                    ", seed = %lu, one value extraction\n",
+                    v, r, seedval);
         freeResourcesAndReturn(had_err);
       }
     }
-#ifdef VERBOSE_UNIT_TEST
-    fputs("passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, "passed\n");
   }
   if(numRnd > 0)
   {
-#ifdef VERBOSE_UNIT_TEST
-    fputs("bsCopy: ", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+    env_log_log(env, "bsCopy: ");
     {
       /* first decide how many of the values to use and at which to start */
       size_t numValueCopies, copyStart;
       BitOffset numCopyBits = 0, destOffset;
-      unsigned numBits = random()%(sizeof (uint@LEN@_t)*CHAR_BIT) + 1;
-      uint@LEN@_t mask = ~(uint@LEN@_t)0;
-      if (numBits < @LEN@)
+      unsigned numBits = random()%(sizeof (@uOpType@)*CHAR_BIT) + 1;
+      @uOpType@ mask = ~(@uOpType@)0;
+      if (numBits < @bitSize@)
         mask = ~(mask << numBits);
       if (random()&1)
       {
@@ -369,11 +312,11 @@ bitPackString@LEN@_unit_test(Env *env)
       offset = offsetStart + (BitOffset)copyStart * numBits;
       destOffset = random()%
         (offsetStart
-         + (sizeof (uint@LEN@_t)*CHAR_BIT)
+         + (sizeof (@uOpType@)*CHAR_BIT)
          * (BitOffset)(numRnd - numValueCopies) + 1);
       numCopyBits = (BitOffset)numBits * numValueCopies;
       /* the following bsCopy should be equivalent to:
-       * bsStoreUniformUInt@LEN@Array(bitStoreCopy, destOffset,
+       * bsStoreUniform@uTypeTag@Array(bitStoreCopy, destOffset,
        *                              numBits, numValueCopies, randSrc); */
       bsCopy(bitStore, offset, bitStoreCopy, destOffset, numCopyBits);
       ensure(had_err,
@@ -381,19 +324,15 @@ bitPackString@LEN@_unit_test(Env *env)
                        bitStoreCopy, destOffset, numCopyBits) == 0);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "Expected equality on bitstrings\n"
-                "seed = %lu, offset = %llu, destOffset = %llu,"
-                " numCopyBits=%llu\n",
-                seedval, (unsigned long long)offset,
-                (unsigned long long)destOffset, (unsigned long long)numCopyBits);
+        env_log_log(env, "Expected equality on bitstrings\n"
+                    "seed = %lu, offset = %llu, destOffset = %llu,"
+                    " numCopyBits=%llu\n",
+                    seedval, (unsigned long long)offset,
+                    (unsigned long long)destOffset, (unsigned long long)numCopyBits);
         /* FIXME: implement bitstring output function */
-#endif /* VERBOSE_UNIT_TEST */
         freeResourcesAndReturn(had_err);
       }
-#ifdef VERBOSE_UNIT_TEST
-      fputs("passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+      env_log_log(env, "passed\n");
     }
   }
   freeResourcesAndReturn(had_err);

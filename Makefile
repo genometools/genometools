@@ -244,35 +244,39 @@ Doxyfile: Doxyfile.in VERSION
 
 src/libgtcore/bitpackstringop8.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 8 $^
 
 src/libgtcore/checkbitpackstring8.c: src/libgtcore/checkbitpackstring.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 8 $^
 
 src/libgtcore/bitpackstringop16.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 16 $^
 
 src/libgtcore/checkbitpackstring16.c: src/libgtcore/checkbitpackstring.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 16 $^
 
 src/libgtcore/bitpackstringop32.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 32 $^
 
 src/libgtcore/checkbitpackstring32.c: src/libgtcore/checkbitpackstring.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 32 $^
 
 src/libgtcore/bitpackstringop64.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 64 $^
 
 src/libgtcore/checkbitpackstring64.c: src/libgtcore/checkbitpackstring.template
 	@echo '[rebuild $@]'
-	@scripts/template2c.pl $^
+	@scripts/template2c.pl 64 $^
+
+src/libgtcore/checkbitpackstring-int.c: src/libgtcore/checkbitpackstring.template
+	@echo '[rebuild $@]'
+	@scripts/template2c.pl '-int' $^
 
 # we create the dependency files on the fly
 obj/%.o: %.c

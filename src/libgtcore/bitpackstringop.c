@@ -18,7 +18,19 @@
 
 #define MIN(a, b) (((a)<(b))?(a):(b))
 #define MIN3(a, b, c) (((a)<(b))?((a)<(c)?(a):(c)):((b)<(c)?(b):(c)))
-
+/*
+ * Both requiredUInt{32|64}Bits functions are based on the concepts
+ * presented at 
+ * http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogDeBruijn
+ * the method has two steps:
+ * 1. isolate the highest bit set by first copying the highest bit set
+ * via the shift and or instructions, then the final divide and
+ * increment result in the highest bit being set.
+ * 2. lookup the 5/6 top bits resulting from multiplication with a
+ * DeBruijn bit sequence (the long unsigned constant), since a
+ * DeBruijn sequence has all q-words differ by at least one bit, any
+ * bit set in v results in a corresponding table lookup. 
+ */
 int
 requiredUInt32Bits(uint32_t v)
 {
@@ -37,7 +49,6 @@ requiredUInt32Bits(uint32_t v)
   return r;
 }
 
-/* FIXME: this needs some serious rework for 64-bit */
 int
 requiredUInt64Bits(uint64_t v)
 {
