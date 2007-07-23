@@ -2,7 +2,8 @@
 extern "C" {
 #endif
 /*@null@*/ FILE *opensfxfile(const Str *indexname,
-                             const char *suffix,Env *env);
+                             const char *suffix,
+                             const char *mode,Env *env);
 
 #ifdef __cplusplus
 }

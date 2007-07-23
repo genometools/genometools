@@ -46,8 +46,8 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
 
   indexname = str_new_cstr(argv[parsed_args],env);
   if ((usestream ? streamsuffixarray : mapsuffixarray)(&suffixarray,
-                                                     true,true,true,true,
-                                                     indexname,env) != 0)
+                                                       SARR_ALLTAB, 
+                                                       indexname,env) != 0)
   {
     haserr = true;
   }

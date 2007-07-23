@@ -47,6 +47,7 @@
 #include "tools/gt_splitfasta.h"
 #include "tools/gt_stat.h"
 #include "tools/gt_suffixerator.h"
+#include "tools/gt_mkfmindex.h"
 
 #ifdef LIBGTVIEW
 #include "libgtview/block.h"
@@ -127,6 +128,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "splitfasta", gt_splitfasta, env);
   toolbox_add(gtr->toolbox, "stat", gt_stat, env);
   toolbox_add(gtr->toolbox, "suffixerator", gt_suffixerator, env);
+  toolbox_add(gtr->toolbox, "mkfmindex", gt_mkfmindex, env);
 #ifdef LIBGTVIEW
   toolbox_add(gtr->toolbox, "view", gt_view, env);
 #endif

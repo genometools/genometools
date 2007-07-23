@@ -1,0 +1,15 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Env *env);
+
+int initEmissionmergedesa(Emissionmergedesa *emmesa,
+                          const StrArray *indexnametab,
+                          unsigned int demand,
+                          Env *env);
+
+void wraptEmissionmergedesa(Emissionmergedesa *emmesa,Env *env);
+
+#ifdef __cplusplus
+}
+#endif

@@ -10,14 +10,15 @@
 #include "libgtcore/str.h"
 
 /*@null@*/ FILE *opensfxfile(const Str *indexname,
-                             const char *suffix,Env *env)
+                             const char *suffix,
+                             const char *mode,Env *env)
 {
   Str *tmpfilename;
   FILE *fp;
 
   tmpfilename = str_clone(indexname,env);
   str_append_cstr(tmpfilename,suffix,env);
-  fp = env_fa_fopen(env,str_get(tmpfilename),"wb");
+  fp = env_fa_fopen(env,str_get(tmpfilename),mode);
   if (fp == NULL)
   {
     env_error_set(env,"cannot open file \"%s\": %s\n",str_get(tmpfilename),

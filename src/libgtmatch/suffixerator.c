@@ -6,7 +6,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <errno.h>
 #include <assert.h>
 #include "libgtcore/env.h"
 #include "types.h"

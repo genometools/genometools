@@ -1,0 +1,9 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int saveFmindex (const Str *indexname,Fmindex *fm,
+                 bool storeindexpos,Env *env);
+
+#ifdef __cplusplus
+}
+#endif

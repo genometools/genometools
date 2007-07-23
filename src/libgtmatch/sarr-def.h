@@ -14,6 +14,13 @@
 
 #define FILEBUFFERSIZE 65536
 
+#define SARR_ESQTAB ((unsigned int) 1)
+#define SARR_SUFTAB ((unsigned int) 1 << 1)
+#define SARR_LCPTAB ((unsigned int) 1 << 2)
+#define SARR_BWTTAB ((unsigned int) 1 << 3)
+
+#define SARR_ALLTAB (SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB | SARR_BWTTAB)
+
 #define DECLAREBufferedfiletype(TYPE)\
         typedef struct\
         {\
@@ -31,7 +38,8 @@ DECLAREBufferedfiletype(Largelcpvalue);
 
 #define DECLAREREADFUNCTION(TYPE)\
         static int readnext ## TYPE ## fromstream(TYPE *val,\
-                                                  TYPE ## Bufferedfile *buf)\
+                                                  TYPE ## Bufferedfile *buf,\
+                                                  Env *env)\
         {\
           if(buf->nextread >= buf->nextfree)\
           {\

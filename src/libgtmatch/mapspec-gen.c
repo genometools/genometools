@@ -8,6 +8,7 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "types.h"
+#include "bwtbound.h"
 #include "intbits.h"
 #include "safecast-gen.h"
 #include "mapspec-def.h"
@@ -19,13 +20,8 @@
           *((TYPE **) mapspec->startptr) = NULL;\
         } else\
         {\
-          unsigned long i, addup = 0;\
           voidptr = (((void *) ptr) + byteoffset);\
           *((TYPE **) mapspec->startptr) = voidptr;\
-          for(i=0; i<mapspec->numofunits; i++)\
-          {\
-            addup += (*((TYPE **) mapspec->startptr))[i];\
-          }\
         }
 
 #define ALIGNSIZE sizeof(void *)
@@ -101,6 +97,12 @@ static int assigncorrecttype(Mapspecification *mapspec,
       break;
     case SeqposType:
       ASSIGNPTR2STARTPTR(Seqpos);
+      break;
+    case BwtboundType:
+      ASSIGNPTR2STARTPTR(Bwtbound);
+      break;
+    case PairBwtidxType:
+      ASSIGNPTR2STARTPTR(PairBwtidx);
       break;
     default:
       env_error_set(env,"no assignment specification for size %lu",
@@ -259,6 +261,12 @@ int flushtheindex2file(FILE *fp,
           break;
         case SeqposType:
           WRITEACTIONWITHTYPE(Seqpos);
+          break;
+        case BwtboundType:
+          WRITEACTIONWITHTYPE(Bwtbound);
+          break;
+        case PairBwtidxType:
+          WRITEACTIONWITHTYPE(PairBwtidx);
           break;
         default:
            env_error_set(env,"no map specification for size %lu",
