@@ -95,7 +95,10 @@ void computefmkeyvalues (Fmindex *fm,
   {
     fm->numofcodes = 0;
   }
-  fm->specialcharinfo = *specialcharinfo;
+  if(&fm->specialcharinfo != specialcharinfo)
+  {
+    fm->specialcharinfo = *specialcharinfo;
+  }
   fm->sizeofindex = determinefmindexsize (fm,
                                           suffixlength,
                                           storeindexpos);

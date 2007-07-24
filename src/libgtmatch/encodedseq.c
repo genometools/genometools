@@ -1503,6 +1503,7 @@ static int readsatfromfile(const Str *indexname,Env *env)
                             plainformat ? NULL : getsymbolmapAlphabet(alphabet),
                             plainformat,
                             NULL,
+                            NULL,
                             env);
       printf("# call %s\n",
              encodedseqfunctab[(int) sat].fillpos.funcname);

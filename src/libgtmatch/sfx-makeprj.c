@@ -80,6 +80,7 @@ int scanfastasequence(
                         symbolmap,
                         plainformat,
                         filelengthtab,
+                        NULL,
                         env);
   specialrangelengths = initdistribution(env);
   for (pos = 0; /* Nothing */; pos++)

@@ -10,9 +10,10 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include <zlib.h>
+#include "libgtcore/strarray.h"
 #include "symboldef.h"
 #include "filelength-def.h"
-#include "libgtcore/strarray.h"
+#include "arraydef.h"
 
 #define FILEBUFFERSIZE 65536
 
@@ -30,13 +31,14 @@ typedef struct
 {
   uint32_t filenum;
   uint64_t linenum;
-  uint_fast32_t nextread,
+  unsigned long nextread,
                 nextfree;
   bool indesc,
        firstoverallseq,
        firstseqinfile,
        complete,
        nextfile;
+  Arraychar *headerbuffer;
   Genericstream inputstream;
   Uchar bufspace[FILEBUFFERSIZE];
   uint64_t lastspeciallength;

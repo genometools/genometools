@@ -2,13 +2,16 @@
 extern "C" {
 #endif
 int overallquerysequences(int(*processsequence)(void *,
-                                                unsigned long,
+                                                uint64_t,
                                                 const Uchar *,
+                                                unsigned long,
                                                 const char *,
-                                                unsigned long),
+                                                unsigned long,
+                                                Env *),
                           void *info,
                           ArrayUchar *sequencebuffer,
                           const StrArray *filenametab,
+                          Arraychar *headerbuffer,
                           const Uchar *symbolmap,
                           Env *env);
 

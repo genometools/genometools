@@ -486,6 +486,7 @@ int getencseqkmersgeneric(
                           symbolmap,
                           plainformat,
                           NULL,
+                          NULL,
                           env);
     for (currentposition = 0; /* Nothing */; currentposition++)
     {
