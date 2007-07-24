@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 /**
- * \file png_stream.c
+ * \if INTERNAL \file png_stream.c \endif
  * \author Gordon Gremme <gremme@zbh.uni-hamburg.de>
  */
 

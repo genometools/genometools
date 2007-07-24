@@ -4,7 +4,7 @@
    See LICENSE file or http://genometools.org/license.html for license details.
 */
 /**
- * \file element.c
+ * \if INTERNAL \file element.c \endif
  * \author Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
  */
 

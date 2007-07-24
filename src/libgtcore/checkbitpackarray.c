@@ -10,8 +10,8 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include <libgtcore/ensure.h>
-#include <libgtcore/bitpackarray.h>
+#include "libgtcore/ensure.h"
+#include "libgtcore/bitpackarray.h"
 
 enum {
 /*   MAX_RND_NUMS = 10, */
@@ -40,25 +40,11 @@ int bitPackArray_unit_test(Env *env)
     else
       mask = ~((~(uint32_t)0)<<bits);
 
-#ifdef VERBOSE_UNIT_TEST
-    fprintf(stderr, "seedval = %lu, numRnd=%lu\n", seedval,
-            (long unsigned)numRnd);
-#endif
-    ensure(had_err,
-           ((randSrc = env_ma_malloc(env, sizeof (uint32_t)*numRnd))
-            && (bitStore = newBitPackArray(bits, numRnd, env))
-            && (randCmp = env_ma_malloc(env, sizeof (uint32_t)*numRnd))));
-    if (had_err)
-    {
-      perror("Storage allocations failed");
-      if (randSrc)
-        env_ma_free(randSrc, env);
-      if (randCmp)
-        env_ma_free(randCmp, env);
-      if (bitStore)
-        deleteBitPackArray(bitStore, env);
-      return had_err;
-    }
+    env_log_log(env, "seedval = %lu, numRnd=%lu\n", seedval,
+                (long unsigned)numRnd);
+    randSrc = env_ma_malloc(env, sizeof (uint32_t)*numRnd);
+    bitStore = newBitPackArray(bits, numRnd, env);
+    randCmp = env_ma_malloc(env, sizeof (uint32_t)*numRnd);
     for (i = 0; i < numRnd; ++i)
     {
       uint32_t v = randSrc[i] = random();
@@ -71,11 +57,9 @@ int bitPackArray_unit_test(Env *env)
       ensure(had_err, (v & mask) == r);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "bsStoreUInt32/bpaGetUInt32: "
-                "Expected %u, got %u, seed = %lu, i = %lu, bits=%u\n",
-              v & mask, r, seedval, (unsigned long)i, bits);
-#endif
+        env_log_log(env, "bsStoreUInt32/bpaGetUInt32: "
+                    "Expected %u, got %u, seed = %lu, i = %lu, bits=%u\n",
+                    v & mask, r, seedval, (unsigned long)i, bits);
         env_ma_free(randSrc, env);
         env_ma_free(randCmp, env);
         deleteBitPackArray(bitStore, env);
@@ -86,9 +70,7 @@ int bitPackArray_unit_test(Env *env)
     env_ma_free(randCmp, env);
     deleteBitPackArray(bitStore, env);
   }
-#ifdef VERBOSE_UNIT_TEST
-  fputs("bpaStoreUInt32/bpaGetUInt32: passed\n", stderr);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "bpaStoreUInt32/bpaGetUInt32: passed\n");
   {
     uint64_t *randSrc = NULL; /*< create random ints here for input as bit
                         *  store */
@@ -129,12 +111,10 @@ int bitPackArray_unit_test(Env *env)
       ensure(had_err, (v & mask) == r);
       if (had_err)
       {
-#ifdef VERBOSE_UNIT_TEST
-        fprintf(stderr, "bsStoreUInt64/bpaGetUInt64: "
-                "Expected %llu, got %llu, seed = %lu, i = %lu, bits=%u\n",
-                (unsigned long long)v & mask,
-                (unsigned long long)r, seedval, (unsigned long)i, bits);
-#endif /* VERBOSE_UNIT_TEST */
+        env_log_log(env, "bsStoreUInt64/bpaGetUInt64: "
+                    "Expected %llu, got %llu, seed = %lu, i = %lu, bits=%u\n",
+                    (unsigned long long)v & mask,
+                    (unsigned long long)r, seedval, (unsigned long)i, bits);
         env_ma_free(randSrc, env);
         env_ma_free(randCmp, env);
         deleteBitPackArray(bitStore, env);
@@ -145,8 +125,6 @@ int bitPackArray_unit_test(Env *env)
     env_ma_free(randCmp, env);
     deleteBitPackArray(bitStore, env);
   }
-#ifdef VERBOSE_UNIT_TEST
-  fputs("bpaStoreUInt64/bpaGetUInt64: passed\n", stdout);
-#endif /* VERBOSE_UNIT_TEST */
+  env_log_log(env, "bpaStoreUInt64/bpaGetUInt64: passed\n");
   return had_err;
 }

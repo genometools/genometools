@@ -12,10 +12,9 @@
 #include <limits.h>
 #include <stdio.h>
 
-#include "bitpackstring.h"
+#include "libgtcore/minmax.h"
+#include "libgtcore/bitpackstring.h"
 
-#define MIN(a, b) (((a)<(b))?(a):(b))
-#define MIN3(a, b, c) (((a)<(b))?((a)<(c)?(a):(c)):((b)<(c)?(b):(c)))
 
 uint8_t
 bsGetUInt8(const BitString str, BitOffset offset, unsigned numBits)
@@ -103,7 +102,7 @@ bsStoreUInt8(BitString str, BitOffset offset,
   if (bitsLeft)
   {
     uint_fast32_t mask = ((~(uint_fast32_t)0)<<(bitElemBits - bitsLeft));
-    if (bitElemBits < (sizeof (uint8_t)*CHAR_BIT))
+    if (bitElemBits < (sizeof (uint_fast32_t)*CHAR_BIT))
       mask &= (~(~(uint_fast32_t)0<<bitElemBits));
     *p = (*p & ~mask) | ((val << (bitElemBits - bitsLeft)) & mask);
   }
@@ -241,7 +240,7 @@ bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
 
       /* all of val[j] consumed? */
       bitsInAccum += bits2Read;
-      if (!(bits2Read -= bitsLeft))
+      if (!(bitsLeft -= bits2Read) && totalBitsLeft)
         currentVal = val[++j] & valMask, totalBitsLeft -= bitsLeft = numBits;
     }
     /* at this point accum holds as many bits as we could get
