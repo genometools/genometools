@@ -21,5 +21,5 @@ splitmultifasta.pl TMP 60 0 ${TMPFILE}
 
 filelist=`ls TMP-*`
 
-runmerge.sh ${U8} ${filelist}
+./runmerge.sh ${U8} ${filelist}
 rm -f ${TMPFILE} TMP-*
