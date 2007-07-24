@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 # Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
@@ -16,10 +16,6 @@ do
   rm -f ${headfile}.o ${headfile}.d ${headfile}.splint
 done
 
-rm -f testdata/*.lcp testdata/*.llv testdata/*.prj testdata/*.suf 
-rm -f testdata/*.al1 testdata/*.esq testdata/*.bwt 
-rm -f testdata/fm-all.fm[bd]
-rm -f testdata/at1MB.*
-
+rm -rf indexdir
 rm -f lib/libgtmatch.a
 rm -f testsuite/TMP.[a-zA-Z0-9]*

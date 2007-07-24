@@ -5,13 +5,14 @@
 */
 
 #include <stdio.h>
+#include <limits.h>
 #include "sarr-def.h"
 #include "emimergeesa.h"
 #include "encseq-def.h"
 #include "trieins-def.h"
 
 #include "trieins.pr"
-#include "sfxmap.pr"
+#include "sfx-map.pr"
 
  DECLAREREADFUNCTION(Seqpos);
 
@@ -44,11 +45,13 @@ static int inputthesequences(Alphabet **alpha,
 {
   unsigned long idx;
   Str *indexname;
+  Seqpos totallength;
   
   for(idx=0; idx<strarray_size(indexnametab); idx++)
   {
     indexname = str_new_cstr(strarray_get(indexnametab,idx),env);
     if(streamsuffixarray(&suffixarraytable[idx],
+                         &totallength,
                          demand,
                          indexname,
                          env) != 0)

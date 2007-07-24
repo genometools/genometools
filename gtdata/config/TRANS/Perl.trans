@@ -1,0 +1,506 @@
+
+<html><head>
+<!-- ViewCVS       -- http://www.lyra.org/viewcvs/
+     by Greg Stein -- mailto:gstein@lyra.org
+  -->
+
+<title>bioperl-live/Bio/Tools/OddCodes.pm - view - 1.7</title></head>
+<body bgcolor="#eeeeee">
+<!-- OBF navbar --> 
+<table cellspacing="0" cellpadding="0" width="100%" border="0">
+<tr bgcolor="#e7e7e7"><td><img src="/images/blank.gif" width="1" height="1" alt=""></td></tr>
+</table>
+
+<table cellspacing="0" cellpadding="1" width="100%" border="0">
+<tr valign="middle" bgcolor="#dadada"> <td>
+<font face="geneva,arial,verdana,sans-serif" size="-1" color="#003399">
+&nbsp;&nbsp;<a href="http://open-bio.org" style="text-decoration:none"><font color="#003399">(O|B|F)</font></a>
+&nbsp;&middot;&middot;&middot;
+	&nbsp;&nbsp;<a href="http://bioperl.org" style="text-decoration:none"><font color="#003399">BIOPERL</font></a>
+&nbsp;&middot;&nbsp;<a href="http://biojava.org" style="text-decoration:none"><font color="#003399">BIOJAVA</font></a>
+&nbsp;&middot;&nbsp;<a href="http://biopython.org" style="text-decoration:none"><font color="#003399">BIOPYTHON</font></a>
+&nbsp;&middot;&nbsp;<a href="http://biocorba.org" style="text-decoration:none"><font color="#003399">BIOCORBA</font></a>
+&nbsp;&middot;&nbsp;<a href="http://bioxml.org" style="text-decoration:none"><font color="#003399">BIOXML</font></a>
+&nbsp;&middot;&nbsp;<a href="http://biodas.org" style="text-decoration:none"><font color="#003399">BIODAS</font></a>
+</font>
+</td>
+<td>&nbsp;  
+    </td>
+<td align="right"> <font size="-2" face="geneva,arial,geneva,arial,verdana,sans-serif" color="#003399"> ( Community link &nbsp;&middot;&nbsp;<a  href="http://bioinformatics.org" TARGET="_blank" style="text-decoration:none"" >BIOINFORMATICS.ORG)</a> &nbsp;&nbsp;&nbsp; </font> </td>
+</table>
+
+<table border="0" bgcolor="#E1E0E0" cellpadding="0" cellspacing="0" width="100%">
+   <TR> <TD bgcolor="#000000" colspan="2"><img src="/images/pix.gif" width="1" height="1"></TD></TR>
+   <TR> <TD bgcolor="#87BBD9" colspan="2"><img src="/images/pix.gif" width="1" height="1"></TD></TR>
+   <TR> <TD bgcolor="#D362AF" colspan="2"><img src="/images/pix.gif" width="1" height="1"></TD></TR>
+   <TR> <TD bgcolor="#808080" colspan="2"><img src="/images/pix.gif" width="1" height="2"></TD></TR>
+   <TR> <TD align="left" bgcolor="#E1E0E0" colspan="2">
+</table>
+
+<table width="100&#37;" border=0 cellspacing=0 cellpadding=1 bgcolor="#dadada">
+<tr valign=bottom><td>
+<a href="OddCodes.pm?cvsroot=bioperl#rev1.7"><img src="/icons/small/back.gif" alt="[BACK_ICON]" border=0 width=16 height=16></a>
+<b>Return to <a href="OddCodes.pm?cvsroot=bioperl#rev1.7">OddCodes.pm</a> CVS log</b> <img src="/icons/small/text.gif" alt="[FILE_ICON]" border=0 width=16 height=16></td>
+<td align=right><img src="/icons/small/dir.gif" alt="[DIR_ICON]" border=0 width=16 height=16> <b>Up to <a href="/cgi-bin/viewcvs/viewcvs.cgi/bioperl-live/Bio/Tools/OddCodes.pm/?cvsroot=bioperl#dirlist">[bioperl]</a> / <a href="/cgi-bin/viewcvs/viewcvs.cgi/bioperl-live/Bio/Tools/OddCodes.pm/bioperl-live/?cvsroot=bioperl#dirlist">bioperl-live</a> / <a href="/cgi-bin/viewcvs/viewcvs.cgi/bioperl-live/Bio/Tools/OddCodes.pm/bioperl-live/Bio/?cvsroot=bioperl#dirlist">Bio</a> / <a href="/cgi-bin/viewcvs/viewcvs.cgi/bioperl-live/Bio/Tools/OddCodes.pm/bioperl-live/Bio/Tools/?cvsroot=bioperl#dirlist">Tools</a></b></td>
+</tr></table>
+<hr noshade>
+<table width="100&#37;"><tr><td bgcolor="#ffffff">
+File: <a href="/cgi-bin/viewcvs/viewcvs.cgi/bioperl-live/Bio/Tools/OddCodes.pm/?cvsroot=bioperl#dirlist">[bioperl]</a> / <a href="/cgi-bin/viewcvs/viewcvs.cgi/bioperl-live/Bio/Tools/OddCodes.pm/bioperl-live/?cvsroot=bioperl#dirlist">bioperl-live</a> / <a href="/cgi-bin/viewcvs/viewcvs.cgi/bioperl-live/Bio/Tools/OddCodes.pm/bioperl-live/Bio/?cvsroot=bioperl#dirlist">Bio</a> / <a href="/cgi-bin/viewcvs/viewcvs.cgi/bioperl-live/Bio/Tools/OddCodes.pm/bioperl-live/Bio/Tools/?cvsroot=bioperl#dirlist">Tools</a> / <a href="/cgi-bin/viewcvs/viewcvs.cgi/bioperl-live/Bio/Tools/OddCodes.pm/bioperl-live/Bio/Tools/OddCodes.pm?cvsroot=bioperl#dirlist">OddCodes.pm</a> </b>
+(<a href="/cgi-bin/viewcvs/viewcvs.cgi/bioperl-live/Bio/Tools/OddCodes.pm/~checkout~/bioperl-live/Bio/Tools/OddCodes.pm?rev=1.7&cvsroot=bioperl"
+ target="cvs_checkout"
+ onClick="window.open('/cgi-bin/viewcvs/viewcvs.cgi/bioperl-live/Bio/Tools/OddCodes.pm/~checkout~/bioperl-live/Bio/Tools/OddCodes.pm?rev=1.7','cvs_checkout','resizeable=1,scrollbars=1 ');"
+><b>download</b></a>)
+<br>
+Revision <b>1.7</b>
+, <i>Mon Jun 18 12:43:22 2001 UTC</i> (4 weeks, 3 days ago) by <i>heikki</i>
+<br>Branch: <b>MAIN</b>
+<br>CVS Tags: <b>HEAD</b>
+<br>Changes since <b>1.6: +2 -2 lines</b>
+<pre>more POD fixes from Nicolas Joly and then more
+</pre>
+</td></tr></table>
+<hr noshade>
+<pre>
+#$Id: Perl.trans,v 1.1.1.1 2003/04/09 13:17:13 jahns Exp $
+#-----------------------------------------------------------------------------
+# PACKAGE    : OddCodes.pm
+# PURPOSE    : To write amino acid sequences in alternative alphabets
+# AUTHOR     : Derek Gatherer (<a href="mailto:D.Gatherer@organon.nhe.akzonobel.nl">D.Gatherer@organon.nhe.akzonobel.nl</a>)
+# SOURCE     : 
+# CREATED    : 8th July 2000
+# MODIFIED   : 
+# DISCLAIMER : I am employed in the pharmaceutical industry but my 
+#            : employers do not endorse or sponsor this module
+#            : in any way whatsoever.  The above email address is
+#            : given purely for the purpose of easy communication
+#            : with the author, and does not imply any connection
+#	     : between my employers and anything written below.
+# LICENCE    : You may distribute this module under the same terms 
+#	     : as the rest of BioPerl.
+#----------------------------------------------------------------------------
+
+=head1 NAME
+
+Bio::Tools::OddCodes - Object holding alternative alphabet coding for 
+one protein sequence
+
+=head1 SYNOPSIS
+
+Take a sequence object from eg, an inputstream, and creates an object
+for the purposes of rewriting that sequence in another alphabet.
+These are abbreviated amino acid sequence alphabets, designed to
+simplify the statistical aspects of analysing protein sequences, by
+reducing the combinatorial explosion of the 20-letter alphabet.  These
+abbreviated alphabets range in size from 2 to 8.
+
+Creating the OddCodes object, eg:
+
+	my $inputstream = Bio::SeqIO-&gt;new( '-file' =&gt; "seqfile", 
+                                           '-format' =&gt; 'Fasta');
+	my $seqobj = $inputstream-&gt;next_seq();
+	my $oddcode_obj = Bio::Tools::Oddcodes-&gt;new(-seq =&gt; $seqobj);
+
+or:
+
+	my $seqobj = Bio::PrimarySeq-&gt;new
+              (-seq=&gt;'[cut and paste a sequence here]', 
+               -moltype = 'protein', 
+               -id = 'test');
+	my $oddcode_obj  =  Bio::Tools::OddCodes-&gt;new(-seq =&gt; $seqobj);
+
+do the alternative coding, returning the answer as a reference to a string
+
+	my $output = $oddcode_obj-&gt;structural();
+	my $output = $oddcode_obj-&gt;chemical();
+	my $output = $oddcode_obj-&gt;functional();
+	my $output = $oddcode_obj-&gt;charge();
+	my $output = $oddcode_obj-&gt;hydrophobic();
+	my $output = $oddcode_obj-&gt;Dayhoff();
+	my $output = $oddcode_obj-&gt;Sneath();
+	my $output = $oddcode_obj-&gt;Stanfel();
+
+
+display sequence in new form, eg:
+
+	my $new_coding = $$output;
+	print "\n$new_coding";
+
+=head1 DESCRIPTION
+
+Bio::Tools::Oddcodes is a welterweight object for rewriting a protein
+sequence in an alternative alphabet.  8 of these are provided, ranging
+from the the 2-letter hydrophobic alphabet, to the 8-letter chemical
+alphabet.  These are useful for the statistical analysis of protein
+sequences since they can partially avoid the combinatorial explosion
+produced by the full 20-letter alphabet (eg. 400 dimers, 8000 trimers
+etc.)
+
+See Synopsis above for object creation code.
+
+=head1 FEEDBACK
+
+=head2 Mailing Lists
+
+User feedback is an integral part of the evolution of this
+and other Bioperl modules. Send your comments and suggestions preferably
+to one of the Bioperl mailing lists.
+Your participation is much appreciated.
+
+  <a href="mailto:bioperl-l@bioperl.org">bioperl-l@bioperl.org</a>                - General discussion
+  <a href="http://www.bioperl.org/MailList.html">http://www.bioperl.org/MailList.html</a> - About the mailing lists
+
+=head2 Reporting Bugs
+
+Report bugs to the Bioperl bug tracking system to help us keep track
+the bugs and their resolution.  Bug reports can be submitted via email
+or the web:
+
+  <a href="mailto:bioperl-bugs@bioperl.org">bioperl-bugs@bioperl.org</a>
+  <a href="http://www.bioperl.org/bioperl-bugs/">http://www.bioperl.org/bioperl-bugs/</a>
+
+=head1 AUTHOR
+
+Derek Gatherer
+
+=head1 APPENDIX
+
+The rest of the documentation details each of the object methods. 
+Internal methods are usually preceded with a _
+
+=cut
+
+#'
+
+package Bio::Tools::OddCodes;
+use vars qw(@ISA);
+use strict;
+
+use Bio::Root::RootI;
+
+@ISA = qw(Bio::Root::RootI);
+
+
+sub new 
+{
+    my($class,@args) = @_;
+
+    my $self = $class-&gt;SUPER::new(@args);
+
+    my ($seqobj) = $self-&gt;_rearrange([qw(SEQ)],@args);
+    if((! defined($seqobj)) &amp;&amp; @args &amp;&amp; ref($args[0])) {
+	# parameter not passed as named parameter?
+	$seqobj = $args[0];
+    }
+    unless  ($seqobj-&gt;isa("Bio::PrimarySeqI")) 
+    {
+	die("die in _init, OddCodes works only on PrimarySeqI
+objects\n");
+    }
+
+    $self-&gt;{'_seqref'} = $seqobj;
+
+    return $self;
+}
+
+=head2 structural
+
+ Title   : structural
+ Usage   : $output = $oddcode_obj-&gt;structural(); 
+ Function: turns amino acid sequence into 3-letter structural alphabet
+	 : A (ambivalent), E (external), I (internal)
+ Example : a sequence ACDEFGH will become AAEEIAE
+ Returns : Reference to the new sequence string
+ Args    : none
+
+=cut
+
+sub structural()
+{
+	my $self = $_[0];
+	my $seqstring = &amp;_pullseq($self);	# see _pullseq() below
+
+# now the real business
+	
+	$seqstring =~ tr/[ACGPSTWY]/1/;
+	$seqstring =~ tr/[RNDQEHK]/2/;
+	$seqstring =~ tr/[ILMFV]/3/;
+	$seqstring =~ tr/1/A/;
+	$seqstring =~ tr/2/E/;
+	$seqstring =~ tr/3/I/;
+
+	return \$seqstring;
+
+# and that's that one
+}
+
+=head2 functional
+
+ Title   : functional
+ Usage   : $output = $oddcode_obj-&gt;functional(); 
+ Function: turns amino acid sequence into 4-letter functional alphabet
+	 : A (acidic), C (basic), H (hydrophobic), P (polar)
+ Example : a sequence ACDEFGH will become HPAAHHC 
+ Returns : Reference to the new sequence string
+ Args    : none
+
+=cut
+
+sub functional()
+{
+	my $self = $_[0];
+	my $seqstring = &amp;_pullseq($self);
+
+# now the real business
+	
+	$seqstring =~ tr/[DE]/1/;
+	$seqstring =~ tr/[HKR]/2/;
+	$seqstring =~ tr/[AFILMPVW]/3/;
+	$seqstring =~ tr/[CGNQSTY]/4/;
+	$seqstring =~ tr/1/A/;
+	$seqstring =~ tr/2/C/;
+	$seqstring =~ tr/3/H/;
+	$seqstring =~ tr/4/P/;
+
+	return \$seqstring;
+
+# and that's that one
+}
+
+=head2 hydrophobic
+
+ Title   : hydrophobic
+ Usage   : $output = $oddcode_obj-&gt;hydrophobic(); 
+ Function: turns amino acid sequence into 2-letter hydrophobicity alphabet
+	 : O (hydrophobic), I (hydrophilic)
+ Example : a sequence ACDEFGH will become OIIIOII
+ Returns : Reference to the new sequence string
+ Args    : none
+
+=cut
+
+sub hydrophobic()
+{
+	my $self = $_[0];
+	my $seqstring = &amp;_pullseq($self);
+
+# now the real business
+	
+	$seqstring =~ tr/[AFILMPVW]/1/;
+	$seqstring =~ tr/[CDEGHKNQRSTY]/2/;
+	$seqstring =~ tr/1/I/;
+	$seqstring =~ tr/2/O/;
+
+	return \$seqstring;
+
+# and that's that one
+}
+
+=head2 Dayhoff
+
+ Title   : Dayhoff
+ Usage   : $output = $oddcode_obj-&gt;Dayhoff(); 
+ Function: turns amino acid sequence into 6-letter Dayhoff alphabet
+ Example : a sequence ACDEFGH will become CADDGCE 
+ Returns : Reference to the new sequence string
+ Args    : none
+
+=cut
+
+sub Dayhoff()
+{
+	my $self = $_[0];
+	my $seqstring = &amp;_pullseq($self);
+
+# now the real business
+	
+	$seqstring =~ tr/[C]/1/;
+	$seqstring =~ tr/[AGPST]/2/;
+	$seqstring =~ tr/[DENQ]/3/;
+	$seqstring =~ tr/[HKR]/4/;
+	$seqstring =~ tr/[ILMV]/5/;
+	$seqstring =~ tr/[FWY]/6/;
+	$seqstring =~ tr/1/A/;
+	$seqstring =~ tr/2/C/;
+	$seqstring =~ tr/3/D/;
+	$seqstring =~ tr/4/E/;
+	$seqstring =~ tr/5/F/;
+	$seqstring =~ tr/6/G/;
+
+	return \$seqstring;
+
+# and that's that one
+}
+
+=head2 Sneath
+
+ Title   : Sneath
+ Usage   : $output = $oddcode_obj-&gt;Sneath(); 
+ Function: turns amino acid sequence into 7-letter Sneath alphabet
+ Example : a sequence ACDEFGH will become CEFFHCF
+ Returns : Reference to the new sequence string
+ Args    : none
+
+=cut
+
+sub Sneath()
+{
+	my $self = $_[0];
+	my $seqstring = &amp;_pullseq($self);
+
+# now the real business
+	
+	$seqstring =~ tr/[ILV]/1/;
+	$seqstring =~ tr/[AGP]/2/;
+	$seqstring =~ tr/[MNQ]/3/;
+	$seqstring =~ tr/[CST]/4/;
+	$seqstring =~ tr/[DE]/5/;
+	$seqstring =~ tr/[KR]/6/;
+	$seqstring =~ tr/[FHWY]/7/;
+	$seqstring =~ tr/1/A/;
+	$seqstring =~ tr/2/C/;
+	$seqstring =~ tr/3/D/;
+	$seqstring =~ tr/4/E/;
+	$seqstring =~ tr/5/F/;
+	$seqstring =~ tr/6/G/;
+	$seqstring =~ tr/7/H/;
+
+	return \$seqstring;
+
+# and that's that one
+}
+
+=head2 Stanfel
+
+ Title   : Stanfel
+ Usage   : $output = $oddcode_obj-&gt;Stanfel(); 
+ Function: turns amino acid sequence into 4-letter Stanfel alphabet
+ Example : a sequence ACDEFGH will become AACCDAE
+ Returns : Reference to the new sequence string
+ Args    : none
+
+=cut
+
+sub Stanfel()
+{
+	my $self = $_[0];
+	my $seqstring = &amp;_pullseq($self);
+
+# now the real business
+	
+	$seqstring =~ tr/[ACGILMPSTV]/1/;
+	$seqstring =~ tr/[DENQ]/2/;
+	$seqstring =~ tr/[FWY]/3/;
+	$seqstring =~ tr/[HKR]/4/;
+	$seqstring =~ tr/1/A/;
+	$seqstring =~ tr/2/C/;
+	$seqstring =~ tr/3/D/;
+	$seqstring =~ tr/4/E/;
+
+	return \$seqstring;
+
+# and that's that one
+}
+
+=head2 chemical()
+
+ Title   : chemical
+ Usage   : $output = $oddcode_obj-&gt;chemical(); 
+ Function: turns amino acid sequence into 8-letter chemical alphabet
+	 : A (acidic), L (aliphatic), M (amide), R (aromatic)
+	 : C (basic), H (hydroxyl), I (imino), S (sulphur)
+ Example : a sequence ACDEFGH will become LSAARAC 
+ Returns : Reference to the new sequence string
+ Args    : none
+
+=cut
+
+sub chemical()
+{
+	my $self = $_[0];
+	my $seqstring = &amp;_pullseq($self);
+
+# now the real business
+	
+	$seqstring =~ tr/[DE]/1/;
+	$seqstring =~ tr/[AGILV]/2/;
+	$seqstring =~ tr/[NQ]/3/;
+	$seqstring =~ tr/[FWY]/4/;
+	$seqstring =~ tr/[RHK]/5/;
+	$seqstring =~ tr/[ST]/6/;
+	$seqstring =~ tr/P/7/;
+	$seqstring =~ tr/[CM]/8/;
+	$seqstring =~ tr/1/A/;
+	$seqstring =~ tr/2/L/;
+	$seqstring =~ tr/3/M/;
+	$seqstring =~ tr/4/R/;
+	$seqstring =~ tr/5/C/;
+	$seqstring =~ tr/6/H/;
+	$seqstring =~ tr/7/I/;
+	$seqstring =~ tr/8/S/;
+
+	return \$seqstring;
+
+# and that's that one
+}
+
+=head2 charge
+
+ Title   : charge
+ Usage   : $output = $oddcode_obj-&gt;charge(); 
+ Function: turns amino acid sequence into 3-letter charge alphabet
+ Example : a sequence ACDEFGH will become NNAANNC 
+ Returns : Reference to the new sequence string
+ Args    : none
+
+=cut
+
+sub charge()
+{
+	my $self = $_[0];
+	my $seqstring = &amp;_pullseq($self);
+
+# now the real business
+	
+	$seqstring =~ tr/[DE]/1/;
+	$seqstring =~ tr/[HKR]/2/;
+	$seqstring =~ tr/[ACFGILMNPQSTVWY]/3/;
+	$seqstring =~ tr/1/A/;
+	$seqstring =~ tr/2/C/;
+	$seqstring =~ tr/3/N/;
+
+	return \$seqstring;
+
+# and that's that one
+}
+
+# _pullseq is called within each of the subroutines
+# it just checks a few things and returns the sequence
+
+sub _pullseq
+{
+	my $self = $_[0];
+
+	my $seqobj =  $self-&gt;{'_seqref'};
+	
+	unless  ($seqobj-&gt;isa("Bio::PrimarySeqI")) 
+	{
+		die("die, OddCodes works only on PrimarySeqI objects\n");
+    	}
+
+	my $seqstring = uc $seqobj-&gt;seq();
+
+	if(length($seqstring)&lt;1)
+	{
+		die("$seqstring: die, sequence has zero length\n");
+	}
+	return $seqstring;
+}
+
+1;
+</pre>
+<hr noshade><table width="100&#37;" border=0 cellpadding=0 cellspacing=0><tr>
+<td align=left><address><a href="mailto:dag@sonsorol.org">dag@sonsorol.org</a></address></td>
+<td align=right><a href="http://www.lyra.org/viewcvs/">ViewCVS 0.6</a><br>
+by <a href="mailto:gstein@lyra.org">Greg Stein</a>
+</td></tr></table>
+</body></html>

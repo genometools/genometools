@@ -21,6 +21,11 @@ void freeAlphabet(Alphabet **alpha,Env *env);
 
 void outputalphabet(FILE *fpout,const Alphabet *alpha);
 
+void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
+                             const Uchar *w,unsigned long wlen);
+
+void showsymbolstring(const Alphabet *alpha,const Uchar *w,unsigned long wlen);
+
 #ifdef __cplusplus
 }
 #endif

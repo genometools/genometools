@@ -5,7 +5,7 @@
 */
 
 #include <assert.h>
-#include "types.h"
+#include "format64.h"
 #include "chardef.h"
 #include "intbits-tab.h"
 #include "divmodmul.h"
@@ -111,8 +111,7 @@ static void showtrie2(const Trierep *trierep,
       current != NULL; 
       current = current->rightsibling)
   {
-    printf("%*.*s",(Fieldwidthtype) (6 * level),
-                   (Fieldwidthtype) (6 * level)," ");
+    printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
     if(ISLEAF(current))
     {
       endpos = getencseqtotallength(

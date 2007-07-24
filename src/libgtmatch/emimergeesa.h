@@ -7,8 +7,7 @@
 #ifndef EMIMERGEESA_H
 #define EMIMERGEESA_H
 
-#include <stdio.h>
-#include "types.h"
+#include "seqpos-def.h"
 #include "sarr-def.h"
 #include "trieins-def.h"
 

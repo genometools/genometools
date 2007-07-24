@@ -4,15 +4,14 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "types.h"
 #include "spacedef.h"
 #include "sarr-def.h"
 #include "trieins-def.h"
 #include "encseq-def.h"
 
 #include "trieins.pr"
-#include "sfxmap.pr"
 #include "alphabet.pr"
+#include "sfx-map.pr"
 
 static void maketrie(Trierep *trierep,
                      /*@unused@*/ const Uchar *characters,
@@ -72,6 +71,7 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
   const Uchar *characters;
 
   if(streamsuffixarray(&suffixarray,
+                       &totallength,
                        SARR_ESQTAB,
                        indexname,
                        env) != 0)
@@ -81,7 +81,6 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
   if(!haserr)
   {
     trierep.encseqtable = &suffixarray.encseq;
-    totallength = getencseqtotallength(suffixarray.encseq);
     characters = getcharactersAlphabet(suffixarray.alpha);
     inittrienodetable(&trierep,totallength,(uint32_t) 1,env);
     maketrie(&trierep,characters,totallength);

@@ -1,9 +1,0 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-/*@notnull@*/ char *dynamicstrdup(const char *file,int linenum,
-                                  const char *source,Env *env);
-
-#ifdef __cplusplus
-}
-#endif

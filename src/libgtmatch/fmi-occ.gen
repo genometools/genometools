@@ -1,0 +1,104 @@
+#define ACCESSBWTTEXT(POS) getencodedchar(fm->bwtformatching,POS)
+
+static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
+{
+  Seqpos bwtidx,
+         bwtlastidx,
+         numofocc,
+         idx,
+         maxbfreqidx, 
+         ctimesnumofblocks = cc * fm->nofblocks,
+         ctimesnumofsuperblocks = cc * fm->nofsuperblocks,
+         posshiftbsizepow = pos >> fm->log2bsize,
+         posshiftsuperbsizepow = pos >> fm->log2superbsize;
+
+  if ((pos <= fm->longestsuffixpos && 
+       fm->longestsuffixpos - pos < (Seqpos) fm->bsize) ||
+      (pos >  fm->longestsuffixpos && 
+       pos - fm->longestsuffixpos < (Seqpos) fm->bsize))
+  {                                    // dollar in block
+    maxbfreqidx = ctimesnumofblocks + posshiftbsizepow;
+    numofocc = fm->superbfreq[ctimesnumofsuperblocks + posshiftsuperbsizepow];
+    for (idx = ctimesnumofblocks + 
+               ((pos & fm->negatesuperbsizeones) >> fm->log2bsize);
+         idx < maxbfreqidx; idx++)
+    {
+      numofocc += fm->bfreq[idx];
+    }
+    for (bwtidx = (pos & fm->negatebsizeones); bwtidx < pos; bwtidx++)
+    {
+      if (bwtidx != fm->longestsuffixpos && ACCESSBWTTEXT(bwtidx) == cc)
+      {
+        numofocc++;
+      }
+    }
+    return numofocc;
+  }
+  if ((pos & (fm->superbsize >> 1)) &&       // first halve of superbuckets
+      fm->bwtlength - pos > (Seqpos) fm->superbsize)
+  {
+    maxbfreqidx = ctimesnumofblocks +
+                  ((posshiftsuperbsizepow + 1) << 
+                   fm->log2superbsizeminuslog2bsize);
+    numofocc = fm->superbfreq[ctimesnumofsuperblocks +
+                              posshiftsuperbsizepow + 1];
+    for (idx = ctimesnumofblocks + posshiftbsizepow; idx < maxbfreqidx; idx++)
+    {
+      numofocc -= fm->bfreq[idx];
+    }
+    if (pos & fm->bsizehalve)            // second halve of bucket
+    {
+      numofocc += fm->bfreq[ctimesnumofblocks + posshiftbsizepow];
+      bwtlastidx = (Seqpos) (posshiftbsizepow + 1) << fm->log2bsize;
+      for (bwtidx = pos; bwtidx < bwtlastidx; bwtidx++)
+      {
+        if (ACCESSBWTTEXT(bwtidx) == cc)
+        {
+          numofocc--;
+        }
+      }
+    } else                               // first halve of bucket
+    {
+      for (bwtidx = (pos & fm->negatebsizeones); bwtidx < pos; bwtidx++)
+      {
+        if (ACCESSBWTTEXT(bwtidx) == cc)
+        {
+          numofocc++;
+        }
+      }
+    }
+  } else                                 // second halve of superbucket
+  {
+    maxbfreqidx = ctimesnumofblocks + posshiftbsizepow;
+    numofocc = fm->superbfreq[ctimesnumofsuperblocks + posshiftsuperbsizepow];
+    for (idx = ctimesnumofblocks + 
+               ((pos & fm->negatesuperbsizeones) >> fm->log2bsize);
+         idx < maxbfreqidx; idx++)
+    {
+      numofocc += fm->bfreq[idx];
+    }
+    if ((pos & fm->bsizehalve)           // second halve of bucket
+        && (fm->bwtlength - pos > (Seqpos) fm->bsize))
+    {
+      numofocc += fm->bfreq[ctimesnumofblocks + posshiftbsizepow];
+      bwtlastidx = (pos & fm->negatebsizeones) + fm->bsize;
+      for (bwtidx = pos; bwtidx < bwtlastidx; bwtidx++)
+      {
+        if (ACCESSBWTTEXT(bwtidx) == cc)
+        {
+          numofocc--;
+        }
+      }
+    } else                               // first halve of bucket
+    {
+      for (bwtidx = (pos & fm->negatebsizeones); bwtidx < pos; bwtidx++)
+      {
+        if (ACCESSBWTTEXT(bwtidx) == cc)
+        {
+          numofocc++;
+        }
+      }
+    }
+  }
+  return numofocc;
+}

@@ -7,7 +7,7 @@
 #ifndef CHARDEF_H
 #define CHARDEF_H
 #include <limits.h>
-#include "types.h"
+#include <inttypes.h>
 
 /*
   This file defines some character values used when storing

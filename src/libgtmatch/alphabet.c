@@ -14,7 +14,7 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
-#include "types.h"
+#include "symboldef.h"
 #include "arraydef.h"
 #include "chardef.h"
 #include "alphadef.h"
@@ -167,8 +167,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
         for (column=0; column<line.nextfreeUchar; column++) 
         { /* for all chars in line */
           cc = LINE(column);
-          if (ispunct((Ctypeargumenttype) cc) ||
-              isalnum((Ctypeargumenttype) cc))
+          if (ispunct((int) cc) || isalnum((int) cc))
           {
             if (alpha->symbolmap[(uint32_t) cc] != (Uchar) UNDEFCHAR)
             {
@@ -197,7 +196,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
         }
         if (blankfound)
         {
-          if (isspace((Ctypeargumenttype) LINE(column+1)))
+          if (isspace((int) LINE(column+1)))
           {
             env_error_set(env,
                           "illegal character '%c' at the end of "
@@ -500,7 +499,7 @@ void outputalphabet(FILE *fpout,const Alphabet *alpha)
         afternewline = false;
       }
     }
-    (void) putc((Fputcfirstargtype) currentcc,fpout);
+    (void) putc((int) currentcc,fpout);
     if (afternewline)
     {
       firstinline = currentcc;
@@ -511,5 +510,34 @@ void outputalphabet(FILE *fpout,const Alphabet *alpha)
   {
     fprintf(fpout," %c",(int) alpha->characters[linenum]);
   }
-  (void) putc((Fputcfirstargtype) '\n',fpout);
+  (void) putc((int) '\n',fpout);
+}
+
+/*
+  Suppose the string \texttt{w} of length \texttt{wlen} 
+  was transformed according to the alphabet \texttt{alpha}.
+  The following function shows each character in \texttt{w}
+  as the characters specified in the transformation.
+  The output goes to the given file pointer.
+ */
+
+void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
+                             const Uchar *w,unsigned long wlen)
+{
+  unsigned long i;
+ 
+  for(i = 0; i < wlen; i++)
+  {
+    (void) putc((int) alpha->characters[(int) w[i]],fpout);
+  }
+}
+
+/*
+  The following function is a special case of the previous
+  function showing the output on stdout.
+*/
+
+void showsymbolstring(const Alphabet *alpha,const Uchar *w,unsigned long wlen)
+{
+  showsymbolstringgeneric(stdout,alpha,w,wlen);
 }

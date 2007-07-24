@@ -5,6 +5,7 @@
 */
 
 #include <errno.h>
+#include <limits.h>
 #include "sarr-def.h"
 #include "emimergeesa.h"
 #include "esafileend.h"
@@ -37,8 +38,8 @@ static int initNameandFILE(NameandFILE *nf,
   nf->fp = env_fa_fopen(env,str_get(nf->outfilename),"wb");
   if(nf->fp == NULL)
   {
-    env_error_set(env,"cannot open file \"%s\": %s\n",str_get(nf->outfilename),
-                                                      strerror(errno));
+    env_error_set(env,"cannot open file \"%s\": %s",str_get(nf->outfilename),
+                                                    strerror(errno));
     return -1;
   }
   return 0;

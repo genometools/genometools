@@ -6,10 +6,13 @@
 
 #ifndef ENCSEQDEF_H
 #define ENCSEQDEF_H
-#include "types.h"
+#include "symboldef.h"
+#include "seqpos-def.h"
 #include "alphadef.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
+
+#define ENCSEQFILESUFFIX     ".esq"
 
 typedef struct _Encodedsequence Encodedsequence;
 typedef struct _Encodedsequencescanstate Encodedsequencescanstate;
@@ -50,6 +53,7 @@ int overallspecialranges(const Encodedsequence *encseq,
                                            const Specialcharinfo
                                                  *specialcharinfo,
                                            const Alphabet *alphabet,
+                                           bool plainformat,
                                            const char *str_sat,
                                            Env *env);
 

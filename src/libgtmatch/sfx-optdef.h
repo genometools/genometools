@@ -7,6 +7,7 @@
 #ifndef SFX_OPTDEF_H
 #define SFX_OPTDEF_H
 
+#include <stdbool.h>
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
 
@@ -22,6 +23,7 @@ typedef struct
   StrArray *filenametab;
   bool isdna,
        isprotein,
+       isplain,
        outtistab,
        outsuftab,
        outlcptab,

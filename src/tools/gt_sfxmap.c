@@ -32,6 +32,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   Str *indexname;
   bool haserr = false;
   Suffixarray suffixarray;
+  Seqpos totallength;
   int parsed_args;
   bool usestream = false;
 
@@ -46,6 +47,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
 
   indexname = str_new_cstr(argv[parsed_args],env);
   if ((usestream ? streamsuffixarray : mapsuffixarray)(&suffixarray,
+                                                       &totallength,
                                                        SARR_ALLTAB, 
                                                        indexname,env) != 0)
   {

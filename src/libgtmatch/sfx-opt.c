@@ -13,8 +13,6 @@
 
 #include "getbasename.pr"
 
-#define UNDEFPREFIXLENGTH 0
-
 static void versionfunc(const char *progname)
 {
   printf("%s version 0.1\n",progname);
@@ -25,8 +23,14 @@ static OPrval parse_options(int *parsed_args,
                             int argc, const char **argv, Env *env)
 {
   OptionParser *op;
-  Option *option, *optionsmap, *optiondna, *optionprotein,
-         *optionpl, *optionindexname, *optiondb;
+  Option *option, 
+         *optionsmap, 
+         *optiondna, 
+         *optionprotein, 
+         *optionplain,
+         *optionpl, 
+         *optionindexname, 
+         *optiondb;
   OPrval oprval;
 
   env_error_check(env);
@@ -51,23 +55,25 @@ static OPrval parse_options(int *parsed_args,
                                   &so->isprotein,false,env);
   option_parser_add_option(op, optionprotein, env);
 
+  optionplain = option_new_bool("plain","process as plain text",
+                                &so->isplain,false,env);
+  option_parser_add_option(op, optionplain, env);
+
   optionindexname = option_new_string("indexname",
                                       "specify name for index to be generated",
                                       so->str_indexname, NULL, env);
   option_parser_add_option(op, optionindexname, env);
 
-  so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   optionpl = option_new_uint_min("pl",
                                  "specify prefix length for bucket sort\n"
                                  "recommendation: use without argument;\n"
                                  "then a reasonable prefix length is "
                                  "automatically determined",
                                  &so->prefixlength,
-                                 UNDEFPREFIXLENGTH,
+                                 PREFIXLENGTH_AUTOMATIC,
                                  (unsigned int) 1,
                                  env);
   option_argument_is_optional(optionpl);
-  option_is_mandatory(optionpl);
   option_parser_add_option(op, optionpl, env);
 
   option = option_new_uint_min("parts",
@@ -113,6 +119,10 @@ static OPrval parse_options(int *parsed_args,
   option_exclude(optionsmap, optionprotein, env);
   option_exclude(optiondna, optionprotein, env);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
+  if(oprval == OPTIONPARSER_ERROR && strarray_size(so->filenametab) == 0)
+  {
+    env_error_set(env,"missing arguments to option -db");
+  }
   if (oprval == OPTIONPARSER_OK)
   {
     if (!option_is_set(optionindexname))
@@ -132,7 +142,26 @@ static OPrval parse_options(int *parsed_args,
       }
     }
   }
+  if (oprval == OPTIONPARSER_OK)
+  {
+    if (option_is_set(optionplain))
+    {
+      if(!option_is_set(optiondna) && 
+         !option_is_set(optionprotein) && 
+         !option_is_set(optionsmap))
+      {
+        env_error_set(env,"if option -plain is used, then any of the options "
+                          "-dna, -protein, or -smap is mandatory");
+        oprval = OPTIONPARSER_ERROR;
+      }
+    }
+  }
   option_parser_delete(op, env);
+  if(oprval == OPTIONPARSER_OK && *parsed_args != argc)
+  {
+    env_error_set(env,"superfluous program parameters");
+    oprval = OPTIONPARSER_ERROR;
+  }
   return oprval;
 }
 
@@ -152,8 +181,15 @@ static void showoptions(const Suffixeratoroptions *so)
   {
     printf("# protein=yes\n");
   }
+  if(so->isplain)
+  {
+    printf("# plain=yes\n");
+  }
   printf("# indexname=\"%s\"\n",str_get(so->str_indexname));
-  if (so->prefixlength != UNDEFPREFIXLENGTH)
+  if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
+  {
+    printf("# prefixlength=automatic\n");
+  } else
   {
     printf("# prefixlength=%u\n",so->prefixlength);
   }
@@ -188,6 +224,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->filenametab = strarray_new(env);
   so->str_smap = str_new(env);
   so->str_sat = str_new(env);
+  so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   rval = parse_options(&parsed_args, so, argc, argv, env);
   if (rval == OPTIONPARSER_ERROR)
   {

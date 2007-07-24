@@ -4,7 +4,6 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "types.h"
 #include "arraydef.h"
 
 /*EE
@@ -14,7 +13,7 @@
 
 int readnextline(FILE *fpin,ArrayUchar *line,Env *env)
 {
-  Fgetcreturntype cc;
+  int cc;
 
   while (true)
   {
@@ -23,7 +22,7 @@ int readnextline(FILE *fpin,ArrayUchar *line,Env *env)
     {
       return EOF;
     }
-    if (cc == (Fgetcreturntype) '\n')
+    if (cc == (int) '\n')
     {
       STOREINARRAY(line,Uchar,512,(Uchar) '\0');
       line->nextfreeUchar--;

@@ -8,20 +8,19 @@
 #include <string.h>
 #include <stdbool.h>
 #include "libgtcore/env.h"
-#include "types.h"
 #include "arraydef.h"
 #include "spacedef.h"
 #include "alphadef.h"
 #include "chardef.h"
-#include "addnextchar.h"
 #include "encseq-def.h"
 #include "intcode-def.h"
 #include "sarr-def.h"
+#include "sfx-nextchar.h"
 
-#include "kmer2string.pr"
-#include "mappedstr.pr"
 #include "alphabet.pr"
-#include "sfxmap.pr"
+#include "kmer2string.pr"
+#include "sfx-mappedstr.pr"
+#include "sfx-map.pr"
 
 static Codetype qgram2codefillspecial(uint32_t numofchars,
                                       uint32_t kmersize,
@@ -206,6 +205,7 @@ int verifymappedstr(const Suffixarray *suffixarray,Env *env)
                           numofchars,
                           suffixarray->prefixlength,
                           getsymbolmapAlphabet(suffixarray->alpha),
+                          false,
                           env) != 0)
   {
     haserr = true;

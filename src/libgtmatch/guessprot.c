@@ -6,9 +6,9 @@
 
 #include <ctype.h>
 #include <stdbool.h>
+#include <inttypes.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
-#include "types.h"
 #include "fbs-def.h"
 #include "stamp.h"
 
@@ -18,18 +18,20 @@
 
 int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
 {
-  Seqpos countnonbases = 0,
-         currentposition;
+  uint32_t countnonbases = 0,
+           currentposition;
   Uchar currentchar;
   Fastabufferstate fbs;
   int retval;
 
-  initfastabufferstate(&fbs,
-                       filenametab,
-                       NULL,
-                       NULL,
-                       env);
-  for (currentposition = 0; currentposition < (Seqpos) 1000; currentposition++)
+  initformatbufferstate(&fbs,
+                        filenametab,
+                        NULL,
+                        false,
+                        NULL,
+                        env);
+  for (currentposition = 0; currentposition < (uint32_t) 1000; 
+       currentposition++)
   {
     retval = readnextUchar(&currentchar,&fbs,env);
     if (retval < 0)

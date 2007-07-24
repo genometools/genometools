@@ -15,7 +15,7 @@
         V = (T *) realloc(S,sizeof (T) * (size_t) (N));\
         if ((V) == NULL)\
         {\
-          fprintf(stderr,"file %s, line %d: malloc(%lu) failed\n",\
+          fprintf(stderr,"file %s, line %d: realloc(%lu) failed\n",\
                   FILENAME,LINENUM,\
                   (unsigned long) (sizeof (T) * (size_t) (N)));\
           exit(EXIT_FAILURE);\

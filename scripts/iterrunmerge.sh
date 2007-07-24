@@ -1,4 +1,6 @@
-#!/bin/bash
+#!/bin/sh
+
+set -e -x
 
 if test $# -ne 1
 then
@@ -8,13 +10,16 @@ fi
 
 numofsequences=$1
 
-INDEXNAME=../testdata/at1MB
+INDEXDIR=../indexdir
+INDEXNAME=${INDEXDIR}/at1MB
+QUERY=${U8}
 TMPFILE=`mktemp TMP.XXXXXX` || exit 1
+mkdir -p ${INDEXDIR}
 mkvtree.sh -indexname ${INDEXNAME} -db ${AT} -dna -pl -ois -tis
 runVmatchprog.sh vseqselect -randomnum ${numofsequences} ${INDEXNAME} > ${TMPFILE}
 splitmultifasta.pl TMP 60 0 ${TMPFILE}
 
 filelist=`ls TMP-*`
 
-runmerge.sh ${filelist}
+runmerge.sh ${U8} ${filelist}
 rm -f ${TMPFILE} TMP-*

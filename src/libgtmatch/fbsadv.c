@@ -7,10 +7,10 @@
 #include <ctype.h>
 #include "libgtcore/env.h"
 #include "libgtcore/strarray.h"
+#include "format64.h"
 #include "fbs-def.h"
 #include "spacedef.h"
 #include "chardef.h"
-#include "stamp.h"
 
 #define GZIPSUFFIX        ".gz"
 #define GZIPSUFFIXLENGTH  (sizeof (GZIPSUFFIX)-1)
@@ -70,12 +70,14 @@ static void closegenericstream(Genericstream *inputstream,const char *inputfile)
   }
 }
 
-void initfastabufferstate(Fastabufferstate *fbs,
-                          const StrArray *filenametab,
-                          const Uchar *symbolmap,
-                          Filelengthvalues **filelengthtab,
-                          Env *env)
+void initformatbufferstate(Fastabufferstate *fbs,
+                           const StrArray *filenametab,
+                           const Uchar *symbolmap,
+                           bool plainformat,
+                           Filelengthvalues **filelengthtab,
+                           Env *env)
 {
+  fbs->plainformat = plainformat;
   fbs->filenum = 0;
   fbs->firstoverallseq = true;
   fbs->firstseqinfile = true;
@@ -84,11 +86,11 @@ void initfastabufferstate(Fastabufferstate *fbs,
   fbs->filenametab = filenametab;
   fbs->symbolmap = symbolmap;
   fbs->complete = false;
-  fbs->totaloffset = 0;
   fbs->lastspeciallength = 0;
   if(filelengthtab != NULL)
   {
-    ALLOCASSIGNSPACE(*filelengthtab,NULL,Filelengthvalues,strarray_size(filenametab));
+    ALLOCASSIGNSPACE(*filelengthtab,NULL,Filelengthvalues,
+                     strarray_size(filenametab));
     fbs->filelengthtab = *filelengthtab;
   } else
   {
@@ -96,11 +98,10 @@ void initfastabufferstate(Fastabufferstate *fbs,
   }
 }
 
-int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
+static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
 {
-  Fgetcreturntype currentchar;
-  uint32_t currentposition = 0;
-  Seqpos currentfileadd = 0, currentfileread = 0;
+  int currentchar;
+  uint_fast32_t currentposition = 0, currentfileadd = 0, currentfileread = 0;
   Uchar charcode;
 
   env_error_check(env);
@@ -110,8 +111,10 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
     {
       if(fbs->filelengthtab != NULL)
       {
-        fbs->filelengthtab[fbs->filenum].length += currentfileread;
-        fbs->filelengthtab[fbs->filenum].effectivelength += currentfileadd;
+        fbs->filelengthtab[fbs->filenum].length 
+          += (uint64_t) currentfileread;
+        fbs->filelengthtab[fbs->filenum].effectivelength 
+          += (uint64_t) currentfileadd;
       }
       break;
     }
@@ -169,7 +172,7 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
           }
         } else
         {
-          if (!isspace((Ctypeargumenttype) currentchar))
+          if (!isspace((int) currentchar))
           {
             if (currentchar == FASTASEPARATOR)
             {
@@ -201,11 +204,11 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
                 if (charcode == (Uchar) UNDEFCHAR)
                 {
                   env_error_set(env,"illegal character '%c':"
-                                    " file \"%s\", line %u",
+                                    " file \"%s\", line " Formatuint64_t,
                                 currentchar,
                                 strarray_get(fbs->filenametab,
                                              (unsigned long) fbs->filenum),
-                                fbs->linenum);
+                                PRINTuint64_tcast(fbs->linenum));
                   return -1;
                 }
                 if (ISSPECIAL(charcode))
@@ -227,7 +230,6 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       }
     }
   }
-  fbs->totaloffset += (Seqpos) currentposition;
   if (fbs->firstoverallseq)
   {
     env_error_set(env,"no sequences in multiple fasta file(s) %s ...",
@@ -236,4 +238,90 @@ int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
   }
   fbs->nextfree = currentposition;
   return 0;
+}
+
+static int advancePlainbufferstate(Fastabufferstate *fbs,Env *env)
+{
+  int currentchar;
+  uint_fast32_t currentposition = 0, currentfileread = 0;
+
+  env_error_check(env);
+  while (true)
+  {
+    if (currentposition >= (uint32_t) FILEBUFFERSIZE)
+    {
+      if(fbs->filelengthtab != NULL)
+      {
+        fbs->filelengthtab[fbs->filenum].length 
+           += (uint64_t) currentfileread;
+        fbs->filelengthtab[fbs->filenum].effectivelength 
+           += (uint64_t) currentfileread;
+      }
+      break;
+    }
+    if (fbs->nextfile)
+    {
+      if(fbs->filelengthtab != NULL)
+      {
+        fbs->filelengthtab[fbs->filenum].length = 0;
+        fbs->filelengthtab[fbs->filenum].effectivelength = 0;
+      }
+      fbs->nextfile = false;
+      fbs->firstseqinfile = true;
+      currentfileread = 0;
+      opengenericstream(&fbs->inputstream,
+                        strarray_get(fbs->filenametab,
+                        (unsigned long) fbs->filenum));
+    } else
+    {
+      if (fbs->inputstream.isgzippedstream)
+      {
+        currentchar = gzgetc(fbs->inputstream.stream.gzippedstream);
+      } else
+      {
+        currentchar = fgetc(fbs->inputstream.stream.fopenstream);
+      }
+      if (currentchar == EOF)
+      {
+        closegenericstream(&fbs->inputstream,
+                           strarray_get(fbs->filenametab,
+                                        (unsigned long) fbs->filenum));
+        if(fbs->filelengthtab != NULL)
+        {
+          fbs->filelengthtab[fbs->filenum].length 
+            += (uint64_t) currentfileread;
+          fbs->filelengthtab[fbs->filenum].effectivelength 
+            += (uint64_t) currentfileread;
+        }
+        if ((unsigned long) fbs->filenum == strarray_size(fbs->filenametab) - 1)
+        {
+          fbs->complete = true;
+          break;
+        }
+        fbs->filenum++;
+        fbs->nextfile = true;
+      } else
+      {
+        currentfileread++;
+        fbs->bufspace[currentposition++] = (Uchar) currentchar;
+      }
+    }
+  }
+  if(currentposition == 0)
+  {
+    env_error_set(env,"no characters in plain file(s) %s ...",
+                  strarray_get(fbs->filenametab,0));
+    return -2;
+  }
+  fbs->nextfree = currentposition;
+  return 0;
+}
+
+int advanceformatbufferstate(Fastabufferstate *fbs,Env *env)
+{
+  if(fbs->plainformat)
+  {
+    return advancePlainbufferstate(fbs,env);
+  }
+  return advanceFastabufferstate(fbs,env);
 }
