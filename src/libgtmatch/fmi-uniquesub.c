@@ -8,11 +8,14 @@
 #include "libgtcore/option.h"
 #include "fmindex.h"
 #include "format64.h"
+#include "seqdesc.h"
+#include "gqueue-def.h"
 
 #include "alphabet.pr"
 #include "fmi-map.pr"
 #include "fmi-fwduni.pr"
 #include "iterseq.pr"
+#include "genericqueue.pr"
 
 #define SHOWSEQUENCE   ((uint32_t) 1)
 #define SHOWQUERYPOS   (((uint32_t) 1) << 1)
@@ -46,9 +49,8 @@ typedef struct
 } Optionargmodedesc;
 
 typedef int (*Preprocessuniquelength)(uint64_t,
-                                      void *,
                                       const char *,
-                                      unsigned long,
+                                      void *,
                                       Env *env);
 typedef int (*Processuniquelength)(const Alphabet *,
                                    const Uchar *,
@@ -59,7 +61,6 @@ typedef int (*Processuniquelength)(const Alphabet *,
 typedef int (*Postprocessuniquelength)(const Alphabet *,
                                        uint64_t,
                                        const char *,
-                                       unsigned long,
                                        const Uchar *,
                                        unsigned long,
                                        void *,
@@ -243,7 +244,6 @@ static int uniqueposinsinglesequence(void *info,
                                      const Uchar *start,
                                      unsigned long seqlen,
                                      const char *desc,
-                                     unsigned long desclen,
                                      Env *env)
 {
   Substringinfo *substringinfo = (Substringinfo *) info;
@@ -252,9 +252,8 @@ static int uniqueposinsinglesequence(void *info,
 
   if(substringinfo->preprocessuniquelength != NULL &&
      substringinfo->preprocessuniquelength(unitnum,
-                                           substringinfo->processinfo,
                                            desc,
-                                           desclen,
+                                           substringinfo->processinfo,
                                            env) != 0)
   {
     return -1;
@@ -280,7 +279,6 @@ static int uniqueposinsinglesequence(void *info,
      substringinfo->postprocessuniquelength(substringinfo->fmindex->alphabet,
                                             unitnum,
                                             desc,
-                                            desclen,
                                             start,
                                             seqlen,
                                             substringinfo->processinfo,
@@ -292,22 +290,14 @@ static int uniqueposinsinglesequence(void *info,
 }
 
 static int showunitnum(uint64_t unitnum,
-                       /*@unused@*/ void *info,
                        const char *desc,
-                       unsigned long desclen,
-                       Env *env)
+                       /*@unused@*/ void *info,
+                       /*@unused@*/ Env *env)
 {
   printf("unitnum=" Formatuint64_t, PRINTuint64_tcast(unitnum));
-  if(desclen > (unsigned long) 1)
+  if(desc != NULL)
   {
-    printf(" (");
-    if(fwrite(desc,sizeof(char),desclen,stdout) != desclen)
-    {
-      env_error_set(env,"cannot write description for unit " Formatuint64_t,
-                    PRINTuint64_tcast(unitnum));
-      return -1;
-    }
-    printf(")");
+    printf(" (%s)",desc);
   }
   printf("\n");
   return 0;
@@ -318,7 +308,7 @@ static int showifinlengthrange(const Alphabet *alphabet,
                                unsigned long uniquelength,
                                unsigned long querystart,
                                void *info,
-                               Env *env)
+                                /*@unused@*/ Env *env)
 {
   Rangespecinfo *rangespecinfo = (Rangespecinfo *) info;
 
@@ -354,7 +344,8 @@ static int findsubquerymatch(Fmindex *fmindex,
   Substringinfo substringinfo;
   Rangespecinfo rangespecinfo;
   ArrayUchar sequencebuffer;
-  Arraychar headerbuffer;
+  Sequencedescription sequencedescription;
+  bool haserr = false;
 
   substringinfo.fmindex = fmindex;
   rangespecinfo.minlength = minlength;
@@ -365,20 +356,22 @@ static int findsubquerymatch(Fmindex *fmindex,
   substringinfo.postprocessuniquelength = NULL;
   substringinfo.processinfo = &rangespecinfo;
   INITARRAY(&sequencebuffer,Uchar);
-  INITARRAY(&headerbuffer,char);
+  INITARRAY(&sequencedescription.headerbuffer,char);
+  sequencedescription.descptr = emptyqueuegeneric(env);
   if(overallquerysequences(uniqueposinsinglesequence,
                            &substringinfo,
                            &sequencebuffer,
                            queryfilenames,
-                           &headerbuffer,
+                           &sequencedescription,
                            getsymbolmapAlphabet(fmindex->alphabet),
                            env) != 0)
   {
-    return -2;
+    haserr = true;
   }
+  wrapqueuegeneric(true,&sequencedescription.descptr,env);
   FREEARRAY(&sequencebuffer,Uchar);
-  FREEARRAY(&headerbuffer,char);
-  return 0;
+  FREEARRAY(&sequencedescription.headerbuffer,char);
+  return haserr ? -1 : 0;
 }
 
 int findminuniquesubstrings(int argc,const char **argv,Env *env)

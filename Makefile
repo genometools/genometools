@@ -370,6 +370,12 @@ splint:
 
 sgt:${addprefix obj/,${notdir ${subst .c,.splint,${wildcard ${CURDIR}/src/libgtmatch/*.c}}}}
 
+
+obj/%.splint: ${CURDIR}/src/libgtmatch/%.c
+	@echo "splint $<"
+	@splint -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@touch $@
+
 obj/%.prepro: ${CURDIR}/src/libgtmatch/%.c
 	@echo "[generate $@]"
 	${CC} -c $< -o $@ ${CFLAGS} ${GT_CFLAGS} -E -g3

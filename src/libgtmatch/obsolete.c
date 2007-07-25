@@ -220,22 +220,6 @@ char *composefilename(const char *file,
 }
 */
 
-/* from dstrdup.c
-
-char *dynamicstrdup(const char *file,int linenum,
-                                  const char *source,Env *env)
-{
-  size_t sourcelength;
-  char *dest;
-
-  assert(source != NULL);
-  sourcelength = strlen(source);
-  ALLOCASSIGNSPACEGENERIC(file,linenum,dest,NULL,char,sourcelength+1);
-  strcpy(dest,source);
-  return dest;
-}
-*/
-
 /* from makeprj.c
 
 int scanfastasequence2(

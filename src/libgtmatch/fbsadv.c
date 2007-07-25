@@ -11,6 +11,9 @@
 #include "fbs-def.h"
 #include "spacedef.h"
 #include "chardef.h"
+#include "gqueue-def.h"
+
+#include "genericqueue.pr"
 
 #define GZIPSUFFIX        ".gz"
 #define GZIPSUFFIXLENGTH  (sizeof (GZIPSUFFIX)-1)
@@ -75,7 +78,7 @@ void initformatbufferstate(Fastabufferstate *fbs,
                            const Uchar *symbolmap,
                            bool plainformat,
                            Filelengthvalues **filelengthtab,
-                           Headerinfo *headerinfo,
+                           Sequencedescription *sequencedescription,
                            Env *env)
 {
   fbs->plainformat = plainformat;
@@ -88,7 +91,7 @@ void initformatbufferstate(Fastabufferstate *fbs,
   fbs->symbolmap = symbolmap;
   fbs->complete = false;
   fbs->lastspeciallength = 0;
-  fbs->headerinfo = headerinfo;
+  fbs->sequencedescription = sequencedescription;
   if(filelengthtab != NULL)
   {
     ALLOCASSIGNSPACE(*filelengthtab,NULL,Filelengthvalues,
@@ -105,11 +108,12 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
   int currentchar;
   unsigned long currentposition = 0, currentfileadd = 0, currentfileread = 0;
   Uchar charcode;
+  char *savebuffer;
 
   env_error_check(env);
   while (true)
   {
-    if (currentposition >= (uint32_t) FILEBUFFERSIZE)
+    if (currentposition >= (unsigned long) FILEBUFFERSIZE)
     {
       if(fbs->filelengthtab != NULL)
       {
@@ -129,12 +133,6 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       }
       fbs->nextfile = false;
       fbs->indesc = false;
-      if(fbs->headerinfo != NULL)
-      {
-        fbs->headerinfo->headerbuffer.nextfreechar = 0;
-        fbs->headerinfo->startdesc.nextfreeUlong = 0;
-        STOREINARRAY(&fbs->headerinfo->startdesc,Ulong,128,0);
-      }
       fbs->firstseqinfile = true;
       currentfileadd = 0;
       currentfileread = 0;
@@ -178,9 +176,24 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
             fbs->linenum++;
             fbs->indesc = false;
           }
-          if(fbs->headerinfo != NULL)
+          if(fbs->sequencedescription != NULL)
           {
-            STOREINARRAY(&fbs->headerinfo->headerbuffer,char,128,currentchar);
+            if(currentchar == NEWLINESYMBOL)
+            {
+              STOREINARRAY(&fbs->sequencedescription->headerbuffer,char,128,
+                           '\0');
+              ALLOCASSIGNSPACE(savebuffer,NULL,char,
+                               fbs->sequencedescription->headerbuffer.
+                                                         nextfreechar);
+              strcpy(savebuffer,
+                     fbs->sequencedescription->headerbuffer.spacechar);
+              enqueuegeneric(fbs->sequencedescription->descptr,savebuffer,env);
+              fbs->sequencedescription->headerbuffer.nextfreechar = 0;
+            } else
+            {
+              STOREINARRAY(&fbs->sequencedescription->headerbuffer,char,128,
+                           currentchar);
+            }
           }
         } else
         {
@@ -188,11 +201,6 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
           {
             if (currentchar == FASTASEPARATOR)
             {
-              if(fbs->headerinfo != NULL)
-              {
-                STOREINARRAY(&fbs->headerinfo->startdesc,Ulong,
-                             128,fbs->headerinfo->headerbuffer.nextfreechar);
-              }
               if (fbs->firstoverallseq)
               {
                 fbs->firstoverallseq = false;
@@ -263,14 +271,14 @@ static int advancePlainbufferstate(Fastabufferstate *fbs,Env *env)
   unsigned long currentposition = 0, currentfileread = 0;
 
   env_error_check(env);
-  if(fbs->headerinfo != NULL)
+  if(fbs->sequencedescription != NULL)
   {
     env_error_set(env,"no headers in plain sequence file");
     return -1;
   }
   while (true)
   {
-    if (currentposition >= (uint32_t) FILEBUFFERSIZE)
+    if (currentposition >= (unsigned long) FILEBUFFERSIZE)
     {
       if(fbs->filelengthtab != NULL)
       {

@@ -14,18 +14,9 @@
 #include "symboldef.h"
 #include "filelength-def.h"
 #include "arraydef.h"
+#include "seqdesc.h"
 
 #define FILEBUFFERSIZE 65536
-
-typedef unsigned long Ulong;
-
-DECLAREARRAYSTRUCT(Ulong);
-
-typedef struct
-{
-  Arraychar headerbuffer;
-  ArrayUlong startdesc;
-} Headerinfo;
 
 typedef struct
 {
@@ -48,7 +39,7 @@ typedef struct
        firstseqinfile,
        complete,
        nextfile;
-  Headerinfo *headerinfo;
+  Sequencedescription *sequencedescription;
   Genericstream inputstream;
   Uchar bufspace[FILEBUFFERSIZE];
   uint64_t lastspeciallength;
