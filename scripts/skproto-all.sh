@@ -15,6 +15,6 @@ do
      test ${filename} -nt ${prfile}
   then
     echo "create ${prfile}"
-    bin/gt dev skproto ${filename} > ${prfile}
+    bin/skproto ${filename} > ${prfile}
   fi
 done
