@@ -17,6 +17,16 @@
 
 #define FILEBUFFERSIZE 65536
 
+typedef unsigned long Ulong;
+
+DECLAREARRAYSTRUCT(Ulong);
+
+typedef struct
+{
+  Arraychar headerbuffer;
+  ArrayUlong startdesc;
+} Headerinfo;
+
 typedef struct
 {
   bool isgzippedstream;
@@ -38,7 +48,7 @@ typedef struct
        firstseqinfile,
        complete,
        nextfile;
-  Arraychar *headerbuffer;
+  Headerinfo *headerinfo;
   Genericstream inputstream;
   Uchar bufspace[FILEBUFFERSIZE];
   uint64_t lastspeciallength;

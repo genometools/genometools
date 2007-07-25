@@ -12,7 +12,7 @@ SKTOOLS='src/tools/gt_suffixerator.c
 
 for filename in `ls ${SKTOOLS} src/libgtmatch/*.c`
 do
-  headfile="obj/`basename ${filename} .c`"
+  headfile="obj/src/libgtmatch/`basename ${filename} .c`"
   rm -f ${headfile}.o ${headfile}.d ${headfile}.splint
 done
 

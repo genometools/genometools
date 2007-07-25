@@ -75,7 +75,7 @@ void initformatbufferstate(Fastabufferstate *fbs,
                            const Uchar *symbolmap,
                            bool plainformat,
                            Filelengthvalues **filelengthtab,
-                           Arraychar *headerbuffer,
+                           Headerinfo *headerinfo,
                            Env *env)
 {
   fbs->plainformat = plainformat;
@@ -88,7 +88,7 @@ void initformatbufferstate(Fastabufferstate *fbs,
   fbs->symbolmap = symbolmap;
   fbs->complete = false;
   fbs->lastspeciallength = 0;
-  fbs->headerbuffer = headerbuffer;
+  fbs->headerinfo = headerinfo;
   if(filelengthtab != NULL)
   {
     ALLOCASSIGNSPACE(*filelengthtab,NULL,Filelengthvalues,
@@ -129,9 +129,11 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       }
       fbs->nextfile = false;
       fbs->indesc = false;
-      if(fbs->headerbuffer != NULL)
+      if(fbs->headerinfo != NULL)
       {
-        fbs->headerbuffer->nextfreechar = 0;
+        fbs->headerinfo->headerbuffer.nextfreechar = 0;
+        fbs->headerinfo->startdesc.nextfreeUlong = 0;
+        STOREINARRAY(&fbs->headerinfo->startdesc,Ulong,128,0);
       }
       fbs->firstseqinfile = true;
       currentfileadd = 0;
@@ -175,12 +177,10 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
           {
             fbs->linenum++;
             fbs->indesc = false;
-          } else
+          }
+          if(fbs->headerinfo != NULL)
           {
-            if(fbs->headerbuffer != NULL)
-            {
-              STOREINARRAY(fbs->headerbuffer,char,128,currentchar);
-            }
+            STOREINARRAY(&fbs->headerinfo->headerbuffer,char,128,currentchar);
           }
         } else
         {
@@ -188,9 +188,10 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
           {
             if (currentchar == FASTASEPARATOR)
             {
-              if(fbs->headerbuffer != NULL)
+              if(fbs->headerinfo != NULL)
               {
-                fbs->headerbuffer->nextfreechar = 0;
+                STOREINARRAY(&fbs->headerinfo->startdesc,Ulong,
+                             128,fbs->headerinfo->headerbuffer.nextfreechar);
               }
               if (fbs->firstoverallseq)
               {
@@ -262,7 +263,7 @@ static int advancePlainbufferstate(Fastabufferstate *fbs,Env *env)
   unsigned long currentposition = 0, currentfileread = 0;
 
   env_error_check(env);
-  if(fbs->headerbuffer != NULL)
+  if(fbs->headerinfo != NULL)
   {
     env_error_set(env,"no headers in plain sequence file");
     return -1;

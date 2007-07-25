@@ -19,13 +19,11 @@ int overallquerysequences(int(*processsequence)(void *,
                                                 uint64_t,
                                                 const Uchar *,
                                                 unsigned long,
-                                                const char *,
-                                                unsigned long,
                                                 Env *),
                           void *info,
                           ArrayUchar *sequencebuffer,
                           const StrArray *filenametab,
-                          Arraychar *headerbuffer,
+                          Headerinfo *headerinfo,
                           const Uchar *symbolmap,
                           Env *env)
 {
@@ -39,7 +37,7 @@ int overallquerysequences(int(*processsequence)(void *,
                         symbolmap,
                         false,
                         NULL,
-                        headerbuffer,
+                        headerinfo,
                         env);
   sequencebuffer->nextfreeUchar = 0;
   while(true)
@@ -63,14 +61,12 @@ int overallquerysequences(int(*processsequence)(void *,
                              unitnum,
                              sequencebuffer->spaceUchar,
                              sequencebuffer->nextfreeUchar,
-                             headerbuffer->spacechar,
-                             headerbuffer->nextfreechar,
                              env) != 0)
           {
             return -2;
           }
           sequencebuffer->nextfreeUchar = 0;
-          headerbuffer->nextfreechar = 0;
+          headerinfo->startdesc.nextfreeUlong = 0;
         }
         unitnum++;
       }
@@ -85,14 +81,12 @@ int overallquerysequences(int(*processsequence)(void *,
                        unitnum,
                        sequencebuffer->spaceUchar,
                        sequencebuffer->nextfreeUchar,
-                       headerbuffer->spacechar,
-                       headerbuffer->nextfreechar,
                        env) != 0)
     {
       return -3;
     }
     sequencebuffer->nextfreeUchar = 0;
-    headerbuffer->nextfreechar = 0;
+    headerinfo->startdesc.nextfreeUlong = 0;
   }
   return 0;
 }

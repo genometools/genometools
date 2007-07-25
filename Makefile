@@ -370,6 +370,11 @@ splint:
 
 sgt:${addprefix obj/,${notdir ${subst .c,.splint,${wildcard ${CURDIR}/src/libgtmatch/*.c}}}}
 
+obj/%.prepro: ${CURDIR}/src/libgtmatch/%.c
+	@echo "[generate $@]"
+	${CC} -c $< -o $@ ${CFLAGS} ${GT_CFLAGS} -E -g3
+	indent $@
+
 test: all
 	bin/gt -test
 	cd testsuite && env -i ruby -I. testsuite.rb -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin $(STEST_FLAGS)
