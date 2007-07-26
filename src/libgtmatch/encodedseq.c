@@ -1355,14 +1355,18 @@ static int readsatfromfile(const Str *indexname,Env *env)
         encseq->seqdelivercharname\
           = encodedseqfunctab[(int) sat].seqdeliverchar##NAME.funcname
 
+/*
+  if filenametab != NULL, 
+*/
+
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
                                            const StrArray *filenametab,
+                                           bool plainformat,
                                            const Str *indexname,
                                            Seqpos totallength,
                                            const Specialcharinfo
                                                  *specialcharinfo,
                                            const Alphabet *alphabet,
-                                           bool plainformat,
                                            const char *str_sat,
                                            Env *env)
 {

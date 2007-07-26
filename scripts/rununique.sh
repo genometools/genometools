@@ -64,20 +64,20 @@ done
 
 if test ${numofrfiles} -eq 1
 then
-  if test ! -f ${IDIR}/mkv-single.prj ||
-     test ${rfiles} -nt ${IDIR}/mkv-single.prj   
+  if test ! -f ${IDIR}/sfx-single.prj ||
+     test ${rfiles} -nt ${IDIR}/sfx-single.prj   
   then
-    suffixerator -indexname ${IDIR}/mkv-single -db ${rfiles} -bwt -pl
+    suffixerator -dna -indexname ${IDIR}/sfx-single -db ${rfiles} -bwt -pl
   else
-    echo "# ${IDIR}/mkv-single is up to date"
+    echo "# ${IDIR}/sfx-single is up to date"
   fi
-  if test ! -f ${IDIR}/fmidx.fma ||
-     test ${IDIR}/mkv-single.prj -nt ${IDIR}/fmidx.fma
+  if test ! -f ${IDIR}/sfx-fm.fma ||
+     test ${IDIR}/sfx-single.prj -nt ${IDIR}/sfx-fm.fma
   then
-    mkfmindex ${IDIR}/fmidx ${IDIR}/mkv-single
-    plain ${IDIR}/fmidx ${IDIR}/mkv-single.al1 ${IDIR}/mkv-single.bwt
+    mkfmindex ${IDIR}/sfx-fm ${IDIR}/sfx-single
+    plain ${IDIR}/sfx-fm ${IDIR}/sfx-single.al1 ${IDIR}/sfx-single.bwt
   else
-    echo "# ${IDIR}/fmidx is up to date"
+    echo "# ${IDIR}/sfx-fm is up to date"
   fi
 else
   runmkfm=0
@@ -87,7 +87,7 @@ else
     if test ! -f ${IDIR}/midx${fn}.prj || 
        test ${rfile} -nt ${IDIR}/midx${fn}.prj
     then
-      suffixerator -indexname ${IDIR}/midx${fn} -db ${rfile} -suf -lcp -tis -pl
+      suffixerator -dna -indexname ${IDIR}/midx${fn} -db ${rfile} -suf -lcp -tis -pl
       runmkfm=1
     else
       echo "# ${IDIR}/midx${fn} is up to date"
@@ -97,11 +97,11 @@ else
   done
   if test ${runmkfm} -eq 1
   then
-    mkfmindex ${IDIR}/fmidx ${indexlist}
-    plain ${IDIR}/fmidx ${IDIR}/fmidx.al1 ${IDIR}/fmidx.bwt
+    mkfmindex ${IDIR}/sfx-fm ${indexlist}
+    plain ${IDIR}/sfx-fm ${IDIR}/sfx-fm.al1 ${IDIR}/sfx-fm.bwt
   else
-    echo "# ${IDIR}/fmidx is up to date"
+    echo "# ${IDIR}/sfx-fm is up to date"
   fi
 fi
-fmindexname=${IDIR}/fmidx
+fmindexname=${IDIR}/sfx-fm
 uniquesub -fmi ${fmindexname} -query ${queryfile} -min ${minval} -max ${maxval}

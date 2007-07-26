@@ -288,11 +288,11 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
     deliverthetime(stdout,mtime,"computing sequence encoding",env);
     encseq = initencodedseq(true,
                             so->filenametab,
+                            so->isplain,
                             NULL,
                             totallength,
                             &specialcharinfo,
                             alpha,
-                            so->isplain,
                             str_length(so->str_sat) > 0
                                   ? str_get(so->str_sat)
                                   : NULL,

@@ -465,17 +465,24 @@ int getencseqkmersgeneric(
   filllargestchartable(&spwp.filltable,numofchars,kmersize,env);
   if(encseq != NULL)
   {
-    Encodedsequencescanstate *esr;
     Seqpos totallength = getencseqtotallength(encseq);
 
+    /*
+    Encodedsequencescanstate *esr;
     esr = initEncodedsequencescanstate(encseq,env);
+    */
     for (currentposition = 0; currentposition<totallength; currentposition++)
     {
+      /*
       charcode = sequentialgetencodedchar(encseq,esr,currentposition);
+      */
+      charcode = getencodedchar(encseq,currentposition);
       shiftrightwithchar(processkmercode,processkmercodeinfo,
                          &spwp,currentposition,charcode,env);
     }
+    /*
     freeEncodedsequencescanstate(&esr,env);
+    */
   } else
   {
     Fastabufferstate fbs;

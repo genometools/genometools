@@ -13,6 +13,15 @@
 
 #define PREFIXLENGTH_AUTOMATIC 0
 
+
+typedef enum
+{
+  Forwardmode,
+  Reversemode,
+  Complementmode,
+  Reversecomplementmode
+} Readmode;
+
 typedef struct
 {
   unsigned int numofparts,
@@ -21,6 +30,7 @@ typedef struct
       *str_smap,
       *str_sat;
   StrArray *filenametab;
+  Readmode readmode;
   bool isdna,
        isprotein,
        isplain,

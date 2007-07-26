@@ -258,6 +258,7 @@ static int uniqueposinsinglesequence(void *info,
   {
     return -1;
   }
+  printf("seqlen=%lu\n",seqlen);
   for(query = start, remaining = seqlen; remaining > 0; query++, remaining--)
   {
     uniquelength = skfmuniqueforward (substringinfo->fmindex,
@@ -294,7 +295,7 @@ static int showunitnum(uint64_t unitnum,
                        /*@unused@*/ void *info,
                        /*@unused@*/ Env *env)
 {
-  printf("unitnum=" Formatuint64_t, PRINTuint64_tcast(unitnum));
+  printf("unit " Formatuint64_t, PRINTuint64_tcast(unitnum));
   if(desc != NULL)
   {
     printf(" (%s)",desc);

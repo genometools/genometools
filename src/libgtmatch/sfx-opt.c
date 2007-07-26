@@ -4,6 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#include <string.h>
 #include <inttypes.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
@@ -30,8 +31,10 @@ static OPrval parse_options(int *parsed_args,
          *optionplain,
          *optionpl, 
          *optionindexname, 
-         *optiondb;
+         *optiondb,
+         *optiondir;
   OPrval oprval;
+  Str *dirarg = str_new(env);
 
   env_error_check(env);
   op = option_parser_new("options",
@@ -58,6 +61,11 @@ static OPrval parse_options(int *parsed_args,
   optionplain = option_new_bool("plain","process as plain text",
                                 &so->isplain,false,env);
   option_parser_add_option(op, optionplain, env);
+
+  optiondir = option_new_string("dir",
+                                "specify reading direction",
+                                 dirarg, "fwd", env);
+  option_parser_add_option(op, optiondir, env);
 
   optionindexname = option_new_string("indexname",
                                       "specify name for index to be generated",
@@ -162,6 +170,38 @@ static OPrval parse_options(int *parsed_args,
     env_error_set(env,"superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
   }
+  if(oprval == OPTIONPARSER_OK)
+  {
+    const char *dirargstring = str_get(dirarg);
+    if(strcmp(dirargstring,"fwd") == 0)
+    {
+      so->readmode = Forwardmode;
+    } else
+    {
+      if(strcmp(dirargstring,"rev") == 0)
+      {
+        so->readmode = Reversemode;
+      } else
+      {
+        if(strcmp(dirargstring,"cpl") == 0)
+        {
+          so->readmode = Complementmode;
+        } else
+        {
+          if(strcmp(dirargstring,"rcl") == 0)
+          {
+            so->readmode = Reversecomplementmode;
+          } else
+          {
+            env_error_set(env,"argument to option -dir must be in "
+                              "fwd or rev or cpl or rcl");
+            oprval = OPTIONPARSER_ERROR;
+          }
+        }
+      }
+    }
+  }
+  str_delete(dirarg,env);
   return oprval;
 }
 
@@ -198,6 +238,11 @@ static void showoptions(const Suffixeratoroptions *so)
   {
     printf("# inputfile[%lu]=%s\n",i,strarray_get(so->filenametab,i));
   }
+  printf("# outtistab=%s,outsuftab=%s,outlcptab=%s,outbwttab=%s\n",
+          so->outtistab ? "true" : "false",
+          so->outsuftab ? "true" : "false",
+          so->outlcptab ? "true" : "false",
+          so->outbwttab ? "true" : "false");
 }
 
 void wrapsfxoptions(Suffixeratoroptions *so,Env *env)

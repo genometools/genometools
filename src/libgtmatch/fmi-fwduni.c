@@ -15,15 +15,23 @@ unsigned long skfmuniqueforward (const Fmindex *fmindex,
 
   qptr = qstart;
   cc = *qptr++;
+  // printf("# start cc=%u\n",cc);
   if(ISSPECIAL(cc))
   {
     return 0;
   }
   bwtbound.lbound = fmindex->tfreq[cc];
   bwtbound.ubound = fmindex->tfreq[cc+1];
+  /*
+  printf("# bounds=%u,%u = %u occurrences\n",
+              (unsigned int) bwtbound.lbound,
+              (unsigned int) bwtbound.ubound,
+              bwtbound.ubound - bwtbound.lbound);
+  */
   while (qptr < qend && bwtbound.lbound + 1 < bwtbound.ubound)
   {
     cc = *qptr;
+    // printf("# cc=%u\n",cc);
     if (ISSPECIAL (cc))
     {
       return 0;
@@ -32,6 +40,12 @@ unsigned long skfmuniqueforward (const Fmindex *fmindex,
                       fmoccurrence (fmindex, cc, bwtbound.lbound);
     bwtbound.ubound = fmindex->tfreq[cc] + 
                       fmoccurrence (fmindex, cc, bwtbound.ubound);
+    /*
+    printf("# bounds=%u,%u = %u occurrences\n",
+                (unsigned int) bwtbound.lbound,
+                (unsigned int) bwtbound.ubound,
+                bwtbound.ubound - bwtbound.lbound);
+    */
     qptr++;
   }
   if(bwtbound.lbound + 1 == bwtbound.ubound)

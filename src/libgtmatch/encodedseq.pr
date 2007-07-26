@@ -26,12 +26,12 @@ int overallspecialranges(const Encodedsequence *encseq,
 
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
                                            const StrArray *filenametab,
+                                           bool plainformat,
                                            const Str *indexname,
                                            Seqpos totallength,
                                            const Specialcharinfo
                                                  *specialcharinfo,
                                            const Alphabet *alphabet,
-                                           bool plainformat,
                                            const char *str_sat,
                                            Env *env);
 

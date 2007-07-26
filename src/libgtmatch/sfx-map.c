@@ -335,13 +335,13 @@ int mapsuffixarray(Suffixarray *suffixarray,
   if (!haserr && (demand & SARR_ESQTAB))
   {
     suffixarray->encseq = initencodedseq(true,
-					 NULL,
+					 NULL,   /* filenametab */
+                                         false,  /* not relevant, since
+                                                 indexname != NULL*/
 					 indexname,
 					 *totallength,
 					 &suffixarray->specialcharinfo,
 					 suffixarray->alpha,
-                                         false,  /* not relevant, since
-                                                 indexname != NULL*/
                                          NULL,
 					 env);
     if (suffixarray->encseq == NULL)
@@ -425,13 +425,13 @@ int streamsuffixarray(Suffixarray *suffixarray,
   if (!haserr && (demand & SARR_ESQTAB))
   {
     suffixarray->encseq = initencodedseq(true,
-					 NULL,
+					 NULL,  /* filenametab */
+                                         false, /* not relevant since 
+                                                   indexname != NULL */
 					 indexname,
 					 *totallength,
 					 &suffixarray->specialcharinfo,
 					 suffixarray->alpha,
-                                         false, /* not relevant since 
-                                                   indexname != NULL */
                                          NULL,
 					 env);
     if (suffixarray->encseq == NULL)
