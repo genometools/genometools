@@ -87,7 +87,8 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
       break;
     }
   }
-  if (!haserr && allkeysdefined(indexname,FMASCIIFILESUFFIX,riktab,env) != 0)
+  if (!haserr && allkeysdefined(indexname,FMASCIIFILESUFFIX,riktab,false,
+                                env) != 0)
   {
     haserr = true;
   }
@@ -135,7 +136,8 @@ static Encodedsequence *mapbwtencoding(const Str *indexname,Env *env)
   bool haserr = false;
   Seqpos totallength;
 
-  if(mapsuffixarray(&suffixarray,&totallength,SARR_ESQTAB,indexname,env) != 0)
+  if(mapsuffixarray(&suffixarray,&totallength,SARR_ESQTAB,indexname,
+                    false,env) != 0)
   {
     haserr = true;
   }

@@ -123,7 +123,7 @@ static int scanuintintline(uint32_t *lengthofkey,
 }
 
 int allkeysdefined(const Str *indexname,const char *suffix,
-                   const Array *riktab,Env *env)
+                   const Array *riktab,bool verbose,Env *env)
 {
   unsigned long i;
   Readintkeys *rikptr;
@@ -134,26 +134,29 @@ int allkeysdefined(const Str *indexname,const char *suffix,
     rikptr = (Readintkeys *) array_get(riktab,i);
     if(rikptr->found)
     {
-      printf("%s=",rikptr->keystring);
-      if (rikptr->ptrdefined)
+      if(verbose)
       {
-        if (rikptr->smallvalueptr != NULL)
+        printf("%s=",rikptr->keystring);
+        if (rikptr->ptrdefined)
         {
-          printf("%u\n",(unsigned int) *(rikptr->smallvalueptr));
-        } else
-        {
-          if (rikptr->bigvalueptr != NULL)
+          if (rikptr->smallvalueptr != NULL)
           {
-            printf(Formatuint64_t "\n",
-                  PRINTuint64_tcast(*(rikptr->bigvalueptr)));
+            printf("%u\n",(unsigned int) *(rikptr->smallvalueptr));
           } else
           {
-            assert(false);
+            if (rikptr->bigvalueptr != NULL)
+            {
+              printf(Formatuint64_t "\n",
+                    PRINTuint64_tcast(*(rikptr->bigvalueptr)));
+            } else
+            {
+              assert(false);
+            }
           }
+        } else
+        {
+          printf("0\n");
         }
-      } else
-      {
-        printf("0\n");
       }
       if(rikptr->readflag != NULL)
       {

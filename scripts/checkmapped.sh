@@ -22,7 +22,7 @@ function checkerror()
 
 function checksfxmap()
 {
-  cmd="${VALGRIND} ../bin/gt dev sfxmap $1"
+  cmd="${VALGRIND} ../bin/gt dev sfxmap -v $1"
   TMPFILE=`mktemp TMP.XXXXXX` || exit 1
   ${cmd} > ${TMPFILE}
   if test $? -ne 0
@@ -39,4 +39,4 @@ function checksfxmap()
 
 checkerror "${VALGRIND} ../bin/gt suffixerator -tis -suf -bwt -lcp -indexname /tmp/sfx $*"
 checkerror "checksfxmap /tmp/sfx"
-checkerror "../bin/gt dev sfxmap -stream /tmp/sfx"
+checkerror "../bin/gt dev sfxmap -v -stream /tmp/sfx"

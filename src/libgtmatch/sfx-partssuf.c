@@ -125,7 +125,7 @@ Suftabparts *newsuftabparts(uint32_t numofparts,
         suftabparts->components[part].suftaboffset
           = (uint64_t) leftborder[suftabparts->components[part-1].nextcode];
       }
-      printf("widthofpart[%u]=" FormatSeqpos "\n",
+      printf("# widthofpart[%u]=" FormatSeqpos "\n",
               (unsigned int) part,
               PRINTSeqposcast(suftabparts->components[part].widthofpart));
       if (suftabparts->largestwidth <

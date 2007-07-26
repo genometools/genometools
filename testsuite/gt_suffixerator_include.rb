@@ -16,7 +16,7 @@ def checksfx(parts,pl,withsmap,sat,filelist)
   end
   run "#{$bin}gt suffixerator -parts #{parts} -pl #{pl} #{extra} #{outoptions()}  -db " +
        filearg
-  run "#{$bin}gt dev sfxmap sfx"
+  run "#{$bin}gt dev sfxmap -v sfx"
   run "grep -v '^#' #{$last_stdout}"
   run "cmp -s sfx.prj #{$last_stdout}"
 end

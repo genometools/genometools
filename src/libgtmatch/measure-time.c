@@ -28,13 +28,13 @@ void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent,Env *env)
   clock_t stopclock;
 
   stopclock = clock();
-  fprintf(fp,"TIME %s %.2f\n",mtime->eventdescription,
+  fprintf(fp,"# TIME %s %.2f\n",mtime->eventdescription,
              (double) (stopclock-mtime->startclock)/(double) CLOCKS_PER_SEC);
   (void) fflush(fp);
   mtime->overalltime += (stopclock - mtime->startclock);
   if (newevent == NULL)
   {
-    fprintf(fp,"TIME overall %.2f\n",
+    fprintf(fp,"# TIME overall %.2f\n",
                 (double) mtime->overalltime/(double) CLOCKS_PER_SEC);
     (void) fflush(fp);
     env_ma_free(mtime,env);

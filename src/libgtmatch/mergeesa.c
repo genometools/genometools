@@ -54,6 +54,7 @@ static int inputthesequences(Alphabet **alpha,
                          &totallength,
                          demand,
                          indexname,
+                         false,
                          env) != 0)
     {
       str_delete(indexname,env);

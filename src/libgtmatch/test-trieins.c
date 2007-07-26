@@ -74,6 +74,7 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
                        &totallength,
                        SARR_ESQTAB,
                        indexname,
+                       false,
                        env) != 0)
   {
     haserr = true;

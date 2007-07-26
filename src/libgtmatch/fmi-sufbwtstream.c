@@ -208,6 +208,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                          &totallength,
                          SARR_BWTTAB | (storeindexpos ? SARR_SUFTAB : 0),
                          indexname,
+                         false,
                          env) != 0)
     {
       haserr = true;
