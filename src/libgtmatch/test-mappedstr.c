@@ -25,6 +25,7 @@
 static Codetype qgram2codefillspecial(uint32_t numofchars,
                                       uint32_t kmersize,
                                       const Encodedsequence *encseq,
+                                      Readmode readmode,
                                       Seqpos startpos,
                                       Seqpos totallength)
 {
@@ -39,7 +40,7 @@ static Codetype qgram2codefillspecial(uint32_t numofchars,
     foundspecial = true;
   } else
   {
-    cc = getencodedchar(encseq,startpos);
+    cc = getencodedchar(encseq,startpos,readmode);
     if (ISSPECIAL(cc))
     {
       integercode = numofchars - 1;
@@ -63,7 +64,7 @@ static Codetype qgram2codefillspecial(uint32_t numofchars,
         foundspecial = true;
       } else
       {
-        cc = getencodedchar(encseq,pos);
+        cc = getencodedchar(encseq,pos,readmode);
         if (ISSPECIAL(cc))
         {
           ADDNEXTCHAR(integercode,numofchars-1,numofchars);
@@ -94,6 +95,7 @@ static void outkmeroccurrence(void *processinfo,
 
 static void collectkmercode(ArrayCodetype *codelist,
                             const Encodedsequence *encseq,
+                            Readmode readmode,
                             uint32_t kmersize,
                             uint32_t numofchars,
                             Seqpos stringtotallength,
@@ -107,6 +109,7 @@ static void collectkmercode(ArrayCodetype *codelist,
     code = qgram2codefillspecial(numofchars,
                                  kmersize,
                                  encseq,
+                                 readmode,
                                  offset,
                                  stringtotallength);
     STOREINARRAY(codelist,Codetype,1024,code);
@@ -161,6 +164,7 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
 }
 
 static int verifycodelists(const Encodedsequence *encseq,
+                           Readmode readmode,
                            const Uchar *characters,
                            uint32_t kmersize,
                            uint32_t numofchars,
@@ -174,6 +178,7 @@ static int verifycodelists(const Encodedsequence *encseq,
   INITARRAY(&codeliststring,Codetype);
   collectkmercode(&codeliststring,
                   encseq,
+                  readmode,
                   kmersize,
                   numofchars,
                   stringtotallength,
@@ -213,6 +218,7 @@ int verifymappedstr(const Suffixarray *suffixarray,Env *env)
   if (!haserr)
   {
     if (verifycodelists(suffixarray->encseq,
+                        suffixarray->readmode,
                         getcharactersAlphabet(suffixarray->alpha),
                         suffixarray->prefixlength,
                         numofchars,

@@ -39,10 +39,11 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                                  Seqpos *totallength,
                                  const Str *indexname,
                                  bool verbose,
-                                 FILE *fpin,Env *env)
+                                 FILE *fpin,
+                                 Env *env)
 {
   ArrayUchar linebuffer;
-  uint32_t integersize, littleendian, linenum;
+  uint32_t integersize, littleendian, linenum, readmodeint;
   unsigned long numofsequences, numoffiles = 0, numofallocatedfiles = 0;
   DefinedSeqpos maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
@@ -73,6 +74,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                  &maxbranchdepth.defined);
   SETREADINTKEYS("integersize",&integersize,NULL);
   SETREADINTKEYS("littleendian",&littleendian,NULL);
+  SETREADINTKEYS("readmode",&readmodeint,NULL);
   INITARRAY(&linebuffer,Uchar);
   suffixarray->filenametab = strarray_new(env);
   suffixarray->filelengthtab = NULL;
@@ -198,6 +200,15 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         haserr = true;
       }
     }
+  }
+  if(!haserr)
+  {
+    if(readmodeint > (uint32_t) 3)
+    {
+      env_error_set(env,"illegal readmode %u",(unsigned int) readmodeint);
+      haserr = true;
+    }
+    suffixarray->readmode = (Readmode) readmodeint;
   }
   FREEARRAY(&linebuffer,Uchar);
   array_delete(riktab,env);

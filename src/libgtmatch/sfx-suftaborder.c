@@ -16,6 +16,7 @@
 
 static void showlocalsuffix(FILE *fpout,
                             const Encodedsequence *encseq,
+                            Readmode readmode,
                             const Uchar *characters,
                             Seqpos start,
                             Seqpos depth)
@@ -38,7 +39,7 @@ static void showlocalsuffix(FILE *fpout,
       (void) putc('~',fpout);
       break;
     }
-    cc = getencodedchar(encseq,i);
+    cc = getencodedchar(encseq,i,readmode);
     if (ISSPECIAL(cc))
     {
       (void) putc('~',fpout);
@@ -50,6 +51,7 @@ static void showlocalsuffix(FILE *fpout,
 
 static void showcomparisonfailure(const char *where,
                                   const Encodedsequence *encseq,
+                                  Readmode readmode,
                                   const Uchar *characters,
                                   const Seqpos *suftab,
                                   Seqpos depth,
@@ -64,9 +66,9 @@ static void showcomparisonfailure(const char *where,
                        PRINTSeqposcast((Seqpos) (ptr1 - suftab)),
                        PRINTSeqposcast((Seqpos) (ptr2 - suftab)),
                        PRINTSeqposcast(*ptr1));
-  showlocalsuffix(stderr,encseq,characters,*ptr1,depth);
+  showlocalsuffix(stderr,encseq,readmode,characters,*ptr1,depth);
   fprintf(stderr,"\",\"");
-  showlocalsuffix(stderr,encseq,characters,*ptr2,depth);
+  showlocalsuffix(stderr,encseq,readmode,characters,*ptr2,depth);
   fprintf(stderr,"\"=" FormatSeqpos ")=%d with maxlcp " FormatSeqpos "\n",
               PRINTSeqposcast(*ptr2),
               cmp,
@@ -74,6 +76,7 @@ static void showcomparisonfailure(const char *where,
 }
 
 void checkifprefixesareidentical(const Encodedsequence *encseq,
+                                 Readmode readmode,
                                  const Uchar *characters,
                                  const Seqpos *suftab,
                                  uint32_t prefixlength,
@@ -88,6 +91,7 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
   for (ptr = suftab + left; ptr < suftab + right; ptr++)
   {
     cmp = comparetwosuffixes(encseq,
+                             readmode,
                              &maxlcp,
                              false,
                              true,
@@ -98,6 +102,7 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
     {
       showcomparisonfailure("checkifprefixesareidentical",
                             encseq,
+                            readmode,
                             characters,
                             suftab,
                             depth,
@@ -108,6 +113,7 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
 }
 
 void showentiresuftab(const Encodedsequence *encseq,
+                      Readmode readmode,
                       const Uchar *characters,
                       const Seqpos *suftab,
                       Seqpos depth)
@@ -120,12 +126,13 @@ void showentiresuftab(const Encodedsequence *encseq,
     printf("suftab[" FormatSeqpos "]=" FormatSeqpos " ",
             PRINTSeqposcast((Seqpos) (ptr-suftab)),
             PRINTSeqposcast(*ptr));
-    showlocalsuffix(stdout,encseq,characters,*ptr,depth);
+    showlocalsuffix(stdout,encseq,readmode,characters,*ptr,depth);
     printf("\n");
   }
 }
 
 void checkentiresuftab(const Encodedsequence *encseq,
+                       Readmode readmode,
                        const Uchar *characters,
                        const Seqpos *suftab,
                        bool specialsareequal,
@@ -161,6 +168,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
   for (ptr = suftab + 1; ptr <= suftab + totallength; ptr++)
   {
     cmp = comparetwosuffixes(encseq,
+                             readmode,
                              &maxlcp,
                              specialsareequal,
                              specialsareequalatdepth0,
@@ -171,6 +179,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
     {
       showcomparisonfailure("checkentiresuftab",
                             encseq,
+                            readmode,
                             characters,
                             suftab,
                             depth,

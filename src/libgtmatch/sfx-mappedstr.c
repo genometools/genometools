@@ -435,22 +435,24 @@ static void filllargestchartable(uint32_t **filltable,
   }
 }
 
-int getencseqkmersgeneric(
-        const Encodedsequence *encseq,
-        const StrArray *filenametab,
-        void(*processkmercode)(void *,Codetype,Seqpos,
-                               const Firstspecialpos *,Env *),
-        void *processkmercodeinfo,
-        uint32_t numofchars,
-        uint32_t kmersize,
-        const Uchar *symbolmap,
-        bool plainformat,
-        Env *env)
+static int getencseqkmersgeneric(
+                      const Encodedsequence *encseq,
+                      Readmode readmode,
+                      const StrArray *filenametab,
+                      void(*processkmercode)(void *,Codetype,Seqpos,
+                                             const Firstspecialpos *,Env *),
+                      void *processkmercodeinfo,
+                      uint32_t numofchars,
+                      uint32_t kmersize,
+                      const Uchar *symbolmap,
+                      bool plainformat,
+                      Env *env)
 {
   uint32_t overshoot;
   Seqpos currentposition;
   Streamstate spwp;
   Uchar charcode;
+  bool haserr = false;
 
   env_error_check(env);
   initmultimappower(&spwp.multimappower,numofchars,kmersize,env);
@@ -476,7 +478,7 @@ int getencseqkmersgeneric(
       /*
       charcode = sequentialgetencodedchar(encseq,esr,currentposition);
       */
-      charcode = getencodedchar(encseq,currentposition);
+      charcode = getencodedchar(encseq,currentposition,readmode);
       shiftrightwithchar(processkmercode,processkmercodeinfo,
                          &spwp,currentposition,charcode,env);
     }
@@ -488,38 +490,51 @@ int getencseqkmersgeneric(
     Fastabufferstate fbs;
     int retval;
 
-    initformatbufferstate(&fbs,
-                          filenametab,
-                          symbolmap,
-                          plainformat,
-                          NULL,
-                          NULL,
-                          env);
-    for (currentposition = 0; /* Nothing */; currentposition++)
+    if(readmode != Forwardmode)
     {
-      retval = readnextUchar(&charcode,&fbs,env);
-      if (retval < 0)
+      env_error_set(env,"readmode = %u not possible when reading symbols "
+                        "from file",(unsigned int) readmode);
+      haserr = true;
+    }
+    if(!haserr)
+    {
+      initformatbufferstate(&fbs,
+                            filenametab,
+                            symbolmap,
+                            plainformat,
+                            NULL,
+                            NULL,
+                            env);
+      for (currentposition = 0; /* Nothing */; currentposition++)
       {
-        return -1;
+        retval = readnextUchar(&charcode,&fbs,env);
+        if (retval < 0)
+        {
+          haserr = true;
+          break;
+        }
+        if (retval == 0)
+        {
+          break;
+        }
+        shiftrightwithchar(processkmercode,processkmercodeinfo,
+                           &spwp,currentposition,charcode,env);
       }
-      if (retval == 0)
-      {
-        break;
-      }
-      shiftrightwithchar(processkmercode,processkmercodeinfo,
-                         &spwp,currentposition,charcode,env);
     }
   }
-  for (overshoot=0; overshoot<kmersize; overshoot++)
+  if(!haserr)
   {
-    shiftrightwithchar(processkmercode,processkmercodeinfo,&spwp,
-                       currentposition + overshoot,(Uchar) WILDCARD,env);
+    for (overshoot=0; overshoot<kmersize; overshoot++)
+    {
+      shiftrightwithchar(processkmercode,processkmercodeinfo,&spwp,
+                         currentposition + overshoot,(Uchar) WILDCARD,env);
+    }
   }
   FREESPACE(spwp.cyclicwindow);
   FREESPACE(spwp.filltable);
   ARRAY2DIMFREE(spwp.multimappower);
   specialwrapqueue(&spwp.spos,env);
-  return 0;
+  return haserr ? -1 : 0;
 }
 
 int getfastastreamkmers(
@@ -534,6 +549,7 @@ int getfastastreamkmers(
         Env *env)
 {
   return getencseqkmersgeneric(NULL,
+                               Forwardmode,
                                filenametab,
                                processkmercode,
                                processkmercodeinfo,
@@ -546,6 +562,7 @@ int getfastastreamkmers(
 
 void getencseqkmers(
         const Encodedsequence *encseq,
+        Readmode readmode,
         void(*processkmercode)(void *,Codetype,Seqpos,
                                const Firstspecialpos *,Env *),
         void *processkmercodeinfo,
@@ -553,7 +570,8 @@ void getencseqkmers(
         uint32_t kmersize,
         Env *env)
 {
-  (void) getencseqkmersgeneric(encseq,
+  (void) getencseqkmersgeneric(encseq, /* not NULL */
+                               readmode,
                                NULL,
                                processkmercode,
                                processkmercodeinfo,

@@ -58,6 +58,7 @@ static void initoutfileinfo(Outfileinfo *outfileinfo)
 
 static int suftab2file(void *info,
                        const Seqpos *suftab,
+                       Readmode readmode,
                        Seqpos widthofpart,
                        Env *env)
 {
@@ -118,6 +119,7 @@ static int suftab2file(void *info,
         if(pos > 0 || outfileinfo->absolutepos > 0)
         {
           cmp = comparetwosuffixes(outfileinfo->encseq,
+                                   readmode,
                                    &lcpvalue,
                                    false,
                                    false,
@@ -186,7 +188,7 @@ static int suftab2file(void *info,
         cc = (Uchar) UNDEFBWTCHAR;
       } else
       {
-        cc = getencodedchar(outfileinfo->encseq,startpos - 1);
+        cc = getencodedchar(outfileinfo->encseq,startpos - 1,readmode);
       }
       if (fwrite(&cc,sizeof(Uchar),(size_t) 1,outfileinfo->outfpbwttab) 
                   != (size_t) 1)
@@ -359,6 +361,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
                          specialcharinfo.specialcharacters,
                          specialcharinfo.specialranges,
                          encseq,
+                         so->readmode,
                          (uint32_t) numofchars,
                          (uint32_t) so->prefixlength,
                          (uint32_t) so->numofparts,
@@ -378,6 +381,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
   {
     if (outprjfile(so->str_indexname,
                    so->filenametab,
+                   so->readmode,
                    filelengthtab,
                    totallength,
                    numofsequences,

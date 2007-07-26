@@ -1,4 +1,4 @@
-#define ACCESSBWTTEXT(POS) getencodedchar(fm->bwtformatching,POS)
+#define ACCESSBWTTEXT(POS) getencodedchar(fm->bwtformatching,POS,Forwardmode)
 
 static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
 {

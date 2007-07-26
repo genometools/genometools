@@ -8,6 +8,7 @@
 #include "encseq-def.h"
 
 int comparetwosuffixes(const Encodedsequence *encseq,
+                       Readmode readmode,
                        Seqpos *maxlcp,
                        bool specialsareequal,
                        bool specialsareequalatdepth0,
@@ -32,8 +33,8 @@ int comparetwosuffixes(const Encodedsequence *encseq,
   }
   for (pos1=start1, pos2=start2; pos1 < end1 && pos2 < end2; pos1++, pos2++)
   {
-    cc1 = getencodedchar(encseq,pos1);
-    cc2 = getencodedchar(encseq,pos2);
+    cc1 = getencodedchar(encseq,pos1,readmode);
+    cc2 = getencodedchar(encseq,pos2,readmode);
     if (ISSPECIAL(cc1))
     {
       if (ISSPECIAL(cc2))

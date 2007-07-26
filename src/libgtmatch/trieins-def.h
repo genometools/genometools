@@ -35,7 +35,13 @@ DECLAREARRAYSTRUCT(Trienodeptr);
 
 typedef struct
 {
-  Encodedsequence **encseqtable;
+  Encodedsequence *encseqptr;
+  Readmode readmode;
+} Encseqreadinfo;
+
+typedef struct
+{
+  Encseqreadinfo *encseqreadinfo;
   Trienode *nodetable, 
            *root;
   Trienodeptr *unusedTrienodes;

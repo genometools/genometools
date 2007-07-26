@@ -3,6 +3,7 @@ extern "C" {
 #endif
 int outprjfile(const Str *indexname,
                const StrArray *filenametab,
+               Readmode readmode,
                const Filelengthvalues *filelengthtab,
                Seqpos totallength,
                unsigned long numofsequences,

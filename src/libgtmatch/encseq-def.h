@@ -6,11 +6,12 @@
 
 #ifndef ENCSEQDEF_H
 #define ENCSEQDEF_H
+#include "libgtcore/str.h"
+#include "libgtcore/strarray.h"
 #include "symboldef.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
-#include "libgtcore/str.h"
-#include "libgtcore/strarray.h"
+#include "readmode-def.h"
 
 #define ENCSEQFILESUFFIX     ".esq"
 
@@ -23,9 +24,11 @@ typedef struct
          rightpos;
 } Sequencerange;          /* \Typedef{Sequencerange} */
 
+
 Seqpos getencseqtotallength(const Encodedsequence *encseq);
 
-Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos);
+Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
+                     Readmode readmode);
 
 int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
 

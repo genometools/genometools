@@ -10,17 +10,9 @@
 #include <stdbool.h>
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
+#include "readmode-def.h"
 
 #define PREFIXLENGTH_AUTOMATIC 0
-
-
-typedef enum
-{
-  Forwardmode,
-  Reversemode,
-  Complementmode,
-  Reversecomplementmode
-} Readmode;
 
 typedef struct
 {

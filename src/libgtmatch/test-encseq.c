@@ -46,7 +46,7 @@ int testencodedsequence(const StrArray *filenametab,
     {
       break;
     }
-    cc1 = getencodedchar(encseq,pos);
+    cc1 = getencodedchar(encseq,pos,Forwardmode);
     if (cc0 != cc1)
     {
       env_error_set(env,"position " FormatSeqpos

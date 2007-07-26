@@ -74,7 +74,7 @@ typedef struct
   DefinedSeqpos longest;
   Specialcharinfo specialcharinfo;
   Alphabet *alpha;
-  bool mappedinput;
+  Readmode readmode; /* relevant when reading the encoded sequence */
   /* either with mapped input */
   const Seqpos *suftab;
   const Uchar *lcptab;

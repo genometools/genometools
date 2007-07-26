@@ -60,11 +60,11 @@ typedef struct
          *spacesuffixstarts;
   unsigned long nextfreeUint, 
                 allocatedUint; 
-  int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *);
+  int(*processsuftab)(void *,const Seqpos *,Readmode,Seqpos,Env *);
   void *processsuftabinfo;
+  Readmode readmode;
   Env *env;
 } InsertCompletespecials;
-
 
 static int initbasepower(uint32_t **basepower,
                          uint32_t **filltable,
@@ -283,6 +283,7 @@ static int insertfullspecialrange(InsertCompletespecials *ics,
     {
       if (ics->processsuftab(ics->processsuftabinfo,
                              ics->spacesuffixstarts,
+                             ics->readmode,
                              (Seqpos) ics->nextfreeUint,
                              ics->env) != 0)
       {
@@ -312,9 +313,11 @@ static int insertfullspecialpair(void *info,
 
 static int insertallfullspecials(
                 const Encodedsequence *encseq,
+                Readmode readmode,
                 Seqpos largestwidth,
                 Seqpos *suftab,
-                int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
+                int(*processsuftab)(void *,const Seqpos *,Readmode,
+                                    Seqpos,Env *),
                 void *processsuftabinfo,
                 Env *env)
 {
@@ -326,6 +329,7 @@ static int insertallfullspecials(
   ics.nextfreeUint = 0;
   ics.processsuftab = processsuftab;
   ics.processsuftabinfo = processsuftabinfo;
+  ics.readmode = readmode;
   ics.env = env;
   if(overallspecialranges(encseq,insertfullspecialpair,&ics,env) != 0)
   {
@@ -339,6 +343,7 @@ static int insertallfullspecials(
   {
     if (ics.processsuftab(ics.processsuftabinfo,
                           ics.spacesuffixstarts,
+                          ics.readmode,
                           (Seqpos) ics.nextfreeUint,
                           env) != 0)
     {
@@ -348,11 +353,13 @@ static int insertallfullspecials(
   return 0;
 }
 
-int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
+int suffixerator(int(*processsuftab)(void *,const Seqpos *,
+                                     Readmode,Seqpos,Env *),
                  void *processsuftabinfo,
                  Seqpos specialcharacters,
                  Seqpos specialranges,
                  const Encodedsequence *encseq,
+                 Readmode readmode,
                  uint32_t numofchars,
                  uint32_t prefixlength,
                  uint32_t numofparts,
@@ -419,6 +426,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
     csf.storespecials = true;
     deliverthetime(stdout,mtime,"counting prefix distribution",env);
     getencseqkmers(encseq,
+                   readmode,
                    updatekmercount,
                    &csf,
                    numofchars,
@@ -459,6 +467,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
                          env);
       deliverthetime(stdout,mtime,"inserting suffixes into buckets",env);
       getencseqkmers(encseq,
+                     readmode,
                      insertwithoutspecial,
                      &csf,
                      numofchars,
@@ -467,6 +476,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
       deliverthetime(stdout,mtime,"sorting the buckets",env);
       sortallbuckets(csf.suftabptr,
                      encseq,
+                     readmode,
                      csf.leftborder,
                      csf.countspecialcodes,
                      numofchars,
@@ -479,6 +489,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
       {
         if (processsuftab(processsuftabinfo,
                           csf.suftab,
+                          readmode,
                           stpgetcurrentwidtofpart(part,suftabparts),
                           env) != 0)
         {
@@ -488,6 +499,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,Seqpos,Env *),
       }
     }
     if (insertallfullspecials(encseq,
+                              readmode,
                               largestwidth,
                               csf.suftab,
                               processsuftab,

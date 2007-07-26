@@ -17,8 +17,8 @@
 
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
 #define UNIQUEINT(P)    ((Seqpos) ((P) + COMPAREOFFSET))
-#define ACCESSCHAR(T)   getencodedchar(encseq,T)
-#define ISNOTEND(P)     ((P) < totallength && ISNOTSPECIAL(ACCESSCHAR(P)))
+#define ACCESSCHAR(POS) getencodedchar(encseq,POS,readmode)
+#define ISNOTEND(POS)   ((POS) < totallength && ISNOTSPECIAL(ACCESSCHAR(POS)))
 
 #define DECLARETMPC Uchar tmpsvar, tmptvar
 #define GENDEREF(VAR,A,S)\
@@ -63,7 +63,7 @@
 #define SUBSORT(WIDTH,BORDER,LEFT,RIGHT,DEPTH)\
         if ((WIDTH) <= (BORDER))\
         {\
-          insertionsort(encseq,totallength,DEPTH,LEFT,RIGHT);\
+          insertionsort(encseq,readmode,totallength,DEPTH,LEFT,RIGHT);\
         } else\
         {\
           PUSHMKVSTACK(LEFT,RIGHT,DEPTH);\
@@ -84,6 +84,7 @@
 typedef Seqpos Suffixptr;
 
 static Suffixptr *medianof3(const Encodedsequence *encseq,
+                            Readmode readmode,
                             Seqpos totallength,
                             Seqpos depth,
                             Suffixptr *a,
@@ -110,6 +111,7 @@ static Suffixptr *medianof3(const Encodedsequence *encseq,
 }
 
 static void insertionsort(const Encodedsequence *encseq,
+                          Readmode readmode,
                           Seqpos totallength,
                           Seqpos depth,
                           Suffixptr *left,
@@ -144,6 +146,7 @@ typedef struct
 DECLAREARRAYSTRUCT(MKVstack);
 
 static void bentleysedgewick(const Encodedsequence *encseq,
+                             Readmode readmode,
                              Seqpos totallength,
                              ArrayMKVstack *mkvauxstack,
                              Suffixptr *l,Suffixptr *r,Seqpos d,
@@ -157,7 +160,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   width = (Seqpos) (r - l + 1);
   if (width <= (Seqpos) (SMALLSIZE))
   {
-    insertionsort(encseq,totallength,d,l,r);
+    insertionsort(encseq,readmode,totallength,d,l,r);
     return;
   }
   left = l;
@@ -174,11 +177,14 @@ static void bentleysedgewick(const Encodedsequence *encseq,
     { /* On big arrays, pseudomedian of 9 */
       offset = DIV8(width);
       doubleoffset = MULT2(offset);
-      pl = medianof3(encseq,totallength,depth,pl,pl+offset,pl+doubleoffset);
-      pm = medianof3(encseq,totallength,depth,pm-offset,pm,pm+offset);
-      pr = medianof3(encseq,totallength,depth,pr-doubleoffset,pr-offset,pr);
+      pl = medianof3(encseq,readmode,totallength,depth,
+                     pl,pl+offset,pl+doubleoffset);
+      pm = medianof3(encseq,readmode,totallength,depth,
+                     pm-offset,pm,pm+offset);
+      pr = medianof3(encseq,readmode,totallength,depth,
+                     pr-doubleoffset,pr-offset,pr);
     }
-    pm = medianof3(encseq,totallength,depth,pl,pm,pr);
+    pm = medianof3(encseq,readmode,totallength,depth,pl,pm,pr);
     SWAP(left, pm);
     partval = PTR2INT(tmpsvar,left);
     pa = pb = left + 1;
@@ -259,6 +265,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
 
 void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
+                    Readmode readmode,
                     const Seqpos *leftborder,
                     const Seqpos *countspecialcodes,
                     uint32_t numofchars,
@@ -310,6 +317,7 @@ void sortallbuckets(Seqpos *suftabptr,
     if (left < right)
     {
       bentleysedgewick(encseq,
+                       readmode,
                        totallength,
                        &mkvauxstack,
                        suftabptr + left,

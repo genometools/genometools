@@ -240,7 +240,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
   emmesa->numofindexes = numofindexes;
   emmesa->numofentries = numofindexes;
   emmesa->ident = (uint64_t) numofindexes;
-  emmesa->trierep.encseqtable = NULL;
+  emmesa->trierep.encseqreadinfo = NULL;
   ALLOCASSIGNSPACE(emmesa->suffixarraytable,NULL,Suffixarray,numofindexes);
   ALLOCASSIGNSPACE(emmesa->nextpostable,NULL,Seqpos,numofindexes);
   if(inputthesequences(&emmesa->alpha,
@@ -257,11 +257,14 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
   {
     uint32_t idx;
 
-    ALLOCASSIGNSPACE(emmesa->trierep.encseqtable,NULL,Encodedsequence *,
+    ALLOCASSIGNSPACE(emmesa->trierep.encseqreadinfo,NULL,Encseqreadinfo,
                      numofindexes);
     for(idx = 0; idx < numofindexes; idx++)
     {
-      emmesa->trierep.encseqtable[idx] = emmesa->suffixarraytable[idx].encseq;
+      emmesa->trierep.encseqreadinfo[idx].encseqptr 
+        = emmesa->suffixarraytable[idx].encseq;
+      emmesa->trierep.encseqreadinfo[idx].readmode 
+        = emmesa->suffixarraytable[idx].readmode;
     }
     inittrienodetable(&emmesa->trierep,numofindexes,numofindexes,env);
     if(insertfirstsuffixes(&emmesa->trierep,
@@ -270,7 +273,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
                            numofindexes,
                            env) != 0)
     {
-      FREESPACE(emmesa->trierep.encseqtable);
+      FREESPACE(emmesa->trierep.encseqreadinfo);
       haserr = true;
     }
   }
@@ -291,7 +294,7 @@ void wraptEmissionmergedesa(Emissionmergedesa *emmesa,Env *env)
     freesuffixarray(emmesa->suffixarraytable + idx,env);
   }
   FREESPACE(emmesa->suffixarraytable);
-  FREESPACE(emmesa->trierep.encseqtable);
+  FREESPACE(emmesa->trierep.encseqreadinfo);
   if(emmesa->numofindexes > (uint32_t) 1)
   {
     freetrierep(&emmesa->trierep,env);

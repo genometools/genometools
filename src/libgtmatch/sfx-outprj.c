@@ -15,6 +15,7 @@
 #include "spacedef.h"
 #include "filelength-def.h"
 #include "esafileend.h"
+#include "readmode-def.h"
 #include "stamp.h"
 
 #include "endianess.pr"
@@ -26,6 +27,7 @@
 
 static void showprjinfo(FILE *outprj,
                         const StrArray *filenametab,
+                        Readmode readmode,
                         const Filelengthvalues *filelengthtab,
                         Seqpos totallength,
                         unsigned long numofsequences,
@@ -67,10 +69,12 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"integersize=%u\n",
                   (unsigned int) (sizeof (Seqpos) * CHAR_BIT));
   fprintf(outprj,"littleendian=%c\n",islittleendian() ? '1' : '0');
+  fprintf(outprj,"readmode=%u\n",(unsigned int) readmode);
 }
 
 int outprjfile(const Str *indexname,
                const StrArray *filenametab,
+               Readmode readmode,
                const Filelengthvalues *filelengthtab,
                Seqpos totallength,
                unsigned long numofsequences,
@@ -94,6 +98,7 @@ int outprjfile(const Str *indexname,
   {
     showprjinfo(prjfp,
                 filenametab,
+                readmode,
                 filelengthtab,
                 totallength,
                 numofsequences,

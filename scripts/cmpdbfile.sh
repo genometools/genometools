@@ -21,9 +21,9 @@ function checkerror()
 function comparefiles()
 {
   TMPFILE1=`mktemp ../testsuite/TMP.XXXXXX` || exit 1
-  egrep -v 'prefixlength|integersize' $1 > ${TMPFILE1}
+  egrep -v 'prefixlength|integersize|readmode' $1 > ${TMPFILE1}
   TMPFILE2=`mktemp ../testsuite/TMP.XXXXXX` || exit 1
-  egrep -v 'prefixlength|integersize' $2 > ${TMPFILE2}
+  egrep -v 'prefixlength|integersize|readmode' $2 > ${TMPFILE2}
   checkerror "cmp -s ${TMPFILE1} ${TMPFILE2}"
   rm -f ${TMPFILE1} ${TMPFILE2}
 }

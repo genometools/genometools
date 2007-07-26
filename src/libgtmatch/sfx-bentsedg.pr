@@ -3,6 +3,7 @@ extern "C" {
 #endif
 void sortallbuckets(Seqpos *suftabptr,
                     const Encodedsequence *encseq,
+                    Readmode readmode,
                     const Seqpos *leftborder,
                     const Seqpos *countspecialcodes,
                     uint32_t numofchars,

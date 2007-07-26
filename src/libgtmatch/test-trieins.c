@@ -65,10 +65,8 @@ static void successivelydeletesmallest(Trierep *trierep,
 int test_trieins(bool onlyins,const Str *indexname,Env *env)
 {
   Suffixarray suffixarray;
-  Trierep trierep;
   bool haserr = false;
   Seqpos totallength;
-  const Uchar *characters;
 
   if(streamsuffixarray(&suffixarray,
                        &totallength,
@@ -81,7 +79,12 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
   }
   if(!haserr)
   {
-    trierep.encseqtable = &suffixarray.encseq;
+    Trierep trierep;
+    const Uchar *characters;
+
+    ALLOCASSIGNSPACE(trierep.encseqreadinfo,NULL,Encseqreadinfo,1);
+    trierep.encseqreadinfo[0].encseqptr = suffixarray.encseq;
+    trierep.encseqreadinfo[0].readmode = suffixarray.readmode;
     characters = getcharactersAlphabet(suffixarray.alpha);
     inittrienodetable(&trierep,totallength,(uint32_t) 1,env);
     maketrie(&trierep,characters,totallength);

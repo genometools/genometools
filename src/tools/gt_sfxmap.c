@@ -81,6 +81,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   if (!haserr && !usestream)
   {
     checkentiresuftab(suffixarray.encseq,
+                      suffixarray.readmode,
                       getcharactersAlphabet(suffixarray.alpha),
                       suffixarray.suftab,
                       false, /* specialsareequal  */
