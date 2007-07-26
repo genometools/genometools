@@ -13,6 +13,8 @@ function cerr()
   then
     echo "failure: ${1}"
     exit 1
+  else
+    echo "success $1"
   fi
 }
 
@@ -64,18 +66,18 @@ done
 
 if test ${numofrfiles} -eq 1
 then
-  if test ! -f ${IDIR}/sfx-single.prj ||
-     test ${rfiles} -nt ${IDIR}/sfx-single.prj   
+  if test ! -f ${IDIR}/sfx-single.rev.prj ||
+     test ${rfiles} -nt ${IDIR}/sfx-single.rev.prj   
   then
-    suffixerator -dna -indexname ${IDIR}/sfx-single -db ${rfiles} -bwt -pl
+    suffixerator -dir rev -dna -indexname ${IDIR}/sfx-single.rev -db ${rfiles} -bwt -pl
   else
-    echo "# ${IDIR}/sfx-single is up to date"
+    echo "# ${IDIR}/sfx-single.rev is up to date"
   fi
   if test ! -f ${IDIR}/sfx-fm.fma ||
-     test ${IDIR}/sfx-single.prj -nt ${IDIR}/sfx-fm.fma
+     test ${IDIR}/sfx-single.rev.prj -nt ${IDIR}/sfx-fm.fma
   then
-    mkfmindex ${IDIR}/sfx-fm ${IDIR}/sfx-single
-    plain ${IDIR}/sfx-fm ${IDIR}/sfx-single.al1 ${IDIR}/sfx-single.bwt
+    mkfmindex ${IDIR}/sfx-fm ${IDIR}/sfx-single.rev
+    plain ${IDIR}/sfx-fm ${IDIR}/sfx-single.rev.al1 ${IDIR}/sfx-single.rev.bwt
   else
     echo "# ${IDIR}/sfx-fm is up to date"
   fi

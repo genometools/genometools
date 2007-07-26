@@ -258,7 +258,6 @@ static int uniqueposinsinglesequence(void *info,
   {
     return -1;
   }
-  printf("seqlen=%lu\n",seqlen);
   for(query = start, remaining = seqlen; remaining > 0; query++, remaining--)
   {
     uniquelength = skfmuniqueforward (substringinfo->fmindex,

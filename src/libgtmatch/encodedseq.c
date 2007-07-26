@@ -223,12 +223,16 @@ Seqpos getencseqtotallength(const Encodedsequence *encseq)
 Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
                      Readmode readmode)
 {
-  if(readmode != Forwardmode)
+  if(readmode == Forwardmode)
   {
-    fprintf(stderr,"other readmodes not implemented\n");
-    exit(EXIT_FAILURE);
+    return encseq->deliverchar(encseq,pos);
   }
-  return encseq->deliverchar(encseq,pos);
+  if(readmode == Reversemode)
+  {
+    return encseq->deliverchar(encseq,encseq->totallength - 1 - pos);
+  }
+  fprintf(stderr,"readmodes %u implemented\n",(unsigned int) readmode);
+  exit(EXIT_FAILURE);
 }
 
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,

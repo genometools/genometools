@@ -371,6 +371,15 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
           haserr = true;
         }
       }
+    } else
+    {
+      if(so->readmode != Forwardmode)
+      {
+        env_error_set(env,"readmode = %u only makes sense in combination with "
+                          "at least one of the options -suf, -lcp, or -bwt",
+                          so->readmode);
+        haserr = true;
+      }
     }
   }
   env_fa_xfclose(outfileinfo.outfpsuftab,env);

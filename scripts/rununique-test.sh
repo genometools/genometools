@@ -15,6 +15,8 @@ function cerr()
   then
     echo "failure: ${1}"
     exit 1
+  else
+    echo "success $1"
   fi
 }
 
@@ -61,17 +63,17 @@ done
 
 if test ${numofrfiles} -eq 1
 then
-  if test ! -f ${IDIR}/mkv-single.prj ||
-     test ${rfiles} -nt ${IDIR}/mkv-single.prj   
+  if test ! -f ${IDIR}/mkv-single.rev.prj ||
+     test ${rfiles} -nt ${IDIR}/mkv-single.rev.prj   
   then
-    mkvtree -dna -indexname ${IDIR}/mkv-single -db ${rfiles} -suf -tis -bwt -pl
+    mkvtree -rev -dna -indexname ${IDIR}/mkv-single -db ${rfiles} -suf -tis -bwt -pl
   else
-    echo "# ${IDIR}/mkv-single is up to date"
+    echo "# ${IDIR}/mkv-single.rev is up to date"
   fi
   if test ! -f ${IDIR}/mkv-fm.fma ||
-     test ${IDIR}/mkv-single.prj -nt ${IDIR}/mkv-fm.fma
+     test ${IDIR}/mkv-single.rev.prj -nt ${IDIR}/mkv-fm.fma
   then
-    mkfmindex ${IDIR}/mkv-fm ${IDIR}/mkv-single
+    mkfmindex ${IDIR}/mkv-fm ${IDIR}/mkv-single.rev
   else
     echo "# ${IDIR}/mkv-fm is up to date"
   fi
@@ -83,7 +85,7 @@ else
     if test ! -f ${IDIR}/midx${fn}.prj || 
        test ${rfile} -nt ${IDIR}/midx${fn}.prj
     then
-      mkvtree -indexname ${IDIR}/midx${fn} -db ${rfile} -suf -lcp -tis -pl
+      mkvtree -rev -indexname ${IDIR}/midx${fn} -db ${rfile} -suf -lcp -tis -pl
       runmkfm=1
     else
       echo "# ${IDIR}/midx${fn} is up to date"
