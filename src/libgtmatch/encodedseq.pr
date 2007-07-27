@@ -3,7 +3,8 @@ extern "C" {
 #endif
 Seqpos getencseqtotallength(const Encodedsequence *encseq);
 
-Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos);
+Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
+                     Readmode readmode);
 
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
@@ -26,6 +27,7 @@ int overallspecialranges(const Encodedsequence *encseq,
 
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
                                            const StrArray *filenametab,
+                                           bool plainformat,
                                            const Str *indexname,
                                            Seqpos totallength,
                                            const Specialcharinfo

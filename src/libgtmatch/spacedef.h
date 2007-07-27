@@ -15,7 +15,7 @@
         V = (T *) realloc(S,sizeof (T) * (size_t) (N));\
         if ((V) == NULL)\
         {\
-          fprintf(stderr,"file %s, line %d: malloc(%lu) failed\n",\
+          fprintf(stderr,"file %s, line %d: realloc(%lu) failed\n",\
                   FILENAME,LINENUM,\
                   (unsigned long) (sizeof (T) * (size_t) (N)));\
           exit(EXIT_FAILURE);\
@@ -60,17 +60,7 @@
   appears.
 */
 
-/* Some obsolete macros
-
 #define ASSIGNDYNAMICSTRDUP(V,S)\
         V = dynamicstrdup(__FILE__,__LINE__,S,env)
-
-#define COMPOSEFILENAME(FILENAME,SUFFIX)\
-        composefilename(__FILE__,__LINE__,FILENAME,SUFFIX,env)
-
-#define COMPOSEFILENAMEGENERIC(FILENAME,SEP,SUFFIX)\
-        composefilenamegeneric(__FILE__,__LINE__,FILENAME,SEP,SUFFIX,env)
-
-*/
 
 #endif

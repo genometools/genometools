@@ -5,7 +5,7 @@
 */
 
 #include <assert.h>
-#include "types.h"
+#include "format64.h"
 #include "chardef.h"
 #include "intbits-tab.h"
 #include "divmodmul.h"
@@ -46,14 +46,17 @@ static Uchar getfirstedgechar(const Trierep *trierep,
                               const Trienode *node,
                               Seqpos prevdepth)
 {
-  Encodedsequence *encseq = trierep->encseqtable[node->suffixinfo.idx];
+  Encseqreadinfo *eri = trierep->encseqreadinfo + node->suffixinfo.idx;
 
   if(ISLEAF(node) &&
-     node->suffixinfo.startpos + prevdepth >= getencseqtotallength(encseq))
+     node->suffixinfo.startpos + prevdepth >= 
+     getencseqtotallength(eri->encseqptr))
   {
     return (Uchar) SEPARATOR;
   }
-  return getencodedchar(encseq,node->suffixinfo.startpos + prevdepth);
+  return getencodedchar(eri->encseqptr,
+                        node->suffixinfo.startpos + prevdepth,
+                        eri->readmode);
 }
 
 static int comparecharacters(Uchar cc1,Seqpos idx1,Uchar cc2,Seqpos idx2)
@@ -111,8 +114,7 @@ static void showtrie2(const Trierep *trierep,
       current != NULL; 
       current = current->rightsibling)
   {
-    printf("%*.*s",(Fieldwidthtype) (6 * level),
-                   (Fieldwidthtype) (6 * level)," ");
+    printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
     if(ISLEAF(current))
     {
       endpos = getencseqtotallength(
@@ -379,7 +381,7 @@ static Trienode *makenewbranch(Trierep *trierep,
 {
   Trienode *newbranch, *newleaf;
   Uchar cc1, cc2;
-  Encodedsequence *encseq = trierep->encseqtable[suffixinfo->idx];
+  Encseqreadinfo *eri = trierep->encseqreadinfo + suffixinfo->idx;
 
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW
@@ -391,12 +393,14 @@ static Trienode *makenewbranch(Trierep *trierep,
   newbranch->suffixinfo = *suffixinfo;
   newbranch->rightsibling = oldnode->rightsibling;
   cc1 = getfirstedgechar(trierep,oldnode,currentdepth);
-  if(suffixinfo->startpos + currentdepth >= getencseqtotallength(encseq))
+  if(suffixinfo->startpos + currentdepth >= 
+     getencseqtotallength(eri->encseqptr))
   {
     cc2 = (Uchar) SEPARATOR;
   } else
   {
-    cc2 = getencodedchar(encseq,suffixinfo->startpos + currentdepth);
+    cc2 = getencodedchar(eri->encseqptr,suffixinfo->startpos + currentdepth,
+                         eri->readmode);
   }
   newleaf = makenewleaf(trierep,suffixinfo);
   if(comparecharacters(cc1,oldnode->suffixinfo.idx,
@@ -411,16 +415,18 @@ static Trienode *makenewbranch(Trierep *trierep,
   return newbranch;
 }
 
-static Seqpos getlcp(const Encodedsequence *encseq1,Seqpos start1,Seqpos end1,
-                     const Encodedsequence *encseq2,Seqpos start2,Seqpos end2)
+static Seqpos getlcp(const Encodedsequence *encseq1,Readmode readmode1,
+                     Seqpos start1,Seqpos end1,
+                     const Encodedsequence *encseq2,Readmode readmode2,
+                     Seqpos start2,Seqpos end2)
 {
   Seqpos i1, i2;
   Uchar cc1;
 
   for(i1=start1, i2=start2; i1 <= end1 && i2 <= end2; i1++, i2++)
   {
-    cc1 = getencodedchar(encseq1,i1);
-    if(cc1 != getencodedchar(encseq2,i2) || ISSPECIAL(cc1))
+    cc1 = getencodedchar(encseq1,i1,readmode1);
+    if(cc1 != getencodedchar(encseq2,i2,readmode2) || ISSPECIAL(cc1))
     {
       break;
     }
@@ -470,19 +476,21 @@ void insertsuffixintotrie(Trierep *trierep,
     Trienode *currentnode, *newleaf, *newbranch, *succ;
     Nodepair np;
     Uchar cc;
-    Encodedsequence *encseq = trierep->encseqtable[suffixinfo->idx];
+    Encseqreadinfo *eri = trierep->encseqreadinfo + suffixinfo->idx;
 
     assert(!ISLEAF(node));
     currentnode = node;
     currentdepth = node->depth;
     while(true)
     {
-      if(suffixinfo->startpos + currentdepth >= getencseqtotallength(encseq))
+      if(suffixinfo->startpos + currentdepth >= 
+         getencseqtotallength(eri->encseqptr))
       {
 	cc = (Uchar) SEPARATOR;
       } else
       {
-	cc = getencodedchar(encseq,suffixinfo->startpos + currentdepth);
+	cc = getencodedchar(eri->encseqptr,suffixinfo->startpos + currentdepth,
+                            eri->readmode);
       }
       assert(currentnode != NULL);
       assert(!ISLEAF(currentnode));
@@ -505,14 +513,18 @@ void insertsuffixintotrie(Trierep *trierep,
       succ = np.current;
       if(ISLEAF(succ))
       {
-	lcpvalue = getlcp(trierep->encseqtable[suffixinfo->idx],
+	lcpvalue = getlcp(eri->encseqptr,
+                          eri->readmode,
                           suffixinfo->startpos + currentdepth + 1,
-			  getencseqtotallength(
-                              trierep->encseqtable[suffixinfo->idx]) - 1,
-			  trierep->encseqtable[succ->suffixinfo.idx],
+			  getencseqtotallength(eri->encseqptr) - 1,
+			  trierep->encseqreadinfo[succ->suffixinfo.idx].
+                                encseqptr,
+			  trierep->encseqreadinfo[succ->suffixinfo.idx].
+                                readmode,
 			  succ->suffixinfo.startpos + currentdepth + 1,
 			  getencseqtotallength(
-                              trierep->encseqtable[succ->suffixinfo.idx]) - 1);
+                              trierep->encseqreadinfo[succ->suffixinfo.idx].
+                                        encseqptr) - 1);
 	newbranch = makenewbranch(trierep,
 				  suffixinfo,
 				  currentdepth + lcpvalue + 1,
@@ -528,11 +540,12 @@ void insertsuffixintotrie(Trierep *trierep,
 	}
 	return;
       }
-      lcpvalue = getlcp(trierep->encseqtable[suffixinfo->idx],
+      lcpvalue = getlcp(eri->encseqptr,
+                        eri->readmode,
                         suffixinfo->startpos + currentdepth + 1,
-			getencseqtotallength(
-                            trierep->encseqtable[suffixinfo->idx]) - 1,
-			trierep->encseqtable[succ->suffixinfo.idx],
+			getencseqtotallength(eri->encseqptr) - 1,
+			trierep->encseqreadinfo[succ->suffixinfo.idx].encseqptr,
+			trierep->encseqreadinfo[succ->suffixinfo.idx].readmode,
 			succ->suffixinfo.startpos + currentdepth + 1,
 			succ->suffixinfo.startpos + succ->depth - 1);
       if(currentdepth + lcpvalue + 1 < succ->depth)
@@ -625,4 +638,5 @@ void freetrierep(Trierep *trierep,Env *env)
 {
   FREESPACE(trierep->nodetable);
   FREESPACE(trierep->unusedTrienodes);
+  FREESPACE(trierep->encseqreadinfo);
 }

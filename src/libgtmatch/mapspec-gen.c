@@ -7,11 +7,12 @@
 #include <errno.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
-#include "types.h"
-#include "bwtbound.h"
+#include "ushort-def.h"
+#include "fmi-bwtbound.h"
 #include "intbits.h"
 #include "safecast-gen.h"
 #include "mapspec-def.h"
+#include "format64.h"
 #include "stamp.h"
 
 #define ASSIGNPTR2STARTPTR(TYPE)\
@@ -163,7 +164,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
                          " expected",
                          (unsigned long) numofbytes,
                          str_get(tmpfilename),
-                         expectedaccordingtomapspec);
+                         PRINTuint64_tcast(expectedaccordingtomapspec));
       haserr = true;
     }
   }

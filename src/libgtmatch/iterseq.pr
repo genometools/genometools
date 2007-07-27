@@ -1,0 +1,19 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int overallquerysequences(int(*processsequence)(void *,
+                                                uint64_t,
+                                                const Uchar *,
+                                                unsigned long,
+                                                const char *,
+                                                Env *),
+                          void *info,
+                          ArrayUchar *sequencebuffer,
+                          const StrArray *filenametab,
+                          Sequencedescription *sequencedescription,
+                          const Uchar *symbolmap,
+                          Env *env);
+
+#ifdef __cplusplus
+}
+#endif

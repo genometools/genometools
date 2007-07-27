@@ -5,7 +5,6 @@
 */
 
 #include "libgtcore/env.h"
-#include "types.h"
 #include "spacedef.h"
 #include "encseq-def.h"
 #include "fbs-def.h"
@@ -27,11 +26,13 @@ int testencodedsequence(const StrArray *filenametab,
   Encodedsequencescanstate *esr;
 
   env_error_check(env);
-  initfastabufferstate(&fbs,
-                       filenametab,
-                       symbolmap,
-                       NULL,
-                       env);
+  initformatbufferstate(&fbs,
+                        filenametab,
+                        symbolmap,
+                        false,
+                        NULL,
+                        NULL,
+                        env);
   esr = initEncodedsequencescanstate(encseq,env);
   for (pos=0; /* Nothing */; pos++)
   {
@@ -45,7 +46,7 @@ int testencodedsequence(const StrArray *filenametab,
     {
       break;
     }
-    cc1 = getencodedchar(encseq,pos);
+    cc1 = getencodedchar(encseq,pos,Forwardmode);
     if (cc0 != cc1)
     {
       env_error_set(env,"position " FormatSeqpos

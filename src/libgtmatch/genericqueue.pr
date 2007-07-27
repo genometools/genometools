@@ -1,0 +1,24 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+Genericqueue *emptyqueuegeneric(Env *env);
+
+unsigned long sizeofgenericqueue(const Genericqueue *q);
+
+bool queueisemptygeneric(const Genericqueue *q);
+
+void enqueuegeneric(Genericqueue *q,void *contents,Env *env);
+
+/*@null@*/ void *dequeuegeneric(Genericqueue *q,Env *env);
+
+/*@null@*/ void *headofqueuegeneric(const Genericqueue *q);
+
+int overallqueuelementsgeneric(Genericqueue *q,
+                               GenericQueueprocessor queueprocessor,
+                               void *info);
+
+void wrapqueuegeneric(bool freecontents,Genericqueue **q,Env *env);
+
+#ifdef __cplusplus
+}
+#endif

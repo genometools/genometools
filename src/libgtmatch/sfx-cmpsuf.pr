@@ -1,0 +1,15 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int comparetwosuffixes(const Encodedsequence *encseq,
+                       Readmode readmode,
+                       Seqpos *maxlcp,
+                       bool specialsareequal,
+                       bool specialsareequalatdepth0,
+                       Seqpos depth,
+                       Seqpos start1,
+                       Seqpos start2);
+
+#ifdef __cplusplus
+}
+#endif

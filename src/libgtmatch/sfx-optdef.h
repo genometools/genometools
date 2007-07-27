@@ -7,8 +7,10 @@
 #ifndef SFX_OPTDEF_H
 #define SFX_OPTDEF_H
 
+#include <stdbool.h>
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
+#include "readmode-def.h"
 
 #define PREFIXLENGTH_AUTOMATIC 0
 
@@ -20,8 +22,10 @@ typedef struct
       *str_smap,
       *str_sat;
   StrArray *filenametab;
+  Readmode readmode;
   bool isdna,
        isprotein,
+       isplain,
        outtistab,
        outsuftab,
        outlcptab,

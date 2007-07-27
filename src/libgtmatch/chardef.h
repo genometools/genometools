@@ -7,7 +7,7 @@
 #ifndef CHARDEF_H
 #define CHARDEF_H
 #include <limits.h>
-#include "types.h"
+#include <inttypes.h>
 
 /*
   This file defines some character values used when storing
@@ -49,13 +49,13 @@
   transform
 */
 
-#define UNDEFBWTCHAR    UNDEFCHAR
+#define UNDEFBWTCHAR    WILDCARD
 
 /*
   Either special character or UNDEFBWTCHAR
 */
 
-#define ISBWTSPECIAL(C)    ((C) >= (Uchar) UNDEFBWTCHAR)
+#define ISBWTSPECIAL(C) ((C) >= (Uchar) UNDEFBWTCHAR)
 
 /*
   the size of the DNA alphabet

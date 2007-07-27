@@ -7,14 +7,14 @@
 #ifndef TRIEINS_DEF_H
 #define TRIEINS_DEF_H
 
-#include "types.h"
+#include "seqpos-def.h"
 #include "arraydef.h"
 #include "encseq-def.h"
 
 typedef struct
 {
-  Seqpos idx,
-         startpos;
+  uint32_t idx;
+  Seqpos startpos;
 #ifdef WITHTRIEIDENT
   uint64_t  ident;
 #endif
@@ -35,7 +35,13 @@ DECLAREARRAYSTRUCT(Trienodeptr);
 
 typedef struct
 {
-  Encodedsequence **encseqtable;
+  Encodedsequence *encseqptr;
+  Readmode readmode;
+} Encseqreadinfo;
+
+typedef struct
+{
+  Encseqreadinfo *encseqreadinfo;
   Trienode *nodetable, 
            *root;
   Trienodeptr *unusedTrienodes;

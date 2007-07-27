@@ -111,7 +111,7 @@ static void skproto(const char *filename, FILE *fpin, Env *env)
     removecomments(line, &incomment, env);
     if (str_length(line)) {
       if (startfunction) {
-        if (isalpha(str_get(line)[0]) ||
+        if (isalpha((int) (str_get(line)[0])) ||
             (str_length(line) >= 3 &&
              strncmp(str_get(line), "/*@", 3) == 0)) {
           if (!forbiddenstring(line)) {

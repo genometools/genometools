@@ -8,9 +8,13 @@
 #define FBS_DEF_H
 #include <stdio.h>
 #include <stdbool.h>
+#include <inttypes.h>
 #include <zlib.h>
 #include "libgtcore/strarray.h"
-#include "types.h"
+#include "symboldef.h"
+#include "filelength-def.h"
+#include "arraydef.h"
+#include "seqdesc.h"
 
 #define FILEBUFFERSIZE 65536
 
@@ -26,22 +30,23 @@ typedef struct
 
 typedef struct
 {
-  uint32_t filenum,
-           linenum,
-           nextread,
-           nextfree;
+  uint32_t filenum;
+  uint64_t linenum;
+  unsigned long nextread,
+                nextfree;
   bool indesc,
        firstoverallseq,
        firstseqinfile,
        complete,
        nextfile;
+  Sequencedescription *sequencedescription;
   Genericstream inputstream;
   Uchar bufspace[FILEBUFFERSIZE];
-  Seqpos totaloffset;
-  Seqpos lastspeciallength;
+  uint64_t lastspeciallength;
   Filelengthvalues *filelengthtab;
   const StrArray *filenametab;
   const Uchar *symbolmap;
+  bool plainformat;
 } Fastabufferstate;
 
 #endif

@@ -62,6 +62,7 @@ LIBGTEXT_CXX_DEP:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.d)
 # the GenomeTools matching library
 LIBGTMATCH_SRC:=$(wildcard src/libgtmatch/*.c)
 LIBGTMATCH_OBJ:=$(LIBGTMATCH_SRC:%.c=obj/%.o)
+LIBGTMATCH_DEP:=$(LIBGTMATCH_SRC:%.c=obj/%.d)
 
 # the GenomeTools view library
 LIBGTVIEW_C_SRC:=$(wildcard src/libgtview/*.c)
@@ -305,8 +306,9 @@ obj/%.o: %.cxx
 
 # read deps
 -include $(LIBGTCORE_DEP) $(LIBGTEXT_C_DEP) $(LIBGTEXT_CXX_DEP) \
-         $(LIBGTVIEW_C_DEP) $(TOOLS_DEP) $(LIBAGG_DEP) $(LIBEXPAT_DEP) \
-         $(LIBLUA_DEP) $(LIBPNG_DEP) $(LIBRNV_DEP) $(LIBBBZ2_DEP)
+         $(LIBGTMATCH_DEP) $(LIBGTVIEW_C_DEP) $(TOOLS_DEP) $(LIBAGG_DEP) \
+         $(LIBEXPAT_DEP) $(LIBLUA_DEP) $(LIBPNG_DEP) $(LIBRNV_DEP) \
+         $(LIBBBZ2_DEP)
 
 .SUFFIXES:
 .PHONY: dist srcdist release gt install splint test clean cleanup apidoc
@@ -368,7 +370,18 @@ splint:
         $(CURDIR)/src/libgtext/*.c \
         $(CURDIR)/src/tools/*.c
 
-splint-gtmatch:${addprefix obj/,${notdir ${subst .c,.splint,${wildcard ${CURDIR}/src/libgtmatch/*.c}}}}
+sgt:${addprefix obj/,${notdir ${subst .c,.splint,${wildcard ${CURDIR}/src/libgtmatch/*.c}}}}
+
+
+obj/%.splint: ${CURDIR}/src/libgtmatch/%.c
+	@echo "splint $<"
+	@splint -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@touch $@
+
+obj/%.prepro: ${CURDIR}/src/libgtmatch/%.c
+	@echo "[generate $@]"
+	${CC} -c $< -o $@ ${CFLAGS} ${GT_CFLAGS} -E -g3
+	indent $@
 
 test: all
 	bin/gt -test

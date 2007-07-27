@@ -8,7 +8,6 @@
 #include <ctype.h>
 #include "libgtcore/env.h"
 #include "libgtcore/hashtable.h"
-#include "types.h"
 #include "spacedef.h"
 #include "dist-if.h"
 

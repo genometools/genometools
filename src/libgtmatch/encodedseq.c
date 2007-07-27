@@ -9,7 +9,8 @@
 #include <ctype.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
-#include "types.h"
+#include "seqpos-def.h"
+#include "ushort-def.h"
 #include "intbits-tab.h"
 #include "alphadef.h"
 #include "chardef.h"
@@ -28,10 +29,13 @@
 
 #include "readnextUchar.gen"
 
+
 #ifdef Seqposequalsunsignedint
+#define Uint32Const(N)   (N##U)  /* uint32_t constant */
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
         ((ESEQ[DIV4(IDX)] >> (Uint32Const(6) - MULT2(MOD4(IDX)))) & Uint32Const(3))
 #else
+#define Uint64Const(N)   (N##UL) /* uint64_t constant */
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
         ((ESEQ[(Seqpos) DIV4(IDX)] >> (Uint64Const(6) - (uint64_t) MULT2(MOD4(IDX))))\
          & Uint64Const(3))
@@ -216,9 +220,37 @@ Seqpos getencseqtotallength(const Encodedsequence *encseq)
   return encseq->totallength;
 }
 
-Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos)
+Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
+                     Readmode readmode)
 {
-  return encseq->deliverchar(encseq,pos);
+  if(readmode == Forwardmode)
+  {
+    return encseq->deliverchar(encseq,pos);
+  }
+  if(readmode == Reversemode)
+  {
+    return encseq->deliverchar(encseq,encseq->totallength - 1 - pos);
+  }
+  if(readmode == Complementmode) /* only works with dna */
+  {
+    Uchar cc = encseq->deliverchar(encseq,pos);
+    if(ISSPECIAL(cc))
+    {
+      return cc;
+    } 
+    return (Uchar) 3 - cc;
+  }
+  if(readmode == Reversecomplementmode)
+  {
+    Uchar cc = encseq->deliverchar(encseq,encseq->totallength - 1 - pos);
+    if(ISSPECIAL(cc))
+    {
+      return cc;
+    } 
+    return (Uchar) 3 - cc;
+  }
+  fprintf(stderr,"readmodes %u implemented\n",(unsigned int) readmode);
+  exit(EXIT_FAILURE);
 }
 
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
@@ -374,7 +406,7 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
   env_error_check(env);
   encseqwithoptions.encseq = encseq;
   encseqwithoptions.writemode = true;
-  fp = opensfxfile(indexname,ENCODEDSEQINDEX,"wb",env);
+  fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"wb",env);
   if (fp == NULL)
   {
     haserr = true;
@@ -405,7 +437,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
 
   env_error_check(env);
   tmpfilename = str_clone(indexname,env);
-  str_append_cstr(tmpfilename,ENCODEDSEQINDEX,env);
+  str_append_cstr(tmpfilename,ENCSEQFILESUFFIX,env);
   encseqwithoptions.encseq = encseq;
   encseqwithoptions.writemode = false;
   if (fillmapspecstartptr(assignencseqmapspecification,
@@ -1311,7 +1343,7 @@ static int readsatfromfile(const Str *indexname,Env *env)
   int cc = 0;
   bool haserr = false;
 
-  fp = opensfxfile(indexname,ENCODEDSEQINDEX,"rb",env);
+  fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"rb",env);
   if (fp == NULL)
   {
     haserr = true;
@@ -1322,7 +1354,7 @@ static int readsatfromfile(const Str *indexname,Env *env)
     if(cc == EOF)
     {
       env_error_set(env,"illegal EOF symbol in \"%s%s\"",
-                     str_get(indexname),ENCODEDSEQINDEX);
+                     str_get(indexname),ENCSEQFILESUFFIX);
       haserr = true;
     }
   }
@@ -1331,7 +1363,7 @@ static int readsatfromfile(const Str *indexname,Env *env)
     if(cc < 0 || cc >= (int) Undefpositionaccesstype)
     {
       env_error_set(env,"illegal type %d in \"%s%s\"",cc,
-                         str_get(indexname),ENCODEDSEQINDEX);
+                         str_get(indexname),ENCSEQFILESUFFIX);
       haserr = true;
     }
   }
@@ -1351,8 +1383,13 @@ static int readsatfromfile(const Str *indexname,Env *env)
         encseq->seqdelivercharname\
           = encodedseqfunctab[(int) sat].seqdeliverchar##NAME.funcname
 
+/*
+  if filenametab != NULL, 
+*/
+
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
                                            const StrArray *filenametab,
+                                           bool plainformat,
                                            const Str *indexname,
                                            Seqpos totallength,
                                            const Specialcharinfo
@@ -1493,11 +1530,13 @@ static int readsatfromfile(const Str *indexname,Env *env)
       Fastabufferstate fbs;
       encseq->mappedptr = NULL;
   
-      initfastabufferstate(&fbs,
-                           filenametab,
-                           getsymbolmapAlphabet(alphabet),
-                           NULL,
-                           env);
+      initformatbufferstate(&fbs,
+                            filenametab,
+                            plainformat ? NULL : getsymbolmapAlphabet(alphabet),
+                            plainformat,
+                            NULL,
+                            NULL,
+                            env);
       printf("# call %s\n",
              encodedseqfunctab[(int) sat].fillpos.funcname);
       if (encodedseqfunctab[(int) sat].fillpos.function(encseq,&fbs,env)

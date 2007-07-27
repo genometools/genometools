@@ -6,7 +6,6 @@
 
 #ifndef INTBITS_H
 #define INTBITS_H
-#include <limits.h>
 
 /*
   This file contains some definitions manipulating bitvectors represented

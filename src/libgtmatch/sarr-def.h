@@ -8,8 +8,9 @@
 #define SARR_DEF_H
 
 #include <stdio.h>
-#include "types.h"
+#include "seqpos-def.h"
 #include "alphadef.h"
+#include "filelength-def.h"
 #include "encseq-def.h"
 
 #define FILEBUFFERSIZE 65536
@@ -73,7 +74,7 @@ typedef struct
   DefinedSeqpos longest;
   Specialcharinfo specialcharinfo;
   Alphabet *alpha;
-  bool mappedinput;
+  Readmode readmode; /* relevant when reading the encoded sequence */
   /* either with mapped input */
   const Seqpos *suftab;
   const Uchar *lcptab;

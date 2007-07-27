@@ -4,7 +4,6 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include "types.h"
 #include "spacedef.h"
 #include "chardef.h"
 #include "sarr-def.h"
@@ -48,8 +47,10 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
     if(idx > 0)
     {
       lastofprevious = getencodedchar(suffixarraytable[idx - 1].encseq,
-                                      tmplength-1);
-      firstofcurrent = getencodedchar(suffixarraytable[idx].encseq,0);
+                                      tmplength-1,
+                                      suffixarraytable[idx - 1].readmode);
+      firstofcurrent = getencodedchar(suffixarraytable[idx].encseq,0,
+                                      suffixarraytable[idx].readmode);
       if(ISSPECIAL(lastofprevious))
       {
          if(ISSPECIAL(firstofcurrent))

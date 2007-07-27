@@ -1,0 +1,27 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int getfastastreamkmers(
+        const StrArray *filenametab,
+        void(*processkmercode)(void *,Codetype,Seqpos,
+                               const Firstspecialpos *,Env *),
+        void *processkmercodeinfo,
+        uint32_t numofchars,
+        uint32_t kmersize,
+        const Uchar *symbolmap,
+        bool plainformat,
+        Env *env);
+
+void getencseqkmers(
+        const Encodedsequence *encseq,
+        Readmode readmode,
+        void(*processkmercode)(void *,Codetype,Seqpos,
+                               const Firstspecialpos *,Env *),
+        void *processkmercodeinfo,
+        uint32_t numofchars,
+        uint32_t kmersize,
+        Env *env);
+
+#ifdef __cplusplus
+}
+#endif

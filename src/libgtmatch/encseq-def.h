@@ -6,10 +6,14 @@
 
 #ifndef ENCSEQDEF_H
 #define ENCSEQDEF_H
-#include "types.h"
-#include "alphadef.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
+#include "symboldef.h"
+#include "seqpos-def.h"
+#include "alphadef.h"
+#include "readmode-def.h"
+
+#define ENCSEQFILESUFFIX     ".esq"
 
 typedef struct _Encodedsequence Encodedsequence;
 typedef struct _Encodedsequencescanstate Encodedsequencescanstate;
@@ -20,9 +24,11 @@ typedef struct
          rightpos;
 } Sequencerange;          /* \Typedef{Sequencerange} */
 
+
 Seqpos getencseqtotallength(const Encodedsequence *encseq);
 
-Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos);
+Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
+                     Readmode readmode);
 
 int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
 
@@ -45,6 +51,7 @@ int overallspecialranges(const Encodedsequence *encseq,
 
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
                                            const StrArray *filenametab,
+                                           bool plainformat,
                                            const Str *indexname,
                                            Seqpos totallength,
                                            const Specialcharinfo

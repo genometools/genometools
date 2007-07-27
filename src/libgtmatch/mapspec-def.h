@@ -39,7 +39,7 @@ typedef struct
   unsigned long numofunits;
 } Mapspecification;
 
- DECLAREARRAYSTRUCT(Mapspecification);
+DECLAREARRAYSTRUCT(Mapspecification);
 
 typedef void(*Assignmapspec)(ArrayMapspecification *,void *,Env *);
 

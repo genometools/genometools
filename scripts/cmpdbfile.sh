@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 if test $# -lt 1
 then
@@ -18,8 +18,18 @@ function checkerror()
   fi
 }
 
+function comparefiles()
+{
+  TMPFILE1=`mktemp ../testsuite/TMP.XXXXXX` || exit 1
+  egrep -v 'prefixlength|integersize|readmode' $1 > ${TMPFILE1}
+  TMPFILE2=`mktemp ../testsuite/TMP.XXXXXX` || exit 1
+  egrep -v 'prefixlength|integersize|readmode' $2 > ${TMPFILE2}
+  checkerror "cmp -s ${TMPFILE1} ${TMPFILE2}"
+  rm -f ${TMPFILE1} ${TMPFILE2}
+}
+
 options="$*"
 
 checkerror "../bin/gt suffixerator -indexname /tmp/idx-sfx ${options}"
 checkerror "mkvtree.sh -indexname /tmp/idx-mkv -dna ${options}"
-checkerror "cmp -s /tmp/idx-mkv.prj /tmp/idx-sfx.prj"
+comparefiles /tmp/idx-mkv.prj /tmp/idx-sfx.prj

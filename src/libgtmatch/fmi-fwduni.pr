@@ -1,0 +1,10 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+unsigned long skfmuniqueforward (const Fmindex *fmindex,
+                                 const Uchar *qstart,
+                                 const Uchar *qend);
+
+#ifdef __cplusplus
+}
+#endif

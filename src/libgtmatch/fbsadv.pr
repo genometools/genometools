@@ -1,13 +1,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-void initfastabufferstate(Fastabufferstate *fbs,
-                          const StrArray *filenametab,
-                          const Uchar *symbolmap,
-                          Filelengthvalues **filelengthtab,
-                          Env *env);
+void initformatbufferstate(Fastabufferstate *fbs,
+                           const StrArray *filenametab,
+                           const Uchar *symbolmap,
+                           bool plainformat,
+                           Filelengthvalues **filelengthtab,
+                           Sequencedescription *sequencedescription,
+                           Env *env);
 
-int advanceFastabufferstate(Fastabufferstate *fbs,Env *env);
+int advanceformatbufferstate(Fastabufferstate *fbs,Env *env);
 
 #ifdef __cplusplus
 }

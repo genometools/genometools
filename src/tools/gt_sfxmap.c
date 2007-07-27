@@ -6,11 +6,11 @@
 
 #include "gt.h"
 
-static OPrval parse_options(bool *usestream,int *parsed_args, 
+static OPrval parse_options(bool *usestream,bool *verbose,int *parsed_args, 
                             int argc, const char **argv,Env *env)
 {
   OptionParser *op;
-  Option *optionstream;
+  Option *optionstream, *optionverbose;
   OPrval oprval;
 
   env_error_check(env);
@@ -21,6 +21,9 @@ static OPrval parse_options(bool *usestream,int *parsed_args,
   optionstream = option_new_bool("stream","stream the index",
                                  usestream,false,env);
   option_parser_add_option(op, optionstream, env);
+  optionverbose = option_new_bool("v","be verbose",verbose,false,env);
+  option_parser_add_option(op, optionverbose, env);
+
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 1, 2, env);
   option_parser_delete(op, env);
@@ -32,22 +35,28 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   Str *indexname;
   bool haserr = false;
   Suffixarray suffixarray;
+  Seqpos totallength;
   int parsed_args;
-  bool usestream = false;
+  bool usestream = false,
+       verbose = false;
 
   env_error_check(env);
 
-  switch (parse_options(&usestream,&parsed_args, argc, argv, env)) {
+  switch (parse_options(&usestream,&verbose,&parsed_args, argc, argv, env)) 
+  {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  assert(parsed_args == 1 || parsed_args == 2);
+  assert(parsed_args >= 1 && parsed_args <= 3);
 
   indexname = str_new_cstr(argv[parsed_args],env);
   if ((usestream ? streamsuffixarray : mapsuffixarray)(&suffixarray,
+                                                       &totallength,
                                                        SARR_ALLTAB, 
-                                                       indexname,env) != 0)
+                                                       indexname,
+                                                       verbose,
+                                                       env) != 0)
   {
     haserr = true;
   }
@@ -72,6 +81,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   if (!haserr && !usestream)
   {
     checkentiresuftab(suffixarray.encseq,
+                      suffixarray.readmode,
                       getcharactersAlphabet(suffixarray.alpha),
                       suffixarray.suftab,
                       false, /* specialsareequal  */
