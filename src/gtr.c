@@ -224,11 +224,11 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
   int had_err = 0;
   env_error_check(env);
   assert(gtr);
+  if (gtr->debug)
+    env_set_log(env, log_new(env_ma(env)));
   if (gtr->test) {
     return run_tests(gtr, env);
   }
-  if (gtr->debug)
-    env_set_log(env, log_new(env_ma(env)));
   assert(argc);
   if (argc == 1 && !gtr->interactive) {
     env_error_set(env, "no tool specified; option -help lists possible tools");
