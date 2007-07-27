@@ -365,14 +365,14 @@ bsCopy(const BitString src, BitOffset offsetSrc,
     /* write remaining (trailing) bits */
     while (bitsLeft || bitsInAccum)
     {
-      while(bitsLeft && bitsInAccum < sizeof (accum) * CHAR_BIT)
+      while (bitsLeft && bitsInAccum < sizeof (accum) * CHAR_BIT)
       {
         unsigned bits2Read = MIN3(bitsLeft, bitElemBits - bitTopSrc,
                                   sizeof (accum) * CHAR_BIT - bitsInAccum);
         unsigned unreadRightBits = (bitElemBits - bitTopSrc - bits2Read);
         uint_fast32_t mask =
-          (~((~(uint_fast32_t)0) << bits2Read)) << unreadRightBits;
-        accum = (accum << bits2Read) | ((*p) & mask) >> unreadRightBits;
+          ~((~(uint_fast32_t)0) << bits2Read);
+        accum = (accum << bits2Read) | (((*p) >> unreadRightBits) & mask);
         bitsLeft -= bits2Read;
         bitsInAccum += bits2Read;
         if((bitTopSrc += bits2Read) == bitElemBits)
@@ -381,15 +381,15 @@ bsCopy(const BitString src, BitOffset offsetSrc,
       while (bitsInAccum)
       {
         unsigned bits2Write = MIN(bitsInAccum, bitElemBits - bitTopDest),
-          unreadRightBits = bitElemBits - bits2Write - bitTopDest;
+          unwrittenRightBits = bitElemBits - bits2Write - bitTopDest;
         uint_fast32_t mask = (~(uint_fast32_t)0);
         if (bits2Write != bitElemBits)
         {
-          mask = (~(mask << bits2Write)) << unreadRightBits;
+          mask = (~(mask << bits2Write)) << unwrittenRightBits;
         }
         *q = (*q & ~mask) |
             (((accum >> (bitsInAccum -= bits2Write))
-              << unreadRightBits) & mask);
+              << unwrittenRightBits) & mask);
         if ((bitTopDest += bits2Write) == bitElemBits)
           bitTopDest = 0, ++q;
       }

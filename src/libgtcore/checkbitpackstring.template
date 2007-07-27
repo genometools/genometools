@@ -310,6 +310,8 @@ bitPackString@iTypeTag@_unit_test(Env *env)
       }
       assert(copyStart + numValueCopies <= numRnd);
       offset = offsetStart + (BitOffset)copyStart * numBits;
+      bsStoreUniform@uTypeTag@Array(bitStore, offset, numBits, numRnd,
+                               randSrc);
       destOffset = random()%
         (offsetStart
          + (sizeof (@uOpType@)*CHAR_BIT)

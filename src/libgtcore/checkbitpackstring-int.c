@@ -313,6 +313,8 @@ bitPackStringInt_unit_test(Env *env)
       }
       assert(copyStart + numValueCopies <= numRnd);
       offset = offsetStart + (BitOffset)copyStart * numBits;
+      bsStoreUniformUIntArray(bitStore, offset, numBits, numRnd,
+                               randSrc);
       destOffset = random()%
         (offsetStart
          + (sizeof (unsigned)*CHAR_BIT)
