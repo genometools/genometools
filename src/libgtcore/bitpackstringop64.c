@@ -15,11 +15,10 @@
 #include "libgtcore/minmax.h"
 #include "libgtcore/bitpackstring.h"
 
-
 uint64_t
 bsGetUInt64(const BitString str, BitOffset offset, unsigned numBits)
 {
-  uint_fast64_t accum = 0;
+  unsigned long long accum = 0;
   unsigned bitsLeft = numBits, bitTop = offset%bitElemBits;
   size_t elemStart = offset/bitElemBits;
   const BitElem *p = str + elemStart;
@@ -31,10 +30,10 @@ bsGetUInt64(const BitString str, BitOffset offset, unsigned numBits)
   assert(numBits <= sizeof (accum)*CHAR_BIT);
   if (bitTop)
   {
-    uint_fast64_t mask;
+    unsigned long long mask;
     unsigned bits2Read = MIN(bitElemBits - bitTop, bitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
-    mask = (~((~(uint_fast64_t)0) << bits2Read)) << unreadRightBits;
+    mask = (~((~(unsigned long long)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
     bitsLeft -= bits2Read;
   }
@@ -48,7 +47,7 @@ bsGetUInt64(const BitString str, BitOffset offset, unsigned numBits)
   if (bitsLeft)
   {
     accum = accum << bitsLeft |
-      (((*p) & ((~(uint_fast64_t)0)<<(bitElemBits - bitsLeft)))
+      (((*p) & ((~(unsigned long long)0)<<(bitElemBits - bitsLeft)))
        >>(bitElemBits - bitsLeft));
   }
   return accum;
@@ -67,8 +66,8 @@ bsStoreUInt64(BitString str, BitOffset offset,
   /* set bits of first element, accounting for bits to be preserved */
   if (bitTop)
   {
-    uint_fast64_t mask = ~(uint_fast64_t)0;
-    if (bitElemBits < (sizeof (uint_fast64_t)*CHAR_BIT))
+    unsigned long long mask = ~(unsigned long long)0;
+    if (bitElemBits < (sizeof (unsigned long long)*CHAR_BIT))
     {
       mask <<= bitElemBits;
     }
@@ -80,7 +79,7 @@ bsStoreUInt64(BitString str, BitOffset offset,
     if (numBits < bitElemBits - bitTop)
     {
       unsigned backShift = bitElemBits - numBits - bitTop;
-      mask &= ~(uint_fast64_t)0 << backShift;
+      mask &= ~(unsigned long long)0 << backShift;
       *p = (*p & ~mask) | ((val << backShift) & mask);
       /* TODO: try wether  r = a ^ ((a ^ b) & mask) is faster, see below */
       return;
@@ -101,9 +100,10 @@ bsStoreUInt64(BitString str, BitOffset offset,
   /* set bits for last elem */
   if (bitsLeft)
   {
-    uint_fast64_t mask = ((~(uint_fast64_t)0)<<(bitElemBits - bitsLeft));
-    if (bitElemBits < (sizeof (uint_fast64_t)*CHAR_BIT))
-      mask &= (~(~(uint_fast64_t)0<<bitElemBits));
+    unsigned long long mask =
+      ((~(unsigned long long)0)<<(bitElemBits - bitsLeft));
+    if (bitElemBits < (sizeof (unsigned long long)*CHAR_BIT))
+      mask &= (~(~(unsigned long long)0<<bitElemBits));
     *p = (*p & ~mask) | ((val << (bitElemBits - bitsLeft)) & mask);
   }
 }
@@ -140,7 +140,7 @@ bsGetUniformUInt64Array(const BitString str, BitOffset offset,
     bitsRead = 0; /*< how many bits in current *p are read */
   const BitElem *p = str + elemStart;
   unsigned bitsInAccum = 0;
-  uint_fast64_t accum = 0, valMask = ~(uint_fast64_t)0;
+  unsigned long long accum = 0, valMask = ~(unsigned long long)0;
   if (numBits < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
   assert(str && val);
@@ -153,10 +153,10 @@ bsGetUniformUInt64Array(const BitString str, BitOffset offset,
   /* get bits of first element if not aligned */
   if (bitTop)
   {
-    uint_fast64_t mask; /*< all of the bits we want to get from *p */
+    unsigned long long mask; /*< all of the bits we want to get from *p */
     unsigned bits2Read = MIN(bitElemBits - bitTop, totalBitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
-    mask = (~((~(uint_fast64_t)0) << bits2Read)) << unreadRightBits;
+    mask = (~((~(unsigned long long)0) << bits2Read)) << unreadRightBits;
     accum = ((*p++) & mask) >> unreadRightBits;
     bitsInAccum += bits2Read;
     totalBitsLeft -= bits2Read;
@@ -166,9 +166,9 @@ bsGetUniformUInt64Array(const BitString str, BitOffset offset,
     while (bitsInAccum < numBits && totalBitsLeft)
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
-      uint_fast64_t mask;
+      unsigned long long mask;
       bits2Read = MIN3(bitsFree, bitElemBits - bitsRead, totalBitsLeft);
-      mask = (~((~(uint_fast64_t)0) << bits2Read));
+      mask = (~((~(unsigned long long)0) << bits2Read));
       accum = accum << bits2Read | (((*p) >> (bitElemBits
                                               - bits2Read - bitsRead)) & mask);
       bitsInAccum += bits2Read;
@@ -200,7 +200,7 @@ bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
     bitsLeft; /*< how many bits in currentVal == val[j] are left */
   BitElem *p = str + offset/bitElemBits;
   unsigned bitsInAccum;
-  uint_fast64_t accum, valMask = ~(uint_fast64_t)0, currentVal;
+  unsigned long long accum, valMask = ~(unsigned long long)0, currentVal;
   if (numBits < (sizeof (val[0])*CHAR_BIT))
     valMask = ~(valMask << numBits);
   assert(str && val);
@@ -225,7 +225,7 @@ bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
   /* set bits of first element if not aligned */
   if (bitTop)
   {
-    BitElem mask = ~(~(uint_fast64_t)0 << (bitElemBits - bitTop));
+    BitElem mask = ~(~(unsigned long long)0 << (bitElemBits - bitTop));
     while ((totalBitsLeft || bitsLeft) && bitsInAccum < bitElemBits - bitTop)
     {
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
@@ -249,7 +249,7 @@ bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
     {
       /* no there's not enough */
       unsigned backShift = bitElemBits - bitsInAccum - bitTop;
-      mask &= ~(uint_fast64_t)0 << backShift;
+      mask &= ~(unsigned long long)0 << backShift;
       *p = (*p & ~mask) | ((accum << backShift) & mask);
       /* TODO: try wether  r = a ^ ((a ^ b) & mask) is faster, see below */
       return; /* if we couldn't gather more bits, there's none left */
@@ -272,7 +272,7 @@ bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
       unsigned bits2Read, bitsFree = sizeof (accum)*CHAR_BIT - bitsInAccum;
       if ((bits2Read = MIN(bitsFree, bitsLeft)) < sizeof (accum)*CHAR_BIT)
       {
-        uint_fast64_t mask = ~((~(uint_fast64_t)0) << bits2Read);
+        unsigned long long mask = ~((~(unsigned long long)0) << bits2Read);
         accum = accum << bits2Read
           | ((currentVal >> (bitsLeft - bits2Read)) & mask);
       }
@@ -303,7 +303,8 @@ bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
   }
   if (bitsInAccum)
   {
-    uint_fast64_t mask = ~(uint_fast64_t)0 << (bitElemBits - bitsInAccum);
+    unsigned long long mask =
+      ~(unsigned long long)0 << (bitElemBits - bitsInAccum);
     *p = (*p & ~mask) | ((accum << (bitElemBits - bitsInAccum))& mask);
   }
 }

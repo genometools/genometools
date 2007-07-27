@@ -5,7 +5,8 @@ use warnings;
 my @lengthTags = ('8', '16', '32', '64', '-int');
 my @bitSizes = ('8', '16', '32', '64', '32');
 my @valueTypes = qw(uint8_t uint16_t uint32_t uint64_t);
-my @accumTypes = qw(uint_fast32_t uint_fast32_t uint_fast32_t uint_fast64_t);
+my @accumTypes = ('unsigned long', 'unsigned long', 'unsigned long',
+                  'unsigned long long');
 # allow for signed and unsigned operand types
 my @uOpTypes = qw(uint8_t uint16_t uint32_t uint64_t unsigned);
 my @iOpTypes = qw(int8_t int16_t int32_t int64_t int);

@@ -43,8 +43,7 @@ icmp(uint64_t a, uint64_t b)
     env_ma_free(bitStore, env);        \
     env_ma_free(bitStoreCopy, env);    \
     return retval;                     \
-  } while(0)
-
+  } while (0)
 
 int
 bitPackStringInt64_unit_test(Env *env)
@@ -107,7 +106,7 @@ bitPackStringInt64_unit_test(Env *env)
     offset += bits;
   }
   env_log_log(env, "passed\n");
-  if(numRnd > 1)
+  if (numRnd > 1)
   {
     env_log_log(env, "bsCompare: ");
     {
@@ -272,7 +271,7 @@ bitPackStringInt64_unit_test(Env *env)
         freeResourcesAndReturn(had_err);
       }
     }
-    if(numRnd > 0)
+    if (numRnd > 0)
     {
       int64_t m = (int64_t)1 << (numBits - 1);
       int64_t v = (int64_t)((randSrc[0] & mask) ^ m) - m;
@@ -290,7 +289,7 @@ bitPackStringInt64_unit_test(Env *env)
     }
     env_log_log(env, "passed\n");
   }
-  if(numRnd > 0)
+  if (numRnd > 0)
   {
     env_log_log(env, "bsCopy: ");
     {
@@ -333,7 +332,8 @@ bitPackStringInt64_unit_test(Env *env)
                     "seed = %lu, offset = %llu, destOffset = %llu,"
                     " numCopyBits=%llu\n",
                     seedval, (unsigned long long)offset,
-                    (unsigned long long)destOffset, (unsigned long long)numCopyBits);
+                    (unsigned long long)destOffset,
+                    (unsigned long long)numCopyBits);
         /* FIXME: implement bitstring output function */
         freeResourcesAndReturn(had_err);
       }

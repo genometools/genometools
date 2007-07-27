@@ -20,7 +20,7 @@
 
 #include "libgtcore/env.h"
 
-/* Caution: sizeof (BitElem) <= sizeof (uint_fast32_t) must be met */
+/* Caution: sizeof (BitElem) <= sizeof (unsigned long) must be met */
 typedef unsigned char BitElem;
 typedef BitElem *BitString;
 typedef unsigned long long BitOffset;
@@ -511,7 +511,7 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
  * @param numBits number of bits to copy
  */
 extern void
-bsCopy(const BitString src, BitOffset offsetSrc, 
+bsCopy(const BitString src, BitOffset offsetSrc,
        const BitString dest, BitOffset offsetDest, BitOffset numBits);
 /**
  * \brief Meta-Unit test function for bitPackString, calls all functions

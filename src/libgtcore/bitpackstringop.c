@@ -18,7 +18,7 @@
 
 /*
  * Both requiredUInt{32|64}Bits functions are based on the concepts
- * presented at 
+ * presented at
  * http://graphics.stanford.edu/~seander/bithacks.html#IntegerLogDeBruijn
  * the method has two steps:
  * 1. isolate the highest bit set by first copying the highest bit set
@@ -27,7 +27,7 @@
  * 2. lookup the 5/6 top bits resulting from multiplication with a
  * DeBruijn bit sequence (the long unsigned constant), since a
  * DeBruijn sequence has all q-words differ by at least one bit, any
- * bit set in v results in a corresponding table lookup. 
+ * bit set in v results in a corresponding table lookup.
  */
 int
 requiredUInt32Bits(uint32_t v)
@@ -119,7 +119,7 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
   size_t elemStartA = offsetA/bitElemBits, elemStartB = offsetB/bitElemBits;
   unsigned bitTopA = offsetA%bitElemBits, bitTopB = offsetB%bitElemBits;
   const BitElem *pA = a + elemStartA, *pB = b + elemStartB;
-  uint_fast32_t accumA = 0, accumB = 0;
+  unsigned long accumA = 0, accumB = 0;
   unsigned bitsInAccumA, bitsInAccumB;
   assert(a && b);
   /* user requested zero length comparison, treat as equality */
@@ -137,10 +137,10 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
       bitsInAccumB = 0;
       if (bitTopB)
       {
-        uint_fast32_t mask; /*< all of the bits we want to get from *pB */
+        unsigned long mask; /*< all of the bits we want to get from *pB */
         unsigned bits2Read = MIN(bitElemBits - bitTopB, comparePreBits);
         unsigned unreadRightBits = (bitElemBits - bitTopB - bits2Read);
-        mask = (~((~(uint_fast32_t)0) << bits2Read)) << unreadRightBits;
+        mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
         accumB = ((*pB++) & mask) >> unreadRightBits;
         bitsInAccumB += bits2Read;
         totalBitsLeftB -= bits2Read;
@@ -150,9 +150,9 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
       {
         unsigned bits2Read,
           bitsFree = (CHAR_BIT * sizeof (accumA)) - bitsInAccumB;
-        uint_fast32_t mask;
+        unsigned long mask;
         bits2Read = MIN3(bitsFree, bitElemBits, comparePreBits);
-        mask = ~((~(uint_fast32_t)0) << bits2Read);
+        mask = ~((~(unsigned long)0) << bits2Read);
         accumB = accumB << bits2Read
           | (((*pB) >> (bitElemBits - bits2Read)) & mask);
         bitsInAccumB += bits2Read;
@@ -173,10 +173,10 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
     /* get bits of first element if not aligned */
     if (bitTopA)
     {
-      uint_fast32_t mask; /*< all of the bits we want to get from *pA */
+      unsigned long mask; /*< all of the bits we want to get from *pA */
       unsigned bits2Read = MIN(bitElemBits - bitTopA, totalBitsLeftA);
       unsigned unreadRightBits = (bitElemBits - bitTopA - bits2Read);
-      mask = (~((~(uint_fast32_t)0) << bits2Read)) << unreadRightBits;
+      mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
       accumA = ((*pA++) & mask) >> unreadRightBits;
       bitsInAccumA += bits2Read;
       totalBitsLeftA -= bits2Read;
@@ -186,10 +186,10 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
     /* get bits of first element if not aligned */
     if (bitTopB)
     {
-      uint_fast32_t mask; /*< all of the bits we want to get from *pB */
+      unsigned long mask; /*< all of the bits we want to get from *pB */
       unsigned bits2Read = MIN(bitElemBits - bitTopB, totalBitsLeftB);
       unsigned unreadRightBits = (bitElemBits - bitTopB - bits2Read);
-      mask = (~((~(uint_fast32_t)0) << bits2Read)) << unreadRightBits;
+      mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
       accumB = ((*pB++) & mask) >> unreadRightBits;
       bitsInAccumB += bits2Read;
       totalBitsLeftB -= bits2Read;
@@ -200,9 +200,9 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
     {
       unsigned bits2Read,
                bitsFree = (CHAR_BIT * sizeof (accumA)) - bitsInAccumA;
-      uint_fast32_t mask;
+      unsigned long mask;
       bits2Read = MIN3(bitsFree, bitElemBits, totalBitsLeftA);
-      mask = (~((~(uint_fast32_t)0) << bits2Read));
+      mask = (~((~(unsigned long)0) << bits2Read));
       accumA = accumA << bits2Read
         | (((*pA) >> (bitElemBits - bits2Read)) & mask);
       bitsInAccumA += bits2Read;
@@ -217,9 +217,9 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
     {
       unsigned bits2Read,
         bitsFree = (CHAR_BIT * sizeof (accumA)) - bitsInAccumB;
-      uint_fast32_t mask;
+      unsigned long mask;
       bits2Read = MIN3(bitsFree, bitElemBits, totalBitsLeftB);
-      mask = (~((~(uint_fast32_t)0) << bits2Read));
+      mask = (~((~(unsigned long)0) << bits2Read));
       accumB = accumB << bits2Read
         | (((*pB) >> (bitElemBits - bits2Read)) & mask);
       bitsInAccumB += bits2Read;
@@ -281,17 +281,17 @@ bsCopy(const BitString src, BitOffset offsetSrc,
   }
   else
   {
-    uint_fast32_t accum = 0;
+    unsigned long accum = 0;
     unsigned bitsInAccum = 0;
     while (bitsLeft && (bitTopSrc || bitTopDest))
     {
       if (bitTopSrc)
       {
-        uint_fast32_t mask;
+        unsigned long mask;
         unsigned bits2Read = MIN3(bitElemBits - bitTopSrc, bitsLeft,
                                   sizeof (accum) * CHAR_BIT - bitsInAccum);
         unsigned unreadRightBits = (bitElemBits - bitTopSrc - bits2Read);
-        mask = (~((~(uint_fast32_t)0) << bits2Read));
+        mask = (~((~(unsigned long)0) << bits2Read));
         accum = (accum << bits2Read) | (((*p) >> unreadRightBits) & mask);
         bitsLeft -= bits2Read;
         bitsInAccum += bits2Read;
@@ -315,11 +315,11 @@ bsCopy(const BitString src, BitOffset offsetSrc,
            * just to fill the first incomplete element */
           while (bitsInAccum < bits2Write)
           {
-            uint_fast32_t mask;
+            unsigned long mask;
             unsigned bits2Read = MIN3(sizeof (accum) * CHAR_BIT - bitsInAccum,
                                       bitsLeft, bitElemBits);
             unsigned unreadRightBits = (bitElemBits - bits2Read);
-            mask = (~((~(uint_fast32_t)0) << bits2Read)) << unreadRightBits;
+            mask = (~((~(unsigned long)0) << bits2Read)) << unreadRightBits;
             accum = (accum << bits2Read) | ((*p) & mask) >> unreadRightBits;
             bitsLeft -= bits2Read;
             bitsInAccum += bits2Read;
@@ -330,8 +330,8 @@ bsCopy(const BitString src, BitOffset offsetSrc,
         {
           unsigned unwrittenRightBits = bitElemBits
             - bitTopDest - bits2Write;
-          uint_fast32_t mask =
-            (~((~(uint_fast32_t)0) << bits2Write)) << unwrittenRightBits;
+          unsigned long mask =
+            (~((~(unsigned long)0) << bits2Write)) << unwrittenRightBits;
           *q = (*q & ~mask)
             | (((accum >> (bitsInAccum -= bits2Write))
                 << unwrittenRightBits) & mask);
@@ -370,19 +370,19 @@ bsCopy(const BitString src, BitOffset offsetSrc,
         unsigned bits2Read = MIN3(bitsLeft, bitElemBits - bitTopSrc,
                                   sizeof (accum) * CHAR_BIT - bitsInAccum);
         unsigned unreadRightBits = (bitElemBits - bitTopSrc - bits2Read);
-        uint_fast32_t mask =
-          ~((~(uint_fast32_t)0) << bits2Read);
+        unsigned long mask =
+          ~((~(unsigned long)0) << bits2Read);
         accum = (accum << bits2Read) | (((*p) >> unreadRightBits) & mask);
         bitsLeft -= bits2Read;
         bitsInAccum += bits2Read;
-        if((bitTopSrc += bits2Read) == bitElemBits)
+        if ((bitTopSrc += bits2Read) == bitElemBits)
           ++p, bitTopSrc = 0;
       }
       while (bitsInAccum)
       {
         unsigned bits2Write = MIN(bitsInAccum, bitElemBits - bitTopDest),
           unwrittenRightBits = bitElemBits - bits2Write - bitTopDest;
-        uint_fast32_t mask = (~(uint_fast32_t)0);
+        unsigned long mask = (~(unsigned long)0);
         if (bits2Write != bitElemBits)
         {
           mask = (~(mask << bits2Write)) << unwrittenRightBits;
