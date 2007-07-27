@@ -62,6 +62,7 @@ struct GTR {
   bool test,
        interactive,
        debug;
+  Str *spacepeak;
   Toolbox *toolbox;
   Hashtable *unit_tests;
   lua_State *L;
@@ -70,6 +71,7 @@ struct GTR {
 GTR* gtr_new(Env *env)
 {
   GTR *gtr = env_ma_calloc(env, 1, sizeof (GTR));
+  gtr->spacepeak = str_new(env);
   /* XXX */
   gtr->L = luaL_newstate();
   assert(gtr->L);
@@ -82,6 +84,12 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   OptionParser *op;
   Option *o;
   OPrval oprval;
+  static const char *spacepeak_choices[] = {
+   "stderr", /* the default */
+   "stdout",
+   NULL
+  };
+
   env_error_check(env);
   assert(gtr);
   op = option_parser_new("[option ...] [tool ...] [argument ...]",
@@ -97,6 +105,12 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   option_is_development_option(o);
   option_parser_add_option(op, o, env);
   o = option_new_debug(&gtr->debug, env);
+  option_parser_add_option(op, o, env);
+  o = option_new_choice("spacepeak", "show spacepeak on stdout or stderr "
+                        "upon deletion", gtr->spacepeak, spacepeak_choices[0],
+                        spacepeak_choices, env);
+  option_argument_is_optional(o);
+  option_is_development_option(o);
   option_parser_add_option(op, o, env);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
   option_parser_delete(op, env);
@@ -263,6 +277,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
 void gtr_delete(GTR *gtr, Env *env)
 {
   if (!gtr) return;
+  str_delete(gtr->spacepeak, env);
   toolbox_delete(gtr->toolbox, env);
   hashtable_delete(gtr->unit_tests, env);
   if (gtr->L) lua_close(gtr->L);
