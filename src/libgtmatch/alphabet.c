@@ -14,6 +14,7 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
+#include "qsorttype.h"
 #include "symboldef.h"
 #include "arraydef.h"
 #include "chardef.h"
@@ -540,4 +541,129 @@ void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
 void showsymbolstring(const Alphabet *alpha,const Uchar *w,unsigned long wlen)
 {
   showsymbolstringgeneric(stdout,alpha,w,wlen);
+}
+
+static uint32_t removelowercaseproteinchars(Uchar *domainbuf,
+                                            const Alphabet *alpha)
+{
+  uint32_t i, j = 0;
+
+  for(i=0; i< alpha->domainsize - alpha->mappedwildcards; i++)
+  {
+    if(isalnum((int) alpha->mapdomain[i]) && 
+       isupper((int) alpha->mapdomain[i]))
+    {
+      domainbuf[j++] = alpha->mapdomain[i];
+    }
+  }
+  return j;
+}
+
+#define UNCAST(X) (*((const Uchar *) (X)))
+
+static Qsortcomparereturntype comparechar(const void *a,const void *b)
+{
+  if(UNCAST(a) < UNCAST(b))
+  {
+    return -1;
+  }
+  if(UNCAST(a) > UNCAST(b))
+  {
+    return 1;
+  }
+  return 0;
+}
+
+/*EE
+  The following function checks if the given alphabet is the Protein
+  alphabet with the aminoacids 
+  A, C, D, E, F, G, H, I, K, L, M, N, P, Q, R, S, T, V, W, Y written in 
+  lower or upper case.
+*/
+
+bool isproteinalphabet(const Alphabet *alpha)
+{
+  Alphabet proteinalphabet;
+  uint32_t i, reduceddomainsize1, reduceddomainsize2;
+  Uchar domainbuf1[UCHAR_MAX+1], 
+        domainbuf2[UCHAR_MAX+1];
+
+  reduceddomainsize1 = removelowercaseproteinchars(&domainbuf1[0],alpha);
+  assignProteinalphabet(&proteinalphabet);
+  reduceddomainsize2 = removelowercaseproteinchars(&domainbuf2[0],
+                                                   &proteinalphabet);
+  if(reduceddomainsize1 == reduceddomainsize2)
+  {
+    qsort(&domainbuf1[0],(size_t) reduceddomainsize1,sizeof(char),
+          (Qsortcomparefunction) comparechar);
+    qsort(&domainbuf2[0],(size_t) reduceddomainsize2,sizeof(char),
+          (Qsortcomparefunction) comparechar);
+    for(i=0; i < reduceddomainsize2; i++)
+    {
+      if(domainbuf1[i] != domainbuf2[i])
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+static bool checksymbolmap(const Uchar *testsymbolmap,
+                           const Uchar *verifiedsymbolmap,
+                           const char *testcharacters)
+{
+  unsigned int i;
+  Uchar cc1, cc2 = 0;
+
+  for(i=0; testcharacters[i] != '\0'; i++)
+  {
+    cc1 = testcharacters[i];
+    if(isupper((int) cc1))
+    {
+      cc2 = tolower((int) cc1);
+    } else
+    {
+      if(islower((int) cc1))
+      {
+        cc2 = toupper((int) cc2);
+      } else
+      {
+        fprintf(stderr,"checksymbolmap used for non-alphabet character %c\n",
+                cc1);
+        exit(EXIT_FAILURE);
+      }
+    }
+    if(testsymbolmap[cc1] != verifiedsymbolmap[cc1] &&
+       testsymbolmap[cc2] != verifiedsymbolmap[cc2])
+    {
+      return false;
+    }
+  }
+  return true;
+}
+
+/*
+  The following function checks if the given alphabet is the DNA
+  alphabet with the bases A, C, G, T written in lower or upper case.
+*/
+
+bool isdnaalphabet(const Alphabet *alpha)
+{
+  if(isproteinalphabet(alpha))
+  {
+    return false;
+  }
+  if(alpha->mapsize == MAPSIZEDNA)
+  {
+    Uchar dnasymbolmap[UCHAR_MAX+1];
+
+    assignDNAsymbolmap(&dnasymbolmap[0]);
+    if(checksymbolmap(alpha->symbolmap,&dnasymbolmap[0],"acgt"))
+    {
+      return true;
+    }
+  }
+  return false;
 }

@@ -26,6 +26,10 @@ void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
 
 void showsymbolstring(const Alphabet *alpha,const Uchar *w,unsigned long wlen);
 
+bool isproteinalphabet(const Alphabet *alpha);
+
+bool isdnaalphabet(const Alphabet *alpha);
+
 #ifdef __cplusplus
 }
 #endif

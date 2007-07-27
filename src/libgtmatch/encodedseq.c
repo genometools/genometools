@@ -231,6 +231,24 @@ Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
   {
     return encseq->deliverchar(encseq,encseq->totallength - 1 - pos);
   }
+  if(readmode == Complementmode) /* only works with dna */
+  {
+    Uchar cc = encseq->deliverchar(encseq,pos);
+    if(ISSPECIAL(cc))
+    {
+      return cc;
+    } 
+    return (Uchar) 3 - cc;
+  }
+  if(readmode == Reversecomplementmode)
+  {
+    Uchar cc = encseq->deliverchar(encseq,encseq->totallength - 1 - pos);
+    if(ISSPECIAL(cc))
+    {
+      return cc;
+    } 
+    return (Uchar) 3 - cc;
+  }
   fprintf(stderr,"readmodes %u implemented\n",(unsigned int) readmode);
   exit(EXIT_FAILURE);
 }

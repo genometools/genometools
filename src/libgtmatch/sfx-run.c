@@ -324,7 +324,16 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
            PRINTSeqposcast(specialcharinfo.specialcharacters));
     printf("# specialranges=" FormatSeqpos "\n",
            PRINTSeqposcast(specialcharinfo.specialranges));
-    if (so->outsuftab || so->outbwttab || so->outlcptab)
+    if(so->readmode == Complementmode || so->readmode == Reversecomplementmode)
+    {
+      if(!isdnaalphabet(alpha))
+      {
+        env_error_set(env,"option %s only can be used for DNA alphabets",
+                          so->readmode == Complementmode ? "-cpl" : "rcl");
+        haserr = true;
+      }
+    }
+    if (!haserr && (so->outsuftab || so->outbwttab || so->outlcptab))
     {
       if(so->prefixlength == PREFIXLENGTH_AUTOMATIC)
       {
