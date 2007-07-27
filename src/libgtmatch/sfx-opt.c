@@ -63,7 +63,8 @@ static OPrval parse_options(int *parsed_args,
   option_parser_add_option(op, optionplain, env);
 
   optiondir = option_new_string("dir",
-                                "specify reading direction",
+                                "specify reading direction "
+                                "(fwd, cpl, rev, rcl)",
                                  dirarg, "fwd", env);
   option_parser_add_option(op, optiondir, env);
 
