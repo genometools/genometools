@@ -110,6 +110,12 @@ void env_set_log(Env *env, Log *log)
   env->log = log;
 }
 
+void env_set_spacepeak(Env *env, bool spacepeak)
+{
+  assert(env);
+  env->spacepeak = spacepeak;
+}
+
 int env_delete(Env *env)
 {
   int fa_fptr_rval, fa_mmap_rval, ma_rval;

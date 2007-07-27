@@ -21,6 +21,7 @@ FA*    env_fa(const Env*);    /* return the file allocator */
 Error* env_error(const Env*); /* return the error object */
 Log*   env_log(const Env*);   /* return the log object or NULL */
 void   env_set_log(Env*, Log*);
+void   env_set_spacepeak(Env*, bool);
 int    env_delete(Env*);
 
 /* wrapper for memory functions */
