@@ -43,8 +43,7 @@ icmp(uint16_t a, uint16_t b)
     env_ma_free(bitStore, env);        \
     env_ma_free(bitStoreCopy, env);    \
     return retval;                     \
-  } while(0)
-
+  } while (0)
 
 int
 bitPackStringInt16_unit_test(Env *env)
@@ -107,7 +106,7 @@ bitPackStringInt16_unit_test(Env *env)
     offset += bits;
   }
   env_log_log(env, "passed\n");
-  if(numRnd > 1)
+  if (numRnd > 1)
   {
     env_log_log(env, "bsCompare: ");
     {
@@ -272,7 +271,7 @@ bitPackStringInt16_unit_test(Env *env)
         freeResourcesAndReturn(had_err);
       }
     }
-    if(numRnd > 0)
+    if (numRnd > 0)
     {
       int16_t m = (int16_t)1 << (numBits - 1);
       int16_t v = (int16_t)((randSrc[0] & mask) ^ m) - m;
@@ -290,7 +289,7 @@ bitPackStringInt16_unit_test(Env *env)
     }
     env_log_log(env, "passed\n");
   }
-  if(numRnd > 0)
+  if (numRnd > 0)
   {
     env_log_log(env, "bsCopy: ");
     {
@@ -313,6 +312,8 @@ bitPackStringInt16_unit_test(Env *env)
       }
       assert(copyStart + numValueCopies <= numRnd);
       offset = offsetStart + (BitOffset)copyStart * numBits;
+      bsStoreUniformUInt16Array(bitStore, offset, numBits, numRnd,
+                               randSrc);
       destOffset = random()%
         (offsetStart
          + (sizeof (uint16_t)*CHAR_BIT)
@@ -331,7 +332,8 @@ bitPackStringInt16_unit_test(Env *env)
                     "seed = %lu, offset = %llu, destOffset = %llu,"
                     " numCopyBits=%llu\n",
                     seedval, (unsigned long long)offset,
-                    (unsigned long long)destOffset, (unsigned long long)numCopyBits);
+                    (unsigned long long)destOffset,
+                    (unsigned long long)numCopyBits);
         /* FIXME: implement bitstring output function */
         freeResourcesAndReturn(had_err);
       }

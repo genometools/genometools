@@ -12,7 +12,6 @@
 #include "libgtcore/minmax.h"
 #include "libgtcore/bitpackstring.h"
 
-
 @ValueType@
 bsGet@uTypeTag@(const BitString str, BitOffset offset, unsigned numBits)
 {
@@ -98,7 +97,8 @@ bsStore@uTypeTag@(BitString str, BitOffset offset,
   /* set bits for last elem */
   if (bitsLeft)
   {
-    @AccumType@ mask = ((~(@AccumType@)0)<<(bitElemBits - bitsLeft));
+    @AccumType@ mask =
+      ((~(@AccumType@)0)<<(bitElemBits - bitsLeft));
     if (bitElemBits < (sizeof (@AccumType@)*CHAR_BIT))
       mask &= (~(~(@AccumType@)0<<bitElemBits));
     *p = (*p & ~mask) | ((val << (bitElemBits - bitsLeft)) & mask);
@@ -300,7 +300,8 @@ bsStoreUniform@uTypeTag@Array(BitString str, BitOffset offset, unsigned numBits,
   }
   if (bitsInAccum)
   {
-    @AccumType@ mask = ~(@AccumType@)0 << (bitElemBits - bitsInAccum);
+    @AccumType@ mask =
+      ~(@AccumType@)0 << (bitElemBits - bitsInAccum);
     *p = (*p & ~mask) | ((accum << (bitElemBits - bitsInAccum))& mask);
   }
 }
