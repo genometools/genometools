@@ -49,13 +49,13 @@
   transform
 */
 
-#define UNDEFBWTCHAR    /* UNDEFCHAR */ WILDCARD
+#define UNDEFBWTCHAR    WILDCARD
 
 /*
   Either special character or UNDEFBWTCHAR
 */
 
-#define ISBWTSPECIAL(C)    ((C) >= (Uchar) UNDEFBWTCHAR)
+#define ISBWTSPECIAL(C) ((C) >= (Uchar) UNDEFBWTCHAR)
 
 /*
   the size of the DNA alphabet

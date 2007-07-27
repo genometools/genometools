@@ -1,10 +1,20 @@
 #!/usr/bin/env bash
 
-if test $# -lt 4
+if test $# -lt 5
 then
-  echo "Usage: $0 <min> <max> <queryfile> <file1> <file2> ..."
+  echo "Usage: $0 <gtpath> <min> <max> <queryfile> <file1> <file2> ..."
   exit 1
 fi
+
+gtpath=$1
+minval=$2
+maxval=$3
+queryfile=$4
+shift
+shift
+shift
+shift
+rfiles=$*
 
 function cerr() 
 {
@@ -23,34 +33,26 @@ function mkfmindex()
   indexname=$1
   shift
   iiargs=$*
-  cerr "../bin/gt mkfmindex -noindexpos -fmout ${indexname} -ii ${iiargs}"
+  cerr "${gtpath} mkfmindex -noindexpos -fmout ${indexname} -ii ${iiargs}"
 }
 
 function plain() 
 {
-  cerr "../bin/gt suffixerator -plain -tis -indexname $1 -smap $2 -db $3"
+  cerr "${gtpath} suffixerator -plain -tis -indexname $1 -smap $2 -db $3"
 }
 
 function suffixerator
 {
-  cerr "../bin/gt suffixerator $*"
+  cerr "${gtpath} suffixerator $*"
 }
 
 function uniquesub
 {
-  cerr "../bin/gt uniquesub -output sequence querypos $*"
+  cerr "${gtpath} uniquesub -output sequence querypos $*"
 }
 
 IDIR=../indexdir
 mkdir -p ${IDIR}
-
-minval=$1
-maxval=$2
-queryfile=$3
-shift
-shift
-shift
-rfiles=$*
 
 numofrfiles=0
 for rfile in ${rfiles}

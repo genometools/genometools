@@ -8,6 +8,6 @@ then
   exit 1
 fi
 
-rununique.sh $* | grep -v '^#' > shit
+rununique.sh ../bin/gt $* | grep -v '^#' > shit
 rununique-test.sh $* | grep -v '^#' > shit-test
 diff shit shit-test
