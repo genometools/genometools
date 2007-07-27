@@ -295,7 +295,7 @@ static int showunitnum(uint64_t unitnum,
                        /*@unused@*/ Env *env)
 {
   printf("unit " Formatuint64_t, PRINTuint64_tcast(unitnum));
-  if(desc != NULL)
+  if(desc != NULL && desc[0] != '\0')
   {
     printf(" (%s)",desc);
   }

@@ -14,7 +14,7 @@ function cerr()
     echo "failure: ${1}"
     exit 1
   else
-    echo "success $1"
+    echo "# success $1"
   fi
 }
 

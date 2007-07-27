@@ -15,6 +15,7 @@ unsigned long skfmuniqueforward (const Fmindex *fmindex,
 
   qptr = qstart;
   cc = *qptr++;
+#undef mydebug
 #ifdef mydebug
   printf("# start cc=%u\n",cc);
 #endif

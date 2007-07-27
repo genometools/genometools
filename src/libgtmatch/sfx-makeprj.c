@@ -69,6 +69,7 @@ int scanfastasequence(
   Seqpos lastspeciallength = 0;
   Distribution *specialrangelengths;
   unsigned long idx;
+  bool isspecial;
 
   *numofsequences = 0;
   specialcharinfo->specialcharacters = 0;
@@ -99,7 +100,14 @@ int scanfastasequence(
       }
       break;
     }
-    if (ISSPECIAL(charcode))
+    if(plainformat)
+    {
+      isspecial = ISBWTSPECIAL(charcode) ? true : false;
+    } else
+    {
+      isspecial = ISSPECIAL(charcode) ? true : false;
+    }
+    if (isspecial)
     {
       if (specialprefix)
       {

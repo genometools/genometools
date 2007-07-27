@@ -228,7 +228,6 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if(!haserr)
     {
-      /* XXX is this necessary? */
       /*
       if(makeindexfilecopy(outfmindex,
                            indexname,

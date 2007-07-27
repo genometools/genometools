@@ -49,7 +49,7 @@
   transform
 */
 
-#define UNDEFBWTCHAR    UNDEFCHAR
+#define UNDEFBWTCHAR    /* UNDEFCHAR */ WILDCARD
 
 /*
   Either special character or UNDEFBWTCHAR
