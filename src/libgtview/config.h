@@ -89,7 +89,7 @@ void         config_set_cstr(Config *cfg,
                              const char *section,
                              const char *key,
                              const char *str,
-                             Env* env);
+                             Env *env);
 
 /*!
 Retrieves a string value from the configuration.
@@ -104,7 +104,7 @@ const char*  config_get_cstr(Config *cfg,
                              const char *section,
                              const char *key,
                              const char *deflt,
-                             Env* env);
+                             Env *env);
 
 /*!
 Retrieves a numeric value from the configuration.
@@ -119,7 +119,7 @@ double       config_get_num(Config *cfg,
                             const char *section,
                             const char *key,
                             double deflt,
-                            Env* env);
+                            Env *env);
 
 /*!
 Sets a numeric value in the configuration to a certain value.
@@ -133,7 +133,7 @@ void         config_set_num(Config *cfg,
                             const char* section,
                             const char *key,
                             double number,
-                            Env* env);
+                            Env *env);
 
 /*!
 Checks whether a given string appears in a list (table) of strings
@@ -149,13 +149,14 @@ bool         config_cstr_in_list(Config *cfg,
                                  const char *section,
                                  const char *key,
                                  const char *checkstr,
-                                 Env* env);
+                                 Env *env);
 
 /*!
 Returns verbosity flag.
 \param cfg Pointer to Config object.
 \return Verbosity status as bool
-*/bool         config_get_verbose(Config *cfg);
+*/
+bool         config_get_verbose(Config *cfg);
 
 /*!
 Compares two GenomeFeatureTypes w.r.t. their splitting
@@ -170,7 +171,7 @@ If a type dominates, it will be drawn on top of the other in the image.
 int          config_dominates(Config *cfg,
                               GenomeFeatureType gft1,
                               GenomeFeatureType gft2,
-                              Env* env);
+                              Env *env);
 /* Unit test */
 int          config_unit_test(Env*);
 
