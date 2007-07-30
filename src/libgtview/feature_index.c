@@ -158,7 +158,7 @@ Array* feature_index_get_features_for_seqid(FeatureIndex *fi, char *seqid)
 {
   assert(fi);
   RegionInfo *res = (RegionInfo*) hashtable_get(fi->regions, seqid);
-  return res->features;
+  return (res != NULL ? res->features : NULL);
 }
 
 /*!
@@ -180,20 +180,19 @@ int feature_index_get_features_for_range(FeatureIndex *fi,
   GenomeNode* key;
   int i = 0;
   base = feature_index_get_features_for_seqid(fi, seqid);
-  assert(fi && results && seqid && (qry_range.start < qry_range.end));
+  if (!base) return -1;
+  assert(fi && results && seqid && base && (qry_range.start < qry_range.end));
   key = genome_feature_new(gft_gene, qry_range, STRAND_UNKNOWN, NULL,
                            UNDEF_ULONG, env);
- for (i = 0; i < array_size(base); i++)
- {
-   GenomeNode *gn = *(GenomeNode**) array_get(base, i);
-   Range r = genome_node_get_range(gn);
-   if (range_overlap(r, qry_range))
-     array_add(results, gn, env);
- }
-
- genome_node_delete(key, env);
-
- return 0;
+  for (i = 0; i < array_size(base); i++)
+  {
+    GenomeNode *gn = *(GenomeNode**) array_get(base, i);
+    Range r = genome_node_get_range(gn);
+    if (range_overlap(r, qry_range))
+      array_add(results, gn, env);
+  }
+  genome_node_delete(key, env);
+  return 0;
 }
 
 /*!
@@ -345,6 +344,9 @@ int feature_index_unit_test(Env* env)
 
   check_range = feature_index_get_range_for_seqid(fi, "test1");
   ensure(had_err, check_range.start == 100 && check_range.end == 1000);
+
+  ensure(had_err, feature_index_get_features_for_seqid(fi, "test1") != NULL);
+  ensure(had_err, feature_index_get_features_for_seqid(fi, "noexist") == NULL);
 
   /* delete all generated objects */
   feature_index_delete(fi, env);
