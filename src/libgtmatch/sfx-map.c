@@ -125,6 +125,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         FREESPACE(tmpfilename);
         FREESPACE(suffixarray->filelengthtab);
         haserr = true;
+        break;
       }
       if (!haserr)
       {
@@ -332,102 +333,13 @@ void freesuffixarray(Suffixarray *suffixarray,Env *env)
   FREESPACE(suffixarray->filelengthtab);
 }
 
-int mapsuffixarray(Suffixarray *suffixarray,
-                   Seqpos *totallength,
-                   unsigned int demand,
-                   const Str *indexname,
-                   bool verbose,
-                   Env *env)
-{
-  bool haserr = false;
-
-  env_error_check(env);
-  initsuffixarray(suffixarray);
-  haserr = scanprjfile(suffixarray,totallength,indexname,verbose,env);
-  if (!haserr)
-  {
-    haserr = scanal1file(suffixarray,indexname,env);
-  }
-  if (!haserr && (demand & SARR_ESQTAB))
-  {
-    suffixarray->encseq = initencodedseq(true,
-					 NULL,   /* filenametab */
-                                         false,  /* not relevant, since
-                                                 indexname != NULL*/
-					 indexname,
-					 *totallength,
-					 &suffixarray->specialcharinfo,
-					 suffixarray->alpha,
-                                         NULL,
-					 env);
-    if (suffixarray->encseq == NULL)
-    {
-      haserr = true;
-    }
-  }
-  if (!haserr && (demand & SARR_SUFTAB))
-  {
-    suffixarray->suftab = genericmaptable(indexname,SUFTABSUFFIX,
-                                          (*totallength)+1,
-                                          sizeof(Seqpos),
-                                          env);
-    if (suffixarray->suftab == NULL)
-    {
-      haserr = true;
-    }
-  }
-  if(!haserr && (demand & SARR_LCPTAB))
-  {
-    suffixarray->lcptab = genericmaptable(indexname,LCPTABSUFFIX,
-                                          (*totallength)+1,
-                                          sizeof(Uchar),
-                                          env);
-    if (suffixarray->lcptab == NULL)
-    {
-      haserr = true;
-    }
-    if(!haserr && !suffixarray->numoflargelcpvalues.defined)
-    {
-      env_error_set(env,"numoflargelcpvalues not defined");
-      haserr = true;
-    }
-    if(!haserr && suffixarray->numoflargelcpvalues.valueseqpos > 0)
-    {
-      suffixarray->llvtab = genericmaptable(indexname,LARGELCPTABSUFFIX,
-                                            suffixarray->numoflargelcpvalues.
-                                            valueseqpos,
-                                            sizeof(Largelcpvalue),
-                                            env);
-      if (suffixarray->llvtab == NULL)
-      {
-        haserr = true;
-      }
-    }
-  }
-  if(!haserr && (demand & SARR_BWTTAB))
-  {
-    suffixarray->bwttab = genericmaptable(indexname,BWTTABSUFFIX,
-                                          (*totallength)+1,
-                                          sizeof(Uchar),
-                                          env);
-    if (suffixarray->bwttab == NULL)
-    {
-      haserr = true;
-    }
-  }
-  if(haserr)
-  {
-    freesuffixarray(suffixarray,env);
-  }
-  return haserr ? -1 : 0;
-}
-
-int streamsuffixarray(Suffixarray *suffixarray,
-                      Seqpos *totallength,
-                      unsigned int demand,
-                      const Str *indexname,
-                      bool verbose,
-                      Env *env)
+static int inputsuffixarray(bool map,
+                            Suffixarray *suffixarray,
+                            Seqpos *totallength,
+                            unsigned int demand,
+                            const Str *indexname,
+                            bool verbose,
+                            Env *env)
 {
   bool haserr = false;
 
@@ -457,25 +369,49 @@ int streamsuffixarray(Suffixarray *suffixarray,
   }
   if (!haserr && (demand & SARR_SUFTAB))
   {
-    INITBufferedfile(indexname,&suffixarray->suftabstream,SUFTABSUFFIX);
+    if(map)
+    {
+      suffixarray->suftab = genericmaptable(indexname,
+                                            SUFTABSUFFIX,
+                                            (*totallength)+1,
+                                            sizeof(Seqpos),
+                                            env);
+      if (suffixarray->suftab == NULL)
+      {
+        haserr = true;
+      }
+    } else
+    {
+      INITBufferedfile(indexname,&suffixarray->suftabstream,SUFTABSUFFIX);
+    }
     if(!haserr && !suffixarray->longest.defined)
     {
       env_error_set(env,"longest not defined");
       haserr = true;
     }
   }
-  if(!haserr && (demand & SARR_BWTTAB))
-  {
-    INITBufferedfile(indexname,&suffixarray->bwttabstream,BWTTABSUFFIX);
-  }
   if(!haserr && (demand & SARR_LCPTAB))
   {
-    INITBufferedfile(indexname,&suffixarray->lcptabstream,LCPTABSUFFIX);
-    if(!haserr && 
-       fseek(suffixarray->lcptabstream.fp,(long) sizeof(Uchar),SEEK_SET) != 0)
+    if(map)
     {
-      env_error_set(env,"fseek(esastream) failed: %s",strerror(errno));
-      haserr = true;
+      suffixarray->lcptab = genericmaptable(indexname,
+                                            LCPTABSUFFIX,
+                                            (*totallength)+1,
+                                            sizeof(Uchar),
+                                            env);
+      if (suffixarray->lcptab == NULL)
+      {
+        haserr = true;
+      }
+    } else
+    {
+      INITBufferedfile(indexname,&suffixarray->lcptabstream,LCPTABSUFFIX);
+      if(!haserr && 
+         fseek(suffixarray->lcptabstream.fp,(long) sizeof(Uchar),SEEK_SET) != 0)
+      {
+        env_error_set(env,"fseek(esastream) failed: %s",strerror(errno));
+        haserr = true;
+      }
     }
     if(!haserr && !suffixarray->numoflargelcpvalues.defined)
     {
@@ -484,14 +420,78 @@ int streamsuffixarray(Suffixarray *suffixarray,
     }
     if(!haserr && suffixarray->numoflargelcpvalues.valueseqpos > 0)
     {
-      INITBufferedfile(indexname,&suffixarray->llvtabstream,LARGELCPTABSUFFIX);
+      if(map)
+      {
+        suffixarray->llvtab = genericmaptable(indexname,
+                                              LARGELCPTABSUFFIX,
+                                              suffixarray->numoflargelcpvalues.
+                                              valueseqpos,
+                                              sizeof(Largelcpvalue),
+                                              env);
+        if (suffixarray->llvtab == NULL)
+        {
+          haserr = true;
+        }
+      } else
+      {
+        INITBufferedfile(indexname,&suffixarray->llvtabstream,
+                         LARGELCPTABSUFFIX);
+      }
     } 
+  }
+  if(!haserr && (demand & SARR_BWTTAB))
+  {
+    if(map)
+    {
+      suffixarray->bwttab = genericmaptable(indexname,
+                                            BWTTABSUFFIX,
+                                            (*totallength)+1,
+                                            sizeof(Uchar),
+                                            env);
+      if (suffixarray->bwttab == NULL)
+      {
+        haserr = true;
+      }
+    } else
+    {
+      INITBufferedfile(indexname,&suffixarray->bwttabstream,BWTTABSUFFIX);
+    }
   }
   if(haserr)
   {
-    STAMP;
     freesuffixarray(suffixarray,env);
-    STAMP;
   }
   return haserr ? -1 : 0;
+}
+
+int streamsuffixarray(Suffixarray *suffixarray,
+                      Seqpos *totallength,
+                      unsigned int demand,
+                      const Str *indexname,
+                      bool verbose,
+                      Env *env)
+{
+  return inputsuffixarray(false,
+                          suffixarray,
+                          totallength,
+                          demand,
+                          indexname,
+                          verbose,
+                          env);
+}
+
+int mapsuffixarray(Suffixarray *suffixarray,
+                   Seqpos *totallength,
+                   unsigned int demand,
+                   const Str *indexname,
+                   bool verbose,
+                   Env *env)
+{
+  return inputsuffixarray(true,
+                          suffixarray,
+                          totallength,
+                          demand,
+                          indexname,
+                          verbose,
+                          env);
 }

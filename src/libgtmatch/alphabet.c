@@ -11,6 +11,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <limits.h>
+#include <errno.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
@@ -265,6 +266,8 @@ static int readsymbolmap(Alphabet *alpha,Uchar wildcard,
   fpin = env_fa_fopen(env,str_get(mapfile),"rb");
   if (fpin == NULL)
   {
+    env_error_set(env,"cannot open file \"%s\": %s",str_get(mapfile),
+                                                    strerror(errno));
     haserr = true;
   }
   if(!haserr)
@@ -638,19 +641,19 @@ static bool checksymbolmap(const Uchar *testsymbolmap,
 
   for(i=0; testcharacters[i] != '\0'; i++)
   {
-    cc1 = testcharacters[i];
+    cc1 = (Uchar) testcharacters[i];
     if(isupper((int) cc1))
     {
-      cc2 = tolower((int) cc1);
+      cc2 = (Uchar) tolower((int) cc1);
     } else
     {
       if(islower((int) cc1))
       {
-        cc2 = toupper((int) cc2);
+        cc2 = (Uchar) toupper((int) cc2);
       } else
       {
         fprintf(stderr,"checksymbolmap used for non-alphabet character %c\n",
-                cc1);
+                (char) cc1);
         exit(EXIT_FAILURE);
       }
     }

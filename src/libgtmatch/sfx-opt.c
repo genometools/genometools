@@ -37,7 +37,7 @@ static int parsereadmode(const char *dirargstring,Env *env)
   {
     if(strcmp(dirargstring,readmodes[i]) == 0)
     {
-      return i;
+      return (int) i;
     }
   }
   env_error_set(env,"argument to option -dir must be in "
