@@ -21,7 +21,6 @@
 #include "alphadef.h"
 
 #include "guessprot.pr"
-#include "scanpaths.pr"
 #include "readnextline.pr"
 
  struct _Alphabet
@@ -131,7 +130,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
   unsigned cnum, linecount = 0;
   ArrayUchar line;
   unsigned long column;
-  bool blankfound, ignore, preamble = true;
+  bool blankfound, ignore, preamble = true, haserr = false;
 
   env_error_check(env);
   alpha->domainsize = alpha->mapsize = alpha->mappedwildcards = 0;
@@ -177,7 +176,8 @@ static int readsymbolmapviafp(Alphabet *alpha,
                              cc,
                              alpha->mapsize,
                              (uint32_t) alpha->symbolmap[(uint32_t) cc]);
-              return -1;
+              haserr = true;
+              break;
             }
             /* get same value */
             alpha->symbolmap[(uint32_t) cc] = (Uchar) alpha->mapsize;
@@ -192,8 +192,13 @@ static int readsymbolmapviafp(Alphabet *alpha,
             env_error_set(env,
                           "illegal character '%c' in line %u of mapfile %s",
                           cc,linecount,str_get(mapfile));
-            return -2;
+            haserr = true;
+            break;
           }
+        }
+        if(haserr)
+        {
+          break;
         }
         if (blankfound)
         {
@@ -203,7 +208,8 @@ static int readsymbolmapviafp(Alphabet *alpha,
                           "illegal character '%c' at the end of "
                           "line %u in mapfile %s",
                           LINE(column+1),linecount,str_get(mapfile));
-            return -3;
+            haserr  = true;
+            break;
           }
           /* use next character to display character */
           alpha->characters[alpha->mapsize++] = LINE(column+1);
@@ -215,24 +221,27 @@ static int readsymbolmapviafp(Alphabet *alpha,
       }
     }
   }
-  for (cnum=0;cnum<=UCHAR_MAX; cnum++)
+  if(!haserr)
   {
-    if (alpha->symbolmap[cnum] == (Uchar) (alpha->mapsize - 1))
+    for (cnum=0;cnum<=UCHAR_MAX; cnum++)
     {
-      if (wildcard > 0)
+      if (alpha->symbolmap[cnum] == (Uchar) (alpha->mapsize - 1))
       {
-        alpha->symbolmap[cnum] = wildcard; /* modify mapping for wildcard */
+        if (wildcard > 0)
+        {
+          alpha->symbolmap[cnum] = wildcard; /* modify mapping for wildcard */
+        }
+        alpha->mappedwildcards++;
       }
-      alpha->mappedwildcards++;
+    }
+    if (wildcard > 0)
+    {
+      alpha->characters[(uint32_t) wildcard] 
+        = alpha->characters[alpha->mapsize-1];
     }
   }
-  if (wildcard > 0)
-  {
-    alpha->characters[(uint32_t) wildcard] 
-      = alpha->characters[alpha->mapsize-1];
-  }
   FREEARRAY(&line,Uchar);
-  return 0;
+  return haserr ? -1 : 0;
 }
 
 /*EE
@@ -250,19 +259,23 @@ static int readsymbolmap(Alphabet *alpha,Uchar wildcard,
                          const Str *mapfile,Env *env)
 {
   FILE *fpin;
+  bool haserr = false;
 
   env_error_check(env);
-  fpin = scanpathsforfile("MKVTREESMAPDIR",mapfile,env);
+  fpin = env_fa_fopen(env,str_get(mapfile),"rb");
   if (fpin == NULL)
   {
-    return -1;
+    haserr = true;
   }
-  if (readsymbolmapviafp(alpha,wildcard,mapfile,fpin,env) != 0)
+  if(!haserr)
   {
-    return -2;
+    if (readsymbolmapviafp(alpha,wildcard,mapfile,fpin,env) != 0)
+    {
+      haserr = true;
+    }
   }
   env_fa_xfclose(fpin,env);
-  return 0;
+  return haserr ? -1 : 0;
 }
 
 static void assignDNAsymbolmap(Uchar *symbolmap)
@@ -407,6 +420,7 @@ static int assignProteinorDNAalphabet(Alphabet *alpha,
                                          Env *env)
 {
   Alphabet *alpha;
+  bool haserr = false;
 
   env_error_check(env);
   ALLOCASSIGNSPACE(alpha,NULL,Alphabet,(size_t) 1);
@@ -427,16 +441,21 @@ static int assignProteinorDNAalphabet(Alphabet *alpha,
                          smapfile,
                          env) != 0)
         {
-          return NULL;
+          haserr = true;
         }
       } else
       {
         if(assignProteinorDNAalphabet(alpha,filenametab,env) != 0)
         {
-          return NULL;
+          haserr = true;
         }
       }
     }
+  }
+  if(haserr)
+  {
+    FREESPACE(alpha);
+    return NULL;
   }
   return alpha;
 }

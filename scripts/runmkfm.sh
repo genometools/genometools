@@ -49,7 +49,7 @@ function mkfmindex()
   indexname=$1
   shift
   iiargs=$*
-  cerr "${gtpath} mkfmindex -noindexpos -fmout ${indexname} -ii ${iiargs}"
+  cerr "${gtpath} mkfmindex -size small -noindexpos -fmout ${indexname} -ii ${iiargs}"
 }
 
 needsrebuild=0

@@ -200,6 +200,8 @@ int sufbwt2fmindex(Fmindex *fmindex,
   Specialcharinfo specialcharinfo;
   bool haserr = false;
   
+  longest.defined = false;
+  longest.valueseqpos = 0;
   numofindexes = (uint32_t) strarray_size(indexnametab);
   if(numofindexes == (uint32_t) 1)
   {

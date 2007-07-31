@@ -33,6 +33,14 @@ allfiles = ["RandomN.fna","Random.fna","Atinsert.fna",
             "TTT-small.fna","trna_glutamine.fna",
             "Atinsert.fna","Random-Small.fna"]
 
+Name "gt suffixerator failure"
+Keywords "gt_suffixerator"
+Test do
+  run_test "#{$bin}gt suffixerator -tis -indexname sfx -pl -db /nothing",:retval => 1
+  run_test "#{$bin}gt suffixerator -tis -indexname /nothing/sfx -pl -db #{$testdata}TTT-small.fna",:retval => 1
+  run_test "#{$bin}gt suffixerator -smap /nothing -tis -pl -db #{$testdata}TTT-small.fna",:retval => 1
+end
+
 Name "gt suffixerator bwt"
 Keywords "gt_suffixerator"
 Test do
@@ -80,3 +88,4 @@ end
     end
   end
 end
+
