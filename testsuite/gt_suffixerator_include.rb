@@ -29,6 +29,10 @@ def checkbwt(filelist)
   run "#{$bin}gt suffixerator -pl #{outoptions()} -db " + filearg
 end
 
+def runsfxfail(args)
+  run_test "#{$bin}gt suffixerator -tis " + args,:retval => 1
+end
+
 allfiles = ["RandomN.fna","Random.fna","Atinsert.fna",
             "TTT-small.fna","trna_glutamine.fna",
             "Atinsert.fna","Random-Small.fna"]
@@ -36,9 +40,10 @@ allfiles = ["RandomN.fna","Random.fna","Atinsert.fna",
 Name "gt suffixerator failure"
 Keywords "gt_suffixerator"
 Test do
-  run_test "#{$bin}gt suffixerator -tis -indexname sfx -pl -db /nothing",:retval => 1
-  run_test "#{$bin}gt suffixerator -tis -indexname /nothing/sfx -pl -db #{$testdata}TTT-small.fna",:retval => 1
-  run_test "#{$bin}gt suffixerator -smap /nothing -tis -pl -db #{$testdata}TTT-small.fna",:retval => 1
+  runsfxfail "-indexname sfx -db /nothing"
+  runsfxfail "-indexname /nothing/sfx -db #{$testdata}TTT-small.fna"
+  runsfxfail "-smap /nothing -db #{$testdata}TTT-small.fna"
+  runsfxfail "-dna -db #{$testdata}sw100K1.fna"
 end
 
 Name "gt suffixerator bwt"

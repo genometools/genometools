@@ -69,6 +69,7 @@ int scanfastasequence(
   Seqpos lastspeciallength = 0;
   Distribution *specialrangelengths;
   unsigned long idx;
+  bool haserr = false;
 
   *numofsequences = 0;
   specialcharinfo->specialcharacters = 0;
@@ -88,7 +89,8 @@ int scanfastasequence(
     retval = readnextUchar(&charcode,&fbs,env);
     if (retval < 0)
     {
-      return -1;
+      haserr = true;
+      break;
     }
     if (retval == 0)
     {
@@ -131,12 +133,15 @@ int scanfastasequence(
       }
     }
   }
-  specialcharinfo->specialranges = 0;
-  (void) foreachdistributionvalue(specialrangelengths,updatesumranges,
-                                  &specialcharinfo->specialranges,env);
+  if(!haserr)
+  {
+    specialcharinfo->specialranges = 0;
+    (void) foreachdistributionvalue(specialrangelengths,updatesumranges,
+                                    &specialcharinfo->specialranges,env);
+    specialcharinfo->lengthofspecialsuffix = lastspeciallength;
+    (*numofsequences)++;
+    *totallength = pos;
+  }
   freedistribution(&specialrangelengths,env);
-  specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-  (*numofsequences)++;
-  *totallength = pos;
-  return 0;
+  return haserr ? -1 : 0;
 }
