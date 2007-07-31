@@ -384,9 +384,10 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
     {
       if(so->readmode != Forwardmode)
       {
-        env_error_set(env,"readmode = %u only makes sense in combination with "
-                          "at least one of the options -suf, -lcp, or -bwt",
-                          so->readmode);
+        env_error_set(env,"option '-dir %s' only makes sense in combination "
+                          "with at least one of the options -suf, -lcp, or "
+                          "-bwt",
+                          showreadmode(so->readmode));
         haserr = true;
       }
     }

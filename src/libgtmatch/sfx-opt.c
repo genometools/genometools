@@ -19,6 +19,32 @@ static void versionfunc(const char *progname)
   printf("%s version 0.1\n",progname);
 }
 
+static char *readmodes[] = {"fwd", 
+                            "cpl", 
+                            "rev", 
+                            "rcl"};
+
+const char *showreadmode(Readmode readmode)
+{
+  return readmodes[(int) readmode];
+}
+
+static int parsereadmode(const char *dirargstring,Env *env)
+{
+  size_t i;
+
+  for(i=0; i<sizeof(readmodes)/sizeof(readmodes[0]); i++)
+  {
+    if(strcmp(dirargstring,readmodes[i]) == 0)
+    {
+      return i;
+    }
+  }
+  env_error_set(env,"argument to option -dir must be in "
+                "fwd or rev or cpl or rcl");
+  return -1;
+}
+
 static OPrval parse_options(int *parsed_args,
                             Suffixeratoroptions *so,
                             int argc, const char **argv, Env *env)
@@ -173,33 +199,14 @@ static OPrval parse_options(int *parsed_args,
   }
   if(oprval == OPTIONPARSER_OK)
   {
-    const char *dirargstring = str_get(dirarg);
-    if(strcmp(dirargstring,"fwd") == 0)
+    int retval = parsereadmode(str_get(dirarg),env);
+
+    if(retval < 0)
     {
-      so->readmode = Forwardmode;
+      oprval = OPTIONPARSER_ERROR;
     } else
     {
-      if(strcmp(dirargstring,"rev") == 0)
-      {
-        so->readmode = Reversemode;
-      } else
-      {
-        if(strcmp(dirargstring,"cpl") == 0)
-        {
-          so->readmode = Complementmode;
-        } else
-        {
-          if(strcmp(dirargstring,"rcl") == 0)
-          {
-            so->readmode = Reversecomplementmode;
-          } else
-          {
-            env_error_set(env,"argument to option -dir must be in "
-                              "fwd or rev or cpl or rcl");
-            oprval = OPTIONPARSER_ERROR;
-          }
-        }
-      }
+      so->readmode = (Readmode) retval;
     }
   }
   str_delete(dirarg,env);

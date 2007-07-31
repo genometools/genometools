@@ -30,10 +30,12 @@
         (STREAM)->fp = opensfxfile(INDEXNAME,SUFFIX,"rb",env);\
         if((STREAM)->fp == NULL)\
         {\
-          return -1;\
-        }\
-        (STREAM)->nextread = 0;\
-        (STREAM)->nextfree = 0
+          haserr = true;\
+        } else\
+        {\
+          (STREAM)->nextread = 0;\
+          (STREAM)->nextfree = 0;\
+        }
 
 static int scanprjfileviafileptr(Suffixarray *suffixarray,
                                  Seqpos *totallength,
@@ -235,7 +237,7 @@ static void *genericmaptable(const Str *indexname,const char *suffix,
   }
   if (!haserr && expectedunits != (Seqpos) (numofbytes/sizeofunit))
   {
-    env_error_set(env,"number of mapped integers = %lu != " FormatSeqpos
+    env_error_set(env,"number of mapped units = %lu != " FormatSeqpos
                       " = expected number of integers",
                          (unsigned long) (numofbytes/sizeofunit),
                          PRINTSeqposcast(expectedunits));
@@ -249,8 +251,10 @@ int initUcharBufferedfile(UcharBufferedfile *stream,
                           const Str *indexname,
                           const char *suffix,Env *env)
 {
+  bool haserr = false;
+
   INITBufferedfile(indexname,stream,suffix);
-  return 0;
+  return haserr ? -1 : 0;
 }
 
 static void initsuffixarray(Suffixarray *suffixarray)
@@ -324,6 +328,7 @@ void freesuffixarray(Suffixarray *suffixarray,Env *env)
   freeAlphabet(&suffixarray->alpha,env);
   freeEncodedsequence(&suffixarray->encseq,env);
   strarray_delete(suffixarray->filenametab,env);
+  suffixarray->filenametab = NULL;
   FREESPACE(suffixarray->filelengthtab);
 }
 
@@ -453,7 +458,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
   if (!haserr && (demand & SARR_SUFTAB))
   {
     INITBufferedfile(indexname,&suffixarray->suftabstream,SUFTABSUFFIX);
-    if(!suffixarray->longest.defined)
+    if(!haserr && !suffixarray->longest.defined)
     {
       env_error_set(env,"longest not defined");
       haserr = true;
@@ -466,7 +471,8 @@ int streamsuffixarray(Suffixarray *suffixarray,
   if(!haserr && (demand & SARR_LCPTAB))
   {
     INITBufferedfile(indexname,&suffixarray->lcptabstream,LCPTABSUFFIX);
-    if(fseek(suffixarray->lcptabstream.fp,(long) sizeof(Uchar),SEEK_SET) != 0)
+    if(!haserr && 
+       fseek(suffixarray->lcptabstream.fp,(long) sizeof(Uchar),SEEK_SET) != 0)
     {
       env_error_set(env,"fseek(esastream) failed: %s",strerror(errno));
       haserr = true;
@@ -483,7 +489,9 @@ int streamsuffixarray(Suffixarray *suffixarray,
   }
   if(haserr)
   {
+    STAMP;
     freesuffixarray(suffixarray,env);
+    STAMP;
   }
   return haserr ? -1 : 0;
 }
