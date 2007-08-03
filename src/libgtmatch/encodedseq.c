@@ -1104,7 +1104,9 @@ static bool nextnonemptypagereverse(const Encodedsequence *encseq,
 #endif
       endpos0 = accessendspecialsubsUint(encseq,esr->nextpage-1);
       endpos1 = accessendspecialsubsUint(encseq,esr->nextpage);
+#ifdef DEBUG
       printf("endpos0=%u,endpos1=%u\n",endpos0,endpos1);
+#endif
       if (endpos0 < endpos1)
       {
         esr->firstcell = endpos0;
