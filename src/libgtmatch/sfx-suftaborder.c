@@ -145,6 +145,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
   Seqpos maxlcp, countbitsset = 0, totallength = getencseqtotallength(encseq);
   int cmp;
 
+  env_error_check(env);
   assert(!specialsareequal || specialsareequalatdepth0);
   INITBITTAB(startposoccurs,totallength+1);
   for (ptr = suftab; ptr <= suftab + totallength; ptr++)

@@ -95,6 +95,7 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
 int checkprefixlength(unsigned int maxprefixlen,
                       unsigned int prefixlength,Env *env)
 {
+  env_error_check(env);
   if(maxprefixlen < prefixlength)
   {
     env_error_set(env,"prefix length %u is too large, maximal prefix length "

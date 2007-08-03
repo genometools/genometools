@@ -47,6 +47,7 @@ static int inputthesequences(Alphabet **alpha,
   Str *indexname;
   Seqpos totallength;
   
+  env_error_check(env);
   for(idx=0; idx<strarray_size(indexnametab); idx++)
   {
     indexname = str_new_cstr(strarray_get(indexnametab,idx),env);
@@ -80,6 +81,7 @@ static int insertfirstsuffixes(Trierep *trierep,
   Seqpos suftabvalue;
   int retval;
 
+  env_error_check(env);
   for(idx=0; idx<numofindexes; idx++)
   {
     retval = readnextSeqposfromstream(&suftabvalue,
@@ -111,6 +113,7 @@ static int insertfirstsuffixes(Trierep *trierep,
 {
   Trienode *tmp;
 
+  env_error_check(env);
   for(tmp = smallest->parent; tmp != NULL; tmp = tmp->parent)
   {
     if(tmp->depth <= lcpvalue)
@@ -134,6 +137,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Env *env)
          tmplastbranchdepth;
   uint32_t tmpidx; 
   
+  env_error_check(env);
   for(emmesa->buf.nextstoreidx = 0;
       emmesa->numofentries > 0 &&
       emmesa->buf.nextstoreidx < (uint32_t) SIZEOFMERGERESULTBUFFER;

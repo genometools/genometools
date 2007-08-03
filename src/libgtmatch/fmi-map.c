@@ -27,6 +27,7 @@
 
 bool fmindexexists(const Str *indexname,Env *env)
 {
+  env_error_check(env);
   if(!indexfilealreadyexists(indexname,FMASCIIFILESUFFIX,env))
   {
     return false;
@@ -136,6 +137,7 @@ static Encodedsequence *mapbwtencoding(const Str *indexname,Env *env)
   bool haserr = false;
   Seqpos totallength;
 
+  env_error_check(env);
   if(mapsuffixarray(&suffixarray,&totallength,SARR_ESQTAB,indexname,
                     false,env) != 0)
   {
@@ -157,6 +159,7 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env)
   FILE *fpin = NULL;
   bool haserr = false, storeindexpos = true;
 
+  env_error_check(env);
   fmindex->mappedptr = NULL;
   fmindex->bwtformatching = NULL;
   fpin = opensfxfile(indexname,FMASCIIFILESUFFIX,"rb",env);

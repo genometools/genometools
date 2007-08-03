@@ -44,6 +44,7 @@ void setreadintkeys(Array *riktab,
 {
   Readintkeys rikvalue;
 
+  env_error_check(env);
   rikvalue.keystring = keystring;
   rikvalue.readflag = readflag;
   switch(sizeval)
@@ -193,6 +194,7 @@ int analyzeuintline(const Str *indexname,
   Smallorbigint smallorbigint;
   uint32_t lengthofkey;
 
+  env_error_check(env);
   retval = scanuintintline(&lengthofkey,
                            &smallorbigint,
                            linebuffer,

@@ -227,6 +227,7 @@ static void *genericmaptable(const Str *indexname,const char *suffix,
   void *ptr;
   bool haserr = false;
 
+  env_error_check(env);
   tmpfilename = str_clone(indexname,env);
   str_append_cstr(tmpfilename,suffix,env);
   ptr = env_fa_mmap_read(env,str_get(tmpfilename),&numofbytes);
@@ -254,6 +255,7 @@ int initUcharBufferedfile(UcharBufferedfile *stream,
 {
   bool haserr = false;
 
+  env_error_check(env);
   INITBufferedfile(indexname,stream,suffix);
   return haserr ? -1 : 0;
 }
@@ -281,6 +283,7 @@ static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
   bool haserr = false;
   FILE *fp;
 
+  env_error_check(env);
   fp = opensfxfile(indexname,PROJECTFILESUFFIX,"rb",env);
   if (fp == NULL)
   {
@@ -301,6 +304,7 @@ static bool scanal1file(Suffixarray *suffixarray,const Str *indexname,Env *env)
   Str *tmpfilename;
   bool haserr = false;
 
+  env_error_check(env);
   tmpfilename = str_clone(indexname,env);
   str_append_cstr(tmpfilename,ALPHABETFILESUFFIX,env);
   suffixarray->alpha = assigninputalphabet(false,
@@ -471,6 +475,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
                       bool verbose,
                       Env *env)
 {
+  env_error_check(env);
   return inputsuffixarray(false,
                           suffixarray,
                           totallength,
@@ -487,6 +492,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
                    bool verbose,
                    Env *env)
 {
+  env_error_check(env);
   return inputsuffixarray(true,
                           suffixarray,
                           totallength,

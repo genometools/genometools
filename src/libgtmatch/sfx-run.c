@@ -27,6 +27,7 @@
 #include "sfx-outprj.pr"
 #include "sfx-suffixer.pr"
 #include "sfx-apfxlen.pr"
+#include "sfx-readmode.pr"
 
 typedef struct
 {
@@ -128,7 +129,19 @@ static int suftab2file(void *info,
                                            : outfileinfo->
                                              lastsuftabentryofpreviouspart,
                                    suftab[pos]);
-          assert(cmp <= 0);
+          if(cmp > 0)
+          {
+            fprintf(stderr,"pos = " FormatSeqpos 
+                           ": cmp " FormatSeqpos 
+                           " " FormatSeqpos " = %d\n",
+                    PRINTSeqposcast(pos),
+                    pos > 0 ? PRINTSeqposcast(suftab[pos-1])
+                            : PRINTSeqposcast(outfileinfo->
+                                              lastsuftabentryofpreviouspart),
+                    PRINTSeqposcast(suftab[pos]),
+                    cmp);
+            exit(EXIT_FAILURE);
+          } 
           if(outfileinfo->maxbranchdepth < lcpvalue)
           {
             outfileinfo->maxbranchdepth = lcpvalue;
@@ -427,6 +440,7 @@ int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
   int retval;
   bool haserr = false;
 
+  env_error_check(env);
   retval = suffixeratoroptions(&so,argc,argv,env);
   if(retval == 0)
   {

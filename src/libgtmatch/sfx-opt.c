@@ -13,36 +13,11 @@
 #include "stamp.h"
 
 #include "getbasename.pr"
+#include "sfx-readmode.pr"
 
 static void versionfunc(const char *progname)
 {
   printf("%s version 0.1\n",progname);
-}
-
-static char *readmodes[] = {"fwd", 
-                            "cpl", 
-                            "rev", 
-                            "rcl"};
-
-const char *showreadmode(Readmode readmode)
-{
-  return readmodes[(int) readmode];
-}
-
-static int parsereadmode(const char *dirargstring,Env *env)
-{
-  size_t i;
-
-  for(i=0; i<sizeof(readmodes)/sizeof(readmodes[0]); i++)
-  {
-    if(strcmp(dirargstring,readmodes[i]) == 0)
-    {
-      return (int) i;
-    }
-  }
-  env_error_set(env,"argument to option -dir must be in "
-                "fwd or rev or cpl or rcl");
-  return -1;
 }
 
 static OPrval parse_options(int *parsed_args,

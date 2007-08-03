@@ -21,12 +21,21 @@ def checksfx(parts,pl,withsmap,sat,filelist)
   run "cmp -s sfx.prj #{$last_stdout}"
 end
 
+def flattenfilelist(filelist)
+  s=""
+  filelist.each do |f|
+    s += "#{$testdata}#{f} "
+  end
+  return s
+end
+
 def checkbwt(filelist)
   filearg=""
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run "#{$bin}gt suffixerator -pl #{outoptions()} -db " + filearg
+  run "#{$bin}gt suffixerator -pl #{outoptions()} -db " +
+       flattenfilelist(filelist)
 end
 
 def runsfxfail(args)
@@ -40,6 +49,18 @@ end
 allfiles = ["RandomN.fna","Random.fna","Atinsert.fna",
             "TTT-small.fna","trna_glutamine.fna",
             "Atinsert.fna","Random-Small.fna"]
+
+alldir = ["fwd","cpl","rev","rcl"]
+
+alldir.each do |dir|
+  Name "gt suffixerator #{dir}"
+  Keywords "gt_suffixerator"
+  Test do
+    run "#{$bin}gt suffixerator -dir #{dir} -suf -bwt -lcp -tis " +
+        "-indexname sfx -pl -db " + 
+        flattenfilelist(allfiles)
+   end
+end
 
 runsfxfail "-indexname sfx -db /nothing"
 runsfxfail "-indexname /nothing/sfx -db #{$testdata}TTT-small.fna"

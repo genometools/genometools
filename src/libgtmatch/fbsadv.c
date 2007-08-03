@@ -81,6 +81,7 @@ void initformatbufferstate(Fastabufferstate *fbs,
                            Sequencedescription *sequencedescription,
                            Env *env)
 {
+  env_error_check(env);
   fbs->plainformat = plainformat;
   fbs->filenum = 0;
   fbs->firstoverallseq = true;

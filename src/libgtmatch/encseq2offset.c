@@ -24,6 +24,7 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
            tmpspecialranges,
            tmplarge;
 
+  env_error_check(env);
   assert(numofindexes > 0);
   ALLOCASSIGNSPACE(sequenceoffsettable,NULL,Seqpos,numofindexes);
   tmpspecialcharacters = (uint64_t) (numofindexes-1);
@@ -49,7 +50,8 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
       lastofprevious = getencodedchar(suffixarraytable[idx - 1].encseq,
                                       tmplength-1,
                                       suffixarraytable[idx - 1].readmode);
-      firstofcurrent = getencodedchar(suffixarraytable[idx].encseq,0,
+      firstofcurrent = getencodedchar(suffixarraytable[idx].encseq,
+                                      0,
                                       suffixarraytable[idx].readmode);
       if(ISSPECIAL(lastofprevious))
       {

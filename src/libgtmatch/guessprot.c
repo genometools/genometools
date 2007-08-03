@@ -24,6 +24,7 @@ int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
   Fastabufferstate fbs;
   int retval;
 
+  env_error_check(env);
   initformatbufferstate(&fbs,
                         filenametab,
                         NULL,

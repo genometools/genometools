@@ -33,6 +33,7 @@ static int initNameandFILE(NameandFILE *nf,
                             const char *suffix,
                             Env *env)
 {
+  env_error_check(env);
   nf->outfilename = str_clone(outindex,env);
   str_append_cstr(nf->outfilename,suffix,env);
   nf->fp = env_fa_fopen(env,str_get(nf->outfilename),"wb");
@@ -64,6 +65,7 @@ static int outputsuflcpllv(void *processinfo,
   Uchar smallvalue;
   bool haserr = false;
 
+  env_error_check(env);
   for(i=0; i<buf->nextstoreidx; i++)
   {
     mergeoutinfo->absstartpostable[i] 
@@ -136,6 +138,7 @@ static int mergeandstoreindex(const Str *storeindex,
   Seqpos *sequenceoffsettable, totallength; 
   bool haserr = false;
 
+  env_error_check(env);
   if(initNameandFILE(&mergeoutinfo.outsuf,storeindex,SUFTABSUFFIX,env) != 0)
   {
     haserr = true;
@@ -205,6 +208,7 @@ int performtheindexmerging(const Str *storeindex,
   unsigned int demand = SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB;
   bool haserr = false;
 
+  env_error_check(env);
   if(initEmissionmergedesa(&emmesa,
                            indexnametab,
                            demand,

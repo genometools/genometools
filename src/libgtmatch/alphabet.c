@@ -402,6 +402,8 @@ static int assignProteinorDNAalphabet(Alphabet *alpha,
                                       const StrArray *filenametab,Env *env)
 {
   int retval = guessifproteinsequencestream(filenametab,env);
+
+  env_error_check(env);
   if(retval < 0)
   {
     return -1;
@@ -487,6 +489,7 @@ Uchar *copycharactersAlphabet(const Alphabet *alpha,Env *env)
 {
   Uchar *characters;
 
+  env_error_check(env);
   ALLOCASSIGNSPACE(characters,NULL,Uchar,alpha->domainsize);
   (void) memcpy(characters,alpha->characters,(size_t) alpha->domainsize);
   return characters;

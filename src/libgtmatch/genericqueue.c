@@ -26,6 +26,7 @@ Genericqueue *emptyqueuegeneric(Env *env)
 {
   Genericqueue *q;
   
+  env_error_check(env);
   ALLOCASSIGNSPACE(q,NULL,Genericqueue,1);
   assert(q != NULL);
   q->numberofelements = 0;
@@ -53,6 +54,7 @@ void enqueuegeneric(Genericqueue *q,void *contents,Env *env)
 {
   Genericelementofqueue *newqueueelem;
 
+  env_error_check(env);
   ALLOCASSIGNSPACE(newqueueelem,NULL,Genericelementofqueue,1);
   newqueueelem->contents = contents;
   newqueueelem->previous = NULL;
@@ -73,6 +75,7 @@ void enqueuegeneric(Genericqueue *q,void *contents,Env *env)
   void *contents;
   Genericelementofqueue *oldheadptr;
 
+  env_error_check(env);
   if(q->numberofelements == 0)
   {
     env_error_set(env,"dequeuegeneric(emptyqueue) is undefined");

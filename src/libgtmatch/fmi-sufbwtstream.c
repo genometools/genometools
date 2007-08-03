@@ -25,6 +25,7 @@
 
 static void allocatefmtables(Fmindex *fm,bool storeindexpos,Env *env)
 {
+  env_error_check(env);
   ALLOCASSIGNSPACE (fm->tfreq, NULL, Seqpos,TFREQSIZE(fm->mapsize));
   ALLOCASSIGNSPACE (fm->superbfreq, NULL, Seqpos ,
                     SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks));
@@ -121,6 +122,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
 {
   Indexedsuffix indexedsuffix;
 
+  env_error_check(env);
   if(emmesa->buf.nextaccessidx >= emmesa->buf.nextstoreidx)
   {
     if(emmesa->numofentries == 0)
@@ -200,6 +202,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
   Specialcharinfo specialcharinfo;
   bool haserr = false;
   
+  env_error_check(env);
   longest.defined = false;
   longest.valueseqpos = 0;
   numofindexes = (uint32_t) strarray_size(indexnametab);

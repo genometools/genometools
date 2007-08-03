@@ -3,6 +3,7 @@ extern "C" {
 #endif
 int testencodedsequence(const StrArray *filenametab,
                         const Encodedsequence *encseq,
+                        Readmode readmode,
                         const Uchar *symbolmap,
                         Env *env);
 

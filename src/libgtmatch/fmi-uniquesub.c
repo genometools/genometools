@@ -89,6 +89,7 @@ static int optionaddbitmask(Optionargmodedesc *modedesc,
 {
   size_t modecount;
   
+  env_error_check(env);
   for(modecount=0; modecount < numberofentries; modecount++)
   {
     if(strcmp(optionargument,modedesc[modecount].name) == 0)
@@ -250,6 +251,7 @@ static int uniqueposinsinglesequence(void *info,
   const Uchar *query;
   unsigned long uniquelength, remaining;
 
+  env_error_check(env);
   if(substringinfo->preprocessuniquelength != NULL &&
      substringinfo->preprocessuniquelength(unitnum,
                                            desc,
@@ -339,7 +341,7 @@ static int findsubquerymatch(Fmindex *fmindex,
                              Definedunsignedlong minlength,
                              Definedunsignedlong maxlength,
                              uint32_t showmode,
-                             /*@unused@*/ Env *env)
+                             Env *env)
 {
   Substringinfo substringinfo;
   Rangespecinfo rangespecinfo;
@@ -347,6 +349,7 @@ static int findsubquerymatch(Fmindex *fmindex,
   Sequencedescription sequencedescription;
   bool haserr = false;
 
+  env_error_check(env);
   substringinfo.fmindex = fmindex;
   rangespecinfo.minlength = minlength;
   rangespecinfo.maxlength = maxlength;
@@ -381,6 +384,7 @@ int findminuniquesubstrings(int argc,const char **argv,Env *env)
   int retval = 0;
   bool haserr = false;
 
+  env_error_check(env);
   oprval = parseuniquesub(&uniquesubcallinfo,
                           argc, 
                           argv, 

@@ -71,6 +71,7 @@ int scanfastasequence(
   unsigned long idx;
   bool haserr = false;
 
+  env_error_check(env);
   *numofsequences = 0;
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;

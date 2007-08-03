@@ -21,6 +21,7 @@ int makeindexfilecopy(const Str *destindex,
   int cc;
   bool haserr = false;
 
+  env_error_check(env);
   fpdest = opensfxfile(destindex,suffix,"wb",env);
   if (fpdest == NULL)
   {

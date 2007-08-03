@@ -158,6 +158,7 @@ static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
   OPrval rval;
   int retval = 0;
 
+  env_error_check(env);
   rval = parsemkfmindex(mkfmcallinfo,argc,argv,env);
   if (rval == OPTIONPARSER_ERROR)
   {
@@ -179,6 +180,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
            log2markdist; 
   bool haserr = false;
   
+  env_error_check(env);
   INITARRAY(&fm.specpos, PairBwtidx);
   fm.bfreq = NULL;
   fm.superbfreq = NULL;

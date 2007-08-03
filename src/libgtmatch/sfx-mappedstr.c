@@ -470,8 +470,8 @@ static int getencseqkmersgeneric(
     Seqpos totallength = getencseqtotallength(encseq);
 
     /*
-    Encodedsequencescanstate *esr;
-    esr = initEncodedsequencescanstate(encseq,env);
+    Encodedsequencescanstate *esr;  XXX
+    esr = initEncodedsequencescanstate(encseq,readmode,env);
     */
     for (currentposition = 0; currentposition<totallength; currentposition++)
     {
@@ -479,6 +479,7 @@ static int getencseqkmersgeneric(
       charcode = sequentialgetencodedchar(encseq,esr,currentposition);
       */
       charcode = getencodedchar(encseq,currentposition,readmode);
+      // printf("charcode[%u]=%u\n",currentposition,charcode);
       shiftrightwithchar(processkmercode,processkmercodeinfo,
                          &spwp,currentposition,charcode,env);
     }

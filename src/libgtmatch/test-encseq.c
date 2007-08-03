@@ -10,22 +10,26 @@
 #include "fbs-def.h"
 #include "stamp.h"
 
+#include "sfx-readmode.pr"
 #include "fbsadv.pr"
 #include "readnextUchar.gen"
 
 int testencodedsequence(const StrArray *filenametab,
                         const Encodedsequence *encseq,
+                        Readmode readmode,
                         const Uchar *symbolmap,
                         Env *env)
 {
-  Seqpos pos;
-  Uchar cc0, cc1;
+  Seqpos pos, totallength;
+  Uchar ccscan, ccra, ccsr;
   Fastabufferstate fbs;
   int retval;
   bool haserr = false;
   Encodedsequencescanstate *esr;
 
+  printf("# testencodedsequence with readmode = %s\n",showreadmode(readmode));
   env_error_check(env);
+  totallength = getencseqtotallength(encseq);
   initformatbufferstate(&fbs,
                         filenametab,
                         symbolmap,
@@ -33,50 +37,62 @@ int testencodedsequence(const StrArray *filenametab,
                         NULL,
                         NULL,
                         env);
-  esr = initEncodedsequencescanstate(encseq,env);
+  esr = initEncodedsequencescanstate(encseq,readmode,env);
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = readnextUchar(&cc0,&fbs,env);
-    if (retval < 0)
+    if(readmode == Forwardmode)
     {
-      haserr = true;
-      break;
-    }
-    if (retval == 0)
+      retval = readnextUchar(&ccscan,&fbs,env);
+      if (retval < 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (retval == 0)
+      {
+        break;
+      }
+    } else
     {
-      break;
+      if(pos >= totallength)
+      {
+        break;
+      }
     }
-    cc1 = getencodedchar(encseq,pos,Forwardmode);
-    if (cc0 != cc1)
+    ccra = getencodedchar(encseq,pos,readmode);
+    if(readmode == Forwardmode)
+    {
+      if (ccscan != ccra)
+      {
+        env_error_set(env,"position " FormatSeqpos
+                          ": scan (readnextchar) = %u != "
+                          "%u = random access (getencodedchar)",
+                           pos,
+                           (uint32_t) ccscan,
+                           (uint32_t) ccra);
+        haserr = true;
+        break;
+      }
+    }
+    ccsr = sequentialgetencodedchar(encseq,esr,pos);
+    if (ccra != ccsr)
     {
       env_error_set(env,"position " FormatSeqpos
-                        ": correct = %u != %u = cc1 (getencodedchar)",
+                        ": random access (getencodedchar) = %u != "
+                        " %u = sequential read (sequentialgetencodedchar)",
                          pos,
-                         (uint32_t) cc0,
-                         (uint32_t) cc1);
-      haserr = true;
-      break;
-    }
-    cc1 = sequentialgetencodedchar(encseq,esr,pos);
-    if (cc0 != cc1)
-    {
-      env_error_set(env,"position " FormatSeqpos
-                        ": correct = %u != %u = cc1 "
-                        "(sequentialgetencodedchar)",
-                         pos,
-                         (uint32_t) cc0,
-                         (uint32_t) cc1);
+                         (uint32_t) ccra,
+                         (uint32_t) ccsr);
       haserr = true;
       break;
     }
   }
   if (!haserr)
   {
-    if (pos != getencseqtotallength(encseq))
+    if (pos != totallength)
     {
       env_error_set(env,"sequence length must be " FormatSeqpos " but is "
-                         FormatSeqpos,
-                         getencseqtotallength(encseq),pos);
+                         FormatSeqpos,totallength,pos);
       haserr = true;
     }
   }

@@ -68,6 +68,7 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
   bool haserr = false;
   Seqpos totallength;
 
+  env_error_check(env);
   if(streamsuffixarray(&suffixarray,
                        &totallength,
                        SARR_ESQTAB,

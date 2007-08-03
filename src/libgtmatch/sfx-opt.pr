@@ -1,8 +1,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-const char *showreadmode(Readmode readmode);
-
 void wrapsfxoptions(Suffixeratoroptions *so,Env *env);
 
 int suffixeratoroptions(Suffixeratoroptions *so,

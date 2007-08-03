@@ -39,6 +39,7 @@ int overallquerysequences(int(*processsequence)(void *,
   bool haserr = false;
   char *desc;
 
+  env_error_check(env);
   initformatbufferstate(&fbs,
                         filenametab,
                         symbolmap,

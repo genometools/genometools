@@ -37,6 +37,7 @@ typedef struct
 
 DECLAREARRAYSTRUCT(Codeatposition);
 
+#define LONGOUTPUT
 #undef LONGOUTPUT
 
 typedef struct
@@ -331,13 +332,15 @@ static int insertallfullspecials(
   ics.processsuftabinfo = processsuftabinfo;
   ics.readmode = readmode;
   ics.env = env;
-  if(overallspecialranges(encseq,insertfullspecialpair,&ics,env) != 0)
+  if(overallspecialranges(encseq,
+                          readmode,
+                          insertfullspecialpair,&ics,env) != 0)
   {
     return -1;
   }
   if(insertfullspecialrange(&ics,ics.totallength,ics.totallength+1) != 0)
   {
-    return -1;
+    return -2;
   }
   if(ics.nextfreeUint > 0)
   {
@@ -347,7 +350,7 @@ static int insertallfullspecials(
                           (Seqpos) ics.nextfreeUint,
                           env) != 0)
     {
-      return -1;
+      return -3;
     }
   }
   return 0;
@@ -435,9 +438,12 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
     assert(specialranges+1 >= (Seqpos) csf.nextfreeCodeatposition);
     assert(csf.filltable != NULL);
     assert(csf.leftborder != NULL);
+    // printf("leftborder[0]=%u\n",csf.leftborder[0]);
     for (optr = csf.leftborder + 1;
          optr < csf.leftborder + numofallcodes; optr++)
     {
+      // printf("leftborder[%u]=%u\n",(unsigned int) (optr - csf.leftborder),
+                                   // *optr);
       *optr += *(optr-1);
     }
     csf.leftborder[numofallcodes] 
@@ -458,7 +464,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
       csf.currentmincode = stpgetcurrentmincode(part,suftabparts);
       csf.suftabptr = csf.suftab - stpgetcurrentsuftaboffset(part,suftabparts);
       csf.currentmaxcode = stpgetcurrentmaxcode(part,suftabparts);
-      derivespecialcodes(encseq,
+      derivespecialcodes(NULL, /* not needed her */
                          numofchars,
                          prefixlength,
                          &csf,

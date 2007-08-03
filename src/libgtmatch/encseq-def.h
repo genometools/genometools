@@ -15,8 +15,8 @@
 
 #define ENCSEQFILESUFFIX     ".esq"
 
-typedef struct _Encodedsequence Encodedsequence;
-typedef struct _Encodedsequencescanstate Encodedsequencescanstate;
+typedef struct Encodedsequence Encodedsequence;
+typedef struct Encodedsequencescanstate Encodedsequencescanstate;
 
 typedef struct
 {
@@ -36,6 +36,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
 
 /*@null@*/ Encodedsequencescanstate *initEncodedsequencescanstate(
                                          const Encodedsequence *encseq,
+                                         Readmode readmode,
                                          Env *env);
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
@@ -45,6 +46,7 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Seqpos pos);
 
 int overallspecialranges(const Encodedsequence *encseq,
+                         Readmode readmode,
                          int(*process)(void *,const Sequencerange *,Env *),
                          void *processinfo,
                          Env *env);

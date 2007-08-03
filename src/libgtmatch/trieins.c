@@ -126,7 +126,11 @@ static void showtrie2(const Trierep *trierep,
     for(pos = current->suffixinfo.startpos + node->depth;
         pos < endpos; pos++)
     {
-      cc = getencodedchar(trierep->encseqtable[current->suffixinfo.idx],pos);
+      cc = getencodedchar(trierep->enseqreadinfo[current->suffixinfo.idx].
+                          encseqptr,
+                          pos,
+                          trierep->enseqreadinfo[current->suffixinfo.idx].
+                          readmode);
       if(ISSPECIAL(cc))
       {
         printf("#\n");
@@ -236,6 +240,7 @@ static void checktrie2(Trierep *trierep,
 void checktrie(Trierep *trierep,uint32_t numberofleaves,
                uint32_t maxleafnum,Env *env)
 {
+  env_error_check(env);
   if(trierep->root != NULL)
   {
     Bitstring *leafused; 
@@ -399,7 +404,8 @@ static Trienode *makenewbranch(Trierep *trierep,
     cc2 = (Uchar) SEPARATOR;
   } else
   {
-    cc2 = getencodedchar(eri->encseqptr,suffixinfo->startpos + currentdepth,
+    cc2 = getencodedchar(eri->encseqptr,
+                         suffixinfo->startpos + currentdepth,
                          eri->readmode);
   }
   newleaf = makenewleaf(trierep,suffixinfo);
@@ -489,7 +495,8 @@ void insertsuffixintotrie(Trierep *trierep,
 	cc = (Uchar) SEPARATOR;
       } else
       {
-	cc = getencodedchar(eri->encseqptr,suffixinfo->startpos + currentdepth,
+	cc = getencodedchar(eri->encseqptr,
+                            suffixinfo->startpos + currentdepth,
                             eri->readmode);
       }
       assert(currentnode != NULL);
@@ -624,6 +631,7 @@ void deletesmallestpath(Trienode *smallest,Trierep *trierep)
 void inittrienodetable(Trierep *trierep,Seqpos numofsuffixes,
                        uint32_t numofindexes,Env *env)
 {
+  env_error_check(env);
   trierep->numofindexes = numofindexes;
   trierep->allocatedTrienode = MULT2(numofsuffixes + 1) + 1;
   ALLOCASSIGNSPACE(trierep->nodetable,NULL,Trienode,trierep->allocatedTrienode);

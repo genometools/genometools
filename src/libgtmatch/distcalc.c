@@ -18,12 +18,15 @@
 
 static void freevalue(void *ptr,Env *env)
 {
+  env_error_check(env);
   FREESPACE(ptr);
 }
 
 Distribution *initdistribution(Env *env)
 {
   Distribution *dist;
+
+  env_error_check(env);
   ALLOCASSIGNSPACE(dist,NULL,Distribution,1);
   dist->hashdist = hashtable_new(HASH_DIRECT, NULL, freevalue, env);
   return dist;
@@ -42,6 +45,7 @@ void addmultidistribution(Distribution *dist,unsigned long ind,
 {
   void *result;
 
+  env_error_check(env);
   result = hashtable_get(dist->hashdist,(void *) ind);
   if(result == NULL)
   {
@@ -60,6 +64,7 @@ void addmultidistribution(Distribution *dist,unsigned long ind,
 
 void adddistribution(Distribution *dist,unsigned long ind,Env *env)
 {
+  env_error_check(env);
   addmultidistribution(dist,ind,(unsigned long) 1,env);
 }
 
@@ -68,5 +73,6 @@ int foreachdistributionvalue(Distribution *dist,
                                              void *data, Env*),
                              void *data,Env *env)
 {
+  env_error_check(env);
   return hashtable_foreach(dist->hashdist,hashiter,data,env);
 }

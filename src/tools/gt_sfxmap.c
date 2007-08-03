@@ -63,12 +63,24 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   str_delete(indexname,env);
   if (!haserr)
   {
-    if (testencodedsequence(suffixarray.filenametab,
-                            suffixarray.encseq,
-                            getsymbolmapAlphabet(suffixarray.alpha),
-                            env) != 0)
+    int readmode;
+    
+    for(readmode = 0; readmode < 4; readmode++)
     {
-      haserr = true;
+      if(isdnaalphabet(suffixarray.alpha) || 
+         ((Readmode) readmode) == Forwardmode ||  
+         ((Readmode) readmode) == Reversemode)
+      {
+        if (testencodedsequence(suffixarray.filenametab,
+                                suffixarray.encseq,
+                                (Readmode) readmode,
+                                getsymbolmapAlphabet(suffixarray.alpha),
+                                env) != 0)
+        {
+          haserr = true;
+          break;
+        }
+      }
     }
   }
   if (!haserr)

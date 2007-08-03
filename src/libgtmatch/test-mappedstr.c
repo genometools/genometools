@@ -90,6 +90,7 @@ static void outkmeroccurrence(void *processinfo,
 {
   ArrayCodetype *codelist = (ArrayCodetype *) processinfo;
 
+  env_error_check(env);
   STOREINARRAY(codelist,Codetype,1024,code);
 }
 
@@ -104,6 +105,7 @@ static void collectkmercode(ArrayCodetype *codelist,
   Seqpos offset;
   Codetype code;
 
+  env_error_check(env);
   for (offset=0; offset<=stringtotallength; offset++)
   {
     code = qgram2codefillspecial(numofchars,
@@ -126,6 +128,7 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
   unsigned long i;
   char buffer1[64+1], buffer2[64+1];
 
+  env_error_check(env);
   if (codeliststream->nextfreeCodetype != codeliststring->nextfreeCodetype)
   {
     env_error_set(env,
@@ -175,6 +178,7 @@ static int verifycodelists(const Encodedsequence *encseq,
   bool haserr = false;
   ArrayCodetype codeliststring;
 
+  env_error_check(env);
   INITARRAY(&codeliststring,Codetype);
   collectkmercode(&codeliststring,
                   encseq,
@@ -202,6 +206,7 @@ int verifymappedstr(const Suffixarray *suffixarray,Env *env)
   ArrayCodetype codeliststream;
   bool haserr = false;
 
+  env_error_check(env);
   numofchars = getnumofcharsAlphabet(suffixarray->alpha);
   INITARRAY(&codeliststream,Codetype);
   if (getfastastreamkmers(suffixarray->filenametab,
