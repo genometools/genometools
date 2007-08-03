@@ -975,7 +975,7 @@ static uint32_t sat2maxspecialtype(Positionaccesstype sat)
   exit(EXIT_FAILURE);
 }
 
-#define DEBUG
+#undef DEBUG
 #ifdef DEBUG
 static void ucharshowspecialpositions(const Encodedsequence *encseq,
                                       Seqpos pgnum,
@@ -1279,15 +1279,17 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
       esr->maxspecialtype = sat2maxspecialtype(encseq->sat);
       esr->numofspecialcells
         = (Seqpos) (encseq->totallength/esr->maxspecialtype + 1);
+#ifdef DEBUG
       printf("numofspecialcells=%u\n",esr->numofspecialcells);
+#endif
       if(ISDIRREVERSE(readmode) && esr->numofspecialcells > 0)
       {
         esr->nextpage = esr->numofspecialcells-1;
         esr->pageoffset = esr->nextpage * (esr->maxspecialtype+1);
-        printf("esr->pageoffset=%u\n",(unsigned int) esr->pageoffset);
 #ifdef DEBUG
-        // printf("start at page = %u\n",(unsigned int) esr->nextpage);
-        // printf("start at pageoffset = %u\n",(unsigned int) esr->pageoffset);
+        printf("esr->pageoffset=%u\n",(unsigned int) esr->pageoffset);
+        printf("start at page = %u\n",(unsigned int) esr->nextpage);
+        printf("start at pageoffset = %u\n",(unsigned int) esr->pageoffset);
 #endif
       } else
       {
@@ -1401,9 +1403,8 @@ static int overallspecialrangesdirectorbitaccess(
                 void *processinfo,
                 Env *env)
 {
-  Seqpos pos;
+  Seqpos pos, specialrangelength = 0;
   Sequencerange range;
-  Seqpos specialrangelength = 0;
   bool isspecialchar;
 
   env_error_check(env);
@@ -1481,6 +1482,55 @@ static int overallspecialrangesdirectorbitaccess(
   return 0;
 }
 
+static int overallspecialrangesreverse(
+                const Encodedsequence *encseq,
+                int(*process)(void *,const Sequencerange *,Env *),
+                void *processinfo,
+                Env *env)
+{
+  Seqpos pos, specialrangelength = 0;
+  Sequencerange range;
+  Uchar cc;
+
+  env_error_check(env);
+  pos = encseq->totallength-1;
+  while(true)
+  {
+    cc = getencodedchar (encseq,pos,Forwardmode);
+    if(ISSPECIAL(cc))
+    {
+      specialrangelength++;
+    } else
+    {
+      if(specialrangelength > 0)
+      {
+        range.leftpos = REVERSEPOS(pos + specialrangelength);
+        range.rightpos = REVERSEPOS(pos);
+        if(process(processinfo,&range,env) != 0)
+        {
+          return -1;
+        }
+      }
+      specialrangelength = 0;
+    }
+    if(pos == 0)
+    {
+      break;
+    }
+    pos--;
+  }
+  if(specialrangelength > 0)
+  {
+    range.leftpos = REVERSEPOS(pos + specialrangelength - 1);
+    range.rightpos = REVERSEPOS(pos - 1);
+    if(process(processinfo,&range,env) != 0)
+    {
+      return -1;
+    }
+  }
+  return 0;
+}
+
 int overallspecialranges(const Encodedsequence *encseq,
                          Readmode readmode,
                          int(*process)(void *,const Sequencerange *,Env *),
@@ -1523,8 +1573,17 @@ int overallspecialranges(const Encodedsequence *encseq,
   assert(esr != NULL);
   if(ISDIRREVERSE(readmode))
   {
-    Sequencerange seqrange;
 
+    if(overallspecialrangesreverse(
+                encseq,
+                process,
+                processinfo,
+                env) != 0)
+    {
+      return -1;
+    }
+    /*
+    Sequencerange seqrange;
     while (true)
     {
       seqrange.leftpos = REVERSEPOS(esr->previousrange.rightpos);
@@ -1539,6 +1598,7 @@ int overallspecialranges(const Encodedsequence *encseq,
       }
       advanceEncodedseqstatereverse(encseq,esr);
     }
+    */
   } else
   {
     while (true)
