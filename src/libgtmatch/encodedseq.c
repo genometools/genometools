@@ -1036,6 +1036,16 @@ static void ucharshowallspecialpositions(const Encodedsequence *encseq)
 }
 #endif
 
+static void checkpageoffset(Encodedsequencescanstate *esr)
+{
+  if(esr->nextpage == 0)
+  {
+    assert(esr->pageoffset == 0);
+  } else
+  {
+    assert(esr->pageoffset == (esr->nextpage - 1) * (esr->maxspecialtype+1));
+  }
+}
 
 static bool nextnonemptypageforward(const Encodedsequence *encseq,
                                     Encodedsequencescanstate *esr)
@@ -1047,31 +1057,28 @@ static bool nextnonemptypageforward(const Encodedsequence *encseq,
     if (esr->nextpage == 0)
     {
       endpos0 = accessendspecialsubsUint(encseq,0);
+      esr->nextpage = (Seqpos) 1;
+      esr->pageoffset = 0;
+      checkpageoffset(esr);
       if (endpos0 >= (Seqpos) 1)
       {
         esr->firstcell = 0;
         esr->lastcell = endpos0;
-        esr->nextpage++;
         return true;
       }
     } else
     {
       endpos0 = accessendspecialsubsUint(encseq,esr->nextpage-1);
       endpos1 = accessendspecialsubsUint(encseq,esr->nextpage);
+      esr->nextpage++;
+      esr->pageoffset += (esr->maxspecialtype+1);
       if (endpos0 < endpos1)
       {
         esr->firstcell = endpos0;
         esr->lastcell = endpos1;
-        esr->nextpage++;
-        esr->pageoffset += (esr->maxspecialtype+1);
         return true;
       }
     }
-    if (esr->nextpage > 0)
-    {
-      esr->pageoffset += (esr->maxspecialtype+1);
-    }
-    esr->nextpage++;
   }
   return false;
 }
@@ -1081,7 +1088,7 @@ static bool nextnonemptypagereverse(const Encodedsequence *encseq,
 {
   Seqpos endpos0, endpos1;
 
-  while (esr->nextpage + 1 >= (Seqpos) 1) /* equivalent to esr->nextpage >= 0 */
+  while (esr->nextpage <=  esr->numofspecialcells)
   {
     if (esr->nextpage == 0)
     {
@@ -1089,11 +1096,12 @@ static bool nextnonemptypagereverse(const Encodedsequence *encseq,
       printf("access page 0\n");
 #endif
       endpos0 = accessendspecialsubsUint(encseq,0);
+      esr->nextpage = esr->numofspecialcells+1;
+      esr->pageoffset = 0;
       if (endpos0 >= (Seqpos) 1)
       {
         esr->firstcell = 0;
         esr->lastcell = endpos0;
-        esr->nextpage--;
         return true;
       }
     } else
@@ -1107,24 +1115,15 @@ static bool nextnonemptypagereverse(const Encodedsequence *encseq,
 #ifdef DEBUG
       printf("endpos0=%u,endpos1=%u\n",endpos0,endpos1);
 #endif
+      esr->nextpage--;
+      esr->pageoffset -= (esr->maxspecialtype+1);
       if (endpos0 < endpos1)
       {
         esr->firstcell = endpos0;
         esr->lastcell = endpos1;
-        if(esr->nextpage < esr->numofspecialcells - 1 && 
-           esr->pageoffset >= esr->maxspecialtype+1)
-        {
-          esr->pageoffset -= (esr->maxspecialtype+1);
-        }
-        esr->nextpage--;
         return true;
       }
     }
-    if (esr->pageoffset >= esr->maxspecialtype+1)
-    {
-      esr->pageoffset -= (esr->maxspecialtype+1);
-    }
-    esr->nextpage--;
   }
   return false;
 }
@@ -1284,10 +1283,17 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
 #ifdef DEBUG
       printf("numofspecialcells=%u\n",esr->numofspecialcells);
 #endif
-      if(ISDIRREVERSE(readmode) && esr->numofspecialcells > 0)
+      if(ISDIRREVERSE(readmode))
       {
-        esr->nextpage = esr->numofspecialcells-1;
-        esr->pageoffset = esr->nextpage * (esr->maxspecialtype+1);
+        if(esr->numofspecialcells > 0)
+        {
+          esr->nextpage = esr->numofspecialcells;
+          esr->pageoffset = (esr->numofspecialcells-1) * (esr->maxspecialtype+1);
+        } else
+        {
+          esr->nextpage = 0;
+          esr->pageoffset = 0;
+        }
 #ifdef DEBUG
         printf("esr->pageoffset=%u\n",(unsigned int) esr->pageoffset);
         printf("start at page = %u\n",(unsigned int) esr->nextpage);
