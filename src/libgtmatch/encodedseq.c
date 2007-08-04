@@ -1598,13 +1598,14 @@ static int overallspecialrangesforward(
   return 0;
 }
 
-static int checkspecialranges(const Encodedsequence *encseq,
-                              Env *env)
+int checkspecialranges(const Encodedsequence *encseq,Env *env)
 {
   Array *rangesforward, *rangesreverse;
 
   rangesforward = array_new(sizeof(Sequencerange),env);
   rangesreverse = array_new(sizeof(Sequencerange),env);
+
+  if(overallspecialrangesforward(encseq,
 
 }
 
