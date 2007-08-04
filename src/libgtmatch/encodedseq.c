@@ -1539,14 +1539,81 @@ static int overallspecialrangesreverse(
   return 0;
 }
 
+static int overallspecialrangesreverse2(
+                const Encodedsequence *encseq,
+                Readmode readmode,
+                int(*process)(void *,const Sequencerange *,Env *),
+                void *processinfo,
+                Env *env)
+{
+  Encodedsequencescanstate *esr;
+  Sequencerange seqrange;
+
+  env_error_check(env);
+  esr = initEncodedsequencescanstate(encseq,readmode,env);
+  assert(esr != NULL);
+  while (true)
+  {
+    seqrange.leftpos = REVERSEPOS(esr->previousrange.rightpos);
+    seqrange.rightpos = REVERSEPOS(esr->previousrange.leftpos);
+    if (process(processinfo,&seqrange,env) != 0)
+    {
+      return -1;
+    }
+    if (!esr->hasrange)
+    {
+      break;
+    }
+    advanceEncodedseqstatereverse(encseq,esr);
+  }
+  freeEncodedsequencescanstate(&esr,env);
+  return 0;
+}
+
+static int overallspecialrangesforward(
+                const Encodedsequence *encseq,
+                Readmode readmode,
+                int(*process)(void *,const Sequencerange *,Env *),
+                void *processinfo,
+                Env *env)
+{
+  Encodedsequencescanstate *esr;
+
+  env_error_check(env);
+  esr = initEncodedsequencescanstate(encseq,readmode,env);
+  assert(esr != NULL);
+  while (true)
+  {
+    if (process(processinfo,&esr->previousrange,env) != 0)
+    {
+      return -1;
+    }
+    if (!esr->hasrange)
+    {
+      break;
+    }
+    advanceEncodedseqstateforward(encseq,esr);
+  }
+  freeEncodedsequencescanstate(&esr,env);
+  return 0;
+}
+
+static int checkspecialranges(const Encodedsequence *encseq,
+                              Env *env)
+{
+  Array *rangesforward, *rangesreverse;
+
+  rangesforward = array_new(sizeof(Sequencerange),env);
+  rangesreverse = array_new(sizeof(Sequencerange),env);
+
+}
+
 int overallspecialranges(const Encodedsequence *encseq,
                          Readmode readmode,
                          int(*process)(void *,const Sequencerange *,Env *),
                          void *processinfo,
                          Env *env)
 {
-  Encodedsequencescanstate *esr;
-
   env_error_check(env);
   if(encseq->sat == Viadirectaccess)
   {
@@ -1576,53 +1643,26 @@ int overallspecialranges(const Encodedsequence *encseq,
     }
     return 0;
   }
-
-  esr = initEncodedsequencescanstate(encseq,readmode,env);
-  assert(esr != NULL);
   if(ISDIRREVERSE(readmode))
   {
-
-    if(overallspecialrangesreverse(
-                encseq,
-                process,
-                processinfo,
-                env) != 0)
+    if(overallspecialrangesreverse2(encseq,
+                                    readmode,
+                                    process,
+                                    processinfo,
+                                    env) != 0)
     {
       return -1;
     }
-    /*
-    Sequencerange seqrange;
-    while (true)
-    {
-      seqrange.leftpos = REVERSEPOS(esr->previousrange.rightpos);
-      seqrange.rightpos = REVERSEPOS(esr->previousrange.leftpos);
-      if (process(processinfo,&seqrange,env) != 0)
-      {
-        return -1;
-      }
-      if (!esr->hasrange)
-      {
-        break;
-      }
-      advanceEncodedseqstatereverse(encseq,esr);
-    }
-    */
-  } else
-  {
-    while (true)
-    {
-      if (process(processinfo,&esr->previousrange,env) != 0)
-      {
-        return -1;
-      }
-      if (!esr->hasrange)
-      {
-        break;
-      }
-      advanceEncodedseqstateforward(encseq,esr);
-    }
+    return 0;
   }
-  freeEncodedsequencescanstate(&esr,env);
+  if(overallspecialrangesforward(encseq,
+                                 readmode,
+                                 process,
+                                 processinfo,
+                                 env) != 0)
+  {
+    return -1;
+  }
   return 0;
 }
 
