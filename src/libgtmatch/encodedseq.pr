@@ -21,6 +21,8 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
 
+int checkspecialranges(const Encodedsequence *encseq,Env *env);
+
 int overallspecialranges(const Encodedsequence *encseq,
                          Readmode readmode,
                          int(*process)(void *,const Sequencerange *,Env *),
