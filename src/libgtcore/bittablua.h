@@ -7,8 +7,15 @@
 #ifndef BITTABLUA_H
 #define BITTABLUA_H
 
+
 #include "lua.h"
 
+/* exports the Bittab class to Lua:
+
+   gt.bittab_new(num_of_bits)
+   bittab:set_bit(bit)
+   bittab:unset_bit(bit)
+*/
 int luaopen_bittab(lua_State*);
 
 #endif
