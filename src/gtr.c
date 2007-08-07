@@ -7,6 +7,7 @@
 #include "gtr.h"
 #include "lua.h"
 #include "lauxlib.h"
+#include "lualib.h"
 #include "libgtcore/array.h"
 #include "libgtcore/bitpackarray.h"
 #include "libgtcore/bitpackstring.h"
@@ -72,6 +73,7 @@ GTR* gtr_new(Env *env)
   gtr->spacepeak = str_new(env);
   /* XXX */
   gtr->L = luaL_newstate();
+  luaL_openlibs(gtr->L); /* open the standard libraries */
   assert(gtr->L);
   return gtr;
 }
@@ -231,6 +233,21 @@ static int run_tests(GTR *gtr, Env *env)
   return EXIT_SUCCESS;
 }
 
+static void run_interactive_lua_interpreter(lua_State *L)
+{
+  char buf[BUFSIZ];
+  int error;
+  assert(L);
+  while (fgets(buf, sizeof buf, stdin)) {
+    error = luaL_loadbuffer(L, buf, strlen(buf), "line") ||
+            lua_pcall(L, 0, 0, 0);
+    if (error) {
+      fprintf(stderr, "%s", lua_tostring(L, -1));
+      lua_pop(L, 1); /* pop error message */
+    }
+  }
+}
+
 int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
 {
   Tool tool = NULL;
@@ -261,9 +278,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
   }
   cstr_array_delete(nargv, env);
   if (!had_err && gtr->interactive) {
-    /* XXX */
-    env_error_set(env, "interactive mode not implemented yet");
-    had_err = -1;
+    run_interactive_lua_interpreter(gtr->L);
   }
   if (had_err)
     return EXIT_FAILURE;
