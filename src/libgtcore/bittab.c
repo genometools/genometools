@@ -10,8 +10,8 @@
 #include <libgtcore/undef.h>
 #include <libgtcore/xansi.h>
 
-#define NUM_OF_TESTS	50
-#define MAX_SIZE	1024
+#define NUM_OF_TESTS    50
+#define MAX_SIZE        1024
 
 struct Bittab {
   unsigned long *tabptr,
@@ -40,13 +40,14 @@ Bittab* bittab_new(unsigned long num_of_bits, Env *env)
 
 void bittab_set_bit(Bittab *b, unsigned long bit)
 {
-  assert(b);
+  assert(b && bit < b->num_of_bits);
   b->tabptr[(bit >> 3) / sizeof (unsigned long)] |=
     1UL << (bit & (8UL * sizeof (unsigned long) - 1));
 }
 
 void bittab_unset_bit(Bittab *b, unsigned long bit)
 {
+  assert(b && bit < b->num_of_bits);
   b->tabptr[(bit >> 3) / sizeof (unsigned long)] &=
     ~(1UL << (bit & (8UL * sizeof (unsigned long) - 1)));
 }
@@ -166,7 +167,7 @@ void bittab_get_all_bitnums(const Bittab *b, Array *bitnums, Env *env)
 
 bool bittab_bit_is_set(const Bittab *b, unsigned long bit)
 {
-  assert(b);
+  assert(b && bit < b->num_of_bits);
   if (b->tabptr[(bit >> 3) / sizeof (unsigned long)] &
       1UL << (bit & (8UL * sizeof (unsigned long) - 1))) {
     return true;
@@ -393,7 +394,7 @@ int bittab_unit_test(Env *env)
   bittab_set_bit(b, 64);
   bittab_set_bit(b, 77);
   bittab_set_bit(b, 96);
-  bittab_set_bit(b, 124);
+  bittab_set_bit(b, 123);
   ensure(had_err, bittab_count_set_bits(b) == 6);
   bittab_shift_left_equal(b);
   ensure(had_err, bittab_count_set_bits(b) == 6);
@@ -402,7 +403,7 @@ int bittab_unit_test(Env *env)
   ensure(had_err, bittab_bit_is_set(b, 65));
   ensure(had_err, bittab_bit_is_set(b, 78));
   ensure(had_err, bittab_bit_is_set(b, 97));
-  ensure(had_err, bittab_bit_is_set(b, 125));
+  ensure(had_err, bittab_bit_is_set(b, 124));
   bittab_delete(b, env);
 
   /* test bittab_shift_right_equal() */
@@ -412,7 +413,7 @@ int bittab_unit_test(Env *env)
   bittab_set_bit(b, 65);
   bittab_set_bit(b, 77);
   bittab_set_bit(b, 97);
-  bittab_set_bit(b, 125);
+  bittab_set_bit(b, 124);
   ensure(had_err, bittab_count_set_bits(b) == 6);
   bittab_shift_right_equal(b);
   ensure(had_err, bittab_count_set_bits(b) == 6);
@@ -421,7 +422,7 @@ int bittab_unit_test(Env *env)
   ensure(had_err, bittab_bit_is_set(b, 64));
   ensure(had_err, bittab_bit_is_set(b, 76));
   ensure(had_err, bittab_bit_is_set(b, 96));
-  ensure(had_err, bittab_bit_is_set(b, 124));
+  ensure(had_err, bittab_bit_is_set(b, 123));
   bittab_delete(b, env);
 
   return had_err;

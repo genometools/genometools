@@ -4,12 +4,11 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#ifndef GTLUA_H
-#define GTLUA_H
+#ifndef BITTABLUA_H
+#define BITTABLUA_H
 
 #include "lua.h"
 
-int  luaopen_gt(lua_State*); /* open all GenomeTools libraries in Lua */
-void run_interactive_lua_interpreter(lua_State*);
+int luaopen_bittab(lua_State*);
 
 #endif

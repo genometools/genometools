@@ -9,6 +9,14 @@
 #include <string.h>
 #include "gtlua.h"
 #include "lauxlib.h"
+#include "libgtcore/gtcorelua.h"
+
+int luaopen_gt(lua_State *L)
+{
+  assert(L);
+  luaopen_gtcore(L); /* open core library */
+  return 1;
+}
 
 void run_interactive_lua_interpreter(lua_State *L)
 {

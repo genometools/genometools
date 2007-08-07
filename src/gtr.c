@@ -19,6 +19,7 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/env.h"
 #include "libgtcore/grep.h"
+#include "libgtcore/gtcorelua.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/range.h"
 #include "libgtcore/splitter.h"
@@ -75,6 +76,10 @@ GTR* gtr_new(Env *env)
   /* XXX */
   gtr->L = luaL_newstate();
   luaL_openlibs(gtr->L); /* open the standard libraries */
+  put_env_in_registry(gtr->L, env); /* we have to register the env object,
+                                       before we can open the GenomeTools
+                                       libraries */
+  luaopen_gt(gtr->L); /* open all GenomeTools libraries */
   assert(gtr->L);
   return gtr;
 }

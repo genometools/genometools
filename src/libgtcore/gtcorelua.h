@@ -4,12 +4,14 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#ifndef GTLUA_H
-#define GTLUA_H
+#ifndef GTCORELUA_H
+#define GTCORELUA_H
 
 #include "lua.h"
+#include "libgtcore/env.h"
 
-int  luaopen_gt(lua_State*); /* open all GenomeTools libraries in Lua */
-void run_interactive_lua_interpreter(lua_State*);
+void put_env_in_registry(lua_State*, Env*);
+Env* get_env_from_registry(lua_State*);
+int  luaopen_gtcore(lua_State*); /* open core library in Lua */
 
 #endif
