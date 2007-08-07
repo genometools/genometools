@@ -5,6 +5,7 @@
 */
 
 #include "gtr.h"
+#include "gtlua.h"
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
@@ -231,21 +232,6 @@ static int run_tests(GTR *gtr, Env *env)
   if (test_err)
     return EXIT_FAILURE;
   return EXIT_SUCCESS;
-}
-
-static void run_interactive_lua_interpreter(lua_State *L)
-{
-  char buf[BUFSIZ];
-  int error;
-  assert(L);
-  while (fgets(buf, sizeof buf, stdin)) {
-    error = luaL_loadbuffer(L, buf, strlen(buf), "line") ||
-            lua_pcall(L, 0, 0, 0);
-    if (error) {
-      fprintf(stderr, "%s", lua_tostring(L, -1));
-      lua_pop(L, 1); /* pop error message */
-    }
-  }
 }
 
 int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
