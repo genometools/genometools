@@ -18,6 +18,7 @@
 #include "libgtcore/dlist.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fileutils.h"
 #include "libgtcore/grep.h"
 #include "libgtcore/gtcorelua.h"
 #include "libgtcore/hashtable.h"
@@ -98,7 +99,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
 
   env_error_check(env);
   assert(gtr);
-  op = option_parser_new("[option ...] [tool ...] [argument ...]",
+  op = option_parser_new("[option ...] [tool | script] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
                           "(http://genometools.org).", env);
   option_parser_set_comment_func(op, toolbox_show, gtr->toolbox);
@@ -253,19 +254,35 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
     env_set_log(env, log_new(env_ma(env)));
   assert(argc);
   if (argc == 1 && !gtr->interactive) {
-    env_error_set(env, "no tool specified; option -help lists possible tools");
+    env_error_set(env, "neither tool nor script specified; option -help lists "
+                       "possible tools");
     had_err = -1;
   }
   if (!had_err && argc > 1) {
     if (!gtr->toolbox || !(tool = toolbox_get(gtr->toolbox, argv[1]))) {
-      env_error_set(env, "tool '%s' not found; option -help lists possible "
-                         "tools", argv[1]);
-      had_err = -1;
+      /* no tool found -> try to open script */
+      if (file_exists(argv[1])) {
+        /* run script */
+        if (luaL_dofile(gtr->L, argv[1])) {
+          /* error */
+          assert(lua_isstring(gtr->L, -1)); /* error message on top */
+          env_error_set(env, "could not execute script %s", lua_tostring(gtr->L, -1));
+          had_err = -1;
+          lua_pop(gtr->L, 1); /* pop error message */
+        }
+      }
+      else {
+        /* neither tool nor script found */
+        env_error_set(env, "neither tool nor script '%s' found; option -help "
+                           "lists possible tools", argv[1]);
+        had_err = -1;
+      }
     }
-  }
-  if (!had_err && argc > 1) {
-    nargv = cstr_array_prefix_first(argv+1, argv[0], env);
-    had_err = tool(argc-1, (const char**) nargv, env);
+    else {
+      /* run tool */
+      nargv = cstr_array_prefix_first(argv+1, argv[0], env);
+      had_err = tool(argc-1, (const char**) nargv, env);
+    }
   }
   cstr_array_delete(nargv, env);
   if (!had_err && gtr->interactive) {
