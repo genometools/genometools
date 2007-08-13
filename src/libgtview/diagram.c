@@ -22,7 +22,7 @@
 #include "libgtview/feature_index.h"
 #include "libgtview/track.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 struct Diagram
 {
