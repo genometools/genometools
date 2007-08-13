@@ -30,7 +30,7 @@ Creates a new Block object.
 \param env Pointer to Environment object.
 \return Pointer to a new Block object.
 */
-Block* block_new(Env* env);
+Block* block_new(Env *env);
 
 /*!
 Inserts an element into a Block object
@@ -39,24 +39,24 @@ Inserts an element into a Block object
 \param cfg Pointer to Config file
 \param env Pointer to Environment object
 */
-void block_insert_element(Block* block,
-                          GenomeNode* gn,
-                          Config* cfg,
-                          Env* env);
+void block_insert_element(Block *block,
+                          GenomeNode *gn,
+                          Config *cfg,
+                          Env *env);
 
 /*!
 Returns range of a Block object
 \param block Pointer to Block object
 \return Pointer to Range object
 */
-Range block_get_range(Block* block);
+Range block_get_range(Block *block);
 
 /*!
 Sets range of a Block object
 \param block Pointer to Block object to set range
 \param r Range to set
 */
-void block_set_range(Block* block,
+void block_set_range(Block *block,
                      Range r);
 
 /*!
@@ -64,51 +64,59 @@ Sets whether a block caption should be displayed or not.
 \param block Pointer to Block object to set visibility for.
 \param val TRUE to show caption, FALSE to disable
 */
-void block_set_caption_visibility(Block* block, bool val);
+void block_set_caption_visibility(Block *block, bool val);
 
 /*!
 Returns block caption visibility setting.
 \param block Pointer to Block object to query.
 \return TRUE if visible, FALSE otherwise.
 */
-bool block_caption_is_visible(Block* block);
+bool block_caption_is_visible(Block *block);
 
 /*!
 Sets caption of a Block object
 \param block Pointer to Block object to set caption
 \param caption Pointer to String object
 */
-void block_set_caption(Block* block,
-                       const char* caption);
+void block_set_caption(Block *block,
+                       const char *caption);
+
+/*!
+Sets caption of a Block object to Name or ID of a given node
+\param block Pointer to Block object to set caption
+\param gn GenomeNode to take captions from
+*/
+void block_set_caption_from_node(Block *block,
+                       GenomeNode *gn);
 
 /*!
 Gets caption of a Block object
 \param block Pointer to Block object
 \return caption Pointer to String object
 */
-const char* block_get_caption(Block* block);
+const char* block_get_caption(Block *block);
 
 /*!
 Sets parent_caption of a Block object
 \param block Pointer to Block object to set caption
 \param caption Pointer to String object
 */
-void block_set_parent_caption(Block* block,
-                              const char* caption);
+void block_set_parent_caption(Block *block,
+                              const char *caption);
 
 /*!
 Gets parent_caption of a Block object
 \param block Pointer to Block object
 \return caption Pointer to String object
 */
-const char* block_get_parent_caption(Block* block);
+const char* block_get_parent_caption(Block *block);
 
 /*!
 Sets strand of a Block object
 \param block Block to set strand
 \param strand Strand to set
 */
-void block_set_strand(Block* block,
+void block_set_strand(Block *block,
                       Strand strand);
 
 /*!
@@ -116,14 +124,14 @@ Gets strand of a Block object
 \param block Pointer to Block object
 \return strand Strand
 */
-Strand block_get_strand(Block* block);
+Strand block_get_strand(Block *block);
 
 /*!
 Sets type of a Block object
 \param block Block to set type
 \param type GenomeFeatureType to set
 */
-void block_set_type(Block* block,
+void block_set_type(Block *block,
                     GenomeFeatureType type);
 
 /*!
@@ -131,28 +139,28 @@ Gets type of a Block object
 \param block Pointer to Block object
 \returen GenomeFeature Type
 */
-GenomeFeatureType block_get_type(Block* block);
+GenomeFeatureType block_get_type(Block *block);
 
 /*!
 Returns Array with Pointer to Element objects
 \param block Pointer to Block object
 \return Pointer to Array
 */
-Dlist* block_get_elements(Block* block);
+Dlist* block_get_elements(Block *block);
 
 /*!
 Unit Test for Block Class
 \param env Pointer to Environment object
 */
-int block_unit_test(Env* env);
+int block_unit_test(Env *env);
 
 /*!
 Delets Block
 \param block Pointer to Block object to delete
 \param env Pointer to Environment object
 */
-void block_delete(Block* block,
-                  Env* env);
+void block_delete(Block *block,
+                  Env  *env);
 
 #endif
 

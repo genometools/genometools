@@ -21,142 +21,35 @@ typedef struct
 struct Track
 {
   Str *title;
-  Hashtable *types;
   Array *lines;
-  Hashtable *blocks;
 };
 
 Track* track_new(Str *title,
                  Env *env)
 {
-  assert(title);
+  assert(title && env);
 
   Track *track;
   env_error_check(env);
   track = env_ma_malloc(env, sizeof (Track));
-  Str* t = str_ref(title);
+  Str* t = title;
   track->title = t;
   track->lines = array_new(sizeof (Line*), env);
-  track->blocks = hashtable_new(HASH_DIRECT, NULL, NULL, env);
-  track->types = hashtable_new(HASH_STRING, NULL, NULL, env);
   assert(track);
   return track;
-}
-
-static int check_children_for_collapse(GenomeNode *gn, void *info, Env *env)
-{
-  CollapseCheckInfo *check_info;
-  check_info = (CollapseCheckInfo *) info;
-  const char *feature_type;
-  GenomeFeatureType gn_type;
-  gn_type = genome_feature_get_type((GenomeFeature*) gn);
-  feature_type = genome_feature_type_get_cstr(gn_type);
-  if (config_cstr_in_list(check_info->ptr, "collapse","to_parent", feature_type,
-                          env)) {
-    check_info->collapse_target = true;
-  }
-  return 0;
-}
-
-void track_insert_element(Track *track,
-                          GenomeNode *gn,
-                          Config *cfg,
-                          GenomeNode *parent,
-                          Env *env)
-{
-  assert(track && gn && cfg);
-  Block *block;
-  const char* caption;
-  const char* parent_caption;
-  Range gn_range;
-  GenomeFeatureType gn_type;
-  Strand gn_strand;
-  Strand parent_strand;
-  const char* feature_type;
-
-  gn_type = genome_feature_get_type((GenomeFeature*) gn);
-  feature_type = genome_feature_type_get_cstr(gn_type);
-  gn_range = genome_node_get_range(gn);
-  gn_strand = genome_feature_get_strand((GenomeFeature*) gn);
-
-  if (!hashtable_get(track->types, feature_type))
-    hashtable_add(track->types,
-                  (char *) feature_type,
-                  (char *) feature_type,
-                  env);
-
-  if (parent == NULL)
-  {
-    block = block_new(env);
-    hashtable_add(track->blocks, gn, block, env);
-    caption = genome_feature_get_attribute(gn, "Name");
-    if (caption == NULL)
-    {
-      caption = genome_feature_get_attribute(gn, "ID");
-    }
-    block_set_caption(block, caption);
-    block_set_range(block, genome_node_get_range(gn));
-    block_set_type(block, gn_type);
-    block_set_strand(block, gn_strand);
-  }
-  else
-  {
-    parent_strand = genome_feature_get_strand((GenomeFeature*) parent);
-    block = (Block*) hashtable_get(track->blocks, parent);
-    if (block == NULL)
-    {
-      block = block_new(env);
-      if (genome_node_direct_children_do_not_overlap_st(parent, gn, env))
-      {
-        CollapseCheckInfo info;
-        info.collapse_target = false;
-        info.ptr = (void *) cfg;
-        genome_node_traverse_direct_children(gn, &info,
-                                             check_children_for_collapse, env);
-        if (info.collapse_target)
-        {
-          hashtable_add(track->blocks, gn, block, env);
-        }
-        else
-        {
-          hashtable_add(track->blocks, parent, block, env);
-        }
-      }
-      else
-      {
-        hashtable_add(track->blocks, gn, block, env);
-      }
-      caption = genome_feature_get_attribute(gn, "Name");
-      if (caption == NULL)
-      {
-         caption = genome_feature_get_attribute(gn, "ID");
-      }
-      block_set_caption(block, caption);
-      parent_caption =  genome_feature_get_attribute(parent, "Name");
-      if (parent_caption == NULL)
-      {
-        parent_caption = genome_feature_get_attribute(parent, "ID");
-      }
-      block_set_parent_caption(block, parent_caption);
-      block_set_range(block, genome_node_get_range(parent));
-      block_set_type(block, gn_type);
-      block_set_strand(block, parent_strand);
-    }
-  }
-  block_insert_element(block, gn, cfg, env);
 }
 
 /*
 Constructs Track title
 */
-int add_type_to_title(void *key, void *value, void* data, Env* env)
+/*static int add_type_to_title(void *key, void *value, void* data, Env* env)
 {
   Str *title = (Str*) data;
   const char *type = (const char*) key;
   str_append_cstr(title, type, env);
   str_append_cstr(title, ", ", env);
   return 0;
-}
+}*/
 
 Str* track_get_title(Track *track)
 {
@@ -166,7 +59,7 @@ Str* track_get_title(Track *track)
 
 Line* get_next_free_line(Track* track, Range r, Env* env)
 {
-  assert(track);
+  assert(track && env);
 
   int i;
   Line* line;
@@ -201,63 +94,27 @@ int track_get_number_of_lines(Track *track)
 }
 
 /*
-foreach function to track_get_number_of_blocks
-*/
-int track_add_block(void *parent , void *block, void *nof_blocks, Env *env)
-{
-  int *add;
-
-  add = nof_blocks;
-  *add += 1;
-
-  return 0;
-}
-
-/*
-Returns number of Blocks of a Track object
-*/
-int track_get_number_of_blocks(Track *track, Env *env)
-{
-  assert(track);
-  int nof_blocks;
-  nof_blocks = 0;
-  hashtable_foreach(track->blocks, track_add_block, &nof_blocks, env);
-
-  return nof_blocks;
-}
-
-/*
 Sort block into free line
 */
-int process_block(void *parent, void *block, void *track, Env *env)
+void track_insert_block(Track *track, Block *block, Env *env)
 {
+  assert(track && block && env);
+
   Range r;
   Line *line;
-  Block *cur_block = (Block*) block;
-  Track *t = (Track*) track;
 
-  r = block_get_range(cur_block);
-  line = get_next_free_line(t, r, env);
-  line_insert_block(line, cur_block, env);
-
-  return 0;
-}
-
-void track_finish(Track *track, Env *env)
-{
-  hashtable_foreach(track->blocks, process_block, track, env);
-  hashtable_foreach(track->types, add_type_to_title, track->title, env);
-  str_set_length(track->title, str_length(track->title)-2);
-  hashtable_delete(track->blocks, env);
+  r = block_get_range(block);
+  line = get_next_free_line(track, r, env);
+  line_insert_block(line, block, env);
 }
 
 int track_unit_test(Env* env)
 {
-  Range r1, r2, r3, r_parent, r_mRNA1, r_mRNA2;
+/*  Range r1, r2, r3, r_parent, r_mRNA1, r_mRNA2;
   Str *seqid1, *seqid2, *seqid3;
-  Array* lines;
+  Array* lines;*/
   int had_err = 0;
-
+/*
   Config *cfg;
 
   cfg = config_new(env, false);
@@ -326,8 +183,6 @@ int track_unit_test(Env* env)
   Track* t2 = track_new(s, env);
   Track* t3 = track_new(s, env);
 
-  /* test track_insert_elements
-     (implicit test of get_next_free_line) */
   int nof_blocks;
   nof_blocks = track_get_number_of_blocks(t, env);
   ensure(had_err, (0 == nof_blocks));
@@ -350,16 +205,13 @@ int track_unit_test(Env* env)
   ensure(had_err, (2 == nof_blocks));
   track_finish(t3, env);
 
-  /* test track_finish*/
   ensure(had_err, (0 == array_size(track_get_lines(t))));
   track_finish(t, env);
   ensure(had_err, (2 == array_size(track_get_lines(t))));
 
-  /* test track_get_title */
   ensure(had_err, (0 == str_cmp(title, track_get_title(t))));
   ensure(had_err, !(0 == str_cmp(s, track_get_title(t))));
 
-  /* test track_get_lines and track_get_number_of_lines */
   lines = track_get_lines(t2);
   ensure(had_err, (0 == array_size(lines)));
   ensure(had_err, (0 == track_get_number_of_lines(t2)));
@@ -389,7 +241,7 @@ int track_unit_test(Env* env)
   genome_node_delete(gn3, env);
   genome_node_delete(mRNA1, env);
   genome_node_delete(mRNA2, env);
-
+*/
   return had_err;
 }
 
@@ -397,14 +249,11 @@ void track_delete(Track *track,
                   Env *env)
 {
   int i;
-
   if (!track) return;
-
   for (i=0; i<array_size(track->lines); i++)
   {
     line_delete(*(Line**) array_get(track->lines, i), env);
   }
-  hashtable_delete(track->types, env);
   array_delete(track->lines, env);
   str_delete(track->title, env);
   env_ma_free(track, env);

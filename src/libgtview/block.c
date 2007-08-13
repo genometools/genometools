@@ -237,10 +237,19 @@ void block_set_range(Block *block, Range r)
 }
 
 void block_set_caption(Block *block,
-                       const char* caption)
+                       const char *caption)
 {
   assert(block);
   block->caption = caption;
+}
+
+void block_set_caption_from_node(Block *block,
+                                 GenomeNode *gn)
+{
+  assert(block);
+  block->caption = genome_feature_get_attribute(gn, "Name");
+  if (!block->caption)
+    block->caption = genome_feature_get_attribute(gn, "ID" );
 }
 
 const char* block_get_caption(Block *block)
@@ -251,7 +260,7 @@ const char* block_get_caption(Block *block)
 }
 
 void block_set_parent_caption(Block *block,
-                       const char* caption)
+                       const char *caption)
 {
   assert(block);
   block->parent_caption = caption;

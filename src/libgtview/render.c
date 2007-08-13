@@ -523,6 +523,8 @@ void render_to_png(Render *r, Diagram *d,
     Hashtable *tracks = diagram_get_tracks(r->dia);
     hashtable_foreach(tracks, render_track, r, env);
   }
+  else if (config_get_verbose(r->cfg))
+    fprintf( stderr, "diagram has no tracks!\n");
 
   if (config_get_verbose(r->cfg))
     fprintf(stderr, "actual used height: %f\n", r->y);

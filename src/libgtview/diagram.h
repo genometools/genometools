@@ -15,68 +15,91 @@
 #ifndef DIAGRAM_H
 #define DIAGRAM_H
 
-#include "libgtcore/array.h"
 #include "libgtview/config.h"
+#include "libgtview/block.h"
+#include "libgtcore/array.h"
 #include "libgtcore/range.h"
 #include "libgtcore/hashtable.h"
+#include "libgtext/genome_feature.h"
+#include "libgtext/genome_feature_type.h"
 
+typedef struct
+{
+  GenomeFeatureType gft;
+  Block *block;
+} BlockTuple;
+
+typedef struct
+{
+  GenomeNode *parent;
+  Array *blocktuples;
+} NodeInfoElement;
+
+/*  The Diagram class */
 typedef struct Diagram Diagram;
 
-             /*!
-            Initialize a new diagram object.
-            \param features pointer to the array of genome nodes.
-            \param range the given range of the diagam.
-            \param config pointer to the configuration object.
-            \param env Pointer to Environment object.
-            */
-Diagram*    diagram_new(Array* features,Range,Config*,Env*);
+/*!
+Initialize a new diagram object.
+\param features pointer to the array of genome nodes.
+\param range the given range of the diagram.
+\param config pointer to the configuration object.
+\param env Pointer to Environment object.
+*/
+Diagram*    diagram_new(Array *features,
+                        Range range,
+                        Config *cfg,
+                        Env *env);
 
-            /*!
-            delivers the range of a diagram
-            \param diagram Pointer to diagram object.
-            */
-Range       diagram_get_range(Diagram* diagram);
+/*!
+Returns the range of a diagram's nodes.
+\param diagram Pointer to diagram object.
+*/
+Range       diagram_get_range(Diagram *diagram);
 
-            /*!
-            Update the configuration object with new settings.
-            \param diagram pointer to the diagram object.
-            \param config pointer to the configuration object.
-            \param env Pointer to Environment object.
-            */
-void        diagram_set_config(Diagram*,Config*,Env*);
+/*!
+Assign a new Config object to a Diagram.
+\param diagram pointer to the diagram object.
+\param config pointer to the configuration object.
+\param env Pointer to Environment object.
+*/
+void        diagram_set_config(Diagram *diagram,
+                               Config *cfg,
+                               Env *env);
 
-            /*!
-            Delivers the hashtable with the stored tracks.
-            \param diagram pointer to the diagram object.
-            */
-Hashtable*  diagram_get_tracks(Diagram*);
+/*!
+Returns the hashtable with the stored tracks.
+\param diagram pointer to the diagram object.
+*/
+Hashtable*  diagram_get_tracks(Diagram *diagram);
 
-            /*!
-            Returns the number of all lines in the diagram.
-            \param diagram pointer to the diagram object.
-            \param env Pointer to Environment object.
-            */
-int         diagram_get_total_lines(Diagram*, Env*);
+/*!
+Returns the total number of lines in the diagram.
+\param diagram pointer to the diagram object.
+\param env Pointer to Environment object.
+*/
+int         diagram_get_total_lines(Diagram *diagram,
+                                    Env *env);
 
-            /*!
-            Returns the number of all lines in the diagram.
-            \param diagram pointer to the diagram object.
-            \param env Pointer to Environment object.
-            */
+/*!
+Returns the number of all lines in the diagram.
+\param diagram pointer to the diagram object.
+\param env Pointer to Environment object.
+*/
 int         diagram_get_number_of_tracks(Diagram *diagram);
 
-            /*
-            Delete the diagram object.
-            \param diagram pointer to the diagram object.
-            \param env Pointer to Environment object.
-            */
-void        diagram_delete(Diagram*,Env*);
+/*
+Delete the diagram object.
+\param diagram pointer to the diagram object.
+\param env Pointer to Environment object.
+*/
+void        diagram_delete(Diagram *diagram,
+                           Env* env);
 
-            /*
-            generate a feature index test structure and
-            test the diagram functions.
-            \param env Pointer to Environment object.
-            */
-int         diagram_unit_test(Env*);
+/*
+Create a feature index test structure and
+test the diagram functions.
+\param env Pointer to Environment object.
+*/
+int         diagram_unit_test(Env* env);
 
 #endif

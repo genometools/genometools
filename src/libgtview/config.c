@@ -487,7 +487,7 @@ int config_unit_test(Env* env)
   ensure(had_err, (strcmp(str,test1)==0));
   str = config_get_cstr(cfg, "bar", "test", "", env);
   ensure(had_err, (strcmp(str,"")==0));
-  
+
   /* mem cleanup */
   str_delete(luafile, env);
   config_delete(cfg, env);

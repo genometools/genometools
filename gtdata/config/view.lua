@@ -38,7 +38,7 @@ config =
   -- feature's track.
   collapse =
   {
-    to_parent = {"exon","intron","CDS"},
+    to_parent = {"exon","mRNA","intron","long_terminal_repeat","LTR_retrotransposon","inverted_repeat","target_site_duplication"},
   },
   -- Defines precedence of feature types when overlapping
   -- in a collapsed parent track.
@@ -48,6 +48,7 @@ config =
     CDS = {"exon","intron","mRNA","gene"},
     exon = {"mRNA","gene"},
     intron = {"mRNA", "gene"},
+    mRNA = {"gene"},
   },
   -- Defines various format options for drawing.
   format =

@@ -34,17 +34,14 @@ Track* track_new(Str* title,
                  Env* env);
 
 /*!
-Inserts an element into a Track object
+Inserts a Block into a Track object
 \param track Track in which to insert element
-\param gn Pointer to GenomeNode object
-\param cfg Pointer to Config file
+\param block Block to insert
 \param env Pointer to Environment object
 */
-void track_insert_element(Track* track,
-                          GenomeNode* gn,
-                          Config* cfg,
-                          GenomeNode* parent,
-                          Env* env);
+void track_insert_block(Track *track,
+                        Block *block,
+                        Env *env);
 
 /*!
 Returns Track title
@@ -75,14 +72,6 @@ Returns Number of Lines of a Track object
 \param track Pointer to Track object
 */
 int track_get_number_of_lines(Track* track);
-
-/*!
-Sort all blocks into lines
-\param track Pointer to Track object
-\param env Pointer to Environment object
-*/
-void track_finish(Track* track,
-                  Env* env);
 
 /*!
 Tests Track Class
