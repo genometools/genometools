@@ -1,5 +1,6 @@
 *.bac
 *.bak
+*~
 *.core
 *.diff
 *.gcov
@@ -32,9 +33,7 @@ tags
 /testsuite/stest_testsuite
 /testsuite/stest_stest_tests
 gthtestsuite
-*~
 gthlicense.aux
 gthlicense.log
 gthlicense.pdf
-Doxyfile
 cscope.*
