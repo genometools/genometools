@@ -126,6 +126,7 @@ constBlockCompositionSeq2encIdxSeq(const struct blockCompositionSeq *seq)
 struct permList
 {
   size_t numPermutations;
+  unsigned permIdxBits;
   BitString catPerms;
 };
 
@@ -137,7 +138,7 @@ struct compList
                                         * compositions encoded in
                                         * minimal space concatenated
                                         * together */
-  unsigned bitsPerCount, bitsPerSymbol;
+  unsigned bitsPerCount, bitsPerSymbol, compositionIdxBits, maxPermIdxBits;
   size_t maxPermCount;
 };
 
@@ -305,8 +306,7 @@ newBlockEncIdxSeq(enum rangeStoreMode modes[],
     newBlockEncIdxSeqErrRet();
   bitsPerComposition = newSeqIdx->compositionTable->bitsPerCount
     * blockMapAlphabetSize;
-  compositionIdxBits =
-    requiredUInt64Bits(newSeqIdx->compositionTable->numCompositions - 1);
+  compositionIdxBits = newSeqIdx->compositionTable->compositionIdxBits;
   bitsPerPermutation = newSeqIdx->compositionTable->bitsPerSymbol * blockSize;
   initOnDiskBlockCompIdx(&newSeqIdx->externalData, projectName,
                          cwSize(seqLen, compositionIdxBits, 
@@ -343,8 +343,8 @@ newBlockEncIdxSeq(enum rangeStoreMode modes[],
           struct appendState aState;
           initAppendState(&aState,
                           superBucketBlocks * compositionIdxBits,
-                          superBucketBlocks * requiredUIntBits(
-                            newSeqIdx->compositionTable->maxPermCount - 1),
+                          superBucketBlocks * 
+                          newSeqIdx->compositionTable->maxPermIdxBits,
                           env);
           blockNum = 0;
           while(blockNum < numFullBlocks)
@@ -482,12 +482,30 @@ struct superBlock
   BitString varIdx, compIdx;
 };
 
+static struct superBlock *
+newEmptySuperBlock(size_t symsInBucket, size_t cwBitElems,
+                   size_t varMaxBitElems, Env *env)
+{
+  struct superBlock *sBlock;
+  size_t offset;
+  sBlock = env_ma_calloc(env,
+                         sizeof(*sBlock)
+                         + symsInBucket * sizeof(Seqpos)
+                         + sizeof(BitElem) * (cwBitElems + varMaxBitElems), 1);
+  sBlock->prevBucket = (Seqpos *)((char *)sBlock + (offset = sizeof(*sBlock)));
+  sBlock->compIdx = (BitString)((char *)sBlock
+                               + (offset += symsInBucket * sizeof(Seqpos)));
+  sBlock->varIdx = (BitString)((char *)sBlock
+                               + (offset += sizeof(BitElem) * cwBitElems));
+  return sBlock;
+}
+
 static void
 deleteSuperBlock(struct superBlock *sBlock, Env *env)
 {
-  env_ma_free(sBlock->compIdx, env);
-  env_ma_free(sBlock->varIdx, env);
-  env_ma_free(sBlock->prevBucket, env);
+/*   env_ma_free(sBlock->compIdx, env); */
+/*   env_ma_free(sBlock->varIdx, env); */
+/*   env_ma_free(sBlock->prevBucket, env); */
   env_ma_free(sBlock, env);
 }
 
@@ -504,6 +522,13 @@ superBucketNumFromPos(struct blockCompositionSeq *seqIdx, Seqpos pos)
 }
 
 static inline Seqpos
+superBucketBasePos(struct blockCompositionSeq *seqIdx, Seqpos superBucketNum)
+{
+  return superBucketNum * seqIdx->superBucketLen;
+}
+
+
+static inline Seqpos
 superBucketNumFromBlockNum(struct blockCompositionSeq *seqIdx, Seqpos blockNum)
 {
   return blockNum / (seqIdx->superBucketLen / seqIdx->blockSize);
@@ -512,10 +537,7 @@ superBucketNumFromBlockNum(struct blockCompositionSeq *seqIdx, Seqpos blockNum)
 
 #define fetchSuperBlockErrRet()                 \
   do {                                          \
-    env_ma_free(retval->compIdx, env);          \
-    env_ma_free(retval->varIdx, env);           \
-    env_ma_free(retval->prevBucket, env);       \
-    env_ma_free(retval, env);                   \
+    deleteSuperBlock(retval, env);              \
     return NULL;                                \
   } while(0)
 
@@ -528,7 +550,7 @@ fetchSuperBlock(struct blockCompositionSeq *seqIdx, Seqpos superBucketNum,
   off_t superBucketDiskSize;
   unsigned superBucketLen, superBucketBlocks,
     blockSize, compositionIdxBits, maxVarIdxBits;
-  struct superBlock *retval;
+  struct superBlock *retval = NULL;
   FILE *idxFP;
   assert(seqIdx);
   blockSize = seqIdx->blockSize;
@@ -537,20 +559,15 @@ fetchSuperBlock(struct blockCompositionSeq *seqIdx, Seqpos superBucketNum,
   assert(superBucketNum * superBucketLen < seqIdx->baseClass.seqLen);
   blockEncNumSyms = seqIdx->blockEncNumSyms;
   bucketDataSize = blockEncNumSyms * sizeof(Seqpos);
-  compositionIdxBits =
-    requiredUInt64Bits(seqIdx->compositionTable->numCompositions - 1);
+  compositionIdxBits = seqIdx->compositionTable->compositionIdxBits;
   superBucketDiskSize =
     superBucketSize(compositionIdxBits, blockEncNumSyms,
                     superBucketLen, blockSize);
   cwBitElems = bitElemsAllocSize(compositionIdxBits * superBucketBlocks);
-  maxVarIdxBits =
-    requiredUInt64Bits(seqIdx->compositionTable->maxPermCount - 1);
+  maxVarIdxBits = seqIdx->compositionTable->maxPermIdxBits;
   varMaxBitElems = bitElemsAllocSize(maxVarIdxBits * superBucketBlocks
                                      + bitElemBits - 1);
-  retval = env_ma_calloc(env, sizeof(*retval), 1);
-  retval->prevBucket = env_ma_calloc(env, bucketDataSize, 1);
-  retval->compIdx = env_ma_malloc(env, sizeof(BitElem) * cwBitElems);
-  retval->varIdx = env_ma_malloc(env, sizeof(BitElem) * varMaxBitElems);
+  retval = newEmptySuperBlock(blockEncNumSyms, cwBitElems, varMaxBitElems, env);
   if(superBucketNum != 0)
   {
     off_t prevBucketOffset = superBucketNum * superBucketDiskSize
@@ -618,8 +635,7 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
   }
   varIdxMemOffset = sBlock->varIdxMemBase;
   relBlockNum = blockNum % (seqIdx->superBucketLen/blockSize);
-  bitsPerCompositionIdx =
-    requiredUInt64Bits(seqIdx->compositionTable->numCompositions - 1);
+  bitsPerCompositionIdx = seqIdx->compositionTable->compositionIdxBits;
   block = env_ma_calloc(env, sizeof(Symbol), blockSize);
   while(relBlockNum)
   {
@@ -627,8 +643,7 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
     compIndex = bsGetUInt64(sBlock->compIdx, cwIdxMemOffset,
                             bitsPerCompositionIdx);
     varIdxMemOffset +=
-      requiredUInt64Bits(seqIdx->compositionTable
-                         ->permutations[compIndex].numPermutations - 1);
+      seqIdx->compositionTable->permutations[compIndex].permIdxBits;
     cwIdxMemOffset += bitsPerCompositionIdx;
     --relBlockNum;
   }
@@ -640,8 +655,7 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
     compPermIndex[0] = bsGetUInt64(sBlock->compIdx, cwIdxMemOffset,
                                    bitsPerCompositionIdx);
     permutationList = seqIdx->compositionTable->permutations + compPermIndex[0];
-    varIdxBits =
-      requiredUInt64Bits(permutationList->numPermutations - 1);
+    varIdxBits = permutationList->permIdxBits;
     compPermIndex[1] = bsGetUInt64(sBlock->varIdx, varIdxMemOffset, varIdxBits);
     bsGetUniformUIntArray(permutationList->catPerms,
                           bitsPerPermutation * compPermIndex[1],
@@ -701,11 +715,12 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol sym, Seqpos pos,
     BitOffset varIdxMemOffset, cwIdxMemOffset = 0;
     struct superBlock *sBlock;
     Symbol bSym = MRAEncMapSymbol(seqIdx->blockMapAlphabet, eSym);
-    unsigned bitsPerCompositionIdx = 
-      requiredUInt64Bits(seqIdx->compositionTable->numCompositions - 1);
+    Seqpos superBucketNum;
+    unsigned bitsPerCompositionIdx
+      = seqIdx->compositionTable->compositionIdxBits;
     blockSize = seqIdx->blockSize;
-    sBlock = fetchSuperBlock(seqIdx, superBucketNumFromPos(seqIdx, pos + 1),
-                             env);
+    superBucketNum = superBucketNumFromPos(seqIdx, pos + 1);
+    sBlock = fetchSuperBlock(seqIdx, superBucketNum, env);
     varIdxMemOffset = sBlock->varIdxMemBase;
     rankCount = sBlock->prevBucket[bSym];
     blockNum = blockNumFromPos(seqIdx, pos + 1);
@@ -720,8 +735,7 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol sym, Seqpos pos,
                                 bitsPerCompositionIdx);
         rankCount += symCountFromComposition(seqIdx, compIndex, bSym);
         varIdxMemOffset +=
-          requiredUInt64Bits(seqIdx->compositionTable
-                             ->permutations[compIndex].numPermutations - 1);
+          seqIdx->compositionTable->permutations[compIndex].permIdxBits;
         cwIdxMemOffset += bitsPerCompositionIdx;
         --relBlockNum;
       }
@@ -748,7 +762,8 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol sym, Seqpos pos,
       }
       if(bSym == seqIdx->fallback)
       {
-        rankCount -= SRLAllSymbolsCountInSeqRegion(seqIdx->rangeEncs, 0, pos,
+        Seqpos base = superBucketBasePos(seqIdx, superBucketNum);
+        rankCount -= SRLAllSymbolsCountInSeqRegion(seqIdx->rangeEncs, base, pos,
                                                    &hint->bcHint.rangeHint);
       }
     }
@@ -757,7 +772,7 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol sym, Seqpos pos,
   else
   {
     /* FIXME: rank for range symbols */
-    rankCount = SRLSymbolCountInSeqRegion(seqIdx->rangeEncs, 0, pos, sym,
+    rankCount = SRLSymbolCountInSeqRegion(seqIdx->rangeEncs, 0, pos, eSym,
                                           &hint->bcHint.rangeHint);
   }
   return rankCount;
@@ -923,6 +938,7 @@ newCompositionList(const struct blockCompositionSeq *seqIdx,
   newList->bitsPerCount = bitsPerCount;
   numCompositions = newList->numCompositions =
     binomialCoeff(blockSize + maxSym, maxSym);
+  newList->compositionIdxBits = requiredUInt64Bits(numCompositions - 1);
   newList->bitsPerSymbol = requiredUIntBits(maxSym);
 
   newList->catComps = env_ma_malloc(env, 
@@ -975,6 +991,7 @@ newCompositionList(const struct blockCompositionSeq *seqIdx,
     assert(permSum == pow(numSyms, blockSize));
   }
   newList->maxPermCount = maxNumPermutations;
+  newList->maxPermIdxBits = requiredUInt64Bits(maxNumPermutations - 1);
   env_ma_free(composition, env);
   return newList;
 }
@@ -1040,6 +1057,7 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
 {
   size_t numPermutations = permutation->numPermutations =
     multinomialCoeff(blockSize, numSyms, composition);
+  permutation->permIdxBits = requiredUInt64Bits(numPermutations - 1);
   Symbol *currentPermutation;
   BitOffset bitsPerPermutation = bitsPerSymbol * blockSize;
   if(!(permutation->catPerms =
@@ -1252,7 +1270,7 @@ block2IndexPair(const struct blockCompositionSeq *seqIdx,
     struct permList *permutation = compositionTab->permutations
       + idxOutput[0];
     if(bitsOfPermIdx)
-      *bitsOfPermIdx = requiredUIntBits(permutation->numPermutations - 1);
+      *bitsOfPermIdx = permutation->permIdxBits;
     if(permutation->numPermutations > 1)
     {
       /* build permutation bitstring */
@@ -1466,8 +1484,7 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
   /* FIXME: this assumes that the string of variable width date does
    * indeed occupy at least one full bitElem */
   aState->cwDiskOffset +=
-    superBucketSize(requiredUInt64Bits(
-                      seqIdx->compositionTable->numCompositions - 1),
+    superBucketSize(seqIdx->compositionTable->compositionIdxBits,
                     seqIdx->blockEncNumSyms, seqIdx->superBucketLen,
                     seqIdx->blockSize);
   aState->cwMemPos = 0;

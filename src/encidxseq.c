@@ -77,6 +77,8 @@ verifyIntegrity(struct encIdxSeq *seqIdx,
     return -1;
   memset(rankTable, 0, sizeof(rankTable));
   bwtFP = suffixArray.bwttabstream.fp;
+/*   pos = 1803218; */
+/*   fseeko(bwtFP, pos, SEEK_SET); */
   hint = newEISHint(seqIdx, env);
   while((symOrig = getc(bwtFP)) != EOF)
   {
