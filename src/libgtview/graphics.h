@@ -84,7 +84,7 @@ parameters.
 \param y Vertical coordinate to draw at.
 \param width Width of the box including arrowhead, in pixels.
 \param height Height of the box, in pixels.
-\param color Color of the line.
+\param fill_color Color of the box.
 \param arrow_status Arrow status, of ArrowStatus enum type.
 \param arrow_width Width of the arrowhead, in pixels.
 \param stroke_width Outline width, in pixels
@@ -92,7 +92,7 @@ parameters.
 \param stroke_color Outline color
 */
 void      graphics_draw_box(Graphics *g, double x, double y, double width,
-                            double height, Color color, int arrow_status,
+                            double height, Color fill_color, int arrow_status,
                             double arrow_width, double stroke_width,
                             Color stroke_color);
 
@@ -206,7 +206,7 @@ double    graphics_get_text_width(Graphics *g, const char *text);
 Writes out the Graphics to the chosen source.
 \param g Graphics object to save.
 */
-void      graphics_save(const Graphics*);
+bool     graphics_save(const Graphics*);
 
 /*!
 Deletes a Graphics object.

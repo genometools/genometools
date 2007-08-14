@@ -47,7 +47,7 @@ Initialize a new diagram object.
 */
 Diagram*    diagram_new(Array *features,
                         Range range,
-                        Config *cfg,
+                        Config *config,
                         Env *env);
 
 /*!
@@ -63,7 +63,7 @@ Assign a new Config object to a Diagram.
 \param env Pointer to Environment object.
 */
 void        diagram_set_config(Diagram *diagram,
-                               Config *cfg,
+                               Config *config,
                                Env *env);
 
 /*!

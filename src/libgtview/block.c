@@ -24,16 +24,16 @@ struct Block
   GenomeFeatureType type;
 };
 
-void block_set_caption_visibility(Block *b, bool val)
+void block_set_caption_visibility(Block *block, bool val)
 {
-  assert(b);
-  b->show_caption = val;
+  assert(block != NULL);
+  block->show_caption = val;
 }
 
-bool block_caption_is_visible(Block *b)
+bool block_caption_is_visible(Block *block)
 {
-  assert(b);
-  return b->show_caption;
+  assert(block != NULL);
+  return block->show_caption;
 }
 
 /*
@@ -53,10 +53,10 @@ int elemcmp(const void *a, const void *b)
 Block* block_new(Env *env)
 {
   Block *block;
+  Range r;
   env_error_check(env);
   block = env_ma_malloc(env, sizeof (Block));
   block->elements = dlist_new(elemcmp, env);
-  Range r;
   r.start = 0;
   r.end = 0;
   block->range = r;
@@ -65,7 +65,7 @@ Block* block_new(Env *env)
   block->show_caption = true;
   block->strand = STRAND_UNKNOWN;
 
-  assert(block);
+  assert(block != NULL);
   return block;
 }
 
@@ -74,14 +74,14 @@ void block_insert_element(Block *block,
                           Config *cfg,
                           Env *env)
 {
-  assert(block && gn && cfg);
-
   Dlistelem *elem;
   Range elem_r, gn_r;
-  int dominates;
+  enum DominateStatus dominates;
   int count = 0;
   Element *element, *e;
   GenomeFeatureType gn_type, e_type;
+
+  assert(block && gn && cfg);
 
   gn_r = genome_node_get_range(gn);
   gn_type = genome_feature_get_type((GenomeFeature*) gn);
@@ -113,6 +113,9 @@ void block_insert_element(Block *block,
         {
           case DOMINATES_FIRST:
             break;
+          case DOMINATES_EQUAL:
+          case DOMINATES_NOT_SPECIFIED:
+          case DOMINATES_UNKNOWN_TYPE:
           case DOMINATES_SECOND:
             elem_r.start = gn_r.end+1;
             element_set_range(element, elem_r);
@@ -131,6 +134,9 @@ void block_insert_element(Block *block,
           case DOMINATES_FIRST:
             gn_r.start = elem_r.end;
             break;
+          case DOMINATES_EQUAL:
+          case DOMINATES_NOT_SPECIFIED:
+          case DOMINATES_UNKNOWN_TYPE:
           case DOMINATES_SECOND:
             elem_r.end = gn_r.start-1;
             if (elem_r.start == elem_r.end+1)
@@ -155,11 +161,16 @@ void block_insert_element(Block *block,
       else if (elem_r.start <= gn_r.start && elem_r.end < gn_r.end)
       {
         bool removed = false;
+        Range gnnew_r;
+        
         switch (dominates)
         {
           case DOMINATES_FIRST:
             gn_r.start = elem_r.end+1;
-            break;
+            break;          
+          case DOMINATES_EQUAL:
+          case DOMINATES_NOT_SPECIFIED:
+          case DOMINATES_UNKNOWN_TYPE:
           case DOMINATES_SECOND:
             elem_r.end = gn_r.start-1;
             if (elem_r.start == elem_r.end+1)
@@ -172,7 +183,7 @@ void block_insert_element(Block *block,
             {
               element_set_range(element, elem_r);
             }
-            Range gnnew_r = gn_r;
+            gnnew_r = gn_r;
             gnnew_r.end = elem_r.end;
             e = element_new_empty(cfg, env);
             element_set_range(e, gnnew_r);
@@ -192,17 +203,21 @@ void block_insert_element(Block *block,
       else if (elem_r.start < gn_r.start && gn_r.end < elem_r.end)
       {
         Range elemnew_r;
-
+        Element *elemnew;
+        
         switch (dominates)
         {
           case DOMINATES_FIRST:
             break;
+          case DOMINATES_EQUAL:
+          case DOMINATES_NOT_SPECIFIED:
+          case DOMINATES_UNKNOWN_TYPE:
           case DOMINATES_SECOND:
             elemnew_r = elem_r;
             elem_r.end = gn_r.start-1;
             element_set_range(element, elem_r);
             elemnew_r.start = gn_r.end+1;
-            Element *elemnew = element_new_empty(cfg, env);
+            elemnew = element_new_empty(cfg, env);
             element_set_range(elemnew, elemnew_r);
             element_set_type(elemnew, e_type);
             e = element_new(gn, cfg, env);
@@ -224,14 +239,14 @@ void block_insert_element(Block *block,
 
 Range block_get_range(Block *block)
 {
-   assert(block);
+   assert(block != NULL);
 
    return block->range;
 }
 
 void block_set_range(Block *block, Range r)
 {
-  assert(block && r.start && r.end);
+  assert(block != NULL && r.start <= r.end);
 
   block->range = r;
 }
@@ -239,14 +254,14 @@ void block_set_range(Block *block, Range r)
 void block_set_caption(Block *block,
                        const char *caption)
 {
-  assert(block);
+  assert(block != NULL);
   block->caption = caption;
 }
 
 void block_set_caption_from_node(Block *block,
                                  GenomeNode *gn)
 {
-  assert(block);
+  assert(block != NULL);
   block->caption = genome_feature_get_attribute(gn, "Name");
   if (!block->caption)
     block->caption = genome_feature_get_attribute(gn, "ID" );
@@ -254,7 +269,7 @@ void block_set_caption_from_node(Block *block,
 
 const char* block_get_caption(Block *block)
 {
-  assert(block);
+  assert(block != NULL);
 
   return block->caption;
 }
@@ -262,13 +277,13 @@ const char* block_get_caption(Block *block)
 void block_set_parent_caption(Block *block,
                        const char *caption)
 {
-  assert(block);
+  assert(block != NULL);
   block->parent_caption = caption;
 }
 
 const char* block_get_parent_caption(Block *block)
 {
-  assert(block);
+  assert(block != NULL);
 
   return block->parent_caption;
 }
@@ -276,14 +291,14 @@ const char* block_get_parent_caption(Block *block)
 void block_set_strand(Block *block,
                       Strand strand)
 {
-  assert(block);
+  assert(block != NULL);
 
   block->strand = strand;
 }
 
 Strand block_get_strand(Block *block)
 {
-  assert(block);
+  assert(block != NULL);
 
   return block->strand;
 }
@@ -291,20 +306,21 @@ Strand block_get_strand(Block *block)
 void block_set_type(Block *block,
                     GenomeFeatureType type)
 {
-  assert(block);
+  assert(block != NULL);
 
   block->type = type;
 }
 
 GenomeFeatureType block_get_type(Block *block)
 {
-  assert(block);
+  assert(block != NULL);
 
   return block->type;
 }
 
 Dlist* block_get_elements(Block *block)
 {
+  assert(block != NULL);
   return block->elements;
 }
 
@@ -314,40 +330,41 @@ int block_unit_test(Env* env)
   Dlist* elements;
   int had_err = 0;
   Strand s;
-
+  GenomeNode *gn1, *gn2;
+  Element *e1, *e2, *elem;
+  Block * b;
+  const char* caption1 = "foo";
+  const char* caption2 = "bar";
   Config *cfg;
 
   cfg = config_new(env, false);
 
-  r1.start = 10;
-  r1.end = 50;
+  r1.start = 10UL;
+  r1.end = 50UL;
 
-  r2.start = 51;
-  r2.end = 80;
+  r2.start = 51UL;
+  r2.end = 80UL;
 
-  GenomeNode* gn1 = genome_feature_new(gft_exon, r1,
-                                       STRAND_FORWARD, NULL, 0, env);
-  GenomeNode* gn2 = genome_feature_new(gft_intron, r2,
-                                       STRAND_FORWARD, NULL, 0, env);
+  gn1 = genome_feature_new(gft_exon, r1,
+                           STRAND_FORWARD, NULL, 0, env);
+  gn2 = genome_feature_new(gft_intron, r2,
+                           STRAND_FORWARD, NULL, 0, env);
 
-  Element* e1 = element_new(gn1, cfg, env);
-  Element* e2 = element_new(gn2, cfg, env);
+  e1 = element_new(gn1, cfg, env);
+  e2 = element_new(gn2, cfg, env);
 
-  Block* b = block_new(env);
-
-  const char* caption1 = "foo";
-  const char* caption2 = "bar";
+  b = block_new(env);
 
   /* test block_insert_elements */
-  ensure(had_err, (0 == dlist_size(block_get_elements(b))));
+  ensure(had_err, (0UL == dlist_size(block_get_elements(b))));
   block_insert_element(b, gn1, cfg, env);
-  ensure(had_err, (1 == dlist_size(block_get_elements(b))));
+  ensure(had_err, (1UL == dlist_size(block_get_elements(b))));
   block_insert_element(b, gn2, cfg, env);
-  ensure(had_err, (2 == dlist_size(block_get_elements(b))));
+  ensure(had_err, (2UL == dlist_size(block_get_elements(b))));
 
   /* test block_get_elements */
   elements = block_get_elements(b);
-  Element *elem = (Element*) dlistelem_get_data(dlist_first(elements));
+  elem = (Element*) dlistelem_get_data(dlist_first(elements));
   ensure(had_err, elements_are_equal(e1, elem));
   ensure(had_err, !elements_are_equal(e2, (Element*) dlist_first(elements)));
   elem = (Element*) dlistelem_get_data(dlist_last(elements));

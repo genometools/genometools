@@ -168,10 +168,10 @@ If a type dominates, it will be drawn on top of the other in the image.
 \param cfg Pointer to Environment object.
 \return DominateStatus enum value
 */
-int          config_dominates(Config *cfg,
-                              GenomeFeatureType gft1,
-                              GenomeFeatureType gft2,
-                              Env *env);
+enum DominateStatus config_dominates(Config *cfg,
+                                     GenomeFeatureType gft1,
+                                     GenomeFeatureType gft2,
+                                     Env *env);
 /* Unit test */
 int          config_unit_test(Env*);
 

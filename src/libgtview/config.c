@@ -48,10 +48,9 @@ Config* config_new(Env *env, bool verbose)
 
 void config_delete(Config *cfg, Env *env)
 {
-  assert(env);
   if (!cfg) return;
-  if (cfg->L) lua_close(cfg->L);
-  if (cfg->filename) str_delete(cfg->filename,env);
+  if (cfg->L != NULL) lua_close(cfg->L);
+  if (cfg->filename != NULL) str_delete(cfg->filename,env);
   env_ma_free(cfg, env);
 }
 
@@ -192,14 +191,14 @@ void config_set_color(Config *cfg, const char *key, Color color, Env* env)
 void config_set_num(Config *cfg,
                     const char* section,
                     const char *key,
-                    double num,
+                    double number,
                     Env* env)
 {
   int i = 0;
   assert(cfg && section && key);
   i = config_find_section_for_setting(cfg, section, env);
   lua_pushstring(cfg->L, key);
-  lua_pushnumber(cfg->L, num);
+  lua_pushnumber(cfg->L, number);
   lua_settable(cfg->L, -3);
   lua_pop(cfg->L, i);
 }
@@ -210,10 +209,10 @@ double config_get_num(Config *cfg,
                       double deflt,
                       Env* env)
 {
-  assert(cfg && key && section);
   double num = deflt;
   int i = 0;
   env_error_check(env);
+  assert(cfg != NULL && key != NULL && section != NULL);
   /* get section */
   i = config_find_section_for_getting(cfg, section, env);
   /* could not get section, return default */
@@ -243,10 +242,10 @@ const char* config_get_cstr(Config *cfg,
                             const char *deflt,
                             Env* env)
 {
-  assert(cfg && key && section);
   const char* str = deflt;
   int i = 0;
   env_error_check(env);
+  assert(cfg != NULL && key != NULL && section != NULL);
   /* get section */
   i = config_find_section_for_getting(cfg, section, env);
   /* could not get section, return default */
@@ -272,10 +271,10 @@ const char* config_get_cstr(Config *cfg,
 
 Color config_get_color(Config *cfg, const char *key, Env* env)
 {
-  assert(cfg && key);
   Color color;
   int i = 0;
   env_error_check(env);
+  assert(cfg != NULL && key != NULL);
   /* set default colors */
   color.red=0.8; color.green = 0.8; color.blue=0.8;
   /* get section */
@@ -338,7 +337,7 @@ Color config_get_color(Config *cfg, const char *key, Env* env)
 void config_reload(Config *cfg, Env *env)
 {
   assert(cfg && cfg->filename);
-  config_load_file(cfg, cfg->filename, env);
+  (void) config_load_file(cfg, cfg->filename, env);
 }
 
 bool config_cstr_in_list(Config *cfg,
@@ -347,10 +346,10 @@ bool config_cstr_in_list(Config *cfg,
                     const char* checkstr,
                     Env* env)
 {
-  assert(cfg && key && section && checkstr);
   int i = 0, had_err = 0;
   bool ret = false;
   env_error_check(env);
+  assert(cfg != NULL && key != NULL && section != NULL && checkstr != NULL);
   /* get section */
   i = config_find_section_for_getting(cfg, section, env);
   if (i < 0)
@@ -396,19 +395,21 @@ bool config_cstr_in_list(Config *cfg,
 
 bool config_get_verbose(Config *cfg)
 {
+  assert(cfg != NULL);
   return cfg->verbose;
 }
 
-int config_dominates(Config* cfg, GenomeFeatureType ft1,
-                      GenomeFeatureType ft2, Env* env)
+enum DominateStatus config_dominates(Config* cfg, GenomeFeatureType gft1,
+                                     GenomeFeatureType gft2, Env* env)
 {
-  assert(cfg && env);
   char *fts1, *fts2;
 
-  if (ft1 == ft2)
+  assert(cfg != NULL);
+
+  if (gft1 == gft2)
     return DOMINATES_EQUAL;
-  fts1 = (char*) genome_feature_type_get_cstr(ft1);
-  fts2 = (char*) genome_feature_type_get_cstr(ft2);
+  fts1 = (char*) genome_feature_type_get_cstr(gft1);
+  fts2 = (char*) genome_feature_type_get_cstr(gft2);
   if (fts1 == NULL || fts2 == NULL)
     return DOMINATES_UNKNOWN_TYPE;
   else
@@ -440,7 +441,7 @@ int config_unit_test(Env* env)
   /* example colors */
   col1.red=.1;col1.green=.2;col1.blue=.3;
   col2.red=.4;col2.green=.5;col2.blue=.6;
-  col.red=1;col.green=1;col.blue=1;
+  col.red=1.0;col.green=1.0;col.blue=1.0;
   defcol.red=.8;defcol.green=.8;defcol.blue=.8;
 
   /* instantiate new config object */
@@ -453,24 +454,24 @@ int config_unit_test(Env* env)
   ensure(had_err, color_equals(tmpcol,defcol));
   tmpcol = config_get_color(cfg, "foo", env);
   ensure(had_err, color_equals(tmpcol,defcol));
-  num = config_get_num(cfg,"format", "margins", 10, env);
+  num = config_get_num(cfg,"format", "margins", 10.0, env);
   ensure(had_err, num == 10.0);
   str = config_get_cstr(cfg, "collapse", "exon", "", env);
   ensure(had_err, (strcmp(str,"")==0));
 
   /* change some values... */
   config_set_color(cfg, "exon", col, env);
-  config_set_num(cfg,"format", "margins", 11, env);
-  config_set_num(cfg,"format", "foo", 2, env);
+  config_set_num(cfg,"format", "margins", 11.0, env);
+  config_set_num(cfg,"format", "foo", 2.0, env);
 
   /* is it saved correctly? */
   tmpcol = config_get_color(cfg, "exon", env);
   ensure(had_err, !color_equals(tmpcol,defcol));
   tmpcol = config_get_color(cfg, "exon", env);
   ensure(had_err, color_equals(tmpcol,col));
-  num = config_get_num(cfg,"format", "margins", 10,  env);
+  num = config_get_num(cfg,"format", "margins", 10.0,  env);
   ensure(had_err, num == 11.0);
-  num = config_get_num(cfg,"format", "foo", 10, env);
+  num = config_get_num(cfg,"format", "foo", 10.0, env);
   ensure(had_err, num == 2.0);
 
   /* create a new color definition */

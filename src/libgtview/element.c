@@ -25,10 +25,10 @@ struct Element
 
 Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
 {
-  assert(gn);
-
   Element *element;
   GenomeFeature *gf = (GenomeFeature*) gn;
+
+  assert(gn != NULL);
 
   env_error_check(env);
   element = env_ma_malloc(env, sizeof (Element));
@@ -36,7 +36,7 @@ Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
   element->range = genome_node_get_range(gn);
   element->cfg = cfg;
 
-  assert(element);
+  assert(element != NULL);
   return element;
 }
 
@@ -49,26 +49,26 @@ Element* element_new_empty(Config *cfg,
   element = env_ma_malloc(env, sizeof (Element));
   element->cfg = cfg;
 
-  assert(element);
+  assert(element != NULL);
   return element;
 }
 
 GenomeFeatureType element_get_type(Element *element)
 {
-  assert(element);
+  assert(element != NULL);
   return element->type;
 }
 
 void element_set_type(Element *element,
                       GenomeFeatureType type)
 {
-  assert(element);
+  assert(element != NULL);
   element->type = type;
 }
 
 Range element_get_range(Element *element)
 {
-  assert(element);
+  assert(element != NULL);
 
   return element->range;
 }
@@ -76,7 +76,7 @@ Range element_get_range(Element *element)
 void element_set_range(Element *element,
                        Range r)
 {
-  assert(element);
+  assert(element != NULL);
 
   element->range = r;
 }
@@ -84,7 +84,7 @@ void element_set_range(Element *element,
 bool elements_are_equal(Element* e1,
                         Element* e2)
 {
-  assert(e1 && e2);
+  assert(e1 != NULL && e2 != NULL);
   if ((0 == strcmp(genome_feature_type_get_cstr(e1->type),
                    genome_feature_type_get_cstr(e2->type)))
      && (0 == range_compare(e1->range, e2->range)))
@@ -97,21 +97,23 @@ int element_unit_test(Env* env)
 {
   Range r1, r2, r_temp;
   int had_err = 0;
+  GenomeNode *gn, *gn2;
+  Element *e, *e2, *e3;
 
-  r1.start = 10;
-  r1.end = 50;
+  r1.start = 10UL;
+  r1.end = 50UL;
 
-  r2.start = 20;
-  r2.end = 50;
+  r2.start = 20UL;
+  r2.end = 50UL;
 
-  GenomeNode* gn = genome_feature_new(gft_exon, r1,
-                                      STRAND_BOTH, NULL, 0, env);
-  GenomeNode* gn2 = genome_feature_new(gft_exon, r2,
-                                       STRAND_BOTH, NULL, 0, env);
+  gn = genome_feature_new(gft_exon, r1,
+                          STRAND_BOTH, NULL, 0, env);
+  gn2 = genome_feature_new(gft_exon, r2,
+                           STRAND_BOTH, NULL, 0, env);
 
-  Element* e = element_new(gn, NULL, env);
-  Element* e2 = element_new(gn, NULL, env);
-  Element* e3 = element_new(gn2, NULL, env);
+  e = element_new(gn, NULL, env);
+  e2 = element_new(gn, NULL, env);
+  e3 = element_new(gn2, NULL, env);
 
   /* tests element_get_range */
   r_temp = element_get_range(e);
