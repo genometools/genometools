@@ -135,6 +135,25 @@ void      graphics_draw_caret(Graphics *g, double x, double y, double width,
                               Color stroke_color);
 
 /*!
+Draws a rectangle.
+\param g Graphics object to modify.
+\param x Horizontal coordinate to draw at.
+\param y Vertical coordinate to draw at.
+\param filled Defines whether the rectangle should be filled with a color.
+\param fill_color Color to fill with.
+\param stroked Defines whether the rectangle should be outlined.
+\param stroke_color Outline color
+\param stroke_width Outline width, in pixels
+                    (can be a decimal subpixel value).
+\param width Width of the rectangle, in pixels.
+\param height Height of the rectangle, in pixels.
+*/
+void graphics_draw_rectangle(Graphics *g, double x, double y,
+                             bool filled, Color fill_color, bool stroked,
+                             Color stroke_color, double stroke_width,
+                             double width, double height);
+
+/*!
 Draws the given string to the right of the given coordinates.
 \param g Graphics object to modify.
 \param x Horizontal coordinate to draw at.

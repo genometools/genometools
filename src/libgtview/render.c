@@ -84,11 +84,11 @@ Render* render_new(Config *cfg, Env *env)
   Render *r;
 
   assert(cfg != NULL);
-  
+
   r = env_ma_malloc(env, sizeof (Render));
-  
+
   assert(r != NULL);
-  
+
   r->dia = NULL;
   r->cfg = cfg;
   r->margins = config_get_num(r->cfg, "format", "margins", 10, env);
@@ -162,6 +162,7 @@ void render_line(Render *r, Line *line, Env *env)
 
   assert(r != NULL && line != NULL);
 
+  /* TODO: make this an iterator? */
   blocks = line_get_blocks(line);
   /* begin drawing block */
   for (i=0; i<array_size(blocks); i++)
@@ -179,7 +180,6 @@ void render_line(Render *r, Line *line, Env *env)
     if (block_caption_is_visible(block))
     {
       caption = block_get_caption(block);
-      if (!caption) caption = block_get_parent_caption(block);
       if (!caption) caption = "";
       graphics_draw_text(r->g,
                          MAX(r->margins, draw_range.start),
@@ -242,10 +242,11 @@ void render_line(Render *r, Line *line, Env *env)
 
       /* draw each element according to style set in the config */
       style = config_get_cstr(r->cfg,
-                                          "feature_styles",
-                                          type,
-                                          "box",
-                                          env);
+                              "feature_styles",
+                              type,
+                              "box",
+                              env);
+
       if (strcmp(style, "box")==0)
       {
         graphics_draw_box(r->g,
@@ -333,9 +334,9 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
 {
   int i, j;
   Array *blocks;
-  
+
   assert(r != NULL && line != NULL);
-  
+
   blocks = line_get_blocks(line);
   for (i=0; i<array_size(blocks)-1; i++)
   {
@@ -346,7 +347,6 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
       const char *caption;
       Range cur_range;
       caption = block_get_caption(this_block);
-      if (!caption) caption = block_get_parent_caption(this_block);
       if (!caption) caption = "";
       cur_range.start = MAX(r->margins,
                             render_convert_point(r, block_range.start));
@@ -357,7 +357,6 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
         Block *left_block = *(Block**) array_get(blocks, j);
         Range chk_range = block_get_range(left_block);
         caption = block_get_caption(left_block);
-        if (!caption) caption = block_get_parent_caption(left_block);
         if (!caption) caption = "";
         chk_range.start = render_convert_point(r, chk_range.start);
         chk_range.end   = chk_range.start
@@ -370,7 +369,6 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
         Block *right_block = *(Block**) array_get(blocks, j);
         Range chk_range = block_get_range(right_block);
         caption = block_get_caption(right_block);
-        if (!caption) caption = block_get_parent_caption(right_block);
         if (!caption) caption = "";
         chk_range.start = render_convert_point(r, chk_range.start);
         chk_range.end   = chk_range.start
@@ -442,7 +440,7 @@ void render_ruler(Render *r, Env* env)
   long base_length, tick;
   Color rulercol, gridcol;
   char str[BUFSIZ];
-  
+
   assert(r != NULL);
 
   rulercol.red = rulercol.green = rulercol.blue = .2;

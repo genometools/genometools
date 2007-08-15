@@ -74,7 +74,7 @@ int line_unit_test(Env* env)
   const char* foo = "foo";
   const char* bar = "bar";
   const char* blub = "blub";
-  
+
   cfg = config_new(env, false);
 
   r_parent.start = 10UL;

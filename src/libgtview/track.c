@@ -12,12 +12,6 @@
 #include "libgtcore/hashtable.h"
 #include "libgtview/track.h"
 
-typedef struct
-{
-  void *ptr;
-  bool collapse_target;
-} CollapseCheckInfo;
-
 struct Track
 {
   Str *title;
@@ -43,7 +37,7 @@ Str* track_get_title(Track *track)
   return track->title;
 }
 
-Line* get_next_free_line(Track *track, Range r, Env *env)
+static Line* get_next_free_line(Track *track, Range r, Env *env)
 {
   unsigned long i;
   Line* line;
@@ -96,9 +90,41 @@ void track_insert_block(Track *track, Block *block, Env *env)
 int track_unit_test(Env *env)
 {
   int had_err = 0;
+  Block *b1, *b2, *b3, *b4;
+  Range r1, r2, r3, r4;
+  Track *track;
+  Str *title = str_new_cstr("test", env);
   
-  /* TODO: add unit test */
+  r1.start=100UL;  r1.end=1000UL;
+  r2.start=1001UL; r2.end=1500UL;
+  r3.start=700UL;  r3.end=1200UL;
+  r4.start=10UL;   r4.end=200UL;
+  
+  b1 = block_new(env);
+  block_set_range(b1, r1);
+  b2 = block_new(env);
+  block_set_range(b2, r2);
+  b3 = block_new(env);
+  block_set_range(b3, r3);
+  b4 = block_new(env);
+  block_set_range(b4, r4);
+  
+  track = track_new(title, env);
+  ensure(had_err, track != NULL);
+  ensure(had_err, track_get_title(track) == title);
+  
+  ensure(had_err, track_get_number_of_lines(track) == 0);
+  track_insert_block(track, b1, env);
+  ensure(had_err, track_get_number_of_lines(track) == 1);
+  track_insert_block(track, b2, env);
+  ensure(had_err, track_get_number_of_lines(track) == 1);
+  track_insert_block(track, b3, env);
+  ensure(had_err, track_get_number_of_lines(track) == 2);
+  track_insert_block(track, b4, env);
+  ensure(had_err, track_get_number_of_lines(track) == 2);
 
+  track_delete(track, env);
+  
   return had_err;
 }
 

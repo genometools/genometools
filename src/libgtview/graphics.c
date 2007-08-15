@@ -279,6 +279,35 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
    cairo_restore(g->cr);
 }
 
+void graphics_draw_rectangle(Graphics *g, double x, double y,
+                             bool filled, Color fill_color, bool stroked,
+                             Color stroke_color, double stroke_width,
+                             double width, double height)
+{
+  assert(g != NULL);
+  /* save cairo context */
+  cairo_save(g->cr);
+  cairo_new_path(g->cr);
+  cairo_rectangle(g->cr, x, y, x + width, y + width);
+  if (filled)
+  {
+    cairo_set_source_rgb(g->cr, fill_color.red,
+                                fill_color.green,
+                                fill_color.blue);
+    cairo_fill_preserve(g->cr);
+  }
+  if (stroked)
+  {
+    cairo_set_line_width(g->cr, stroke_width);
+    cairo_set_source_rgb(g->cr, stroke_color.red,
+                                stroke_color.green,
+                                stroke_color.blue);
+    cairo_stroke(g->cr);
+  }
+  /* restore cairo context */
+  cairo_restore(g->cr);
+}
+
 void graphics_draw_text_centered(Graphics *g, double x, double y,
                                  const char *text)
 {
@@ -356,7 +385,7 @@ void graphics_draw_arrowhead(Graphics *g, double x, double y,
   cairo_save(g->cr);
   cairo_reset_clip(g->cr);
   cairo_set_source_rgb(g->cr, color.red, color.green, color.blue);
-  switch (arrow_status) 
+  switch (arrow_status)
   {
     case ARROW_LEFT:
       cairo_move_to(g->cr, x+arrow_width, y);

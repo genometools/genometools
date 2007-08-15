@@ -33,6 +33,15 @@ Creates a new Block object.
 Block* block_new(Env *env);
 
 /*!
+Creates a new Block object, setting block parameters
+(such as strand, range, caption) from a given GenomeNode template.
+\param env Pointer to Environment object.
+\parem node GenomeNode template node.
+\return Pointer to a new Block object.
+*/
+Block* block_new_from_node(GenomeNode *node, Env *env);
+
+/*!
 Inserts an element into a Block object
 \param block Block in which the element shall be insert
 \param gn Pointer to GenomeNode object
@@ -82,34 +91,11 @@ void block_set_caption(Block *block,
                        const char *caption);
 
 /*!
-Sets caption of a Block object to Name or ID of a given node
-\param block Pointer to Block object to set caption
-\param gn GenomeNode to take captions from
-*/
-void block_set_caption_from_node(Block *block,
-                       GenomeNode *gn);
-
-/*!
 Gets caption of a Block object
 \param block Pointer to Block object
 \return caption Pointer to String object
 */
 const char* block_get_caption(Block *block);
-
-/*!
-Sets parent_caption of a Block object
-\param block Pointer to Block object to set caption
-\param caption Pointer to String object
-*/
-void block_set_parent_caption(Block *block,
-                              const char *caption);
-
-/*!
-Gets parent_caption of a Block object
-\param block Pointer to Block object
-\return caption Pointer to String object
-*/
-const char* block_get_parent_caption(Block *block);
 
 /*!
 Sets strand of a Block object

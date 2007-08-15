@@ -18,7 +18,6 @@ struct Block
   Dlist *elements;
   Range range;
   const char* caption;
-  const char* parent_caption;
   bool show_caption;
   Strand strand;
   GenomeFeatureType type;
@@ -61,11 +60,27 @@ Block* block_new(Env *env)
   r.end = 0;
   block->range = r;
   block->caption = NULL;
-  block->parent_caption = NULL;
   block->show_caption = true;
   block->strand = STRAND_UNKNOWN;
 
   assert(block != NULL);
+  return block;
+}
+
+Block* block_new_from_node(GenomeNode *node, Env *env)
+{
+  Block *block;
+  const char *caption;
+
+  assert(node != NULL);
+
+  block = block_new(env);
+  caption = genome_feature_get_attribute(node, "Name");
+  if (caption == NULL)
+    caption = genome_feature_get_attribute(node, "ID" );
+  block_set_caption(block, caption);
+  block_set_range(block, genome_node_get_range(node));
+  block_set_strand(block, genome_feature_get_strand((GenomeFeature*) node));
   return block;
 }
 
@@ -98,12 +113,6 @@ void block_insert_element(Block *block,
       e_type = element_get_type(element);
 
       dominates = config_dominates(cfg, e_type, gn_type, env);
-      if (dominates == DOMINATES_EQUAL
-         || dominates == DOMINATES_NOT_SPECIFIED
-         || dominates == DOMINATES_UNKNOWN_TYPE)
-      {
-        dominates = DOMINATES_SECOND;
-      }
 
       /* Fall:    -------------------
                   ---------- */
@@ -113,14 +122,15 @@ void block_insert_element(Block *block,
         {
           case DOMINATES_FIRST:
             break;
-          case DOMINATES_EQUAL:
-          case DOMINATES_NOT_SPECIFIED:
-          case DOMINATES_UNKNOWN_TYPE:
           case DOMINATES_SECOND:
             elem_r.start = gn_r.end+1;
             element_set_range(element, elem_r);
             e = element_new(gn, cfg, env);
             dlist_add(block->elements, e, env);
+            break;          
+          case DOMINATES_EQUAL:
+          case DOMINATES_NOT_SPECIFIED:
+          case DOMINATES_UNKNOWN_TYPE:
             break;
         }
       }
@@ -134,9 +144,6 @@ void block_insert_element(Block *block,
           case DOMINATES_FIRST:
             gn_r.start = elem_r.end;
             break;
-          case DOMINATES_EQUAL:
-          case DOMINATES_NOT_SPECIFIED:
-          case DOMINATES_UNKNOWN_TYPE:
           case DOMINATES_SECOND:
             elem_r.end = gn_r.start-1;
             if (elem_r.start == elem_r.end+1)
@@ -152,6 +159,10 @@ void block_insert_element(Block *block,
             element_set_range(e, gn_r);
             dlist_add(block->elements, e, env);
             elem = dlist_find(block->elements, e);
+            break;          
+          case DOMINATES_EQUAL:
+          case DOMINATES_NOT_SPECIFIED:
+          case DOMINATES_UNKNOWN_TYPE:
             break;
         }
       }
@@ -162,15 +173,12 @@ void block_insert_element(Block *block,
       {
         bool removed = false;
         Range gnnew_r;
-        
+
         switch (dominates)
         {
           case DOMINATES_FIRST:
             gn_r.start = elem_r.end+1;
-            break;          
-          case DOMINATES_EQUAL:
-          case DOMINATES_NOT_SPECIFIED:
-          case DOMINATES_UNKNOWN_TYPE:
+            break;
           case DOMINATES_SECOND:
             elem_r.end = gn_r.start-1;
             if (elem_r.start == elem_r.end+1)
@@ -194,6 +202,10 @@ void block_insert_element(Block *block,
             {
               elem = dlist_find(block->elements, e);
             }
+            break;          
+          case DOMINATES_EQUAL:
+          case DOMINATES_NOT_SPECIFIED:
+          case DOMINATES_UNKNOWN_TYPE:
             break;
         }
       }
@@ -204,14 +216,11 @@ void block_insert_element(Block *block,
       {
         Range elemnew_r;
         Element *elemnew;
-        
+
         switch (dominates)
         {
           case DOMINATES_FIRST:
             break;
-          case DOMINATES_EQUAL:
-          case DOMINATES_NOT_SPECIFIED:
-          case DOMINATES_UNKNOWN_TYPE:
           case DOMINATES_SECOND:
             elemnew_r = elem_r;
             elem_r.end = gn_r.start-1;
@@ -223,6 +232,10 @@ void block_insert_element(Block *block,
             e = element_new(gn, cfg, env);
             dlist_add(block->elements, elemnew, env);
             dlist_add(block->elements, e, env);
+            break;          
+          case DOMINATES_EQUAL:
+          case DOMINATES_NOT_SPECIFIED:
+          case DOMINATES_UNKNOWN_TYPE:
             break;
         }
       }
@@ -258,34 +271,11 @@ void block_set_caption(Block *block,
   block->caption = caption;
 }
 
-void block_set_caption_from_node(Block *block,
-                                 GenomeNode *gn)
-{
-  assert(block != NULL);
-  block->caption = genome_feature_get_attribute(gn, "Name");
-  if (!block->caption)
-    block->caption = genome_feature_get_attribute(gn, "ID" );
-}
-
 const char* block_get_caption(Block *block)
 {
   assert(block != NULL);
 
   return block->caption;
-}
-
-void block_set_parent_caption(Block *block,
-                       const char *caption)
-{
-  assert(block != NULL);
-  block->parent_caption = caption;
-}
-
-const char* block_get_parent_caption(Block *block)
-{
-  assert(block != NULL);
-
-  return block->parent_caption;
 }
 
 void block_set_strand(Block *block,

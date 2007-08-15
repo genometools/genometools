@@ -22,7 +22,7 @@
 #include "libgtview/feature_index.h"
 #include "libgtview/track.h"
 
-#define DEBUG false
+#define DEBUG true
 
 struct Diagram
 {
@@ -39,16 +39,6 @@ typedef struct
   Diagram *diagram;
 } NodeTraverseInfo;
 
-static Block* block_new_from_node(GenomeNode *node, Env *env)
-{
-  Block *block;
-  assert(node != NULL);
-  block = block_new(env);
-  block_set_caption_from_node(block, node);
-  block_set_range(block, genome_node_get_range(node));
-  block_set_strand(block, genome_feature_get_strand((GenomeFeature*) node));
-  return block;
-}
 static void add_to_current(Diagram *d, GenomeNode *node, Env *env)
 {
   NodeInfoElement *ni;
@@ -90,8 +80,8 @@ static void add_to_parent(Diagram *d, GenomeNode *node,
 
   assert(d != NULL && parent != NULL && node != NULL);
 
-  if (DEBUG) printf("calling add_to_parent: %s, %s\n",
-   genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) node)),
+if (DEBUG) printf("calling add_to_parent: %s, %s\n",
+genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) node)),
 genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) parent)));
 
   par_ni = hashtable_get(d->nodeinfo, parent);
@@ -127,8 +117,10 @@ genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) parent)));
     bt->gft = genome_feature_get_type((GenomeFeature*) node);
     bt->block = block;
     array_add(par_ni->blocktuples, bt, env);
-    if (DEBUG) printf("added %s to (%s) block for node %s\n", genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) node)), genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) parent)),
-    genome_feature_get_attribute(parent, "ID" ));
+if (DEBUG) printf("added %s to (%s) block for node %s\n",
+genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) node)),
+genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) parent)),
+   genome_feature_get_attribute(parent, "ID" ));
   }
   block_insert_element(block, node, d->config, env);
 }
@@ -142,7 +134,9 @@ static void add_recursive(Diagram *d, GenomeNode *node,
   assert(d != NULL && node != NULL &&
            parent != NULL && original_node != NULL);
 
-  if (DEBUG) printf("calling add_recursive: %s -> %s\n", genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) node)), genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) parent)));
+if (DEBUG) printf("calling add_recursive: %s -> %s\n",
+genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) node)),
+genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) parent)));
 
   ni = hashtable_get(d->nodeinfo, node);
   /* end of recursion, insert into target block */
@@ -154,10 +148,13 @@ static void add_recursive(Diagram *d, GenomeNode *node,
     for (i=0; i<array_size(ni->blocktuples);i++)
     {
       bt = *(BlockTuple**) array_get(ni->blocktuples, i);
-      /* XXX: find out whether to insert new block if overlap */
       if (bt->gft == genome_feature_get_type((GenomeFeature*) node))
       {
-        if (DEBUG) printf("found root block with type %s, inserting...\n", genome_feature_type_get_cstr(bt->gft));
+
+if (DEBUG)
+printf("found root block with type %s, inserting...\n",
+genome_feature_type_get_cstr(bt->gft));
+
         block = bt->block;
         break;
       }
@@ -219,14 +216,17 @@ static void process_node(Diagram *d,
     children_do_not_overlap =
       genome_node_direct_children_do_not_overlap_st(parent, node, env);
 
-  if (DEBUG) printf("processing node: %s (%s)\n",
-  genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) node)),
-  genome_feature_get_attribute(node, "ID" ));
+if (DEBUG) printf("processing node: %s (%s)\n",
+feature_type,
+genome_feature_get_attribute(node, "ID" ));
 
-  if (collapse && children_do_not_overlap)
+  if (collapse)
   {
-    /* when collapsing types overlap, do stop collapsing at that level.
-       otherwise, add to noncollapsing root type block. */
+    if (!children_do_not_overlap)
+      fprintf(stderr, "Warning: collapsing %s features overlap "
+                      "and will be missing in the %s block! \n",
+                      feature_type,
+                      genome_feature_get_attribute(parent, "ID" ));
     add_recursive(d, node, parent, node, env);
   }
   else if (children_do_not_overlap)
@@ -236,8 +236,7 @@ static void process_node(Diagram *d,
   }
   else
   {
-    /* nodes that belong into their own track.
-       (e.g. root nodes, uncollapsing types w/o non-overlapping siblings) */
+    /* nodes that belong into their own track */
     add_to_current(d, node, env);
   }
 
@@ -245,11 +244,6 @@ static void process_node(Diagram *d,
      lookup structure */
   assert(hashtable_get(d->nodeinfo, node) != NULL);
 }
-
-
-
-
-
 
 Range diagram_get_range(Diagram* diagram)
 {
@@ -318,7 +312,9 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
   Diagram *diagram = (Diagram*) data;
   unsigned long i = 0;
 
-  if (DEBUG && array_size(ni->blocktuples) > 0) printf("collecting blocks from %lu tuples...\n", array_size(ni->blocktuples));
+if (DEBUG && array_size(ni->blocktuples) > 0)
+printf("collecting blocks from %lu tuples...\n",
+array_size(ni->blocktuples));
 
   for (i=0;i<array_size(ni->blocktuples);i++)
   {
@@ -332,11 +328,13 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
       track = track_new(str_new_cstr(type, env), env);
       hashtable_add(diagram->tracks, (void*) type, track, env);
       diagram->nof_tracks++;
-      if (DEBUG) printf("created track: %s\n", type);
-      if (DEBUG) printf("diagram has now %d tracks\n", diagram_get_number_of_tracks(diagram));
+if (DEBUG) printf("created track: %s\n", type);
+if (DEBUG) printf("diagram has now %d tracks\n",
+diagram_get_number_of_tracks(diagram));
     }
     track_insert_block(track, bt->block, env);
-    if (DEBUG) printf("inserted block %s into track %s\n", block_get_caption(bt->block),type);
+if (DEBUG) printf("inserted block %s into track %s\n",
+block_get_caption(bt->block),type);
     env_ma_free(bt, env);
   }
   array_delete(ni->blocktuples, env);

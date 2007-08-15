@@ -51,16 +51,6 @@ Returns Track title
 Str* track_get_title(Track* track);
 
 /*!
-Gets the next unoccupied Line object
-\param lines Array with Line objects
-\param gn Pointer to GenomeNode object
-\return Pointer to unoccupied Line object
-*/
-Line* get_next_free_line(Track* track,
-                         Range r,
-                         Env* env);
-
-/*!
 Returns Array with Pointer to Line objects
 \param track Pointer to Track object
 \return Pointer to Array

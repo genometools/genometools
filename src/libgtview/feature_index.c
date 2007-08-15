@@ -157,9 +157,9 @@ sequence region identifier.
 Array* feature_index_get_features_for_seqid(FeatureIndex *fi, char *seqid)
 {
   RegionInfo *res;
-  
+
   assert(fi != NULL);
-  
+
   res = (RegionInfo*) hashtable_get(fi->regions, seqid);
   return (res != NULL ? res->features : NULL);
 }
@@ -182,9 +182,9 @@ int feature_index_get_features_for_range(FeatureIndex *fi,
   Array* base;
   GenomeNode* key;
   unsigned long i = 0;
-  
+
   assert(fi != NULL && results != NULL);
-  
+
   base = feature_index_get_features_for_seqid(fi, seqid);
   if (!base) return -1;
   assert(fi && results && seqid && base && (qry_range.start < qry_range.end));
