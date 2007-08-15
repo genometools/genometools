@@ -38,7 +38,7 @@ config =
   -- feature's track.
   collapse =
   {
-    to_parent = {"exon","mRNA","intron","long_terminal_repeat","LTR_retrotransposon","inverted_repeat","target_site_duplication"},
+    to_parent = {"exon","intron","mRNA","long_terminal_repeat","LTR_retrotransposon","inverted_repeat","target_site_duplication"},
   },
   -- Defines precedence of feature types when overlapping
   -- in a collapsed parent track.

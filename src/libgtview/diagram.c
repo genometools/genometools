@@ -13,6 +13,7 @@
  */
 
 #include "libgtcore/ensure.h"
+#include "libgtcore/warning.h"
 #include "libgtcore/str.h"
 #include "libgtcore/undef.h"
 #include "libgtext/genome_node.h"
@@ -22,7 +23,7 @@
 #include "libgtview/feature_index.h"
 #include "libgtview/track.h"
 
-#define DEBUG true
+#define DEBUG false
 
 struct Diagram
 {
@@ -112,7 +113,14 @@ genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) parent)));
   if (block == NULL)
   {
     BlockTuple *bt;
-    block = block_new_from_node(parent,env);
+    block = block_new_from_node(parent, env);
+    /* if element is alone in block, do not use parent's caption */
+    if (genome_node_number_of_children(parent) == 1)
+    {
+      block_set_caption(block, genome_feature_get_attribute(node,"Name"));
+      if (!block_get_caption(block))
+        block_set_caption(block, genome_feature_get_attribute(node,"ID"));
+    }
     bt = env_ma_malloc(env, sizeof (BlockTuple));
     bt->gft = genome_feature_get_type((GenomeFeature*) node);
     bt->block = block;
@@ -196,7 +204,7 @@ static void process_node(Diagram *d,
                   Env *env)
 {
   Range elem_range;
-  bool collapse, children_do_not_overlap=false;
+  bool collapse, do_not_overlap=false;
   const char *feature_type;
 
   assert(d != NULL && node != NULL);
@@ -213,7 +221,7 @@ static void process_node(Diagram *d,
 
   /* check if direct children overlap */
   if (parent != NULL)
-    children_do_not_overlap =
+    do_not_overlap =
       genome_node_direct_children_do_not_overlap_st(parent, node, env);
 
 if (DEBUG) printf("processing node: %s (%s)\n",
@@ -222,14 +230,14 @@ genome_feature_get_attribute(node, "ID" ));
 
   if (collapse)
   {
-    if (!children_do_not_overlap)
-      fprintf(stderr, "Warning: collapsing %s features overlap "
-                      "and will be missing in the %s block! \n",
-                      feature_type,
-                      genome_feature_get_attribute(parent, "ID" ));
+    if (!do_not_overlap)
+      warning("collapsing %s features overlap "
+              "and will be missing in the %s block!",
+              feature_type,
+              genome_feature_get_attribute(parent, "ID" ));
     add_recursive(d, node, parent, node, env);
   }
-  else if (children_do_not_overlap)
+  else if (do_not_overlap)
   {
     /* group overlapping child nodes of a noncollapsing type by parent */
     add_to_parent(d, node, parent, env);
