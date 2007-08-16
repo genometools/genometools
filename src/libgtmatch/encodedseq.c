@@ -9,7 +9,6 @@
 #include <ctype.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
-#include "libgtcore/array.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
 #include "intbits-tab.h"
@@ -976,7 +975,7 @@ static uint32_t sat2maxspecialtype(Positionaccesstype sat)
   exit(EXIT_FAILURE);
 }
 
-#undef DEBUG
+#define DEBUG
 #ifdef DEBUG
 static void ucharshowspecialpositions(const Encodedsequence *encseq,
                                       Seqpos pgnum,
@@ -1046,6 +1045,11 @@ static void checkpageoffset(Encodedsequencescanstate *esr)
   {
     assert(esr->pageoffset == (esr->nextpage - 1) * (esr->maxspecialtype+1));
   }
+#ifdef DEBUG
+  printf("forward: nextpage = %u, pageoffset=%u\n",
+          (unsigned int) esr->nextpage,
+          (unsigned int) esr->pageoffset);
+#endif
 }
 
 static bool nextnonemptypageforward(const Encodedsequence *encseq,
@@ -1073,6 +1077,7 @@ static bool nextnonemptypageforward(const Encodedsequence *encseq,
       endpos1 = accessendspecialsubsUint(encseq,esr->nextpage);
       esr->nextpage++;
       esr->pageoffset += (esr->maxspecialtype+1);
+      checkpageoffset(esr);
       if (endpos0 < endpos1)
       {
         esr->firstcell = endpos0;
@@ -1089,6 +1094,8 @@ static bool nextnonemptypagebackward(const Encodedsequence *encseq,
 {
   Seqpos endpos0, endpos1;
 
+  printf("nextnonemptypagebackward(nextpage = %u)\n",
+          (unsigned int) esr->nextpage);
   while (esr->nextpage <=  esr->numofspecialcells)
   {
     if (esr->nextpage == 0)
@@ -1118,6 +1125,9 @@ static bool nextnonemptypagebackward(const Encodedsequence *encseq,
 #endif
       esr->nextpage--;
       esr->pageoffset -= (esr->maxspecialtype+1);
+#ifdef DEBUG
+      printf("nextpage=%u,endpos1=%u\n",endpos0,endpos1);
+#endif
       if (endpos0 < endpos1)
       {
         esr->firstcell = endpos0;
@@ -1541,123 +1551,94 @@ static int overallspecialrangesbackward(
   return 0;
 }
 
-static int overallspecialrangesbackward2(
+int overallspecialrangesbackward2(
                 const Encodedsequence *encseq,
                 Readmode readmode,
                 int(*process)(void *,const Sequencerange *,Env *),
                 void *processinfo,
                 Env *env)
 {
-  Encodedsequencescanstate *esr;
-  Sequencerange seqrange;
+  bool haserr = false;
 
   env_error_check(env);
-  esr = initEncodedsequencescanstate(encseq,readmode,env);
-  assert(esr != NULL);
-  while (true)
+  printf("now run backward enumeration\n");
+  if(encseq->sat == Viadirectaccess || encseq->sat == Viabitaccess)
   {
-    seqrange.leftpos = REVERSEPOS(esr->previousrange.rightpos);
-    seqrange.rightpos = REVERSEPOS(esr->previousrange.leftpos);
-    if (process(processinfo,&seqrange,env) != 0)
-    {
-      return -1;
-    }
-    if (!esr->hasrange)
-    {
-      break;
-    }
-    advanceEncodedseqstatebackward(encseq,esr);
+    env_error_set(env,"overallspecialrangesbackward2 not possible for sat = %s",
+                  accesstype2name(encseq->sat));
+    haserr = true;
   }
-  freeEncodedsequencescanstate(&esr,env);
-  return 0;
+  if(!haserr)
+  {
+    Encodedsequencescanstate *esr;
+    Sequencerange seqrange;
+
+    esr = initEncodedsequencescanstate(encseq,readmode,env);
+    assert(esr != NULL);
+    while (true)
+    {
+      seqrange.leftpos = REVERSEPOS(esr->previousrange.rightpos);
+      seqrange.rightpos = REVERSEPOS(esr->previousrange.leftpos);
+      /*
+      printf("backward process %u %u\n",(unsigned int) seqrange.leftpos,
+                                        (unsigned int) seqrange.rightpos);
+      */
+      printf("backward process %u %u\n",
+               (unsigned int) esr->previousrange.leftpos,
+               (unsigned int) esr->previousrange.rightpos);
+      if (process(processinfo,&esr->previousrange,env) != 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (!esr->hasrange)
+      {
+        break;
+      }
+      advanceEncodedseqstatebackward(encseq,esr);
+    }
+    freeEncodedsequencescanstate(&esr,env);
+  }
+  return haserr ? - 1 : 0;
 }
 
-static int overallspecialrangesforward(
+int overallspecialrangesforward(
                 const Encodedsequence *encseq,
                 Readmode readmode,
                 int(*process)(void *,const Sequencerange *,Env *),
                 void *processinfo,
                 Env *env)
 {
-  Encodedsequencescanstate *esr;
+  bool haserr = false;
 
   env_error_check(env);
-  esr = initEncodedsequencescanstate(encseq,readmode,env);
-  assert(esr != NULL);
-  while (true)
+  if(encseq->sat == Viadirectaccess || encseq->sat == Viabitaccess)
   {
-    if (process(processinfo,&esr->previousrange,env) != 0)
+    env_error_set(env,"overallspecialrangesforward not possible for sat = %s",
+                  accesstype2name(encseq->sat));
+    haserr = true;
+  }
+  if(!haserr)
+  {
+    Encodedsequencescanstate *esr;
+    esr = initEncodedsequencescanstate(encseq,readmode,env);
+    assert(esr != NULL);
+    while (true)
     {
-      return -1;
+      if (process(processinfo,&esr->previousrange,env) != 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (!esr->hasrange)
+      {
+        break;
+      }
+      advanceEncodedseqstateforward(encseq,esr);
     }
-    if (!esr->hasrange)
-    {
-      break;
-    }
-    advanceEncodedseqstateforward(encseq,esr);
+    freeEncodedsequencescanstate(&esr,env);
   }
-  freeEncodedsequencescanstate(&esr,env);
-  return 0;
-}
-
-static int addelem(void *processinfo,const Sequencerange *range,Env *env)
-{
-  env_error_check(env);
-  array_add_elem((Array *) processinfo,(void *) range,sizeof(Sequencerange),
-                 env);
-  return 0;
-}
-
-int checkspecialranges(const Encodedsequence *encseq,Env *env)
-{
-  Array *rangesforward, *rangesbackward;
-  Sequencerange *valf, *valb;
-  unsigned long idx;
-
-  env_error_check(env);
-  rangesforward = array_new(sizeof(Sequencerange),env);
-  rangesbackward = array_new(sizeof(Sequencerange),env);
-
-  if(overallspecialrangesforward(encseq,Forwardmode,addelem,rangesforward,
-                                 env) != 0)
-  {
-    return -1;
-  }
-  if(overallspecialrangesbackward2(encseq,Reversemode,addelem,rangesbackward,
-                                   env) != 0)
-  {
-    return -1;
-  }
-  array_reverse(rangesbackward,env);
-  if(array_size(rangesforward) != array_size(rangesbackward))
-  {
-    fprintf(stderr,"array_size(rangesforward) = %lu != %lu = "
-                   "array_size(rangesbackward)\n",
-                    (unsigned long) array_size(rangesforward),
-                    (unsigned long) array_size(rangesbackward));
-    exit(EXIT_FAILURE);
-  }
-  for(idx=0; idx<(unsigned long) array_size(rangesforward); idx++)
-  {
-    valf = (Sequencerange *) array_get(rangesforward,idx);
-    valb = (Sequencerange *) array_get(rangesbackward,idx);
-    if(valf->leftpos != valb->leftpos || valf->rightpos != valb->rightpos)
-    {
-      fprintf(stderr,"rangesforward[%lu] = (" FormatSeqpos "," FormatSeqpos 
-                     ") != (" FormatSeqpos "," FormatSeqpos 
-                     " = rangesbackward[%lu]\n",
-                     idx,
-                     PRINTSeqposcast(valf->leftpos),
-                     PRINTSeqposcast(valf->rightpos),
-                     PRINTSeqposcast(valb->leftpos),
-                     PRINTSeqposcast(valb->rightpos),
-                     idx);
-      exit(EXIT_FAILURE);
-    }
-  }
-  array_delete(rangesforward,env);
-  array_delete(rangesbackward,env);
-  return 0;
+  return haserr ? -1 : 0;
 }
 
 int overallspecialranges(const Encodedsequence *encseq,

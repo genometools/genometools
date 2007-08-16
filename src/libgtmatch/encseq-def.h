@@ -45,11 +45,6 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos);
 
-int overallspecialranges(const Encodedsequence *encseq,
-                         Readmode readmode,
-                         int(*process)(void *,const Sequencerange *,Env *),
-                         void *processinfo,
-                         Env *env);
 
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
                                            const StrArray *filenametab,
@@ -61,5 +56,25 @@ int overallspecialranges(const Encodedsequence *encseq,
                                            const Alphabet *alphabet,
                                            const char *str_sat,
                                            Env *env);
+
+int overallspecialrangesforward(
+                const Encodedsequence *encseq,
+                Readmode readmode,
+                int(*process)(void *,const Sequencerange *,Env *),
+                void *processinfo,
+                Env *env);
+
+int overallspecialrangesbackward2(
+                const Encodedsequence *encseq,
+                Readmode readmode,
+                int(*process)(void *,const Sequencerange *,Env *),
+                void *processinfo,
+                Env *env);
+
+int overallspecialranges(const Encodedsequence *encseq,
+                         Readmode readmode,
+                         int(*process)(void *,const Sequencerange *,Env *),
+                         void *processinfo,
+                         Env *env);
 
 #endif

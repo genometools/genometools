@@ -63,6 +63,13 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   str_delete(indexname,env);
   if (!haserr)
   {
+    if(checkspecialranges(suffixarray.encseq,env) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
     int readmode;
     
     for(readmode = 0; readmode < 4; readmode++)
