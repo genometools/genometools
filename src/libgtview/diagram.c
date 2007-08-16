@@ -40,16 +40,22 @@ typedef struct
   Diagram *diagram;
 } NodeTraverseInfo;
 
-static void add_to_current(Diagram *d, GenomeNode *node, Env *env)
+static BlockTuple* blocktuple_new(GenomeFeatureType gft, Block *block, Env* env)
+{
+  BlockTuple *bt;
+  assert(block != NULL);
+  bt = env_ma_malloc(env, sizeof (BlockTuple));
+  bt->gft = gft;
+  bt->block = block;
+  return bt;
+}
+
+static NodeInfoElement* get_or_create_node_info(Diagram *d,
+                                                GenomeNode *node,
+                                                Env* env)
 {
   NodeInfoElement *ni;
-  Block *block;
-  BlockTuple *bt;
-
-  if (DEBUG) printf("calling add_to_current\n");
-
   assert(d != NULL && node != NULL);
-
   ni = hashtable_get(d->nodeinfo, node);
   if (ni == NULL)
   {
@@ -60,15 +66,51 @@ static void add_to_current(Diagram *d, GenomeNode *node, Env *env)
   }
   else
   {
-    /* here, we could handle non-tree condition */
+    /* here, we could handle a non-tree condition */
   }
+  return ni;
+}
 
+static Block* find_right_block(NodeInfoElement* ni,
+                               GenomeFeatureType gft)
+{
+  Block *block = NULL;
+  unsigned long i;
+  assert(ni != NULL);
+  for (i=0; i<array_size(ni->blocktuples);i++)
+  {
+    BlockTuple *bt = *(BlockTuple**) array_get(ni->blocktuples, i);
+    if (bt->gft == gft)
+    {
+if (DEBUG)
+printf("    found root block with type %s, inserting...\n",
+genome_feature_type_get_cstr(bt->gft));
+      block = bt->block;
+      break;
+    }
+  }
+  return block;
+}
+
+static void add_to_current(Diagram *d, GenomeNode *node, Env *env)
+{
+  NodeInfoElement *ni;
+  Block *block;
+  BlockTuple *bt;
+
+  if (DEBUG) fprintf(stderr,"  calling add_to_current\n");
+
+  assert(d != NULL && node != NULL);
+
+  /* Lookup node info and set itself as parent */
+  ni = get_or_create_node_info(d, node, env);
   ni->parent = node;
+  /* create new Block tuple and add to node info */
   block = block_new_from_node(node,env);
   block_insert_element(block, node, d->config, env);
-  bt = env_ma_malloc(env, sizeof (BlockTuple));
-  bt->gft = genome_feature_get_type((GenomeFeature*) node);
-  bt->block = block;
+  bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node),
+                      block,
+                      env);
   array_add(ni->blocktuples, bt, env);
 }
 
@@ -76,40 +118,22 @@ static void add_to_parent(Diagram *d, GenomeNode *node,
                           GenomeNode* parent, Env *env)
 {
   Block *block = NULL;
-  unsigned long i;
   NodeInfoElement *par_ni, *ni;
 
   assert(d != NULL && parent != NULL && node != NULL);
 
-if (DEBUG) printf("calling add_to_parent: %s, %s\n",
+if (DEBUG) fprintf(stderr,"  calling add_to_parent: %s, %s\n",
 genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) node)),
 genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) parent)));
 
-  par_ni = hashtable_get(d->nodeinfo, parent);
-  ni = hashtable_get(d->nodeinfo, node);
+  par_ni = get_or_create_node_info(d, parent, env);
+  ni = get_or_create_node_info(d, node, env);
+  ni->parent = parent;
 
-  if (ni == NULL)
-  {
-  NodeInfoElement *new_ni = env_ma_malloc(env, sizeof (NodeInfoElement));
-  new_ni->blocktuples = array_new(sizeof (BlockTuple*), env);
-  new_ni->parent = parent;
-  hashtable_add(d->nodeinfo, node, new_ni, env);
-  }
-  else
-  {
-    /* here, we could handle non-tree condition */
-  }
-
-  for (i=0; i<array_size(par_ni->blocktuples);i++)
-  {
-    BlockTuple *bt = *(BlockTuple**) array_get(par_ni->blocktuples, i);
-    if (bt->gft == genome_feature_get_type((GenomeFeature*) node))
-    {
-      if (DEBUG) printf("found root block with type %s, inserting...\n",
-                  genome_feature_type_get_cstr(bt->gft));
-      block = bt->block;
-    }
-  }
+  /* try to find the right block to insert */
+  block = find_right_block(par_ni,
+                           genome_feature_get_type((GenomeFeature*) node));
+  /* no fitting block was found, create a new one */
   if (block == NULL)
   {
     BlockTuple *bt;
@@ -121,15 +145,16 @@ genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) parent)));
       if (!block_get_caption(block))
         block_set_caption(block, genome_feature_get_attribute(node,"ID"));
     }
-    bt = env_ma_malloc(env, sizeof (BlockTuple));
-    bt->gft = genome_feature_get_type((GenomeFeature*) node);
-    bt->block = block;
+    bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node),
+                        block,
+                        env);
     array_add(par_ni->blocktuples, bt, env);
-if (DEBUG) printf("added %s to (%s) block for node %s\n",
+if (DEBUG) fprintf(stderr,"    added %s to (%s) block for node %s\n",
 genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) node)),
 genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) parent)),
    genome_feature_get_attribute(parent, "ID" ));
   }
+  /* now we have a block to insert into */
   block_insert_element(block, node, d->config, env);
 }
 
@@ -142,57 +167,39 @@ static void add_recursive(Diagram *d, GenomeNode *node,
   assert(d != NULL && node != NULL &&
            parent != NULL && original_node != NULL);
 
-if (DEBUG) printf("calling add_recursive: %s -> %s\n",
+if (DEBUG) fprintf(stderr,"  calling add_recursive: %s (%s) -> %s (%s)\n",
 genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) node)),
-genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) parent)));
+genome_feature_get_attribute(node,"ID"),
+genome_feature_type_get_cstr(genome_feature_get_type((GenomeFeature*) parent)),
+genome_feature_get_attribute(parent,"ID"));
 
-  ni = hashtable_get(d->nodeinfo, node);
+  ni = get_or_create_node_info(d, node, env);
+
   /* end of recursion, insert into target block */
   if (parent == node)
   {
-    unsigned long i;
-    Block *block = NULL;
+    Block *block ;
     BlockTuple *bt;
-    for (i=0; i<array_size(ni->blocktuples);i++)
-    {
-      bt = *(BlockTuple**) array_get(ni->blocktuples, i);
-      if (bt->gft == genome_feature_get_type((GenomeFeature*) node))
-      {
-
-if (DEBUG)
-printf("found root block with type %s, inserting...\n",
-genome_feature_type_get_cstr(bt->gft));
-
-        block = bt->block;
-        break;
-      }
-    }
+    /* try to find the right block to insert */
+    block = find_right_block(ni,
+                             genome_feature_get_type((GenomeFeature*) node));
     if (block == NULL)
     {
       block = block_new_from_node(node,env);
-      bt = env_ma_malloc(env, sizeof (BlockTuple));
-      bt->gft = genome_feature_get_type((GenomeFeature*) node);
-      bt->block = block;
+      bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node),
+                          block,
+                          env);
       array_add(ni->blocktuples, bt, env);
     }
-    block_insert_element(bt->block, original_node, d->config, env);
+    block_insert_element(block, original_node, d->config, env);
   }
   else
   /* not at target type block yet, set up reverse entry and follow */
   {
+    /* set up reverse entry */
+    ni->parent = parent;
+    /* recursively call with parent node and its parent */
     NodeInfoElement *parent_ni;
-    if (ni == NULL)
-    {
-      NodeInfoElement *new_ni;
-      new_ni = env_ma_malloc(env, sizeof (NodeInfoElement));
-      new_ni->blocktuples = array_new(sizeof (BlockTuple*), env);
-      new_ni->parent = parent;
-      hashtable_add(d->nodeinfo, node, new_ni, env);
-    }
-    else
-    {
-      /* here, we could handle non-tree condition */
-    }
     parent_ni = hashtable_get(d->nodeinfo, parent);
     add_recursive(d, parent, parent_ni->parent, original_node, env);
   }
@@ -224,7 +231,7 @@ static void process_node(Diagram *d,
     do_not_overlap =
       genome_node_direct_children_do_not_overlap_st(parent, node, env);
 
-if (DEBUG) printf("processing node: %s (%s)\n",
+if (DEBUG) fprintf(stderr,"processing node: %s (%s)\n",
 feature_type,
 genome_feature_get_attribute(node, "ID" ));
 
@@ -237,7 +244,7 @@ genome_feature_get_attribute(node, "ID" ));
               genome_feature_get_attribute(parent, "ID" ));
     add_recursive(d, node, parent, node, env);
   }
-  else if (do_not_overlap)
+  else if (do_not_overlap && (genome_node_number_of_children(parent) > 1))
   {
     /* group overlapping child nodes of a noncollapsing type by parent */
     add_to_parent(d, node, parent, env);
@@ -259,10 +266,6 @@ Range diagram_get_range(Diagram* diagram)
   return diagram->range;
 }
 
-/*
-Fetching the number of lines from a track object and add number
- of lines to data.
-*/
 static int diagram_add_tracklines(void *key, void *value, void *data,
                                   Env* env)
 {
@@ -271,9 +274,6 @@ static int diagram_add_tracklines(void *key, void *value, void *data,
   return 0;
 }
 
-/*
-deletes every given track object.
-*/
 static int diagram_track_delete(void *key, void *value, void *data, Env* env)
 {
   track_delete((Track*) value, env);
@@ -336,12 +336,12 @@ array_size(ni->blocktuples));
       track = track_new(str_new_cstr(type, env), env);
       hashtable_add(diagram->tracks, (void*) type, track, env);
       diagram->nof_tracks++;
-if (DEBUG) printf("created track: %s\n", type);
-if (DEBUG) printf("diagram has now %d tracks\n",
+if (DEBUG) fprintf(stderr,"created track: %s\n", type);
+if (DEBUG) fprintf(stderr,"diagram has now %d tracks\n",
 diagram_get_number_of_tracks(diagram));
     }
     track_insert_block(track, bt->block, env);
-if (DEBUG) printf("inserted block %s into track %s\n",
+if (DEBUG) fprintf(stderr,"inserted block %s into track %s\n",
 block_get_caption(bt->block),type);
     env_ma_free(bt, env);
   }
@@ -380,10 +380,6 @@ static int traverse_genome_nodes(GenomeNode *gn, void *genome_node_children,
   return 0;
 }
 
-/*!
-Iterating through the array of genome nodes and traversing the genome node
-trees and insert always the first root node into a track.
-*/
 static void diagram_build(Diagram *diagram, Array *features, Env *env)
 {
   unsigned long i = 0;

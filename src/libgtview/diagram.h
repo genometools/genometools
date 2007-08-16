@@ -23,12 +23,14 @@
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
 
+/* holds a Block with associated type */
 typedef struct
 {
   GenomeFeatureType gft;
   Block *block;
 } BlockTuple;
 
+/* a node in the reverse lookup structure used for collapsing */
 typedef struct
 {
   GenomeNode *parent;

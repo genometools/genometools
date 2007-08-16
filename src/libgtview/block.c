@@ -122,14 +122,14 @@ void block_insert_element(Block *block,
         {
           case DOMINATES_FIRST:
             break;
+          case DOMINATES_NOT_SPECIFIED:
           case DOMINATES_SECOND:
             elem_r.start = gn_r.end+1;
             element_set_range(element, elem_r);
             e = element_new(gn, cfg, env);
             dlist_add(block->elements, e, env);
-            break;          
+            break;
           case DOMINATES_EQUAL:
-          case DOMINATES_NOT_SPECIFIED:
           case DOMINATES_UNKNOWN_TYPE:
             break;
         }
@@ -144,6 +144,7 @@ void block_insert_element(Block *block,
           case DOMINATES_FIRST:
             gn_r.start = elem_r.end;
             break;
+          case DOMINATES_NOT_SPECIFIED:
           case DOMINATES_SECOND:
             elem_r.end = gn_r.start-1;
             if (elem_r.start == elem_r.end+1)
@@ -159,9 +160,8 @@ void block_insert_element(Block *block,
             element_set_range(e, gn_r);
             dlist_add(block->elements, e, env);
             elem = dlist_find(block->elements, e);
-            break;          
+            break;
           case DOMINATES_EQUAL:
-          case DOMINATES_NOT_SPECIFIED:
           case DOMINATES_UNKNOWN_TYPE:
             break;
         }
@@ -179,6 +179,7 @@ void block_insert_element(Block *block,
           case DOMINATES_FIRST:
             gn_r.start = elem_r.end+1;
             break;
+          case DOMINATES_NOT_SPECIFIED:
           case DOMINATES_SECOND:
             elem_r.end = gn_r.start-1;
             if (elem_r.start == elem_r.end+1)
@@ -202,9 +203,8 @@ void block_insert_element(Block *block,
             {
               elem = dlist_find(block->elements, e);
             }
-            break;          
+            break;
           case DOMINATES_EQUAL:
-          case DOMINATES_NOT_SPECIFIED:
           case DOMINATES_UNKNOWN_TYPE:
             break;
         }
@@ -232,7 +232,7 @@ void block_insert_element(Block *block,
             e = element_new(gn, cfg, env);
             dlist_add(block->elements, elemnew, env);
             dlist_add(block->elements, e, env);
-            break;          
+            break;
           case DOMINATES_EQUAL:
           case DOMINATES_NOT_SPECIFIED:
           case DOMINATES_UNKNOWN_TYPE:

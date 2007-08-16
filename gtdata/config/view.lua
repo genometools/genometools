@@ -34,14 +34,17 @@ config =
     gene            = "box",
     intron          = "caret",
   },
-  -- Defines which feature types are displayed in another 
-  -- feature's track.
+  -- Defines which feature types are displayed in their parent 
+  -- feature's track. It is possible here to specify type chains,
+  -- e.g. {"exon","mRNA"} will make the exon features collapse into
+  -- the mRNA features, which in turn collapse into their parents.
   collapse =
   {
-    to_parent = {"exon","intron","mRNA","long_terminal_repeat","LTR_retrotransposon","inverted_repeat","target_site_duplication"},
+--    to_parent = {"CDS","exon","intron","long_terminal_repeat",
+--                 "LTR_retrotransposon","inverted_repeat","target_site_duplication"},
   },
-  -- Defines precedence of feature types when overlapping
-  -- in a collapsed parent track.
+  -- Defines precedence of same level feature types when overlapping
+  -- in a collapsed track.
   -- read "=" as ">" or "dominates"
   dominate =
   {
