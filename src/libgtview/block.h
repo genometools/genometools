@@ -36,7 +36,7 @@ Block* block_new(Env *env);
 Creates a new Block object, setting block parameters
 (such as strand, range, caption) from a given GenomeNode template.
 \param env Pointer to Environment object.
-\parem node GenomeNode template node.
+\param node GenomeNode template node.
 \return Pointer to a new Block object.
 */
 Block* block_new_from_node(GenomeNode *node, Env *env);
@@ -123,14 +123,14 @@ void block_set_type(Block *block,
 /*!
 Gets type of a Block object
 \param block Pointer to Block object
-\returen GenomeFeature Type
+\return GenomeFeature Type
 */
 GenomeFeatureType block_get_type(Block *block);
 
 /*!
-Returns Array with Pointer to Element objects
+Returns Dlist with Pointer to Element objects
 \param block Pointer to Block object
-\return Pointer to Array
+\return Pointer to Dlist
 */
 Dlist* block_get_elements(Block *block);
 
