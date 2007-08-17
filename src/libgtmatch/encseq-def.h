@@ -59,15 +59,9 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
 
 bool fastspecialranges(const Encodedsequence *encseq);
 
-int overallspecialrangesforward(
+int overallspecialrangesfast(
                 const Encodedsequence *encseq,
-                Readmode readmode,
-                int(*process)(void *,const Sequencerange *,Env *),
-                void *processinfo,
-                Env *env);
-
-int overallspecialrangesbackward2(
-                const Encodedsequence *encseq,
+                bool moveforward,
                 Readmode readmode,
                 int(*process)(void *,const Sequencerange *,Env *),
                 void *processinfo,

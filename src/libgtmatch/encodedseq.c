@@ -263,7 +263,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
          lastcell,  /* last position of special range */
          nextpage, /* next page to be used, not for Viauint64tables */
          numofspecialcells; /* number of pages */
-  Readmode readmode;    /* scan in backward direction */
+  Readmode readmode;    /* mode of reading the sequence */
   uint32_t maxspecialtype;  /* maximal value of special type */
   Sequencerange previousrange,  /* previous range of wildcards */
                 currentrange;   /* current range of wildcards */
@@ -1035,47 +1035,21 @@ static void ucharshowallspecialpositions(const Encodedsequence *encseq)
 }
 #endif
 
-static bool nextnonemptypageforward(const Encodedsequence *encseq,
-                                    Encodedsequencescanstate *esr)
-{
-  Seqpos endpos0, endpos1;
-
-  while (esr->nextpage < esr->numofspecialcells)
-  {
-    if (esr->nextpage == 0) // init case
-    {
-      endpos0 = accessendspecialsubsUint(encseq,0);
-      esr->nextpage++;
-      if (endpos0 >= (Seqpos) 1)
-      {
-        esr->firstcell = 0;
-        esr->lastcell = endpos0;
-        return true;
-      }
-    } else
-    {
-      endpos0 = accessendspecialsubsUint(encseq,esr->nextpage-1);
-      endpos1 = accessendspecialsubsUint(encseq,esr->nextpage);
-      esr->nextpage++;
-      if (endpos0 < endpos1)
-      {
-        esr->firstcell = endpos0;
-        esr->lastcell = endpos1;
-        return true;
-      }
-    }
-  }
-  return false;
-}
-
-static bool nextnonemptypagebackward(const Encodedsequence *encseq,
-                                     Encodedsequencescanstate *esr)
+static bool nextnonemptypage(const Encodedsequence *encseq,
+                             Encodedsequencescanstate *esr,
+                             bool moveforward)
 {
   Seqpos endpos0, endpos1, pageno;
   
   while (esr->nextpage < esr->numofspecialcells)
   {
-    pageno = esr->numofspecialcells - esr->nextpage - 1;
+    if(moveforward)
+    {
+      pageno = esr->nextpage;
+    } else
+    {
+      pageno = esr->numofspecialcells - esr->nextpage - 1;
+    }
     if (pageno == 0)
     {
       endpos0 = accessendspecialsubsUint(encseq,0);
@@ -1102,21 +1076,22 @@ static bool nextnonemptypagebackward(const Encodedsequence *encseq,
   return false;
 }
 
-static Seqpos getpageoffset(Encodedsequencescanstate *esr,bool forward)
+static Seqpos getpageoffset(Encodedsequencescanstate *esr,bool moveforward)
 {
   assert(esr->nextpage > 0);
-  if(forward)
+  if(moveforward)
   {
     return (esr->nextpage - 1) * (esr->maxspecialtype + 1);
   }
   return (esr->numofspecialcells - esr->nextpage) * 
-           (esr->maxspecialtype + 1);
+         (esr->maxspecialtype + 1);
 }
 
-static void advanceEncodedseqstateforward(const Encodedsequence *encseq,
-                                          Encodedsequencescanstate *esr)
+static void advanceEncodedseqstate(const Encodedsequence *encseq,
+                                   Encodedsequencescanstate *esr,
+                                   bool moveforward)
 {
-  Seqpos pageoffset;
+  Seqpos pageoffset, cellnum;
 
   while (true)
   {
@@ -1125,82 +1100,29 @@ static void advanceEncodedseqstateforward(const Encodedsequence *encseq,
       esr->previousrange = esr->currentrange;
       esr->hascurrent = false;
     }
-    esr->firstcell++;
-    if (esr->firstcell < esr->lastcell ||
-        (encseq->sat != Viauint64tables && nextnonemptypageforward(encseq,esr)))
+    if(moveforward)
     {
-      pageoffset = getpageoffset(esr,true);
-      esr->currentrange.leftpos
-        = pageoffset + accessspecialpositions(encseq,esr->firstcell);
-      esr->currentrange.rightpos
-        = esr->currentrange.leftpos
-          + encseq->specialrangelength[esr->firstcell];
-      esr->hasrange = true;
+      esr->firstcell++;
     } else
     {
-      esr->hasrange = false;
-      break;
+      esr->lastcell--;
     }
-    if (esr->hasprevious)
-    {
-#ifdef DEBUG
-      printf("# forward: possibly merge previous=(%u,%u) (%u,%u)=current\n",
-                esr->previousrange.leftpos,
-                esr->previousrange.rightpos,
-                esr->currentrange.leftpos,
-                esr->currentrange.rightpos);
-#endif
-      if (esr->previousrange.rightpos == esr->currentrange.leftpos)
-      { /* merging of ranges */
-        esr->previousrange.rightpos = esr->currentrange.rightpos;
-        esr->hascurrent = false;
-      } else
-      {
-        esr->hascurrent = true;
-        break;
-      }
-    } else
-    {
-      esr->previousrange = esr->currentrange;
-      esr->hasprevious = true;
-      esr->hascurrent = false;
-    }
-  }
-}
-
-static void advanceEncodedseqstatebackward(const Encodedsequence *encseq,
-                                           Encodedsequencescanstate *esr)
-{
-  Seqpos pageoffset;
-
-  while (true)
-  {
-    if (esr->hascurrent)
-    {
-      esr->previousrange = esr->currentrange;
-      esr->hascurrent = false;
-    }
-    esr->lastcell--;
-#ifdef DEBUG
-    printf("(1) firstcell=%u,lastcell=%u\n",esr->firstcell,esr->lastcell);
-#endif
     if (esr->firstcell + 1 < esr->lastcell + 1 ||
         (encseq->sat != Viauint64tables && 
-         nextnonemptypagebackward(encseq,esr)))
+         nextnonemptypage(encseq,esr,moveforward)))
     {
-#ifdef DEBUG
-      printf("(2) firstcell=%u,lastcell=%u,",esr->firstcell,esr->lastcell);
-#endif
-      pageoffset = getpageoffset(esr,false);
+      pageoffset = getpageoffset(esr,moveforward);
+      if(moveforward)
+      {
+        cellnum = esr->firstcell;
+      } else
+      {
+        cellnum = esr->lastcell - 1;
+      }
       esr->currentrange.leftpos
-        = pageoffset + accessspecialpositions(encseq,esr->lastcell - 1);
+        = pageoffset + accessspecialpositions(encseq,cellnum);
       esr->currentrange.rightpos
-        = esr->currentrange.leftpos
-          + encseq->specialrangelength[esr->lastcell-1];
-#ifdef DEBUG
-      printf("new range %u,%u\n",esr->currentrange.leftpos,
-                                 esr->currentrange.rightpos);
-#endif
+        = esr->currentrange.leftpos + encseq->specialrangelength[cellnum];
       esr->hasrange = true;
     } else
     {
@@ -1209,21 +1131,28 @@ static void advanceEncodedseqstatebackward(const Encodedsequence *encseq,
     }
     if (esr->hasprevious)
     {
-#ifdef DEBUG
-      printf("# backward: possibly merge current=(%u,%u) (%u,%u)=previous\n",
-                esr->currentrange.leftpos,
-                esr->currentrange.rightpos,
-                esr->previousrange.leftpos,
-                esr->previousrange.rightpos);
-#endif
-      if (esr->currentrange.rightpos == esr->previousrange.leftpos)
-      { /* merging of ranges */
-        esr->previousrange.leftpos = esr->currentrange.leftpos;
-        esr->hascurrent = false;
+      if(moveforward)
+      { 
+        if (esr->previousrange.rightpos == esr->currentrange.leftpos)
+        {
+          esr->previousrange.rightpos = esr->currentrange.rightpos;
+          esr->hascurrent = false;
+        } else
+        {
+          esr->hascurrent = true;
+          break;
+        }
       } else
       {
-        esr->hascurrent = true;
-        break;
+        if (esr->currentrange.rightpos == esr->previousrange.leftpos)
+        {
+          esr->previousrange.leftpos = esr->currentrange.leftpos;
+          esr->hascurrent = false;
+        } else
+        {
+          esr->hascurrent = true;
+          break;
+        }
       }
     } else
     {
@@ -1271,17 +1200,14 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
       esr->maxspecialtype = sat2maxspecialtype(encseq->sat);
       esr->numofspecialcells
         = (Seqpos) (encseq->totallength/esr->maxspecialtype + 1);
-#ifdef DEBUG
-      printf("numofspecialcells=%u\n",esr->numofspecialcells);
-#endif
       esr->nextpage = 0;
       esr->lastcell = 0;
       if(ISDIRREVERSE(readmode))
       {
-        advanceEncodedseqstatebackward(encseq,esr);
+        advanceEncodedseqstate(encseq,esr,false);
       } else
       {
-        advanceEncodedseqstateforward(encseq,esr);
+        advanceEncodedseqstate(encseq,esr,true);
       }
     }
   }
@@ -1350,7 +1276,7 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
       }
       if (esr->hasrange)
       {
-        advanceEncodedseqstatebackward(encseq,esr);
+        advanceEncodedseqstate(encseq,esr,false);
       }
     }
   } else
@@ -1367,7 +1293,7 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
       }
       if (esr->hasrange)
       {
-        advanceEncodedseqstateforward(encseq,esr);
+        advanceEncodedseqstate(encseq,esr,true);
       }
     }
   }
@@ -1376,7 +1302,7 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
 
 static int overallspecialrangesdirectorbitaccess(
                 bool direct,
-                bool movebackward,
+                bool moveforward,
                 const Encodedsequence *encseq,
                 int(*process)(void *,const Sequencerange *,Env *),
                 void *processinfo,
@@ -1387,12 +1313,12 @@ static int overallspecialrangesdirectorbitaccess(
   bool isspecialchar;
 
   env_error_check(env);
-  if(movebackward)
-  {
-    pos = encseq->totallength-1;
-  } else
+  if(moveforward)
   {
     pos = 0;
+  } else
+  {
+    pos = encseq->totallength-1;
   }
   while(true)
   {
@@ -1410,14 +1336,14 @@ static int overallspecialrangesdirectorbitaccess(
     {
       if(specialrangelength > 0)
       {
-        if(movebackward)
-        {
-          range.leftpos = REVERSEPOS(pos + specialrangelength);
-          range.rightpos = REVERSEPOS(pos);
-        } else
+        if(moveforward)
         {
           range.leftpos = pos - specialrangelength;
           range.rightpos = pos;
+        } else
+        {
+          range.leftpos = REVERSEPOS(pos + specialrangelength);
+          range.rightpos = REVERSEPOS(pos);
         }
         if(process(processinfo,&range,env) != 0)
         {
@@ -1426,82 +1352,33 @@ static int overallspecialrangesdirectorbitaccess(
       }
       specialrangelength = 0;
     }
-    if(movebackward)
-    {
-      if(pos == 0)
-      {
-        break;
-      }
-      pos--;
-    } else
+    if(moveforward)
     {
       if(pos == encseq->totallength - 1)
       {
         break;
       }
       pos++;
+    } else
+    {
+      if(pos == 0)
+      {
+        break;
+      }
+      pos--;
     }
   }
   if(specialrangelength > 0)
   {
-    if(movebackward)
-    {
-      range.leftpos = REVERSEPOS(pos + specialrangelength - 1);
-      range.rightpos = REVERSEPOS(pos - 1);
-    } else
+    if(moveforward)
     {
       range.leftpos = pos + 1 - specialrangelength;
       range.rightpos = pos + 1;
-    }
-    if(process(processinfo,&range,env) != 0)
-    {
-      return -1;
-    }
-  }
-  return 0;
-}
-
-static int overallspecialrangesbackward(
-                const Encodedsequence *encseq,
-                int(*process)(void *,const Sequencerange *,Env *),
-                void *processinfo,
-                Env *env)
-{
-  Seqpos pos, specialrangelength = 0;
-  Sequencerange range;
-  Uchar cc;
-
-  env_error_check(env);
-  pos = encseq->totallength-1;
-  while(true)
-  {
-    cc = getencodedchar (encseq,pos,Forwardmode);
-    if(ISSPECIAL(cc))
-    {
-      specialrangelength++;
     } else
     {
-      if(specialrangelength > 0)
-      {
-        range.leftpos = REVERSEPOS(pos + specialrangelength);
-        range.rightpos = REVERSEPOS(pos);
-        if(process(processinfo,&range,env) != 0)
-        {
-          return -1;
-        }
-      }
-      specialrangelength = 0;
+      range.leftpos = REVERSEPOS(pos + specialrangelength - 1);
+      range.rightpos = REVERSEPOS(pos - 1);
     }
-    if(pos == 0)
-    {
-      break;
-    }
-    pos--;
-  }
-  if(specialrangelength > 0)
-  {
-    range.leftpos = REVERSEPOS(pos + specialrangelength - 1);
-    range.rightpos = REVERSEPOS(pos - 1);
     if(process(processinfo,&range,env) != 0)
     {
       return -1;
@@ -1519,8 +1396,9 @@ bool fastspecialranges(const Encodedsequence *encseq)
   return true;
 }
 
-int overallspecialrangesbackward2(
+int overallspecialrangesfast(
                 const Encodedsequence *encseq,
+                bool moveforward,
                 Readmode readmode,
                 int(*process)(void *,const Sequencerange *,Env *),
                 void *processinfo,
@@ -1529,10 +1407,9 @@ int overallspecialrangesbackward2(
   bool haserr = false;
 
   env_error_check(env);
-  printf("# now run backward enumeration\n");
   if(!fastspecialranges(encseq))
   {
-    env_error_set(env,"overallspecialrangesbackward2 not possible for sat = %s",
+    env_error_set(env,"overallspecialrangesfast not possible for sat = %s",
                   accesstype2name(encseq->sat));
     haserr = true;
   }
@@ -1544,11 +1421,6 @@ int overallspecialrangesbackward2(
     assert(esr != NULL);
     while (true)
     {
-#ifdef DEBUG      
-      printf("backward process %u %u\n",
-               (unsigned int) esr->previousrange.leftpos,
-               (unsigned int) esr->previousrange.rightpos);
-#endif
       if (process(processinfo,&esr->previousrange,env) != 0)
       {
         haserr = true;
@@ -1558,50 +1430,11 @@ int overallspecialrangesbackward2(
       {
         break;
       }
-      advanceEncodedseqstatebackward(encseq,esr);
+      advanceEncodedseqstate(encseq,esr,moveforward);
     }
     freeEncodedsequencescanstate(&esr,env);
   }
   return haserr ? - 1 : 0;
-}
-
-int overallspecialrangesforward(
-                const Encodedsequence *encseq,
-                Readmode readmode,
-                int(*process)(void *,const Sequencerange *,Env *),
-                void *processinfo,
-                Env *env)
-{
-  bool haserr = false;
-
-  env_error_check(env);
-  if(!fastspecialranges(encseq))
-  {
-    env_error_set(env,"overallspecialrangesforward not possible for sat = %s",
-                  accesstype2name(encseq->sat));
-    haserr = true;
-  }
-  if(!haserr)
-  {
-    Encodedsequencescanstate *esr;
-    esr = initEncodedsequencescanstate(encseq,readmode,env);
-    assert(esr != NULL);
-    while (true)
-    {
-      if (process(processinfo,&esr->previousrange,env) != 0)
-      {
-        haserr = true;
-        break;
-      }
-      if (!esr->hasrange)
-      {
-        break;
-      }
-      advanceEncodedseqstateforward(encseq,esr);
-    }
-    freeEncodedsequencescanstate(&esr,env);
-  }
-  return haserr ? -1 : 0;
 }
 
 int overallspecialranges(const Encodedsequence *encseq,
@@ -1615,7 +1448,7 @@ int overallspecialranges(const Encodedsequence *encseq,
   {
     if(overallspecialrangesdirectorbitaccess(true,
                                              ISDIRREVERSE(readmode) 
-                                               ? true : false,
+                                               ? false : true,
                                              encseq,
                                              process,
                                              processinfo,
@@ -1629,7 +1462,7 @@ int overallspecialranges(const Encodedsequence *encseq,
   {
     if(overallspecialrangesdirectorbitaccess(false,
                                              ISDIRREVERSE(readmode)
-                                               ? true : false,
+                                               ? false : true,
                                              encseq,
                                              process,
                                              processinfo,
@@ -1639,22 +1472,12 @@ int overallspecialranges(const Encodedsequence *encseq,
     }
     return 0;
   }
-  if(ISDIRREVERSE(readmode))
-  {
-    if(overallspecialrangesbackward(encseq,
-                                    process,
-                                    processinfo,
-                                    env) != 0)
-    {
-      return -1;
-    }
-    return 0;
-  }
-  if(overallspecialrangesforward(encseq,
-                                 readmode,
-                                 process,
-                                 processinfo,
-                                 env) != 0)
+  if(overallspecialrangesfast(encseq,
+                              ISDIRREVERSE(readmode) ? false : true,
+                              readmode,
+                              process,
+                              processinfo,
+                              env) != 0)
   {
     return -1;
   }

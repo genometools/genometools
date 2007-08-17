@@ -140,15 +140,15 @@ int checkspecialranges(const Encodedsequence *encseq,Env *env)
   rangesforward = array_new(sizeof(Sequencerange),env);
   rangesbackward = array_new(sizeof(Sequencerange),env);
 
-  if(overallspecialrangesforward(encseq,Forwardmode,addelem,rangesforward,
-                                 env) != 0)
+  if(overallspecialrangesfast(encseq,true,Forwardmode,addelem,rangesforward,
+                              env) != 0)
   {
     haserr = true;
   }
   if(!haserr)
   {
-    if(overallspecialrangesbackward2(encseq,Reversemode,addelem,rangesbackward,
-                                     env) != 0)
+    if(overallspecialrangesfast(encseq,false,Reversemode,addelem,rangesbackward,
+                                env) != 0)
     {
       haserr = true;
     }
@@ -174,17 +174,18 @@ int checkspecialranges(const Encodedsequence *encseq,Env *env)
       valb = (Sequencerange *) array_get(rangesbackward,idx);
       if(valf->leftpos != valb->leftpos || valf->rightpos != valb->rightpos)
       {
-        printf("rangesforward[%lu] = (" FormatSeqpos "," FormatSeqpos 
-                       ") != (" FormatSeqpos "," FormatSeqpos 
-                       ") = rangesbackward[%lu]\n",
-                       idx,
-                       PRINTSeqposcast(valf->leftpos),
-                       PRINTSeqposcast(valf->rightpos),
-                       PRINTSeqposcast(valb->leftpos),
-                       PRINTSeqposcast(valb->rightpos),
-                       idx);
+        env_error_set(env,
+                      "rangesforward[%lu] = (" FormatSeqpos "," FormatSeqpos 
+                      ") != (" FormatSeqpos "," FormatSeqpos 
+                      ") = rangesbackward[%lu]\n",
+                      idx,
+                      PRINTSeqposcast(valf->leftpos),
+                      PRINTSeqposcast(valf->rightpos),
+                      PRINTSeqposcast(valb->leftpos),
+                      PRINTSeqposcast(valb->rightpos),
+                      idx);
         haserr = true;
-        // break;
+        break;
       }
     }
   }

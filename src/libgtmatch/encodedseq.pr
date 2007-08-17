@@ -23,15 +23,9 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
 
 bool fastspecialranges(const Encodedsequence *encseq);
 
-int overallspecialrangesbackward2(
+int overallspecialrangesfast(
                 const Encodedsequence *encseq,
-                Readmode readmode,
-                int(*process)(void *,const Sequencerange *,Env *),
-                void *processinfo,
-                Env *env);
-
-int overallspecialrangesforward(
-                const Encodedsequence *encseq,
+                bool moveforward,
                 Readmode readmode,
                 int(*process)(void *,const Sequencerange *,Env *),
                 void *processinfo,

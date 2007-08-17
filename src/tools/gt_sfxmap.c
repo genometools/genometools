@@ -77,7 +77,6 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
       if(isdnaalphabet(suffixarray.alpha) || 
          ((Readmode) readmode) == Forwardmode ||  
          ((Readmode) readmode) == Reversemode)
-      /* if(((Readmode) readmode) == Forwardmode) */
       {
         if (testencodedsequence(suffixarray.filenametab,
                                 suffixarray.encseq,
