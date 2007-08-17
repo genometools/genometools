@@ -139,7 +139,7 @@ void block_insert_element(Block *block,
           case DOMINATES_SECOND:
             elem_r.start = gn_r.end+1;
             element_set_range(element, elem_r);
-            e = element_new(gn, cfg, env);
+            e = element_new(gn, env);
             dlist_add(block->elements, e, env);
             break;
           case DOMINATES_EQUAL:
@@ -169,7 +169,7 @@ void block_insert_element(Block *block,
             {
               element_set_range(element, elem_r);
             }
-            e = element_new(gn, cfg, env);
+            e = element_new(gn, env);
             element_set_range(e, gn_r);
             dlist_add(block->elements, e, env);
             elem = dlist_find(block->elements, e);
@@ -207,7 +207,7 @@ void block_insert_element(Block *block,
             }
             gnnew_r = gn_r;
             gnnew_r.end = elem_r.end;
-            e = element_new_empty(cfg, env);
+            e = element_new_empty(env);
             element_set_range(e, gnnew_r);
             element_set_type(e, gn_type);
             dlist_add(block->elements, e, env);
@@ -239,10 +239,10 @@ void block_insert_element(Block *block,
             elem_r.end = gn_r.start-1;
             element_set_range(element, elem_r);
             elemnew_r.start = gn_r.end+1;
-            elemnew = element_new_empty(cfg, env);
+            elemnew = element_new_empty(env);
             element_set_range(elemnew, elemnew_r);
             element_set_type(elemnew, e_type);
-            e = element_new(gn, cfg, env);
+            e = element_new(gn, env);
             dlist_add(block->elements, elemnew, env);
             dlist_add(block->elements, e, env);
             break;
@@ -256,7 +256,7 @@ void block_insert_element(Block *block,
   }
   if (count == 0)
   {
-    e = element_new(gn, cfg, env);
+    e = element_new(gn, env);
     dlist_add(block->elements, e, env);
   }
 }
@@ -346,8 +346,8 @@ int block_unit_test(Env* env)
   gn2 = genome_feature_new(gft_intron, r2,
                            STRAND_FORWARD, NULL, 0, env);
 
-  e1 = element_new(gn1, cfg, env);
-  e2 = element_new(gn2, cfg, env);
+  e1 = element_new(gn1, env);
+  e2 = element_new(gn2, env);
 
   b = block_new(env);
 
@@ -389,6 +389,7 @@ int block_unit_test(Env* env)
   ensure(had_err, (STRAND_FORWARD == s));
 
   config_delete(cfg, env);
+  str_delete(caption2, env);
   element_delete(e1, env);
   element_delete(e2, env);
   block_delete(b, env);

@@ -72,7 +72,7 @@ static NodeInfoElement* get_or_create_node_info(Diagram *d,
 }
 
 static Block* find_block_for_type(NodeInfoElement* ni,
-                               GenomeFeatureType gft)
+                                  GenomeFeatureType gft)
 {
   Block *block = NULL;
   unsigned long i;

@@ -20,10 +20,9 @@ struct Element
 {
   GenomeFeatureType type;
   Range range;
-  Config* cfg;
 };
 
-Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
+Element* element_new(GenomeNode *gn, Env *env)
 {
   Element *element;
   GenomeFeature *gf = (GenomeFeature*) gn;
@@ -31,20 +30,18 @@ Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
   assert(gn != NULL);
 
   env_error_check(env);
-  element = element_new_empty(cfg, env);
+  element = element_new_empty(env);
   element_set_type(element,genome_feature_get_type(gf));
   element_set_range(element, genome_node_get_range(gn));
   return element;
 }
 
-Element* element_new_empty(Config *cfg,
-                           Env *env)
+Element* element_new_empty(Env *env)
 {
   Element *element;
 
   env_error_check(env);
   element = env_ma_malloc(env, sizeof (Element));
-  element->cfg = cfg;
   assert(element != NULL);
   return element;
 }
@@ -107,9 +104,9 @@ int element_unit_test(Env* env)
   gn2 = genome_feature_new(gft_exon, r2,
                            STRAND_BOTH, NULL, 0, env);
 
-  e = element_new(gn, NULL, env);
-  e2 = element_new(gn, NULL, env);
-  e3 = element_new(gn2, NULL, env);
+  e = element_new(gn, env);
+  e2 = element_new(gn, env);
+  e3 = element_new(gn2, env);
 
   /* tests element_get_range */
   r_temp = element_get_range(e);
