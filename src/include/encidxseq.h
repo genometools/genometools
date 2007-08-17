@@ -50,6 +50,8 @@ extern struct encIdxSeq *
 newBlockEncIdxSeq(enum rangeStoreMode modes[],
                   Str *projectName,
                   unsigned blockSize, Env *env);
+struct encIdxSeq *
+loadBlockEncIdxSeq(Str *projectName, Env *env);
 
 extern int
 searchBlock2IndexPair(const struct encIdxSeq *seqIdx,

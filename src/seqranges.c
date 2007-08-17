@@ -241,7 +241,7 @@ SRLFindPositionNext(struct seqRangeList *rangeList, Seqpos pos,
   {
     return rangeList->ranges + hintCopy;
   }
-  else if(numRanges > 1 &&
+  else if((numRanges > hintCopy + 1) &&
           (rangeList->ranges[hintCopy + 1].startPos >= pos
            || pos < rangeList->ranges[hintCopy + 1].startPos
            + rangeList->ranges[hintCopy + 1].len))

@@ -42,8 +42,18 @@ struct encIdxSeq
   Seqpos seqLen;
 };
 
+struct seqCache
+{
+  size_t numEntries;
+  Seqpos *cachedPos;
+  void **entriesPtr;
+  void *entries;
+};
+
+
 struct blockEncIdxSeqHint
 {
+  struct seqCache sBlockCache;
   seqRangeListSearchHint rangeHint;
 };
 

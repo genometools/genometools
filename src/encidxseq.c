@@ -83,6 +83,7 @@ verifyIntegrity(struct encIdxSeq *seqIdx,
   while((symOrig = getc(bwtFP)) != EOF)
   {
     /* TODO: complete once query functions are finished */
+/*     fprintf(stderr, "pos: %llu\n", (unsigned long long)pos); */
     symEnc = EISGetSym(seqIdx, pos, hint, env);
     if(symEnc == EOF)
       verifyIntegrityErrRet(-1);
@@ -97,6 +98,8 @@ verifyIntegrity(struct encIdxSeq *seqIdx,
 /*     if(pos > 2000) */
 /*       break; */
   }
+  if(tickPrint)
+    putc('\n', fp);
   if(ferror(bwtFP))
     verifyIntegrityErrRet(-1);
   deleteEISHint(seqIdx, hint, env);
