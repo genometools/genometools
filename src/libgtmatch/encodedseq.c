@@ -261,14 +261,12 @@ Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
 {
   Seqpos firstcell, /* first position of special range */
          lastcell,  /* last position of special range */
-         nextpage,  /* next page to be used, not for Viauint64tables */
+         nextpage, /* next page to be used, not for Viauint64tables */
          numofspecialcells; /* number of pages */
-  bool nextpagedefined;
   Readmode readmode;    /* scan in backward direction */
   uint32_t maxspecialtype;  /* maximal value of special type */
   Sequencerange previousrange,  /* previous range of wildcards */
                 currentrange;   /* current range of wildcards */
-  uint64_t pageoffset;  /* multiplier of (maxspecialtype+1) */
   bool hasrange,        /* there is some range */
        hasprevious,     /* there is some previous range */
        hascurrent;      /* there is some current range */
@@ -976,7 +974,7 @@ static uint32_t sat2maxspecialtype(Positionaccesstype sat)
   exit(EXIT_FAILURE);
 }
 
-#define DEBUG
+#undef DEBUG
 #ifdef DEBUG
 static void ucharshowspecialpositions(const Encodedsequence *encseq,
                                       Seqpos pgnum,
@@ -1037,42 +1035,17 @@ static void ucharshowallspecialpositions(const Encodedsequence *encseq)
 }
 #endif
 
-static void checkpageoffset(Encodedsequencescanstate *esr)
-{
-  if(esr->nextpagedefined)
-  {
-#ifdef DEBUG
-    printf("nextpage is defined: nextpage = %u, pageoffset=%u\n",
-          (unsigned int) esr->nextpage,
-          (unsigned int) esr->pageoffset);
-#endif
-    assert(esr->nextpage > 0);
-    assert(esr->pageoffset == (esr->nextpage - 1) * (esr->maxspecialtype+1));
-  } else
-  {
-    if(esr->pageoffset != 0)
-    {
-      fprintf(stderr,"nextpage is undefined, pageoffset=%u\n",
-               (unsigned int) esr->pageoffset);
-      exit(EXIT_FAILURE);
-    }
-  }
-}
-
 static bool nextnonemptypageforward(const Encodedsequence *encseq,
                                     Encodedsequencescanstate *esr)
 {
   Seqpos endpos0, endpos1;
 
-  while (true)
+  while (esr->nextpage < esr->numofspecialcells)
   {
-    if (!esr->nextpagedefined)
+    if (esr->nextpage == 0) // init case
     {
       endpos0 = accessendspecialsubsUint(encseq,0);
-      esr->nextpage = (Seqpos) 1;
-      esr->nextpagedefined = true;
-      esr->pageoffset = 0;
-      checkpageoffset(esr);
+      esr->nextpage++;
       if (endpos0 >= (Seqpos) 1)
       {
         esr->firstcell = 0;
@@ -1081,22 +1054,14 @@ static bool nextnonemptypageforward(const Encodedsequence *encseq,
       }
     } else
     {
-      if(esr->nextpage < esr->numofspecialcells)
+      endpos0 = accessendspecialsubsUint(encseq,esr->nextpage-1);
+      endpos1 = accessendspecialsubsUint(encseq,esr->nextpage);
+      esr->nextpage++;
+      if (endpos0 < endpos1)
       {
-        endpos0 = accessendspecialsubsUint(encseq,esr->nextpage-1);
-        endpos1 = accessendspecialsubsUint(encseq,esr->nextpage);
-        esr->nextpage++;
-        esr->pageoffset += (esr->maxspecialtype+1);
-        checkpageoffset(esr);
-        if (endpos0 < endpos1)
-        {
-          esr->firstcell = endpos0;
-          esr->lastcell = endpos1;
-          return true;
-        }
-      } else
-      {
-        break;
+        esr->firstcell = endpos0;
+        esr->lastcell = endpos1;
+        return true;
       }
     }
   }
@@ -1106,21 +1071,15 @@ static bool nextnonemptypageforward(const Encodedsequence *encseq,
 static bool nextnonemptypagebackward(const Encodedsequence *encseq,
                                      Encodedsequencescanstate *esr)
 {
-  Seqpos endpos0, endpos1;
-
-  printf("nextnonemptypagebackward(nextpage = %u)\n",
-          (unsigned int) esr->nextpage);
-  while (true)
+  Seqpos endpos0, endpos1, pageno;
+  
+  while (esr->nextpage < esr->numofspecialcells)
   {
-    if (!esr->nextpagedefined)
+    pageno = esr->numofspecialcells - esr->nextpage - 1;
+    if (pageno == 0)
     {
-#ifdef DEBUG
-      printf("access page 0\n");
-#endif
       endpos0 = accessendspecialsubsUint(encseq,0);
-      esr->nextpage = esr->numofspecialcells+1;
-      esr->nextpagedefined = true;
-      esr->pageoffset = 0;
+      esr->nextpage++;
       if (endpos0 >= (Seqpos) 1)
       {
         esr->firstcell = 0;
@@ -1129,41 +1088,36 @@ static bool nextnonemptypagebackward(const Encodedsequence *encseq,
       }
     } else
     {
-      if(esr->nextpage < esr->numofspecialcells)
+      endpos0 = accessendspecialsubsUint(encseq,pageno-1);
+      endpos1 = accessendspecialsubsUint(encseq,pageno);
+      esr->nextpage++;
+      if (endpos0 < endpos1)
       {
-        endpos0 = accessendspecialsubsUint(encseq,esr->nextpage-1);
-        endpos1 = accessendspecialsubsUint(encseq,esr->nextpage);
-        if(esr->nextpage == 1)
-        {
-          esr->pageoffset = 0;
-          esr->nextpagedefined = false;
-        } else
-        {
-          esr->nextpage--;
-          esr->pageoffset -= (esr->maxspecialtype+1);
-        }
-#ifdef DEBUG
-        printf("nextpage=%u,pageoffset=%u\n",
-                (unsigned int) esr->nextpage,(unsigned int) esr->pageoffset);
-#endif
-        if (endpos0 < endpos1)
-        {
-          esr->firstcell = endpos0;
-          esr->lastcell = endpos1;
-          return true;
-        }
-      } else
-      {
-        break;
+        esr->firstcell = endpos0;
+        esr->lastcell = endpos1;
+        return true;
       }
     }
   }
   return false;
 }
 
+static Seqpos getpageoffset(Encodedsequencescanstate *esr,bool forward)
+{
+  assert(esr->nextpage > 0);
+  if(forward)
+  {
+    return (esr->nextpage - 1) * (esr->maxspecialtype + 1);
+  }
+  return (esr->numofspecialcells - esr->nextpage) * 
+           (esr->maxspecialtype + 1);
+}
+
 static void advanceEncodedseqstateforward(const Encodedsequence *encseq,
                                           Encodedsequencescanstate *esr)
 {
+  Seqpos pageoffset;
+
   while (true)
   {
     if (esr->hascurrent)
@@ -1175,8 +1129,9 @@ static void advanceEncodedseqstateforward(const Encodedsequence *encseq,
     if (esr->firstcell < esr->lastcell ||
         (encseq->sat != Viauint64tables && nextnonemptypageforward(encseq,esr)))
     {
+      pageoffset = getpageoffset(esr,true);
       esr->currentrange.leftpos
-        = esr->pageoffset + accessspecialpositions(encseq,esr->firstcell);
+        = pageoffset + accessspecialpositions(encseq,esr->firstcell);
       esr->currentrange.rightpos
         = esr->currentrange.leftpos
           + encseq->specialrangelength[esr->firstcell];
@@ -1216,6 +1171,8 @@ static void advanceEncodedseqstateforward(const Encodedsequence *encseq,
 static void advanceEncodedseqstatebackward(const Encodedsequence *encseq,
                                            Encodedsequencescanstate *esr)
 {
+  Seqpos pageoffset;
+
   while (true)
   {
     if (esr->hascurrent)
@@ -1233,10 +1190,10 @@ static void advanceEncodedseqstatebackward(const Encodedsequence *encseq,
     {
 #ifdef DEBUG
       printf("(2) firstcell=%u,lastcell=%u,",esr->firstcell,esr->lastcell);
-      printf("pageoffset = %u\n",(unsigned int) esr->pageoffset);
 #endif
+      pageoffset = getpageoffset(esr,false);
       esr->currentrange.leftpos
-        = esr->pageoffset + accessspecialpositions(encseq,esr->lastcell - 1);
+        = pageoffset + accessspecialpositions(encseq,esr->lastcell - 1);
       esr->currentrange.rightpos
         = esr->currentrange.leftpos
           + encseq->specialrangelength[esr->lastcell-1];
@@ -1297,8 +1254,7 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
     esr->firstcell = 0;
     if(encseq->sat == Viauint64tables)
     {
-      esr->pageoffset = 0;
-      esr->nextpagedefined = false;
+      esr->nextpage = 0;
       esr->lastcell = encseq->numofspecialstostore;
       if(esr->lastcell > 0)
       {
@@ -1318,29 +1274,7 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
 #ifdef DEBUG
       printf("numofspecialcells=%u\n",esr->numofspecialcells);
 #endif
-      if(ISDIRREVERSE(readmode))
-      {
-        if(esr->numofspecialcells > 0)
-        {
-          esr->nextpage = esr->numofspecialcells - 1;
-          esr->nextpagedefined = true;
-          esr->pageoffset = (esr->numofspecialcells-1) * (esr->maxspecialtype+1);
-          printf("nextpage = %u\n",(unsigned int) esr->nextpage);
-        } else
-        {
-          esr->nextpagedefined = false;
-          esr->pageoffset = 0;
-          printf("nextpage is undefined\n");
-        }
-#ifdef DEBUG
-        printf("esr->pageoffset=%u\n",(unsigned int) esr->pageoffset);
-        printf("start at pageoffset = %u\n",(unsigned int) esr->pageoffset);
-#endif
-      } else
-      {
-        esr->nextpagedefined = false;
-        esr->pageoffset = 0;
-      }
+      esr->nextpage = 0;
       esr->lastcell = 0;
       if(ISDIRREVERSE(readmode))
       {
@@ -1576,6 +1510,15 @@ static int overallspecialrangesbackward(
   return 0;
 }
 
+bool fastspecialranges(const Encodedsequence *encseq)
+{
+  if(encseq->sat == Viadirectaccess || encseq->sat == Viabitaccess)
+  {
+    return false;
+  }
+  return true;
+}
+
 int overallspecialrangesbackward2(
                 const Encodedsequence *encseq,
                 Readmode readmode,
@@ -1586,8 +1529,8 @@ int overallspecialrangesbackward2(
   bool haserr = false;
 
   env_error_check(env);
-  printf("now run backward enumeration\n");
-  if(encseq->sat == Viadirectaccess || encseq->sat == Viabitaccess)
+  printf("# now run backward enumeration\n");
+  if(!fastspecialranges(encseq))
   {
     env_error_set(env,"overallspecialrangesbackward2 not possible for sat = %s",
                   accesstype2name(encseq->sat));
@@ -1596,21 +1539,16 @@ int overallspecialrangesbackward2(
   if(!haserr)
   {
     Encodedsequencescanstate *esr;
-    Sequencerange seqrange;
 
     esr = initEncodedsequencescanstate(encseq,readmode,env);
     assert(esr != NULL);
     while (true)
     {
-      seqrange.leftpos = REVERSEPOS(esr->previousrange.rightpos);
-      seqrange.rightpos = REVERSEPOS(esr->previousrange.leftpos);
-      /*
-      printf("backward process %u %u\n",(unsigned int) seqrange.leftpos,
-                                        (unsigned int) seqrange.rightpos);
-      */
+#ifdef DEBUG      
       printf("backward process %u %u\n",
                (unsigned int) esr->previousrange.leftpos,
                (unsigned int) esr->previousrange.rightpos);
+#endif
       if (process(processinfo,&esr->previousrange,env) != 0)
       {
         haserr = true;
@@ -1637,7 +1575,7 @@ int overallspecialrangesforward(
   bool haserr = false;
 
   env_error_check(env);
-  if(encseq->sat == Viadirectaccess || encseq->sat == Viabitaccess)
+  if(!fastspecialranges(encseq))
   {
     env_error_set(env,"overallspecialrangesforward not possible for sat = %s",
                   accesstype2name(encseq->sat));

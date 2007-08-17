@@ -57,6 +57,8 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                            const char *str_sat,
                                            Env *env);
 
+bool fastspecialranges(const Encodedsequence *encseq);
+
 int overallspecialrangesforward(
                 const Encodedsequence *encseq,
                 Readmode readmode,

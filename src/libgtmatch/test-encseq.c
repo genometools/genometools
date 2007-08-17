@@ -104,8 +104,6 @@ int testencodedsequence(const StrArray *filenametab,
 static int addelem(void *processinfo,const Sequencerange *range,Env *env)
 {
   env_error_check(env);
-  printf("addelem %u %u\n",(unsigned int) range->leftpos,
-                           (unsigned int) range->rightpos);
   array_add_elem((Array *) processinfo,(void *) range,sizeof(Sequencerange),
                  env);
   return 0;
@@ -135,6 +133,10 @@ int checkspecialranges(const Encodedsequence *encseq,Env *env)
   bool haserr = false;
 
   env_error_check(env);
+  if(!fastspecialranges(encseq))
+  {
+    return 0;
+  }
   rangesforward = array_new(sizeof(Sequencerange),env);
   rangesbackward = array_new(sizeof(Sequencerange),env);
 
