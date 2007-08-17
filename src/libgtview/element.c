@@ -31,12 +31,9 @@ Element* element_new(GenomeNode *gn, Config *cfg, Env *env)
   assert(gn != NULL);
 
   env_error_check(env);
-  element = env_ma_malloc(env, sizeof (Element));
-  element->type = genome_feature_get_type(gf);
-  element->range = genome_node_get_range(gn);
-  element->cfg = cfg;
-
-  assert(element != NULL);
+  element = element_new_empty(cfg, env);
+  element_set_type(element,genome_feature_get_type(gf));
+  element_set_range(element, genome_node_get_range(gn));
   return element;
 }
 
@@ -48,7 +45,6 @@ Element* element_new_empty(Config *cfg,
   env_error_check(env);
   element = env_ma_malloc(env, sizeof (Element));
   element->cfg = cfg;
-
   assert(element != NULL);
   return element;
 }

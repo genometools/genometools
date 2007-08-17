@@ -17,7 +17,7 @@ struct Block
 {
   Dlist *elements;
   Range range;
-  const char* caption;
+  Str *caption;
   bool show_caption;
   Strand strand;
   GenomeFeatureType type;
@@ -70,18 +70,31 @@ Block* block_new(Env *env)
 Block* block_new_from_node(GenomeNode *node, Env *env)
 {
   Block *block;
-  const char *caption;
 
   assert(node != NULL);
 
   block = block_new(env);
-  caption = genome_feature_get_attribute(node, "Name");
-  if (caption == NULL)
-    caption = genome_feature_get_attribute(node, "ID" );
-  block_set_caption(block, caption);
   block_set_range(block, genome_node_get_range(node));
   block_set_strand(block, genome_feature_get_strand((GenomeFeature*) node));
   return block;
+}
+
+bool block_has_only_one_fullsize_element(Block *block)
+{
+  bool ret = false;
+
+  assert(block != NULL);
+
+  if (dlist_size(block->elements) == 1UL)
+  {
+    Range elem_range, block_range;
+    assert(dlist_first(block->elements) == dlist_last(block->elements));
+    elem_range = element_get_range(
+                   dlistelem_get_data(dlist_first(block->elements)));
+    block_range = block_get_range(block);
+    ret = (range_compare(block_range, elem_range) == 0);
+  }
+  return ret;
 }
 
 void block_insert_element(Block *block,
@@ -239,9 +252,7 @@ void block_insert_element(Block *block,
             break;
         }
       }
-
     }
-
   }
   if (count == 0)
   {
@@ -265,16 +276,15 @@ void block_set_range(Block *block, Range r)
 }
 
 void block_set_caption(Block *block,
-                       const char *caption)
+                       Str *caption)
 {
-  assert(block != NULL);
+  assert(block != NULL && caption != NULL);
   block->caption = caption;
 }
 
-const char* block_get_caption(Block *block)
+Str* block_get_caption(Block *block)
 {
   assert(block != NULL);
-
   return block->caption;
 }
 
@@ -282,14 +292,12 @@ void block_set_strand(Block *block,
                       Strand strand)
 {
   assert(block != NULL);
-
   block->strand = strand;
 }
 
 Strand block_get_strand(Block *block)
 {
   assert(block != NULL);
-
   return block->strand;
 }
 
@@ -297,14 +305,12 @@ void block_set_type(Block *block,
                     GenomeFeatureType type)
 {
   assert(block != NULL);
-
   block->type = type;
 }
 
 GenomeFeatureType block_get_type(Block *block)
 {
   assert(block != NULL);
-
   return block->type;
 }
 
@@ -323,8 +329,8 @@ int block_unit_test(Env* env)
   GenomeNode *gn1, *gn2;
   Element *e1, *e2, *elem;
   Block * b;
-  const char* caption1 = "foo";
-  const char* caption2 = "bar";
+  Str *caption1 = str_new_cstr("foo", env);
+  Str *caption2 = str_new_cstr("bar", env);
   Config *cfg;
 
   cfg = config_new(env, false);
@@ -371,8 +377,8 @@ int block_unit_test(Env* env)
   /* tests block_set_caption
      & block_get_caption */
   block_set_caption(b, caption1);
-  ensure(had_err, (0 == strcmp(block_get_caption(b), caption1)));
-  ensure(had_err, (0 != strcmp(block_get_caption(b), caption2)));
+  ensure(had_err, (0 == str_cmp(block_get_caption(b), caption1)));
+  ensure(had_err, (0 != str_cmp(block_get_caption(b), caption2)));
 
   /* tests block_set_strand
      & block_get_range */
@@ -405,6 +411,7 @@ void block_delete(Block *block,
     Element* elem = (Element*) dlistelem_get_data(delem);
     element_delete(elem, env);
   }
+  str_delete(block->caption, env);
   dlist_delete(block->elements, env);
   env_ma_free(block, env);
 }

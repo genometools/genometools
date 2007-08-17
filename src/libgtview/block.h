@@ -34,7 +34,7 @@ Block* block_new(Env *env);
 
 /*!
 Creates a new Block object, setting block parameters
-(such as strand, range, caption) from a given GenomeNode template.
+(such as strand, range) from a given GenomeNode template.
 \param env Pointer to Environment object.
 \param node GenomeNode template node.
 \return Pointer to a new Block object.
@@ -59,6 +59,12 @@ Returns range of a Block object
 \return Pointer to Range object
 */
 Range block_get_range(Block *block);
+
+/*!
+Checks whether a Block is occupied completely by a single element
+\param block Pointer to Block object
+*/
+bool block_has_only_one_fullsize_element(Block* block);
 
 /*!
 Sets range of a Block object
@@ -88,14 +94,14 @@ Sets caption of a Block object
 \param caption Pointer to String object
 */
 void block_set_caption(Block *block,
-                       const char *caption);
+                       Str *caption);
 
 /*!
 Gets caption of a Block object
 \param block Pointer to Block object
 \return caption Pointer to String object
 */
-const char* block_get_caption(Block *block);
+Str* block_get_caption(Block *block);
 
 /*!
 Sets strand of a Block object

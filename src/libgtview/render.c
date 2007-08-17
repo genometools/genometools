@@ -179,7 +179,7 @@ void render_line(Render *r, Line *line, Env *env)
     draw_range = render_convert_coords(r, block_range, env);
     if (block_caption_is_visible(block))
     {
-      caption = block_get_caption(block);
+      caption = str_get(block_get_caption(block));
       if (!caption) caption = "";
       graphics_draw_text(r->g,
                          MAX(r->margins, draw_range.start),
@@ -346,7 +346,7 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
       Range block_range = block_get_range(this_block);
       const char *caption;
       Range cur_range;
-      caption = block_get_caption(this_block);
+      caption = str_get(block_get_caption(this_block));
       if (!caption) caption = "";
       cur_range.start = MAX(r->margins,
                             render_convert_point(r, block_range.start));
@@ -356,7 +356,7 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
       {
         Block *left_block = *(Block**) array_get(blocks, j);
         Range chk_range = block_get_range(left_block);
-        caption = block_get_caption(left_block);
+        caption = str_get(block_get_caption(left_block));
         if (!caption) caption = "";
         chk_range.start = render_convert_point(r, chk_range.start);
         chk_range.end   = chk_range.start
@@ -368,7 +368,7 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
       {
         Block *right_block = *(Block**) array_get(blocks, j);
         Range chk_range = block_get_range(right_block);
-        caption = block_get_caption(right_block);
+        caption = str_get(block_get_caption(right_block));
         if (!caption) caption = "";
         chk_range.start = render_convert_point(r, chk_range.start);
         chk_range.end   = chk_range.start
