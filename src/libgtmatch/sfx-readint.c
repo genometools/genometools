@@ -25,7 +25,7 @@ struct Readintkeys
   const char *keystring;
   uint32_t *smallvalueptr;
   uint64_t *bigvalueptr;
-  bool ptrdefined, 
+  bool ptrdefined,
        found,
        *readflag;
 };
@@ -181,7 +181,7 @@ int allkeysdefined(const Str *indexname,const char *suffix,
 
 int analyzeuintline(const Str *indexname,
                     const char *suffix,
-                    uint32_t linenum, 
+                    uint32_t linenum,
                     const Uchar *linebuffer,
                     unsigned long linelength,
                     Array *riktab,
@@ -228,7 +228,7 @@ int analyzeuintline(const Str *indexname,
 	  {
 	    if(retval == 1)
 	    {
-	      env_error_set(env,"bigvalue " Formatuint64_t 
+	      env_error_set(env,"bigvalue " Formatuint64_t
 				" does not fit into %s",
 			    PRINTuint64_tcast(smallorbigint.bigvalue),
 			    rikptr->keystring);
@@ -236,7 +236,7 @@ int analyzeuintline(const Str *indexname,
 	      break;
 	    }
             *(rikptr->smallvalueptr) = smallorbigint.smallvalue;
-	  } 
+	  }
 	}
 	found = true;
 	break;

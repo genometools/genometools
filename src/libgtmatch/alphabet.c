@@ -165,7 +165,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
       if (!ignore)
       {
         blankfound = false;
-        for (column=0; column<line.nextfreeUchar; column++) 
+        for (column=0; column<line.nextfreeUchar; column++)
         { /* for all chars in line */
           cc = LINE(column);
           if (ispunct((int) cc) || isalnum((int) cc))
@@ -237,7 +237,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
     }
     if (wildcard > 0)
     {
-      alpha->characters[(uint32_t) wildcard] 
+      alpha->characters[(uint32_t) wildcard]
         = alpha->characters[alpha->mapsize-1];
     }
   }
@@ -540,7 +540,7 @@ void outputalphabet(FILE *fpout,const Alphabet *alpha)
 }
 
 /*
-  Suppose the string \texttt{w} of length \texttt{wlen} 
+  Suppose the string \texttt{w} of length \texttt{wlen}
   was transformed according to the alphabet \texttt{alpha}.
   The following function shows each character in \texttt{w}
   as the characters specified in the transformation.
@@ -551,7 +551,7 @@ void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
                              const Uchar *w,unsigned long wlen)
 {
   unsigned long i;
- 
+
   for(i = 0; i < wlen; i++)
   {
     (void) putc((int) alpha->characters[(int) w[i]],fpout);
@@ -575,7 +575,7 @@ static uint32_t removelowercaseproteinchars(Uchar *domainbuf,
 
   for(i=0; i< alpha->domainsize - alpha->mappedwildcards; i++)
   {
-    if(isalnum((int) alpha->mapdomain[i]) && 
+    if(isalnum((int) alpha->mapdomain[i]) &&
        isupper((int) alpha->mapdomain[i]))
     {
       domainbuf[j++] = alpha->mapdomain[i];
@@ -601,8 +601,8 @@ static Qsortcomparereturntype comparechar(const void *a,const void *b)
 
 /*EE
   The following function checks if the given alphabet is the Protein
-  alphabet with the aminoacids 
-  A, C, D, E, F, G, H, I, K, L, M, N, P, Q, R, S, T, V, W, Y written in 
+  alphabet with the aminoacids
+  A, C, D, E, F, G, H, I, K, L, M, N, P, Q, R, S, T, V, W, Y written in
   lower or upper case.
 */
 
@@ -610,7 +610,7 @@ bool isproteinalphabet(const Alphabet *alpha)
 {
   Alphabet proteinalphabet;
   uint32_t i, reduceddomainsize1, reduceddomainsize2;
-  Uchar domainbuf1[UCHAR_MAX+1], 
+  Uchar domainbuf1[UCHAR_MAX+1],
         domainbuf2[UCHAR_MAX+1];
 
   reduceddomainsize1 = removelowercaseproteinchars(&domainbuf1[0],alpha);

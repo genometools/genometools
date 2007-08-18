@@ -23,8 +23,8 @@ static void maketrie(Trierep *trierep,
 #ifdef WITHTRIEIDENT
   suffixinfo.ident = 0;
 #endif
-  for(suffixinfo.startpos = 0; 
-      suffixinfo.startpos <= len; 
+  for(suffixinfo.startpos = 0;
+      suffixinfo.startpos <= len;
       suffixinfo.startpos++)
   {
     insertsuffixintotrie(trierep,trierep->root,&suffixinfo);

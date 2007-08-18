@@ -41,9 +41,9 @@ unsigned long skfmuniqueforward (const Fmindex *fmindex,
     {
       return 0;
     }
-    bwtbound.lbound = fmindex->tfreq[cc] + 
+    bwtbound.lbound = fmindex->tfreq[cc] +
                       fmoccurrence (fmindex, cc, bwtbound.lbound);
-    bwtbound.ubound = fmindex->tfreq[cc] + 
+    bwtbound.ubound = fmindex->tfreq[cc] +
                       fmoccurrence (fmindex, cc, bwtbound.ubound);
 #ifdef mydebug
     printf("# bounds=%u,%u = %u occurrences\n",

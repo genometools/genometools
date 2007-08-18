@@ -12,13 +12,13 @@
 
 typedef struct
 {
-  Seqpos lbound, 
+  Seqpos lbound,
          ubound;
 } Bwtbound;
 
 typedef struct
 {
-  Seqpos bwtpos, 
+  Seqpos bwtpos,
          suftabvalue;
 } PairBwtidx;
 

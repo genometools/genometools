@@ -78,7 +78,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
     }
     if(analyzeuintline(indexname,
                        FMASCIIFILESUFFIX,
-                       linenum, 
+                       linenum,
                        linebuffer.spaceUchar,
                        linebuffer.nextfreeUchar,
                        riktab,
@@ -183,7 +183,7 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env)
   {
     Str *tmpfilename;
 
-    fmindex->specpos.nextfreePairBwtidx 
+    fmindex->specpos.nextfreePairBwtidx
       = (unsigned long) determinenumberofspecialstostore(
                                           &fmindex->specialcharinfo);
     fmindex->specpos.spacePairBwtidx = NULL;
@@ -214,8 +214,8 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env)
     Str *tmpfilename;
 
     computefmkeyvalues (fmindex,
-                        fmindex->bwtlength, 
-                        fmindex->log2bsize, 
+                        fmindex->bwtlength,
+                        fmindex->log2bsize,
                         fmindex->log2markdist,
                         getmapsizeAlphabet(fmindex->alphabet),
                         fmindex->suffixlength,

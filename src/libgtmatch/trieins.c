@@ -38,7 +38,7 @@
 
 typedef struct
 {
-  Trienode *previous, 
+  Trienode *previous,
            *current;
 } Nodepair;
 
@@ -49,7 +49,7 @@ static Uchar getfirstedgechar(const Trierep *trierep,
   Encseqreadinfo *eri = trierep->encseqreadinfo + node->suffixinfo.idx;
 
   if(ISLEAF(node) &&
-     node->suffixinfo.startpos + prevdepth >= 
+     node->suffixinfo.startpos + prevdepth >=
      getencseqtotallength(eri->encseqptr))
   {
     return (Uchar) SEPARATOR;
@@ -67,33 +67,33 @@ static int comparecharacters(Uchar cc1,Seqpos idx1,Uchar cc2,Seqpos idx2)
     {
       if(idx1 <= idx2)
       {
-        return -1;  // cc1 < cc2
+        return -1;  /* cc1 < cc2 */
       } else
       {
-        return 1;  // cc1 > cc2
+        return 1;  /* cc1 > cc2 */
       }
     } else
     {
-      return 1; // cc1 > cc2
+      return 1; /* cc1 > cc2 */
     }
   } else
   {
     if(ISSPECIAL(cc2))
     {
-      return -1;  // cc1 < cc2
+      return -1;  /* cc1 < cc2 */
     } else
     {
       if(cc1 < cc2)
       {
-        return -1;  // cc1 < cc2
+        return -1;  /* cc1 < cc2 */
       } else
       {
         if(cc1 > cc2)
         {
-          return 1;  // cc1 > cc2
+          return 1;  /* cc1 > cc2 */
         } else
         {
-          return 0; // cc1 
+          return 0; /* cc1 == cc2 */
         }
       }
     }
@@ -110,8 +110,8 @@ static void showtrie2(const Trierep *trierep,
   Seqpos pos, endpos;
   Trienode *current;
 
-  for(current = node->firstchild; 
-      current != NULL; 
+  for(current = node->firstchild;
+      current != NULL;
       current = current->rightsibling)
   {
     printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
@@ -208,7 +208,7 @@ static void checktrie2(Trierep *trierep,
       }
       if(father->depth >= node->depth)
       {
-        fprintf(stderr,"father.depth = " FormatSeqpos " >= " FormatSeqpos 
+        fprintf(stderr,"father.depth = " FormatSeqpos " >= " FormatSeqpos
                        " = node.depth\n",
                        PRINTSeqposcast(father->depth),
                        PRINTSeqposcast(node->depth));
@@ -216,7 +216,7 @@ static void checktrie2(Trierep *trierep,
       }
     }
     previous = NULL;
-    for(current = node->firstchild; current != NULL; 
+    for(current = node->firstchild; current != NULL;
         current = current->rightsibling)
     {
       if(previous != NULL)
@@ -243,7 +243,7 @@ void checktrie(Trierep *trierep,uint32_t numberofleaves,
   env_error_check(env);
   if(trierep->root != NULL)
   {
-    Bitstring *leafused; 
+    Bitstring *leafused;
     uint32_t numberofbitsset = 0;
 
     INITBITTAB(leafused,maxleafnum+1);
@@ -398,7 +398,7 @@ static Trienode *makenewbranch(Trierep *trierep,
   newbranch->suffixinfo = *suffixinfo;
   newbranch->rightsibling = oldnode->rightsibling;
   cc1 = getfirstedgechar(trierep,oldnode,currentdepth);
-  if(suffixinfo->startpos + currentdepth >= 
+  if(suffixinfo->startpos + currentdepth >=
      getencseqtotallength(eri->encseqptr))
   {
     cc2 = (Uchar) SEPARATOR;
@@ -450,8 +450,8 @@ static bool hassuccessor(const Trierep *trierep,
   Uchar cc1;
   int cmpresult;
 
-  for(np->previous = NULL, np->current = node->firstchild; 
-      np->current != NULL; 
+  for(np->previous = NULL, np->current = node->firstchild;
+      np->current != NULL;
       np->current = np->current->rightsibling)
   {
     cc1 = getfirstedgechar(trierep,np->current,prevdepth);
@@ -489,7 +489,7 @@ void insertsuffixintotrie(Trierep *trierep,
     currentdepth = node->depth;
     while(true)
     {
-      if(suffixinfo->startpos + currentdepth >= 
+      if(suffixinfo->startpos + currentdepth >=
          getencseqtotallength(eri->encseqptr))
       {
 	cc = (Uchar) SEPARATOR;

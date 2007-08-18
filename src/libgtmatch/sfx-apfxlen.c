@@ -13,7 +13,7 @@
 
 /*
   We need \texttt{prefixlenbits} bits to store the length of
-  a matching prefix. So we can store the following maximal value 
+  a matching prefix. So we can store the following maximal value
   in the remaining bits.
 */
 
@@ -22,12 +22,12 @@
 
 /*
   We allow to choose the prefixlength \(l\) in such a way that the size of
-  table bcktab (which is $8\cdot k^{l}$ never exceeds the 
+  table bcktab (which is $8\cdot k^{l}$ never exceeds the
   $\texttt{MAXMULTIPLIEROFTOTALLENGTH} \cdot n$, where \(k\) is the size
   of the alphabet and \(n\) is the total length of the input sequence.
 */
 
-#define MAXMULTIPLIEROFTOTALLENGTH 4  
+#define MAXMULTIPLIEROFTOTALLENGTH 4
 
 #define MAXVALUEWITHBITS(BITNUM)    ((((unsigned int) 1) << (BITNUM)) - 1)
 
@@ -77,7 +77,7 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
   {
     unsigned int tmplength;
     tmplength = logalphasize(numofchars,
-                             (double) 
+                             (double)
                              MAXREMAININGAFTERPREFIXLEN(prefixlenbits));
     if(maxprefixlen > tmplength)
     {

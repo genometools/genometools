@@ -8,9 +8,9 @@
 #include "libgtcore/env.h"
 #include "readmode-def.h"
 
-static char *readmodes[] = {"fwd", 
-                            "rev", 
-                            "cpl", 
+static char *readmodes[] = {"fwd",
+                            "rev",
+                            "cpl",
                             "rcl"};
 
 const char *showreadmode(Readmode readmode)

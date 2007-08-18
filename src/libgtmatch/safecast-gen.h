@@ -20,7 +20,7 @@
                                                         int line,\
                                                         FROMTYPE from)\
         {\
-          if(sizeof(FROMTYPE) > sizeof(TOTYPE))\
+          if (sizeof (FROMTYPE) > sizeof (TOTYPE))\
           {\
             if (from > (FROMTYPE) UINT32_MAX)\
             {\

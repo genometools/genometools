@@ -32,7 +32,7 @@ int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
                         NULL,
                         NULL,
                         env);
-  for (currentposition = 0; currentposition < (uint32_t) 1000; 
+  for (currentposition = 0; currentposition < (uint32_t) 1000;
        currentposition++)
   {
     retval = readnextUchar(&currentchar,&fbs,env);

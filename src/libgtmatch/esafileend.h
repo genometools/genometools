@@ -9,34 +9,34 @@
 
 /*
   The following defines the suffix of an indexname to be used for an
-  reverse complemented index. The length is also defined
+  reverse complemented index. The length is also defined.
 */
 
 #define RCMSUFFIX         ".rcm"
 
 /*
   The following defines the suffix of an indexname to be used as
-  a six frame index. The length is also defined
+  a six frame index. The length is also defined.
 */
 
 #define SIXFRAMESUFFIX    ".6fr"
 
 /*
-  The following defines the suffix of a file to store the 
+  The following defines the suffix of a file to store the
   table suftab.
 */
 
 #define SUFTABSUFFIX  ".suf"
 
 /*
-  The following defines the suffix of a file to store the 
+  The following defines the suffix of a file to store the
   table lcptab.
 */
 
 #define LCPTABSUFFIX  ".lcp"
 
 /*
-  The following defines the suffix of a file to store the 
+  The following defines the suffix of a file to store the
   large lcp table values.
 */
 

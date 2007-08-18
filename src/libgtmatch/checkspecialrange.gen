@@ -21,7 +21,8 @@
       {
         uint64_t rangeend
                = (uint64_t) *found +
-                 (uint64_t) encseq->specialrangelength[(Seqpos) (found - start)];
+                 (uint64_t) encseq->specialrangelength[
+                                    (Seqpos) (found - start)];
         if (rangeend > (uint64_t) pos)
         {
           return true;
@@ -45,7 +46,7 @@
         uint64_t rangeend
                = (uint64_t) ((MAXSPECIALTYPE+1) * pagenumber) +
                  (uint64_t) *found +
-                 (uint64_t) encseq->specialrangelength[(Seqpos) 
+                 (uint64_t) encseq->specialrangelength[(Seqpos)
                                                        (found - start)];
         if (rangeend >  (uint64_t) pos)
         {

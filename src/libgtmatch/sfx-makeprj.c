@@ -38,8 +38,8 @@ static unsigned long currentrangevalue(unsigned long i,unsigned long distvalue)
 static int updatesumranges(void *key, void *value, void *data,
                            /*@unused@*/ Env *env)
 {
-  unsigned long keyvalue, 
-                distvalue, 
+  unsigned long keyvalue,
+                distvalue,
                 *specialrangesptr = (unsigned long *) data;
 
   keyvalue = (unsigned long) key;

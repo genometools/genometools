@@ -114,7 +114,7 @@ static void reverseSequencerange(Array *a)
   unsigned long idx1, idx2;
   Sequencerange tmp, *valptr1, *valptr2;
 
-  for(idx1=0, idx2 = (unsigned long) array_size(a) - 1; 
+  for(idx1=0, idx2 = (unsigned long) array_size(a) - 1;
       idx1 < idx2; idx1++, idx2--)
   {
     valptr1 = (Sequencerange *) array_get(a,idx1);
@@ -161,7 +161,7 @@ int checkspecialranges(const Encodedsequence *encseq,Env *env)
                         "array_size(rangesbackward)\n",
                         (unsigned long) array_size(rangesforward),
                         (unsigned long) array_size(rangesbackward));
-      haserr = true;  
+      haserr = true;
     }
   }
   if(!haserr)
@@ -175,8 +175,8 @@ int checkspecialranges(const Encodedsequence *encseq,Env *env)
       if(valf->leftpos != valb->leftpos || valf->rightpos != valb->rightpos)
       {
         env_error_set(env,
-                      "rangesforward[%lu] = (" FormatSeqpos "," FormatSeqpos 
-                      ") != (" FormatSeqpos "," FormatSeqpos 
+                      "rangesforward[%lu] = (" FormatSeqpos "," FormatSeqpos
+                      ") != (" FormatSeqpos "," FormatSeqpos
                       ") = rangesbackward[%lu]\n",
                       idx,
                       PRINTSeqposcast(valf->leftpos),

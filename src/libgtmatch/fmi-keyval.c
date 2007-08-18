@@ -40,11 +40,11 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
   uint64_t sumsize = 0;
 
   sumsize += (uint64_t) sizeof(Seqpos) * (uint64_t) TFREQSIZE(fm->mapsize);
-  sumsize += (uint64_t) sizeof(Seqpos) * 
+  sumsize += (uint64_t) sizeof(Seqpos) *
              (uint64_t) SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks);
   if(storeindexpos)
   {
-    sumsize += (uint64_t) sizeof(Seqpos) * 
+    sumsize += (uint64_t) sizeof(Seqpos) *
                (uint64_t) MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist);
   }
   if(suffixlength > 0)
@@ -53,11 +53,11 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
   }
   if(storeindexpos)
   {
-    sumsize += (uint64_t) sizeof(PairBwtidx) * 
+    sumsize += (uint64_t) sizeof(PairBwtidx) *
                (uint64_t) determinenumberofspecialstostore(
                                  &fm->specialcharinfo);
   }
-  sumsize += (uint64_t) sizeof(Uchar) * 
+  sumsize += (uint64_t) sizeof(Uchar) *
              (uint64_t) BFREQSIZE(fm->mapsize,fm->nofblocks);
   return CALLCASTFUNC(uint64_t,unsigned_long,sumsize);
 }

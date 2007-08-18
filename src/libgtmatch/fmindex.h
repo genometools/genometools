@@ -21,7 +21,7 @@
     for the different methods.
 
   - can we guarantee that in the BWT we only access positions smaller
-    than 
+    than
     firstignorespecial = fm->bwtlength - (specialcharacters + 1);
     Then we do not have to store so many special positions.
 
@@ -35,7 +35,7 @@
   - also for single input index generate bwt file if option
     -fmout is used.
 
-  - can we, for a given alphabet, first determine all bounds like in 
+  - can we, for a given alphabet, first determine all bounds like in
     binsplitinterval?
 
   - trenne uniquesub in uniquesub und uniquesub-esa auf.
@@ -46,7 +46,7 @@
                             single thread f"ahig
                             dynamische Allokation f"ur Dateinamen
                             flexible kombination von Optionen
-*/ 
+*/
 
 #define FMASCIIFILESUFFIX ".fma"
 #define FMDATAFILESUFFIX  ".fmd"
@@ -68,36 +68,35 @@ typedef int(*FMprocessqhit)(void *,Seqpos,Seqpos);
 typedef struct
 {
   Encodedsequence *bwtformatching;
-  Uchar *bfreq;            // bfreq[c][i] = #c in block i
-  Seqpos bwtlength,        // also totallength + 1
-         *tfreq,           // tfreq[c] = #characters < c in text
-         *superbfreq,      // superbfreq[c][i] = #c in all superblocks 
-                           // which are previous to superblock i
-         *markpostable,    // sampling of entries from suffix array
+  Uchar *bfreq;            /* bfreq[c][i] = #c in block i */
+  Seqpos bwtlength,        /* also totallength + 1 */
+         *tfreq,           /* tfreq[c] = #characters < c in text */
+         *superbfreq,      /* superbfreq[c][i] = #c in all superblocks */
+                           /* which are previous to superblock i */
+         *markpostable,    /* sampling of entries from suffix array */
          longestsuffixpos,
          negatebsizeones,
          negatesuperbsizeones,
-         markdistminus1;   // markdist - 1
+         markdistminus1;   /* markdist - 1 */
   Specialcharinfo specialcharinfo;
-  ArrayPairBwtidx specpos; // positions of special characters
+  ArrayPairBwtidx specpos; /* positions of special characters */
   Alphabet *alphabet;
   void *mappedptr; /* NULL or pointer to the mapped space block */
-  
-  uint32_t mapsize,          // copy of alphabet.mapsize, used for searching
-           bsize,            // size of block
-           bsizehalve,       // DIV2(fm->bsize)
-           superbsize,       // size of superblock
-           log2bsize,        // log_{2}(bsize)
-           log2superbsize,   // log_{2}(superbsize)
-           log2superbsizeminuslog2bsize, // log_{2}(superbsize) - log_{2}(bsize)
-           log2markdist,     // log_{2}(markdist)
-           suffixlength;     // length of suffix for which buckets are computed
-  unsigned long sizeofindex;   // size of the fmindex in bytes
-  Seqpos nofblocks,          // number of blocks (bwtlength/bsize + 1)
-         nofsuperblocks,     // number of superblocks (bwtlength/superbsize + 2)
-         markdist,           // multiple of entry number stored in suffix array
-         numofcodes;         // number of entries in boundaries
-  Bwtbound *boundarray;    // corresponding boundaries
+  uint32_t mapsize,          /* copy of alphabet.mapsize, used for searching */
+           bsize,            /* size of block */
+           bsizehalve,       /* DIV2(fm->bsize) */
+           superbsize,       /* size of superblock */
+           log2bsize,        /* log_{2}(bsize) */
+           log2superbsize,   /* log_{2}(superbsize) */
+           log2superbsizeminuslog2bsize, /* log{2}(superbsize)- log{2}(bsize) */
+           log2markdist,     /* log_{2}(markdist) */
+           suffixlength;     /* len of suffix for which buckets are computed*/
+  unsigned long sizeofindex; /* size of the fmindex in bytes */
+  Seqpos nofblocks,          /* number of blocks (bwtlength/bsize + 1) */
+         nofsuperblocks,     /* number of superblocks (bwtlength/superbsize+2)*/
+         markdist,           /* multiple of entry num stored in suffix array */
+         numofcodes;         /* number of entries in boundaries */
+  Bwtbound *boundarray;      /* corresponding boundaries */
 } Fmindex;
 
 typedef struct

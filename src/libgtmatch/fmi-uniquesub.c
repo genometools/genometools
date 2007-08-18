@@ -88,7 +88,7 @@ static int optionaddbitmask(Optionargmodedesc *modedesc,
                             Env *env)
 {
   size_t modecount;
-  
+
   env_error_check(env);
   for(modecount=0; modecount < numberofentries; modecount++)
   {
@@ -110,8 +110,8 @@ static int optionaddbitmask(Optionargmodedesc *modedesc,
 }
 
 static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
-                             int argc, 
-                             const char **argv, 
+                             int argc,
+                             const char **argv,
                              Env *env)
 {
   OptionParser *op;
@@ -195,7 +195,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
       if(uniquesubcallinfo->minlength.defined &&
          uniquesubcallinfo->maxlength.defined)
       {
-        if(uniquesubcallinfo->maxlength.valueunsignedlong < 
+        if(uniquesubcallinfo->maxlength.valueunsignedlong <
            uniquesubcallinfo->minlength.valueunsignedlong)
         {
           env_error_set(env,"minvalue must be smaller or equal than maxvalue");
@@ -240,7 +240,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   return oprval;
 }
 
-static int uniqueposinsinglesequence(void *info, 
+static int uniqueposinsinglesequence(void *info,
                                      uint64_t unitnum,
                                      const Uchar *start,
                                      unsigned long seqlen,
@@ -386,8 +386,8 @@ int findminuniquesubstrings(int argc,const char **argv,Env *env)
 
   env_error_check(env);
   oprval = parseuniquesub(&uniquesubcallinfo,
-                          argc, 
-                          argv, 
+                          argc,
+                          argv,
                           env);
   if (oprval == OPTIONPARSER_ERROR)
   {

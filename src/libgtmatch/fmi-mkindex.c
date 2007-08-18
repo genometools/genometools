@@ -25,11 +25,11 @@ typedef struct
 typedef struct
 {
   const char *name;
-  uint32_t log2bsize, 
+  uint32_t log2bsize,
            log2markdist;
 } Indexleveldesc;
 
-static Indexleveldesc indexlevel[] = 
+static Indexleveldesc indexlevel[] =
 {
   {"tiny",  (uint32_t) 7, (uint32_t) 6},
   {"small", (uint32_t) 7, (uint32_t) 4},
@@ -43,8 +43,8 @@ static void versionfunc(const char *progname)
 }
 
 static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
-                             int argc, 
-                             const char **argv, 
+                             int argc,
+                             const char **argv,
                              Env *env)
 {
   OptionParser *op;
@@ -176,10 +176,10 @@ static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
 static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
 {
   Fmindex fm;
-  uint32_t log2bsize, 
-           log2markdist; 
+  uint32_t log2bsize,
+           log2markdist;
   bool haserr = false;
-  
+
   env_error_check(env);
   INITARRAY(&fm.specpos, PairBwtidx);
   fm.bfreq = NULL;

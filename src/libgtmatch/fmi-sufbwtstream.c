@@ -36,12 +36,12 @@ static void allocatefmtables(Fmindex *fm,bool storeindexpos,Env *env)
     fm->specpos.nextfreePairBwtidx = 0;
     fm->specpos.allocatedPairBwtidx
       = (unsigned long) determinenumberofspecialstostore(&fm->specialcharinfo);
-    printf("# %lu wildcards in the last " FormatSeqpos 
+    printf("# %lu wildcards in the last " FormatSeqpos
            " characters (%.2f)\n",
-            (unsigned long) (fm->specialcharinfo.specialcharacters - 
+            (unsigned long) (fm->specialcharinfo.specialcharacters -
                             fm->specpos.allocatedPairBwtidx),
             PRINTSeqposcast(fm->specialcharinfo.specialcharacters),
-            (double) (fm->specialcharinfo.specialcharacters - 
+            (double) (fm->specialcharinfo.specialcharacters -
                       fm->specpos.allocatedPairBwtidx)/
                           fm->specialcharinfo.specialcharacters);
     ALLOCASSIGNSPACE(fm->specpos.spacePairBwtidx,NULL,PairBwtidx,
@@ -75,7 +75,7 @@ static void set0frequencies(Fmindex *fm)
 
 static void finalizefmfrequencies(Fmindex *fm)
 {
-  uint32_t j; 
+  uint32_t j;
   Seqpos i, *freqptr;
 
   for (j = (uint32_t) 2; j <= fm->mapsize; j++)
@@ -109,7 +109,7 @@ static void showconstructionmessage(const Str *indexname,
           (unsigned int) (mapsize-1));
   printf("%lu bytes, space overhead %.2f\n",
           fmsize,
-          (double) fmsize/(double) (totallength+1)); 
+          (double) fmsize/(double) (totallength+1));
 }
 
 static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
@@ -140,7 +140,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
     emmesa->buf.nextaccessidx = 0;
   }
   indexedsuffix = emmesa->buf.suftabstore[emmesa->buf.nextaccessidx];
-  *suftabvalue = sequenceoffsettable[indexedsuffix.idx] + 
+  *suftabvalue = sequenceoffsettable[indexedsuffix.idx] +
                  indexedsuffix.startpos;
   if(indexedsuffix.startpos == 0)
   {
@@ -181,19 +181,19 @@ int sufbwt2fmindex(Fmindex *fmindex,
   Suffixarray suffixarray;
   Emissionmergedesa emmesa;
   Uchar cc;
-  Seqpos bwtpos, 
-         totallength, 
-         suftabvalue = 0, 
+  Seqpos bwtpos,
+         totallength,
+         suftabvalue = 0,
          *sequenceoffsettable = NULL,
          firstignorespecial = 0,
-         nextmark, 
-         *markptr, 
-         nextprogress, 
-         tmpsuftabvalue, 
+         nextmark,
+         *markptr,
+         nextprogress,
+         tmpsuftabvalue,
          stepprogress;
-  uint32_t mapsize = 0, 
+  uint32_t mapsize = 0,
            suffixlength = 0,
-           numofindexes; 
+           numofindexes;
   int retval;
   DefinedSeqpos longest;
   PairBwtidx *pairptr;
@@ -201,7 +201,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
   Str *tmpfilename = NULL;
   Specialcharinfo specialcharinfo;
   bool haserr = false;
-  
+
   env_error_check(env);
   longest.defined = false;
   longest.valueseqpos = 0;
@@ -333,7 +333,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
           {
             haserr = true;
             break;
-          } 
+          }
           if(retval == 0)
           {
             break;
@@ -386,7 +386,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
         (void) putchar('.');
         (void) fflush(stdout);
         nextprogress += stepprogress;
-      } 
+      }
       if(storeindexpos && bwtpos == nextmark)
       {
         *markptr++ = suftabvalue;
@@ -398,7 +398,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
         {
           pairptr = fmindex->specpos.spacePairBwtidx +
                     fmindex->specpos.nextfreePairBwtidx++;
-          if(pairptr >= fmindex->specpos.spacePairBwtidx + 
+          if(pairptr >= fmindex->specpos.spacePairBwtidx +
                         fmindex->specpos.allocatedPairBwtidx)
           {
             env_error_set(env,"program error: not enough space for specpos");
@@ -411,7 +411,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
       } else
       {
         fmindex->tfreq[cc+1]++;
-        fmindex->bfreq[(cc * fmindex->nofblocks) + 
+        fmindex->bfreq[(cc * fmindex->nofblocks) +
                        (bwtpos >> fmindex->log2bsize)]++;
         fmindex->superbfreq[(cc * fmindex->nofsuperblocks) +
                        (bwtpos >> fmindex->log2superbsize) + 1]++;
@@ -420,8 +420,8 @@ int sufbwt2fmindex(Fmindex *fmindex,
   }
   if(!haserr)
   {
-    if(storeindexpos && 
-       fmindex->specpos.allocatedPairBwtidx != 
+    if(storeindexpos &&
+       fmindex->specpos.allocatedPairBwtidx !=
        fmindex->specpos.nextfreePairBwtidx)
     {
       env_error_set(env,"program error: too much space for specpos: "

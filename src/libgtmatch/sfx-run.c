@@ -35,7 +35,7 @@ typedef struct
        *outfplcptab,
        *outfpllvtab,
        *outfpbwttab;
-  Seqpos lastsuftabentryofpreviouspart, 
+  Seqpos lastsuftabentryofpreviouspart,
          absolutepos,
          numoflargelcpvalues,
          maxbranchdepth;
@@ -103,7 +103,7 @@ static int suftab2file(void *info,
     Largelcpvalue largelcpvalue;
     int cmp;
 
-    outvalue = (Uchar) 0; 
+    outvalue = (Uchar) 0;
     if (outfileinfo->absolutepos == 0 &&
         fwrite(&outvalue,sizeof(Uchar),(size_t) 1,
                outfileinfo->outfplcptab) != (size_t) 1)
@@ -125,14 +125,14 @@ static int suftab2file(void *info,
                                    false,
                                    false,
                                    0,
-                                   pos > 0 ? suftab[pos-1] 
+                                   pos > 0 ? suftab[pos-1]
                                            : outfileinfo->
                                              lastsuftabentryofpreviouspart,
                                    suftab[pos]);
           if(cmp > 0)
           {
-            fprintf(stderr,"pos = " FormatSeqpos 
-                           ": cmp " FormatSeqpos 
+            fprintf(stderr,"pos = " FormatSeqpos
+                           ": cmp " FormatSeqpos
                            " " FormatSeqpos " = %d\n",
                     PRINTSeqposcast(pos),
                     pos > 0 ? PRINTSeqposcast(suftab[pos-1])
@@ -141,7 +141,7 @@ static int suftab2file(void *info,
                     PRINTSeqposcast(suftab[pos]),
                     cmp);
             exit(EXIT_FAILURE);
-          } 
+          }
           if(outfileinfo->maxbranchdepth < lcpvalue)
           {
             outfileinfo->maxbranchdepth = lcpvalue;
@@ -161,7 +161,7 @@ static int suftab2file(void *info,
               haserr = true;
               break;
             }
-            outvalue = (Uchar) UCHAR_MAX; 
+            outvalue = (Uchar) UCHAR_MAX;
           } else
           {
             outvalue = (Uchar) lcpvalue;
@@ -203,7 +203,7 @@ static int suftab2file(void *info,
       {
         cc = getencodedchar(outfileinfo->encseq,startpos - 1,readmode);
       }
-      if (fwrite(&cc,sizeof(Uchar),(size_t) 1,outfileinfo->outfpbwttab) 
+      if (fwrite(&cc,sizeof(Uchar),(size_t) 1,outfileinfo->outfpbwttab)
                   != (size_t) 1)
       {
         env_error_set(env,"cannot write 1 item of size %lu: "\
@@ -283,7 +283,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
                           &specialcharinfo,
                           so->filenametab,
                           &filelengthtab,
-                          getsymbolmapAlphabet(alpha), 
+                          getsymbolmapAlphabet(alpha),
                           so->isplain,
                           env) != 0)
     {
@@ -359,7 +359,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
       {
         unsigned int maxprefixlen;
 
-        maxprefixlen 
+        maxprefixlen
           = whatisthemaximalprefixlength(numofchars,
                                          totallength,
                                          SIZEOFBCKENTRY,

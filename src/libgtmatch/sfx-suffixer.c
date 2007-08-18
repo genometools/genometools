@@ -59,8 +59,8 @@ typedef struct
 {
   Seqpos totallength,
          *spacesuffixstarts;
-  unsigned long nextfreeUint, 
-                allocatedUint; 
+  unsigned long nextfreeUint,
+                allocatedUint;
   int(*processsuftab)(void *,const Seqpos *,Readmode,Seqpos,Env *);
   void *processsuftabinfo;
   Readmode readmode;
@@ -239,9 +239,9 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
             csf->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)]++;
             stidx = --csf->leftborder[code];
 #ifdef LONGOUTPUT
-            printf("insert special_suffix " FormatSeqpos 
+            printf("insert special_suffix " FormatSeqpos
                    " (code %u) at location " FormatSeqpos "\n",
-                   PRINTSeqposcast(csf->spaceCodeatposition[j].position - 
+                   PRINTSeqposcast(csf->spaceCodeatposition[j].position -
                                    prefixindex),
                    (unsigned int) code,
                    PRINTSeqposcast(stidx));
@@ -438,15 +438,15 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
     assert(specialranges+1 >= (Seqpos) csf.nextfreeCodeatposition);
     assert(csf.filltable != NULL);
     assert(csf.leftborder != NULL);
-    // printf("leftborder[0]=%u\n",csf.leftborder[0]);
+    /* printf("leftborder[0]=%u\n",csf.leftborder[0]); */
     for (optr = csf.leftborder + 1;
          optr < csf.leftborder + numofallcodes; optr++)
     {
-      // printf("leftborder[%u]=%u\n",(unsigned int) (optr - csf.leftborder),
-                                   // *optr);
+      /*/ printf("leftborder[%u]=%u\n",(unsigned int) (optr - csf.leftborder),
+                                   *optr); */
       *optr += *(optr-1);
     }
-    csf.leftborder[numofallcodes] 
+    csf.leftborder[numofallcodes]
       = getencseqtotallength(encseq) - specialcharacters;
     suftabparts = newsuftabparts(numofparts,
                                  csf.leftborder,

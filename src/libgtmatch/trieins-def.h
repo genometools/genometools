@@ -23,7 +23,7 @@ typedef struct
 typedef struct _Trienode
 {
   Suffixinfo suffixinfo;
-  struct _Trienode *firstchild, 
+  struct _Trienode *firstchild,
                    *rightsibling,
                    *parent;
   Seqpos depth;
@@ -42,12 +42,12 @@ typedef struct
 typedef struct
 {
   Encseqreadinfo *encseqreadinfo;
-  Trienode *nodetable, 
+  Trienode *nodetable,
            *root;
   Trienodeptr *unusedTrienodes;
   uint32_t numofindexes,
            nextunused,
-           allocatedTrienode, 
+           allocatedTrienode,
            nextfreeTrienode;
 } Trierep;
 

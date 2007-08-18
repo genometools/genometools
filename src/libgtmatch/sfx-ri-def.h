@@ -10,6 +10,6 @@
 typedef struct Readintkeys Readintkeys;
 
 #define SETREADINTKEYS(VALNAME,VAL,FORCEREAD)\
-        setreadintkeys(riktab,VALNAME,VAL,sizeof(*(VAL)),FORCEREAD,env)
+        setreadintkeys(riktab,VALNAME,VAL,sizeof (*(VAL)),FORCEREAD,env)
 
 #endif

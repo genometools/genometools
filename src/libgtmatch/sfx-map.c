@@ -133,7 +133,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         FREESPACE(tmpfilename);
         assert(suffixarray->filelengthtab != NULL);
         suffixarray->filelengthtab[numoffiles].length = (Seqpos) readint1;
-        suffixarray->filelengthtab[numoffiles].effectivelength 
+        suffixarray->filelengthtab[numoffiles].effectivelength
                                                = (Seqpos) readint2;
         if(verbose)
         {
@@ -151,7 +151,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     {
       if(analyzeuintline(indexname,
                          PROJECTFILESUFFIX,
-                         linenum, 
+                         linenum,
                          linebuffer.spaceUchar,
                          linebuffer.nextfreeUchar,
                          riktab,
@@ -167,8 +167,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   {
     haserr = true;
   }
-  if (!haserr && 
-      integersize != (uint32_t) 32 && 
+  if (!haserr &&
+      integersize != (uint32_t) 32 &&
       integersize != (uint32_t) 64)
   {
     env_error_set(env,"%s%s contains illegal line defining the integer size",
@@ -358,7 +358,7 @@ static int inputsuffixarray(bool map,
   {
     suffixarray->encseq = initencodedseq(true,
 					 NULL,  /* filenametab */
-                                         false, /* not relevant since 
+                                         false, /* not relevant since
                                                    indexname != NULL */
 					 indexname,
 					 *totallength,
@@ -410,7 +410,7 @@ static int inputsuffixarray(bool map,
     } else
     {
       INITBufferedfile(indexname,&suffixarray->lcptabstream,LCPTABSUFFIX);
-      if(!haserr && 
+      if(!haserr &&
          fseek(suffixarray->lcptabstream.fp,(long) sizeof(Uchar),SEEK_SET) != 0)
       {
         env_error_set(env,"fseek(esastream) failed: %s",strerror(errno));
@@ -441,7 +441,7 @@ static int inputsuffixarray(bool map,
         INITBufferedfile(indexname,&suffixarray->llvtabstream,
                          LARGELCPTABSUFFIX);
       }
-    } 
+    }
   }
   if(!haserr && (demand & SARR_BWTTAB))
   {

@@ -41,8 +41,7 @@
           haserr = true;\
         }
 
-
-static uint64_t detexpectedaccordingtomapspec(const ArrayMapspecification 
+static uint64_t detexpectedaccordingtomapspec(const ArrayMapspecification
                                               *mapspectable)
 {
   uint64_t sumup = 0;
@@ -52,7 +51,7 @@ static uint64_t detexpectedaccordingtomapspec(const ArrayMapspecification
        mapspecptr < mapspectable->spaceMapspecification +
                     mapspectable->nextfreeMapspecification; mapspecptr++)
   {
-    sumup += (uint64_t) mapspecptr->sizeofunit * 
+    sumup += (uint64_t) mapspecptr->sizeofunit *
              (uint64_t) mapspecptr->numofunits;
     if(sumup % ALIGNSIZE > 0)
     {
@@ -160,7 +159,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
     expectedaccordingtomapspec = detexpectedaccordingtomapspec(&mapspectable);
     if (expectedaccordingtomapspec != (uint64_t) numofbytes)
     {
-      env_error_set(env,"%lu bytes read from %s, but " Formatuint64_t 
+      env_error_set(env,"%lu bytes read from %s, but " Formatuint64_t
                          " expected",
                          (unsigned long) numofbytes,
                          str_get(tmpfilename),
@@ -173,7 +172,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
     mapspecptr = mapspectable.spaceMapspecification;
     assert(mapspecptr != NULL);
     byteoffset = CALLCASTFUNC(uint64_t,unsigned_long,
-                              (uint64_t) (mapspecptr->sizeofunit * 
+                              (uint64_t) (mapspecptr->sizeofunit *
                                           mapspecptr->numofunits));
     if(byteoffset % (unsigned long) ALIGNSIZE > 0)
     {
@@ -191,8 +190,8 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
         break;
       }
       byteoffset = CALLCASTFUNC(uint64_t,unsigned_long,
-                                (uint64_t) (byteoffset + 
-                                            mapspecptr->sizeofunit * 
+                                (uint64_t) (byteoffset +
+                                            mapspecptr->sizeofunit *
                                             mapspecptr->numofunits));
       if(byteoffset % (unsigned long) ALIGNSIZE > 0)
       {
@@ -235,7 +234,7 @@ int flushtheindex2file(FILE *fp,
   assert(mapspectable.spaceMapspecification != NULL);
   for (mapspecptr = mapspectable.spaceMapspecification;
        mapspecptr < mapspectable.spaceMapspecification +
-                    mapspectable.nextfreeMapspecification; 
+                    mapspectable.nextfreeMapspecification;
        mapspecptr++)
   {
     printf("# flushtheindex2file");
@@ -280,8 +279,8 @@ int flushtheindex2file(FILE *fp,
       break;
     }
     byteoffset = CALLCASTFUNC(uint64_t,unsigned_long,
-                              (uint64_t) (byteoffset + 
-                                          mapspecptr->sizeofunit * 
+                              (uint64_t) (byteoffset +
+                                          mapspecptr->sizeofunit *
                                           mapspecptr->numofunits));
     if(byteoffset % (unsigned long) ALIGNSIZE > 0)
     {
@@ -294,7 +293,7 @@ int flushtheindex2file(FILE *fp,
                            (unsigned long) padunits,
                            (unsigned int) sizeof(Uchar),
                            strerror(errno));
-        haserr = true; 
+        haserr = true;
       }
       byteoffset += (unsigned long) padunits;
       totalpadunits += (unsigned long) padunits;

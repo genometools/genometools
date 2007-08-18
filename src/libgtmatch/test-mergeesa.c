@@ -24,7 +24,7 @@ typedef struct
   NameandFILE outsuf,
               outlcp,
               outllv;
-  Seqpos currentlcpindex, 
+  Seqpos currentlcpindex,
          absstartpostable[SIZEOFMERGERESULTBUFFER];
 } Mergeoutinfo;
 
@@ -58,7 +58,7 @@ static int outputsuflcpllv(void *processinfo,
                            Env *env)
 {
   Mergeoutinfo *mergeoutinfo = (Mergeoutinfo *) processinfo;
-  
+
   uint32_t i, lastindex;
   Seqpos lcpvalue;
   Largelcpvalue currentexception;
@@ -68,14 +68,14 @@ static int outputsuflcpllv(void *processinfo,
   env_error_check(env);
   for(i=0; i<buf->nextstoreidx; i++)
   {
-    mergeoutinfo->absstartpostable[i] 
+    mergeoutinfo->absstartpostable[i]
       = sequenceoffsettable[buf->suftabstore[i].idx] +
         buf->suftabstore[i].startpos;
   }
   if(fwrite(mergeoutinfo->absstartpostable,
             sizeof(Seqpos),
             (size_t) buf->nextstoreidx,
-            mergeoutinfo->outsuf.fp) 
+            mergeoutinfo->outsuf.fp)
          != (size_t) buf->nextstoreidx)
   {
     env_error_set(env,"fwrite(%s) of %u Seqpos-value failed: %s",
@@ -135,7 +135,7 @@ static int mergeandstoreindex(const Str *storeindex,
   Mergeoutinfo mergeoutinfo;
   Uchar smalllcpvalue;
   Specialcharinfo specialcharinfo;
-  Seqpos *sequenceoffsettable, totallength; 
+  Seqpos *sequenceoffsettable, totallength;
   bool haserr = false;
 
   env_error_check(env);

@@ -44,7 +44,7 @@ static int writefmascii (const Str *indexname,
 }
 
 static int writefmdata (const Str *indexname,
-                        Fmindex *fm, 
+                        Fmindex *fm,
                         bool storeindexpos,
                         Env *env)
 {

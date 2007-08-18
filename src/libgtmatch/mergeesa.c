@@ -46,7 +46,7 @@ static int inputthesequences(Alphabet **alpha,
   unsigned long idx;
   Str *indexname;
   Seqpos totallength;
-  
+
   env_error_check(env);
   for(idx=0; idx<strarray_size(indexnametab); idx++)
   {
@@ -89,7 +89,7 @@ static int insertfirstsuffixes(Trierep *trierep,
                                       env);
     if(retval < 0)
     {
-      return -1; 
+      return -1;
     }
     if(retval == 0)
     {
@@ -135,8 +135,8 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Env *env)
   Seqpos tmpsuftabvalue,
          tmplcpvalue,
          tmplastbranchdepth;
-  uint32_t tmpidx; 
-  
+  uint32_t tmpidx;
+
   env_error_check(env);
   for(emmesa->buf.nextstoreidx = 0;
       emmesa->numofentries > 0 &&
@@ -149,7 +149,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Env *env)
     emmesa->buf.suftabstore[emmesa->buf.nextstoreidx].idx = tmpidx;
     emmesa->buf.suftabstore[emmesa->buf.nextstoreidx].startpos
       = tmpsmallestleaf->suffixinfo.startpos;
-    if(emmesa->nextpostable[tmpidx] > 
+    if(emmesa->nextpostable[tmpidx] >
        getencseqtotallength(emmesa->suffixarraytable[tmpidx].encseq))
     {
       deletesmallestpath(tmpsmallestleaf,&emmesa->trierep);
@@ -161,7 +161,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Env *env)
                                                 lcptabstream,env);
       if(retval < 0)
       {
-        return -1; 
+        return -1;
       }
       if(retval == 0)
       {
@@ -177,7 +177,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Env *env)
                                env);
         if(retval < 0)
         {
-          return -3; 
+          return -3;
         }
         if(retval == 0)
         {
@@ -265,9 +265,9 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
                      numofindexes);
     for(idx = 0; idx < numofindexes; idx++)
     {
-      emmesa->trierep.encseqreadinfo[idx].encseqptr 
+      emmesa->trierep.encseqreadinfo[idx].encseqptr
         = emmesa->suffixarraytable[idx].encseq;
-      emmesa->trierep.encseqreadinfo[idx].readmode 
+      emmesa->trierep.encseqreadinfo[idx].readmode
         = emmesa->suffixarraytable[idx].readmode;
     }
     inittrienodetable(&emmesa->trierep,numofindexes,numofindexes,env);

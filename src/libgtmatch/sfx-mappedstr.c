@@ -53,7 +53,8 @@
         CODE = ((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]) * (NUMOFCHARS)
 
 #define SUBTRACTLCHARSHIFTADDNEXT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER,CC)\
-        CODE = (Codetype) (((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]) * (NUMOFCHARS) + (CC))
+        CODE = (Codetype) (((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]) *\
+                           (NUMOFCHARS) + (CC))
 #endif
 
 #define ARRAY2DIMMALLOC(ARRAY2DIM, ROWS, COLUMNS, TYPE)\
@@ -166,7 +167,7 @@ typedef struct
   uint32_t enqueueindex,  /* entry into which element is to be enqued */
                dequeueindex,  /* last element of queue */
                queuesize,     /* size of the queue */
-               noofelements;  /* no ofelements between enqueueindex+1 and 
+               noofelements;  /* no ofelements between enqueueindex+1 and
                                  dequeindex */
 } Specialpositions;
 
@@ -468,24 +469,16 @@ static int getencseqkmersgeneric(
   if(encseq != NULL)
   {
     Seqpos totallength = getencseqtotallength(encseq);
+    Encodedsequencescanstate *esr;
 
-    /*
-    Encodedsequencescanstate *esr;  XXX
     esr = initEncodedsequencescanstate(encseq,readmode,env);
-    */
     for (currentposition = 0; currentposition<totallength; currentposition++)
     {
-      /*
       charcode = sequentialgetencodedchar(encseq,esr,currentposition);
-      */
-      charcode = getencodedchar(encseq,currentposition,readmode);
-      // printf("charcode[%u]=%u\n",currentposition,charcode);
       shiftrightwithchar(processkmercode,processkmercodeinfo,
                          &spwp,currentposition,charcode,env);
     }
-    /*
     freeEncodedsequencescanstate(&esr,env);
-    */
   } else
   {
     Fastabufferstate fbs;

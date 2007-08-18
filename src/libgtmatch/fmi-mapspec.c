@@ -30,7 +30,7 @@ static void assignfmmapspecification(ArrayMapspecification *mapspectable,
              : 0);
   NEWMAPSPEC(fmindex->boundarray,Bwtbound,(unsigned long) fmindex->numofcodes);
   NEWMAPSPEC(fmindex->specpos.spacePairBwtidx,PairBwtidx,
-             fmwithoptions->storeindexpos 
+             fmwithoptions->storeindexpos
              ? fmindex->specpos.nextfreePairBwtidx
              : 0);
   NEWMAPSPEC(fmindex->bfreq,Uchar,

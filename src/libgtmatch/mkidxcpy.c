@@ -48,7 +48,7 @@ int makeindexfilecopy(const Str *destindex,
     } else
     {
       uint64_t pos;
-  
+
       for(pos = 0; pos < maxlength; pos++)
       {
         if((cc = fgetc(fpsource)) == EOF)

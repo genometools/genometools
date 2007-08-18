@@ -21,7 +21,8 @@ static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
                                    pos);
 }
 
-static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
+static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,
+                                       Seqpos pos)
 {
   SPECIALTYPE *found, *start;
 
@@ -32,7 +33,7 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
                                              pos);
   if (found != NULL)
   {
-    Seqpos rangeend 
+    Seqpos rangeend
              = *found +
                (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)];
     if (rangeend > pos)

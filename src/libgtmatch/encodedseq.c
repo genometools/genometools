@@ -29,15 +29,16 @@
 
 #include "readnextUchar.gen"
 
-
 #ifdef Seqposequalsunsignedint
 #define Uint32Const(N)   (N##U)  /* uint32_t constant */
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
-        ((ESEQ[DIV4(IDX)] >> (Uint32Const(6) - MULT2(MOD4(IDX)))) & Uint32Const(3))
+        ((ESEQ[DIV4(IDX)] >> (Uint32Const(6) - MULT2(MOD4(IDX)))) &\
+                              Uint32Const(3))
 #else
 #define Uint64Const(N)   (N##UL) /* uint64_t constant */
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
-        ((ESEQ[(Seqpos) DIV4(IDX)] >> (Uint64Const(6) - (uint64_t) MULT2(MOD4(IDX))))\
+        ((ESEQ[(Seqpos) DIV4(IDX)] >> (Uint64Const(6) - \
+                                       (uint64_t) MULT2(MOD4(IDX))))\
          & Uint64Const(3))
 #endif
 
@@ -113,7 +114,7 @@
 #define NAMEDFUNCTION(F) {#F,F}
 
 #define REVERSEPOS(POS) (encseq->totallength - 1 - (POS))
-#define ISDIRREVERSE(R)   ((R) == Reversemode || (R) == Reversecomplementmode)
+#define ISDIRREVERSE(R) ((R) == Reversemode || (R) == Reversecomplementmode)
 
 typedef enum
 {
@@ -240,7 +241,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
     if(ISSPECIAL(cc))
     {
       return cc;
-    } 
+    }
     return (Uchar) 3 - cc;
   }
   if(readmode == Reversecomplementmode) /* only works with dna */
@@ -249,7 +250,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
     if(ISSPECIAL(cc))
     {
       return cc;
-    } 
+    }
     return (Uchar) 3 - cc;
   }
   fprintf(stderr,"getencodedchar: readmode %d not implemented\n",
@@ -290,7 +291,7 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
     if(ISSPECIAL(cc))
     {
       return cc;
-    } 
+    }
     return (Uchar) 3 - cc;
   }
   if(esr->readmode == Reversecomplementmode) /* only works with dna */
@@ -299,7 +300,7 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
     if(ISSPECIAL(cc))
     {
       return cc;
-    } 
+    }
     return (Uchar) 3 - cc;
   }
   fprintf(stderr,"sequentialgetencodedchar: readmode %d not implemented\n",
@@ -394,7 +395,6 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       NEWMAPSPEC(encseq->fourcharsinonebyte,Uchar,fourcharssize);
       if (encseq->numofspecialstostore > 0)
       {
-        
         numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
                                   encseq->numofspecialstostore);
         NEWMAPSPEC(encseq->ucharspecialpositions,Uchar,numofunits);
@@ -499,7 +499,6 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
   str_delete(tmpfilename,env);
   return haserr ? -1 : 0;
 }
-
 
 static uint64_t detsizeencseq(Positionaccesstype sat,
                               Seqpos totallength,
@@ -984,7 +983,7 @@ static void ucharshowspecialpositions(const Encodedsequence *encseq,
 {
   Seqpos idx, startpos;
 
-  printf("page " FormatSeqpos ": " FormatSeqpos " elems at offset " 
+  printf("page " FormatSeqpos ": " FormatSeqpos " elems at offset "
          FormatSeqpos "\n",
           PRINTSeqposcast(pgnum),
           PRINTSeqposcast(last - first + 1),
@@ -999,7 +998,7 @@ static void ucharshowspecialpositions(const Encodedsequence *encseq,
     {
       printf("[" FormatSeqpos "," FormatSeqpos "]\n",
                PRINTSeqposcast(offset + startpos),
-               PRINTSeqposcast(offset + startpos + 
+               PRINTSeqposcast(offset + startpos +
                               (Seqpos) (encseq->specialrangelength[idx] - 1)));
     }
   }
@@ -1040,7 +1039,7 @@ static bool nextnonemptypage(const Encodedsequence *encseq,
                              bool moveforward)
 {
   Seqpos endpos0, endpos1, pageno;
-  
+
   while (esr->nextpage < esr->numofspecialcells)
   {
     if(moveforward)
@@ -1083,7 +1082,7 @@ static Seqpos getpageoffset(Encodedsequencescanstate *esr,bool moveforward)
   {
     return (esr->nextpage - 1) * (esr->maxspecialtype + 1);
   }
-  return (esr->numofspecialcells - esr->nextpage) * 
+  return (esr->numofspecialcells - esr->nextpage) *
          (esr->maxspecialtype + 1);
 }
 
@@ -1108,7 +1107,7 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
       esr->lastcell--;
     }
     if (esr->firstcell + 1 < esr->lastcell + 1 ||
-        (encseq->sat != Viauint64tables && 
+        (encseq->sat != Viauint64tables &&
          nextnonemptypage(encseq,esr,moveforward)))
     {
       pageoffset = getpageoffset(esr,moveforward);
@@ -1132,7 +1131,7 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
     if (esr->hasprevious)
     {
       if(moveforward)
-      { 
+      {
         if (esr->previousrange.rightpos == esr->currentrange.leftpos)
         {
           esr->previousrange.rightpos = esr->currentrange.rightpos;
@@ -1202,13 +1201,8 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
         = (Seqpos) (encseq->totallength/esr->maxspecialtype + 1);
       esr->nextpage = 0;
       esr->lastcell = 0;
-      if(ISDIRREVERSE(readmode))
-      {
-        advanceEncodedseqstate(encseq,esr,false);
-      } else
-      {
-        advanceEncodedseqstate(encseq,esr,true);
-      }
+      advanceEncodedseqstate(encseq,esr,
+                             ISDIRREVERSE(readmode) ? false : true);
     }
   }
   assert(esr != NULL);
@@ -1447,7 +1441,7 @@ int overallspecialranges(const Encodedsequence *encseq,
   if(encseq->sat == Viadirectaccess)
   {
     if(overallspecialrangesdirectorbitaccess(true,
-                                             ISDIRREVERSE(readmode) 
+                                             ISDIRREVERSE(readmode)
                                                ? false : true,
                                              encseq,
                                              process,
@@ -1575,7 +1569,7 @@ static int readsatfromfile(const Str *indexname,Env *env)
           = encodedseqfunctab[(int) sat].seqdeliverchar##NAME.funcname
 
 /*
-  if filenametab != NULL, 
+  if filenametab != NULL,
 */
 
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
@@ -1720,7 +1714,7 @@ static int readsatfromfile(const Str *indexname,Env *env)
     {
       Fastabufferstate fbs;
       encseq->mappedptr = NULL;
-  
+
       initformatbufferstate(&fbs,
                             filenametab,
                             plainformat ? NULL : getsymbolmapAlphabet(alphabet),

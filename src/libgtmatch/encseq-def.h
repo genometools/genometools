@@ -24,7 +24,6 @@ typedef struct
          rightpos;
 } Sequencerange;          /* \Typedef{Sequencerange} */
 
-
 Seqpos getencseqtotallength(const Encodedsequence *encseq);
 
 Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
@@ -44,7 +43,6 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos);
-
 
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
                                            const StrArray *filenametab,

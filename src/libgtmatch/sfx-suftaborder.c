@@ -60,7 +60,7 @@ static void showcomparisonfailure(const char *where,
                                   int cmp,
                                   Seqpos maxlcp)
 {
-  fprintf(stderr,"ERROR: %s(" FormatSeqpos " vs " FormatSeqpos 
+  fprintf(stderr,"ERROR: %s(" FormatSeqpos " vs " FormatSeqpos
                  " " FormatSeqpos "=\"",
                        where,
                        PRINTSeqposcast((Seqpos) (ptr1 - suftab)),
@@ -152,7 +152,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
   {
     if (ISIBITSET(startposoccurs,*ptr))
     {
-      fprintf(stderr,"ERROR: suffix with startpos " FormatSeqpos 
+      fprintf(stderr,"ERROR: suffix with startpos " FormatSeqpos
                      " already occurs\n",
                       PRINTSeqposcast(*ptr));
       exit(EXIT_FAILURE);

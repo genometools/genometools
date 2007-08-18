@@ -118,9 +118,9 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
     {
       if(fbs->filelengthtab != NULL)
       {
-        fbs->filelengthtab[fbs->filenum].length 
+        fbs->filelengthtab[fbs->filenum].length
           += (uint64_t) currentfileread;
-        fbs->filelengthtab[fbs->filenum].effectivelength 
+        fbs->filelengthtab[fbs->filenum].effectivelength
           += (uint64_t) currentfileadd;
       }
       break;
@@ -283,9 +283,9 @@ static int advancePlainbufferstate(Fastabufferstate *fbs,Env *env)
     {
       if(fbs->filelengthtab != NULL)
       {
-        fbs->filelengthtab[fbs->filenum].length 
+        fbs->filelengthtab[fbs->filenum].length
            += (uint64_t) currentfileread;
-        fbs->filelengthtab[fbs->filenum].effectivelength 
+        fbs->filelengthtab[fbs->filenum].effectivelength
            += (uint64_t) currentfileread;
       }
       break;
@@ -319,9 +319,9 @@ static int advancePlainbufferstate(Fastabufferstate *fbs,Env *env)
                                         (unsigned long) fbs->filenum));
         if(fbs->filelengthtab != NULL)
         {
-          fbs->filelengthtab[fbs->filenum].length 
+          fbs->filelengthtab[fbs->filenum].length
             += (uint64_t) currentfileread;
-          fbs->filelengthtab[fbs->filenum].effectivelength 
+          fbs->filelengthtab[fbs->filenum].effectivelength
             += (uint64_t) currentfileread;
         }
         if ((unsigned long) fbs->filenum == strarray_size(fbs->filenametab) - 1)

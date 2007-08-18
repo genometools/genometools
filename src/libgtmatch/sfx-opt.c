@@ -25,13 +25,13 @@ static OPrval parse_options(int *parsed_args,
                             int argc, const char **argv, Env *env)
 {
   OptionParser *op;
-  Option *option, 
-         *optionsmap, 
-         *optiondna, 
-         *optionprotein, 
+  Option *option,
+         *optionsmap,
+         *optiondna,
+         *optionprotein,
          *optionplain,
-         *optionpl, 
-         *optionindexname, 
+         *optionpl,
+         *optionindexname,
          *optiondb,
          *optiondir;
   OPrval oprval;
@@ -156,8 +156,8 @@ static OPrval parse_options(int *parsed_args,
   {
     if (option_is_set(optionplain))
     {
-      if(!option_is_set(optiondna) && 
-         !option_is_set(optionprotein) && 
+      if(!option_is_set(optiondna) &&
+         !option_is_set(optionprotein) &&
          !option_is_set(optionsmap))
       {
         env_error_set(env,"if option -plain is used, then any of the options "
