@@ -576,7 +576,9 @@ static Positionaccesstype determinesmallestrep(Seqpos totallength,
   CHECKANDUPDATE(Viauchartables);
   CHECKANDUPDATE(Viaushorttables);
   CHECKANDUPDATE(Viauint32tables);
+#ifdef BIGSEQPOS
   CHECKANDUPDATE(Viauint64tables);
+#endif
   return cret;
 }
 
@@ -639,7 +641,6 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
 #define DIVMAXSPECIALTYPE(V)     ((V) >> 8)
 
 #include "accessspecial.gen"
-//#include "accessspecial64.gen"
 
 #undef ADDTYPE
 #undef ACCESSENCSEQ
@@ -654,7 +655,6 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
 #define DIVMAXSPECIALTYPE(V)     ((V) >> 16)
 
 #include "accessspecial.gen"
-//#include "accessspecial64.gen"
 
 #undef ADDTYPE
 #undef ACCESSENCSEQ
@@ -673,8 +673,6 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
 
 #define DIVMAXSPECIALTYPE(V)     ((V) >> 32)
 
-//#include "accessspecial64.gen"
-
 #undef ADDTYPE
 #undef ACCESSENCSEQ
 #undef SPECIALTYPE
@@ -686,8 +684,16 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
 #define ADDTYPE(V)               uint64##V
 #define ACCESSENCSEQ(ES,V)       (ES)->ADDTYPE(V)
 #define SPECIALTYPE              Uint64
+#define NOENDPTR
+#define DIRECTBINSEARCH
 
-#include "uintaccessspecial.gen"
+#include "accessspecial.gen"
+
+#undef ADDTYPE
+#undef ACCESSENCSEQ
+#undef SPECIALTYPE
+#undef NOENDPTR
+#undef DIRECTBINSEARCH
 
 /* Viadirect access */
 
