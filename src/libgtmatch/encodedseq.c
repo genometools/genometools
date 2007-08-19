@@ -1186,11 +1186,11 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
     esr->hasprevious = false;
     esr->hascurrent = false;
     esr->firstcell = 0;
+    esr->nextpage = 0;
     if(encseq->sat == Viauint64tables)
     {
-      esr->nextpage = 0;
       esr->lastcell = encseq->numofspecialstostore;
-      if(esr->lastcell > 0)
+      if(encseq->numofspecialstostore > 0)
       {
         esr->previousrange.leftpos = accessspecialpositions(encseq,0);
         esr->previousrange.rightpos
@@ -1205,7 +1205,6 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
       esr->maxspecialtype = sat2maxspecialtype(encseq->sat);
       esr->numofspecialcells
         = (Seqpos) (encseq->totallength/esr->maxspecialtype + 1);
-      esr->nextpage = 0;
       esr->lastcell = 0;
       advanceEncodedseqstate(encseq,esr,
                              ISDIRREVERSE(readmode) ? false : true);

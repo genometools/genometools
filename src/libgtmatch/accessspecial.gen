@@ -9,9 +9,9 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
                                       Env *env)
 {
   Uchar cc;
-  Seqpos pos;
+  Seqpos pos,
+         currentspecialchar = 0;
   int retval;
-  Seqpos currentspecialchar = 0;
   Bitstring bitwise = 0;
   Uchar lastspeciallength = 0;
 #ifndef NOENDPTR
@@ -171,9 +171,9 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,
   if (found != NULL)
   {
     Seqpos rangeend
-             = *found +
+             = (Seqpos) *found +
                (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)];
-    if (rangeend > pos)
+    if (pos < rangeend)
     {
       return true;
     }
@@ -235,11 +235,10 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
                         (SPECIALTYPE) pos);
       if (found != NULL)
       {
-        uint64_t rangeend
-               = (uint64_t) *found +
-                 (uint64_t) encseq->specialrangelength[
-                                    (Seqpos) (found - start)];
-        if (rangeend > (uint64_t) pos)
+        Seqpos rangeend
+               = (Seqpos) *found + 
+                 (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)];
+        if (pos < rangeend)
         {
           return true;
         }
@@ -252,19 +251,18 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
     {
       start = ACCESSENCSEQ(encseq,specialpositions);
       found = ADDTYPE(binarysearchpreviousequal)(
-                    start +
-                    ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1],
-                    start +
-                    ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber] - 1,
-                    (SPECIALTYPE) pos);
+                        start +
+                        ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1],
+                        start +
+                        ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber] - 1,
+                        (SPECIALTYPE) pos);
       if (found != NULL)
       {
-        uint64_t rangeend
-               = (uint64_t) ((MAXSPECIALTYPE+1) * pagenumber) +
-                 (uint64_t) *found +
-                 (uint64_t) encseq->specialrangelength[(Seqpos)
-                                                       (found - start)];
-        if (rangeend >  (uint64_t) pos)
+        Seqpos rangeend
+               = (Seqpos) ((MAXSPECIALTYPE+1) * pagenumber) +
+                 (Seqpos) *found +
+                 (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)];
+        if (pos < rangeend)
         {
           return true;
         }
@@ -274,13 +272,12 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
     {
       if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] > (Seqpos) 1)
       {
-        Seqpos i;
-        uint64_t rangeend;
+        Seqpos i, rangeend;
 
         i = ACCESSENCSEQ(encseq,endspecialsubsUint)[0] - 1;
-        rangeend = (uint64_t) ACCESSENCSEQ(encseq,specialpositions)[i] +
-                   (uint64_t) encseq->specialrangelength[i];
-        if (rangeend > (uint64_t) pos)
+        rangeend = (Seqpos) ACCESSENCSEQ(encseq,specialpositions)[i] +
+                   (Seqpos) encseq->specialrangelength[i];
+        if (pos < rangeend)
         {
           return true;
         }
@@ -290,14 +287,13 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
       if (ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-2] <
           ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1])
       {
-        Seqpos i;
-        uint64_t rangeend;
+        Seqpos i, rangeend;
 
         i = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] - 1;
-        rangeend = (uint64_t) ((MAXSPECIALTYPE+1) * (pagenumber-1)) +
-                   (uint64_t) ACCESSENCSEQ(encseq,specialpositions)[i] +
-                   (uint64_t) encseq->specialrangelength[i];
-        if (rangeend > (uint64_t) pos)
+        rangeend = (Seqpos) ((MAXSPECIALTYPE+1) * (pagenumber-1)) +
+                   (Seqpos) ACCESSENCSEQ(encseq,specialpositions)[i] +
+                   (Seqpos) encseq->specialrangelength[i];
+        if (pos < rangeend)
         {
           return true;
         }
