@@ -266,7 +266,8 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
         if (luaL_dofile(gtr->L, argv[1])) {
           /* error */
           assert(lua_isstring(gtr->L, -1)); /* error message on top */
-          env_error_set(env, "could not execute script %s", lua_tostring(gtr->L, -1));
+          env_error_set(env, "could not execute script %s",
+                        lua_tostring(gtr->L, -1));
           had_err = -1;
           lua_pop(gtr->L, 1); /* pop error message */
         }
