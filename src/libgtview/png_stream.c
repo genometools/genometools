@@ -51,8 +51,9 @@ static int determine_number_of_tracks(GenomeNode *gn, void *data, Env *env)
     }
 
     /* recursion */
-    genome_node_traverse_direct_children(gn, data, determine_number_of_tracks,
-                                         env);
+    (void) genome_node_traverse_direct_children(gn, data,
+                                                determine_number_of_tracks,
+                                                env);
   }
 
   return 0;
@@ -77,7 +78,7 @@ static int png_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
       png_stream->seqid = str_ref(genome_node_get_seqid(*gn));
     }
 
-    assert(png_stream->seqid);
+    assert(png_stream->seqid != NULL);
     /* XXX: we shown only features which lie completely in the given range */
     assert(png_stream->from);
     assert(png_stream->to);
@@ -165,7 +166,7 @@ GenomeStream* png_stream_new(GenomeStream *in_stream, Str *seqid,
   PNGStream *png_stream;
   GenomeStream *gs;
   env_error_check(env);
-  assert(seqid);
+  assert(seqid != NULL);
   assert(from <= to);
   gs = genome_stream_create(png_stream_class(),
                             genome_stream_is_sorted(in_stream), env);
@@ -191,7 +192,7 @@ void png_stream_draw(PNGStream *png_stream, bool verbose, Env *env)
   unsigned long i;
 
   env_error_check(env);
-  assert(png_stream);
+  assert(png_stream != NULL);
 
   png_visitor = png_visitor_new(png_stream->png_filename, png_stream->width,
                                 png_stream->number_of_tracks, png_stream->from,
@@ -207,7 +208,7 @@ void png_stream_draw(PNGStream *png_stream, bool verbose, Env *env)
   /* drawing */
   for (; i < array_size(png_stream->nodes_to_draw); i++) {
     gn = *(GenomeNode**) array_get(png_stream->nodes_to_draw, i);
-    genome_node_accept(gn, png_visitor, env);
+    (void) genome_node_accept(gn, png_visitor, env);
   }
 
   /* teardown */

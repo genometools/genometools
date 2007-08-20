@@ -35,7 +35,8 @@ feature requests:
 view tool:
 ----------
 
-- add multilevel collapsing
+- handle overlapping children more conveniently
+- check for tree properties of input data
 - add (full) Lua bindings
 - allow to specify the ``type order'' of tracks in config file
 - allow multiple files as input to `gt view` (as discussed with Sascha):

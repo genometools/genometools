@@ -50,7 +50,7 @@ typedef struct {
 static void png_visitor_free(GenomeVisitor *gv, Env *env)
 {
   PNGVisitor *pngv = png_visitor_cast(gv);
-  assert(pngv->png_filename);
+  assert(pngv->png_filename != NULL);
   assert(pngv->width); /* the width has to be positive */
   assert(pngv->height); /* the height has to be positive */
   graphics_save_as_png(pngv->graphics, pngv->png_filename);
@@ -121,7 +121,8 @@ static int show_children(GenomeNode *gn, void *data, Env *env)
     if (!info->children_overlap)
       local_info.local_track_number++;
 
-    genome_node_traverse_direct_children(gn, &local_info, show_children, env);
+    (void) genome_node_traverse_direct_children(gn, &local_info,
+                                                show_children, env);
 
     if (!local_info.children_overlap)
       local_info.local_track_number++;
@@ -193,8 +194,8 @@ static int png_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
     info.children_overlap =
       !genome_node_direct_children_do_not_overlap((GenomeNode*) gf, env);
     info.local_track_number = pngv->global_track_number;
-    genome_node_traverse_direct_children((GenomeNode*) gf, &info,
-                                         show_children, env);
+    (void) genome_node_traverse_direct_children((GenomeNode*) gf, &info,
+                                                show_children, env);
     if (!info.children_overlap)
       info.local_track_number++;
     assert(info.local_track_number >= pngv->global_track_number);

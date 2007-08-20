@@ -25,7 +25,7 @@ Creates a new Render object.
 \param env Pointer to Environment object.
 \return Created Render object.
 */
-Render* render_new(Config* cfg, Env* env);
+Render* render_new(Config *cfg, Env *env);
 
 /*!
 Renders a Diagram to a PNG file.
@@ -36,14 +36,14 @@ Renders a Diagram to a PNG file.
 \param width Target image width (in pixels).
 \param env Pointer to Environment object.
 */
-void    render_to_png(Render* r, Diagram* dia, char* fn,
-                      unsigned int width, Env* env);
+void    render_to_png(Render *r, Diagram *dia, char *fn,
+                      unsigned int width, Env *env);
 
 /*!
 Deletes a Render object
 \param r Render object
 \param env Pointer to Environment object.
 */
-void    render_delete(Render* r, Env* env);
+void    render_delete(Render *r, Env *env);
 
 #endif
