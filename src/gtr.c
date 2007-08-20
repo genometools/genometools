@@ -282,6 +282,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
     else {
       /* run tool */
       nargv = cstr_array_prefix_first(argv+1, argv[0], env);
+      env_error_set_progname(env, nargv[0]);
       had_err = tool(argc-1, (const char**) nargv, env);
     }
   }
