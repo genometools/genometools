@@ -23,7 +23,7 @@ config =
     long_terminal_repeat ={red=0.9,green=0.9,blue=0.4},
     LTR_retrotransposon  ={red=0.8,green=0.5,blue=0.5},
   },
-  -- Defines how a feature is drawn. 
+  -- Defines how a feature is drawn.
   -- Possible choices: "line", "box", "caret", "dashes"
   feature_styles =
   {
@@ -34,7 +34,7 @@ config =
     gene            = "box",
     intron          = "caret",
   },
-  -- Defines which feature types are displayed in their parent 
+  -- Defines which feature types are displayed in their parent
   -- feature's track. It is possible here to specify type chains,
   -- e.g. {"exon","mRNA"} will make the exon features collapse into
   -- the mRNA features, which in turn collapse into their parents.
@@ -64,7 +64,7 @@ config =
     scale_arrow_width = 6,     -- width of scale arrowheads, in pixels
     scale_arrow_height = 10,   -- height of scale arrowheads, in pixels
     arrow_width = 6,   -- width of feature arrowheads, in pixels
-    stroke_width = .5,  -- width of outlines, in pixels
+    stroke_width = .5, -- width of outlines, in pixels
     show_grid = "yes", -- shows light vertical lines for orientation
   },
 }
