@@ -40,9 +40,9 @@ config =
   -- the mRNA features, which in turn collapse into their parents.
   collapse =
   {
-  --uncomment below to enable collapsing
---    to_parent = {"CDS","exon","intron","long_terminal_repeat",
---                 "LTR_retrotransposon","inverted_repeat","target_site_duplication"},
+    to_parent = {"CDS","exon","intron","long_terminal_repeat",
+                 "LTR_retrotransposon","inverted_repeat",
+                 "target_site_duplication"},
   },
   -- Defines precedence of same level feature types when overlapping
   -- in a collapsed track.
