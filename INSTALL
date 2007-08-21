@@ -52,7 +52,7 @@ You can change this with the prefix argument. For example, to install under
 # make prefix=/usr install
 
 
-Finale note
+Final note
 -----------
 
 Please look at http://genometools.org for updates and report bugs if you
