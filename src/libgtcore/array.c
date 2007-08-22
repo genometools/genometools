@@ -36,12 +36,6 @@ void* array_get(const Array *a, unsigned long idx)
   return a->space + idx * a->size_of_elem;
 }
 
-void array_update(Array *a, unsigned long idx, void *elem)
-{
-  assert(a && idx < a->next_free);
-  memcpy(a->space + idx * a->size_of_elem, elem, a->size_of_elem);
-}
-
 void* array_get_first(const Array *a)
 {
   return array_get(a, 0);

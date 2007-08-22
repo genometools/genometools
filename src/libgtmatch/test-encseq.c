@@ -115,13 +115,13 @@ static void reverseSequencerange(Array *a)
   Sequencerange tmp, *valptr1, *valptr2;
 
   for (idx1=0, idx2 = (unsigned long) array_size(a) - 1;
-      idx1 < idx2; idx1++, idx2--)
+       idx1 < idx2; idx1++, idx2--)
   {
     valptr1 = (Sequencerange *) array_get(a,idx1);
     valptr2 = (Sequencerange *) array_get(a,idx2);
     tmp = *valptr1;
-    array_update(a,idx1,valptr2);
-    array_update(a,idx2,&tmp);
+    *valptr1 = *valptr2;
+    *valptr2 = tmp;
   }
 }
 
