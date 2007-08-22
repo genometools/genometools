@@ -14,6 +14,20 @@ end
   end
 end
 
+Name "gt eval prob 1"
+Keywords "gt_eval"
+Test do
+  run_test "#{$bin}gt eval #{$testdata}/gt_eval_prob_1.reality #{$testdata}/gt_eval_prob_1.prediction"
+  run "diff #{$last_stdout} #{$testdata}/gt_eval_prob_1.out"
+end
+
+Name "gt eval prob 1 (swapped)"
+Keywords "gt_eval"
+Test do
+  run_test "#{$bin}gt eval #{$testdata}/gt_eval_prob_1.prediction #{$testdata}/gt_eval_prob_1.reality"
+  run "diff #{$last_stdout} #{$testdata}/gt_eval_prob_1.out_swapped"
+end
+
 Name "gt eval -ltr test 1"
 Keywords "gt_eval"
 Test do
@@ -29,3 +43,4 @@ end
     run "diff #{$last_stdout} #{$testdata}/gt_eval_ltr_test_#{i}.out"
   end
 end
+
