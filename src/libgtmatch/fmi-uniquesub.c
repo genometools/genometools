@@ -133,11 +133,11 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   uniquesubcallinfo->queryfilenames = strarray_new(env);
   flagsoutputoption = strarray_new(env);
 
-  op = option_parser_new("options",
+  op = option_parser_new("[option ...]",
                          "Compute length of minumum unique prefixes.", env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optionmin = option_new_ulong_min("min",
-                                   "only output length"
+                                   "only output length "
                                    "if >= given minimum length",
                                    &uniquesubcallinfo->minlength.
                                           valueunsignedlong,

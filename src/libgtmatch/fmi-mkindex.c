@@ -56,7 +56,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   mkfmcallinfo->indexnametab = strarray_new(env);
   mkfmcallinfo->outfmindex = str_new(env);
   mkfmcallinfo->leveldesc = str_new(env);
-  op = option_parser_new("options",
+  op = option_parser_new("[option ...]",
                          "Compute FMindex.", env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optionfmout = option_new_string("fmout",
