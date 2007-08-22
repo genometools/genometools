@@ -18,15 +18,15 @@ err=0
 grep -n ' $' $*
 if [ $? -eq 0 ]; then echo "unnecessary blank(s) at the end of line"; err=1; fi
 
-#grep -n -e 'if('     \
-        #-e 'sizeof(' \
-        #-e 'switch(' \
-        #-e 'while('  \
-        #-e 'for('    \
-        #-e 'do{'     \
-        #-e '){'      \
-        #$*
-#if [ $? -eq 0 ]; then echo "missing blank(s)"; err=1; fi
+grep -n -e 'if('     \
+        -e 'sizeof(' \
+        -e 'switch(' \
+        -e 'while('  \
+        -e 'for('    \
+        -e 'do{'     \
+        -e '){'      \
+        $*
+if [ $? -eq 0 ]; then echo "missing blank(s)"; err=1; fi
 
 grep -n '.\{81,\}' $*
 if [ $? -eq 0 ]; then echo "line(s) longer than 80 characters"; err=1; fi
