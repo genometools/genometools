@@ -34,10 +34,10 @@ static OPrval parse_options(int *parsed_args,
   Str *dirarg = str_new(env);
 
   env_error_check(env);
-  op = option_parser_new("[option ...]",
+  op = option_parser_new("[option ...] -db file [...]",
                          "Compute enhanced suffix array.", env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  optiondb = option_new_filenamearray("db","specify database files (mandatory)",
+  optiondb = option_new_filenamearray("db","specify database files",
                                       so->filenametab,env);
   option_is_mandatory(optiondb);
   option_parser_add_option(op, optiondb, env);
