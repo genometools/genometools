@@ -5,6 +5,7 @@
 */
 
 #include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
 #include "divmodmul.h"
 #include "fmindex.h"
 #include "stamp.h"
@@ -36,11 +37,6 @@ static Indexleveldesc indexlevel[] =
   {"medium",(uint32_t) 5, (uint32_t) 3},
   {"big",   (uint32_t) 4, (uint32_t) 2}
 };
-
-static void versionfunc(const char *progname)
-{
-  printf("%s version 0.1\n",progname);
-}
 
 static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
                              int argc,

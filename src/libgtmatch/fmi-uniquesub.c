@@ -6,6 +6,7 @@
 
 #include <inttypes.h>
 #include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
 #include "fmindex.h"
 #include "format64.h"
 #include "seqdesc.h"
@@ -74,11 +75,6 @@ typedef struct
   Postprocessuniquelength postprocessuniquelength;
   void *processinfo;
 } Substringinfo;
-
-static void versionfunc(const char *progname)
-{
-  printf("%s version 0.1\n",progname);
-}
 
 static int optionaddbitmask(Optionargmodedesc *modedesc,
                             size_t numberofentries,

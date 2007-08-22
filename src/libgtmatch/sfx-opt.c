@@ -7,18 +7,14 @@
 #include <string.h>
 #include <inttypes.h>
 #include "libgtcore/env.h"
-#include "libgtcore/str.h"
 #include "libgtcore/option.h"
+#include "libgtcore/str.h"
+#include "libgtcore/versionfunc.h"
 #include "sfx-optdef.h"
 #include "stamp.h"
 
 #include "getbasename.pr"
 #include "sfx-readmode.pr"
-
-static void versionfunc(const char *progname)
-{
-  printf("%s version 0.1\n",progname);
-}
 
 static OPrval parse_options(int *parsed_args,
                             Suffixeratoroptions *so,
