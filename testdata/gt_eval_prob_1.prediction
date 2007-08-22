@@ -1,0 +1,25 @@
+##gff-version   3
+##sequence-region   chr8 118886142 119354298
+#
+#
+chr8	AUGUSTUS	CDS	118886142	118886313	.	-	1	 gene_id="g1";transcript_id="g1.t1"
+chr8	AUGUSTUS	gene	118886142	118926734	1.000000	-	.	.
+chr8	AUGUSTUS	transcript	118886142	118926734	.	-	.	.
+chr8	AUGUSTUS	CDS	118888637	118888797	.	-	0	 gene_id="g1";transcript_id="g1.t1"
+chr8	AUGUSTUS	CDS	118894292	118894381	.	-	0	 gene_id="g1";transcript_id="g1.t1"
+chr8	AUGUSTUS	CDS	118899855	118899950	.	-	0	 gene_id="g1";transcript_id="g1.t1"
+chr8	AUGUSTUS	CDS	118901096	118901214	.	-	2	 gene_id="g1";transcript_id="g1.t1"
+chr8	AUGUSTUS	CDS	118903885	118904017	.	-	0	 gene_id="g1";transcript_id="g1.t1"
+chr8	AUGUSTUS	CDS	118916864	118916971	.	-	0	 gene_id="g1";transcript_id="g1.t1"
+chr8	AUGUSTUS	CDS	118918528	118918621	.	-	1	 gene_id="g1";transcript_id="g1.t1"
+chr8	AUGUSTUS	CDS	118926685	118926734	.	-	0	 gene_id="g1";transcript_id="g1.t1"
+chr8	AUGUSTUS	gene	119191501	119192466	1.000000	-	.	.
+chr8	AUGUSTUS	transcript	119191501	119192466	.	-	.	.
+chr8	AUGUSTUS	CDS	119191501	119192466	.	-	0	 gene_id="g2";transcript_id="g2.t1"
+chr8	AUGUSTUS	CDS	119192825	119192837	.	+	0	 gene_id="g3";transcript_id="g3.t1"
+chr8	AUGUSTUS	gene	119192825	119193688	1.000000	+	.	.
+chr8	AUGUSTUS	transcript	119192825	119193688	.	+	.	.
+chr8	AUGUSTUS	CDS	119193042	119193688	.	+	2	 gene_id="g3";transcript_id="g3.t1"
+chr8	AUGUSTUS	gene	119353885	119354298	1.000000	-	.	.
+chr8	AUGUSTUS	transcript	119353885	119354298	.	-	.	.
+chr8	AUGUSTUS	CDS	119353885	119354298	.	-	0	 gene_id="g4";transcript_id="g4.t1"
