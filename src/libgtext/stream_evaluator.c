@@ -570,20 +570,6 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   return equal;
 }
 
-#if 0
-static bool LTRs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2,
-                           unsigned long LTRdelta)
-{
-  Range range_1, range_2;
-  assert(gn_1 && gn_2);
-  range_1 = genome_node_get_range(gn_1);
-  range_2 = genome_node_get_range(gn_2);
-  if (!range_compare_with_delta(range_1, range_2, LTRdelta))
-    return true;
-  return false;
-}
-#endif
-
 static void store_predicted_exon(TranscriptEvaluators *te, GenomeFeature *gf)
 {
   assert(te && gf);
@@ -949,22 +935,6 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                        &info->LTRdelta, info->slot->overlapped_LTRs, env);
 
       if (array_size(real_genome_nodes)) {
-#if 0
-        /* LTR(s) with the same range found -> check if they are equal */
-        for (i = 0; i < array_size(real_genome_nodes); i++) {
-          real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
-          if (LTRs_are_equal(gn, *real_gn, info->LTRdelta)) {
-            num = real_gn - (GenomeNode**)
-                            array_get_space(info->slot->LTRs);
-            if (!bittab_bit_is_set(info->slot->true_LTRs, num)) {
-              bittab_set_bit(info->slot->true_LTRs, num);
-              evaluator_add_true(info->LTR_evaluator);
-              /*@loopbreak@*/
-              break;
-            }
-          }
-        }
-#else
         for (i = 0; i < array_size(real_genome_nodes); i++) {
           real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
           num = real_gn - (GenomeNode**) array_get_space(info->slot->LTRs);
@@ -975,7 +945,6 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
             break;
           }
         }
-#endif
       }
       else {
         /* no LTR with the same range found -> check if this is a wrong LTR */
