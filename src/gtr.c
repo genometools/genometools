@@ -200,7 +200,7 @@ int run_test(void *key, void *value, void *data, Env *env)
   env_error_check(env);
   assert(key && value && data);
   testname = (const char*) key;
-  test = value;
+  test = (int (*)(Env *)) value;
   had_errp = (int*) data;
   printf("%s...", testname);
   xfflush(stdout);
