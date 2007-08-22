@@ -1,3 +1,11 @@
+ma_get_space_peak() und das Makro
+env_ma_get_space_peak() die den space peak in Bytes zur"uckliefern.
+
+mrege genericfilenames into fbsadv, and finally replace genericfilename
+by genfilename (if not too slow).
+
+--------------------
+
 store the special code information on a file and perform
 prefixlength many iterations to insert the suffixes: PRIO-low
 
