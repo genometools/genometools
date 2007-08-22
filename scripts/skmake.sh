@@ -30,18 +30,19 @@ else
   bignum=
 fi
 
+# NOASSERT='assert=no'
 #-DWITHTRIEIDENT
-FASTDEF="-Duint_fast32_t=uint32_t  -Duint_fast64_t=uint64_t"
+# FASTDEF="-Duint_fast32_t=uint32_t  -Duint_fast64_t=uint64_t"
 
 if test $icc -eq 1
 then
-  make assert=no CC='ccache icc' CFLAGS='-O3 ${FASTDEF} ${bignum} -wd1418,869,981,1338' LD='icc' CXX='icc' $*
+  make ${NOASSERT} CC='ccache icc' CFLAGS='-O3 ${FASTDEF} ${bignum} -wd1418,869,981,1338' LD='icc' CXX='icc' $*
 else
   if test $do64 -eq 1
   then
-    make assert=no CC="ccache gcc" CFLAGS="-O3 -m64 ${FASTDEF}" LDFLAGS="-m64" $*
+    make ${NOASSERT} CC="ccache gcc" CFLAGS="-O3 -m64 ${FASTDEF}" LDFLAGS="-m64" $*
   else
-    make assert=no CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum} ${FASTDEF}" LDFLAGS="-m32" $*
+    make ${NOASSERT} CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum} ${FASTDEF}" LDFLAGS="-m32" $*
   fi
 fi
 

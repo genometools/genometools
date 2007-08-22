@@ -15,6 +15,7 @@ char *dynamicstrdup(const char *file,int linenum,
   size_t sourcelength;
   char *dest;
 
+  env_error_check(env);
   assert(source != NULL);
   sourcelength = strlen(source);
   ALLOCASSIGNSPACEGENERIC(file,linenum,dest,NULL,char,sourcelength+1);

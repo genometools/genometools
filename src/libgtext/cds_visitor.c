@@ -152,8 +152,8 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
           genome_node_set_source(cds_feature, v->source);
           genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
           /* XXX correct this */
-          genome_node_set_phase(cds_feature,
-                                (Phase) splicedseq_map(v->splicedseq, orf.start)  % 3);
+          genome_node_set_phase(cds_feature, (Phase)
+                                splicedseq_map(v->splicedseq, orf.start) % 3);
         }
       }
       /* set the end of the last CDS feature and store it */

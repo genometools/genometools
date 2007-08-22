@@ -39,6 +39,7 @@ int overallquerysequences(int(*processsequence)(void *,
   bool haserr = false;
   char *desc;
 
+  env_error_check(env);
   initformatbufferstate(&fbs,
                         filenametab,
                         symbolmap,
@@ -47,7 +48,7 @@ int overallquerysequences(int(*processsequence)(void *,
                         sequencedescription,
                         env);
   sequencebuffer->nextfreeUchar = 0;
-  while(true)
+  while (true)
   {
     retval = readnextUchar(&charcode,&fbs,env);
     if (retval < 0)
@@ -61,7 +62,7 @@ int overallquerysequences(int(*processsequence)(void *,
     }
     if (charcode == (Uchar) SEPARATOR)
     {
-      if(sequencebuffer->nextfreeUchar == 0)
+      if (sequencebuffer->nextfreeUchar == 0)
       {
         env_error_set(env,"sequence " Formatuint64_t " is empty",
                       PRINTuint64_tcast(unitnum));
@@ -69,12 +70,12 @@ int overallquerysequences(int(*processsequence)(void *,
         break;
       }
       desc = dequeuegeneric(sequencedescription->descptr,env);
-      if(desc == NULL)
+      if (desc == NULL)
       {
         haserr = true;
         break;
       }
-      if(processsequence(info,
+      if (processsequence(info,
                          unitnum,
                          sequencebuffer->spaceUchar,
                          sequencebuffer->nextfreeUchar,
@@ -93,16 +94,16 @@ int overallquerysequences(int(*processsequence)(void *,
       STOREINARRAY(sequencebuffer,Uchar,1024,charcode);
     }
   }
-  if(!haserr && sequencebuffer->nextfreeUchar > 0)
+  if (!haserr && sequencebuffer->nextfreeUchar > 0)
   {
     desc = dequeuegeneric(sequencedescription->descptr,env);
-    if(desc == NULL)
+    if (desc == NULL)
     {
       haserr = true;
     }
-    if(!haserr)
+    if (!haserr)
     {
-      if(processsequence(info,
+      if (processsequence(info,
                          unitnum,
                          sequencebuffer->spaceUchar,
                          sequencebuffer->nextfreeUchar,

@@ -23,8 +23,8 @@ static void maketrie(Trierep *trierep,
 #ifdef WITHTRIEIDENT
   suffixinfo.ident = 0;
 #endif
-  for(suffixinfo.startpos = 0; 
-      suffixinfo.startpos <= len; 
+  for (suffixinfo.startpos = 0;
+      suffixinfo.startpos <= len;
       suffixinfo.startpos++)
   {
     insertsuffixintotrie(trierep,trierep->root,&suffixinfo);
@@ -48,7 +48,7 @@ static void successivelydeletesmallest(Trierep *trierep,
   uint32_t maxleafnum = (uint32_t) seqlen;
 #endif
 
-  while(trierep->root != NULL && trierep->root->firstchild != NULL)
+  while (trierep->root != NULL && trierep->root->firstchild != NULL)
   {
     smallest = findsmallestnodeintrie(trierep);
     deletesmallestpath(smallest,trierep);
@@ -68,7 +68,8 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
   bool haserr = false;
   Seqpos totallength;
 
-  if(streamsuffixarray(&suffixarray,
+  env_error_check(env);
+  if (streamsuffixarray(&suffixarray,
                        &totallength,
                        SARR_ESQTAB,
                        indexname,
@@ -77,7 +78,7 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
   {
     haserr = true;
   }
-  if(!haserr)
+  if (!haserr)
   {
     Trierep trierep;
     const Uchar *characters;
@@ -88,7 +89,7 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
     characters = getcharactersAlphabet(suffixarray.alpha);
     inittrienodetable(&trierep,totallength,(uint32_t) 1,env);
     maketrie(&trierep,characters,totallength);
-    if(onlyins)
+    if (onlyins)
     {
 #ifdef WITHTRIEIDENT
 #ifdef WITHTRIESHOW

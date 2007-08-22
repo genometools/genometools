@@ -25,14 +25,14 @@ struct Readintkeys
   const char *keystring;
   uint32_t *smallvalueptr;
   uint64_t *bigvalueptr;
-  bool ptrdefined, 
+  bool ptrdefined,
        found,
        *readflag;
 };
 
 size_t sizeofReadintkeys(void)
 {
-  return sizeof(Readintkeys);
+  return sizeof (Readintkeys);
 }
 
 void setreadintkeys(Array *riktab,
@@ -44,20 +44,21 @@ void setreadintkeys(Array *riktab,
 {
   Readintkeys rikvalue;
 
+  env_error_check(env);
   rikvalue.keystring = keystring;
   rikvalue.readflag = readflag;
-  switch(sizeval)
+  switch (sizeval)
   {
     case 0: rikvalue.smallvalueptr = NULL;
             rikvalue.bigvalueptr = NULL;
             rikvalue.ptrdefined = false;
             break;
-    case 4: assert(sizeof(uint32_t) == (size_t) 4);
+    case 4: assert(sizeof (uint32_t) == (size_t) 4);
             rikvalue.smallvalueptr = valueptr;
             rikvalue.bigvalueptr = NULL;
             rikvalue.ptrdefined = true;
             break;
-    case 8: assert(sizeof(uint64_t) == (size_t) 8);
+    case 8: assert(sizeof (uint64_t) == (size_t) 8);
             rikvalue.bigvalueptr = valueptr;
             rikvalue.smallvalueptr = NULL;
             rikvalue.ptrdefined = true;
@@ -66,7 +67,7 @@ void setreadintkeys(Array *riktab,
              exit(EXIT_FAILURE);
   }
   rikvalue.found = false;
-  array_add_elem(riktab,&rikvalue,sizeof(Readintkeys),env);
+  array_add_elem(riktab,&rikvalue,sizeof (Readintkeys),env);
 }
 
 static int scanuintintline(uint32_t *lengthofkey,
@@ -99,7 +100,7 @@ static int scanuintintline(uint32_t *lengthofkey,
                            (const char *) (linebuffer + i + 1));
         return -1;
       }
-      if(readint <= (int64_t) UINT32_MAX)
+      if (readint <= (int64_t) UINT32_MAX)
       {
         smallorbigint->smallvalue = (uint32_t) readint;
         retval = 0;
@@ -132,9 +133,9 @@ int allkeysdefined(const Str *indexname,const char *suffix,
   for (i=0; i<array_size(riktab); i++)
   {
     rikptr = (Readintkeys *) array_get(riktab,i);
-    if(rikptr->found)
+    if (rikptr->found)
     {
-      if(verbose)
+      if (verbose)
       {
         printf("%s=",rikptr->keystring);
         if (rikptr->ptrdefined)
@@ -158,7 +159,7 @@ int allkeysdefined(const Str *indexname,const char *suffix,
           printf("0\n");
         }
       }
-      if(rikptr->readflag != NULL)
+      if (rikptr->readflag != NULL)
       {
         *(rikptr->readflag) = true;
       }
@@ -180,7 +181,7 @@ int allkeysdefined(const Str *indexname,const char *suffix,
 
 int analyzeuintline(const Str *indexname,
                     const char *suffix,
-                    uint32_t linenum, 
+                    uint32_t linenum,
                     const Uchar *linebuffer,
                     unsigned long linelength,
                     Array *riktab,
@@ -193,6 +194,7 @@ int analyzeuintline(const Str *indexname,
   Smallorbigint smallorbigint;
   uint32_t lengthofkey;
 
+  env_error_check(env);
   retval = scanuintintline(&lengthofkey,
                            &smallorbigint,
                            linebuffer,
@@ -213,9 +215,9 @@ int analyzeuintline(const Str *indexname,
 	rikptr->found = true;
 	if (rikptr->ptrdefined)
 	{
-	  if(rikptr->smallvalueptr == NULL)
+	  if (rikptr->smallvalueptr == NULL)
 	  {
-	    if(retval == 1)
+	    if (retval == 1)
 	    {
               *(rikptr->bigvalueptr) = smallorbigint.bigvalue;
 	    } else
@@ -224,9 +226,9 @@ int analyzeuintline(const Str *indexname,
 	    }
 	  } else
 	  {
-	    if(retval == 1)
+	    if (retval == 1)
 	    {
-	      env_error_set(env,"bigvalue " Formatuint64_t 
+	      env_error_set(env,"bigvalue " Formatuint64_t
 				" does not fit into %s",
 			    PRINTuint64_tcast(smallorbigint.bigvalue),
 			    rikptr->keystring);
@@ -234,7 +236,7 @@ int analyzeuintline(const Str *indexname,
 	      break;
 	    }
             *(rikptr->smallvalueptr) = smallorbigint.smallvalue;
-	  } 
+	  }
 	}
 	found = true;
 	break;

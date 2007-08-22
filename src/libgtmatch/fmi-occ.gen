@@ -6,7 +6,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
          bwtlastidx,
          numofocc,
          idx,
-         maxbfreqidx, 
+         maxbfreqidx,
          ctimesnumofblocks = cc * fm->nofblocks,
          ctimesnumofsuperblocks = cc * fm->nofsuperblocks,
          posshiftbsizepow = pos >> fm->log2bsize,
@@ -18,17 +18,17 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
   printf("bsize=%u,",(unsigned int) fm->bsize);
   printf("pos=%u,cc=%u\n",pos,cc);
 #endif
-  if ((pos <= fm->longestsuffixpos && 
+  if ((pos <= fm->longestsuffixpos &&
        fm->longestsuffixpos - pos < (Seqpos) fm->bsize) ||
-      (pos >  fm->longestsuffixpos && 
+      (pos >  fm->longestsuffixpos &&
        pos - fm->longestsuffixpos < (Seqpos) fm->bsize))
-  {                                    // dollar in block
+  {                                    /* dollar in block */
     maxbfreqidx = ctimesnumofblocks + posshiftbsizepow;
     numofocc = fm->superbfreq[ctimesnumofsuperblocks + posshiftsuperbsizepow];
 #ifdef mydebug
     printf("case 0: numofocc = %u\n",numofocc);
 #endif
-    for (idx = ctimesnumofblocks + 
+    for (idx = ctimesnumofblocks +
                ((pos & fm->negatesuperbsizeones) >> fm->log2bsize);
          idx < maxbfreqidx; idx++)
     {
@@ -55,11 +55,11 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
 #endif
     return numofocc;
   }
-  if ((pos & (fm->superbsize >> 1)) &&       // first halve of superbuckets
+  if ((pos & (fm->superbsize >> 1)) &&       /* first halve of superbuckets */
       fm->bwtlength - pos > (Seqpos) fm->superbsize)
   {
     maxbfreqidx = ctimesnumofblocks +
-                  ((posshiftsuperbsizepow + 1) << 
+                  ((posshiftsuperbsizepow + 1) <<
                    fm->log2superbsizeminuslog2bsize);
     numofocc = fm->superbfreq[ctimesnumofsuperblocks +
                               posshiftsuperbsizepow + 1];
@@ -73,7 +73,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
       printf("case 4: numofocc %u\n",numofocc);
 #endif
     }
-    if (pos & fm->bsizehalve)            // second halve of bucket
+    if (pos & fm->bsizehalve)            /* second halve of bucket */
     {
       numofocc += fm->bfreq[ctimesnumofblocks + posshiftbsizepow];
 #ifdef mydebug
@@ -90,7 +90,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
 #endif
         }
       }
-    } else                               // first halve of bucket
+    } else                               /* first halve of bucket */
     {
       for (bwtidx = (pos & fm->negatebsizeones); bwtidx < pos; bwtidx++)
       {
@@ -103,14 +103,14 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
         }
       }
     }
-  } else                                 // second halve of superbucket
+  } else                                 /* second halve of superbucket */
   {
     maxbfreqidx = ctimesnumofblocks + posshiftbsizepow;
     numofocc = fm->superbfreq[ctimesnumofsuperblocks + posshiftsuperbsizepow];
 #ifdef mydebug
     printf("case 8: numofocc = %u\n",numofocc);
 #endif
-    for (idx = ctimesnumofblocks + 
+    for (idx = ctimesnumofblocks +
                ((pos & fm->negatesuperbsizeones) >> fm->log2bsize);
          idx < maxbfreqidx; idx++)
     {
@@ -119,7 +119,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
       printf("case 9: numofocc = %u\n",numofocc);
 #endif
     }
-    if ((pos & fm->bsizehalve)           // second halve of bucket
+    if ((pos & fm->bsizehalve)           /* second halve of bucket */
         && (fm->bwtlength - pos > (Seqpos) fm->bsize))
     {
       numofocc += fm->bfreq[ctimesnumofblocks + posshiftbsizepow];
@@ -137,7 +137,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
 #endif
         }
       }
-    } else                               // first halve of bucket
+    } else                               /* first halve of bucket */
     {
       for (bwtidx = (pos & fm->negatebsizeones); bwtidx < pos; bwtidx++)
       {

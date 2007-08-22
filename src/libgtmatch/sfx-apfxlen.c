@@ -13,7 +13,7 @@
 
 /*
   We need \texttt{prefixlenbits} bits to store the length of
-  a matching prefix. So we can store the following maximal value 
+  a matching prefix. So we can store the following maximal value
   in the remaining bits.
 */
 
@@ -22,12 +22,12 @@
 
 /*
   We allow to choose the prefixlength \(l\) in such a way that the size of
-  table bcktab (which is $8\cdot k^{l}$ never exceeds the 
+  table bcktab (which is $8\cdot k^{l}$ never exceeds the
   $\texttt{MAXMULTIPLIEROFTOTALLENGTH} \cdot n$, where \(k\) is the size
   of the alphabet and \(n\) is the total length of the input sequence.
 */
 
-#define MAXMULTIPLIEROFTOTALLENGTH 4  
+#define MAXMULTIPLIEROFTOTALLENGTH 4
 
 #define MAXVALUEWITHBITS(BITNUM)    ((((unsigned int) 1) << (BITNUM)) - 1)
 
@@ -36,7 +36,7 @@ static unsigned int logalphasize(unsigned int numofchars,double value)
   unsigned int retval;
   double logtmp1, logtmp2;
 
-  if(value <= (double) numofchars)
+  if (value <= (double) numofchars)
   {
     return (unsigned int) 1;
   }
@@ -54,7 +54,7 @@ unsigned int recommendedprefixlength(unsigned int numofchars,
 
   prefixlength = logalphasize(numofchars,
                               (double) totallength/sizeofbckentry);
-  if(prefixlength == 0)
+  if (prefixlength == 0)
   {
     return (unsigned int) 1;
   } else
@@ -73,18 +73,18 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
   maxprefixlen = logalphasize(numofchars,
                            (double) totallength/
                                 (sizeofbckentry/MAXMULTIPLIEROFTOTALLENGTH));
-  if(prefixlenbits > 0)
+  if (prefixlenbits > 0)
   {
     unsigned int tmplength;
     tmplength = logalphasize(numofchars,
-                             (double) 
+                             (double)
                              MAXREMAININGAFTERPREFIXLEN(prefixlenbits));
-    if(maxprefixlen > tmplength)
+    if (maxprefixlen > tmplength)
     {
       maxprefixlen = tmplength;
     }
     tmplength = MAXVALUEWITHBITS(prefixlenbits);
-    if(maxprefixlen > tmplength)
+    if (maxprefixlen > tmplength)
     {
       maxprefixlen = tmplength;
     }
@@ -95,7 +95,8 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
 int checkprefixlength(unsigned int maxprefixlen,
                       unsigned int prefixlength,Env *env)
 {
-  if(maxprefixlen < prefixlength)
+  env_error_check(env);
+  if (maxprefixlen < prefixlength)
   {
     env_error_set(env,"prefix length %u is too large, maximal prefix length "
                       "for this input size and alphabet size is %u",

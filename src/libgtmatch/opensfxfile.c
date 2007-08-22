@@ -14,11 +14,13 @@
 
 /*@null@*/ FILE *opensfxfile(const Str *indexname,
                              const char *suffix,
-                             const char *mode,Env *env)
+                             const char *mode,
+                             Env *env)
 {
   Str *tmpfilename;
   FILE *fp;
 
+  env_error_check(env);
   tmpfilename = str_clone(indexname,env);
   str_append_cstr(tmpfilename,suffix,env);
   fp = env_fa_fopen(env,str_get(tmpfilename),mode);
@@ -36,10 +38,11 @@ bool indexfilealreadyexists(const Str *indexname,const char *suffix,Env *env)
   struct stat statbuf;
   Str *tmpfilename;
 
+  env_error_check(env);
   tmpfilename = str_clone(indexname,env);
   str_append_cstr(tmpfilename,suffix,env);
 
-  if(stat(str_get(tmpfilename),&statbuf) == 0)
+  if (stat(str_get(tmpfilename),&statbuf) == 0)
   {
     str_delete(tmpfilename,env);
     return true;

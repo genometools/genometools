@@ -80,6 +80,10 @@ void    env_error_set(Env*, const char *format, ...)
         error_unset(env_error(env))
 #define env_error_get(env)\
         error_get(env_error(env))
+#define env_error_set_progname(env, progname)\
+        error_set_progname(env_error(env), progname, env)
+#define env_error_get_progname(env)\
+        error_get_progname(env_error(env))
 /* make sure that the error is not set, has to be used at the beginning of
    every routine which has an Env* argument */
 #define env_error_check(env)\

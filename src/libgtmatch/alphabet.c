@@ -11,6 +11,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <limits.h>
+#include <errno.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
@@ -21,7 +22,6 @@
 #include "alphadef.h"
 
 #include "guessprot.pr"
-#include "scanpaths.pr"
 #include "readnextline.pr"
 
  struct _Alphabet
@@ -131,7 +131,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
   unsigned cnum, linecount = 0;
   ArrayUchar line;
   unsigned long column;
-  bool blankfound, ignore, preamble = true;
+  bool blankfound, ignore, preamble = true, haserr = false;
 
   env_error_check(env);
   alpha->domainsize = alpha->mapsize = alpha->mappedwildcards = 0;
@@ -165,7 +165,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
       if (!ignore)
       {
         blankfound = false;
-        for (column=0; column<line.nextfreeUchar; column++) 
+        for (column=0; column<line.nextfreeUchar; column++)
         { /* for all chars in line */
           cc = LINE(column);
           if (ispunct((int) cc) || isalnum((int) cc))
@@ -177,7 +177,8 @@ static int readsymbolmapviafp(Alphabet *alpha,
                              cc,
                              alpha->mapsize,
                              (uint32_t) alpha->symbolmap[(uint32_t) cc]);
-              return -1;
+              haserr = true;
+              break;
             }
             /* get same value */
             alpha->symbolmap[(uint32_t) cc] = (Uchar) alpha->mapsize;
@@ -192,8 +193,13 @@ static int readsymbolmapviafp(Alphabet *alpha,
             env_error_set(env,
                           "illegal character '%c' in line %u of mapfile %s",
                           cc,linecount,str_get(mapfile));
-            return -2;
+            haserr = true;
+            break;
           }
+        }
+        if (haserr)
+        {
+          break;
         }
         if (blankfound)
         {
@@ -203,7 +209,8 @@ static int readsymbolmapviafp(Alphabet *alpha,
                           "illegal character '%c' at the end of "
                           "line %u in mapfile %s",
                           LINE(column+1),linecount,str_get(mapfile));
-            return -3;
+            haserr  = true;
+            break;
           }
           /* use next character to display character */
           alpha->characters[alpha->mapsize++] = LINE(column+1);
@@ -215,24 +222,27 @@ static int readsymbolmapviafp(Alphabet *alpha,
       }
     }
   }
-  for (cnum=0;cnum<=UCHAR_MAX; cnum++)
+  if (!haserr)
   {
-    if (alpha->symbolmap[cnum] == (Uchar) (alpha->mapsize - 1))
+    for (cnum=0;cnum<=UCHAR_MAX; cnum++)
     {
-      if (wildcard > 0)
+      if (alpha->symbolmap[cnum] == (Uchar) (alpha->mapsize - 1))
       {
-        alpha->symbolmap[cnum] = wildcard; /* modify mapping for wildcard */
+        if (wildcard > 0)
+        {
+          alpha->symbolmap[cnum] = wildcard; /* modify mapping for wildcard */
+        }
+        alpha->mappedwildcards++;
       }
-      alpha->mappedwildcards++;
+    }
+    if (wildcard > 0)
+    {
+      alpha->characters[(uint32_t) wildcard]
+        = alpha->characters[alpha->mapsize-1];
     }
   }
-  if (wildcard > 0)
-  {
-    alpha->characters[(uint32_t) wildcard] 
-      = alpha->characters[alpha->mapsize-1];
-  }
   FREEARRAY(&line,Uchar);
-  return 0;
+  return haserr ? -1 : 0;
 }
 
 /*EE
@@ -250,19 +260,25 @@ static int readsymbolmap(Alphabet *alpha,Uchar wildcard,
                          const Str *mapfile,Env *env)
 {
   FILE *fpin;
+  bool haserr = false;
 
   env_error_check(env);
-  fpin = scanpathsforfile("MKVTREESMAPDIR",mapfile,env);
+  fpin = env_fa_fopen(env,str_get(mapfile),"rb");
   if (fpin == NULL)
   {
-    return -1;
+    env_error_set(env,"cannot open file \"%s\": %s",str_get(mapfile),
+                                                    strerror(errno));
+    haserr = true;
   }
-  if (readsymbolmapviafp(alpha,wildcard,mapfile,fpin,env) != 0)
+  if (!haserr)
   {
-    return -2;
+    if (readsymbolmapviafp(alpha,wildcard,mapfile,fpin,env) != 0)
+    {
+      haserr = true;
+    }
   }
   env_fa_xfclose(fpin,env);
-  return 0;
+  return haserr ? -1 : 0;
 }
 
 static void assignDNAsymbolmap(Uchar *symbolmap)
@@ -386,7 +402,9 @@ static int assignProteinorDNAalphabet(Alphabet *alpha,
                                       const StrArray *filenametab,Env *env)
 {
   int retval = guessifproteinsequencestream(filenametab,env);
-  if(retval < 0)
+
+  env_error_check(env);
+  if (retval < 0)
   {
     return -1;
   }
@@ -407,6 +425,7 @@ static int assignProteinorDNAalphabet(Alphabet *alpha,
                                          Env *env)
 {
   Alphabet *alpha;
+  bool haserr = false;
 
   env_error_check(env);
   ALLOCASSIGNSPACE(alpha,NULL,Alphabet,(size_t) 1);
@@ -427,16 +446,21 @@ static int assignProteinorDNAalphabet(Alphabet *alpha,
                          smapfile,
                          env) != 0)
         {
-          return NULL;
+          haserr = true;
         }
       } else
       {
-        if(assignProteinorDNAalphabet(alpha,filenametab,env) != 0)
+        if (assignProteinorDNAalphabet(alpha,filenametab,env) != 0)
         {
-          return NULL;
+          haserr = true;
         }
       }
     }
+  }
+  if (haserr)
+  {
+    FREESPACE(alpha);
+    return NULL;
   }
   return alpha;
 }
@@ -465,6 +489,7 @@ Uchar *copycharactersAlphabet(const Alphabet *alpha,Env *env)
 {
   Uchar *characters;
 
+  env_error_check(env);
   ALLOCASSIGNSPACE(characters,NULL,Uchar,alpha->domainsize);
   (void) memcpy(characters,alpha->characters,(size_t) alpha->domainsize);
   return characters;
@@ -515,7 +540,7 @@ void outputalphabet(FILE *fpout,const Alphabet *alpha)
 }
 
 /*
-  Suppose the string \texttt{w} of length \texttt{wlen} 
+  Suppose the string \texttt{w} of length \texttt{wlen}
   was transformed according to the alphabet \texttt{alpha}.
   The following function shows each character in \texttt{w}
   as the characters specified in the transformation.
@@ -526,8 +551,8 @@ void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
                              const Uchar *w,unsigned long wlen)
 {
   unsigned long i;
- 
-  for(i = 0; i < wlen; i++)
+
+  for (i = 0; i < wlen; i++)
   {
     (void) putc((int) alpha->characters[(int) w[i]],fpout);
   }
@@ -548,9 +573,9 @@ static uint32_t removelowercaseproteinchars(Uchar *domainbuf,
 {
   uint32_t i, j = 0;
 
-  for(i=0; i< alpha->domainsize - alpha->mappedwildcards; i++)
+  for (i=0; i< alpha->domainsize - alpha->mappedwildcards; i++)
   {
-    if(isalnum((int) alpha->mapdomain[i]) && 
+    if (isalnum((int) alpha->mapdomain[i]) &&
        isupper((int) alpha->mapdomain[i]))
     {
       domainbuf[j++] = alpha->mapdomain[i];
@@ -563,11 +588,11 @@ static uint32_t removelowercaseproteinchars(Uchar *domainbuf,
 
 static Qsortcomparereturntype comparechar(const void *a,const void *b)
 {
-  if(UNCAST(a) < UNCAST(b))
+  if (UNCAST(a) < UNCAST(b))
   {
     return -1;
   }
-  if(UNCAST(a) > UNCAST(b))
+  if (UNCAST(a) > UNCAST(b))
   {
     return 1;
   }
@@ -576,8 +601,8 @@ static Qsortcomparereturntype comparechar(const void *a,const void *b)
 
 /*EE
   The following function checks if the given alphabet is the Protein
-  alphabet with the aminoacids 
-  A, C, D, E, F, G, H, I, K, L, M, N, P, Q, R, S, T, V, W, Y written in 
+  alphabet with the aminoacids
+  A, C, D, E, F, G, H, I, K, L, M, N, P, Q, R, S, T, V, W, Y written in
   lower or upper case.
 */
 
@@ -585,22 +610,22 @@ bool isproteinalphabet(const Alphabet *alpha)
 {
   Alphabet proteinalphabet;
   uint32_t i, reduceddomainsize1, reduceddomainsize2;
-  Uchar domainbuf1[UCHAR_MAX+1], 
+  Uchar domainbuf1[UCHAR_MAX+1],
         domainbuf2[UCHAR_MAX+1];
 
   reduceddomainsize1 = removelowercaseproteinchars(&domainbuf1[0],alpha);
   assignProteinalphabet(&proteinalphabet);
   reduceddomainsize2 = removelowercaseproteinchars(&domainbuf2[0],
                                                    &proteinalphabet);
-  if(reduceddomainsize1 == reduceddomainsize2)
+  if (reduceddomainsize1 == reduceddomainsize2)
   {
-    qsort(&domainbuf1[0],(size_t) reduceddomainsize1,sizeof(char),
+    qsort(&domainbuf1[0],(size_t) reduceddomainsize1,sizeof (char),
           (Qsortcomparefunction) comparechar);
-    qsort(&domainbuf2[0],(size_t) reduceddomainsize2,sizeof(char),
+    qsort(&domainbuf2[0],(size_t) reduceddomainsize2,sizeof (char),
           (Qsortcomparefunction) comparechar);
-    for(i=0; i < reduceddomainsize2; i++)
+    for (i=0; i < reduceddomainsize2; i++)
     {
-      if(domainbuf1[i] != domainbuf2[i])
+      if (domainbuf1[i] != domainbuf2[i])
       {
         return false;
       }
@@ -617,25 +642,25 @@ static bool checksymbolmap(const Uchar *testsymbolmap,
   unsigned int i;
   Uchar cc1, cc2 = 0;
 
-  for(i=0; testcharacters[i] != '\0'; i++)
+  for (i=0; testcharacters[i] != '\0'; i++)
   {
-    cc1 = testcharacters[i];
-    if(isupper((int) cc1))
+    cc1 = (Uchar) testcharacters[i];
+    if (isupper((int) cc1))
     {
-      cc2 = tolower((int) cc1);
+      cc2 = (Uchar) tolower((int) cc1);
     } else
     {
-      if(islower((int) cc1))
+      if (islower((int) cc1))
       {
-        cc2 = toupper((int) cc2);
+        cc2 = (Uchar) toupper((int) cc2);
       } else
       {
         fprintf(stderr,"checksymbolmap used for non-alphabet character %c\n",
-                cc1);
+                (char) cc1);
         exit(EXIT_FAILURE);
       }
     }
-    if(testsymbolmap[cc1] != verifiedsymbolmap[cc1] &&
+    if (testsymbolmap[cc1] != verifiedsymbolmap[cc1] &&
        testsymbolmap[cc2] != verifiedsymbolmap[cc2])
     {
       return false;
@@ -651,16 +676,16 @@ static bool checksymbolmap(const Uchar *testsymbolmap,
 
 bool isdnaalphabet(const Alphabet *alpha)
 {
-  if(isproteinalphabet(alpha))
+  if (isproteinalphabet(alpha))
   {
     return false;
   }
-  if(alpha->mapsize == MAPSIZEDNA)
+  if (alpha->mapsize == MAPSIZEDNA)
   {
     Uchar dnasymbolmap[UCHAR_MAX+1];
 
     assignDNAsymbolmap(&dnasymbolmap[0]);
-    if(checksymbolmap(alpha->symbolmap,&dnasymbolmap[0],"acgt"))
+    if (checksymbolmap(alpha->symbolmap,&dnasymbolmap[0],"acgt"))
     {
       return true;
     }

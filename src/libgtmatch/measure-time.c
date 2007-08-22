@@ -17,6 +17,7 @@
 
 void inittheclock(Measuretime **mtime,const char *event,Env *env)
 {
+  env_error_check(env);
   *mtime = env_ma_malloc(env,sizeof (Measuretime));
   (*mtime)->startclock = clock();
   (*mtime)->overalltime = 0;

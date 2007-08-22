@@ -20,52 +20,54 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
   uint32_t idx;
   Uchar lastofprevious, firstofcurrent;
   Seqpos tmplength, *sequenceoffsettable;
-  uint64_t tmpspecialcharacters, 
+  uint64_t tmpspecialcharacters,
            tmpspecialranges,
            tmplarge;
 
+  env_error_check(env);
   assert(numofindexes > 0);
   ALLOCASSIGNSPACE(sequenceoffsettable,NULL,Seqpos,numofindexes);
   tmpspecialcharacters = (uint64_t) (numofindexes-1);
   tmpspecialranges = 0;
-  for(idx=0; idx<numofindexes; idx++)
+  for (idx=0; idx<numofindexes; idx++)
   {
-    if(idx == 0)
+    if (idx == 0)
     {
       tmplength = 0;
       sequenceoffsettable[idx] = 0;
     } else
     {
       tmplength = getencseqtotallength(suffixarraytable[idx - 1].encseq);
-      sequenceoffsettable[idx] 
+      sequenceoffsettable[idx]
 	= sequenceoffsettable[idx-1] + tmplength + (Seqpos) 1;
     }
-    tmpspecialcharacters 
+    tmpspecialcharacters
       += (uint64_t) suffixarraytable[idx].specialcharinfo.specialcharacters;
-    tmpspecialranges 
+    tmpspecialranges
       += (uint64_t) suffixarraytable[idx].specialcharinfo.specialranges;
-    if(idx > 0)
+    if (idx > 0)
     {
       lastofprevious = getencodedchar(suffixarraytable[idx - 1].encseq,
                                       tmplength-1,
                                       suffixarraytable[idx - 1].readmode);
-      firstofcurrent = getencodedchar(suffixarraytable[idx].encseq,0,
+      firstofcurrent = getencodedchar(suffixarraytable[idx].encseq,
+                                      0,
                                       suffixarraytable[idx].readmode);
-      if(ISSPECIAL(lastofprevious))
+      if (ISSPECIAL(lastofprevious))
       {
-         if(ISSPECIAL(firstofcurrent))
+         if (ISSPECIAL(firstofcurrent))
          {
            tmpspecialranges--;
          }
       } else
       {
-        if(ISNOTSPECIAL(firstofcurrent))
+        if (ISNOTSPECIAL(firstofcurrent))
         {
           tmpspecialranges++;
         }
       }
     }
-    tmplarge = (uint64_t) sequenceoffsettable[idx] + 
+    tmplarge = (uint64_t) sequenceoffsettable[idx] +
                (uint64_t) getencseqtotallength(suffixarraytable[idx].encseq);
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmplarge);
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmpspecialcharacters);

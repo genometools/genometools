@@ -13,7 +13,7 @@ void kmercode2string(char *buffer,
                      const char *characters)
 {
   int i;
-  uint32_t cc; 
+  uint32_t cc;
   Codetype tmpcode = code;
 
   buffer[kmersize] = '\0';

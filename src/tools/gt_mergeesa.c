@@ -7,7 +7,7 @@
 #include "gt.h"
 
 static OPrval parse_options(Str *indexname,StrArray *indexnametab,
-                            int *parsed_args, int argc, 
+                            int *parsed_args, int argc,
                             const char **argv,Env *env)
 {
   OptionParser *op;
@@ -15,7 +15,7 @@ static OPrval parse_options(Str *indexname,StrArray *indexnametab,
   Option *option;
 
   env_error_check(env);
-  op = option_parser_new("storeindex <mkvindex1> <mkvindex2> ...", 
+  op = option_parser_new("storeindex <mkvindex1> <mkvindex2> ...",
                          "Merge indexes into one index.",
                          env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -48,24 +48,24 @@ int gt_mergeesa(int argc, const char **argv, Env *env)
 
   storeindex = str_new(env);
   indexnametab = strarray_new(env);
-  switch (parse_options(storeindex, indexnametab, &parsed_args, 
-                        argc, argv, env)) 
+  switch (parse_options(storeindex, indexnametab, &parsed_args,
+                        argc, argv, env))
   {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
          haserr = true; break;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  if(!haserr)
+  if (!haserr)
   {
     unsigned long i;
 
     printf("# storeindex=%s\n",str_get(storeindex));
-    for(i=0; i<strarray_size(indexnametab); i++)
+    for (i=0; i<strarray_size(indexnametab); i++)
     {
       printf("# input=%s\n",strarray_get(indexnametab,i));
     }
-    if(performtheindexmerging(storeindex,
+    if (performtheindexmerging(storeindex,
                               indexnametab,env) != 0)
     {
       haserr = true;

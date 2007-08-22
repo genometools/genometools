@@ -42,19 +42,19 @@ DECLAREBufferedfiletype(Largelcpvalue);
                                                   TYPE ## Bufferedfile *buf,\
                                                   Env *env)\
         {\
-          if(buf->nextread >= buf->nextfree)\
+          if (buf->nextread >= buf->nextfree)\
           {\
             buf->nextfree = (uint32_t) fread(buf->bufspace,\
-                                             sizeof(TYPE),\
+                                             sizeof (TYPE),\
                                              (size_t) FILEBUFFERSIZE,\
                                              buf->fp);\
-            if(ferror(buf->fp))\
+            if (ferror(buf->fp))\
             {\
               env_error_set(env,"error when trying to read next %s",#TYPE);\
               return -2;\
             }\
             buf->nextread = 0;\
-            if(buf->nextfree == 0)\
+            if (buf->nextfree == 0)\
             {\
               return 0;\
             }\

@@ -20,11 +20,11 @@ Seqpos determinenumberofspecialstostore(
 {
   Seqpos addprefixsuffix = 0;
 
-  if(specialcharinfo->lengthofspecialprefix > 0)
+  if (specialcharinfo->lengthofspecialprefix > 0)
   {
     addprefixsuffix++;
   }
-  if(specialcharinfo->lengthofspecialsuffix > 0)
+  if (specialcharinfo->lengthofspecialsuffix > 0)
   {
     addprefixsuffix++;
   }
@@ -39,25 +39,25 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
 {
   uint64_t sumsize = 0;
 
-  sumsize += (uint64_t) sizeof(Seqpos) * (uint64_t) TFREQSIZE(fm->mapsize);
-  sumsize += (uint64_t) sizeof(Seqpos) * 
+  sumsize += (uint64_t) sizeof (Seqpos) * (uint64_t) TFREQSIZE(fm->mapsize);
+  sumsize += (uint64_t) sizeof (Seqpos) *
              (uint64_t) SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks);
-  if(storeindexpos)
+  if (storeindexpos)
   {
-    sumsize += (uint64_t) sizeof(Seqpos) * 
+    sumsize += (uint64_t) sizeof (Seqpos) *
                (uint64_t) MARKPOSTABLELENGTH(fm->bwtlength,fm->markdist);
   }
-  if(suffixlength > 0)
+  if (suffixlength > 0)
   {
-    sumsize += (uint64_t) sizeof(Bwtbound) * (uint64_t) fm->numofcodes;
+    sumsize += (uint64_t) sizeof (Bwtbound) * (uint64_t) fm->numofcodes;
   }
-  if(storeindexpos)
+  if (storeindexpos)
   {
-    sumsize += (uint64_t) sizeof(PairBwtidx) * 
+    sumsize += (uint64_t) sizeof (PairBwtidx) *
                (uint64_t) determinenumberofspecialstostore(
                                  &fm->specialcharinfo);
   }
-  sumsize += (uint64_t) sizeof(Uchar) * 
+  sumsize += (uint64_t) sizeof (Uchar) *
              (uint64_t) BFREQSIZE(fm->mapsize,fm->nofblocks);
   return CALLCASTFUNC(uint64_t,unsigned_long,sumsize);
 }
@@ -88,14 +88,14 @@ void computefmkeyvalues (Fmindex *fm,
   fm->log2superbsizeminuslog2bsize = fm->log2superbsize - fm->log2bsize;
   fm->mapsize = mapsize;
   fm->suffixlength = suffixlength;
-  if(fm->suffixlength > 0)
+  if (fm->suffixlength > 0)
   {
     fm->numofcodes = determinenumofcodes(fm->mapsize-1,fm->suffixlength);
   } else
   {
     fm->numofcodes = 0;
   }
-  if(&fm->specialcharinfo != specialcharinfo)
+  if (&fm->specialcharinfo != specialcharinfo)
   {
     fm->specialcharinfo = *specialcharinfo;
   }

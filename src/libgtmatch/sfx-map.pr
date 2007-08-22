@@ -7,19 +7,19 @@ int initUcharBufferedfile(UcharBufferedfile *stream,
 
 void freesuffixarray(Suffixarray *suffixarray,Env *env);
 
-int mapsuffixarray(Suffixarray *suffixarray,
-                   Seqpos *totallength,
-                   unsigned int demand,
-                   const Str *indexname,
-                   bool verbose,
-                   Env *env);
-
 int streamsuffixarray(Suffixarray *suffixarray,
                       Seqpos *totallength,
                       unsigned int demand,
                       const Str *indexname,
                       bool verbose,
                       Env *env);
+
+int mapsuffixarray(Suffixarray *suffixarray,
+                   Seqpos *totallength,
+                   unsigned int demand,
+                   const Str *indexname,
+                   bool verbose,
+                   Env *env);
 
 #ifdef __cplusplus
 }

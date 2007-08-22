@@ -17,6 +17,7 @@ static void assignfmmapspecification(ArrayMapspecification *mapspectable,
   Fmindex *fmindex;
   Mapspecification *mapspecptr;
 
+  env_error_check(env);
   fmindex = fmwithoptions->fmptr;
   NEWMAPSPEC(fmindex->tfreq,Seqpos,(unsigned long) TFREQSIZE(fmindex->mapsize));
   NEWMAPSPEC(fmindex->superbfreq,Seqpos,
@@ -29,7 +30,7 @@ static void assignfmmapspecification(ArrayMapspecification *mapspectable,
              : 0);
   NEWMAPSPEC(fmindex->boundarray,Bwtbound,(unsigned long) fmindex->numofcodes);
   NEWMAPSPEC(fmindex->specpos.spacePairBwtidx,PairBwtidx,
-             fmwithoptions->storeindexpos 
+             fmwithoptions->storeindexpos
              ? fmindex->specpos.nextfreePairBwtidx
              : 0);
   NEWMAPSPEC(fmindex->bfreq,Uchar,
@@ -43,6 +44,7 @@ int flushfmindex2file(FILE *fp,
 {
   Fmindexwithoptions fmwithoptions;
 
+  env_error_check(env);
   fmwithoptions.fmptr = fmindex;
   fmwithoptions.storeindexpos = storeindexpos;
   return flushtheindex2file(fp,assignfmmapspecification,
@@ -56,6 +58,7 @@ int fillfmmapspecstartptr(Fmindex *fmindex,
 {
   Fmindexwithoptions fmwithoptions;
 
+  env_error_check(env);
   fmwithoptions.fmptr = fmindex;
   fmwithoptions.storeindexpos = storeindexpos;
   return fillmapspecstartptr(assignfmmapspecification,

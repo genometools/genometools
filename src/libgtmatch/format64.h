@@ -4,8 +4,8 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef FORMAT64_H
+#define FORMAT64_H
 #include <inttypes.h>
 
 /*

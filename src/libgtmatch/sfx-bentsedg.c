@@ -34,7 +34,7 @@
         {\
           ccs = DEREF(tmpsvar,sptr);\
           cct = DEREF(tmptvar,tptr);\
-          if(ccs != cct)\
+          if (ccs != cct)\
           {\
             break;\
           }\
@@ -157,6 +157,7 @@ static void bentleysedgewick(const Encodedsequence *encseq,
   Suffixptr *pa, *pb, *pc, *pd, *pl, *pm, *pr, *aptr, *bptr, cptr, temp;
   Uchar tmpsvar;
 
+  env_error_check(env);
   width = (Seqpos) (r - l + 1);
   if (width <= (Seqpos) (SMALLSIZE))
   {
@@ -281,6 +282,7 @@ void sortallbuckets(Seqpos *suftabptr,
   ArrayMKVstack mkvauxstack;
   Seqpos totallength = getencseqtotallength(encseq);
 
+  env_error_check(env);
   INITARRAY(&mkvauxstack,MKVstack);
   for (code=mincode; code<=maxcode; code++)
   {

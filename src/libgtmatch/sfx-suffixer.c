@@ -37,6 +37,7 @@ typedef struct
 
 DECLAREARRAYSTRUCT(Codeatposition);
 
+#define LONGOUTPUT
 #undef LONGOUTPUT
 
 typedef struct
@@ -58,8 +59,8 @@ typedef struct
 {
   Seqpos totallength,
          *spacesuffixstarts;
-  unsigned long nextfreeUint, 
-                allocatedUint; 
+  unsigned long nextfreeUint,
+                allocatedUint;
   int(*processsuftab)(void *,const Seqpos *,Readmode,Seqpos,Env *);
   void *processsuftabinfo;
   Readmode readmode;
@@ -137,7 +138,7 @@ static void updatekmercount(void *processinfo,
       }
     } else
     {
-      if(firstspecial->specialpos > 0)
+      if (firstspecial->specialpos > 0)
       {
         csf->leftborder[code]++;
       } else
@@ -233,14 +234,14 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
         if (code >= csf->currentmincode &&
             code <= csf->currentmaxcode)
         {
-          if(code != csf->filltable[0] || prefixindex > 0)
+          if (code != csf->filltable[0] || prefixindex > 0)
           {
             csf->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)]++;
             stidx = --csf->leftborder[code];
 #ifdef LONGOUTPUT
-            printf("insert special_suffix " FormatSeqpos 
+            printf("insert special_suffix " FormatSeqpos
                    " (code %u) at location " FormatSeqpos "\n",
-                   PRINTSeqposcast(csf->spaceCodeatposition[j].position - 
+                   PRINTSeqposcast(csf->spaceCodeatposition[j].position -
                                    prefixindex),
                    (unsigned int) code,
                    PRINTSeqposcast(stidx));
@@ -279,7 +280,7 @@ static int insertfullspecialrange(InsertCompletespecials *ics,
 
   for (pos = startpos; pos < endpos; pos++)
   {
-    if(ics->nextfreeUint >= ics->allocatedUint)
+    if (ics->nextfreeUint >= ics->allocatedUint)
     {
       if (ics->processsuftab(ics->processsuftabinfo,
                              ics->spacesuffixstarts,
@@ -302,7 +303,7 @@ static int insertfullspecialpair(void *info,
 {
   InsertCompletespecials *ics = (InsertCompletespecials *) info;
 
-  if(insertfullspecialrange(ics,pair->leftpos,pair->rightpos) != 0)
+  if (insertfullspecialrange(ics,pair->leftpos,pair->rightpos) != 0)
   {
     return -1;
   }
@@ -331,15 +332,17 @@ static int insertallfullspecials(
   ics.processsuftabinfo = processsuftabinfo;
   ics.readmode = readmode;
   ics.env = env;
-  if(overallspecialranges(encseq,insertfullspecialpair,&ics,env) != 0)
+  if (overallspecialranges(encseq,
+                          readmode,
+                          insertfullspecialpair,&ics,env) != 0)
   {
     return -1;
   }
-  if(insertfullspecialrange(&ics,ics.totallength,ics.totallength+1) != 0)
+  if (insertfullspecialrange(&ics,ics.totallength,ics.totallength+1) != 0)
   {
-    return -1;
+    return -2;
   }
-  if(ics.nextfreeUint > 0)
+  if (ics.nextfreeUint > 0)
   {
     if (ics.processsuftab(ics.processsuftabinfo,
                           ics.spacesuffixstarts,
@@ -347,7 +350,7 @@ static int insertallfullspecials(
                           (Seqpos) ics.nextfreeUint,
                           env) != 0)
     {
-      return -1;
+      return -3;
     }
   }
   return 0;
@@ -435,12 +438,15 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
     assert(specialranges+1 >= (Seqpos) csf.nextfreeCodeatposition);
     assert(csf.filltable != NULL);
     assert(csf.leftborder != NULL);
+    /* printf("leftborder[0]=%u\n",csf.leftborder[0]); */
     for (optr = csf.leftborder + 1;
          optr < csf.leftborder + numofallcodes; optr++)
     {
+      /*/ printf("leftborder[%u]=%u\n",(unsigned int) (optr - csf.leftborder),
+                                   *optr); */
       *optr += *(optr-1);
     }
-    csf.leftborder[numofallcodes] 
+    csf.leftborder[numofallcodes]
       = getencseqtotallength(encseq) - specialcharacters;
     suftabparts = newsuftabparts(numofparts,
                                  csf.leftborder,
@@ -458,7 +464,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
       csf.currentmincode = stpgetcurrentmincode(part,suftabparts);
       csf.suftabptr = csf.suftab - stpgetcurrentsuftaboffset(part,suftabparts);
       csf.currentmaxcode = stpgetcurrentmaxcode(part,suftabparts);
-      derivespecialcodes(encseq,
+      derivespecialcodes(NULL, /* not needed her */
                          numofchars,
                          prefixlength,
                          &csf,

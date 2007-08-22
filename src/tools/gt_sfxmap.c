@@ -6,7 +6,7 @@
 
 #include "gt.h"
 
-static OPrval parse_options(bool *usestream,bool *verbose,int *parsed_args, 
+static OPrval parse_options(bool *usestream,bool *verbose,int *parsed_args,
                             int argc, const char **argv,Env *env)
 {
   OptionParser *op;
@@ -14,7 +14,7 @@ static OPrval parse_options(bool *usestream,bool *verbose,int *parsed_args,
   OPrval oprval;
 
   env_error_check(env);
-  op = option_parser_new("[options] indexname", 
+  op = option_parser_new("[options] indexname",
                          "Map or Stream <indexname> and check consistency.",
                          env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -42,7 +42,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
 
   env_error_check(env);
 
-  switch (parse_options(&usestream,&verbose,&parsed_args, argc, argv, env)) 
+  switch (parse_options(&usestream,&verbose,&parsed_args, argc, argv, env))
   {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR: return -1;
@@ -53,7 +53,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   indexname = str_new_cstr(argv[parsed_args],env);
   if ((usestream ? streamsuffixarray : mapsuffixarray)(&suffixarray,
                                                        &totallength,
-                                                       SARR_ALLTAB, 
+                                                       SARR_ALLTAB,
                                                        indexname,
                                                        verbose,
                                                        env) != 0)
@@ -63,12 +63,31 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   str_delete(indexname,env);
   if (!haserr)
   {
-    if (testencodedsequence(suffixarray.filenametab,
-                            suffixarray.encseq,
-                            getsymbolmapAlphabet(suffixarray.alpha),
-                            env) != 0)
+    if (checkspecialranges(suffixarray.encseq,env) != 0)
     {
       haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    int readmode;
+
+    for (readmode = 0; readmode < 4; readmode++)
+    {
+      if (isdnaalphabet(suffixarray.alpha) ||
+         ((Readmode) readmode) == Forwardmode ||
+         ((Readmode) readmode) == Reversemode)
+      {
+        if (testencodedsequence(suffixarray.filenametab,
+                                suffixarray.encseq,
+                                (Readmode) readmode,
+                                getsymbolmapAlphabet(suffixarray.alpha),
+                                env) != 0)
+        {
+          haserr = true;
+          break;
+        }
+      }
     }
   }
   if (!haserr)

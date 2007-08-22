@@ -21,17 +21,61 @@ def checksfx(parts,pl,withsmap,sat,filelist)
   run "cmp -s sfx.prj #{$last_stdout}"
 end
 
+def flattenfilelist(filelist)
+  s=""
+  filelist.each do |f|
+    s += "#{$testdata}#{f} "
+  end
+  return s
+end
+
 def checkbwt(filelist)
   filearg=""
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run "#{$bin}gt suffixerator -pl #{outoptions()} -db " + filearg
+  run "#{$bin}gt suffixerator -pl #{outoptions()} -db " +
+       flattenfilelist(filelist)
+end
+
+def runsfxfail(args)
+  Name "gt suffixerator failure"
+  Keywords "gt_suffixerator"
+  Test do
+    run_test "#{$bin}gt suffixerator -tis " + args,:retval => 1
+  end
 end
 
 allfiles = ["RandomN.fna","Random.fna","Atinsert.fna",
             "TTT-small.fna","trna_glutamine.fna",
             "Atinsert.fna","Random-Small.fna"]
+
+alldir = ["fwd","cpl","rev","rcl"]
+
+alldir.each do |dir|
+  Name "gt suffixerator #{dir}"
+  Keywords "gt_suffixerator"
+  Test do
+    run "#{$bin}gt suffixerator -dir #{dir} -suf -bwt -lcp -tis " +
+        "-indexname sfx -pl -db " + 
+        flattenfilelist(allfiles)
+   end
+end
+
+runsfxfail "-indexname sfx -db /nothing"
+runsfxfail "-indexname /nothing/sfx -db #{$testdata}TTT-small.fna"
+runsfxfail "-smap /nothing -db #{$testdata}TTT-small.fna"
+runsfxfail "-dna -db #{$testdata}sw100K1.fna"
+runsfxfail "-protein -dir cpl -db #{$testdata}sw100K1.fna"
+runsfxfail "-dna -db #{$testdata}Random.fna RandomN.fna"
+runsfxfail "-dna -suf -pl 10 -db #{$testdata}Random.fna"
+
+Name "gt suffixerator failure"
+Keywords "gt_suffixerator"
+Test do
+  run "#{$bin}gt suffixerator -tis -dna -indexname localidx -db #{$testdata}Random.fna"
+  run_test "#{$bin}gt dev sfxmap localidx",:retval => 1
+end
 
 Name "gt suffixerator bwt"
 Keywords "gt_suffixerator"
@@ -80,3 +124,4 @@ end
     end
   end
 end
+

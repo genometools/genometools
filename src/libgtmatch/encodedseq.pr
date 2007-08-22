@@ -14,13 +14,25 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
 
 void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
 
-/*@null@*/ Encodedsequencescanstate *initEncodedsequencescanstate(
-                                         const Encodedsequence *encseq,
-                                         Env *env);
+Encodedsequencescanstate *initEncodedsequencescanstate(
+                               const Encodedsequence *encseq,
+                               Readmode readmode,
+                               Env *env);
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
 
+bool fastspecialranges(const Encodedsequence *encseq);
+
+int overallspecialrangesfast(
+                const Encodedsequence *encseq,
+                bool moveforward,
+                Readmode readmode,
+                int(*process)(void *,const Sequencerange *,Env *),
+                void *processinfo,
+                Env *env);
+
 int overallspecialranges(const Encodedsequence *encseq,
+                         Readmode readmode,
                          int(*process)(void *,const Sequencerange *,Env *),
                          void *processinfo,
                          Env *env);

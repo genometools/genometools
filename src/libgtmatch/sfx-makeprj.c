@@ -38,8 +38,8 @@ static unsigned long currentrangevalue(unsigned long i,unsigned long distvalue)
 static int updatesumranges(void *key, void *value, void *data,
                            /*@unused@*/ Env *env)
 {
-  unsigned long keyvalue, 
-                distvalue, 
+  unsigned long keyvalue,
+                distvalue,
                 *specialrangesptr = (unsigned long *) data;
 
   keyvalue = (unsigned long) key;
@@ -69,7 +69,9 @@ int scanfastasequence(
   Seqpos lastspeciallength = 0;
   Distribution *specialrangelengths;
   unsigned long idx;
+  bool haserr = false;
 
+  env_error_check(env);
   *numofsequences = 0;
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
@@ -88,7 +90,8 @@ int scanfastasequence(
     retval = readnextUchar(&charcode,&fbs,env);
     if (retval < 0)
     {
-      return -1;
+      haserr = true;
+      break;
     }
     if (retval == 0)
     {
@@ -131,12 +134,15 @@ int scanfastasequence(
       }
     }
   }
-  specialcharinfo->specialranges = 0;
-  (void) foreachdistributionvalue(specialrangelengths,updatesumranges,
-                                  &specialcharinfo->specialranges,env);
+  if (!haserr)
+  {
+    specialcharinfo->specialranges = 0;
+    (void) foreachdistributionvalue(specialrangelengths,updatesumranges,
+                                    &specialcharinfo->specialranges,env);
+    specialcharinfo->lengthofspecialsuffix = lastspeciallength;
+    (*numofsequences)++;
+    *totallength = pos;
+  }
   freedistribution(&specialrangelengths,env);
-  specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-  (*numofsequences)++;
-  *totallength = pos;
-  return 0;
+  return haserr ? -1 : 0;
 }

@@ -15,15 +15,14 @@
 
 #define ENCSEQFILESUFFIX     ".esq"
 
-typedef struct _Encodedsequence Encodedsequence;
-typedef struct _Encodedsequencescanstate Encodedsequencescanstate;
+typedef struct Encodedsequence Encodedsequence;
+typedef struct Encodedsequencescanstate Encodedsequencescanstate;
 
 typedef struct
 {
   Seqpos leftpos,
          rightpos;
 } Sequencerange;          /* \Typedef{Sequencerange} */
-
 
 Seqpos getencseqtotallength(const Encodedsequence *encseq);
 
@@ -36,6 +35,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
 
 /*@null@*/ Encodedsequencescanstate *initEncodedsequencescanstate(
                                          const Encodedsequence *encseq,
+                                         Readmode readmode,
                                          Env *env);
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
@@ -43,11 +43,6 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos);
-
-int overallspecialranges(const Encodedsequence *encseq,
-                         int(*process)(void *,const Sequencerange *,Env *),
-                         void *processinfo,
-                         Env *env);
 
 /*@null@*/ Encodedsequence *initencodedseq(bool withrange,
                                            const StrArray *filenametab,
@@ -59,5 +54,21 @@ int overallspecialranges(const Encodedsequence *encseq,
                                            const Alphabet *alphabet,
                                            const char *str_sat,
                                            Env *env);
+
+bool fastspecialranges(const Encodedsequence *encseq);
+
+int overallspecialrangesfast(
+                const Encodedsequence *encseq,
+                bool moveforward,
+                Readmode readmode,
+                int(*process)(void *,const Sequencerange *,Env *),
+                void *processinfo,
+                Env *env);
+
+int overallspecialranges(const Encodedsequence *encseq,
+                         Readmode readmode,
+                         int(*process)(void *,const Sequencerange *,Env *),
+                         void *processinfo,
+                         Env *env);
 
 #endif

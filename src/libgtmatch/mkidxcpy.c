@@ -21,12 +21,13 @@ int makeindexfilecopy(const Str *destindex,
   int cc;
   bool haserr = false;
 
+  env_error_check(env);
   fpdest = opensfxfile(destindex,suffix,"wb",env);
   if (fpdest == NULL)
   {
     haserr = true;
   }
-  if(!haserr)
+  if (!haserr)
   {
     fpsource = opensfxfile(sourceindex,suffix,"rb",env);
     if (fpsource == NULL)
@@ -36,21 +37,21 @@ int makeindexfilecopy(const Str *destindex,
   }
   printf("# cp %s%s %s%s\n",
            str_get(sourceindex),suffix,str_get(destindex),suffix);
-  if(!haserr)
+  if (!haserr)
   {
-    if(maxlength == 0)
+    if (maxlength == 0)
     {
-      while((cc = fgetc(fpsource)) != EOF)
+      while ((cc = fgetc(fpsource)) != EOF)
       {
         (void) putc(cc,fpdest);
       }
     } else
     {
       uint64_t pos;
-  
-      for(pos = 0; pos < maxlength; pos++)
+
+      for (pos = 0; pos < maxlength; pos++)
       {
-        if((cc = fgetc(fpsource)) == EOF)
+        if ((cc = fgetc(fpsource)) == EOF)
         {
           break;
         }

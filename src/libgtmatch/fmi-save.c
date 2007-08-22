@@ -18,6 +18,7 @@ static int writefmascii (const Str *indexname,
 {
   FILE *fmafp;
 
+  env_error_check(env);
   if ((fmafp = opensfxfile (indexname, FMASCIIFILESUFFIX,"wb",env)) == NULL)
   {
     return -1;
@@ -43,17 +44,18 @@ static int writefmascii (const Str *indexname,
 }
 
 static int writefmdata (const Str *indexname,
-                        Fmindex *fm, 
+                        Fmindex *fm,
                         bool storeindexpos,
                         Env *env)
 {
   FILE *fp;
 
+  env_error_check(env);
   if ((fp = opensfxfile (indexname, FMDATAFILESUFFIX,"wb",env)) == NULL)
   {
     return -1;
   }
-  if(flushfmindex2file(fp,fm,storeindexpos,env) != 0)
+  if (flushfmindex2file(fp,fm,storeindexpos,env) != 0)
   {
     return -2;
   }
@@ -64,6 +66,7 @@ static int writefmdata (const Str *indexname,
 int saveFmindex (const Str *indexname,Fmindex *fm,
                  bool storeindexpos,Env *env)
 {
+  env_error_check(env);
   if (writefmascii (indexname, fm, storeindexpos,env) != 0)
   {
     return -1;

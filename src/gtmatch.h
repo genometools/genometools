@@ -8,18 +8,18 @@
 #define GTMATCH_H
 
 /* The GenomeTools matching library (libgtmatch) header */
-#include <libgtmatch/sarr-def.h>
+#include "libgtmatch/sarr-def.h"
 
-#include <libgtmatch/alphabet.pr>
-#include <libgtmatch/guessprot.pr>
-#include <libgtmatch/sfx-run.pr>
-#include <libgtmatch/fmi-mkindex.pr>
-#include <libgtmatch/fmi-uniquesub.pr>
-#include <libgtmatch/sfx-map.pr>
-#include <libgtmatch/sfx-suftaborder.pr>
-#include <libgtmatch/test-encseq.pr>
-#include <libgtmatch/test-mappedstr.pr>
-#include <libgtmatch/test-trieins.pr>
-#include <libgtmatch/test-mergeesa.pr>
+#include "libgtmatch/alphabet.pr"
+#include "libgtmatch/guessprot.pr"
+#include "libgtmatch/sfx-run.pr"
+#include "libgtmatch/fmi-mkindex.pr"
+#include "libgtmatch/fmi-uniquesub.pr"
+#include "libgtmatch/sfx-map.pr"
+#include "libgtmatch/sfx-suftaborder.pr"
+#include "libgtmatch/test-encseq.pr"
+#include "libgtmatch/test-mappedstr.pr"
+#include "libgtmatch/test-trieins.pr"
+#include "libgtmatch/test-mergeesa.pr"
 
 #endif

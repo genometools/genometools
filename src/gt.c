@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
   GTR *gtr;
   int rval;
   env = env_new();
+  env_error_set_progname(env, argv[0]);
   gtr = gtr_new(env);
   gtr_register_components(gtr, env);
   switch (gtr_parse(gtr, &rval, argc, (const char**) argv, env)) {
@@ -28,7 +29,8 @@ int main(int argc, char *argv[])
       rval = 0; /* everything went fine */
   }
   if (env_error_is_set(env)) {
-    fprintf(stderr, "error: %s\n", env_error_get(env));
+    fprintf(stderr, "%s: error: %s\n", env_error_get_progname(env),
+            env_error_get(env));
     assert(rval);
   }
   gtr_delete(gtr, env);

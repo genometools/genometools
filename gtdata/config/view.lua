@@ -23,7 +23,7 @@ config =
     long_terminal_repeat ={red=0.9,green=0.9,blue=0.4},
     LTR_retrotransposon  ={red=0.8,green=0.5,blue=0.5},
   },
-  -- Defines how a feature is drawn. 
+  -- Defines how a feature is drawn.
   -- Possible choices: "line", "box", "caret", "dashes"
   feature_styles =
   {
@@ -34,20 +34,25 @@ config =
     gene            = "box",
     intron          = "caret",
   },
-  -- Defines which feature types are displayed in another 
-  -- feature's track.
+  -- Defines which feature types are displayed in their parent
+  -- feature's track. It is possible here to specify type chains,
+  -- e.g. {"exon","mRNA"} will make the exon features collapse into
+  -- the mRNA features, which in turn collapse into their parents.
   collapse =
   {
-    to_parent = {"exon","intron","CDS"},
+    to_parent = {"CDS","exon","intron","long_terminal_repeat",
+                 "LTR_retrotransposon","inverted_repeat",
+                 "target_site_duplication"},
   },
-  -- Defines precedence of feature types when overlapping
-  -- in a collapsed parent track.
+  -- Defines precedence of same level feature types when overlapping
+  -- in a collapsed track.
   -- read "=" as ">" or "dominates"
   dominate =
   {
     CDS = {"exon","intron","mRNA","gene"},
     exon = {"mRNA","gene"},
     intron = {"mRNA", "gene"},
+    mRNA = {"gene"},
   },
   -- Defines various format options for drawing.
   format =
@@ -59,7 +64,7 @@ config =
     scale_arrow_width = 6,     -- width of scale arrowheads, in pixels
     scale_arrow_height = 10,   -- height of scale arrowheads, in pixels
     arrow_width = 6,   -- width of feature arrowheads, in pixels
-    stroke_width = .5,  -- width of outlines, in pixels
+    stroke_width = .5, -- width of outlines, in pixels
     show_grid = "yes", -- shows light vertical lines for orientation
   },
 }

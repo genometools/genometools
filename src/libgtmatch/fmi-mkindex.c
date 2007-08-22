@@ -5,6 +5,7 @@
 */
 
 #include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
 #include "divmodmul.h"
 #include "fmindex.h"
 #include "stamp.h"
@@ -25,11 +26,11 @@ typedef struct
 typedef struct
 {
   const char *name;
-  uint32_t log2bsize, 
+  uint32_t log2bsize,
            log2markdist;
 } Indexleveldesc;
 
-static Indexleveldesc indexlevel[] = 
+static Indexleveldesc indexlevel[] =
 {
   {"tiny",  (uint32_t) 7, (uint32_t) 6},
   {"small", (uint32_t) 7, (uint32_t) 4},
@@ -37,14 +38,9 @@ static Indexleveldesc indexlevel[] =
   {"big",   (uint32_t) 4, (uint32_t) 2}
 };
 
-static void versionfunc(const char *progname)
-{
-  printf("%s version 0.1\n",progname);
-}
-
 static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
-                             int argc, 
-                             const char **argv, 
+                             int argc,
+                             const char **argv,
                              Env *env)
 {
   OptionParser *op;
@@ -56,7 +52,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   mkfmcallinfo->indexnametab = strarray_new(env);
   mkfmcallinfo->outfmindex = str_new(env);
   mkfmcallinfo->leveldesc = str_new(env);
-  op = option_parser_new("options",
+  op = option_parser_new("[option ...]",
                          "Compute FMindex.", env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optionfmout = option_new_string("fmout",
@@ -105,7 +101,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
     }
   }
   option_parser_delete(op, env);
-  if(oprval == OPTIONPARSER_OK && parsed_args != argc)
+  if (oprval == OPTIONPARSER_OK && parsed_args != argc)
   {
     env_error_set(env,"superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
@@ -127,9 +123,9 @@ static int levedescl2levelnum(const char *name,
   size_t i;
 
   assert(name != NULL);
-  for(i=0; i<sizeof(indexlevel)/sizeof(indexlevel[0]); i++)
+  for (i=0; i<sizeof (indexlevel)/sizeof (indexlevel[0]); i++)
   {
-    if(strcmp(name,indexlevel[i].name) == 0)
+    if (strcmp(name,indexlevel[i].name) == 0)
     {
       *log2bsize = indexlevel[i].log2bsize;
       *log2markdist = indexlevel[i].log2markdist;
@@ -146,7 +142,7 @@ static void freeconstructedfmindex(Fmindex *fm,Env *env)
   FREESPACE (fm->superbfreq);
   FREESPACE (fm->tfreq);
   FREESPACE (fm->markpostable);
-  if(fm->suffixlength > 0)
+  if (fm->suffixlength > 0)
   {
     FREESPACE(fm->boundarray);
   }
@@ -158,6 +154,7 @@ static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
   OPrval rval;
   int retval = 0;
 
+  env_error_check(env);
   rval = parsemkfmindex(mkfmcallinfo,argc,argv,env);
   if (rval == OPTIONPARSER_ERROR)
   {
@@ -175,10 +172,11 @@ static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
 static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
 {
   Fmindex fm;
-  uint32_t log2bsize, 
-           log2markdist; 
+  uint32_t log2bsize,
+           log2markdist;
   bool haserr = false;
-  
+
+  env_error_check(env);
   INITARRAY(&fm.specpos, PairBwtidx);
   fm.bfreq = NULL;
   fm.superbfreq = NULL;
@@ -186,7 +184,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
   fm.markpostable = NULL;
   fm.boundarray = NULL;
   fm.suffixlength = 0;
-  if(levedescl2levelnum(str_get(mkfmcallinfo->leveldesc),
+  if (levedescl2levelnum(str_get(mkfmcallinfo->leveldesc),
                         &log2bsize,
                         &log2markdist) != 0)
   {
@@ -194,7 +192,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
                       str_get(mkfmcallinfo->leveldesc));
     haserr = true;
   }
-  if(!haserr && sufbwt2fmindex(&fm,
+  if (!haserr && sufbwt2fmindex(&fm,
                                log2bsize,
                                log2markdist,
                                mkfmcallinfo->outfmindex,
@@ -204,7 +202,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
   {
     haserr = true;
   }
-  if(!haserr && saveFmindex(mkfmcallinfo->outfmindex,
+  if (!haserr && saveFmindex(mkfmcallinfo->outfmindex,
                             &fm,
                             mkfmcallinfo->noindexpos ? false : true,
                             env) < 0)

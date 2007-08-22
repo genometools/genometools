@@ -15,6 +15,7 @@ int readnextline(FILE *fpin,ArrayUchar *line,Env *env)
 {
   int cc;
 
+  env_error_check(env);
   while (true)
   {
     cc = fgetc(fpin);

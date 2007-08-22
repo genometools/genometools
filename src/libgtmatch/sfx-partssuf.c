@@ -15,7 +15,7 @@ typedef struct
 {
   Codetype nextcode;
   Seqpos widthofpart;
-  uint64_t suftaboffset, 
+  uint64_t suftaboffset,
            sumofwidth;
 } Suftabpartcomponent;
 
