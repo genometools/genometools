@@ -15,7 +15,7 @@ typedef struct Array Array;
 Array*        array_new(size_t, Env*);
 Array*        array_clone(const Array*, Env*);
 void*         array_get(const Array*, unsigned long);
-void          array_update(Array *a, unsigned long idx, void *elem);
+void          array_update(Array*, unsigned long, void *elem);
 void*         array_get_first(const Array*);
 void*         array_get_last(const Array*);
 void*         array_pop(Array*);
