@@ -33,7 +33,7 @@ else
   $bin=File.join(Dir.pwd, "..", "bin", "")
 end
 
-$transdir=File.join(Dir.pwd, "..", "gtdata" , "config", "TRANS", "")
+$transdir=File.join(Dir.pwd, "..", "gtdata" , "trans", "")
 
 $systemname=`uname -s`
 $systemname.chomp!
