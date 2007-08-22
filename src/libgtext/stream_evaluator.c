@@ -319,12 +319,18 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
   return 0;
 }
 
-static void add_exon(TranscriptExons *te, Range range, GenomeFeature *gf,
-                     Env *env)
+static void add_real_exon(TranscriptExons *te, Range range, GenomeNode *gn,
+                          Env *env)
 {
   assert(te);
   array_add(transcript_exons_get_all(te), range, env);
-  switch (genome_feature_get_transcriptfeaturetype(gf)) {
+  switch (genome_feature_get_transcriptfeaturetype((GenomeFeature*) gn)) {
+    case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
+      warning("type of feature (single, initial, internal, or terminal) given "
+              "on line %lu in file \"%s\" could not be determined, because the "
+              "feature has no Parent attribute. Treating it as single.",
+              genome_node_get_line_number(gn), genome_node_get_filename(gn));
+      /*@fallthrough@*/
     case TRANSCRIPT_FEATURE_TYPE_SINGLE:
       array_add(transcript_exons_get_single(te), range, env);
       break;
@@ -337,7 +343,6 @@ static void add_exon(TranscriptExons *te, Range range, GenomeFeature *gf,
     case TRANSCRIPT_FEATURE_TYPE_TERMINAL:
       array_add(transcript_exons_get_terminal(te), range, env);
       break;
-    case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED: assert(0);
   }
 }
 
@@ -400,12 +405,12 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       range = genome_node_get_range(gn);
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
-          add_exon(process_real_feature_data->slot->CDS_exons_forward, range,
-                   gf, env);
+          add_real_exon(process_real_feature_data->slot->CDS_exons_forward,
+                        range, gn, env);
           break;
         case STRAND_REVERSE:
-          add_exon(process_real_feature_data->slot->CDS_exons_reverse, range,
-                   gf, env);
+          add_real_exon(process_real_feature_data->slot->CDS_exons_reverse,
+                        range, gn, env);
           break;
         default:
           if (process_real_feature_data->verbose) {
@@ -418,12 +423,12 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       range = genome_node_get_range(gn);
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
-          add_exon(process_real_feature_data->slot->mRNA_exons_forward, range,
-                   gf, env);
+          add_real_exon(process_real_feature_data->slot->mRNA_exons_forward,
+                        range, gn, env);
           break;
         case STRAND_REVERSE:
-          add_exon(process_real_feature_data->slot->mRNA_exons_reverse, range,
-                   gf, env);
+          add_real_exon(process_real_feature_data->slot->mRNA_exons_reverse,
+                        range, gn, env);
           break;
         default:
           if (process_real_feature_data->verbose) {
@@ -570,25 +575,17 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   return equal;
 }
 
-#if 0
-static bool LTRs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2,
-                           unsigned long LTRdelta)
+static void store_predicted_exon(TranscriptEvaluators *te, GenomeNode *gn)
 {
-  Range range_1, range_2;
-  assert(gn_1 && gn_2);
-  range_1 = genome_node_get_range(gn_1);
-  range_2 = genome_node_get_range(gn_2);
-  if (!range_compare_with_delta(range_1, range_2, LTRdelta))
-    return true;
-  return false;
-}
-#endif
-
-static void store_predicted_exon(TranscriptEvaluators *te, GenomeFeature *gf)
-{
-  assert(te && gf);
+  assert(te && gn);
   evaluator_add_predicted(transcript_evaluators_get_all(te), 1);
-  switch (genome_feature_get_transcriptfeaturetype(gf)) {
+  switch (genome_feature_get_transcriptfeaturetype((GenomeFeature*) gn)) {
+    case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
+      warning("type of feature (single, initial, internal, or terminal) given "
+              "on line %lu in file \"%s\" could not be determined, because the "
+              "feature has no Parent attribute. Treating it as single.",
+              genome_node_get_line_number(gn), genome_node_get_filename(gn));
+      /*@fallthrough@*/
     case TRANSCRIPT_FEATURE_TYPE_SINGLE:
       evaluator_add_predicted(transcript_evaluators_get_single(te), 1);
     break;
@@ -601,7 +598,6 @@ static void store_predicted_exon(TranscriptEvaluators *te, GenomeFeature *gf)
     case TRANSCRIPT_FEATURE_TYPE_TERMINAL:
       evaluator_add_predicted(transcript_evaluators_get_terminal(te), 1);
     break;
-    case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED: assert(0);
   }
 }
 
@@ -623,12 +619,15 @@ static void add_predicted_collapsed(Dlist *used_exons, Range *predicted_range,
 static void store_predicted_exon_collapsed(TranscriptUsedExons *used_exons,
                                            Range *predicted_range,
                                            TranscriptEvaluators *te,
-                                           GenomeFeature *gf, Env *env)
+                                           GenomeNode *gn, Env *env)
 {
   add_predicted_collapsed(transcript_used_exons_get_all(used_exons),
                           predicted_range, transcript_evaluators_get_all(te),
                           env);
-  switch (genome_feature_get_transcriptfeaturetype(gf)) {
+  switch (genome_feature_get_transcriptfeaturetype((GenomeFeature*) gn)) {
+    case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
+      /* we do not show a warning here, because store_predicted_exon() has been
+         called before and already shown one */
     case TRANSCRIPT_FEATURE_TYPE_SINGLE:
       add_predicted_collapsed(transcript_used_exons_get_single(used_exons),
                               predicted_range,
@@ -649,7 +648,6 @@ static void store_predicted_exon_collapsed(TranscriptUsedExons *used_exons,
                               predicted_range,
                               transcript_evaluators_get_terminal(te), env);
           break;
-    case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED: assert(0);
   }
 }
 
@@ -731,6 +729,7 @@ static void store_true_exon(GenomeNode *gn, Strand predicted_strand,
                       transcript_evaluators_get_all(exon_evaluators),
                       transcript_evaluators_get_all(exon_evaluators_collapsed));
   switch (genome_feature_get_transcriptfeaturetype((GenomeFeature*) gn)) {
+    case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
     case TRANSCRIPT_FEATURE_TYPE_SINGLE:
       determine_true_exon(gn, predicted_strand, exondiff, predicted_range,
                           transcript_exons_get_single(exons_forward),
@@ -779,7 +778,6 @@ static void store_true_exon(GenomeNode *gn, Strand predicted_strand,
                           transcript_evaluators_get_terminal(
                             exon_evaluators_collapsed));
       break;
-    case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED: assert(0);
   }
 }
 
@@ -949,22 +947,6 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                        &info->LTRdelta, info->slot->overlapped_LTRs, env);
 
       if (array_size(real_genome_nodes)) {
-#if 0
-        /* LTR(s) with the same range found -> check if they are equal */
-        for (i = 0; i < array_size(real_genome_nodes); i++) {
-          real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
-          if (LTRs_are_equal(gn, *real_gn, info->LTRdelta)) {
-            num = real_gn - (GenomeNode**)
-                            array_get_space(info->slot->LTRs);
-            if (!bittab_bit_is_set(info->slot->true_LTRs, num)) {
-              bittab_set_bit(info->slot->true_LTRs, num);
-              evaluator_add_true(info->LTR_evaluator);
-              /*@loopbreak@*/
-              break;
-            }
-          }
-        }
-#else
         for (i = 0; i < array_size(real_genome_nodes); i++) {
           real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
           num = real_gn - (GenomeNode**) array_get_space(info->slot->LTRs);
@@ -975,7 +957,6 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
             break;
           }
         }
-#endif
       }
       else {
         /* no LTR with the same range found -> check if this is a wrong LTR */
@@ -987,15 +968,15 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
       break;
     case gft_exon:
       /* store predicted exon (mRNA level)*/
-      store_predicted_exon(info->mRNA_exon_evaluators, (GenomeFeature*) gn);
+      store_predicted_exon(info->mRNA_exon_evaluators, gn);
 
       /* store predicted exon (mRNA level, collapsed) */
       store_predicted_exon_collapsed(predicted_strand == STRAND_FORWARD
                                      ? info->slot->used_mRNA_exons_forward
                                      : info->slot->used_mRNA_exons_reverse,
                                      &predicted_range,
-                                     info->mRNA_exon_evaluators_collapsed,
-                                     (GenomeFeature*) gn, env);
+                                     info->mRNA_exon_evaluators_collapsed, gn,
+                                     env);
 
       /* determine true exon (mRNA level)*/
       switch (predicted_strand) {
@@ -1021,15 +1002,15 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
       break;
     case gft_CDS:
       /* store predicted exon (CDS level)*/
-      store_predicted_exon(info->CDS_exon_evaluators, (GenomeFeature*) gn);
+      store_predicted_exon(info->CDS_exon_evaluators, gn);
 
       /* store predicted exon (CDS level, collapsed) */
       store_predicted_exon_collapsed(predicted_strand == STRAND_FORWARD
                                      ? info->slot->used_CDS_exons_forward
                                      : info->slot->used_CDS_exons_reverse,
                                      &predicted_range,
-                                     info->CDS_exon_evaluators_collapsed,
-                                     (GenomeFeature*) gn, env);
+                                     info->CDS_exon_evaluators_collapsed, gn,
+                                     env);
 
       /* determine true exon (CDS level) */
       switch (predicted_strand) {

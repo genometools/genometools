@@ -5,12 +5,13 @@
 */
 
 #include <stdarg.h>
-#include <libgtcore/env.h>
+#include <libgtcore/cstr.h>
 #include <libgtcore/error.h>
 #include <libgtcore/xansi.h>
 
 struct Error {
-  char error_string[BUFSIZ];
+  char error_string[BUFSIZ],
+       *progname;
   bool error_is_set;
 };
 
@@ -54,8 +55,22 @@ const char* error_get(const Error *e)
   return e->error_string;
 }
 
+void error_set_progname(Error *e, const char *progname, Env *env)
+{
+  assert(e && progname);
+  env_ma_free(e->progname, env);
+  e->progname = cstr_dup(progname, env);
+}
+
+const char* error_get_progname(const Error *e)
+{
+  assert(e);
+  return e->progname;
+}
+
 void error_delete(Error *e, MA *ma)
 {
   if (!e) return;
+  ma_free(e->progname, ma);
   ma_free(e, ma);
 }

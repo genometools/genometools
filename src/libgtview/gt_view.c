@@ -131,8 +131,7 @@ int gt_view(int argc, const char **argv, Env *env)
   Array *results = NULL;
   Config *cfg = NULL;
   Str *config_file = NULL;
-  char *prog;
-  Splitter *splitter;
+  Str *prog;
   Diagram *d = NULL;
   Render *r = NULL;
 
@@ -221,11 +220,11 @@ int gt_view(int argc, const char **argv, Env *env)
                          sequence_region_range.end :
                          arguments.end);
 
-    feature_index_get_features_for_range(features,
-                                         results,
-                                         seqid,
-                                         qry_range,
-                                         env);
+    (void) feature_index_get_features_for_range(features,
+                                                results,
+                                                seqid,
+                                                qry_range,
+                                                env);
   }
 
   if (!had_err)
@@ -234,16 +233,13 @@ int gt_view(int argc, const char **argv, Env *env)
       fprintf(stderr, "# of results: %lu\n", array_size(results));
 
     /* find and load configuration file */
-    prog = cstr_dup(argv[0], env); /* create modifiable copy for splitter */
-    /* XXX: remove the ugly splitter stuff */
-    splitter = splitter_new(env);
-    splitter_split(splitter, prog, strlen(prog), ' ', env);
-    config_file = gtdata_get_path(splitter_get_token(splitter, 0), env);
-    splitter_delete(splitter, env);
-    env_ma_free(prog, env);
+    prog = str_new(env);
+    str_append_cstr_nt(prog, argv[0], cstr_length_up_to_char(argv[0], ' '),
+                       env);
+    config_file = gtdata_get_path(str_get(prog), env);
+    str_delete(prog, env);
     str_append_cstr(config_file, "/config/view.lua", env);
     cfg = config_new(env, arguments.verbose);
-    assert(cfg);
     if (file_exists(str_get(config_file)))
       had_err = config_load_file(cfg, config_file, env);
   }

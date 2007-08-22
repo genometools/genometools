@@ -28,6 +28,16 @@ void cstr_show(const char *cstr, unsigned long length, FILE *fp)
     xfputc(cstr[i], fp);
 }
 
+unsigned long cstr_length_up_to_char(const char *cstr, char c)
+{
+  char *suffix;
+  assert(cstr);
+  suffix = strchr(cstr, c);
+  if (suffix)
+    return suffix - cstr;
+  return strlen(cstr);
+}
+
 char** cstr_array_prefix_first(const char **cstr_array, const char *p, Env *env)
 {
   unsigned long i, a_len, f_len;

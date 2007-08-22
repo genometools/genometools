@@ -32,9 +32,9 @@ void log_log(Log *l, const char *format, ...)
 void log_vlog(Log *l, const char *format, va_list ap)
 {
   if (!l) return;
-  fprintf(stderr, "debug: ");
-  (void) vfprintf(stderr, format, ap);
-  (void) putc('\n', stderr);
+  fprintf(l->logfp, "debug: ");
+  (void) vfprintf(l->logfp, format, ap);
+  (void) putc('\n', l->logfp);
 }
 
 FILE* log_fp(Log *l)

@@ -30,12 +30,14 @@ feature requests:
   memory sizes and maybe line number and file name)
 
 - remove GT_ENV_OPTIONS environment variable, do settings via gtdata/ dir
+- function similary to option_new_choice(), but which allows to set multiple
+  strings from the given set
+- use asciidoc for documentation
 
 
 view tool:
 ----------
 
-- add multilevel collapsing
 - add (full) Lua bindings
 - allow to specify the ``type order'' of tracks in config file
 - allow multiple files as input to `gt view` (as discussed with Sascha):

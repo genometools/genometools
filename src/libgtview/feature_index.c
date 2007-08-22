@@ -65,7 +65,7 @@ FeatureIndex* feature_index_new(Env *env)
   fi->nof_sequence_regions = 0;
   fi->firstseqid = NULL;
   fi->regions  = hashtable_new(HASH_STRING, NULL,
-                                (FreeFunc) region_info_delete, env);
+                               (FreeFunc) region_info_delete, env);
   return fi;
 }
 
@@ -76,7 +76,7 @@ Deletes a FeatureIndex object.
 */
 void feature_index_delete(FeatureIndex *fi, Env *env)
 {
-  assert(fi);
+  assert(fi != NULL);
   hashtable_delete(fi->regions, env);
   env_ma_free(fi, env);
 }
@@ -86,15 +86,15 @@ Creates a new table entry for some sequence region.
 \param fi Pointer to FeatureIndex object to add to.
 \param sr Pointer to SequenceRegion object to process.
 \param env Pointer to Environment object.
-\return Status code: 0 if ok, -1 otherwise.
 */
-int feature_index_add_sequence_region(FeatureIndex *fi,
+void feature_index_add_sequence_region(FeatureIndex *fi,
                                       SequenceRegion *sr,
                                       Env *env)
 {
-  assert(fi && sr);
   char *seqid;
   RegionInfo *info;
+
+  assert(fi != NULL && sr != NULL);
 
   seqid = str_get(genome_node_get_seqid((GenomeNode*) sr));
   info = env_ma_malloc(env, sizeof (RegionInfo));
@@ -108,7 +108,6 @@ int feature_index_add_sequence_region(FeatureIndex *fi,
                 env);
   if (fi->nof_sequence_regions++ == 0)
     fi->firstseqid = seqid;
-  return 0;
 }
 
 /*!
@@ -122,13 +121,14 @@ void feature_index_add_genome_feature(FeatureIndex *fi,
                                       GenomeFeature *gf,
                                       Env *env)
 {
-  assert(fi && gf);
   GenomeNode *gn;
   GenomeFeature *gf_new;
   char* seqid;
   Range node_range;
   RegionInfo *info;
   env_error_check(env);
+
+  assert(fi != NULL && gf != NULL);
 
   gn = genome_node_rec_ref((GenomeNode*) gf, env);
   gf_new = (GenomeFeature*) gn;
@@ -156,9 +156,12 @@ sequence region identifier.
 */
 Array* feature_index_get_features_for_seqid(FeatureIndex *fi, char *seqid)
 {
-  assert(fi);
-  RegionInfo *res = (RegionInfo*) hashtable_get(fi->regions, seqid);
-  return res->features;
+  RegionInfo *res;
+
+  assert(fi != NULL);
+
+  res = (RegionInfo*) hashtable_get(fi->regions, seqid);
+  return (res != NULL ? res->features : NULL);
 }
 
 /*!
@@ -178,22 +181,24 @@ int feature_index_get_features_for_range(FeatureIndex *fi,
 {
   Array* base;
   GenomeNode* key;
-  int i = 0;
+  unsigned long i = 0;
+
+  assert(fi != NULL && results != NULL);
+
   base = feature_index_get_features_for_seqid(fi, seqid);
-  assert(fi && results && seqid && (qry_range.start < qry_range.end));
+  if (!base) return -1;
+  assert(fi && results && seqid && base && (qry_range.start < qry_range.end));
   key = genome_feature_new(gft_gene, qry_range, STRAND_UNKNOWN, NULL,
                            UNDEF_ULONG, env);
- for (i = 0; i < array_size(base); i++)
- {
-   GenomeNode *gn = *(GenomeNode**) array_get(base, i);
-   Range r = genome_node_get_range(gn);
-   if (range_overlap(r, qry_range))
-     array_add(results, gn, env);
- }
-
- genome_node_delete(key, env);
-
- return 0;
+  for (i = 0; i < array_size(base); i++)
+  {
+    GenomeNode *gn = *(GenomeNode**) array_get(base, i);
+    Range r = genome_node_get_range(gn);
+    if (range_overlap(r, qry_range))
+      array_add(results, gn, env);
+  }
+  genome_node_delete(key, env);
+  return 0;
 }
 
 /*!
@@ -205,7 +210,7 @@ Checks whether a given cstr is a key in the FeatureIndex.
 */
 bool feature_index_has_seqid(FeatureIndex *fi, char *seqid, Env *env)
 {
-  assert(fi && seqid);
+  assert(fi != NULL);
   return (hashtable_get(fi->regions, seqid) != NULL);
 }
 
@@ -216,16 +221,17 @@ Returns the first sequence region identifier added to the index.
 */
 char* feature_index_get_first_seqid(FeatureIndex *fi)
 {
-  assert(fi);
+  assert(fi != NULL);
   return fi->firstseqid;
 }
 
 Range feature_index_get_range_for_seqid(FeatureIndex *fi,
                                         char *seqid)
 {
-  assert(fi && seqid);
   Range ret;
   RegionInfo *info;
+
+  assert(fi != NULL);
 
   info = (RegionInfo*) hashtable_get(fi->regions, seqid);
   if (info && (info->dyn_range.start != ~0UL
@@ -257,12 +263,12 @@ int feature_index_unit_test(Env* env)
   int had_err=0;
 
   /* Generating some ranges */
-  r1.start=100; r1.end=1000;
-  r2.start=100; r2.end=300;
-  r3.start=500; r3.end=1000;
-  r4.start=600; r4.end=1200;
-  r5.start=600; r5.end=1000;
-  rs.start=100; rs.end=1200;
+  r1.start=100UL; r1.end=1000UL;
+  r2.start=100UL; r2.end=300UL;
+  r3.start=500UL; r3.end=1000UL;
+  r4.start=600UL; r4.end=1200UL;
+  r5.start=600UL; r5.end=1000UL;
+  rs.start=100UL; rs.end=1200UL;
 
   /* Generating sequnce ids as c-strings */
   seqid1 = str_new_cstr("test1", env);
@@ -332,19 +338,22 @@ int feature_index_unit_test(Env* env)
      to every sequence region the size has to be one. */
   feature_index_add_genome_feature(fi, (GenomeFeature*) gn1, env);
   ensure(had_err,
-         array_size(feature_index_get_features_for_seqid(fi, "test1")) == 1);
+         array_size(feature_index_get_features_for_seqid(fi, "test1")) == 1UL);
 
   feature_index_add_genome_feature(fi, (GenomeFeature*) gn2, env);
 
   ensure(had_err,
-         array_size(feature_index_get_features_for_seqid(fi, "test2")) == 1);
+         array_size(feature_index_get_features_for_seqid(fi, "test2")) == 1UL);
 
   /* test feature_index_get_first_seqid() */
   ensure(had_err, feature_index_get_first_seqid(fi));
   ensure(had_err, strcmp("test1", feature_index_get_first_seqid(fi)) == 0);
 
   check_range = feature_index_get_range_for_seqid(fi, "test1");
-  ensure(had_err, check_range.start == 100 && check_range.end == 1000);
+  ensure(had_err, check_range.start == 100UL && check_range.end == 1000UL);
+
+  ensure(had_err, feature_index_get_features_for_seqid(fi, "test1") != NULL);
+  ensure(had_err, feature_index_get_features_for_seqid(fi, "noexist") == NULL);
 
   /* delete all generated objects */
   feature_index_delete(fi, env);

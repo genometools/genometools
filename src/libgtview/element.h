@@ -30,7 +30,6 @@ Creates a new Element object.
 \return Pointer to a new Element object.
 */
 Element* element_new(GenomeNode *gn,
-                     Config *cfg,
                      Env* env);
 
 /*!
@@ -41,8 +40,7 @@ element_set_range and element_set_type
 \param env Pointer to Environment object.
 \return Pointer to a new Element object.
 */
-Element* element_new_empty(Config* cfg,
-                           Env* env);
+Element* element_new_empty(Env* env);
 
 /*!
 Returns range of an Element object

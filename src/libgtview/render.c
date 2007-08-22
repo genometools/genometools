@@ -51,7 +51,6 @@ Calculates the final height of the image to be created.
 */
 unsigned int render_calculate_height(Render *r, Env *env)
 {
-  assert(r && env);
   unsigned int lines = diagram_get_total_lines(r->dia, env);
   unsigned int height;
   /* obtain line height and spacer from configuration settings */
@@ -65,6 +64,9 @@ unsigned int render_calculate_height(Render *r, Env *env)
                                                             "bar_vspace",
                                                             10,
                                                             env)) + 15;
+
+  assert(r != NULL);
+
   /* get total height of all lines */
   height = lines * line_height;
   /* add track caption height and spacer */
@@ -79,8 +81,14 @@ unsigned int render_calculate_height(Render *r, Env *env)
 
 Render* render_new(Config *cfg, Env *env)
 {
-  assert(cfg && env);
-  Render *r = env_ma_malloc(env, sizeof (Render));
+  Render *r;
+
+  assert(cfg != NULL);
+
+  r = env_ma_malloc(env, sizeof (Render));
+
+  assert(r != NULL);
+
   r->dia = NULL;
   r->cfg = cfg;
   r->margins = config_get_num(r->cfg, "format", "margins", 10, env);
@@ -149,10 +157,13 @@ Renders a line.
 */
 void render_line(Render *r, Line *line, Env *env)
 {
-  assert(r && line && env);
   int i;
-  Array *blocks = line_get_blocks(line);
+  Array *blocks;
 
+  assert(r != NULL && line != NULL);
+
+  /* TODO: make this an iterator? */
+  blocks = line_get_blocks(line);
   /* begin drawing block */
   for (i=0; i<array_size(blocks); i++)
   {
@@ -168,8 +179,7 @@ void render_line(Render *r, Line *line, Env *env)
     draw_range = render_convert_coords(r, block_range, env);
     if (block_caption_is_visible(block))
     {
-      caption = block_get_caption(block);
-      if (!caption) caption = block_get_parent_caption(block);
+      caption = str_get(block_get_caption(block));
       if (!caption) caption = "";
       graphics_draw_text(r->g,
                          MAX(r->margins, draw_range.start),
@@ -201,7 +211,8 @@ void render_line(Render *r, Line *line, Env *env)
       double elem_start, elem_width, bar_height;
       Color grey;
       int arrow_status = ARROW_NONE;
-      const char* type = genome_feature_type_get_cstr(element_get_type(elem));
+      const char *style,
+                 *type = genome_feature_type_get_cstr(element_get_type(elem));
 
       if ((strand == STRAND_REVERSE || strand == STRAND_BOTH)
              && delem == dlist_first(elems))
@@ -217,7 +228,7 @@ void render_line(Render *r, Line *line, Env *env)
         fprintf(stderr, "processing element from %lu to %lu, strand %d\n",
                 elem_range.start,
                 elem_range.end,
-                strand);
+                (int) strand);
 
       draw_range = render_convert_coords(r, elem_range, env);
       elem_start = draw_range.start;
@@ -230,11 +241,12 @@ void render_line(Render *r, Line *line, Env *env)
                 arrow_status);
 
       /* draw each element according to style set in the config */
-      const char* style = config_get_cstr(r->cfg,
-                                          "feature_styles",
-                                          type,
-                                          "box",
-                                          env);
+      style = config_get_cstr(r->cfg,
+                              "feature_styles",
+                              type,
+                              "box",
+                              env);
+
       if (strcmp(style, "box")==0)
       {
         graphics_draw_box(r->g,
@@ -320,9 +332,12 @@ void render_line(Render *r, Line *line, Env *env)
 */
 static void mark_caption_collisions(Render *r, Line *line, Env* env)
 {
-  assert(r && line && env);
   int i, j;
-  Array *blocks = line_get_blocks(line);
+  Array *blocks;
+
+  assert(r != NULL && line != NULL);
+
+  blocks = line_get_blocks(line);
   for (i=0; i<array_size(blocks)-1; i++)
   {
     Block *this_block = *(Block**) array_get(blocks, i);
@@ -331,8 +346,7 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
       Range block_range = block_get_range(this_block);
       const char *caption;
       Range cur_range;
-      caption = block_get_caption(this_block);
-      if (!caption) caption = block_get_parent_caption(this_block);
+      caption = str_get(block_get_caption(this_block));
       if (!caption) caption = "";
       cur_range.start = MAX(r->margins,
                             render_convert_point(r, block_range.start));
@@ -342,8 +356,7 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
       {
         Block *left_block = *(Block**) array_get(blocks, j);
         Range chk_range = block_get_range(left_block);
-        caption = block_get_caption(left_block);
-        if (!caption) caption = block_get_parent_caption(left_block);
+        caption = str_get(block_get_caption(left_block));
         if (!caption) caption = "";
         chk_range.start = render_convert_point(r, chk_range.start);
         chk_range.end   = chk_range.start
@@ -355,8 +368,7 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
       {
         Block *right_block = *(Block**) array_get(blocks, j);
         Range chk_range = block_get_range(right_block);
-        caption = block_get_caption(right_block);
-        if (!caption) caption = block_get_parent_caption(right_block);
+        caption = str_get(block_get_caption(right_block));
         if (!caption) caption = "";
         chk_range.start = render_convert_point(r, chk_range.start);
         chk_range.end   = chk_range.start
@@ -378,11 +390,12 @@ Renders a track.
 */
 int render_track(void *key, void *value, void *data, Env *env)
 {
-  assert(value && key && data && env);
   Render* r = (Render*) data;
   Track* track = (Track*) value;
   Array* lines = track_get_lines(track);
   int i;
+
+  assert(value != NULL && key != NULL && data != NULL);
 
   if (config_get_verbose(r->cfg))
     fprintf(stderr, "processing track %s\n", (const char*) key);
@@ -414,7 +427,8 @@ Formats a given position number for short display in the ruler.
 */
 void format_ruler_label(char *txt, long pos)
 {
-  snprintf(txt, BUFSIZ, "%li", pos);
+  assert(txt != NULL);
+  (void) snprintf(txt, BUFSIZ, "%li", pos);
 }
 
 /*!
@@ -426,6 +440,8 @@ void render_ruler(Render *r, Env* env)
   long base_length, tick;
   Color rulercol, gridcol;
   char str[BUFSIZ];
+
+  assert(r != NULL);
 
   rulercol.red = rulercol.green = rulercol.blue = .2;
   gridcol.red = gridcol.green = gridcol.blue = .9;
@@ -489,17 +505,18 @@ void render_ruler(Render *r, Env* env)
                               "3'");
 }
 
-void render_to_png(Render *r, Diagram *d,
+void render_to_png(Render *r, Diagram *dia,
                    char *fn, unsigned int width, Env *env)
 {
-  assert(r && fn && env && width > 0);
   unsigned int height;
+
+  assert(r != NULL && fn != NULL && width > 1);
 
   /* set initial image-specific values */
   r->y = 70;
   r->width = width;
-  r->dia = d;
-  r->range = diagram_get_range(d);
+  r->dia = dia;
+  r->range = diagram_get_range(dia);
   r->height = height = render_calculate_height(r, env);
 
   /* calculate scaling factor */
@@ -521,13 +538,15 @@ void render_to_png(Render *r, Diagram *d,
   {
     /* process (render) each track */
     Hashtable *tracks = diagram_get_tracks(r->dia);
-    hashtable_foreach(tracks, render_track, r, env);
+    (void) hashtable_foreach(tracks, render_track, r, env);
   }
+  else if (config_get_verbose(r->cfg))
+    fprintf( stderr, "diagram has no tracks!\n");
 
   if (config_get_verbose(r->cfg))
     fprintf(stderr, "actual used height: %f\n", r->y);
 
   /* write out result file */
-  graphics_save(r->g);
+  (void) graphics_save(r->g);
   graphics_delete(r->g, env);
 }
