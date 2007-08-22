@@ -28,7 +28,7 @@
 
 #define SETFIRSTCHILD(NODE,VALUE)\
         (NODE)->firstchild = VALUE;\
-        if((VALUE) != NULL)\
+        if ((VALUE) != NULL)\
         {\
           (VALUE)->parent = NODE;\
         }
@@ -48,7 +48,7 @@ static Uchar getfirstedgechar(const Trierep *trierep,
 {
   Encseqreadinfo *eri = trierep->encseqreadinfo + node->suffixinfo.idx;
 
-  if(ISLEAF(node) &&
+  if (ISLEAF(node) &&
      node->suffixinfo.startpos + prevdepth >=
      getencseqtotallength(eri->encseqptr))
   {
@@ -61,11 +61,11 @@ static Uchar getfirstedgechar(const Trierep *trierep,
 
 static int comparecharacters(Uchar cc1,Seqpos idx1,Uchar cc2,Seqpos idx2)
 {
-  if(ISSPECIAL(cc1))
+  if (ISSPECIAL(cc1))
   {
-    if(ISSPECIAL(cc2))
+    if (ISSPECIAL(cc2))
     {
-      if(idx1 <= idx2)
+      if (idx1 <= idx2)
       {
         return -1;  /* cc1 < cc2 */
       } else
@@ -78,17 +78,17 @@ static int comparecharacters(Uchar cc1,Seqpos idx1,Uchar cc2,Seqpos idx2)
     }
   } else
   {
-    if(ISSPECIAL(cc2))
+    if (ISSPECIAL(cc2))
     {
       return -1;  /* cc1 < cc2 */
     } else
     {
-      if(cc1 < cc2)
+      if (cc1 < cc2)
       {
         return -1;  /* cc1 < cc2 */
       } else
       {
-        if(cc1 > cc2)
+        if (cc1 > cc2)
         {
           return 1;  /* cc1 > cc2 */
         } else
@@ -110,12 +110,12 @@ static void showtrie2(const Trierep *trierep,
   Seqpos pos, endpos;
   Trienode *current;
 
-  for(current = node->firstchild;
+  for (current = node->firstchild;
       current != NULL;
       current = current->rightsibling)
   {
     printf("%*.*s",(int) (6 * level),(int) (6 * level)," ");
-    if(ISLEAF(current))
+    if (ISLEAF(current))
     {
       endpos = getencseqtotallength(
                   trierep->encseqtable[current->suffixinfo.idx]);
@@ -123,7 +123,7 @@ static void showtrie2(const Trierep *trierep,
     {
       endpos = current->suffixinfo.startpos + current->depth;
     }
-    for(pos = current->suffixinfo.startpos + node->depth;
+    for (pos = current->suffixinfo.startpos + node->depth;
         pos < endpos; pos++)
     {
       cc = getencodedchar(trierep->enseqreadinfo[current->suffixinfo.idx].
@@ -131,16 +131,16 @@ static void showtrie2(const Trierep *trierep,
                           pos,
                           trierep->enseqreadinfo[current->suffixinfo.idx].
                           readmode);
-      if(ISSPECIAL(cc))
+      if (ISSPECIAL(cc))
       {
         printf("#\n");
         break;
       }
       printf("%c",characters[(int) cc]);
     }
-    if(ISLEAF(current))
+    if (ISLEAF(current))
     {
-      if(!ISSPECIAL(cc))
+      if (!ISSPECIAL(cc))
       {
         printf("~\n");
       }
@@ -157,7 +157,7 @@ static void showtrie2(const Trierep *trierep,
 void showtrie(const Trierep *trierep,
               const Uchar *characters)
 {
-  if(trierep->root != NULL)
+  if (trierep->root != NULL)
   {
     showtrie2(trierep,characters,0,trierep->root);
   }
@@ -181,10 +181,10 @@ static void checktrie2(Trierep *trierep,
 {
   Trienode *current, *previous;
 
-  if(ISLEAF(node))
+  if (ISLEAF(node))
   {
     Seqpos start = node->suffixinfo.startpos;
-    if(ISIBITSET(leafused,start))
+    if (ISIBITSET(leafused,start))
     {
       fprintf(stderr,"leaf " FormatSeqpos " already found\n",
               PRINTSeqposcast(start));
@@ -194,19 +194,19 @@ static void checktrie2(Trierep *trierep,
     (*numberofbitsset)++;
   } else
   {
-    if(node->depth > 0 && node->firstchild->rightsibling == NULL)
+    if (node->depth > 0 && node->firstchild->rightsibling == NULL)
     {
       fprintf(stderr,"Node has less than two successors\n");
       exit(EXIT_FAILURE);
     }
-    if(father != NULL)
+    if (father != NULL)
     {
-      if(ISLEAF(father))
+      if (ISLEAF(father))
       {
         fprintf(stderr,"father of branching node is a leaf\n");
         exit(EXIT_FAILURE);
       }
-      if(father->depth >= node->depth)
+      if (father->depth >= node->depth)
       {
         fprintf(stderr,"father.depth = " FormatSeqpos " >= " FormatSeqpos
                        " = node.depth\n",
@@ -216,12 +216,12 @@ static void checktrie2(Trierep *trierep,
       }
     }
     previous = NULL;
-    for(current = node->firstchild; current != NULL;
+    for (current = node->firstchild; current != NULL;
         current = current->rightsibling)
     {
-      if(previous != NULL)
+      if (previous != NULL)
       {
-        if(comparecharacters(
+        if (comparecharacters(
               getfirstedgechar(trierep,previous,node->depth),
               previous->suffixinfo.idx,
               getfirstedgechar(trierep,current,node->depth),
@@ -241,14 +241,14 @@ void checktrie(Trierep *trierep,uint32_t numberofleaves,
                uint32_t maxleafnum,Env *env)
 {
   env_error_check(env);
-  if(trierep->root != NULL)
+  if (trierep->root != NULL)
   {
     Bitstring *leafused;
     uint32_t numberofbitsset = 0;
 
     INITBITTAB(leafused,maxleafnum+1);
     checktrie2(trierep,trierep->root,NULL,leafused,&numberofbitsset);
-    if(numberofbitsset != numberofleaves)
+    if (numberofbitsset != numberofleaves)
     {
       fprintf(stderr,"numberofbitsset = %u != %u = numberofleaves\n",
                       (unsigned int) numberofbitsset,
@@ -262,7 +262,7 @@ void checktrie(Trierep *trierep,uint32_t numberofleaves,
 #ifdef WITHTRIESHOW
 static void shownode(const Trienode *node)
 {
-  if(node == NULL)
+  if (node == NULL)
   {
     printf("NULL");
   } else
@@ -295,9 +295,9 @@ void showallnoderelations(const Trienode *node)
   Trienode *tmp;
 
   showsimplenoderelations(node);
-  for(tmp = node->firstchild; tmp != NULL; tmp = tmp->rightsibling)
+  for (tmp = node->firstchild; tmp != NULL; tmp = tmp->rightsibling)
   {
-    if(tmp->firstchild == NULL)
+    if (tmp->firstchild == NULL)
     {
       showsimplenoderelations(tmp);
     } else
@@ -318,9 +318,9 @@ static Trienode *newTrienode(Trierep *trierep)
   printf("unused trie nodes: %u\n",trierep->nextunused);
 #endif
 #endif
-  if(trierep->nextfreeTrienode >= trierep->allocatedTrienode)
+  if (trierep->nextfreeTrienode >= trierep->allocatedTrienode)
   {
-    if(trierep->nextunused == 0)
+    if (trierep->nextunused == 0)
     {
       fprintf(stderr,"not enough nodes have been allocated\n");
       exit(EXIT_FAILURE);
@@ -398,7 +398,7 @@ static Trienode *makenewbranch(Trierep *trierep,
   newbranch->suffixinfo = *suffixinfo;
   newbranch->rightsibling = oldnode->rightsibling;
   cc1 = getfirstedgechar(trierep,oldnode,currentdepth);
-  if(suffixinfo->startpos + currentdepth >=
+  if (suffixinfo->startpos + currentdepth >=
      getencseqtotallength(eri->encseqptr))
   {
     cc2 = (Uchar) SEPARATOR;
@@ -409,7 +409,7 @@ static Trienode *makenewbranch(Trierep *trierep,
                          eri->readmode);
   }
   newleaf = makenewleaf(trierep,suffixinfo);
-  if(comparecharacters(cc1,oldnode->suffixinfo.idx,
+  if (comparecharacters(cc1,oldnode->suffixinfo.idx,
                        cc2,suffixinfo->idx) <= 0)
   {
     makesuccs(newbranch,oldnode,newleaf);
@@ -429,10 +429,10 @@ static Seqpos getlcp(const Encodedsequence *encseq1,Readmode readmode1,
   Seqpos i1, i2;
   Uchar cc1;
 
-  for(i1=start1, i2=start2; i1 <= end1 && i2 <= end2; i1++, i2++)
+  for (i1=start1, i2=start2; i1 <= end1 && i2 <= end2; i1++, i2++)
   {
     cc1 = getencodedchar(encseq1,i1,readmode1);
-    if(cc1 != getencodedchar(encseq2,i2,readmode2) || ISSPECIAL(cc1))
+    if (cc1 != getencodedchar(encseq2,i2,readmode2) || ISSPECIAL(cc1))
     {
       break;
     }
@@ -450,17 +450,17 @@ static bool hassuccessor(const Trierep *trierep,
   Uchar cc1;
   int cmpresult;
 
-  for(np->previous = NULL, np->current = node->firstchild;
+  for (np->previous = NULL, np->current = node->firstchild;
       np->current != NULL;
       np->current = np->current->rightsibling)
   {
     cc1 = getfirstedgechar(trierep,np->current,prevdepth);
     cmpresult = comparecharacters(cc1,np->current->suffixinfo.idx,cc2,idx2);
-    if(cmpresult == 1)
+    if (cmpresult == 1)
     {
       return false;
     }
-    if(cmpresult == 0)
+    if (cmpresult == 0)
     {
       return true;
     }
@@ -473,7 +473,7 @@ void insertsuffixintotrie(Trierep *trierep,
                           Trienode *node,
                           Suffixinfo *suffixinfo)
 {
-  if(trierep->root == NULL)
+  if (trierep->root == NULL)
   {
     trierep->root = makeroot(trierep,suffixinfo);
   } else
@@ -487,9 +487,9 @@ void insertsuffixintotrie(Trierep *trierep,
     assert(!ISLEAF(node));
     currentnode = node;
     currentdepth = node->depth;
-    while(true)
+    while (true)
     {
-      if(suffixinfo->startpos + currentdepth >=
+      if (suffixinfo->startpos + currentdepth >=
          getencseqtotallength(eri->encseqptr))
       {
         cc = (Uchar) SEPARATOR;
@@ -501,12 +501,13 @@ void insertsuffixintotrie(Trierep *trierep,
       }
       assert(currentnode != NULL);
       assert(!ISLEAF(currentnode));
-      if(!hassuccessor(trierep,&np,currentdepth,currentnode,cc,suffixinfo->idx))
+      if (!hassuccessor(trierep,&np,currentdepth,currentnode,cc,
+                        suffixinfo->idx))
       {
         newleaf = makenewleaf(trierep,suffixinfo);
         newleaf->rightsibling = np.current;
         SHOWNODERELATIONS(newleaf);
-        if(np.previous == NULL)
+        if (np.previous == NULL)
         {
           SETFIRSTCHILD(currentnode,newleaf);
           SHOWNODERELATIONS(currentnode);
@@ -518,7 +519,7 @@ void insertsuffixintotrie(Trierep *trierep,
         return;
       }
       succ = np.current;
-      if(ISLEAF(succ))
+      if (ISLEAF(succ))
       {
         lcpvalue = getlcp(eri->encseqptr,
                           eri->readmode,
@@ -536,7 +537,7 @@ void insertsuffixintotrie(Trierep *trierep,
                                   suffixinfo,
                                   currentdepth + lcpvalue + 1,
                                   succ);
-        if(np.previous == NULL)
+        if (np.previous == NULL)
         {
           SETFIRSTCHILD(currentnode,newbranch);
           SHOWNODERELATIONS(currentnode);
@@ -555,13 +556,13 @@ void insertsuffixintotrie(Trierep *trierep,
                         trierep->encseqreadinfo[succ->suffixinfo.idx].readmode,
                         succ->suffixinfo.startpos + currentdepth + 1,
                         succ->suffixinfo.startpos + succ->depth - 1);
-      if(currentdepth + lcpvalue + 1 < succ->depth)
+      if (currentdepth + lcpvalue + 1 < succ->depth)
       {
         newbranch = makenewbranch(trierep,
                                   suffixinfo,
                                   currentdepth + lcpvalue + 1,
                                   succ);
-        if(np.previous == NULL)
+        if (np.previous == NULL)
         {
           SETFIRSTCHILD(currentnode,newbranch);
           SHOWNODERELATIONS(currentnode);
@@ -583,7 +584,7 @@ Trienode *findsmallestnodeintrie(const Trierep *trierep)
   Trienode *node;
 
   assert(trierep->root != NULL);
-  for(node = trierep->root; node->firstchild != NULL; node = node->firstchild)
+  for (node = trierep->root; node->firstchild != NULL; node = node->firstchild)
     /* Nothing */ ;
   return node;
 }
@@ -592,17 +593,17 @@ void deletesmallestpath(Trienode *smallest,Trierep *trierep)
 {
   Trienode *father, *son;
 
-  for(son = smallest; son->parent != NULL; son = son->parent)
+  for (son = smallest; son->parent != NULL; son = son->parent)
   {
     father = son->parent;
-    if(son->firstchild == NULL)
+    if (son->firstchild == NULL)
     {
       SETFIRSTCHILD(father,son->rightsibling);
       SHOWNODERELATIONS(father);
       son->rightsibling = NULL;
     } else
     {
-      if(son->firstchild->rightsibling != NULL)
+      if (son->firstchild->rightsibling != NULL)
       {
         break;
       }
@@ -621,7 +622,7 @@ void deletesmallestpath(Trienode *smallest,Trierep *trierep)
 #endif
     trierep->unusedTrienodes[trierep->nextunused++] = son;
   }
-  if(trierep->root->firstchild == NULL)
+  if (trierep->root->firstchild == NULL)
   {
     trierep->unusedTrienodes[trierep->nextunused++] = trierep->root;
     trierep->root = NULL;

@@ -43,7 +43,7 @@ unsigned long sizeofgenericqueue(const Genericqueue *q)
 
 bool queueisemptygeneric(const Genericqueue *q)
 {
-  if(q->numberofelements == 0)
+  if (q->numberofelements == 0)
   {
     return true;
   }
@@ -59,7 +59,7 @@ void enqueuegeneric(Genericqueue *q,void *contents,Env *env)
   newqueueelem->contents = contents;
   newqueueelem->previous = NULL;
   newqueueelem->next = q->tail;
-  if(q->numberofelements == 0)
+  if (q->numberofelements == 0)
   {
     q->head = newqueueelem;
   } else
@@ -76,14 +76,14 @@ void enqueuegeneric(Genericqueue *q,void *contents,Env *env)
   Genericelementofqueue *oldheadptr;
 
   env_error_check(env);
-  if(q->numberofelements == 0)
+  if (q->numberofelements == 0)
   {
     env_error_set(env,"dequeuegeneric(emptyqueue) is undefined");
     return NULL;
   }
   oldheadptr = q->head;
   q->head = q->head->previous;
-  if(q->head == NULL)
+  if (q->head == NULL)
   {
     q->tail = NULL;
   } else
@@ -98,7 +98,7 @@ void enqueuegeneric(Genericqueue *q,void *contents,Env *env)
 
 /*@null@*/ void *headofqueuegeneric(const Genericqueue *q)
 {
-  if(q->numberofelements == 0)
+  if (q->numberofelements == 0)
   {
     return NULL;
   }
@@ -111,13 +111,13 @@ int overallqueuelementsgeneric(Genericqueue *q,
 {
   Genericelementofqueue *current;
 
-  if(q->numberofelements > 0)
+  if (q->numberofelements > 0)
   {
-    for(current = q->head;
+    for (current = q->head;
         current != NULL;
         current = current->previous)
     {
-      if(queueprocessor(current->contents,info) != 0)
+      if (queueprocessor(current->contents,info) != 0)
       {
         return -1;
       }
@@ -128,9 +128,9 @@ int overallqueuelementsgeneric(Genericqueue *q,
 
 void wrapqueuegeneric(bool freecontents,Genericqueue **q,Env *env)
 {
-  while(!queueisemptygeneric(*q))
+  while (!queueisemptygeneric(*q))
   {
-    if(freecontents)
+    if (freecontents)
     {
       FREESPACE((*q)->head->contents);
     }

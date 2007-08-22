@@ -7,7 +7,6 @@
 #ifndef BITTABLUA_H
 #define BITTABLUA_H
 
-
 #include "lua.h"
 
 /* exports the Bittab class to Lua:

@@ -134,7 +134,7 @@ int scanfastasequence(
       }
     }
   }
-  if(!haserr)
+  if (!haserr)
   {
     specialcharinfo->specialranges = 0;
     (void) foreachdistributionvalue(specialrangelengths,updatesumranges,

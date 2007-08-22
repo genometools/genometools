@@ -29,9 +29,9 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
   ALLOCASSIGNSPACE(sequenceoffsettable,NULL,Seqpos,numofindexes);
   tmpspecialcharacters = (uint64_t) (numofindexes-1);
   tmpspecialranges = 0;
-  for(idx=0; idx<numofindexes; idx++)
+  for (idx=0; idx<numofindexes; idx++)
   {
-    if(idx == 0)
+    if (idx == 0)
     {
       tmplength = 0;
       sequenceoffsettable[idx] = 0;
@@ -45,7 +45,7 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
       += (uint64_t) suffixarraytable[idx].specialcharinfo.specialcharacters;
     tmpspecialranges
       += (uint64_t) suffixarraytable[idx].specialcharinfo.specialranges;
-    if(idx > 0)
+    if (idx > 0)
     {
       lastofprevious = getencodedchar(suffixarraytable[idx - 1].encseq,
                                       tmplength-1,
@@ -53,15 +53,15 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
       firstofcurrent = getencodedchar(suffixarraytable[idx].encseq,
                                       0,
                                       suffixarraytable[idx].readmode);
-      if(ISSPECIAL(lastofprevious))
+      if (ISSPECIAL(lastofprevious))
       {
-         if(ISSPECIAL(firstofcurrent))
+         if (ISSPECIAL(firstofcurrent))
          {
            tmpspecialranges--;
          }
       } else
       {
-        if(ISNOTSPECIAL(firstofcurrent))
+        if (ISNOTSPECIAL(firstofcurrent))
         {
           tmpspecialranges++;
         }

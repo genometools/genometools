@@ -138,7 +138,7 @@ static void updatekmercount(void *processinfo,
       }
     } else
     {
-      if(firstspecial->specialpos > 0)
+      if (firstspecial->specialpos > 0)
       {
         csf->leftborder[code]++;
       } else
@@ -234,7 +234,7 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
         if (code >= csf->currentmincode &&
             code <= csf->currentmaxcode)
         {
-          if(code != csf->filltable[0] || prefixindex > 0)
+          if (code != csf->filltable[0] || prefixindex > 0)
           {
             csf->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)]++;
             stidx = --csf->leftborder[code];
@@ -280,7 +280,7 @@ static int insertfullspecialrange(InsertCompletespecials *ics,
 
   for (pos = startpos; pos < endpos; pos++)
   {
-    if(ics->nextfreeUint >= ics->allocatedUint)
+    if (ics->nextfreeUint >= ics->allocatedUint)
     {
       if (ics->processsuftab(ics->processsuftabinfo,
                              ics->spacesuffixstarts,
@@ -303,7 +303,7 @@ static int insertfullspecialpair(void *info,
 {
   InsertCompletespecials *ics = (InsertCompletespecials *) info;
 
-  if(insertfullspecialrange(ics,pair->leftpos,pair->rightpos) != 0)
+  if (insertfullspecialrange(ics,pair->leftpos,pair->rightpos) != 0)
   {
     return -1;
   }
@@ -332,17 +332,17 @@ static int insertallfullspecials(
   ics.processsuftabinfo = processsuftabinfo;
   ics.readmode = readmode;
   ics.env = env;
-  if(overallspecialranges(encseq,
+  if (overallspecialranges(encseq,
                           readmode,
                           insertfullspecialpair,&ics,env) != 0)
   {
     return -1;
   }
-  if(insertfullspecialrange(&ics,ics.totallength,ics.totallength+1) != 0)
+  if (insertfullspecialrange(&ics,ics.totallength,ics.totallength+1) != 0)
   {
     return -2;
   }
-  if(ics.nextfreeUint > 0)
+  if (ics.nextfreeUint > 0)
   {
     if (ics.processsuftab(ics.processsuftabinfo,
                           ics.spacesuffixstarts,

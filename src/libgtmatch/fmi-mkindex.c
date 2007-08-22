@@ -105,7 +105,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
     }
   }
   option_parser_delete(op, env);
-  if(oprval == OPTIONPARSER_OK && parsed_args != argc)
+  if (oprval == OPTIONPARSER_OK && parsed_args != argc)
   {
     env_error_set(env,"superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
@@ -127,9 +127,9 @@ static int levedescl2levelnum(const char *name,
   size_t i;
 
   assert(name != NULL);
-  for(i=0; i<sizeof(indexlevel)/sizeof(indexlevel[0]); i++)
+  for (i=0; i<sizeof (indexlevel)/sizeof (indexlevel[0]); i++)
   {
-    if(strcmp(name,indexlevel[i].name) == 0)
+    if (strcmp(name,indexlevel[i].name) == 0)
     {
       *log2bsize = indexlevel[i].log2bsize;
       *log2markdist = indexlevel[i].log2markdist;
@@ -146,7 +146,7 @@ static void freeconstructedfmindex(Fmindex *fm,Env *env)
   FREESPACE (fm->superbfreq);
   FREESPACE (fm->tfreq);
   FREESPACE (fm->markpostable);
-  if(fm->suffixlength > 0)
+  if (fm->suffixlength > 0)
   {
     FREESPACE(fm->boundarray);
   }
@@ -188,7 +188,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
   fm.markpostable = NULL;
   fm.boundarray = NULL;
   fm.suffixlength = 0;
-  if(levedescl2levelnum(str_get(mkfmcallinfo->leveldesc),
+  if (levedescl2levelnum(str_get(mkfmcallinfo->leveldesc),
                         &log2bsize,
                         &log2markdist) != 0)
   {
@@ -196,7 +196,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
                       str_get(mkfmcallinfo->leveldesc));
     haserr = true;
   }
-  if(!haserr && sufbwt2fmindex(&fm,
+  if (!haserr && sufbwt2fmindex(&fm,
                                log2bsize,
                                log2markdist,
                                mkfmcallinfo->outfmindex,
@@ -206,7 +206,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
   {
     haserr = true;
   }
-  if(!haserr && saveFmindex(mkfmcallinfo->outfmindex,
+  if (!haserr && saveFmindex(mkfmcallinfo->outfmindex,
                             &fm,
                             mkfmcallinfo->noindexpos ? false : true,
                             env) < 0)

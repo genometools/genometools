@@ -197,7 +197,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
             break;
           }
         }
-        if(haserr)
+        if (haserr)
         {
           break;
         }
@@ -222,7 +222,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
       }
     }
   }
-  if(!haserr)
+  if (!haserr)
   {
     for (cnum=0;cnum<=UCHAR_MAX; cnum++)
     {
@@ -270,7 +270,7 @@ static int readsymbolmap(Alphabet *alpha,Uchar wildcard,
                                                     strerror(errno));
     haserr = true;
   }
-  if(!haserr)
+  if (!haserr)
   {
     if (readsymbolmapviafp(alpha,wildcard,mapfile,fpin,env) != 0)
     {
@@ -404,7 +404,7 @@ static int assignProteinorDNAalphabet(Alphabet *alpha,
   int retval = guessifproteinsequencestream(filenametab,env);
 
   env_error_check(env);
-  if(retval < 0)
+  if (retval < 0)
   {
     return -1;
   }
@@ -450,14 +450,14 @@ static int assignProteinorDNAalphabet(Alphabet *alpha,
         }
       } else
       {
-        if(assignProteinorDNAalphabet(alpha,filenametab,env) != 0)
+        if (assignProteinorDNAalphabet(alpha,filenametab,env) != 0)
         {
           haserr = true;
         }
       }
     }
   }
-  if(haserr)
+  if (haserr)
   {
     FREESPACE(alpha);
     return NULL;
@@ -552,7 +552,7 @@ void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
 {
   unsigned long i;
 
-  for(i = 0; i < wlen; i++)
+  for (i = 0; i < wlen; i++)
   {
     (void) putc((int) alpha->characters[(int) w[i]],fpout);
   }
@@ -573,9 +573,9 @@ static uint32_t removelowercaseproteinchars(Uchar *domainbuf,
 {
   uint32_t i, j = 0;
 
-  for(i=0; i< alpha->domainsize - alpha->mappedwildcards; i++)
+  for (i=0; i< alpha->domainsize - alpha->mappedwildcards; i++)
   {
-    if(isalnum((int) alpha->mapdomain[i]) &&
+    if (isalnum((int) alpha->mapdomain[i]) &&
        isupper((int) alpha->mapdomain[i]))
     {
       domainbuf[j++] = alpha->mapdomain[i];
@@ -588,11 +588,11 @@ static uint32_t removelowercaseproteinchars(Uchar *domainbuf,
 
 static Qsortcomparereturntype comparechar(const void *a,const void *b)
 {
-  if(UNCAST(a) < UNCAST(b))
+  if (UNCAST(a) < UNCAST(b))
   {
     return -1;
   }
-  if(UNCAST(a) > UNCAST(b))
+  if (UNCAST(a) > UNCAST(b))
   {
     return 1;
   }
@@ -617,15 +617,15 @@ bool isproteinalphabet(const Alphabet *alpha)
   assignProteinalphabet(&proteinalphabet);
   reduceddomainsize2 = removelowercaseproteinchars(&domainbuf2[0],
                                                    &proteinalphabet);
-  if(reduceddomainsize1 == reduceddomainsize2)
+  if (reduceddomainsize1 == reduceddomainsize2)
   {
-    qsort(&domainbuf1[0],(size_t) reduceddomainsize1,sizeof(char),
+    qsort(&domainbuf1[0],(size_t) reduceddomainsize1,sizeof (char),
           (Qsortcomparefunction) comparechar);
-    qsort(&domainbuf2[0],(size_t) reduceddomainsize2,sizeof(char),
+    qsort(&domainbuf2[0],(size_t) reduceddomainsize2,sizeof (char),
           (Qsortcomparefunction) comparechar);
-    for(i=0; i < reduceddomainsize2; i++)
+    for (i=0; i < reduceddomainsize2; i++)
     {
-      if(domainbuf1[i] != domainbuf2[i])
+      if (domainbuf1[i] != domainbuf2[i])
       {
         return false;
       }
@@ -642,15 +642,15 @@ static bool checksymbolmap(const Uchar *testsymbolmap,
   unsigned int i;
   Uchar cc1, cc2 = 0;
 
-  for(i=0; testcharacters[i] != '\0'; i++)
+  for (i=0; testcharacters[i] != '\0'; i++)
   {
     cc1 = (Uchar) testcharacters[i];
-    if(isupper((int) cc1))
+    if (isupper((int) cc1))
     {
       cc2 = (Uchar) tolower((int) cc1);
     } else
     {
-      if(islower((int) cc1))
+      if (islower((int) cc1))
       {
         cc2 = (Uchar) toupper((int) cc2);
       } else
@@ -660,7 +660,7 @@ static bool checksymbolmap(const Uchar *testsymbolmap,
         exit(EXIT_FAILURE);
       }
     }
-    if(testsymbolmap[cc1] != verifiedsymbolmap[cc1] &&
+    if (testsymbolmap[cc1] != verifiedsymbolmap[cc1] &&
        testsymbolmap[cc2] != verifiedsymbolmap[cc2])
     {
       return false;
@@ -676,16 +676,16 @@ static bool checksymbolmap(const Uchar *testsymbolmap,
 
 bool isdnaalphabet(const Alphabet *alpha)
 {
-  if(isproteinalphabet(alpha))
+  if (isproteinalphabet(alpha))
   {
     return false;
   }
-  if(alpha->mapsize == MAPSIZEDNA)
+  if (alpha->mapsize == MAPSIZEDNA)
   {
     Uchar dnasymbolmap[UCHAR_MAX+1];
 
     assignDNAsymbolmap(&dnasymbolmap[0]);
-    if(checksymbolmap(alpha->symbolmap,&dnasymbolmap[0],"acgt"))
+    if (checksymbolmap(alpha->symbolmap,&dnasymbolmap[0],"acgt"))
     {
       return true;
     }

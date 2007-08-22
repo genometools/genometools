@@ -227,27 +227,27 @@ Seqpos getencseqtotallength(const Encodedsequence *encseq)
 Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
                      Readmode readmode)
 {
-  if(readmode == Forwardmode)
+  if (readmode == Forwardmode)
   {
     return encseq->deliverchar(encseq,pos);
   }
-  if(readmode == Reversemode)
+  if (readmode == Reversemode)
   {
     return encseq->deliverchar(encseq,REVERSEPOS(pos));
   }
-  if(readmode == Complementmode) /* only works with dna */
+  if (readmode == Complementmode) /* only works with dna */
   {
     Uchar cc = encseq->deliverchar(encseq,pos);
-    if(ISSPECIAL(cc))
+    if (ISSPECIAL(cc))
     {
       return cc;
     }
     return (Uchar) 3 - cc;
   }
-  if(readmode == Reversecomplementmode) /* only works with dna */
+  if (readmode == Reversecomplementmode) /* only works with dna */
   {
     Uchar cc = encseq->deliverchar(encseq,REVERSEPOS(pos));
-    if(ISSPECIAL(cc))
+    if (ISSPECIAL(cc))
     {
       return cc;
     }
@@ -277,27 +277,27 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos)
 {
-  if(esr->readmode == Forwardmode)
+  if (esr->readmode == Forwardmode)
   {
     return encseq->seqdeliverchar(encseq,esr,pos);
   }
-  if(esr->readmode == Reversemode)
+  if (esr->readmode == Reversemode)
   {
     return encseq->seqdeliverchar(encseq,esr,REVERSEPOS(pos));
   }
-  if(esr->readmode == Complementmode) /* only works with dna */
+  if (esr->readmode == Complementmode) /* only works with dna */
   {
     Uchar cc = encseq->seqdeliverchar(encseq,esr,pos);
-    if(ISSPECIAL(cc))
+    if (ISSPECIAL(cc))
     {
       return cc;
     }
     return (Uchar) 3 - cc;
   }
-  if(esr->readmode == Reversecomplementmode) /* only works with dna */
+  if (esr->readmode == Reversecomplementmode) /* only works with dna */
   {
     Uchar cc = encseq->seqdeliverchar(encseq,esr,REVERSEPOS(pos));
-    if(ISSPECIAL(cc))
+    if (ISSPECIAL(cc))
     {
       return cc;
     }
@@ -332,9 +332,9 @@ static WrittenPositionaccesstype wpa[] = {
 {
   size_t i;
 
-  for(i=0; i<sizeof(wpa)/sizeof(wpa[0]); i++)
+  for (i=0; i<sizeof (wpa)/sizeof (wpa[0]); i++)
   {
-    if(strcmp(str,wpa[i].name) == 0)
+    if (strcmp(str,wpa[i].name) == 0)
     {
       return wpa[i].sat;
     }
@@ -370,7 +370,7 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   env_error_check(env);
   encseq = encseqwithoptions->encseq;
   fourcharssize = detsizeoffourcharsinonebyte(encseq->totallength);
-  if(encseqwithoptions->writemode)
+  if (encseqwithoptions->writemode)
   {
     ALLOCASSIGNSPACE(encseq->satcharptr,NULL,Uchar,1);
     encseq->satcharptr[0] = (Uchar) encseq->sat;
@@ -718,7 +718,7 @@ static Uchar delivercharViabitaccessSpecial(const Encodedsequence *encseq,
 {
   if (ISIBITSET(encseq->specialbits,pos))
   {
-    if(EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
     {
       return (Uchar) SEPARATOR;
     }
@@ -735,7 +735,7 @@ static Uchar delivercharViauchartablesSpecialfirst(
 {
   if (ucharcheckspecial(encseq,pos))
   {
-    if(EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
     {
       return (Uchar) SEPARATOR;
     }
@@ -750,7 +750,7 @@ static Uchar delivercharViauchartablesSpecialrange(
 {
   if (ucharcheckspecialrange(encseq,pos))
   {
-    if(EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
     {
       return (Uchar) SEPARATOR;
     }
@@ -767,7 +767,7 @@ static Uchar delivercharViaushorttablesSpecialfirst(
 {
   if (ushortcheckspecial(encseq,pos))
   {
-    if(EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
     {
       return (Uchar) SEPARATOR;
     }
@@ -782,7 +782,7 @@ static Uchar delivercharViaushorttablesSpecialrange(
 {
   if (ushortcheckspecialrange(encseq,pos))
   {
-    if(EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
     {
       return (Uchar) SEPARATOR;
     }
@@ -799,7 +799,7 @@ static Uchar delivercharViauint32tablesSpecialfirst(
 {
   if (uint32checkspecial(encseq,pos))
   {
-    if(EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
     {
       return (Uchar) SEPARATOR;
     }
@@ -814,7 +814,7 @@ static Uchar delivercharViauint32tablesSpecialrange(
 {
   if (uint32checkspecialrange(encseq,pos))
   {
-    if(EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
     {
       return (Uchar) SEPARATOR;
     }
@@ -831,7 +831,7 @@ static Uchar delivercharViauint64tablesSpecialfirst(
 {
   if (uint64checkspecial(encseq,pos))
   {
-    if(EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
     {
       return (Uchar) SEPARATOR;
     }
@@ -846,7 +846,7 @@ static Uchar delivercharViauint64tablesSpecialrange(
 {
   if (uint64checkspecialrange(encseq,pos))
   {
-    if(EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+    if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
     {
       return (Uchar) SEPARATOR;
     }
@@ -1048,7 +1048,7 @@ static bool nextnonemptypage(const Encodedsequence *encseq,
 
   while (esr->nextpage < esr->numofspecialcells)
   {
-    if(moveforward)
+    if (moveforward)
     {
       pageno = esr->nextpage;
     } else
@@ -1084,7 +1084,7 @@ static bool nextnonemptypage(const Encodedsequence *encseq,
 static Seqpos getpageoffset(Encodedsequencescanstate *esr,bool moveforward)
 {
   assert(esr->nextpage > 0);
-  if(moveforward)
+  if (moveforward)
   {
     return (esr->nextpage - 1) * (esr->maxspecialtype + 1);
   }
@@ -1105,7 +1105,7 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
       esr->previousrange = esr->currentrange;
       esr->hascurrent = false;
     }
-    if(moveforward)
+    if (moveforward)
     {
       esr->firstcell++;
     } else
@@ -1117,7 +1117,7 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
          nextnonemptypage(encseq,esr,moveforward)))
     {
       pageoffset = getpageoffset(esr,moveforward);
-      if(moveforward)
+      if (moveforward)
       {
         cellnum = esr->firstcell;
       } else
@@ -1136,7 +1136,7 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
     }
     if (esr->hasprevious)
     {
-      if(moveforward)
+      if (moveforward)
       {
         if (esr->previousrange.rightpos == esr->currentrange.leftpos)
         {
@@ -1178,7 +1178,7 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
   env_error_check(env);
   ALLOCASSIGNSPACE(esr,NULL,Encodedsequencescanstate,(size_t) 1);
   esr->readmode = readmode;
-  if(encseq->sat == Viauchartables ||
+  if (encseq->sat == Viauchartables ||
      encseq->sat == Viaushorttables ||
      encseq->sat == Viauint32tables ||
      encseq->sat == Viauint64tables)
@@ -1187,10 +1187,10 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
     esr->hascurrent = false;
     esr->firstcell = 0;
     esr->nextpage = 0;
-    if(encseq->sat == Viauint64tables)
+    if (encseq->sat == Viauint64tables)
     {
       esr->lastcell = encseq->numofspecialstostore;
-      if(encseq->numofspecialstostore > 0)
+      if (encseq->numofspecialstostore > 0)
       {
         esr->previousrange.leftpos = accessspecialpositions(encseq,0);
         esr->previousrange.rightpos
@@ -1261,13 +1261,13 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
           PRINTSeqposcast(esr->previousrange.leftpos),
           PRINTSeqposcast(esr->previousrange.rightpos));
 #endif
-  if(ISDIRREVERSE(esr->readmode))
+  if (ISDIRREVERSE(esr->readmode))
   {
     if (pos < esr->previousrange.rightpos)
     {
       if (pos >= esr->previousrange.leftpos)
       {
-        if(EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+        if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
         {
           return (Uchar) SEPARATOR;
         }
@@ -1284,7 +1284,7 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
     {
       if (pos < esr->previousrange.rightpos)
       {
-        if(EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+        if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
         {
           return (Uchar) SEPARATOR;
         }
@@ -1312,30 +1312,30 @@ static int overallspecialrangesdirectorbitaccess(
   bool isspecialchar;
 
   env_error_check(env);
-  if(moveforward)
+  if (moveforward)
   {
     pos = 0;
   } else
   {
     pos = encseq->totallength-1;
   }
-  while(true)
+  while (true)
   {
-    if(direct)
+    if (direct)
     {
       isspecialchar = ISSPECIAL(encseq->plainseq[pos]);
     } else
     {
       isspecialchar = ISIBITSET(encseq->specialbits,pos) ? true : false;
     }
-    if(isspecialchar)
+    if (isspecialchar)
     {
       specialrangelength++;
     } else
     {
-      if(specialrangelength > 0)
+      if (specialrangelength > 0)
       {
-        if(moveforward)
+        if (moveforward)
         {
           range.leftpos = pos - specialrangelength;
           range.rightpos = pos;
@@ -1344,32 +1344,32 @@ static int overallspecialrangesdirectorbitaccess(
           range.leftpos = REVERSEPOS(pos + specialrangelength);
           range.rightpos = REVERSEPOS(pos);
         }
-        if(process(processinfo,&range,env) != 0)
+        if (process(processinfo,&range,env) != 0)
         {
           return -1;
         }
       }
       specialrangelength = 0;
     }
-    if(moveforward)
+    if (moveforward)
     {
-      if(pos == encseq->totallength - 1)
+      if (pos == encseq->totallength - 1)
       {
         break;
       }
       pos++;
     } else
     {
-      if(pos == 0)
+      if (pos == 0)
       {
         break;
       }
       pos--;
     }
   }
-  if(specialrangelength > 0)
+  if (specialrangelength > 0)
   {
-    if(moveforward)
+    if (moveforward)
     {
       range.leftpos = pos + 1 - specialrangelength;
       range.rightpos = pos + 1;
@@ -1378,7 +1378,7 @@ static int overallspecialrangesdirectorbitaccess(
       range.leftpos = REVERSEPOS(pos + specialrangelength - 1);
       range.rightpos = REVERSEPOS(pos - 1);
     }
-    if(process(processinfo,&range,env) != 0)
+    if (process(processinfo,&range,env) != 0)
     {
       return -1;
     }
@@ -1388,7 +1388,7 @@ static int overallspecialrangesdirectorbitaccess(
 
 bool fastspecialranges(const Encodedsequence *encseq)
 {
-  if(encseq->sat == Viadirectaccess || encseq->sat == Viabitaccess)
+  if (encseq->sat == Viadirectaccess || encseq->sat == Viabitaccess)
   {
     return false;
   }
@@ -1406,13 +1406,13 @@ int overallspecialrangesfast(
   bool haserr = false;
 
   env_error_check(env);
-  if(!fastspecialranges(encseq))
+  if (!fastspecialranges(encseq))
   {
     env_error_set(env,"overallspecialrangesfast not possible for sat = %s",
                   accesstype2name(encseq->sat));
     haserr = true;
   }
-  if(!haserr)
+  if (!haserr)
   {
     Encodedsequencescanstate *esr;
 
@@ -1443,9 +1443,9 @@ int overallspecialranges(const Encodedsequence *encseq,
                          Env *env)
 {
   env_error_check(env);
-  if(encseq->sat == Viadirectaccess)
+  if (encseq->sat == Viadirectaccess)
   {
-    if(overallspecialrangesdirectorbitaccess(true,
+    if (overallspecialrangesdirectorbitaccess(true,
                                              ISDIRREVERSE(readmode)
                                                ? false : true,
                                              encseq,
@@ -1457,9 +1457,9 @@ int overallspecialranges(const Encodedsequence *encseq,
     }
     return 0;
   }
-  if(encseq->sat == Viabitaccess)
+  if (encseq->sat == Viabitaccess)
   {
-    if(overallspecialrangesdirectorbitaccess(false,
+    if (overallspecialrangesdirectorbitaccess(false,
                                              ISDIRREVERSE(readmode)
                                                ? false : true,
                                              encseq,
@@ -1471,7 +1471,7 @@ int overallspecialranges(const Encodedsequence *encseq,
     }
     return 0;
   }
-  if(overallspecialrangesfast(encseq,
+  if (overallspecialrangesfast(encseq,
                               ISDIRREVERSE(readmode) ? false : true,
                               readmode,
                               process,
@@ -1538,19 +1538,19 @@ static int readsatfromfile(const Str *indexname,Env *env)
   {
     haserr = true;
   }
-  if(!haserr)
+  if (!haserr)
   {
     cc = fgetc(fp);
-    if(cc == EOF)
+    if (cc == EOF)
     {
       env_error_set(env,"illegal EOF symbol in \"%s%s\"",
                      str_get(indexname),ENCSEQFILESUFFIX);
       haserr = true;
     }
   }
-  if(!haserr)
+  if (!haserr)
   {
-    if(cc < 0 || cc >= (int) Undefpositionaccesstype)
+    if (cc < 0 || cc >= (int) Undefpositionaccesstype)
     {
       env_error_set(env,"illegal type %d in \"%s%s\"",cc,
                          str_get(indexname),ENCSEQFILESUFFIX);
@@ -1652,16 +1652,16 @@ static int readsatfromfile(const Str *indexname,Env *env)
   env_error_check(env);
   if (getmapsizeAlphabet(alphabet) == DNAALPHASIZE + 1)
   {
-    if(str_sat == NULL)
+    if (str_sat == NULL)
     {
-      if(str_length(indexname) == 0)
+      if (str_length(indexname) == 0)
       {
         sat = determinesmallestrep(totallength,
                                    specialcharinfo);
       } else
       {
         int retcode = readsatfromfile(indexname,env);
-        if(retcode < 0)
+        if (retcode < 0)
         {
           haserr = true;
         }
@@ -1670,7 +1670,7 @@ static int readsatfromfile(const Str *indexname,Env *env)
     } else
     {
       sat = str2positionaccesstype(str_sat);
-      if(sat == Undefpositionaccesstype)
+      if (sat == Undefpositionaccesstype)
       {
         env_error_set(env,"illegal argument \"%s\" to option -sat",
                       str_sat);
@@ -1681,7 +1681,7 @@ static int readsatfromfile(const Str *indexname,Env *env)
   {
     sat = Viadirectaccess;
   }
-  if(!haserr)
+  if (!haserr)
   {
     ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
     determineencseqkeyvalues(encseq,

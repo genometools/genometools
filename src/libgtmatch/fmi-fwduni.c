@@ -19,7 +19,7 @@ unsigned long skfmuniqueforward (const Fmindex *fmindex,
 #ifdef mydebug
   printf("# start cc=%u\n",cc);
 #endif
-  if(ISSPECIAL(cc))
+  if (ISSPECIAL(cc))
   {
     return 0;
   }
@@ -53,7 +53,7 @@ unsigned long skfmuniqueforward (const Fmindex *fmindex,
 #endif
     qptr++;
   }
-  if(bwtbound.lbound + 1 == bwtbound.ubound)
+  if (bwtbound.lbound + 1 == bwtbound.ubound)
   {
     return (unsigned long) (qptr - qstart);
   }

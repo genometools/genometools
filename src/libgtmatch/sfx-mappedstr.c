@@ -466,7 +466,7 @@ static int getencseqkmersgeneric(
   ALLOCASSIGNSPACE(spwp.cyclicwindow,NULL,Uchar,kmersize);
   specialemptyqueue(&spwp.spos,kmersize,env);
   filllargestchartable(&spwp.filltable,numofchars,kmersize,env);
-  if(encseq != NULL)
+  if (encseq != NULL)
   {
     Seqpos totallength = getencseqtotallength(encseq);
     Encodedsequencescanstate *esr;
@@ -484,13 +484,13 @@ static int getencseqkmersgeneric(
     Fastabufferstate fbs;
     int retval;
 
-    if(readmode != Forwardmode)
+    if (readmode != Forwardmode)
     {
       env_error_set(env,"readmode = %u not possible when reading symbols "
                         "from file",(unsigned int) readmode);
       haserr = true;
     }
-    if(!haserr)
+    if (!haserr)
     {
       initformatbufferstate(&fbs,
                             filenametab,
@@ -516,7 +516,7 @@ static int getencseqkmersgeneric(
       }
     }
   }
-  if(!haserr)
+  if (!haserr)
   {
     for (overshoot=0; overshoot<kmersize; overshoot++)
     {

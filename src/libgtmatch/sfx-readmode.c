@@ -23,9 +23,9 @@ int parsereadmode(const char *dirargstring,Env *env)
   size_t i;
 
   env_error_check(env);
-  for(i=0; i<sizeof(readmodes)/sizeof(readmodes[0]); i++)
+  for (i=0; i<sizeof (readmodes)/sizeof (readmodes[0]); i++)
   {
-    if(strcmp(dirargstring,readmodes[i]) == 0)
+    if (strcmp(dirargstring,readmodes[i]) == 0)
     {
       return (int) i;
     }

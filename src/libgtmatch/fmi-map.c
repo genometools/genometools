@@ -28,11 +28,11 @@
 bool fmindexexists(const Str *indexname,Env *env)
 {
   env_error_check(env);
-  if(!indexfilealreadyexists(indexname,FMASCIIFILESUFFIX,env))
+  if (!indexfilealreadyexists(indexname,FMASCIIFILESUFFIX,env))
   {
     return false;
   }
-  if(!indexfilealreadyexists(indexname,FMDATAFILESUFFIX,env))
+  if (!indexfilealreadyexists(indexname,FMDATAFILESUFFIX,env))
   {
     return false;
   }
@@ -76,7 +76,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
     {
       break;
     }
-    if(analyzeuintline(indexname,
+    if (analyzeuintline(indexname,
                        FMASCIIFILESUFFIX,
                        linenum,
                        linebuffer.spaceUchar,
@@ -93,14 +93,14 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   {
     haserr = true;
   }
-  if(!haserr)
+  if (!haserr)
   {
-    if(intstoreindexpos == (uint32_t) 1)
+    if (intstoreindexpos == (uint32_t) 1)
     {
       *storeindexpos = true;
     } else
     {
-      if(intstoreindexpos == 0)
+      if (intstoreindexpos == 0)
       {
         *storeindexpos = false;
       } else
@@ -117,15 +117,15 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
 
 void freefmindex(Fmindex *fmindex,Env *env)
 {
-  if(fmindex->mappedptr != NULL)
+  if (fmindex->mappedptr != NULL)
   {
     env_fa_xmunmap(fmindex->mappedptr,env);
   }
-  if(fmindex->bwtformatching != NULL)
+  if (fmindex->bwtformatching != NULL)
   {
     freeEncodedsequence(&fmindex->bwtformatching,env);
   }
-  if(fmindex->alphabet != NULL)
+  if (fmindex->alphabet != NULL)
   {
     freeAlphabet(&fmindex->alphabet,env);
   }
@@ -138,7 +138,7 @@ static Encodedsequence *mapbwtencoding(const Str *indexname,Env *env)
   Seqpos totallength;
 
   env_error_check(env);
-  if(mapsuffixarray(&suffixarray,&totallength,SARR_ESQTAB,indexname,
+  if (mapsuffixarray(&suffixarray,&totallength,SARR_ESQTAB,indexname,
                     false,env) != 0)
   {
     haserr = true;
@@ -146,7 +146,7 @@ static Encodedsequence *mapbwtencoding(const Str *indexname,Env *env)
   freeAlphabet(&suffixarray.alpha,env);
   strarray_delete(suffixarray.filenametab,env);
   FREESPACE(suffixarray.filelengthtab);
-  if(haserr)
+  if (haserr)
   {
     freeEncodedsequence(&suffixarray.encseq,env);
     return NULL;
@@ -163,13 +163,13 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env)
   fmindex->mappedptr = NULL;
   fmindex->bwtformatching = NULL;
   fpin = opensfxfile(indexname,FMASCIIFILESUFFIX,"rb",env);
-  if(fpin == NULL)
+  if (fpin == NULL)
   {
     haserr = true;
   }
-  if(!haserr)
+  if (!haserr)
   {
-    if(scanfmafileviafileptr(fmindex,
+    if (scanfmafileviafileptr(fmindex,
                              &storeindexpos,
                              indexname,
                              fpin,
@@ -179,7 +179,7 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env)
     }
   }
   env_fa_xfclose(fpin, env);
-  if(!haserr)
+  if (!haserr)
   {
     Str *tmpfilename;
 
@@ -201,15 +201,15 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env)
     }
     str_delete(tmpfilename,env);
   }
-  if(!haserr)
+  if (!haserr)
   {
     fmindex->bwtformatching = mapbwtencoding(indexname,env);
-    if(fmindex->bwtformatching == NULL)
+    if (fmindex->bwtformatching == NULL)
     {
       haserr = true;
     }
   }
-  if(!haserr)
+  if (!haserr)
   {
     Str *tmpfilename;
 
@@ -223,13 +223,13 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env)
                         &fmindex->specialcharinfo);
     tmpfilename = str_clone(indexname,env);
     str_append_cstr(tmpfilename,FMDATAFILESUFFIX,env);
-    if(fillfmmapspecstartptr(fmindex,storeindexpos,tmpfilename,env) != 0)
+    if (fillfmmapspecstartptr(fmindex,storeindexpos,tmpfilename,env) != 0)
     {
       haserr = true;
     }
     str_delete(tmpfilename,env);
   }
-  if(haserr)
+  if (haserr)
   {
     freefmindex(fmindex,env);
   }

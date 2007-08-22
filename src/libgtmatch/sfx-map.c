@@ -28,7 +28,7 @@
 
 #define INITBufferedfile(INDEXNAME,STREAM,SUFFIX)\
         (STREAM)->fp = opensfxfile(INDEXNAME,SUFFIX,"rb",env);\
-        if((STREAM)->fp == NULL)\
+        if ((STREAM)->fp == NULL)\
         {\
           haserr = true;\
         } else\
@@ -135,7 +135,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         suffixarray->filelengthtab[numoffiles].length = (Seqpos) readint1;
         suffixarray->filelengthtab[numoffiles].effectivelength
                                                = (Seqpos) readint2;
-        if(verbose)
+        if (verbose)
         {
           printf("%s%s " Formatuint64_t " " Formatuint64_t "\n",
                   DBFILEKEY,
@@ -149,7 +149,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
     } else
     {
-      if(analyzeuintline(indexname,
+      if (analyzeuintline(indexname,
                          PROJECTFILESUFFIX,
                          linenum,
                          linebuffer.spaceUchar,
@@ -204,9 +204,9 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
     }
   }
-  if(!haserr)
+  if (!haserr)
   {
-    if(readmodeint > (uint32_t) 3)
+    if (readmodeint > (uint32_t) 3)
     {
       env_error_set(env,"illegal readmode %u",(unsigned int) readmodeint);
       haserr = true;
@@ -373,12 +373,12 @@ static int inputsuffixarray(bool map,
   }
   if (!haserr && (demand & SARR_SUFTAB))
   {
-    if(map)
+    if (map)
     {
       suffixarray->suftab = genericmaptable(indexname,
                                             SUFTABSUFFIX,
                                             (*totallength)+1,
-                                            sizeof(Seqpos),
+                                            sizeof (Seqpos),
                                             env);
       if (suffixarray->suftab == NULL)
       {
@@ -388,20 +388,20 @@ static int inputsuffixarray(bool map,
     {
       INITBufferedfile(indexname,&suffixarray->suftabstream,SUFTABSUFFIX);
     }
-    if(!haserr && !suffixarray->longest.defined)
+    if (!haserr && !suffixarray->longest.defined)
     {
       env_error_set(env,"longest not defined");
       haserr = true;
     }
   }
-  if(!haserr && (demand & SARR_LCPTAB))
+  if (!haserr && (demand & SARR_LCPTAB))
   {
-    if(map)
+    if (map)
     {
       suffixarray->lcptab = genericmaptable(indexname,
                                             LCPTABSUFFIX,
                                             (*totallength)+1,
-                                            sizeof(Uchar),
+                                            sizeof (Uchar),
                                             env);
       if (suffixarray->lcptab == NULL)
       {
@@ -410,27 +410,27 @@ static int inputsuffixarray(bool map,
     } else
     {
       INITBufferedfile(indexname,&suffixarray->lcptabstream,LCPTABSUFFIX);
-      if(!haserr &&
-         fseek(suffixarray->lcptabstream.fp,(long) sizeof(Uchar),SEEK_SET) != 0)
+      if (!haserr &&
+          fseek(suffixarray->lcptabstream.fp,(long) sizeof (Uchar),SEEK_SET))
       {
         env_error_set(env,"fseek(esastream) failed: %s",strerror(errno));
         haserr = true;
       }
     }
-    if(!haserr && !suffixarray->numoflargelcpvalues.defined)
+    if (!haserr && !suffixarray->numoflargelcpvalues.defined)
     {
       env_error_set(env,"numoflargelcpvalues not defined");
       haserr = true;
     }
-    if(!haserr && suffixarray->numoflargelcpvalues.valueseqpos > 0)
+    if (!haserr && suffixarray->numoflargelcpvalues.valueseqpos > 0)
     {
-      if(map)
+      if (map)
       {
         suffixarray->llvtab = genericmaptable(indexname,
                                               LARGELCPTABSUFFIX,
                                               suffixarray->numoflargelcpvalues.
                                               valueseqpos,
-                                              sizeof(Largelcpvalue),
+                                              sizeof (Largelcpvalue),
                                               env);
         if (suffixarray->llvtab == NULL)
         {
@@ -443,14 +443,14 @@ static int inputsuffixarray(bool map,
       }
     }
   }
-  if(!haserr && (demand & SARR_BWTTAB))
+  if (!haserr && (demand & SARR_BWTTAB))
   {
-    if(map)
+    if (map)
     {
       suffixarray->bwttab = genericmaptable(indexname,
                                             BWTTABSUFFIX,
                                             (*totallength)+1,
-                                            sizeof(Uchar),
+                                            sizeof (Uchar),
                                             env);
       if (suffixarray->bwttab == NULL)
       {
@@ -461,7 +461,7 @@ static int inputsuffixarray(bool map,
       INITBufferedfile(indexname,&suffixarray->bwttabstream,BWTTABSUFFIX);
     }
   }
-  if(haserr)
+  if (haserr)
   {
     freesuffixarray(suffixarray,env);
   }

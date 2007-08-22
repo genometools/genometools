@@ -36,7 +36,7 @@ static unsigned int logalphasize(unsigned int numofchars,double value)
   unsigned int retval;
   double logtmp1, logtmp2;
 
-  if(value <= (double) numofchars)
+  if (value <= (double) numofchars)
   {
     return (unsigned int) 1;
   }
@@ -54,7 +54,7 @@ unsigned int recommendedprefixlength(unsigned int numofchars,
 
   prefixlength = logalphasize(numofchars,
                               (double) totallength/sizeofbckentry);
-  if(prefixlength == 0)
+  if (prefixlength == 0)
   {
     return (unsigned int) 1;
   } else
@@ -73,18 +73,18 @@ unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
   maxprefixlen = logalphasize(numofchars,
                            (double) totallength/
                                 (sizeofbckentry/MAXMULTIPLIEROFTOTALLENGTH));
-  if(prefixlenbits > 0)
+  if (prefixlenbits > 0)
   {
     unsigned int tmplength;
     tmplength = logalphasize(numofchars,
                              (double)
                              MAXREMAININGAFTERPREFIXLEN(prefixlenbits));
-    if(maxprefixlen > tmplength)
+    if (maxprefixlen > tmplength)
     {
       maxprefixlen = tmplength;
     }
     tmplength = MAXVALUEWITHBITS(prefixlenbits);
-    if(maxprefixlen > tmplength)
+    if (maxprefixlen > tmplength)
     {
       maxprefixlen = tmplength;
     }
@@ -96,7 +96,7 @@ int checkprefixlength(unsigned int maxprefixlen,
                       unsigned int prefixlength,Env *env)
 {
   env_error_check(env);
-  if(maxprefixlen < prefixlength)
+  if (maxprefixlen < prefixlength)
   {
     env_error_set(env,"prefix length %u is too large, maximal prefix length "
                       "for this input size and alphabet size is %u",

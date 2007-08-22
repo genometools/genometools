@@ -34,7 +34,7 @@
         {\
           ccs = DEREF(tmpsvar,sptr);\
           cct = DEREF(tmptvar,tptr);\
-          if(ccs != cct)\
+          if (ccs != cct)\
           {\
             break;\
           }\

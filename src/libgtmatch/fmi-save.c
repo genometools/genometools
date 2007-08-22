@@ -55,7 +55,7 @@ static int writefmdata (const Str *indexname,
   {
     return -1;
   }
-  if(flushfmindex2file(fp,fm,storeindexpos,env) != 0)
+  if (flushfmindex2file(fp,fm,storeindexpos,env) != 0)
   {
     return -2;
   }

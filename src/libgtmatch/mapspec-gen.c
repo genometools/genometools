@@ -25,7 +25,7 @@
           *((TYPE **) mapspec->startptr) = voidptr;\
         }
 
-#define ALIGNSIZE sizeof(void *)
+#define ALIGNSIZE sizeof (void *)
 
 #define WRITEACTIONWITHTYPE(TYPE)\
         if (fwrite(*((TYPE **) mapspecptr->startptr),\
@@ -53,7 +53,7 @@ static uint64_t detexpectedaccordingtomapspec(const ArrayMapspecification
   {
     sumup += (uint64_t) mapspecptr->sizeofunit *
              (uint64_t) mapspecptr->numofunits;
-    if(sumup % ALIGNSIZE > 0)
+    if (sumup % ALIGNSIZE > 0)
     {
       sumup += (ALIGNSIZE - (sumup % ALIGNSIZE));
     }
@@ -174,7 +174,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
     byteoffset = CALLCASTFUNC(uint64_t,unsigned_long,
                               (uint64_t) (mapspecptr->sizeofunit *
                                           mapspecptr->numofunits));
-    if(byteoffset % (unsigned long) ALIGNSIZE > 0)
+    if (byteoffset % (unsigned long) ALIGNSIZE > 0)
     {
       size_t padunits = ALIGNSIZE - (byteoffset % ALIGNSIZE);
       byteoffset += (unsigned long) padunits;
@@ -193,7 +193,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
                                 (uint64_t) (byteoffset +
                                             mapspecptr->sizeofunit *
                                             mapspecptr->numofunits));
-      if(byteoffset % (unsigned long) ALIGNSIZE > 0)
+      if (byteoffset % (unsigned long) ALIGNSIZE > 0)
       {
         size_t padunits = ALIGNSIZE - (byteoffset % ALIGNSIZE);
         byteoffset += (unsigned long) padunits;
@@ -282,16 +282,16 @@ int flushtheindex2file(FILE *fp,
                               (uint64_t) (byteoffset +
                                           mapspecptr->sizeofunit *
                                           mapspecptr->numofunits));
-    if(byteoffset % (unsigned long) ALIGNSIZE > 0)
+    if (byteoffset % (unsigned long) ALIGNSIZE > 0)
     {
       size_t padunits = ALIGNSIZE - (byteoffset % ALIGNSIZE);
-      if(fwrite(padbuffer,
-                sizeof(Uchar),padunits,fp) != padunits)
+      if (fwrite(padbuffer,
+                sizeof (Uchar),padunits,fp) != padunits)
       {
         env_error_set(env,"cannot write %lu items of size %u: "
                           "errormsg=\"%s\"",
                            (unsigned long) padunits,
-                           (unsigned int) sizeof(Uchar),
+                           (unsigned int) sizeof (Uchar),
                            strerror(errno));
         haserr = true;
       }

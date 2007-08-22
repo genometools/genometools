@@ -42,7 +42,7 @@ bool indexfilealreadyexists(const Str *indexname,const char *suffix,Env *env)
   tmpfilename = str_clone(indexname,env);
   str_append_cstr(tmpfilename,suffix,env);
 
-  if(stat(str_get(tmpfilename),&statbuf) == 0)
+  if (stat(str_get(tmpfilename),&statbuf) == 0)
   {
     str_delete(tmpfilename,env);
     return true;

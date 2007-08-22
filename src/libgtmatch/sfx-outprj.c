@@ -56,7 +56,7 @@ static void showprjinfo(FILE *outprj,
   fprintf(outprj,"numofsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofdbsequences=%lu\n",numofsequences);
   fprintf(outprj,"numofquerysequences=0\n");
-  if(longest->defined)
+  if (longest->defined)
   {
     fprintf(outprj,"longest=" FormatSeqpos "\n",
             PRINTSeqposcast(longest->valueseqpos));

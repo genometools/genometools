@@ -41,7 +41,7 @@ int testencodedsequence(const StrArray *filenametab,
   esr = initEncodedsequencescanstate(encseq,readmode,env);
   for (pos=0; /* Nothing */; pos++)
   {
-    if(readmode == Forwardmode)
+    if (readmode == Forwardmode)
     {
       retval = readnextUchar(&ccscan,&fbs,env);
       if (retval < 0)
@@ -55,13 +55,13 @@ int testencodedsequence(const StrArray *filenametab,
       }
     } else
     {
-      if(pos >= totallength)
+      if (pos >= totallength)
       {
         break;
       }
     }
     ccra = getencodedchar(encseq,pos,readmode);
-    if(readmode == Forwardmode)
+    if (readmode == Forwardmode)
     {
       if (ccscan != ccra)
       {
@@ -104,7 +104,7 @@ int testencodedsequence(const StrArray *filenametab,
 static int addelem(void *processinfo,const Sequencerange *range,Env *env)
 {
   env_error_check(env);
-  array_add_elem((Array *) processinfo,(void *) range,sizeof(Sequencerange),
+  array_add_elem((Array *) processinfo,(void *) range,sizeof (Sequencerange),
                  env);
   return 0;
 }
@@ -114,7 +114,7 @@ static void reverseSequencerange(Array *a)
   unsigned long idx1, idx2;
   Sequencerange tmp, *valptr1, *valptr2;
 
-  for(idx1=0, idx2 = (unsigned long) array_size(a) - 1;
+  for (idx1=0, idx2 = (unsigned long) array_size(a) - 1;
       idx1 < idx2; idx1++, idx2--)
   {
     valptr1 = (Sequencerange *) array_get(a,idx1);
@@ -133,29 +133,29 @@ int checkspecialranges(const Encodedsequence *encseq,Env *env)
   bool haserr = false;
 
   env_error_check(env);
-  if(!fastspecialranges(encseq))
+  if (!fastspecialranges(encseq))
   {
     return 0;
   }
-  rangesforward = array_new(sizeof(Sequencerange),env);
-  rangesbackward = array_new(sizeof(Sequencerange),env);
+  rangesforward = array_new(sizeof (Sequencerange),env);
+  rangesbackward = array_new(sizeof (Sequencerange),env);
 
-  if(overallspecialrangesfast(encseq,true,Forwardmode,addelem,rangesforward,
+  if (overallspecialrangesfast(encseq,true,Forwardmode,addelem,rangesforward,
                               env) != 0)
   {
     haserr = true;
   }
-  if(!haserr)
+  if (!haserr)
   {
-    if(overallspecialrangesfast(encseq,false,Reversemode,addelem,rangesbackward,
-                                env) != 0)
+    if (overallspecialrangesfast(encseq,false,Reversemode,addelem,
+                                 rangesbackward,env) != 0)
     {
       haserr = true;
     }
   }
-  if(!haserr)
+  if (!haserr)
   {
-    if(array_size(rangesforward) != array_size(rangesbackward))
+    if (array_size(rangesforward) != array_size(rangesbackward))
     {
       env_error_set(env,"array_size(rangesforward) = %lu != %lu = "
                         "array_size(rangesbackward)\n",
@@ -164,15 +164,15 @@ int checkspecialranges(const Encodedsequence *encseq,Env *env)
       haserr = true;
     }
   }
-  if(!haserr)
+  if (!haserr)
   {
     reverseSequencerange(rangesbackward);
     printf("# check %lu ranges\n",(unsigned long) array_size(rangesforward));
-    for(idx=0; idx<(unsigned long) array_size(rangesforward); idx++)
+    for (idx=0; idx<(unsigned long) array_size(rangesforward); idx++)
     {
       valf = (Sequencerange *) array_get(rangesforward,idx);
       valb = (Sequencerange *) array_get(rangesbackward,idx);
-      if(valf->leftpos != valb->leftpos || valf->rightpos != valb->rightpos)
+      if (valf->leftpos != valb->leftpos || valf->rightpos != valb->rightpos)
       {
         env_error_set(env,
                       "rangesforward[%lu] = (" FormatSeqpos "," FormatSeqpos

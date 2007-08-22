@@ -47,7 +47,7 @@ void addmultidistribution(Distribution *dist,unsigned long ind,
 
   env_error_check(env);
   result = hashtable_get(dist->hashdist,(void *) ind);
-  if(result == NULL)
+  if (result == NULL)
   {
     unsigned long *newvalueptr;
 

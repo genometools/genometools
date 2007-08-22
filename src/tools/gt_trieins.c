@@ -6,7 +6,7 @@
 
 #include "gt.h"
 
-static OPrval parse_options(bool *onlyins,int *parsed_args, 
+static OPrval parse_options(bool *onlyins,int *parsed_args,
                             int argc, const char **argv,Env *env)
 {
   OptionParser *op;
@@ -14,7 +14,7 @@ static OPrval parse_options(bool *onlyins,int *parsed_args,
   OPrval oprval;
 
   env_error_check(env);
-  op = option_parser_new("[options] indexname", 
+  op = option_parser_new("[options] indexname",
                          "Perfrom trie insertions and check consistency.",
                          env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -43,7 +43,7 @@ int gt_trieins(int argc, const char **argv, Env *env)
   assert(parsed_args == 1 || parsed_args == 2);
 
   indexname = str_new_cstr(argv[parsed_args],env);
-  if(test_trieins(onlyins,indexname,env) != 0)
+  if (test_trieins(onlyins,indexname,env) != 0)
   {
     haserr = true;
   }

@@ -129,7 +129,7 @@ static OPrval parse_options(int *parsed_args,
   option_exclude(optionsmap, optionprotein, env);
   option_exclude(optiondna, optionprotein, env);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
-  if(oprval == OPTIONPARSER_ERROR && strarray_size(so->filenametab) == 0)
+  if (oprval == OPTIONPARSER_ERROR && strarray_size(so->filenametab) == 0)
   {
     env_error_set(env,"missing arguments to option -db");
   }
@@ -156,7 +156,7 @@ static OPrval parse_options(int *parsed_args,
   {
     if (option_is_set(optionplain))
     {
-      if(!option_is_set(optiondna) &&
+      if (!option_is_set(optiondna) &&
          !option_is_set(optionprotein) &&
          !option_is_set(optionsmap))
       {
@@ -167,16 +167,16 @@ static OPrval parse_options(int *parsed_args,
     }
   }
   option_parser_delete(op, env);
-  if(oprval == OPTIONPARSER_OK && *parsed_args != argc)
+  if (oprval == OPTIONPARSER_OK && *parsed_args != argc)
   {
     env_error_set(env,"superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
   }
-  if(oprval == OPTIONPARSER_OK)
+  if (oprval == OPTIONPARSER_OK)
   {
     int retval = parsereadmode(str_get(dirarg),env);
 
-    if(retval < 0)
+    if (retval < 0)
     {
       oprval = OPTIONPARSER_ERROR;
     } else
@@ -204,7 +204,7 @@ static void showoptions(const Suffixeratoroptions *so)
   {
     printf("# protein=yes\n");
   }
-  if(so->isplain)
+  if (so->isplain)
   {
     printf("# plain=yes\n");
   }
