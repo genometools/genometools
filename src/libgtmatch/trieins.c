@@ -492,10 +492,10 @@ void insertsuffixintotrie(Trierep *trierep,
       if(suffixinfo->startpos + currentdepth >=
          getencseqtotallength(eri->encseqptr))
       {
-	cc = (Uchar) SEPARATOR;
+        cc = (Uchar) SEPARATOR;
       } else
       {
-	cc = getencodedchar(eri->encseqptr,
+        cc = getencodedchar(eri->encseqptr,
                             suffixinfo->startpos + currentdepth,
                             eri->readmode);
       }
@@ -503,74 +503,74 @@ void insertsuffixintotrie(Trierep *trierep,
       assert(!ISLEAF(currentnode));
       if(!hassuccessor(trierep,&np,currentdepth,currentnode,cc,suffixinfo->idx))
       {
-	newleaf = makenewleaf(trierep,suffixinfo);
-	newleaf->rightsibling = np.current;
-	SHOWNODERELATIONS(newleaf);
-	if(np.previous == NULL)
-	{
+        newleaf = makenewleaf(trierep,suffixinfo);
+        newleaf->rightsibling = np.current;
+        SHOWNODERELATIONS(newleaf);
+        if(np.previous == NULL)
+        {
           SETFIRSTCHILD(currentnode,newleaf);
-	  SHOWNODERELATIONS(currentnode);
-	} else
-	{
-	  np.previous->rightsibling = newleaf;
-	  SHOWNODERELATIONS(np.previous);
-	}
-	return;
+          SHOWNODERELATIONS(currentnode);
+        } else
+        {
+          np.previous->rightsibling = newleaf;
+          SHOWNODERELATIONS(np.previous);
+        }
+        return;
       }
       succ = np.current;
       if(ISLEAF(succ))
       {
-	lcpvalue = getlcp(eri->encseqptr,
+        lcpvalue = getlcp(eri->encseqptr,
                           eri->readmode,
                           suffixinfo->startpos + currentdepth + 1,
-			  getencseqtotallength(eri->encseqptr) - 1,
-			  trierep->encseqreadinfo[succ->suffixinfo.idx].
+                          getencseqtotallength(eri->encseqptr) - 1,
+                          trierep->encseqreadinfo[succ->suffixinfo.idx].
                                 encseqptr,
-			  trierep->encseqreadinfo[succ->suffixinfo.idx].
+                          trierep->encseqreadinfo[succ->suffixinfo.idx].
                                 readmode,
-			  succ->suffixinfo.startpos + currentdepth + 1,
-			  getencseqtotallength(
+                          succ->suffixinfo.startpos + currentdepth + 1,
+                          getencseqtotallength(
                               trierep->encseqreadinfo[succ->suffixinfo.idx].
                                         encseqptr) - 1);
-	newbranch = makenewbranch(trierep,
-				  suffixinfo,
-				  currentdepth + lcpvalue + 1,
-				  succ);
-	if(np.previous == NULL)
-	{
+        newbranch = makenewbranch(trierep,
+                                  suffixinfo,
+                                  currentdepth + lcpvalue + 1,
+                                  succ);
+        if(np.previous == NULL)
+        {
           SETFIRSTCHILD(currentnode,newbranch);
-	  SHOWNODERELATIONS(currentnode);
-	} else
-	{
-	  np.previous->rightsibling = newbranch;
-	  SHOWNODERELATIONS(np.previous);
-	}
-	return;
+          SHOWNODERELATIONS(currentnode);
+        } else
+        {
+          np.previous->rightsibling = newbranch;
+          SHOWNODERELATIONS(np.previous);
+        }
+        return;
       }
       lcpvalue = getlcp(eri->encseqptr,
                         eri->readmode,
                         suffixinfo->startpos + currentdepth + 1,
-			getencseqtotallength(eri->encseqptr) - 1,
-			trierep->encseqreadinfo[succ->suffixinfo.idx].encseqptr,
-			trierep->encseqreadinfo[succ->suffixinfo.idx].readmode,
-			succ->suffixinfo.startpos + currentdepth + 1,
-			succ->suffixinfo.startpos + succ->depth - 1);
+                        getencseqtotallength(eri->encseqptr) - 1,
+                        trierep->encseqreadinfo[succ->suffixinfo.idx].encseqptr,
+                        trierep->encseqreadinfo[succ->suffixinfo.idx].readmode,
+                        succ->suffixinfo.startpos + currentdepth + 1,
+                        succ->suffixinfo.startpos + succ->depth - 1);
       if(currentdepth + lcpvalue + 1 < succ->depth)
       {
-	newbranch = makenewbranch(trierep,
-				  suffixinfo,
-				  currentdepth + lcpvalue + 1,
-				  succ);
-	if(np.previous == NULL)
-	{
+        newbranch = makenewbranch(trierep,
+                                  suffixinfo,
+                                  currentdepth + lcpvalue + 1,
+                                  succ);
+        if(np.previous == NULL)
+        {
           SETFIRSTCHILD(currentnode,newbranch);
-	  SHOWNODERELATIONS(currentnode);
-	} else
-	{
-	  np.previous->rightsibling = newbranch;
-	  SHOWNODERELATIONS(np.previous);
-	}
-	return;
+          SHOWNODERELATIONS(currentnode);
+        } else
+        {
+          np.previous->rightsibling = newbranch;
+          SHOWNODERELATIONS(np.previous);
+        }
+        return;
       }
       currentnode = succ;
       currentdepth = currentnode->depth;
