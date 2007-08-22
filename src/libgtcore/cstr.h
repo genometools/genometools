@@ -13,6 +13,9 @@
 
 char*         cstr_dup(const char*, Env*);
 void          cstr_show(const char*, unsigned long length, FILE*);
+/* returns the length of the prefix of <cstr> ending just before <c>, if <cstr>
+   does not contain <c>, strlen(cstr) is returned. */
+unsigned long cstr_length_up_to_char(const char *cstr, char c);
 
 /* use p and a blank as prefix for cstr_array[0] and return the result */
 char**        cstr_array_prefix_first(const char **cstr_array, const char *p,

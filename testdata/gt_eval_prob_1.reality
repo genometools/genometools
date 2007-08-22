@@ -1,0 +1,48 @@
+##gff-version   3
+##sequence-region   chr8 118886142 119279152
+chr8	ENCODE	gene	118886142	119192762	.	-	.	ID=gene1;Name=AC113188.1-004;Name2=EXT1
+chr8	ENCODE	exon	118886142	118886313	.	-	.	Parent=gene1
+chr8	ENCODE	exon	118888637	118888797	.	-	.	Parent=gene1
+chr8	ENCODE	exon	118894292	118894381	.	-	.	Parent=gene1
+chr8	ENCODE	exon	118899855	118899950	.	-	.	Parent=gene1
+chr8	ENCODE	exon	118901096	118901214	.	-	.	Parent=gene1
+chr8	ENCODE	exon	118903885	118904017	.	-	.	Parent=gene1
+chr8	ENCODE	exon	118911650	118911769	.	-	.	Parent=gene1
+chr8	ENCODE	exon	118916864	118916971	.	-	.	Parent=gene1
+chr8	ENCODE	exon	119192394	119192762	.	-	.	Parent=gene1
+###
+chr8	ENCODE	gene	118886142	119192806	.	-	.	ID=gene2;Name=AC113188.1-002;Name2=EXT1
+chr8	ENCODE	exon	118886142	118886313	.	-	.	Parent=gene2
+chr8	ENCODE	exon	118888637	118888797	.	-	.	Parent=gene2
+chr8	ENCODE	exon	118894292	118894381	.	-	.	Parent=gene2
+chr8	ENCODE	exon	118899855	118899880	.	-	.	Parent=gene2
+chr8	ENCODE	exon	119191651	119192806	.	-	.	Parent=gene2
+###
+chr8	ENCODE	gene	118886142	119193119	.	-	.	ID=gene3;Name=AC113188.1-001;Name2=EXT1
+chr8	ENCODE	exon	118886142	118886313	.	-	.	Parent=gene3
+chr8	ENCODE	exon	118888637	118888797	.	-	.	Parent=gene3
+chr8	ENCODE	exon	118894292	118894381	.	-	.	Parent=gene3
+chr8	ENCODE	exon	118899855	118899950	.	-	.	Parent=gene3
+chr8	ENCODE	exon	118901096	118901214	.	-	.	Parent=gene3
+chr8	ENCODE	exon	118903885	118904017	.	-	.	Parent=gene3
+chr8	ENCODE	exon	118911650	118911769	.	-	.	Parent=gene3
+chr8	ENCODE	exon	118916864	118916971	.	-	.	Parent=gene3
+chr8	ENCODE	exon	118918528	118918621	.	-	.	Parent=gene3
+chr8	ENCODE	exon	119191505	119193119	.	-	.	Parent=gene3
+###
+chr8	ENCODE	gene	118911657	119191834	.	-	.	ID=gene4;Name=AC113188.1-003;Name2=EXT1
+chr8	ENCODE	exon	118911657	118911769	.	-	.	Parent=gene4
+chr8	ENCODE	exon	118913019	118913073	.	-	.	Parent=gene4
+chr8	ENCODE	exon	118916864	118916971	.	-	.	Parent=gene4
+chr8	ENCODE	exon	118918528	118918621	.	-	.	Parent=gene4
+chr8	ENCODE	exon	119191505	119191834	.	-	.	Parent=gene4
+###
+chr8	ENCODE	gene	119276307	119279152	.	-	.	ID=gene5;Name=AC023590.2-005;Name2=SAMD12
+chr8	ENCODE	exon	119276307	119279152	.	-	.	Parent=gene5
+###
+chr8	ENCODE	gene	119276307	119279152	.	-	.	ID=gene6;Name=AC023590.2-003;Name2=SAMD12
+chr8	ENCODE	exon	119276307	119279152	.	-	.	Parent=gene6
+###
+chr8	ENCODE	gene	119278740	119279152	.	-	.	ID=gene7;Name=AC023590.2-004;Name2=SAMD12
+chr8	ENCODE	exon	119278740	119279152	.	-	.	Parent=gene7
+###

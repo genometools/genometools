@@ -5,8 +5,10 @@
 */
 
 #include "gtr.h"
+#include "gtlua.h"
 #include "lua.h"
 #include "lauxlib.h"
+#include "lualib.h"
 #include "libgtcore/array.h"
 #include "libgtcore/bitpackarray.h"
 #include "libgtcore/bitpackstring.h"
@@ -16,7 +18,9 @@
 #include "libgtcore/dlist.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fileutils.h"
 #include "libgtcore/grep.h"
+#include "libgtcore/gtcorelua.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/range.h"
 #include "libgtcore/splitter.h"
@@ -63,6 +67,7 @@ struct GTR {
   bool test,
        interactive,
        debug;
+  Str *spacepeak;
   Toolbox *toolbox;
   Hashtable *unit_tests;
   lua_State *L;
@@ -71,8 +76,14 @@ struct GTR {
 GTR* gtr_new(Env *env)
 {
   GTR *gtr = env_ma_calloc(env, 1, sizeof (GTR));
+  gtr->spacepeak = str_new(env);
   /* XXX */
   gtr->L = luaL_newstate();
+  luaL_openlibs(gtr->L); /* open the standard libraries */
+  put_env_in_registry(gtr->L, env); /* we have to register the env object,
+                                       before we can open the GenomeTools
+                                       libraries */
+  luaopen_gt(gtr->L); /* open all GenomeTools libraries */
   assert(gtr->L);
   return gtr;
 }
@@ -83,9 +94,15 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   OptionParser *op;
   Option *o;
   OPrval oprval;
+  static const char *spacepeak_choices[] = {
+   "stderr", /* the default */
+   "stdout",
+   NULL
+  };
+
   env_error_check(env);
   assert(gtr);
-  op = option_parser_new("[option ...] [tool ...] [argument ...]",
+  op = option_parser_new("[option ...] [tool | script] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
                           "(http://genometools.org).", env);
   option_parser_set_comment_func(op, toolbox_show, gtr->toolbox);
@@ -98,6 +115,12 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   option_is_development_option(o);
   option_parser_add_option(op, o, env);
   o = option_new_debug(&gtr->debug, env);
+  option_parser_add_option(op, o, env);
+  o = option_new_choice("spacepeak", "show spacepeak on stdout or stderr "
+                        "upon deletion", gtr->spacepeak, spacepeak_choices[0],
+                        spacepeak_choices, env);
+  option_argument_is_optional(o);
+  option_is_development_option(o);
   option_parser_add_option(op, o, env);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
   option_parser_delete(op, env);
@@ -230,32 +253,48 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
   int had_err = 0;
   env_error_check(env);
   assert(gtr);
+  if (gtr->debug)
+    env_set_log(env, log_new(env_ma(env)));
   if (gtr->test) {
     return run_tests(gtr, env);
   }
-  if (gtr->debug)
-    env_set_log(env, log_new(env_ma(env)));
   assert(argc);
   if (argc == 1 && !gtr->interactive) {
-    env_error_set(env, "no tool specified; option -help lists possible tools");
+    env_error_set(env, "neither tool nor script specified; option -help lists "
+                       "possible tools");
     had_err = -1;
   }
   if (!had_err && argc > 1) {
     if (!gtr->toolbox || !(tool = toolbox_get(gtr->toolbox, argv[1]))) {
-      env_error_set(env, "tool '%s' not found; option -help lists possible "
-                         "tools", argv[1]);
-      had_err = -1;
+      /* no tool found -> try to open script */
+      if (file_exists(argv[1])) {
+        /* run script */
+        if (luaL_dofile(gtr->L, argv[1])) {
+          /* error */
+          assert(lua_isstring(gtr->L, -1)); /* error message on top */
+          env_error_set(env, "could not execute script %s",
+                        lua_tostring(gtr->L, -1));
+          had_err = -1;
+          lua_pop(gtr->L, 1); /* pop error message */
+        }
+      }
+      else {
+        /* neither tool nor script found */
+        env_error_set(env, "neither tool nor script '%s' found; option -help "
+                           "lists possible tools", argv[1]);
+        had_err = -1;
+      }
     }
-  }
-  if (!had_err && argc > 1) {
-    nargv = cstr_array_prefix_first(argv+1, argv[0], env);
-    had_err = tool(argc-1, (const char**) nargv, env);
+    else {
+      /* run tool */
+      nargv = cstr_array_prefix_first(argv+1, argv[0], env);
+      env_error_set_progname(env, nargv[0]);
+      had_err = tool(argc-1, (const char**) nargv, env);
+    }
   }
   cstr_array_delete(nargv, env);
   if (!had_err && gtr->interactive) {
-    /* XXX */
-    env_error_set(env, "interactive mode not implemented yet");
-    had_err = -1;
+    run_interactive_lua_interpreter(gtr->L);
   }
   if (had_err)
     return EXIT_FAILURE;
@@ -265,6 +304,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
 void gtr_delete(GTR *gtr, Env *env)
 {
   if (!gtr) return;
+  str_delete(gtr->spacepeak, env);
   toolbox_delete(gtr->toolbox, env);
   hashtable_delete(gtr->unit_tests, env);
   if (gtr->L) lua_close(gtr->L);
