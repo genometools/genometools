@@ -11,7 +11,7 @@
 
 /* exports the Bittab class to Lua:
 
-   gt.bittab_new(num_of_bits)
+   bittab = gt.bittab_new(num_of_bits)
    bittab:set_bit(bit)
    bittab:unset_bit(bit)
 */
