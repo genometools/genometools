@@ -88,8 +88,8 @@ Creates a new table entry for some sequence region.
 \param env Pointer to Environment object.
 */
 void feature_index_add_sequence_region(FeatureIndex *fi,
-                                      SequenceRegion *sr,
-                                      Env *env)
+                                       SequenceRegion *sr,
+                                       Env *env)
 {
   char *seqid;
   RegionInfo *info;
