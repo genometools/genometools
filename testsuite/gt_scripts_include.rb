@@ -9,3 +9,9 @@ Keywords "gt_scripts"
 Test do
   run_test "#{$bin}gt #{$testdata}/gtscripts/genome_node.lua"
 end
+
+Name "genome_stream bindings"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$testdata}/gtscripts/genome_stream.lua"
+end
