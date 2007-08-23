@@ -25,8 +25,7 @@ static int genome_feature_lua_new(lua_State *L)
   assert(L);
   /* get/check parameters */
   type_str = luaL_checkstring(L, 1);
-  /* XXX */
-  luaL_argcheck(L, !genome_feature_type_get(&type, (char*) type_str), 1,
+  luaL_argcheck(L, !genome_feature_type_get(&type, type_str), 1,
                 "invalid feature type");
 
   range.start = luaL_checklong(L, 2);

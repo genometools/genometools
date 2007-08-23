@@ -34,7 +34,7 @@ static const char *genome_feature_type_strings[] = { "CDS",
                                                      "transcript"
                                                    };
 
-int genome_feature_type_get(GenomeFeatureType *type, char *gft_string)
+int genome_feature_type_get(GenomeFeatureType *type, const char *gft_string)
 {
   void *result;
 
