@@ -138,7 +138,7 @@ void feature_index_add_genome_feature(FeatureIndex *fi,
   /* entry for the seqid must already exist */
   assert(feature_index_has_seqid(fi, seqid, env));
   info = (RegionInfo*) hashtable_get(fi->regions, seqid);
-  /* Add node to the appropriate array in the hashtable. */
+  /* add node to the appropriate array in the hashtable. */
   array_add(info->features,
             gf_new,
             env);
