@@ -14,6 +14,8 @@
    bittab = gt.bittab_new(num_of_bits)
    bittab:set_bit(bit)
    bittab:unset_bit(bit)
+   bittab:comlement(src) -- bittab = ~src
+   bittab:equal(src)     -- bittab =  src
 */
 int luaopen_bittab(lua_State*);
 

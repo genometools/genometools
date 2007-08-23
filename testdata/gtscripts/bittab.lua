@@ -27,7 +27,6 @@ rval, err = pcall(b.unset_bit, b, 10)
 assert(not rval)
 assert(string.find(err, "bit number too large"))
 
---[[
 -- testing bittab:complement
 src = gt.bittab_new(10)
 src:set_bit(5)
@@ -43,4 +42,3 @@ b:equal(src)
 rval, err = pcall(b.equal, b, prob)
 assert(not rval)
 assert(string.find(err, "bittabs have different sizes"))
-]]
