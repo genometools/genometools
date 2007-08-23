@@ -32,15 +32,18 @@ static unsigned char checkgzipsuffix(const char *filename)
   return (unsigned char) 1;
 }
 
-static void opengenericstream(Genericstream *inputstream,const char *inputfile)
+static int opengenericstream(Genericstream *inputstream,
+                             const char *inputfile,
+                             Env *env)
 {
+  env_error_check(env);
   if (checkgzipsuffix(inputfile))
   {
     inputstream->stream.gzippedstream = gzopen(inputfile,"rb");
     if (inputstream->stream.gzippedstream == NULL)
     {
-      fprintf(stderr,"cannot open file \"%s\"\n",inputfile);
-      exit(EXIT_FAILURE);
+      env_error_set(env,"cannot open file \"%s\"",inputfile);
+      return -1;
     }
     inputstream->isgzippedstream = true;
   } else
@@ -48,17 +51,21 @@ static void opengenericstream(Genericstream *inputstream,const char *inputfile)
     inputstream->stream.fopenstream = fopen(inputfile,"rb");
     if (inputstream->stream.fopenstream == NULL)
     {
-      fprintf(stderr,"cannot open file \"%s\"\n",inputfile);
-      exit(EXIT_FAILURE);
+      env_error_set(env,"cannot open file \"%s\"",inputfile);
+      return -1;
     }
     inputstream->isgzippedstream = false;
   }
+  return 0;
 }
 
-static void closegenericstream(Genericstream *inputstream,const char *inputfile)
+static int closegenericstream(Genericstream *inputstream,
+                              const char *inputfile,
+                              Env *env)
 {
   int retval;
 
+  env_error_check(env);
   if (inputstream->isgzippedstream)
   {
     retval = gzclose(inputstream->stream.gzippedstream);
@@ -68,9 +75,10 @@ static void closegenericstream(Genericstream *inputstream,const char *inputfile)
   }
   if (retval != 0)
   {
-    fprintf(stderr,"cannot close file \"%s\"\n",inputfile);
-    exit(EXIT_FAILURE);
+    env_error_set(env,"cannot close file \"%s\"",inputfile);
+    return -1;
   }
+  return 0;
 }
 
 void initformatbufferstate(Fastabufferstate *fbs,
@@ -138,9 +146,13 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       currentfileadd = 0;
       currentfileread = 0;
       fbs->linenum = (uint32_t) 1;
-      opengenericstream(&fbs->inputstream,
-                        strarray_get(fbs->filenametab,
-                        (unsigned long) fbs->filenum));
+      if(opengenericstream(&fbs->inputstream,
+                           strarray_get(fbs->filenametab,
+                           (unsigned long) fbs->filenum),
+                           env) != 0)
+      {
+        return -1;
+      }
     } else
     {
       if (fbs->inputstream.isgzippedstream)
@@ -152,9 +164,13 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       }
       if (currentchar == EOF)
       {
-        closegenericstream(&fbs->inputstream,
-                           strarray_get(fbs->filenametab,
-                                        (unsigned long) fbs->filenum));
+        if(closegenericstream(&fbs->inputstream,
+                              strarray_get(fbs->filenametab,
+                                           (unsigned long) fbs->filenum),
+                              env) != 0)
+        {
+          return -2;
+        }
         if (fbs->filelengthtab != NULL)
         {
           fbs->filelengthtab[fbs->filenum].length += currentfileread;
@@ -300,9 +316,13 @@ static int advancePlainbufferstate(Fastabufferstate *fbs,Env *env)
       fbs->nextfile = false;
       fbs->firstseqinfile = true;
       currentfileread = 0;
-      opengenericstream(&fbs->inputstream,
-                        strarray_get(fbs->filenametab,
-                        (unsigned long) fbs->filenum));
+      if(opengenericstream(&fbs->inputstream,
+                           strarray_get(fbs->filenametab,
+                           (unsigned long) fbs->filenum),
+                           env) != 0)
+      {
+        return -1;
+      }
     } else
     {
       if (fbs->inputstream.isgzippedstream)
@@ -314,9 +334,13 @@ static int advancePlainbufferstate(Fastabufferstate *fbs,Env *env)
       }
       if (currentchar == EOF)
       {
-        closegenericstream(&fbs->inputstream,
-                           strarray_get(fbs->filenametab,
-                                        (unsigned long) fbs->filenum));
+        if(closegenericstream(&fbs->inputstream,
+                              strarray_get(fbs->filenametab,
+                                           (unsigned long) fbs->filenum),
+                              env) != 0)
+        {
+          return -1;
+        }
         if (fbs->filelengthtab != NULL)
         {
           fbs->filelengthtab[fbs->filenum].length
@@ -350,6 +374,7 @@ static int advancePlainbufferstate(Fastabufferstate *fbs,Env *env)
 
 int advanceformatbufferstate(Fastabufferstate *fbs,Env *env)
 {
+  env_error_check(env);
   if (fbs->plainformat)
   {
     return advancePlainbufferstate(fbs,env);

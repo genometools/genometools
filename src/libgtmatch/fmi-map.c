@@ -67,25 +67,27 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   SETREADINTKEYS("lengthofspecialsuffix",
                  &fmindex->specialcharinfo.lengthofspecialsuffix,NULL);
   SETREADINTKEYS("suffixlength",&fmindex->suffixlength,NULL);
-
-  INITARRAY(&linebuffer,Uchar);
-  for (linenum = 0; /* Nothing */; linenum++)
+  if(!haserr)
   {
-    linebuffer.nextfreeUchar = 0;
-    if (readnextline(fpin,&linebuffer,env) == EOF)
+    INITARRAY(&linebuffer,Uchar);
+    for (linenum = 0; /* Nothing */; linenum++)
     {
-      break;
-    }
-    if (analyzeuintline(indexname,
-                       FMASCIIFILESUFFIX,
-                       linenum,
-                       linebuffer.spaceUchar,
-                       linebuffer.nextfreeUchar,
-                       riktab,
-                       env) != 0)
-    {
-      haserr = true;
-      break;
+      linebuffer.nextfreeUchar = 0;
+      if (readnextline(fpin,&linebuffer,env) == EOF)
+      {
+        break;
+      }
+      if (analyzeuintline(indexname,
+                         FMASCIIFILESUFFIX,
+                         linenum,
+                         linebuffer.spaceUchar,
+                         linebuffer.nextfreeUchar,
+                         riktab,
+                         env) != 0)
+      {
+        haserr = true;
+        break;
+      }
     }
   }
   if (!haserr && allkeysdefined(indexname,FMASCIIFILESUFFIX,riktab,false,

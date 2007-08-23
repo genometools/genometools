@@ -75,14 +75,15 @@ static void showcomparisonfailure(const char *where,
               PRINTSeqposcast(maxlcp));
 }
 
-void checkifprefixesareidentical(const Encodedsequence *encseq,
-                                 Readmode readmode,
-                                 const Uchar *characters,
-                                 const Seqpos *suftab,
-                                 uint32_t prefixlength,
-                                 Seqpos depth,
-                                 Seqpos left,
-                                 Seqpos right)
+/*
+static void checkifprefixesareidentical(const Encodedsequence *encseq,
+                                        Readmode readmode,
+                                        const Uchar *characters,
+                                        const Seqpos *suftab,
+                                        uint32_t prefixlength,
+                                        Seqpos depth,
+                                        Seqpos left,
+                                        Seqpos right)
 {
   const Seqpos *ptr;
   Seqpos maxlcp;
@@ -111,6 +112,7 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
     }
   }
 }
+*/
 
 void showentiresuftab(const Encodedsequence *encseq,
                       Readmode readmode,
@@ -155,7 +157,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
       fprintf(stderr,"ERROR: suffix with startpos " FormatSeqpos
                      " already occurs\n",
                       PRINTSeqposcast(*ptr));
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programming error */
     }
     SETIBIT(startposoccurs,*ptr);
     countbitsset++;
@@ -163,7 +165,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
   if (countbitsset != totallength+1)
   {
     fprintf(stderr,"ERROR: not all bits are set\n");
-    exit(EXIT_FAILURE);
+    exit(EXIT_FAILURE); /* programming error */
   }
   FREESPACE(startposoccurs);
   for (ptr = suftab + 1; ptr <= suftab + totallength; ptr++)
@@ -188,7 +190,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
                             ptr,
                             cmp,
                             maxlcp);
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programming error */
     }
   }
   /*

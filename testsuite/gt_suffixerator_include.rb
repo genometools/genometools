@@ -102,7 +102,7 @@ end
       extra=""
       extraname=""
     end
-    Name "gt suffixerator protein #{extraname} #{parts} parts"
+    Name "gt sfxmap protein #{extraname} #{parts} parts"
     Keywords "gt_suffixerator"
     Test do
       checksfx(parts,3,extra,"direct",["sw100K1.fna","sw100K2.fna"])
@@ -113,7 +113,7 @@ end
 
 1.upto(2) do |parts|
   ["direct", "bit", "uchar", "ushort", "uint"].each do |sat|
-    Name "gt suffixerator dna #{sat} #{parts} parts"
+    Name "gt sfxmap dna #{sat} #{parts} parts"
     Keywords "gt_suffixerator"
     Test do
       checksfx(parts,1,0,sat,["Random-Small.fna"])

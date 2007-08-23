@@ -224,7 +224,8 @@ Seqpos getencseqtotallength(const Encodedsequence *encseq)
   return encseq->totallength;
 }
 
-Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
+Uchar getencodedchar(const Encodedsequence *encseq,
+                     Seqpos pos,
                      Readmode readmode)
 {
   if (readmode == Forwardmode)
@@ -255,7 +256,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
   }
   fprintf(stderr,"getencodedchar: readmode %d not implemented\n",
                  (int) readmode);
-  exit(EXIT_FAILURE);
+  exit(EXIT_FAILURE); /* programming error */
 }
 
  struct Encodedsequencescanstate
@@ -305,7 +306,7 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
   }
   fprintf(stderr,"sequentialgetencodedchar: readmode %d not implemented\n",
                   (int) esr->readmode);
-  exit(EXIT_FAILURE);
+  exit(EXIT_FAILURE); /* programming error */
 }
 
 typedef struct
@@ -559,7 +560,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          break;
     default:
          fprintf(stderr,"detsizeencseq(%d) undefined\n",(int) sat);
-         exit(EXIT_FAILURE);
+         exit(EXIT_FAILURE); /* programming error */
   }
   return sum + 1;
 }
@@ -933,7 +934,7 @@ static Seqpos accessspecialpositions(const Encodedsequence *encseq,Seqpos idx)
   }
   fprintf(stderr,"accessspecialpositions(sat = %s is undefined)\n",
                   accesstype2name(encseq->sat));
-  exit(EXIT_FAILURE);
+  exit(EXIT_FAILURE); /* programming error */
 }
 
 static Seqpos accessendspecialsubsUint(const Encodedsequence *encseq,
@@ -953,7 +954,7 @@ static Seqpos accessendspecialsubsUint(const Encodedsequence *encseq,
   }
   fprintf(stderr,"accessendspecialsubsUint(sat = %s is undefined)\n",
                   accesstype2name(encseq->sat));
-  exit(EXIT_FAILURE);
+  exit(EXIT_FAILURE); /* programming error */
 }
 
 static uint32_t sat2maxspecialtype(Positionaccesstype sat)
@@ -976,7 +977,7 @@ static uint32_t sat2maxspecialtype(Positionaccesstype sat)
   }
   fprintf(stderr,"sat2maxspecialtype(sat = %s is undefined)\n",
                   accesstype2name(sat));
-  exit(EXIT_FAILURE);
+  exit(EXIT_FAILURE); /* programming error */
 }
 
 #undef DEBUG

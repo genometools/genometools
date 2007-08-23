@@ -401,9 +401,10 @@ static void assignProteinalphabet(Alphabet *alpha)
 static int assignProteinorDNAalphabet(Alphabet *alpha,
                                       const StrArray *filenametab,Env *env)
 {
-  int retval = guessifproteinsequencestream(filenametab,env);
+  int retval;
 
   env_error_check(env);
+  retval = guessifproteinsequencestream(filenametab,env);
   if (retval < 0)
   {
     return -1;
@@ -650,18 +651,11 @@ static bool checksymbolmap(const Uchar *testsymbolmap,
       cc2 = (Uchar) tolower((int) cc1);
     } else
     {
-      if (islower((int) cc1))
-      {
-        cc2 = (Uchar) toupper((int) cc2);
-      } else
-      {
-        fprintf(stderr,"checksymbolmap used for non-alphabet character %c\n",
-                (char) cc1);
-        exit(EXIT_FAILURE);
-      }
+      assert(islower((int) cc1));
+      cc2 = (Uchar) toupper((int) cc1);
     }
     if (testsymbolmap[cc1] != verifiedsymbolmap[cc1] &&
-       testsymbolmap[cc2] != verifiedsymbolmap[cc2])
+        testsymbolmap[cc2] != verifiedsymbolmap[cc2])
     {
       return false;
     }

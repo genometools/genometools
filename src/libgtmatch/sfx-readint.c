@@ -36,17 +36,18 @@ size_t sizeofReadintkeys(void)
 }
 
 void setreadintkeys(Array *riktab,
-                    const char *keystring,
-                    void *valueptr,
-                    size_t sizeval,
-                    bool *readflag,
-                    Env *env)
+                   const char *keystring,
+                   void *valueptr,
+                   size_t sizeval,
+                   bool *readflag,
+                   Env *env)
 {
   Readintkeys rikvalue;
 
   env_error_check(env);
   rikvalue.keystring = keystring;
   rikvalue.readflag = readflag;
+  assert(sizeval == 0 || sizeval == 4 || sizeval == 8);
   switch (sizeval)
   {
     case 0: rikvalue.smallvalueptr = NULL;
@@ -63,8 +64,6 @@ void setreadintkeys(Array *riktab,
             rikvalue.smallvalueptr = NULL;
             rikvalue.ptrdefined = true;
             break;
-    default: fprintf(stderr,"sizeval must be 0 or 4 or 8\n");
-             exit(EXIT_FAILURE);
   }
   rikvalue.found = false;
   array_add_elem(riktab,&rikvalue,sizeof (Readintkeys),env);
