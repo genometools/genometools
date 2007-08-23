@@ -5,6 +5,7 @@
 */
 
 #include "lauxlib.h"
+#include "gtlua.h"
 #include "libgtcore/bittab.h"
 #include "libgtcore/bittablua.h"
 #include "libgtcore/env.h"

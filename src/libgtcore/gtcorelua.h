@@ -8,10 +8,7 @@
 #define GTCORELUA_H
 
 #include "lua.h"
-#include "libgtcore/env.h"
 
-void put_env_in_registry(lua_State*, Env*);
-Env* get_env_from_registry(lua_State*);
-int  luaopen_gtcore(lua_State*); /* open core library in Lua */
+int luaopen_gtcore(lua_State*); /* open core library in Lua */
 
 #endif

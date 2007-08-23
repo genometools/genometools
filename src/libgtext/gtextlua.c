@@ -5,12 +5,11 @@
 */
 
 #include <assert.h>
-#include "libgtcore/bittablua.h"
-#include "libgtcore/gtcorelua.h"
+#include "libgtext/gtextlua.h"
 
-int luaopen_gtcore(lua_State *L)
+int luaopen_gtext(lua_State *L)
 {
   assert(L);
-  luaopen_bittab(L);
+  /* XXX luaopen_bittab(L); */
   return 1;
 }

@@ -8,7 +8,10 @@
 #define GTLUA_H
 
 #include "lua.h"
+#include "libgtcore/env.h"
 
+void put_env_in_registry(lua_State*, Env*);
+Env* get_env_from_registry(lua_State*);
 int  luaopen_gt(lua_State*); /* open all GenomeTools libraries in Lua */
 void run_interactive_lua_interpreter(lua_State*);
 
