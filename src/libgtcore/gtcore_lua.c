@@ -4,11 +4,13 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#ifndef GTCORELUA_H
-#define GTCORELUA_H
+#include <assert.h>
+#include "libgtcore/bittab_lua.h"
+#include "libgtcore/gtcore_lua.h"
 
-#include "lua.h"
-
-int luaopen_gtcore(lua_State*); /* open core library in Lua */
-
-#endif
+int luaopen_gtcore(lua_State *L)
+{
+  assert(L);
+  luaopen_bittab(L);
+  return 1;
+}

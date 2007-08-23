@@ -20,7 +20,6 @@
 #include "libgtcore/env.h"
 #include "libgtcore/fileutils.h"
 #include "libgtcore/grep.h"
-#include "libgtcore/gtcorelua.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/range.h"
 #include "libgtcore/splitter.h"

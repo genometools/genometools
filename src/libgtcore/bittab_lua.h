@@ -4,12 +4,17 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#include <assert.h>
-#include "libgtext/gtextlua.h"
+#ifndef BITTAB_LUA_H
+#define BITTAB_LUA_H
 
-int luaopen_gtext(lua_State *L)
-{
-  assert(L);
-  /* XXX luaopen_bittab(L); */
-  return 1;
-}
+#include "lua.h"
+
+/* exports the Bittab class to Lua:
+
+   gt.bittab_new(num_of_bits)
+   bittab:set_bit(bit)
+   bittab:unset_bit(bit)
+*/
+int luaopen_bittab(lua_State*);
+
+#endif

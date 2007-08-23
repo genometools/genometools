@@ -7,9 +7,9 @@
 #include "lauxlib.h"
 #include "gtlua.h"
 #include "libgtcore/bittab.h"
-#include "libgtcore/bittablua.h"
+#include "libgtcore/bittab_lua.h"
 #include "libgtcore/env.h"
-#include "libgtcore/gtcorelua.h"
+#include "libgtcore/gtcore_lua.h"
 
 #define BITTAB_METATABLE  "GenomeTools.bittab"
 #define checkbittab(L) \

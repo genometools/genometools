@@ -4,11 +4,12 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#ifndef GTEXTLUA_H
-#define GTEXTLUA_H
+#include <assert.h>
+#include "libgtext/gtext_lua.h"
 
-#include "lua.h"
-
-int luaopen_gtext(lua_State*); /* open extended library in Lua */
-
-#endif
+int luaopen_gtext(lua_State *L)
+{
+  assert(L);
+  /* XXX luaopen_bittab(L); */
+  return 1;
+}
