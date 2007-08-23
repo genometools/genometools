@@ -66,6 +66,7 @@ void graphics_draw_exon_box(Graphics *g, double x, double y, double width,
     case STRAND_BOTH:
     case STRAND_UNKNOWN:
       cairo_rectangle(g->cr, x, y, width, height);
+    default: assert(0);
    }
 
    cairo_fill_preserve(g->cr);
