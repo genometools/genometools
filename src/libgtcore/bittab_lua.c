@@ -32,13 +32,28 @@ static int bittab_lua_new(lua_State *L)
   return 1;
 }
 
+static void get_bittab_and_bit(lua_State *L, Bittab ***bittab, long *bit)
+{
+  *bittab = checkbittab(L);
+  *bit = luaL_checklong(L, 2);
+  luaL_argcheck(L, *bit < bittab_size(**bittab), 2, "bit number too large");
+}
+
 static int bittab_lua_set_bit(lua_State *L)
 {
-  Bittab **bittab = checkbittab(L);
+  Bittab **bittab;
   long bit;
-  bit = luaL_checklong(L, 2);
-  luaL_argcheck(L, bit < bittab_size(*bittab), 2, "bit number too large");
+  get_bittab_and_bit(L, &bittab, &bit);
   bittab_set_bit(*bittab, bit);
+  return 0;
+}
+
+static int bittab_lua_unset_bit(lua_State *L)
+{
+  Bittab **bittab;
+  long bit;
+  get_bittab_and_bit(L, &bittab, &bit);
+  bittab_unset_bit(*bittab, bit);
   return 0;
 }
 
@@ -58,6 +73,7 @@ static const struct luaL_Reg bittab_lib_f [] = {
 
 static const struct luaL_Reg bittab_lib_m [] = {
   { "set_bit", bittab_lua_set_bit },
+  { "unset_bit", bittab_lua_unset_bit },
   { NULL, NULL }
 };
 
