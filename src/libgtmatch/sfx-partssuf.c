@@ -51,6 +51,36 @@ static Codetype findfirstlarger(const Seqpos *leftborder,
   return found;
 }
 
+static void removeemptyparts(Suftabparts *suftabparts)
+{
+  if(suftabparts->numofparts > 0)
+  {
+    uint32_t destpart, srcpart;
+    for(destpart = 0, srcpart = 0; srcpart < suftabparts->numofparts; srcpart++)
+    {
+      if(suftabparts->components[srcpart].widthofpart > 0)
+      {
+        if(destpart < srcpart)
+        {
+          suftabparts->components[destpart] = suftabparts->components[srcpart];
+        }
+        destpart++;
+      }
+    }
+    if(destpart < srcpart)
+    {
+      suftabparts->numofparts -= (srcpart - destpart);
+    }
+    for(srcpart = 0; srcpart < suftabparts->numofparts; srcpart++)
+    {
+      assert(suftabparts->components[srcpart].widthofpart > 0);
+      printf("# widthofpart[%u]=" FormatSeqpos "\n",
+              (unsigned int) srcpart,
+              PRINTSeqposcast(suftabparts->components[srcpart].widthofpart));
+    }
+  }
+}
+
 Suftabparts *newsuftabparts(uint32_t numofparts,
                             const Seqpos *leftborder,
                             Codetype numofallcodes,
@@ -125,9 +155,6 @@ Suftabparts *newsuftabparts(uint32_t numofparts,
         suftabparts->components[part].suftaboffset
           = (uint64_t) leftborder[suftabparts->components[part-1].nextcode];
       }
-      printf("# widthofpart[%u]=" FormatSeqpos "\n",
-              (unsigned int) part,
-              PRINTSeqposcast(suftabparts->components[part].widthofpart));
       if (suftabparts->largestwidth <
          suftabparts->components[part].widthofpart)
       {
@@ -139,6 +166,7 @@ Suftabparts *newsuftabparts(uint32_t numofparts,
     }
     assert(sumofwidth == numofsuffixestoinsert);
   }
+  removeemptyparts(suftabparts);
   return suftabparts;
 }
 

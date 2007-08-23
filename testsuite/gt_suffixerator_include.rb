@@ -14,9 +14,9 @@ def checksfx(parts,pl,withsmap,sat,filelist)
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run "#{$bin}gt suffixerator -parts #{parts} -pl #{pl} #{extra} #{outoptions()}  -db " +
-       filearg
-  run "#{$bin}gt dev sfxmap -v sfx"
+  run_test "#{$bin}gt suffixerator -parts #{parts} -pl #{pl} " +
+           "#{extra} #{outoptions()}  -db " + filearg
+  run_test "#{$bin}gt dev sfxmap -v sfx"
   run "grep -v '^#' #{$last_stdout}"
   run "cmp -s sfx.prj #{$last_stdout}"
 end
@@ -34,8 +34,8 @@ def checkbwt(filelist)
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run "#{$bin}gt suffixerator -pl #{outoptions()} -db " +
-       flattenfilelist(filelist)
+  run_test "#{$bin}gt suffixerator -pl #{outoptions()} -db " +
+           flattenfilelist(filelist)
 end
 
 def runsfxfail(args)
@@ -56,8 +56,8 @@ alldir.each do |dir|
   Name "gt suffixerator #{dir}"
   Keywords "gt_suffixerator"
   Test do
-    run "#{$bin}gt suffixerator -dir #{dir} -suf -bwt -lcp -tis " +
-        "-indexname sfx -pl -db " + 
+    run_test "#{$bin}gt suffixerator -dir #{dir} -suf -bwt -lcp -tis " +
+             "-indexname sfx -pl -db " + 
         flattenfilelist(allfiles)
    end
 end
@@ -73,7 +73,8 @@ runsfxfail "-dna -suf -pl 10 -db #{$testdata}Random.fna"
 Name "gt suffixerator failure"
 Keywords "gt_suffixerator"
 Test do
-  run "#{$bin}gt suffixerator -tis -dna -indexname localidx -db #{$testdata}Random.fna"
+  run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx " +
+           "-db #{$testdata}Random.fna"
   run_test "#{$bin}gt dev sfxmap localidx",:retval => 1
 end
 
@@ -87,8 +88,8 @@ allfiles.each do |filename|
   Name "gt suffixerator uint64"
   Keywords "gt_suffixerator"
   Test do
-    run "#{$bin}gt suffixerator -tis -indexname sfx -sat uint64 -pl -db " +
-        "#{$testdata}#{filename}"
+    run_test "#{$bin}gt suffixerator -tis -indexname sfx -sat uint64 " +
+             "-pl -db #{$testdata}#{filename}"
   end
 end
 
@@ -124,4 +125,3 @@ end
     end
   end
 end
-
