@@ -9,8 +9,8 @@
 #include <string.h>
 #include "gtlua.h"
 #include "lauxlib.h"
-#include "libgtcore/gtcorelua.h"
-#include "libgtext/gtextlua.h"
+#include "libgtcore/gtcore_lua.h"
+#include "libgtext/gtext_lua.h"
 
 /* key used to store the Env object in the Lua registry */
 #define ENV_KEY env_new

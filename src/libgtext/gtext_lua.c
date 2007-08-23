@@ -5,11 +5,12 @@
 */
 
 #include <assert.h>
+#include "libgtext/genome_node_lua.h"
 #include "libgtext/gtext_lua.h"
 
 int luaopen_gtext(lua_State *L)
 {
   assert(L);
-  /* XXX luaopen_bittab(L); */
+  luaopen_genome_node(L);
   return 1;
 }
