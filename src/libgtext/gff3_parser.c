@@ -326,7 +326,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
 
   if (!had_err) {
     gn = (is_child || auto_sr) ? NULL : genome_feature;
-    if (auto_sr)
+    if (auto_sr && !is_child)
       array_add(auto_sr->genome_features, genome_feature, env);
   }
   else
