@@ -310,7 +310,7 @@ int feature_index_unit_test(Env* env)
   genome_node_is_part_of_genome_node(gn2, ex3, env);
   genome_node_is_part_of_genome_node(gn2, cds1, env);
 
-  /*Create a new feature index on which we can perfom some tests*/
+  /* Create a new feature index on which we can perfom some tests */
   fi  = feature_index_new(env);
 
   ensure(had_err, fi);
