@@ -96,7 +96,9 @@ static Option *option_new(const char *option_str, const char *description,
                           void *value, Env *env)
 {
   Option *o = env_ma_calloc(env, 1, sizeof (Option));
-  assert(option_str && strlen(option_str) && option_str[0] != '-');
+  assert(option_str && strlen(option_str));
+  assert(option_str[0] != '-'); /* an option string should not start with '-',
+                                   this is added automatically */
   o->option_str = str_new_cstr(option_str, env);
   o->description = str_new_cstr(description, env);
   o->value = value;
