@@ -641,7 +641,7 @@ static bool checksymbolmap(const Uchar *testsymbolmap,
                            const char *testcharacters)
 {
   unsigned int i;
-  Uchar cc1, cc2 = 0;
+  Uchar cc1, cc2;
 
   for (i=0; testcharacters[i] != '\0'; i++)
   {

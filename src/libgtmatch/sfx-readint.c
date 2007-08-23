@@ -47,7 +47,7 @@ void setreadintkeys(Array *riktab,
   env_error_check(env);
   rikvalue.keystring = keystring;
   rikvalue.readflag = readflag;
-  assert(sizeval == 0 || sizeval == 4 || sizeval == 8);
+  assert(sizeval == 0 || sizeval == (size_t) 4 || sizeval == (size_t) 8);
   switch (sizeval)
   {
     case 0: rikvalue.smallvalueptr = NULL;
