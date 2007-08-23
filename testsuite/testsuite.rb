@@ -44,7 +44,7 @@ def run_test(str, opts = {})
     if $systemname == "Linux" then 
       memcheck = "valgrind --tool=memcheck --suppressions="+
                  File.join($testdata, "gt.supp")+
-                 " --leak-check=yes -q"
+                 " --leak-check=yes --error-exitcode=1 -q"
     elsif $systemname == "OpenBSD" then
       memcheck = "env MALLOC_OPTIONS='GJ'"
     end
