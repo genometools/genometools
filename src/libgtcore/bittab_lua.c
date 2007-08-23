@@ -15,7 +15,7 @@
 #define checkbittab(L) \
         (Bittab**) luaL_checkudata(L, 1, BITTAB_METATABLE);
 
-static int bittablua_new(lua_State *L)
+static int bittab_lua_new(lua_State *L)
 {
   long num_of_bits;
   Bittab **bittab;
@@ -32,7 +32,7 @@ static int bittablua_new(lua_State *L)
   return 1;
 }
 
-static int bittablua_set_bit(lua_State *L)
+static int bittab_lua_set_bit(lua_State *L)
 {
   Bittab **bittab = checkbittab(L);
   long bit;
@@ -42,7 +42,7 @@ static int bittablua_set_bit(lua_State *L)
   return 0;
 }
 
-static int bittablua_delete(lua_State *L)
+static int bittab_lua_delete(lua_State *L)
 {
   Bittab **bittab = checkbittab(L);
   Env *env;
@@ -51,13 +51,13 @@ static int bittablua_delete(lua_State *L)
   return 0;
 }
 
-static const struct luaL_Reg bittablib_f [] = {
-  { "bittab_new", bittablua_new },
+static const struct luaL_Reg bittab_lib_f [] = {
+  { "bittab_new", bittab_lua_new },
   { NULL, NULL }
 };
 
-static const struct luaL_Reg bittablib_m [] = {
-  { "set_bit", bittablua_set_bit },
+static const struct luaL_Reg bittab_lib_m [] = {
+  { "set_bit", bittab_lua_set_bit },
   { NULL, NULL }
 };
 
@@ -70,10 +70,10 @@ int luaopen_bittab(lua_State *L)
   lua_setfield(L, -2, "__index");
   /* set its _gc field */
   lua_pushstring(L, "__gc");
-  lua_pushcfunction(L, bittablua_delete);
+  lua_pushcfunction(L, bittab_lua_delete);
   lua_settable(L, -3);
   /* register functions */
-  luaL_register(L, NULL, bittablib_m);
-  luaL_register(L, "gt", bittablib_f);
+  luaL_register(L, NULL, bittab_lib_m);
+  luaL_register(L, "gt", bittab_lib_f);
   return 1;
 }
