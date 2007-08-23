@@ -286,13 +286,14 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
     }
     else {
       /* run tool */
-      nargv = cstr_array_prefix_first(argv+1, argv[0], env);
+      nargv = cstr_array_prefix_first(argv+1, env_error_get_progname(env), env);
       env_error_set_progname(env, nargv[0]);
       had_err = tool(argc-1, (const char**) nargv, env);
     }
   }
   cstr_array_delete(nargv, env);
   if (!had_err && gtr->interactive) {
+    showshortversion(env_error_get_progname(env));
     run_interactive_lua_interpreter(gtr->L);
   }
   if (had_err)

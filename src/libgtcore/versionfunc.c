@@ -22,3 +22,8 @@ void versionfunc(const char *progname)
   printf("Used compiler: %s\n", GT_CC);
   printf("Compile flags: %s\n", GT_CFLAGS);
 }
+
+void showshortversion(const char *progname)
+{
+  printf("%s (GenomeTools) %s (%s)\n", progname, GT_VERSION, GT_BUILT);
+}
