@@ -53,25 +53,26 @@ static Codetype findfirstlarger(const Seqpos *leftborder,
 
 static void removeemptyparts(Suftabparts *suftabparts)
 {
-  if(suftabparts->numofparts > 0)
+  if (suftabparts->numofparts > 0)
   {
     uint32_t destpart, srcpart;
-    for(destpart = 0, srcpart = 0; srcpart < suftabparts->numofparts; srcpart++)
+    for (destpart = 0, srcpart = 0; srcpart < suftabparts->numofparts;
+         srcpart++)
     {
-      if(suftabparts->components[srcpart].widthofpart > 0)
+      if (suftabparts->components[srcpart].widthofpart > 0)
       {
-        if(destpart < srcpart)
+        if (destpart < srcpart)
         {
           suftabparts->components[destpart] = suftabparts->components[srcpart];
         }
         destpart++;
       }
     }
-    if(destpart < srcpart)
+    if (destpart < srcpart)
     {
       suftabparts->numofparts -= (srcpart - destpart);
     }
-    for(srcpart = 0; srcpart < suftabparts->numofparts; srcpart++)
+    for (srcpart = 0; srcpart < suftabparts->numofparts; srcpart++)
     {
       assert(suftabparts->components[srcpart].widthofpart > 0);
       printf("# widthofpart[%u]=" FormatSeqpos "\n",
