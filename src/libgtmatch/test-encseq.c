@@ -22,7 +22,7 @@ int testencodedsequence(const StrArray *filenametab,
                         Env *env)
 {
   Seqpos pos, totallength;
-  Uchar ccscan, ccra, ccsr;
+  Uchar ccscan = '\0', ccra, ccsr;
   Fastabufferstate fbs;
   int retval;
   bool haserr = false;
