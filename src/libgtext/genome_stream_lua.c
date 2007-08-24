@@ -7,6 +7,7 @@
 #include "lauxlib.h"
 #include "gtlua.h"
 #include "libgtcore/fileutils.h"
+#include "libgtext/genome_node_lua.h"
 #include "libgtext/genome_stream.h"
 #include "libgtext/genome_stream_lua.h"
 #include "libgtext/gff3_in_stream.h"
@@ -36,10 +37,20 @@ static int gff3_in_stream_lua_new_sorted(lua_State *L)
 
 static int genome_stream_lua_next_tree(lua_State *L)
 {
-#if 0
   GenomeStream **gs = check_genome_stream(L);
-  lua_pushstring(L, genome_stream_get_filename(*gs));
-#endif
+  GenomeNode *gn;
+  Env *env = get_env_from_registry(L);
+  if (genome_stream_next_tree(*gs, &gn, env)) {
+    /* handle error */
+    assert(env_error_is_set(env));
+    lua_pushstring(L, env_error_get(env));
+    env_error_unset(env);
+    return lua_error(L);
+  }
+  else if (gn)
+    genome_node_lua_push(L, gn);
+  else
+    lua_pushnil(L);
   return 1;
 }
 

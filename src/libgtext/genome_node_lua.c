@@ -39,7 +39,6 @@ static int genome_feature_lua_new(lua_State *L)
   /* construct object */
   env = get_env_from_registry(L);
   gf = lua_newuserdata(L, sizeof (GenomeNode**));
-  assert(gf);
   *gf = genome_feature_new(type, range, strand, "Lua", 0, env);
   assert(*gf);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
@@ -88,4 +87,14 @@ int luaopen_genome_node(lua_State *L)
   luaL_register(L, NULL, genome_node_lib_m);
   luaL_register(L, "gt", genome_node_lib_f);
   return 1;
+}
+
+void genome_node_lua_push(lua_State *L, GenomeNode *gn)
+{
+  GenomeNode **gn_lua;
+  assert(L && gn);
+  gn_lua = lua_newuserdata(L, sizeof (GenomeNode**));
+  *gn_lua = gn;
+  luaL_getmetatable(L, GENOME_NODE_METATABLE);
+  lua_setmetatable(L, -2);
 }
