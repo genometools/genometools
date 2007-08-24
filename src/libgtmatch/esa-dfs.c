@@ -4,15 +4,15 @@
 #include "symboldef.h"
 #include "spacedef.h"
 
-#define STATICSTACKSPACE 512
+#define ABOVETOP  stackspace[nextfreeItvinfo]
+#define TOP       stackspace[nextfreeItvinfo-1]
+#define BELOWTOP  stackspace[nextfreeItvinfo-2]
 
-#define ABOVETOP  stackptr[nextfreeItvinfo]
-#define TOP       stackptr[nextfreeItvinfo-1]
-#define BELOWTOP  stackptr[nextfreeItvinfo-2]
+#define INCSTACKSIZE  4
 
 #define PUSHDFS(D,B)\
-        stackptr[nextfreeItvinfo].depth = D;\
-        stackptr[nextfreeItvinfo].lastisleafedge = B;\
+        stackspace[nextfreeItvinfo].depth = D;\
+        stackspace[nextfreeItvinfo].lastisleafedge = B;\
         nextfreeItvinfo++
 
  DECLAREREADFUNCTION(Seqpos);
@@ -20,12 +20,6 @@
  DECLAREREADFUNCTION(Uchar);
 
  DECLAREREADFUNCTION(Largelcpvalue);
-
-typedef struct
-{
-  uint32_t start, 
-           length;
-} Listtype;
 
 typedef struct Dfsinfo Dfsinfo;
 
@@ -36,29 +30,57 @@ typedef struct
   Dfsinfo *dfsinfo;
 } Itvinfo;
 
-int depthfirstvstreegeneric(
-                  Suffixarray *suffixarray,
-                  Readmode readmode,
+static Itvinfo *allocItvinfo(Itvinfo *ptr,
+                             unsigned long currentallocated,
+                             unsigned long allocated,
+                             Dfsinfo *(*allocateDfsinfo)(void *,Env *),
+                             void *info,
+                             Env *env)
+{
+  unsigned long i;
+
+  ALLOCASSIGNSPACE(ptr,ptr,Itvinfo,allocated);
+  if(allocateDfsinfo != NULL)
+  {
+    for(i=currentallocated; i<allocated; i++)
+    {
+      ptr[i].dfsinfo = allocateDfsinfo(info,env);
+    }
+  }
+  return ptr;
+}
+
+static void freeItvinfo(Itvinfo *ptr,
+                        unsigned long allocated,
+                        void (*freeDfsinfo)(Dfsinfo *,void *,Env *),
+                        void *info,
+                        Env *env)
+{
+  unsigned long i;
+
+  for(i=0; i<allocated; i++)
+  {
+    freeDfsinfo(ptr[i].dfsinfo,info,env);
+  }
+  FREESPACE(ptr);
+}
+
+int depthfirstesa(Suffixarray *suffixarray,
                   Uchar initialchar,
-                  int(*allocateextrastackelements)(Itvinfo *,unsigned long,
-                                                   void *,Env *),
-                  int(*reallocateextrastackelements)(Itvinfo *,
-                                                     unsigned long,
-                                                     unsigned long,
-                                                     void *,Env *),
-                  void(*freenodestackspace)(Itvinfo *,unsigned long,
-                                            void *,Env *),
-                  int(*processleafedge)(bool,Itvinfo *,Uchar,Seqpos,void *,
+                  Dfsinfo *(*allocateDfsinfo)(void *,Env *),
+                  void(*freeDfsinfo)(Dfsinfo *,void *,Env *),
+                  int(*processleafedge)(bool,Seqpos,Dfsinfo *,
+                                        Uchar,Seqpos,void *,
                                         Env *),
                   int(*processbranchedge)(bool,
                                           Seqpos,
-                                          Itvinfo *,
+                                          Dfsinfo *,
                                           void *,
                                           Env *),
-                  int(*processcompletenode)(Itvinfo *,void *,Env *),
-                  int(*assignleftmostleaf)(Itvinfo *,Seqpos,
+                  int(*processcompletenode)(Dfsinfo *,void *,Env *),
+                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,
                                            void *,Env *),
-                  int(*assignrightmostleaf)(Itvinfo *,Seqpos,Seqpos,
+                  int(*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
                                             Seqpos,void *,Env *),
                   void *info,
                   Env *env)
@@ -75,26 +97,24 @@ int depthfirstvstreegeneric(
   unsigned long allocatedItvinfo,
                 nextfreeItvinfo;
   Largelcpvalue tmpexception;
-  Itvinfo *stackptr,
-           stackspace[STATICSTACKSPACE];
+  Itvinfo *stackspace;
   Uchar leftchar;
   bool haserr = false;
-
-  allocatedItvinfo = (unsigned long) STATICSTACKSPACE;
+  
+  allocatedItvinfo = (unsigned long) INCSTACKSIZE;
+  stackspace = allocItvinfo(NULL,
+                            0,
+                            allocatedItvinfo,
+                            allocateDfsinfo,
+                            info,
+                            env);
   nextfreeItvinfo = 0;
   firstrootedge = true;
-  stackptr = &stackspace[0];
-  if (allocateextrastackelements != NULL &&
-      allocateextrastackelements(stackptr,(unsigned long) STATICSTACKSPACE,
-                                 info,env) != 0)
-  {
-    haserr = true;
-  }
   if (!haserr)
   {
     PUSHDFS(0,true);
     if(assignleftmostleaf != NULL && 
-       assignleftmostleaf(&TOP,0,info,env) != 0)
+       assignleftmostleaf(TOP.dfsinfo,0,info,env) != 0)
     {
       haserr = true;
     }
@@ -160,14 +180,15 @@ int depthfirstvstreegeneric(
     {
       leftchar = getencodedchar(suffixarray->encseq,
                                 previoussuffix-1,
-                                readmode);
+                                suffixarray->readmode);
     }
     while(currentlcp < TOP.depth)    // splitting edge is reached 
     {
       if (TOP.lastisleafedge)       // last edge from top-node is leaf
       {                            // previoussuffix
         if (processleafedge != NULL &&
-            processleafedge(false,&TOP,leftchar,previoussuffix,info,env) != 0)
+            processleafedge(false,TOP.depth,TOP.dfsinfo,leftchar,
+                            previoussuffix,info,env) != 0)
         {
           haserr = true;
           break;
@@ -177,7 +198,7 @@ int depthfirstvstreegeneric(
         if (processbranchedge != NULL &&
             processbranchedge(false,
                               ABOVETOP.depth,
-                              &ABOVETOP,
+                              ABOVETOP.dfsinfo,
                               info,
                               env) != 0)
         {
@@ -186,7 +207,7 @@ int depthfirstvstreegeneric(
         }
       }
       if (assignrightmostleaf != NULL && 
-          assignrightmostleaf(&TOP,
+          assignrightmostleaf(TOP.dfsinfo,
                               currentindex,
                               previoussuffix,
                               currentlcp,
@@ -196,7 +217,7 @@ int depthfirstvstreegeneric(
         break; 
       }
       if (processcompletenode != NULL && 
-          processcompletenode(&TOP,info,env) != 0)
+          processcompletenode(TOP.dfsinfo,info,env) != 0)
       {
         haserr = true;
         break;
@@ -222,7 +243,8 @@ int depthfirstvstreegeneric(
       if (TOP.lastisleafedge)
       {
         if (processleafedge != NULL &&
-            processleafedge(firstedge,&TOP,leftchar,previoussuffix,info,
+            processleafedge(firstedge,TOP.depth,TOP.dfsinfo,
+                            leftchar,previoussuffix,info,
                             env) != 0)
         {
           haserr = true;
@@ -233,7 +255,7 @@ int depthfirstvstreegeneric(
         if (processbranchedge != NULL &&
             processbranchedge(firstedge,
                               ABOVETOP.depth,
-                              &ABOVETOP,
+                              ABOVETOP.dfsinfo,
                               info,
                               env) != 0)
         {
@@ -247,49 +269,28 @@ int depthfirstvstreegeneric(
       previouslcp = ABOVETOP.depth;
       if (nextfreeItvinfo >= allocatedItvinfo)
       {
-        if (allocatedItvinfo == (unsigned long) STATICSTACKSPACE)
-        {
-          ALLOCASSIGNSPACE(stackptr,NULL,Itvinfo,
-                           nextfreeItvinfo + STATICSTACKSPACE);
-          memcpy(stackptr,&stackspace[0],
-                 (size_t) (sizeof(Itvinfo) * STATICSTACKSPACE));
-          if (reallocateextrastackelements != NULL &&
-              reallocateextrastackelements(stackptr,
-                                           (unsigned long) STATICSTACKSPACE,
-                                           nextfreeItvinfo,info,env) != 0)
-          {
-            haserr = true;
-            break;
-          }
-        } else
-        {
-          ALLOCASSIGNSPACE(stackptr,stackptr,Itvinfo,
-                           allocatedItvinfo+STATICSTACKSPACE);
-          if (reallocateextrastackelements != NULL &&
-              reallocateextrastackelements(stackptr,
-                                           allocatedItvinfo,
-                                           (unsigned long) STATICSTACKSPACE,
-                                           info,
-                                           env) != 0)
-          {
-            haserr = true;
-            break;
-          }
-        }
-        allocatedItvinfo += STATICSTACKSPACE;
+        stackspace = allocItvinfo(stackspace,
+                                  allocatedItvinfo,
+                                  allocatedItvinfo+INCSTACKSIZE,
+                                  allocateDfsinfo,
+                                  info,
+                                  env);
+        allocatedItvinfo += INCSTACKSIZE;
       }
       PUSHDFS(currentlcp,true);
       if (BELOWTOP.lastisleafedge)
       {
         // replace leaf edge by internal Edge
         if(assignleftmostleaf != NULL &&
-           assignleftmostleaf(&TOP,currentindex,info,env) != 0)
+           assignleftmostleaf(TOP.dfsinfo,currentindex,info,env) != 0)
         {
           haserr = true;
           break;
         }
         if (processleafedge != NULL &&
-            processleafedge(true,&TOP,leftchar,previoussuffix,info,env) != 0)
+            processleafedge(true,TOP.depth,TOP.dfsinfo,
+                            leftchar,previoussuffix,
+                            info,env) != 0)
         {
           haserr = true;
           break;
@@ -300,7 +301,7 @@ int depthfirstvstreegeneric(
         if (processbranchedge != NULL && 
             processbranchedge(true,
                               previouslcp,
-                              &TOP,
+                              TOP.dfsinfo,
                               info,
                               env) != 0)
         {
@@ -319,7 +320,7 @@ int depthfirstvstreegeneric(
     {
       leftchar = getencodedchar(suffixarray->encseq,
                                 previoussuffix-1,
-                                readmode);
+                                suffixarray->readmode);
     }
     retval = readnextSeqposfromstream(&previoussuffix,
                                       &suffixarray->suftabstream,
@@ -339,7 +340,9 @@ int depthfirstvstreegeneric(
     if (!haserr)
     {
       if (processleafedge != NULL &&
-          processleafedge(false,&TOP,leftchar,previoussuffix,info,env) != 0)
+          processleafedge(false,TOP.depth,TOP.dfsinfo,
+                          leftchar,previoussuffix,
+                          info,env) != 0)
       {
         haserr = true;
       }
@@ -347,7 +350,7 @@ int depthfirstvstreegeneric(
     if (!haserr)
     {
       if (assignrightmostleaf != NULL && 
-          assignrightmostleaf(&TOP,
+          assignrightmostleaf(TOP.dfsinfo,
                               currentindex,
                               previoussuffix,
                               currentlcp,
@@ -359,19 +362,16 @@ int depthfirstvstreegeneric(
     if (!haserr)
     {
       if (processcompletenode != NULL && 
-          processcompletenode(&TOP,info,env) != 0)
+          processcompletenode(TOP.dfsinfo,info,env) != 0)
       {
         haserr = true;
       }
     }
   }
-  if (freenodestackspace != NULL)
-  {
-    freenodestackspace(stackptr,allocatedItvinfo,info,env);
-  }
-  if (allocatedItvinfo > (unsigned long) STATICSTACKSPACE)
-  {
-    FREESPACE(stackptr);
-  }
+  freeItvinfo(stackspace,
+              allocatedItvinfo,
+              freeDfsinfo,
+              info,
+              env);
   return haserr ? -1 : 0;
 }
