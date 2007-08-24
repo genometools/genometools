@@ -19,9 +19,20 @@ GenomeStream* genome_stream_create(const GenomeStreamClass *gsc,
   return gs;
 }
 
+GenomeStream* genome_stream_ref(GenomeStream *gs)
+{
+  assert(gs);
+  gs->reference_count++;
+  return gs;
+}
+
 void genome_stream_delete(GenomeStream *gs, Env *env)
 {
   if (!gs) return;
+  if (gs->reference_count) {
+    gs->reference_count--;
+    return;
+  }
   assert(gs->c_class);
   if (gs->c_class->free) gs->c_class->free(gs, env);
   genome_node_delete(gs->last_node, env);
