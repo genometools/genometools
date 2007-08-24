@@ -28,6 +28,6 @@ end
 Name "genome_stream bindings"
 Keywords "gt_scripts"
 Test do
-  run_test "#{$bin}gt #{$testdata}/gtscripts/genome_stream.lua"
+  run_test "#{$bin}gt #{$testdata}/gtscripts/genome_stream.lua #{$testdata}"
 end
 
