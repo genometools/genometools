@@ -254,9 +254,9 @@ static void add_recursive(Diagram *d, GenomeNode *node,
 }
 
 static void process_node(Diagram *d,
-                  GenomeNode *node,
-                  GenomeNode *parent,
-                  Env *env)
+                         GenomeNode *node,
+                         GenomeNode *parent,
+                         Env *env)
 {
   Range elem_range;
   bool collapse, do_not_overlap=false;
