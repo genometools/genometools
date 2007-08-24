@@ -70,20 +70,25 @@ struct GTR {
   Toolbox *toolbox;
   Hashtable *unit_tests;
   lua_State *L;
+#ifdef LIBGTVIEW
+  Config *config;
+#endif
 };
 
 GTR* gtr_new(Env *env)
 {
   GTR *gtr = env_ma_calloc(env, 1, sizeof (GTR));
   gtr->spacepeak = str_new(env);
-  /* XXX */
   gtr->L = luaL_newstate();
+  assert(gtr->L); /* XXX: proper error message  */
   luaL_openlibs(gtr->L); /* open the standard libraries */
   put_env_in_registry(gtr->L, env); /* we have to register the env object,
                                        before we can open the GenomeTools
                                        libraries */
   luaopen_gt(gtr->L); /* open all GenomeTools libraries */
-  assert(gtr->L);
+#ifdef LIBGTVIEW
+  gtr->config = config_new_with_state(gtr->L, env);
+#endif
   return gtr;
 }
 
@@ -309,5 +314,8 @@ void gtr_delete(GTR *gtr, Env *env)
   toolbox_delete(gtr->toolbox, env);
   hashtable_delete(gtr->unit_tests, env);
   if (gtr->L) lua_close(gtr->L);
+#ifdef LIBGTVIEW
+  config_delete_without_state(gtr->config, env);
+#endif
   env_ma_free(gtr, env);
 }

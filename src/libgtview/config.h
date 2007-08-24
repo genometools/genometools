@@ -38,6 +38,14 @@ Creates a Config object.
 Config*      config_new(bool verbose, Env *env);
 
 /*!
+Creates a Config object.
+\param L the reused Lua state.
+\param env Pointer to Environment object.
+\return Pointer to the new object.
+*/
+Config*      config_new_with_state(lua_State *L, Env *env);
+
+/*!
 Loads and executes a Lua configuration file.
 This file must contain a global table called 'config'.
 \param cfg Config object to load into.
@@ -174,6 +182,13 @@ enum DominateStatus config_dominates(Config *cfg,
                                      Env *env);
 /* Unit test */
 int          config_unit_test(Env*);
+
+/*!
+Deletes a Config object but leaves the internal Lua state intact.
+\param cfg Pointer to Config object to delete.
+\param env Pointer to Environment object.
+*/
+void         config_delete_without_state(Config*, Env*);
 
 /*!
 Deletes a Config object.
