@@ -109,8 +109,8 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                       env);
   option_hide_default(o);
   option_parser_add_option(op, o, env);
-  o = option_new_bool("i", "enter interactive mode after executing 'tool'",
-                      &gtr->interactive, false, env);
+  o = option_new_bool("i", "enter interactive mode after executing 'tool' or "
+                      "'script'", &gtr->interactive, false, env);
   option_is_development_option(o);
   option_parser_add_option(op, o, env);
   o = option_new_debug(&gtr->debug, env);
