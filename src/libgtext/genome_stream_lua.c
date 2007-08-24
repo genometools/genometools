@@ -55,13 +55,8 @@ static int genome_stream_lua_next_tree(lua_State *L)
   GenomeStream **gs = check_genome_stream(L);
   GenomeNode *gn;
   Env *env = get_env_from_registry(L);
-  if (genome_stream_next_tree(*gs, &gn, env)) {
-    /* handle error */
-    assert(env_error_is_set(env));
-    lua_pushstring(L, env_error_get(env));
-    env_error_unset(env);
-    return lua_error(L);
-  }
+  if (genome_stream_next_tree(*gs, &gn, env))
+    return luagt_error(L, env); /* handle error */
   else if (gn)
     genome_node_lua_push(L, gn);
   else

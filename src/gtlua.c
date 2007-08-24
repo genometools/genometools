@@ -80,3 +80,14 @@ void run_interactive_lua_interpreter(lua_State *L)
     }
   }
 }
+
+int luagt_error(lua_State *L, Env *env)
+{
+  assert(L && env);
+  assert(env_error_is_set(env));
+  luaL_where(L, 1);
+  lua_pushstring(L, env_error_get(env));
+  env_error_unset(env);
+  lua_concat(L, 2);
+  return lua_error(L);
+}

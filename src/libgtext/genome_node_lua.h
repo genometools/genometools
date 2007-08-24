@@ -14,6 +14,7 @@
 
    genome_node = gt.genome_feature_new(type, start, end, strand)
    string      = genome_node:get_filename()
+                 genome_node:accept(genome_visitor)
 */
 int luaopen_genome_node(lua_State*);
 

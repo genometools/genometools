@@ -8,10 +8,11 @@
 #include "gtlua.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/genome_node_lua.h"
+#include "libgtext/genome_visitor_lua.h"
 
 #define GENOME_NODE_METATABLE  "GenomeTools.genome_node"
 #define check_genome_node(L) \
-        (GenomeNode**) luaL_checkudata(L, 1, GENOME_NODE_METATABLE);
+              (GenomeNode**) luaL_checkudata(L, 1, GENOME_NODE_METATABLE);
 
 static int genome_feature_lua_new(lua_State *L)
 {
@@ -53,6 +54,20 @@ static int genome_node_lua_get_filename(lua_State *L)
   return 1;
 }
 
+static int genome_node_lua_accept(lua_State *L)
+{
+  GenomeNode **gn;
+  GenomeVisitor **gv;
+  Env *env;
+  gn = check_genome_node(L);
+  gv = check_genome_visitor(L, 2);
+  env = get_env_from_registry(L);
+  env_error_check(env);
+  if (genome_node_accept(*gn, *gv, env))
+    return luagt_error(L, env);
+  return 0;
+}
+
 static int genome_node_lua_delete(lua_State *L)
 {
   GenomeNode **gn = check_genome_node(L);
@@ -69,6 +84,7 @@ static const struct luaL_Reg genome_node_lib_f [] = {
 
 static const struct luaL_Reg genome_node_lib_m [] = {
   { "get_filename", genome_node_lua_get_filename },
+  { "accept", genome_node_lua_accept },
   { NULL, NULL }
 };
 
