@@ -23,6 +23,7 @@
 #include "libgtview/feature_index.h"
 #include "libgtview/track.h"
 
+/* XXX: use debugging interface (gt -debug, env_log_log()) */
 #define DEBUG false
 
 struct Diagram
