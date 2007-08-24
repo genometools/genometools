@@ -130,7 +130,7 @@ Sets a numeric value in the configuration to a certain value.
 \param env Pointer to Environment object.
 */
 void         config_set_num(Config *cfg,
-                            const char* section,
+                            const char *section,
                             const char *key,
                             double number,
                             Env *env);
