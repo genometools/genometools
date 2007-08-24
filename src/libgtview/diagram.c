@@ -403,8 +403,8 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
 /*!
 Traverse a genome node tree with depth first search.
 */
-static int traverse_genome_nodes(GenomeNode *gn, void *genome_node_children,
-                                 Env *env)
+static void traverse_genome_nodes(GenomeNode *gn, void *genome_node_children,
+                                  Env *env)
 {
   NodeTraverseInfo* genome_node_info;
   assert(genome_node_children != NULL);
@@ -422,7 +422,6 @@ static int traverse_genome_nodes(GenomeNode *gn, void *genome_node_children,
                                                 visit_child,
                                                 env);
   }
-  return 0;
 }
 
 static void diagram_build(Diagram *diagram, Array *features, Env *env)
@@ -434,7 +433,7 @@ static void diagram_build(Diagram *diagram, Array *features, Env *env)
   for (i=0;i<array_size(features);i++)
   {
     GenomeNode *current_root = *(GenomeNode**) array_get(features,i);
-    (void) traverse_genome_nodes(current_root, &genome_node_children, env);
+    traverse_genome_nodes(current_root, &genome_node_children, env);
   }
   /* collect blocks from nodeinfo structures */
   (void) hashtable_foreach(diagram->nodeinfo, collect_blocks, diagram, env);
