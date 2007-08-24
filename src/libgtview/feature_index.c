@@ -154,7 +154,7 @@ sequence region identifier.
 \param seqid Sequence region identifier to lookup.
 \return Pointer to the result array.
 */
-Array* feature_index_get_features_for_seqid(FeatureIndex *fi, char *seqid)
+Array* feature_index_get_features_for_seqid(FeatureIndex *fi, const char *seqid)
 {
   RegionInfo *res;
 
