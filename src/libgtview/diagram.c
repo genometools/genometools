@@ -67,6 +67,7 @@ static NodeInfoElement* get_or_create_node_info(Diagram *d,
   }
   else
   {
+    /* XXX: is the following comment still relevant? */
     /* here, we could handle a non-tree condition */
   }
   return ni;
