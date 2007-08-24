@@ -31,7 +31,7 @@ static void config_lua_new_table(lua_State *L, const char *key)
   lua_settable(L, -3);
 }
 
-Config* config_new(Env *env, bool verbose)
+Config* config_new(bool verbose, Env *env)
 {
   Config *cfg;
   env_error_check(env);
@@ -428,7 +428,7 @@ Unit tests for the Config class.
 \param env Pointer to Environment object.
 \return Error status.
 */
-int config_unit_test(Env* env)
+int config_unit_test(Env *env)
 {
   int had_err = 0;
   Config *cfg;
@@ -445,7 +445,7 @@ int config_unit_test(Env* env)
   defcol.red=.8;defcol.green=.8;defcol.blue=.8;
 
   /* instantiate new config object */
-  cfg = config_new(env, false);
+  cfg = config_new(false, env);
 
   /* at the beginning, all values are defaults, since nothing is defined */
   tmpcol = config_get_color(cfg, "exon", env);

@@ -333,7 +333,7 @@ int block_unit_test(Env* env)
   Str *caption2 = str_new_cstr("bar", env);
   Config *cfg;
 
-  cfg = config_new(env, false);
+  cfg = config_new(false, env);
 
   r1.start = 10UL;
   r1.end = 50UL;

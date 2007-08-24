@@ -239,7 +239,7 @@ int gt_view(int argc, const char **argv, Env *env)
     config_file = gtdata_get_path(str_get(prog), env);
     str_delete(prog, env);
     str_append_cstr(config_file, "/config/view.lua", env);
-    cfg = config_new(env, arguments.verbose);
+    cfg = config_new(arguments.verbose, env);
     if (file_exists(str_get(config_file)))
       had_err = config_load_file(cfg, config_file, env);
   }

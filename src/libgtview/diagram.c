@@ -577,7 +577,7 @@ int diagram_unit_test(Env *env)
   (void) feature_index_get_features_for_range(fi,features,"test1",dr1,env);
 
   /*create a config object*/
-  cfg = config_new(env, false);
+  cfg = config_new(false, env);
 
   /*create a diagram object and test it*/
   dia = diagram_new(features,dr1,cfg,env);

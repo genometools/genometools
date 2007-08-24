@@ -31,11 +31,11 @@ typedef struct Config Config;
 
 /*!
 Creates a Config object.
-\param env Pointer to Environment object.
 \param verbose Verbosity flag. If set, warnings will be given.
+\param env Pointer to Environment object.
 \return Pointer to the new object.
 */
-Config*      config_new(Env *env, bool verbose);
+Config*      config_new(bool verbose, Env *env);
 
 /*!
 Loads and executes a Lua configuration file.
