@@ -1,8 +1,15 @@
+/*
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
+*/
+
 #include <limits.h>
 #include "sarr-def.h"
 #include "seqpos-def.h"
 #include "symboldef.h"
 #include "spacedef.h"
+#include "stamp.h"
 
 #define ABOVETOP  stackspace[nextfreeItvinfo]
 #define TOP       stackspace[nextfreeItvinfo-1]
@@ -11,6 +18,7 @@
 #define INCSTACKSIZE  4
 
 #define PUSHDFS(D,B)\
+        printf("push D=%u,B=%s\n",(unsigned int) (D),(B) ? "true" : "false");\
         stackspace[nextfreeItvinfo].depth = D;\
         stackspace[nextfreeItvinfo].lastisleafedge = B;\
         nextfreeItvinfo++
@@ -38,16 +46,17 @@ static Itvinfo *allocItvinfo(Itvinfo *ptr,
                              Env *env)
 {
   unsigned long i;
+  Itvinfo *itvinfo;
 
-  ALLOCASSIGNSPACE(ptr,ptr,Itvinfo,allocated);
+  ALLOCASSIGNSPACE(itvinfo,ptr,Itvinfo,allocated);
   if (allocateDfsinfo != NULL)
   {
     for (i=currentallocated; i<allocated; i++)
     {
-      ptr[i].dfsinfo = allocateDfsinfo(info,env);
+      itvinfo[i].dfsinfo = allocateDfsinfo(info,env);
     }
   }
-  return ptr;
+  return itvinfo;
 }
 
 static void freeItvinfo(Itvinfo *ptr,
@@ -75,11 +84,11 @@ int depthfirstesa(Suffixarray *suffixarray,
                   int(*processbranchedge)(bool,
                                           Seqpos,
                                           Dfsinfo *,
+                                          Dfsinfo *,
                                           void *,
                                           Env *),
                   int(*processcompletenode)(Dfsinfo *,void *,Env *),
-                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,
-                                           void *,Env *),
+                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,void *,Env *),
                   int(*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
                                             Seqpos,void *,Env *),
                   void *info,
@@ -114,7 +123,7 @@ int depthfirstesa(Suffixarray *suffixarray,
   {
     PUSHDFS(0,true);
     if (assignleftmostleaf != NULL &&
-       assignleftmostleaf(TOP.dfsinfo,0,info,env) != 0)
+        assignleftmostleaf(TOP.dfsinfo,0,info,env) != 0)
     {
       haserr = true;
     }
@@ -131,9 +140,6 @@ int depthfirstesa(Suffixarray *suffixarray,
     }
     if (retval == 0)
     {
-      env_error_set(env,"file %s: line %d: unexpected end of file when "
-                        "reading lcptab",__FILE__,__LINE__);
-      haserr = true;
       break;
     }
     if (tmpsmalllcpvalue == (Uchar) UCHAR_MAX)
@@ -182,6 +188,10 @@ int depthfirstesa(Suffixarray *suffixarray,
                                 previoussuffix-1,
                                 suffixarray->readmode);
     }
+    printf("suftabvalue=%u,lcpvalue=%u,leftchar=%u\n",
+            (unsigned int) previoussuffix,
+            (unsigned int) currentlcp,
+            (unsigned int) leftchar);
     while (currentlcp < TOP.depth)
     {
       if (TOP.lastisleafedge)
@@ -195,9 +205,11 @@ int depthfirstesa(Suffixarray *suffixarray,
         }
       } else
       {
+        STAMP;
         if (processbranchedge != NULL &&
             processbranchedge(false,
-                              ABOVETOP.depth,
+                              TOP.depth,
+                              TOP.dfsinfo,
                               ABOVETOP.dfsinfo,
                               info,
                               env) != 0)
@@ -235,8 +247,10 @@ int depthfirstesa(Suffixarray *suffixarray,
       {
         firstedge = true;
         firstrootedge = false;
+        STAMP;
       } else
       {
+        STAMP;
         firstedge = false;
       }
       if (TOP.lastisleafedge)
@@ -251,9 +265,12 @@ int depthfirstesa(Suffixarray *suffixarray,
         }
       } else
       {
+        STAMP;
+        printf("nextfreeItvinfo=%u\n",(unsigned int) nextfreeItvinfo);
         if (processbranchedge != NULL &&
             processbranchedge(firstedge,
-                              ABOVETOP.depth,
+                              TOP.depth,
+                              TOP.dfsinfo,
                               ABOVETOP.dfsinfo,
                               info,
                               env) != 0)
@@ -296,10 +313,12 @@ int depthfirstesa(Suffixarray *suffixarray,
         BELOWTOP.lastisleafedge = false;
       } else
       {
+        STAMP;
         if (processbranchedge != NULL &&
             processbranchedge(true,
                               previouslcp,
                               TOP.dfsinfo,
+                              ABOVETOP.dfsinfo,
                               info,
                               env) != 0)
         {
