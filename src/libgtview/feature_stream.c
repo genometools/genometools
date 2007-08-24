@@ -38,6 +38,7 @@ static int feature_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 static void feature_stream_free(GenomeStream *gs, Env *env)
 {
   FeatureStream *feature_stream = feature_stream_cast(gs);
+  genome_stream_delete(feature_stream->in_stream, env);
   genome_visitor_delete(feature_stream->feature_visitor, env);
 }
 
@@ -50,14 +51,14 @@ const GenomeStreamClass* feature_stream_class(void)
 }
 
 GenomeStream* feature_stream_new(GenomeStream *in_stream,
-                             FeatureIndex *fi, Env *env)
+                                 FeatureIndex *fi, Env *env)
 {
   GenomeStream *gs;
   FeatureStream *feature_stream;
   env_error_check(env);
   gs = genome_stream_create(feature_stream_class(), true, env);
   feature_stream = feature_stream_cast(gs);
-  feature_stream->in_stream = in_stream;
+  feature_stream->in_stream = genome_stream_ref(in_stream);
   feature_stream->feature_visitor = feature_visitor_new(fi, env);
   return gs;
 }

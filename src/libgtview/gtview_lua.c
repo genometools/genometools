@@ -6,11 +6,13 @@
 
 #include <assert.h>
 #include "libgtview/feature_index_lua.h"
+#include "libgtview/feature_stream_lua.h"
 #include "libgtview/gtview_lua.h"
 
-int luaopen_gtext(lua_State *L)
+int luaopen_gtview(lua_State *L)
 {
   assert(L);
   luaopen_feature_index(L);
+  luaopen_feature_stream(L);
   return 1;
 }

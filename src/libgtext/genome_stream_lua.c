@@ -13,10 +13,6 @@
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 
-#define GENOME_STREAM_METATABLE  "GenomeTools.genome_stream"
-#define check_genome_stream(L) \
-        (GenomeStream**) luaL_checkudata(L, 1, GENOME_STREAM_METATABLE);
-
 static int gff3_in_stream_lua_new_sorted(lua_State *L)
 {
   GenomeStream **gs;

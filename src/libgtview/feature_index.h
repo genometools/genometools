@@ -23,6 +23,7 @@
 typedef struct FeatureIndex FeatureIndex;
 
 FeatureIndex* feature_index_new(Env*);
+FeatureIndex* feature_index_ref(FeatureIndex*);
 void          feature_index_add_sequence_region(FeatureIndex*,
                                                 SequenceRegion* , Env*);
 void          feature_index_add_genome_feature(FeatureIndex*,

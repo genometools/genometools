@@ -27,6 +27,7 @@ struct FeatureIndex
   Hashtable *regions;
   char* firstseqid;
   unsigned int nof_sequence_regions;
+  unsigned int reference_count;
 };
 
 typedef struct
@@ -61,11 +62,16 @@ FeatureIndex* feature_index_new(Env *env)
 {
   FeatureIndex *fi;
   env_error_check(env);
-  fi = env_ma_malloc(env, sizeof (FeatureIndex));
-  fi->nof_sequence_regions = 0;
-  fi->firstseqid = NULL;
-  fi->regions  = hashtable_new(HASH_STRING, NULL,
-                               (FreeFunc) region_info_delete, env);
+  fi = env_ma_calloc(env, 1, sizeof (FeatureIndex));
+  fi->regions = hashtable_new(HASH_STRING, NULL, (FreeFunc) region_info_delete,
+                              env);
+  return fi;
+}
+
+FeatureIndex* feature_index_ref(FeatureIndex *fi)
+{
+  assert(fi);
+  fi->reference_count++;
   return fi;
 }
 
@@ -76,7 +82,11 @@ Deletes a FeatureIndex object.
 */
 void feature_index_delete(FeatureIndex *fi, Env *env)
 {
-  assert(fi != NULL);
+  if (!fi) return;
+  if (fi->reference_count) {
+    fi->reference_count--;
+    return;
+  }
   hashtable_delete(fi->regions, env);
   env_ma_free(fi, env);
 }

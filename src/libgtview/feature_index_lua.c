@@ -10,10 +10,6 @@
 #include "libgtview/feature_index.h"
 #include "libgtview/feature_index_lua.h"
 
-#define FEATURE_INDEX_METATABLE  "GenomeTools.feature_index"
-#define checkfeature_index(L) \
-        (FeatureIndex**) luaL_checkudata(L, 1, FEATURE_INDEX_METATABLE);
-
 static int feature_index_lua_new(lua_State *L)
 {
   FeatureIndex **feature_index;
@@ -33,7 +29,7 @@ static int feature_index_lua_get_features_for_seqid(lua_State *L)
   Array *features;
   unsigned long i;
   Env *env = get_env_from_registry(L);
-  feature_index = checkfeature_index(L);
+  feature_index = check_feature_index(L, 1);
   seqid = luaL_checkstring(L, 2);
   features = feature_index_get_features_for_seqid(*feature_index, seqid);
   if (features) {
@@ -54,7 +50,7 @@ static int feature_index_lua_get_features_for_seqid(lua_State *L)
 
 static int feature_index_lua_delete(lua_State *L)
 {
-  FeatureIndex **feature_index = checkfeature_index(L);
+  FeatureIndex **feature_index = check_feature_index(L, 1);
   Env *env;
   env = get_env_from_registry(L);
   feature_index_delete(*feature_index, env);
