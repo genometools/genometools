@@ -10,6 +10,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "lua.h"
 #include "libgtcore/str.h"
 #include "libgtview/color.h"
 #include "libgtext/genome_feature_type.h"

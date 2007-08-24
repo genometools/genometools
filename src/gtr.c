@@ -29,6 +29,7 @@
 #include "libgtext/alignment.h"
 #include "libgtext/bsearch.h"
 #include "libgtext/evaluator.h"
+#include "libgtext/gtdata.h"
 #include "libgtext/hmm.h"
 #include "libgtext/splicedseq.h"
 #include "libgtext/toolbox.h"
@@ -78,6 +79,9 @@ struct GTR {
 GTR* gtr_new(Env *env)
 {
   GTR *gtr = env_ma_calloc(env, 1, sizeof (GTR));
+#ifdef LIBGTVIEW
+  Str *config_file;
+#endif
   gtr->spacepeak = str_new(env);
   gtr->L = luaL_newstate();
   assert(gtr->L); /* XXX: proper error message  */
@@ -88,6 +92,19 @@ GTR* gtr_new(Env *env)
   luaopen_gt(gtr->L); /* open all GenomeTools libraries */
 #ifdef LIBGTVIEW
   gtr->config = config_new_with_state(gtr->L, env);
+  config_file = gtdata_get_path(env_error_get_progname(env), env);
+  str_append_cstr(config_file, "/config/view.lua", env);
+  if (file_exists(str_get(config_file))) {
+    if (config_load_file(gtr->config, config_file, env)) {
+      /* XXX: hack... */
+      fprintf(stderr, "%s: error: %s\n", env_error_get_progname(env),
+              env_error_get(env));
+      exit(EXIT_FAILURE);
+    }
+    else
+      put_config_in_registry(gtr->L, gtr->config);
+  }
+  str_delete(config_file, env);
 #endif
   return gtr;
 }
