@@ -13,6 +13,8 @@
 void put_env_in_registry(lua_State*, Env*);
 Env* get_env_from_registry(lua_State*);
 int  luaopen_gt(lua_State*); /* open all GenomeTools libraries in Lua */
+void set_arg_in_lua_interpreter(lua_State*, const char *argv_0,
+                                const char **argv);
 void run_interactive_lua_interpreter(lua_State*);
 
 #endif

@@ -44,6 +44,28 @@ int luaopen_gt(lua_State *L)
   return 1;
 }
 
+void set_arg_in_lua_interpreter(lua_State *L, const char *argv_0,
+                                const char **argv)
+{
+  lua_Integer n = 0;
+  assert(L && argv_0);
+  /* create table */
+  lua_newtable(L);
+  /* set arg[0] */
+  lua_pushinteger(L, 0);
+  lua_pushstring(L, argv_0);
+  lua_rawset(L, -3);
+  /* set other arguments */
+  while (argv[n]) {
+    lua_pushinteger(L, n+1);
+    lua_pushstring(L, argv[n]);
+    lua_rawset(L, -3);
+    n++;
+  }
+  /* register table globally */
+  lua_setglobal(L, "arg");
+}
+
 void run_interactive_lua_interpreter(lua_State *L)
 {
   char buf[BUFSIZ];

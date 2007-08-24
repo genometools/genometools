@@ -123,7 +123,6 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   option_parser_add_option(op, o, env);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
   option_parser_delete(op, env);
-  (*parsed_args)--;
   return oprval;
 }
 
@@ -257,18 +256,19 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
   if (gtr->test) {
     return run_tests(gtr, env);
   }
-  assert(argc);
-  if (argc == 1 && !gtr->interactive) {
+  if (argc == 0 && !gtr->interactive) {
     env_error_set(env, "neither tool nor script specified; option -help lists "
                        "possible tools");
     had_err = -1;
   }
-  if (!had_err && argc > 1) {
-    if (!gtr->toolbox || !(tool = toolbox_get(gtr->toolbox, argv[1]))) {
+  if (!had_err && argc) {
+    if (!gtr->toolbox || !(tool = toolbox_get(gtr->toolbox, argv[0]))) {
       /* no tool found -> try to open script */
-      if (file_exists(argv[1])) {
+      if (file_exists(argv[0])) {
         /* run script */
-        if (luaL_dofile(gtr->L, argv[1])) {
+        nargv = cstr_array_prefix_first(argv, env_error_get_progname(env), env);
+        set_arg_in_lua_interpreter(gtr->L, nargv[0], (const char**) nargv+1);
+        if (luaL_dofile(gtr->L, argv[0])) {
           /* error */
           assert(lua_isstring(gtr->L, -1)); /* error message on top */
           env_error_set(env, "could not execute script %s",
@@ -280,20 +280,21 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
       else {
         /* neither tool nor script found */
         env_error_set(env, "neither tool nor script '%s' found; option -help "
-                           "lists possible tools", argv[1]);
+                           "lists possible tools", argv[0]);
         had_err = -1;
       }
     }
     else {
       /* run tool */
-      nargv = cstr_array_prefix_first(argv+1, env_error_get_progname(env), env);
+      nargv = cstr_array_prefix_first(argv, env_error_get_progname(env), env);
       env_error_set_progname(env, nargv[0]);
-      had_err = tool(argc-1, (const char**) nargv, env);
+      had_err = tool(argc, (const char**) nargv, env);
     }
   }
   cstr_array_delete(nargv, env);
   if (!had_err && gtr->interactive) {
     showshortversion(env_error_get_progname(env));
+    set_arg_in_lua_interpreter(gtr->L, env_error_get_progname(env), argv);
     run_interactive_lua_interpreter(gtr->L);
   }
   if (had_err)
