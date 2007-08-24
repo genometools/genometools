@@ -47,10 +47,12 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
 end
 
-Name "feature_index and feature_stream bindings"
-Keywords "gt_scripts"
-Test do
-  run_test "#{$bin}gt #{$testdata}/gtscripts/feature_stuff.lua #{$testdata}"
-  run "env LC_ALL=C sort #{$last_stdout}"
-  run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{$last_stdout} -"
+if $arguments["libgtview"] then
+  Name "feature_index and feature_stream bindings"
+  Keywords "gt_scripts"
+  Test do
+    run_test "#{$bin}gt #{$testdata}/gtscripts/feature_stuff.lua #{$testdata}"
+    run "env LC_ALL=C sort #{$last_stdout}"
+    run "grep -v '^##sequence-region' #{$testdata}gff3_file_1_short_sorted.txt | diff #{$last_stdout} -"
+  end
 end
