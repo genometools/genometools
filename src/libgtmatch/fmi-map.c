@@ -67,7 +67,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   SETREADINTKEYS("lengthofspecialsuffix",
                  &fmindex->specialcharinfo.lengthofspecialsuffix,NULL);
   SETREADINTKEYS("suffixlength",&fmindex->suffixlength,NULL);
-  if(!haserr)
+  if (!haserr)
   {
     INITARRAY(&linebuffer,Uchar);
     for (linenum = 0; /* Nothing */; linenum++)

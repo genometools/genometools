@@ -146,7 +146,7 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       currentfileadd = 0;
       currentfileread = 0;
       fbs->linenum = (uint32_t) 1;
-      if(opengenericstream(&fbs->inputstream,
+      if (opengenericstream(&fbs->inputstream,
                            strarray_get(fbs->filenametab,
                            (unsigned long) fbs->filenum),
                            env) != 0)
@@ -164,7 +164,7 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       }
       if (currentchar == EOF)
       {
-        if(closegenericstream(&fbs->inputstream,
+        if (closegenericstream(&fbs->inputstream,
                               strarray_get(fbs->filenametab,
                                            (unsigned long) fbs->filenum),
                               env) != 0)
@@ -316,7 +316,7 @@ static int advancePlainbufferstate(Fastabufferstate *fbs,Env *env)
       fbs->nextfile = false;
       fbs->firstseqinfile = true;
       currentfileread = 0;
-      if(opengenericstream(&fbs->inputstream,
+      if (opengenericstream(&fbs->inputstream,
                            strarray_get(fbs->filenametab,
                            (unsigned long) fbs->filenum),
                            env) != 0)
@@ -334,7 +334,7 @@ static int advancePlainbufferstate(Fastabufferstate *fbs,Env *env)
       }
       if (currentchar == EOF)
       {
-        if(closegenericstream(&fbs->inputstream,
+        if (closegenericstream(&fbs->inputstream,
                               strarray_get(fbs->filenametab,
                                            (unsigned long) fbs->filenum),
                               env) != 0)

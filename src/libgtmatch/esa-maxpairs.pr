@@ -1,11 +1,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int enumeratemaxpairs(Suffixarray *suffixarray,
-                      uint32_t searchlength,
-                      int(*output)(void *,Seqpos,Seqpos,Seqpos),
-                      void *outinfo,
-                      Env *env);
+int callenummaxpairs(const Str *indexname,
+                     uint32_t userdefinedleastlength,
+                     Env *env);
 
 #ifdef __cplusplus
 }

@@ -40,9 +40,9 @@ static Itvinfo *allocItvinfo(Itvinfo *ptr,
   unsigned long i;
 
   ALLOCASSIGNSPACE(ptr,ptr,Itvinfo,allocated);
-  if(allocateDfsinfo != NULL)
+  if (allocateDfsinfo != NULL)
   {
-    for(i=currentallocated; i<allocated; i++)
+    for (i=currentallocated; i<allocated; i++)
     {
       ptr[i].dfsinfo = allocateDfsinfo(info,env);
     }
@@ -58,7 +58,7 @@ static void freeItvinfo(Itvinfo *ptr,
 {
   unsigned long i;
 
-  for(i=0; i<allocated; i++)
+  for (i=0; i<allocated; i++)
   {
     freeDfsinfo(ptr[i].dfsinfo,info,env);
   }
@@ -89,7 +89,7 @@ int depthfirstesa(Suffixarray *suffixarray,
   Uchar tmpsmalllcpvalue;
   bool firstedge,
        firstrootedge;
-  Seqpos previoussuffix, 
+  Seqpos previoussuffix,
          previouslcp,
          currentindex,
          currentlcp = 0; /* May be necessary if the lcpvalue is used after the
@@ -100,7 +100,7 @@ int depthfirstesa(Suffixarray *suffixarray,
   Itvinfo *stackspace;
   Uchar leftchar;
   bool haserr = false;
-  
+
   allocatedItvinfo = (unsigned long) INCSTACKSIZE;
   stackspace = allocItvinfo(NULL,
                             0,
@@ -113,13 +113,13 @@ int depthfirstesa(Suffixarray *suffixarray,
   if (!haserr)
   {
     PUSHDFS(0,true);
-    if(assignleftmostleaf != NULL && 
+    if (assignleftmostleaf != NULL &&
        assignleftmostleaf(TOP.dfsinfo,0,info,env) != 0)
     {
       haserr = true;
     }
   }
-  for(currentindex = 0; !haserr; currentindex++)
+  for (currentindex = 0; !haserr; currentindex++)
   {
     retval = readnextUcharfromstream(&tmpsmalllcpvalue,
                                      &suffixarray->lcptabstream,
@@ -182,10 +182,10 @@ int depthfirstesa(Suffixarray *suffixarray,
                                 previoussuffix-1,
                                 suffixarray->readmode);
     }
-    while(currentlcp < TOP.depth)    // splitting edge is reached 
+    while (currentlcp < TOP.depth)
     {
-      if (TOP.lastisleafedge)       // last edge from top-node is leaf
-      {                            // previoussuffix
+      if (TOP.lastisleafedge)
+      {
         if (processleafedge != NULL &&
             processleafedge(false,TOP.depth,TOP.dfsinfo,leftchar,
                             previoussuffix,info,env) != 0)
@@ -206,7 +206,7 @@ int depthfirstesa(Suffixarray *suffixarray,
           break;
         }
       }
-      if (assignrightmostleaf != NULL && 
+      if (assignrightmostleaf != NULL &&
           assignrightmostleaf(TOP.dfsinfo,
                               currentindex,
                               previoussuffix,
@@ -214,9 +214,9 @@ int depthfirstesa(Suffixarray *suffixarray,
                               info,env) != 0)
       {
         haserr = true;
-        break; 
+        break;
       }
-      if (processcompletenode != NULL && 
+      if (processcompletenode != NULL &&
           processcompletenode(TOP.dfsinfo,info,env) != 0)
       {
         haserr = true;
@@ -231,7 +231,6 @@ int depthfirstesa(Suffixarray *suffixarray,
     }
     if (currentlcp == TOP.depth)
     {
-      // add leaf edge to TOP-node
       if (firstrootedge && TOP.depth == 0)
       {
         firstedge = true;
@@ -280,8 +279,7 @@ int depthfirstesa(Suffixarray *suffixarray,
       PUSHDFS(currentlcp,true);
       if (BELOWTOP.lastisleafedge)
       {
-        // replace leaf edge by internal Edge
-        if(assignleftmostleaf != NULL &&
+       if (assignleftmostleaf != NULL &&
            assignleftmostleaf(TOP.dfsinfo,currentindex,info,env) != 0)
         {
           haserr = true;
@@ -298,7 +296,7 @@ int depthfirstesa(Suffixarray *suffixarray,
         BELOWTOP.lastisleafedge = false;
       } else
       {
-        if (processbranchedge != NULL && 
+        if (processbranchedge != NULL &&
             processbranchedge(true,
                               previouslcp,
                               TOP.dfsinfo,
@@ -349,7 +347,7 @@ int depthfirstesa(Suffixarray *suffixarray,
     }
     if (!haserr)
     {
-      if (assignrightmostleaf != NULL && 
+      if (assignrightmostleaf != NULL &&
           assignrightmostleaf(TOP.dfsinfo,
                               currentindex,
                               previoussuffix,
@@ -361,7 +359,7 @@ int depthfirstesa(Suffixarray *suffixarray,
     }
     if (!haserr)
     {
-      if (processcompletenode != NULL && 
+      if (processcompletenode != NULL &&
           processcompletenode(TOP.dfsinfo,info,env) != 0)
       {
         haserr = true;
