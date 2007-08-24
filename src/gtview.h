@@ -20,7 +20,6 @@
 #include "libgtview/feature_visitor.h"
 #include "libgtview/graphics.h"
 #include "libgtview/line.h"
-#include "libgtview/png_stream.h"
 #include "libgtview/render.h"
 #include "libgtview/track.h"
 
