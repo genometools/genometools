@@ -21,6 +21,7 @@ end
 
 in_stream = gt.gff3_in_stream_new_sorted(gff3file)
 out_stream = gt.gff3_out_stream_new(in_stream)
+in_stream = nil; collectgarbage() -- being nasty
 gn = out_stream:next_tree()
 while (gn) do
   gn = out_stream:next_tree()
