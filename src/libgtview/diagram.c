@@ -339,7 +339,7 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
   if (genome_node_has_children(gn))
   {
     GenomeNode *oldparent = genome_node_info->parent;
-    process_node((Diagram*) genome_node_info->diagram,
+    process_node(genome_node_info->diagram,
                  gn,
                  genome_node_info->parent,
                  env);
@@ -352,7 +352,7 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
   }
   else
   {
-    process_node((Diagram*) genome_node_info->diagram,
+    process_node(genome_node_info->diagram,
                  gn,
                  genome_node_info->parent,
                  env);
@@ -411,7 +411,7 @@ static void traverse_genome_nodes(GenomeNode *gn, void *genome_node_children,
   genome_node_info = (NodeTraverseInfo*) genome_node_children;
   genome_node_info->parent = gn;
   /* handle root nodes */
-  process_node((Diagram*) genome_node_info->diagram,
+  process_node(genome_node_info->diagram,
                gn,
                NULL,
                env);
