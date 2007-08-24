@@ -39,3 +39,11 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
 end
 
+Name "genome_visitor bindings"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$testdata}/gtscripts/genome_visitor.lua #{$testdata}/gff3_file_1_short.txt"
+  run "env LC_ALL=C sort #{$last_stdout}"
+  run "diff #{$last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+end
+
