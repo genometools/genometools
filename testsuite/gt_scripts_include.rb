@@ -31,3 +31,11 @@ Test do
   run_test "#{$bin}gt #{$testdata}/gtscripts/genome_stream.lua #{$testdata}"
 end
 
+Name "genome_stream bindings (output stream)"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$testdata}/gtscripts/gff3.lua #{$testdata}/gff3_file_1_short.txt"
+  run "env LC_ALL=C sort #{$last_stdout}"
+  run "diff #{$last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+end
+

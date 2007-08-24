@@ -12,6 +12,7 @@
 /* exports the GenomeStream interface and its implementors to Lua:
 
    genome_stream = gt.gff3_in_stream_new_sorted(filename)
+   genome_stream = gt.gff3_out_stream_new(genome_stream)
    genome_node   = genome_stream:next_tree()
 */
 int luaopen_genome_stream(lua_State*);
