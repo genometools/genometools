@@ -1,15 +1,19 @@
+#include <limits.h>
+#include "sarr-def.h"
 #include "seqpos-def.h"
+#include "symboldef.h"
+#include "spacedef.h"
 
 #define STATICSTACKSPACE 512
 
-#define ABOVETOP  stackptr[nextfreeNodeinfo]
-#define TOP       stackptr[nextfreeNodeinfo-1]
-#define BELOWTOP  stackptr[nextfreeNodeinfo-2]
+#define ABOVETOP  stackptr[nextfreeItvinfo]
+#define TOP       stackptr[nextfreeItvinfo-1]
+#define BELOWTOP  stackptr[nextfreeItvinfo-2]
 
 #define PUSHDFS(D,B)\
-        stackptr[nextfreeNodeinfo].depth = D;\
-        stackptr[nextfreeNodeinfo].lastisleafedge = B;\
-        nextfreeNodeinfo++
+        stackptr[nextfreeItvinfo].depth = D;\
+        stackptr[nextfreeItvinfo].lastisleafedge = B;\
+        nextfreeItvinfo++
 
  DECLAREREADFUNCTION(Seqpos);
 
@@ -23,35 +27,39 @@ typedef struct
            length;
 } Listtype;
 
+typedef struct Dfsinfo Dfsinfo;
+
 typedef struct
 {
   bool lastisleafedge;
-  Uchar commonchar;
   Seqpos depth;
-  uint32_t uniquecharposstart,
-           uniquecharposlength; // uniquecharpos[start..start+len-1]
-  Listtype *nodeposlist;
-  Seqpos leftmostleaf,
-         rightmostleaf;
-} Nodeinfo;
+  Dfsinfo *dfsinfo;
+} Itvinfo;
 
-static int depthfirstvstreegeneric(
+int depthfirstvstreegeneric(
                   Suffixarray *suffixarray,
                   Readmode readmode,
-                  int(*allocateextrastackelements)(Nodeinfo *,uint32_t,
+                  Uchar initialchar,
+                  int(*allocateextrastackelements)(Itvinfo *,unsigned long,
                                                    void *,Env *),
-                  int(*reallocateextrastackelements)(Nodeinfo *,
-                                                     uint32_t,uint32_t,
+                  int(*reallocateextrastackelements)(Itvinfo *,
+                                                     unsigned long,
+                                                     unsigned long,
                                                      void *,Env *),
-                  void(*freenodestackspace)(Nodeinfo *,uint32_t,void *,Env *),
-                  int(*processleafedge)(bool,Nodeinfo *,Uchar,Seqpos,void *,
+                  void(*freenodestackspace)(Itvinfo *,unsigned long,
+                                            void *,Env *),
+                  int(*processleafedge)(bool,Itvinfo *,Uchar,Seqpos,void *,
                                         Env *),
                   int(*processbranchedge)(bool,
-                                          uint32_t,
                                           Seqpos,
-                                          Seqpos,
+                                          Itvinfo *,
                                           void *,
                                           Env *),
+                  int(*processcompletenode)(Itvinfo *,void *,Env *),
+                  int(*assignleftmostleaf)(Itvinfo *,Seqpos,
+                                           void *,Env *),
+                  int(*assignrightmostleaf)(Itvinfo *,Seqpos,Seqpos,
+                                            Seqpos,void *,Env *),
                   void *info,
                   Env *env)
 {
@@ -62,34 +70,39 @@ static int depthfirstvstreegeneric(
   Seqpos previoussuffix, 
          previouslcp,
          currentindex,
-         currentlcp = 0, /* May be necessary if the lcpvalue is used after the
+         currentlcp = 0; /* May be necessary if the lcpvalue is used after the
                             outer while loop */
-         allocatedNodeinfo,
-         nextfreeNodeinfo;
+  unsigned long allocatedItvinfo,
+                nextfreeItvinfo;
   Largelcpvalue tmpexception;
-  Nodeinfo *stackptr,
+  Itvinfo *stackptr,
            stackspace[STATICSTACKSPACE];
   Uchar leftchar;
   bool haserr = false;
 
-  allocatedNodeinfo = (Uint) STATICSTACKSPACE;
-  nextfreeNodeinfo = 0;
+  allocatedItvinfo = (unsigned long) STATICSTACKSPACE;
+  nextfreeItvinfo = 0;
   firstrootedge = true;
   stackptr = &stackspace[0];
-  if(allocateextrastackelements != NULL &&
-     allocateextrastackelements(stackptr,STATICSTACKSPACE,info,env) != 0)
+  if (allocateextrastackelements != NULL &&
+      allocateextrastackelements(stackptr,(unsigned long) STATICSTACKSPACE,
+                                 info,env) != 0)
   {
     haserr = true;
   }
-  if(!haserr)
+  if (!haserr)
   {
-    PUSHDFS(FIRSTLCPVALUE,true);
-    ASSIGNLEFTMOSTLEAF(TOP,firstsuftabindex);
+    PUSHDFS(0,true);
+    if(assignleftmostleaf != NULL && 
+       assignleftmostleaf(&TOP,0,info,env) != 0)
+    {
+      haserr = true;
+    }
   }
-  for(currentindex = firstsuftabindex; !haserr; currentindex++)
+  for(currentindex = 0; !haserr; currentindex++)
   {
     retval = readnextUcharfromstream(&tmpsmalllcpvalue,
-                                     suffixarray->lcptabstream,
+                                     &suffixarray->lcptabstream,
                                      env);
     if (retval < 0)
     {
@@ -106,7 +119,7 @@ static int depthfirstvstreegeneric(
     if (tmpsmalllcpvalue == (Uchar) UCHAR_MAX)
     {
       retval = readnextLargelcpvaluefromstream(&tmpexception,
-                                               suffixarray->llvtabstream,
+                                               &suffixarray->llvtabstream,
                                                env);
       if (retval < 0)
       {
@@ -126,7 +139,7 @@ static int depthfirstvstreegeneric(
       currentlcp = (Seqpos) tmpsmalllcpvalue;
     }
     retval = readnextSeqposfromstream(&previoussuffix,
-                                      suffixarray->suftabstream,
+                                      &suffixarray->suftabstream,
                                       env);
     if (retval < 0)
     {
@@ -140,55 +153,65 @@ static int depthfirstvstreegeneric(
       haserr = true;
       break;
     }
-    if(previoussuffix == 0)
+    if (previoussuffix == 0)
     {
-      leftchar = (Uchar) INITIALCHAR;
+      leftchar = initialchar;
     } else
     {
-      leftchar = getencodedchar(suffixarray->encseqtable,
+      leftchar = getencodedchar(suffixarray->encseq,
                                 previoussuffix-1,
                                 readmode);
     }
     while(currentlcp < TOP.depth)    // splitting edge is reached 
     {
-      if(TOP.lastisleafedge)       // last edge from top-node is leaf
+      if (TOP.lastisleafedge)       // last edge from top-node is leaf
       {                            // previoussuffix
-        if(processleaf != NULL &&
-           processleafedge(false,&TOP,leftchar,previoussuffix) != 0)
+        if (processleafedge != NULL &&
+            processleafedge(false,&TOP,leftchar,previoussuffix,info,env) != 0)
         {
           haserr = true;
           break;
         }
       } else
       {
-        if(processbranchedge != NULL &&
-           processbranchedge(false,
-                             ABOVETOP.depth,
-                             ABOVETOP.leftmostleaf,
-                             ABOVETOP.rightmostleaf,
-                             info,
-                             env) != 0)
+        if (processbranchedge != NULL &&
+            processbranchedge(false,
+                              ABOVETOP.depth,
+                              &ABOVETOP,
+                              info,
+                              env) != 0)
         {
           haserr = true;
           break;
         }
       }
-      ASSIGNRIGHTMOSTLEAF(TOP,
-                          currentindex,
-                          previoussuffix,
-                          currentlcp);
-      PROCESSCOMPLETENODE(&TOP);
-      assert(nextfreeNodeinfo > 0);
-      nextfreeNodeinfo--;
+      if (assignrightmostleaf != NULL && 
+          assignrightmostleaf(&TOP,
+                              currentindex,
+                              previoussuffix,
+                              currentlcp,
+                              info,env) != 0)
+      {
+        haserr = true;
+        break; 
+      }
+      if (processcompletenode != NULL && 
+          processcompletenode(&TOP,info,env) != 0)
+      {
+        haserr = true;
+        break;
+      }
+      assert(nextfreeItvinfo > 0);
+      nextfreeItvinfo--;
     }
-    if(haserr)
+    if (haserr)
     {
       break;
     }
-    if(currentlcp == TOP.depth)
+    if (currentlcp == TOP.depth)
     {
       // add leaf edge to TOP-node
-      if(firstrootedge && TOP.depth == 0)
+      if (firstrootedge && TOP.depth == 0)
       {
         firstedge = true;
         firstrootedge = false;
@@ -196,24 +219,23 @@ static int depthfirstvstreegeneric(
       {
         firstedge = false;
       }
-      if(TOP.lastisleafedge)
+      if (TOP.lastisleafedge)
       {
-        if(processleafedge != NULL &&
-           processleafedge(firstedge,&TOP,leftchar,previoussuffix,info,
-                           env) != 0)
+        if (processleafedge != NULL &&
+            processleafedge(firstedge,&TOP,leftchar,previoussuffix,info,
+                            env) != 0)
         {
           haserr = true;
           break;
         }
       } else
       {
-        if(processbranchedge != NULL &&
-          processbranchedge(firstedge,
-                             ABOVETOP.depth,
-                             ABOVETOP.leftmostleaf,
-                             ABOVETOP.rightmostleaf,
-                             info,
-                             env) != 0)
+        if (processbranchedge != NULL &&
+            processbranchedge(firstedge,
+                              ABOVETOP.depth,
+                              &ABOVETOP,
+                              info,
+                              env) != 0)
         {
           haserr = true;
           break;
@@ -223,46 +245,51 @@ static int depthfirstvstreegeneric(
     } else
     {
       previouslcp = ABOVETOP.depth;
-      if(nextfreeNodeinfo >= allocatedNodeinfo)
+      if (nextfreeItvinfo >= allocatedItvinfo)
       {
-        if(allocatedNodeinfo == (Uint) STATICSTACKSPACE)
+        if (allocatedItvinfo == (unsigned long) STATICSTACKSPACE)
         {
-          ALLOCASSIGNSPACE(stackptr,NULL,Nodeinfo,
-                           nextfreeNodeinfo + STATICSTACKSPACE);
+          ALLOCASSIGNSPACE(stackptr,NULL,Itvinfo,
+                           nextfreeItvinfo + STATICSTACKSPACE);
           memcpy(stackptr,&stackspace[0],
-                 (size_t) (sizeof(Nodeinfo) * STATICSTACKSPACE));
-          if(reallocateextrastackelements != NULL &&
-             reallocateextrastackelements(stackptr,
-                                          STATICSTACKSPACE,
-                                          nextfreeNodeinfo,info,env) != 0)
+                 (size_t) (sizeof(Itvinfo) * STATICSTACKSPACE));
+          if (reallocateextrastackelements != NULL &&
+              reallocateextrastackelements(stackptr,
+                                           (unsigned long) STATICSTACKSPACE,
+                                           nextfreeItvinfo,info,env) != 0)
           {
             haserr = true;
             break;
           }
         } else
         {
-          ALLOCASSIGNSPACE(stackptr,stackptr,Nodeinfo,
-                           allocatedNodeinfo+STATICSTACKSPACE);
-          if(reallocateextrastackelements != NULL &&
-             reallocateextrastackelements(stackptr,
-                                          allocatedNodeinfo,
-                                          STATICSTACKSPACE,
-                                          info,
-                                          env) != 0)
+          ALLOCASSIGNSPACE(stackptr,stackptr,Itvinfo,
+                           allocatedItvinfo+STATICSTACKSPACE);
+          if (reallocateextrastackelements != NULL &&
+              reallocateextrastackelements(stackptr,
+                                           allocatedItvinfo,
+                                           (unsigned long) STATICSTACKSPACE,
+                                           info,
+                                           env) != 0)
           {
             haserr = true;
             break;
           }
         }
-        allocatedNodeinfo += STATICSTACKSPACE;
+        allocatedItvinfo += STATICSTACKSPACE;
       }
       PUSHDFS(currentlcp,true);
-      if(BELOWTOP.lastisleafedge)
+      if (BELOWTOP.lastisleafedge)
       {
         // replace leaf edge by internal Edge
-        ASSIGNLEFTMOSTLEAF(TOP,currentindex);
-        PROCESSSPLITLEAFEDGE;
-        if(processleafedge(true,&TOP,leftchar,previoussuffix) != 0)
+        if(assignleftmostleaf != NULL &&
+           assignleftmostleaf(&TOP,currentindex,info,env) != 0)
+        {
+          haserr = true;
+          break;
+        }
+        if (processleafedge != NULL &&
+            processleafedge(true,&TOP,leftchar,previoussuffix,info,env) != 0)
         {
           haserr = true;
           break;
@@ -270,11 +297,12 @@ static int depthfirstvstreegeneric(
         BELOWTOP.lastisleafedge = false;
       } else
       {
-        if(processbranchedge(true,previouslcp,
-                             TOP.leftmostleaf,
-                             TOP.rightmostleaf,
-                             info,
-                             env) != 0)
+        if (processbranchedge != NULL && 
+            processbranchedge(true,
+                              previouslcp,
+                              &TOP,
+                              info,
+                              env) != 0)
         {
           haserr = true;
           break;
@@ -282,47 +310,68 @@ static int depthfirstvstreegeneric(
       }
     }
   }
-  if(TOP.lastisleafedge)
+  if (TOP.lastisleafedge)
   {
-    if(previoussuffix == 0)
+    if (previoussuffix == 0)
     {
-      leftchar = (Uchar) INITIALCHAR;
+      leftchar = initialchar;
     } else
     {
-      leftchar = getencodedchar(suffixarray->encseqtable,
+      leftchar = getencodedchar(suffixarray->encseq,
                                 previoussuffix-1,
                                 readmode);
     }
     retval = readnextSeqposfromstream(&previoussuffix,
-                                      suffixarray->suftabstream,
+                                      &suffixarray->suftabstream,
                                       env);
     if (retval < 0)
     {
       haserr = true;
-    }
-    if (retval == 0)
+    } else
     {
-      env_error_set(env,"file %s: line %d: unexpected end of file when "
-                    "reading suftab",__FILE__,__LINE__);
-      haserr = true;
+      if (retval == 0)
+      {
+        env_error_set(env,"file %s: line %d: unexpected end of file when "
+                      "reading suftab",__FILE__,__LINE__);
+        haserr = true;
+      }
     }
-    if(processleafedge(false,&TOP,leftchar,previoussuffix) != 0)
+    if (!haserr)
     {
-      haserr = true;
+      if (processleafedge != NULL &&
+          processleafedge(false,&TOP,leftchar,previoussuffix,info,env) != 0)
+      {
+        haserr = true;
+      }
     }
-    ASSIGNRIGHTMOSTLEAF(TOP,
-                        currentindex,
-                        previoussuffix,
-                        currentlcp);
-    PROCESSCOMPLETENODE(&TOP);
+    if (!haserr)
+    {
+      if (assignrightmostleaf != NULL && 
+          assignrightmostleaf(&TOP,
+                              currentindex,
+                              previoussuffix,
+                              currentlcp,
+                              info,env) != 0)
+      {
+        haserr = true;
+      }
+    }
+    if (!haserr)
+    {
+      if (processcompletenode != NULL && 
+          processcompletenode(&TOP,info,env) != 0)
+      {
+        haserr = true;
+      }
+    }
   }
-  if(freenodestackspace != NULL)
+  if (freenodestackspace != NULL)
   {
-    freenodestackspace(stackptr,allocatedNodeinfo,info,env);
+    freenodestackspace(stackptr,allocatedItvinfo,info,env);
   }
-  if(allocatedNodeinfo > (Uint) STATICSTACKSPACE)
+  if (allocatedItvinfo > (unsigned long) STATICSTACKSPACE)
   {
     FREESPACE(stackptr);
   }
-  return 0;
+  return haserr ? -1 : 0;
 }

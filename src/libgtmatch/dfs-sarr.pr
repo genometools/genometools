@@ -1,0 +1,33 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int depthfirstvstreegeneric(
+                  Suffixarray *suffixarray,
+                  Readmode readmode,
+                  Uchar initialchar,
+                  int(*allocateextrastackelements)(Itvinfo *,unsigned long,
+                                                   void *,Env *),
+                  int(*reallocateextrastackelements)(Itvinfo *,
+                                                     unsigned long,
+                                                     unsigned long,
+                                                     void *,Env *),
+                  void(*freenodestackspace)(Itvinfo *,unsigned long,
+                                            void *,Env *),
+                  int(*processleafedge)(bool,Itvinfo *,Uchar,Seqpos,void *,
+                                        Env *),
+                  int(*processbranchedge)(bool,
+                                          Seqpos,
+                                          Itvinfo *,
+                                          void *,
+                                          Env *),
+                  int(*processcompletenode)(Itvinfo *,void *,Env *),
+                  int(*assignleftmostleaf)(Itvinfo *,Seqpos,
+                                           void *,Env *),
+                  int(*assignrightmostleaf)(Itvinfo *,Seqpos,Seqpos,
+                                            Seqpos,void *,Env *),
+                  void *info,
+                  Env *env);
+
+#ifdef __cplusplus
+}
+#endif
