@@ -12,6 +12,10 @@
 #include "libgtcore/gtcore_lua.h"
 #include "libgtext/gtext_lua.h"
 
+#ifdef LIBGTVIEW
+#include "libgtview/gtview_lua.h"
+#endif
+
 /* key used to store the Env object in the Lua registry */
 #define ENV_KEY env_new
 
@@ -41,6 +45,9 @@ int luaopen_gt(lua_State *L)
   assert(L);
   luaopen_gtcore(L); /* open core library */
   luaopen_gtext(L);  /* open extended library */
+#ifdef LIBGTVIEW
+  luaopen_gtview(L); /* open view library */
+#endif
   return 1;
 }
 
