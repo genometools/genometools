@@ -15,10 +15,20 @@
 #define TOP       stackspace[nextfreeItvinfo-1]
 #define BELOWTOP  stackspace[nextfreeItvinfo-2]
 
-#define INCSTACKSIZE  4
+#define INCSTACKSIZE  1
 
-#define PUSHDFS(D,B)\
-        printf("push D=%u,B=%s\n",(unsigned int) (D),(B) ? "true" : "false");\
+#define PUSHDFS(D,B,PREVIOUSPTR)\
+        if (nextfreeItvinfo >= allocatedItvinfo)\
+        {\
+          assert(nextfreeItvinfo == allocatedItvinfo);\
+          stackspace = allocItvinfo(PREVIOUSPTR,\
+                                    allocatedItvinfo,\
+                                    allocatedItvinfo+INCSTACKSIZE,\
+                                    allocateDfsinfo,\
+                                    info,\
+                                    env);\
+          allocatedItvinfo += INCSTACKSIZE;\
+        }\
         stackspace[nextfreeItvinfo].depth = D;\
         stackspace[nextfreeItvinfo].lastisleafedge = B;\
         nextfreeItvinfo++
@@ -51,11 +61,13 @@ static Itvinfo *allocItvinfo(Itvinfo *ptr,
   ALLOCASSIGNSPACE(itvinfo,ptr,Itvinfo,allocated);
   if (allocateDfsinfo != NULL)
   {
+    assert(allocated > currentallocated);
     for (i=currentallocated; i<allocated; i++)
     {
       itvinfo[i].dfsinfo = allocateDfsinfo(info,env);
     }
   }
+  assert(itvinfo != NULL);
   return itvinfo;
 }
 
@@ -103,30 +115,19 @@ int depthfirstesa(Suffixarray *suffixarray,
          currentindex,
          currentlcp = 0; /* May be necessary if the lcpvalue is used after the
                             outer while loop */
-  unsigned long allocatedItvinfo,
-                nextfreeItvinfo;
+  unsigned long allocatedItvinfo = 0,
+                nextfreeItvinfo = 0;
   Largelcpvalue tmpexception;
   Itvinfo *stackspace;
   Uchar leftchar;
   bool haserr = false;
 
-  allocatedItvinfo = (unsigned long) INCSTACKSIZE;
-  stackspace = allocItvinfo(NULL,
-                            0,
-                            allocatedItvinfo,
-                            allocateDfsinfo,
-                            info,
-                            env);
-  nextfreeItvinfo = 0;
   firstrootedge = true;
-  if (!haserr)
+  PUSHDFS(0,true,NULL);
+  if (assignleftmostleaf != NULL &&
+      assignleftmostleaf(TOP.dfsinfo,0,info,env) != 0)
   {
-    PUSHDFS(0,true);
-    if (assignleftmostleaf != NULL &&
-        assignleftmostleaf(TOP.dfsinfo,0,info,env) != 0)
-    {
-      haserr = true;
-    }
+    haserr = true;
   }
   for (currentindex = 0; !haserr; currentindex++)
   {
@@ -188,10 +189,12 @@ int depthfirstesa(Suffixarray *suffixarray,
                                 previoussuffix-1,
                                 suffixarray->readmode);
     }
+#ifdef DEBUG
     printf("suftabvalue=%u,lcpvalue=%u,leftchar=%u\n",
             (unsigned int) previoussuffix,
             (unsigned int) currentlcp,
             (unsigned int) leftchar);
+#endif
     while (currentlcp < TOP.depth)
     {
       if (TOP.lastisleafedge)
@@ -205,7 +208,7 @@ int depthfirstesa(Suffixarray *suffixarray,
         }
       } else
       {
-        STAMP;
+        assert(nextfreeItvinfo < allocatedItvinfo);
         if (processbranchedge != NULL &&
             processbranchedge(false,
                               TOP.depth,
@@ -247,10 +250,8 @@ int depthfirstesa(Suffixarray *suffixarray,
       {
         firstedge = true;
         firstrootedge = false;
-        STAMP;
       } else
       {
-        STAMP;
         firstedge = false;
       }
       if (TOP.lastisleafedge)
@@ -265,13 +266,15 @@ int depthfirstesa(Suffixarray *suffixarray,
         }
       } else
       {
-        STAMP;
-        printf("nextfreeItvinfo=%u\n",(unsigned int) nextfreeItvinfo);
+        if(!firstedge)
+        {
+          assert(nextfreeItvinfo < allocatedItvinfo);
+        }
         if (processbranchedge != NULL &&
             processbranchedge(firstedge,
                               TOP.depth,
                               TOP.dfsinfo,
-                              ABOVETOP.dfsinfo,
+                              firstedge ? NULL : ABOVETOP.dfsinfo,
                               info,
                               env) != 0)
         {
@@ -282,18 +285,7 @@ int depthfirstesa(Suffixarray *suffixarray,
       }
     } else
     {
-      previouslcp = ABOVETOP.depth;
-      if (nextfreeItvinfo >= allocatedItvinfo)
-      {
-        stackspace = allocItvinfo(stackspace,
-                                  allocatedItvinfo,
-                                  allocatedItvinfo+INCSTACKSIZE,
-                                  allocateDfsinfo,
-                                  info,
-                                  env);
-        allocatedItvinfo += INCSTACKSIZE;
-      }
-      PUSHDFS(currentlcp,true);
+      PUSHDFS(currentlcp,true,stackspace);
       if (BELOWTOP.lastisleafedge)
       {
        if (assignleftmostleaf != NULL &&
@@ -313,12 +305,12 @@ int depthfirstesa(Suffixarray *suffixarray,
         BELOWTOP.lastisleafedge = false;
       } else
       {
-        STAMP;
+        previouslcp = TOP.depth;
         if (processbranchedge != NULL &&
             processbranchedge(true,
                               previouslcp,
                               TOP.dfsinfo,
-                              ABOVETOP.dfsinfo,
+                              NULL, /* not used since firstsucc = true */
                               info,
                               env) != 0)
         {

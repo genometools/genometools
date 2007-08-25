@@ -42,7 +42,7 @@ typedef struct
   Uchar commonchar;
   unsigned long uniquecharposstart,
                 uniquecharposlength; /* uniquecharpos[start..start+len-1] */
-  Seqpos leftmostleaf;
+  Seqpos leftmostleaf;  /* XXX not necessary */
   Listtype *nodeposlist;
 } Dfsinfo;
 
@@ -56,8 +56,8 @@ typedef struct
   uint32_t searchlength,
            alphabetsize;
   Seqpos depth;            /* value changes with each new match */
-  void *outinfo;
   int(*output)(void *,Seqpos,Seqpos,Seqpos);
+  void *outinfo;
   ArraySeqpos uniquechar,
               poslist[UCHAR_MAX+1];
 } State;
@@ -106,7 +106,7 @@ static void concatlists(State *state,Dfsinfo *father,Dfsinfo *son)
   father->uniquecharposlength += son->uniquecharposlength;
 }
 
-static int cartproduct1(State *state,Dfsinfo *ninfo,uint32_t base,
+static int cartproduct1(State *state,const Dfsinfo *ninfo,uint32_t base,
                         Seqpos leafnumber)
 {
   Listtype *pl;
@@ -125,8 +125,8 @@ static int cartproduct1(State *state,Dfsinfo *ninfo,uint32_t base,
 }
 
 static int cartproduct2(State *state,
-                        Dfsinfo *ninfo1, uint32_t base1,
-                        Dfsinfo *ninfo2, uint32_t base2)
+                        const Dfsinfo *ninfo1, uint32_t base1,
+                        const Dfsinfo *ninfo2, uint32_t base2)
 {
   Listtype *pl1, *pl2;
   Seqpos *start1, *start2, *spptr1, *spptr2;
@@ -175,6 +175,7 @@ static int processleafedge(bool firstsucc,
   Seqpos *start, *spptr;
   State *state = (State *) info;
 
+#ifdef DEBUG
   printf("processleafedge " FormatSeqpos " firstsucc=%s, " 
          "leftmostleaf(father)=" FormatSeqpos 
          " depth(father)= " FormatSeqpos "\n",
@@ -182,6 +183,7 @@ static int processleafedge(bool firstsucc,
          firstsucc ? "true" : "false",
          PRINTSeqposcast(father->leftmostleaf),
          PRINTSeqposcast(fatherdepth));
+#endif
   if (fatherdepth < (Seqpos) state->searchlength)
   {
     setpostabto0(state);
@@ -189,7 +191,9 @@ static int processleafedge(bool firstsucc,
   }
   state->initialized = false;
   state->depth = fatherdepth;
+#ifdef DEBUG
   printf("processleafedge: leftchar %u\n",(unsigned int) leftchar);
+#endif
   if (firstsucc)
   {
     father->commonchar = leftchar;
@@ -233,20 +237,25 @@ static int processleafedge(bool firstsucc,
   return 0;
 }
 
-static int processbranchedge(bool firstsucc,Seqpos fatherdepth,
-                             Dfsinfo *father,Dfsinfo *son,
-                             void *info,/*@unused@*/ Env *env)
+static int processbranchedge(bool firstsucc,
+                             Seqpos fatherdepth,
+                             Dfsinfo *father,
+                             Dfsinfo *son,
+                             void *info,
+                             /*@unused@*/ Env *env)
 {
   uint32_t chfather, chson;
   Seqpos *start, *spptr, *fptr, *fstart;
   State *state = (State *) info;
 
+#ifdef DEBUG
   printf("processbranchedge firstsucc=%s, "
          "leftmostleaf(father)= " FormatSeqpos
          " depth(father)= " FormatSeqpos "\n",
          firstsucc ? "true" : "false",
          PRINTSeqposcast(father->leftmostleaf),
          PRINTSeqposcast(fatherdepth));
+#endif
   if (fatherdepth < (Seqpos) state->searchlength)
   {
     setpostabto0(state);
@@ -261,7 +270,9 @@ static int processbranchedge(bool firstsucc,Seqpos fatherdepth,
   if (father->commonchar != ISLEFTDIVERSE)
   {
     assert(son != NULL);
+#ifdef DEBUG
     printf("commonchar=%u\n",(unsigned int) son->commonchar);
+#endif
     if (son->commonchar != ISLEFTDIVERSE)
     {
       CHECKCHAR(son->commonchar);
@@ -317,8 +328,9 @@ static int processbranchedge(bool firstsucc,Seqpos fatherdepth,
   return 0;
 }
 
-static int assignleftmostleaf(Dfsinfo *dfsinfo,Seqpos leafnumber,void *info,
-                              Env *env)
+static int assignleftmostleaf(Dfsinfo *dfsinfo,Seqpos leafnumber,
+                              /*@unused@*/ void *info,
+                              /*@unused@*/ Env *env)
 {
   dfsinfo->leftmostleaf = leafnumber;
   return 0;
@@ -397,19 +409,19 @@ int callenummaxpairs(const Str *indexname,
   bool haserr = false;
 
   if (streamsuffixarray(&suffixarray,
-                       &totallength,
-                       SARR_LCPTAB | SARR_SUFTAB | SARR_ESQTAB,
-                       indexname,
-                       false,
-                       env) != 0)
+                        &totallength,
+                        SARR_LCPTAB | SARR_SUFTAB | SARR_ESQTAB,
+                        indexname,
+                        false,
+                        env) != 0)
   {
     haserr = true;
   }
   if (!haserr && enumeratemaxpairs(&suffixarray,
-                                  userdefinedleastlength,
-                                  simpleexactselfmatchoutput,
-                                  NULL,
-                                  env) != 0)
+                                   userdefinedleastlength,
+                                   simpleexactselfmatchoutput,
+                                   NULL,
+                                   env) != 0)
   {
     haserr = true;
   }
