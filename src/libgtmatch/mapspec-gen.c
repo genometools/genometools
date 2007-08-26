@@ -111,9 +111,9 @@ static int assigncorrecttype(Mapspecification *mapspec,
   }
   if (!haserr)
   {
-    printf("# assign pointer");
+    /* printf("# assign pointer");
     showmapspec(mapspec);
-    printf(" at byteoffset %lu\n",byteoffset);
+    printf(" at byteoffset %lu\n",byteoffset); XXX insert later */
   }
   return haserr ? -1 : 0;
 }

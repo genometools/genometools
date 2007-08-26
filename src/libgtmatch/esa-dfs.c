@@ -15,7 +15,7 @@
 #define TOP       stackspace[nextfreeItvinfo-1]
 #define BELOWTOP  stackspace[nextfreeItvinfo-2]
 
-#define INCSTACKSIZE  1
+#define INCSTACKSIZE  32
 
 #define PUSHDFS(D,B,PREVIOUSPTR)\
         if (nextfreeItvinfo >= allocatedItvinfo)\
@@ -189,12 +189,6 @@ int depthfirstesa(Suffixarray *suffixarray,
                                 previoussuffix-1,
                                 suffixarray->readmode);
     }
-#ifdef DEBUG
-    printf("suftabvalue=%u,lcpvalue=%u,leftchar=%u\n",
-            (unsigned int) previoussuffix,
-            (unsigned int) currentlcp,
-            (unsigned int) leftchar);
-#endif
     while (currentlcp < TOP.depth)
     {
       if (TOP.lastisleafedge)

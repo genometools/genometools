@@ -42,7 +42,6 @@ typedef struct
   Uchar commonchar;
   unsigned long uniquecharposstart,
                 uniquecharposlength; /* uniquecharpos[start..start+len-1] */
-  Seqpos leftmostleaf;  /* XXX not necessary */
   Listtype *nodeposlist;
 } Dfsinfo;
 
@@ -177,11 +176,9 @@ static int processleafedge(bool firstsucc,
 
 #ifdef DEBUG
   printf("processleafedge " FormatSeqpos " firstsucc=%s, " 
-         "leftmostleaf(father)=" FormatSeqpos 
          " depth(father)= " FormatSeqpos "\n",
          PRINTSeqposcast(leafnumber), 
          firstsucc ? "true" : "false",
-         PRINTSeqposcast(father->leftmostleaf),
          PRINTSeqposcast(fatherdepth));
 #endif
   if (fatherdepth < (Seqpos) state->searchlength)
@@ -250,10 +247,8 @@ static int processbranchedge(bool firstsucc,
 
 #ifdef DEBUG
   printf("processbranchedge firstsucc=%s, "
-         "leftmostleaf(father)= " FormatSeqpos
          " depth(father)= " FormatSeqpos "\n",
          firstsucc ? "true" : "false",
-         PRINTSeqposcast(father->leftmostleaf),
          PRINTSeqposcast(fatherdepth));
 #endif
   if (fatherdepth < (Seqpos) state->searchlength)
@@ -328,14 +323,6 @@ static int processbranchedge(bool firstsucc,
   return 0;
 }
 
-static int assignleftmostleaf(Dfsinfo *dfsinfo,Seqpos leafnumber,
-                              /*@unused@*/ void *info,
-                              /*@unused@*/ Env *env)
-{
-  dfsinfo->leftmostleaf = leafnumber;
-  return 0;
-}
-
 static int enumeratemaxpairs(Suffixarray *suffixarray,
                              uint32_t searchlength,
                              int(*output)(void *,Seqpos,Seqpos,Seqpos),
@@ -366,7 +353,7 @@ static int enumeratemaxpairs(Suffixarray *suffixarray,
                     processleafedge,
                     processbranchedge,
                     NULL,
-                    assignleftmostleaf,
+                    NULL,
                     NULL,
                     (void *) &state,
                     env) != 0)

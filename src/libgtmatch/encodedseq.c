@@ -1522,9 +1522,11 @@ static void determineencseqkeyvalues(Encodedsequence *encseq,
   spaceinbitsperchar
     = (double) ((uint64_t) CHAR_BIT * (uint64_t) encseq->sizeofrep)/
       (double) totallength;
+  /*
   printf("# init character encoding (%s,%lu"
          " bytes,%.2f bits/symbol)\n",
           encseq->name,encseq->sizeofrep,spaceinbitsperchar);
+  XXX insert later */
 }
 
 static int readsatfromfile(const Str *indexname,Env *env)
@@ -1706,7 +1708,9 @@ static int readsatfromfile(const Str *indexname,Env *env)
       ASSIGNAPPFUNC( ); /* Note the importance of the space between ( ) */
       SEQASSIGNAPPFUNC( );
     }
-    printf("# deliverchar=%s\n",encseq->delivercharname);
+    /*
+    printf("# deliverchar=%s\n",encseq->delivercharname); XXX insert later
+    */
     if (indexname != NULL)
     {
       if (fillencseqmapspecstartptr(encseq,
