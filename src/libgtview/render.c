@@ -524,7 +524,7 @@ void render_to_png(Render *r, Diagram *dia, char *filename, unsigned int width,
                  -(2*r->margins))
                / range_length(r->range);
   if (config_get_verbose(r->cfg))
-     fprintf( stderr, "scaling factor is %f\n",r->factor);
+     fprintf(stderr, "scaling factor is %f\n",r->factor);
 
   /* create new Graphics backend */
   r->g = graphics_new_png(filename, width, height, env);
@@ -541,7 +541,7 @@ void render_to_png(Render *r, Diagram *dia, char *filename, unsigned int width,
     (void) hashtable_foreach(tracks, render_track, r, env);
   }
   else if (config_get_verbose(r->cfg))
-    fprintf( stderr, "diagram has no tracks!\n");
+    fprintf(stderr, "diagram has no tracks!\n");
 
   if (config_get_verbose(r->cfg))
     fprintf(stderr, "actual used height: %f\n", r->y);
