@@ -3,7 +3,9 @@
 #include "libgtcore/str.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
+#include "sarr-def.h"
 
+#include "sfx-map.pr"
 #include "esa-maxpairs.pr"
 
 typedef struct
@@ -11,6 +13,53 @@ typedef struct
   unsigned int userdefinedleastlength;
   Str *indexname;
 } Maxpairsoptions;
+
+static int simpleexactselfmatchoutput(/*@unused@*/ void *info,
+                                      Seqpos len,
+                                      Seqpos pos1,
+                                      Seqpos pos2)
+{
+  if (pos1 > pos2)
+  {
+    Seqpos tmp = pos1;
+    pos1 = pos2;
+    pos2 = tmp;
+  }
+  printf(FormatSeqpos " " FormatSeqpos " " FormatSeqpos "\n",
+            PRINTSeqposcast(len),
+            PRINTSeqposcast(pos1),
+            PRINTSeqposcast(pos2));
+  return 0;
+}
+
+static int callenummaxpairs(const Str *indexname,
+                            uint32_t userdefinedleastlength,
+                            Env *env)
+{
+  Suffixarray suffixarray;
+  Seqpos totallength;
+  bool haserr = false;
+
+  if (streamsuffixarray(&suffixarray,
+                        &totallength,
+                        SARR_LCPTAB | SARR_SUFTAB | SARR_ESQTAB,
+                        indexname,
+                        false,
+                        env) != 0)
+  {
+    haserr = true;
+  }
+  if (!haserr && enumeratemaxpairs(&suffixarray,
+                                   userdefinedleastlength,
+                                   simpleexactselfmatchoutput,
+                                   NULL,
+                                   env) != 0)
+  {
+    haserr = true;
+  }
+  freesuffixarray(&suffixarray,env);
+  return haserr ? -1 : 0;
+}
 
 static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
                             int *parsed_args,

@@ -11,7 +11,6 @@
 #include "alphadef.h"
 
 #include "alphabet.pr"
-#include "sfx-map.pr"
 
 #define ISLEFTDIVERSE   (state->alphabetsize)
 #define INITIALCHAR     (state->alphabetsize+1)
@@ -323,11 +322,11 @@ static int processbranchedge(bool firstsucc,
   return 0;
 }
 
-static int enumeratemaxpairs(Suffixarray *suffixarray,
-                             uint32_t searchlength,
-                             int(*output)(void *,Seqpos,Seqpos,Seqpos),
-                             void *outinfo,
-                             Env *env)
+int enumeratemaxpairs(Suffixarray *suffixarray,
+                      uint32_t searchlength,
+                      int(*output)(void *,Seqpos,Seqpos,Seqpos),
+                      void *outinfo,
+                      Env *env)
 {
   uint32_t base;
   ArraySeqpos *ptr;
@@ -366,52 +365,5 @@ static int enumeratemaxpairs(Suffixarray *suffixarray,
     ptr = &state.poslist[base];
     FREEARRAY(ptr,Seqpos);
   }
-  return haserr ? -1 : 0;
-}
-
-static int simpleexactselfmatchoutput(/*@unused@*/ void *info,
-                                      Seqpos len,
-                                      Seqpos pos1,
-                                      Seqpos pos2)
-{
-  if (pos1 > pos2)
-  {
-    Seqpos tmp = pos1;
-    pos1 = pos2;
-    pos2 = tmp;
-  }
-  printf(FormatSeqpos " " FormatSeqpos " " FormatSeqpos "\n",
-            PRINTSeqposcast(len),
-            PRINTSeqposcast(pos1),
-            PRINTSeqposcast(pos2));
-  return 0;
-}
-
-int callenummaxpairs(const Str *indexname,
-                     uint32_t userdefinedleastlength,
-                     Env *env)
-{
-  Suffixarray suffixarray;
-  Seqpos totallength;
-  bool haserr = false;
-
-  if (streamsuffixarray(&suffixarray,
-                        &totallength,
-                        SARR_LCPTAB | SARR_SUFTAB | SARR_ESQTAB,
-                        indexname,
-                        false,
-                        env) != 0)
-  {
-    haserr = true;
-  }
-  if (!haserr && enumeratemaxpairs(&suffixarray,
-                                   userdefinedleastlength,
-                                   simpleexactselfmatchoutput,
-                                   NULL,
-                                   env) != 0)
-  {
-    haserr = true;
-  }
-  freesuffixarray(&suffixarray,env);
   return haserr ? -1 : 0;
 }

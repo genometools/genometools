@@ -20,3 +20,4 @@ rm -rf indexdir
 rm -f lib/libgtmatch.a
 rm -f testsuite/TMP.[a-zA-Z0-9]*
 rm -f testsuite/result.mp testsuite/result.vm
+rm -f testsuite/sfxidx.esq
