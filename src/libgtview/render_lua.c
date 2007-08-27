@@ -38,10 +38,10 @@ static int render_lua_to_png(lua_State *L)
   render = check_render(L);
   diagram = check_diagram(L, 2);
   filename = luaL_checkstring(L, 3);
-  if (lua_isnil(L, 4))
-    width = DEFAULT_RENDER_WIDTH;
-  else
+  if (lua_gettop(L) >= 4)
     width = luaL_checkint(L, 4);
+  else
+    width = DEFAULT_RENDER_WIDTH;
   if (render_to_png(*render, *diagram, filename, width, env))
     return luagt_error(L, env);
   return 0;
