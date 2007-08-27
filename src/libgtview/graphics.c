@@ -350,7 +350,7 @@ double graphics_get_text_height(Graphics *g)
   assert(g != NULL);
   /* get text extents */
   cairo_text_extents(g->cr, "A", &ext);
-	return ext.height;
+  return ext.height;
 }
 
 double graphics_get_text_width(Graphics *g, const char* text)
@@ -359,7 +359,7 @@ double graphics_get_text_width(Graphics *g, const char* text)
   assert(g != NULL);
   /* get text extents */
   cairo_text_extents(g->cr, text, &ext);
-	return ext.width;
+  return ext.width;
 }
 
 void graphics_draw_colored_text(Graphics *g,
