@@ -14,6 +14,8 @@
 #include "libgtview/diagram.h"
 #include "libgtview/config.h"
 
+#define DEFAULT_RENDER_WIDTH  800
+
 /* the Render class
    contains methods for Diagram->Image conversion */
 typedef struct Render Render;
@@ -36,7 +38,7 @@ Renders a Diagram to a PNG file.
 \param width Target image width (in pixels).
 \param env Pointer to Environment object.
 */
-void    render_to_png(Render *r, Diagram *dia, char *filename,
+void    render_to_png(Render *r, Diagram *dia, const char *filename,
                       unsigned int width, Env *env);
 
 /*!

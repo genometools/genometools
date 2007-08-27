@@ -10,10 +10,6 @@
 #include "libgtview/diagram.h"
 #include "libgtview/diagram_lua.h"
 
-#define DIAGRAM_METATABLE  "GenomeTools.diagram"
-#define check_diagram(L, POS) \
-            (Diagram**) luaL_checkudata(L, POS, DIAGRAM_METATABLE);
-
 static int diagram_lua_new(lua_State *L)
 {
   Diagram **diagram;

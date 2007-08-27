@@ -505,8 +505,8 @@ void render_ruler(Render *r, Env* env)
                               "3'");
 }
 
-void render_to_png(Render *r, Diagram *dia, char *filename, unsigned int width,
-                   Env *env)
+void render_to_png(Render *r, Diagram *dia, const char *filename,
+                   unsigned int width, Env *env)
 {
   unsigned int height;
 
