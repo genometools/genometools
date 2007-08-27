@@ -61,6 +61,15 @@ Test do
   run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
 end
 
+Name "gt suffixerator patternmatch"
+Keywords "gt_suffixerator"
+Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Atinsert.fna " +
+           "-indexname sfx -dna -suf -tis -pl"
+  run_test "#{$bin}gt dev patternmatch -samples 1000 -minpl 10 -maxpl 15 " +
+           " -ii sfx"
+end
+
 alldir.each do |dir|
   Name "gt suffixerator #{dir}"
   Keywords "gt_suffixerator"

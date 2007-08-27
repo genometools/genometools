@@ -1,0 +1,16 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+Enumpatternstate *newenumpattern(unsigned long minpatternlen,
+                                 unsigned long maxpatternlen,
+                                 const Encodedsequence *encseq,
+                                 Env *env);
+
+const Uchar *nextsampledpattern(unsigned long *patternlen,
+                                Enumpatternstate *eps);
+
+void freeenumpattern(Enumpatternstate *eps,Env *env);
+
+#ifdef __cplusplus
+}
+#endif

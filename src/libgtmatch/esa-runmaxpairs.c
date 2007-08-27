@@ -4,6 +4,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "sarr-def.h"
+#include "stamp.h"
 
 #include "sfx-map.pr"
 #include "esa-maxpairs.pr"
@@ -70,7 +71,7 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
   OPrval oprval;
 
   env_error_check(env);
-  op = option_parser_new("[-l minlength] -db indexname",
+  op = option_parser_new("[-l minlength] -ii indexname",
                          "Enumerate maximal paris of minimum length.",
                          env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");

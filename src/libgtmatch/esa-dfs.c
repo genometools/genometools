@@ -9,7 +9,6 @@
 #include "seqpos-def.h"
 #include "symboldef.h"
 #include "spacedef.h"
-#include "stamp.h"
 
 #define ABOVETOP  stackspace[nextfreeItvinfo]
 #define TOP       stackspace[nextfreeItvinfo-1]
@@ -25,7 +24,7 @@
                                     allocatedItvinfo,\
                                     allocatedItvinfo+INCSTACKSIZE,\
                                     allocateDfsinfo,\
-                                    info,\
+                                    state,\
                                     env);\
           allocatedItvinfo += INCSTACKSIZE;\
         }\
@@ -40,6 +39,7 @@
  DECLAREREADFUNCTION(Largelcpvalue);
 
 typedef struct Dfsinfo Dfsinfo;
+typedef struct Dfsstate Dfsstate;
 
 typedef struct
 {
@@ -51,8 +51,8 @@ typedef struct
 static Itvinfo *allocItvinfo(Itvinfo *ptr,
                              unsigned long currentallocated,
                              unsigned long allocated,
-                             Dfsinfo *(*allocateDfsinfo)(void *,Env *),
-                             void *info,
+                             Dfsinfo *(*allocateDfsinfo)(Dfsstate *,Env *),
+                             Dfsstate *state,
                              Env *env)
 {
   unsigned long i;
@@ -64,7 +64,7 @@ static Itvinfo *allocItvinfo(Itvinfo *ptr,
     assert(allocated > currentallocated);
     for (i=currentallocated; i<allocated; i++)
     {
-      itvinfo[i].dfsinfo = allocateDfsinfo(info,env);
+      itvinfo[i].dfsinfo = allocateDfsinfo(state,env);
     }
   }
   assert(itvinfo != NULL);
@@ -73,37 +73,37 @@ static Itvinfo *allocItvinfo(Itvinfo *ptr,
 
 static void freeItvinfo(Itvinfo *ptr,
                         unsigned long allocated,
-                        void (*freeDfsinfo)(Dfsinfo *,void *,Env *),
-                        void *info,
+                        void (*freeDfsinfo)(Dfsinfo *,Dfsstate *,Env *),
+                        Dfsstate *state,
                         Env *env)
 {
   unsigned long i;
 
   for (i=0; i<allocated; i++)
   {
-    freeDfsinfo(ptr[i].dfsinfo,info,env);
+    freeDfsinfo(ptr[i].dfsinfo,state,env);
   }
   FREESPACE(ptr);
 }
 
 int depthfirstesa(Suffixarray *suffixarray,
                   Uchar initialchar,
-                  Dfsinfo *(*allocateDfsinfo)(void *,Env *),
-                  void(*freeDfsinfo)(Dfsinfo *,void *,Env *),
+                  Dfsinfo *(*allocateDfsinfo)(Dfsstate *,Env *),
+                  void(*freeDfsinfo)(Dfsinfo *,Dfsstate *,Env *),
                   int(*processleafedge)(bool,Seqpos,Dfsinfo *,
-                                        Uchar,Seqpos,void *,
+                                        Uchar,Seqpos,Dfsstate *,
                                         Env *),
                   int(*processbranchedge)(bool,
                                           Seqpos,
                                           Dfsinfo *,
                                           Dfsinfo *,
-                                          void *,
+                                          Dfsstate *,
                                           Env *),
-                  int(*processcompletenode)(Dfsinfo *,void *,Env *),
-                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,void *,Env *),
+                  int(*processcompletenode)(Dfsinfo *,Dfsstate *,Env *),
+                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *,Env *),
                   int(*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
-                                            Seqpos,void *,Env *),
-                  void *info,
+                                            Seqpos,Dfsstate *,Env *),
+                  Dfsstate *state,
                   Env *env)
 {
   int retval;
@@ -125,7 +125,7 @@ int depthfirstesa(Suffixarray *suffixarray,
   firstrootedge = true;
   PUSHDFS(0,true,NULL);
   if (assignleftmostleaf != NULL &&
-      assignleftmostleaf(TOP.dfsinfo,0,info,env) != 0)
+      assignleftmostleaf(TOP.dfsinfo,0,state,env) != 0)
   {
     haserr = true;
   }
@@ -195,7 +195,7 @@ int depthfirstesa(Suffixarray *suffixarray,
       {
         if (processleafedge != NULL &&
             processleafedge(false,TOP.depth,TOP.dfsinfo,leftchar,
-                            previoussuffix,info,env) != 0)
+                            previoussuffix,state,env) != 0)
         {
           haserr = true;
           break;
@@ -208,7 +208,7 @@ int depthfirstesa(Suffixarray *suffixarray,
                               TOP.depth,
                               TOP.dfsinfo,
                               ABOVETOP.dfsinfo,
-                              info,
+                              state,
                               env) != 0)
         {
           haserr = true;
@@ -220,13 +220,14 @@ int depthfirstesa(Suffixarray *suffixarray,
                               currentindex,
                               previoussuffix,
                               currentlcp,
-                              info,env) != 0)
+                              state,
+                              env) != 0)
       {
         haserr = true;
         break;
       }
       if (processcompletenode != NULL &&
-          processcompletenode(TOP.dfsinfo,info,env) != 0)
+          processcompletenode(TOP.dfsinfo,state,env) != 0)
       {
         haserr = true;
         break;
@@ -252,7 +253,7 @@ int depthfirstesa(Suffixarray *suffixarray,
       {
         if (processleafedge != NULL &&
             processleafedge(firstedge,TOP.depth,TOP.dfsinfo,
-                            leftchar,previoussuffix,info,
+                            leftchar,previoussuffix,state,
                             env) != 0)
         {
           haserr = true;
@@ -269,7 +270,7 @@ int depthfirstesa(Suffixarray *suffixarray,
                               TOP.depth,
                               TOP.dfsinfo,
                               firstedge ? NULL : ABOVETOP.dfsinfo,
-                              info,
+                              state,
                               env) != 0)
         {
           haserr = true;
@@ -283,15 +284,19 @@ int depthfirstesa(Suffixarray *suffixarray,
       if (BELOWTOP.lastisleafedge)
       {
        if (assignleftmostleaf != NULL &&
-           assignleftmostleaf(TOP.dfsinfo,currentindex,info,env) != 0)
+           assignleftmostleaf(TOP.dfsinfo,currentindex,state,env) != 0)
         {
           haserr = true;
           break;
         }
         if (processleafedge != NULL &&
-            processleafedge(true,TOP.depth,TOP.dfsinfo,
-                            leftchar,previoussuffix,
-                            info,env) != 0)
+            processleafedge(true,
+                            TOP.depth,
+                            TOP.dfsinfo,
+                            leftchar,
+                            previoussuffix,
+                            state,
+                            env) != 0)
         {
           haserr = true;
           break;
@@ -305,7 +310,7 @@ int depthfirstesa(Suffixarray *suffixarray,
                               previouslcp,
                               TOP.dfsinfo,
                               NULL, /* not used since firstsucc = true */
-                              info,
+                              state,
                               env) != 0)
         {
           haserr = true;
@@ -343,9 +348,13 @@ int depthfirstesa(Suffixarray *suffixarray,
     if (!haserr)
     {
       if (processleafedge != NULL &&
-          processleafedge(false,TOP.depth,TOP.dfsinfo,
-                          leftchar,previoussuffix,
-                          info,env) != 0)
+          processleafedge(false,
+                          TOP.depth,
+                          TOP.dfsinfo,
+                          leftchar,
+                          previoussuffix,
+                          state,
+                          env) != 0)
       {
         haserr = true;
       }
@@ -357,7 +366,8 @@ int depthfirstesa(Suffixarray *suffixarray,
                               currentindex,
                               previoussuffix,
                               currentlcp,
-                              info,env) != 0)
+                              state,
+                              env) != 0)
       {
         haserr = true;
       }
@@ -365,7 +375,7 @@ int depthfirstesa(Suffixarray *suffixarray,
     if (!haserr)
     {
       if (processcompletenode != NULL &&
-          processcompletenode(TOP.dfsinfo,info,env) != 0)
+          processcompletenode(TOP.dfsinfo,state,env) != 0)
       {
         haserr = true;
       }
@@ -374,7 +384,7 @@ int depthfirstesa(Suffixarray *suffixarray,
   freeItvinfo(stackspace,
               allocatedItvinfo,
               freeDfsinfo,
-              info,
+              state,
               env);
   return haserr ? -1 : 0;
 }
