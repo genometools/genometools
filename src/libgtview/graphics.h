@@ -218,8 +218,10 @@ double    graphics_get_text_width(Graphics *g, const char *text);
 /*!
 Writes out the Graphics to the chosen source.
 \param g Graphics object to save.
+\param env Pointer to Environment object.
+\return Error code.
 */
-bool     graphics_save(const Graphics*);
+int       graphics_save(const Graphics*, Env *env);
 
 /*!
 Deletes a Graphics object.

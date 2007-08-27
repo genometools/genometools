@@ -354,11 +354,19 @@ void graphics_set_margins(Graphics *g, double margin_x, double margin_y,
   g->margin_y = margin_y;
 }
 
-bool graphics_save(const Graphics *g)
+int graphics_save(const Graphics *g, Env *env)
 {
-  assert(g != NULL);
-  return (cairo_surface_write_to_png(g->surf, g->filename) ==
-          CAIRO_STATUS_SUCCESS);
+  cairo_status_t rval;
+  env_error_check(env);
+  assert(g);
+  rval = cairo_surface_write_to_png(g->surf, g->filename);
+  assert(rval == CAIRO_STATUS_SUCCESS || rval == CAIRO_STATUS_WRITE_ERROR);
+  if (rval == CAIRO_STATUS_WRITE_ERROR) {
+    env_error_set(env, "an I/O error occurred while attempting to write PNG "
+                  "file \"%s\"", g->filename);
+    return -1;
+  }
+  return 0;
 }
 
 void graphics_delete(Graphics *g, Env *env)

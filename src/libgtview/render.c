@@ -505,12 +505,13 @@ void render_ruler(Render *r, Env* env)
                               "3'");
 }
 
-void render_to_png(Render *r, Diagram *dia, const char *filename,
-                   unsigned int width, Env *env)
+int render_to_png(Render *r, Diagram *dia, const char *filename,
+                  unsigned int width, Env *env)
 {
-  unsigned int height;
+  unsigned int height, had_err;
 
-  assert(r != NULL && filename != NULL && width > 1);
+  env_error_check(env);
+  assert(r && filename && width > 1);
 
   /* set initial image-specific values */
   r->y = 70;
@@ -547,6 +548,8 @@ void render_to_png(Render *r, Diagram *dia, const char *filename,
     fprintf(stderr, "actual used height: %f\n", r->y);
 
   /* write out result file */
-  (void) graphics_save(r->g);
+  had_err = graphics_save(r->g, env);
   graphics_delete(r->g, env);
+
+  return had_err;
 }

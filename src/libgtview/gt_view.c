@@ -248,7 +248,7 @@ int gt_view(int argc, const char **argv, Env *env)
     /* create and write image file */
     d = diagram_new(results, qry_range, cfg, env);
     r = render_new(cfg, env);
-    render_to_png(r, d, argv[parsed_args], arguments.width, env);
+    had_err = render_to_png(r, d, argv[parsed_args], arguments.width, env);
   }
 
   render_delete(r, env);

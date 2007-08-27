@@ -15,8 +15,10 @@ end
 Name "gt view short test (unwriteable file)"
 Keywords "gt_view"
 Test do
-  run_test("#{$bin}gt view -force /dev/null #{$testdata}gff3_file_1_short.txt", :retval => 1)
-  # XXX: check error message
+  run "touch unwriteable.png"
+  run "chmod u-w unwriteable.png"
+  run_test("#{$bin}gt view -force unwriteable.png #{$testdata}gff3_file_1_short.txt", :retval => 1)
+  grep($last_stderr, /an I\/O error occurred/)
 end
 
 Name "gt view prob 1"

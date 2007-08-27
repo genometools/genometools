@@ -37,8 +37,9 @@ Renders a Diagram to a PNG file.
           the image should be written to.
 \param width Target image width (in pixels).
 \param env Pointer to Environment object.
+\return Error code.
 */
-void    render_to_png(Render *r, Diagram *dia, const char *filename,
+int     render_to_png(Render *r, Diagram *dia, const char *filename,
                       unsigned int width, Env *env);
 
 /*!
