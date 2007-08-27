@@ -1,8 +1,0 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
-int gt_maxpairs(int argc, const char **argv, Env *env);
-
-#ifdef __cplusplus
-}
-#endif

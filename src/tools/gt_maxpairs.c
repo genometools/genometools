@@ -1,13 +1,19 @@
+/*
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
+*/
+
 #include <inttypes.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
-#include "sarr-def.h"
-#include "stamp.h"
+#include "libgtmatch/sarr-def.h"
+#include "libgtmatch/stamp.h"
 
-#include "sfx-map.pr"
-#include "esa-maxpairs.pr"
+#include "libgtmatch/sfx-map.pr"
+#include "libgtmatch/esa-maxpairs.pr"
 
 typedef struct
 {

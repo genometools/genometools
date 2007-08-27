@@ -19,7 +19,7 @@
                 *patternstat;
   Uchar *patternspace;
   const Encodedsequence *sampleencseq;
-  Seqpos totallength; 
+  Seqpos totallength;
 };
 
 Enumpatternstate *newenumpattern(unsigned long minpatternlen,
@@ -30,7 +30,7 @@ Enumpatternstate *newenumpattern(unsigned long minpatternlen,
   Enumpatternstate *eps = NULL;
   unsigned long i;
 
-  if(maxpatternlen < minpatternlen)
+  if (maxpatternlen < minpatternlen)
   {
     env_error_set(env,"maxpatternlen=%lu < %lu\n",
                     maxpatternlen,
@@ -39,7 +39,7 @@ Enumpatternstate *newenumpattern(unsigned long minpatternlen,
   }
   ALLOCASSIGNSPACE(eps,NULL,Enumpatternstate,1);
   eps->totallength = getencseqtotallength(encseq);
-  if(eps->totallength <= (Seqpos) maxpatternlen)
+  if (eps->totallength <= (Seqpos) maxpatternlen)
   {
     env_error_set(env,"totallength=" FormatSeqpos " <= maxpatternlen = %lu\n",
                     PRINTSeqposcast(eps->totallength),
@@ -49,7 +49,7 @@ Enumpatternstate *newenumpattern(unsigned long minpatternlen,
   }
   ALLOCASSIGNSPACE(eps->patternspace,NULL,Uchar,maxpatternlen);
   ALLOCASSIGNSPACE(eps->patternstat,NULL,unsigned long,maxpatternlen+1);
-  for(i=0; i<maxpatternlen; i++)
+  for (i=0; i<maxpatternlen; i++)
   {
     eps->patternstat[i] = 0;
   }
@@ -65,7 +65,7 @@ static void reverseinplace(Uchar *s,unsigned long len)
 {
   Uchar *front, *back, tmp;
 
-  for(front = s, back = s + len - 1; front < back; front++, back--)
+  for (front = s, back = s + len - 1; front < back; front++, back--)
   {
     tmp = *front;
     *front = *back;
@@ -79,34 +79,34 @@ const Uchar *nextsampledpattern(unsigned long *patternlen,
   Seqpos start;
   unsigned long j, requiredpatternlen;
 
-  if(eps->minpatternlen == eps->maxpatternlen)
+  if (eps->minpatternlen == eps->maxpatternlen)
   {
     requiredpatternlen = eps->minpatternlen;
   } else
   {
-    requiredpatternlen = (unsigned long) (eps->minpatternlen + 
-                                          (drand48() * 
-                                          (double) (eps->maxpatternlen - 
+    requiredpatternlen = (unsigned long) (eps->minpatternlen +
+                                          (drand48() *
+                                          (double) (eps->maxpatternlen -
                                                     eps->minpatternlen+1)));
   }
-  while(true)
+  while (true)
   {
     *patternlen = requiredpatternlen;
     start = (Seqpos) (drand48() * (double) (eps->totallength - *patternlen));
     assert(start < (Seqpos) (eps->totallength - *patternlen));
-    for(j=0; j<*patternlen; j++)
+    for (j=0; j<*patternlen; j++)
     {
       eps->patternspace[j] = getencodedchar(eps->sampleencseq,start+j,
                                             Forwardmode);
-      if(ISSPECIAL(eps->patternspace[j]))
+      if (ISSPECIAL(eps->patternspace[j]))
       {
         *patternlen = j;
         break;
       }
     }
-    if(*patternlen > (unsigned long) 1)
+    if (*patternlen > (unsigned long) 1)
     {
-      if(eps->samplecount & 1)
+      if (eps->samplecount & 1)
       {
         reverseinplace(eps->patternspace,*patternlen);
       }

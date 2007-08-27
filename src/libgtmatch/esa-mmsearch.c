@@ -12,24 +12,24 @@
 #include "chardef.h"
 
 #define COMPARE(OFFSET)\
-        for(sidx = (OFFSET) + lcplen;\
+        for (sidx = (OFFSET) + lcplen;\
             /* Nothing */; sidx++, lcplen++)\
         {\
-          if(lcplen >= (Seqpos) querylen)\
+          if (lcplen >= (Seqpos) querylen)\
           {\
             retcode = 0;\
             break;\
           }\
-          if(sidx >= totallength)\
+          if (sidx >= totallength)\
           {\
             retcode = -1;\
             break;\
           }\
           currentchar = getencodedchar(encseq,sidx,readmode);\
           retcode = (int) (query[lcplen] - currentchar);\
-          if(retcode == 0)\
+          if (retcode == 0)\
           {\
-            if(ISSPECIAL(currentchar) && ISSPECIAL(query[lcplen]))\
+            if (ISSPECIAL(currentchar) && ISSPECIAL(query[lcplen]))\
             {\
               retcode = (int) -1;\
               break;\
@@ -42,8 +42,8 @@
 
 typedef struct
 {
-  Seqpos offset, 
-         left, 
+  Seqpos offset,
+         left,
          right;
 } Lcpinterval;
 
@@ -64,23 +64,23 @@ static bool mmsearch(const Encodedsequence *encseq,
   right = lcpitv->right;
   lcplen = lcpitv->offset;
   COMPARE(suftab[left]);
-  if(retcode > 0)
+  if (retcode > 0)
   {
     lpref = lcplen;
     lcplen = lcpitv->offset;
     COMPARE(suftab[right]);
-    if(retcode > 0)
+    if (retcode > 0)
     {
       return false;
     } else
     {
       rpref = lcplen;
-      while(right > left + 1)
+      while (right > left + 1)
       {
         mid = DIV2(left+right);
         lcplen = MIN(lpref,rpref);
         COMPARE(suftab[mid]);
-        if(retcode <= 0)
+        if (retcode <= 0)
         {
           right = mid;
           rpref = lcplen;
@@ -98,7 +98,7 @@ static bool mmsearch(const Encodedsequence *encseq,
   right = lcpitv->right;
   lcplen = lcpitv->offset;
   COMPARE(suftab[left]);
-  if(retcode < 0)
+  if (retcode < 0)
   {
     return false;
   } else
@@ -106,18 +106,18 @@ static bool mmsearch(const Encodedsequence *encseq,
     lpref = lcplen;
     lcplen = lcpitv->offset;
     COMPARE(suftab[right]);
-    if(retcode >= 0)
+    if (retcode >= 0)
     {
       lcpitv->right = right;
     } else
     {
       rpref = lcplen;
-      while(right > left + 1)
+      while (right > left + 1)
       {
         mid = DIV2(left+right);
         lcplen = MIN(lpref,rpref);
         COMPARE(suftab[mid]);
-        if(retcode >= 0)
+        if (retcode >= 0)
         {
           left = mid;
           lpref = lcplen;
@@ -147,11 +147,11 @@ int mmenumpatternpositions(const Encodedsequence *encseq,
   lcpitv.offset = 0;
   lcpitv.left = 0;
   lcpitv.right = getencseqtotallength(encseq);
-  if(mmsearch(encseq,suftab,readmode,&lcpitv,pattern,patternlen))
+  if (mmsearch(encseq,suftab,readmode,&lcpitv,pattern,patternlen))
   {
-    for(sufindex = lcpitv.left; sufindex <= lcpitv.right; sufindex++)
+    for (sufindex = lcpitv.left; sufindex <= lcpitv.right; sufindex++)
     {
-      if(processmatch(processinfo,
+      if (processmatch(processinfo,
                       suftab[sufindex]) != 0)
       {
         return -1;

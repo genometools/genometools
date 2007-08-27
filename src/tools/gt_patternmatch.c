@@ -1,15 +1,21 @@
+/*
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
+*/
+
 #include <inttypes.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
-#include "sarr-def.h"
-#include "stamp.h"
-#include "enum-patt-def.h"
+#include "libgtmatch/sarr-def.h"
+#include "libgtmatch/stamp.h"
+#include "libgtmatch/enum-patt-def.h"
 
-#include "sfx-map.pr"
-#include "enum-patt.pr"
-#include "esa-mmsearch.pr"
+#include "libgtmatch/sfx-map.pr"
+#include "libgtmatch/enum-patt.pr"
+#include "libgtmatch/esa-mmsearch.pr"
 
 typedef struct
 {
@@ -48,10 +54,10 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
                          pmopt->maxpatternlen,
                          suffixarray.encseq,
                          env);
-    for(trial = 0; trial < pmopt->numofsamples; trial++)
+    for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
       pptr = nextsampledpattern(&patternlen,eps);
-      if(mmenumpatternpositions(suffixarray.encseq,
+      if (mmenumpatternpositions(suffixarray.encseq,
                                 suffixarray.suftab,
                                 suffixarray.readmode,
                                 pptr,
@@ -122,20 +128,20 @@ int gt_patternmatch(int argc, const char **argv, Env *env)
 
   pmopt.indexname = str_new(env);
   oprval = parse_options(&pmopt,&parsed_args, argc, argv, env);
-  if(oprval == OPTIONPARSER_OK)
+  if (oprval == OPTIONPARSER_OK)
   {
     assert(parsed_args == argc);
-    if(callpatternmatcher(&pmopt,env) != 0)
+    if (callpatternmatcher(&pmopt,env) != 0)
     {
       haserr = true;
     }
   }
   str_delete(pmopt.indexname,env);
-  if(oprval == OPTIONPARSER_REQUESTS_EXIT)
+  if (oprval == OPTIONPARSER_REQUESTS_EXIT)
   {
     return 0;
   }
-  if(oprval == OPTIONPARSER_ERROR)
+  if (oprval == OPTIONPARSER_ERROR)
   {
     return -1;
   }
