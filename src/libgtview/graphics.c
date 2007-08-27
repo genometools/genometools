@@ -25,23 +25,6 @@ struct Graphics {
   const char* filename;
 };
 
-void graphics_draw_horizontal_line(Graphics *g, double x, double y,
-                                   double width)
-{
-  assert(g != NULL);
-  cairo_move_to(g->cr, x, y);
-  cairo_rel_line_to(g->cr, width, 0);
-  cairo_stroke(g->cr);
-}
-
-void graphics_draw_text(Graphics *g, double x, double y, const char *text)
-{
-  assert(g != NULL && text != NULL);
-  cairo_set_source_rgb(g->cr, 0, 0, 0);
-  cairo_move_to(g->cr, x, y);
-  cairo_show_text(g->cr, text);
-}
-
 Graphics* graphics_new_png(const char *filename, unsigned int width,
                            unsigned int height, Env *env)
 {
@@ -59,6 +42,23 @@ Graphics* graphics_new_png(const char *filename, unsigned int width,
   cairo_set_line_join(g->cr, CAIRO_LINE_JOIN_ROUND);
   cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);
   return g;
+}
+
+void graphics_draw_horizontal_line(Graphics *g, double x, double y,
+                                   double width)
+{
+  assert(g != NULL);
+  cairo_move_to(g->cr, x, y);
+  cairo_rel_line_to(g->cr, width, 0);
+  cairo_stroke(g->cr);
+}
+
+void graphics_draw_text(Graphics *g, double x, double y, const char *text)
+{
+  assert(g != NULL && text != NULL);
+  cairo_set_source_rgb(g->cr, 0, 0, 0);
+  cairo_move_to(g->cr, x, y);
+  cairo_show_text(g->cr, text);
 }
 
 void graphics_draw_box(Graphics *g, double x, double y, double width,

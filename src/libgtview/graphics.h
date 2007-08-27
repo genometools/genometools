@@ -28,12 +28,6 @@ enum
 /* the graphics class */
 typedef struct Graphics Graphics;
 
-void      graphics_draw_horizontal_line(Graphics *g, double x, double y,
-                                        double width);
-void      graphics_draw_text(Graphics *g, double x, double y, const char *text);
-
-/* new interface functions, ssteinbiss */
-
 /*!
 Creates a new Graphics object, which is an abstraction of a
 drawing surface on which several relevant primitives can be drawn.
@@ -46,6 +40,10 @@ This constructor creates a Graphics that can be written out as a PNG file.
 */
 Graphics* graphics_new_png(const char *filename, unsigned int width,
                            unsigned int height, Env*);
+
+void      graphics_draw_horizontal_line(Graphics *g, double x, double y,
+                                        double width);
+void      graphics_draw_text(Graphics *g, double x, double y, const char *text);
 
 /*!
 Sets margins (space to the image boundaries that are clear of elements)
