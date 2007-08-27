@@ -78,6 +78,7 @@ int gt_dev(int argc, const char **argv, Env *env)
   /* call development tool */
   if (!had_err) {
     nargv = cstr_array_prefix_first(argv+parsed_args, argv[0], env);
+    env_error_set_progname(env, nargv[0]);
     had_err = devtool(argc-parsed_args, (const char**) nargv, env);
   }
 
