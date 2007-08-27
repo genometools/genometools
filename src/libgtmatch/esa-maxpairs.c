@@ -44,8 +44,6 @@ typedef struct
   Listtype *nodeposlist;
 } Dfsinfo;
 
-#include "esa-dfs.pr"
-
 DECLAREARRAYSTRUCT(Seqpos);
 
 typedef struct
@@ -58,25 +56,26 @@ typedef struct
   void *outinfo;
   ArraySeqpos uniquechar,
               poslist[UCHAR_MAX+1];
-} State;
+} Dfsstate;
 
-static Dfsinfo *allocateDfsinfo(void *info,Env *env)
+#include "esa-dfs.pr"
+
+static Dfsinfo *allocateDfsinfo(Dfsstate *state,Env *env)
 {
   Dfsinfo *dfsinfo;
-  State *state = (State *) info;
 
   ALLOCASSIGNSPACE(dfsinfo,NULL,Dfsinfo,1);
   ALLOCASSIGNSPACE(dfsinfo->nodeposlist,NULL,Listtype,state->alphabetsize);
   return dfsinfo;
 }
 
-static void freeDfsinfo(Dfsinfo *dfsinfo,/*@unused@*/ void *info,Env *env)
+static void freeDfsinfo(Dfsinfo *dfsinfo,/*@unused@*/ Dfsstate *state,Env *env)
 {
   FREESPACE(dfsinfo->nodeposlist);
   FREESPACE(dfsinfo);
 }
 
-static void add2poslist(State *state,Dfsinfo *ninfo,uint32_t base,
+static void add2poslist(Dfsstate *state,Dfsinfo *ninfo,uint32_t base,
                         Seqpos leafnumber,Env *env)
 {
   ArraySeqpos *ptr;
@@ -93,7 +92,7 @@ static void add2poslist(State *state,Dfsinfo *ninfo,uint32_t base,
   }
 }
 
-static void concatlists(State *state,Dfsinfo *father,Dfsinfo *son)
+static void concatlists(Dfsstate *state,Dfsinfo *father,Dfsinfo *son)
 {
   uint32_t base;
 
@@ -104,7 +103,7 @@ static void concatlists(State *state,Dfsinfo *father,Dfsinfo *son)
   father->uniquecharposlength += son->uniquecharposlength;
 }
 
-static int cartproduct1(State *state,const Dfsinfo *ninfo,uint32_t base,
+static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,uint32_t base,
                         Seqpos leafnumber)
 {
   Listtype *pl;
@@ -122,7 +121,7 @@ static int cartproduct1(State *state,const Dfsinfo *ninfo,uint32_t base,
   return 0;
 }
 
-static int cartproduct2(State *state,
+static int cartproduct2(Dfsstate *state,
                         const Dfsinfo *ninfo1, uint32_t base1,
                         const Dfsinfo *ninfo2, uint32_t base2)
 {
@@ -146,7 +145,7 @@ static int cartproduct2(State *state,
   return 0;
 }
 
-static void setpostabto0(State *state)
+static void setpostabto0(Dfsstate *state)
 {
   uint32_t base;
 
@@ -166,12 +165,11 @@ static int processleafedge(bool firstsucc,
                            Dfsinfo *father,
                            Uchar leftchar,
                            Seqpos leafnumber,
-                           void *info,
+                           Dfsstate *state,
                            Env *env)
 {
   uint32_t base;
   Seqpos *start, *spptr;
-  State *state = (State *) info;
 
 #ifdef DEBUG
   printf("processleafedge " FormatSeqpos " firstsucc=%s, " 
@@ -237,12 +235,11 @@ static int processbranchedge(bool firstsucc,
                              Seqpos fatherdepth,
                              Dfsinfo *father,
                              Dfsinfo *son,
-                             void *info,
+                             Dfsstate *state,
                              /*@unused@*/ Env *env)
 {
   uint32_t chfather, chson;
   Seqpos *start, *spptr, *fptr, *fstart;
-  State *state = (State *) info;
 
 #ifdef DEBUG
   printf("processbranchedge firstsucc=%s, "
@@ -330,7 +327,7 @@ int enumeratemaxpairs(Suffixarray *suffixarray,
 {
   uint32_t base;
   ArraySeqpos *ptr;
-  State state;
+  Dfsstate state;
   bool haserr = false;
 
   state.alphabetsize = getnumofcharsAlphabet(suffixarray->alpha);
@@ -354,7 +351,7 @@ int enumeratemaxpairs(Suffixarray *suffixarray,
                     NULL,
                     NULL,
                     NULL,
-                    (void *) &state,
+                    &state,
                     env) != 0)
   {
     haserr = true;
