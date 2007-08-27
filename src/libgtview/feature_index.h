@@ -30,11 +30,11 @@ void          feature_index_add_genome_feature(FeatureIndex*,
                                                GenomeFeature*, Env*);
 Array*        feature_index_get_features_for_seqid(FeatureIndex*,
                                                    const char*);
-int           feature_index_get_features_for_range(FeatureIndex*, Array*, char*,
-                                                   Range, Env*);
+int           feature_index_get_features_for_range(FeatureIndex*, Array*,
+                                                   const char*, Range, Env*);
 char*         feature_index_get_first_seqid(FeatureIndex*);
-Range         feature_index_get_range_for_seqid(FeatureIndex*, char*);
-bool          feature_index_has_seqid(FeatureIndex*, char* seqid, Env* env);
+Range         feature_index_get_range_for_seqid(FeatureIndex*, const char*);
+bool          feature_index_has_seqid(FeatureIndex*, const char *seqid, Env*);
 
 int           feature_index_unit_test(Env*);
 void          feature_index_delete(FeatureIndex*, Env*);

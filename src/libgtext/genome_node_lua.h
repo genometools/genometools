@@ -12,7 +12,7 @@
 
 /* exports the GenomeNode interface and its implementors to Lua:
 
-   genome_node = gt.genome_feature_new(type, start, end, strand)
+   genome_node = gt.genome_feature_new(type, startpos, endpos, strand)
    string      = genome_node:get_filename()
                  genome_node:accept(genome_visitor)
 */

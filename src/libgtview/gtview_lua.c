@@ -5,6 +5,7 @@
 */
 
 #include <assert.h>
+#include "libgtview/diagram_lua.h"
 #include "libgtview/feature_index_lua.h"
 #include "libgtview/feature_stream_lua.h"
 #include "libgtview/gtview_lua.h"
@@ -12,6 +13,7 @@
 int luaopen_gtview(lua_State *L)
 {
   assert(L);
+  luaopen_diagram(L);
   luaopen_feature_index(L);
   luaopen_feature_stream(L);
   return 1;

@@ -12,10 +12,10 @@
 /* exports the Diagram class to Lua:
 
    -- create a diagram which contains the genome nodes given in <table> in the
-   -- range from <start> to <end>
-   diagram = gt.diagram_new(table, start, end)
+   -- range from <startpos> to <endend>
+   diagram = gt.diagram_new(table, startpos, endpos)
 */
-int luaopen_feature_index(lua_State*);
+int luaopen_diagram(lua_State*);
 
 #define DIAGRAM_METATABLE  "GenomeTools.diagram"
 #define check_diagram(L, POS) \
