@@ -160,3 +160,4 @@ int mmenumpatternpositions(const Encodedsequence *encseq,
   }
   return 0;
 }
+
