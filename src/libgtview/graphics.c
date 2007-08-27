@@ -22,7 +22,7 @@ struct Graphics {
   cairo_t *cr;
   cairo_surface_t *surf;
   double margin_x, margin_y, height, width;
-  const char* fn;
+  const char* filename;
 };
 
 Graphics* graphics_new(unsigned int width, unsigned int height, Env *env)
@@ -106,12 +106,12 @@ void graphics_delete(Graphics *g, Env *env)
 }
 
 /* new functions -------------------------------------------------------------*/
-Graphics* graphics_new_png(const char *fname, unsigned int width,
+Graphics* graphics_new_png(const char *filename, unsigned int width,
                            unsigned int height, Env *env)
 {
   Graphics *g = env_ma_malloc(env, sizeof (Graphics));
   g->surf = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
-  g->fn = fname;
+  g->filename = filename;
   g->cr = cairo_create(g->surf);
   assert(cairo_status(g->cr) == CAIRO_STATUS_SUCCESS);
   g->width = width;
@@ -421,5 +421,6 @@ void graphics_set_margins(Graphics *g, double margin_x, double margin_y,
 bool graphics_save(const Graphics *g)
 {
   assert(g != NULL);
-  return (cairo_surface_write_to_png(g->surf, g->fn) == CAIRO_STATUS_SUCCESS);
+  return (cairo_surface_write_to_png(g->surf, g->filename) ==
+          CAIRO_STATUS_SUCCESS);
 }

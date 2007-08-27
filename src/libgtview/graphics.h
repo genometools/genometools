@@ -42,13 +42,13 @@ void      graphics_save_as_png(const Graphics*, const char *path);
 Creates a new Graphics object, which is an abstraction of a
 drawing surface on which several relevant primitives can be drawn.
 This constructor creates a Graphics that can be written out as a PNG file.
-\param fname Filename of the resulting PNG.
+\param filename Filename of the resulting PNG.
 \param width Surface width (in pixels).
 \param height Surface height (in pixels).
 \param env Pointer to Environment object.
 \return Pointer to new Graphics object.
 */
-Graphics* graphics_new_png(const char *fname, unsigned int width,
+Graphics* graphics_new_png(const char *filename, unsigned int width,
                            unsigned int height, Env*);
 
 /*!
