@@ -42,7 +42,8 @@ static int render_lua_to_png(lua_State *L)
     width = DEFAULT_RENDER_WIDTH;
   else
     width = luaL_checkint(L, 4);
-  render_to_png(*render, *diagram, filename, width, env);
+  if (render_to_png(*render, *diagram, filename, width, env))
+    return luagt_error(L, env);
   return 0;
 }
 
