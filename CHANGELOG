@@ -4,6 +4,7 @@ changes in version 1.0.2 (2007-08-22):
 - `gt mkfmindex` tool added
 - `gt uniquesub` tool added
 - bug fixes
+- new option -i added to `gt`
 
 
 changes in version 1.0.1 (2007-07-17):
