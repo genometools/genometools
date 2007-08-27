@@ -1,10 +1,17 @@
+/*
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
+*/
+
 #include <stdlib.h>
 #include "symboldef.h"
 #include "encseq-def.h"
 #include "spacedef.h"
 #include "chardef.h"
+#include "enum-patt-def.h"
 
-typedef struct
+ struct Enumpatternstate
 {
   unsigned long minpatternlen,
                 maxpatternlen,
@@ -13,7 +20,7 @@ typedef struct
   Uchar *patternspace;
   const Encodedsequence *sampleencseq;
   Seqpos totallength; 
-} Enumpatternstate;
+};
 
 Enumpatternstate *newenumpattern(unsigned long minpatternlen,
                                  unsigned long maxpatternlen,
@@ -70,42 +77,41 @@ const Uchar *nextsampledpattern(unsigned long *patternlen,
                                 Enumpatternstate *eps)
 {
   Seqpos start;
-  unsigned long j;
-  bool special;
+  unsigned long j, requiredpatternlen;
 
   if(eps->minpatternlen == eps->maxpatternlen)
   {
-    *patternlen = eps->minpatternlen;
+    requiredpatternlen = eps->minpatternlen;
   } else
   {
-    *patternlen = (unsigned long) (eps->minpatternlen + 
-                                   (drand48() * 
-                                   (double) (eps->maxpatternlen - 
-                                             eps->minpatternlen+1)));
+    requiredpatternlen = (unsigned long) (eps->minpatternlen + 
+                                          (drand48() * 
+                                          (double) (eps->maxpatternlen - 
+                                                    eps->minpatternlen+1)));
   }
-  eps->patternstat[*patternlen]++;
   while(true)
   {
+    *patternlen = requiredpatternlen;
     start = (Seqpos) (drand48() * (double) (eps->totallength - *patternlen));
     assert(start < (Seqpos) (eps->totallength - *patternlen));
-    special = false;
     for(j=0; j<*patternlen; j++)
     {
       eps->patternspace[j] = getencodedchar(eps->sampleencseq,start+j,
                                             Forwardmode);
       if(ISSPECIAL(eps->patternspace[j]))
       {
-        special = true;
+        *patternlen = j;
         break;
       }
     }
-    if(!special)
+    if(*patternlen > (unsigned long) 1)
     {
       if(eps->samplecount & 1)
       {
         reverseinplace(eps->patternspace,*patternlen);
       }
       eps->samplecount++;
+      eps->patternstat[*patternlen]++;
       break;
     }
   }

@@ -154,10 +154,9 @@ int mmenumpatternpositions(const Encodedsequence *encseq,
       if(processmatch(processinfo,
                       suftab[sufindex]) != 0)
       {
-        return (int) -1;
+        return -1;
       }
     }
   }
   return 0;
 }
-
