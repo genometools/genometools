@@ -21,8 +21,6 @@ static int diagram_lua_new(lua_State *L)
   bool error;
   Config *config;
   Env *env = get_env_from_registry(L);
-  diagram = lua_newuserdata(L, sizeof (Diagram**));
-  assert(diagram);
   /* make sure we got a table as first argument */
   luaL_checktype(L, 1, LUA_TTABLE);
   /* traverse table and save the features */
@@ -60,6 +58,8 @@ static int diagram_lua_new(lua_State *L)
   luaL_argcheck(L, range.start <= range.end, 2, "must be <= endpos");
   /* create diagram */
   config = get_config_from_registry(L);
+  diagram = lua_newuserdata(L, sizeof (Diagram**));
+  assert(diagram);
   *diagram = diagram_new(features, range, config, env);
   array_delete(features, env);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
