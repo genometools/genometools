@@ -25,55 +25,6 @@ struct Graphics {
   const char* filename;
 };
 
-Graphics* graphics_new(unsigned int width, unsigned int height, Env *env)
-{
-  Graphics *g = env_ma_malloc(env, sizeof (Graphics));
-  g->surf = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
-  g->cr = cairo_create(g->surf);
-  assert(cairo_status(g->cr) == CAIRO_STATUS_SUCCESS);
-  cairo_set_source_rgb(g->cr, 1.0, 1.0, 1.0);
-  cairo_set_operator(g->cr, CAIRO_OPERATOR_SOURCE);
-  cairo_paint(g->cr);
-  return g;
-}
-
-void graphics_draw_exon_box(Graphics *g, double x, double y, double width,
-                            double height, Strand strand)
-{
-  assert(g != NULL);
-  cairo_set_source_rgb(g->cr, 0.0, 0.0, 1.0);
-  switch (strand) {
-    case STRAND_FORWARD:
-      cairo_move_to(g->cr, x, y);
-      if (width - EXON_ARROW_WIDTH > 0.0)
-        cairo_rel_line_to(g->cr, width - EXON_ARROW_WIDTH, 0.0);
-      cairo_line_to(g->cr, x + width, y + height / 2);
-      if (width - EXON_ARROW_WIDTH > 0.0)
-        cairo_line_to(g->cr, x + width - EXON_ARROW_WIDTH, y + height);
-      cairo_line_to(g->cr, x, y + height);
-      cairo_close_path(g->cr);
-      break;
-    case STRAND_REVERSE:
-      cairo_move_to(g->cr, x + width, y);
-      if (width - EXON_ARROW_WIDTH > 0)
-        cairo_rel_line_to(g->cr, -(width - EXON_ARROW_WIDTH), 0);
-      cairo_line_to(g->cr, x, y + height / 2);
-      cairo_line_to(g->cr, x + MIN(width, EXON_ARROW_WIDTH), y + height);
-      if (width - EXON_ARROW_WIDTH > 0)
-        cairo_line_to(g->cr, x + width, y + height);
-      cairo_close_path(g->cr);
-      break;
-    case STRAND_BOTH:
-    case STRAND_UNKNOWN:
-      cairo_rectangle(g->cr, x, y, width, height);
-    default: assert(0);
-   }
-
-   cairo_fill_preserve(g->cr);
-   cairo_set_source_rgb(g->cr, 0, 0, 0);
-   cairo_stroke(g->cr);
-}
-
 void graphics_draw_horizontal_line(Graphics *g, double x, double y,
                                    double width)
 {
@@ -89,12 +40,6 @@ void graphics_draw_text(Graphics *g, double x, double y, const char *text)
   cairo_set_source_rgb(g->cr, 0, 0, 0);
   cairo_move_to(g->cr, x, y);
   cairo_show_text(g->cr, text);
-}
-
-void graphics_save_as_png(const Graphics *g, const char *path)
-{
-  assert(g != NULL);
-  (void) cairo_surface_write_to_png(g->surf, path);
 }
 
 void graphics_delete(Graphics *g, Env *env)

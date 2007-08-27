@@ -28,13 +28,9 @@ enum
 /* the graphics class */
 typedef struct Graphics Graphics;
 
-Graphics* graphics_new(unsigned int width, unsigned int height, Env *env);
-void      graphics_draw_exon_box(Graphics *g, double x, double y, double width,
-                                 double height, Strand strand);
 void      graphics_draw_horizontal_line(Graphics *g, double x, double y,
                                         double width);
 void      graphics_draw_text(Graphics *g, double x, double y, const char *text);
-void      graphics_save_as_png(const Graphics*, const char *path);
 
 /* new interface functions, ssteinbiss */
 
