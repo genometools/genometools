@@ -1,0 +1,13 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+bool mmsearch(const Encodedsequence *encseq,
+              const Seqpos *suftab,
+              Readmode readmode,
+              Lcpinterval *vnode,
+              Uchar *query,
+              unsigned long querylen);
+
+#ifdef __cplusplus
+}
+#endif
