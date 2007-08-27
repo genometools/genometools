@@ -505,12 +505,12 @@ void render_ruler(Render *r, Env* env)
                               "3'");
 }
 
-void render_to_png(Render *r, Diagram *dia,
-                   char *fn, unsigned int width, Env *env)
+void render_to_png(Render *r, Diagram *dia, char *filename, unsigned int width,
+                   Env *env)
 {
   unsigned int height;
 
-  assert(r != NULL && fn != NULL && width > 1);
+  assert(r != NULL && filename != NULL && width > 1);
 
   /* set initial image-specific values */
   r->y = 70;
@@ -527,7 +527,7 @@ void render_to_png(Render *r, Diagram *dia,
      fprintf( stderr, "scaling factor is %f\n",r->factor);
 
   /* create new Graphics backend */
-  r->g = graphics_new_png(fn, width, height, env);
+  r->g = graphics_new_png(filename, width, height, env);
   graphics_set_margins(r->g, r->margins, 0, width, height);
 
   /* Add ruler/scale to the image */
