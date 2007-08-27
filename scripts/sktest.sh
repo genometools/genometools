@@ -18,6 +18,7 @@ cd testsuite
 testsuite.rb -keywords gt_suffixerator
 # optional -memcheck   (run valgrind)
 #          -select 253 (run testcase 253)
+../scripts/runmaxpairs.sh 14 ${GRUMBACH}/*.fna
 num=2
 while test ${num} -lt 10 
 do

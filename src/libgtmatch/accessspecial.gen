@@ -236,7 +236,7 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
       if (found != NULL)
       {
         Seqpos rangeend
-               = (Seqpos) *found + 
+               = (Seqpos) *found +
                  (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)];
         if (pos < rangeend)
         {

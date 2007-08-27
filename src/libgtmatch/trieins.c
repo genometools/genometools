@@ -194,18 +194,10 @@ static void checktrie2(Trierep *trierep,
     (*numberofbitsset)++;
   } else
   {
-    if (node->depth > 0 && node->firstchild->rightsibling == NULL)
-    {
-      fprintf(stderr,"Node has less than two successors\n");
-      exit(EXIT_FAILURE);
-    }
+    assert(node->depth == 0 || node->firstchild->rightsibling != NULL);
     if (father != NULL)
     {
-      if (ISLEAF(father))
-      {
-        fprintf(stderr,"father of branching node is a leaf\n");
-        exit(EXIT_FAILURE);
-      }
+      assert(!ISLEAF(father));
       if (father->depth >= node->depth)
       {
         fprintf(stderr,"father.depth = " FormatSeqpos " >= " FormatSeqpos
@@ -320,11 +312,7 @@ static Trienode *newTrienode(Trierep *trierep)
 #endif
   if (trierep->nextfreeTrienode >= trierep->allocatedTrienode)
   {
-    if (trierep->nextunused == 0)
-    {
-      fprintf(stderr,"not enough nodes have been allocated\n");
-      exit(EXIT_FAILURE);
-    }
+    assert(trierep->nextunused > 0);
     trierep->nextunused--;
     return trierep->unusedTrienodes[trierep->nextunused];
   }

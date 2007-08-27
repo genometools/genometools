@@ -13,6 +13,7 @@
 #include "gt_sfxmap.h"
 #include "gt_trieins.h"
 #include "gt_mergeesa.h"
+#include "gt_maxpairs.h"
 #include "gt_skproto.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
@@ -42,6 +43,7 @@ void register_devtools(Toolbox *dev_toolbox, Env *env)
   toolbox_add(dev_toolbox, "trieins", gt_trieins, env);
   toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa, env);
   toolbox_add(dev_toolbox, "skproto", gt_skproto, env);
+  toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs, env);
 }
 
 int gt_dev(int argc, const char **argv, Env *env)

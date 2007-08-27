@@ -52,6 +52,15 @@ allfiles = ["RandomN.fna","Random.fna","Atinsert.fna",
 
 alldir = ["fwd","cpl","rev","rcl"]
 
+Name "gt suffixerator maxpairs"
+Keywords "gt_suffixerator"
+Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Atinsert.fna " +
+           "-indexname sfx -dna -suf -tis -lcp -pl"
+  run_test "#{$bin}gt dev maxpairs -l 8 -ii sfx"
+  run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
+end
+
 alldir.each do |dir|
   Name "gt suffixerator #{dir}"
   Keywords "gt_suffixerator"
@@ -102,7 +111,7 @@ end
       extra=""
       extraname=""
     end
-    Name "gt suffixerator protein #{extraname} #{parts} parts"
+    Name "gt sfxmap protein #{extraname} #{parts} parts"
     Keywords "gt_suffixerator"
     Test do
       checksfx(parts,3,extra,"direct",["sw100K1.fna","sw100K2.fna"])
@@ -113,7 +122,7 @@ end
 
 1.upto(2) do |parts|
   ["direct", "bit", "uchar", "ushort", "uint"].each do |sat|
-    Name "gt suffixerator dna #{sat} #{parts} parts"
+    Name "gt sfxmap dna #{sat} #{parts} parts"
     Keywords "gt_suffixerator"
     Test do
       checksfx(parts,1,0,sat,["Random-Small.fna"])

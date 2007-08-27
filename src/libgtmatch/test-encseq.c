@@ -22,7 +22,7 @@ int testencodedsequence(const StrArray *filenametab,
                         Env *env)
 {
   Seqpos pos, totallength;
-  Uchar ccscan = '\0', ccra, ccsr;
+  Uchar ccscan = 0, ccra, ccsr;
   Fastabufferstate fbs;
   int retval;
   bool haserr = false;
@@ -109,6 +109,7 @@ static int addelem(void *processinfo,const Sequencerange *range,Env *env)
   return 0;
 }
 
+/*
 static void reverseSequencerange(Array *a)
 {
   unsigned long idx1, idx2;
@@ -124,6 +125,7 @@ static void reverseSequencerange(Array *a)
     *valptr2 = tmp;
   }
 }
+*/
 
 int checkspecialranges(const Encodedsequence *encseq,Env *env)
 {
@@ -166,7 +168,7 @@ int checkspecialranges(const Encodedsequence *encseq,Env *env)
   }
   if (!haserr)
   {
-    reverseSequencerange(rangesbackward);
+    array_reverse(rangesbackward,env);
     printf("# check %lu ranges\n",(unsigned long) array_size(rangesforward));
     for (idx=0; idx<(unsigned long) array_size(rangesforward); idx++)
     {
