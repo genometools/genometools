@@ -12,6 +12,13 @@ Test do
   run "test -e out.png"
 end
 
+Name "gt view short test (unwriteable file)"
+Keywords "gt_view"
+Test do
+  run_test("#{$bin}gt view -force /dev/null #{$testdata}gff3_file_1_short.txt", :retval => 1)
+  # XXX: check error message
+end
+
 Name "gt view prob 1"
 Keywords "gt_view"
 Test do
