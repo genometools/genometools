@@ -33,6 +33,7 @@ struct Diagram
   int nof_tracks;
   Config *config;
   Range range;
+  Array *feature_backup; /* XXX: hack */
 };
 
 typedef struct
@@ -444,6 +445,8 @@ static void diagram_build(Diagram *diagram, Array *features, Env *env)
 Diagram* diagram_new(Array* features, Range range, Config* config, Env* env)
 {
   Diagram *diagram;
+  GenomeNode *gn;
+  unsigned long i;
   env_error_check(env);
   diagram = env_ma_malloc(env, sizeof (Diagram));
   diagram->tracks = hashtable_new(HASH_STRING, NULL, NULL, env);
@@ -452,6 +455,14 @@ Diagram* diagram_new(Array* features, Range range, Config* config, Env* env)
   diagram->config = config;
   diagram->range = range;
   diagram_build(diagram, features, env);
+  /* XXX: the following is a hack to make sure the feature references are always
+     valid, if the Diagram is exported to Lua. It would be much better to store
+     and free the feature references further down the call stack... */
+  diagram->feature_backup = array_new(sizeof (GenomeNode*), env);
+  for (i = 0; i < array_size(features); i++) {
+    gn = genome_node_rec_ref(*(GenomeNode**) array_get(features, i), env);
+    array_add(diagram->feature_backup, gn, env);
+  }
   return diagram;
 }
 
@@ -484,10 +495,16 @@ int diagram_get_number_of_tracks(Diagram *diagram)
 
 void diagram_delete(Diagram *diagram, Env *env)
 {
+  unsigned long i;
   if (!diagram) return;
   (void) hashtable_foreach(diagram->tracks, diagram_track_delete, NULL, env);
   hashtable_delete(diagram->tracks, env);
   hashtable_delete(diagram->nodeinfo, env);
+  for (i = 0; i < array_size(diagram->feature_backup); i++) {
+    genome_node_rec_delete(*(GenomeNode**)
+                           array_get(diagram->feature_backup, i), env);
+  }
+  array_delete(diagram->feature_backup, env);
   env_ma_free(diagram, env);
 }
 
