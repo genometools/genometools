@@ -47,12 +47,12 @@ typedef struct
          right;
 } Lcpinterval;
 
-bool mmsearch(const Encodedsequence *encseq,
-              const Seqpos *suftab,
-              Readmode readmode,
-              Lcpinterval *vnode,
-              Uchar *query,
-              unsigned long querylen)
+static bool mmsearch(const Encodedsequence *encseq,
+                     const Seqpos *suftab,
+                     Readmode readmode,
+                     Lcpinterval *lcpitv,
+                     const Uchar *query,
+                     unsigned long querylen)
 {
   Seqpos sidx, left, leftsave, mid, right, lpref, rpref, totallength;
   int retcode = 0;
@@ -60,14 +60,14 @@ bool mmsearch(const Encodedsequence *encseq,
   Seqpos lcplen;
 
   totallength = getencseqtotallength(encseq);
-  leftsave = left = vnode->left;
-  right = vnode->right;
-  lcplen = vnode->offset;
+  leftsave = left = lcpitv->left;
+  right = lcpitv->right;
+  lcplen = lcpitv->offset;
   COMPARE(suftab[left]);
   if(retcode > 0)
   {
     lpref = lcplen;
-    lcplen = vnode->offset;
+    lcplen = lcpitv->offset;
     COMPARE(suftab[right]);
     if(retcode > 0)
     {
@@ -90,13 +90,13 @@ bool mmsearch(const Encodedsequence *encseq,
           lpref = lcplen;
         }
       }
-      vnode->left = right;
+      lcpitv->left = right;
     }
   }
 
   left = leftsave;
-  right = vnode->right;
-  lcplen = vnode->offset;
+  right = lcpitv->right;
+  lcplen = lcpitv->offset;
   COMPARE(suftab[left]);
   if(retcode < 0)
   {
@@ -104,11 +104,11 @@ bool mmsearch(const Encodedsequence *encseq,
   } else
   {
     lpref = lcplen;
-    lcplen = vnode->offset;
+    lcplen = lcpitv->offset;
     COMPARE(suftab[right]);
     if(retcode >= 0)
     {
-      vnode->right = right;
+      lcpitv->right = right;
     } else
     {
       rpref = lcplen;
@@ -127,8 +127,36 @@ bool mmsearch(const Encodedsequence *encseq,
           rpref = lcplen;
         }
       }
-      vnode->right = left;
+      lcpitv->right = left;
     }
   }
   return true;
+}
+
+int mmenumpatternpositions(const Encodedsequence *encseq,
+                           const Seqpos *suftab,
+                           Readmode readmode,
+                           const Uchar *pattern,
+                           unsigned long patternlen,
+                           int (*processmatch)(void *,Seqpos),
+                           void *processinfo)
+{
+  Seqpos sufindex;
+  Lcpinterval lcpitv;
+
+  lcpitv.offset = 0;
+  lcpitv.left = 0;
+  lcpitv.right = getencseqtotallength(encseq);
+  if(mmsearch(encseq,suftab,readmode,&lcpitv,pattern,patternlen))
+  {
+    for(sufindex = lcpitv.left; sufindex <= lcpitv.right; sufindex++)
+    {
+      if(processmatch(processinfo,
+                      suftab[sufindex]) != 0)
+      {
+        return (int) -1;
+      }
+    }
+  }
+  return 0;
 }
