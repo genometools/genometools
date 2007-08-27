@@ -42,15 +42,6 @@ void graphics_draw_text(Graphics *g, double x, double y, const char *text)
   cairo_show_text(g->cr, text);
 }
 
-void graphics_delete(Graphics *g, Env *env)
-{
-  if (!g) return;
-  cairo_surface_destroy(g->surf); /* reference counted */
-  cairo_destroy(g->cr);
-  env_ma_free(g, env);
-}
-
-/* new functions -------------------------------------------------------------*/
 Graphics* graphics_new_png(const char *filename, unsigned int width,
                            unsigned int height, Env *env)
 {
@@ -368,4 +359,12 @@ bool graphics_save(const Graphics *g)
   assert(g != NULL);
   return (cairo_surface_write_to_png(g->surf, g->filename) ==
           CAIRO_STATUS_SUCCESS);
+}
+
+void graphics_delete(Graphics *g, Env *env)
+{
+  if (!g) return;
+  cairo_surface_destroy(g->surf); /* reference counted */
+  cairo_destroy(g->cr);
+  env_ma_free(g, env);
 }
