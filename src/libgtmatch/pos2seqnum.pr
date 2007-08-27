@@ -1,0 +1,16 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+Seqpos *calculatemarkpositions(const Encodedsequence *encseq,
+                               unsigned long numofdbsequences,
+                               Env *env);
+
+unsigned long getrecordnum(const Seqpos *recordseps,
+                           unsigned long numofrecords,
+                           Seqpos totalwidth,
+                           Seqpos position,
+                           Env *env);
+
+#ifdef __cplusplus
+}
+#endif
