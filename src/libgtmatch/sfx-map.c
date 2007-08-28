@@ -365,16 +365,13 @@ static int inputsuffixarray(bool map,
   }
   if (!haserr && (demand & SARR_ESQTAB))
   {
-    suffixarray->encseq = initencodedseq(true,
-					 NULL,  /* filenametab */
-                                         false, /* not relevant since
-                                                   indexname != NULL */
-					 indexname,
-					 *totallength,
-					 &suffixarray->specialcharinfo,
-					 suffixarray->alpha,
-                                         NULL,
-					 env);
+    suffixarray->encseq = mapencodedsequence(true,
+					     indexname,
+					     *totallength,
+					     &suffixarray->specialcharinfo,
+					     suffixarray->alpha,
+                                             NULL,
+					     env);
     if (suffixarray->encseq == NULL)
     {
       haserr = true;

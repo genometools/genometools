@@ -36,20 +36,34 @@ int overallspecialrangesfast(
 int overallspecialranges(const Encodedsequence *encseq,
                          Readmode readmode,
                          int(*processrange)(void *,const Encodedsequence *,
-                                       const Sequencerange *,Env *),
+                                            const Sequencerange *,Env *),
                          void *processinfo,
                          Env *env);
 
-/*@null@*/ Encodedsequence *initencodedseq(bool withrange,
-                                           const StrArray *filenametab,
-                                           bool plainformat,
-                                           const Str *indexname,
-                                           Seqpos totallength,
-                                           const Specialcharinfo
-                                                 *specialcharinfo,
-                                           const Alphabet *alphabet,
-                                           const char *str_sat,
-                                           Env *env);
+/*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
+                                                  const StrArray *filenametab,
+                                                  bool plainformat,
+                                                  Seqpos totallength,
+                                                  const Specialcharinfo
+                                                        *specialcharinfo,
+                                                  const Alphabet *alphabet,
+                                                  const char *str_sat,
+                                                  Env *env);
+
+/*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
+                                               const Str *indexname,
+                                               Seqpos totallength,
+                                               const Specialcharinfo
+                                                     *specialcharinfo,
+                                               const Alphabet *alphabet,
+                                               const char *str_sat,
+                                               Env *env);
+
+Encodedsequence *plain2encodedsequence(bool withrange,
+                                       const Uchar *seq,
+                                       Seqpos len,
+                                       const Alphabet *alphabet,
+                                       Env *env);
 
 #ifdef __cplusplus
 }

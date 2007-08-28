@@ -44,16 +44,24 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos);
 
-/*@null@*/ Encodedsequence *initencodedseq(bool withrange,
-                                           const StrArray *filenametab,
-                                           bool plainformat,
-                                           const Str *indexname,
-                                           Seqpos totallength,
-                                           const Specialcharinfo
-                                                 *specialcharinfo,
-                                           const Alphabet *alphabet,
-                                           const char *str_sat,
-                                           Env *env);
+/*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
+                                                  const StrArray *filenametab,
+                                                  bool plainformat,
+                                                  Seqpos totallength,
+                                                  const Specialcharinfo
+                                                        *specialcharinfo,
+                                                  const Alphabet *alphabet,
+                                                  const char *str_sat,
+                                                  Env *env);
+
+/*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
+                                               const Str *indexname,
+                                               Seqpos totallength,
+                                               const Specialcharinfo
+                                                     *specialcharinfo,
+                                               const Alphabet *alphabet,
+                                               const char *str_sat,
+                                               Env *env);
 
 bool fastspecialranges(const Encodedsequence *encseq);
 

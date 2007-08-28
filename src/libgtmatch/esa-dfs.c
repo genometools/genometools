@@ -110,7 +110,7 @@ int depthfirstesa(Suffixarray *suffixarray,
   Uchar tmpsmalllcpvalue;
   bool firstedge,
        firstrootedge;
-  Seqpos previoussuffix,
+  Seqpos previoussuffix = 0,
          previouslcp,
          currentindex,
          currentlcp = 0; /* May be necessary if the lcpvalue is used after the
