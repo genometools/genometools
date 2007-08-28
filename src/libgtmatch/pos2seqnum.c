@@ -14,14 +14,14 @@ static int addmarkpos(void *info,const Encodedsequence *encseq,
   Uchar currentchar;
   ArraySeqpos *asp = (ArraySeqpos *) info;
 
-  for(pos=seqrange->leftpos; pos<=seqrange->rightpos; pos++)
+  for (pos=seqrange->leftpos; pos<=seqrange->rightpos; pos++)
   {
     currentchar = getencodedchar(encseq,pos,Forwardmode);
     assert(ISSPECIAL(currentchar));
-    if(currentchar == (Uchar) SEPARATOR)
+    if (currentchar == (Uchar) SEPARATOR)
     {
       assert(asp->nextfreeSeqpos < asp->allocatedSeqpos);
-      asp->spaceSeqpos[asp->nextfreeSeqpos++] = pos; 
+      asp->spaceSeqpos[asp->nextfreeSeqpos++] = pos;
     }
   }
   return 0;
@@ -31,18 +31,18 @@ Seqpos *calculatemarkpositions(const Encodedsequence *encseq,
                                unsigned long numofdbsequences,
                                Env *env)
 {
-  
+
   ArraySeqpos asp;
 
   assert(numofdbsequences > 0);
-  if(numofdbsequences == (unsigned long) 1)
+  if (numofdbsequences == (unsigned long) 1)
   {
     return NULL;
   }
   asp.allocatedSeqpos = numofdbsequences-1;
   asp.nextfreeSeqpos = 0;
   ALLOCASSIGNSPACE(asp.spaceSeqpos,NULL,Seqpos,asp.allocatedSeqpos);
-  if(overallspecialranges(encseq,
+  if (overallspecialranges(encseq,
                           Forwardmode,
                           addmarkpos,
                           &asp,
@@ -63,13 +63,13 @@ unsigned long getrecordnum(const Seqpos *recordseps,
   unsigned long left, mid, right, len;
 
   assert(numofrecords > 0);
-  if(numofrecords == (unsigned long) 1 || position < recordseps[0])
+  if (numofrecords == (unsigned long) 1 || position < recordseps[0])
   {
     return 0;
   }
-  if(position > recordseps[numofrecords-2])
-  { 
-    if(position < totalwidth)
+  if (position > recordseps[numofrecords-2])
+  {
+    if (position < totalwidth)
     {
       return numofrecords - 1;
     }
@@ -83,16 +83,16 @@ unsigned long getrecordnum(const Seqpos *recordseps,
   {
     len = (unsigned long) (right-left);
     mid = left + DIV2(len);
-    if(recordseps[mid] < position)
+    if (recordseps[mid] < position)
     {
-      if(position < recordseps[mid+1])
+      if (position < recordseps[mid+1])
       {
         return mid - 1;
-      } 
+      }
       left = mid + 1;
     } else
     {
-      if(recordseps[mid-1] < position)
+      if (recordseps[mid-1] < position)
       {
         return mid;
       }
