@@ -27,6 +27,7 @@ struct FeatureIndex
   Hashtable *regions;
   char* firstseqid;
   unsigned int nof_sequence_regions;
+  unsigned int reference_count;
 };
 
 typedef struct
@@ -61,11 +62,16 @@ FeatureIndex* feature_index_new(Env *env)
 {
   FeatureIndex *fi;
   env_error_check(env);
-  fi = env_ma_malloc(env, sizeof (FeatureIndex));
-  fi->nof_sequence_regions = 0;
-  fi->firstseqid = NULL;
-  fi->regions  = hashtable_new(HASH_STRING, NULL,
-                               (FreeFunc) region_info_delete, env);
+  fi = env_ma_calloc(env, 1, sizeof (FeatureIndex));
+  fi->regions = hashtable_new(HASH_STRING, NULL, (FreeFunc) region_info_delete,
+                              env);
+  return fi;
+}
+
+FeatureIndex* feature_index_ref(FeatureIndex *fi)
+{
+  assert(fi);
+  fi->reference_count++;
   return fi;
 }
 
@@ -76,7 +82,11 @@ Deletes a FeatureIndex object.
 */
 void feature_index_delete(FeatureIndex *fi, Env *env)
 {
-  assert(fi != NULL);
+  if (!fi) return;
+  if (fi->reference_count) {
+    fi->reference_count--;
+    return;
+  }
   hashtable_delete(fi->regions, env);
   env_ma_free(fi, env);
 }
@@ -88,8 +98,8 @@ Creates a new table entry for some sequence region.
 \param env Pointer to Environment object.
 */
 void feature_index_add_sequence_region(FeatureIndex *fi,
-                                      SequenceRegion *sr,
-                                      Env *env)
+                                       SequenceRegion *sr,
+                                       Env *env)
 {
   char *seqid;
   RegionInfo *info;
@@ -138,7 +148,7 @@ void feature_index_add_genome_feature(FeatureIndex *fi,
   /* entry for the seqid must already exist */
   assert(feature_index_has_seqid(fi, seqid, env));
   info = (RegionInfo*) hashtable_get(fi->regions, seqid);
-  /* Add node to the appropriate array in the hashtable. */
+  /* add node to the appropriate array in the hashtable. */
   array_add(info->features,
             gf_new,
             env);
@@ -154,7 +164,7 @@ sequence region identifier.
 \param seqid Sequence region identifier to lookup.
 \return Pointer to the result array.
 */
-Array* feature_index_get_features_for_seqid(FeatureIndex *fi, char *seqid)
+Array* feature_index_get_features_for_seqid(FeatureIndex *fi, const char *seqid)
 {
   RegionInfo *res;
 
@@ -310,7 +320,7 @@ int feature_index_unit_test(Env* env)
   genome_node_is_part_of_genome_node(gn2, ex3, env);
   genome_node_is_part_of_genome_node(gn2, cds1, env);
 
-  /*Create a new feature index on which we can perfom some tests*/
+  /* Create a new feature index on which we can perfom some tests */
   fi  = feature_index_new(env);
 
   ensure(had_err, fi);

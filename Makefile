@@ -305,7 +305,8 @@ obj/%.o: %.cxx
 	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 # read deps
--include $(LIBGTCORE_DEP) $(LIBGTEXT_C_DEP) $(LIBGTEXT_CXX_DEP) \
+-include obj/src/gt.d obj/src/gtlua.d obj/src/gtr.d obj/src/skproto.d \
+         $(LIBGTCORE_DEP) $(LIBGTEXT_C_DEP) $(LIBGTEXT_CXX_DEP) \
          $(LIBGTMATCH_DEP) $(LIBGTVIEW_C_DEP) $(TOOLS_DEP) $(LIBAGG_DEP) \
          $(LIBEXPAT_DEP) $(LIBLUA_DEP) $(LIBPNG_DEP) $(LIBRNV_DEP) \
          $(LIBBBZ2_DEP)

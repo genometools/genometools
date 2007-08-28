@@ -34,10 +34,10 @@ static OPrval parse_options(int *parsed_args,
   Str *dirarg = str_new(env);
 
   env_error_check(env);
-  op = option_parser_new("[option ...]",
+  op = option_parser_new("[option ...] -db file [...]",
                          "Compute enhanced suffix array.", env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
-  optiondb = option_new_filenamearray("db","specify database files (mandatory)",
+  optiondb = option_new_filenamearray("db","specify database files",
                                       so->filenametab,env);
   option_is_mandatory(optiondb);
   option_parser_add_option(op, optiondb, env);
@@ -125,10 +125,6 @@ static OPrval parse_options(int *parsed_args,
   option_exclude(optionsmap, optionprotein, env);
   option_exclude(optiondna, optionprotein, env);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
-  if (oprval == OPTIONPARSER_ERROR && strarray_size(so->filenametab) == 0)
-  {
-    env_error_set(env,"missing arguments to option -db");
-  }
   if (oprval == OPTIONPARSER_OK)
   {
     if (!option_is_set(optionindexname))

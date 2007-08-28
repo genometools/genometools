@@ -31,7 +31,7 @@ static void config_lua_new_table(lua_State *L, const char *key)
   lua_settable(L, -3);
 }
 
-Config* config_new(Env *env, bool verbose)
+Config* config_new(bool verbose, Env *env)
 {
   Config *cfg;
   env_error_check(env);
@@ -46,12 +46,27 @@ Config* config_new(Env *env, bool verbose)
   return cfg;
 }
 
+Config* config_new_with_state(lua_State *L, Env *env)
+{
+  Config *cfg;
+  env_error_check(env);
+  cfg = env_ma_calloc(env, 1, sizeof (Config));
+  cfg->L = L;
+  return cfg;
+}
+
+void config_delete_without_state(Config *cfg, Env *env)
+{
+  if (!cfg) return;
+  str_delete(cfg->filename,env);
+  env_ma_free(cfg, env);
+}
+
 void config_delete(Config *cfg, Env *env)
 {
   if (!cfg) return;
-  if (cfg->L != NULL) lua_close(cfg->L);
-  if (cfg->filename != NULL) str_delete(cfg->filename,env);
-  env_ma_free(cfg, env);
+  if (cfg->L) lua_close(cfg->L);
+  config_delete_without_state(cfg, env);
 }
 
 int config_load_file(Config *cfg, Str *fn, Env* env)
@@ -428,7 +443,7 @@ Unit tests for the Config class.
 \param env Pointer to Environment object.
 \return Error status.
 */
-int config_unit_test(Env* env)
+int config_unit_test(Env *env)
 {
   int had_err = 0;
   Config *cfg;
@@ -445,7 +460,7 @@ int config_unit_test(Env* env)
   defcol.red=.8;defcol.green=.8;defcol.blue=.8;
 
   /* instantiate new config object */
-  cfg = config_new(env, false);
+  cfg = config_new(false, env);
 
   /* at the beginning, all values are defaults, since nothing is defined */
   tmpcol = config_get_color(cfg, "exon", env);

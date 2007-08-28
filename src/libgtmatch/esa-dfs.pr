@@ -1,0 +1,26 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int depthfirstesa(Suffixarray *suffixarray,
+                  Uchar initialchar,
+                  Dfsinfo *(*allocateDfsinfo)(Dfsstate *,Env *),
+                  void(*freeDfsinfo)(Dfsinfo *,Dfsstate *,Env *),
+                  int(*processleafedge)(bool,Seqpos,Dfsinfo *,
+                                        Uchar,Seqpos,Dfsstate *,
+                                        Env *),
+                  int(*processbranchedge)(bool,
+                                          Seqpos,
+                                          Dfsinfo *,
+                                          Dfsinfo *,
+                                          Dfsstate *,
+                                          Env *),
+                  int(*processcompletenode)(Dfsinfo *,Dfsstate *,Env *),
+                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *,Env *),
+                  int(*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
+                                            Seqpos,Dfsstate *,Env *),
+                  Dfsstate *state,
+                  Env *env);
+
+#ifdef __cplusplus
+}
+#endif

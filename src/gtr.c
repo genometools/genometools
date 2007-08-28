@@ -20,7 +20,6 @@
 #include "libgtcore/env.h"
 #include "libgtcore/fileutils.h"
 #include "libgtcore/grep.h"
-#include "libgtcore/gtcorelua.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/range.h"
 #include "libgtcore/splitter.h"
@@ -30,6 +29,7 @@
 #include "libgtext/alignment.h"
 #include "libgtext/bsearch.h"
 #include "libgtext/evaluator.h"
+#include "libgtext/gtdata.h"
 #include "libgtext/hmm.h"
 #include "libgtext/splicedseq.h"
 #include "libgtext/toolbox.h"
@@ -71,20 +71,41 @@ struct GTR {
   Toolbox *toolbox;
   Hashtable *unit_tests;
   lua_State *L;
+#ifdef LIBGTVIEW
+  Config *config;
+#endif
 };
 
 GTR* gtr_new(Env *env)
 {
   GTR *gtr = env_ma_calloc(env, 1, sizeof (GTR));
+#ifdef LIBGTVIEW
+  Str *config_file;
+#endif
   gtr->spacepeak = str_new(env);
-  /* XXX */
   gtr->L = luaL_newstate();
+  assert(gtr->L); /* XXX: proper error message  */
   luaL_openlibs(gtr->L); /* open the standard libraries */
   put_env_in_registry(gtr->L, env); /* we have to register the env object,
                                        before we can open the GenomeTools
                                        libraries */
   luaopen_gt(gtr->L); /* open all GenomeTools libraries */
-  assert(gtr->L);
+#ifdef LIBGTVIEW
+  gtr->config = config_new_with_state(gtr->L, env);
+  config_file = gtdata_get_path(env_error_get_progname(env), env);
+  str_append_cstr(config_file, "/config/view.lua", env);
+  if (file_exists(str_get(config_file))) {
+    if (config_load_file(gtr->config, config_file, env)) {
+      /* XXX: hack... */
+      fprintf(stderr, "%s: error: %s\n", env_error_get_progname(env),
+              env_error_get(env));
+      exit(EXIT_FAILURE);
+    }
+    else
+      put_config_in_registry(gtr->L, gtr->config);
+  }
+  str_delete(config_file, env);
+#endif
   return gtr;
 }
 
@@ -110,8 +131,8 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                       env);
   option_hide_default(o);
   option_parser_add_option(op, o, env);
-  o = option_new_bool("i", "enter interactive mode after executing 'tool'",
-                      &gtr->interactive, false, env);
+  o = option_new_bool("i", "enter interactive mode after executing 'tool' or "
+                      "'script'", &gtr->interactive, false, env);
   option_is_development_option(o);
   option_parser_add_option(op, o, env);
   o = option_new_debug(&gtr->debug, env);
@@ -124,7 +145,6 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   option_parser_add_option(op, o, env);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
   option_parser_delete(op, env);
-  (*parsed_args)--;
   return oprval;
 }
 
@@ -258,18 +278,19 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
   if (gtr->test) {
     return run_tests(gtr, env);
   }
-  assert(argc);
-  if (argc == 1 && !gtr->interactive) {
+  if (argc == 0 && !gtr->interactive) {
     env_error_set(env, "neither tool nor script specified; option -help lists "
                        "possible tools");
     had_err = -1;
   }
-  if (!had_err && argc > 1) {
-    if (!gtr->toolbox || !(tool = toolbox_get(gtr->toolbox, argv[1]))) {
+  if (!had_err && argc) {
+    if (!gtr->toolbox || !(tool = toolbox_get(gtr->toolbox, argv[0]))) {
       /* no tool found -> try to open script */
-      if (file_exists(argv[1])) {
+      if (file_exists(argv[0])) {
         /* run script */
-        if (luaL_dofile(gtr->L, argv[1])) {
+        nargv = cstr_array_prefix_first(argv, env_error_get_progname(env), env);
+        set_arg_in_lua_interpreter(gtr->L, nargv[0], (const char**) nargv+1);
+        if (luaL_dofile(gtr->L, argv[0])) {
           /* error */
           assert(lua_isstring(gtr->L, -1)); /* error message on top */
           env_error_set(env, "could not execute script %s",
@@ -281,19 +302,21 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
       else {
         /* neither tool nor script found */
         env_error_set(env, "neither tool nor script '%s' found; option -help "
-                           "lists possible tools", argv[1]);
+                           "lists possible tools", argv[0]);
         had_err = -1;
       }
     }
     else {
       /* run tool */
-      nargv = cstr_array_prefix_first(argv+1, argv[0], env);
+      nargv = cstr_array_prefix_first(argv, env_error_get_progname(env), env);
       env_error_set_progname(env, nargv[0]);
-      had_err = tool(argc-1, (const char**) nargv, env);
+      had_err = tool(argc, (const char**) nargv, env);
     }
   }
   cstr_array_delete(nargv, env);
   if (!had_err && gtr->interactive) {
+    showshortversion(env_error_get_progname(env));
+    set_arg_in_lua_interpreter(gtr->L, env_error_get_progname(env), argv);
     run_interactive_lua_interpreter(gtr->L);
   }
   if (had_err)
@@ -308,5 +331,8 @@ void gtr_delete(GTR *gtr, Env *env)
   toolbox_delete(gtr->toolbox, env);
   hashtable_delete(gtr->unit_tests, env);
   if (gtr->L) lua_close(gtr->L);
+#ifdef LIBGTVIEW
+  config_delete_without_state(gtr->config, env);
+#endif
   env_ma_free(gtr, env);
 }

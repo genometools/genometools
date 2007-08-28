@@ -323,13 +323,21 @@ static bool scanal1file(Suffixarray *suffixarray,const Str *indexname,Env *env)
 void freesuffixarray(Suffixarray *suffixarray,Env *env)
 {
   env_fa_xmunmap((void *) suffixarray->suftab,env);
+  suffixarray->suftab = NULL;
   env_fa_xmunmap((void *) suffixarray->lcptab,env);
+  suffixarray->lcptab = NULL;
   env_fa_xmunmap((void *) suffixarray->llvtab,env);
+  suffixarray->llvtab = NULL;
   env_fa_xmunmap((void *) suffixarray->bwttab,env);
+  suffixarray->bwttab = NULL;
   env_fa_xfclose(suffixarray->suftabstream.fp,env);
+  suffixarray->suftabstream.fp = NULL;
   env_fa_xfclose(suffixarray->lcptabstream.fp,env);
+  suffixarray->lcptabstream.fp = NULL;
   env_fa_xfclose(suffixarray->llvtabstream.fp,env);
+  suffixarray->llvtabstream.fp = NULL;
   env_fa_xfclose(suffixarray->bwttabstream.fp,env);
+  suffixarray->bwttabstream.fp = NULL;
   freeAlphabet(&suffixarray->alpha,env);
   freeEncodedsequence(&suffixarray->encseq,env);
   strarray_delete(suffixarray->filenametab,env);

@@ -1,0 +1,14 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int mmenumpatternpositions(const Encodedsequence *encseq,
+                           const Seqpos *suftab,
+                           Readmode readmode,
+                           const Uchar *pattern,
+                           unsigned long patternlen,
+                           int (*processmatch)(void *,Seqpos),
+                           void *processinfo);
+
+#ifdef __cplusplus
+}
+#endif

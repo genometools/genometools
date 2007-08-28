@@ -23,12 +23,13 @@
 typedef struct FeatureIndex FeatureIndex;
 
 FeatureIndex* feature_index_new(Env*);
+FeatureIndex* feature_index_ref(FeatureIndex*);
 void          feature_index_add_sequence_region(FeatureIndex*,
                                                 SequenceRegion* , Env*);
 void          feature_index_add_genome_feature(FeatureIndex*,
                                                GenomeFeature*, Env*);
 Array*        feature_index_get_features_for_seqid(FeatureIndex*,
-                                                   char*);
+                                                   const char*);
 int           feature_index_get_features_for_range(FeatureIndex*, Array*, char*,
                                                    Range, Env*);
 char*         feature_index_get_first_seqid(FeatureIndex*);

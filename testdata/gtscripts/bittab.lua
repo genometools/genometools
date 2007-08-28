@@ -42,5 +42,3 @@ b:equal(src)
 rval, err = pcall(b.equal, b, prob)
 assert(not rval)
 assert(string.find(err, "bittabs have different sizes"))
-
--- testing bittab:and

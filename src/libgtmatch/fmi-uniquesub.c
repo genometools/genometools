@@ -129,7 +129,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   uniquesubcallinfo->queryfilenames = strarray_new(env);
   flagsoutputoption = strarray_new(env);
 
-  op = option_parser_new("[option ...]",
+  op = option_parser_new("[option ...] -fm fmindex -quer queryfile [...]",
                          "Compute length of minumum unique prefixes.", env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optionmin = option_new_ulong_min("min",
@@ -153,24 +153,17 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
                           flagsoutputoption,env);
   option_parser_add_option(op, optionoutput, env);
 
-  optionfmindex = option_new_string("fmi",
-                                    "specify fmindex (mandatory)",
+  optionfmindex = option_new_string("fmi", "specify fmindex",
                                     uniquesubcallinfo->fmindexname,NULL,env);
   option_is_mandatory(optionfmindex);
   option_parser_add_option(op, optionfmindex, env);
 
-  optionquery = option_new_filenamearray("query",
-                                         "specify queryfiles (mandatory)",
+  optionquery = option_new_filenamearray("query", "specify queryfiles",
                                          uniquesubcallinfo->queryfilenames,env);
   option_is_mandatory(optionquery);
   option_parser_add_option(op, optionquery, env);
 
   oprval = option_parser_parse(op, &parsed_args, argc, argv, versionfunc, env);
-  if (oprval == OPTIONPARSER_ERROR &&
-     strarray_size(uniquesubcallinfo->queryfilenames) == 0)
-  {
-    env_error_set(env,"missing arguments to option -query");
-  }
   if (oprval == OPTIONPARSER_OK)
   {
     if (option_is_set(optionmin))
@@ -376,47 +369,40 @@ static int findsubquerymatch(Fmindex *fmindex,
 int findminuniquesubstrings(int argc,const char **argv,Env *env)
 {
   Uniquesubcallinfo uniquesubcallinfo;
-  OPrval oprval;
-  int retval = 0;
-  bool haserr = false;
+    Fmindex fmindex;
+  int had_err = 0;
 
   env_error_check(env);
-  oprval = parseuniquesub(&uniquesubcallinfo,
-                          argc,
-                          argv,
-                          env);
-  if (oprval == OPTIONPARSER_ERROR)
+
+  switch (parseuniquesub(&uniquesubcallinfo, argc, argv, env)) {
+    case OPTIONPARSER_OK: break;
+    case OPTIONPARSER_ERROR:
+      str_delete(uniquesubcallinfo.fmindexname,env);
+      strarray_delete(uniquesubcallinfo.queryfilenames,env);
+      return -1;
+    case OPTIONPARSER_REQUESTS_EXIT:
+      str_delete(uniquesubcallinfo.fmindexname,env);
+      strarray_delete(uniquesubcallinfo.queryfilenames,env);
+      return 0;
+  }
+
+  if (mapfmindex (&fmindex, uniquesubcallinfo.fmindexname,env) != 0)
   {
-    retval = -1;
+    had_err = -1;
   } else
   {
-    if (oprval == OPTIONPARSER_REQUESTS_EXIT)
+    if (findsubquerymatch(&fmindex,
+                          uniquesubcallinfo.queryfilenames,
+                          uniquesubcallinfo.minlength,
+                          uniquesubcallinfo.maxlength,
+                          uniquesubcallinfo.showmode,
+                          env) != 0)
     {
-      retval = 2;
+      had_err = -1;
     }
-  }
-  if (retval == 0)
-  {
-    Fmindex fmindex;
-
-    if (mapfmindex (&fmindex, uniquesubcallinfo.fmindexname,env) != 0)
-    {
-      haserr = true;
-    } else
-    {
-      if (findsubquerymatch(&fmindex,
-                           uniquesubcallinfo.queryfilenames,
-                           uniquesubcallinfo.minlength,
-                           uniquesubcallinfo.maxlength,
-                           uniquesubcallinfo.showmode,
-                           env) != 0)
-      {
-        haserr = true;
-      }
-      freefmindex(&fmindex,env);
-    }
+    freefmindex(&fmindex,env);
   }
   str_delete(uniquesubcallinfo.fmindexname,env);
   strarray_delete(uniquesubcallinfo.queryfilenames,env);
-  return haserr ? -1 : 0;
+  return had_err;
 }

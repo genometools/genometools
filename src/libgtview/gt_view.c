@@ -93,9 +93,8 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   option_hide_default(option2);
 
   /* -width */
-  option = option_new_uint_min("width", "target image width",
-                            &arguments->width,
-                            800, 1, env);
+  option = option_new_uint_min("width", "target image width", &arguments->width,
+                               DEFAULT_RENDER_WIDTH, 1, env);
   option_parser_add_option(op, option, env);
 
   /* set contact mailaddress */
@@ -239,7 +238,7 @@ int gt_view(int argc, const char **argv, Env *env)
     config_file = gtdata_get_path(str_get(prog), env);
     str_delete(prog, env);
     str_append_cstr(config_file, "/config/view.lua", env);
-    cfg = config_new(env, arguments.verbose);
+    cfg = config_new(arguments.verbose, env);
     if (file_exists(str_get(config_file)))
       had_err = config_load_file(cfg, config_file, env);
   }
@@ -249,7 +248,7 @@ int gt_view(int argc, const char **argv, Env *env)
     /* create and write image file */
     d = diagram_new(results, qry_range, cfg, env);
     r = render_new(cfg, env);
-    render_to_png(r, d, (char*) argv[parsed_args], arguments.width, env);
+    had_err = render_to_png(r, d, argv[parsed_args], arguments.width, env);
   }
 
   render_delete(r, env);

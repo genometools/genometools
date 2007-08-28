@@ -32,11 +32,10 @@ typedef enum {
   gft_transcript,
 } GenomeFeatureType;
 
-/*
-  Determine a genome feature type ``gft'' from the string ``gft_string''.
-  If such a feature does not exits, -1 is returned.
-*/
-int           genome_feature_type_get(GenomeFeatureType*, char *gft_string);
+/* Determine a genome feature type <gft> from the string <gft_string>.
+   If such a feature does not exits, -1 is returned. */
+int           genome_feature_type_get(GenomeFeatureType *gft,
+                                      const char *gft_string);
 const char*   genome_feature_type_get_cstr(GenomeFeatureType);
 unsigned long genome_feature_type_num_of_features(void);
 

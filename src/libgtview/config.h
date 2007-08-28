@@ -10,6 +10,7 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "lua.h"
 #include "libgtcore/str.h"
 #include "libgtview/color.h"
 #include "libgtext/genome_feature_type.h"
@@ -31,11 +32,19 @@ typedef struct Config Config;
 
 /*!
 Creates a Config object.
-\param env Pointer to Environment object.
 \param verbose Verbosity flag. If set, warnings will be given.
+\param env Pointer to Environment object.
 \return Pointer to the new object.
 */
-Config*      config_new(Env *env, bool verbose);
+Config*      config_new(bool verbose, Env *env);
+
+/*!
+Creates a Config object.
+\param L the reused Lua state.
+\param env Pointer to Environment object.
+\return Pointer to the new object.
+*/
+Config*      config_new_with_state(lua_State *L, Env *env);
 
 /*!
 Loads and executes a Lua configuration file.
@@ -130,7 +139,7 @@ Sets a numeric value in the configuration to a certain value.
 \param env Pointer to Environment object.
 */
 void         config_set_num(Config *cfg,
-                            const char* section,
+                            const char *section,
                             const char *key,
                             double number,
                             Env *env);
@@ -174,6 +183,13 @@ enum DominateStatus config_dominates(Config *cfg,
                                      Env *env);
 /* Unit test */
 int          config_unit_test(Env*);
+
+/*!
+Deletes a Config object but leaves the internal Lua state intact.
+\param cfg Pointer to Config object to delete.
+\param env Pointer to Environment object.
+*/
+void         config_delete_without_state(Config*, Env*);
 
 /*!
 Deletes a Config object.

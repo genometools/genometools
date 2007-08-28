@@ -23,6 +23,7 @@
 #include "libgtview/feature_index.h"
 #include "libgtview/track.h"
 
+/* XXX: use debugging interface (gt -debug, env_log_log()) */
 #define DEBUG false
 
 struct Diagram
@@ -32,6 +33,7 @@ struct Diagram
   int nof_tracks;
   Config *config;
   Range range;
+  Array *feature_backup; /* XXX: hack */
 };
 
 typedef struct
@@ -66,6 +68,7 @@ static NodeInfoElement* get_or_create_node_info(Diagram *d,
   }
   else
   {
+    /* XXX: is the following comment still relevant? */
     /* here, we could handle a non-tree condition */
   }
   return ni;
@@ -254,9 +257,9 @@ static void add_recursive(Diagram *d, GenomeNode *node,
 }
 
 static void process_node(Diagram *d,
-                  GenomeNode *node,
-                  GenomeNode *parent,
-                  Env *env)
+                         GenomeNode *node,
+                         GenomeNode *parent,
+                         Env *env)
 {
   Range elem_range;
   bool collapse, do_not_overlap=false;
@@ -339,7 +342,7 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
   if (genome_node_has_children(gn))
   {
     GenomeNode *oldparent = genome_node_info->parent;
-    process_node((Diagram*) genome_node_info->diagram,
+    process_node(genome_node_info->diagram,
                  gn,
                  genome_node_info->parent,
                  env);
@@ -352,7 +355,7 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
   }
   else
   {
-    process_node((Diagram*) genome_node_info->diagram,
+    process_node(genome_node_info->diagram,
                  gn,
                  genome_node_info->parent,
                  env);
@@ -403,15 +406,15 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
 /*!
 Traverse a genome node tree with depth first search.
 */
-static int traverse_genome_nodes(GenomeNode *gn, void *genome_node_children,
-                                 Env *env)
+static void traverse_genome_nodes(GenomeNode *gn, void *genome_node_children,
+                                  Env *env)
 {
   NodeTraverseInfo* genome_node_info;
   assert(genome_node_children != NULL);
   genome_node_info = (NodeTraverseInfo*) genome_node_children;
   genome_node_info->parent = gn;
   /* handle root nodes */
-  process_node((Diagram*) genome_node_info->diagram,
+  process_node(genome_node_info->diagram,
                gn,
                NULL,
                env);
@@ -422,7 +425,6 @@ static int traverse_genome_nodes(GenomeNode *gn, void *genome_node_children,
                                                 visit_child,
                                                 env);
   }
-  return 0;
 }
 
 static void diagram_build(Diagram *diagram, Array *features, Env *env)
@@ -434,7 +436,7 @@ static void diagram_build(Diagram *diagram, Array *features, Env *env)
   for (i=0;i<array_size(features);i++)
   {
     GenomeNode *current_root = *(GenomeNode**) array_get(features,i);
-    (void) traverse_genome_nodes(current_root, &genome_node_children, env);
+    traverse_genome_nodes(current_root, &genome_node_children, env);
   }
   /* collect blocks from nodeinfo structures */
   (void) hashtable_foreach(diagram->nodeinfo, collect_blocks, diagram, env);
@@ -443,6 +445,8 @@ static void diagram_build(Diagram *diagram, Array *features, Env *env)
 Diagram* diagram_new(Array* features, Range range, Config* config, Env* env)
 {
   Diagram *diagram;
+  GenomeNode *gn;
+  unsigned long i;
   env_error_check(env);
   diagram = env_ma_malloc(env, sizeof (Diagram));
   diagram->tracks = hashtable_new(HASH_STRING, NULL, NULL, env);
@@ -451,6 +455,14 @@ Diagram* diagram_new(Array* features, Range range, Config* config, Env* env)
   diagram->config = config;
   diagram->range = range;
   diagram_build(diagram, features, env);
+  /* XXX: the following is a hack to make sure the feature references are always
+     valid, if the Diagram is exported to Lua. It would be much better to store
+     and free the feature references further down the call stack... */
+  diagram->feature_backup = array_new(sizeof (GenomeNode*), env);
+  for (i = 0; i < array_size(features); i++) {
+    gn = genome_node_rec_ref(*(GenomeNode**) array_get(features, i), env);
+    array_add(diagram->feature_backup, gn, env);
+  }
   return diagram;
 }
 
@@ -483,10 +495,16 @@ int diagram_get_number_of_tracks(Diagram *diagram)
 
 void diagram_delete(Diagram *diagram, Env *env)
 {
+  unsigned long i;
   if (!diagram) return;
   (void) hashtable_foreach(diagram->tracks, diagram_track_delete, NULL, env);
   hashtable_delete(diagram->tracks, env);
   hashtable_delete(diagram->nodeinfo, env);
+  for (i = 0; i < array_size(diagram->feature_backup); i++) {
+    genome_node_rec_delete(*(GenomeNode**)
+                           array_get(diagram->feature_backup, i), env);
+  }
+  array_delete(diagram->feature_backup, env);
   env_ma_free(diagram, env);
 }
 
@@ -577,7 +595,7 @@ int diagram_unit_test(Env *env)
   (void) feature_index_get_features_for_range(fi,features,"test1",dr1,env);
 
   /*create a config object*/
-  cfg = config_new(env, false);
+  cfg = config_new(false, env);
 
   /*create a diagram object and test it*/
   dia = diagram_new(features,dr1,cfg,env);

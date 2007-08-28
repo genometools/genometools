@@ -505,12 +505,13 @@ void render_ruler(Render *r, Env* env)
                               "3'");
 }
 
-void render_to_png(Render *r, Diagram *dia,
-                   char *fn, unsigned int width, Env *env)
+int render_to_png(Render *r, Diagram *dia, const char *filename,
+                  unsigned int width, Env *env)
 {
-  unsigned int height;
+  unsigned int height, had_err;
 
-  assert(r != NULL && fn != NULL && width > 1);
+  env_error_check(env);
+  assert(r && filename && width > 1);
 
   /* set initial image-specific values */
   r->y = 70;
@@ -524,10 +525,10 @@ void render_to_png(Render *r, Diagram *dia,
                  -(2*r->margins))
                / range_length(r->range);
   if (config_get_verbose(r->cfg))
-     fprintf( stderr, "scaling factor is %f\n",r->factor);
+     fprintf(stderr, "scaling factor is %f\n",r->factor);
 
   /* create new Graphics backend */
-  r->g = graphics_new_png(fn, width, height, env);
+  r->g = graphics_new_png(filename, width, height, env);
   graphics_set_margins(r->g, r->margins, 0, width, height);
 
   /* Add ruler/scale to the image */
@@ -541,12 +542,14 @@ void render_to_png(Render *r, Diagram *dia,
     (void) hashtable_foreach(tracks, render_track, r, env);
   }
   else if (config_get_verbose(r->cfg))
-    fprintf( stderr, "diagram has no tracks!\n");
+    fprintf(stderr, "diagram has no tracks!\n");
 
   if (config_get_verbose(r->cfg))
     fprintf(stderr, "actual used height: %f\n", r->y);
 
   /* write out result file */
-  (void) graphics_save(r->g);
+  had_err = graphics_save(r->g, env);
   graphics_delete(r->g, env);
+
+  return had_err;
 }

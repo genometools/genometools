@@ -13,11 +13,9 @@
 #include "gt_sfxmap.h"
 #include "gt_trieins.h"
 #include "gt_mergeesa.h"
+#include "gt_maxpairs.h"
+#include "gt_patternmatch.h"
 #include "gt_skproto.h"
-
-#ifdef LIBGTVIEW
-#include <libgtview/gt_png.h>
-#endif
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Toolbox *dev_toolbox, Env *env)
@@ -41,14 +39,13 @@ void register_devtools(Toolbox *dev_toolbox, Env *env)
   /* add development tools here with a function call like this:
      toolbox_add(dev_toolbox, "devtool", gt_devtool, env); */
   toolbox_add(dev_toolbox, "guessprot", gt_guessprot, env);
-#ifdef LIBGTVIEW
-  toolbox_add(dev_toolbox, "png", gt_png, env);
-#endif
   toolbox_add(dev_toolbox, "regioncov", gt_regioncov, env);
   toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap, env);
   toolbox_add(dev_toolbox, "trieins", gt_trieins, env);
   toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa, env);
   toolbox_add(dev_toolbox, "skproto", gt_skproto, env);
+  toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs, env);
+  toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch, env);
 }
 
 int gt_dev(int argc, const char **argv, Env *env)
@@ -83,6 +80,7 @@ int gt_dev(int argc, const char **argv, Env *env)
   /* call development tool */
   if (!had_err) {
     nargv = cstr_array_prefix_first(argv+parsed_args, argv[0], env);
+    env_error_set_progname(env, nargv[0]);
     had_err = devtool(argc-parsed_args, (const char**) nargv, env);
   }
 

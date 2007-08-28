@@ -28,28 +28,22 @@ enum
 /* the graphics class */
 typedef struct Graphics Graphics;
 
-Graphics* graphics_new(unsigned int width, unsigned int height, Env *env);
-void      graphics_draw_exon_box(Graphics *g, double x, double y, double width,
-                                 double height, Strand strand);
-void      graphics_draw_horizontal_line(Graphics *g, double x, double y,
-                                        double width);
-void      graphics_draw_text(Graphics *g, double x, double y, const char *text);
-void      graphics_save_as_png(const Graphics*, const char *path);
-
-/* new interface functions, ssteinbiss */
-
 /*!
 Creates a new Graphics object, which is an abstraction of a
 drawing surface on which several relevant primitives can be drawn.
 This constructor creates a Graphics that can be written out as a PNG file.
-\param fname Filename of the resulting PNG.
+\param filename Filename of the resulting PNG.
 \param width Surface width (in pixels).
 \param height Surface height (in pixels).
 \param env Pointer to Environment object.
 \return Pointer to new Graphics object.
 */
-Graphics* graphics_new_png(const char *fname, unsigned int width,
+Graphics* graphics_new_png(const char *filename, unsigned int width,
                            unsigned int height, Env*);
+
+void      graphics_draw_horizontal_line(Graphics *g, double x, double y,
+                                        double width);
+void      graphics_draw_text(Graphics *g, double x, double y, const char *text);
 
 /*!
 Sets margins (space to the image boundaries that are clear of elements)
@@ -224,8 +218,10 @@ double    graphics_get_text_width(Graphics *g, const char *text);
 /*!
 Writes out the Graphics to the chosen source.
 \param g Graphics object to save.
+\param env Pointer to Environment object.
+\return Error code.
 */
-bool     graphics_save(const Graphics*);
+int       graphics_save(const Graphics*, Env *env);
 
 /*!
 Deletes a Graphics object.

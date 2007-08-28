@@ -131,16 +131,17 @@ static int suftab2file(void *info,
                                    suftab[pos]);
           if (cmp > 0)
           {
-            fprintf(stderr,"pos = " FormatSeqpos
-                           ": cmp " FormatSeqpos
-                           " " FormatSeqpos " = %d\n",
-                    PRINTSeqposcast(pos),
-                    pos > 0 ? PRINTSeqposcast(suftab[pos-1])
-                            : PRINTSeqposcast(outfileinfo->
-                                              lastsuftabentryofpreviouspart),
+            env_error_set(env,"pos = " FormatSeqpos
+                              ": cmp " FormatSeqpos
+                              " " FormatSeqpos " = %d\n",
+                          PRINTSeqposcast(pos),
+                           pos > 0 ? PRINTSeqposcast(suftab[pos-1])
+                                   : PRINTSeqposcast(outfileinfo->
+                                                 lastsuftabentryofpreviouspart),
                     PRINTSeqposcast(suftab[pos]),
                     cmp);
-            exit(EXIT_FAILURE);
+            haserr = true;
+            break;
           }
           if (outfileinfo->maxbranchdepth < lcpvalue)
           {

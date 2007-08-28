@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
-# 
+#
 # Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg 
+# Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 # See LICENSE file or http://genometools.org/license.html for license details.
-# 
+#
 
 # the GenomeTools test suite (employs ``stest'').
 
@@ -44,7 +44,7 @@ def run_test(str, opts = {})
     if $systemname == "Linux" then 
       memcheck = "valgrind --tool=memcheck --suppressions="+
                  File.join($testdata, "gt.supp")+
-                 " --leak-check=yes -q"
+                 " --leak-check=yes --error-exitcode=1 -q"
     elsif $systemname == "OpenBSD" then
       memcheck = "env MALLOC_OPTIONS='GJ'"
     end
@@ -68,6 +68,7 @@ require 'gt_merge_include'
 require 'gt_mmapandread_include'
 require 'gt_mutate_include'
 require 'gt_regioncov_include'
+require 'gt_scripts_include'
 require 'gt_stat_include'
 require 'gt_suffixerator_include'
 require 'gt_trieins_include'

@@ -52,7 +52,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   mkfmcallinfo->indexnametab = strarray_new(env);
   mkfmcallinfo->outfmindex = str_new(env);
   mkfmcallinfo->leveldesc = str_new(env);
-  op = option_parser_new("[option ...]",
+  op = option_parser_new("[option ...] -ii indexfile [...]",
                          "Compute FMindex.", env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optionfmout = option_new_string("fmout",
@@ -62,8 +62,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
                              mkfmcallinfo->outfmindex, NULL, env);
   option_parser_add_option(op, optionfmout, env);
 
-  option = option_new_filenamearray("ii",
-                                    "specify indices to be used (mandatory)",
+  option = option_new_filenamearray("ii", "specify indices to be used",
                                     mkfmcallinfo->indexnametab,env);
   option_is_mandatory(option);
   option_parser_add_option(op, option, env);

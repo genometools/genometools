@@ -22,6 +22,7 @@ struct GenomeStream
   const GenomeStreamClass *c_class;
   GenomeNode *last_node;
   bool ensure_sorting;
+  unsigned int reference_count;
 };
 
 GenomeStream*  genome_stream_create(const GenomeStreamClass*,

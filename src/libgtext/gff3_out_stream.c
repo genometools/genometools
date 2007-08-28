@@ -33,6 +33,7 @@ static int gff3_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
 static void gff3_out_stream_free(GenomeStream *gs, Env *env)
 {
   GFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
+  genome_stream_delete(gff3_out_stream->in_stream, env);
   genome_visitor_delete(gff3_out_stream->gff3_visitor, env);
 }
 
@@ -51,7 +52,7 @@ GenomeStream* gff3_out_stream_new(GenomeStream *in_stream, GenFile *outfp,
                                           genome_stream_is_sorted(in_stream),
                                           env);
   GFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
-  gff3_out_stream->in_stream = in_stream;
+  gff3_out_stream->in_stream = genome_stream_ref(in_stream);
   gff3_out_stream->gff3_visitor = gff3_visitor_new(outfp, env);
   return gs;
 }

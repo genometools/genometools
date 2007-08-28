@@ -4,17 +4,16 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#ifndef BITTABLUA_H
-#define BITTABLUA_H
+#ifndef RENDER_LUA_H
+#define RENDER_LUA_H
 
 #include "lua.h"
 
-/* exports the Bittab class to Lua:
+/* exports the Render class to Lua:
 
-   gt.bittab_new(num_of_bits)
-   bittab:set_bit(bit)
-   bittab:unset_bit(bit)
+   render = gt.render_new()
+            render:to_png(diagram, filename, [width])
 */
-int luaopen_bittab(lua_State*);
+int luaopen_render(lua_State*);
 
 #endif
