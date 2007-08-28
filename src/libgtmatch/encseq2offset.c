@@ -39,7 +39,7 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
     {
       tmplength = getencseqtotallength(suffixarraytable[idx - 1].encseq);
       sequenceoffsettable[idx]
-	= sequenceoffsettable[idx-1] + tmplength + (Seqpos) 1;
+        = sequenceoffsettable[idx-1] + tmplength + (Seqpos) 1;
     }
     tmpspecialcharacters
       += (uint64_t) suffixarraytable[idx].specialcharinfo.specialcharacters;
