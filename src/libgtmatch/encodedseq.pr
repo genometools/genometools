@@ -59,6 +59,12 @@ int overallspecialranges(const Encodedsequence *encseq,
                                                const char *str_sat,
                                                Env *env);
 
+Encodedsequence *plain2encodedsequence(bool withrange,
+                                       const Uchar *seq,
+                                       Seqpos len,
+                                       const Alphabet *alphabet,
+                                       Env *env);
+
 #ifdef __cplusplus
 }
 #endif

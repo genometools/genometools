@@ -22,7 +22,7 @@
 #include "measure-time.pr"
 #include "opensfxfile.pr"
 #include "sfx-cmpsuf.pr"
-#include "sfx-makeprj.pr"
+#include "sfx-sci.pr"
 #include "sfx-opt.pr"
 #include "sfx-outprj.pr"
 #include "sfx-suffixer.pr"
@@ -279,14 +279,14 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
   }
   if (!haserr)
   {
-    if (scanfastasequence(&numofsequences,
-                          &totallength,
-                          &specialcharinfo,
-                          so->filenametab,
-                          &filelengthtab,
-                          getsymbolmapAlphabet(alpha),
-                          so->isplain,
-                          env) != 0)
+    if (fasta2sequencekeyvalues(&numofsequences,
+                                &totallength,
+                                &specialcharinfo,
+                                so->filenametab,
+                                &filelengthtab,
+                                getsymbolmapAlphabet(alpha),
+                                so->isplain,
+                                env) != 0)
     {
       haserr = true;
     }

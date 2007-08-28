@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int scanfastasequence(
+int fasta2sequencekeyvalues(
         unsigned long *numofsequences,
         Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
@@ -10,6 +10,11 @@ int scanfastasequence(
         const Uchar *symbolmap,
         bool plainformat,
         Env *env);
+
+void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
+                              const Uchar *seq,
+                              const Seqpos len,
+                              Env *env);
 
 #ifdef __cplusplus
 }
