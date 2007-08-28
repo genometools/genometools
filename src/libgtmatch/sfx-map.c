@@ -46,7 +46,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
 {
   ArrayUchar linebuffer;
   uint32_t integersize, littleendian, linenum, readmodeint;
-  unsigned long numofsequences, numoffiles = 0, numofallocatedfiles = 0;
+  unsigned long numofsequences, numofquerysequences,
+                numoffiles = 0, numofallocatedfiles = 0;
   DefinedSeqpos maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;
@@ -65,7 +66,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                  &suffixarray->specialcharinfo.lengthofspecialsuffix,NULL);
   SETREADINTKEYS("numofsequences",&numofsequences,NULL);
   SETREADINTKEYS("numofdbsequences",&suffixarray->numofdbsequences,NULL);
-  setreadintkeys(riktab,"numofquerysequences",&suffixarray->numofdbsequences,
+  setreadintkeys(riktab,"numofquerysequences",&numofquerysequences,
                  0,NULL,env);
   SETREADINTKEYS("longest",&suffixarray->longest.valueseqpos,
                            &suffixarray->longest.defined);

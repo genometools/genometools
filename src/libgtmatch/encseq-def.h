@@ -61,13 +61,15 @@ int overallspecialrangesfast(
                 const Encodedsequence *encseq,
                 bool moveforward,
                 Readmode readmode,
-                int(*process)(void *,const Sequencerange *,Env *),
+                int(*processrange)(void *,const Encodedsequence *,
+                                   const Sequencerange *,Env *),
                 void *processinfo,
                 Env *env);
 
 int overallspecialranges(const Encodedsequence *encseq,
                          Readmode readmode,
-                         int(*process)(void *,const Sequencerange *,Env *),
+                         int(*processrange)(void *,const Encodedsequence *,
+                                            const Sequencerange *,Env *),
                          void *processinfo,
                          Env *env);
 

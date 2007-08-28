@@ -10,7 +10,6 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/sarr-def.h"
-#include "libgtmatch/stamp.h"
 
 #include "libgtmatch/sfx-map.pr"
 #include "libgtmatch/esa-maxpairs.pr"
