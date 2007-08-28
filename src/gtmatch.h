@@ -21,5 +21,6 @@
 #include "libgtmatch/test-mappedstr.pr"
 #include "libgtmatch/test-trieins.pr"
 #include "libgtmatch/test-mergeesa.pr"
+#include "libgtmatch/pos2seqnum.pr"
 
 #endif

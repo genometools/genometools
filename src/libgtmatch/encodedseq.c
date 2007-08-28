@@ -167,6 +167,7 @@ typedef uint64_t Uint64;
 
   /* only for Viadirectaccess */
   Uchar *plainseq;
+  bool plainseqptr;
 
   /* only for Viabitaccess */
   Bitstring *specialbits;
@@ -604,7 +605,10 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
     switch (encseq->sat)
     {
       case Viadirectaccess:
-        FREESPACE(encseq->plainseq);
+        if(!encseq->plainseqptr)
+        {
+          FREESPACE(encseq->plainseq);
+        }
         break;
       case Viabitaccess:
         FREESPACE(encseq->fourcharsinonebyte);
@@ -868,6 +872,7 @@ static int fillplainseq(Encodedsequence *encseq,Fastabufferstate *fbs,Env *env)
 
   env_error_check(env);
   ALLOCASSIGNSPACE(encseq->plainseq,NULL,Uchar,encseq->totallength);
+  encseq->plainseqptr = false;
   for (pos=0; /* Nothing */; pos++)
   {
     retval = readnextUchar(&cc,fbs,env);
@@ -1446,7 +1451,7 @@ int overallspecialrangesfast(
 int overallspecialranges(const Encodedsequence *encseq,
                          Readmode readmode,
                          int(*processrange)(void *,const Encodedsequence *,
-                                       const Sequencerange *,Env *),
+                                            const Sequencerange *,Env *),
                          void *processinfo,
                          Env *env)
 {
@@ -1843,7 +1848,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
   printf("# deliverchar=%s\n",encseq->delivercharname); XXX insert later
   */
   encseq->mappedptr = NULL;
-  ALLOCASSIGNSPACE(encseq->plainseq,NULL,Uchar,len);
-  memcpy(encseq->plainseq,seq,len * sizeof(Uchar));
+  encseq->plainseq = (Uchar *) seq;
+  encseq->plainseqptr = true;
   return encseq;
 }

@@ -36,7 +36,7 @@ int overallspecialrangesfast(
 int overallspecialranges(const Encodedsequence *encseq,
                          Readmode readmode,
                          int(*processrange)(void *,const Encodedsequence *,
-                                       const Sequencerange *,Env *),
+                                            const Sequencerange *,Env *),
                          void *processinfo,
                          Env *env);
 

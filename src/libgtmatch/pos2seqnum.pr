@@ -11,6 +11,10 @@ unsigned long getrecordnum(const Seqpos *recordseps,
                            Seqpos position,
                            Env *env);
 
+int checkmarkpos(const Encodedsequence *encseq,
+                 unsigned long numofdbsequences,
+                 Env *env);
+
 #ifdef __cplusplus
 }
 #endif

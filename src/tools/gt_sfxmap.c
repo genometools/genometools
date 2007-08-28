@@ -70,6 +70,13 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   }
   if (!haserr)
   {
+    if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,env) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
     int readmode;
 
     for (readmode = 0; readmode < 4; readmode++)
