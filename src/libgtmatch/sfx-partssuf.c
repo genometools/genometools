@@ -75,9 +75,12 @@ static void removeemptyparts(Suftabparts *suftabparts)
     for (srcpart = 0; srcpart < suftabparts->numofparts; srcpart++)
     {
       assert(suftabparts->components[srcpart].widthofpart > 0);
+      /*
+      XXX insert later
       printf("# widthofpart[%u]=" FormatSeqpos "\n",
               (unsigned int) srcpart,
               PRINTSeqposcast(suftabparts->components[srcpart].widthofpart));
+      */
     }
   }
 }
@@ -122,8 +125,10 @@ Suftabparts *newsuftabparts(uint32_t numofparts,
     widthofsuftabpart = (uint64_t) numofsuffixestoinsert/numofparts;
     remainder = (uint32_t) (numofsuffixestoinsert % (Seqpos) numofparts);
     suftabparts->largestwidth = 0;
+    /* XXX insert later
     printf("# numofsuffixestoinsert=" FormatSeqpos "\n",
            PRINTSeqposcast(numofsuffixestoinsert));
+    */
     for (part=0; part < numofparts; part++)
     {
       if (remainder > 0)

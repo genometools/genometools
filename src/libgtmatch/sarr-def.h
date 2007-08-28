@@ -65,15 +65,15 @@ DECLAREBufferedfiletype(Largelcpvalue);
 
 typedef struct
 {
-  unsigned long numofdbsequences;
+  unsigned long numofdbsequences; /* XXX: move to encoded sequence */
   StrArray *filenametab;
   Filelengthvalues *filelengthtab;
   uint32_t prefixlength;
   DefinedSeqpos numoflargelcpvalues;
   Encodedsequence *encseq;
   DefinedSeqpos longest;
-  Specialcharinfo specialcharinfo;
-  Alphabet *alpha;
+  Specialcharinfo specialcharinfo; /* XXX: move to encoded sequence */
+  Alphabet *alpha;                 /* XXX: move to encoded sequence */
   Readmode readmode; /* relevant when reading the encoded sequence */
   /* either with mapped input */
   const Seqpos *suftab;
@@ -88,4 +88,3 @@ typedef struct
 } Suffixarray;
 
 #endif
-

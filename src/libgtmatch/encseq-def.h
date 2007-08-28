@@ -64,6 +64,7 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                                Env *env);
 
 Encodedsequence *plain2encodedsequence(bool withrange,
+                                       Specialcharinfo *specialcharinfo,
                                        const Uchar *seq1,
                                        Seqpos len1,
                                        const Uchar *seq2,

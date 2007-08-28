@@ -1826,6 +1826,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
 }
 
 Encodedsequence *plain2encodedsequence(bool withrange,
+                                       Specialcharinfo *specialcharinfo,
                                        const Uchar *seq1,
                                        Seqpos len1,
                                        const Uchar *seq2,
@@ -1834,7 +1835,6 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        Env *env)
 {
   Encodedsequence *encseq;
-  Specialcharinfo specialcharinfo;
   Uchar *seqptr;
   Seqpos len;
   const Positionaccesstype sat = Viadirectaccess;
@@ -1854,11 +1854,11 @@ Encodedsequence *plain2encodedsequence(bool withrange,
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof(Uchar) * len2);
   }
-  sequence2specialcharinfo(&specialcharinfo,seqptr,len,env);
+  sequence2specialcharinfo(specialcharinfo,seqptr,len,env);
   encseq = determineencseqkeyvalues(sat,
                                     len,
-                                    specialcharinfo.specialcharacters,
-                                    specialcharinfo.specialranges,
+                                    specialcharinfo->specialcharacters,
+                                    specialcharinfo->specialranges,
                                     alphabet,
                                     env);
   encseq->plainseq = seqptr;

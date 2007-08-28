@@ -428,7 +428,10 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
            sizeof (*csf.countspecialcodes) *
                   (size_t) numofspecialcodes);
     csf.storespecials = true;
-    deliverthetime(stdout,mtime,"counting prefix distribution",env);
+    if(mtime != NULL)
+    {
+      deliverthetime(stdout,mtime,"counting prefix distribution",env);
+    }
     getencseqkmers(encseq,
                    readmode,
                    updatekmercount,
@@ -472,7 +475,10 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
                          (stpgetnumofparts(suftabparts) == (uint32_t) 1)
                            ? true : false,
                          env);
-      deliverthetime(stdout,mtime,"inserting suffixes into buckets",env);
+      if(mtime != NULL)
+      {
+        deliverthetime(stdout,mtime,"inserting suffixes into buckets",env);
+      }
       getencseqkmers(encseq,
                      readmode,
                      insertwithoutspecial,
@@ -480,7 +486,10 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
                      numofchars,
                      prefixlength,
                      env);
-      deliverthetime(stdout,mtime,"sorting the buckets",env);
+      if(mtime != NULL)
+      {
+        deliverthetime(stdout,mtime,"sorting the buckets",env);
+      }
       sortallbuckets(csf.suftabptr,
                      encseq,
                      readmode,

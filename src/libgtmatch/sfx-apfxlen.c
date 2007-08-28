@@ -11,6 +11,8 @@
 #include "intcode-def.h"
 #include "seqpos-def.h"
 
+#define SIZEOFBCKENTRY (2 * sizeof (Seqpos))
+
 /*
   We need \texttt{prefixlenbits} bits to store the length of
   a matching prefix. So we can store the following maximal value
@@ -47,13 +49,12 @@ static unsigned int logalphasize(unsigned int numofchars,double value)
 }
 
 unsigned int recommendedprefixlength(unsigned int numofchars,
-                                     Seqpos totallength,
-                                     size_t sizeofbckentry)
+                                     Seqpos totallength)
 {
   unsigned int prefixlength;
 
   prefixlength = logalphasize(numofchars,
-                              (double) totallength/sizeofbckentry);
+                              (double) totallength/SIZEOFBCKENTRY);
   if (prefixlength == 0)
   {
     return (unsigned int) 1;
@@ -65,14 +66,13 @@ unsigned int recommendedprefixlength(unsigned int numofchars,
 
 unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
                                           Seqpos totallength,
-                                          size_t sizeofbckentry,
                                           unsigned int prefixlenbits)
 {
   unsigned int maxprefixlen;
 
   maxprefixlen = logalphasize(numofchars,
                            (double) totallength/
-                                (sizeofbckentry/MAXMULTIPLIEROFTOTALLENGTH));
+                                (SIZEOFBCKENTRY/MAXMULTIPLIEROFTOTALLENGTH));
   if (prefixlenbits > 0)
   {
     unsigned int tmplength;

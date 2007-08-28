@@ -249,8 +249,6 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
           }\
         }
 
-#define SIZEOFBCKENTRY (2 * sizeof (Seqpos))
-
 static int runsuffixerator(Suffixeratoroptions *so,Env *env)
 {
   unsigned char numofchars = 0;
@@ -350,9 +348,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
     {
       if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
       {
-        so->prefixlength = recommendedprefixlength(numofchars,
-                                                   totallength,
-                                                   SIZEOFBCKENTRY);
+        so->prefixlength = recommendedprefixlength(numofchars,totallength);
         printf("# automatically determined prefixlength = %u\n",
                 so->prefixlength);
       } else
@@ -362,7 +358,6 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
         maxprefixlen
           = whatisthemaximalprefixlength(numofchars,
                                          totallength,
-                                         SIZEOFBCKENTRY,
                                          (unsigned int) PREFIXLENBITS);
         if (checkprefixlength(maxprefixlen,so->prefixlength,env) != 0)
         {
@@ -372,8 +367,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
           showmaximalprefixlength(maxprefixlen,
                                   recommendedprefixlength(
                                   numofchars,
-                                  totallength,
-                                  SIZEOFBCKENTRY));
+                                  totallength));
         }
       }
       if (!haserr)
