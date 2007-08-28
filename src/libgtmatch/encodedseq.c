@@ -1568,38 +1568,50 @@ static int readsatfromfile(const Str *indexname,Env *env)
   return haserr ? -1 : cc;
 }
 
-#define ASSIGNAPPFUNC(NAME)\
-        encseq->deliverchar\
-          = encodedseqfunctab[(int) sat].deliverchar##NAME.function;\
-        encseq->delivercharname\
-          = encodedseqfunctab[(int) sat].deliverchar##NAME.funcname;\
-
-#define SEQASSIGNAPPFUNC(NAME)\
-        encseq->seqdeliverchar\
-          = encodedseqfunctab[(int) sat].seqdeliverchar##NAME.function;\
-        encseq->seqdelivercharname\
-          = encodedseqfunctab[(int) sat].seqdeliverchar##NAME.funcname
-
-/*
-  if filenametab != NULL,
-*/
-
-/*@null@*/ Encodedsequence *initencodedseq(bool withrange,
-                                           const StrArray *filenametab,
-                                           bool plainformat,
-                                           const Str *indexname,
-                                           Seqpos totallength,
-                                           const Specialcharinfo
-                                                 *specialcharinfo,
-                                           const Alphabet *alphabet,
-                                           const char *str_sat,
-                                           Env *env)
+static int determinesattype(const Str *indexname,
+                            Seqpos totallength,
+                            const Specialcharinfo *specialcharinfo,
+                            const Alphabet *alphabet,
+                            const char *str_sat,
+                            Env *env)
 {
-  Encodedsequence *encseq;
   Positionaccesstype sat;
   bool haserr = false;
+  
+  if (getmapsizeAlphabet(alphabet) == DNAALPHASIZE + 1)
+  {
+    if (str_sat == NULL)
+    {
+      if (indexname != NULL)
+      {
+        int retcode = readsatfromfile(indexname,env);
+        if (retcode < 0)
+        {
+          haserr = true;
+        }
+        sat = (Positionaccesstype) retcode;
+      } else
+      {
+        sat = determinesmallestrep(totallength,specialcharinfo);
+      }
+    } else
+    {
+      sat = str2positionaccesstype(str_sat);
+      if (sat == Undefpositionaccesstype)
+      {
+        env_error_set(env,"illegal argument \"%s\" to option -sat",
+                      str_sat);
+        haserr = true;
+      }
+    }
+  } else
+  {
+    sat = Viadirectaccess;
+  }
+  return haserr ? -1 : (int) sat;
+}
 
-  Encodedsequencefunctions encodedseqfunctab[] =
+static Encodedsequencefunctions encodedseqfunctab[] =
   {
     { /* Viadirectaccess */
       NAMEDFUNCTION(fillplainseq),
@@ -1656,37 +1668,60 @@ static int readsatfromfile(const Str *indexname,Env *env)
     }
   };
 
-  env_error_check(env);
-  if (getmapsizeAlphabet(alphabet) == DNAALPHASIZE + 1)
-  {
-    if (str_sat == NULL)
-    {
-      if (str_length(indexname) == 0)
-      {
-        sat = determinesmallestrep(totallength,
-                                   specialcharinfo);
-      } else
-      {
-        int retcode = readsatfromfile(indexname,env);
-        if (retcode < 0)
-        {
-          haserr = true;
+#define ASSIGNAPPFUNC(NAME)\
+        encseq->deliverchar\
+          = encodedseqfunctab[(int) sat].deliverchar##NAME.function;\
+        encseq->delivercharname\
+          = encodedseqfunctab[(int) sat].deliverchar##NAME.funcname;\
+
+#define SEQASSIGNAPPFUNC(NAME)\
+        encseq->seqdeliverchar\
+          = encodedseqfunctab[(int) sat].seqdeliverchar##NAME.function;\
+        encseq->seqdelivercharname\
+          = encodedseqfunctab[(int) sat].seqdeliverchar##NAME.funcname
+
+#define ALLASSIGNAPPENDFUNC\
+        if (encseq->numofspecialstostore > 0)\
+        {\
+          if (withrange)\
+          {\
+            ASSIGNAPPFUNC(specialrange);\
+          } else\
+          {\
+            ASSIGNAPPFUNC(special);\
+          }\
+          SEQASSIGNAPPFUNC(special);\
+        } else\
+        {\
+          ASSIGNAPPFUNC( ); /* Note the importance of the space between ( ) */\
+          SEQASSIGNAPPFUNC( );\
         }
-        sat = (Positionaccesstype) retcode;
-      }
-    } else
-    {
-      sat = str2positionaccesstype(str_sat);
-      if (sat == Undefpositionaccesstype)
-      {
-        env_error_set(env,"illegal argument \"%s\" to option -sat",
-                      str_sat);
-        haserr = true;
-      }
-    }
+
+/*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
+                                                  const StrArray *filenametab,
+                                                  bool plainformat,
+                                                  Seqpos totallength,
+                                                  const Specialcharinfo
+                                                        *specialcharinfo,
+                                                  const Alphabet *alphabet,
+                                                  const char *str_sat,
+                                                  Env *env)
+{
+  Encodedsequence *encseq;
+  Positionaccesstype sat;
+  bool haserr = false;
+  int retcode;
+  Fastabufferstate fbs;
+
+  env_error_check(env);
+  retcode = determinesattype(NULL,totallength,specialcharinfo,
+                             alphabet,str_sat,env);
+  if(retcode < 0)
+  {
+    haserr = true;
   } else
   {
-    sat = Viadirectaccess;
+    sat = (Positionaccesstype) retcode;
   }
   if (!haserr)
   {
@@ -1697,57 +1732,76 @@ static int readsatfromfile(const Str *indexname,Env *env)
                              specialcharinfo,
                              alphabet,
                              env);
-    if (encseq->numofspecialstostore > 0)
-    {
-      if (withrange)
-      {
-        ASSIGNAPPFUNC(specialrange);
-      } else
-      {
-        ASSIGNAPPFUNC(special);
-      }
-      SEQASSIGNAPPFUNC(special);
-    } else
-    {
-      ASSIGNAPPFUNC( ); /* Note the importance of the space between ( ) */
-      SEQASSIGNAPPFUNC( );
-    }
+    ALLASSIGNAPPENDFUNC;
     /*
     printf("# deliverchar=%s\n",encseq->delivercharname); XXX insert later
     */
-    if (indexname != NULL)
-    {
-      if (fillencseqmapspecstartptr(encseq,
-                                    indexname,
-                                    env) != 0)
-      {
-        haserr = true;
-        freeEncodedsequence(&encseq,env);
-      }
-    } else
-    {
-      Fastabufferstate fbs;
-      encseq->mappedptr = NULL;
+    encseq->mappedptr = NULL;
 
-      initformatbufferstate(&fbs,
-                            filenametab,
-                            plainformat ? NULL : getsymbolmapAlphabet(alphabet),
-                            plainformat,
-                            NULL,
-                            NULL,
-                            env);
-      printf("# call %s\n",
-             encodedseqfunctab[(int) sat].fillpos.funcname);
-      if (encodedseqfunctab[(int) sat].fillpos.function(encseq,&fbs,env)
-         != 0)
-      {
-        freeEncodedsequence(&encseq,env);
-        haserr = true;
-      }
+    assert(filenametab != NULL);
+    initformatbufferstate(&fbs,
+                          filenametab,
+                          plainformat ? NULL : getsymbolmapAlphabet(alphabet),
+                          plainformat,
+                          NULL,
+                          NULL,
+                          env);
+    printf("# call %s\n",encodedseqfunctab[(int) sat].fillpos.funcname);
+    if (encodedseqfunctab[(int) sat].fillpos.function(encseq,&fbs,env) != 0)
+    {
+      freeEncodedsequence(&encseq,env);
+      haserr = true;
+    }
+  }
+  return haserr ? NULL : encseq;
+}
+
+/*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
+                                               const Str *indexname,
+                                               Seqpos totallength,
+                                               const Specialcharinfo
+                                                     *specialcharinfo,
+                                               const Alphabet *alphabet,
+                                               const char *str_sat,
+                                               Env *env)
+{
+  Encodedsequence *encseq;
+  Positionaccesstype sat;
+  bool haserr = false;
+  int retcode;
+
+  env_error_check(env);
+  retcode = determinesattype(indexname,totallength,specialcharinfo,
+                             alphabet,str_sat,env);
+  if(retcode < 0)
+  {
+    haserr = true;
+  } else
+  {
+    sat = (Positionaccesstype) retcode;
+  }
+  if (!haserr)
+  {
+    ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
+    determineencseqkeyvalues(encseq,
+                             sat,
+                             totallength,
+                             specialcharinfo,
+                             alphabet,
+                             env);
+    ALLASSIGNAPPENDFUNC;
+    /*
+    printf("# deliverchar=%s\n",encseq->delivercharname); XXX insert later
+    */
+    if (fillencseqmapspecstartptr(encseq,indexname,env) != 0)
+    {
+      haserr = true;
+      freeEncodedsequence(&encseq,env);
     }
   }
 #ifdef DEBUG
-  if (!haserr && encseq->sat == Viauchartables &&
+  if (!haserr && 
+      encseq->sat == Viauchartables &&
       encseq->numofspecialstostore > 0)
   {
     ucharshowallspecialpositions(encseq);
