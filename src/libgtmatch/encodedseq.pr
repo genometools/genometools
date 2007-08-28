@@ -60,8 +60,10 @@ int overallspecialranges(const Encodedsequence *encseq,
                                                Env *env);
 
 Encodedsequence *plain2encodedsequence(bool withrange,
-                                       const Uchar *seq,
-                                       Seqpos len,
+                                       const Uchar *seq1,
+                                       Seqpos len1,
+                                       const Uchar *seq2,
+                                       Seqpos len2,
                                        const Alphabet *alphabet,
                                        Env *env);
 

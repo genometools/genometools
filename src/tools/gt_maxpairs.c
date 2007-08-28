@@ -13,10 +13,12 @@
 
 #include "libgtmatch/sfx-map.pr"
 #include "libgtmatch/esa-maxpairs.pr"
+#include "libgtmatch/test-maxpairs.pr"
 
 typedef struct
 {
   unsigned int userdefinedleastlength;
+  unsigned long samples;
   Str *indexname;
 } Maxpairsoptions;
 
@@ -76,7 +78,7 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
   OPrval oprval;
 
   env_error_check(env);
-  op = option_parser_new("[-l minlength] -ii indexname",
+  op = option_parser_new("[options] -ii indexname",
                          "Enumerate maximal pairs of minimum length.",
                          env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -85,6 +87,12 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
                                &maxpairsoptions->userdefinedleastlength,
                                (unsigned int) 20,
                                (unsigned int) 1,env);
+  option_parser_add_option(op, option, env);
+
+  option = option_new_ulong_min("samples","Specify number of samples",
+                                 &maxpairsoptions->samples,
+                                 (unsigned long) 1000,
+                                 (unsigned long) 0,env);
   option_parser_add_option(op, option, env);
 
   option = option_new_string("ii",
@@ -118,6 +126,17 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
                         env) != 0)
     {
       haserr = true;
+    }
+    if(!haserr && maxpairsoptions.samples > 0)
+    {
+      if(testmaxpairs(maxpairsoptions.indexname,
+                      maxpairsoptions.samples,
+                      maxpairsoptions.userdefinedleastlength,
+                      10 * maxpairsoptions.userdefinedleastlength,
+                      env) != 0)
+      {
+        haserr = true;
+      }
     }
   }
   str_delete(maxpairsoptions.indexname,env);

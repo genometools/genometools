@@ -38,7 +38,7 @@ Seqpos *calculatemarkpositions(const Encodedsequence *encseq,
   
   ArraySeqpos asp;
 
-  assert(numofdbsequences > 1);
+  assert(numofdbsequences > (unsigned long) 1);
   asp.allocatedSeqpos = numofdbsequences-1;
   asp.nextfreeSeqpos = 0;
   ALLOCASSIGNSPACE(asp.spaceSeqpos,NULL,Seqpos,asp.allocatedSeqpos);
@@ -112,7 +112,7 @@ int checkmarkpos(const Encodedsequence *encseq,
                  unsigned long numofdbsequences,
                  Env *env)
 {
-  if(numofdbsequences > 1)
+  if(numofdbsequences > (unsigned long) 1)
   {
     Seqpos *markpos, totallength, pos;
     unsigned long currentseqnum = 0, seqnum;

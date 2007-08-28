@@ -1826,29 +1826,47 @@ static Encodedsequencefunctions encodedseqfunctab[] =
 }
 
 Encodedsequence *plain2encodedsequence(bool withrange,
-                                       const Uchar *seq,
-                                       Seqpos len,
+                                       const Uchar *seq1,
+                                       Seqpos len1,
+                                       const Uchar *seq2,
+                                       Seqpos len2,
                                        const Alphabet *alphabet,
                                        Env *env)
 {
   Encodedsequence *encseq;
   Specialcharinfo specialcharinfo;
+  Uchar *seqptr;
+  Seqpos len;
   const Positionaccesstype sat = Viadirectaccess;
 
   env_error_check(env);
-  sequence2specialcharinfo(&specialcharinfo,seq,len,env);
+  assert(seq1 != NULL);
+  assert(len1 > 0);
+  if(seq2 == NULL)
+  {
+    seqptr = (Uchar *) seq1;
+    len = len1;
+  } else
+  {
+    len = len1+len2+1;
+    ALLOCASSIGNSPACE(seqptr,NULL,Uchar,len);
+    memcpy(seqptr,seq1,sizeof(Uchar) * len1);
+    seqptr[len1] = (Uchar) SEPARATOR;
+    memcpy(seqptr + len1 + 1,seq2,sizeof(Uchar) * len2);
+  }
+  sequence2specialcharinfo(&specialcharinfo,seqptr,len,env);
   encseq = determineencseqkeyvalues(sat,
                                     len,
                                     specialcharinfo.specialcharacters,
                                     specialcharinfo.specialranges,
                                     alphabet,
                                     env);
+  encseq->plainseq = seqptr;
+  encseq->plainseqptr = (seq2 == NULL) ? true : false;
   ALLASSIGNAPPENDFUNC;
   /*
   printf("# deliverchar=%s\n",encseq->delivercharname); XXX insert later
   */
   encseq->mappedptr = NULL;
-  encseq->plainseq = (Uchar *) seq;
-  encseq->plainseqptr = true;
   return encseq;
 }

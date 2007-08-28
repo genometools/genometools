@@ -63,6 +63,14 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                                const char *str_sat,
                                                Env *env);
 
+Encodedsequence *plain2encodedsequence(bool withrange,
+                                       const Uchar *seq1,
+                                       Seqpos len1,
+                                       const Uchar *seq2,
+                                       Seqpos len2,
+                                       const Alphabet *alphabet,
+                                       Env *env);
+
 bool fastspecialranges(const Encodedsequence *encseq);
 
 int overallspecialrangesfast(
