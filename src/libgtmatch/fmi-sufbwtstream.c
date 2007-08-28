@@ -195,7 +195,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
            suffixlength = 0,
            numofindexes;
   int retval;
-  DefinedSeqpos longest;
+  DefinedSeqpos longest = { false, 0 };
   PairBwtidx *pairptr;
   FILE *outbwt = NULL;
   Str *tmpfilename = NULL;
