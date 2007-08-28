@@ -72,6 +72,7 @@ require 'gt_scripts_include'
 require 'gt_stat_include'
 require 'gt_suffixerator_include'
 require 'gt_trieins_include'
+require 'gt_ltr_include'
 if $arguments["libgtview"] then
   require 'gt_view_include'
 end

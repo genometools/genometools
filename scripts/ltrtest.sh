@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+# Copyright (c) 2007 David Ellinghaus <dellinghaus@stud.zbh.uni-hamburg.de>
+# Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+# See LICENSE file or http://genometools.org/license.html for license details.
+#
+
+set -e -x
+
+function checkerror() 
+{
+  $1
+  if test $? -ne 0
+  then
+    echo "failure: ${1}"
+    exit 1
+  fi
+}
+
+# the make call normally used for development
+#cd ../testsuite
+#./testsuite.rb -keywords gt_ltr
+# optional -memcheck   (run valgrind)
+#          -select 253 (run testcase 253)
+
+for (( i=1; i<=9 ; i++ ))
+do	
+  filenames[$i]="${LTR}/gt_ltr/s_cer_tab/chr0${i}_tab/chr0${i}.fsa"
+done
+for (( i=10; i<=16 ; i++ ))
+do	
+  filenames[$i]="${LTR}/gt_ltr/s_cer_tab/chr${i}_tab/chr${i}.fsa"
+done
+filenames[17]="${LTR}/gt_ltr/s_cer_tab/chrAll_tab/chrAll_before-1997-10-01.fsa"
+echo ${filenames}
+
+for (( i=1; i<=16 ; i++ ))
+do
+  checkerror "../bin/gt ltrharvest -index ${filenames[${i}]} -seed 100 -minlenltr 100 -maxlenltr 1000 -mindistltr 1500 -maxdistltr 15000 -similar 80 -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0 -vic 60 -overlaps best -xdrop 5 -mat 2 -mis -3 -ins -3 -del -3 -v"
+done

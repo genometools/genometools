@@ -53,6 +53,7 @@
 #include "tools/gt_suffixerator.h"
 #include "tools/gt_mkfmindex.h"
 #include "tools/gt_uniquesub.h"
+#include "tools/gt_ltrharvest.h"
 
 #ifdef LIBGTVIEW
 #include "libgtview/block.h"
@@ -173,6 +174,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "suffixerator", gt_suffixerator, env);
   toolbox_add(gtr->toolbox, "mkfmindex", gt_mkfmindex, env);
   toolbox_add(gtr->toolbox, "uniquesub", gt_uniquesub, env);
+  toolbox_add(gtr->toolbox, "ltrharvest", gt_ltrharvest, env);
 #ifdef LIBGTVIEW
   toolbox_add(gtr->toolbox, "view", gt_view, env);
 #endif

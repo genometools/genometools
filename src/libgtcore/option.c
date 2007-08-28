@@ -75,6 +75,7 @@ struct Option {
   } min_value;
   union {
     double d;
+    int i;
     unsigned int ui;
     unsigned long ul;
   } max_value;
@@ -97,8 +98,8 @@ static Option *option_new(const char *option_str, const char *description,
 {
   Option *o = env_ma_calloc(env, 1, sizeof (Option));
   assert(option_str && strlen(option_str));
-  assert("an option string should not start with '-', this is added "
-         "automatically"  && option_str[0] != '-');
+  assert(option_str[0] != '-'); /* an option string should not start with '-',
+                                   this is added automatically */
   o->option_str = str_new_cstr(option_str, env);
   o->description = str_new_cstr(description, env);
   o->value = value;
@@ -151,8 +152,8 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
 {
   OptionParser *op = env_ma_malloc(env, sizeof (OptionParser));
   assert(synopsis && one_liner);
-  assert("one_liner must have upper case letter at start and '.' at end" &&
-         strlen(one_liner) && isupper((int) one_liner[0]));
+  /* enforce upper case letter at start and '.' at end of one line desc. */
+  assert(strlen(one_liner) && isupper((int) one_liner[0]));
   assert(one_liner[strlen(one_liner)-1] == '.');
   op->progname = NULL;
   op->synopsis = cstr_dup(synopsis, env);
@@ -1081,6 +1082,17 @@ Option* option_new_int_min(const char *option_str, const char *description,
   return o;
 }
 
+Option* option_new_int_max(const char *option_str, const char *description,
+                            int *value, int default_value,
+                            int max_value, Env *env)
+{
+  Option *o = option_new_int(option_str, description, value, default_value,
+                              env);
+  o->max_value_set = true;
+  o->max_value.i = max_value;
+  return o;
+}
+
 Option* option_new_uint(const char *option_str, const char *description,
                         unsigned int *value, unsigned int default_value,
                         Env *env)
@@ -1113,6 +1125,22 @@ Option* option_new_uint_max(const char *option_str, const char *description,
   o->max_value.ui = max_value;
   return o;
 }
+
+Option *option_new_uint_min_max(const char *option_str,
+                                 const char *description, unsigned int *value,
+                                 unsigned int default_value,
+                                 unsigned int min_value,
+                                 unsigned int max_value, Env *env)
+{
+  Option *o = option_new_uint(option_str, description, value, default_value,
+                               env);
+  o->min_value_set = true;
+  o->min_value.i = min_value;
+  o->max_value_set = true;
+  o->max_value.i = max_value;
+  return o;
+}
+
 
 Option* option_new_long(const char *option_str, const char *description,
                         long *value, long default_value, Env *env)
