@@ -10,7 +10,7 @@
 #include <libgtcore/env.h>
 #include <libgtcore/genfile.h>
 
-/* A descrete distribution */
+/* A discrete distribution */
 typedef struct DiscDistri DiscDistri;
 
 DiscDistri*   disc_distri_new(Env*);
