@@ -48,7 +48,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   env_error_check(env);
 
   /* init */
-  op = option_parser_new("[option ...] PNG_file [GFF3_file]",
+  op = option_parser_new("[option ...] PNG_file [GFF3_file ...]",
                          "Create PNG representations of GFF3 annotation files.",
                          env);
 
@@ -101,8 +101,8 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   option_parser_set_mailaddress(op, "<ssteinbiss@stud.zbh.uni-hamburg.de>");
 
   /* parse options */
-  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 2, env);
+  oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
+                                        versionfunc, 1, env);
 
   if (oprval == OPTIONPARSER_OK && !force && file_exists(argv[*parsed_args])) {
     env_error_set(env, "file \"%s\" exists already. use option -force to "
@@ -125,6 +125,7 @@ int gt_view(int argc, const char **argv, Env *env)
   GenomeNode *gn = NULL;
   FeatureIndex *features = NULL;
   int parsed_args, had_err=0;
+  const char *png_file;
   char *seqid = NULL;
   Range qry_range, sequence_region_range;
   Array *results = NULL;
@@ -148,41 +149,48 @@ int gt_view(int argc, const char **argv, Env *env)
       return 0;
   }
 
-  /* create a gff3 input stream */
-  gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args + 1],
-                                             arguments.verbose &&
-                                             NULL, env);
-
-  /* create gff3 output stream if -pipe was used */
-  if (arguments.pipe)
-    gff3_out_stream = gff3_out_stream_new(gff3_in_stream, NULL, env);
-
-  /* create feature index and stream */
-  features = feature_index_new(env);
-  feature_stream = feature_stream_new((arguments.pipe ?
-                                         gff3_out_stream :
-                                         gff3_in_stream),
-                                      features, env);
+  /* save name of PNG file */
+  png_file = argv[parsed_args];
 
   /* check for correct order: range end < range start */
   if (!had_err &&
       arguments.start != UNDEF_ULONG &&
       arguments.end != UNDEF_ULONG &&
-      !(arguments.start < arguments.end))
-  {
+      !(arguments.start < arguments.end)) {
     env_error_set(env, "start of query range (%lu) must be before "
                        "end of query range (%lu)",
                        arguments.start, arguments.end);
     had_err = -1;
   }
 
-  if (!had_err)
-  {
-    /* pull the features through the stream and free them afterwards */
-    while (!(had_err = genome_stream_next_tree(feature_stream, &gn, env)) && gn)
-    {
-      genome_node_rec_delete(gn, env);
-    }
+  if (!had_err) {
+    /* create feature index */
+    features = feature_index_new(env);
+    parsed_args++;
+    do {
+      /* create a gff3 input stream */
+      gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
+                                                 arguments.verbose, env);
+      /* create gff3 output stream if -pipe was used */
+      if (arguments.pipe)
+        gff3_out_stream = gff3_out_stream_new(gff3_in_stream, NULL, env);
+
+      /* create feature stream */
+      feature_stream = feature_stream_new(arguments.pipe
+                                          ?  gff3_out_stream
+                                          : gff3_in_stream,
+                                          features, env);
+
+      /* pull the features through the stream and free them afterwards */
+      while (!(had_err = genome_stream_next_tree(feature_stream, &gn, env)) &&
+             gn) {
+        genome_node_rec_delete(gn, env);
+      }
+
+      genome_stream_delete(feature_stream, env);
+      genome_stream_delete(gff3_in_stream, env);
+      genome_stream_delete(gff3_out_stream, env);
+    } while (!had_err && argv[++parsed_args]);
   }
 
   /* if seqid is empty, take first one added to index */
@@ -248,7 +256,7 @@ int gt_view(int argc, const char **argv, Env *env)
     /* create and write image file */
     d = diagram_new(results, qry_range, cfg, env);
     r = render_new(cfg, env);
-    had_err = render_to_png(r, d, argv[parsed_args], arguments.width, env);
+    had_err = render_to_png(r, d, png_file, arguments.width, env);
   }
 
   render_delete(r, env);
@@ -260,9 +268,6 @@ int gt_view(int argc, const char **argv, Env *env)
   str_delete(arguments.seqid,env);
   array_delete(results, env);
   feature_index_delete(features, env);
-  genome_stream_delete(feature_stream, env);
-  genome_stream_delete(gff3_in_stream, env);
-  genome_stream_delete(gff3_out_stream, env);
 
   return had_err;
 }

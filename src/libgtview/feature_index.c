@@ -103,18 +103,18 @@ void feature_index_add_sequence_region(FeatureIndex *fi,
 {
   char *seqid;
   RegionInfo *info;
-
-  assert(fi != NULL && sr != NULL);
-
+  assert(fi && sr);
   seqid = str_get(genome_node_get_seqid((GenomeNode*) sr));
-  info = env_ma_malloc(env, sizeof (RegionInfo));
-  info->region = (SequenceRegion*) genome_node_rec_ref((GenomeNode*) sr, env);
-  info->features = array_new(sizeof (GenomeNode*),env);
-  info->dyn_range.start = ~0UL;
-  info->dyn_range.end   = 0;
-  hashtable_add(fi->regions, seqid, info, env);
-  if (fi->nof_sequence_regions++ == 0)
-    fi->firstseqid = seqid;
+  if (!hashtable_get(fi->regions, seqid)) {
+    info = env_ma_malloc(env, sizeof (RegionInfo));
+    info->region = (SequenceRegion*) genome_node_rec_ref((GenomeNode*) sr, env);
+    info->features = array_new(sizeof (GenomeNode*),env);
+    info->dyn_range.start = ~0UL;
+    info->dyn_range.end   = 0;
+    hashtable_add(fi->regions, seqid, info, env);
+    if (fi->nof_sequence_regions++ == 0)
+      fi->firstseqid = seqid;
+  }
 }
 
 /*!
