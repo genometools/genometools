@@ -280,7 +280,7 @@ static void add_sa_to_exon_feature_array(Array *exon_nodes,
       genome_feature_new(gft_exon,
                          genome_node_get_range((GenomeNode*)
                                                exons_from_sa_feature),
-                         gene_strand, NULL, UNDEF_ULONG, env);
+                         gene_strand, "generated", UNDEF_ULONG, env);
     genome_node_set_seqid(new_feature, seqid);
     genome_feature_set_score((GenomeFeature*) new_feature,
                              genome_feature_get_score(exons_from_sa_feature));
@@ -362,7 +362,7 @@ static void process_splice_form(Array *spliced_alignments_in_form,
 
     assert(info->gene_strand != STRAND_BOTH);
     info->gene_feature = genome_feature_new(gft_gene, gene_range,
-                                            info->gene_strand, NULL,
+                                            info->gene_strand, "generated",
                                             UNDEF_ULONG, env);
     genome_node_set_seqid(info->gene_feature, info->seqid);
     genome_node_set_source(info->gene_feature, info->gth_csa_source_str);
@@ -389,7 +389,7 @@ static void process_splice_form(Array *spliced_alignments_in_form,
                                          array_size(exon_nodes) - 1));
   assert(info->gene_strand != STRAND_BOTH);
   mRNA_feature = genome_feature_new(gft_mRNA, mRNA_range, info->gene_strand,
-                                    NULL, UNDEF_ULONG, env);
+                                    "generated", UNDEF_ULONG, env);
   genome_node_set_seqid(mRNA_feature, info->seqid);
   genome_node_set_source(mRNA_feature, info->gth_csa_source_str);
   genome_node_is_part_of_genome_node(info->gene_feature, mRNA_feature, env);

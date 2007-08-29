@@ -84,7 +84,7 @@ static int construct_sequence_regions(void *key, void *value, void *data,
   assert(key && value && data);
   seqid = str_new_cstr(key, env);
   range = *(Range*) value;
-  gn = sequence_region_new(seqid, range, NULL, 0, env);
+  gn = sequence_region_new(seqid, range, "generated", 0, env);
   queue_add(genome_nodes, gn, env);
   str_delete(seqid, env);
   return 0;
@@ -129,8 +129,8 @@ static int construct_mRNAs(void *key, void *value, void *data, Env *env)
   }
 
   if (!had_err) {
-    mRNA_node = genome_feature_new(gft_mRNA, mRNA_range, mRNA_strand, NULL, 0,
-                                   env);
+    mRNA_node = genome_feature_new(gft_mRNA, mRNA_range, mRNA_strand,
+                                   "generated", 0, env);
     genome_node_set_seqid(mRNA_node, mRNA_seqid);
 
     /* register children */
@@ -178,8 +178,8 @@ static int construct_genes(void *key, void *value, void *data, Env *env)
       assert(str_cmp(gene_seqid, genome_node_get_seqid(gn)) == 0);
     }
 
-    gene_node = genome_feature_new(gft_gene, gene_range, gene_strand, NULL, 0,
-                                   env);
+    gene_node = genome_feature_new(gft_gene, gene_range, gene_strand,
+                                   "generated", 0, env);
     genome_node_set_seqid(gene_node, gene_seqid);
 
     /* register children */

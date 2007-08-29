@@ -62,7 +62,7 @@ static int addintrons_in_children(GenomeNode *gn, void *data, Env *env)
 
       /* create intron */
       intron_node = genome_feature_new(gft_intron, intron_range, intron_strand,
-                                       NULL, UNDEF_ULONG, env);
+                                       "generated", UNDEF_ULONG, env);
       genome_node_set_seqid(intron_node, parent_seqid);
       genome_node_is_part_of_genome_node((GenomeNode*) v->parent_feature,
                                          intron_node, env);
