@@ -23,7 +23,6 @@
 #include "esafileend.h"
 #include "stamp.h"
 
-#include "alphabet.pr"
 #include "mapspec-gen.pr"
 #include "fbsadv.pr"
 #include "opensfxfile.pr"

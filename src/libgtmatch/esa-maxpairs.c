@@ -10,8 +10,6 @@
 #include "sarr-def.h"
 #include "alphadef.h"
 
-#include "alphabet.pr"
-
 #define ISLEFTDIVERSE   (state->alphabetsize)
 #define INITIALCHAR     (state->alphabetsize+1)
 

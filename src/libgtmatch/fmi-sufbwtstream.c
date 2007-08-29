@@ -13,7 +13,6 @@
 #include "mergeesa.pr"
 #include "sfx-map.pr"
 #include "encseq2offset.pr"
-#include "alphabet.pr"
 #include "opensfxfile.pr"
 #include "mkidxcpy.pr"
 #include "fmi-keyval.pr"

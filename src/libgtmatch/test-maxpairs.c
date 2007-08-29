@@ -5,7 +5,6 @@
 #include "sfx-map.pr"
 #include "sfx-apfxlen.pr"
 #include "sfx-suffixer.pr"
-#include "alphabet.pr"
 
 static Seqpos samplesubstring(Uchar *seqspace,
                               const Encodedsequence *encseq,

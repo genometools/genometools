@@ -24,7 +24,7 @@
 #include "guessprot.pr"
 #include "readnextline.pr"
 
- struct _Alphabet
+ struct Alphabet                /* initial blank prevents select by skproto */
 {
   Uchar characters[UCHAR_MAX+1],     /* array of characters to show */
         mapdomain[UCHAR_MAX+1],      /* list of characters mapped */

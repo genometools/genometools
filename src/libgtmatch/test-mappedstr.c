@@ -17,7 +17,6 @@
 #include "sarr-def.h"
 #include "sfx-nextchar.h"
 
-#include "alphabet.pr"
 #include "kmer2string.pr"
 #include "sfx-mappedstr.pr"
 #include "sfx-map.pr"

@@ -12,7 +12,6 @@
 #include "seqdesc.h"
 #include "gqueue-def.h"
 
-#include "alphabet.pr"
 #include "fmi-map.pr"
 #include "fmi-fwduni.pr"
 #include "iterseq.pr"

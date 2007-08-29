@@ -20,7 +20,6 @@
 
 #include "readnextline.pr"
 #include "endianess.pr"
-#include "alphabet.pr"
 #include "opensfxfile.pr"
 #include "sfx-readint.pr"
 

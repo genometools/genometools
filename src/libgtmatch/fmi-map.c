@@ -19,7 +19,6 @@
 
 #include "readnextline.pr"
 #include "opensfxfile.pr"
-#include "alphabet.pr"
 #include "sfx-readint.pr"
 #include "sfx-map.pr"
 #include "fmi-keyval.pr"

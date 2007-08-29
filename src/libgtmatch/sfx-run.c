@@ -18,7 +18,6 @@
 #include "filelength-def.h"
 #include "chardef.h"
 
-#include "alphabet.pr"
 #include "measure-time.pr"
 #include "opensfxfile.pr"
 #include "fillsci.pr"

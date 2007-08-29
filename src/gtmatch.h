@@ -10,7 +10,6 @@
 /* The GenomeTools matching library (libgtmatch) header */
 #include "libgtmatch/sarr-def.h"
 
-#include "libgtmatch/alphabet.pr"
 #include "libgtmatch/guessprot.pr"
 #include "libgtmatch/sfx-run.pr"
 #include "libgtmatch/fmi-mkindex.pr"

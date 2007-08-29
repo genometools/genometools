@@ -8,9 +8,9 @@
 #include "sarr-def.h"
 #include "trieins-def.h"
 #include "encseq-def.h"
+#include "alphadef.h"
 
 #include "trieins.pr"
-#include "alphabet.pr"
 #include "sfx-map.pr"
 
 static void maketrie(Trierep *trierep,
