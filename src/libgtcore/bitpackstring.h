@@ -497,6 +497,24 @@ static inline void
 bsGetUniformInt64Array(const BitString str, BitOffset offset, unsigned numBits,
                        size_t numValues, int64_t val[]);
 
+/**
+ * \brief Compares substrings of bitstrings, starting at respective offsets,
+ * both of lenght numBits.
+ *
+ * The bitstrings are treated as MSB-first encodings (which they are
+ * if produced by above functions) and thus after the first
+ * most-significant bit set in only one of the strings the comparision
+ * can terminate.
+ *
+ * This function treats two sub-bitstrings as
+ * @param a first bitstring to compare
+ * @param offsetA corresponding start position
+ * @param numBitsA length of substring \f$a'\f$ in a to use for comparison.
+ * @param b second bitstring
+ * @param offsetB corresponding start position
+ * @param numBitsB length of substring \f$b'\f$ in b to use for comparison.
+ * @return 0 for equality, \f$-1\f$ if \f$a < b\f$, \f$1\f$ if \f$b > a\f$
+ */
 extern int
 bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
           const BitString b, BitOffset offsetB, BitOffset numBitsB);
@@ -513,6 +531,16 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
 extern void
 bsCopy(const BitString src, BitOffset offsetSrc,
        const BitString dest, BitOffset offsetDest, BitOffset numBits);
+
+/**
+ * \brief set (sub-)bitstring to all one or zero bits
+ * @param str bitsring to reset (portion of)
+ * @param offset bit position in str to start at
+ * @param numBits number of bits to copy
+ * @param bitVal set all numBits bits to 0 if 0, to 1 otherwise
+ */
+extern void
+bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal);
 /**
  * \brief Meta-Unit test function for bitPackString, calls all functions
  * mentioned below.

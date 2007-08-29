@@ -147,9 +147,9 @@ bitPackStringInt8_unit_test(Env *env)
   }
   env_log_log(env, "bsStoreUniformUInt8Array/bsGetUInt8: ");
   {
-    unsigned numBits = random()%(sizeof (uint8_t)*CHAR_BIT) + 1;
+    unsigned numBits = random()%8 + 1;
     uint8_t mask = ~(uint8_t)0;
-    if (numBits < sizeof (uint8_t)*CHAR_BIT)
+    if (numBits < 8)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniformUInt8Array(bitStore, offset, numBits, numRnd, randSrc);
@@ -231,9 +231,9 @@ bitPackStringInt8_unit_test(Env *env)
   env_log_log(env, "passed\n");
   env_log_log(env, "bsStoreUniformInt8Array/bsGetInt8: ");
   {
-    unsigned numBits = random()%(sizeof (int8_t)*CHAR_BIT) + 1;
+    unsigned numBits = random()%8 + 1;
     int8_t mask = ~(int8_t)0;
-    if (numBits < sizeof (int8_t)*CHAR_BIT)
+    if (numBits < 8)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniformInt8Array(bitStore, offset, numBits, numRnd,
@@ -296,7 +296,7 @@ bitPackStringInt8_unit_test(Env *env)
       /* first decide how many of the values to use and at which to start */
       size_t numValueCopies, copyStart;
       BitOffset numCopyBits = 0, destOffset;
-      unsigned numBits = random()%(sizeof (uint8_t)*CHAR_BIT) + 1;
+      unsigned numBits = random()%8 + 1;
       uint8_t mask = ~(uint8_t)0;
       if (numBits < 8)
         mask = ~(mask << numBits);
@@ -314,10 +314,8 @@ bitPackStringInt8_unit_test(Env *env)
       offset = offsetStart + (BitOffset)copyStart * numBits;
       bsStoreUniformUInt8Array(bitStore, offset, numBits, numValueCopies,
                                     randSrc);
-      destOffset = random()%
-        (offsetStart
-         + (sizeof (uint8_t)*CHAR_BIT)
-         * (BitOffset)(numRnd - numValueCopies) + 1);
+      destOffset = random()%(offsetStart + 8
+                             * (BitOffset)(numRnd - numValueCopies) + 1);
       numCopyBits = (BitOffset)numBits * numValueCopies;
       /* the following bsCopy should be equivalent to:
        * bsStoreUniformUInt8Array(bitStoreCopy, destOffset,
@@ -336,6 +334,86 @@ bitPackStringInt8_unit_test(Env *env)
                     (unsigned long long)numCopyBits);
         /* FIXME: implement bitstring output function */
         freeResourcesAndReturn(had_err);
+      }
+      env_log_log(env, "passed\n");
+    }
+  }
+  if (numRnd > 0)
+  {
+    env_log_log(env, "bsClear: ");
+    {
+      /* first decide how many of the values to use and at which to start */
+      size_t numResetValues, resetStart;
+      BitOffset numResetBits = 0;
+      unsigned numBits = random()%8 + 1;
+      int bitVal = random()&1;
+      int8_t cmpVal = bitVal?-1:0;
+      uint8_t mask = ~(uint8_t)0;
+      if (numBits < 8)
+        mask = ~(mask << numBits);
+      if (random()&1)
+      {
+        numResetValues = random()%(numRnd + 1);
+        resetStart = random()%(numRnd - numResetValues + 1);
+      }
+      else
+      {
+        resetStart = random() % numRnd;
+        numResetValues = random()%(numRnd - resetStart) + 1;
+      }
+      assert(resetStart + numResetValues <= numRnd);
+      offset = offsetStart;
+      bsStoreUniformInt8Array(bitStore, offset, numBits, numRnd,
+                                    (int8_t *)randSrc);
+      numResetBits = (BitOffset)numBits * numResetValues;
+      /* the following bsCopy should be equivalent to:
+       * bsStoreUniformUInt8Array(bitStoreCopy, destOffset,
+       *                              numBits, numResetValues, randSrc); */
+      bsClear(bitStore, offset + (BitOffset)resetStart * numBits,
+              numResetBits, bitVal);
+      {
+        int8_t m = (int8_t)1 << (numBits - 1);
+        for (i = 0; i < resetStart; ++i)
+        {
+          int8_t v = (int8_t)((randSrc[i] & mask) ^ m) - m;
+          int8_t r = bsGetInt8(bitStore, offset, numBits);
+          ensure(had_err, r == v);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %"PRId8", got %"PRId8",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        v, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
+        for (; i < resetStart + numResetValues; ++i)
+        {
+          int8_t r = bsGetInt8(bitStore, offset, numBits);
+          ensure(had_err, r == cmpVal);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %"PRId8", got %"PRId8",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        cmpVal, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
+        for (; i < numRnd; ++i)
+        {
+          int8_t v = (int8_t)((randSrc[i] & mask) ^ m) - m;
+          int8_t r = bsGetInt8(bitStore, offset, numBits);
+          ensure(had_err, r == v);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %"PRId8", got %"PRId8",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        v, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
       }
       env_log_log(env, "passed\n");
     }

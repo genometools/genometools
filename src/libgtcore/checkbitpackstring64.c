@@ -147,9 +147,9 @@ bitPackStringInt64_unit_test(Env *env)
   }
   env_log_log(env, "bsStoreUniformUInt64Array/bsGetUInt64: ");
   {
-    unsigned numBits = random()%(sizeof (uint64_t)*CHAR_BIT) + 1;
+    unsigned numBits = random()%64 + 1;
     uint64_t mask = ~(uint64_t)0;
-    if (numBits < sizeof (uint64_t)*CHAR_BIT)
+    if (numBits < 64)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniformUInt64Array(bitStore, offset, numBits, numRnd, randSrc);
@@ -231,9 +231,9 @@ bitPackStringInt64_unit_test(Env *env)
   env_log_log(env, "passed\n");
   env_log_log(env, "bsStoreUniformInt64Array/bsGetInt64: ");
   {
-    unsigned numBits = random()%(sizeof (int64_t)*CHAR_BIT) + 1;
+    unsigned numBits = random()%64 + 1;
     int64_t mask = ~(int64_t)0;
-    if (numBits < sizeof (int64_t)*CHAR_BIT)
+    if (numBits < 64)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniformInt64Array(bitStore, offset, numBits, numRnd,
@@ -296,7 +296,7 @@ bitPackStringInt64_unit_test(Env *env)
       /* first decide how many of the values to use and at which to start */
       size_t numValueCopies, copyStart;
       BitOffset numCopyBits = 0, destOffset;
-      unsigned numBits = random()%(sizeof (uint64_t)*CHAR_BIT) + 1;
+      unsigned numBits = random()%64 + 1;
       uint64_t mask = ~(uint64_t)0;
       if (numBits < 64)
         mask = ~(mask << numBits);
@@ -314,10 +314,8 @@ bitPackStringInt64_unit_test(Env *env)
       offset = offsetStart + (BitOffset)copyStart * numBits;
       bsStoreUniformUInt64Array(bitStore, offset, numBits, numValueCopies,
                                     randSrc);
-      destOffset = random()%
-        (offsetStart
-         + (sizeof (uint64_t)*CHAR_BIT)
-         * (BitOffset)(numRnd - numValueCopies) + 1);
+      destOffset = random()%(offsetStart + 64
+                             * (BitOffset)(numRnd - numValueCopies) + 1);
       numCopyBits = (BitOffset)numBits * numValueCopies;
       /* the following bsCopy should be equivalent to:
        * bsStoreUniformUInt64Array(bitStoreCopy, destOffset,
@@ -336,6 +334,86 @@ bitPackStringInt64_unit_test(Env *env)
                     (unsigned long long)numCopyBits);
         /* FIXME: implement bitstring output function */
         freeResourcesAndReturn(had_err);
+      }
+      env_log_log(env, "passed\n");
+    }
+  }
+  if (numRnd > 0)
+  {
+    env_log_log(env, "bsClear: ");
+    {
+      /* first decide how many of the values to use and at which to start */
+      size_t numResetValues, resetStart;
+      BitOffset numResetBits = 0;
+      unsigned numBits = random()%64 + 1;
+      int bitVal = random()&1;
+      int64_t cmpVal = bitVal?-1:0;
+      uint64_t mask = ~(uint64_t)0;
+      if (numBits < 64)
+        mask = ~(mask << numBits);
+      if (random()&1)
+      {
+        numResetValues = random()%(numRnd + 1);
+        resetStart = random()%(numRnd - numResetValues + 1);
+      }
+      else
+      {
+        resetStart = random() % numRnd;
+        numResetValues = random()%(numRnd - resetStart) + 1;
+      }
+      assert(resetStart + numResetValues <= numRnd);
+      offset = offsetStart;
+      bsStoreUniformInt64Array(bitStore, offset, numBits, numRnd,
+                                    (int64_t *)randSrc);
+      numResetBits = (BitOffset)numBits * numResetValues;
+      /* the following bsCopy should be equivalent to:
+       * bsStoreUniformUInt64Array(bitStoreCopy, destOffset,
+       *                              numBits, numResetValues, randSrc); */
+      bsClear(bitStore, offset + (BitOffset)resetStart * numBits,
+              numResetBits, bitVal);
+      {
+        int64_t m = (int64_t)1 << (numBits - 1);
+        for (i = 0; i < resetStart; ++i)
+        {
+          int64_t v = (int64_t)((randSrc[i] & mask) ^ m) - m;
+          int64_t r = bsGetInt64(bitStore, offset, numBits);
+          ensure(had_err, r == v);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %"PRId64", got %"PRId64",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        v, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
+        for (; i < resetStart + numResetValues; ++i)
+        {
+          int64_t r = bsGetInt64(bitStore, offset, numBits);
+          ensure(had_err, r == cmpVal);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %"PRId64", got %"PRId64",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        cmpVal, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
+        for (; i < numRnd; ++i)
+        {
+          int64_t v = (int64_t)((randSrc[i] & mask) ^ m) - m;
+          int64_t r = bsGetInt64(bitStore, offset, numBits);
+          ensure(had_err, r == v);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %"PRId64", got %"PRId64",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        v, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
       }
       env_log_log(env, "passed\n");
     }

@@ -147,9 +147,9 @@ bitPackStringInt_unit_test(Env *env)
   }
   env_log_log(env, "bsStoreUniformUIntArray/bsGetUInt: ");
   {
-    unsigned numBits = random()%(sizeof (unsigned)*CHAR_BIT) + 1;
+    unsigned numBits = random()%32 + 1;
     unsigned mask = ~(unsigned)0;
-    if (numBits < sizeof (unsigned)*CHAR_BIT)
+    if (numBits < 32)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniformUIntArray(bitStore, offset, numBits, numRnd, randSrc);
@@ -231,9 +231,9 @@ bitPackStringInt_unit_test(Env *env)
   env_log_log(env, "passed\n");
   env_log_log(env, "bsStoreUniformIntArray/bsGetInt: ");
   {
-    unsigned numBits = random()%(sizeof (int)*CHAR_BIT) + 1;
+    unsigned numBits = random()%32 + 1;
     int mask = ~(int)0;
-    if (numBits < sizeof (int)*CHAR_BIT)
+    if (numBits < 32)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniformIntArray(bitStore, offset, numBits, numRnd,
@@ -296,7 +296,7 @@ bitPackStringInt_unit_test(Env *env)
       /* first decide how many of the values to use and at which to start */
       size_t numValueCopies, copyStart;
       BitOffset numCopyBits = 0, destOffset;
-      unsigned numBits = random()%(sizeof (unsigned)*CHAR_BIT) + 1;
+      unsigned numBits = random()%32 + 1;
       unsigned mask = ~(unsigned)0;
       if (numBits < 32)
         mask = ~(mask << numBits);
@@ -314,10 +314,8 @@ bitPackStringInt_unit_test(Env *env)
       offset = offsetStart + (BitOffset)copyStart * numBits;
       bsStoreUniformUIntArray(bitStore, offset, numBits, numValueCopies,
                                     randSrc);
-      destOffset = random()%
-        (offsetStart
-         + (sizeof (unsigned)*CHAR_BIT)
-         * (BitOffset)(numRnd - numValueCopies) + 1);
+      destOffset = random()%(offsetStart + 32
+                             * (BitOffset)(numRnd - numValueCopies) + 1);
       numCopyBits = (BitOffset)numBits * numValueCopies;
       /* the following bsCopy should be equivalent to:
        * bsStoreUniformUIntArray(bitStoreCopy, destOffset,
@@ -336,6 +334,86 @@ bitPackStringInt_unit_test(Env *env)
                     (unsigned long long)numCopyBits);
         /* FIXME: implement bitstring output function */
         freeResourcesAndReturn(had_err);
+      }
+      env_log_log(env, "passed\n");
+    }
+  }
+  if (numRnd > 0)
+  {
+    env_log_log(env, "bsClear: ");
+    {
+      /* first decide how many of the values to use and at which to start */
+      size_t numResetValues, resetStart;
+      BitOffset numResetBits = 0;
+      unsigned numBits = random()%32 + 1;
+      int bitVal = random()&1;
+      int cmpVal = bitVal?-1:0;
+      unsigned mask = ~(unsigned)0;
+      if (numBits < 32)
+        mask = ~(mask << numBits);
+      if (random()&1)
+      {
+        numResetValues = random()%(numRnd + 1);
+        resetStart = random()%(numRnd - numResetValues + 1);
+      }
+      else
+      {
+        resetStart = random() % numRnd;
+        numResetValues = random()%(numRnd - resetStart) + 1;
+      }
+      assert(resetStart + numResetValues <= numRnd);
+      offset = offsetStart;
+      bsStoreUniformIntArray(bitStore, offset, numBits, numRnd,
+                                    (int *)randSrc);
+      numResetBits = (BitOffset)numBits * numResetValues;
+      /* the following bsCopy should be equivalent to:
+       * bsStoreUniformUIntArray(bitStoreCopy, destOffset,
+       *                              numBits, numResetValues, randSrc); */
+      bsClear(bitStore, offset + (BitOffset)resetStart * numBits,
+              numResetBits, bitVal);
+      {
+        int m = (int)1 << (numBits - 1);
+        for (i = 0; i < resetStart; ++i)
+        {
+          int v = (int)((randSrc[i] & mask) ^ m) - m;
+          int r = bsGetInt(bitStore, offset, numBits);
+          ensure(had_err, r == v);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %""d"", got %""d"",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        v, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
+        for (; i < resetStart + numResetValues; ++i)
+        {
+          int r = bsGetInt(bitStore, offset, numBits);
+          ensure(had_err, r == cmpVal);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %""d"", got %""d"",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        cmpVal, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
+        for (; i < numRnd; ++i)
+        {
+          int v = (int)((randSrc[i] & mask) ^ m) - m;
+          int r = bsGetInt(bitStore, offset, numBits);
+          ensure(had_err, r == v);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %""d"", got %""d"",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        v, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
       }
       env_log_log(env, "passed\n");
     }

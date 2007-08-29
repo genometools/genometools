@@ -93,24 +93,6 @@ computeDeBruijn()
 }
 #endif
 
-/**
- * \brief Compares substrings of bitstrings, starting at respective offsets,
- * both of lenght numBits.
- *
- * The bitstrings are treated as MSB-first encodings (which they are
- * if produced by above functions) and thus after the first
- * most-significant bit set in only one of the strings the comparision
- * can terminate.
- *
- * This function treats two sub-bitstrings as
- * @param a first bitstring to compare
- * @param offsetA corresponding start position
- * @param numBitsA length of substring \f$a'\f$ in a to use for comparison.
- * @param b second bitstring
- * @param offsetB corresponding start position
- * @param numBitsB length of substring \f$b'\f$ in b to use for comparison.
- * @return 0 for equality, \f$-1\f$ if \f$a < b\f$, \f$1\f$ if \f$b > a\f$
- */
 extern int
 bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
           const BitString b, BitOffset offsetB, BitOffset numBitsB)
@@ -394,5 +376,57 @@ bsCopy(const BitString src, BitOffset offsetSrc,
           bitTopDest = 0, ++q;
       }
     }
+  }
+}
+
+void
+bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal)
+{
+  unsigned bitsLeft = numBits,
+    bitTop = offset%bitElemBits;
+  size_t elemStart = offset/bitElemBits;
+  BitElem *p = str + elemStart;
+  unsigned long bitPatSource = 0UL;
+  assert(str);
+  if (bitVal)
+    bitPatSource = ~0UL;
+  if (bitTop)
+  {
+    unsigned long mask = ~0UL;
+    if (bitElemBits < (sizeof (unsigned long)*CHAR_BIT))
+    {
+      mask <<= bitElemBits;
+    }
+    else
+    {
+      mask = 0;
+    }
+    mask = (~mask) >> bitTop;
+    if (numBits < bitElemBits - bitTop)
+    {
+      unsigned backShift = bitElemBits - numBits - bitTop;
+      mask &= ~0UL << backShift;
+      *p = (*p & ~mask) | (bitPatSource & mask);
+      return;
+    }
+    else
+    {
+      bitsLeft -= bitElemBits - bitTop;
+      *p = (*p & ~mask) | (bitPatSource & mask);
+      ++p;
+    }
+  }
+  {
+    size_t fullElems = bitsLeft / bitElemBits;
+    memset(p, bitPatSource, sizeof (BitElem) * fullElems);
+    p += fullElems;
+    bitsLeft -= fullElems * bitElemBits;
+  }
+  if (bitsLeft)
+  {
+    unsigned long mask = ((~0UL)<<(bitElemBits - bitsLeft));
+    if (bitElemBits < (sizeof (unsigned long)*CHAR_BIT))
+      mask &= (~(~0UL<<bitElemBits));
+    *p = (*p & ~mask) | (bitPatSource & mask);
   }
 }

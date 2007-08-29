@@ -147,9 +147,9 @@ bitPackStringInt16_unit_test(Env *env)
   }
   env_log_log(env, "bsStoreUniformUInt16Array/bsGetUInt16: ");
   {
-    unsigned numBits = random()%(sizeof (uint16_t)*CHAR_BIT) + 1;
+    unsigned numBits = random()%16 + 1;
     uint16_t mask = ~(uint16_t)0;
-    if (numBits < sizeof (uint16_t)*CHAR_BIT)
+    if (numBits < 16)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniformUInt16Array(bitStore, offset, numBits, numRnd, randSrc);
@@ -231,9 +231,9 @@ bitPackStringInt16_unit_test(Env *env)
   env_log_log(env, "passed\n");
   env_log_log(env, "bsStoreUniformInt16Array/bsGetInt16: ");
   {
-    unsigned numBits = random()%(sizeof (int16_t)*CHAR_BIT) + 1;
+    unsigned numBits = random()%16 + 1;
     int16_t mask = ~(int16_t)0;
-    if (numBits < sizeof (int16_t)*CHAR_BIT)
+    if (numBits < 16)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniformInt16Array(bitStore, offset, numBits, numRnd,
@@ -296,7 +296,7 @@ bitPackStringInt16_unit_test(Env *env)
       /* first decide how many of the values to use and at which to start */
       size_t numValueCopies, copyStart;
       BitOffset numCopyBits = 0, destOffset;
-      unsigned numBits = random()%(sizeof (uint16_t)*CHAR_BIT) + 1;
+      unsigned numBits = random()%16 + 1;
       uint16_t mask = ~(uint16_t)0;
       if (numBits < 16)
         mask = ~(mask << numBits);
@@ -314,10 +314,8 @@ bitPackStringInt16_unit_test(Env *env)
       offset = offsetStart + (BitOffset)copyStart * numBits;
       bsStoreUniformUInt16Array(bitStore, offset, numBits, numValueCopies,
                                     randSrc);
-      destOffset = random()%
-        (offsetStart
-         + (sizeof (uint16_t)*CHAR_BIT)
-         * (BitOffset)(numRnd - numValueCopies) + 1);
+      destOffset = random()%(offsetStart + 16
+                             * (BitOffset)(numRnd - numValueCopies) + 1);
       numCopyBits = (BitOffset)numBits * numValueCopies;
       /* the following bsCopy should be equivalent to:
        * bsStoreUniformUInt16Array(bitStoreCopy, destOffset,
@@ -336,6 +334,86 @@ bitPackStringInt16_unit_test(Env *env)
                     (unsigned long long)numCopyBits);
         /* FIXME: implement bitstring output function */
         freeResourcesAndReturn(had_err);
+      }
+      env_log_log(env, "passed\n");
+    }
+  }
+  if (numRnd > 0)
+  {
+    env_log_log(env, "bsClear: ");
+    {
+      /* first decide how many of the values to use and at which to start */
+      size_t numResetValues, resetStart;
+      BitOffset numResetBits = 0;
+      unsigned numBits = random()%16 + 1;
+      int bitVal = random()&1;
+      int16_t cmpVal = bitVal?-1:0;
+      uint16_t mask = ~(uint16_t)0;
+      if (numBits < 16)
+        mask = ~(mask << numBits);
+      if (random()&1)
+      {
+        numResetValues = random()%(numRnd + 1);
+        resetStart = random()%(numRnd - numResetValues + 1);
+      }
+      else
+      {
+        resetStart = random() % numRnd;
+        numResetValues = random()%(numRnd - resetStart) + 1;
+      }
+      assert(resetStart + numResetValues <= numRnd);
+      offset = offsetStart;
+      bsStoreUniformInt16Array(bitStore, offset, numBits, numRnd,
+                                    (int16_t *)randSrc);
+      numResetBits = (BitOffset)numBits * numResetValues;
+      /* the following bsCopy should be equivalent to:
+       * bsStoreUniformUInt16Array(bitStoreCopy, destOffset,
+       *                              numBits, numResetValues, randSrc); */
+      bsClear(bitStore, offset + (BitOffset)resetStart * numBits,
+              numResetBits, bitVal);
+      {
+        int16_t m = (int16_t)1 << (numBits - 1);
+        for (i = 0; i < resetStart; ++i)
+        {
+          int16_t v = (int16_t)((randSrc[i] & mask) ^ m) - m;
+          int16_t r = bsGetInt16(bitStore, offset, numBits);
+          ensure(had_err, r == v);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %"PRId16", got %"PRId16",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        v, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
+        for (; i < resetStart + numResetValues; ++i)
+        {
+          int16_t r = bsGetInt16(bitStore, offset, numBits);
+          ensure(had_err, r == cmpVal);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %"PRId16", got %"PRId16",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        cmpVal, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
+        for (; i < numRnd; ++i)
+        {
+          int16_t v = (int16_t)((randSrc[i] & mask) ^ m) - m;
+          int16_t r = bsGetInt16(bitStore, offset, numBits);
+          ensure(had_err, r == v);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %"PRId16", got %"PRId16",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        v, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
       }
       env_log_log(env, "passed\n");
     }
