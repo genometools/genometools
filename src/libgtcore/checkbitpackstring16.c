@@ -108,7 +108,7 @@ bitPackStringInt16_unit_test(Env *env)
   env_log_log(env, "passed\n");
   if (numRnd > 0)
   {
-    uint16_t v = randSrc[0], r;
+    uint16_t v = randSrc[0], r = 0;
     unsigned numBits = requiredUInt16Bits(v);
     BitOffset i = offsetStart + numBits;
     uint16_t mask = ~(uint16_t)0;

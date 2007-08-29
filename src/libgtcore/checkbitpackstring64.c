@@ -108,7 +108,7 @@ bitPackStringInt64_unit_test(Env *env)
   env_log_log(env, "passed\n");
   if (numRnd > 0)
   {
-    uint64_t v = randSrc[0], r;
+    uint64_t v = randSrc[0], r = 0;
     unsigned numBits = requiredUInt64Bits(v);
     BitOffset i = offsetStart + numBits;
     uint64_t mask = ~(uint64_t)0;
