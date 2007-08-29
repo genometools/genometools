@@ -91,8 +91,9 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
 
   option = option_new_ulong_min("samples","Specify number of samples",
                                  &maxpairsoptions->samples,
-                                 (unsigned long) 1000,
-                                 (unsigned long) 0,env);
+                                 (unsigned long) 0,
+                                 (unsigned long) 1,
+                                 env);
   option_parser_add_option(op, option, env);
 
   option = option_new_string("ii",

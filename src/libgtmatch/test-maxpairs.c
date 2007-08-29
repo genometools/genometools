@@ -1,10 +1,13 @@
 #include "sarr-def.h"
 #include "measure-time-if.h"
+#include "arraydef.h"
 #include "spacedef.h"
+#include "esa-mmsearch-def.h"
 
 #include "sfx-map.pr"
 #include "sfx-apfxlen.pr"
 #include "sfx-suffixer.pr"
+#include "esa-mmsearch.pr"
 
 static Seqpos samplesubstring(Uchar *seqspace,
                               const Encodedsequence *encseq,
@@ -25,13 +28,63 @@ static Seqpos samplesubstring(Uchar *seqspace,
   return substringlength;
 }
 
- /*@ignore@*/
-static int storesuftab(void *info,const Seqpos *suftabpart,
-                       Readmode readmode,Seqpos widthofpart,Env *env)
+typedef struct
 {
+  const Uchar *query;
+  unsigned long querylen,
+                minlength;
+  const Encodedsequence *encseq;
+  int (*extendmatch)(void *,Seqpos,unsigned long);
+  void *extendinfo;
+  unsigned long currentquerystart;
+} Substringmatchinfo;
+
+static int processsuftab(void *info,
+                         const Seqpos *suftabpart,
+                         Readmode readmode,
+                         Seqpos widthofpart,
+                         Env *env)
+{
+  Substringmatchinfo *ssi = (Substringmatchinfo *) info;
+  MMsearchiterator *mmsi; 
+  Seqpos dbstart;
+
+  assert(widthofpart > 0);
+  for(ssi->currentquerystart = 0;
+      ssi->currentquerystart <= ssi->querylen - ssi->minlength;
+      ssi->currentquerystart++)
+  {
+    mmsi = newmmsearchiterator(ssi->encseq,
+                               suftabpart,
+                               0,
+                               0,
+                               widthofpart-1,
+                               readmode,
+                               ssi->query +
+                               ssi->currentquerystart,
+                               ssi->minlength,
+                               env);
+    while(nextmmsearchiterator(&dbstart,mmsi))
+    {
+      if(ssi->extendmatch(ssi->extendinfo,
+                          dbstart,
+                          ssi->currentquerystart) != 0)
+      {
+        return -1;
+      }
+    }
+    freemmsearchiterator(&mmsi,env);
+  }
   return 0;
 }
- /*@end@*/
+
+static int extendmatch(/*@unused@*/ void *extendinfo,
+                       Seqpos dbstart,
+                       unsigned long querystart)
+{
+  printf("# " FormatSeqpos " %lu\n",PRINTSeqposcast(dbstart),querystart);
+  return 0;
+}
 
 int testmaxpairs(const Str *indexname,
                  unsigned long samples,
@@ -47,16 +100,17 @@ int testmaxpairs(const Str *indexname,
   unsigned long s;
   Encodedsequence *encseq;
   uint32_t numofchars;
+  Substringmatchinfo ssi;
 
   /*
   printf("# draw %lu samples\n",samples); XXX integrate later
   */
   if (mapsuffixarray(&suffixarray,
-                    &totallength,
-                    SARR_ESQTAB,
-                    indexname,
-                    false,
-                    env) != 0)
+                     &totallength,
+                     SARR_ESQTAB,
+                     indexname,
+                     false,
+                     env) != 0)
   {
     haserr = true;
   }
@@ -76,12 +130,18 @@ int testmaxpairs(const Str *indexname,
                                    &samplespecialcharinfo,
                                    seq1,
                                    len1,
-                                   seq2,
-                                   len2,
+                                   NULL,
+                                   0,
                                    suffixarray.alpha,
                                    env);
-    if (suffixerator(storesuftab,
-                     NULL,
+    ssi.query = seq2;
+    ssi.querylen = (unsigned long) len2;
+    ssi.minlength = minlength;
+    ssi.encseq = encseq;
+    ssi.extendmatch = extendmatch;
+    ssi.extendinfo = NULL;
+    if (suffixerator(processsuftab,
+                     &ssi,
                      samplespecialcharinfo.specialcharacters,
                      samplespecialcharinfo.specialranges,
                      encseq,
@@ -89,7 +149,7 @@ int testmaxpairs(const Str *indexname,
                      numofchars,
                      (uint32_t)
                         recommendedprefixlength((unsigned int) numofchars,
-                                                totallength),
+                                                len1),
                      (uint32_t) 1,
                      NULL,
                      env) != 0)

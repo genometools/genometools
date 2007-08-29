@@ -1,13 +1,19 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int mmenumpatternpositions(const Encodedsequence *encseq,
-                           const Seqpos *suftab,
-                           Readmode readmode,
-                           const Uchar *pattern,
-                           unsigned long patternlen,
-                           int (*processmatch)(void *,Seqpos),
-                           void *processinfo);
+MMsearchiterator *newmmsearchiterator(const Encodedsequence *encseq,
+                                      const Seqpos *suftab,
+                                      Seqpos leftbound,
+                                      Seqpos rightbound,
+                                      Seqpos offset,
+                                      Readmode readmode,
+                                      const Uchar *pattern,
+                                      unsigned long patternlen,
+                                      Env *env);
+
+bool nextmmsearchiterator(Seqpos *dbstart,MMsearchiterator *mmsi);
+
+void freemmsearchiterator(MMsearchiterator **mmsi,Env *env);
 
 #ifdef __cplusplus
 }

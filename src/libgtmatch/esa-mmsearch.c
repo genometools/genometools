@@ -9,11 +9,12 @@
 #include "seqpos-def.h"
 #include "divmodmul.h"
 #include "symboldef.h"
+#include "spacedef.h"
 #include "chardef.h"
+#include "esa-mmsearch-def.h"
 
 #define COMPARE(OFFSET)\
-        for (sidx = (OFFSET) + lcplen;\
-            /* Nothing */; sidx++, lcplen++)\
+        for (sidx = (OFFSET) + lcplen; /* Nothing */; sidx++, lcplen++)\
         {\
           if (lcplen >= (Seqpos) querylen)\
           {\
@@ -133,30 +134,50 @@ static bool mmsearch(const Encodedsequence *encseq,
   return true;
 }
 
-int mmenumpatternpositions(const Encodedsequence *encseq,
-                           const Seqpos *suftab,
-                           Readmode readmode,
-                           const Uchar *pattern,
-                           unsigned long patternlen,
-                           int (*processmatch)(void *,Seqpos),
-                           void *processinfo)
+ struct MMsearchiterator
 {
-  Seqpos sufindex;
   Lcpinterval lcpitv;
+  Seqpos sufindex;
+  const Seqpos *suftab;
+};
 
-  lcpitv.offset = 0;
-  lcpitv.left = 0;
-  lcpitv.right = getencseqtotallength(encseq);
-  if (mmsearch(encseq,suftab,readmode,&lcpitv,pattern,patternlen))
+MMsearchiterator *newmmsearchiterator(const Encodedsequence *encseq,
+                                      const Seqpos *suftab,
+                                      Seqpos leftbound,
+                                      Seqpos rightbound,
+                                      Seqpos offset,
+                                      Readmode readmode,
+                                      const Uchar *pattern,
+                                      unsigned long patternlen,
+                                      Env *env)
+{
+  MMsearchiterator *mmsi;
+
+  ALLOCASSIGNSPACE(mmsi,NULL,MMsearchiterator,1);
+  mmsi->lcpitv.offset = offset;
+  mmsi->lcpitv.left = leftbound;
+  mmsi->lcpitv.right = rightbound;
+  mmsi->suftab = suftab;
+  if (!mmsearch(encseq,suftab,readmode,&mmsi->lcpitv,pattern,patternlen))
   {
-    for (sufindex = lcpitv.left; sufindex <= lcpitv.right; sufindex++)
-    {
-      if (processmatch(processinfo,
-                      suftab[sufindex]) != 0)
-      {
-        return -1;
-      }
-    }
+    mmsi->lcpitv.left = 1;
+    mmsi->lcpitv.right = 0;
   }
-  return 0;
+  mmsi->sufindex = mmsi->lcpitv.left;
+  return mmsi;
+}
+
+bool nextmmsearchiterator(Seqpos *dbstart,MMsearchiterator *mmsi)
+{
+  if(mmsi->sufindex <= mmsi->lcpitv.right)
+  {
+    *dbstart = mmsi->suftab[mmsi->sufindex++];
+    return true;
+  }
+  return false;
+}
+
+void freemmsearchiterator(MMsearchiterator **mmsi,Env *env)
+{
+  FREESPACE(*mmsi);
 }

@@ -58,6 +58,7 @@ Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}Atinsert.fna " +
            "-indexname sfx -dna -suf -tis -lcp -pl"
   run_test "#{$bin}gt dev maxpairs -samples 100 -l 8 -ii sfx"
+  run "grep -v '^#' #{$last_stdout}"
   run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
 end
 
