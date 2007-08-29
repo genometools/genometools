@@ -21,14 +21,12 @@ static int diagram_lua_new(lua_State *L)
   bool error;
   Config *config;
   Env *env = get_env_from_registry(L);
-  diagram = lua_newuserdata(L, sizeof (Diagram**));
-  assert(diagram);
   /* make sure we got a table as first argument */
   luaL_checktype(L, 1, LUA_TTABLE);
   /* traverse table and save the features */
   features = array_new(sizeof (GenomeNode*), env);
   lua_pushinteger(L, i);
-  lua_gettable(L, -1);
+  lua_gettable(L, 1);
   while (!lua_isnil(L, -1)) {
     error = false;
     gn = lua_touserdata(L, -1);
@@ -52,14 +50,16 @@ static int diagram_lua_new(lua_State *L)
     }
     i++;
     lua_pushinteger(L, i);
-    lua_gettable(L, -1);
+    lua_gettable(L, 1);
   }
   /* get range */
   range.start = luaL_checklong(L, 2);
   range.end   = luaL_checklong(L, 3);
-  luaL_argcheck(L, range.start <= range.end, 2, "must be <= end");
+  luaL_argcheck(L, range.start <= range.end, 2, "must be <= endpos");
   /* create diagram */
   config = get_config_from_registry(L);
+  diagram = lua_newuserdata(L, sizeof (Diagram**));
+  assert(diagram);
   *diagram = diagram_new(features, range, config, env);
   array_delete(features, env);
   luaL_getmetatable(L, DIAGRAM_METATABLE);

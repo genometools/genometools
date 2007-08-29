@@ -30,7 +30,7 @@ static int genome_feature_lua_new(lua_State *L)
 
   range.start = luaL_checklong(L, 2);
   range.end   = luaL_checklong(L, 3);
-  luaL_argcheck(L, range.start <= range.end, 2, "must be <= end");
+  luaL_argcheck(L, range.start <= range.end, 2, "must be <= endpos");
 
   strand_str = luaL_checklstring(L, 4, &length);
   luaL_argcheck(L, length == 1, 4, "strand string must have length 1");

@@ -22,19 +22,11 @@ static int feature_index_lua_new(lua_State *L)
   return 1;
 }
 
-static int feature_index_lua_get_features_for_seqid(lua_State *L)
+static void push_features_as_table(lua_State *L, Array *features, Env *env)
 {
-  FeatureIndex **feature_index;
-  const char *seqid;
-  Array *features;
   unsigned long i;
-  Env *env = get_env_from_registry(L);
-  feature_index = check_feature_index(L, 1);
-  seqid = luaL_checkstring(L, 2);
-  features = feature_index_get_features_for_seqid(*feature_index, seqid);
-  if (features) {
+  if (features && array_size(features)) {
     /* push table containing feature references onto the stack */
-    assert(array_size(features));
     lua_newtable(L);
     for (i = 0; i < array_size(features); i++) {
       lua_pushinteger(L, i+1); /* in Lua we index from 1 on */
@@ -45,7 +37,73 @@ static int feature_index_lua_get_features_for_seqid(lua_State *L)
   }
   else
     lua_pushnil(L);
+}
+
+static int feature_index_lua_get_features_for_seqid(lua_State *L)
+{
+  FeatureIndex **feature_index;
+  const char *seqid;
+  Array *features;
+  Env *env = get_env_from_registry(L);
+  feature_index = check_feature_index(L, 1);
+  seqid = luaL_checkstring(L, 2);
+  features = feature_index_get_features_for_seqid(*feature_index, seqid);
+  push_features_as_table(L, features, env);
   return 1;
+}
+
+static int feature_index_lua_get_features_for_range(lua_State *L)
+{
+  FeatureIndex **feature_index;
+  const char *seqid;
+  Range range;
+  Array *features;
+  int had_err;
+  Env *env = get_env_from_registry(L);
+  feature_index = check_feature_index(L, 1);
+  seqid = luaL_checkstring(L, 2);
+  luaL_argcheck(L, feature_index_has_seqid(*feature_index, seqid, env), 2,
+                "feature_index does not contain seqid");
+  range.start = luaL_checklong(L, 3);
+  range.end   = luaL_checklong(L, 4);
+  luaL_argcheck(L, range.start <= range.end, 3, "must be <= endpos");
+  features = array_new(sizeof (GenomeNode*), env);
+  had_err = feature_index_get_features_for_range(*feature_index, features,
+                                                 seqid, range, env);
+  assert(!had_err); /* it was checked before that the feature_index contains the
+                       given sequence id*/
+  push_features_as_table(L, features, env);
+  array_delete(features, env);
+  return 1;
+}
+
+static int feature_index_lua_get_first_seqid(lua_State *L)
+{
+  FeatureIndex **feature_index;
+  const char *seqid;
+  feature_index = check_feature_index(L, 1);
+  seqid = feature_index_get_first_seqid(*feature_index);
+  if (seqid)
+    lua_pushstring(L, seqid);
+  else
+    lua_pushnil(L);
+  return 1;
+}
+
+static int feature_index_lua_get_range_for_seqid(lua_State *L)
+{
+  FeatureIndex **feature_index;
+  const char *seqid;
+  Range range;
+  Env *env = get_env_from_registry(L);
+  feature_index = check_feature_index(L, 1);
+  seqid = luaL_checkstring(L, 2);
+  luaL_argcheck(L, feature_index_has_seqid(*feature_index, seqid, env), 2,
+                "feature_index does not contain seqid");
+  range = feature_index_get_range_for_seqid(*feature_index, seqid);
+  lua_pushinteger(L, range.start);
+  lua_pushinteger(L, range.end);
+  return 2;
 }
 
 static int feature_index_lua_delete(lua_State *L)
@@ -64,6 +122,9 @@ static const struct luaL_Reg feature_index_lib_f [] = {
 
 static const struct luaL_Reg feature_index_lib_m [] = {
   { "get_features_for_seqid", feature_index_lua_get_features_for_seqid },
+  { "get_features_for_range", feature_index_lua_get_features_for_range },
+  { "get_first_seqid", feature_index_lua_get_first_seqid },
+  { "get_range_for_seqid", feature_index_lua_get_range_for_seqid },
   { NULL, NULL }
 };
 

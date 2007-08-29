@@ -298,6 +298,7 @@ static int insertfullspecialrange(InsertCompletespecials *ics,
 }
 
 static int insertfullspecialpair(void *info,
+                                 /*@unused@*/ const Encodedsequence *encseq,
                                  const Sequencerange *pair,
                                  /*@unused@*/ Env *env)
 {

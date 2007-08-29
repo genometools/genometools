@@ -9,12 +9,10 @@
 
 #include "lua.h"
 
-/* exports the FeatureIndex class (which implements the GenomeStream) interface
+/* exports the FeatureStream class (which implements the GenomeStream) interface
    to Lua:
 
-   feature_index = gt.feature_index_new()
-   -- returns the genome features (of type genome_node) in a table
-   table         = feature_index:get_features_for_seqid(string)
+   feature_stream = gt.feature_stream_new(feature_index)
 */
 int luaopen_feature_stream(lua_State*);
 

@@ -17,6 +17,7 @@
 #include "divmodmul.h"
 #include "mapspec-def.h"
 #include "encseq-def.h"
+#include "arraydef.h"
 #include "fbs-def.h"
 #include "safecast-gen.h"
 #include "esafileend.h"
@@ -1304,7 +1305,8 @@ static int overallspecialrangesdirectorbitaccess(
                 bool direct,
                 bool moveforward,
                 const Encodedsequence *encseq,
-                int(*process)(void *,const Sequencerange *,Env *),
+                int(*processrange)(void *,const Encodedsequence *,
+                                   const Sequencerange *,Env *),
                 void *processinfo,
                 Env *env)
 {
@@ -1345,7 +1347,7 @@ static int overallspecialrangesdirectorbitaccess(
           range.leftpos = REVERSEPOS(pos + specialrangelength);
           range.rightpos = REVERSEPOS(pos);
         }
-        if (process(processinfo,&range,env) != 0)
+        if (processrange(processinfo,encseq,&range,env) != 0)
         {
           return -1;
         }
@@ -1379,7 +1381,7 @@ static int overallspecialrangesdirectorbitaccess(
       range.leftpos = REVERSEPOS(pos + specialrangelength - 1);
       range.rightpos = REVERSEPOS(pos - 1);
     }
-    if (process(processinfo,&range,env) != 0)
+    if (processrange(processinfo,encseq,&range,env) != 0)
     {
       return -1;
     }
@@ -1400,7 +1402,8 @@ int overallspecialrangesfast(
                 const Encodedsequence *encseq,
                 bool moveforward,
                 Readmode readmode,
-                int(*process)(void *,const Sequencerange *,Env *),
+                int(*processrange)(void *,const Encodedsequence *,
+                                   const Sequencerange *,Env *),
                 void *processinfo,
                 Env *env)
 {
@@ -1421,7 +1424,7 @@ int overallspecialrangesfast(
     assert(esr != NULL);
     while (true)
     {
-      if (process(processinfo,&esr->previousrange,env) != 0)
+      if (processrange(processinfo,encseq,&esr->previousrange,env) != 0)
       {
         haserr = true;
         break;
@@ -1439,7 +1442,8 @@ int overallspecialrangesfast(
 
 int overallspecialranges(const Encodedsequence *encseq,
                          Readmode readmode,
-                         int(*process)(void *,const Sequencerange *,Env *),
+                         int(*processrange)(void *,const Encodedsequence *,
+                                       const Sequencerange *,Env *),
                          void *processinfo,
                          Env *env)
 {
@@ -1450,7 +1454,7 @@ int overallspecialranges(const Encodedsequence *encseq,
                                              ISDIRREVERSE(readmode)
                                                ? false : true,
                                              encseq,
-                                             process,
+                                             processrange,
                                              processinfo,
                                              env) != 0)
     {
@@ -1461,23 +1465,23 @@ int overallspecialranges(const Encodedsequence *encseq,
   if (encseq->sat == Viabitaccess)
   {
     if (overallspecialrangesdirectorbitaccess(false,
-                                             ISDIRREVERSE(readmode)
-                                               ? false : true,
-                                             encseq,
-                                             process,
-                                             processinfo,
-                                             env) != 0)
+                                              ISDIRREVERSE(readmode)
+                                                ? false : true,
+                                              encseq,
+                                              processrange,
+                                              processinfo,
+                                              env) != 0)
     {
       return -1;
     }
     return 0;
   }
   if (overallspecialrangesfast(encseq,
-                              ISDIRREVERSE(readmode) ? false : true,
-                              readmode,
-                              process,
-                              processinfo,
-                              env) != 0)
+                               ISDIRREVERSE(readmode) ? false : true,
+                               readmode,
+                               processrange,
+                               processinfo,
+                               env) != 0)
   {
     return -1;
   }

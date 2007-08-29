@@ -185,7 +185,7 @@ sequence region.
 */
 int feature_index_get_features_for_range(FeatureIndex *fi,
                                          Array *results,
-                                         char *seqid,
+                                         const char *seqid,
                                          Range qry_range,
                                          Env *env)
 {
@@ -196,7 +196,10 @@ int feature_index_get_features_for_range(FeatureIndex *fi,
   assert(fi != NULL && results != NULL);
 
   base = feature_index_get_features_for_seqid(fi, seqid);
-  if (!base) return -1;
+  if (!base) {
+    env_error_set(env, "feature index does not contain the given sequence id");
+    return -1;
+  }
   assert(fi && results && seqid && base && (qry_range.start < qry_range.end));
   key = genome_feature_new(gft_gene, qry_range, STRAND_UNKNOWN, NULL,
                            UNDEF_ULONG, env);
@@ -218,7 +221,7 @@ Checks whether a given cstr is a key in the FeatureIndex.
 \param env Pointer to Environment object.
 \return TRUE if found, FALSE otherwise.
 */
-bool feature_index_has_seqid(FeatureIndex *fi, char *seqid, Env *env)
+bool feature_index_has_seqid(FeatureIndex *fi, const char *seqid, Env *env)
 {
   assert(fi != NULL);
   return (hashtable_get(fi->regions, seqid) != NULL);
@@ -236,7 +239,7 @@ char* feature_index_get_first_seqid(FeatureIndex *fi)
 }
 
 Range feature_index_get_range_for_seqid(FeatureIndex *fi,
-                                        char *seqid)
+                                        const char *seqid)
 {
   Range ret;
   RegionInfo *info;
@@ -244,6 +247,7 @@ Range feature_index_get_range_for_seqid(FeatureIndex *fi,
   assert(fi != NULL);
 
   info = (RegionInfo*) hashtable_get(fi->regions, seqid);
+  assert(info);
   if (info && (info->dyn_range.start != ~0UL
             && info->dyn_range.end != 0))
   {

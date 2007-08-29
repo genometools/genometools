@@ -101,7 +101,9 @@ int testencodedsequence(const StrArray *filenametab,
   return haserr ? -1 : 0;
 }
 
-static int addelem(void *processinfo,const Sequencerange *range,Env *env)
+static int addelem(void *processinfo,
+                   /*@unused@*/ const Encodedsequence *encseq,
+                   const Sequencerange *range,Env *env)
 {
   env_error_check(env);
   array_add_elem((Array *) processinfo,(void *) range,sizeof (Sequencerange),

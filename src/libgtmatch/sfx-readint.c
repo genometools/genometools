@@ -36,11 +36,11 @@ size_t sizeofReadintkeys(void)
 }
 
 void setreadintkeys(Array *riktab,
-                   const char *keystring,
-                   void *valueptr,
-                   size_t sizeval,
-                   bool *readflag,
-                   Env *env)
+                    const char *keystring,
+                    void *valueptr,
+                    size_t sizeval,
+                    bool *readflag,
+                    Env *env)
 {
   Readintkeys rikvalue;
 

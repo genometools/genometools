@@ -65,7 +65,7 @@ DECLAREBufferedfiletype(Largelcpvalue);
 
 typedef struct
 {
-  uint32_t numofdbsequences;
+  unsigned long numofdbsequences;
   StrArray *filenametab;
   Filelengthvalues *filelengthtab;
   uint32_t prefixlength;
