@@ -428,7 +428,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
            sizeof (*csf.countspecialcodes) *
                   (size_t) numofspecialcodes);
     csf.storespecials = true;
-    if(mtime != NULL)
+    if (mtime != NULL)
     {
       deliverthetime(stdout,mtime,"counting prefix distribution",env);
     }
@@ -475,7 +475,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
                          (stpgetnumofparts(suftabparts) == (uint32_t) 1)
                            ? true : false,
                          env);
-      if(mtime != NULL)
+      if (mtime != NULL)
       {
         deliverthetime(stdout,mtime,"inserting suffixes into buckets",env);
       }
@@ -486,7 +486,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
                      numofchars,
                      prefixlength,
                      env);
-      if(mtime != NULL)
+      if (mtime != NULL)
       {
         deliverthetime(stdout,mtime,"sorting the buckets",env);
       }

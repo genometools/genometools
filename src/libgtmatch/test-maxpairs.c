@@ -19,7 +19,7 @@ static Seqpos samplesubstring(Uchar *seqspace,
   {
     substringlength = totallength - start;
   }
-  for(i = 0; i < substringlength; i++)
+  for (i = 0; i < substringlength; i++)
   {
     seqspace[i] = getencodedchar(encseq,start+i,Forwardmode);
   }
@@ -52,7 +52,7 @@ int testmaxpairs(const Str *indexname,
   /*
   printf("# draw %lu samples\n",samples); XXX integrate later
   */
-  if(mapsuffixarray(&suffixarray,
+  if (mapsuffixarray(&suffixarray,
                     &totallength,
                     SARR_ESQTAB,
                     indexname,
@@ -62,14 +62,14 @@ int testmaxpairs(const Str *indexname,
     haserr = true;
   }
   srand48(42349421);
-  if(substringlength > totallength/2)
+  if (substringlength > totallength/2)
   {
     substringlength = totallength/2;
   }
   ALLOCASSIGNSPACE(seq1,NULL,Uchar,substringlength);
   ALLOCASSIGNSPACE(seq2,NULL,Uchar,substringlength);
   numofchars = getnumofcharsAlphabet(suffixarray.alpha);
-  for(s=0; s<samples; s++)
+  for (s=0; s<samples; s++)
   {
     len1 = samplesubstring(seq1,suffixarray.encseq,substringlength);
     len2 = samplesubstring(seq2,suffixarray.encseq,substringlength);
@@ -81,19 +81,19 @@ int testmaxpairs(const Str *indexname,
                                    len2,
                                    suffixarray.alpha,
                                    env);
-    if(suffixerator(storesuftab,
-                    NULL,
-                    samplespecialcharinfo.specialcharacters,
-                    samplespecialcharinfo.specialranges,
-                    encseq,
-                    Forwardmode,
-                    numofchars,
-                    (uint32_t) 
-                       recommendedprefixlength((unsigned int) numofchars,
-                                               totallength),
-                    (uint32_t) 1,
-                    NULL,
-                    env) != 0)
+    if (suffixerator(storesuftab,
+                     NULL,
+                     samplespecialcharinfo.specialcharacters,
+                     samplespecialcharinfo.specialranges,
+                     encseq,
+                     Forwardmode,
+                     numofchars,
+                     (uint32_t)
+                        recommendedprefixlength((unsigned int) numofchars,
+                                                totallength),
+                     (uint32_t) 1,
+                     NULL,
+                     env) != 0)
     {
       haserr = true;
       freeEncodedsequence(&encseq,env);

@@ -10,12 +10,9 @@
 #include "libgtcore/strarray.h"
 #include "seqpos-def.h"
 #include "chardef.h"
-#include "spacedef.h"
-#include "arraydef.h"
 #include "fbs-def.h"
 #include "dist-if.h"
 #include "safecast-gen.h"
-#include "stamp.h"
 
 #include "distcalc.pr"
 #include "fbsadv.pr"
@@ -45,7 +42,7 @@ static int updatesumranges(void *key, void *value, void *data,
   keyvalue = (unsigned long) key;
   distvalue = *((unsigned long *) value);
   (*specialrangesptr) += currentrangevalue(keyvalue,distvalue);
-  /* printf("# specialranges of length %lu: %lu\n",keyvalue,distvalue); 
+  /* printf("# specialranges of length %lu: %lu\n",keyvalue,distvalue);
      XXX integrate later */
   return 0;
 }

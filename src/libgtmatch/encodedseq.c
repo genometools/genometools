@@ -27,7 +27,7 @@
 #include "mapspec-gen.pr"
 #include "fbsadv.pr"
 #include "opensfxfile.pr"
-#include "sfx-sci.pr"
+#include "fillsci.pr"
 
 #include "readnextUchar.gen"
 
@@ -605,7 +605,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
     switch (encseq->sat)
     {
       case Viadirectaccess:
-        if(!encseq->plainseqptr)
+        if (!encseq->plainseqptr)
         {
           FREESPACE(encseq->plainseq);
         }
@@ -1591,7 +1591,7 @@ static int determinesattype(const Str *indexname,
 {
   Positionaccesstype sat;
   bool haserr = false;
-  
+
   if (getmapsizeAlphabet(alphabet) == DNAALPHASIZE + 1)
   {
     if (str_sat == NULL)
@@ -1732,7 +1732,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                              specialcharinfo->specialcharacters,
                              specialcharinfo->specialranges,
                              alphabet,str_sat,env);
-  if(retcode < 0)
+  if (retcode < 0)
   {
     haserr = true;
   } else
@@ -1789,7 +1789,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                              specialcharinfo->specialcharacters,
                              specialcharinfo->specialranges,
                              alphabet,str_sat,env);
-  if(retcode < 0)
+  if (retcode < 0)
   {
     haserr = true;
   } else
@@ -1815,7 +1815,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     }
   }
 #ifdef DEBUG
-  if (!haserr && 
+  if (!haserr &&
       encseq->sat == Viauchartables &&
       encseq->numofspecialstostore > 0)
   {
@@ -1842,7 +1842,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
   env_error_check(env);
   assert(seq1 != NULL);
   assert(len1 > 0);
-  if(seq2 == NULL)
+  if (seq2 == NULL)
   {
     seqptr = (Uchar *) seq1;
     len = len1;
@@ -1850,9 +1850,9 @@ Encodedsequence *plain2encodedsequence(bool withrange,
   {
     len = len1+len2+1;
     ALLOCASSIGNSPACE(seqptr,NULL,Uchar,len);
-    memcpy(seqptr,seq1,sizeof(Uchar) * len1);
+    memcpy(seqptr,seq1,sizeof (Uchar) * len1);
     seqptr[len1] = (Uchar) SEPARATOR;
-    memcpy(seqptr + len1 + 1,seq2,sizeof(Uchar) * len2);
+    memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
   sequence2specialcharinfo(specialcharinfo,seqptr,len,env);
   encseq = determineencseqkeyvalues(sat,

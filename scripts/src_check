@@ -5,6 +5,13 @@
 # See LICENSE file or http://genometools.org/license.html for license details.
 #
 
+function showmessage()
+{
+  echo "############### "
+  echo $1
+  echo "###############"
+}
+
 if [ $# -eq 0 ]
 then
   echo "Usage: $0 file [...]" >&2
@@ -16,7 +23,7 @@ fi
 err=0
 
 grep -n ' $' $*
-if [ $? -eq 0 ]; then echo "unnecessary blank(s) at the end of line"; err=1; fi
+if [ $? -eq 0 ]; then showmessage "unnecessary blank(s) at the end of line"; err=1; fi
 
 grep -n -e 'if('     \
         -e 'sizeof(' \
@@ -26,19 +33,19 @@ grep -n -e 'if('     \
         -e 'do{'     \
         -e '){'      \
         $*
-if [ $? -eq 0 ]; then echo "missing blank(s)"; err=1; fi
+if [ $? -eq 0 ]; then showmessage "missing blank(s)"; err=1; fi
 
 grep -n '.\{81,\}' $*
-if [ $? -eq 0 ]; then echo "line(s) longer than 80 characters"; err=1; fi
+if [ $? -eq 0 ]; then showmessage "line(s) longer than 80 characters"; err=1; fi
 
 grep -n '[^:]//' $*
-if [ $? -eq 0 ]; then echo "C++ style comment"; err=1; fi
+if [ $? -eq 0 ]; then showmessage "C++ style comment"; err=1; fi
 
 grep -n '^ *,' $*
-if [ $? -eq 0 ]; then echo "illegal ',' at beginning of line"; err=1; fi
+if [ $? -eq 0 ]; then showmessage "illegal ',' at beginning of line"; err=1; fi
 
 grep -n ' has_err' $*
-if [ $? -eq 0 ]; then echo "illegal variable name 'has_err', use 'had_err' instead"; err=1; fi
+if [ $? -eq 0 ]; then showmessage "illegal variable name 'has_err', use 'had_err' instead"; err=1; fi
 
 dir=`dirname $0`
 $dir/two_empty_lines $*

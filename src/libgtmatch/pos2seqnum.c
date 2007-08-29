@@ -25,7 +25,7 @@ static int addmarkpos(void *info,const Encodedsequence *encseq,
     if (currentchar == (Uchar) SEPARATOR)
     {
       assert(asp->nextfreeSeqpos < asp->allocatedSeqpos);
-      asp->spaceSeqpos[asp->nextfreeSeqpos++] = pos; 
+      asp->spaceSeqpos[asp->nextfreeSeqpos++] = pos;
     }
   }
   return 0;
@@ -35,7 +35,6 @@ Seqpos *calculatemarkpositions(const Encodedsequence *encseq,
                                unsigned long numofdbsequences,
                                Env *env)
 {
-  
   ArraySeqpos asp;
 
   assert(numofdbsequences > (unsigned long) 1);
@@ -68,7 +67,7 @@ unsigned long getrecordnum(const Seqpos *recordseps,
     return 0;
   }
   if (position > recordseps[numofrecords-2])
-  { 
+  {
     if (position < totalwidth)
     {
       return numofrecords - 1;
@@ -92,7 +91,7 @@ unsigned long getrecordnum(const Seqpos *recordseps,
       if (position < recordseps[mid+1])
       {
         return mid + 1;
-      } 
+      }
       left = mid + 1;
     } else
     {
@@ -112,7 +111,7 @@ int checkmarkpos(const Encodedsequence *encseq,
                  unsigned long numofdbsequences,
                  Env *env)
 {
-  if(numofdbsequences > (unsigned long) 1)
+  if (numofdbsequences > (unsigned long) 1)
   {
     Seqpos *markpos, totallength, pos;
     unsigned long currentseqnum = 0, seqnum;
@@ -126,7 +125,7 @@ int checkmarkpos(const Encodedsequence *encseq,
       return -1;
     }
     totallength = getencseqtotallength(encseq);
-    for(pos=0; pos<totallength; pos++)
+    for (pos=0; pos<totallength; pos++)
     {
       currentchar = getencodedchar(encseq,pos,Forwardmode);
       if (currentchar == (Uchar) SEPARATOR)
@@ -139,13 +138,13 @@ int checkmarkpos(const Encodedsequence *encseq,
                               totallength,
                               pos,
                               env);
-        if(seqnum == numofdbsequences)
+        if (seqnum == numofdbsequences)
         {
           return -1;
         }
-        if(seqnum != currentseqnum)
+        if (seqnum != currentseqnum)
         {
-          fprintf(stderr,"pos= " FormatSeqpos 
+          fprintf(stderr,"pos= " FormatSeqpos
                          " seqnum = %lu != %lu = currentseqnum\n",
                           PRINTSeqposcast(pos),seqnum,currentseqnum);
           exit(EXIT_FAILURE);
