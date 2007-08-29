@@ -162,7 +162,7 @@ void render_line(Render *r, Line *line, Env *env)
 
   assert(r != NULL && line != NULL);
 
-  /* TODO: make this an iterator? */
+  /* XXX: make this an iterator? */
   blocks = line_get_blocks(line);
   /* begin drawing block */
   for (i=0; i<array_size(blocks); i++)
