@@ -63,6 +63,8 @@ DECLAREBufferedfiletype(Largelcpvalue);
           return 1;\
         }
 
+typedef struct Sequentialsuffixarrayreader Sequentialsuffixarrayreader;
+
 typedef struct
 {
   unsigned long numofdbsequences; /* XXX: move to encoded sequence */

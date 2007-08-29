@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int enumeratemaxpairs(Suffixarray *suffixarray,
+int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       uint32_t searchlength,
                       int(*output)(void *,Seqpos,Seqpos,Seqpos),
                       void *outinfo,

@@ -44,20 +44,20 @@ static int callenummaxpairs(const Str *indexname,
                             uint32_t userdefinedleastlength,
                             Env *env)
 {
-  Suffixarray suffixarray;
-  Seqpos totallength;
   bool haserr = false;
+  Sequentialsuffixarrayreader *ssar;
 
-  if (streamsuffixarray(&suffixarray,
-                        &totallength,
-                        SARR_LCPTAB | SARR_SUFTAB | SARR_ESQTAB,
-                        indexname,
-                        false,
-                        env) != 0)
+  ssar = newSequentialsuffixarrayreader(indexname,
+                                        SARR_LCPTAB | 
+                                        SARR_SUFTAB | 
+                                        SARR_ESQTAB,
+                                        false,
+                                        env);
+  if(ssar == NULL)
   {
     haserr = true;
   }
-  if (!haserr && enumeratemaxpairs(&suffixarray,
+  if (!haserr && enumeratemaxpairs(ssar,
                                    userdefinedleastlength,
                                    simpleexactselfmatchoutput,
                                    NULL,
@@ -65,7 +65,7 @@ static int callenummaxpairs(const Str *indexname,
   {
     haserr = true;
   }
-  freesuffixarray(&suffixarray,env);
+  freeSequentialsuffixarrayreader(&ssar,env);
   return haserr ? -1 : 0;
 }
 

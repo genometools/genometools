@@ -8,7 +8,8 @@
 #include "arraydef.h"
 #include "seqpos-def.h"
 #include "sarr-def.h"
-#include "alphadef.h"
+
+#include "sfx-map.pr"
 
 #define ISLEFTDIVERSE   (state->alphabetsize)
 #define INITIALCHAR     (state->alphabetsize+1)
@@ -317,7 +318,7 @@ static int processbranchedge(bool firstsucc,
   return 0;
 }
 
-int enumeratemaxpairs(Suffixarray *suffixarray,
+int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       uint32_t searchlength,
                       int(*output)(void *,Seqpos,Seqpos,Seqpos),
                       void *outinfo,
@@ -328,7 +329,7 @@ int enumeratemaxpairs(Suffixarray *suffixarray,
   Dfsstate state;
   bool haserr = false;
 
-  state.alphabetsize = getnumofcharsAlphabet(suffixarray->alpha);
+  state.alphabetsize = alphabetsizeSequentialsuffixarrayreader(ssar);
   state.searchlength = searchlength;
   state.output = output;
   state.outinfo = outinfo;
@@ -340,7 +341,7 @@ int enumeratemaxpairs(Suffixarray *suffixarray,
     ptr = &state.poslist[base];
     INITARRAY(ptr,Seqpos);
   }
-  if (depthfirstesa(suffixarray,
+  if (depthfirstesa(ssar,
                     state.alphabetsize+1,
                     allocateDfsinfo,
                     freeDfsinfo,
