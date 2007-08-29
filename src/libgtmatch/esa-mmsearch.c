@@ -186,16 +186,6 @@ void freemmsearchiterator(MMsearchiterator **mmsi,Env *env)
   FREESPACE(*mmsi);
 }
 
-typedef struct
-{
-  const Uchar *query;
-  unsigned long querylen;
-  unsigned int minlength;
-  Encodedsequence *dbencseq;
-  int (*processmaxmatch)(void *,unsigned long,Seqpos,unsigned long);
-  void *processmaxmatchinfo;
-} Substringmatchinfo;
-
 static bool isleftmaximal(const Encodedsequence *dbencseq,
                           Readmode readmode,
                           Seqpos dbstart,
@@ -243,6 +233,15 @@ static unsigned long extendright(const Encodedsequence *dbencseq,
   return querypos - queryend;
 }
 
+typedef struct
+{
+  const Uchar *query;
+  unsigned long querylen;
+  unsigned int minlength;
+  Encodedsequence *dbencseq;
+  int (*processmaxmatch)(void *,unsigned long,Seqpos,unsigned long);
+  void *processmaxmatchinfo;
+} Substringmatchinfo;
 
 static int processsuftab(void *info,
                          const Seqpos *suftabpart,

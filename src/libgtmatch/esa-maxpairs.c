@@ -8,8 +8,11 @@
 #include "arraydef.h"
 #include "seqpos-def.h"
 #include "sarr-def.h"
+#include "measure-time-if.h"
 
 #include "sfx-map.pr"
+#include "sfx-apfxlen.pr"
+#include "sfx-suffixer.pr"
 
 #define ISLEFTDIVERSE   (state->alphabetsize)
 #define INITIALCHAR     (state->alphabetsize+1)
@@ -361,5 +364,69 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
     ptr = &state.poslist[base];
     FREEARRAY(ptr,Seqpos);
   }
+  return haserr ? -1 : 0;
+}
+
+typedef struct
+{
+  unsigned int minlength;
+  Encodedsequence *encseq;
+  int (*processmaxmatch)(void *,Seqpos,Seqpos,Seqpos);
+  void *processmaxmatchinfo;
+} Substringmatchinfo;
+
+static int processsuftab(void *info,
+                         const Seqpos *suftabpart,
+                         Readmode readmode,
+                         Seqpos widthofpart,
+                         Env *env)
+{
+  return 0;
+}
+
+int sarrselfsubstringmatch(const Uchar *dbseq,
+                           Seqpos dblen,
+                           const Uchar *query,
+                           unsigned long querylen,
+                           unsigned int minlength,
+                           const Alphabet *alpha,
+                           int (*processmaxmatch)(void *,Seqpos,
+                                                  Seqpos,Seqpos),
+                           void *processmaxmatchinfo,
+                           Env *env)
+{
+  Specialcharinfo samplespecialcharinfo;
+  Substringmatchinfo ssi;
+  uint32_t numofchars;
+  bool haserr = false;
+                                   
+  ssi.encseq = plain2encodedsequence(true,
+                                     &samplespecialcharinfo,
+                                     dbseq,
+                                     dblen,
+                                     query,
+                                     querylen,
+                                     alpha,
+                                     env);
+  ssi.minlength = minlength;
+  ssi.processmaxmatch = processmaxmatch;
+  ssi.processmaxmatchinfo = processmaxmatchinfo;
+  numofchars = getnumofcharsAlphabet(alpha);
+  if (suffixerator(processsuftab,
+                   &ssi,
+                   samplespecialcharinfo.specialcharacters,
+                   samplespecialcharinfo.specialranges,
+                   ssi.encseq,
+                   Forwardmode,
+                   numofchars,
+                   (uint32_t) recommendedprefixlength((unsigned int) numofchars,
+                                                      dblen),
+                   (uint32_t) 1, /* parts */
+                   NULL,
+		   env) != 0)
+  {
+    haserr = true;
+  }
+  freeEncodedsequence(&ssi.encseq,env);
   return haserr ? -1 : 0;
 }

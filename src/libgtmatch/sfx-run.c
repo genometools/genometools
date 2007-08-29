@@ -56,6 +56,45 @@ static void initoutfileinfo(Outfileinfo *outfileinfo)
   outfileinfo->longest.valueseqpos = 0;
 }
 
+static int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Outfileinfo *outfileinfo,
+                       Env *env)
+{
+  Uchar outvalue;
+  bool haserr = false;
+
+  if (lcpvalue >= (Seqpos) UCHAR_MAX)
+  {
+    Largelcpvalue largelcpvalue;
+
+    outfileinfo->numoflargelcpvalues++;
+    largelcpvalue.position = outfileinfo->absolutepos + pos;
+    largelcpvalue.value = lcpvalue;
+    if (fwrite(&largelcpvalue,sizeof (Largelcpvalue),(size_t) 1,
+               outfileinfo->outfpllvtab) != (size_t) 1)
+    {
+      env_error_set(env,"cannot write 1 item of size %lu: "
+                        "errormsg=\"%s\"",
+                        (unsigned long) sizeof (Largelcpvalue),
+                        strerror(errno));
+      haserr = true;
+    }
+    outvalue = (Uchar) UCHAR_MAX;
+  } else
+  {
+    outvalue = (Uchar) lcpvalue;
+  }
+  if (!haserr && fwrite(&outvalue,sizeof (Uchar),(size_t) 1,
+                        outfileinfo->outfplcptab) != (size_t) 1)
+  {
+    env_error_set(env,"cannot write 1 item of size %lu: "
+                      "errormsg=\"%s\"",
+                      (unsigned long) sizeof (Uchar),
+                      strerror(errno));
+    haserr = true;
+  }
+  return haserr ? -1 : 0;
+}
+
 static int suftab2file(void *info,
                        const Seqpos *suftab,
                        Readmode readmode,
@@ -83,7 +122,7 @@ static int suftab2file(void *info,
       haserr = true;
     }
   }
-  if (!outfileinfo->longest.defined)
+  if (!haserr && !outfileinfo->longest.defined)
   {
     for (pos=0; pos<widthofpart; pos++)
     {
@@ -98,19 +137,14 @@ static int suftab2file(void *info,
   if (!haserr && outfileinfo->outfplcptab != NULL)
   {
     Seqpos lcpvalue;
-    Uchar outvalue;
-    Largelcpvalue largelcpvalue;
     int cmp;
 
-    outvalue = (Uchar) 0;
-    if (outfileinfo->absolutepos == 0 &&
-        fwrite(&outvalue,sizeof (Uchar),(size_t) 1,
-               outfileinfo->outfplcptab) != (size_t) 1)
+    if (outfileinfo->absolutepos == 0)
     {
-      env_error_set(env,"cannot write 1 item of size %lu: errormsg=\"%s\"",
-                         (unsigned long) sizeof (Uchar),
-                         strerror(errno));
-      haserr = true;
+      if(outlcpvalue(0,0,outfileinfo,env) != 0)
+      {
+        haserr = true;
+      }
     }
     if (!haserr)
     {
@@ -146,33 +180,8 @@ static int suftab2file(void *info,
           {
             outfileinfo->maxbranchdepth = lcpvalue;
           }
-          if (lcpvalue >= (Seqpos) UCHAR_MAX)
+          if(outlcpvalue(lcpvalue,pos,outfileinfo,env) != 0)
           {
-            outfileinfo->numoflargelcpvalues++;
-            largelcpvalue.position = outfileinfo->absolutepos + pos;
-            largelcpvalue.value = lcpvalue;
-            if (fwrite(&largelcpvalue,sizeof (Largelcpvalue),(size_t) 1,
-                       outfileinfo->outfpllvtab) != (size_t) 1)
-            {
-              env_error_set(env,"cannot write 1 item of size %lu: "
-                                "errormsg=\"%s\"",
-                                (unsigned long) sizeof (Largelcpvalue),
-                                strerror(errno));
-              haserr = true;
-              break;
-            }
-            outvalue = (Uchar) UCHAR_MAX;
-          } else
-          {
-            outvalue = (Uchar) lcpvalue;
-          }
-          if (!haserr && fwrite(&outvalue,sizeof (Uchar),(size_t) 1,
-                                outfileinfo->outfplcptab) != (size_t) 1)
-          {
-            env_error_set(env,"cannot write 1 item of size %lu: "
-                              "errormsg=\"%s\"",
-                              (unsigned long) sizeof (Uchar),
-                              strerror(errno));
             haserr = true;
             break;
           }
