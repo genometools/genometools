@@ -25,7 +25,7 @@ Track* track_new(Str *title,
   assert(title != NULL && env != NULL);
   env_error_check(env);
   track = env_ma_malloc(env, sizeof (Track));
-  track->title = title;
+  track->title = str_ref(title);
   track->lines = array_new(sizeof (Line*), env);
   assert(track != NULL);
   return track;
@@ -124,6 +124,7 @@ int track_unit_test(Env *env)
   ensure(had_err, track_get_number_of_lines(track) == 2);
 
   track_delete(track, env);
+  str_delete(title, env);
 
   return had_err;
 }

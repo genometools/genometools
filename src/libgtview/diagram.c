@@ -367,6 +367,17 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
   return 0;
 }
 
+static Str* track_key_new(const char *filename, GenomeFeatureType type,
+                          Env *env)
+{
+  Str *track_key;
+  env_error_check(env);
+  track_key = str_new_cstr(filename, env);
+  str_append_char(track_key, FILENAME_TYPE_SEPARATOR, env);
+  str_append_cstr(track_key, genome_feature_type_get_cstr(type), env);
+  return track_key;
+}
+
 /*
 create Tracks for all Blocks in the diagram
 */
@@ -383,14 +394,11 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
   for (i=0;i<array_size(ni->blocktuples);i++)
   {
     Track *track;
-    const char *filename, *type;
+    const char *filename;
     Str *track_key;
     BlockTuple *bt = *(BlockTuple**) array_get(ni->blocktuples, i);
-    filename = genome_node_get_filename((GenomeNode*) bt->gft);
-    type = genome_feature_type_get_cstr(bt->gft);
-    track_key = str_new_cstr(filename, env);
-    str_append_char(track_key, FILENAME_TYPE_SEPARATOR, env);
-    str_append_cstr(track_key, type, env);
+    filename = genome_node_get_filename(ni->parent);
+    track_key = track_key_new(filename, bt->gft, env);
     track = hashtable_get(diagram->tracks, str_get(track_key));
 
     if (track == NULL)
@@ -399,17 +407,18 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
       hashtable_add(diagram->tracks, cstr_dup(str_get(track_key), env), track,
                     env);
       diagram->nof_tracks++;
-      if (DEBUG)
-        fprintf(stderr,"created track: %s, diagram has now %d tracks\n",
-                type,diagram_get_number_of_tracks(diagram));
+      if (DEBUG) {
+        fprintf(stderr, "created track: %s, diagram has now %d tracks\n",
+                str_get(track_key), diagram_get_number_of_tracks(diagram));
+      }
     }
-    else
-      str_delete(track_key, env);
     track_insert_block(track, bt->block, env);
-    if (DEBUG)
-      fprintf(stderr,"inserted block %s into track %s\n",
-              str_get(block_get_caption(bt->block)),type);
-              env_ma_free(bt, env);
+    if (DEBUG) {
+      fprintf(stderr, "inserted block %s into track %s\n",
+              str_get(block_get_caption(bt->block)), str_get(track_key));
+    }
+    str_delete(track_key, env);
+    env_ma_free(bt, env);
   }
   array_delete(ni->blocktuples, env);
   env_ma_free(ni, env);
@@ -526,7 +535,7 @@ int diagram_unit_test(Env *env)
   GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   FeatureIndex *fi;
   Range r1, r2, r3, r4, r5, dr1, rs;
-  Str *seqid1, *seqid2;
+  Str *seqid1, *seqid2, *track_key;
   SequenceRegion *sr1, *sr2;
   int had_err=0;
   Array *features = NULL, *features2 = NULL;
@@ -612,12 +621,16 @@ int diagram_unit_test(Env *env)
   ensure(had_err, dia->range.end == 900UL);
   if (!had_err &&
       !config_cstr_in_list(dia->config,"collapse","to_parent","gene", env)) {
-    ensure(had_err, hashtable_get(dia->tracks,"gene") != NULL);
+    track_key = track_key_new("unit_test", gft_gene, env);
+    ensure(had_err, hashtable_get(dia->tracks, str_get(track_key)));
+    str_delete(track_key, env);
   }
 
   if (!had_err &&
       !config_cstr_in_list(dia->config,"collapse","to_parent","exon", env)) {
-    ensure(had_err, hashtable_get(dia->tracks,"exon") != NULL);
+    track_key = track_key_new("unit_test", gft_exon, env);
+    ensure(had_err, hashtable_get(dia->tracks, str_get(track_key)));
+    str_delete(track_key, env);
   }
   ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
 
@@ -636,17 +649,23 @@ int diagram_unit_test(Env *env)
 
   if (!had_err &&
       !config_cstr_in_list(dia2->config,"collapse","to_parent","gene", env)) {
-    ensure(had_err, hashtable_get(dia2->tracks,"gene") != NULL);
+    track_key = track_key_new("unit_test", gft_gene, env);
+    ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
+    str_delete(track_key, env);
   }
 
   if (!had_err &&
       !config_cstr_in_list(dia2->config,"collapse","to_parent","exon", env)) {
-    ensure(had_err, hashtable_get(dia2->tracks,"exon") != NULL);
+    track_key = track_key_new("unit_test", gft_exon, env);
+    ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
+    str_delete(track_key, env);
   }
 
   if (!had_err &&
       !config_cstr_in_list(dia2->config,"collapse","to_parent","CDS", env)) {
-    ensure(had_err, hashtable_get(dia2->tracks,"CDS") != NULL);
+    track_key = track_key_new("unit_test", gft_CDS, env);
+    ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
+    str_delete(track_key, env);
   }
   ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
 

@@ -26,7 +26,7 @@ typedef struct Track Track;
 
 /*!
 reates a new Track object.
-\param title Title of the Track object (takes ownership).
+\param title Title of the Track object.
 \param env Pointer to Environment object.
 \return Pointer to a new Track object.
 */
