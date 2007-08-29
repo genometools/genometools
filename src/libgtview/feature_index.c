@@ -25,9 +25,9 @@
 struct FeatureIndex
 {
   Hashtable *regions;
-  char* firstseqid;
-  unsigned int nof_sequence_regions;
-  unsigned int reference_count;
+  char *firstseqid;
+  unsigned int nof_sequence_regions,
+               reference_count;
 };
 
 typedef struct
