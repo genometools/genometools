@@ -194,7 +194,6 @@ typedef struct
   Encodedsequence *dbencseq;
   int (*processmaxmatch)(void *,unsigned long,Seqpos,unsigned long);
   void *processmaxmatchinfo;
-  unsigned long currentquerystart;
 } Substringmatchinfo;
 
 static bool isleftmaximal(const Encodedsequence *dbencseq,
@@ -217,6 +216,34 @@ static bool isleftmaximal(const Encodedsequence *dbencseq,
   return false;
 }
 
+static unsigned long extendright(const Encodedsequence *dbencseq,
+                                 Readmode readmode,
+                                 Seqpos totallength,
+                                 Seqpos dbend,
+                                 const Uchar *query,
+                                 unsigned long queryend,
+                                 unsigned long querylength)
+{
+  Uchar dbchar;
+  Seqpos dbpos;
+  unsigned long querypos;
+
+  for(dbpos = dbend, querypos = queryend; /* Nothing */; dbpos++, querypos++)
+  {
+    if(dbpos == totallength || querypos == querylength)
+    {
+      break;
+    }
+    dbchar = getencodedchar(dbencseq,dbpos,readmode);
+    if(dbchar != query[querypos] || ISSPECIAL(dbchar))
+    {
+      break;
+    }
+  }
+  return querypos - queryend;
+}
+
+
 static int processsuftab(void *info,
                          const Seqpos *suftabpart,
                          Readmode readmode,
@@ -225,12 +252,14 @@ static int processsuftab(void *info,
 {
   Substringmatchinfo *ssi = (Substringmatchinfo *) info;
   MMsearchiterator *mmsi; 
-  Seqpos dbstart;
+  Seqpos dbstart, totallength;
+  unsigned long extend, currentquerystart;
 
   assert(widthofpart > 0);
-  for(ssi->currentquerystart = 0;
-      ssi->currentquerystart <= ssi->querylen - ssi->minlength;
-      ssi->currentquerystart++)
+  totallength = getencseqtotallength(ssi->dbencseq);
+  for(currentquerystart = 0;
+      currentquerystart <= ssi->querylen - ssi->minlength;
+      currentquerystart++)
   {
     mmsi = newmmsearchiterator(ssi->dbencseq,
                                suftabpart,
@@ -239,7 +268,7 @@ static int processsuftab(void *info,
                                widthofpart-1,
                                readmode,
                                ssi->query +
-                               ssi->currentquerystart,
+                               currentquerystart,
                                (unsigned long) ssi->minlength,
                                env);
     while(nextmmsearchiterator(&dbstart,mmsi))
@@ -248,12 +277,19 @@ static int processsuftab(void *info,
                        readmode,
                        dbstart,
                        ssi->query,
-                       ssi->currentquerystart))
+                       currentquerystart))
       {
+         extend = extendright(ssi->dbencseq,
+                              readmode,
+                              totallength,
+                              dbstart + ssi->minlength,
+                              ssi->query,
+                              currentquerystart + ssi->minlength,
+                              ssi->querylen);
         if(ssi->processmaxmatch(ssi->processmaxmatchinfo,
-                                (unsigned long) ssi->minlength,
+                                extend + (unsigned long) ssi->minlength,
                                 dbstart,
-                                ssi->currentquerystart) != 0)
+                                currentquerystart) != 0)
         {
           return -1;
 	}
