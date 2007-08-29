@@ -12,6 +12,7 @@
  * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
  */
 
+#include "libgtcore/cstr.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/warning.h"
 #include "libgtcore/str.h"
@@ -25,6 +26,9 @@
 
 /* XXX: use debugging interface (gt -debug, env_log_log()) */
 #define DEBUG false
+
+/* used to separate a filename from the type in a track name */
+#define FILENAME_TYPE_SEPARATOR  '|'
 
 struct Diagram
 {
@@ -379,19 +383,28 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
   for (i=0;i<array_size(ni->blocktuples);i++)
   {
     Track *track;
+    const char *filename, *type;
+    Str *track_key;
     BlockTuple *bt = *(BlockTuple**) array_get(ni->blocktuples, i);
-    const char *type = genome_feature_type_get_cstr(bt->gft);
-    track = hashtable_get(diagram->tracks, type);
+    filename = genome_node_get_filename((GenomeNode*) bt->gft);
+    type = genome_feature_type_get_cstr(bt->gft);
+    track_key = str_new_cstr(filename, env);
+    str_append_char(track_key, FILENAME_TYPE_SEPARATOR, env);
+    str_append_cstr(track_key, type, env);
+    track = hashtable_get(diagram->tracks, str_get(track_key));
 
     if (track == NULL)
     {
-      track = track_new(str_new_cstr(type, env), env);
-      hashtable_add(diagram->tracks, (void*) type, track, env);
+      track = track_new(track_key, env);
+      hashtable_add(diagram->tracks, cstr_dup(str_get(track_key), env), track,
+                    env);
       diagram->nof_tracks++;
       if (DEBUG)
         fprintf(stderr,"created track: %s, diagram has now %d tracks\n",
                 type,diagram_get_number_of_tracks(diagram));
     }
+    else
+      str_delete(track_key, env);
     track_insert_block(track, bt->block, env);
     if (DEBUG)
       fprintf(stderr,"inserted block %s into track %s\n",
@@ -438,7 +451,7 @@ static void diagram_build(Diagram *diagram, Array *features, Env *env)
     GenomeNode *current_root = *(GenomeNode**) array_get(features,i);
     traverse_genome_nodes(current_root, &genome_node_children, env);
   }
-  /* collect blocks from nodeinfo structures */
+  /* collect blocks from nodeinfo structures and create the tracks */
   (void) hashtable_foreach(diagram->nodeinfo, collect_blocks, diagram, env);
 }
 
@@ -449,7 +462,7 @@ Diagram* diagram_new(Array* features, Range range, Config* config, Env* env)
   unsigned long i;
   env_error_check(env);
   diagram = env_ma_malloc(env, sizeof (Diagram));
-  diagram->tracks = hashtable_new(HASH_STRING, NULL, NULL, env);
+  diagram->tracks = hashtable_new(HASH_STRING, env_ma_free_func, NULL, env);
   diagram->nodeinfo = hashtable_new(HASH_DIRECT, NULL, NULL, env);
   diagram->nof_tracks = 0;
   diagram->config = config;
@@ -532,40 +545,34 @@ int diagram_unit_test(Env *env)
   seqid1 = str_new_cstr("test1", env);
   seqid2 = str_new_cstr("test2", env);
 
-  sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, NULL, 0, env);
-  sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, NULL, 0, env);
+  sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, "unit_test", 0, env);
+  sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, "unit_test", 0, env);
 
   /* Generating a new genome_feature with the property gft_gene and
    the range r1 ... */
-  gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN, NULL, UNDEF_ULONG,
-                           env);
-
+  gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN, "unit_test",
+                           UNDEF_ULONG, env);
   /* ... and assign a sequence id to the new genome_feature-object. */
   genome_node_set_seqid((GenomeNode*) gn1, seqid1);
 
-  gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN, NULL, UNDEF_ULONG,
-                           env);
-
+  gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN, "unit_test",
+                           UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) gn2, seqid2);
 
-  ex1 = genome_feature_new(gft_exon, r2, STRAND_UNKNOWN, NULL, UNDEF_ULONG,
-                           env);
-
+  ex1 = genome_feature_new(gft_exon, r2, STRAND_UNKNOWN, "unit_test",
+                           UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) ex1, seqid1);
 
-  ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN, NULL, UNDEF_ULONG,
-                           env);
-
+  ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN, "unit_test",
+                           UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) ex2, seqid1);
 
-  ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN, NULL, UNDEF_ULONG,
-                           env);
-
+  ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN, "unit_test",
+                           UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) ex3, seqid2);
 
-  cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN, NULL, UNDEF_ULONG,
-                            env);
-
+  cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN, "unit_test",
+                            UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) cds1, seqid2);
 
   /* Determine the structure of our feature tree */

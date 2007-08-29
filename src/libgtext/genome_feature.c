@@ -113,10 +113,12 @@ GenomeNode* genome_feature_new(GenomeFeatureType type, Range range,
                                Strand strand, const char *filename,
                                unsigned long line_number, Env *env)
 {
-  GenomeNode *gn = genome_node_create(genome_feature_class(), filename,
-                                      line_number, env);
-  GenomeFeature *gf = genome_feature_cast(gn);
+  GenomeNode *gn;
+  GenomeFeature *gf;
   assert(range.start <= range.end);
+  assert(filename);
+  gn = genome_node_create(genome_feature_class(), filename, line_number, env);
+  gf = genome_feature_cast(gn);
   gf->seqid          = NULL;
   gf->source         = NULL;
   gf->type           = type;

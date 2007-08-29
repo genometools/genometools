@@ -201,8 +201,8 @@ int feature_index_get_features_for_range(FeatureIndex *fi,
     return -1;
   }
   assert(fi && results && seqid && base && (qry_range.start < qry_range.end));
-  key = genome_feature_new(gft_gene, qry_range, STRAND_UNKNOWN, NULL,
-                           UNDEF_ULONG, env);
+  key = genome_feature_new(gft_gene, qry_range, STRAND_UNKNOWN, "", UNDEF_ULONG,
+                           env);
   for (i = 0; i < array_size(base); i++)
   {
     GenomeNode *gn = *(GenomeNode**) array_get(base, i);

@@ -539,7 +539,7 @@ int render_to_png(Render *r, Diagram *dia, const char *filename,
   {
     /* process (render) each track */
     Hashtable *tracks = diagram_get_tracks(r->dia);
-    (void) hashtable_foreach(tracks, render_track, r, env);
+    (void) hashtable_foreach_ao(tracks, render_track, r, env);
   }
   else if (config_get_verbose(r->cfg))
     fprintf(stderr, "diagram has no tracks!\n");

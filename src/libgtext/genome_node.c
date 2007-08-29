@@ -70,7 +70,7 @@ GenomeNode* genome_node_create(const GenomeNodeClass *gnc,
                                unsigned long line_number, Env *env)
 {
   GenomeNode *gn;
-  assert(gnc && gnc->size);
+  assert(gnc && gnc->size && filename);
   gn                  = env_ma_malloc(env, gnc->size);
   gn->c_class         = gnc;
   gn->filename        = filename;

@@ -341,10 +341,8 @@ int block_unit_test(Env* env)
   r2.start = 51UL;
   r2.end = 80UL;
 
-  gn1 = genome_feature_new(gft_exon, r1,
-                           STRAND_FORWARD, NULL, 0, env);
-  gn2 = genome_feature_new(gft_intron, r2,
-                           STRAND_FORWARD, NULL, 0, env);
+  gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, "unit_test", 0, env);
+  gn2 = genome_feature_new(gft_intron, r2, STRAND_FORWARD, "unit_test", 0, env);
 
   e1 = element_new(gn1, env);
   e2 = element_new(gn2, env);
