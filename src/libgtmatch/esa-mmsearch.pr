@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-MMsearchiterator *newmmsearchiterator(const Encodedsequence *encseq,
+MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
                                       const Seqpos *suftab,
                                       Seqpos leftbound,
                                       Seqpos rightbound,
@@ -14,6 +14,17 @@ MMsearchiterator *newmmsearchiterator(const Encodedsequence *encseq,
 bool nextmmsearchiterator(Seqpos *dbstart,MMsearchiterator *mmsi);
 
 void freemmsearchiterator(MMsearchiterator **mmsi,Env *env);
+
+int sarrquerysubstringmatch(const Uchar *dbseq,
+                            Seqpos dblen,
+                            const Uchar *query,
+                            unsigned long querylen,
+                            unsigned int minlength,
+                            const Alphabet *alpha,
+                            int (*processmaxmatch)(void *,unsigned long,Seqpos,
+                                                   unsigned long),
+                            void *processmaxmatchinfo,
+                            Env *env);
 
 #ifdef __cplusplus
 }

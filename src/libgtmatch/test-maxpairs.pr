@@ -3,7 +3,7 @@ extern "C" {
 #endif
 int testmaxpairs(const Str *indexname,
                  unsigned long samples,
-                 /*@unused@*/ unsigned long minlength,
+                 /*@unused@*/ unsigned int minlength,
                  Seqpos substringlength,
                  Env *env);
 
