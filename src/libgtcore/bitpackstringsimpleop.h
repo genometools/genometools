@@ -306,3 +306,39 @@ bsGetUniformInt64Array(const BitString str, BitOffset offset, unsigned numBits,
   bsSignExpandArray64(blockPtr, revIndex, numBits);
 }
 
+static inline void
+bsSetBit(BitString str, BitOffset pos)
+{
+  unsigned bitTop = pos%bitElemBits;
+  BitElem *p = str + pos/bitElemBits;
+  assert(str);
+  *p |= 1 << (bitElemBits - bitTop - 1);
+}
+
+static inline void
+bsClearBit(BitString str, BitOffset pos)
+{
+  unsigned bitTop = pos%bitElemBits;
+  BitElem *p = str + pos/bitElemBits;
+  assert(str);
+  *p &= ~(1 << (bitElemBits - bitTop - 1));
+}
+
+static inline void
+bsToggleBit(BitString str, BitOffset pos)
+{
+  unsigned bitTop = pos%bitElemBits;
+  BitElem *p = str + pos/bitElemBits;
+  assert(str);
+  *p ^= 1 << (bitElemBits - bitTop - 1);
+}
+
+static inline int
+bsGetBit(const BitString str, BitOffset pos)
+{
+  unsigned bitTop = pos%bitElemBits;
+  const BitElem *p = str + pos/bitElemBits;
+  assert(str);
+  return (*p & 1 << (bitElemBits - bitTop - 1))?1:0;
+}
+
