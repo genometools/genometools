@@ -112,10 +112,7 @@ void feature_index_add_sequence_region(FeatureIndex *fi,
   info->features = array_new(sizeof (GenomeNode*),env);
   info->dyn_range.start = ~0UL;
   info->dyn_range.end   = 0;
-  hashtable_add(fi->regions,
-                seqid,
-                info,
-                env);
+  hashtable_add(fi->regions, seqid, info, env);
   if (fi->nof_sequence_regions++ == 0)
     fi->firstseqid = seqid;
 }
@@ -288,34 +285,34 @@ int feature_index_unit_test(Env* env)
   seqid1 = str_new_cstr("test1", env);
   seqid2 = str_new_cstr("test2", env);
 
-  sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, NULL, 0, env);
-  sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, NULL, 0, env);
+  sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, "unit_test", 0, env);
+  sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, "unit_test", 0, env);
 
   /* Generating a new genome_feature with the property gft_gene and the range r1
      ... */
-  gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN,
-                                            NULL, UNDEF_ULONG, env);
+  gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN, "unit_test",
+                           UNDEF_ULONG, env);
   /* ... and assign a sequence id to the new genome_feature-object. */
   genome_node_set_seqid((GenomeNode*) gn1, seqid1);
 
-  gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN,
-                                            NULL, UNDEF_ULONG, env);
+  gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN, "unit_test",
+                           UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) gn2, seqid2);
 
-  ex1 = genome_feature_new(gft_exon, r2, STRAND_UNKNOWN,
-                                            NULL, UNDEF_ULONG, env);
+  ex1 = genome_feature_new(gft_exon, r2, STRAND_UNKNOWN, "unit_test",
+                           UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) ex1, seqid1);
 
-  ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN,
-                                            NULL, UNDEF_ULONG, env);
+  ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN, "unit_test",
+                           UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) ex2, seqid1);
 
-  ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN,
-                                            NULL, UNDEF_ULONG, env);
+  ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN, "unit_test",
+                           UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) ex3, seqid2);
 
-  cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN,
-                                            NULL, UNDEF_ULONG, env);
+  cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN, "unit_test",
+                            UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) cds1, seqid2);
 
   /* Determine the structure of our feature tree */

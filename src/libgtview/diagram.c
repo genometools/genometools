@@ -529,11 +529,11 @@ int diagram_unit_test(Env *env)
   Str *seqid1, *seqid2;
   SequenceRegion *sr1, *sr2;
   int had_err=0;
-  Array *features, *features2;
-  Config *cfg;
-  Diagram *dia, *dia2;
+  Array *features = NULL, *features2 = NULL;
+  Config *cfg = NULL;
+  Diagram *dia = NULL, *dia2 = NULL;
 
-  /* Generating some ranges */
+  /* generating some ranges */
   r1.start=100UL; r1.end=1000UL;
   r2.start=100UL; r2.end=300UL;
   r3.start=500UL; r3.end=1000UL;
@@ -541,18 +541,15 @@ int diagram_unit_test(Env *env)
   r5.start=600UL; r5.end=1000UL;
   rs.start=100UL; rs.end=1200UL;
 
-  /* Generating sequnce ids as c-strings */
+  /* generating sequence IDs */
   seqid1 = str_new_cstr("test1", env);
   seqid2 = str_new_cstr("test2", env);
 
   sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, "unit_test", 0, env);
   sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, "unit_test", 0, env);
 
-  /* Generating a new genome_feature with the property gft_gene and
-   the range r1 ... */
   gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN, "unit_test",
                            UNDEF_ULONG, env);
-  /* ... and assign a sequence id to the new genome_feature-object. */
   genome_node_set_seqid((GenomeNode*) gn1, seqid1);
 
   gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN, "unit_test",
@@ -575,73 +572,85 @@ int diagram_unit_test(Env *env)
                             UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) cds1, seqid2);
 
-  /* Determine the structure of our feature tree */
+  /* determine the structure of our feature tree */
   genome_node_is_part_of_genome_node(gn1, ex1, env);
   genome_node_is_part_of_genome_node(gn1, ex2, env);
   genome_node_is_part_of_genome_node(gn2, ex3, env);
   genome_node_is_part_of_genome_node(gn2, cds1, env);
 
-  /*Create a new feature index on which we can perfom some tests*/
-  fi  = feature_index_new(env);
+  /* create a new feature index on which we can perfom some tests */
+  fi = feature_index_new(env);
 
-  /*Add a sequence region the feature index and test if
-   it has really been added*/
-  (void) feature_index_add_sequence_region(fi, sr1, env);
+  /* add a sequence region the feature index and test if it has really been
+     added */
+  feature_index_add_sequence_region(fi, sr1, env);
+  feature_index_add_sequence_region(fi, sr2, env);
 
-  (void) feature_index_add_sequence_region(fi, sr2, env);
-
-  /*Add features to every sequence region.*/
+  /* add features to every sequence region */
   feature_index_add_genome_feature(fi, (GenomeFeature*) gn1, env);
   feature_index_add_genome_feature(fi, (GenomeFeature*) gn2, env);
 
-  /* Generating the Range for the diagram*/
-  dr1.start=400UL; dr1.end=900UL;
+  /* set the Range for the diagram */
+  dr1.start = 400UL;
+  dr1.end   = 900UL;
 
-  /*get the features for the test1 sequence region*/
+  /* get the features for the test1 sequence region */
   features = array_new(sizeof (GenomeFeature*), env);
-  (void) feature_index_get_features_for_range(fi,features,"test1",dr1,env);
+  ensure(had_err, !feature_index_get_features_for_range(fi, features, "test1",
+                                                        dr1, env));
 
-  /*create a config object*/
-  cfg = config_new(false, env);
+  /* create a config object */
+  if (!had_err)
+    cfg = config_new(false, env);
 
-  /*create a diagram object and test it*/
-  dia = diagram_new(features,dr1,cfg,env);
+  /* create a diagram object and test it */
+  if (!had_err)
+    dia = diagram_new(features, dr1, cfg, env);
 
   ensure(had_err, dia->config != NULL);
   ensure(had_err, dia->range.start == 400UL);
   ensure(had_err, dia->range.end == 900UL);
-  if (!config_cstr_in_list(dia->config,"collapse","to_parent","gene", env)) {
+  if (!had_err &&
+      !config_cstr_in_list(dia->config,"collapse","to_parent","gene", env)) {
     ensure(had_err, hashtable_get(dia->tracks,"gene") != NULL);
   }
 
-  if (!config_cstr_in_list(dia->config,"collapse","to_parent","exon", env)) {
+  if (!had_err &&
+      !config_cstr_in_list(dia->config,"collapse","to_parent","exon", env)) {
     ensure(had_err, hashtable_get(dia->tracks,"exon") != NULL);
   }
   ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
 
-  /*get the features for the test2 sequence region*/
-  features2 = array_new(sizeof (GenomeFeature*), env);
-  (void) feature_index_get_features_for_range(fi,features2,"test2",dr1,env);
+  /* get the features for the test2 sequence region */
+  if (!had_err) {
+    features2 = array_new(sizeof (GenomeFeature*), env);
+    feature_index_get_features_for_range(fi,features2,"test2",dr1,env);
+  }
 
-  /*create a diagram object and test it*/
-  dia2 = diagram_new(features2,dr1,cfg,env);
-  ensure(had_err, dia->range.start == 400UL);
-  ensure(had_err, dia->range.end == 900UL);
+  /* create a diagram object and test it */
+  if (!had_err) {
+    dia2 = diagram_new(features2,dr1,cfg,env);
+    ensure(had_err, dia->range.start == 400UL);
+    ensure(had_err, dia->range.end == 900UL);
+  }
 
-  if (!config_cstr_in_list(dia2->config,"collapse","to_parent","gene", env)) {
+  if (!had_err &&
+      !config_cstr_in_list(dia2->config,"collapse","to_parent","gene", env)) {
     ensure(had_err, hashtable_get(dia2->tracks,"gene") != NULL);
   }
 
-  if (!config_cstr_in_list(dia2->config,"collapse","to_parent","exon", env)) {
+  if (!had_err &&
+      !config_cstr_in_list(dia2->config,"collapse","to_parent","exon", env)) {
     ensure(had_err, hashtable_get(dia2->tracks,"exon") != NULL);
   }
 
-  if (!config_cstr_in_list(dia2->config,"collapse","to_parent","CDS", env)) {
+  if (!had_err &&
+      !config_cstr_in_list(dia2->config,"collapse","to_parent","CDS", env)) {
     ensure(had_err, hashtable_get(dia2->tracks,"CDS") != NULL);
   }
   ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
 
-  /*delete all generated objects*/
+  /* delete all generated objects */
   config_delete(cfg, env);
   diagram_delete(dia,env);
   diagram_delete(dia2,env);

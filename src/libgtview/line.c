@@ -96,16 +96,13 @@ int line_unit_test(Env* env)
   seqid2 = str_new_cstr("test2", env);
   seqid3 = str_new_cstr("foo", env);
 
-  parent = genome_feature_new(gft_gene, r_parent,
-                                          STRAND_FORWARD, NULL, 0, env);
-  gn1 = genome_feature_new(gft_exon, r1,
-                                       STRAND_FORWARD, NULL, 0, env);
-  gn2 = genome_feature_new(gft_exon, r2,
-                                       STRAND_FORWARD, NULL, 0, env);
-  gn3 = genome_feature_new(gft_exon, r3,
-                                       STRAND_FORWARD, NULL, 0, env);
-  gn4 = genome_feature_new(gft_TF_binding_site, r4,
-                                       STRAND_FORWARD, NULL, 0, env);
+  parent = genome_feature_new(gft_gene, r_parent, STRAND_FORWARD, "unit_test",
+                              0, env);
+  gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, "unit_test", 0, env);
+  gn2 = genome_feature_new(gft_exon, r2, STRAND_FORWARD, "unit_test", 0, env);
+  gn3 = genome_feature_new(gft_exon, r3, STRAND_FORWARD, "unit_test", 0, env);
+  gn4 = genome_feature_new(gft_TF_binding_site, r4, STRAND_FORWARD, "unit_test",
+                           0, env);
 
   genome_node_set_seqid((GenomeNode*) parent, seqid1);
   genome_node_set_seqid((GenomeNode*) gn1, seqid3);

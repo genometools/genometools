@@ -99,10 +99,8 @@ int element_unit_test(Env* env)
   r2.start = 20UL;
   r2.end = 50UL;
 
-  gn = genome_feature_new(gft_exon, r1,
-                          STRAND_BOTH, NULL, 0, env);
-  gn2 = genome_feature_new(gft_exon, r2,
-                           STRAND_BOTH, NULL, 0, env);
+  gn = genome_feature_new(gft_exon, r1, STRAND_BOTH, "unit_test", 0, env);
+  gn2 = genome_feature_new(gft_exon, r2, STRAND_BOTH, "unit_test", 0, env);
 
   e = element_new(gn, env);
   e2 = element_new(gn, env);
