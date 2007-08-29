@@ -541,6 +541,40 @@ bsCopy(const BitString src, BitOffset offsetSrc,
  */
 extern void
 bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal);
+
+/**
+ * \brief set singular bit in bitstring to 1
+ * @param str bitstring to modify
+ * @param pos selects bit to set
+ */
+static inline void
+bsSetBit(BitString str, BitOffset pos);
+
+/**
+ * \brief clear, i.e. set to 0 singular bit in bitstring
+ * @param str bitstring to modify
+ * @param pos selects bit to clear
+ */
+static inline void
+bsClearBit(BitString str, BitOffset pos);
+
+/**
+ * \brief XOR singular bit in bitstring
+ * @param str bitstring to modify
+ * @param pos selects bit to invert
+ */
+static inline void
+bsToggleBit(BitString str, BitOffset pos);
+
+/**
+ * \brief queries value of single bit in bitstring
+ * @param str bitstring to read from
+ * @param pos selects bit to retrieve
+ * @return 1 if selected bit is set, 0 if not set
+ */
+static inline int
+bsGetBit(const BitString str, BitOffset pos);
+
 /**
  * \brief Meta-Unit test function for bitPackString, calls all functions
  * mentioned below.
@@ -554,12 +588,6 @@ bitPackString_unit_test(Env *env);
  */
 extern int
 bitPackStringInt_unit_test(Env *env);
-/**
- * \brief Unit test function for bitPackString, unsigned functions.
- * @return 0 on success, -1 on error.
- */
-extern int
-bitPackStringUInt_unit_test(Env *env);
 /**
  * \brief Unit test function for bitPackString, 8-bit functions.
  * @return 0 on success, -1 on error.

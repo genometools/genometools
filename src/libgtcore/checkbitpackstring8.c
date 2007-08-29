@@ -106,6 +106,60 @@ bitPackStringInt8_unit_test(Env *env)
     offset += bits;
   }
   env_log_log(env, "passed\n");
+  if (numRnd > 0)
+  {
+    uint8_t v = randSrc[0], r;
+    unsigned numBits = requiredUInt8Bits(v);
+    BitOffset i = offsetStart + numBits;
+    uint8_t mask = ~(uint8_t)0;
+    if (numBits < 8)
+      mask = ~(mask << numBits);
+    env_log_log(env, "bsSetBit, bsClearBit, bsToggleBit, bsGetBit: ");
+    while (v)
+    {
+      int lowBit = v & 1;
+      v >>= 1;
+      ensure(had_err, lowBit == (r = bsGetBit(bitStore, --i)));
+      if (had_err)
+      {
+        env_log_log(env, "Expected %d, got %d, seed = %lu, i = %llu\n",
+                    lowBit, (int)r, seedval, (unsigned long long)i);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    i = offsetStart + numBits;
+    bsClear(bitStoreCopy, offsetStart, numBits, random()&1);
+    v = randSrc[0];
+    while (v)
+    {
+      int lowBit = v & 1;
+      v >>= 1;
+      if (lowBit)
+        bsSetBit(bitStoreCopy, --i);
+      else
+        bsClearBit(bitStoreCopy, --i);
+    }
+    v = randSrc[0];
+    r = bsGetUInt8(bitStoreCopy, offsetStart, numBits);
+    ensure(had_err, r == v);
+    if (had_err)
+    {
+      env_log_log(env, "Expected %"PRIu8", got %"PRIu8
+                  ", seed = %lu\n", v, r, seedval);
+      freeResourcesAndReturn(had_err);
+    }
+    for (i = 0; i < numBits; ++i)
+      bsToggleBit(bitStoreCopy, offsetStart + i);
+    r = bsGetUInt8(bitStoreCopy, offsetStart, numBits);
+    ensure(had_err, r == (v = (~v & mask)));
+    if (had_err)
+    {
+      env_log_log(env, "Expected %"PRIu8", got %"PRIu8
+                  ", seed = %lu\n", v, r, seedval);
+      freeResourcesAndReturn(had_err);
+    }
+    env_log_log(env, "passed\n");
+  }
   if (numRnd > 1)
   {
     env_log_log(env, "bsCompare: ");
