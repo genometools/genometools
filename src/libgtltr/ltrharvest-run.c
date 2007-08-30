@@ -15,10 +15,7 @@
 #include "libgtmatch/sfx-map.pr"
 
 #include "ltrharvest-opt.h"
-//#include "repeattypes.h"
-
 #include "repeats.h"
-//#include "myxdrop.h"
 #include "searchforLTRs.h"
 
 static int runltrharvest(LTRharvestoptions *lo, Env *env)

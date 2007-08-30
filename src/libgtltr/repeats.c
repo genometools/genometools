@@ -6,17 +6,13 @@
 
 #include <stdio.h>
 
-/* Gremme */
 #include "libgtcore/env.h"
 
-/* Prof.Kurtz files */
 #include "libgtmatch/arraydef.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/encseq-def.h"
-
 #include "libgtmatch/pos2seqnum.pr"
 
-/* my files */
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 

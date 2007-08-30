@@ -5,7 +5,6 @@
 */
 #include <stdio.h>
 
-/* Gremme */
 #include "libgtcore/env.h"
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"

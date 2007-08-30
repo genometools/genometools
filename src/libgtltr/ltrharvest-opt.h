@@ -9,7 +9,6 @@
 
 #include <stdbool.h>
 
-/* Gremme */
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"

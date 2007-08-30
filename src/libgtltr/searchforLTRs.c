@@ -4,11 +4,9 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-/* Prof. Kurtz files */
 #include "libgtmatch/arraydef.h"
 #include "libgtmatch/encseq-def.h"
 
-/* my files */
 #include "searchforLTRs.h"
 #include "repeattypes.h"
 #include "repeats.h"

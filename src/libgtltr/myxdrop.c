@@ -6,7 +6,6 @@
 
 #include <string.h>
 
-/* Prof.Kurtz files*/
 #include "libgtmatch/divmodmul.h"
 #include "libgtmatch/chardef.h"
 
