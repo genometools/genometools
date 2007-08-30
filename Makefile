@@ -8,7 +8,7 @@ CC:=gcc
 CXX:=g++
 INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
              -I$(CURDIR)/src/external/lua-5.1.2/src \
-             -I$(CURDIR)/src/external/expat-2.0.0/lib\
+             -I$(CURDIR)/src/external/expat-2.0.1/lib\
              -I$(CURDIR)/src/external/bzip2-1.0.4\
              -I$(CURDIR)/src/external/agg-2.4/include\
              -I$(CURDIR)/src/external/libpng-1.2.18\
@@ -77,7 +77,7 @@ LIBAGG_SRC:=$(wildcard src/external/agg-2.4/src/*.cpp src/external/agg-2.4/src/c
 LIBAGG_OBJ:=$(LIBAGG_SRC:%.cpp=obj/%.o)
 LIBAGG_DEP:=$(LIBAGG_SRC:%.cpp=obj/%.d)
 
-EXPAT_DIR:=src/external/expat-2.0.0/lib
+EXPAT_DIR:=src/external/expat-2.0.1/lib
 LIBEXPAT_SRC:=$(EXPAT_DIR)/xmlparse.c $(EXPAT_DIR)/xmlrole.c \
               $(EXPAT_DIR)/xmltok.c
 LIBEXPAT_OBJ:=$(LIBEXPAT_SRC:%.c=obj/%.o)
