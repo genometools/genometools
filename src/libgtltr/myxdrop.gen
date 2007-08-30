@@ -6,8 +6,7 @@
 
 EVALXDROPARBITSCORES
 {
-
-  int integermax, integermin, i , // index i 
+  int integermax, integermin, i ,     // index i 
     j = 0,                            // index j
     k = 0,                            // diagonal
     end_k = ulen - vlen,              // diagonal of endpoint (ulen, vlen)
@@ -67,7 +66,7 @@ EVALXDROPARBITSCORES
   */
 
   tmpfront.dptabrow = i;
-  tmpfront.dptabdirection = (Unsigned char) 0;   // no predecessor
+  tmpfront.dptabdirection = (unsigned char) 0;   // no predecessor
 
   STOREINARRAYFRONTS (fronts, 0, Myfrontvalue, tmpfront);
   xdropbest->score = bigt_tmp = S (i + i, 0);
@@ -159,7 +158,7 @@ EVALXDROPARBITSCORES
       // if i = MINUSINFINITYINY or MINUSINFINITYINY + 1
       if( i < 0)
       {
-	if(tmpfront.dptabdirection == (Unsigned char)0)
+	if(tmpfront.dptabdirection == (unsigned char)0)
 	{
           alwaysMININFINITYINT = false;
 	}
@@ -273,7 +272,7 @@ EVALXDROPARBITSCORES
     else
     {
       currentMININFINITYINTgeneration = 0;
-      alwaysMININFINITYINT = True;
+      alwaysMININFINITYINT = true;
     }
     
     /*

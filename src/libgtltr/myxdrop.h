@@ -27,8 +27,6 @@ typedef struct
       del;
 } Arbitrarydistances;
 
-//#include "ltrharvest-opt.h"
-
 /*
   For each entry in the DP-matrix we store a single byte, and
   use the three rightmost bits to mark which edge in the edit distance
@@ -79,45 +77,13 @@ void calculateallowedMININFINITYINTgenerations(
 
 /*
    The following functions extend seeds to the right and to the left,
-   respectively. \texttt{bestmatch} stores information about the best match
-   found. \texttt{useq} is the first sequence and \texttt{vseq} is the
-   second sequence. \texttt{ulen} and \texttt{vlen} are the
+   respectively. xdropbest stores information about the best match
+   found. useq is the first sequence position and vseq is the
+   second sequence position. ulen and vlen are the
    remaining sequence length to align. If an alignment has score smaller than
-   \(M-\texttt{xdropbelowscore}\), then this alignment is not extended
-   any more. \(M\) is the maximal score achieved so far.
+   xdropbelowscore, then this alignment is not extended
+   any more.
 */
-/*
-#define EVALXDROPARBITSCORESRIGHT\
-      void evalxdroparbitscoresright(Arbitraryscores *arbitscores,\
-                                     Myxdropbest * xdropbest,\
-	                             ArrayMyfrontvalue * fronts,\
-	                             Seqpos * useq,\
-				     Seqpos * vseq,\
-	                             int ulen,\
-				     int vlen,\
-	                             Xdropscore xdropbelowscore)
-
-#define EVALXDROPARBITSCORESLEFT\
-      void evalxdroparbitscoresleft(Arbitraryscores *arbitscores,\
-                                    Myxdropbest * xdropbest,\
-                                    ArrayMyfrontvalue * fronts,\
-                                    Seqpos * useq,\
-				    Seqpos * vseq,\
-                                    int ulen,\
-				    int vlen,\
-                                    Xdropscore xdropbelowscore)
-*/
-
-void evalxdroparbitscoresleft(Suffixarray *suffixarray,
-                                    Arbitraryscores * arbitscores,
-                                    Myxdropbest * xdropbest,
-                                    ArrayMyfrontvalue * fronts,
-                                    Seqpos useq,
-				    Seqpos vseq,
-                                    int ulen,
-				    int vlen,
-                                    Xdropscore xdropbelowscore,
-				    Env *env);
 
 void evalxdroparbitscoresright(Suffixarray *suffixarray,
                                      Arbitraryscores *arbitscores,
@@ -129,4 +95,40 @@ void evalxdroparbitscoresright(Suffixarray *suffixarray,
 				     int vlen,
 	                             Xdropscore xdropbelowscore,
 				     Env *env);
+
+
+#define EVALXDROPARBITSCORESRIGHT\
+      void evalxdroparbitscoresright(Suffixarray *suffixarray,\
+                                     Arbitraryscores *arbitscores,\
+                                     Myxdropbest * xdropbest,\
+	                             ArrayMyfrontvalue * fronts,\
+	                             Seqpos useq,\
+				     Seqpos vseq,\
+	                             int ulen,\
+				     int vlen,\
+	                             Xdropscore xdropbelowscore,\
+				     Env *env)
+
+void evalxdroparbitscoresleft(Suffixarray *suffixarray,
+                                    Arbitraryscores * arbitscores,
+                                    Myxdropbest * xdropbest,
+                                    ArrayMyfrontvalue * fronts,
+                                    Seqpos useq,
+				    Seqpos vseq,
+                                    int ulen,
+				    int vlen,
+                                    Xdropscore xdropbelowscore,
+				    Env *env);
+      
+#define EVALXDROPARBITSCORESLEFT\
+       void evalxdroparbitscoresleft(Suffixarray *suffixarray,\
+                                    Arbitraryscores * arbitscores,\
+                                    Myxdropbest * xdropbest,\
+                                    ArrayMyfrontvalue * fronts,\
+                                    Seqpos useq,\
+				    Seqpos vseq,\
+                                    int ulen,\
+				    int vlen,\
+                                    Xdropscore xdropbelowscore,\
+				    Env *env)
 #endif
