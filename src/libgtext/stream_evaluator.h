@@ -16,8 +16,10 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
                                       GenomeStream *prediction,
                                       bool evalLTR, unsigned long LTRdelta,
                                       Env*);
+/* if <gv> is not NULL, it visits all nodes from reality and the prediction */
 int              stream_evaluator_evaluate(StreamEvaluator*, bool verbose,
-                                           bool exondiff, Env*);
+                                           bool exondiff, GenomeVisitor *gv,
+                                           Env*);
 void             stream_evaluator_show(StreamEvaluator*, FILE*);
 void             stream_evaluator_delete(StreamEvaluator*, Env*);
 

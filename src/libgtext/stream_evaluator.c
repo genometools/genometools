@@ -1071,7 +1071,7 @@ int determine_missing_features(void *key, void *value, void *data, Env *env)
 }
 
 int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
-                              Env *env)
+                              GenomeVisitor *gv, Env *env)
 {
   GenomeNode *gn;
   SequenceRegion *sr;
@@ -1129,6 +1129,8 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                                               env);
       assert(!had_err); /* cannot happen, process_real_feature() is sane */
     }
+    if (gv)
+      genome_node_accept(gn, gv, env);
     genome_node_rec_delete(gn, env);
   }
 
@@ -1163,6 +1165,8 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                   "``reality''", str_get(genome_node_get_seqid(gn)));
         }
       }
+      if (gv)
+        genome_node_accept(gn, gv, env);
       genome_node_rec_delete(gn, env);
     }
   }

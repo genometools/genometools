@@ -93,7 +93,7 @@ int gt_eval(int argc, const char **argv, Env *env)
 
   /* compute the evaluation */
   had_err = stream_evaluator_evaluate(evaluator, arguments.verbose,
-                                      arguments.exondiff, env);
+                                      arguments.exondiff, NULL, env);
 
   /* show the evaluation */
   if (!had_err)
