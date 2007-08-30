@@ -61,7 +61,7 @@ static void showprjinfo(FILE *outprj,
     fprintf(outprj,"longest=" FormatSeqpos "\n",
             PRINTSeqposcast(longest->valueseqpos));
   }
-  fprintf(outprj,"prefixlength=%u\n",(unsigned int) prefixlength);
+  fprintf(outprj,"prefixlength=%u\n",prefixlength);
   fprintf(outprj,"largelcpvalues=" FormatSeqpos "\n",
                    PRINTSeqposcast(numoflargelcpvalues));
   fprintf(outprj,"maxbranchdepth=" FormatSeqpos "\n",

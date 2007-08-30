@@ -100,8 +100,8 @@ int checkprefixlength(unsigned int maxprefixlen,
   {
     env_error_set(env,"prefix length %u is too large, maximal prefix length "
                       "for this input size and alphabet size is %u",
-                      (unsigned int) prefixlength,
-                      (unsigned int) maxprefixlen);
+                      prefixlength,
+                      maxprefixlen);
     return -1;
   }
   return 0;
@@ -113,6 +113,6 @@ void showmaximalprefixlength(unsigned int maxprefixlen,
   printf("# for this input size and alphabet size, the maximal prefixlength\n"
          "# (argument of option -pl) is %u,\n"
          "# the recommended prefixlength is %u\n",
-         (unsigned int) maxprefixlen,
-         (unsigned int) recommended);
+         maxprefixlen,
+         recommended);
 }

@@ -548,7 +548,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          sum = fourcharssize;
          if (specialcharacters > 0)
          {
-           sum += (uint64_t) sizeof (unsigned int) * numofspecialstostore +
+           sum += (uint64_t) sizeof (uint32_t) * numofspecialstostore +
                   (uint64_t) sizeof (Uchar) * numofspecialstostore +
                   (uint64_t) sizeof (Seqpos) * (totallength/UINT32_MAX+1);
          }

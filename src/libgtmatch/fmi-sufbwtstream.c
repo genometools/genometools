@@ -105,7 +105,7 @@ static void showconstructionmessage(const Str *indexname,
           (unsigned long) POW2(log2markdist));
   printf(" len=" FormatSeqpos ", alphasize=%u: size ",
           PRINTSeqposcast(totallength),
-          (unsigned int) (mapsize-1));
+          mapsize-1);
   printf("%lu bytes, space overhead %.2f\n",
           fmsize,
           (double) fmsize/(double) (totallength+1));

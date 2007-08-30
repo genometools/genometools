@@ -14,10 +14,6 @@ static int addmarkpos(void *info,const Encodedsequence *encseq,
   Uchar currentchar;
   ArraySeqpos *asp = (ArraySeqpos *) info;
 
-#ifdef DEBUG
-  printf("range (%u,%u)\n",(unsigned int) seqrange->leftpos,
-                           (unsigned int) seqrange->rightpos-1);
-#endif
   for (pos=seqrange->leftpos; pos<seqrange->rightpos; pos++)
   {
     currentchar = getencodedchar(encseq,pos,Forwardmode);

@@ -73,7 +73,7 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmpspecialcharacters);
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmpspecialranges);
     printf("# seqlen[%u] = " FormatSeqpos "\n",
-           (unsigned int) idx,
+           idx,
            PRINTSeqposcast(getencseqtotallength(suffixarraytable[idx].encseq)));
   }
   tmplength = getencseqtotallength(suffixarraytable[numofindexes -1].encseq);
