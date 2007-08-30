@@ -1,22 +1,17 @@
-/* Copyright (C) 2007 by David Ellinghaus <dellinghaus@zbh.uni-hamburg.de> */
+/*
+  Copyright (C) 2007 David Ellinghaus <dellinghaus@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
+*/
 
 #ifndef SEARCHFORLTRS_H
 #define SEARCHFORLTRS_H
 
-//#include "types.h"
-#include <libgtcore/str.h> 
+#include "libgtcore/env.h"
+#include "libgtmatch/sarr-def.h"
 
-/*
- The datatype Motif stores information about the specified motif.
- */
-typedef struct
-{
-  Str *str_motif;
-  unsigned char firstleft,     /* first character of left motif instance */
-        secondleft,    /* second character of left motif instance */ 
-	firstright,    /* first character of right motif instance */ 
-	secondright;   /* second character of right motif instance */ 
-  unsigned int allowedmismatches; /* number of allowed mismatches in the four 
-                             character motif*/
-} Motif;
+#include "ltrharvest-opt.h"
+
+int searchforLTRs(Suffixarray *suffixarray, LTRharvestoptions *lo, Env *env);
+
 #endif

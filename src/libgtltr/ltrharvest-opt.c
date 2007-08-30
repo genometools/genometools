@@ -1,53 +1,21 @@
 /*
-  Copyright (C) 2007 by David Ellinghaus <dellinghaus@zbh.uni-hamburg.de>
+  Copyright (C) 2007 David Ellinghaus <dellinghaus@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 #include <stdio.h>
-//#include <inttypes.h>
+
+/* Gremme */
 #include "libgtcore/env.h"
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtcore/option.h"
-#include "ltrharvest-opt.h"
-//#include "stamp.h"
-
-//#include <limits.h>
-/* Prof. Kurtz files */
-//#include "types.h"
-//#include "debugdef.h"
-#include "libgtmatch/arraydef.h"
-//#include "spacedef.h"
-//#include "errordef.h"
-//#include "virtualdef.h" //ersetzen
-//#include "vmatfind-def.h"
-//#include "xdropdef.h"
-//#include "optdesc.h"
-//#include "megabytes.h"
-//#include "chardef.h"
-//#include "fhandledef.h"
-
-//#include "readvirt.pr"
-//#include "procopt.pr"
-//#include "safescpy.pr"
-//#include "clock.pr"
-//#include "filehandle.pr"
-
-/* Gremme */
 #include "libgtcore/undef.h"
 
-/* my files */
+#include "libgtmatch/arraydef.h"
+
+#include "ltrharvest-opt.h"
 #include "repeattypes.h"
-//#include "repeats.pr"
-//#include "myxdrop.h"
-//#include "myxdrop.pr"
-//#include "searchforLTRs.h"
-//#include "searchforLTRs.pr"
-//#include "outputfasta.pr"
-//#include "duplicates.pr"
-
-
-//#include "getbasename.pr"
 
 static void versionfunc(const char *progname)
 {
@@ -236,11 +204,11 @@ static OPrval parse_options(int *parsed_args,
   option_parser_add_option(op, optionoverlaps, env);
   
   /* -xdrop */ 
-  optionxdrop = option_new_uint_min("xdrop",
+  optionxdrop = option_new_int_min("xdrop",
                         "specify xdropbelowscore for extension-alignment",
                         &lo->xdropbelowscore,
-		        (unsigned int)5,
-		        (unsigned int)0,
+		        (int)5,
+		        (int)0,
 			env);
   option_parser_add_option(op, optionxdrop, env);
 
@@ -517,15 +485,17 @@ static void showuserdefinedoptionsandvalues(LTRharvestoptions *lo)
 }
 */
 
-void wrapltrharvestoptions(LTRharvestoptions *lo,Env *env)
+int wrapltrharvestoptions(LTRharvestoptions *lo,Env *env)
 {
   /* no checking if error occurs, since errors have been output before */
+  lo->env = NULL;
   str_delete(lo->str_indexname,env);
   str_delete(lo->str_fastaoutputfilename,env);
   str_delete(lo->str_fastaoutputfilenameinnerregion,env);
   str_delete(lo->str_gff3filename,env);
   str_delete(lo->str_overlaps,env);
   str_delete(lo->motif.str_motif,env);
+  return 0;
 }
 
 int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,

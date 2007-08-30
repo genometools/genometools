@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2007 by David Ellinghaus <dellinghaus@zbh.uni-hamburg.de>
+  Copyright (C) 2007 David Ellinghaus <dellinghaus@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
@@ -14,10 +14,12 @@
 #include "libgtmatch/esa-maxpairs.pr"
 #include "libgtmatch/sfx-map.pr"
 
-#include "repeattypes.h"
+#include "ltrharvest-opt.h"
+//#include "repeattypes.h"
 
 #include "repeats.h"
-#include "ltrharvest-opt.h"
+//#include "myxdrop.h"
+#include "searchforLTRs.h"
 
 static int runltrharvest(LTRharvestoptions *lo, Env *env)
 {
@@ -42,14 +44,26 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   /* search for maximal repeats */ 
   if(!haserror && enumeratemaxpairs(&suffixarray,
                        (uint32_t)lo->minseedlength,
-		       simpleexactselfmatchoutput,
-		       NULL,
+		       (void*)simpleexactselfmatchstore,
+		       lo,
 		       env) != 0)
   {
     haserror = true;
   }
 
+  INITARRAY(&lo->arrayLTRboundaries, LTRboundaries);
+
+  /* apply the filter algorithms */
+  if(searchforLTRs (&suffixarray, lo, env) != 0)
+  {
+     return -1; 
+  }
   FREEARRAY(&lo->repeatinfo.repeats, Repeat);
+
+
+
+
+  FREEARRAY(&lo->arrayLTRboundaries, LTRboundaries);
   /* free suffixarray */
   freesuffixarray(&suffixarray, env);
 
@@ -61,7 +75,8 @@ int parseargsandcallltrharvest(int argc,const char *argv[],Env *env)
   LTRharvestoptions lo;
   int retval;
   bool haserr = false;
-  //unsigned int spacepeak;
+
+  lo.env = env;
 
   retval = ltrharvestoptions(&lo,argc,argv,env);
   if (retval == 0)
@@ -78,6 +93,12 @@ int parseargsandcallltrharvest(int argc,const char *argv[],Env *env)
       haserr = true;
     }
   }
-  wrapltrharvestoptions(&lo,env);
+
+  retval = wrapltrharvestoptions(&lo,env);
+  if(retval != 0)
+  {
+    haserr = true;
+  }
+
   return haserr ? -1 : 0;
 }
