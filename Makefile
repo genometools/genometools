@@ -373,6 +373,8 @@ splint:
 
 sgt:${addprefix obj/,${notdir ${subst .c,.splint,${wildcard ${CURDIR}/src/libgtmatch/*.c}}}}
 
+splintclean:
+	find -name '*.splint' | xargs rm -f
 
 obj/%.splint: ${CURDIR}/src/libgtmatch/%.c
 	@echo "splint $<"

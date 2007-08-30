@@ -38,7 +38,7 @@ Seqpos *calculatemarkpositions(const Encodedsequence *encseq,
   asp.nextfreeSeqpos = 0;
   ALLOCASSIGNSPACE(asp.spaceSeqpos,NULL,Seqpos,asp.allocatedSeqpos);
   if (overallspecialranges(encseq,
-                           Forwardmode,
+                           true,
                            addmarkpos,
                            &asp,
                            env) != 0)

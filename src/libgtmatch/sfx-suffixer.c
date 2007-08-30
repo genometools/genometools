@@ -341,7 +341,7 @@ static int insertallfullspecials(
   ics.readmode = readmode;
   ics.env = env;
   if (overallspecialranges(encseq,
-                           readmode,
+                           ISDIRREVERSE(readmode) ? false : true,
                            insertfullspecialpair,&ics,env) != 0)
   {
     return -1;
@@ -474,16 +474,14 @@ static int initsuffixerator(Collectedsuffixes *csf,
   return haserr ? -1 : 0;
 }
 
-static void preparethispart(Collectedsuffixes *csf,
+static bool preparethispart(Collectedsuffixes *csf,
                             Measuretime *mtime,
                             Env *env)
 {
-  /*
-  if(stpgetnumofparts(csf->suftabparts))
+  if(csf->part >= stpgetnumofparts(csf->suftabparts))
   {
     return false;
   }
-  */
   csf->currentmincode = stpgetcurrentmincode(csf->part,csf->suftabparts);
   csf->currentmaxcode = stpgetcurrentmaxcode(csf->part,csf->suftabparts);
   csf->widthofpart = stpgetcurrentwidthofpart(csf->part,csf->suftabparts);
@@ -520,14 +518,8 @@ static void preparethispart(Collectedsuffixes *csf,
                  csf->currentmaxcode,
                  stpgetcurrentsumofwdith(csf->part,csf->suftabparts),
                  env);
-  /*
-  if(csf->part < stpgetnumofparts(csf->suftabparts) - 1)
-  {
-    csf->part++;
-    return true;
-  }
-  return false;
-  */
+  csf->part++;
+  return true;
 }
 
 static void freeCollectedsuffixes(Collectedsuffixes *csf,Env *env)
@@ -575,11 +567,8 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
   {
     Codetype specialcode;
 
-    for(csf.part = 0; csf.part < stpgetnumofparts(csf.suftabparts); csf.part++)
+    while(preparethispart(&csf,mtime,env))
     {
-      preparethispart(&csf,
-                      mtime,
-                      env);
       if (processsuftab != NULL)
       {
         if (processsuftab(processsuftabinfo,

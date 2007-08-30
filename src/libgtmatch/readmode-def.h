@@ -15,4 +15,6 @@ typedef enum
   Reversecomplementmode
 } Readmode;
 
+#define ISDIRREVERSE(R) ((R) == Reversemode || (R) == Reversecomplementmode)
+
 #endif

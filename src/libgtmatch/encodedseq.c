@@ -115,7 +115,6 @@
 #define NAMEDFUNCTION(F) {#F,F}
 
 #define REVERSEPOS(POS) (encseq->totallength - 1 - (POS))
-#define ISDIRREVERSE(R) ((R) == Reversemode || (R) == Reversecomplementmode)
 
 typedef enum
 {
@@ -1188,9 +1187,9 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
   ALLOCASSIGNSPACE(esr,NULL,Encodedsequencescanstate,(size_t) 1);
   esr->readmode = readmode;
   if (encseq->sat == Viauchartables ||
-     encseq->sat == Viaushorttables ||
-     encseq->sat == Viauint32tables ||
-     encseq->sat == Viauint64tables)
+      encseq->sat == Viaushorttables ||
+      encseq->sat == Viauint32tables ||
+      encseq->sat == Viauint64tables)
   {
     esr->hasprevious = false;
     esr->hascurrent = false;
@@ -1405,10 +1404,18 @@ bool fastspecialranges(const Encodedsequence *encseq)
   return true;
 }
 
+bool hasspecialranges(const Encodedsequence *encseq)
+{
+  if(encseq->numofspecialstostore > 0)
+  {
+    return true;
+  }
+  return false;
+}
+
 int overallspecialrangesfast(
                 const Encodedsequence *encseq,
                 bool moveforward,
-                Readmode readmode,
                 int(*processrange)(void *,const Encodedsequence *,
                                    const Sequencerange *,Env *),
                 void *processinfo,
@@ -1417,6 +1424,7 @@ int overallspecialrangesfast(
   bool haserr = false;
 
   env_error_check(env);
+  assert(encseq->numofspecialstostore > 0);
   if (!fastspecialranges(encseq))
   {
     env_error_set(env,"overallspecialrangesfast not possible for sat = %s",
@@ -1427,7 +1435,9 @@ int overallspecialrangesfast(
   {
     Encodedsequencescanstate *esr;
 
-    esr = initEncodedsequencescanstate(encseq,readmode,env);
+    esr = initEncodedsequencescanstate(encseq,
+                                       moveforward ? Forwardmode 
+                                                   : Reversemode,env);
     assert(esr != NULL);
     while (true)
     {
@@ -1447,23 +1457,32 @@ int overallspecialrangesfast(
   return haserr ? - 1 : 0;
 }
 
+typedef struct
+{
+  bool moveforward;
+  const Encodedsequence *encseq;
+} Encodedsequencespecialrangeiterator;
+
 int overallspecialranges(const Encodedsequence *encseq,
-                         Readmode readmode,
+                         bool moveforward,
                          int(*processrange)(void *,const Encodedsequence *,
                                             const Sequencerange *,Env *),
                          void *processinfo,
                          Env *env)
 {
   env_error_check(env);
+  if(encseq->numofspecialstostore == 0)
+  {
+    return 0;
+  }
   if (encseq->sat == Viadirectaccess)
   {
     if (overallspecialrangesdirectorbitaccess(true,
-                                             ISDIRREVERSE(readmode)
-                                               ? false : true,
-                                             encseq,
-                                             processrange,
-                                             processinfo,
-                                             env) != 0)
+                                              moveforward,
+                                              encseq,
+                                              processrange,
+                                              processinfo,
+                                              env) != 0)
     {
       return -1;
     }
@@ -1472,8 +1491,7 @@ int overallspecialranges(const Encodedsequence *encseq,
   if (encseq->sat == Viabitaccess)
   {
     if (overallspecialrangesdirectorbitaccess(false,
-                                              ISDIRREVERSE(readmode)
-                                                ? false : true,
+                                              moveforward,
                                               encseq,
                                               processrange,
                                               processinfo,
@@ -1484,8 +1502,7 @@ int overallspecialranges(const Encodedsequence *encseq,
     return 0;
   }
   if (overallspecialrangesfast(encseq,
-                               ISDIRREVERSE(readmode) ? false : true,
-                               readmode,
+                               moveforward,
                                processrange,
                                processinfo,
                                env) != 0)
@@ -1537,11 +1554,9 @@ static Encodedsequence *determineencseqkeyvalues(
   spaceinbitsperchar
     = (double) ((uint64_t) CHAR_BIT * (uint64_t) encseq->sizeofrep)/
       (double) totallength;
-  /*
   printf("# init character encoding (%s,%lu"
          " bytes,%.2f bits/symbol)\n",
           encseq->name,encseq->sizeofrep,spaceinbitsperchar);
-  XXX insert later */
   return encseq;
 }
 

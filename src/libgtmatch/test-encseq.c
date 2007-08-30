@@ -137,22 +137,20 @@ int checkspecialranges(const Encodedsequence *encseq,Env *env)
   bool haserr = false;
 
   env_error_check(env);
-  if (!fastspecialranges(encseq))
+  if (!hasspecialranges(encseq) || !fastspecialranges(encseq))
   {
     return 0;
   }
   rangesforward = array_new(sizeof (Sequencerange),env);
   rangesbackward = array_new(sizeof (Sequencerange),env);
 
-  if (overallspecialrangesfast(encseq,true,Forwardmode,addelem,rangesforward,
-                              env) != 0)
+  if (overallspecialrangesfast(encseq,true,addelem,rangesforward,env) != 0)
   {
     haserr = true;
   }
   if (!haserr)
   {
-    if (overallspecialrangesfast(encseq,false,Reversemode,addelem,
-                                 rangesbackward,env) != 0)
+    if (overallspecialrangesfast(encseq,false,addelem,rangesbackward,env) != 0)
     {
       haserr = true;
     }
