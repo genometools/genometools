@@ -13,6 +13,8 @@
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
 
+#include "libgtmatch/symboldef.h"
+
 #include "myxdrop.h"
 #include "repeattypes.h"
 
@@ -51,7 +53,14 @@ typedef struct
 					     // and motif 
 } LTRharvestoptions;
 
+void showuserdefinedoptionsandvalues(LTRharvestoptions *lo);
+
+void printargsline(const char **argv, int argc);
+
+int testmotif(Motif *motif, Alphabet *alpha, Env *env);
+
 int ltrharvestoptions(LTRharvestoptions *lo, int argc, 
                         const char **argv, Env *env);
 int wrapltrharvestoptions(LTRharvestoptions *lo,Env *env);
+
 #endif

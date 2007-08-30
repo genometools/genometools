@@ -17,15 +17,13 @@
 #include "ltrharvest-opt.h"
 #include "repeats.h"
 #include "searchforLTRs.h"
+#include "duplicates.h"
 
 static int runltrharvest(LTRharvestoptions *lo, Env *env)
 {
   bool haserror = false;
   Suffixarray suffixarray;
   Seqpos totallength;
-
-  INITARRAY (&lo->repeatinfo.repeats, Repeat);
-  lo->repeatinfo.suffixarrayptr = &suffixarray;
 
   /* map suffix array */
   if(streamsuffixarray(&suffixarray,
@@ -38,6 +36,22 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
     haserror = true;
   }
 
+  /* test if motif is valid */
+  if( testmotif(&lo->motif, suffixarray.alpha, env) != 0)
+  {
+    return -1; 
+  }
+
+  /* show defined option and values */
+  if(lo->verbosemode)
+  {
+    showuserdefinedoptionsandvalues(lo);
+  }
+
+  /* init array for maximal repeats */
+  INITARRAY (&lo->repeatinfo.repeats, Repeat);
+  lo->repeatinfo.suffixarrayptr = &suffixarray;
+
   /* search for maximal repeats */ 
   if(!haserror && enumeratemaxpairs(&suffixarray,
                        (uint32_t)lo->minseedlength,
@@ -48,6 +62,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
     haserror = true;
   }
 
+  /* init array for candidate pairs */
   INITARRAY(&lo->arrayLTRboundaries, LTRboundaries);
 
   /* apply the filter algorithms */
@@ -55,7 +70,13 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   {
      return -1; 
   }
+
+  /* free array for maximal repeats */
   FREEARRAY(&lo->repeatinfo.repeats, Repeat);
+
+  /* remove exact duplicates */
+  removeduplicates(&lo->arrayLTRboundaries);
+
 
 
 
@@ -79,6 +100,7 @@ int parseargsandcallltrharvest(int argc,const char *argv[],Env *env)
   if (retval == 0)
   {
     haserr = false;
+    printargsline(argv,argc);
     if (runltrharvest(&lo,env) < 0)
     {
       haserr = true;

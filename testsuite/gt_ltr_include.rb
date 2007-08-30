@@ -19,6 +19,22 @@ Test do
            " -motif tgca -motifmis 0"
 end
 
+Name "gt ltrharvest unvalid motif characters"
+Keywords "gt_ltr"
+Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis"
+  run_test "#{$bin}gt ltrharvest -index Random.fna" +
+           " -motif qgca -motifmis 0", :retval => 2
+end
+
+Name "gt ltrharvest motif not palindromic"
+Keywords "gt_ltr"
+Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis"
+  run_test "#{$bin}gt ltrharvest -index Random.fna" +
+           " -motif agga -motifmis 0", :retval => 1
+end
+
 Name "gt ltrharvest motifmis and missing motif"
 Keywords "gt_ltr"
 Test do

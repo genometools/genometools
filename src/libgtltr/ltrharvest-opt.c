@@ -11,10 +11,165 @@
 #include "libgtcore/option.h"
 #include "libgtcore/undef.h"
 
+#include "libgtmatch/symboldef.h"
 #include "libgtmatch/arraydef.h"
+#include "libgtmatch/chardef.h"
+#include "libgtmatch/alphadef.h"
+#include "libgtmatch/alphabet.pr"
 
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
+
+/*
+ The following function shows all options that are set by default or from
+  the user on stdout.
+*/
+
+void showuserdefinedoptionsandvalues(LTRharvestoptions *lo
+/*
+    bool verbosemode,
+    bool bestofoverlap,
+    bool nooverlapallowed,
+    char *indexname,
+    Arbitraryscores *arbitscores,
+    unsigned int minseedlength,
+    Xdropscore xdropbelowscore,
+    double similaritythreshold,
+    RepeatInfo *repeatinfo,
+    unsigned int minlengthTSD,
+    unsigned int maxlengthTSD,
+    Motif *motif,
+    unsigned int vicinityforcorrectboundaries,
+    Alphabet *alpha,
+    bool fastaoutput,
+    char *fastaoutputfilename,
+    bool fastaoutputinnerregion,
+    char *fastaoutputfilenameinnerregion,
+    bool gff3output,
+    char *gff3filename
+*/
+)
+{
+  printf("# user defined options and values:\n");
+  if(lo->verbosemode)
+  {
+    printf("#   verbosemode: On\n");
+  }
+  else
+  {
+    printf("#   verbosemode: Off\n");
+  }
+  printf("#   indexname: %s\n", str_get(lo->str_indexname));
+  if(lo->fastaoutput)
+  {
+    printf("#   outputfile: %s\n", str_get(lo->str_fastaoutputfilename));
+  }
+  if(lo->fastaoutputinnerregion)
+  {
+    printf("#   outputfile inner region: %s\n",
+	str_get(lo->str_fastaoutputfilenameinnerregion));
+  }
+  if(lo->gff3output)
+  {
+    printf("#   outputfile gff3 format: %s\n", str_get(lo->str_gff3filename));
+  }
+  printf("#   xdropbelowscore: %d\n", lo->xdropbelowscore);
+  printf("#   similaritythreshold: %.2f\n", lo->similaritythreshold);
+  printf("#   minseedlength: %lu\n", lo->minseedlength);
+  printf("#   matchscore: %d\n", lo->arbitscores.mat);
+  printf("#   mismatchscore: %d\n", lo->arbitscores.mis);
+  printf("#   insertionscore: %d\n", lo->arbitscores.ins);
+  printf("#   deletionscore: %d\n", lo->arbitscores.del);
+  printf("#   minLTRlength: %lu\n",  lo->repeatinfo.lmin);
+  printf("#   maxLTRlength: %lu\n",  lo->repeatinfo.lmax);
+  printf("#   minLTRdistance: %lu\n",  lo->repeatinfo.dmin);
+  printf("#   maxLTRdistance: %lu\n",  lo->repeatinfo.dmax);
+  if(lo->nooverlapallowed)
+  {
+    printf("#   overlaps: no\n");
+  }
+  else
+  {
+    if(lo->bestofoverlap)
+    {
+      printf("#   overlaps: best\n");
+    }
+    else
+    {
+      printf("#   overlaps: all\n");
+    }
+  }
+  printf("#   minTSDlength: %lu\n",  lo->minlengthTSD);
+  printf("#   maxTSDlength: %lu\n",  lo->maxlengthTSD);
+  printf("#   leftboundarymotifLTR: %c%c\n", lo->motif.firstleft,
+                                             lo->motif.secondleft);
+  printf("#   rightboundarymotifLTR: %c%c\n", lo->motif.firstright,
+                                              lo->motif.secondright);
+  printf("#   motifmismatchesallowed: %u\n", lo->motif.allowedmismatches);
+  printf("#   vicinity: %u nt\n", lo->vicinityforcorrectboundaries);
+}
+
+/*
+   This function prints the arguments from argv on standard output.
+ */
+void printargsline(const char **argv, int argc)
+{
+  int i;
+
+  printf("# args=");
+  for(i=1; i<argc; i++)
+  {
+    printf("%s",argv[i]);
+    if(i == (argc-1))
+    {
+      printf("\n");
+    } else
+    {
+      printf(" ");
+    }
+  }
+}
+
+int testmotif(Motif *motif, Alphabet *alpha, Env *env)
+{
+  const Uchar *symbolmap;
+
+  symbolmap = getsymbolmapAlphabet(alpha);
+  if( UNDEFCHAR == symbolmap[(unsigned int)motif->firstleft])
+  {
+    env_error_set(env,"Illegal nucleotide character %c " 
+                      "as argument to option -motif", motif->firstleft);
+    //ERROR1("Illegal nucleotide character %c as argument to option -motif",
+    //	   motif->firstleft);
+    return -1;
+  }
+  if( UNDEFCHAR == symbolmap[(unsigned int)motif->secondleft] )
+  {
+    env_error_set(env,"Illegal nucleotide character %c " 
+                      "as argument to option -motif", motif->secondleft);
+    //ERROR1("Illegal nucleotide character %c as argument to option -motif",
+    //	motif->secondleft);
+    return -1;
+  }
+  if( UNDEFCHAR == symbolmap[(unsigned int)motif->firstright] )
+  {
+    env_error_set(env,"Illegal nucleotide character %c " 
+                      "as argument to option -motif", motif->firstright);
+    //ERROR1("Illegal nucleotide character %c as argument to option -motif",
+    //	motif->firstright);
+    return -1;
+  }
+  if( UNDEFCHAR == symbolmap[(unsigned int)motif->secondright] )
+  {
+    env_error_set(env,"Illegal nucleotide character %c " 
+                      "as argument to option -motif", motif->secondright);
+    //ERROR1("Illegal nucleotide character %c as argument to option -motif",
+    //	motif->secondright);
+    return -1;
+  }
+
+  return 0;
+}
 
 static void versionfunc(const char *progname)
 {
