@@ -9,6 +9,7 @@
 #include "libgtext/genome_stream_lua.h"
 #include "libgtext/genome_visitor_lua.h"
 #include "libgtext/gtext_lua.h"
+#include "libgtext/stream_evaluator_lua.h"
 
 int luaopen_gtext(lua_State *L)
 {
@@ -16,5 +17,6 @@ int luaopen_gtext(lua_State *L)
   luaopen_genome_node(L);
   luaopen_genome_stream(L);
   luaopen_genome_visitor(L);
+  luaopen_stream_evaluator(L);
   return 1;
 }

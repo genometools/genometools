@@ -34,7 +34,7 @@ static int gff3_in_stream_lua_new_sorted(lua_State *L)
 
 static int gff3_out_stream_lua_new(lua_State *L)
 {
-  GenomeStream **out_stream, **in_stream = check_genome_stream(L);
+  GenomeStream **out_stream, **in_stream = check_genome_stream(L, 1);
   Env *env = get_env_from_registry(L);
   assert(L);
   /* construct object */
@@ -48,7 +48,7 @@ static int gff3_out_stream_lua_new(lua_State *L)
 
 static int genome_stream_lua_next_tree(lua_State *L)
 {
-  GenomeStream **gs = check_genome_stream(L);
+  GenomeStream **gs = check_genome_stream(L, 1);
   GenomeNode *gn;
   Env *env = get_env_from_registry(L);
   if (genome_stream_next_tree(*gs, &gn, env))
@@ -62,7 +62,7 @@ static int genome_stream_lua_next_tree(lua_State *L)
 
 static int genome_stream_lua_delete(lua_State *L)
 {
-  GenomeStream **gs = check_genome_stream(L);
+  GenomeStream **gs = check_genome_stream(L, 1);
   Env *env;
   env = get_env_from_registry(L);
   genome_stream_delete(*gs, env);

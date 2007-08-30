@@ -18,7 +18,7 @@ static int feature_stream_lua_new(lua_State *L)
   Env *env = get_env_from_registry(L);
   feature_stream = lua_newuserdata(L, sizeof (GenomeStream**));
   assert(feature_stream);
-  in_stream = check_genome_stream(L);
+  in_stream = check_genome_stream(L, 1);
   feature_index = check_feature_index(L, 2);
   *feature_stream = feature_stream_new(*in_stream, *feature_index, env);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
