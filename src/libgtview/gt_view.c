@@ -190,7 +190,11 @@ int gt_view(int argc, const char **argv, Env *env)
       genome_stream_delete(feature_stream, env);
       genome_stream_delete(gff3_in_stream, env);
       genome_stream_delete(gff3_out_stream, env);
-    } while (!had_err && argv[++parsed_args]);
+
+      if (!argv[parsed_args]) /* no GFF3 file was given at all */
+        break;
+      parsed_args++;
+    } while (!had_err && argv[parsed_args]);
   }
 
   /* if seqid is empty, take first one added to index */
