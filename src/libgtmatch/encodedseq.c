@@ -1307,6 +1307,15 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
   return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
+bool hasspecialranges(const Encodedsequence *encseq)
+{
+  if(encseq->numofspecialstostore > 0)
+  {
+    return true;
+  }
+  return false;
+}
+
 static int overallspecialrangesdirectorbitaccess(
                 bool direct,
                 bool moveforward,
@@ -1404,15 +1413,6 @@ bool fastspecialranges(const Encodedsequence *encseq)
   return true;
 }
 
-bool hasspecialranges(const Encodedsequence *encseq)
-{
-  if(encseq->numofspecialstostore > 0)
-  {
-    return true;
-  }
-  return false;
-}
-
 int overallspecialrangesfast(
                 const Encodedsequence *encseq,
                 bool moveforward,
@@ -1457,11 +1457,59 @@ int overallspecialrangesfast(
   return haserr ? - 1 : 0;
 }
 
-typedef struct
+ struct Specialrangeiterator
 {
-  bool moveforward;
+  bool moveforward, exhausted;
   const Encodedsequence *encseq;
-} Encodedsequencespecialrangeiterator;
+  Encodedsequencescanstate *esr;
+};
+
+Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
+                                              bool moveforward,
+                                              Env *env)
+{
+  Specialrangeiterator *sri;
+
+  assert(encseq->numofspecialstostore > 0);
+  if (!fastspecialranges(encseq))
+  {
+    env_error_set(env,"overallspecialrangesfast not possible for sat = %s",
+                  accesstype2name(encseq->sat));
+    return NULL;
+  }
+  ALLOCASSIGNSPACE(sri,NULL,Specialrangeiterator,1);
+  sri->moveforward = moveforward;
+  sri->encseq = encseq;
+  sri->exhausted = (encseq->numofspecialstostore == 0) ? true : false;
+  sri->esr = initEncodedsequencescanstate(encseq,
+                                          moveforward ? Forwardmode 
+                                                      : Reversemode,env);
+  assert(sri != NULL);
+  return sri;
+}
+
+bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri)
+{
+  if(sri->exhausted)
+  {
+    return false;
+  }
+  *range = sri->esr->previousrange;
+  if (sri->esr->hasrange)
+  {
+    advanceEncodedseqstate(sri->encseq,sri->esr,sri->moveforward);
+  } else
+  {
+    sri->exhausted = true;
+  }
+  return true;
+}
+
+void freespecialrangeiterator(Specialrangeiterator **sri,Env *env)
+{
+  freeEncodedsequencescanstate(&(*sri)->esr,env);
+  FREESPACE(*sri);
+}
 
 int overallspecialranges(const Encodedsequence *encseq,
                          bool moveforward,

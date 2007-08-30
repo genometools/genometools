@@ -17,6 +17,7 @@
 
 typedef struct Encodedsequence Encodedsequence;
 typedef struct Encodedsequencescanstate Encodedsequencescanstate;
+typedef struct Specialrangeiterator Specialrangeiterator;
 
 typedef struct
 {
@@ -90,5 +91,13 @@ int overallspecialranges(const Encodedsequence *encseq,
                                             const Sequencerange *,Env *),
                          void *processinfo,
                          Env *env);
+
+Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
+                                              bool moveforward,
+                                              Env *env);
+
+bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
+
+void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
 
 #endif

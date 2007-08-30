@@ -22,9 +22,9 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
 
-bool fastspecialranges(const Encodedsequence *encseq);
-
 bool hasspecialranges(const Encodedsequence *encseq);
+
+bool fastspecialranges(const Encodedsequence *encseq);
 
 int overallspecialrangesfast(
                 const Encodedsequence *encseq,
@@ -33,6 +33,14 @@ int overallspecialrangesfast(
                                    const Sequencerange *,Env *),
                 void *processinfo,
                 Env *env);
+
+Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
+                                              bool moveforward,
+                                              Env *env);
+
+bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
+
+void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
 
 int overallspecialranges(const Encodedsequence *encseq,
                          bool moveforward,
