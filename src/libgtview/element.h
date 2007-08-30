@@ -29,8 +29,7 @@ Creates a new Element object.
 \param env Pointer to Environment object.
 \return Pointer to a new Element object.
 */
-Element* element_new(GenomeNode *gn,
-                     Env* env);
+Element* element_new(GenomeNode *gn, Env* env);
 
 /*!
 Creates a new Element object.
@@ -54,8 +53,7 @@ Sets Range of an Element object
 \param element Element to set range
 \param r Range to set
 */
-void element_set_range(Element* element,
-                       Range r);
+void element_set_range(Element* element, Range r);
 
 /*!
 Returns Type of an Element object
@@ -69,8 +67,7 @@ Sets Type of an Element object
 \param element Element to set type
 \param type GenomeFeatureType to set
 */
-void element_set_type(Element *element,
-                      GenomeFeatureType type);
+void element_set_type(Element *element, GenomeFeatureType type);
 
 /*!
 Checks if two Element objects are equal
@@ -78,8 +75,7 @@ Checks if two Element objects are equal
 \param e2 Pointer to Element object
 \returns true if e1 and e2 are equal
 */
-bool elements_are_equal(Element* e1,
-                        Element* e2);
+bool elements_are_equal(Element* e1, Element* e2);
 
 /*!
 Unit Test for Element Class
@@ -92,8 +88,7 @@ Delets Element
 \param element Pointer to Element object to delete
 \param env Pointer to Environment object
 */
-void element_delete(Element* element,
-                    Env* env);
+void element_delete(Element* element, Env* env);
 
 #endif
 

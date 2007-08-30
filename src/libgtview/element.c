@@ -26,9 +26,7 @@ Element* element_new(GenomeNode *gn, Env *env)
 {
   Element *element;
   GenomeFeature *gf = (GenomeFeature*) gn;
-
-  assert(gn != NULL);
-
+  assert(gn);
   env_error_check(env);
   element = element_new_empty(env);
   element_set_type(element,genome_feature_get_type(gf));
@@ -42,42 +40,37 @@ Element* element_new_empty(Env *env)
 
   env_error_check(env);
   element = env_ma_malloc(env, sizeof (Element));
-  assert(element != NULL);
+  assert(element);
   return element;
 }
 
 GenomeFeatureType element_get_type(Element *element)
 {
-  assert(element != NULL);
+  assert(element);
   return element->type;
 }
 
-void element_set_type(Element *element,
-                      GenomeFeatureType type)
+void element_set_type(Element *element, GenomeFeatureType type)
 {
-  assert(element != NULL);
+  assert(element);
   element->type = type;
 }
 
 Range element_get_range(Element *element)
 {
-  assert(element != NULL);
-
+  assert(element);
   return element->range;
 }
 
-void element_set_range(Element *element,
-                       Range r)
+void element_set_range(Element *element, Range r)
 {
-  assert(element != NULL);
-
+  assert(element);
   element->range = r;
 }
 
-bool elements_are_equal(Element* e1,
-                        Element* e2)
+bool elements_are_equal(Element* e1, Element* e2)
 {
-  assert(e1 != NULL && e2 != NULL);
+  assert(e1 && e2);
   if ((0 == strcmp(genome_feature_type_get_cstr(e1->type),
                    genome_feature_type_get_cstr(e2->type)))
      && (0 == range_compare(e1->range, e2->range)))
@@ -89,9 +82,9 @@ bool elements_are_equal(Element* e1,
 int element_unit_test(Env* env)
 {
   Range r1, r2, r_temp;
-  int had_err = 0;
   GenomeNode *gn, *gn2;
   Element *e, *e2, *e3;
+  int had_err = 0;
 
   r1.start = 10UL;
   r1.end = 50UL;
@@ -137,7 +130,6 @@ void element_delete(Element *element,
                     Env *env)
 {
   if (!element) return;
-
   env_ma_free(element, env);
 }
 
