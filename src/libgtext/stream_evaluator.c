@@ -700,10 +700,13 @@ static void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
       }
     }
   }
-  else if (exondiff) {
-    printf("> ");
-    gff3_output_leading((GenomeFeature*) gn, NULL);
-    printf(".\n");
+  else  {
+    genome_node_mark(gn); /* mark false exons */
+    if (exondiff) {
+      printf("> ");
+      gff3_output_leading((GenomeFeature*) gn, NULL);
+      printf(".\n");
+    }
   }
 }
 
