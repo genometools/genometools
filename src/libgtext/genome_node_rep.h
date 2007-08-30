@@ -35,6 +35,7 @@ struct GenomeNode
   Dlist *children;
   unsigned int reference_count;
   GenomeNodeInfo info;
+  bool mark;
 };
 
 GenomeNode* genome_node_create(const GenomeNodeClass*, const char *filename,

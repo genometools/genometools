@@ -51,6 +51,8 @@ void          genome_node_is_part_of_genome_node(GenomeNode *parent,
 /* does not free the leaf */
 void          genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn,
                                       Env*);
+void          genome_node_mark(GenomeNode*);
+bool          genome_node_is_marked(const GenomeNode*);
 bool          genome_node_has_children(GenomeNode*);
 bool          genome_node_direct_children_do_not_overlap(GenomeNode*, Env*);
 /* returns true if all direct childred of <parent> with the same type (s.t.) as

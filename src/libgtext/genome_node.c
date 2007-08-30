@@ -79,6 +79,7 @@ GenomeNode* genome_node_create(const GenomeNodeClass *gnc,
   gn->reference_count = 0;
   gn->info            = 0;
   genome_node_info_set_tree_status(&gn->info, GENOME_NODE_IS_TREE);
+  gn->mark            = false;
   return gn;
 }
 
@@ -384,6 +385,18 @@ void genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn, Env *env)
   assert(!genome_node_number_of_children(leafn));
   had_err = genome_node_traverse_children(tree, leafn, remove_leaf, true, env);
   assert(!had_err); /* cannot happen, remove_leaf() is sane */
+}
+
+void genome_node_mark(GenomeNode *gn)
+{
+  assert(gn);
+  gn->mark = true;
+}
+
+bool genome_node_is_marked(const GenomeNode *gn)
+{
+  assert(gn);
+  return gn->mark;
 }
 
 bool genome_node_has_children(GenomeNode *gn)
