@@ -20,8 +20,8 @@ Codetype stpgetcurrentmaxcode(unsigned int part,
 uint64_t stpgetcurrentsumofwdith(unsigned int part,
                                  const Suftabparts *suftabparts);
 
-Seqpos stpgetcurrentwidtofpart(unsigned int part,
-                               const Suftabparts *suftabparts);
+Seqpos stpgetcurrentwidthofpart(unsigned int part,
+                                const Suftabparts *suftabparts);
 
 Seqpos stpgetlargestwidth(const Suftabparts *suftabparts);
 

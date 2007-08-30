@@ -208,8 +208,8 @@ uint64_t stpgetcurrentsumofwdith(unsigned int part,
   return suftabparts->components[part].sumofwidth;
 }
 
-Seqpos stpgetcurrentwidtofpart(unsigned int part,
-                               const Suftabparts *suftabparts)
+Seqpos stpgetcurrentwidthofpart(unsigned int part,
+                                const Suftabparts *suftabparts)
 {
   return suftabparts->components[part].widthofpart;
 }

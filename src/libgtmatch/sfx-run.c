@@ -352,7 +352,10 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
         haserr = true;
       }
     }
-    if (!haserr && (so->outsuftab || so->outbwttab || so->outlcptab))
+  }
+  if (!haserr)
+  {
+    if(so->outsuftab || so->outbwttab || so->outlcptab)
     {
       if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
       {
@@ -362,7 +365,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
       } else
       {
         unsigned int maxprefixlen;
-
+  
         maxprefixlen
           = whatisthemaximalprefixlength(numofchars,
                                          totallength,
@@ -394,7 +397,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
         {
           haserr = true;
         }
-      }
+      } 
     } else
     {
       if (so->readmode != Forwardmode)

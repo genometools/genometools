@@ -54,6 +54,13 @@ typedef struct
          *suftabptr;
   unsigned long nextfreeCodeatposition;
   Codeatposition *spaceCodeatposition;
+  Suftabparts *suftabparts;
+  const Encodedsequence *encseq;
+  Readmode readmode;
+  Seqpos widthofpart;
+  unsigned int part,
+               numofchars,
+               prefixlength;
 } Collectedsuffixes;
 
 typedef struct
@@ -210,8 +217,6 @@ static Codetype codedownscale(const unsigned int *filltable,
 }
 
 static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
-                               unsigned int numofchars,
-                               unsigned int prefixlength,
                                Collectedsuffixes *csf,
                                bool deletevalues,
                                /*@unused@*/ Env *env)
@@ -221,7 +226,7 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
   unsigned long insertindex, j;
   Seqpos stidx;
 
-  for (prefixindex=0; prefixindex < prefixlength; prefixindex++)
+  for (prefixindex=0; prefixindex < csf->prefixlength; prefixindex++)
   {
     for (j=0, insertindex = 0; j < csf->nextfreeCodeatposition; j++)
     {
@@ -237,7 +242,8 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
         {
           if (code != csf->filltable[0] || prefixindex > 0)
           {
-            csf->countspecialcodes[FROMCODE2SPECIALCODE(code,numofchars)]++;
+            csf->countspecialcodes[FROMCODE2SPECIALCODE(code,
+                                                        csf->numofchars)]++;
             stidx = --csf->leftborder[code];
 #ifdef LONGOUTPUT
             printf("insert special_suffix " FormatSeqpos
@@ -254,7 +260,7 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
       }
       if (deletevalues)
       {
-        if (prefixindex < prefixlength - 1 &&
+        if (prefixindex < csf->prefixlength - 1 &&
             prefixindex < csf->spaceCodeatposition[j].maxprefixlen)
         {
           if (insertindex < j)
@@ -335,8 +341,8 @@ static int insertallfullspecials(
   ics.readmode = readmode;
   ics.env = env;
   if (overallspecialranges(encseq,
-                          readmode,
-                          insertfullspecialpair,&ics,env) != 0)
+                           readmode,
+                           insertfullspecialpair,&ics,env) != 0)
   {
     return -1;
   }
@@ -344,7 +350,7 @@ static int insertallfullspecials(
   {
     return -2;
   }
-  if (ics.nextfreeUint > 0)
+  if (ics.nextfreeUint > 0 && ics.processsuftab != NULL)
   {
     if (ics.processsuftab(ics.processsuftabinfo,
                           ics.spacesuffixstarts,
@@ -356,6 +362,183 @@ static int insertallfullspecials(
     }
   }
   return 0;
+}
+
+static int initsuffixerator(Collectedsuffixes *csf,
+                            Seqpos specialcharacters,
+                            Seqpos specialranges,
+                            const Encodedsequence *encseq,
+                            Readmode readmode,
+                            unsigned int numofchars,
+                            unsigned int prefixlength,
+                            unsigned int numofparts,
+                            Measuretime *mtime,
+                            Env *env)
+{
+  unsigned int numofallcodes = 0, numofspecialcodes;
+  Seqpos *optr;
+  bool haserr = false;
+
+  env_error_check(env);
+  ALLOCASSIGNSPACE(csf->spaceCodeatposition,NULL,
+                   Codeatposition,specialranges+1);
+  csf->nextfreeCodeatposition = 0;
+  csf->filltable = NULL;
+  csf->basepower = NULL;
+  csf->leftborder = NULL;
+  csf->countspecialcodes = NULL;
+  csf->suftab = NULL;
+  csf->encseq = encseq;
+  csf->readmode = readmode;
+  csf->numofchars = numofchars;
+  csf->prefixlength = prefixlength;
+  csf->part = 0;
+  if (prefixlength == 0 || prefixlength > MAXPREFIXLENGTH)
+  {
+    env_error_set(env,"argument for option -pl must be in the range [1,%u]",
+                  MAXPREFIXLENGTH);
+    haserr = true;
+  }
+  if (!haserr && initbasepower(&csf->basepower,
+                               &csf->filltable,
+                               numofchars,
+                               prefixlength,
+                               env) != 0)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    assert(csf->basepower != NULL);
+    numofallcodes = csf->basepower[prefixlength];
+    if (numofallcodes-1 > MAXCODEVALUE)
+    {
+      env_error_set(env,
+                    "alphasize^prefixlength-1 = %u does not fit into "
+                    " %u bits: choose smaller value for prefixlength",
+                    numofallcodes-1,
+                    (unsigned int) CODEBITS);
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    Seqpos largestwidth;
+
+    assert(csf->basepower != NULL);
+    numofspecialcodes = csf->basepower[prefixlength-1];
+    ALLOCASSIGNSPACE(csf->leftborder,NULL,Seqpos,numofallcodes+1);
+    memset(csf->leftborder,0,
+           sizeof (*csf->leftborder) * (size_t) numofallcodes);
+    ALLOCASSIGNSPACE(csf->countspecialcodes,NULL,Seqpos,numofspecialcodes);
+    memset(csf->countspecialcodes,0,
+           sizeof (*csf->countspecialcodes) *
+                  (size_t) numofspecialcodes);
+    csf->storespecials = true;
+    if (mtime != NULL)
+    {
+      deliverthetime(stdout,mtime,"counting prefix distribution",env);
+    }
+    getencseqkmers(encseq,
+                   readmode,
+                   updatekmercount,
+                   csf,
+                   numofchars,
+                   prefixlength,
+                   env);
+    assert(specialranges+1 >= (Seqpos) csf->nextfreeCodeatposition);
+    assert(csf->filltable != NULL);
+    assert(csf->leftborder != NULL);
+    /* printf("leftborder[0]=%u\n",csf.leftborder[0]); */
+    for (optr = csf->leftborder + 1;
+         optr < csf->leftborder + numofallcodes; optr++)
+    {
+      /*/ printf("leftborder[%u]=%u\n",(unsigned int) (optr - csf->leftborder),
+                                   *optr); */
+      *optr += *(optr-1);
+    }
+    csf->leftborder[numofallcodes]
+      = getencseqtotallength(encseq) - specialcharacters;
+    csf->suftabparts = newsuftabparts(numofparts,
+                                      csf->leftborder,
+                                      numofallcodes,
+                                      getencseqtotallength(encseq)
+                                        - specialcharacters,
+                                      specialcharacters + 1,
+                                      env);
+    assert(csf->suftabparts != NULL);
+    largestwidth = stpgetlargestwidth(csf->suftabparts);
+    ALLOCASSIGNSPACE(csf->suftab,NULL,Seqpos,largestwidth);
+    reversespecialcodes(csf->spaceCodeatposition,csf->nextfreeCodeatposition);
+  }
+  return haserr ? -1 : 0;
+}
+
+static void preparethispart(Collectedsuffixes *csf,
+                            Measuretime *mtime,
+                            Env *env)
+{
+  /*
+  if(stpgetnumofparts(csf->suftabparts))
+  {
+    return false;
+  }
+  */
+  csf->currentmincode = stpgetcurrentmincode(csf->part,csf->suftabparts);
+  csf->currentmaxcode = stpgetcurrentmaxcode(csf->part,csf->suftabparts);
+  csf->widthofpart = stpgetcurrentwidthofpart(csf->part,csf->suftabparts);
+  csf->suftabptr = csf->suftab -
+                   stpgetcurrentsuftaboffset(csf->part,csf->suftabparts);
+  derivespecialcodes(NULL, /* not needed her */
+                     csf,
+                     (stpgetnumofparts(csf->suftabparts) == (unsigned int) 1)
+                       ? true : false,
+                     env);
+  if (mtime != NULL)
+  {
+    deliverthetime(stdout,mtime,"inserting suffixes into buckets",env);
+  }
+  getencseqkmers(csf->encseq,
+                 csf->readmode,
+                 insertwithoutspecial,
+                 csf,
+                 csf->numofchars,
+                 csf->prefixlength,
+                 env);
+  if (mtime != NULL)
+  {
+    deliverthetime(stdout,mtime,"sorting the buckets",env);
+  }
+  sortallbuckets(csf->suftabptr,
+                 csf->encseq,
+                 csf->readmode,
+                 csf->leftborder,
+                 csf->countspecialcodes,
+                 csf->numofchars,
+                 csf->prefixlength,
+                 csf->currentmincode,
+                 csf->currentmaxcode,
+                 stpgetcurrentsumofwdith(csf->part,csf->suftabparts),
+                 env);
+  /*
+  if(csf->part < stpgetnumofparts(csf->suftabparts) - 1)
+  {
+    csf->part++;
+    return true;
+  }
+  return false;
+  */
+}
+
+static void freeCollectedsuffixes(Collectedsuffixes *csf,Env *env)
+{
+  FREESPACE(csf->spaceCodeatposition);
+  FREESPACE(csf->filltable);
+  FREESPACE(csf->basepower);
+  FREESPACE(csf->leftborder);
+  FREESPACE(csf->countspecialcodes);
+  FREESPACE(csf->suftab);
+  freesuftabparts(csf->suftabparts,env);
 }
 
 int suffixerator(int(*processsuftab)(void *,const Seqpos *,
@@ -371,143 +554,38 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
                  Measuretime *mtime,
                  Env *env)
 {
-  unsigned int numofallcodes = 0, numofspecialcodes, part;
-  Seqpos *optr;
   Collectedsuffixes csf;
-  Suftabparts *suftabparts = NULL;
   bool haserr = false;
 
   env_error_check(env);
-  ALLOCASSIGNSPACE(csf.spaceCodeatposition,NULL,
-                   Codeatposition,specialranges+1);
-  csf.nextfreeCodeatposition = 0;
-  csf.filltable = NULL;
-  csf.basepower = NULL;
-  csf.leftborder = NULL;
-  csf.countspecialcodes = NULL;
-  csf.suftab = NULL;
-  if (prefixlength == 0 || prefixlength > MAXPREFIXLENGTH)
-  {
-    env_error_set(env,"argument for option -pl must be in the range [1,%u]",
-                  MAXPREFIXLENGTH);
-    haserr = true;
-  }
-  if (!haserr && initbasepower(&csf.basepower,
-                               &csf.filltable,
-                               numofchars,
-                               prefixlength,
-                               env) != 0)
+  if(initsuffixerator(&csf,
+                      specialcharacters,
+                      specialranges,
+                      encseq,
+                      readmode,
+                      numofchars,
+                      prefixlength,
+                      numofparts,
+                      mtime,
+                      env) != 0)
   {
     haserr = true;
   }
-  if (!haserr)
-  {
-    assert(csf.basepower != NULL);
-    numofallcodes = csf.basepower[prefixlength];
-    if (numofallcodes-1 > MAXCODEVALUE)
-    {
-      env_error_set(env,
-                    "alphasize^prefixlength-1 = %u does not fit into "
-                    " %u bits: choose smaller value for prefixlength",
-                    numofallcodes-1,
-                    (unsigned int) CODEBITS);
-      haserr = true;
-    }
-  }
-  if (!haserr)
+  if(!haserr)
   {
     Codetype specialcode;
-    Seqpos largestwidth;
 
-    assert(csf.basepower != NULL);
-    numofspecialcodes = csf.basepower[prefixlength-1];
-    ALLOCASSIGNSPACE(csf.leftborder,NULL,Seqpos,numofallcodes+1);
-    memset(csf.leftborder,0,
-           sizeof (*csf.leftborder) * (size_t) numofallcodes);
-    ALLOCASSIGNSPACE(csf.countspecialcodes,NULL,Seqpos,numofspecialcodes);
-    memset(csf.countspecialcodes,0,
-           sizeof (*csf.countspecialcodes) *
-                  (size_t) numofspecialcodes);
-    csf.storespecials = true;
-    if (mtime != NULL)
+    for(csf.part = 0; csf.part < stpgetnumofparts(csf.suftabparts); csf.part++)
     {
-      deliverthetime(stdout,mtime,"counting prefix distribution",env);
-    }
-    getencseqkmers(encseq,
-                   readmode,
-                   updatekmercount,
-                   &csf,
-                   numofchars,
-                   prefixlength,
-                   env);
-    assert(specialranges+1 >= (Seqpos) csf.nextfreeCodeatposition);
-    assert(csf.filltable != NULL);
-    assert(csf.leftborder != NULL);
-    /* printf("leftborder[0]=%u\n",csf.leftborder[0]); */
-    for (optr = csf.leftborder + 1;
-         optr < csf.leftborder + numofallcodes; optr++)
-    {
-      /*/ printf("leftborder[%u]=%u\n",(unsigned int) (optr - csf.leftborder),
-                                   *optr); */
-      *optr += *(optr-1);
-    }
-    csf.leftborder[numofallcodes]
-      = getencseqtotallength(encseq) - specialcharacters;
-    suftabparts = newsuftabparts(numofparts,
-                                 csf.leftborder,
-                                 numofallcodes,
-                                 getencseqtotallength(encseq)
-                                   - specialcharacters,
-                                 specialcharacters + 1,
-                                 env);
-    assert(suftabparts != NULL);
-    largestwidth = stpgetlargestwidth(suftabparts);
-    ALLOCASSIGNSPACE(csf.suftab,NULL,Seqpos,largestwidth);
-    reversespecialcodes(csf.spaceCodeatposition,csf.nextfreeCodeatposition);
-    for (part = 0; part < stpgetnumofparts(suftabparts); part++)
-    {
-      csf.currentmincode = stpgetcurrentmincode(part,suftabparts);
-      csf.suftabptr = csf.suftab - stpgetcurrentsuftaboffset(part,suftabparts);
-      csf.currentmaxcode = stpgetcurrentmaxcode(part,suftabparts);
-      derivespecialcodes(NULL, /* not needed her */
-                         numofchars,
-                         prefixlength,
-                         &csf,
-                         (stpgetnumofparts(suftabparts) == (unsigned int) 1)
-                           ? true : false,
-                         env);
-      if (mtime != NULL)
-      {
-        deliverthetime(stdout,mtime,"inserting suffixes into buckets",env);
-      }
-      getencseqkmers(encseq,
-                     readmode,
-                     insertwithoutspecial,
-                     &csf,
-                     numofchars,
-                     prefixlength,
-                     env);
-      if (mtime != NULL)
-      {
-        deliverthetime(stdout,mtime,"sorting the buckets",env);
-      }
-      sortallbuckets(csf.suftabptr,
-                     encseq,
-                     readmode,
-                     csf.leftborder,
-                     csf.countspecialcodes,
-                     numofchars,
-                     prefixlength,
-                     csf.currentmincode,
-                     csf.currentmaxcode,
-                     stpgetcurrentsumofwdith(part,suftabparts),
-                     env);
+      preparethispart(&csf,
+                      mtime,
+                      env);
       if (processsuftab != NULL)
       {
         if (processsuftab(processsuftabinfo,
                           csf.suftab,
-                          readmode,
-                          stpgetcurrentwidtofpart(part,suftabparts),
+                          csf.readmode,
+                          csf.widthofpart,
                           env) != 0)
         {
           haserr = true;
@@ -515,9 +593,9 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
         }
       }
     }
-    if (insertallfullspecials(encseq,
-                              readmode,
-                              largestwidth,
+    if (insertallfullspecials(csf.encseq,
+                              csf.readmode,
+                              stpgetlargestwidth(csf.suftabparts),
                               csf.suftab,
                               processsuftab,
                               processsuftabinfo,
@@ -525,15 +603,9 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
     {
       haserr = true;
     }
-    specialcode = FROMCODE2SPECIALCODE(csf.filltable[0],numofchars);
+    specialcode = FROMCODE2SPECIALCODE(csf.filltable[0],csf.numofchars);
     csf.countspecialcodes[specialcode] += (specialcharacters + 1);
   }
-  FREESPACE(csf.spaceCodeatposition);
-  FREESPACE(csf.filltable);
-  FREESPACE(csf.basepower);
-  FREESPACE(csf.leftborder);
-  FREESPACE(csf.countspecialcodes);
-  FREESPACE(csf.suftab);
-  freesuftabparts(suftabparts,env);
+  freeCollectedsuffixes(&csf,env);
   return haserr ? -1 : 0;
 }
