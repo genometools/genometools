@@ -166,8 +166,8 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
                                       unsigned long LTRdelta, Env *env)
 {
   StreamEvaluator *evaluator = env_ma_malloc(env, sizeof (StreamEvaluator));
-  evaluator->reality = reality;
-  evaluator->prediction = prediction;
+  evaluator->reality = genome_stream_ref(reality);
+  evaluator->prediction = genome_stream_ref(prediction);
   evaluator->evalLTR = evalLTR;
   evaluator->LTRdelta = LTRdelta;
   evaluator->real_features = hashtable_new(HASH_STRING, NULL,

@@ -38,9 +38,13 @@ static int stream_evaluator_lua_evaluate(lua_State *L)
   GenomeVisitor **genome_visitor;
   Env *env = get_env_from_registry(L);
   stream_evaluator = check_stream_evaluator(L);
-  genome_visitor = check_genome_visitor(L, 2);
-  stream_evaluator_evaluate(*stream_evaluator, false, false, *genome_visitor,
-                            env);
+  if (lua_gettop(L) >= 2) {
+    genome_visitor = check_genome_visitor(L, 2);
+  }
+  else
+    genome_visitor = NULL;
+  stream_evaluator_evaluate(*stream_evaluator, false, false,
+                            genome_visitor ?  *genome_visitor : NULL, env);
   return 0;
 }
 

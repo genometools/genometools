@@ -61,4 +61,11 @@ if $arguments["libgtview"] then
   Test do
     run_test "#{$bin}gt #{$testdata}/gtscripts/view.lua test.png #{$testdata}/gff3_file_1_short.txt"
   end
+
+  Name "evalviz.lua test 1"
+  Keywords "gt_scripts"
+  Test do
+    run_test "#{$bin}gt #{$testdata}/gtscripts/evalviz.lua test.png #{$testdata}/gt_eval_test_1.in #{$testdata}/gt_eval_test_1.in"
+    run "diff #{$last_stdout} #{$testdata}/gt_eval_test_1.out"
+  end
 end

@@ -101,6 +101,8 @@ int gt_eval(int argc, const char **argv, Env *env)
 
   /* free */
   stream_evaluator_delete(evaluator, env);
+  genome_stream_delete(prediction_stream, env);
+  genome_stream_delete(reality_stream, env);
 
   return had_err;
 }

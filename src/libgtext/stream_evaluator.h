@@ -11,7 +11,6 @@
 
 typedef struct StreamEvaluator StreamEvaluator;
 
-/* takes ownership of the given streams */
 StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
                                       GenomeStream *prediction,
                                       bool evalLTR, unsigned long LTRdelta,
