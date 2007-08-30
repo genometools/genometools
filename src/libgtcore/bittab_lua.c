@@ -83,9 +83,9 @@ static int bittab_lua_equal(lua_State *L)
 
 static int bittab_lua_delete(lua_State *L)
 {
-  Bittab **bittab = checkbittab(L, 1);
-  Env *env;
-  env = get_env_from_registry(L);
+  Bittab **bittab;
+  Env *env = get_env_from_registry(L);
+  bittab = checkbittab(L, 1);
   bittab_delete(*bittab, env);
   return 0;
 }
