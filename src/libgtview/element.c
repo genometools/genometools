@@ -20,17 +20,19 @@ struct Element
 {
   GenomeFeatureType type;
   Range range;
+  bool mark;
 };
 
 Element* element_new(GenomeNode *gn, Env *env)
 {
   Element *element;
   GenomeFeature *gf = (GenomeFeature*) gn;
-  assert(gn);
   env_error_check(env);
+  assert(gn);
   element = element_new_empty(env);
   element_set_type(element,genome_feature_get_type(gf));
   element_set_range(element, genome_node_get_range(gn));
+  element->mark = genome_node_is_marked(gn);
   return element;
 }
 
@@ -44,7 +46,7 @@ Element* element_new_empty(Env *env)
   return element;
 }
 
-GenomeFeatureType element_get_type(Element *element)
+GenomeFeatureType element_get_type(const Element *element)
 {
   assert(element);
   return element->type;
@@ -56,7 +58,7 @@ void element_set_type(Element *element, GenomeFeatureType type)
   element->type = type;
 }
 
-Range element_get_range(Element *element)
+Range element_get_range(const Element *element)
 {
   assert(element);
   return element->range;
@@ -68,15 +70,18 @@ void element_set_range(Element *element, Range r)
   element->range = r;
 }
 
-bool elements_are_equal(Element* e1, Element* e2)
+bool element_is_marked(const Element *element)
+{
+  assert(element);
+  return element->mark;
+}
+
+bool elements_are_equal(const Element* e1, const Element* e2)
 {
   assert(e1 && e2);
-  if ((0 == strcmp(genome_feature_type_get_cstr(e1->type),
-                   genome_feature_type_get_cstr(e2->type)))
-     && (0 == range_compare(e1->range, e2->range)))
+  if (e1->type == e2->type && !range_compare(e1->range, e2->range))
     return true;
-  else
-    return false;
+  return false;
 }
 
 int element_unit_test(Env* env)

@@ -46,7 +46,7 @@ Returns range of an Element object
 \param block Pointer to Element object
 \return Pointer to Range object
 */
-Range element_get_range(Element* element);
+Range element_get_range(const Element* element);
 
 /*!
 Sets Range of an Element object
@@ -60,7 +60,7 @@ Returns Type of an Element object
 \param element Pointer to Element object
 \return GenomeFeatureType
 */
-GenomeFeatureType element_get_type(Element* element);
+GenomeFeatureType element_get_type(const Element* element);
 
 /*!
 Sets Type of an Element object
@@ -69,13 +69,15 @@ Sets Type of an Element object
 */
 void element_set_type(Element *element, GenomeFeatureType type);
 
+bool element_is_marked(const Element *element);
+
 /*!
 Checks if two Element objects are equal
 \param e1 Pointer to Element object
 \param e2 Pointer to Element object
 \returns true if e1 and e2 are equal
 */
-bool elements_are_equal(Element* e1, Element* e2);
+bool elements_are_equal(const Element* e1, const Element* e2);
 
 /*!
 Unit Test for Element Class
