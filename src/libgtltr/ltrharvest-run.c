@@ -18,12 +18,15 @@
 #include "repeats.h"
 #include "searchforLTRs.h"
 #include "duplicates.h"
+#include "outputstd.c"
 
 static int runltrharvest(LTRharvestoptions *lo, Env *env)
 {
   bool haserror = false;
   Suffixarray suffixarray;
   Seqpos totallength;
+  
+  env_error_check(env);
 
   /* map suffix array */
   if(streamsuffixarray(&suffixarray,
@@ -77,10 +80,19 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   /* remove exact duplicates */
   removeduplicates(&lo->arrayLTRboundaries);
 
+  /* remove overlapping predictions if desired */
+  // function fehlt noch
 
+  /* print multiple FASTA file of predictions */
+  // fehlt noch
 
+  /* print GFF3 format file of predictions */
+  // fehlt noch
 
+  /* print predictions to stdout */
+  showinfoiffoundfullLTRs(lo, &suffixarray, env);
 
+  /* free prediction array */
   FREEARRAY(&lo->arrayLTRboundaries, LTRboundaries);
   /* free suffixarray */
   freesuffixarray(&suffixarray, env);

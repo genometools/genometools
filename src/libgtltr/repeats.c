@@ -149,7 +149,11 @@ int simpleexactselfmatchstore (
 	  break;
       }
     }
+    
+    FREESPACE(markpos);
   }
+
+
   //test maximal length of candidate pair and distance constraints
   if( samecontig && (len <= (Seqpos) info->repeatinfo.lmax) && 
       ( (Seqpos) info->repeatinfo.dmin <= tmp) && 
@@ -159,7 +163,7 @@ int simpleexactselfmatchstore (
 
     GETNEXTFREEINARRAY(nextfreerepeatptr, &info->repeatinfo.repeats, 
                        Repeat, 10);
-//#ifdef DEBUG
+#ifdef DEBUG
     printf("maximal repeat pos1: " FormatSeqpos "\n",
                PRINTSeqposcast(pos1));
     printf("maximal repeat pos2: " FormatSeqpos "\n",
@@ -167,7 +171,7 @@ int simpleexactselfmatchstore (
     printf("len: " FormatSeqpos "\n",
                PRINTSeqposcast(len));
     printf("seq number: %lu\n\n", contignumber);
-//#endif
+#endif
     nextfreerepeatptr->pos1 = pos1;
     nextfreerepeatptr->offset = tmp;
     nextfreerepeatptr->len = len;

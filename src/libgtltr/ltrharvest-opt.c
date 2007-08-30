@@ -642,7 +642,6 @@ static void showuserdefinedoptionsandvalues(LTRharvestoptions *lo)
 int wrapltrharvestoptions(LTRharvestoptions *lo,Env *env)
 {
   /* no checking if error occurs, since errors have been output before */
-  lo->env = NULL;
   str_delete(lo->str_indexname,env);
   str_delete(lo->str_fastaoutputfilename,env);
   str_delete(lo->str_fastaoutputfilenameinnerregion,env);

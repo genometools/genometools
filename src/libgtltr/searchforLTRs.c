@@ -132,7 +132,7 @@ void adjustboundariesfromXdropextension(
   boundaries->leftLTR_3  = seed1_endpos + xdropbest_right.ivalue;
   boundaries->rightLTR_3 = seed2_endpos + xdropbest_right.jvalue;
   
-  ///*
+  /*
   printf("Adjusted boundaries from Xdrop-alignment-extension:\n");
   printf("boundaries->leftLTR_5  = " FormatSeqpos "\n", 
             PRINTSeqposcast(boundaries->leftLTR_5 + 1)); 
@@ -150,7 +150,7 @@ void adjustboundariesfromXdropextension(
          // count positions from 1, thus + 1
   printf("len rightLTR = " FormatSeqpos "\n", 
             PRINTSeqposcast((boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1)));
-  //*/
+  */
 
   /* noch aendern auf multiseqoffset
   printf("Adjusted boundaries from Xdrop-alignment-extension:\n");
@@ -231,19 +231,19 @@ int searchforLTRs (
   //Seqpos multiseqoffset = 0;
   //Uchar *seq = virtualtree->multiseq.sequence;
 
-  ///*
+  /*
   printf("xdropbelowscore = %d\n", lo->xdropbelowscore);
   printf("scores:\n");
   printf("mat  = %d\n", lo->arbitscores.mat);
   printf("mis  = %d\n", lo->arbitscores.mis);
   printf("ins  = %d\n", lo->arbitscores.ins);
   printf("del  = %d\n", lo->arbitscores.del);
-  //*/
+  */
 
   for (repeatcounter = 0; repeatcounter < lo->repeatinfo.repeats.nextfreeRepeat;
        repeatcounter++)
   {
-    printf("\n\nAlignments of repeat nr. = %u :\n", repeatcounter+1);
+    //printf("\n\nAlignments of repeat nr. = %u :\n", repeatcounter+1);
    
     repeatptr = &(lo->repeatinfo.repeats.spaceRepeat[repeatcounter]);
     alilen = ((Seqpos)lo->repeatinfo.lmax) - repeatptr->len;
