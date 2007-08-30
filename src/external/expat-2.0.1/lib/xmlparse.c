@@ -1475,7 +1475,7 @@ XML_Parse(XML_Parser parser, const char *s, int len, int isFinal)
   else if (bufferPtr == bufferEnd) {
     const char *end;
     int nLeftOver;
-    enum XML_Error result;
+    enum XML_Error result = 0;
     parseEndByteIndex += len;
     positionPtr = s;
     ps_finalBuffer = (XML_Bool)isFinal;
@@ -1499,6 +1499,8 @@ XML_Parse(XML_Parser parser, const char *s, int len, int isFinal)
           ps_parsing = XML_FINISHED;
           return result;
         }
+      case XML_FINISHED:
+        break;
       }
     }
 
