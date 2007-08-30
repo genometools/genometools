@@ -440,3 +440,44 @@ bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal)
     *p = (*p & ~mask) | (bitPatSource & mask);
   }
 }
+
+extern BitOffset
+bs1BitsCount(const BitString str, BitOffset offset, BitOffset numBits)
+{
+  uint32_t accum = 0;
+  BitOffset weight = 0, bitsLeft = numBits;
+  unsigned bitTop = offset%bitElemBits, bitsInAccum = 0;
+  size_t elemStart = offset/bitElemBits;
+  const BitElem *p = str + elemStart;
+  assert(str);
+  if (bitTop)
+  {
+    uint32_t mask;
+    unsigned bits2Read = MIN(bitElemBits - bitTop, bitsLeft);
+    unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
+    mask = (~((~(uint32_t)0) << bits2Read)) << unreadRightBits;
+    accum = ((*p++) & mask) >> unreadRightBits;
+    bitsLeft -= bits2Read;
+    bitsInAccum += bits2Read;
+  }
+  /* get bits from intervening elems */
+  while (bitsLeft >= bitElemBits)
+  {
+    while (bitsLeft >= bitElemBits
+           && sizeof (accum) * CHAR_BIT - bitElemBits >= bitsInAccum)
+    {
+      accum = accum << bitElemBits | (*p++);
+      bitsLeft -= bitElemBits;
+      bitsInAccum += bitElemBits;
+    }
+    weight += bitCountUInt32(accum);
+    accum = 0; bitsInAccum = 0;
+  }
+  /* get bits from last elem */
+  if (bitsLeft)
+  {
+    accum = ((*p) & ((~(uint32_t)0)<<(bitElemBits - bitsLeft)));
+    weight += bitCountUInt32(accum);
+  }
+  return weight;
+}

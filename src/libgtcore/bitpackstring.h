@@ -577,13 +577,19 @@ static inline void
 bsToggleBit(BitString str, BitOffset pos);
 
 /**
- * \brief queries value of single bit in bitstring
+ * \brief Query value of single bit in bitstring.
  * @param str bitstring to read from
  * @param pos selects bit to retrieve
  * @return 1 if selected bit is set, 0 if not set
  */
 static inline int
 bsGetBit(const BitString str, BitOffset pos);
+/**
+ * \brief Compute Hamming weight of (sub-)bitstring
+ * @return number of bits set in (sub-)bitstring
+ */
+extern BitOffset
+bs1BitsCount(const BitString str, BitOffset offset, BitOffset numBits);
 
 /**
  * \brief Meta-Unit test function for bitPackString, calls all functions

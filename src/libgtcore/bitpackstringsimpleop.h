@@ -351,3 +351,15 @@ bsGetBit(const BitString str, BitOffset pos)
   return (*p & 1 << (bitElemBits - bitTop - 1))?1:0;
 }
 
+/*
+ * the following helper function counts the bits set in a 32 bit int
+ * see http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetParallel
+ * for an exhaustive discussion
+ */
+static inline unsigned
+bitCountUInt32(uint32_t v)
+{
+  v = v - ((v >> 1) & 0x55555555UL);      /* reuse input as temporary */
+  v = (v & 0x33333333UL) + ((v >> 2) & 0x33333333UL);        /* temp  */
+  return (((v + (v >> 4)) & 0xF0F0F0FUL) * 0x1010101UL) >> 24; /* count */
+}
