@@ -12,6 +12,7 @@ config =
   colors =
   {
     stroke          ={red=0.0,green=0.0,blue=0.0},
+    stroke_marked   ={red=1.0,green=0.0,blue=0.0},
     track_title     ={red=0.6,green=0.6,blue=0.7},
     exon            ={red=0.6,green=0.6,blue=0.9},
     CDS             ={red=0.9,green=0.9,blue=0.2},

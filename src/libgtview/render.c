@@ -209,7 +209,7 @@ void render_line(Render *r, Line *line, Env *env)
       Range elem_range = element_get_range(elem);
       DrawingRange draw_range;
       double elem_start, elem_width, bar_height;
-      Color grey;
+      Color grey, elem_color;
       int arrow_status = ARROW_NONE;
       const char *style,
                  *type = genome_feature_type_get_cstr(element_get_type(elem));
@@ -221,7 +221,7 @@ void render_line(Render *r, Line *line, Env *env)
              && dlistelem_next(delem) == NULL)
         arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
 
-      grey.red=grey.green=grey.blue=.85;
+      grey.red = grey.green = grey.blue = .85;
       bar_height = config_get_num(r->cfg, "format", "bar_height", 15, env);
 
       if (config_get_verbose(r->cfg))
@@ -247,6 +247,11 @@ void render_line(Render *r, Line *line, Env *env)
                               "box",
                               env);
 
+      if (element_is_marked(elem))
+        elem_color = config_get_color(r->cfg, "stroke_marked", env);
+      else
+        elem_color = config_get_color(r->cfg, "stroke", env);
+
       if (strcmp(style, "box")==0)
       {
         graphics_draw_box(r->g,
@@ -258,7 +263,7 @@ void render_line(Render *r, Line *line, Env *env)
                        arrow_status,
                        config_get_num(r->cfg, "format", "arrow_width", 6, env),
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
-                       config_get_color(r->cfg, "stroke", env));
+                       elem_color);
       }
       else if (strcmp(style, "caret")==0)
       {
@@ -270,7 +275,7 @@ void render_line(Render *r, Line *line, Env *env)
                        arrow_status,
                        config_get_num(r->cfg, "format", "arrow_width", 6, env),
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
-                       config_get_color(r->cfg, "stroke", env));
+                       elem_color);
       }
       else if (strcmp(style, "dashes")==0)
       {
@@ -282,7 +287,7 @@ void render_line(Render *r, Line *line, Env *env)
                        arrow_status,
                        config_get_num(r->cfg, "format", "arrow_width", 6, env),
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
-                       config_get_color(r->cfg, "stroke", env));
+                       elem_color);
       }
       else if (strcmp(style, "line")==0)
       {
@@ -302,7 +307,7 @@ void render_line(Render *r, Line *line, Env *env)
                        arrow_status,
                        config_get_num(r->cfg, "format", "arrow_width", 6, env),
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
-                       config_get_color(r->cfg, "stroke", env));
+                       elem_color);
       }
 
       /* draw arrowheads at clipped margins */
