@@ -13,7 +13,7 @@
 
 typedef struct
 {
-  uint32_t idx;
+  unsigned int idx;
   Seqpos startpos;
 #ifdef WITHTRIEIDENT
   uint64_t  ident;
@@ -45,10 +45,10 @@ typedef struct
   Trienode *nodetable,
            *root;
   Trienodeptr *unusedTrienodes;
-  uint32_t numofindexes,
-           nextunused,
-           allocatedTrienode,
-           nextfreeTrienode;
+  unsigned int numofindexes,
+               nextunused,
+               allocatedTrienode,
+               nextfreeTrienode;
 } Trierep;
 
 #endif

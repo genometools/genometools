@@ -82,7 +82,7 @@ typedef struct
   ArrayPairBwtidx specpos; /* positions of special characters */
   Alphabet *alphabet;
   void *mappedptr; /* NULL or pointer to the mapped space block */
-  uint32_t mapsize,          /* copy of alphabet.mapsize, used for searching */
+  unsigned int mapsize,      /* copy of alphabet.mapsize, used for searching */
            bsize,            /* size of block */
            bsizehalve,       /* DIV2(fm->bsize) */
            superbsize,       /* size of superblock */

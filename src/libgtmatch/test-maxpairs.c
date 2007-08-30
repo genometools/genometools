@@ -25,7 +25,6 @@ static Seqpos samplesubstring(Uchar *seqspace,
   return substringlength;
 }
 
-
 static int showmaxmatch(/*@unused@*/ void *info,
                         unsigned long len,
                         Seqpos dbstart,
@@ -71,15 +70,15 @@ int testmaxpairs(const Str *indexname,
   {
     dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength);
     querylen = samplesubstring(query,suffixarray.encseq,substringlength);
-    if(sarrquerysubstringmatch(dbseq,
-                               dblen,
-                               query,
-                               (unsigned long) querylen,
-                               minlength,
-                               suffixarray.alpha,
-                               showmaxmatch,
-                               NULL,
-                               env) != 0)
+    if (sarrquerysubstringmatch(dbseq,
+                                dblen,
+                                query,
+                                (unsigned long) querylen,
+                                minlength,
+                                suffixarray.alpha,
+                                showmaxmatch,
+                                NULL,
+                                env) != 0)
     {
       haserr = true;
       break;

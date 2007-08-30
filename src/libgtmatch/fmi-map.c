@@ -47,8 +47,8 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   ArrayUchar linebuffer;
   bool haserr = false;
   Array *riktab;
-  uint32_t linenum,
-           intstoreindexpos;
+  unsigned int linenum,
+               intstoreindexpos;
 
   env_error_check(env);
   riktab = array_new(sizeofReadintkeys(),env);
@@ -96,7 +96,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   }
   if (!haserr)
   {
-    if (intstoreindexpos == (uint32_t) 1)
+    if (intstoreindexpos == (unsigned int) 1)
     {
       *storeindexpos = true;
     } else

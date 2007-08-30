@@ -4,7 +4,7 @@ extern "C" {
 Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
                                Specialcharinfo *specialcharinfo,
                                const Suffixarray *suffixarraytable,
-                               uint32_t numofindexes,
+                               unsigned int numofindexes,
                                Env *env);
 
 #ifdef __cplusplus

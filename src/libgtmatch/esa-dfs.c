@@ -301,7 +301,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
         haserr = true;
       }
     }
-    if(!haserr)
+    if (!haserr)
     {
       if (previoussuffix == 0)
       {

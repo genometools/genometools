@@ -21,8 +21,8 @@
 #include "sfx-mappedstr.pr"
 #include "sfx-map.pr"
 
-static Codetype qgram2codefillspecial(uint32_t numofchars,
-                                      uint32_t kmersize,
+static Codetype qgram2codefillspecial(unsigned int numofchars,
+                                      unsigned int kmersize,
                                       const Encodedsequence *encseq,
                                       Readmode readmode,
                                       Seqpos startpos,
@@ -96,8 +96,8 @@ static void outkmeroccurrence(void *processinfo,
 static void collectkmercode(ArrayCodetype *codelist,
                             const Encodedsequence *encseq,
                             Readmode readmode,
-                            uint32_t kmersize,
-                            uint32_t numofchars,
+                            unsigned int kmersize,
+                            unsigned int numofchars,
                             Seqpos stringtotallength,
                             Env *env)
 {
@@ -119,8 +119,8 @@ static void collectkmercode(ArrayCodetype *codelist,
 
 static int comparecodelists(const ArrayCodetype *codeliststream,
                             const ArrayCodetype *codeliststring,
-                            uint32_t kmersize,
-                            uint32_t numofchars,
+                            unsigned int kmersize,
+                            unsigned int numofchars,
                             const char *characters,
                             Env *env)
 {
@@ -168,8 +168,8 @@ static int comparecodelists(const ArrayCodetype *codeliststream,
 static int verifycodelists(const Encodedsequence *encseq,
                            Readmode readmode,
                            const Uchar *characters,
-                           uint32_t kmersize,
-                           uint32_t numofchars,
+                           unsigned int kmersize,
+                           unsigned int numofchars,
                            Seqpos stringtotallength,
                            const ArrayCodetype *codeliststream,
                            Env *env)
@@ -201,7 +201,7 @@ static int verifycodelists(const Encodedsequence *encseq,
 
 int verifymappedstr(const Suffixarray *suffixarray,Env *env)
 {
-  uint32_t numofchars;
+  unsigned int numofchars;
   ArrayCodetype codeliststream;
   bool haserr = false;
 

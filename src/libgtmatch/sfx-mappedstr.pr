@@ -6,8 +6,8 @@ int getfastastreamkmers(
         void(*processkmercode)(void *,Codetype,Seqpos,
                                const Firstspecialpos *,Env *),
         void *processkmercodeinfo,
-        uint32_t numofchars,
-        uint32_t kmersize,
+        unsigned int numofchars,
+        unsigned int kmersize,
         const Uchar *symbolmap,
         bool plainformat,
         Env *env);
@@ -18,8 +18,8 @@ void getencseqkmers(
         void(*processkmercode)(void *,Codetype,Seqpos,
                                const Firstspecialpos *,Env *),
         void *processkmercodeinfo,
-        uint32_t numofchars,
-        uint32_t kmersize,
+        unsigned int numofchars,
+        unsigned int kmersize,
         Env *env);
 
 #ifdef __cplusplus

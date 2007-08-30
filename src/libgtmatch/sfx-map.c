@@ -50,7 +50,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                                  Env *env)
 {
   ArrayUchar linebuffer;
-  uint32_t integersize, littleendian, linenum, readmodeint;
+  uint32_t integersize, littleendian, readmodeint;
+  unsigned int linenum;
   unsigned long numofsequences, numofquerysequences,
                 numoffiles = 0, numofallocatedfiles = 0;
   DefinedSeqpos maxbranchdepth;
@@ -528,17 +529,16 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreader(
                                         unsigned int demand,
                                         bool mapped,
                                         Env *env)
-                                         
 {
   Sequentialsuffixarrayreader *ssar;
 
   ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
-  if((mapped ? mapsuffixarray : streamsuffixarray)(&ssar->suffixarray,
-                                                   &ssar->totallength,
-                                                   demand,
-                                                   indexname,
-                                                   false,
-                                                   env) != 0)
+  if ((mapped ? mapsuffixarray : streamsuffixarray)(&ssar->suffixarray,
+                                                    &ssar->totallength,
+                                                    demand,
+                                                    indexname,
+                                                    false,
+                                                    env) != 0)
   {
     FREESPACE(ssar);
     return NULL;
@@ -564,9 +564,9 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
   Uchar tmpsmalllcpvalue;
   int retval;
 
-  if(ssar->mapped)
+  if (ssar->mapped)
   {
-    if(ssar->nextlcptabindex > ssar->totallength)
+    if (ssar->nextlcptabindex > ssar->totallength)
     {
       return 0;
     }
@@ -589,7 +589,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
   {
     Largelcpvalue tmpexception;
 
-    if(ssar->mapped)
+    if (ssar->mapped)
     {
       assert(ssar->suffixarray.llvtab[ssar->largelcpindex].position ==
              ssar->nextlcptabindex-1);
@@ -639,7 +639,7 @@ Readmode readmodeSequentialsuffixarrayreader(
   return sarr->suffixarray.readmode;
 }
 
-uint32_t alphabetsizeSequentialsuffixarrayreader(
+unsigned int alphabetsizeSequentialsuffixarrayreader(
 			  const Sequentialsuffixarrayreader *sarr)
 {
   return getnumofcharsAlphabet(sarr->suffixarray.alpha);

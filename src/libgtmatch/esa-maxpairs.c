@@ -14,8 +14,8 @@
 #include "sfx-apfxlen.pr"
 #include "sfx-suffixer.pr"
 
-#define ISLEFTDIVERSE   (state->alphabetsize)
-#define INITIALCHAR     (state->alphabetsize+1)
+#define ISLEFTDIVERSE   (Uchar) (state->alphabetsize)
+#define INITIALCHAR     (Uchar) (state->alphabetsize+1)
 
 #define CHECKCHAR(CC)\
         if (father->commonchar != (CC) || (CC) >= ISLEFTDIVERSE)\
@@ -51,8 +51,8 @@ DECLAREARRAYSTRUCT(Seqpos);
 typedef struct
 {
   bool initialized;
-  uint32_t searchlength,
-           alphabetsize;
+  unsigned int searchlength,
+               alphabetsize;
   Seqpos depth;            /* value changes with each new match */
   int(*output)(void *,Seqpos,Seqpos,Seqpos);
   void *outinfo;
@@ -77,7 +77,7 @@ static void freeDfsinfo(Dfsinfo *dfsinfo,/*@unused@*/ Dfsstate *state,Env *env)
   FREESPACE(dfsinfo);
 }
 
-static void add2poslist(Dfsstate *state,Dfsinfo *ninfo,uint32_t base,
+static void add2poslist(Dfsstate *state,Dfsinfo *ninfo,unsigned int base,
                         Seqpos leafnumber,Env *env)
 {
   ArraySeqpos *ptr;
@@ -96,7 +96,7 @@ static void add2poslist(Dfsstate *state,Dfsinfo *ninfo,uint32_t base,
 
 static void concatlists(Dfsstate *state,Dfsinfo *father,Dfsinfo *son)
 {
-  uint32_t base;
+  unsigned int base;
 
   for (base = 0; base < state->alphabetsize; base++)
   {
@@ -105,7 +105,7 @@ static void concatlists(Dfsstate *state,Dfsinfo *father,Dfsinfo *son)
   father->uniquecharposlength += son->uniquecharposlength;
 }
 
-static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,uint32_t base,
+static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
                         Seqpos leafnumber)
 {
   Listtype *pl;
@@ -124,8 +124,8 @@ static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,uint32_t base,
 }
 
 static int cartproduct2(Dfsstate *state,
-                        const Dfsinfo *ninfo1, uint32_t base1,
-                        const Dfsinfo *ninfo2, uint32_t base2)
+                        const Dfsinfo *ninfo1, unsigned int base1,
+                        const Dfsinfo *ninfo2, unsigned int base2)
 {
   Listtype *pl1, *pl2;
   Seqpos *start1, *start2, *spptr1, *spptr2;
@@ -149,7 +149,7 @@ static int cartproduct2(Dfsstate *state,
 
 static void setpostabto0(Dfsstate *state)
 {
-  uint32_t base;
+  unsigned int base;
 
   if (!state->initialized)
   {
@@ -170,7 +170,7 @@ static int processleafedge(bool firstsucc,
                            Dfsstate *state,
                            Env *env)
 {
-  uint32_t base;
+  unsigned int base;
   Seqpos *start, *spptr;
 
 #ifdef DEBUG
@@ -200,7 +200,7 @@ static int processleafedge(bool firstsucc,
       NODEPOSLISTSTART(father,base) = state->poslist[base].nextfreeSeqpos;
       NODEPOSLISTLENGTH(father,base) = 0;
     }
-    add2poslist(state,father,leftchar,leafnumber,env);
+    add2poslist(state,father,(unsigned int) leftchar,leafnumber,env);
     return 0;
   }
   if (father->commonchar != ISLEFTDIVERSE)
@@ -211,7 +211,7 @@ static int processleafedge(bool firstsucc,
   {
     for (base = 0; base < state->alphabetsize; base++)
     {
-      if (base != leftchar)
+      if (leftchar != (Uchar) base)
       {
         if (cartproduct1(state,father,base,leafnumber) != 0)
         {
@@ -229,7 +229,7 @@ static int processleafedge(bool firstsucc,
       }
     }
   }
-  add2poslist(state,father,leftchar,leafnumber,env);
+  add2poslist(state,father,(unsigned int) leftchar,leafnumber,env);
   return 0;
 }
 
@@ -240,7 +240,7 @@ static int processbranchedge(bool firstsucc,
                              Dfsstate *state,
                              /*@unused@*/ Env *env)
 {
-  uint32_t chfather, chson;
+  unsigned int chfather, chson;
   Seqpos *start, *spptr, *fptr, *fstart;
 
 #ifdef DEBUG
@@ -322,12 +322,12 @@ static int processbranchedge(bool firstsucc,
 }
 
 int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
-                      uint32_t searchlength,
+                      unsigned int searchlength,
                       int(*output)(void *,Seqpos,Seqpos,Seqpos),
                       void *outinfo,
                       Env *env)
 {
-  uint32_t base;
+  unsigned int base;
   ArraySeqpos *ptr;
   Dfsstate state;
   bool haserr = false;
@@ -345,7 +345,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
     INITARRAY(ptr,Seqpos);
   }
   if (depthfirstesa(ssar,
-                    state.alphabetsize+1,
+                    (Uchar) (state.alphabetsize+1),
                     allocateDfsinfo,
                     freeDfsinfo,
                     processleafedge,
@@ -375,11 +375,11 @@ typedef struct
   void *processmaxmatchinfo;
 } Substringmatchinfo;
 
-static int processsuftab(void *info,
-                         const Seqpos *suftabpart,
-                         Readmode readmode,
-                         Seqpos widthofpart,
-                         Env *env)
+static int processsuftab(/*@unused@*/ void *info,
+                         /*@unused@*/ const Seqpos *suftabpart,
+                         /*@unused@*/ Readmode readmode,
+                         /*@unused@*/ Seqpos widthofpart,
+                         /*@unused@*/ Env *env)
 {
   return 0;
 }
@@ -397,9 +397,9 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
 {
   Specialcharinfo samplespecialcharinfo;
   Substringmatchinfo ssi;
-  uint32_t numofchars;
+  unsigned int numofchars;
   bool haserr = false;
-                                   
+
   ssi.encseq = plain2encodedsequence(true,
                                      &samplespecialcharinfo,
                                      dbseq,
@@ -419,9 +419,8 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                    ssi.encseq,
                    Forwardmode,
                    numofchars,
-                   (uint32_t) recommendedprefixlength((unsigned int) numofchars,
-                                                      dblen),
-                   (uint32_t) 1, /* parts */
+                   recommendedprefixlength(numofchars,dblen),
+                   (unsigned int) 1, /* parts */
                    NULL,
 		   env) != 0)
   {

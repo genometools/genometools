@@ -173,7 +173,7 @@ MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
 
 bool nextmmsearchiterator(Seqpos *dbstart,MMsearchiterator *mmsi)
 {
-  if(mmsi->sufindex <= mmsi->lcpitv.right)
+  if (mmsi->sufindex <= mmsi->lcpitv.right)
   {
     *dbstart = mmsi->suftab[mmsi->sufindex++];
     return true;
@@ -194,12 +194,12 @@ static bool isleftmaximal(const Encodedsequence *dbencseq,
 {
   Uchar dbleftchar;
 
-  if(dbstart == 0 || querystart == 0)
+  if (dbstart == 0 || querystart == 0)
   {
     return true;
   }
   dbleftchar = getencodedchar(dbencseq,dbstart-1,readmode);
-  if(dbleftchar != query[querystart-1] || ISSPECIAL(dbleftchar))
+  if (dbleftchar != query[querystart-1] || ISSPECIAL(dbleftchar))
   {
     return true;
   }
@@ -218,14 +218,14 @@ static unsigned long extendright(const Encodedsequence *dbencseq,
   Seqpos dbpos;
   unsigned long querypos;
 
-  for(dbpos = dbend, querypos = queryend; /* Nothing */; dbpos++, querypos++)
+  for (dbpos = dbend, querypos = queryend; /* Nothing */; dbpos++, querypos++)
   {
-    if(dbpos == totallength || querypos == querylength)
+    if (dbpos == totallength || querypos == querylength)
     {
       break;
     }
     dbchar = getencodedchar(dbencseq,dbpos,readmode);
-    if(dbchar != query[querypos] || ISSPECIAL(dbchar))
+    if (dbchar != query[querypos] || ISSPECIAL(dbchar))
     {
       break;
     }
@@ -250,13 +250,13 @@ static int processsuftab(void *info,
                          Env *env)
 {
   Substringmatchinfo *ssi = (Substringmatchinfo *) info;
-  MMsearchiterator *mmsi; 
+  MMsearchiterator *mmsi;
   Seqpos dbstart, totallength;
   unsigned long extend, currentquerystart;
 
   assert(widthofpart > 0);
   totallength = getencseqtotallength(ssi->dbencseq);
-  for(currentquerystart = 0;
+  for (currentquerystart = 0;
       currentquerystart <= ssi->querylen - ssi->minlength;
       currentquerystart++)
   {
@@ -270,13 +270,13 @@ static int processsuftab(void *info,
                                currentquerystart,
                                (unsigned long) ssi->minlength,
                                env);
-    while(nextmmsearchiterator(&dbstart,mmsi))
+    while (nextmmsearchiterator(&dbstart,mmsi))
     {
-      if(isleftmaximal(ssi->dbencseq,
-                       readmode,
-                       dbstart,
-                       ssi->query,
-                       currentquerystart))
+      if (isleftmaximal(ssi->dbencseq,
+                        readmode,
+                        dbstart,
+                        ssi->query,
+                        currentquerystart))
       {
          extend = extendright(ssi->dbencseq,
                               readmode,
@@ -285,10 +285,10 @@ static int processsuftab(void *info,
                               ssi->query,
                               currentquerystart + ssi->minlength,
                               ssi->querylen);
-        if(ssi->processmaxmatch(ssi->processmaxmatchinfo,
-                                extend + (unsigned long) ssi->minlength,
-                                dbstart,
-                                currentquerystart) != 0)
+        if (ssi->processmaxmatch(ssi->processmaxmatchinfo,
+                                 extend + (unsigned long) ssi->minlength,
+                                 dbstart,
+                                 currentquerystart) != 0)
         {
           return -1;
 	}
@@ -312,9 +312,9 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
 {
   Specialcharinfo samplespecialcharinfo;
   Substringmatchinfo ssi;
-  uint32_t numofchars;
+  unsigned int numofchars;
   bool haserr = false;
-                                   
+
   ssi.dbencseq = plain2encodedsequence(true,
                                        &samplespecialcharinfo,
                                        dbseq,
@@ -336,9 +336,8 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                    ssi.dbencseq,
                    Forwardmode,
                    numofchars,
-                   (uint32_t) recommendedprefixlength((unsigned int) numofchars,
-                                                      dblen),
-                   (uint32_t) 1, /* parts */
+                   recommendedprefixlength(numofchars,dblen),
+                   (unsigned int) 1, /* parts */
                    NULL,
 		   env) != 0)
   {

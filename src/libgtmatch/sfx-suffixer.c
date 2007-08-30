@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include <limits.h>
 #include "libgtcore/env.h"
 #include "spacedef.h"
 #include "arraydef.h"
@@ -25,13 +26,13 @@
 #include "sfx-bentsedg.pr"
 
 #define CODEBITS        (32-PREFIXLENBITS)
-#define MAXPREFIXLENGTH ((((uint32_t) 1) << PREFIXLENBITS) - 1)
-#define MAXCODEVALUE    ((((uint32_t) 1) << CODEBITS) - 1)
+#define MAXPREFIXLENGTH ((((unsigned int) 1) << PREFIXLENBITS) - 1)
+#define MAXCODEVALUE    ((((unsigned int) 1) << CODEBITS) - 1)
 
 typedef struct
 {
-  uint32_t maxprefixlen:PREFIXLENBITS;
-  uint32_t code:CODEBITS;
+  unsigned int maxprefixlen:PREFIXLENBITS;
+  unsigned int code:CODEBITS;
   Seqpos position; /* get rid of this by using information from encseq */
 } Codeatposition;
 
@@ -45,8 +46,8 @@ typedef struct
   bool storespecials;
   Codetype currentmincode,
            currentmaxcode;
-  uint32_t *filltable,
-           *basepower;
+  unsigned int *filltable,
+               *basepower;
   Seqpos *leftborder,
          *countspecialcodes,
          *suftab,
@@ -67,19 +68,19 @@ typedef struct
   Env *env;
 } InsertCompletespecials;
 
-static int initbasepower(uint32_t **basepower,
-                         uint32_t **filltable,
-                         uint32_t base,
-                         uint32_t len,
+static int initbasepower(unsigned int **basepower,
+                         unsigned int **filltable,
+                         unsigned int base,
+                         unsigned int len,
                          Env *env)
 {
-  uint32_t thepower = (uint32_t) 1, i, minfailure;
+  unsigned int thepower = (unsigned int) 1, i, minfailure;
   bool haserr = false;
 
   env_error_check(env);
-  ALLOCASSIGNSPACE(*basepower,NULL,uint32_t,len+1);
-  ALLOCASSIGNSPACE(*filltable,NULL,uint32_t,len);
-  minfailure = INT32_MAX/base;
+  ALLOCASSIGNSPACE(*basepower,NULL,unsigned int,len+1);
+  ALLOCASSIGNSPACE(*filltable,NULL,unsigned int,len);
+  minfailure = UINT_MAX/base;
   for (i=0; /* Nothing */; i++)
   {
     (*basepower)[i] = thepower;
@@ -192,13 +193,13 @@ static void reversespecialcodes(Codeatposition *spaceCodeatposition,
   }
 }
 
-static Codetype codedownscale(const uint32_t *filltable,
-                              const uint32_t *basepower,
+static Codetype codedownscale(const unsigned int *filltable,
+                              const unsigned int *basepower,
                               Codetype code,
-                              uint32_t prefixindex,
-                              uint32_t maxprefixlen)
+                              unsigned int prefixindex,
+                              unsigned int maxprefixlen)
 {
-  uint32_t remain;
+  unsigned int remain;
 
   code -= filltable[maxprefixlen];
   remain = maxprefixlen-prefixindex;
@@ -209,14 +210,14 @@ static Codetype codedownscale(const uint32_t *filltable,
 }
 
 static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
-                               uint32_t numofchars,
-                               uint32_t prefixlength,
+                               unsigned int numofchars,
+                               unsigned int prefixlength,
                                Collectedsuffixes *csf,
                                bool deletevalues,
                                /*@unused@*/ Env *env)
 {
   Codetype code;
-  uint32_t prefixindex;
+  unsigned int prefixindex;
   unsigned long insertindex, j;
   Seqpos stidx;
 
@@ -364,13 +365,13 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
                  Seqpos specialranges,
                  const Encodedsequence *encseq,
                  Readmode readmode,
-                 uint32_t numofchars,
-                 uint32_t prefixlength,
-                 uint32_t numofparts,
+                 unsigned int numofchars,
+                 unsigned int prefixlength,
+                 unsigned int numofparts,
                  Measuretime *mtime,
                  Env *env)
 {
-  uint32_t numofallcodes = 0, numofspecialcodes, part;
+  unsigned int numofallcodes = 0, numofspecialcodes, part;
   Seqpos *optr;
   Collectedsuffixes csf;
   Suftabparts *suftabparts = NULL;
@@ -472,7 +473,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
                          numofchars,
                          prefixlength,
                          &csf,
-                         (stpgetnumofparts(suftabparts) == (uint32_t) 1)
+                         (stpgetnumofparts(suftabparts) == (unsigned int) 1)
                            ? true : false,
                          env);
       if (mtime != NULL)

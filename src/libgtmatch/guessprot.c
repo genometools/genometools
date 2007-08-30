@@ -18,8 +18,8 @@
 
 int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
 {
-  uint32_t countnonbases = 0,
-           currentposition;
+  unsigned int countnonbases = 0,
+               currentposition;
   Uchar currentchar;
   Fastabufferstate fbs;
   int retval;
@@ -32,7 +32,7 @@ int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
                         NULL,
                         NULL,
                         env);
-  for (currentposition = 0; currentposition < (uint32_t) 1000;
+  for (currentposition = 0; currentposition < (unsigned int) 1000;
        currentposition++)
   {
     retval = readnextUchar(&currentchar,&fbs,env);

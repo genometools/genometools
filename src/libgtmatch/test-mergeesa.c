@@ -59,7 +59,7 @@ static int outputsuflcpllv(void *processinfo,
 {
   Mergeoutinfo *mergeoutinfo = (Mergeoutinfo *) processinfo;
 
-  uint32_t i, lastindex;
+  unsigned int i, lastindex;
   Seqpos lcpvalue;
   Largelcpvalue currentexception;
   Uchar smallvalue;

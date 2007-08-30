@@ -14,10 +14,10 @@
 Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
                                Specialcharinfo *specialcharinfo,
                                const Suffixarray *suffixarraytable,
-                               uint32_t numofindexes,
+                               unsigned int numofindexes,
                                Env *env)
 {
-  uint32_t idx;
+  unsigned int idx;
   Uchar lastofprevious, firstofcurrent;
   Seqpos tmplength, *sequenceoffsettable;
   uint64_t tmpspecialcharacters,

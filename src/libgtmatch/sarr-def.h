@@ -25,8 +25,8 @@
 #define DECLAREBufferedfiletype(TYPE)\
         typedef struct\
         {\
-          uint32_t nextfree,\
-                   nextread;\
+          unsigned int nextfree,\
+                       nextread;\
           TYPE bufspace[FILEBUFFERSIZE];\
           FILE *fp;\
         } TYPE ## Bufferedfile
@@ -44,10 +44,10 @@ DECLAREBufferedfiletype(Largelcpvalue);
         {\
           if (buf->nextread >= buf->nextfree)\
           {\
-            buf->nextfree = (uint32_t) fread(buf->bufspace,\
-                                             sizeof (TYPE),\
-                                             (size_t) FILEBUFFERSIZE,\
-                                             buf->fp);\
+            buf->nextfree = (unsigned int) fread(buf->bufspace,\
+                                                 sizeof (TYPE),\
+                                                 (size_t) FILEBUFFERSIZE,\
+                                                 buf->fp);\
             if (ferror(buf->fp))\
             {\
               env_error_set(env,"error when trying to read next %s",#TYPE);\
@@ -70,7 +70,7 @@ typedef struct
   unsigned long numofdbsequences; /* XXX: move to encoded sequence */
   StrArray *filenametab;
   Filelengthvalues *filelengthtab;
-  uint32_t prefixlength;
+  unsigned int prefixlength;
   DefinedSeqpos numoflargelcpvalues;
   Encodedsequence *encseq;
   DefinedSeqpos longest;

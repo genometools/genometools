@@ -376,7 +376,7 @@ sgt:${addprefix obj/,${notdir ${subst .c,.splint,${wildcard ${CURDIR}/src/libgtm
 
 obj/%.splint: ${CURDIR}/src/libgtmatch/%.c
 	@echo "splint $<"
-	@splint -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.prepro: ${CURDIR}/src/libgtmatch/%.c

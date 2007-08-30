@@ -80,7 +80,7 @@ static void checkifprefixesareidentical(const Encodedsequence *encseq,
                                         Readmode readmode,
                                         const Uchar *characters,
                                         const Seqpos *suftab,
-                                        uint32_t prefixlength,
+                                        unsigned int prefixlength,
                                         Seqpos depth,
                                         Seqpos left,
                                         Seqpos right)

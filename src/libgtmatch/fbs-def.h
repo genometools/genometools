@@ -30,7 +30,7 @@ typedef struct
 
 typedef struct
 {
-  uint32_t filenum;
+  unsigned int filenum;
   uint64_t linenum;
   unsigned long nextread,
                 nextfree;

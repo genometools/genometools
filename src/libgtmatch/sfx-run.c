@@ -141,7 +141,7 @@ static int suftab2file(void *info,
 
     if (outfileinfo->absolutepos == 0)
     {
-      if(outlcpvalue(0,0,outfileinfo,env) != 0)
+      if (outlcpvalue(0,0,outfileinfo,env) != 0)
       {
         haserr = true;
       }
@@ -180,7 +180,7 @@ static int suftab2file(void *info,
           {
             outfileinfo->maxbranchdepth = lcpvalue;
           }
-          if(outlcpvalue(lcpvalue,pos,outfileinfo,env) != 0)
+          if (outlcpvalue(lcpvalue,pos,outfileinfo,env) != 0)
           {
             haserr = true;
             break;
@@ -259,7 +259,7 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
 
 static int runsuffixerator(Suffixeratoroptions *so,Env *env)
 {
-  unsigned char numofchars = 0;
+  unsigned int numofchars = 0;
   unsigned long numofsequences;
   Seqpos totallength;
   Alphabet *alpha;
@@ -299,7 +299,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
   }
   if (!haserr)
   {
-    numofchars = (unsigned char) getnumofcharsAlphabet(alpha);
+    numofchars = getnumofcharsAlphabet(alpha);
     if (outal1file(so->str_indexname,alpha,env) != 0)
     {
       haserr = true;
@@ -386,9 +386,9 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
                          specialcharinfo.specialranges,
                          encseq,
                          so->readmode,
-                         (uint32_t) numofchars,
-                         (uint32_t) so->prefixlength,
-                         (uint32_t) so->numofparts,
+                         numofchars,
+                         so->prefixlength,
+                         so->numofparts,
                          mtime,
                          env) != 0)
         {
@@ -420,7 +420,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
                    totallength,
                    numofsequences,
                    &specialcharinfo,
-                   (uint32_t) so->prefixlength,
+                   so->prefixlength,
                    outfileinfo.numoflargelcpvalues,
                    outfileinfo.maxbranchdepth,
                    &outfileinfo.longest,

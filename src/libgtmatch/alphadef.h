@@ -25,9 +25,9 @@ typedef struct Alphabet Alphabet;
 
 const Uchar *getsymbolmapAlphabet(const Alphabet *alpha);
 
-uint32_t getnumofcharsAlphabet(const Alphabet *alpha);
+unsigned int getnumofcharsAlphabet(const Alphabet *alpha);
 
-uint32_t getmapsizeAlphabet(const Alphabet *alpha);
+unsigned int getmapsizeAlphabet(const Alphabet *alpha);
 
 const Uchar *getcharactersAlphabet(const Alphabet *alpha);
 

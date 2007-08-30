@@ -9,8 +9,8 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
          maxbfreqidx,
          ctimesnumofblocks = cc * fm->nofblocks,
          ctimesnumofsuperblocks = cc * fm->nofsuperblocks,
-         posshiftbsizepow = pos >> fm->log2bsize,
-         posshiftsuperbsizepow = pos >> fm->log2superbsize;
+         posshiftbsizepow = pos >> (Seqpos) fm->log2bsize,
+         posshiftsuperbsizepow = pos >> (Seqpos) fm->log2superbsize;
 
 #ifdef mydebug
   printf("bwtlength=%u,",(unsigned int) fm->bwtlength);
@@ -79,7 +79,7 @@ static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
 #ifdef mydebug
       printf("case 5: numofocc %u\n",numofocc);
 #endif
-      bwtlastidx = (Seqpos) (posshiftbsizepow + 1) << fm->log2bsize;
+      bwtlastidx = (posshiftbsizepow + 1) << (Seqpos) fm->log2bsize;
       for (bwtidx = pos; bwtidx < bwtlastidx; bwtidx++)
       {
         if (ACCESSBWTTEXT(bwtidx) == cc)

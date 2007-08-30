@@ -269,15 +269,15 @@ void sortallbuckets(Seqpos *suftabptr,
                     Readmode readmode,
                     const Seqpos *leftborder,
                     const Seqpos *countspecialcodes,
-                    uint32_t numofchars,
-                    uint32_t prefixlength,
+                    unsigned int numofchars,
+                    unsigned int prefixlength,
                     Codetype mincode,
                     Codetype maxcode,
                     uint64_t widthofpart,
                     Env *env)
 {
   Codetype code;
-  uint32_t rightchar = mincode % numofchars;
+  unsigned int rightchar = mincode % numofchars;
   Seqpos left, right, specialcodes;
   ArrayMKVstack mkvauxstack;
   Seqpos totallength = getencseqtotallength(encseq);

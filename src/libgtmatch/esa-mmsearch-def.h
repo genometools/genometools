@@ -6,7 +6,7 @@
 
 #ifndef ESA_MMSEARCH_DEF_H
 #define ESA_MMSEARCH_DEF_H
- 
+
 typedef struct MMsearchiterator MMsearchiterator;
 
 #endif

@@ -59,7 +59,8 @@ static Uchar getfirstedgechar(const Trierep *trierep,
                         eri->readmode);
 }
 
-static int comparecharacters(Uchar cc1,Seqpos idx1,Uchar cc2,Seqpos idx2)
+static int comparecharacters(Uchar cc1,unsigned int idx1,
+                             Uchar cc2,unsigned int idx2)
 {
   if (ISSPECIAL(cc1))
   {
@@ -103,7 +104,7 @@ static int comparecharacters(Uchar cc1,Seqpos idx1,Uchar cc2,Seqpos idx2)
 #ifdef WITHTRIEIDENT
 static void showtrie2(const Trierep *trierep,
                       const Uchar *characters,
-                      uint32_t level,
+                      unsigned int level,
                       const Trienode *node)
 {
   Uchar cc = 0;
@@ -177,7 +178,7 @@ static void checktrie2(Trierep *trierep,
                        Trienode *node,
                        Trienode *father,
                        Bitstring *leafused,
-                       uint32_t *numberofbitsset)
+                       unsigned int *numberofbitsset)
 {
   Trienode *current, *previous;
 
@@ -229,22 +230,22 @@ static void checktrie2(Trierep *trierep,
   }
 }
 
-void checktrie(Trierep *trierep,uint32_t numberofleaves,
-               uint32_t maxleafnum,Env *env)
+void checktrie(Trierep *trierep,unsigned int numberofleaves,
+               unsigned int maxleafnum,Env *env)
 {
   env_error_check(env);
   if (trierep->root != NULL)
   {
     Bitstring *leafused;
-    uint32_t numberofbitsset = 0;
+    unsigned int numberofbitsset = 0;
 
     INITBITTAB(leafused,maxleafnum+1);
     checktrie2(trierep,trierep->root,NULL,leafused,&numberofbitsset);
     if (numberofbitsset != numberofleaves)
     {
       fprintf(stderr,"numberofbitsset = %u != %u = numberofleaves\n",
-                      (unsigned int) numberofbitsset,
-                      (unsigned int) numberofleaves);
+                      numberofbitsset,
+                      numberofleaves);
       exit(EXIT_FAILURE);
     }
     FREESPACE(leafused);
@@ -398,7 +399,7 @@ static Trienode *makenewbranch(Trierep *trierep,
   }
   newleaf = makenewleaf(trierep,suffixinfo);
   if (comparecharacters(cc1,oldnode->suffixinfo.idx,
-                       cc2,suffixinfo->idx) <= 0)
+                        cc2,suffixinfo->idx) <= 0)
   {
     makesuccs(newbranch,oldnode,newleaf);
   } else
@@ -433,7 +434,7 @@ static bool hassuccessor(const Trierep *trierep,
                          Seqpos prevdepth,
                          const Trienode *node,
                          Uchar cc2,
-                         Seqpos idx2)
+                         unsigned int idx2)
 {
   Uchar cc1;
   int cmpresult;
@@ -618,11 +619,11 @@ void deletesmallestpath(Trienode *smallest,Trierep *trierep)
 }
 
 void inittrienodetable(Trierep *trierep,Seqpos numofsuffixes,
-                       uint32_t numofindexes,Env *env)
+                       unsigned int numofindexes,Env *env)
 {
   env_error_check(env);
   trierep->numofindexes = numofindexes;
-  trierep->allocatedTrienode = MULT2(numofsuffixes + 1) + 1;
+  trierep->allocatedTrienode = (unsigned int) MULT2(numofsuffixes + 1) + 1;
   ALLOCASSIGNSPACE(trierep->nodetable,NULL,Trienode,trierep->allocatedTrienode);
   trierep->nextfreeTrienode = 0;
   trierep->root = NULL;

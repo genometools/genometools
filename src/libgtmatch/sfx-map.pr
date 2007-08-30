@@ -44,7 +44,7 @@ Encodedsequence *encseqSequentialsuffixarrayreader(
 Readmode readmodeSequentialsuffixarrayreader(
 			  const Sequentialsuffixarrayreader *sarr);
 
-uint32_t alphabetsizeSequentialsuffixarrayreader(
+unsigned int alphabetsizeSequentialsuffixarrayreader(
 			  const Sequentialsuffixarrayreader *sarr);
 
 #ifdef __cplusplus

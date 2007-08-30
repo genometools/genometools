@@ -2,7 +2,7 @@
 extern "C" {
 #endif
 int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
-                      uint32_t searchlength,
+                      unsigned int searchlength,
                       int(*output)(void *,Seqpos,Seqpos,Seqpos),
                       void *outinfo,
                       Env *env);

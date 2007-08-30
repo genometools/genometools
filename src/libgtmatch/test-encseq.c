@@ -69,8 +69,8 @@ int testencodedsequence(const StrArray *filenametab,
                           ": scan (readnextchar) = %u != "
                           "%u = random access (getencodedchar)",
                            pos,
-                           (uint32_t) ccscan,
-                           (uint32_t) ccra);
+                           (unsigned int) ccscan,
+                           (unsigned int) ccra);
         haserr = true;
         break;
       }
@@ -82,8 +82,8 @@ int testencodedsequence(const StrArray *filenametab,
                         ": random access (getencodedchar) = %u != "
                         " %u = sequential read (sequentialgetencodedchar)",
                          pos,
-                         (uint32_t) ccra,
-                         (uint32_t) ccsr);
+                         (unsigned int) ccra,
+                         (unsigned int) ccsr);
       haserr = true;
       break;
     }

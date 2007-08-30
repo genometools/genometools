@@ -31,7 +31,7 @@
 #include "readnextUchar.gen"
 
 #ifdef Seqposequalsunsignedint
-#define Uint32Const(N)   (N##U)  /* uint32_t constant */
+#define Uint32Const(N)   (N##U)  /* unsigned int constant */
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\
         ((ESEQ[DIV4(IDX)] >> (Uint32Const(6) - MULT2(MOD4(IDX)))) &\
                               Uint32Const(3))
@@ -65,7 +65,7 @@
 #define DECLARESEQBUFFER(TABLE)\
         unsigned long fourcharssize\
           = detsizeoffourcharsinonebyte(encseq->totallength);\
-        uint32_t widthbuffer = 0, j = 0;\
+        unsigned int widthbuffer = 0, j = 0;\
         ALLOCASSIGNSPACE(TABLE,NULL,Uchar,fourcharssize)
 
 #define UPDATESEQBUFFER(TABLE,CC)\
@@ -80,7 +80,7 @@
             bitwise |= (Bitstring) 1;\
           }\
         }\
-        if (widthbuffer == (uint32_t) 3)\
+        if (widthbuffer == (unsigned int) 3)\
         {\
           TABLE[j] = (Uchar) bitwise;\
           j++;\
@@ -92,19 +92,19 @@
         }
 
 #define UPDATESEQBUFFERFINAL(TABLE)\
-        if (widthbuffer == (uint32_t) 1)\
+        if (widthbuffer == (unsigned int) 1)\
         {\
           bitwise <<= 6;\
           TABLE[j] = (Uchar) bitwise;\
         } else\
         {\
-          if (widthbuffer == (uint32_t) 2)\
+          if (widthbuffer == (unsigned int) 2)\
           {\
             bitwise <<= 4;\
             TABLE[j] = (Uchar) bitwise;\
           } else\
           {\
-            if (widthbuffer == (uint32_t) 3)\
+            if (widthbuffer == (unsigned int) 3)\
             {\
               bitwise <<= 2;\
               TABLE[j] = (Uchar) bitwise;\
@@ -137,7 +137,7 @@ typedef uint64_t Uint64;
   Uchar *characters;
   Uchar *satcharptr;
   Positionaccesstype sat;
-  uint32_t mapsize;
+  unsigned int mapsize;
   void *mappedptr; /* NULL or pointer to the mapped space block */
   Seqpos numofspecialstostore;
   Seqpos totallength;
@@ -268,7 +268,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,
          nextpage, /* next page to be used, not for Viauint64tables */
          numofspecialcells; /* number of pages */
   Readmode readmode;    /* mode of reading the sequence */
-  uint32_t maxspecialtype;  /* maximal value of special type */
+  unsigned int maxspecialtype;  /* maximal value of special type */
   Sequencerange previousrange,  /* previous range of wildcards */
                 currentrange;   /* current range of wildcards */
   bool hasrange,        /* there is some range */
@@ -548,7 +548,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          sum = fourcharssize;
          if (specialcharacters > 0)
          {
-           sum += (uint64_t) sizeof (uint32_t) * numofspecialstostore +
+           sum += (uint64_t) sizeof (unsigned int) * numofspecialstostore +
                   (uint64_t) sizeof (Uchar) * numofspecialstostore +
                   (uint64_t) sizeof (Seqpos) * (totallength/UINT32_MAX+1);
          }
@@ -965,19 +965,19 @@ static Seqpos accessendspecialsubsUint(const Encodedsequence *encseq,
   exit(EXIT_FAILURE); /* programming error */
 }
 
-static uint32_t sat2maxspecialtype(Positionaccesstype sat)
+static unsigned int sat2maxspecialtype(Positionaccesstype sat)
 {
   if (sat == Viauchartables)
   {
-    return (uint32_t) UCHAR_MAX;
+    return (unsigned int) UCHAR_MAX;
   }
   if (sat == Viaushorttables)
   {
-    return (uint32_t) USHRT_MAX;
+    return (unsigned int) USHRT_MAX;
   }
   if (sat == Viauint32tables)
   {
-    return (uint32_t) UINT32_MAX;
+    return (unsigned int) UINT32_MAX;
   }
   if (sat == Viauint64tables)
   {
@@ -1021,7 +1021,7 @@ static void ucharshowspecialpositions(const Encodedsequence *encseq,
 
 static void ucharshowallspecialpositions(const Encodedsequence *encseq)
 {
-  uint32_t maxspecialtype;
+  unsigned int maxspecialtype;
   Seqpos endspecialcells, pgnum, endpos0, endpos1, offset = 0;
 
   maxspecialtype = sat2maxspecialtype(encseq->sat);
@@ -1829,7 +1829,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        const Uchar *seq1,
                                        Seqpos len1,
                                        const Uchar *seq2,
-                                       Seqpos len2,
+                                       unsigned long len2,
                                        const Alphabet *alphabet,
                                        Env *env)
 {
@@ -1847,7 +1847,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
     len = len1;
   } else
   {
-    len = len1+len2+1;
+    len = len1 + (Seqpos) len2 + 1;
     ALLOCASSIGNSPACE(seqptr,NULL,Uchar,len);
     memcpy(seqptr,seq1,sizeof (Uchar) * len1);
     seqptr[len1] = (Uchar) SEPARATOR;

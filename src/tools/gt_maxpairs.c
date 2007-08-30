@@ -41,7 +41,7 @@ static int simpleexactselfmatchoutput(/*@unused@*/ void *info,
 }
 
 static int callenummaxpairs(const Str *indexname,
-                            uint32_t userdefinedleastlength,
+                            unsigned int userdefinedleastlength,
                             Env *env)
 {
   bool haserr = false;
@@ -123,8 +123,8 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
   {
     assert(parsed_args == argc);
     if (callenummaxpairs(maxpairsoptions.indexname,
-                        (uint32_t) maxpairsoptions.userdefinedleastlength,
-                        env) != 0)
+                         maxpairsoptions.userdefinedleastlength,
+                         env) != 0)
     {
       haserr = true;
     }
