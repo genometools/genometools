@@ -25,7 +25,8 @@ Bioseq*       bioseq_new_str(Str* sequence_file, Env*);
 Alpha*        bioseq_get_alpha(Bioseq*, Env*);
 Seq*          bioseq_get_seq(Bioseq*, unsigned long, Env*);
 const char*   bioseq_get_description(Bioseq*, unsigned long);
-const char*   bioseq_get_sequence(Bioseq*, unsigned long);
+/* return sequence with given <index> (not '\0' terminated) */
+const char*   bioseq_get_sequence(Bioseq*, unsigned long index);
 const char*   bioseq_get_raw_sequence(Bioseq*);
 unsigned long bioseq_get_sequence_length(Bioseq*, unsigned long);
 unsigned long bioseq_get_raw_sequence_length(Bioseq*);
