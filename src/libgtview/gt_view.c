@@ -230,12 +230,6 @@ int gt_view(int argc, const char **argv, Env *env)
     qry_range.end   = (arguments.end == UNDEF_ULONG ?
                          sequence_region_range.end :
                          arguments.end);
-
-    (void) feature_index_get_features_for_range(features,
-                                                results,
-                                                seqid,
-                                                qry_range,
-                                                env);
   }
 
   if (!had_err)
@@ -258,7 +252,7 @@ int gt_view(int argc, const char **argv, Env *env)
   if (!had_err)
   {
     /* create and write image file */
-    d = diagram_new(results, qry_range, cfg, env);
+    d = diagram_new(features, qry_range, seqid, cfg, env);
     r = render_new(cfg, env);
     had_err = render_to_png(r, d, png_file, arguments.width, env);
   }

@@ -17,6 +17,7 @@
 
 #include "libgtview/config.h"
 #include "libgtview/block.h"
+#include "libgtview/feature_index.h"
 #include "libgtcore/array.h"
 #include "libgtcore/range.h"
 #include "libgtcore/hashtable.h"
@@ -42,13 +43,15 @@ typedef struct Diagram Diagram;
 
 /*!
 Initialize a new diagram object.
-\param features pointer to the array of genome nodes.
-\param range the given range of the diagram.
-\param config pointer to the configuration object.
+\param fi FeatureIndex source for feature data.
+\param range Desired range of the diagram.
+\param seqid Sequence region identifier for the desired region.
+\param config Pointer to the configuration object.
 \param env Pointer to Environment object.
 */
-Diagram*    diagram_new(Array *features,
+Diagram*    diagram_new(FeatureIndex *fi,
                         Range range,
+                        const char *seqid,
                         Config *config,
                         Env *env);
 
