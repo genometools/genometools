@@ -217,7 +217,8 @@ static void add_recursive(Diagram *d, GenomeNode *node,
     BlockTuple *bt;
     /* try to find the right block to insert */
     block = find_block_for_type(ni,
-                                genome_feature_get_type((GenomeFeature*) node));
+                                genome_feature_get_type((GenomeFeature*) node),
+                                env);
     if (block == NULL) {
       block = block_new_from_node(node,env);
       bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node),
@@ -612,4 +613,5 @@ void diagram_delete(Diagram *diagram, Env *env)
   hashtable_delete(diagram->nodeinfo, env);
   env_ma_free(diagram, env);
 }
+
 
