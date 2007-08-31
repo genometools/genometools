@@ -54,6 +54,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
   GenomeStream *gs;
   GTFInStream *gtf_in_stream;
   GTF_parser *gtf_parser;
+  Str *filenamestr;
   int had_err;
   FILE *fpin;
 
@@ -72,9 +73,10 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
     fpin = stdin;
 
   /* parse input file */
+  filenamestr = str_new_cstr(filename ? filename : "stdin", env);
   had_err = gtf_parser_parse(gtf_parser, gtf_in_stream->genome_node_buffer,
-                             filename ? filename : "stdin", fpin, be_tolerant,
-                             env);
+                             filenamestr, fpin, be_tolerant, env);
+  str_delete(filenamestr, env);
 
   /* close input file, if necessary */
   if (filename)

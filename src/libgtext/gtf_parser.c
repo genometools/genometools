@@ -84,7 +84,7 @@ static int construct_sequence_regions(void *key, void *value, void *data,
   assert(key && value && data);
   seqid = str_new_cstr(key, env);
   range = *(Range*) value;
-  gn = sequence_region_new(seqid, range, "generated", 0, env);
+  gn = sequence_region_new(seqid, range, NULL, 0, env);
   queue_add(genome_nodes, gn, env);
   str_delete(seqid, env);
   return 0;
@@ -129,8 +129,8 @@ static int construct_mRNAs(void *key, void *value, void *data, Env *env)
   }
 
   if (!had_err) {
-    mRNA_node = genome_feature_new(gft_mRNA, mRNA_range, mRNA_strand,
-                                   "generated", 0, env);
+    mRNA_node = genome_feature_new(gft_mRNA, mRNA_range, mRNA_strand, NULL, 0,
+                                   env);
     genome_node_set_seqid(mRNA_node, mRNA_seqid);
 
     /* register children */
@@ -178,8 +178,8 @@ static int construct_genes(void *key, void *value, void *data, Env *env)
       assert(str_cmp(gene_seqid, genome_node_get_seqid(gn)) == 0);
     }
 
-    gene_node = genome_feature_new(gft_gene, gene_range, gene_strand,
-                                   "generated", 0, env);
+    gene_node = genome_feature_new(gft_gene, gene_range, gene_strand, NULL, 0,
+                                   env);
     genome_node_set_seqid(gene_node, gene_seqid);
 
     /* register children */
@@ -199,8 +199,8 @@ static int construct_genes(void *key, void *value, void *data, Env *env)
 }
 
 int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
-                     const char *filename, FILE *fpin,
-                     unsigned int be_tolerant, Env *env)
+                     Str *filenamestr, FILE *fpin, unsigned int be_tolerant,
+                     Env *env)
 {
   Str *seqid_str, *source_str, *line_buffer;
   char *line;
@@ -231,10 +231,13 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   GTF_feature_type gtf_feature_type;
   /* abuse gft_TF_binding_site as an undefined value */
   GenomeFeatureType gff_feature_type = gft_TF_binding_site;
+  const char *filename;
   int had_err = 0;
 
-  assert(parser && genome_nodes && filename && fpin);
+  assert(parser && genome_nodes && fpin);
   env_error_check(env);
+
+  filename = str_get(filenamestr);
 
   /* alloc */
   line_buffer = str_new(env);
@@ -266,7 +269,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       warning("skipping blank line %lu in file \"%s\"", line_number, filename);
     else if (line[0] == '#') {
       /* storing comment */
-      gn = comment_new(line+1, filename, line_number, env);
+      gn = comment_new(line+1, filenamestr, line_number, env);
       queue_add(genome_nodes, gn, env);
     }
     else {
@@ -409,8 +412,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       assert(genome_node_array);
 
       /* construct the new feature */
-      gn = genome_feature_new(gff_feature_type, range, strand_value, filename,
-                              line_number, env);
+      gn = genome_feature_new(gff_feature_type, range, strand_value,
+                              filenamestr, line_number, env);
 
       /* set seqid */
       seqid_str = hashtable_get(parser->seqid_to_str_mapping, seqname);

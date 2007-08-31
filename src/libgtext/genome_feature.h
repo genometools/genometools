@@ -22,7 +22,7 @@ typedef int (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
 
 const GenomeNodeClass* genome_feature_class(void);
 GenomeNode*            genome_feature_new(GenomeFeatureType, Range, Strand,
-                                          const char *filename,
+                                          Str *filename,
                                           unsigned long line_number, Env*);
 const char*            genome_feature_get_source(GenomeFeature*);
 const char*            genome_feature_get_attribute(GenomeNode *gn,

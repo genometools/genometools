@@ -67,7 +67,7 @@ const GenomeNodeClass* sequence_region_class()
   return &gnc;
 }
 
-GenomeNode* sequence_region_new(Str *seqid, Range range, const char *filename,
+GenomeNode* sequence_region_new(Str *seqid, Range range, Str *filename,
                                 unsigned long line_number, Env *env)
 {
   GenomeNode *gn = genome_node_create(sequence_region_class(), filename,

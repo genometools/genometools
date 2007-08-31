@@ -65,15 +65,15 @@ static int compare_genome_nodes_with_delta(GenomeNode *gn_a, GenomeNode *gn_b,
                                   genome_node_get_range(gn_b), delta);
 }
 
-GenomeNode* genome_node_create(const GenomeNodeClass *gnc,
-                               const char *filename,
+GenomeNode* genome_node_create(const GenomeNodeClass *gnc, Str *filename,
                                unsigned long line_number, Env *env)
 {
   GenomeNode *gn;
-  assert(gnc && gnc->size && filename);
+  assert(gnc && gnc->size);
   gn                  = env_ma_malloc(env, gnc->size);
   gn->c_class         = gnc;
-  gn->filename        = filename;
+  gn->filename        = filename ? str_ref(filename)
+                                 : str_new_cstr("generated", env);
   gn->line_number     = line_number;
   gn->children        = NULL; /* the children list is created on demand */
   gn->reference_count = 0;
@@ -269,7 +269,7 @@ int genome_node_traverse_direct_children(GenomeNode *gn,
 const char* genome_node_get_filename(const GenomeNode *gn)
 {
   assert(gn);
-  return gn->filename;
+  return str_get(gn->filename);
 }
 
 unsigned long genome_node_get_line_number(const GenomeNode *gn)
@@ -553,6 +553,7 @@ void genome_node_delete(GenomeNode *gn, Env *env)
   if (gn->reference_count) { gn->reference_count--; return; }
   assert(gn->c_class);
   if (gn->c_class->free) gn->c_class->free(gn, env);
+  str_delete(gn->filename, env);
   dlist_delete(gn->children, env);
   env_ma_free(gn, env);
 }

@@ -502,30 +502,30 @@ int diagram_unit_test(Env *env)
   seqid1 = str_new_cstr("test1", env);
   seqid2 = str_new_cstr("test2", env);
 
-  sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, "unit_test", 0, env);
-  sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, "unit_test", 0, env);
+  sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, NULL, 0, env);
+  sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, NULL, 0, env);
 
-  gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN, "unit_test",
+  gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN, NULL,
                            UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) gn1, seqid1);
 
-  gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN, "unit_test",
+  gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN, NULL,
                            UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) gn2, seqid2);
 
-  ex1 = genome_feature_new(gft_exon, r2, STRAND_UNKNOWN, "unit_test",
+  ex1 = genome_feature_new(gft_exon, r2, STRAND_UNKNOWN, NULL,
                            UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) ex1, seqid1);
 
-  ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN, "unit_test",
+  ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN, NULL,
                            UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) ex2, seqid1);
 
-  ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN, "unit_test",
+  ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN, NULL,
                            UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) ex3, seqid2);
 
-  cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN, "unit_test",
+  cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN, NULL,
                             UNDEF_ULONG, env);
   genome_node_set_seqid((GenomeNode*) cds1, seqid2);
 
@@ -569,14 +569,14 @@ int diagram_unit_test(Env *env)
   ensure(had_err, dia->range.end == 900UL);
   if (!had_err &&
       !config_cstr_in_list(dia->config,"collapse","to_parent","gene", env)) {
-    track_key = track_key_new("unit_test", gft_gene, env);
+    track_key = track_key_new("generated", gft_gene, env);
     ensure(had_err, hashtable_get(dia->tracks, str_get(track_key)));
     str_delete(track_key, env);
   }
 
   if (!had_err &&
       !config_cstr_in_list(dia->config,"collapse","to_parent","exon", env)) {
-    track_key = track_key_new("unit_test", gft_exon, env);
+    track_key = track_key_new("generated", gft_exon, env);
     ensure(had_err, hashtable_get(dia->tracks, str_get(track_key)));
     str_delete(track_key, env);
   }
@@ -597,21 +597,21 @@ int diagram_unit_test(Env *env)
 
   if (!had_err &&
       !config_cstr_in_list(dia2->config,"collapse","to_parent","gene", env)) {
-    track_key = track_key_new("unit_test", gft_gene, env);
+    track_key = track_key_new("generated", gft_gene, env);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key, env);
   }
 
   if (!had_err &&
       !config_cstr_in_list(dia2->config,"collapse","to_parent","exon", env)) {
-    track_key = track_key_new("unit_test", gft_exon, env);
+    track_key = track_key_new("generated", gft_exon, env);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key, env);
   }
 
   if (!had_err &&
       !config_cstr_in_list(dia2->config,"collapse","to_parent","CDS", env)) {
-    track_key = track_key_new("unit_test", gft_CDS, env);
+    track_key = track_key_new("generated", gft_CDS, env);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key, env);
   }
