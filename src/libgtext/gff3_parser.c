@@ -85,8 +85,8 @@ void gff3parser_set_offset(GFF3Parser *gff3_parser, long offset)
 
 static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                                    char *line, size_t line_length,
-                                   const char *filename,
-                                   unsigned long line_number, Env *env)
+                                   Str *filenamestr, unsigned long line_number,
+                                   Env *env)
 {
   GenomeNode *gn = NULL, *genome_feature = NULL, *parent_gf;
   GenomeFeatureType gft;
@@ -99,11 +99,14 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   Range range;
   char *id = NULL, *seqid = NULL, *source = NULL, *type, *start, *end, *score,
        *strand, *phase, *attributes, *token, *tmp_token, **tokens;
+  const char *filename;
   bool is_child = false, seqid_str_created = false;
   unsigned long i;
   int had_err = 0;
 
   env_error_check(env);
+
+  filename = str_get(filenamestr);
 
   /* create splitter */
   splitter = splitter_new(env);
@@ -159,7 +162,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
 
   /* create the feature */
   if (!had_err) {
-    genome_feature = genome_feature_new(gft, range, strand_value, filename,
+    genome_feature = genome_feature_new(gft, range, strand_value, filenamestr,
                                         line_number, env);
   }
 
@@ -247,8 +250,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         auto_sr = automatic_sequence_region_new(env);
         seqid_str = str_new_cstr(seqid, env);
         seqid_str_created = true;
-        auto_sr->sequence_region = sequence_region_new(seqid_str, range,
-                                 "[feature was automatically created]", 0, env);
+        auto_sr->sequence_region = sequence_region_new(seqid_str, range, NULL,
+                                                       0, env);
         hashtable_add(gff3_parser->undefined_sequence_regions,
                       str_get(seqid_str), auto_sr, env);
       }
@@ -346,21 +349,24 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
 
 static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                                 char *line, size_t line_length,
-                                const char *filename, unsigned long line_number,
+                                Str *filenamestr, unsigned long line_number,
                                 Env *env)
 {
   char *tmpline, *tmplineend, *seqid = NULL;
   GenomeNode *gn;
   Str *seqid_str;
   Range range;
+  const char *filename;
   int rval, had_err = 0;
 
   env_error_check(env);
   assert(line[0] == '#');
 
+  filename = str_get(filenamestr);
+
   if (line_length == 1 || line[1] != '#') {
     /* storing comment */
-    gn = comment_new(line+1, filename, line_number, env);
+    gn = comment_new(line+1, filenamestr, line_number, env);
     queue_add(genome_nodes, gn, env);
   }
   else if ((strncmp(line, GFF_SEQUENCE_REGION,
@@ -453,7 +459,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     }
     if (!had_err) {
       assert(seqid_str);
-      gn = sequence_region_new(seqid_str, range, filename, line_number, env);
+      gn = sequence_region_new(seqid_str, range, filenamestr, line_number, env);
       queue_add(genome_nodes, gn, env);
     }
   }
@@ -489,16 +495,19 @@ static int add_auto_sr_to_queue(void *key, void *value, void *data, Env *env)
 }
 
 int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
-                                  Queue *genome_nodes, const char *filename,
+                                  Queue *genome_nodes, Str *filenamestr,
                                   unsigned long *line_number, FILE *fpin,
                                   Env *env)
 {
   size_t line_length;
   Str *line_buffer;
   char *line;
+  const char *filename;
   int rval, version, had_err = 0;
 
   env_error_check(env);
+
+  filename = str_get(filenamestr);
 
   /* init */
   line_buffer = str_new(env);
@@ -537,7 +546,8 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
       warning("skipping blank line %lu in file \"%s\"", *line_number, filename);
     else if (line[0] == '#') {
       had_err = parse_meta_gff3_line(gff3_parser, genome_nodes, line,
-                                     line_length, filename, *line_number, env);
+                                     line_length, filenamestr, *line_number,
+                                     env);
       if (had_err ||
           (!gff3_parser->incomplete_node && queue_size(genome_nodes))) {
         break;
@@ -545,7 +555,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
     }
     else {
       had_err = parse_regular_gff3_line(gff3_parser, genome_nodes, line,
-                                        line_length, filename, *line_number,
+                                        line_length, filenamestr, *line_number,
                                         env);
       if (had_err ||
           (!gff3_parser->incomplete_node && queue_size(genome_nodes))) {

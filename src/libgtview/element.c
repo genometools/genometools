@@ -1,12 +1,8 @@
 /*
-   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-   See LICENSE file or http://genometools.org/license.html for license details.
+  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
 */
-/**
- * \if INTERNAL \file element.c \endif
- * \author Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
- */
 
 #include <string.h>
 #include "libgtcore/array.h"
@@ -16,8 +12,7 @@
 #include "libgtext/genome_feature_type.h"
 #include "libgtview/element.h"
 
-struct Element
-{
+struct Element {
   GenomeFeatureType type;
   Range range;
   bool mark;
@@ -46,18 +41,6 @@ Element* element_new_empty(Env *env)
   return element;
 }
 
-GenomeFeatureType element_get_type(const Element *element)
-{
-  assert(element);
-  return element->type;
-}
-
-void element_set_type(Element *element, GenomeFeatureType type)
-{
-  assert(element);
-  element->type = type;
-}
-
 Range element_get_range(const Element *element)
 {
   assert(element);
@@ -68,6 +51,18 @@ void element_set_range(Element *element, Range r)
 {
   assert(element);
   element->range = r;
+}
+
+GenomeFeatureType element_get_type(const Element *element)
+{
+  assert(element);
+  return element->type;
+}
+
+void element_set_type(Element *element, GenomeFeatureType type)
+{
+  assert(element);
+  element->type = type;
 }
 
 bool element_is_marked(const Element *element)
@@ -97,8 +92,8 @@ int element_unit_test(Env* env)
   r2.start = 20UL;
   r2.end = 50UL;
 
-  gn = genome_feature_new(gft_exon, r1, STRAND_BOTH, "unit_test", 0, env);
-  gn2 = genome_feature_new(gft_exon, r2, STRAND_BOTH, "unit_test", 0, env);
+  gn = genome_feature_new(gft_exon, r1, STRAND_BOTH, NULL, 0, env);
+  gn2 = genome_feature_new(gft_exon, r2, STRAND_BOTH, NULL, 0, env);
 
   e = element_new(gn, env);
   e2 = element_new(gn, env);
@@ -131,8 +126,7 @@ int element_unit_test(Env* env)
 
 }
 
-void element_delete(Element *element,
-                    Env *env)
+void element_delete(Element *element, Env *env)
 {
   if (!element) return;
   env_ma_free(element, env);

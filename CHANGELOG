@@ -2,6 +2,7 @@ changes in version 1.0.3 (2007-08-30):
 
 - `gt view` can process multiple GFF3 files
 
+
 changes in version 1.0.2 (2007-08-29):
 
 - `gt suffixerator` tool added

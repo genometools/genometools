@@ -67,7 +67,7 @@ const GenomeNodeClass* comment_class()
   return &gnc;
 }
 
-GenomeNode* comment_new(const char *comment, const char *filename,
+GenomeNode* comment_new(const char *comment, Str *filename,
                         unsigned long line_number, Env *env)
 {
   GenomeNode *gn = genome_node_create(comment_class(), filename, line_number,

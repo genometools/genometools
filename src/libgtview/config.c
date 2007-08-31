@@ -55,20 +55,6 @@ Config* config_new_with_state(lua_State *L, Env *env)
   return cfg;
 }
 
-void config_delete_without_state(Config *cfg, Env *env)
-{
-  if (!cfg) return;
-  str_delete(cfg->filename,env);
-  env_ma_free(cfg, env);
-}
-
-void config_delete(Config *cfg, Env *env)
-{
-  if (!cfg) return;
-  if (cfg->L) lua_close(cfg->L);
-  config_delete_without_state(cfg, env);
-}
-
 int config_load_file(Config *cfg, Str *fn, Env* env)
 {
   int had_err = 0;
@@ -78,17 +64,14 @@ int config_load_file(Config *cfg, Str *fn, Env* env)
   if (config_get_verbose(cfg))
     fprintf(stderr, "Trying to load config file: %s...\n", str_get(fn));
   if (luaL_loadfile(cfg->L, str_get(fn)) ||
-      lua_pcall(cfg->L, 0, 0, 0))
-  {
+      lua_pcall(cfg->L, 0, 0, 0)) {
     env_error_set(env, "cannot run configuration file: %s",
                   lua_tostring(cfg->L, -1));
     had_err = -1;
   }
-  if (!had_err)
-  {
+  if (!had_err) {
     lua_getglobal(cfg->L, "config");
-    if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1))
-    {
+    if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1)) {
       env_error_set(env, "'config' is not defined or not a table in \"%s\"",
                     str_get(fn));
     }
@@ -97,24 +80,23 @@ int config_load_file(Config *cfg, Str *fn, Env* env)
   return had_err;
 }
 
-/*!
-Searches for a section inside the config table,
-creating it if it does not exist and finally pushing
-it on the Lua stack (at the top).
-\param cfg Config object to search in.
-\param section Name of the section to search for.
-\param env Pointer to Environment object.
-\return Total number of items pushed on the stack by this function.
-*/
-static int config_find_section_for_setting(Config* cfg, const char* section,
+void config_reload(Config *cfg, Env *env)
+{
+  assert(cfg && cfg->filename);
+  (void) config_load_file(cfg, cfg->filename, env);
+}
+
+/* Searches for  <section> inside the config table, creating it if it does not
+   exist and finally pushing it on the Lua stack (at the top).
+   Returns the total number of items pushed on the stack by this function. */
+static int config_find_section_for_setting(Config* cfg, const char *section,
                                            Env* env)
 {
   int depth = 0;
   assert(cfg && section);
   env_error_check(env);
   lua_getglobal(cfg->L, "config");
-  if (lua_isnil(cfg->L, -1))
-  {
+  if (lua_isnil(cfg->L, -1)) {
     lua_pop(cfg->L, 1);
     lua_newtable(cfg->L);
     lua_setglobal(cfg->L, "config");
@@ -122,8 +104,7 @@ static int config_find_section_for_setting(Config* cfg, const char* section,
   }
   depth++;
   lua_getfield(cfg->L, -1, section);
-  if (lua_isnil(cfg->L, -1))
-  {
+  if (lua_isnil(cfg->L, -1)) {
     lua_pop(cfg->L, 1);
     config_lua_new_table(cfg->L, section);
     lua_getfield(cfg->L, -1, section);
@@ -132,30 +113,21 @@ static int config_find_section_for_setting(Config* cfg, const char* section,
   return depth;
 }
 
-/*!
-Searches for a section inside the config table,
-returning if it is not found.
-\param cfg Config object to search in.
-\param section Name of the section to search for.
-\param env Pointer to Environment object.
-\return -1 if not found, otherwise number of items
-        pushed on the stack by this function.
-*/
-static int config_find_section_for_getting(Config* cfg, const char* section,
-                                           Env* env)
+/* Searches for <section> inside the config table, returning -1 if it is not
+   found. Otherwise the number of items pushed onto the stack is returned. */
+static int config_find_section_for_getting(const Config *cfg,
+                                           const char *section, Env* env)
 {
   int depth = 0;
   assert(cfg && section);
   lua_getglobal(cfg->L, "config");
-  if (lua_isnil(cfg->L, -1))
-  {
+  if (lua_isnil(cfg->L, -1)) {
     if (cfg->verbose) warning("'config' is not defined");
     lua_pop(cfg->L, 1);
     return -1;
   } else depth++;
   lua_getfield(cfg->L, -1, section);
-  if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1))
-  {
+  if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1)) {
     if (cfg->verbose) warning("section '%s' is not defined", section);
     lua_pop(cfg->L, 1);
     return -1;
@@ -163,19 +135,58 @@ static int config_find_section_for_getting(Config* cfg, const char* section,
   return depth;
 }
 
-void config_set_cstr(Config *cfg,
-                     const char* section,
-                     const char *key,
-                     const char* str,
-                     Env* env)
+Color config_get_color(const Config *cfg, const char *key, Env* env)
 {
+  Color color;
   int i = 0;
-  assert(cfg && section && key);
-  i = config_find_section_for_setting(cfg, section, env);
-  lua_pushstring(cfg->L, key);
-  lua_pushstring(cfg->L, str);
-  lua_settable(cfg->L, -3);
+  env_error_check(env);
+  assert(cfg && key);
+  /* set default colors */
+  color.red=0.8; color.green = 0.8; color.blue=0.8;
+  /* get section */
+  i = config_find_section_for_getting(cfg, "colors", env);
+  /* could not get section, return default */
+  if (i < 0) {
+    lua_pop(cfg->L, i);
+    return color;
+  }
+  /* lookup color entry for given feature */
+  lua_getfield(cfg->L, -1, key);
+  if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1)) {
+    if (cfg->verbose) warning("no colors are defined for type '%s', "
+                               "will use defaults.",
+                               key);
+    lua_pop(cfg->L, 3);
+    return color;
+  } else i++;
+  /* update color struct */
+  lua_getfield(cfg->L, -1, "red");
+  if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1)) {
+    if (cfg->verbose) warning("%s  value for type '%s' is undefined or"
+                               " not numeric, using default","red", key);
+  }
+  else
+    color.red = lua_tonumber(cfg->L,-1);
+  lua_pop(cfg->L, 1);
+  lua_getfield(cfg->L, -1, "green");
+  if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1)) {
+    if (cfg->verbose) warning("%s  value for type '%s' is undefined or"
+                               " not numeric, using default","green", key);
+  }
+  else
+    color.green = lua_tonumber(cfg->L,-1);
+  lua_pop(cfg->L, 1);
+  lua_getfield(cfg->L, -1, "blue");
+  if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1)) {
+    if (cfg->verbose) warning("%s  value for type '%s' is undefined or"
+                               " not numeric, using default","blue", key);
+  }
+  else
+    color.blue = lua_tonumber(cfg->L,-1);
+  lua_pop(cfg->L, 1);
+  /* reset stack to original state for subsequent calls */
   lua_pop(cfg->L, i);
+  return color;
 }
 
 void config_set_color(Config *cfg, const char *key, Color color, Env* env)
@@ -185,8 +196,7 @@ void config_set_color(Config *cfg, const char *key, Color color, Env* env)
   i = config_find_section_for_setting(cfg, "colors", env);
   lua_getfield(cfg->L, -1, key);
   i++;
-  if (lua_isnil(cfg->L, -1))
-  {
+  if (lua_isnil(cfg->L, -1)) {
     lua_pop(cfg->L, 1);
     config_lua_new_table(cfg->L, key);
     lua_getfield(cfg->L, -1, key);
@@ -203,31 +213,13 @@ void config_set_color(Config *cfg, const char *key, Color color, Env* env)
   lua_pop(cfg->L, i);
 }
 
-void config_set_num(Config *cfg,
-                    const char* section,
-                    const char *key,
-                    double number,
-                    Env* env)
+const char* config_get_cstr(const Config *cfg, const char *section,
+                            const char *key, const char *deflt, Env* env)
 {
-  int i = 0;
-  assert(cfg && section && key);
-  i = config_find_section_for_setting(cfg, section, env);
-  lua_pushstring(cfg->L, key);
-  lua_pushnumber(cfg->L, number);
-  lua_settable(cfg->L, -3);
-  lua_pop(cfg->L, i);
-}
-
-double config_get_num(Config *cfg,
-                      const char *section,
-                      const char *key,
-                      double deflt,
-                      Env* env)
-{
-  double num = deflt;
+  const char *str = deflt;
   int i = 0;
   env_error_check(env);
-  assert(cfg != NULL && key != NULL && section != NULL);
+  assert(cfg && key && section);
   /* get section */
   i = config_find_section_for_getting(cfg, section, env);
   /* could not get section, return default */
@@ -237,41 +229,7 @@ double config_get_num(Config *cfg,
   }
   /* lookup entry for given key */
   lua_getfield(cfg->L, -1, key);
-  if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1))
-  {
-    if (cfg->verbose) warning("no or non-numeric value found for key '%s'",
-                              key);
-    lua_pop(cfg->L, i+1);
-    return deflt;
-  } else i++;
-  /* retrieve value */
-  num = lua_tonumber(cfg->L, -1);
-  /* reset stack to original state for subsequent calls */
-  lua_pop(cfg->L, i);
-  return num;
-}
-
-const char* config_get_cstr(Config *cfg,
-                            const char *section,
-                            const char *key,
-                            const char *deflt,
-                            Env* env)
-{
-  const char* str = deflt;
-  int i = 0;
-  env_error_check(env);
-  assert(cfg != NULL && key != NULL && section != NULL);
-  /* get section */
-  i = config_find_section_for_getting(cfg, section, env);
-  /* could not get section, return default */
-  if (i < 0) {
-    lua_pop(cfg->L, i);
-    return deflt;
-  }
-  /* lookup entry for given key */
-  lua_getfield(cfg->L, -1, key);
-  if (lua_isnil(cfg->L, -1) || !lua_isstring(cfg->L, -1))
-  {
+  if (lua_isnil(cfg->L, -1) || !lua_isstring(cfg->L, -1)) {
     if (cfg->verbose) warning("no value is defined for key '%s'",
                                key);
     lua_pop(cfg->L, i+1);
@@ -284,98 +242,77 @@ const char* config_get_cstr(Config *cfg,
   return str;
 }
 
-Color config_get_color(Config *cfg, const char *key, Env* env)
+void config_set_cstr(Config *cfg, const char *section, const char *key,
+                     const char *str, Env* env)
 {
-  Color color;
+  int i = 0;
+  assert(cfg && section && key);
+  i = config_find_section_for_setting(cfg, section, env);
+  lua_pushstring(cfg->L, key);
+  lua_pushstring(cfg->L, str);
+  lua_settable(cfg->L, -3);
+  lua_pop(cfg->L, i);
+}
+
+double config_get_num(const Config *cfg, const char *section, const char *key,
+                      double deflt, Env* env)
+{
+  double num = deflt;
   int i = 0;
   env_error_check(env);
-  assert(cfg != NULL && key != NULL);
-  /* set default colors */
-  color.red=0.8; color.green = 0.8; color.blue=0.8;
+  assert(cfg && key && section);
   /* get section */
-  i = config_find_section_for_getting(cfg, "colors", env);
+  i = config_find_section_for_getting(cfg, section, env);
   /* could not get section, return default */
-  if (i < 0)
-  {
+  if (i < 0) {
     lua_pop(cfg->L, i);
-    return color;
+    return deflt;
   }
-  /* lookup color entry for given feature */
+  /* lookup entry for given key */
   lua_getfield(cfg->L, -1, key);
-  if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1))
-  {
-    if (cfg->verbose) warning("no colors are defined for type '%s', "
-                               "will use defaults.",
-                               key);
-    lua_pop(cfg->L, 3);
-    return color;
+  if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1)) {
+    if (cfg->verbose) warning("no or non-numeric value found for key '%s'",
+                              key);
+    lua_pop(cfg->L, i+1);
+    return deflt;
   } else i++;
-  /* update color struct */
-  lua_getfield(cfg->L, -1, "red");
-  if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1))
-  {
-    if (cfg->verbose) warning("%s  value for type '%s' is undefined or"
-                               " not numeric, using default","red", key);
-  }
-  else
-  {
-    color.red = lua_tonumber(cfg->L,-1);
-  }
-  lua_pop(cfg->L, 1);
-  lua_getfield(cfg->L, -1, "green");
-  if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1))
-  {
-    if (cfg->verbose) warning("%s  value for type '%s' is undefined or"
-                               " not numeric, using default","green", key);
-  }
-  else
-  {
-    color.green = lua_tonumber(cfg->L,-1);
-  }
-  lua_pop(cfg->L, 1);
-  lua_getfield(cfg->L, -1, "blue");
-  if (lua_isnil(cfg->L, -1) || !lua_isnumber(cfg->L, -1))
-  {
-    if (cfg->verbose) warning("%s  value for type '%s' is undefined or"
-                               " not numeric, using default","blue", key);
-  }
-  else
-  {
-    color.blue = lua_tonumber(cfg->L,-1);
-  }
-  lua_pop(cfg->L, 1);
+  /* retrieve value */
+  num = lua_tonumber(cfg->L, -1);
   /* reset stack to original state for subsequent calls */
   lua_pop(cfg->L, i);
-  return color;
+  return num;
 }
 
-void config_reload(Config *cfg, Env *env)
+void config_set_num(Config *cfg, const char *section, const char *key,
+                    double number, Env* env)
 {
-  assert(cfg && cfg->filename);
-  (void) config_load_file(cfg, cfg->filename, env);
+  int i = 0;
+  assert(cfg && section && key);
+  i = config_find_section_for_setting(cfg, section, env);
+  lua_pushstring(cfg->L, key);
+  lua_pushnumber(cfg->L, number);
+  lua_settable(cfg->L, -3);
+  lua_pop(cfg->L, i);
 }
 
-bool config_cstr_in_list(Config *cfg,
-                    const char* section,
-                    const char* key,
-                    const char* checkstr,
-                    Env* env)
+bool config_cstr_in_list(const Config *cfg, const char *section,
+                         const char *key, const char *checkstr, Env* env)
 {
   int i = 0, had_err = 0;
   bool ret = false;
   env_error_check(env);
-  assert(cfg != NULL && key != NULL && section != NULL && checkstr != NULL);
+  assert(cfg && key && section && checkstr);
   /* get section */
   i = config_find_section_for_getting(cfg, section, env);
-  if (i < 0)
-  {
+  if (i < 0) {
     lua_pop(cfg->L, i);
     return false;
   }
   lua_getfield(cfg->L, -1, key);
   i++;
-  if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1))
-  {
+  if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1)) {
+    /* XXX: fix the following (had_err is set, but env_error_set() is not called
+     */
 /*    if (cfg->verbose) warning("key '%s' is not set or not a table",
                                key);
     lua_pop(cfg->L, 1);*/
@@ -408,18 +345,18 @@ bool config_cstr_in_list(Config *cfg,
   return ret;
 }
 
-bool config_get_verbose(Config *cfg)
+bool config_get_verbose(const Config *cfg)
 {
-  assert(cfg != NULL);
+  assert(cfg);
   return cfg->verbose;
 }
 
-enum DominateStatus config_dominates(Config* cfg, GenomeFeatureType gft1,
-                                     GenomeFeatureType gft2, Env* env)
+DominateStatus config_dominates(Config* cfg, GenomeFeatureType gft1,
+                                GenomeFeatureType gft2, Env* env)
 {
   char *fts1, *fts2;
 
-  assert(cfg != NULL);
+  assert(cfg);
 
   if (gft1 == gft2)
     return DOMINATES_EQUAL;
@@ -427,8 +364,7 @@ enum DominateStatus config_dominates(Config* cfg, GenomeFeatureType gft1,
   fts2 = (char*) genome_feature_type_get_cstr(gft2);
   if (fts1 == NULL || fts2 == NULL)
     return DOMINATES_UNKNOWN_TYPE;
-  else
-  {
+  else {
     if (config_cstr_in_list(cfg, "dominate",fts1, fts2, env))
       return DOMINATES_FIRST;
     else if (config_cstr_in_list(cfg, "dominate",fts2, fts1, env))
@@ -438,11 +374,6 @@ enum DominateStatus config_dominates(Config* cfg, GenomeFeatureType gft1,
   }
 }
 
-/*!
-Unit tests for the Config class.
-\param env Pointer to Environment object.
-\return Error status.
-*/
 int config_unit_test(Env *env)
 {
   int had_err = 0;
@@ -509,4 +440,18 @@ int config_unit_test(Env *env)
   config_delete(cfg, env);
 
   return had_err;
+}
+
+void config_delete_without_state(Config *cfg, Env *env)
+{
+  if (!cfg) return;
+  str_delete(cfg->filename,env);
+  env_ma_free(cfg, env);
+}
+
+void config_delete(Config *cfg, Env *env)
+{
+  if (!cfg) return;
+  if (cfg->L) lua_close(cfg->L);
+  config_delete_without_state(cfg, env);
 }

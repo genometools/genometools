@@ -36,6 +36,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   unsigned long i;
+  Str *filenamestr;
   int had_err = 0, status_code;
 
   env_error_check(env);
@@ -87,13 +88,13 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 
     assert(is->fpin); /* file is open */
 
+    filenamestr = str_new_cstr(strarray_size(is->files)
+                               ? strarray_get(is->files, is->next_file-1)
+                               : "stdin", env);
     had_err = gff3parser_parse_genome_nodes(&status_code, is->gff3_parser,
-                                            is->genome_node_buffer,
-                                            strarray_size(is->files)
-                                            ? strarray_get(is->files,
-                                                           is->next_file-1)
-                                            : "stdin",
+                                            is->genome_node_buffer, filenamestr,
                                             &is->line_number, is->fpin, env);
+    str_delete(filenamestr, env);
     if (had_err)
       break;
 
@@ -122,7 +123,8 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
                                                        i), env)) {
           assert(is->last_node);
           /* a sorted stream can have at most one input file */
-          assert(strarray_size(is->files) == 0 || strarray_size(is->files) == 1);
+          assert(strarray_size(is->files) == 0 ||
+                 strarray_size(is->files) == 1);
           env_error_set(env,
                     "the file %s is not sorted (example: line %lu and %lu)",
                     genome_node_get_filename(is->last_node),

@@ -21,6 +21,7 @@ static int genome_feature_lua_new(lua_State *L)
   Strand strand;
   const char *type_str, *strand_str;
   size_t length;
+  Str *filename;
   Env *env;
   assert(L);
   /* get/check parameters */
@@ -39,7 +40,9 @@ static int genome_feature_lua_new(lua_State *L)
   /* construct object */
   env = get_env_from_registry(L);
   gf = lua_newuserdata(L, sizeof (GenomeNode**));
-  *gf = genome_feature_new(type, range, strand, "Lua", 0, env);
+  filename = str_new_cstr("Lua", env);
+  *gf = genome_feature_new(type, range, strand, filename, 0, env);
+  str_delete(filename, env);
   assert(*gf);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
   lua_setmetatable(L, -2);

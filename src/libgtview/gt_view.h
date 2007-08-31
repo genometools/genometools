@@ -5,17 +5,11 @@
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
-/**
- * \file gt_view.h
- * \author Malte Mader <mmader@zbh.uni-hamburg.de>
- * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
- * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
- */
 
 #ifndef GT_VIEW_H
 #define GT_VIEW_H
 
-/* the GFF3 viewer */
+/* the GFF3 viewer tool */
 int gt_view(int argc, const char **argv, Env*);
 
 #endif
