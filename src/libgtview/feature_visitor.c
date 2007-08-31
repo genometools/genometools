@@ -3,13 +3,8 @@
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
-/**
- * \if INTERNAL \file feature_visitor.c \endif
- * \author Gordon Gremme <gremme@zbh.uni-hamburg.de>
- */
 
 #include <assert.h>
-
 #include "libgtview/feature_visitor.h"
 #include "libgtview/feature_index.h"
 #include "libgtext/genome_visitor_rep.h"
@@ -31,8 +26,7 @@ static void feature_visitor_free(GenomeVisitor *gv,
   feature_index_delete(feature_visitor->feature_index, env);
 }
 
-static int feature_visitor_genome_feature(GenomeVisitor *gv,
-                                          GenomeFeature *gf,
+static int feature_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
                                           Env *env)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
@@ -42,8 +36,7 @@ static int feature_visitor_genome_feature(GenomeVisitor *gv,
 }
 
 static int feature_visitor_sequence_region(GenomeVisitor *gv,
-                                           SequenceRegion *sr,
-                                           Env *env)
+                                           SequenceRegion *sr, Env *env)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
   env_error_check(env);
@@ -62,8 +55,7 @@ const GenomeVisitorClass* feature_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* feature_visitor_new(FeatureIndex *fi,
-                                   Env *env)
+GenomeVisitor* feature_visitor_new(FeatureIndex *fi, Env *env)
 {
   GenomeVisitor *gv;
   FeatureVisitor *feature_visitor;
