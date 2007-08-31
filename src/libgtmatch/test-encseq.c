@@ -101,16 +101,6 @@ int testencodedsequence(const StrArray *filenametab,
   return haserr ? -1 : 0;
 }
 
-static int addelem(void *processinfo,
-                   /*@unused@*/ const Encodedsequence *encseq,
-                   const Sequencerange *range,Env *env)
-{
-  env_error_check(env);
-  array_add_elem((Array *) processinfo,(void *) range,sizeof (Sequencerange),
-                 env);
-  return 0;
-}
-
 /*
 static void reverseSequencerange(Array *a)
 {
@@ -135,6 +125,8 @@ int checkspecialranges(const Encodedsequence *encseq,Env *env)
   Sequencerange *valf, *valb;
   unsigned long idx;
   bool haserr = false;
+  Specialrangeiterator *sri;
+  Sequencerange range;
 
   env_error_check(env);
   if (!hasspecialranges(encseq) || !fastspecialranges(encseq))
@@ -144,17 +136,18 @@ int checkspecialranges(const Encodedsequence *encseq,Env *env)
   rangesforward = array_new(sizeof (Sequencerange),env);
   rangesbackward = array_new(sizeof (Sequencerange),env);
 
-  if (overallspecialrangesfast(encseq,true,addelem,rangesforward,env) != 0)
+  sri = newspecialrangeiterator(encseq,true,env);
+  while(nextspecialrangeiterator(&range,sri))
   {
-    haserr = true;
+    array_add(rangesforward,range,env);
   }
-  if (!haserr)
+  freespecialrangeiterator(&sri,env);
+  sri = newspecialrangeiterator(encseq,false,env);
+  while(nextspecialrangeiterator(&range,sri))
   {
-    if (overallspecialrangesfast(encseq,false,addelem,rangesbackward,env) != 0)
-    {
-      haserr = true;
-    }
+    array_add(rangesbackward,range,env);
   }
+  freespecialrangeiterator(&sri,env);
   if (!haserr)
   {
     if (array_size(rangesforward) != array_size(rangesbackward))

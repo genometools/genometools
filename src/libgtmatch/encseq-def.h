@@ -77,14 +77,6 @@ bool fastspecialranges(const Encodedsequence *encseq);
 
 bool hasspecialranges(const Encodedsequence *encseq);
 
-int overallspecialrangesfast(
-                const Encodedsequence *encseq,
-                bool moveforward,
-                int(*processrange)(void *,const Encodedsequence *,
-                                   const Sequencerange *,Env *),
-                void *processinfo,
-                Env *env);
-
 int overallspecialranges(const Encodedsequence *encseq,
                          bool moveforward,
                          int(*processrange)(void *,const Encodedsequence *,

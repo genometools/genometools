@@ -1413,7 +1413,7 @@ bool fastspecialranges(const Encodedsequence *encseq)
   return true;
 }
 
-int overallspecialrangesfast(
+static int overallspecialrangesfast(
                 const Encodedsequence *encseq,
                 bool moveforward,
                 int(*processrange)(void *,const Encodedsequence *,
