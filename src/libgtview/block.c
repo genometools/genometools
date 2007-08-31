@@ -35,10 +35,8 @@ bool block_caption_is_visible(Block *block)
   return block->show_caption;
 }
 
-/*
-Compare function to insert Elements into dlist
-*/
-int elemcmp(const void *a, const void *b)
+/* Compare function used to insert Elements into dlist */
+static int elemcmp(const void *a, const void *b)
 {
   Element *elem_a = (Element*) a;
   Element *elem_b = (Element*) b;
