@@ -60,7 +60,7 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
 {
   Dlistelem *elem;
   Range elem_r, gn_r;
-  enum DominateStatus dominates;
+  DominateStatus dominates;
   int count = 0;
   Element *element, *e;
   GenomeFeatureType gn_type, e_type;
