@@ -22,7 +22,7 @@ typedef struct Diagram Diagram;
 /* Create a new diagram object representing the genome nodes in <features>
    overlapping with <range>. */
 Diagram*    diagram_new(Array *features, Range range, Config*, Env*);
-Range       diagram_get_range(Diagram *diagram);
+Range       diagram_get_range(Diagram*);
 void        diagram_set_config(Diagram*, Config*, Env*);
 Hashtable*  diagram_get_tracks(const Diagram*);
 int         diagram_get_total_lines(const Diagram*, Env*);
