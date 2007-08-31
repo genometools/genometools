@@ -28,6 +28,8 @@ static int diagram_lua_new(lua_State *L)
   luaL_argcheck(L, range.start <= range.end, 2, "must be <= endpos");
   /* get seqid */
   seqid       = luaL_checkstring(L, 4);
+  luaL_argcheck(L, feature_index_has_seqid(*feature_index, seqid, env),
+                4, "feature index does not contain the given sequence id");
   /* create diagram */
   config = get_config_from_registry(L);
   diagram = lua_newuserdata(L, sizeof (Diagram**));

@@ -35,7 +35,7 @@ Config* config_new(bool verbose, Env *env)
 {
   Config *cfg;
   env_error_check(env);
-  cfg = env_ma_malloc(env, sizeof (Config));
+  cfg = env_ma_calloc(env, 1, sizeof (Config));
   cfg->filename = NULL;
   cfg->verbose = verbose;
   cfg->L = luaL_newstate();
@@ -311,11 +311,8 @@ bool config_cstr_in_list(const Config *cfg, const char *section,
   lua_getfield(cfg->L, -1, key);
   i++;
   if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1)) {
-    /* XXX: fix the following (had_err is set, but env_error_set() is not called
-     */
-/*    if (cfg->verbose) warning("key '%s' is not set or not a table",
-                               key);
-    lua_pop(cfg->L, 1);*/
+    lua_pop(cfg->L, 1);
+    i--;
     had_err = -1;
   }
   if (!had_err)

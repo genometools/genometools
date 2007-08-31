@@ -413,6 +413,7 @@ Diagram* diagram_new(FeatureIndex *fi, Range range, const char *seqid,
 {
   Diagram *diagram;
   Array *features = array_new(sizeof(GenomeNode*), env);
+  int had_err;
   env_error_check(env);
   diagram = env_ma_malloc(env, sizeof (Diagram));
   diagram->tracks = hashtable_new(HASH_STRING, env_ma_free_func, NULL, env);
@@ -420,11 +421,12 @@ Diagram* diagram_new(FeatureIndex *fi, Range range, const char *seqid,
   diagram->nof_tracks = 0;
   diagram->config = config;
   diagram->range = range;
-  (void) feature_index_get_features_for_range(fi,
-                                              features,
-                                              seqid,
-                                              range,
-                                              env);
+  had_err = feature_index_get_features_for_range(fi,
+                                                 features,
+                                                 seqid,
+                                                 range,
+                                                 env);
+  assert(!had_err); /* <fi> must contain <seqid> */
   diagram_build(diagram, features, env);
   array_delete(features, env);
   return diagram;
