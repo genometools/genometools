@@ -1,20 +1,15 @@
 /*
-   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-   See LICENSE file or http://genometools.org/license.html for license details.
+  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
 */
-/**
- * \if INTERNAL \file line.c \endif
- * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
- */
 
 #include "libgtcore/ensure.h"
 #include "libgtcore/range.h"
 #include "libgtview/block.h"
 #include "libgtview/line.h"
 
-struct Line
-{
+struct Line {
   Array *blocks;
 };
 
@@ -24,39 +19,31 @@ Line* line_new(Env *env)
   env_error_check(env);
   line = env_ma_malloc(env, sizeof (Line));
   line->blocks = array_new(sizeof (Block*), env);
-
-  assert(line != NULL);
   return line;
 }
 
 void line_insert_block(Line *line, Block *block, Env *env)
 {
-  assert(line != NULL && block != NULL);
-
+  assert(line && block);
   array_add(line->blocks, block, env);
 }
 
-bool line_is_occupied(Line *line, Range r)
+bool line_is_occupied(const Line *line, Range r)
 {
-  int i;
+  unsigned long i;
   Range r1;
-
-  assert(line != NULL);
-
-  for (i=0; i<array_size(line->blocks); i++)
-  {
-    r1 = block_get_range(*(Block**)  array_get(line->blocks, i));
+  assert(line);
+  for (i = 0; i < array_size(line->blocks); i++) {
+    r1 = block_get_range(*(Block**) array_get(line->blocks, i));
     if (range_overlap(r1, r))
-    {
       return true;
-    }
   }
   return false;
 }
 
 Array* line_get_blocks(Line* line)
 {
-  assert(line != NULL);
+  assert(line);
   return line->blocks;
 }
 
@@ -171,4 +158,3 @@ void line_delete(Line *line, Env *env)
   array_delete(line->blocks, env);
   env_ma_free(line, env);
 }
-
