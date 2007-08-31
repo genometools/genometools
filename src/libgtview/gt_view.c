@@ -125,8 +125,7 @@ int gt_view(int argc, const char **argv, Env *env)
   GenomeNode *gn = NULL;
   FeatureIndex *features = NULL;
   int parsed_args, had_err=0;
-  const char *png_file;
-  char *seqid = NULL;
+  const char *png_file, *seqid = NULL;
   Range qry_range, sequence_region_range;
   Array *results = NULL;
   Config *cfg = NULL;
