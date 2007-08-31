@@ -6,13 +6,6 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-/**
- * \if INTERNAL \file gt_view.c \endif
- * \author Malte Mader <mmader@zbh.uni-hamburg.de>
- * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
- * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
- */
-
 #include <string.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/fileutils.h"
@@ -197,31 +190,25 @@ int gt_view(int argc, const char **argv, Env *env)
   }
 
   /* if seqid is empty, take first one added to index */
-  if (!had_err && strcmp(str_get(arguments.seqid),"") == 0)
-  {
+  if (!had_err && strcmp(str_get(arguments.seqid),"") == 0) {
     seqid = feature_index_get_first_seqid(features);
-    if (seqid == NULL)
-    {
+    if (seqid == NULL) {
       env_error_set(env, "GFF input file must contain a sequence region!");
       had_err = -1;
     }
   }
   else if (!had_err && !feature_index_has_seqid(features,
                                                 str_get(arguments.seqid),
-                                                env))
-  {
+                                                env)) {
     env_error_set(env, "sequence region '%s' does not exist in GFF input file",
                   str_get(arguments.seqid));
     had_err = -1;
   }
   else if (!had_err)
-  {
     seqid = str_get(arguments.seqid);
-  }
 
   results = array_new(sizeof (GenomeNode*), env);
-  if (!had_err)
-  {
+  if (!had_err) {
     sequence_region_range = feature_index_get_range_for_seqid(features, seqid);
     qry_range.start = (arguments.start == UNDEF_ULONG ?
                          sequence_region_range.start :
@@ -237,8 +224,7 @@ int gt_view(int argc, const char **argv, Env *env)
                                                 env);
   }
 
-  if (!had_err)
-  {
+  if (!had_err) {
     if (arguments.verbose)
       fprintf(stderr, "# of results: %lu\n", array_size(results));
 
@@ -254,8 +240,7 @@ int gt_view(int argc, const char **argv, Env *env)
       had_err = config_load_file(cfg, config_file, env);
   }
 
-  if (!had_err)
-  {
+  if (!had_err) {
     /* create and write image file */
     d = diagram_new(results, qry_range, cfg, env);
     r = render_new(cfg, env);
