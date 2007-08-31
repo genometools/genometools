@@ -252,10 +252,6 @@ obj/gt_cflags.h:
 obj/gt_version.h: VERSION
 	@echo '#define GT_VERSION "'`cat VERSION`\" > $@
 
-Doxyfile: Doxyfile.in VERSION
-	@echo '[rebuild $@]'
-	@sed -e "s/@VERSION@/`cat VERSION`/g" <$< >$@
-
 src/libgtcore/bitpackstringop8.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl 8 $^
@@ -312,7 +308,7 @@ obj/%.o: %.cxx
          $(LIBBBZ2_DEP)
 
 .SUFFIXES:
-.PHONY: dist srcdist release gt install splint test clean cleanup apidoc
+.PHONY: dist srcdist release gt install splint test clean cleanup
 
 dist: all
 	tar cvzf gt-`cat VERSION`.tar.gz bin/gt
@@ -321,21 +317,11 @@ srcdist:
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
         gzip -9 > genometools-`cat VERSION`.tar.gz
 
-apidoc: Doxyfile
-	doxygen
-
-release: apidoc
+release:
 	git tag "v`cat VERSION`"
-	git archive --format=tar --prefix="genometools-`cat VERSION`"/ HEAD \
-	>"genometools-`cat VERSION`.tar"
-	mkdir -p "genometools-`cat VERSION`/doc"
-	rsync -a doc/api "genometools-`cat VERSION`/doc/"
-	tar -r -f "genometools-`cat VERSION`.tar" \
-		"genometools-`cat VERSION`/doc/api"
-	rm -rf "genometools-`cat VERSION`"
-	gzip -9 "genometools-`cat VERSION`.tar"
+	git archive --format=tar --prefix="genometools-`cat VERSION`"/ HEAD | \
+	gzip -9 > genometools-`cat VERSION`.tar.gz
 	scp "genometools-`cat VERSION`.tar.gz" $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/pub
-	rsync -rv doc/api/html/ $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/apidoc
 	git push --tags
 
 installwww:
@@ -393,4 +379,4 @@ clean:
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
 
 cleanup: clean
-	rm -rf lib bin Doxyfile doc/api
+	rm -rf lib bin
