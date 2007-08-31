@@ -13,6 +13,7 @@
 #include "chardef.h"
 #include "esa-mmsearch-def.h"
 #include "measure-time-if.h"
+#include "stamp.h"
 
 #include "sfx-apfxlen.pr"
 #include "sfx-suffixer.pr"
@@ -220,7 +221,7 @@ static unsigned long extendright(const Encodedsequence *dbencseq,
 
   for (dbpos = dbend, querypos = queryend; /* Nothing */; dbpos++, querypos++)
   {
-    if (dbpos == totallength || querypos == querylength)
+    if (dbpos >= totallength || querypos >= querylength)
     {
       break;
     }
@@ -257,8 +258,8 @@ static int processsuftab(void *info,
   assert(widthofpart > 0);
   totallength = getencseqtotallength(ssi->dbencseq);
   for (currentquerystart = 0;
-      currentquerystart <= ssi->querylen - ssi->minlength;
-      currentquerystart++)
+       currentquerystart <= ssi->querylen - ssi->minlength;
+       currentquerystart++)
   {
     mmsi = newmmsearchiterator(ssi->dbencseq,
                                suftabpart,
@@ -278,13 +279,13 @@ static int processsuftab(void *info,
                         ssi->query,
                         currentquerystart))
       {
-         extend = extendright(ssi->dbencseq,
-                              readmode,
-                              totallength,
-                              dbstart + ssi->minlength,
-                              ssi->query,
-                              currentquerystart + ssi->minlength,
-                              ssi->querylen);
+        extend = extendright(ssi->dbencseq,
+                             readmode,
+                             totallength,
+                             dbstart + ssi->minlength,
+                             ssi->query,
+                             currentquerystart + ssi->minlength,
+                             ssi->querylen);
         if (ssi->processmaxmatch(ssi->processmaxmatchinfo,
                                  extend + (unsigned long) ssi->minlength,
                                  dbstart,

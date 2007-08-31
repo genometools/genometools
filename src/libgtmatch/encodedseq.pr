@@ -11,6 +11,8 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos);
 
+/*@null@*/ char *encseqaccessname(const Encodedsequence *encseq);
+
 int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
 
 void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
@@ -24,15 +26,12 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
 
 bool hasspecialranges(const Encodedsequence *encseq);
 
-bool fastspecialranges(const Encodedsequence *encseq);
+int storespecialranges(Array *ranges,
+                       bool moveforward,
+                       const Encodedsequence *encseq,
+                       Env *env);
 
-int overallspecialrangesfast(
-                const Encodedsequence *encseq,
-                bool moveforward,
-                int(*processrange)(void *,const Encodedsequence *,
-                                   const Sequencerange *,Env *),
-                void *processinfo,
-                Env *env);
+bool fastspecialranges(const Encodedsequence *encseq);
 
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
                                               bool moveforward,

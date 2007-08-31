@@ -279,27 +279,67 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
   }
 }
 
-static int insertfullspecialrange(InsertCompletespecials *ics,
-                                  Seqpos startpos,
-                                  Seqpos endpos)
+static int checkicsspace(InsertCompletespecials *ics)
 {
-  Seqpos pos;
-
-  for (pos = startpos; pos < endpos; pos++)
+  if (ics->nextfreeUint >= ics->allocatedUint)
   {
-    if (ics->nextfreeUint >= ics->allocatedUint)
+    if (ics->processsuftab(ics->processsuftabinfo,
+                           ics->spacesuffixstarts,
+                           ics->readmode,
+                           (Seqpos) ics->nextfreeUint,
+                           ics->env) != 0)
     {
-      if (ics->processsuftab(ics->processsuftabinfo,
-                             ics->spacesuffixstarts,
-                             ics->readmode,
-                             (Seqpos) ics->nextfreeUint,
-                             ics->env) != 0)
-      {
-        return -1;
-      }
-      ics->nextfreeUint = 0;
+      return -1;
     }
-    ics->spacesuffixstarts[ics->nextfreeUint++] = pos;
+    ics->nextfreeUint = 0;
+  }
+  return 0;
+}
+
+static int insertfullspecialrange(InsertCompletespecials *ics,
+                                  Seqpos leftpos,
+                                  Seqpos rightpos)
+{
+  Seqpos pos, tmppos;
+
+  assert(leftpos < rightpos);
+  /*
+  printf("range %u,%u\n",leftpos,rightpos);
+  */
+  if(ISDIRREVERSE(ics->readmode))
+  {
+    pos = rightpos - 1;
+  } else
+  {
+    pos = leftpos;
+  }
+  while(true)
+  {
+    if(checkicsspace(ics) != 0)
+    {
+      return -1;
+    }
+    if(ISDIRREVERSE(ics->readmode))
+    {
+      tmppos = REVERSEPOS(ics->totallength,pos);
+      ics->spacesuffixstarts[ics->nextfreeUint++] = tmppos;
+      /*
+      printf("map %u -> %u\n",pos,tmppos);
+      */
+      if(pos == leftpos)
+      {
+        break;
+      }
+      pos--;
+    } else
+    {
+      ics->spacesuffixstarts[ics->nextfreeUint++] = pos;
+      if(pos == rightpos-1)
+      {
+        break;
+      }
+      pos++;
+    }
   }
   return 0;
 }
@@ -346,10 +386,11 @@ static int insertallfullspecials(
   {
     return -1;
   }
-  if (insertfullspecialrange(&ics,ics.totallength,ics.totallength+1) != 0)
+  if(checkicsspace(&ics) != 0)
   {
-    return -2;
+    return -1;
   }
+  ics.spacesuffixstarts[ics.nextfreeUint++] = ics.totallength;
   if (ics.nextfreeUint > 0 && ics.processsuftab != NULL)
   {
     if (ics.processsuftab(ics.processsuftabinfo,

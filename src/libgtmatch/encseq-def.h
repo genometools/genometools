@@ -15,6 +15,8 @@
 
 #define ENCSEQFILESUFFIX     ".esq"
 
+#define REVERSEPOS(TOT,POS) ((TOT) - 1 - (POS))
+
 typedef struct Encodedsequence Encodedsequence;
 typedef struct Encodedsequencescanstate Encodedsequencescanstate;
 typedef struct Specialrangeiterator Specialrangeiterator;
@@ -92,4 +94,7 @@ bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
 
 void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
 
+/*@null@*/ char *encseqaccessname(const Encodedsequence *encseq);
+
 #endif
+

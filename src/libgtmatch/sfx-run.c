@@ -166,13 +166,13 @@ static int suftab2file(void *info,
           {
             env_error_set(env,"pos = " FormatSeqpos
                               ": cmp " FormatSeqpos
-                              " " FormatSeqpos " = %d\n",
+                              " " FormatSeqpos " = %d",
                           PRINTSeqposcast(pos),
                            pos > 0 ? PRINTSeqposcast(suftab[pos-1])
                                    : PRINTSeqposcast(outfileinfo->
                                                  lastsuftabentryofpreviouspart),
-                    PRINTSeqposcast(suftab[pos]),
-                    cmp);
+                          PRINTSeqposcast(suftab[pos]),
+                          cmp);
             haserr = true;
             break;
           }
@@ -332,6 +332,22 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
       }
     }
   }
+  /*
+  if(!haserr)
+  {
+    if(checkspecialrangesfast(encseq,env) != 0)
+    {
+      haserr = true; 
+    }
+  }
+  if(!haserr)
+  {
+    if(checkspecialrangesslow(encseq,env) != 0)
+    {
+      haserr = true; 
+    }
+  }
+  */
   initoutfileinfo(&outfileinfo);
   INITOUTFILEPTR(outfileinfo.outfpsuftab,so->outsuftab,SUFTABSUFFIX);
   INITOUTFILEPTR(outfileinfo.outfplcptab,so->outlcptab,LCPTABSUFFIX);
