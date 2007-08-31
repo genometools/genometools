@@ -20,7 +20,7 @@
 
 typedef struct Diagram Diagram;
 
-/* Create a new diagram object representing the genome nodes in 
+/* Create a new diagram object representing the genome nodes in
    FeatureIndex in region <seqid> overlapping with <range>. */
 Diagram*    diagram_new(FeatureIndex*, Range range, const char *seqid,
                         Config*, Env*);

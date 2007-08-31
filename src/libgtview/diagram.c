@@ -412,7 +412,7 @@ Diagram* diagram_new(FeatureIndex *fi, Range range, const char *seqid,
                      Config *config, Env *env)
 {
   Diagram *diagram;
-  Array *features = array_new(sizeof(GenomeNode*), env);
+  Array *features = array_new(sizeof (GenomeNode*), env);
   int had_err;
   env_error_check(env);
   diagram = env_ma_malloc(env, sizeof (Diagram));
@@ -562,7 +562,7 @@ int diagram_unit_test(Env *env)
     str_delete(track_key, env);
   }
   ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
-  
+
   /* create a diagram object and test it */
   if (!had_err) {
     dia2 = diagram_new(fi,dr1,"test2",cfg,env);
@@ -615,5 +615,3 @@ void diagram_delete(Diagram *diagram, Env *env)
   hashtable_delete(diagram->nodeinfo, env);
   env_ma_free(diagram, env);
 }
-
-
