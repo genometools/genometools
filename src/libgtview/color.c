@@ -4,11 +4,6 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-/**
- * \if INTERNAL \file color.c \endif
- * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
- */
-
 #include "libgtview/color.h"
 
 bool color_equals(Color c1, Color c2)
