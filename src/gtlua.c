@@ -106,7 +106,7 @@ void run_interactive_lua_interpreter(lua_State *L)
     error = luaL_loadbuffer(L, buf, strlen(buf), "line") ||
             lua_pcall(L, 0, 0, 0);
     if (error) {
-      fprintf(stderr, "%s", lua_tostring(L, -1));
+      fprintf(stderr, "%s\n", lua_tostring(L, -1));
       lua_pop(L, 1); /* pop error message */
     }
   }
