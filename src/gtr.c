@@ -181,6 +181,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL, env);
   hashtable_add(gtr->unit_tests, "alignment class", alignment_unit_test, env);
   hashtable_add(gtr->unit_tests, "array class", array_unit_test, env);
+  hashtable_add(gtr->unit_tests, "array example", array_example, env);
   hashtable_add(gtr->unit_tests, "bit pack array class",
                 bitPackArray_unit_test, env);
   hashtable_add(gtr->unit_tests, "bit pack string module",

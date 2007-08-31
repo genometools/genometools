@@ -29,29 +29,8 @@ void          array_set_size(Array*, unsigned long);
 void          array_reset(Array*);
 size_t        array_elem_size(const Array*);
 unsigned long array_size(const Array*);
+int           array_example(Env*);
 int           array_unit_test(Env*);
 void          array_delete(Array*, Env*);
-
-#if 0
-  XXX: update this usecase
-
-  a typical array use case:
-
-  int main(void)
-  {
-    unsigned long i;
-    Array *a;
-    a = array_new(sizeof (unsigned long), env);
-    for (i = 0; i < 100; i++) {
-      array_add(a, i);
-      assert(i = *(unsigned long*) array_get(a, i));
-    }
-    assert(array_size(a) == 100);
-    assert(*(unsigned long*) array_pop(a) == 99);
-    assert(array_size(a) == 99);
-    array_delete(a, env);
-    return EXIT_SUCCESS;
-  }
-#endif
 
 #endif
