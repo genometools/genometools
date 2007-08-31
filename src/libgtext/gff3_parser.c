@@ -546,7 +546,8 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
       warning("skipping blank line %lu in file \"%s\"", *line_number, filename);
     else if (line[0] == '#') {
       had_err = parse_meta_gff3_line(gff3_parser, genome_nodes, line,
-                                     line_length, filenamestr, *line_number, env);
+                                     line_length, filenamestr, *line_number,
+                                     env);
       if (had_err ||
           (!gff3_parser->incomplete_node && queue_size(genome_nodes))) {
         break;
