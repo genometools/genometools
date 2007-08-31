@@ -168,7 +168,7 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
   Sequencerange range;
 
   env_error_check(env);
-  if (!hasspecialranges(encseq)) /* || !fastspecialranges(encseq)) */
+  if (!hasspecialranges(encseq))
   {
     return 0;
   }

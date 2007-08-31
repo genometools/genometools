@@ -104,10 +104,10 @@ Test do
 end
 
 allfiles.each do |filename|
-  Name "gt suffixerator uint64"
+  Name "gt suffixerator uint32"
   Keywords "gt_suffixerator"
   Test do
-    run_test "#{$bin}gt suffixerator -tis -indexname sfx -sat uint64 " +
+    run_test "#{$bin}gt suffixerator -tis -indexname sfx -sat uint32 " +
              "-pl -db #{$testdata}#{filename}"
   end
 end

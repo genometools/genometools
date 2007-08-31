@@ -332,22 +332,6 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
       }
     }
   }
-  /*
-  if(!haserr)
-  {
-    if(checkspecialrangesfast(encseq,env) != 0)
-    {
-      haserr = true; 
-    }
-  }
-  if(!haserr)
-  {
-    if(checkspecialrangesslow(encseq,env) != 0)
-    {
-      haserr = true; 
-    }
-  }
-  */
   initoutfileinfo(&outfileinfo);
   INITOUTFILEPTR(outfileinfo.outfpsuftab,so->outsuftab,SUFTABSUFFIX);
   INITOUTFILEPTR(outfileinfo.outfplcptab,so->outlcptab,LCPTABSUFFIX);
