@@ -146,6 +146,28 @@ Array* array_clone(const Array *a, Env *env)
   return a_copy;
 }
 
+int array_example(Env *env)
+{
+  unsigned long i;
+  Array *a;
+
+  env_error_check(env);
+
+  /* an example array use case */
+
+  a = array_new(sizeof (unsigned long), env);
+  for (i = 0; i < 100; i++) {
+    array_add(a, i, env);
+    assert(i == *(unsigned long*) array_get(a, i));
+  }
+  assert(array_size(a) == 100);
+  assert(*(unsigned long*) array_pop(a) == 99);
+  assert(array_size(a) == 99);
+  array_delete(a, env);
+
+  return 0;
+}
+
 int array_unit_test(Env *env)
 {
   Array *char_array, *int_array;
