@@ -1082,6 +1082,26 @@ static void showallspecialpositionsuint64(const Encodedsequence *encseq)
                            encseq->specialrangelength[idx]);
   }
 }
+
+static void showallspecialpositions(const Encodedsequence *encseq)
+{
+  if (encseq->numofspecialstostore > 0)
+  {
+    if(encseq->sat == Viauchartables || 
+       encseq->sat == Viaushorttables ||
+       encseq->sat == Viauint32tables)
+    {
+      showallspecialpositionswithpages(encseq);
+    } else
+    {
+      if(encseq->sat == Viauint64tables)
+      {
+        showallspecialpositionsuint64(encseq);
+      }
+    }
+  }
+}
+
 #endif
 
 static bool nextnonemptypage(const Encodedsequence *encseq,
@@ -2020,6 +2040,12 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   {
     freeEncodedsequence(&encseq,env);
   }
+#ifdef DEBUG
+  if (!haserr)
+  {
+    showallspecialpositions(encseq);
+  }
+#endif
   return haserr ? NULL : encseq;
 }
 
@@ -2068,21 +2094,9 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     }
   }
 #ifdef DEBUG
-  if (!haserr &&
-      encseq->numofspecialstostore > 0)
+  if (!haserr)
   {
-    if(encseq->sat == Viauchartables || 
-       encseq->sat == Viaushorttables ||
-       encseq->sat == Viauint32tables)
-    {
-      showallspecialpositionswithpages(encseq);
-    } else
-    {
-      if(encseq->sat == Viauint64tables)
-      {
-        showallspecialpositionsuint64(encseq);
-      }
-    }
+    showallspecialpositions(encseq);
   }
 #endif
   return haserr ? NULL : encseq;
