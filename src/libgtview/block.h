@@ -18,10 +18,10 @@
    contains element objects. */
 typedef struct Block Block;
 
-Block*            block_new(Env *env);
+Block*            block_new(Env*);
 /* Create a new Block object, setting block parameters (such as strand, range)
    from a given <node> template. */
-Block*            block_new_from_node(GenomeNode *node, Env *env);
+Block*            block_new_from_node(GenomeNode *node, Env*);
 /* Insert <node> into block. */
 void              block_insert_element(Block*, GenomeNode *node, Config*, Env*);
 Range             block_get_range(const Block*);
@@ -39,7 +39,7 @@ void              block_set_type(Block*, GenomeFeatureType);
 GenomeFeatureType block_get_type(const Block*);
 /* Returns Dlist with Pointer to Element objects. */
 Dlist*            block_get_elements(const Block*);
-int               block_unit_test(Env *env);
+int               block_unit_test(Env*);
 void              block_delete(Block*, Env*);
 
 #endif
