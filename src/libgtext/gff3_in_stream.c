@@ -122,7 +122,8 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
                                                        i), env)) {
           assert(is->last_node);
           /* a sorted stream can have at most one input file */
-          assert(strarray_size(is->files) == 0 || strarray_size(is->files) == 1);
+          assert(strarray_size(is->files) == 0 ||
+                 strarray_size(is->files) == 1);
           env_error_set(env,
                     "the file %s is not sorted (example: line %lu and %lu)",
                     genome_node_get_filename(is->last_node),
