@@ -1,20 +1,15 @@
 /*
-   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-   See LICENSE file or http://genometools.org/license.html for license details.
+  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+  See LICENSE file or http://genometools.org/license.html for license details.
 */
-/**
- * \if INTERNAL \file block.c \endif
- * \author Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
- */
 
 #include <string.h>
 #include "libgtcore/ensure.h"
 #include "libgtview/block.h"
 #include "libgtview/element.h"
 
-struct Block
-{
+struct Block {
   Dlist *elements;
   Range range;
   Str *caption;
@@ -22,18 +17,6 @@ struct Block
   Strand strand;
   GenomeFeatureType type;
 };
-
-void block_set_caption_visibility(Block *block, bool val)
-{
-  assert(block != NULL);
-  block->show_caption = val;
-}
-
-bool block_caption_is_visible(Block *block)
-{
-  assert(block != NULL);
-  return block->show_caption;
-}
 
 /* Compare function used to insert Elements into dlist */
 static int elemcmp(const void *a, const void *b)
@@ -60,45 +43,20 @@ Block* block_new(Env *env)
   block->caption = NULL;
   block->show_caption = true;
   block->strand = STRAND_UNKNOWN;
-
-  assert(block != NULL);
   return block;
 }
 
 Block* block_new_from_node(GenomeNode *node, Env *env)
 {
   Block *block;
-
-  assert(node != NULL);
-
+  assert(node);
   block = block_new(env);
   block_set_range(block, genome_node_get_range(node));
   block_set_strand(block, genome_feature_get_strand((GenomeFeature*) node));
   return block;
 }
 
-bool block_has_only_one_fullsize_element(Block *block)
-{
-  bool ret = false;
-
-  assert(block != NULL);
-
-  if (dlist_size(block->elements) == 1UL)
-  {
-    Range elem_range, block_range;
-    assert(dlist_first(block->elements) == dlist_last(block->elements));
-    elem_range = element_get_range(
-                   dlistelem_get_data(dlist_first(block->elements)));
-    block_range = block_get_range(block);
-    ret = (range_compare(block_range, elem_range) == 0);
-  }
-  return ret;
-}
-
-void block_insert_element(Block *block,
-                          GenomeNode *gn,
-                          Config *cfg,
-                          Env *env)
+void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
 {
   Dlistelem *elem;
   Range elem_r, gn_r;
@@ -112,25 +70,21 @@ void block_insert_element(Block *block,
   gn_r = genome_node_get_range(gn);
   gn_type = genome_feature_get_type((GenomeFeature*) gn);
 
-  for (elem = dlist_first(block->elements); elem != NULL;
-      elem = dlistelem_next(elem))
-  {
+  for (elem = dlist_first(block->elements); elem;
+       elem = dlistelem_next(elem)) {
     element = (Element*) dlistelem_get_data(elem);
     elem_r = element_get_range(element);
 
-    if (range_overlap(elem_r, gn_r))
-    {
+    if (range_overlap(elem_r, gn_r)) {
       count += 1;
       e_type = element_get_type(element);
 
       dominates = config_dominates(cfg, e_type, gn_type, env);
 
-      /* Fall:    -------------------
-                  ---------- */
-      if (gn_r.start == elem_r.start && gn_r.end < elem_r.end)
-      {
-        switch (dominates)
-        {
+      if (gn_r.start == elem_r.start && gn_r.end < elem_r.end) {
+        /* Case:    -------------------
+                    ---------- */
+        switch (dominates) {
           case DOMINATES_FIRST:
             break;
           case DOMINATES_NOT_SPECIFIED:
@@ -145,28 +99,22 @@ void block_insert_element(Block *block,
             break;
         }
       }
-
-      /* Fall:  --------------
-                   -----------  */
-      else if (gn_r.start >= elem_r.start && gn_r.end == elem_r.end)
-      {
-        switch (dominates)
-        {
+      else if (gn_r.start >= elem_r.start && gn_r.end == elem_r.end) {
+        /* Case:  --------------
+                     -----------  */
+        switch (dominates) {
           case DOMINATES_FIRST:
             gn_r.start = elem_r.end;
             break;
           case DOMINATES_NOT_SPECIFIED:
           case DOMINATES_SECOND:
             elem_r.end = gn_r.start-1;
-            if (elem_r.start == elem_r.end+1)
-            {
+            if (elem_r.start == elem_r.end+1) {
               dlist_remove(block->elements, elem, env);
               element_delete(element, env);
             }
             else
-            {
               element_set_range(element, elem_r);
-            }
             e = element_new(gn, env);
             element_set_range(e, gn_r);
             dlist_add(block->elements, e, env);
@@ -177,32 +125,26 @@ void block_insert_element(Block *block,
             break;
         }
       }
-
-      /* Fall: ----------
-               -------------- */
-      else if (elem_r.start <= gn_r.start && elem_r.end < gn_r.end)
-      {
+      else if (elem_r.start <= gn_r.start && elem_r.end < gn_r.end) {
+        /* Case: ----------
+                 -------------- */
         bool removed = false;
         Range gnnew_r;
 
-        switch (dominates)
-        {
+        switch (dominates) {
           case DOMINATES_FIRST:
             gn_r.start = elem_r.end+1;
             break;
           case DOMINATES_NOT_SPECIFIED:
           case DOMINATES_SECOND:
             elem_r.end = gn_r.start-1;
-            if (elem_r.start == elem_r.end+1)
-            {
+            if (elem_r.start == elem_r.end+1) {
               dlist_remove(block->elements, elem, env);
               element_delete(element, env);
               removed = true;
             }
             else
-            {
               element_set_range(element, elem_r);
-            }
             gnnew_r = gn_r;
             gnnew_r.end = elem_r.end;
             e = element_new_empty(env);
@@ -211,25 +153,20 @@ void block_insert_element(Block *block,
             dlist_add(block->elements, e, env);
             gn_r.start = elem_r.end+1;
             if (removed)
-            {
               elem = dlist_find(block->elements, e);
-            }
             break;
           case DOMINATES_EQUAL:
           case DOMINATES_UNKNOWN_TYPE:
             break;
         }
       }
-
-      /* Fall: -------------
-                  ------      */
-      else if (elem_r.start < gn_r.start && gn_r.end < elem_r.end)
-      {
+      else if (elem_r.start < gn_r.start && gn_r.end < elem_r.end) {
+        /* Case: -------------
+                    ------      */
         Range elemnew_r;
         Element *elemnew;
 
-        switch (dominates)
-        {
+        switch (dominates) {
           case DOMINATES_FIRST:
             break;
           case DOMINATES_SECOND:
@@ -252,69 +189,90 @@ void block_insert_element(Block *block,
       }
     }
   }
-  if (count == 0)
-  {
+  if (count == 0) {
     e = element_new(gn, env);
     dlist_add(block->elements, e, env);
   }
 }
 
-Range block_get_range(Block *block)
+Range block_get_range(const Block *block)
 {
-   assert(block != NULL);
-
+   assert(block);
    return block->range;
 }
 
 void block_set_range(Block *block, Range r)
 {
-  assert(block != NULL && r.start <= r.end);
-
+  assert(block && r.start <= r.end);
   block->range = r;
 }
 
-void block_set_caption(Block *block,
-                       Str *caption)
+bool block_has_only_one_fullsize_element(Block *block)
 {
-  assert(block != NULL && caption != NULL);
+  bool ret = false;
+  assert(block);
+  if (dlist_size(block->elements) == 1UL) {
+    Range elem_range, block_range;
+    assert(dlist_first(block->elements) == dlist_last(block->elements));
+    elem_range = element_get_range(
+                   dlistelem_get_data(dlist_first(block->elements)));
+    block_range = block_get_range(block);
+    ret = (range_compare(block_range, elem_range) == 0);
+  }
+  return ret;
+}
+
+void block_set_caption_visibility(Block *block, bool val)
+{
+  assert(block);
+  block->show_caption = val;
+}
+
+bool block_caption_is_visible(const Block *block)
+{
+  assert(block);
+  return block->show_caption;
+}
+
+void block_set_caption(Block *block, Str *caption)
+{
+  assert(block && caption);
   block->caption = caption;
 }
 
-Str* block_get_caption(Block *block)
+Str* block_get_caption(const Block *block)
 {
-  assert(block != NULL);
+  assert(block);
   return block->caption;
 }
 
-void block_set_strand(Block *block,
-                      Strand strand)
+void block_set_strand(Block *block, Strand strand)
 {
-  assert(block != NULL);
+  assert(block);
   block->strand = strand;
 }
 
-Strand block_get_strand(Block *block)
+Strand block_get_strand(const Block *block)
 {
-  assert(block != NULL);
+  assert(block);
   return block->strand;
 }
 
-void block_set_type(Block *block,
-                    GenomeFeatureType type)
+void block_set_type(Block *block, GenomeFeatureType type)
 {
-  assert(block != NULL);
+  assert(block);
   block->type = type;
 }
 
-GenomeFeatureType block_get_type(Block *block)
+GenomeFeatureType block_get_type(const Block *block)
 {
-  assert(block != NULL);
+  assert(block);
   return block->type;
 }
 
-Dlist* block_get_elements(Block *block)
+Dlist* block_get_elements(const Block *block)
 {
-  assert(block != NULL);
+  assert(block);
   return block->elements;
 }
 
@@ -370,14 +328,12 @@ int block_unit_test(Env* env)
   ensure(had_err, (0 == range_compare(b_range, r_temp)));
   ensure(had_err, (1 == range_compare(r2, r_temp)));
 
-  /* tests block_set_caption
-     & block_get_caption */
+  /* tests block_set_caption & block_get_caption */
   block_set_caption(b, caption1);
   ensure(had_err, (0 == str_cmp(block_get_caption(b), caption1)));
   ensure(had_err, (0 != str_cmp(block_get_caption(b), caption2)));
 
-  /* tests block_set_strand
-     & block_get_range */
+  /* tests block_set_strand & block_get_range */
   s = block_get_strand(b);
   ensure(had_err, (STRAND_UNKNOWN == s));
   block_set_strand(b, STRAND_FORWARD);
@@ -399,12 +355,9 @@ void block_delete(Block *block,
                   Env *env)
 {
   Dlistelem *delem;
-
   if (!block) return;
-
-  for (delem = dlist_first(block->elements); delem != NULL;
-      delem = dlistelem_next(delem))
-  {
+  for (delem = dlist_first(block->elements); delem;
+       delem = dlistelem_next(delem)) {
     Element* elem = (Element*) dlistelem_get_data(delem);
     element_delete(elem, env);
   }
@@ -412,4 +365,3 @@ void block_delete(Block *block,
   dlist_delete(block->elements, env);
   env_ma_free(block, env);
 }
-
