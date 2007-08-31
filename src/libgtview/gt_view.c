@@ -169,7 +169,7 @@ int gt_view(int argc, const char **argv, Env *env)
 
       /* create feature stream */
       feature_stream = feature_stream_new(arguments.pipe
-                                          ?  gff3_out_stream
+                                          ? gff3_out_stream
                                           : gff3_in_stream,
                                           features, env);
 
