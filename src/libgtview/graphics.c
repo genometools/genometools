@@ -90,8 +90,7 @@ double graphics_get_text_height(Graphics *g)
   return ext.height;
 }
 
-void graphics_set_margins(Graphics *g, double margin_x, double margin_y,
-                          double width, double height)
+void graphics_set_margins(Graphics *g, double margin_x, double margin_y)
 {
   assert(g);
   g->margin_x = margin_x;

@@ -485,7 +485,7 @@ int render_to_png(Render *r, Diagram *dia, const char *filename,
 
   /* create new Graphics backend */
   r->g = graphics_new_png(filename, width, height, env);
-  graphics_set_margins(r->g, r->margins, 0, width, height);
+  graphics_set_margins(r->g, r->margins, 0);
 
   /* Add ruler/scale to the image */
   render_ruler(r, env);

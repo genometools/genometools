@@ -40,11 +40,8 @@ double    graphics_get_text_width(Graphics*, const char *text);
 /* Set margins (space to the image boundaries that are clear of elements)
    in the graphics.
    <margin_x> denotes the Margin to the left and right, in pixels.
-   <margin_y> denotes the Margin to the top and bottom, in pixels.
-   <width> denotes  the Surface width (in pixels).
-   <height> denotes the Surface height (in pixels). */
-void      graphics_set_margins(Graphics*, double margin_x, double margin_y,
-                               double width, double height);
+   <margin_y> denotes the Margin to the top and bottom, in pixels. */
+void      graphics_set_margins(Graphics*, double margin_x, double margin_y);
 void      graphics_draw_horizontal_line(Graphics*, double x, double y,
                                         double width);
 /* Draws a vertical line beginning at the given coordinates downwards. */
