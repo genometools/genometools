@@ -33,12 +33,8 @@ Element* element_new(GenomeNode *gn, Env *env)
 
 Element* element_new_empty(Env *env)
 {
-  Element *element;
-
   env_error_check(env);
-  element = env_ma_malloc(env, sizeof (Element));
-  assert(element);
-  return element;
+  return env_ma_calloc(env, 1, sizeof (Element));
 }
 
 Range element_get_range(const Element *element)
