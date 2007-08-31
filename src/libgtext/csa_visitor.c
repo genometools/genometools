@@ -73,13 +73,6 @@ static int csa_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   csa_visitor->second_range = genome_node_get_range((GenomeNode*) gf);
   csa_visitor->second_str = genome_node_get_seqid((GenomeNode*) gf);
 
-#if 0
-  printf("# first range =%lu, %lu\n", csa_visitor->first_range.start,
-         csa_visitor->first_range.end);
-  printf("# second range=%lu, %lu\n", csa_visitor->second_range.start,
-         csa_visitor->second_range.end);
-#endif
-
   if ((str_cmp(csa_visitor->first_str, csa_visitor->second_str) == 0) &&
       (csa_visitor->first_range.end + csa_visitor->join_length >=
        csa_visitor->second_range.start)) {
@@ -87,12 +80,8 @@ static int csa_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
       array_add(csa_visitor->cluster, gf, env);
       /* update first range */
       assert(csa_visitor->second_range.start >= csa_visitor->first_range.start);
-#if 1
       if (csa_visitor->second_range.end > csa_visitor->first_range.end)
         csa_visitor->first_range.end = csa_visitor->second_range.end;
-#else
-    csa_visitor->first_range = csa_visitor->second_range;
-#endif
   }
   else {
     /* end of cluster -> process it */

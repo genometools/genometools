@@ -51,9 +51,6 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, Env *env)
       /* XXX: */
       genome_node_remove_leaf(v->current_tree, (GenomeNode*) current_feature,
                               env);
-#if 0
-      genome_node_delete((GenomeNode*) current_feature);
-#endif
     }
     /* remove previous feature */
     hashtable_remove(v->ht, (char*) genome_feature_type_get_cstr(
