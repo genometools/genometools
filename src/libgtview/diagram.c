@@ -278,13 +278,13 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent,
               genome_feature_get_attribute(parent, "ID" ));
     add_recursive(d, node, parent, node, env);
   }
-  else if (do_not_overlap)
+  else if (do_not_overlap && genome_node_number_of_children(parent) > 1)
   {
     /* group non-overlapping child nodes of a non-collapsing type by parent */
     add_to_parent(d, node, parent, env);
   }
   else {
-    /* nodes that belong into their own track */
+    /* nodes that belong into their own track and block */
     add_to_current(d, node, parent, env);
   }
 
