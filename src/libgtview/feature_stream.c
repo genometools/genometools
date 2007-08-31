@@ -3,18 +3,13 @@
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
   See LICENSE file or http://genometools.org/license.html for license details.
 */
-/**
- * \if INTERNAL \file feature_stream.c \endif
- * \author Gordon Gremme <gremme@zbh.uni-hamburg.de>
- */
 
 #include "libgtview/feature_stream.h"
 #include "libgtview/feature_visitor.h"
 #include "libgtview/feature_index.h"
 #include "libgtext/genome_stream_rep.h"
 
-struct FeatureStream
-{
+struct FeatureStream {
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
   GenomeVisitor *feature_visitor;
