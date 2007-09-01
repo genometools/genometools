@@ -646,9 +646,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
 #define ACCESSENCSEQ(ES,V)       (ES)->uint32##V
 #define SPECIALTYPE              Uint32
 #define MAXSPECIALTYPE           UINT32_MAX
-#ifdef Seqposequalsunsignedint
-#define POS2PAGENUM(V)           0
-#else
+#ifndef Seqposequalsunsignedint
 #define POS2PAGENUM(V)           ((V) >> 32)
 #endif
 
