@@ -75,16 +75,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        const Alphabet *alphabet,
                                        Env *env);
 
-bool fastspecialranges(const Encodedsequence *encseq);
-
 bool hasspecialranges(const Encodedsequence *encseq);
-
-int overallspecialranges(const Encodedsequence *encseq,
-                         bool moveforward,
-                         int(*processrange)(void *,const Encodedsequence *,
-                                            const Sequencerange *,Env *),
-                         void *processinfo,
-                         Env *env);
 
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
                                               bool moveforward,
@@ -97,4 +88,3 @@ void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
 /*@null@*/ char *encseqaccessname(const Encodedsequence *encseq);
 
 #endif
-

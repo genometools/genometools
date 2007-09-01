@@ -63,17 +63,7 @@ typedef struct
                prefixlength;
 } Collectedsuffixes;
 
-typedef struct
-{
-  Seqpos totallength,
-         *spacesuffixstarts;
-  unsigned long nextfreeUint,
-                allocatedUint;
-  int(*processsuftab)(void *,const Seqpos *,Readmode,Seqpos,Env *);
-  void *processsuftabinfo;
-  Readmode readmode;
-  Env *env;
-} InsertCompletespecials;
+DECLAREARRAYSTRUCT(Seqpos);
 
 static int initbasepower(unsigned int **basepower,
                          unsigned int **filltable,
@@ -279,26 +269,37 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
   }
 }
 
-static int checkicsspace(InsertCompletespecials *ics)
+static int flushsuffixstarts(ArraySeqpos *suffixstarts,
+                             Readmode readmode,
+                             int(*processsuftab)(void *,const Seqpos *,
+                                                 Readmode,Seqpos,Env *),
+                             void *processsuftabinfo,
+                             Env *env)
 {
-  if (ics->nextfreeUint >= ics->allocatedUint)
+  if (suffixstarts->nextfreeSeqpos >= suffixstarts->allocatedSeqpos)
   {
-    if (ics->processsuftab(ics->processsuftabinfo,
-                           ics->spacesuffixstarts,
-                           ics->readmode,
-                           (Seqpos) ics->nextfreeUint,
-                           ics->env) != 0)
+    if (processsuftab(processsuftabinfo,
+                      suffixstarts->spaceSeqpos,
+                      readmode,
+                      (Seqpos) suffixstarts->nextfreeSeqpos,
+                      env) != 0)
     {
       return -1;
     }
-    ics->nextfreeUint = 0;
+    suffixstarts->nextfreeSeqpos = 0;
   }
   return 0;
 }
 
-static int insertfullspecialrange(InsertCompletespecials *ics,
+static int insertfullspecialrange(ArraySeqpos *suffixstarts,
+                                  Seqpos totallength,
+                                  Readmode readmode,
+                                  int(*processsuftab)(void *,const Seqpos *,
+                                                      Readmode,Seqpos,Env *),
+                                  void *processsuftabinfo,
                                   Seqpos leftpos,
-                                  Seqpos rightpos)
+                                  Seqpos rightpos,
+                                  Env *env)
 {
   Seqpos pos, tmppos;
 
@@ -306,7 +307,7 @@ static int insertfullspecialrange(InsertCompletespecials *ics,
   /*
   printf("range %u,%u\n",leftpos,rightpos);
   */
-  if(ISDIRREVERSE(ics->readmode))
+  if(ISDIRREVERSE(readmode))
   {
     pos = rightpos - 1;
   } else
@@ -315,14 +316,16 @@ static int insertfullspecialrange(InsertCompletespecials *ics,
   }
   while(true)
   {
-    if(checkicsspace(ics) != 0)
+    if(flushsuffixstarts(suffixstarts,readmode,processsuftab,
+                         processsuftabinfo,env) != 0)
     {
       return -1;
     }
-    if(ISDIRREVERSE(ics->readmode))
+    if(ISDIRREVERSE(readmode))
     {
-      tmppos = REVERSEPOS(ics->totallength,pos);
-      ics->spacesuffixstarts[ics->nextfreeUint++] = tmppos;
+      tmppos = REVERSEPOS(totallength,pos);
+      suffixstarts->spaceSeqpos[suffixstarts->nextfreeSeqpos++] 
+        = tmppos;
       /*
       printf("map %u -> %u\n",pos,tmppos);
       */
@@ -333,27 +336,13 @@ static int insertfullspecialrange(InsertCompletespecials *ics,
       pos--;
     } else
     {
-      ics->spacesuffixstarts[ics->nextfreeUint++] = pos;
+      suffixstarts->spaceSeqpos[suffixstarts->nextfreeSeqpos++] = pos;
       if(pos == rightpos-1)
       {
         break;
       }
       pos++;
     }
-  }
-  return 0;
-}
-
-static int insertfullspecialpair(void *info,
-                                 /*@unused@*/ const Encodedsequence *encseq,
-                                 const Sequencerange *pair,
-                                 /*@unused@*/ Env *env)
-{
-  InsertCompletespecials *ics = (InsertCompletespecials *) info;
-
-  if (insertfullspecialrange(ics,pair->leftpos,pair->rightpos) != 0)
-  {
-    return -1;
   }
   return 0;
 }
@@ -370,36 +359,60 @@ static int insertallfullspecials(
                 void *processsuftabinfo,
                 Env *env)
 {
-  InsertCompletespecials ics;
+  ArraySeqpos suffixstarts;
+  Sequencerange range;
+  Seqpos totallength;
+  bool haserr = false;
 
-  ics.totallength = getencseqtotallength(encseq);
-  ics.spacesuffixstarts = suftab;
-  ics.allocatedUint = CALLCASTFUNC(Seqpos,unsigned_long,largestwidth);
-  ics.nextfreeUint = 0;
-  ics.processsuftab = processsuftab;
-  ics.processsuftabinfo = processsuftabinfo;
-  ics.readmode = readmode;
-  ics.env = env;
-  if (overallspecialranges(encseq,
-                           ISDIRREVERSE(readmode) ? false : true,
-                           insertfullspecialpair,&ics,env) != 0)
+  totallength = getencseqtotallength(encseq);
+  suffixstarts.spaceSeqpos = suftab;
+  suffixstarts.allocatedSeqpos 
+    = CALLCASTFUNC(Seqpos,unsigned_long,largestwidth);
+  suffixstarts.nextfreeSeqpos = 0;
+  if(hasspecialranges(encseq))
   {
-    return -1;
-  }
-  if(checkicsspace(&ics) != 0)
-  {
-    return -1;
-  }
-  ics.spacesuffixstarts[ics.nextfreeUint++] = ics.totallength;
-  if (ics.nextfreeUint > 0 && ics.processsuftab != NULL)
-  {
-    if (ics.processsuftab(ics.processsuftabinfo,
-                          ics.spacesuffixstarts,
-                          ics.readmode,
-                          (Seqpos) ics.nextfreeUint,
-                          env) != 0)
+    Specialrangeiterator *sri;
+
+    sri = newspecialrangeiterator(encseq,ISDIRREVERSE(readmode) ? false : true,
+                                  env);
+    while(nextspecialrangeiterator(&range,sri))
     {
-      return -3;
+      if (insertfullspecialrange(&suffixstarts,
+                                 totallength,
+                                 readmode,
+                                 processsuftab,
+                                 processsuftabinfo,
+                                 range.leftpos,
+                                 range.rightpos,
+                                 env) != 0)
+      {
+        haserr = true;
+        break;
+      }
+    }
+    freespecialrangeiterator(&sri,env);
+  }
+  if(!haserr)
+  {
+    if(flushsuffixstarts(&suffixstarts,readmode,processsuftab,
+                         processsuftabinfo,env) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if(!haserr)
+  {
+    suffixstarts.spaceSeqpos[suffixstarts.nextfreeSeqpos++] = totallength;
+    if (suffixstarts.nextfreeSeqpos > 0 && processsuftab != NULL)
+    {
+      if (processsuftab(processsuftabinfo,
+                            suffixstarts.spaceSeqpos,
+                            readmode,
+                            (Seqpos) suffixstarts.nextfreeSeqpos,
+                            env) != 0)
+      {
+        haserr = true;
+      }
     }
   }
   return 0;

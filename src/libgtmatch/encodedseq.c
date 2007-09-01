@@ -9,7 +9,6 @@
 #include <ctype.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
-#include "libgtcore/array.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
 #include "intbits-tab.h"
@@ -1242,184 +1241,6 @@ bool hasspecialranges(const Encodedsequence *encseq)
   return false;
 }
 
-static int overallspecialrangesdirectorbitaccess(
-                bool direct,
-                bool moveforward,
-                const Encodedsequence *encseq,
-                int(*processrange)(void *,const Encodedsequence *,
-                                   const Sequencerange *,Env *),
-                void *processinfo,
-                Env *env)
-{
-  Seqpos pos, specialrangelength = 0;
-  Sequencerange range;
-  bool isspecialchar;
-
-  env_error_check(env);
-  if (moveforward)
-  {
-    pos = 0;
-  } else
-  {
-    pos = encseq->totallength-1;
-  }
-  while (true)
-  {
-    if (direct)
-    {
-      isspecialchar = ISSPECIAL(encseq->plainseq[pos]);
-    } else
-    {
-      isspecialchar = ISIBITSET(encseq->specialbits,pos) ? true : false;
-    }
-    if (isspecialchar)
-    {
-      specialrangelength++;
-    } else
-    {
-      if (specialrangelength > 0)
-      {
-        if (moveforward)
-        {
-          range.leftpos = pos - specialrangelength;
-          range.rightpos = pos;
-        } else
-        {
-          range.leftpos = pos+1;
-          range.rightpos = pos+1+specialrangelength;
-          /*
-          range.leftpos = REVERSEPOS(encseq,pos + specialrangelength);
-          range.rightpos = REVERSEPOS(encseq,pos);
-          */
-        }
-        if (processrange(processinfo,encseq,&range,env) != 0)
-        {
-          return -1;
-        }
-      }
-      specialrangelength = 0;
-    }
-    if (moveforward)
-    {
-      if (pos == encseq->totallength - 1)
-      {
-        break;
-      }
-      pos++;
-    } else
-    {
-      if (pos == 0)
-      {
-        break;
-      }
-      pos--;
-    }
-  }
-  if (specialrangelength > 0)
-  {
-    if (moveforward)
-    {
-      range.leftpos = pos + 1 - specialrangelength;
-      range.rightpos = pos + 1;
-    } else
-    {
-      range.leftpos = 0;
-      range.rightpos = specialrangelength;
-      /*
-      range.leftpos = REVERSEPOS(encseq,pos + specialrangelength - 1);
-      range.rightpos = REVERSEPOS(encseq,pos - 1);
-      */
-    }
-    if (processrange(processinfo,encseq,&range,env) != 0)
-    {
-      return -1;
-    }
-  }
-  return 0;
-}
-
-static int addelem(void *processinfo,
-                   /*@unused@*/ const Encodedsequence *encseq,
-                   const Sequencerange *range,
-                   Env *env)
-{
-  env_error_check(env);
-  array_add_elem((Array *) processinfo,(void *) range,sizeof (Sequencerange),
-                 env);
-  return 0;
-}
-
-int storespecialranges(Array *ranges,
-                       bool moveforward,
-                       const Encodedsequence *encseq,
-                       Env *env)
-{
-  if(overallspecialrangesdirectorbitaccess(
-                (encseq->sat == Viadirectaccess) ? true : false,
-                moveforward,
-                encseq,
-                addelem,
-                ranges,
-                env) != 0)
-  {
-    return -1;
-  }
-  return 0;
-}
-
-bool fastspecialranges(const Encodedsequence *encseq)
-{
-  if (encseq->sat == Viadirectaccess || encseq->sat == Viabitaccess)
-  {
-    return false;
-  }
-  return true;
-}
-
-static int overallspecialrangesfast(
-                const Encodedsequence *encseq,
-                bool moveforward,
-                int(*processrange)(void *,const Encodedsequence *,
-                                   const Sequencerange *,Env *),
-                void *processinfo,
-                Env *env)
-{
-  bool haserr = false;
-
-  env_error_check(env);
-  assert(encseq->numofspecialstostore > 0);
-  if (!fastspecialranges(encseq))
-  {
-    env_error_set(env,"overallspecialrangesfast not possible for sat = %s",
-                  accesstype2name(encseq->sat));
-    haserr = true;
-  }
-  if (!haserr)
-  {
-    Encodedsequencescanstate *esr;
-
-    esr = initEncodedsequencescanstate(encseq,
-                                       moveforward ? Forwardmode 
-                                                   : Reversemode,env);
-    assert(esr != NULL);
-    while (true)
-    {
-      if (processrange(processinfo,encseq,&esr->previousrange,env) != 0)
-      {
-        haserr = true;
-        break;
-      }
-      if (!esr->hasrange)
-      {
-        break;
-      }
-      advanceEncodedseqstate(encseq,esr,moveforward);
-    }
-    freeEncodedsequencescanstate(&esr,env);
-  }
-  return haserr ? - 1 : 0;
-}
-
  struct Specialrangeiterator
 {
   bool direct, moveforward, exhausted;
@@ -1494,11 +1315,6 @@ static bool bitanddirectnextspecialrangeiterator(Sequencerange *range,
         {
           range->leftpos = sri->pos+1;
           range->rightpos = sri->pos+1+sri->specialrangelength;
-          /*
-          range->leftpos = REVERSEPOS(sri->encseq,
-                                      sri->pos + sri->specialrangelength);
-          range->rightpos = REVERSEPOS(sri->encseq,sri->pos);
-          */
         }
         success = true;
         sri->specialrangelength = 0;
@@ -1526,10 +1342,6 @@ static bool bitanddirectnextspecialrangeiterator(Sequencerange *range,
         {
           range->leftpos = 0;
           range->rightpos = sri->specialrangelength;
-          /*
-          range->leftpos = REVERSEPOS(sri->encseq,sri->specialrangelength - 1);
-          range->rightpos = REVERSEPOS(sri->encseq,-1);
-          */
           success = true;
         }
         sri->exhausted = true;
@@ -1569,55 +1381,6 @@ void freespecialrangeiterator(Specialrangeiterator **sri,Env *env)
     freeEncodedsequencescanstate(&(*sri)->esr,env);
   }
   FREESPACE(*sri);
-}
-
-int overallspecialranges(const Encodedsequence *encseq,
-                         bool moveforward,
-                         int(*processrange)(void *,const Encodedsequence *,
-                                            const Sequencerange *,Env *),
-                         void *processinfo,
-                         Env *env)
-{
-  env_error_check(env);
-  if(encseq->numofspecialstostore == 0)
-  {
-    return 0;
-  }
-  if (encseq->sat == Viadirectaccess)
-  {
-    if (overallspecialrangesdirectorbitaccess(true,
-                                              moveforward,
-                                              encseq,
-                                              processrange,
-                                              processinfo,
-                                              env) != 0)
-    {
-      return -1;
-    }
-    return 0;
-  }
-  if (encseq->sat == Viabitaccess)
-  {
-    if (overallspecialrangesdirectorbitaccess(false,
-                                              moveforward,
-                                              encseq,
-                                              processrange,
-                                              processinfo,
-                                              env) != 0)
-    {
-      return -1;
-    }
-    return 0;
-  }
-  if (overallspecialrangesfast(encseq,
-                               moveforward,
-                               processrange,
-                               processinfo,
-                               env) != 0)
-  {
-    return -1;
-  }
-  return 0;
 }
 
 static Encodedsequence *determineencseqkeyvalues(

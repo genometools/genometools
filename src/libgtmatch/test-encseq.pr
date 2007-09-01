@@ -9,8 +9,6 @@ int testencodedsequence(const StrArray *filenametab,
 
 int checkspecialrangesfast(const Encodedsequence *encseq,Env *env);
 
-int checkspecialrangesslow(const Encodedsequence *encseq,Env *env);
-
 #ifdef __cplusplus
 }
 #endif

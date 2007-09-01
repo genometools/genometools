@@ -107,7 +107,6 @@ int testencodedsequence(const StrArray *filenametab,
   return haserr ? -1 : 0;
 }
 
-/*
 static void reverseSequencerange(Array *a)
 {
   unsigned long idx1, idx2;
@@ -123,7 +122,6 @@ static void reverseSequencerange(Array *a)
     *valptr2 = tmp;
   }
 }
-*/
 
 static int comparearrays(const Array *a,const Array *b,Env *env)
 {
@@ -187,7 +185,10 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
     array_add(rangesbackward,range,env);
   }
   freespecialrangeiterator(&sri,env);
-  array_reverse(rangesbackward,env);
+  /*
+  array_reverse(rangesbackward,env); this does not work: use the following
+  */
+  reverseSequencerange(rangesbackward);
   if (!haserr)
   {
     printf("# checkspecialrangesfast(%lu ranges)\n",
@@ -199,54 +200,5 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
   }
   array_delete(rangesforward,env);
   array_delete(rangesbackward,env);
-  return haserr ? - 1 : 0;
-}
-
-/* only for testing; remove later */
-
- int storespecialranges(Array *ranges,
-                       bool moveforward,
-                       const Encodedsequence *encseq,
-                       Env *env);
-
-int checkspecialrangesslow(const Encodedsequence *encseq,Env *env)
-{
-  Array *rangesiter, *rangescallback;
-  bool haserr = false;
-  Specialrangeiterator *sri;
-  Sequencerange range;
-  const bool moveforward = false;
-
-  env_error_check(env);
-  if (!hasspecialranges(encseq) || fastspecialranges(encseq))
-  {
-    return 0;
-  }
-  rangesiter = array_new(sizeof (Sequencerange),env);
-  sri = newspecialrangeiterator(encseq,moveforward,env);
-  while(nextspecialrangeiterator(&range,sri))
-  {
-    array_add(rangesiter,range,env);
-  }
-  freespecialrangeiterator(&sri,env);
-  rangescallback = array_new(sizeof (Sequencerange),env);
-  if(storespecialranges(rangescallback,
-                        moveforward,
-                        encseq,
-                        env) != 0)
-  {
-    haserr = true;
-  }
-  if (!haserr)
-  {
-    printf("# checkspecialrangesslow(%lu ranges)\n",
-            (unsigned long) array_size(rangesiter));
-    if(comparearrays(rangesiter,rangescallback,env) != 0)
-    {
-      haserr = true;
-    }
-  }
-  array_delete(rangesiter,env);
-  array_delete(rangescallback,env);
   return haserr ? - 1 : 0;
 }

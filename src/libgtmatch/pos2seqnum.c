@@ -6,13 +6,12 @@
 
 DECLAREARRAYSTRUCT(Seqpos);
 
-static int addmarkpos(void *info,const Encodedsequence *encseq,
-                      const Sequencerange *seqrange,
-                      /*@unused@*/ Env *env)
+static int addmarkpos(ArraySeqpos *asp,
+                      const Encodedsequence *encseq,
+                      const Sequencerange *seqrange)
 {
   Seqpos pos;
   Uchar currentchar;
-  ArraySeqpos *asp = (ArraySeqpos *) info;
 
   for (pos=seqrange->leftpos; pos<seqrange->rightpos; pos++)
   {
@@ -32,16 +31,25 @@ Seqpos *calculatemarkpositions(const Encodedsequence *encseq,
                                Env *env)
 {
   ArraySeqpos asp;
+  Specialrangeiterator *sri;
+  Sequencerange range;
+  bool haserr = false;
 
   assert(numofdbsequences > (unsigned long) 1);
   asp.allocatedSeqpos = numofdbsequences-1;
   asp.nextfreeSeqpos = 0;
   ALLOCASSIGNSPACE(asp.spaceSeqpos,NULL,Seqpos,asp.allocatedSeqpos);
-  if (overallspecialranges(encseq,
-                           true,
-                           addmarkpos,
-                           &asp,
-                           env) != 0)
+  sri = newspecialrangeiterator(encseq,true,env);
+  while(nextspecialrangeiterator(&range,sri))
+  {
+    if(addmarkpos(&asp,encseq,&range) != 0)
+    {
+      haserr = true;
+      break;
+    }
+  }
+  freespecialrangeiterator(&sri,env);
+  if(haserr)
   {
     FREEARRAY(&asp,Seqpos);
     return NULL;

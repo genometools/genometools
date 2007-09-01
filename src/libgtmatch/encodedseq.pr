@@ -26,13 +26,6 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
 
 bool hasspecialranges(const Encodedsequence *encseq);
 
-int storespecialranges(Array *ranges,
-                       bool moveforward,
-                       const Encodedsequence *encseq,
-                       Env *env);
-
-bool fastspecialranges(const Encodedsequence *encseq);
-
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
                                               bool moveforward,
                                               Env *env);
@@ -40,13 +33,6 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
 bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
 
 void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
-
-int overallspecialranges(const Encodedsequence *encseq,
-                         bool moveforward,
-                         int(*processrange)(void *,const Encodedsequence *,
-                                            const Sequencerange *,Env *),
-                         void *processinfo,
-                         Env *env);
 
 /*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
                                                   const StrArray *filenametab,
