@@ -35,13 +35,6 @@ feature requests:
 - use asciidoc for documentation
 
 
-improvements:
--------------
-
-- put complete license in source files (the line which is used now is not really
-  meaningful, if the file is not in the context of GenomeTools)
-
-
 merge libgtview and libgtmatch:
 -------------------------------
 
