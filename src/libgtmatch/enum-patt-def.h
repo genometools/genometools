@@ -1,16 +1,16 @@
 #ifndef ENUM_PATT_DEF_H
 #define ENUM_PATT_DEF_H
 
-typedef struct Enumpatternstate Enumpatternstate;
+typedef struct Enumpatterniterator Enumpatterniterator;
 
-Enumpatternstate *newenumpattern(unsigned long minpatternlen,
-                                 unsigned long maxpatternlen,
-                                 const Encodedsequence *encseq,
-                                 Env *env);
+Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
+                                            unsigned long maxpatternlen,
+                                            const Encodedsequence *encseq,
+                                            Env *env);
 
-const Uchar *nextsampledpattern(unsigned long *patternlen,
-                                Enumpatternstate *eps);
+const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
+                                     Enumpatterniterator *epi);
 
-void freeenumpattern(Enumpatternstate *eps,Env *env);
+void freeEnumpatterniterator(Enumpatterniterator **epi,Env *env);
 
 #endif

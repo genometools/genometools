@@ -11,7 +11,7 @@
 #include "chardef.h"
 #include "enum-patt-def.h"
 
- struct Enumpatternstate
+ struct Enumpatterniterator
 {
   unsigned long minpatternlen,
                 maxpatternlen,
@@ -22,12 +22,12 @@
   Seqpos totallength;
 };
 
-Enumpatternstate *newenumpattern(unsigned long minpatternlen,
-                                 unsigned long maxpatternlen,
-                                 const Encodedsequence *encseq,
-                                 Env *env)
+Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
+                                            unsigned long maxpatternlen,
+                                            const Encodedsequence *encseq,
+                                            Env *env)
 {
-  Enumpatternstate *eps = NULL;
+  Enumpatterniterator *eps = NULL;
   unsigned long i;
 
   if (maxpatternlen < minpatternlen)
@@ -37,7 +37,7 @@ Enumpatternstate *newenumpattern(unsigned long minpatternlen,
                     minpatternlen);
     return NULL;
   }
-  ALLOCASSIGNSPACE(eps,NULL,Enumpatternstate,1);
+  ALLOCASSIGNSPACE(eps,NULL,Enumpatterniterator,1);
   eps->totallength = getencseqtotallength(encseq);
   if (eps->totallength <= (Seqpos) maxpatternlen)
   {
@@ -73,8 +73,8 @@ static void reverseinplace(Uchar *s,unsigned long len)
   }
 }
 
-const Uchar *nextsampledpattern(unsigned long *patternlen,
-                                Enumpatternstate *eps)
+const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
+                                     Enumpatterniterator *eps)
 {
   Seqpos start;
   unsigned long j, requiredpatternlen;
@@ -118,9 +118,9 @@ const Uchar *nextsampledpattern(unsigned long *patternlen,
   return eps->patternspace;
 }
 
-void freeenumpattern(Enumpatternstate *eps,Env *env)
+void freeEnumpatterniterator(Enumpatterniterator **eps,Env *env)
 {
-  FREESPACE(eps->patternspace);
-  FREESPACE(eps->patternstat);
-  FREESPACE(eps);
+  FREESPACE((*eps)->patternspace);
+  FREESPACE((*eps)->patternstat);
+  FREESPACE(*eps);
 }

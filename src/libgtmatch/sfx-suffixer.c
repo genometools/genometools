@@ -43,6 +43,14 @@ DECLAREARRAYSTRUCT(Codeatposition);
 
 DECLAREARRAYSTRUCT(Seqpos);
 
+typedef enum
+{
+  Partphase,
+  Specialrangephase,
+  Enumspecialposphase,
+  Finalsuffixphase
+} Suffixeratorphase;
+
 typedef struct
 {
   bool storespecials;
@@ -50,7 +58,8 @@ typedef struct
            currentmaxcode;
   unsigned int *filltable,
                *basepower;
-  Seqpos *leftborder,
+  Seqpos specialcharacters,
+         *leftborder,
          *countspecialcodes,
          *suftab,
          *suftabptr;
@@ -65,7 +74,10 @@ typedef struct
                numofchars,
                prefixlength;
   ArraySeqpos fusp;
-} Collectedsuffixes;
+  Specialrangeiterator *sri;
+  Suffixeratorphase phase;
+  Sequencerange overhang;
+} Sfxiterator;
 
 static int initbasepower(unsigned int **basepower,
                          unsigned int **filltable,
@@ -117,7 +129,7 @@ static void updatekmercount(void *processinfo,
                             const Firstspecialpos *firstspecial,
                             Env *env)
 {
-  Collectedsuffixes *csf = (Collectedsuffixes *) processinfo;
+  Sfxiterator *csf = (Sfxiterator *) processinfo;
 
   if (firstspecial->defined)
   {
@@ -160,7 +172,7 @@ static void insertwithoutspecial(void *processinfo,
 {
   if (!firstspecial->defined)
   {
-    Collectedsuffixes *csf = (Collectedsuffixes *) processinfo;
+    Sfxiterator *csf = (Sfxiterator *) processinfo;
 
     if (code >= csf->currentmincode && code <= csf->currentmaxcode)
     {
@@ -209,7 +221,7 @@ static Codetype codedownscale(const unsigned int *filltable,
 }
 
 static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
-                               Collectedsuffixes *csf,
+                               Sfxiterator *csf,
                                bool deletevalues,
                                /*@unused@*/ Env *env)
 {
@@ -271,13 +283,13 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
   }
 }
 
-static int insertfullspecialrange(Collectedsuffixes *csf,
-                                  int(*processsuftab)(void *,const Seqpos *,
-                                                      Readmode,Seqpos,Env *),
-                                  void *processsuftabinfo,
-                                  Seqpos leftpos,
-                                  Seqpos rightpos,
-                                  Env *env)
+static int processfullspecialrange(Sfxiterator *csf,
+                                   int(*processsuftab)(void *,const Seqpos *,
+                                                       Readmode,Seqpos,Env *),
+                                   void *processsuftabinfo,
+                                   Seqpos leftpos,
+                                   Seqpos rightpos,
+                                   Env *env)
 {
   Seqpos pos;
   bool stop = false;
@@ -330,9 +342,47 @@ static int insertfullspecialrange(Collectedsuffixes *csf,
   return 0;
 }
 
+static void insertfullspecialrange(Sfxiterator *csf,
+                                   Seqpos leftpos,
+                                   Seqpos rightpos,
+                                   Env *env)
+{
+  Seqpos pos;
+
+  assert(leftpos < rightpos);
+  if(ISDIRREVERSE(csf->readmode))
+  {
+    pos = rightpos - 1;
+  } else
+  {
+    pos = leftpos;
+  }
+  while(true)
+  {
+    if(ISDIRREVERSE(csf->readmode))
+    {
+      csf->fusp.spaceSeqpos[csf->fusp.nextfreeSeqpos++] 
+        = REVERSEPOS(csf->totallength,pos);
+      if(pos == leftpos)
+      {
+        break;
+      }
+      pos--;
+    } else
+    {
+      csf->fusp.spaceSeqpos[csf->fusp.nextfreeSeqpos++] = pos;
+      if(pos == rightpos-1)
+      {
+        break;
+      } 
+      pos++;
+    }
+  }
+}
+
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
-static int initsuffixerator(Collectedsuffixes *csf,
+static int initsuffixerator(Sfxiterator *csf,
                             Seqpos specialcharacters,
                             Seqpos specialranges,
                             const Encodedsequence *encseq,
@@ -361,7 +411,9 @@ static int initsuffixerator(Collectedsuffixes *csf,
   csf->numofchars = numofchars;
   csf->prefixlength = prefixlength;
   csf->totallength = getencseqtotallength(encseq);
+  csf->specialcharacters = specialcharacters;
   csf->part = 0;
+  csf->phase = Partphase;
   if (prefixlength == 0 || prefixlength > MAXPREFIXLENGTH)
   {
     env_error_set(env,"argument for option -pl must be in the range [1,%u]",
@@ -435,15 +487,12 @@ static int initsuffixerator(Collectedsuffixes *csf,
     ALLOCASSIGNSPACE(csf->suftab,NULL,Seqpos,
                      stpgetlargestwidth(csf->suftabparts));
     reversespecialcodes(csf->spaceCodeatposition,csf->nextfreeCodeatposition);
-    csf->fusp.spaceSeqpos = csf->suftab;
-    csf->fusp.allocatedSeqpos 
-      = CALLCASTFUNC(Seqpos,unsigned_long,stpgetlargestwidth(csf->suftabparts));
-    csf->fusp.nextfreeSeqpos = 0;
+
   }
   return haserr ? -1 : 0;
 }
 
-static bool preparethispart(Collectedsuffixes *csf,
+static bool preparethispart(Sfxiterator *csf,
                             Measuretime *mtime,
                             Env *env)
 {
@@ -491,7 +540,7 @@ static bool preparethispart(Collectedsuffixes *csf,
   return true;
 }
 
-static void freeCollectedsuffixes(Collectedsuffixes *csf,Env *env)
+static void freeSfxiterator(Sfxiterator *csf,Env *env)
 {
   FREESPACE(csf->spaceCodeatposition);
   FREESPACE(csf->filltable);
@@ -515,7 +564,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
                  Measuretime *mtime,
                  Env *env)
 {
-  Collectedsuffixes csf;
+  Sfxiterator csf;
   bool haserr = false;
 
   env_error_check(env);
@@ -561,7 +610,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
                                     env);
       while(nextspecialrangeiterator(&range,sri))
       {
-        if (insertfullspecialrange(&csf,
+        if (processfullspecialrange(&csf,
                                    processsuftab,
                                    processsuftabinfo,
                                    range.leftpos,
@@ -592,6 +641,198 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
     specialcode = FROMCODE2SPECIALCODE(csf.filltable[0],csf.numofchars);
     csf.countspecialcodes[specialcode] += (specialcharacters + 1);
   }
-  freeCollectedsuffixes(&csf,env);
+  freeSfxiterator(&csf,env);
   return haserr ? -1 : 0;
 }
+
+ void freeSfxiterator2(Sfxiterator **sfxiterator,Env *env)
+{
+  Codetype specialcode;
+
+  specialcode = FROMCODE2SPECIALCODE((*sfxiterator)->filltable[0],
+                                    (*sfxiterator)->numofchars);
+  (*sfxiterator)->countspecialcodes[specialcode] 
+    += ((*sfxiterator)->specialcharacters + 1);
+  freeSfxiterator(*sfxiterator,env);
+  FREESPACE(*sfxiterator);
+}
+
+ Sfxiterator *newsfxiterator(Seqpos specialcharacters,
+                             Seqpos specialranges,
+                             const Encodedsequence *encseq,
+                             Readmode readmode,
+                             unsigned int numofchars,
+                             unsigned int prefixlength,
+                             unsigned int numofparts,
+                             Measuretime *mtime,
+                             Env *env)
+{
+  Sfxiterator *csf;
+
+  env_error_check(env);
+  ALLOCASSIGNSPACE(csf,NULL,Sfxiterator,1);
+  if(initsuffixerator(csf,
+                      specialcharacters,
+                      specialranges,
+                      encseq,
+                      readmode,
+                      numofchars,
+                      prefixlength,
+                      numofparts,
+                      mtime,
+                      env) != 0)
+  {
+    freeSfxiterator2(&csf,env);
+    return NULL;
+  }
+  return csf;
+}
+
+static void fillspecialnextpage(Sfxiterator *csf)
+{
+  Sequencerange range;
+  Seqpos width;
+
+  while(true)
+  {
+    if(csf->overhang.leftpos < csf->overhang.rightpos)
+    {
+      width = csf->overhang.rightpos - csf->overhang.leftpos;
+      if(csf->fusp.nextfreeSeqpos + width <= csf->fusp.allocatedSeqpos)
+      {
+        insertfullspecialrange(csf,csf->overhang.leftpos,
+                               csf->overhang.rightpos);
+        csf->overhang.leftpos = csf->overhang.rightpos = 0;
+      } else
+      {
+        Seqpos rest = csf->fusp.nextfreeSeqpos + width 
+                                               - csf->fusp.allocatedSeqpos;
+        if(ISDIRREVERSE(csf->readmode))
+        {
+          insertfullspecialrange(csf,csf->overhang.leftpos + rest,
+                                 csf->overhang.rightpos);
+          csf->overhang.rightpos = csf->overhang.leftpos + rest;
+        } else
+        {
+          insertfullspecialrange(csf,csf->overhang.leftpos,
+                                     csf->overhang.rightpos-rest);
+          csf->overhang.leftpos = csf->overhang.rightpos - rest;
+        }
+        break;
+      }
+    } else
+    {
+      if(nextspecialrangeiterator(&range,sri))
+      {
+        width = range.rightpos - range.leftpos;
+        if(csf->fusp.nextfreeSeqpos + width <= csf->fusp.allocatedSeqpos)
+        {
+          insertfullspecialrange(csf,range.leftpos,range.rightpos);
+        } else
+        {
+          Seqpos rest = csf->fusp.nextfreeSeqpos - csf->fusp.allocatedSeqpos;
+          if(ISDIRREVERSE(csf->readmode))
+          {
+            insertfullspecialrange(csf,range.leftpos + rest,
+                                   range.rightpos);
+          } else
+          {
+            insertfullspecialrange(csf,range.leftpos+done,range.rightpos);
+          }
+        }
+      }
+    }
+  }
+}
+
+ const Seqpos *nextSfxiterator(Seqpos *len,Measuretime *mtime,
+                               Sfxiterator *csf,Env *env)
+{
+  env_error_check(env);
+  while(true)
+  {
+    if(csf->phase == Partphase)
+    {
+      if(preparethispart(csf,mtime,env))
+      {
+        break;
+      }
+      if(hasspecialranges(csf->encseq))
+      {
+        csf->phase = Finalsuffixphase;
+      } else
+      {
+        csf->phase = Specialrangephase;
+        csf->sri = newspecialrangeiterator(encseq,
+                                           ISDIRREVERSE(readmode)
+                                             ? false : true,
+                                           env);
+        csf->fusp.spaceSeqpos = csf->suftab;
+        csf->fusp.allocatedSeqpos 
+          = CALLCASTFUNC(Seqpos,unsigned_long,
+                         stpgetlargestwidth(csf->suftabparts));
+        csf->fusp.nextfreeSeqpos = 0;
+        csf->overhang.leftpos = csf.overhang.rightpos = 0;
+      }
+    }
+    if(csf->phase == Specialrangephase)
+    {
+      if(!exaustedspecialrangeiterator(csf->sri))
+      {
+        fillspecialnextpage(csf);
+      } else
+      {
+        csf->phase = Finalsuffixphase;
+      }
+    }
+  }
+  *len = csf->widthofpart;
+  return csf->suftab;
+}
+
+/*
+
+    if(!haserr && hasspecialranges(csf->encseq))
+    {
+      Sequencerange range;
+      Specialrangeiterator *sri;
+  
+      sri = newspecialrangeiterator(csf->encseq,
+                                    ISDIRREVERSE(csf->readmode) ? false : true,
+                                    env);
+      while(nextspecialrangeiterator(&range,sri))
+      {
+        if (processfullspecialrange(csf,
+                                   processsuftab,
+                                   processsuftabinfo,
+                                   range.leftpos,
+                                   range.rightpos,
+                                   env) != 0)
+        {
+          haserr = true;
+          break;
+        }
+      }
+      freespecialrangeiterator(&sri,env);
+    }
+    if(!haserr)
+    {
+      csf->fusp.spaceSeqpos[csf->fusp.nextfreeSeqpos++] = csf->totallength;
+      if (processsuftab != NULL)
+      {
+        if (processsuftab(processsuftabinfo,
+                          csf->fusp.spaceSeqpos,
+                          csf->readmode,
+                          (Seqpos) csf->fusp.nextfreeSeqpos,
+                          env) != 0)
+        {
+          haserr = true;
+        }
+      }
+    }
+    specialcode = FROMCODE2SPECIALCODE(csf->filltable[0],csf->numofchars);
+    csf->countspecialcodes[specialcode] += (specialcharacters + 1);
+  }
+  return haserr ? -1 : 0;
+}
+*/
