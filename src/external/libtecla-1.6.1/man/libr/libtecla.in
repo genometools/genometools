@@ -1,0 +1,168 @@
+.\" Copyright (c) 2000, 2001, 2002, 2003, 2004 by Martin C. Shepherd
+.\" 
+.\" All rights reserved.
+.\" 
+.\" Permission is hereby granted, free of charge, to any person obtaining a
+.\" copy of this software and associated documentation files (the
+.\" "Software"), to deal in the Software without restriction, including
+.\" without limitation the rights to use, copy, modify, merge, publish,
+.\" distribute, and/or sell copies of the Software, and to permit persons
+.\" to whom the Software is furnished to do so, provided that the above
+.\" copyright notice(s) and this permission notice appear in all copies of
+.\" the Software and that both the above copyright notice(s) and this
+.\" permission notice appear in supporting documentation.
+.\" 
+.\" THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+.\" OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+.\" MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+.\" OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+.\" HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL
+.\" INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+.\" FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+.\" NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+.\" WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\" 
+.\" Except as contained in this notice, the name of a copyright holder
+.\" shall not be used in advertising or otherwise to promote the sale, use
+.\" or other dealings in this Software without prior written authorization
+.\" of the copyright holder.
+.TH libtecla @LIBR_MANEXT@
+.SH NAME
+libtecla - An interactive command-line input library.
+.SH SYNOPSIS
+.nf
+@CC@ ... -ltecla -lcurses
+.fi
+
+.SH DESCRIPTION
+
+The \f3tecla\f1 library provides programs with interactive command
+line editing facilities, similar to those of the unix \f3tcsh\f1
+shell. In addition to simple command-line editing, it supports recall
+of previously entered command lines, TAB completion of file names or
+other tokens, and in-line wild-card expansion of filenames. The
+internal functions which perform file-name completion and wild-card
+expansion are also available externally for optional use by the
+calling program.
+.sp
+The various parts of the library are documented in the following man
+pages:
+
+.nf
+  tecla(@MISC_MANEXT@)              -  Use level documentation of the
+                        command-line editing facilities
+                        provided by \f3gl_get_line()\f1.
+  gl_get_line(@FUNC_MANEXT@)        -  The interactive line-input module.
+  gl_io_mode(@FUNC_MANEXT@)         -  How to use \f3gl_get_line()\f1 in an
+                        incremental, non-blocking fashion.
+  cpl_complete_word(@FUNC_MANEXT@)  -  The word completion module.
+  ef_expand_file(@FUNC_MANEXT@)     -  The filename expansion module.
+  pca_lookup_file(@FUNC_MANEXT@)    -  A directory-list based filename
+                        lookup and completion module.
+.fi
+
+In addition there is one optional application distributed
+with the library:
+
+.nf
+  enhance(@PROG_MANEXT@)            -  Add command-line editing to third
+                           party applications.
+.fi
+
+.SH THREAD SAFETY
+
+If the library is compiled with -D_POSIX_C_SOURCE=199506L, reentrant
+versions of as many functions as possible are used. This includes
+using getpwuid_r() and getpwnam_r() instead of getpwuid() and
+getpwnam() when looking up the home directories of specific users in
+the password file (for ~user/ expansion), and readdir_r() instead of
+readdir() for reading directory entries when doing filename
+completion. The reentrant version of the library is usually called
+libtecla_r.a instead of libtecla.a, so if only the latter is
+available, it probably isn't the correct version to link with
+threaded programs.
+
+Reentrant functions for iterating through the password file aren't
+available, so when the library is compiled to be reentrant, TAB
+completion of incomplete usernames in \f3~username/\f1 expressions is
+disabled. This doesn't disable expansion of complete \f3~username\f1
+expressions, which can be done reentrantly, or expansion of the parts
+of filenames that follow them, so this doesn't remove much
+functionality.
+
+The terminfo functions setupterm(), tigetstr(), tigetnum() and tputs()
+also aren't reentrant, but very few programs will want to interact
+with multiple terminals, so this shouldn't prevent this library from
+being used in threaded programs.
+
+.SH LIBRARY VERSION NUMBER
+
+The version number of the library can be queried using the following
+function.
+.sp
+.nf
+ void libtecla_version(int *major, int *minor, int *micro);
+.fi
+.sp
+
+On return, this function records the three components of the libtecla
+version number in \f3*major\f1, \f3*minor\f1, \f3*micro\f1. The formal
+meaning of the three components is as follows.
+
+.sp
+.nf
+ major - Incrementing this number implies that a change has
+         been made to the library's public interface, which
+         makes it binary incompatible  with programs that
+         were linked with previous shared versions of the
+         tecla library.
+
+ minor - This number is incremented by one whenever
+         additional functionality, such as new functions or
+         modules, are added to the library.
+
+ micro - This is incremented whenever modifications to the
+         library are made which make no changes to the
+         public interface, but which fix bugs and/or improve
+         the behind-the-scenes implementation.
+.fi
+.sp
+
+.SH TRIVIA
+
+In Spanish, a "tecla" is the key of a keyboard. Since this library
+centers on keyboard input, and given that I wrote much of the library
+while working in Chile, this seemed like a suitable name.
+
+.SH FILES
+.nf
+libtecla.a    -   The tecla library.
+libtecla.h    -   The tecla header file.
+~/.teclarc    -   The tecla personal customization file.
+.fi
+
+.SH SEE ALSO
+
+.nf
+gl_get_line(@FUNC_MANEXT@), tecla(@MISC_MANEXT@), gl_io_mode(@FUNC_MANEXT@), ef_expand_file(@FUNC_MANEXT@),
+cpl_complete_word(@FUNC_MANEXT@), pca_lookup_file(@FUNC_MANEXT@), enhance(@PROG_MANEXT@)
+.fi
+
+.SH AUTHOR
+Martin Shepherd  (mcs@astro.caltech.edu)
+
+.SH ACKNOWLEDGMENTS
+
+.nf
+Markus Gyger  - Lots of assistance, including help with
+                shared libraries, configuration information,
+                particularly for Solaris; modifications to
+                support C++ compilers, improvements for ksh
+                users, faster cursor motion, output
+                buffering, and changes to make gl_get_line()
+                8-bit clean. 
+Mike MacFaden - Suggestions, feedback and testing that led
+                to many of the major new functions that were
+                added in version 1.4.0.
+Tim Eliseo    - Many vi-mode bindings and fixes.
+.fi

@@ -1,0 +1,571 @@
+.\" Copyright (c) 2002, 2003, 2004 by Martin C. Shepherd
+.\" 
+.\" All rights reserved.
+.\" 
+.\" Permission is hereby granted, free of charge, to any person obtaining a
+.\" copy of this software and associated documentation files (the
+.\" "Software"), to deal in the Software without restriction, including
+.\" without limitation the rights to use, copy, modify, merge, publish,
+.\" distribute, and/or sell copies of the Software, and to permit persons
+.\" to whom the Software is furnished to do so, provided that the above
+.\" copyright notice(s) and this permission notice appear in all copies of
+.\" the Software and that both the above copyright notice(s) and this
+.\" permission notice appear in supporting documentation.
+.\" 
+.\" THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+.\" OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+.\" MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+.\" OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+.\" HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL
+.\" INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+.\" FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+.\" NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+.\" WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\" 
+.\" Except as contained in this notice, the name of a copyright holder
+.\" shall not be used in advertising or otherwise to promote the sale, use
+.\" or other dealings in this Software without prior written authorization
+.\" of the copyright holder.
+.TH gl_io_mode @FUNC_MANEXT@
+.SH NAME
+ gl_io_mode, gl_raw_io, gl_normal_io, gl_tty_signals, gl_abandon_line,
+ gl_handle_signal, gl_pending_io \- How to use gl_get_line() from an external event loop.
+.SH SYNOPSIS
+.nf
+#include <libtecla.h>
+
+int gl_io_mode(GetLine *gl, GlIOMode mode);
+
+int gl_raw_io(GetLine *gl);
+
+int gl_normal_io(GetLine *gl);
+
+int gl_tty_signals(void (*term_handler)(int),
+                   void (*susp_handler)(int),
+                   void (*cont_handler)(int),
+                   void (*size_handler)(int));
+
+void gl_abandon_line(GetLine *gl);
+
+void gl_handle_signal(int signo, GetLine *gl, int ngl);
+
+GlPendingIO gl_pending_io(GetLine *gl);
+
+.fi
+
+.SH DESCRIPTION
+
+The \f3gl_get_line()\f1 function, which is documented separately in
+the \f3gl_get_line(@FUNC_MANEXT@)\f1 man page, supports two different I/O modes.
+These are selected by calling the \f3gl_io_mode()\f1 function.
+
+.sp
+.nf
+  int gl_io_mode(GetLine *gl, GlIOMode mode);
+.fi
+.sp
+
+The \f3mode\f1 argument of this function specifies the new I/O mode,
+and must be one of the following.
+
+.sp
+.nf
+  GL_NORMAL_MODE   -  Select the normal blocking-I/O mode.
+                      In this mode \f3gl_get_line()\f1
+                      doesn't return until either an error
+                      occurs of the user finishes entering a
+                      new line. This mode is the focus of
+                      the \f3gl_get_line(@FUNC_MANEXT@)\f1 man page.
+
+  GL_SERVER_MODE   -  Select non-blocking server I/O mode.
+                      In this mode, since non-blocking
+                      terminal I/O is used, the entry of
+                      each new input line typically requires
+                      many calls to \f3gl_get_line()\f1 from
+                      an external I/O-driven event loop.
+                      This mode is the focus of this man
+                      page.
+.fi
+.sp
+
+Newly created \f3GetLine\f1 objects start in normal I/O
+mode, so to switch to non-blocking server mode requires an
+initial call to \f3gl_io_mode()\f1.
+
+.SH SERVER I/O MODE
+
+In non-blocking server I/O mode, the application is required
+to have an event loop which calls \f3gl_get_line()\f1
+whenever the terminal file descriptor can do the type I/O
+that \f3gl_get_line()\f1 is waiting for. To determine which
+type of I/O \f3gl_get_line()\f1 is waiting for, the
+application calls the \f3gl_pending_io()\f1 function.
+
+.sp
+.nf
+  GlPendingIO gl_pending_io(GetLine *gl);
+.fi
+.sp
+
+The return value of this function is one of the following two
+enumerated values.
+
+.sp
+.nf
+  GLP_READ    -  gl_get_line() is waiting to write a
+                 character to the terminal.
+
+  GLP_WRITE   -  gl_get_line() is waiting to read a
+                 character from the keyboad.
+.fi
+.sp
+
+If the application is using either the \f3select()\f1 or \f3poll()\f1
+system calls to watch for I/O on a group of file descriptors, then it
+should call the \f3gl_pending_io()\f1 function before each call to
+these functions to see which direction of I/O it should tell them to
+watch for, and configure their arguments accordingly. In the case of
+the \f3select()\f1 system call, this means using the \f3FD_SET()\f1
+macro to add the terminal file descriptor either to the set of file
+descriptors to be watched for readability, or the set to be watched
+for writability.
+
+As in normal I/O mode, the return value of \f3gl_get_line()\f1 is
+either a pointer to a completed input line, or \f3NULL\f1. However,
+whereas in normal I/O mode a \f3NULL\f1 return value always means that
+an error occurred, in non-blocking server mode, \f3NULL\f1 is also
+returned when \f3gl_get_line()\f1 can't read or write to the terminal
+without blocking. Thus in non-blocking server mode, in order to
+determine when a \f3NULL\f1 return value signifies that an error
+occurred or not, it is necessary to call the \f3gl_return_status()\f1
+function. If this function returns the enumerated value,
+\f3GLR_BLOCKED\f1, as documented in the \f3gl_get_line(@FUNC_MANEXT@)\f1 man page,
+this means that \f3gl_get_line()\f1 is waiting for I/O, and no error
+has occurred.
+
+When \f3gl_get_line()\f1 returns \f3NULL\f1 and
+\f3gl_return_status()\f1 indicates that this is due to blocked
+terminal I/O, the application should call \f3gl_get_line()\f1 again
+when the type of I/O reported by \f3gl_pending_io()\f1 becomes
+possible. The \f3prompt\f1, \f3start_line\f1 and \f3start_pos\f1
+arguments of \f3gl_get_line()\f1 will be ignored on these calls.  If
+you need to change the prompt of the line that is currently being
+edited, then you can call the \f3gl_replace_prompt()\f1 function
+(documented in the \f3gl_get_line(@FUNC_MANEXT@) man page) between calls to
+\f3gl_get_line()\f1.
+
+.SH GIVING UP THE TERMINAL
+
+A complication that is unique to non-blocking server mode is that it
+requires that the terminal be left in raw mode between calls to
+\f3gl_get_line()\f1. If this weren't the case, the external event loop
+wouldn't be able to detect individual key-presses, and the basic line
+editing implemented by the terminal driver would clash with the
+editing provided by \f3gl_get_line()\f1. What this means is that any
+time that the terminal needs to be used for other things than entering
+a new input line with \f3gl_get_line()\f1, it needs to be restored to
+a usable state. In particular, whenever the process is suspended or
+terminated, the terminal must be returned to a normal state. If this
+isn't done, then depending on the characteristics of the shell that
+was used to invoke the program, the user may end up with a hung
+terminal. To this end, the \f3gl_normal_io()\f1 function is provided
+for switching the terminal back to the state that it was in when raw
+mode was last established.
+
+.sp
+.nf
+  int gl_normal_io(GetLine *gl);
+.fi
+.sp
+
+What this function does is first flush any pending output to the
+terminal, then move the cursor to the start of the terminal line which
+follows the end of the incompletely entered input line. At this point
+it is safe to suspend or terminate the process, and it is safe for the
+application to read and write to the terminal. To resume entry of the
+input line, the application should call the \f3gl_raw_io()\f1
+function.
+
+.sp
+.nf
+  int gl_raw_io(GetLine *gl);
+.fi
+.sp
+
+This function starts a new line, redisplays the partially completed
+input line (if any), restores the cursor position within this line to
+where it was when \f3gl_normal_io()\f1 was called, then switches back
+to raw, non-blocking terminal mode ready to continue entry of the
+input line when \f3gl_get_line()\f1 is next called.
+
+Note that in non-blocking server mode, if \f3gl_get_line()\f1 is
+called after a call to \f3gl_normal_io()\f1, without an intervening
+call to \f3gl_raw_io()\f1, \f3gl_get_line()\f1 will call
+\f3gl_raw_mode()\f1 itself, and the terminal will remain in this mode
+when \f3gl_get_line()\f1 returns.
+
+.SH SIGNAL HANDLING
+
+In the previous section it was pointed out that in non-blocking server
+mode, the terminal must be restored to a sane state whenever a signal
+is received that either suspends or terminates the process. In normal
+I/O mode, this is done for you by \f3gl_get_line()\f1, but in
+non-blocking server mode, since the terminal is left in raw mode
+between calls to \f3gl_get_line()\f1, this signal handling has to be
+done by the application. Since there are many signals that can suspend
+or terminate a process, as well as other signals that are important to
+\f3gl_get_line()\f1, such as the \f3SIGWINCH\f1 signal, which tells it
+when the terminal size has changed, the \f3gl_tty_signals()\f1
+function is provided for installing signal handlers for all pertinent
+signals.
+
+.sp
+.nf
+  int gl_tty_signals(void (*term_handler)(int),
+                     void (*susp_handler)(int),
+                     void (*cont_handler)(int),
+                     void (*size_handler)(int));
+.fi
+.sp
+
+What this does is use \f3gl_get_line()\f1's internal list of signals
+to assign specified signal handlers to groups of signals. The
+arguments of this function are as follows.
+
+.sp
+.nf
+  term_handler  -  This is the signal handler that is to be
+                   used to trap signals that by default
+                   terminate any process that receives
+                   them (eg. SIGINT or SIGTERM).
+
+  susp_handler  -  This is the signal handler that is to be
+                   used to trap signals that by default
+                   suspend any process that receives them,
+                   (eg. SIGTSTP or SIGTTOU).
+
+  cont_handler  -  This is the signal handler that is to be
+                   used to trap signals that are usually
+                   sent when a process resumes after being
+                   suspended (usually SIGCONT). Beware that there is
+                   nothing to stop a user from sending one of these
+                   signals at other times.
+
+  size_handler  -  This signal handler is used to trap
+                   signals that are sent to processes when
+                   their controlling terminals are resized
+                   by the user (eg. SIGWINCH).
+.fi
+.sp
+
+These arguments can all be the same, if so desired, and you can
+specify \f3SIG_IGN\f1 (ignore this signal) or \f3SIG_DFL\f1 (use the
+system-provided default signal handler) instead of a function where
+pertinent. In particular, it is rarely useful to trap \f3SIGCONT\f1,
+so the \f3cont_handler\f1 argument will usually be \f3SIG_DFL\f1 or
+\f3SIG_IGN\f1.
+
+The \f3gl_tty_signals()\f1 function uses the POSIX \f3sigaction()\f1
+function to install these signal handlers, and it is careful to use
+the \f3sa_mask\f1 member of each sigaction structure to ensure that
+only one of these signals is ever delivered at a time. This guards
+against different instances of these signal handlers from
+simultaneously trying to write to common global data, such as a shared
+\f3sigsetjmp()\f1 buffer or a signal-received flag.
+
+The signal handlers that are installed by this function, should call
+the \f3gl_handle_signal().
+
+.sp
+.nf
+  void gl_handle_signal(int signo, GetLine *gl, int ngl);
+.fi
+.sp
+
+The \f3signo\f1 argument tells this function which signal it is being
+asked to respond to, and the \f3gl\f1 argument should be a pointer to
+the first element of an array of \f3ngl\f1 \f3GetLine\f1 objects. If
+your application only has one of these objects, just pass its pointer
+as the \f3gl\f1 argument and specify \f3ngl\f1 as \f31\f1.
+
+Depending on the signal that is being handled, this function does
+different things.
+
+.SS Terminal resize signals (SIGWINCH)
+
+If the signal indicates that the terminal was resized, then it
+arranges for the next call to \f3gl_get_line()\f1 to ask the terminal
+for its new size and redraw the input line accordingly. In order that
+\f3gl_get_line()\f1 be called as soon as possible to do this,
+\f3gl_handle_signal()\f1 also arranges that the next call to
+\f3gl_pending_io()\f1 will return \f3GLP_WRITE\f1. Thus if the
+application waits for I/O in \f3select()\f1 or \f3poll()\f1, then the
+application needs to ensure that these functions will be reliably
+aborted when a signal is caught and handled by the application. More
+on this below.
+
+.SH Process termination signals.
+
+If the signal that was caught is one of those that by default
+terminates any process that receives it, then \f3gl_handle_signal()\f1
+does the following steps.
+
+1. First it blocks the delivery of all signals that can be
+   blocked (ie. \f3SIGKILL\f1 and \f3SIGSTOP\f1 can't be blocked)
+
+2. Next it calls \f3gl_normal_io()\f1 for each of the \f3ngl\f1
+   \f3GetLine\f1 objects. Note that this does nothing to any of the
+   \f3GetLine\f1 objects that aren't currently in raw mode.
+
+3. Next it sets the signal handler of the signal to its default,
+   process-termination disposition.
+
+4. Next it re-sends the process the signal that was caught.
+
+5. Finally it unblocks delivery of this signal, which
+   results in the process being terminated.
+
+.SH Process suspension signals.
+
+If the default disposition of the signal is to suspend the process,
+the same steps are executed as for process termination signals, except
+that when the process is later resumed, \f3gl_handle_signal()\f1
+continues, and does the following steps.
+
+6. It re-blocks delivery of the signal.
+
+7. It reinstates the signal handler of the signal to the one
+   that was displaced when its default disposition was substituted.
+
+8. For any of the \f3GetLine\f1 objects that were in raw mode when
+   \f3gl_handle_signal()\f1 was called, \f3gl_handle_signal()\f1 then
+   calls \f3gl_raw_io()\f1, to resume entry of the input lines on
+   those terminals.
+
+9. Finally, it restores the signal process mask to how it
+   was when \f3gl_handle_signal()\f1 was called.
+
+Note that the process is suspended or terminated using the original
+signal that was caught, rather than using the uncatchable
+\f3SIGSTOP\f1 and \f3SIGKILL\f1 signals. This is important, because
+when a process is suspended or terminated, the parent of the process
+may wish to use the status value returned by the \f3wait()\f1 system
+call to figure out which signal was responsible. In particular, most
+shells use this information to print a corresponding message to the
+terminal. Users would be rightly confused if when their process
+received a \f3SIGPIPE\f1 signal, the program responded by sending
+itself a \f3SIGKILL\f1 signal, and the shell then printed out the
+provocative statement, "Killed!".
+
+.SH INTERRUPTING THE EVENT LOOP
+
+If a signal is caught and handled when the application's event loop is
+waiting in \f3select()\f1 or \f3poll()\f1, these functions will be
+aborted with \f3errno\f1 set to \f3EINTR\f1. When this happens the
+event loop should call \f3gl_pending_io()\f1, before calling
+\f3select()\f1 or \f3poll()\f1 again. It should then arrange for
+\f3select()\f1 or \f3poll()\f1 to wait for the type of I/O that this
+reports. This is necessary, because any signal handler which calls
+\f3gl_handle_signal()\f1, will frequently change the type of I/O that
+\f3gl_get_line()\f1 is waiting for.
+
+Unfortunately, if a signal arrives between the statements which
+configure the arguments of \f3select()\f1 or \f3poll()\f1 and the
+calls to these functions, then the signal will not be seen by these
+functions, which will then not be aborted. If these functions are
+waiting for keyboard input from the user when the signal is received,
+and the signal handler arranges to redraw the input line to accomodate
+a terminal resize or the resumption of the process, then this
+redisplay will be end up being delayed until the user hits the next
+key. Apart from puzzling the user, this clearly isn't a serious
+problem. However there is a way, albeit complicated, to completely
+avoid this race condition. The following steps illustrate this.
+
+1. Block all of the signals that \f3gl_get_line()\f1 catches,
+   by passing the signal set returned by \f3gl_list_signals()\f1 to
+   \f3sigprocmask()\f1.
+
+2. Call \f3gl_pending_io()\f1 and set up the arguments of
+   \f3select()\f1 or \f3poll()\f1 accordingly.
+
+3. Call \f3sigsetjmp()\f1 with a non-zero \f3savesigs\f1 argument.
+
+4. Initially this \f3sigsetjmp()\f1 statement will return zero,
+   indicating that control isn't resuming there after a matching
+   call to \f3siglongjmp()\f1.
+
+5. Replace all of the handlers of the signals that \f3gl_get_line()\f1
+   is configured to catch, with a signal handler that first records
+   the number of the signal that was caught, in a file-scope variable,
+   then calls \f3siglongjmp()\f1 with a non-zero value argument, to
+   return execution to the above \f3sigsetjmp()\f1
+   statement.  Registering these signal handlers can conveniently be
+   done using the \f3gl_tty_signals()\f1 function.
+
+6. Set the file-scope variable that the above signal handler uses to
+   record any signal that is caught to -1, so that we can check
+   whether a signal was caught by seeing if it contains a valid signal
+   number.
+
+7. Now unblock the signals that were blocked in step 1. Any signal
+   that was received by the process in between step 1 and now will
+   now be delivered, and trigger our signal handler, as will any
+   signal that is received until we block these signals again.
+
+8. Now call \f3select()\f1 or \f3poll()\f1.
+
+9. When \f3select()\f1 returns, again block the signals that were
+   unblocked in step 7.
+
+If a signal is arrived any time during the above steps, our signal
+handler will be triggered and cause control to return to the
+\f3sigsetjmp()\f1 statement, where this time, \f3sigsetjmp()\f1 will
+return non-zero, indicating that a signal was caught. When this
+happens we simply skip the above block of statements, and continue
+with the following statements, which are executed regardless of
+whether or not a signal is caught. Note that when \f3sigsetjmp()\f1
+returns, regardless of why it returned, the process signal mask is
+returned to how it was when \f3sigsetjmp()\f1 was called. Thus the
+following statements are always executed with all of our signals
+blocked.
+
+9. Reinstate the signal handlers that were displaced in step 5.
+
+10. Check wether a signal was caught, by checking the file-scope
+    variable that the signal handler records signal numbers in.
+
+11. If a signal was caught, send this signal to the application
+    again, and unblock just this signal, so that it invokes the
+    signal handler which we just reinstated in step 10.
+
+12. Unblock all of the signals that were blocked in step 7.
+
+Since this is complicated, note that \f3demo3.c\f1 includes a working
+example of how to do this. The method used there however, is more
+general than the above. What it provides is a wrapper function around
+\f3select()\f1 which encompasses steps 3 to 11. In this wrapper,
+rather than use \f3gl_list_signals()\f1 to figure out the signals to
+block, and and \f3gl_tty_signals()\f1 to assign and revert signal
+handlers, one of its arguments is a \f3sigset_t\f1 which specifies
+which signals to block and assign signal handlers to. This function
+thus doesn't depend on \f3gl_get_line()\f1 and can thus be used in
+other situations where race-condition-free signal handling is
+required.
+
+.SH SIGNALS CAUGHT BY GL_GET_LINE
+
+Since the application is expected to handle signals in non-blocking
+server mode, \f3gl_get_line()\f1 doesn't attempt to duplicate this
+when it is being called. If one of the signals that it is configured
+to catch is sent to the application while \f3gl_get_line()\f1 is being
+called, \f3gl_get_line()\f1 reinstates the caller's signal handlers,
+then just before returning, re-sends the signal to the process to let
+the application's signal handler handle it. If the process isn't
+terminated by this signal, \f3gl_get_line()\f1 returns \f3NULL\f1, and
+a following call to \f3gl_return_status()\f1 returns the enumerated
+value \f3GLR_SIGNAL\f1.
+
+.SH ABORTING LINE INPUT
+
+Often, rather than letting it terminate the process, applications
+respond to the SIGINT user-interrupt signal by aborting the current
+input line. The way to do this in non-blocking server-I/O mode is to
+not call \f3gl_handle_signal()\f1 when this signal is caught, but
+instead to call the \f3gl_abandon_line()\f1.
+
+.sp
+.nf
+  void gl_abandon_line(GetLine *gl);
+.fi
+.sp
+
+This function arranges that when \f3gl_get_line()\f1 is next called,
+it first flushes any pending output to the terminal, then discardes
+the current input line, outputs a new prompt on the next line, and
+finally starts accepting input of a new input line from the user.
+
+.SH SIGNAL SAFE FUNCTIONS
+
+Provided that certain rules are followed, the following functions can
+have been written to be safely callable from signal handlers. Other
+functions in this library should not be called from signal handlers.
+
+.sp
+.nf
+  gl_normal_io()
+  gl_raw_io()
+  gl_handle_signal()
+  gl_abandon_line()
+.fi
+.sp
+
+In order for this to be true, all signal handlers that call these
+functions must be registered in such a way that only one instance of
+any one of them can be running at one time. The way to do this is to
+use the POSIX \f3sigaction()\f1 function to register all signal
+handlers, and when doing this, use the \f3sa_mask\f1 member of the
+corresponding sigaction structure, to indicate that all of the signals
+who's handlers invoke the above functions, should be blocked when the
+current signal is being handled. This prevents two signal handlers
+from operating on a \f3GetLine\f1 object at the same time.
+
+To prevent signal handlers from accessing a \f3GetLine\f1 object while
+\f3gl_get_line()\f1 or any of its associated public functions are
+operating on it, all public functions associated with
+\f3gl_get_line()\f1, including \f3gl_get_line()\f1 itself, temporarily
+block the delivery of signals when they are accessing \f3GetLine\f1
+objects. Beware that the only signals that they block are the signals
+that \f3gl_get_line()\f1 is currently configured to catch, so be sure
+that if you call any of the above functions from signal handlers, that
+the signals that these handlers are assigned to are configured to be
+caught by \f3gl_get_line()\f1 (see \f3gl_trap_signal()\f1).
+
+.SH USING TIMEOUTS TO POLL
+
+If instead of using \f3select()\f1 or \f3poll()\f1 to wait for I/O,
+your application just needs to get out of \f3gl_get_line()\f1
+periodically to briefly do something else before returning to accept
+input from the user, this can be done in non-blocking server mode by
+using the \f3gl_inactivity_timeout()\f1 function (see
+\f3gl_get_line(@FUNC_MANEXT@)\f1), to specify that a callback function that
+returns \f3GLTO_CONTINUE\f1 should be called whenever
+\f3gl_get_line()\f1 has been waiting for I/O for more than a specified
+amount of time.
+
+When this callback is triggered, \f3gl_get_line()\f1 will return
+\f3NULL\f1, and a following call to \f3gl_return_status()\f1 will
+return \f3GLR_BLOCKED\f1.
+
+Beware that \f3gl_get_line()\f1 won't return until the user
+hasn't typed a key for the specified interval, so if the
+interval is long, and the user keeps typing,
+\f3gl_get_line()\f1 may not return for a while. In other
+words there is no guarantee that it will return in the time
+specified.
+
+.SH THE SERVER DEMO PROGRAM
+
+The \f3demo3\f1 program that is distributed with the library, provides
+a working example of how to use non-blocking server I/O mode in a real
+program. As far as the user is concerned, this program operates
+identically to the main demo program (called \f3demo\f1), except that
+whereas the main demo program uses the normal blocking I/O mode,
+\f3demo3\f1 using non-blocking I/O and an external event loop. The
+source code can be found in \f3demo3.c\f1, and the comments therein
+explain the various steps.
+
+.SH FILES
+.nf
+libtecla.a      -    The tecla library
+libtecla.h      -    The tecla header file.
+.fi
+
+.SH SEE ALSO
+
+.nf
+libtecla(@LIBR_MANEXT@), gl_get_line(@FUNC_MANEXT@), tecla(@MISC_MANEXT@), ef_expand_file(@FUNC_MANEXT@),
+cpl_complete_word(@FUNC_MANEXT@), pca_lookup_file(@FUNC_MANEXT@)
+.fi
+
+.SH AUTHOR
+Martin Shepherd  (mcs@astro.caltech.edu)

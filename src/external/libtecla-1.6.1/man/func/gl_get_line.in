@@ -1,0 +1,2236 @@
+.\" Copyright (c) 2000, 2001, 2002, 2003, 2004 by Martin C. Shepherd
+.\" 
+.\" All rights reserved.
+.\" 
+.\" Permission is hereby granted, free of charge, to any person obtaining a
+.\" copy of this software and associated documentation files (the
+.\" "Software"), to deal in the Software without restriction, including
+.\" without limitation the rights to use, copy, modify, merge, publish,
+.\" distribute, and/or sell copies of the Software, and to permit persons
+.\" to whom the Software is furnished to do so, provided that the above
+.\" copyright notice(s) and this permission notice appear in all copies of
+.\" the Software and that both the above copyright notice(s) and this
+.\" permission notice appear in supporting documentation.
+.\" 
+.\" THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+.\" OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+.\" MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+.\" OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+.\" HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL
+.\" INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+.\" FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+.\" NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+.\" WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\" 
+.\" Except as contained in this notice, the name of a copyright holder
+.\" shall not be used in advertising or otherwise to promote the sale, use
+.\" or other dealings in this Software without prior written authorization
+.\" of the copyright holder.
+.TH gl_get_line @FUNC_MANEXT@
+.SH NAME
+gl_get_line, new_GetLine, del_GetLine, gl_customize_completion,
+gl_change_terminal, gl_configure_getline, gl_load_history,
+gl_save_history, gl_group_history, gl_show_history, gl_watch_fd,
+gl_inactivity_timeout, gl_terminal_size, gl_set_term_size,
+gl_resize_history, gl_limit_history, gl_clear_history,
+gl_toggle_history, gl_lookup_history, gl_state_of_history,
+gl_range_of_history, gl_size_of_history, gl_echo_mode,
+gl_replace_prompt, gl_prompt_style, gl_ignore_signal, gl_trap_signal,
+gl_last_signal, gl_completion_action, gl_display_text,
+gl_return_status, gl_error_message, gl_catch_blocked, gl_list_signals,
+gl_bind_keyseq, gl_erase_terminal, gl_automatic_history, gl_append_history,
+gl_query_char, gl_read_char \- allow the user to compose an input line
+.SH SYNOPSIS
+.nf
+#include <stdio.h>
+#include <libtecla.h>
+
+GetLine *new_GetLine(size_t linelen, size_t histlen);
+
+GetLine *del_GetLine(GetLine *gl);
+
+char *gl_get_line(GetLine *gl, const char *prompt,
+                  const char *start_line, int start_pos);
+
+int gl_query_char(GetLine *gl, const char *prompt,
+                  char defchar);
+
+int gl_read_char(GetLine *gl);
+
+int gl_customize_completion(GetLine *gl, void *data,
+                            CplMatchFn *match_fn);
+
+int gl_change_terminal(GetLine *gl, FILE *input_fp,
+                       FILE *output_fp, const char *term);
+
+int gl_configure_getline(GetLine *gl,
+                         const char *app_string,
+                         const char *app_file,
+                         const char *user_file);
+
+int gl_bind_keyseq(GetLine *gl, GlKeyOrigin origin,
+                   const char *keyseq, const char *action);
+
+int gl_save_history(GetLine *gl, const char *filename,
+                    const char *comment, int max_lines);
+
+int gl_load_history(GetLine *gl, const char *filename,
+                    const char *comment);
+
+int gl_watch_fd(GetLine *gl, int fd, GlFdEvent event,
+                GlFdEventFn *callback, void *data);
+
+int gl_inactivity_timeout(GetLine *gl, GlTimeoutFn *callback,
+                   void *data, unsigned long sec,
+                   unsigned long nsec);
+
+int gl_group_history(GetLine *gl, unsigned stream);
+
+int gl_show_history(GetLine *gl, FILE *fp,
+                    const char *fmt, int all_groups,
+                    int max_lines);
+
+int gl_resize_history(GetLine *gl, size_t bufsize);
+
+void gl_limit_history(GetLine *gl, int max_lines);
+
+void gl_clear_history(GetLine *gl, int all_groups);
+
+void gl_toggle_history(GetLine *gl, int enable);
+
+GlTerminalSize gl_terminal_size(GetLine *gl,
+                                int def_ncolumn,
+                                int def_nline);
+
+int gl_set_term_size(GetLine *gl, int ncolumn, int nline);
+
+int gl_lookup_history(GetLine *gl, unsigned long id,
+                      GlHistoryLine *hline);
+
+void gl_state_of_history(GetLine *gl,
+                         GlHistoryState *state);
+
+void gl_range_of_history(GetLine *gl,
+                         GlHistoryRange *range);
+
+void gl_size_of_history(GetLine *gl, GlHistorySize *size);
+
+void gl_echo_mode(GetLine *gl, int enable);
+
+void gl_replace_prompt(GetLine *gl, const char *prompt);
+
+void gl_prompt_style(GetLine *gl, GlPromptStyle style);
+
+int gl_ignore_signal(GetLine *gl, int signo);
+
+int gl_trap_signal(GetLine *gl, int signo, unsigned flags,
+                   GlAfterSignal after, int errno_value);
+
+int gl_last_signal(GetLine *gl);
+
+int gl_completion_action(GetLine *gl,
+                         void *data, CplMatchFn *match_fn,
+                         int list_only, const char *name,
+                         const char *keyseq);
+
+int gl_register_action(GetLine *gl, void *data,
+                       GlActionFn *fn, const char *name,
+                       const char *keyseq);
+
+int gl_display_text(GetLine *gl, int indentation,
+                    const char *prefix,
+                    const char *suffix, int fill_char,
+                    int def_width, int start,
+                    const char *string);
+
+GlReturnStatus gl_return_status(GetLine *gl);
+
+const char *gl_error_message(GetLine *gl, char *buff,
+                             size_t n);
+
+void gl_catch_blocked(GetLine *gl);
+
+int gl_list_signals(GetLine *gl, sigset_t *set);
+
+int gl_append_history(GetLine *gl, const char *line);
+
+int gl_automatic_history(GetLine *gl, int enable);
+
+.fi
+
+.SH DESCRIPTION
+
+The \f3gl_get_line()\f1 function is part of the tecla library (see the
+\f3libtecla(@LIBR_MANEXT@)\f1 man page). If the user is typing at a terminal, each
+call prompts them for an line of input, then provides interactive
+editing facilities, similar to those of the unix \f3tcsh\f1 shell. In
+addition to simple command-line editing, it supports recall of
+previously entered command lines, TAB completion of file names, and
+in-line wild-card expansion of filenames. Documentation of both the
+user-level command-line editing features and all user configuration
+options, can be found in the \f3tecla(@MISC_MANEXT@)\f1 man page. This man page
+concerns itself with documentation for programmers interested in using
+this library in their application.
+.sp
+.SH AN EXAMPLE
+
+The following shows a complete example of how to use the
+\f3gl_get_line()\f1 function to get input from the user:
+
+.nf
+  #include <stdio.h>
+  #include <locale.h>
+  #include <libtecla.h>
+
+  int main(int argc, char *argv[])
+  { 
+    char *line;    /* The line that the user typed */
+    GetLine *gl;   /* The gl_get_line() resource object */
+
+    setlocale(LC_CTYPE, ""); /* Adopt the user's choice */
+                             /* of character set. */
+
+    gl = new_GetLine(1024, 2048);
+    if(!gl)
+      return 1;
+
+    while((line=gl_get_line(gl, "$ ", NULL, -1)) != NULL &&
+           strcmp(line, "exit\\n") != 0)
+      printf("You typed: %s\\n", line);
+
+    gl = del_GetLine(gl);
+    return 0;
+  }
+.fi
+.sp
+In the example, first the resources needed by the \f3gl_get_line()\f1 function
+are created by calling \f3new_GetLine()\f1. This allocates the memory used in
+subsequent calls to the \f3gl_get_line()\f1 function, including the history
+buffer for recording previously entered lines. Then one or more lines are read
+from the user, until either an error occurs, or the user types \f3exit\f1. Then
+finally the resources that were allocated by \f3new_GetLine()\f1, are returned
+to the system by calling \f3del_GetLine()\f1. Note the use of the \f3NULL\f1
+return value of \f3del_GetLine()\f1 to make \f3gl\f1 \f3NULL\f1. This is a
+safety precaution. If the program subsequently attempts to pass \f3gl\f1 to
+\f3gl_get_line()\f1, said function will complain, and return an error, instead of
+attempting to use the deleted resource object.
+
+.sp
+.SH THE FUNCTIONS USED IN THE EXAMPLE
+The descriptions of the functions used in the example are as follows:
+.sp
+.nf
+  GetLine *new_GetLine(size_t linelen, size_t histlen)
+.fi
+.sp
+This function creates the resources used by the \f3gl_get_line()\f1
+function and returns an opaque pointer to the object that contains
+them.  The maximum length of an input line is specified via the
+\f3linelen\f1 argument, and the number of bytes to allocate for
+storing history lines is set by the \f3histlen\f1 argument. History
+lines are stored back-to-back in a single buffer of this size. Note
+that this means that the number of history lines that can be stored at
+any given time, depends on the lengths of the individual lines.  If
+you want to place an upper limit on the number of lines that can be
+stored, see the \f3gl_limit_history()\f1 function described later. If
+you don't want history at all, specify \f3histlen\f1 as zero, and no
+history buffer will be allocated.
+.sp
+On error, a message is printed to \f3stderr\f1 and \f3NULL\f1 is returned.
+.sp
+.nf
+  GetLine *del_GetLine(GetLine *gl)
+.fi
+.sp
+This function deletes the resources that were returned by a previous
+call to \f3new_GetLine()\f1. It always returns \f3NULL\f1 (ie a
+deleted object). It does nothing if the \f3gl\f1 argument is
+\f3NULL\f1.
+.sp
+.nf
+  char *gl_get_line(GetLine *gl, const char *prompt,
+                   const char *start_line, int start_pos);
+.fi
+.sp
+The \f3gl_get_line()\f1 function can be called any number of
+times to read input from the user. The \f3gl\f1 argument
+must have been previously returned by a call to
+\f3new_GetLine()\f1. The \f3prompt\f1 argument should be a
+normal \f3NUL\f1 terminated string, specifying the prompt to
+present the user with. By default prompts are displayed
+literally, but if enabled with the \f3gl_prompt_style()\f1
+function (see later), prompts can contain directives to do
+underlining, switch to and from bold fonts, or turn
+highlighting on and off.
+
+If you want to specify the initial contents of the line, for the user
+to edit, pass the desired string via the \f3start_line\f1
+argument. You can then specify which character of this line the cursor
+is initially positioned over, using the \f3start_pos\f1 argument. This
+should be -1 if you want the cursor to follow the last character of
+the start line. If you don't want to preload the line in this manner,
+send \f3start_line\f1 as \f3NULL\f1, and set \f3start_pos\f1 to
+-1. Note that the line pointer returned by one call to
+\f3gl_get_line()\f1 can be passed back to the next call to
+\f3gl_get_line()\f1 via the \f3start_line\f1. This allows the
+application to take the last entered line, and if it contains an
+error, to then present it back to the user for re-editing, with the
+cursor initially positioned where the error was encountered.
+
+The \f3gl_get_line()\f1 function returns a pointer to the line entered
+by the user, or \f3NULL\f1 on error or at the end of the input. The
+returned pointer is part of the specified \f3gl\f1 resource object,
+and thus should not be free'd by the caller, or assumed to be
+unchanging from one call to the next. When reading from a user at a
+terminal, there will always be a newline character at the end of the
+returned line.  When standard input is being taken from a pipe or a
+file, there will similarly be a newline unless the input line was too
+long to store in the internal buffer. In the latter case you should
+call \f3gl_get_line()\f1 again to read the rest of the line. Note that
+this behavior makes \f3gl_get_line()\f1 similar to \f3fgets()\f1.  In
+fact when \f3stdin\f1 isn't connected to a terminal,\f3gl_get_line()\f1
+just calls \f3fgets()\f1.
+
+.SH THE RETURN STATUS OF GL_GET_LINE
+
+As described above, the \f3gl_get_line()\f1 function has two possible
+return values; a pointer to the completed input line, or
+\f3NULL\f1. Extra information about what caused \f3gl_get_line()\f1 to
+return is available both by inspecting \f3errno\f1, and by calling the
+\f3gl_return_status()\f1 function.
+
+.sp
+.nf
+  GlReturnStatus gl_return_status(GetLine *gl);
+.fi
+.sp
+
+The following are the possible enumerated values that this
+function returns.
+
+.sp
+.nf
+  GLR_NEWLINE     -  The last call to \f3gl_get_line()\f1
+                     successfully returned a completed
+                     input line.
+
+  GLR_BLOCKED     -  \f3gl_get_line()\f1 was in non-blocking
+                     server mode, and returned early to
+                     avoid blocking the process while
+                     waiting for terminal I/O. The
+                     \f3gl_pending_io()\f1 function can be
+                     used to see what type of I/O
+                     \f3gl_get_line()\f1 was waiting for.
+                     (see the \f3gl_io_mode(@FUNC_MANEXT@)\f1 man page
+                     for details).
+
+  GLR_SIGNAL      -  A signal was caught by
+                     \f3gl_get_line()\f1 that had an
+                     after-signal disposition of
+                     \f3GLS_ABORT\f1 (See \f3gl_trap_signal()\f1).
+
+  GLR_TIMEOUT     -  The inactivity timer expired while
+                     \f3gl_get_line()\f1 was waiting for
+                     input, and the timeout callback
+                     function returned \f3GLTO_ABORT\f1.
+                     See \f3gl_inactivity_timeout()\f1 for
+                     information about timeouts.
+
+  GLR_FDABORT     -  An application I/O callack returned
+                     \f3GLFD_ABORT\f1 (see \f3gl_watch_fd()\f1).
+
+  GLR_EOF         -  End of file reached. This can happen
+                     when input is coming from a file or a
+                     pipe, instead of the terminal. It also
+                     occurs if the user invokes the
+                     \f3list-or-eof\f1 or \f3del-char-or-list-or-eof\f1
+                     actions at the start of a new line.
+
+  GLR_ERROR       -  An unexpected error caused
+                     \f3gl_get_line()\f1 to abort (consult
+                     \f3errno\f1 and/or
+                     \f3gl_error_message()\f1 for details.
+.fi
+.sp
+
+When \f3gl_return_status()\f1 returns \f3GLR_ERROR\f1, and the
+value of \f3errno\f1 isn't sufficient to explain what
+happened, you can use the \f3gl_error_message()\f1 function
+to request a description of the last error that occurred.
+
+.sp
+.nf
+  const char *gl_error_message(GetLine *gl, char *buff,
+                               size_t n);
+.fi
+.sp
+
+The return value is a pointer to the message that
+occurred. If the \f3buff\f1 argument is \f3NULL\f1, this
+will be a pointer to a buffer within \f3gl\f1, who's value
+will probably change on the next call to any function
+associated with \f3gl_get_line()\f1. Otherwise, if a
+non-\f3NULL\f1 \f3buff\f1 argument is provided, the error
+message, including a \f3'\\0'\f1 terminator, will be written
+within the first \f3n\f1 elements of this buffer, and the
+return value will be a pointer to the first element of this
+buffer. If the message won't fit in the provided buffer, it
+will be truncated to fit.
+
+.SH OPTIONAL PROMPT FORMATTING
+
+Whereas by default the prompt string that you specify is
+displayed literally, without any special interpretation of
+the characters within it, the \f3gl_prompt_style()\f1
+function can be used to enable optional formatting
+directives within the prompt.
+.sp
+.nf
+  void gl_prompt_style(GetLine *gl, GlPromptStyle style);
+.fi
+.sp
+The \f3style\f1 argument, which specifies the formatting
+style, can take any of the following values:
+.sp
+.nf
+  GL_FORMAT_PROMPT   -  In this style, the formatting
+                        directives described below, when
+                        included in prompt strings, are
+                        interpreted as follows:
+
+                          %B  -  Display subsequent
+                                 characters with a bold
+                                 font.
+                          %b  -  Stop displaying characters
+                                 with the bold font.
+                          %F  -  Make subsequent characters
+                                 flash.
+                          %f  -  Turn off flashing
+                                 characters.
+                          %U  -  Underline subsequent
+                                 characters. 
+                          %u  -  Stop underlining
+                                 characters.
+                          %P  -  Switch to a pale (half
+                                 brightness) font.
+                          %p  -  Stop using the pale font.
+                          %S  -  Highlight subsequent
+                                 characters (also known as
+                                 standout mode).
+                          %s  -  Stop highlighting
+                                 characters.
+                          %V  -  Turn on reverse video.
+                          %v  -  Turn off reverse video.
+                          %%  -  Display a single %
+                                 character.
+
+                        For example, in this mode, a prompt
+                        string like \f3"%UOK%u$ "\f1 would
+                        display the prompt \f3"OK$ "\f1,
+                        but with the \f3OK\f1 part
+                        underlined.
+
+                        Note that although a pair of
+                        characters that starts with a %
+                        character, but doesn't match any of
+                        the above directives is displayed
+                        literally, if a new directive is
+                        subsequently introduced which does
+                        match, the displayed prompt will
+                        change, so it is better to always
+                        use %% to display a literal %.
+
+                        Also note that not all terminals
+                        support all of these text
+                        attributes, and that some substitute
+                        a different attribute for missing
+                        ones.
+
+  GL_LITERAL_PROMPT  -  In this style, the prompt string is
+                        printed literally. This is the
+                        default style.
+.fi
+
+.SH ALTERNATE CONFIGURATION SOURCES
+
+As mentioned above, by default users have the option of configuring
+the behavior of \f3gl_get_line()\f1 via a configuration file called
+\f3\&.teclarc\f1 in their home directories. The fact that all
+applications share this same configuration file is both an advantage
+and a disadvantage.  In most cases it is an advantage, since it
+encourages uniformity, and frees the user from having to configure
+each application separately.  In some applications, however, this
+single means of configuration is a problem. This is particularly true
+of embedded software, where there's no filesystem to read a
+configuration file from, and also in applications where a radically
+different choice of keybindings is needed to emulate a legacy keyboard
+interface.  To cater for such cases, the following function allows the
+application to control where configuration information is read from.
+
+.sp
+.nf
+  int gl_configure_getline(GetLine *gl,
+                           const char *app_string,
+                           const char *app_file,
+                           const char *user_file);
+.fi
+.sp
+
+It allows the configuration commands that would normally be read from
+a user's \f3~/.teclarc\f1 file, to be read from any or none of, a
+string, an application specific configuration file, and/or a
+user-specific configuration file. If this function is called before
+the first call to \f3gl_get_line()\f1, the default behavior of
+reading \f3~/.teclarc\f1 on the first call to \f3gl_get_line()\f1 is
+disabled, so all configuration must be achieved using the
+configuration sources specified with this function.
+
+If \f3app_string != NULL\f1, then it is interpreted as a string
+containing one or more configuration commands, separated from each
+other in the string by embedded newline characters. If \f3app_file !=
+NULL\f1 then it is interpreted as the full pathname of an
+application-specific configuration file. If \f3user_file != NULL\f1
+then it is interpreted as the full pathname of a user-specific
+configuration file, such as \f3~/.teclarc\f1. For example, in the
+following call,
+
+.sp
+.nf
+  gl_configure_getline(gl, "edit-mode vi \\n nobeep",
+                           "/usr/share/myapp/teclarc",
+                           "~/.teclarc");
+.fi
+.sp
+
+the \f3app_string\f1 argument causes the calling application to start
+in vi edit-mode, instead of the default emacs mode, and turns off the
+use of the terminal bell by the library. It then attempts to read
+system-wide configuration commands from an optional file called
+\f3/usr/share/myapp/teclarc\f1, then finally reads user-specific
+configuration commands from an optional \f3\&.teclarc\f1 file in the
+user's home directory. Note that the arguments are listed in ascending
+order of priority, with the contents of \f3app_string\f1 being
+potentially overriden by commands in \f3app_file\f1, and commands in
+\f3app_file\f1 potentially being overriden by commands in
+\f3user_file\f1.
+.sp
+You can call this function as many times as needed, the results being
+cumulative, but note that copies of any filenames specified via the
+\f3app_file\f1 and \f3user_file\f1 arguments are recorded internally
+for subsequent use by the \f3read-init-files\f1 key-binding function,
+so if you plan to call this function multiple times, be sure that the
+last call specifies the filenames that you want re-read when the user
+requests that the configuration files be re-read.
+.sp
+Individual key sequences can also be bound and unbound using the
+\f3gl_bind_keyseq()\f1 function.
+
+.sp
+.nf
+  int gl_bind_keyseq(GetLine *gl, GlKeyOrigin origin,
+                     const char *keyseq,
+                     const char *action);
+.fi
+.sp
+
+The \f3origin\f1 argument specifies the priority of the binding,
+according to who it is being established for, and must be one of
+the following two values.
+.sp
+.nf
+  GL_USER_KEY   -   The user requested this key-binding.
+  GL_APP_KEY    -   This is a default binding set by the
+                    application.
+.fi
+.sp
+When both user and application bindings for a given key-sequence have
+been specified, the user binding takes precedence. The application's
+binding is subsequently reinstated if the user's binding is later
+unbound via either another to this function, or a call to
+\f3gl_configure_getline()\f1.
+
+The \f3keyseq\f1 argument specifies the key-sequence to be bound or
+unbound, and is expressed in the same way as in a \f3~/.teclarc\f1
+configuration file. The \f3action\f1 argument must either be a string
+containing the name of the action to bind the key-sequence to, or it
+must be \f3NULL\f1 or "" to unbind the key-sequence.
+
+.SH CUSTOMIZED WORD COMPLETION
+
+If in your application, you would like to have TAB completion complete
+other things in addition to or instead of filenames, you can arrange
+this by registering an alternate completion callback function, via a
+call to the \f3gl_customize_completion()\f1 function.
+.sp
+.nf
+  int gl_customize_completion(GetLine *gl, void *data,
+                              CplMatchFn *match_fn);
+.fi
+.sp
+The \f3data\f1 argument provides a way for your application to pass
+arbitrary, application-specific information to the callback
+function. This is passed to the callback every time that it is
+called. It might for example, point to the symbol table from which
+possible completions are to be sought. The \f3match_fn\f1 argument
+specifies the callback function to be called. The \f3CplMatchFn\f1
+function type is defined in \f3libtecla.h\f1, as is a
+\f3CPL_MATCH_FN()\f1 macro that you can use to declare and prototype
+callback functions. The declaration and responsibilities of callback
+functions are described in depth in the \f1cpl_complete_word(@FUNC_MANEXT@)\f1 man
+page.
+.sp
+In brief, the callback function is responsible for looking backwards
+in the input line, back from the point at which the user pressed TAB,
+to find the start of the word being completed. It then must lookup
+possible completions of this word, and record them one by one in the
+\f3WordCompletion\f1 object that is passed to it as an argument, by
+calling the \f3cpl_add_completion()\f1 function. If the callback
+function wishes to provide filename completion in addition to its own
+specific completions, it has the option of itself calling the builtin
+file-name completion callback. This also, is documented in the
+\f3cpl_complete_word(@FUNC_MANEXT@)\f1 man page.
+.sp
+Note that if you would like \f3gl_get_line()\f1 to return the current
+input line when a successful completion is been made, you can arrange
+this when you call \f3cpl_add_completion()\f1, by making the last
+character of the continuation suffix a newline character. If you do
+this, the input line will be updated to display the completion,
+together with any contiuation suffix up to the newline character, then
+\f3gl_get_line()\f1 will return this input line.
+.sp
+
+If, for some reason, your callback function needs to write something
+to the terminal, it must call \f3gl_normal_io()\f1 before doing
+so. This will start a new line after the input line that is currently
+being edited, reinstate normal terminal I/O, and tell
+\f3gl_get_line()\f1 that the input line will need to be redrawn when
+the callback returns.
+
+.SH ADDING COMPLETION ACTIONS
+
+In the previous section the ability to customize the behavior of the
+only default completion action, \f3complete-word\f1, was described.
+In this section the ability to install additional action functions, so
+that different types of word completion can be bound to different
+key-sequences, is described. This is achieved by using the
+\f3gl_completion_action()\f1 function.
+
+.sp
+.nf
+  int gl_completion_action(GetLine *gl,
+                           void *data, CplMatchFn *match_fn,
+                           int list_only, const char *name,
+                           const char *keyseq);
+.fi
+.sp
+
+The \f3data\f1 and \f3match_fn\f1 arguments are as described
+in the \f3cpl_complete_word\f1 man page, and specify the
+callback function that should be invoked to identify
+possible completions.  The \f3list_only\f1 argument
+determines whether the action that is being defined should
+attempt to complete the word as far as possible in the input
+line before displaying any possible ambiguous completions,
+or whether it should simply display the list of possible
+completions without touching the input line. The former
+option is selected by specifying a value of \f30\f1, and the
+latter by specifying a value of \f31\f1. The \f3name\f1
+argument specifies the name by which configuration files and
+future invokations of this function should refer to the
+action. This must either be the name of an existing
+completion action to be changed, or be a new unused name for
+a new action. Finally, the \f3keyseq\f1 argument specifies
+the default key-sequence to bind the action to. If this is
+\f3NULL\f1, no new keysequence will be bound to the action.
+
+Beware that in order for the user to be able to change the
+key-sequence that is bound to actions that are installed in
+this manner, when you call \f3gl_completion_action()\f1 to
+install a given action for the first time, you should do
+this between calling \f3new_GetLine()\f1 and the first call
+to \f3gl_get_line()\f1.  Otherwise, when the user's
+configuration file is read on the first call to
+\f3gl_get_line()\f1, the name of the your additional action
+won't be known, and any reference to it in the configuration
+file will generate an error.
+
+As discussed for \f3gl_customize_completion()\f1, if your callback
+function, for some reason, needs to write anything to the terminal, it
+must call \f3gl_normal_io()\f1 before doing so.
+
+.SH DEFINING CUSTOM ACTIONS
+
+Although the built-in key-binding actions are sufficient for the needs
+of most applications, occasionally a specialized application may need
+to define one or more custom actions, bound to application-specific
+key-sequences. For example, a sales application would benefit from
+having a key-sequence that displayed the part name that corresponded
+to a part number preceding the cursor. Such a feature is clearly
+beyond the scope of the built-in action functions. So for such special
+cases, the \f3gl_register_action()\f1 function is provided.
+
+.sp
+.nf
+  int gl_register_action(GetLine *gl, void *data,
+			 GlActionFn *fn, const char *name,
+			 const char *keyseq);
+.fi
+.sp
+
+This function lets the application register an external function,
+\f3fn\f1, that will thereafter be called whenever either the specified
+key-sequence, \f3keyseq\f1, is entered by the user, or the user enters
+any other key-sequence that the user subsequently binds to the
+specified action name, \f3name\f1, in their configuration file. The
+\f3data\f1 argument can be a pointer to anything that the application
+wishes to have passed to the action function, \f3fn\f1, whenever that
+function is invoked.
+
+The action function, \f3fn\f1, should be declared using the following
+macro, which is defined in \f3libtecla.h\f1.
+
+.sp
+.nf
+  #define GL_ACTION_FN(fn) GlAfterAction (fn)(GetLine *gl, \\
+              void *data, int count, size_t curpos, \\
+              const char *line)
+.fi
+.sp
+
+The \f3gl\f1 and \f3data\f1 arguments are those that were previously
+passed to \f3gl_register_action()\f1 when the action function was
+registered. The \f3count\f1 argument is a numeric argument which the
+user has the option of entering using the \f3digit-argument\f1 action,
+before invoking the action. If the user doesn't enter a number, then
+the \f3count\f1 argument is set to 1. Nominally this argument is
+interpreted as a repeat count, meaning that the action should be
+repeated that many times. In practice however, for some actions a
+repeat count makes little sense. In such cases, actions can either
+simply ignore the \f3count\f1 argument, or use its value for a
+different purpose.
+
+A copy of the current input line is passed in the read-only \f3line\f1
+argument. The current cursor position within this string is given by
+the index contained in the \f3curpos\f1 argument. Note that direct
+manipulation of the input line and the cursor position is not
+permitted. This is because the rules dicated by various modes, such as
+vi mode versus emacs mode, no-echo mode, and insert mode versus
+overstrike mode etc, make it too complex for an application writer to
+write a conforming editing action, as well as constrain future changes
+to the internals of \f3gl_get_line()\f1. A potential solution to this
+dilema would be to allow the action function to edit the line using
+the existing editing actions. This is currently under consideration.
+
+If the action function wishes to write text to the terminal, without
+this getting mixed up with the displayed text of the input line, or
+read from the terminal without having to handle raw terminal I/O, then
+before doing either of these operations, it must temporarily suspend
+line editing by calling the \f3gl_normal_io()\f1 function. This
+function flushes any pending output to the terminal, moves the cursor
+to the start of the line that follows the last terminal line of the
+input line, then restores the terminal to a state that is suitable for
+use with the C stdio facilities. The latter includes such things as
+restoring the normal mapping of \f3\\n\f1 to \f3\\r\\n\f1, and, when
+in server mode, restoring the normal blocking form of terminal
+I/O. Having called this function, the action function can read from
+and write to the terminal without the fear of creating a mess.  It
+isn't necessary for the action function to restore the original
+editing environment before it returns. This is done automatically by
+\f3gl_get_line()\f1 after the action function returns.  The following
+is a simple example of an action function which writes the sentence
+"Hello world" on a new terminal line after the line being edited. When
+this function returns, the input line is redrawn on the line that
+follows the "Hello world" line, and line editing resumes.
+
+.sp
+.nf
+  static GL_ACTION_FN(say_hello_fn)
+  {
+    if(gl_normal_io(gl))   /* Temporarily suspend editing */
+      return GLA_ABORT;
+    printf("Hello world\\n");
+    return GLA_CONTINUE;
+  }
+.fi
+.sp
+
+Action functions must return one of the following values, to tell
+\f3gl_get_line()\f1 how to procede.
+
+.sp
+.nf
+  GLA_ABORT     -   Cause gl_get_line() to return NULL.
+  GLA_RETURN    -   Cause gl_get_line() to return the
+                    completed input line.
+  GLA_CONTINUE  -   Resume command-line editing.
+.fi
+.sp
+
+Note that the \f3name\f1 argument of \f3gl_register_action()\f1
+specifies the name by which a user can refer to the action in their
+configuration file. This allows them to re-bind the action to an
+alternate key-seqeunce. In order for this to work, it is necessary to
+call \f3gl_register_action()\f1 between calling \f3new_GetLine()\f1
+and the first call to \f3gl_get_line()\f1.
+
+.SH HISTORY FILES
+
+To save the contents of the history buffer before quitting your
+application, and subsequently restore them when you next start the
+application, the following functions are provided.
+
+.sp
+.nf
+ int gl_save_history(GetLine *gl, const char *filename,
+                     const char *comment, int max_lines);
+ int gl_load_history(GetLine *gl, const char *filename,
+                     const char *comment);
+.fi
+.sp
+
+The \f3filename\f1 argument specifies the name to give the history
+file when saving, or the name of an existing history file, when
+loading. This may contain home-directory and environment variable
+expressions, such as "~/.myapp_history" or "$HOME/.myapp_history".
+.sp
+Along with each history line, extra information about it, such as when
+it was entered by the user, and what its nesting level is, is recorded
+as a comment preceding the line in the history file. Writing this as a
+comment allows the history file to double as a command file, just in
+case you wish to replay a whole session using it. Since comment
+prefixes differ in different languages, the \f3comment\f1 argument is
+provided for specifying the comment prefix. For example, if your
+application were a unix shell, such as the bourne shell, you would
+specify "#" here. Whatever you choose for the comment character, you
+must specify the same prefix to \f3gl_load_history()\f1 that you used
+when you called \f3gl_save_history()\f1 to write the history file.
+.sp
+The \f3max_lines\f1 must be either -1 to specify that all lines in the
+history list be saved, or a positive number specifying a ceiling on
+how many of the most recent lines should be saved.
+.sp
+Both fuctions return non-zero on error, after writing an error message
+to stderr. Note that \f3gl_load_history()\f1 does not consider the
+non-existence of a file to be an error.
+
+.SH MULTIPLE HISTORY LISTS
+
+If your application uses a single \f3GetLine\f1 object for entering
+many different types of input lines, you may wish \f3gl_get_line()\f1
+to distinguish the different types of lines in the history list, and
+only recall lines that match the current type of line. To support this
+requirement, \f3gl_get_line()\f1 marks lines being recorded in the
+history list with an integer identifier chosen by the application.
+Initially this identifier is set to \f10\f3 by \f3new_GetLine()\f1,
+but it can be changed subsequently by calling
+\f3gl_group_history()\f1.
+
+.sp
+.nf
+  int gl_group_history(GetLine *gl, unsigned id);
+.fi
+.sp
+
+The integer identifier \f3id\f1 can be any number chosen by the
+application, but note that \f3gl_save_history()\f1 and
+\f3gl_load_history()\f1 preserve the association between identifiers
+and historical input lines between program invokations, so you should
+choose fixed identifiers for the different types of input line used by
+your application.
+.sp
+Whenever \f3gl_get_line()\f1 appends a new input line to the history
+list, the current history identifier is recorded with it, and when it
+is asked to recall a historical input line, it only recalls lines that
+are marked with the current identifier.
+
+.SH DISPLAYING HISTORY
+
+The history list can be displayed by calling \f3gl_show_history()\f1.
+
+.sp
+.nf
+  int gl_show_history(GetLine *gl, FILE *fp,
+                      const char *fmt,
+                      int all_groups,
+                      int max_lines);
+.fi
+.sp
+
+This displays the current contents of the history list to the stdio
+output stream \f3fp\f1. If the \f3max_lines\f1 argument is greater
+than or equal to zero, then no more than this number of the most
+recent lines will be displayed. If the \f3all_groups\f1 argument is
+non-zero, lines from all history groups are displayed. Otherwise just
+those of the currently selected history group are displayed. The
+format string argument, \f3fmt\f1, determines how the line is
+displayed. This can contain arbitrary characters which are written
+verbatim, interleaved with any of the following format directives:
+
+.nf
+  %D  -  The date on which the line was originally
+         entered, formatted like 2001-11-20.
+  %T  -  The time of day when the line was entered,
+         formatted like 23:59:59.
+  %N  -  The sequential entry number of the line in
+         the history buffer.
+  %G  -  The number of the history group which the
+         line belongs to.
+  %%  -  A literal % character.
+  %H  -  The history line itself.
+.fi
+
+Thus a format string like \f3"%D %T  %H\n"\f1 would output something like:
+
+.nf
+  2001-11-20 10:23:34  Hello world
+.fi
+
+Note the inclusion of an explicit newline character in the format
+string.
+
+.SH LOOKING UP HISTORY
+
+The \f3gl_lookup_history()\f1 function allows the calling application
+to look up lines in the history list.
+
+.sp
+.nf
+  typedef struct {
+    const char *line;    /* The requested historical */
+                         /*  line. */
+    unsigned group;      /* The history group to which */
+                         /*  the line belongs. */
+    time_t timestamp;    /* The date and time at which */
+                         /*  the line was originally */
+                         /*  entered. */
+  } GlHistoryLine;
+
+  int gl_lookup_history(GetLine *gl, unsigned long id,
+                        GlHistoryLine *hline);
+.fi
+.sp  
+
+The \f3id\f1 argument indicates which line to look up, where the first
+line that was entered in the history list after \f3new_GetLine()\f1
+was called, is denoted by 0, and subsequently entered lines are
+denoted with successively higher numbers. Note that the range of lines
+currently preserved in the history list can be queried by calling the
+\f3gl_range_of_history()\f1 function, described later. If the
+requested line is in the history list, the details of the line are
+recorded in the variable pointed to by the \f3hline\f1 argument, and
+\f31\f1 is returned. Otherwise \f30\f1 is returned, and the variable
+pointed to by \f3hline\f1 is left unchanged.
+.sp
+Beware that the string returned in \f3hline->line\f1 is part of the
+history buffer, so it must not be modified by the caller, and will be
+recycled on the next call to any function that takes \f3gl\f1 as its
+argument. Therefore you should make a private copy of this string if
+you need to keep it around.
+
+.SH MANUAL HISTORY ARCHIVAL
+
+By default, whenever a line is entered by the user, it is
+automatically appended to the history list, just before
+\f3gl_get_line()\f1 returns the line to the caller. This is convenient
+for the majority of applications, but there are also applications that
+need finer grained control over what gets added to the history
+list. In such cases, the automatic addition of entered lines to the
+history list can be turned off by calling the
+\f3gl_automatic_history()\f1 function.
+
+.sp
+.nf
+  int gl_automatic_history(GetLine *gl, int enable);
+.fi
+.sp
+
+If this function is called with its \f3enable\f1 argument set to
+\f30\f1, \f3gl_get_line()\f1 won't automatically archive subsequently
+entered lines. Automatic archiving can be reenabled at a later time,
+by calling this function again, with its \f3enable\f1 argument set to
+1.  While automatic history archiving is disabled, the calling
+application can use the \f3gl_append_history()\f1 to append lines to
+the history list as needed.
+
+.sp
+.nf
+  int gl_append_history(GetLine *gl, const char *line);
+.fi
+.sp
+
+The \f3line\f1 argument specifies the line to be added to the history
+list. This must be a normal \f3'\0'\f1 terminated string. If this
+string contains any newline characters, the line that gets archived in
+the history list will be terminated by the first of these. Otherwise
+it will be terminated by the \f3'\0'\f1 terminator.  If the line is
+longer than the maximum input line length, that was specified when
+\f3new_GetLine()\f1 was called, when the line is recalled, it will get
+truncated to the actual \f3gl_get_line()\f1 line length.
+
+If successful, \f3gl_append_history()\f1 returns 0. Otherwise it
+returns non-zero, and sets \f3errno\f1 to one of the following values.
+
+.sp
+.nf
+   EINVAL  -  One of the arguments passed to
+              gl_append_history() was NULL.
+   ENOMEM  -  The specified line was longer than the allocated
+              size of the history buffer (as specified when
+              new_GetLine() was called), so it couldn't be
+              archived.
+.fi
+.sp
+
+A textual description of the error can optionally be obtained by
+calling \f3gl_error_message()\f1. Note that after such an error, the
+history list remains in a valid state to receive new history lines, so
+there is little harm in simply ignoring the return status of
+\f3gl_append_history()\f1.
+
+.SH MISCELLANEOUS HISTORY CONFIGURATION
+
+If you wish to change the size of the history buffer that was
+originally specified in the call to \f3new_GetLine()\f1, you can do so
+with the \f3gl_resize_history()\f1 function.
+
+.sp
+.nf
+  int gl_resize_history(GetLine *gl, size_t histlen);
+.fi
+.sp
+
+The \f3histlen\f1 argument specifies the new size in bytes, and if you
+specify this as 0, the buffer will be deleted.
+.sp
+As mentioned in the discussion of \f3new_GetLine()\f1, the number of
+lines that can be stored in the history buffer, depends on the lengths
+of the individual lines. For example, a 1000 byte buffer could equally
+store 10 lines of average length 100 bytes, or 2 lines of average
+length 50 bytes. Although the buffer is never expanded when new lines
+are added, a list of pointers into the buffer does get expanded when
+needed to accomodate the number of lines currently stored in the
+buffer. To place an upper limit on the number of lines in the buffer,
+and thus a ceiling on the amount of memory used in this list, you can
+call the \f3gl_limit_history()\f1 function.
+
+.sp
+.nf
+  void gl_limit_history(GetLine *gl, int max_lines);
+.fi
+.sp
+
+The \f3max_lines\f1 should either be a positive number \f3>= 0\f1,
+specifying an upper limit on the number of lines in the buffer, or be
+\f3-1\f1 to cancel any previously specified limit. When a limit is in
+effect, only the \f3max_lines\f1 most recently appended lines are kept
+in the buffer. Older lines are discarded.
+.sp
+To discard lines from the history buffer, use the
+\f3gl_clear_history()\f1 function.
+.sp
+.nf
+  void gl_clear_history(GetLine *gl, int all_groups);
+.fi
+.sp
+The \f3all_groups\f1 argument tells the function whether to delete
+just the lines associated with the current history group (see
+\f3gl_group_history()\f1), or all historical lines in the buffer.
+.sp
+The \f3gl_toggle_history()\f1 function allows you to toggle history on
+and off without losing the current contents of the history list.
+
+.sp
+.nf
+  void gl_toggle_history(GetLine *gl, int enable);
+.fi
+.sp
+
+Setting the \f3enable\f1 argument to 0 turns off the history
+mechanism, and setting it to 1 turns it back on. When history is
+turned off, no new lines will be added to the history list, and
+history lookup key-bindings will act as though there is nothing in the
+history buffer.
+
+.SH QUERYING HISTORY INFORMATION
+
+The configured state of the history list can be queried with the
+\f3gl_history_state()\f1 function.
+
+.sp
+.nf
+  typedef struct {
+    int enabled;     /* True if history is enabled */
+    unsigned group;  /* The current history group */
+    int max_lines;   /* The current upper limit on the */
+                     /*  number of lines in the history */
+                     /*  list, or -1 if unlimited. */
+  } GlHistoryState;
+
+  void gl_state_of_history(GetLine *gl,
+                           GlHistoryState *state);
+.fi
+.sp
+On return, the status information is recorded in the variable pointed
+to by the \f3state\f1 argument.
+.sp
+The \f3gl_range_of_history()\f1 function returns the number and
+range of lines in the history list.
+
+.sp
+.nf
+typedef struct {
+  unsigned long oldest;  /* The sequential entry number */
+                         /*  of the oldest line in the */
+                         /*  history list. */
+  unsigned long newest;  /* The sequential entry number */
+                         /*  of the newest line in the */
+                         /*  history list. */
+  int nlines;            /* The number of lines in the */
+                         /*  history list. */
+} GlHistoryRange;
+
+void gl_range_of_history(GetLine *gl, GlHistoryRange *range);
+.fi
+.sp
+The return values are recorded in the variable pointed to by the
+\f3range\f1 argument. If the \f3nlines\f1 member of this structure is
+greater than zero, then the \f3oldest\f1 and \f3newest\f1 members
+report the range of lines in the list, and \f3newest=oldest+nlines-1\f1.
+Otherwise they are both zero.
+.sp
+The \f3gl_size_of_history()\f1 function returns the total size of the
+history buffer and the amount of the buffer that is currently
+occupied.
+.sp
+.nf
+  typedef struct {
+    size_t size;      /* The size of the history buffer */
+                      /*  (bytes). */
+    size_t used;      /* The number of bytes of the */
+                      /*  history buffer that are */
+                      /*  currently occupied. */
+  } GlHistorySize;
+
+  void gl_size_of_history(GetLine *gl, GlHistorySize *size);
+.fi
+.sp
+On return, the size information is recorded in the variable pointed to
+by the \f3size\f1 argument.
+
+.SH CHANGING TERMINALS
+
+The \f3new_GetLine()\f1 constructor function assumes that input is to
+be read from \f3stdin\f1, and output written to \f3stdout\f1. The
+following function allows you to switch to different input and output
+streams.
+.sp
+.nf
+  int gl_change_terminal(GetLine *gl, FILE *input_fp,
+                         FILE *output_fp, const char *term);
+.fi
+.sp
+The \f3gl\f1 argument is the object that was returned by
+\f3new_GetLine()\f1.  The \f3input_fp\f1 argument specifies the stream
+to read from, and \f3output_fp\f1 specifies the stream to be written
+to. Only if both of these refer to a terminal, will interactive
+terminal input be enabled.  Otherwise \f3gl_get_line()\f1 will simply
+call \f3fgets()\f1 to read command input. If both streams refer to a
+terminal, then they must refer to the same terminal, and the type of
+this terminal must be specified via the \f3term\f1 argument. The value
+of the \f3term\f1 argument is looked up in the terminal information
+database (terminfo or termcap), in order to determine which special
+control sequences are needed to control various aspects of the
+terminal. \f3new_GetLine()\f1 for example, passes the return value of
+\f3getenv("TERM")\f1 in this argument. Note that if one or both of
+\f3input_fp\f1 and \f3output_fp\f1 don't refer to a terminal, then it
+is legal to pass \f3NULL\f1 instead of a terminal type.
+.sp
+Note that if you want to pass file descriptors to
+\f3gl_change_terminal()\f1, you can do this by creating stdio stream
+wrappers using the POSIX \f3fdopen()\f1 function.
+
+.SH EXTERNAL EVENT HANDLING
+
+By default, \f3gl_get_line()\f1 doesn't return until either a complete
+input line has been entered by the user, or an error occurs. In
+programs that need to watch for I/O from other sources than the
+terminal, there are two options.
+
+.sp
+.nf
+  1. Use the functions described in the
+     \f3gl_io_mode(@FUNC_MANEXT@)\f1 man page to switch
+     \f3gl_get_line()\f1 into non-blocking server mode. In this mode,
+     \f3gl_get_line()\f1 becomes a non-blocking, incremental
+     line-editing function that can safely be called from
+     an external event loop. Although this is a very
+     versatile method, it involves taking on some
+     responsibilities that are normally performed behind
+     the scenes by \f3gl_get_line()\f1.
+
+  2. While \f3gl_get_line()\f1 is waiting for keyboard
+     input from the user, you can ask it to also watch for
+     activity on arbitrary file descriptors, such as
+     network sockets, pipes etc, and have it call functions
+     of your choosing when activity is seen. This works on
+     any system that has the \f3select()\f1 system call,
+     which is most, if not all flavors of unix.
+.fi
+.sp
+
+Registering a file descriptor to be watched by
+\f3gl_get_line()\f1 involves calling the \f3gl_watch_fd()\f1 function.
+
+.sp
+.nf
+  int gl_watch_fd(GetLine *gl, int fd, GlFdEvent event,
+                  GlFdEventFn *callback, void *data);
+.fi
+.sp
+
+If this returns non-zero, then it means that either your arguments are
+invalid, or that this facility isn't supported on the host system.
+.sp
+The \f3fd\f1 argument is the file descriptor to be watched. The
+\f3event\f1 argument specifies what type of activity is of interest,
+chosen from the following enumerated values:
+
+.sp
+.nf
+  GLFD_READ   -  Watch for the arrival of data to be read.
+  GLFD_WRITE  -  Watch for the ability to write to the file
+                 descriptor without blocking.
+  GLFD_URGENT -  Watch for the arrival of urgent
+                 out-of-band data on the file descriptor.
+.fi
+.sp
+
+The \f3callback\f1 argument is the function to call when the selected
+activity is seen. It should be defined with the following macro, which
+is defined in libtecla.h.
+
+.sp
+.nf
+  #define GL_FD_EVENT_FN(fn) GlFdStatus (fn)(GetLine *gl, \\
+                                      void *data, int fd, \\
+                                      GlFdEvent event)
+.fi
+.sp
+The \f3data\f1 argument of the \f3gl_watch_fd()\f1 function is passed
+to the callback function for its own use, and can point to anything
+you like, including \f3NULL\f1. The file descriptor and the event
+argument are also passed to the callback function, and this
+potentially allows the same callback function to be registered to more
+than one type of event and/or more than one file descriptor. The
+return value of the callback function should be one of the following
+values.
+
+.sp
+.nf
+  GLFD_ABORT    -  Tell gl_get_line() to abort. When this
+                   happens, \f3gl_get_line()\f1 returns
+                   \f3NULL\f1, and a following call to
+                   \f3gl_return_status()\f1 will return
+                   \f3GLR_FDABORT\f1. Note that if the
+                   application needs \f3errno\f1 always to
+                   have a meaningful value when
+                   \f3gl_get_line()\f1 returns \f3NULL\f1,
+                   the callback function should set
+                   \f3errno\f1 appropriately.
+  GLFD_REFRESH  -  Redraw the input line then continue
+                   waiting for input. Return this if
+                   your callback wrote to the terminal.
+  GLFD_CONTINUE -  Continue to wait for input, without
+                   redrawing the line.
+.fi
+.sp
+Note that before calling the callback, \f3gl_get_line()\f1 blocks most
+signals, and leaves its own signal handlers installed, so if you need
+to catch a particular signal you will need to both temporarily install
+your own signal handler, and unblock the signal. Be sure to re-block
+the signal (if it was originally blocked) and reinstate the original
+signal handler, if any, before returning.
+
+.sp
+
+If the callback function needs to read or write to the terminal, it
+should ideally first call \f3gl_normal_io(gl)\f1 to temporarily
+suspend line editing. This will restore the terminal to canonical,
+blocking-I/O, mode, and move the cursor to the start of a new terminal
+line. Later, when the callback returns, \f3gl_get_line()\f1 will
+notice that \f3gl_normal_io()\f1 was called, redisplay the input line
+and resume editing. Note that in this case the return values,
+\f3GLFD_REFRESH\f1 and \f3GLFD_CONTINUE\f1 are equivalent.
+
+.sp
+
+To support cases where the callback function calls a third-party
+function which occasionally and unpredictably writes to the terminal,
+the automatic conversion of \f3"\n"\f1 to \f3"\r\n"\f1 is re-enabled
+before the callback function is called. If the callack knows that the
+third-party function wrote to the terminal, it should then return the
+\f3GLFD_REFRESH\f1 return value, to tell \f3gl_get_line()\f1 to
+redisplay the input line.
+
+.sp
+
+To remove a callback function that you previously registered for a
+given file descriptor and event, simply call \f3gl_watch_fd()\f1 with
+the same file descriptor and \f3event\f1 arguments, but with a
+\f3callback\f1 argument of \f30\f1. The \f3data\f1 argument is ignored
+in this case.
+
+.SH SETTING AN INACTIVITY TIMEOUT
+
+On systems with the \f3select()\f1 system call, the
+\f3gl_inactivity_timeout()\f1 function can be used to set or cancel an
+inactivity timeout. Inactivity in this case refers both to keyboard
+input, and to I/O on any file descriptors registered by prior and
+subsequent calls to \f3gl_watch_fd()\f1. On oddball systems that don't
+have \f3select()\f1, this call has no effect.
+
+.sp
+.nf
+  int gl_inactivity_timeout(GetLine *gl, GlTimeoutFn *callback,
+                     void *data, unsigned long sec,
+                     unsigned long nsec);
+.fi
+.sp
+
+The timeout is specified in the form of an integral number of seconds
+and an integral number of nanoseconds, via the \f3sec\f1 and
+\f3nsec\f1 arguments respectively. Subsequently, whenever no activity
+is seen for this time period, the function specified via the
+\f3callback\f1 argument is called. The \f3data\f1 argument of
+\f3gl_inactivity_timeout()\f1 is passed verbatim to this callback function
+whenever it is invoked, and can thus be used to pass arbitrary
+application-specific information to the callback. The following macro
+is provided in \f3libtecla.h\f1 for applications to use to declare and
+prototype timeout callback functions.
+
+.sp
+.nf
+  #define GL_TIMEOUT_FN(fn) \\
+               GlAfterTimeout (fn)(GetLine *gl, void *data)
+.fi
+.sp
+
+On returning, the application's callback is expected to return one of
+the following enumerators to tell \f3gl_get_line()\f1 how to procede
+after the timeout has been handled by the callback.
+
+.sp
+.nf
+  GLTO_ABORT    -  Tell gl_get_line() to abort. When
+                   this happens, \f3gl_get_line()\f1 will
+                   return \f3NULL\f1, and a following call
+                   to \f3gl_return_status()\f1 will return
+                   \f3GLR_TIMEOUT\f1. Note that if the
+                   application needs \f3errno\f1 always to
+                   have a meaningful value when
+                   \f3gl_get_line()\f1 returns \f3NULL\f1,
+                   the callback function should set
+                   \f3errno\f1 appropriately.
+  GLTO_REFRESH  -  Redraw the input line, then continue
+                   waiting for input. You should return
+                   this value if your callback wrote to the
+                   terminal without having first called
+                   \f3gl_normal_io(gl)\f1.
+  GLTO_CONTINUE -  In normal blocking-I/O mode, continue to
+                   wait for input, without redrawing the
+                   user's input line.
+                   In non-blocking server I/O mode (see
+                   gl_io_mode(@FUNC_MANEXT@)), cause \f3gl_get_line()\f1
+                   to act as though I/O blocked. This means
+                   that \f3gl_get_line()\f1 will immediately
+                   return \f3NULL\f1, and a following call
+                   to \f3gl_return_status()\f1 will return
+                   \f3GLR_BLOCKED\f1.
+.fi
+.sp
+
+Note that before calling the callback, \f3gl_get_line()\f1 blocks most
+signals, and leaves its own signal handlers installed, so if you need
+to catch a particular signal you will need to both temporarily install
+your own signal handler, and unblock the signal. Be sure to re-block
+the signal (if it was originally blocked) and reinstate the original
+signal handler, if any, before returning.
+
+.sp
+
+If the callback function needs to read or write to the terminal, it
+should ideally first call \f3gl_normal_io(gl)\f1 to temporarily
+suspend line editing. This will restore the terminal to canonical,
+blocking-I/O, mode, and move the cursor to the start of a new terminal
+line. Later, when the callback returns, \f3gl_get_line()\f1 will
+notice that \f3gl_normal_io()\f1 was called, redisplay the input line
+and resume editing. Note that in this case the return values,
+\f3GLTO_REFRESH\f1 and \f3GLTO_CONTINUE\f1 are equivalent.
+
+.sp
+
+To support cases where the callback function calls a third-party
+function which occasionally and unpredictably writes to the terminal,
+the automatic conversion of \f3"\n"\f1 to \f3"\r\n"\f1 is re-enabled
+before the callback function is called. If the callack knows that the
+third-party function wrote to the terminal, it should then return the
+\f3GLTO_REFRESH\f1 return value, to tell \f3gl_get_line()\f1 to
+redisplay the input line.
+
+.sp
+
+Note that although the timeout argument includes a nano-second
+component, few computer clocks presently have resolutions that are
+finer than a few milliseconds, so asking for less than a few
+milliseconds is equivalent to requesting zero seconds on a lot of
+systems. If this would be a problem, you should base your timeout
+selection on the actual resolution of the host clock (eg. by calling
+\f3sysconf(_SC_CLK_TCK)\f1).
+
+.sp
+
+To turn off timeouts, simply call \f3gl_inactivity_timeout()\f1 with a
+\f3callback\f1 argument of \f30\f1. The \f3data\f1 argument is ignored
+in this case.
+
+.SH SIGNAL HANDLING DEFAULTS
+
+By default, the \f3gl_get_line()\f1 function intercepts a
+number of signals. This is particularly important for
+signals which would by default terminate the process, since
+the terminal needs to be restored to a usable state before
+this happens. In this section, the signals that are trapped
+by default, and how \f3gl_get_line()\f1 responds to them, is
+described. Changing these defaults is the topic of the
+following section.
+.sp
+When the following subset of signals are caught, \f3gl_get_line()\f1
+first restores the terminal settings and signal handling to how they
+were before \f3gl_get_line()\f1 was called, resends the signal, to
+allow the calling application's signal handlers to handle it, then if
+the process still exists, \f3gl_get_line()\f1 returns \f3NULL\f1 and
+sets \f3errno\f1 as specified below.
+
+.sp
+.nf
+ SIGINT  -  This signal is generated both by the keyboard
+            interrupt key (usually ^C), and the keyboard
+            break key.
+
+            errno=EINTR
+
+ SIGHUP  -  This signal is generated when the controlling
+            terminal exits.
+
+            errno=ENOTTY
+
+ SIGPIPE -  This signal is generated when a program attempts
+            to write to a pipe who's remote end isn't being
+            read by any process. This can happen for example
+            if you have called \f3gl_change_terminal()\f1 to
+            redirect output to a pipe hidden under a pseudo
+            terminal.
+
+            errno=EPIPE
+
+ SIGQUIT -  This signal is generated by the keyboard quit
+            key (usually ^\\).
+
+            errno=EINTR
+
+ SIGABRT -  This signal is generated by the standard C,
+            abort() function. By default it both
+            terminates the process and generates a core
+            dump.
+
+            errno=EINTR
+
+ SIGTERM -  This is the default signal that the UN*X
+            kill command sends to processes.
+
+            errno=EINTR
+.fi
+.sp
+Note that in the case of all of the above signals, POSIX mandates that
+by default the process is terminated, with the addition of a core dump
+in the case of the \f3SIGQUIT\f1 signal. In other words, if the
+calling application doesn't override the default handler by supplying
+its own signal handler, receipt of the corresponding signal will
+terminate the application before \f3gl_get_line()\f1 returns.
+.sp
+If gl_get_line() aborts with errno set to EINTR, you can find out what
+signal caused it to abort, by calling the following function.
+.sp
+.nf
+  int gl_last_signal(const GetLine *gl);
+.fi
+.sp
+This returns the numeric code (eg. \f3SIGINT\f1) of the last signal
+that was received during the most recent call to \f3gl_get_line()\f1,
+or \f3-1\f1 if no signals were received.
+.sp
+On systems that support it, when a SIGWINCH (window change) signal is
+received, \f3gl_get_line()\f1 queries the terminal to find out its new
+size, redraws the current input line to accomodate the new size, then
+returns to waiting for keyboard input from the user. Unlike other
+signals, this signal isn't resent to the application.
+.sp
+Finally, the following signals cause \f3gl_get_line()\f1 to first
+restore the terminal and signal environment to that which prevailed
+before \f3gl_get_line()\f1 was called, then resend the signal to the
+application. If the process still exists after the signal has been
+delivered, then \f3gl_get_line()\f1 then re-establishes its own signal
+handlers, switches the terminal back to raw mode, redisplays the input
+line, and goes back to awaiting terminal input from the user.
+.sp
+.nf
+ SIGCONT    -  This signal is generated when a suspended
+               process is resumed.
+
+ SIGPOLL    -  On SVR4 systems, this signal notifies the
+               process of an asynchronous I/O event. Note
+               that under 4.3+BSD, SIGIO and SIGPOLL are
+               the same. On other systems, SIGIO is ignored
+               by default, so \f3gl_get_line()\f1 doesn't
+               trap it by default.
+
+ SIGPWR     -  This signal is generated when a power failure
+               occurs (presumably when the system is on a
+               UPS).
+
+ SIGALRM    -  This signal is generated when a timer
+               expires.
+
+ SIGUSR1    -  An application specific signal.
+
+ SIGUSR2    -  Another application specific signal.
+
+ SIGVTALRM  -  This signal is generated when a virtual
+               timer expires (see man setitimer(2)).
+
+ SIGXCPU    -  This signal is generated when a process
+               exceeds its soft CPU time limit.
+
+ SIGXFSZ    -  This signal is generated when a process
+               exceeds its soft file-size limit.
+
+ SIGTSTP    -  This signal is generated by the terminal
+               suspend key, which is usually ^Z, or the
+               delayed terminal suspend key, which is
+               usually ^Y.
+
+ SIGTTIN    -  This signal is generated if the program
+               attempts to read from the terminal while the
+               program is running in the background.
+
+ SIGTTOU    -  This signal is generated if the program
+               attempts to write to the terminal while the
+               program is running in the background.
+.fi
+.sp
+
+Obviously not all of the above signals are supported on all systems,
+so code to support them is conditionally compiled into the tecla
+library.
+.sp
+Note that if \f3SIGKILL\f1 or \f3SIGPOLL\f1, which by definition can't
+be caught, or any of the hardware generated exception signals, such as
+\f3SIGSEGV\f1, \f3SIGBUS\f1 and \f3SIGFPE\f1, are received and
+unhandled while \f3gl_get_line()\f1 has the terminal in raw mode, the
+program will be terminated without the terminal having been restored
+to a usable state. In practice, job-control shells usually reset the
+terminal settings when a process relinquishes the controlling
+terminal, so this is only a problem with older shells.
+
+.SH CUSTOMIZED SIGNAL HANDLING
+
+The previous section listed the signals that
+\f3gl_get_line()\f1 traps by default, and described how it
+responds to them. This section describes how to both add and
+remove signals from the list of trapped signals, and how to
+specify how \f3gl_get_line()\f1 should respond to a given
+signal.
+.sp
+If you don't need \f3gl_get_line()\f1 to do anything in
+response to a signal that it normally traps, you can tell to
+\f3gl_get_line()\f1 to ignore that signal by calling
+\f3gl_ignore_signal()\f1.
+.sp
+.nf
+  int gl_ignore_signal(GetLine *gl, int signo);
+.fi
+.sp
+The \f3signo\f1 argument is the number of the signal
+(eg. \f3SIGINT\f1) that you want to have ignored. If the
+specified signal isn't currently one of those being trapped,
+this function does nothing.
+.sp
+The \f3gl_trap_signal()\f1 function allows you to either add
+a new signal to the list that \f3gl_get_line()\f1 traps, or
+modify how it responds to a signal that it already traps.
+.sp
+.nf
+  int gl_trap_signal(GetLine *gl, int signo, unsigned flags,
+                     GlAfterSignal after, int errno_value);
+.fi
+.sp
+The \f3signo\f1 argument is the number of the signal that
+you wish to have trapped. The \f3flags\f1 argument is a set
+of flags which determine the environment in which the
+application's signal handler is invoked, the \f3after\f1
+argument tells \f3gl_get_line()\f1 what to do after the
+application's signal handler returns, and \f3errno_value\f1
+tells \f3gl_get_line()\f1 what to set \f3errno\f1 to if told
+to abort.
+.sp
+The \f3flags\f1 argument is a bitwise OR of zero or more of
+the following enumerators:
+.sp
+.nf
+  GLS_RESTORE_SIG  -  Restore the caller's signal
+                      environment while handling the
+                      signal.
+
+  GLS_RESTORE_TTY  -  Restore the caller's terminal settings
+                      while handling the signal.
+
+  GLS_RESTORE_LINE -  Move the cursor to the start of the
+                      line following the input line before
+                      invoking the application's signal
+                      handler.
+
+  GLS_REDRAW_LINE  -  Redraw the input line when the
+                      application's signal handler returns.
+
+  GLS_UNBLOCK_SIG  -  Normally, if the calling program has
+                      a signal blocked (man sigprocmask),
+                      gl_get_line() does not trap that
+                      signal. This flag tells gl_get_line()
+                      to trap the signal and unblock it for
+                      the duration of the call to
+                      gl_get_line().
+
+  GLS_DONT_FORWARD -  If this flag is included, the signal
+                      will not be forwarded to the signal
+                      handler of the calling program.
+.fi
+.sp
+Two commonly useful flag combinations are also enumerated as
+follows:
+.sp
+.nf
+  GLS_RESTORE_ENV   = GLS_RESTORE_SIG | GLS_RESTORE_TTY |
+                      GLS_REDRAW_LINE
+
+  GLS_SUSPEND_INPUT = GLS_RESTORE_ENV | GLS_RESTORE_LINE
+.fi
+.sp
+
+If your signal handler, or the default system signal
+handler for this signal, if you haven't overridden it, never
+either writes to the terminal, nor suspends or terminates
+the calling program, then you can safely set the \f3flags\f1
+argument to \f30\f1.
+.sp
+If your signal handler always writes to the terminal, reads
+from it, or suspends or terminates the program, you should
+specify the \f3flags\f1 argument as \f3GL_SUSPEND_INPUT\f1,
+so that:
+.sp
+.nf
+1. The cursor doesn't get left in the middle of the input
+   line.
+2. So that the user can type in input and have it echoed.
+3. So that you don't need to end each output line with
+   \f3\\r\\n\f1, instead of just \f3\\n\f1.
+.fi
+.sp
+The \f3GL_RESTORE_ENV\f1 combination is the same as
+\f3GL_SUSPEND_INPUT\f1, except that it doesn't move the
+cursor, and if your signal handler doesn't read or write
+anything to the terminal, the user won't see any visible
+indication that a signal was caught. This can be useful if
+you have a signal handler that only occasionally writes to
+the terminal, where using \f3GL_SUSPEND_LINE\f1 would cause
+the input line to be unnecessarily duplicated when nothing
+had been written to the terminal.  Such a signal handler,
+when it does write to the terminal, should be sure to start
+a new line at the start of its first write, by writing a
+'\\n' character, and should be sure to leave the cursor on a
+new line before returning. If the signal arrives while the
+user is entering a line that only occupies a signal terminal
+line, or if the cursor is on the last terminal line of a
+longer input line, this will have the same effect as
+\f3GL_SUSPEND_INPUT\f1. Otherwise it will start writing on a
+line that already contains part of the displayed input line.
+This doesn't do any harm, but it looks a bit ugly, which is
+why the \f3GL_SUSPEND_INPUT\f1 combination is better if you
+know that you are always going to be writting to the
+terminal.
+.sp
+The \f3after\f1 argument, which determines what
+\f3gl_get_line()\f1 does after the application's signal
+handler returns (if it returns), can take any one of the
+following values:
+.sp
+.nf
+  GLS_RETURN   - Return the completed input line, just as
+                 though the user had pressed the return
+                 key.
+
+  GLS_ABORT    - Cause \f3gl_get_line()\f1 to abort. When
+                 this happens, \f3gl_get_line()\f1 returns
+                 \f3NULL\f1, and a following call to
+                 \f3gl_return_status()\f1 will return
+                 \f3GLR_SIGNAL\f1. Note that if the
+                 application needs \f3errno\f1 always to
+                 have a meaningful value when
+                 \f3gl_get_line()\f1 returns \f3NULL\f1,
+                 the callback function should set
+                 \f3errno\f1 appropriately.
+  GLS_CONTINUE - Resume command line editing. 
+.fi
+.sp
+The \f3errno_value\f1 argument is intended to be combined
+with the \f3GLS_ABORT\f1 option, telling \f3gl_get_line()\f1
+what to set the standard \f3errno\f1 variable to before
+returning \f3NULL\f1 to the calling program. It can also,
+however, be used with the \f3GL_RETURN\f1 option, in case
+you wish to have a way to distinguish between an input line
+that was entered using the return key, and one that was
+entered by the receipt of a signal.
+
+.SH RELIABLE SIGNAL HANDLING
+
+Signal handling is suprisingly hard to do reliably without race
+conditions. In \f3gl_get_line()\f1 a lot of care has been taken to
+allow applications to perform reliable signal handling around
+\f3gl_get_line()\f1. This section explains how to make use of this.
+
+As an example of the problems that can arise if the application isn't
+written correctly, imagine that one's application has a SIGINT signal
+handler that sets a global flag. Now suppose that the application
+tests this flag just before invoking \f3gl_get_line()\f1. If a SIGINT
+signal happens to be received in the small window of time between the
+statement that tests the value of this flag, and the statement that
+calls \f3gl_get_line()\f1, then \f3gl_get_line()\f1 will not see the
+signal, and will not be interrupted. As a result, the application
+won't be able to respond to the signal until the user gets around to
+finishing entering the input line and \f3gl_get_line()\f1
+returns. Depending on the application, this might or might not be a
+disaster, but at the very least it would puzzle the user.
+
+The way to avoid such problems is to do the following.
+
+1. If needed, use the \f3gl_trap_signal()\f1 function to
+   configure \f3gl_get_line()\f1 to abort when important
+   signals are caught.
+
+2. Configure \f3gl_get_line()\f1 such that if any of the
+   signals that it catches are blocked when
+   \f3gl_get_line()\f1 is called, they will be unblocked
+   automatically during times when \f3gl_get_line()\f1 is
+   waiting for I/O. This can be done either
+   on a per signal basis, by calling the
+   \f3gl_trap_signal()\f1 function, and specifying the
+   \f3GLS_UNBLOCK\f1 attribute of the signal, or globally by
+   calling the \f3gl_catch_blocked()\f1 function.
+
+.sp
+.nf
+     void gl_catch_blocked(GetLine *gl);
+.fi
+.sp
+
+   This function simply adds the \f3GLS_UNBLOCK\f1 attribute
+   to all of the signals that it is currently configured to
+   trap.
+
+3. Just before calling \f3gl_get_line()\f1, block delivery
+   of all of the signals that \f3gl_get_line()\f1 is
+   configured to trap. This can be done using the POSIX
+   \f3sigprocmask()\f1 function in conjunction with the
+   \f3gl_list_signals()\f1 function.
+
+.sp
+.nf
+      int gl_list_signals(GetLine *gl, sigset_t *set);
+.fi
+.sp
+
+   This function returns the set of signals that it is
+   currently configured to catch in the \f3set\f1 argument,
+   which is in the form required by \f3sigprocmask()\f1.
+
+4. In the example, one would now test the global flag that
+   the signal handler sets, knowing that there is now no
+   danger of this flag being set again until
+   \f3gl_get_line()\f1 unblocks its signals while performing
+   I/O.
+
+5. Eventually \f3gl_get_line()\f1 returns, either because
+   a signal was caught, an error occurred, or the user
+   finished entering their input line.
+
+6. Now one would check the global signal flag again, and if
+   it is set, respond to it, and zero the flag.
+
+7. Use \f3sigprocmask()\f1 to unblock the signals that were
+   blocked in step 3.
+
+The same technique can be used around certain POSIX
+signal-aware functions, such as \f3sigsetjmp()\f1 and
+\f3sigsuspend()\f1, and in particular, the former of these
+two functions can be used in conjunction with
+\f3siglongjmp()\f1 to implement race-condition free signal
+handling around other long-running system calls. The way to
+do this, is explained next, by showing how
+\f3gl_get_line()\f1 manages to reliably trap signals around
+calls to functions like \f3read()\f1 and \f3select()\f1
+without race conditions.
+
+The first thing that \f3gl_get_line()\f1 does, whenever it
+is called, is to use the POSIX \f3sigprocmask()\f1 function
+to block the delivery of all of the signals that it is
+currently configured to catch. This is redundant if the
+application has already blocked them, but it does no
+harm. It undoes this step just before returning.
+
+Whenever \f3gl_get_line()\f1 needs to call \f3read()\f1 or
+\f3select()\f1 to wait for input from the user, it first
+calls the POSIX \f3sigsetjmp()\f1 function, being sure to
+specify a non-zero value for its \f3savesigs\f1 argument.
+The reason for the latter argument will become clear
+shortly.
+
+If \f3sigsetjmp()\f1 returns zero, \f3gl_get_line()\f1 then
+does the following.
+
+.sp
+.nf
+a. It uses the POSIX \f3sigaction()\f1 function to register
+   a temporary signal handler to all of the signals that it
+   is configured to catch. This signal handler does two
+   things.
+
+   1. It records the number of the signal that was received
+      in a file-scope variable.
+
+   2. It then calls the POSIX \f3siglongjmp()\f1
+      function using the buffer that was passed to
+      \f3sigsetjmp()\f1 for its first argument, and
+      a non-zero value for its second argument.
+
+   When this signal handler is registered, the \f3sa_mask\f1
+   member of the \f3struct sigaction act\f1 argument of the
+   call to \f3sigaction()\f1 is configured to contain all of
+   the signals that \f3gl_get_line()\f1 is catching. This
+   ensures that only one signal will be caught at once by
+   our signal handler, which in turn ensures that multiple
+   instances of our signal handler don't tread on each
+   other's toes.
+
+b. Now that the signal handler has been set up,
+   \f3gl_get_line()\f1 unblocks all of the signals that it
+   is configured to catch.
+
+c. It then calls the \f3read()\f1 or \f3select()\f1 system
+   calls to wait for keyboard input.
+
+d. If this system call returns (ie. no signal is received),
+   \f3gl_get_line()\f1 blocks delivery of the signals of
+   interest again.
+
+e. It then reinstates the signal handlers that were
+   displaced by the one that was just installed.
+.fi
+.sp
+
+Alternatively, if \f3sigsetjmp()\f1 returns non-zero, this
+means that one of the signals being trapped was caught while
+the above steps were executing. When this happens,
+\f3gl_get_line()\f1 does the following.
+
+First, note that when a call to \f3siglongjmp()\f1 causes
+\f3sigsetjmp()\f1 to return, provided that the
+\f3savesigs\f1 argument of \f3sigsetjmp()\f1 was non-zero,
+as specified above, the signal process mask is restored to
+how it was when \f3sigsetjmp()\f1 was called. This is the
+important difference between \f3sigsetjmp()\f1 and the older
+problematic \f3setjmp()\f1, and is the essential ingredient
+that makes it possible to avoid signal handling race
+conditions.  Because of this we are guaranteed that all of
+the signals that we blocked before calling \f3sigsetjmp()\f1
+are blocked again as soon as any signal is caught. The
+following statements, which are then executed, are thus
+guaranteed to be executed without any further signals being
+caught.
+
+1. If so instructed by the \f3gl_get_line()\f1 configuration
+   attributes of the signal that was caught,
+   \f3gl_get_line()\f1 restores the terminal attributes to
+   the state that they had when \f3gl_get_line()\f1 was
+   called. This is particularly important for signals that
+   suspend or terminate the process, since otherwise the
+   terminal would be left in an unusable state.
+
+2. It then reinstates the application's signal handlers.
+
+3. Then it uses the C standard-library \f3raise()\f1
+   function to re-send the application the signal that
+   was caught.
+
+3. Next it unblocks delivery of the signal that we just
+   sent. This results in the signal that was just sent
+   via \f3raise()\f1, being caught by the application's
+   original signal handler, which can now handle it as it
+   sees fit.
+
+4. If the signal handler returns (ie. it doesn't terminate
+   the process), \f3gl_get_line()\f1 blocks delivery of the
+   above signal again.
+
+5. It then undoes any actions performed in the first of the
+   above steps, and redisplays the line, if the signal
+   configuration calls for this.
+
+6. \f3gl_get_line()\f1 then either resumes trying to
+   read a character, or aborts, depending on the
+   configuration of the signal that was caught.
+
+What the above steps do in essence is to take asynchronously
+delivered signals and handle them synchronously, one at a
+time, at a point in the code where \f3gl_get_line()\f1 has
+complete control over its environment.
+
+.SH THE TERMINAL SIZE
+
+On most systems the combination of the \f3TIOCGWINSZ\f1 ioctl and the
+\f3SIGWINCH\f1 signal is used to maintain an accurate idea of the
+terminal size. The terminal size is newly queried every time that
+\f3gl_get_line()\f1 is called and whenever a \f3SIGWINCH\f1 signal is
+received.
+.sp
+On the few systems where this mechanism isn't available, at
+startup \f3new_GetLine()\f1 first looks for the \f3LINES\f1
+and \f3COLUMNS\f1 environment variables.  If these aren't
+found, or they contain unusable values, then if a terminal
+information database like terminfo or termcap is available,
+the default size of the terminal is looked up in this
+database. If this too fails to provide the terminal size, a
+default size of 80 columns by 24 lines is used.
+.sp
+Even on systems that do support \f3ioctl(TIOCGWINSZ)\f1, if the
+terminal is on the other end of a serial line, the terminal driver
+generally has no way of detecting when a resize occurs or of querying
+what the current size is. In such cases no \f3SIGWINCH\f1 is sent to
+the process, and the dimensions returned by \f3ioctl(TIOCGWINSZ)\f1
+aren't correct. The only way to handle such instances is to provide a
+way for the user to enter a command that tells the remote system what
+the new size is. This command would then call the
+\f3gl_set_term_size()\f1 function to tell \f3gl_get_line()\f1 about
+the change in size.
+
+.sp
+.nf
+  int gl_set_term_size(GetLine *gl, int ncolumn, int nline);
+.fi
+.sp
+
+The \f3ncolumn\f1 and \f3nline\f1 arguments are used to specify the
+new dimensions of the terminal, and must not be less than 1. On
+systems that do support \f3ioctl(TIOCGWINSZ)\f1, this function first
+calls \f3ioctl(TIOCSWINSZ)\f1 to tell the terminal driver about the
+change in size. In non-blocking server-I/O mode, if a line is
+currently being input, the input line is then redrawn to accomodate
+the changed size. Finally the new values are recorded in \f3gl\f1 for
+future use by \f3gl_get_line()\f1.
+.sp
+The \f3gl_terminal_size()\f1 function allows you to query
+the current size of the terminal, and install an alternate
+fallback size for cases where the size isn't available.
+Beware that the terminal size won't be available if reading
+from a pipe or a file, so the default values can be
+important even on systems that do support ways of finding
+out the terminal size.
+.sp
+.nf
+  typedef struct {
+    int nline;        /* The terminal has nline lines */
+    int ncolumn;      /* The terminal has ncolumn columns */
+  } GlTerminalSize;
+
+  GlTerminalSize gl_terminal_size(GetLine *gl,
+                                  int def_ncolumn,
+                                  int def_nline);
+.fi
+.sp
+This function first updates \f3gl_get_line()\f1's fallback terminal
+dimensions, then records its findings in the return value.
+.sp
+The \f3def_ncolumn\f1 and \f3def_nline\f1 specify the
+default number of terminal columns and lines to use if the
+terminal size can't be determined via \f3ioctl(TIOCGWINSZ)\f1 or
+environment variables.
+
+.SH HIDING WHAT YOU TYPE
+
+When entering sensitive information, such as passwords, it is best not
+to have the text that you are entering echoed on the terminal.
+Furthermore, such text should not be recorded in the history list,
+since somebody finding your terminal unattended could then recall it,
+or somebody snooping through your directories could see it in your
+history file. With this in mind, the \f3gl_echo_mode()\f1
+function allows you to toggle on and off the display and archival of
+any text that is subsequently entered in calls to \f3gl_get_line()\f1.
+
+.sp
+.nf
+  int gl_echo_mode(GetLine *gl, int enable);
+.fi
+.sp
+
+The \f3enable\f1 argument specifies whether entered text
+should be visible or not. If it is \f30\f1, then
+subsequently entered lines will not be visible on the
+terminal, and will not be recorded in the history list. If
+it is \f31\f1, then subsequent input lines will be displayed
+as they are entered, and provided that history hasn't been
+turned off via a call to \f3gl_toggle_history()\f1, then
+they will also be archived in the history list. Finally, if
+the \f3enable\f1 argument is \f3-1\f1, then the echoing mode
+is left unchanged, which allows you to non-destructively
+query the current setting via the return value. In all
+cases, the return value of the function is \f30\f1 if
+echoing was disabled before the function was called, and
+\f31\f1 if it was enabled.
+.sp
+When echoing is turned off, note that although tab
+completion will invisibly complete your prefix as far as
+possible, ambiguous completions will not be displayed.
+
+.SH SINGLE CHARACTER QUERIES
+
+Using \f3gl_get_line()\f1 to query the user for a single character
+reply, is inconvenient for the user, since they must hit the enter or
+return key before the character that they typed is returned to the
+program. Thus the \f3gl_query_char()\f1 function has been provided for
+single character queries like this.
+
+.sp
+.nf
+  int gl_query_char(GetLine *gl, const char *prompt,
+                    char defchar);
+.fi
+.sp
+
+This function displays the specified prompt at the start of a new
+line, and waits for the user to type a character. When the user types
+a character, \f3gl_query_char()\f1 displays it to the right of the
+prompt, starts a newline, then returns the character to the calling
+program. The return value of the function is the character that was
+typed. If the read had to be aborted for some reason, \f3EOF\f1 is
+returned instead. In the latter case, the application can call the
+previously documented \f3gl_return_status()\f1, to find out what went
+wrong. This could, for example, have been the reception of a signal,
+or the optional inactivity timer going off.
+
+If the user simply hits enter, the value of the \f3defchar\f1 argument
+is substituted. This means that when the user hits either newline or
+return, the character specified in \f3defchar\f1, is displayed after
+the prompt, as though the user had typed it, as well as being returned
+to the calling application. If such a replacement is not important,
+simply pass \f3'\n'\f1 as the value of \f3defchar\f1.
+
+If the entered character is an unprintable character, it is displayed
+symbolically. For example, control-A is displayed as ^A, and
+characters beyond 127 are displayed in octal, preceded by a
+backslash.
+
+As with \f3gl_get_line()\f1, echoing of the entered character can be
+disabled using the \f3gl_echo_mode()\f1 function.
+
+If the calling process is suspended while waiting for the user to type
+their response, the cursor is moved to the line following the prompt
+line, then when the process resumes, the prompt is redisplayed, and
+\f3gl_query_char()\f1 resumes waiting for the user to type a
+character.
+
+Note that in non-blocking server mode, (see
+gl_io_mode(@FUNC_MANEXT@)), if an incomplete input line is in the
+process of being read when \f3gl_query_char()\f1 is called, the
+partial input line is discarded, and erased from the terminal, before
+the new prompt is displayed. The next call to \f3gl_get_line()\f1 will
+thus start editing a new line.
+
+.SH READING RAW CHARACTERS
+
+Whereas the \f3gl_query_char()\f1 function visibly prompts the user
+for a character, and displays what they typed, the
+\f3gl_read_char()\f1 function reads a signal character from the user,
+without writing anything to the terminal, or perturbing any
+incompletely entered input line. This means that it can be called not
+only from between calls to \f3gl_get_line()\f1, but also from callback
+functions that the application has registered to be called by
+\f3gl_get_line()\f1.
+
+.sp
+.nf
+  int gl_read_char(GetLine *gl);
+.fi
+.sp
+
+On success, the return value of \f3gl_read_char()\f1 is the character
+that was read. On failure, \f3EOF\f1 is returned, and the
+\f3gl_return_status()\f1 function can be called to find out what went
+wrong. Possibilities include the optional inactivity timer going off,
+the receipt of a signal that is configured to abort gl_get_line(), or
+terminal I/O blocking, when in non-blocking server-I/O mode.
+
+Beware that certain keyboard keys, such as function keys, and cursor
+keys, usually generate at least 3 characters each, so a single call to
+\f3gl_read_char()\f1 won't be enough to identify such keystrokes.
+
+.SH CLEARING THE TERMINAL
+
+The calling program can clear the terminal by calling
+\f3gl_erase_terminal()\f1. In non-blocking server-I/O mode, this
+function also arranges for the current input line to be redrawn from
+scratch when \f3gl_get_line()\f1 is next called.
+
+.sp
+.nf
+  int gl_erase_terminal(GetLine *gl);
+.fi
+.sp
+
+.SH DISPLAYING TEXT DYNAMICALLY
+
+Between calls to \f3gl_get_line()\f1, the \f3gl_display_text()\f1
+function provides a convenient way to display paragraphs of text,
+left-justified and split over one or more terminal lines according to
+the constraints of the current width of the terminal. Examples of the
+use of this function may be found in the demo programs, where it is
+used to display introductions. In those examples the advanced use of
+optional prefixes, suffixes and filled lines to draw a box around the
+text is also illustrated.
+
+.sp
+.nf
+  int gl_display_text(GetLine *gl, int indentation,
+                      const char *prefix,
+                      const char *suffix, int fill_char,
+                      int def_width, int start,
+                      const char *string);
+.fi
+.sp
+If \f3gl\f1 isn't currently connected to a terminal, for example if
+the output of a program that uses \f3gl_get_line()\f1 is being piped
+to another program or redirected to a file, then the value of the
+\f3def_width\f1 parameter is used as the terminal width.
+
+The \f3indentation\f1 argument specifies the number of characters to
+use to indent each line of ouput. The \f3fill_char\f1 argument
+specifies the character that will be used to perform this indentation.
+
+The \f3prefix\f1 argument can either be \f3NULL\f1, or be a string to
+place at the beginning of each new line (after any indentation).
+Similarly, the \f3suffix\f1 argument can either be \f3NULL\f1, or be a
+string to place at the end of each line. The suffix is placed flush
+against the right edge of the terminal, and any space between its
+first character and the last word on that line is filled with the
+character specified via the \f3fill_char\f1 argument.  Normally the
+fill-character is a space.
+
+The \f3start\f1 argument tells \f3gl_display_text()\f1 how many
+characters have already been written to the current terminal line, and
+thus tells it the starting column index of the cursor.  Since the
+return value of \f3gl_display_text()\f1 is the ending column index of
+the cursor, by passing the return value of one call to the \f3start\f1
+argument of the next call, a paragraph that is broken between more
+than one string can be composed by calling \f3gl_display_text()\f1 for
+each successive portion of the paragraph. Note that literal newline
+characters are necessary at the end of each paragraph to force a new
+line to be started.
+
+On error, \f3gl_display_text()\f1 returns -1.
+
+.SH CALLBACK FUNCTION FACILITIES
+
+Unless otherwise stated, callback functions, such as tab
+completion callbacks and event callbacks should not call any
+functions in this module. The following functions, however,
+are designed specifically to be used by callback functions.
+.sp
+Calling the \f3gl_replace_prompt()\f1 function from a
+callback tells \f3gl_get_line()\f1 to display a different
+prompt when the callback returns. Except in non-blocking
+server mode, it has no effect if used between calls to
+\f3gl_get_line()\f1. In non-blocking server mode (see the
+\f3gl_io_mode(@FUNC_MANEXT@)\f1 man page, when used between two calls to
+\f3gl_get_line()\f1 that are operating on the same input
+line, the current input line will be re-drawn with the new
+prompt on the following call to \f3gl_get_line()\f1.
+
+.sp
+.nf
+  void gl_replace_prompt(GetLine *gl, const char *prompt);
+.fi
+.sp
+
+.SH INTERNATIONAL CHARACTER SETS
+
+Since libtecla version 1.4.0, \f3gl_get_line()\f1 has been 8-bit
+clean. This means that all 8-bit characters that are printable in the
+user's current locale are now displayed verbatim and included in the
+returned input line.  Assuming that the calling program correctly
+contains a call like the following,
+.sp
+.nf
+  setlocale(LC_CTYPE, "");
+.fi
+.sp
+then the current locale is determined by the first of the environment
+variables \f3LC_CTYPE\f1, \f3LC_ALL\f1, and \f3LANG\f1, that is found
+to contain a valid locale name. If none of these variables are
+defined, or the program neglects to call setlocale, then the default
+\f3C\f1 locale is used, which is US 7-bit ASCII. On most unix-like
+platforms, you can get a list of valid locales by typing the command:
+.sp
+.nf
+  locale -a
+.fi
+.sp
+at the shell prompt. Further documentation on how the user can make use
+of this to enter international characters can be found in the
+\f3tecla(@MISC_MANEXT@)\f1 man page.
+
+.SH THREAD SAFETY
+
+In a multi-threaded program, you should use the libtecla_r.a version
+of the library. This uses reentrant versions of system functions,
+where available. Unfortunately neither terminfo nor termcap were
+designed to be reentrant, so you can't safely use the functions of the
+getline module in multiple threads (you can use the separate
+file-expansion and word-completion modules in multiple threads, see
+the corresponding man pages for details). However due to the use of
+POSIX reentrant functions for looking up home directories etc, it is
+safe to use this module from a single thread of a multi-threaded
+program, provided that your other threads don't use any termcap or
+terminfo functions.
+
+.SH FILES
+.nf
+libtecla.a      -    The tecla library
+libtecla.h      -    The tecla header file.
+~/.teclarc      -    The personal tecla customization file.
+.fi
+
+.SH SEE ALSO
+.nf
+libtecla(@LIBR_MANEXT@), gl_io_mode(@FUNC_MANEXT@), tecla(@MISC_MANEXT@), ef_expand_file(@FUNC_MANEXT@),
+cpl_complete_word(@FUNC_MANEXT@), pca_lookup_file(@FUNC_MANEXT@)
+.fi
+
+.SH AUTHOR
+Martin Shepherd  (mcs@astro.caltech.edu)

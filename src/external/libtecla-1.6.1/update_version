@@ -1,0 +1,82 @@
+#!/bin/sh
+#-----------------------------------------------------------------------
+# Change the version number of the library. This changes the number in
+# every file that it is known to appear in.
+#
+# Usage:
+#  update_version major minor micro
+#-----------------------------------------------------------------------
+
+usage="$0 major minor micro"
+
+if [ $# -ne 3 ]; then
+  echo $usage
+  exit 1
+fi
+
+# Get the three components of the version number.
+
+major="$1"
+minor="$2"
+micro="$3"
+
+# Everything will need to be reconfigured after this change, so
+# discard any existing configuration.
+
+make distclean 2>/dev/null
+
+# Check that the version components are all positive integers.
+
+for c in $major $minor $micro; do
+  if echo "$c" | awk '{exit $1 ~ /^[0-9]+$/}'; then
+    echo 'Version number components must all be positive integers.'
+    exit 1
+  fi
+done
+
+#
+# Update the version number in the configure.in script.
+#
+ed -s configure.in << EOF
+/^MAJOR_VER=\"[0-9][0-9]*\"/ s/^.*$/MAJOR_VER=\"$major\"/
+/^MINOR_VER=\"[0-9][0-9]*\"/ s/^.*$/MINOR_VER=\"$minor\"/
+/^MICRO_VER=\"[0-9][0-9]*\"/ s/^.*$/MICRO_VER=\"$micro\"/
+w
+q
+EOF
+
+if which autoconf 1>/dev/null 2>&1; then
+  autoconf
+else
+  echo 'Note that autoconf needs to be run.'
+fi
+
+#
+# Update the version number in the libtecla header file script.
+#
+ed -s libtecla.h << EOF
+/^#define TECLA_MAJOR_VER [0-9][0-9]*/ s/^.*$/#define TECLA_MAJOR_VER $major/
+/^#define TECLA_MINOR_VER [0-9][0-9]*/ s/^.*$/#define TECLA_MINOR_VER $minor/
+/^#define TECLA_MICRO_VER [0-9][0-9]*/ s/^.*$/#define TECLA_MICRO_VER $micro/
+w
+q
+EOF
+
+#
+# Update the version number in the README file.
+#
+ed -s README << EOF
+/version [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]* / s/version [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/version $major.$minor.$micro/
+w
+q
+EOF
+
+#
+# Update the version number in the html index file.
+#
+ed -s html/index.html << EOF
+/version [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\./ s/version [0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*/version $major.$minor.$micro/g
+/libtecla-[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\./ s/libtecla-[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\./libtecla-$major.$minor.$micro./g
+w
+q
+EOF

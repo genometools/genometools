@@ -1,0 +1,365 @@
+.\" Copyright (c) 2001, 2002, 2003, 2004 by Martin C. Shepherd
+.\" 
+.\" All rights reserved.
+.\" 
+.\" Permission is hereby granted, free of charge, to any person obtaining a
+.\" copy of this software and associated documentation files (the
+.\" "Software"), to deal in the Software without restriction, including
+.\" without limitation the rights to use, copy, modify, merge, publish,
+.\" distribute, and/or sell copies of the Software, and to permit persons
+.\" to whom the Software is furnished to do so, provided that the above
+.\" copyright notice(s) and this permission notice appear in all copies of
+.\" the Software and that both the above copyright notice(s) and this
+.\" permission notice appear in supporting documentation.
+.\" 
+.\" THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+.\" OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+.\" MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+.\" OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+.\" HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL
+.\" INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+.\" FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+.\" NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+.\" WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\" 
+.\" Except as contained in this notice, the name of a copyright holder
+.\" shall not be used in advertising or otherwise to promote the sale, use
+.\" or other dealings in this Software without prior written authorization
+.\" of the copyright holder.
+.TH pca_lookup_file @FUNC_MANEXT@
+.SH NAME
+pca_lookup_file, del_PathCache, del_PcaPathConf, new_PathCache, new_PcaPathConf, pca_last_error, pca_path_completions, pca_scan_path, pca_set_check_fn, ppc_file_start, ppc_literal_escapes \- lookup a file in a list of directories
+.SH SYNOPSIS
+.nf
+#include <libtecla.h>
+
+PathCache *new_PathCache(void);
+
+PathCache *del_PathCache(PathCache *pc);
+
+int pca_scan_path(PathCache *pc, const char *path);
+
+void pca_set_check_fn(PathCache *pc, CplCheckFn *check_fn,
+                      void *data);
+
+char *pca_lookup_file(PathCache *pc, const char *name,
+                      int name_len, int literal);
+
+const char *pca_last_error(PathCache *pc);
+
+CPL_MATCH_FN(pca_path_completions);
+
+.fi
+
+.SH DESCRIPTION
+
+The \f3PathCache\f1 object is part of the tecla library (see the
+libtecla(@LIBR_MANEXT@) man page).
+.sp
+\f3PathCache\f1 objects allow an application to search for files in
+any colon separated list of directories, such as the unix execution
+PATH environment variable. Files in absolute directories are cached in
+a \f3PathCache\f1 object, whereas relative directories are scanned as
+needed. Using a \f3PathCache\f1 object, you can look up the full
+pathname of a simple filename, or you can obtain a list of the
+possible completions of a given filename prefix. By default all files
+in the list of directories are targets for lookup and completion, but
+a versatile mechanism is provided for only selecting specific types of
+files. The obvious application of this facility is to provide
+Tab-completion and lookup of executable commands in the unix PATH, so
+an optional callback which rejects all but executable files, is
+provided.
+.sp
+.SH AN EXAMPLE
+
+Under UNIX, the following example program looks up and displays the
+full pathnames of each of the command names on the command line.
+.sp
+.nf
+  #include <stdio.h>
+  #include <stdlib.h>
+  #include <libtecla.h>
+
+  int main(int argc, char *argv[])
+  {
+    int i;
+  /*
+   * Create a cache for executable files.
+   */
+    PathCache *pc = new_PathCache();
+    if(!pc)
+      exit(1);
+  /*
+   * Scan the user's PATH for executables.
+   */
+    if(pca_scan_path(pc, getenv("PATH"))) {
+      fprintf(stderr, "%s\\n", pca_last_error(pc));
+      exit(1);
+    }
+  /*
+   * Arrange to only report executable files.
+   */
+   pca_set_check_fn(pc, cpl_check_exe, NULL);
+  /*
+   * Lookup and display the full pathname of each of the
+   * commands listed on the command line.
+   */
+    for(i=1; i<argc; i++) {
+      char *cmd = pca_lookup_file(pc, argv[i], -1, 0);
+      printf("The full pathname of '%s' is %s\\n", argv[i],
+             cmd ? cmd : "unknown");
+    }
+    pc = del_PathCache(pc);  /* Clean up */
+    return 0;
+  }
+.fi
+.sp
+The following is an example of what this does on my laptop under
+linux:
+.sp
+.nf
+  $ ./example less more blob
+  The full pathname of 'less' is /usr/bin/less
+  The full pathname of 'more' is /bin/more
+  The full pathname of 'blob' is unknown
+  $ 
+.fi
+.sp
+.SH FUNCTION DESCRIPTIONS
+
+In order to use the facilities of this module, you must first allocate
+a \f3PathCache\f1 object by calling the \f3new_PathCache()\f1
+constructor function.
+.sp
+.nf
+  PathCache *new_PathCache(void)
+.fi
+.sp
+This function creates the resources needed to cache and lookup files
+in a list of directories. It returns \f3NULL\f1 on error.
+.sp
+.SH POPULATING THE CACHE
+Once you have created a cache, it needs to be populated with files.
+To do this, call the \f3pca_scan_path()\f1 function.
+.sp
+.nf
+  int pca_scan_path(PathCache *pc, const char *path);
+.fi
+.sp
+Whenever this function is called, it discards the current contents of
+the cache, then scans the list of directories specified in its
+\f3path\f1 argument for files. The \f3path\f1 argument must be a
+string containing a colon-separated list of directories, such as
+\f3"/usr/bin:/home/mcs/bin:."\f1. This can include directories
+specified by absolute pathnames such as \f3"/usr/bin"\f1, as well as
+sub-directories specified by relative pathnames such as \f3"."\f1 or
+\f3"bin"\f1. Files in the absolute directories are immediately cached
+in the specified \f3PathCache\f1 object, whereas sub-directories,
+whose identities obviously change whenever the current working
+directory is changed, are marked to be scanned on the fly whenever a
+file is looked up.
+.sp
+On success this function return \f30\f1. On error it returns \f31\f1,
+and a description of the error can be obtained by calling
+\f3pca_last_error(pc)\f1.
+.sp
+.SH LOOKING UP FILES
+
+Once the cache has been populated with files, you can look up the full
+pathname of a file, simply by specifying its filename to
+\f3pca_lookup_file()\f1.
+.sp
+.nf
+  char *pca_lookup_file(PathCache *pc, const char *name,
+                        int name_len, int literal);
+.fi
+.sp
+To make it possible to pass this function a filename which is actually
+part of a longer string, the \f3name_len\f1 argument can be used to
+specify the length of the filename at the start of the \f3name[]\f1
+argument. If you pass \f3-1\f1 for this length, the length of the
+string will be determined with \f3strlen()\f1. If the \f3name[]\f1
+string might contain backslashes that escape the special meanings of
+spaces and tabs within the filename, give the \f3literal\f1 argument,
+the value \f30\f1. Otherwise, if backslashes should be treated as
+normal characters, pass \f31\f1 for the value of the \f3literal\f1
+argument.
+
+.SH FILENAME COMPLETION
+
+Looking up the potential completions of a filename-prefix in the
+filename cache, is achieved by passing the provided
+\f3pca_path_completions()\f1 callback function to the
+\f3cpl_complete_word()\f1 function (see the \f3cpl_complete_word(@FUNC_MANEXT@)\f1
+man page).
+.sp
+.nf
+  CPL_MATCH_FN(pca_path_completions);
+.fi
+.sp
+This callback requires that its \f3data\f1 argument be a pointer to a
+\f3PcaPathConf\f1 object. Configuration objects of this type are
+allocated by calling \f3new_PcaPathConf()\f1.
+.sp
+.nf
+  PcaPathConf *new_PcaPathConf(PathCache *pc);
+.fi
+.sp
+This function returns an object initialized with default configuration
+parameters, which determine how the \f3cpl_path_completions()\f1
+callback function behaves. The functions which allow you to
+individually change these parameters are discussed below.
+.sp
+By default, the \f3pca_path_completions()\f1 callback function
+searches backwards for the start of the filename being completed,
+looking for the first un-escaped space or the start of the input
+line. If you wish to specify a different location, call
+\f3ppc_file_start()\f1 with the index at which the filename starts in
+the input line. Passing \f3start_index=-1\f1 re-enables the default
+behavior.
+.sp
+.nf
+  void ppc_file_start(PcaPathConf *ppc, int start_index);
+.fi
+.sp
+By default, when \f3pca_path_completions()\f1 looks at a filename in
+the input line, each lone backslash in the input line is interpreted
+as being a special character which removes any special significance of
+the character which follows it, such as a space which should be taken
+as part of the filename rather than delimiting the start of the
+filename. These backslashes are thus ignored while looking for
+completions, and subsequently added before spaces, tabs and literal
+backslashes in the list of completions. To have unescaped backslashes
+treated as normal characters, call \f3ppc_literal_escapes()\f1 with a
+non-zero value in its \f3literal\f1 argument.
+.sp
+.nf
+  void ppc_literal_escapes(PcaPathConf *ppc, int literal);
+.fi
+.sp
+When you have finished with a \f3PcaPathConf\f1 variable, you can pass
+it to the \f3del_PcaPathConf()\f1 destructor function to reclaim its
+memory.
+.sp
+.nf
+  PcaPathConf *del_PcaPathConf(PcaPathConf *ppc);
+.fi
+.sp
+
+.SH BEING SELECTIVE
+If you are only interested in certain types or files, such as, for
+example, executable files, or files whose names end in a particular
+suffix, you can arrange for the file completion and lookup functions
+to be selective in the filenames that they return.  This is done by
+registering a callback function with your \f3PathCache\f1
+object. Thereafter, whenever a filename is found which either matches
+a filename being looked up, or matches a prefix which is being
+completed, your callback function will be called with the full
+pathname of the file, plus any application-specific data that you
+provide, and if the callback returns \f31\f1 the filename will be
+reported as a match, and if it returns \f30\f1, it will be ignored.
+Suitable callback functions and their prototypes should be declared
+with the following macro. The \f3CplCheckFn\f1 \f3typedef\f1 is also
+provided in case you wish to declare pointers to such functions.
+.sp
+.nf
+  #define CPL_CHECK_FN(fn) int (fn)(void *data, \\
+                                    const char *pathname)
+  typedef CPL_CHECK_FN(CplCheckFn);
+.fi
+.sp
+Registering one of these functions involves calling the
+\f3pca_set_check_fn()\f1 function. In addition to the callback
+function, passed via the \f3check_fn\f1 argument, you can pass a
+pointer to anything via the \f3data\f1 argument. This pointer will be
+passed on to your callback function, via its own \f3data\f1 argument,
+whenever it is called, so this provides a way to pass appplication
+specific data to your callback.
+.sp
+.nf
+  void pca_set_check_fn(PathCache *pc, CplCheckFn *check_fn,
+                        void *data);
+.fi
+.sp
+Note that these callbacks are passed the full pathname of each
+matching file, so the decision about whether a file is of interest can
+be based on any property of the file, not just its filename. As an
+example, the provided \f3cpl_check_exe()\f1 callback function looks at
+the executable permissions of the file and the permissions of its
+parent directories, and only returns \f31\f1 if the user has execute
+permission to the file. This callback function can thus be used to
+lookup or complete command names found in the directories listed in
+the user's \f3PATH\f1 environment variable. The example program given
+earlier in this man page provides a demonstration of this.
+.sp
+Beware that if somebody tries to complete an empty string, your
+callback will get called once for every file in the cache, which could
+number in the thousands. If your callback does anything time
+consuming, this could result in an unacceptable delay for the user, so
+callbacks should be kept short.
+.sp
+To improve performance, whenever one of these callbacks is called, the
+choice that it makes is cached, and the next time the corresponding
+file is looked up, instead of calling the callback again, the cached
+record of whether it was accepted or rejected is used. Thus if
+somebody tries to complete an empty string, and hits tab a second time
+when nothing appears to happen, there will only be one long delay,
+since the second pass will operate entirely from the cached
+dispositions of the files. These cached dipositions are discarded
+whenever \f3pca_scan_path()\f1 is called, and whenever
+\f3pca_set_check_fn()\f1 is called with changed callback function or
+data arguments.
+
+.SH ERROR HANDLING
+
+If \f3pca_scan_path()\f1 reports that an error occurred by returning
+\f31\f1, you can obtain a terse description of the error by calling
+\f3pca_last_error(pc)\f1. This returns an internal string containing
+an error message.
+.sp
+.nf
+  const char *pca_last_error(PathCache *pc);
+.fi
+.sp
+
+.SH CLEANING UP
+
+Once you have finished using a \f3PathCache\f1 object, you can reclaim
+its resources by passing it to the \f3del_PathCache()\f1 destructor
+function. This takes a pointer to one of these objects, and always
+returns \f3NULL\f1.
+.sp
+.nf
+  PathCache *del_PathCache(PathCache *pc);
+.fi
+.sp
+.SH THREAD SAFETY
+
+In multi-threaded programs, you should use the \f3libtecla_r.a\f1
+version of the library. This uses POSIX reentrant functions where
+available (hence the \f3_r\f1 suffix), and disables features that rely
+on non-reentrant system functions. In the case of this module, the
+only disabled feature is username completion in \f3~username/\f1
+expressions, in \f3cpl_path_completions()\f1.
+
+Using the \f3libtecla_r.a\f1 version of the library, it is safe to use
+the facilities of this module in multiple threads, provided that each
+thread uses a separately allocated \f3PathCache\f1 object. In other
+words, if two threads want to do path searching, they should each call
+\f3new_PathCache()\f1 to allocate their own caches.
+
+.SH FILES
+.nf
+libtecla.a    -    The tecla library
+libtecla.h    -    The tecla header file.
+.fi
+
+.SH SEE ALSO
+
+.nf
+libtecla(@LIBR_MANEXT@), gl_get_line(@FUNC_MANEXT@), ef_expand_file(@FUNC_MANEXT@),
+cpl_complete_word(@FUNC_MANEXT@)
+.fi
+
+.SH AUTHOR
+Martin Shepherd  (mcs@astro.caltech.edu)

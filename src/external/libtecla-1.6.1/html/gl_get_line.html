@@ -1,0 +1,1996 @@
+<head>
+<title>Manual Page</title>
+</head>
+<body>
+<pre>
+<a href="gl_get_line.html"><b>gl_get_line</b></a>                          <a href="gl_get_line.html"><b>gl_get_line</b></a>
+
+
+
+</pre><h2>NAME</h2><pre>
+       gl_get_line,    new_GetLine,    del_GetLine,   gl_customize_completion,
+       gl_change_terminal, gl_configure_getline, gl_load_history, gl_save_his-
+       tory,   gl_group_history,   gl_show_history,  gl_watch_fd,  gl_inactiv-
+       ity_timeout,  gl_terminal_size,  gl_set_term_size,   gl_resize_history,
+       gl_limit_history,  gl_clear_history,  gl_toggle_history, gl_lookup_his-
+       tory,  gl_state_of_history,  gl_range_of_history,   gl_size_of_history,
+       gl_echo_mode,   gl_replace_prompt,  gl_prompt_style,  gl_ignore_signal,
+       gl_trap_signal, gl_last_signal, gl_completion_action,  gl_display_text,
+       gl_return_status,  gl_error_message, gl_catch_blocked, gl_list_signals,
+       gl_bind_keyseq, gl_erase_terminal, gl_automatic_history, gl_append_his-
+       tory,  gl_query_char, gl_read_char - allow the user to compose an input
+       line
+
+</pre><h2>SYNOPSIS</h2><pre>
+       #include &lt;stdio.h&gt;
+       #include &lt;libtecla.h&gt;
+
+       GetLine *new_GetLine(size_t linelen, size_t histlen);
+
+       GetLine *del_GetLine(GetLine *gl);
+
+       char *gl_get_line(GetLine *gl, const char *prompt,
+                         const char *start_line, int start_pos);
+
+       int gl_query_char(GetLine *gl, const char *prompt,
+                         char defchar);
+
+       int gl_read_char(GetLine *gl);
+
+       int gl_customize_completion(GetLine *gl, void *data,
+                                   CplMatchFn *match_fn);
+
+       int gl_change_terminal(GetLine *gl, FILE *input_fp,
+                              FILE *output_fp, const char *term);
+
+       int gl_configure_getline(GetLine *gl,
+                                const char *app_string,
+                                const char *app_file,
+                                const char *user_file);
+
+       int gl_bind_keyseq(GetLine *gl, GlKeyOrigin origin,
+                          const char *keyseq, const char *action);
+
+       int gl_save_history(GetLine *gl, const char *filename,
+                           const char *comment, int max_lines);
+
+       int gl_load_history(GetLine *gl, const char *filename,
+                           const char *comment);
+
+       int gl_watch_fd(GetLine *gl, int fd, GlFdEvent event,
+                       GlFdEventFn *callback, void *data);
+
+       int gl_inactivity_timeout(GetLine *gl, GlTimeoutFn *callback,
+                          void *data, unsigned long sec,
+                          unsigned long nsec);
+
+       int gl_group_history(GetLine *gl, unsigned stream);
+
+       int gl_show_history(GetLine *gl, FILE *fp,
+                           const char *fmt, int all_groups,
+                           int max_lines);
+
+       int gl_resize_history(GetLine *gl, size_t bufsize);
+
+       void gl_limit_history(GetLine *gl, int max_lines);
+
+       void gl_clear_history(GetLine *gl, int all_groups);
+
+       void gl_toggle_history(GetLine *gl, int enable);
+
+       GlTerminalSize gl_terminal_size(GetLine *gl,
+                                       int def_ncolumn,
+                                       int def_nline);
+
+       int gl_set_term_size(GetLine *gl, int ncolumn, int nline);
+
+       int gl_lookup_history(GetLine *gl, unsigned long id,
+                             GlHistoryLine *hline);
+
+       void gl_state_of_history(GetLine *gl,
+                                GlHistoryState *state);
+
+       void gl_range_of_history(GetLine *gl,
+                                GlHistoryRange *range);
+
+       void gl_size_of_history(GetLine *gl, GlHistorySize *size);
+
+       void gl_echo_mode(GetLine *gl, int enable);
+
+       void gl_replace_prompt(GetLine *gl, const char *prompt);
+
+       void gl_prompt_style(GetLine *gl, GlPromptStyle style);
+
+       int gl_ignore_signal(GetLine *gl, int signo);
+
+       int gl_trap_signal(GetLine *gl, int signo, unsigned flags,
+                          GlAfterSignal after, int errno_value);
+
+       int gl_last_signal(GetLine *gl);
+
+       int gl_completion_action(GetLine *gl,
+                                void *data, CplMatchFn *match_fn,
+                                int list_only, const char *name,
+                                const char *keyseq);
+
+       int gl_register_action(GetLine *gl, void *data,
+                              GlActionFn *fn, const char *name,
+                              const char *keyseq);
+
+       int gl_display_text(GetLine *gl, int indentation,
+                           const char *prefix,
+                           const char *suffix, int fill_char,
+                           int def_width, int start,
+                           const char *string);
+
+       GlReturnStatus gl_return_status(GetLine *gl);
+
+       const char *gl_error_message(GetLine *gl, char *buff,
+                                    size_t n);
+
+       void gl_catch_blocked(GetLine *gl);
+
+       int gl_list_signals(GetLine *gl, sigset_t *set);
+
+       int gl_append_history(GetLine *gl, const char *line);
+
+       int gl_automatic_history(GetLine *gl, int enable);
+
+
+
+</pre><h2>DESCRIPTION</h2><pre>
+       The gl_get_line() function is part of the tecla library (see the libte-
+       cla(@LIBR_MANEXT@) man page). If the user is typing at a terminal, each
+       call prompts them for an line of input, then provides interactive edit-
+       ing facilities, similar to those of the unix tcsh shell. In addition to
+       simple command-line editing, it supports recall of  previously  entered
+       command  lines,  TAB  completion  of  file names, and in-line wild-card
+       expansion of filenames. Documentation of both the  user-level  command-
+       line  editing features and all user configuration options, can be found
+       in the <a href="tecla.html"><b>tecla</b></a> man page. This  man  page  concerns  itself
+       with  documentation for programmers interested in using this library in
+       their application.
+
+
+</pre><h2>AN EXAMPLE</h2><pre>
+       The following shows a complete example of how to use the  gl_get_line()
+       function to get input from the user:
+
+         #include &lt;stdio.h&gt;
+         #include &lt;locale.h&gt;
+         #include &lt;libtecla.h&gt;
+
+         int main(int argc, char *argv[])
+         {
+           char *line;    /* The line that the user typed */
+           GetLine *gl;   /* The gl_get_line() resource object */
+
+           setlocale(LC_CTYPE, ""); /* Adopt the user's choice */
+                                    /* of character set. */
+
+           gl = new_GetLine(1024, 2048);
+           if(!gl)
+             return 1;
+
+           while((line=gl_get_line(gl, "$ ", NULL, -1)) != NULL &amp;&amp;
+                  strcmp(line, "exit\n") != 0)
+             printf("You typed: %s\n", line);
+
+           gl = del_GetLine(gl);
+           return 0;
+         }
+
+       In  the  example, first the resources needed by the gl_get_line() func-
+       tion are created by calling new_GetLine(). This  allocates  the  memory
+       used  in  subsequent calls to the gl_get_line() function, including the
+       history buffer for recording previously entered lines. Then one or more
+       lines are read from the user, until either an error occurs, or the user
+       types exit. Then finally the resources that were allocated by  new_Get-
+       Line(),  are  returned to the system by calling del_GetLine(). Note the
+       use of the NULL return value of del_GetLine() to make gl NULL. This  is
+       a safety precaution. If the program subsequently attempts to pass gl to
+       gl_get_line(), said  function  will  complain,  and  return  an  error,
+       instead of attempting to use the deleted resource object.
+
+
+
+</pre><h2>THE FUNCTIONS USED IN THE EXAMPLE</h2><pre>
+       The descriptions of the functions used in the example are as follows:
+
+         GetLine *new_GetLine(size_t linelen, size_t histlen)
+
+       This  function creates the resources used by the gl_get_line() function
+       and returns an opaque pointer to the object that  contains  them.   The
+       maximum  length of an input line is specified via the linelen argument,
+       and the number of bytes to allocate for storing history lines is set by
+       the histlen argument. History lines are stored back-to-back in a single
+       buffer of this size. Note that this means that the  number  of  history
+       lines  that  can be stored at any given time, depends on the lengths of
+       the individual lines.  If you want to place an upper limit on the  num-
+       ber  of  lines  that can be stored, see the gl_limit_history() function
+       described later. If you don't want history at all, specify  histlen  as
+       zero, and no history buffer will be allocated.
+
+       On error, a message is printed to stderr and NULL is returned.
+
+         GetLine *del_GetLine(GetLine *gl)
+
+       This  function  deletes  the resources that were returned by a previous
+       call to new_GetLine(). It always returns NULL (ie a deleted object). It
+       does nothing if the gl argument is NULL.
+
+         char *gl_get_line(GetLine *gl, const char *prompt,
+                          const char *start_line, int start_pos);
+
+       The  gl_get_line()  function  can be called any number of times to read
+       input from the user. The gl argument must have been previously returned
+       by  a call to new_GetLine(). The prompt argument should be a normal NUL
+       terminated string, specifying the prompt to present the user  with.  By
+       default  prompts  are  displayed  literally,  but  if  enabled with the
+       gl_prompt_style() function (see later), prompts can contain  directives
+       to  do underlining, switch to and from bold fonts, or turn highlighting
+       on and off.
+
+       If you want to specify the initial contents of the line, for  the  user
+       to  edit,  pass the desired string via the start_line argument. You can
+       then specify which character of this line the cursor is initially posi-
+       tioned  over,  using  the  start_pos argument. This should be -1 if you
+       want the cursor to follow the last character of the start line. If  you
+       don't want to preload the line in this manner, send start_line as NULL,
+       and set start_pos to -1. Note that the line  pointer  returned  by  one
+       call  to  gl_get_line()  can  be  passed  back  to  the  next  call  to
+       gl_get_line() via the start_line. This allows the application  to  take
+       the  last entered line, and if it contains an error, to then present it
+       back to the user for re-editing, with the cursor  initially  positioned
+       where the error was encountered.
+
+       The gl_get_line() function returns a pointer to the line entered by the
+       user, or NULL on error or at the end of the input. The returned pointer
+       is  part  of  the  specified gl resource object, and thus should not be
+       free'd by the caller, or assumed to be unchanging from one call to  the
+       next.  When  reading  from a user at a terminal, there will always be a
+       newline character at the end of the returned line.  When standard input
+       is being taken from a pipe or a file, there will similarly be a newline
+       unless the input line was too long to store in the internal buffer.  In
+       the latter case you should call gl_get_line() again to read the rest of
+       the line. Note  that  this  behavior  makes  gl_get_line()  similar  to
+       fgets().    In   fact   when   stdin   isn't   connected  to  a  termi-
+       nal,gl_get_line() just calls fgets().
+
+
+</pre><h2>THE RETURN STATUS OF GL_GET_LINE</h2><pre>
+       As described above, the gl_get_line() function has two possible  return
+       values;  a pointer to the completed input line, or NULL. Extra informa-
+       tion about what caused gl_get_line() to return  is  available  both  by
+       inspecting errno, and by calling the gl_return_status() function.
+
+
+         GlReturnStatus gl_return_status(GetLine *gl);
+
+
+       The  following  are  the  possible enumerated values that this function
+       returns.
+
+
+         GLR_NEWLINE     -  The last call to gl_get_line()
+                            successfully returned a completed
+                            input line.
+
+         GLR_BLOCKED     -  gl_get_line() was in non-blocking
+                            server mode, and returned early to
+                            avoid blocking the process while
+                            waiting for terminal I/O. The
+                            gl_pending_io() function can be
+                            used to see what type of I/O
+                            gl_get_line() was waiting for.
+                            (see the <a href="gl_io_mode.html"><b>gl_io_mode</b></a> man page
+                            for details).
+
+         GLR_SIGNAL      -  A signal was caught by
+                            gl_get_line() that had an
+                            after-signal disposition of
+                            GLS_ABORT (See gl_trap_signal()).
+
+         GLR_TIMEOUT     -  The inactivity timer expired while
+                            gl_get_line() was waiting for
+                            input, and the timeout callback
+                            function returned GLTO_ABORT.
+                            See gl_inactivity_timeout() for
+                            information about timeouts.
+
+         GLR_FDABORT     -  An application I/O callack returned
+                            GLFD_ABORT (see gl_watch_fd()).
+
+         GLR_EOF         -  End of file reached. This can happen
+                            when input is coming from a file or a
+                            pipe, instead of the terminal. It also
+                            occurs if the user invokes the
+                            list-or-eof or del-char-or-list-or-eof
+                            actions at the start of a new line.
+
+         GLR_ERROR       -  An unexpected error caused
+                            gl_get_line() to abort (consult
+                            errno and/or
+                            gl_error_message() for details.
+
+
+       When gl_return_status() returns GLR_ERROR, and the value of errno isn't
+       sufficient to explain what happened, you can use the gl_error_message()
+       function to request a description of the last error that occurred.
+
+
+         const char *gl_error_message(GetLine *gl, char *buff,
+                                      size_t n);
+
+
+       The return value is a pointer to the message that occurred. If the buff
+       argument  is  NULL, this will be a pointer to a buffer within gl, who's
+       value will probably change on the next call to any function  associated
+       with gl_get_line(). Otherwise, if a non-NULL buff argument is provided,
+       the error message, including a '\0' terminator, will be written  within
+       the  first  n  elements  of this buffer, and the return value will be a
+       pointer to the first element of this buffer. If the message  won't  fit
+       in the provided buffer, it will be truncated to fit.
+
+
+</pre><h2>OPTIONAL PROMPT FORMATTING</h2><pre>
+       Whereas by default the prompt string that you specify is displayed lit-
+       erally, without any special interpretation of the characters within it,
+       the  gl_prompt_style()  function can be used to enable optional format-
+       ting directives within the prompt.
+
+         void gl_prompt_style(GetLine *gl, GlPromptStyle style);
+
+       The style argument, which specifies the formatting style, can take  any
+       of the following values:
+
+         GL_FORMAT_PROMPT   -  In this style, the formatting
+                               directives described below, when
+                               included in prompt strings, are
+                               interpreted as follows:
+
+                                 %B  -  Display subsequent
+                                        characters with a bold
+                                        font.
+                                 %b  -  Stop displaying characters
+                                        with the bold font.
+                                 %F  -  Make subsequent characters
+                                        flash.
+                                 %f  -  Turn off flashing
+                                        characters.
+                                 %U  -  Underline subsequent
+                                        characters.
+                                 %u  -  Stop underlining
+                                        characters.
+                                 %P  -  Switch to a pale (half
+                                        brightness) font.
+                                 %p  -  Stop using the pale font.
+                                 %S  -  Highlight subsequent
+                                        characters (also known as
+                                        standout mode).
+                                 %s  -  Stop highlighting
+                                        characters.
+                                 %V  -  Turn on reverse video.
+                                 %v  -  Turn off reverse video.
+                                 %%  -  Display a single %
+                                        character.
+
+                               For example, in this mode, a prompt
+                               string like "%UOK%u$ " would
+                               display the prompt "OK$ ",
+                               but with the OK part
+                               underlined.
+
+                               Note that although a pair of
+                               characters that starts with a %
+                               character, but doesn't match any of
+                               the above directives is displayed
+                               literally, if a new directive is
+                               subsequently introduced which does
+                               match, the displayed prompt will
+                               change, so it is better to always
+                               use %% to display a literal %.
+
+                               Also note that not all terminals
+                               support all of these text
+                               attributes, and that some substitute
+                               a different attribute for missing
+                               ones.
+
+         GL_LITERAL_PROMPT  -  In this style, the prompt string is
+                               printed literally. This is the
+                               default style.
+
+
+</pre><h2>ALTERNATE CONFIGURATION SOURCES</h2><pre>
+       As mentioned above, by default users have the option of configuring the
+       behavior of gl_get_line() via a configuration file called  .teclarc  in
+       their  home directories. The fact that all applications share this same
+       configuration file is both an advantage and a  disadvantage.   In  most
+       cases it is an advantage, since it encourages uniformity, and frees the
+       user from having to configure each  application  separately.   In  some
+       applications, however, this single means of configuration is a problem.
+       This is particularly  true  of  embedded  software,  where  there's  no
+       filesystem  to read a configuration file from, and also in applications
+       where a radically different choice of keybindings is needed to  emulate
+       a  legacy  keyboard  interface.  To cater for such cases, the following
+       function allows the application to control where configuration informa-
+       tion is read from.
+
+
+         int gl_configure_getline(GetLine *gl,
+                                  const char *app_string,
+                                  const char *app_file,
+                                  const char *user_file);
+
+
+       It allows the configuration commands that would normally be read from a
+       user's ~/.teclarc file, to be read from any or none of,  a  string,  an
+       application specific configuration file, and/or a user-specific config-
+       uration file. If this function is  called  before  the  first  call  to
+       gl_get_line(),  the default behavior of reading ~/.teclarc on the first
+       call to  gl_get_line()  is  disabled,  so  all  configuration  must  be
+       achieved  using the configuration sources specified with this function.
+
+       If app_string != NULL, then it is interpreted as  a  string  containing
+       one  or  more  configuration commands, separated from each other in the
+       string by embedded newline characters. If app_file != NULL then  it  is
+       interpreted  as the full pathname of an application-specific configura-
+       tion file. If user_file != NULL then it  is  interpreted  as  the  full
+       pathname of a user-specific configuration file, such as ~/.teclarc. For
+       example, in the following call,
+
+
+         gl_configure_getline(gl, "edit-mode vi \n nobeep",
+                                  "/usr/share/myapp/teclarc",
+                                  "~/.teclarc");
+
+
+       the app_string argument causes the calling application to start  in  vi
+       edit-mode,  instead of the default emacs mode, and turns off the use of
+       the terminal bell by the library. It then attempts to read  system-wide
+       configuration     commands     from    an    optional    file    called
+       /usr/share/myapp/teclarc, then finally reads  user-specific  configura-
+       tion  commands from an optional .teclarc file in the user's home direc-
+       tory. Note that the arguments are listed in ascending order  of  prior-
+       ity,  with  the  contents  of app_string being potentially overriden by
+       commands in app_file, and commands in app_file potentially being  over-
+       riden by commands in user_file.
+
+       You  can  call this function as many times as needed, the results being
+       cumulative, but note that copies of any  filenames  specified  via  the
+       app_file and user_file arguments are recorded internally for subsequent
+       use by the read-init-files key-binding function, so if you plan to call
+       this  function multiple times, be sure that the last call specifies the
+       filenames that you want re-read when the user requests that the config-
+       uration files be re-read.
+
+       Individual  key  sequences  can  also  be  bound  and unbound using the
+       gl_bind_keyseq() function.
+
+
+         int gl_bind_keyseq(GetLine *gl, GlKeyOrigin origin,
+                            const char *keyseq,
+                            const char *action);
+
+
+       The origin argument specifies the priority of the binding, according to
+       who  it  is being established for, and must be one of the following two
+       values.
+
+         GL_USER_KEY   -   The user requested this key-binding.
+         GL_APP_KEY    -   This is a default binding set by the
+                           application.
+
+       When both user and application bindings for a given  key-sequence  have
+       been  specified,  the  user binding takes precedence. The application's
+       binding is subsequently reinstated  if  the  user's  binding  is  later
+       unbound  via  either  another to this function, or a call to gl_config-
+       ure_getline().
+
+       The keyseq argument specifies the key-sequence to be bound or  unbound,
+       and is expressed in the same way as in a ~/.teclarc configuration file.
+       The action argument must either be a string containing the name of  the
+       action  to bind the key-sequence to, or it must be NULL or "" to unbind
+       the key-sequence.
+
+
+</pre><h2>CUSTOMIZED WORD COMPLETION</h2><pre>
+       If in your application, you would like to have TAB completion  complete
+       other  things  in  addition to or instead of filenames, you can arrange
+       this by registering an alternate completion callback  function,  via  a
+       call to the gl_customize_completion() function.
+
+         int gl_customize_completion(GetLine *gl, void *data,
+                                     CplMatchFn *match_fn);
+
+       The  data  argument  provides  a way for your application to pass arbi-
+       trary, application-specific information to the callback function.  This
+       is  passed  to  the callback every time that it is called. It might for
+       example, point to the symbol table from which possible completions  are
+       to  be sought. The match_fn argument specifies the callback function to
+       be called. The CplMatchFn function type is defined in libtecla.h, as is
+       a  CPL_MATCH_FN() macro that you can use to declare and prototype call-
+       back functions. The declaration and responsibilities of callback  func-
+       tions  are  described  in depth in the <a href="cpl_complete_word.html"><b>cpl_complete_word</b></a>
+       man page.
+
+       In brief, the callback function is responsible for looking backwards in
+       the  input  line, back from the point at which the user pressed TAB, to
+       find the start of the word being completed. It then must lookup  possi-
+       ble  completions  of this word, and record them one by one in the Word-
+       Completion object that is passed to it as an argument, by  calling  the
+       cpl_add_completion()  function. If the callback function wishes to pro-
+       vide filename completion in addition to its own  specific  completions,
+       it  has  the  option of itself calling the builtin file-name completion
+       callback.    This    also,    is    documented    in    the    cpl_com-
+       plete_word(@FUNC_MANEXT@) man page.
+
+       Note  that  if you would like gl_get_line() to return the current input
+       line when a successful completion is been made, you  can  arrange  this
+       when you call cpl_add_completion(), by making the last character of the
+       continuation suffix a newline character. If you do this, the input line
+       will   be   updated  to  display  the  completion,  together  with  any
+       contiuation suffix up to the newline character, then gl_get_line() will
+       return this input line.
+
+
+       If, for some reason, your callback function needs to write something to
+       the terminal, it must call gl_normal_io() before doing  so.  This  will
+       start  a  new line after the input line that is currently being edited,
+       reinstate normal terminal I/O, and tell gl_get_line()  that  the  input
+       line will need to be redrawn when the callback returns.
+
+
+</pre><h2>ADDING COMPLETION ACTIONS</h2><pre>
+       In  the  previous  section the ability to customize the behavior of the
+       only default completion action, complete-word, was described.  In  this
+       section  the  ability  to  install additional action functions, so that
+       different types of word completion  can  be  bound  to  different  key-
+       sequences,  is  described.  This  is  achieved  by using the gl_comple-
+       tion_action() function.
+
+
+         int gl_completion_action(GetLine *gl,
+                                  void *data, CplMatchFn *match_fn,
+                                  int list_only, const char *name,
+                                  const char *keyseq);
+
+
+       The data and match_fn  arguments  are  as  described  in  the  cpl_com-
+       plete_word  man  page, and specify the callback function that should be
+       invoked to  identify  possible  completions.   The  list_only  argument
+       determines  whether  the action that is being defined should attempt to
+       complete the word as far as possible in the input line before  display-
+       ing  any  possible  ambiguous  completions, or whether it should simply
+       display the list of possible completions  without  touching  the  input
+       line. The former option is selected by specifying a value of 0, and the
+       latter by specifying a value of 1. The name argument specifies the name
+       by  which  configuration  files and future invokations of this function
+       should refer to the action. This must either be the name of an existing
+       completion  action  to  be  changed,  or be a new unused name for a new
+       action. Finally, the keyseq argument specifies the default key-sequence
+       to  bind  the  action  to.  If this is NULL, no new keysequence will be
+       bound to the action.
+
+       Beware that in order for the user to be able to change the key-sequence
+       that  is  bound  to actions that are installed in this manner, when you
+       call gl_completion_action() to install a given  action  for  the  first
+       time,  you  should  do this between calling new_GetLine() and the first
+       call to gl_get_line().  Otherwise, when the user's  configuration  file
+       is  read on the first call to gl_get_line(), the name of the your addi-
+       tional action won't be known, and any reference to it in the configura-
+       tion file will generate an error.
+
+       As  discussed for gl_customize_completion(), if your callback function,
+       for some reason, needs to write anything to the terminal, it must  call
+       gl_normal_io() before doing so.
+
+
+</pre><h2>DEFINING CUSTOM ACTIONS</h2><pre>
+       Although  the built-in key-binding actions are sufficient for the needs
+       of most applications, occasionally a specialized application  may  need
+       to  define  one  or  more custom actions, bound to application-specific
+       key-sequences. For example, a sales application would benefit from hav-
+       ing  a key-sequence that displayed the part name that corresponded to a
+       part number preceding the cursor. Such a feature is clearly beyond  the
+       scope  of the built-in action functions. So for such special cases, the
+       gl_register_action() function is provided.
+
+
+         int gl_register_action(GetLine *gl, void *data,
+                       GlActionFn *fn, const char *name,
+                       const char *keyseq);
+
+
+       This function lets the application register an external  function,  fn,
+       that  will  thereafter  be  called  whenever  either the specified key-
+       sequence, keyseq, is entered by the user, or the user enters any  other
+       key-sequence  that  the user subsequently binds to the specified action
+       name, name, in their configuration file. The data  argument  can  be  a
+       pointer  to  anything that the application wishes to have passed to the
+       action function, fn, whenever that function is invoked.
+
+       The action function, fn, should be declared using the following  macro,
+       which is defined in libtecla.h.
+
+
+         #define GL_ACTION_FN(fn) GlAfterAction (fn)(GetLine *gl, \
+                     void *data, int count, size_t curpos, \
+                     const char *line)
+
+
+       The  gl  and  data  arguments  are those that were previously passed to
+       gl_register_action() when the action function was registered. The count
+       argument  is a numeric argument which the user has the option of enter-
+       ing using the digit-argument action, before invoking the action. If the
+       user doesn't enter a number, then the count argument is set to 1. Nomi-
+       nally this argument is interpreted as a repeat count, meaning that  the
+       action  should  be  repeated  that many times. In practice however, for
+       some actions a repeat count makes little sense. In such cases,  actions
+       can  either  simply  ignore  the count argument, or use its value for a
+       different purpose.
+
+       A copy of the current input line is passed in the read-only line  argu-
+       ment.  The  current  cursor position within this string is given by the
+       index contained in the curpos argument. Note that  direct  manipulation
+       of  the  input  line  and the cursor position is not permitted. This is
+       because the rules dicated by various modes,  such  as  vi  mode  versus
+       emacs  mode,  no-echo mode, and insert mode versus overstrike mode etc,
+       make it too complex for an application writer  to  write  a  conforming
+       editing action, as well as constrain future changes to the internals of
+       gl_get_line(). A potential solution to this dilema would  be  to  allow
+       the  action  function  to  edit  the  line  using  the existing editing
+       actions. This is currently under consideration.
+
+       If the action function wishes to write text to  the  terminal,  without
+       this  getting  mixed  up  with the displayed text of the input line, or
+       read from the terminal without having to handle raw terminal I/O,  then
+       before  doing  either  of these operations, it must temporarily suspend
+       line editing by calling  the  gl_normal_io()  function.  This  function
+       flushes  any  pending  output  to the terminal, moves the cursor to the
+       start of the line that follows the last  terminal  line  of  the  input
+       line,  then  restores  the terminal to a state that is suitable for use
+       with the C stdio facilities. The latter includes such things as restor-
+       ing the normal mapping of \n to \r\n, and, when in server mode, restor-
+       ing the normal blocking form of terminal I/O. Having called this  func-
+       tion, the action function can read from and write to the terminal with-
+       out the fear of creating a mess.  It isn't  necessary  for  the  action
+       function to restore the original editing environment before it returns.
+       This is done automatically by gl_get_line() after the  action  function
+       returns.  The following is a simple example of an action function which
+       writes the sentence "Hello world" on a new terminal line after the line
+       being  edited. When this function returns, the input line is redrawn on
+       the line that follows the "Hello world" line, and line editing resumes.
+
+
+         static GL_ACTION_FN(say_hello_fn)
+         {
+           if(gl_normal_io(gl))   /* Temporarily suspend editing */
+             return GLA_ABORT;
+           printf("Hello world\n");
+           return GLA_CONTINUE;
+         }
+
+
+       Action  functions  must  return  one  of  the following values, to tell
+       gl_get_line() how to procede.
+
+
+         GLA_ABORT     -   Cause gl_get_line() to return NULL.
+         GLA_RETURN    -   Cause gl_get_line() to return the
+                           completed input line.
+         GLA_CONTINUE  -   Resume command-line editing.
+
+
+       Note that the name argument of gl_register_action() specifies the  name
+       by  which  a  user can refer to the action in their configuration file.
+       This allows them to re-bind the action to an alternate key-seqeunce. In
+       order  for  this  to work, it is necessary to call gl_register_action()
+       between calling new_GetLine() and the first call to gl_get_line().
+
+
+</pre><h2>HISTORY FILES</h2><pre>
+       To save the contents of the history buffer before quitting your  appli-
+       cation,  and subsequently restore them when you next start the applica-
+       tion, the following functions are provided.
+
+
+        int gl_save_history(GetLine *gl, const char *filename,
+                            const char *comment, int max_lines);
+        int gl_load_history(GetLine *gl, const char *filename,
+                            const char *comment);
+
+
+       The filename argument specifies the name to give the history file  when
+       saving, or the name of an existing history file, when loading. This may
+       contain home-directory and environment variable  expressions,  such  as
+       "~/.myapp_history" or "$HOME/.myapp_history".
+
+       Along  with each history line, extra information about it, such as when
+       it was entered by the user, and what its nesting level is, is  recorded
+       as  a comment preceding the line in the history file. Writing this as a
+       comment allows the history file to double as a command  file,  just  in
+       case  you  wish  to replay a whole session using it. Since comment pre-
+       fixes differ in different languages, the comment argument  is  provided
+       for  specifying  the  comment  prefix. For example, if your application
+       were a unix shell, such as the bourne  shell,  you  would  specify  "#"
+       here.  Whatever  you choose for the comment character, you must specify
+       the same prefix to gl_load_history() that  you  used  when  you  called
+       gl_save_history() to write the history file.
+
+       The  max_lines  must be either -1 to specify that all lines in the his-
+       tory list be saved, or a positive number specifying a  ceiling  on  how
+       many of the most recent lines should be saved.
+
+       Both  fuctions return non-zero on error, after writing an error message
+       to stderr. Note that gl_load_history() does not consider the  non-exis-
+       tence of a file to be an error.
+
+
+</pre><h2>MULTIPLE HISTORY LISTS</h2><pre>
+       If your application uses a single GetLine object for entering many dif-
+       ferent types of input lines, you may wish gl_get_line() to  distinguish
+       the different types of lines in the history list, and only recall lines
+       that match the current type  of  line.  To  support  this  requirement,
+       gl_get_line()  marks  lines  being recorded in the history list with an
+       integer identifier chosen by the application.  Initially  this  identi-
+       fier  is  set to 0 by new_GetLine(), but it can be changed subsequently
+       by calling gl_group_history().
+
+
+         int gl_group_history(GetLine *gl, unsigned id);
+
+
+       The integer identifier id can be any number chosen by the  application,
+       but  note  that  gl_save_history()  and  gl_load_history() preserve the
+       association between identifiers and historical input lines between pro-
+       gram  invokations,  so you should choose fixed identifiers for the dif-
+       ferent types of input line used by your application.
+
+       Whenever gl_get_line() appends a new input line to  the  history  list,
+       the  current  history  identifier  is  recorded with it, and when it is
+       asked to recall a historical input line, it only recalls lines that are
+       marked with the current identifier.
+
+
+</pre><h2>DISPLAYING HISTORY</h2><pre>
+       The history list can be displayed by calling gl_show_history().
+
+
+         int gl_show_history(GetLine *gl, FILE *fp,
+                             const char *fmt,
+                             int all_groups,
+                             int max_lines);
+
+
+       This  displays  the  current  contents of the history list to the stdio
+       output stream fp. If the max_lines argument is greater than or equal to
+       zero,  then  no  more than this number of the most recent lines will be
+       displayed. If the all_groups argument is non-zero, lines from all  his-
+       tory  groups  are  displayed.  Otherwise  just  those  of the currently
+       selected history group are displayed. The format string argument,  fmt,
+       determines  how the line is displayed. This can contain arbitrary char-
+       acters which are written verbatim, interleaved with any of the  follow-
+       ing format directives:
+
+         %D  -  The date on which the line was originally
+                entered, formatted like 2001-11-20.
+         %T  -  The time of day when the line was entered,
+                formatted like 23:59:59.
+         %N  -  The sequential entry number of the line in
+                the history buffer.
+         %G  -  The number of the history group which the
+                line belongs to.
+         %%  -  A literal % character.
+         %H  -  The history line itself.
+
+       Thus a format string like "%D %T  %H0 would output something like:
+
+         2001-11-20 10:23:34  Hello world
+
+       Note  the  inclusion  of  an  explicit  newline character in the format
+       string.
+
+
+</pre><h2>LOOKING UP HISTORY</h2><pre>
+       The gl_lookup_history() function allows the calling application to look
+       up lines in the history list.
+
+
+         typedef struct {
+           const char *line;    /* The requested historical */
+                                /*  line. */
+           unsigned group;      /* The history group to which */
+                                /*  the line belongs. */
+           time_t timestamp;    /* The date and time at which */
+                                /*  the line was originally */
+                                /*  entered. */
+         } GlHistoryLine;
+
+         int gl_lookup_history(GetLine *gl, unsigned long id,
+                               GlHistoryLine *hline);
+
+
+       The  id  argument indicates which line to look up, where the first line
+       that was entered in the history list after new_GetLine() was called, is
+       denoted  by  0, and subsequently entered lines are denoted with succes-
+       sively higher numbers. Note that the range of lines currently preserved
+       in the history list can be queried by calling the gl_range_of_history()
+       function, described later. If the requested  line  is  in  the  history
+       list,  the  details of the line are recorded in the variable pointed to
+       by the hline argument, and 1 is returned. Otherwise 0 is returned,  and
+       the variable pointed to by hline is left unchanged.
+
+       Beware  that  the string returned in hline-&gt;line is part of the history
+       buffer, so it must not be modified by the caller, and will be  recycled
+       on  the next call to any function that takes gl as its argument. There-
+       fore you should make a private copy of this string if you need to  keep
+       it around.
+
+
+</pre><h2>MANUAL HISTORY ARCHIVAL</h2><pre>
+       By default, whenever a line is entered by the user, it is automatically
+       appended to the history list, just  before  gl_get_line()  returns  the
+       line  to  the  caller.  This is convenient for the majority of applica-
+       tions, but there are also applications that need finer grained  control
+       over  what gets added to the history list. In such cases, the automatic
+       addition of entered lines to the history list  can  be  turned  off  by
+       calling the gl_automatic_history() function.
+
+
+         int gl_automatic_history(GetLine *gl, int enable);
+
+
+       If  this  function  is  called  with  its  enable  argument  set  to 0,
+       gl_get_line() won't automatically archive subsequently  entered  lines.
+       Automatic  archiving  can be reenabled at a later time, by calling this
+       function again, with its enable argument set  to  1.   While  automatic
+       history  archiving  is  disabled,  the  calling application can use the
+       gl_append_history() to append lines to the history list as needed.
+
+
+         int gl_append_history(GetLine *gl, const char *line);
+
+
+       The line argument specifies the line to be added to the  history  list.
+       This  must  be  a normal ' ' terminated string. If this string contains
+       any newline characters, the line that gets archived in the history list
+       will  be  terminated by the first of these. Otherwise it will be termi-
+       nated by the ' ' terminator.  If the line is longer  than  the  maximum
+       input  line  length,  that was specified when new_GetLine() was called,
+       when the line  is  recalled,  it  will  get  truncated  to  the  actual
+       gl_get_line() line length.
+
+       If successful, gl_append_history() returns 0. Otherwise it returns non-
+       zero, and sets errno to one of the following values.
+
+
+          EINVAL  -  One of the arguments passed to
+                     gl_append_history() was NULL.
+          ENOMEM  -  The specified line was longer than the allocated
+                     size of the history buffer (as specified when
+                     new_GetLine() was called), so it couldn't be
+                     archived.
+
+
+       A textual description of the error can optionally be obtained by  call-
+       ing gl_error_message(). Note that after such an error, the history list
+       remains in a valid state to receive new history lines, so there is lit-
+       tle harm in simply ignoring the return status of gl_append_history().
+
+
+</pre><h2>MISCELLANEOUS HISTORY CONFIGURATION</h2><pre>
+       If  you  wish  to change the size of the history buffer that was origi-
+       nally specified in the call to new_GetLine(), you can do  so  with  the
+       gl_resize_history() function.
+
+
+         int gl_resize_history(GetLine *gl, size_t histlen);
+
+
+       The  histlen argument specifies the new size in bytes, and if you spec-
+       ify this as 0, the buffer will be deleted.
+
+       As mentioned in the discussion of new_GetLine(), the  number  of  lines
+       that can be stored in the history buffer, depends on the lengths of the
+       individual lines. For example, a 1000 byte buffer could  equally  store
+       10  lines  of average length 100 bytes, or 2 lines of average length 50
+       bytes. Although the buffer is never expanded when new lines are  added,
+       a  list  of  pointers  into the buffer does get expanded when needed to
+       accomodate the number of lines currently stored in the buffer. To place
+       an upper limit on the number of lines in the buffer, and thus a ceiling
+       on  the  amount  of  memory  used  in  this  list,  you  can  call  the
+       gl_limit_history() function.
+
+
+         void gl_limit_history(GetLine *gl, int max_lines);
+
+
+       The  max_lines  should  either be a positive number &gt;= 0, specifying an
+       upper limit on the number of lines in the buffer, or be  -1  to  cancel
+       any  previously  specified  limit.  When a limit is in effect, only the
+       max_lines most recently appended lines are kept in  the  buffer.  Older
+       lines are discarded.
+
+       To  discard  lines  from the history buffer, use the gl_clear_history()
+       function.
+
+         void gl_clear_history(GetLine *gl, int all_groups);
+
+       The all_groups argument tells the function whether to delete  just  the
+       lines  associated  with  the  current  history group (see gl_group_his-
+       tory()), or all historical lines in the buffer.
+
+       The gl_toggle_history() function allows you to toggle  history  on  and
+       off without losing the current contents of the history list.
+
+
+         void gl_toggle_history(GetLine *gl, int enable);
+
+
+       Setting  the  enable argument to 0 turns off the history mechanism, and
+       setting it to 1 turns it back on. When history is turned  off,  no  new
+       lines  will  be added to the history list, and history lookup key-bind-
+       ings will act as though there is nothing in the history buffer.
+
+
+</pre><h2>QUERYING HISTORY INFORMATION</h2><pre>
+       The configured state of the  history  list  can  be  queried  with  the
+       gl_history_state() function.
+
+
+         typedef struct {
+           int enabled;     /* True if history is enabled */
+           unsigned group;  /* The current history group */
+           int max_lines;   /* The current upper limit on the */
+                            /*  number of lines in the history */
+                            /*  list, or -1 if unlimited. */
+         } GlHistoryState;
+
+         void gl_state_of_history(GetLine *gl,
+                                  GlHistoryState *state);
+
+       On  return,  the status information is recorded in the variable pointed
+       to by the state argument.
+
+       The gl_range_of_history() function returns  the  number  and  range  of
+       lines in the history list.
+
+
+       typedef struct {
+         unsigned long oldest;  /* The sequential entry number */
+                                /*  of the oldest line in the */
+                                /*  history list. */
+         unsigned long newest;  /* The sequential entry number */
+                                /*  of the newest line in the */
+                                /*  history list. */
+         int nlines;            /* The number of lines in the */
+                                /*  history list. */
+       } GlHistoryRange;
+
+       void gl_range_of_history(GetLine *gl, GlHistoryRange *range);
+
+       The  return values are recorded in the variable pointed to by the range
+       argument. If the nlines member of this structure is greater than  zero,
+       then  the  oldest  and  newest members report the range of lines in the
+       list, and newest=oldest+nlines-1.  Otherwise they are both zero.
+
+       The gl_size_of_history() function returns the total size of the history
+       buffer and the amount of the buffer that is currently occupied.
+
+         typedef struct {
+           size_t size;      /* The size of the history buffer */
+                             /*  (bytes). */
+           size_t used;      /* The number of bytes of the */
+                             /*  history buffer that are */
+                             /*  currently occupied. */
+         } GlHistorySize;
+
+         void gl_size_of_history(GetLine *gl, GlHistorySize *size);
+
+       On  return, the size information is recorded in the variable pointed to
+       by the size argument.
+
+
+</pre><h2>CHANGING TERMINALS</h2><pre>
+       The new_GetLine() constructor function assumes that input is to be read
+       from stdin, and output written to stdout. The following function allows
+       you to switch to different input and output streams.
+
+         int gl_change_terminal(GetLine *gl, FILE *input_fp,
+                                FILE *output_fp, const char *term);
+
+       The gl argument is the object that was returned by new_GetLine().   The
+       input_fp  argument  specifies  the  stream  to read from, and output_fp
+       specifies the stream to be written to. Only if both of these refer to a
+       terminal,  will  interactive  terminal  input  be  enabled.   Otherwise
+       gl_get_line() will simply call fgets() to read command input.  If  both
+       streams refer to a terminal, then they must refer to the same terminal,
+       and the type of this terminal must be specified via the term  argument.
+       The value of the term argument is looked up in the terminal information
+       database (terminfo or termcap), in order  to  determine  which  special
+       control  sequences  are needed to control various aspects of the termi-
+       nal.  new_GetLine()  for  example,   passes   the   return   value   of
+       getenv("TERM")  in  this argument. Note that if one or both of input_fp
+       and output_fp don't refer to a terminal, then it is legal to pass  NULL
+       instead of a terminal type.
+
+       Note that if you want to pass file descriptors to gl_change_terminal(),
+       you can do this by creating  stdio  stream  wrappers  using  the  POSIX
+       fdopen() function.
+
+
+</pre><h2>EXTERNAL EVENT HANDLING</h2><pre>
+       By  default, gl_get_line() doesn't return until either a complete input
+       line has been entered by the user, or an error occurs. In programs that
+       need  to  watch for I/O from other sources than the terminal, there are
+       two options.
+
+
+         1. Use the functions described in the
+            <a href="gl_io_mode.html"><b>gl_io_mode</b></a> man page to switch
+            gl_get_line() into non-blocking server mode. In this mode,
+            gl_get_line() becomes a non-blocking, incremental
+            line-editing function that can safely be called from
+            an external event loop. Although this is a very
+            versatile method, it involves taking on some
+            responsibilities that are normally performed behind
+            the scenes by gl_get_line().
+
+         2. While gl_get_line() is waiting for keyboard
+            input from the user, you can ask it to also watch for
+            activity on arbitrary file descriptors, such as
+            network sockets, pipes etc, and have it call functions
+            of your choosing when activity is seen. This works on
+            any system that has the select() system call,
+            which is most, if not all flavors of unix.
+
+
+       Registering a file descriptor to be watched by  gl_get_line()  involves
+       calling the gl_watch_fd() function.
+
+
+         int gl_watch_fd(GetLine *gl, int fd, GlFdEvent event,
+                         GlFdEventFn *callback, void *data);
+
+
+       If  this returns non-zero, then it means that either your arguments are
+       invalid, or that this facility isn't supported on the host system.
+
+       The fd argument is the file descriptor to be watched. The  event  argu-
+       ment  specifies  what  type of activity is of interest, chosen from the
+       following enumerated values:
+
+
+         GLFD_READ   -  Watch for the arrival of data to be read.
+         GLFD_WRITE  -  Watch for the ability to write to the file
+                        descriptor without blocking.
+         GLFD_URGENT -  Watch for the arrival of urgent
+                        out-of-band data on the file descriptor.
+
+
+       The callback argument  is  the  function  to  call  when  the  selected
+       activity  is seen. It should be defined with the following macro, which
+       is defined in libtecla.h.
+
+
+         #define GL_FD_EVENT_FN(fn) GlFdStatus (fn)(GetLine *gl, \
+                                             void *data, int fd, \
+                                             GlFdEvent event)
+
+       The data argument of the gl_watch_fd() function is passed to the  call-
+       back  function  for  its  own  use, and can point to anything you like,
+       including NULL. The file descriptor and the  event  argument  are  also
+       passed  to  the callback function, and this potentially allows the same
+       callback function to be registered to  more  than  one  type  of  event
+       and/or  more than one file descriptor. The return value of the callback
+       function should be one of the following values.
+
+
+         GLFD_ABORT    -  Tell gl_get_line() to abort. When this
+                          happens, gl_get_line() returns
+                          NULL, and a following call to
+                          gl_return_status() will return
+                          GLR_FDABORT. Note that if the
+                          application needs errno always to
+                          have a meaningful value when
+                          gl_get_line() returns NULL,
+                          the callback function should set
+                          errno appropriately.
+         GLFD_REFRESH  -  Redraw the input line then continue
+                          waiting for input. Return this if
+                          your callback wrote to the terminal.
+         GLFD_CONTINUE -  Continue to wait for input, without
+                          redrawing the line.
+
+       Note that before calling the callback, gl_get_line() blocks  most  sig-
+       nals,  and  leaves its own signal handlers installed, so if you need to
+       catch a particular signal you will need  to  both  temporarily  install
+       your  own  signal  handler, and unblock the signal. Be sure to re-block
+       the signal (if it was originally blocked) and  reinstate  the  original
+       signal handler, if any, before returning.
+
+
+
+       If  the  callback  function  needs to read or write to the terminal, it
+       should ideally first call gl_normal_io(gl) to temporarily suspend  line
+       editing.  This  will  restore  the terminal to canonical, blocking-I/O,
+       mode, and move the cursor to the start of a new terminal  line.  Later,
+       when  the  callback  returns,  gl_get_line()  will  notice that gl_nor-
+       mal_io() was called, redisplay the input line and resume editing.  Note
+       that in this case the return values, GLFD_REFRESH and GLFD_CONTINUE are
+       equivalent.
+
+
+
+       To support cases where the callback function calls a third-party  func-
+       tion  which  occasionally and u0prisicre-enabledesbeforee themicallback
+       automatic conversion of "0 to "
+       function  is called. If the callack knows that the third-party function
+       wrote to the terminal, it should then return  the  GLFD_REFRESH  return
+       value, to tell gl_get_line() to redisplay the input line.
+
+
+
+       To  remove  a  callback  function  that you previously registered for a
+       given file descriptor and event, simply  call  gl_watch_fd()  with  the
+       same  file descriptor and event arguments, but with a callback argument
+       of 0. The data argument is ignored in this case.
+
+
+</pre><h2>SETTING AN INACTIVITY TIMEOUT</h2><pre>
+       On systems with the select() system call,  the  gl_inactivity_timeout()
+       function can be used to set or cancel an inactivity timeout. Inactivity
+       in this case refers both to keyboard input, and  to  I/O  on  any  file
+       descriptors  registered by prior and subsequent calls to gl_watch_fd().
+       On oddball systems that don't have select(), this call has no effect.
+
+
+         int gl_inactivity_timeout(GetLine *gl, GlTimeoutFn *callback,
+                            void *data, unsigned long sec,
+                            unsigned long nsec);
+
+
+       The timeout is specified in the form of an integral number  of  seconds
+       and  an  integral number of nanoseconds, via the sec and nsec arguments
+       respectively. Subsequently, whenever no activity is seen for this  time
+       period, the function specified via the callback argument is called. The
+       data argument of gl_inactivity_timeout() is  passed  verbatim  to  this
+       callback  function whenever it is invoked, and can thus be used to pass
+       arbitrary application-specific information to the callback. The follow-
+       ing  macro is provided in libtecla.h for applications to use to declare
+       and prototype timeout callback functions.
+
+
+         #define GL_TIMEOUT_FN(fn) \
+                      GlAfterTimeout (fn)(GetLine *gl, void *data)
+
+
+       On returning, the application's callback is expected to return  one  of
+       the  following  enumerators  to tell gl_get_line() how to procede after
+       the timeout has been handled by the callback.
+
+
+         GLTO_ABORT    -  Tell gl_get_line() to abort. When
+                          this happens, gl_get_line() will
+                          return NULL, and a following call
+                          to gl_return_status() will return
+                          GLR_TIMEOUT. Note that if the
+                          application needs errno always to
+                          have a meaningful value when
+                          gl_get_line() returns NULL,
+                          the callback function should set
+                          errno appropriately.
+         GLTO_REFRESH  -  Redraw the input line, then continue
+                          waiting for input. You should return
+                          this value if your callback wrote to the
+                          terminal without having first called
+                          gl_normal_io(gl).
+         GLTO_CONTINUE -  In normal blocking-I/O mode, continue to
+                          wait for input, without redrawing the
+                          user's input line.
+                          In non-blocking server I/O mode (see
+                          <a href="gl_io_mode.html"><b>gl_io_mode</b></a>), cause gl_get_line()
+                          to act as though I/O blocked. This means
+                          that gl_get_line() will immediately
+                          return NULL, and a following call
+                          to gl_return_status() will return
+                          GLR_BLOCKED.
+
+
+       Note that before calling the callback, gl_get_line() blocks  most  sig-
+       nals,  and  leaves its own signal handlers installed, so if you need to
+       catch a particular signal you will need  to  both  temporarily  install
+       your  own  signal  handler, and unblock the signal. Be sure to re-block
+       the signal (if it was originally blocked) and  reinstate  the  original
+       signal handler, if any, before returning.
+
+
+
+       If  the  callback  function  needs to read or write to the terminal, it
+       should ideally first call gl_normal_io(gl) to temporarily suspend  line
+       editing.  This  will  restore  the terminal to canonical, blocking-I/O,
+       mode, and move the cursor to the start of a new terminal  line.  Later,
+       when  the  callback  returns,  gl_get_line()  will  notice that gl_nor-
+       mal_io() was called, redisplay the input line and resume editing.  Note
+       that in this case the return values, GLTO_REFRESH and GLTO_CONTINUE are
+       equivalent.
+
+
+
+       To support cases where the callback function calls a third-party  func-
+       tion  which  occasionally and u0prisicre-enabledesbeforee themicallback
+       automatic conversion of "0 to "
+       function  is called. If the callack knows that the third-party function
+       wrote to the terminal, it should then return  the  GLTO_REFRESH  return
+       value, to tell gl_get_line() to redisplay the input line.
+
+
+
+       Note  that  although the timeout argument includes a nano-second compo-
+       nent, few computer clocks presently have  resolutions  that  are  finer
+       than  a few milliseconds, so asking for less than a few milliseconds is
+       equivalent to requesting zero seconds on a  lot  of  systems.  If  this
+       would  be  a  problem,  you  should  base your timeout selection on the
+       actual   resolution   of   the   host    clock    (eg.    by    calling
+       sysconf(_SC_CLK_TCK)).
+
+
+
+       To  turn off timeouts, simply call gl_inactivity_timeout() with a call-
+       back argument of 0. The data argument is ignored in this case.
+
+
+</pre><h2>SIGNAL HANDLING DEFAULTS</h2><pre>
+       By default, the gl_get_line() function intercepts a number of  signals.
+       This  is particularly important for signals which would by default ter-
+       minate the process, since the terminal needs to be restored to a usable
+       state  before  this  happens.  In  this  section,  the signals that are
+       trapped  by  default,  and  how  gl_get_line()  responds  to  them,  is
+       described.  Changing  these defaults is the topic of the following sec-
+       tion.
+
+       When the following subset of signals are  caught,  gl_get_line()  first
+       restores  the  terminal  settings  and signal handling to how they were
+       before gl_get_line() was called, resends the signal, to allow the call-
+       ing  application's  signal  handlers  to handle it, then if the process
+       still exists, gl_get_line() returns NULL and sets  errno  as  specified
+       below.
+
+
+        SIGINT  -  This signal is generated both by the keyboard
+                   interrupt key (usually ^C), and the keyboard
+                   break key.
+
+                   errno=EINTR
+
+        SIGHUP  -  This signal is generated when the controlling
+                   terminal exits.
+
+                   errno=ENOTTY
+
+        SIGPIPE -  This signal is generated when a program attempts
+                   to write to a pipe who's remote end isn't being
+                   read by any process. This can happen for example
+                   if you have called gl_change_terminal() to
+                   redirect output to a pipe hidden under a pseudo
+                   terminal.
+
+                   errno=EPIPE
+
+        SIGQUIT -  This signal is generated by the keyboard quit
+                   key (usually ^\).
+
+                   errno=EINTR
+
+        SIGABRT -  This signal is generated by the standard C,
+                   abort() function. By default it both
+                   terminates the process and generates a core
+                   dump.
+
+                   errno=EINTR
+
+        SIGTERM -  This is the default signal that the UN*X
+                   kill command sends to processes.
+
+                   errno=EINTR
+
+       Note  that in the case of all of the above signals, POSIX mandates that
+       by default the process is terminated, with the addition of a core  dump
+       in  the  case  of  the  SIGQUIT  signal. In other words, if the calling
+       application doesn't override the default handler by supplying  its  own
+       signal  handler, receipt of the corresponding signal will terminate the
+       application before gl_get_line() returns.
+
+       If gl_get_line() aborts with errno set to EINTR, you can find out  what
+       signal caused it to abort, by calling the following function.
+
+         int gl_last_signal(const GetLine *gl);
+
+       This  returns the numeric code (eg. SIGINT) of the last signal that was
+       received during the most recent call to gl_get_line(), or -1 if no sig-
+       nals were received.
+
+       On  systems  that support it, when a SIGWINCH (window change) signal is
+       received, gl_get_line() queries the terminal to find out its new  size,
+       redraws the current input line to accomodate the new size, then returns
+       to waiting for keyboard input from the user. Unlike other signals, this
+       signal isn't resent to the application.
+
+       Finally, the following signals cause gl_get_line() to first restore the
+       terminal  and  signal  environment  to  that  which  prevailed   before
+       gl_get_line() was called, then resend the signal to the application. If
+       the process still exists after the  signal  has  been  delivered,  then
+       gl_get_line() then re-establishes its own signal handlers, switches the
+       terminal back to raw mode, redisplays the input line, and goes back  to
+       awaiting terminal input from the user.
+
+        SIGCONT    -  This signal is generated when a suspended
+                      process is resumed.
+
+        SIGPOLL    -  On SVR4 systems, this signal notifies the
+                      process of an asynchronous I/O event. Note
+                      that under 4.3+BSD, SIGIO and SIGPOLL are
+                      the same. On other systems, SIGIO is ignored
+                      by default, so gl_get_line() doesn't
+                      trap it by default.
+
+        SIGPWR     -  This signal is generated when a power failure
+                      occurs (presumably when the system is on a
+                      UPS).
+
+        SIGALRM    -  This signal is generated when a timer
+                      expires.
+
+        SIGUSR1    -  An application specific signal.
+
+        SIGUSR2    -  Another application specific signal.
+
+        SIGVTALRM  -  This signal is generated when a virtual
+                      timer expires (see man setitimer(2)).
+
+        SIGXCPU    -  This signal is generated when a process
+                      exceeds its soft CPU time limit.
+
+        SIGXFSZ    -  This signal is generated when a process
+                      exceeds its soft file-size limit.
+
+        SIGTSTP    -  This signal is generated by the terminal
+                      suspend key, which is usually ^Z, or the
+                      delayed terminal suspend key, which is
+                      usually ^Y.
+
+        SIGTTIN    -  This signal is generated if the program
+                      attempts to read from the terminal while the
+                      program is running in the background.
+
+        SIGTTOU    -  This signal is generated if the program
+                      attempts to write to the terminal while the
+                      program is running in the background.
+
+
+       Obviously not all of the above signals are supported on all systems, so
+       code to support them is conditionally compiled into the tecla  library.
+
+       Note  that  if SIGKILL or SIGPOLL, which by definition can't be caught,
+       or any of the hardware generated exception signals,  such  as  SIGSEGV,
+       SIGBUS  and  SIGFPE, are received and unhandled while gl_get_line() has
+       the terminal in raw mode, the program will be  terminated  without  the
+       terminal  having been restored to a usable state. In practice, job-con-
+       trol shells usually reset the terminal settings when a  process  relin-
+       quishes  the controlling terminal, so this is only a problem with older
+       shells.
+
+
+</pre><h2>CUSTOMIZED SIGNAL HANDLING</h2><pre>
+       The previous section listed the signals  that  gl_get_line()  traps  by
+       default,  and described how it responds to them. This section describes
+       how to both add and remove signals from the list  of  trapped  signals,
+       and  how to specify how gl_get_line() should respond to a given signal.
+
+       If you don't need gl_get_line() to do anything in response to a  signal
+       that  it  normally  traps, you can tell to gl_get_line() to ignore that
+       signal by calling gl_ignore_signal().
+
+         int gl_ignore_signal(GetLine *gl, int signo);
+
+       The signo argument is the number of the signal (eg.  SIGINT)  that  you
+       want  to  have  ignored. If the specified signal isn't currently one of
+       those being trapped, this function does nothing.
+
+       The gl_trap_signal() function allows you to either add a new signal  to
+       the  list that gl_get_line() traps, or modify how it responds to a sig-
+       nal that it already traps.
+
+         int gl_trap_signal(GetLine *gl, int signo, unsigned flags,
+                            GlAfterSignal after, int errno_value);
+
+       The signo argument is the number of the signal that you  wish  to  have
+       trapped. The flags argument is a set of flags which determine the envi-
+       ronment in which the application's signal handler is invoked, the after
+       argument  tells gl_get_line() what to do after the application's signal
+       handler returns, and errno_value tells gl_get_line() what to set  errno
+       to if told to abort.
+
+       The  flags  argument  is  a bitwise OR of zero or more of the following
+       enumerators:
+
+         GLS_RESTORE_SIG  -  Restore the caller's signal
+                             environment while handling the
+                             signal.
+
+         GLS_RESTORE_TTY  -  Restore the caller's terminal settings
+                             while handling the signal.
+
+         GLS_RESTORE_LINE -  Move the cursor to the start of the
+                             line following the input line before
+                             invoking the application's signal
+                             handler.
+
+         GLS_REDRAW_LINE  -  Redraw the input line when the
+                             application's signal handler returns.
+
+         GLS_UNBLOCK_SIG  -  Normally, if the calling program has
+                             a signal blocked (man sigprocmask),
+                             gl_get_line() does not trap that
+                             signal. This flag tells gl_get_line()
+                             to trap the signal and unblock it for
+                             the duration of the call to
+                             gl_get_line().
+
+         GLS_DONT_FORWARD -  If this flag is included, the signal
+                             will not be forwarded to the signal
+                             handler of the calling program.
+
+       Two commonly useful flag combinations are also enumerated as follows:
+
+         GLS_RESTORE_ENV   = GLS_RESTORE_SIG | GLS_RESTORE_TTY |
+                             GLS_REDRAW_LINE
+
+         GLS_SUSPEND_INPUT = GLS_RESTORE_ENV | GLS_RESTORE_LINE
+
+
+       If your signal handler, or the default system signal handler  for  this
+       signal, if you haven't overridden it, never either writes to the termi-
+       nal, nor suspends or terminates  the  calling  program,  then  you  can
+       safely set the flags argument to 0.
+
+       If your signal handler always writes to the terminal, reads from it, or
+       suspends or terminates the program, you should specify the flags  argu-
+       ment as GL_SUSPEND_INPUT, so that:
+
+       1. The cursor doesn't get left in the middle of the input
+          line.
+       2. So that the user can type in input and have it echoed.
+       3. So that you don't need to end each output line with
+          \r\n, instead of just \n.
+
+       The  GL_RESTORE_ENV combination is the same as GL_SUSPEND_INPUT, except
+       that it doesn't move the cursor, and if  your  signal  handler  doesn't
+       read  or write anything to the terminal, the user won't see any visible
+       indication that a signal was caught. This can be useful if you  have  a
+       signal  handler  that  only  occasionally writes to the terminal, where
+       using GL_SUSPEND_LINE would cause the input line  to  be  unnecessarily
+       duplicated  when nothing had been written to the terminal.  Such a sig-
+       nal handler, when it does write to the  terminal,  should  be  sure  to
+       start a new line at the start of its first write, by writing a new line
+       before returning. If the signal arrives while the user  is  entering  a
+       line  that only occupies a signal terminal line, or if the cursor is on
+       the last terminal line of a longer input line, this will have the  same
+       effect  as  GL_SUSPEND_INPUT. Otherwise it will start writing on a line
+       that already contains part of the displayed input line.   This  doesn't
+       do any harm, but it looks a bit ugly, which is why the GL_SUSPEND_INPUT
+       combination is better if you know that you are always going to be writ-
+       ting to the terminal.
+
+       The  after argument, which determines what gl_get_line() does after the
+       application's signal handler returns (if it returns), can take any  one
+       of the following values:
+
+         GLS_RETURN   - Return the completed input line, just as
+                        though the user had pressed the return
+                        key.
+
+         GLS_ABORT    - Cause gl_get_line() to abort. When
+                        this happens, gl_get_line() returns
+                        NULL, and a following call to
+                        gl_return_status() will return
+                        GLR_SIGNAL. Note that if the
+                        application needs errno always to
+                        have a meaningful value when
+                        gl_get_line() returns NULL,
+                        the callback function should set
+                        errno appropriately.
+         GLS_CONTINUE - Resume command line editing.
+
+       The  errno_value argument is intended to be combined with the GLS_ABORT
+       option, telling gl_get_line() what to set the standard  errno  variable
+       to  before returning NULL to the calling program. It can also, however,
+       be used with the GL_RETURN option, in case you wish to have  a  way  to
+       distinguish  between  an  input  line that was entered using the return
+       key, and one that was entered by the receipt of a signal.
+
+
+</pre><h2>RELIABLE SIGNAL HANDLING</h2><pre>
+       Signal handling is suprisingly hard to do reliably without race  condi-
+       tions.  In gl_get_line() a lot of care has been taken to allow applica-
+       tions to perform reliable signal handling  around  gl_get_line().  This
+       section explains how to make use of this.
+
+       As  an  example of the problems that can arise if the application isn't
+       written correctly, imagine that one's application has a  SIGINT  signal
+       handler that sets a global flag. Now suppose that the application tests
+       this flag just before invoking gl_get_line(). If a SIGINT  signal  hap-
+       pens  to  be received in the small window of time between the statement
+       that tests the value  of  this  flag,  and  the  statement  that  calls
+       gl_get_line(), then gl_get_line() will not see the signal, and will not
+       be interrupted. As a result, the application won't be able  to  respond
+       to  the  signal  until  the  user gets around to finishing entering the
+       input line and gl_get_line() returns.  Depending  on  the  application,
+       this  might  or might not be a disaster, but at the very least it would
+       puzzle the user.
+
+       The way to avoid such problems is to do the following.
+
+       1. If needed, use the gl_trap_signal() function to
+          configure gl_get_line() to abort when important
+          signals are caught.
+
+       2. Configure gl_get_line() such that if any of the
+          signals that it catches are blocked when
+          gl_get_line() is called, they will be unblocked
+          automatically during times when gl_get_line() is
+          waiting for I/O. This can be done either
+          on a per signal basis, by calling the
+          gl_trap_signal() function, and specifying the
+          GLS_UNBLOCK attribute of the signal, or globally by
+          calling the gl_catch_blocked() function.
+
+
+            void gl_catch_blocked(GetLine *gl);
+
+
+          This function simply adds the GLS_UNBLOCK attribute
+          to all of the signals that it is currently configured to
+          trap.
+
+       3. Just before calling gl_get_line(), block delivery
+          of all of the signals that gl_get_line() is
+          configured to trap. This can be done using the POSIX
+          sigprocmask() function in conjunction with the
+          gl_list_signals() function.
+
+
+             int gl_list_signals(GetLine *gl, sigset_t *set);
+
+
+          This function returns the set of signals that it is
+          currently configured to catch in the set argument,
+          which is in the form required by sigprocmask().
+
+       4. In the example, one would now test the global flag that
+          the signal handler sets, knowing that there is now no
+          danger of this flag being set again until
+          gl_get_line() unblocks its signals while performing
+          I/O.
+
+       5. Eventually gl_get_line() returns, either because
+          a signal was caught, an error occurred, or the user
+          finished entering their input line.
+
+       6. Now one would check the global signal flag again, and if
+          it is set, respond to it, and zero the flag.
+
+       7. Use sigprocmask() to unblock the signals that were
+          blocked in step 3.
+
+       The same technique can be used around certain POSIX signal-aware  func-
+       tions,  such  as  sigsetjmp()  and sigsuspend(), and in particular, the
+       former of these two functions can be  used  in  conjunction  with  sig-
+       longjmp() to implement race-condition free signal handling around other
+       long-running system calls. The way to do this, is  explained  next,  by
+       showing how gl_get_line() manages to reliably trap signals around calls
+       to functions like read() and select() without race conditions.
+
+       The first thing that gl_get_line() does, whenever it is called,  is  to
+       use  the  POSIX  sigprocmask() function to block the delivery of all of
+       the signals that it is currently configured to catch. This is redundant
+       if  the  application  has already blocked them, but it does no harm. It
+       undoes this step just before returning.
+
+       Whenever gl_get_line() needs to call read() or  select()  to  wait  for
+       input  from  the  user,  it first calls the POSIX sigsetjmp() function,
+       being sure to specify a non-zero value for its savesigs argument.   The
+       reason for the latter argument will become clear shortly.
+
+       If sigsetjmp() returns zero, gl_get_line() then does the following.
+
+
+       a. It uses the POSIX sigaction() function to register
+          a temporary signal handler to all of the signals that it
+          is configured to catch. This signal handler does two
+          things.
+
+          1. It records the number of the signal that was received
+             in a file-scope variable.
+
+          2. It then calls the POSIX siglongjmp()
+             function using the buffer that was passed to
+             sigsetjmp() for its first argument, and
+             a non-zero value for its second argument.
+
+          When this signal handler is registered, the sa_mask
+          member of the struct sigaction act argument of the
+          call to sigaction() is configured to contain all of
+          the signals that gl_get_line() is catching. This
+          ensures that only one signal will be caught at once by
+          our signal handler, which in turn ensures that multiple
+          instances of our signal handler don't tread on each
+          other's toes.
+
+       b. Now that the signal handler has been set up,
+          gl_get_line() unblocks all of the signals that it
+          is configured to catch.
+
+       c. It then calls the read() or select() system
+          calls to wait for keyboard input.
+
+       d. If this system call returns (ie. no signal is received),
+          gl_get_line() blocks delivery of the signals of
+          interest again.
+
+       e. It then reinstates the signal handlers that were
+          displaced by the one that was just installed.
+
+
+       Alternatively,  if sigsetjmp() returns non-zero, this means that one of
+       the signals being trapped was caught while the above steps were execut-
+       ing. When this happens, gl_get_line() does the following.
+
+       First,  note  that  when  a  call to siglongjmp() causes sigsetjmp() to
+       return, provided that the savesigs argument  of  sigsetjmp()  was  non-
+       zero, as specified above, the signal process mask is restored to how it
+       was when sigsetjmp() was  called.  This  is  the  important  difference
+       between  sigsetjmp()  and  the  older  problematic setjmp(), and is the
+       essential ingredient that makes it possible to  avoid  signal  handling
+       race  conditions.   Because  of  this we are guaranteed that all of the
+       signals that we blocked before calling sigsetjmp() are blocked again as
+       soon  as any signal is caught. The following statements, which are then
+       executed, are thus guaranteed to be executed without any  further  sig-
+       nals being caught.
+
+       1. If so instructed by the gl_get_line() configuration
+          attributes of the signal that was caught,
+          gl_get_line() restores the terminal attributes to
+          the state that they had when gl_get_line() was
+          called. This is particularly important for signals that
+          suspend or terminate the process, since otherwise the
+          terminal would be left in an unusable state.
+
+       2. It then reinstates the application's signal handlers.
+
+       3. Then it uses the C standard-library raise()
+          function to re-send the application the signal that
+          was caught.
+
+       3. Next it unblocks delivery of the signal that we just
+          sent. This results in the signal that was just sent
+          via raise(), being caught by the application's
+          original signal handler, which can now handle it as it
+          sees fit.
+
+       4. If the signal handler returns (ie. it doesn't terminate
+          the process), gl_get_line() blocks delivery of the
+          above signal again.
+
+       5. It then undoes any actions performed in the first of the
+          above steps, and redisplays the line, if the signal
+          configuration calls for this.
+
+       6. gl_get_line() then either resumes trying to
+          read a character, or aborts, depending on the
+          configuration of the signal that was caught.
+
+       What  the above steps do in essence is to take asynchronously delivered
+       signals and handle them synchronously, one at a time, at a point in the
+       code where gl_get_line() has complete control over its environment.
+
+
+</pre><h2>THE TERMINAL SIZE</h2><pre>
+       On  most  systems  the combination of the TIOCGWINSZ ioctl and the SIG-
+       WINCH signal is used to maintain an accurate idea of the terminal size.
+       The  terminal  size  is  newly queried every time that gl_get_line() is
+       called and whenever a SIGWINCH signal is received.
+
+       On the few systems where this mechanism  isn't  available,  at  startup
+       new_GetLine()  first  looks for the LINES and COLUMNS environment vari-
+       ables.  If these aren't found, or they contain unusable values, then if
+       a  terminal information database like terminfo or termcap is available,
+       the default size of the terminal is looked up in this database. If this
+       too fails to provide the terminal size, a default size of 80 columns by
+       24 lines is used.
+
+       Even on systems that do support ioctl(TIOCGWINSZ), if the  terminal  is
+       on the other end of a serial line, the terminal driver generally has no
+       way of detecting when a resize occurs or of querying what  the  current
+       size  is.  In  such  cases  no SIGWINCH is sent to the process, and the
+       dimensions returned by ioctl(TIOCGWINSZ) aren't correct. The  only  way
+       to  handle  such  instances is to provide a way for the user to enter a
+       command that tells the remote system what the new size is. This command
+       would  then  call the gl_set_term_size() function to tell gl_get_line()
+       about the change in size.
+
+
+         int gl_set_term_size(GetLine *gl, int ncolumn, int nline);
+
+
+       The ncolumn and nline arguments are used to specify the new  dimensions
+       of  the  terminal, and must not be less than 1. On systems that do sup-
+       port ioctl(TIOCGWINSZ), this function first calls ioctl(TIOCSWINSZ)  to
+       tell  the  terminal  driver  about  the change in size. In non-blocking
+       server-I/O mode, if a line is currently being input, the input line  is
+       then redrawn to accomodate the changed size. Finally the new values are
+       recorded in gl for future use by gl_get_line().
+
+       The gl_terminal_size() function allows you to query the current size of
+       the  terminal,  and  install an alternate fallback size for cases where
+       the size isn't available.  Beware  that  the  terminal  size  won't  be
+       available  if  reading from a pipe or a file, so the default values can
+       be important even on systems that do support ways of  finding  out  the
+       terminal size.
+
+         typedef struct {
+           int nline;        /* The terminal has nline lines */
+           int ncolumn;      /* The terminal has ncolumn columns */
+         } GlTerminalSize;
+
+         GlTerminalSize gl_terminal_size(GetLine *gl,
+                                         int def_ncolumn,
+                                         int def_nline);
+
+       This  function  first  updates gl_get_line()'s fallback terminal dimen-
+       sions, then records its findings in the return value.
+
+       The def_ncolumn and def_nline specify the default  number  of  terminal
+       columns  and  lines to use if the terminal size can't be determined via
+       ioctl(TIOCGWINSZ) or environment variables.
+
+
+</pre><h2>HIDING WHAT YOU TYPE</h2><pre>
+       When entering sensitive information, such as passwords, it is best  not
+       to  have  the  text that you are entering echoed on the terminal.  Fur-
+       thermore, such text should not be recorded in the history  list,  since
+       somebody  finding  your  terminal  unattended  could then recall it, or
+       somebody snooping through your directories could see it in your history
+       file. With this in mind, the gl_echo_mode() function allows you to tog-
+       gle on and off the display and archival of  any  text  that  is  subse-
+       quently entered in calls to gl_get_line().
+
+
+         int gl_echo_mode(GetLine *gl, int enable);
+
+
+       The enable argument specifies whether entered text should be visible or
+       not. If it is 0, then subsequently entered lines will not be visible on
+       the terminal, and will not be recorded in the history list. If it is 1,
+       then subsequent input lines will be displayed as they are entered,  and
+       provided  that  history  hasn't  been  turned off via a call to gl_tog-
+       gle_history(), then they will also be archived  in  the  history  list.
+       Finally,  if  the  enable argument is -1, then the echoing mode is left
+       unchanged, which allows you to non-destructively query the current set-
+       ting  via the return value. In all cases, the return value of the func-
+       tion is 0 if echoing was disabled before the function was called, and 1
+       if it was enabled.
+
+       When  echoing  is  turned  off,  note that although tab completion will
+       invisibly complete your prefix as far as  possible,  ambiguous  comple-
+       tions will not be displayed.
+
+
+</pre><h2>SINGLE CHARACTER QUERIES</h2><pre>
+       Using  gl_get_line() to query the user for a single character reply, is
+       inconvenient for the user, since they must hit the enter or return  key
+       before  the  character that they typed is returned to the program. Thus
+       the gl_query_char() function has been  provided  for  single  character
+       queries like this.
+
+
+         int gl_query_char(GetLine *gl, const char *prompt,
+                           char defchar);
+
+
+       This function displays the specified prompt at the start of a new line,
+       and waits for the user to type a character. When the user types a char-
+       acter, gl_query_char() displays it to the right of the prompt, starts a
+       newline, then returns the character to the calling program. The  return
+       value  of the function is the character that was typed. If the read had
+       to be aborted for some reason, EOF is returned instead. In  the  latter
+       case, the application can call the previously documented gl_return_sta-
+       tus(), to find out what went wrong. This could, for example, have  been
+       the  reception of a signal, or the optional inactivity timer going off.
+
+       If the user simply hits enter, the value of  the  defchar  argument  is
+       substituted.  This  means  that  when  the  user hits either newline or
+       return, the character specified in  defchar,  is  displayed  after  the
+       prompt,  as  though the user had typed it, as well as being returned to
+       the calling application. If such a replacement is not important, simply
+       pass '0 as the value of defchar.
+
+       If  the  entered character is an unprintable character, it is displayed
+       symbolically. For example, control-A is displayed as ^A, and characters
+       beyond 127 are displayed in octal, preceded by a backslash.
+
+       As with gl_get_line(), echoing of the entered character can be disabled
+       using the gl_echo_mode() function.
+
+       If the calling process is suspended while waiting for the user to  type
+       their  response,  the  cursor is moved to the line following the prompt
+       line, then when the process resumes, the  prompt  is  redisplayed,  and
+       gl_query_char() resumes waiting for the user to type a character.
+
+       Note that in non-blocking server mode, (see <a href="gl_io_mode.html"><b>gl_io_mode</b></a>),
+       if an incomplete input line is  in  the  process  of  being  read  when
+       gl_query_char()  is  called,  the  partial input line is discarded, and
+       erased from the terminal, before the new prompt is displayed. The  next
+       call to gl_get_line() will thus start editing a new line.
+
+
+</pre><h2>READING RAW CHARACTERS</h2><pre>
+       Whereas  the  gl_query_char()  function  visibly prompts the user for a
+       character, and displays what they typed,  the  gl_read_char()  function
+       reads a signal character from the user, without writing anything to the
+       terminal, or perturbing any incompletely entered input line. This means
+       that it can be called not only from between calls to gl_get_line(), but
+       also from callback functions that the application has registered to  be
+       called by gl_get_line().
+
+
+         int gl_read_char(GetLine *gl);
+
+
+       On  success,  the  return value of gl_read_char() is the character that
+       was read. On failure, EOF is returned, and the gl_return_status() func-
+       tion  can  be called to find out what went wrong. Possibilities include
+       the optional inactivity timer going off, the receipt of a  signal  that
+       is configured to abort gl_get_line(), or terminal I/O blocking, when in
+       non-blocking server-I/O mode.
+
+       Beware that certain keyboard keys, such as function  keys,  and  cursor
+       keys,  usually generate at least 3 characters each, so a single call to
+       gl_read_char() won't be enough to identify such keystrokes.
+
+
+</pre><h2>CLEARING THE TERMINAL</h2><pre>
+       The calling program can clear the terminal by  calling  gl_erase_termi-
+       nal(). In non-blocking server-I/O mode, this function also arranges for
+       the current input line to be redrawn from scratch when gl_get_line() is
+       next called.
+
+
+         int gl_erase_terminal(GetLine *gl);
+
+
+
+</pre><h2>DISPLAYING TEXT DYNAMICALLY</h2><pre>
+       Between calls to gl_get_line(), the gl_display_text() function provides
+       a convenient way to display  paragraphs  of  text,  left-justified  and
+       split  over  one or more terminal lines according to the constraints of
+       the current width of the terminal. Examples of the use of this function
+       may  be  found in the demo programs, where it is used to display intro-
+       ductions. In those examples the advanced use of optional prefixes, suf-
+       fixes  and  filled  lines  to draw a box around the text is also illus-
+       trated.
+
+
+         int gl_display_text(GetLine *gl, int indentation,
+                             const char *prefix,
+                             const char *suffix, int fill_char,
+                             int def_width, int start,
+                             const char *string);
+
+       If gl isn't currently connected to a terminal, for example if the  out-
+       put of a program that uses gl_get_line() is being piped to another pro-
+       gram or redirected to a file, then the value of the def_width parameter
+       is used as the terminal width.
+
+       The  indentation  argument specifies the number of characters to use to
+       indent each line of ouput. The fill_char argument specifies the charac-
+       ter that will be used to perform this indentation.
+
+       The  prefix argument can either be NULL, or be a string to place at the
+       beginning of each new line (after  any  indentation).   Similarly,  the
+       suffix  argument can either be NULL, or be a string to place at the end
+       of each line. The suffix is placed flush against the right edge of  the
+       terminal,  and  any space between its first character and the last word
+       on that line is filled with the character specified via  the  fill_char
+       argument.  Normally the fill-character is a space.
+
+       The  start  argument  tells  gl_display_text() how many characters have
+       already been written to the current terminal line, and  thus  tells  it
+       the  starting  column  index  of the cursor.  Since the return value of
+       gl_display_text() is the ending column index of the cursor, by  passing
+       the  return value of one call to the start argument of the next call, a
+       paragraph that is broken between more than one string can  be  composed
+       by  calling  gl_display_text() for each successive portion of the para-
+       graph. Note that literal newline characters are necessary at the end of
+       each paragraph to force a new line to be started.
+
+       On error, gl_display_text() returns -1.
+
+
+</pre><h2>CALLBACK FUNCTION FACILITIES</h2><pre>
+       Unless  otherwise  stated,  callback  functions, such as tab completion
+       callbacks and event callbacks should not call  any  functions  in  this
+       module.  The following functions, however, are designed specifically to
+       be used by callback functions.
+
+       Calling  the  gl_replace_prompt()  function  from  a   callback   tells
+       gl_get_line()  to display a different prompt when the callback returns.
+       Except in non-blocking server mode, it has no effect  if  used  between
+       calls   to   gl_get_line().   In  non-blocking  server  mode  (see  the
+       <a href="gl_io_mode.html"><b>gl_io_mode</b></a> man page, when  used  between  two  calls  to
+       gl_get_line()  that  are  operating on the same input line, the current
+       input line will be re-drawn with the new prompt on the  following  call
+       to gl_get_line().
+
+
+         void gl_replace_prompt(GetLine *gl, const char *prompt);
+
+
+
+</pre><h2>INTERNATIONAL CHARACTER SETS</h2><pre>
+       Since  libtecla version 1.4.0, gl_get_line() has been 8-bit clean. This
+       means that all 8-bit characters that are printable in the  user's  cur-
+       rent  locale  are  now  displayed verbatim and included in the returned
+       input line.  Assuming that the calling  program  correctly  contains  a
+       call like the following,
+
+         setlocale(LC_CTYPE, "");
+
+       then  the  current locale is determined by the first of the environment
+       variables LC_CTYPE, LC_ALL, and LANG, that is found to contain a  valid
+       locale  name.  If  none  of these variables are defined, or the program
+       neglects to call setlocale, then the default C locale is used, which is
+       US  7-bit  ASCII.  On  most  unix-like platforms, you can get a list of
+       valid locales by typing the command:
+
+         locale -a
+
+       at the shell prompt. Further documentation on how the user can make use
+       of  this  to  enter  international  characters  can  be  found  in  the
+       <a href="tecla.html"><b>tecla</b></a> man page.
+
+
+</pre><h2>THREAD SAFETY</h2><pre>
+       In a multi-threaded program, you should use the libtecla_r.a version of
+       the  library.  This  uses reentrant versions of system functions, where
+       available. Unfortunately neither terminfo nor termcap were designed  to
+       be reentrant, so you can't safely use the functions of the getline mod-
+       ule in multiple threads (you can use the  separate  file-expansion  and
+       word-completion  modules in multiple threads, see the corresponding man
+       pages for details). However due to the use of POSIX reentrant functions
+       for looking up home directories etc, it is safe to use this module from
+       a single thread of a multi-threaded program, provided that  your  other
+       threads don't use any termcap or terminfo functions.
+
+
+</pre><h2>FILES</h2><pre>
+       libtecla.a      -    The tecla library
+       libtecla.h      -    The tecla header file.
+       ~/.teclarc      -    The personal tecla customization file.
+
+
+</pre><h2>SEE ALSO</h2><pre>
+       <a href="libtecla.html"><b>libtecla</b></a>, <a href="gl_io_mode.html"><b>gl_io_mode</b></a>, <a href="tecla.html"><b>tecla</b></a>, <a href="ef_expand_file.html"><b>ef_expand_file</b></a>,
+       <a href="cpl_complete_word.html"><b>cpl_complete_word</b></a>, <a href="pca_lookup_file.html"><b>pca_lookup_file</b></a>
+
+
+</pre><h2>AUTHOR</h2><pre>
+       Martin Shepherd  (mcs@astro.caltech.edu)
+
+
+
+                                                    <a href="gl_get_line.html"><b>gl_get_line</b></a>
+</pre>
+</body>

@@ -1,0 +1,441 @@
+.\" Copyright (c) 2000, 2001, 2002, 2003, 2004 by Martin C. Shepherd
+.\" 
+.\" All rights reserved.
+.\" 
+.\" Permission is hereby granted, free of charge, to any person obtaining a
+.\" copy of this software and associated documentation files (the
+.\" "Software"), to deal in the Software without restriction, including
+.\" without limitation the rights to use, copy, modify, merge, publish,
+.\" distribute, and/or sell copies of the Software, and to permit persons
+.\" to whom the Software is furnished to do so, provided that the above
+.\" copyright notice(s) and this permission notice appear in all copies of
+.\" the Software and that both the above copyright notice(s) and this
+.\" permission notice appear in supporting documentation.
+.\" 
+.\" THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+.\" OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+.\" MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+.\" OF THIRD PARTY RIGHTS. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR
+.\" HOLDERS INCLUDED IN THIS NOTICE BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL
+.\" INDIRECT OR CONSEQUENTIAL DAMAGES, OR ANY DAMAGES WHATSOEVER RESULTING
+.\" FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+.\" NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+.\" WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\" 
+.\" Except as contained in this notice, the name of a copyright holder
+.\" shall not be used in advertising or otherwise to promote the sale, use
+.\" or other dealings in this Software without prior written authorization
+.\" of the copyright holder.
+.TH cpl_complete_word @FUNC_MANEXT@
+.SH NAME
+cpl_complete_word, cfc_file_start, cfc_literal_escapes, cfc_set_check_fn, cpl_add_completion, cpl_file_completions, cpl_last_error, cpl_list_completions, cpl_recall_matches, cpl_record_error, del_CplFileConf, del_WordCompletion, new_CplFileConf, new_WordCompletion \- lookup possible completions for a word
+.SH SYNOPSIS
+.nf
+#include <stdio.h>
+#include <libtecla.h>
+
+WordCompletion *new_WordCompletion(void);
+
+WordCompletion *del_WordCompletion(WordCompletion *cpl);
+
+
+#define CPL_MATCH_FN(fn) int (fn)(WordCompletion *cpl, \\
+                                  void *data, \\
+                                  const char *line, \\
+                                  int word_end)
+typedef CPL_MATCH_FN(CplMatchFn);
+
+CPL_MATCH_FN(cpl_file_completions);
+
+
+CplMatches *cpl_complete_word(WordCompletion *cpl,
+                              const char *line,
+                              int word_end, void *data,
+                              CplMatchFn *match_fn);
+
+CplMatches *cpl_recall_matches(WordCompletion *cpl);
+
+int cpl_list_completions(CplMatches *result, FILE *fp,
+                         int term_width);
+
+int cpl_add_completion(WordCompletion *cpl,
+                       const char *line, int word_start,
+                       int word_end, const char *suffix,
+                       const char *type_suffix,
+                       const char *cont_suffix);
+
+void cpl_record_error(WordCompletion *cpl,
+                      const char *errmsg);
+
+const char *cpl_last_error(WordCompletion *cpl);
+
+
+#define CPL_CHECK_FN(fn) int (fn)(void *data, \\
+                                  const char *pathname)
+
+typedef CPL_CHECK_FN(CplCheckFn);
+
+CPL_CHECK_FN(cpl_check_exe);
+
+CplFileConf *new_CplFileConf(void);
+
+CplFileConf *del_CplFileConf(CplFileConf *cfc);
+
+void cfc_literal_escapes(CplFileConf *cfc, int literal);
+
+void cfc_file_start(CplFileConf *cfc, int start_index);
+
+void cfc_set_check_fn(CplFileConf *cfc, CplCheckFn *chk_fn,
+                      void *chk_data);
+
+.fi
+
+.SH DESCRIPTION
+
+The \f3cpl_complete_word()\f1 function is part of the tecla library
+(see the libtecla(@LIBR_MANEXT@) man page). It is usually called behind the scenes
+by \f3gl_get_line(@FUNC_MANEXT@)\f1, but can also be called separately.
+
+Given an input line containing an incomplete word to be completed, it
+calls a user-provided callback function (or the provided
+file-completion callback function) to look up all possible completion
+suffixes for that word. The callback function is expected to look
+backward in the line, starting from the specified cursor position, to
+find the start of the word to be completed, then to look up all
+possible completions of that word and record them, one at a time by
+calling \f3cpl_add_completion()\f1.
+
+.sp
+Descriptions of the functions of this module are as follows:
+.sp
+.nf
+  WordCompletion *new_WordCompletion(void)
+.fi
+.sp
+This function creates the resources used by the \f3cpl_complete_word()\f1
+function. In particular, it maintains the memory that is used to
+return the results of calling \f3cpl_complete_word()\f1.
+.sp
+.nf
+  WordCompletion *del_WordCompletion(WordCompletion *cpl)
+.fi
+.sp
+This function deletes the resources that were returned by a previous
+call to \f3new_WordCompletion()\f1. It always returns \f3NULL\f1 (ie. a
+deleted object). It does nothing if the \f3cpl\f1 argument is
+\f3NULL\f1.
+.sp
+The callback functions which lookup possible completions should be
+defined with the following macro (which is defined in libtecla.h).
+.sp
+.nf
+  #define CPL_MATCH_FN(fn) int (fn)(WordCompletion *cpl, \\
+                                    void *data, \\
+                                    const char *line, \\
+                                    int word_end)
+.fi
+.sp
+Functions of this type are called by \f3cpl_complete_word()\f1, and
+all of the arguments of the callback are those that were passed to
+said function. In particular, the \f3line\f1 argument contains the
+input line containing the word to be completed, and \f3word_end\f1 is
+the index of the character that follows the last character of the
+incomplete word within this string. The callback is expected to look
+backwards from \f3word_end\f1 for the start of the incomplete
+word. What constitutes the start of a word clearly depends on the
+application, so it makes sense for the callback to take on this
+responsibility. For example, the builtin filename completion function
+looks backwards until it hits an unescaped space, or the start of the
+line.  Having found the start of the word, the callback should then
+lookup all possible completions of this word, and record each
+completion via separate calls to \f3cpl_add_completion()\f1. If the
+callback needs access to an application-specific symbol table, it can
+pass it and any other data that it needs, via the \f3data\f1
+argument. This removes any need for globals.
+.sp
+The callback function should return 0 if no errors occur. On failure
+it should return 1, and register a terse description of the error by
+calling \f3cpl_record_error()\f1.
+.sp
+.nf
+  void cpl_record_error(WordCompletion *cpl,
+                        const char *errmsg);
+.fi
+.sp
+The last error message recorded by calling \f3cpl_record_error()\f1,
+can subsequently be queried by calling \f3cpl_last_error()\f1, as
+described later.
+.sp
+.nf
+  int cpl_add_completion(WordCompletion *cpl,
+                         const char *line, int word_start,
+                         int word_end, const char *suffix,
+                         const char *type_suffix,
+                         const char *cont_suffix);
+.fi
+.sp
+The \f3cpl_add_completion()\f1 function is called zero or more times
+by the completion callback function to record each possible completion
+in the specified \f3WordCompletion\f1 object. These completions are
+subsequently returned by \f3cpl_complete_word()\f1, as described
+later. The \f3cpl\f1, \f3line\f1, and \f3word_end\f1 arguments should
+be those that were passed to the callback function. The
+\f3word_start\f1 argument should be the index within the input line
+string of the start of the word that is being completed. This should
+equal \f3word_end\f1 if a zero-length string is being completed. The
+\f3suffix\f1 argument is the string that would have to be appended to
+the incomplete word to complete it.  If this needs any quoting
+(eg. the addition of backslashes before special charaters) to be valid
+within the displayed input line, this should be included. A copy of
+the suffix string is allocated internally, so there is no need to
+maintain your copy of the string after \f3cpl_add_completion()\f1
+returns.
+.sp
+Note that in the array of possible completions which the
+\f3cpl_complete_word()\f1 function returns, the suffix recorded by
+\f3cpl_add_completion()\f1 is listed along with the concatentation of
+this suffix with the word that lies between \f3word_start\f1 and
+\f3word_end\f1 in the input line.
+.sp
+The \f3type_suffix\f1 argument specifies an optional string to be
+appended to the completion if it is displayed as part of a list of
+completions by \f3cpl_list_completions()\f1. The intention is that
+this indicate to the user the type of each completion. For example,
+the file completion function places a directory separator after
+completions that are directories, to indicate their nature to the
+user. Similary, if the completion were a function, you could indicate
+this to the user by setting \f3type_suffix\f1 to "()". Note that the
+\f3type_suffix\f1 string isn't copied, so if the argument isn't a
+literal string between speech marks, be sure that the string remains
+valid for at least as long as the results of \f3cpl_complete_word()\f1
+are needed.
+.sp
+The \f3cont_suffix\f1 is a continuation suffix to append to the
+completed word in the input line if this is the only completion. This
+is something that isn't part of the completion itself, but that gives
+the user an indication about how they might continue to extend the
+token.  For example, the file-completion callback function adds a
+directory separator if the completed word is a directory. If the
+completed word were a function name, you could similarly aid the user
+by arranging for an open parenthesis to be appended.
+.sp
+.nf
+  CplMatches *cpl_complete_word(WordCompletion *cpl,
+                                const char *line,
+                                int word_end, void *data,
+                                CplMatchFn *match_fn);
+.fi
+.sp
+The \f3cpl_complete_word()\f1 is normally called behind the scenes by
+\f3gl_get_line(@FUNC_MANEXT@)\f1, but can also be called separately if you
+separately allocate a \f3WordCompletion\f1 object. It performs word
+completion, as described at the beginning of this section. Its first
+argument is a resource object previously returned by
+\f3new_WordCompletion()\f1.  The \f3line\f1 argument is the input line
+string, containing the word to be completed. The \f3word_end\f1
+argument contains the index of the character in the input line, that
+just follows the last character of the word to be completed. When
+called by \f3gl_get_line()\f1, this is the character over which the
+user pressed \f3TAB\f1. The \f3match_fn\f3 argument is the function
+pointer of the callback function which will lookup possible
+completions of the word, as described above, and the \f3data\f1
+argument provides a way for the application to pass arbitrary data to
+the callback function.
+.sp
+If no errors occur, the \f3cpl_complete_word()\f1 function returns a
+pointer to a \f3CplMatches\f1 container, as defined below. This
+container is allocated as part of the \f3cpl\f1 object that was passed
+to \f3cpl_complete_word()\f1, and will thus change on each call which
+uses the same \f3cpl\f1 argument.
+.sp
+.nf
+  typedef struct {
+    char *completion;        /* A matching completion */
+                             /*  string */
+    char *suffix;            /* The part of the */
+                             /*  completion string which */
+                             /*  would have to be */
+                             /*  appended to complete the */
+                             /*  original word. */
+    const char *type_suffix; /* A suffix to be added when */
+                             /*  listing completions, to */
+                             /*  indicate the type of the */
+                             /*  completion. */
+  } CplMatch;
+
+  typedef struct {
+    char *suffix;            /* The common initial part */
+                             /*  of all of the completion */
+                             /*  suffixes. */
+    const char *cont_suffix; /* Optional continuation */
+                             /*  string to be appended to */
+                             /*  the sole completion when */
+                             /*  nmatch==1. */
+    CplMatch *matches;       /* The array of possible */
+                             /*  completion strings, */
+                             /*  sorted into lexical */
+                             /*  order. */
+    int nmatch;              /* The number of elements in */
+                             /*  the above matches[] */
+                             /*  array. */
+  } CplMatches;
+.fi
+.sp
+If an error occurs during completion, \f3cpl_complete_word()\f1
+returns NULL. A description of the error can be acquired by calling
+the \f3cpl_last_error()\f3 function.
+.sp
+.nf
+  const char *cpl_last_error(WordCompletion *cpl);
+.fi
+.sp
+The \f3cpl_last_error()\f3 function returns a terse description of the
+error which occurred on the last call to \f3cpl_complete_word()\f1 or
+\f3cpl_add_completion()\f1.
+.sp
+.nf
+  CplMatches *cpl_recall_matches(WordCompletion *cpl);
+.fi
+.sp
+As a convenience, the return value of the last call to
+\f3cpl_complete_word()\f1 can be recalled at a later time by calling
+\f3cpl_recall_matches()\f1. If \f3cpl_complete_word()\f1 returned
+\f3NULL\f1, so will \f3cpl_recall_matches()\f1.
+.sp
+.nf
+  int cpl_list_completions(CplMatches *result, FILE *fp,
+                           int terminal_width);
+.fi
+.sp
+When the \f3cpl_complete_word()\f1 function returns multiple possible
+completions, the \f3cpl_list_completions()\f1 function can be called
+upon to list them, suitably arranged across the available width of the
+terminal. It arranges for the displayed columns of completions to all
+have the same width, set by the longest completion. It also appends
+the \f3type_suffix\f1 strings that were recorded with each completion,
+thus indicating their types to the user.
+
+.SH THE BUILT-IN FILENAME-COMPLETION CALLBACK
+
+By default the \f3gl_get_line(@FUNC_MANEXT@)\f1 function, passes the following
+completion callback function to \f3cpl_complete_word()\f1. This
+function can also be used separately, either by sending it to
+\f3cpl_complete_word()\f1, or by calling it directly from your
+own completion callback function.
+.sp
+.nf
+  CPL_MATCH_FN(cpl_file_completions);
+.fi
+.sp
+Certain aspects of the behavior of this callback can be changed via
+its \f3data\f1 argument. If you are happy with its default behavior
+you can pass \f3NULL\f1 in this argument. Otherwise it should be a
+pointer to a \f3CplFileConf\f1 object, previously allocated by calling
+\f3new_CplFileConf()\f1.
+.sp
+.nf
+  CplFileConf *new_CplFileConf(void);
+.fi
+.sp
+\f3CplFileConf\f1 objects encapsulate the configuration parameters of
+\f3cpl_file_completions()\f1. These parameters, which start out with
+default values, can be changed by calling the accessor functions
+described below.
+.sp
+By default, the \f3cpl_file_completions()\f3 callback function
+searches backwards for the start of the filename being completed,
+looking for the first un-escaped space or the start of the input
+line. If you wish to specify a different location, call
+\f3cfc_file_start()\f1 with the index at which the filename starts in
+the input line. Passing start_index=-1 re-enables the default
+behavior.
+.sp
+.nf
+  void cfc_file_start(CplFileConf *cfc, int start_index);
+.fi
+.sp
+By default, when \f3cpl_file_completions()\f1 looks at a filename in
+the input line, each lone backslash in the input line is interpreted
+as being a special character which removes any special significance of
+the character which follows it, such as a space which should be taken
+as part of the filename rather than delimiting the start of the
+filename. These backslashes are thus ignored while looking for
+completions, and subsequently added before spaces, tabs and literal
+backslashes in the list of completions. To have unescaped backslashes
+treated as normal characters, call \f3cfc_literal_escapes()\f1 with a
+non-zero value in its \f3literal\f1 argument.
+.sp
+.nf
+  void cfc_literal_escapes(CplFileConf *cfc, int literal);
+.fi
+.sp
+By default, \f3cpl_file_completions()\f1 reports all files who's names
+start with the prefix that is being completed. If you only want a
+selected subset of these files to be reported in the list of
+completions, you can arrange this by providing a callback function
+which takes the full pathname of a file, and returns \f30\f1 if the
+file should be ignored, or \f31\f1 if the file should be included in
+the list of completions. To register such a function for use by
+\f3cpl_file_completions()\f1, call \f3cfc_set_check_fn()\f1, and pass
+it a pointer to the function, together with a pointer to any data that
+you would like passed to this callback whenever it is called. Your
+callback can make its decisions based on any property of the file,
+such as the filename itself, whether the file is readable, writable or
+executable, or even based on what the file contains.
+.sp
+.nf
+  #define CPL_CHECK_FN(fn) int (fn)(void *data, \\
+                                    const char *pathname)
+  typedef CPL_CHECK_FN(CplCheckFn);
+
+  void cfc_set_check_fn(CplFileConf *cfc,
+                        CplCheckFn *chk_fn, void *chk_data);
+.fi
+.sp
+The \f3cpl_check_exe()\f1 function is a provided callback of the above
+type, for use with \f3cpl_file_completions()\f1. It returns non-zero
+if the filename that it is given represents a normal file that the
+user has execute permission to. You could use this to have
+\f3cpl_file_completions()\f1 only list completions of executable
+files.
+.sp
+When you have finished with a \f3CplFileConf\f1 variable, you can pass
+it to the \f3del_CplFileConf()\f1 destructor function to reclaim its
+memory.
+.sp
+.nf
+  CplFileConf *del_CplFileConf(CplFileConf *cfc);
+.fi
+.sp
+
+.SH THREAD SAFETY
+
+In multi-threaded programs, you should use the \f3libtecla_r.a\f1
+version of the library. This uses POSIX reentrant functions where
+available (hence the \f3_r\f1 suffix), and disables features that rely
+on non-reentrant system functions. In the case of this module, the
+only disabled feature is username completion in \f3~username/\f1
+expressions, in \f3cpl_file_completions()\f1.
+
+Using the \f3libtecla_r.a\f1 version of the library, it is safe to use
+the facilities of this module in multiple threads, provided that each
+thread uses a separately allocated \f3WordCompletion\f1 object. In
+other words, if two threads want to do word completion, they should
+each call \f3new_WordCompletion()\f1 to allocate their own completion
+objects.
+
+.SH FILES
+.nf
+libtecla.a    -    The tecla library
+libtecla.h    -    The tecla header file.
+.fi
+
+.SH SEE ALSO
+
+.nf
+libtecla(@LIBR_MANEXT@), gl_get_line(@FUNC_MANEXT@), ef_expand_file(@FUNC_MANEXT@),
+pca_lookup_file(@FUNC_MANEXT@)
+.fi
+
+.SH AUTHOR
+Martin Shepherd  (mcs@astro.caltech.edu)

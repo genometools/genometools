@@ -1,0 +1,582 @@
+dnl This is the input file which autoconf uses to construct a
+dnl "configure" script for the tecla library. It is a bourne shell
+dnl script which autoconf pre-processes with the m4 preprocessor to
+dnl expand autoconf-defined m4 macros such as AC_INIT().  The
+dnl following line just initializes autoconf. Autoconf interprets the
+dnl single argument as the name of an arbitrary file, which it uses to
+dnl ensure that it is being run correctly from the directory which
+dnl contains the libtecla source code.
+
+AC_INIT(getline.c)
+
+dnl Here we set the major version number of the tecla library.
+dnl Incrementing this number implies that a change has been made to
+dnl the library's public interface, which makes it binary incompatible
+dnl with programs that were linked with previous shared versions of
+dnl the tecla library.  Incompatible changes of this type should be
+dnl avoided at all costs, so it is hoped that the major version number
+dnl won't ever have to change. The major version number must be a
+dnl small integer number, preferably a single numeric digit.
+
+AC_SUBST(MAJOR_VER)
+MAJOR_VER="1"
+
+dnl Set the minor version number of the tecla library. This number
+dnl should be incremented by one whenever additional functionality,
+dnl such as new functions or modules, are added to the library. The
+dnl idea is that a program that was linked with a shared library of
+dnl the same major version number, but a lower minor version number,
+dnl will continue to function when the run-time loader links it
+dnl against the updated version.  The minor version number must be a
+dnl small integer number, which should be reset to 0 whenever the
+dnl major version number is incremented.
+
+AC_SUBST(MINOR_VER)
+MINOR_VER="6"
+
+dnl Set the micro version number of the tecla library. This is
+dnl incremented whenever modifications to the library are made which
+dnl make no changes to the public interface, but which fix bugs and/or
+dnl improve the behind-the-scenes implementation.  The micro version
+dnl number should be reset to 0 whenever the minor version number is
+dnl incremented.  The micro version number must be a small integer
+dnl number.
+
+AC_SUBST(MICRO_VER)
+MICRO_VER="1"
+
+dnl The AC_PROG_CC line looks for a C compiler, and if gcc is chosen,
+dnl sets the $GCC shell variable to "yes". Make sure that CFLAGS is
+dnl set to something first, to prevent AC_PROG_CC from substituting -g
+dnl for the optimization level.
+
+CFLAGS="$CFLAGS"
+AC_PROG_CC
+
+dnl Apparently not all implementations of the 'make' command define
+dnl the MAKE variable. The following directive creates a variable
+dnl called SET_MAKE which when expanded in a makefile is either empty
+dnl if the local 'make' command was found to define the MAKE variable,
+dnl or contains an assignment which will give the MAKE variable the
+dnl value 'make'.
+
+AC_PROG_MAKE_SET
+
+dnl The following directive causes autoconf to see if symbolic links
+dnl are supported on the current filesystem. If so, it sets the
+dnl variable LN_S to "ln -s". Otherwise it sets LN_S to just "ln".
+dnl This allows us to create symbolic links where possible, but falls
+dnl back to creating hard links where symbolic links aren't available.
+
+AC_PROG_LN_S
+
+dnl The following macro searches for the best implementation of awk
+dnl on the host system, and records it in the AWK shell variable.
+
+AC_PROG_AWK
+
+dnl If ranlib is needed on the target system, the RANLIB make variable
+dnl is set to ranlib. Otherwise it is set to :, which is the do-nothing
+dnl command of the bourne shell.
+dnl Note that we do not use AC_PROG_RANLIB because (at least in
+dnl autoconf 2.53) this does not check for cross-compilation.
+
+AC_CHECK_TOOL(RANLIB, ranlib)
+
+dnl Set LD as appropriate, especially when cross-compiling
+
+AC_CHECK_TOOL(LD, ld)
+
+dnl The following directive tells autoconf to figure out the target
+dnl system type and assign a canonical name for this to the $target
+dnl shell variable. This is used below in the target-specific case
+dnl statement.
+
+AC_CANONICAL_SYSTEM
+
+dnl In early versions of Solaris, some libraries are in /usr/ccs/lib,
+dnl where gcc doesn't look. The tests below for the curses library
+dnl would thus fail without this directory being added to the search
+dnl path. We thus add it here before the tests. Note that in the
+dnl following, since [ and ] are m4 quotes, and m4 will remove the
+dnl outermost quotes when it processes this file, we have to double
+dnl them up here to get [0-6] to appear in the output configure
+dnl script.
+
+case $target_os in
+solaris2.[[0-6]]|solaris2.[[0-6]].*)
+  LIBS="$LIBS -L/usr/ccs/lib"
+  ;;
+esac
+
+dnl Recent versions of gcc place /usr/local/include at the head of the
+dnl system include-file search path. This causes problems when include
+dnl files that have the same name as standard system include files are
+dnl placed in this directory by third-party packages. To avoid this,
+dnl move /usr/local/include to the end of the search path.
+
+if test "$GCC"_ = "yes"_; then
+  touch foo.c
+  fix=`$CC -E -Wp,-v foo.c 2>&1 | $AWK '
+    /^#include <...> search starts here:/ {in_list=1;ndir=0}
+    / *\// && in_list {path[[ndir++]] = $1}
+    /^End of search list/ {in_list=0}
+    END {
+      if(path[[0]] ~ /\/usr\/local\/include/) {
+        for(dir=1; dir<ndir; dir++) {
+          printf(" -isystem %s", path[[dir]])
+        }
+        printf("\n");
+      }
+    }'`
+  rm -f foo.c
+  CFLAGS="$CFLAGS$fix"
+fi
+
+dnl The following lines look for terminfo functions in the normal
+dnl curses library. If not found, they are searched for in the GNU
+dnl ncurses library. If the terminfo functions still aren't found,
+dnl then termcap functions are searched for in the curses library.  If
+dnl either set of functions is found, the corresponding variable
+dnl USE_TERMINFO or USE_TERMCAP is arranged to be defined in CFLAGS,
+dnl via the exported DEFINES shell variable, and the library in which
+dnl they were found is appended to the LIBS shell variable.
+
+AC_CHECK_LIB(curses, tigetstr, [
+  AC_DEFINE(USE_TERMINFO)
+  LIBS="$LIBS -lcurses"
+], [AC_CHECK_LIB(ncurses, tigetstr, [
+  AC_DEFINE(USE_TERMINFO)
+  LIBS="$LIBS -lncurses"
+], [AC_CHECK_LIB(curses, tgetstr, [
+  AC_DEFINE(USE_TERMCAP)
+  LIBS="$LIBS -lcurses"
+  AC_CHECK_HEADER(termcap.h, AC_DEFINE(HAVE_TERMCAP_H))
+])])])
+
+dnl Search for the curses.h and term.h header files, first in the
+dnl standard system-include directories, and then if not found there,
+dnl in any ncurses subdirectories of these directories. If found, have
+dnl CFLAGS define C macros such as HAVE_TERM_H or HAVE_NCURSES_TERM_H.
+dnl Note that on some systems trying to compile term.h without first
+dnl including curses.h causes complaints, so when checking for term.h
+dnl we tell AC_CHECK_HEADERS() to include curses.h in the test file
+dnl that it attempts to compile.
+
+AC_CHECK_HEADERS(curses.h, [AC_CHECK_HEADERS(term.h,[],[],[#include <curses.h>])], [AC_CHECK_HEADERS(ncurses/curses.h, [AC_CHECK_HEADERS(ncurses/term.h,[],[],[#include <ncurses/curses.h>])])])
+
+dnl The following variable lists the targets that will be created if
+dnl the user runs make without any arguments. Initially we assume
+dnl that we can create both the normal and the reentrant versions
+dnl of the library.
+
+AC_SUBST(TARGETS)
+TARGETS="normal reentrant"
+
+dnl Check for reentrant functions by attempting to compile and link a
+dnl temporary program which calls them, being sure to include the
+dnl appropriate headers and define _POSIX_C_SOURCE, just in case any
+dnl of the functions are defined as macros. In the following,
+dnl AC_CACHE_CHECK outputs the message "checking for reentrant
+dnl functions". If this check has been done before, it assigns the
+dnl cached yes/no value to tecla_cv_reentrant.  Otherwise it uses
+dnl AC_TRY_LINK() to attempt to compile and link the specified dummy
+dnl program, and sets tecla_cv_reentrant to yes or no, depending on
+dnl whether this succeeds. Finally it caches the value of
+dnl tecla_cv_reentrant in the file config.cache, and writes "yes" or
+dnl "no" to the terminal.
+
+AC_CACHE_CHECK(for reentrant functions, tecla_cv_reentrant, [
+  KEPT_CFLAGS="$CFLAGS"
+  CFLAGS="$CFLAGS -D_POSIX_C_SOURCE=199506L"
+  AC_TRY_LINK([
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <pwd.h>
+  ], [
+    (void) readdir_r(NULL, NULL, NULL);
+    (void) getpwuid_r(geteuid(), NULL, NULL, 0, NULL);
+    (void) getpwnam_r(NULL, NULL, NULL, 0, NULL);
+  ], tecla_cv_reentrant=yes, tecla_cv_reentrant=no)
+  CFLAGS="$KEPT_CFLAGS"
+])
+
+dnl If the necessary reentrant functions weren't found to be
+dnl available, default to only compiling the non-reentrant version of
+dnl the library.
+
+if test $tecla_cv_reentrant = no; then
+  TARGETS="normal"
+fi
+
+dnl If sys/select.h exists, arrange for the HAVE_SYS_SELECT_H C-macro to
+dnl be defined when compiling the library.
+
+AC_CHECK_HEADER(sys/select.h, AC_DEFINE(HAVE_SYS_SELECT_H))
+
+dnl Check for the select system call with the normal arguments,
+dnl by attempting to compile and link a temporary program which
+dnl calls it, being sure to include the appropriate headers.
+dnl In the following, AC_CACHE_CHECK outputs the message
+dnl "checking for select system call". If this check has been done
+dnl before, it assigns the cached yes/no value to tecla_cv_select.
+dnl Otherwise it uses AC_TRY_LINK() to attempt to compile and link
+dnl the specified dummy program, and sets tecla_cv_select to yes
+dnl or no, depending on whether this succeeds. Finally it caches
+dnl the value of tecla_cv_select in the file config.cache, and
+dnl writes "yes" or "no" to the terminal.
+
+AC_CACHE_CHECK(for select system call, tecla_cv_select, [
+  AC_TRY_LINK([
+#include <sys/time.h>
+#include <sys/types.h>
+#include <unistd.h>
+#ifdef HAVE_SYS_SELECT_H
+#include <sys/select.h>
+#endif
+  ], [
+    fd_set fds;
+    int nready;
+    FD_ZERO(&fds);
+    FD_SET(1, &fds);
+    nready = select(2, &fds, &fds, &fds, NULL);
+  ], tecla_cv_select=yes, tecla_cv_select=no)
+])
+
+dnl If the select function was available, arrange for HAVE_SELECT to
+dnl be defined by CFLAGS.
+
+if test $tecla_cv_select = yes; then
+  AC_DEFINE(HAVE_SELECT)
+fi
+
+dnl Check if this system supports the system V pseudo terminal interface.
+
+AC_CACHE_CHECK(for SysV pseudo-terminals, tecla_cv_sysv_pty, [
+  AC_TRY_LINK([
+#include <stdlib.h>
+#include <unistd.h>
+#include <stropts.h>
+  ], [
+    char *name = ptsname(0);
+    int i1 = grantpt(0);
+    int i2 = unlockpt(0);
+    int i3 = ioctl(0, I_PUSH, "ptem");
+    return 0;
+  ], tecla_cv_sysv_pty=yes, tecla_cv_sysv_pty=no)
+])
+
+dnl If the system-V pseudo-terminal interface is available, arrange
+dnl for HAVE_SYSV_PTY to be defined by CFLAGS.
+
+if test $tecla_cv_sysv_pty = yes; then
+  AC_DEFINE(HAVE_SYSV_PTY)
+fi
+
+dnl The following variable contains the extension to append to
+dnl "libtecla" and "libtecla_r" when creating shared libraries on the
+dnl target platform.  This is system dependent and is ignored if
+dnl LINK_SHARED remains an empty string. On most platforms that
+dnl support shared libaries, this will be .so.$MAJOR_VER, where
+dnl MAJOR_VER is the major version number described above, which on
+dnl some systems, tells the run-time loader if the program being
+dnl loaded is binary compatible with a given version of the library
+dnl (see the discussion of MAJOR_VER near the top of this file).
+dnl The following empty default can be overriden on a system by system
+dnl basis later in this file.
+
+AC_SUBST(SHARED_EXT)
+SHARED_EXT=""
+
+dnl When a shared library is installed with the extension $SHARED_EXT,
+dnl you can optionally produce other copies of this library with
+dnl different extensions. This is done using symbolic or hard links,
+dnl depending on what is available on the current filesystem, and the
+dnl extensions to use for these links are listed in the following
+dnl variable, separated by spaces. The following empty default can be
+dnl overriden on a system by system basis later in this file.
+
+AC_SUBST(SHARED_ALT)
+SHARED_ALT=""
+
+dnl The following variable lists extra compilation flags needed to
+dnl create object files that can be included in shared libraries.
+dnl Normally one would include a flag to tell the C compiler to
+dnl compile position-independent code. This option commonly includes
+dnl the acronym 'pic'.
+
+AC_SUBST(SHARED_CFLAGS)
+SHARED_CFLAGS=""
+
+dnl On systems that support shared libraries, the following variable
+dnl provides the command needed to make a shared library. In this
+dnl variable, $$@ will be replaced with the name of the shared
+dnl library, $$(LIB_OBJECTS) will be replaced with a space separated
+dnl list of the object files that are to be included in the library,
+dnl and libtecla$$(SUFFIX) will be the name of the library being
+dnl built, minus the system-specific extension (eg. libtecla or
+dnl libtecla_r).  If LINK_SHARED is left as an empty string, shared
+dnl library creation will not attempted. If your system supports
+dnl shared library creation, you should override the default value of
+dnl this variable in the target-specific case statement later in this
+dnl file.
+
+AC_SUBST(LINK_SHARED)
+LINK_SHARED=""
+
+dnl When compiling the reentrant version of the library, the following
+dnl compiler flags are presented to the compiler, in addition to those
+dnl that are used when compiling the non-reentrant version of the
+dnl library. The PREFER_REENTRANT macro is an internal libtecla macro
+dnl whose presence reports when the reentrant version of the library
+dnl is being compiled. This allows the code to determine when to
+dnl disable features that can't portably be implemented reentrantly,
+dnl such as username completion. The existence of the _POSIX_C_SOURCE
+dnl macro can't be reliably used for this purpose, since some systems
+dnl define it by default for all code.
+
+AC_SUBST(DEFS_R)
+DEFS_R="-D_POSIX_C_SOURCE=199506L -DPREFER_REENTRANT"
+
+dnl For man pages relating to library features, the following two
+dnl variables determine in which sub-directory of the top-level man
+dnl directory the man pages should go, and what file-name extensions
+dnl these files should have. On systems where the following defaults
+dnl are not valid, the default values should be overriden in the
+dnl target-specific case statement later in this file.
+
+AC_SUBST(LIBR_MANDIR)
+AC_SUBST(LIBR_MANEXT)
+LIBR_MANDIR="man3"
+LIBR_MANEXT="3"
+
+dnl For man pages relating to library functions, the following two
+dnl variables serve the same purpose as the previously described
+dnl LIBR_MANDIR and LIBR_MANEXT variables.
+
+AC_SUBST(FUNC_MANDIR)
+AC_SUBST(FUNC_MANEXT)
+FUNC_MANDIR="man3"
+FUNC_MANEXT="3"
+
+dnl For man pages relating to programs, the following two variables
+dnl serve the same purpose as the previously described LIBR_MANDIR
+dnl and LIBR_MANEXT variables.
+
+AC_SUBST(PROG_MANDIR)
+AC_SUBST(PROG_MANEXT)
+PROG_MANDIR="man1"
+PROG_MANEXT="1"
+
+dnl For man pages on miscellaneous topics, the following two variables
+dnl serve the same purpose as the previously described LIBR_MANDIR
+dnl and LIBR_MANEXT variables.
+
+AC_SUBST(MISC_MANDIR)
+AC_SUBST(MISC_MANEXT)
+MISC_MANDIR="man7"
+MISC_MANEXT="7"
+
+dnl For man pages relating to configuration files, the following two
+dnl variables serve the same purpose as the previously described
+dnl LIBR_MANDIR and LIBR_MANEXT variables.
+
+AC_SUBST(FILE_MANDIR)
+AC_SUBST(FILE_MANEXT)
+FILE_MANDIR="man5"
+FILE_MANEXT="5"
+
+dnl If the application doesn't want the user to have access to the
+dnl filesystem, it can remove all action functions that list, read or
+dnl write files, by including the configuration argument
+dnl --without-file-actions.
+
+AC_ARG_WITH(file-actions, AC_HELP_STRING([--with-file-actions], [Should users of gl_get_line() have access to the filesystem (default=yes)]),
+ AC_DEFINE(HIDE_FILE_SYSTEM), )
+
+dnl If the target system either has no file-system, or file-system access
+dnl isn't needed, libtecla can be made smaller by excluding all file and
+dnl directory access code. This is done by adding the configuration
+dnl argument --without-file-system.
+
+AC_ARG_WITH(file-system, AC_HELP_STRING([--with-file-system], [Does the target have a filesystem (default=yes)]),
+ AC_DEFINE(WITHOUT_FILE_SYSTEM), )
+
+dnl The following bourne shell case statement is where system
+dnl dependencies can be added.  In particular, if your system supports
+dnl shared library creation, the following switch is the place to
+dnl configure it. To do so you will first need to find out what target
+dnl type was just assigned by the AC_CANONICAL_SYSTEM macro executed
+dnl previously.  The target type of your current system can be
+dnl determined by cd'ing to the top level directory of the tecla
+dnl distribution, and typing the command "sh config.guess". This will
+dnl report what autoconf thinks the system type is. Note that this
+dnl will be very specific, so if you know that the configuration
+dnl parameters that you are about to provide apply to different
+dnl versions of the current system type, you can express this in the
+dnl case statement by using a wild-card in place of the version
+dnl number, or by using an | alternation to list one or more version
+dnl names. Beware that autoconf uses [] as quote characters, so if you
+dnl want to use a regexp character range like [a-z], you should write
+dnl this as [[a-z]].
+
+case $target in
+*solaris*)
+  AC_DEFINE(__EXTENSIONS__)
+  SHARED_EXT=".so.${MAJOR_VER}"
+  SHARED_ALT=".so"
+  LINK_SHARED="$LD"' -G -M $$(srcdir)/libtecla.map -o $$@ -h $$(@F) -z defs -i $$(LIB_OBJECTS) $$(LIBS) -lc'
+  SHARED_CFLAGS="-Kpic"
+  case $CC in
+  */cc|cc) SHARED_CFLAGS="$SHARED_CFLAGS -xstrconst" ;;
+  esac
+  case $target_cpu in
+  sparc) SHARED_CFLAGS="$SHARED_CFLAGS -xregs=no%appl"
+  esac
+  case $target_os in
+  solaris2.[[89]]*|solaris2.1[[0-9]]*)
+    LIBR_MANEXT=3lib
+    FUNC_MANEXT=3tecla
+    LIBR_MANDIR=man$LIBR_MANEXT
+    FUNC_MANDIR=man$FUNC_MANEXT
+  esac
+  MISC_MANDIR="man5"
+  MISC_MANEXT="5"
+  FILE_MANDIR="man4"
+  FILE_MANEXT="4"
+  ;;
+*linux*)
+  SHARED_EXT=".so.${MAJOR_VER}.${MINOR_VER}.${MICRO_VER}"
+  SHARED_ALT=".so .so.${MAJOR_VER}"
+
+dnl See if the installed version of Gnu ld accepts version scripts.
+
+  AC_CACHE_CHECK([for --version-script in GNU ld], tecla_cv_gnu_ld_script, [
+    if (echo 'void dummy(void) {return;}' > dummy.c; $CC -c -fpic dummy.c; \
+         $LD -o dummy.so dummy.o -shared --version-script=$srcdir/libtecla.map) 1>&2 2>/dev/null; then
+      tecla_cv_gnu_ld_script=yes
+    else
+      tecla_cv_gnu_ld_script=no
+    fi
+    rm -f dummy.c dummy.o dummy.so
+  ])
+  if test $tecla_cv_gnu_ld_script = yes; then
+    VERSION_OPT='--version-script=$$(srcdir)/libtecla.map'
+  else
+    VERSION_OPT=''
+  fi
+
+  LINK_SHARED="$LD"' -o $$@ -soname libtecla$$(SUFFIX).so.'${MAJOR_VER}' -shared '$VERSION_OPT' $$(LIB_OBJECTS) $$(LIBS) -lc'
+  SHARED_CFLAGS="-fpic"
+
+dnl Reenable the inclusion of symbols which get undefined when POSIX_C_SOURCE
+dnl is specified.
+
+  CFLAGS="-D_SVID_SOURCE -D_BSD_SOURCE $CFLAGS"
+  ;;
+*hpux*)
+  SHARED_EXT=".${MAJOR_VER}"
+  SHARED_ALT=".sl"
+  LINK_SHARED="$LD"' -b +h $$(@F) +k +vshlibunsats -o $$@ -c libtecla.map.opt $$(LIB_OBJECTS) $$(LIBS) -lc'
+  SHARED_CFLAGS="+z"
+  MISC_MANEXT=5
+  FILE_MANEXT=4
+  MISC_MANDIR=man$MISC_MANEXT
+  FILE_MANDIR=man$FILE_MANEXT
+  ;;
+*darwin*)
+  SHARED_EXT=".${MAJOR_VER}.${MINOR_VER}.${MICRO_VER}.dylib"
+  SHARED_ALT=".dylib .${MAJOR_VER}.dylib"
+  LINK_SHARED='$(CC) -o $$@ -dynamiclib -flat_namespace -undefined suppress -compatibility_version '${MAJOR_VER}.${MINOR_VER}' -current_version '${MAJOR_VER}.${MINOR_VER}.${MICRO_VER}' -install_name '${libdir}'/$$@ $$(LIB_OBJECTS)'
+  SHARED_CFLAGS=""
+  ;;
+*dec-osf*)
+  AC_DEFINE(_OSF_SOURCE)
+  ;;
+*freebsd*)
+  SHARED_EXT=".so.${MAJOR_VER}"
+  SHARED_ALT=".so"
+  VERSION_OPT='--version-script=$$(srcdir)/libtecla.map'
+  LINK_SHARED='ld -o $$@ -soname libtecla$$(SUFFIX).so.'${MAJOR_VER}' -shared '$VERSION_OPT' $$(LIB_OBJECTS) $$(LIBS) -lc'
+  SHARED_CFLAGS="-fpic"
+  ;;
+mips-sgi-irix*)
+  DEFS_R="$DEFS_R -D_XOPEN_SOURCE=500"
+  if test "$RANLIB"_ = "_"; then
+    RANLIB=":"
+  fi
+  ;;
+esac
+
+dnl The following statement checks to see if the GNU C compiler has
+dnl been chosen instead of the normal compiler of the host operating
+dnl system. If it has, and shared library creation has been
+dnl configured, it replaces the shared-library-specific C compilation
+dnl flags with those supported by gcc. Also append the gcc run-time
+dnl library to the shared library link line.
+
+if test "$GCC"_ = "yes"_ && test "$LINK_SHARED"_ != "_" ; then
+  SHARED_CFLAGS="-fpic"
+  case $target in
+  sparc-*-solaris*)
+    SHARED_CFLAGS="$SHARED_CFLAGS -mno-app-regs"
+    ;;
+  *darwin*)
+    SHARED_CFLAGS=""
+    ;;
+  esac
+  LINK_SHARED="$LINK_SHARED `gcc -print-libgcc-file-name`"
+fi
+
+dnl The following variable will list which types of libraries,
+dnl "static", and possibly "shared", are to be created and installed.
+
+AC_SUBST(TARGET_LIBS)
+
+dnl If shared library creation has been configured, add shared
+dnl libraries to the list of libraries to be built.
+
+if test "$LINK_SHARED"_ != "_"; then
+  TARGET_LIBS="static shared"
+else
+  TARGET_LIBS="static"
+  LINK_SHARED="@:"
+fi
+
+dnl Set the shell variable and Makefile variable, MAKE_MAN_PAGES, to
+dnl "yes" if man pages are desired. By default they are, but if the
+dnl user specifies --with-man-pages=no or --without-man-pages, then
+dnl they won't be preprocessed by the configure script or installed
+dnl by the Makefile.
+
+AC_SUBST(MAKE_MAN_PAGES)
+AC_ARG_WITH(man-pages, AC_HELP_STRING([--with-man-pages], [Are man pages desired (default=yes)]),
+ MAKE_MAN_PAGES="$withval", MAKE_MAN_PAGES="yes")
+
+dnl Create the list of files to be generated by the configure script.
+
+OUTPUT_FILES="Makefile"
+rm -rf man/man*
+if test "$MAKE_MAN_PAGES"_ = "yes"_; then
+  for area in libr func misc prog file; do
+    for page in man/$area/*.in; do
+      OUTPUT_FILES="$OUTPUT_FILES `echo $page | sed 's/\.in$//'`"
+    done
+  done
+fi
+
+dnl The following directive must always be the last line of any
+dnl autoconf script. It causes autoconf to create the configure
+dnl script, which for each argument of AC_OUTPUT, will look for a
+dnl filename formed by appending ".in" to the argument, preprocess
+dnl that file, replacing @VAR@ directives with the corresponding value
+dnl of the specified shell variable VAR, as set above in this file,
+dnl and write the resulting output to the filename given in the
+dnl argument. Note that only shell variables that were exported above
+dnl with the AC_SUBST() directive will be substituted in @VAR@
+dnl directives (some macros like AC_PROG_CC also call AC_SUBST for you
+dnl for the variables that they output).
+
+AC_OUTPUT($OUTPUT_FILES)
