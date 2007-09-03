@@ -19,6 +19,7 @@
 #ifndef ENCIDXSEQPRIV_H_INCLUDED
 #define ENCIDXSEQPRIV_H_INCLUDED
 
+#include "mrangealphabet.h"
 #include "seqranges.h"
 #include "encidxseq.h"
 
@@ -33,12 +34,13 @@ struct encIdxSeqClass
                 Env *env);
   union EISHint *(*newHint)(struct encIdxSeq *seq, Env *env);
   void (*deleteHint)(struct encIdxSeq *seq, EISHint hint, Env *env);
-
+  const MRAEnc *(*getAlphabet)(const struct encIdxSeq *seq);
 };
 
 struct encIdxSeq
 {
   const struct encIdxSeqClass *classInfo;
+  MRAEnc *alphabet;
   Seqpos seqLen;
 };
 

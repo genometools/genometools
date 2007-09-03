@@ -25,11 +25,14 @@ AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include \
 
 AM_LDFLAGS = -L$(top_builddir)/src
 
-noinst_PROGRAMS = checkblockcomp
+noinst_PROGRAMS = checkblockcomp checkbwtseq
 
 checkblockcomp_SOURCES = checkblockcomp.c
 checkblockcomp_LDADD = $(top_builddir)/src/libbiofmi2.a
 
+checkbwtseq_SOURCES = checkbwtseq.c
+checkbwtseq_LDADD = $(top_builddir)/src/libbiofmi2.a
+
 #checkbitpackarray_LDADD = -lgtcore -lbz2 -lz
 
-EXTRA_DIST = checkbitpackstring.template
+#EXTRA_DIST = checkbitpackstring.template

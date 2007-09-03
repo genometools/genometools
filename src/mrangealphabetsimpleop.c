@@ -35,6 +35,19 @@ MRAEncGetRangeSize(const MRAEnc *mralpha, size_t range)
   return mralpha->symbolsPerRange[range];
 }
 
+staticifinline inline size_t
+MRAEncGetDomainSize(const MRAEnc *mralpha)
+{
+  assert(mralpha);
+  switch(mralpha->encType)
+  {
+  case sourceUInt8:
+    return UINT8_MAX + 1;
+  default:
+    abort();
+  }
+}
+
 staticifinline inline Symbol
 MRAEncMapSymbol(const MRAEnc *mralpha, Symbol sym)
 {
@@ -56,7 +69,7 @@ MRAEncRevMapSymbol(const MRAEnc *mralpha, Symbol sym)
     return constMRAEnc2MRAEncUInt8(mralpha)->revMappings[(uint8_t)sym];
   default:
     abort();
-  }  
+  }
 }
 
 

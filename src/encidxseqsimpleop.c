@@ -17,6 +17,7 @@
 **  
 */
 
+#include "mrangealphabet.h"
 #include "encidxseq.h"
 #include "encidxseqpriv.h"
 
@@ -24,6 +25,13 @@ staticifinline inline Seqpos
 EISLength(struct encIdxSeq *seq)
 {
   return seq->seqLen;
+}
+
+staticifinline inline const MRAEnc *
+EISGetAlphabet(const struct encIdxSeq *seq)
+{
+  assert(seq);
+  return seq->alphabet;
 }
 
 staticifinline inline Symbol
@@ -36,8 +44,19 @@ staticifinline inline Seqpos
 EISRank(struct encIdxSeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
         Env *env)
 {
-  return seq->classInfo->rank(seq, sym, pos, hint, env);
+  Symbol mSym;
+  mSym = MRAEncMapSymbol(seq->alphabet, sym);
+  return seq->classInfo->rank(seq, mSym, pos, hint, env);
 }
+
+staticifinline inline Seqpos
+EISSymTransformedRank(struct encIdxSeq *seq, Symbol msym, Seqpos pos,
+                      union EISHint *hint, Env *env)
+{
+  assert(msym < MRAEncGetSize(EISGetAlphabet(seq)));
+  return seq->classInfo->rank(seq, msym, pos, hint, env);
+}
+
 
 staticifinline inline EISHint
 newEISHint(struct encIdxSeq *seq, Env *env)

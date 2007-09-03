@@ -57,18 +57,19 @@ void
 SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
                   Symbol sym, Env *env)
 {
-  size_t numRanges, numNewRanges;
-  struct seqRange *p;
   assert(rangeList && env);
   if(len)
   {
-    p = rangeList->ranges + (numRanges = rangeList->numRanges);
-    numNewRanges = len/MAX_SEQRANGE_LEN + ((len%MAX_SEQRANGE_LEN)?1:0);
-    if((numRanges = rangeList->numRanges) + numNewRanges
-       > rangeList->numRangesStorable)
+    struct seqRange *p;
+    size_t numRanges = rangeList->numRanges,
+      numNewRanges = len/MAX_SEQRANGE_LEN + ((len%MAX_SEQRANGE_LEN)?1:0);
+    if(numRanges + numNewRanges > rangeList->numRangesStorable)
       rangeList->ranges =
         env_ma_realloc(env, rangeList->ranges,
-                       sizeof(struct seqRange) * (numRanges + numNewRanges));
+                       sizeof(struct seqRange)
+                       * (rangeList->numRangesStorable
+                          = (numRanges + 2 * numNewRanges)));
+    p = rangeList->ranges + numRanges;
     while(len > MAX_SEQRANGE_LEN)
     {
       p->startPos = pos;
@@ -105,19 +106,21 @@ void
 SRLAddPosition(struct seqRangeList *rangeList, Seqpos pos,
                Symbol sym, Env *env)
 {
+  size_t numRanges;
+  struct seqRange *lastRange;
   assert(rangeList && env);
-  if(rangeList->numRanges && 
-     rangeList->ranges[rangeList->numRanges - 1].startPos > pos)
+  numRanges = rangeList->numRanges;
+  lastRange = rangeList->ranges + numRanges - 1;
+  if(numRanges && lastRange->startPos > pos)
   {
     /* TODO: search for range */
     SRLinsertNewRange(rangeList, pos, 1, sym, env);
   }
-  else if(rangeList->numRanges
-          && (rangeList->ranges[rangeList->numRanges - 1].startPos + 
-              rangeList->ranges[rangeList->numRanges - 1].len == pos)
-          && (rangeList->ranges[rangeList->numRanges - 1].len
-              < MAX_SEQRANGE_LEN))
-    ++rangeList->ranges[rangeList->numRanges - 1].len;
+  else if(numRanges
+          && (lastRange->sym == sym)
+          && (lastRange->startPos + lastRange->len == pos)
+          && (lastRange->len < MAX_SEQRANGE_LEN))
+    ++(lastRange->len);
   else
     SRLAppendNewRange(rangeList, pos, 1, sym, env);
 }
@@ -175,7 +178,8 @@ SRLOverlapsPosition(struct seqRangeList *rangeList, Seqpos pos,
     {
       if(symAtPos)
         *symAtPos = searchRes->sym;
-      *hint = searchRes - rangeList->ranges;
+      if(hint)
+        *hint = searchRes - rangeList->ranges;
       return 1;
     }
     else
@@ -241,10 +245,12 @@ SRLFindPositionNext(struct seqRangeList *rangeList, Seqpos pos,
   {
     return rangeList->ranges + hintCopy;
   }
-  else if((numRanges > hintCopy + 1) &&
-          (rangeList->ranges[hintCopy + 1].startPos >= pos
-           || pos < rangeList->ranges[hintCopy + 1].startPos
-           + rangeList->ranges[hintCopy + 1].len))
+  else if((numRanges > hintCopy + 1)
+          && (rangeList->ranges[hintCopy + 1].startPos >= pos
+              || pos < rangeList->ranges[hintCopy + 1].startPos
+              + rangeList->ranges[hintCopy + 1].len)
+          && (rangeList->ranges[hintCopy].startPos
+              + rangeList->ranges[hintCopy].len <= pos))
   {
     ++hintCopy;
     if(hint)
@@ -257,6 +263,8 @@ SRLFindPositionNext(struct seqRangeList *rangeList, Seqpos pos,
     struct seqRange *searchRes =
       bsearch(&searchPos, rangeList->ranges + 1, rangeList->numRanges - 1,
               sizeof(struct seqRange), posSeqRangeNextCompare);
+    if(searchRes && hint)
+      *hint = searchRes - rangeList->ranges;
     return searchRes;
   }
   else /* numRanges <= 2 */

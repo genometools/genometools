@@ -31,11 +31,32 @@
 #include <inttypes.h>
 #endif /* HAVE_INTTYPES_H */
 
+#include <libgtcore/bitpackstring.h>
 #include <libgtcore/env.h>
 #include <libgtcore/str.h>
 #include <libgtmatch/seqpos-def.h>
 
 #include "mrangealphabet.h"
+
+/**
+ * callback function to insert variable width data into encidx
+ * construction
+ * @param dest bitstring to append data to (can hold at least as many
+ * bits as specified in the constructor)
+ * @param sOffset position in dest at which the callee may start
+ * writing
+ * @param start the data will be written together with the encoding of
+ * symbols at position start up to position start + len
+ * @param len see parameter start for description
+ * @param cbState is passed on every call back of bitInsertFunc to
+ * pass information that is kept across individual calls
+ * @param env passes information about allocator etc
+ * @return number of bits actually written, or (BitOffset)-1 if an
+ * error occured
+ */
+typedef BitOffset (*bitInsertFunc)(BitString dest, BitOffset sOffset,
+                                   Seqpos start, Seqpos len, void *cbState,
+                                   Env *env);
 
 /* typedef int_fast64_t Seqpos; */
 enum rangeStoreMode {
@@ -47,11 +68,11 @@ enum rangeStoreMode {
 typedef union EISHint *EISHint;
 
 extern struct encIdxSeq *
-newBlockEncIdxSeq(enum rangeStoreMode modes[],
-                  Str *projectName,
-                  unsigned blockSize, Env *env);
-struct encIdxSeq *
-loadBlockEncIdxSeq(Str *projectName, Env *env);
+newBlockEncIdxSeq(const Str *projectName, unsigned blockSize,
+                  bitInsertFunc biFunc, BitOffset maxBitsPerPos, void *cbState,
+                  Env *env);
+extern struct encIdxSeq *
+loadBlockEncIdxSeq(const Str *projectName, Env *env);
 
 extern int
 searchBlock2IndexPair(const struct encIdxSeq *seqIdx,
@@ -61,9 +82,16 @@ searchBlock2IndexPair(const struct encIdxSeq *seqIdx,
 extern void
 deleteEncIdxSeq(struct encIdxSeq *seq, Env *env);
 
+staticifinline inline const MRAEnc *
+EISGetAlphabet(const struct encIdxSeq *seq);
+
 staticifinline inline Seqpos
 EISRank(struct encIdxSeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
         Env *env);
+
+staticifinline inline Seqpos
+EISSymTransformedRank(struct encIdxSeq *seq, Symbol msym, Seqpos pos,
+                      union EISHint *hint, Env *env);
 
 extern Seqpos
 EISSelect(struct encIdxSeq *seq, Symbol sym, Seqpos count);

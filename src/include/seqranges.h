@@ -1,3 +1,4 @@
+
 /*
 ** Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
 **  
@@ -83,7 +84,7 @@ SRLOverlapsPosition(struct seqRangeList *rangeList, Seqpos pos,
 
 extern void
 SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
-                      Seqpos end, Symbol *occStore,
+                      Seqpos end, Seqpos *occStore,
                       seqRangeListSearchHint *hint);
 
 extern Seqpos

@@ -69,8 +69,17 @@ MRAEncGetNumRanges(const MRAEnc *mralpha);
 staticifinline inline size_t
 MRAEncGetRangeSize(const MRAEnc *mralpha, size_t range);
 
+/**
+ * @return number of symbols in alphabet
+ */
 extern size_t
 MRAEncGetSize(const MRAEnc *mralpha);
+
+/**
+ * @return size of original value range of symbols in alphabet
+ */
+staticifinline size_t
+MRAEncGetDomainSize(const MRAEnc *mralpha);
 
 staticifinline inline Symbol
 MRAEncMapSymbol(const MRAEnc *mralpha, Symbol sym);

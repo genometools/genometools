@@ -43,8 +43,8 @@ AC_CHECK_LIB([gtcore], [str_new],,
         [AC_MSG_ERROR([biofmi2 depends on libgtcore])])
 AC_CHECK_LIB([gtmatch], [mapsuffixarray],,
         [AC_MSG_ERROR([biofmi2 depends on libgtmatch])])
-AC_CHECK_LIB([pcdr], [PCDRFileStreamNew],,
-        [AC_MSG_ERROR([biofmi2 depends on libpcdr])])
+dnl AC_CHECK_LIB([pcdr], [PCDRFileStreamNew],,
+dnl         [AC_MSG_ERROR([biofmi2 depends on libpcdr])])
 dnl No 4 Check for header files
 dnl   std c headers, this information should be used later
 AC_HEADER_STDC

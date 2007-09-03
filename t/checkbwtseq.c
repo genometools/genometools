@@ -17,8 +17,8 @@
 **  
 */
 /**
- * \file checkblockcomp.c
- * \brief Experimentally try methods for block-compressed sequences.
+ * \file checkbwtseq.c
+ * \brief Experimentally try methods for bwt sequence indices.
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
 #ifdef HAVE_CONFIG_H
@@ -41,8 +41,7 @@
 #include <libgtcore/option.h>
 #include <libgtcore/str.h>
 #include <libgtcore/versionfunc.h>
-#include <encidxseq.h>
-#include <warts.h>
+#include <bwtseq.h>
 
 enum {
   BLOCKSIZE = 8,
@@ -64,7 +63,8 @@ parseOptions(int *parsed_args, int argc, char **argv,
 
   env_error_check(env);
   op = option_parser_new("indexname",
-                         "Map <indexname> and build block composition index.",
+                         "Load (or build if necessary) BWT index for project"
+                         " <indexname>.",
                          env);
   randSeedOption = option_new_long("random-seed", "specify start value"
                                    " for random number generator", &seedVal,
@@ -84,9 +84,9 @@ parseOptions(int *parsed_args, int argc, char **argv,
 int
 main(int argc, char *argv[])
 {
-  struct encIdxSeq *seq;
-  int dnasymcount = 4;
+  struct BWTSeq *bwtseq;
   Str *inputProject;
+  union bwtSeqParam bwtparams;
   int parsedArgs;
   int had_err = 0;
   Env *env = env_new();
@@ -102,56 +102,52 @@ main(int argc, char *argv[])
   }
 
   inputProject = str_new_cstr(argv[parsedArgs], env);
-  env_error_check(env);
-  if(!(seq = loadBlockEncIdxSeq(inputProject, env)))
-  {
-    env_error_unset(env);
-    seq = newBlockEncIdxSeq(inputProject, BLOCKSIZE, NULL, 0, NULL, env);
-  }
+  bwtparams.blockEncParams.blockSize = BLOCKSIZE;
+  bwtseq = newBWTSeq(BWT_ON_BLOCK_ENC, &bwtparams, inputProject, env);
   
-  ensure(had_err, seq);
+  ensure(had_err, bwtseq);
   if(had_err)
   {
     str_delete(inputProject, env);
     env_delete(env);
     return EXIT_FAILURE;
   }
-  {
-    int i;
-    Symbol exampleBlock[BLOCKSIZE];
-    size_t indices[2];
-    for(i = 0; i < BLOCKSIZE; ++i)
-    {
-      exampleBlock[i] = ((unsigned long)random())%dnasymcount;
-    }
-    searchBlock2IndexPair(seq, exampleBlock, indices, env);
-    exampleBlock[0] = 3;
-    exampleBlock[1] = 0;
-    exampleBlock[2] = 0;
-    exampleBlock[3] = 2;
-    exampleBlock[4] = 2;
-    exampleBlock[5] = 2;
-    exampleBlock[6] = 2;
-    exampleBlock[7] = 2;
-    searchBlock2IndexPair(seq, exampleBlock, indices, env);
-    fprintf(stderr, "indices: %lu, %lu\n", (unsigned long)indices[0],
-            (unsigned long)indices[1]);
-  }
-  {
-    int integrity = verifyIntegrity(seq, inputProject, 100000, stderr, env);
-    if((integrity))
-    {
-      if(integrity == -1)
-        perror("I/O error when checking index integrity");
-      else
-        fputs("Integrity check failed for index.\n", stderr);
-      deleteEncIdxSeq(seq, env);
-      str_delete(inputProject, env);
-      env_delete(env);
-      return EXIT_FAILURE;
-    }
-  }
-  deleteEncIdxSeq(seq, env);
+/*   { */
+/*     int i; */
+/*     Symbol exampleBlock[BLOCKSIZE]; */
+/*     size_t indices[2]; */
+/*     for(i = 0; i < BLOCKSIZE; ++i) */
+/*     { */
+/*       exampleBlock[i] = ((unsigned long)random())%dnasymcount; */
+/*     } */
+/*     searchBlock2IndexPair(bwtseq, exampleBlock, indices, env); */
+/*     exampleBlock[0] = 3; */
+/*     exampleBlock[1] = 0; */
+/*     exampleBlock[2] = 0; */
+/*     exampleBlock[3] = 2; */
+/*     exampleBlock[4] = 2; */
+/*     exampleBlock[5] = 2; */
+/*     exampleBlock[6] = 2; */
+/*     exampleBlock[7] = 2; */
+/*     searchBlock2IndexPair(bwtseq, exampleBlock, indices, env); */
+/*     fprintf(stderr, "indices: %lu, %lu\n", (unsigned long)indices[0], */
+/*             (unsigned long)indices[1]); */
+/*   } */
+/*   { */
+/*     int integrity = verifyIntegrity(bwtseq, inputProject, 100000, stderr, env); */
+/*     if((integrity)) */
+/*     { */
+/*       if(integrity == -1) */
+/*         perror("I/O error when checking index integrity"); */
+/*       else */
+/*         fputs("Integrity check failed for index.\n", stderr); */
+/*       deleteEncIdxBwtseq(bwtseq, env); */
+/*       str_delete(inputProject, env); */
+/*       env_delete(env); */
+/*       return EXIT_FAILURE; */
+/*     } */
+/*   } */
+  deleteBWTSeq(bwtseq, env);
   str_delete(inputProject, env);
   env_delete(env);
   return EXIT_SUCCESS;
