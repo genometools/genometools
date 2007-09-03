@@ -20,7 +20,7 @@
 #include "libgtcore/env.h"
 #include "libgtlua/bittab_lua.h"
 #include "libgtlua/gtcore_lua.h"
-#include "libgtlua/gt_lua.h"
+#include "libgtlua/helper.h"
 
 #define BITTAB_METATABLE  "GenomeTools.bittab"
 #define checkbittab(L, POS) \

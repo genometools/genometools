@@ -22,7 +22,7 @@
 #include "libgtext/gff3_out_stream.h"
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/genome_stream_lua.h"
-#include "libgtlua/gt_lua.h"
+#include "libgtlua/helper.h"
 
 static int gff3_in_stream_lua_new_sorted(lua_State *L)
 {

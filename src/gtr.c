@@ -44,6 +44,7 @@
 #include "libgtext/splicedseq.h"
 #include "libgtext/toolbox.h"
 #include "libgtlua/gt_lua.h"
+#include "libgtlua/helper.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_clean.h"

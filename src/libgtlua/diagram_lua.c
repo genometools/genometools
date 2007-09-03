@@ -21,7 +21,7 @@
 #include "libgtlua/diagram_lua.h"
 #include "libgtlua/feature_index_lua.h"
 #include "libgtlua/genome_node_lua.h"
-#include "libgtlua/gt_lua.h"
+#include "libgtlua/helper.h"
 #include "libgtview/feature_index.h"
 #include "libgtview/diagram.h"
 

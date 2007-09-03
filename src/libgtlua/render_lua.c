@@ -19,8 +19,8 @@
 
 #include "lauxlib.h"
 #include "libgtlua/diagram_lua.h"
+#include "libgtlua/helper.h"
 #include "libgtlua/render_lua.h"
-#include "libgtlua/gt_lua.h"
 #include "libgtview/render.h"
 
 #define RENDER_METATABLE  "GenomeTools.render"
