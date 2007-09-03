@@ -43,6 +43,6 @@ function checkerror()
 
 #checkerror "../bin/gt ltrharvest -index ${LTR}/gt_ltr/s_cer_tab/chrAll_tab/chrAll_before-1997-10-01.fsa -seed 100 -minlenltr 100 -maxlenltr 1000 -mindistltr 1500 -maxdistltr 15000 -similar 80 -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0 -vic 60 -overlaps best -xdrop 5 -mat 2 -mis -3 -ins -3 -del -3 -v"
 
-#checkerror "../bin/gt ltrharvest -index ${LTR}/gt_ltr/s_cer_tab/chrAll_tab/chrAll_before-1997-10-01.fsa -seed 100 -minlenltr 100 -maxlenltr 1000 -mindistltr 1500 -maxdistltr 15000 -similar 0 -overlaps all -xdrop 0 -mat 2 -mis -3 -ins -3 -del -3 -v"
+checkerror "../bin/gt ltrharvest -index ${LTR}/gt_ltr/s_cer_tab/chrAll_tab/chrAll_before-1997-10-01.fsa -seed 100 -minlenltr 100 -maxlenltr 1000 -mindistltr 1500 -maxdistltr 15000 -similar 0 -overlaps all -xdrop 5 -mat 2 -mis -3 -ins -3 -del -3 -v"
 
-../bin/gt ltrharvest -index ${LTR}/gt_ltr/s_cer_tab/chrAll_tab/chrAll_before-1997-10-01.fsa -seed 100 -minlenltr 100 -maxlenltr 1000 -mindistltr 1500 -maxdistltr 15000 -similar 0 -overlaps all -xdrop 0 -mat 2 -mis -3 -ins -3 -del -3 -v
+#../bin/gt ltrharvest -index ${LTR}/gt_ltr/s_cer_tab/chrAll_tab/chrAll_before-1997-10-01.fsa -seed 100 -minlenltr 100 -maxlenltr 1000 -mindistltr 1500 -maxdistltr 15000 -similar 0 -overlaps all -xdrop 0 -mat 2 -mis -3 -ins -3 -del -3 -v

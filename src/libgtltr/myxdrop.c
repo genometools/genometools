@@ -253,10 +253,10 @@ void calculateallowedMININFINITYINTgenerations(
 #define EVALXDROPARBITSCORES EVALXDROPARBITSCORESRIGHT
 //alt #define USEQ(A,I) A = useq[(I)]
 //alt #define VSEQ(A,J) A = vseq[(J)]
-#define USEQ(A,I) A = getencodedchar(suffixarray->encseq,\
+#define USEQ(A,I) A = getencodedchar(str_useq,\
                                      useq+(Seqpos)(I),\
                                      Forwardmode)
-#define VSEQ(A,J) A = getencodedchar(suffixarray->encseq,\
+#define VSEQ(A,J) A = getencodedchar(str_vseq,\
                                      vseq+(Seqpos)(J),\
 				     Forwardmode)
 
@@ -276,11 +276,11 @@ void calculateallowedMININFINITYINTgenerations(
 #define EVALXDROPARBITSCORES EVALXDROPARBITSCORESLEFT
 //#define USEQ(A,I) A = *(useq-1-(I))
 //#define VSEQ(A,J) A = *(vseq-1-(J))
-#define USEQ(A,I) A = getencodedchar(suffixarray->encseq,\
-                                     useq-1-(I),\
+#define USEQ(A,I) A = getencodedchar(str_useq,\
+                                     useq-(Seqpos)1-(I),\
 				     Forwardmode)
-#define VSEQ(A,J) A = getencodedchar(suffixarray->encseq,\
-                                     vseq-1-(J),\
+#define VSEQ(A,J) A = getencodedchar(str_vseq,\
+                                     vseq-(Seqpos)1-(J),\
 				     Forwardmode)
 
 #include "myxdrop.gen"

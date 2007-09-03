@@ -252,10 +252,11 @@ int searchforLTRs (
     INITARRAY (&fronts, Myfrontvalue);
     if(alilen <= repeatptr->pos1)
     {
-      evalxdroparbitscoresleft(suffixarray,
-                               &lo->arbitscores, 
+      evalxdroparbitscoresleft(&lo->arbitscores, 
 	                       &xdropbest_left, 
 			       &fronts, 
+			       suffixarray->encseq,
+			       suffixarray->encseq,
 			       repeatptr->pos1, 
 			       repeatptr->pos1 + repeatptr->offset,
 			       //seq + repeatptr->pos1, 
@@ -267,10 +268,11 @@ int searchforLTRs (
     }
     else
     {
-      evalxdroparbitscoresleft(suffixarray,
-                               &lo->arbitscores, 
+      evalxdroparbitscoresleft(&lo->arbitscores, 
 	                       &xdropbest_left, 
 			       &fronts, 
+			       suffixarray->encseq,
+			       suffixarray->encseq,
 			       repeatptr->pos1, 
 			       repeatptr->pos1 + repeatptr->offset,
 			       //seq + repeatptr->pos1, 
@@ -288,12 +290,13 @@ int searchforLTRs (
     if(alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
 		                repeatptr->len) )
     {
-      evalxdroparbitscoresright (suffixarray,
-                                 &lo->arbitscores, 
+      evalxdroparbitscoresright (&lo->arbitscores, 
                                  &xdropbest_right, 
 				 &fronts, 
 				 //seq + repeatptr->pos1 + repeatptr->len,
 				 //seq + repeatptr->pos1 + repeatptr->offset +
+				 suffixarray->encseq,
+				 suffixarray->encseq,
 				 repeatptr->pos1 + repeatptr->len,
 				 repeatptr->pos1 + repeatptr->offset +
 				 repeatptr->len, 
@@ -304,12 +307,13 @@ int searchforLTRs (
     } 
     else
     {
-      evalxdroparbitscoresright(suffixarray,
-                                &lo->arbitscores, 
+      evalxdroparbitscoresright(&lo->arbitscores, 
 	                        &xdropbest_right, 
 				&fronts, 
 				//seq + repeatptr->pos1 + repeatptr->len,
 				//seq + repeatptr->pos1 + repeatptr->offset +
+				suffixarray->encseq,
+				suffixarray->encseq,
 				repeatptr->pos1 + repeatptr->len,
 				repeatptr->pos1 + repeatptr->offset +
 				repeatptr->len, 
@@ -343,6 +347,7 @@ int searchforLTRs (
         return -1;
       }
       offset = markpos[boundaries->contignumber-1];
+      FREESPACE(markpos);
       //multiseqoffset = 
       //virtualtree->multiseq.markpos.spaceUint[boundaries->contignumber-1]+1;
     }

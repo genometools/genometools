@@ -85,10 +85,11 @@ void calculateallowedMININFINITYINTgenerations(
    any more.
 */
 
-void evalxdroparbitscoresright(Suffixarray *suffixarray,
-                                     Arbitraryscores *arbitscores,
+void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                      Myxdropbest * xdropbest,
 	                             ArrayMyfrontvalue * fronts,
+				     const Encodedsequence *str_useq,
+				     const Encodedsequence *str_vseq,
 	                             Seqpos useq,
 				     Seqpos vseq,
 	                             int ulen,
@@ -98,10 +99,11 @@ void evalxdroparbitscoresright(Suffixarray *suffixarray,
 
 
 #define EVALXDROPARBITSCORESRIGHT\
-      void evalxdroparbitscoresright(Suffixarray *suffixarray,\
-                                     Arbitraryscores *arbitscores,\
+      void evalxdroparbitscoresright(Arbitraryscores *arbitscores,\
                                      Myxdropbest * xdropbest,\
 	                             ArrayMyfrontvalue * fronts,\
+				     const Encodedsequence *str_useq,\
+				     const Encodedsequence *str_vseq,\
 	                             Seqpos useq,\
 				     Seqpos vseq,\
 	                             int ulen,\
@@ -109,10 +111,11 @@ void evalxdroparbitscoresright(Suffixarray *suffixarray,
 	                             Xdropscore xdropbelowscore,\
 				     Env *env)
 
-void evalxdroparbitscoresleft(Suffixarray *suffixarray,
-                                    Arbitraryscores * arbitscores,
+void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                                     Myxdropbest * xdropbest,
                                     ArrayMyfrontvalue * fronts,
+				    const Encodedsequence *str_useq,
+				    const Encodedsequence *str_vseq,
                                     Seqpos useq,
 				    Seqpos vseq,
                                     int ulen,
@@ -121,10 +124,11 @@ void evalxdroparbitscoresleft(Suffixarray *suffixarray,
 				    Env *env);
       
 #define EVALXDROPARBITSCORESLEFT\
-       void evalxdroparbitscoresleft(Suffixarray *suffixarray,\
-                                    Arbitraryscores * arbitscores,\
+       void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,\
                                     Myxdropbest * xdropbest,\
                                     ArrayMyfrontvalue * fronts,\
+				    const Encodedsequence *str_useq,\
+				    const Encodedsequence *str_vseq,\
                                     Seqpos useq,\
 				    Seqpos vseq,\
                                     int ulen,\
