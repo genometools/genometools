@@ -16,9 +16,9 @@
 */
 
 #include "lauxlib.h"
-#include "gtlua.h"
 #include "libgtext/gff3_visitor.h"
 #include "libgtlua/genome_visitor_lua.h"
+#include "libgtlua/gt_lua.h"
 
 static int gff3_visitor_lua_new(lua_State *L)
 {

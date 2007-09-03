@@ -43,7 +43,7 @@
 #include "libgtext/hmm.h"
 #include "libgtext/splicedseq.h"
 #include "libgtext/toolbox.h"
-#include "libgtlua/gtlua.h"
+#include "libgtlua/gt_lua.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_clean.h"

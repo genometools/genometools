@@ -18,10 +18,10 @@
 #ifdef LIBGTVIEW
 
 #include "lauxlib.h"
-#include "gtlua.h"
 #include "libgtlua/diagram_lua.h"
 #include "libgtlua/feature_index_lua.h"
 #include "libgtlua/genome_node_lua.h"
+#include "libgtlua/gt_lua.h"
 #include "libgtview/feature_index.h"
 #include "libgtview/diagram.h"
 

@@ -16,13 +16,13 @@
 */
 
 #include "lauxlib.h"
-#include "gtlua.h"
 #include "libgtcore/env.h"
 #include "libgtext/stream_evaluator.h"
 #include "libgtlua/genome_stream_lua.h"
 #include "libgtlua/genome_visitor_lua.h"
 #include "libgtlua/gtext_lua.h"
 #include "libgtlua/stream_evaluator_lua.h"
+#include "libgtlua/gt_lua.h"
 
 #define STREAM_EVALUATOR_METATABLE  "GenomeTools.stream_evaluator"
 #define check_stream_evaluator(L) \

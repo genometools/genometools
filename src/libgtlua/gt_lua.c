@@ -18,10 +18,10 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include "gtlua.h"
 #include "lauxlib.h"
 #include "libgtlua/gtcore_lua.h"
 #include "libgtlua/gtext_lua.h"
+#include "libgtlua/gt_lua.h"
 
 #ifdef LIBGTVIEW
 #include "libgtlua/gtview_lua.h"

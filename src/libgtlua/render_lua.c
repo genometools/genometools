@@ -18,9 +18,9 @@
 #ifdef LIBGTVIEW
 
 #include "lauxlib.h"
-#include "gtlua.h"
 #include "libgtlua/diagram_lua.h"
 #include "libgtlua/render_lua.h"
+#include "libgtlua/gt_lua.h"
 #include "libgtview/render.h"
 
 #define RENDER_METATABLE  "GenomeTools.render"

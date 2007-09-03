@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GTLUA_H
-#define GTLUA_H
+#ifndef GT_LUA_H
+#define GT_LUA_H
 
 #include "lua.h"
 #include "libgtcore/env.h"

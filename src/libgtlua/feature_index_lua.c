@@ -16,9 +16,9 @@
 */
 
 #include "lauxlib.h"
-#include "gtlua.h"
 #include "libgtlua/feature_index_lua.h"
 #include "libgtlua/genome_node_lua.h"
+#include "libgtlua/gt_lua.h"
 #include "libgtview/feature_index.h"
 
 static int feature_index_lua_new(lua_State *L)
