@@ -6,6 +6,7 @@
 
 #include "libgtmatch/arraydef.h"
 #include "libgtmatch/encseq-def.h"
+#include "libgtmatch/pos2seqnum.pr"
 
 #include "searchforLTRs.h"
 #include "repeattypes.h"
@@ -120,8 +121,8 @@ void adjustboundariesfromXdropextension(
     Seqpos seed2_startpos,
     Seqpos seed1_endpos,
     Seqpos seed2_endpos,
-    LTRboundaries *boundaries/*,
-    unsigned int multiseqoffset*/ //spater dazu nehmen !!
+    LTRboundaries *boundaries,
+    Seqpos offset
     )
 {
   // left alignment
@@ -131,8 +132,8 @@ void adjustboundariesfromXdropextension(
   // right alignment
   boundaries->leftLTR_3  = seed1_endpos + xdropbest_right.ivalue;
   boundaries->rightLTR_3 = seed2_endpos + xdropbest_right.jvalue;
-  
-  /*
+
+/* ohne offset
   printf("Adjusted boundaries from Xdrop-alignment-extension:\n");
   printf("boundaries->leftLTR_5  = " FormatSeqpos "\n", 
             PRINTSeqposcast(boundaries->leftLTR_5 + 1)); 
@@ -150,23 +151,20 @@ void adjustboundariesfromXdropextension(
          // count positions from 1, thus + 1
   printf("len rightLTR = " FormatSeqpos "\n", 
             PRINTSeqposcast((boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1)));
-  */
-
-  /* noch aendern auf multiseqoffset
+*/
   printf("Adjusted boundaries from Xdrop-alignment-extension:\n");
   printf("boundaries->leftLTR_5  = " FormatSeqpos "\n", 
-            PRINTSeqposcast( boundaries->leftLTR_5 - multiseqoffset));
+            PRINTSeqposcast( boundaries->leftLTR_5 - offset));
   printf("boundaries->leftLTR_3  = " FormatSeqpos "\n", 
-            PRINTSeqposcast( boundaries->leftLTR_3 - multiseqoffset));
+            PRINTSeqposcast( boundaries->leftLTR_3 - offset));
   printf("len leftLTR = " FormatSeqpos "\n", 
             PRINTSeqposcast( (boundaries->leftLTR_3 - boundaries->leftLTR_5 + 1)));
   printf("boundaries->rightLTR_5 = " FormatSeqpos "\n", 
-            PRINTSeqposcast( boundaries->rightLTR_5 - multiseqoffset));
+            PRINTSeqposcast( boundaries->rightLTR_5 - offset));
   printf("boundaries->rightLTR_3 = " FormatSeqpos "\n", 
-            PRINTSeqposcast( boundaries->rightLTR_3 - multiseqoffset));
+            PRINTSeqposcast( boundaries->rightLTR_3 - offset));
   printf("len rightLTR = " FormatSeqpos "\n", 
             PRINTSeqposcast( (boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1)));
-  */
 
 }
 
@@ -228,8 +226,10 @@ int searchforLTRs (
          totallength; 
   Repeat *repeatptr;
   LTRboundaries *boundaries;
-  //Seqpos multiseqoffset = 0;
+  Seqpos offset = 0;
+  unsigned long numofdbsequences = suffixarray->numofdbsequences;
   //Uchar *seq = virtualtree->multiseq.sequence;
+  Seqpos *markpos = NULL; //fuer testen
 
   /*
   printf("xdropbelowscore = %d\n", lo->xdropbelowscore);
@@ -243,7 +243,7 @@ int searchforLTRs (
   for (repeatcounter = 0; repeatcounter < lo->repeatinfo.repeats.nextfreeRepeat;
        repeatcounter++)
   {
-    //printf("\n\nAlignments of repeat nr. = %u :\n", repeatcounter+1);
+    printf("\n\nAlignments of repeat nr. = %u :\n", repeatcounter+1);
    
     repeatptr = &(lo->repeatinfo.repeats.spaceRepeat[repeatcounter]);
     alilen = ((Seqpos)lo->repeatinfo.lmax) - repeatptr->len;
@@ -328,42 +328,48 @@ int searchforLTRs (
 		       LTRboundaries,
 		       5);
     INITBOUNDARIES(boundaries);
-/*
+// test 
     if( boundaries->contignumber == (unsigned long)0)
     {
-      multiseqoffset = 0;
+      offset = 0;
     }
     else
     {
-      multiseqoffset = 
-      virtualtree->multiseq.markpos.spaceUint[boundaries->contignumber-1]+1;
+      markpos = calculatemarkpositions(suffixarray->encseq, 
+                                     numofdbsequences, 
+				     env);
+      if(markpos == NULL)
+      { 
+        return -1;
+      }
+      offset = markpos[boundaries->contignumber-1];
+      //multiseqoffset = 
+      //virtualtree->multiseq.markpos.spaceUint[boundaries->contignumber-1]+1;
     }
-*/
-/*
-    DEBUG1(1, "contig number: %lu\n",
-               (Showuint) boundaries->contignumber);
-    DEBUG1(1, "multiseqoffset to contig startpos: %lu\n",
-               (Showuint) multiseqoffset );
+// test
+    printf("contig number: %lu\n",
+               boundaries->contignumber);
+    printf("offset to contig startpos: " FormatSeqpos "\n",
+               PRINTSeqposcast(offset)); //brauche markpos array
     
-    DEBUG0(1, "Boundaries from vmatmaxoutdynamic:\n");
+    printf("Boundaries from vmatmaxoutdynamic:\n");
     
-    DEBUG1(1, "boundaries->leftLTR_5 abs. = %lu\n",
-              (Showuint)repeatptr->pos1);
-    DEBUG1(1, "boundaries->rightLTR_5 abs. = %lu\n", 
-	      (Showuint)repeatptr->pos1 + repeatptr->offset);
+    printf("boundaries->leftLTR_5 abs. = " FormatSeqpos "\n",
+              PRINTSeqposcast(repeatptr->pos1));
+    printf("boundaries->rightLTR_5 abs. = " FormatSeqpos "\n", 
+	      PRINTSeqposcast(repeatptr->pos1 + repeatptr->offset));
     
-    DEBUG1(1, "boundaries->leftLTR_5  = %lu\n",
-              (Showuint)repeatptr->pos1 - multiseqoffset);
-    DEBUG1(1, "boundaries->leftLTR_3  = %lu\n", 
-	      (Showuint)repeatptr->pos1 + repeatptr->len - 1 
-	                - multiseqoffset);
-    DEBUG1(1, "boundaries->rightLTR_5 = %lu\n", 
-	      (Showuint)repeatptr->pos1 + repeatptr->offset 
-	                - multiseqoffset);
-    DEBUG1(1, "boundaries->rightLTR_3 = %lu\n", 
-	      (Showuint)repeatptr->pos1 + repeatptr->offset + 
-	                repeatptr->len - 1 - multiseqoffset);
-*/
+    printf("boundaries->leftLTR_5  = " FormatSeqpos "\n",
+              PRINTSeqposcast(repeatptr->pos1 - offset));
+    printf("boundaries->leftLTR_3  = " FormatSeqpos "\n", 
+	      PRINTSeqposcast(repeatptr->pos1 + repeatptr->len - 1 
+	                - offset));
+    printf("boundaries->rightLTR_5 = " FormatSeqpos "\n", 
+	      PRINTSeqposcast(repeatptr->pos1 + repeatptr->offset 
+	                - offset));
+    printf("boundaries->rightLTR_3 = " FormatSeqpos "\n", 
+	      PRINTSeqposcast(repeatptr->pos1 + repeatptr->offset + 
+	                repeatptr->len - 1 - offset));
     /* store new boundaries-positions in boundaries */
     adjustboundariesfromXdropextension( 
 	           xdropbest_left, 
@@ -373,8 +379,8 @@ int searchforLTRs (
                    repeatptr->pos1 + repeatptr->len - 1, /*seed1 endpos*/
                    repeatptr->pos1 + repeatptr->offset + repeatptr->len - 1,
 		                                         /*seed2 endpos*/  
-		   boundaries/*,
-		   multiseqoffset*/);
+		   boundaries,
+		   offset); //muss noch uerbergeben werden
 /*  
     // if search for motif and/or TSD
     if( motif->allowedmismatches < (Ushort)4 || minlengthTSD > (unsigned int) 1)
