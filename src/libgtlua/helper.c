@@ -16,9 +16,8 @@
 */
 
 #include <assert.h>
-#include <stdio.h>
-#include <string.h>
 #include "lauxlib.h"
+#include "libgtlua/helper.h"
 
 #ifdef LIBGTVIEW
 #include "libgtview/config.h"
@@ -92,21 +91,6 @@ void set_arg_in_lua_interpreter(lua_State *L, const char *argv_0,
   }
   /* register table globally */
   lua_setglobal(L, "arg");
-}
-
-void run_interactive_lua_interpreter(lua_State *L)
-{
-  char buf[BUFSIZ];
-  int error;
-  assert(L);
-  while (fgets(buf, sizeof buf, stdin)) {
-    error = luaL_loadbuffer(L, buf, strlen(buf), "line") ||
-            lua_pcall(L, 0, 0, 0);
-    if (error) {
-      fprintf(stderr, "%s\n", lua_tostring(L, -1));
-      lua_pop(L, 1); /* pop error message */
-    }
-  }
 }
 
 int luagt_error(lua_State *L, Env *env)
