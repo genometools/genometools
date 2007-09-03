@@ -18,11 +18,11 @@
 #include "lauxlib.h"
 #include "gtlua.h"
 #include "libgtcore/fileutils.h"
-#include "libgtext/genome_node_lua.h"
 #include "libgtext/genome_stream.h"
-#include "libgtext/genome_stream_lua.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
+#include "libgtlua/genome_node_lua.h"
+#include "libgtlua/genome_stream_lua.h"
 
 static int gff3_in_stream_lua_new_sorted(lua_State *L)
 {

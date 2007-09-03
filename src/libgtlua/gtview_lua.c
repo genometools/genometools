@@ -16,12 +16,20 @@
 */
 
 #include <assert.h>
-#include "libgtcore/bittab_lua.h"
-#include "libgtcore/gtcore_lua.h"
+#include "libgtlua/diagram_lua.h"
+#include "libgtlua/feature_index_lua.h"
+#include "libgtlua/feature_stream_lua.h"
+#include "libgtlua/feature_visitor_lua.h"
+#include "libgtlua/gtview_lua.h"
+#include "libgtlua/render_lua.h"
 
-int luaopen_gtcore(lua_State *L)
+int luaopen_gtview(lua_State *L)
 {
   assert(L);
-  luaopen_bittab(L);
+  luaopen_diagram(L);
+  luaopen_feature_index(L);
+  luaopen_feature_stream(L);
+  luaopen_feature_visitor(L);
+  luaopen_render(L);
   return 1;
 }

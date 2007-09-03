@@ -15,81 +15,73 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifdef LIBGTVIEW
+
 #include "lauxlib.h"
 #include "gtlua.h"
-#include "libgtview/diagram_lua.h"
-#include "libgtview/render.h"
-#include "libgtview/render_lua.h"
+#include "libgtlua/diagram_lua.h"
+#include "libgtlua/feature_index_lua.h"
+#include "libgtlua/genome_node_lua.h"
+#include "libgtview/feature_index.h"
+#include "libgtview/diagram.h"
 
-#define RENDER_METATABLE  "GenomeTools.render"
-#define check_render(L) \
-        (Render**) luaL_checkudata(L, 1, RENDER_METATABLE);
-
-static int render_lua_new(lua_State *L)
+static int diagram_lua_new(lua_State *L)
 {
-  Render **render;
+  Diagram **diagram;
+  FeatureIndex **feature_index;
+  Range range;
+  const char *seqid;
   Config *config;
   Env *env = get_env_from_registry(L);
-  render = lua_newuserdata(L, sizeof (Render**));
-  assert(render);
+  /* get feature index */
+  feature_index = check_feature_index(L, 1);
+  /* get range */
+  range.start = luaL_checklong(L, 2);
+  range.end   = luaL_checklong(L, 3);
+  luaL_argcheck(L, range.start <= range.end, 2, "must be <= endpos");
+  /* get seqid */
+  seqid       = luaL_checkstring(L, 4);
+  luaL_argcheck(L, feature_index_has_seqid(*feature_index, seqid, env),
+                4, "feature index does not contain the given sequence id");
+  /* create diagram */
   config = get_config_from_registry(L);
-  *render = render_new(config, env);
-  luaL_getmetatable(L, RENDER_METATABLE);
+  diagram = lua_newuserdata(L, sizeof (Diagram**));
+  assert(diagram);
+  *diagram = diagram_new(*feature_index, range, seqid, config, env);
+  luaL_getmetatable(L, DIAGRAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
 }
 
-static int render_lua_to_png(lua_State *L)
+static int diagram_lua_delete(lua_State *L)
 {
-  Render **render;
   Diagram **diagram;
-  const char *filename;
-  unsigned int width;
-  Env *env = get_env_from_registry(L);
-  render = check_render(L);
-  diagram = check_diagram(L, 2);
-  filename = luaL_checkstring(L, 3);
-  if (lua_gettop(L) >= 4)
-    width = luaL_checkint(L, 4);
-  else
-    width = DEFAULT_RENDER_WIDTH;
-  if (render_to_png(*render, *diagram, filename, width, env))
-    return luagt_error(L, env);
-  return 0;
-}
-
-static int render_lua_delete(lua_State *L)
-{
-  Render **render = check_render(L);
   Env *env;
+  diagram = check_diagram(L, 1);
   env = get_env_from_registry(L);
-  render_delete(*render, env);
+  diagram_delete(*diagram, env);
   return 0;
 }
 
-static const struct luaL_Reg render_lib_f [] = {
-  { "render_new", render_lua_new },
+static const struct luaL_Reg diagram_lib_f [] = {
+  { "diagram_new", diagram_lua_new },
   { NULL, NULL }
 };
 
-static const struct luaL_Reg render_lib_m [] = {
-  { "to_png", render_lua_to_png },
-  { NULL, NULL }
-};
-
-int luaopen_render(lua_State *L)
+int luaopen_diagram(lua_State *L)
 {
   assert(L);
-  luaL_newmetatable(L, RENDER_METATABLE);
+  luaL_newmetatable(L, DIAGRAM_METATABLE);
   /* metatable.__index = metatable */
   lua_pushvalue(L, -1); /* duplicate the metatable */
   lua_setfield(L, -2, "__index");
   /* set its _gc field */
   lua_pushstring(L, "__gc");
-  lua_pushcfunction(L, render_lua_delete);
+  lua_pushcfunction(L, diagram_lua_delete);
   lua_settable(L, -3);
   /* register functions */
-  luaL_register(L, NULL, render_lib_m);
-  luaL_register(L, "gt", render_lib_f);
+  luaL_register(L, "gt", diagram_lib_f);
   return 1;
 }
+
+#endif

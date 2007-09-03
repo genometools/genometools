@@ -16,20 +16,18 @@
 */
 
 #include <assert.h>
-#include "libgtview/diagram_lua.h"
-#include "libgtview/feature_index_lua.h"
-#include "libgtview/feature_stream_lua.h"
-#include "libgtview/feature_visitor_lua.h"
-#include "libgtview/gtview_lua.h"
-#include "libgtview/render_lua.h"
+#include "libgtlua/genome_node_lua.h"
+#include "libgtlua/genome_stream_lua.h"
+#include "libgtlua/genome_visitor_lua.h"
+#include "libgtlua/gtext_lua.h"
+#include "libgtlua/stream_evaluator_lua.h"
 
-int luaopen_gtview(lua_State *L)
+int luaopen_gtext(lua_State *L)
 {
   assert(L);
-  luaopen_diagram(L);
-  luaopen_feature_index(L);
-  luaopen_feature_stream(L);
-  luaopen_feature_visitor(L);
-  luaopen_render(L);
+  luaopen_genome_node(L);
+  luaopen_genome_stream(L);
+  luaopen_genome_visitor(L);
+  luaopen_stream_evaluator(L);
   return 1;
 }

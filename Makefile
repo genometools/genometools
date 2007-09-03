@@ -44,6 +44,7 @@ endif
 GTLIBS:=lib/libgtext.a\
         lib/libgtcore.a\
         lib/libgtmatch.a\
+        lib/libgtlua.a\
         lib/libbz2.a
 
 # the core GenomeTools library (no other dependencies)
@@ -68,6 +69,11 @@ LIBGTMATCH_DEP:=$(LIBGTMATCH_SRC:%.c=obj/%.d)
 LIBGTVIEW_C_SRC:=$(wildcard src/libgtview/*.c)
 LIBGTVIEW_C_OBJ:=$(LIBGTVIEW_C_SRC:%.c=obj/%.o)
 LIBGTVIEW_C_DEP:=$(LIBGTVIEW_C_SRC:%.c=obj/%.d)
+
+# the GenomeTools Lua library
+LIBGTLUA_C_SRC:=$(wildcard src/libgtlua/*.c)
+LIBGTLUA_C_OBJ:=$(LIBGTLUA_C_SRC:%.c=obj/%.o)
+LIBGTLUA_C_DEP:=$(LIBGTLUA_C_SRC:%.c=obj/%.d)
 
 TOOLS_SRC:=$(wildcard src/tools/*.c)
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
@@ -209,6 +215,14 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
+lib/libgtlua.a: $(LIBGTLUA_C_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@ar ru $@ $(LIBGTLUA_C_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
 lib/libpng.a: $(LIBPNG_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -230,7 +244,7 @@ bin/skproto: obj/src/skproto.o obj/src/tools/gt_skproto.o lib/libgtcore.a lib/li
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CXX) $(LDFLAGS) $(GT_LDFLAGS) $^ $(LDLIBS) -o $@
 
-bin/gt: obj/src/gt.o obj/src/gtr.o obj/src/gtlua.o $(TOOLS_OBJ) $(GTLIBS)
+bin/gt: obj/src/gt.o obj/src/gtr.o $(TOOLS_OBJ) $(GTLIBS)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CXX) $(LDFLAGS) $(GT_LDFLAGS) $^ $(LDLIBS) -o $@
@@ -303,9 +317,9 @@ obj/%.o: %.cxx
 # read deps
 -include obj/src/gt.d obj/src/gtlua.d obj/src/gtr.d obj/src/skproto.d \
          $(LIBGTCORE_DEP) $(LIBGTEXT_C_DEP) $(LIBGTEXT_CXX_DEP) \
-         $(LIBGTMATCH_DEP) $(LIBGTVIEW_C_DEP) $(TOOLS_DEP) $(LIBAGG_DEP) \
-         $(LIBEXPAT_DEP) $(LIBLUA_DEP) $(LIBPNG_DEP) $(LIBRNV_DEP) \
-         $(LIBBBZ2_DEP)
+         $(LIBGTMATCH_DEP) $(LIBGTVIEW_C_DEP) $(LIBGTLUA_C_DEP) $(TOOLS_DEP) \
+         $(LIBAGG_DEP) $(LIBEXPAT_DEP) $(LIBLUA_DEP) $(LIBPNG_DEP) \
+         $(LIBRNV_DEP) $(LIBBBZ2_DEP)
 
 .SUFFIXES:
 .PHONY: dist srcdist release gt install splint test clean cleanup

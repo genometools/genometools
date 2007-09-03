@@ -17,33 +17,49 @@
 
 #include "lauxlib.h"
 #include "gtlua.h"
-#include "libgtext/genome_visitor_lua.h"
-#include "libgtview/feature_index_lua.h"
-#include "libgtview/feature_visitor.h"
-#include "libgtview/feature_visitor_lua.h"
+#include "libgtext/gff3_visitor.h"
+#include "libgtlua/genome_visitor_lua.h"
 
-static int feature_visitor_lua_new(lua_State *L)
+static int gff3_visitor_lua_new(lua_State *L)
 {
-  GenomeVisitor **feature_visitor;
-  FeatureIndex **feature_index;
+  GenomeVisitor **gv;
   Env *env = get_env_from_registry(L);
-  feature_visitor = lua_newuserdata(L, sizeof (GenomeVisitor**));
-  assert(feature_visitor);
-  feature_index = check_feature_index(L, 1);
-  *feature_visitor = feature_visitor_new(*feature_index, env);
+  assert(L);
+  /* construct object */
+  gv = lua_newuserdata(L, sizeof (GenomeVisitor**));
+  *gv = gff3_visitor_new(NULL, env);
+  assert(*gv);
   luaL_getmetatable(L, GENOME_VISITOR_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
 }
 
-static const struct luaL_Reg feature_visitor_lib_f [] = {
-  { "feature_visitor_new", feature_visitor_lua_new },
+static int genome_visitor_lua_delete(lua_State *L)
+{
+  GenomeVisitor **gv = check_genome_visitor(L, 1);
+  Env *env;
+  env = get_env_from_registry(L);
+  genome_visitor_delete(*gv, env);
+  return 0;
+}
+
+static const struct luaL_Reg genome_visitor_lib_f [] = {
+  { "gff3_visitor", gff3_visitor_lua_new },
   { NULL, NULL }
 };
 
-int luaopen_feature_visitor(lua_State *L)
+int luaopen_genome_visitor(lua_State *L)
 {
   assert(L);
-  luaL_register(L, "gt", feature_visitor_lib_f);
+  luaL_newmetatable(L, GENOME_VISITOR_METATABLE);
+  /* metatable.__index = metatable */
+  lua_pushvalue(L, -1); /* duplicate the metatable */
+  lua_setfield(L, -2, "__index");
+  /* set its _gc field */
+  lua_pushstring(L, "__gc");
+  lua_pushcfunction(L, genome_visitor_lua_delete);
+  lua_settable(L, -3);
+  /* register functions */
+  luaL_register(L, "gt", genome_visitor_lib_f);
   return 1;
 }

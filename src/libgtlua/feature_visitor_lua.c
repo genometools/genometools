@@ -15,19 +15,35 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
-#include "libgtext/genome_node_lua.h"
-#include "libgtext/genome_stream_lua.h"
-#include "libgtext/genome_visitor_lua.h"
-#include "libgtext/gtext_lua.h"
-#include "libgtext/stream_evaluator_lua.h"
+#include "lauxlib.h"
+#include "gtlua.h"
+#include "libgtlua/genome_visitor_lua.h"
+#include "libgtlua/feature_index_lua.h"
+#include "libgtlua/feature_visitor_lua.h"
+#include "libgtview/feature_visitor.h"
 
-int luaopen_gtext(lua_State *L)
+static int feature_visitor_lua_new(lua_State *L)
+{
+  GenomeVisitor **feature_visitor;
+  FeatureIndex **feature_index;
+  Env *env = get_env_from_registry(L);
+  feature_visitor = lua_newuserdata(L, sizeof (GenomeVisitor**));
+  assert(feature_visitor);
+  feature_index = check_feature_index(L, 1);
+  *feature_visitor = feature_visitor_new(*feature_index, env);
+  luaL_getmetatable(L, GENOME_VISITOR_METATABLE);
+  lua_setmetatable(L, -2);
+  return 1;
+}
+
+static const struct luaL_Reg feature_visitor_lib_f [] = {
+  { "feature_visitor_new", feature_visitor_lua_new },
+  { NULL, NULL }
+};
+
+int luaopen_feature_visitor(lua_State *L)
 {
   assert(L);
-  luaopen_genome_node(L);
-  luaopen_genome_stream(L);
-  luaopen_genome_visitor(L);
-  luaopen_stream_evaluator(L);
+  luaL_register(L, "gt", feature_visitor_lib_f);
   return 1;
 }

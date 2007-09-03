@@ -20,11 +20,11 @@
 #include <string.h>
 #include "gtlua.h"
 #include "lauxlib.h"
-#include "libgtcore/gtcore_lua.h"
-#include "libgtext/gtext_lua.h"
+#include "libgtlua/gtcore_lua.h"
+#include "libgtlua/gtext_lua.h"
 
 #ifdef LIBGTVIEW
-#include "libgtview/gtview_lua.h"
+#include "libgtlua/gtview_lua.h"
 #endif
 
 /* key used to store the Env object in the Lua registry */

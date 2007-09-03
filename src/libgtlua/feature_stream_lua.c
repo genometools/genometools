@@ -17,10 +17,10 @@
 
 #include "lauxlib.h"
 #include "gtlua.h"
-#include "libgtext/genome_stream_lua.h"
-#include "libgtview/feature_index_lua.h"
+#include "libgtlua/genome_stream_lua.h"
+#include "libgtlua/feature_index_lua.h"
+#include "libgtlua/feature_stream_lua.h"
 #include "libgtview/feature_stream.h"
-#include "libgtview/feature_stream_lua.h"
 
 static int feature_stream_lua_new(lua_State *L)
 {

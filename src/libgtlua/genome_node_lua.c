@@ -18,8 +18,8 @@
 #include "lauxlib.h"
 #include "gtlua.h"
 #include "libgtext/genome_node.h"
-#include "libgtext/genome_node_lua.h"
-#include "libgtext/genome_visitor_lua.h"
+#include "libgtlua/genome_node_lua.h"
+#include "libgtlua/genome_visitor_lua.h"
 
 #define check_genome_node(L) \
               (GenomeNode**) luaL_checkudata(L, 1, GENOME_NODE_METATABLE);
