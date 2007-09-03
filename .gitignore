@@ -1,6 +1,7 @@
 *.bac
 *.bak
 *~
+<<<<<<< HEAD:.gitignore
 *.core
 *.diff
 *.gcov
@@ -29,6 +30,7 @@
 /obj
 /lib
 tags
+TAGS
 .ccache
 /testsuite/stest_testsuite
 /testsuite/stest_stest_tests
