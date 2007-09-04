@@ -23,7 +23,7 @@
 #include "libgtlua/helper.h"
 
 #define BITTAB_METATABLE  "GenomeTools.bittab"
-#define checkbittab(L, POS) \
+#define check_bittab(L, POS) \
         (Bittab**) luaL_checkudata(L, POS, BITTAB_METATABLE)
 
 static int bittab_lua_new(lua_State *L)
@@ -45,15 +45,15 @@ static int bittab_lua_new(lua_State *L)
 
 static void get_bittab_and_bit(lua_State *L, Bittab ***bittab, long *bit)
 {
-  *bittab = checkbittab(L, 1);
+  *bittab = check_bittab(L, 1);
   *bit = luaL_checklong(L, 2);
   luaL_argcheck(L, *bit < bittab_size(**bittab), 2, "bit number too large");
 }
 
 static void get_two_bittabs(lua_State *L, Bittab ***bt1, Bittab ***bt2)
 {
- *bt1 = checkbittab(L, 1);
- *bt2 = checkbittab(L, 2);
+ *bt1 = check_bittab(L, 1);
+ *bt2 = check_bittab(L, 2);
  luaL_argcheck(L, bittab_size(**bt1) == bittab_size(**bt2), 1, "bittabs have "
                "different sizes");
 }
@@ -96,7 +96,7 @@ static int bittab_lua_delete(lua_State *L)
 {
   Bittab **bittab;
   Env *env = get_env_from_registry(L);
-  bittab = checkbittab(L, 1);
+  bittab = check_bittab(L, 1);
   bittab_delete(*bittab, env);
   return 0;
 }
