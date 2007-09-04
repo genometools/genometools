@@ -34,14 +34,14 @@ static int range_lua_new(lua_State *L)
   return 1;
 }
 
-static int range_lua_startpos(lua_State *L)
+static int range_lua_get_start(lua_State *L)
 {
   Range *range = check_range(L, 1);
   lua_pushinteger(L, range->start);
   return 1;
 }
 
-static int range_lua_endpos(lua_State *L)
+static int range_lua_get_end(lua_State *L)
 {
   Range *range = check_range(L, 1);
   lua_pushinteger(L, range->end);
@@ -135,8 +135,8 @@ static const struct luaL_Reg range_lib_f [] = {
 };
 
 static const struct luaL_Reg range_lib_m [] = {
-  { "startpos", range_lua_startpos },
-  { "endpos", range_lua_endpos },
+  { "get_start", range_lua_get_start},
+  { "get_end", range_lua_get_end},
   { NULL, NULL }
 };
 

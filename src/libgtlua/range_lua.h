@@ -24,8 +24,8 @@
 /* exports the Range class to Lua:
 
    range       = gt.range_new(startpos, endpos)
-   startpos    = range:startpos()
-   endpos      = range:endpos()
+   startpos    = range:get_start()
+   endpos      = range:get_end()
    range_table = gt.ranges_sort(range_table)
    boolean     = gt.ranges_are_sorted(range_table)
 */

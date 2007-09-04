@@ -18,8 +18,8 @@
 -- testing the Lua bindings for the Range class
 
 range = gt.range_new(1, 1000)
-assert(range:startpos() == 1)
-assert(range:endpos() == 1000)
+assert(range:get_start() == 1)
+assert(range:get_end() == 1000)
 
 rval, err = pcall(gt.range_new, 1000, 1)
 assert(not rval)
