@@ -83,6 +83,7 @@ static Array* range_table_to_array(lua_State *L, Env *env)
       lua_error(L);
     }
     i++;
+    lua_pop(L, 1); /* pop last result */
     lua_pushinteger(L, i);
     lua_gettable(L, 1);
   }
