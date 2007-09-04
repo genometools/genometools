@@ -35,8 +35,7 @@
 
 static lua_State *globalL = NULL;
 
-static void lstop (lua_State *L, lua_Debug *ar) {
-  (void)ar;  /* unused arg. */
+static void lstop(lua_State *L, lua_Debug *ar) {
   lua_sethook(L, NULL, 0, 0);
   luaL_error(L, "interrupted!");
 }
@@ -47,7 +46,7 @@ static void laction (int i) {
   lua_sethook(globalL, lstop, LUA_MASKCALL | LUA_MASKRET | LUA_MASKCOUNT, 1);
 }
 
-static int report (lua_State *L, int status) {
+static int report(lua_State *L, int status) {
   if (status && !lua_isnil(L, -1)) {
     const char *msg = lua_tostring(L, -1);
     if (msg == NULL) msg = "(error object is not a string)";
@@ -58,7 +57,7 @@ static int report (lua_State *L, int status) {
   return status;
 }
 
-static int traceback (lua_State *L) {
+static int traceback(lua_State *L) {
   lua_getfield(L, LUA_GLOBALSINDEX, "debug");
   if (!lua_istable(L, -1)) {
     lua_pop(L, 1);
@@ -75,7 +74,7 @@ static int traceback (lua_State *L) {
   return 1;
 }
 
-static int docall (lua_State *L, int narg, int clear) {
+static int docall(lua_State *L, int narg, int clear) {
   int status;
   int base = lua_gettop(L) - narg;  /* function index */
   lua_pushcfunction(L, traceback);  /* push traceback function */
@@ -89,7 +88,7 @@ static int docall (lua_State *L, int narg, int clear) {
   return status;
 }
 
-static const char *get_prompt (lua_State *L, int firstline) {
+static const char* get_prompt(lua_State *L, int firstline) {
   const char *p;
   lua_getfield(L, LUA_GLOBALSINDEX, firstline ? "_PROMPT" : "_PROMPT2");
   p = lua_tostring(L, -1);
@@ -98,7 +97,7 @@ static const char *get_prompt (lua_State *L, int firstline) {
   return p;
 }
 
-static int incomplete (lua_State *L, int status) {
+static int incomplete(lua_State *L, int status) {
   if (status == LUA_ERRSYNTAX) {
     size_t lmsg;
     const char *msg = lua_tolstring(L, -1, &lmsg);
@@ -111,7 +110,7 @@ static int incomplete (lua_State *L, int status) {
   return 0;  /* else... */
 }
 
-static int pushline (lua_State *L, int firstline) {
+static int pushline(lua_State *L, int firstline) {
   char buffer[BUFSIZ];
   char *b = buffer;
   size_t l;
@@ -129,7 +128,7 @@ static int pushline (lua_State *L, int firstline) {
   return 1;
 }
 
-static int loadline (lua_State *L) {
+static int loadline(lua_State *L) {
   int status;
   lua_settop(L, 0);
   if (!pushline(L, 1))
@@ -148,7 +147,7 @@ static int loadline (lua_State *L) {
   return status;
 }
 
-static void dotty (lua_State *L) {
+static void dotty(lua_State *L) {
   int status;
   while ((status = loadline(L)) != -1) {
     if (status == 0) status = docall(L, 0, 0);
