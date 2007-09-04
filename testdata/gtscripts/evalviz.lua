@@ -46,6 +46,44 @@ function render_and_show()
   show()
 end
 
+function show_coverage(maxdist)
+  local maxdist = maxdist or 0
+  local features = feature_index:get_features_for_seqid(seqid)
+  local starpos, endpos
+  local minstartpos = nil
+  local maxendpos = nil
+  local ranges = {}
+
+  -- collect all feature ranges
+  for i, feature in ipairs(features) do
+    table.insert(ranges, feature:get_range())
+  end
+  -- sort feature ranges
+  ranges = gt.ranges_sort(ranges)
+
+  -- compute and show coverage
+  for i, range in ipairs(ranges) do
+    startpos, endpos = range:get_start(), range:get_end()
+    if i == 1 then
+      minstartpos = startpos
+      maxendpos   = endpos
+    else
+      -- assert(startpos >= minstartpos)
+      if (startpos > maxendpos + maxdist) then
+        -- new region started
+        io.write(string.format("%d, %d\n", minstartpos, maxendpos))
+        minstartpos = startpos
+        maxendpos   = endpos
+      else
+        -- continue old region
+        maxendpos = (endpos > maxendpos) and endpos or maxendpos
+      end
+    end
+  end
+  -- show last region
+  io.write(string.format("%d, %d\n", minstartpos, maxendpos))
+end
+
 -- process input files
 reality_stream = gt.gff3_in_stream_new_sorted(reality_file)
 prediction_stream = gt.gff3_in_stream_new_sorted(prediction_file)
