@@ -31,3 +31,4 @@ for i = 1, 100 do
   table.insert(ranges, range)
 end
 ranges = gt.ranges_sort(ranges)
+assert(gt.ranges_are_sorted(ranges))

@@ -115,9 +115,22 @@ static int ranges_lua_sort(lua_State *L)
   return 1;
 }
 
+static int ranges_lua_are_sorted(lua_State *L)
+{
+  Array *ranges;
+  bool are_sorted;
+  Env *env = get_env_from_registry(L);
+  ranges = range_table_to_array(L, env);
+  are_sorted = ranges_are_sorted(ranges);
+  array_delete(ranges, env);
+  lua_pushboolean(L, are_sorted);
+  return 1;
+}
+
 static const struct luaL_Reg range_lib_f [] = {
   { "range_new", range_lua_new },
   { "ranges_sort", ranges_lua_sort},
+  { "ranges_are_sorted", ranges_lua_are_sorted},
   { NULL, NULL }
 };
 

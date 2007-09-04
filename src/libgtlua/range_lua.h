@@ -27,6 +27,7 @@
    startpos    = range:startpos()
    endpos      = range:endpos()
    range_table = gt.ranges_sort(range_table)
+   boolean     = gt.ranges_are_sorted(range_table)
 */
 int luaopen_range(lua_State*);
 
