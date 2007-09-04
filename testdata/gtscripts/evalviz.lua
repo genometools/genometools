@@ -31,6 +31,22 @@ else
   usage()
 end
 
+function render_to_png()
+  local diagram = gt.diagram_new(feature_index, startpos, endpos, seqid)
+  local render =  gt.render_new()
+  render:to_png(diagram, png_file, width)
+end
+
+function show()
+  os.execute("display "..png_file)
+end
+
+function render_and_show()
+  render_to_png()
+  show()
+end
+
+-- process input files
 reality_stream = gt.gff3_in_stream_new_sorted(reality_file)
 prediction_stream = gt.gff3_in_stream_new_sorted(prediction_file)
 stream_evaluator = gt.stream_evaluator_new(reality_stream, prediction_stream)
@@ -41,9 +57,11 @@ feature_visitor = gt.feature_visitor_new(feature_index)
 stream_evaluator:evaluate(feature_visitor)
 stream_evaluator:show()
 
+-- view results
 seqid = feature_index:get_first_seqid()
 startpos, endpos = feature_index:get_range_for_seqid(seqid)
 
 diagram = gt.diagram_new(feature_index, startpos, endpos, seqid)
+width = 800
 render = gt.render_new()
-render:to_png(diagram, png_file)
+render:to_png(diagram, png_file, width)
