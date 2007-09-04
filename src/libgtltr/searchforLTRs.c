@@ -208,7 +208,6 @@ int searchforLTRs (
   LTRboundaries *boundaries;
   Seqpos offset = 0;
   unsigned long numofdbsequences = suffixarray->numofdbsequences;
-  //Uchar *seq = virtualtree->multiseq.sequence;
   Seqpos *markpos = NULL; //fuer testen
 
   /*
@@ -219,6 +218,15 @@ int searchforLTRs (
   printf("ins  = %d\n", lo->arbitscores.ins);
   printf("del  = %d\n", lo->arbitscores.del);
   */
+
+  // calculate markpos array for offset
+  markpos = calculatemarkpositions(suffixarray->encseq, 
+                                     numofdbsequences, 
+				     env);
+  if(markpos == NULL)
+  { 
+    return -1;
+  }
 
   for (repeatcounter = 0; repeatcounter < lo->repeatinfo.repeats.nextfreeRepeat;
        repeatcounter++)
@@ -312,24 +320,14 @@ int searchforLTRs (
 		       LTRboundaries,
 		       5);
     INITBOUNDARIES(boundaries);
-// test 
+    
     if( boundaries->contignumber == (unsigned long)0)
     {
       offset = 0;
     }
     else
     {
-      markpos = calculatemarkpositions(suffixarray->encseq, 
-                                     numofdbsequences, 
-				     env);
-      if(markpos == NULL)
-      { 
-        return -1;
-      }
       offset = markpos[boundaries->contignumber-1];
-      FREESPACE(markpos);
-      //multiseqoffset = 
-      //virtualtree->multiseq.markpos.spaceUint[boundaries->contignumber-1]+1;
     }
 /* test
     printf("contig number: %lu\n",
@@ -434,6 +432,7 @@ int searchforLTRs (
     }
 */
   }
+  FREESPACE(markpos);
 
   return 0;
 }
