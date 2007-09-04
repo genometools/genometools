@@ -1,6 +1,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+void checkifprefixesareidentical(const Encodedsequence *encseq,
+                                 Readmode readmode,
+                                 const Uchar *characters,
+                                 const Seqpos *suftab,
+                                 unsigned int prefixlength,
+                                 Seqpos depth,
+                                 Seqpos left,
+                                 Seqpos right);
+
 void showentiresuftab(const Encodedsequence *encseq,
                       Readmode readmode,
                       const Uchar *characters,

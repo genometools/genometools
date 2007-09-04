@@ -342,11 +342,9 @@ static int processfullspecialrange(Sfxiterator *csf,
   return 0;
 }
 
-/*
-  static void insertfullspecialrange(Sfxiterator *csf,
+static void insertfullspecialrange(Sfxiterator *csf,
                                    Seqpos leftpos,
-                                   Seqpos rightpos,
-                                   Env *env)
+                                   Seqpos rightpos)
 {
   Seqpos pos;
 
@@ -380,8 +378,6 @@ static int processfullspecialrange(Sfxiterator *csf,
     }
   }
 }
-
-*/
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
@@ -490,7 +486,7 @@ static int initsuffixerator(Sfxiterator *csf,
     ALLOCASSIGNSPACE(csf->suftab,NULL,Seqpos,
                      stpgetlargestwidth(csf->suftabparts));
     reversespecialcodes(csf->spaceCodeatposition,csf->nextfreeCodeatposition);
-    /* the following can be removed for the iterator version */
+    /* XXX the following can be removed for the iterator version */
     csf->fusp.spaceSeqpos = csf->suftab;
     csf->fusp.allocatedSeqpos 
     = CALLCASTFUNC(Seqpos,unsigned_long,
@@ -696,7 +692,6 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
   return csf;
 }
 
-/*
 static void fillspecialnextpage(Sfxiterator *csf)
 {
   Sequencerange range;
@@ -707,15 +702,172 @@ static void fillspecialnextpage(Sfxiterator *csf)
     if(csf->overhang.leftpos < csf->overhang.rightpos)
     {
       width = csf->overhang.rightpos - csf->overhang.leftpos;
-      if(csf->fusp.nextfreeSeqpos + width <= csf->fusp.allocatedSeqpos)
+      if(csf->fusp.nextfreeSeqpos + width > csf->fusp.allocatedSeqpos)
       {
+        /* does not fit into the buffer, so only output a part */
+        Seqpos rest = csf->fusp.nextfreeSeqpos + width
+                                               - csf->fusp.allocatedSeqpos;
+        assert(rest > 0);
+        if(ISDIRREVERSE(csf->readmode))
+        {
+          insertfullspecialrange(csf,csf->overhang.leftpos + rest,
+                                 csf->overhang.rightpos);
+          csf->overhang.rightpos = csf->overhang.leftpos + rest;
+        } else
+        {
+          insertfullspecialrange(csf,csf->overhang.leftpos,
+                                     csf->overhang.rightpos-rest);
+          csf->overhang.leftpos = csf->overhang.rightpos - rest;
+        }
+        break;
+      }
+      if(csf->fusp.nextfreeSeqpos + width == csf->fusp.allocatedSeqpos)
+      { /* overhang fits into the buffer and buffer is full */
         insertfullspecialrange(csf,csf->overhang.leftpos,
                                csf->overhang.rightpos);
         csf->overhang.leftpos = csf->overhang.rightpos = 0;
+        break;
+      }
+      /* overhang fits into the buffer and buffer is not full */
+      insertfullspecialrange(csf,csf->overhang.leftpos,
+                             csf->overhang.rightpos);
+      csf->overhang.leftpos = csf->overhang.rightpos = 0;
+    } else
+    {
+      if(nextspecialrangeiterator(&range,csf->sri))
+      {
+        width = range.rightpos - range.leftpos;
+        if(csf->fusp.nextfreeSeqpos + width > csf->fusp.allocatedSeqpos)
+        { /* does not fit into the buffer, so only output a part */
+          Seqpos rest = csf->fusp.nextfreeSeqpos + width 
+                                                 - csf->fusp.allocatedSeqpos;
+          if(ISDIRREVERSE(csf->readmode))
+          {
+            insertfullspecialrange(csf,range.leftpos + rest,
+                                   range.rightpos);
+            csf->overhang.leftpos = range.leftpos;
+            csf->overhang.rightpos = range.leftpos + rest;
+          } else
+          {
+            insertfullspecialrange(csf,range.leftpos,range.rightpos-rest);
+            csf->overhang.leftpos = range.rightpos-rest;
+            csf->overhang.rightpos = range.rightpos;
+          }
+          break;
+        }
+        if(csf->fusp.nextfreeSeqpos + width == csf->fusp.allocatedSeqpos)
+        { /* overhang fits into the buffer and buffer is full */
+          insertfullspecialrange(csf,range.leftpos,range.rightpos);
+          csf->overhang.leftpos = csf->overhang.rightpos = 0;
+          break;
+        }
+        insertfullspecialrange(csf,range.leftpos,range.rightpos);
+        csf->overhang.leftpos = csf->overhang.rightpos = 0;
+      }
+    }
+  }
+}
+
+ const Seqpos *nextSfxiterator(Seqpos *len,Measuretime *mtime,
+                               Sfxiterator *csf,Env *env)
+{
+  env_error_check(env);
+  while(true)
+  {
+    if(csf->phase == Partphase)
+    {
+      if(preparethispart(csf,mtime,env))
+      {
+        break;
+      }
+      if(hasspecialranges(csf->encseq))
+      {
+        csf->phase = Finalsuffixphase;
       } else
       {
-        Seqpos rest = csf->fusp.nextfreeSeqpos + width 
+        csf->phase = Specialrangephase;
+        csf->sri = newspecialrangeiterator(encseq,
+                                           ISDIRREVERSE(readmode)
+                                             ? false : true,
+                                           env);
+        csf->fusp.spaceSeqpos = csf->suftab;
+        csf->fusp.allocatedSeqpos 
+          = CALLCASTFUNC(Seqpos,unsigned_long,
+                         stpgetlargestwidth(csf->suftabparts));
+        csf->fusp.nextfreeSeqpos = 0;
+        csf->overhang.leftpos = csf.overhang.rightpos = 0;
+      }
+    }
+    if(csf->phase == Specialrangephase)
+    {
+      if(!exhaustedspecialrangeiterator(csf->sri))
+      {
+        fillspecialnextpage(csf);
+      } else
+      {
+        csf->phase = Finalsuffixphase;
+      }
+    }
+  }
+  *len = csf->widthofpart;
+  return csf->suftab;
+}
+*/
+
+/*
+
+    if(!haserr && hasspecialranges(csf->encseq))
+    {
+      Sequencerange range;
+      Specialrangeiterator *sri;
+  
+      sri = newspecialrangeiterator(csf->encseq,
+                                    ISDIRREVERSE(csf->readmode) ? false : true,
+                                    env);
+      while(nextspecialrangeiterator(&range,sri))
+      {
+        if (processfullspecialrange(csf,
+                                   processsuftab,
+                                   processsuftabinfo,
+                                   range.leftpos,
+                                   range.rightpos,
+                                   env) != 0)
+        {
+          haserr = true;
+          break;
+        }
+      }
+      freespecialrangeiterator(&sri,env);
+    }
+    if(!haserr)
+    {
+      csf->fusp.spaceSeqpos[csf->fusp.nextfreeSeqpos++] = csf->totallength;
+      if (processsuftab != NULL)
+      {
+        if (processsuftab(processsuftabinfo,
+                          csf->fusp.spaceSeqpos,
+                          csf->readmode,
+                          (Seqpos) csf->fusp.nextfreeSeqpos,
+                          env) != 0)
+        {
+          haserr = true;
+        }
+      }
+    }
+    specialcode = FROMCODE2SPECIALCODE(csf->filltable[0],csf->numofchars);
+    csf->countspecialcodes[specialcode] += (specialcharacters + 1);
+  }
+  return haserr ? -1 : 0;
+}
+*/
+          break;
+        }
+      } else
+      {
+        /* does not fit into the buffer, so only output a part */
+        Seqpos rest = csf->fusp.nextfreeSeqpos + width
                                                - csf->fusp.allocatedSeqpos;
+        assert(rest > 0);
         if(ISDIRREVERSE(csf->readmode))
         {
           insertfullspecialrange(csf,csf->overhang.leftpos + rest,
@@ -736,10 +888,16 @@ static void fillspecialnextpage(Sfxiterator *csf)
         width = range.rightpos - range.leftpos;
         if(csf->fusp.nextfreeSeqpos + width <= csf->fusp.allocatedSeqpos)
         {
+          /* fits into buffer */
           insertfullspecialrange(csf,range.leftpos,range.rightpos);
+          if(csf->fusp.nextfreeSeqpos + width == csf->fusp.allocatedSeqpos)
+          {
+            break; /* buffer is full */
+          }
         } else
         {
-          Seqpos rest = csf->fusp.nextfreeSeqpos - csf->fusp.allocatedSeqpos;
+          Seqpos rest = csf->fusp.nextfreeSeqpos + width 
+                                                 - csf->fusp.allocatedSeqpos;
           if(ISDIRREVERSE(csf->readmode))
           {
             insertfullspecialrange(csf,range.leftpos + rest,

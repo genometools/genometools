@@ -151,7 +151,7 @@ int checkmarkpos(const Encodedsequence *encseq,
           fprintf(stderr,"pos= " FormatSeqpos
                          " seqnum = %lu != %lu = currentseqnum\n",
                           PRINTSeqposcast(pos),seqnum,currentseqnum);
-          exit(EXIT_FAILURE);
+          exit(EXIT_FAILURE); /* programming error */
         }
       }
     }

@@ -189,7 +189,7 @@ static void checktrie2(Trierep *trierep,
     {
       fprintf(stderr,"leaf " FormatSeqpos " already found\n",
               PRINTSeqposcast(start));
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programming error */
     }
     SETIBIT(leafused,start);
     (*numberofbitsset)++;
@@ -205,7 +205,7 @@ static void checktrie2(Trierep *trierep,
                        " = node.depth\n",
                        PRINTSeqposcast(father->depth),
                        PRINTSeqposcast(node->depth));
-        exit(EXIT_FAILURE);
+        exit(EXIT_FAILURE); /* programming error */
       }
     }
     previous = NULL;
@@ -221,7 +221,7 @@ static void checktrie2(Trierep *trierep,
               current->suffixinfo.idx) >= 0)
         {
           fprintf(stderr,"nodes not correctly ordered\n");
-          exit(EXIT_FAILURE);
+          exit(EXIT_FAILURE); /* programming error */
         }
       }
       checktrie2(trierep,current,node,leafused,numberofbitsset);
@@ -246,7 +246,7 @@ void checktrie(Trierep *trierep,unsigned int numberofleaves,
       fprintf(stderr,"numberofbitsset = %u != %u = numberofleaves\n",
                       numberofbitsset,
                       numberofleaves);
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programming error */
     }
     FREESPACE(leafused);
   }

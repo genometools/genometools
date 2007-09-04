@@ -75,15 +75,14 @@ static void showcomparisonfailure(const char *where,
               PRINTSeqposcast(maxlcp));
 }
 
-/*
-static void checkifprefixesareidentical(const Encodedsequence *encseq,
-                                        Readmode readmode,
-                                        const Uchar *characters,
-                                        const Seqpos *suftab,
-                                        unsigned int prefixlength,
-                                        Seqpos depth,
-                                        Seqpos left,
-                                        Seqpos right)
+void checkifprefixesareidentical(const Encodedsequence *encseq,
+                                 Readmode readmode,
+                                 const Uchar *characters,
+                                 const Seqpos *suftab,
+                                 unsigned int prefixlength,
+                                 Seqpos depth,
+                                 Seqpos left,
+                                 Seqpos right)
 {
   const Seqpos *ptr;
   Seqpos maxlcp;
@@ -108,11 +107,10 @@ static void checkifprefixesareidentical(const Encodedsequence *encseq,
                             suftab,
                             depth,
                             ptr,ptr+1,cmp,maxlcp);
-      exit(EXIT_FAILURE);
+      exit(EXIT_FAILURE); /* programming error */
     }
   }
 }
-*/
 
 void showentiresuftab(const Encodedsequence *encseq,
                       Readmode readmode,

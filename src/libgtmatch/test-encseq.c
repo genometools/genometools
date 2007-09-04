@@ -107,6 +107,8 @@ int testencodedsequence(const StrArray *filenametab,
   return haserr ? -1 : 0;
 }
 
+#define WORKSWITHVALGRIND
+#ifdef WORKSWITHVALGRIND
 static void reverseSequencerange(Array *a)
 {
   unsigned long idx1, idx2;
@@ -122,6 +124,11 @@ static void reverseSequencerange(Array *a)
     *valptr2 = tmp;
   }
 }
+#else
+/* run 
+   testsuite.rb -memcheck -keywords gt_suffixerator -select 250 
+   to produce an error */
+#endif
 
 static int comparearrays(const Array *a,const Array *b,Env *env)
 {
@@ -185,10 +192,11 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
     array_add(rangesbackward,range,env);
   }
   freespecialrangeiterator(&sri,env);
-  /*
-  array_reverse(rangesbackward,env); this does not work: use the following
-  */
+#ifdef WORKSWITHVALGRIND
   reverseSequencerange(rangesbackward);
+#else
+  array_reverse(rangesbackward,env);
+#endif
   if (!haserr)
   {
     printf("# checkspecialrangesfast(%lu ranges)\n",
