@@ -47,6 +47,12 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
 end
 
+Name "range bindings"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$testdata}/gtscripts/range.lua"
+end
+
 if $arguments["libgtview"] then
   Name "feature_index and feature_stream bindings"
   Keywords "gt_scripts"
