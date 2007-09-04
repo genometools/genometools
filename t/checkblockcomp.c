@@ -138,10 +138,10 @@ main(int argc, char *argv[])
             (unsigned long)indices[1]);
   }
   {
-    int integrity = verifyIntegrity(seq, inputProject, 100000, stderr, env);
-    if((integrity))
+    int corrupt = verifyIntegrity(seq, inputProject, 100000, stderr, env);
+    if(corrupt)
     {
-      if(integrity == -1)
+      if(corrupt == -1)
         perror("I/O error when checking index integrity");
       else
         fputs("Integrity check failed for index.\n", stderr);
