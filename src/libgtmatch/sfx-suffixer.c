@@ -342,7 +342,8 @@ static int processfullspecialrange(Sfxiterator *csf,
   return 0;
 }
 
-static void insertfullspecialrange(Sfxiterator *csf,
+/*
+  static void insertfullspecialrange(Sfxiterator *csf,
                                    Seqpos leftpos,
                                    Seqpos rightpos,
                                    Env *env)
@@ -379,6 +380,8 @@ static void insertfullspecialrange(Sfxiterator *csf,
     }
   }
 }
+
+*/
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
@@ -487,7 +490,12 @@ static int initsuffixerator(Sfxiterator *csf,
     ALLOCASSIGNSPACE(csf->suftab,NULL,Seqpos,
                      stpgetlargestwidth(csf->suftabparts));
     reversespecialcodes(csf->spaceCodeatposition,csf->nextfreeCodeatposition);
-
+    /* the following can be removed for the iterator version */
+    csf->fusp.spaceSeqpos = csf->suftab;
+    csf->fusp.allocatedSeqpos 
+    = CALLCASTFUNC(Seqpos,unsigned_long,
+                   stpgetlargestwidth(csf->suftabparts));
+    csf->fusp.nextfreeSeqpos = 0;
   }
   return haserr ? -1 : 0;
 }
@@ -688,6 +696,7 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
   return csf;
 }
 
+/*
 static void fillspecialnextpage(Sfxiterator *csf)
 {
   Sequencerange range;
@@ -789,6 +798,7 @@ static void fillspecialnextpage(Sfxiterator *csf)
   *len = csf->widthofpart;
   return csf->suftab;
 }
+*/
 
 /*
 

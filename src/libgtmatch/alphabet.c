@@ -15,6 +15,9 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
+#include "libgtcore/fileutils.h"
+#include "libgtcore/cstr.h"
+#include "libgtext/gtdata.h"
 #include "qsorttype.h"
 #include "symboldef.h"
 #include "arraydef.h"
@@ -443,13 +446,29 @@ static int assignProteinorDNAalphabet(Alphabet *alpha,
     {
       if (str_length(smapfile) > 0)
       {
+        Str *transpath = NULL;
+
+        if(!file_exists(str_get(smapfile)))
+        {
+          Str *prog;
+          const char *progname = env_error_get_progname(env);
+
+          prog = str_new(env);
+          str_append_cstr_nt(prog, progname,
+                             cstr_length_up_to_char(progname, ' '), env);
+          transpath = gtdata_get_path(str_get(prog), env);
+          str_delete(prog, env);
+          str_append_cstr(transpath, "/trans/", env);
+          str_append_cstr(transpath, str_get(smapfile), env);
+        }
         if (readsymbolmap(alpha,
                          (Uchar) WILDCARD,
-                         smapfile,
+                         transpath == NULL ? smapfile : transpath,
                          env) != 0)
         {
           haserr = true;
         }
+        str_delete(transpath, env);
       } else
       {
         if (assignProteinorDNAalphabet(alpha,filenametab,env) != 0)

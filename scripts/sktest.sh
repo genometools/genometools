@@ -11,7 +11,6 @@
 set -e -x
 
 outoptions="-tis -lcp -suf -bwt"
-transdir=../gtdata/trans
 
 # the make call normally used for development
 cd testsuite
@@ -32,8 +31,8 @@ done
 ../scripts/checkmapped.sh -db ${ATK} ${AT} ${GRUMBACH}/*.fna -parts 3 -pl
 ../scripts/checkmapped.sh -parts 1 -pl -db ${SWK} ${SW}
 ../scripts/checkmapped.sh -db ${SWK} ${SW} -parts 3 -pl
-../scripts/checkmapped.sh -parts 2 -pl -smap ${transdir}/TransDNA -db ${AT}
-../scripts/checkmapped.sh -db ${SWK} -parts 1 -pl -smap ${transdir}/TransProt11 
+../scripts/checkmapped.sh -parts 2 -pl -smap TransDNA -db ${AT}
+../scripts/checkmapped.sh -db ${SWK} -parts 1 -pl -smap TransProt11 
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random-Small.fna
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random.fna
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Atinsert.fna ../testdata/Random.fna

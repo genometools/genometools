@@ -7,9 +7,9 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
                                             Env *env);
 
 const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
-                                     Enumpatterniterator *eps);
+                                     Enumpatterniterator *epi);
 
-void freeEnumpatterniterator(Enumpatterniterator **eps,Env *env);
+void freeEnumpatterniterator(Enumpatterniterator **epi,Env *env);
 
 #ifdef __cplusplus
 }

@@ -1355,7 +1355,7 @@ static bool bitanddirectnextspecialrangeiterator(Sequencerange *range,
 
 bool exhaustedrangeiterator(Specialrangeiterator *sri)
 {
-  sri->exhausted;
+  return sri->exhausted;
 }
 
 bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri)

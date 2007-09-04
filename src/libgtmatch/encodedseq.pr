@@ -30,6 +30,8 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
                                               bool moveforward,
                                               Env *env);
 
+bool exhaustedrangeiterator(Specialrangeiterator *sri);
+
 bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
 
 void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
