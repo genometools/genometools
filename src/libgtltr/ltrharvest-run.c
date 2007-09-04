@@ -40,7 +40,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   }
 
   /* test if motif is valid */
-  if( testmotif(&lo->motif, suffixarray.alpha, env) != 0)
+  if( testmotifandencodemotif(&lo->motif, suffixarray.alpha, env) != 0)
   {
     return -1; 
   }

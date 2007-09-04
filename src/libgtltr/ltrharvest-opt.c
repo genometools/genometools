@@ -101,10 +101,11 @@ void showuserdefinedoptionsandvalues(LTRharvestoptions *lo
   }
   printf("#   minTSDlength: %lu\n",  lo->minlengthTSD);
   printf("#   maxTSDlength: %lu\n",  lo->maxlengthTSD);
-  printf("#   leftboundarymotifLTR: %c%c\n", lo->motif.firstleft,
+  printf("#   palindromic motif: %s\n", str_get(lo->motif.str_motif));
+  /*printf("#   leftboundarymotifLTR: %c%c\n", lo->motif.firstleft,
                                              lo->motif.secondleft);
   printf("#   rightboundarymotifLTR: %c%c\n", lo->motif.firstright,
-                                              lo->motif.secondright);
+                                              lo->motif.secondright);*/
   printf("#   motifmismatchesallowed: %u\n", lo->motif.allowedmismatches);
   printf("#   vicinity: %u nt\n", lo->vicinityforcorrectboundaries);
 }
@@ -130,7 +131,7 @@ void printargsline(const char **argv, int argc)
   }
 }
 
-int testmotif(Motif *motif, Alphabet *alpha, Env *env)
+int testmotifandencodemotif(Motif *motif, Alphabet *alpha, Env *env)
 {
   const Uchar *symbolmap;
 
@@ -167,6 +168,11 @@ int testmotif(Motif *motif, Alphabet *alpha, Env *env)
     //	motif->secondright);
     return -1;
   }
+
+  motif->firstleft = symbolmap[(unsigned int)motif->firstleft];
+  motif->secondleft = symbolmap[(unsigned int)motif->secondleft];
+  motif->firstright = symbolmap[(unsigned int)motif->firstright]; 
+  motif->secondright = symbolmap[(unsigned int)motif->secondright];  
 
   return 0;
 }

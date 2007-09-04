@@ -4,6 +4,8 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
+#include "libgtcore/env.h"
+
 #include "libgtmatch/arraydef.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/pos2seqnum.pr"
@@ -13,6 +15,7 @@
 #include "repeats.h"
 #include "myxdrop.h"
 #include "minmax.h"
+#include "searchTSDandmotif.h"
 
 /* 
  The following function checks, if the remaining candidate pairs still
@@ -21,9 +24,12 @@
 
 static int checklengthanddistanceconstraints(
     LTRboundaries *boundaries,
-    RepeatInfo *repeatinfo
+    RepeatInfo *repeatinfo,
+    Env *env
     )
 {
+  env_error_check(env);
+
   Seqpos ulen = boundaries->leftLTR_3  - boundaries->leftLTR_5  + 1,
        vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1,
        dist_between_LTRs = boundaries->rightLTR_5 - boundaries->leftLTR_5;
@@ -210,6 +216,8 @@ int searchforLTRs (
   unsigned long numofdbsequences = suffixarray->numofdbsequences;
   Seqpos *markpos = NULL; //fuer testen
 
+  env_error_check(env);
+
   /*
   printf("xdropbelowscore = %d\n", lo->xdropbelowscore);
   printf("scores:\n");
@@ -365,21 +373,21 @@ int searchforLTRs (
 		                                         /*seed2 endpos*/  
 		   boundaries,
 		   offset); //muss noch uerbergeben werden
-/*  
     // if search for motif and/or TSD
-    if( motif->allowedmismatches < (Ushort)4 || minlengthTSD > (unsigned int) 1)
+    if( lo->motif.allowedmismatches < (unsigned int)4 || 
+        lo->minlengthTSD > (unsigned long) 1)
     {
       if( findcorrectboundaries(
-            minlengthTSD,
-	    maxlengthTSD,
+            lo,
 	    boundaries,
-	    virtualtree, 
-	    vicinityforcorrectboundaries,
-	    motif) != 0 )
+	    suffixarray,
+	    markpos,
+	    env) != 0 )
       {
         return (int) -1;
       }
 
+/*  
       // if search for TSDs and (not) motif
       if( boundaries->tsd && 
 	  (motif->allowedmismatches >= (Ushort)4 ||
@@ -390,9 +398,10 @@ int searchforLTRs (
       }
       else
       {
+*/
 	// if search for motif only (and not TSD)
-	if( minlengthTSD <= (unsigned int) 1 &&
-	    boundaries->motif_near_tsd &&
+	if( lo->minlengthTSD <= (unsigned long) 1 &&
+	    //boundaries->motif_near_tsd &&  ///!!!!!!wichtig spaeter einkommentieren!!!!!!
 	    boundaries->motif_far_tsd )
 	{
 	  // predicted as full LTR-pair, keep it
@@ -400,18 +409,20 @@ int searchforLTRs (
 	else
 	{
 	  // delete this LTR-pair candidate
-	  arrayLTRboundaries->nextfreeLTRboundaries--;
+	  lo->arrayLTRboundaries.nextfreeLTRboundaries--;
 	  continue;
 	}
-      }
+      //}
     }
+
 #ifdef DEBUG
     shownewboundariesifadjusted(boundaries, multiseqoffset); 
 #endif
-*/
+
     // check length and distance constraints again
     if( checklengthanddistanceconstraints(boundaries,
-					  &lo->repeatinfo) != 0)
+					  &lo->repeatinfo,
+					  env) != 0)
     {
       // delete this LTR-pair candidate
       lo->arrayLTRboundaries.nextfreeLTRboundaries--;
