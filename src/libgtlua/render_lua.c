@@ -32,7 +32,7 @@ static int render_lua_new(lua_State *L)
   Render **render;
   Config *config;
   Env *env = get_env_from_registry(L);
-  render = lua_newuserdata(L, sizeof (Render**));
+  render = lua_newuserdata(L, sizeof (Render*));
   assert(render);
   config = get_config_from_registry(L);
   *render = render_new(config, env);

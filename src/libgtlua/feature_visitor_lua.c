@@ -27,7 +27,7 @@ static int feature_visitor_lua_new(lua_State *L)
   GenomeVisitor **feature_visitor;
   FeatureIndex **feature_index;
   Env *env = get_env_from_registry(L);
-  feature_visitor = lua_newuserdata(L, sizeof (GenomeVisitor**));
+  feature_visitor = lua_newuserdata(L, sizeof (GenomeVisitor*));
   assert(feature_visitor);
   feature_index = check_feature_index(L, 1);
   *feature_visitor = feature_visitor_new(*feature_index, env);

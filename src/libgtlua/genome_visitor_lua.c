@@ -26,7 +26,7 @@ static int gff3_visitor_lua_new(lua_State *L)
   Env *env = get_env_from_registry(L);
   assert(L);
   /* construct object */
-  gv = lua_newuserdata(L, sizeof (GenomeVisitor**));
+  gv = lua_newuserdata(L, sizeof (GenomeVisitor*));
   *gv = gff3_visitor_new(NULL, env);
   assert(*gv);
   luaL_getmetatable(L, GENOME_VISITOR_METATABLE);

@@ -35,7 +35,7 @@ static int stream_evaluator_lua_new(lua_State *L)
   Env *env = get_env_from_registry(L);
   reality_stream = check_genome_stream(L, 1);
   prediction_stream = check_genome_stream(L, 2);
-  stream_evaluator = lua_newuserdata(L, sizeof (StreamEvaluator**));
+  stream_evaluator = lua_newuserdata(L, sizeof (StreamEvaluator*));
   *stream_evaluator = stream_evaluator_new(*reality_stream, *prediction_stream,
                                            false, 0, env);
   luaL_getmetatable(L, STREAM_EVALUATOR_METATABLE);

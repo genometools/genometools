@@ -18,10 +18,12 @@
 #include <assert.h>
 #include "libgtlua/bittab_lua.h"
 #include "libgtlua/gtcore_lua.h"
+#include "libgtlua/range_lua.h"
 
 int luaopen_gtcore(lua_State *L)
 {
   assert(L);
   luaopen_bittab(L);
+  luaopen_range(L);
   return 1;
 }

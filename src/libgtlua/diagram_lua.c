@@ -45,7 +45,7 @@ static int diagram_lua_new(lua_State *L)
                 4, "feature index does not contain the given sequence id");
   /* create diagram */
   config = get_config_from_registry(L);
-  diagram = lua_newuserdata(L, sizeof (Diagram**));
+  diagram = lua_newuserdata(L, sizeof (Diagram*));
   assert(diagram);
   *diagram = diagram_new(*feature_index, range, seqid, config, env);
   luaL_getmetatable(L, DIAGRAM_METATABLE);

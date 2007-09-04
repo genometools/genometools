@@ -25,7 +25,7 @@ static int feature_index_lua_new(lua_State *L)
 {
   FeatureIndex **feature_index;
   Env *env = get_env_from_registry(L);
-  feature_index = lua_newuserdata(L, sizeof (FeatureIndex**));
+  feature_index = lua_newuserdata(L, sizeof (FeatureIndex*));
   assert(feature_index);
   *feature_index = feature_index_new(env);
   luaL_getmetatable(L, FEATURE_INDEX_METATABLE);

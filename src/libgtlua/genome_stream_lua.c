@@ -35,7 +35,7 @@ static int gff3_in_stream_lua_new_sorted(lua_State *L)
   luaL_argcheck(L, file_exists(filename), 1, "file does not exist");
   /* construct object */
   env = get_env_from_registry(L);
-  gs = lua_newuserdata(L, sizeof (GenomeStream**));
+  gs = lua_newuserdata(L, sizeof (GenomeStream*));
   *gs = gff3_in_stream_new_sorted(filename, false, env);
   assert(*gs);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
@@ -49,7 +49,7 @@ static int gff3_out_stream_lua_new(lua_State *L)
   Env *env = get_env_from_registry(L);
   assert(L);
   /* construct object */
-  out_stream = lua_newuserdata(L, sizeof (GenomeStream**));
+  out_stream = lua_newuserdata(L, sizeof (GenomeStream*));
   *out_stream = gff3_out_stream_new(*in_stream, NULL, env);
   assert(*out_stream);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
