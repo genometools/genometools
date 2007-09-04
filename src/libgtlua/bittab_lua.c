@@ -24,7 +24,7 @@
 
 #define BITTAB_METATABLE  "GenomeTools.bittab"
 #define checkbittab(L, POS) \
-        (Bittab**) luaL_checkudata(L, POS, BITTAB_METATABLE);
+        (Bittab**) luaL_checkudata(L, POS, BITTAB_METATABLE)
 
 static int bittab_lua_new(lua_State *L)
 {

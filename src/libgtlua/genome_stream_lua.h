@@ -30,6 +30,6 @@ int luaopen_genome_stream(lua_State*);
 
 #define GENOME_STREAM_METATABLE  "GenomeTools.genome_stream"
 #define check_genome_stream(L, POS) \
-          (GenomeStream**) luaL_checkudata(L, POS, GENOME_STREAM_METATABLE);
+          (GenomeStream**) luaL_checkudata(L, POS, GENOME_STREAM_METATABLE)
 
 #endif

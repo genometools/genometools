@@ -26,7 +26,7 @@
 
 #define STREAM_EVALUATOR_METATABLE  "GenomeTools.stream_evaluator"
 #define check_stream_evaluator(L) \
-        (StreamEvaluator**) luaL_checkudata(L, 1, STREAM_EVALUATOR_METATABLE);
+        (StreamEvaluator**) luaL_checkudata(L, 1, STREAM_EVALUATOR_METATABLE)
 
 static int stream_evaluator_lua_new(lua_State *L)
 {

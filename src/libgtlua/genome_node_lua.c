@@ -22,7 +22,7 @@
 #include "libgtlua/helper.h"
 
 #define check_genome_node(L) \
-              (GenomeNode**) luaL_checkudata(L, 1, GENOME_NODE_METATABLE);
+              (GenomeNode**) luaL_checkudata(L, 1, GENOME_NODE_METATABLE)
 
 static int genome_feature_lua_new(lua_State *L)
 {

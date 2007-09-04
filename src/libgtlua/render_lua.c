@@ -25,7 +25,7 @@
 
 #define RENDER_METATABLE  "GenomeTools.render"
 #define check_render(L) \
-        (Render**) luaL_checkudata(L, 1, RENDER_METATABLE);
+        (Render**) luaL_checkudata(L, 1, RENDER_METATABLE)
 
 static int render_lua_new(lua_State *L)
 {
