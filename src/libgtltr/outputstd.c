@@ -280,7 +280,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 	    else
 	    {
 	      //offset = virtualtree->multiseq.markpos.spaceunsigned int[contignumber-1]+1;
-	      offset = markpos[contignumber-1];
+	      offset = markpos[contignumber-1]+1;
 	    }
 
 	    printf(FormatSeqpos "  ",

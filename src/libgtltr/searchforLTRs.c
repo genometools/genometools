@@ -133,25 +133,7 @@ void adjustboundariesfromXdropextension(
   boundaries->leftLTR_3  = seed1_endpos + xdropbest_right.ivalue;
   boundaries->rightLTR_3 = seed2_endpos + xdropbest_right.jvalue;
 
-/* ohne offset
-  printf("Adjusted boundaries from Xdrop-alignment-extension:\n");
-  printf("boundaries->leftLTR_5  = " FormatSeqpos "\n", 
-            PRINTSeqposcast(boundaries->leftLTR_5 + 1)); 
-         // count positions from 1, thus + 1
-  printf("boundaries->leftLTR_3  = " FormatSeqpos "\n", 
-            PRINTSeqposcast(boundaries->leftLTR_3 + 1));
-         // count positions from 1, thus + 1
-  printf("len leftLTR = " FormatSeqpos "\n", 
-            PRINTSeqposcast((boundaries->leftLTR_3 - boundaries->leftLTR_5 + 1)));
-  printf("boundaries->rightLTR_5 = " FormatSeqpos "\n", 
-            PRINTSeqposcast(boundaries->rightLTR_5 + 1));
-         // count positions from 1, thus + 1
-  printf("boundaries->rightLTR_3 = " FormatSeqpos "\n", 
-            PRINTSeqposcast(boundaries->rightLTR_3 + 1));
-         // count positions from 1, thus + 1
-  printf("len rightLTR = " FormatSeqpos "\n", 
-            PRINTSeqposcast((boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1)));
-*/
+  /*
   printf("Adjusted boundaries from Xdrop-alignment-extension:\n");
   printf("boundaries->leftLTR_5  = " FormatSeqpos "\n", 
             PRINTSeqposcast( boundaries->leftLTR_5 - offset));
@@ -165,7 +147,7 @@ void adjustboundariesfromXdropextension(
             PRINTSeqposcast( boundaries->rightLTR_3 - offset));
   printf("len rightLTR = " FormatSeqpos "\n", 
             PRINTSeqposcast( (boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1)));
-
+ */
 }
 
 /*
@@ -243,7 +225,7 @@ int searchforLTRs (
   for (repeatcounter = 0; repeatcounter < lo->repeatinfo.repeats.nextfreeRepeat;
        repeatcounter++)
   {
-    printf("\n\nAlignments of repeat nr. = %u :\n", repeatcounter+1);
+    //printf("\n\nAlignments of repeat nr. = %u :\n", repeatcounter+1);
    
     repeatptr = &(lo->repeatinfo.repeats.spaceRepeat[repeatcounter]);
     alilen = ((Seqpos)lo->repeatinfo.lmax) - repeatptr->len;
@@ -351,7 +333,7 @@ int searchforLTRs (
       //multiseqoffset = 
       //virtualtree->multiseq.markpos.spaceUint[boundaries->contignumber-1]+1;
     }
-// test
+/* test
     printf("contig number: %lu\n",
                boundaries->contignumber);
     printf("offset to contig startpos: " FormatSeqpos "\n",
@@ -375,6 +357,7 @@ int searchforLTRs (
     printf("boundaries->rightLTR_3 = " FormatSeqpos "\n", 
 	      PRINTSeqposcast(repeatptr->pos1 + repeatptr->offset + 
 	                repeatptr->len - 1 - offset));
+*/
     /* store new boundaries-positions in boundaries */
     adjustboundariesfromXdropextension( 
 	           xdropbest_left, 
