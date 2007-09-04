@@ -19,35 +19,33 @@
  fulfill the length and distance constraints of LTRs.
  */
 
-/*
 static int checklengthanddistanceconstraints(
     LTRboundaries *boundaries,
     RepeatInfo *repeatinfo
     )
 {
-  unsigned int ulen = boundaries->leftLTR_3  - boundaries->leftLTR_5  + 1,
+  Seqpos ulen = boundaries->leftLTR_3  - boundaries->leftLTR_5  + 1,
        vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1,
        dist_between_LTRs = boundaries->rightLTR_5 - boundaries->leftLTR_5;
 
-  if(ulen > repeatinfo->lmax || vlen > repeatinfo->lmax ||
-     ulen < repeatinfo->lmin || vlen < repeatinfo->lmin ||
-     dist_between_LTRs > repeatinfo->dmax || 
-     dist_between_LTRs < repeatinfo->dmin ||
+  if(ulen > (Seqpos)repeatinfo->lmax || vlen > (Seqpos)repeatinfo->lmax ||
+     ulen < (Seqpos)repeatinfo->lmin || vlen < (Seqpos)repeatinfo->lmin ||
+     dist_between_LTRs > (Seqpos)repeatinfo->dmax || 
+     dist_between_LTRs < (Seqpos)repeatinfo->dmin ||
      boundaries->leftLTR_3 >= boundaries->rightLTR_5)
   {
-    DEBUG0(1, "boundaries exceed length contraints or overlap.\n");
-    boundaries->lengthdistconstraint = False;
+    //DEBUG0(1, "boundaries exceed length contraints or overlap.\n");
+    boundaries->lengthdistconstraint = false;
     boundaries->similarity = 0.0;
     return (int) -1;
   }
   else
   {
-    boundaries->lengthdistconstraint = True;
+    boundaries->lengthdistconstraint = true;
   }
   
   return 0;
 }
-*/
 
 /*
  The following function determines the similarity of the two predicted LTRs.
@@ -412,16 +410,16 @@ int searchforLTRs (
 #ifdef DEBUG
     shownewboundariesifadjusted(boundaries, multiseqoffset); 
 #endif
-
+*/
     // check length and distance constraints again
     if( checklengthanddistanceconstraints(boundaries,
-					  repeatinfo) != 0)
+					  &lo->repeatinfo) != 0)
     {
       // delete this LTR-pair candidate
-      arrayLTRboundaries->nextfreeLTRboundaries--;
+      lo->arrayLTRboundaries.nextfreeLTRboundaries--;
       continue;
     }
-
+/*
     // check similarity from candidate pair
     if( determinesimilarityfromcandidate(
 	         boundaries,
