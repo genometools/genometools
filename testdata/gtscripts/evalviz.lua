@@ -32,7 +32,7 @@ else
 end
 
 function render_to_png()
-  local diagram = gt.diagram_new(feature_index, startpos, endpos, seqid)
+  local diagram = gt.diagram_new(feature_index, range, seqid)
   local render =  gt.render_new()
   render:to_png(diagram, png_file, width)
 end
@@ -59,9 +59,9 @@ stream_evaluator:show()
 
 -- view results
 seqid = feature_index:get_first_seqid()
-startpos, endpos = feature_index:get_range_for_seqid(seqid)
+range = feature_index:get_range_for_seqid(seqid)
 
-diagram = gt.diagram_new(feature_index, startpos, endpos, seqid)
+diagram = gt.diagram_new(feature_index, range, seqid)
 width = 800
 render = gt.render_new()
 render:to_png(diagram, png_file, width)

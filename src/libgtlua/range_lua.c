@@ -19,10 +19,6 @@
 #include "libgtlua/helper.h"
 #include "libgtlua/range_lua.h"
 
-#define RANGE_METATABLE  "GenomeTools.range"
-#define checkrange(L) \
-        (Range*) luaL_checkudata(L, 1, RANGE_METATABLE)
-
 static int range_lua_new(lua_State *L)
 {
   unsigned long startpos, endpos;
@@ -40,14 +36,14 @@ static int range_lua_new(lua_State *L)
 
 static int range_lua_startpos(lua_State *L)
 {
-  Range *range = checkrange(L);
+  Range *range = check_range(L, 1);
   lua_pushinteger(L, range->start);
   return 1;
 }
 
 static int range_lua_endpos(lua_State *L)
 {
-  Range *range = checkrange(L);
+  Range *range = check_range(L, 1);
   lua_pushinteger(L, range->end);
   return 1;
 }
@@ -144,7 +140,7 @@ int luaopen_range(lua_State *L)
   return 1;
 }
 
-void range_lua_push(lua_State *L, Range inrange)
+int range_lua_push(lua_State *L, Range inrange)
 {
   Range *outrange;
   assert(L);
@@ -152,4 +148,5 @@ void range_lua_push(lua_State *L, Range inrange)
   *outrange = inrange;
   luaL_getmetatable(L, RANGE_METATABLE);
   lua_setmetatable(L, -2);
+  return 1;
 }

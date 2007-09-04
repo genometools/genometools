@@ -20,6 +20,7 @@
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/genome_visitor_lua.h"
 #include "libgtlua/helper.h"
+#include "libgtlua/range_lua.h"
 
 #define check_genome_node(L) \
               (GenomeNode**) luaL_checkudata(L, 1, GENOME_NODE_METATABLE)
@@ -28,7 +29,7 @@ static int genome_feature_lua_new(lua_State *L)
 {
   GenomeNode **gf;
   GenomeFeatureType type;
-  Range range;
+  Range *range;
   Strand strand;
   const char *type_str, *strand_str;
   size_t length;
@@ -39,20 +40,16 @@ static int genome_feature_lua_new(lua_State *L)
   type_str = luaL_checkstring(L, 1);
   luaL_argcheck(L, !genome_feature_type_get(&type, type_str), 1,
                 "invalid feature type");
-
-  range.start = luaL_checklong(L, 2);
-  range.end   = luaL_checklong(L, 3);
-  luaL_argcheck(L, range.start <= range.end, 2, "must be <= endpos");
-
-  strand_str = luaL_checklstring(L, 4, &length);
-  luaL_argcheck(L, length == 1, 4, "strand string must have length 1");
+  range = check_range(L, 2);
+  strand_str = luaL_checklstring(L, 3, &length);
+  luaL_argcheck(L, length == 1, 3, "strand string must have length 1");
   luaL_argcheck(L, (strand = strand_get(strand_str[0])) != NUM_OF_STRAND_TYPES,
-                4, "invalid strand");
+                3, "invalid strand");
   /* construct object */
   env = get_env_from_registry(L);
   gf = lua_newuserdata(L, sizeof (GenomeNode*));
   filename = str_new_cstr("Lua", env);
-  *gf = genome_feature_new(type, range, strand, filename, 0, env);
+  *gf = genome_feature_new(type, *range, strand, filename, 0, env);
   str_delete(filename, env);
   assert(*gf);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
@@ -69,13 +66,8 @@ static int genome_node_lua_get_filename(lua_State *L)
 
 static int genome_node_lua_get_range(lua_State *L)
 {
-  GenomeNode **gn;
-  Range range;
-  gn = check_genome_node(L);
-  range = genome_node_get_range(*gn);
-  lua_pushinteger(L, range.start);
-  lua_pushinteger(L, range.end);
-  return 2;
+  GenomeNode **gn = check_genome_node(L);
+  return range_lua_push(L, genome_node_get_range(*gn));
 }
 
 static int genome_node_lua_accept(lua_State *L)

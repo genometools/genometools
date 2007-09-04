@@ -19,6 +19,7 @@
 #include "libgtlua/feature_index_lua.h"
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/helper.h"
+#include "libgtlua/range_lua.h"
 #include "libgtview/feature_index.h"
 
 static int feature_index_lua_new(lua_State *L)
@@ -67,7 +68,7 @@ static int feature_index_lua_get_features_for_range(lua_State *L)
 {
   FeatureIndex **feature_index;
   const char *seqid;
-  Range range;
+  Range *range;
   Array *features;
   int had_err;
   Env *env = get_env_from_registry(L);
@@ -75,12 +76,10 @@ static int feature_index_lua_get_features_for_range(lua_State *L)
   seqid = luaL_checkstring(L, 2);
   luaL_argcheck(L, feature_index_has_seqid(*feature_index, seqid, env), 2,
                 "feature_index does not contain seqid");
-  range.start = luaL_checklong(L, 3);
-  range.end   = luaL_checklong(L, 4);
-  luaL_argcheck(L, range.start <= range.end, 3, "must be <= endpos");
+  range = check_range(L, 3);
   features = array_new(sizeof (GenomeNode*), env);
   had_err = feature_index_get_features_for_range(*feature_index, features,
-                                                 seqid, range, env);
+                                                 seqid, *range, env);
   assert(!had_err); /* it was checked before that the feature_index contains the
                        given sequence id*/
   push_features_as_table(L, features, env);
@@ -105,16 +104,13 @@ static int feature_index_lua_get_range_for_seqid(lua_State *L)
 {
   FeatureIndex **feature_index;
   const char *seqid;
-  Range range;
   Env *env = get_env_from_registry(L);
   feature_index = check_feature_index(L, 1);
   seqid = luaL_checkstring(L, 2);
   luaL_argcheck(L, feature_index_has_seqid(*feature_index, seqid, env), 2,
                 "feature_index does not contain seqid");
-  range = feature_index_get_range_for_seqid(*feature_index, seqid);
-  lua_pushinteger(L, range.start);
-  lua_pushinteger(L, range.end);
-  return 2;
+  return range_lua_push(L, feature_index_get_range_for_seqid(*feature_index,
+                                                             seqid));
 }
 
 static int feature_index_lua_delete(lua_State *L)

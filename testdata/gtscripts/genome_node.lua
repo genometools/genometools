@@ -18,25 +18,22 @@
 -- testing the Lua bindings for the GenomeNode interface
 
 -- testing gt.genome_feature_new
-rval, err = pcall(gt.genome_feature_new, nil, 1, 100, "+")
+range = gt.range_new(1, 100)
+rval, err = pcall(gt.genome_feature_new, nil, range, "+")
 assert(not rval)
-rval, err = pcall(gt.genome_feature_new, "not_defined", 1, 100, "+")
+rval, err = pcall(gt.genome_feature_new, "not_defined", range, "+")
 assert(not rval)
 assert(string.find(err, "invalid feature type"))
-rval, err = pcall(gt.genome_feature_new, "gene", "test", 100, "+")
+rval, err = pcall(gt.genome_feature_new, "gene", "test", "+")
 assert(not rval)
-rval, err = pcall(gt.genome_feature_new, "gene", 1, "test", "+")
-assert(not rval)
-rval, err = pcall(gt.genome_feature_new, "gene", 100, 1, "+")
-assert(not rval)
-assert(string.find(err, "must be <= endpos"))
-rval, err = pcall(gt.genome_feature_new, "gene", 1, 100, "plus")
+assert(string.find(err, "range expected"))
+rval, err = pcall(gt.genome_feature_new, "gene", range, "plus")
 assert(not rval)
 assert(string.find(err, "strand string must have length 1"))
-rval, err = pcall(gt.genome_feature_new, "gene", 1, 100, "p")
+rval, err = pcall(gt.genome_feature_new, "gene", range, "p")
 assert(not rval)
 assert(string.find(err, "invalid strand"))
-gn = gt.genome_feature_new("gene", 1, 100, "+")
+gn = gt.genome_feature_new("gene", range, "+")
 
 -- testing genome_node:get_filename
 rval, fn = pcall(gn.get_filename, gn)

@@ -23,8 +23,8 @@
 /* exports the Diagram class to Lua:
 
    -- create a diagram which contains the genome nodes given in <feature_index>
-   -- in the range from <startpos> to <endend> in sequence region <seqid>
-   diagram = gt.diagram_new(feature_index, startpos, endpos, seqid)
+   -- in the given <range> in sequence region <seqid>
+   diagram = gt.diagram_new(feature_index, range, seqid)
 */
 int luaopen_diagram(lua_State*);
 

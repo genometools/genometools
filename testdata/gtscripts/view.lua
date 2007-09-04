@@ -41,8 +41,8 @@ while (gn) do
 end
 
 seqid = feature_index:get_first_seqid()
-startpos, endpos = feature_index:get_range_for_seqid(seqid)
+range = feature_index:get_range_for_seqid(seqid)
 
-diagram = gt.diagram_new(feature_index, startpos, endpos, seqid)
+diagram = gt.diagram_new(feature_index, range, seqid)
 render = gt.render_new()
 render:to_png(diagram, pngfile)

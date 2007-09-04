@@ -22,6 +22,7 @@
 #include "libgtlua/feature_index_lua.h"
 #include "libgtlua/genome_node_lua.h"
 #include "libgtlua/helper.h"
+#include "libgtlua/range_lua.h"
 #include "libgtview/feature_index.h"
 #include "libgtview/diagram.h"
 
@@ -29,25 +30,23 @@ static int diagram_lua_new(lua_State *L)
 {
   Diagram **diagram;
   FeatureIndex **feature_index;
-  Range range;
+  Range *range;
   const char *seqid;
   Config *config;
   Env *env = get_env_from_registry(L);
   /* get feature index */
   feature_index = check_feature_index(L, 1);
   /* get range */
-  range.start = luaL_checklong(L, 2);
-  range.end   = luaL_checklong(L, 3);
-  luaL_argcheck(L, range.start <= range.end, 2, "must be <= endpos");
+  range = check_range(L, 2);
   /* get seqid */
-  seqid       = luaL_checkstring(L, 4);
+  seqid       = luaL_checkstring(L, 3);
   luaL_argcheck(L, feature_index_has_seqid(*feature_index, seqid, env),
-                4, "feature index does not contain the given sequence id");
+                3, "feature index does not contain the given sequence id");
   /* create diagram */
   config = get_config_from_registry(L);
   diagram = lua_newuserdata(L, sizeof (Diagram*));
   assert(diagram);
-  *diagram = diagram_new(*feature_index, range, seqid, config, env);
+  *diagram = diagram_new(*feature_index, *range, seqid, config, env);
   luaL_getmetatable(L, DIAGRAM_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
