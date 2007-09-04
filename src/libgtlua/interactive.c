@@ -22,6 +22,7 @@
 
 #include <assert.h>
 #include <signal.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 #include "lauxlib.h"
@@ -88,7 +89,7 @@ static int docall(lua_State *L, int narg, int clear) {
   return status;
 }
 
-static const char* get_prompt(lua_State *L, int firstline) {
+static const char* get_prompt(lua_State *L, bool firstline) {
   const char *p;
   lua_getfield(L, LUA_GLOBALSINDEX, firstline ? "_PROMPT" : "_PROMPT2");
   p = lua_tostring(L, -1);
@@ -110,7 +111,7 @@ static int incomplete(lua_State *L, int status) {
   return 0;  /* else... */
 }
 
-static int pushline(lua_State *L, int firstline) {
+static int pushline(lua_State *L, bool firstline) {
   char buffer[BUFSIZ];
   char *b = buffer;
   size_t l;
@@ -131,12 +132,12 @@ static int pushline(lua_State *L, int firstline) {
 static int loadline(lua_State *L) {
   int status;
   lua_settop(L, 0);
-  if (!pushline(L, 1))
+  if (!pushline(L, true))
     return -1;  /* no input */
   for (;;) {  /* repeat until gets a complete line */
     status = luaL_loadbuffer(L, lua_tostring(L, 1), lua_strlen(L, 1), "=stdin");
     if (!incomplete(L, status)) break;  /* cannot try to add lines? */
-    if (!pushline(L, 0))  /* no more input? */
+    if (!pushline(L, false))  /* no more input? */
       return -1;
     lua_pushliteral(L, "\n");  /* add a new line... */
     lua_insert(L, -2);  /* ...between the two lines */
