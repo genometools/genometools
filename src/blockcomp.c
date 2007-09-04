@@ -165,12 +165,14 @@ initCompositionList(struct compList *compList,
 static void
 destructCompositionList(struct compList *clist, Env *env);
 
+#if 0
 static struct compList *
 newCompositionList(const struct blockCompositionSeq *seqIdx,
                    unsigned numSyms, Env *env);
 
 static void
 deleteCompositionList(struct compList *clist, Env *env);
+#endif
 
 static int
 block2IndexPair(const struct blockCompositionSeq *seqIdx,
@@ -1249,6 +1251,7 @@ destructCompositionList(struct compList *clist, Env *env)
   env_ma_free(clist->catComps, env);
 }
 
+#if 0
 /**
  * @return NULL on error
  */
@@ -1274,6 +1277,7 @@ deleteCompositionList(struct compList *clist, Env *env)
   destructCompositionList(clist, env);
   env_ma_free(clist, env);
 }
+#endif
 
 #if DEBUG > 1
 static void
@@ -1539,7 +1543,7 @@ block2IndexPair(const struct blockCompositionSeq *seqIdx,
     idxOutput[0] = compIndex;
   }
   {
-    struct permList *permutation = compositionTab->permutations
+    const struct permList *permutation = compositionTab->permutations
       + idxOutput[0];
     if(bitsOfPermIdx)
       *bitsOfPermIdx = permutation->permIdxBits;
