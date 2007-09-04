@@ -31,6 +31,18 @@ char* cstr_dup(const char *cstr, Env *env)
   return copy;
 }
 
+void cstr_rep(char *cstr, char f, char t)
+{
+  char *cc;
+  assert(cstr);
+  cc = cstr;
+  while (*cc) {
+    if (*cc == f)
+      *cc = t;
+    cc++;
+  }
+}
+
 void cstr_show(const char *cstr, unsigned long length, FILE *fp)
 {
   unsigned long i;

@@ -26,13 +26,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "lauxlib.h"
+#include "libtecla.h"
+#include "libgtcore/cstr.h"
 #include "libgtlua/interactive.h"
-
-#define lua_readline(L,b,p)     \
-        ((void)L, fputs(p, stdout), fflush(stdout),  /* show prompt */ \
-        fgets(b, BUFSIZ, stdin) != NULL)  /* get line */
-#define lua_saveline(L,idx)     { (void)L; (void)idx; }
-#define lua_freeline(L,b)       { (void)L; (void)b; }
 
 static lua_State *globalL = NULL;
 
@@ -111,12 +107,11 @@ static int incomplete(lua_State *L, int status) {
   return 0;  /* else... */
 }
 
-static int pushline(lua_State *L, bool firstline) {
-  char buffer[BUFSIZ];
-  char *b = buffer;
+static int pushline(lua_State *L, bool firstline, GetLine *gl) {
+  char *b;
   size_t l;
   const char *prmt = get_prompt(L, firstline);
-  if (lua_readline(L, b, prmt) == 0)
+  if (!(b = gl_get_line(gl, prmt, NULL, 0)))
     return 0;  /* no input */
   l = strlen(b);
   if (l > 0 && b[l-1] == '\n')  /* line ends with newline? */
@@ -125,32 +120,43 @@ static int pushline(lua_State *L, bool firstline) {
     lua_pushfstring(L, "return %s", b+1);  /* change it to `return' */
   else
     lua_pushstring(L, b);
-  lua_freeline(L, b);
   return 1;
 }
 
-static int loadline(lua_State *L) {
-  int status;
+static int loadline(lua_State *L, GetLine *gl, Env *env) {
+  int status, rval;
   lua_settop(L, 0);
-  if (!pushline(L, true))
+  char *line;
+  env_error_check(env);
+  if (!pushline(L, true, gl))
     return -1;  /* no input */
   for (;;) {  /* repeat until gets a complete line */
     status = luaL_loadbuffer(L, lua_tostring(L, 1), lua_strlen(L, 1), "=stdin");
     if (!incomplete(L, status)) break;  /* cannot try to add lines? */
-    if (!pushline(L, false))  /* no more input? */
+    if (!pushline(L, false, gl))  /* no more input? */
       return -1;
     lua_pushliteral(L, "\n");  /* add a new line... */
     lua_insert(L, -2);  /* ...between the two lines */
     lua_concat(L, 3);  /* join them */
   }
-  lua_saveline(L, 1);
+  if (lua_strlen(L, 1) > 0) { /* non-empty line? */
+    /* save complete line in history */
+    line = cstr_dup(lua_tostring(L, 1), env);
+    cstr_rep(line, '\n', ' '); /* replace all newlines in <line> with blanks,
+                                  because otherwise gl_append_history() would
+                                  truncate <line> at the first newline */
+    rval = gl_append_history(gl, line);
+    assert(!rval);
+    env_ma_free(line, env);
+  }
   lua_remove(L, 1);  /* remove line */
   return status;
 }
 
-static void dotty(lua_State *L) {
+static void dotty(lua_State *L, GetLine *gl, Env *env) {
   int status;
-  while ((status = loadline(L)) != -1) {
+  env_error_check(env);
+  while ((status = loadline(L, gl, env)) != -1) {
     if (status == 0) status = docall(L, 0, 0);
     report(L, status);
     if (status == 0 && lua_gettop(L) > 0) {  /* any result to print? */
@@ -168,8 +174,18 @@ static void dotty(lua_State *L) {
   fflush(stdout);
 }
 
-void run_interactive_lua_interpreter(lua_State *L)
+void run_interactive_lua_interpreter(lua_State *L, Env *env)
 {
+  GetLine *gl;
+  env_error_check(env);
+  gl = new_GetLine(2048, 8096);
+  gl_automatic_history(gl, 0); /* disable automatic history saving, we save
+                                  complete input lines explicitly */
+  if (!gl) {
+    fprintf(stderr, "cannot create GetLine object\n");
+    exit(EXIT_FAILURE);
+  }
   globalL = L; /* for signal handling */
-  dotty(L);
+  dotty(L, gl, env);
+  del_GetLine(gl);
 }

@@ -23,6 +23,8 @@
 #include <libgtcore/genfile.h>
 
 char*         cstr_dup(const char*, Env*);
+/* replace each occurence of <f> in <cstr> to <t> */
+void          cstr_rep(char *cstr, char f, char t);
 void          cstr_show(const char*, unsigned long length, FILE*);
 /* returns the length of the prefix of <cstr> ending just before <c>, if <cstr>
    does not contain <c>, strlen(cstr) is returned. */

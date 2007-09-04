@@ -31,7 +31,7 @@ EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DUNISTD_H="<unistd.h>" \
 GT_CXXFLAGS:= -g -pipe $(INCLUDEOPT)
 STEST_FLAGS:=
 GT_LDFLAGS:=-L/usr/local/lib -L/usr/X11R6/lib
-LDLIBS:=-lm -lz
+LDLIBS:=-lm -lz -lncurses
 
 # try to set RANLIB automatically
 SYSTEM:=$(shell uname -s)
