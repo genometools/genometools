@@ -67,6 +67,17 @@ static int genome_node_lua_get_filename(lua_State *L)
   return 1;
 }
 
+static int genome_node_lua_get_range(lua_State *L)
+{
+  GenomeNode **gn;
+  Range range;
+  gn = check_genome_node(L);
+  range = genome_node_get_range(*gn);
+  lua_pushinteger(L, range.start);
+  lua_pushinteger(L, range.end);
+  return 2;
+}
+
 static int genome_node_lua_accept(lua_State *L)
 {
   GenomeNode **gn;
@@ -97,6 +108,7 @@ static const struct luaL_Reg genome_node_lib_f [] = {
 
 static const struct luaL_Reg genome_node_lib_m [] = {
   { "get_filename", genome_node_lua_get_filename },
+  { "get_range", genome_node_lua_get_range },
   { "accept", genome_node_lua_accept },
   { NULL, NULL }
 };

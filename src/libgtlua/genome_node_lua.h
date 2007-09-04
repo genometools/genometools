@@ -23,9 +23,10 @@
 
 /* exports the GenomeNode interface and its implementors to Lua:
 
-   genome_node = gt.genome_feature_new(type, startpos, endpos, strand)
-   string      = genome_node:get_filename()
-                 genome_node:accept(genome_visitor)
+   genome_node      = gt.genome_feature_new(type, startpos, endpos, strand)
+   string           = genome_node:get_filename()
+   startpos, endpos = genome_node:get_range()
+                      genome_node:accept(genome_visitor)
 */
 int luaopen_genome_node(lua_State*);
 
