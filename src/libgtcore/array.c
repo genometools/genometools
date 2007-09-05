@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <assert.h>
@@ -10,6 +21,7 @@
 #include <libgtcore/array.h>
 #include <libgtcore/dynalloc.h>
 #include <libgtcore/ensure.h>
+#include <libgtcore/range.h>
 #include <libgtcore/xansi.h>
 
 #define NUM_OF_TESTS    100
@@ -71,9 +83,10 @@ void array_reverse(Array *a, Env *env)
 {
   void *front, *back, *tmp;
   assert(a);
-  tmp = env_ma_malloc(env, sizeof (a->size_of_elem));
+  tmp = env_ma_malloc(env, a->size_of_elem);
   for (front = a->space, back = a->space + (a->next_free-1) * a->size_of_elem;
-       front < back; front += a->size_of_elem, back -= a->size_of_elem) {
+       front < back;
+       front += a->size_of_elem, back -= a->size_of_elem) {
     memcpy(tmp, front, a->size_of_elem);
     memcpy(front, back, a->size_of_elem);
     memcpy(back, tmp, a->size_of_elem);
@@ -146,12 +159,35 @@ Array* array_clone(const Array *a, Env *env)
   return a_copy;
 }
 
+int array_example(Env *env)
+{
+  unsigned long i;
+  Array *a;
+
+  env_error_check(env);
+
+  /* an example array use case */
+
+  a = array_new(sizeof (unsigned long), env);
+  for (i = 0; i < 100; i++) {
+    array_add(a, i, env);
+    assert(i == *(unsigned long*) array_get(a, i));
+  }
+  assert(array_size(a) == 100);
+  assert(*(unsigned long*) array_pop(a) == 99);
+  assert(array_size(a) == 99);
+  array_delete(a, env);
+
+  return 0;
+}
+
 int array_unit_test(Env *env)
 {
-  Array *char_array, *int_array;
+  Array *char_array, *int_array, *a = NULL;
   char cc, *char_array_test;
   int ci, *int_array_test;
   unsigned long i, j, size;
+  Range range;
   int had_err = 0;
   env_error_check(env);
 
@@ -212,6 +248,23 @@ int array_unit_test(Env *env)
         ensure(had_err, *(int*) array_get(int_array, j) == int_array_test[j]);
     }
   }
+
+  /* test array_reverse() */
+  if (!had_err) {
+    a = array_new(sizeof (Range), env);
+    for (i = 0; i < 24; i++) {
+      range.start = i + 1;
+      range.end   = i + 101;
+      array_add(a, range, env);
+    }
+    array_reverse(a, env);
+    for (i = 0; !had_err && i < 24; i++) {
+      range.start = i + 1;
+      range.end   = i + 101;
+      ensure(had_err, !range_compare(range, *(Range*) array_get(a, 23 - i)));
+    }
+  }
+  array_delete(a, env);
 
   array_delete(char_array, env);
   array_delete(int_array, env);

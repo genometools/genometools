@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <stdlib.h>
@@ -981,7 +992,7 @@ static void showallspecialpositions(const Encodedsequence *encseq)
 {
   if (encseq->numofspecialstostore > 0)
   {
-    if(encseq->sat == Viauchartables || 
+    if (encseq->sat == Viauchartables ||
        encseq->sat == Viaushorttables ||
        encseq->sat == Viauint32tables)
     {
@@ -1086,9 +1097,9 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
       break;
     }
     if (esr->hasprevious)
-    {  
+    {
       if (moveforward)
-      {  
+      {
         if (esr->previousrange.rightpos == esr->currentrange.leftpos)
         {
           esr->previousrange.rightpos = esr->currentrange.rightpos;
@@ -1234,7 +1245,7 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
 
 bool hasspecialranges(const Encodedsequence *encseq)
 {
-  if(encseq->numofspecialstostore > 0)
+  if (encseq->numofspecialstostore > 0)
   {
     return true;
   }
@@ -1246,7 +1257,7 @@ bool hasspecialranges(const Encodedsequence *encseq)
   bool direct, moveforward, exhausted;
   const Encodedsequence *encseq;
   Encodedsequencescanstate *esr;
-  Seqpos pos, 
+  Seqpos pos,
          specialrangelength;
 };
 
@@ -1264,7 +1275,7 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
   sri->specialrangelength = 0;
   if (encseq->sat == Viadirectaccess || encseq->sat == Viabitaccess)
   {
-    if(moveforward)
+    if (moveforward)
     {
       sri->pos = 0;
     } else
@@ -1278,7 +1289,7 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
     sri->pos = 0;
     sri->direct = false;
     sri->esr = initEncodedsequencescanstate(encseq,
-                                            moveforward ? Forwardmode 
+                                            moveforward ? Forwardmode
                                                         : Reversemode,env);
   }
   assert(sri != NULL);
@@ -1290,14 +1301,14 @@ static bool bitanddirectnextspecialrangeiterator(Sequencerange *range,
 {
   bool success = false, isspecialchar;
 
-  while(!success)
+  while (!success)
   {
     if (sri->direct)
     {
       isspecialchar = ISSPECIAL(sri->encseq->plainseq[sri->pos]);
     } else
     {
-      isspecialchar = ISIBITSET(sri->encseq->specialbits,sri->pos) 
+      isspecialchar = ISIBITSET(sri->encseq->specialbits,sri->pos)
                       ? true : false;
     }
     if (isspecialchar)
@@ -1360,7 +1371,7 @@ bool exhaustedspecialrangeiterator(Specialrangeiterator *sri)
 
 bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri)
 {
-  if(sri->exhausted)
+  if (sri->exhausted)
   {
     return false;
   }
@@ -1381,7 +1392,7 @@ bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri)
 
 void freespecialrangeiterator(Specialrangeiterator **sri,Env *env)
 {
-  if((*sri)->esr != NULL)
+  if ((*sri)->esr != NULL)
   {
     freeEncodedsequencescanstate(&(*sri)->esr,env);
   }
@@ -1647,7 +1658,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
       haserr = true;
     }
   }
-  if(haserr)
+  if (haserr)
   {
     freeEncodedsequence(&encseq,env);
   }

@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <assert.h>
@@ -199,8 +210,8 @@ static int construct_genes(void *key, void *value, void *data, Env *env)
 }
 
 int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
-                     const char *filename, FILE *fpin,
-                     unsigned int be_tolerant, Env *env)
+                     Str *filenamestr, FILE *fpin, unsigned int be_tolerant,
+                     Env *env)
 {
   Str *seqid_str, *source_str, *line_buffer;
   char *line;
@@ -231,10 +242,13 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   GTF_feature_type gtf_feature_type;
   /* abuse gft_TF_binding_site as an undefined value */
   GenomeFeatureType gff_feature_type = gft_TF_binding_site;
+  const char *filename;
   int had_err = 0;
 
-  assert(parser && genome_nodes && filename && fpin);
+  assert(parser && genome_nodes && fpin);
   env_error_check(env);
+
+  filename = str_get(filenamestr);
 
   /* alloc */
   line_buffer = str_new(env);
@@ -266,7 +280,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       warning("skipping blank line %lu in file \"%s\"", line_number, filename);
     else if (line[0] == '#') {
       /* storing comment */
-      gn = comment_new(line+1, filename, line_number, env);
+      gn = comment_new(line+1, filenamestr, line_number, env);
       queue_add(genome_nodes, gn, env);
     }
     else {
@@ -409,8 +423,8 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       assert(genome_node_array);
 
       /* construct the new feature */
-      gn = genome_feature_new(gff_feature_type, range, strand_value, filename,
-                              line_number, env);
+      gn = genome_feature_new(gff_feature_type, range, strand_value,
+                              filenamestr, line_number, env);
 
       /* set seqid */
       seqid_str = hashtable_get(parser->seqid_to_str_mapping, seqname);

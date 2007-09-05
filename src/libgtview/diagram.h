@@ -3,105 +3,44 @@
   Copyright (c) 2007 Sascha Steinbiss, Christin Schaerfer, Malte Mader
   Copyright (c) 2007 Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-/**
- * \file diagram.h
- * \author Malte Mader <mmader@zbh.uni-hamburg.de>
- * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
- * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
- */
 
 #ifndef DIAGRAM_H
 #define DIAGRAM_H
 
 #include "libgtview/config.h"
 #include "libgtview/block.h"
+#include "libgtview/feature_index.h"
 #include "libgtcore/array.h"
 #include "libgtcore/range.h"
 #include "libgtcore/hashtable.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
 
-/* holds a Block with associated type */
-typedef struct
-{
-  GenomeFeatureType gft;
-  Block *block;
-} BlockTuple;
-
-/* a node in the reverse lookup structure used for collapsing */
-typedef struct
-{
-  GenomeNode *parent;
-  Array *blocktuples;
-} NodeInfoElement;
-
-/*  The Diagram class */
 typedef struct Diagram Diagram;
 
-/*!
-Initialize a new diagram object.
-\param features pointer to the array of genome nodes.
-\param range the given range of the diagram.
-\param config pointer to the configuration object.
-\param env Pointer to Environment object.
-*/
-Diagram*    diagram_new(Array *features,
-                        Range range,
-                        Config *config,
-                        Env *env);
-
-/*!
-Returns the range of a diagram's nodes.
-\param diagram Pointer to diagram object.
-*/
-Range       diagram_get_range(Diagram *diagram);
-
-/*!
-Assign a new Config object to a Diagram.
-\param diagram pointer to the diagram object.
-\param config pointer to the configuration object.
-\param env Pointer to Environment object.
-*/
-void        diagram_set_config(Diagram *diagram,
-                               Config *config,
-                               Env *env);
-
-/*!
-Returns the hashtable with the stored tracks.
-\param diagram pointer to the diagram object.
-*/
-Hashtable*  diagram_get_tracks(Diagram *diagram);
-
-/*!
-Returns the total number of lines in the diagram.
-\param diagram pointer to the diagram object.
-\param env Pointer to Environment object.
-*/
-int         diagram_get_total_lines(Diagram *diagram,
-                                    Env *env);
-
-/*!
-Returns the number of all lines in the diagram.
-\param diagram pointer to the diagram object.
-\param env Pointer to Environment object.
-*/
-int         diagram_get_number_of_tracks(Diagram *diagram);
-
-/*
-Delete the diagram object.
-\param diagram pointer to the diagram object.
-\param env Pointer to Environment object.
-*/
-void        diagram_delete(Diagram *diagram,
-                           Env* env);
-
-/*
-Create a feature index test structure and
-test the diagram functions.
-\param env Pointer to Environment object.
-*/
-int         diagram_unit_test(Env* env);
+/* Create a new diagram object representing the genome nodes in
+   FeatureIndex in region <seqid> overlapping with <range>. */
+Diagram*    diagram_new(FeatureIndex*, Range range, const char *seqid,
+                        Config*, Env*);
+Range       diagram_get_range(Diagram*);
+void        diagram_set_config(Diagram*, Config*, Env*);
+Hashtable*  diagram_get_tracks(const Diagram*);
+int         diagram_get_total_lines(const Diagram*, Env*);
+int         diagram_get_number_of_tracks(const Diagram*);
+int         diagram_unit_test(Env*);
+void        diagram_delete(Diagram*, Env*);
 
 #endif

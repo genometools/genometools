@@ -1,9 +1,17 @@
-changes in version 1.0.2 (2007-08-22):
+changes in version 1.0.3 (2007-09-04):
+
+- `gt view` can process multiple GFF3 files
+- the interactive mode has been improved (multiple line input, command line
+  editing, similar to the Lua interpreter)
+
+
+changes in version 1.0.2 (2007-08-29):
 
 - `gt suffixerator` tool added
 - `gt mkfmindex` tool added
 - `gt uniquesub` tool added
 - bug fixes
+- new option -i added to `gt`
 
 
 changes in version 1.0.1 (2007-07-17):

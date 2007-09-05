@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include "libgtcore/env.h"
@@ -31,7 +42,7 @@ int testencodedsequence(const StrArray *filenametab,
   env_error_check(env);
   printf("# testencodedsequence with readmode = %s\n",showreadmode(readmode));
   totallength = getencseqtotallength(encseq);
-  if(filenametab != NULL)
+  if (filenametab != NULL)
   {
     initformatbufferstate(&fbs,
                           filenametab,
@@ -86,7 +97,7 @@ int testencodedsequence(const StrArray *filenametab,
                         ": random access (getencodedchar) = %u != "
                         " %u = sequential read (sequentialgetencodedchar)",
                         encseqaccessname(encseq),
-                        showreadmode(readmode), 
+                        showreadmode(readmode),
                         pos,
                         (unsigned int) ccra,
                         (unsigned int) ccsr);
@@ -106,29 +117,6 @@ int testencodedsequence(const StrArray *filenametab,
   freeEncodedsequencescanstate(&esr,env);
   return haserr ? -1 : 0;
 }
-
-#define WORKSWITHVALGRIND
-#ifdef WORKSWITHVALGRIND
-static void reverseSequencerange(Array *a)
-{
-  unsigned long idx1, idx2;
-  Sequencerange tmp, *valptr1, *valptr2;
-
-  for (idx1=0, idx2 = (unsigned long) array_size(a) - 1;
-       idx1 < idx2; idx1++, idx2--)
-  {
-    valptr1 = (Sequencerange *) array_get(a,idx1);
-    valptr2 = (Sequencerange *) array_get(a,idx2);
-    tmp = *valptr1;
-    *valptr1 = *valptr2;
-    *valptr2 = tmp;
-  }
-}
-#else
-/* run 
-   testsuite.rb -memcheck -keywords gt_suffixerator -select 250 
-   to produce an error */
-#endif
 
 static int comparearrays(const Array *a,const Array *b,Env *env)
 {
@@ -181,27 +169,23 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
   rangesbackward = array_new(sizeof (Sequencerange),env);
 
   sri = newspecialrangeiterator(encseq,true,env);
-  while(nextspecialrangeiterator(&range,sri))
+  while (nextspecialrangeiterator(&range,sri))
   {
     array_add(rangesforward,range,env);
   }
   freespecialrangeiterator(&sri,env);
   sri = newspecialrangeiterator(encseq,false,env);
-  while(nextspecialrangeiterator(&range,sri))
+  while (nextspecialrangeiterator(&range,sri))
   {
     array_add(rangesbackward,range,env);
   }
   freespecialrangeiterator(&sri,env);
-#ifdef WORKSWITHVALGRIND
-  reverseSequencerange(rangesbackward);
-#else
   array_reverse(rangesbackward,env);
-#endif
   if (!haserr)
   {
     printf("# checkspecialrangesfast(%lu ranges)\n",
              (unsigned long) array_size(rangesforward));
-    if(comparearrays(rangesforward,rangesbackward,env) != 0)
+    if (comparearrays(rangesforward,rangesbackward,env) != 0)
     {
       haserr = true;
     }

@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <assert.h>
@@ -97,8 +108,8 @@ static Option *option_new(const char *option_str, const char *description,
 {
   Option *o = env_ma_calloc(env, 1, sizeof (Option));
   assert(option_str && strlen(option_str));
-  assert(option_str[0] != '-'); /* an option string should not start with '-',
-                                   this is added automatically */
+  assert("an option string should not start with '-', this is added "
+         "automatically"  && option_str[0] != '-');
   o->option_str = str_new_cstr(option_str, env);
   o->description = str_new_cstr(description, env);
   o->value = value;
@@ -151,8 +162,8 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
 {
   OptionParser *op = env_ma_malloc(env, sizeof (OptionParser));
   assert(synopsis && one_liner);
-  /* enforce upper case letter at start and '.' at end of one line desc. */
-  assert(strlen(one_liner) && isupper((int) one_liner[0]));
+  assert("one_liner must have upper case letter at start and '.' at end" &&
+         strlen(one_liner) && isupper((int) one_liner[0]));
   assert(one_liner[strlen(one_liner)-1] == '.');
   op->progname = NULL;
   op->synopsis = cstr_dup(synopsis, env);

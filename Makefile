@@ -8,10 +8,11 @@ CC:=gcc
 CXX:=g++
 INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
              -I$(CURDIR)/src/external/lua-5.1.2/src \
-             -I$(CURDIR)/src/external/expat-2.0.0/lib\
+             -I$(CURDIR)/src/external/expat-2.0.1/lib\
              -I$(CURDIR)/src/external/bzip2-1.0.4\
              -I$(CURDIR)/src/external/agg-2.4/include\
              -I$(CURDIR)/src/external/libpng-1.2.18\
+             -I$(CURDIR)/src/external/libtecla-1.6.1\
              -I/usr/include/cairo\
              -I/usr/local/include/cairo
 
@@ -23,12 +24,14 @@ GT_CFLAGS:= -g -Wall -Werror -pipe -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
 # expat needs -DHAVE_MEMMOVE
 # lua needs -DLUA_USE_POSIX
 # rnv needs -DUNISTD_H="<unistd.h>" -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\""
+# tecla needs -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO
 EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DUNISTD_H="<unistd.h>" \
-            -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\""
+            -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\"" \
+            -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO
 GT_CXXFLAGS:= -g -pipe $(INCLUDEOPT)
 STEST_FLAGS:=
 GT_LDFLAGS:=-L/usr/local/lib -L/usr/X11R6/lib
-LDLIBS:=-lm -lz
+LDLIBS:=-lm -lz -lncurses
 
 # try to set RANLIB automatically
 SYSTEM:=$(shell uname -s)
@@ -44,7 +47,9 @@ endif
 GTLIBS:=lib/libgtext.a\
         lib/libgtcore.a\
         lib/libgtmatch.a\
-        lib/libbz2.a
+        lib/libgtlua.a\
+        lib/libbz2.a\
+        lib/libtecla.a
 
 # the core GenomeTools library (no other dependencies)
 LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
@@ -69,6 +74,11 @@ LIBGTVIEW_C_SRC:=$(wildcard src/libgtview/*.c)
 LIBGTVIEW_C_OBJ:=$(LIBGTVIEW_C_SRC:%.c=obj/%.o)
 LIBGTVIEW_C_DEP:=$(LIBGTVIEW_C_SRC:%.c=obj/%.d)
 
+# the GenomeTools Lua library
+LIBGTLUA_C_SRC:=$(wildcard src/libgtlua/*.c)
+LIBGTLUA_C_OBJ:=$(LIBGTLUA_C_SRC:%.c=obj/%.o)
+LIBGTLUA_C_DEP:=$(LIBGTLUA_C_SRC:%.c=obj/%.d)
+
 TOOLS_SRC:=$(wildcard src/tools/*.c)
 TOOLS_OBJ:=$(TOOLS_SRC:%.c=obj/%.o)
 TOOLS_DEP:=$(TOOLS_SRC:%.c=obj/%.d)
@@ -77,7 +87,7 @@ LIBAGG_SRC:=$(wildcard src/external/agg-2.4/src/*.cpp src/external/agg-2.4/src/c
 LIBAGG_OBJ:=$(LIBAGG_SRC:%.cpp=obj/%.o)
 LIBAGG_DEP:=$(LIBAGG_SRC:%.cpp=obj/%.d)
 
-EXPAT_DIR:=src/external/expat-2.0.0/lib
+EXPAT_DIR:=src/external/expat-2.0.1/lib
 LIBEXPAT_SRC:=$(EXPAT_DIR)/xmlparse.c $(EXPAT_DIR)/xmlrole.c \
               $(EXPAT_DIR)/xmltok.c
 LIBEXPAT_OBJ:=$(LIBEXPAT_SRC:%.c=obj/%.o)
@@ -97,7 +107,7 @@ LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
 LIBLUA_OBJ:=$(LIBLUA_SRC:%.c=obj/%.o)
 LIBLUA_DEP:=$(LIBLUA_SRC:%.c=obj/%.d)
 
-PNG_DIR:=external/libpng-1.2.18
+PNG_DIR:=src/external/libpng-1.2.18
 LIBPNG_SRC:=$(PNG_DIR)/png.o $(PNG_DIR)/pngset.o $(PNG_DIR)/pngget.o \
             $(PNG_DIR)/pngrutil.o $(PNG_DIR)/pngtrans.o $(PNG_DIR)/pngwutil.o \
             $(PNG_DIR)/pngread.o $(PNG_DIR)/pngrio.o $(PNG_DIR)/pngwio.o \
@@ -105,6 +115,19 @@ LIBPNG_SRC:=$(PNG_DIR)/png.o $(PNG_DIR)/pngset.o $(PNG_DIR)/pngget.o \
             $(PNG_DIR)/pngmem.o $(PNG_DIR)/pngerror.o $(PNG_DIR)/pngpread.o
 LIBPNG_OBJ:=$(LIBPNG_SRC:%.c=obj/%.o)
 LIBPNG_DEP:=$(LIBPNG_SRC:%.c=obj/%.d)
+
+TECLA_DIR:=src/external/libtecla-1.6.1
+LIBTECLA_SRC:=$(TECLA_DIR)/chrqueue.c $(TECLA_DIR)/cplfile.c \
+              $(TECLA_DIR)/cplmatch.c $(TECLA_DIR)/direader.c \
+              $(TECLA_DIR)/errmsg.c $(TECLA_DIR)/expand.c \
+              $(TECLA_DIR)/freelist.c $(TECLA_DIR)/getline.c \
+              $(TECLA_DIR)/hash.c $(TECLA_DIR)/history.c \
+              $(TECLA_DIR)/homedir.c $(TECLA_DIR)/ioutil.c \
+              $(TECLA_DIR)/keytab.c $(TECLA_DIR)/pathutil.c \
+              $(TECLA_DIR)/pcache.c $(TECLA_DIR)/stringrp.c \
+              $(TECLA_DIR)/strngmem.c $(TECLA_DIR)/version.c
+LIBTECLA_OBJ:=$(LIBTECLA_SRC:%.c=obj/%.o)
+LIBTECLA_DEP:=$(LIBTECLA_SRC:%.c=obj/%.d)
 
 RNV_DIR:=src/external/rnv-1.7.8
 LIBRNV_SRC:=$(RNV_DIR)/rn.c $(RNV_DIR)/rnc.c $(RNV_DIR)/rnd.c $(RNV_DIR)/rnl.c \
@@ -209,10 +232,26 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
+lib/libgtlua.a: $(LIBGTLUA_C_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@ar ru $@ $(LIBGTLUA_C_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
 lib/libpng.a: $(LIBPNG_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBPNG_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
+lib/libtecla.a: $(LIBTECLA_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@ar ru $@ $(LIBTECLA_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
@@ -230,7 +269,7 @@ bin/skproto: obj/src/skproto.o obj/src/tools/gt_skproto.o lib/libgtcore.a lib/li
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CXX) $(LDFLAGS) $(GT_LDFLAGS) $^ $(LDLIBS) -o $@
 
-bin/gt: obj/src/gt.o obj/src/gtr.o obj/src/gtlua.o $(TOOLS_OBJ) $(GTLIBS)
+bin/gt: obj/src/gt.o obj/src/gtr.o $(TOOLS_OBJ) $(GTLIBS)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CXX) $(LDFLAGS) $(GT_LDFLAGS) $^ $(LDLIBS) -o $@
@@ -251,10 +290,6 @@ obj/gt_cflags.h:
 
 obj/gt_version.h: VERSION
 	@echo '#define GT_VERSION "'`cat VERSION`\" > $@
-
-Doxyfile: Doxyfile.in VERSION
-	@echo '[rebuild $@]'
-	@sed -e "s/@VERSION@/`cat VERSION`/g" <$< >$@
 
 src/libgtcore/bitpackstringop8.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
@@ -307,12 +342,12 @@ obj/%.o: %.cxx
 # read deps
 -include obj/src/gt.d obj/src/gtlua.d obj/src/gtr.d obj/src/skproto.d \
          $(LIBGTCORE_DEP) $(LIBGTEXT_C_DEP) $(LIBGTEXT_CXX_DEP) \
-         $(LIBGTMATCH_DEP) $(LIBGTVIEW_C_DEP) $(TOOLS_DEP) $(LIBAGG_DEP) \
-         $(LIBEXPAT_DEP) $(LIBLUA_DEP) $(LIBPNG_DEP) $(LIBRNV_DEP) \
-         $(LIBBBZ2_DEP)
+         $(LIBGTMATCH_DEP) $(LIBGTVIEW_C_DEP) $(LIBGTLUA_C_DEP) $(TOOLS_DEP) \
+         $(LIBAGG_DEP) $(LIBEXPAT_DEP) $(LIBLUA_DEP) $(LIBPNG_DEP) \
+         $(LIBTECLA_DEP) $(LIBRNV_DEP) $(LIBBBZ2_DEP)
 
 .SUFFIXES:
-.PHONY: dist srcdist release gt install splint test clean cleanup apidoc
+.PHONY: dist srcdist release gt install splint test clean cleanup
 
 dist: all
 	tar cvzf gt-`cat VERSION`.tar.gz bin/gt
@@ -321,21 +356,11 @@ srcdist:
 	git archive --format=tar --prefix=genometools-`cat VERSION`/ HEAD | \
         gzip -9 > genometools-`cat VERSION`.tar.gz
 
-apidoc: Doxyfile
-	doxygen
-
-release: apidoc
+release:
 	git tag "v`cat VERSION`"
-	git archive --format=tar --prefix="genometools-`cat VERSION`"/ HEAD \
-	>"genometools-`cat VERSION`.tar"
-	mkdir -p "genometools-`cat VERSION`/doc"
-	rsync -a doc/api "genometools-`cat VERSION`/doc/"
-	tar -r -f "genometools-`cat VERSION`.tar" \
-		"genometools-`cat VERSION`/doc/api"
-	rm -rf "genometools-`cat VERSION`"
-	gzip -9 "genometools-`cat VERSION`.tar"
+	git archive --format=tar --prefix="genometools-`cat VERSION`"/ HEAD | \
+	gzip -9 > genometools-`cat VERSION`.tar.gz
 	scp "genometools-`cat VERSION`.tar.gz" $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/pub
-	rsync -rv doc/api/html/ $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/apidoc
 	git push --tags
 
 installwww:
@@ -395,4 +420,4 @@ clean:
 	rm -rf testsuite/stest_testsuite testsuite/stest_stest_tests
 
 cleanup: clean
-	rm -rf lib bin Doxyfile doc/api
+	rm -rf lib bin

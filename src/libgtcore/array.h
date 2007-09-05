@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #ifndef ARRAY_H
@@ -29,29 +40,8 @@ void          array_set_size(Array*, unsigned long);
 void          array_reset(Array*);
 size_t        array_elem_size(const Array*);
 unsigned long array_size(const Array*);
+int           array_example(Env*);
 int           array_unit_test(Env*);
 void          array_delete(Array*, Env*);
-
-#if 0
-  XXX: update this usecase
-
-  a typical array use case:
-
-  int main(void)
-  {
-    unsigned long i;
-    Array *a;
-    a = array_new(sizeof (unsigned long), env);
-    for (i = 0; i < 100; i++) {
-      array_add(a, i);
-      assert(i = *(unsigned long*) array_get(a, i));
-    }
-    assert(array_size(a) == 100);
-    assert(*(unsigned long*) array_pop(a) == 99);
-    assert(array_size(a) == 99);
-    array_delete(a, env);
-    return EXIT_SUCCESS;
-  }
-#endif
 
 #endif

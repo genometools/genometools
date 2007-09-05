@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <assert.h>
@@ -65,20 +76,21 @@ static int compare_genome_nodes_with_delta(GenomeNode *gn_a, GenomeNode *gn_b,
                                   genome_node_get_range(gn_b), delta);
 }
 
-GenomeNode* genome_node_create(const GenomeNodeClass *gnc,
-                               const char *filename,
+GenomeNode* genome_node_create(const GenomeNodeClass *gnc, Str *filename,
                                unsigned long line_number, Env *env)
 {
   GenomeNode *gn;
   assert(gnc && gnc->size);
   gn                  = env_ma_malloc(env, gnc->size);
   gn->c_class         = gnc;
-  gn->filename        = filename;
+  gn->filename        = filename ? str_ref(filename)
+                                 : str_new_cstr("generated", env);
   gn->line_number     = line_number;
   gn->children        = NULL; /* the children list is created on demand */
   gn->reference_count = 0;
   gn->info            = 0;
   genome_node_info_set_tree_status(&gn->info, GENOME_NODE_IS_TREE);
+  gn->mark            = false;
   return gn;
 }
 
@@ -268,7 +280,7 @@ int genome_node_traverse_direct_children(GenomeNode *gn,
 const char* genome_node_get_filename(const GenomeNode *gn)
 {
   assert(gn);
-  return gn->filename;
+  return str_get(gn->filename);
 }
 
 unsigned long genome_node_get_line_number(const GenomeNode *gn)
@@ -384,6 +396,18 @@ void genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn, Env *env)
   assert(!genome_node_number_of_children(leafn));
   had_err = genome_node_traverse_children(tree, leafn, remove_leaf, true, env);
   assert(!had_err); /* cannot happen, remove_leaf() is sane */
+}
+
+void genome_node_mark(GenomeNode *gn)
+{
+  assert(gn);
+  gn->mark = true;
+}
+
+bool genome_node_is_marked(const GenomeNode *gn)
+{
+  assert(gn);
+  return gn->mark;
 }
 
 bool genome_node_has_children(GenomeNode *gn)
@@ -540,6 +564,7 @@ void genome_node_delete(GenomeNode *gn, Env *env)
   if (gn->reference_count) { gn->reference_count--; return; }
   assert(gn->c_class);
   if (gn->c_class->free) gn->c_class->free(gn, env);
+  str_delete(gn->filename, env);
   dlist_delete(gn->children, env);
   env_ma_free(gn, env);
 }

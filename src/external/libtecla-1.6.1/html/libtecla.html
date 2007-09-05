@@ -1,0 +1,138 @@
+<head>
+<title>Manual Page</title>
+</head>
+<body>
+<pre>
+<a href="libtecla.html"><b>libtecla</b></a>                                <a href="libtecla.html"><b>libtecla</b></a>
+
+
+
+</pre><h2>NAME</h2><pre>
+       libtecla - An interactive command-line input library.
+
+</pre><h2>SYNOPSIS</h2><pre>
+       @CC@ ... -ltecla -lcurses
+
+
+</pre><h2>DESCRIPTION</h2><pre>
+       The tecla library provides programs with interactive command line edit-
+       ing facilities, similar to those of the unix tcsh shell. In addition to
+       simple  command-line  editing, it supports recall of previously entered
+       command lines, TAB completion of file names or other  tokens,  and  in-
+       line  wild-card  expansion  of  filenames. The internal functions which
+       perform file-name completion and wild-card expansion are also available
+       externally for optional use by the calling program.
+
+       The  various  parts  of the library are documented in the following man
+       pages:
+
+         <a href="tecla.html"><b>tecla</b></a>              -  Use level documentation of the
+                               command-line editing facilities
+                               provided by gl_get_line().
+         <a href="gl_get_line.html"><b>gl_get_line</b></a>        -  The interactive line-input module.
+         <a href="gl_io_mode.html"><b>gl_io_mode</b></a>         -  How to use gl_get_line() in an
+                               incremental, non-blocking fashion.
+         <a href="cpl_complete_word.html"><b>cpl_complete_word</b></a>  -  The word completion module.
+         <a href="ef_expand_file.html"><b>ef_expand_file</b></a>     -  The filename expansion module.
+         <a href="pca_lookup_file.html"><b>pca_lookup_file</b></a>    -  A directory-list based filename
+                               lookup and completion module.
+
+       In addition there is one  optional  application  distributed  with  the
+       library:
+
+         <a href="enhance.html"><b>enhance</b></a>            -  Add command-line editing to third
+                                  party applications.
+
+
+</pre><h2>THREAD SAFETY</h2><pre>
+       If  the  library  is compiled with -D_POSIX_C_SOURCE=199506L, reentrant
+       versions of as many functions as possible are used. This includes using
+       getpwuid_r() and getpwnam_r() instead of getpwuid() and getpwnam() when
+       looking up the home directories of specific users in the password  file
+       (for  ~user/ expansion), and readdir_r() instead of readdir() for read-
+       ing directory entries when doing  filename  completion.  The  reentrant
+       version of the library is usually called libtecla_r.a instead of libte-
+       cla.a, so if only the latter is available, it probably isn't  the  cor-
+       rect version to link with threaded programs.
+
+       Reentrant  functions  for  iterating  through  the password file aren't
+       available, so when the library is compiled to be reentrant, TAB comple-
+       tion  of  incomplete  usernames  in ~username/ expressions is disabled.
+       This doesn't disable expansion of complete ~username expressions, which
+       can  be  done  reentrantly, or expansion of the parts of filenames that
+       follow them, so this doesn't remove much functionality.
+
+       The terminfo functions setupterm(), tigetstr(), tigetnum() and  tputs()
+       also aren't reentrant, but very few programs will want to interact with
+       multiple terminals, so this shouldn't prevent this library  from  being
+       used in threaded programs.
+
+
+</pre><h2>LIBRARY VERSION NUMBER</h2><pre>
+       The  version  number  of the library can be queried using the following
+       function.
+
+        void libtecla_version(int *major, int *minor, int *micro);
+
+
+       On return, this function records the three components of  the  libtecla
+       version  number  in  *major,  *minor, *micro. The formal meaning of the
+       three components is as follows.
+
+
+        major - Incrementing this number implies that a change has
+                been made to the library's public interface, which
+                makes it binary incompatible  with programs that
+                were linked with previous shared versions of the
+                tecla library.
+
+        minor - This number is incremented by one whenever
+                additional functionality, such as new functions or
+                modules, are added to the library.
+
+        micro - This is incremented whenever modifications to the
+                library are made which make no changes to the
+                public interface, but which fix bugs and/or improve
+                the behind-the-scenes implementation.
+
+
+
+</pre><h2>TRIVIA</h2><pre>
+       In Spanish, a "tecla" is the key of a keyboard. Since this library cen-
+       ters  on  keyboard  input,  and  given that I wrote much of the library
+       while working in Chile, this seemed like a suitable name.
+
+
+</pre><h2>FILES</h2><pre>
+       libtecla.a    -   The tecla library.
+       libtecla.h    -   The tecla header file.
+       ~/.teclarc    -   The tecla personal customization file.
+
+
+</pre><h2>SEE ALSO</h2><pre>
+       <a href="gl_get_line.html"><b>gl_get_line</b></a>, <a href="tecla.html"><b>tecla</b></a>, <a href="gl_io_mode.html"><b>gl_io_mode</b></a>, <a href="ef_expand_file.html"><b>ef_expand_file</b></a>,
+       <a href="cpl_complete_word.html"><b>cpl_complete_word</b></a>, <a href="pca_lookup_file.html"><b>pca_lookup_file</b></a>, <a href="enhance.html"><b>enhance</b></a>
+
+
+</pre><h2>AUTHOR</h2><pre>
+       Martin Shepherd  (mcs@astro.caltech.edu)
+
+
+</pre><h2>ACKNOWLEDGMENTS</h2><pre>
+       Markus Gyger  - Lots of assistance, including help with
+                       shared libraries, configuration information,
+                       particularly for Solaris; modifications to
+                       support C++ compilers, improvements for ksh
+                       users, faster cursor motion, output
+                       buffering, and changes to make gl_get_line()
+                       8-bit clean.
+       Mike MacFaden - Suggestions, feedback and testing that led
+                       to many of the major new functions that were
+                       added in version 1.4.0.
+       Tim Eliseo    - Many vi-mode bindings and fixes.
+
+
+
+                                                       <a href="libtecla.html"><b>libtecla</b></a>
+</pre>
+</body>

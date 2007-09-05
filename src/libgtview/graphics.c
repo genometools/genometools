@@ -2,13 +2,19 @@
   Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>,
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-/**
- * \if INTERNAL \file graphics.c \endif
- * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
- * \author Gordon Gremme <gremme@zbh.uni-hamburg.de>
- */
 
 #include <cairo.h>
 #include <cairo-pdf.h>
@@ -44,29 +50,98 @@ Graphics* graphics_new_png(const char *filename, unsigned int width,
   return g;
 }
 
-void graphics_draw_horizontal_line(Graphics *g, double x, double y,
-                                   double width)
-{
-  assert(g != NULL);
-  cairo_move_to(g->cr, x, y);
-  cairo_rel_line_to(g->cr, width, 0);
-  cairo_stroke(g->cr);
-}
-
 void graphics_draw_text(Graphics *g, double x, double y, const char *text)
 {
-  assert(g != NULL && text != NULL);
+  assert(g && text);
   cairo_set_source_rgb(g->cr, 0, 0, 0);
   cairo_move_to(g->cr, x, y);
   cairo_show_text(g->cr, text);
 }
 
-void graphics_draw_box(Graphics *g, double x, double y, double width,
-                       double height, Color fill_color, int arrow_status,
-                       double arrow_width, double stroke_width,
-                       Color stroke_color)
+void graphics_draw_text_centered(Graphics *g, double x, double y,
+                                 const char *text)
 {
-  assert(g != NULL);
+  cairo_text_extents_t ext;
+  assert(g && text);
+  cairo_set_source_rgb(g->cr, 0, 0, 0);
+  /* get text extents */
+  cairo_text_extents(g->cr, text, &ext);
+  /* draw text w/ its center at the given coords */
+  cairo_move_to(g->cr, x-(ext.width/2)-1, y);
+  cairo_show_text(g->cr, text);
+}
+
+void graphics_draw_text_right(Graphics *g, double x, double y, const char *text)
+{
+  cairo_text_extents_t ext;
+  assert(g && text);
+  cairo_set_source_rgb(g->cr, 0, 0, 0);
+  /* get text extents */
+  cairo_text_extents(g->cr, text, &ext);
+  /* draw text w/ its right end at the given coords */
+  cairo_move_to(g->cr, x-(ext.width)-1, y);
+  cairo_show_text(g->cr, text);
+}
+
+void graphics_draw_colored_text(Graphics *g, double x, double y, Color color,
+                                const char *text)
+{
+  assert(g && text);
+  cairo_set_source_rgb(g->cr, color.red, color.green, color.blue);
+  cairo_move_to(g->cr, x, y);
+  cairo_show_text(g->cr, text);
+}
+
+double graphics_get_text_height(Graphics *g)
+{
+  cairo_text_extents_t ext;
+  assert(g);
+  /* get text extents */
+  cairo_text_extents(g->cr, "A", &ext);
+  return ext.height;
+}
+
+void graphics_set_margins(Graphics *g, double margin_x, double margin_y)
+{
+  assert(g);
+  g->margin_x = margin_x;
+  g->margin_y = margin_y;
+}
+
+void graphics_draw_horizontal_line(Graphics *g, double x, double y,
+                                   double width)
+{
+  assert(g);
+  cairo_move_to(g->cr, x, y);
+  cairo_rel_line_to(g->cr, width, 0);
+  cairo_stroke(g->cr);
+}
+
+void graphics_draw_vertical_line(Graphics *g, double x, double y,
+                                 Color color, double length)
+{
+  assert(g);
+  cairo_move_to(g->cr, x, y);
+  cairo_set_source_rgb(g->cr, color.red, color.green, color.blue);
+  cairo_rel_line_to(g->cr, 0, length);
+  cairo_stroke(g->cr);
+}
+
+double graphics_get_text_width(Graphics *g, const char* text)
+{
+  cairo_text_extents_t ext;
+  assert(g);
+  /* get text extents */
+  cairo_text_extents(g->cr, text, &ext);
+  return ext.width;
+}
+
+void graphics_draw_box(Graphics *g, double x, double y, double width,
+                       double height, Color fill_color,
+                       ArrowStatus arrow_status, double arrow_width,
+                       double stroke_width, Color stroke_color)
+{
+  assert(g);
   /* save cairo context */
   cairo_save(g->cr);
   cairo_rectangle(g->cr, g->margin_x, g->margin_y,
@@ -95,6 +170,7 @@ void graphics_draw_box(Graphics *g, double x, double y, double width,
         cairo_line_to(g->cr, x + width, y + height);
       cairo_close_path(g->cr);
       break;
+    case ARROW_BOTH: /* XXX */
     case ARROW_NONE:
       cairo_rectangle(g->cr, x, y, width, height);
    }
@@ -114,12 +190,12 @@ void graphics_draw_box(Graphics *g, double x, double y, double width,
 }
 
 void graphics_draw_dashes(Graphics *g, double x, double y, double width,
-                          double height, int arrow_status,
+                          double height, ArrowStatus arrow_status,
                           double arrow_width, double stroke_width,
                           Color stroke_color)
 {
   double dashes[] = {5.0};
-  assert(g != NULL);
+  assert(g);
   /* save cairo context */
   cairo_save(g->cr);
   cairo_rectangle(g->cr, g->margin_x, g->margin_y,
@@ -148,6 +224,8 @@ void graphics_draw_dashes(Graphics *g, double x, double y, double width,
         /* draw arrowhead */
         cairo_stroke(g->cr);
         break;
+      case ARROW_BOTH: /* XXX */
+      case ARROW_NONE: break;
     }
   }
   /* draw dashes */
@@ -160,11 +238,11 @@ void graphics_draw_dashes(Graphics *g, double x, double y, double width,
 }
 
 void graphics_draw_caret(Graphics *g, double x, double y, double width,
-                         double height, int arrow_status,
+                         double height, ArrowStatus arrow_status,
                          double arrow_width, double stroke_width,
                          Color stroke_color)
 {
-  assert(g != NULL);
+  assert(g);
   /* save cairo context */
   cairo_save(g->cr);
   cairo_rectangle(g->cr, g->margin_x, g->margin_y,
@@ -201,6 +279,7 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
         cairo_line_to(g->cr, x + arrow_width + width, y + (height/2));
       }
       break;
+    case ARROW_BOTH: /* XXX */
     case ARROW_NONE:
      cairo_move_to(g->cr, x, y + (height/2));
      cairo_line_to(g->cr, x + (width/2), y);
@@ -217,107 +296,37 @@ void graphics_draw_caret(Graphics *g, double x, double y, double width,
 }
 
 void graphics_draw_rectangle(Graphics *g, double x, double y,
-                             bool filled, Color fill_color, bool stroked,
-                             Color stroke_color, double stroke_width,
+                             bool filled, Color fill_color, bool outlined,
+                             Color outline_color, double outline_width,
                              double width, double height)
 {
-  assert(g != NULL);
+  assert(g);
   /* save cairo context */
   cairo_save(g->cr);
   cairo_new_path(g->cr);
   cairo_rectangle(g->cr, x, y, x + width, y + width);
-  if (filled)
-  {
+  if (filled) {
     cairo_set_source_rgb(g->cr, fill_color.red,
                                 fill_color.green,
                                 fill_color.blue);
     cairo_fill_preserve(g->cr);
   }
-  if (stroked)
-  {
-    cairo_set_line_width(g->cr, stroke_width);
-    cairo_set_source_rgb(g->cr, stroke_color.red,
-                                stroke_color.green,
-                                stroke_color.blue);
+  if (outlined) {
+    cairo_set_line_width(g->cr, outline_width);
+    cairo_set_source_rgb(g->cr, outline_color.red,
+                                outline_color.green,
+                                outline_color.blue);
     cairo_stroke(g->cr);
   }
   /* restore cairo context */
   cairo_restore(g->cr);
 }
 
-void graphics_draw_text_centered(Graphics *g, double x, double y,
-                                 const char *text)
-{
-  cairo_text_extents_t ext;
-  assert(g != NULL && text != NULL);
-  cairo_set_source_rgb(g->cr, 0, 0, 0);
-  /* get text extents */
-  cairo_text_extents(g->cr, text, &ext);
-  /* draw text w/ its center at the given coords */
-  cairo_move_to(g->cr, x-(ext.width/2)-1, y);
-  cairo_show_text(g->cr, text);
-}
-
-void graphics_draw_text_right(Graphics *g, double x, double y, const char *text)
-{
-  cairo_text_extents_t ext;
-  assert(g != NULL && text != NULL);
-  cairo_set_source_rgb(g->cr, 0, 0, 0);
-  /* get text extents */
-  cairo_text_extents(g->cr, text, &ext);
-  /* draw text w/ its right end at the given coords */
-  cairo_move_to(g->cr, x-(ext.width)-1, y);
-  cairo_show_text(g->cr, text);
-}
-
-void graphics_draw_vertical_line(Graphics *g, double x, double y,
-                                 Color color, double length)
-{
-  assert(g != NULL);
-  cairo_move_to(g->cr, x, y);
-  cairo_set_source_rgb(g->cr, color.red, color.green, color.blue);
-  cairo_rel_line_to(g->cr, 0, length);
-  cairo_stroke(g->cr);
-}
-
-double graphics_get_text_height(Graphics *g)
-{
-  cairo_text_extents_t ext;
-  assert(g != NULL);
-  /* get text extents */
-  cairo_text_extents(g->cr, "A", &ext);
-  return ext.height;
-}
-
-double graphics_get_text_width(Graphics *g, const char* text)
-{
-  cairo_text_extents_t ext;
-  assert(g != NULL);
-  /* get text extents */
-  cairo_text_extents(g->cr, text, &ext);
-  return ext.width;
-}
-
-void graphics_draw_colored_text(Graphics *g,
-                                double x,
-                                double y,
-                                Color color,
-                                const char *text)
-{
-  assert(g != NULL && text != NULL);
-  cairo_set_source_rgb(g->cr,
-                       color.red,
-                       color.green,
-                       color.blue);
-  cairo_move_to(g->cr, x, y);
-  cairo_show_text(g->cr, text);
-}
-
 void graphics_draw_arrowhead(Graphics *g, double x, double y,
-                             Color color, int arrow_status)
+                             Color color, ArrowStatus arrow_status)
 {
   double arrow_height = 8, arrow_width = 5;
-  assert(g != NULL);
+  assert(g);
   /* save cairo context */
   cairo_save(g->cr);
   cairo_reset_clip(g->cr);
@@ -342,16 +351,11 @@ void graphics_draw_arrowhead(Graphics *g, double x, double y,
       cairo_fill_preserve(g->cr);
       cairo_stroke(g->cr);
       break;
+    case ARROW_BOTH: /* XXX */
+    case ARROW_NONE: break;
   }
   /* restore cairo context */
   cairo_restore(g->cr);
-}
-
-void graphics_set_margins(Graphics *g, double margin_x, double margin_y,
-                          double width, double height)
-{
-  g->margin_x = margin_x;
-  g->margin_y = margin_y;
 }
 
 int graphics_save(const Graphics *g, Env *env)

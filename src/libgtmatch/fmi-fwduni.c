@@ -26,7 +26,7 @@ unsigned long skfmuniqueforward (const Fmindex *fmindex,
   bwtbound.lbound = fmindex->tfreq[cc];
   bwtbound.ubound = fmindex->tfreq[cc+1];
 #ifdef mydebug
-  printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos 
+  printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
           "occurrences\n",
          PRINTSeqposcast(bwtbound.lbound),
          PRINTSeqposcast(bwtbound.ubound),
@@ -47,7 +47,7 @@ unsigned long skfmuniqueforward (const Fmindex *fmindex,
     bwtbound.ubound = fmindex->tfreq[cc] +
                       fmoccurrence (fmindex, cc, bwtbound.ubound);
 #ifdef mydebug
-    printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos 
+    printf("# bounds=" FormatSeqpos "," FormatSeqpos " = " FormatSeqos
             "occurrences\n",
            PRINTSeqposcast(bwtbound.lbound),
            PRINTSeqposcast(bwtbound.ubound),

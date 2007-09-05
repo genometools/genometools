@@ -1,13 +1,25 @@
 /*
   Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <assert.h>
 #include <string.h>
 #include "libgtcore/fileutils.h"
 #include "libgtcore/progressbar.h"
+#include "libgtcore/strarray.h"
 #include "libgtext/genome_stream_rep.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_parser.h"
@@ -16,7 +28,7 @@ struct GFF3InStream
 {
   const GenomeStream parent_instance;
   int next_file;
-  Array *files; /* contains char* to filenames */
+  StrArray *files; /* contains char* to filenames */
   bool ensure_sorting,
        stdin_argument,
        non_stdin_file_is_open,
@@ -35,6 +47,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   unsigned long i;
+  Str *filenamestr;
   int had_err = 0, status_code;
 
   env_error_check(env);
@@ -51,11 +64,11 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   for (;;) {
     /* open file if necessary */
     if (is->fpin == NULL) {
-      if (array_size(is->files) && is->next_file == array_size(is->files))
+      if (strarray_size(is->files) && is->next_file == strarray_size(is->files))
         break;
       assert(!is->non_stdin_file_is_open);
-      if (array_size(is->files)) {
-        if (strcmp(*(char**) array_get(is->files, is->next_file), "-") == 0) {
+      if (strarray_size(is->files)) {
+        if (strcmp(strarray_get(is->files, is->next_file), "-") == 0) {
           if (is->stdin_argument) {
             env_error_set(env,
                           "multiple specification of argument file \"-\"\n");
@@ -66,18 +79,19 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
           is->stdin_argument = true;
         }
         else {
-          is->fpin = env_fa_xfopen(env, *(char**)
-                                   array_get(is->files, is->next_file), "r");
+          is->fpin = env_fa_xfopen(env,
+                                   strarray_get(is->files, is->next_file), "r");
           is->non_stdin_file_is_open = true;
         }
         is->next_file++;
       }
-      else is->fpin = stdin;
+      else
+        is->fpin = stdin;
       is->line_number = 0;
 
       if (is->be_verbose) {
-        printf("processing file \"%s\"\n", array_size(is->files)
-               ? *(char**) array_get(is->files, is->next_file-1) : "stdin");
+        printf("processing file \"%s\"\n", strarray_size(is->files)
+               ? strarray_get(is->files, is->next_file-1) : "stdin");
       }
       if (is->non_stdin_file_is_open && is->be_verbose)
         progressbar_start(&is->line_number, file_number_of_lines(is->fpin));
@@ -85,14 +99,13 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 
     assert(is->fpin); /* file is open */
 
+    filenamestr = str_new_cstr(strarray_size(is->files)
+                               ? strarray_get(is->files, is->next_file-1)
+                               : "stdin", env);
     had_err = gff3parser_parse_genome_nodes(&status_code, is->gff3_parser,
-                                            is->genome_node_buffer,
-                                            array_size(is->files)
-                                            ? *(char**)
-                                              array_get(is->files,
-                                                        is->next_file-1)
-                                            : "stdin",
+                                            is->genome_node_buffer, filenamestr,
                                             &is->line_number, is->fpin, env);
+    str_delete(filenamestr, env);
     if (had_err)
       break;
 
@@ -106,7 +119,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
       }
       is->fpin = NULL;
       gff3parser_reset(is->gff3_parser, env);
-      if (!array_size(is->files))
+      if (!strarray_size(is->files))
         break;
       continue;
     }
@@ -121,7 +134,8 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
                                                        i), env)) {
           assert(is->last_node);
           /* a sorted stream can have at most one input file */
-          assert(array_size(is->files) == 0 || array_size(is->files) == 1);
+          assert(strarray_size(is->files) == 0 ||
+                 strarray_size(is->files) == 1);
           env_error_set(env,
                     "the file %s is not sorted (example: line %lu and %lu)",
                     genome_node_get_filename(is->last_node),
@@ -144,7 +158,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 static void gff3_in_stream_free(GenomeStream *gs, Env *env)
 {
   GFF3InStream *gff3_in_stream = gff3_in_stream_cast(gs);
-  array_delete(gff3_in_stream->files, env);
+  strarray_delete(gff3_in_stream->files, env);
   while (queue_size(gff3_in_stream->genome_node_buffer)) {
     genome_node_rec_delete(*(GenomeNode**)
                            queue_get(gff3_in_stream->genome_node_buffer), env);
@@ -164,7 +178,7 @@ const GenomeStreamClass* gff3_in_stream_class(void)
   return &gsc;
 }
 
-static GenomeStream* gff3_in_stream_new(Array *files, /* takes ownership */
+static GenomeStream* gff3_in_stream_new(StrArray *files, /* takes ownership */
                                         bool ensure_sorting, bool be_verbose,
                                         Env *env)
 {
@@ -196,17 +210,17 @@ GenomeStream* gff3_in_stream_new_unsorted(int num_of_files,
                                           bool be_verbose, Env *env)
 {
   int i;
-  Array *files = array_new(sizeof (char*), env);
+  StrArray *files = strarray_new(env);
   for (i = 0; i < num_of_files; i++)
-    array_add(files, filenames[i], env);
+    strarray_add_cstr(files, filenames[i], env);
   return gff3_in_stream_new(files, false, be_verbose, env);
 }
 
 GenomeStream* gff3_in_stream_new_sorted(const char *filename, bool be_verbose,
                                         Env *env)
 {
-  Array *files = array_new(sizeof (char*), env);
+  StrArray *files = strarray_new(env);
   if (filename)
-    array_add(files, filename, env);
+    strarray_add_cstr(files, filename, env);
   return gff3_in_stream_new(files, true, be_verbose, env);
 }

@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <assert.h>
@@ -166,8 +177,8 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
                                       unsigned long LTRdelta, Env *env)
 {
   StreamEvaluator *evaluator = env_ma_malloc(env, sizeof (StreamEvaluator));
-  evaluator->reality = reality;
-  evaluator->prediction = prediction;
+  evaluator->reality = genome_stream_ref(reality);
+  evaluator->prediction = genome_stream_ref(prediction);
   evaluator->evalLTR = evalLTR;
   evaluator->LTRdelta = LTRdelta;
   evaluator->real_features = hashtable_new(HASH_STRING, NULL,
@@ -700,10 +711,13 @@ static void determine_true_exon(GenomeNode *gn, Strand predicted_strand,
       }
     }
   }
-  else if (exondiff) {
-    printf("> ");
-    gff3_output_leading((GenomeFeature*) gn, NULL);
-    printf(".\n");
+  else  {
+    genome_node_mark(gn); /* mark false exons */
+    if (exondiff) {
+      printf("> ");
+      gff3_output_leading((GenomeFeature*) gn, NULL);
+      printf(".\n");
+    }
   }
 }
 
@@ -1071,7 +1085,7 @@ int determine_missing_features(void *key, void *value, void *data, Env *env)
 }
 
 int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
-                              Env *env)
+                              GenomeVisitor *gv, Env *env)
 {
   GenomeNode *gn;
   SequenceRegion *sr;
@@ -1129,6 +1143,8 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                                               env);
       assert(!had_err); /* cannot happen, process_real_feature() is sane */
     }
+    if (gv)
+      genome_node_accept(gn, gv, env);
     genome_node_rec_delete(gn, env);
   }
 
@@ -1163,6 +1179,8 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                   "``reality''", str_get(genome_node_get_seqid(gn)));
         }
       }
+      if (gv)
+        genome_node_accept(gn, gv, env);
       genome_node_rec_delete(gn, env);
     }
   }

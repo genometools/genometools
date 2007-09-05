@@ -1,0 +1,55 @@
+#!/usr/bin/env lua
+--[[
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+]]
+
+function usage()
+  io.stderr:write(string.format("Usage: %s source_file [...]\n", arg[0]))
+  io.stderr:write("Expand license string to full license in given source files.\n")
+  os.exit(1)
+end
+
+if #arg == 0 then usage() end
+
+local tmpfile = "tempfile.txt" -- not nice, but ``pure'' lua doesn't have mktemp
+
+local license_string = [[
+  See LICENSE file or http://genometools.org/license.html for license details.]]
+
+local license_full = [[
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.]]
+
+for index, file in ipairs(arg) do
+  io.output(tmpfile)
+  for line in io.lines(file) do
+    line = string.gsub(line, license_string, license_full)
+    io.write(line)
+    io.write("\n")
+  end
+  rval, err = os.rename(tmpfile, file)
+  if not rval then error(err) end
+end

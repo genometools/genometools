@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #ifndef GENOME_NODE_H
@@ -51,6 +62,8 @@ void          genome_node_is_part_of_genome_node(GenomeNode *parent,
 /* does not free the leaf */
 void          genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn,
                                       Env*);
+void          genome_node_mark(GenomeNode*);
+bool          genome_node_is_marked(const GenomeNode*);
 bool          genome_node_has_children(GenomeNode*);
 bool          genome_node_direct_children_do_not_overlap(GenomeNode*, Env*);
 /* returns true if all direct childred of <parent> with the same type (s.t.) as
