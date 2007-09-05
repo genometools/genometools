@@ -21,6 +21,7 @@
 #include <libgtcore/array.h>
 #include <libgtcore/dynalloc.h>
 #include <libgtcore/ensure.h>
+#include <libgtcore/range.h>
 #include <libgtcore/xansi.h>
 
 #define NUM_OF_TESTS    100
@@ -82,9 +83,10 @@ void array_reverse(Array *a, Env *env)
 {
   void *front, *back, *tmp;
   assert(a);
-  tmp = env_ma_malloc(env, sizeof (a->size_of_elem));
+  tmp = env_ma_malloc(env, a->size_of_elem);
   for (front = a->space, back = a->space + (a->next_free-1) * a->size_of_elem;
-       front < back; front += a->size_of_elem, back -= a->size_of_elem) {
+       front < back;
+       front += a->size_of_elem, back -= a->size_of_elem) {
     memcpy(tmp, front, a->size_of_elem);
     memcpy(front, back, a->size_of_elem);
     memcpy(back, tmp, a->size_of_elem);
@@ -181,10 +183,11 @@ int array_example(Env *env)
 
 int array_unit_test(Env *env)
 {
-  Array *char_array, *int_array;
+  Array *char_array, *int_array, *a = NULL;
   char cc, *char_array_test;
   int ci, *int_array_test;
   unsigned long i, j, size;
+  Range range;
   int had_err = 0;
   env_error_check(env);
 
@@ -245,6 +248,23 @@ int array_unit_test(Env *env)
         ensure(had_err, *(int*) array_get(int_array, j) == int_array_test[j]);
     }
   }
+
+  /* test array_reverse() */
+  if (!had_err) {
+    a = array_new(sizeof (Range), env);
+    for (i = 0; i < 24; i++) {
+      range.start = i + 1;
+      range.end   = i + 101;
+      array_add(a, range, env);
+    }
+    array_reverse(a, env);
+    for (i = 0; !had_err && i < 24; i++) {
+      range.start = i + 1;
+      range.end   = i + 101;
+      ensure(had_err, !range_compare(range, *(Range*) array_get(a, 23 - i)));
+    }
+  }
+  array_delete(a, env);
 
   array_delete(char_array, env);
   array_delete(int_array, env);
