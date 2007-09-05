@@ -47,7 +47,6 @@ typedef enum
 {
   Partphase,
   Specialrangephase,
-  Enumspecialposphase,
   Finalsuffixphase
 } Suffixeratorphase;
 
@@ -77,6 +76,7 @@ typedef struct
   Specialrangeiterator *sri;
   Suffixeratorphase phase;
   Sequencerange overhang;
+  bool exhausted;
 } Sfxiterator;
 
 static int initbasepower(unsigned int **basepower,
@@ -413,6 +413,7 @@ static int initsuffixerator(Sfxiterator *csf,
   csf->specialcharacters = specialcharacters;
   csf->part = 0;
   csf->phase = Partphase;
+  cvf->exhausted = false;
   if (prefixlength == 0 || prefixlength > MAXPREFIXLENGTH)
   {
     env_error_set(env,"argument for option -pl must be in the range [1,%u]",
@@ -763,6 +764,14 @@ static void fillspecialnextpage(Sfxiterator *csf)
         }
         insertfullspecialrange(csf,range.leftpos,range.rightpos);
         csf->overhang.leftpos = csf->overhang.rightpos = 0;
+      } else
+      {
+        if(csf->fusp.nextfreeSeqpos < csf->fusp.allocatedSeqpos)
+        {
+          csf->fusp.spaceSeqpos[csf->fusp.nextfreeSeqpos++] = csf->totallength;
+          csf->exhausted = true;
+        }
+        break;
       }
     }
   }
@@ -778,12 +787,10 @@ static void fillspecialnextpage(Sfxiterator *csf)
     {
       if(preparethispart(csf,mtime,env))
       {
+        *len = csf->widthofpart;
         break;
       }
       if(hasspecialranges(csf->encseq))
-      {
-        csf->phase = Finalsuffixphase;
-      } else
       {
         csf->phase = Specialrangephase;
         csf->sri = newspecialrangeiterator(csf->encseq,
@@ -796,19 +803,24 @@ static void fillspecialnextpage(Sfxiterator *csf)
                          stpgetlargestwidth(csf->suftabparts));
         csf->fusp.nextfreeSeqpos = 0;
         csf->overhang.leftpos = csf->overhang.rightpos = 0;
-      }
-    }
-    if(csf->phase == Specialrangephase)
-    {
-      if(!exhaustedspecialrangeiterator(csf->sri))
-      {
-        fillspecialnextpage(csf);
       } else
       {
         csf->phase = Finalsuffixphase;
       }
     }
+    if(csf->phase == Specialrangephase)
+    {
+      if(exhaustedspecialrangeiterator(csf->sri) && 
+         csf->overhang.leftpos == csf->overhang.rightpos)
+      {
+        csf->phase = Finalsuffixphase;
+      } else
+      {
+        fillspecialnextpage(csf);
+        *len = (Seqpos) csf->fusp.nextfreeSeqpos;
+        break;
+      }
+    }
   }
-  *len = csf->widthofpart;
   return csf->suftab;
 }
