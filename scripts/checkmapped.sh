@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 if test $# -lt 3
 then
@@ -6,7 +6,7 @@ then
   exit 1
 fi
 
-function checkerror() 
+checkerror() 
 {
   $1
   if test $? -ne 0
@@ -20,7 +20,7 @@ function checkerror()
 
 #VALGRIND=valgrind.sh
 
-function checksfxmap()
+checksfxmap()
 {
   cmd="${VALGRIND} ../bin/gt dev sfxmap -v $1"
   TMPFILE=`mktemp TMP.XXXXXX` || exit 1

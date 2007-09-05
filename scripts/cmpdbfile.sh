@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 if test $# -lt 1
 then
@@ -6,7 +6,7 @@ then
   exit 1
 fi
 
-function checkerror() 
+checkerror() 
 {
   $1
   if test $? -ne 0
@@ -18,7 +18,7 @@ function checkerror()
   fi
 }
 
-function comparefiles()
+comparefiles()
 {
   TMPFILE1=`mktemp ../testsuite/TMP.XXXXXX` || exit 1
   egrep -v 'prefixlength|integersize|readmode' $1 > ${TMPFILE1}
