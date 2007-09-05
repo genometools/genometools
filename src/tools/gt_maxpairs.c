@@ -59,12 +59,12 @@ static int callenummaxpairs(const Str *indexname,
   Sequentialsuffixarrayreader *ssar;
 
   ssar = newSequentialsuffixarrayreader(indexname,
-                                        SARR_LCPTAB | 
-                                        SARR_SUFTAB | 
+                                        SARR_LCPTAB |
+                                        SARR_SUFTAB |
                                         SARR_ESQTAB,
                                         false,
                                         env);
-  if(ssar == NULL)
+  if (ssar == NULL)
   {
     haserr = true;
   }
@@ -139,9 +139,9 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
     {
       haserr = true;
     }
-    if(!haserr && maxpairsoptions.samples > 0)
+    if (!haserr && maxpairsoptions.samples > 0)
     {
-      if(testmaxpairs(maxpairsoptions.indexname,
+      if (testmaxpairs(maxpairsoptions.indexname,
                       maxpairsoptions.samples,
                       maxpairsoptions.userdefinedleastlength,
                       10 * maxpairsoptions.userdefinedleastlength,

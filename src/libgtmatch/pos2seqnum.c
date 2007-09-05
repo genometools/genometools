@@ -40,16 +40,16 @@ Seqpos *calculatemarkpositions(const Encodedsequence *encseq,
   asp.nextfreeSeqpos = 0;
   ALLOCASSIGNSPACE(asp.spaceSeqpos,NULL,Seqpos,asp.allocatedSeqpos);
   sri = newspecialrangeiterator(encseq,true,env);
-  while(nextspecialrangeiterator(&range,sri))
+  while (nextspecialrangeiterator(&range,sri))
   {
-    if(addmarkpos(&asp,encseq,&range) != 0)
+    if (addmarkpos(&asp,encseq,&range) != 0)
     {
       haserr = true;
       break;
     }
   }
   freespecialrangeiterator(&sri,env);
-  if(haserr)
+  if (haserr)
   {
     FREEARRAY(&asp,Seqpos);
     return NULL;

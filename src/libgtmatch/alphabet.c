@@ -459,7 +459,7 @@ static int assignProteinorDNAalphabet(Alphabet *alpha,
       {
         Str *transpath = NULL;
 
-        if(!file_exists(str_get(smapfile)))
+        if (!file_exists(str_get(smapfile)))
         {
           Str *prog;
           const char *progname = env_error_get_progname(env);

@@ -42,7 +42,7 @@ int testencodedsequence(const StrArray *filenametab,
   env_error_check(env);
   printf("# testencodedsequence with readmode = %s\n",showreadmode(readmode));
   totallength = getencseqtotallength(encseq);
-  if(filenametab != NULL)
+  if (filenametab != NULL)
   {
     initformatbufferstate(&fbs,
                           filenametab,
@@ -97,7 +97,7 @@ int testencodedsequence(const StrArray *filenametab,
                         ": random access (getencodedchar) = %u != "
                         " %u = sequential read (sequentialgetencodedchar)",
                         encseqaccessname(encseq),
-                        showreadmode(readmode), 
+                        showreadmode(readmode),
                         pos,
                         (unsigned int) ccra,
                         (unsigned int) ccsr);
@@ -136,8 +136,8 @@ static void reverseSequencerange(Array *a)
   }
 }
 #else
-/* run 
-   testsuite.rb -memcheck -keywords gt_suffixerator -select 250 
+/* run
+   testsuite.rb -memcheck -keywords gt_suffixerator -select 250
    to produce an error */
 #endif
 
@@ -192,13 +192,13 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
   rangesbackward = array_new(sizeof (Sequencerange),env);
 
   sri = newspecialrangeiterator(encseq,true,env);
-  while(nextspecialrangeiterator(&range,sri))
+  while (nextspecialrangeiterator(&range,sri))
   {
     array_add(rangesforward,range,env);
   }
   freespecialrangeiterator(&sri,env);
   sri = newspecialrangeiterator(encseq,false,env);
-  while(nextspecialrangeiterator(&range,sri))
+  while (nextspecialrangeiterator(&range,sri))
   {
     array_add(rangesbackward,range,env);
   }
@@ -212,7 +212,7 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
   {
     printf("# checkspecialrangesfast(%lu ranges)\n",
              (unsigned long) array_size(rangesforward));
-    if(comparearrays(rangesforward,rangesbackward,env) != 0)
+    if (comparearrays(rangesforward,rangesbackward,env) != 0)
     {
       haserr = true;
     }

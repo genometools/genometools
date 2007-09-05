@@ -43,7 +43,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
   Enumpatterniterator *epi = NULL;
   const Uchar *pptr;
   unsigned long patternlen;
-  MMsearchiterator *mmsi; 
+  MMsearchiterator *mmsi;
 
   if (mapsuffixarray(&suffixarray,
                      &totallength,
@@ -75,7 +75,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
                                  pptr,
                                  patternlen,
                                  env);
-      while(nextmmsearchiterator(&dbstart,mmsi))
+      while (nextmmsearchiterator(&dbstart,mmsi))
       {
         /* Nothing */;
       }
