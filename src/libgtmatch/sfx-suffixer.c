@@ -424,7 +424,7 @@ static int initsuffixerator(Sfxiterator *csf,
   csf->specialcharacters = specialcharacters;
   csf->part = 0;
   csf->phase = Partphase;
-  cvf->exhausted = false;
+  csf->exhausted = false;
   if (prefixlength == 0 || prefixlength > MAXPREFIXLENGTH)
   {
     env_error_set(env,"argument for option -pl must be in the range [1,%u]",
@@ -777,7 +777,7 @@ static void fillspecialnextpage(Sfxiterator *csf)
         csf->overhang.leftpos = csf->overhang.rightpos = 0;
       } else
       {
-        if(csf->fusp.nextfreeSeqpos < csf->fusp.allocatedSeqpos)
+        if (csf->fusp.nextfreeSeqpos < csf->fusp.allocatedSeqpos)
         {
           csf->fusp.spaceSeqpos[csf->fusp.nextfreeSeqpos++] = csf->totallength;
           csf->exhausted = true;
@@ -821,7 +821,7 @@ static void fillspecialnextpage(Sfxiterator *csf)
     }
     if (csf->phase == Specialrangephase)
     {
-      if (exhaustedspecialrangeiterator(csf->sri) && 
+      if (exhaustedspecialrangeiterator(csf->sri) &&
           csf->overhang.leftpos == csf->overhang.rightpos)
       {
         csf->phase = Finalsuffixphase;
