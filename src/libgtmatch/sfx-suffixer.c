@@ -705,8 +705,8 @@ static void fillspecialnextpage(Sfxiterator *csf)
       if(csf->fusp.nextfreeSeqpos + width > csf->fusp.allocatedSeqpos)
       {
         /* does not fit into the buffer, so only output a part */
-        Seqpos rest = csf->fusp.nextfreeSeqpos + width
-                                               - csf->fusp.allocatedSeqpos;
+        unsigned long rest = csf->fusp.nextfreeSeqpos + 
+                             width - csf->fusp.allocatedSeqpos;
         assert(rest > 0);
         if(ISDIRREVERSE(csf->readmode))
         {
@@ -716,7 +716,7 @@ static void fillspecialnextpage(Sfxiterator *csf)
         } else
         {
           insertfullspecialrange(csf,csf->overhang.leftpos,
-                                     csf->overhang.rightpos-rest);
+                                     csf->overhang.rightpos - rest);
           csf->overhang.leftpos = csf->overhang.rightpos - rest;
         }
         break;
@@ -739,8 +739,8 @@ static void fillspecialnextpage(Sfxiterator *csf)
         width = range.rightpos - range.leftpos;
         if(csf->fusp.nextfreeSeqpos + width > csf->fusp.allocatedSeqpos)
         { /* does not fit into the buffer, so only output a part */
-          Seqpos rest = csf->fusp.nextfreeSeqpos + width 
-                                                 - csf->fusp.allocatedSeqpos;
+          unsigned long rest = csf->fusp.nextfreeSeqpos + 
+                               width - csf->fusp.allocatedSeqpos;
           if(ISDIRREVERSE(csf->readmode))
           {
             insertfullspecialrange(csf,range.leftpos + rest,
@@ -749,8 +749,8 @@ static void fillspecialnextpage(Sfxiterator *csf)
             csf->overhang.rightpos = range.leftpos + rest;
           } else
           {
-            insertfullspecialrange(csf,range.leftpos,range.rightpos-rest);
-            csf->overhang.leftpos = range.rightpos-rest;
+            insertfullspecialrange(csf,range.leftpos,range.rightpos - rest);
+            csf->overhang.leftpos = range.rightpos - rest;
             csf->overhang.rightpos = range.rightpos;
           }
           break;
@@ -786,8 +786,8 @@ static void fillspecialnextpage(Sfxiterator *csf)
       } else
       {
         csf->phase = Specialrangephase;
-        csf->sri = newspecialrangeiterator(encseq,
-                                           ISDIRREVERSE(readmode)
+        csf->sri = newspecialrangeiterator(csf->encseq,
+                                           ISDIRREVERSE(csf->readmode)
                                              ? false : true,
                                            env);
         csf->fusp.spaceSeqpos = csf->suftab;
@@ -795,7 +795,7 @@ static void fillspecialnextpage(Sfxiterator *csf)
           = CALLCASTFUNC(Seqpos,unsigned_long,
                          stpgetlargestwidth(csf->suftabparts));
         csf->fusp.nextfreeSeqpos = 0;
-        csf->overhang.leftpos = csf.overhang.rightpos = 0;
+        csf->overhang.leftpos = csf->overhang.rightpos = 0;
       }
     }
     if(csf->phase == Specialrangephase)
@@ -812,195 +812,3 @@ static void fillspecialnextpage(Sfxiterator *csf)
   *len = csf->widthofpart;
   return csf->suftab;
 }
-*/
-
-/*
-
-    if(!haserr && hasspecialranges(csf->encseq))
-    {
-      Sequencerange range;
-      Specialrangeiterator *sri;
-  
-      sri = newspecialrangeiterator(csf->encseq,
-                                    ISDIRREVERSE(csf->readmode) ? false : true,
-                                    env);
-      while(nextspecialrangeiterator(&range,sri))
-      {
-        if (processfullspecialrange(csf,
-                                   processsuftab,
-                                   processsuftabinfo,
-                                   range.leftpos,
-                                   range.rightpos,
-                                   env) != 0)
-        {
-          haserr = true;
-          break;
-        }
-      }
-      freespecialrangeiterator(&sri,env);
-    }
-    if(!haserr)
-    {
-      csf->fusp.spaceSeqpos[csf->fusp.nextfreeSeqpos++] = csf->totallength;
-      if (processsuftab != NULL)
-      {
-        if (processsuftab(processsuftabinfo,
-                          csf->fusp.spaceSeqpos,
-                          csf->readmode,
-                          (Seqpos) csf->fusp.nextfreeSeqpos,
-                          env) != 0)
-        {
-          haserr = true;
-        }
-      }
-    }
-    specialcode = FROMCODE2SPECIALCODE(csf->filltable[0],csf->numofchars);
-    csf->countspecialcodes[specialcode] += (specialcharacters + 1);
-  }
-  return haserr ? -1 : 0;
-}
-*/
-          break;
-        }
-      } else
-      {
-        /* does not fit into the buffer, so only output a part */
-        Seqpos rest = csf->fusp.nextfreeSeqpos + width
-                                               - csf->fusp.allocatedSeqpos;
-        assert(rest > 0);
-        if(ISDIRREVERSE(csf->readmode))
-        {
-          insertfullspecialrange(csf,csf->overhang.leftpos + rest,
-                                 csf->overhang.rightpos);
-          csf->overhang.rightpos = csf->overhang.leftpos + rest;
-        } else
-        {
-          insertfullspecialrange(csf,csf->overhang.leftpos,
-                                     csf->overhang.rightpos-rest);
-          csf->overhang.leftpos = csf->overhang.rightpos - rest;
-        }
-        break;
-      }
-    } else
-    {
-      if(nextspecialrangeiterator(&range,sri))
-      {
-        width = range.rightpos - range.leftpos;
-        if(csf->fusp.nextfreeSeqpos + width <= csf->fusp.allocatedSeqpos)
-        {
-          /* fits into buffer */
-          insertfullspecialrange(csf,range.leftpos,range.rightpos);
-          if(csf->fusp.nextfreeSeqpos + width == csf->fusp.allocatedSeqpos)
-          {
-            break; /* buffer is full */
-          }
-        } else
-        {
-          Seqpos rest = csf->fusp.nextfreeSeqpos + width 
-                                                 - csf->fusp.allocatedSeqpos;
-          if(ISDIRREVERSE(csf->readmode))
-          {
-            insertfullspecialrange(csf,range.leftpos + rest,
-                                   range.rightpos);
-          } else
-          {
-            insertfullspecialrange(csf,range.leftpos+done,range.rightpos);
-          }
-        }
-      }
-    }
-  }
-}
-
- const Seqpos *nextSfxiterator(Seqpos *len,Measuretime *mtime,
-                               Sfxiterator *csf,Env *env)
-{
-  env_error_check(env);
-  while(true)
-  {
-    if(csf->phase == Partphase)
-    {
-      if(preparethispart(csf,mtime,env))
-      {
-        break;
-      }
-      if(hasspecialranges(csf->encseq))
-      {
-        csf->phase = Finalsuffixphase;
-      } else
-      {
-        csf->phase = Specialrangephase;
-        csf->sri = newspecialrangeiterator(encseq,
-                                           ISDIRREVERSE(readmode)
-                                             ? false : true,
-                                           env);
-        csf->fusp.spaceSeqpos = csf->suftab;
-        csf->fusp.allocatedSeqpos 
-          = CALLCASTFUNC(Seqpos,unsigned_long,
-                         stpgetlargestwidth(csf->suftabparts));
-        csf->fusp.nextfreeSeqpos = 0;
-        csf->overhang.leftpos = csf.overhang.rightpos = 0;
-      }
-    }
-    if(csf->phase == Specialrangephase)
-    {
-      if(!exaustedspecialrangeiterator(csf->sri))
-      {
-        fillspecialnextpage(csf);
-      } else
-      {
-        csf->phase = Finalsuffixphase;
-      }
-    }
-  }
-  *len = csf->widthofpart;
-  return csf->suftab;
-}
-*/
-
-/*
-
-    if(!haserr && hasspecialranges(csf->encseq))
-    {
-      Sequencerange range;
-      Specialrangeiterator *sri;
-  
-      sri = newspecialrangeiterator(csf->encseq,
-                                    ISDIRREVERSE(csf->readmode) ? false : true,
-                                    env);
-      while(nextspecialrangeiterator(&range,sri))
-      {
-        if (processfullspecialrange(csf,
-                                   processsuftab,
-                                   processsuftabinfo,
-                                   range.leftpos,
-                                   range.rightpos,
-                                   env) != 0)
-        {
-          haserr = true;
-          break;
-        }
-      }
-      freespecialrangeiterator(&sri,env);
-    }
-    if(!haserr)
-    {
-      csf->fusp.spaceSeqpos[csf->fusp.nextfreeSeqpos++] = csf->totallength;
-      if (processsuftab != NULL)
-      {
-        if (processsuftab(processsuftabinfo,
-                          csf->fusp.spaceSeqpos,
-                          csf->readmode,
-                          (Seqpos) csf->fusp.nextfreeSeqpos,
-                          env) != 0)
-        {
-          haserr = true;
-        }
-      }
-    }
-    specialcode = FROMCODE2SPECIALCODE(csf->filltable[0],csf->numofchars);
-    csf->countspecialcodes[specialcode] += (specialcharacters + 1);
-  }
-  return haserr ? -1 : 0;
-}
-*/

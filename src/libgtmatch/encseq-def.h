@@ -87,6 +87,6 @@ void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
 
 /*@null@*/ char *encseqaccessname(const Encodedsequence *encseq);
 
-bool exhaustedrangeiterator(Specialrangeiterator *sri);
+bool exhaustedspecialrangeiterator(Specialrangeiterator *sri);
 
 #endif
