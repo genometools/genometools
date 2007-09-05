@@ -9,5 +9,7 @@
 
 int showinfoiffoundfullLTRs(LTRharvestoptions *lo, Suffixarray *suffixarray,
                             Env *env);
+//int printgff3format(LTRharvestoptions *lo, Suffixarray *suffixarray, 
+//                    Seqpos *markpos);
 
 #endif

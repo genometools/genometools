@@ -12,6 +12,7 @@
 
 #include "ltrharvest-opt.h"
 
-int searchforLTRs(Suffixarray *suffixarray, LTRharvestoptions *lo, Env *env);
+int searchforLTRs(Suffixarray *suffixarray, LTRharvestoptions *lo, 
+                  const Seqpos *markpos, Env *env);
 
 #endif

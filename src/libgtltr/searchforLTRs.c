@@ -126,9 +126,12 @@ void adjustboundariesfromXdropextension(
     Seqpos seed1_endpos,
     Seqpos seed2_endpos,
     LTRboundaries *boundaries,
-    Seqpos offset
+    Seqpos offset,
+    Env *env
     )
 {
+  env_error_check(env);
+  
   // left alignment
   boundaries->leftLTR_5  = seed1_startpos - xdropbest_left.ivalue;
   boundaries->rightLTR_5 = seed2_startpos - xdropbest_left.jvalue;
@@ -196,10 +199,10 @@ void shownewboundariesifadjusted(LTRboundaries *boundaries,
  The following function applies the filter algorithms one after another
  to all candidate pairs.
 */
-
 int searchforLTRs (
   Suffixarray *suffixarray,
   LTRharvestoptions *lo,
+  const Seqpos *markpos,
   Env *env
   )
 {
@@ -213,8 +216,6 @@ int searchforLTRs (
   Repeat *repeatptr;
   LTRboundaries *boundaries;
   Seqpos offset = 0;
-  unsigned long numofdbsequences = suffixarray->numofdbsequences;
-  Seqpos *markpos = NULL; //fuer testen
 
   env_error_check(env);
 
@@ -226,15 +227,6 @@ int searchforLTRs (
   printf("ins  = %d\n", lo->arbitscores.ins);
   printf("del  = %d\n", lo->arbitscores.del);
   */
-
-  // calculate markpos array for offset
-  markpos = calculatemarkpositions(suffixarray->encseq, 
-                                     numofdbsequences, 
-				     env);
-  if(markpos == NULL)
-  { 
-    return -1;
-  }
 
   for (repeatcounter = 0; repeatcounter < lo->repeatinfo.repeats.nextfreeRepeat;
        repeatcounter++)
@@ -255,14 +247,12 @@ int searchforLTRs (
 			       suffixarray->encseq,
 			       repeatptr->pos1, 
 			       repeatptr->pos1 + repeatptr->offset,
-			       //seq + repeatptr->pos1, 
-			       //seq + repeatptr->pos1 + repeatptr->offset,
 			       (int) alilen,
 			       (int) alilen, 
 			       (Xdropscore)lo->xdropbelowscore,
 			       env);
     }
-    else
+    else /* do not align over left sequence boundary */
     {
       evalxdroparbitscoresleft(&lo->arbitscores, 
 	                       &xdropbest_left, 
@@ -271,8 +261,6 @@ int searchforLTRs (
 			       suffixarray->encseq,
 			       repeatptr->pos1, 
 			       repeatptr->pos1 + repeatptr->offset,
-			       //seq + repeatptr->pos1, 
-			       //seq + repeatptr->pos1 + repeatptr->offset,
 			       (int) repeatptr->pos1,
 			       (int) (repeatptr->pos1 + repeatptr->offset), 
 			       (Xdropscore)lo->xdropbelowscore,
@@ -289,8 +277,6 @@ int searchforLTRs (
       evalxdroparbitscoresright (&lo->arbitscores, 
                                  &xdropbest_right, 
 				 &fronts, 
-				 //seq + repeatptr->pos1 + repeatptr->len,
-				 //seq + repeatptr->pos1 + repeatptr->offset +
 				 suffixarray->encseq,
 				 suffixarray->encseq,
 				 repeatptr->pos1 + repeatptr->len,
@@ -301,13 +287,11 @@ int searchforLTRs (
 				 lo->xdropbelowscore,
 				 env);
     } 
-    else
+    else /* do not align over right sequence boundary */
     {
       evalxdroparbitscoresright(&lo->arbitscores, 
 	                        &xdropbest_right, 
 				&fronts, 
-				//seq + repeatptr->pos1 + repeatptr->len,
-				//seq + repeatptr->pos1 + repeatptr->offset +
 				suffixarray->encseq,
 				suffixarray->encseq,
 				repeatptr->pos1 + repeatptr->len,
@@ -337,7 +321,8 @@ int searchforLTRs (
     {
       offset = markpos[boundaries->contignumber-1];
     }
-/* test
+
+    /* test
     printf("contig number: %lu\n",
                boundaries->contignumber);
     printf("offset to contig startpos: " FormatSeqpos "\n",
@@ -361,7 +346,8 @@ int searchforLTRs (
     printf("boundaries->rightLTR_3 = " FormatSeqpos "\n", 
 	      PRINTSeqposcast(repeatptr->pos1 + repeatptr->offset + 
 	                repeatptr->len - 1 - offset));
-*/
+    */
+
     /* store new boundaries-positions in boundaries */
     adjustboundariesfromXdropextension( 
 	           xdropbest_left, 
@@ -372,17 +358,15 @@ int searchforLTRs (
                    repeatptr->pos1 + repeatptr->offset + repeatptr->len - 1,
 		                                         /*seed2 endpos*/  
 		   boundaries,
-		   offset); //muss noch uerbergeben werden
-    // if search for motif and/or TSD
+		   offset,
+		   env);
+
+    /* if search for motif and/or TSD */
     if( lo->motif.allowedmismatches < (unsigned int)4 || 
         lo->minlengthTSD > (unsigned long) 1)
     {
-      if( findcorrectboundaries(
-            lo,
-	    boundaries,
-	    suffixarray,
-	    markpos,
-	    env) != 0 )
+      if( findcorrectboundaries(lo, boundaries, suffixarray, 
+	                        markpos, env) != 0 )
       {
         return (int) -1;
       }
@@ -416,7 +400,8 @@ int searchforLTRs (
     }
 
 #ifdef DEBUG
-    shownewboundariesifadjusted(boundaries, multiseqoffset); 
+    // spaeter einkommentieren
+    //shownewboundariesifadjusted(boundaries, multiseqoffset); 
 #endif
 
     // check length and distance constraints again
@@ -443,7 +428,6 @@ int searchforLTRs (
     }
 */
   }
-  FREESPACE(markpos);
 
   return 0;
 }

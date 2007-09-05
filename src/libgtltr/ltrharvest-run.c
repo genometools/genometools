@@ -13,6 +13,7 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/esa-maxpairs.pr"
 #include "libgtmatch/sfx-map.pr"
+#include "libgtmatch/pos2seqnum.pr"
 
 #include "ltrharvest-opt.h"
 #include "repeats.h"
@@ -22,10 +23,10 @@
 
 static int runltrharvest(LTRharvestoptions *lo, Env *env)
 {
-  bool haserror = false;
   Suffixarray suffixarray;
   Seqpos totallength;
-  
+  Seqpos *markpos = NULL;
+
   env_error_check(env);
 
   /* map suffix array */
@@ -36,10 +37,10 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 		       false,
 		       env) != 0)
   {
-    haserror = true;
+    return -1;
   }
 
-  /* test if motif is valid */
+  /* test if motif is valid and encode motif */
   if( testmotifandencodemotif(&lo->motif, suffixarray.alpha, env) != 0)
   {
     return -1; 
@@ -51,25 +52,34 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
     showuserdefinedoptionsandvalues(lo);
   }
 
+  // calculate markpos array for contig offset
+  markpos = calculatemarkpositions(suffixarray.encseq, 
+                                   suffixarray.numofdbsequences, 
+                                   env);
+  if(markpos == NULL)
+  { 
+    return -1;
+  }
+
   /* init array for maximal repeats */
   INITARRAY (&lo->repeatinfo.repeats, Repeat);
   lo->repeatinfo.suffixarrayptr = &suffixarray;
 
   /* search for maximal repeats */ 
-  if(!haserror && enumeratemaxpairs(&suffixarray,
+  if(enumeratemaxpairs(&suffixarray,
                        (uint32_t)lo->minseedlength,
 		       (void*)simpleexactselfmatchstore,
 		       lo,
 		       env) != 0)
   {
-    haserror = true;
+    return -1;
   }
 
   /* init array for candidate pairs */
   INITARRAY(&lo->arrayLTRboundaries, LTRboundaries);
 
   /* apply the filter algorithms */
-  if(searchforLTRs (&suffixarray, lo, env) != 0)
+  if(searchforLTRs (&suffixarray, lo, markpos, env) != 0)
   {
      return -1; 
   }
@@ -85,9 +95,22 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 
   /* print multiple FASTA file of predictions */
   // fehlt noch
-
-  /* print GFF3 format file of predictions */
+  
+  /* print inner region multiple FASTA file of predictions */
   // fehlt noch
+  
+  /* print GFF3 format file of predictions */
+  /*if(lo->gff3output)
+  {
+    if(printgff3format(lo,
+	  suffixarray,
+	  markpos) != 0 )
+    {
+      return -1; 
+    }
+  }*/
+
+  FREESPACE(markpos);
 
   /* print predictions to stdout */
   showinfoiffoundfullLTRs(lo, &suffixarray, env);
@@ -97,7 +120,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   /* free suffixarray */
   freesuffixarray(&suffixarray, env);
 
-  return haserror ? -1 : 0;
+  return 0;
 }
 
 int parseargsandcallltrharvest(int argc,const char *argv[],Env *env)
@@ -106,7 +129,7 @@ int parseargsandcallltrharvest(int argc,const char *argv[],Env *env)
   int retval;
   bool haserr = false;
 
-  lo.env = env;
+  lo.env = env; //for getting env in simpleexactselfmatchstore 
 
   retval = ltrharvestoptions(&lo,argc,argv,env);
   if (retval == 0)

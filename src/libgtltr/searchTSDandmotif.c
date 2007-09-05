@@ -650,6 +650,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
 #ifdef DEBUG
   if(i == endrightLTR && (!motif2))    
   {
+    printf("no left motif found.\n");
     //DEBUG0(1, "no left motif found.\n");
   }
 #endif

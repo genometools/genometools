@@ -22,9 +22,8 @@
 
 /*
  The following function shows all options that are set by default or from
-  the user on stdout.
+ the user on stdout.
 */
-
 void showuserdefinedoptionsandvalues(LTRharvestoptions *lo
 /*
     bool verbosemode,
@@ -131,6 +130,7 @@ void printargsline(const char **argv, int argc)
   }
 }
 
+/* test the motif and encode the characters by using alpha */
 int testmotifandencodemotif(Motif *motif, Alphabet *alpha, Env *env)
 {
   const Uchar *symbolmap;
@@ -140,35 +140,30 @@ int testmotifandencodemotif(Motif *motif, Alphabet *alpha, Env *env)
   {
     env_error_set(env,"Illegal nucleotide character %c " 
                       "as argument to option -motif", motif->firstleft);
-    //ERROR1("Illegal nucleotide character %c as argument to option -motif",
-    //	   motif->firstleft);
     return -1;
   }
   if( UNDEFCHAR == symbolmap[(unsigned int)motif->secondleft] )
   {
     env_error_set(env,"Illegal nucleotide character %c " 
                       "as argument to option -motif", motif->secondleft);
-    //ERROR1("Illegal nucleotide character %c as argument to option -motif",
-    //	motif->secondleft);
     return -1;
   }
   if( UNDEFCHAR == symbolmap[(unsigned int)motif->firstright] )
   {
     env_error_set(env,"Illegal nucleotide character %c " 
                       "as argument to option -motif", motif->firstright);
-    //ERROR1("Illegal nucleotide character %c as argument to option -motif",
-    //	motif->firstright);
     return -1;
   }
   if( UNDEFCHAR == symbolmap[(unsigned int)motif->secondright] )
   {
     env_error_set(env,"Illegal nucleotide character %c " 
                       "as argument to option -motif", motif->secondright);
-    //ERROR1("Illegal nucleotide character %c as argument to option -motif",
-    //	motif->secondright);
     return -1;
   }
 
+  // hier fehlt test ob motif palindromisch ist!!
+
+  /* encode the symbols */
   motif->firstleft = symbolmap[(unsigned int)motif->firstleft];
   motif->secondleft = symbolmap[(unsigned int)motif->secondleft];
   motif->firstright = symbolmap[(unsigned int)motif->firstright]; 
@@ -666,9 +661,6 @@ int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,
   env_error_check(env);
  
   /** init LTRharvestoptions lo **/
-  //Virtualtree virtualtree; // ersetzen
-  //lo->demand = TISTAB | SUFTAB | LCPTAB | BWTTAB | DESTAB; //ersetzen
-  
   rval = parse_options(&parsed_args, lo, argc, argv, env);
   if (rval == OPTIONPARSER_ERROR)
   {
@@ -683,15 +675,6 @@ int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,
       if (rval == OPTIONPARSER_OK)
       {
 	assert(parsed_args == argc);
-	/* transform motif from argv */
-	/*if( transformmotif(lo) != 0)
-	{
-	  STANDARDMESSAGE;
-	}
-	printargsline(argv,argc); 
-        */
-	/* if verbosemode, show chosen options and values */
-	//showuserdefinedoptionsandvalues(lo); 
       }
     }
   }

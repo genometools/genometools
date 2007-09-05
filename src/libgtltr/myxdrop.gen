@@ -27,6 +27,8 @@ EVALXDROPARBITSCORES
   int allowedMININFINITYINTgenerations = 0,
       currentMININFINITYINTgeneration = 0; 
   
+  env_error_check(env);
+  
   //DEBUG0(1, "starting xdrop-alignment-extension...\n");
   
   calculatedistancesfromscores(arbitscores, &arbitdistances);
