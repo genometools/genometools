@@ -28,6 +28,7 @@
 #include "intcode-def.h"
 #include "filelength-def.h"
 #include "chardef.h"
+#include "sfx-suffixer.h"
 
 #include "measure-time.pr"
 #include "opensfxfile.pr"
@@ -35,7 +36,6 @@
 #include "sfx-cmpsuf.pr"
 #include "sfx-opt.pr"
 #include "sfx-outprj.pr"
-#include "sfx-suffixer.pr"
 #include "sfx-apfxlen.pr"
 #include "sfx-readmode.pr"
 
@@ -106,13 +106,12 @@ static int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Outfileinfo *outfileinfo,
   return haserr ? -1 : 0;
 }
 
-static int suftab2file(void *info,
+static int suftab2file(Outfileinfo *outfileinfo,
                        const Seqpos *suftab,
                        Readmode readmode,
                        Seqpos widthofpart,
                        Env *env)
 {
-  Outfileinfo *outfileinfo = (Outfileinfo *) info;
   bool haserr = false;
   Seqpos pos;
 
@@ -268,6 +267,58 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
           }\
         }
 
+static int suffixeratorwithoutput(
+                 Outfileinfo *outfileinfo,
+                 Seqpos specialcharacters,
+                 Seqpos specialranges,
+                 const Encodedsequence *encseq,
+                 Readmode readmode,
+                 unsigned int numofchars,
+                 unsigned int prefixlength,
+                 unsigned int numofparts,
+                 Measuretime *mtime,
+                 Env *env)
+{
+  const Seqpos *suftabptr;
+  Seqpos len;
+  bool haserr = false;
+  Sfxiterator *sfi;
+
+  sfi = newsfxiterator(specialcharacters,
+                       specialranges,
+                       encseq,
+                       readmode,
+                       numofchars,
+                       prefixlength,
+                       numofparts,
+                       mtime,
+                       env);
+  if(sfi == NULL)
+  {
+    haserr = true;
+  } else
+  {
+    while(true)
+    {
+      suftabptr = nextSfxiterator(&len,mtime,sfi,env);
+      if(suftabptr == NULL)
+      {
+        break;
+      }
+      if(suftab2file(outfileinfo,suftabptr,readmode,len,env) != 0)
+      {
+        haserr = true;
+        break;
+      }
+    }
+  }
+  if(sfi != NULL)
+  {
+    freeSfxiterator(&sfi,env);
+  }
+  return haserr ? -1 : 0;
+}
+
 static int runsuffixerator(Suffixeratoroptions *so,Env *env)
 {
   unsigned int numofchars = 0;
@@ -276,10 +327,10 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
   Alphabet *alpha;
   Specialcharinfo specialcharinfo;
   Filelengthvalues *filelengthtab = NULL;
-  Outfileinfo outfileinfo;
   bool haserr = false;
   Encodedsequence *encseq = NULL;
   Measuretime *mtime;
+  Outfileinfo outfileinfo;
 
   env_error_check(env);
   inittheclock(&mtime,
@@ -394,7 +445,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
       }
       if (!haserr)
       {
-        if (suffixerator(suftab2file,
+        if (suffixeratorwithoutput(
                          &outfileinfo,
                          specialcharinfo.specialcharacters,
                          specialcharinfo.specialranges,
