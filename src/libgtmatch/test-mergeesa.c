@@ -70,7 +70,7 @@ static int outputsuflcpllv(void *processinfo,
 {
   Mergeoutinfo *mergeoutinfo = (Mergeoutinfo *) processinfo;
 
-  uint32_t i, lastindex;
+  unsigned int i, lastindex;
   Seqpos lcpvalue;
   Largelcpvalue currentexception;
   Uchar smallvalue;
@@ -91,7 +91,7 @@ static int outputsuflcpllv(void *processinfo,
   {
     env_error_set(env,"fwrite(%s) of %u Seqpos-value failed: %s",
                   str_get(mergeoutinfo->outsuf.outfilename),
-                  (unsigned int) buf->nextstoreidx,strerror(errno));
+                  buf->nextstoreidx,strerror(errno));
     haserr = true;
   }
   if (!haserr)

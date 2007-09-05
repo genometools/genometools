@@ -23,14 +23,13 @@
 #include "seqdesc.h"
 #include "gqueue-def.h"
 
-#include "alphabet.pr"
 #include "fmi-map.pr"
 #include "fmi-fwduni.pr"
 #include "iterseq.pr"
 #include "genericqueue.pr"
 
-#define SHOWSEQUENCE   ((uint32_t) 1)
-#define SHOWQUERYPOS   (((uint32_t) 1) << 1)
+#define SHOWSEQUENCE   ((unsigned int) 1)
+#define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
 
 typedef struct
 {
@@ -40,7 +39,7 @@ typedef struct
 
 typedef struct
 {
-  uint32_t showmode;
+  unsigned int showmode;
   Definedunsignedlong minlength,
                       maxlength;
 } Rangespecinfo;
@@ -49,7 +48,7 @@ typedef struct
 {
   Definedunsignedlong minlength,
                       maxlength;
-  uint32_t showmode;
+  unsigned int showmode;
   Str *fmindexname;
   StrArray *queryfilenames;
 } Uniquesubcallinfo;
@@ -57,7 +56,7 @@ typedef struct
 typedef struct
 {
   const char *name;
-  uint32_t bitmask;
+  unsigned int bitmask;
 } Optionargmodedesc;
 
 typedef int (*Preprocessuniquelength)(uint64_t,
@@ -89,7 +88,7 @@ typedef struct
 
 static int optionaddbitmask(Optionargmodedesc *modedesc,
                             size_t numberofentries,
-                            uint32_t *mode,
+                            unsigned int *mode,
                             const char *optname,
                             const char *optionargument,
                             Env *env)
@@ -340,7 +339,7 @@ static int findsubquerymatch(Fmindex *fmindex,
                              const StrArray *queryfilenames,
                              Definedunsignedlong minlength,
                              Definedunsignedlong maxlength,
-                             uint32_t showmode,
+                             unsigned int showmode,
                              Env *env)
 {
   Substringinfo substringinfo;

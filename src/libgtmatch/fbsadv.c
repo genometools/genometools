@@ -156,7 +156,7 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       fbs->firstseqinfile = true;
       currentfileadd = 0;
       currentfileread = 0;
-      fbs->linenum = (uint32_t) 1;
+      fbs->linenum = (uint64_t) 1;
       if (opengenericstream(&fbs->inputstream,
                            strarray_get(fbs->filenametab,
                            (unsigned long) fbs->filenum),
@@ -253,7 +253,7 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
                 fbs->bufspace[currentposition++] = (Uchar) currentchar;
               } else
               {
-                charcode = fbs->symbolmap[(uint32_t) currentchar];
+                charcode = fbs->symbolmap[(unsigned int) currentchar];
                 if (charcode == (Uchar) UNDEFCHAR)
                 {
                   env_error_set(env,"illegal character '%c':"

@@ -29,7 +29,7 @@
           fprintf(stderr,"file %s, line %d: realloc(%lu) failed\n",\
                   FILENAME,LINENUM,\
                   (unsigned long) (sizeof (T) * (size_t) (N)));\
-          exit(EXIT_FAILURE);\
+          exit(EXIT_FAILURE); /* malloc error */ \
         }
 
 #define ALLOCASSIGNSPACE(V,S,T,N)\

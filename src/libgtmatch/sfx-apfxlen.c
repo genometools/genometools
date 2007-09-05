@@ -22,6 +22,8 @@
 #include "intcode-def.h"
 #include "seqpos-def.h"
 
+#define SIZEOFBCKENTRY (2 * sizeof (Seqpos))
+
 /*
   We need \texttt{prefixlenbits} bits to store the length of
   a matching prefix. So we can store the following maximal value
@@ -58,13 +60,12 @@ static unsigned int logalphasize(unsigned int numofchars,double value)
 }
 
 unsigned int recommendedprefixlength(unsigned int numofchars,
-                                     Seqpos totallength,
-                                     size_t sizeofbckentry)
+                                     Seqpos totallength)
 {
   unsigned int prefixlength;
 
   prefixlength = logalphasize(numofchars,
-                              (double) totallength/sizeofbckentry);
+                              (double) totallength/SIZEOFBCKENTRY);
   if (prefixlength == 0)
   {
     return (unsigned int) 1;
@@ -76,14 +77,13 @@ unsigned int recommendedprefixlength(unsigned int numofchars,
 
 unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
                                           Seqpos totallength,
-                                          size_t sizeofbckentry,
                                           unsigned int prefixlenbits)
 {
   unsigned int maxprefixlen;
 
   maxprefixlen = logalphasize(numofchars,
                            (double) totallength/
-                                (sizeofbckentry/MAXMULTIPLIEROFTOTALLENGTH));
+                                (SIZEOFBCKENTRY/MAXMULTIPLIEROFTOTALLENGTH));
   if (prefixlenbits > 0)
   {
     unsigned int tmplength;
@@ -111,8 +111,8 @@ int checkprefixlength(unsigned int maxprefixlen,
   {
     env_error_set(env,"prefix length %u is too large, maximal prefix length "
                       "for this input size and alphabet size is %u",
-                      (unsigned int) prefixlength,
-                      (unsigned int) maxprefixlen);
+                      prefixlength,
+                      maxprefixlen);
     return -1;
   }
   return 0;
@@ -124,6 +124,6 @@ void showmaximalprefixlength(unsigned int maxprefixlen,
   printf("# for this input size and alphabet size, the maximal prefixlength\n"
          "# (argument of option -pl) is %u,\n"
          "# the recommended prefixlength is %u\n",
-         (unsigned int) maxprefixlen,
-         (unsigned int) recommended);
+         maxprefixlen,
+         recommended);
 }

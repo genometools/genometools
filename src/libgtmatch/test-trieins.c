@@ -19,9 +19,9 @@
 #include "sarr-def.h"
 #include "trieins-def.h"
 #include "encseq-def.h"
+#include "alphadef.h"
 
 #include "trieins.pr"
-#include "alphabet.pr"
 #include "sfx-map.pr"
 
 static void maketrie(Trierep *trierep,
@@ -55,8 +55,8 @@ static void successivelydeletesmallest(Trierep *trierep,
 {
   Trienode *smallest;
 #ifdef WITHTRIEIDENT
-  uint32_t numberofleaves = (uint32_t) seqlen+1;
-  uint32_t maxleafnum = (uint32_t) seqlen;
+  unsigned int numberofleaves = (unsigned int) seqlen+1;
+  unsigned int maxleafnum = (unsigned int) seqlen;
 #endif
 
   while (trierep->root != NULL && trierep->root->firstchild != NULL)
@@ -98,7 +98,7 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
     trierep.encseqreadinfo[0].encseqptr = suffixarray.encseq;
     trierep.encseqreadinfo[0].readmode = suffixarray.readmode;
     characters = getcharactersAlphabet(suffixarray.alpha);
-    inittrienodetable(&trierep,totallength,(uint32_t) 1,env);
+    inittrienodetable(&trierep,totallength,(unsigned int) 1,env);
     maketrie(&trierep,characters,totallength);
     if (onlyins)
     {

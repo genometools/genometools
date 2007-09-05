@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 # set -e -x
 
@@ -18,7 +18,7 @@ shift
 shift
 rfiles=$*
 
-function cerr() 
+cerr() 
 {
   $1
   if [ $? -ne 0 ]
@@ -30,7 +30,7 @@ function cerr()
   fi
 }
 
-function uniquesub
+uniquesub
 {
   cerr "${gtpath} uniquesub -output sequence querypos $*"
 }

@@ -21,12 +21,9 @@
 #include "libgtcore/strarray.h"
 #include "seqpos-def.h"
 #include "chardef.h"
-#include "spacedef.h"
-#include "arraydef.h"
 #include "fbs-def.h"
 #include "dist-if.h"
 #include "safecast-gen.h"
-#include "stamp.h"
 
 #include "distcalc.pr"
 #include "fbsadv.pr"
@@ -56,13 +53,14 @@ static int updatesumranges(void *key, void *value, void *data,
   keyvalue = (unsigned long) key;
   distvalue = *((unsigned long *) value);
   (*specialrangesptr) += currentrangevalue(keyvalue,distvalue);
-  printf("# specialranges of length %lu: %lu\n",keyvalue,distvalue);
+  /* printf("# specialranges of length %lu: %lu\n",keyvalue,distvalue);
+     XXX integrate later */
   return 0;
 }
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
-int scanfastasequence(
+int fasta2sequencekeyvalues(
         unsigned long *numofsequences,
         Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
@@ -156,4 +154,64 @@ int scanfastasequence(
   }
   freedistribution(&specialrangelengths,env);
   return haserr ? -1 : 0;
+}
+
+void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
+                              const Uchar *seq,
+                              const Seqpos len,
+                              Env *env)
+{
+  Uchar charcode;
+  Seqpos pos;
+  bool specialprefix = true;
+  Seqpos lastspeciallength = 0;
+  Distribution *specialrangelengths;
+  unsigned long idx;
+
+  env_error_check(env);
+  specialcharinfo->specialcharacters = 0;
+  specialcharinfo->lengthofspecialprefix = 0;
+  specialcharinfo->lengthofspecialsuffix = 0;
+  specialrangelengths = initdistribution(env);
+  for (pos = 0; pos < len; pos++)
+  {
+    charcode = seq[pos];
+    if (ISSPECIAL(charcode))
+    {
+      if (specialprefix)
+      {
+        specialcharinfo->lengthofspecialprefix++;
+      }
+      specialcharinfo->specialcharacters++;
+      if (lastspeciallength == 0)
+      {
+        lastspeciallength = (Seqpos) 1;
+      } else
+      {
+        lastspeciallength++;
+      }
+    } else
+    {
+      if (specialprefix)
+      {
+        specialprefix = false;
+      }
+      if (lastspeciallength > 0)
+      {
+        idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+        adddistribution(specialrangelengths,idx,env);
+        lastspeciallength = 0;
+      }
+    }
+  }
+  if (lastspeciallength > 0)
+  {
+    idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+    adddistribution(specialrangelengths,idx,env);
+  }
+  specialcharinfo->specialranges = 0;
+  (void) foreachdistributionvalue(specialrangelengths,updatesumranges,
+                                  &specialcharinfo->specialranges,env);
+  specialcharinfo->lengthofspecialsuffix = lastspeciallength;
+  freedistribution(&specialrangelengths,env);
 }

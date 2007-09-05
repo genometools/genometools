@@ -72,6 +72,6 @@
   the size of the DNA alphabet
 */
 
-#define DNAALPHASIZE       ((uint32_t) 4)
+#define DNAALPHASIZE       ((unsigned int) 4)
 
 #endif

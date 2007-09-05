@@ -57,7 +57,8 @@ Keywords "gt_suffixerator"
 Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}Atinsert.fna " +
            "-indexname sfx -dna -suf -tis -lcp -pl"
-  run_test "#{$bin}gt dev maxpairs -l 8 -ii sfx"
+  run_test "#{$bin}gt dev maxpairs -samples 100 -l 8 -ii sfx"
+  run "grep -v '^#' #{$last_stdout}"
   run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
 end
 
@@ -103,10 +104,10 @@ Test do
 end
 
 allfiles.each do |filename|
-  Name "gt suffixerator uint64"
+  Name "gt suffixerator uint32"
   Keywords "gt_suffixerator"
   Test do
-    run_test "#{$bin}gt suffixerator -tis -indexname sfx -sat uint64 " +
+    run_test "#{$bin}gt suffixerator -tis -indexname sfx -sat uint32 " +
              "-pl -db #{$testdata}#{filename}"
   end
 end

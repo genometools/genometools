@@ -8,9 +8,9 @@ int suffixerator(int(*processsuftab)(void *,const Seqpos *,
                  Seqpos specialranges,
                  const Encodedsequence *encseq,
                  Readmode readmode,
-                 uint32_t numofchars,
-                 uint32_t prefixlength,
-                 uint32_t numofparts,
+                 unsigned int numofchars,
+                 unsigned int prefixlength,
+                 unsigned int numofparts,
                  Measuretime *mtime,
                  Env *env);
 

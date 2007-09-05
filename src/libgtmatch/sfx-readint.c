@@ -191,7 +191,7 @@ int allkeysdefined(const Str *indexname,const char *suffix,
 
 int analyzeuintline(const Str *indexname,
                     const char *suffix,
-                    uint32_t linenum,
+                    unsigned int linenum,
                     const Uchar *linebuffer,
                     unsigned long linelength,
                     Array *riktab,

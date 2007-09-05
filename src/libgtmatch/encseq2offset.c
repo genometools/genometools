@@ -25,10 +25,10 @@
 Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
                                Specialcharinfo *specialcharinfo,
                                const Suffixarray *suffixarraytable,
-                               uint32_t numofindexes,
+                               unsigned int numofindexes,
                                Env *env)
 {
-  uint32_t idx;
+  unsigned int idx;
   Uchar lastofprevious, firstofcurrent;
   Seqpos tmplength, *sequenceoffsettable;
   uint64_t tmpspecialcharacters,
@@ -84,7 +84,7 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmpspecialcharacters);
     (void) CALLCASTFUNC(uint64_t,Seqpos,tmpspecialranges);
     printf("# seqlen[%u] = " FormatSeqpos "\n",
-           (unsigned int) idx,
+           idx,
            PRINTSeqposcast(getencseqtotallength(suffixarraytable[idx].encseq)));
   }
   tmplength = getencseqtotallength(suffixarraytable[numofindexes -1].encseq);

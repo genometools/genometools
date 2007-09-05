@@ -4,8 +4,8 @@ extern "C" {
 void showtrie(const Trierep *trierep,
               const Uchar *characters);
 
-void checktrie(Trierep *trierep,uint32_t numberofleaves,
-               uint32_t maxleafnum,Env *env);
+void checktrie(Trierep *trierep,unsigned int numberofleaves,
+               unsigned int maxleafnum,Env *env);
 
 void showallnoderelations(const Trienode *node);
 
@@ -18,7 +18,7 @@ Trienode *findsmallestnodeintrie(const Trierep *trierep);
 void deletesmallestpath(Trienode *smallest,Trierep *trierep);
 
 void inittrienodetable(Trierep *trierep,Seqpos numofsuffixes,
-                       uint32_t numofindexes,Env *env);
+                       unsigned int numofindexes,Env *env);
 
 void freetrierep(Trierep *trierep,Env *env);
 

@@ -6,7 +6,7 @@ then
   exit 1
 fi
 
-function checkerror() 
+checkerror() 
 {
   $1
   if test $? -ne 0
@@ -16,7 +16,7 @@ function checkerror()
   fi
 }
 
-function cleanhashlines()
+cleanhashlines()
 {
   TMPFILE=`mktemp TMP.XXXXXX` || exit 1
   sed -e '/^#/d' $1 > ${TMPFILE}

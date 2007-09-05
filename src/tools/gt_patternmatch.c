@@ -23,6 +23,7 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/stamp.h"
 #include "libgtmatch/enum-patt-def.h"
+#include "libgtmatch/esa-mmsearch-def.h"
 
 #include "libgtmatch/sfx-map.pr"
 #include "libgtmatch/enum-patt.pr"
@@ -34,19 +35,15 @@ typedef struct
   Str *indexname;
 } Pmatchoptions;
 
-static int swallowmatch(/*@unused@*/ void *info,/*@unused@*/ Seqpos startpos)
-{
-  return 0;
-}
-
 static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
 {
   Suffixarray suffixarray;
   Seqpos totallength;
   bool haserr = false;
-  Enumpatternstate *eps = NULL;
+  Enumpatterniterator *epi = NULL;
   const Uchar *pptr;
   unsigned long patternlen;
+  MMsearchiterator *mmsi; 
 
   if (mapsuffixarray(&suffixarray,
                      &totallength,
@@ -60,29 +57,33 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
   if (!haserr)
   {
     unsigned long trial;
+    Seqpos dbstart;
 
-    eps = newenumpattern(pmopt->minpatternlen,
-                         pmopt->maxpatternlen,
-                         suffixarray.encseq,
-                         env);
+    epi = newenumpatterniterator(pmopt->minpatternlen,
+                                 pmopt->maxpatternlen,
+                                 suffixarray.encseq,
+                                 env);
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
-      pptr = nextsampledpattern(&patternlen,eps);
-      if (mmenumpatternpositions(suffixarray.encseq,
-                                suffixarray.suftab,
-                                suffixarray.readmode,
-                                pptr,
-                                patternlen,
-                                swallowmatch,
-                                NULL) != 0)
+      pptr = nextEnumpatterniterator(&patternlen,epi);
+      mmsi = newmmsearchiterator(suffixarray.encseq,
+                                 suffixarray.suftab,
+                                 0,
+                                 0,
+                                 totallength,
+                                 suffixarray.readmode,
+                                 pptr,
+                                 patternlen,
+                                 env);
+      while(nextmmsearchiterator(&dbstart,mmsi))
       {
-        haserr = true;
-        break;
+        /* Nothing */;
       }
+      freemmsearchiterator(&mmsi,env);
     }
   }
   freesuffixarray(&suffixarray,env);
-  freeenumpattern(eps,env);
+  freeEnumpatterniterator(&epi,env);
   return haserr ? -1 : 0;
 }
 

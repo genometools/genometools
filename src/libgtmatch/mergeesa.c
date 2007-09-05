@@ -32,7 +32,7 @@
  DECLAREREADFUNCTION(Largelcpvalue);
 
 static void fillandinsert(Trierep *trierep,
-                          uint32_t idx,
+                          unsigned int idx,
                           Seqpos suftabvalue,
                           Trienode *node,
                           /*@unused@*/ uint64_t ident)
@@ -85,10 +85,10 @@ static int inputthesequences(Alphabet **alpha,
 static int insertfirstsuffixes(Trierep *trierep,
                                Seqpos *nextpostable,
                                Suffixarray *suffixarraytable,
-                               uint32_t numofindexes,
+                               unsigned int numofindexes,
                                Env *env)
 {
-  uint32_t idx;
+  unsigned int idx;
   Seqpos suftabvalue;
   int retval;
 
@@ -146,12 +146,12 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Env *env)
   Seqpos tmpsuftabvalue,
          tmplcpvalue,
          tmplastbranchdepth;
-  uint32_t tmpidx;
+  unsigned int tmpidx;
 
   env_error_check(env);
   for (emmesa->buf.nextstoreidx = 0;
       emmesa->numofentries > 0 &&
-      emmesa->buf.nextstoreidx < (uint32_t) SIZEOFMERGERESULTBUFFER;
+      emmesa->buf.nextstoreidx < (unsigned int) SIZEOFMERGERESULTBUFFER;
       emmesa->buf.nextstoreidx++)
   {
     tmpsmallestleaf = findsmallestnodeintrie(&emmesa->trierep);
@@ -247,10 +247,10 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
                           unsigned int demand,
                           Env *env)
 {
-  uint32_t numofindexes;
+  unsigned int numofindexes;
   bool haserr = false;
 
-  numofindexes = (uint32_t) strarray_size(indexnametab);
+  numofindexes = (unsigned int) strarray_size(indexnametab);
   emmesa->buf.nextaccessidx = emmesa->buf.nextstoreidx = 0;
   emmesa->numofindexes = numofindexes;
   emmesa->numofentries = numofindexes;
@@ -268,9 +268,9 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
     haserr = true;
     return -1;
   }
-  if (!haserr && numofindexes > (uint32_t) 1)
+  if (!haserr && numofindexes > (unsigned int) 1)
   {
-    uint32_t idx;
+    unsigned int idx;
 
     ALLOCASSIGNSPACE(emmesa->trierep.encseqreadinfo,NULL,Encseqreadinfo,
                      numofindexes);
@@ -281,7 +281,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
       emmesa->trierep.encseqreadinfo[idx].readmode
         = emmesa->suffixarraytable[idx].readmode;
     }
-    inittrienodetable(&emmesa->trierep,numofindexes,numofindexes,env);
+    inittrienodetable(&emmesa->trierep,(Seqpos) numofindexes,numofindexes,env);
     if (insertfirstsuffixes(&emmesa->trierep,
                            emmesa->nextpostable,
                            emmesa->suffixarraytable,
@@ -302,7 +302,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
 
 void wraptEmissionmergedesa(Emissionmergedesa *emmesa,Env *env)
 {
-  uint32_t idx;
+  unsigned int idx;
 
   for (idx = 0; idx < emmesa->numofindexes; idx++)
   {
@@ -310,7 +310,7 @@ void wraptEmissionmergedesa(Emissionmergedesa *emmesa,Env *env)
   }
   FREESPACE(emmesa->suffixarraytable);
   FREESPACE(emmesa->trierep.encseqreadinfo);
-  if (emmesa->numofindexes > (uint32_t) 1)
+  if (emmesa->numofindexes > (unsigned int) 1)
   {
     freetrierep(&emmesa->trierep,env);
   }

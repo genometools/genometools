@@ -26,8 +26,11 @@
 
 #define ENCSEQFILESUFFIX     ".esq"
 
+#define REVERSEPOS(TOT,POS) ((TOT) - 1 - (POS))
+
 typedef struct Encodedsequence Encodedsequence;
 typedef struct Encodedsequencescanstate Encodedsequencescanstate;
+typedef struct Specialrangeiterator Specialrangeiterator;
 
 typedef struct
 {
@@ -55,33 +58,46 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos);
 
-/*@null@*/ Encodedsequence *initencodedseq(bool withrange,
-                                           const StrArray *filenametab,
-                                           bool plainformat,
-                                           const Str *indexname,
-                                           Seqpos totallength,
-                                           const Specialcharinfo
-                                                 *specialcharinfo,
-                                           const Alphabet *alphabet,
-                                           const char *str_sat,
-                                           Env *env);
+/*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
+                                                  const StrArray *filenametab,
+                                                  bool plainformat,
+                                                  Seqpos totallength,
+                                                  const Specialcharinfo
+                                                        *specialcharinfo,
+                                                  const Alphabet *alphabet,
+                                                  const char *str_sat,
+                                                  Env *env);
 
-bool fastspecialranges(const Encodedsequence *encseq);
+/*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
+                                               const Str *indexname,
+                                               Seqpos totallength,
+                                               const Specialcharinfo
+                                                     *specialcharinfo,
+                                               const Alphabet *alphabet,
+                                               const char *str_sat,
+                                               Env *env);
 
-int overallspecialrangesfast(
-                const Encodedsequence *encseq,
-                bool moveforward,
-                Readmode readmode,
-                int(*processrange)(void *,const Encodedsequence *,
-                                   const Sequencerange *,Env *),
-                void *processinfo,
-                Env *env);
+Encodedsequence *plain2encodedsequence(bool withrange,
+                                       Specialcharinfo *specialcharinfo,
+                                       const Uchar *seq1,
+                                       Seqpos len1,
+                                       const Uchar *seq2,
+                                       unsigned long len2,
+                                       const Alphabet *alphabet,
+                                       Env *env);
 
-int overallspecialranges(const Encodedsequence *encseq,
-                         Readmode readmode,
-                         int(*processrange)(void *,const Encodedsequence *,
-                                            const Sequencerange *,Env *),
-                         void *processinfo,
-                         Env *env);
+bool hasspecialranges(const Encodedsequence *encseq);
+
+Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
+                                              bool moveforward,
+                                              Env *env);
+
+bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
+
+void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
+
+/*@null@*/ char *encseqaccessname(const Encodedsequence *encseq);
+
+bool exhaustedspecialrangeiterator(Specialrangeiterator *sri);
 
 #endif

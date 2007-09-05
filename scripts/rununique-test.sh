@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 if test $# -lt 4
 then
@@ -8,7 +8,7 @@ fi
 
 fmdir=${PROJECT}/vstree/src/vstree/src/fmmatch
 
-function cerr() 
+cerr() 
 {
   $1
   if test $? -ne 0
@@ -20,7 +20,7 @@ function cerr()
   fi
 }
 
-function mkfmindex() 
+mkfmindex() 
 {
   indexname=$1
   shift
@@ -28,12 +28,12 @@ function mkfmindex()
   cerr "${fmdir}/mkfmindex.x -noindexpos -fmout ${indexname} ${iiargs}"
 }
 
-function mkvtree
+mkvtree
 {
   cerr "mkvtree.x $*"
 }
 
-function uniquesub
+uniquesub
 {
   cerr "${fmdir}/uniquesub.x -output sequence querypos $*"
 }

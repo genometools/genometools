@@ -17,16 +17,15 @@
 
 #ifndef INTCODE_DEF_H
 #define INTCODE_DEF_H
-#include <inttypes.h>
 #include <stdbool.h>
 
 #define PREFIXLENBITS   4
 
-typedef uint32_t Codetype;      /* \Typedef{Codetype} */
+typedef unsigned int Codetype;      /* \Typedef{Codetype} */
 
 typedef struct
 {
-  uint32_t specialpos;
+  unsigned int specialpos;
   bool defined;
 } Firstspecialpos;
 

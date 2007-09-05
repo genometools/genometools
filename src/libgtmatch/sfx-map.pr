@@ -21,6 +21,32 @@ int mapsuffixarray(Suffixarray *suffixarray,
                    bool verbose,
                    Env *env);
 
+Sequentialsuffixarrayreader *newSequentialsuffixarrayreader(
+                                        const Str *indexname,
+                                        unsigned int demand,
+                                        bool mapped,
+                                        Env *env);
+
+void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
+                                     Env *env);
+
+int nextSequentiallcpvalue(Seqpos *currentlcp,
+                           Sequentialsuffixarrayreader *ssar,
+                           Env *env);
+
+int nextSequentialsuftabvalue(Seqpos *currentsuffix,
+                              Sequentialsuffixarrayreader *ssar,
+                              Env *env);
+
+Encodedsequence *encseqSequentialsuffixarrayreader(
+                          const Sequentialsuffixarrayreader *sarr);
+
+Readmode readmodeSequentialsuffixarrayreader(
+			  const Sequentialsuffixarrayreader *sarr);
+
+unsigned int alphabetsizeSequentialsuffixarrayreader(
+			  const Sequentialsuffixarrayreader *sarr);
+
 #ifdef __cplusplus
 }
 #endif

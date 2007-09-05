@@ -36,8 +36,8 @@
 #define DECLAREBufferedfiletype(TYPE)\
         typedef struct\
         {\
-          uint32_t nextfree,\
-                   nextread;\
+          unsigned int nextfree,\
+                       nextread;\
           TYPE bufspace[FILEBUFFERSIZE];\
           FILE *fp;\
         } TYPE ## Bufferedfile
@@ -55,10 +55,10 @@ DECLAREBufferedfiletype(Largelcpvalue);
         {\
           if (buf->nextread >= buf->nextfree)\
           {\
-            buf->nextfree = (uint32_t) fread(buf->bufspace,\
-                                             sizeof (TYPE),\
-                                             (size_t) FILEBUFFERSIZE,\
-                                             buf->fp);\
+            buf->nextfree = (unsigned int) fread(buf->bufspace,\
+                                                 sizeof (TYPE),\
+                                                 (size_t) FILEBUFFERSIZE,\
+                                                 buf->fp);\
             if (ferror(buf->fp))\
             {\
               env_error_set(env,"error when trying to read next %s",#TYPE);\
@@ -74,17 +74,19 @@ DECLAREBufferedfiletype(Largelcpvalue);
           return 1;\
         }
 
+typedef struct Sequentialsuffixarrayreader Sequentialsuffixarrayreader;
+
 typedef struct
 {
-  unsigned long numofdbsequences;
+  unsigned long numofdbsequences; /* XXX: move to encoded sequence */
   StrArray *filenametab;
   Filelengthvalues *filelengthtab;
-  uint32_t prefixlength;
+  unsigned int prefixlength;
   DefinedSeqpos numoflargelcpvalues;
   Encodedsequence *encseq;
   DefinedSeqpos longest;
-  Specialcharinfo specialcharinfo;
-  Alphabet *alpha;
+  Specialcharinfo specialcharinfo; /* XXX: move to encoded sequence */
+  Alphabet *alpha;                 /* XXX: move to encoded sequence */
   Readmode readmode; /* relevant when reading the encoded sequence */
   /* either with mapped input */
   const Seqpos *suftab;
@@ -99,4 +101,3 @@ typedef struct
 } Suffixarray;
 
 #endif
-

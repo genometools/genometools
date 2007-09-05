@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 if [ $# -lt 4 ]
 then
@@ -14,7 +14,7 @@ shift
 shift
 rfiles=$*
 
-function cerr() 
+cerr() 
 {
   $1
   if [ $? -ne 0 ]
@@ -24,12 +24,12 @@ function cerr()
   fi
 }
 
-function suffixerator
+suffixerator
 {
   cerr "${gtpath} suffixerator $*"
 }
 
-function makesuftab
+makesuftab
 {
   if [ $1 = 'rev' ]
   then
@@ -39,12 +39,12 @@ function makesuftab
   fi
 }
 
-function plain() 
+plain() 
 {
   cerr "${gtpath} suffixerator -plain -tis -indexname $1 -smap $1.al1 -db $1.bwt"
 }
 
-function mkfmindex() 
+mkfmindex() 
 {
   indexname=$1
   shift
@@ -54,7 +54,7 @@ function mkfmindex()
 
 needsrebuild=0
 
-function needconstruction1()
+needconstruction1()
 {
   if [ ! -f ${idir}/$2 ] ||
      [ $1 -nt ${idir}/$2 ]

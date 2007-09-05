@@ -19,12 +19,12 @@
 
 void kmercode2string(char *buffer,
                      Codetype code,
-                     uint32_t numofchars,
-                     uint32_t kmersize,
+                     unsigned int numofchars,
+                     unsigned int kmersize,
                      const char *characters)
 {
   int i;
-  uint32_t cc;
+  unsigned int cc;
   Codetype tmpcode = code;
 
   buffer[kmersize] = '\0';

@@ -159,44 +159,11 @@ static bool ADDTYPE(binarysearchpage)(SPECIALTYPE *leftptr,
   return found;
 }
 
-#ifdef DIRECTBINSEARCH
+#ifdef POS2PAGENUM
 
 static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
 {
-  return ADDTYPE(binarysearchpage)(ACCESSENCSEQ(encseq,specialpositions),
-                                   ACCESSENCSEQ(encseq,specialpositions) +
-                                   encseq->numofspecialstostore - 1,
-                                   pos);
-}
-
-static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,
-                                       Seqpos pos)
-{
-  SPECIALTYPE *found, *start;
-
-  start = ACCESSENCSEQ(encseq,specialpositions);
-  found = ADDTYPE(binarysearchpreviousequal)(start,
-                                             start +
-                                             encseq->numofspecialstostore - 1,
-                                             pos);
-  if (found != NULL)
-  {
-    Seqpos rangeend
-             = (Seqpos) *found +
-               (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)];
-    if (pos < rangeend)
-    {
-      return true;
-    }
-  }
-  return false;
-}
-
-#else
-
-static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
-{
-  unsigned long pagenumber = (unsigned long) DIVMAXSPECIALTYPE(pos);
+  unsigned long pagenumber = (unsigned long) POS2PAGENUM(pos);
 
   if (pagenumber == 0)
   {
@@ -232,7 +199,7 @@ static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
 
 static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
 {
-  unsigned long pagenumber = (unsigned long) DIVMAXSPECIALTYPE(pos);
+  unsigned long pagenumber = (unsigned long) POS2PAGENUM(pos);
   SPECIALTYPE *found, *start;
 
   if (pagenumber == 0)
@@ -309,6 +276,39 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
           return true;
         }
       }
+    }
+  }
+  return false;
+}
+
+#else
+
+static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
+{
+  return ADDTYPE(binarysearchpage)(ACCESSENCSEQ(encseq,specialpositions),
+                                   ACCESSENCSEQ(encseq,specialpositions) +
+                                   encseq->numofspecialstostore - 1,
+                                   pos);
+}
+
+static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,
+                                       Seqpos pos)
+{
+  SPECIALTYPE *found, *start;
+
+  start = ACCESSENCSEQ(encseq,specialpositions);
+  found = ADDTYPE(binarysearchpreviousequal)(start,
+                                             start +
+                                             encseq->numofspecialstostore - 1,
+                                             pos);
+  if (found != NULL)
+  {
+    Seqpos rangeend
+             = (Seqpos) *found +
+               (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)];
+    if (pos < rangeend)
+    {
+      return true;
     }
   }
   return false;
