@@ -46,13 +46,18 @@ function render_and_show()
   show()
 end
 
-function show_coverage(maxdist)
+function show_range(range)
+  io.write(string.format("(%d, %d)\n", range:get_start(), range:get_end()))
+end
+
+function get_coverage(maxdist)
   local maxdist = maxdist or 0
   local features = feature_index:get_features_for_seqid(seqid)
   local starpos, endpos
   local minstartpos = nil
   local maxendpos = nil
   local ranges = {}
+  local coverage = {}
 
   -- collect all feature ranges
   for i, feature in ipairs(features) do
@@ -71,7 +76,7 @@ function show_coverage(maxdist)
       -- assert(startpos >= minstartpos)
       if (startpos > maxendpos + maxdist) then
         -- new region started
-        io.write(string.format("(%d, %d)\n", minstartpos, maxendpos))
+        table.insert(coverage, gt.range_new(minstartpos, maxendpos))
         minstartpos = startpos
         maxendpos   = endpos
       else
@@ -80,8 +85,16 @@ function show_coverage(maxdist)
       end
     end
   end
-  -- show last region
-  io.write(string.format("(%d, %d)\n", minstartpos, maxendpos))
+  -- add last region
+  table.insert(coverage, gt.range_new(minstartpos, maxendpos))
+  return coverage
+end
+
+function show_coverage(maxdist)
+  local coverage = get_coverage(maxdist)
+  for i, range in ipairs(coverage) do
+    show_range(range)
+  end
 end
 
 -- process input files
