@@ -38,6 +38,16 @@ assert(not gn:is_marked())
 gn:mark()
 assert(gn:is_marked())
 
+parent = gt.genome_feature_new("gene", range, "+")
+child  = gt.genome_feature_new("exon", range, "+")
+parent:is_part_of_genome_node(child)
+assert(not parent:is_marked(parent))
+assert(not parent:contains_marked(parent))
+child:mark()
+child  = nil; collectgarbage() -- being nasty
+assert(not parent:is_marked(parent))
+assert(parent:contains_marked(parent))
+
 -- testing genome_node:get_filename
 rval, fn = pcall(gn.get_filename, gn)
 assert(rval)
