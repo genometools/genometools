@@ -23,11 +23,11 @@
 #include "spacedef.h"
 #include "chardef.h"
 #include "esa-mmsearch-def.h"
+#include "sfx-suffixer.h"
 #include "measure-time-if.h"
 #include "stamp.h"
 
 #include "sfx-apfxlen.pr"
-#include "sfx-suffixer.pr"
 
 #define COMPARE(OFFSET)\
         for (sidx = (OFFSET) + lcplen; /* Nothing */; sidx++, lcplen++)\
@@ -245,62 +245,56 @@ static unsigned long extendright(const Encodedsequence *dbencseq,
   return querypos - queryend;
 }
 
-typedef struct
-{
-  const Uchar *query;
-  unsigned long querylen;
-  unsigned int minlength;
-  Encodedsequence *dbencseq;
-  int (*processmaxmatch)(void *,unsigned long,Seqpos,unsigned long);
-  void *processmaxmatchinfo;
-} Substringmatchinfo;
-
-static int processsuftab(void *info,
+static int processsuftab(const Encodedsequence *dbencseq,
                          const Seqpos *suftabpart,
                          Readmode readmode,
-                         Seqpos widthofpart,
+                         Seqpos numberofsuffixes,
+                         const Uchar *query,
+                         unsigned long querylen,
+                         unsigned int minlength,
+                         int (*processmaxmatch)(void *,unsigned long,
+                                                Seqpos,unsigned long),
+                         void *processmaxmatchinfo,
                          Env *env)
 {
-  Substringmatchinfo *ssi = (Substringmatchinfo *) info;
   MMsearchiterator *mmsi;
   Seqpos dbstart, totallength;
   unsigned long extend, currentquerystart;
 
-  assert(widthofpart > 0);
-  totallength = getencseqtotallength(ssi->dbencseq);
+  assert(numberofsuffixes > 0);
+  totallength = getencseqtotallength(dbencseq);
   for (currentquerystart = 0;
-       currentquerystart <= ssi->querylen - ssi->minlength;
+       currentquerystart <= querylen - minlength;
        currentquerystart++)
   {
-    mmsi = newmmsearchiterator(ssi->dbencseq,
+    mmsi = newmmsearchiterator(dbencseq,
                                suftabpart,
                                0,
                                0,
-                               widthofpart-1,
+                               numberofsuffixes-1,
                                readmode,
-                               ssi->query +
-                               currentquerystart,
-                               (unsigned long) ssi->minlength,
+                               query + currentquerystart,
+                               (unsigned long) minlength,
                                env);
     while (nextmmsearchiterator(&dbstart,mmsi))
     {
-      if (isleftmaximal(ssi->dbencseq,
+      if (isleftmaximal(dbencseq,
                         readmode,
                         dbstart,
-                        ssi->query,
+                        query,
                         currentquerystart))
       {
-        extend = extendright(ssi->dbencseq,
+        extend = extendright(dbencseq,
                              readmode,
                              totallength,
-                             dbstart + ssi->minlength,
-                             ssi->query,
-                             currentquerystart + ssi->minlength,
-                             ssi->querylen);
-        if (ssi->processmaxmatch(ssi->processmaxmatchinfo,
-                                 extend + (unsigned long) ssi->minlength,
-                                 dbstart,
-                                 currentquerystart) != 0)
+                             dbstart + minlength,
+                             query,
+                             currentquerystart + minlength,
+                             querylen);
+        if (processmaxmatch(processmaxmatchinfo,
+                            extend + (unsigned long) minlength,
+                            dbstart,
+                            currentquerystart) != 0)
         {
           return -1;
 	}
@@ -309,6 +303,67 @@ static int processsuftab(void *info,
     freemmsearchiterator(&mmsi,env);
   }
   return 0;
+}
+
+static int suffixeratormatch(
+                 Seqpos specialcharacters,
+                 Seqpos specialranges,
+                 const Encodedsequence *dbencseq,
+                 Readmode readmode,
+                 unsigned int numofchars,
+                 unsigned int prefixlength,
+                 unsigned int numofparts,
+                 const Uchar *query,
+                 unsigned long querylen,
+                 unsigned int minlength,
+                 int (*processmaxmatch)(void *,unsigned long,Seqpos,
+                                        unsigned long),
+                 void *processmaxmatchinfo,
+                 Measuretime *mtime,
+                 Env *env)
+{
+  const Seqpos *suftabptr;
+  Seqpos len;
+  bool haserr = false;
+  Sfxiterator *sfi;
+
+  sfi = newsfxiterator(specialcharacters,
+                       specialranges,
+                       dbencseq,
+                       readmode,
+                       numofchars,
+                       prefixlength,
+                       numofparts,
+                       mtime,
+                       env);
+  if(sfi == NULL)
+  {
+    haserr = true;
+  } else
+  {
+    while(true)
+    {
+      suftabptr = nextSfxiterator(&len,mtime,sfi,env);
+      if(suftabptr == NULL)
+      {
+        break;
+      }
+      if(processsuftab(dbencseq,suftabptr,readmode,len,query,querylen,
+                       minlength,
+                       processmaxmatch,
+                       processmaxmatchinfo,
+                       env) != 0)
+      {
+        haserr = true;
+        break;
+      }
+    }
+  }
+  if(sfi != NULL)
+  {
+    freeSfxiterator(&sfi,env);
+  }
+  return haserr ? -1 : 0;
 }
 
 int sarrquerysubstringmatch(const Uchar *dbseq,
@@ -323,38 +378,36 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                             Env *env)
 {
   Specialcharinfo samplespecialcharinfo;
-  Substringmatchinfo ssi;
   unsigned int numofchars;
   bool haserr = false;
+  Encodedsequence *dbencseq;
 
-  ssi.dbencseq = plain2encodedsequence(true,
-                                       &samplespecialcharinfo,
-                                       dbseq,
-                                       dblen,
-                                       NULL,
-                                       0,
-                                       alpha,
-                                       env);
-  ssi.query = query;
-  ssi.querylen = querylen;
-  ssi.minlength = minlength;
-  ssi.processmaxmatch = processmaxmatch;
-  ssi.processmaxmatchinfo = processmaxmatchinfo;
+  dbencseq = plain2encodedsequence(true,
+                                   &samplespecialcharinfo,
+                                   dbseq,
+                                   dblen,
+                                   NULL,
+                                   0,
+                                   alpha,
+                                   env);
   numofchars = getnumofcharsAlphabet(alpha);
-  if (suffixerator(processsuftab,
-                   &ssi,
-                   samplespecialcharinfo.specialcharacters,
-                   samplespecialcharinfo.specialranges,
-                   ssi.dbencseq,
-                   Forwardmode,
-                   numofchars,
-                   recommendedprefixlength(numofchars,dblen),
-                   (unsigned int) 1, /* parts */
-                   NULL,
-		   env) != 0)
+  if (suffixeratormatch(samplespecialcharinfo.specialcharacters,
+                        samplespecialcharinfo.specialranges,
+                        dbencseq,
+                        Forwardmode,
+                        numofchars,
+                        recommendedprefixlength(numofchars,dblen),
+                        (unsigned int) 1, /* parts */
+                        query,
+                        querylen,
+                        minlength,
+                        processmaxmatch,
+                        processmaxmatchinfo,
+                        NULL,
+		        env) != 0)
   {
     haserr = true;
   }
-  freeEncodedsequence(&ssi.dbencseq,env);
+  freeEncodedsequence(&dbencseq,env);
   return haserr ? -1 : 0;
 }

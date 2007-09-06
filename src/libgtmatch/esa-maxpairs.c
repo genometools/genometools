@@ -20,10 +20,10 @@
 #include "seqpos-def.h"
 #include "sarr-def.h"
 #include "measure-time-if.h"
+#include "sfx-suffixer.h"
 
 #include "sfx-map.pr"
 #include "sfx-apfxlen.pr"
-#include "sfx-suffixer.pr"
 
 #define ISLEFTDIVERSE   (Uchar) (state->alphabetsize)
 #define INITIALCHAR     (Uchar) (state->alphabetsize+1)
@@ -343,7 +343,8 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   Dfsstate state;
   bool haserr = false;
 
-  state.alphabetsize = alphabetsizeSequentialsuffixarrayreader(ssar);
+  state.alphabetsize 
+    = getnumofcharsAlphabet(alphabetSequentialsuffixarrayreader(ssar));
   state.searchlength = searchlength;
   state.output = output;
   state.outinfo = outinfo;
@@ -386,13 +387,57 @@ typedef struct
   void *processmaxmatchinfo;
 } Substringmatchinfo;
 
-static int processsuftab(/*@unused@*/ void *info,
-                         /*@unused@*/ const Seqpos *suftabpart,
-                         /*@unused@*/ Readmode readmode,
-                         /*@unused@*/ Seqpos widthofpart,
-                         /*@unused@*/ Env *env)
+static int suffixeratorstoresuftab(
+                 Seqpos specialcharacters,
+                 Seqpos specialranges,
+                 const Encodedsequence *encseq,
+                 Readmode readmode,
+                 unsigned int numofchars,
+                 unsigned int prefixlength,
+                 unsigned int numofparts,
+                 Measuretime *mtime,
+                 Env *env)
 {
-  return 0;
+  const Seqpos *suftabptr;
+  Seqpos len;
+  bool haserr = false;
+  Sfxiterator *sfi;
+
+  sfi = newsfxiterator(specialcharacters,
+                       specialranges,
+                       encseq,
+                       readmode,
+                       numofchars,
+                       prefixlength,
+                       numofparts,
+                       mtime,
+                       env);
+  if(sfi == NULL)
+  {
+    haserr = true;
+  } else
+  {
+    while(true)
+    {
+      suftabptr = nextSfxiterator(&len,mtime,sfi,env);
+      if(suftabptr == NULL)
+      {
+        break;
+      }
+      /*
+      if(suftab2file(outfileinfo,suftabptr,readmode,len,env) != 0)
+      {
+        haserr = true;
+        break;
+      }
+      */
+    }
+  }
+  if(sfi != NULL)
+  {
+    freeSfxiterator(&sfi,env);
+  }
+  return haserr ? -1 : 0;
 }
 
 int sarrselfsubstringmatch(const Uchar *dbseq,
@@ -423,17 +468,15 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
   ssi.processmaxmatch = processmaxmatch;
   ssi.processmaxmatchinfo = processmaxmatchinfo;
   numofchars = getnumofcharsAlphabet(alpha);
-  if (suffixerator(processsuftab,
-                   &ssi,
-                   samplespecialcharinfo.specialcharacters,
-                   samplespecialcharinfo.specialranges,
-                   ssi.encseq,
-                   Forwardmode,
-                   numofchars,
-                   recommendedprefixlength(numofchars,dblen),
-                   (unsigned int) 1, /* parts */
-                   NULL,
-		   env) != 0)
+  if (suffixeratorstoresuftab(samplespecialcharinfo.specialcharacters,
+                              samplespecialcharinfo.specialranges,
+                              ssi.encseq,
+                              Forwardmode,
+                              numofchars,
+                              recommendedprefixlength(numofchars,dblen),
+                              (unsigned int) 1, /* parts */
+                              NULL,
+		              env) != 0)
   {
     haserr = true;
   }
