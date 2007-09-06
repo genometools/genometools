@@ -267,17 +267,6 @@ static void *genericmaptable(const Str *indexname,const char *suffix,
   return haserr ? NULL : ptr;
 }
 
-int initUcharBufferedfile(UcharBufferedfile *stream,
-                          const Str *indexname,
-                          const char *suffix,Env *env)
-{
-  bool haserr = false;
-
-  env_error_check(env);
-  INITBufferedfile(indexname,stream,suffix);
-  return haserr ? -1 : 0;
-}
-
 static void initsuffixarray(Suffixarray *suffixarray)
 {
   suffixarray->filelengthtab = NULL;

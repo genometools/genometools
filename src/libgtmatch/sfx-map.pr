@@ -1,10 +1,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int initUcharBufferedfile(UcharBufferedfile *stream,
-                          const Str *indexname,
-                          const char *suffix,Env *env);
-
 void freesuffixarray(Suffixarray *suffixarray,Env *env);
 
 int streamsuffixarray(Suffixarray *suffixarray,

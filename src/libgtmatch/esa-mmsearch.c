@@ -324,7 +324,7 @@ static int suffixeratormatch(
 {
   const Seqpos *suftabptr;
   Seqpos len;
-  bool haserr = false;
+  bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi;
 
   sfi = newsfxiterator(specialcharacters,
@@ -343,7 +343,7 @@ static int suffixeratormatch(
   {
     while(true)
     {
-      suftabptr = nextSfxiterator(&len,mtime,sfi,env);
+      suftabptr = nextSfxiterator(&len,&specialsuffixes,mtime,sfi,env);
       if(suftabptr == NULL)
       {
         break;

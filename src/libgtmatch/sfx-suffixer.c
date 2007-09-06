@@ -608,8 +608,8 @@ static void fillspecialnextpage(Sfxiterator *sfi)
   }
 }
 
-const Seqpos *nextSfxiterator(Seqpos *len,Measuretime *mtime,
-                              Sfxiterator *sfi,Env *env)
+const Seqpos *nextSfxiterator(Seqpos *len,bool *specialsuffixes,
+                              Measuretime *mtime,Sfxiterator *sfi,Env *env)
 {
   env_error_check(env);
 
@@ -617,6 +617,7 @@ const Seqpos *nextSfxiterator(Seqpos *len,Measuretime *mtime,
   {
     preparethispart(sfi,mtime,env);
     *len = sfi->widthofpart;
+    *specialsuffixes = false;
     return sfi->suftab;
   }
   if (sfi->exhausted)
@@ -627,5 +628,6 @@ const Seqpos *nextSfxiterator(Seqpos *len,Measuretime *mtime,
   fillspecialnextpage(sfi);
   assert(sfi->fusp.nextfreeSeqpos > 0);
   *len = (Seqpos) sfi->fusp.nextfreeSeqpos;
+  *specialsuffixes = true;
   return sfi->suftab;
 }

@@ -60,6 +60,7 @@ static int callenummaxpairs(const Str *indexname,
   bool haserr = false;
   Sequentialsuffixarrayreader *ssar;
 
+  env_error_check(env);
   ssar = newSequentialsuffixarrayreader(indexname,
                                         SARR_LCPTAB |
                                         SARR_SUFTAB |
@@ -78,7 +79,10 @@ static int callenummaxpairs(const Str *indexname,
   {
     haserr = true;
   }
-  freeSequentialsuffixarrayreader(&ssar,env);
+  if(ssar != NULL)
+  {
+    freeSequentialsuffixarrayreader(&ssar,env);
+  }
   return haserr ? -1 : 0;
 }
 

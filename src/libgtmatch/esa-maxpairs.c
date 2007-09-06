@@ -69,6 +69,9 @@ typedef struct
   void *outinfo;
   ArraySeqpos uniquechar,
               poslist[UCHAR_MAX+1];
+  Uchar initialchar;
+  Encodedsequence *encseq;
+  Readmode readmode;
 } Dfsstate;
 
 #include "esa-dfs.pr"
@@ -176,14 +179,14 @@ static void setpostabto0(Dfsstate *state)
 static int processleafedge(bool firstsucc,
                            Seqpos fatherdepth,
                            Dfsinfo *father,
-                           Uchar leftchar,
                            Seqpos leafnumber,
                            Dfsstate *state,
                            Env *env)
 {
   unsigned int base;
   Seqpos *start, *spptr;
-
+  Uchar leftchar;
+ 
 #ifdef DEBUG
   printf("processleafedge " FormatSeqpos " firstsucc=%s, "
          " depth(father)= " FormatSeqpos "\n",
@@ -195,6 +198,13 @@ static int processleafedge(bool firstsucc,
   {
     setpostabto0(state);
     return 0;
+  }
+  if(leafnumber == 0)
+  {
+    leftchar = state->initialchar;
+  } else
+  {
+    leftchar = getencodedchar(state->encseq,leafnumber-1,state->readmode);
   }
   state->initialized = false;
   state->depth = fatherdepth;
@@ -349,6 +359,9 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   state.output = output;
   state.outinfo = outinfo;
   state.initialized = false;
+  state.encseq = encseqSequentialsuffixarrayreader(ssar);
+  state.readmode = readmodeSequentialsuffixarrayreader(ssar);
+  state.initialchar = (Uchar) (state.alphabetsize+1),
 
   INITARRAY(&state.uniquechar,Seqpos);
   for (base = 0; base < state.alphabetsize; base++)
@@ -357,7 +370,6 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
     INITARRAY(ptr,Seqpos);
   }
   if (depthfirstesa(ssar,
-                    (Uchar) (state.alphabetsize+1),
                     allocateDfsinfo,
                     freeDfsinfo,
                     processleafedge,
@@ -402,6 +414,7 @@ static int suffixeratorstoresuftab(
   Seqpos len;
   bool haserr = false;
   Sfxiterator *sfi;
+  bool specialsuffixes = false;
 
   sfi = newsfxiterator(specialcharacters,
                        specialranges,
@@ -419,7 +432,7 @@ static int suffixeratorstoresuftab(
   {
     while(true)
     {
-      suftabptr = nextSfxiterator(&len,mtime,sfi,env);
+      suftabptr = nextSfxiterator(&len,&specialsuffixes,mtime,sfi,env);
       if(suftabptr == NULL)
       {
         break;
