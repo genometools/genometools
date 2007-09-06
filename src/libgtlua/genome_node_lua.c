@@ -22,8 +22,8 @@
 #include "libgtlua/helper.h"
 #include "libgtlua/range_lua.h"
 
-#define check_genome_node(L) \
-              (GenomeNode**) luaL_checkudata(L, 1, GENOME_NODE_METATABLE)
+#define check_genome_node(L, POS) \
+              (GenomeNode**) luaL_checkudata(L, POS, GENOME_NODE_METATABLE)
 
 static int genome_feature_lua_new(lua_State *L)
 {
@@ -59,14 +59,14 @@ static int genome_feature_lua_new(lua_State *L)
 
 static int genome_node_lua_get_filename(lua_State *L)
 {
-  GenomeNode **gn = check_genome_node(L);
+  GenomeNode **gn = check_genome_node(L, 1);
   lua_pushstring(L, genome_node_get_filename(*gn));
   return 1;
 }
 
 static int genome_node_lua_get_range(lua_State *L)
 {
-  GenomeNode **gn = check_genome_node(L);
+  GenomeNode **gn = check_genome_node(L, 1);
   return range_lua_push(L, genome_node_get_range(*gn));
 }
 
@@ -75,7 +75,7 @@ static int genome_node_lua_accept(lua_State *L)
   GenomeNode **gn;
   GenomeVisitor **gv;
   Env *env;
-  gn = check_genome_node(L);
+  gn = check_genome_node(L, 1);
   gv = check_genome_visitor(L, 2);
   env = get_env_from_registry(L);
   env_error_check(env);
@@ -84,16 +84,27 @@ static int genome_node_lua_accept(lua_State *L)
   return 0;
 }
 
+static int genome_node_lua_is_part_of_genome_node(lua_State *L)
+{
+  GenomeNode **parent, **child;
+  Env *env = get_env_from_registry(L);
+  parent = check_genome_node(L, 1);
+  child  = check_genome_node(L, 2);
+  genome_node_is_part_of_genome_node(*parent, genome_node_rec_ref(*child, env),
+                                     env);
+  return 0;
+}
+
 static int genome_node_lua_mark(lua_State *L)
 {
-  GenomeNode **gn = check_genome_node(L);
+  GenomeNode **gn = check_genome_node(L, 1);
   genome_node_mark(*gn);
   return 0;
 }
 
 static int genome_node_lua_is_marked(lua_State *L)
 {
-  GenomeNode **gn = check_genome_node(L);
+  GenomeNode **gn = check_genome_node(L, 1);
   lua_pushboolean(L, genome_node_is_marked(*gn));
   return 1;
 }
@@ -102,7 +113,7 @@ static int genome_node_lua_contains_marked(lua_State *L)
 {
   GenomeNode **gn;
   Env *env = get_env_from_registry(L);
-  gn = check_genome_node(L);
+  gn = check_genome_node(L, 1);
   lua_pushboolean(L, genome_node_contains_marked(*gn, env));
   return 1;
 }
@@ -111,7 +122,7 @@ static int genome_node_lua_delete(lua_State *L)
 {
   GenomeNode **gn;
   Env *env = get_env_from_registry(L);
-  gn = check_genome_node(L);
+  gn = check_genome_node(L, 1);
   genome_node_rec_delete(*gn, env);
   return 0;
 }
@@ -125,6 +136,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "get_filename", genome_node_lua_get_filename },
   { "get_range", genome_node_lua_get_range },
   { "accept", genome_node_lua_accept },
+  { "is_part_of_genome_node", genome_node_lua_is_part_of_genome_node },
   { "mark", genome_node_lua_mark },
   { "is_marked", genome_node_lua_is_marked },
   { "contains_marked", genome_node_lua_contains_marked },

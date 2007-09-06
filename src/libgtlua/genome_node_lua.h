@@ -27,6 +27,7 @@
    string      = genome_node:get_filename()
    range       = genome_node:get_range()
                  genome_node:accept(genome_visitor)
+                 parent_node:is_part_of_genome_node(child_node)
                  genome_node:mark()
    boolean     = genome_node:is_marked()
    boolean     = genome_node:contains_marked()
