@@ -1,0 +1,17 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+Lcpvalueiterator *newLcpvalueiterator(const Encodedsequence *encseq,
+                                      Readmode readmode,
+                                      Env *env);
+
+Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
+                            bool firstpage,
+                            const Seqpos *suftabptr,
+                            Seqpos numberofsuffixes);
+
+void freeLcpvalueiterator(Lcpvalueiterator **lvi,Env *env);
+
+#ifdef __cplusplus
+}
+#endif
