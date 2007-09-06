@@ -71,7 +71,7 @@ function show_coverage(maxdist)
       -- assert(startpos >= minstartpos)
       if (startpos > maxendpos + maxdist) then
         -- new region started
-        io.write(string.format("%d, %d\n", minstartpos, maxendpos))
+        io.write(string.format("(%d, %d)\n", minstartpos, maxendpos))
         minstartpos = startpos
         maxendpos   = endpos
       else
@@ -81,7 +81,7 @@ function show_coverage(maxdist)
     end
   end
   -- show last region
-  io.write(string.format("%d, %d\n", minstartpos, maxendpos))
+  io.write(string.format("(%d, %d)\n", minstartpos, maxendpos))
 end
 
 -- process input files
