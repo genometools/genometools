@@ -105,6 +105,26 @@ function show_covered_regions(maxdist)
   end
 end
 
+function contains_marked_feature(features)
+  for i, feature in ipairs(features) do
+    if feature:contains_marked() then
+      return true
+    end
+  end
+  return false
+end
+
+function show_marked_regions(maxdist)
+  local coverage = get_coverage(maxdist)
+  for i, r in ipairs(coverage) do
+    local features = feature_index:get_features_for_range(seqid, r)
+    if contains_marked_feature(features) then
+      range = r
+      render_and_show()
+    end
+  end
+end
+
 -- process input files
 reality_stream = gt.gff3_in_stream_new_sorted(reality_file)
 prediction_stream = gt.gff3_in_stream_new_sorted(prediction_file)
