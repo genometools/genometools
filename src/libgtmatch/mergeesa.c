@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <stdio.h>
@@ -21,7 +32,7 @@
  DECLAREREADFUNCTION(Largelcpvalue);
 
 static void fillandinsert(Trierep *trierep,
-                          uint32_t idx,
+                          unsigned int idx,
                           Seqpos suftabvalue,
                           Trienode *node,
                           /*@unused@*/ uint64_t ident)
@@ -74,10 +85,10 @@ static int inputthesequences(Alphabet **alpha,
 static int insertfirstsuffixes(Trierep *trierep,
                                Seqpos *nextpostable,
                                Suffixarray *suffixarraytable,
-                               uint32_t numofindexes,
+                               unsigned int numofindexes,
                                Env *env)
 {
-  uint32_t idx;
+  unsigned int idx;
   Seqpos suftabvalue;
   int retval;
 
@@ -135,12 +146,12 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Env *env)
   Seqpos tmpsuftabvalue,
          tmplcpvalue,
          tmplastbranchdepth;
-  uint32_t tmpidx;
+  unsigned int tmpidx;
 
   env_error_check(env);
   for (emmesa->buf.nextstoreidx = 0;
       emmesa->numofentries > 0 &&
-      emmesa->buf.nextstoreidx < (uint32_t) SIZEOFMERGERESULTBUFFER;
+      emmesa->buf.nextstoreidx < (unsigned int) SIZEOFMERGERESULTBUFFER;
       emmesa->buf.nextstoreidx++)
   {
     tmpsmallestleaf = findsmallestnodeintrie(&emmesa->trierep);
@@ -236,10 +247,10 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
                           unsigned int demand,
                           Env *env)
 {
-  uint32_t numofindexes;
+  unsigned int numofindexes;
   bool haserr = false;
 
-  numofindexes = (uint32_t) strarray_size(indexnametab);
+  numofindexes = (unsigned int) strarray_size(indexnametab);
   emmesa->buf.nextaccessidx = emmesa->buf.nextstoreidx = 0;
   emmesa->numofindexes = numofindexes;
   emmesa->numofentries = numofindexes;
@@ -257,9 +268,9 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
     haserr = true;
     return -1;
   }
-  if (!haserr && numofindexes > (uint32_t) 1)
+  if (!haserr && numofindexes > (unsigned int) 1)
   {
-    uint32_t idx;
+    unsigned int idx;
 
     ALLOCASSIGNSPACE(emmesa->trierep.encseqreadinfo,NULL,Encseqreadinfo,
                      numofindexes);
@@ -270,7 +281,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
       emmesa->trierep.encseqreadinfo[idx].readmode
         = emmesa->suffixarraytable[idx].readmode;
     }
-    inittrienodetable(&emmesa->trierep,numofindexes,numofindexes,env);
+    inittrienodetable(&emmesa->trierep,(Seqpos) numofindexes,numofindexes,env);
     if (insertfirstsuffixes(&emmesa->trierep,
                            emmesa->nextpostable,
                            emmesa->suffixarraytable,
@@ -291,7 +302,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
 
 void wraptEmissionmergedesa(Emissionmergedesa *emmesa,Env *env)
 {
-  uint32_t idx;
+  unsigned int idx;
 
   for (idx = 0; idx < emmesa->numofindexes; idx++)
   {
@@ -299,7 +310,7 @@ void wraptEmissionmergedesa(Emissionmergedesa *emmesa,Env *env)
   }
   FREESPACE(emmesa->suffixarraytable);
   FREESPACE(emmesa->trierep.encseqreadinfo);
-  if (emmesa->numofindexes > (uint32_t) 1)
+  if (emmesa->numofindexes > (unsigned int) 1)
   {
     freetrierep(&emmesa->trierep,env);
   }

@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include "emimergeesa.h"
@@ -13,7 +24,6 @@
 #include "mergeesa.pr"
 #include "sfx-map.pr"
 #include "encseq2offset.pr"
-#include "alphabet.pr"
 #include "opensfxfile.pr"
 #include "mkidxcpy.pr"
 #include "fmi-keyval.pr"
@@ -59,15 +69,15 @@ static void set0frequencies(Fmindex *fm)
 {
   Seqpos i;
 
-  for (i = 0; i < TFREQSIZE(fm->mapsize); i++)
+  for (i = 0; i < (Seqpos) TFREQSIZE(fm->mapsize); i++)
   {
     fm->tfreq[i] = 0;
   }
-  for (i = 0; i < BFREQSIZE(fm->mapsize,fm->nofblocks); i++)
+  for (i = 0; i < (Seqpos) BFREQSIZE(fm->mapsize,fm->nofblocks); i++)
   {
     fm->bfreq[i] = 0;
   }
-  for (i = 0; i < SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks); i++)
+  for (i = 0; i < (Seqpos) SUPERBFREQSIZE(fm->mapsize,fm->nofsuperblocks); i++)
   {
     fm->superbfreq[i] = 0;
   }
@@ -75,10 +85,10 @@ static void set0frequencies(Fmindex *fm)
 
 static void finalizefmfrequencies(Fmindex *fm)
 {
-  uint32_t j;
+  unsigned int j;
   Seqpos i, *freqptr;
 
-  for (j = (uint32_t) 2; j <= fm->mapsize; j++)
+  for (j = (unsigned int) 2; j <= fm->mapsize; j++)
   {
     fm->tfreq[j] += fm->tfreq[j - 1];
   }
@@ -96,9 +106,9 @@ static void finalizefmfrequencies(Fmindex *fm)
 static void showconstructionmessage(const Str *indexname,
                                     Seqpos totallength,
                                     unsigned long fmsize,
-                                    uint32_t log2bsize,
-                                    uint32_t log2markdist,
-                                    uint32_t mapsize)
+                                    unsigned int log2bsize,
+                                    unsigned int log2markdist,
+                                    unsigned int mapsize)
 {
   printf("# construct fmindex \"%s\" for bsize=%lu, superbsize=%lu,",
           str_get(indexname),
@@ -106,7 +116,7 @@ static void showconstructionmessage(const Str *indexname,
           (unsigned long) POW2(log2markdist));
   printf(" len=" FormatSeqpos ", alphasize=%u: size ",
           PRINTSeqposcast(totallength),
-          (unsigned int) (mapsize-1));
+          mapsize-1);
   printf("%lu bytes, space overhead %.2f\n",
           fmsize,
           (double) fmsize/(double) (totallength+1));
@@ -171,8 +181,8 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
 }
 
 int sufbwt2fmindex(Fmindex *fmindex,
-                   uint32_t log2bsize,
-                   uint32_t log2markdist,
+                   unsigned int log2bsize,
+                   unsigned int log2markdist,
                    const Str *outfmindex,
                    const StrArray *indexnametab,
                    bool storeindexpos,
@@ -191,11 +201,11 @@ int sufbwt2fmindex(Fmindex *fmindex,
          nextprogress,
          tmpsuftabvalue,
          stepprogress;
-  uint32_t mapsize = 0,
-           suffixlength = 0,
-           numofindexes;
+  unsigned int mapsize = 0,
+               suffixlength = 0,
+               numofindexes;
   int retval;
-  DefinedSeqpos longest;
+  DefinedSeqpos longest = { false, 0 };
   PairBwtidx *pairptr;
   FILE *outbwt = NULL;
   Str *tmpfilename = NULL;
@@ -205,8 +215,8 @@ int sufbwt2fmindex(Fmindex *fmindex,
   env_error_check(env);
   longest.defined = false;
   longest.valueseqpos = 0;
-  numofindexes = (uint32_t) strarray_size(indexnametab);
-  if (numofindexes == (uint32_t) 1)
+  numofindexes = (unsigned int) strarray_size(indexnametab);
+  if (numofindexes == (unsigned int) 1)
   {
     Str *indexname = str_new_cstr(strarray_get(indexnametab,0),env);
 
@@ -322,7 +332,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     nextprogress = stepprogress = totallength/78;
     for (bwtpos = 0, nextmark = 0; ; bwtpos++)
     {
-      if (numofindexes == (uint32_t) 1)
+      if (numofindexes == (unsigned int) 1)
       {
         if (storeindexpos)
         {
@@ -439,7 +449,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     {
       ALLOCASSIGNSPACE(fmindex->boundarray,NULL,Bwtbound,fmindex->numofcodes);
     }
-    if (numofindexes == (uint32_t) 1)
+    if (numofindexes == (unsigned int) 1)
     {
       fmindex->longestsuffixpos = suffixarray.longest.valueseqpos;
       freesuffixarray(&suffixarray,env);

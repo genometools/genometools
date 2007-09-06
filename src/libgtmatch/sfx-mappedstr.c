@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <stdlib.h>
@@ -33,36 +44,37 @@
 #define SUBTRACTLCHARANDSHIFT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER)\
         if ((NUMOFCHARS) == DNAALPHASIZE)\
         {\
-          CODE = MULT4((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]);\
+          CODE = MULT4((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]);\
         } else\
         {\
-          CODE = ((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]) * (NUMOFCHARS);\
+          CODE = ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)])\
+                 * (NUMOFCHARS);\
         }
 
 #define SUBTRACTLCHARSHIFTADDNEXT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER,CC)\
         if ((NUMOFCHARS) == DNAALPHASIZE)\
         {\
-          CODE = MULT4((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]) | (CC);\
+          CODE = MULT4((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) | (CC);\
         } else\
         {\
-          CODE = (Codetype) ((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]) *\
+          CODE = (Codetype) ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) *\
                             (NUMOFCHARS) + (CC);\
         }
 #else
 #define SUBTRACTLCHARANDSHIFT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER)\
-        CODE = ((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]) * (NUMOFCHARS)
+        CODE = ((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) * (NUMOFCHARS)
 
 #define SUBTRACTLCHARSHIFTADDNEXT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER,CC)\
-        CODE = (Codetype) (((CODE) - MULTIMAPPOWER[(uint32_t) (LCHAR)]) *\
+        CODE = (Codetype) (((CODE) - MULTIMAPPOWER[(unsigned int) (LCHAR)]) *\
                            (NUMOFCHARS) + (CC))
 #endif
 
 #define ARRAY2DIMMALLOC(ARRAY2DIM, ROWS, COLUMNS, TYPE)\
         {\
-          uint32_t rownumber;\
+          unsigned int rownumber;\
           ALLOCASSIGNSPACE(ARRAY2DIM,NULL,TYPE *,ROWS);\
           ALLOCASSIGNSPACE((ARRAY2DIM)[0],NULL,TYPE,(ROWS) * (COLUMNS));\
-          for (rownumber = (uint32_t) 1; rownumber < (ROWS); rownumber++)\
+          for (rownumber = (unsigned int) 1; rownumber < (ROWS); rownumber++)\
           {\
             (ARRAY2DIM)[rownumber] = (ARRAY2DIM)[rownumber-1] + (COLUMNS);\
           }\
@@ -73,12 +85,12 @@
         FREESPACE(ARRAY2DIM)
 
 #ifndef NDEBUG
-static Codetype windowkmer2code(uint32_t numofchars,
-                                uint32_t kmersize,
+static Codetype windowkmer2code(unsigned int numofchars,
+                                unsigned int kmersize,
                                 const Uchar *cyclicwindow,
-                                uint32_t firstindex)
+                                unsigned int firstindex)
 {
-  uint32_t i;
+  unsigned int i;
   Codetype integercode;
   Uchar cc;
   bool foundspecial;
@@ -93,7 +105,7 @@ static Codetype windowkmer2code(uint32_t numofchars,
     integercode = (Codetype) cc;
     foundspecial = false;
   }
-  for (i=(uint32_t) 1; i < kmersize; i++)
+  for (i=(unsigned int) 1; i < kmersize; i++)
   {
     if (foundspecial)
     {
@@ -114,13 +126,13 @@ static Codetype windowkmer2code(uint32_t numofchars,
   return integercode;
 }
 
-static Codetype prefixwindowkmer2code(uint32_t firstspecialpos,
-                                      uint32_t kmersize,
+static Codetype prefixwindowkmer2code(unsigned int firstspecialpos,
+                                      unsigned int kmersize,
                                       Codetype **multimappower,
                                       const Uchar *cyclicwindow,
-                                      uint32_t firstindex)
+                                      unsigned int firstindex)
 {
-  uint32_t i;
+  unsigned int i;
   Codetype integercode = 0;
   Uchar cc;
 
@@ -132,12 +144,12 @@ static Codetype prefixwindowkmer2code(uint32_t firstspecialpos,
   return integercode;
 }
 
-static Firstspecialpos determinefirstspecialposition(uint32_t windowwidth,
-                                                     uint32_t kmersize,
+static Firstspecialpos determinefirstspecialposition(unsigned int windowwidth,
+                                                     unsigned int kmersize,
                                                      const Uchar *cyclicwindow,
-                                                     uint32_t firstindex)
+                                                     unsigned int firstindex)
 {
-  uint32_t i;
+  unsigned int i;
   Firstspecialpos fsp;
 
   for (i=0; i < windowwidth; i++)
@@ -157,14 +169,14 @@ static Firstspecialpos determinefirstspecialposition(uint32_t windowwidth,
 
 typedef struct
 {
-  uint32_t distvalue;
+  unsigned int distvalue;
   Codetype codeforleftcontext;
 } Queueelem;
 
 typedef struct
 {
   Queueelem *queuespace;  /* the space to store the queue elements */
-  uint32_t enqueueindex,  /* entry into which element is to be enqued */
+  unsigned int enqueueindex,  /* entry into which element is to be enqued */
                dequeueindex,  /* last element of queue */
                queuesize,     /* size of the queue */
                noofelements;  /* no ofelements between enqueueindex+1 and
@@ -175,17 +187,17 @@ typedef struct
 {
   Specialpositions spos;
   Uchar *cyclicwindow;
-  uint32_t numofchars,
-               kmersize,
-               windowwidth,
-               firstindex,
-               *filltable,
-               lengthwithoutspecial;
+  unsigned int numofchars;
+  unsigned int kmersize,
+           windowwidth,
+           firstindex,
+           *filltable,
+           lengthwithoutspecial;
   Codetype codewithoutspecial,
            **multimappower;
 } Streamstate;
 
-static void specialemptyqueue(Specialpositions *spos,uint32_t queuesize,
+static void specialemptyqueue(Specialpositions *spos,unsigned int queuesize,
                               Env *env)
 {
   env_error_check(env);
@@ -395,22 +407,22 @@ static void shiftrightwithchar(
   }
 }
 
-static void initmultimappower(uint32_t ***multimappower,
-                              uint32_t numofchars,
-                              uint32_t kmersize,
+static void initmultimappower(unsigned int ***multimappower,
+                              unsigned int numofchars,
+                              unsigned int kmersize,
                               Env *env)
 {
   int offset;
-  uint32_t thepower, mapindex, *mmptr;
+  unsigned int thepower, mapindex, *mmptr;
 
   env_error_check(env);
-  ARRAY2DIMMALLOC(*multimappower,kmersize,numofchars,uint32_t);
-  thepower = (uint32_t) 1;
+  ARRAY2DIMMALLOC(*multimappower,kmersize,numofchars,unsigned int);
+  thepower = (unsigned int) 1;
   for (offset=(int) (kmersize - 1); offset>=0; offset--)
   {
     mmptr = (*multimappower)[offset];
     mmptr[0] = 0;
-    for (mapindex = (uint32_t) 1; mapindex < numofchars; mapindex++)
+    for (mapindex = (unsigned int) 1; mapindex < numofchars; mapindex++)
     {
       mmptr[mapindex] = mmptr[mapindex-1] + thepower;
     }
@@ -418,16 +430,16 @@ static void initmultimappower(uint32_t ***multimappower,
   }
 }
 
-static void filllargestchartable(uint32_t **filltable,
-                                 uint32_t numofchars,
-                                 uint32_t kmersize,
+static void filllargestchartable(unsigned int **filltable,
+                                 unsigned int numofchars,
+                                 unsigned int kmersize,
                                  Env *env)
 {
-  uint32_t *ptr;
+  unsigned int *ptr;
   Codetype code;
 
   env_error_check(env);
-  ALLOCASSIGNSPACE(*filltable,NULL,uint32_t,kmersize);
+  ALLOCASSIGNSPACE(*filltable,NULL,unsigned int,kmersize);
   code = numofchars;
   for (ptr = *filltable + kmersize - 1; ptr >= *filltable; ptr--)
   {
@@ -443,13 +455,13 @@ static int getencseqkmersgeneric(
                       void(*processkmercode)(void *,Codetype,Seqpos,
                                              const Firstspecialpos *,Env *),
                       void *processkmercodeinfo,
-                      uint32_t numofchars,
-                      uint32_t kmersize,
+                      unsigned int numofchars,
+                      unsigned int kmersize,
                       const Uchar *symbolmap,
                       bool plainformat,
                       Env *env)
 {
-  uint32_t overshoot;
+  unsigned int overshoot;
   Seqpos currentposition;
   Streamstate spwp;
   Uchar charcode;
@@ -536,8 +548,8 @@ int getfastastreamkmers(
         void(*processkmercode)(void *,Codetype,Seqpos,
                                const Firstspecialpos *,Env *),
         void *processkmercodeinfo,
-        uint32_t numofchars,
-        uint32_t kmersize,
+        unsigned int numofchars,
+        unsigned int kmersize,
         const Uchar *symbolmap,
         bool plainformat,
         Env *env)
@@ -560,8 +572,8 @@ void getencseqkmers(
         void(*processkmercode)(void *,Codetype,Seqpos,
                                const Firstspecialpos *,Env *),
         void *processkmercodeinfo,
-        uint32_t numofchars,
-        uint32_t kmersize,
+        unsigned int numofchars,
+        unsigned int kmersize,
         Env *env)
 {
   (void) getencseqkmersgeneric(encseq, /* not NULL */

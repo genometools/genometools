@@ -1,11 +1,22 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int enumeratemaxpairs(Suffixarray *suffixarray,
-                      uint32_t searchlength,
+int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
+                      unsigned int searchlength,
                       int(*output)(void *,Seqpos,Seqpos,Seqpos),
                       void *outinfo,
                       Env *env);
+
+int sarrselfsubstringmatch(const Uchar *dbseq,
+                           Seqpos dblen,
+                           const Uchar *query,
+                           unsigned long querylen,
+                           unsigned int minlength,
+                           const Alphabet *alpha,
+                           int (*processmaxmatch)(void *,Seqpos,
+                                                  Seqpos,Seqpos),
+                           void *processmaxmatchinfo,
+                           Env *env);
 
 #ifdef __cplusplus
 }

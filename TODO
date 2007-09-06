@@ -35,16 +35,29 @@ feature requests:
 - use asciidoc for documentation
 
 
+merge libgtview and libgtmatch:
+-------------------------------
+
+- Alphabet (Stefan: ersetze alphabet.pr durch alphadef.h, Gordon: evtl. mergen
+  mit Alpha)
+- Distributions mergen (Hashtable basiert, 64bit)
+- Encodedseq und Bioseq mergen (FastaReader und fbsadv.c)
+  guesprot.c
+- endianess -> core
+- Queues mergen
+- generic queue unit test (Stefan)
+- basename portabel? Randf"alle! (getbasename)
+- merge Timer und measure-time.c (Ereignis, formatierter String)
+- readnextline evtl. durch str_read_next_line(_generic) ersetzen (Stefan)
+
+
 view tool:
 ----------
 
-- add (full) Lua bindings
 - allow to specify the ``type order'' of tracks in config file
-- allow multiple files as input to `gt view` (as discussed with Sascha):
-  - each track has a filename (additionally to the type)
-  - allow to sort tracks by type and then by filename (in the order specified
-    on the command line) or the other way round (one is the default, one is
-    switched on by a command line option)
+- allow to sort tracks by type and then by filename (in the order specified
+  on the command line) or the other way round (one is the default, one is
+  switched on by a command line option)
 
 
 BitPackArray/BitPackClass:

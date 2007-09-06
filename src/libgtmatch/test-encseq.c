@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include "libgtcore/env.h"
@@ -28,20 +39,23 @@ int testencodedsequence(const StrArray *filenametab,
   bool haserr = false;
   Encodedsequencescanstate *esr;
 
-  printf("# testencodedsequence with readmode = %s\n",showreadmode(readmode));
   env_error_check(env);
+  printf("# testencodedsequence with readmode = %s\n",showreadmode(readmode));
   totallength = getencseqtotallength(encseq);
-  initformatbufferstate(&fbs,
-                        filenametab,
-                        symbolmap,
-                        false,
-                        NULL,
-                        NULL,
-                        env);
+  if (filenametab != NULL)
+  {
+    initformatbufferstate(&fbs,
+                          filenametab,
+                          symbolmap,
+                          false,
+                          NULL,
+                          NULL,
+                          env);
+  }
   esr = initEncodedsequencescanstate(encseq,readmode,env);
   for (pos=0; /* Nothing */; pos++)
   {
-    if (readmode == Forwardmode)
+    if (filenametab != NULL && readmode == Forwardmode)
     {
       retval = readnextUchar(&ccscan,&fbs,env);
       if (retval < 0)
@@ -61,16 +75,17 @@ int testencodedsequence(const StrArray *filenametab,
       }
     }
     ccra = getencodedchar(encseq,pos,readmode);
-    if (readmode == Forwardmode)
+    if (filenametab != NULL && readmode == Forwardmode)
     {
       if (ccscan != ccra)
       {
-        env_error_set(env,"position " FormatSeqpos
+        env_error_set(env,"access=%s, position=" FormatSeqpos
                           ": scan (readnextchar) = %u != "
                           "%u = random access (getencodedchar)",
-                           pos,
-                           (uint32_t) ccscan,
-                           (uint32_t) ccra);
+                          encseqaccessname(encseq),
+                          pos,
+                          (unsigned int) ccscan,
+                          (unsigned int) ccra);
         haserr = true;
         break;
       }
@@ -78,12 +93,14 @@ int testencodedsequence(const StrArray *filenametab,
     ccsr = sequentialgetencodedchar(encseq,esr,pos);
     if (ccra != ccsr)
     {
-      env_error_set(env,"position " FormatSeqpos
+      env_error_set(env,"access=%s, mode=%s: position=" FormatSeqpos
                         ": random access (getencodedchar) = %u != "
                         " %u = sequential read (sequentialgetencodedchar)",
-                         pos,
-                         (uint32_t) ccra,
-                         (uint32_t) ccsr);
+                        encseqaccessname(encseq),
+                        showreadmode(readmode),
+                        pos,
+                        (unsigned int) ccra,
+                        (unsigned int) ccsr);
       haserr = true;
       break;
     }
@@ -101,96 +118,76 @@ int testencodedsequence(const StrArray *filenametab,
   return haserr ? -1 : 0;
 }
 
-static int addelem(void *processinfo,
-                   /*@unused@*/ const Encodedsequence *encseq,
-                   const Sequencerange *range,Env *env)
+static int comparearrays(const Array *a,const Array *b,Env *env)
 {
-  env_error_check(env);
-  array_add_elem((Array *) processinfo,(void *) range,sizeof (Sequencerange),
-                 env);
+  unsigned long idx;
+  Sequencerange *vala, *valb;
+
+  if (array_size(a) != array_size(b))
+  {
+    env_error_set(env,"array_size(a) = %lu != %lu = "
+                      "array_size(b)\n",
+    (unsigned long) array_size(a),
+    (unsigned long) array_size(b));
+    return -1;
+  }
+  for (idx=0; idx<(unsigned long) array_size(a); idx++)
+  {
+    vala = (Sequencerange *) array_get(a,idx);
+    valb = (Sequencerange *) array_get(b,idx);
+    if (vala->leftpos != valb->leftpos || vala->rightpos != valb->rightpos)
+    {
+      env_error_set(env,
+                    "a[%lu] = (" FormatSeqpos "," FormatSeqpos
+                      ") != (" FormatSeqpos "," FormatSeqpos
+                      ") = b[%lu]",
+                      idx,
+                      PRINTSeqposcast(vala->leftpos),
+                      PRINTSeqposcast(vala->rightpos),
+                      PRINTSeqposcast(valb->leftpos),
+                      PRINTSeqposcast(valb->rightpos),
+                      idx);
+      return -1;
+    }
+  }
   return 0;
 }
 
-/*
-static void reverseSequencerange(Array *a)
-{
-  unsigned long idx1, idx2;
-  Sequencerange tmp, *valptr1, *valptr2;
-
-  for (idx1=0, idx2 = (unsigned long) array_size(a) - 1;
-       idx1 < idx2; idx1++, idx2--)
-  {
-    valptr1 = (Sequencerange *) array_get(a,idx1);
-    valptr2 = (Sequencerange *) array_get(a,idx2);
-    tmp = *valptr1;
-    *valptr1 = *valptr2;
-    *valptr2 = tmp;
-  }
-}
-*/
-
-int checkspecialranges(const Encodedsequence *encseq,Env *env)
+int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
 {
   Array *rangesforward, *rangesbackward;
-  Sequencerange *valf, *valb;
-  unsigned long idx;
   bool haserr = false;
+  Specialrangeiterator *sri;
+  Sequencerange range;
 
   env_error_check(env);
-  if (!fastspecialranges(encseq))
+  if (!hasspecialranges(encseq))
   {
     return 0;
   }
   rangesforward = array_new(sizeof (Sequencerange),env);
   rangesbackward = array_new(sizeof (Sequencerange),env);
 
-  if (overallspecialrangesfast(encseq,true,Forwardmode,addelem,rangesforward,
-                              env) != 0)
+  sri = newspecialrangeiterator(encseq,true,env);
+  while (nextspecialrangeiterator(&range,sri))
   {
-    haserr = true;
+    array_add(rangesforward,range,env);
   }
+  freespecialrangeiterator(&sri,env);
+  sri = newspecialrangeiterator(encseq,false,env);
+  while (nextspecialrangeiterator(&range,sri))
+  {
+    array_add(rangesbackward,range,env);
+  }
+  freespecialrangeiterator(&sri,env);
+  array_reverse(rangesbackward,env);
   if (!haserr)
   {
-    if (overallspecialrangesfast(encseq,false,Reversemode,addelem,
-                                 rangesbackward,env) != 0)
+    printf("# checkspecialrangesfast(%lu ranges)\n",
+             (unsigned long) array_size(rangesforward));
+    if (comparearrays(rangesforward,rangesbackward,env) != 0)
     {
       haserr = true;
-    }
-  }
-  if (!haserr)
-  {
-    if (array_size(rangesforward) != array_size(rangesbackward))
-    {
-      env_error_set(env,"array_size(rangesforward) = %lu != %lu = "
-                        "array_size(rangesbackward)\n",
-                        (unsigned long) array_size(rangesforward),
-                        (unsigned long) array_size(rangesbackward));
-      haserr = true;
-    }
-  }
-  if (!haserr)
-  {
-    array_reverse(rangesbackward,env);
-    printf("# check %lu ranges\n",(unsigned long) array_size(rangesforward));
-    for (idx=0; idx<(unsigned long) array_size(rangesforward); idx++)
-    {
-      valf = (Sequencerange *) array_get(rangesforward,idx);
-      valb = (Sequencerange *) array_get(rangesbackward,idx);
-      if (valf->leftpos != valb->leftpos || valf->rightpos != valb->rightpos)
-      {
-        env_error_set(env,
-                      "rangesforward[%lu] = (" FormatSeqpos "," FormatSeqpos
-                      ") != (" FormatSeqpos "," FormatSeqpos
-                      ") = rangesbackward[%lu]\n",
-                      idx,
-                      PRINTSeqposcast(valf->leftpos),
-                      PRINTSeqposcast(valf->rightpos),
-                      PRINTSeqposcast(valb->leftpos),
-                      PRINTSeqposcast(valb->rightpos),
-                      idx);
-        haserr = true;
-        break;
-      }
     }
   }
   array_delete(rangesforward,env);

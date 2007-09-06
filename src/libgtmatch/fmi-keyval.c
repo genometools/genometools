@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <math.h>
@@ -10,7 +21,7 @@
 #include "alphadef.h"
 #include "safecast-gen.h"
 
-Seqpos determinenumofcodes(uint32_t numofchars,uint32_t prefixlength)
+Seqpos determinenumofcodes(unsigned int numofchars,unsigned int prefixlength)
 {
   return (Seqpos) pow((double) numofchars,(double) prefixlength);
 }
@@ -34,7 +45,7 @@ Seqpos determinenumberofspecialstostore(
  DECLARESAFECASTFUNCTION(uint64_t,uint64_t,unsigned long,unsigned_long)
 
 static unsigned long determinefmindexsize (const Fmindex *fm,
-                                           Seqpos suffixlength,
+                                           unsigned int suffixlength,
                                            bool storeindexpos)
 {
   uint64_t sumsize = 0;
@@ -64,10 +75,10 @@ static unsigned long determinefmindexsize (const Fmindex *fm,
 
 void computefmkeyvalues (Fmindex *fm,
                          Seqpos bwtlength,
-                         uint32_t log2bsize,
-                         uint32_t log2markdist,
-                         uint32_t mapsize,
-                         uint32_t suffixlength,
+                         unsigned int log2bsize,
+                         unsigned int log2markdist,
+                         unsigned int mapsize,
+                         unsigned int suffixlength,
                          bool storeindexpos,
                          const Specialcharinfo *specialcharinfo)
 {
@@ -76,9 +87,9 @@ void computefmkeyvalues (Fmindex *fm,
   fm->log2markdist = log2markdist;
   fm->bwtlength = bwtlength;
   fm->log2superbsize = MULT2 (fm->log2bsize);
-  fm->bsize = (uint32_t) POW2 (fm->log2bsize);
+  fm->bsize = (unsigned int) POW2 (fm->log2bsize);
   fm->bsizehalve = DIV2(fm->bsize);
-  fm->superbsize = (uint32_t) POW2 (fm->log2superbsize);
+  fm->superbsize = (unsigned int) POW2 (fm->log2superbsize);
   fm->nofblocks = (Seqpos) (fm->bwtlength / fm->bsize) + 1;
   fm->nofsuperblocks = (Seqpos) (fm->bwtlength / fm->superbsize) + 2;
   fm->markdist = (Seqpos) POW2 (fm->log2markdist);

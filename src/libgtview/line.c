@@ -1,20 +1,26 @@
 /*
-   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-   See LICENSE file or http://genometools.org/license.html for license details.
+  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-/**
- * \if INTERNAL \file line.c \endif
- * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
- */
 
 #include "libgtcore/ensure.h"
 #include "libgtcore/range.h"
 #include "libgtview/block.h"
 #include "libgtview/line.h"
 
-struct Line
-{
+struct Line {
   Array *blocks;
 };
 
@@ -24,39 +30,31 @@ Line* line_new(Env *env)
   env_error_check(env);
   line = env_ma_malloc(env, sizeof (Line));
   line->blocks = array_new(sizeof (Block*), env);
-
-  assert(line != NULL);
   return line;
 }
 
 void line_insert_block(Line *line, Block *block, Env *env)
 {
-  assert(line != NULL && block != NULL);
-
+  assert(line && block);
   array_add(line->blocks, block, env);
 }
 
-bool line_is_occupied(Line *line, Range r)
+bool line_is_occupied(const Line *line, Range r)
 {
-  int i;
+  unsigned long i;
   Range r1;
-
-  assert(line != NULL);
-
-  for (i=0; i<array_size(line->blocks); i++)
-  {
-    r1 = block_get_range(*(Block**)  array_get(line->blocks, i));
+  assert(line);
+  for (i = 0; i < array_size(line->blocks); i++) {
+    r1 = block_get_range(*(Block**) array_get(line->blocks, i));
     if (range_overlap(r1, r))
-    {
       return true;
-    }
   }
   return false;
 }
 
 Array* line_get_blocks(Line* line)
 {
-  assert(line != NULL);
+  assert(line);
   return line->blocks;
 }
 
@@ -96,16 +94,12 @@ int line_unit_test(Env* env)
   seqid2 = str_new_cstr("test2", env);
   seqid3 = str_new_cstr("foo", env);
 
-  parent = genome_feature_new(gft_gene, r_parent,
-                                          STRAND_FORWARD, NULL, 0, env);
-  gn1 = genome_feature_new(gft_exon, r1,
-                                       STRAND_FORWARD, NULL, 0, env);
-  gn2 = genome_feature_new(gft_exon, r2,
-                                       STRAND_FORWARD, NULL, 0, env);
-  gn3 = genome_feature_new(gft_exon, r3,
-                                       STRAND_FORWARD, NULL, 0, env);
-  gn4 = genome_feature_new(gft_TF_binding_site, r4,
-                                       STRAND_FORWARD, NULL, 0, env);
+  parent = genome_feature_new(gft_gene, r_parent, STRAND_FORWARD, NULL, 0, env);
+  gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0, env);
+  gn2 = genome_feature_new(gft_exon, r2, STRAND_FORWARD, NULL, 0, env);
+  gn3 = genome_feature_new(gft_exon, r3, STRAND_FORWARD, NULL, 0, env);
+  gn4 = genome_feature_new(gft_TF_binding_site, r4, STRAND_FORWARD, NULL, 0,
+                           env);
 
   genome_node_set_seqid((GenomeNode*) parent, seqid1);
   genome_node_set_seqid((GenomeNode*) gn1, seqid3);
@@ -174,4 +168,3 @@ void line_delete(Line *line, Env *env)
   array_delete(line->blocks, env);
   env_ma_free(line, env);
 }
-

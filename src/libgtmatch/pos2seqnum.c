@@ -1,3 +1,20 @@
+/*
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
+
 #include "libgtcore/env.h"
 #include "encseq-def.h"
 #include "arraydef.h"
@@ -6,18 +23,13 @@
 
 DECLAREARRAYSTRUCT(Seqpos);
 
-static int addmarkpos(void *info,const Encodedsequence *encseq,
-                      const Sequencerange *seqrange,
-                      /*@unused@*/ Env *env)
+static int addmarkpos(ArraySeqpos *asp,
+                      const Encodedsequence *encseq,
+                      const Sequencerange *seqrange)
 {
   Seqpos pos;
   Uchar currentchar;
-  ArraySeqpos *asp = (ArraySeqpos *) info;
 
-#ifdef DEBUG
-  printf("range (%u,%u)\n",(unsigned int) seqrange->leftpos,
-                           (unsigned int) seqrange->rightpos-1);
-#endif
   for (pos=seqrange->leftpos; pos<seqrange->rightpos; pos++)
   {
     currentchar = getencodedchar(encseq,pos,Forwardmode);
@@ -25,7 +37,7 @@ static int addmarkpos(void *info,const Encodedsequence *encseq,
     if (currentchar == (Uchar) SEPARATOR)
     {
       assert(asp->nextfreeSeqpos < asp->allocatedSeqpos);
-      asp->spaceSeqpos[asp->nextfreeSeqpos++] = pos; 
+      asp->spaceSeqpos[asp->nextfreeSeqpos++] = pos;
     }
   }
   return 0;
@@ -35,18 +47,26 @@ Seqpos *calculatemarkpositions(const Encodedsequence *encseq,
                                unsigned long numofdbsequences,
                                Env *env)
 {
-  
   ArraySeqpos asp;
+  Specialrangeiterator *sri;
+  Sequencerange range;
+  bool haserr = false;
 
-  assert(numofdbsequences > 1);
+  assert(numofdbsequences > (unsigned long) 1);
   asp.allocatedSeqpos = numofdbsequences-1;
   asp.nextfreeSeqpos = 0;
   ALLOCASSIGNSPACE(asp.spaceSeqpos,NULL,Seqpos,asp.allocatedSeqpos);
-  if (overallspecialranges(encseq,
-                           Forwardmode,
-                           addmarkpos,
-                           &asp,
-                           env) != 0)
+  sri = newspecialrangeiterator(encseq,true,env);
+  while (nextspecialrangeiterator(&range,sri))
+  {
+    if (addmarkpos(&asp,encseq,&range) != 0)
+    {
+      haserr = true;
+      break;
+    }
+  }
+  freespecialrangeiterator(&sri,env);
+  if (haserr)
   {
     FREEARRAY(&asp,Seqpos);
     return NULL;
@@ -68,7 +88,7 @@ unsigned long getrecordnum(const Seqpos *recordseps,
     return 0;
   }
   if (position > recordseps[numofrecords-2])
-  { 
+  {
     if (position < totalwidth)
     {
       return numofrecords - 1;
@@ -92,7 +112,7 @@ unsigned long getrecordnum(const Seqpos *recordseps,
       if (position < recordseps[mid+1])
       {
         return mid + 1;
-      } 
+      }
       left = mid + 1;
     } else
     {
@@ -112,7 +132,7 @@ int checkmarkpos(const Encodedsequence *encseq,
                  unsigned long numofdbsequences,
                  Env *env)
 {
-  if(numofdbsequences > 1)
+  if (numofdbsequences > (unsigned long) 1)
   {
     Seqpos *markpos, totallength, pos;
     unsigned long currentseqnum = 0, seqnum;
@@ -126,7 +146,7 @@ int checkmarkpos(const Encodedsequence *encseq,
       return -1;
     }
     totallength = getencseqtotallength(encseq);
-    for(pos=0; pos<totallength; pos++)
+    for (pos=0; pos<totallength; pos++)
     {
       currentchar = getencodedchar(encseq,pos,Forwardmode);
       if (currentchar == (Uchar) SEPARATOR)
@@ -139,16 +159,16 @@ int checkmarkpos(const Encodedsequence *encseq,
                               totallength,
                               pos,
                               env);
-        if(seqnum == numofdbsequences)
+        if (seqnum == numofdbsequences)
         {
           return -1;
         }
-        if(seqnum != currentseqnum)
+        if (seqnum != currentseqnum)
         {
-          fprintf(stderr,"pos= " FormatSeqpos 
+          fprintf(stderr,"pos= " FormatSeqpos
                          " seqnum = %lu != %lu = currentseqnum\n",
                           PRINTSeqposcast(pos),seqnum,currentseqnum);
-          exit(EXIT_FAILURE);
+          exit(EXIT_FAILURE); /* programming error */
         }
       }
     }

@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include "libgtcore/option.h"
@@ -26,16 +37,16 @@ typedef struct
 typedef struct
 {
   const char *name;
-  uint32_t log2bsize,
-           log2markdist;
+  unsigned int log2bsize,
+               log2markdist;
 } Indexleveldesc;
 
 static Indexleveldesc indexlevel[] =
 {
-  {"tiny",  (uint32_t) 7, (uint32_t) 6},
-  {"small", (uint32_t) 7, (uint32_t) 4},
-  {"medium",(uint32_t) 5, (uint32_t) 3},
-  {"big",   (uint32_t) 4, (uint32_t) 2}
+  {"tiny",  (unsigned int) 7, (unsigned int) 6},
+  {"small", (unsigned int) 7, (unsigned int) 4},
+  {"medium",(unsigned int) 5, (unsigned int) 3},
+  {"big",   (unsigned int) 4, (unsigned int) 2}
 };
 
 static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
@@ -116,8 +127,8 @@ static void freemkfmcallinfo(Mkfmcallinfo *mkfmcallinfo,Env *env)
 }
 
 static int levedescl2levelnum(const char *name,
-                              uint32_t *log2bsize,
-                              uint32_t *log2markdist)
+                              unsigned int *log2bsize,
+                              unsigned int *log2markdist)
 {
   size_t i;
 
@@ -171,8 +182,8 @@ static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
 static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
 {
   Fmindex fm;
-  uint32_t log2bsize,
-           log2markdist;
+  unsigned int log2bsize,
+               log2markdist;
   bool haserr = false;
 
   env_error_check(env);
@@ -192,12 +203,12 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
     haserr = true;
   }
   if (!haserr && sufbwt2fmindex(&fm,
-                               log2bsize,
-                               log2markdist,
-                               mkfmcallinfo->outfmindex,
-                               mkfmcallinfo->indexnametab,
-                               mkfmcallinfo->noindexpos ? false : true,
-                               env) != 0)
+                                log2bsize,
+                                log2markdist,
+                                mkfmcallinfo->outfmindex,
+                                mkfmcallinfo->indexnametab,
+                                mkfmcallinfo->noindexpos ? false : true,
+                                env) != 0)
   {
     haserr = true;
   }

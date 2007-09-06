@@ -3,15 +3,19 @@
   Copyright (c) 2007 Malte Mader <mmader@stud.zbh.uni-hamburg.de>
   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
-*/
 
-/**
- * \if INTERNAL \file gt_view.c \endif
- * \author Malte Mader <mmader@zbh.uni-hamburg.de>
- * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
- * \author Christin Schaerfer <cschaerfer@zbh.uni-hamburg.de>
- */
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
 
 #include <string.h>
 #include "libgtcore/cstr.h"
@@ -48,7 +52,7 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   env_error_check(env);
 
   /* init */
-  op = option_parser_new("[option ...] PNG_file [GFF3_file]",
+  op = option_parser_new("[option ...] PNG_file [GFF3_file ...]",
                          "Create PNG representations of GFF3 annotation files.",
                          env);
 
@@ -101,8 +105,8 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
   option_parser_set_mailaddress(op, "<ssteinbiss@stud.zbh.uni-hamburg.de>");
 
   /* parse options */
-  oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 2, env);
+  oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
+                                        versionfunc, 1, env);
 
   if (oprval == OPTIONPARSER_OK && !force && file_exists(argv[*parsed_args])) {
     env_error_set(env, "file \"%s\" exists already. use option -force to "
@@ -125,7 +129,7 @@ int gt_view(int argc, const char **argv, Env *env)
   GenomeNode *gn = NULL;
   FeatureIndex *features = NULL;
   int parsed_args, had_err=0;
-  char *seqid = NULL;
+  const char *png_file, *seqid = NULL;
   Range qry_range, sequence_region_range;
   Array *results = NULL;
   Config *cfg = NULL;
@@ -148,69 +152,74 @@ int gt_view(int argc, const char **argv, Env *env)
       return 0;
   }
 
-  /* create a gff3 input stream */
-  gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args + 1],
-                                             arguments.verbose &&
-                                             NULL, env);
-
-  /* create gff3 output stream if -pipe was used */
-  if (arguments.pipe)
-    gff3_out_stream = gff3_out_stream_new(gff3_in_stream, NULL, env);
-
-  /* create feature index and stream */
-  features = feature_index_new(env);
-  feature_stream = feature_stream_new((arguments.pipe ?
-                                         gff3_out_stream :
-                                         gff3_in_stream),
-                                      features, env);
+  /* save name of PNG file */
+  png_file = argv[parsed_args];
 
   /* check for correct order: range end < range start */
   if (!had_err &&
       arguments.start != UNDEF_ULONG &&
       arguments.end != UNDEF_ULONG &&
-      !(arguments.start < arguments.end))
-  {
+      !(arguments.start < arguments.end)) {
     env_error_set(env, "start of query range (%lu) must be before "
                        "end of query range (%lu)",
                        arguments.start, arguments.end);
     had_err = -1;
   }
 
-  if (!had_err)
-  {
-    /* pull the features through the stream and free them afterwards */
-    while (!(had_err = genome_stream_next_tree(feature_stream, &gn, env)) && gn)
-    {
-      genome_node_rec_delete(gn, env);
-    }
+  if (!had_err) {
+    /* create feature index */
+    features = feature_index_new(env);
+    parsed_args++;
+    do {
+      /* create a gff3 input stream */
+      gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
+                                                 arguments.verbose, env);
+      /* create gff3 output stream if -pipe was used */
+      if (arguments.pipe)
+        gff3_out_stream = gff3_out_stream_new(gff3_in_stream, NULL, env);
+
+      /* create feature stream */
+      feature_stream = feature_stream_new(arguments.pipe
+                                          ? gff3_out_stream
+                                          : gff3_in_stream,
+                                          features, env);
+
+      /* pull the features through the stream and free them afterwards */
+      while (!(had_err = genome_stream_next_tree(feature_stream, &gn, env)) &&
+             gn) {
+        genome_node_rec_delete(gn, env);
+      }
+
+      genome_stream_delete(feature_stream, env);
+      genome_stream_delete(gff3_in_stream, env);
+      genome_stream_delete(gff3_out_stream, env);
+
+      if (!argv[parsed_args]) /* no GFF3 file was given at all */
+        break;
+      parsed_args++;
+    } while (!had_err && argv[parsed_args]);
   }
 
   /* if seqid is empty, take first one added to index */
-  if (!had_err && strcmp(str_get(arguments.seqid),"") == 0)
-  {
+  if (!had_err && strcmp(str_get(arguments.seqid),"") == 0) {
     seqid = feature_index_get_first_seqid(features);
-    if (seqid == NULL)
-    {
+    if (seqid == NULL) {
       env_error_set(env, "GFF input file must contain a sequence region!");
       had_err = -1;
     }
   }
   else if (!had_err && !feature_index_has_seqid(features,
                                                 str_get(arguments.seqid),
-                                                env))
-  {
+                                                env)) {
     env_error_set(env, "sequence region '%s' does not exist in GFF input file",
                   str_get(arguments.seqid));
     had_err = -1;
   }
   else if (!had_err)
-  {
     seqid = str_get(arguments.seqid);
-  }
 
   results = array_new(sizeof (GenomeNode*), env);
-  if (!had_err)
-  {
+  if (!had_err) {
     sequence_region_range = feature_index_get_range_for_seqid(features, seqid);
     qry_range.start = (arguments.start == UNDEF_ULONG ?
                          sequence_region_range.start :
@@ -218,16 +227,9 @@ int gt_view(int argc, const char **argv, Env *env)
     qry_range.end   = (arguments.end == UNDEF_ULONG ?
                          sequence_region_range.end :
                          arguments.end);
-
-    (void) feature_index_get_features_for_range(features,
-                                                results,
-                                                seqid,
-                                                qry_range,
-                                                env);
   }
 
-  if (!had_err)
-  {
+  if (!had_err) {
     if (arguments.verbose)
       fprintf(stderr, "# of results: %lu\n", array_size(results));
 
@@ -243,12 +245,11 @@ int gt_view(int argc, const char **argv, Env *env)
       had_err = config_load_file(cfg, config_file, env);
   }
 
-  if (!had_err)
-  {
+  if (!had_err) {
     /* create and write image file */
-    d = diagram_new(results, qry_range, cfg, env);
+    d = diagram_new(features, qry_range, seqid, cfg, env);
     r = render_new(cfg, env);
-    had_err = render_to_png(r, d, argv[parsed_args], arguments.width, env);
+    had_err = render_to_png(r, d, png_file, arguments.width, env);
   }
 
   render_delete(r, env);
@@ -260,9 +261,6 @@ int gt_view(int argc, const char **argv, Env *env)
   str_delete(arguments.seqid,env);
   array_delete(results, env);
   feature_index_delete(features, env);
-  genome_stream_delete(feature_stream, env);
-  genome_stream_delete(gff3_in_stream, env);
-  genome_stream_delete(gff3_out_stream, env);
 
   return had_err;
 }

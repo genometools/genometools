@@ -47,6 +47,12 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
 end
 
+Name "range bindings"
+Keywords "gt_scripts"
+Test do
+  run_test "#{$bin}gt #{$testdata}/gtscripts/range.lua"
+end
+
 if $arguments["libgtview"] then
   Name "feature_index and feature_stream bindings"
   Keywords "gt_scripts"
@@ -60,5 +66,19 @@ if $arguments["libgtview"] then
   Keywords "gt_scripts"
   Test do
     run_test "#{$bin}gt #{$testdata}/gtscripts/view.lua test.png #{$testdata}/gff3_file_1_short.txt"
+  end
+
+  Name "evalviz.lua test 1"
+  Keywords "gt_scripts"
+  Test do
+    run_test "#{$bin}gt #{$testdata}/gtscripts/evalviz.lua test.png #{$testdata}/gt_eval_test_1.in #{$testdata}/gt_eval_test_1.in"
+    run "diff #{$last_stdout} #{$testdata}/gt_eval_test_1.out"
+  end
+
+  Name "evalviz.lua test 2"
+  Keywords "gt_scripts"
+  Test do
+    run_test "#{$bin}gt #{$testdata}/gtscripts/evalviz.lua test.png #{$testdata}/gt_evalviz_test.reality #{$testdata}/gt_evalviz_test.prediction"
+    run "diff #{$last_stdout} #{$testdata}/gt_evalviz_test.out"
   end
 end

@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <limits.h>
@@ -9,6 +20,7 @@
 #include "seqpos-def.h"
 #include "symboldef.h"
 #include "spacedef.h"
+#include "sfx-map.pr"
 
 #define ABOVETOP  stackspace[nextfreeItvinfo]
 #define TOP       stackspace[nextfreeItvinfo-1]
@@ -31,12 +43,6 @@
         stackspace[nextfreeItvinfo].depth = D;\
         stackspace[nextfreeItvinfo].lastisleafedge = B;\
         nextfreeItvinfo++
-
- DECLAREREADFUNCTION(Seqpos);
-
- DECLAREREADFUNCTION(Uchar);
-
- DECLAREREADFUNCTION(Largelcpvalue);
 
 typedef struct Dfsinfo Dfsinfo;
 typedef struct Dfsstate Dfsstate;
@@ -86,7 +92,7 @@ static void freeItvinfo(Itvinfo *ptr,
   FREESPACE(ptr);
 }
 
-int depthfirstesa(Suffixarray *suffixarray,
+int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                   Uchar initialchar,
                   Dfsinfo *(*allocateDfsinfo)(Dfsstate *,Env *),
                   void(*freeDfsinfo)(Dfsinfo *,Dfsstate *,Env *),
@@ -107,7 +113,6 @@ int depthfirstesa(Suffixarray *suffixarray,
                   Env *env)
 {
   int retval;
-  Uchar tmpsmalllcpvalue;
   bool firstedge,
        firstrootedge;
   Seqpos previoussuffix = 0,
@@ -117,12 +122,15 @@ int depthfirstesa(Suffixarray *suffixarray,
                             outer while loop */
   unsigned long allocatedItvinfo = 0,
                 nextfreeItvinfo = 0;
-  Largelcpvalue tmpexception;
   Itvinfo *stackspace;
   Uchar leftchar;
   bool haserr = false;
+  Encodedsequence *encseq;
+  Readmode readmode;
 
   firstrootedge = true;
+  encseq = encseqSequentialsuffixarrayreader(ssar);
+  readmode = readmodeSequentialsuffixarrayreader(ssar);
   PUSHDFS(0,true,NULL);
   if (assignleftmostleaf != NULL &&
       assignleftmostleaf(TOP.dfsinfo,0,state,env) != 0)
@@ -131,9 +139,7 @@ int depthfirstesa(Suffixarray *suffixarray,
   }
   for (currentindex = 0; !haserr; currentindex++)
   {
-    retval = readnextUcharfromstream(&tmpsmalllcpvalue,
-                                     &suffixarray->lcptabstream,
-                                     env);
+    retval = nextSequentiallcpvalue(&currentlcp,ssar,env);
     if (retval < 0)
     {
       haserr = true;
@@ -143,31 +149,7 @@ int depthfirstesa(Suffixarray *suffixarray,
     {
       break;
     }
-    if (tmpsmalllcpvalue == (Uchar) UCHAR_MAX)
-    {
-      retval = readnextLargelcpvaluefromstream(&tmpexception,
-                                               &suffixarray->llvtabstream,
-                                               env);
-      if (retval < 0)
-      {
-        haserr = true;
-        break;
-      }
-      if (retval == 0)
-      {
-        env_error_set(env,"file %s: line %d: unexpected end of file when "
-                      "reading llvtab",__FILE__,__LINE__);
-        haserr = true;
-        break;
-      }
-      currentlcp = tmpexception.value;
-    } else
-    {
-      currentlcp = (Seqpos) tmpsmalllcpvalue;
-    }
-    retval = readnextSeqposfromstream(&previoussuffix,
-                                      &suffixarray->suftabstream,
-                                      env);
+    retval = nextSequentialsuftabvalue(&previoussuffix,ssar,env);
     if (retval < 0)
     {
       haserr = true;
@@ -175,8 +157,6 @@ int depthfirstesa(Suffixarray *suffixarray,
     }
     if (retval == 0)
     {
-      env_error_set(env,"file %s: line %d: unexpected end of file when "
-                    "reading suftab",__FILE__,__LINE__);
       haserr = true;
       break;
     }
@@ -185,9 +165,9 @@ int depthfirstesa(Suffixarray *suffixarray,
       leftchar = initialchar;
     } else
     {
-      leftchar = getencodedchar(suffixarray->encseq,
+      leftchar = getencodedchar(encseq,
                                 previoussuffix-1,
-                                suffixarray->readmode);
+                                readmode);
     }
     while (currentlcp < TOP.depth)
     {
@@ -319,20 +299,9 @@ int depthfirstesa(Suffixarray *suffixarray,
       }
     }
   }
-  if (TOP.lastisleafedge)
+  if (!haserr && TOP.lastisleafedge)
   {
-    if (previoussuffix == 0)
-    {
-      leftchar = initialchar;
-    } else
-    {
-      leftchar = getencodedchar(suffixarray->encseq,
-                                previoussuffix-1,
-                                suffixarray->readmode);
-    }
-    retval = readnextSeqposfromstream(&previoussuffix,
-                                      &suffixarray->suftabstream,
-                                      env);
+    retval = nextSequentialsuftabvalue(&previoussuffix,ssar,env);
     if (retval < 0)
     {
       haserr = true;
@@ -340,9 +309,19 @@ int depthfirstesa(Suffixarray *suffixarray,
     {
       if (retval == 0)
       {
-        env_error_set(env,"file %s: line %d: unexpected end of file when "
-                      "reading suftab",__FILE__,__LINE__);
         haserr = true;
+      }
+    }
+    if (!haserr)
+    {
+      if (previoussuffix == 0)
+      {
+        leftchar = initialchar;
+      } else
+      {
+        leftchar = getencodedchar(encseq,
+                                  previoussuffix-1,
+                                  readmode);
       }
     }
     if (!haserr)

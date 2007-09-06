@@ -2,12 +2,10 @@
 extern "C" {
 #endif
 unsigned int recommendedprefixlength(unsigned int numofchars,
-                                     Seqpos totallength,
-                                     size_t sizeofbckentry);
+                                     Seqpos totallength);
 
 unsigned int whatisthemaximalprefixlength(unsigned int numofchars,
                                           Seqpos totallength,
-                                          size_t sizeofbckentry,
                                           unsigned int prefixlenbits);
 
 int checkprefixlength(unsigned int maxprefixlen,

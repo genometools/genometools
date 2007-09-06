@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <inttypes.h>
@@ -12,14 +23,13 @@
 #include "seqdesc.h"
 #include "gqueue-def.h"
 
-#include "alphabet.pr"
 #include "fmi-map.pr"
 #include "fmi-fwduni.pr"
 #include "iterseq.pr"
 #include "genericqueue.pr"
 
-#define SHOWSEQUENCE   ((uint32_t) 1)
-#define SHOWQUERYPOS   (((uint32_t) 1) << 1)
+#define SHOWSEQUENCE   ((unsigned int) 1)
+#define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
 
 typedef struct
 {
@@ -29,7 +39,7 @@ typedef struct
 
 typedef struct
 {
-  uint32_t showmode;
+  unsigned int showmode;
   Definedunsignedlong minlength,
                       maxlength;
 } Rangespecinfo;
@@ -38,7 +48,7 @@ typedef struct
 {
   Definedunsignedlong minlength,
                       maxlength;
-  uint32_t showmode;
+  unsigned int showmode;
   Str *fmindexname;
   StrArray *queryfilenames;
 } Uniquesubcallinfo;
@@ -46,7 +56,7 @@ typedef struct
 typedef struct
 {
   const char *name;
-  uint32_t bitmask;
+  unsigned int bitmask;
 } Optionargmodedesc;
 
 typedef int (*Preprocessuniquelength)(uint64_t,
@@ -78,7 +88,7 @@ typedef struct
 
 static int optionaddbitmask(Optionargmodedesc *modedesc,
                             size_t numberofentries,
-                            uint32_t *mode,
+                            unsigned int *mode,
                             const char *optname,
                             const char *optionargument,
                             Env *env)
@@ -329,7 +339,7 @@ static int findsubquerymatch(Fmindex *fmindex,
                              const StrArray *queryfilenames,
                              Definedunsignedlong minlength,
                              Definedunsignedlong maxlength,
-                             uint32_t showmode,
+                             unsigned int showmode,
                              Env *env)
 {
   Substringinfo substringinfo;

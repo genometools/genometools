@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <stdio.h>
@@ -15,6 +26,9 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
+#include "libgtcore/fileutils.h"
+#include "libgtcore/cstr.h"
+#include "libgtext/gtdata.h"
 #include "qsorttype.h"
 #include "symboldef.h"
 #include "arraydef.h"
@@ -24,15 +38,15 @@
 #include "guessprot.pr"
 #include "readnextline.pr"
 
- struct _Alphabet
+ struct Alphabet                /* initial blank prevents select by skproto */
 {
   Uchar characters[UCHAR_MAX+1],     /* array of characters to show */
         mapdomain[UCHAR_MAX+1],      /* list of characters mapped */
         symbolmap[UCHAR_MAX+1];      /* mapping of the symbols */
-  uint32_t domainsize,               /* size of domain of symbolmap */
-           mapsize,                  /* size of image of map, i.e. */
+  unsigned int domainsize,           /* size of domain of symbolmap */
+               mapsize,              /* size of image of map, i.e. */
                                      /* mapping to [0..mapsize-1] */
-           mappedwildcards;          /* number of mapped wildcards */
+               mappedwildcards;      /* number of mapped wildcards */
 };
 
 /*EE
@@ -45,11 +59,11 @@
 
 #define DNABASES                     "aAcCgGtTuU"
 #define DNAWILDCARDS                 "nsywrkvbdhmNSYWRKVBDHM"
-#define MAPSIZEDNA                   ((uint32_t) 5)
+#define MAPSIZEDNA                   ((unsigned int) 5)
 #define DNAALPHABETDOMAIN            DNABASES DNAWILDCARDS
 #define PROTEINUPPERAMINOACIDS       "LVIFKREDAGSTNQYWPHMC"
 #define PROTEINLOWERAMINOACIDS       "lvifkredagstnqywphmc"
-#define MAPSIZEPROTEIN               ((uint32_t) 21)
+#define MAPSIZEPROTEIN               ((unsigned int) 21)
 #define PROTEINWILDCARDS             "XUBZ*-"
 #define PROTEINALPHABETDOMAIN        PROTEINUPPERAMINOACIDS PROTEINWILDCARDS
 
@@ -170,18 +184,19 @@ static int readsymbolmapviafp(Alphabet *alpha,
           cc = LINE(column);
           if (ispunct((int) cc) || isalnum((int) cc))
           {
-            if (alpha->symbolmap[(uint32_t) cc] != (Uchar) UNDEFCHAR)
+            if (alpha->symbolmap[(unsigned int) cc] != (Uchar) UNDEFCHAR)
             {
               env_error_set(env,"cannot map symbol '%c' to %u: "
                             "it is already mapped to %u",
                              cc,
                              alpha->mapsize,
-                             (uint32_t) alpha->symbolmap[(uint32_t) cc]);
+                             (unsigned int) alpha->
+                                            symbolmap[(unsigned int) cc]);
               haserr = true;
               break;
             }
             /* get same value */
-            alpha->symbolmap[(uint32_t) cc] = (Uchar) alpha->mapsize;
+            alpha->symbolmap[(unsigned int) cc] = (Uchar) alpha->mapsize;
             alpha->mapdomain[alpha->domainsize++] = cc;
           } else
           {
@@ -237,7 +252,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
     }
     if (wildcard > 0)
     {
-      alpha->characters[(uint32_t) wildcard]
+      alpha->characters[(unsigned int) wildcard]
         = alpha->characters[alpha->mapsize-1];
     }
   }
@@ -283,25 +298,25 @@ static int readsymbolmap(Alphabet *alpha,Uchar wildcard,
 
 static void assignDNAsymbolmap(Uchar *symbolmap)
 {
-  uint32_t cnum;
+  unsigned int cnum;
 
-  for (cnum=0; cnum<=(uint32_t) UCHAR_MAX; cnum++)
+  for (cnum=0; cnum<=(unsigned int) UCHAR_MAX; cnum++)
   {
     symbolmap[cnum] = (Uchar) UNDEFCHAR;
   }
-  symbolmap[(uint32_t) 'a'] = (Uchar) 0;
-  symbolmap[(uint32_t) 'A'] = (Uchar) 0;
-  symbolmap[(uint32_t) 'c'] = (Uchar) 1;
-  symbolmap[(uint32_t) 'C'] = (Uchar) 1;
-  symbolmap[(uint32_t) 'g'] = (Uchar) 2;
-  symbolmap[(uint32_t) 'G'] = (Uchar) 2;
-  symbolmap[(uint32_t) 't'] = (Uchar) 3;
-  symbolmap[(uint32_t) 'T'] = (Uchar) 3;
-  symbolmap[(uint32_t) 'u'] = (Uchar) 3;
-  symbolmap[(uint32_t) 'U'] = (Uchar) 3;
+  symbolmap[(unsigned int) 'a'] = (Uchar) 0;
+  symbolmap[(unsigned int) 'A'] = (Uchar) 0;
+  symbolmap[(unsigned int) 'c'] = (Uchar) 1;
+  symbolmap[(unsigned int) 'C'] = (Uchar) 1;
+  symbolmap[(unsigned int) 'g'] = (Uchar) 2;
+  symbolmap[(unsigned int) 'G'] = (Uchar) 2;
+  symbolmap[(unsigned int) 't'] = (Uchar) 3;
+  symbolmap[(unsigned int) 'T'] = (Uchar) 3;
+  symbolmap[(unsigned int) 'u'] = (Uchar) 3;
+  symbolmap[(unsigned int) 'U'] = (Uchar) 3;
   for (cnum=0; DNAWILDCARDS[cnum] != '\0'; cnum++)
   {
-    symbolmap[(uint32_t) DNAWILDCARDS[cnum]] = (Uchar) WILDCARD;
+    symbolmap[(unsigned int) DNAWILDCARDS[cnum]] = (Uchar) WILDCARD;
   }
 }
 
@@ -323,8 +338,8 @@ static void assignDNAsymbolmap(Uchar *symbolmap)
 
 static void assignDNAalphabet(Alphabet *alpha)
 {
-  alpha->domainsize = (uint32_t) strlen(DNAALPHABETDOMAIN);
-  alpha->mappedwildcards = (uint32_t) strlen(DNAWILDCARDS);
+  alpha->domainsize = (unsigned int) strlen(DNAALPHABETDOMAIN);
+  alpha->mappedwildcards = (unsigned int) strlen(DNAWILDCARDS);
   memcpy(alpha->mapdomain,
          (Uchar *) DNAALPHABETDOMAIN,
          (size_t) alpha->domainsize);
@@ -337,19 +352,19 @@ static void assignDNAalphabet(Alphabet *alpha)
 
 static void assignproteinsymbolmap(Uchar *symbolmap)
 {
-  uint32_t cnum;
+  unsigned int cnum;
 
-  for (cnum=0; cnum<=(uint32_t) UCHAR_MAX; cnum++)
+  for (cnum=0; cnum<=(unsigned int) UCHAR_MAX; cnum++)
   {
     symbolmap[cnum] = (Uchar) UNDEFCHAR;
   }
   for (cnum=0; PROTEINUPPERAMINOACIDS[cnum] != '\0'; cnum++)
   {
-    symbolmap[(uint32_t) PROTEINUPPERAMINOACIDS[cnum]] = (Uchar) cnum;
+    symbolmap[(unsigned int) PROTEINUPPERAMINOACIDS[cnum]] = (Uchar) cnum;
   }
   for (cnum=0; PROTEINWILDCARDS[cnum] != '\0'; cnum++)
   {
-    symbolmap[(uint32_t) PROTEINWILDCARDS[cnum]] = (Uchar) WILDCARD;
+    symbolmap[(unsigned int) PROTEINWILDCARDS[cnum]] = (Uchar) WILDCARD;
   }
 }
 
@@ -387,8 +402,8 @@ static void assignproteinsymbolmap(Uchar *symbolmap)
 
 static void assignProteinalphabet(Alphabet *alpha)
 {
-  alpha->domainsize = (uint32_t) strlen(PROTEINALPHABETDOMAIN);
-  alpha->mappedwildcards = (uint32_t) strlen(PROTEINWILDCARDS);
+  alpha->domainsize = (unsigned int) strlen(PROTEINALPHABETDOMAIN);
+  alpha->mappedwildcards = (unsigned int) strlen(PROTEINWILDCARDS);
   memcpy(alpha->mapdomain,
          (Uchar *) PROTEINALPHABETDOMAIN,(size_t) alpha->domainsize);
   alpha->mapsize = MAPSIZEPROTEIN;
@@ -442,13 +457,29 @@ static int assignProteinorDNAalphabet(Alphabet *alpha,
     {
       if (str_length(smapfile) > 0)
       {
+        Str *transpath = NULL;
+
+        if (!file_exists(str_get(smapfile)))
+        {
+          Str *prog;
+          const char *progname = env_error_get_progname(env);
+
+          prog = str_new(env);
+          str_append_cstr_nt(prog, progname,
+                             cstr_length_up_to_char(progname, ' '), env);
+          transpath = gtdata_get_path(str_get(prog), env);
+          str_delete(prog, env);
+          str_append_cstr(transpath, "/trans/", env);
+          str_append_cstr(transpath, str_get(smapfile), env);
+        }
         if (readsymbolmap(alpha,
                          (Uchar) WILDCARD,
-                         smapfile,
+                         transpath == NULL ? smapfile : transpath,
                          env) != 0)
         {
           haserr = true;
         }
+        str_delete(transpath, env);
       } else
       {
         if (assignProteinorDNAalphabet(alpha,filenametab,env) != 0)
@@ -471,12 +502,12 @@ const Uchar *getsymbolmapAlphabet(const Alphabet *alpha)
   return alpha->symbolmap;
 }
 
-uint32_t getnumofcharsAlphabet(const Alphabet *alpha)
+unsigned int getnumofcharsAlphabet(const Alphabet *alpha)
 {
   return alpha->mapsize-1;
 }
 
-uint32_t getmapsizeAlphabet(const Alphabet *alpha)
+unsigned int getmapsizeAlphabet(const Alphabet *alpha)
 {
   return alpha->mapsize;
 }
@@ -504,7 +535,7 @@ void freeAlphabet(Alphabet **alpha,Env *env)
 void outputalphabet(FILE *fpout,const Alphabet *alpha)
 {
   Uchar currentcc, previouscc = 0, firstinline = 0;
-  uint32_t cnum, linenum = 0;
+  unsigned int cnum, linenum = 0;
   bool afternewline = true;
 
   for (cnum=0; cnum < alpha->domainsize; cnum++)
@@ -569,10 +600,10 @@ void showsymbolstring(const Alphabet *alpha,const Uchar *w,unsigned long wlen)
   showsymbolstringgeneric(stdout,alpha,w,wlen);
 }
 
-static uint32_t removelowercaseproteinchars(Uchar *domainbuf,
-                                            const Alphabet *alpha)
+static unsigned int removelowercaseproteinchars(Uchar *domainbuf,
+                                                const Alphabet *alpha)
 {
-  uint32_t i, j = 0;
+  unsigned int i, j = 0;
 
   for (i=0; i< alpha->domainsize - alpha->mappedwildcards; i++)
   {
@@ -610,7 +641,7 @@ static Qsortcomparereturntype comparechar(const void *a,const void *b)
 bool isproteinalphabet(const Alphabet *alpha)
 {
   Alphabet proteinalphabet;
-  uint32_t i, reduceddomainsize1, reduceddomainsize2;
+  unsigned int i, reduceddomainsize1, reduceddomainsize2;
   Uchar domainbuf1[UCHAR_MAX+1],
         domainbuf2[UCHAR_MAX+1];
 

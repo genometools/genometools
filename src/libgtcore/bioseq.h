@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #ifndef BIOSEQ_H
@@ -25,7 +36,8 @@ Bioseq*       bioseq_new_str(Str* sequence_file, Env*);
 Alpha*        bioseq_get_alpha(Bioseq*, Env*);
 Seq*          bioseq_get_seq(Bioseq*, unsigned long, Env*);
 const char*   bioseq_get_description(Bioseq*, unsigned long);
-const char*   bioseq_get_sequence(Bioseq*, unsigned long);
+/* return sequence with given <index> (not '\0' terminated) */
+const char*   bioseq_get_sequence(Bioseq*, unsigned long index);
 const char*   bioseq_get_raw_sequence(Bioseq*);
 unsigned long bioseq_get_sequence_length(Bioseq*, unsigned long);
 unsigned long bioseq_get_raw_sequence_length(Bioseq*);

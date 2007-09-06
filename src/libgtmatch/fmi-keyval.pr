@@ -1,17 +1,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-Seqpos determinenumofcodes(uint32_t numofchars,uint32_t prefixlength);
+Seqpos determinenumofcodes(unsigned int numofchars,unsigned int prefixlength);
 
 Seqpos determinenumberofspecialstostore(
                     const Specialcharinfo *specialcharinfo);
 
 void computefmkeyvalues (Fmindex *fm,
                          Seqpos bwtlength,
-                         uint32_t log2bsize,
-                         uint32_t log2markdist,
-                         uint32_t mapsize,
-                         uint32_t suffixlength,
+                         unsigned int log2bsize,
+                         unsigned int log2markdist,
+                         unsigned int mapsize,
+                         unsigned int suffixlength,
                          bool storeindexpos,
                          const Specialcharinfo *specialcharinfo);
 

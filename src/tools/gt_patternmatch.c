@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <inttypes.h>
@@ -12,6 +23,7 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/stamp.h"
 #include "libgtmatch/enum-patt-def.h"
+#include "libgtmatch/esa-mmsearch-def.h"
 
 #include "libgtmatch/sfx-map.pr"
 #include "libgtmatch/enum-patt.pr"
@@ -23,19 +35,15 @@ typedef struct
   Str *indexname;
 } Pmatchoptions;
 
-static int swallowmatch(/*@unused@*/ void *info,/*@unused@*/ Seqpos startpos)
-{
-  return 0;
-}
-
 static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
 {
   Suffixarray suffixarray;
   Seqpos totallength;
   bool haserr = false;
-  Enumpatternstate *eps = NULL;
+  Enumpatterniterator *epi = NULL;
   const Uchar *pptr;
   unsigned long patternlen;
+  MMsearchiterator *mmsi;
 
   if (mapsuffixarray(&suffixarray,
                      &totallength,
@@ -49,29 +57,33 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
   if (!haserr)
   {
     unsigned long trial;
+    Seqpos dbstart;
 
-    eps = newenumpattern(pmopt->minpatternlen,
-                         pmopt->maxpatternlen,
-                         suffixarray.encseq,
-                         env);
+    epi = newenumpatterniterator(pmopt->minpatternlen,
+                                 pmopt->maxpatternlen,
+                                 suffixarray.encseq,
+                                 env);
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
-      pptr = nextsampledpattern(&patternlen,eps);
-      if (mmenumpatternpositions(suffixarray.encseq,
-                                suffixarray.suftab,
-                                suffixarray.readmode,
-                                pptr,
-                                patternlen,
-                                swallowmatch,
-                                NULL) != 0)
+      pptr = nextEnumpatterniterator(&patternlen,epi);
+      mmsi = newmmsearchiterator(suffixarray.encseq,
+                                 suffixarray.suftab,
+                                 0,
+                                 0,
+                                 totallength,
+                                 suffixarray.readmode,
+                                 pptr,
+                                 patternlen,
+                                 env);
+      while (nextmmsearchiterator(&dbstart,mmsi))
       {
-        haserr = true;
-        break;
+        /* Nothing */;
       }
+      freemmsearchiterator(&mmsi,env);
     }
   }
   freesuffixarray(&suffixarray,env);
-  freeenumpattern(eps,env);
+  freeEnumpatterniterator(&epi,env);
   return haserr ? -1 : 0;
 }
 

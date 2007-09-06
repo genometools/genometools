@@ -1,7 +1,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int depthfirstesa(Suffixarray *suffixarray,
+int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                   Uchar initialchar,
                   Dfsinfo *(*allocateDfsinfo)(Dfsstate *,Env *),
                   void(*freeDfsinfo)(Dfsinfo *,Dfsstate *,Env *),

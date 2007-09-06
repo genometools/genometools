@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #ifndef ENCSEQDEF_H
@@ -15,8 +26,11 @@
 
 #define ENCSEQFILESUFFIX     ".esq"
 
+#define REVERSEPOS(TOT,POS) ((TOT) - 1 - (POS))
+
 typedef struct Encodedsequence Encodedsequence;
 typedef struct Encodedsequencescanstate Encodedsequencescanstate;
+typedef struct Specialrangeiterator Specialrangeiterator;
 
 typedef struct
 {
@@ -63,22 +77,27 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                                const char *str_sat,
                                                Env *env);
 
-bool fastspecialranges(const Encodedsequence *encseq);
+Encodedsequence *plain2encodedsequence(bool withrange,
+                                       Specialcharinfo *specialcharinfo,
+                                       const Uchar *seq1,
+                                       Seqpos len1,
+                                       const Uchar *seq2,
+                                       unsigned long len2,
+                                       const Alphabet *alphabet,
+                                       Env *env);
 
-int overallspecialrangesfast(
-                const Encodedsequence *encseq,
-                bool moveforward,
-                Readmode readmode,
-                int(*processrange)(void *,const Encodedsequence *,
-                                   const Sequencerange *,Env *),
-                void *processinfo,
-                Env *env);
+bool hasspecialranges(const Encodedsequence *encseq);
 
-int overallspecialranges(const Encodedsequence *encseq,
-                         Readmode readmode,
-                         int(*processrange)(void *,const Encodedsequence *,
-                                            const Sequencerange *,Env *),
-                         void *processinfo,
-                         Env *env);
+Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
+                                              bool moveforward,
+                                              Env *env);
+
+bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
+
+void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
+
+/*@null@*/ char *encseqaccessname(const Encodedsequence *encseq);
+
+bool exhaustedspecialrangeiterator(Specialrangeiterator *sri);
 
 #endif

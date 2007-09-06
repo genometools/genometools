@@ -1,19 +1,32 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <limits.h>
 #include "arraydef.h"
 #include "seqpos-def.h"
 #include "sarr-def.h"
-#include "alphadef.h"
+#include "measure-time-if.h"
 
-#include "alphabet.pr"
+#include "sfx-map.pr"
+#include "sfx-apfxlen.pr"
+#include "sfx-suffixer.pr"
 
-#define ISLEFTDIVERSE   (state->alphabetsize)
-#define INITIALCHAR     (state->alphabetsize+1)
+#define ISLEFTDIVERSE   (Uchar) (state->alphabetsize)
+#define INITIALCHAR     (Uchar) (state->alphabetsize+1)
 
 #define CHECKCHAR(CC)\
         if (father->commonchar != (CC) || (CC) >= ISLEFTDIVERSE)\
@@ -49,8 +62,8 @@ DECLAREARRAYSTRUCT(Seqpos);
 typedef struct
 {
   bool initialized;
-  uint32_t searchlength,
-           alphabetsize;
+  unsigned int searchlength,
+               alphabetsize;
   Seqpos depth;            /* value changes with each new match */
   int(*output)(void *,Seqpos,Seqpos,Seqpos);
   void *outinfo;
@@ -75,7 +88,7 @@ static void freeDfsinfo(Dfsinfo *dfsinfo,/*@unused@*/ Dfsstate *state,Env *env)
   FREESPACE(dfsinfo);
 }
 
-static void add2poslist(Dfsstate *state,Dfsinfo *ninfo,uint32_t base,
+static void add2poslist(Dfsstate *state,Dfsinfo *ninfo,unsigned int base,
                         Seqpos leafnumber,Env *env)
 {
   ArraySeqpos *ptr;
@@ -94,7 +107,7 @@ static void add2poslist(Dfsstate *state,Dfsinfo *ninfo,uint32_t base,
 
 static void concatlists(Dfsstate *state,Dfsinfo *father,Dfsinfo *son)
 {
-  uint32_t base;
+  unsigned int base;
 
   for (base = 0; base < state->alphabetsize; base++)
   {
@@ -103,7 +116,7 @@ static void concatlists(Dfsstate *state,Dfsinfo *father,Dfsinfo *son)
   father->uniquecharposlength += son->uniquecharposlength;
 }
 
-static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,uint32_t base,
+static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
                         Seqpos leafnumber)
 {
   Listtype *pl;
@@ -122,8 +135,8 @@ static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,uint32_t base,
 }
 
 static int cartproduct2(Dfsstate *state,
-                        const Dfsinfo *ninfo1, uint32_t base1,
-                        const Dfsinfo *ninfo2, uint32_t base2)
+                        const Dfsinfo *ninfo1, unsigned int base1,
+                        const Dfsinfo *ninfo2, unsigned int base2)
 {
   Listtype *pl1, *pl2;
   Seqpos *start1, *start2, *spptr1, *spptr2;
@@ -147,7 +160,7 @@ static int cartproduct2(Dfsstate *state,
 
 static void setpostabto0(Dfsstate *state)
 {
-  uint32_t base;
+  unsigned int base;
 
   if (!state->initialized)
   {
@@ -168,7 +181,7 @@ static int processleafedge(bool firstsucc,
                            Dfsstate *state,
                            Env *env)
 {
-  uint32_t base;
+  unsigned int base;
   Seqpos *start, *spptr;
 
 #ifdef DEBUG
@@ -198,7 +211,7 @@ static int processleafedge(bool firstsucc,
       NODEPOSLISTSTART(father,base) = state->poslist[base].nextfreeSeqpos;
       NODEPOSLISTLENGTH(father,base) = 0;
     }
-    add2poslist(state,father,leftchar,leafnumber,env);
+    add2poslist(state,father,(unsigned int) leftchar,leafnumber,env);
     return 0;
   }
   if (father->commonchar != ISLEFTDIVERSE)
@@ -209,7 +222,7 @@ static int processleafedge(bool firstsucc,
   {
     for (base = 0; base < state->alphabetsize; base++)
     {
-      if (base != leftchar)
+      if (leftchar != (Uchar) base)
       {
         if (cartproduct1(state,father,base,leafnumber) != 0)
         {
@@ -227,7 +240,7 @@ static int processleafedge(bool firstsucc,
       }
     }
   }
-  add2poslist(state,father,leftchar,leafnumber,env);
+  add2poslist(state,father,(unsigned int) leftchar,leafnumber,env);
   return 0;
 }
 
@@ -238,7 +251,7 @@ static int processbranchedge(bool firstsucc,
                              Dfsstate *state,
                              /*@unused@*/ Env *env)
 {
-  uint32_t chfather, chson;
+  unsigned int chfather, chson;
   Seqpos *start, *spptr, *fptr, *fstart;
 
 #ifdef DEBUG
@@ -319,18 +332,18 @@ static int processbranchedge(bool firstsucc,
   return 0;
 }
 
-int enumeratemaxpairs(Suffixarray *suffixarray,
-                      uint32_t searchlength,
+int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
+                      unsigned int searchlength,
                       int(*output)(void *,Seqpos,Seqpos,Seqpos),
                       void *outinfo,
                       Env *env)
 {
-  uint32_t base;
+  unsigned int base;
   ArraySeqpos *ptr;
   Dfsstate state;
   bool haserr = false;
 
-  state.alphabetsize = getnumofcharsAlphabet(suffixarray->alpha);
+  state.alphabetsize = alphabetsizeSequentialsuffixarrayreader(ssar);
   state.searchlength = searchlength;
   state.output = output;
   state.outinfo = outinfo;
@@ -342,8 +355,8 @@ int enumeratemaxpairs(Suffixarray *suffixarray,
     ptr = &state.poslist[base];
     INITARRAY(ptr,Seqpos);
   }
-  if (depthfirstesa(suffixarray,
-                    state.alphabetsize+1,
+  if (depthfirstesa(ssar,
+                    (Uchar) (state.alphabetsize+1),
                     allocateDfsinfo,
                     freeDfsinfo,
                     processleafedge,
@@ -362,5 +375,68 @@ int enumeratemaxpairs(Suffixarray *suffixarray,
     ptr = &state.poslist[base];
     FREEARRAY(ptr,Seqpos);
   }
+  return haserr ? -1 : 0;
+}
+
+typedef struct
+{
+  unsigned int minlength;
+  Encodedsequence *encseq;
+  int (*processmaxmatch)(void *,Seqpos,Seqpos,Seqpos);
+  void *processmaxmatchinfo;
+} Substringmatchinfo;
+
+static int processsuftab(/*@unused@*/ void *info,
+                         /*@unused@*/ const Seqpos *suftabpart,
+                         /*@unused@*/ Readmode readmode,
+                         /*@unused@*/ Seqpos widthofpart,
+                         /*@unused@*/ Env *env)
+{
+  return 0;
+}
+
+int sarrselfsubstringmatch(const Uchar *dbseq,
+                           Seqpos dblen,
+                           const Uchar *query,
+                           unsigned long querylen,
+                           unsigned int minlength,
+                           const Alphabet *alpha,
+                           int (*processmaxmatch)(void *,Seqpos,
+                                                  Seqpos,Seqpos),
+                           void *processmaxmatchinfo,
+                           Env *env)
+{
+  Specialcharinfo samplespecialcharinfo;
+  Substringmatchinfo ssi;
+  unsigned int numofchars;
+  bool haserr = false;
+
+  ssi.encseq = plain2encodedsequence(true,
+                                     &samplespecialcharinfo,
+                                     dbseq,
+                                     dblen,
+                                     query,
+                                     querylen,
+                                     alpha,
+                                     env);
+  ssi.minlength = minlength;
+  ssi.processmaxmatch = processmaxmatch;
+  ssi.processmaxmatchinfo = processmaxmatchinfo;
+  numofchars = getnumofcharsAlphabet(alpha);
+  if (suffixerator(processsuftab,
+                   &ssi,
+                   samplespecialcharinfo.specialcharacters,
+                   samplespecialcharinfo.specialranges,
+                   ssi.encseq,
+                   Forwardmode,
+                   numofchars,
+                   recommendedprefixlength(numofchars,dblen),
+                   (unsigned int) 1, /* parts */
+                   NULL,
+		   env) != 0)
+  {
+    haserr = true;
+  }
+  freeEncodedsequence(&ssi.encseq,env);
   return haserr ? -1 : 0;
 }

@@ -23,13 +23,23 @@
 
 static int runltrharvest(LTRharvestoptions *lo, Env *env)
 {
-  Suffixarray suffixarray;
+  Sequentialsuffixarrayreader *ssar; /* suffix array */
   Seqpos totallength;
   Seqpos *markpos = NULL;
 
   env_error_check(env);
+  
+  ssar = newSequentialsuffixarrayreader(
+                                  lo->str_indexname,
+		                  SARR_LCPTAB | SARR_SUFTAB | SARR_ESQTAB,
+				  true,
+				  env);
+  if(ssar == NULL)
+  {
+    return -1;
+  }
 
-  /* map suffix array */
+  /*
   if(streamsuffixarray(&suffixarray,
                        &totallength,
 		       SARR_LCPTAB | SARR_SUFTAB | SARR_ESQTAB,
@@ -39,9 +49,12 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   {
     return -1;
   }
+  */
+
+  //HIER WEITER
 
   /* test if motif is valid and encode motif */
-  if( testmotifandencodemotif(&lo->motif, suffixarray.alpha, env) != 0)
+  if( testmotifandencodemotif(&lo->motif, ssar->suffixarray.alpha, env) != 0)
   {
     return -1; 
   }
@@ -66,8 +79,8 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   lo->repeatinfo.suffixarrayptr = &suffixarray;
 
   /* search for maximal repeats */ 
-  if(enumeratemaxpairs(&suffixarray,
-                       (uint32_t)lo->minseedlength,
+  if(enumeratemaxpairs(&ssar,
+                       (unsigned int)lo->minseedlength,
 		       (void*)simpleexactselfmatchstore,
 		       lo,
 		       env) != 0)
@@ -118,7 +131,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   /* free prediction array */
   FREEARRAY(&lo->arrayLTRboundaries, LTRboundaries);
   /* free suffixarray */
-  freesuffixarray(&suffixarray, env);
+  freeSequentialsuffixarrayreader(&ssar, env);
 
   return 0;
 }

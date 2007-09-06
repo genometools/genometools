@@ -1,0 +1,155 @@
+# This mapfile (or version script) lists the public symbols that are
+# publically exported by each version of the tecla library. This file
+# has the format required by the Sun and Linux linkers, and also acts
+# as a template from which map files for other systems can be derived
+# with awk or sed.
+#
+# Under Solaris and Linux, this map file is used by ld during shared
+# library creation. It has two purposes:
+#
+# 1. It specifies which symbols in the library are to be made visible
+#    to applications. This has the dual benefits of reducing namespace
+#    polution, and of preventing applications from using private
+#    internal library functions that might change or disappear in
+#    future releases.
+#
+# 2. The information listed in this file is recorded in the shared
+#    library, such that when an application is linked against it, the
+#    linker can record a dependency in the application which says
+#    which is the earliest library version which included all of the
+#    symbols that the application needs. This means that if the
+#    application is copied to another system that has an earlier
+#    version of the library, the linker can quickly determine whether
+#    the earlier version contains all of the symbols that it needs.
+#
+# Under Linux, mapfiles can also be used to allow multiple
+# incompatible versions of a given function to exist in a library,
+# thus supporting applications that were compiled against different
+# incompatible versions of the library. Since this feature (and the
+# inclusion of .symver directives) isn't supported by Solaris, it
+# can't be included in this file. Non backwards compatibility in the
+# ABI must instead be handled in the more traditional way, by
+# incrementing the major version number.
+#
+# When a new minor release is made, a new tecla_1.x specification
+# should be added which inherits the symbols of the previous release
+# and lists newly added functions. For example, below you will find
+# the following clause:
+#
+# tecla_1.3 {
+#    global:
+#	ef_list_expansions;
+# } tecla_1.2;
+#
+# This says that ef_list_expansions is the name of a public function
+# that was added in the 1.3 release, and that the symbols defined in
+# the previous tecla_1.2 clause have been inherited by tecla_1.3.
+#
+# For more details see the following URL:
+#
+# http://www.usenix.org/publications/library/proceedings/als2000/browndavid.html
+#-------------------------------------------------------------------------------
+
+tecla_1.2 {
+    global:
+	cfc_file_start;
+	cfc_literal_escapes;
+	cfc_set_check_fn;
+	cpl_add_completion;
+	cpl_check_exe;
+	cpl_complete_word;
+	cpl_file_completions;
+	cpl_init_FileArgs;
+	cpl_last_error;
+	cpl_list_completions;
+	cpl_record_error;
+	del_CplFileConf;
+	del_ExpandFile;
+	del_GetLine;
+	del_PathCache;
+	del_PcaPathConf;
+	del_WordCompletion;
+	ef_expand_file;
+	ef_last_error;
+	gl_change_terminal;
+	gl_customize_completion;
+	gl_get_line;
+	new_CplFileConf;
+	new_ExpandFile;
+	new_GetLine;
+	new_PathCache;
+	new_PcaPathConf;
+	new_WordCompletion;
+	pca_last_error;
+	pca_lookup_file;
+	pca_path_completions;
+	pca_scan_path;
+	pca_set_check_fn;
+	ppc_file_start;
+	ppc_literal_escapes;
+
+    local:
+	*;
+};
+
+tecla_1.3 {
+    global:
+	ef_list_expansions;
+} tecla_1.2;
+
+tecla_1.4 {
+    global:
+	gl_configure_getline;
+	gl_save_history;
+	gl_load_history;
+	gl_group_history;
+	gl_show_history;
+	gl_resize_history;
+	gl_limit_history;
+	gl_clear_history;
+	gl_toggle_history;
+	gl_watch_fd;
+	libtecla_version;
+	gl_terminal_size;
+	gl_state_of_history;
+	gl_range_of_history;
+	gl_size_of_history;
+	gl_lookup_history;
+	gl_echo_mode;
+	gl_replace_prompt;
+	gl_prompt_style;
+	gl_ignore_signal;
+	gl_trap_signal;
+	gl_last_signal;
+} tecla_1.3;
+
+tecla_l.5 {
+   global:
+	gl_inactivity_timeout;
+	gl_completion_action;
+	gl_register_action;
+	gl_display_text;
+	gl_error_message;
+	gl_return_status;
+	gl_set_term_size;
+        gl_list_signals;
+	gl_catch_blocked;
+	gl_io_mode;
+	gl_raw_io;
+	gl_normal_io;
+	gl_tty_signals;
+	gl_abandon_line;
+	gl_handle_signal;
+	gl_pending_io;
+	gl_bind_keyseq;
+	cpl_recall_matches;
+	gl_erase_terminal;
+} tecla_1.4;
+
+tecla_1.6 {
+   global:
+	gl_append_history;
+	gl_automatic_history;
+	gl_query_char;
+	gl_read_char;
+} tecla_l.5;

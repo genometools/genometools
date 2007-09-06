@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include "libgtcore/env.h"
@@ -22,7 +33,7 @@ typedef struct
  struct _Suftabparts
 {
   Suftabpartcomponent *components;
-  uint32_t numofparts;
+  unsigned int numofparts;
   Seqpos largestwidth;
 };
 
@@ -55,7 +66,7 @@ static void removeemptyparts(Suftabparts *suftabparts)
 {
   if (suftabparts->numofparts > 0)
   {
-    uint32_t destpart, srcpart;
+    unsigned int destpart, srcpart;
     for (destpart = 0, srcpart = 0; srcpart < suftabparts->numofparts;
          srcpart++)
     {
@@ -75,14 +86,17 @@ static void removeemptyparts(Suftabparts *suftabparts)
     for (srcpart = 0; srcpart < suftabparts->numofparts; srcpart++)
     {
       assert(suftabparts->components[srcpart].widthofpart > 0);
+      /*
+      XXX insert later
       printf("# widthofpart[%u]=" FormatSeqpos "\n",
               (unsigned int) srcpart,
               PRINTSeqposcast(suftabparts->components[srcpart].widthofpart));
+      */
     }
   }
 }
 
-Suftabparts *newsuftabparts(uint32_t numofparts,
+Suftabparts *newsuftabparts(unsigned int numofparts,
                             const Seqpos *leftborder,
                             Codetype numofallcodes,
                             Seqpos numofsuffixestoinsert,
@@ -101,7 +115,7 @@ Suftabparts *newsuftabparts(uint32_t numofparts,
   {
     if (numofsuffixestoinsert < (Seqpos) numofparts)
     {
-      suftabparts->numofparts = (uint32_t) 1;
+      suftabparts->numofparts = (unsigned int) 1;
     } else
     {
       suftabparts->numofparts = numofparts;
@@ -113,17 +127,19 @@ Suftabparts *newsuftabparts(uint32_t numofparts,
     suftabparts->components = NULL;
   } else
   {
-    uint32_t part, remainder;
+    unsigned int part, remainder;
     uint64_t widthofsuftabpart,
              suftaboffset = 0,
              sumofwidth = 0;
     ALLOCASSIGNSPACE(suftabparts->components,NULL,Suftabpartcomponent,
                      numofparts);
     widthofsuftabpart = (uint64_t) numofsuffixestoinsert/numofparts;
-    remainder = (uint32_t) (numofsuffixestoinsert % (Seqpos) numofparts);
+    remainder = (unsigned int) (numofsuffixestoinsert % (Seqpos) numofparts);
     suftabparts->largestwidth = 0;
+    /* XXX insert later
     printf("# numofsuffixestoinsert=" FormatSeqpos "\n",
            PRINTSeqposcast(numofsuffixestoinsert));
+    */
     for (part=0; part < numofparts; part++)
     {
       if (remainder > 0)
@@ -171,7 +187,7 @@ Suftabparts *newsuftabparts(uint32_t numofparts,
   return suftabparts;
 }
 
-Codetype stpgetcurrentmincode(uint32_t part,
+Codetype stpgetcurrentmincode(unsigned int part,
                               const Suftabparts *suftabparts)
 {
   if (part == 0)
@@ -181,13 +197,13 @@ Codetype stpgetcurrentmincode(uint32_t part,
   return suftabparts->components[part-1].nextcode + 1;
 }
 
-uint64_t stpgetcurrentsuftaboffset(uint32_t part,
+uint64_t stpgetcurrentsuftaboffset(unsigned int part,
                                    const Suftabparts *suftabparts)
 {
   return suftabparts->components[part].suftaboffset;
 }
 
-Codetype stpgetcurrentmaxcode(uint32_t part,
+Codetype stpgetcurrentmaxcode(unsigned int part,
                               const Suftabparts *suftabparts)
 {
   if (part == suftabparts->numofparts - 1)
@@ -197,14 +213,14 @@ Codetype stpgetcurrentmaxcode(uint32_t part,
   return suftabparts->components[part].nextcode;
 }
 
-uint64_t stpgetcurrentsumofwdith(uint32_t part,
+uint64_t stpgetcurrentsumofwdith(unsigned int part,
                                  const Suftabparts *suftabparts)
 {
   return suftabparts->components[part].sumofwidth;
 }
 
-Seqpos stpgetcurrentwidtofpart(uint32_t part,
-                               const Suftabparts *suftabparts)
+Seqpos stpgetcurrentwidthofpart(unsigned int part,
+                                const Suftabparts *suftabparts)
 {
   return suftabparts->components[part].widthofpart;
 }
@@ -214,7 +230,7 @@ Seqpos stpgetlargestwidth(const Suftabparts *suftabparts)
   return suftabparts->largestwidth;
 }
 
-uint32_t stpgetnumofparts(const Suftabparts *suftabparts)
+unsigned int stpgetnumofparts(const Suftabparts *suftabparts)
 {
   return suftabparts->numofparts;
 }

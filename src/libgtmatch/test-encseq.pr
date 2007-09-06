@@ -7,7 +7,7 @@ int testencodedsequence(const StrArray *filenametab,
                         const Uchar *symbolmap,
                         Env *env);
 
-int checkspecialranges(const Encodedsequence *encseq,Env *env);
+int checkspecialrangesfast(const Encodedsequence *encseq,Env *env);
 
 #ifdef __cplusplus
 }

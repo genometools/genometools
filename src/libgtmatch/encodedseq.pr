@@ -11,6 +11,8 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos);
 
+/*@null@*/ char *encseqaccessname(const Encodedsequence *encseq);
+
 int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
 
 void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
@@ -22,23 +24,17 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
 
-bool fastspecialranges(const Encodedsequence *encseq);
+bool hasspecialranges(const Encodedsequence *encseq);
 
-int overallspecialrangesfast(
-                const Encodedsequence *encseq,
-                bool moveforward,
-                Readmode readmode,
-                int(*processrange)(void *,const Encodedsequence *,
-                                   const Sequencerange *,Env *),
-                void *processinfo,
-                Env *env);
+Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
+                                              bool moveforward,
+                                              Env *env);
 
-int overallspecialranges(const Encodedsequence *encseq,
-                         Readmode readmode,
-                         int(*processrange)(void *,const Encodedsequence *,
-                                            const Sequencerange *,Env *),
-                         void *processinfo,
-                         Env *env);
+bool exhaustedspecialrangeiterator(Specialrangeiterator *sri);
+
+bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
+
+void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
 
 /*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
                                                   const StrArray *filenametab,
@@ -60,8 +56,11 @@ int overallspecialranges(const Encodedsequence *encseq,
                                                Env *env);
 
 Encodedsequence *plain2encodedsequence(bool withrange,
-                                       const Uchar *seq,
-                                       Seqpos len,
+                                       Specialcharinfo *specialcharinfo,
+                                       const Uchar *seq1,
+                                       Seqpos len1,
+                                       const Uchar *seq2,
+                                       unsigned long len2,
                                        const Alphabet *alphabet,
                                        Env *env);
 

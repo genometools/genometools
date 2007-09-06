@@ -1,11 +1,21 @@
 /*
   Copyright (c) 2003-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2003-2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include "gtr.h"
-#include "gtlua.h"
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
@@ -33,6 +43,9 @@
 #include "libgtext/hmm.h"
 #include "libgtext/splicedseq.h"
 #include "libgtext/toolbox.h"
+#include "libgtlua/gt_lua.h"
+#include "libgtlua/helper.h"
+#include "libgtlua/interactive.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
 #include "tools/gt_clean.h"
@@ -183,6 +196,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL, env);
   hashtable_add(gtr->unit_tests, "alignment class", alignment_unit_test, env);
   hashtable_add(gtr->unit_tests, "array class", array_unit_test, env);
+  hashtable_add(gtr->unit_tests, "array example", array_example, env);
   hashtable_add(gtr->unit_tests, "bit pack array class",
                 bitPackArray_unit_test, env);
   hashtable_add(gtr->unit_tests, "bit pack string module",
@@ -318,7 +332,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
   if (!had_err && gtr->interactive) {
     showshortversion(env_error_get_progname(env));
     set_arg_in_lua_interpreter(gtr->L, env_error_get_progname(env), argv);
-    run_interactive_lua_interpreter(gtr->L);
+    run_interactive_lua_interpreter(gtr->L, env);
   }
   if (had_err)
     return EXIT_FAILURE;

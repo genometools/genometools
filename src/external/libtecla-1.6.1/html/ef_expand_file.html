@@ -1,0 +1,213 @@
+<head>
+<title>Manual Page</title>
+</head>
+<body>
+<pre>
+<a href="ef_expand_file.html"><b>ef_expand_file</b></a>                    <a href="ef_expand_file.html"><b>ef_expand_file</b></a>
+
+
+
+</pre><h2>NAME</h2><pre>
+       ef_expand_file,   del_ExpandFile,   ef_last_error,  ef_list_expansions,
+       new_ExpandFile - expand filenames containing ~user/$envvar and wildcard
+       expressions
+
+</pre><h2>SYNOPSIS</h2><pre>
+       #include &lt;libtecla.h&gt;
+
+       ExpandFile *new_ExpandFile(void);
+
+       ExpandFile *del_ExpandFile(ExpandFile *ef);
+
+       FileExpansion *ef_expand_file(ExpandFile *ef,
+                                     const char *path,
+                                     int pathlen);
+
+       int ef_list_expansions(FileExpansion *result, FILE *fp,
+                              int term_width);
+
+       const char *ef_last_error(ExpandFile *ef);
+
+
+</pre><h2>DESCRIPTION</h2><pre>
+       The  ef_expand_file()  function  is  part of the tecla library (see the
+       <a href="libtecla.html"><b>libtecla</b></a> man page). It  expands  a  specified  filename,
+       converting  ~user/  and  ~/ expressions at the start of the filename to
+       the corresponding home directories, replacing $envvar with the value of
+       the  corresponding  environment  variable,  and  then, if there are any
+       wildcards, matching these against existing  filenames.  Backslashes  in
+       the  input filename are interpreted as escaping any special meanings of
+       the characters that follow them.  Only backslahes that  are  themselves
+       preceded by backslashes are preserved in the expanded filename.
+
+       In  the  presence  of  wildcards,  the  returned list of filenames only
+       includes the names of existing files which match the wildcards.  Other-
+       wise,  the  original  filename is returned after expansion of tilde and
+       dollar expressions, and the result  is  not  checked  against  existing
+       files. This mimics the file-globbing behavior of the unix tcsh shell.
+
+       The supported wildcards and their meanings are:
+         *        -  Match any sequence of zero or more characters.
+         ?        -  Match any single character.
+         [chars]  -  Match any single character that appears in
+                     'chars'.  If 'chars' contains an expression of
+                     the form a-b, then any character between a and
+                     b, including a and b, matches. The '-'
+                     character looses its special meaning as a
+                     range specifier when it appears at the start
+                     of the sequence of characters. The ']'
+                     character also looses its significance as the
+                     terminator of the range expression if it
+                     appears immediately after the opening '[', at
+                     which point it is treated one of the
+                     characters of the range. If you want both '-'
+                     and ']' to be part of the range, the '-'
+                     should come first and the ']' second.
+
+         [^chars] -  The same as [chars] except that it matches any
+                     single character that doesn't appear in
+                     'chars'.
+
+       Note that wildcards never match the initial dot in filenames that start
+       with '.'. The initial '.' must be explicitly specified in the filename.
+       This  again  mimics  the globbing behavior of most unix shells, and its
+       rational is based in the fact that in unix, files with names that start
+       with  '.'  are usually hidden configuration files, which are not listed
+       by default by the ls command.
+
+       The following is a complete example of how to use  the  file  expansion
+       function.
+
+         #include &lt;stdio.h&gt;
+         #include &lt;libtecla.h&gt;
+
+         int main(int argc, char *argv[])
+         {
+           ExpandFile *ef;      /* The expansion resource object */
+           char *filename;      /* The filename being expanded */
+           FileExpansion *expn; /* The results of the expansion */
+           int i;
+
+           ef = new_ExpandFile();
+           if(!ef)
+             return 1;
+
+           for(arg = *(argv++); arg; arg = *(argv++)) {
+             if((expn = ef_expand_file(ef, arg, -1)) == NULL) {
+               fprintf(stderr, "Error expanding %s (%s).\n", arg,
+                                ef_last_error(ef));
+             } else {
+               printf("%s matches the following files:\n", arg);
+               for(i=0; i&lt;expn-&gt;nfile; i++)
+                 printf(" %s\n", expn-&gt;files[i]);
+             }
+           }
+
+           ef = del_ExpandFile(ef);
+           return 0;
+         }
+
+       Descriptions of the functions used above are as follows:
+
+         ExpandFile *new_ExpandFile(void)
+
+       This  function creates the resources used by the ef_expand_file() func-
+       tion. In particular, it maintains the memory that is used to record the
+       array  of matching filenames that is returned by ef_expand_file(). This
+       array is expanded as needed, so there is no built in limit to the  num-
+       ber of files that can be matched.
+
+         ExpandFile *del_ExpandFile(ExpandFile *ef)
+
+       This  function  deletes  the resources that were returned by a previous
+       call to new_ExpandFile(). It always returns NULL (ie a deleted object).
+       It does nothing if the ef argument is NULL.
+
+       A container of the following type is returned by ef_expand_file().
+
+         typedef struct {
+           int exists;   /* True if the files in files[] exist */
+           int nfile;    /* The number of files in files[] */
+           char **files; /* An array of 'nfile' filenames. */
+         } FileExpansion;
+
+         FileExpansion *ef_expand_file(ExpandFile *ef,
+                                       const char *path,
+                                       int pathlen)
+
+       The  ef_expand_file()  function  performs  filename expansion, as docu-
+       mented at the start of this section. Its first argument is  a  resource
+       object  returned  by  new_ExpandFile().  A  pointer to the start of the
+       filename to be matched is passed via the path argument. This must be  a
+       normal  NUL  terminated  string, but unless a length of -1 is passed in
+       pathlen, only the first pathlen characters will be used in the filename
+       expansion.   If  the length is specified as -1, the whole of the string
+       will be expanded.
+
+       The function returns a pointer to a container who's  contents  are  the
+       results  of  the expansion. If there were no wildcards in the filename,
+       the nfile member will be 1, and the exists member should be queried  if
+       it  is  important to know if the expanded file currently exists or not.
+       If there were wildcards, then the contained files[] array will  contain
+       the names of the nfile existing files that matched the wildcarded file-
+       name, and the exists member will  have  the  value  1.  Note  that  the
+       returned container belongs to the specified ef object, and its contents
+       will change on each call, so if you need to retain the results of  more
+       than  one  call  to  ef_expand_file(), you should either make a private
+       copy  of  the  returned  results,  or  create  multiple  file-expansion
+       resource objects via multiple calls to new_ExpandFile().
+
+       On  error,  NULL  is  returned,  and an explanation of the error can be
+       determined by calling ef_last_error(ef).
+
+         const char *ef_last_error(ExpandFile *ef)
+
+       This function returns  the  message  which  describes  the  error  that
+       occurred  on  the last call to ef_expand_file(), for the given (Expand-
+       File *ef) resource object.
+
+         int ef_list_expansions(FileExpansion *result, FILE *fp,
+                                int terminal_width);
+
+       The ef_list_expansions() function provides a convenient way to list the
+       filename expansions returned by ef_expand_file(). Like the unix ls com-
+       mand, it arranges the filenames into equal width columns,  each  column
+       having  the  width  of  the largest file. The number of columns used is
+       thus determined by the length of the longest filename, and  the  speci-
+       fied  terminal  width.  Beware  that filenames that are longer than the
+       specified terminal width are printed without being truncated, so output
+       longer than the specified terminal width can occur. The list is written
+       to the stdio stream specified by the fp argument.
+
+
+</pre><h2>THREAD SAFETY</h2><pre>
+       In multi-threaded programs, you should use the libtecla_r.a version  of
+       the library. This uses POSIX reentrant functions where available (hence
+       the _r suffix), and disables features that rely on non-reentrant system
+       functions. Currently there are no features disabled in this module.
+
+       Using  the  libtecla_r.a  version of the library, it is safe to use the
+       facilities of this module  in  multiple  threads,  provided  that  each
+       thread  uses  a separately allocated ExpandFile object. In other words,
+       if two threads want  to  do  file  expansion,  they  should  each  call
+       new_ExpandFile() to allocate their own file-expansion objects.
+
+
+</pre><h2>FILES</h2><pre>
+       libtecla.a    -    The tecla library
+       libtecla.h    -    The tecla header file.
+
+
+</pre><h2>SEE ALSO</h2><pre>
+       <a href="libtecla.html"><b>libtecla</b></a>, <a href="gl_get_line.html"><b>gl_get_line</b></a>, <a href="cpl_complete_word.html"><b>cpl_complete_word</b></a>,
+       <a href="pca_lookup_file.html"><b>pca_lookup_file</b></a>
+
+
+</pre><h2>AUTHOR</h2><pre>
+       Martin Shepherd  (mcs@astro.caltech.edu)
+
+
+
+                                                 <a href="ef_expand_file.html"><b>ef_expand_file</b></a>
+</pre>
+</body>

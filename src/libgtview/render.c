@@ -1,12 +1,19 @@
 /*
   Copyright (c) 2007 Sascha Steinbiss <ssteinbiss@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-/**
- * \if INTERNAL \file render.c \endif
- * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
- */
 
 #include <math.h>
 #include <string.h>
@@ -19,22 +26,21 @@
 #include "libgtview/line.h"
 #include "libgtview/block.h"
 
-enum ClipType
+typedef enum
 {
   CLIPPED_RIGHT,
   CLIPPED_LEFT,
   CLIPPED_NONE,
   CLIPPED_BOTH
-};
+} ClipType;
 
 typedef struct
 {
   double start, end;
-  enum ClipType clip;
+  ClipType clip;
 } DrawingRange;
 
-struct Render
-{
+struct Render {
   Diagram *dia;
   Config *cfg;
   Graphics *g;
@@ -43,13 +49,19 @@ struct Render
   unsigned int width, height, cur_track;
 };
 
-/*!
-Calculates the final height of the image to be created.
-\param r Render object
-\param env Pointer to Environment object.
-\return Height of the image in pixels.
-*/
-unsigned int render_calculate_height(Render *r, Env *env)
+Render* render_new(Config *cfg, Env *env)
+{
+  Render *r;
+  assert(cfg);
+  r = env_ma_malloc(env, sizeof (Render));
+  r->dia = NULL;
+  r->cfg = cfg;
+  r->margins = config_get_num(r->cfg, "format", "margins", 10, env);
+  return r;
+}
+
+/* Calculate the final height of the image to be created. */
+static unsigned int render_calculate_height(Render *r, Env *env)
 {
   unsigned int lines = diagram_get_total_lines(r->dia, env);
   unsigned int height;
@@ -65,7 +77,7 @@ unsigned int render_calculate_height(Render *r, Env *env)
                                                             10,
                                                             env)) + 15;
 
-  assert(r != NULL);
+  assert(r);
 
   /* get total height of all lines */
   height = lines * line_height;
@@ -79,45 +91,15 @@ unsigned int render_calculate_height(Render *r, Env *env)
   return height;
 }
 
-Render* render_new(Config *cfg, Env *env)
-{
-  Render *r;
-
-  assert(cfg != NULL);
-
-  r = env_ma_malloc(env, sizeof (Render));
-
-  assert(r != NULL);
-
-  r->dia = NULL;
-  r->cfg = cfg;
-  r->margins = config_get_num(r->cfg, "format", "margins", 10, env);
-  return r;
-}
-
-void render_delete(Render *r, Env *env)
-{
-  if (!r) return;
-  env_ma_free(r, env);
-}
-
 double render_convert_point(Render *r, long pos)
 {
   return (double) ((r->factor * MAX(0,(pos-(long) r->range.start)))
                       + r->margins);
 }
 
-/*!
-Converts an base range into a pixel range.
-If the range exceeds visibility boundaries, clipping info is set.
-\param r Render object
-\param node_range Range to convert.
-\param env Pointer to Environment object.
-\return Height of the image in pixels.
-*/
-DrawingRange render_convert_coords(Render *r,
-                                   Range node_range,
-                                   Env *env)
+/* Converts base range <node_range> into a pixel range.
+   If the range exceeds visibility boundaries, clipping info is set. */
+static DrawingRange render_convert_coords(Render *r, Range node_range, Env *env)
 {
   DrawingRange converted_range;
   converted_range.clip = CLIPPED_NONE;
@@ -149,20 +131,14 @@ DrawingRange render_convert_coords(Render *r,
   return converted_range;
 }
 
-/*!
-Renders a line.
-\param r Render object
-\param line Line object to render.
-\param env Pointer to Environment object.
-*/
-void render_line(Render *r, Line *line, Env *env)
+static void render_line(Render *r, Line *line, Env *env)
 {
   int i;
   Array *blocks;
 
-  assert(r != NULL && line != NULL);
+  assert(r && line);
 
-  /* TODO: make this an iterator? */
+  /* XXX: make this an iterator? */
   blocks = line_get_blocks(line);
   /* begin drawing block */
   for (i=0; i<array_size(blocks); i++)
@@ -202,14 +178,14 @@ void render_line(Render *r, Line *line, Env *env)
                          config_get_color(r->cfg, "stroke", env));
 
     /* draw elements in block */
-    for (delem = dlist_first(elems); delem != NULL;
+    for (delem = dlist_first(elems); delem;
            delem = dlistelem_next(delem))
     {
       Element *elem = (Element*) dlistelem_get_data(delem);
       Range elem_range = element_get_range(elem);
       DrawingRange draw_range;
       double elem_start, elem_width, bar_height;
-      Color grey;
+      Color grey, elem_color;
       int arrow_status = ARROW_NONE;
       const char *style,
                  *type = genome_feature_type_get_cstr(element_get_type(elem));
@@ -221,7 +197,7 @@ void render_line(Render *r, Line *line, Env *env)
              && dlistelem_next(delem) == NULL)
         arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
 
-      grey.red=grey.green=grey.blue=.85;
+      grey.red = grey.green = grey.blue = .85;
       bar_height = config_get_num(r->cfg, "format", "bar_height", 15, env);
 
       if (config_get_verbose(r->cfg))
@@ -247,6 +223,11 @@ void render_line(Render *r, Line *line, Env *env)
                               "box",
                               env);
 
+      if (element_is_marked(elem))
+        elem_color = config_get_color(r->cfg, "stroke_marked", env);
+      else
+        elem_color = config_get_color(r->cfg, "stroke", env);
+
       if (strcmp(style, "box")==0)
       {
         graphics_draw_box(r->g,
@@ -258,7 +239,7 @@ void render_line(Render *r, Line *line, Env *env)
                        arrow_status,
                        config_get_num(r->cfg, "format", "arrow_width", 6, env),
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
-                       config_get_color(r->cfg, "stroke", env));
+                       elem_color);
       }
       else if (strcmp(style, "caret")==0)
       {
@@ -270,7 +251,7 @@ void render_line(Render *r, Line *line, Env *env)
                        arrow_status,
                        config_get_num(r->cfg, "format", "arrow_width", 6, env),
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
-                       config_get_color(r->cfg, "stroke", env));
+                       elem_color);
       }
       else if (strcmp(style, "dashes")==0)
       {
@@ -282,7 +263,7 @@ void render_line(Render *r, Line *line, Env *env)
                        arrow_status,
                        config_get_num(r->cfg, "format", "arrow_width", 6, env),
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
-                       config_get_color(r->cfg, "stroke", env));
+                       elem_color);
       }
       else if (strcmp(style, "line")==0)
       {
@@ -302,7 +283,7 @@ void render_line(Render *r, Line *line, Env *env)
                        arrow_status,
                        config_get_num(r->cfg, "format", "arrow_width", 6, env),
                        config_get_num(r->cfg, "format", "stroke_width", 1, env),
-                       config_get_color(r->cfg, "stroke", env));
+                       elem_color);
       }
 
       /* draw arrowheads at clipped margins */
@@ -326,16 +307,14 @@ void render_line(Render *r, Line *line, Env *env)
                config_get_num(r->cfg, "format", "bar_vspace", 10, env) + 15;
 }
 
-/*
-  This function disables captions for blocks if they overlap with
-  neighboring captions.
-*/
+/* This function disables captions for blocks if they overlap with
+   neighboring captions. */
 static void mark_caption_collisions(Render *r, Line *line, Env* env)
 {
   int i, j;
   Array *blocks;
 
-  assert(r != NULL && line != NULL);
+  assert(r && line);
 
   blocks = line_get_blocks(line);
   for (i=0; i<array_size(blocks)-1; i++)
@@ -380,22 +359,14 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
   }
 }
 
-/*!
-Renders a track.
-\param r Render object
-\param key CString with track description.
-\param value Pointer to Track object.
-\param data Render object.
-\param env Pointer to Environment object.
-*/
-int render_track(void *key, void *value, void *data, Env *env)
+static int render_track(void *key, void *value, void *data, Env *env)
 {
   Render* r = (Render*) data;
   Track* track = (Track*) value;
   Array* lines = track_get_lines(track);
   int i;
 
-  assert(value != NULL && key != NULL && data != NULL);
+  assert(value && key && data);
 
   if (config_get_verbose(r->cfg))
     fprintf(stderr, "processing track %s\n", (const char*) key);
@@ -422,26 +393,22 @@ int render_track(void *key, void *value, void *data, Env *env)
   return 0;
 }
 
-/*!
-Formats a given position number for short display in the ruler.
-*/
-void format_ruler_label(char *txt, long pos)
+/* Formats a given position number for short display in the ruler. */
+static void format_ruler_label(char *txt, long pos)
 {
-  assert(txt != NULL);
+  assert(txt);
   (void) snprintf(txt, BUFSIZ, "%li", pos);
 }
 
-/*!
-Renders a ruler with dynamic scale labeling and optional grid.
-*/
-void render_ruler(Render *r, Env* env)
+/* Renders a ruler with dynamic scale labeling and optional grid. */
+static void render_ruler(Render *r, Env* env)
 {
   double step, minorstep, vmajor, vminor;
   long base_length, tick;
   Color rulercol, gridcol;
   char str[BUFSIZ];
 
-  assert(r != NULL);
+  assert(r);
 
   rulercol.red = rulercol.green = rulercol.blue = .2;
   gridcol.red = gridcol.green = gridcol.blue = .9;
@@ -529,7 +496,7 @@ int render_to_png(Render *r, Diagram *dia, const char *filename,
 
   /* create new Graphics backend */
   r->g = graphics_new_png(filename, width, height, env);
-  graphics_set_margins(r->g, r->margins, 0, width, height);
+  graphics_set_margins(r->g, r->margins, 0);
 
   /* Add ruler/scale to the image */
   render_ruler(r, env);
@@ -539,7 +506,7 @@ int render_to_png(Render *r, Diagram *dia, const char *filename,
   {
     /* process (render) each track */
     Hashtable *tracks = diagram_get_tracks(r->dia);
-    (void) hashtable_foreach(tracks, render_track, r, env);
+    (void) hashtable_foreach_ao(tracks, render_track, r, env);
   }
   else if (config_get_verbose(r->cfg))
     fprintf(stderr, "diagram has no tracks!\n");
@@ -553,3 +520,10 @@ int render_to_png(Render *r, Diagram *dia, const char *filename,
 
   return had_err;
 }
+
+void render_delete(Render *r, Env *env)
+{
+  if (!r) return;
+  env_ma_free(r, env);
+}
+

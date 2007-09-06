@@ -1,7 +1,18 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-  See LICENSE file or http://genometools.org/license.html for license details.
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
 #include <inttypes.h>
@@ -13,10 +24,12 @@
 
 #include "libgtmatch/sfx-map.pr"
 #include "libgtmatch/esa-maxpairs.pr"
+#include "libgtmatch/test-maxpairs.pr"
 
 typedef struct
 {
   unsigned int userdefinedleastlength;
+  unsigned long samples;
   Str *indexname;
 } Maxpairsoptions;
 
@@ -39,23 +52,23 @@ static int simpleexactselfmatchoutput(/*@unused@*/ void *info,
 }
 
 static int callenummaxpairs(const Str *indexname,
-                            uint32_t userdefinedleastlength,
+                            unsigned int userdefinedleastlength,
                             Env *env)
 {
-  Suffixarray suffixarray;
-  Seqpos totallength;
   bool haserr = false;
+  Sequentialsuffixarrayreader *ssar;
 
-  if (streamsuffixarray(&suffixarray,
-                        &totallength,
-                        SARR_LCPTAB | SARR_SUFTAB | SARR_ESQTAB,
-                        indexname,
-                        false,
-                        env) != 0)
+  ssar = newSequentialsuffixarrayreader(indexname,
+                                        SARR_LCPTAB |
+                                        SARR_SUFTAB |
+                                        SARR_ESQTAB,
+                                        false,
+                                        env);
+  if (ssar == NULL)
   {
     haserr = true;
   }
-  if (!haserr && enumeratemaxpairs(&suffixarray,
+  if (!haserr && enumeratemaxpairs(ssar,
                                    userdefinedleastlength,
                                    simpleexactselfmatchoutput,
                                    NULL,
@@ -63,7 +76,7 @@ static int callenummaxpairs(const Str *indexname,
   {
     haserr = true;
   }
-  freesuffixarray(&suffixarray,env);
+  freeSequentialsuffixarrayreader(&ssar,env);
   return haserr ? -1 : 0;
 }
 
@@ -76,7 +89,7 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
   OPrval oprval;
 
   env_error_check(env);
-  op = option_parser_new("[-l minlength] -ii indexname",
+  op = option_parser_new("[options] -ii indexname",
                          "Enumerate maximal pairs of minimum length.",
                          env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -85,6 +98,13 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
                                &maxpairsoptions->userdefinedleastlength,
                                (unsigned int) 20,
                                (unsigned int) 1,env);
+  option_parser_add_option(op, option, env);
+
+  option = option_new_ulong_min("samples","Specify number of samples",
+                                 &maxpairsoptions->samples,
+                                 (unsigned long) 0,
+                                 (unsigned long) 1,
+                                 env);
   option_parser_add_option(op, option, env);
 
   option = option_new_string("ii",
@@ -114,10 +134,21 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
   {
     assert(parsed_args == argc);
     if (callenummaxpairs(maxpairsoptions.indexname,
-                        (uint32_t) maxpairsoptions.userdefinedleastlength,
-                        env) != 0)
+                         maxpairsoptions.userdefinedleastlength,
+                         env) != 0)
     {
       haserr = true;
+    }
+    if (!haserr && maxpairsoptions.samples > 0)
+    {
+      if (testmaxpairs(maxpairsoptions.indexname,
+                      maxpairsoptions.samples,
+                      maxpairsoptions.userdefinedleastlength,
+                      10 * maxpairsoptions.userdefinedleastlength,
+                      env) != 0)
+      {
+        haserr = true;
+      }
     }
   }
   str_delete(maxpairsoptions.indexname,env);

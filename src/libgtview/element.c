@@ -1,12 +1,19 @@
 /*
-   Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
-   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-   See LICENSE file or http://genometools.org/license.html for license details.
+  Copyright (c) 2007 Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-/**
- * \if INTERNAL \file element.c \endif
- * \author Christin Schaerfer <cschaerfer@stud.zbh.uni-hamburg.de>
- */
 
 #include <string.h>
 #include "libgtcore/array.h"
@@ -16,82 +23,75 @@
 #include "libgtext/genome_feature_type.h"
 #include "libgtview/element.h"
 
-struct Element
-{
+struct Element {
   GenomeFeatureType type;
   Range range;
+  bool mark;
 };
 
 Element* element_new(GenomeNode *gn, Env *env)
 {
   Element *element;
   GenomeFeature *gf = (GenomeFeature*) gn;
-
-  assert(gn != NULL);
-
   env_error_check(env);
+  assert(gn);
   element = element_new_empty(env);
   element_set_type(element,genome_feature_get_type(gf));
   element_set_range(element, genome_node_get_range(gn));
+  element->mark = genome_node_is_marked(gn);
   return element;
 }
 
 Element* element_new_empty(Env *env)
 {
-  Element *element;
-
   env_error_check(env);
-  element = env_ma_malloc(env, sizeof (Element));
-  assert(element != NULL);
-  return element;
+  return env_ma_calloc(env, 1, sizeof (Element));
 }
 
-GenomeFeatureType element_get_type(Element *element)
+Range element_get_range(const Element *element)
 {
-  assert(element != NULL);
-  return element->type;
-}
-
-void element_set_type(Element *element,
-                      GenomeFeatureType type)
-{
-  assert(element != NULL);
-  element->type = type;
-}
-
-Range element_get_range(Element *element)
-{
-  assert(element != NULL);
-
+  assert(element);
   return element->range;
 }
 
-void element_set_range(Element *element,
-                       Range r)
+void element_set_range(Element *element, Range r)
 {
-  assert(element != NULL);
-
+  assert(element);
   element->range = r;
 }
 
-bool elements_are_equal(Element* e1,
-                        Element* e2)
+GenomeFeatureType element_get_type(const Element *element)
 {
-  assert(e1 != NULL && e2 != NULL);
-  if ((0 == strcmp(genome_feature_type_get_cstr(e1->type),
-                   genome_feature_type_get_cstr(e2->type)))
-     && (0 == range_compare(e1->range, e2->range)))
+  assert(element);
+  return element->type;
+}
+
+void element_set_type(Element *element, GenomeFeatureType type)
+{
+  assert(element);
+  element->type = type;
+}
+
+bool element_is_marked(const Element *element)
+{
+  assert(element);
+  return element->mark;
+}
+
+bool elements_are_equal(const Element* e1, const Element* e2)
+{
+  assert(e1 && e2);
+  if (e1->type == e2->type && !range_compare(e1->range, e2->range))
     return true;
-  else
-    return false;
+  return false;
 }
 
 int element_unit_test(Env* env)
 {
   Range r1, r2, r_temp;
-  int had_err = 0;
   GenomeNode *gn, *gn2;
   Element *e, *e2, *e3;
+  int had_err = 0;
 
   r1.start = 10UL;
   r1.end = 50UL;
@@ -99,10 +99,8 @@ int element_unit_test(Env* env)
   r2.start = 20UL;
   r2.end = 50UL;
 
-  gn = genome_feature_new(gft_exon, r1,
-                          STRAND_BOTH, NULL, 0, env);
-  gn2 = genome_feature_new(gft_exon, r2,
-                           STRAND_BOTH, NULL, 0, env);
+  gn = genome_feature_new(gft_exon, r1, STRAND_BOTH, NULL, 0, env);
+  gn2 = genome_feature_new(gft_exon, r2, STRAND_BOTH, NULL, 0, env);
 
   e = element_new(gn, env);
   e2 = element_new(gn, env);
@@ -135,11 +133,9 @@ int element_unit_test(Env* env)
 
 }
 
-void element_delete(Element *element,
-                    Env *env)
+void element_delete(Element *element, Env *env)
 {
   if (!element) return;
-
   env_ma_free(element, env);
 }
 

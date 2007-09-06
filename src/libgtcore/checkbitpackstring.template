@@ -1,9 +1,19 @@
 /*
-** Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
-**
-** See LICENSE file or http://genometools.org/license.html for license details.
-**
+  Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
 #include <assert.h>
 #include <limits.h>
 #include <stdio.h>
@@ -103,6 +113,60 @@ bitPackString@iTypeTag@_unit_test(Env *env)
     offset += bits;
   }
   env_log_log(env, "passed\n");
+  if (numRnd > 0)
+  {
+    @uOpType@ v = randSrc[0], r = 0;
+    unsigned numBits = required@uTypeTag@Bits(v);
+    BitOffset i = offsetStart + numBits;
+    @uOpType@ mask = ~(@uOpType@)0;
+    if (numBits < @bitSize@)
+      mask = ~(mask << numBits);
+    env_log_log(env, "bsSetBit, bsClearBit, bsToggleBit, bsGetBit: ");
+    while (v)
+    {
+      int lowBit = v & 1;
+      v >>= 1;
+      ensure(had_err, lowBit == (r = bsGetBit(bitStore, --i)));
+      if (had_err)
+      {
+        env_log_log(env, "Expected %d, got %d, seed = %lu, i = %llu\n",
+                    lowBit, (int)r, seedval, (unsigned long long)i);
+        freeResourcesAndReturn(had_err);
+      }
+    }
+    i = offsetStart + numBits;
+    bsClear(bitStoreCopy, offsetStart, numBits, random()&1);
+    v = randSrc[0];
+    while (v)
+    {
+      int lowBit = v & 1;
+      v >>= 1;
+      if (lowBit)
+        bsSetBit(bitStoreCopy, --i);
+      else
+        bsClearBit(bitStoreCopy, --i);
+    }
+    v = randSrc[0];
+    r = bsGet@uTypeTag@(bitStoreCopy, offsetStart, numBits);
+    ensure(had_err, r == v);
+    if (had_err)
+    {
+      env_log_log(env, "Expected %"@uOpPRI@", got %"@uOpPRI@
+                  ", seed = %lu\n", v, r, seedval);
+      freeResourcesAndReturn(had_err);
+    }
+    for (i = 0; i < numBits; ++i)
+      bsToggleBit(bitStoreCopy, offsetStart + i);
+    r = bsGet@uTypeTag@(bitStoreCopy, offsetStart, numBits);
+    ensure(had_err, r == (v = (~v & mask)));
+    if (had_err)
+    {
+      env_log_log(env, "Expected %"@uOpPRI@", got %"@uOpPRI@
+                  ", seed = %lu\n", v, r, seedval);
+      freeResourcesAndReturn(had_err);
+    }
+    env_log_log(env, "passed\n");
+  }
   if (numRnd > 1)
   {
     env_log_log(env, "bsCompare: ");
@@ -144,9 +208,9 @@ bitPackString@iTypeTag@_unit_test(Env *env)
   }
   env_log_log(env, "bsStoreUniform@uTypeTag@Array/bsGet@uTypeTag@: ");
   {
-    unsigned numBits = random()%(sizeof (@uOpType@)*CHAR_BIT) + 1;
+    unsigned numBits = random()%@bitSize@ + 1;
     @uOpType@ mask = ~(@uOpType@)0;
-    if (numBits < sizeof (@uOpType@)*CHAR_BIT)
+    if (numBits < @bitSize@)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniform@uTypeTag@Array(bitStore, offset, numBits, numRnd, randSrc);
@@ -228,9 +292,9 @@ bitPackString@iTypeTag@_unit_test(Env *env)
   env_log_log(env, "passed\n");
   env_log_log(env, "bsStoreUniform@iTypeTag@Array/bsGet@iTypeTag@: ");
   {
-    unsigned numBits = random()%(sizeof (@iOpType@)*CHAR_BIT) + 1;
+    unsigned numBits = random()%@bitSize@ + 1;
     @iOpType@ mask = ~(@iOpType@)0;
-    if (numBits < sizeof (@iOpType@)*CHAR_BIT)
+    if (numBits < @bitSize@)
       mask = ~(mask << numBits);
     offset = offsetStart;
     bsStoreUniform@iTypeTag@Array(bitStore, offset, numBits, numRnd,
@@ -293,7 +357,7 @@ bitPackString@iTypeTag@_unit_test(Env *env)
       /* first decide how many of the values to use and at which to start */
       size_t numValueCopies, copyStart;
       BitOffset numCopyBits = 0, destOffset;
-      unsigned numBits = random()%(sizeof (@uOpType@)*CHAR_BIT) + 1;
+      unsigned numBits = random()%@bitSize@ + 1;
       @uOpType@ mask = ~(@uOpType@)0;
       if (numBits < @bitSize@)
         mask = ~(mask << numBits);
@@ -311,10 +375,8 @@ bitPackString@iTypeTag@_unit_test(Env *env)
       offset = offsetStart + (BitOffset)copyStart * numBits;
       bsStoreUniform@uTypeTag@Array(bitStore, offset, numBits, numValueCopies,
                                     randSrc);
-      destOffset = random()%
-        (offsetStart
-         + (sizeof (@uOpType@)*CHAR_BIT)
-         * (BitOffset)(numRnd - numValueCopies) + 1);
+      destOffset = random()%(offsetStart + @bitSize@
+                             * (BitOffset)(numRnd - numValueCopies) + 1);
       numCopyBits = (BitOffset)numBits * numValueCopies;
       /* the following bsCopy should be equivalent to:
        * bsStoreUniform@uTypeTag@Array(bitStoreCopy, destOffset,
@@ -333,6 +395,86 @@ bitPackString@iTypeTag@_unit_test(Env *env)
                     (unsigned long long)numCopyBits);
         /* FIXME: implement bitstring output function */
         freeResourcesAndReturn(had_err);
+      }
+      env_log_log(env, "passed\n");
+    }
+  }
+  if (numRnd > 0)
+  {
+    env_log_log(env, "bsClear: ");
+    {
+      /* first decide how many of the values to use and at which to start */
+      size_t numResetValues, resetStart;
+      BitOffset numResetBits = 0;
+      unsigned numBits = random()%@bitSize@ + 1;
+      int bitVal = random()&1;
+      @iOpType@ cmpVal = bitVal?-1:0;
+      @uOpType@ mask = ~(@uOpType@)0;
+      if (numBits < @bitSize@)
+        mask = ~(mask << numBits);
+      if (random()&1)
+      {
+        numResetValues = random()%(numRnd + 1);
+        resetStart = random()%(numRnd - numResetValues + 1);
+      }
+      else
+      {
+        resetStart = random() % numRnd;
+        numResetValues = random()%(numRnd - resetStart) + 1;
+      }
+      assert(resetStart + numResetValues <= numRnd);
+      offset = offsetStart;
+      bsStoreUniform@iTypeTag@Array(bitStore, offset, numBits, numRnd,
+                                    (@iOpType@ *)randSrc);
+      numResetBits = (BitOffset)numBits * numResetValues;
+      /* the following bsCopy should be equivalent to:
+       * bsStoreUniform@uTypeTag@Array(bitStoreCopy, destOffset,
+       *                              numBits, numResetValues, randSrc); */
+      bsClear(bitStore, offset + (BitOffset)resetStart * numBits,
+              numResetBits, bitVal);
+      {
+        @iOpType@ m = (@iOpType@)1 << (numBits - 1);
+        for (i = 0; i < resetStart; ++i)
+        {
+          @iOpType@ v = (@iOpType@)((randSrc[i] & mask) ^ m) - m;
+          @iOpType@ r = bsGet@iTypeTag@(bitStore, offset, numBits);
+          ensure(had_err, r == v);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %"@dOpPRI@", got %"@dOpPRI@",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        v, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
+        for (; i < resetStart + numResetValues; ++i)
+        {
+          @iOpType@ r = bsGet@iTypeTag@(bitStore, offset, numBits);
+          ensure(had_err, r == cmpVal);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %"@dOpPRI@", got %"@dOpPRI@",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        cmpVal, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
+        for (; i < numRnd; ++i)
+        {
+          @iOpType@ v = (@iOpType@)((randSrc[i] & mask) ^ m) - m;
+          @iOpType@ r = bsGet@iTypeTag@(bitStore, offset, numBits);
+          ensure(had_err, r == v);
+          if (had_err)
+          {
+            env_log_log(env, "Expected %"@dOpPRI@", got %"@dOpPRI@",\n"
+                        "seed = %lu, i = %lu, numBits=%u\n",
+                        v, r, seedval, (unsigned long)i, numBits);
+            freeResourcesAndReturn(had_err);
+          }
+          offset += numBits;
+        }
       }
       env_log_log(env, "passed\n");
     }
