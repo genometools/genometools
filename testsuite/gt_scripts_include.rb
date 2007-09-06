@@ -71,14 +71,16 @@ if $arguments["libgtview"] then
   Name "evalviz.lua test 1"
   Keywords "gt_scripts"
   Test do
-    run_test "#{$bin}gt #{$testdata}/gtscripts/evalviz.lua test.png #{$testdata}/gt_eval_test_1.in #{$testdata}/gt_eval_test_1.in"
+    run_test "#{$bin}gt #{$testdata}../gtscripts/evalviz.lua png_files #{$testdata}/gt_eval_test_1.in #{$testdata}/gt_eval_test_1.in"
     run "diff #{$last_stdout} #{$testdata}/gt_eval_test_1.out"
   end
 
+=begin XXX: takes too long
   Name "evalviz.lua test 2"
   Keywords "gt_scripts"
   Test do
-    run_test "#{$bin}gt #{$testdata}/gtscripts/evalviz.lua test.png #{$testdata}/gt_evalviz_test.reality #{$testdata}/gt_evalviz_test.prediction"
+    run_test "#{$bin}gt #{$testdata}../gtscripts/evalviz.lua png_files #{$testdata}/gt_evalviz_test.reality #{$testdata}/gt_evalviz_test.prediction"
     run "diff #{$last_stdout} #{$testdata}/gt_evalviz_test.out"
   end
+=end
 end
