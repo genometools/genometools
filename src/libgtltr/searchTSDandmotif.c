@@ -8,8 +8,10 @@
 
 #include "libgtcore/env.h"
 
+#include "libgtmatch/sarr-def.h"
 #include "libgtmatch/arraydef.h"
 #include "libgtmatch/symboldef.h"
+#include "libgtmatch/sfx-map.pr"
 
 #include "ltrharvest-opt.h"
 #include "minmax.h"
@@ -451,7 +453,7 @@ static void searchformotifonlyborders(
 
 static void searchformotifonlyinside(LTRharvestoptions *lo,
     LTRboundaries *boundaries,
-    Suffixarray *suffixarray,
+    Sequentialsuffixarrayreader *ssar,
     Seqpos *markpos,
     unsigned int *motifmismatchesleftLTR,
     unsigned int *motifmismatchesrightLTR,
@@ -472,7 +474,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
                motifmismatches_frombestmatch = 0;
   
   Seqpos i;
-  Encodedsequence *encseq = suffixarray->encseq;
+  Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
   //Uchar *charptr;
   //Uchar *dbseq = virtualtree->multiseq.sequence;
  
@@ -945,7 +947,7 @@ static Sint searchforTSDandorMotifoutside(
 int findcorrectboundaries(
     LTRharvestoptions *lo,
     LTRboundaries *boundaries,
-    Suffixarray *suffixarray,
+    Sequentialsuffixarrayreader *ssar,
     Seqpos *markpos,
     Env *env)
 {
@@ -979,7 +981,7 @@ int findcorrectboundaries(
     //	      " LTR and 5'-border of right LTR...\n");
     searchformotifonlyinside(lo,
         boundaries, 
-	suffixarray,
+	ssar,
 	markpos,
 	&motifmismatchesleftLTR,
 	&motifmismatchesrightLTR,

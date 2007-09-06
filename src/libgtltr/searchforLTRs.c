@@ -6,9 +6,11 @@
 
 #include "libgtcore/env.h"
 
+#include "libgtmatch/sarr-def.h"
 #include "libgtmatch/arraydef.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/pos2seqnum.pr"
+#include "libgtmatch/sfx-map.pr"
 
 #include "searchforLTRs.h"
 #include "repeattypes.h"
@@ -200,7 +202,7 @@ void shownewboundariesifadjusted(LTRboundaries *boundaries,
  to all candidate pairs.
 */
 int searchforLTRs (
-  Suffixarray *suffixarray,
+  Sequentialsuffixarrayreader *ssar,
   LTRharvestoptions *lo,
   const Seqpos *markpos,
   Env *env
@@ -216,6 +218,8 @@ int searchforLTRs (
   Repeat *repeatptr;
   LTRboundaries *boundaries;
   Seqpos offset = 0;
+  const Encodedsequence *encseq = 
+          encseqSequentialsuffixarrayreader(ssar);
 
   env_error_check(env);
 
@@ -243,8 +247,8 @@ int searchforLTRs (
       evalxdroparbitscoresleft(&lo->arbitscores, 
 	                       &xdropbest_left, 
 			       &fronts, 
-			       suffixarray->encseq,
-			       suffixarray->encseq,
+			       encseq,
+			       encseq,
 			       repeatptr->pos1, 
 			       repeatptr->pos1 + repeatptr->offset,
 			       (int) alilen,
@@ -257,8 +261,8 @@ int searchforLTRs (
       evalxdroparbitscoresleft(&lo->arbitscores, 
 	                       &xdropbest_left, 
 			       &fronts, 
-			       suffixarray->encseq,
-			       suffixarray->encseq,
+			       encseq,
+			       encseq,
 			       repeatptr->pos1, 
 			       repeatptr->pos1 + repeatptr->offset,
 			       (int) repeatptr->pos1,
@@ -270,15 +274,15 @@ int searchforLTRs (
 
     /**** right xdrop alignment ****/
     INITARRAY (&fronts, Myfrontvalue);
-    totallength = getencseqtotallength(suffixarray->encseq);
+    totallength = getencseqtotallength(encseq);
     if(alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
 		                repeatptr->len) )
     {
       evalxdroparbitscoresright (&lo->arbitscores, 
                                  &xdropbest_right, 
 				 &fronts, 
-				 suffixarray->encseq,
-				 suffixarray->encseq,
+				 encseq,
+				 encseq,
 				 repeatptr->pos1 + repeatptr->len,
 				 repeatptr->pos1 + repeatptr->offset +
 				 repeatptr->len, 
@@ -292,8 +296,8 @@ int searchforLTRs (
       evalxdroparbitscoresright(&lo->arbitscores, 
 	                        &xdropbest_right, 
 				&fronts, 
-				suffixarray->encseq,
-				suffixarray->encseq,
+				encseq,
+				encseq,
 				repeatptr->pos1 + repeatptr->len,
 				repeatptr->pos1 + repeatptr->offset +
 				repeatptr->len, 
@@ -365,7 +369,7 @@ int searchforLTRs (
     if( lo->motif.allowedmismatches < (unsigned int)4 || 
         lo->minlengthTSD > (unsigned long) 1)
     {
-      if( findcorrectboundaries(lo, boundaries, suffixarray, 
+      if( findcorrectboundaries(lo, boundaries, ssar, 
 	                        markpos, env) != 0 )
       {
         return (int) -1;

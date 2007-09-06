@@ -24,15 +24,13 @@
 static int runltrharvest(LTRharvestoptions *lo, Env *env)
 {
   Sequentialsuffixarrayreader *ssar; /* suffix array */
-  Seqpos totallength;
   Seqpos *markpos = NULL;
 
   env_error_check(env);
   
-  ssar = newSequentialsuffixarrayreader(
-                                  lo->str_indexname,
+  ssar = newSequentialsuffixarrayreader(lo->str_indexname,
 		                  SARR_LCPTAB | SARR_SUFTAB | SARR_ESQTAB,
-				  true,
+				  false,
 				  env);
   if(ssar == NULL)
   {
@@ -51,12 +49,10 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   }
   */
 
-
-  //HIER WEITER
-
-
   /* test if motif is valid and encode motif */
-  if( testmotifandencodemotif(&lo->motif, ssar->suffixarray.alpha, env) != 0)
+  if( testmotifandencodemotif(&lo->motif, 
+                              alphabetSequentialsuffixarrayreader(ssar),
+			      env) != 0)
   {
     return -1; 
   }
@@ -68,9 +64,10 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   }
 
   // calculate markpos array for contig offset
-  markpos = calculatemarkpositions(suffixarray.encseq, 
-                                   suffixarray.numofdbsequences, 
-                                   env);
+  markpos = calculatemarkpositions( 
+              encseqSequentialsuffixarrayreader(ssar),
+              numofdbsequencesSequentialsuffixarrayreader(ssar), 
+              env);
   if(markpos == NULL)
   { 
     return -1;
@@ -78,10 +75,11 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 
   /* init array for maximal repeats */
   INITARRAY (&lo->repeatinfo.repeats, Repeat);
-  lo->repeatinfo.suffixarrayptr = &suffixarray;
+  //lo->repeatinfo.suffixarrayptr = &suffixarray;
+  lo->repeatinfo.ssarptr = ssar;
 
   /* search for maximal repeats */ 
-  if(enumeratemaxpairs(&ssar,
+  if(enumeratemaxpairs(ssar,
                        (unsigned int)lo->minseedlength,
 		       (void*)simpleexactselfmatchstore,
 		       lo,
@@ -94,7 +92,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   INITARRAY(&lo->arrayLTRboundaries, LTRboundaries);
 
   /* apply the filter algorithms */
-  if(searchforLTRs (&suffixarray, lo, markpos, env) != 0)
+  if(searchforLTRs (ssar, lo, markpos, env) != 0)
   {
      return -1; 
   }
@@ -118,7 +116,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   /*if(lo->gff3output)
   {
     if(printgff3format(lo,
-	  suffixarray,
+	  ssar,
 	  markpos) != 0 )
     {
       return -1; 
@@ -128,7 +126,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   FREESPACE(markpos);
 
   /* print predictions to stdout */
-  showinfoiffoundfullLTRs(lo, &suffixarray, env);
+  showinfoiffoundfullLTRs(lo, ssar, env);
 
   /* free prediction array */
   FREEARRAY(&lo->arrayLTRboundaries, LTRboundaries);

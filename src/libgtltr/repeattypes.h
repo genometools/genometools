@@ -33,7 +33,7 @@ unsigned long lmin;        // minimum allowed length of a LTR
 unsigned long lmax;        // maximum allowed length of a LTR
 unsigned long dmin;        // minimum distance between LTRs
 unsigned long dmax;        // maximum distance between LTRs
-Suffixarray *suffixarrayptr; 
+Sequentialsuffixarrayreader *ssarptr; 
 // pointer on suffixarray, is needed in function simpleexactselfmatchstore, repeats.c
 } RepeatInfo;
 

@@ -131,7 +131,7 @@ void printargsline(const char **argv, int argc)
 }
 
 /* test the motif and encode the characters by using alpha */
-int testmotifandencodemotif(Motif *motif, Alphabet *alpha, Env *env)
+int testmotifandencodemotif(Motif *motif, const Alphabet *alpha, Env *env)
 {
   const Uchar *symbolmap;
 

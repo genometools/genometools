@@ -12,6 +12,7 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/pos2seqnum.pr"
+#include "libgtmatch/sfx-map.pr"
 
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
@@ -86,9 +87,10 @@ int simpleexactselfmatchstore (
   Env *env = info->env;
   Seqpos tmp,
          totallength;
-  const Encodedsequence *encseq = info->repeatinfo.suffixarrayptr->encseq;  
+  const Encodedsequence *encseq = 
+          encseqSequentialsuffixarrayreader(info->repeatinfo.ssarptr);  
   unsigned long numofdbsequences = 
-                        info->repeatinfo.suffixarrayptr->numofdbsequences;
+       numofdbsequencesSequentialsuffixarrayreader(info->repeatinfo.ssarptr);
   Seqpos *markpos;
   unsigned long i,
                 contignumber = 0,

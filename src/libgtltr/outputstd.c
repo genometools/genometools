@@ -5,11 +5,13 @@
 */
 
 #include "libgtcore/env.h"
+#include "libgtmatch/sarr-def.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/readmode-def.h"
 #include "libgtmatch/pos2seqnum.pr"
 #include "libgtmatch/symboldef.h"
 #include "libgtmatch/alphabet.pr"
+#include "libgtmatch/sfx-map.pr"
 
 #include "ltrharvest-opt.h"
 
@@ -22,7 +24,7 @@
  *          is position 1 instead of 0.
  */
 int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
-    Suffixarray *suffixarray,
+    const Sequentialsuffixarrayreader *ssar,
     Env *env)
 /*
     ArrayLTRboundaries *arrayLTRboundaries,
@@ -38,11 +40,14 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
   unsigned int contignumber;
   Seqpos offset;
   Seqpos *markpos = NULL;
-  unsigned long numofdbsequences = suffixarray->numofdbsequences;
+  unsigned long numofdbsequences = 
+     numofdbsequencesSequentialsuffixarrayreader(ssar);
   const Uchar *characters;
- 
+  const Encodedsequence *encseq =
+     encseqSequentialsuffixarrayreader(ssar);
   /* in order to get to visible dna characters */
-  characters = getcharactersAlphabet(suffixarray->alpha);
+  characters = getcharactersAlphabet(
+                 alphabetSequentialsuffixarrayreader(ssar));
 
   /* count unique LTR predictions */
   //unsigned int counter = 0;
@@ -57,9 +62,9 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 
   if( numofdbsequences > (unsigned long)1 )
   {
-    markpos = calculatemarkpositions(suffixarray->encseq, 
-                                     numofdbsequences, 
-				     env);
+    markpos = calculatemarkpositions(encseq, 
+                numofdbsequences, 
+		env);
     if(markpos == NULL)
     {
       return -1;
@@ -152,7 +157,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 	      for(j = 0; j < boundaries->lenleftTSD; j++)
 	      {
 		printf("%c", 
-		 characters[getencodedchar(suffixarray->encseq,
+		 characters[getencodedchar(encseq,
 		    boundaries->leftLTR_5 - boundaries->lenleftTSD + j,
 		    Forwardmode)]);
 	      }
@@ -162,16 +167,16 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 	    if(lo->motif.allowedmismatches < (unsigned int)4)
 	    {
 	      printf("%c%c..%c%c  ",
-		  characters[getencodedchar(suffixarray->encseq,
+		  characters[getencodedchar(encseq,
                                  boundaries->leftLTR_5,
 				 Forwardmode)],
-		  characters[getencodedchar(suffixarray->encseq,
+		  characters[getencodedchar(encseq,
                                  boundaries->leftLTR_5+(Seqpos)1,
 				 Forwardmode)],
-		  characters[getencodedchar(suffixarray->encseq,
+		  characters[getencodedchar(encseq,
                                  boundaries->leftLTR_3-(Seqpos)1,
 				 Forwardmode)],
-		  characters[getencodedchar(suffixarray->encseq,
+		  characters[getencodedchar(encseq,
                                  boundaries->leftLTR_3,
 				 Forwardmode)] );
 		  /* 
@@ -199,7 +204,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 
 	      for(j = 0; j < boundaries->lenrightTSD; j++)
 	      {
-		printf("%c", characters[getencodedchar(suffixarray->encseq, 
+		printf("%c", characters[getencodedchar(encseq, 
 		    boundaries->rightLTR_3 + j + 1,
 		    Forwardmode)]);
 	      }
@@ -209,16 +214,16 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 	    if(lo->motif.allowedmismatches < (unsigned int)4)
 	    {
 	      printf("%c%c..%c%c",
-		  characters[getencodedchar(suffixarray->encseq,
+		  characters[getencodedchar(encseq,
                                  boundaries->rightLTR_5,
 				 Forwardmode)],
-		  characters[getencodedchar(suffixarray->encseq,
+		  characters[getencodedchar(encseq,
 			         boundaries->rightLTR_5+(Seqpos)1,
 				 Forwardmode)],
-		  characters[getencodedchar(suffixarray->encseq,
+		  characters[getencodedchar(encseq,
 			         boundaries->rightLTR_3-(Seqpos)1, 	  
 				 Forwardmode)],
-		  characters[getencodedchar(suffixarray->encseq,
+		  characters[getencodedchar(encseq,
 			         boundaries->rightLTR_3,
 				 Forwardmode)] );
 		  /*
