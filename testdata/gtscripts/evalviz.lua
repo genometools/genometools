@@ -100,6 +100,6 @@ seqid = feature_index:get_first_seqid()
 range = feature_index:get_range_for_seqid(seqid)
 
 diagram = gt.diagram_new(feature_index, range, seqid)
-width = 800
+width = 1600
 render = gt.render_new()
 render:to_png(diagram, png_file, width)
