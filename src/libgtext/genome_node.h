@@ -57,6 +57,7 @@ void          genome_node_set_seqid(GenomeNode*, Str*);
 void          genome_node_set_source(GenomeNode*, Str*);
 void          genome_node_set_phase(GenomeNode*, Phase);
 int           genome_node_accept(GenomeNode*, GenomeVisitor*, Env*);
+/* <parent> takes ownership of <child> */
 void          genome_node_is_part_of_genome_node(GenomeNode *parent,
                                                  GenomeNode *child, Env*);
 /* does not free the leaf */
