@@ -97,6 +97,14 @@ function show_coverage(maxdist)
   end
 end
 
+function show_covered_regions(maxdist)
+  local coverage = get_coverage(maxdist)
+  for i, r in ipairs(coverage) do
+    range = r
+    render_and_show()
+  end
+end
+
 -- process input files
 reality_stream = gt.gff3_in_stream_new_sorted(reality_file)
 prediction_stream = gt.gff3_in_stream_new_sorted(prediction_file)
