@@ -11,6 +11,7 @@ It is based on a C library named ``libgt'' which consists of two parts:
 
 doc/            some documentation
 gtdata/         data needed by gt (during runtime)
+gtscripts/      some GenomeTools scripts (can be executed with gt)
 scripts/        scripts used for development
 src/            the C source code gt itself and the runtime
 src/external/   all C source code from external sources (different license!)
