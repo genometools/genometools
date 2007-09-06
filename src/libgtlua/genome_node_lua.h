@@ -27,6 +27,8 @@
    string      = genome_node:get_filename()
    range       = genome_node:get_range()
                  genome_node:accept(genome_visitor)
+                 genome_node:mark()
+   boolean     = genome_node:is_marked()
 */
 int luaopen_genome_node(lua_State*);
 

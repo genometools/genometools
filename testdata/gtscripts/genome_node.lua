@@ -34,6 +34,9 @@ rval, err = pcall(gt.genome_feature_new, "gene", range, "p")
 assert(not rval)
 assert(string.find(err, "invalid strand"))
 gn = gt.genome_feature_new("gene", range, "+")
+assert(not gn:is_marked())
+gn:mark()
+assert(gn:is_marked())
 
 -- testing genome_node:get_filename
 rval, fn = pcall(gn.get_filename, gn)

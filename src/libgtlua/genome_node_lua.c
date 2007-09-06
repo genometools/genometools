@@ -84,6 +84,20 @@ static int genome_node_lua_accept(lua_State *L)
   return 0;
 }
 
+static int genome_node_lua_mark(lua_State *L)
+{
+  GenomeNode **gn = check_genome_node(L);
+  genome_node_mark(*gn);
+  return 0;
+}
+
+static int genome_node_lua_is_marked(lua_State *L)
+{
+  GenomeNode **gn = check_genome_node(L);
+  lua_pushboolean(L, genome_node_is_marked(*gn));
+  return 1;
+}
+
 static int genome_node_lua_delete(lua_State *L)
 {
   GenomeNode **gn = check_genome_node(L);
@@ -102,6 +116,8 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "get_filename", genome_node_lua_get_filename },
   { "get_range", genome_node_lua_get_range },
   { "accept", genome_node_lua_accept },
+  { "mark", genome_node_lua_mark },
+  { "is_marked", genome_node_lua_is_marked },
   { NULL, NULL }
 };
 
