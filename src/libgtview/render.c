@@ -178,9 +178,7 @@ static void render_line(Render *r, Line *line, Env *env)
                          config_get_color(r->cfg, "stroke", env));
 
     /* draw elements in block */
-    for (delem = dlist_first(elems); delem;
-           delem = dlistelem_next(delem))
-    {
+    for (delem = dlist_first(elems); delem; delem = dlistelem_next(delem)) {
       Element *elem = (Element*) dlistelem_get_data(delem);
       Range elem_range = element_get_range(elem);
       DrawingRange draw_range;
