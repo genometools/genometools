@@ -673,47 +673,44 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
  at the 5'-border of left LTR and 3'-border of right LTR.
  */
 
-/*
 static Sint searchforTSDandorMotifoutside(
+  LTRharvestoptions lo,
   LTRboundaries *boundaries,
-  Uint minlengthTSD,
-  Uint maxlengthTSD,
-  Motif *motif,
-  Ushort *motifmismatchesleftLTR,
-  Ushort *motifmismatchesrightLTR,
-  Uint vicinity,
-  Virtualtree *virtualtree
-)
+  Sequentialsuffixarrayreader *ssar,
+  Seqpos *markpos,
+  unsigned int *motifmismatchesleftLTR,
+  unsigned int *motifmismatchesrightLTR,
+  Env *env)
 {
-  Uint startleftLTR,
-       endleftLTR,
-       startrightLTR,
-       endrightLTR,
-       leftlen,
-       rightlen;
+  Seqpos startleftLTR,
+         endleftLTR,
+         startrightLTR,
+         endrightLTR,
+         leftlen,
+         rightlen;
+  unsigned long contignumber = boundaries->contignumber;
+  Seqpos offset;
+
   Multiseq *multiseqptr = &(virtualtree->multiseq);
   Uchar *sequence  = multiseqptr->sequence;
-  Uint sequence_length = multiseqptr->totallength;
-  Uint numofcontigs = multiseqptr->numofsequences;
-  Uint multiseqoffset;
-  Uint contignumber = boundaries->contignumber;
+  unsigned int sequence_length = multiseqptr->totallength;
+  unsigned int numofcontigs = multiseqptr->numofsequences;
    
   Virtualtree subvirtualtree;
   SubRepeatInfo subrepeatinfo;
-  Uint demand = LCPTAB | TISTAB | SUFTAB | BWTTAB;
+  unsigned int demand = LCPTAB | TISTAB | SUFTAB | BWTTAB;
 
-  DEBUG2(1, "try vicinity left len = %lu, try vicinity right len = %lu"
-      " (might be pruned if too large)\n",
-      (Showuint) vicinity, (Showuint) vicinity);
+  //DEBUG2(1, "try vicinity left len = %lu, try vicinity right len = %lu"
+  //    " (might be pruned if too large)\n",
+  //    (Showuint) vicinity, (Showuint) vicinity);
 
   if( contignumber == 0)
   {
-    multiseqoffset = 0;
+    offset = 0;
   }
   else
   {
-    multiseqoffset = 
-      virtualtree->multiseq.markpos.spaceUint[contignumber-1]+1;
+    offset = markpos[contignumber-1]+1;
   }
 
   // check border cases //
@@ -723,39 +720,41 @@ static Sint searchforTSDandorMotifoutside(
   {
     // do not align over left sequence boundary,
     //   in case of need decrease alignment length //
-    if( boundaries->leftLTR_5 < vicinity)
+    if( boundaries->leftLTR_5 < lo->vicinityforcorrectboundaries)
     {
       startleftLTR = 0;
     }
     else
     {
-      startleftLTR = boundaries->leftLTR_5 - vicinity;
+      startleftLTR = 
+        boundaries->leftLTR_5 - lo->vicinityforcorrectboundaries;
     }
   }
   else
   {
     // do not align over left separator symbol 
-       at markpos.spaceUint[contignumber-1],
-       in case of need decrease alignment length //
-    DEBUG1(1, "boundaries->leftLTR_5 abs. position = %lu\n", 
-           (Showuint) boundaries->leftLTR_5);
-    DEBUG1(1, "vicinity = %lu\n", (Showuint) vicinity);
-    DEBUG1(1, "multiseqptr->markpos.spaceUint[contignumber-1]+1 = %ld\n", 
-           (Showuint) multiseqptr->markpos.spaceUint[contignumber-1]+1);
+    //   at markpos.spaceunsigned int[contignumber-1],
+    //   in case of need decrease alignment length //
+    //DEBUG1(1, "boundaries->leftLTR_5 abs. position = %lu\n", 
+    //       (Showuint) boundaries->leftLTR_5);
+    //DEBUG1(1, "vicinity = %lu\n", (Showuint) vicinity);
+    //DEBUG1(1, "multiseqptr->markpos.spaceunsigned int[contignumber-1]+1 = %ld\n", 
+    //      (Showuint) multiseqptr->markpos.spaceunsigned int[contignumber-1]+1);
    
-    if( boundaries->leftLTR_5 < vicinity )
+    if( boundaries->leftLTR_5 < lo->vicinityforcorrectboundaries )
     {
-      startleftLTR = multiseqptr->markpos.spaceUint[contignumber-1]+1;
+      startleftLTR = markpos[contignumber-1]+1;
     }
     else
     {
-      if( ((startleftLTR = boundaries->leftLTR_5 - vicinity) <
-	   multiseqptr->markpos.spaceUint[contignumber-1]+1)
-	  &&
-	  (boundaries->leftLTR_5 >= multiseqptr->markpos.spaceUint[contignumber-1]+1)
+      if( ((startleftLTR = 
+	      boundaries->leftLTR_5 - lo->vicinityforcorrectboundaries) <
+	        markpos[contignumber-1]+1)
+	    &&
+	  (boundaries->leftLTR_5 >= markpos[contignumber-1]+1)
 	)
       {
-	startleftLTR = multiseqptr->markpos.spaceUint[contignumber-1]+1;
+	startleftLTR = markpos[contignumber-1]+1;
       }
     }
   }
@@ -789,15 +788,15 @@ static Sint searchforTSDandorMotifoutside(
   else
   {
     // do not align over right separator symbol 
-       at markpos.spaceUint[contignumber],
+       at markpos.spaceunsigned int[contignumber],
        in case of need decrease alignment length //
     if( ((endrightLTR = boundaries->rightLTR_3 + vicinity) >
-	multiseqptr->markpos.spaceUint[contignumber]-1) 
+	multiseqptr->markpos.spaceunsigned int[contignumber]-1) 
         &&
-        (boundaries->rightLTR_3 < multiseqptr->markpos.spaceUint[contignumber])
+        (boundaries->rightLTR_3 < multiseqptr->markpos.spaceunsigned int[contignumber])
       )
     {
-      endrightLTR = multiseqptr->markpos.spaceUint[contignumber]-1; 
+      endrightLTR = multiseqptr->markpos.spaceunsigned int[contignumber]-1; 
     }
   }
   rightlen = endrightLTR - startrightLTR + 1; 
@@ -805,7 +804,7 @@ static Sint searchforTSDandorMotifoutside(
 
   // now, search for correct boundaries //
 
-  if(minlengthTSD > (Uint) 1) ///// search for TSDs and/or motif /////
+  if(minlengthTSD > (unsigned int) 1) ///// search for TSDs and/or motif /////
   {
     DEBUG2(1, "searching for TSD and motif between pos = %lu up to "
 	"pos end = %lu\n",
@@ -879,7 +878,7 @@ static Sint searchforTSDandorMotifoutside(
     subrepeatinfo.offset2 = startrightLTR;
     DEBUG0(1, "the following are repeat candidates:\n");
 
-    if( vmatmaxoutdynamic (&subvirtualtree, UintConst (1),
+    if( vmatmaxoutdynamic (&subvirtualtree, unsigned intConst (1),
 	  minlengthTSD,
 	  NULL, &subrepeatinfo,     // NULL,
 	  (void*)subsimpleexactselfmatchstore) != 0)
@@ -937,13 +936,11 @@ static Sint searchforTSDandorMotifoutside(
 
   return 0;
 }
-*/
 
 /*
  The following function searches for TSD and/or a specified palindromic motif
  at the borders of left LTR and the right LTR, respectively.
  */
-
 int findcorrectboundaries(
     LTRharvestoptions *lo,
     LTRboundaries *boundaries,
@@ -960,18 +957,16 @@ int findcorrectboundaries(
 
   /****** first: 5'-border of left LTR and 3'-border of right LTR *****/
 
-  /*if( searchforTSDandorMotifoutside(boundaries, 
-                                    minlengthTSD,
-                                    maxlengthTSD,
-                                    motif,
+  if( searchforTSDandorMotifoutside(lo,
+                                    boundaries, 
+				    ssar,
+				    markpos,
 				    &motifmismatchesleftLTR,
 	                            &motifmismatchesrightLTR,
-				    vicinity,
-				    virtualtree) != 0 )
+				    env) != 0 )
   {
     return (Sint) -1;
   }
-  */
 
   /****** second: 3'-border of left LTR and 5'-border of right LTR *****/
 
