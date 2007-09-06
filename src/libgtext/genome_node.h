@@ -64,7 +64,10 @@ void          genome_node_is_part_of_genome_node(GenomeNode *parent,
 void          genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn,
                                       Env*);
 void          genome_node_mark(GenomeNode*);
+/* returns true if the (top-level) node is marked */
 bool          genome_node_is_marked(const GenomeNode*);
+/* returns true if the given node graph contains a marked node */
+bool          genome_node_contains_marked(GenomeNode*, Env*);
 bool          genome_node_has_children(GenomeNode*);
 bool          genome_node_direct_children_do_not_overlap(GenomeNode*, Env*);
 /* returns true if all direct childred of <parent> with the same type (s.t.) as
