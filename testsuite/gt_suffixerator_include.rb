@@ -60,6 +60,9 @@ Test do
   run_test "#{$bin}gt dev maxpairs -samples 100 -l 8 -ii sfx"
   run "grep -v '^#' #{$last_stdout}"
   run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
+  run_test "#{$bin}gt dev maxpairs -map -samples 100 -l 8 -ii sfx"
+  run "grep -v '^#' #{$last_stdout}"
+  run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
 end
 
 Name "gt suffixerator patternmatch"

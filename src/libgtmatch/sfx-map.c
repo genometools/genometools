@@ -633,6 +633,11 @@ int nextSequentialsuftabvalue(Seqpos *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
                               Env *env)
 {
+  if(ssar->mapped)
+  {
+    *currentsuffix = ssar->suffixarray.suftab[ssar->nextsuftabindex++];
+    return 1;
+  }
   return readnextSeqposfromstream(currentsuffix,
 				  &ssar->suffixarray.suftabstream,
 				  env);

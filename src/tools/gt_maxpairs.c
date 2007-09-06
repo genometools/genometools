@@ -30,6 +30,7 @@ typedef struct
 {
   unsigned int userdefinedleastlength;
   unsigned long samples;
+  bool mapped;
   Str *indexname;
 } Maxpairsoptions;
 
@@ -53,6 +54,7 @@ static int simpleexactselfmatchoutput(/*@unused@*/ void *info,
 
 static int callenummaxpairs(const Str *indexname,
                             unsigned int userdefinedleastlength,
+                            bool mapped,
                             Env *env)
 {
   bool haserr = false;
@@ -62,7 +64,7 @@ static int callenummaxpairs(const Str *indexname,
                                         SARR_LCPTAB |
                                         SARR_SUFTAB |
                                         SARR_ESQTAB,
-                                        false,
+                                        mapped,
                                         env);
   if (ssar == NULL)
   {
@@ -107,6 +109,13 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
                                  env);
   option_parser_add_option(op, option, env);
 
+  option = option_new_bool("map","map index",
+                           &maxpairsoptions->mapped,
+                           false,
+                           env);
+  option_parser_add_option(op, option, env);
+
+
   option = option_new_string("ii",
                              "Specify input index",
                              maxpairsoptions->indexname, NULL, env);
@@ -135,6 +144,7 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
     assert(parsed_args == argc);
     if (callenummaxpairs(maxpairsoptions.indexname,
                          maxpairsoptions.userdefinedleastlength,
+                         maxpairsoptions.mapped,
                          env) != 0)
     {
       haserr = true;
