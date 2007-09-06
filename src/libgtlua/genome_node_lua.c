@@ -98,6 +98,15 @@ static int genome_node_lua_is_marked(lua_State *L)
   return 1;
 }
 
+static int genome_node_lua_contains_marked(lua_State *L)
+{
+  GenomeNode **gn;
+  Env *env = get_env_from_registry(L);
+  gn = check_genome_node(L);
+  lua_pushboolean(L, genome_node_contains_marked(*gn, env));
+  return 1;
+}
+
 static int genome_node_lua_delete(lua_State *L)
 {
   GenomeNode **gn = check_genome_node(L);
@@ -118,6 +127,7 @@ static const struct luaL_Reg genome_node_lib_m [] = {
   { "accept", genome_node_lua_accept },
   { "mark", genome_node_lua_mark },
   { "is_marked", genome_node_lua_is_marked },
+  { "contains_marked", genome_node_lua_contains_marked },
   { NULL, NULL }
 };
 
