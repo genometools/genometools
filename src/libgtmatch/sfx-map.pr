@@ -44,8 +44,11 @@ Encodedsequence *encseqSequentialsuffixarrayreader(
 Readmode readmodeSequentialsuffixarrayreader(
 			  const Sequentialsuffixarrayreader *sarr);
 
-unsigned int alphabetsizeSequentialsuffixarrayreader(
+const Alphabet *alphabetSequentialsuffixarrayreader(
 			  const Sequentialsuffixarrayreader *sarr);
+
+unsigned long numofdbsequencesSequentialsuffixarrayreader(
+                    const Sequentialsuffixarrayreader *sarr);
 
 #ifdef __cplusplus
 }

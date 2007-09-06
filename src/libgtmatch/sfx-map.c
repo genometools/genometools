@@ -650,8 +650,14 @@ Readmode readmodeSequentialsuffixarrayreader(
   return sarr->suffixarray.readmode;
 }
 
-unsigned int alphabetsizeSequentialsuffixarrayreader(
+const Alphabet *alphabetSequentialsuffixarrayreader(
 			  const Sequentialsuffixarrayreader *sarr)
 {
-  return getnumofcharsAlphabet(sarr->suffixarray.alpha);
+  return sarr->suffixarray.alpha;
+}
+
+unsigned long numofdbsequencesSequentialsuffixarrayreader(
+                    const Sequentialsuffixarrayreader *sarr)
+{
+  return sarr->suffixarray.numofdbsequences;
 }

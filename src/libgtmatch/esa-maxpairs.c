@@ -343,7 +343,8 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   Dfsstate state;
   bool haserr = false;
 
-  state.alphabetsize = alphabetsizeSequentialsuffixarrayreader(ssar);
+  state.alphabetsize 
+    = getnumofcharsAlphabet(alphabetSequentialsuffixarrayreader(ssar));
   state.searchlength = searchlength;
   state.output = output;
   state.outinfo = outinfo;
