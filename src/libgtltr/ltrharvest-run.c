@@ -51,7 +51,9 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   }
   */
 
+
   //HIER WEITER
+
 
   /* test if motif is valid and encode motif */
   if( testmotifandencodemotif(&lo->motif, ssar->suffixarray.alpha, env) != 0)
