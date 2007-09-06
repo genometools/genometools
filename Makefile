@@ -8,6 +8,7 @@ CC:=gcc
 CXX:=g++
 INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
              -I$(CURDIR)/src/external/lua-5.1.2/src \
+             -I$(CURDIR)/src/external/luafilesystem-1.2.1/src \
              -I$(CURDIR)/src/external/expat-2.0.1/lib\
              -I$(CURDIR)/src/external/bzip2-1.0.4\
              -I$(CURDIR)/src/external/agg-2.4/include\
