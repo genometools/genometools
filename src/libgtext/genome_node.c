@@ -360,7 +360,7 @@ void genome_node_is_part_of_genome_node(GenomeNode *parent, GenomeNode *child,
                                         Env *env)
 {
   assert(parent && child);
-  /* create children list  on demand */
+  /* create children list on demand */
   if (!parent->children)
     parent->children = dlist_new((Compare) compare_genome_nodes, env);
   dlist_add(parent->children, child, env); /* XXX: check for circles */
