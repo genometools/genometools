@@ -32,9 +32,9 @@ typedef struct {
        verbose;
   long offset;
   GenFile *outfp;
-} Gff3_arguments;
+} GFF3Arguments;
 
-static OPrval parse_options(int *parsed_args, Gff3_arguments *arguments,
+static OPrval parse_options(int *parsed_args, GFF3Arguments *arguments,
                             int argc, const char **argv, Env *env)
 {
   OptionParser *op;
@@ -100,7 +100,7 @@ int gt_gff3(int argc, const char **argv, Env *env)
                *addintrons_stream = NULL,
                *gff3_out_stream,
                *last_stream;
-  Gff3_arguments arguments;
+  GFF3Arguments arguments;
   GenomeNode *gn;
   int parsed_args, had_err;
   env_error_check(env);
