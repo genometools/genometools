@@ -400,10 +400,10 @@ typedef struct
   void *processmaxmatchinfo;
 } Substringmatchinfo;
 
-static int suffixeratorstoresuftab(
+static int constructsarrandrunmaxpairs(
+                 Substringmatchinfo *ssi,
                  Seqpos specialcharacters,
                  Seqpos specialranges,
-                 const Encodedsequence *encseq,
                  Readmode readmode,
                  unsigned int numofchars,
                  unsigned int prefixlength,
@@ -412,14 +412,15 @@ static int suffixeratorstoresuftab(
                  Env *env)
 {
   const Seqpos *suftabptr;
-  Seqpos len;
+  Seqpos numberofsuffixes;
   bool haserr = false;
   Sfxiterator *sfi;
   bool specialsuffixes = false;
+  Sequentialsuffixarrayreader *ssar = NULL;
 
   sfi = newsfxiterator(specialcharacters,
                        specialranges,
-                       encseq,
+                       ssi->encseq,
                        readmode,
                        numofchars,
                        prefixlength,
@@ -431,21 +432,29 @@ static int suffixeratorstoresuftab(
     haserr = true;
   } else
   {
-    while(true)
+    suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
+                                mtime,sfi,env);
+    assert(suftabptr != NULL);
+    ssar = newSequentialsuffixarrayreaderfromRAM(ssi->encseq,
+                                                 suftabptr,
+                                                 numberofsuffixes,
+                                                 readmode,
+                                                 env);
+    if(enumeratemaxpairs(ssar,
+                         numofchars,
+                         ssi->encseq,
+                         readmode,
+                         ssi->minlength,
+                         ssi->processmaxmatch,
+                         ssi->processmaxmatchinfo,
+                         env) != 0)
     {
-      suftabptr = nextSfxiterator(&len,&specialsuffixes,mtime,sfi,env);
-      if(suftabptr == NULL)
-      {
-        break;
-      }
-      /*
-      if(suftab2file(outfileinfo,suftabptr,readmode,len,env) != 0)
-      {
-        haserr = true;
-        break;
-      }
-      */
+      haserr = true;
     }
+  }
+  if(ssar != NULL)
+  {
+    freeSequentialsuffixarrayreader(&ssar,env);
   }
   if(sfi != NULL)
   {
@@ -482,15 +491,15 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
   ssi.processmaxmatch = processmaxmatch;
   ssi.processmaxmatchinfo = processmaxmatchinfo;
   numofchars = getnumofcharsAlphabet(alpha);
-  if (suffixeratorstoresuftab(samplespecialcharinfo.specialcharacters,
-                              samplespecialcharinfo.specialranges,
-                              ssi.encseq,
-                              Forwardmode,
-                              numofchars,
-                              recommendedprefixlength(numofchars,dblen),
-                              (unsigned int) 1, /* parts */
-                              NULL,
-		              env) != 0)
+  if (constructsarrandrunmaxpairs(&ssi,
+                                  samplespecialcharinfo.specialcharacters,
+                                  samplespecialcharinfo.specialranges,
+                                  Forwardmode,
+                                  numofchars,
+                                  recommendedprefixlength(numofchars,dblen),
+                                  (unsigned int) 1, /* parts */
+                                  NULL,
+		                  env) != 0)
   {
     haserr = true;
   }

@@ -6,12 +6,26 @@
 #include "seqpos-def.h"
 #include "encseq-def.h"
 
+typedef enum
+{
+  SEQ_mappedboth,
+  SEQ_scan,
+  SEQ_suftabfrommemory
+} Sequentialaccesstype;
+
 typedef struct Sequentialsuffixarrayreader Sequentialsuffixarrayreader;
 
-Sequentialsuffixarrayreader *newSequentialsuffixarrayreader(
+Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                         const Str *indexname,
                                         unsigned int demand,
-                                        bool mapped,
+                                        Sequentialaccesstype seqactype,
+                                        Env *env);
+
+Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
+                                        const Encodedsequence *encseq,
+                                        const Seqpos *suftab,
+                                        Seqpos numberofsuffixes,
+                                        Readmode readmode,
                                         Env *env);
 
 void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
@@ -25,7 +39,7 @@ int nextSequentialsuftabvalue(Seqpos *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
                               Env *env);
 
-Encodedsequence *encseqSequentialsuffixarrayreader(
+const Encodedsequence *encseqSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *sarr);
 
 Readmode readmodeSequentialsuffixarrayreader(

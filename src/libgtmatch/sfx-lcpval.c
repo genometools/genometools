@@ -24,7 +24,8 @@
 
  struct Lcpvalueiterator
 {
-  Seqpos relpos, lastsuftabentryofpreviouspart;
+  Seqpos relpos, 
+         lastsuftabentry;
   Readmode readmode;
   const Encodedsequence *encseq;
 };
@@ -39,7 +40,7 @@ Lcpvalueiterator *newLcpvalueiterator(const Encodedsequence *encseq,
   lvi->encseq = encseq;
   lvi->relpos = 0;
   lvi->readmode = readmode;
-  lvi->lastsuftabentryofpreviouspart = 0;
+  lvi->lastsuftabentry = 0;
   return lvi;
 }
 
@@ -64,9 +65,7 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
                              false,
                              false,
                              0,
-                             lvi->relpos > 0 
-                               ? suftabptr[lvi->relpos-1]
-                               : lvi->lastsuftabentryofpreviouspart,
+                             lvi->lastsuftabentry,
                              suftabptr[lvi->relpos]);
     if (cmp > 0)
     {
@@ -74,18 +73,16 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
               ": cmp " FormatSeqpos
               " " FormatSeqpos " = %d",
               PRINTSeqposcast(lvi->relpos),
-              lvi->relpos > 0 
-                ? PRINTSeqposcast(suftabptr[lvi->relpos-1])
-                : PRINTSeqposcast(lvi->lastsuftabentryofpreviouspart),
+              PRINTSeqposcast(lvi->lastsuftabentry),
               PRINTSeqposcast(suftabptr[lvi->relpos]),
               cmp);
       exit(EXIT_FAILURE);
     }
   }
+  lvi->lastsuftabentry = suftabptr[lvi->relpos];
   if(lvi->relpos + 1 == numberofsuffixes)
   {
     lvi->relpos = 0;
-    lvi->lastsuftabentryofpreviouspart = suftabptr[numberofsuffixes-1];
   } else
   {
     lvi->relpos++;
