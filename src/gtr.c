@@ -142,12 +142,13 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                          "The GenomeTools (gt) genome analysis system "
                           "(http://genometools.org).", env);
   option_parser_set_comment_func(op, toolbox_show, gtr->toolbox);
+  o = option_new_bool("i", "enter interactive mode after executing 'tool' or "
+                      "'script'", &gtr->interactive, false, env);
+  option_hide_default(o);
+  option_parser_add_option(op, o, env);
   o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false,
                       env);
   option_hide_default(o);
-  option_parser_add_option(op, o, env);
-  o = option_new_bool("i", "enter interactive mode after executing 'tool' or "
-                      "'script'", &gtr->interactive, false, env);
   option_parser_add_option(op, o, env);
   o = option_new_debug(&gtr->debug, env);
   option_parser_add_option(op, o, env);
