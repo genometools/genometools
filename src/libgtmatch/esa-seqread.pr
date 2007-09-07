@@ -1,0 +1,35 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+Sequentialsuffixarrayreader *newSequentialsuffixarrayreader(
+                                        const Str *indexname,
+                                        unsigned int demand,
+                                        bool mapped,
+                                        Env *env);
+
+void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
+                                     Env *env);
+
+int nextSequentiallcpvalue(Seqpos *currentlcp,
+                           Sequentialsuffixarrayreader *ssar,
+                           Env *env);
+
+int nextSequentialsuftabvalue(Seqpos *currentsuffix,
+                              Sequentialsuffixarrayreader *ssar,
+                              Env *env);
+
+Encodedsequence *encseqSequentialsuffixarrayreader(
+                          const Sequentialsuffixarrayreader *sarr);
+
+Readmode readmodeSequentialsuffixarrayreader(
+			  const Sequentialsuffixarrayreader *sarr);
+
+const Alphabet *alphabetSequentialsuffixarrayreader(
+			  const Sequentialsuffixarrayreader *sarr);
+
+unsigned long numofdbsequencesSequentialsuffixarrayreader(
+                    const Sequentialsuffixarrayreader *sarr);
+
+#ifdef __cplusplus
+}
+#endif

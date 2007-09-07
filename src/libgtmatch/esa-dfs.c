@@ -16,11 +16,10 @@
 */
 
 #include <limits.h>
-#include "sarr-def.h"
 #include "seqpos-def.h"
 #include "symboldef.h"
 #include "spacedef.h"
-#include "sfx-map.pr"
+#include "esa-seqread.h"
 
 #define ABOVETOP  stackspace[nextfreeItvinfo]
 #define TOP       stackspace[nextfreeItvinfo-1]

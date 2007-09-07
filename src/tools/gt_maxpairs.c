@@ -21,6 +21,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/sarr-def.h"
+#include "libgtmatch/esa-seqread.h"
 
 #include "libgtmatch/sfx-map.pr"
 #include "libgtmatch/esa-maxpairs.pr"
@@ -71,11 +72,16 @@ static int callenummaxpairs(const Str *indexname,
   {
     haserr = true;
   }
-  if (!haserr && enumeratemaxpairs(ssar,
-                                   userdefinedleastlength,
-                                   simpleexactselfmatchoutput,
-                                   NULL,
-                                   env) != 0)
+  if (!haserr && 
+      enumeratemaxpairs(ssar,
+                        getnumofcharsAlphabet(
+                                 alphabetSequentialsuffixarrayreader(ssar)),
+                        encseqSequentialsuffixarrayreader(ssar),
+                        readmodeSequentialsuffixarrayreader(ssar),
+                        userdefinedleastlength,
+                        simpleexactselfmatchoutput,
+                        NULL,
+                        env) != 0)
   {
     haserr = true;
   }
@@ -88,7 +94,9 @@ static int callenummaxpairs(const Str *indexname,
 
 static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
                             int *parsed_args,
-                            int argc, const char **argv,Env *env)
+                            int argc,
+                            const char **argv,
+                            Env *env)
 {
   OptionParser *op;
   Option *option;
@@ -118,7 +126,6 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
                            false,
                            env);
   option_parser_add_option(op, option, env);
-
 
   option = option_new_string("ii",
                              "Specify input index",

@@ -18,11 +18,10 @@
 #include <limits.h>
 #include "arraydef.h"
 #include "seqpos-def.h"
-#include "sarr-def.h"
 #include "measure-time-if.h"
 #include "sfx-suffixer.h"
+#include "esa-seqread.h"
 
-#include "sfx-map.pr"
 #include "sfx-apfxlen.pr"
 
 #define ISLEFTDIVERSE   (Uchar) (state->alphabetsize)
@@ -70,7 +69,7 @@ typedef struct
   ArraySeqpos uniquechar,
               poslist[UCHAR_MAX+1];
   Uchar initialchar;
-  Encodedsequence *encseq;
+  const Encodedsequence *encseq;
   Readmode readmode;
 } Dfsstate;
 
@@ -343,6 +342,9 @@ static int processbranchedge(bool firstsucc,
 }
 
 int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
+                      unsigned int alphabetsize,
+                      const Encodedsequence *encseq,
+                      Readmode readmode,
                       unsigned int searchlength,
                       int(*output)(void *,Seqpos,Seqpos,Seqpos),
                       void *outinfo,
@@ -353,14 +355,13 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   Dfsstate state;
   bool haserr = false;
 
-  state.alphabetsize 
-    = getnumofcharsAlphabet(alphabetSequentialsuffixarrayreader(ssar));
+  state.alphabetsize = alphabetsize;
   state.searchlength = searchlength;
   state.output = output;
   state.outinfo = outinfo;
   state.initialized = false;
-  state.encseq = encseqSequentialsuffixarrayreader(ssar);
-  state.readmode = readmodeSequentialsuffixarrayreader(ssar);
+  state.encseq = encseq;
+  state.readmode = readmode;
   state.initialchar = (Uchar) (state.alphabetsize+1),
 
   INITARRAY(&state.uniquechar,Seqpos);
