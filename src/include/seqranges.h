@@ -27,10 +27,12 @@
 
 #include "mrangealphabet.h"
 
+typedef uint16_t regionLength;
+
 struct seqRange 
 {
   Seqpos startPos;
-  uint16_t len;
+  regionLength len;
   Symbol sym;
 };
 
@@ -45,16 +47,23 @@ enum {
   MAX_SEQRANGE_LEN = UINT16_MAX,
 };
 
+enum SRLFeatures {
+  SRL_PARTIAL_SYMBOL_SUMS = 1 << 0,
+};
+
 struct seqRangeList
 {
   size_t numRangesStorable, numRanges;
   struct seqRange *ranges;
+  Seqpos *partialSymSums;
+  const MRAEnc *alphabet;
 };
 
 typedef size_t seqRangeListSearchHint;
 
 extern struct seqRangeList *
-newSeqRangeList(size_t rangesStartNum, Env *env);
+newSeqRangeList(size_t rangesStartNum, const MRAEnc *alphabet,
+                enum SRLFeatures features, Env *env);
 
 extern void
 SRLCompact(struct seqRangeList *rangeList, Env *env);
@@ -99,6 +108,7 @@ extern int
 SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp);
 
 extern struct seqRangeList *
-SRLReadFromStream(FILE *fp, Env *env);
+SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
+                  enum SRLFeatures features, Env *env);
 
 #endif /* SEQRANGES_H_INCLUDED */
