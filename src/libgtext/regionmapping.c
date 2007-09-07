@@ -44,7 +44,6 @@ RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Env *env)
   /* create new lua state (i.e., interpreter) */
   rm->L = luaL_newstate();
   if (!rm->L) {
-    /* XXX: -> assert? */
     env_error_set(env, "out of memory (cannot create new lua state)");
     had_err = -1;
   }
