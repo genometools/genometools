@@ -1,6 +1,13 @@
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef ITERSEQ_H
+#define ITERSEQ_H
+#include <inttypes.h>
+#include "libgtcore/strarray.h"
+#include "symboldef.h"
+#include "arraydef.h"
+#include "seqdesc.h"
+
+typedef struct Scansequenceiterator Scansequenceiterator;
+
 int overallquerysequences(int(*processsequence)(void *,
                                                 uint64_t,
                                                 const Uchar *,
@@ -26,6 +33,4 @@ int nextScansequenceiterator(const Uchar **sequence,
                              Scansequenceiterator *sseqit,
                              Env *env);
 
-#ifdef __cplusplus
-}
 #endif

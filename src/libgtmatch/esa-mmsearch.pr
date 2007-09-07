@@ -15,6 +15,26 @@ bool nextmmsearchiterator(Seqpos *dbstart,MMsearchiterator *mmsi);
 
 void freemmsearchiterator(MMsearchiterator **mmsi,Env *env);
 
+int runquerysubstringmatch(const Encodedsequence *dbencseq,
+                           const Seqpos *suftabpart,
+                           Readmode readmode,
+                           Seqpos numberofsuffixes,
+                           const Uchar *query,
+                           unsigned long querylen,
+                           unsigned int minlength,
+                           int (*processmaxmatch)(void *,unsigned long,
+                                                  Seqpos,unsigned long),
+                           void *processmaxmatchinfo,
+                           Env *env);
+
+int callenumquerymatches(const Str *indexname,
+                         const StrArray *queryfiles,
+                         unsigned int userdefinedleastlength,
+                         int (*processmaxmatch)(void *,unsigned long,Seqpos,
+                                                unsigned long),
+                         void *processmaxmatchinfo,
+                         Env *env);
+
 int sarrquerysubstringmatch(const Uchar *dbseq,
                             Seqpos dblen,
                             const Uchar *query,

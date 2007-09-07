@@ -68,9 +68,9 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
       pptr = nextEnumpatterniterator(&patternlen,epi);
       mmsi = newmmsearchiterator(suffixarray.encseq,
                                  suffixarray.suftab,
-                                 0,
-                                 0,
-                                 totallength,
+                                 0,  /* leftbound */
+                                 totallength, /* rightbound */
+                                 0, /* offset */
                                  suffixarray.readmode,
                                  pptr,
                                  patternlen,

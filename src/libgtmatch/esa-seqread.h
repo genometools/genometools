@@ -5,6 +5,7 @@
 #include "libgtcore/env.h"
 #include "seqpos-def.h"
 #include "encseq-def.h"
+#include "sarr-def.h"
 
 typedef enum
 {

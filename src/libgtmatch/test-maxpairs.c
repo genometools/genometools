@@ -19,13 +19,16 @@
 #include "arraydef.h"
 #include "spacedef.h"
 #include "esa-mmsearch-def.h"
+#include "alphadef.h"
 
 #include "sfx-map.pr"
 #include "esa-mmsearch.pr"
+#include "esa-selfmatch.pr"
 
 static Seqpos samplesubstring(Uchar *seqspace,
                               const Encodedsequence *encseq,
-                              Seqpos substringlength)
+                              Seqpos substringlength,
+                              const Alphabet *alpha)
 {
   Seqpos i, start, totallength;
 
@@ -39,22 +42,39 @@ static Seqpos samplesubstring(Uchar *seqspace,
   {
     seqspace[i] = getencodedchar(encseq,start+i,Forwardmode);
   }
+  /*
+  printf("# sample of length %u at start %u\n",substringlength,start);
+  */
+  fastasymbolstringgeneric(stdout,alpha,seqspace,
+                           (unsigned long) substringlength,
+                           (unsigned long) 60);
   return substringlength;
 }
 
-static int showmaxmatch(/*@unused@*/ void *info,
-                        unsigned long len,
-                        Seqpos dbstart,
-                        unsigned long querystart)
+static int showmaxmatchquery(/*@unused@*/ void *info,
+                             unsigned long len,
+                             Seqpos dbstart,
+                             unsigned long querystart)
 {
   printf("# %lu " FormatSeqpos " %lu\n",
            len,PRINTSeqposcast(dbstart),querystart);
   return 0;
 }
 
+static int showmaxmatchself(/*@unused@*/ void *info,
+                            Seqpos len,
+                            Seqpos dbstart,
+                            Seqpos querystart)
+{
+  printf("# " FormatSeqpos " " FormatSeqpos " " FormatSeqpos "\n",
+           PRINTSeqposcast(len),PRINTSeqposcast(dbstart),
+           PRINTSeqposcast(querystart));
+  return 0;
+}
+
 int testmaxpairs(const Str *indexname,
                  unsigned long samples,
-                 /*@unused@*/ unsigned int minlength,
+                 unsigned int minlength,
                  Seqpos substringlength,
                  Env *env)
 {
@@ -85,17 +105,34 @@ int testmaxpairs(const Str *indexname,
   ALLOCASSIGNSPACE(query,NULL,Uchar,substringlength);
   for (s=0; s<samples; s++)
   {
-    dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength);
-    querylen = samplesubstring(query,suffixarray.encseq,substringlength);
+    dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength,
+                            suffixarray.alpha);
+    querylen = samplesubstring(query,suffixarray.encseq,substringlength,
+                               suffixarray.alpha);
+    printf("# run query match\n");
     if (sarrquerysubstringmatch(dbseq,
                                 dblen,
                                 query,
                                 (unsigned long) querylen,
                                 minlength,
                                 suffixarray.alpha,
-                                showmaxmatch,
+                                showmaxmatchquery,
                                 NULL,
                                 env) != 0)
+    {
+      haserr = true;
+      break;
+    }
+    printf("# run self match\n");
+    if (sarrselfsubstringmatch(dbseq,
+                               dblen,
+                               query,
+                               (unsigned long) querylen,
+                               minlength,
+                               suffixarray.alpha,
+                               showmaxmatchself,
+                               NULL,
+                               env) != 0)
     {
       haserr = true;
       break;

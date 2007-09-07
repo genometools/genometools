@@ -590,6 +590,41 @@ void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
   }
 }
 
+void fastasymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
+                             const Uchar *w,unsigned long wlen,
+                             unsigned long width)
+{
+  unsigned long i, j;
+
+  assert(width > 0);
+  fprintf(fpout,">\n");
+  for (i = 0, j = 0; ; i++)
+  {
+    if(w[i] == (Uchar) SEPARATOR)
+    {
+      fprintf(fpout,"\n>\n");
+      j = 0;
+    } else
+    {
+      (void) putc((int) alpha->characters[(int) w[i]],fpout);
+    }
+    if(i == wlen - 1)
+    {
+      fprintf(fpout,"\n");
+      break;
+    }
+    if(w[i] != (Uchar) SEPARATOR)
+    {
+      j++;
+      if(j >= width)
+      {
+        fprintf(fpout,"\n"); 
+        j = 0;
+      }
+    }
+  }
+}
+
 /*
   The following function is a special case of the previous
   function showing the output on stdout.
