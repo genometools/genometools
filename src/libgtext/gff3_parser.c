@@ -157,7 +157,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     had_err = parse_range(&range, start, end, line_number, filename, env);
 
   if (!had_err && gff3_parser->offset != UNDEF_LONG)
-    range = range_offset(range, gff3_parser->offset, line_number);
+    range = range_offset(range, gff3_parser->offset);
 
   /* parse the score */
   if (!had_err)
@@ -452,7 +452,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     }
     if (!had_err) {
       if (gff3_parser->offset != UNDEF_LONG)
-        range = range_offset(range, gff3_parser->offset, line_number);
+        range = range_offset(range, gff3_parser->offset);
       /* now we can create a sequence region node */
       assert(seqid);
       seqid_str = hashtable_get(gff3_parser->seqid_to_str_mapping, seqid);

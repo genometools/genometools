@@ -106,8 +106,7 @@ Range range_join(Range range_a, Range range_b)
   return r;
 }
 
-Range range_offset(Range range, long offset,
-                   /*@unused@*/ unsigned long line_number)
+Range range_offset(Range range, long offset)
 {
   Range transformed_range;
   assert(range.start <= range.end);
