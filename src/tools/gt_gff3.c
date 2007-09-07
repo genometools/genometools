@@ -73,9 +73,6 @@ static OPrval parse_options(int *parsed_args, Gff3_arguments *arguments,
   option = option_new_long("offset",
                            "transform all features by the given offset",
                            &arguments->offset, UNDEF_LONG, env);
-  /* XXX: do not make this a ``normal option'' until the necessary envor checks
-     have been added to range_offset() in range.c */
-  option_is_development_option(option);
   option_parser_add_option(op, option, env);
 
   /* -v */
