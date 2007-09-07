@@ -110,7 +110,8 @@ Range range_offset(Range range, long offset)
 {
   Range transformed_range;
   assert(range.start <= range.end);
-  /* XXX: add proper error checks here! */
+  /* XXX: add proper overflow checks here, this is not as easy as it seems, see
+     http://www.fefe.de/intof.html for details */
   transformed_range.start = (long) range.start + offset;
   transformed_range.end   = (long) range.end + offset;
   assert(transformed_range.start <= transformed_range.end);
