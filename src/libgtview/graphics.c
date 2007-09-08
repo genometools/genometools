@@ -20,22 +20,26 @@
 #include <cairo-pdf.h>
 #include <cairo-ps.h>
 #include "libgtcore/minmax.h"
+#include "libgtcore/fileutils.h"
 #include "libgtview/graphics.h"
 
-#define EXON_ARROW_WIDTH        6
+typedef enum {
+  PDF,
+  PNG,
+  PS
+} CairoGraphicsType;
 
 struct Graphics {
   cairo_t *cr;
   cairo_surface_t *surf;
+  CairoGraphicsType type;
   double margin_x, margin_y, height, width;
   const char* filename;
 };
 
-Graphics* graphics_new_png(const char *filename, unsigned int width,
-                           unsigned int height, Env *env)
+void graphics_initialize(Graphics *g, const char *filename, unsigned int width,
+                         unsigned int height, Env *env)
 {
-  Graphics *g = env_ma_malloc(env, sizeof (Graphics));
-  g->surf = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
   g->filename = filename;
   g->cr = cairo_create(g->surf);
   assert(cairo_status(g->cr) == CAIRO_STATUS_SUCCESS);
@@ -47,6 +51,35 @@ Graphics* graphics_new_png(const char *filename, unsigned int width,
   cairo_paint(g->cr);
   cairo_set_line_join(g->cr, CAIRO_LINE_JOIN_ROUND);
   cairo_set_line_cap(g->cr, CAIRO_LINE_CAP_ROUND);
+}
+
+Graphics* graphics_new_png(const char *filename, unsigned int width,
+                           unsigned int height, Env *env)
+{
+  Graphics *g = env_ma_malloc(env, sizeof (Graphics));
+  g->type = PNG;
+  g->surf = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
+  graphics_initialize(g, filename, width, height, env);
+  return g;
+}
+
+Graphics* graphics_new_pdf(const char *filename, unsigned int width,
+                           unsigned int height, Env *env)
+{
+  Graphics *g = env_ma_malloc(env, sizeof (Graphics));
+  g->type = PDF;
+  g->surf = cairo_pdf_surface_create(filename, width, height);
+  graphics_initialize(g, filename, width, height, env);
+  return g;
+}
+
+Graphics* graphics_new_ps(const char *filename, unsigned int width,
+                          unsigned int height, Env *env)
+{
+  Graphics *g = env_ma_malloc(env, sizeof (Graphics));
+  g->type = PS;
+  g->surf = cairo_ps_surface_create(filename, width, height);
+  graphics_initialize(g, filename, width, height, env);
   return g;
 }
 
@@ -194,7 +227,7 @@ void graphics_draw_dashes(Graphics *g, double x, double y, double width,
                           double arrow_width, double stroke_width,
                           Color stroke_color)
 {
-  double dashes[] = {5.0};
+  double dashes[] = {3.0};
   assert(g);
   /* save cairo context */
   cairo_save(g->cr);
@@ -360,13 +393,26 @@ void graphics_draw_arrowhead(Graphics *g, double x, double y,
 
 int graphics_save(const Graphics *g, Env *env)
 {
-  cairo_status_t rval;
+  cairo_status_t rval = CAIRO_STATUS_SUCCESS;
   env_error_check(env);
   assert(g);
-  rval = cairo_surface_write_to_png(g->surf, g->filename);
+  
+  switch(g->type)
+  {
+    case PNG:
+      rval = cairo_surface_write_to_png(g->surf, g->filename);
+      break;
+    case PDF:
+    case PS:
+      cairo_show_page(g->cr);
+      cairo_surface_flush(g->surf);
+      if(!file_exists(g->filename))
+        rval = CAIRO_STATUS_WRITE_ERROR;
+      break;
+  }
   assert(rval == CAIRO_STATUS_SUCCESS || rval == CAIRO_STATUS_WRITE_ERROR);
   if (rval == CAIRO_STATUS_WRITE_ERROR) {
-    env_error_set(env, "an I/O error occurred while attempting to write PNG "
+    env_error_set(env, "an I/O error occurred while attempting to write image "
                   "file \"%s\"", g->filename);
     return -1;
   }

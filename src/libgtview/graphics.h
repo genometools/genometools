@@ -34,10 +34,14 @@ typedef struct Graphics Graphics;
 
 /* Create a new Graphics object, which is an abstraction of a drawing surface on
    which several relevant primitives can be drawn.
-   This constructor creates a Graphics that can be written out as PNG file
+   This constructor creates a Graphics that can be written out as an image file
    <filename>. */
 Graphics* graphics_new_png(const char *filename, unsigned int width,
                            unsigned int height, Env*);
+Graphics* graphics_new_pdf(const char *filename, unsigned int width,
+                           unsigned int height, Env*);
+Graphics* graphics_new_ps(const char *filename, unsigned int width,
+                          unsigned int height, Env*);
 void      graphics_draw_text(Graphics*, double x, double y, const char*);
 #define   graphics_draw_text_left(g,x,y,t) \
           graphics_draw_text(g,x,y,t);
