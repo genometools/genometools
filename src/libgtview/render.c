@@ -528,4 +528,3 @@ void render_delete(Render *r, Env *env)
   if (!r) return;
   env_ma_free(r, env);
 }
-

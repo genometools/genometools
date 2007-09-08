@@ -396,8 +396,8 @@ int graphics_save(const Graphics *g, Env *env)
   cairo_status_t rval = CAIRO_STATUS_SUCCESS;
   env_error_check(env);
   assert(g);
-  
-  switch(g->type)
+
+  switch (g->type)
   {
     case PNG:
       rval = cairo_surface_write_to_png(g->surf, g->filename);
@@ -406,7 +406,7 @@ int graphics_save(const Graphics *g, Env *env)
     case PS:
       cairo_show_page(g->cr);
       cairo_surface_flush(g->surf);
-      if(!file_exists(g->filename))
+      if (!file_exists(g->filename))
         rval = CAIRO_STATUS_WRITE_ERROR;
       break;
   }
