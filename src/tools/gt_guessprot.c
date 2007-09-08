@@ -15,7 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/versionfunc.h"
 #include "libgtcore/option.h"
+#include "libgtmatch/guessprot.pr"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Env *env)

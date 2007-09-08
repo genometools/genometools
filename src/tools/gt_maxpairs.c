@@ -20,6 +20,7 @@
 #include "libgtcore/str.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
+#include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/esa-mmsearch-def.h"
 
 #include "libgtmatch/esa-maxpairs.pr"
