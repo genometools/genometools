@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "gt.h"
+#include "libgtcore/option.h"
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                             Env *env)
@@ -27,7 +27,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
                          "guess if sequence in filenames is protein or DNA.",
                           env);
   oprval = option_parser_parse_min_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, env);
+                                            versionfunc, (unsigned int) 1, env);
   option_parser_delete(op, env);
   return oprval;
 }
@@ -58,7 +58,10 @@ int gt_guessprot(int argc, const char **argv, Env *env)
   }
   if (retval == 1)
   {
+    /*@ignore@*/
     exit(1); /* XXX */
+    /*@end@*/
+
   } else
   {
     return 0;

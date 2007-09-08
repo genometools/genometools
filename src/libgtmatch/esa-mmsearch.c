@@ -62,8 +62,8 @@
 */
 
 #define COMPARE(OFFSET,LCPLEN)\
-        comparecharacters(OFFSET,&lcplen,dbencseq,readmode,totallength,\
-                          query,querylen)
+        retcode = comparecharacters(OFFSET,&lcplen,dbencseq,readmode,\
+                                    totallength,query,querylen)
 
 static int comparecharacters(Seqpos start,
                              Seqpos *lcplen,
@@ -71,7 +71,7 @@ static int comparecharacters(Seqpos start,
                              Readmode readmode,
                              Seqpos totallength,
                              const Uchar *query,
-                             Seqpos querylen)
+                             unsigned long querylen)
 {
   Seqpos sidx;
   int retcode = 0;
@@ -89,7 +89,7 @@ static int comparecharacters(Seqpos start,
       retcode = -1;
       break;
     }
-    printf("getencodedchar at %u\n",sidx);
+    // printf("getencodedchar at %u\n",sidx);
     currentchar = getencodedchar(dbencseq,sidx,readmode);
     retcode = (int) (query[*lcplen] - currentchar);
     if (retcode == 0)
@@ -146,7 +146,7 @@ static bool mmsearch(const Encodedsequence *dbencseq,
       {
         mid = DIV2(left+right);
         lcplen = MIN(lpref,rpref);
-        printf("mid=%u,lcplen=%u\n",mid,lcplen);
+        // printf("mid=%u,lcplen=%u\n",mid,lcplen);
         COMPARE(suftab[mid],lcplen);
         if (retcode <= 0)
         {

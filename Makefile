@@ -146,6 +146,16 @@ LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
 LIBBZ2_OBJ:=$(LIBBZ2_SRC:%.c=obj/%.o)
 LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.o)
 
+SKTOOLS=src/tools/gt_guessprot.c\
+        src/tools/gt_maxpairs.c\
+        src/tools/gt_mergeesa.c\
+        src/tools/gt_mkfmindex.c\
+        src/tools/gt_patternmatch.c\
+        src/tools/gt_sfxmap.c\
+        src/tools/gt_suffixerator.c\
+        src/tools/gt_trieins.c\
+        src/tools/gt_uniquesub.c
+
 SERVER=gordon@genometools.org
 WWWBASEDIR=/var/www/servers
 
@@ -396,12 +406,19 @@ splint:
         $(CURDIR)/src/libgtext/*.c \
         $(CURDIR)/src/tools/*.c
 
-sgt:${addprefix obj/,${notdir ${subst .c,.splint,${wildcard ${CURDIR}/src/libgtmatch/*.c}}}}
+sgt:${addprefix obj/,${notdir ${subst .c,.gtsplint,${wildcard ${CURDIR}/src/libgtmatch/*.c}}}}
+
+sto:${addprefix obj/,${notdir ${subst .c,.tosplint,${SKTOOLS}}}}
 
 splintclean:
 	find -name '*.splint' | xargs rm -f
 
-obj/%.splint: ${CURDIR}/src/libgtmatch/%.c
+obj/%.gtsplint: ${CURDIR}/src/libgtmatch/%.c
+	@echo "splint $<"
+	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@touch $@
+
+obj/%.tosplint: ${CURDIR}/src/tools/%.c
 	@echo "splint $<"
 	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@

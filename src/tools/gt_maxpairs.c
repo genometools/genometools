@@ -20,9 +20,7 @@
 #include "libgtcore/str.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
-#include "libgtmatch/sarr-def.h"
 #include "libgtmatch/esa-mmsearch-def.h"
-#include "libgtmatch/esa-seqread.h"
 
 #include "libgtmatch/esa-maxpairs.pr"
 #include "libgtmatch/esa-mmsearch.pr"
@@ -55,7 +53,7 @@ static int simpleexactselfmatchoutput(/*@unused@*/ void *info,
   return 0;
 }
 
-static int simpleexactquerymatchoutput(void *info,
+static int simpleexactquerymatchoutput(/*@unused@*/ void *info,
                                        unsigned long len,
                                        Seqpos dbstart,
                                        unsigned long querystart)
@@ -161,7 +159,7 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
         if (testmaxpairs(maxpairsoptions.indexname,
                          maxpairsoptions.samples,
                          maxpairsoptions.userdefinedleastlength,
-                         10 * maxpairsoptions.userdefinedleastlength,
+                         (Seqpos) (10 * maxpairsoptions.userdefinedleastlength),
                          env) != 0)
         {
           haserr = true;
