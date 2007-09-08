@@ -47,12 +47,12 @@ static char *forbid[] = {
 
 static unsigned char forbiddenstring(Str *line)
 {
-  unsigned long slen, i;
+  size_t slen, i;
   for (i = 0; i < sizeof (forbid) / sizeof (forbid[0]); i++) {
     slen = strlen(forbid[i]);
-    if (slen <= str_length(line) &&
+    if (slen <= (size_t) str_length(line) &&
        !strncmp(forbid[i], str_get(line), slen)) {
-      return 1;
+      return (unsigned char) 1;
     }
   }
   return 0;
@@ -61,19 +61,19 @@ static unsigned char forbiddenstring(Str *line)
 static void removecomments(Str *line, int *incomment, Env *env)
 {
   unsigned char *buffer;
-  unsigned int pos=0, bufpos=0;
+  unsigned long pos=0, bufpos=0;
 
   env_error_check(env);
 
   if (!line || !str_length(line))
     return;
 
-  buffer = env_ma_malloc(env, str_length(line) + 1);
+  buffer = env_ma_malloc(env, (size_t) str_length(line) + 1);
 
   /* remove comments, except for those used for splint: */
   while (pos < str_length(line)) {
     if (*incomment) {
-      if (!strncmp(str_get(line) + pos, "*/", 2)) {
+      if (!strncmp(str_get(line) + pos, "*/", (size_t) 2)) {
         *incomment=0;
         pos+=2;
       }
@@ -81,18 +81,18 @@ static void removecomments(Str *line, int *incomment, Env *env)
         pos++;
     }
     else {
-      if (str_length(line)     >  2   &&
+      if (str_length(line)     >  (unsigned long) 2   &&
           str_get(line)[pos]   == '/' &&
           str_get(line)[pos+1] == '/') {
         break;
       }
-      else if (!strncmp(str_get(line) + pos, "/*", 2) &&
+      else if (!strncmp(str_get(line) + pos, "/*", (size_t) 2) &&
                (pos + 2 >= str_length(line) || str_get(line)[pos+2] != '@')) {
         *incomment=1;
         pos+=2;
       }
       else
-        buffer[bufpos++] = str_get(line)[pos++];
+        buffer[bufpos++] = (unsigned char) str_get(line)[pos++];
     }
   }
 
