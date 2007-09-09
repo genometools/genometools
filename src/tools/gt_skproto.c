@@ -102,7 +102,7 @@ static void removecomments(Str *line, int *incomment, Env *env)
   buffer[bufpos]='\0';
 
   /* copy back into line */
-  memcpy(str_get(line), buffer, bufpos + 1);
+  memcpy(str_get(line), buffer, (size_t) (bufpos + 1));
   str_set_length(line, bufpos);
   env_ma_free(buffer, env);
 }
@@ -123,32 +123,32 @@ static void skproto(const char *filename, FILE *fpin, Env *env)
     if (str_length(line)) {
       if (startfunction) {
         if (isalpha((int) (str_get(line)[0])) ||
-            (str_length(line) >= 3 &&
-             strncmp(str_get(line), "/*@", 3) == 0)) {
+            (str_length(line) >= (unsigned long) 3 &&
+             strncmp(str_get(line), "/*@", (size_t) 3) == 0)) {
           if (!forbiddenstring(line)) {
-            if (str_length(line) >= MAX_LINE_LENGTH)
+            if (str_length(line) >= (unsigned long) MAX_LINE_LENGTH)
               warning("file %s, line %d too long\n", filename, linenum);
             printf("%s", str_get(line));
             if (str_get(line)[str_length(line)-1] == ')') {
-              putchar(';');
-              putchar('\n');
+              (void) putchar(';');
+              (void) putchar('\n');
             }
             else
               startfunction = 0;
-            putchar('\n');
+            (void) putchar('\n');
           }
         }
       }
       else {
-        if (str_length(line) >= MAX_LINE_LENGTH)
+        if (str_length(line) >= (unsigned long) MAX_LINE_LENGTH)
           warning("file %s, line %d too long\n", filename, linenum);
         printf("%s", str_get(line));
         if (str_get(line)[str_length(line)-1] == ')') {
-          putchar(';');
-          putchar('\n');
+          (void) putchar(';');
+          (void) putchar('\n');
           startfunction = 1;
         }
-        putchar('\n');
+        (void) putchar('\n');
       }
     }
     str_reset(line);
