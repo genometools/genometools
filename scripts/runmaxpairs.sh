@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e -x
+
 if test $# -lt 2
 then
   echo "Usage: $0 minlength [filenames]"
@@ -31,7 +33,7 @@ VMMINI=vmatch-mini.x
 for filename in ${filenames}
 do
   echo "$0 ${minlength} ${filename}"
-  checkerror "mkvtree.sh -db ${filename} -indexname mkvidx -dna -suf -tis -lcp -bwt -pl"
+  checkerror "mkvtree.sh -db ${filename} -indexname mkvidx -dna -bck -suf -tis -lcp -bwt -pl"
   checkerror "${VMMINI} ${minlength} mkvidx" > result.vm
   cleanhashlines result.vm
   checkerror "../bin/gt suffixerator -db ${filename} -indexname sfxidx -dna -suf -tis -lcp -pl"

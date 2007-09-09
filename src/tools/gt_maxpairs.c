@@ -32,7 +32,7 @@ typedef struct
   unsigned int userdefinedleastlength;
   unsigned long samples;
   bool scanfile;
-  Str *indexname; 
+  Str *indexname;
   StrArray *queryfiles;
 } Maxpairsoptions;
 
@@ -170,6 +170,7 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
     {
       if (callenumquerymatches(maxpairsoptions.indexname,
                                maxpairsoptions.queryfiles,
+                               false,
                                maxpairsoptions.userdefinedleastlength,
                                simpleexactquerymatchoutput,
                                NULL,

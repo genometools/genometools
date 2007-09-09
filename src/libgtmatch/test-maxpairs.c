@@ -28,7 +28,7 @@
 static Seqpos samplesubstring(Uchar *seqspace,
                               const Encodedsequence *encseq,
                               Seqpos substringlength,
-                              const Alphabet *alpha)
+                              const Uchar *characters)
 {
   Seqpos i, start, totallength;
 
@@ -45,7 +45,7 @@ static Seqpos samplesubstring(Uchar *seqspace,
   /*
   printf("# sample of length %u at start %u\n",substringlength,start);
   */
-  fastasymbolstringgeneric(stdout,alpha,seqspace,
+  fastasymbolstringgeneric(stdout,NULL,characters,seqspace,
                            (unsigned long) substringlength,
                            (unsigned long) 60);
   return substringlength;
@@ -106,9 +106,9 @@ int testmaxpairs(const Str *indexname,
   for (s=0; s<samples; s++)
   {
     dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength,
-                            suffixarray.alpha);
+                            getcharactersAlphabet(suffixarray.alpha));
     querylen = samplesubstring(query,suffixarray.encseq,substringlength,
-                               suffixarray.alpha);
+                               getcharactersAlphabet(suffixarray.alpha));
     printf("# run query match\n");
     if (sarrquerysubstringmatch(dbseq,
                                 dblen,

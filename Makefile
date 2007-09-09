@@ -148,19 +148,6 @@ LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.o)
 
 SKTOOLS=$(shell grep -l Kurtz src/tools/*.c)
 
-testit:
-	echo ${SKTOOLS}
-
-        #src/tools/gt_guessprot.c\
-        #src/tools/gt_maxpairs.c\
-        #src/tools/gt_mergeesa.c\
-        #src/tools/gt_mkfmindex.c\
-        #src/tools/gt_patternmatch.c\
-        #src/tools/gt_sfxmap.c\
-        #src/tools/gt_suffixerator.c\
-        #src/tools/gt_trieins.c\
-        #src/tools/gt_uniquesub.c
-
 SERVER=gordon@genometools.org
 WWWBASEDIR=/var/www/servers
 
