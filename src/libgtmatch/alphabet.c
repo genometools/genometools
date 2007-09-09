@@ -600,7 +600,13 @@ void fastasymbolstringgeneric(FILE *fpout,
   unsigned long i, j;
 
   assert(width > 0);
-  fprintf(fpout,">%s\n",desc);
+  if(desc == NULL)
+  {
+    fprintf(fpout,">\n");
+  } else
+  {
+    fprintf(fpout,">%s\n",desc);
+  }
   for (i = 0, j = 0; ; i++)
   {
     if(w[i] == (Uchar) SEPARATOR)

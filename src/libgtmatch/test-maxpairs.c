@@ -45,9 +45,11 @@ static Seqpos samplesubstring(Uchar *seqspace,
   /*
   printf("# sample of length %u at start %u\n",substringlength,start);
   */
+  /*
   fastasymbolstringgeneric(stdout,NULL,characters,seqspace,
                            (unsigned long) substringlength,
                            (unsigned long) 60);
+  */
   return substringlength;
 }
 
