@@ -59,7 +59,28 @@ typedef BitOffset (*bitInsertFunc)(BitString cwDest, BitOffset cwOffset,
                                    Seqpos start, Seqpos len, void *cbState,
                                    Env *env);
 
-/* typedef int_fast64_t Seqpos; */
+/**
+ * later inserted bits can be retrieved and will be presented in this
+ * struct.
+ * CAUTION: the bitstrings exposed in this manner become invalid if
+ * delete is called for the corresponding sequence index.
+ */
+struct extBitsRetrieval
+{
+  BitOffset cwOffset, varOffset;
+  Seqpos start, len;
+  BitString cwPart, varPart;
+  int flags;
+};
+
+enum extBitsRetrievalFlags
+{
+  EBRF_PERSISTENT_CWBITS = 1<<0,
+  EBRF_RETRIEVE_VARBITS = 1<<1,
+  EBRF_PERSISTENT_VARBITS = 1<<2,
+};
+
+
 enum rangeStoreMode {
   DIRECT_SYM_ENCODE,
   BLOCK_COMPOSITION_INCLUDE,
@@ -93,6 +114,27 @@ EISRank(struct encIdxSeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
 staticifinline inline Seqpos
 EISSymTransformedRank(struct encIdxSeq *seq, Symbol msym, Seqpos pos,
                       union EISHint *hint, Env *env);
+
+/**
+ * Presents the bits previously stored by a bitInsertFunc callback.
+ * @param seq
+ * @param pos sequence position for which to retrieve corresponding
+ * area
+ * @param persistent if false, the retrieved BitString elements will
+ * become invalid once the hint union is used in another call.
+ * @param hint provides cache and direction information for queries
+ * @param env genometools state
+ */
+staticifinline inline void
+EISRetrieveExtraBits(struct encIdxSeq *seq, Seqpos pos, int flags,
+                     struct extBitsRetrieval *retval, union EISHint *hint,
+                     Env *env);
+
+staticifinline inline struct extBitsRetrieval *
+newExtBitsRetrieval(Env *env);
+
+staticifinline inline void
+deleteExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
 
 extern Seqpos
 EISSelect(struct encIdxSeq *seq, Symbol sym, Seqpos count);

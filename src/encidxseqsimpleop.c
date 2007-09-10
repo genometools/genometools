@@ -49,6 +49,33 @@ EISRank(struct encIdxSeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
   return seq->classInfo->rank(seq, mSym, pos, hint, env);
 }
 
+staticifinline inline void
+EISRetrieveExtraBits(struct encIdxSeq *seq, Seqpos pos, int flags,
+                     struct extBitsRetrieval *retval, union EISHint *hint,
+                     Env *env)
+{
+  return seq->classInfo->expose(seq, pos, flags, retval, hint, env);
+}
+
+staticifinline inline struct extBitsRetrieval *
+newExtBitsRetrieval(Env *env)
+{
+  struct extBitsRetrieval *retval 
+    = env_ma_calloc(env, 1, sizeof(struct extBitsRetrieval));
+  return retval;
+}
+
+
+staticifinline inline void
+deleteExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
+{
+  if(r->flags & EBRF_PERSISTENT_CWBITS)
+    env_ma_free(r->cwPart, env);
+  if(r->flags & EBRF_PERSISTENT_VARBITS)
+    env_ma_free(r->varPart, env);
+  env_ma_free(r, env);
+}
+
 staticifinline inline Seqpos
 EISSymTransformedRank(struct encIdxSeq *seq, Symbol msym, Seqpos pos,
                       union EISHint *hint, Env *env)

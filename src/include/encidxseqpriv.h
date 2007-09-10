@@ -35,6 +35,9 @@ struct encIdxSeqClass
   union EISHint *(*newHint)(struct encIdxSeq *seq, Env *env);
   void (*deleteHint)(struct encIdxSeq *seq, EISHint hint, Env *env);
   const MRAEnc *(*getAlphabet)(const struct encIdxSeq *seq);
+  void (*expose)(struct encIdxSeq *seq, Seqpos pos, int persistent,
+                 struct extBitsRetrieval *retval, union EISHint *hint,
+                 Env *env);
 };
 
 struct encIdxSeq
