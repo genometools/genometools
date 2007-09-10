@@ -153,7 +153,6 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
       haserr = true;
       break;
     }
-    printf("# %u lcp=%u suf=%u\n",currentindex,currentlcp,previoussuffix);
     while (currentlcp < TOP.depth)
     {
       if (TOP.lastisleafedge)

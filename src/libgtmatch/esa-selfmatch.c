@@ -81,7 +81,6 @@ static int constructsarrandrunmaxpairs(
                                                suftabptr,
                                                firstpage,
                                                numberofsuffixes);
-      printf("# numberofsuffixes=%u\n",numberofsuffixes);
       firstpage = false;
       if (enumeratemaxpairs(ssar,
                             numofchars,

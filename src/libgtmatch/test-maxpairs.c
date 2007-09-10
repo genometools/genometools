@@ -84,12 +84,22 @@ typedef struct
 
 static int storemaxmatchself(void *info,
                              Seqpos len,
-                             Seqpos dbstart,
-                             Seqpos querystart,
+                             Seqpos pos1,
+                             Seqpos pos2,
                              Env *env)
 {
   Maxmatchselfinfo *maxmatchselfinfo = (Maxmatchselfinfo *) info;
+  Seqpos dbstart, querystart;
 
+  if (pos1 < pos2)
+  {
+    dbstart = pos1;
+    querystart = pos2;
+  } else
+  {
+    dbstart = pos2;
+    querystart = pos1;
+  }
   if (dbstart < maxmatchselfinfo->dblen && 
       maxmatchselfinfo->dblen < querystart)
   {
@@ -220,7 +230,7 @@ int testmaxpairs(const Str *indexname,
     dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength);
     querylen = samplesubstring(query,suffixarray.encseq,substringlength);
     printf("# run query match for dblen=" FormatSeqpos ",querylen= "
-           FormatSeqpos "minlength=%u\n",
+           FormatSeqpos ", minlength=%u\n",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
     tabmaxquerymatches = array_new(sizeof (Substringmatch),env);
     if (sarrquerysubstringmatch(dbseq,
@@ -236,9 +246,8 @@ int testmaxpairs(const Str *indexname,
       haserr = true;
       break;
     }
-    printf("found %lu matches\n",array_size(tabmaxquerymatches));
     printf("# run self match for dblen=" FormatSeqpos ",querylen= "
-           FormatSeqpos "minlength=%u\n",
+           FormatSeqpos ", minlength=%u\n",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
     maxmatchselfinfo.results = array_new(sizeof (Substringmatch),env);
     maxmatchselfinfo.dblen = dblen;
@@ -259,7 +268,6 @@ int testmaxpairs(const Str *indexname,
       haserr = true;
       break;
     }
-    printf("found %lu matches\n",array_size(maxmatchselfinfo.results));
     array_sort(tabmaxquerymatches,orderSubstringmatch);
     array_sort(maxmatchselfinfo.results,orderSubstringmatch);
     if (array_compare(tabmaxquerymatches,maxmatchselfinfo.results,
@@ -283,6 +291,7 @@ int testmaxpairs(const Str *indexname,
       exit(EXIT_FAILURE); /* programming error */
     }
     FREESPACE(maxmatchselfinfo.markpos);
+    printf("# numberofmatches=%lu\n",array_size(tabmaxquerymatches));
     array_delete(tabmaxquerymatches,env);
     array_delete(maxmatchselfinfo.results,env);
   }

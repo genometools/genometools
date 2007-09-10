@@ -321,8 +321,6 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
   uint64_t localunitnum = unitnum;
   unsigned long localqueryoffset = 0;
 
-  printf("# unitnum=" Formatuint64_t " of length %lu\n",
-          PRINTuint64_tcast(unitnum),querylen);
   assert(numberofsuffixes > 0);
   totallength = getencseqtotallength(dbencseq);
   for (currentquerystart = 0;

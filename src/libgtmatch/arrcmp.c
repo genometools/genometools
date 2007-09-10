@@ -28,14 +28,14 @@ int array_compare(const Array *a,const Array *b,
   size_b = array_size(b);
   if (size_a < size_b)
   {
-    fprintf(stderr,"array_size(a) = %lu < %lu = array_size(b)",
+    fprintf(stderr,"array_size(a) = %lu < %lu = array_size(b)\n",
                   size_a,
                   size_b);
     return -1;
   }
   if (size_a > size_b)
   {
-    fprintf(stderr,"array_size(a) = %lu > %lu = array_size(b)",
+    fprintf(stderr,"array_size(a) = %lu > %lu = array_size(b)\n",
                   size_a,
                   size_b);
     return 1;

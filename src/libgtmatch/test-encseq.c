@@ -162,7 +162,7 @@ static void makeerrormsg(const Sequencerange *vala,const Sequencerange *valb,
   fprintf(stderr,
                 "(" FormatSeqpos "," FormatSeqpos
                 ") %s (" FormatSeqpos "," FormatSeqpos
-                ")",
+                ")\n",
                 PRINTSeqposcast(vala->leftpos),
                 PRINTSeqposcast(vala->rightpos),
                 cmpflag,
