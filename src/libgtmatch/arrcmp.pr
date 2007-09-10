@@ -2,8 +2,7 @@
 extern "C" {
 #endif
 int array_compare(const Array *a,const Array *b,
-                  int(*compar)(const void *, const void *,Env *),
-                  Env *env);
+                  int(*compar)(const void *, const void *));
 
 #ifdef __cplusplus
 }

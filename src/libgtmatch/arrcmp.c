@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdlib.h>
 #include "libgtcore/array.h"
 
 int array_compare(const Array *a,const Array *b,
-                  int(*compar)(const void *, const void *,Env *),
-                  Env *env)
+                  int(*compar)(const void *, const void *))
 {
   unsigned long idx, size_a, size_b;
   int cmp;
@@ -28,22 +28,23 @@ int array_compare(const Array *a,const Array *b,
   size_b = array_size(b);
   if (size_a < size_b)
   {
-    env_error_set(env,"array_size(a) = %lu < %lu = array_size(b)",
+    fprintf(stderr,"array_size(a) = %lu < %lu = array_size(b)\n",
                   size_a,
                   size_b);
     return -1;
   }
   if (size_a > size_b)
   {
-    env_error_set(env,"array_size(a) = %lu > %lu = array_size(b)",
+    fprintf(stderr,"array_size(a) = %lu > %lu = array_size(b)\n",
                   size_a,
                   size_b);
     return 1;
+    exit(EXIT_FAILURE);
   }
   for (idx=0; idx < size_a; idx++)
   {
-    cmp = compar(array_get(a,idx),array_get(b,idx),env);
-    if (cmp != 0)
+    cmp = compar(array_get(a,idx),array_get(b,idx));
+    if(cmp != 0)
     {
       return cmp;
     }

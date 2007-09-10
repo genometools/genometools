@@ -321,8 +321,6 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
   uint64_t localunitnum = unitnum;
   unsigned long localqueryoffset = 0;
 
-  printf("unitnum=" Formatuint64_t " of length %lu\n",
-          PRINTuint64_tcast(unitnum),querylen);
   assert(numberofsuffixes > 0);
   totallength = getencseqtotallength(dbencseq);
   for (currentquerystart = 0;
@@ -353,7 +351,6 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
                              query,
                              currentquerystart + minlength,
                              querylen);
-        printf("match at querystart %lu\n",currentquerystart);
         if (processmaxmatch(processmaxmatchinfo,
                             extend + (unsigned long) minlength,
                             dbstart,
@@ -514,7 +511,7 @@ static int constructsarrandrunmmsearch(
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi;
 
-  sfi = newsfxiterator(specialcharacters,
+  sfi = newSfxiterator(specialcharacters,
                        specialranges,
                        dbencseq,
                        readmode,
