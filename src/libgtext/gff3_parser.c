@@ -128,7 +128,7 @@ int gff3parser_set_chseqids(GFF3Parser *gff3_parser, Str *chseqids, Env *env)
 static int add_offset_if_necessary(Range *range, GFF3Parser *gff3_parser,
                                    const char *seqid, Env *env)
 {
-  unsigned long offset;
+  long offset;
   int had_err = 0;
   env_error_check(env);
   if (gff3_parser->offset != UNDEF_LONG)
