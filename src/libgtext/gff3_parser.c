@@ -30,6 +30,7 @@
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/gff3_parser.h"
+#include "libgtext/mapping.h"
 #include "libgtext/sequence_region.h"
 
 struct GFF3Parser {
@@ -40,6 +41,7 @@ struct GFF3Parser {
                                             sequence regions */
   bool incomplete_node; /* at least on node is potentially incomplete */
   long offset;
+  Mapping *offset_mapping;
 };
 
 typedef struct {
@@ -85,13 +87,46 @@ GFF3Parser* gff3parser_new(Env *env)
                               (FreeFunc) automatic_sequence_region_delete, env);
   gff3_parser->incomplete_node = false;
   gff3_parser->offset = UNDEF_LONG;
+  gff3_parser->offset_mapping = NULL;
   return gff3_parser;
 }
 
 void gff3parser_set_offset(GFF3Parser *gff3_parser, long offset)
 {
   assert(gff3_parser);
+  assert(!gff3_parser->offset_mapping);
   gff3_parser->offset = offset;
+}
+
+int gff3parser_set_offsetfile(GFF3Parser *gff3_parser, Str *offsetfile,
+                              Env *env)
+{
+  env_error_check(env);
+  assert(gff3_parser);
+  assert(gff3_parser->offset == UNDEF_LONG);
+  gff3_parser->offset_mapping = mapping_new(offsetfile, "offsets",
+                                            MAPPINGTYPE_INTEGER, env);
+  if (gff3_parser->offset_mapping)
+    return 0;
+  return -1;
+
+}
+
+static int add_offset_if_necessary(Range *range, GFF3Parser *gff3_parser,
+                                   const char *seqid, Env *env)
+{
+  unsigned long offset;
+  int had_err = 0;
+  env_error_check(env);
+  if (gff3_parser->offset != UNDEF_LONG)
+    *range = range_offset(*range, gff3_parser->offset);
+  else if (gff3_parser->offset_mapping) {
+    had_err = mapping_map_integer(gff3_parser->offset_mapping, &offset, seqid,
+                                  env);
+    if (!had_err)
+      *range = range_offset(*range, offset);
+  }
+  return had_err;
 }
 
 static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
@@ -155,9 +190,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   /* parse the range */
   if (!had_err)
     had_err = parse_range(&range, start, end, line_number, filename, env);
-
-  if (!had_err && gff3_parser->offset != UNDEF_LONG)
-    range = range_offset(range, gff3_parser->offset);
+  if (!had_err)
+    had_err = add_offset_if_necessary(&range, gff3_parser, seqid, env);
 
   /* parse the score */
   if (!had_err)
@@ -450,9 +484,9 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                     line_number, filename);
       had_err = -1;
     }
+    if (!had_err)
+      had_err = add_offset_if_necessary(&range, gff3_parser, seqid, env);
     if (!had_err) {
-      if (gff3_parser->offset != UNDEF_LONG)
-        range = range_offset(range, gff3_parser->offset);
       /* now we can create a sequence region node */
       assert(seqid);
       seqid_str = hashtable_get(gff3_parser->seqid_to_str_mapping, seqid);
@@ -613,5 +647,6 @@ void gff3parser_delete(GFF3Parser *gff3_parser, Env *env)
   hashtable_delete(gff3_parser->seqid_to_str_mapping, env);
   hashtable_delete(gff3_parser->source_to_str_mapping, env);
   hashtable_delete(gff3_parser->undefined_sequence_regions, env);
+  mapping_delete(gff3_parser->offset_mapping, env);
   env_ma_free(gff3_parser, env);
 }

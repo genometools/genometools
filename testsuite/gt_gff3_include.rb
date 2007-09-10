@@ -246,3 +246,10 @@ Test do
   run_test "#{$bin}gt gff3 -offset 1000 #{$testdata}gt_gff3_offset_test.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_gff3_offset_test.out"
 end
+
+Name "gt gff3 test option -offsetfile"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -offsetfile #{$testdata}gt_gff3_offsetfile_test.offsetfile #{$testdata}gt_gff3_offsetfile_test.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_offsetfile_test.out"
+end
