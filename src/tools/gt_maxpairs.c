@@ -119,14 +119,14 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
 
   oprval = option_parser_parse(op, parsed_args, argc, argv,
                                versionfunc, env);
-  if(option_is_set(queryoption))
+  if (option_is_set(queryoption))
   {
-    if(option_is_set(sampleoption))
+    if (option_is_set(sampleoption))
     {
       env_error_set(env,"option -samples cannot be combined with option -q");
       return OPTIONPARSER_ERROR;
     }
-    if(option_is_set(scanoption))
+    if (option_is_set(scanoption))
     {
       env_error_set(env,"option -scan cannot be combined with option -q");
       return OPTIONPARSER_ERROR;
@@ -151,7 +151,7 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
   if (oprval == OPTIONPARSER_OK)
   {
     assert(parsed_args == argc);
-    if(strarray_size(maxpairsoptions.queryfiles) == 0)
+    if (strarray_size(maxpairsoptions.queryfiles) == 0)
     {
       if (maxpairsoptions.samples == 0)
       {
@@ -169,7 +169,7 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
         if (testmaxpairs(maxpairsoptions.indexname,
                          maxpairsoptions.samples,
                          maxpairsoptions.userdefinedleastlength,
-                         (Seqpos) (100 * 
+                         (Seqpos) (100 *
                                    maxpairsoptions.userdefinedleastlength),
                          env) != 0)
         {
@@ -192,7 +192,7 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
   }
   str_delete(maxpairsoptions.indexname,env);
   strarray_delete(maxpairsoptions.queryfiles,env);
-                                    
+
   if (oprval == OPTIONPARSER_REQUESTS_EXIT)
   {
     return 0;
