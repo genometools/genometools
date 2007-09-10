@@ -80,8 +80,8 @@
 struct onDiskBlockCompIdx 
 {
   FILE *idxData;
-  off_t cwIdxDataPos,              /*< constant width data of the index */
-    varIdxDataPos,                      /*< variable width part */
+  off_t cwDataPos,              /*< constant width data of the index */
+    varDataPos,                      /*< variable width part */
     rangeEncPos;                   /*< in-file position of special
                                     *  symbol representation */
 };
@@ -591,8 +591,8 @@ deleteBlockEncIdxSeq(struct encIdxSeq *seq, Env *env)
 
 struct superBlock
 {
-  unsigned varIdxMemBase, cwIdxMemBase;
-  BitString varIdx, compIdx;
+  unsigned varDataMemBase, cwIdxMemBase;
+  BitString varData, cwData;
 };
 
 static inline size_t
@@ -632,9 +632,9 @@ initEmptySuperBlock(struct superBlock *sBlock,
                     const struct blockCompositionSeq *seqIdx)
 {
   size_t offset;
-  sBlock->compIdx = (BitString)
+  sBlock->cwData = (BitString)
     ((char *)sBlock + (offset = offsetAlign(sizeof(*sBlock), sizeof(BitElem))));
-  sBlock->varIdx = (BitString)
+  sBlock->varData = (BitString)
     ((char *)sBlock + (offset = offsetAlign(offset
                                             + superBlockCWMaxReadSize(seqIdx),
                                             sizeof(BitElem))));
@@ -653,8 +653,8 @@ newEmptySuperBlock(const struct blockCompositionSeq *seqIdx, Env *env)
 static void
 deleteSuperBlock(struct superBlock *sBlock, Env *env)
 {
-/*   env_ma_free(sBlock->compIdx, env); */
-/*   env_ma_free(sBlock->varIdx, env); */
+/*   env_ma_free(sBlock->cwData, env); */
+/*   env_ma_free(sBlock->varData, env); */
 /*   env_ma_free(sBlock->prevBucket, env); */
   env_ma_free(sBlock, env);
 }
@@ -665,7 +665,7 @@ sBlockGetSymStartCount(struct superBlock *sBlock, Symbol sym,
 {
   unsigned bitsPerSeqpos;
   bitsPerSeqpos = seqIdx->bitsPerSeqpos;
-  return bsGetSeqpos(sBlock->compIdx, bitsPerSeqpos*sym + sBlock->cwIdxMemBase,
+  return bsGetSeqpos(sBlock->cwData, bitsPerSeqpos*sym + sBlock->cwIdxMemBase,
                      bitsPerSeqpos);
 }
 
@@ -726,7 +726,7 @@ sBlockGetcbOffset(const struct superBlock *sBlock,
                   const struct blockCompositionSeq *seqIdx)
 {
   BitOffset offset = sBlockGetcbOffsetOffset(sBlock, seqIdx);
-  return bsGetUInt64(sBlock->compIdx, offset, seqIdx->callBackDataOffsetBits);  
+  return bsGetUInt64(sBlock->cwData, offset, seqIdx->callBackDataOffsetBits);  
 }
 
 static inline size_t
@@ -735,7 +735,7 @@ sBlockGetCompIdx(const struct superBlock *sBlock, unsigned compIdxNum,
 {
   BitOffset offset = sBlockGetCompIdxOffset(sBlock, seqIdx, compIdxNum);
   unsigned bitsPerCompositionIdx = seqIdx->compositionTable.compositionIdxBits;
-  return bsGetUInt64(sBlock->compIdx, offset, bitsPerCompositionIdx);
+  return bsGetUInt64(sBlock->cwData, offset, bitsPerCompositionIdx);
 }
 
 static inline size_t
@@ -744,7 +744,7 @@ sBlockGetVarIdxOffset(const struct superBlock *sBlock,
 {
   BitOffset offset = seqIdx->bitsPerSeqpos * seqIdx->blockEncNumSyms
     + sBlock->cwIdxMemBase;
-  return bsGetUInt64(sBlock->compIdx, offset, seqIdx->bitsPerVarDiskOffset);
+  return bsGetUInt64(sBlock->cwData, offset, seqIdx->bitsPerVarDiskOffset);
 }
 
 static inline Seqpos
@@ -815,21 +815,21 @@ fetchSuperBlock(struct blockCompositionSeq *seqIdx, Seqpos superBucketNum,
                          superBucketBlocks, blockSize, callBackDataOffsetBits,
                          seqIdx->bitsPerVarDiskOffset,
                          seqIdx->cwExtBitsPerBucket);
-    BitOffset varIdxOffset;
-    if(fseeko(idxFP, seqIdx->externalData.cwIdxDataPos
+    BitOffset varDataOffset;
+    if(fseeko(idxFP, seqIdx->externalData.cwDataPos
               + bucketOffset / bitElemBits, SEEK_SET))
       fetchSuperBlockErrRet();
-    if(fread(retval->compIdx, 1, superBlockCWDiskSize, idxFP)
+    if(fread(retval->cwData, 1, superBlockCWDiskSize, idxFP)
        != superBlockCWDiskSize)
       fetchSuperBlockErrRet();
     retval->cwIdxMemBase = bucketOffset%bitElemBits;
-    varIdxOffset = sBlockGetVarIdxOffset(retval, seqIdx);
-    if(fseeko(idxFP, seqIdx->externalData.varIdxDataPos
-              + varIdxOffset/bitElemBits * sizeof(BitElem), SEEK_SET))
+    varDataOffset = sBlockGetVarIdxOffset(retval, seqIdx);
+    if(fseeko(idxFP, seqIdx->externalData.varDataPos
+              + varDataOffset/bitElemBits * sizeof(BitElem), SEEK_SET))
       fetchSuperBlockErrRet();
-    retval->varIdxMemBase = varIdxOffset%bitElemBits;
+    retval->varDataMemBase = varDataOffset%bitElemBits;
     retval->cwIdxMemBase = bucketOffset%bitElemBits;
-    fread(retval->varIdx, sizeof(BitElem), varMaxBitElems, idxFP);
+    fread(retval->varData, sizeof(BitElem), varMaxBitElems, idxFP);
     if(ferror(idxFP))
       fetchSuperBlockErrRet();
   }
@@ -931,7 +931,7 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
                      Symbol *blockPA, Env *env)
 {
   struct superBlock *sBlock;
-  BitOffset varIdxMemOffset, cwIdxMemOffset;
+  BitOffset varDataMemOffset, cwIdxMemOffset;
   Seqpos relBlockNum;
   unsigned blockSize, bitsPerCompositionIdx;
   Symbol *block;
@@ -951,7 +951,7 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
     sBlock = fetchSuperBlock(seqIdx, superBucketNum, NULL, env);
 #endif
   }
-  varIdxMemOffset = sBlock->varIdxMemBase;
+  varDataMemOffset = sBlock->varDataMemBase;
   relBlockNum = blockNum % seqIdx->superBucketBlocks;
   bitsPerCompositionIdx = seqIdx->compositionTable.compositionIdxBits;
   if(blockPA)
@@ -962,9 +962,9 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
   while(relBlockNum)
   {
     size_t compIndex;
-    compIndex = bsGetUInt64(sBlock->compIdx, cwIdxMemOffset,
+    compIndex = bsGetUInt64(sBlock->cwData, cwIdxMemOffset,
                             bitsPerCompositionIdx);
-    varIdxMemOffset +=
+    varDataMemOffset +=
       seqIdx->compositionTable.permutations[compIndex].permIdxBits;
     cwIdxMemOffset += bitsPerCompositionIdx;
     --relBlockNum;
@@ -974,11 +974,11 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
     unsigned varIdxBits,
       bitsPerPermutation = seqIdx->compositionTable.bitsPerSymbol * blockSize;
     struct permList *permutationList;
-    compPermIndex[0] = bsGetUInt64(sBlock->compIdx, cwIdxMemOffset,
+    compPermIndex[0] = bsGetUInt64(sBlock->cwData, cwIdxMemOffset,
                                    bitsPerCompositionIdx);
     permutationList = seqIdx->compositionTable.permutations + compPermIndex[0];
     varIdxBits = permutationList->permIdxBits;
-    compPermIndex[1] = bsGetUInt64(sBlock->varIdx, varIdxMemOffset, varIdxBits);
+    compPermIndex[1] = bsGetUInt64(sBlock->varData, varDataMemOffset, varIdxBits);
     bsGetUniformUIntArray(permutationList->catPerms,
                           bitsPerPermutation * compPermIndex[1],
                           seqIdx->compositionTable.bitsPerSymbol, blockSize,
@@ -1035,7 +1035,7 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
   if(MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet, eSym,
                                     BLOCK_COMPOSITION_INCLUDE, seqIdx->modes))
   {
-    BitOffset varIdxMemOffset, cwIdxMemOffset;
+    BitOffset varDataMemOffset, cwIdxMemOffset;
     struct superBlock *sBlock;
     Symbol bSym = MRAEncMapSymbol(seqIdx->blockMapAlphabet, eSym);
     Seqpos superBucketNum;
@@ -1050,7 +1050,7 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
     sBlock = fetchSuperBlock(seqIdx, superBucketNum, NULL, env);
 #endif
     cwIdxMemOffset = sBlockGetCompIdxOffset(sBlock, seqIdx, 0);
-    varIdxMemOffset = sBlock->varIdxMemBase;
+    varDataMemOffset = sBlock->varDataMemBase;
     rankCount = sBlockGetSymStartCount(sBlock, bSym, seqIdx);
     blockNum = blockNumFromPos(seqIdx, pos + 1);
     {
@@ -1060,10 +1060,10 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
       while(relBlockNum)
       {
         size_t compIndex;
-        compIndex = bsGetUInt64(sBlock->compIdx, cwIdxMemOffset,
+        compIndex = bsGetUInt64(sBlock->cwData, cwIdxMemOffset,
                                 bitsPerCompositionIdx);
         rankCount += symCountFromComposition(seqIdx, compIndex, bSym);
-        varIdxMemOffset +=
+        varDataMemOffset +=
           seqIdx->compositionTable.permutations[compIndex].permIdxBits;
         cwIdxMemOffset += bitsPerCompositionIdx;
         --relBlockNum;
@@ -1073,7 +1073,7 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
       Seqpos inBlockPos;
       if((inBlockPos = (pos + 1) % blockSize)
          && symCountFromComposition(seqIdx,
-                                    bsGetUInt64(sBlock->compIdx, cwIdxMemOffset,
+                                    bsGetUInt64(sBlock->cwData, cwIdxMemOffset,
                                                 bitsPerCompositionIdx), bSym))
       {
         Symbol block[blockSize];
@@ -1139,19 +1139,19 @@ blockCompSeqExpose(struct encIdxSeq *eSeqIdx, Seqpos pos, int flags,
           retval->varPart
             = env_ma_malloc(env, superBlockCWMaxReadSize(seqIdx));
       }
-      memcpy(retval->cwPart, sBlock->compIdx,
+      memcpy(retval->cwPart, sBlock->cwData,
              superBlockCWMaxReadSize(seqIdx));
     }
     else
     {
       if(retval->flags & EBRF_PERSISTENT_CWBITS)
         env_ma_free(retval->cwPart, env);
-      retval->cwPart = sBlock->compIdx;
+      retval->cwPart = sBlock->cwData;
     }
     if(EBRF_RETRIEVE_VARBITS)
     {
       retval->varOffset = sBlockGetcbOffset(sBlock, seqIdx)
-        + sBlock->varIdxMemBase;
+        + sBlock->varDataMemBase;
       if(flags & EBRF_PERSISTENT_VARBITS)
       {
         if(!(retval->flags & EBRF_PERSISTENT_VARBITS))
@@ -1159,14 +1159,14 @@ blockCompSeqExpose(struct encIdxSeq *eSeqIdx, Seqpos pos, int flags,
           retval->varPart
             = env_ma_malloc(env, superBlockVarMaxReadSize(seqIdx));
         }
-        memcpy(retval->varPart, sBlock->varIdx,
+        memcpy(retval->varPart, sBlock->varData,
                superBlockVarMaxReadSize(seqIdx));
       }
       else
       {
         if(retval->flags & EBRF_PERSISTENT_VARBITS)
           env_ma_free(retval->varPart, env);
-        retval->varPart = sBlock->varIdx;
+        retval->varPart = sBlock->varData;
       }
     }
     else
@@ -1884,8 +1884,8 @@ static void
 initOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx,
                        size_t headerLen, off_t cwLen)
 {
-  idx->cwIdxDataPos = headerLen;
-  idx->varIdxDataPos = headerLen + cwLen + idx->cwIdxDataPos;
+  idx->cwDataPos = headerLen;
+  idx->varDataPos = headerLen + cwLen + idx->cwDataPos;
   idx->rangeEncPos = 0;
 }
 
@@ -1977,8 +1977,8 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
   BitOffset sBucketBits;
   assert(seqIdx && aState && buck);
   /* seek2/write constant width indices */
-  assert(seqIdx->externalData.cwIdxDataPos + aState->cwDiskOffset
-         < seqIdx->externalData.varIdxDataPos
+  assert(seqIdx->externalData.cwDataPos + aState->cwDiskOffset
+         < seqIdx->externalData.varDataPos
          + aState->varDiskOffset/bitElemBits * sizeof(BitElem));
   blockAlphabetSize = seqIdx->blockEncNumSyms;
   sBucketBits = seqIdx->bitsPerSeqpos * blockAlphabetSize;
@@ -1991,7 +1991,7 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
   bsStoreUInt64(aState->compCache, aState->cwMemOldBits + sBucketBits,
                 seqIdx->bitsPerVarDiskOffset, aState->varDiskOffset);
   if(fseeko(seqIdx->externalData.idxData,
-            seqIdx->externalData.cwIdxDataPos + aState->cwDiskOffset,
+            seqIdx->externalData.cwDataPos + aState->cwDiskOffset,
             SEEK_SET))
     return 0;
   cwBitElems = recordsExpected = aState->cwMemPos / bitElemBits;
@@ -2001,7 +2001,7 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
   if((aState->cwMemOldBits = aState->cwMemPos % bitElemBits))
     aState->compCache[0] = aState->compCache[recordsExpected];
   /* seek2/write variable width indices */
-  if(fseeko(seqIdx->externalData.idxData, seqIdx->externalData.varIdxDataPos
+  if(fseeko(seqIdx->externalData.idxData, seqIdx->externalData.varDataPos
             + aState->varDiskOffset/bitElemBits * sizeof(BitElem), SEEK_SET))
     return 0;
   recordsExpected = aState->varMemPos/bitElemBits;
@@ -2088,7 +2088,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx, Env *env)
   *(uint32_t *)(buf + offset + 4) = seqIdx->superBucketBlocks;
   offset += 8;
   *(uint32_t *)(buf + offset) = VOFF_HEADER_FIELD;
-  *(uint64_t *)(buf + offset + 4) = seqIdx->externalData.varIdxDataPos;
+  *(uint64_t *)(buf + offset + 4) = seqIdx->externalData.varDataPos;
   offset += 12;
   *(uint32_t *)(buf + offset) = ROFF_HEADER_FIELD;
   *(uint64_t *)(buf + offset + 4) = seqIdx->externalData.rangeEncPos;
@@ -2127,7 +2127,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx, Env *env)
     return 0;
   if(fwrite(buf, len, 1, fp) != 1)
     return 0;
-  seqIdx->externalData.cwIdxDataPos = len;
+  seqIdx->externalData.cwDataPos = len;
   env_ma_free(buf, env);
   return len;
 }
@@ -2183,7 +2183,7 @@ loadBlockEncIdxSeq(const Str *projectName, Env *env)
       loadBlockEncIdxSeqErrRet();
     if(strcmp(buf, bdxHeader)!= 0)
       loadBlockEncIdxSeqErrRet();
-    newSeqIdx->externalData.cwIdxDataPos = headerLen = *(uint32_t *)(buf + 4);
+    newSeqIdx->externalData.cwDataPos = headerLen = *(uint32_t *)(buf + 4);
     buf = env_ma_realloc(env, buf, headerLen);
     if(fread(buf + 8, headerLen - 8, 1, newSeqIdx->externalData.idxData) != 1)
       loadBlockEncIdxSeqErrRet();
@@ -2200,7 +2200,7 @@ loadBlockEncIdxSeq(const Str *projectName, Env *env)
         offset += 8;
         break;
       case VOFF_HEADER_FIELD:
-        newSeqIdx->externalData.varIdxDataPos
+        newSeqIdx->externalData.varDataPos
           = *(uint64_t *)(buf + offset + 4);
         offset += 12;
         break;
@@ -2340,7 +2340,7 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
   {
     /* seek2/write variable width indices */
     if(fseeko(seqIdx->externalData.idxData,
-              seqIdx->externalData.cwIdxDataPos
+              seqIdx->externalData.cwDataPos
               + aState->cwDiskOffset * sizeof(BitElem), SEEK_SET))
       return 0;
     recordsExpected = 1;
@@ -2354,7 +2354,7 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
   {
     /* seek2/write variable width indices */
     if(fseeko(seqIdx->externalData.idxData,
-              seqIdx->externalData.varIdxDataPos
+              seqIdx->externalData.varDataPos
               + aState->varDiskOffset/bitElemBits * sizeof(BitElem), SEEK_SET))
       return 0;
     recordsExpected = 1;
@@ -2363,7 +2363,7 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
                                  seqIdx->externalData.idxData))
       return 0;
   }
-  rangeEncPos = seqIdx->externalData.varIdxDataPos
+  rangeEncPos = seqIdx->externalData.varDataPos
     + aState->varDiskOffset / bitElemBits * sizeof(BitElem)
     + ((aState->varDiskOffset%bitElemBits)?sizeof(BitElem):0);
   seqIdx->externalData.rangeEncPos = rangeEncPos;
