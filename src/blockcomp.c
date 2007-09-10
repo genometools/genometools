@@ -111,7 +111,7 @@ struct blockCompositionSeq
   struct onDiskBlockCompIdx externalData;
   struct seqRangeList *rangeEncs;
   struct compList compositionTable;
-  BitOffset maxExtBitsPerBucket;
+  BitOffset maxVarExtBitsPerBucket, cwExtBitsPerBucket;
   /* maxVarBitsPerBucket, cwBits */
   MRAEnc *blockMapAlphabet, *rangeMapAlphabet;
   int *modes;
@@ -246,11 +246,12 @@ numSuperBuckets(Seqpos seqLen, Seqpos superBucketLen);
 static inline off_t
 cwSize(Seqpos seqLen, unsigned bitsPerSeqpos, unsigned compositionIdxBits,
        unsigned alphabetSize, size_t superBucketBlocks, unsigned blockSize,
-       unsigned callBackDataOffsetBits, unsigned bitsPerVarDiskOffset);
+       unsigned callBackDataOffsetBits, unsigned bitsPerVarDiskOffset,
+       BitOffset cwExtBitsPerBucket);
 
 static inline BitOffset
 vwBits(Seqpos seqLen, unsigned blockSize, size_t superBucketBlocks,
-       unsigned maxPermIdxBits, BitOffset maxExtBitsPerBucket);
+       unsigned maxPermIdxBits, BitOffset maxVarExtBitsPerBucket);
 
 static void
 addRangeEncodedSyms(struct seqRangeList *rangeList, Symbol *block,
@@ -298,8 +299,8 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
 
 struct encIdxSeq *
 newBlockEncIdxSeq(const Str *projectName, unsigned blockSize,
-                  bitInsertFunc biFunc, BitOffset maxExtBitsPerPos,
-                  void *cbState, Env *env)
+                  bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
+                  BitOffset maxVarExtBitsPerPos, void *cbState, Env *env)
 {
   struct blockCompositionSeq *newSeqIdx = NULL;
   Symbol blockMapAlphabetSize, totalAlphabetSize;
@@ -376,7 +377,8 @@ newBlockEncIdxSeq(const Str *projectName, unsigned blockSize,
     newBlockEncIdxSeqErrRet();
   newSeqIdx->baseClass.classInfo = &blockCompositionSeqClass;
   newSeqIdx->blockSize = blockSize;
-  newSeqIdx->maxExtBitsPerBucket = maxExtBitsPerPos * superBucketLen;
+  newSeqIdx->cwExtBitsPerBucket = cwExtBitsPerPos * superBucketLen;
+  newSeqIdx->maxVarExtBitsPerBucket = maxVarExtBitsPerPos * superBucketLen;
   newSeqIdx->blockEncNumSyms = blockMapAlphabetSize;
   if(!initCompositionList(&newSeqIdx->compositionTable, newSeqIdx,
                           blockMapAlphabetSize, env))
@@ -394,7 +396,7 @@ newBlockEncIdxSeq(const Str *projectName, unsigned blockSize,
   newSeqIdx->bitsPerVarDiskOffset =
     requiredUInt64Bits(vwBits(seqLen, blockSize, superBucketBlocks,
                               newSeqIdx->compositionTable.maxPermIdxBits,
-                              newSeqIdx->maxExtBitsPerBucket));
+                              newSeqIdx->maxVarExtBitsPerBucket));
   {
     size_t headerLen = blockEncIdxSeqHeaderLength(newSeqIdx);
     if(!openOnDiskData(projectName, &newSeqIdx->externalData, "wb+", env))
@@ -405,7 +407,8 @@ newBlockEncIdxSeq(const Str *projectName, unsigned blockSize,
                                              newSeqIdx->blockEncNumSyms,
                                              superBucketBlocks, blockSize,
                                              callBackDataOffsetBits,
-                                             newSeqIdx->bitsPerVarDiskOffset));
+                                             newSeqIdx->bitsPerVarDiskOffset,
+                                             newSeqIdx->cwExtBitsPerBucket));
   }
   /* At this point everything should be ready to receive the actual sequence
    * information, steps: */
@@ -594,16 +597,19 @@ struct superBlock
 
 static inline size_t
 superBlockCWMaxReadSize(const struct blockCompositionSeq *seqIdx);
+
 static inline size_t
 superBlockCWMaxReadSz(unsigned bitsPerSeqpos, unsigned compositionIdxBits,
                       unsigned alphabetSize, size_t superBucketBlocks,
                       unsigned blockSize, unsigned callBackDataOffsetBits,
-                      unsigned bitsPerVarDiskOffset);
+                      unsigned bitsPerVarDiskOffset,
+                      BitOffset cwExtBitsPerBucket);
+
 static inline BitOffset
 superBlockCWBits(unsigned bitsPerSeqpos, unsigned compositionIdxBits,
                  unsigned alphabetSize, size_t superBucketBlocks,
                  unsigned blockSize, unsigned callBackDataOffsetBits,
-                 unsigned bitsPerVarDiskOffset);
+                 unsigned bitsPerVarDiskOffset, BitOffset cwExtBitsPerBucket);
 
 static inline size_t
 superBlockMemSize(const struct blockCompositionSeq *seqIdx)
@@ -615,7 +621,8 @@ superBlockMemSize(const struct blockCompositionSeq *seqIdx)
   offset = offsetAlign(offset + superBlockCWMaxReadSize(seqIdx),
                        sizeof(BitElem));
   offset += bitElemsAllocSize(maxVarIdxBits * seqIdx->superBucketBlocks
-                              + seqIdx->maxExtBitsPerBucket + bitElemBits - 1);
+                              + seqIdx->maxVarExtBitsPerBucket
+                              + bitElemBits - 1);
   return offsetAlign(offset, MAX_ALIGN_REQUIREMENT);
 }
 
@@ -684,6 +691,26 @@ sBlockPrecbOffsetBits(const struct blockCompositionSeq *seqIdx)
 {
   BitOffset offset = seqIdx->bitsPerSeqpos * seqIdx->blockEncNumSyms
     + seqIdx->bitsPerVarDiskOffset;
+  return offset;  
+}
+
+static inline BitOffset
+sBlockPreExtBits(const struct blockCompositionSeq *seqIdx)
+{
+  BitOffset offset = seqIdx->bitsPerSeqpos * seqIdx->blockEncNumSyms
+    + seqIdx->bitsPerVarDiskOffset + seqIdx->callBackDataOffsetBits
+    + seqIdx->superBucketBlocks * seqIdx->compositionTable.compositionIdxBits;
+  return offset;  
+}
+
+static inline BitOffset
+sBlockExtBitsOffset(const struct superBlock *sBlock,
+                    const struct blockCompositionSeq *seqIdx)
+{
+  BitOffset offset = seqIdx->bitsPerSeqpos * seqIdx->blockEncNumSyms
+    + seqIdx->bitsPerVarDiskOffset + seqIdx->callBackDataOffsetBits
+    + seqIdx->superBucketBlocks * seqIdx->compositionTable.compositionIdxBits
+    + sBlock->cwIdxMemBase;
   return offset;  
 }
 
@@ -769,10 +796,11 @@ fetchSuperBlock(struct blockCompositionSeq *seqIdx, Seqpos superBucketNum,
   superBlockCWDiskSize =
     superBlockCWMaxReadSz(bitsPerSeqpos, compositionIdxBits, blockEncNumSyms,
                           superBucketBlocks, blockSize, callBackDataOffsetBits,
-                          seqIdx->bitsPerVarDiskOffset);
+                          seqIdx->bitsPerVarDiskOffset,
+                          seqIdx->cwExtBitsPerBucket);
   maxVarIdxBits = seqIdx->compositionTable.maxPermIdxBits;
   varMaxBitElems = bitElemsAllocSize(maxVarIdxBits * superBucketBlocks
-                                     + seqIdx->maxExtBitsPerBucket
+                                     + seqIdx->maxVarExtBitsPerBucket
                                      + bitElemBits - 1);
   if(sBlockPreAlloc)
     retval = sBlockPreAlloc;
@@ -782,7 +810,8 @@ fetchSuperBlock(struct blockCompositionSeq *seqIdx, Seqpos superBucketNum,
     BitOffset bucketOffset = superBucketNum
       * superBlockCWBits(bitsPerSeqpos, compositionIdxBits, blockEncNumSyms,
                          superBucketBlocks, blockSize, callBackDataOffsetBits,
-                         seqIdx->bitsPerVarDiskOffset);
+                         seqIdx->bitsPerVarDiskOffset,
+                         seqIdx->cwExtBitsPerBucket);
     BitOffset varIdxOffset;
     if(fseeko(idxFP, seqIdx->externalData.cwIdxDataPos
               + bucketOffset / bitElemBits, SEEK_SET))
@@ -836,7 +865,7 @@ initSuperBlockSeqCache(struct seqCache *sBlockCache,
   superBucketLen = (superBucketBlocks = seqIdx->superBucketBlocks) * blockSize;
   maxVarIdxBits = seqIdx->compositionTable.maxPermIdxBits;
   varMaxBitElems = bitElemsAllocSize(maxVarIdxBits * superBucketBlocks
-                                     + seqIdx->maxExtBitsPerBucket
+                                     + seqIdx->maxVarExtBitsPerBucket
                                      + bitElemBits - 1);
   superBlockSize = superBlockMemSize(seqIdx);
   sBlockCache->numEntries = numEntries;
@@ -1680,22 +1709,25 @@ static inline BitOffset
 superBlockCWBits(unsigned bitsPerSeqpos, unsigned compositionIdxBits,
                  unsigned alphabetSize, size_t superBucketBlocks,
                  unsigned blockSize, unsigned callBackDataOffsetBits,
-                 unsigned bitsPerVarDiskOffset)
+                 unsigned bitsPerVarDiskOffset, BitOffset cwExtBitsPerBucket)
 {
   return bitsPerSeqpos * alphabetSize + bitsPerVarDiskOffset
-    + callBackDataOffsetBits + compositionIdxBits * superBucketBlocks;
+    + callBackDataOffsetBits + compositionIdxBits * superBucketBlocks
+    + cwExtBitsPerBucket;
 }
 
 static inline size_t
 superBlockCWMaxReadSz(unsigned bitsPerSeqpos, unsigned compositionIdxBits,
                       unsigned alphabetSize, size_t superBucketBlocks,
                       unsigned blockSize, unsigned callBackDataOffsetBits,
-                      unsigned bitsPerVarDiskOffset)
+                      unsigned bitsPerVarDiskOffset,
+                      BitOffset cwExtBitsPerBucket)
 {
   return bitElemsAllocSize(
     superBlockCWBits(bitsPerSeqpos, compositionIdxBits, alphabetSize,
                      superBucketBlocks, blockSize, callBackDataOffsetBits,
-                     bitsPerVarDiskOffset) + bitElemBits - 1)
+                     bitsPerVarDiskOffset, cwExtBitsPerBucket)
+    + bitElemBits - 1)
     * sizeof(BitElem);
 }
 
@@ -1707,7 +1739,7 @@ superBlockCWMaxReadSize(const struct blockCompositionSeq *seqIdx)
                      seqIdx->compositionTable.compositionIdxBits,
                      seqIdx->blockEncNumSyms, seqIdx->superBucketBlocks,
                      seqIdx->blockSize, seqIdx->callBackDataOffsetBits,
-                     seqIdx->bitsPerVarDiskOffset)
+                     seqIdx->bitsPerVarDiskOffset, seqIdx->cwExtBitsPerBucket)
     + bitElemBits - 1)
     * sizeof(BitElem);
 }
@@ -1721,13 +1753,14 @@ numSuperBuckets(Seqpos seqLen, Seqpos superBucketLen)
 static inline off_t
 cwSize(Seqpos seqLen, unsigned bitsPerSeqpos, unsigned compositionIdxBits,
        unsigned alphabetSize, size_t superBucketBlocks, unsigned blockSize,
-       unsigned callBackDataOffsetBits, unsigned bitsPerVarDiskOffset)
+       unsigned callBackDataOffsetBits, unsigned bitsPerVarDiskOffset,
+       BitOffset cwExtBitsPerBucket)
 {
   off_t cwLen;
   cwLen = bitElemsAllocSize(
     superBlockCWBits(bitsPerSeqpos, compositionIdxBits, alphabetSize,
                      superBucketBlocks, blockSize, callBackDataOffsetBits,
-                     bitsPerVarDiskOffset)
+                     bitsPerVarDiskOffset, cwExtBitsPerBucket)
     * numSuperBuckets(seqLen, superBucketBlocks * blockSize))
     * sizeof(BitElem);
   return cwLen;
@@ -1735,10 +1768,10 @@ cwSize(Seqpos seqLen, unsigned bitsPerSeqpos, unsigned compositionIdxBits,
 
 static inline BitOffset
 vwBits(Seqpos seqLen, unsigned blockSize, size_t superBucketBlocks,
-       unsigned maxPermIdxBits, BitOffset maxExtBitsPerBucket)
+       unsigned maxPermIdxBits, BitOffset maxVarExtBitsPerBucket)
 {
   return numSuperBuckets(seqLen, superBucketBlocks * blockSize)
-    * (maxPermIdxBits * superBucketBlocks + maxExtBitsPerBucket);
+    * (maxPermIdxBits * superBucketBlocks + maxVarExtBitsPerBucket);
 }
 
 /**
@@ -1781,7 +1814,7 @@ initAppendState(struct appendState *aState,
   BitOffset compCacheLen = sBlockPreCompIdxBits(seqIdx)
     + superBucketBlocks * seqIdx->compositionTable.compositionIdxBits
     + bitElemBits - 1,
-    permCacheLen = seqIdx->maxExtBitsPerBucket
+    permCacheLen = seqIdx->maxVarExtBitsPerBucket
     + superBucketBlocks * seqIdx->compositionTable.maxPermIdxBits
     + bitElemBits - 1;
   aState->compCacheLen = compCacheLen;
@@ -1836,7 +1869,9 @@ appendCallBackOutput(struct appendState *state,
                   callBackDataOffsetBits,
                   state->varMemPos - state->varMemOldBits);
   }
-  bitsWritten = biFunc(state->permCache, state->varMemPos, start, len, cbState,
+  bitsWritten = biFunc(state->compCache, state->cwMemOldBits
+                       + sBlockPreExtBits(seqIdx),
+                       state->permCache, state->varMemPos, start, len, cbState,
                        env);
   state->varMemPos += bitsWritten;
   return bitsWritten;
@@ -1906,6 +1941,7 @@ enum bdxHeader {
   NMRN_HEADER_FIELD = 0x4e4d524e,
   CBMB_HEADER_FIELD = 0x43424d42,
   MEXB_HEADER_FIELD = 0x4d455842,
+  CEXB_HEADER_FIELD = 0x43455842,
   SPBT_HEADER_FIELD = 0x53504254,
   BEFB_HEADER_FIELD = 0x42454642,
   REFB_HEADER_FIELD = 0x52454642,
@@ -1930,7 +1966,8 @@ blockEncIdxSeqHeaderLength(struct blockCompositionSeq *seqIdx)
     + 4 * seqIdx->numModes      /* one uint32_t for every mode */
     ;
   if(seqIdx->callBackDataOffsetBits)
-    headerSize += 4 + 4         /* bits per constant block */
+    headerSize += 4 + 4         /* extra offset bits per constant block */
+      + 4 + 8                   /* extension bits stored in constant block */
       + 4 + 8;                  /* variable area bits added per bucket max */
   return headerSize;
 }
@@ -1991,8 +2028,11 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx, Env *env)
     *(uint32_t *)(buf + offset) = CBMB_HEADER_FIELD;
     *(uint32_t *)(buf + offset + 4) = seqIdx->callBackDataOffsetBits;
     offset += 8;
+    *(uint32_t *)(buf + offset) = CEXB_HEADER_FIELD;
+    *(uint64_t *)(buf + offset + 4) = seqIdx->cwExtBitsPerBucket;
+    offset += 12;
     *(uint32_t *)(buf + offset) = MEXB_HEADER_FIELD;
-    *(uint64_t *)(buf + offset + 4) = seqIdx->maxExtBitsPerBucket;
+    *(uint64_t *)(buf + offset + 4) = seqIdx->maxVarExtBitsPerBucket;
     offset += 12;
   }
   assert(offset == len);
@@ -2113,7 +2153,11 @@ loadBlockEncIdxSeq(const Str *projectName, Env *env)
         offset += 8;
         break;
       case MEXB_HEADER_FIELD:
-        newSeqIdx->maxExtBitsPerBucket = *(uint64_t *)(buf + offset + 4);
+        newSeqIdx->maxVarExtBitsPerBucket = *(uint64_t *)(buf + offset + 4);
+        offset += 12;
+        break;
+      case CEXB_HEADER_FIELD:
+        newSeqIdx->cwExtBitsPerBucket = *(uint64_t *)(buf + offset + 4);
         offset += 12;
         break;
       default:
@@ -2175,7 +2219,7 @@ loadBlockEncIdxSeq(const Str *projectName, Env *env)
     requiredUInt64Bits(vwBits(newSeqIdx->baseClass.seqLen, newSeqIdx->blockSize,
                               newSeqIdx->superBucketBlocks,
                               newSeqIdx->compositionTable.maxPermIdxBits,
-                              newSeqIdx->maxExtBitsPerBucket));
+                              newSeqIdx->maxVarExtBitsPerBucket));
 
   if(fseeko(newSeqIdx->externalData.idxData,
             newSeqIdx->externalData.rangeEncPos, SEEK_SET))

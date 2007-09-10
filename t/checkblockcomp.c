@@ -106,7 +106,7 @@ main(int argc, char *argv[])
   if(!(seq = loadBlockEncIdxSeq(inputProject, env)))
   {
     env_error_unset(env);
-    seq = newBlockEncIdxSeq(inputProject, BLOCKSIZE, NULL, 0, NULL, env);
+    seq = newBlockEncIdxSeq(inputProject, BLOCKSIZE, NULL, 0, 0, NULL, env);
   }
   
   ensure(had_err, seq);

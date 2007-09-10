@@ -54,7 +54,8 @@
  * @return number of bits actually written, or (BitOffset)-1 if an
  * error occured
  */
-typedef BitOffset (*bitInsertFunc)(BitString dest, BitOffset sOffset,
+typedef BitOffset (*bitInsertFunc)(BitString cwDest, BitOffset cwOffset,
+                                   BitString varDest, BitOffset varOffset,
                                    Seqpos start, Seqpos len, void *cbState,
                                    Env *env);
 
@@ -69,8 +70,8 @@ typedef union EISHint *EISHint;
 
 extern struct encIdxSeq *
 newBlockEncIdxSeq(const Str *projectName, unsigned blockSize,
-                  bitInsertFunc biFunc, BitOffset maxBitsPerPos, void *cbState,
-                  Env *env);
+                  bitInsertFunc biFunc, BitOffset cwBitsPerPos,
+                  BitOffset maxBitsPerPos, void *cbState, Env *env);
 extern struct encIdxSeq *
 loadBlockEncIdxSeq(const Str *projectName, Env *env);
 

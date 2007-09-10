@@ -40,7 +40,8 @@ struct BWTSeq
 
 #if 0
 static BitOffset
-doNothing(BitString dest, BitOffset sOffset,
+doNothing(BitString cwDest, BitOffset cwOffset,
+          BitString varDest, BitOffset varOffset,
           Seqpos start, Seqpos end, void *cbState,
           Env *env)
 {
@@ -93,7 +94,8 @@ destructAddLocateInfoState(struct addLocateInfoState *state, Env *env)
 DECLAREREADFUNCTION(Seqpos)
 
 static BitOffset
-addLocateInfo(BitString dest, BitOffset sOffset,
+addLocateInfo(BitString cwDest, BitOffset cwOffset,
+              BitString varDest, BitOffset varOffset,
               Seqpos start, Seqpos len, void *cbState,
               Env *env)
 {
@@ -101,7 +103,7 @@ addLocateInfo(BitString dest, BitOffset sOffset,
   struct addLocateInfoState *state = cbState;
   unsigned bitsPerBWTPos, bitsPerOrigPos;
   int retcode;
-  assert(dest && cbState);
+  assert(varDest && cbState);
   /* 0. resize caches if necessary */
   if(len > state->revMapCacheSize)
   {
@@ -131,18 +133,18 @@ addLocateInfo(BitString dest, BitOffset sOffset,
         state->revMapCache[revMapCachePos].origPos = mapVal;
         ++revMapCachePos;
         /* 1.b.2 mark position in bwt sequence */
-        bsSetBit(dest, sOffset + i);
+        bsSetBit(varDest, varOffset + i);
       }
       else
-        bsClearBit(dest, sOffset + i);
+        bsClearBit(varDest, varOffset + i);
     }
     /* 2. copy revMapCache into output */
     for(i = 0; i < revMapCachePos; ++i)
     {
-      bsStoreUInt64(dest, sOffset + bitsWritten, bitsPerBWTPos,
+      bsStoreUInt64(varDest, varOffset + bitsWritten, bitsPerBWTPos,
                     state->revMapCache[i].bwtPos);
       bitsWritten += bitsPerBWTPos;
-      bsStoreUInt64(dest, sOffset + bitsWritten, bitsPerOrigPos,
+      bsStoreUInt64(varDest, varOffset + bitsWritten, bitsPerOrigPos,
                     state->revMapCache[i].origPos);
       bitsWritten += bitsPerOrigPos;
     }
@@ -174,7 +176,8 @@ newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
       if(!(baseSeqIdx
            = newBlockEncIdxSeq(projectName,
                                extraParams->blockEncParams.blockSize,
-                               addLocateInfo, bitsPerPosUpperBound(&varState),
+                               addLocateInfo, 0,
+                               bitsPerPosUpperBound(&varState),
                                &varState, env)))
       {
         destructAddLocateInfoState(&varState, env);
