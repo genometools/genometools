@@ -39,7 +39,6 @@ int array_compare(const Array *a,const Array *b,
                   size_a,
                   size_b);
     return 1;
-    exit(EXIT_FAILURE);
   }
   for (idx=0; idx < size_a; idx++)
   {
