@@ -41,7 +41,8 @@ struct GFF3Parser {
                                             sequence regions */
   bool incomplete_node; /* at least on node is potentially incomplete */
   long offset;
-  Mapping *offset_mapping;
+  Mapping *offset_mapping,
+          *chseqids_mapping;
 };
 
 typedef struct {
@@ -88,6 +89,7 @@ GFF3Parser* gff3parser_new(Env *env)
   gff3_parser->incomplete_node = false;
   gff3_parser->offset = UNDEF_LONG;
   gff3_parser->offset_mapping = NULL;
+  gff3_parser->chseqids_mapping = NULL;
   return gff3_parser;
 }
 
@@ -110,6 +112,17 @@ int gff3parser_set_offsetfile(GFF3Parser *gff3_parser, Str *offsetfile,
     return 0;
   return -1;
 
+}
+
+int gff3parser_set_chseqids(GFF3Parser *gff3_parser, Str *chseqids, Env *env)
+{
+  env_error_check(env);
+  assert(gff3_parser);
+  gff3_parser->chseqids_mapping = mapping_new(chseqids, "chseqids",
+                                              MAPPINGTYPE_STRING, env);
+  if (gff3_parser->chseqids_mapping)
+    return 0;
+  return -1;
 }
 
 static int add_offset_if_necessary(Range *range, GFF3Parser *gff3_parser,
@@ -138,7 +151,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   GenomeFeatureType gft;
   Splitter *splitter, *attribute_splitter, *tmp_splitter, *parents_splitter;
   AutomaticSequenceRegion *auto_sr = NULL;
-  Str *seqid_str, *source_str;
+  Str *seqid_str, *source_str, *changed_seqid = NULL;
   Strand strand_value;
   double score_value;
   Phase phase_value;
@@ -279,6 +292,16 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     }
   }
 
+  /* change seqid (if necessary) */
+  if (!had_err && gff3_parser->chseqids_mapping) {
+    if ((changed_seqid = mapping_map_string(gff3_parser->chseqids_mapping,
+                                           seqid, env))) {
+      seqid = str_get(changed_seqid);
+    }
+    else
+      had_err = -1;
+  }
+
   /* set seqid */
   if (!had_err) {
     seqid_str = hashtable_get(gff3_parser->seqid_to_str_mapping, seqid);
@@ -384,6 +407,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     queue_add(genome_nodes, gn, env);
 
   /* free */
+  str_delete(changed_seqid, env);
   splitter_delete(splitter, env);
   splitter_delete(attribute_splitter, env);
   splitter_delete(tmp_splitter, env);
@@ -399,7 +423,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
 {
   char *tmpline, *tmplineend, *seqid = NULL;
   GenomeNode *gn;
-  Str *seqid_str;
+  Str *seqid_str, *changed_seqid = NULL;
   Range range;
   const char *filename;
   int rval, had_err = 0;
@@ -435,15 +459,6 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         tmpline++;
       /* terminate seqid */
       *tmpline++ = '\0';
-      if (hashtable_get(gff3_parser->undefined_sequence_regions, seqid)) {
-        env_error_set(env, "sequence feature with id \"%s\" has been defined "
-                      "before the corresponding \"%s\" definition on line %lu "
-                      "in file \"%s\"", seqid, GFF_SEQUENCE_REGION, line_number,
-                      filename);
-        had_err = -1;
-      }
-    }
-    if (!had_err) {
       /* skip blanks */
       while (tmpline < tmplineend && tmpline[0] == ' ')
         tmpline++;
@@ -487,6 +502,26 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     if (!had_err)
       had_err = add_offset_if_necessary(&range, gff3_parser, seqid, env);
     if (!had_err) {
+      /* change seqid (if necessary) */
+      if (gff3_parser->chseqids_mapping) {
+        if ((changed_seqid = mapping_map_string(gff3_parser->chseqids_mapping,
+                                                seqid, env))) {
+          seqid = str_get(changed_seqid);
+        }
+        else
+          had_err = -1;
+      }
+    }
+   if (!had_err) {
+      if (hashtable_get(gff3_parser->undefined_sequence_regions, seqid)) {
+        env_error_set(env, "sequence feature with id \"%s\" has been defined "
+                      "before the corresponding \"%s\" definition on line %lu "
+                      "in file \"%s\"", seqid, GFF_SEQUENCE_REGION, line_number,
+                      filename);
+        had_err = -1;
+      }
+    }
+    if (!had_err) {
       /* now we can create a sequence region node */
       assert(seqid);
       seqid_str = hashtable_get(gff3_parser->seqid_to_str_mapping, seqid);
@@ -516,6 +551,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     warning("skipping unknown meta line %lu in file \"%s\": %s", line_number,
             filename, line);
   }
+  str_delete(changed_seqid, env);
   return had_err;
 }
 
@@ -648,5 +684,6 @@ void gff3parser_delete(GFF3Parser *gff3_parser, Env *env)
   hashtable_delete(gff3_parser->source_to_str_mapping, env);
   hashtable_delete(gff3_parser->undefined_sequence_regions, env);
   mapping_delete(gff3_parser->offset_mapping, env);
+  mapping_delete(gff3_parser->chseqids_mapping, env);
   env_ma_free(gff3_parser, env);
 }

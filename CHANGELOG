@@ -5,6 +5,7 @@ changes in version 1.0.3 (2007-09-10):
   editing, similar to the Lua interpreter)
 - `gt gff3` has new option -offset
 - `gt gff3` has new option -offsetfile
+- `gt gff3` has new option -chseqids
 
 
 changes in version 1.0.2 (2007-08-29):
