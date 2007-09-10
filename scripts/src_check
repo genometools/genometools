@@ -1,54 +1,84 @@
-#!/bin/sh
-#
-# Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
-# See LICENSE file or http://genometools.org/license.html for license details.
-#
+#!/usr/bin/env lua
+--[[
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
-showmessage()
-{
-  echo "###############"
-  echo $1
-  echo "###############"
-}
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
 
-if [ $# -eq 0 ]
-then
-  echo "Usage: $0 file [...]" >&2
-  echo "Check C sources for accordance with coding standards." >&2
-  exit 1
-fi
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+]]
 
-# if at least one of the checks fails an error code is returned at the end
-err=0
+function usage()
+  io.stderr:write(string.format("Usage: %s file [...]\n", arg[0]))
+  io.stderr:write("Check C for accordance with coding standards.\n")
+  os.exit(1)
+end
 
-grep -n ' $' $*
-if [ $? -eq 0 ]; then showmessage "unnecessary blank(s) at the end of line"; err=1; fi
+if #arg == 0 then usage() end
 
-grep -n -e 'if('     \
-        -e 'sizeof(' \
-        -e 'switch(' \
-        -e 'while('  \
-        -e 'for('    \
-        -e 'do{'     \
-        -e '){'      \
-        $*
-if [ $? -eq 0 ]; then showmessage "missing blank(s)"; err=1; fi
+error_code = 0
 
-grep -n '.\{81,\}' $*
-if [ $? -eq 0 ]; then showmessage "line(s) longer than 80 characters"; err=1; fi
+function err(filename, line_number, msg)
+  io.stderr:write(string.format("%s: %d: %s\n", filename, line_number, msg))
+  error_code = 1
+end
 
-grep -n '[^:]//' $*
-if [ $? -eq 0 ]; then showmessage "C++ style comment"; err=1; fi
+for i, fn in ipairs(arg) do -- iterate over all files
+  -- reset per file variables
+  local empty_line_found = false
+  local ln = 1 -- the line number
 
-grep -n '^ *,' $*
-if [ $? -eq 0 ]; then showmessage "illegal ',' at beginning of line"; err=1; fi
+  for l in io.lines(fn) do -- iterate over all lines
+    -- check for unnecessary blanks
+    if string.find(l, " $") then
+      err(fn, ln, "unnecessary blank(s) at the end of line")
+    end
 
-grep -n ' has_err' $*
-if [ $? -eq 0 ]; then showmessage "illegal variable name 'has_err', use 'had_err' instead"; err=1; fi
+    -- check for missing blanks
+    if string.find(l, "if%(")     then err(fn, ln, "missing blanks") end
+    if string.find(l, "sizeof%(") then err(fn, ln, "missing blanks") end
+    if string.find(l, "switch%(") then err(fn, ln, "missing blanks") end
+    if string.find(l, "while%(")  then err(fn, ln, "missing blanks") end
+    if string.find(l, "for%(")    then err(fn, ln, "missing blanks") end
+    if string.find(l, "do%(")     then err(fn, ln, "missing blanks") end
+    if string.find(l, "%){")      then err(fn, ln, "missing blanks") end
 
-dir=`dirname $0`
-$dir/two_empty_lines $*
-if [ $? -ne 0 ]; then err=1; fi
+    -- check line length
+    if #l > 80 then err(fn, ln, "line longer than 80 characters") end
 
-exit $err
+    -- check for C++ style comments
+    if string.find(l, "[^:]//") then err(fn, ln, "C++ style comment") end
+
+    -- check for commata at the beginning of a line
+    if string.find(l, "^ *,") then
+      err(fn, ln, "illegal ',' at beginning of line")
+    end
+
+    -- check for old has_err usage
+    if string.find(l, " has_err") then
+      err(fn, ln, "illegal variable name 'has_err', use 'had_err' instead")
+    end
+
+    -- check for two empty lines in a row
+    if string.find(l, "^$") then
+      if (empty_line_found) then
+        err(fn, ln, "two empty lines in a row")
+      end
+      empty_line_found = true
+    else
+      empty_line_found = false
+    end
+    -- increate line number
+    ln = ln + 1
+  end
+end
+
+os.exit(error_code)

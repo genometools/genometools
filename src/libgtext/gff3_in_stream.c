@@ -205,6 +205,18 @@ void gff3_in_stream_set_offset(GenomeStream *gs, long offset)
   gff3parser_set_offset(is->gff3_parser, offset);
 }
 
+int gff3_in_stream_set_offsetfile(GenomeStream *gs, Str *offsetfile, Env *env)
+{
+  GFF3InStream *is = gff3_in_stream_cast(gs);
+  return gff3parser_set_offsetfile(is->gff3_parser, offsetfile, env);
+}
+
+int gff3_in_stream_set_chseqids(GenomeStream *gs, Str *chseqids, Env *env)
+{
+  GFF3InStream *is = gff3_in_stream_cast(gs);
+  return gff3parser_set_chseqids(is->gff3_parser, chseqids, env);
+}
+
 GenomeStream* gff3_in_stream_new_unsorted(int num_of_files,
                                           const char **filenames,
                                           bool be_verbose, Env *env)

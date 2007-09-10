@@ -1,13 +1,25 @@
 #
 # Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg 
-# See LICENSE file or http://genometools.org/license.html for license details
+# Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
 CC:=gcc
 CXX:=g++
 INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
              -I$(CURDIR)/src/external/lua-5.1.2/src \
+             -I$(CURDIR)/src/external/luafilesystem-1.2.1/src \
              -I$(CURDIR)/src/external/expat-2.0.1/lib\
              -I$(CURDIR)/src/external/bzip2-1.0.4\
              -I$(CURDIR)/src/external/agg-2.4/include\
@@ -31,7 +43,7 @@ EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DUNISTD_H="<unistd.h>" \
 GT_CXXFLAGS:= -g -pipe $(INCLUDEOPT)
 STEST_FLAGS:=
 GT_LDFLAGS:=-L/usr/local/lib -L/usr/X11R6/lib
-LDLIBS:=-lm -lz -lncurses
+LDLIBS:=-lm -lz
 
 # try to set RANLIB automatically
 SYSTEM:=$(shell uname -s)
@@ -48,8 +60,7 @@ GTLIBS:=lib/libgtext.a\
         lib/libgtcore.a\
         lib/libgtmatch.a\
         lib/libgtlua.a\
-        lib/libbz2.a\
-        lib/libtecla.a
+        lib/libbz2.a
 
 # the core GenomeTools library (no other dependencies)
 LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
@@ -103,7 +114,8 @@ LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
            $(LUA_DIR)/lzio.c $(LUA_DIR)/lauxlib.c $(LUA_DIR)/lbaselib.c \
            $(LUA_DIR)/ldblib.c $(LUA_DIR)/liolib.c $(LUA_DIR)/lmathlib.c \
            $(LUA_DIR)/loslib.c $(LUA_DIR)/ltablib.c $(LUA_DIR)/lstrlib.c \
-           $(LUA_DIR)/loadlib.c $(LUA_DIR)/linit.c
+           $(LUA_DIR)/loadlib.c $(LUA_DIR)/linit.c \
+           src/external/luafilesystem-1.2.1/src/lfs.c
 LIBLUA_OBJ:=$(LIBLUA_SRC:%.c=obj/%.o)
 LIBLUA_DEP:=$(LIBLUA_SRC:%.c=obj/%.d)
 
@@ -164,6 +176,12 @@ endif
 
 ifeq ($(static),yes)
   GT_LDFLAGS += -static
+endif
+
+ifneq ($(curses),no)
+  GTLIBS := $(GTLIBS) lib/libtecla.a
+  GT_CFLAGS += -DCURSES
+  LDLIBS += -lcurses
 endif
 
 ifeq ($(libgtview),yes)

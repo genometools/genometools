@@ -18,7 +18,7 @@
 #include "libgtext/seqid2file.h"
 
 void seqid2file_options(OptionParser *op, Str *seqfile, Str *regionmapping,
-                       Env *env)
+                        Env *env)
 {
   Option *seqfile_option, *regionmapping_option;
   assert(op && seqfile && regionmapping);
