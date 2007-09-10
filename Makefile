@@ -181,7 +181,7 @@ endif
 ifneq ($(curses),no)
   GTLIBS := $(GTLIBS) lib/libtecla.a
   GT_CFLAGS += -DCURSES
-  LDLIBS += -lcurses
+  LDLIBS += -lncurses
 endif
 
 ifeq ($(libgtview),yes)
