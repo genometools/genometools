@@ -1,18 +1,20 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int suffixerator(int(*processsuftab)(void *,const Seqpos *,
-                                     Readmode,Seqpos,Env *),
-                 void *processsuftabinfo,
-                 Seqpos specialcharacters,
-                 Seqpos specialranges,
-                 const Encodedsequence *encseq,
-                 Readmode readmode,
-                 unsigned int numofchars,
-                 unsigned int prefixlength,
-                 unsigned int numofparts,
-                 Measuretime *mtime,
-                 Env *env);
+void freeSfxiterator(Sfxiterator **sfxiterator,Env *env);
+
+Sfxiterator *newsfxiterator(Seqpos specialcharacters,
+                            Seqpos specialranges,
+                            const Encodedsequence *encseq,
+                            Readmode readmode,
+                            unsigned int numofchars,
+                            unsigned int prefixlength,
+                            unsigned int numofparts,
+                            Measuretime *mtime,
+                            Env *env);
+
+const Seqpos *nextSfxiterator(Seqpos *len,bool *specialsuffixes,
+                              Measuretime *mtime,Sfxiterator *sfi,Env *env);
 
 #ifdef __cplusplus
 }

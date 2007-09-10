@@ -15,7 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "gt.h"
+#include "libgtcore/option.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtmatch/sarr-def.h"
+#include "libgtmatch/sfx-map.pr"
+#include "libgtmatch/test-encseq.pr"
+#include "libgtmatch/pos2seqnum.pr"
+#include "libgtmatch/test-mappedstr.pr"
+#include "libgtmatch/sfx-suftaborder.pr"
 
 static OPrval parse_options(bool *usestream,bool *verbose,int *parsed_args,
                             int argc, const char **argv,Env *env)
@@ -36,7 +43,8 @@ static OPrval parse_options(bool *usestream,bool *verbose,int *parsed_args,
   option_parser_add_option(op, optionverbose, env);
 
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
-                                            versionfunc, 1, 2, env);
+                                            versionfunc, (unsigned int) 1,
+                                            (unsigned int) 2, env);
   option_parser_delete(op, env);
   return oprval;
 }

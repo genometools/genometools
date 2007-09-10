@@ -15,11 +15,38 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/env.h"
-#include "libgtmatch/sfx-run.pr"
+#include "libgtcore/array.h"
 
-int gt_suffixerator(int argc, const char **argv, Env *env)
+int array_compare(const Array *a,const Array *b,
+                  int(*compar)(const void *, const void *,Env *),
+                  Env *env)
 {
-  env_error_check(env);
-  return parseargsandcallsuffixerator(argc, argv, env);
+  unsigned long idx, size_a, size_b;
+  int cmp;
+
+  size_a = array_size(a);
+  size_b = array_size(b);
+  if (size_a < size_b)
+  {
+    env_error_set(env,"array_size(a) = %lu < %lu = array_size(b)",
+                  size_a,
+                  size_b);
+    return -1;
+  }
+  if (size_a > size_b)
+  {
+    env_error_set(env,"array_size(a) = %lu > %lu = array_size(b)",
+                  size_a,
+                  size_b);
+    return 1;
+  }
+  for (idx=0; idx < size_a; idx++)
+  {
+    cmp = compar(array_get(a,idx),array_get(b,idx),env);
+    if (cmp != 0)
+    {
+      return cmp;
+    }
+  }
+  return 0;
 }

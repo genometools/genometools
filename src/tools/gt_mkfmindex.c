@@ -15,7 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "gt.h"
+#include "libgtcore/env.h"
+#include "libgtmatch/fmi-mkindex.pr"
 
 int gt_mkfmindex(int argc, const char **argv, Env *env)
 {

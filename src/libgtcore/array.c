@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
+#include <stdlib.h>
 #include <libgtcore/array.h>
 #include <libgtcore/dynalloc.h>
 #include <libgtcore/ensure.h>
@@ -157,6 +158,27 @@ Array* array_clone(const Array *a, Env *env)
   a_copy->next_free = a_copy->allocated = a->next_free;
   a_copy->size_of_elem = a->size_of_elem;
   return a_copy;
+}
+
+void array_sort(Array *a,int(*compar)(const void *, const void *))
+{
+  qsort(a->space,a->next_free,a->size_of_elem,compar);
+}
+
+int array_iterate(const Array *a,int(*iterfunc)(void *info,const void *value,
+                                                Env *env),
+                  void *info,Env *env)
+{
+  unsigned long idx;
+
+  for (idx=0; idx<(unsigned long) array_size(a); idx++)
+  {
+    if(iterfunc(info,array_get(a,idx),env) != 0)
+    {
+      return -1;
+    }
+  }
+  return 0;
 }
 
 int array_example(Env *env)

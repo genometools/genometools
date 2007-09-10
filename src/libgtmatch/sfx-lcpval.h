@@ -15,11 +15,24 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef LCPVALITERATOR_H
+#define LCPVALITERATOR_H
 #include "libgtcore/env.h"
-#include "libgtmatch/sfx-run.pr"
+#include "seqpos-def.h"
+#include "readmode-def.h"
+#include "encseq-def.h"
 
-int gt_suffixerator(int argc, const char **argv, Env *env)
-{
-  env_error_check(env);
-  return parseargsandcallsuffixerator(argc, argv, env);
-}
+typedef struct Lcpvalueiterator Lcpvalueiterator;
+
+Lcpvalueiterator *newLcpvalueiterator(const Encodedsequence *encseq,
+                                      Readmode readmode,
+                                      Env *env);
+
+Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
+                            bool firstpage,
+                            const Seqpos *suftabptr,
+                            Seqpos numberofsuffixes);
+
+void freeLcpvalueiterator(Lcpvalueiterator **lvi,Env *env);
+
+#endif

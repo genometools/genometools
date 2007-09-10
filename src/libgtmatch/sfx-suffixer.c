@@ -30,6 +30,7 @@
 #include "safecast-gen.h"
 #include "sfx-codespec.h"
 #include "sfx-partssuf-def.h"
+#include "sfx-suffixer.h"
 
 #include "measure-time.pr"
 #include "sfx-mappedstr.pr"
@@ -54,14 +55,7 @@ DECLAREARRAYSTRUCT(Codeatposition);
 
 DECLAREARRAYSTRUCT(Seqpos);
 
-typedef enum
-{
-  Partphase,
-  Specialrangephase,
-  Finalsuffixphase
-} Suffixeratorphase;
-
-typedef struct
+ struct Sfxiterator
 {
   bool storespecials;
   Codetype currentmincode,
@@ -85,10 +79,9 @@ typedef struct
                prefixlength;
   ArraySeqpos fusp;
   Specialrangeiterator *sri;
-  Suffixeratorphase phase;
   Sequencerange overhang;
   bool exhausted;
-} Sfxiterator;
+};
 
 static int initbasepower(unsigned int **basepower,
                          unsigned int **filltable,
@@ -140,11 +133,11 @@ static void updatekmercount(void *processinfo,
                             const Firstspecialpos *firstspecial,
                             Env *env)
 {
-  Sfxiterator *csf = (Sfxiterator *) processinfo;
+  Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
   if (firstspecial->defined)
   {
-    if (csf->storespecials)
+    if (sfi->storespecials)
     {
       env_error_check(env);
 
@@ -155,23 +148,23 @@ static void updatekmercount(void *processinfo,
         cp.code = code;
         cp.maxprefixlen = firstspecial->specialpos;
         cp.position = position + firstspecial->specialpos;
-        csf->spaceCodeatposition[csf->nextfreeCodeatposition++] = cp;
-        csf->storespecials = false;
-        csf->leftborder[code]++;
+        sfi->spaceCodeatposition[sfi->nextfreeCodeatposition++] = cp;
+        sfi->storespecials = false;
+        sfi->leftborder[code]++;
       }
     } else
     {
       if (firstspecial->specialpos > 0)
       {
-        csf->leftborder[code]++;
+        sfi->leftborder[code]++;
       } else
       {
-        csf->storespecials = true;
+        sfi->storespecials = true;
       }
     }
   } else
   {
-    csf->leftborder[code]++;
+    sfi->leftborder[code]++;
   }
 }
 
@@ -183,19 +176,19 @@ static void insertwithoutspecial(void *processinfo,
 {
   if (!firstspecial->defined)
   {
-    Sfxiterator *csf = (Sfxiterator *) processinfo;
+    Sfxiterator *sfi = (Sfxiterator *) processinfo;
 
-    if (code >= csf->currentmincode && code <= csf->currentmaxcode)
+    if (code >= sfi->currentmincode && code <= sfi->currentmaxcode)
     {
       Seqpos stidx;
 
-      stidx = --csf->leftborder[code];
+      stidx = --sfi->leftborder[code];
 #ifdef LONGOUTPUT
       printf("insert suffix " FormatSeqpos " at location " FormatSeqpos "\n",
               PRINTSeqposcast(position),
               PRINTSeqposcast(stidx));
 #endif
-      csf->suftabptr[stidx] = position;
+      sfi->suftabptr[stidx] = position;
     }
   }
 }
@@ -232,7 +225,7 @@ static Codetype codedownscale(const unsigned int *filltable,
 }
 
 static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
-                               Sfxiterator *csf,
+                               Sfxiterator *sfi,
                                bool deletevalues,
                                /*@unused@*/ Env *env)
 {
@@ -241,47 +234,47 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
   unsigned long insertindex, j;
   Seqpos stidx;
 
-  for (prefixindex=0; prefixindex < csf->prefixlength; prefixindex++)
+  for (prefixindex=0; prefixindex < sfi->prefixlength; prefixindex++)
   {
-    for (j=0, insertindex = 0; j < csf->nextfreeCodeatposition; j++)
+    for (j=0, insertindex = 0; j < sfi->nextfreeCodeatposition; j++)
     {
-      if (prefixindex <= csf->spaceCodeatposition[j].maxprefixlen)
+      if (prefixindex <= sfi->spaceCodeatposition[j].maxprefixlen)
       {
-        code = codedownscale(csf->filltable,
-                             csf->basepower,
-                             csf->spaceCodeatposition[j].code,
+        code = codedownscale(sfi->filltable,
+                             sfi->basepower,
+                             sfi->spaceCodeatposition[j].code,
                              prefixindex,
-                             csf->spaceCodeatposition[j].maxprefixlen);
-        if (code >= csf->currentmincode &&
-            code <= csf->currentmaxcode)
+                             sfi->spaceCodeatposition[j].maxprefixlen);
+        if (code >= sfi->currentmincode &&
+            code <= sfi->currentmaxcode)
         {
-          if (code != csf->filltable[0] || prefixindex > 0)
+          if (code != sfi->filltable[0] || prefixindex > 0)
           {
-            csf->countspecialcodes[FROMCODE2SPECIALCODE(code,
-                                                        csf->numofchars)]++;
-            stidx = --csf->leftborder[code];
+            sfi->countspecialcodes[FROMCODE2SPECIALCODE(code,
+                                                        sfi->numofchars)]++;
+            stidx = --sfi->leftborder[code];
 #ifdef LONGOUTPUT
             printf("insert special_suffix " FormatSeqpos
                    " (code %u) at location " FormatSeqpos "\n",
-                   PRINTSeqposcast(csf->spaceCodeatposition[j].position -
+                   PRINTSeqposcast(sfi->spaceCodeatposition[j].position -
                                    prefixindex),
                    (unsigned int) code,
                    PRINTSeqposcast(stidx));
 #endif
-            csf->suftabptr[stidx] = csf->spaceCodeatposition[j].position -
+            sfi->suftabptr[stidx] = sfi->spaceCodeatposition[j].position -
                                     prefixindex;
           }
         }
       }
       if (deletevalues)
       {
-        if (prefixindex < csf->prefixlength - 1 &&
-            prefixindex < csf->spaceCodeatposition[j].maxprefixlen)
+        if (prefixindex < sfi->prefixlength - 1 &&
+            prefixindex < sfi->spaceCodeatposition[j].maxprefixlen)
         {
           if (insertindex < j)
           {
-            csf->spaceCodeatposition[insertindex] =
-              csf->spaceCodeatposition[j];
+            sfi->spaceCodeatposition[insertindex] =
+              sfi->spaceCodeatposition[j];
           }
           insertindex++;
         }
@@ -289,111 +282,36 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
     }
     if (deletevalues)
     {
-      csf->nextfreeCodeatposition = insertindex;
+      sfi->nextfreeCodeatposition = insertindex;
     }
   }
 }
 
-static int processfullspecialrange(Sfxiterator *csf,
-                                   int(*processsuftab)(void *,const Seqpos *,
-                                                       Readmode,Seqpos,Env *),
-                                   void *processsuftabinfo,
-                                   Seqpos leftpos,
-                                   Seqpos rightpos,
-                                   Env *env)
+void freeSfxiterator(Sfxiterator **sfxiterator,Env *env)
 {
-  Seqpos pos;
-  bool stop = false;
+  Codetype specialcode;
 
-  assert(leftpos < rightpos);
-  if (ISDIRREVERSE(csf->readmode))
+  specialcode = FROMCODE2SPECIALCODE((*sfxiterator)->filltable[0],
+                                    (*sfxiterator)->numofchars);
+  (*sfxiterator)->countspecialcodes[specialcode]
+    += ((*sfxiterator)->specialcharacters + 1);
+  if ((*sfxiterator)->sri != NULL)
   {
-    pos = rightpos - 1;
-  } else
-  {
-    pos = leftpos;
+    freespecialrangeiterator(&(*sfxiterator)->sri,env);
   }
-  while (!stop)
-  {
-    if (ISDIRREVERSE(csf->readmode))
-    {
-      csf->fusp.spaceSeqpos[csf->fusp.nextfreeSeqpos++]
-        = REVERSEPOS(csf->totallength,pos);
-      if (pos == leftpos)
-      {
-        stop = true;
-      } else
-      {
-        pos--;
-      }
-    } else
-    {
-      csf->fusp.spaceSeqpos[csf->fusp.nextfreeSeqpos++] = pos;
-      if (pos == rightpos-1)
-      {
-        stop = true;
-      } else
-      {
-        pos++;
-      }
-    }
-    if (csf->fusp.nextfreeSeqpos >= csf->fusp.allocatedSeqpos)
-    {
-      if (processsuftab(processsuftabinfo,
-                        csf->fusp.spaceSeqpos,
-                        csf->readmode,
-                        (Seqpos) csf->fusp.nextfreeSeqpos,
-                        env) != 0)
-      {
-        return -1;
-      }
-      csf->fusp.nextfreeSeqpos = 0;
-    }
-  }
-  return 0;
-}
-
-static void insertfullspecialrange(Sfxiterator *csf,
-                                   Seqpos leftpos,
-                                   Seqpos rightpos)
-{
-  Seqpos pos;
-
-  assert(leftpos < rightpos);
-  if (ISDIRREVERSE(csf->readmode))
-  {
-    pos = rightpos - 1;
-  } else
-  {
-    pos = leftpos;
-  }
-  while (true)
-  {
-    if (ISDIRREVERSE(csf->readmode))
-    {
-      csf->fusp.spaceSeqpos[csf->fusp.nextfreeSeqpos++]
-        = REVERSEPOS(csf->totallength,pos);
-      if (pos == leftpos)
-      {
-        break;
-      }
-      pos--;
-    } else
-    {
-      csf->fusp.spaceSeqpos[csf->fusp.nextfreeSeqpos++] = pos;
-      if (pos == rightpos-1)
-      {
-        break;
-      }
-      pos++;
-    }
-  }
+  FREESPACE((*sfxiterator)->spaceCodeatposition);
+  FREESPACE((*sfxiterator)->filltable);
+  FREESPACE((*sfxiterator)->basepower);
+  FREESPACE((*sfxiterator)->leftborder);
+  FREESPACE((*sfxiterator)->countspecialcodes);
+  FREESPACE((*sfxiterator)->suftab);
+  freesuftabparts((*sfxiterator)->suftabparts,env);
+  FREESPACE(*sfxiterator);
 }
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
-static int initsuffixerator(Sfxiterator *csf,
-                            Seqpos specialcharacters,
+Sfxiterator *newsfxiterator(Seqpos specialcharacters,
                             Seqpos specialranges,
                             const Encodedsequence *encseq,
                             Readmode readmode,
@@ -403,36 +321,40 @@ static int initsuffixerator(Sfxiterator *csf,
                             Measuretime *mtime,
                             Env *env)
 {
+  Sfxiterator *sfi;
   unsigned int numofallcodes = 0, numofspecialcodes;
   Seqpos *optr;
   bool haserr = false;
 
   env_error_check(env);
-  ALLOCASSIGNSPACE(csf->spaceCodeatposition,NULL,
+  ALLOCASSIGNSPACE(sfi,NULL,Sfxiterator,1);
+  ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,
                    Codeatposition,specialranges+1);
-  csf->nextfreeCodeatposition = 0;
-  csf->filltable = NULL;
-  csf->basepower = NULL;
-  csf->leftborder = NULL;
-  csf->countspecialcodes = NULL;
-  csf->suftab = NULL;
-  csf->encseq = encseq;
-  csf->readmode = readmode;
-  csf->numofchars = numofchars;
-  csf->prefixlength = prefixlength;
-  csf->totallength = getencseqtotallength(encseq);
-  csf->specialcharacters = specialcharacters;
-  csf->part = 0;
-  csf->phase = Partphase;
-  csf->exhausted = false;
+  sfi->nextfreeCodeatposition = 0;
+  sfi->filltable = NULL;
+  sfi->basepower = NULL;
+  sfi->leftborder = NULL;
+  sfi->countspecialcodes = NULL;
+  sfi->suftab = NULL;
+  sfi->suftabptr = NULL;
+  sfi->suftabparts = NULL;
+  sfi->encseq = encseq;
+  sfi->readmode = readmode;
+  sfi->numofchars = numofchars;
+  sfi->prefixlength = prefixlength;
+  sfi->totallength = getencseqtotallength(encseq);
+  sfi->specialcharacters = specialcharacters;
+  sfi->sri = NULL;
+  sfi->part = 0;
+  sfi->exhausted = false;
   if (prefixlength == 0 || prefixlength > MAXPREFIXLENGTH)
   {
     env_error_set(env,"argument for option -pl must be in the range [1,%u]",
                   MAXPREFIXLENGTH);
     haserr = true;
   }
-  if (!haserr && initbasepower(&csf->basepower,
-                               &csf->filltable,
+  if (!haserr && initbasepower(&sfi->basepower,
+                               &sfi->filltable,
                                numofchars,
                                prefixlength,
                                env) != 0)
@@ -441,8 +363,8 @@ static int initsuffixerator(Sfxiterator *csf,
   }
   if (!haserr)
   {
-    assert(csf->basepower != NULL);
-    numofallcodes = csf->basepower[prefixlength];
+    assert(sfi->basepower != NULL);
+    numofallcodes = sfi->basepower[prefixlength];
     if (numofallcodes-1 > MAXCODEVALUE)
     {
       env_error_set(env,
@@ -455,16 +377,16 @@ static int initsuffixerator(Sfxiterator *csf,
   }
   if (!haserr)
   {
-    assert(csf->basepower != NULL);
-    numofspecialcodes = csf->basepower[prefixlength-1];
-    ALLOCASSIGNSPACE(csf->leftborder,NULL,Seqpos,numofallcodes+1);
-    memset(csf->leftborder,0,
-           sizeof (*csf->leftborder) * (size_t) numofallcodes);
-    ALLOCASSIGNSPACE(csf->countspecialcodes,NULL,Seqpos,numofspecialcodes);
-    memset(csf->countspecialcodes,0,
-           sizeof (*csf->countspecialcodes) *
+    assert(sfi->basepower != NULL);
+    numofspecialcodes = sfi->basepower[prefixlength-1];
+    ALLOCASSIGNSPACE(sfi->leftborder,NULL,Seqpos,numofallcodes+1);
+    memset(sfi->leftborder,0,
+           sizeof (*sfi->leftborder) * (size_t) numofallcodes);
+    ALLOCASSIGNSPACE(sfi->countspecialcodes,NULL,Seqpos,numofspecialcodes);
+    memset(sfi->countspecialcodes,0,
+           sizeof (*sfi->countspecialcodes) *
                   (size_t) numofspecialcodes);
-    csf->storespecials = true;
+    sfi->storespecials = true;
     if (mtime != NULL)
     {
       deliverthetime(stdout,mtime,"counting prefix distribution",env);
@@ -472,315 +394,213 @@ static int initsuffixerator(Sfxiterator *csf,
     getencseqkmers(encseq,
                    readmode,
                    updatekmercount,
-                   csf,
+                   sfi,
                    numofchars,
                    prefixlength,
                    env);
-    assert(specialranges+1 >= (Seqpos) csf->nextfreeCodeatposition);
-    assert(csf->filltable != NULL);
-    assert(csf->leftborder != NULL);
-    /* printf("leftborder[0]=%u\n",csf.leftborder[0]); */
-    for (optr = csf->leftborder + 1;
-         optr < csf->leftborder + numofallcodes; optr++)
+    assert(specialranges+1 >= (Seqpos) sfi->nextfreeCodeatposition);
+    assert(sfi->filltable != NULL);
+    assert(sfi->leftborder != NULL);
+    /* printf("leftborder[0]=%u\n",sfi.leftborder[0]); */
+    for (optr = sfi->leftborder + 1;
+         optr < sfi->leftborder + numofallcodes; optr++)
     {
-      /*/ printf("leftborder[%u]=%u\n",(unsigned int) (optr - csf->leftborder),
+      /*/ printf("leftborder[%u]=%u\n",(unsigned int) (optr - sfi->leftborder),
                                    *optr); */
       *optr += *(optr-1);
     }
-    csf->leftborder[numofallcodes] = csf->totallength - specialcharacters;
-    csf->suftabparts = newsuftabparts(numofparts,
-                                      csf->leftborder,
+    sfi->leftborder[numofallcodes] = sfi->totallength - specialcharacters;
+    sfi->suftabparts = newsuftabparts(numofparts,
+                                      sfi->leftborder,
                                       numofallcodes,
-                                      csf->totallength - specialcharacters,
+                                      sfi->totallength - specialcharacters,
                                       specialcharacters + 1,
                                       env);
-    assert(csf->suftabparts != NULL);
-    ALLOCASSIGNSPACE(csf->suftab,NULL,Seqpos,
-                     stpgetlargestwidth(csf->suftabparts));
-    reversespecialcodes(csf->spaceCodeatposition,csf->nextfreeCodeatposition);
-    /* XXX the following can be removed for the iterator version */
-    csf->fusp.spaceSeqpos = csf->suftab;
-    csf->fusp.allocatedSeqpos
-    = CALLCASTFUNC(Seqpos,unsigned_long,
-                   stpgetlargestwidth(csf->suftabparts));
-    csf->fusp.nextfreeSeqpos = 0;
+    assert(sfi->suftabparts != NULL);
+    ALLOCASSIGNSPACE(sfi->suftab,NULL,Seqpos,
+                     stpgetlargestwidth(sfi->suftabparts));
+    reversespecialcodes(sfi->spaceCodeatposition,sfi->nextfreeCodeatposition);
+    if (hasspecialranges(sfi->encseq))
+    {
+      sfi->sri = newspecialrangeiterator(sfi->encseq,
+                                         ISDIRREVERSE(sfi->readmode)
+                                           ? false : true,
+                                          env);
+    } else
+    {
+      sfi->sri = NULL;
+    }
+    sfi->fusp.spaceSeqpos = sfi->suftab;
+    sfi->fusp.allocatedSeqpos
+      = CALLCASTFUNC(Seqpos,unsigned_long,
+                     stpgetlargestwidth(sfi->suftabparts));
+    sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
   }
-  return haserr ? -1 : 0;
+  if (haserr)
+  {
+    freeSfxiterator(&sfi,env);
+    return NULL;
+  }
+  return sfi;
 }
 
-static bool preparethispart(Sfxiterator *csf,
+static void preparethispart(Sfxiterator *sfi,
                             Measuretime *mtime,
                             Env *env)
 {
-  if (csf->part >= stpgetnumofparts(csf->suftabparts))
-  {
-    return false;
-  }
-  csf->currentmincode = stpgetcurrentmincode(csf->part,csf->suftabparts);
-  csf->currentmaxcode = stpgetcurrentmaxcode(csf->part,csf->suftabparts);
-  csf->widthofpart = stpgetcurrentwidthofpart(csf->part,csf->suftabparts);
-  csf->suftabptr = csf->suftab -
-                   stpgetcurrentsuftaboffset(csf->part,csf->suftabparts);
+  sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
+  sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
+  sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
+  sfi->suftabptr = sfi->suftab -
+                   stpgetcurrentsuftaboffset(sfi->part,sfi->suftabparts);
   derivespecialcodes(NULL, /* not needed her */
-                     csf,
-                     (stpgetnumofparts(csf->suftabparts) == (unsigned int) 1)
+                     sfi,
+                     (stpgetnumofparts(sfi->suftabparts) == (unsigned int) 1)
                        ? true : false,
                      env);
   if (mtime != NULL)
   {
     deliverthetime(stdout,mtime,"inserting suffixes into buckets",env);
   }
-  getencseqkmers(csf->encseq,
-                 csf->readmode,
+  getencseqkmers(sfi->encseq,
+                 sfi->readmode,
                  insertwithoutspecial,
-                 csf,
-                 csf->numofchars,
-                 csf->prefixlength,
+                 sfi,
+                 sfi->numofchars,
+                 sfi->prefixlength,
                  env);
   if (mtime != NULL)
   {
     deliverthetime(stdout,mtime,"sorting the buckets",env);
   }
-  sortallbuckets(csf->suftabptr,
-                 csf->encseq,
-                 csf->readmode,
-                 csf->leftborder,
-                 csf->countspecialcodes,
-                 csf->numofchars,
-                 csf->prefixlength,
-                 csf->currentmincode,
-                 csf->currentmaxcode,
-                 stpgetcurrentsumofwdith(csf->part,csf->suftabparts),
+  sortallbuckets(sfi->suftabptr,
+                 sfi->encseq,
+                 sfi->readmode,
+                 sfi->leftborder,
+                 sfi->countspecialcodes,
+                 sfi->numofchars,
+                 sfi->prefixlength,
+                 sfi->currentmincode,
+                 sfi->currentmaxcode,
+                 stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts),
                  env);
-  csf->part++;
-  return true;
+  sfi->part++;
 }
 
-static void freeSfxiterator(Sfxiterator *csf,Env *env)
+static void insertfullspecialrange(Sfxiterator *sfi,
+                                   Seqpos leftpos,
+                                   Seqpos rightpos)
 {
-  FREESPACE(csf->spaceCodeatposition);
-  FREESPACE(csf->filltable);
-  FREESPACE(csf->basepower);
-  FREESPACE(csf->leftborder);
-  FREESPACE(csf->countspecialcodes);
-  FREESPACE(csf->suftab);
-  freesuftabparts(csf->suftabparts,env);
-}
+  Seqpos pos;
 
-int suffixerator(int(*processsuftab)(void *,const Seqpos *,
-                                     Readmode,Seqpos,Env *),
-                 void *processsuftabinfo,
-                 Seqpos specialcharacters,
-                 Seqpos specialranges,
-                 const Encodedsequence *encseq,
-                 Readmode readmode,
-                 unsigned int numofchars,
-                 unsigned int prefixlength,
-                 unsigned int numofparts,
-                 Measuretime *mtime,
-                 Env *env)
-{
-  Sfxiterator csf;
-  bool haserr = false;
-
-  env_error_check(env);
-  if (initsuffixerator(&csf,
-                      specialcharacters,
-                      specialranges,
-                      encseq,
-                      readmode,
-                      numofchars,
-                      prefixlength,
-                      numofparts,
-                      mtime,
-                      env) != 0)
+  assert(leftpos < rightpos);
+  if (ISDIRREVERSE(sfi->readmode))
   {
-    haserr = true;
-  }
-  if (!haserr)
+    pos = rightpos - 1;
+  } else
   {
-    Codetype specialcode;
-
-    while (preparethispart(&csf,mtime,env))  /* parts phase */
-    {
-      if (processsuftab != NULL)
-      {
-        if (processsuftab(processsuftabinfo,
-                          csf.suftab,
-                          csf.readmode,
-                          csf.widthofpart,
-                          env) != 0)
-        {
-          haserr = true;
-          break;
-        }
-      }
-    }
-    if (!haserr && hasspecialranges(csf.encseq)) /* special ranges phase */
-    {
-      Sequencerange range;
-      Specialrangeiterator *sri;
-
-      sri = newspecialrangeiterator(csf.encseq,
-                                    ISDIRREVERSE(csf.readmode) ? false : true,
-                                    env);
-      while (nextspecialrangeiterator(&range,sri))
-      {
-        if (processfullspecialrange(&csf,
-                                   processsuftab,
-                                   processsuftabinfo,
-                                   range.leftpos,
-                                   range.rightpos,
-                                   env) != 0)
-        {
-          haserr = true;
-          break;
-        }
-      }
-      freespecialrangeiterator(&sri,env);
-    }
-    if (!haserr) /* last special phase */
-    {
-      csf.fusp.spaceSeqpos[csf.fusp.nextfreeSeqpos++] = csf.totallength;
-      if (processsuftab != NULL)
-      {
-        if (processsuftab(processsuftabinfo,
-                          csf.fusp.spaceSeqpos,
-                          csf.readmode,
-                          (Seqpos) csf.fusp.nextfreeSeqpos,
-                          env) != 0)
-        {
-          haserr = true;
-        }
-      }
-    }
-    specialcode = FROMCODE2SPECIALCODE(csf.filltable[0],csf.numofchars);
-    csf.countspecialcodes[specialcode] += (specialcharacters + 1);
+    pos = leftpos;
   }
-  freeSfxiterator(&csf,env);
-  return haserr ? -1 : 0;
-}
-
- void freeSfxiterator2(Sfxiterator **sfxiterator,Env *env)
-{
-  Codetype specialcode;
-
-  specialcode = FROMCODE2SPECIALCODE((*sfxiterator)->filltable[0],
-                                    (*sfxiterator)->numofchars);
-  (*sfxiterator)->countspecialcodes[specialcode]
-    += ((*sfxiterator)->specialcharacters + 1);
-  freeSfxiterator(*sfxiterator,env);
-  FREESPACE(*sfxiterator);
-}
-
- Sfxiterator *newsfxiterator(Seqpos specialcharacters,
-                             Seqpos specialranges,
-                             const Encodedsequence *encseq,
-                             Readmode readmode,
-                             unsigned int numofchars,
-                             unsigned int prefixlength,
-                             unsigned int numofparts,
-                             Measuretime *mtime,
-                             Env *env)
-{
-  Sfxiterator *csf;
-
-  env_error_check(env);
-  ALLOCASSIGNSPACE(csf,NULL,Sfxiterator,1);
-  if (initsuffixerator(csf,
-                      specialcharacters,
-                      specialranges,
-                      encseq,
-                      readmode,
-                      numofchars,
-                      prefixlength,
-                      numofparts,
-                      mtime,
-                      env) != 0)
+  while (true)
   {
-    freeSfxiterator2(&csf,env);
-    return NULL;
+    if (ISDIRREVERSE(sfi->readmode))
+    {
+      sfi->fusp.spaceSeqpos[sfi->fusp.nextfreeSeqpos++]
+        = REVERSEPOS(sfi->totallength,pos);
+      if (pos == leftpos)
+      {
+        break;
+      }
+      pos--;
+    } else
+    {
+      sfi->fusp.spaceSeqpos[sfi->fusp.nextfreeSeqpos++] = pos;
+      if (pos == rightpos-1)
+      {
+        break;
+      }
+      pos++;
+    }
   }
-  return csf;
 }
 
-static void fillspecialnextpage(Sfxiterator *csf)
+static void fillspecialnextpage(Sfxiterator *sfi)
 {
   Sequencerange range;
   Seqpos width;
 
   while (true)
   {
-    if (csf->overhang.leftpos < csf->overhang.rightpos)
+    if (sfi->overhang.leftpos < sfi->overhang.rightpos)
     {
-      width = csf->overhang.rightpos - csf->overhang.leftpos;
-      if (csf->fusp.nextfreeSeqpos + width > csf->fusp.allocatedSeqpos)
+      width = sfi->overhang.rightpos - sfi->overhang.leftpos;
+      if (sfi->fusp.nextfreeSeqpos + width > sfi->fusp.allocatedSeqpos)
       {
         /* does not fit into the buffer, so only output a part */
-        unsigned long rest = csf->fusp.nextfreeSeqpos +
-                             width - csf->fusp.allocatedSeqpos;
+        unsigned long rest = sfi->fusp.nextfreeSeqpos +
+                             width - sfi->fusp.allocatedSeqpos;
         assert(rest > 0);
-        if (ISDIRREVERSE(csf->readmode))
+        if (ISDIRREVERSE(sfi->readmode))
         {
-          insertfullspecialrange(csf,csf->overhang.leftpos + rest,
-                                 csf->overhang.rightpos);
-          csf->overhang.rightpos = csf->overhang.leftpos + rest;
+          insertfullspecialrange(sfi,sfi->overhang.leftpos + rest,
+                                 sfi->overhang.rightpos);
+          sfi->overhang.rightpos = sfi->overhang.leftpos + rest;
         } else
         {
-          insertfullspecialrange(csf,csf->overhang.leftpos,
-                                     csf->overhang.rightpos - rest);
-          csf->overhang.leftpos = csf->overhang.rightpos - rest;
+          insertfullspecialrange(sfi,sfi->overhang.leftpos,
+                                     sfi->overhang.rightpos - rest);
+          sfi->overhang.leftpos = sfi->overhang.rightpos - rest;
         }
         break;
       }
-      if (csf->fusp.nextfreeSeqpos + width == csf->fusp.allocatedSeqpos)
+      if (sfi->fusp.nextfreeSeqpos + width == sfi->fusp.allocatedSeqpos)
       { /* overhang fits into the buffer and buffer is full */
-        insertfullspecialrange(csf,csf->overhang.leftpos,
-                               csf->overhang.rightpos);
-        csf->overhang.leftpos = csf->overhang.rightpos = 0;
+        insertfullspecialrange(sfi,sfi->overhang.leftpos,
+                               sfi->overhang.rightpos);
+        sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
         break;
       }
       /* overhang fits into the buffer and buffer is not full */
-      insertfullspecialrange(csf,csf->overhang.leftpos,
-                             csf->overhang.rightpos);
-      csf->overhang.leftpos = csf->overhang.rightpos = 0;
+      insertfullspecialrange(sfi,sfi->overhang.leftpos,
+                             sfi->overhang.rightpos);
+      sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
     } else
     {
-      if (nextspecialrangeiterator(&range,csf->sri))
+      if (sfi->sri != NULL && nextspecialrangeiterator(&range,sfi->sri))
       {
         width = range.rightpos - range.leftpos;
-        if (csf->fusp.nextfreeSeqpos + width > csf->fusp.allocatedSeqpos)
+        if (sfi->fusp.nextfreeSeqpos + width > sfi->fusp.allocatedSeqpos)
         { /* does not fit into the buffer, so only output a part */
-          unsigned long rest = csf->fusp.nextfreeSeqpos +
-                               width - csf->fusp.allocatedSeqpos;
-          if (ISDIRREVERSE(csf->readmode))
+          unsigned long rest = sfi->fusp.nextfreeSeqpos +
+                               width - sfi->fusp.allocatedSeqpos;
+          if (ISDIRREVERSE(sfi->readmode))
           {
-            insertfullspecialrange(csf,range.leftpos + rest,
+            insertfullspecialrange(sfi,range.leftpos + rest,
                                    range.rightpos);
-            csf->overhang.leftpos = range.leftpos;
-            csf->overhang.rightpos = range.leftpos + rest;
+            sfi->overhang.leftpos = range.leftpos;
+            sfi->overhang.rightpos = range.leftpos + rest;
           } else
           {
-            insertfullspecialrange(csf,range.leftpos,range.rightpos - rest);
-            csf->overhang.leftpos = range.rightpos - rest;
-            csf->overhang.rightpos = range.rightpos;
+            insertfullspecialrange(sfi,range.leftpos,range.rightpos - rest);
+            sfi->overhang.leftpos = range.rightpos - rest;
+            sfi->overhang.rightpos = range.rightpos;
           }
           break;
         }
-        if (csf->fusp.nextfreeSeqpos + width == csf->fusp.allocatedSeqpos)
+        if (sfi->fusp.nextfreeSeqpos + width == sfi->fusp.allocatedSeqpos)
         { /* overhang fits into the buffer and buffer is full */
-          insertfullspecialrange(csf,range.leftpos,range.rightpos);
-          csf->overhang.leftpos = csf->overhang.rightpos = 0;
+          insertfullspecialrange(sfi,range.leftpos,range.rightpos);
+          sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
           break;
         }
-        insertfullspecialrange(csf,range.leftpos,range.rightpos);
-        csf->overhang.leftpos = csf->overhang.rightpos = 0;
+        insertfullspecialrange(sfi,range.leftpos,range.rightpos);
+        sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
       } else
       {
-        if (csf->fusp.nextfreeSeqpos < csf->fusp.allocatedSeqpos)
+        if (sfi->fusp.nextfreeSeqpos < sfi->fusp.allocatedSeqpos)
         {
-          csf->fusp.spaceSeqpos[csf->fusp.nextfreeSeqpos++] = csf->totallength;
-          csf->exhausted = true;
+          sfi->fusp.spaceSeqpos[sfi->fusp.nextfreeSeqpos++] = sfi->totallength;
+          sfi->exhausted = true;
         }
         break;
       }
@@ -788,50 +608,26 @@ static void fillspecialnextpage(Sfxiterator *csf)
   }
 }
 
- const Seqpos *nextSfxiterator(Seqpos *len,Measuretime *mtime,
-                               Sfxiterator *csf,Env *env)
+const Seqpos *nextSfxiterator(Seqpos *len,bool *specialsuffixes,
+                              Measuretime *mtime,Sfxiterator *sfi,Env *env)
 {
   env_error_check(env);
-  while (true)
+
+  if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {
-    if (csf->phase == Partphase)
-    {
-      if (preparethispart(csf,mtime,env))
-      {
-        *len = csf->widthofpart;
-        break;
-      }
-      if (hasspecialranges(csf->encseq))
-      {
-        csf->phase = Specialrangephase;
-        csf->sri = newspecialrangeiterator(csf->encseq,
-                                           ISDIRREVERSE(csf->readmode)
-                                             ? false : true,
-                                           env);
-        csf->fusp.spaceSeqpos = csf->suftab;
-        csf->fusp.allocatedSeqpos
-          = CALLCASTFUNC(Seqpos,unsigned_long,
-                         stpgetlargestwidth(csf->suftabparts));
-        csf->fusp.nextfreeSeqpos = 0;
-        csf->overhang.leftpos = csf->overhang.rightpos = 0;
-      } else
-      {
-        csf->phase = Finalsuffixphase;
-      }
-    }
-    if (csf->phase == Specialrangephase)
-    {
-      if (exhaustedspecialrangeiterator(csf->sri) &&
-          csf->overhang.leftpos == csf->overhang.rightpos)
-      {
-        csf->phase = Finalsuffixphase;
-      } else
-      {
-        fillspecialnextpage(csf);
-        *len = (Seqpos) csf->fusp.nextfreeSeqpos;
-        break;
-      }
-    }
+    preparethispart(sfi,mtime,env);
+    *len = sfi->widthofpart;
+    *specialsuffixes = false;
+    return sfi->suftab;
   }
-  return csf->suftab;
+  if (sfi->exhausted)
+  {
+    return NULL;
+  }
+  sfi->fusp.nextfreeSeqpos = 0;
+  fillspecialnextpage(sfi);
+  assert(sfi->fusp.nextfreeSeqpos > 0);
+  *len = (Seqpos) sfi->fusp.nextfreeSeqpos;
+  *specialsuffixes = true;
+  return sfi->suftab;
 }

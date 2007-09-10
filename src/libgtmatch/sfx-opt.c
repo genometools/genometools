@@ -154,6 +154,11 @@ static OPrval parse_options(int *parsed_args,
         env_ma_free(basenameptr,env);
       }
     }
+    if (strarray_size(so->filenametab) == 0)
+    {
+      env_error_set(env,"missing argument to option -db");
+      oprval = OPTIONPARSER_ERROR;
+    }
   }
   if (oprval == OPTIONPARSER_OK)
   {
