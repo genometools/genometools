@@ -28,7 +28,7 @@ typedef struct
 {
   unsigned int minlength;
   Encodedsequence *encseq;
-  int (*processmaxmatch)(void *,Seqpos,Seqpos,Seqpos);
+  int (*processmaxmatch)(void *,Seqpos,Seqpos,Seqpos,Env *);
   void *processmaxmatchinfo;
 } Substringmatchinfo;
 
@@ -102,7 +102,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                            unsigned int minlength,
                            const Alphabet *alpha,
                            int (*processmaxmatch)(void *,Seqpos,
-                                                  Seqpos,Seqpos),
+                                                  Seqpos,Seqpos,Env *),
                            void *processmaxmatchinfo,
                            Env *env)
 {

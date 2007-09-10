@@ -118,6 +118,7 @@ int testencodedsequence(const StrArray *filenametab,
   return haserr ? -1 : 0;
 }
 
+/*
 static int comparearrays(const Array *a,const Array *b,Env *env)
 {
   unsigned long idx;
@@ -149,6 +150,51 @@ static int comparearrays(const Array *a,const Array *b,Env *env)
                       idx);
       return -1;
     }
+  }
+  return 0;
+}
+*/
+
+static void makeerrormsg(const Sequencerange *vala,const Sequencerange *valb,
+                         const char *cmpflag,
+                         Env *env)
+{
+  env_error_set(env,
+                "(" FormatSeqpos "," FormatSeqpos
+                ") %s (" FormatSeqpos "," FormatSeqpos
+                ")",
+                PRINTSeqposcast(vala->leftpos),
+                PRINTSeqposcast(vala->rightpos),
+                cmpflag,
+                PRINTSeqposcast(valb->leftpos),
+                PRINTSeqposcast(valb->rightpos));
+}
+
+static int compareSequencerange(const void *a,const void *b,Env *env)
+{
+  const Sequencerange *vala, *valb;
+
+  vala = (Sequencerange *) a;
+  valb = (Sequencerange *) b;
+  if (vala->leftpos < valb->leftpos)
+  {
+    makeerrormsg(vala,valb,"<",env);
+    return -1;
+  }
+  if (vala->leftpos > valb->leftpos)
+  {
+    makeerrormsg(vala,valb,">",env);
+    return 1;
+  }
+  if (vala->rightpos < valb->rightpos)
+  {
+    makeerrormsg(vala,valb,"<",env);
+    return -1;
+  }
+  if (vala->rightpos > valb->rightpos)
+  {
+    makeerrormsg(vala,valb,">",env);
+    return 1;
   }
   return 0;
 }
@@ -185,7 +231,9 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
   {
     printf("# checkspecialrangesfast(%lu ranges)\n",
              (unsigned long) array_size(rangesforward));
-    if (comparearrays(rangesforward,rangesbackward,env) != 0)
+    if(array_compare(rangesforward,rangesbackward,
+                     compareSequencerange,
+                     env) != 0)
     {
       haserr = true;
     }

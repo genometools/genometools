@@ -60,7 +60,7 @@ typedef struct
   unsigned int searchlength,
                alphabetsize;
   Seqpos depth;            /* value changes with each new match */
-  int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos);
+  int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *);
   void *processmaxpairsinfo;
   ArraySeqpos uniquechar,
               poslist[UCHAR_MAX+1];
@@ -114,7 +114,7 @@ static void concatlists(Dfsstate *state,Dfsinfo *father,Dfsinfo *son)
 }
 
 static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
-                        Seqpos leafnumber)
+                        Seqpos leafnumber,Env *env)
 {
   Listtype *pl;
   Seqpos *spptr, *start;
@@ -124,7 +124,7 @@ static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
   for (spptr = start; spptr < start + pl->length; spptr++)
   {
     if (state->processmaxpairs(state->processmaxpairsinfo,
-                               state->depth,leafnumber,*spptr) != 0)
+                               state->depth,leafnumber,*spptr,env) != 0)
     {
       return -1;
     }
@@ -134,7 +134,8 @@ static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
 
 static int cartproduct2(Dfsstate *state,
                         const Dfsinfo *ninfo1, unsigned int base1,
-                        const Dfsinfo *ninfo2, unsigned int base2)
+                        const Dfsinfo *ninfo2, unsigned int base2,
+                        Env *env)
 {
   Listtype *pl1, *pl2;
   Seqpos *start1, *start2, *spptr1, *spptr2;
@@ -148,7 +149,7 @@ static int cartproduct2(Dfsstate *state,
     for (spptr2 = start2; spptr2 < start2 + pl2->length; spptr2++)
     {
       if (state->processmaxpairs(state->processmaxpairsinfo,
-                                 state->depth,*spptr1,*spptr2) != 0)
+                                 state->depth,*spptr1,*spptr2,env) != 0)
       {
         return -1;
       }
@@ -230,7 +231,7 @@ static int processleafedge(bool firstsucc,
     {
       if (leftchar != (Uchar) base)
       {
-        if (cartproduct1(state,father,base,leafnumber) != 0)
+        if (cartproduct1(state,father,base,leafnumber,env) != 0)
         {
           return -1;
         }
@@ -241,7 +242,7 @@ static int processleafedge(bool firstsucc,
     for (spptr = start; spptr < start + father->uniquecharposlength; spptr++)
     {
       if (state->processmaxpairs(state->processmaxpairsinfo,
-                                 state->depth,leafnumber,*spptr) != 0)
+                                 state->depth,leafnumber,*spptr,env) != 0)
       {
         return -2;
       }
@@ -301,7 +302,7 @@ static int processbranchedge(bool firstsucc,
       {
         if (chson != chfather)
         {
-          if (cartproduct2(state,father,chfather,son,chson) != 0)
+          if (cartproduct2(state,father,chfather,son,chson,env) != 0)
           {
             return -1;
           }
@@ -309,7 +310,7 @@ static int processbranchedge(bool firstsucc,
       }
       for (spptr = start; spptr < start + son->uniquecharposlength; spptr++)
       {
-        if (cartproduct1(state,father,chfather,*spptr) != 0)
+        if (cartproduct1(state,father,chfather,*spptr,env) != 0)
         {
           return -2;
         }
@@ -321,7 +322,7 @@ static int processbranchedge(bool firstsucc,
     {
       for (chson = 0; chson < state->alphabetsize; chson++)
       {
-        if (cartproduct1(state,son,chson,*fptr) != 0)
+        if (cartproduct1(state,son,chson,*fptr,env) != 0)
         {
           return -3;
         }
@@ -329,7 +330,7 @@ static int processbranchedge(bool firstsucc,
       for (spptr = start; spptr < start + son->uniquecharposlength; spptr++)
       {
         if (state->processmaxpairs(state->processmaxpairsinfo,
-                                   state->depth,*fptr,*spptr) != 0)
+                                   state->depth,*fptr,*spptr,env) != 0)
         {
           return -4;
         }
@@ -345,7 +346,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       const Encodedsequence *encseq,
                       Readmode readmode,
                       unsigned int searchlength,
-                      int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos),
+                      int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *),
                       void *processmaxpairsinfo,
                       Env *env)
 {
@@ -393,7 +394,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
 int callenummaxpairs(const Str *indexname,
                      unsigned int userdefinedleastlength,
                      bool scanfile,
-                     int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos),
+                     int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *),
                      void *processmaxpairsinfo,
                      Env *env)
 {

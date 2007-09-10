@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
+#include <stdlib.h>
 #include <libgtcore/array.h>
 #include <libgtcore/dynalloc.h>
 #include <libgtcore/ensure.h>
@@ -157,6 +158,46 @@ Array* array_clone(const Array *a, Env *env)
   a_copy->next_free = a_copy->allocated = a->next_free;
   a_copy->size_of_elem = a->size_of_elem;
   return a_copy;
+}
+
+void array_sort(Array *a,int(*compar)(const void *, const void *))
+{
+  qsort(a->space,a->next_free,a->size_of_elem,compar);
+}
+
+int array_compare(Array *a,Array *b,
+                  int(*compar)(const void *, const void *,Env *),
+                  Env *env)
+{
+  unsigned long idx;
+  size_t size_a, size_b;
+  int cmp;
+
+  size_a = array_size(a);
+  size_b = array_size(b);
+  if (size_a < size_b)
+  {
+    env_error_set(env,"array_size(a) = %lu < %lu = array_size(b)",
+                  (unsigned long) size_a,
+                  (unsigned long) size_b);
+    return -1;
+  }
+  if (size_a > size_b)
+  {
+    env_error_set(env,"array_size(a) = %lu > %lu = array_size(b)",
+                  (unsigned long) size_a,
+                  (unsigned long) size_b);
+    return 1;
+  }
+  for (idx=0; idx<(unsigned long) size_a; idx++)
+  {
+    cmp = compar(array_get(a,idx),array_get(b,idx),env);
+    if(cmp != 0)
+    {
+      return cmp;
+    }
+  }
+  return 0;
 }
 
 int array_example(Env *env)

@@ -309,7 +309,7 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
                            unsigned long querylen,
                            unsigned int minlength,
                            int (*processmaxmatch)(void *,unsigned long,
-                                                  Seqpos,unsigned long),
+                                                  Seqpos,unsigned long,Env *),
                            void *processmaxmatchinfo,
                            Env *env)
 {
@@ -350,7 +350,8 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
         if (processmaxmatch(processmaxmatchinfo,
                             extend + (unsigned long) minlength,
                             dbstart,
-                            currentquerystart) != 0)
+                            currentquerystart,
+                            env) != 0)
         {
           return -1;
 	}
@@ -401,7 +402,7 @@ int callenumquerymatches(const Str *indexname,
                          bool echoquery,
                          unsigned int userdefinedleastlength,
                          int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                                unsigned long),
+                                                unsigned long,Env *),
                          void *processmaxmatchinfo,
                          Env *env)
 {
@@ -486,7 +487,7 @@ static int constructsarrandrunmmsearch(
                  unsigned long querylen,
                  unsigned int minlength,
                  int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                        unsigned long),
+                                        unsigned long,Env *),
                  void *processmaxmatchinfo,
                  Measuretime *mtime,
                  Env *env)
@@ -548,7 +549,7 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                             unsigned int minlength,
                             const Alphabet *alpha,
                             int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                                   unsigned long),
+                                                   unsigned long,Env *),
                             void *processmaxmatchinfo,
                             Env *env)
 {

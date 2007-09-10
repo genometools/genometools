@@ -6,14 +6,14 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       const Encodedsequence *encseq,
                       Readmode readmode,
                       unsigned int searchlength,
-                      int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos),
+                      int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *),
                       void *processmaxpairsinfo,
                       Env *env);
 
 int callenummaxpairs(const Str *indexname,
                      unsigned int userdefinedleastlength,
                      bool scanfile,
-                     int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos),
+                     int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *),
                      void *processmaxpairsinfo,
                      Env *env);
 
