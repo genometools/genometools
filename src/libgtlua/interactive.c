@@ -108,11 +108,19 @@ static int incomplete(lua_State *L, int status) {
 }
 
 static int pushline(lua_State *L, bool firstline, GetLine *gl) {
-  char *b;
+  char buffer[BUFSIZ];
+  char *b = buffer;
   size_t l;
   const char *prmt = get_prompt(L, firstline);
+#ifdef CURSES
   if (!(b = gl_get_line(gl, prmt, NULL, 0)))
-    return 0;  /* no input */
+    return 0; /* no input */
+#else
+  b = buffer; /* use static buffer */
+  fputs(prmt, stdout); fflush(stdout);/* show prompt */
+  if (!fgets(b, BUFSIZ, stdin))  /* get line */
+    return 0; /* no input */
+#endif
   l = strlen(b);
   if (l > 0 && b[l-1] == '\n')  /* line ends with newline? */
     b[l-1] = '\0';  /* remove it */
@@ -124,9 +132,8 @@ static int pushline(lua_State *L, bool firstline, GetLine *gl) {
 }
 
 static int loadline(lua_State *L, GetLine *gl, Env *env) {
-  int status, rval;
+  int status;
   lua_settop(L, 0);
-  char *line;
   env_error_check(env);
   if (!pushline(L, true, gl))
     return -1;  /* no input */
@@ -139,7 +146,10 @@ static int loadline(lua_State *L, GetLine *gl, Env *env) {
     lua_insert(L, -2);  /* ...between the two lines */
     lua_concat(L, 3);  /* join them */
   }
+#ifdef CURSES
   if (lua_strlen(L, 1) > 0) { /* non-empty line? */
+    char *line;
+    int rval;
     /* save complete line in history */
     line = cstr_dup(lua_tostring(L, 1), env);
     cstr_rep(line, '\n', ' '); /* replace all newlines in <line> with blanks,
@@ -150,6 +160,7 @@ static int loadline(lua_State *L, GetLine *gl, Env *env) {
     env_ma_free(line, env);
   }
   lua_remove(L, 1);  /* remove line */
+#endif
   return status;
 }
 
@@ -176,8 +187,8 @@ static void dotty(lua_State *L, GetLine *gl, Env *env) {
 
 void run_interactive_lua_interpreter(lua_State *L, Env *env)
 {
+#ifdef CURSES
   GetLine *gl;
-  env_error_check(env);
   gl = new_GetLine(2048, 8096);
   gl_automatic_history(gl, 0); /* disable automatic history saving, we save
                                   complete input lines explicitly */
@@ -185,7 +196,13 @@ void run_interactive_lua_interpreter(lua_State *L, Env *env)
     fprintf(stderr, "cannot create GetLine object\n");
     exit(EXIT_FAILURE);
   }
+#endif
+  env_error_check(env);
   globalL = L; /* for signal handling */
+#ifdef CURSES
   dotty(L, gl, env);
   del_GetLine(gl);
+#else
+  dotty(L, NULL, env);
+#endif
 }

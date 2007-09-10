@@ -32,7 +32,7 @@ EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DUNISTD_H="<unistd.h>" \
 GT_CXXFLAGS:= -g -pipe $(INCLUDEOPT)
 STEST_FLAGS:=
 GT_LDFLAGS:=-L/usr/local/lib -L/usr/X11R6/lib
-LDLIBS:=-lm -lz -lncurses
+LDLIBS:=-lm -lz
 
 # try to set RANLIB automatically
 SYSTEM:=$(shell uname -s)
@@ -49,8 +49,7 @@ GTLIBS:=lib/libgtext.a\
         lib/libgtcore.a\
         lib/libgtmatch.a\
         lib/libgtlua.a\
-        lib/libbz2.a\
-        lib/libtecla.a
+        lib/libbz2.a
 
 # the core GenomeTools library (no other dependencies)
 LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
@@ -164,6 +163,12 @@ endif
 
 ifeq ($(static),yes)
   GT_LDFLAGS += -static
+endif
+
+ifneq ($(curses),no)
+  GTLIBS := $(GTLIBS) lib/libtecla.a
+  GT_CFLAGS += -DCURSES
+  LDLIBS += -lcurses
 endif
 
 ifeq ($(libgtview),yes)
