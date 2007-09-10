@@ -165,49 +165,20 @@ void array_sort(Array *a,int(*compar)(const void *, const void *))
   qsort(a->space,a->next_free,a->size_of_elem,compar);
 }
 
-int array_compare(const Array *a,const Array *b,
-                  int(*compar)(const void *, const void *,Env *),
-                  Env *env)
-{
-  unsigned long idx;
-  size_t size_a, size_b;
-  int cmp;
-
-  size_a = array_size(a);
-  size_b = array_size(b);
-  if (size_a < size_b)
-  {
-    env_error_set(env,"array_size(a) = %lu < %lu = array_size(b)",
-                  (unsigned long) size_a,
-                  (unsigned long) size_b);
-    return -1;
-  }
-  if (size_a > size_b)
-  {
-    env_error_set(env,"array_size(a) = %lu > %lu = array_size(b)",
-                  (unsigned long) size_a,
-                  (unsigned long) size_b);
-    return 1;
-  }
-  for (idx=0; idx<(unsigned long) size_a; idx++)
-  {
-    cmp = compar(array_get(a,idx),array_get(b,idx),env);
-    if(cmp != 0)
-    {
-      return cmp;
-    }
-  }
-  return 0;
-}
-
-void array_show(const Array *a,void(*showelem)(const void *))
+int array_iterate(const Array *a,int(*iterfunc)(void *info,const void *value,
+                                                Env *env),
+                  void *info,Env *env)
 {
   unsigned long idx;
 
   for (idx=0; idx<(unsigned long) array_size(a); idx++)
   {
-    showelem(array_get(a,idx));
+    if(iterfunc(info,array_get(a,idx),env) != 0)
+    {
+      return -1;
+    }
   }
+  return 0;
 }
 
 int array_example(Env *env)

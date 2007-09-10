@@ -24,6 +24,7 @@
 
 #include "sfx-readmode.pr"
 #include "fbsadv.pr"
+#include "arrcmp.pr"
 #include "readnextUchar.gen"
 
 int testencodedsequence(const StrArray *filenametab,
@@ -231,9 +232,9 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
   {
     printf("# checkspecialrangesfast(%lu ranges)\n",
              (unsigned long) array_size(rangesforward));
-    if(array_compare(rangesforward,rangesbackward,
-                     compareSequencerange,
-                     env) != 0)
+    if (array_compare(rangesforward,rangesbackward,
+                      compareSequencerange,
+                      env) != 0)
     {
       haserr = true;
     }

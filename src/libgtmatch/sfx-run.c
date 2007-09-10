@@ -141,7 +141,7 @@ static int suftab2file(Outfileinfo *outfileinfo,
       if (startpos == 0)
       {
         cc = (Uchar) UNDEFBWTCHAR;
-        if(outfileinfo->longest.defined)
+        if (outfileinfo->longest.defined)
         {
           env_error_set(env,"longest = " FormatSeqpos " is already defined",
                              PRINTSeqposcast(outfileinfo->longest.valueseqpos));
@@ -152,12 +152,12 @@ static int suftab2file(Outfileinfo *outfileinfo,
         outfileinfo->longest.valueseqpos = outfileinfo->pageoffset + pos;
       } else
       {
-        if(outfileinfo->outfpbwttab != NULL)
+        if (outfileinfo->outfpbwttab != NULL)
         {
           cc = getencodedchar(outfileinfo->encseq,startpos - 1,readmode);
         }
       }
-      if(outfileinfo->outfpbwttab != NULL)
+      if (outfileinfo->outfpbwttab != NULL)
       {
         if (fwrite(&cc,sizeof (Uchar),(size_t) 1,outfileinfo->outfpbwttab)
                     != (size_t) 1)
@@ -170,10 +170,10 @@ static int suftab2file(Outfileinfo *outfileinfo,
           break;
         }
       }
-      if(outfileinfo->outfplcptab != NULL)
+      if (outfileinfo->outfplcptab != NULL)
       {
         lcpvalue = nextLcpvalueiterator(outfileinfo->lvi,
-                                        (outfileinfo->pageoffset == 0) 
+                                        (outfileinfo->pageoffset == 0)
                                           ? true : false,
                                         suftab,
                                         numberofsuffixes);
@@ -249,26 +249,26 @@ static int suffixeratorwithoutput(
                        numofparts,
                        mtime,
                        env);
-  if(sfi == NULL)
+  if (sfi == NULL)
   {
     haserr = true;
   } else
   {
-    while(true)
+    while (true)
     {
       suftabptr = nextSfxiterator(&len,&specialsuffixes,mtime,sfi,env);
-      if(suftabptr == NULL)
+      if (suftabptr == NULL)
       {
         break;
       }
-      if(suftab2file(outfileinfo,suftabptr,readmode,len,env) != 0)
+      if (suftab2file(outfileinfo,suftabptr,readmode,len,env) != 0)
       {
         haserr = true;
         break;
       }
     }
   }
-  if(sfi != NULL)
+  if (sfi != NULL)
   {
     freeSfxiterator(&sfi,env);
   }
@@ -351,7 +351,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
     }
   }
   initoutfileinfo(&outfileinfo);
-  if(so->outlcptab)
+  if (so->outlcptab)
   {
     outfileinfo.lvi = newLcpvalueiterator(encseq,so->readmode,env);
   } else
@@ -439,7 +439,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
   env_fa_xfclose(outfileinfo.outfplcptab,env);
   env_fa_xfclose(outfileinfo.outfpllvtab,env);
   env_fa_xfclose(outfileinfo.outfpbwttab,env);
-  if(outfileinfo.lvi != NULL)
+  if (outfileinfo.lvi != NULL)
   {
     freeLcpvalueiterator(&outfileinfo.lvi,env);
   }

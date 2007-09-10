@@ -600,7 +600,7 @@ void fastasymbolstringgeneric(FILE *fpout,
   unsigned long i, j;
 
   assert(width > 0);
-  if(desc == NULL)
+  if (desc == NULL)
   {
     fprintf(fpout,">\n");
   } else
@@ -609,13 +609,13 @@ void fastasymbolstringgeneric(FILE *fpout,
   }
   for (i = 0, j = 0; ; i++)
   {
-    if(w[i] == (Uchar) SEPARATOR)
+    if (w[i] == (Uchar) SEPARATOR)
     {
       fprintf(fpout,"\n>\n");
       j = 0;
     } else
     {
-      if(characters == NULL)
+      if (characters == NULL)
       {
         (void) putc((int) w[i],fpout);
       } else
@@ -623,17 +623,17 @@ void fastasymbolstringgeneric(FILE *fpout,
         (void) putc((int) characters[(int) w[i]],fpout);
       }
     }
-    if(i == wlen - 1)
+    if (i == wlen - 1)
     {
       fprintf(fpout,"\n");
       break;
     }
-    if(w[i] != (Uchar) SEPARATOR)
+    if (w[i] != (Uchar) SEPARATOR)
     {
       j++;
-      if(j >= width)
+      if (j >= width)
       {
-        fprintf(fpout,"\n"); 
+        fprintf(fpout,"\n");
         j = 0;
       }
     }

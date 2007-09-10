@@ -295,7 +295,7 @@ void freeSfxiterator(Sfxiterator **sfxiterator,Env *env)
                                     (*sfxiterator)->numofchars);
   (*sfxiterator)->countspecialcodes[specialcode]
     += ((*sfxiterator)->specialcharacters + 1);
-  if((*sfxiterator)->sri != NULL)
+  if ((*sfxiterator)->sri != NULL)
   {
     freespecialrangeiterator(&(*sfxiterator)->sri,env);
   }
@@ -436,7 +436,7 @@ Sfxiterator *newsfxiterator(Seqpos specialcharacters,
                      stpgetlargestwidth(sfi->suftabparts));
     sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
   }
-  if(haserr)
+  if (haserr)
   {
     freeSfxiterator(&sfi,env);
     return NULL;
@@ -597,11 +597,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
         sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
       } else
       {
-<<<<<<< HEAD:src/libgtmatch/sfx-suffixer.c
-        if(sfi->fusp.nextfreeSeqpos < sfi->fusp.allocatedSeqpos)
-=======
-        if (csf->fusp.nextfreeSeqpos < csf->fusp.allocatedSeqpos)
->>>>>>> 526dec606ad73d9d26d9989c13f1a9e48580b30c:src/libgtmatch/sfx-suffixer.c
+        if (sfi->fusp.nextfreeSeqpos < sfi->fusp.allocatedSeqpos)
         {
           sfi->fusp.spaceSeqpos[sfi->fusp.nextfreeSeqpos++] = sfi->totallength;
           sfi->exhausted = true;
@@ -619,7 +615,6 @@ const Seqpos *nextSfxiterator(Seqpos *len,bool *specialsuffixes,
 
   if (sfi->part < stpgetnumofparts(sfi->suftabparts))
   {
-<<<<<<< HEAD:src/libgtmatch/sfx-suffixer.c
     preparethispart(sfi,mtime,env);
     *len = sfi->widthofpart;
     *specialsuffixes = false;
@@ -628,46 +623,6 @@ const Seqpos *nextSfxiterator(Seqpos *len,bool *specialsuffixes,
   if (sfi->exhausted)
   {
     return NULL;
-=======
-    if (csf->phase == Partphase)
-    {
-      if (preparethispart(csf,mtime,env))
-      {
-        *len = csf->widthofpart;
-        break;
-      }
-      if (hasspecialranges(csf->encseq))
-      {
-        csf->phase = Specialrangephase;
-        csf->sri = newspecialrangeiterator(csf->encseq,
-                                           ISDIRREVERSE(csf->readmode)
-                                             ? false : true,
-                                           env);
-        csf->fusp.spaceSeqpos = csf->suftab;
-        csf->fusp.allocatedSeqpos
-          = CALLCASTFUNC(Seqpos,unsigned_long,
-                         stpgetlargestwidth(csf->suftabparts));
-        csf->fusp.nextfreeSeqpos = 0;
-        csf->overhang.leftpos = csf->overhang.rightpos = 0;
-      } else
-      {
-        csf->phase = Finalsuffixphase;
-      }
-    }
-    if (csf->phase == Specialrangephase)
-    {
-      if (exhaustedspecialrangeiterator(csf->sri) &&
-          csf->overhang.leftpos == csf->overhang.rightpos)
-      {
-        csf->phase = Finalsuffixphase;
-      } else
-      {
-        fillspecialnextpage(csf);
-        *len = (Seqpos) csf->fusp.nextfreeSeqpos;
-        break;
-      }
-    }
->>>>>>> 526dec606ad73d9d26d9989c13f1a9e48580b30c:src/libgtmatch/sfx-suffixer.c
   }
   sfi->fusp.nextfreeSeqpos = 0;
   fillspecialnextpage(sfi);

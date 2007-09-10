@@ -183,7 +183,7 @@ static int processleafedge(bool firstsucc,
   unsigned int base;
   Seqpos *start, *spptr;
   Uchar leftchar;
- 
+
 #ifdef DEBUG
   printf("processleafedge " FormatSeqpos " firstsucc=%s, "
          " depth(father)= " FormatSeqpos "\n",
@@ -196,7 +196,7 @@ static int processleafedge(bool firstsucc,
     setpostabto0(state);
     return 0;
   }
-  if(leafnumber == 0)
+  if (leafnumber == 0)
   {
     leftchar = INITIALCHAR;
   } else
@@ -406,14 +406,14 @@ int callenummaxpairs(const Str *indexname,
                                                 SARR_LCPTAB |
                                                 SARR_SUFTAB |
                                                 SARR_ESQTAB,
-                                                scanfile 
+                                                scanfile
                                                   ? SEQ_scan : SEQ_mappedboth,
                                                 env);
   if (ssar == NULL)
   {
     haserr = true;
   }
-  if (!haserr && 
+  if (!haserr &&
       enumeratemaxpairs(ssar,
                         getnumofcharsAlphabet(
                                  alphabetSequentialsuffixarrayreader(ssar)),
@@ -426,7 +426,7 @@ int callenummaxpairs(const Str *indexname,
   {
     haserr = true;
   }
-  if(ssar != NULL)
+  if (ssar != NULL)
   {
     freeSequentialsuffixarrayreader(&ssar,env);
   }

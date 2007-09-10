@@ -44,8 +44,7 @@ fi
 # NOASSERT='assert=no'
 #-DWITHTRIEIDENT
 # FASTDEF="-Duint_fast32_t=uint32_t  -Duint_fast64_t=uint64_t"
-CURSES='curses=no'
-COMMON='${CURSES} ${NOASSERT}'
+COMMON='curses=no'
 
 if test $icc -eq 1
 then

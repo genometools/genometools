@@ -24,7 +24,7 @@
 
  struct Lcpvalueiterator
 {
-  Seqpos relpos, 
+  Seqpos relpos,
          lastsuftabentry;
   Readmode readmode;
   const Encodedsequence *encseq;
@@ -35,7 +35,7 @@ Lcpvalueiterator *newLcpvalueiterator(const Encodedsequence *encseq,
                                       Env *env)
 {
   Lcpvalueiterator *lvi;
-  
+
   ALLOCASSIGNSPACE(lvi,NULL,Lcpvalueiterator,1);
   lvi->encseq = encseq;
   lvi->relpos = 0;
@@ -52,7 +52,7 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
   Seqpos lcpvalue;
 
   assert(lvi->relpos < numberofsuffixes);
-  if(firstpage && lvi->relpos == 0)
+  if (firstpage && lvi->relpos == 0)
   {
     lcpvalue = 0;
   } else
@@ -80,7 +80,7 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
     }
   }
   lvi->lastsuftabentry = suftabptr[lvi->relpos];
-  if(lvi->relpos + 1 == numberofsuffixes)
+  if (lvi->relpos + 1 == numberofsuffixes)
   {
     lvi->relpos = 0;
   } else

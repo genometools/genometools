@@ -52,7 +52,7 @@ Seqpos *encseq2markpositions(const Encodedsequence *encseq,
   Sequencerange range;
   bool haserr = false;
 
-  assert(numofsequences > (unsigned long) 1);
+  assert (numofsequences > (unsigned long) 1);
   asp.allocatedSeqpos = numofsequences-1;
   asp.nextfreeSeqpos = 0;
   ALLOCASSIGNSPACE(asp.spaceSeqpos,NULL,Seqpos,asp.allocatedSeqpos);
@@ -82,22 +82,22 @@ unsigned long *sequence2markpositions(unsigned long *numofsequences,
   unsigned long *spacemarkpos, i, allocatedmarkpos, nextfreemarkpos;
 
   *numofsequences = (unsigned long) 1;
-  for(i=0; i<seqlen; i++)
+  for (i=0; i<seqlen; i++)
   {
-    if(seq[i] == (Uchar) SEPARATOR)
+    if (seq[i] == (Uchar) SEPARATOR)
     {
       (*numofsequences)++;
     }
   }
-  if(*numofsequences == (unsigned long) 1)
+  if (*numofsequences == (unsigned long) 1)
   {
     return NULL;
   }
   allocatedmarkpos = (*numofsequences)-1;
   ALLOCASSIGNSPACE(spacemarkpos,NULL,unsigned long,allocatedmarkpos);
-  for(i=0, nextfreemarkpos = 0; i<seqlen; i++)
+  for (i=0, nextfreemarkpos = 0; i<seqlen; i++)
   {
-    if(seq[i] == (Uchar) SEPARATOR)
+    if (seq[i] == (Uchar) SEPARATOR)
     {
       spacemarkpos[nextfreemarkpos++] = i;
     }

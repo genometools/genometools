@@ -183,7 +183,7 @@ int nextScansequenceiterator(const Uchar **sequence,
   int retval;
   bool haserr = false, foundseq = false;
 
-  if(sseqit->exhausted)
+  if (sseqit->exhausted)
   {
     return 0;
   }
@@ -242,11 +242,11 @@ int nextScansequenceiterator(const Uchar **sequence,
     }
     sseqit->sequencebuffer.nextfreeUchar = 0;
   }
-  if(haserr)
+  if (haserr)
   {
     return -1;
   }
-  if(foundseq)
+  if (foundseq)
   {
     return 1;
   }

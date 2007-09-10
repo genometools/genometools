@@ -59,7 +59,7 @@ static int constructsarrandrunmaxpairs(
                        numofparts,
                        mtime,
                        env);
-  if(sfi == NULL)
+  if (sfi == NULL)
   {
     haserr = true;
   } else
@@ -72,23 +72,23 @@ static int constructsarrandrunmaxpairs(
                                                  numberofsuffixes,
                                                  readmode,
                                                  env);
-    if(enumeratemaxpairs(ssar,
-                         numofchars,
-                         ssi->encseq,
-                         readmode,
-                         ssi->minlength,
-                         ssi->processmaxmatch,
-                         ssi->processmaxmatchinfo,
-                         env) != 0)
+    if (enumeratemaxpairs(ssar,
+                          numofchars,
+                          ssi->encseq,
+                          readmode,
+                          ssi->minlength,
+                          ssi->processmaxmatch,
+                          ssi->processmaxmatchinfo,
+                          env) != 0)
     {
       haserr = true;
     }
   }
-  if(ssar != NULL)
+  if (ssar != NULL)
   {
     freeSequentialsuffixarrayreader(&ssar,env);
   }
-  if(sfi != NULL)
+  if (sfi != NULL)
   {
     freeSfxiterator(&sfi,env);
   }
@@ -132,7 +132,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                                                           dblen+querylen+1),
                                   (unsigned int) 1, /* parts */
                                   NULL,
-		                  env) != 0)
+                                  env) != 0)
   {
     haserr = true;
   }

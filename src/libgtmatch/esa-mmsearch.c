@@ -90,7 +90,7 @@ static int comparecharacters(Seqpos start,
       retcode = -1;
       break;
     }
-    // printf("getencodedchar at %u\n",sidx);
+    /* printf("getencodedchar at %u\n",sidx); */
     currentchar = getencodedchar(dbencseq,sidx,readmode);
     retcode = (int) (query[*lcplen] - currentchar);
     if (retcode == 0)
@@ -124,7 +124,6 @@ static bool mmsearch(const Encodedsequence *dbencseq,
 {
   Seqpos left, leftsave, mid, right, lpref, rpref, totallength;
   int retcode = 0;
-  // Uchar currentchar;
   Seqpos lcplen;
 
   totallength = getencseqtotallength(dbencseq);
@@ -147,7 +146,7 @@ static bool mmsearch(const Encodedsequence *dbencseq,
       {
         mid = DIV2(left+right);
         lcplen = MIN(lpref,rpref);
-        // printf("mid=%u,lcplen=%u\n",mid,lcplen);
+        /* printf("mid=%u,lcplen=%u\n",mid,lcplen); */
         COMPARE(suftab[mid],lcplen);
         if (retcode <= 0)
         {
@@ -367,7 +366,7 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
       }
     }
     freemmsearchiterator(&mmsi,env);
-    if(query[currentquerystart] == (Uchar) SEPARATOR)
+    if (query[currentquerystart] == (Uchar) SEPARATOR)
     {
       localunitnum++;
       localqueryoffset = 0;
@@ -389,19 +388,19 @@ static int echothesequence(const StrArray *queryfiles,Env *env)
   int retval;
 
   sseqit = newScansequenceiterator(queryfiles,NULL,env);
-  while(true)
+  while (true)
   {
     retval = nextScansequenceiterator(&sequence,
                                       &seqlen,
                                       &desc,
                                       sseqit,
                                       env);
-    if(retval < 0)
+    if (retval < 0)
     {
       haserr = true;
       break;
     }
-    if(retval == 0)
+    if (retval == 0)
     {
       break;
     }
@@ -435,14 +434,14 @@ int callenumquerymatches(const Str *indexname,
   {
     haserr = true;
   }
-  if(!haserr && echoquery)
+  if (!haserr && echoquery)
   {
-    if(echothesequence(queryfiles,env) != 0)
+    if (echothesequence(queryfiles,env) != 0)
     {
       haserr = true;
     }
   }
-  if(!haserr)
+  if (!haserr)
   {
     Scansequenceiterator *sseqit;
     const Uchar *query;
@@ -454,23 +453,23 @@ int callenumquerymatches(const Str *indexname,
     sseqit = newScansequenceiterator(queryfiles,
                                      getsymbolmapAlphabet(suffixarray.alpha),
                                      env);
-    for(unitnum = 0; /* Nothing */; unitnum++)
+    for (unitnum = 0; /* Nothing */; unitnum++)
     {
       retval = nextScansequenceiterator(&query,
                                         &querylen,
                                         &desc,
                                         sseqit,
                                         env);
-      if(retval < 0)
+      if (retval < 0)
       {
         haserr = true;
         break;
       }
-      if(retval == 0)
+      if (retval == 0)
       {
         break;
       }
-      if(runquerysubstringmatch(suffixarray.encseq,
+      if (runquerysubstringmatch(suffixarray.encseq,
                                 suffixarray.suftab,
                                 suffixarray.readmode,
                                 totallength+1,
@@ -524,20 +523,20 @@ static int constructsarrandrunmmsearch(
                        numofparts,
                        mtime,
                        env);
-  if(sfi == NULL)
+  if (sfi == NULL)
   {
     haserr = true;
   } else
   {
-    while(true)
+    while (true)
     {
       suftabptr = nextSfxiterator(&numofsuffixes,&specialsuffixes,
                                   mtime,sfi,env);
-      if(suftabptr == NULL)
+      if (suftabptr == NULL)
       {
         break;
       }
-      if(runquerysubstringmatch(dbencseq,
+      if (runquerysubstringmatch(dbencseq,
                                 suftabptr,
                                 readmode,
                                 numofsuffixes,
@@ -554,7 +553,7 @@ static int constructsarrandrunmmsearch(
       }
     }
   }
-  if(sfi != NULL)
+  if (sfi != NULL)
   {
     freeSfxiterator(&sfi,env);
   }

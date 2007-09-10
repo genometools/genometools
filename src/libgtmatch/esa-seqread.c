@@ -55,7 +55,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
   ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
   ALLOCASSIGNSPACE(ssar->suffixarray,NULL,Suffixarray,1);
   assert(seqactype == SEQ_mappedboth || seqactype == SEQ_scan);
-  if (((seqactype == SEQ_mappedboth) 
+  if (((seqactype == SEQ_mappedboth)
          ? mapsuffixarray : streamsuffixarray)(ssar->suffixarray,
                                                &totallength,
                                                demand,
@@ -108,12 +108,12 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
 void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
                                      Env *env)
 {
-  if((*ssar)->suffixarray != NULL)
+  if ((*ssar)->suffixarray != NULL)
   {
     freesuffixarray((*ssar)->suffixarray,env);
     FREESPACE((*ssar)->suffixarray);
   }
-  if((*ssar)->lvi != NULL)
+  if ((*ssar)->lvi != NULL)
   {
     freeLcpvalueiterator(&(*ssar)->lvi,env);
   }
@@ -127,7 +127,7 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
   Uchar tmpsmalllcpvalue;
   int retval;
 
-  if(ssar->seqactype == SEQ_suftabfrommemory)
+  if (ssar->seqactype == SEQ_suftabfrommemory)
   {
     if (ssar->nextlcptabindex >= ssar->numberofsuffixes)
     {
@@ -200,7 +200,7 @@ int nextSequentialsuftabvalue(Seqpos *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
                               Env *env)
 {
-  if(ssar->seqactype == SEQ_scan)
+  if (ssar->seqactype == SEQ_scan)
   {
     return readnextSeqposfromstream(currentsuffix,
                                     &ssar->suffixarray->suftabstream,
