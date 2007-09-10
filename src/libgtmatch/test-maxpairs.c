@@ -129,9 +129,7 @@ static int storemaxmatchself(void *info,
   return 0;
 }
 
-static int envorderSubstringmatch(const void *a,
-                                  const void *b,
-                                  /*@unused@*/ Env *env)
+static int orderSubstringmatch(const void *a,const void *b)
 {
   Substringmatch *m1 = (Substringmatch *) a,
                  *m2 = (Substringmatch *) b;
@@ -169,12 +167,6 @@ static int envorderSubstringmatch(const void *a,
     return 1;
   }
   return 0;
-}
-
-static int orderSubstringmatch(const void *a,
-                               const void *b)
-{
-  return envorderSubstringmatch(a,b,NULL);
 }
 
 static int showSubstringmatch(/*@unused@*/ void *info,const void *a,
@@ -271,7 +263,7 @@ int testmaxpairs(const Str *indexname,
     array_sort(tabmaxquerymatches,orderSubstringmatch);
     array_sort(maxmatchselfinfo.results,orderSubstringmatch);
     if (array_compare(tabmaxquerymatches,maxmatchselfinfo.results,
-                      envorderSubstringmatch,env) != 0)
+                      orderSubstringmatch) != 0)
     {
       printf("querymatches\n");
       (void) array_iterate(tabmaxquerymatches,showSubstringmatch,NULL,env);
@@ -288,7 +280,7 @@ int testmaxpairs(const Str *indexname,
                                query,
                                (unsigned long) querylen,
                                (unsigned long) 60);
-      haserr = true;
+      exit(EXIT_FAILURE); /* programming error */
     }
     FREESPACE(maxmatchselfinfo.markpos);
     array_delete(tabmaxquerymatches,env);

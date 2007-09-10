@@ -157,10 +157,9 @@ static int comparearrays(const Array *a,const Array *b,Env *env)
 */
 
 static void makeerrormsg(const Sequencerange *vala,const Sequencerange *valb,
-                         const char *cmpflag,
-                         Env *env)
+                         const char *cmpflag)
 {
-  env_error_set(env,
+  fprintf(stderr,
                 "(" FormatSeqpos "," FormatSeqpos
                 ") %s (" FormatSeqpos "," FormatSeqpos
                 ")",
@@ -171,7 +170,7 @@ static void makeerrormsg(const Sequencerange *vala,const Sequencerange *valb,
                 PRINTSeqposcast(valb->rightpos));
 }
 
-static int compareSequencerange(const void *a,const void *b,Env *env)
+static int compareSequencerange(const void *a,const void *b)
 {
   const Sequencerange *vala, *valb;
 
@@ -179,22 +178,22 @@ static int compareSequencerange(const void *a,const void *b,Env *env)
   valb = (Sequencerange *) b;
   if (vala->leftpos < valb->leftpos)
   {
-    makeerrormsg(vala,valb,"<",env);
+    makeerrormsg(vala,valb,"<");
     return -1;
   }
   if (vala->leftpos > valb->leftpos)
   {
-    makeerrormsg(vala,valb,">",env);
+    makeerrormsg(vala,valb,">");
     return 1;
   }
   if (vala->rightpos < valb->rightpos)
   {
-    makeerrormsg(vala,valb,"<",env);
+    makeerrormsg(vala,valb,"<");
     return -1;
   }
   if (vala->rightpos > valb->rightpos)
   {
-    makeerrormsg(vala,valb,">",env);
+    makeerrormsg(vala,valb,">");
     return 1;
   }
   return 0;
@@ -233,10 +232,9 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
     printf("# checkspecialrangesfast(%lu ranges)\n",
              (unsigned long) array_size(rangesforward));
     if (array_compare(rangesforward,rangesbackward,
-                      compareSequencerange,
-                      env) != 0)
+                      compareSequencerange) != 0)
     {
-      haserr = true;
+      exit(EXIT_FAILURE);
     }
   }
   array_delete(rangesforward,env);
