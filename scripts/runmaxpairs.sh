@@ -50,7 +50,7 @@ VMMINI=vmatch-mini.x
 for filename in ${filenames}
 do
   echo "$0 ${minlength} ${filename}"
-  checkerror "mkvtree.sh -db ${filename} -indexname mkvidx -dna -sti1 -bck -suf -tis -lcp -bwt -pl"
+  checkerror "mkvtree.sh -db ${filename} -indexname mkvidx -dna -ois -sti1 -bck -suf -tis -lcp -bwt -pl"
   checkerror "../bin/gt suffixerator -db ${filename} -indexname sfxidx -dna -suf -tis -lcp -pl"
   if test "X${queryfile}" = "X"
   then

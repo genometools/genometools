@@ -240,7 +240,7 @@ static int suffixeratorwithoutput(
   bool haserr = false, specialsuffixes = false;
   Sfxiterator *sfi;
 
-  sfi = newsfxiterator(specialcharacters,
+  sfi = newSfxiterator(specialcharacters,
                        specialranges,
                        encseq,
                        readmode,

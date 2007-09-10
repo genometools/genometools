@@ -48,9 +48,8 @@ static int constructsarrandrunmaxpairs(
   bool haserr = false;
   Sfxiterator *sfi;
   bool specialsuffixes = false;
-  Sequentialsuffixarrayreader *ssar = NULL;
 
-  sfi = newsfxiterator(specialcharacters,
+  sfi = newSfxiterator(specialcharacters,
                        specialranges,
                        ssi->encseq,
                        readmode,
@@ -64,29 +63,42 @@ static int constructsarrandrunmaxpairs(
     haserr = true;
   } else
   {
-    suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
-                                mtime,sfi,env);
-    assert(suftabptr != NULL);
+    Sequentialsuffixarrayreader *ssar = NULL;
+    bool firstpage = true;
+
     ssar = newSequentialsuffixarrayreaderfromRAM(ssi->encseq,
-                                                 suftabptr,
-                                                 numberofsuffixes,
                                                  readmode,
                                                  env);
-    if (enumeratemaxpairs(ssar,
-                          numofchars,
-                          ssi->encseq,
-                          readmode,
-                          ssi->minlength,
-                          ssi->processmaxmatch,
-                          ssi->processmaxmatchinfo,
-                          env) != 0)
+    while(true)
     {
-      haserr = true;
+      suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
+                                  mtime,sfi,env);
+      if(suftabptr == NULL)
+      {
+        break;
+      }
+      updateSequentialsuffixarrayreaderfromRAM(ssar,
+                                               suftabptr,
+                                               firstpage,
+                                               numberofsuffixes);
+      printf("# numberofsuffixes=%u\n",numberofsuffixes);
+      firstpage = false;
+      if (enumeratemaxpairs(ssar,
+                            numofchars,
+                            ssi->encseq,
+                            readmode,
+                            ssi->minlength,
+                            ssi->processmaxmatch,
+                            ssi->processmaxmatchinfo,
+                            env) != 0)
+      {
+        haserr = true;
+      }
     }
-  }
-  if (ssar != NULL)
-  {
-    freeSequentialsuffixarrayreader(&ssar,env);
+    if (ssar != NULL)
+    {
+      freeSequentialsuffixarrayreader(&ssar,env);
+    }
   }
   if (sfi != NULL)
   {

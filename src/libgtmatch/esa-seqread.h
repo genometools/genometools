@@ -41,10 +41,14 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
 
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
                                         const Encodedsequence *encseq,
-                                        const Seqpos *suftab,
-                                        Seqpos numberofsuffixes,
                                         Readmode readmode,
                                         Env *env);
+
+void updateSequentialsuffixarrayreaderfromRAM(
+                    Sequentialsuffixarrayreader *ssar,
+                    const Seqpos *suftab,
+                    bool firstpage,
+                    Seqpos numberofsuffixes);
 
 void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
                                      Env *env);

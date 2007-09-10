@@ -90,7 +90,8 @@ static int storemaxmatchself(void *info,
 {
   Maxmatchselfinfo *maxmatchselfinfo = (Maxmatchselfinfo *) info;
 
-  if (maxmatchselfinfo->dblen < querystart)
+  if (dbstart < maxmatchselfinfo->dblen && 
+      maxmatchselfinfo->dblen < querystart)
   {
     Substringmatch subm;
     unsigned long pos;
@@ -114,8 +115,14 @@ static int storemaxmatchself(void *info,
       {
         return -1;
       }
+      if(queryseqnum == 0)
+      {
+        subm.querystart = pos;
+      } else
+      {
+        subm.querystart = pos - (maxmatchselfinfo->markpos[queryseqnum-1] + 1);
+      }
       subm.queryseqnum = (uint64_t) queryseqnum;
-      subm.querystart = pos;
     }
     array_add(maxmatchselfinfo->results,subm,env);
   }
