@@ -165,7 +165,7 @@ void array_sort(Array *a,int(*compar)(const void *, const void *))
   qsort(a->space,a->next_free,a->size_of_elem,compar);
 }
 
-int array_compare(Array *a,Array *b,
+int array_compare(const Array *a,const Array *b,
                   int(*compar)(const void *, const void *,Env *),
                   Env *env)
 {
@@ -198,6 +198,16 @@ int array_compare(Array *a,Array *b,
     }
   }
   return 0;
+}
+
+void array_show(const Array *a,void(*showelem)(const void *))
+{
+  unsigned long idx;
+
+  for (idx=0; idx<(unsigned long) array_size(a); idx++)
+  {
+    showelem(array_get(a,idx));
+  }
 }
 
 int array_example(Env *env)

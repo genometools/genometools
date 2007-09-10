@@ -19,11 +19,13 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
                            const Seqpos *suftabpart,
                            Readmode readmode,
                            Seqpos numberofsuffixes,
+                           uint64_t unitnum,
                            const Uchar *query,
                            unsigned long querylen,
                            unsigned int minlength,
                            int (*processmaxmatch)(void *,unsigned long,
-                                                  Seqpos,unsigned long,Env *),
+                                                  Seqpos,uint64_t,
+                                                  unsigned long,Env *),
                            void *processmaxmatchinfo,
                            Env *env);
 
@@ -32,7 +34,7 @@ int callenumquerymatches(const Str *indexname,
                          bool echoquery,
                          unsigned int userdefinedleastlength,
                          int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                                unsigned long,Env *),
+                                                uint64_t,unsigned long,Env *),
                          void *processmaxmatchinfo,
                          Env *env);
 
@@ -43,7 +45,8 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                             unsigned int minlength,
                             const Alphabet *alpha,
                             int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                                   unsigned long,Env *),
+                                                   uint64_t,unsigned long,
+                                                   Env *),
                             void *processmaxmatchinfo,
                             Env *env);
 

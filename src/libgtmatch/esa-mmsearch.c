@@ -26,6 +26,7 @@
 #include "sfx-suffixer.h"
 #include "measure-time-if.h"
 #include "iterseq.h"
+#include "format64.h"
 #include "stamp.h"
 
 #include "sfx-apfxlen.pr"
@@ -305,18 +306,24 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
                            const Seqpos *suftabpart,
                            Readmode readmode,
                            Seqpos numberofsuffixes,
+                           uint64_t unitnum,
                            const Uchar *query,
                            unsigned long querylen,
                            unsigned int minlength,
                            int (*processmaxmatch)(void *,unsigned long,
-                                                  Seqpos,unsigned long,Env *),
+                                                  Seqpos,uint64_t,
+                                                  unsigned long,Env *),
                            void *processmaxmatchinfo,
                            Env *env)
 {
   MMsearchiterator *mmsi;
   Seqpos dbstart, totallength;
   unsigned long extend, currentquerystart;
+  uint64_t localunitnum = unitnum;
+  unsigned long localqueryoffset = 0;
 
+  printf("unitnum=" Formatuint64_t " of length %lu\n",
+          PRINTuint64_tcast(unitnum),querylen);
   assert(numberofsuffixes > 0);
   totallength = getencseqtotallength(dbencseq);
   for (currentquerystart = 0;
@@ -347,10 +354,12 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
                              query,
                              currentquerystart + minlength,
                              querylen);
+        printf("match at querystart %lu\n",currentquerystart);
         if (processmaxmatch(processmaxmatchinfo,
                             extend + (unsigned long) minlength,
                             dbstart,
-                            currentquerystart,
+                            localunitnum,
+                            localqueryoffset,
                             env) != 0)
         {
           return -1;
@@ -358,12 +367,19 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
       }
     }
     freemmsearchiterator(&mmsi,env);
+    if(query[currentquerystart] == (Uchar) SEPARATOR)
+    {
+      localunitnum++;
+      localqueryoffset = 0;
+    } else
+    {
+      localqueryoffset++;
+    }
   }
   return 0;
 }
 
-static int echothesequence(const StrArray *queryfiles,
-                           Env *env)
+static int echothesequence(const StrArray *queryfiles,Env *env)
 {
   Scansequenceiterator *sseqit;
   char *desc = NULL;
@@ -402,7 +418,7 @@ int callenumquerymatches(const Str *indexname,
                          bool echoquery,
                          unsigned int userdefinedleastlength,
                          int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                                unsigned long,Env *),
+                                                uint64_t,unsigned long,Env *),
                          void *processmaxmatchinfo,
                          Env *env)
 {
@@ -433,11 +449,12 @@ int callenumquerymatches(const Str *indexname,
     unsigned long querylen;
     char *desc = NULL;
     int retval;
+    uint64_t unitnum;
 
     sseqit = newScansequenceiterator(queryfiles,
                                      getsymbolmapAlphabet(suffixarray.alpha),
                                      env);
-    while(true)
+    for(unitnum = 0; /* Nothing */; unitnum++)
     {
       retval = nextScansequenceiterator(&query,
                                         &querylen,
@@ -457,6 +474,7 @@ int callenumquerymatches(const Str *indexname,
                                 suffixarray.suftab,
                                 suffixarray.readmode,
                                 totallength+1,
+                                unitnum,
                                 query,
                                 querylen,
                                 userdefinedleastlength,
@@ -487,7 +505,7 @@ static int constructsarrandrunmmsearch(
                  unsigned long querylen,
                  unsigned int minlength,
                  int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                        unsigned long,Env *),
+                                        uint64_t,unsigned long,Env *),
                  void *processmaxmatchinfo,
                  Measuretime *mtime,
                  Env *env)
@@ -523,6 +541,7 @@ static int constructsarrandrunmmsearch(
                                 suftabptr,
                                 readmode,
                                 numofsuffixes,
+                                0,
                                 query,
                                 querylen,
                                 minlength,
@@ -549,7 +568,8 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                             unsigned int minlength,
                             const Alphabet *alpha,
                             int (*processmaxmatch)(void *,unsigned long,Seqpos,
-                                                   unsigned long,Env *),
+                                                   uint64_t,unsigned long,
+                                                   Env *),
                             void *processmaxmatchinfo,
                             Env *env)
 {

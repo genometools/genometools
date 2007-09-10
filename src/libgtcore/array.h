@@ -44,8 +44,9 @@ int           array_example(Env*);
 int           array_unit_test(Env*);
 void          array_delete(Array*, Env*);
 void          array_sort(Array *a,int(*compar)(const void *, const void *));
-int           array_compare(Array *a,Array *b,
+int           array_compare(const Array *,const Array *,
                             int(*compar)(const void *, const void *,Env *),
                             Env *env);
+void          array_show(const Array *,void(*showelem)(const void *));
 
 #endif

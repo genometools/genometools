@@ -22,6 +22,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/esa-mmsearch-def.h"
+#include "libgtmatch/format64.h"
 
 #include "libgtmatch/esa-maxpairs.pr"
 #include "libgtmatch/esa-mmsearch.pr"
@@ -58,11 +59,15 @@ static int simpleexactselfmatchoutput(/*@unused@*/ void *info,
 static int simpleexactquerymatchoutput(/*@unused@*/ void *info,
                                        unsigned long len,
                                        Seqpos dbstart,
+                                       uint64_t unitnum,
                                        unsigned long querystart,
                                        /*@unused@*/ Env *env)
 {
-  printf("%lu " FormatSeqpos " %lu\n",
-           len,PRINTSeqposcast(dbstart),querystart);
+  printf("%lu " FormatSeqpos " " Formatuint64_t " %lu\n",
+           len,
+           PRINTSeqposcast(dbstart),
+           PRINTuint64_tcast(unitnum),
+           querystart);
   return 0;
 }
 
@@ -161,17 +166,14 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
         }
       } else
       {
-        if (maxpairsoptions.samples > 0)
+        if (testmaxpairs(maxpairsoptions.indexname,
+                         maxpairsoptions.samples,
+                         maxpairsoptions.userdefinedleastlength,
+                         (Seqpos) (100 * 
+                                   maxpairsoptions.userdefinedleastlength),
+                         env) != 0)
         {
-          if (testmaxpairs(maxpairsoptions.indexname,
-                           maxpairsoptions.samples,
-                           maxpairsoptions.userdefinedleastlength,
-                           (Seqpos) (100 * 
-                                     maxpairsoptions.userdefinedleastlength),
-                           env) != 0)
-          {
-            haserr = true;
-          }
+          haserr = true;
         }
       }
     } else

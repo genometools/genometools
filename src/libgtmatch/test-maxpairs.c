@@ -21,10 +21,12 @@
 #include "spacedef.h"
 #include "esa-mmsearch-def.h"
 #include "alphadef.h"
+#include "format64.h"
 
 #include "sfx-map.pr"
 #include "esa-mmsearch.pr"
 #include "esa-selfmatch.pr"
+#include "pos2seqnum.pr"
 
 static Seqpos samplesubstring(Uchar *seqspace,
                               const Encodedsequence *encseq,
@@ -48,12 +50,14 @@ static Seqpos samplesubstring(Uchar *seqspace,
 typedef struct
 {
   unsigned long len, querystart;
+  uint64_t queryseqnum;
   Seqpos dbstart;
 } Substringmatch;
 
 static int storemaxmatchquery(void *info,
                               unsigned long len,
                               Seqpos dbstart,
+                              uint64_t queryseqnum,
                               unsigned long querystart,
                               Env *env)
 {
@@ -61,11 +65,21 @@ static int storemaxmatchquery(void *info,
   Substringmatch subm;
 
   subm.len = len;
-  subm.querystart = querystart;
   subm.dbstart = dbstart;
+  subm.queryseqnum = queryseqnum;
+  subm.querystart = querystart;
   array_add(tab,subm,env);
   return 0;
 }
+
+typedef struct
+{
+  Array *results;
+  Seqpos dblen;
+  unsigned long *markpos,
+                numofquerysequences,
+                querylen;
+} Maxmatchselfinfo;
 
 static int storemaxmatchself(void *info,
                              Seqpos len,
@@ -73,22 +87,54 @@ static int storemaxmatchself(void *info,
                              Seqpos querystart,
                              Env *env)
 {
-  Array *tab = (Array *) info;
-  Substringmatch subm;
+  Maxmatchselfinfo *maxmatchselfinfo = (Maxmatchselfinfo *) info;
 
-  subm.len = (unsigned long) len;
-  subm.querystart = (unsigned long) querystart;
-  subm.dbstart = dbstart;
-  array_add(tab,subm,env);
+  if(maxmatchselfinfo->dblen < querystart)
+  {
+    Substringmatch subm;
+    unsigned long pos;
+
+    subm.len = (unsigned long) len;
+    subm.dbstart = dbstart;
+    pos = (unsigned long) (querystart - (maxmatchselfinfo->dblen + 1));
+    if(maxmatchselfinfo->markpos == 0)
+    {
+      subm.queryseqnum = 0;
+      subm.querystart = pos;
+    } else
+    {
+      subm.queryseqnum = getrecordnumulong(maxmatchselfinfo->markpos,
+                                           maxmatchselfinfo->
+                                             numofquerysequences,
+                                           maxmatchselfinfo->querylen,
+                                           pos,
+                                           env);
+      if(subm.queryseqnum == maxmatchselfinfo->numofquerysequences)
+      {
+        return -1;
+      }
+      subm.querystart = pos;
+    }
+    array_add(maxmatchselfinfo->results,subm,env);
+  }
   return 0;
 }
 
-static int envcompareSubstringmatches(const void *a,
-                                      const void *b,
-                                      /*@unused@*/ Env *env)
+static int envorderSubstringmatch(const void *a,
+                                  const void *b,
+                                  /*@unused@*/ Env *env)
 {
   Substringmatch *m1 = (Substringmatch *) a,
                  *m2 = (Substringmatch *) b;
+
+  if(m1->queryseqnum < m2->queryseqnum)
+  {
+    return -1;
+  }
+  if(m1->queryseqnum > m2->queryseqnum)
+  {
+    return 1;
+  }
   if(m1->querystart < m2->querystart)
   {
     return -1;
@@ -105,15 +151,33 @@ static int envcompareSubstringmatches(const void *a,
   {
     return 1;
   }
-  fprintf(stderr,"matches are not maximal\n");
-  exit(EXIT_FAILURE);
+  if(m1->len < m2->len)
+  {
+    return -1;
+  }
+  if(m1->len > m2->len)
+  {
+    return 1;
+  }
+  return 0;
 }
 
-static int compareSubstringmatches(const void *a,
-                                   const void *b)
+static int orderSubstringmatch(const void *a,
+                               const void *b)
                                    
 {
-  return envcompareSubstringmatches(a,b,NULL);
+  return envorderSubstringmatch(a,b,NULL);
+}
+
+static void showSubstringmatch(const void *a)
+{
+  Substringmatch *m = (Substringmatch *) a;
+
+  printf("%lu " FormatSeqpos " " Formatuint64_t " %lu\n",
+           m->len,
+           PRINTSeqposcast(m->dbstart),
+           PRINTuint64_tcast(m->queryseqnum),
+           m->querystart);
 }
 
 int testmaxpairs(const Str *indexname,
@@ -127,7 +191,8 @@ int testmaxpairs(const Str *indexname,
   Uchar *dbseq, *query;
   bool haserr = false;
   unsigned long s;
-  Array *tabmaxquerymatches, *tabmaxselfmatches;
+  Array *tabmaxquerymatches;
+  Maxmatchselfinfo maxmatchselfinfo;
 
   /*
   printf("# draw %lu samples\n",samples); XXX integrate later
@@ -173,7 +238,12 @@ int testmaxpairs(const Str *indexname,
     printf("# run self match for dblen=" FormatSeqpos ",querylen= " 
            FormatSeqpos "minlength=%u\n",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
-    tabmaxselfmatches = array_new(sizeof(Substringmatch),env);
+    maxmatchselfinfo.results = array_new(sizeof(Substringmatch),env);
+    maxmatchselfinfo.dblen = dblen;
+    maxmatchselfinfo.querylen = querylen;
+    maxmatchselfinfo.markpos 
+      = sequence2markpositions(&maxmatchselfinfo.numofquerysequences,
+                               query,querylen,env);
     if (sarrselfsubstringmatch(dbseq,
                                dblen,
                                query,
@@ -181,18 +251,22 @@ int testmaxpairs(const Str *indexname,
                                minlength,
                                suffixarray.alpha,
                                storemaxmatchself,
-                               tabmaxselfmatches,
+                               &maxmatchselfinfo,
                                env) != 0)
     {
       haserr = true;
       break;
     }
-    printf("found %lu matches\n",array_size(tabmaxselfmatches));
-    array_sort(tabmaxquerymatches,compareSubstringmatches);
-    array_sort(tabmaxselfmatches,compareSubstringmatches);
-    if(array_compare(tabmaxquerymatches,tabmaxselfmatches,
-                     envcompareSubstringmatches,env) != 0)
+    printf("found %lu matches\n",array_size(maxmatchselfinfo.results));
+    array_sort(tabmaxquerymatches,orderSubstringmatch);
+    array_sort(maxmatchselfinfo.results,orderSubstringmatch);
+    if(array_compare(tabmaxquerymatches,maxmatchselfinfo.results,
+                     envorderSubstringmatch,env) != 0)
     {
+      printf("querymatches\n");
+      array_show(tabmaxquerymatches,showSubstringmatch);
+      printf("dbmatches\n");
+      array_show(maxmatchselfinfo.results,showSubstringmatch);
       fastasymbolstringgeneric(stdout,"dbseq",
                                getcharactersAlphabet(suffixarray.alpha),
                                dbseq,
@@ -205,8 +279,9 @@ int testmaxpairs(const Str *indexname,
                                (unsigned long) 60);
       haserr = true;
     }
+    FREESPACE(maxmatchselfinfo.markpos);
     array_delete(tabmaxquerymatches,env);
-    array_delete(tabmaxselfmatches,env);
+    array_delete(maxmatchselfinfo.results,env);
   }
   FREESPACE(dbseq);
   FREESPACE(query);
