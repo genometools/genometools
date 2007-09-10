@@ -20,73 +20,26 @@
 #include "lauxlib.h"
 #include "lualib.h"
 #include "libgtcore/bioseq.h"
+#include "libgtext/mapping.h"
 #include "libgtext/regionmapping.h"
 
 struct RegionMapping {
-  Str *mapping_filename,
-      *sequence_filename,
+  Str *sequence_filename,
       *sequence_file, /* the (current) sequence file */
       *sequence_name; /* the (current) sequence name */
-  lua_State *L;
-  bool is_table;
+  Mapping *mapping;
   Bioseq *bioseq; /* the current bioseq */
 };
 
 RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Env *env)
 {
   RegionMapping *rm;
-  int had_err = 0;
   env_error_check(env);
   assert(mapping_filename);
-  /* alloc */
   rm = env_ma_calloc(env, 1, sizeof (RegionMapping));
-  rm->mapping_filename = str_ref(mapping_filename);
-  /* create new lua state (i.e., interpreter) */
-  rm->L = luaL_newstate();
-  if (!rm->L) {
-    env_error_set(env, "out of memory (cannot create new lua state)");
-    had_err = -1;
-  }
-  /* load the standard libs into the lua interpreter */
-  if (!had_err)
-    luaL_openlibs(rm->L);
-  /* try to load & run mapping file */
-  if (!had_err) {
-    if (luaL_loadfile(rm->L, str_get(mapping_filename)) ||
-        lua_pcall(rm->L, 0, 0, 0)) {
-      env_error_set(env, "cannot run mapping file: %s",
-                    lua_tostring(rm->L, -1));
-      had_err = -1;
-    }
-  }
-  /* make sure a global 'mapping' variable is defined */
-  if (!had_err) {
-    lua_getglobal(rm->L, "mapping");
-    if (lua_isnil(rm->L, -1)) {
-      env_error_set(env, "'mapping' is not defined in \"%s\"",
-                str_get(mapping_filename));
-      had_err = -1;
-    }
-  }
-  /* make sure it is either a table or a function */
-  if (!had_err) {
-    if (!(lua_istable(rm->L, -1) || lua_isfunction(rm->L, -1))) {
-      env_error_set(env, "'mapping' must be either a table or a function "
-                    "(defined in \"%s\")", str_get(mapping_filename));
-      had_err = -1;
-    }
-  }
-  /* remember if it is a table or a function */
-  if (!had_err) {
-    if (lua_istable(rm->L, -1))
-      rm->is_table = true;
-    else {
-      rm->is_table = false;
-      lua_pop(rm->L, 1);
-    }
-  }
-  /* return */
-  if (had_err) {
+  rm->mapping = mapping_new(mapping_filename, "mapping", MAPPINGTYPE_STRING,
+                            env);
+  if (!rm->mapping) {
     regionmapping_delete(rm, env);
     return NULL;
   }
@@ -102,64 +55,6 @@ RegionMapping* regionmapping_new_seqfile(Str *sequence_filename, Env *env)
   return rm;
 }
 
-static Str* map_table(RegionMapping *rm, const char *sequence_region,
-                      Env *env)
-{
-  Str *result = NULL;
-  int had_err = 0;
-  env_error_check(env);
-  assert(rm && sequence_region);
-  lua_pushstring(rm->L, sequence_region);
-  lua_gettable(rm->L, -2); /* get mapping[sequence_region] */
-  /* make sure mapping[sequence_region] is defined */
-  if (lua_isnil(rm->L, -1)) {
-    env_error_set(env, "mapping[%s] is nil (defined in \"%s\")",
-                  sequence_region, str_get(rm->mapping_filename));
-    had_err = -1;
-  }
-  /* make sure mapping[sequence_region] is a string */
-  if (!had_err) {
-    if (!(lua_isstring(rm->L, -1))) {
-      env_error_set(env, "mapping[%s] is not a string (defined in \"%s\")",
-                sequence_region, str_get(rm->mapping_filename));
-      had_err = -1;
-    }
-  }
-  if (!had_err)
-    result = str_new_cstr(lua_tostring(rm->L, -1), env);
-  lua_pop(rm->L, 1); /* pop result */
-  return result;
-}
-
-static Str* map_function(RegionMapping *rm, const char *sequence_region,
-                         Env *env)
-{
-  Str *result = NULL;
-  int had_err = 0;
-  env_error_check(env);
-  assert(rm && sequence_region);
-  lua_getglobal(rm->L, "mapping");
-  lua_pushstring(rm->L, sequence_region);
-  /* call function */
-  if (lua_pcall(rm->L, 1, 1, 0)) {
-    env_error_set(env, "running function 'mapping': %s",
-                  lua_tostring(rm->L, -1));
-    had_err = -1;
-  }
-  /* make sure the result is a string */
-  if (!had_err) {
-    if (!lua_isstring(rm->L, -1)) {
-      env_error_set(env, "function 'mapping' must return a string (defined in "
-                "\"%s\")", str_get(rm->mapping_filename));
-      had_err = -1;
-    }
-    if (!had_err)
-      result = str_new_cstr(lua_tostring(rm->L, -1), env);
-    lua_pop(rm->L, 1); /* pop result */
-  }
-  return result;
-}
-
 static Str* regionmapping_map(RegionMapping *rm, const char *sequence_region,
                               Env *env)
 {
@@ -167,10 +62,8 @@ static Str* regionmapping_map(RegionMapping *rm, const char *sequence_region,
   assert(rm && sequence_region);
   if (rm->sequence_filename)
     return str_ref(rm->sequence_filename);
-  else if (rm->is_table)
-    return map_table(rm, sequence_region, env);
   else
-    return map_function(rm, sequence_region, env);
+    return mapping_map_string(rm->mapping, sequence_region, env);
 }
 
 static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Env *env)
@@ -226,11 +119,10 @@ int regionmapping_get_raw_sequence_length(RegionMapping *rm,
 void regionmapping_delete(RegionMapping *rm, Env *env)
 {
   if (!rm) return;
-  str_delete(rm->mapping_filename, env);
   str_delete(rm->sequence_filename, env);
   str_delete(rm->sequence_file, env);
   str_delete(rm->sequence_name, env);
-  if (rm->L) lua_close(rm->L);
+  mapping_delete(rm->mapping, env);
   bioseq_delete(rm->bioseq, env);
   env_ma_free(rm, env);
 }

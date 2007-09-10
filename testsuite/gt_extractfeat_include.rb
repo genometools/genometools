@@ -44,7 +44,7 @@ Name "gt extractfeat -regionmapping fail 1 (no mapping file)"
 Keywords "gt_extractfeat"
 Test do
   run_test("#{$bin}gt extractfeat -type exon -regionmapping #{$testdata}/nonexistent_file #{$testdata}/gt_extractfeat_succ_1.gff3", :retval => 1 )
-  grep($last_stderr, "cannot run mapping file");
+  grep($last_stderr, "cannot run file");
 end
 
 Name "gt extractfeat -regionmapping fail 2 (empty file)"
