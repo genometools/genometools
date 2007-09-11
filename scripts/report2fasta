@@ -1,0 +1,112 @@
+#!/usr/bin/env lua
+--[[
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
+
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+]]
+
+--[[
+  convert NCBI reports from file handle <fh> to fasta format and show them on
+  stdout
+
+  The parser is implemented as a state machine with the following states:
+  - nil
+  - "parse_identifier"
+  - "search_sequence"
+  - "parse_sequence"
+  - "parse_organism"
+]]
+function report2fasta(fh, set_organism)
+  assert(fh)
+  local state, sequence, description
+  for line in fh:lines() do
+    if not state then
+      if string.match(line, "^IDENTIFIERS") then
+        state = "parse_identifier"
+      end
+    elseif state == "parse_identifier" then
+      local id = string.match(line, "^GenBank gi:%s*(%d*)")
+      if id then
+        description = ">gi|" .. id
+        state = "search_sequence"
+      end
+    elseif state == "search_sequence" then
+      if string.match(line, "^SEQUENCE") then
+        state = "parse_sequence"
+        sequence = ""
+      end
+    elseif state == "parse_sequence" then
+      local sequence_part = string.match(line, "^%s+(%a+)")
+      if sequence_part then
+        sequence = sequence..sequence_part
+      else
+        assert(sequence.len)
+        state = "parse_organism"
+      end
+    elseif state == "parse_organism" then
+      local given_organism = string.match(line, "^Organism:%s*(%a.*)")
+      if given_organism and
+         (not set_organism or given_organism == set_organism) then
+        description = description .. " [" .. given_organism .. "]"
+        io.stdout:write(string.format("%s\n%s\n", description, sequence))
+        state = nil -- go back to start state
+      end
+    end
+  end
+end
+
+local set_organism -- per default, sequences for all organisms are shown
+
+-- argument parsing (XXX: make the option parser more generic)
+for i,v in ipairs(arg) do
+  if v == "-help" then
+    -- XXX: use basename(arg[0]) insead of arg[0]
+    io.stderr:write(string.format("Usage: %s [report_file ...]\n", arg[0]))
+    io.stderr:write("Convert all given report files to fasta files\n\n")
+    io.stderr:write("-organism set organism to show\n")
+    io.stderr:write("-help     display help and exit\n\n")
+    io.stderr:write("Report bugs to <gremme@zbh.uni-hamburg.de>.\n")
+    os.exit()
+  elseif v == "-organism" then
+    if not arg[i+1] then
+      io.stderr:write("error: missing argument to option -organism\n")
+      os.exit(1)
+    end
+    set_organism = arg[i+1]
+    table.remove(arg, i+1)
+    table.remove(arg, i)
+  end
+end
+
+local read_from_stdin = false -- per default, do not read from stdin
+
+-- iterate over all given files
+for i,v in ipairs(arg) do
+  if v == "-" then
+    read_from_stdin = true
+  else
+    local fh, err = io.open(v)
+    if not fh then
+      io.stderr:write(string.format("error: %s\n", err))
+      os.exit(1)
+    end
+    report2fasta(fh, set_organism)
+    fh:close()
+  end
+end
+
+-- finally, read from stdin (if necessary)
+if read_from_stdin or not arg[1] then
+  report2fasta(io.stdin, set_organism)
+end
