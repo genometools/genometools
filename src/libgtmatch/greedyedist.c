@@ -4,15 +4,15 @@
 #include "arraydef.h"
 
 #define COMPARESYMBOLS(A,B)\
-        if((A) == (Uchar) SEPARATOR)\
+        if ((A) == (Uchar) SEPARATOR)\
         {\
           gl->ubound = uptr;\
         }\
-        if((B) == (Uchar) SEPARATOR)\
+        if ((B) == (Uchar) SEPARATOR)\
         {\
           gl->vbound = vptr;\
         }\
-        if((A) != (B) || ISSPECIAL(A))\
+        if ((A) != (B) || ISSPECIAL(A))\
         {\
           break;\
         }
@@ -30,22 +30,22 @@ typedef long Frontvalue;
 
 typedef struct
 {
-  long offset,   // absolute base address of the front
-       width,    // width of the front
-       left;     // left boundary (negative),
-                 // -left is relative address of entry
-} Frontspec;     // \Typedef{Frontspec}
+  long offset,   /* absolute base address of the front */
+       width,    /* width of the front */
+       left;     /* left boundary (negative), */
+                 /* -left is relative address of entry */
+} Frontspec;     /* \Typedef{Frontspec} */
 
 DECLAREARRAYSTRUCT(Frontspec);
 
 typedef struct
 {
-  const Uchar *useq, 
+  const Uchar *useq,
               *vseq,
-              *ubound, 
+              *ubound,
               *vbound;
-  long ulen, 
-       vlen, 
+  long ulen,
+       vlen,
        integermin;
   Frontvalue *frontspace;
 } FrontResource;
@@ -56,10 +56,10 @@ static void showfront(FrontResource *gl,Frontspec *fspec,long r)
   Frontvalue *fval;
   long k;
 
-  for(fval = gl->frontspace + fspec->offset, k=fspec->left; 
-      k < fspec->left + fspec->width; k++, fval++)
+  for (fval = gl->frontspace + fspec->offset, k=fspec->left;
+       k < fspec->left + fspec->width; k++, fval++)
   {
-    if(r <= 0 || k <= -r || k >= r)
+    if (r <= 0 || k <= -r || k >= r)
     {
       printf("(k=%ld)%ld ",k,ROWVALUE(fval));
     } else
@@ -73,7 +73,7 @@ static void showfront(FrontResource *gl,Frontspec *fspec,long r)
 
 static void frontspecparms(FrontResource *gl,Frontspec *fspec,long p,long r)
 {
-  if(r <= 0)
+  if (r <= 0)
   {
     fspec->left = -p;
     fspec->width = p + p + 1;
@@ -91,7 +91,7 @@ static void frontspecparms(FrontResource *gl,Frontspec *fspec,long p,long r)
 static long accessfront(FrontResource *gl,Frontvalue *fval,
                         Frontspec *fspec,long k)
 {
-  if(fspec->left <= k && k < fspec->left + fspec->width)
+  if (fspec->left <= k && k < fspec->left + fspec->width)
   {
     return ROWVALUE(fval+k);
   }
@@ -99,7 +99,7 @@ static long accessfront(FrontResource *gl,Frontvalue *fval,
 }
 
 /*
-  The following function evaluates an entry \(front(k,p)\) in a 
+  The following function evaluates an entry \(front(k,p)\) in a
   forward direction.
 */
 
@@ -115,38 +115,38 @@ static void evalentryforward(FrontResource *gl,
 
   printf("evalentryforward(k=%ld)\n",k);
   fptr = gl->frontspace + fspec->offset - fspec->left;
-  t = accessfront(gl,fptr,fspec,k) + 1;         // same diagonal
+  t = accessfront(gl,fptr,fspec,k) + 1;         /* same diagonal */
   printf("same: access(k=%ld)=%ld\n",k,t-1);
 
-  value = accessfront(gl,fptr,fspec,k-1);       // diagonal below
+  value = accessfront(gl,fptr,fspec,k-1);       /* diagonal below */
   printf("below: access(k=%ld)=%ld\n",k-1,value);
-  if(t < value)
+  if (t < value)
   {
     t = value;
   }
-  value = accessfront(gl,fptr,fspec,k+1) + 1;     // diagonal above
+  value = accessfront(gl,fptr,fspec,k+1) + 1;     /* diagonal above */
   printf("above: access(k=%ld)=%ld\n",k+1,value-1);
-  if(t < value)
+  if (t < value)
   {
     t = value;
   }
-  printf("maximum: t=%ld\n",t);   // the maximum over three values
-  if(t < 0 || t+k < 0)             // no negative value
+  printf("maximum: t=%ld\n",t);   /* the maximum over three values */
+  if (t < 0 || t+k < 0)             /* no negative value */
   {
     STOREFRONT(gl,ROWVALUE(fval),MINUSINFINITYFRONT(gl));
   } else
   {
     uptr = gl->useq + t;
     vptr = gl->vseq + t + k;
-    if(gl->ulen != 0 && gl->vlen != 0)  // only for nonempty strings
+    if (gl->ulen != 0 && gl->vlen != 0)  /* only for nonempty strings */
     {
-      if(uptr == vptr)    // strings are equal
+      if (uptr == vptr)    /* strings are equal */
       {
         t = gl->ulen-1;
       } else
       {
-        for(/* Nothing */; uptr < gl->ubound && vptr < gl->vbound;
-            uptr++, vptr++)
+        for (/* Nothing */; uptr < gl->ubound && vptr < gl->vbound;
+             uptr++, vptr++)
         {
           a = *uptr;
           b = *vptr;
@@ -155,7 +155,7 @@ static void evalentryforward(FrontResource *gl,
         t = (long) (uptr - gl->useq);
       }
     }
-    if(gl->useq + t > gl->ubound || gl->vseq + t + k > gl->vbound)
+    if (gl->useq + t > gl->ubound || gl->vseq + t + k > gl->vbound)
     {
       STOREFRONT(gl,ROWVALUE(fval),MINUSINFINITYFRONT(gl));
     } else
@@ -165,7 +165,7 @@ static void evalentryforward(FrontResource *gl,
   }
 }
 
-/* 
+/*
   The following function evaluates a front in forward direction.
   It returns true if any of the returned values is at least 0.
 */
@@ -176,16 +176,16 @@ static bool evalfrontforward(FrontResource *gl,
                              long r)
 {
   long k;
-  bool defined = false; 
+  bool defined = false;
   Frontvalue *fval;
 
-  for(fval = gl->frontspace + fspec->offset, k = fspec->left; 
+  for (fval = gl->frontspace + fspec->offset, k = fspec->left;
       k < fspec->left + fspec->width; k++, fval++)
   {
-    if(r <= 0 || k <= -r || k >= r)
+    if (r <= 0 || k <= -r || k >= r)
     {
       evalentryforward(gl,fval,prevfspec,k);
-      if(ROWVALUE(fval) >= 0)
+      if (ROWVALUE(fval) >= 0)
       {
         defined = true;
       }
@@ -206,7 +206,7 @@ static bool evalfrontforward(FrontResource *gl,
 }
 
 /*
-  The following function evaluates the entry \(front(0,0)\) in a 
+  The following function evaluates the entry \(front(0,0)\) in a
   forward direction.
 */
 
@@ -217,22 +217,22 @@ static void firstfrontforward(FrontResource *gl,Frontspec *fspec)
 
   fspec->left = fspec->offset = 0;
   fspec->width = (long) 1;
-  if(gl->ulen == 0 || gl->vlen == 0)
+  if (gl->ulen == 0 || gl->vlen == 0)
   {
     STOREFRONT(gl,ROWVALUE(&gl->frontspace[0]),0);
   } else
   {
-    for(uptr = gl->useq, vptr = gl->vseq; 
-        uptr < gl->ubound && 
-        vptr < gl->vbound;
-        uptr++, vptr++)
+    for (uptr = gl->useq, vptr = gl->vseq;
+         uptr < gl->ubound &&
+         vptr < gl->vbound;
+         uptr++, vptr++)
     {
       a = *uptr;
       b = *vptr;
       COMPARESYMBOLS(a,b);
     }
     STOREFRONT(gl,ROWVALUE(&gl->frontspace[0]),(long) (uptr - gl->useq));
-  } 
+  }
   printf("forward front[0]=%ld\n",ROWVALUE(&gl->frontspace[0]));
 }
 
@@ -247,14 +247,14 @@ long unitedistfrontSEPgeneric(bool withmaxdist,
   unsigned long currentallocated;
   FrontResource gl;
   Frontspec frontspecspace[2],
-            *fspec, 
+            *fspec,
             *prevfspec;
   Frontvalue *fptr;
   long k, r, realdistance;
 
   printf("unitedistcheckSEPgeneric(ulen=%ld,vlen=%ld)\n",ulen,vlen);
 
-  if(withmaxdist)
+  if (withmaxdist)
   {
     currentallocated = (maxdist+1) * (maxdist+1) + 1;
   } else
@@ -271,19 +271,19 @@ long unitedistfrontSEPgeneric(bool withmaxdist,
   gl.integermin = -MAX(ulen,vlen);
   prevfspec = &frontspecspace[0];
   firstfrontforward(&gl,prevfspec);
-  if(gl.ulen == gl.vlen && ROWVALUE(&gl.frontspace[0]) == gl.vlen)
+  if (gl.ulen == gl.vlen && ROWVALUE(&gl.frontspace[0]) == gl.vlen)
   {
     realdistance = 0;
   } else
   {
-    for(k=(long) 1, r=1-MIN(gl.ulen,gl.vlen); /* Nothing */ ; k++, r++)
+    for (k=(long) 1, r=1-MIN(gl.ulen,gl.vlen); /* Nothing */ ; k++, r++)
     {
-      if(withmaxdist && k > (long) maxdist)
+      if (withmaxdist && k > (long) maxdist)
       {
         realdistance = (long) (maxdist + 1);
         break;
       }
-      if(prevfspec == &frontspecspace[0])
+      if (prevfspec == &frontspecspace[0])
       {
         fspec = &frontspecspace[1];
       } else
@@ -292,9 +292,10 @@ long unitedistfrontSEPgeneric(bool withmaxdist,
       }
       fspec->offset = prevfspec->offset + prevfspec->width;
       frontspecparms(&gl,fspec,k,r);
-      while((unsigned long) (fspec->offset + fspec->width) >= currentallocated)
+      while ((unsigned long) (fspec->offset + fspec->width)
+             >= currentallocated)
       {
-        if(withmaxdist)
+        if (withmaxdist)
         {
           fprintf(stderr,"Not enough frontspace: "
                          "maxdist=%lu,p=%ld,offset=%ld,width=%ld\n",
@@ -310,12 +311,12 @@ long unitedistfrontSEPgeneric(bool withmaxdist,
       }
       (void) evalfrontforward(&gl,prevfspec,fspec,r);
       fptr = gl.frontspace + fspec->offset - fspec->left;
-      if(accessfront(&gl,fptr,fspec,(long) (vlen - ulen)) == ulen)
+      if (accessfront(&gl,fptr,fspec,(long) (vlen - ulen)) == ulen)
       {
         realdistance = k;
         break;
       }
-      if(prevfspec == &frontspecspace[0])
+      if (prevfspec == &frontspecspace[0])
       {
         prevfspec = &frontspecspace[1];
       } else
@@ -323,9 +324,9 @@ long unitedistfrontSEPgeneric(bool withmaxdist,
         prevfspec = &frontspecspace[0];
       }
     }
-    if(withmaxdist)
+    if (withmaxdist)
     {
-      if(realdistance <= (long) maxdist)
+      if (realdistance <= (long) maxdist)
       {
         printf("unitedistfrontSEP returns %ld\n",realdistance);
         FREESPACE(gl.frontspace);

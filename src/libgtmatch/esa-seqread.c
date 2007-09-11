@@ -105,7 +105,7 @@ void updateSequentialsuffixarrayreaderfromRAM(
   ssar->nextsuftabindex = 0;
   ssar->suftab = suftab;
   ssar->numberofsuffixes = numberofsuffixes;
-  if(firstpage)
+  if (firstpage)
   {
     (void) nextLcpvalueiterator(ssar->lvi,
                                 true,

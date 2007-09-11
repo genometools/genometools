@@ -100,7 +100,7 @@ static int storemaxmatchself(void *info,
     dbstart = pos2;
     querystart = pos1;
   }
-  if (dbstart < maxmatchselfinfo->dblen && 
+  if (dbstart < maxmatchselfinfo->dblen &&
       maxmatchselfinfo->dblen < querystart)
   {
     Substringmatch subm;
@@ -125,7 +125,7 @@ static int storemaxmatchself(void *info,
       {
         return -1;
       }
-      if(queryseqnum == 0)
+      if (queryseqnum == 0)
       {
         subm.querystart = pos;
       } else

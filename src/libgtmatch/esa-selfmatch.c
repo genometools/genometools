@@ -69,11 +69,11 @@ static int constructsarrandrunmaxpairs(
     ssar = newSequentialsuffixarrayreaderfromRAM(ssi->encseq,
                                                  readmode,
                                                  env);
-    while(true)
+    while (true)
     {
       suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
                                   mtime,sfi,env);
-      if(suftabptr == NULL)
+      if (suftabptr == NULL)
       {
         break;
       }

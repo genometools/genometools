@@ -43,7 +43,7 @@ int array_compare(const Array *a,const Array *b,
   for (idx=0; idx < size_a; idx++)
   {
     cmp = compar(array_get(a,idx),array_get(b,idx));
-    if(cmp != 0)
+    if (cmp != 0)
     {
       return cmp;
     }
