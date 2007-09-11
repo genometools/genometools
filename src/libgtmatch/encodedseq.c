@@ -140,7 +140,6 @@ typedef uint32_t Uint32;
  struct Encodedsequence
 {
   /* Common part */
-  Uchar *characters;
   Uchar *satcharptr;
   Positionaccesstype sat;
   unsigned int mapsize;
@@ -445,6 +444,33 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   }
 }
 
+#ifdef INLINEDENCSEQ
+
+int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
+{
+  FILE *fp;
+  bool haserr = false;
+
+  env_error_check(env);
+  fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"wb",env);
+  if (fp == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    if (fwrite(encseq->plainseq,sizeof(Uchar),(size_t) encseq->totallength,
+               fp) ! = (size_t) encseq->totallength)
+    {
+      haserr = true;
+    }
+  }
+  env_fa_xfclose(fp,env);
+  return haserr ? -1 : 0;
+}
+
+#else
+
 int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
 {
   Encodedsequencewithoptions encseqwithoptions;
@@ -474,6 +500,7 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
   env_fa_xfclose(fp,env);
   return haserr ? -1 : 0;
 }
+#endif
 
 static int fillencseqmapspecstartptr(Encodedsequence *encseq,
                                      const Str *indexname,
@@ -582,7 +609,6 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
   {
     return;
   }
-  env_ma_free(encseq->characters, env);
   if (encseq->mappedptr != NULL)
   {
     env_fa_xmunmap(encseq->mappedptr,env);
@@ -1364,11 +1390,6 @@ static bool bitanddirectnextspecialrangeiterator(Sequencerange *range,
   return success;
 }
 
-bool exhaustedspecialrangeiterator(Specialrangeiterator *sri)
-{
-  return sri->exhausted;
-}
-
 bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri)
 {
   if (sri->exhausted)
@@ -1413,7 +1434,6 @@ static Encodedsequence *determineencseqkeyvalues(
   env_error_check(env);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->sat = sat;
-  encseq->characters = copycharactersAlphabet(alphabet,env);
   encseq->mapsize = getmapsizeAlphabet(alphabet);
   encseq->mappedptr = NULL;
   encseq->satcharptr = NULL;

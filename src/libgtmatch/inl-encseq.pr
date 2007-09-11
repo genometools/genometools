@@ -1,0 +1,10 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
+{
+}
+#endif
+#ifdef __cplusplus
+}
+#endif

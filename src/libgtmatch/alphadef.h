@@ -42,8 +42,6 @@ unsigned int getmapsizeAlphabet(const Alphabet *alpha);
 
 const Uchar *getcharactersAlphabet(const Alphabet *alpha);
 
-Uchar *copycharactersAlphabet(const Alphabet *alpha,Env *env);
-
 void freeAlphabet(Alphabet **alpha,Env *env);
 
 void outputalphabet(FILE *fpout,const Alphabet *alpha);

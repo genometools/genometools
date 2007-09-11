@@ -517,16 +517,6 @@ const Uchar *getcharactersAlphabet(const Alphabet *alpha)
   return alpha->characters;
 }
 
-Uchar *copycharactersAlphabet(const Alphabet *alpha,Env *env)
-{
-  Uchar *characters;
-
-  env_error_check(env);
-  ALLOCASSIGNSPACE(characters,NULL,Uchar,alpha->domainsize);
-  (void) memcpy(characters,alpha->characters,(size_t) alpha->domainsize);
-  return characters;
-}
-
 void freeAlphabet(Alphabet **alpha,Env *env)
 {
   FREESPACE(*alpha);
