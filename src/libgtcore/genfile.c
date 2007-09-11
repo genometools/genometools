@@ -162,19 +162,22 @@ static int bzgetc(BZFILE *bzfile)
 int genfile_getc(GenFile *genfile)
 {
   int c = -1;
-  assert(genfile);
-  switch (genfile->mode) {
-    case GFM_UNCOMPRESSED:
-      c = fgetc(genfile->fileptr.file);
-      break;
-    case GFM_GZIP:
-      c = gzgetc(genfile->fileptr.gzfile);
-      break;
-    case GFM_BZIP2:
-      c = bzgetc(genfile->fileptr.bzfile);
-      break;
-    default: assert(0);
+  if (genfile) {
+    switch (genfile->mode) {
+      case GFM_UNCOMPRESSED:
+        c = fgetc(genfile->fileptr.file);
+        break;
+      case GFM_GZIP:
+        c = gzgetc(genfile->fileptr.gzfile);
+        break;
+      case GFM_BZIP2:
+        c = bzgetc(genfile->fileptr.bzfile);
+        break;
+      default: assert(0);
+    }
   }
+  else
+    c = fgetc(stdin);
   return c;
 }
 
