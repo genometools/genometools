@@ -89,12 +89,16 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
         is->fpin = stdin;
       is->line_number = 0;
 
-      if (is->be_verbose) {
+      if (!had_err && is->be_verbose) {
         printf("processing file \"%s\"\n", strarray_size(is->files)
                ? strarray_get(is->files, is->next_file-1) : "stdin");
       }
-      if (is->non_stdin_file_is_open && is->be_verbose)
-        progressbar_start(&is->line_number, file_number_of_lines(is->fpin));
+      if (!had_err && is->non_stdin_file_is_open && is->be_verbose) {
+        progressbar_start(&is->line_number,
+                          file_number_of_lines(strarray_get(is->files,
+                                                            is->next_file-1),
+                                               env));
+      }
     }
 
     assert(is->fpin); /* file is open */
