@@ -23,8 +23,7 @@
 #include "libgtcore/str.h"
 #include "libgtmatch/spacedef.h"
 #include "libgtmatch/symboldef.h"
-
-#include "libgtmatch/test-pairwise.pr"
+#include "libgtmatch/test-pairwise.h"
 
 typedef struct
 {
@@ -189,62 +188,48 @@ static void freesimpleoption(Cmppairwiseopt *cmppairwise,Env *env)
   }
 }
 
-static int applycheckfunctiontosimpleoptions(Checkcmppairfuntype checkfunction,
-                                             const Cmppairwiseopt *opt,
-                                             Env *env)
+static unsigned long applycheckfunctiontosimpleoptions(
+                                  Checkcmppairfuntype checkfunction,
+                                  const Cmppairwiseopt *opt,
+                                  Env *env)
 {
   if(strarray_size(opt->strings) > 0)
   {
-    bool forward = true, haserr = false;
+    bool forward = true;
     while(true)
     {
-      if(checkfunction(forward,
-                       (const Uchar *) strarray_get(opt->strings,0),
-                       (unsigned long) strlen(strarray_get(opt->strings,0)),
-                       (const Uchar *) strarray_get(opt->strings,1UL),
-                       (unsigned long) strlen(strarray_get(opt->strings,1UL))) 
-          != 0)
-      {
-        haserr = true;
-        break;
-      }
+      checkfunction(forward,
+                    (const Uchar *) strarray_get(opt->strings,0),
+                    (unsigned long) strlen(strarray_get(opt->strings,0)),
+                    (const Uchar *) strarray_get(opt->strings,1UL),
+                    (unsigned long) strlen(strarray_get(opt->strings,1UL)),
+                    env);
       if(!forward)
       {
         break;
       }
       forward = false;
     }
-    return haserr ? -1 : 0;
+    return 2UL; /* number of testcases */
   }
   if(strarray_size(opt->files) > 0)
   {
-    if(runcheckfunctionontwofiles(checkfunction,
-                                  strarray_get(opt->files,0),
-                                  strarray_get(opt->files,1UL),
-                                  env) != 0)
-    {
-      return -1;
-    }
-    return 0;
+    runcheckfunctionontwofiles(checkfunction,
+                               strarray_get(opt->files,0),
+                               strarray_get(opt->files,1UL),
+                               env);
+    return 2UL;
   }
   if(opt->charlistlen != NULL)
   {
-    if(runcheckfunctiononalphalen(checkfunction,
-                                  str_get(opt->charlistlen->charlist),
-                                  opt->charlistlen->len,
-                                  env) != 0)
-    {
-      return -1;
-    }
-    return 0;
+    return runcheckfunctiononalphalen(checkfunction,
+                                      str_get(opt->charlistlen->charlist),
+                                      opt->charlistlen->len,
+                                      env);
   }
   if(str_length(opt->text) > 0)
   {
-    if(runcheckfunctionontext(checkfunction,str_get(opt->text)) != 0)
-    {
-      return -5;
-    }
-    return 0;
+    return runcheckfunctionontext(checkfunction,str_get(opt->text),env);
   }
   assert(false);
   return 0;
@@ -252,7 +237,6 @@ static int applycheckfunctiontosimpleoptions(Checkcmppairfuntype checkfunction,
 
 int gt_paircmp(int argc, const char **argv, Env *env)
 {
-  bool haserr = false;
   int parsed_args;
   Cmppairwiseopt cmppairwise;
   OPrval oprval;
@@ -262,12 +246,13 @@ int gt_paircmp(int argc, const char **argv, Env *env)
   oprval = parse_options(&parsed_args,&cmppairwise,argc, argv, env);
   if (oprval == OPTIONPARSER_OK)
   {
+    unsigned long testcases;
+
     assert(parsed_args == argc);
     showsimpleoptions(&cmppairwise);
-  }
-  if(applycheckfunctiontosimpleoptions(NULL,&cmppairwise,env) != 0)
-  {
-    haserr = true;
+    testcases = applycheckfunctiontosimpleoptions(checkgreedyunitedist,
+                                                  &cmppairwise,env);
+    printf("# number of testcases: %lu\n",testcases);
   }
   freesimpleoption(&cmppairwise,env);
   if (oprval == OPTIONPARSER_REQUESTS_EXIT)
@@ -278,5 +263,5 @@ int gt_paircmp(int argc, const char **argv, Env *env)
   {
     return -1;
   }
-  return haserr ? -1 : 0;
+  return 0;
 }

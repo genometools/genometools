@@ -1,11 +1,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-long greedyunitedist(const Uchar *useq,
-                     unsigned long ulenvalue,
-                     const Uchar *vseq,
-                     unsigned long vlenvalue,
-                     Env *env);
+unsigned long greedyunitedist(const Uchar *useq,
+                              unsigned long ulenvalue,
+                              const Uchar *vseq,
+                              unsigned long vlenvalue,
+                              Env *env);
 
 #ifdef __cplusplus
 }

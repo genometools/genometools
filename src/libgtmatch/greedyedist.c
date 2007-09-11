@@ -279,33 +279,26 @@ static void firstfrontforward(FrontResource *gl,Frontspec *fspec)
 #endif
 }
 
-long greedyunitedist(const Uchar *useq,
-                     unsigned long ulenvalue,
-                     const Uchar *vseq,
-                     unsigned long vlenvalue,
-                     Env *env)
+unsigned long greedyunitedist(const Uchar *useq,
+                              unsigned long ulenvalue,
+                              const Uchar *vseq,
+                              unsigned long vlenvalue,
+                              Env *env)
 {
-  unsigned long currentallocated;
+  unsigned long currentallocated, realdistance;
   FrontResource gl;
   Frontspec frontspecspace[2],
             *fspec,
             *prevfspec;
   Frontvalue *fptr;
-  long k, r, realdistance;
+  unsigned long kval;
+  long r;
 
 #ifdef DEBUG
   printf("unitedistcheckSEPgeneric(ulen=%lu,vlen=%lu)\n",ulenvalue,vlenvalue);
 #endif
-  if (ulenvalue > (unsigned long) LONG_MAX)
-  {
-    env_error_set(env,"ulen = %lu is too large",ulenvalue);
-    return (long) -1;
-  }
-  if (vlenvalue > (unsigned long) LONG_MAX)
-  {
-    env_error_set(env,"vlen = %lu is too large",vlenvalue);
-    return (long) -1;
-  }
+  assert(ulenvalue < (unsigned long) LONG_MAX);
+  assert(vlenvalue < (unsigned long) LONG_MAX);
   currentallocated = (unsigned long) 1;
   ALLOCASSIGNSPACE(gl.frontspace,NULL,Frontvalue,currentallocated);
   gl.useq = useq;
@@ -322,7 +315,7 @@ long greedyunitedist(const Uchar *useq,
     realdistance = 0;
   } else
   {
-    for (k=(long) 1, r=1-MIN(gl.ulen,gl.vlen); /* Nothing */ ; k++, r++)
+    for (kval=1UL, r=1-MIN(gl.ulen,gl.vlen); /* Nothing */ ; kval++, r++)
     {
       if (prevfspec == &frontspecspace[0])
       {
@@ -332,11 +325,11 @@ long greedyunitedist(const Uchar *useq,
         fspec = &frontspecspace[0];
       }
       fspec->offset = prevfspec->offset + prevfspec->width;
-      frontspecparms(&gl,fspec,k,r);
+      frontspecparms(&gl,fspec,(long) kval,r);
       while ((unsigned long) (fspec->offset + fspec->width)
              >= currentallocated)
       {
-        currentallocated += (k+1);
+        currentallocated += (kval+1);
         ALLOCASSIGNSPACE(gl.frontspace,gl.frontspace,
                          Frontvalue,currentallocated);
       }
@@ -344,7 +337,7 @@ long greedyunitedist(const Uchar *useq,
       fptr = gl.frontspace + fspec->offset - fspec->left;
       if (accessfront(&gl,fptr,fspec,gl.vlen - gl.ulen) == gl.ulen)
       {
-        realdistance = k;
+        realdistance = kval;
         break;
       }
       if (prevfspec == &frontspecspace[0])
@@ -360,6 +353,5 @@ long greedyunitedist(const Uchar *useq,
   printf("unitedistfrontSEP returns %ld\n",realdistance);
 #endif
   FREESPACE(gl.frontspace);
-  assert(realdistance >= 0);
   return realdistance;
 }

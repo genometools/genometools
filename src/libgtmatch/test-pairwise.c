@@ -21,95 +21,95 @@
 #include "libgtcore/env.h"
 #include "symboldef.h"
 #include "spacedef.h"
+#include "test-pairwise.h"
 
-int runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
-                               const char *file1,
-                               const char *file2,
-                               Env *env)
+#include "greedyedist.pr"
+#include "squarededist.pr"
+
+void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
+                                const char *file1,
+                                const char *file2,
+                                Env *env)
 {
   const Uchar *useq = NULL, *vseq = NULL;
   size_t ulen, vlen;
-  bool haserr = false;
+  bool forward = true;
 
   useq = (const Uchar *) env_fa_mmap_read(env,file1,&ulen);
   if (useq == NULL)
   {
-    env_error_set(env,"cannot map file \"%s\": %s",file1,strerror(errno));
-    haserr = true;
+    fprintf(stderr,"cannot map file \"%s\": %s\n",file1,strerror(errno));
+    exit(EXIT_FAILURE);
   }
-  if (!haserr)
+  vseq = (const Uchar *) env_fa_mmap_read(env,file2,&vlen);
+  if (vseq == NULL)
   {
-    vseq = (const Uchar *) env_fa_mmap_read(env,file2,&vlen);
-    if (vseq == NULL)
-    {
-      env_error_set(env,"cannot map file \"%s\": %s",file2,strerror(errno));
-      haserr = true;
-    }
+    fprintf(stderr,"cannot map file \"%s\": %s",file2,strerror(errno));
+    exit(EXIT_FAILURE);
   }
-  if (!haserr)
+  while (true)
   {
-    if (checkfunction(true,useq,(unsigned long) ulen,
-                           vseq,(unsigned long) vlen) != 0)
+    checkfunction(forward,useq,(unsigned long) ulen,
+                          vseq,(unsigned long) vlen,env);
+    if (!forward)
     {
-      haserr = true;
+      break;
     }
-  }
-  if (!haserr)
-  {
-    if (checkfunction(false,useq,(unsigned long) ulen,
-                            vseq,(unsigned long) vlen) != 0)
-    {
-      haserr = true;
-    }
+    forward = false;
   }
   env_fa_xmunmap((void *) useq,env);
   env_fa_xmunmap((void *) vseq,env);
-  return haserr ? -1 : 0;
 }
 
-int runcheckfunctionontext(Checkcmppairfuntype checkfunction,
-                           const char *text)
+unsigned long runcheckfunctionontext(Checkcmppairfuntype checkfunction,
+                                     const char *text,
+                                     Env *env)
 {
-  size_t i, len;
+  unsigned long i, len;
 
-  len = strlen(text);
-  for (i=(size_t) 1; i<=len/2; i++)
+  len = (unsigned long) strlen(text);
+  for (i=1UL; i<=len/2; i++)
   {
-    if (checkfunction(true,(const Uchar *) text,(unsigned long) i,
-                           (const Uchar *) (text+i), (unsigned long) len-i)
-        != 0)
-    {
-      return -1;
-    }
+    checkfunction(true,
+                  (const Uchar *) text,
+                  i,
+                  (const Uchar *) (text+i),
+                  len-i,
+                  env);
   }
-  return 0;
+  return len/2;
 }
 
-int applycheckfunctiontotext(const Uchar *text,
-                             unsigned long textlen,
-                             void *info)
+unsigned long applycheckfunctiontotext(const Uchar *text,
+                                       unsigned long textlen,
+                                       void *info,
+                                       Env *env)
 {
   unsigned long i;
   Checkcmppairfuntype checkfunction = (Checkcmppairfuntype) info;
 
+#ifdef DEBUG
   printf("%s\n",(char *) text);
+#endif
   for (i=0; i<=textlen/2; i++)
   {
-    if (checkfunction(true,text,i,text+i,textlen-i) != 0)
-    {
-      return -1;
-    }
+    checkfunction(true,text,i,text+i,textlen-i,env);
   }
-  return 0;
+  return textlen/2+1;
 }
 
-static int applyall(const char *alpha,unsigned long textlen,void *info,
-                    int (*apply)(const Uchar *,unsigned long,void *),
-                    Env *env)
+static unsigned long applyall(const char *alpha,
+                              unsigned long textlen,void *info,
+                              unsigned long (*apply)(const Uchar *,
+                                                     unsigned long,
+                                                     void *,Env *),
+                              Env *env)
 {
-  unsigned long i, *w, z = textlen-1, asize = (unsigned long) strlen(alpha);
+  unsigned long i, *w, z = textlen-1,
+                testcases = 0,
+                asize = (unsigned long) strlen(alpha);
   Uchar *text;
-  bool haserr = false;
+  bool stop = false;
 
   ALLOCASSIGNSPACE(w,NULL,unsigned long,textlen+1);
   ALLOCASSIGNSPACE(text,NULL,Uchar,textlen+1);
@@ -118,18 +118,13 @@ static int applyall(const char *alpha,unsigned long textlen,void *info,
     w[i] = 0;
   }
   text[textlen] = (Uchar) '\0';
-
-  while (true)
+  while (!stop)
   {
     for (i = 0; i<textlen; i++)
     {
       text[i] = (Uchar) alpha[w[i]];
     }
-    if (apply(text,textlen,info) != 0)
-    {
-      haserr = true;
-      break;
-    }
+    testcases += apply(text,textlen,info,env);
     while (true)
     {
       w[z]++;
@@ -138,7 +133,8 @@ static int applyall(const char *alpha,unsigned long textlen,void *info,
         w[z] = 0;
         if (z == 0)
         {
-          return 0;
+          stop = true;
+          break;
         }
         z--;
       } else
@@ -150,23 +146,39 @@ static int applyall(const char *alpha,unsigned long textlen,void *info,
   }
   FREESPACE(w);
   FREESPACE(text);
-  /*@ignore@*/
-  return haserr ? -1 : 0;
-  /*@end@*/
+  return testcases;
 }
 
-int runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
-                               const char *charlist,
-                               unsigned long len,
-                               Env *env)
+unsigned long runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
+                                         const char *charlist,
+                                         unsigned long len,
+                                         Env *env)
 {
-  if (applyall(charlist,
-               len,
-               (void *) checkfunction,
-               applycheckfunctiontotext,
-               env) != 0)
+  return applyall(charlist,
+                  len,
+                  (void *) checkfunction,
+                  applycheckfunctiontotext,
+                  env);
+}
+
+void checkgreedyunitedist(/*@unused@*/ bool forward,
+                          const Uchar *useq,
+                          unsigned long ulen,
+                          const Uchar *vseq,
+                          unsigned long vlen,
+                          Env *env)
+{
+  unsigned long edist1, edist2;
+
+  edist1 = greedyunitedist(useq,ulen,vseq,vlen,env);
+  edist2 = squarededistunit (useq,ulen,vseq,vlen,env);
+#ifdef DEBUG
+  printf("edist = %lu\n",edist1);
+#endif
+  if (edist1 != edist2)
   {
-    return -1;
+    fprintf(stderr,"greedyunitedist = %lu != %lu = squarededistunit\n",
+                   edist1,edist2);
+    exit(EXIT_FAILURE);
   }
-  return 0;
 }
