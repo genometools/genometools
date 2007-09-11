@@ -55,18 +55,21 @@ void    env_ma_free_func(void *ptr, Env*);
         fa_fopen(env_fa(env), path, mode, __FILE__, __LINE__)
 #define env_fa_xfopen(env, path, mode)\
         fa_xfopen(env_fa(env), path, mode, __FILE__, __LINE__)
+void    env_fa_fclose(FILE *stream, Env*);
 void    env_fa_xfclose(FILE *stream, Env*);
 
 #define env_fa_gzopen(env, path, mode)\
         fa_gzopen(env_fa(env), path, mode, __FILE__, __LINE__)
 #define env_fa_xgzopen(env, path, mode)\
         fa_xgzopen(env_fa(env), path, mode, __FILE__, __LINE__)
+void    env_fa_gzclose(gzFile stream, Env*);
 void    env_fa_xgzclose(gzFile stream, Env*);
 
 #define env_fa_bzopen(env, path, mode)\
         fa_bzopen(env_fa(env), path, mode, __FILE__, __LINE__)
 #define env_fa_xbzopen(env, path, mode)\
         fa_xbzopen(env_fa(env), path, mode, __FILE__, __LINE__)
+void    env_fa_bzclose(BZFILE *stream, Env*);
 void    env_fa_xbzclose(BZFILE *stream, Env*);
 
 #define env_fa_xtmpfile(env, template)\
