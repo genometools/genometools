@@ -22,6 +22,9 @@
 #include "libgtcore/option.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/spacedef.h"
+#include "libgtmatch/symboldef.h"
+
+#include "libgtmatch/test-pairwise.pr"
 
 typedef struct
 {
@@ -42,13 +45,13 @@ static void showsimpleoptions(const Cmppairwiseopt *opt)
   if(strarray_size(opt->strings) > 0)
   {
     printf("# two strings \"%s\" \"%s\"\n",strarray_get(opt->strings,0),
-                                           strarray_get(opt->strings,1));
+                                           strarray_get(opt->strings,1UL));
     return;
   }
   if(strarray_size(opt->files) > 0)
   {
     printf("# two files \"%s\" \"%s\"\n",strarray_get(opt->files,0),
-                                         strarray_get(opt->files,1));
+                                         strarray_get(opt->files,1UL));
     return;
   }
   if(opt->charlistlen != NULL)
@@ -114,7 +117,7 @@ static OPrval parse_options(int *parsed_args,
   {
     if (option_is_set(optionstrings))
     {
-      if (strarray_size(pw->strings) != 2)
+      if (strarray_size(pw->strings) != 2UL)
       {
         env_error_set(env,"option -ss requires two string arguments");
         oprval = OPTIONPARSER_ERROR;
@@ -123,7 +126,7 @@ static OPrval parse_options(int *parsed_args,
     {
       if (option_is_set(optionfiles))
       {
-        if (strarray_size(pw->files) != 2)
+        if (strarray_size(pw->files) != 2UL)
         {
           env_error_set(env,"option -ff requires two filename arguments");
           oprval = OPTIONPARSER_ERROR;
@@ -134,7 +137,7 @@ static OPrval parse_options(int *parsed_args,
         {
           long readint;
 
-          if (strarray_size(charlistlen) != 2)
+          if (strarray_size(charlistlen) != 2UL)
           {
             env_error_set(env,
                           "option -a requires charlist and length argument");
@@ -143,8 +146,8 @@ static OPrval parse_options(int *parsed_args,
           ALLOCASSIGNSPACE(pw->charlistlen,NULL,Charlistlen,1);
           pw->charlistlen->charlist 
             = str_new_cstr(strarray_get(charlistlen,0),env);
-          if(sscanf(strarray_get(charlistlen,1),"%ld",&readint) != 1 ||
-             readint < 1)
+          if(sscanf(strarray_get(charlistlen,1UL),"%ld",&readint) != 1 ||
+             readint < 1L)
           {
             env_error_set(env,
                           "option -a requires charlist and length argument");
@@ -173,6 +176,80 @@ static OPrval parse_options(int *parsed_args,
   return oprval;
 }
 
+
+static void freesimpleoption(Cmppairwiseopt *cmppairwise,Env *env)
+{
+  strarray_delete(cmppairwise->strings,env);
+  strarray_delete(cmppairwise->files,env);
+  str_delete(cmppairwise->text,env);
+  if(cmppairwise->charlistlen != NULL)
+  {
+    str_delete(cmppairwise->charlistlen->charlist,env);
+    FREESPACE(cmppairwise->charlistlen);
+  }
+}
+
+static int applycheckfunctiontosimpleoptions(Checkcmppairfuntype checkfunction,
+                                             const Cmppairwiseopt *opt,
+                                             Env *env)
+{
+  if(strarray_size(opt->strings) > 0)
+  {
+    bool forward = true, haserr = false;
+    while(true)
+    {
+      if(checkfunction(forward,
+                       (const Uchar *) strarray_get(opt->strings,0),
+                       (unsigned long) strlen(strarray_get(opt->strings,0)),
+                       (const Uchar *) strarray_get(opt->strings,1UL),
+                       (unsigned long) strlen(strarray_get(opt->strings,1UL))) 
+          != 0)
+      {
+        haserr = true;
+        break;
+      }
+      if(!forward)
+      {
+        break;
+      }
+      forward = false;
+    }
+    return haserr ? -1 : 0;
+  }
+  if(strarray_size(opt->files) > 0)
+  {
+    if(runcheckfunctionontwofiles(checkfunction,
+                                  strarray_get(opt->files,0),
+                                  strarray_get(opt->files,1UL),
+                                  env) != 0)
+    {
+      return -1;
+    }
+    return 0;
+  }
+  if(opt->charlistlen != NULL)
+  {
+    if(runcheckfunctiononalphalen(checkfunction,
+                                  str_get(opt->charlistlen->charlist),
+                                  opt->charlistlen->len,
+                                  env) != 0)
+    {
+      return -1;
+    }
+    return 0;
+  }
+  if(str_length(opt->text) > 0)
+  {
+    if(runcheckfunctionontext(checkfunction,str_get(opt->text)) != 0)
+    {
+      return -5;
+    }
+    return 0;
+  }
+  assert(false);
+  return 0;
+}
+
 int gt_paircmp(int argc, const char **argv, Env *env)
 {
   bool haserr = false;
@@ -188,14 +265,11 @@ int gt_paircmp(int argc, const char **argv, Env *env)
     assert(parsed_args == argc);
     showsimpleoptions(&cmppairwise);
   }
-  strarray_delete(cmppairwise.strings,env);
-  strarray_delete(cmppairwise.files,env);
-  str_delete(cmppairwise.text,env);
-  if(cmppairwise.charlistlen != NULL)
+  if(applycheckfunctiontosimpleoptions(NULL,&cmppairwise,env) != 0)
   {
-    str_delete(cmppairwise.charlistlen->charlist,env);
-    FREESPACE(cmppairwise.charlistlen);
+    haserr = true;
   }
+  freesimpleoption(&cmppairwise,env);
   if (oprval == OPTIONPARSER_REQUESTS_EXIT)
   {
     return 0;

@@ -1,13 +1,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-long unitedistfrontSEPgeneric(bool withmaxdist,
-                              unsigned long maxdist,
-                              const Uchar *useq,
-                              long ulen,
-                              const Uchar *vseq,
-                              long vlen,
-                              Env *env);
+long greedyunitedist(const Uchar *useq,
+                     unsigned long ulenvalue,
+                     const Uchar *vseq,
+                     unsigned long vlenvalue,
+                     Env *env);
 
 #ifdef __cplusplus
 }

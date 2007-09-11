@@ -296,12 +296,12 @@ long greedyunitedist(const Uchar *useq,
 #ifdef DEBUG
   printf("unitedistcheckSEPgeneric(ulen=%lu,vlen=%lu)\n",ulenvalue,vlenvalue);
 #endif
-  if(ulenvalue > (unsigned long) LONG_MAX)
+  if (ulenvalue > (unsigned long) LONG_MAX)
   {
     env_error_set(env,"ulen = %lu is too large",ulenvalue);
     return (long) -1;
   }
-  if(vlenvalue > (unsigned long) LONG_MAX)
+  if (vlenvalue > (unsigned long) LONG_MAX)
   {
     env_error_set(env,"vlen = %lu is too large",vlenvalue);
     return (long) -1;

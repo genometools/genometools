@@ -18,7 +18,12 @@
 #ifndef SYMBOLDEF_H
 #define SYMBOLDEF_H
 #include <inttypes.h>
+#include <stdbool.h>
 
 typedef uint8_t Uchar;         /* \Typedef{Uchar} */
+
+typedef int (*Checkcmppairfuntype)(bool,
+                                   const Uchar *,unsigned long,
+                                   const Uchar *,unsigned long);
 
 #endif
