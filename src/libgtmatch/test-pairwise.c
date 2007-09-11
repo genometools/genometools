@@ -76,7 +76,7 @@ int runcheckfunctionontext(Checkcmppairfuntype checkfunction,
   for (i=(size_t) 1; i<=len/2; i++)
   {
     if (checkfunction(true,(const Uchar *) text,(unsigned long) i,
-                           (const Uchar *) (text+i), (unsigned long) len-i) 
+                           (const Uchar *) (text+i), (unsigned long) len-i)
         != 0)
     {
       return -1;
@@ -93,9 +93,9 @@ int applycheckfunctiontotext(const Uchar *text,
   Checkcmppairfuntype checkfunction = (Checkcmppairfuntype) info;
 
   printf("%s\n",(char *) text);
-  for(i=0; i<=textlen/2; i++)
+  for (i=0; i<=textlen/2; i++)
   {
-    if(checkfunction(true,text,i,text+i,textlen-i) != 0)
+    if (checkfunction(true,text,i,text+i,textlen-i) != 0)
     {
       return -1;
     }
@@ -113,35 +113,35 @@ static int applyall(const char *alpha,unsigned long textlen,void *info,
 
   ALLOCASSIGNSPACE(w,NULL,unsigned long,textlen+1);
   ALLOCASSIGNSPACE(text,NULL,Uchar,textlen+1);
-  for(i=0; i<=textlen; i++)
+  for (i=0; i<=textlen; i++)
   {
-    w[i] = (unsigned long) 0;
+    w[i] = 0;
   }
   text[textlen] = (Uchar) '\0';
 
-  while(true)
+  while (true)
   {
     for (i = 0; i<textlen; i++)
     {
       text[i] = (Uchar) alpha[w[i]];
     }
-    if(apply(text,textlen,info) != 0)
+    if (apply(text,textlen,info) != 0)
     {
       haserr = true;
       break;
     }
-    while(true)
+    while (true)
     {
       w[z]++;
-      if(w[z] == asize) 
+      if (w[z] == asize)
       {
         w[z] = 0;
-        if(z == 0)
+        if (z == 0)
         {
           return 0;
         }
         z--;
-      } else 
+      } else
       {
         z = textlen-1;
         /*@innerbreak@*/ break;
@@ -160,11 +160,11 @@ int runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
                                unsigned long len,
                                Env *env)
 {
-  if(applyall(charlist,
-              len,
-              (void *) checkfunction,
-              applycheckfunctiontotext,
-              env) != 0)
+  if (applyall(charlist,
+               len,
+               (void *) checkfunction,
+               applycheckfunctiontotext,
+               env) != 0)
   {
     return -1;
   }

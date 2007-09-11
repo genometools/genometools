@@ -2,7 +2,7 @@
 #include "symboldef.h"
 #include "spacedef.h"
 
-static unsigned long squarededistunit2 (const Uchar *u, unsigned long m, 
+static unsigned long squarededistunit2 (const Uchar *u, unsigned long m,
                                         const Uchar *v, unsigned long n,
                                         Env *env)
 {
@@ -10,7 +10,7 @@ static unsigned long squarededistunit2 (const Uchar *u, unsigned long m,
   const Uchar *uptr, *vptr;
 
   ALLOCASSIGNSPACE(ecol,NULL,unsigned long,m+1);
-  for(*ecol = 0, ecolptr = ecol+1, uptr = u; uptr < u + m; ecolptr++, uptr++)
+  for (*ecol = 0, ecolptr = ecol+1, uptr = u; uptr < u + m; ecolptr++, uptr++)
   {
     *ecolptr = *(ecolptr-1) + 1;
   }
@@ -18,22 +18,22 @@ static unsigned long squarededistunit2 (const Uchar *u, unsigned long m,
   {
     nw = *ecol;
     *ecol = nw + 1;
-    for(ecolptr = ecol+1, uptr = u; uptr < u + m; ecolptr++, uptr++)
+    for (ecolptr = ecol+1, uptr = u; uptr < u + m; ecolptr++, uptr++)
     {
       we = *ecolptr;
       *ecolptr = *(ecolptr-1) + 1;
-      if(*uptr == *vptr)
+      if (*uptr == *vptr)
       {
         val = nw;
       } else
       {
         val = nw + 1;
       }
-      if(val < *ecolptr)
+      if (val < *ecolptr)
       {
 	*ecolptr = val;
-      } 
-      if((val = we + 1) < *ecolptr)
+      }
+      if ((val = we + 1) < *ecolptr)
       {
         *ecolptr = val;
       }
@@ -45,13 +45,13 @@ static unsigned long squarededistunit2 (const Uchar *u, unsigned long m,
   return val;
 }
 
-unsigned long squarededistunit (const Uchar *u, unsigned long m, 
+unsigned long squarededistunit (const Uchar *u, unsigned long m,
                                 const Uchar *v, unsigned long n,
                                 Env *env)
 {
   if (m < n)
   {
     return squarededistunit2(u,m,v,n,env);
-  } 
+  }
   return squarededistunit2(v,n,u,m,env);
 }
