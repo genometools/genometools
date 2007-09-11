@@ -148,7 +148,7 @@ Option*        option_new_string(const char *option_str,
    <domain> (<default_value> must be an entry of <domain> or NULL) */
 Option*        option_new_choice(const char *option_str,
                                  const char *description, Str *value,
-                                 const char* default_value, const char** domain,
+                                 const char *default_value, const char **domain,
                                  Env*);
 Option*        option_new_filename(const char *option_str,
                                    const char *description, Str*, Env*);

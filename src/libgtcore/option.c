@@ -1183,7 +1183,7 @@ Option* option_new_string(const char *option_str, const char *description,
 }
 
 Option* option_new_filename(const char *option_str, const char *description,
-                            Str*filename, Env *env)
+                            Str *filename, Env *env)
 {
   return option_new_string(option_str, description, filename, NULL, env);
 }
