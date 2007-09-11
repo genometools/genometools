@@ -90,15 +90,16 @@ struct permList
 {
   size_t numPermutations;
   unsigned permIdxBits;
-  BitString catPerms;
+  BitOffset catPermsOffset;
 };
 
 struct compList
 {
   size_t numCompositions;
   struct permList *permutations;
-  BitString catComps;                  /*< bitstring with all
-                                        * compositions encoded in
+  BitString catCompsPerms;             /*< bitstring with all
+                                        * compositions, followed by
+                                        * all permutations encoded in
                                         * minimal space concatenated
                                         * together */
   unsigned bitsPerCount, bitsPerSymbol, compositionIdxBits, maxPermIdxBits;
@@ -194,6 +195,9 @@ block2IndexPair(const struct blockCompositionSeq *seqIdx,
                 unsigned *bitsOfPermIdx,
                 Env *env,
                 BitString permCompPA, Symbol *compPA);
+
+static inline BitOffset
+compListPermStartOffset(struct compList *list, unsigned numSyms);
 
 static unsigned
 symCountFromComposition(const struct blockCompositionSeq *seqIdx,
@@ -978,8 +982,10 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
                                    bitsPerCompositionIdx);
     permutationList = seqIdx->compositionTable.permutations + compPermIndex[0];
     varIdxBits = permutationList->permIdxBits;
-    compPermIndex[1] = bsGetUInt64(sBlock->varData, varDataMemOffset, varIdxBits);
-    bsGetUniformUIntArray(permutationList->catPerms,
+    compPermIndex[1] = bsGetUInt64(sBlock->varData, varDataMemOffset,
+                                   varIdxBits);
+    bsGetUniformUIntArray(seqIdx->compositionTable.catCompsPerms,
+                          permutationList->catPermsOffset +
                           bitsPerPermutation * compPermIndex[1],
                           seqIdx->compositionTable.bitsPerSymbol, blockSize,
                           block);
@@ -1295,6 +1301,7 @@ nextComposition(unsigned composition[],
 
 static int
 initPermutationsList(const unsigned *composition, struct permList *permutation,
+                     BitString permStore, BitOffset permOffset,
                      unsigned blockSize, Symbol numSyms,
                      unsigned bitsPerSymbol, Env *env);
 static void
@@ -1315,7 +1322,8 @@ printComposition(FILE *fp, const unsigned *composition, Symbol numSyms,
         destructPermutationsList(newList->permutations + i, env);       \
       env_ma_free(newList->permutations, env);                          \
     }                                                                   \
-    if(newList->catComps) env_ma_free(newList->catComps, env);          \
+    if(newList->catCompsPerms)                                          \
+      env_ma_free(newList->catCompsPerms, env);                         \
     if(composition) env_ma_free(composition, env);                      \
     return 0;                                                           \
   } while(0)
@@ -1331,9 +1339,9 @@ initCompositionList(struct compList *newList,
   unsigned *composition = NULL;
   unsigned blockSize;
   Symbol maxSym = numSyms - 1;
-  BitOffset bitsPerComp, bitsPerCount;
+  BitOffset bitsPerComp, bitsPerCount, bitsPerPerm;
   size_t numCompositions, cmpIdx = 0;
-  size_t maxNumPermutations = 0;
+  size_t maxNumPermutations = 0, numTotalPermutations;
   assert(seqIdx);
   blockSize = seqIdx->blockSize;
   if(!(composition =
@@ -1343,15 +1351,19 @@ initCompositionList(struct compList *newList,
   newList->bitsPerCount = bitsPerCount;
   numCompositions = newList->numCompositions =
     binomialCoeff(blockSize + maxSym, maxSym);
+  numTotalPermutations = iPow(numSyms, blockSize);
   newList->compositionIdxBits = requiredUInt64Bits(numCompositions - 1);
   newList->bitsPerSymbol = requiredUIntBits(maxSym);
-  newList->catComps = env_ma_malloc(env, 
-     bitElemsAllocSize(numCompositions * bitsPerComp) * sizeof(BitElem));
+  bitsPerPerm = newList->bitsPerSymbol * blockSize;
+  newList->catCompsPerms = env_ma_malloc(env,
+    bitElemsAllocSize(numCompositions * bitsPerComp
+                      + numTotalPermutations * bitsPerPerm) * sizeof(BitElem));
   newList->permutations = 
     env_ma_calloc(env, sizeof(struct permList), numCompositions);
   {
     unsigned symRMNZ;
-    BitOffset offset = 0;
+    BitOffset offset = 0, permOffset =
+      compListPermStartOffset(newList, numSyms);
 #ifndef NDEBUG
     size_t permSum = 0;
 #endif
@@ -1361,12 +1373,13 @@ initCompositionList(struct compList *newList,
 #if DEBUG > 1
       printComposition(stderr, composition, numSyms, blockSize);
 #endif /* DEBUG > 1 */
-      bsStoreUniformUIntArray(newList->catComps, offset,
+      bsStoreUniformUIntArray(newList->catCompsPerms, offset,
                               bitsPerCount, numSyms, composition);
-      assert(cmpIdx > 1?(bsCompare(newList->catComps, offset, bitsPerComp,
-                              newList->catComps, offset - bitsPerComp,
+      assert(cmpIdx > 1?(bsCompare(newList->catCompsPerms, offset, bitsPerComp,
+                              newList->catCompsPerms, offset - bitsPerComp,
                               bitsPerComp)>0):1);
       if(initPermutationsList(composition, newList->permutations + cmpIdx,
+                              newList->catCompsPerms, permOffset,
                               blockSize, numSyms, newList->bitsPerSymbol, env))
         initCompositionListErrRet();
 #ifndef NDEBUG
@@ -1374,6 +1387,7 @@ initCompositionList(struct compList *newList,
                   (unsigned long)newList->permutations[cmpIdx].numPermutations);
       permSum += newList->permutations[cmpIdx].numPermutations;
 #endif
+      permOffset += newList->permutations[cmpIdx].numPermutations * bitsPerPerm;
       if(newList->permutations[cmpIdx].numPermutations > maxNumPermutations)
         maxNumPermutations = newList->permutations[cmpIdx].numPermutations;
       if(++cmpIdx < numCompositions)
@@ -1408,7 +1422,7 @@ destructCompositionList(struct compList *clist, Env *env)
       destructPermutationsList(clist->permutations + i, env);
   }
   env_ma_free(clist->permutations, env);
-  env_ma_free(clist->catComps, env);
+  env_ma_free(clist->catCompsPerms, env);
 }
 
 #if 0
@@ -1463,7 +1477,7 @@ symCountFromComposition(const struct blockCompositionSeq *seqIdx,
   bitsPerCount = seqIdx->compositionTable.bitsPerCount;
   bitsPerComp = bitsPerCount * seqIdx->blockEncNumSyms;
   assert(compIndex < seqIdx->compositionTable.numCompositions);
-  return bsGetUInt(seqIdx->compositionTable.catComps,
+  return bsGetUInt(seqIdx->compositionTable.catCompsPerms,
                    compIndex * bitsPerComp + sym * bitsPerCount,
                    bitsPerCount);
 }
@@ -1482,6 +1496,7 @@ printPermutation(FILE *fp, Symbol *permutation, unsigned blockSize);
 
 static int
 initPermutationsList(const unsigned *composition, struct permList *permutation,
+                     BitString permStore, BitOffset permOffset,
                      unsigned blockSize, Symbol numSyms,
                      unsigned bitsPerSymbol, Env *env)
 {
@@ -1490,31 +1505,23 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
   permutation->permIdxBits = requiredUInt64Bits(numPermutations - 1);
   Symbol *currentPermutation;
   BitOffset bitsPerPermutation = bitsPerSymbol * blockSize;
-  if(!(permutation->catPerms =
-       env_ma_malloc(env, bitElemsAllocSize(
-                       (BitOffset)numPermutations *
-                       bitsPerPermutation)
-                     * sizeof(BitElem))))
-    return -1;
   if(!(currentPermutation = env_ma_malloc(env, 
          sizeof(Symbol) * blockSize)))
-  {
-    env_ma_free(permutation->catPerms, env);
     return -1;
-  }
+  permutation->catPermsOffset = permOffset;
   initPermutation(currentPermutation, composition, blockSize, numSyms);
   {
     size_t i = 0;
-    BitOffset offset = 0;
+    BitOffset offset = permOffset;
     do
     {
-      bsStoreUniformUIntArray(permutation->catPerms, offset,
+      bsStoreUniformUIntArray(permStore, offset,
                               bitsPerSymbol, blockSize, currentPermutation);
 #if DEBUG > 1
       printPermutation(stderr, currentPermutation, blockSize);
 #endif /* DEBUG > 1 */
-      assert(i > 0?(bsCompare(permutation->catPerms, offset, bitsPerPermutation,
-                              permutation->catPerms,
+      assert(i > 0?(bsCompare(permStore, offset, bitsPerPermutation,
+                              permStore,
                               offset - bitsPerPermutation,
                               bitsPerPermutation)>0):1);
       if(++i < numPermutations)
@@ -1532,7 +1539,7 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
 static void
 destructPermutationsList(struct permList *permutation, Env *env)
 {
-  env_ma_free(permutation->catPerms, env);
+/*   env_ma_free(permutation->catPerms, env); */
 }
 
 static void
@@ -1689,7 +1696,7 @@ block2IndexPair(const struct blockCompositionSeq *seqIdx,
     size_t divStep = compIndex;
     int cmpresult;
     while((cmpresult = bsCompare(permCompBitString, 0, bitsPerComposition,
-                                 compositionTab->catComps,
+                                 compositionTab->catCompsPerms,
                                  compIndex * bitsPerComposition,
                                  bitsPerComposition)))
     {
@@ -1719,8 +1726,9 @@ block2IndexPair(const struct blockCompositionSeq *seqIdx,
         int cmpresult;
         while((cmpresult = bsCompare(permCompBitString, bitsPerComposition,
                                      bitsPerPermutation,
-                                     permutation->catPerms,
-                                     permIndex * bitsPerPermutation,
+                                     compositionTab->catCompsPerms,
+                                     permutation->catPermsOffset
+                                     + permIndex * bitsPerPermutation,
                                      bitsPerPermutation)))
         {
           if(divStep > 1)
@@ -1739,6 +1747,12 @@ block2IndexPair(const struct blockCompositionSeq *seqIdx,
   if(!permCompPA)
     env_ma_free(permCompBitString, env);
   return 0;
+}
+
+static inline BitOffset
+compListPermStartOffset(struct compList *list, unsigned numSyms)
+{
+  return list->numCompositions * list->bitsPerCount * numSyms;
 }
 
 /**
@@ -1903,7 +1917,7 @@ initAppendState(struct appendState *aState,
   BitOffset compCacheLen = sBlockPreCompIdxBits(seqIdx)
     + superBucketBlocks * seqIdx->compositionTable.compositionIdxBits
     + bitElemBits - 1,
-    permCacheLen = superBlockVarMaxBits(seqIdx);
+    permCacheLen = superBlockVarMaxBits(seqIdx) + bitElemBits - 1;
   aState->compCacheLen = compCacheLen;
   aState->permCacheLen = permCacheLen;
   aState->compCache = env_ma_malloc(env, sizeof (BitElem) *

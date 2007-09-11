@@ -155,4 +155,19 @@ offsetAlign(size_t offset, size_t sizeOfVal2Align)
   return (offset/alignBase + ((offset%alignBase)?1:0))*alignBase;
 }
 
+static inline unsigned long long
+iPow(unsigned long long x, unsigned i)
+{
+   unsigned long long result = 1;
+   while (i)
+   {
+     if (i & 1)
+       result *= x;
+     x *= x;
+     i >>= 1;
+   }
+   return result;
+}
+
+
 #endif /* BIOFMI2_MISC_H_INCLUDED */
