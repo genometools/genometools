@@ -55,12 +55,8 @@ unsigned long file_number_of_lines(FILE *fp)
   assert(fp);
   xfgetpos(fp, &current_pos);
   xfseek(fp, SEEK_SET, 0);
-  while ((cc = getc(fp)) != EOF)
+  while ((cc = xfgetc(fp)) != EOF)
     if (cc == '\n') number_of_lines++;
-  if (ferror(fp)) {
-    perror("cannot read char");
-    exit(EXIT_FAILURE);
-  }
   xfsetpos(fp, &current_pos);
   return number_of_lines;
 }
