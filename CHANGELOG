@@ -1,4 +1,4 @@
-changes in version 1.0.3 (2007-09-11):
+changes in version 1.0.3 (2007-09-12):
 
 - `gt view` can process multiple GFF3 files
 - the interactive mode has been improved (multiple line input, command line
