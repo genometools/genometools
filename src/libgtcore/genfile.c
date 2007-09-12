@@ -162,19 +162,22 @@ static int bzgetc(BZFILE *bzfile)
 int genfile_getc(GenFile *genfile)
 {
   int c = -1;
-  assert(genfile);
-  switch (genfile->mode) {
-    case GFM_UNCOMPRESSED:
-      c = fgetc(genfile->fileptr.file);
-      break;
-    case GFM_GZIP:
-      c = gzgetc(genfile->fileptr.gzfile);
-      break;
-    case GFM_BZIP2:
-      c = bzgetc(genfile->fileptr.bzfile);
-      break;
-    default: assert(0);
+  if (genfile) {
+    switch (genfile->mode) {
+      case GFM_UNCOMPRESSED:
+        c = fgetc(genfile->fileptr.file);
+        break;
+      case GFM_GZIP:
+        c = gzgetc(genfile->fileptr.gzfile);
+        break;
+      case GFM_BZIP2:
+        c = bzgetc(genfile->fileptr.bzfile);
+        break;
+      default: assert(0);
+    }
   }
+  else
+    c = fgetc(stdin);
   return c;
 }
 
@@ -354,18 +357,30 @@ void genfile_delete(GenFile *genfile, Env *env)
   env_ma_free(genfile, env);
 }
 
+/* the following function can only fail, if no error is set. This makes sure,
+   that it can be used safely after an error has been set (i.e., the error is
+   always propagated upwards). */
 void genfile_xclose(GenFile *genfile, Env *env)
 {
   if (!genfile) return;
   switch (genfile->mode) {
     case GFM_UNCOMPRESSED:
-      env_fa_xfclose(genfile->fileptr.file, env);
+      if (env_error_is_set(env))
+        env_fa_fclose(genfile->fileptr.file, env);
+      else
+        env_fa_xfclose(genfile->fileptr.file, env);
       break;
     case GFM_GZIP:
-      env_fa_xgzclose(genfile->fileptr.gzfile, env);
+      if (env_error_is_set(env))
+        env_fa_gzclose(genfile->fileptr.gzfile, env);
+      else
+        env_fa_xgzclose(genfile->fileptr.gzfile, env);
       break;
     case GFM_BZIP2:
-      env_fa_xbzclose(genfile->fileptr.bzfile, env);
+      if (env_error_is_set(env))
+        env_fa_bzclose(genfile->fileptr.bzfile, env);
+      else
+        env_fa_xbzclose(genfile->fileptr.bzfile, env);
       break;
     default: assert(0);
   }

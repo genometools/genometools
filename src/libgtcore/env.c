@@ -153,6 +153,13 @@ void env_ma_free_func(void *ptr, Env *env)
   ma_free(ptr, env_ma(env));
 }
 
+void env_fa_fclose(FILE *stream, Env *env)
+{
+  assert(env);
+  if (!stream) return;
+  fa_fclose(stream, env_fa(env));
+}
+
 void env_fa_xfclose(FILE *stream, Env *env)
 {
   assert(env);
@@ -160,11 +167,25 @@ void env_fa_xfclose(FILE *stream, Env *env)
   fa_xfclose(stream, env_fa(env));
 }
 
+void env_fa_gzclose(gzFile stream, Env *env)
+{
+  assert(env);
+  if (!stream) return;
+  fa_gzclose(stream, env_fa(env));
+}
+
 void env_fa_xgzclose(gzFile stream, Env *env)
 {
   assert(env);
   if (!stream) return;
   fa_xgzclose(stream, env_fa(env));
+}
+
+void env_fa_bzclose(BZFILE *stream, Env *env)
+{
+  assert(env);
+  if (!stream) return;
+  fa_bzclose(stream, env_fa(env));
 }
 
 void env_fa_xbzclose(BZFILE *stream, Env *env)

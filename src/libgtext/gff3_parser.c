@@ -577,7 +577,7 @@ static int add_auto_sr_to_queue(void *key, void *value, void *data, Env *env)
 
 int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
                                   Queue *genome_nodes, Str *filenamestr,
-                                  unsigned long *line_number, FILE *fpin,
+                                  unsigned long *line_number, GenFile *fpin,
                                   Env *env)
 {
   size_t line_length;
@@ -596,7 +596,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
   /* the given (buffer) queue is empty */
   assert(!queue_size(genome_nodes));
 
-  while ((rval = str_read_next_line(line_buffer, fpin, env)) != EOF) {
+  while ((rval = str_read_next_line_generic(line_buffer, fpin, env)) != EOF) {
     line = str_get(line_buffer);
     line_length = str_length(line_buffer);
     (*line_number)++;

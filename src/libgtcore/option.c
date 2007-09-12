@@ -1182,19 +1182,32 @@ Option* option_new_string(const char *option_str, const char *description,
   return o;
 }
 
+Option* option_new_stringarray(const char *option_str,
+                               const char *description, StrArray *value,
+                               Env *env)
+{
+  Option *o = option_new(option_str, description, value, env);
+  o->option_type = OPTION_STRINGARRAY;
+  return o;
+}
+
+/* the following function would allow to handle files differently from strings
+   later on (e.g., for CGI scripts), but for now the are implemented in the same
+   way */
 Option* option_new_filename(const char *option_str, const char *description,
                             Str*filename, Env *env)
 {
   return option_new_string(option_str, description, filename, NULL, env);
 }
 
+/* the following function would allow to handle file arrays differently from
+   string arrays later on (e.g., for CGI scripts) , but for now the are
+   implemented in the same way */
 Option* option_new_filenamearray(const char *option_str,
                                  const char *description, StrArray *filenames,
                                  Env *env)
 {
-  Option *o = option_new(option_str, description, filenames, env);
-  o->option_type = OPTION_STRINGARRAY;
-  return o;
+  return option_new_stringarray(option_str, description, filenames, env);
 }
 
 Option* option_new_choice(const char *option_str, const char *description,
