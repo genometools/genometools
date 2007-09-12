@@ -25,6 +25,7 @@
  */
 int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
     const Sequentialsuffixarrayreader *ssar,
+    Seqpos *markpos,
     Env *env)
 /*
     ArrayLTRboundaries *arrayLTRboundaries,
@@ -39,7 +40,6 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
                 i;
   unsigned int contignumber;
   Seqpos offset;
-  Seqpos *markpos = NULL;
   unsigned long numofdbsequences = 
      numofdbsequencesSequentialsuffixarrayreader(ssar);
   const Uchar *characters;
@@ -59,17 +59,6 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
     counter++;
     }
     }*/
-
-  if( numofdbsequences > (unsigned long)1 )
-  {
-    markpos = calculatemarkpositions(encseq, 
-                numofdbsequences, 
-		env);
-    if(markpos == NULL)
-    {
-      return -1;
-    }
-  }
 
   if(lo->longoutput)
   {
@@ -315,8 +304,6 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
       }
     }
   }
-
-  FREESPACE(markpos);
 
   return 0;
 }

@@ -11,6 +11,7 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/sarr-def.h"
+#include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/esa-maxpairs.pr"
 #include "libgtmatch/sfx-map.pr"
 #include "libgtmatch/pos2seqnum.pr"
@@ -29,7 +30,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 
   env_error_check(env);
   
-  ssar = newSequentialsuffixarrayreader(lo->str_indexname,
+  ssar = newSequentialsuffixarrayreaderfromfile(lo->str_indexname,
 		                  SARR_LCPTAB | SARR_SUFTAB | SARR_ESQTAB,
 				  false,
 				  env);
@@ -131,7 +132,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   FREESPACE(markpos);
 
   /* print predictions to stdout */
-  showinfoiffoundfullLTRs(lo, ssar, env);
+  showinfoiffoundfullLTRs(lo, ssar, markpos, env);
 
   /* free prediction array */
   FREEARRAY(&lo->arrayLTRboundaries, LTRboundaries);
