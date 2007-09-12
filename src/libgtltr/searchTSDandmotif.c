@@ -13,6 +13,8 @@
 #include "libgtmatch/arraydef.h"
 #include "libgtmatch/symboldef.h"
 #include "libgtmatch/spacedef.h"
+#include "libgtmatch/esa-seqread.h"
+#include "libgtmatch/esa-seqread.pr"
 #include "libgtmatch/esa-mmsearch-def.h"
 #include "libgtmatch/sfx-map.pr"
 #include "libgtmatch/esa-mmsearch.pr"

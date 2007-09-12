@@ -318,7 +318,10 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
     }
   }
 
-  FREESPACE(markpos);
+  if( numofdbsequences > 1)
+  {
+    FREESPACE(markpos);
+  }
   return 0;
 }
 
