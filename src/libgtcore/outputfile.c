@@ -74,8 +74,9 @@ static int determine_outfp(void *data, Env *env)
         had_err = -1;
     }
     if (!had_err) {
-      *ofi->outfp = genfile_xopen(genfilemode, str_get(ofi->output_filename),
-                                  "w", env);
+      *ofi->outfp = genfile_xopen_w_gfmode(genfilemode,
+                                           str_get(ofi->output_filename), "w",
+                                           env);
       assert(*ofi->outfp);
     }
   }

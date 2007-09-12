@@ -111,8 +111,8 @@ GenFile* genfile_open(GenFileMode genfilemode, const char *path,
   return genfile;
 }
 
-GenFile* genfile_xopen(GenFileMode genfilemode, const char *path,
-                       const char *mode, Env *env)
+GenFile* genfile_xopen_w_gfmode(GenFileMode genfilemode, const char *path,
+                                const char *mode, Env *env)
 {
   GenFile *genfile;
   assert(path && mode);
@@ -133,6 +133,13 @@ GenFile* genfile_xopen(GenFileMode genfilemode, const char *path,
     default: assert(0);
   }
   return genfile;
+}
+
+GenFile* genfile_xopen(const char *path, const char *mode, Env *env)
+{
+  env_error_check(env);
+  assert(path && mode);
+  return genfile_xopen_w_gfmode(genfilemode_determine(path), path, mode, env);
 }
 
 GenFile* genfile_new(FILE *fp, Env *env)

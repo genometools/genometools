@@ -38,11 +38,8 @@ FastaReader* fasta_reader_new(Str *sequence_filename, Env *env)
 {
   FastaReader *fs = env_ma_calloc(env, 1, sizeof (FastaReader));
   fs->sequence_filename = str_ref(sequence_filename);
-  if (sequence_filename) {
-    fs->sequence_file =
-      genfile_xopen(genfilemode_determine(str_get(sequence_filename)),
-                    str_get(sequence_filename), "r", env);
-  }
+  if (sequence_filename)
+    fs->sequence_file = genfile_xopen(str_get(sequence_filename), "r", env);
   else
     fs->sequence_filename = str_new_cstr("stdin", env);
   return fs;

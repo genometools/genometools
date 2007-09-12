@@ -79,9 +79,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
           is->stdin_argument = true;
         }
         else {
-          is->fpin = genfile_xopen(genfilemode_determine(
-                                     strarray_get(is->files, is->next_file)),
-                                   strarray_get(is->files, is->next_file), "r",
+          is->fpin = genfile_xopen(strarray_get(is->files, is->next_file), "r",
                                    env);
           is->file_is_open = true;
         }
