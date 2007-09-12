@@ -72,7 +72,8 @@ static void searchforbestTSDandormotifatborders(
     Seqpos *markpos,
     LTRboundaries *boundaries,
     unsigned int *motifmismatchesleftLTR,
-    unsigned int *motifmismatchesrightLTR
+    unsigned int *motifmismatchesrightLTR,
+    Env *env
     )
 {
   unsigned long i;
@@ -89,7 +90,9 @@ static void searchforbestTSDandormotifatborders(
        difffromoldboundary1 = 0,
        difffromoldboundary2 = 0;
   unsigned int hitcounter = 0;
- 
+
+  env_error_check(env);
+
   if( boundaries->contignumber == 0)
   {
     offset = 0;
@@ -105,10 +108,11 @@ static void searchforbestTSDandormotifatborders(
   }
   boundaries->motif_near_tsd = false;
   
-  printf("  old boundary pos leftLTR_5  = " FormatSeqpos "\n",
+  /*printf("  old boundary pos leftLTR_5  = " FormatSeqpos "\n",
 	         PRINTSeqposcast(boundaries->leftLTR_5 - offset));
   printf("  old boundary pos rightLTR_3 = " FormatSeqpos "\n",
 	         PRINTSeqposcast(boundaries->rightLTR_3 - offset));
+  */
  
   for(i = 0; i < info->repeats.nextfreeRepeat; i++)
   {
@@ -275,6 +279,7 @@ static void searchforbestTSDandormotifatborders(
     }
   }
 
+  /*
   if( boundaries->motif_near_tsd )
   {
     printf("found %hu time(s) TSD and motif:\n",
@@ -288,6 +293,7 @@ static void searchforbestTSDandormotifatborders(
   {
     printf("no TSD and motif found.\n");   
   }
+  */
 }
 
 /*
@@ -295,73 +301,74 @@ static void searchforbestTSDandormotifatborders(
  at the 5'-border of left LTR and 3'-border of right LTR.
  */
 
-/*
-static void searchformotifonlyborders(
+static void searchformotifonlyborders(LTRharvestoptions *lo,
     LTRboundaries *boundaries,
-    Virtualtree *virtualtree,
-    Uchar *dbseq,
-    Uint startleftLTR,
-    Uint endleftLTR,
-    Uint startrightLTR,
-    Uint endrightLTR,
-    Motif *motif,
-    Ushort *motifmismatchesleftLTR,
-    Ushort *motifmismatchesrightLTR
+    Sequentialsuffixarrayreader *ssar,
+    Seqpos *markpos,
+    Seqpos startleftLTR,
+    Seqpos endleftLTR,
+    Seqpos startrightLTR,
+    Seqpos endrightLTR,
+    unsigned int *motifmismatchesleftLTR,
+    unsigned int *motifmismatchesrightLTR,
+    Env *env
     )
 {
-  Uchar *charptr;
-  BOOL motif1 = False, 
-       motif2 = False;
-  Ushort tmp_motifmismatchesleftLTR,
+  Seqpos offset = 0,
+         i;
+  bool motif1 = false, 
+       motif2 = false;
+  unsigned int tmp_motifmismatchesleftLTR,
          tmp_motifmismatchesrightLTR,
 	 motifmismatches_frombestmatch = 0; 
-  Uint oldleftLTR_5  = boundaries->leftLTR_5,
-       oldrightLTR_3 = boundaries->rightLTR_3,
-       difffromoldboundary = 0;
-  Uint multiseqoffset = 0;
+  const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
+  Seqpos oldleftLTR_5  = boundaries->leftLTR_5,
+         oldrightLTR_3 = boundaries->rightLTR_3,
+         difffromoldboundary = 0;
+
+  env_error_check(env);
 
   if( boundaries->contignumber == 0)
   {
-    multiseqoffset = 0;
+    offset = 0;
   }
   else
   {
-    multiseqoffset = 
-      virtualtree->multiseq.markpos.spaceUint[boundaries->contignumber-1]+1;
+    offset = markpos[boundaries->contignumber-1]+(Seqpos)1;
   }
  
   ///// search for left motif around leftLTR_5 /////
-  DEBUG2(1, "search for left motif between pos = %lu up to "
-	"pos end = %lu\n",
-	(Showuint) startleftLTR - multiseqoffset,
-	(Showuint) endleftLTR - multiseqoffset);
- 
-  for(charptr = dbseq + startleftLTR ; charptr < dbseq + endleftLTR; 
-      charptr++)
+  //DEBUG2(1, "search for left motif between pos = %lu up to "
+  //	"pos end = %lu\n",
+  //	(Showuint) startleftLTR - multiseqoffset,
+  //	(Showuint) endleftLTR - multiseqoffset);
+  
+  for(i = startleftLTR; i < endleftLTR; i++)
   {
-    tmp_motifmismatchesleftLTR = 0;
-    if(*charptr != motif->firstleft)
+    tmp_motifmismatchesleftLTR = (unsigned int)0;
+    if(getencodedchar(encseq, i, Forwardmode) != lo->motif.firstleft)
     {
       tmp_motifmismatchesleftLTR++; 
-    }
-    if(*(charptr+1) != motif->secondleft)
+    }  
+    if(getencodedchar(encseq, i+1, Forwardmode) != lo->motif.secondleft)
     {
-      tmp_motifmismatchesleftLTR++;
-    }
+      tmp_motifmismatchesleftLTR++; 
+    }  
+     
     if(tmp_motifmismatchesleftLTR + (*motifmismatchesleftLTR) 
-                                <= motif->allowedmismatches)
+                                <= lo->motif.allowedmismatches)
     {
        // first hit //
        if( !motif1 )
        {
-         Uint max, min;
+         unsigned int max, min;
 
 	 motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
-	 boundaries->leftLTR_5 = (Uint) (charptr - dbseq);
-	 motif1 = True;
-	 DEBUG0(1, "found left motif:\n");
-	 DEBUG1(1, "  new boundary pos leftLTR_5 = %lu\n",
-	           (Showuint) boundaries->leftLTR_5 - multiseqoffset);
+	 boundaries->leftLTR_5 = i;
+	 motif1 = true;
+	 //DEBUG0(1, "found left motif:\n");
+	 //DEBUG1(1, "  new boundary pos leftLTR_5 = %lu\n",
+	 //          (Showuint) boundaries->leftLTR_5 - multiseqoffset);
 	 max = MAX(oldleftLTR_5, boundaries->leftLTR_5);
 	 min = MIN(oldleftLTR_5, boundaries->leftLTR_5);
 	 difffromoldboundary = max - min; 
@@ -369,65 +376,66 @@ static void searchformotifonlyborders(
        // next hit //
        else
        {
-         Uint max, min, difffromnewboundary;
+         Seqpos max, min, difffromnewboundary;
         
 	 // test if hit is nearer to old boundaries than previous hit //
-	 max = MAX(oldleftLTR_5, ((Uint)(charptr - dbseq)));
-	 min = MIN(oldleftLTR_5, ((Uint)(charptr - dbseq)));
+	 max = MAX(oldleftLTR_5, i);
+	 min = MIN(oldleftLTR_5, i);
 	 difffromnewboundary = max - min;
 
 	 if( difffromnewboundary < difffromoldboundary )
 	 {
 	   motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
-	   boundaries->leftLTR_5 = (Uint) (charptr - dbseq);
-           DEBUG0(1, "next better hit\n");
-	   DEBUG1(1, "  new boundary pos leftLTR_5 = %lu\n",
-	             (Showuint) boundaries->leftLTR_5 - multiseqoffset);
+	   boundaries->leftLTR_5 = i;
+           //DEBUG0(1, "next better hit\n");
+	   //DEBUG1(1, "  new boundary pos leftLTR_5 = %lu\n",
+	   //          (Showuint) boundaries->leftLTR_5 - multiseqoffset);
            difffromoldboundary = difffromnewboundary;
 	 }
        }
     }
   }
-  if(charptr == dbseq + endleftLTR && (!motif1) )
+#ifdef DEBUG
+  if(i == endleftLTR && (!motif1) )
   {
-    DEBUG0(1, "no left motif found.\n");
+    printf("no left motif found.\n");
   }
+#endif
   *motifmismatchesleftLTR += motifmismatches_frombestmatch;
   motifmismatches_frombestmatch = 0;
 
-
   ///// search for right motif around rightLTR_3 /////
-  DEBUG2(1, "search right motif between pos = %lu"
-            " up to pos end = %lu\n",
-            (Showuint) startrightLTR - multiseqoffset,
-	    (Showuint) endrightLTR - multiseqoffset);
+  //DEBUG2(1, "search right motif between pos = %lu"
+  //          " up to pos end = %lu\n",
+  //          (Showuint) startrightLTR - multiseqoffset,
+  //	    (Showuint) endrightLTR - multiseqoffset);
 
-  for(charptr = dbseq + startrightLTR + 1; charptr <= dbseq + endrightLTR; 
-      charptr++)
+  for(i = startrightLTR + (Seqpos)1; i <= endrightLTR; i++)
   {
     tmp_motifmismatchesrightLTR = 0;
-    if(*charptr != motif->secondright)
+    if(getencodedchar(encseq, i, Forwardmode) != lo->motif.firstright)
     {
       tmp_motifmismatchesrightLTR++;
     }
-    if(*(charptr-1) != motif->firstright)
+    if(getencodedchar(encseq, i-1, Forwardmode) != lo->motif.secondright)
     {
       tmp_motifmismatchesrightLTR++;
     }
+
     if(tmp_motifmismatchesrightLTR + (*motifmismatchesrightLTR)
-                                   <= motif->allowedmismatches)
+                                   <= lo->motif.allowedmismatches)
     {
        // first hit //
        if( !motif2 )
        {
-	 Uint max, min;
+	 Seqpos max, min;
 
 	 motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
-	 boundaries->rightLTR_3 = (Uint) (charptr - dbseq);
-	 motif2 = True;
-	 DEBUG0(1, "found right motif:\n");
-	 DEBUG1(1, "  new boundary pos rightLTR_3 = %lu\n",
-	           (Showuint) boundaries->rightLTR_3 - multiseqoffset);
+	 boundaries->rightLTR_3 = i;
+	 motif2 = true;
+	 //DEBUG0(1, "found right motif:\n");
+	 //DEBUG1(1, "  new boundary pos rightLTR_3 = %lu\n",
+	 //          (Showuint) boundaries->rightLTR_3 - multiseqoffset);
 	 max = MAX(oldrightLTR_3, boundaries->rightLTR_3);
 	 min = MIN(oldrightLTR_3, boundaries->rightLTR_3);
 	 difffromoldboundary = max - min; 
@@ -435,41 +443,42 @@ static void searchformotifonlyborders(
        // next hit //
        else
        {
-         Uint max, min, difffromnewboundary;
+         Seqpos max, min, difffromnewboundary;
 
 	 // test if hit is nearer to old boundaries than previous hit //
-	 max = MAX(oldrightLTR_3, ((Uint)(charptr - dbseq)));
-	 min = MIN(oldrightLTR_3, ((Uint)(charptr - dbseq)));
+	 max = MAX(oldrightLTR_3, i);
+	 min = MIN(oldrightLTR_3, i);
 	 difffromnewboundary = max - min;
          if( difffromnewboundary < difffromoldboundary )
 	 {
 	   motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
-	   boundaries->rightLTR_3 = (Uint) (charptr - dbseq);
-           DEBUG0(1, "next better hit\n");
-	   DEBUG1(1, "  new boundary pos rightLTR_3 = %lu\n",
-	             (Showuint) boundaries->rightLTR_3 - multiseqoffset);
+	   boundaries->rightLTR_3 = i;
+           //DEBUG0(1, "next better hit\n");
+	   //DEBUG1(1, "  new boundary pos rightLTR_3 = %lu\n",
+	   //          (Showuint) boundaries->rightLTR_3 - multiseqoffset);
            difffromoldboundary = difffromnewboundary;
 	 }
        }
     }
   }
-  if(charptr > dbseq + endrightLTR && (!motif2))    
+#ifdef DEBUG
+  if(i > endrightLTR && (!motif2))    
   {
-    DEBUG0(1, "no right motif found.\n");
+    printf("no right motif found.\n");
   }
+#endif
   *motifmismatchesrightLTR += motifmismatches_frombestmatch;
   
   if(motif1 && motif2) 
   {
-    boundaries->motif_near_tsd = True; 
+    boundaries->motif_near_tsd = true; 
   }
   else
   {
-    boundaries->motif_near_tsd = False;
+    boundaries->motif_near_tsd = false;
   }
 
 }
-*/
 
 /*
  The following function searches for a specified palindromic motif at the 
@@ -574,7 +583,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
        /* first hit */
        if( !motif1 )
        {
-         unsigned int max, min;
+         Seqpos max, min;
 
 	 motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
 	 boundaries->leftLTR_3 = i;
@@ -589,7 +598,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
        /* next hit */
        else
        {
-         unsigned int max, min, difffromnewboundary;
+         Seqpos max, min, difffromnewboundary;
         
 	 /* test if hit is nearer to old boundaries than previous hit */
 	 max = MAX(oldleftLTR_3, i);
@@ -841,7 +850,8 @@ static int searchforTSDandorMotifoutside(
 
   // now, search for correct boundaries //
 
-  if(lo->minlengthTSD > (unsigned long) 1) ///// search for TSDs and/or motif /////
+  ///// search for TSDs and/or motif ///// 
+  if(lo->minlengthTSD > (unsigned long) 1) 
   {
     //DEBUG2(1, "searching for TSD and motif between pos = %lu up to "
     //	"pos end = %lu\n",
@@ -878,7 +888,7 @@ static int searchforTSDandorMotifoutside(
 							Forwardmode); 
     }
  
-    ///*test
+    /*test
     printf("dbseq from =  " FormatSeqpos " to " FormatSeqpos "\n",
            PRINTSeqposcast(startleftLTR),
            PRINTSeqposcast(endleftLTR)
@@ -897,7 +907,7 @@ static int searchforTSDandorMotifoutside(
       printf("%c", characters[query[i]]);
     }
     printf("\n");
-    //test*/
+    test*/
 
     INITARRAY(&subrepeatinfo.repeats, Repeat);
     subrepeatinfo.lmin = lo->minlengthTSD;
@@ -1002,7 +1012,8 @@ static int searchforTSDandorMotifoutside(
 	markpos,
 	boundaries,
 	motifmismatchesleftLTR,
-	motifmismatchesrightLTR
+	motifmismatchesrightLTR,
+	env
 	);
 
     FREEARRAY (&subrepeatinfo.repeats, Repeat);
@@ -1024,16 +1035,17 @@ static int searchforTSDandorMotifoutside(
     DEBUG1(1, "use total vicinity len = %lu\n", 
 	(Showuint) rightlen);*/
     
-    /*searchformotifonlyborders(boundaries, //ACHTUNG einkommentieren
-	virtualtree,
-	sequence, 
+    searchformotifonlyborders(lo,
+        boundaries, 
+	ssar,
+	markpos,
 	startleftLTR,
 	endleftLTR,
 	startrightLTR,
 	endrightLTR,
-	motif,
 	motifmismatchesleftLTR,
-	motifmismatchesrightLTR);*/
+	motifmismatchesrightLTR,
+	env);
   }
 
   return 0;

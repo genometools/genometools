@@ -386,7 +386,7 @@ int searchforLTRs (
       {
 	// if search for motif only (and not TSD)
 	if( lo->minlengthTSD <= (unsigned long) 1 &&
-	    //boundaries->motif_near_tsd &&  ///!!!!!!wichtig spaeter einkommentieren!!!!!!
+	    boundaries->motif_near_tsd &&
 	    boundaries->motif_far_tsd )
 	{
 	  // predicted as full LTR-pair, keep it
