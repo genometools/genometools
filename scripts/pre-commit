@@ -4,7 +4,7 @@
 # to perform source checks before commits
 
 # this hack allows us to determine the GenomeTools directory automatically
-# (GIT_INDEX_FILE is the only environment variable given to us by git)
+# (GIT_INDEX_FILE is the only environment variable set git)
 GTDIR=`echo $GIT_INDEX_FILE | sed 's%/\.git/.*$%%'`
 
 $GTDIR/scripts/src_check $GTDIR/src/*.[ch]            \
