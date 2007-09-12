@@ -24,8 +24,6 @@
 #include "alphadef.h"
 #include "readmode-def.h"
 
-#define ENCSEQFILESUFFIX     ".esq"
-
 #define REVERSEPOS(TOT,POS) ((TOT) - 1 - (POS))
 
 typedef struct
@@ -40,8 +38,7 @@ typedef struct
 {
   Uchar *plainseq;
   Seqpos totallength;
-  bool plainseqptr;
-  Readmode readmode;
+  bool hasownmemory, mappedfile;
 } Encodedsequence;
 
 #define getencseqtotallength(ENCSEQ) ((ENCSEQ)->totallength)
@@ -79,24 +76,6 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos);
 
-/*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
-                                               const Str *indexname,
-                                               Seqpos totallength,
-                                               const Specialcharinfo
-                                                     *specialcharinfo,
-                                               const Alphabet *alphabet,
-                                               const char *str_sat,
-                                               Env *env);
-
-Encodedsequence *plain2encodedsequence(bool withrange,
-                                       Specialcharinfo *specialcharinfo,
-                                       const Uchar *seq1,
-                                       Seqpos len1,
-                                       const Uchar *seq2,
-                                       unsigned long len2,
-                                       const Alphabet *alphabet,
-                                       Env *env);
-
 bool hasspecialranges(const Encodedsequence *encseq);
 
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
@@ -126,5 +105,23 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
                                                   const Alphabet *alphabet,
                                                   const char *str_sat,
                                                   Env *env);
+
+/*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
+                                               const Str *indexname,
+                                               Seqpos totallength,
+                                               const Specialcharinfo
+                                                     *specialcharinfo,
+                                               const Alphabet *alphabet,
+                                               const char *str_sat,
+                                               Env *env);
+
+Encodedsequence *plain2encodedsequence(bool withrange,
+                                       Specialcharinfo *specialcharinfo,
+                                       const Uchar *seq1,
+                                       Seqpos len1,
+                                       const Uchar *seq2,
+                                       unsigned long len2,
+                                       const Alphabet *alphabet,
+                                       Env *env);
 
 #endif

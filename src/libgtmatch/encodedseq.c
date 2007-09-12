@@ -125,6 +125,8 @@
           }\
         }
 
+#define ENCSEQFILESUFFIX     ".esq"
+
 #define NAMEDFUNCTION(F) {#F,F}
 
 typedef enum

@@ -15,8 +15,6 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
 
 int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
 
-int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
-
 void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
 
 Encodedsequencescanstate *initEncodedsequencescanstate(
