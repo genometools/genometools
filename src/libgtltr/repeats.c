@@ -189,10 +189,10 @@ int subsimpleexactselfmatchstore (
   SubRepeatInfo *info,
   unsigned long len,
   Seqpos dbstart,
-  unsigned long querystart)
+  uint64_t queryseqnum,
+  unsigned long querystart,
+  Env *env)
 {
-  Env *env = info->envptr;
-  
   env_error_check(env);
 
   //test maximal length of candidate pair
@@ -219,10 +219,10 @@ int subshowrepeats (
   SubRepeatInfo *info,
   unsigned long len,
   Seqpos dbstart,
-  unsigned long querystart)
+  uint64_t queryseqnum,
+  unsigned long querystart,
+  Env *env)
 {
-  Env *env = info->envptr;
-  
   env_error_check(env);
 
   //test maximal length of candidate pair

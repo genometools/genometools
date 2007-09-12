@@ -913,7 +913,7 @@ static int searchforTSDandorMotifoutside(
 	  (unsigned long)rightlen,
 	  (unsigned int)lo->minlengthTSD,
 	  alphabetSequentialsuffixarrayreader(ssar),
-	  (void*)subsimpleexactselfmatchstore,//(void*)subshowrepeats,  //spaeter aenders
+	  (void*)subsimpleexactselfmatchstore,//(void*)subshowrepeats,
 	  &subrepeatinfo,
 	  env) != 0)
     {
