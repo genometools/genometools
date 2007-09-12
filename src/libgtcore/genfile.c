@@ -59,8 +59,7 @@ const char* genfilemode_suffix(GenFileMode mode)
       return "";
   }
   /* due do warning on solaris:
-     warning: control reaches end of non-void function
-  */
+     warning: control reaches end of non-void function */
   return "";
 }
 
