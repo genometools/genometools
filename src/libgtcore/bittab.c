@@ -16,10 +16,10 @@
 */
 
 #include <assert.h>
-#include <libgtcore/bittab.h>
-#include <libgtcore/ensure.h>
-#include <libgtcore/undef.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/bittab.h"
+#include "libgtcore/ensure.h"
+#include "libgtcore/undef.h"
+#include "libgtcore/xansi.h"
 
 #define NUM_OF_TESTS    50
 #define MAX_SIZE        1024

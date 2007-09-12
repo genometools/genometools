@@ -28,7 +28,7 @@
 #include "libgtcore/strarray.h"
 #include "libgtcore/fileutils.h"
 #include "libgtcore/cstr.h"
-#include "libgtext/gtdata.h"
+#include "libgtcore/gtdatapath.h"
 #include "qsorttype.h"
 #include "symboldef.h"
 #include "arraydef.h"
@@ -515,16 +515,6 @@ unsigned int getmapsizeAlphabet(const Alphabet *alpha)
 const Uchar *getcharactersAlphabet(const Alphabet *alpha)
 {
   return alpha->characters;
-}
-
-Uchar *copycharactersAlphabet(const Alphabet *alpha,Env *env)
-{
-  Uchar *characters;
-
-  env_error_check(env);
-  ALLOCASSIGNSPACE(characters,NULL,Uchar,alpha->domainsize);
-  (void) memcpy(characters,alpha->characters,(size_t) alpha->domainsize);
-  return characters;
 }
 
 void freeAlphabet(Alphabet **alpha,Env *env)

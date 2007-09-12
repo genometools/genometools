@@ -23,38 +23,8 @@
 #include "libgtcore/cstr.h"
 #include "libgtcore/fileutils.h"
 #include "libgtcore/splitter.h"
-#include "libgtext/gtdata.h"
-
-#define GTDATADIR "/gtdata"
-#define UPDIR     "/.."
-
-Str* gtdata_get_path(const char *prog, Env *env)
-{
-  Str *path;
-  int had_err = 0;
-  env_error_check(env);
-  assert(prog);
-  path = str_new(env);
-  had_err = file_find_in_path(path, prog, env);
-  if (!had_err) {
-    assert(str_length(path));
-    str_append_cstr(path, GTDATADIR, env);
-    if (file_exists(str_get(path)))
-      return path;
-    str_set_length(path, str_length(path) - strlen(GTDATADIR));
-    str_append_cstr(path, UPDIR, env);
-    str_append_cstr(path, GTDATADIR, env);
-    if (!file_exists(str_get(path))) {
-      env_error_set(env, "could not find gtdata/ directory");
-      had_err = -1;
-    }
-  }
-  if (had_err) {
-    str_delete(path, env);
-    return NULL;
-  }
-  return path;
-}
+#include "libgtcore/gtdatapath.h"
+#include "libgtext/gtdatahelp.h"
 
 int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
 {

@@ -19,7 +19,7 @@
 #include "libgtcore/fasta.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
-#include "libgtext/gtdata.h"
+#include "libgtext/gtdatahelp.h"
 #include "libgtext/mutate.h"
 
 typedef struct {

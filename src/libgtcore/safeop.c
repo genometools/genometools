@@ -17,7 +17,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <libgtcore/safeop.h>
+#include "libgtcore/safeop.h"
 
 long safe_cast_to_long_type(unsigned long ulong, const char *filename, int line)
 {

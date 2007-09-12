@@ -60,8 +60,8 @@ static Uchar getfirstedgechar(const Trierep *trierep,
   Encseqreadinfo *eri = trierep->encseqreadinfo + node->suffixinfo.idx;
 
   if (ISLEAF(node) &&
-     node->suffixinfo.startpos + prevdepth >=
-     getencseqtotallength(eri->encseqptr))
+      node->suffixinfo.startpos + prevdepth >=
+      getencseqtotallength(eri->encseqptr))
   {
     return (Uchar) SEPARATOR;
   }
@@ -399,7 +399,7 @@ static Trienode *makenewbranch(Trierep *trierep,
   newbranch->rightsibling = oldnode->rightsibling;
   cc1 = getfirstedgechar(trierep,oldnode,currentdepth);
   if (suffixinfo->startpos + currentdepth >=
-     getencseqtotallength(eri->encseqptr))
+      getencseqtotallength(eri->encseqptr))
   {
     cc2 = (Uchar) SEPARATOR;
   } else
@@ -490,7 +490,7 @@ void insertsuffixintotrie(Trierep *trierep,
     while (true)
     {
       if (suffixinfo->startpos + currentdepth >=
-         getencseqtotallength(eri->encseqptr))
+          getencseqtotallength(eri->encseqptr))
       {
         cc = (Uchar) SEPARATOR;
       } else

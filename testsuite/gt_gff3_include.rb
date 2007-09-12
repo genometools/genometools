@@ -14,6 +14,13 @@ Test do
   run "diff #{$last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
 end
 
+Name "gt gff3 short test (compressed output)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -o test -gzip #{$testdata}gff3_file_1_short.txt"
+  grep $last_stderr, "appending it"
+end
+
 Name "gt gff3 prob 1"
 Keywords "gt_gff3"
 Test do

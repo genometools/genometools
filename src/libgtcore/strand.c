@@ -17,7 +17,7 @@
 
 #include <assert.h>
 #include <string.h>
-#include <libgtcore/strand.h>
+#include "libgtcore/strand.h"
 
 Strand strand_get(char strand_char)
 {

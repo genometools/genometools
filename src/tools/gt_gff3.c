@@ -22,7 +22,7 @@
 #include "libgtext/addintrons_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
-#include "libgtext/gtdata.h"
+#include "libgtext/gtdatahelp.h"
 #include "libgtext/mergefeat_stream_sorted.h"
 #include "libgtext/sort_stream.h"
 

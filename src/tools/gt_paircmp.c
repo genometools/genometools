@@ -41,26 +41,26 @@ typedef struct
 
 static void showsimpleoptions(const Cmppairwiseopt *opt)
 {
-  if(strarray_size(opt->strings) > 0)
+  if (strarray_size(opt->strings) > 0)
   {
     printf("# two strings \"%s\" \"%s\"\n",strarray_get(opt->strings,0),
                                            strarray_get(opt->strings,1UL));
     return;
   }
-  if(strarray_size(opt->files) > 0)
+  if (strarray_size(opt->files) > 0)
   {
     printf("# two files \"%s\" \"%s\"\n",strarray_get(opt->files,0),
                                          strarray_get(opt->files,1UL));
     return;
   }
-  if(opt->charlistlen != NULL)
+  if (opt->charlistlen != NULL)
   {
     printf("# alphalen \"%s\" %lu\n",
              str_get(opt->charlistlen->charlist),
              opt->charlistlen->len);
     return;
   }
-  if(str_length(opt->text) > 0)
+  if (str_length(opt->text) > 0)
   {
     printf("# text \"%s\"\n",str_get(opt->text));
     return;
@@ -143,9 +143,9 @@ static OPrval parse_options(int *parsed_args,
             oprval = OPTIONPARSER_ERROR;
           }
           ALLOCASSIGNSPACE(pw->charlistlen,NULL,Charlistlen,1);
-          pw->charlistlen->charlist 
+          pw->charlistlen->charlist
             = str_new_cstr(strarray_get(charlistlen,0),env);
-          if(sscanf(strarray_get(charlistlen,1UL),"%ld",&readint) != 1 ||
+          if (sscanf(strarray_get(charlistlen,1UL),"%ld",&readint) != 1 ||
              readint < 1L)
           {
             env_error_set(env,
@@ -175,13 +175,12 @@ static OPrval parse_options(int *parsed_args,
   return oprval;
 }
 
-
 static void freesimpleoption(Cmppairwiseopt *cmppairwise,Env *env)
 {
   strarray_delete(cmppairwise->strings,env);
   strarray_delete(cmppairwise->files,env);
   str_delete(cmppairwise->text,env);
-  if(cmppairwise->charlistlen != NULL)
+  if (cmppairwise->charlistlen != NULL)
   {
     str_delete(cmppairwise->charlistlen->charlist,env);
     FREESPACE(cmppairwise->charlistlen);
@@ -193,10 +192,10 @@ static unsigned long applycheckfunctiontosimpleoptions(
                                   const Cmppairwiseopt *opt,
                                   Env *env)
 {
-  if(strarray_size(opt->strings) > 0)
+  if (strarray_size(opt->strings) > 0)
   {
     bool forward = true;
-    while(true)
+    while (true)
     {
       checkfunction(forward,
                     (const Uchar *) strarray_get(opt->strings,0),
@@ -204,7 +203,7 @@ static unsigned long applycheckfunctiontosimpleoptions(
                     (const Uchar *) strarray_get(opt->strings,1UL),
                     (unsigned long) strlen(strarray_get(opt->strings,1UL)),
                     env);
-      if(!forward)
+      if (!forward)
       {
         break;
       }
@@ -212,7 +211,7 @@ static unsigned long applycheckfunctiontosimpleoptions(
     }
     return 2UL; /* number of testcases */
   }
-  if(strarray_size(opt->files) > 0)
+  if (strarray_size(opt->files) > 0)
   {
     runcheckfunctionontwofiles(checkfunction,
                                strarray_get(opt->files,0),
@@ -220,14 +219,14 @@ static unsigned long applycheckfunctiontosimpleoptions(
                                env);
     return 2UL;
   }
-  if(opt->charlistlen != NULL)
+  if (opt->charlistlen != NULL)
   {
     return runcheckfunctiononalphalen(checkfunction,
                                       str_get(opt->charlistlen->charlist),
                                       opt->charlistlen->len,
                                       env);
   }
-  if(str_length(opt->text) > 0)
+  if (str_length(opt->text) > 0)
   {
     return runcheckfunctionontext(checkfunction,str_get(opt->text),env);
   }

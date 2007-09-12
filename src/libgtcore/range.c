@@ -16,12 +16,12 @@
 */
 
 #include <assert.h>
-#include <libgtcore/ensure.h>
-#include <libgtcore/fptr.h>
-#include <libgtcore/minmax.h>
-#include <libgtcore/msort.h>
-#include <libgtcore/range.h>
-#include <libgtcore/undef.h>
+#include "libgtcore/ensure.h"
+#include "libgtcore/fptr.h"
+#include "libgtcore/minmax.h"
+#include "libgtcore/msort.h"
+#include "libgtcore/range.h"
+#include "libgtcore/undef.h"
 
 int range_compare(Range range_a, Range range_b)
 {

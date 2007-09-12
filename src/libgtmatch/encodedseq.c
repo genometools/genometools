@@ -15,6 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef INLINEDENCSEQ
+
 #include <stdlib.h>
 #include <limits.h>
 #include <ctype.h>
@@ -123,6 +125,8 @@
           }\
         }
 
+#define ENCSEQFILESUFFIX     ".esq"
+
 #define NAMEDFUNCTION(F) {#F,F}
 
 typedef enum
@@ -140,7 +144,6 @@ typedef uint32_t Uint32;
  struct Encodedsequence
 {
   /* Common part */
-  Uchar *characters;
   Uchar *satcharptr;
   Positionaccesstype sat;
   unsigned int mapsize;
@@ -582,7 +585,6 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
   {
     return;
   }
-  env_ma_free(encseq->characters, env);
   if (encseq->mappedptr != NULL)
   {
     env_fa_xmunmap(encseq->mappedptr,env);
@@ -1364,11 +1366,6 @@ static bool bitanddirectnextspecialrangeiterator(Sequencerange *range,
   return success;
 }
 
-bool exhaustedspecialrangeiterator(Specialrangeiterator *sri)
-{
-  return sri->exhausted;
-}
-
 bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri)
 {
   if (sri->exhausted)
@@ -1413,7 +1410,6 @@ static Encodedsequence *determineencseqkeyvalues(
   env_error_check(env);
   ALLOCASSIGNSPACE(encseq,NULL,Encodedsequence,(size_t) 1);
   encseq->sat = sat;
-  encseq->characters = copycharactersAlphabet(alphabet,env);
   encseq->mapsize = getmapsizeAlphabet(alphabet);
   encseq->mappedptr = NULL;
   encseq->satcharptr = NULL;
@@ -1763,3 +1759,5 @@ Encodedsequence *plain2encodedsequence(bool withrange,
   */
   return encseq;
 }
+
+#endif /* INLINEDENCSEQ */

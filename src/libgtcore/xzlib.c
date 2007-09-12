@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <libgtcore/xzlib.h>
+#include "libgtcore/xzlib.h"
 
 gzFile xgzopen(const char *path, const char *mode)
 {

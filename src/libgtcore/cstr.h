@@ -19,8 +19,8 @@
 #define CSTR_H
 
 #include <stdio.h>
-#include <libgtcore/env.h>
-#include <libgtcore/genfile.h>
+#include "libgtcore/env.h"
+#include "libgtcore/genfile.h"
 
 char*         cstr_dup(const char*, Env*);
 /* replace each occurence of <f> in <cstr> to <t> */

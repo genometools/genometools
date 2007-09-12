@@ -15,15 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/genfile.h>
-#include <libgtcore/hashtable.h>
-#include <libgtcore/fa.h>
-#include <libgtcore/mmap.h>
-#include <libgtcore/xansi.h>
-#include <libgtcore/xbzlib.h>
-#include <libgtcore/xposix.h>
-#include <libgtcore/xtmpfile.h>
-#include <libgtcore/xzlib.h>
+#include "libgtcore/genfile.h"
+#include "libgtcore/hashtable.h"
+#include "libgtcore/fa.h"
+#include "libgtcore/mmap.h"
+#include "libgtcore/xansi.h"
+#include "libgtcore/xbzlib.h"
+#include "libgtcore/xposix.h"
+#include "libgtcore/xtmpfile.h"
+#include "libgtcore/xzlib.h"
 
 /* the file allocator class */
 struct FA {
@@ -99,6 +99,27 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
   return fp;
 }
 
+static void fclose_generic(void *stream, GenFileMode genfilemode, FA *fa)
+{
+  FAFileInfo *fileinfo;
+  assert(stream && fa);
+  fileinfo = hashtable_get(fa->file_pointer, stream);
+  assert(fileinfo);
+  hashtable_remove(fa->file_pointer, stream, fa->env);
+  switch (genfilemode) {
+    case GFM_UNCOMPRESSED:
+      fclose(stream);
+      break;
+    case GFM_GZIP:
+      gzclose(stream);
+      break;
+    case GFM_BZIP2:
+      BZ2_bzclose(stream);
+      break;
+    default: assert(0);
+  }
+}
+
 static void xfclose_generic(void *stream, GenFileMode genfilemode, FA *fa)
 {
   FAFileInfo *fileinfo;
@@ -136,6 +157,13 @@ FILE* fa_xfopen(FA *fa, const char *path, const char *mode,
                           line);
 }
 
+void fa_fclose(FILE *stream, FA *fa)
+{
+  assert(fa);
+  if (!stream) return;
+  fclose_generic(stream, GFM_UNCOMPRESSED, fa);
+}
+
 void fa_xfclose(FILE *stream, FA *fa)
 {
   assert(fa);
@@ -155,6 +183,13 @@ gzFile fa_xgzopen(FA *fa, const char *path, const char *mode,
 {
   assert(fa && path && mode);
   return fileopen_generic(fa, path, mode, GFM_GZIP, true, filename, line);
+}
+
+void fa_gzclose(gzFile stream, FA *fa)
+{
+  assert(fa);
+  if (!stream) return;
+  fclose_generic(stream, GFM_GZIP, fa);
 }
 
 void fa_xgzclose(gzFile stream, FA *fa)
@@ -177,6 +212,13 @@ BZFILE* fa_xbzopen(FA *fa, const char *path, const char *mode,
 {
   assert(fa && path && mode);
   return fileopen_generic(fa, path, mode, GFM_BZIP2, true, filename, line);
+}
+
+void fa_bzclose(BZFILE *stream, FA *fa)
+{
+  assert(fa);
+  if (!stream) return;
+  fclose_generic(stream, GFM_BZIP2, fa);
 }
 
 void fa_xbzclose(BZFILE *stream, FA *fa)

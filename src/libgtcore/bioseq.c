@@ -16,22 +16,22 @@
 */
 
 #include <assert.h>
-#include <libgtcore/array.h>
-#include <libgtcore/bioseq.h>
-#include <libgtcore/cstr.h>
-#include <libgtcore/dynalloc.h>
-#include <libgtcore/error.h>
-#include <libgtcore/fasta.h>
-#include <libgtcore/fasta_reader.h>
-#include <libgtcore/fileutils.h>
-#include <libgtcore/gc_content.h>
-#include <libgtcore/grep.h>
-#include <libgtcore/range.h>
-#include <libgtcore/sig.h>
-#include <libgtcore/str.h>
-#include <libgtcore/undef.h>
-#include <libgtcore/xansi.h>
-#include <libgtcore/xposix.h>
+#include "libgtcore/array.h"
+#include "libgtcore/bioseq.h"
+#include "libgtcore/cstr.h"
+#include "libgtcore/dynalloc.h"
+#include "libgtcore/error.h"
+#include "libgtcore/fasta.h"
+#include "libgtcore/fasta_reader.h"
+#include "libgtcore/fileutils.h"
+#include "libgtcore/gc_content.h"
+#include "libgtcore/grep.h"
+#include "libgtcore/range.h"
+#include "libgtcore/sig.h"
+#include "libgtcore/str.h"
+#include "libgtcore/undef.h"
+#include "libgtcore/xansi.h"
+#include "libgtcore/xposix.h"
 
 struct Bioseq {
   bool use_stdin;

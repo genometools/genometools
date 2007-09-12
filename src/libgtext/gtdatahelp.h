@@ -15,14 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GTDATA_H
-#define GTDATA_H
+#ifndef GTDATAHELP_H
+#define GTDATAHELP_H
 
-/* This module defines functions working on the ``gtdata'' directory */
 #include "libgtcore/str.h"
-
-/* get the path to the gtdata/ directory (including it) for the given 'prog' */
-Str* gtdata_get_path(const char *prog, Env*);
 
 /* execute helpfile gtdata/doc/progname.lua */
 int  gtdata_show_help(const char *progname, void *unused, Env*);

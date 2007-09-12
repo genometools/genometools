@@ -16,8 +16,8 @@
 */
 
 #include <assert.h>
-#include <libgtcore/seq.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/seq.h"
+#include "libgtcore/xansi.h"
 
 struct Seq {
   char *seq, *description;

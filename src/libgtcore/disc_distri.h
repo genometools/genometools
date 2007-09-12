@@ -18,8 +18,8 @@
 #ifndef DISC_DISTRI_H
 #define DISC_DISTRI_H
 
-#include <libgtcore/env.h>
-#include <libgtcore/genfile.h>
+#include "libgtcore/env.h"
+#include "libgtcore/genfile.h"
 
 /* A discrete distribution */
 typedef struct DiscDistri DiscDistri;

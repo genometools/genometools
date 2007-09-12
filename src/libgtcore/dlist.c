@@ -17,10 +17,10 @@
 
 #include <assert.h>
 #include <limits.h>
-#include <libgtcore/dlist.h>
-#include <libgtcore/ensure.h>
-#include <libgtcore/mathsupport.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/dlist.h"
+#include "libgtcore/ensure.h"
+#include "libgtcore/mathsupport.h"
+#include "libgtcore/xansi.h"
 
 #define NUM_OF_TESTS  100
 #define MAX_SIZE      1024

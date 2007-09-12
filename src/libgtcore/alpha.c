@@ -18,9 +18,9 @@
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
-#include <libgtcore/alpha.h>
-#include <libgtcore/undef.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/alpha.h"
+#include "libgtcore/undef.h"
+#include "libgtcore/xansi.h"
 
 #define DNA_WILDCARDS                "nsywrkvbdhmNSYWRKVBDHM"
 #define PROTEIN_CHARACTERS_UPPERCASE "LVIFKREDAGSTNQYWPHMC"

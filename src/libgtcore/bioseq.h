@@ -18,9 +18,9 @@
 #ifndef BIOSEQ_H
 #define BIOSEQ_H
 
-#include <libgtcore/env.h>
-#include <libgtcore/seq.h>
-#include <libgtcore/str.h>
+#include "libgtcore/env.h"
+#include "libgtcore/seq.h"
+#include "libgtcore/str.h"
 
 /* Bioseq file endings */
 #define GT_BIOSEQ_INDEX ".gt_bsi"

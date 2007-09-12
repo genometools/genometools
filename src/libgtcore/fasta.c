@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/fasta.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/fasta.h"
+#include "libgtcore/xansi.h"
 
 void fasta_show_entry(const char *description, const char *sequence,
                       unsigned long sequence_length, unsigned long width)

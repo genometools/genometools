@@ -18,7 +18,7 @@
 #ifndef DYNALLOC_H
 #define DYNALLOC_H
 
-#include <libgtcore/env.h>
+#include "libgtcore/env.h"
 
 /*
   Do not use this function directly! It is only used internally to implement

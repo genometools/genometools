@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/xtmpfile.h>
-#include <libgtcore/xposix.h>
+#include "libgtcore/xtmpfile.h"
+#include "libgtcore/xposix.h"
 
 FILE* xtmpfile(char *template)
 {

@@ -18,10 +18,10 @@
 #ifndef PARSEUTILS_H
 #define PARSEUTILS_H
 
-#include <libgtcore/env.h>
-#include <libgtcore/range.h>
-#include <libgtcore/phase.h>
-#include <libgtcore/strand.h>
+#include "libgtcore/env.h"
+#include "libgtcore/range.h"
+#include "libgtcore/phase.h"
+#include "libgtcore/strand.h"
 
 /* enforces that start <= end */
 int parse_range(Range*, const char *start, const char *end,

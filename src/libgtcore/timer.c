@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/timer.h>
-#include <libgtcore/xansi.h>
-#include <libgtcore/xposix.h>
+#include "libgtcore/timer.h"
+#include "libgtcore/xansi.h"
+#include "libgtcore/xposix.h"
 
 typedef enum {
   TIMER_RUNNING,
