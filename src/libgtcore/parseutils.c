@@ -19,8 +19,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
-#include <libgtcore/parseutils.h>
-#include <libgtcore/undef.h>
+#include "libgtcore/parseutils.h"
+#include "libgtcore/undef.h"
 
 int parse_range(Range *range, const char *start, const char *end,
                 unsigned long line_number, const char *filename, Env *env)

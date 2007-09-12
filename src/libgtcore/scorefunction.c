@@ -16,8 +16,8 @@
 */
 
 #include <assert.h>
-#include <libgtcore/scorefunction.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/scorefunction.h"
+#include "libgtcore/xansi.h"
 
 struct ScoreFunction {
   ScoreMatrix *sm;

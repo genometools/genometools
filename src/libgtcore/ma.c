@@ -16,9 +16,9 @@
 */
 
 #include <stdbool.h>
-#include <libgtcore/hashtable.h>
-#include <libgtcore/ma.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
+#include "libgtcore/xansi.h"
 
 /* the memory allocator class */
 struct MA {

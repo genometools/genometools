@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/fileutils.h>
-#include <libgtcore/outputfile.h>
+#include "libgtcore/fileutils.h"
+#include "libgtcore/outputfile.h"
 
 #define FORCE_OPT_CSTR  "force"
 

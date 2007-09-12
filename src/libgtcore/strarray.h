@@ -18,7 +18,7 @@
 #ifndef STRARRAY_H
 #define STRARRAY_H
 
-#include <libgtcore/env.h>
+#include "libgtcore/env.h"
 
 /* the string array class  */
 typedef struct StrArray StrArray;

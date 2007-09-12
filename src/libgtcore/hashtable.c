@@ -16,11 +16,11 @@
 */
 
 #include <assert.h>
-#include <libgtcore/array.h>
-#include <libgtcore/ensure.h>
-#include <libgtcore/hashtable.h>
-#include <libgtcore/st.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/array.h"
+#include "libgtcore/ensure.h"
+#include "libgtcore/hashtable.h"
+#include "libgtcore/st.h"
+#include "libgtcore/xansi.h"
 
 struct Hashtable
 {

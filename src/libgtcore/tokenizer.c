@@ -16,10 +16,10 @@
 */
 
 #include <assert.h>
-#include <libgtcore/ensure.h>
-#include <libgtcore/tokenizer.h>
-#include <libgtcore/xansi.h>
-#include <libgtcore/xtmpfile.h>
+#include "libgtcore/ensure.h"
+#include "libgtcore/tokenizer.h"
+#include "libgtcore/xansi.h"
+#include "libgtcore/xtmpfile.h"
 
 struct Tokenizer {
   IO *io;

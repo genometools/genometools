@@ -20,7 +20,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <libgtcore/array.h>
+#include "libgtcore/array.h"
 
 typedef struct Bittab Bittab;
 

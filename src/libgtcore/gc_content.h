@@ -18,7 +18,7 @@
 #ifndef GC_CONTENT_H
 #define GC_CONTENT_H
 
-#include <libgtcore/alpha.h>
+#include "libgtcore/alpha.h"
 
 /* show the GC-content for sequence <seq> with length <len> on stdout. <alpha>
    has to be compatible with a DNA alphabet */

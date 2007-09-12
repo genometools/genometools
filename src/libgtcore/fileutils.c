@@ -18,11 +18,11 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <libgtcore/cstr.h>
-#include <libgtcore/fileutils.h>
-#include <libgtcore/splitter.h>
-#include <libgtcore/xansi.h>
-#include <libgtcore/xposix.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/fileutils.h"
+#include "libgtcore/splitter.h"
+#include "libgtcore/xansi.h"
+#include "libgtcore/xposix.h"
 
 bool file_exists(const char *path)
 {

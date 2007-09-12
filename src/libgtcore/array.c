@@ -18,11 +18,11 @@
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
-#include <libgtcore/array.h>
-#include <libgtcore/dynalloc.h>
-#include <libgtcore/ensure.h>
-#include <libgtcore/range.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/array.h"
+#include "libgtcore/dynalloc.h"
+#include "libgtcore/ensure.h"
+#include "libgtcore/range.h"
+#include "libgtcore/xansi.h"
 
 #define NUM_OF_TESTS    100
 #define MAX_SIZE        1024

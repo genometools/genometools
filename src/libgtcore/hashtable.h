@@ -18,7 +18,7 @@
 #ifndef HASHTABLE_H
 #define HASHTABLE_H
 
-#include <libgtcore/fptr.h>
+#include "libgtcore/fptr.h"
 
 typedef struct Hashtable Hashtable;
 

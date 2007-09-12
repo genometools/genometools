@@ -15,9 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/array.h>
-#include <libgtcore/cstr.h>
-#include <libgtcore/strarray.h>
+#include "libgtcore/array.h"
+#include "libgtcore/cstr.h"
+#include "libgtcore/strarray.h"
 
 struct StrArray {
   Array *cstrings;

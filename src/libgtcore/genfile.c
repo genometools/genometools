@@ -18,11 +18,11 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <libgtcore/cstr.h>
-#include <libgtcore/genfile.h>
-#include <libgtcore/xansi.h>
-#include <libgtcore/xbzlib.h>
-#include <libgtcore/xzlib.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/genfile.h"
+#include "libgtcore/xansi.h"
+#include "libgtcore/xbzlib.h"
+#include "libgtcore/xzlib.h"
 
 struct GenFile {
   GenFileMode mode;

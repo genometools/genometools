@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/gc_content.h>
+#include "libgtcore/gc_content.h"
 
 void gc_content_show(const char *seq, unsigned long len, Alpha *alpha, Env *env)
 {

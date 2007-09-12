@@ -19,7 +19,7 @@
 #define RANGE_H
 
 #include <stdbool.h>
-#include <libgtcore/array.h>
+#include "libgtcore/array.h"
 
 typedef struct {
   unsigned long start,

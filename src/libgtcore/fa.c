@@ -15,15 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/genfile.h>
-#include <libgtcore/hashtable.h>
-#include <libgtcore/fa.h>
-#include <libgtcore/mmap.h>
-#include <libgtcore/xansi.h>
-#include <libgtcore/xbzlib.h>
-#include <libgtcore/xposix.h>
-#include <libgtcore/xtmpfile.h>
-#include <libgtcore/xzlib.h>
+#include "libgtcore/genfile.h"
+#include "libgtcore/hashtable.h"
+#include "libgtcore/fa.h"
+#include "libgtcore/mmap.h"
+#include "libgtcore/xansi.h"
+#include "libgtcore/xbzlib.h"
+#include "libgtcore/xposix.h"
+#include "libgtcore/xtmpfile.h"
+#include "libgtcore/xzlib.h"
 
 /* the file allocator class */
 struct FA {

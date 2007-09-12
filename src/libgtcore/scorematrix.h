@@ -18,8 +18,8 @@
 #ifndef SCOREMATRIX_H
 #define SCOREMATRIX_H
 
-#include <libgtcore/alpha.h>
-#include <libgtcore/env.h>
+#include "libgtcore/alpha.h"
+#include "libgtcore/env.h"
 
 typedef struct ScoreMatrix ScoreMatrix;
 

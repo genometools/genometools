@@ -17,10 +17,10 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include <libgtcore/fasta.h>
-#include <libgtcore/fasta_reader.h>
-#include <libgtcore/genfile.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/fasta.h"
+#include "libgtcore/fasta_reader.h"
+#include "libgtcore/genfile.h"
+#include "libgtcore/xansi.h"
 
 struct FastaReader {
   Str *sequence_filename;

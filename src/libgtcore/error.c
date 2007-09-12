@@ -16,9 +16,9 @@
 */
 
 #include <stdarg.h>
-#include <libgtcore/cstr.h>
-#include <libgtcore/error.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/error.h"
+#include "libgtcore/xansi.h"
 
 struct Error {
   char error_string[BUFSIZ],

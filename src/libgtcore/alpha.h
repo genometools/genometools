@@ -20,7 +20,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <libgtcore/env.h>
+#include "libgtcore/env.h"
 
 /* the alphabet class */
 typedef struct Alpha Alpha; /* XXX: Alpha -> Alphabet */

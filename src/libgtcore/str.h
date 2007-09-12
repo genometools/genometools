@@ -19,8 +19,8 @@
 #define STR_H
 
 #include <stdio.h>
-#include <libgtcore/env.h>
-#include <libgtcore/genfile.h>
+#include "libgtcore/env.h"
+#include "libgtcore/genfile.h"
 
 /* the string class, string objects are strings which grow on demand */
 typedef struct Str Str;
