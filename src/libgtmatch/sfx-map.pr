@@ -50,14 +50,6 @@ const Alphabet *alphabetSequentialsuffixarrayreader(
 unsigned long numofdbsequencesSequentialsuffixarrayreader(
                     const Sequentialsuffixarrayreader *sarr);
 
-Seqpos totallengthSequentialsuffixarrayreader(
-                    const Sequentialsuffixarrayreader *ssar);
-
-Uchar getencodedcharSequentialsuffixarrayreader(
-                    const Sequentialsuffixarrayreader *ssar,
-		    Seqpos pos,
-		    Readmode readmode);
-
 #ifdef __cplusplus
 }
 #endif
