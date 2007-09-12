@@ -25,7 +25,6 @@
  */
 int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
     const Sequentialsuffixarrayreader *ssar,
-    Seqpos *markpos,
     Env *env)
 /*
     ArrayLTRboundaries *arrayLTRboundaries,
@@ -48,6 +47,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
   /* in order to get to visible dna characters */
   characters = getcharactersAlphabet(
                  alphabetSequentialsuffixarrayreader(ssar));
+  Seqpos *markpos;
 
   /* count unique LTR predictions */
   //unsigned int counter = 0;
@@ -59,6 +59,19 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
     counter++;
     }
     }*/
+
+  // calculate markpos array for contig offset
+  if( numofdbsequences > 1)
+  {
+    markpos = encseq2markpositions( 
+	encseqSequentialsuffixarrayreader(ssar),
+	numofdbsequencesSequentialsuffixarrayreader(ssar), 
+	env);
+    if(markpos == NULL)
+    { 
+      return -1;
+    }
+  }
 
   if(lo->longoutput)
   {
@@ -305,6 +318,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
     }
   }
 
+  FREESPACE(markpos);
   return 0;
 }
 

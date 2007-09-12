@@ -69,7 +69,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   // calculate markpos array for contig offset
   if( numofdbsequences > 1)
   {
-    markpos = calculatemarkpositions( 
+    markpos = encseq2markpositions( 
 	encseqSequentialsuffixarrayreader(ssar),
 	numofdbsequencesSequentialsuffixarrayreader(ssar), 
 	env);
@@ -86,6 +86,10 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 
   /* search for maximal repeats */ 
   if(enumeratemaxpairs(ssar,
+		       getnumofcharsAlphabet(
+		         alphabetSequentialsuffixarrayreader(ssar)),
+		       encseqSequentialsuffixarrayreader(ssar),
+		       readmodeSequentialsuffixarrayreader(ssar),
                        (unsigned int)lo->minseedlength,
 		       (void*)simpleexactselfmatchstore,
 		       lo,
@@ -132,7 +136,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   FREESPACE(markpos);
 
   /* print predictions to stdout */
-  showinfoiffoundfullLTRs(lo, ssar, markpos, env);
+  showinfoiffoundfullLTRs(lo, ssar, env);
 
   /* free prediction array */
   FREEARRAY(&lo->arrayLTRboundaries, LTRboundaries);

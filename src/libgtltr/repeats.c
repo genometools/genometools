@@ -116,7 +116,7 @@ int simpleexactselfmatchstore (
   // at least two db sequences
   else
   {
-    markpos = calculatemarkpositions(encseq, numofdbsequences, env);
+    markpos = encseq2markpositions(encseq, numofdbsequences, env);
     if(markpos == NULL)
     {
       return -1;  
@@ -124,14 +124,14 @@ int simpleexactselfmatchstore (
     totallength = getencseqtotallength(encseq);
     for( i = 0; i < numofdbsequences - 1; i++)
     {
-      seqnum1 = getrecordnum(markpos, numofdbsequences, 
+      seqnum1 = getrecordnumSeqpos(markpos, numofdbsequences, 
 	                totallength, pos1, env);
       if( seqnum1 == numofdbsequences)
       {
         return -1;
       }
 
-      seqnum2 = getrecordnum(markpos, numofdbsequences, 
+      seqnum2 = getrecordnumSeqpos(markpos, numofdbsequences, 
 	                totallength, pos2, env);
       if( seqnum2 == numofdbsequences)
       {

@@ -497,7 +497,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
                motifmismatches_frombestmatch = 0;
   
   Seqpos i;
-  Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
+  const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
   //Uchar *charptr;
   //Uchar *dbseq = virtualtree->multiseq.sequence;
  
@@ -715,7 +715,8 @@ static int searchforTSDandorMotifoutside(
   Seqpos offset;
   unsigned long numofdbsequences 
                   = numofdbsequencesSequentialsuffixarrayreader(ssar);
-  Seqpos totallength = totallengthSequentialsuffixarrayreader(ssar);
+  Seqpos totallength = 
+            getencseqtotallength(encseqSequentialsuffixarrayreader(ssar));
   SubRepeatInfo subrepeatinfo;
   
   ///*test
