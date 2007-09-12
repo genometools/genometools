@@ -15,8 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <string.h>
 #include "libgtcore/fileutils.h"
 #include "libgtcore/outputfile.h"
+#include "libgtcore/warning.h"
 
 #define FORCE_OPT_CSTR  "force"
 
@@ -47,6 +49,24 @@ static int determine_outfp(void *data, Env *env)
   if (!str_length(ofi->output_filename)) /* no output file given -> use stdin */
     *ofi->outfp = NULL;
   else { /* outputfile given -> create generic file pointer */
+    assert(!(ofi->gzip && ofi->bzip2));
+    if (ofi->gzip)
+      genfilemode = GFM_GZIP;
+    else if (ofi->bzip2)
+      genfilemode = GFM_BZIP2;
+    else
+      genfilemode = GFM_UNCOMPRESSED;
+    if (genfilemode != GFM_UNCOMPRESSED &&
+        strcmp(str_get(ofi->output_filename) +
+               str_length(ofi->output_filename) -
+               strlen(genfilemode_suffix(genfilemode)),
+               genfilemode_suffix(genfilemode))) {
+      warning("output file '%s' doesn't have correct suffix '%s', appending "
+              "it", str_get(ofi->output_filename),
+              genfilemode_suffix(genfilemode));
+      str_append_cstr(ofi->output_filename, genfilemode_suffix(genfilemode),
+                      env);
+    }
     if (!ofi->force && file_exists(str_get(ofi->output_filename))) {
         env_error_set(env, "file \"%s\" exists already, use option -%s to "
                       "overwrite", str_get(ofi->output_filename),
@@ -54,14 +74,6 @@ static int determine_outfp(void *data, Env *env)
         had_err = -1;
     }
     if (!had_err) {
-      assert(!(ofi->gzip && ofi->bzip2));
-      if (ofi->gzip)
-        genfilemode = GFM_GZIP;
-      else if (ofi->bzip2)
-        genfilemode = GFM_BZIP2;
-      else
-        genfilemode = GFM_UNCOMPRESSED;
-      /* XXX: append .gz/.bz2 to output_filename if necessary */
       *ofi->outfp = genfile_xopen(genfilemode, str_get(ofi->output_filename),
                                   "w", env);
       assert(*ofi->outfp);
