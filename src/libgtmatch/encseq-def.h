@@ -41,7 +41,7 @@ typedef struct
   bool hasownmemory, mappedfile, hasspecialcharacters;
 } Encodedsequence;
 
-typedef struct 
+typedef struct
 {
   bool moveforward, exhausted;
   const Encodedsequence *encseq;

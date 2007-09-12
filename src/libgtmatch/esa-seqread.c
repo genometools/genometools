@@ -63,6 +63,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                                false,
                                                env) != 0)
   {
+    FREESPACE(ssar->suffixarray);
     FREESPACE(ssar);
     return NULL;
   }

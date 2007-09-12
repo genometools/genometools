@@ -133,9 +133,9 @@ static int fillplainseq(Encodedsequence *encseq,Fastabufferstate *fbs,Env *env)
     {
       break;
     }
-    if(!encseq->hasspecialcharacters)
+    if (!encseq->hasspecialcharacters)
     {
-      if(ISSPECIAL(cc))
+      if (ISSPECIAL(cc))
       {
         encseq->hasspecialcharacters = true;
       }
@@ -150,7 +150,7 @@ static int fillplainseq(Encodedsequence *encseq,Fastabufferstate *fbs,Env *env)
                                  const StrArray *filenametab,
                                  bool plainformat,
                                  Seqpos totallength,
-                                 /*@unused@*/ const Specialcharinfo 
+                                 /*@unused@*/ const Specialcharinfo
                                                    *specialcharinfo,
                                  const Alphabet *alphabet,
                                  /*@unused@*/ const char *str_sat,
@@ -197,7 +197,7 @@ static int fillplainseq(Encodedsequence *encseq,Fastabufferstate *fbs,Env *env)
   str_delete(tmpfilename,env);
   encseq->hasownmemory = false;
   encseq->mappedfile = true;
-  encseq->hasspecialcharacters 
+  encseq->hasspecialcharacters
     = (specialcharinfo->specialcharacters > 0) ?  true : false;
   return encseq;
 }
@@ -240,7 +240,7 @@ Encodedsequence *plain2encodedsequence(
   encseq->hasspecialcharacters = false;
   for (pos=0; pos < encseq->totallength; pos++)
   {
-    if(ISSPECIAL(encseq->plainseq[pos]))
+    if (ISSPECIAL(encseq->plainseq[pos]))
     {
       encseq->hasspecialcharacters = true;
       break;
