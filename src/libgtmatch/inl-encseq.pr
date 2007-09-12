@@ -1,10 +1,15 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+Uchar fungetencodedchar(const Encodedsequence *encseq,
+                        Seqpos pos,
+                        Readmode readmode);
+
+int flushencseqfile(const Str *indexname,Encodedsequence *encseq,
+                    Env *env);
+
 void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
-{
-}
-#endif
+
 #ifdef __cplusplus
 }
 #endif

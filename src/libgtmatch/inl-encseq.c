@@ -1,8 +1,13 @@
 #ifdef INLINEDENCSEQ
+#include "encseq-def.h"
+#include "spacedef.h"
+#include "chardef.h"
 
-static Uchar getencodedchar(const Encodedsequence *encseq,
-                            Seqpos pos,
-                            Readmode readmode)
+#include "opensfxfile.pr"
+
+Uchar fungetencodedchar(const Encodedsequence *encseq,
+                        Seqpos pos,
+                        Readmode readmode)
 {
   if (readmode == Forwardmode)
   {
@@ -32,11 +37,11 @@ static Uchar getencodedchar(const Encodedsequence *encseq,
   }
   fprintf(stderr,"getencodedchar: readmode %d not implemented\n",
                  (int) readmode);
-  exit(EXIT_FAILURE); 
+  exit(EXIT_FAILURE);
 }
 
-static int flushencseqfile(const Str *indexname,Encodedsequence *encseq,
-                           Env *env)
+int flushencseqfile(const Str *indexname,Encodedsequence *encseq,
+                    Env *env)
 {
   FILE *fp;
   bool haserr = false;
@@ -49,8 +54,9 @@ static int flushencseqfile(const Str *indexname,Encodedsequence *encseq,
   }
   if (!haserr)
   {
-    if (fwrite(encseq->plainseq,sizeof(Uchar),(size_t) encseq->totallength,
-               fp) ! = (size_t) encseq->totallength)
+    if (fwrite(encseq->plainseq,sizeof (Uchar),
+               (size_t) encseq->totallength, fp)
+               != (size_t) encseq->totallength)
     {
       haserr = true;
     }
@@ -59,8 +65,18 @@ static int flushencseqfile(const Str *indexname,Encodedsequence *encseq,
   return haserr ? -1 : 0;
 }
 
-void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
+void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
 {
+  Encodedsequence *encseq = *encseqptr;
+
+  if (encseq == NULL)
+  {
+    return;
+  }
+  if (!encseq->plainseqptr)
+  {
+    FREESPACE(encseq->plainseq);
+  }
 }
 
 #endif

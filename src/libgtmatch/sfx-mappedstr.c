@@ -490,7 +490,10 @@ static int getencseqkmersgeneric(
       shiftrightwithchar(processkmercode,processkmercodeinfo,
                          &spwp,currentposition,charcode,env);
     }
-    freeEncodedsequencescanstate(&esr,env);
+    if (esr != NULL)
+    {
+      freeEncodedsequencescanstate(&esr,env);
+    }
   } else
   {
     Fastabufferstate fbs;

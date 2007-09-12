@@ -423,7 +423,7 @@ splintclean:
 
 obj/%.splint: ${CURDIR}/src/libgtmatch/%.c
 	@echo "splint $<"
-	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint -DBIGSEQPOS -DINLINEDENCSEQ -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/tools/%.c

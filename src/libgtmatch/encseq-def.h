@@ -39,14 +39,23 @@ typedef struct
 typedef struct
 {
   Uchar *plainseq;
-  Seqpos *totallength;
+  Seqpos totallength;
+  bool plainseqptr;
+  Readmode readmode;
 } Encodedsequence;
 
 #define getencseqtotallength(ENCSEQ) ((ENCSEQ)->totallength)
-#define getencodedchar(ENCSEQ,POS,READMODE)\
-        (ENCSEQ)->plainseq[POS]
 
-int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
+/* XXX to be done: implement the other readmodes */
+
+#define getencodedchar(ENCSEQ,POS,READMODE) (ENCSEQ)->plainseq[POS]
+
+#define initEncodedsequencescanstate(ENCSEQ,READMODE,ENV) NULL
+
+#define freeEncodedsequencescanstate(ENCSEQSTATE,ENV) /* Nothing */
+
+#define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS)\
+                                 (ENCSEQ)->plainseq[POS]
 
 #else
 
@@ -59,30 +68,16 @@ Seqpos getencseqtotallength(const Encodedsequence *encseq);
 Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
                      Readmode readmode);
 
-int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
-
-void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
-
-/*@null@*/ Encodedsequencescanstate *initEncodedsequencescanstate(
-                                         const Encodedsequence *encseq,
-                                         Readmode readmode,
-                                         Env *env);
+Encodedsequencescanstate *initEncodedsequencescanstate(
+                               const Encodedsequence *encseq,
+                               Readmode readmode,
+                               Env *env);
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
 
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos);
-
-/*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
-                                                  const StrArray *filenametab,
-                                                  bool plainformat,
-                                                  Seqpos totallength,
-                                                  const Specialcharinfo
-                                                        *specialcharinfo,
-                                                  const Alphabet *alphabet,
-                                                  const char *str_sat,
-                                                  Env *env);
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const Str *indexname,
@@ -115,5 +110,21 @@ void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
 /*@null@*/ char *encseqaccessname(const Encodedsequence *encseq);
 
 #endif
+
+/* the functions with exactly the same interface */
+
+int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
+
+void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
+
+/*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
+                                                  const StrArray *filenametab,
+                                                  bool plainformat,
+                                                  Seqpos totallength,
+                                                  const Specialcharinfo
+                                                        *specialcharinfo,
+                                                  const Alphabet *alphabet,
+                                                  const char *str_sat,
+                                                  Env *env);
 
 #endif

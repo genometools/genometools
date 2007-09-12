@@ -15,6 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef INLINEDENCSEQ
+
 #include <stdlib.h>
 #include <limits.h>
 #include <ctype.h>
@@ -444,33 +446,6 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
   }
 }
 
-#ifdef INLINEDENCSEQ
-
-int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
-{
-  FILE *fp;
-  bool haserr = false;
-
-  env_error_check(env);
-  fp = opensfxfile(indexname,ENCSEQFILESUFFIX,"wb",env);
-  if (fp == NULL)
-  {
-    haserr = true;
-  }
-  if (!haserr)
-  {
-    if (fwrite(encseq->plainseq,sizeof(Uchar),(size_t) encseq->totallength,
-               fp) ! = (size_t) encseq->totallength)
-    {
-      haserr = true;
-    }
-  }
-  env_fa_xfclose(fp,env);
-  return haserr ? -1 : 0;
-}
-
-#else
-
 int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
 {
   Encodedsequencewithoptions encseqwithoptions;
@@ -500,7 +475,6 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
   env_fa_xfclose(fp,env);
   return haserr ? -1 : 0;
 }
-#endif
 
 static int fillencseqmapspecstartptr(Encodedsequence *encseq,
                                      const Str *indexname,
@@ -1783,3 +1757,5 @@ Encodedsequence *plain2encodedsequence(bool withrange,
   */
   return encseq;
 }
+
+#endif /* INLINEDENCSEQ */

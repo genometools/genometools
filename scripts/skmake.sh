@@ -43,18 +43,19 @@ fi
 
 # NOASSERT='assert=no'
 #-DWITHTRIEIDENT
-# FASTDEF="-Duint_fast32_t=uint32_t  -Duint_fast64_t=uint64_t"
+# EXTRAFLAGS="-Duint_fast32_t=uint32_t  -Duint_fast64_t=uint64_t"
+EXTRAFLAGS=-DINLINEDENCSEQ
 COMMON='curses=no'
 
 if test $icc -eq 1
 then
-  make ${COMMON} CC='ccache icc' CFLAGS='-O3 ${FASTDEF} ${bignum} -wd1418,869,981,1338' LD='icc' CXX='icc' $*
+  make ${COMMON} CC='ccache icc' CFLAGS='-O3 ${EXTRAFLAGS} ${bignum} -wd1418,869,981,1338' LD='icc' CXX='icc' $*
 else
   if test $do64 -eq 1
   then
-    make ${COMMON} CC="ccache gcc" CFLAGS="-O3 -m64 ${FASTDEF}" LDFLAGS="-m64" $*
+    make ${COMMON} CC="ccache gcc" CFLAGS="-O3 -m64 ${EXTRAFLAGS}" LDFLAGS="-m64" $*
   else
-    make ${COMMON} CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum} ${FASTDEF}" LDFLAGS="-m32" $*
+    make ${COMMON} CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum} ${EXTRAFLAGS}" LDFLAGS="-m32" $*
   fi
 fi
 
