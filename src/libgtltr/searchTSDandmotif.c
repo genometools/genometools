@@ -193,8 +193,8 @@ static void searchforbestTSDandormotifatborders(
 	     boundaries->rightLTR_3 = motifpos2 + 1 + forward;
 
              // store TSD length
-             /*boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
-	     printf("first hit\n");
+             boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
+	     /*printf("first hit\n");
 	     printf("boundaries->leftLTR_5 = " FormatSeqpos "\n",
 	         PRINTSeqposcast(boundaries->leftLTR_5 - offset) );
 	     printf("boundaries->rightLTR_3 = " FormatSeqpos "\n",

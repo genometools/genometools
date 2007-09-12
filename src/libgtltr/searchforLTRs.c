@@ -11,6 +11,7 @@
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/pos2seqnum.pr"
 #include "libgtmatch/sfx-map.pr"
+#include "libgtmatch/greedyedist.pr"
 
 #include "searchforLTRs.h"
 #include "repeattypes.h"
@@ -58,65 +59,36 @@ static int checklengthanddistanceconstraints(
 /*
  The following function determines the similarity of the two predicted LTRs.
  */
-
 /*
-static int determinesimilarityfromcandidate(
-    LTRboundaries *boundaries,
-    Virtualtree *virtualtree)
+static unsigned long determinesimilarityfromcandidate(
+                LTRboundaries *boundaries,
+                const Uchar *useq,
+		unsigned long ulen,
+		const Uchar *vseq,
+		unsigned long vlen,
+		Env *env)
 {
-  unsigned int ulen = boundaries->leftLTR_3  - boundaries->leftLTR_5  + 1,
-       vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1;
-  Uchar *dbseq = virtualtree->multiseq.sequence;
+  unsigned long edist;
 
-  int edist;
-  Greedyalignreservoir greedyalignreservoir;
+  env_error_check(env);
 
-#ifdef DEBUG
-  unsigned int saflag;
-#endif
-  DEBUG0(1, "determine similarity threshold...\n");
-  DEBUG1(1, "ulen = %lu\n", (Showuint) ulen);
-  DEBUG1(1, "vlen = %lu\n", (Showuint) vlen);
+  //DEBUG0(1, "determine similarity threshold...\n");
+  //DEBUG1(1, "ulen = %lu\n", (Showuint) ulen);
+  //DEBUG1(1, "vlen = %lu\n", (Showuint) vlen);
 
-  initgreedyalignreservoir(&greedyalignreservoir);
-  edist = greedyedistalign(&greedyalignreservoir,
-      False,
-      0,
-      dbseq + boundaries->leftLTR_5,
-      (int) ulen,
-      dbseq + boundaries->rightLTR_5,
-      (int) vlen);
+  edist = greedyunitedist(useq, (unsigned long)ulen, 
+                          vseq, (unsigned long)vlen,
+			  env);
   if( edist < 0 )
   {
-    return (int) -1;
+    return (unsigned long) -1;
   }
-
-#ifdef DEBUG
-  MAKESAFLAG(saflag,True,False,False);
-  DEBUG1(2, "edist = %ld\n", (Showsint) edist);
-  showalignment(saflag,
-      stdout,
-      UintConst(60),
-      greedyalignreservoir.alignment.spaceEditoperation,
-      greedyalignreservoir.alignment.nextfreeEditoperation,
-      (unsigned int) edist,
-      dbseq + boundaries->leftLTR_5,
-      dbseq + boundaries->leftLTR_5,
-      ulen,
-      dbseq + boundaries->rightLTR_5, 
-      dbseq + boundaries->rightLTR_5, 
-      vlen,
-      0,
-      0);
-#endif
 
   // determine similarity
   boundaries->similarity = 100.0 *
     (1 - (((double)(edist))/(MAX(ulen,vlen))));
 
-  wraptgreedyalignreservoir(&greedyalignreservoir);
-
-  return 0;
+  return edist;
 }
 */
 
@@ -214,7 +186,14 @@ int searchforLTRs (
   Myxdropbest xdropbest_left;
   Myxdropbest xdropbest_right;
   Seqpos alilen = 0,
-         totallength; 
+         totallength,
+	 i = 0,
+	 k = 0,
+	 ulen,
+	 vlen; 
+  Uchar *useq = NULL, 
+        *vseq = NULL;
+  unsigned long edist;
   Repeat *repeatptr;
   LTRboundaries *boundaries;
   Seqpos offset = 0;
@@ -414,20 +393,42 @@ int searchforLTRs (
       lo->arrayLTRboundaries.nextfreeLTRboundaries--;
       continue;
     }
-/*
+
     // check similarity from candidate pair
-    if( determinesimilarityfromcandidate(
-	         boundaries,
-                 virtualtree) != 0)
+    // copy LTR sequences for greedyunitedist function
+    ulen = boundaries->leftLTR_3 - boundaries->leftLTR_5 + 1;
+    vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1;
+    ALLOCASSIGNSPACE(useq, NULL, Uchar, ulen);
+    ALLOCASSIGNSPACE(vseq, NULL, Uchar, vlen);
+    for(k=0,i=boundaries->leftLTR_5; i<=boundaries->leftLTR_3; i++, k++) 
     {
-      return (int) -1;
+      useq[k] = getencodedcharSequentialsuffixarrayreader(ssar,
+                                                        i,
+							Forwardmode);
     }
-    if( boundaries->similarity < similaritythreshold )
+    for(k=0, i=boundaries->rightLTR_5; i<=boundaries->rightLTR_3; i++, k++)
+    {
+      vseq[k] = getencodedcharSequentialsuffixarrayreader(ssar,
+                                                        i,
+							Forwardmode); 
+    }
+
+    edist = greedyunitedist(useq, (unsigned long)ulen, 
+                            vseq, (unsigned long)vlen,
+                            env);
+
+    // determine similarity
+    boundaries->similarity = 100.0 *
+    (1 - (((double)(edist))/(MAX(ulen,vlen))));
+
+    if( boundaries->similarity < lo->similaritythreshold )
     {
       // delete this LTR-pair candidate
-      arrayLTRboundaries->nextfreeLTRboundaries--;
+      lo->arrayLTRboundaries.nextfreeLTRboundaries--;
     }
-*/
+
+    FREESPACE(useq);
+    FREESPACE(vseq);
   }
 
   return 0;
