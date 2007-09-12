@@ -57,8 +57,8 @@ endif
 
 # the default GenomeTools libraries which are build
 GTLIBS:=lib/libgtext.a\
-        lib/libgtcore.a\
         lib/libgtmatch.a\
+        lib/libgtcore.a\
         lib/libgtlua.a\
         lib/libbz2.a
 

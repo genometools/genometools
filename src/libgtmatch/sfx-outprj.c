@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <limits.h>
+#include "libgtcore/endianess.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/str.h"
 #include "seqpos-def.h"
@@ -29,7 +30,6 @@
 #include "readmode-def.h"
 #include "stamp.h"
 
-#include "endianess.pr"
 #include "opensfxfile.pr"
 
 #define PRJSPECIALOUT(VAL)\
@@ -79,7 +79,7 @@ static void showprjinfo(FILE *outprj,
                    PRINTSeqposcast(maxbranchdepth));
   fprintf(outprj,"integersize=%u\n",
                   (unsigned int) (sizeof (Seqpos) * CHAR_BIT));
-  fprintf(outprj,"littleendian=%c\n",islittleendian() ? '1' : '0');
+  fprintf(outprj,"littleendian=%c\n",is_little_endian() ? '1' : '0');
   fprintf(outprj,"readmode=%u\n",(unsigned int) readmode);
 }
 
