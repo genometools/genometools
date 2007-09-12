@@ -369,8 +369,8 @@ static int inputsuffixarray(bool map,
 					     indexname,
 					     *totallength,
 					     &suffixarray->specialcharinfo,
-					     suffixarray->alpha,
-                                             NULL,
+					     getmapsizeAlphabet(suffixarray->
+                                                                alpha),
 					     env);
     if (suffixarray->encseq == NULL)
     {

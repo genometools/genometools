@@ -52,6 +52,6 @@ typedef struct
 
 DECLAREARRAYSTRUCT(Mapspecification);
 
-typedef void(*Assignmapspec)(ArrayMapspecification *,void *,Env *);
+typedef void(*Assignmapspec)(ArrayMapspecification *,void *,bool,Env *);
 
 #endif

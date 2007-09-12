@@ -580,7 +580,7 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                                    dblen,
                                    NULL,
                                    0,
-                                   alpha,
+                                   getmapsizeAlphabet(alpha),
                                    env);
   numofchars = getnumofcharsAlphabet(alpha);
   if (constructsarrandrunmmsearch(samplespecialcharinfo.specialcharacters,

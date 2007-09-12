@@ -149,7 +149,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
 
   env_error_check(env);
   INITARRAY(&mapspectable,Mapspecification);
-  assignmapspec(&mapspectable,assignmapinfo,env);
+  assignmapspec(&mapspectable,assignmapinfo,false,env);
   mapptr = env_fa_mmap_read(env,str_get(tmpfilename), &numofbytes);
   if (mapptr == NULL)
   {
@@ -241,7 +241,7 @@ int flushtheindex2file(FILE *fp,
 
   env_error_check(env);
   INITARRAY(&mapspectable,Mapspecification);
-  assignmapspec(&mapspectable,assignmapinfo,env);
+  assignmapspec(&mapspectable,assignmapinfo,true,env);
   assert(mapspectable.spaceMapspecification != NULL);
   for (mapspecptr = mapspectable.spaceMapspecification;
        mapspecptr < mapspectable.spaceMapspecification +
