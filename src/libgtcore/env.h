@@ -21,10 +21,10 @@
 /* the enviroment class (creates and holds all singular objects) */
 typedef struct Env Env;
 
-#include <libgtcore/ma.h>
-#include <libgtcore/error.h>
-#include <libgtcore/fa.h>
-#include <libgtcore/log.h>
+#include "libgtcore/ma.h"
+#include "libgtcore/error.h"
+#include "libgtcore/fa.h"
+#include "libgtcore/log.h"
 
 Env*   env_new(void);
 MA*    env_ma(const Env*);    /* return the memory allocator */

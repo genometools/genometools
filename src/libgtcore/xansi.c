@@ -15,7 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/xansi.h>
+#include "libgtcore/xansi.h"
 
 void* xcalloc(size_t nmemb, size_t size)
 {

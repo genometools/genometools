@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/cstr.h>
-#include <libgtcore/env.h>
-#include <libgtcore/option.h>
-#include <libgtcore/splitter.h>
-#include <libgtcore/versionfunc.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/env.h"
+#include "libgtcore/option.h"
+#include "libgtcore/splitter.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/xansi.h"
 
 struct Env {
   MA *ma; /* the memory allocator */

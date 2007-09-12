@@ -17,7 +17,7 @@
 
 #include <assert.h>
 #include <string.h>
-#include <libgtcore/phase.h>
+#include "libgtcore/phase.h"
 
 Phase phase_get(char phase_char)
 {

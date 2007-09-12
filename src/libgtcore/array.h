@@ -19,7 +19,7 @@
 #define ARRAY_H
 
 #include <stdlib.h>
-#include <libgtcore/env.h>
+#include "libgtcore/env.h"
 
 typedef struct Array Array;
 

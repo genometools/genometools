@@ -19,7 +19,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtext/extractfeat_stream.h"
 #include "libgtext/gff3_in_stream.h"
-#include "libgtext/gtdata.h"
+#include "libgtext/gtdatahelp.h"
 #include "libgtext/seqid2file.h"
 
 typedef struct {

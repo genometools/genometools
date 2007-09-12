@@ -3,8 +3,8 @@
 
 /* static	char	sccsid[] = "@(#) st.c 5.1 89/12/14 Crucible"; */
 
-#include <libgtcore/st.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/st.h"
+#include "libgtcore/xansi.h"
 
 typedef struct st_table_entry st_table_entry;
 

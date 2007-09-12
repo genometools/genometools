@@ -17,11 +17,11 @@
 
 #include <math.h>
 #include <assert.h>
-#include <libgtcore/cstr.h>
-#include <libgtcore/dynalloc.h>
-#include <libgtcore/ensure.h>
-#include <libgtcore/str.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/dynalloc.h"
+#include "libgtcore/ensure.h"
+#include "libgtcore/str.h"
+#include "libgtcore/xansi.h"
 
 struct Str {
   char *cstr;           /* the actual string (always '\0' terminated) */

@@ -17,9 +17,9 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include <libgtcore/array.h>
-#include <libgtcore/disc_distri.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/array.h"
+#include "libgtcore/disc_distri.h"
+#include "libgtcore/xansi.h"
 
 struct DiscDistri {
   Array *values;

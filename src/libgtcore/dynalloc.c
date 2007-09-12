@@ -16,9 +16,9 @@
 */
 
 #include <assert.h>
-#include <libgtcore/dynalloc.h>
-#include <libgtcore/error.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/dynalloc.h"
+#include "libgtcore/error.h"
+#include "libgtcore/xansi.h"
 
 #ifndef SIZE_MAX
 #define SIZE_MAX ~(size_t)0

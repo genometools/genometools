@@ -18,10 +18,10 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <libgtcore/dynalloc.h>
-#include <libgtcore/ensure.h>
-#include <libgtcore/splitter.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/dynalloc.h"
+#include "libgtcore/ensure.h"
+#include "libgtcore/splitter.h"
+#include "libgtcore/xansi.h"
 
 struct Splitter {
   char **tokens;

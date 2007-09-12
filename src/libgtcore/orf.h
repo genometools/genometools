@@ -18,7 +18,7 @@
 #ifndef ORF_H
 #define ORF_H
 
-#include <libgtcore/array.h>
+#include "libgtcore/array.h"
 
 /* the determined ORFs include the start and the stop codon */
 void determine_ORFs(Array *ranges, unsigned int framenum,

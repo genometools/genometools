@@ -28,7 +28,7 @@
 #include "libgtcore/strarray.h"
 #include "libgtcore/fileutils.h"
 #include "libgtcore/cstr.h"
-#include "libgtext/gtdata.h"
+#include "libgtcore/gtdatapath.h"
 #include "qsorttype.h"
 #include "symboldef.h"
 #include "arraydef.h"

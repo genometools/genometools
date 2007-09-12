@@ -16,8 +16,8 @@
 */
 
 #include <assert.h>
-#include <libgtcore/codon.h>
-#include <libgtcore/translate.h>
+#include "libgtcore/codon.h"
+#include "libgtcore/translate.h"
 
 void translate_dna(Str *protein, const char *dnaseq, unsigned long dnalen,
                    unsigned int frame, Env *env)

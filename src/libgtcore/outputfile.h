@@ -18,8 +18,8 @@
 #ifndef OUTPUTFILE_H
 #define OUTPUTFILE_H
 
-#include <libgtcore/env.h>
-#include <libgtcore/option.h>
+#include "libgtcore/env.h"
+#include "libgtcore/option.h"
 
 typedef struct OutputFileInfo OutputFileInfo;
 

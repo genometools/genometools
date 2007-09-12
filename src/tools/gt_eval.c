@@ -18,7 +18,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtext/gff3_in_stream.h"
-#include "libgtext/gtdata.h"
+#include "libgtext/gtdatahelp.h"
 #include "libgtext/stream_evaluator.h"
 
 typedef struct {

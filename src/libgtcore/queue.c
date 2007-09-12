@@ -16,9 +16,9 @@
 */
 
 #include <assert.h>
-#include <libgtcore/array.h>
-#include <libgtcore/queue.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/array.h"
+#include "libgtcore/queue.h"
+#include "libgtcore/xansi.h"
 
 struct Queue {
   Array *queue;

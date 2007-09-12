@@ -18,7 +18,7 @@
 #ifndef GENFILE_H
 #define GENFILE_H
 
-#include <libgtcore/env.h>
+#include "libgtcore/env.h"
 
 /*
   This class defines generic files.  A generic file is is a file which either
@@ -54,9 +54,14 @@ size_t      genfile_basename_length(const char *path);
 GenFile*    genfile_open(GenFileMode, const char *path, const char *mode, Env*);
 
 /* create a new GenFile object and open the underlying file handle, abort if the
-   file <path> does not exist */
-GenFile*    genfile_xopen(GenFileMode, const char *path, const char *mode,
-                          Env*);
+   file <path> does not exist, the GenFileMode has to be given explicitly */
+GenFile*    genfile_xopen_w_gfmode(GenFileMode, const char *path,
+                                   const char *mode, Env*);
+
+/* create a new GenFile object and open the underlying file handle, abort if the
+   file <path> does not exist, the GenFileMode is determined automatically via
+   genfilemode_determine(path) */
+GenFile*    genfile_xopen(const char *path, const char *mode, Env*);
 
 /* create a new GenFile object from a normal file pointer */
 GenFile*    genfile_new(FILE*, Env*);

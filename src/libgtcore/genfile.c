@@ -18,11 +18,11 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
-#include <libgtcore/cstr.h>
-#include <libgtcore/genfile.h>
-#include <libgtcore/xansi.h>
-#include <libgtcore/xbzlib.h>
-#include <libgtcore/xzlib.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/genfile.h"
+#include "libgtcore/xansi.h"
+#include "libgtcore/xbzlib.h"
+#include "libgtcore/xzlib.h"
 
 struct GenFile {
   GenFileMode mode;
@@ -59,8 +59,7 @@ const char* genfilemode_suffix(GenFileMode mode)
       return "";
   }
   /* due do warning on solaris:
-     warning: control reaches end of non-void function
-  */
+     warning: control reaches end of non-void function */
   return "";
 }
 
@@ -112,8 +111,8 @@ GenFile* genfile_open(GenFileMode genfilemode, const char *path,
   return genfile;
 }
 
-GenFile* genfile_xopen(GenFileMode genfilemode, const char *path,
-                       const char *mode, Env *env)
+GenFile* genfile_xopen_w_gfmode(GenFileMode genfilemode, const char *path,
+                                const char *mode, Env *env)
 {
   GenFile *genfile;
   assert(path && mode);
@@ -134,6 +133,13 @@ GenFile* genfile_xopen(GenFileMode genfilemode, const char *path,
     default: assert(0);
   }
   return genfile;
+}
+
+GenFile* genfile_xopen(const char *path, const char *mode, Env *env)
+{
+  env_error_check(env);
+  assert(path && mode);
+  return genfile_xopen_w_gfmode(genfilemode_determine(path), path, mode, env);
 }
 
 GenFile* genfile_new(FILE *fp, Env *env)

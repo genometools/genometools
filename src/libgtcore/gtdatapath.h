@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,19 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GREP_H
-#define GREP_H
+#ifndef GTDATAPATH_H
+#define GTDATAPATH_H
 
-#include <sys/types.h>
-#include <assert.h>
-#include <regex.h>
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include "libgtcore/env.h"
+#include "libgtcore/str.h"
 
-/* sets 'match' to true if pattern matches line, to false otherwise */
-int  grep(bool *match, const char *pattern, const char *line, Env*);
-int  grep_unit_test(Env*);
+/* get the path to the gtdata/ directory (including it) for the given 'prog' */
+Str* gtdata_get_path(const char *prog, Env*);
 
 #endif

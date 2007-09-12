@@ -19,8 +19,8 @@
 #include <sys/mman.h>
 #include <assert.h>
 #include <fcntl.h>
-#include <libgtcore/mmap.h>
-#include <libgtcore/xposix.h>
+#include "libgtcore/mmap.h"
+#include "libgtcore/xposix.h"
 
 static void *mmap_generic(const char *path, size_t *len, int prot)
 {

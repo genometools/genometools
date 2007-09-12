@@ -18,7 +18,7 @@
 #ifndef FASTA_READER_H
 #define FASTA_READER_H
 
-#include <libgtcore/str.h>
+#include "libgtcore/str.h"
 
 typedef struct FastaReader FastaReader;
 

@@ -67,6 +67,16 @@ for i, fn in ipairs(arg) do -- iterate over all files
       err(fn, ln, "illegal variable name 'has_err', use 'had_err' instead")
     end
 
+    -- check for gt library includes with <
+    if string.find(l, "^#include <libgt") then
+      err(fn, ln, "wrong library include (<...>), use \"...\" instead")
+    end
+
+    -- check for tool includes with <
+    if string.find(l, "^#include <tools/") then
+      err(fn, ln, "wrong tool include (<...>), use \"...\" instead")
+    end
+
     -- check for two empty lines in a row
     if string.find(l, "^$") then
       if (empty_line_found) then

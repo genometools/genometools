@@ -18,15 +18,15 @@
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
-#include <libgtcore/array.h>
-#include <libgtcore/cstr.h>
-#include <libgtcore/error.h>
-#include <libgtcore/mailaddress.h>
-#include <libgtcore/minmax.h>
-#include <libgtcore/option.h>
-#include <libgtcore/str.h>
-#include <libgtcore/undef.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/array.h"
+#include "libgtcore/cstr.h"
+#include "libgtcore/error.h"
+#include "libgtcore/mailaddress.h"
+#include "libgtcore/minmax.h"
+#include "libgtcore/option.h"
+#include "libgtcore/str.h"
+#include "libgtcore/undef.h"
+#include "libgtcore/xansi.h"
 
 typedef enum {
   OPTION_BOOL,
