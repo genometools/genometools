@@ -661,3 +661,17 @@ unsigned long numofdbsequencesSequentialsuffixarrayreader(
 {
   return sarr->suffixarray.numofdbsequences;
 }
+
+Seqpos totallengthSequentialsuffixarrayreader(
+                    const Sequentialsuffixarrayreader *ssar)
+{
+  return ssar->totallength;
+}
+
+Uchar getencodedcharSequentialsuffixarrayreader(
+                    const Sequentialsuffixarrayreader *ssar,
+		    Seqpos pos,
+		    Readmode readmode) 
+{
+  return getencodedchar(ssar->suffixarray.encseq, pos, readmode);
+}

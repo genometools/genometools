@@ -22,6 +22,9 @@ int simpleexactselfmatchoutput(/*@unused@*/ void *info,
 int simpleexactselfmatchstore(LTRharvestoptions *lo, Seqpos len, 
                               Seqpos pos1, Seqpos pos2); 
 
-int subsimpleexactselfmatchstore (SubRepeatInfo * info, Seqpos len,
-                                  Seqpos pos1, Seqpos pos2);
+int subsimpleexactselfmatchstore(SubRepeatInfo *info, unsigned long len,
+  Seqpos dbstart, unsigned long querystart);
+
+int subshowrepeats (SubRepeatInfo *info, unsigned long len, Seqpos dbstart,
+                    unsigned long querystart);
 #endif

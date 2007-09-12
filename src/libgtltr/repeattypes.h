@@ -9,6 +9,7 @@
 
 #include <stdbool.h>
 
+#include "libgtcore/env.h"
 #include "libgtmatch/arraydef.h"
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/sarr-def.h"
@@ -42,13 +43,12 @@ Sequentialsuffixarrayreader *ssarptr;
 typedef struct
 {
 ArrayRepeat repeats; // array of maximal repeats for TSDs
-unsigned longlmin;   // minimal length of TSD
-unsigned longlmax;   // maximal length of TSD
-Seqpos separatorpos; // position of separator of the 
-                     // two concatenated sequences 
+unsigned long lmin;   // minimal length of TSD
+unsigned long lmax;   // maximal length of TSD
 Seqpos offset1;      // offset1 for absolute position 1 in sequence
 Seqpos offset2;      // offset2 for absolute position 2 in sequence
                      // pos1 < pos2
+Env *envptr;
 } SubRepeatInfo;
 
 // The datatype LTRboundaries stores all information of one predicted

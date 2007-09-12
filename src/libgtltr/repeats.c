@@ -98,6 +98,8 @@ int simpleexactselfmatchstore (
 		seqnum2; 
   bool samecontig = false;
 
+  env_error_check(env);
+
   if (pos1 > pos2)
   {
     tmp = pos1;
@@ -183,41 +185,54 @@ int simpleexactselfmatchstore (
   return 0;
 }
 
-/*
 int subsimpleexactselfmatchstore (
-  SubRepeatInfo * info,
-  Seqpos len,
-  Seqpos pos1,
-  Seqpos pos2)
+  SubRepeatInfo *info,
+  unsigned long len,
+  Seqpos dbstart,
+  unsigned long querystart)
 {
-  Seqpos tmp;
+  Env *env = info->envptr;
+  
+  env_error_check(env);
 
-  if (pos1 > pos2)
-  {
-    tmp = pos1;
-    pos1 = pos2;
-    pos2 = tmp;
-  }
-
-  tmp = (pos2 - pos1);
-
-  //test maximal length of candidate pair and if one instance per sequence
-  if ((pos1 < (Uint) info->separatorpos)
-      && ((Uint) info->separatorpos < pos2))
+  //test maximal length of candidate pair
+  if (len <= info->lmax)
   {
     Repeat *nextfreerepeatptr;
 #ifdef DEBUG
-    printf("%lu %lu %lu\n",
-	       PRINTSeqposcast(len),
-	       PRINTSeqposcast(info->offset1 + pos1),
-	       PRINTSeqposcast(info->offset2 - info->separatorpos - 1 + pos2));
+    printf("%lu " FormatSeqpos " " FormatSeqpos "\n",
+	       len,
+	       PRINTSeqposcast(info->offset1 + dbstart),
+	       PRINTSeqposcast(info->offset2 + (Seqpos)querystart));
 #endif
     GETNEXTFREEINARRAY (nextfreerepeatptr, &info->repeats, Repeat, 10);
-    nextfreerepeatptr->pos1 = pos1;
-    nextfreerepeatptr->offset = tmp;
-    nextfreerepeatptr->len = len;
+    nextfreerepeatptr->pos1 = info->offset1 + dbstart;
+    nextfreerepeatptr->offset = info->offset2 + (Seqpos)querystart - 
+                                  (info->offset1 + dbstart);
+    nextfreerepeatptr->len = (Seqpos)len;
   }
 
   return 0;
 }
-*/
+ 
+int subshowrepeats (
+  SubRepeatInfo *info,
+  unsigned long len,
+  Seqpos dbstart,
+  unsigned long querystart)
+{
+  Env *env = info->envptr;
+  
+  env_error_check(env);
+
+  //test maximal length of candidate pair
+  if (len <= info->lmax)
+  {
+    printf("%lu " FormatSeqpos " " FormatSeqpos "\n",
+	       len,
+	       PRINTSeqposcast(info->offset1 + dbstart),
+	       PRINTSeqposcast(info->offset2 + (Seqpos)querystart));
+  }
+
+  return 0;
+} 

@@ -25,6 +25,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 {
   Sequentialsuffixarrayreader *ssar; /* suffix array */
   Seqpos *markpos = NULL;
+  unsigned long numofdbsequences;
 
   env_error_check(env);
   
@@ -63,14 +64,18 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
     showuserdefinedoptionsandvalues(lo);
   }
 
+  numofdbsequences = numofdbsequencesSequentialsuffixarrayreader(ssar);
   // calculate markpos array for contig offset
-  markpos = calculatemarkpositions( 
-              encseqSequentialsuffixarrayreader(ssar),
-              numofdbsequencesSequentialsuffixarrayreader(ssar), 
-              env);
-  if(markpos == NULL)
-  { 
-    return -1;
+  if( numofdbsequences > 1)
+  {
+    markpos = calculatemarkpositions( 
+	encseqSequentialsuffixarrayreader(ssar),
+	numofdbsequencesSequentialsuffixarrayreader(ssar), 
+	env);
+    if(markpos == NULL)
+    { 
+      return -1;
+    }
   }
 
   /* init array for maximal repeats */

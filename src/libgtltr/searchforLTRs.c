@@ -372,21 +372,18 @@ int searchforLTRs (
       if( findcorrectboundaries(lo, boundaries, ssar, 
 	                        markpos, env) != 0 )
       {
-        return (int) -1;
+        return -1;
       }
 
-/*  
       // if search for TSDs and (not) motif
       if( boundaries->tsd && 
-	  (motif->allowedmismatches >= (Ushort)4 ||
-	   (boundaries->motif_near_tsd && boundaries->motif_far_tsd))
-        )
+	  (lo->motif.allowedmismatches >= (unsigned int)4 ||
+	  (boundaries->motif_near_tsd && boundaries->motif_far_tsd)) )
       {
 	// predicted as full LTR-pair, keep it
       }
       else
       {
-*/
 	// if search for motif only (and not TSD)
 	if( lo->minlengthTSD <= (unsigned long) 1 &&
 	    //boundaries->motif_near_tsd &&  ///!!!!!!wichtig spaeter einkommentieren!!!!!!
@@ -400,7 +397,7 @@ int searchforLTRs (
 	  lo->arrayLTRboundaries.nextfreeLTRboundaries--;
 	  continue;
 	}
-      //}
+      }
     }
 
 #ifdef DEBUG

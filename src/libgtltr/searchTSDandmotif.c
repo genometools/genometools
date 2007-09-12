@@ -8,14 +8,19 @@
 
 #include "libgtcore/env.h"
 
+#include "libgtmatch/encseq-def.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/arraydef.h"
 #include "libgtmatch/symboldef.h"
+#include "libgtmatch/spacedef.h"
+#include "libgtmatch/esa-mmsearch-def.h"
 #include "libgtmatch/sfx-map.pr"
+#include "libgtmatch/esa-mmsearch.pr"
 
 #include "ltrharvest-opt.h"
 #include "minmax.h"
 #include "repeattypes.h"
+#include "repeats.h"
 
 //#include "libgtmatch/encseq-def.h"
 //#include "libgtmatch/pos2seqnum.pr"
@@ -58,62 +63,62 @@
  a simple motif check at the boundaries of the TSDs is performed.
  */
 
-/*
 static void searchforbestTSDandormotifatborders(
     SubRepeatInfo *info,
-    Virtualtree *virtualtree,
+    LTRharvestoptions *lo,
+    Sequentialsuffixarrayreader *ssar,
+    Seqpos *markpos,
     LTRboundaries *boundaries,
-    Uchar *dbseq,
-    Motif *motif,
-    Ushort *motifmismatchesleftLTR,
-    Ushort *motifmismatchesrightLTR
+    unsigned int *motifmismatchesleftLTR,
+    unsigned int *motifmismatchesrightLTR
     )
 {
-  Uint i,
-       motifpos1,
-       motifpos2;
-  Ushort tmp_motifmismatchesleftLTR,
-         tmp_motifmismatchesrightLTR;
-  Uchar *dbseqpos1,
-	*dbseqpos2;
-  Uint back, forward;
-  Uint oldleftLTR_5  = boundaries->leftLTR_5,
+  unsigned long i;
+  Seqpos offset,
+         motifpos1,
+         motifpos2,
+	 dbseqpos1,
+	 dbseqpos2;
+  Seqpos back, forward;
+  unsigned int tmp_motifmismatchesleftLTR,
+               tmp_motifmismatchesrightLTR;
+  Seqpos oldleftLTR_5  = boundaries->leftLTR_5,
        oldrightLTR_3 = boundaries->rightLTR_3,
        difffromoldboundary1 = 0,
        difffromoldboundary2 = 0;
-  Ushort hitcounter = 0;
-  Uint multiseqoffset = 0;
+  unsigned int hitcounter = 0;
  
   if( boundaries->contignumber == 0)
   {
-    multiseqoffset = 0;
+    offset = 0;
   }
   else
   {
-    multiseqoffset = 
-      virtualtree->multiseq.markpos.spaceUint[boundaries->contignumber-1]+1;
+    offset = markpos[boundaries->contignumber-1]+1;
   }
 
   if( info->repeats.nextfreeRepeat > 0 )
   {
-    boundaries->tsd = True;
+    boundaries->tsd = true;
   }
-  boundaries->motif_near_tsd = False;
-   
+  boundaries->motif_near_tsd = false;
+  
+  printf("  old boundary pos leftLTR_5  = " FormatSeqpos "\n",
+	         PRINTSeqposcast(boundaries->leftLTR_5 - offset));
+  printf("  old boundary pos rightLTR_3 = " FormatSeqpos "\n",
+	         PRINTSeqposcast(boundaries->rightLTR_3 - offset));
+ 
   for(i = 0; i < info->repeats.nextfreeRepeat; i++)
   {
-    motifpos1 = info->offset1 + 
-                  info->repeats.spaceRepeat[i].pos1 + 
-                           info->repeats.spaceRepeat[i].len;
-    motifpos2 = info->offset2 - info->separatorpos - 1 
-                  + info->repeats.spaceRepeat[i].pos1
-		  + info->repeats.spaceRepeat[i].offset - 2;
-  
     // dbseqpos1 is the first position after the left repeat
-    dbseqpos1 = dbseq + motifpos1;
+    motifpos1 = info->repeats.spaceRepeat[i].pos1 + 
+                           info->repeats.spaceRepeat[i].len;
     // dbseqpos2 is two positions before the right repeat
-    dbseqpos2 = dbseq + motifpos2;
-    
+    motifpos2 = info->repeats.spaceRepeat[i].pos1
+		  + info->repeats.spaceRepeat[i].offset - 2;
+    dbseqpos1 = motifpos1;
+    dbseqpos2 = motifpos2;
+
     for(back = 0; 
         back < info->repeats.spaceRepeat[i].len - info->lmin + 1; 
 	back++)
@@ -124,61 +129,74 @@ static void searchforbestTSDandormotifatborders(
 	  forward++)
       {
 	tmp_motifmismatchesleftLTR = tmp_motifmismatchesrightLTR = 0;
-	if( *(dbseqpos1 - back) != motif->firstleft) 
+	//if( *(dbseqpos1 - back) != motif->firstleft) 
+	if( getencodedcharSequentialsuffixarrayreader(ssar, 
+	                                              dbseqpos1 - back,
+						      Forwardmode) 
+	    != lo->motif.firstleft) 
 	{
 	  tmp_motifmismatchesleftLTR++;
 	}
-	if( *(dbseqpos1 + 1 - back) != motif->secondleft)
+	if( getencodedcharSequentialsuffixarrayreader(ssar, 
+	                                              dbseqpos1 + 1 - back,
+						      Forwardmode) 
+	    != lo->motif.secondleft)
 	{
 	  tmp_motifmismatchesleftLTR++;
 	}
-        if( *(dbseqpos2 + forward) != motif->firstright)
+        if( getencodedcharSequentialsuffixarrayreader(ssar,   
+	                                              dbseqpos2 + forward,
+						      Forwardmode) 
+	    != lo->motif.firstright)
 	{
 	  tmp_motifmismatchesrightLTR++;
 	}
-        if( *(dbseqpos2 + 1 + forward) != motif->secondright)
+        if( getencodedcharSequentialsuffixarrayreader(ssar, 
+	                                             dbseqpos2 + 1 + forward,
+						     Forwardmode) 
+	    != lo->motif.secondright)
 	{
 	  tmp_motifmismatchesrightLTR++;
 	}
 	
-	if(tmp_motifmismatchesleftLTR <= motif->allowedmismatches
+	if(tmp_motifmismatchesleftLTR <= lo->motif.allowedmismatches
 	   &&
-	   tmp_motifmismatchesrightLTR <= motif->allowedmismatches
+	   tmp_motifmismatchesrightLTR <= lo->motif.allowedmismatches
 	  )
 	{
-	   Uint tsd_len;
+	   Seqpos tsd_len;
 	   tsd_len = info->repeats.spaceRepeat[i].len - back - forward;
 	 
 	   // TSD length too big 
-	   if(tsd_len > info->lmax)
+	   if(tsd_len > (Seqpos)info->lmax)
 	   {
              // nothing
 	   }
 	   // first hit
 	   else if( !boundaries->motif_near_tsd )
 	   {
-	     Uint max, min;
+	     unsigned int max, min;
 	   
              // save number of mismatches
              *motifmismatchesleftLTR  = tmp_motifmismatchesleftLTR;
              *motifmismatchesrightLTR = tmp_motifmismatchesrightLTR;
 
 	     // adjust boundaries
-	     boundaries->motif_near_tsd = True;
+	     boundaries->motif_near_tsd = true;
 	     boundaries->leftLTR_5  = motifpos1 - back;
 	     boundaries->rightLTR_3 = motifpos2 + 1 + forward;
 
              // store TSD length
-             boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
-	     DEBUG0(1, "first hit\n");
-	     DEBUG1(1, "boundaries->leftLTR_5 = %lu\n",
-		        (Showuint) boundaries->leftLTR_5 - multiseqoffset );
-	     DEBUG1(1, "boundaries->rightLTR_3 = %lu\n",
-		        (Showuint) boundaries->rightLTR_3 - multiseqoffset );
-             DEBUG1(1, "length left TSD: %lu\n",  (Showuint) 
-	                                          boundaries->lenleftTSD);
-             DEBUG1(1, "length right TSD: %lu\n", (Showuint)
-	                                          boundaries->lenrightTSD);
+             /*boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
+	     printf("first hit\n");
+	     printf("boundaries->leftLTR_5 = " FormatSeqpos "\n",
+	         PRINTSeqposcast(boundaries->leftLTR_5 - offset) );
+	     printf("boundaries->rightLTR_3 = " FormatSeqpos "\n",
+	         PRINTSeqposcast(boundaries->rightLTR_3 - offset) );
+             printf("length left TSD: " FormatSeqpos "\n", 
+	             PRINTSeqposcast(boundaries->lenleftTSD));
+             printf("length right TSD: " FormatSeqpos "\n",
+	             PRINTSeqposcast(boundaries->lenrightTSD));*/
 	     
 	     max = MAX(oldleftLTR_5, boundaries->leftLTR_5);
 	     min = MIN(oldleftLTR_5, boundaries->leftLTR_5);
@@ -192,7 +210,7 @@ static void searchforbestTSDandormotifatborders(
 	   }
 	   else
 	   {
-	     Uint max, 
+	     unsigned int max, 
 		  min,
 		  difffromnewboundary1,
 		  difffromnewboundary2;
@@ -219,23 +237,31 @@ static void searchforbestTSDandormotifatborders(
 	     
 		 // store TSD length
                  boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
-		 DEBUG0(1, "next better hit\n");
-		 DEBUG1(1, "boundaries->leftLTR_5 = %lu\n",
-		        (Showuint) boundaries->leftLTR_5 - multiseqoffset);
-	         DEBUG1(1, "boundaries->rightLTR_3 = %lu\n",
-		        (Showuint) boundaries->rightLTR_3 - multiseqoffset);
-                 DEBUG1(1, "length left TSD: %lu\n", (Showuint)
-		                                     boundaries->lenleftTSD);
-                 DEBUG1(1, "length right TSD: %lu\n",(Showuint)
-		                                     boundaries->lenrightTSD);
-                 DEBUG4(1, "difffromnewboundary1 + difffromnewboundary2 ="
-		           " %lu + %lu <\n"
-			   "difffromoldboundary1 + difffromoldboundary2 ="
-			   " %lu + %lu\n",
-	                    (Showuint) difffromnewboundary1,
-	                    (Showuint) difffromnewboundary2,
-	                    (Showuint) difffromoldboundary1,
-	                    (Showuint) difffromoldboundary2 );
+		 /*printf("next better hit\n");
+		 printf("boundaries->leftLTR_5 = " FormatSeqpos "\n",
+		     PRINTSeqposcast(boundaries->leftLTR_5 - offset) );
+		 printf("boundaries->rightLTR_3 = " FormatSeqpos "\n",
+		     PRINTSeqposcast(boundaries->rightLTR_3 - offset) );
+		 printf("length left TSD: " FormatSeqpos "\n", 
+		     PRINTSeqposcast(boundaries->lenleftTSD));
+		 printf("length right TSD: " FormatSeqpos "\n",
+		     PRINTSeqposcast(boundaries->lenrightTSD));
+                 //DEBUG1(1, "boundaries->leftLTR_5 = %lu\n",
+		 //       (Showuint) boundaries->leftLTR_5 - multiseqoffset);
+	         //DEBUG1(1, "boundaries->rightLTR_3 = %lu\n",
+		 //       (Showuint) boundaries->rightLTR_3 - multiseqoffset);
+                 //DEBUG1(1, "length left TSD: %lu\n", (Showuint)
+		 //                                    boundaries->lenleftTSD);
+                 //DEBUG1(1, "length right TSD: %lu\n",(Showuint)
+		 //                                    boundaries->lenrightTSD);
+                 printf("difffromnewboundary1 + difffromnewboundary2 ="
+		           FormatSeqpos  " + " FormatSeqpos "<\n"
+		 	   "difffromoldboundary1 + difffromoldboundary2 ="
+		 	   FormatSeqpos  " + " FormatSeqpos "\n",
+	                    PRINTSeqposcast(difffromnewboundary1),
+	                    PRINTSeqposcast(difffromnewboundary2),
+	                    PRINTSeqposcast(difffromoldboundary1),
+	                    PRINTSeqposcast(difffromoldboundary2) );*/
                  
 		 difffromoldboundary1 = difffromnewboundary1;
 		 difffromoldboundary2 = difffromnewboundary2;
@@ -247,23 +273,20 @@ static void searchforbestTSDandormotifatborders(
     }
   }
 
-#ifdef DEBUG
   if( boundaries->motif_near_tsd )
   {
-    DEBUG1(1, "found %hu time(s) TSD and motif:\n",
+    printf("found %hu time(s) TSD and motif:\n",
 	              hitcounter);
-    DEBUG1(1, "  new boundary pos leftLTR_5  = %lu\n",
-	            (Showuint) boundaries->leftLTR_5 - multiseqoffset);
-    DEBUG1(1, "  new boundary pos rightLTR_3 = %lu\n",
-	            (Showuint) boundaries->rightLTR_3 - multiseqoffset);
+    printf("  new boundary pos leftLTR_5  = " FormatSeqpos "\n",
+	         PRINTSeqposcast(boundaries->leftLTR_5 - offset));
+    printf("  new boundary pos rightLTR_3 = " FormatSeqpos "\n",
+	         PRINTSeqposcast(boundaries->rightLTR_3 - offset));
   }
   else
   {
-    DEBUG0(1, "no TSD and motif found.\n");   
+    printf("no TSD and motif found.\n");   
   }
-#endif
 }
-*/
 
 /*
  The following function searches only for a specified palindromic motif
@@ -673,8 +696,8 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
  at the 5'-border of left LTR and 3'-border of right LTR.
  */
 
-static Sint searchforTSDandorMotifoutside(
-  LTRharvestoptions lo,
+static int searchforTSDandorMotifoutside(
+  LTRharvestoptions *lo,
   LTRboundaries *boundaries,
   Sequentialsuffixarrayreader *ssar,
   Seqpos *markpos,
@@ -690,19 +713,28 @@ static Sint searchforTSDandorMotifoutside(
          rightlen;
   unsigned long contignumber = boundaries->contignumber;
   Seqpos offset;
-
-  Multiseq *multiseqptr = &(virtualtree->multiseq);
-  Uchar *sequence  = multiseqptr->sequence;
-  unsigned int sequence_length = multiseqptr->totallength;
-  unsigned int numofcontigs = multiseqptr->numofsequences;
-   
-  Virtualtree subvirtualtree;
+  unsigned long numofdbsequences 
+                  = numofdbsequencesSequentialsuffixarrayreader(ssar);
+  Seqpos totallength = totallengthSequentialsuffixarrayreader(ssar);
   SubRepeatInfo subrepeatinfo;
-  unsigned int demand = LCPTAB | TISTAB | SUFTAB | BWTTAB;
+  
+  ///*test
+  const Uchar *characters;
+  // in order to get to visible dna characters
+  characters = getcharactersAlphabet(
+                 alphabetSequentialsuffixarrayreader(ssar));
+  //test*/
+
+  //Multiseq *multiseqptr = &(virtualtree->multiseq);
+  //Uchar *sequence  = multiseqptr->sequence;
+  //Virtualtree subvirtualtree;
+  //unsigned int demand = LCPTAB | TISTAB | SUFTAB | BWTTAB;
 
   //DEBUG2(1, "try vicinity left len = %lu, try vicinity right len = %lu"
   //    " (might be pruned if too large)\n",
   //    (Showuint) vicinity, (Showuint) vicinity);
+
+  env_error_check(env);
 
   if( contignumber == 0)
   {
@@ -759,8 +791,7 @@ static Sint searchforTSDandorMotifoutside(
     }
   }
   // do not align over 3'-border of left LTR //
-  if( (endleftLTR = boundaries->leftLTR_5 + vicinity) >
-      boundaries->leftLTR_3 - 2 // -2 because of possible motif 
+  if( (endleftLTR = boundaries->leftLTR_5 + lo->vicinityforcorrectboundaries)         > boundaries->leftLTR_3 - 2 // -2 because of possible motif 
     )
   {
     endleftLTR = boundaries->leftLTR_3 - 2; 
@@ -769,34 +800,37 @@ static Sint searchforTSDandorMotifoutside(
 
   /// vicinity of 3'-border of right LTR ///
   // do not align over 5'border of right LTR //
-  if( (startrightLTR = boundaries->rightLTR_3 - vicinity) <
+  if( (startrightLTR = 
+         boundaries->rightLTR_3 - lo->vicinityforcorrectboundaries) <
       boundaries->rightLTR_5 + 2  // +2 because of possible motif //
     )
   {
     startrightLTR = boundaries->rightLTR_5 + 2;
   }
-  if(contignumber == numofcontigs - 1)
+  if(contignumber == numofdbsequences - 1)
   {
     // do not align over right sequence boundary,
-       in case of need decrease alignment length //
-    if( (endrightLTR = boundaries->rightLTR_3 + vicinity) 
-	> sequence_length - 1)
+    //   in case of need decrease alignment length
+    if( (endrightLTR = 
+           boundaries->rightLTR_3 + lo->vicinityforcorrectboundaries) 
+	> totallength - 1)
     {
-      endrightLTR = sequence_length - 1;
+      endrightLTR = totallength - 1;
     }
   }
   else
   {
     // do not align over right separator symbol 
-       at markpos.spaceunsigned int[contignumber],
-       in case of need decrease alignment length //
-    if( ((endrightLTR = boundaries->rightLTR_3 + vicinity) >
-	multiseqptr->markpos.spaceunsigned int[contignumber]-1) 
+    //   at markpos.spaceunsigned int[contignumber],
+    //   in case of need decrease alignment length
+    if( ((endrightLTR = 
+            boundaries->rightLTR_3 + lo->vicinityforcorrectboundaries) >
+	  markpos[contignumber]-1) 
         &&
-        (boundaries->rightLTR_3 < multiseqptr->markpos.spaceunsigned int[contignumber])
+        (boundaries->rightLTR_3 < markpos[contignumber])
       )
     {
-      endrightLTR = multiseqptr->markpos.spaceunsigned int[contignumber]-1; 
+      endrightLTR = markpos[contignumber]-1; 
     }
   }
   rightlen = endrightLTR - startrightLTR + 1; 
@@ -804,101 +838,166 @@ static Sint searchforTSDandorMotifoutside(
 
   // now, search for correct boundaries //
 
-  if(minlengthTSD > (unsigned int) 1) ///// search for TSDs and/or motif /////
+  if(lo->minlengthTSD > (unsigned long) 1) ///// search for TSDs and/or motif /////
   {
-    DEBUG2(1, "searching for TSD and motif between pos = %lu up to "
-	"pos end = %lu\n",
-	(Showuint) startleftLTR - multiseqoffset, 
-	(Showuint) endleftLTR - multiseqoffset);
-    DEBUG1(1, "use total vicinity len = %lu\n", 
-	(Showuint) leftlen); 
-    DEBUG2(1, "searching for TSD and motif between pos = %lu"
-	" up to pos end = %lu\n",
-	(Showuint) startrightLTR - multiseqoffset, 
-	(Showuint) endrightLTR - multiseqoffset);
-    DEBUG1(1, "use total vicinity len = %lu\n", 
-	(Showuint) rightlen); 
+    //DEBUG2(1, "searching for TSD and motif between pos = %lu up to "
+    //	"pos end = %lu\n",
+    //	(Showuint) startleftLTR - multiseqoffset, 
+    //	(Showuint) endleftLTR - multiseqoffset);
+    //DEBUG1(1, "use total vicinity len = %lu\n", 
+    //	(Showuint) leftlen); 
+    //DEBUG2(1, "searching for TSD and motif between pos = %lu"
+    //	" up to pos end = %lu\n",
+    //	(Showuint) startrightLTR - multiseqoffset, 
+    //	(Showuint) endrightLTR - multiseqoffset);
+    //DEBUG1(1, "use total vicinity len = %lu\n", 
+    //	(Showuint) rightlen); 
     
-    makeemptyvirtualtree(&subvirtualtree);
+    //makeemptyvirtualtree(&subvirtualtree);
 
-    // 1. prepare multiseq //
-    initmultiseq(&subvirtualtree.multiseq);
+    Uchar *dbseq, *query;
+    Seqpos i;
+    unsigned long k = 0;
+    ALLOCASSIGNSPACE(dbseq,NULL,Uchar,leftlen);
+    ALLOCASSIGNSPACE(query,NULL,Uchar,rightlen);
 
-    addmultiseq(&subvirtualtree.multiseq, sequence + startleftLTR, leftlen);
-    addmultiseq(&subvirtualtree.multiseq, sequence + startrightLTR, rightlen);
-
-    subvirtualtree.multiseq.numofqueryfiles = 0;
-    subvirtualtree.multiseq.numofquerysequences = 0;
-    subvirtualtree.multiseq.totalquerylength = 0;
-
-    // 2. copy alphabet of vitualtree //
-    copyAlphabet(&subvirtualtree.alpha, &virtualtree->alpha);
-
-    // 3. copy specialsymbols //
-    subvirtualtree.specialsymbols = virtualtree->specialsymbols; 
-
-    // 4. determine prefixlength
-       ACHTUNG: bei prefixlength != 0 bricht das Programm ab //
-    subvirtualtree.prefixlength = 0;
-
-    //
-    // funktioniert leider nicht
-    //subvirtualtree.prefixlength = 
-    //recommendedprefixlength(
-    //subvirtualtree.alpha.mapsize-1,
-    //subvirtualtree.multiseq.totallength,
-    //SIZEOFBCKENTRY
-    //);
-     //
-
-    // fill subvirtualtree-tabs //
-    if( completevirtualtree(&subvirtualtree,
-	  demand,
-	  NULL //showonstdout
-	  ) != 0 )
+    for(i = startleftLTR; i <= endleftLTR; i++, k++) 
     {
-      ERROR0("completevirtualtree failed.\n");
-      return (Sint) -1;
+      dbseq[k] = getencodedcharSequentialsuffixarrayreader(ssar,
+                                                        i,
+							Forwardmode);
     }
-
-    DEBUG0(1, "showvirtualtreestatus (for TSD and Motif search):\n");
-#ifdef DEBUG
-    if (showvirtualtreestatus (&subvirtualtree, "(null)", showonstdout) != 0)
+   
+    for(k=0, i = startrightLTR; i <= endrightLTR; i++, k++)
     {
-      ERROR0("showvirtualtreestatus failed.\n");
-      return (Sint) -1;
+      query[k] = getencodedcharSequentialsuffixarrayreader(ssar,
+                                                        i,
+							Forwardmode); 
     }
-#endif
+ 
+    ///*test
+    printf("dbseq from =  " FormatSeqpos " to " FormatSeqpos "\n",
+           PRINTSeqposcast(startleftLTR),
+           PRINTSeqposcast(endleftLTR)
+	   );
+    for(i = 0; i<leftlen; i++)
+    {
+      printf("%c", characters[dbseq[i]]);
+    }
+    printf("\n");
+    printf("query = " FormatSeqpos " to " FormatSeqpos "\n",
+           PRINTSeqposcast(startrightLTR),
+           PRINTSeqposcast(endrightLTR)
+	   );
+    for(i = 0; i<rightlen; i++)
+    {
+      printf("%c", characters[query[i]]);
+    }
+    printf("\n");
+    //test*/
 
-    INITARRAY (&subrepeatinfo.repeats, Repeat);
-    subrepeatinfo.lmin = minlengthTSD;
-    subrepeatinfo.lmax = maxlengthTSD;
-    subrepeatinfo.separatorpos = leftlen;
+    INITARRAY(&subrepeatinfo.repeats, Repeat);
+    subrepeatinfo.lmin = lo->minlengthTSD;
+    subrepeatinfo.lmax = lo->maxlengthTSD;
+    assert(startleftLTR < startrightLTR);
     subrepeatinfo.offset1 = startleftLTR;
     subrepeatinfo.offset2 = startrightLTR;
-    DEBUG0(1, "the following are repeat candidates:\n");
+    subrepeatinfo.envptr = env;
 
-    if( vmatmaxoutdynamic (&subvirtualtree, unsigned intConst (1),
-	  minlengthTSD,
-	  NULL, &subrepeatinfo,     // NULL,
-	  (void*)subsimpleexactselfmatchstore) != 0)
+    if (sarrquerysubstringmatch(dbseq,
+	  leftlen,
+	  query,
+	  (unsigned long)rightlen,
+	  (unsigned int)lo->minlengthTSD,
+	  alphabetSequentialsuffixarrayreader(ssar),
+	  (void*)subsimpleexactselfmatchstore,//(void*)subshowrepeats,  //spaeter aenders
+	  &subrepeatinfo,
+	  env) != 0)
     {
-      ERROR0("vmatmaxoutdynamic failed.\n");
-      return (Sint) -1;
-    } 
-
-    freemultiseq(&subvirtualtree.multiseq);
-    if( freevirtualtree(&subvirtualtree) != 0 )
-    {
-      ERROR0("freevirtualtree failed.\n");
-      return (Sint) -1;
+       return -1;
     }
 
+    // 1. prepare multiseq //
+    //initmultiseq(&subvirtualtree.multiseq);
+
+    //addmultiseq(&subvirtualtree.multiseq, sequence + startleftLTR, leftlen);
+    //addmultiseq(&subvirtualtree.multiseq, sequence + startrightLTR, rightlen);
+    //
+    //subvirtualtree.multiseq.numofqueryfiles = 0;
+    //subvirtualtree.multiseq.numofquerysequences = 0;
+    //subvirtualtree.multiseq.totalquerylength = 0;
+    //
+    //// 2. copy alphabet of vitualtree //
+    //copyAlphabet(&subvirtualtree.alpha, &virtualtree->alpha);
+    //
+    //// 3. copy specialsymbols //
+    //subvirtualtree.specialsymbols = virtualtree->specialsymbols; 
+
+    // 4. determine prefixlength
+    //   ACHTUNG: bei prefixlength != 0 bricht das Programm ab //
+    //subvirtualtree.prefixlength = 0;
+
+    ////
+    //// funktioniert leider nicht
+    ////subvirtualtree.prefixlength = 
+    ////recommendedprefixlength(
+    ////subvirtualtree.alpha.mapsize-1,
+    ////subvirtualtree.multiseq.totallength,
+    ////SIZEOFBCKENTRY
+    ////);
+    // //
+    //
+    //// fill subvirtualtree-tabs //
+    //if( completevirtualtree(&subvirtualtree,
+    //	  demand,
+    // 	  NULL //showonstdout
+    //	  ) != 0 )
+    //{
+    //  ERROR0("completevirtualtree failed.\n");
+    //  return (Sint) -1;
+    //}
+
+    //DEBUG0(1, "showvirtualtreestatus (for TSD and Motif search):\n");
+//#ifdef DEBUG
+    //if (showvirtualtreestatus (&subvirtualtree, "(null)", showonstdout) != 0)
+    //{
+    //  ERROR0("showvirtualtreestatus failed.\n");
+    //  return (Sint) -1;
+    //}
+//#endif
+
+    //INITARRAY (&subrepeatinfo.repeats, Repeat);
+    //subrepeatinfo.lmin = minlengthTSD;
+    //subrepeatinfo.lmax = maxlengthTSD;
+    //subrepeatinfo.separatorpos = leftlen;
+    //subrepeatinfo.offset1 = startleftLTR;
+    //subrepeatinfo.offset2 = startrightLTR;
+    //DEBUG0(1, "the following are repeat candidates:\n");
+    //
+    //if( vmatmaxoutdynamic (&subvirtualtree, unsigned intConst (1),
+    //      minlengthTSD,
+    //      NULL, &subrepeatinfo,     // NULL,
+    //      (void*)subsimpleexactselfmatchstore) != 0)
+    //{
+    //  ERROR0("vmatmaxoutdynamic failed.\n");
+    //  return (Sint) -1;
+    //} 
+    //
+    //freemultiseq(&subvirtualtree.multiseq);
+    //if( freevirtualtree(&subvirtualtree) != 0 )
+    //{
+    //  ERROR0("freevirtualtree failed.\n");
+    //  return (Sint) -1;
+    //}
+
+    FREESPACE(dbseq);
+    FREESPACE(query);
+
     searchforbestTSDandormotifatborders(&subrepeatinfo, 
-	virtualtree,
+	lo,
+	ssar,
+	markpos,
 	boundaries,
-	sequence,
-	motif,
 	motifmismatchesleftLTR,
 	motifmismatchesrightLTR
 	);
@@ -908,7 +1007,7 @@ static Sint searchforTSDandorMotifoutside(
   } else // no search for TSDs, search for motif only /////
   {
     
-    DEBUG2(1, "searching for and motif only between pos = %lu up to "
+    /*DEBUG2(1, "searching for and motif only between pos = %lu up to "
 	"pos end = %lu\n",
 	(Showuint) startleftLTR - multiseqoffset, 
 	(Showuint) endleftLTR - multiseqoffset);
@@ -920,9 +1019,9 @@ static Sint searchforTSDandorMotifoutside(
 	(Showuint) startrightLTR - multiseqoffset, 
 	(Showuint) endrightLTR - multiseqoffset);
     DEBUG1(1, "use total vicinity len = %lu\n", 
-	(Showuint) rightlen); 
+	(Showuint) rightlen);*/
     
-    searchformotifonlyborders(boundaries, 
+    /*searchformotifonlyborders(boundaries, //ACHTUNG einkommentieren
 	virtualtree,
 	sequence, 
 	startleftLTR,
@@ -931,7 +1030,7 @@ static Sint searchforTSDandorMotifoutside(
 	endrightLTR,
 	motif,
 	motifmismatchesleftLTR,
-	motifmismatchesrightLTR);
+	motifmismatchesrightLTR);*/
   }
 
   return 0;
@@ -965,7 +1064,7 @@ int findcorrectboundaries(
 	                            &motifmismatchesrightLTR,
 				    env) != 0 )
   {
-    return (Sint) -1;
+    return -1;
   }
 
   /****** second: 3'-border of left LTR and 5'-border of right LTR *****/
