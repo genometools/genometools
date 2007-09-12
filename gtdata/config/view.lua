@@ -66,6 +66,7 @@ config =
     scale_arrow_height = 10,   -- height of scale arrowheads, in pixels
     arrow_width = 6,   -- width of feature arrowheads, in pixels
     stroke_width = .5, -- width of outlines, in pixels
+    stroke_marked_width = 1.5, -- width of outlines for marked elements, in pixels
     show_grid = "yes", -- shows light vertical lines for orientation
   },
 }

@@ -14,6 +14,18 @@ int overallquerysequences(int(*processsequence)(void *,
                           const Uchar *symbolmap,
                           Env *env);
 
+Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
+                                              const Uchar *symbolmap,
+                                              Env *env);
+
+void freeScansequenceiterator(Scansequenceiterator **sseqit,Env *env);
+
+int nextScansequenceiterator(const Uchar **sequence,
+                             unsigned long *len,
+                             char **desc,
+                             Scansequenceiterator *sseqit,
+                             Env *env);
+
 #ifdef __cplusplus
 }
 #endif

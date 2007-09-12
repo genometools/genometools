@@ -18,12 +18,7 @@
 #include <limits.h>
 #include "arraydef.h"
 #include "seqpos-def.h"
-#include "sarr-def.h"
-#include "measure-time-if.h"
-#include "sfx-suffixer.h"
-
-#include "sfx-map.pr"
-#include "sfx-apfxlen.pr"
+#include "esa-seqread.h"
 
 #define ISLEFTDIVERSE   (Uchar) (state->alphabetsize)
 #define INITIALCHAR     (Uchar) (state->alphabetsize+1)
@@ -65,10 +60,12 @@ typedef struct
   unsigned int searchlength,
                alphabetsize;
   Seqpos depth;            /* value changes with each new match */
-  int(*output)(void *,Seqpos,Seqpos,Seqpos);
-  void *outinfo;
+  int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *);
+  void *processmaxpairsinfo;
   ArraySeqpos uniquechar,
               poslist[UCHAR_MAX+1];
+  const Encodedsequence *encseq;
+  Readmode readmode;
 } Dfsstate;
 
 #include "esa-dfs.pr"
@@ -117,7 +114,7 @@ static void concatlists(Dfsstate *state,Dfsinfo *father,Dfsinfo *son)
 }
 
 static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
-                        Seqpos leafnumber)
+                        Seqpos leafnumber,Env *env)
 {
   Listtype *pl;
   Seqpos *spptr, *start;
@@ -126,7 +123,8 @@ static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
   start = state->poslist[base].spaceSeqpos + pl->start;
   for (spptr = start; spptr < start + pl->length; spptr++)
   {
-    if (state->output(state->outinfo,state->depth,leafnumber,*spptr) != 0)
+    if (state->processmaxpairs(state->processmaxpairsinfo,
+                               state->depth,leafnumber,*spptr,env) != 0)
     {
       return -1;
     }
@@ -136,7 +134,8 @@ static int cartproduct1(Dfsstate *state,const Dfsinfo *ninfo,unsigned int base,
 
 static int cartproduct2(Dfsstate *state,
                         const Dfsinfo *ninfo1, unsigned int base1,
-                        const Dfsinfo *ninfo2, unsigned int base2)
+                        const Dfsinfo *ninfo2, unsigned int base2,
+                        Env *env)
 {
   Listtype *pl1, *pl2;
   Seqpos *start1, *start2, *spptr1, *spptr2;
@@ -149,7 +148,8 @@ static int cartproduct2(Dfsstate *state,
   {
     for (spptr2 = start2; spptr2 < start2 + pl2->length; spptr2++)
     {
-      if (state->output(state->outinfo,state->depth,*spptr1,*spptr2) != 0)
+      if (state->processmaxpairs(state->processmaxpairsinfo,
+                                 state->depth,*spptr1,*spptr2,env) != 0)
       {
         return -1;
       }
@@ -176,13 +176,13 @@ static void setpostabto0(Dfsstate *state)
 static int processleafedge(bool firstsucc,
                            Seqpos fatherdepth,
                            Dfsinfo *father,
-                           Uchar leftchar,
                            Seqpos leafnumber,
                            Dfsstate *state,
                            Env *env)
 {
   unsigned int base;
   Seqpos *start, *spptr;
+  Uchar leftchar;
 
 #ifdef DEBUG
   printf("processleafedge " FormatSeqpos " firstsucc=%s, "
@@ -195,6 +195,13 @@ static int processleafedge(bool firstsucc,
   {
     setpostabto0(state);
     return 0;
+  }
+  if (leafnumber == 0)
+  {
+    leftchar = INITIALCHAR;
+  } else
+  {
+    leftchar = getencodedchar(state->encseq,leafnumber-1,state->readmode);
   }
   state->initialized = false;
   state->depth = fatherdepth;
@@ -224,7 +231,7 @@ static int processleafedge(bool firstsucc,
     {
       if (leftchar != (Uchar) base)
       {
-        if (cartproduct1(state,father,base,leafnumber) != 0)
+        if (cartproduct1(state,father,base,leafnumber,env) != 0)
         {
           return -1;
         }
@@ -234,7 +241,8 @@ static int processleafedge(bool firstsucc,
             father->uniquecharposstart;
     for (spptr = start; spptr < start + father->uniquecharposlength; spptr++)
     {
-      if (state->output(state->outinfo,state->depth,leafnumber,*spptr) != 0)
+      if (state->processmaxpairs(state->processmaxpairsinfo,
+                                 state->depth,leafnumber,*spptr,env) != 0)
       {
         return -2;
       }
@@ -294,7 +302,7 @@ static int processbranchedge(bool firstsucc,
       {
         if (chson != chfather)
         {
-          if (cartproduct2(state,father,chfather,son,chson) != 0)
+          if (cartproduct2(state,father,chfather,son,chson,env) != 0)
           {
             return -1;
           }
@@ -302,7 +310,7 @@ static int processbranchedge(bool firstsucc,
       }
       for (spptr = start; spptr < start + son->uniquecharposlength; spptr++)
       {
-        if (cartproduct1(state,father,chfather,*spptr) != 0)
+        if (cartproduct1(state,father,chfather,*spptr,env) != 0)
         {
           return -2;
         }
@@ -314,14 +322,15 @@ static int processbranchedge(bool firstsucc,
     {
       for (chson = 0; chson < state->alphabetsize; chson++)
       {
-        if (cartproduct1(state,son,chson,*fptr) != 0)
+        if (cartproduct1(state,son,chson,*fptr,env) != 0)
         {
           return -3;
         }
       }
       for (spptr = start; spptr < start + son->uniquecharposlength; spptr++)
       {
-        if (state->output(state->outinfo,state->depth,*fptr,*spptr) != 0)
+        if (state->processmaxpairs(state->processmaxpairsinfo,
+                                   state->depth,*fptr,*spptr,env) != 0)
         {
           return -4;
         }
@@ -333,9 +342,12 @@ static int processbranchedge(bool firstsucc,
 }
 
 int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
+                      unsigned int alphabetsize,
+                      const Encodedsequence *encseq,
+                      Readmode readmode,
                       unsigned int searchlength,
-                      int(*output)(void *,Seqpos,Seqpos,Seqpos),
-                      void *outinfo,
+                      int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *),
+                      void *processmaxpairsinfo,
                       Env *env)
 {
   unsigned int base;
@@ -343,12 +355,13 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   Dfsstate state;
   bool haserr = false;
 
-  state.alphabetsize 
-    = getnumofcharsAlphabet(alphabetSequentialsuffixarrayreader(ssar));
+  state.alphabetsize = alphabetsize;
   state.searchlength = searchlength;
-  state.output = output;
-  state.outinfo = outinfo;
+  state.processmaxpairs = processmaxpairs;
+  state.processmaxpairsinfo = processmaxpairsinfo;
   state.initialized = false;
+  state.encseq = encseq;
+  state.readmode = readmode;
 
   INITARRAY(&state.uniquechar,Seqpos);
   for (base = 0; base < state.alphabetsize; base++)
@@ -357,7 +370,6 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
     INITARRAY(ptr,Seqpos);
   }
   if (depthfirstesa(ssar,
-                    (Uchar) (state.alphabetsize+1),
                     allocateDfsinfo,
                     freeDfsinfo,
                     processleafedge,
@@ -379,107 +391,44 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   return haserr ? -1 : 0;
 }
 
-typedef struct
+int callenummaxpairs(const Str *indexname,
+                     unsigned int userdefinedleastlength,
+                     bool scanfile,
+                     int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *),
+                     void *processmaxpairsinfo,
+                     Env *env)
 {
-  unsigned int minlength;
-  Encodedsequence *encseq;
-  int (*processmaxmatch)(void *,Seqpos,Seqpos,Seqpos);
-  void *processmaxmatchinfo;
-} Substringmatchinfo;
-
-static int suffixeratorstoresuftab(
-                 Seqpos specialcharacters,
-                 Seqpos specialranges,
-                 const Encodedsequence *encseq,
-                 Readmode readmode,
-                 unsigned int numofchars,
-                 unsigned int prefixlength,
-                 unsigned int numofparts,
-                 Measuretime *mtime,
-                 Env *env)
-{
-  const Seqpos *suftabptr;
-  Seqpos len;
   bool haserr = false;
-  Sfxiterator *sfi;
+  Sequentialsuffixarrayreader *ssar;
 
-  sfi = newsfxiterator(specialcharacters,
-                       specialranges,
-                       encseq,
-                       readmode,
-                       numofchars,
-                       prefixlength,
-                       numofparts,
-                       mtime,
-                       env);
-  if(sfi == NULL)
-  {
-    haserr = true;
-  } else
-  {
-    while(true)
-    {
-      suftabptr = nextSfxiterator(&len,mtime,sfi,env);
-      if(suftabptr == NULL)
-      {
-        break;
-      }
-      /*
-      if(suftab2file(outfileinfo,suftabptr,readmode,len,env) != 0)
-      {
-        haserr = true;
-        break;
-      }
-      */
-    }
-  }
-  if(sfi != NULL)
-  {
-    freeSfxiterator(&sfi,env);
-  }
-  return haserr ? -1 : 0;
-}
-
-int sarrselfsubstringmatch(const Uchar *dbseq,
-                           Seqpos dblen,
-                           const Uchar *query,
-                           unsigned long querylen,
-                           unsigned int minlength,
-                           const Alphabet *alpha,
-                           int (*processmaxmatch)(void *,Seqpos,
-                                                  Seqpos,Seqpos),
-                           void *processmaxmatchinfo,
-                           Env *env)
-{
-  Specialcharinfo samplespecialcharinfo;
-  Substringmatchinfo ssi;
-  unsigned int numofchars;
-  bool haserr = false;
-
-  ssi.encseq = plain2encodedsequence(true,
-                                     &samplespecialcharinfo,
-                                     dbseq,
-                                     dblen,
-                                     query,
-                                     querylen,
-                                     alpha,
-                                     env);
-  ssi.minlength = minlength;
-  ssi.processmaxmatch = processmaxmatch;
-  ssi.processmaxmatchinfo = processmaxmatchinfo;
-  numofchars = getnumofcharsAlphabet(alpha);
-  if (suffixeratorstoresuftab(samplespecialcharinfo.specialcharacters,
-                              samplespecialcharinfo.specialranges,
-                              ssi.encseq,
-                              Forwardmode,
-                              numofchars,
-                              recommendedprefixlength(numofchars,dblen),
-                              (unsigned int) 1, /* parts */
-                              NULL,
-		              env) != 0)
+  env_error_check(env);
+  ssar = newSequentialsuffixarrayreaderfromfile(indexname,
+                                                SARR_LCPTAB |
+                                                SARR_SUFTAB |
+                                                SARR_ESQTAB,
+                                                scanfile
+                                                  ? SEQ_scan : SEQ_mappedboth,
+                                                env);
+  if (ssar == NULL)
   {
     haserr = true;
   }
-  freeEncodedsequence(&ssi.encseq,env);
+  if (!haserr &&
+      enumeratemaxpairs(ssar,
+                        getnumofcharsAlphabet(
+                                 alphabetSequentialsuffixarrayreader(ssar)),
+                        encseqSequentialsuffixarrayreader(ssar),
+                        readmodeSequentialsuffixarrayreader(ssar),
+                        userdefinedleastlength,
+                        processmaxpairs,
+                        processmaxpairsinfo,
+                        env) != 0)
+  {
+    haserr = true;
+  }
+  if (ssar != NULL)
+  {
+    freeSequentialsuffixarrayreader(&ssar,env);
+  }
   return haserr ? -1 : 0;
 }

@@ -32,7 +32,7 @@ int           range_compare_with_delta(Range, Range, unsigned long delta);
 bool          range_overlap(Range, Range);
 bool          range_contains(Range, Range);
 Range         range_join(Range, Range);
-Range         range_offset(Range, long offset, unsigned long line_number);
+Range         range_offset(Range, long offset);
 unsigned long range_length(Range);
 int           range_unit_test(Env*);
 

@@ -25,9 +25,9 @@
 
 typedef struct Sfxiterator Sfxiterator;
 
-void freeSfxiterator(Sfxiterator **sfxiterator,Env *env);
+void freeSfxiterator(Sfxiterator **sfi,Env *env);
 
-Sfxiterator *newsfxiterator(Seqpos specialcharacters,
+Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             Seqpos specialranges,
                             const Encodedsequence *encseq,
                             Readmode readmode,
@@ -37,7 +37,8 @@ Sfxiterator *newsfxiterator(Seqpos specialcharacters,
                             Measuretime *mtime,
                             Env *env);
 
-const Seqpos *nextSfxiterator(Seqpos *len,Measuretime *mtime,
+const Seqpos *nextSfxiterator(Seqpos *len,bool *specialsuffixes,
+                              Measuretime *mtime,
                               Sfxiterator *sfi,Env *env);
 
 #endif

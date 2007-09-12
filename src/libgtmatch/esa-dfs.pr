@@ -2,11 +2,10 @@
 extern "C" {
 #endif
 int depthfirstesa(Sequentialsuffixarrayreader *ssar,
-                  Uchar initialchar,
                   Dfsinfo *(*allocateDfsinfo)(Dfsstate *,Env *),
                   void(*freeDfsinfo)(Dfsinfo *,Dfsstate *,Env *),
                   int(*processleafedge)(bool,Seqpos,Dfsinfo *,
-                                        Uchar,Seqpos,Dfsstate *,
+                                        Seqpos,Dfsstate *,
                                         Env *),
                   int(*processbranchedge)(bool,
                                           Seqpos,

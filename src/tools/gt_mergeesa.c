@@ -15,7 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "gt.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/option.h"
+#include "libgtmatch/test-mergeesa.pr"
 
 static OPrval parse_options(Str *indexname,StrArray *indexnametab,
                             int *parsed_args, int argc,

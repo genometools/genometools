@@ -20,23 +20,28 @@
 #include "libgtcore/str.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
-#include "libgtmatch/sarr-def.h"
+#include "libgtmatch/esa-seqread.h"
+#include "libgtmatch/esa-mmsearch-def.h"
+#include "libgtmatch/format64.h"
 
-#include "libgtmatch/sfx-map.pr"
 #include "libgtmatch/esa-maxpairs.pr"
+#include "libgtmatch/esa-mmsearch.pr"
 #include "libgtmatch/test-maxpairs.pr"
 
 typedef struct
 {
   unsigned int userdefinedleastlength;
   unsigned long samples;
+  bool scanfile;
   Str *indexname;
+  StrArray *queryfiles;
 } Maxpairsoptions;
 
 static int simpleexactselfmatchoutput(/*@unused@*/ void *info,
                                       Seqpos len,
                                       Seqpos pos1,
-                                      Seqpos pos2)
+                                      Seqpos pos2,
+                                      /*@unused@*/ Env *env)
 {
   if (pos1 > pos2)
   {
@@ -51,46 +56,34 @@ static int simpleexactselfmatchoutput(/*@unused@*/ void *info,
   return 0;
 }
 
-static int callenummaxpairs(const Str *indexname,
-                            unsigned int userdefinedleastlength,
-                            Env *env)
+static int simpleexactquerymatchoutput(/*@unused@*/ void *info,
+                                       unsigned long len,
+                                       Seqpos dbstart,
+                                       uint64_t unitnum,
+                                       unsigned long querystart,
+                                       /*@unused@*/ Env *env)
 {
-  bool haserr = false;
-  Sequentialsuffixarrayreader *ssar;
-
-  ssar = newSequentialsuffixarrayreader(indexname,
-                                        SARR_LCPTAB |
-                                        SARR_SUFTAB |
-                                        SARR_ESQTAB,
-                                        false,
-                                        env);
-  if (ssar == NULL)
-  {
-    haserr = true;
-  }
-  if (!haserr && enumeratemaxpairs(ssar,
-                                   userdefinedleastlength,
-                                   simpleexactselfmatchoutput,
-                                   NULL,
-                                   env) != 0)
-  {
-    haserr = true;
-  }
-  freeSequentialsuffixarrayreader(&ssar,env);
-  return haserr ? -1 : 0;
+  printf("%lu " FormatSeqpos " " Formatuint64_t " %lu\n",
+           len,
+           PRINTSeqposcast(dbstart),
+           PRINTuint64_tcast(unitnum),
+           querystart);
+  return 0;
 }
 
 static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
                             int *parsed_args,
-                            int argc, const char **argv,Env *env)
+                            int argc,
+                            const char **argv,
+                            Env *env)
 {
   OptionParser *op;
-  Option *option;
+  Option *option, *queryoption, *scanoption, *sampleoption;
   OPrval oprval;
 
   env_error_check(env);
   op = option_parser_new("[options] -ii indexname",
-                         "Enumerate maximal pairs of minimum length.",
+                         "Perform Substring matches with or without query.",
                          env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
@@ -100,12 +93,18 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
                                (unsigned int) 1,env);
   option_parser_add_option(op, option, env);
 
-  option = option_new_ulong_min("samples","Specify number of samples",
+  sampleoption = option_new_ulong_min("samples","Specify number of samples",
                                  &maxpairsoptions->samples,
                                  (unsigned long) 0,
                                  (unsigned long) 1,
                                  env);
-  option_parser_add_option(op, option, env);
+  option_parser_add_option(op, sampleoption, env);
+
+  scanoption = option_new_bool("scan","scan index",
+                               &maxpairsoptions->scanfile,
+                               false,
+                               env);
+  option_parser_add_option(op, scanoption, env);
 
   option = option_new_string("ii",
                              "Specify input index",
@@ -113,8 +112,26 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
   option_parser_add_option(op, option, env);
   option_is_mandatory(option);
 
+  queryoption = option_new_filenamearray("q",
+                             "Specify query file",
+                             maxpairsoptions->queryfiles, env);
+  option_parser_add_option(op, queryoption, env);
+
   oprval = option_parser_parse(op, parsed_args, argc, argv,
                                versionfunc, env);
+  if (option_is_set(queryoption))
+  {
+    if (option_is_set(sampleoption))
+    {
+      env_error_set(env,"option -samples cannot be combined with option -q");
+      return OPTIONPARSER_ERROR;
+    }
+    if (option_is_set(scanoption))
+    {
+      env_error_set(env,"option -scan cannot be combined with option -q");
+      return OPTIONPARSER_ERROR;
+    }
+  }
   option_parser_delete(op, env);
   return oprval;
 }
@@ -129,29 +146,53 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   maxpairsoptions.indexname = str_new(env);
+  maxpairsoptions.queryfiles = strarray_new(env);
   oprval = parse_options(&maxpairsoptions,&parsed_args, argc, argv, env);
   if (oprval == OPTIONPARSER_OK)
   {
     assert(parsed_args == argc);
-    if (callenummaxpairs(maxpairsoptions.indexname,
+    if (strarray_size(maxpairsoptions.queryfiles) == 0)
+    {
+      if (maxpairsoptions.samples == 0)
+      {
+        if (callenummaxpairs(maxpairsoptions.indexname,
+                             maxpairsoptions.userdefinedleastlength,
+                             maxpairsoptions.scanfile,
+                             simpleexactselfmatchoutput,
+                             NULL,
+                             env) != 0)
+        {
+          haserr = true;
+        }
+      } else
+      {
+        if (testmaxpairs(maxpairsoptions.indexname,
+                         maxpairsoptions.samples,
                          maxpairsoptions.userdefinedleastlength,
+                         (Seqpos) (100 *
+                                   maxpairsoptions.userdefinedleastlength),
                          env) != 0)
+        {
+          haserr = true;
+        }
+      }
+    } else
     {
-      haserr = true;
-    }
-    if (!haserr && maxpairsoptions.samples > 0)
-    {
-      if (testmaxpairs(maxpairsoptions.indexname,
-                      maxpairsoptions.samples,
-                      maxpairsoptions.userdefinedleastlength,
-                      10 * maxpairsoptions.userdefinedleastlength,
-                      env) != 0)
+      if (callenumquerymatches(maxpairsoptions.indexname,
+                               maxpairsoptions.queryfiles,
+                               false,
+                               maxpairsoptions.userdefinedleastlength,
+                               simpleexactquerymatchoutput,
+                               NULL,
+                               env) != 0)
       {
         haserr = true;
       }
     }
   }
   str_delete(maxpairsoptions.indexname,env);
+  strarray_delete(maxpairsoptions.queryfiles,env);
+
   if (oprval == OPTIONPARSER_REQUESTS_EXIT)
   {
     return 0;

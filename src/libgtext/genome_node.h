@@ -57,13 +57,17 @@ void          genome_node_set_seqid(GenomeNode*, Str*);
 void          genome_node_set_source(GenomeNode*, Str*);
 void          genome_node_set_phase(GenomeNode*, Phase);
 int           genome_node_accept(GenomeNode*, GenomeVisitor*, Env*);
+/* <parent> takes ownership of <child> */
 void          genome_node_is_part_of_genome_node(GenomeNode *parent,
                                                  GenomeNode *child, Env*);
 /* does not free the leaf */
 void          genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn,
                                       Env*);
 void          genome_node_mark(GenomeNode*);
+/* returns true if the (top-level) node is marked */
 bool          genome_node_is_marked(const GenomeNode*);
+/* returns true if the given node graph contains a marked node */
+bool          genome_node_contains_marked(GenomeNode*, Env*);
 bool          genome_node_has_children(GenomeNode*);
 bool          genome_node_direct_children_do_not_overlap(GenomeNode*, Env*);
 /* returns true if all direct childred of <parent> with the same type (s.t.) as

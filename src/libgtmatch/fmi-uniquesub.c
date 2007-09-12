@@ -22,10 +22,10 @@
 #include "format64.h"
 #include "seqdesc.h"
 #include "gqueue-def.h"
+#include "iterseq.h"
 
 #include "fmi-map.pr"
 #include "fmi-fwduni.pr"
-#include "iterseq.pr"
 #include "genericqueue.pr"
 
 #define SHOWSEQUENCE   ((unsigned int) 1)

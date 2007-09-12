@@ -15,44 +15,56 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 ]]
 
+require 'gt'
+require 'lfs'
+
 function usage()
-  io.stderr:write(string.format("Usage: %s PNG_file reality_file " ..
+  io.stderr:write(string.format("Usage: %s PNG_dir reality_file " ..
                                 "prediction_file\n", arg[0]))
   io.stderr:write("Evaluate prediction_file against reality_file and write " ..
-                  "out PNG_file.\n")
+                  "out PNGs to PNG_dir.\n")
   os.exit(1)
 end
 
 if #arg == 3 then
-  png_file  = arg[1]
+  png_dir  = arg[1]
   reality_file = arg[2]
   prediction_file = arg[3]
+  -- make sure png_dir is a directory or create it
+  rval, err = lfs.attributes(png_dir, "mode")
+  if rval then
+    if rval ~= "directory" then
+      io.stderr:write(string.format("PNG_dir '%s' is not a directory\n",
+                                    png_dir))
+      os.exit(1)
+    end
+  else
+    -- not successfull, try to create directory
+    rval, err = lfs.mkdir(png_dir)
+    if not rval then
+      io.stderr:write(string.format("could not create directory '%s': %s",
+                                    png_dir, err))
+      os.exit(1)
+    end
+  end
 else
   usage()
 end
 
-function render_to_png()
+function render_to_png(png_file)
   local diagram = gt.diagram_new(feature_index, range, seqid)
   local render =  gt.render_new()
   render:to_png(diagram, png_file, width)
 end
 
-function show()
-  os.execute("display "..png_file)
-end
-
-function render_and_show()
-  render_to_png()
-  show()
-end
-
-function show_coverage(maxdist)
+function get_coverage(maxdist)
   local maxdist = maxdist or 0
   local features = feature_index:get_features_for_seqid(seqid)
   local starpos, endpos
   local minstartpos = nil
   local maxendpos = nil
   local ranges = {}
+  local coverage = {}
 
   -- collect all feature ranges
   for i, feature in ipairs(features) do
@@ -61,7 +73,7 @@ function show_coverage(maxdist)
   -- sort feature ranges
   ranges = gt.ranges_sort(ranges)
 
-  -- compute and show coverage
+  -- compute and store coverage
   for i, range in ipairs(ranges) do
     startpos, endpos = range:get_start(), range:get_end()
     if i == 1 then
@@ -71,7 +83,7 @@ function show_coverage(maxdist)
       -- assert(startpos >= minstartpos)
       if (startpos > maxendpos + maxdist) then
         -- new region started
-        io.write(string.format("%d, %d\n", minstartpos, maxendpos))
+        table.insert(coverage, gt.range_new(minstartpos, maxendpos))
         minstartpos = startpos
         maxendpos   = endpos
       else
@@ -80,8 +92,33 @@ function show_coverage(maxdist)
       end
     end
   end
-  -- show last region
-  io.write(string.format("%d, %d\n", minstartpos, maxendpos))
+  -- add last region
+  table.insert(coverage, gt.range_new(minstartpos, maxendpos))
+  return coverage
+end
+
+function contains_marked_feature(features)
+  for i, feature in ipairs(features) do
+    if feature:contains_marked() then
+      return true
+    end
+  end
+  return false
+end
+
+function write_marked_regions(maxdist)
+  local coverage = get_coverage(maxdist)
+  local filenumber = 1
+  for i, r in ipairs(coverage) do
+    local features = feature_index:get_features_for_range(seqid, r)
+    if contains_marked_feature(features) then
+      range = r
+      local filename = png_dir .. "/" .. filenumber .. ".png"
+      io.write(string.format("writing file '%s'\n", filename))
+      render_to_png(filename)
+      filenumber = filenumber + 1
+    end
+  end
 end
 
 -- process input files
@@ -95,11 +132,8 @@ feature_visitor = gt.feature_visitor_new(feature_index)
 stream_evaluator:evaluate(feature_visitor)
 stream_evaluator:show()
 
--- view results
+-- write results
 seqid = feature_index:get_first_seqid()
 range = feature_index:get_range_for_seqid(seqid)
-
-diagram = gt.diagram_new(feature_index, range, seqid)
-width = 800
-render = gt.render_new()
-render:to_png(diagram, png_file, width)
+width = 1600
+write_marked_regions()

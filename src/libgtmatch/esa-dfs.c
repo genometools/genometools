@@ -16,11 +16,10 @@
 */
 
 #include <limits.h>
-#include "sarr-def.h"
 #include "seqpos-def.h"
 #include "symboldef.h"
 #include "spacedef.h"
-#include "sfx-map.pr"
+#include "esa-seqread.h"
 
 #define ABOVETOP  stackspace[nextfreeItvinfo]
 #define TOP       stackspace[nextfreeItvinfo-1]
@@ -93,11 +92,10 @@ static void freeItvinfo(Itvinfo *ptr,
 }
 
 int depthfirstesa(Sequentialsuffixarrayreader *ssar,
-                  Uchar initialchar,
                   Dfsinfo *(*allocateDfsinfo)(Dfsstate *,Env *),
                   void(*freeDfsinfo)(Dfsinfo *,Dfsstate *,Env *),
                   int(*processleafedge)(bool,Seqpos,Dfsinfo *,
-                                        Uchar,Seqpos,Dfsstate *,
+                                        Seqpos,Dfsstate *,
                                         Env *),
                   int(*processbranchedge)(bool,
                                           Seqpos,
@@ -118,19 +116,14 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
   Seqpos previoussuffix = 0,
          previouslcp,
          currentindex,
-         currentlcp = 0; /* May be necessary if the lcpvalue is used after the
+         currentlcp = 0; /* May be necessary if currentlcp is used after the
                             outer while loop */
   unsigned long allocatedItvinfo = 0,
                 nextfreeItvinfo = 0;
   Itvinfo *stackspace;
-  Uchar leftchar;
   bool haserr = false;
-  Encodedsequence *encseq;
-  Readmode readmode;
 
   firstrootedge = true;
-  encseq = encseqSequentialsuffixarrayreader(ssar);
-  readmode = readmodeSequentialsuffixarrayreader(ssar);
   PUSHDFS(0,true,NULL);
   if (assignleftmostleaf != NULL &&
       assignleftmostleaf(TOP.dfsinfo,0,state,env) != 0)
@@ -160,21 +153,12 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
       haserr = true;
       break;
     }
-    if (previoussuffix == 0)
-    {
-      leftchar = initialchar;
-    } else
-    {
-      leftchar = getencodedchar(encseq,
-                                previoussuffix-1,
-                                readmode);
-    }
     while (currentlcp < TOP.depth)
     {
       if (TOP.lastisleafedge)
       {
         if (processleafedge != NULL &&
-            processleafedge(false,TOP.depth,TOP.dfsinfo,leftchar,
+            processleafedge(false,TOP.depth,TOP.dfsinfo,
                             previoussuffix,state,env) != 0)
         {
           haserr = true;
@@ -233,8 +217,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
       {
         if (processleafedge != NULL &&
             processleafedge(firstedge,TOP.depth,TOP.dfsinfo,
-                            leftchar,previoussuffix,state,
-                            env) != 0)
+                            previoussuffix,state,env) != 0)
         {
           haserr = true;
           break;
@@ -273,7 +256,6 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
             processleafedge(true,
                             TOP.depth,
                             TOP.dfsinfo,
-                            leftchar,
                             previoussuffix,
                             state,
                             env) != 0)
@@ -314,23 +296,10 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
     }
     if (!haserr)
     {
-      if (previoussuffix == 0)
-      {
-        leftchar = initialchar;
-      } else
-      {
-        leftchar = getencodedchar(encseq,
-                                  previoussuffix-1,
-                                  readmode);
-      }
-    }
-    if (!haserr)
-    {
       if (processleafedge != NULL &&
           processleafedge(false,
                           TOP.depth,
                           TOP.dfsinfo,
-                          leftchar,
                           previoussuffix,
                           state,
                           env) != 0)

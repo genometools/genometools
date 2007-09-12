@@ -1,8 +1,11 @@
-changes in version 1.0.3 (2007-09-04):
+changes in version 1.0.3 (2007-09-10):
 
 - `gt view` can process multiple GFF3 files
 - the interactive mode has been improved (multiple line input, command line
   editing, similar to the Lua interpreter)
+- `gt gff3` has new option -offset
+- `gt gff3` has new option -offsetfile
+- `gt gff3` has new option -chseqids
 
 
 changes in version 1.0.2 (2007-08-29):

@@ -52,14 +52,24 @@ allfiles = ["RandomN.fna","Random.fna","Atinsert.fna",
 
 alldir = ["fwd","cpl","rev","rcl"]
 
+Name "gt suffixerator paircmp"
+Keywords "gt_suffixerator"
+Test do
+  run_test "#{$bin}gt dev paircmp -a ac 11"
+end
+
 Name "gt suffixerator maxpairs"
 Keywords "gt_suffixerator"
 Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}Atinsert.fna " +
            "-indexname sfx -dna -suf -tis -lcp -pl"
-  run_test "#{$bin}gt dev maxpairs -samples 100 -l 8 -ii sfx"
+  run_test "#{$bin}gt dev maxpairs -l 8 -ii sfx"
   run "grep -v '^#' #{$last_stdout}"
   run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
+  run_test "#{$bin}gt dev maxpairs -scan -l 8 -ii sfx"
+  run "grep -v '^#' #{$last_stdout}"
+  run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
+  run_test "#{$bin}gt dev maxpairs -samples 50 -l 5 -ii sfx"
 end
 
 Name "gt suffixerator patternmatch"

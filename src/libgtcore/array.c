@@ -159,6 +159,26 @@ Array* array_clone(const Array *a, Env *env)
   return a_copy;
 }
 
+void array_sort(Array *a, int(*compar)(const void*, const void*))
+{
+  assert(a && compar);
+  qsort(a->space, a->next_free, a->size_of_elem, compar);
+}
+
+int array_iterate(const Array *a,
+                  int(*iterfunc)(void *info, const void *value, Env *env),
+                  void *info, Env *env)
+{
+  unsigned long idx;
+  env_error_check(env);
+  assert(a && iterfunc);
+  for (idx = 0; idx < array_size(a); idx++) {
+    if (iterfunc(info, array_get(a, idx), env))
+      return -1;
+  }
+  return 0;
+}
+
 int array_example(Env *env)
 {
   unsigned long i;

@@ -2,21 +2,20 @@
 extern "C" {
 #endif
 int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
+                      unsigned int alphabetsize,
+                      const Encodedsequence *encseq,
+                      Readmode readmode,
                       unsigned int searchlength,
-                      int(*output)(void *,Seqpos,Seqpos,Seqpos),
-                      void *outinfo,
+                      int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *),
+                      void *processmaxpairsinfo,
                       Env *env);
 
-int sarrselfsubstringmatch(const Uchar *dbseq,
-                           Seqpos dblen,
-                           const Uchar *query,
-                           unsigned long querylen,
-                           unsigned int minlength,
-                           const Alphabet *alpha,
-                           int (*processmaxmatch)(void *,Seqpos,
-                                                  Seqpos,Seqpos),
-                           void *processmaxmatchinfo,
-                           Env *env);
+int callenummaxpairs(const Str *indexname,
+                     unsigned int userdefinedleastlength,
+                     bool scanfile,
+                     int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *),
+                     void *processmaxpairsinfo,
+                     Env *env);
 
 #ifdef __cplusplus
 }

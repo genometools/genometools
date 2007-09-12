@@ -19,6 +19,7 @@
 #include "lua.h"
 #include "lauxlib.h"
 #include "lualib.h"
+#include "lfs.h"
 #include "libgtcore/array.h"
 #include "libgtcore/bitpackarray.h"
 #include "libgtcore/bitpackstring.h"
@@ -104,6 +105,7 @@ GTR* gtr_new(Env *env)
                                        before we can open the GenomeTools
                                        libraries */
   luaopen_gt(gtr->L); /* open all GenomeTools libraries */
+  luaopen_lfs(gtr->L); /* open Lua filesystem */
 #ifdef LIBGTVIEW
   gtr->config = config_new_with_state(gtr->L, env);
   config_file = gtdata_get_path(env_error_get_progname(env), env);
@@ -141,12 +143,13 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                          "The GenomeTools (gt) genome analysis system "
                           "(http://genometools.org).", env);
   option_parser_set_comment_func(op, toolbox_show, gtr->toolbox);
+  o = option_new_bool("i", "enter interactive mode after executing 'tool' or "
+                      "'script'", &gtr->interactive, false, env);
+  option_hide_default(o);
+  option_parser_add_option(op, o, env);
   o = option_new_bool("test", "perform unit tests and exit", &gtr->test, false,
                       env);
   option_hide_default(o);
-  option_parser_add_option(op, o, env);
-  o = option_new_bool("i", "enter interactive mode after executing 'tool' or "
-                      "'script'", &gtr->interactive, false, env);
   option_parser_add_option(op, o, env);
   o = option_new_debug(&gtr->debug, env);
   option_parser_add_option(op, o, env);

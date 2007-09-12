@@ -1,15 +1,26 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-Seqpos *calculatemarkpositions(const Encodedsequence *encseq,
-                               unsigned long numofdbsequences,
-                               Env *env);
+Seqpos *encseq2markpositions(const Encodedsequence *encseq,
+                             unsigned long numofsequences,
+                             Env *env);
 
-unsigned long getrecordnum(const Seqpos *recordseps,
-                           unsigned long numofrecords,
-                           Seqpos totalwidth,
-                           Seqpos position,
-                           Env *env);
+unsigned long *sequence2markpositions(unsigned long *numofsequences,
+                                      const Uchar *seq,
+                                      unsigned long seqlen,
+                                      Env *env);
+
+unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
+                                 unsigned long numofrecords,
+                                 Seqpos totalwidth,
+                                 Seqpos position,
+                                 Env *env);
+
+unsigned long getrecordnumulong(const unsigned long *recordseps,
+                                unsigned long numofrecords,
+                                unsigned long totalwidth,
+                                unsigned long position,
+                                Env *env);
 
 int checkmarkpos(const Encodedsequence *encseq,
                  unsigned long numofdbsequences,

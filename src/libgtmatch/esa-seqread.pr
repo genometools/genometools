@@ -1,0 +1,46 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
+                                        const Str *indexname,
+                                        unsigned int demand,
+                                        Sequentialaccesstype seqactype,
+                                        Env *env);
+
+Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
+                                        const Encodedsequence *encseq,
+                                        Readmode readmode,
+                                        Env *env);
+
+void updateSequentialsuffixarrayreaderfromRAM(
+                    Sequentialsuffixarrayreader *ssar,
+                    const Seqpos *suftab,
+                    bool firstpage,
+                    Seqpos numberofsuffixes);
+
+void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
+                                     Env *env);
+
+int nextSequentiallcpvalue(Seqpos *currentlcp,
+                           Sequentialsuffixarrayreader *ssar,
+                           Env *env);
+
+int nextSequentialsuftabvalue(Seqpos *currentsuffix,
+                              Sequentialsuffixarrayreader *ssar,
+                              Env *env);
+
+const Encodedsequence *encseqSequentialsuffixarrayreader(
+                          const Sequentialsuffixarrayreader *sarr);
+
+Readmode readmodeSequentialsuffixarrayreader(
+                          const Sequentialsuffixarrayreader *sarr);
+
+const Alphabet *alphabetSequentialsuffixarrayreader(
+                          const Sequentialsuffixarrayreader *sarr);
+
+unsigned long numofdbsequencesSequentialsuffixarrayreader(
+                    const Sequentialsuffixarrayreader *sarr);
+
+#ifdef __cplusplus
+}
+#endif

@@ -360,7 +360,7 @@ void genome_node_is_part_of_genome_node(GenomeNode *parent, GenomeNode *child,
                                         Env *env)
 {
   assert(parent && child);
-  /* create children list  on demand */
+  /* create children list on demand */
   if (!parent->children)
     parent->children = dlist_new((Compare) compare_genome_nodes, env);
   dlist_add(parent->children, child, env); /* XXX: check for circles */
@@ -408,6 +408,26 @@ bool genome_node_is_marked(const GenomeNode *gn)
 {
   assert(gn);
   return gn->mark;
+}
+
+static int check_marked_status(GenomeNode *gn, void *data, Env *env)
+{
+  bool *marked = data;
+  if (gn->mark)
+    *marked = true;
+  return 0;
+}
+
+bool genome_node_contains_marked(GenomeNode *gn, Env *env)
+{
+  bool contains_marked = false;
+  int rval;
+  env_error_check(env);
+  assert(gn);
+  rval = genome_node_traverse_children(gn, &contains_marked,
+                                       check_marked_status, true, env);
+  assert(!rval); /* check_marked_status() is sane */
+  return contains_marked;
 }
 
 bool genome_node_has_children(GenomeNode *gn)

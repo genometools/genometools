@@ -287,31 +287,30 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
   }
 }
 
-void freeSfxiterator(Sfxiterator **sfxiterator,Env *env)
+void freeSfxiterator(Sfxiterator **sfi,Env *env)
 {
   Codetype specialcode;
 
-  specialcode = FROMCODE2SPECIALCODE((*sfxiterator)->filltable[0],
-                                    (*sfxiterator)->numofchars);
-  (*sfxiterator)->countspecialcodes[specialcode]
-    += ((*sfxiterator)->specialcharacters + 1);
-  if((*sfxiterator)->sri != NULL)
+  specialcode = FROMCODE2SPECIALCODE((*sfi)->filltable[0],
+                                    (*sfi)->numofchars);
+  (*sfi)->countspecialcodes[specialcode] += ((*sfi)->specialcharacters + 1);
+  if ((*sfi)->sri != NULL)
   {
-    freespecialrangeiterator(&(*sfxiterator)->sri,env);
+    freespecialrangeiterator(&(*sfi)->sri,env);
   }
-  FREESPACE((*sfxiterator)->spaceCodeatposition);
-  FREESPACE((*sfxiterator)->filltable);
-  FREESPACE((*sfxiterator)->basepower);
-  FREESPACE((*sfxiterator)->leftborder);
-  FREESPACE((*sfxiterator)->countspecialcodes);
-  FREESPACE((*sfxiterator)->suftab);
-  freesuftabparts((*sfxiterator)->suftabparts,env);
-  FREESPACE(*sfxiterator);
+  FREESPACE((*sfi)->spaceCodeatposition);
+  FREESPACE((*sfi)->filltable);
+  FREESPACE((*sfi)->basepower);
+  FREESPACE((*sfi)->leftborder);
+  FREESPACE((*sfi)->countspecialcodes);
+  FREESPACE((*sfi)->suftab);
+  freesuftabparts((*sfi)->suftabparts,env);
+  FREESPACE(*sfi);
 }
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
-Sfxiterator *newsfxiterator(Seqpos specialcharacters,
+Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             Seqpos specialranges,
                             const Encodedsequence *encseq,
                             Readmode readmode,
@@ -436,7 +435,7 @@ Sfxiterator *newsfxiterator(Seqpos specialcharacters,
                      stpgetlargestwidth(sfi->suftabparts));
     sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
   }
-  if(haserr)
+  if (haserr)
   {
     freeSfxiterator(&sfi,env);
     return NULL;
@@ -597,7 +596,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
         sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
       } else
       {
-        if(sfi->fusp.nextfreeSeqpos < sfi->fusp.allocatedSeqpos)
+        if (sfi->fusp.nextfreeSeqpos < sfi->fusp.allocatedSeqpos)
         {
           sfi->fusp.spaceSeqpos[sfi->fusp.nextfreeSeqpos++] = sfi->totallength;
           sfi->exhausted = true;
@@ -608,8 +607,8 @@ static void fillspecialnextpage(Sfxiterator *sfi)
   }
 }
 
-const Seqpos *nextSfxiterator(Seqpos *len,Measuretime *mtime,
-                              Sfxiterator *sfi,Env *env)
+const Seqpos *nextSfxiterator(Seqpos *len,bool *specialsuffixes,
+                              Measuretime *mtime,Sfxiterator *sfi,Env *env)
 {
   env_error_check(env);
 
@@ -617,6 +616,7 @@ const Seqpos *nextSfxiterator(Seqpos *len,Measuretime *mtime,
   {
     preparethispart(sfi,mtime,env);
     *len = sfi->widthofpart;
+    *specialsuffixes = false;
     return sfi->suftab;
   }
   if (sfi->exhausted)
@@ -627,5 +627,6 @@ const Seqpos *nextSfxiterator(Seqpos *len,Measuretime *mtime,
   fillspecialnextpage(sfi);
   assert(sfi->fusp.nextfreeSeqpos > 0);
   *len = (Seqpos) sfi->fusp.nextfreeSeqpos;
+  *specialsuffixes = true;
   return sfi->suftab;
 }

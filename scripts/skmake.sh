@@ -2,7 +2,18 @@
 #
 # Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
 # Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
-# See LICENSE file or http://genometools.org/license.html for license details.
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
 icc=0
@@ -33,16 +44,17 @@ fi
 # NOASSERT='assert=no'
 #-DWITHTRIEIDENT
 # FASTDEF="-Duint_fast32_t=uint32_t  -Duint_fast64_t=uint64_t"
+COMMON='curses=no'
 
 if test $icc -eq 1
 then
-  make ${NOASSERT} CC='ccache icc' CFLAGS='-O3 ${FASTDEF} ${bignum} -wd1418,869,981,1338' LD='icc' CXX='icc' $*
+  make ${COMMON} CC='ccache icc' CFLAGS='-O3 ${FASTDEF} ${bignum} -wd1418,869,981,1338' LD='icc' CXX='icc' $*
 else
   if test $do64 -eq 1
   then
-    make ${NOASSERT} CC="ccache gcc" CFLAGS="-O3 -m64 ${FASTDEF}" LDFLAGS="-m64" $*
+    make ${COMMON} CC="ccache gcc" CFLAGS="-O3 -m64 ${FASTDEF}" LDFLAGS="-m64" $*
   else
-    make ${NOASSERT} CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum} ${FASTDEF}" LDFLAGS="-m32" $*
+    make ${COMMON} CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum} ${FASTDEF}" LDFLAGS="-m32" $*
   fi
 fi
 

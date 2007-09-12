@@ -1,0 +1,9 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int array_compare(const Array *a,const Array *b,
+                  int(*compar)(const void *, const void *));
+
+#ifdef __cplusplus
+}
+#endif

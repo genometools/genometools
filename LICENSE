@@ -171,7 +171,8 @@ of the copyright holder.
 
 --------------------------------------------------------------------------------
 
-The source in src/external/lua-5.1.2/* is covered by the following license:
+The source in src/external/lua-5.1.2/* and src/external/luafilesystem-1.2.1/*
+is covered by the following license:
 
 Copyright (C) 1994-2007 Lua.org, PUC-Rio.
 
