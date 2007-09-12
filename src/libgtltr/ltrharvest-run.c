@@ -114,7 +114,11 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   removeduplicates(&lo->arrayLTRboundaries);
 
   /* remove overlapping predictions if desired */
-  // function fehlt noch
+  if(lo->nooverlapallowed || lo->bestofoverlap)
+  {
+    removeoverlapswithlowersimilarity(&lo->arrayLTRboundaries,
+                                      lo->nooverlapallowed);
+  }
 
   /* print multiple FASTA file of predictions */
   // fehlt noch
