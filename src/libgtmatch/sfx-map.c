@@ -19,8 +19,9 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <limits.h>
-#include "libgtcore/env.h"
 #include "libgtcore/array.h"
+#include "libgtcore/endianess.h"
+#include "libgtcore/env.h"
 #include "format64.h"
 #include "arraydef.h"
 #include "sarr-def.h"
@@ -30,7 +31,6 @@
 #include "stamp.h"
 
 #include "readnextline.pr"
-#include "endianess.pr"
 #include "opensfxfile.pr"
 #include "sfx-readint.pr"
 
@@ -197,7 +197,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   }
   if (!haserr)
   {
-    if (islittleendian())
+    if (is_little_endian())
     {
       if (littleendian != (uint32_t) 1)
       {

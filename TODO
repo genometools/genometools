@@ -26,13 +26,9 @@ feature requests:
 - range check
 - check for circles
 - `gt eval`: measure nucleotide level
-- extend error messages for xmalloc(), xcalloc(), and xrealloc(): show requested
-  memory sizes and maybe line number and file name)
-
 - remove GT_ENV_OPTIONS environment variable, do settings via gtdata/ dir
 - function similary to option_new_choice(), but which allows to set multiple
   strings from the given set
-- use asciidoc for documentation
 
 
 merge libgtview and libgtmatch:
@@ -43,7 +39,6 @@ merge libgtview and libgtmatch:
 - Distributions mergen (Hashtable basiert, 64bit)
 - Encodedseq und Bioseq mergen (FastaReader und fbsadv.c)
   guesprot.c
-- endianess -> core
 - Queues mergen
 - generic queue unit test (Stefan)
 - basename portabel? Randf"alle! (getbasename)
