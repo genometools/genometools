@@ -384,7 +384,7 @@ static int echothesequence(const StrArray *queryfiles,Env *env)
   bool haserr = false;
   int retval;
 
-  sseqit = newScansequenceiterator(queryfiles,NULL,env);
+  sseqit = newScansequenceiterator(queryfiles,NULL,true,env);
   while (true)
   {
     retval = nextScansequenceiterator(&sequence,
@@ -449,6 +449,7 @@ int callenumquerymatches(const Str *indexname,
 
     sseqit = newScansequenceiterator(queryfiles,
                                      getsymbolmapAlphabet(suffixarray.alpha),
+                                     true,
                                      env);
     for (unitnum = 0; /* Nothing */; unitnum++)
     {

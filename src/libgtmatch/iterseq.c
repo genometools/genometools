@@ -139,11 +139,12 @@ int overallquerysequences(int(*processsequence)(void *,
   Sequencedescription sequencedescription;
   ArrayUchar sequencebuffer;
   uint64_t unitnum;
-  bool exhausted;
+  bool withsequence, exhausted;
 };
 
 Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
                                               const Uchar *symbolmap,
+                                              bool withsequence,
                                               Env *env)
 {
   Scansequenceiterator *sseqit;
@@ -162,6 +163,7 @@ Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
   sseqit->sequencebuffer.nextfreeUchar = 0;
   sseqit->exhausted = false;
   sseqit->unitnum = 0;
+  sseqit->withsequence = withsequence;
   return sseqit;
 }
 
@@ -202,7 +204,7 @@ int nextScansequenceiterator(const Uchar **sequence,
     }
     if (charcode == (Uchar) SEPARATOR)
     {
-      if (sseqit->sequencebuffer.nextfreeUchar == 0)
+      if (sseqit->sequencebuffer.nextfreeUchar == 0 && sseqit->withsequence)
       {
         env_error_set(env,"sequence " Formatuint64_t " is empty",
                       PRINTuint64_tcast(sseqit->unitnum));
@@ -215,16 +217,24 @@ int nextScansequenceiterator(const Uchar **sequence,
         haserr = true;
         break;
       }
-      *sequence = sseqit->sequencebuffer.spaceUchar;
       *len = sseqit->sequencebuffer.nextfreeUchar;
-      foundseq = true;
+      if (sseqit->withsequence)
+      {
+        *sequence = sseqit->sequencebuffer.spaceUchar;
+      }
       sseqit->sequencebuffer.nextfreeUchar = 0;
       foundseq = true;
       sseqit->unitnum++;
       break;
     } else
     {
-      STOREINARRAY(&sseqit->sequencebuffer,Uchar,1024,charcode);
+      if (sseqit->withsequence)
+      {
+        STOREINARRAY(&sseqit->sequencebuffer,Uchar,1024,charcode);
+      } else
+      {
+        sseqit->sequencebuffer.nextfreeUchar++;
+      }
     }
   }
   if (!haserr && sseqit->sequencebuffer.nextfreeUchar > 0)
@@ -236,7 +246,10 @@ int nextScansequenceiterator(const Uchar **sequence,
     }
     if (!haserr)
     {
-      *sequence = sseqit->sequencebuffer.spaceUchar;
+      if (sseqit->withsequence)
+      {
+        *sequence = sseqit->sequencebuffer.spaceUchar;
+      }
       *len = sseqit->sequencebuffer.nextfreeUchar;
       foundseq = true;
     }
