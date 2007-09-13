@@ -20,7 +20,8 @@
 #include "repeats.h"
 #include "searchforLTRs.h"
 #include "duplicates.h"
-#include "outputstd.c"
+#include "outputstd.h"
+#include "outputfasta.h"
 
 static int runltrharvest(LTRharvestoptions *lo, Env *env)
 {
@@ -121,8 +122,20 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   }
 
   /* print multiple FASTA file of predictions */
-  // fehlt noch
-  
+  if(lo->fastaoutput)
+  {
+    if (showpredictionsmultiplefasta(lo,
+          markpos,
+	  false,
+	  60,
+	  ssar,
+	  true,
+	  env) != 0)
+    {
+      return -1;
+    }
+  }
+
   /* print inner region multiple FASTA file of predictions */
   // fehlt noch
   
