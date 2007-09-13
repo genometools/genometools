@@ -22,6 +22,7 @@
 #include "duplicates.h"
 #include "outputstd.h"
 #include "outputfasta.h"
+#include "outputgff3.h"
 
 static int runltrharvest(LTRharvestoptions *lo, Env *env)
 {
@@ -152,15 +153,16 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   }
 
   /* print GFF3 format file of predictions */
-  /*if(lo->gff3output)
+  if(lo->gff3output)
   {
     if(printgff3format(lo,
 	  ssar,
-	  markpos) != 0 )
+	  markpos,
+	  env) != 0 )
     {
       return -1; 
     }
-  }*/
+  }
 
   FREESPACE(markpos);
 

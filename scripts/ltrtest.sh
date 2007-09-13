@@ -51,7 +51,7 @@ function checkerror()
 
 #../bin/gt ltrharvest -index ${LTR}/gt_ltr/s_cer_tab/chr02_tab/chr02.fsa -seed 100 -minlenltr 100 -maxlenltr 1000 -mindistltr 1500 -maxdistltr 15000 -similar 80.0 -overlaps best -xdrop 5 -mat 2 -mis -2 -ins -3 -del -3 -v -longoutput -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0 -out test.fas
 
-../bin/gt ltrharvest -index ${LTR}/gt_ltr/s_cer_tab/chrAll_tab/chrAll_before-1997-10-01.fsa -seed 100 -minlenltr 100 -maxlenltr 1000 -mindistltr 1500 -maxdistltr 15000 -similar 80.0 -overlaps best -xdrop 5 -mat 2 -mis -2 -ins -3 -del -3 -v -longoutput -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0 -outinner test.fas
+../bin/gt ltrharvest -index ${LTR}/gt_ltr/s_cer_tab/chrAll_tab/chrAll_before-1997-10-01.fsa -seed 100 -minlenltr 100 -maxlenltr 1000 -mindistltr 1500 -maxdistltr 15000 -similar 80.0 -overlaps best -xdrop 5 -mat 2 -mis -2 -ins -3 -del -3 -v -longoutput -mintsd 5 -maxtsd 20 -motif tgca -motifmis 0 -gff3 test.gff3 
 
 #extractregion.sh 29641 29645 ${LTR}/gt_ltr/s_cer_tab/chr02_tab/chr02.19970727.fsa
 #extractregion.sh 35598 35602 ${LTR}/gt_ltr/s_cer_tab/chr02_tab/chr02.19970727.fsa
