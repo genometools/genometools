@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef INLINEDSequentialsuffixarrayreader
 #include <limits.h>
 #include "seqpos-def.h"
 #include "measure-time-if.h"
@@ -73,7 +74,7 @@ static int constructsarrandrunmaxpairs(
     {
       suftabptr = nextSfxiterator(&numberofsuffixes,&specialsuffixes,
                                   mtime,sfi,env);
-      if (suftabptr == NULL)
+      if (suftabptr == NULL || specialsuffixes)
       {
         break;
       }
@@ -150,3 +151,4 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
   freeEncodedsequence(&ssi.encseq,env);
   return haserr ? -1 : 0;
 }
+#endif /* !INLINEDSequentialsuffixarrayreader */

@@ -15,6 +15,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifdef INLINEDSequentialsuffixarrayreader
+
+#include "libgtcore/env.h"
+#include "libgtcore/str.h"
+#include "seqpos-def.h"
+
+int testmaxpairs(const Str *indexname,
+                 unsigned long samples,
+                 unsigned int minlength,
+                 Seqpos substringlength,
+                 Env *env)
+{
+  return 0;
+}
+
+#else
+
 #include "libgtcore/array.h"
 #include "sarr-def.h"
 #include "arraydef.h"
@@ -300,3 +317,5 @@ int testmaxpairs(const Str *indexname,
   freesuffixarray(&suffixarray,env);
   return haserr ? -1 : 0;
 }
+
+#endif /* INLINEDSequentialsuffixarrayreader */

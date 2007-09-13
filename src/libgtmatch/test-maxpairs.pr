@@ -7,6 +7,12 @@ int testmaxpairs(const Str *indexname,
                  Seqpos substringlength,
                  Env *env);
 
+int testmaxpairs(const Str *indexname,
+                 unsigned long samples,
+                 unsigned int minlength,
+                 Seqpos substringlength,
+                 Env *env);
+
 #ifdef __cplusplus
 }
 #endif

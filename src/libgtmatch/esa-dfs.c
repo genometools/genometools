@@ -110,7 +110,9 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                   Dfsstate *state,
                   Env *env)
 {
+#ifndef INLINEDSequentialsuffixarrayreader
   int retval;
+#endif
   bool firstedge,
        firstrootedge;
   Seqpos previoussuffix = 0,
@@ -132,6 +134,10 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
   }
   for (currentindex = 0; !haserr; currentindex++)
   {
+#ifdef INLINEDSequentialsuffixarrayreader
+    NEXTSEQUENTIALLCPTABVALUE(currentlcp,ssar);
+    NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+#else
     retval = nextSequentiallcpvalue(&currentlcp,ssar,env);
     if (retval < 0)
     {
@@ -153,6 +159,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
       haserr = true;
       break;
     }
+#endif
     while (currentlcp < TOP.depth)
     {
       if (TOP.lastisleafedge)
@@ -283,6 +290,9 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
   }
   if (!haserr && TOP.lastisleafedge)
   {
+#ifdef INLINEDSequentialsuffixarrayreader
+    NEXTSEQUENTIALSUFTABVALUE(previoussuffix,ssar);
+#else
     retval = nextSequentialsuftabvalue(&previoussuffix,ssar,env);
     if (retval < 0)
     {
@@ -294,6 +304,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
         haserr = true;
       }
     }
+#endif
     if (!haserr)
     {
       if (processleafedge != NULL &&

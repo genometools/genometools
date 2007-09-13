@@ -44,7 +44,7 @@ fi
 # NOASSERT='assert=no'
 #-DWITHTRIEIDENT
 # EXTRAFLAGS="-Duint_fast32_t=uint32_t  -Duint_fast64_t=uint64_t"
-EXTRAFLAGS=-DINLINEDENCSEQ
+EXTRAFLAGS="-DINLINEDENCSEQ -DINLINEDSequentialsuffixarrayreader"
 COMMON='curses=no'
 
 if test $icc -eq 1
