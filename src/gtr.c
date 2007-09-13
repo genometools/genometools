@@ -27,6 +27,7 @@
 #include "libgtcore/countingsort.h"
 #include "libgtcore/cstr.h"
 #include "libgtcore/dlist.h"
+#include "libgtcore/dynbittab.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/env.h"
 #include "libgtcore/fileutils.h"
@@ -207,6 +208,8 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test,
                 env);
   hashtable_add(gtr->unit_tests, "dlist class", dlist_unit_test, env);
+  hashtable_add(gtr->unit_tests, "dynamic bittab class", dynbittab_unit_test,
+                env);
   hashtable_add(gtr->unit_tests, "evaluator class", evaluator_unit_test, env);
   hashtable_add(gtr->unit_tests, "grep module", grep_unit_test, env);
   hashtable_add(gtr->unit_tests, "hashtable class", hashtable_unit_test, env);
