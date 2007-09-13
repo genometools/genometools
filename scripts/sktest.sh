@@ -19,6 +19,8 @@
 # Current Problems: for icc compiled version add 
 # /usr/local/zbh/intel/cc/9.1/lib
 
+set -e -x
+
 outoptions="-tis -lcp -suf -bwt"
 
 # the make call normally used for development

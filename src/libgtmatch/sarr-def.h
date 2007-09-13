@@ -30,8 +30,13 @@
 #define SARR_SUFTAB ((unsigned int) 1 << 1)
 #define SARR_LCPTAB ((unsigned int) 1 << 2)
 #define SARR_BWTTAB ((unsigned int) 1 << 3)
+#define SARR_DESTAB ((unsigned int) 1 << 4)
 
-#define SARR_ALLTAB (SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB | SARR_BWTTAB)
+#define SARR_ALLTAB (SARR_ESQTAB |\
+                     SARR_SUFTAB |\
+                     SARR_LCPTAB |\
+                     SARR_BWTTAB |\
+                     SARR_DESTAB)
 
 #define DECLAREBufferedfiletype(TYPE)\
         typedef struct\
@@ -96,6 +101,8 @@ typedef struct
   UcharBufferedfile bwttabstream,
                     lcptabstream;
   LargelcpvalueBufferedfile llvtabstream;
+  const char *destab;
+  unsigned long destablength;
 } Suffixarray;
 
 #endif

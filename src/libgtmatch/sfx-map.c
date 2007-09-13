@@ -230,11 +230,9 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   return haserr ? -1 : 0;
 }
 
-static void *genericmaptable(const Str *indexname,const char *suffix,
-                             Seqpos expectedunits,size_t sizeofunit,
-                             Env *env)
+static void *genericmaponlytable(const Str *indexname,const char *suffix,
+                                 size_t *numofbytes,Env *env)
 {
-  size_t numofbytes;
   Str *tmpfilename;
   void *ptr;
   bool haserr = false;
@@ -242,23 +240,50 @@ static void *genericmaptable(const Str *indexname,const char *suffix,
   env_error_check(env);
   tmpfilename = str_clone(indexname,env);
   str_append_cstr(tmpfilename,suffix,env);
-  ptr = env_fa_mmap_read(env,str_get(tmpfilename),&numofbytes);
+  ptr = env_fa_mmap_read(env,str_get(tmpfilename),numofbytes);
   if (ptr == NULL)
   {
     env_error_set(env,"cannot map file \"%s\": %s",str_get(tmpfilename),
                   strerror(errno));
     haserr = true;
   }
-  if (!haserr && expectedunits != (Seqpos) (numofbytes/sizeofunit))
+  str_delete(tmpfilename,env);
+  return haserr ? NULL : ptr;
+}
+
+static int checkmappedfilesize(size_t numofbytes,Seqpos expectedunits,
+                               size_t sizeofunit,Env *env)
+{
+  env_error_check(env);
+  if (expectedunits != (Seqpos) (numofbytes/sizeofunit))
   {
     env_error_set(env,"number of mapped units = %lu != " FormatSeqpos
                       " = expected number of integers",
-                         (unsigned long) (numofbytes/sizeofunit),
-                         PRINTSeqposcast(expectedunits));
-    haserr = true;
+                      (unsigned long) (numofbytes/sizeofunit),
+                      PRINTSeqposcast(expectedunits));
+    return -1;
   }
-  str_delete(tmpfilename,env);
-  return haserr ? NULL : ptr;
+  return 0;
+}
+
+static void *genericmaptable(const Str *indexname,
+                             const char *suffix,
+                             Seqpos expectedunits,size_t sizeofunit,
+                             Env *env)
+{
+  size_t numofbytes;
+
+  void *ptr = genericmaponlytable(indexname,suffix,&numofbytes,env);
+  if(ptr == NULL)
+  {
+    return NULL;
+  }
+  if(checkmappedfilesize(numofbytes,expectedunits,sizeofunit,env) != 0)
+  {
+    env_fa_xmunmap(ptr,env);
+    return NULL;
+  }
+  return ptr;
 }
 
 static void initsuffixarray(Suffixarray *suffixarray)
@@ -270,12 +295,14 @@ static void initsuffixarray(Suffixarray *suffixarray)
   suffixarray->lcptab = NULL;
   suffixarray->llvtab = NULL;
   suffixarray->bwttab = NULL;
+  suffixarray->destab = NULL;
   suffixarray->alpha = NULL;
   suffixarray->encseq = NULL;
   suffixarray->bwttabstream.fp = NULL;
   suffixarray->suftabstream.fp = NULL;
   suffixarray->llvtabstream.fp = NULL;
   suffixarray->lcptabstream.fp = NULL;
+  suffixarray->destablength = 0;
 }
 
 static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
@@ -331,6 +358,8 @@ void freesuffixarray(Suffixarray *suffixarray,Env *env)
   suffixarray->llvtab = NULL;
   env_fa_xmunmap((void *) suffixarray->bwttab,env);
   suffixarray->bwttab = NULL;
+  env_fa_xmunmap((void *) suffixarray->destab,env);
+  suffixarray->destab = NULL;
   env_fa_xfclose(suffixarray->suftabstream.fp,env);
   suffixarray->suftabstream.fp = NULL;
   env_fa_xfclose(suffixarray->lcptabstream.fp,env);
@@ -373,6 +402,20 @@ static int inputsuffixarray(bool map,
                                                                 alpha),
 					     env);
     if (suffixarray->encseq == NULL)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr && (demand & SARR_DESTAB))
+  {
+    size_t numofbytes;
+
+    suffixarray->destab = genericmaponlytable(indexname,
+                                              DESTABSUFFIX,
+                                              &numofbytes,
+                                              env);
+    suffixarray->destablength = (unsigned long) numofbytes;
+    if (suffixarray->destab == NULL)
     {
       haserr = true;
     }

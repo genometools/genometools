@@ -1,5 +1,5 @@
 def outoptions()
-  return "-tis -suf -bwt -lcp -indexname sfx"
+  return "-tis -suf -bwt -lcp -des -indexname sfx"
 end
 
 def checksfx(parts,pl,withsmap,sat,filelist)
