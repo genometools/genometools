@@ -410,20 +410,15 @@ static int inputsuffixarray(bool map,
   {
     size_t numofbytes;
 
-    STAMP;
     suffixarray->destab = genericmaponlytable(indexname,
                                               DESTABSUFFIX,
                                               &numofbytes,
                                               env);
-    STAMP;
     suffixarray->destablength = (unsigned long) numofbytes;
-    STAMP;
     if (suffixarray->destab == NULL)
     {
       haserr = true;
-    STAMP;
     }
-    STAMP;
   }
   if (!haserr && (demand & SARR_SUFTAB))
   {
@@ -554,5 +549,4 @@ int mapsuffixarray(Suffixarray *suffixarray,
                           indexname,
                           verbose,
                           env);
-  assert(suffixarray->destab != NULL);
 }

@@ -48,7 +48,7 @@ end
 
 allfiles = ["RandomN.fna","Random.fna","Atinsert.fna",
             "TTT-small.fna","trna_glutamine.fna",
-            "Atinsert.fna","Random-Small.fna"]
+            "Atinsert.fna","Random-Small.fna","Duplicate.fna"]
 
 alldir = ["fwd","cpl","rev","rcl"]
 

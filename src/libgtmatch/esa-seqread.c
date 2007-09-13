@@ -250,11 +250,3 @@ unsigned long numofdbsequencesSequentialsuffixarrayreader(
   assert(sarr->suffixarray != NULL);
   return sarr->suffixarray->numofdbsequences;
 }
-
-Uchar getencodedcharSequentialsuffixarrayreader(
-                    const Sequentialsuffixarrayreader *ssar,
-                    Seqpos pos,
-                    Readmode readmode)
-{
-  return getencodedchar(ssar->encseq, pos, readmode);
-}

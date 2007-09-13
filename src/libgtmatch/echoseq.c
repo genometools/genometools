@@ -23,24 +23,22 @@
 
 unsigned long *calcdescendpositions(const char *destab,
                                     unsigned long destablength,
-                                    unsigned long numofsequences,  
+                                    unsigned long numofsequences,
                                     Env *env)
 {
   unsigned long *descendtab, i, idx = 0;
 
   ALLOCASSIGNSPACE(descendtab,NULL,unsigned long,numofsequences);
   assert(destab != NULL);
-  printf("desclength=%lu\n",destablength);
-  for(i=0; i<destablength; i++)
+  for (i=0; i<destablength; i++)
   {
-    if(destab[i] == '\n')
+    if (destab[i] == '\n')
     {
-      assert(idx < numofsequences - 1);
+      assert(idx < numofsequences);
       descendtab[idx++] = i;
     }
   }
-  assert(idx == numofsequences - 1);
-  descendtab[idx] = destablength;
+  assert(idx == numofsequences);
   return descendtab;
 }
 
@@ -49,7 +47,7 @@ const char *retriesequencedescription(unsigned long *desclen,
                                       const unsigned long *descendtab,
                                       unsigned long seqnum)
 {
-  if(seqnum == 0)
+  if (seqnum == 0)
   {
     *desclen = descendtab[0];
     return destab;
@@ -71,7 +69,7 @@ void checkalldescriptions(const char *destab,unsigned long destablength,
                                     numofsequences,
                                     env);
   totaldesclength = numofsequences; /* for each new line */
-  for(seqnum = 0; seqnum < numofsequences; seqnum++)
+  for (seqnum = 0; seqnum < numofsequences; seqnum++)
   {
     desptr = retriesequencedescription(&desclen,
                                        destab,
@@ -80,7 +78,7 @@ void checkalldescriptions(const char *destab,unsigned long destablength,
     totaldesclength += desclen;
   }
   ALLOCASSIGNSPACE(copydestab,NULL,char,totaldesclength);
-  for(seqnum = 0; seqnum < numofsequences; seqnum++)
+  for (seqnum = 0; seqnum < numofsequences; seqnum++)
   {
     desptr = retriesequencedescription(&desclen,
                                        destab,
@@ -90,7 +88,7 @@ void checkalldescriptions(const char *destab,unsigned long destablength,
     copydestab[offset+desclen] = '\n';
     offset += (desclen+1);
   }
-  if(strncmp(copydestab,destab,(size_t) totaldesclength) != 0)
+  if (strncmp(copydestab,destab,(size_t) totaldesclength) != 0)
   {
     fprintf(stderr,"different descriptions\n");
     exit(EXIT_FAILURE);

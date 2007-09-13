@@ -1746,4 +1746,9 @@ Encodedsequence *plain2encodedsequence(bool withrange,
   return encseq;
 }
 
+const char *showencodedseqtype(void)
+{
+  return "space efficient encodeded sequence";
+}
+
 #endif /* INLINEDENCSEQ */

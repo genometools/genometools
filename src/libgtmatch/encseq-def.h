@@ -56,8 +56,6 @@ typedef struct
 
 #define getencseqtotallength(ENCSEQ) ((ENCSEQ)->totallength)
 
-/* XXX to be done: implement the other readmodes */
-
 #define getencodedchar(ENCSEQ,POS,READMODE)\
         fungetencodedchar(ENCSEQ,POS,READMODE)
 
@@ -67,6 +65,14 @@ typedef struct
 Uchar fungetencodedchar(const Encodedsequence *encseq,
                         Seqpos pos,
                         Readmode readmode);
+
+/*
+#define getencodedchar(ENCSEQ,POS,READMODE)\
+        (ENCSEQ)->plainseq[POS]
+
+#define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS)\
+        (ENCSEQ)->plainseq[POS]
+*/
 
 #else
 
@@ -137,5 +143,7 @@ bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
 void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
 
 /*@null@*/ const char *encseqaccessname(const Encodedsequence *encseq);
+
+const char *showencodedseqtype(void);
 
 #endif

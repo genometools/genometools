@@ -88,17 +88,17 @@ static OPrval parse_options(int *parsed_args,
   op = option_parser_new("options","Apply function to pairs of strings.",env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
 
-  optionstrings = option_new_filenamearray("ss","use two strings",
-                                           pw->strings,env);
+  optionstrings = option_new_stringarray("ss","use two strings",
+                                         pw->strings,env);
   option_parser_add_option(op, optionstrings, env);
 
   optionfiles = option_new_filenamearray("ff","use two files",
                                          pw->files,env);
   option_parser_add_option(op, optionfiles, env);
 
-  optioncharlistlen = option_new_filenamearray("a",
-                                               "use character list and length",
-                                               charlistlen,env);
+  optioncharlistlen = option_new_stringarray("a",
+                                             "use character list and length",
+                                             charlistlen,env);
   option_parser_add_option(op, optioncharlistlen, env);
 
   optiontext = option_new_string("t","use text",pw->text, NULL, env);

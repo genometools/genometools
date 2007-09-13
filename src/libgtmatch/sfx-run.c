@@ -538,6 +538,7 @@ int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
   {
     printf("# sizeof (Seqpos)=%lu\n",
             (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
+    printf("# %s\n",showencodedseqtype());
   }
   if (retval == 0)
   {

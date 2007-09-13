@@ -135,8 +135,11 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
                       0,
                       env);
   }
-  checkalldescriptions(suffixarray.destab,suffixarray.destablength,
-                       suffixarray.numofdbsequences,env);
+  if (!haserr)
+  {
+    checkalldescriptions(suffixarray.destab,suffixarray.destablength,
+                         suffixarray.numofdbsequences,env);
+  }
   freesuffixarray(&suffixarray,env);
   return haserr ? -1 : 0;
 }

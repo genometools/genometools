@@ -29,7 +29,7 @@ testsuite.rb -keywords gt_suffixerator
 testsuite.rb -keywords gt_trieins
 # optional -memcheck   (run valgrind)
 #          -select 253 (run testcase 253)
-../scripts/runmaxpairs.sh 14 ${GRUMBACH}/*.fna
+../scripts/runmaxpairs.sh 14 ${GRUMBACH}/*.fna ../testdata/Duplicate.fna
 num=2
 while test ${num} -lt 10 
 do

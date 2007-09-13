@@ -355,4 +355,9 @@ const char *encseqaccessname(/*@unused@*/ const Encodedsequence *encseq)
   return "direct";
 }
 
+const char *showencodedseqtype(void)
+{
+  return "inlined encodeded sequence";
+}
+
 #endif /* INLINEDENCSEQ */

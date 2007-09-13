@@ -58,6 +58,8 @@ void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
 
 const char *encseqaccessname(/*@unused@*/ const Encodedsequence *encseq);
 
+const char *showencodedseqtype(void);
+
 #ifdef __cplusplus
 }
 #endif
