@@ -194,7 +194,10 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   Fastaoutinfo fastaoutinfo;
   FILE *formatout = NULL;
   
-  if(openoutfile(&formatout, str_get(lo->str_fastaoutputfilename), env) != 0 )
+  if(openoutfile(&formatout, 
+     innerregion ? str_get(lo->str_fastaoutputfilenameinnerregion) 
+                           : str_get(lo->str_fastaoutputfilename), 
+     env) != 0 )
   {
     return -1;
   }

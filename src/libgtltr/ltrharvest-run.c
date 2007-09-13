@@ -137,8 +137,20 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   }
 
   /* print inner region multiple FASTA file of predictions */
-  // fehlt noch
-  
+  if(lo->fastaoutputinnerregion)
+  {
+    if (showpredictionsmultiplefasta(lo,
+          markpos,
+	  true,
+	  60,
+	  ssar,
+	  true,
+	  env) != 0)
+    {
+      return -1;
+    }
+  }
+
   /* print GFF3 format file of predictions */
   /*if(lo->gff3output)
   {
