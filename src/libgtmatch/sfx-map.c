@@ -274,11 +274,11 @@ static void *genericmaptable(const Str *indexname,
   size_t numofbytes;
 
   void *ptr = genericmaponlytable(indexname,suffix,&numofbytes,env);
-  if(ptr == NULL)
+  if (ptr == NULL)
   {
     return NULL;
   }
-  if(checkmappedfilesize(numofbytes,expectedunits,sizeofunit,env) != 0)
+  if (checkmappedfilesize(numofbytes,expectedunits,sizeofunit,env) != 0)
   {
     env_fa_xmunmap(ptr,env);
     return NULL;
@@ -410,15 +410,20 @@ static int inputsuffixarray(bool map,
   {
     size_t numofbytes;
 
+    STAMP;
     suffixarray->destab = genericmaponlytable(indexname,
                                               DESTABSUFFIX,
                                               &numofbytes,
                                               env);
+    STAMP;
     suffixarray->destablength = (unsigned long) numofbytes;
+    STAMP;
     if (suffixarray->destab == NULL)
     {
       haserr = true;
+    STAMP;
     }
+    STAMP;
   }
   if (!haserr && (demand & SARR_SUFTAB))
   {
@@ -549,5 +554,5 @@ int mapsuffixarray(Suffixarray *suffixarray,
                           indexname,
                           verbose,
                           env);
+  assert(suffixarray->destab != NULL);
 }
-

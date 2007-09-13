@@ -31,6 +31,7 @@
 
 #include "sfx-apfxlen.pr"
 #include "sfx-map.pr"
+#include "echoseq.pr"
 
 /*
 #define COMPARE(OFFSET,LCPLEN)\
@@ -375,40 +376,6 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
   return 0;
 }
 
-static int echothesequence(const StrArray *queryfiles,Env *env)
-{
-  Scansequenceiterator *sseqit;
-  char *desc = NULL;
-  const Uchar *sequence;
-  unsigned long seqlen;
-  bool haserr = false;
-  int retval;
-
-  sseqit = newScansequenceiterator(queryfiles,NULL,true,env);
-  while (true)
-  {
-    retval = nextScansequenceiterator(&sequence,
-                                      &seqlen,
-                                      &desc,
-                                      sseqit,
-                                      env);
-    if (retval < 0)
-    {
-      haserr = true;
-      break;
-    }
-    if (retval == 0)
-    {
-      break;
-    }
-    fastasymbolstringgeneric(stdout,desc,NULL,sequence,seqlen,
-                             (unsigned long) 70);
-    FREESPACE(desc);
-  }
-  freeScansequenceiterator(&sseqit,env);
-  return haserr ? -1 : 0;
-}
-
 int callenumquerymatches(const Str *indexname,
                          const StrArray *queryfiles,
                          bool echoquery,
@@ -433,7 +400,7 @@ int callenumquerymatches(const Str *indexname,
   }
   if (!haserr && echoquery)
   {
-    if (echothesequence(queryfiles,env) != 0)
+    if (echodescriptionandsequence(queryfiles,env) != 0)
     {
       haserr = true;
     }

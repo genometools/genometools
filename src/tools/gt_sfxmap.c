@@ -23,6 +23,7 @@
 #include "libgtmatch/pos2seqnum.pr"
 #include "libgtmatch/test-mappedstr.pr"
 #include "libgtmatch/sfx-suftaborder.pr"
+#include "libgtmatch/echoseq.pr"
 
 static OPrval parse_options(bool *usestream,bool *verbose,int *parsed_args,
                             int argc, const char **argv,Env *env)
@@ -134,6 +135,8 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
                       0,
                       env);
   }
+  checkalldescriptions(suffixarray.destab,suffixarray.destablength,
+                       suffixarray.numofdbsequences,env);
   freesuffixarray(&suffixarray,env);
   return haserr ? -1 : 0;
 }
