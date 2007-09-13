@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2005-2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2005-2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2005-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2005-2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,7 +21,8 @@ void* xcalloc(size_t nmemb, size_t size)
 {
   void *p;
   if ((p = calloc(nmemb, size)) == NULL) {
-    perror("cannot calloc memory");
+    fprintf(stderr, "cannot calloc (%zu, %zu) memory: %s\n", nmemb, size,
+            strerror(errno));
     exit(EXIT_FAILURE);
   }
   return p;
@@ -130,7 +131,7 @@ void* xmalloc(size_t size)
 {
   void *p;
   if ((p = malloc(size)) == NULL) {
-    perror("cannot malloc memory");
+    fprintf(stderr, "cannot malloc(%zu) memory: %s\n", size, strerror(errno));
     exit(EXIT_FAILURE);
   }
   return p;
@@ -156,7 +157,7 @@ void* xrealloc(void *ptr, size_t size)
 {
   void *p;
   if ((p = realloc(ptr, size)) == NULL) {
-    perror("cannot realloc memory");
+    fprintf(stderr, "cannot realloc(%zu) memory: %s\n", size, strerror(errno));
     exit(EXIT_FAILURE);
   }
   return p;

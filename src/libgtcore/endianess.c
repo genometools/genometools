@@ -16,16 +16,12 @@
 */
 
 #include <stdbool.h>
+#include "libgtcore/endianess.h"
 
-bool islittleendian(void)
+bool is_little_endian(void)
 {
   int x = 1;
-
-  if (*(char *) &x == 1)
-  {
+  if (*(char*) &x == 1)
     return true;
-  } else
-  {
-    return false;
-  }
+  return false;
 }
