@@ -29,6 +29,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   Sequentialsuffixarrayreader *ssar; /* suffix array */
   Seqpos *markpos = NULL;
   unsigned long numofdbsequences;
+  bool haserror = false;
 
   env_error_check(env);
   
@@ -58,18 +59,19 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
                               alphabetSequentialsuffixarrayreader(ssar),
 			      env) != 0)
   {
-    return -1; 
+    haserror = true;
+    //return -1; 
   }
 
   /* show defined option and values */
-  if(lo->verbosemode)
+  if(!haserror && lo->verbosemode)
   {
     showuserdefinedoptionsandvalues(lo);
   }
 
   numofdbsequences = numofdbsequencesSequentialsuffixarrayreader(ssar);
   // calculate markpos array for contig offset
-  if( numofdbsequences > 1)
+  if( !haserror && numofdbsequences > 1)
   {
     markpos = encseq2markpositions( 
 	encseqSequentialsuffixarrayreader(ssar),
@@ -77,7 +79,8 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 	env);
     if(markpos == NULL)
     { 
-      return -1;
+      haserror = true;
+      //return -1;
     }
   }
 
@@ -87,7 +90,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   lo->repeatinfo.ssarptr = ssar;
 
   /* search for maximal repeats */ 
-  if(enumeratemaxpairs(ssar,
+  if(!haserror && enumeratemaxpairs(ssar,
 		       getnumofcharsAlphabet(
 		         alphabetSequentialsuffixarrayreader(ssar)),
 		       encseqSequentialsuffixarrayreader(ssar),
@@ -97,33 +100,38 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 		       lo,
 		       env) != 0)
   {
-    return -1;
+    haserror = true;
+    //return -1;
   }
 
   /* init array for candidate pairs */
   INITARRAY(&lo->arrayLTRboundaries, LTRboundaries);
 
   /* apply the filter algorithms */
-  if(searchforLTRs (ssar, lo, markpos, env) != 0)
+  if(!haserror && searchforLTRs (ssar, lo, markpos, env) != 0)
   {
-     return -1; 
+    haserror = true;
+    // return -1; 
   }
 
   /* free array for maximal repeats */
   FREEARRAY(&lo->repeatinfo.repeats, Repeat);
 
   /* remove exact duplicates */
-  removeduplicates(&lo->arrayLTRboundaries);
+  if(!haserror)
+  {
+    removeduplicates(&lo->arrayLTRboundaries);
+  }
 
   /* remove overlapping predictions if desired */
-  if(lo->nooverlapallowed || lo->bestofoverlap)
+  if(!haserror && (lo->nooverlapallowed || lo->bestofoverlap))
   {
     removeoverlapswithlowersimilarity(&lo->arrayLTRboundaries,
                                       lo->nooverlapallowed);
   }
 
   /* print multiple FASTA file of predictions */
-  if(lo->fastaoutput)
+  if(!haserror && lo->fastaoutput)
   {
     if (showpredictionsmultiplefasta(lo,
           markpos,
@@ -133,12 +141,13 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 	  true,
 	  env) != 0)
     {
-      return -1;
+      haserror = true;
+      //return -1;
     }
   }
 
   /* print inner region multiple FASTA file of predictions */
-  if(lo->fastaoutputinnerregion)
+  if(!haserror && lo->fastaoutputinnerregion)
   {
     if (showpredictionsmultiplefasta(lo,
           markpos,
@@ -148,26 +157,33 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 	  true,
 	  env) != 0)
     {
-      return -1;
+      haserror = true;
+      //return -1;
     }
   }
 
   /* print GFF3 format file of predictions */
-  if(lo->gff3output)
+  if(!haserror && lo->gff3output)
   {
     if(printgff3format(lo,
 	  ssar,
 	  markpos,
 	  env) != 0 )
     {
-      return -1; 
+      haserror = true;
+      //return -1; 
     }
   }
 
-  FREESPACE(markpos);
-
+  if(!haserror && numofdbsequences > 1)
+  {
+    FREESPACE(markpos);
+  }
   /* print predictions to stdout */
-  showinfoiffoundfullLTRs(lo, ssar, env);
+  if(!haserror)
+  {
+    showinfoiffoundfullLTRs(lo, ssar, env);
+  }
 
   /* free prediction array */
   FREEARRAY(&lo->arrayLTRboundaries, LTRboundaries);
@@ -182,8 +198,6 @@ int parseargsandcallltrharvest(int argc,const char *argv[],Env *env)
   LTRharvestoptions lo;
   int retval;
   bool haserr = false;
-
-  lo.env = env; //for getting env in simpleexactselfmatchstore 
 
   retval = ltrharvestoptions(&lo,argc,argv,env);
   if (retval == 0)

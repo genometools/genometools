@@ -20,7 +20,6 @@
 
 typedef struct
 {
-  Env *env;
   RepeatInfo repeatinfo;                  // stores all repeats 
   ArrayLTRboundaries arrayLTRboundaries;  // stores all predicted 
                                           //   LTR elements 
@@ -28,10 +27,10 @@ typedef struct
   Str *str_fastaoutputfilename; // name of the FASTA output file 
   Str *str_fastaoutputfilenameinnerregion;  // name of the FASTA
                                             // file for the inner regions 
-  Str *str_gff3filename;        // name of the gff3 file
+  Str *str_gff3filename;         // name of the gff3 file
   unsigned long minseedlength;   // minimal exact seed 
   double similaritythreshold;    // minimum similarity of LTRs 
-  int xdropbelowscore;  // xdropbelowscore 
+  int xdropbelowscore;           // xdropbelowscore 
   Arbitraryscores arbitscores;
   Motif motif;                   // the start-, endmotiv of the LTRs,
                                  // by default: OFF

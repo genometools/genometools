@@ -12,7 +12,6 @@
 #include "libgtcore/env.h"
 #include "libgtmatch/arraydef.h"
 #include "libgtmatch/esa-seqread.h"
-//#include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/sarr-def.h"
 
 // The datatype Repeat stores information about the maximal repeats (seeds).

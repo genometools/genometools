@@ -134,6 +134,8 @@ void printargsline(const char **argv, int argc)
 int testmotifandencodemotif(Motif *motif, const Alphabet *alpha, Env *env)
 {
   const Uchar *symbolmap;
+  unsigned char c_tab[UCHAR_MAX+1];
+  int i;
 
   symbolmap = getsymbolmapAlphabet(alpha);
   if( UNDEFCHAR == symbolmap[(unsigned int)motif->firstleft])
@@ -162,6 +164,26 @@ int testmotifandencodemotif(Motif *motif, const Alphabet *alpha, Env *env)
   }
 
   // hier fehlt test ob motif palindromisch ist!!
+  for (i=0; i<=UCHAR_MAX; i++)
+  {
+    c_tab[i] = UNDEFCHAR; 
+  }
+  /* define complementary symbols */
+  c_tab[symbolmap['a']] = symbolmap['t'];
+  c_tab[symbolmap['c']] = symbolmap['g'];
+  c_tab[symbolmap['g']] = symbolmap['c'];
+  c_tab[symbolmap['t']] = symbolmap['a']; 
+ 
+  /* if motif is not palindromic */
+  if( (c_tab[symbolmap[(unsigned int)motif->firstleft]] != 
+       c_tab[c_tab[symbolmap[(unsigned int)motif->secondright]]])
+           ||
+      (c_tab[symbolmap[(unsigned int)motif->secondleft]] != 
+       c_tab[c_tab[symbolmap[(unsigned int)motif->firstright]]]) )
+  {
+    env_error_set(env, "Illegal motif, motif not palindromic");
+    return -1;
+  }
 
   /* encode the symbols */
   motif->firstleft = symbolmap[(unsigned int)motif->firstleft];

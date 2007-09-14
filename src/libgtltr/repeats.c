@@ -57,7 +57,8 @@ int simpleexactselfmatchoutput (
   /*@unused@*/void *info,
   Seqpos len,
   Seqpos pos1,
-  Seqpos pos2)
+  Seqpos pos2,
+  Env *env)
 {
   Seqpos tmp;
 
@@ -82,9 +83,9 @@ int simpleexactselfmatchstore (
   LTRharvestoptions *info,
   Seqpos len,
   Seqpos pos1,
-  Seqpos pos2)
+  Seqpos pos2,
+  Env *env)
 {
-  Env *env = info->env;
   Seqpos tmp,
          totallength;
   const Encodedsequence *encseq = 
@@ -140,14 +141,12 @@ int simpleexactselfmatchstore (
 
       if( seqnum1 == seqnum2 )
       {
-/*
 #ifdef DEBUG
 	  printf("accepted:\n");
 	  printf("pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
 	  printf("pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
 	  printf("i: " FormatSeqpos "\n", PRINTSeqposcast(i));
 #endif
-*/
 	  samecontig = true;
           contignumber = seqnum1;
 	  break;
@@ -158,7 +157,7 @@ int simpleexactselfmatchstore (
   }
 
 
-  //test maximal length of candidate pair and distance constraints
+  /*test maximal length of candidate pair and distance constraints*/
   if( samecontig && (len <= (Seqpos) info->repeatinfo.lmax) && 
       ( (Seqpos) info->repeatinfo.dmin <= tmp) && 
         (tmp <= (Seqpos) info->repeatinfo.dmax) )
@@ -225,7 +224,7 @@ int subshowrepeats (
 {
   env_error_check(env);
 
-  //test maximal length of candidate pair
+  /*test maximal length of candidate pair*/
   if (len <= info->lmax)
   {
     printf("%lu " FormatSeqpos " " FormatSeqpos "\n",

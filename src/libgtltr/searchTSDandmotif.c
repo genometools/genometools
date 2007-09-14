@@ -803,7 +803,8 @@ static int searchforTSDandorMotifoutside(
     }
   }
   // do not align over 3'-border of left LTR //
-  if( (endleftLTR = boundaries->leftLTR_5 + lo->vicinityforcorrectboundaries)         > boundaries->leftLTR_3 - 2 // -2 because of possible motif 
+  if( (endleftLTR = boundaries->leftLTR_5 + lo->vicinityforcorrectboundaries)
+       > boundaries->leftLTR_3 - 2 // -2 because of possible motif 
     )
   {
     endleftLTR = boundaries->leftLTR_3 - 2; 
