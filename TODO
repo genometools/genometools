@@ -2,7 +2,6 @@ bugs:
 -----
 
 - does not compile on Mac OS X 10.3 (glob(3) is not fully POSIX compliant)
-- is the name for the StrArray class misleading (it does not contain Strs)?
 
 
 feature requests:
