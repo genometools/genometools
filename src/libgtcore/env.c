@@ -82,9 +82,11 @@ static void proc_gt_env_options(Env *env)
 
 Env* env_new(void)
 {
+  const char *bookkeeping;
   Env *env = xcalloc(1, sizeof (Env));
   env->ma = ma_new();
-  ma_init(env->ma, env);
+  bookkeeping = getenv("GT_MEM_BOOKKEEPING");
+  ma_init(env->ma, bookkeeping && !strcmp(bookkeeping, "on"), env);
   env->fa = fa_new(env);
   env->error = error_new(env->ma);
   proc_gt_env_options(env);

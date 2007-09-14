@@ -49,7 +49,7 @@ static void free_MAInfo(MAInfo *mainfo, /*@unused@*/ Env *env)
   free(mainfo);
 }
 
-void ma_init(MA *ma, Env *env)
+void ma_init(MA *ma, bool bookkeeping, Env *env)
 {
   assert(ma && env);
   assert(!ma->bookkeeping);
@@ -57,7 +57,7 @@ void ma_init(MA *ma, Env *env)
                                         (FreeFunc) free_MAInfo, env);
   ma->env = env;
   /* MA is ready to use */
-  ma->bookkeeping = true;
+  ma->bookkeeping = bookkeeping;
 }
 
 static void add_size(MA* ma, unsigned long size)
@@ -214,7 +214,6 @@ int ma_check_space_leak(MA *ma, Env *env)
 void ma_clean(MA *ma, /*@unused@*/ Env *env)
 {
   assert(ma);
-  assert(ma->bookkeeping);
   ma->bookkeeping = false;
   hashtable_delete(ma->allocated_pointer, ma->env);
 }
