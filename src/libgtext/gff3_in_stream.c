@@ -28,7 +28,8 @@ struct GFF3InStream
 {
   const GenomeStream parent_instance;
   int next_file;
-  StrArray *files; /* contains char* to filenames */
+  StrArray *files;
+  Str *stdinstr;
   bool ensure_sorting,
        stdin_argument,
        file_is_open,
@@ -105,13 +106,12 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 
     assert(is->file_is_open);
 
-    filenamestr = str_new_cstr(strarray_size(is->files)
-                               ? strarray_get(is->files, is->next_file-1)
-                               : "stdin", env);
+    filenamestr = strarray_size(is->files)
+                  ? strarray_get_str(is->files, is->next_file-1)
+                  : is->stdinstr;
     had_err = gff3parser_parse_genome_nodes(&status_code, is->gff3_parser,
                                             is->genome_node_buffer, filenamestr,
                                             &is->line_number, is->fpin, env);
-    str_delete(filenamestr, env);
     if (had_err)
       break;
 
@@ -162,6 +162,7 @@ static void gff3_in_stream_free(GenomeStream *gs, Env *env)
 {
   GFF3InStream *gff3_in_stream = gff3_in_stream_cast(gs);
   strarray_delete(gff3_in_stream->files, env);
+  str_delete(gff3_in_stream->stdinstr, env);
   while (queue_size(gff3_in_stream->genome_node_buffer)) {
     genome_node_rec_delete(*(GenomeNode**)
                            queue_get(gff3_in_stream->genome_node_buffer), env);
@@ -189,6 +190,7 @@ static GenomeStream* gff3_in_stream_new(StrArray *files, /* takes ownership */
   GFF3InStream *gff3_in_stream         = gff3_in_stream_cast(gs);
   gff3_in_stream->next_file              = 0;
   gff3_in_stream->files                  = files;
+  gff3_in_stream->stdinstr               = str_new_cstr("stdin", env);
   gff3_in_stream->ensure_sorting         = ensure_sorting;
   gff3_in_stream->stdin_argument         = false;
   gff3_in_stream->file_is_open           = false;

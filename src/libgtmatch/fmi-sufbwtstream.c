@@ -218,7 +218,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
   numofindexes = (unsigned int) strarray_size(indexnametab);
   if (numofindexes == (unsigned int) 1)
   {
-    Str *indexname = str_new_cstr(strarray_get(indexnametab,0),env);
+    Str *indexname = strarray_get_str(indexnametab,0);
 
     if (streamsuffixarray(&suffixarray,
                          &totallength,
@@ -254,7 +254,6 @@ int sufbwt2fmindex(Fmindex *fmindex,
       }
       */
     }
-    str_delete(indexname,env);
   } else
   {
     if (initEmissionmergedesa(&emmesa,
@@ -266,13 +265,12 @@ int sufbwt2fmindex(Fmindex *fmindex,
     }
     if (!haserr)
     {
-      Str *indexname = str_new_cstr(strarray_get(indexnametab,0),env);
+      Str *indexname = strarray_get_str(indexnametab,0);
       suffixlength = 0;
       if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,env) != 0)
       {
         haserr = true;
       }
-      str_delete(indexname,env);
     }
     if (!haserr)
     {

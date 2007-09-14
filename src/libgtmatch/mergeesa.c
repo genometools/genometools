@@ -61,7 +61,7 @@ static int inputthesequences(Alphabet **alpha,
   env_error_check(env);
   for (idx=0; idx<strarray_size(indexnametab); idx++)
   {
-    indexname = str_new_cstr(strarray_get(indexnametab,idx),env);
+    indexname = strarray_get_str(indexnametab,idx);
     if (streamsuffixarray(&suffixarraytable[idx],
                          &totallength,
                          demand,
@@ -76,7 +76,6 @@ static int inputthesequences(Alphabet **alpha,
     {
       *alpha = suffixarraytable[idx].alpha;
     }
-    str_delete(indexname,env);
     nextpostable[idx] = 0;
   }
   return 0;
