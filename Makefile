@@ -174,6 +174,11 @@ ifeq ($(assert),no)
   GT_CXXFLAGS += -DNDEBUG
 endif
 
+ifeq ($(prof),yes)
+  GT_CFLAGS += -pg
+  GT_LDFLAGS += -pg
+endif
+
 ifeq ($(static),yes)
   GT_LDFLAGS += -static
 endif
