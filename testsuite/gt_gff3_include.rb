@@ -44,6 +44,7 @@ Name "gt gff3 prob 4"
 Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_prob_4.gff3", :retval => 1)
+  grep $last_stderr, "has been used already for the feature defined on line"
 end
 
 Name "gt gff3 prob 5"
