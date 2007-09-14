@@ -183,7 +183,7 @@ const GenomeStreamClass* gff3_in_stream_class(void)
 
 static GenomeStream* gff3_in_stream_new(StrArray *files, /* takes ownership */
                                         bool ensure_sorting, bool be_verbose,
-                                        Env *env)
+                                        bool checkids, Env *env)
 {
   GenomeStream *gs = genome_stream_create(gff3_in_stream_class(),
                                           ensure_sorting, env);
@@ -197,7 +197,7 @@ static GenomeStream* gff3_in_stream_new(StrArray *files, /* takes ownership */
   gff3_in_stream->fpin                   = NULL;
   gff3_in_stream->line_number            = 0;
   gff3_in_stream->genome_node_buffer     = queue_new(sizeof (GenomeNode*), env);
-  gff3_in_stream->gff3_parser            = gff3parser_new(env);
+  gff3_in_stream->gff3_parser            = gff3parser_new(checkids, env);
   gff3_in_stream->last_node              = NULL;
   gff3_in_stream->be_verbose             = be_verbose;
   return gs;
@@ -223,13 +223,14 @@ int gff3_in_stream_set_chseqids(GenomeStream *gs, Str *chseqids, Env *env)
 
 GenomeStream* gff3_in_stream_new_unsorted(int num_of_files,
                                           const char **filenames,
-                                          bool be_verbose, Env *env)
+                                          bool be_verbose, bool checkids,
+                                          Env *env)
 {
   int i;
   StrArray *files = strarray_new(env);
   for (i = 0; i < num_of_files; i++)
     strarray_add_cstr(files, filenames[i], env);
-  return gff3_in_stream_new(files, false, be_verbose, env);
+  return gff3_in_stream_new(files, false, be_verbose, checkids, env);
 }
 
 GenomeStream* gff3_in_stream_new_sorted(const char *filename, bool be_verbose,
@@ -238,5 +239,5 @@ GenomeStream* gff3_in_stream_new_sorted(const char *filename, bool be_verbose,
   StrArray *files = strarray_new(env);
   if (filename)
     strarray_add_cstr(files, filename, env);
-  return gff3_in_stream_new(files, true, be_verbose, env);
+  return gff3_in_stream_new(files, true, be_verbose, false, env);
 }

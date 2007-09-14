@@ -31,7 +31,8 @@ int                      gff3_in_stream_set_offsetfile(GenomeStream*, Str*,
 int                      gff3_in_stream_set_chseqids(GenomeStream*, Str*, Env*);
 GenomeStream*            gff3_in_stream_new_unsorted(int num_of_files,
                                                      const char **filenames,
-                                                     bool be_verbose, Env*);
+                                                     bool be_verbose,
+                                                     bool checkids, Env*);
 /* filename == NULL -> use stdin */
 GenomeStream*            gff3_in_stream_new_sorted(const char *filename,
                                                    bool be_verbose, Env*);

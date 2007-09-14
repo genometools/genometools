@@ -39,7 +39,8 @@ struct GFF3Parser {
             *source_to_str_mapping,
             *undefined_sequence_regions; /* contains all (automatically created)
                                             sequence regions */
-  bool incomplete_node; /* at least on node is potentially incomplete */
+  bool incomplete_node, /* at least on node is potentially incomplete */
+       checkids;
   long offset;
   Mapping *offset_mapping,
           *chseqids_mapping;
@@ -73,7 +74,7 @@ static void automatic_sequence_region_delete(AutomaticSequenceRegion *auto_sr,
   env_ma_free(auto_sr, env);
 }
 
-GFF3Parser* gff3parser_new(Env *env)
+GFF3Parser* gff3parser_new(bool checkids, Env *env)
 {
   GFF3Parser *gff3_parser = env_ma_malloc(env, sizeof (GFF3Parser));
   gff3_parser->id_to_genome_node_mapping = hashtable_new(HASH_STRING,
@@ -89,6 +90,7 @@ GFF3Parser* gff3parser_new(Env *env)
   gff3_parser->undefined_sequence_regions = hashtable_new(HASH_STRING, NULL,
                               (FreeFunc) automatic_sequence_region_delete, env);
   gff3_parser->incomplete_node = false;
+  gff3_parser->checkids = checkids;
   gff3_parser->offset = UNDEF_LONG;
   gff3_parser->offset_mapping = NULL;
   gff3_parser->chseqids_mapping = NULL;
@@ -548,6 +550,8 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   else if (strcmp(line, GFF_TERMINATOR) == 0) { /* terminator */
     /* now all nodes are complete */
     gff3_parser->incomplete_node = false;
+    if (!gff3_parser->checkids)
+      hashtable_reset(gff3_parser->id_to_genome_node_mapping, env);
   }
   else {
     warning("skipping unknown meta line %lu in file \"%s\": %s", line_number,

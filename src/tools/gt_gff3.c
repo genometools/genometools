@@ -28,6 +28,7 @@
 
 typedef struct {
   bool sort,
+       checkids,
        mergefeat,
        addintrons,
        verbose;
@@ -58,6 +59,14 @@ static OPrval parse_options(int *parsed_args, GFF3Arguments *arguments,
                                 "consumption is O(file_size))",
                                 &arguments->sort, false, env);
   option_parser_add_option(op, sort_option, env);
+
+  /* -checkids */
+  option = option_new_bool("checkids", "make sure the ID attributes are unique "
+                           "within the scope of each GFF3_file, as required by "
+                           "GFF3 specification\n"
+                           "(memory consumption is O(file_size))",
+                           &arguments->checkids, false, env);
+  option_parser_add_option(op, option, env);
 
   /* -mergefeat */
   mergefeat_option = option_new_bool("mergefeat", "merge adjacent features of "
@@ -141,7 +150,8 @@ int gt_gff3(int argc, const char **argv, Env *env)
   gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
                                                argv + parsed_args,
                                                arguments.verbose &&
-                                               arguments.outfp, env);
+                                               arguments.outfp,
+                                               arguments.checkids, env);
   last_stream = gff3_in_stream;
 
   /* set offset (if necessary) */

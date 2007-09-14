@@ -100,6 +100,13 @@ Name "gt gff3 prob 12"
 Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_prob_12.gff3", :retval => 1)
+  grep $last_stderr, "has not been previously defined"
+end
+
+Name "gt gff3 prob 12 (-checkids)"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 -checkids #{$testdata}gt_gff3_prob_12.gff3", :retval => 1)
   grep $last_stderr, "has been used already for the feature defined on line"
 end
 

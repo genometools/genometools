@@ -122,7 +122,7 @@ int gt_filter(int argc, const char **argv, Env *env)
   gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
                                                argv + parsed_args,
                                                arguments.verbose &&
-                                               arguments.outfp, env);
+                                               arguments.outfp, false, env);
 
   /* create a filter stream */
   filter_stream = filter_stream_new(gff3_in_stream, arguments.seqid,

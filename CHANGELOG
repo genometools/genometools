@@ -1,3 +1,8 @@
+changes in version 1.0.3 (2007-09-14):
+
+- `gt gff2` has new option -checkids (was the default behavior before)
+
+
 changes in version 1.0.3 (2007-09-12):
 
 - `gt view` can process multiple GFF3 files
