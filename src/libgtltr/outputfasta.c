@@ -33,6 +33,7 @@
 typedef struct
 {
   Sequentialsuffixarrayreader *ssar;
+  const Encodedsequence *encseq; // encoded sequence
   const Alphabet *alpha;     // the alphabet
   const Uchar *characters;   // for visible characters
   Seqpos totallength;  // totallength of encseq
@@ -102,9 +103,7 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
       k=0;
     }
     fprintf(info->formatout, "%c", 
-      info->characters[getencodedcharSequentialsuffixarrayreader(info->ssar, 
-                                                           i, 
-							   Forwardmode)] );
+      info->characters[getencodedchar(info->encseq, i, Forwardmode)] );
   }
   (void) putc('\n',info->formatout);
 
@@ -193,6 +192,7 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
 {
   Fastaoutinfo fastaoutinfo;
   FILE *formatout = NULL;
+  encseqSequentialsuffixarrayreader(ssar);
   
   if(openoutfile(&formatout, 
      innerregion ? str_get(lo->str_fastaoutputfilenameinnerregion) 
@@ -203,6 +203,7 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   }
 
   fastaoutinfo.ssar = ssar;
+  fastaoutinfo.encseq = encseqSequentialsuffixarrayreader(ssar);
   fastaoutinfo.alpha = alphabetSequentialsuffixarrayreader(ssar);
   fastaoutinfo.characters = getcharactersAlphabet(fastaoutinfo.alpha);
   fastaoutinfo.totallength = getencseqtotallength(

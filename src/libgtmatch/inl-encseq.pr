@@ -10,33 +10,55 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,
 
 void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
 
-/*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
-                                                  const StrArray *filenametab,
-                                                  bool plainformat,
-                                                  Seqpos totallength,
-                                                  const Specialcharinfo
-                                                        *specialcharinfo,
-                                                  const Alphabet *alphabet,
-                                                  const char *str_sat,
-                                                  Env *env);
+Encodedsequencescanstate *initEncodedsequencescanstate(
+                               /*@unused@*/ const Encodedsequence *encseq,
+                               Readmode readmode,
+                               Env *env);
 
-/*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
-                                               const Str *indexname,
-                                               Seqpos totallength,
-                                               const Specialcharinfo
-                                                     *specialcharinfo,
-                                               const Alphabet *alphabet,
-                                               const char *str_sat,
-                                               Env *env);
+void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
 
-Encodedsequence *plain2encodedsequence(bool withrange,
-                                       Specialcharinfo *specialcharinfo,
-                                       const Uchar *seq1,
-                                       Seqpos len1,
-                                       const Uchar *seq2,
-                                       unsigned long len2,
-                                       const Alphabet *alphabet,
+/*@null@*/ Encodedsequence *files2encodedsequence(
+                                 /*@unused@*/ bool withrange,
+                                 const StrArray *filenametab,
+                                 bool plainformat,
+                                 Seqpos totallength,
+                                 /*@unused@*/ const Specialcharinfo
+                                                   *specialcharinfo,
+                                 const Alphabet *alphabet,
+                                 /*@unused@*/ const char *str_sat,
+                                 Env *env);
+
+/*@null@*/ Encodedsequence *mapencodedsequence(
+                                   /*@unused@*/ bool withrange,
+                                   const Str *indexname,
+                                   /*@unused@*/ Seqpos totallength,
+                                   const Specialcharinfo *specialcharinfo,
+                                   /*@unused@*/ unsigned int mapsize,
+                                   Env *env);
+
+Encodedsequence *plain2encodedsequence(
+                         /*@unused@*/ bool withrange,
+                         /*@unused@*/ Specialcharinfo *specialcharinfo,
+                         const Uchar *seq1,
+                         Seqpos len1,
+                         const Uchar *seq2,
+                         unsigned long len2,
+                         /*@unused@*/ unsigned int mapsize,
                                        Env *env);
+
+Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
+                                              bool moveforward,
+                                              Env *env);
+
+bool hasspecialranges(const Encodedsequence *encseq);
+
+bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
+
+void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
+
+const char *encseqaccessname(/*@unused@*/ const Encodedsequence *encseq);
+
+const char *showencodedseqtype(void);
 
 #ifdef __cplusplus
 }

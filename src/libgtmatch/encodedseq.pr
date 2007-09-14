@@ -11,7 +11,7 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos);
 
-/*@null@*/ char *encseqaccessname(const Encodedsequence *encseq);
+/*@null@*/ const char *encseqaccessname(const Encodedsequence *encseq);
 
 int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
 
@@ -49,8 +49,7 @@ void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
                                                Seqpos totallength,
                                                const Specialcharinfo
                                                      *specialcharinfo,
-                                               const Alphabet *alphabet,
-                                               const char *str_sat,
+                                               unsigned int mapsize,
                                                Env *env);
 
 Encodedsequence *plain2encodedsequence(bool withrange,
@@ -59,8 +58,10 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        Seqpos len1,
                                        const Uchar *seq2,
                                        unsigned long len2,
-                                       const Alphabet *alphabet,
+                                       unsigned int mapsize,
                                        Env *env);
+
+const char *showencodedseqtype(void);
 
 #ifdef __cplusplus
 }

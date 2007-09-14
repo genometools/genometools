@@ -90,6 +90,7 @@ static void searchforbestTSDandormotifatborders(
        difffromoldboundary1 = 0,
        difffromoldboundary2 = 0;
   unsigned int hitcounter = 0;
+  const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
 
   env_error_check(env);
 
@@ -136,30 +137,22 @@ static void searchforbestTSDandormotifatborders(
       {
 	tmp_motifmismatchesleftLTR = tmp_motifmismatchesrightLTR = 0;
 	//if( *(dbseqpos1 - back) != motif->firstleft) 
-	if( getencodedcharSequentialsuffixarrayreader(ssar, 
-	                                              dbseqpos1 - back,
-						      Forwardmode) 
+	if( getencodedchar(encseq, dbseqpos1 - back, Forwardmode) 
 	    != lo->motif.firstleft) 
 	{
 	  tmp_motifmismatchesleftLTR++;
 	}
-	if( getencodedcharSequentialsuffixarrayreader(ssar, 
-	                                              dbseqpos1 + 1 - back,
-						      Forwardmode) 
+	if( getencodedchar(encseq, dbseqpos1 + 1 - back, Forwardmode) 
 	    != lo->motif.secondleft)
 	{
 	  tmp_motifmismatchesleftLTR++;
 	}
-        if( getencodedcharSequentialsuffixarrayreader(ssar,   
-	                                              dbseqpos2 + forward,
-						      Forwardmode) 
+        if( getencodedchar(encseq,   dbseqpos2 + forward, Forwardmode) 
 	    != lo->motif.firstright)
 	{
 	  tmp_motifmismatchesrightLTR++;
 	}
-        if( getencodedcharSequentialsuffixarrayreader(ssar, 
-	                                             dbseqpos2 + 1 + forward,
-						     Forwardmode) 
+        if( getencodedchar(encseq, dbseqpos2 + 1 + forward, Forwardmode) 
 	    != lo->motif.secondright)
 	{
 	  tmp_motifmismatchesrightLTR++;
@@ -729,6 +722,7 @@ static int searchforTSDandorMotifoutside(
   Seqpos totallength = 
             getencseqtotallength(encseqSequentialsuffixarrayreader(ssar));
   SubRepeatInfo subrepeatinfo;
+  const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
   
   ///*test
   const Uchar *characters;
@@ -877,16 +871,12 @@ static int searchforTSDandorMotifoutside(
 
     for(i = startleftLTR; i <= endleftLTR; i++, k++) 
     {
-      dbseq[k] = getencodedcharSequentialsuffixarrayreader(ssar,
-                                                        i,
-							Forwardmode);
+      dbseq[k] = getencodedchar(encseq, i, Forwardmode);
     }
    
     for(k=0, i = startrightLTR; i <= endrightLTR; i++, k++)
     {
-      query[k] = getencodedcharSequentialsuffixarrayreader(ssar,
-                                                        i,
-							Forwardmode); 
+      query[k] = getencodedchar(encseq, i, Forwardmode); 
     }
  
     /*test

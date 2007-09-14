@@ -158,7 +158,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
                                    0,(unsigned long) 1,env);
   option_parser_add_option(op, optionmax, env);
 
-  optionoutput = option_new_filenamearray("output",
+  optionoutput = option_new_stringarray("output",
                           "set output flags (sequence, querypos)",
                           flagsoutputoption,env);
   option_parser_add_option(op, optionoutput, env);

@@ -1,0 +1,21 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+unsigned long *calcdescendpositions(const char *destab,
+                                    unsigned long destablength,
+                                    unsigned long numofsequences,
+                                    Env *env);
+
+const char *retriesequencedescription(unsigned long *desclen,
+                                      const char *destab,
+                                      const unsigned long *descendtab,
+                                      unsigned long seqnum);
+
+void checkalldescriptions(const char *destab,unsigned long destablength,
+                          unsigned long numofsequences,Env *env);
+
+int echodescriptionandsequence(const StrArray *filenametab,Env *env);
+
+#ifdef __cplusplus
+}
+#endif

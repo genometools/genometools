@@ -113,7 +113,7 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
   option_is_mandatory(option);
 
   queryoption = option_new_filenamearray("q",
-                             "Specify query file",
+                             "Specify query files",
                              maxpairsoptions->queryfiles, env);
   option_parser_add_option(op, queryoption, env);
 

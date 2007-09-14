@@ -30,6 +30,7 @@
 #include "chardef.h"
 #include "sfx-suffixer.h"
 #include "sfx-lcpval.h"
+#include "iterseq.h"
 
 #include "measure-time.pr"
 #include "opensfxfile.pr"
@@ -275,6 +276,56 @@ static int suffixeratorwithoutput(
   return haserr ? -1 : 0;
 }
 
+static int outputsequencedescription(const Str *indexname,
+                                     const StrArray *filenametab,
+                                     Env *env)
+{
+  FILE *desfp;
+  bool haserr = false;
+
+  desfp = opensfxfile(indexname,DESTABSUFFIX,"wb",env);
+  if (desfp == NULL)
+  {
+    haserr = true;
+  } else
+  {
+    Scansequenceiterator *sseqit;
+    char *desc = NULL;
+    unsigned long seqlen;
+    int retval;
+
+    sseqit = newScansequenceiterator(filenametab,NULL,false,env);
+    while (!haserr)
+    {
+      retval = nextScansequenceiterator(NULL,
+                                        &seqlen,
+                                        &desc,
+                                        sseqit,
+                                        env);
+      if (retval < 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (retval == 0)
+      {
+        break;
+      }
+      if (fputs(desc,desfp) == EOF)
+      {
+        env_error_set(env,"cannot write description to file %s.%s",
+                          str_get(indexname),DESTABSUFFIX);
+        haserr = true;
+      }
+      (void) putc((int) '\n',desfp);
+      FREESPACE(desc);
+    }
+    env_fa_xfclose(desfp,env);
+    freeScansequenceiterator(&sseqit,env);
+  }
+  return haserr ? -1 : 0;
+}
+
 static int runsuffixerator(Suffixeratoroptions *so,Env *env)
 {
   unsigned int numofchars = 0;
@@ -348,6 +399,13 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
           haserr = true;
         }
       }
+    }
+  }
+  if (!haserr && so->outdestab)
+  {
+    if (outputsequencedescription(so->str_indexname,so->filenametab,env) != 0)
+    {
+      haserr = true;
     }
   }
   initoutfileinfo(&outfileinfo);
@@ -480,6 +538,7 @@ int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
   {
     printf("# sizeof (Seqpos)=%lu\n",
             (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
+    printf("# %s\n",showencodedseqtype());
   }
   if (retval == 0)
   {

@@ -15,33 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_OPTDEF_H
-#define SFX_OPTDEF_H
+#ifndef ENDIANESS_H
+#define ENDIANESS_H
 
-#include <stdbool.h>
-#include "libgtcore/str.h"
-#include "libgtcore/strarray.h"
-#include "readmode-def.h"
-
-#define PREFIXLENGTH_AUTOMATIC 0
-
-typedef struct
-{
-  unsigned int numofparts,
-               prefixlength;
-  Str *str_indexname,
-      *str_smap,
-      *str_sat;
-  StrArray *filenametab;
-  Readmode readmode;
-  bool isdna,
-       isprotein,
-       isplain,
-       outtistab,
-       outsuftab,
-       outlcptab,
-       outbwttab,
-       outdestab;
-} Suffixeratoroptions;
+/* returns true if host CPU is little-endian, false otherwise */
+bool is_little_endian(void);
 
 #endif

@@ -40,6 +40,7 @@ int overallquerysequences(int(*processsequence)(void *,
 
 Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
                                               const Uchar *symbolmap,
+                                              bool withsequence,
                                               Env *env);
 
 void freeScansequenceiterator(Scansequenceiterator **sseqit,Env *env);

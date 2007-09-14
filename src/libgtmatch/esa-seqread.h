@@ -73,9 +73,4 @@ const Alphabet *alphabetSequentialsuffixarrayreader(
 unsigned long numofdbsequencesSequentialsuffixarrayreader(
                     const Sequentialsuffixarrayreader *sarr);
 
-Uchar getencodedcharSequentialsuffixarrayreader(
-                    const Sequentialsuffixarrayreader *ssar,
-                    Seqpos pos,
-                    Readmode readmode);
-
 #endif

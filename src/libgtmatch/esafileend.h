@@ -73,6 +73,12 @@
 #define ALPHABETFILESUFFIX ".al1"
 
 /*
+  The following defines the suffix of a file to store sequence descriptions.
+*/
+
+#define DESTABSUFFIX ".des"
+
+/*
   The following defines the suffix of the project file.
 */
 

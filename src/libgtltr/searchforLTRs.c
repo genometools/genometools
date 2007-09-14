@@ -402,15 +402,11 @@ int searchforLTRs (
     ALLOCASSIGNSPACE(vseq, NULL, Uchar, vlen);
     for(k=0,i=boundaries->leftLTR_5; i<=boundaries->leftLTR_3; i++, k++) 
     {
-      useq[k] = getencodedcharSequentialsuffixarrayreader(ssar,
-                                                        i,
-							Forwardmode);
+      useq[k] = getencodedchar(encseq, i, Forwardmode);
     }
     for(k=0, i=boundaries->rightLTR_5; i<=boundaries->rightLTR_3; i++, k++)
     {
-      vseq[k] = getencodedcharSequentialsuffixarrayreader(ssar,
-                                                        i,
-							Forwardmode); 
+      vseq[k] = getencodedchar(encseq, i, Forwardmode); 
     }
 
     edist = greedyunitedist(useq, (unsigned long)ulen, 
