@@ -21,8 +21,8 @@
 #include "searchforLTRs.h"
 #include "duplicates.h"
 #include "outputstd.h"
-#include "outputfasta.h"
-#include "outputgff3.h"
+//#include "outputfasta.h" //spaeter einkommentieren
+//#include "outputgff3.h"
 
 static int runltrharvest(LTRharvestoptions *lo, Env *env)
 {
@@ -34,7 +34,8 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   env_error_check(env);
   
   ssar = newSequentialsuffixarrayreaderfromfile(lo->str_indexname,
-		                  SARR_LCPTAB | SARR_SUFTAB | SARR_ESQTAB,
+		                  SARR_LCPTAB | SARR_SUFTAB | 
+				  SARR_ESQTAB ,//| SARR_DESTAB, ///spaeter einkommentieren!!!!!!!!!!!
 				  false,
 				  env);
   if(ssar == NULL)
@@ -130,7 +131,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
                                       lo->nooverlapallowed);
   }
 
-  /* print multiple FASTA file of predictions */
+  /* print multiple FASTA file of predictions
   if(!haserror && lo->fastaoutput)
   {
     if (showpredictionsmultiplefasta(lo,
@@ -146,7 +147,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
     }
   }
 
-  /* print inner region multiple FASTA file of predictions */
+  // print inner region multiple FASTA file of predictions
   if(!haserror && lo->fastaoutputinnerregion)
   {
     if (showpredictionsmultiplefasta(lo,
@@ -162,7 +163,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
     }
   }
 
-  /* print GFF3 format file of predictions */
+  // print GFF3 format file of predictions
   if(!haserror && lo->gff3output)
   {
     if(printgff3format(lo,
@@ -173,7 +174,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
       haserror = true;
       //return -1; 
     }
-  }
+  }*/
 
   if(!haserror && numofdbsequences > 1)
   {
@@ -190,7 +191,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   /* free suffixarray */
   freeSequentialsuffixarrayreader(&ssar, env);
 
-  return 0;
+  return haserror ? -1 : 0;
 }
 
 int parseargsandcallltrharvest(int argc,const char *argv[],Env *env)

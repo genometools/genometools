@@ -24,7 +24,7 @@ Keywords "gt_ltr"
 Test do
   run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis"
   run_test "#{$bin}gt ltrharvest -index Random.fna" +
-           " -motif qgca -motifmis 0", :retval => 2
+           " -motif qgca -motifmis 0", :retval => 1 
 end
 
 Name "gt ltrharvest motif not palindromic"
@@ -67,13 +67,37 @@ Test do
            " -longoutput -mintsd 5"
 end
 
+Name "gt ltrharvest overlaps1"
+Keywords "gt_ltr"
+Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis"
+  run_test "#{$bin}gt ltrharvest -index Random.fna" +
+           " -overlaps no"
+end
+
+Name "gt ltrharvest overlaps1"
+Keywords "gt_ltr"
+Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis"
+  run_test "#{$bin}gt ltrharvest -index Random.fna" +
+           " -overlaps best"
+end
+
+Name "gt ltrharvest overlaps1"
+Keywords "gt_ltr"
+Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis"
+  run_test "#{$bin}gt ltrharvest -index Random.fna" +
+           " -overlaps all"
+end
+
 # test all combinations of options, test only some of them
 outlist = (["-seed 100",
             "-minlenltr 100", "-maxlenltr 1000",
-	    "-mindistltr 1500", "-maxdistltr 15000"#,
-	    #"-similar 80",
-	    #"-mintsd 5","-maxtsd 20",
-	    #"-motif tgca", #"-motifmis 0",
+	    "-mindistltr 1500", "-maxdistltr 15000",
+	    "-similar 80",
+	    "-mintsd 5","-maxtsd 20",
+	    "-motif tgca"#, #"-motifmis 0",
 	    #"-vic 60",
 	    #"-overlaps best",
 	    #"-xdrop 5",

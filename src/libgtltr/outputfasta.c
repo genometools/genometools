@@ -13,6 +13,7 @@
 #include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/esa-seqread.pr"
 #include "libgtmatch/pos2seqnum.pr"
+#include "libgtmatch/echoseq.pr"
 
 //#include "fhandledef.h"
 //#include "inputsymbol.h"
@@ -36,6 +37,8 @@ typedef struct
   const Encodedsequence *encseq; // encoded sequence
   const Alphabet *alpha;     // the alphabet
   const Uchar *characters;   // for visible characters
+  const char *destab;        // pointer on descriptions
+  unsigned long *descendtab; // positions of desc-separators
   Seqpos totallength;  // totallength of encseq
   unsigned long numofdbsequences; // num of sequences in suffix array
   unsigned int linewidth; // the line width to show the alignment
@@ -59,6 +62,8 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
   unsigned long seqnum = 
                   getrecordnumSeqpos(info->markpos, info->numofdbsequences, 
 		                     info->totallength, startpos, env);
+  unsigned long desclen;
+  const char *desptr;
 
   (void) putc(FASTASEPARATOR,info->formatout);
   if(info->showseqnum)
@@ -82,6 +87,16 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
   //fprintf(fastaoutinfo->formatout,"from %s ", indexfilename);
 
   // if there are sequence descriptions
+  //check if descentab in demand !!!!
+  desptr = retriesequencedescription(&desclen,
+                                     info->destab,
+                                     info->descendtab,
+                                     seqnum);
+  for(i=0; i < desclen; i++) 
+  {
+    fprintf(info->formatout, "%c", desptr[i]);
+  }
+
   /*if(fastaoutinfo->multiseq->descspace.spaceUchar != NULL)
   {
     desclength = DESCRIPTIONLENGTH(fastaoutinfo->multiseq,seqnum);
@@ -192,8 +207,10 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
 {
   Fastaoutinfo fastaoutinfo;
   FILE *formatout = NULL;
-  encseqSequentialsuffixarrayreader(ssar);
-  
+  unsigned long *descendtab = NULL, 
+                destablength; 
+  const char *destab = NULL;
+
   if(openoutfile(&formatout, 
      innerregion ? str_get(lo->str_fastaoutputfilenameinnerregion) 
                            : str_get(lo->str_fastaoutputfilename), 
@@ -214,6 +231,16 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   fastaoutinfo.showseqnum = showseqnum;
   fastaoutinfo.formatout = formatout;
   fastaoutinfo.markpos = markpos;
+
+  destablength = destablengthSequentialsuffixarrayreader(ssar);
+  destab = destabSequentialsuffixarrayreader(ssar);
+  descendtab = calcdescendpositions(destab,
+                                    destablength,
+                                    fastaoutinfo.numofdbsequences,
+                                    env);
+  fastaoutinfo.destab = destab;
+  fastaoutinfo.descendtab = descendtab;
+
   if(overallpredictionsequences(lo,
 				ssar,
                                 innerregion, 

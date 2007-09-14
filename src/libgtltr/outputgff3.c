@@ -28,8 +28,14 @@ int printgff3format(
        idcounterTSD = 0,
        idcounterMotif = 0;
        //desclength;
+  
+  unsigned long *descendtab = NULL, 
+                destablength,
+		desclen; 
+  const char *destab = NULL;
+  const char *desptr = NULL;
  
- unsigned long numofdbsequences = 
+  unsigned long numofdbsequences = 
                 numofdbsequencesSequentialsuffixarrayreader(ssar);
   Seqpos totallength = getencseqtotallength(
                                encseqSequentialsuffixarrayreader(ssar)); 
@@ -41,6 +47,15 @@ int printgff3format(
     env_error_set(env, "cannot open file \"%s\"", str_get(lo->str_gff3filename));
     return -1;
   }
+
+  /* for getting descriptions */
+  destablength = destablengthSequentialsuffixarrayreader(ssar);
+  destab = destabSequentialsuffixarrayreader(ssar);
+  descendtab = calcdescendpositions(destab,
+                                    destablength,
+                                    numofdbsequences,
+                                    env);
+
 
   if(lo->arrayLTRboundaries.nextfreeLTRboundaries == 0)
   {
@@ -80,9 +95,19 @@ int printgff3format(
       }
       fprintf(fp, "##sequence-region seq%lu 1 " FormatSeqpos "\n", 
                   h, PRINTSeqposcast(contiglen));
-      /*fprintf(fp, "# ");
+      /* write description of contig */
+      fprintf(fp, "# ");
+      desptr = retriesequencedescription(&desclen,
+                                     info->destab,
+				     info->descendtab,
+				     h);
+      for(i=0; i < desclen; i++) 
+      {
+	fprintf(fp, "%c", desptr[i]);
+      }
+  
       // if there are sequence descriptions  //HIER DESCRIPTIONS ERGAENZEN!!!
-      if(virtualtree->multiseq.descspace.spaceUchar != NULL)
+      /*if(virtualtree->multiseq.descspace.spaceUchar != NULL)
       {
 	desclength = DESCRIPTIONLENGTH(&virtualtree->multiseq,h);
 	if(WRITETOFILEHANDLE(DESCRIPTIONPTR(&virtualtree->multiseq,h),
