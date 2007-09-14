@@ -30,6 +30,7 @@ typedef struct GenomeNode GenomeNode;
 
 typedef int (*GenomeNodeTraverseFunc)(GenomeNode*, void*, Env*);
 
+GenomeNode*   genome_node_ref(GenomeNode*);
 GenomeNode*   genome_node_rec_ref(GenomeNode*, Env*);
 void*         genome_node_cast(const GenomeNodeClass*, GenomeNode*);
 /* perform depth first traversal of the given genome node */

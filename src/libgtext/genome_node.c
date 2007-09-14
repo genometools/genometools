@@ -111,7 +111,7 @@ static int increase_reference_count(GenomeNode *gn, /*@unused@*/ void *data,
   return 0;
 }
 
-static GenomeNode* genome_node_ref(GenomeNode *gn)
+GenomeNode* genome_node_ref(GenomeNode *gn)
 {
   int had_err;
   had_err = increase_reference_count(gn, NULL, NULL);

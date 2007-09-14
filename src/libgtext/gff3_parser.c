@@ -77,7 +77,9 @@ GFF3Parser* gff3parser_new(Env *env)
 {
   GFF3Parser *gff3_parser = env_ma_malloc(env, sizeof (GFF3Parser));
   gff3_parser->id_to_genome_node_mapping = hashtable_new(HASH_STRING,
-                                                         env_ma_free_func, NULL,
+                                                         env_ma_free_func,
+                                                         (FreeFunc)
+                                                         genome_node_delete,
                                                          env);
   gff3_parser->seqid_to_str_mapping = hashtable_new(HASH_STRING, NULL,
                                                     (FreeFunc) str_delete, env);
@@ -369,8 +371,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     }
     else {
       gff3_parser->incomplete_node = true;
-      hashtable_add(gff3_parser->id_to_genome_node_mapping, id, genome_feature,
-                    env);
+      hashtable_add(gff3_parser->id_to_genome_node_mapping, id,
+                    genome_node_ref(genome_feature), env);
     }
   }
   else

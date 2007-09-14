@@ -40,13 +40,6 @@ Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_prob_3.gff3"
 end
 
-Name "gt gff3 prob 4"
-Keywords "gt_gff3"
-Test do
-  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_prob_4.gff3", :retval => 1)
-  grep $last_stderr, "has been used already for the feature defined on line"
-end
-
 Name "gt gff3 prob 5"
 Keywords "gt_gff3"
 Test do
@@ -101,6 +94,13 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_prob_11.in"
   run "diff #{$last_stdout} #{$testdata}gt_gff3_prob_11.out"
+end
+
+Name "gt gff3 prob 12"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_prob_12.gff3", :retval => 1)
+  grep $last_stderr, "has been used already for the feature defined on line"
 end
 
 Name "gt gff3 test 1.1"
