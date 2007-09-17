@@ -518,7 +518,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     }
    if (!had_err) {
       if (hashtable_get(gff3_parser->undefined_sequence_regions, seqid)) {
-        env_error_set(env, "sequence feature with id \"%s\" has been defined "
+        env_error_set(env, "genome feature with id \"%s\" has been defined "
                       "before the corresponding \"%s\" definition on line %lu "
                       "in file \"%s\"", seqid, GFF_SEQUENCE_REGION, line_number,
                       filename);
