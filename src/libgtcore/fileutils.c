@@ -125,3 +125,50 @@ int file_find_in_path(Str *path, const char *file, Env *env)
 
   return had_err;
 }
+
+StrArray *file2lines(const char *filename,Env *env)
+{
+  size_t textlen;
+  unsigned long i, linecount = 0, lencount;
+  const unsigned char *text;
+  unsigned char *tptr;
+  FILE *fp;
+
+  fp = env_fa_xfopen(env, filename, "r");
+  if(fp == NULL)
+  {
+    env_error_set(env,"cannot map file \"%s\": %s\n",filename,strerror(errno));
+    return NULL;
+  }
+  while (str_read_next_line(line, fpin, env) != EOF)
+  for(i=0, linestart = 0; i < textlen; i++)
+  {
+    if(text[i] == '\n')
+    {
+      
+      
+    }
+  }
+  
+  as->allocatedStrings = linecount+1;
+  as->nextfreeStrings = 0;
+  ALLOCASSIGNSPACE(as->spaceStrings,NULL,Stringtype,linecount+1);
+  as->stringbuffer = text;
+  as->stringbufferlength = textlen;
+  as->spaceStrings[as->nextfreeStrings].start = 0;
+  lencount = 0;
+  for(i=0; i < textlen; i++)
+  {
+    if(text[i] == '\n')
+    {
+      as->spaceStrings[as->nextfreeStrings++].length = lencount;
+      as->spaceStrings[as->nextfreeStrings].start = i + 1;
+      lencount = 0;
+      text[i] = (Uchar) '\0';
+    } else
+    {
+      lencount++;
+    }
+  }
+  return 0;
+}

@@ -144,6 +144,4 @@ void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
 
 /*@null@*/ const char *encseqaccessname(const Encodedsequence *encseq);
 
-const char *showencodedseqtype(void);
-
 #endif

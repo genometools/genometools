@@ -48,8 +48,8 @@ typedef struct
           break;\
         } else\
         {\
-          Uchar tmpsmalllcpvalue\
-                  = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
+          tmpsmalllcpvalue\
+            = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
           if (tmpsmalllcpvalue == (Uchar) UCHAR_MAX)\
           {\
             VALUE = (SSAR)->suffixarray->llvtab[\

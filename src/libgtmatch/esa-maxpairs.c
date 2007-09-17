@@ -15,7 +15,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <limits.h>
 #include "arraydef.h"
 #include "seqpos-def.h"
 #include "esa-seqread.h"
@@ -60,12 +59,12 @@ typedef struct
   unsigned int searchlength,
                alphabetsize;
   Seqpos depth;            /* value changes with each new match */
-  int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *);
-  void *processmaxpairsinfo;
   ArraySeqpos uniquechar,
-              poslist[UCHAR_MAX+1];
+              *poslist;
   const Encodedsequence *encseq;
   Readmode readmode;
+  int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *);
+  void *processmaxpairsinfo;
 } Dfsstate;
 
 #include "esa-dfs.pr"
@@ -364,6 +363,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   state.readmode = readmode;
 
   INITARRAY(&state.uniquechar,Seqpos);
+  ALLOCASSIGNSPACE(state.poslist,NULL,ArraySeqpos,alphabetsize);
   for (base = 0; base < state.alphabetsize; base++)
   {
     ptr = &state.poslist[base];
@@ -374,9 +374,11 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                     freeDfsinfo,
                     processleafedge,
                     processbranchedge,
+                    /*
                     NULL,
                     NULL,
                     NULL,
+                    */
                     &state,
                     env) != 0)
   {
@@ -388,6 +390,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
     ptr = &state.poslist[base];
     FREEARRAY(ptr,Seqpos);
   }
+  FREESPACE(state.poslist);
   return haserr ? -1 : 0;
 }
 

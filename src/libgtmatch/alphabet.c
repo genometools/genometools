@@ -40,8 +40,9 @@
 
  struct Alphabet                /* initial blank prevents select by skproto */
 {
-  Uchar characters[UCHAR_MAX+1],     /* array of characters to show */
-        mapdomain[UCHAR_MAX+1],      /* list of characters mapped */
+  char wildcardshow;
+  char *characters;                  /* array of characters to show */
+  Uchar mapdomain[UCHAR_MAX+1],      /* list of characters mapped */
         symbolmap[UCHAR_MAX+1];      /* mapping of the symbols */
   unsigned int domainsize,           /* size of domain of symbolmap */
                mapsize,              /* size of image of map, i.e. */
@@ -135,11 +136,10 @@
   \texttt{alpha}.
 */
 
-static int readsymbolmapviafp(Alphabet *alpha,
-                              Uchar wildcard,
-                              const Str *mapfile,
-                              FILE *fpin,
-                              Env *env)
+static int readsymbolmapfromlines(Alphabet *alpha,
+                                  const Str *mapfile,
+                                  const StrArray *lines
+                                  Env *env)
 {
   Uchar cc;
   unsigned cnum, linecount = 0;
@@ -243,17 +243,8 @@ static int readsymbolmapviafp(Alphabet *alpha,
     {
       if (alpha->symbolmap[cnum] == (Uchar) (alpha->mapsize - 1))
       {
-        if (wildcard > 0)
-        {
-          alpha->symbolmap[cnum] = wildcard; /* modify mapping for wildcard */
-        }
         alpha->mappedwildcards++;
       }
-    }
-    if (wildcard > 0)
-    {
-      alpha->characters[(unsigned int) wildcard]
-        = alpha->characters[alpha->mapsize-1];
     }
   }
   FREEARRAY(&line,Uchar);
@@ -271,8 +262,7 @@ static int readsymbolmapviafp(Alphabet *alpha,
   \texttt{alpha}.
 */
 
-static int readsymbolmap(Alphabet *alpha,Uchar wildcard,
-                         const Str *mapfile,Env *env)
+static int readsymbolmap(Alphabet *alpha,const Str *mapfile,Env *env)
 {
   FILE *fpin;
   bool haserr = false;
@@ -287,7 +277,7 @@ static int readsymbolmap(Alphabet *alpha,Uchar wildcard,
   }
   if (!haserr)
   {
-    if (readsymbolmapviafp(alpha,wildcard,mapfile,fpin,env) != 0)
+    if (readsymbolmapviafp(alpha,mapfile,fpin,env) != 0)
     {
       haserr = true;
     }
@@ -331,22 +321,18 @@ static void assignDNAsymbolmap(Uchar *symbolmap)
   tTuU
   nsywrkvbdhmNSYWRKVBDHM
   \end{alltt}
-  If the argument \texttt{wildcard} is 0, then the wildcard characters
-  in the last line are mapped to 4. Otherwise they are mapped to
-  the character \texttt{WILDCARD}, as defined in \texttt{chardef.h}
 */
 
 static void assignDNAalphabet(Alphabet *alpha)
 {
+  alpha->wildcardshow = (Uchar) DNAWILDCARDS[0];
   alpha->domainsize = (unsigned int) strlen(DNAALPHABETDOMAIN);
   alpha->mappedwildcards = (unsigned int) strlen(DNAWILDCARDS);
-  memcpy(alpha->mapdomain,
-         (Uchar *) DNAALPHABETDOMAIN,
+  memcpy(alpha->mapdomain,(Uchar *) DNAALPHABETDOMAIN,
          (size_t) alpha->domainsize);
   alpha->mapsize = MAPSIZEDNA;
+  ALLOCASSIGNSPACE(alpha->characters,NULL,char,MAPSIZEDNA-1);
   memcpy(alpha->characters,"acgt",(size_t) (MAPSIZEDNA-1));
-  alpha->characters[WILDCARD] = (Uchar) DNAWILDCARDS[0];
-  alpha->characters[MAPSIZEDNA-1] = (Uchar) DNAWILDCARDS[0];
   assignDNAsymbolmap(alpha->symbolmap);
 }
 
@@ -582,7 +568,7 @@ void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
 
 void fastasymbolstringgeneric(FILE *fpout,
                               const char *desc,
-                              const Uchar *characters,
+                              const Alphabet *alpha,
                               const Uchar *w,
                               unsigned long wlen,
                               unsigned long width)
@@ -605,12 +591,25 @@ void fastasymbolstringgeneric(FILE *fpout,
       j = 0;
     } else
     {
-      if (characters == NULL)
+      if (alpha == NULL)
       {
         (void) putc((int) w[i],fpout);
       } else
       {
-        (void) putc((int) characters[(int) w[i]],fpout);
+        if(w[i] == WILDCARD)
+        {
+          (void) putc(alpha->wildcardshow,fpout);
+        } else
+        {
+          if(w[i] == SEPARATOR)
+          {
+            (void) fprintf(fpout">\n")
+          } else
+          {
+            assert(w[i] < alpha->mapsize-1);
+            (void) putc((int) alpha->characters[(int) w[i]],fpout);
+          }
+        }
       }
     }
     if (i == wlen - 1)
@@ -648,7 +647,7 @@ static unsigned int removelowercaseproteinchars(Uchar *domainbuf,
   for (i=0; i< alpha->domainsize - alpha->mappedwildcards; i++)
   {
     if (isalnum((int) alpha->mapdomain[i]) &&
-       isupper((int) alpha->mapdomain[i]))
+        isupper((int) alpha->mapdomain[i]))
     {
       domainbuf[j++] = alpha->mapdomain[i];
     }

@@ -103,16 +103,16 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                                           Dfsinfo *,
                                           Dfsstate *,
                                           Env *),
+                  /*
+                  Integrate these functions later:
                   int(*processcompletenode)(Dfsinfo *,Dfsstate *,Env *),
                   int(*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *,Env *),
                   int(*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
                                             Seqpos,Dfsstate *,Env *),
+                  */
                   Dfsstate *state,
                   Env *env)
 {
-#ifndef INLINEDSequentialsuffixarrayreader
-  int retval;
-#endif
   bool firstedge,
        firstrootedge;
   Seqpos previoussuffix = 0,
@@ -124,14 +124,22 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                 nextfreeItvinfo = 0;
   Itvinfo *stackspace;
   bool haserr = false;
-
+      
+#ifdef INLINEDSequentialsuffixarrayreader
+  Uchar tmpsmalllcpvalue;
+  printf("# inlined Sequentialsuffixarrayreader\n");
+#else
+  int retval;
+#endif
   firstrootedge = true;
   PUSHDFS(0,true,NULL);
+  /*
   if (assignleftmostleaf != NULL &&
       assignleftmostleaf(TOP.dfsinfo,0,state,env) != 0)
   {
     haserr = true;
   }
+  */
   for (currentindex = 0; !haserr; currentindex++)
   {
 #ifdef INLINEDSequentialsuffixarrayreader
@@ -186,6 +194,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
           break;
         }
       }
+      /*
       if (assignrightmostleaf != NULL &&
           assignrightmostleaf(TOP.dfsinfo,
                               currentindex,
@@ -203,6 +212,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
         haserr = true;
         break;
       }
+      */
       assert(nextfreeItvinfo > 0);
       nextfreeItvinfo--;
     }
@@ -253,12 +263,14 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
       PUSHDFS(currentlcp,true,stackspace);
       if (BELOWTOP.lastisleafedge)
       {
+       /*
        if (assignleftmostleaf != NULL &&
            assignleftmostleaf(TOP.dfsinfo,currentindex,state,env) != 0)
         {
           haserr = true;
           break;
         }
+        */
         if (processleafedge != NULL &&
             processleafedge(true,
                             TOP.depth,
@@ -318,6 +330,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
         haserr = true;
       }
     }
+    /*
     if (!haserr)
     {
       if (assignrightmostleaf != NULL &&
@@ -339,6 +352,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
         haserr = true;
       }
     }
+    */
   }
   freeItvinfo(stackspace,
               allocatedItvinfo,

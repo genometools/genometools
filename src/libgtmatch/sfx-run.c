@@ -538,7 +538,9 @@ int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
   {
     printf("# sizeof (Seqpos)=%lu\n",
             (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
-    printf("# %s\n",showencodedseqtype());
+#ifdef INLINEDENCSEQ
+    printf("# inlined encodeded sequence\n");
+#endif
   }
   if (retval == 0)
   {
