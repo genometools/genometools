@@ -194,22 +194,18 @@ int subsimpleexactselfmatchstore (
 {
   env_error_check(env);
 
-  //test maximal length of candidate pair
-  if (len <= info->lmax)
-  {
-    Repeat *nextfreerepeatptr;
+  Repeat *nextfreerepeatptr;
 #ifdef DEBUG
-    printf("%lu " FormatSeqpos " " FormatSeqpos "\n",
-	       len,
-	       PRINTSeqposcast(info->offset1 + dbstart),
-	       PRINTSeqposcast(info->offset2 + (Seqpos)querystart));
+  printf("%lu " FormatSeqpos " " FormatSeqpos "\n",
+      len,
+      PRINTSeqposcast(info->offset1 + dbstart),
+      PRINTSeqposcast(info->offset2 + (Seqpos)querystart));
 #endif
-    GETNEXTFREEINARRAY (nextfreerepeatptr, &info->repeats, Repeat, 10);
-    nextfreerepeatptr->pos1 = info->offset1 + dbstart;
-    nextfreerepeatptr->offset = info->offset2 + (Seqpos)querystart - 
-                                  (info->offset1 + dbstart);
-    nextfreerepeatptr->len = (Seqpos)len;
-  }
+  GETNEXTFREEINARRAY (nextfreerepeatptr, &info->repeats, Repeat, 10);
+  nextfreerepeatptr->pos1 = info->offset1 + dbstart;
+  nextfreerepeatptr->offset = info->offset2 + (Seqpos)querystart - 
+    (info->offset1 + dbstart);
+  nextfreerepeatptr->len = (Seqpos)len;
 
   return 0;
 }
@@ -224,14 +220,10 @@ int subshowrepeats (
 {
   env_error_check(env);
 
-  /*test maximal length of candidate pair*/
-  if (len <= info->lmax)
-  {
-    printf("%lu " FormatSeqpos " " FormatSeqpos "\n",
-	       len,
-	       PRINTSeqposcast(info->offset1 + dbstart),
-	       PRINTSeqposcast(info->offset2 + (Seqpos)querystart));
-  }
+  printf("%lu " FormatSeqpos " " FormatSeqpos "\n",
+      len,
+      PRINTSeqposcast(info->offset1 + dbstart),
+      PRINTSeqposcast(info->offset2 + (Seqpos)querystart));
 
   return 0;
 } 

@@ -109,7 +109,8 @@ static void searchforbestTSDandormotifatborders(
   }
   boundaries->motif_near_tsd = false;
   
-  /*printf("  old boundary pos leftLTR_5  = " FormatSeqpos "\n",
+  /*
+  printf("  old boundary pos leftLTR_5  = " FormatSeqpos "\n",
 	         PRINTSeqposcast(boundaries->leftLTR_5 - offset));
   printf("  old boundary pos rightLTR_3 = " FormatSeqpos "\n",
 	         PRINTSeqposcast(boundaries->rightLTR_3 - offset));
@@ -123,6 +124,13 @@ static void searchforbestTSDandormotifatborders(
     // dbseqpos2 is two positions before the right repeat
     motifpos2 = info->repeats.spaceRepeat[i].pos1
 		  + info->repeats.spaceRepeat[i].offset - 2;
+    /*
+       printf("  motifpos1 = " FormatSeqpos "\n",
+       PRINTSeqposcast(motifpos1));
+       printf("  motifpos2 = " FormatSeqpos "\n",
+       PRINTSeqposcast(motifpos2));
+    */
+
     dbseqpos1 = motifpos1;
     dbseqpos2 = motifpos2;
 
@@ -136,7 +144,6 @@ static void searchforbestTSDandormotifatborders(
 	  forward++)
       {
 	tmp_motifmismatchesleftLTR = tmp_motifmismatchesrightLTR = 0;
-	//if( *(dbseqpos1 - back) != motif->firstleft) 
 	if( getencodedchar(encseq, dbseqpos1 - back, Forwardmode) 
 	    != lo->motif.firstleft) 
 	{

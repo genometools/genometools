@@ -232,8 +232,8 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   fastaoutinfo.formatout = formatout;
   fastaoutinfo.markpos = markpos;
 
-  destablength = destablengthSequentialsuffixarrayreader(ssar);
-  destab = destabSequentialsuffixarrayreader(ssar);
+  //destablength = destablengthSequentialsuffixarrayreader(ssar); //unbedingt einkommentieren
+  //destab = destabSequentialsuffixarrayreader(ssar); //unbedingt einkommentieren 
   descendtab = calcdescendpositions(destab,
                                     destablength,
                                     fastaoutinfo.numofdbsequences,
