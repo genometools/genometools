@@ -104,6 +104,7 @@ int printgff3format(
       {
 	fprintf(fp, "%c", desptr[i]);
       }
+      fprintf(fp, "\n");
   
       for(i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
       { 
