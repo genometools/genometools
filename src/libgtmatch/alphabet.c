@@ -46,8 +46,8 @@
                                      /* mapping to [0..mapsize-1] */
                mappedwildcards;      /* number of mapped wildcards */
   Uchar wildcardshow,
-        mapdomain[UCHAR_MAX+1],      /* list of characters mapped */
         symbolmap[UCHAR_MAX+1],      /* mapping of the symbols */
+        *mapdomain,                  /* list of characters mapped */
         *characters;                 /* array of characters to show */
 };
 
@@ -144,7 +144,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
 {
   char cc;
   unsigned int cnum;
-  unsigned long linecount, column;
+  unsigned long linecount, column, allocateddomainsize = 0;
   bool blankfound, ignore, preamble = true, haserr = false;
   const char *currentline;
   Uchar showchar;
@@ -155,6 +155,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
   {
     alpha->symbolmap[cnum] = (Uchar) UNDEFCHAR;
   }
+  alpha->mapdomain = NULL;
   ALLOCASSIGNSPACE(alpha->characters,NULL,Uchar,strarray_size(lines)-1);
   for(linecount = 0; linecount < strarray_size(lines); linecount++)
   {
@@ -193,6 +194,12 @@ static int readsymbolmapfromlines(Alphabet *alpha,
             }
             /* get same value */
             alpha->symbolmap[(unsigned int) cc] = (Uchar) alpha->mapsize;
+            if(alpha->domainsize >= allocateddomainsize)
+            {
+              allocateddomainsize += 8;
+              ALLOCASSIGNSPACE(alpha->mapdomain,alpha->mapdomain,Uchar,
+                               allocateddomainsize);
+            }
             alpha->mapdomain[alpha->domainsize++] = (Uchar) cc;
           } else
           {
@@ -328,8 +335,9 @@ static void assignDNAsymbolmap(Uchar *symbolmap)
 static void assignDNAalphabet(Alphabet *alpha,Env *env)
 {
   alpha->wildcardshow = (Uchar) DNAWILDCARDS[0];
-  alpha->domainsize = (unsigned int) strlen(DNAALPHABETDOMAIN);
   alpha->mappedwildcards = (unsigned int) strlen(DNAWILDCARDS);
+  alpha->domainsize = (unsigned int) strlen(DNAALPHABETDOMAIN);
+  ALLOCASSIGNSPACE(alpha->mapdomain,NULL,Uchar,alpha->domainsize);
   memcpy(alpha->mapdomain,(Uchar *) DNAALPHABETDOMAIN,
          (size_t) alpha->domainsize);
   alpha->mapsize = MAPSIZEDNA;
@@ -393,6 +401,7 @@ static void assignProteinalphabet(Alphabet *alpha,Env *env)
   alpha->wildcardshow = (Uchar) PROTEINWILDCARDS[0];
   alpha->domainsize = (unsigned int) strlen(PROTEINALPHABETDOMAIN);
   alpha->mappedwildcards = (unsigned int) strlen(PROTEINWILDCARDS);
+  ALLOCASSIGNSPACE(alpha->mapdomain,NULL,Uchar,alpha->domainsize);
   memcpy(alpha->mapdomain,
          (Uchar *) PROTEINALPHABETDOMAIN,(size_t) alpha->domainsize);
   alpha->mapsize = MAPSIZEPROTEIN;
@@ -424,6 +433,7 @@ static int assignProteinorDNAalphabet(Alphabet *alpha,
 
 void freeAlphabet(Alphabet **alpha,Env *env)
 {
+  FREESPACE((*alpha)->mapdomain);
   FREESPACE((*alpha)->characters);
   FREESPACE(*alpha);
 }
@@ -729,6 +739,7 @@ bool isproteinalphabet(const Alphabet *alpha,Env *env)
   {
     isprot = false;
   }
+  FREESPACE(proteinalphabet.mapdomain);
   FREESPACE(proteinalphabet.characters);
   return isprot;
 }

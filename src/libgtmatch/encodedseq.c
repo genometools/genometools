@@ -486,7 +486,9 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
   {
     haserr = true;
   }
+  /* XXX integrate later 
   printf("# sat=%s\n",encseqaccessname(encseq));
+  */
   str_delete(tmpfilename,env);
   return haserr ? -1 : 0;
 }
@@ -1423,9 +1425,11 @@ static Encodedsequence *determineencseqkeyvalues(
   spaceinbitsperchar
     = (double) ((uint64_t) CHAR_BIT * (uint64_t) encseq->sizeofrep)/
       (double) totallength;
+  /* XXX integrate later 
   printf("# init character encoding (%s,%lu"
          " bytes,%.2f bits/symbol)\n",
           encseq->name,encseq->sizeofrep,spaceinbitsperchar);
+  */
   return encseq;
 }
 
