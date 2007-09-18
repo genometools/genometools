@@ -97,6 +97,8 @@ void          genome_node_rec_delete(GenomeNode*, Env*);
 
 void          genome_nodes_sort(Array*);
 void          genome_nodes_sort_stable(Array*, Env*);
+bool          genome_nodes_are_equal_sequence_regions(GenomeNode*,
+                                                      GenomeNode*);
 bool          genome_nodes_are_sorted(const Array*);
 
 #endif

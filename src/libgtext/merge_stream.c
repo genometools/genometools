@@ -29,21 +29,6 @@ struct MergeStream {
 #define merge_stream_cast(GS)\
         genome_stream_cast(merge_stream_class(), GS)
 
-static unsigned int genome_nodes_are_equal_sequence_regions(GenomeNode *gn_a,
-                                                            GenomeNode *gn_b)
-{
-  void *sr_a, *sr_b;
-
-  sr_a = gn_a ? genome_node_cast(sequence_region_class(), gn_a) : NULL;
-  sr_b = gn_b ? genome_node_cast(sequence_region_class(), gn_b) : NULL;
-
-  if (sr_a && sr_b &&
-      !str_cmp(genome_node_get_seqid(gn_a), genome_node_get_seqid(gn_b))) {
-    return 1;
-  }
-  return 0;
-}
-
 static void consolidate_sequence_regions(GenomeNode *gn_a, GenomeNode *gn_b)
 {
   Range range_a, range_b;

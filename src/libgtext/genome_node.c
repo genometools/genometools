@@ -617,6 +617,20 @@ void genome_nodes_sort_stable(Array *nodes, Env *env)
 
 }
 
+bool genome_nodes_are_equal_sequence_regions(GenomeNode *gn_a, GenomeNode *gn_b)
+{
+  void *sr_a, *sr_b;
+
+  sr_a = gn_a ? genome_node_cast(sequence_region_class(), gn_a) : NULL;
+  sr_b = gn_b ? genome_node_cast(sequence_region_class(), gn_b) : NULL;
+
+  if (sr_a && sr_b && !str_cmp(genome_node_get_seqid(gn_a),
+                               genome_node_get_seqid(gn_b))) {
+    return true;
+  }
+  return false;
+}
+
 bool genome_nodes_are_sorted(const Array *nodes)
 {
   unsigned long i;
