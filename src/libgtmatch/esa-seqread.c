@@ -314,6 +314,7 @@ Readmode readmodeSequentialsuffixarrayreader(
 {
   return sarr->readmode;
 }
+#endif
 
 const Alphabet *alphabetSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *sarr)
@@ -328,4 +329,15 @@ unsigned long numofdbsequencesSequentialsuffixarrayreader(
   assert(sarr->suffixarray != NULL);
   return sarr->suffixarray->numofdbsequences;
 }
-#endif
+
+unsigned long destablengthSequentialsuffixarrayreader(
+              const Sequentialsuffixarrayreader *sarr)
+{
+  return sarr->suffixarray->destablength;
+}
+
+const char *destabSequentialsuffixarrayreader(
+              const Sequentialsuffixarrayreader *sarr)
+{
+  return sarr->suffixarray->destab;
+}
