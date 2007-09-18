@@ -23,6 +23,7 @@
 #include "seqpos-def.h"
 #include "alphadef.h"
 #include "readmode-def.h"
+#include "verbose-def.h"
 
 #define REVERSEPOS(TOT,POS) ((TOT) - 1 - (POS))
 
@@ -121,6 +122,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
                                                const Specialcharinfo
                                                      *specialcharinfo,
                                                unsigned int mapsize,
+                                               Verboseinfo *verboseinfo,
                                                Env *env);
 
 Encodedsequence *plain2encodedsequence(bool withrange,

@@ -15,19 +15,40 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef VERBOSE_H
-#define VERBOSE_H
+#include <assert.h>
+#include <stdarg.h>
+#include "verbose-def.h"
+#include "spacedef.h"
 
-#include "libgtcore/env.h"
-
-typedef struct Verboseinfo Verboseinfo;
+ struct Verboseinfo
+{
+  bool beverbose;
+};
 
 void showverbose(Verboseinfo *verboseinfo,
                  const char *format, ...)
-                 __attribute__ ((format (printf, 2, 3)));
+{
+  if(verboseinfo->beverbose)
+  {
+    va_list ap;
 
-Verboseinfo *newverboseinfo(bool verbose,Env *env);
+    assert(format != NULL);
+    va_start(ap, format);
+    printf(format, ap);
+    va_end(ap);
+  }
+}
 
-void freeverboseinfo(Verboseinfo **v,Env *env);
+Verboseinfo *newverboseinfo(bool verbose,Env *env)
+{
+  Verboseinfo *v;
 
-#endif
+  ALLOCASSIGNSPACE(v,NULL,Verboseinfo,1);
+  v->beverbose = verbose;
+  return v;
+}
+
+void freeverboseinfo(Verboseinfo **v,Env *env)
+{
+  FREESPACE(*v);
+}
