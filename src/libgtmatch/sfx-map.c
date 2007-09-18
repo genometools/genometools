@@ -368,7 +368,7 @@ void freesuffixarray(Suffixarray *suffixarray,Env *env)
   suffixarray->llvtabstream.fp = NULL;
   env_fa_xfclose(suffixarray->bwttabstream.fp,env);
   suffixarray->bwttabstream.fp = NULL;
-  if(suffixarray->alpha != NULL)
+  if (suffixarray->alpha != NULL)
   {
     freeAlphabet(&suffixarray->alpha,env);
   }

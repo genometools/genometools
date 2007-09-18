@@ -521,7 +521,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
     }
   }
   FREESPACE(filelengthtab);
-  if(alpha != NULL)
+  if (alpha != NULL)
   {
     freeAlphabet(&alpha,env);
   }

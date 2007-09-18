@@ -157,7 +157,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
   }
   alpha->mapdomain = NULL;
   ALLOCASSIGNSPACE(alpha->characters,NULL,Uchar,strarray_size(lines)-1);
-  for(linecount = 0; linecount < strarray_size(lines); linecount++)
+  for (linecount = 0; linecount < strarray_size(lines); linecount++)
   {
     currentline = strarray_get(lines,linecount);
     ignore = false;
@@ -194,7 +194,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
             }
             /* get same value */
             alpha->symbolmap[(unsigned int) cc] = (Uchar) alpha->mapsize;
-            if(alpha->domainsize >= allocateddomainsize)
+            if (alpha->domainsize >= allocateddomainsize)
             {
               allocateddomainsize += 8;
               ALLOCASSIGNSPACE(alpha->mapdomain,alpha->mapdomain,Uchar,
@@ -237,7 +237,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
           /* use first character of line to display character */
           showchar = (Uchar) LINE(0);
         }
-        if(linecount == strarray_size(lines)-1)
+        if (linecount == strarray_size(lines)-1)
         {
           alpha->wildcardshow = showchar;
         } else
@@ -495,7 +495,7 @@ void freeAlphabet(Alphabet **alpha,Env *env)
   }
   if (haserr)
   {
-    if(alpha != NULL)
+    if (alpha != NULL)
     {
       freeAlphabet(&alpha,env);
     }
@@ -626,12 +626,12 @@ void fastasymbolstringgeneric(FILE *fpout,
         (void) putc((int) w[i],fpout);
       } else
       {
-        if(w[i] == (Uchar) WILDCARD)
+        if (w[i] == (Uchar) WILDCARD)
         {
           (void) putc((int) alpha->wildcardshow,fpout);
         } else
         {
-          if(w[i] == (Uchar) SEPARATOR)
+          if (w[i] == (Uchar) SEPARATOR)
           {
             (void) fprintf(fpout,">\n");
           } else

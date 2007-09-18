@@ -124,7 +124,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                 nextfreeItvinfo = 0;
   Itvinfo *stackspace;
   bool haserr = false;
-      
+
 #ifdef INLINEDSequentialsuffixarrayreader
   Uchar tmpsmalllcpvalue;
   printf("# inlined Sequentialsuffixarrayreader\n");
