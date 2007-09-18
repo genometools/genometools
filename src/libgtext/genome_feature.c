@@ -76,10 +76,12 @@ static Range genome_feature_get_range(GenomeNode *gn)
   return gf->range;
 }
 
-static void genome_feature_set_seqid(GenomeNode *gn, Str *seqid)
+static void genome_feature_set_seqid(GenomeNode *gn, Str *seqid, Env *env)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
-  assert(gf && seqid && !gf->seqid);
+  env_error_check(env);
+  assert(gf && seqid);
+  str_delete(gf->seqid, env);
   gf->seqid = str_ref(seqid);
 }
 

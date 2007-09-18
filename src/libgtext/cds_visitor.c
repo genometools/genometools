@@ -138,7 +138,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
                                        genome_feature_get_strand(gf), NULL,
                                        UNDEF_ULONG, env);
       genome_node_set_source(cds_feature, v->source);
-      genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
+      genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn), env);
       genome_node_set_phase(cds_feature, PHASE_ZERO);
       /* all CDS features in between */
       for (i = strand == STRAND_FORWARD ? orf.start + 1 : orf.end - 1;
@@ -161,7 +161,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
                                            genome_feature_get_strand(gf),
                                            NULL, UNDEF_ULONG, env);
           genome_node_set_source(cds_feature, v->source);
-          genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
+          genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn), env);
           /* XXX correct this */
           genome_node_set_phase(cds_feature, (Phase)
                                 splicedseq_map(v->splicedseq, orf.start) % 3);

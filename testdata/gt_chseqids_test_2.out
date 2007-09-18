@@ -1,0 +1,4 @@
+##gff-version   3
+##sequence-region   chr1 1 10000
+chr1	.	gene	1000	2000	.	+	.	.
+chr1	.	gene	3000	9000	.	+	.	.

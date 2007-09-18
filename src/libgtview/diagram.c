@@ -504,27 +504,27 @@ int diagram_unit_test(Env *env)
 
   gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN, NULL,
                            UNDEF_ULONG, env);
-  genome_node_set_seqid((GenomeNode*) gn1, seqid1);
+  genome_node_set_seqid((GenomeNode*) gn1, seqid1, env);
 
   gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN, NULL,
                            UNDEF_ULONG, env);
-  genome_node_set_seqid((GenomeNode*) gn2, seqid2);
+  genome_node_set_seqid((GenomeNode*) gn2, seqid2, env);
 
   ex1 = genome_feature_new(gft_exon, r2, STRAND_UNKNOWN, NULL,
                            UNDEF_ULONG, env);
-  genome_node_set_seqid((GenomeNode*) ex1, seqid1);
+  genome_node_set_seqid((GenomeNode*) ex1, seqid1, env);
 
   ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN, NULL,
                            UNDEF_ULONG, env);
-  genome_node_set_seqid((GenomeNode*) ex2, seqid1);
+  genome_node_set_seqid((GenomeNode*) ex2, seqid1, env);
 
   ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN, NULL,
                            UNDEF_ULONG, env);
-  genome_node_set_seqid((GenomeNode*) ex3, seqid2);
+  genome_node_set_seqid((GenomeNode*) ex3, seqid2, env);
 
   cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN, NULL,
                             UNDEF_ULONG, env);
-  genome_node_set_seqid((GenomeNode*) cds1, seqid2);
+  genome_node_set_seqid((GenomeNode*) cds1, seqid2, env);
 
   /* determine the structure of our feature tree */
   genome_node_is_part_of_genome_node(gn1, ex1, env);

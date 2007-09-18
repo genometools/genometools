@@ -28,7 +28,6 @@ const GenomeStreamClass* gff3_in_stream_class(void);
 void                     gff3_in_stream_set_offset(GenomeStream*, long);
 int                      gff3_in_stream_set_offsetfile(GenomeStream*, Str*,
                                                        Env*);
-int                      gff3_in_stream_set_chseqids(GenomeStream*, Str*, Env*);
 GenomeStream*            gff3_in_stream_new_unsorted(int num_of_files,
                                                      const char **filenames,
                                                      bool be_verbose,

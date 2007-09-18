@@ -55,6 +55,15 @@ static void sequence_region_set_range(GenomeNode *gn, Range range)
   sr->range = range;
 }
 
+static void sequence_region_set_seqid(GenomeNode *gn, Str *seqid, Env *env)
+{
+  SequenceRegion *sr = sequence_region_cast(gn);
+  env_error_check(env);
+  assert(sr && seqid);
+  str_delete(sr->seqid, env);
+  sr->seqid = str_ref(seqid);
+}
+
 static int sequence_region_accept(GenomeNode *gn, GenomeVisitor *gv, Env *env)
 {
   SequenceRegion *sr;
@@ -71,7 +80,7 @@ const GenomeNodeClass* sequence_region_class()
                                        sequence_region_get_seqid,
                                        sequence_region_get_range,
                                        sequence_region_set_range,
-                                       NULL,
+                                       sequence_region_set_seqid,
                                        NULL,
                                        NULL,
                                        sequence_region_accept };

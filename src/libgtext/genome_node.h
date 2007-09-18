@@ -54,7 +54,7 @@ unsigned long genome_node_get_start(GenomeNode*);
 unsigned long genome_node_get_end(GenomeNode*);
 Range         genome_node_get_range(GenomeNode*);
 void          genome_node_set_range(GenomeNode*, Range);
-void          genome_node_set_seqid(GenomeNode*, Str*);
+void          genome_node_set_seqid(GenomeNode*, Str*, Env*);
 void          genome_node_set_source(GenomeNode*, Str*);
 void          genome_node_set_phase(GenomeNode*, Phase);
 int           genome_node_accept(GenomeNode*, GenomeVisitor*, Env*);

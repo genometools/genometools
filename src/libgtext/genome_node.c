@@ -297,8 +297,10 @@ unsigned long genome_node_number_of_children(const GenomeNode *gn)
 
 Str* genome_node_get_seqid(GenomeNode *gn)
 {
-  assert(gn && gn->c_class && gn->c_class->get_seqid);
-  return gn->c_class->get_seqid(gn);
+  assert(gn && gn->c_class);
+  if (gn->c_class->get_seqid)
+    return gn->c_class->get_seqid(gn);
+  return NULL;
 }
 
 Str* genome_node_get_idstr(GenomeNode *gn)
@@ -331,10 +333,11 @@ void genome_node_set_range(GenomeNode *gn, Range range)
   gn->c_class->set_range(gn, range);
 }
 
-void genome_node_set_seqid(GenomeNode *gn, Str *seqid)
+void genome_node_set_seqid(GenomeNode *gn, Str *seqid, Env *env)
 {
+  env_error_check(env);
   assert(gn && gn->c_class && gn->c_class->set_seqid && seqid);
-  gn->c_class->set_seqid(gn, seqid);
+  gn->c_class->set_seqid(gn, seqid, env);
 }
 
 void genome_node_set_source(GenomeNode *gn, Str *source)

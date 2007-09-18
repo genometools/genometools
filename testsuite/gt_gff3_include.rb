@@ -268,17 +268,3 @@ Test do
   run_test "#{$bin}gt gff3 -offsetfile #{$testdata}gt_gff3_offsetfile_test.offsetfile #{$testdata}gt_gff3_offsetfile_test.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_gff3_offsetfile_test.out"
 end
-
-Name "gt gff3 test option -chseqids"
-Keywords "gt_gff3"
-Test do
-  run_test "#{$bin}gt gff3 -chseqids #{$testdata}gt_gff3_chseqids_test.chseqids #{$testdata}gt_gff3_chseqids_test.gff3"
-  run "diff #{$last_stdout} #{$testdata}gt_gff3_chseqids_test.out"
-end
-
-Name "gt gff3 test options -offsetfile and -chseqids"
-Keywords "gt_gff3"
-Test do
-  run_test "#{$bin}gt gff3 -offsetfile #{$testdata}gt_gff3_offsetfile_test.offsetfile -chseqids #{$testdata}gt_gff3_chseqids_test.chseqids #{$testdata}gt_gff3_offsetfile_test.gff3"
-  run "diff #{$last_stdout} #{$testdata}gt_gff3_offsetfile_and_chseqids.out"
-end

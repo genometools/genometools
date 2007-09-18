@@ -50,6 +50,7 @@
 #include "libgtlua/interactive.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
+#include "tools/gt_chseqids.h"
 #include "tools/gt_clean.h"
 #include "tools/gt_csa.h"
 #include "tools/gt_dev.h"
@@ -172,6 +173,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   gtr->toolbox = toolbox_new(env);
   toolbox_add(gtr->toolbox, "bioseq", gt_bioseq, env);
   toolbox_add(gtr->toolbox, "cds", gt_cds, env);
+  toolbox_add(gtr->toolbox, "chseqids", gt_chseqids, env);
   toolbox_add(gtr->toolbox, "clean", gt_clean, env);
   toolbox_add(gtr->toolbox, "csa", gt_csa, env);
   toolbox_add(gtr->toolbox, "dev", gt_dev, env);
