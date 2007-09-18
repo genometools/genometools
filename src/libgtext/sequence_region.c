@@ -89,3 +89,19 @@ GenomeNode* sequence_region_new(Str *seqid, Range range, Str *filename,
   sr->range = range;
   return gn;
 }
+
+void sequence_regions_consolidate(GenomeNode *gn_a, GenomeNode *gn_b)
+{
+  Range range_a, range_b;
+
+  assert(gn_a);
+  assert(gn_b);
+  assert(genome_node_cast(sequence_region_class(), gn_a));
+  assert(genome_node_cast(sequence_region_class(), gn_b));
+  assert(!str_cmp(genome_node_get_seqid(gn_a), genome_node_get_seqid(gn_b)));
+
+  range_a = genome_node_get_range(gn_a);
+  range_b = genome_node_get_range(gn_b);
+  range_a = range_join(range_a, range_b);
+  genome_node_set_range(gn_a, range_a);
+}

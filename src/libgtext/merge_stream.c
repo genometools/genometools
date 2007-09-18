@@ -19,6 +19,7 @@
 #include "libgtcore/undef.h"
 #include "libgtext/genome_stream_rep.h"
 #include "libgtext/merge_stream.h"
+#include "libgtext/sequence_region.h"
 
 struct MergeStream {
   const GenomeStream parent_instance;
@@ -28,22 +29,6 @@ struct MergeStream {
 
 #define merge_stream_cast(GS)\
         genome_stream_cast(merge_stream_class(), GS)
-
-static void consolidate_sequence_regions(GenomeNode *gn_a, GenomeNode *gn_b)
-{
-  Range range_a, range_b;
-
-  assert(gn_a);
-  assert(gn_b);
-  assert(genome_node_cast(sequence_region_class(), gn_a));
-  assert(genome_node_cast(sequence_region_class(), gn_b));
-  assert(!str_cmp(genome_node_get_seqid(gn_a), genome_node_get_seqid(gn_b)));
-
-  range_a = genome_node_get_range(gn_a);
-  range_b = genome_node_get_range(gn_b);
-  range_a = range_join(range_a, range_b);
-  genome_node_set_range(gn_a, range_a);
-}
 
 int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
@@ -77,7 +62,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
           assert(i != j);
           if (genome_nodes_are_equal_sequence_regions(ms->buffer[i],
                                                       ms->buffer[j])) {
-            consolidate_sequence_regions(ms->buffer[i], ms->buffer[j]);
+            sequence_regions_consolidate(ms->buffer[i], ms->buffer[j]);
             genome_node_rec_delete(ms->buffer[j], env);
             ms->buffer[j] = NULL;
           }
