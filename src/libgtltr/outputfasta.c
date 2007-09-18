@@ -55,7 +55,6 @@ typedef struct
 static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos, 
                     Seqpos len, /*@unused@*/Str *str_indexfilename, Env *env)
 {
-  //Uint desclength,
   Seqpos i,
          k,
 	 offset;
@@ -121,15 +120,6 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
       info->characters[getencodedchar(info->encseq, i, Forwardmode)] );
   }
   (void) putc('\n',info->formatout);
-
-  /*if(formatseq(fastaoutinfo->formatout,
-	fastaoutinfo->alpha->mapsize,
-	fastaoutinfo->alpha->characters,
-	fastaoutinfo->alpha->undefsymbol,fastaoutinfo->linewidth,
-	start,len) != 0)
-  {
-    return (Sint) -2;
-  }*/
 
   return 0;
 }
@@ -232,8 +222,8 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   fastaoutinfo.formatout = formatout;
   fastaoutinfo.markpos = markpos;
 
-  //destablength = destablengthSequentialsuffixarrayreader(ssar); //unbedingt einkommentieren
-  //destab = destabSequentialsuffixarrayreader(ssar); //unbedingt einkommentieren 
+  destablength = destablengthSequentialsuffixarrayreader(ssar); //unbedingt einkommentieren
+  destab = destabSequentialsuffixarrayreader(ssar); //unbedingt einkommentieren 
   descendtab = calcdescendpositions(destab,
                                     destablength,
                                     fastaoutinfo.numofdbsequences,
@@ -251,11 +241,14 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
     return -1;
   }
 
+  FREESPACE(descendtab);
+
   if(fclose(formatout) != 0)
   {
     env_error_set(env, "cannot close file \"%s\"", 
                        str_get(lo->str_fastaoutputfilename));
     return -1;
   }
+  
   return 0;
 }

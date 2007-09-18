@@ -21,8 +21,8 @@
 #include "searchforLTRs.h"
 #include "duplicates.h"
 #include "outputstd.h"
-//#include "outputfasta.h" //spaeter einkommentieren
-//#include "outputgff3.h"
+#include "outputfasta.h" //spaeter einkommentieren
+#include "outputgff3.h"
 
 static int runltrharvest(LTRharvestoptions *lo, Env *env)
 {
@@ -35,7 +35,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   
   ssar = newSequentialsuffixarrayreaderfromfile(lo->str_indexname,
 		                  SARR_LCPTAB | SARR_SUFTAB | 
-				  SARR_ESQTAB ,//| SARR_DESTAB, ///spaeter einkommentieren!!!!!!!!!!!
+				  SARR_ESQTAB | SARR_DESTAB,
 				  false,
 				  env);
   if(ssar == NULL)
@@ -131,7 +131,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
                                       lo->nooverlapallowed);
   }
 
-  /* print multiple FASTA file of predictions
+  // print multiple FASTA file of predictions
   if(!haserror && lo->fastaoutput)
   {
     if (showpredictionsmultiplefasta(lo,
@@ -174,7 +174,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
       haserror = true;
       //return -1; 
     }
-  }*/
+  }
 
   if(!haserror && numofdbsequences > 1)
   {

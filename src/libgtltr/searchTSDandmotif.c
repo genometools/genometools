@@ -959,7 +959,7 @@ static int searchforTSDandorMotifoutside(
     subrepeatinfo.offset1 = startleftLTR;
     subrepeatinfo.offset2 = startrightLTR;
     subrepeatinfo.envptr = env;
-
+    
     if (sarrquerysubstringmatch(dbseq,
 	  leftlen,
 	  query,

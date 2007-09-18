@@ -6,11 +6,11 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/esa-seqread.h"
+#include "libgtmatch/echoseq.pr"
 
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
 
-/*  unbeding einkommentieren
 int printgff3format(
   LTRharvestoptions *lo,
   Sequentialsuffixarrayreader *ssar,
@@ -28,7 +28,6 @@ int printgff3format(
        idcounterLTR = 0,
        idcounterTSD = 0,
        idcounterMotif = 0;
-       //desclength;
   
   unsigned long *descendtab = NULL, 
                 destablength,
@@ -99,8 +98,8 @@ int printgff3format(
       // write description of contig
       fprintf(fp, "# ");
       desptr = retriesequencedescription(&desclen,
-                                     info->destab,
-				     info->descendtab,
+                                     destab,
+				     descendtab,
 				     h);
       for(i=0; i < desclen; i++) 
       {
@@ -235,6 +234,8 @@ int printgff3format(
       }
     }
   }
+  FREESPACE(descendtab);
+
   if(fclose(fp) != 0)
   {
     env_error_set(env, "cannot close file \"%s\"", str_get(lo->str_gff3filename));
@@ -242,4 +243,3 @@ int printgff3format(
   }
   return 0;
 }
-*/
