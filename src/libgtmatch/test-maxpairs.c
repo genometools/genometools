@@ -40,7 +40,7 @@ int testmaxpairs(const Str *indexname,
 #include "alphadef.h"
 #include "format64.h"
 
-#include "sfx-map.pr"
+#include "esa-map.pr"
 #include "esa-mmsearch.pr"
 #include "esa-selfmatch.pr"
 #include "arrcmp.pr"

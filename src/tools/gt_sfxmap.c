@@ -18,7 +18,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/sarr-def.h"
-#include "libgtmatch/sfx-map.pr"
+#include "libgtmatch/esa-map.pr"
 #include "libgtmatch/test-encseq.pr"
 #include "libgtmatch/pos2seqnum.pr"
 #include "libgtmatch/test-mappedstr.pr"

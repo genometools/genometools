@@ -31,7 +31,7 @@
 #include "readnextline.pr"
 #include "opensfxfile.pr"
 #include "sfx-readint.pr"
-#include "sfx-map.pr"
+#include "esa-map.pr"
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 

@@ -23,7 +23,7 @@
 #include "trieins-def.h"
 
 #include "trieins.pr"
-#include "sfx-map.pr"
+#include "esa-map.pr"
 
  DECLAREREADFUNCTION(Seqpos);
 
@@ -63,11 +63,11 @@ static int inputthesequences(Alphabet **alpha,
   {
     indexname = str_new_cstr(strarray_get(indexnametab,idx),env);
     if (streamsuffixarray(&suffixarraytable[idx],
-                         &totallength,
-                         demand,
-                         indexname,
-                         false,
-                         env) != 0)
+                          &totallength,
+                          demand,
+                          indexname,
+                          false,
+                          env) != 0)
     {
       str_delete(indexname,env);
       return -1;

@@ -25,7 +25,7 @@
 #include "libgtmatch/enum-patt-def.h"
 #include "libgtmatch/esa-mmsearch-def.h"
 
-#include "libgtmatch/sfx-map.pr"
+#include "libgtmatch/esa-map.pr"
 #include "libgtmatch/enum-patt.pr"
 #include "libgtmatch/esa-mmsearch.pr"
 

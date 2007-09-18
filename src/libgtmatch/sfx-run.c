@@ -31,6 +31,7 @@
 #include "sfx-suffixer.h"
 #include "sfx-lcpval.h"
 #include "iterseq.h"
+#include "verbose-def.h"
 #include "stamp.h"
 
 #include "measure-time.pr"

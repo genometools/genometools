@@ -21,7 +21,7 @@
 #include "esa-seqread.h"
 #include "sfx-lcpval.h"
 
-#include "sfx-map.pr"
+#include "esa-map.pr"
 
 #ifdef INLINEDSequentialsuffixarrayreader
 

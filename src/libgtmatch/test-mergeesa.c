@@ -21,7 +21,7 @@
 #include "emimergeesa.h"
 #include "esafileend.h"
 
-#include "mergeesa.pr"
+#include "esa-merge.pr"
 #include "encseq2offset.pr"
 
 typedef struct

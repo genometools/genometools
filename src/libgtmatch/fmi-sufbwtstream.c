@@ -21,8 +21,8 @@
 #include "divmodmul.h"
 #include "chardef.h"
 
-#include "mergeesa.pr"
-#include "sfx-map.pr"
+#include "esa-merge.pr"
+#include "esa-map.pr"
 #include "encseq2offset.pr"
 #include "opensfxfile.pr"
 #include "mkidxcpy.pr"

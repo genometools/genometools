@@ -22,7 +22,7 @@
 #include "alphadef.h"
 
 #include "trieins.pr"
-#include "sfx-map.pr"
+#include "esa-map.pr"
 
 static void maketrie(Trierep *trierep,
                      /*@unused@*/ const Uchar *characters,

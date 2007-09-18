@@ -30,7 +30,7 @@
 #include "stamp.h"
 
 #include "sfx-apfxlen.pr"
-#include "sfx-map.pr"
+#include "esa-map.pr"
 #include "echoseq.pr"
 
 /*
