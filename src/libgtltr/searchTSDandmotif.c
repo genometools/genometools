@@ -92,13 +92,13 @@ static void searchforbestTSDandormotifatborders(
   unsigned int hitcounter = 0;
   const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
 
-  ///* test 
+  /* test 
   Seqpos j;
   const Uchar *characters;
   // in order to get to visible dna characters
   characters = getcharactersAlphabet(
                  alphabetSequentialsuffixarrayreader(ssar));
-  //test*/ 
+  test*/ 
 
   env_error_check(env);
 
@@ -123,10 +123,10 @@ static void searchforbestTSDandormotifatborders(
   printf("  old boundary pos rightLTR_3 = " FormatSeqpos "\n",
 	         PRINTSeqposcast(boundaries->rightLTR_3 - offset));
   */
-  ///*test
+  /*test
   printf("number of maximal repeats in vic: %lu\n",
            info->repeats.nextfreeRepeat);
-  //test*/
+  test*/
 
   for(i = 0; i < info->repeats.nextfreeRepeat; i++)
   {
@@ -256,7 +256,7 @@ static void searchforbestTSDandormotifatborders(
 		 // store TSD length
                  boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
 		
-		 ///*test
+		 /*test
 		 //if(info->repeats.nextfreeRepeat == 199)
 		 //{
 		 printf("next better hit\n");
@@ -285,7 +285,7 @@ static void searchforbestTSDandormotifatborders(
 	                    PRINTSeqposcast(difffromoldboundary1),
 	                    PRINTSeqposcast(difffromoldboundary2) );
 		 //}
-                 //test*/
+                 test*/
 
 		 difffromoldboundary1 = difffromnewboundary1;
 		 difffromoldboundary2 = difffromnewboundary2;
@@ -297,7 +297,7 @@ static void searchforbestTSDandormotifatborders(
     }
   }
   
-  ///*test
+  /*test
   if( boundaries->motif_near_tsd )
   {
     printf("found %hu time(s) TSD and motif:\n",
@@ -339,7 +339,7 @@ static void searchforbestTSDandormotifatborders(
 	characters[getencodedchar(encseq,
 	  boundaries->leftLTR_5 + 1,
 	  Forwardmode)]);
-  //*/
+  */
 }
 
 /*

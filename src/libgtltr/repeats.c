@@ -195,14 +195,6 @@ int subsimpleexactselfmatchstore (
   env_error_check(env);
 
   Repeat *nextfreerepeatptr;
-  /*test
-//#ifdef DEBUG
-  printf("%lu " FormatSeqpos " " FormatSeqpos "\n",
-      len,
-      PRINTSeqposcast(info->offset1 + dbstart),
-      PRINTSeqposcast(info->offset2 + (Seqpos)querystart));
-//#endif
-  test*/
   GETNEXTFREEINARRAY (nextfreerepeatptr, &info->repeats, Repeat, 10);
   nextfreerepeatptr->pos1 = info->offset1 + dbstart;
   nextfreerepeatptr->offset = info->offset2 + (Seqpos)querystart - 
