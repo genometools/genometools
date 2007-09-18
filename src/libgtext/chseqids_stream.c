@@ -36,7 +36,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
   ChseqidsStream *cs;
   GenomeNode *node, **gn_a, **gn_b;
-  Str *changed_seqid = NULL;
+  Str *changed_seqid;
   unsigned long i;
   int had_err = 0;
   env_error_check(env);
@@ -62,6 +62,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
                                            str_get(genome_node_get_seqid(node)),
                                                  env))) {
           genome_node_set_seqid(node, changed_seqid, env);
+          str_delete(changed_seqid, env);
         }
         else
           had_err = -1;
@@ -101,13 +102,13 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
                                             str_get(genome_node_get_seqid(*gn)),
                                                env))) {
         genome_node_set_seqid(*gn, changed_seqid, env);
+          str_delete(changed_seqid, env);
       }
       else
         had_err = -1;
     }
   }
 
-  str_delete(changed_seqid, env);
   return had_err;
 }
 
@@ -121,6 +122,7 @@ static void chseqids_stream_free(GenomeStream *gs, Env *env)
     genome_node_rec_delete(*(GenomeNode**)
                            array_get(cs->genome_node_buffer, i), env);
   }
+  array_delete(cs->genome_node_buffer, env);
 }
 
 const GenomeStreamClass* chseqids_stream_class(void)
