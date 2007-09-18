@@ -38,7 +38,7 @@ static unsigned int genome_nodes_are_equal_sequence_regions(GenomeNode *gn_a,
   sr_b = gn_b ? genome_node_cast(sequence_region_class(), gn_b) : NULL;
 
   if (sr_a && sr_b &&
-      str_cmp(genome_node_get_seqid(gn_a), genome_node_get_seqid(gn_b)) == 0) {
+      !str_cmp(genome_node_get_seqid(gn_a), genome_node_get_seqid(gn_b))) {
     return 1;
   }
   return 0;
@@ -52,8 +52,7 @@ static void consolidate_sequence_regions(GenomeNode *gn_a, GenomeNode *gn_b)
   assert(gn_b);
   assert(genome_node_cast(sequence_region_class(), gn_a));
   assert(genome_node_cast(sequence_region_class(), gn_b));
-  assert(str_cmp(genome_node_get_seqid(gn_a),
-                 genome_node_get_seqid(gn_b)) == 0);
+  assert(!str_cmp(genome_node_get_seqid(gn_a), genome_node_get_seqid(gn_b)));
 
   range_a = genome_node_get_range(gn_a);
   range_b = genome_node_get_range(gn_b);
