@@ -44,6 +44,12 @@ else
   $bin=File.join(Dir.pwd, "..", "bin", "")
 end
 
+if $arguments["cur"] then
+  $cur=$arguments["cur"]
+else
+  $cur=File.join(Dir.pwd, "..")
+end
+
 $transdir=File.join(Dir.pwd, "..", "gtdata" , "trans", "")
 
 $systemname=`uname -s`
@@ -52,7 +58,7 @@ $systemname.chomp!
 # define helper function
 def run_test(str, opts = {})
   if $arguments["memcheck"] then
-    if $systemname == "Linux" then 
+    if $systemname == "Linux" then
       memcheck = "valgrind --tool=memcheck --suppressions="+
                  File.join($testdata, "gt.supp")+
                  " --leak-check=yes --error-exitcode=1 -q"
@@ -88,3 +94,7 @@ if $arguments["libgtview"] then
   require 'gt_view_include'
 end
 require 'gt_env_options_include'
+
+if $arguments["gcov"] then
+  require 'gcov_include' # must be last
+end

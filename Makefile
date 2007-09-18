@@ -174,6 +174,12 @@ ifeq ($(assert),no)
   GT_CXXFLAGS += -DNDEBUG
 endif
 
+ifeq ($(cov),yes)
+  export CCACHE_DISABLE # ccache cannot handle coverage objects
+  GT_CFLAGS += -fprofile-arcs -ftest-coverage
+  STEST_FLAGS += -gcov
+endif
+
 ifeq ($(prof),yes)
   GT_CFLAGS += -pg
   GT_LDFLAGS += -pg
@@ -449,7 +455,7 @@ obj/%.prepro: ${CURDIR}/src/libgtmatch/%.c
 
 test: all
 	bin/gt -test
-	cd testsuite && env -i GT_MEM_BOOKKEEPING=on ruby -I. testsuite.rb -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin $(STEST_FLAGS)
+	cd testsuite && env -i GT_MEM_BOOKKEEPING=on ruby -I. testsuite.rb -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin -cur $(CURDIR)$(STEST_FLAGS)
 
 clean:
 	rm -rf obj
