@@ -368,7 +368,10 @@ void freesuffixarray(Suffixarray *suffixarray,Env *env)
   suffixarray->llvtabstream.fp = NULL;
   env_fa_xfclose(suffixarray->bwttabstream.fp,env);
   suffixarray->bwttabstream.fp = NULL;
-  freeAlphabet(&suffixarray->alpha,env);
+  if(suffixarray->alpha != NULL)
+  {
+    freeAlphabet(&suffixarray->alpha,env);
+  }
   freeEncodedsequence(&suffixarray->encseq,env);
   strarray_delete(suffixarray->filenametab,env);
   suffixarray->filenametab = NULL;

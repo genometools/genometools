@@ -31,6 +31,7 @@
 #include "sfx-suffixer.h"
 #include "sfx-lcpval.h"
 #include "iterseq.h"
+#include "stamp.h"
 
 #include "measure-time.pr"
 #include "opensfxfile.pr"
@@ -428,7 +429,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
            PRINTSeqposcast(specialcharinfo.specialranges));
     if (so->readmode == Complementmode || so->readmode == Reversecomplementmode)
     {
-      if (!isdnaalphabet(alpha))
+      if (!isdnaalphabet(alpha,env))
       {
         env_error_set(env,"option %s only can be used for DNA alphabets",
                           so->readmode == Complementmode ? "-cpl" : "rcl");
@@ -493,10 +494,10 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
       }
     }
   }
-  env_fa_xfclose(outfileinfo.outfpsuftab,env);
-  env_fa_xfclose(outfileinfo.outfplcptab,env);
-  env_fa_xfclose(outfileinfo.outfpllvtab,env);
-  env_fa_xfclose(outfileinfo.outfpbwttab,env);
+  env_fa_fclose(outfileinfo.outfpsuftab,env);
+  env_fa_fclose(outfileinfo.outfplcptab,env);
+  env_fa_fclose(outfileinfo.outfpllvtab,env);
+  env_fa_fclose(outfileinfo.outfpbwttab,env);
   if (outfileinfo.lvi != NULL)
   {
     freeLcpvalueiterator(&outfileinfo.lvi,env);
@@ -520,7 +521,10 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
     }
   }
   FREESPACE(filelengthtab);
-  freeAlphabet(&alpha,env);
+  if(alpha != NULL)
+  {
+    freeAlphabet(&alpha,env);
+  }
   freeEncodedsequence(&encseq,env);
   deliverthetime(stdout,mtime,NULL,env);
   return haserr ? -1 : 0;

@@ -296,12 +296,12 @@ int testmaxpairs(const Str *indexname,
       (void) array_iterate(maxmatchselfinfo.results,showSubstringmatch,
                            NULL,env);
       fastasymbolstringgeneric(stdout,"dbseq",
-                               getcharactersAlphabet(suffixarray.alpha),
+                               suffixarray.alpha,
                                dbseq,
                                (unsigned long) dblen,
                                (unsigned long) 60);
       fastasymbolstringgeneric(stdout,"queryseq",
-                               getcharactersAlphabet(suffixarray.alpha),
+                               suffixarray.alpha,
                                query,
                                (unsigned long) querylen,
                                (unsigned long) 60);
