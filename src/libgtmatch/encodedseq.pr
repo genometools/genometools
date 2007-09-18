@@ -61,8 +61,6 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        unsigned int mapsize,
                                        Env *env);
 
-const char *showencodedseqtype(void);
-
 #ifdef __cplusplus
 }
 #endif

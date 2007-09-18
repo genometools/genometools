@@ -23,6 +23,84 @@
 
 #include "sfx-map.pr"
 
+#ifdef INLINEDSequentialsuffixarrayreader
+
+Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
+                                        const Str *indexname,
+                                        unsigned int demand,
+                                        Sequentialaccesstype seqactype,
+                                        Env *env)
+{
+  Sequentialsuffixarrayreader *ssar;
+  Seqpos totallength;
+
+  ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
+  ALLOCASSIGNSPACE(ssar->suffixarray,NULL,Suffixarray,1);
+  if (mapsuffixarray (ssar->suffixarray,
+                      &totallength,
+                      demand,
+                      indexname,
+                      false,
+                      env) != 0)
+  {
+    FREESPACE(ssar->suffixarray);
+    FREESPACE(ssar);
+    return NULL;
+  }
+  ssar->nextsuftabindex = 0;
+  ssar->nextlcptabindex = (Seqpos) 1;
+  ssar->largelcpindex = 0;
+  ssar->numberofsuffixes = totallength+1;
+  return ssar;
+}
+
+void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
+                                     Env *env)
+{
+  if ((*ssar)->suffixarray != NULL)
+  {
+    freesuffixarray((*ssar)->suffixarray,env);
+    FREESPACE((*ssar)->suffixarray);
+  }
+  FREESPACE(*ssar);
+}
+
+int nextSequentialsuftabvalue(Seqpos *currentsuffix,
+                              Sequentialsuffixarrayreader *ssar,
+                              Env *env)
+{
+  *currentsuffix = ssar->suffixarray->suftab[ssar->nextsuftabindex++];
+  return 1;
+}
+
+const Encodedsequence *encseqSequentialsuffixarrayreader(
+                          const Sequentialsuffixarrayreader *sarr)
+{
+  return sarr->suffixarray->encseq;
+}
+
+Readmode readmodeSequentialsuffixarrayreader(
+                          const Sequentialsuffixarrayreader *sarr)
+{
+  return sarr->suffixarray->readmode;
+}
+
+const Alphabet *alphabetSequentialsuffixarrayreader(
+                          const Sequentialsuffixarrayreader *sarr)
+{
+  assert(sarr->suffixarray != NULL);
+  return sarr->suffixarray->alpha;
+}
+
+unsigned long numofdbsequencesSequentialsuffixarrayreader(
+                    const Sequentialsuffixarrayreader *sarr)
+{
+  assert(sarr->suffixarray != NULL);
+  return sarr->suffixarray->numofdbsequences;
+}
+
+#else
+
  DECLAREREADFUNCTION(Seqpos);
 
  DECLAREREADFUNCTION(Uchar);
@@ -250,3 +328,4 @@ unsigned long numofdbsequencesSequentialsuffixarrayreader(
   assert(sarr->suffixarray != NULL);
   return sarr->suffixarray->numofdbsequences;
 }
+#endif

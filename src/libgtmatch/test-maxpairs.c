@@ -15,6 +15,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifdef INLINEDSequentialsuffixarrayreader
+
+#include "libgtcore/env.h"
+#include "libgtcore/str.h"
+#include "seqpos-def.h"
+
+int testmaxpairs(const Str *indexname,
+                 unsigned long samples,
+                 unsigned int minlength,
+                 Seqpos substringlength,
+                 Env *env)
+{
+  return 0;
+}
+
+#else
+
 #include "libgtcore/array.h"
 #include "sarr-def.h"
 #include "arraydef.h"
@@ -279,12 +296,12 @@ int testmaxpairs(const Str *indexname,
       (void) array_iterate(maxmatchselfinfo.results,showSubstringmatch,
                            NULL,env);
       fastasymbolstringgeneric(stdout,"dbseq",
-                               getcharactersAlphabet(suffixarray.alpha),
+                               suffixarray.alpha,
                                dbseq,
                                (unsigned long) dblen,
                                (unsigned long) 60);
       fastasymbolstringgeneric(stdout,"queryseq",
-                               getcharactersAlphabet(suffixarray.alpha),
+                               suffixarray.alpha,
                                query,
                                (unsigned long) querylen,
                                (unsigned long) 60);
@@ -300,3 +317,5 @@ int testmaxpairs(const Str *indexname,
   freesuffixarray(&suffixarray,env);
   return haserr ? -1 : 0;
 }
+
+#endif /* INLINEDSequentialsuffixarrayreader */
