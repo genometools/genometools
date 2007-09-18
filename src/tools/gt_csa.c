@@ -28,9 +28,9 @@ typedef struct {
   bool verbose;
   unsigned long join_length;
   GenFile *outfp;
-} Csa_arguments;
+} CSAArguments;
 
-static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
+static OPrval parse_options(int *parsed_args, CSAArguments *arguments,
                             int argc, const char **argv, Env *env)
 {
   OptionParser *op;
@@ -75,7 +75,7 @@ int gt_csa(int argc, const char **argv, Env *env)
                *csa_stream,
                *gff3_out_stream;
   GenomeNode *gn;
-  Csa_arguments arguments;
+  CSAArguments arguments;
   int parsed_args, had_err;
   env_error_check(env);
 
