@@ -164,11 +164,6 @@ SERVER=gordon@genometools.org
 WWWBASEDIR=/var/www/servers
 
 # process arguments
-ifneq ($(opt),no)
-  GT_CFLAGS += -Os
-  GT_CXXFLAGS += -Os
-endif
-
 ifeq ($(assert),no)
   GT_CFLAGS += -DNDEBUG
   GT_CXXFLAGS += -DNDEBUG
@@ -178,6 +173,12 @@ ifeq ($(cov),yes)
   export CCACHE_DISABLE # ccache cannot handle coverage objects
   GT_CFLAGS += -fprofile-arcs -ftest-coverage
   STEST_FLAGS += -gcov
+  opt=no
+endif
+
+ifneq ($(opt),no)
+  GT_CFLAGS += -Os
+  GT_CXXFLAGS += -Os
 endif
 
 ifeq ($(prof),yes)
