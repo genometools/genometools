@@ -7,6 +7,7 @@
 #include <stdbool.h>
 
 #include "libgtcore/env.h"
+#include "libgtcore/minmax.h"
 
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/sarr-def.h"
@@ -20,7 +21,6 @@
 #include "libgtmatch/esa-mmsearch.pr"
 
 #include "ltrharvest-opt.h"
-#include "minmax.h"
 #include "repeattypes.h"
 #include "repeats.h"
 
@@ -92,6 +92,14 @@ static void searchforbestTSDandormotifatborders(
   unsigned int hitcounter = 0;
   const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
 
+  ///* test 
+  Seqpos j;
+  const Uchar *characters;
+  // in order to get to visible dna characters
+  characters = getcharactersAlphabet(
+                 alphabetSequentialsuffixarrayreader(ssar));
+  //test*/ 
+
   env_error_check(env);
 
   if( boundaries->contignumber == 0)
@@ -115,7 +123,11 @@ static void searchforbestTSDandormotifatborders(
   printf("  old boundary pos rightLTR_3 = " FormatSeqpos "\n",
 	         PRINTSeqposcast(boundaries->rightLTR_3 - offset));
   */
- 
+  ///*test
+  printf("number of maximal repeats in vic: %lu\n",
+           info->repeats.nextfreeRepeat);
+  //test*/
+
   for(i = 0; i < info->repeats.nextfreeRepeat; i++)
   {
     // dbseqpos1 is the first position after the left repeat
@@ -243,7 +255,11 @@ static void searchforbestTSDandormotifatborders(
 	     
 		 // store TSD length
                  boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
-		 /*printf("next better hit\n");
+		
+		 ///*test
+		 //if(info->repeats.nextfreeRepeat == 199)
+		 //{
+		 printf("next better hit\n");
 		 printf("boundaries->leftLTR_5 = " FormatSeqpos "\n",
 		     PRINTSeqposcast(boundaries->leftLTR_5 - offset) );
 		 printf("boundaries->rightLTR_3 = " FormatSeqpos "\n",
@@ -267,8 +283,10 @@ static void searchforbestTSDandormotifatborders(
 	                    PRINTSeqposcast(difffromnewboundary1),
 	                    PRINTSeqposcast(difffromnewboundary2),
 	                    PRINTSeqposcast(difffromoldboundary1),
-	                    PRINTSeqposcast(difffromoldboundary2) );*/
-                 
+	                    PRINTSeqposcast(difffromoldboundary2) );
+		 //}
+                 //test*/
+
 		 difffromoldboundary1 = difffromnewboundary1;
 		 difffromoldboundary2 = difffromnewboundary2;
 		 hitcounter++;
@@ -278,8 +296,8 @@ static void searchforbestTSDandormotifatborders(
       }
     }
   }
-
-  /*
+  
+  ///*test
   if( boundaries->motif_near_tsd )
   {
     printf("found %hu time(s) TSD and motif:\n",
@@ -293,7 +311,35 @@ static void searchforbestTSDandormotifatborders(
   {
     printf("no TSD and motif found.\n");   
   }
-  */
+
+  printf("found the following TSD: ");
+  for(j = 0; j < boundaries->lenleftTSD; j++)
+  {
+    printf("%c", 
+	characters[getencodedchar(encseq,
+	  boundaries->leftLTR_5 - boundaries->lenleftTSD + j,
+	  Forwardmode)]);
+  }
+  printf(" ");
+  for(j = 1; j <= boundaries->lenleftTSD; j++)
+  {
+    printf("%c", 
+	characters[getencodedchar(encseq,
+	  boundaries->rightLTR_3 + j,
+	  Forwardmode)]);
+  }
+  printf("\nlen of TSD = " FormatSeqpos "\n", 
+      PRINTSeqposcast(boundaries->lenleftTSD));
+  printf("found the following motif: ");
+  printf("%c", 
+	characters[getencodedchar(encseq,
+	  boundaries->leftLTR_5,
+	  Forwardmode)]);
+  printf("%c", 
+	characters[getencodedchar(encseq,
+	  boundaries->leftLTR_5 + 1,
+	  Forwardmode)]);
+  //*/
 }
 
 /*
@@ -334,7 +380,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
   }
   else
   {
-    offset = markpos[boundaries->contignumber-1]+(Seqpos)1;
+    offset = markpos[boundaries->contignumber-1]+1;
   }
  
   ///// search for left motif around leftLTR_5 /////
@@ -413,11 +459,11 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
   for(i = startrightLTR + (Seqpos)1; i <= endrightLTR; i++)
   {
     tmp_motifmismatchesrightLTR = 0;
-    if(getencodedchar(encseq, i, Forwardmode) != lo->motif.firstright)
+    if(getencodedchar(encseq, i, Forwardmode) != lo->motif.secondright)
     {
       tmp_motifmismatchesrightLTR++;
     }
-    if(getencodedchar(encseq, i-1, Forwardmode) != lo->motif.secondright)
+    if(getencodedchar(encseq, i-1, Forwardmode) != lo->motif.firstright)
     {
       tmp_motifmismatchesrightLTR++;
     }
@@ -848,7 +894,6 @@ static int searchforTSDandorMotifoutside(
     }
   }
   rightlen = endrightLTR - startrightLTR + 1; 
-
 
   // now, search for correct boundaries //
 
