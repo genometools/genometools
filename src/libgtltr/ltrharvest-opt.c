@@ -473,7 +473,7 @@ static OPrval parse_options(int *parsed_args,
   //option_imply(optionmindistltr, optionmaxdistltr, env);
   //option_imply(optionmaxdistltr, optionmindistltr, env);
   //option_imply(optionmintsd, optionmaxtsd, env);
-  //option_imply(optionmaxtsd, optionmintsd, env);
+  option_imply(optionmaxtsd, optionmintsd, env);
   option_imply(optionmotifmis, optionmotif, env);
   
   option_imply_either_2(optionlongoutput, optionmintsd, optionmotif, env);

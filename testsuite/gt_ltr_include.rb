@@ -35,6 +35,14 @@ Test do
            " -motif agga -motifmis 0", :retval => 1
 end
 
+Name "gt ltrharvest maxtsd requires mintsd"
+Keywords "gt_ltr"
+Test do
+  run_test "#{$bin}gt suffixerator -db #{$testdata}Random.fna -dna -suf -lcp -tis"
+  run_test "#{$bin}gt ltrharvest -index Random.fna" +
+           " -maxtsd 20", :retval => 1
+end
+
 Name "gt ltrharvest motifmis and missing motif"
 Keywords "gt_ltr"
 Test do
