@@ -1,4 +1,5 @@
-full_coverage_files = [ "src/libgtext/chseqids_stream.c",
+full_coverage_files = [ "src/libgtcore/array.c",
+                        "src/libgtext/chseqids_stream.c",
                         "src/tools/gt_chseqids.c"
                       ]
 
