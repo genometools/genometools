@@ -60,7 +60,6 @@ int printgff3format(
   if(lo->arrayLTRboundaries.nextfreeLTRboundaries == 0)
   {
     // no LTR-pairs predicted
-    return 0;
   }
   else
   {
