@@ -44,10 +44,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 
   if (!cs->sequence_regions_processed) {
     while (!had_err) {
-      if ((had_err = genome_stream_next_tree(cs->in_stream, &node, env))) {
-        genome_node_rec_delete(node, env);
-      }
-      else {
+      if (!(had_err = genome_stream_next_tree(cs->in_stream, &node, env))) {
         array_add(cs->genome_node_buffer, node, env);
         if (!(genome_node_cast(sequence_region_class(), node)))
           break; /* no more sequence regions */
@@ -55,7 +52,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
     }
     /* now the buffer contains only sequence regions (except the last entry)
        -> change sequence ids */
-    for (i = 0; i < array_size(cs->genome_node_buffer); i++) {
+    for (i = 0; !had_err && i < array_size(cs->genome_node_buffer); i++) {
       node = *(GenomeNode**) array_get(cs->genome_node_buffer, i);
       if (genome_node_get_seqid(node)) {
         if  ((changed_seqid = mapping_map_string(cs->chseqids_mapping,
