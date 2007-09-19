@@ -14,6 +14,6 @@ full_coverage_files.each do |file|
   Test do
     run "cd #{$cur} && gcov -o obj/#{file} #{file} && cd -"
     run "mv #{$cur}/#{base}.gcov ."
-    grep(base+".gcov", "#####", true)
+    grep(base+".gcov", "^    #####", true)
   end
 end
