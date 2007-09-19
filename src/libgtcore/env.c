@@ -20,6 +20,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/splitter.h"
 #include "libgtcore/versionfunc.h"
+#include "libgtcore/warning.h"
 #include "libgtcore/xansi.h"
 
 struct Env {
@@ -90,6 +91,8 @@ Env* env_new(void)
   env->fa = fa_new(env);
   env->error = error_new(env->ma);
   proc_gt_env_options(env);
+  if (env->spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
+    warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
   return env;
 }
 
