@@ -114,14 +114,24 @@ static int csa_visitor_default_func(GenomeVisitor *gv, GenomeNode *gn, Env *env)
   return 0;
 }
 
+static int csa_visitor_comment(GenomeVisitor *gv, Comment *c, Env *env)
+{
+  return csa_visitor_default_func(gv, (GenomeNode*) c, env);
+}
+
+static int csa_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
+                                       Env *env)
+{
+  return csa_visitor_default_func(gv, (GenomeNode*) sr, env);
+}
+
 const GenomeVisitorClass* csa_visitor_class()
 {
   static const GenomeVisitorClass gvc = { sizeof (CSAVisitor),
                                           csa_visitor_free,
-                                          NULL,
+                                          csa_visitor_comment,
                                           csa_visitor_genome_feature,
-                                          NULL,
-                                          csa_visitor_default_func };
+                                          csa_visitor_sequence_region };
   return &gvc;
 }
 

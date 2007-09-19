@@ -200,7 +200,6 @@ const GenomeVisitorClass* cds_visitor_class()
                                           cds_visitor_free,
                                           NULL,
                                           cds_visitor_genome_feature,
-                                          NULL,
                                           NULL };
   return &gvc;
 }

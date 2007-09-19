@@ -114,8 +114,7 @@ const GenomeVisitorClass* filter_visitor_class()
                                           filter_visitor_free,
                                           filter_visitor_comment,
                                           filter_visitor_genome_feature,
-                                          filter_visitor_sequence_region,
-                                          NULL };
+                                          filter_visitor_sequence_region };
   return &gvc;
 }
 

@@ -261,8 +261,7 @@ const GenomeVisitorClass* gff3_visitor_class()
                                           gff3_visitor_free,
                                           gff3_visitor_comment,
                                           gff3_visitor_genome_feature,
-                                          gff3_visitor_sequence_region,
-                                          NULL };
+                                          gff3_visitor_sequence_region };
   return &gvc;
 }
 

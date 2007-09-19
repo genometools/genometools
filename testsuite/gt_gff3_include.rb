@@ -263,8 +263,8 @@ end
 Name "gt gff3 test option -addintrons"
 Keywords "gt_gff3"
 Test do
-  run_test "#{$bin}gt gff3 -addintrons #{$testdata}standard_gene_as_tree.gff3"
-  run "diff #{$last_stdout} #{$testdata}standard_gene_with_introns_as_tree.gff3"
+  run_test "#{$bin}gt gff3 -addintrons #{$testdata}addintrons.gff3"
+  run "diff #{$last_stdout} #{$testdata}addintrons.out"
 end
 
 Name "gt gff3 test option -offset"
