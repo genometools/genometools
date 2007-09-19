@@ -56,8 +56,7 @@ static bool set_of_sas_is_sorted(const void *set_of_sas,
     range_b = get_genomic_range(sa);
 
     /* compare */
-    if (!(range_a.start <= range_b.start))
-      return false;
+    if (!(range_a.start <= range_b.start)) return false;
 
     /* make the second range the first */
     range_a = range_b;
