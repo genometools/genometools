@@ -1,0 +1,3 @@
+##gff-version   3
+##sequence-region   seq1 1 10000
+seq1	.	gene	1000	9000	.	+	.	foo==bar

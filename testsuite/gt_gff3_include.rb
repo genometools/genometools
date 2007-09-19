@@ -268,3 +268,23 @@ Test do
   run_test "#{$bin}gt gff3 -offsetfile #{$testdata}gt_gff3_offsetfile_test.offsetfile #{$testdata}gt_gff3_offsetfile_test.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_gff3_offsetfile_test.out"
 end
+
+Name "gt gff3 fail option -offsetfile"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 -offsetfile #{$testdata}empty_file #{$testdata}gt_gff3_offsetfile_test.gff3", :retval => 1)
+end
+
+Name "gt gff3 fail attribute after dot"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}attribute_after_dot.gff3", :retval => 1)
+  grep $last_stderr, "more than one attribute token defined"
+end
+
+Name "gt gff3 fail attribute with multiple equal signs"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}attribute_w_multiple_equals.gff3", :retval => 1)
+  grep $last_stderr, "does not contain exactly one"
+end
