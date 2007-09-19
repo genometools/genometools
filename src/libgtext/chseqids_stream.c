@@ -95,14 +95,13 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
     had_err = genome_stream_next_tree(cs->in_stream, gn, env);
   if (!had_err && *gn) {
     if (genome_node_get_seqid(*gn)) {
-      if  ((changed_seqid = mapping_map_string(cs->chseqids_mapping,
-                                            str_get(genome_node_get_seqid(*gn)),
-                                               env))) {
-        genome_node_set_seqid(*gn, changed_seqid, env);
-          str_delete(changed_seqid, env);
-      }
-      else
-        had_err = -1;
+      changed_seqid = mapping_map_string(cs->chseqids_mapping,
+                                         str_get(genome_node_get_seqid(*gn)),
+                                         env);
+      assert(changed_seqid); /* is always defined, because an undefined mapping
+                                would be catched earlier */
+      genome_node_set_seqid(*gn, changed_seqid, env);
+      str_delete(changed_seqid, env);
     }
   }
 
