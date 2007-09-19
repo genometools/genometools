@@ -84,6 +84,7 @@ struct GTR {
   bool test,
        interactive,
        debug;
+  Str *testspacepeak;
   Toolbox *toolbox;
   Hashtable *unit_tests;
   lua_State *L;
@@ -98,6 +99,7 @@ GTR* gtr_new(Env *env)
 #ifdef LIBGTVIEW
   Str *config_file;
 #endif
+  gtr->testspacepeak = str_new(env);
   gtr->L = luaL_newstate();
   assert(gtr->L); /* XXX: proper error message  */
   luaL_openlibs(gtr->L); /* open the standard libraries */
@@ -156,6 +158,10 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   option_hide_default(o);
   option_parser_add_option(op, o, env);
   o = option_new_debug(&gtr->debug, env);
+  option_parser_add_option(op, o, env);
+  o = option_new_filename("testspacepeak", "alloc 64 MB and mmap the given "
+                          "file", gtr->testspacepeak, env);
+  option_is_development_option(o);
   option_parser_add_option(op, o, env);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
   option_parser_delete(op, env);
@@ -288,6 +294,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
 {
   Tool tool = NULL;
   char **nargv = NULL;
+  void *mem, *map;
   int had_err = 0;
   env_error_check(env);
   assert(gtr);
@@ -295,6 +302,12 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
     env_set_log(env, log_new(env_ma(env)));
   if (gtr->test) {
     return run_tests(gtr, env);
+  }
+  if (str_length(gtr->testspacepeak)) {
+    mem = env_ma_malloc(env, 1 << 26); /* alloc 64 MB */;
+    map = env_fa_mmap_read(env, str_get(gtr->testspacepeak), NULL);
+    env_fa_xmunmap(map, env);
+    env_ma_free(mem, env);
   }
   if (argc == 0 && !gtr->interactive) {
     env_error_set(env, "neither tool nor script specified; option -help lists "
@@ -345,6 +358,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
 void gtr_delete(GTR *gtr, Env *env)
 {
   if (!gtr) return;
+  str_delete(gtr->testspacepeak, env);
   toolbox_delete(gtr->toolbox, env);
   hashtable_delete(gtr->unit_tests, env);
   if (gtr->L) lua_close(gtr->L);
