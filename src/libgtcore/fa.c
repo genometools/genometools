@@ -30,6 +30,8 @@ struct FA {
   Hashtable *file_pointer,
             *memory_maps;
   Env *env;
+  unsigned long current_size,
+                max_size;
 };
 
 typedef struct {
@@ -259,6 +261,9 @@ static void* mmap_generic(FA *fa, const char *path, size_t *len, bool write,
     map = x ? xmmap_read(path, &mapinfo->len) : mmap_read(path, &mapinfo->len);
   if (map) {
     hashtable_add(fa->memory_maps, map, mapinfo, fa->env);
+    fa->current_size += mapinfo->len;
+    if (fa->current_size > fa->max_size)
+      fa->max_size = fa->current_size;
     if (len)
       *len = mapinfo->len;
   }
@@ -303,6 +308,8 @@ void fa_xmunmap(void *addr, FA *fa)
   mapinfo = hashtable_get(fa->memory_maps, addr);
   assert(mapinfo);
   xmunmap(addr, mapinfo->len);
+  assert(fa->current_size >= mapinfo->len);
+  fa->current_size -= mapinfo->len;
   hashtable_remove(fa->memory_maps, addr, fa->env);
 }
 
@@ -361,6 +368,13 @@ int fa_check_mmap_leak(FA *fa, Env *env)
   if (info.has_leak)
     return -1;
   return 0;
+}
+
+void fa_show_space_peak(FA *fa, FILE *fp)
+{
+  assert(fa);
+  fprintf(fp, "# mmap space peak in megabytes: %.2f\n",
+          (double) fa->max_size / (1 << 20));
 }
 
 void fa_delete(FA *fa, Env *env)

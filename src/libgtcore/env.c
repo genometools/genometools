@@ -139,11 +139,13 @@ int env_delete(Env *env)
   log_delete(env->log, env->ma);
   error_delete(env->error, env->ma);
   env->error = NULL;
+  if (env->spacepeak) {
+    ma_show_space_peak(env->ma, stdout);
+    fa_show_space_peak(env->fa, stdout);
+  }
   fa_fptr_rval = fa_check_fptr_leak(env->fa, env);
   fa_mmap_rval = fa_check_mmap_leak(env->fa, env);
   fa_delete(env->fa, env);
-  if (env->spacepeak)
-    ma_show_space_peak(env->ma, stdout);
   ma_rval = ma_check_space_leak(env->ma, env);
   ma_clean(env->ma, env);
   ma_delete(env->ma);
