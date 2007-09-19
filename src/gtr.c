@@ -42,6 +42,7 @@
 #include "libgtext/alignment.h"
 #include "libgtext/bsearch.h"
 #include "libgtext/evaluator.h"
+#include "libgtext/gtdatahelp.h"
 #include "libgtext/hmm.h"
 #include "libgtext/splicedseq.h"
 #include "libgtext/toolbox.h"
@@ -124,6 +125,15 @@ GTR* gtr_new(Env *env)
   return gtr;
 }
 
+static int show_gtr_help(const char *progname, void *data, Env* env)
+{
+  int had_err;
+  had_err = toolbox_show(progname, data, env);
+  if (!had_err)
+    had_err = gtdata_show_help(progname, NULL, env);
+  return had_err;
+}
+
 OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                  Env *env)
 {
@@ -136,7 +146,7 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   op = option_parser_new("[option ...] [tool | script] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
                           "(http://genometools.org).", env);
-  option_parser_set_comment_func(op, toolbox_show, gtr->toolbox);
+  option_parser_set_comment_func(op, show_gtr_help, gtr->toolbox);
   o = option_new_bool("i", "enter interactive mode after executing 'tool' or "
                       "'script'", &gtr->interactive, false, env);
   option_hide_default(o);

@@ -25,9 +25,7 @@ feature requests:
 - range check
 - check for circles
 - `gt eval`: measure nucleotide level
-- remove GT_MEM_BOOKKEEPING environment variable
 - write proper memory allocator
-- remove GT_ENV_OPTIONS environment variable, do settings via gtdata/ dir
 - function similary to option_new_choice(), but which allows to set multiple
   strings from the given set
 
