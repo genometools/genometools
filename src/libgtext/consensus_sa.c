@@ -431,7 +431,7 @@ static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa,
 {
   Bittab *SA_p_complement; /* SA \ SA_p */
   unsigned long sa, sa_prime;
-  bool incompatible_found;
+  bool incompatible_found, valid = true;
 
   SA_p_complement = bittab_new(csa->number_of_sas, env);
   bittab_complement(SA_p_complement, SA_p);
@@ -448,13 +448,10 @@ static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa,
         break;
       }
     }
-    if (!incompatible_found) {
-      bittab_delete(SA_p_complement, env);
-      return false;
-    }
+    if (!incompatible_found) { valid = false; break; }
   }
   bittab_delete(SA_p_complement, env);
-  return true;
+  return valid;
 }
 #endif
 
