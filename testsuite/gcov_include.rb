@@ -3,7 +3,11 @@ full_coverage_files = [ "src/libgtcore/array.c",
                         "src/libgtcore/countingsort.c",
                         "src/libgtcore/dynalloc.c",
                         "src/libgtcore/msort.c",
+                        "src/libgtext/align.c",
                         "src/libgtext/chseqids_stream.c",
+                        "src/libgtext/linearalign.c",
+                        "src/libgtext/linearedist.c",
+                        "src/libgtext/swalign.c",
                         "src/tools/gt_chseqids.c"
                       ]
 
