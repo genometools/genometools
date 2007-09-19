@@ -26,10 +26,10 @@
 #ifdef INLINEDSequentialsuffixarrayreader
 
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
-                                        const Str *indexname,
-                                        unsigned int demand,
-                                        Sequentialaccesstype seqactype,
-                                        Env *env)
+                                  const Str *indexname,
+                                  unsigned int demand,
+                                  /*@unused@*/ Sequentialaccesstype seqactype,
+                                  Env *env)
 {
   Sequentialsuffixarrayreader *ssar;
   Seqpos totallength;
@@ -40,7 +40,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                       &totallength,
                       demand,
                       indexname,
-                      false,
+                      NULL,
                       env) != 0)
   {
     FREESPACE(ssar->suffixarray);
@@ -67,7 +67,7 @@ void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
 
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
-                              Env *env)
+                              /*@unused@*/ Env *env)
 {
   *currentsuffix = ssar->suffixarray->suftab[ssar->nextsuftabindex++];
   return 1;
@@ -83,20 +83,6 @@ Readmode readmodeSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *sarr)
 {
   return sarr->suffixarray->readmode;
-}
-
-const Alphabet *alphabetSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *sarr)
-{
-  assert(sarr->suffixarray != NULL);
-  return sarr->suffixarray->alpha;
-}
-
-unsigned long numofdbsequencesSequentialsuffixarrayreader(
-                    const Sequentialsuffixarrayreader *sarr)
-{
-  assert(sarr->suffixarray != NULL);
-  return sarr->suffixarray->numofdbsequences;
 }
 
 #else
@@ -314,7 +300,7 @@ Readmode readmodeSequentialsuffixarrayreader(
 {
   return sarr->readmode;
 }
-#endif
+#endif /* ifdef INLINEDSequentialsuffixarrayreader */
 
 const Alphabet *alphabetSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *sarr)

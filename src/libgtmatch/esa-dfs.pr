@@ -14,6 +14,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                                           Dfsstate *,
                                           Env *),
                   Dfsstate *state,
+                  /*@unused@*/ Verboseinfo *verboseinfo,
                   Env *env);
 
 #ifdef __cplusplus

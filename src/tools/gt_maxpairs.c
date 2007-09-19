@@ -162,6 +162,7 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
                              maxpairsoptions.scanfile,
                              simpleexactselfmatchoutput,
                              NULL,
+                             verboseinfo,
                              env) != 0)
         {
           haserr = true;

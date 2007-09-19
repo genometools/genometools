@@ -1744,10 +1744,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
   encseq->plainseqptr = (seq2 == NULL) ? true : false;
   ALLASSIGNAPPENDFUNC;
   encseq->mappedptr = NULL;
-  /*
-  printf("# deliverchar=%s\n",encseq->delivercharname); XXX insert later
-  */
   return encseq;
 }
 
-#endif /* INLINEDENCSEQ */
+#endif /* ifndef INLINEDENCSEQ */

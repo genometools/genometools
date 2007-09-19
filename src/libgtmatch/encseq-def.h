@@ -23,6 +23,7 @@
 #include "seqpos-def.h"
 #include "alphadef.h"
 #include "readmode-def.h"
+#include "chardef.h"
 #include "verbose-def.h"
 
 #define REVERSEPOS(TOT,POS) ((TOT) - 1 - (POS))
@@ -57,23 +58,21 @@ typedef struct
 
 #define getencseqtotallength(ENCSEQ) ((ENCSEQ)->totallength)
 
-#define getencodedchar(ENCSEQ,POS,READMODE)\
-        fungetencodedchar(ENCSEQ,POS,READMODE)
+#define MAKECOMPL(CC)\
+        (ISSPECIAL(CC) ? (CC) : (Uchar) 3 - (CC))
+
+#define getencodedchar(ENCSEQ,POS,RM)\
+        (((RM) == Forwardmode) ? (ENCSEQ)->plainseq[POS] :\
+          (((RM) == Reversemode) ? (ENCSEQ)->plainseq[REVERSEPOS((ENCSEQ)->totallength,POS)] :\
+            (((RM) == Complementmode) ? MAKECOMPL((ENCSEQ)->plainseq[POS]) :\
+              (MAKECOMPL((ENCSEQ)->plainseq[REVERSEPOS((ENCSEQ)->totallength,POS)])\
+              )\
+            )\
+          )\
+        )
 
 #define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS)\
-        fungetencodedchar(ENCSEQ,POS,(ENCSEQSTATE)->readmode)
-
-Uchar fungetencodedchar(const Encodedsequence *encseq,
-                        Seqpos pos,
-                        Readmode readmode);
-
-/*
-#define getencodedchar(ENCSEQ,POS,READMODE)\
-        (ENCSEQ)->plainseq[POS]
-
-#define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS)\
-        (ENCSEQ)->plainseq[POS]
-*/
+        getencodedchar(ENCSEQ,POS,(ENCSEQSTATE)->readmode)
 
 #else
 

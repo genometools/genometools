@@ -22,12 +22,12 @@
 #include "verbose-def.h"
 #include "seqpos-def.h"
 
-int testmaxpairs(const Str *indexname,
-                 unsigned long samples,
-                 unsigned int minlength,
-                 Seqpos substringlength,
-                 Verboseinfo *verboseinfo,
-                 Env *env)
+int testmaxpairs(/*@unused@*/ const Str *indexname,
+                 /*@unused@*/ unsigned long samples,
+                 /*@unused@*/ unsigned int minlength,
+                 /*@unused@*/ Seqpos substringlength,
+                 /*@unused@*/ Verboseinfo *verboseinfo,
+                 /*@unused@*/ Env *env)
 {
   return 0;
 }
@@ -283,6 +283,7 @@ int testmaxpairs(const Str *indexname,
                                suffixarray.alpha,
                                storemaxmatchself,
                                &maxmatchselfinfo,
+                               verboseinfo,
                                env) != 0)
     {
       haserr = true;

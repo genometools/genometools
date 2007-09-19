@@ -2,29 +2,23 @@
 extern "C" {
 #endif
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
-                                        const Str *indexname,
-                                        unsigned int demand,
-                                        Sequentialaccesstype seqactype,
-                                        Env *env);
+                                  const Str *indexname,
+                                  unsigned int demand,
+                                  /*@unused@*/ Sequentialaccesstype seqactype,
+                                  Env *env);
 
 void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
                                      Env *env);
 
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
-                              Env *env);
+                              /*@unused@*/ Env *env);
 
 const Encodedsequence *encseqSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *sarr);
 
 Readmode readmodeSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *sarr);
-
-const Alphabet *alphabetSequentialsuffixarrayreader(
-                          const Sequentialsuffixarrayreader *sarr);
-
-unsigned long numofdbsequencesSequentialsuffixarrayreader(
-                    const Sequentialsuffixarrayreader *sarr);
 
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                         const Str *indexname,

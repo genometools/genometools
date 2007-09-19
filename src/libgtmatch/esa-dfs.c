@@ -111,6 +111,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                                             Seqpos,Dfsstate *,Env *),
                   */
                   Dfsstate *state,
+                  /*@unused@*/ Verboseinfo *verboseinfo,
                   Env *env)
 {
   bool firstedge,
@@ -127,7 +128,7 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
 
 #ifdef INLINEDSequentialsuffixarrayreader
   Uchar tmpsmalllcpvalue;
-  printf("# inlined Sequentialsuffixarrayreader\n");
+  showverbose(verboseinfo,"# inlined Sequentialsuffixarrayreader\n");
 #else
   int retval;
 #endif
