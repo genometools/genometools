@@ -61,7 +61,7 @@ int           genome_node_accept(GenomeNode*, GenomeVisitor*, Env*);
 /* <parent> takes ownership of <child> */
 void          genome_node_is_part_of_genome_node(GenomeNode *parent,
                                                  GenomeNode *child, Env*);
-/* does not free the leaf */
+/* does not free the leaf, do not use during traversal! */
 void          genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn,
                                       Env*);
 void          genome_node_mark(GenomeNode*);
