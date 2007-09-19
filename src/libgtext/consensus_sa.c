@@ -439,12 +439,12 @@ static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa,
   for (sa_prime  = bittab_get_first_bitnum(SA_p_complement);
        sa_prime != bittab_get_last_bitnum(SA_p_complement);
        sa_prime  = bittab_get_next_bitnum(SA_p_complement, sa_prime)) {
-    incompatible_found = 0;
+    incompatible_found = false;
     for (sa  = bittab_get_first_bitnum(SA_p);
          sa != bittab_get_last_bitnum(SA_p);
          sa  = bittab_get_next_bitnum(SA_p, sa)) {
       if (!compatible(csa, sa, sa_prime, env)) {
-        incompatible_found = 1;
+        incompatible_found = true;
         break;
       }
     }
