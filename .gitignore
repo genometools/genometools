@@ -2,6 +2,7 @@
 *.bak
 *.core
 *.diff
+*.gcov
 *.al1
 *.bck
 *.bwt
