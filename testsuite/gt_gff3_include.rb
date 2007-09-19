@@ -1,3 +1,15 @@
+Name "gt gff3 -help"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -help"
+end
+
+Name "gt gff3 -noop"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 -noop", :retval => 1)
+end
+
 Name "gt gff3 short test (stdin)"
 Keywords "gt_gff3"
 Test do
@@ -267,6 +279,13 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 -offsetfile #{$testdata}gt_gff3_offsetfile_test.offsetfile #{$testdata}gt_gff3_offsetfile_test.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_gff3_offsetfile_test.out"
+end
+
+Name "gt gff3 test option -mergefeat"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -sort -mergefeat #{$testdata}mergefeat.gff3"
+  run "diff #{$last_stdout} #{$testdata}mergefeat.out"
 end
 
 Name "gt gff3 fail option -offsetfile"

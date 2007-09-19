@@ -9,7 +9,8 @@ full_coverage_files = [ "src/libgtcore/array.c",
                         "src/libgtext/linearalign.c",
                         "src/libgtext/linearedist.c",
                         "src/libgtext/swalign.c",
-                        "src/tools/gt_chseqids.c"
+                        "src/tools/gt_chseqids.c",
+                        "src/tools/gt_gff3.c"
                       ]
 
 full_coverage_files.each do |file|
