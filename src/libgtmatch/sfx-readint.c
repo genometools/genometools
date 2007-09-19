@@ -22,6 +22,7 @@
 #include "libgtcore/str.h"
 #include "libgtcore/array.h"
 #include "symboldef.h"
+#include "verbose-def.h"
 #include "format64.h"
 #include "sfx-ri-def.h"
 
@@ -134,7 +135,8 @@ static int scanuintintline(uint32_t *lengthofkey,
 }
 
 int allkeysdefined(const Str *indexname,const char *suffix,
-                   const Array *riktab,bool verbose,Env *env)
+                   const Array *riktab,Verboseinfo *verboseinfo,
+                   Env *env)
 {
   unsigned long i;
   Readintkeys *rikptr;
@@ -145,29 +147,28 @@ int allkeysdefined(const Str *indexname,const char *suffix,
     rikptr = (Readintkeys *) array_get(riktab,i);
     if (rikptr->found)
     {
-      if (verbose)
+      if (rikptr->ptrdefined)
       {
-        printf("%s=",rikptr->keystring);
-        if (rikptr->ptrdefined)
+        if (rikptr->smallvalueptr != NULL)
         {
-          if (rikptr->smallvalueptr != NULL)
-          {
-            printf("%u\n",(unsigned int) *(rikptr->smallvalueptr));
-          } else
-          {
-            if (rikptr->bigvalueptr != NULL)
-            {
-              printf(Formatuint64_t "\n",
-                    PRINTuint64_tcast(*(rikptr->bigvalueptr)));
-            } else
-            {
-              assert(false);
-            }
-          }
+          showverbose(verboseinfo,"%s=%u\n",
+                      rikptr->keystring,
+                      (unsigned int) *(rikptr->smallvalueptr));
         } else
         {
-          printf("0\n");
+          if (rikptr->bigvalueptr != NULL)
+          {
+            showverbose(verboseinfo,"%s=" Formatuint64_t "\n",
+                        rikptr->keystring,
+                        PRINTuint64_tcast(*(rikptr->bigvalueptr)));
+          } else
+          {
+            assert(false);
+          }
         }
+      } else
+      {
+        showverbose(verboseinfo,"%s=0\n",rikptr->keystring);
       }
       if (rikptr->readflag != NULL)
       {

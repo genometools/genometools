@@ -183,6 +183,7 @@ static int fillplainseq(Encodedsequence *encseq,Fastabufferstate *fbs,Env *env)
                                    /*@unused@*/ Seqpos totallength,
                                    const Specialcharinfo *specialcharinfo,
                                    /*@unused@*/ unsigned int mapsize,
+                                   /*@unused@*/ Verboseinfo *verboseinfo,
                                    Env *env)
 {
   Encodedsequence *encseq;

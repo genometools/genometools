@@ -5,12 +5,14 @@ int testmaxpairs(const Str *indexname,
                  unsigned long samples,
                  unsigned int minlength,
                  Seqpos substringlength,
+                 Verboseinfo *verboseinfo,
                  Env *env);
 
 int testmaxpairs(const Str *indexname,
                  unsigned long samples,
                  unsigned int minlength,
                  Seqpos substringlength,
+                 Verboseinfo *verboseinfo,
                  Env *env);
 
 #ifdef __cplusplus

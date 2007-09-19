@@ -143,8 +143,8 @@ static int readsymbolmapfromlines(Alphabet *alpha,
                                   Env *env)
 {
   char cc;
-  unsigned int cnum;
-  unsigned long linecount, column, allocateddomainsize = 0;
+  unsigned int cnum, allocateddomainsize = 0;
+  unsigned long linecount, column;
   bool blankfound, ignore, preamble = true, haserr = false;
   const char *currentline;
   Uchar showchar;
@@ -200,6 +200,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
               ALLOCASSIGNSPACE(alpha->mapdomain,alpha->mapdomain,Uchar,
                                allocateddomainsize);
             }
+            assert(alpha->mapdomain != NULL);
             alpha->mapdomain[alpha->domainsize++] = (Uchar) cc;
           } else
           {
@@ -254,7 +255,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
     {
       if (alpha->symbolmap[cnum] == (Uchar) (alpha->mapsize - 1))
       {
-        alpha->symbolmap[cnum] = WILDCARD;
+        alpha->symbolmap[cnum] = (Uchar) WILDCARD;
         alpha->mappedwildcards++;
       }
     }

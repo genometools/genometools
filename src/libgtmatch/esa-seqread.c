@@ -138,7 +138,7 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                                &totallength,
                                                demand,
                                                indexname,
-                                               false,
+                                               NULL,
                                                env) != 0)
   {
     FREESPACE(ssar->suffixarray);

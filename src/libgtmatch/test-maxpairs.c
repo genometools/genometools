@@ -19,12 +19,14 @@
 
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
+#include "verbose-def.h"
 #include "seqpos-def.h"
 
 int testmaxpairs(const Str *indexname,
                  unsigned long samples,
                  unsigned int minlength,
                  Seqpos substringlength,
+                 Verboseinfo *verboseinfo,
                  Env *env)
 {
   return 0;
@@ -213,6 +215,7 @@ int testmaxpairs(const Str *indexname,
                  unsigned long samples,
                  unsigned int minlength,
                  Seqpos substringlength,
+                 Verboseinfo *verboseinfo,
                  Env *env)
 {
   Suffixarray suffixarray;
@@ -230,7 +233,7 @@ int testmaxpairs(const Str *indexname,
                      &totallength,
                      SARR_ESQTAB,
                      indexname,
-                     false,
+                     verboseinfo,
                      env) != 0)
   {
     haserr = true;

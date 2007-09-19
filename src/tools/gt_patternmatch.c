@@ -49,7 +49,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
                      &totallength,
                      SARR_SUFTAB | SARR_ESQTAB,
                      pmopt->indexname,
-                     false,
+                     NULL,
                      env) != 0)
   {
     haserr = true;

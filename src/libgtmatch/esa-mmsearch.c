@@ -383,6 +383,7 @@ int callenumquerymatches(const Str *indexname,
                          int (*processmaxmatch)(void *,unsigned long,Seqpos,
                                                 uint64_t,unsigned long,Env *),
                          void *processmaxmatchinfo,
+                         Verboseinfo *verboseinfo,
                          Env *env)
 {
   Suffixarray suffixarray;
@@ -393,7 +394,7 @@ int callenumquerymatches(const Str *indexname,
                      &totallength,
                      SARR_ESQTAB | SARR_SUFTAB,
                      indexname,
-                     false,
+                     verboseinfo,
                      env) != 0)
   {
     haserr = true;

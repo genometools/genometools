@@ -34,6 +34,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
                                    /*@unused@*/ Seqpos totallength,
                                    const Specialcharinfo *specialcharinfo,
                                    /*@unused@*/ unsigned int mapsize,
+                                   /*@unused@*/ Verboseinfo *verboseinfo,
                                    Env *env);
 
 Encodedsequence *plain2encodedsequence(

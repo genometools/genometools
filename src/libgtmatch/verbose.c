@@ -28,13 +28,13 @@
 void showverbose(Verboseinfo *verboseinfo,
                  const char *format, ...)
 {
-  if(verboseinfo->beverbose)
+  if(verboseinfo != NULL && verboseinfo->beverbose)
   {
     va_list ap;
 
     assert(format != NULL);
     va_start(ap, format);
-    printf(format, ap);
+    (void) vprintf(format, ap);
     va_end(ap);
   }
 }
