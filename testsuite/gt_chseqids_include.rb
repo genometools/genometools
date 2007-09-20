@@ -42,3 +42,10 @@ Keywords "gt_chseqids"
 Test do
   run_test("#{$bin}gt chseqids #{$testdata}gt_chseqids_test_3.chseqids #{$testdata}gt_chseqids_test_3.gff3", :retval => 1)
 end
+
+Name "gt chseqids test 4"
+Keywords "gt_chseqids"
+Test do
+  run_test "#{$bin}gt chseqids #{$testdata}gt_chseqids_test_4.chseqids #{$testdata}gt_chseqids_test_4.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_chseqids_test_4.out"
+end
