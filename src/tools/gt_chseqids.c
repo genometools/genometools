@@ -22,11 +22,13 @@
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 #include "libgtext/gtdatahelp.h"
+#include "libgtext/sort_stream.h"
 
 #define DEFAULT_JOINLENGTH 300
 
 typedef struct {
-  bool verbose;
+  bool sort,
+       verbose;
   GenFile *outfp;
 } ChseqidsArguments;
 
@@ -44,6 +46,12 @@ static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
                          "Change sequence ids by the mapping given in "
                          "mapping_file.", env);
   ofi = outputfileinfo_new(env);
+
+  /* -sort */
+  option = option_new_bool("sort", "sort the GFF3 features after changing the "
+                           "sequence ids\n(memory consumption is O(file_size))",
+                           &arguments->sort, false, env);
+  option_parser_add_option(op, option, env);
 
   /* -v */
   option = option_new_verbose(&arguments->verbose, env);
@@ -66,7 +74,8 @@ static OPrval parse_options(int *parsed_args, ChseqidsArguments *arguments,
 
 int gt_chseqids(int argc, const char **argv, Env *env)
 {
-  GenomeStream *gff3_in_stream, *chseqids_stream, *gff3_out_stream = NULL;
+  GenomeStream *gff3_in_stream, *chseqids_stream, *sort_stream = NULL,
+               *gff3_out_stream = NULL;
   GenomeNode *gn;
   ChseqidsArguments arguments;
   Str *chseqids;
@@ -90,8 +99,13 @@ int gt_chseqids(int argc, const char **argv, Env *env)
     had_err = -1;
   str_delete(chseqids, env);
   if (!had_err) {
-    gff3_out_stream = gff3_out_stream_new(chseqids_stream, arguments.outfp,
-                                          env);
+    if (arguments.sort) {
+      sort_stream = sort_stream_new(chseqids_stream, env);
+      gff3_out_stream = gff3_out_stream_new(sort_stream, arguments.outfp, env);
+    }
+    else
+      gff3_out_stream = gff3_out_stream_new(chseqids_stream, arguments.outfp,
+                                            env);
   }
 
   /* pull the features through the stream and free them afterwards */
@@ -105,6 +119,7 @@ int gt_chseqids(int argc, const char **argv, Env *env)
   /* free */
   genome_stream_delete(gff3_out_stream, env);
   genome_stream_delete(chseqids_stream, env);
+  genome_stream_delete(sort_stream, env);
   genome_stream_delete(gff3_in_stream, env);
   genfile_xclose(arguments.outfp, env);
 

@@ -56,3 +56,10 @@ Test do
   run_test "#{$bin}gt chseqids #{$testdata}gt_chseqids_test_5.chseqids #{$testdata}gt_chseqids_test_5.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_chseqids_test_5.out"
 end
+
+Name "gt chseqids test 5 (-sort)"
+Keywords "gt_chseqids"
+Test do
+  run_test "#{$bin}gt chseqids -sort #{$testdata}gt_chseqids_test_5.chseqids #{$testdata}gt_chseqids_test_5.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_chseqids_test_5.sorted_out"
+end
