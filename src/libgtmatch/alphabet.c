@@ -34,6 +34,7 @@
 #include "arraydef.h"
 #include "chardef.h"
 #include "alphadef.h"
+#include "encseq-def.h"
 #include "stamp.h"
 
 #include "guessprot.pr"
@@ -147,7 +148,7 @@ static int readsymbolmapfromlines(Alphabet *alpha,
   unsigned long linecount, column;
   bool blankfound, ignore, preamble = true, haserr = false;
   const char *currentline;
-  Uchar showchar;
+  Uchar chartoshow;
 
   env_error_check(env);
   alpha->domainsize = alpha->mapsize = alpha->mappedwildcards = 0;
@@ -232,18 +233,18 @@ static int readsymbolmapfromlines(Alphabet *alpha,
             break;
           }
           /* use next character to display character */
-          showchar = (Uchar) LINE(column+1);
+          chartoshow = (Uchar) LINE(column+1);
         } else
         {
           /* use first character of line to display character */
-          showchar = (Uchar) LINE(0);
+          chartoshow = (Uchar) LINE(0);
         }
         if (linecount == strarray_size(lines)-1)
         {
-          alpha->wildcardshow = showchar;
+          alpha->wildcardshow = chartoshow;
         } else
         {
-          alpha->characters[alpha->mapsize] = showchar;
+          alpha->characters[alpha->mapsize] = chartoshow;
         }
         alpha->mapsize++;
       }
@@ -527,7 +528,7 @@ const Uchar *getcharactersAlphabet(const Alphabet *alpha)
 
 void outputalphabet(FILE *fpout,const Alphabet *alpha)
 {
-  Uchar showchar, currentcc, previouscc = 0, firstinline = 0;
+  Uchar chartoshow, currentcc, previouscc = 0, firstinline = 0;
   unsigned int cnum, linenum = 0;
   bool afternewline = true;
 
@@ -540,14 +541,14 @@ void outputalphabet(FILE *fpout,const Alphabet *alpha)
       {
         if (linenum < alpha->mapsize-1)
         {
-          showchar = alpha->characters[linenum];
+          chartoshow = alpha->characters[linenum];
         } else
         {
-          showchar = alpha->wildcardshow;
+          chartoshow = alpha->wildcardshow;
         }
-        if (firstinline != showchar)
+        if (firstinline != chartoshow)
         {
-          fprintf(fpout," %c",(int) showchar);
+          fprintf(fpout," %c",(int) chartoshow);
         }
         (void) putc('\n',fpout);
         afternewline = true;
@@ -566,14 +567,14 @@ void outputalphabet(FILE *fpout,const Alphabet *alpha)
   }
   if (linenum < alpha->mapsize-1)
   {
-    showchar = alpha->characters[linenum];
+    chartoshow = alpha->characters[linenum];
   } else
   {
-    showchar = alpha->wildcardshow;
+    chartoshow = alpha->wildcardshow;
   }
-  if (firstinline != showchar)
+  if (firstinline != chartoshow)
   {
-    fprintf(fpout," %c",(int) showchar);
+    fprintf(fpout," %c",(int) chartoshow);
   }
   (void) putc((int) '\n',fpout);
 }
@@ -597,64 +598,25 @@ void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
   }
 }
 
-void fastasymbolstringgeneric(FILE *fpout,
-                              const char *desc,
-                              const Alphabet *alpha,
-                              const Uchar *w,
-                              unsigned long wlen,
-                              unsigned long width)
+void showalphabetsymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar)
 {
-  unsigned long i, j;
-
-  assert(width > 0);
-  if (desc == NULL)
+  if (alpha == NULL)
   {
-    fprintf(fpout,">\n");
+    (void) putc((int) currentchar,fpout);
   } else
   {
-    fprintf(fpout,">%s\n",desc);
-  }
-  for (i = 0, j = 0; ; i++)
-  {
-    if (w[i] == (Uchar) SEPARATOR)
+    if (currentchar == (Uchar) WILDCARD)
     {
-      fprintf(fpout,"\n>\n");
-      j = 0;
+      (void) putc((int) alpha->wildcardshow,fpout);
     } else
     {
-      if (alpha == NULL)
+      if (currentchar == (Uchar) SEPARATOR)
       {
-        (void) putc((int) w[i],fpout);
+        (void) fprintf(fpout,">\n");
       } else
       {
-        if (w[i] == (Uchar) WILDCARD)
-        {
-          (void) putc((int) alpha->wildcardshow,fpout);
-        } else
-        {
-          if (w[i] == (Uchar) SEPARATOR)
-          {
-            (void) fprintf(fpout,">\n");
-          } else
-          {
-            assert((unsigned int) w[i] < alpha->mapsize-1);
-            (void) putc((int) alpha->characters[(int) w[i]],fpout);
-          }
-        }
-      }
-    }
-    if (i == wlen - 1)
-    {
-      fprintf(fpout,"\n");
-      break;
-    }
-    if (w[i] != (Uchar) SEPARATOR)
-    {
-      j++;
-      if (j >= width)
-      {
-        fprintf(fpout,"\n");
-        j = 0;
+        assert((unsigned int) currentchar < alpha->mapsize-1);
+        (void) putc((int) alpha->characters[(int) currentchar],fpout);
       }
     }
   }
