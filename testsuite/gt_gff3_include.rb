@@ -307,3 +307,10 @@ Test do
   run_test("#{$bin}gt gff3 #{$testdata}attribute_w_multiple_equals.gff3", :retval => 1)
   grep $last_stderr, "does not contain exactly one"
 end
+
+Name "gt gff3 fail inconsistent sequence ids"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}inconsistent_sequence_ids.gff3", :retval => 1)
+  grep $last_stderr, "has different sequence id"
+end

@@ -368,6 +368,16 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                   filename, ID_STRING);
         had_err = -1;
       }
+      else if (str_cmp(genome_node_get_seqid(parent_gf),
+                       genome_node_get_seqid(genome_feature))) {
+        env_error_set(env, "child on line %lu in file \"%s\" has different "
+                      "sequence id than its parent on line %lu ('%s' vs. '%s')",
+                      genome_node_get_line_number(genome_feature), filename,
+                      genome_node_get_line_number(parent_gf),
+                      str_get(genome_node_get_seqid(genome_feature)),
+                      str_get(genome_node_get_seqid(parent_gf)));
+        had_err = -1;
+      }
       else {
         assert(gff3_parser->incomplete_node);
         genome_node_is_part_of_genome_node(parent_gf, genome_feature, env);
