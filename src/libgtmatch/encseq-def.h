@@ -62,10 +62,14 @@ typedef struct
         (ISSPECIAL(CC) ? (CC) : (Uchar) 3 - (CC))
 
 #define getencodedchar(ENCSEQ,POS,RM)\
-        (((RM) == Forwardmode) ? (ENCSEQ)->plainseq[POS] :\
-          (((RM) == Reversemode) ? (ENCSEQ)->plainseq[REVERSEPOS((ENCSEQ)->totallength,POS)] :\
-            (((RM) == Complementmode) ? MAKECOMPL((ENCSEQ)->plainseq[POS]) :\
-              (MAKECOMPL((ENCSEQ)->plainseq[REVERSEPOS((ENCSEQ)->totallength,POS)])\
+        (((RM) == Forwardmode)\
+          ? (ENCSEQ)->plainseq[POS]\
+          : (((RM) == Reversemode)\
+            ? (ENCSEQ)->plainseq[REVERSEPOS((ENCSEQ)->totallength,POS)]\
+            : (((RM) == Complementmode) \
+              ? MAKECOMPL((ENCSEQ)->plainseq[POS])\
+              : (MAKECOMPL((ENCSEQ)->plainseq[\
+                           REVERSEPOS((ENCSEQ)->totallength,POS)])\
               )\
             )\
           )\

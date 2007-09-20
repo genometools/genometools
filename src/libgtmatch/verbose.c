@@ -28,7 +28,7 @@
 void showverbose(Verboseinfo *verboseinfo,
                  const char *format, ...)
 {
-  if(verboseinfo != NULL && verboseinfo->beverbose)
+  if (verboseinfo != NULL && verboseinfo->beverbose)
   {
     va_list ap;
 
