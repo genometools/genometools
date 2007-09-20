@@ -22,7 +22,7 @@
 #include "alphadef.h"
 
 #include "trieins.pr"
-#include "sfx-map.pr"
+#include "esa-map.pr"
 
 static void maketrie(Trierep *trierep,
                      /*@unused@*/ const Uchar *characters,
@@ -84,7 +84,7 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
                         &totallength,
                         SARR_ESQTAB,
                         indexname,
-                        false,
+                        NULL,
                         env) != 0)
   {
     haserr = true;

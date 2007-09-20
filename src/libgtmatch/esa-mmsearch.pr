@@ -36,6 +36,7 @@ int callenumquerymatches(const Str *indexname,
                          int (*processmaxmatch)(void *,unsigned long,Seqpos,
                                                 uint64_t,unsigned long,Env *),
                          void *processmaxmatchinfo,
+                         Verboseinfo *verboseinfo,
                          Env *env);
 
 int sarrquerysubstringmatch(const Uchar *dbseq,

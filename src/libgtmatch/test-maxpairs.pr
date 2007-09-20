@@ -1,16 +1,18 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-int testmaxpairs(const Str *indexname,
-                 unsigned long samples,
-                 unsigned int minlength,
-                 Seqpos substringlength,
-                 Env *env);
+int testmaxpairs(/*@unused@*/ const Str *indexname,
+                 /*@unused@*/ unsigned long samples,
+                 /*@unused@*/ unsigned int minlength,
+                 /*@unused@*/ Seqpos substringlength,
+                 /*@unused@*/ Verboseinfo *verboseinfo,
+                 /*@unused@*/ Env *env);
 
 int testmaxpairs(const Str *indexname,
                  unsigned long samples,
                  unsigned int minlength,
                  Seqpos substringlength,
+                 Verboseinfo *verboseinfo,
                  Env *env);
 
 #ifdef __cplusplus

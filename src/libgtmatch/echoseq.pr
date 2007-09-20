@@ -14,6 +14,22 @@ const char *retriesequencedescription(unsigned long *desclen,
 void checkalldescriptions(const char *destab,unsigned long destablength,
                           unsigned long numofsequences,Env *env);
 
+void symbolstring2fasta(FILE *fpout,
+                        const char *desc,
+                        const Alphabet *alpha,
+                        const Uchar *w,
+                        unsigned long wlen,
+                        unsigned long width);
+
+void encseq2symbolstring(FILE *fpout,
+                         const char *desc,
+                         const Alphabet *alpha,
+                         const Encodedsequence *encseq,
+                         Readmode readmode,
+                         Seqpos start,
+                         unsigned long wlen,
+                         unsigned long width);
+
 int echodescriptionandsequence(const StrArray *filenametab,Env *env);
 
 #ifdef __cplusplus

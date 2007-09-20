@@ -31,6 +31,7 @@
 #include "sfx-suffixer.h"
 #include "sfx-lcpval.h"
 #include "iterseq.h"
+#include "verbose-def.h"
 #include "stamp.h"
 
 #include "measure-time.pr"
@@ -521,7 +522,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
     }
   }
   FREESPACE(filelengthtab);
-  if(alpha != NULL)
+  if (alpha != NULL)
   {
     freeAlphabet(&alpha,env);
   }
@@ -540,11 +541,13 @@ int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
   retval = suffixeratoroptions(&so,argc,argv,env);
   if (retval == 0)
   {
-    printf("# sizeof (Seqpos)=%lu\n",
-            (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
+    Verboseinfo *verboseinfo = newverboseinfo(false,env);
+    showverbose(verboseinfo,"# sizeof (Seqpos)=%lu\n",
+                (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
 #ifdef INLINEDENCSEQ
-    printf("# inlined encodeded sequence\n");
+    showverbose(verboseinfo,"# inlined encodeded sequence\n");
 #endif
+    freeverboseinfo(&verboseinfo,env);
   }
   if (retval == 0)
   {

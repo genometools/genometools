@@ -10,6 +10,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                            int (*processmaxmatch)(void *,Seqpos,
                                                   Seqpos,Seqpos,Env *),
                            void *processmaxmatchinfo,
+                           Verboseinfo *verboseinfo,
                            Env *env);
 
 #ifdef __cplusplus

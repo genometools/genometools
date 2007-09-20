@@ -34,6 +34,7 @@
 #include "fbs-def.h"
 #include "safecast-gen.h"
 #include "esafileend.h"
+#include "verbose-def.h"
 #include "stamp.h"
 
 #include "mapspec-gen.pr"
@@ -469,6 +470,7 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
 
 static int fillencseqmapspecstartptr(Encodedsequence *encseq,
                                      const Str *indexname,
+                                     Verboseinfo *verboseinfo,
                                      Env *env)
 {
   bool haserr = false;
@@ -486,9 +488,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
   {
     haserr = true;
   }
-  /* XXX integrate later 
-  printf("# sat=%s\n",encseqaccessname(encseq));
-  */
+  showverbose(verboseinfo,"# sat=%s\n",encseqaccessname(encseq));
   str_delete(tmpfilename,env);
   return haserr ? -1 : 0;
 }
@@ -1425,7 +1425,7 @@ static Encodedsequence *determineencseqkeyvalues(
   spaceinbitsperchar
     = (double) ((uint64_t) CHAR_BIT * (uint64_t) encseq->sizeofrep)/
       (double) totallength;
-  /* XXX integrate later 
+  /* XXX integrate later
   printf("# init character encoding (%s,%lu"
          " bytes,%.2f bits/symbol)\n",
           encseq->name,encseq->sizeofrep,spaceinbitsperchar);
@@ -1658,6 +1658,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                                const Specialcharinfo
                                                      *specialcharinfo,
                                                unsigned int mapsize,
+                                               Verboseinfo *verboseinfo,
                                                Env *env)
 {
   Encodedsequence *encseq;
@@ -1686,10 +1687,9 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                       mapsize,
                                       env);
     ALLASSIGNAPPENDFUNC;
-    /*
-    printf("# deliverchar=%s\n",encseq->delivercharname); XXX insert later
-    */
-    if (fillencseqmapspecstartptr(encseq,indexname,env) != 0)
+    showverbose(verboseinfo,"# deliverchar=%s\n",
+                encseq->delivercharname);
+    if (fillencseqmapspecstartptr(encseq,indexname,verboseinfo,env) != 0)
     {
       haserr = true;
       freeEncodedsequence(&encseq,env);
@@ -1744,10 +1744,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
   encseq->plainseqptr = (seq2 == NULL) ? true : false;
   ALLASSIGNAPPENDFUNC;
   encseq->mappedptr = NULL;
-  /*
-  printf("# deliverchar=%s\n",encseq->delivercharname); XXX insert later
-  */
   return encseq;
 }
 
-#endif /* INLINEDENCSEQ */
+#endif /* ifndef INLINEDENCSEQ */

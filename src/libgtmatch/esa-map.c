@@ -50,7 +50,7 @@
 static int scanprjfileviafileptr(Suffixarray *suffixarray,
                                  Seqpos *totallength,
                                  const Str *indexname,
-                                 bool verbose,
+                                 Verboseinfo *verboseinfo,
                                  FILE *fpin,
                                  Env *env)
 {
@@ -147,16 +147,14 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         suffixarray->filelengthtab[numoffiles].length = (Seqpos) readint1;
         suffixarray->filelengthtab[numoffiles].effectivelength
                                                = (Seqpos) readint2;
-        if (verbose)
-        {
-          printf("%s%s " Formatuint64_t " " Formatuint64_t "\n",
-                  DBFILEKEY,
-                  strarray_get(suffixarray->filenametab,numoffiles),
-                  PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
-                                    length),
-                  PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
-                                    effectivelength));
-        }
+        showverbose(verboseinfo,
+                    "%s%s " Formatuint64_t " " Formatuint64_t "\n",
+                    DBFILEKEY,
+                    strarray_get(suffixarray->filenametab,numoffiles),
+                    PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
+                                      length),
+                    PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].
+                                      effectivelength));
         numoffiles++;
       }
     } else
@@ -175,7 +173,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     }
   }
   if (!haserr && allkeysdefined(indexname,PROJECTFILESUFFIX,riktab,
-                                verbose,env) != 0)
+                                verboseinfo,env) != 0)
   {
     haserr = true;
   }
@@ -306,7 +304,8 @@ static void initsuffixarray(Suffixarray *suffixarray)
 }
 
 static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
-                        const Str *indexname,bool verbose,Env *env)
+                        const Str *indexname,Verboseinfo *verboseinfo,
+                        Env *env)
 {
   bool haserr = false;
   FILE *fp;
@@ -318,7 +317,7 @@ static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
     haserr = true;
   }
   if (!haserr && scanprjfileviafileptr(suffixarray,totallength,
-                                       indexname,verbose,
+                                       indexname,verboseinfo,
                                        fp,env) != 0)
   {
     haserr = true;
@@ -368,7 +367,7 @@ void freesuffixarray(Suffixarray *suffixarray,Env *env)
   suffixarray->llvtabstream.fp = NULL;
   env_fa_xfclose(suffixarray->bwttabstream.fp,env);
   suffixarray->bwttabstream.fp = NULL;
-  if(suffixarray->alpha != NULL)
+  if (suffixarray->alpha != NULL)
   {
     freeAlphabet(&suffixarray->alpha,env);
   }
@@ -383,14 +382,14 @@ static int inputsuffixarray(bool map,
                             Seqpos *totallength,
                             unsigned int demand,
                             const Str *indexname,
-                            bool verbose,
+                            Verboseinfo *verboseinfo,
                             Env *env)
 {
   bool haserr = false;
 
   env_error_check(env);
   initsuffixarray(suffixarray);
-  haserr = scanprjfile(suffixarray,totallength,indexname,verbose,env);
+  haserr = scanprjfile(suffixarray,totallength,indexname,verboseinfo,env);
   if (!haserr)
   {
     haserr = scanal1file(suffixarray,indexname,env);
@@ -403,6 +402,7 @@ static int inputsuffixarray(bool map,
 					     &suffixarray->specialcharinfo,
 					     getmapsizeAlphabet(suffixarray->
                                                                 alpha),
+                                             verboseinfo,
 					     env);
     if (suffixarray->encseq == NULL)
     {
@@ -524,7 +524,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
                       Seqpos *totallength,
                       unsigned int demand,
                       const Str *indexname,
-                      bool verbose,
+                      Verboseinfo *verboseinfo,
                       Env *env)
 {
   env_error_check(env);
@@ -533,7 +533,7 @@ int streamsuffixarray(Suffixarray *suffixarray,
                           totallength,
                           demand,
                           indexname,
-                          verbose,
+                          verboseinfo,
                           env);
 }
 
@@ -541,7 +541,7 @@ int mapsuffixarray(Suffixarray *suffixarray,
                    Seqpos *totallength,
                    unsigned int demand,
                    const Str *indexname,
-                   bool verbose,
+                   Verboseinfo *verboseinfo,
                    Env *env)
 {
   env_error_check(env);
@@ -550,6 +550,6 @@ int mapsuffixarray(Suffixarray *suffixarray,
                           totallength,
                           demand,
                           indexname,
-                          verbose,
+                          verboseinfo,
                           env);
 }

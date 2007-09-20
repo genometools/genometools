@@ -20,6 +20,8 @@
 #include "spacedef.h"
 #include "iterseq.h"
 #include "alphadef.h"
+#include "encseq-def.h"
+#include "chardef.h"
 
 unsigned long *calcdescendpositions(const char *destab,
                                     unsigned long destablength,
@@ -97,6 +99,102 @@ void checkalldescriptions(const char *destab,unsigned long destablength,
   FREESPACE(descendtab);
 }
 
+void symbolstring2fasta(FILE *fpout,
+                        const char *desc,
+                        const Alphabet *alpha,
+                        const Uchar *w,
+                        unsigned long wlen,
+                        unsigned long width)
+{
+  unsigned long i, j;
+  Uchar currentchar;
+
+  assert(width > 0);
+  if (desc == NULL)
+  {
+    fprintf(fpout,">\n");
+  } else
+  {
+    fprintf(fpout,">%s\n",desc);
+  }
+  for (i = 0, j = 0; ; i++)
+  {
+    currentchar = w[i];
+    if (currentchar == (Uchar) SEPARATOR)
+    {
+      fprintf(fpout,"\n>\n");
+      j = 0;
+    } else
+    {
+      showalphabetsymbol(fpout,alpha,currentchar);
+    }
+    if (i == wlen - 1)
+    {
+      fprintf(fpout,"\n");
+      break;
+    }
+    if (currentchar != (Uchar) SEPARATOR)
+    {
+      j++;
+      if (j >= width)
+      {
+        fprintf(fpout,"\n");
+        j = 0;
+      }
+    }
+  }
+}
+
+void encseq2symbolstring(FILE *fpout,
+                         const char *desc,
+                         const Alphabet *alpha,
+                         const Encodedsequence *encseq,
+                         Readmode readmode,
+                         Seqpos start,
+                         unsigned long wlen,
+                         unsigned long width)
+{
+  unsigned long j;
+  Seqpos idx, lastpos;
+  Uchar currentchar;
+
+  assert(width > 0);
+  if (desc == NULL)
+  {
+    fprintf(fpout,">\n");
+  } else
+  {
+    fprintf(fpout,">%s\n",desc);
+  }
+  lastpos = start + wlen - 1;
+  for (idx = start, j = 0; ; idx++)
+  {
+    currentchar = getencodedchar(encseq,idx,readmode);
+    if (currentchar == (Uchar) SEPARATOR)
+    {
+      fprintf(fpout,"\n>\n");
+      j = 0;
+    } else
+    {
+      showalphabetsymbol(fpout,alpha,currentchar);
+    }
+    if (idx == lastpos)
+    {
+      fprintf(fpout,"\n");
+      break;
+    }
+    if (currentchar != (Uchar) SEPARATOR)
+    {
+      j++;
+      if (j >= width)
+      {
+        fprintf(fpout,"\n");
+        j = 0;
+      }
+    }
+  }
+}
+
 int echodescriptionandsequence(const StrArray *filenametab,Env *env)
 {
   Scansequenceiterator *sseqit;
@@ -123,8 +221,7 @@ int echodescriptionandsequence(const StrArray *filenametab,Env *env)
     {
       break;
     }
-    fastasymbolstringgeneric(stdout,desc,NULL,sequence,seqlen,
-                             (unsigned long) 70);
+    symbolstring2fasta(stdout,desc,NULL,sequence,seqlen,70UL);
     FREESPACE(desc);
   }
   freeScansequenceiterator(&sseqit,env);

@@ -18,6 +18,7 @@
 #include "arraydef.h"
 #include "seqpos-def.h"
 #include "esa-seqread.h"
+#include "verbose-def.h"
 
 #define ISLEFTDIVERSE   (Uchar) (state->alphabetsize)
 #define INITIALCHAR     (Uchar) (state->alphabetsize+1)
@@ -347,6 +348,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       unsigned int searchlength,
                       int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *),
                       void *processmaxpairsinfo,
+                      Verboseinfo *verboseinfo,
                       Env *env)
 {
   unsigned int base;
@@ -380,6 +382,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                     NULL,
                     */
                     &state,
+                    verboseinfo,
                     env) != 0)
   {
     haserr = true;
@@ -399,6 +402,7 @@ int callenummaxpairs(const Str *indexname,
                      bool scanfile,
                      int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *),
                      void *processmaxpairsinfo,
+                     Verboseinfo *verboseinfo,
                      Env *env)
 {
   bool haserr = false;
@@ -425,6 +429,7 @@ int callenummaxpairs(const Str *indexname,
                         userdefinedleastlength,
                         processmaxpairs,
                         processmaxpairsinfo,
+                        verboseinfo,
                         env) != 0)
   {
     haserr = true;

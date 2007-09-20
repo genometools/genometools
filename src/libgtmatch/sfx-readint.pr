@@ -20,7 +20,8 @@ void setreadintkeys(Array *riktab,
                     Env *env);
 
 int allkeysdefined(const Str *indexname,const char *suffix,
-                   const Array *riktab,bool verbose,Env *env);
+                   const Array *riktab,Verboseinfo *verboseinfo,
+                   Env *env);
 
 int analyzeuintline(const Str *indexname,
                     const char *suffix,

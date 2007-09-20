@@ -21,6 +21,7 @@
 #include "measure-time-if.h"
 #include "esa-seqread.h"
 #include "sfx-suffixer.h"
+#include "verbose-def.h"
 
 #include "sfx-apfxlen.pr"
 #include "esa-maxpairs.pr"
@@ -42,6 +43,7 @@ static int constructsarrandrunmaxpairs(
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  Measuretime *mtime,
+                 Verboseinfo *verboseinfo,
                  Env *env)
 {
   const Seqpos *suftabptr;
@@ -90,6 +92,7 @@ static int constructsarrandrunmaxpairs(
                             ssi->minlength,
                             ssi->processmaxmatch,
                             ssi->processmaxmatchinfo,
+                            verboseinfo,
                             env) != 0)
       {
         haserr = true;
@@ -116,6 +119,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                            int (*processmaxmatch)(void *,Seqpos,
                                                   Seqpos,Seqpos,Env *),
                            void *processmaxmatchinfo,
+                           Verboseinfo *verboseinfo,
                            Env *env)
 {
   Specialcharinfo samplespecialcharinfo;
@@ -144,6 +148,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                                                           dblen+querylen+1),
                                   (unsigned int) 1, /* parts */
                                   NULL,
+                                  verboseinfo,
                                   env) != 0)
   {
     haserr = true;
@@ -151,4 +156,4 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
   freeEncodedsequence(&ssi.encseq,env);
   return haserr ? -1 : 0;
 }
-#endif /* !INLINEDSequentialsuffixarrayreader */
+#endif /* ifndef INLINEDSequentialsuffixarrayreader */

@@ -50,6 +50,7 @@ void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
                                                const Specialcharinfo
                                                      *specialcharinfo,
                                                unsigned int mapsize,
+                                               Verboseinfo *verboseinfo,
                                                Env *env);
 
 Encodedsequence *plain2encodedsequence(bool withrange,

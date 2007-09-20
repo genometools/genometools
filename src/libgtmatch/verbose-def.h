@@ -15,22 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef GTMATCH_H
-#define GTMATCH_H
+#ifndef VERBOSE_H
+#define VERBOSE_H
 
-/* The GenomeTools matching library (libgtmatch) header */
-#include "libgtmatch/sarr-def.h"
+#include "libgtcore/env.h"
 
-#include "libgtmatch/guessprot.pr"
-#include "libgtmatch/sfx-run.pr"
-#include "libgtmatch/fmi-mkindex.pr"
-#include "libgtmatch/fmi-uniquesub.pr"
-#include "libgtmatch/esa-map.pr"
-#include "libgtmatch/sfx-suftaborder.pr"
-#include "libgtmatch/test-encseq.pr"
-#include "libgtmatch/test-mappedstr.pr"
-#include "libgtmatch/test-trieins.pr"
-#include "libgtmatch/test-mergeesa.pr"
-#include "libgtmatch/pos2seqnum.pr"
+typedef struct Verboseinfo Verboseinfo;
+
+void showverbose(Verboseinfo *verboseinfo,
+                 const char *format, ...)
+                 __attribute__ ((format (printf, 2, 3)));
+
+Verboseinfo *newverboseinfo(bool verbose,Env *env);
+
+void freeverboseinfo(Verboseinfo **v,Env *env);
 
 #endif

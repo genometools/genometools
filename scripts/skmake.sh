@@ -48,6 +48,8 @@ fi
 # EXTRAFLAGS="-DINLINEDENCSEQ"
 COMMON="curses=no"
 
+make bin/skproto
+
 if test $icc -eq 1
 then
   make ${COMMON} CC='ccache icc' CFLAGS='-O3 ${EXTRAFLAGS} ${bignum} -wd1418,869,981,1338' LD='icc' CXX='icc' $*

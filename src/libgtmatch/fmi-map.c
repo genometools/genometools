@@ -26,12 +26,13 @@
 #include "esafileend.h"
 #include "fmindex.h"
 #include "sarr-def.h"
+#include "verbose-def.h"
 #include "stamp.h"
 
 #include "readnextline.pr"
 #include "opensfxfile.pr"
 #include "sfx-readint.pr"
-#include "sfx-map.pr"
+#include "esa-map.pr"
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
 
@@ -53,6 +54,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
                                  bool *storeindexpos,
                                  const Str *indexname,
                                  FILE *fpin,
+                                 Verboseinfo *verboseinfo,
                                  Env *env)
 {
   ArrayUchar linebuffer;
@@ -100,8 +102,8 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
       }
     }
   }
-  if (!haserr && allkeysdefined(indexname,FMASCIIFILESUFFIX,riktab,false,
-                                env) != 0)
+  if (!haserr && allkeysdefined(indexname,FMASCIIFILESUFFIX,riktab,
+                                verboseinfo,env) != 0)
   {
     haserr = true;
   }
@@ -143,7 +145,9 @@ void freefmindex(Fmindex *fmindex,Env *env)
   }
 }
 
-static Encodedsequence *mapbwtencoding(const Str *indexname,Env *env)
+static Encodedsequence *mapbwtencoding(const Str *indexname,
+                                       Verboseinfo *verboseinfo,
+                                       Env *env)
 {
   Suffixarray suffixarray;
   bool haserr = false;
@@ -151,7 +155,7 @@ static Encodedsequence *mapbwtencoding(const Str *indexname,Env *env)
 
   env_error_check(env);
   if (mapsuffixarray(&suffixarray,&totallength,SARR_ESQTAB,indexname,
-                    false,env) != 0)
+                     verboseinfo,env) != 0)
   {
     haserr = true;
   }
@@ -166,7 +170,8 @@ static Encodedsequence *mapbwtencoding(const Str *indexname,Env *env)
   return suffixarray.encseq;
 }
 
-int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env)
+int mapfmindex (Fmindex *fmindex,const Str *indexname,
+                Verboseinfo *verboseinfo,Env *env)
 {
   FILE *fpin = NULL;
   bool haserr = false, storeindexpos = true;
@@ -185,6 +190,7 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env)
                              &storeindexpos,
                              indexname,
                              fpin,
+                             verboseinfo,
                              env) != 0)
     {
       haserr = true;
@@ -215,7 +221,7 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,Env *env)
   }
   if (!haserr)
   {
-    fmindex->bwtformatching = mapbwtencoding(indexname,env);
+    fmindex->bwtformatching = mapbwtencoding(indexname,verboseinfo,env);
     if (fmindex->bwtformatching == NULL)
     {
       haserr = true;

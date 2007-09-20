@@ -21,8 +21,8 @@
 #include "divmodmul.h"
 #include "chardef.h"
 
-#include "mergeesa.pr"
-#include "sfx-map.pr"
+#include "esa-merge.pr"
+#include "esa-map.pr"
 #include "encseq2offset.pr"
 #include "opensfxfile.pr"
 #include "mkidxcpy.pr"
@@ -186,6 +186,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                    const Str *outfmindex,
                    const StrArray *indexnametab,
                    bool storeindexpos,
+                   Verboseinfo *verboseinfo,
                    Env *env)
 {
   Suffixarray suffixarray;
@@ -224,7 +225,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                          &totallength,
                          SARR_BWTTAB | (storeindexpos ? SARR_SUFTAB : 0),
                          indexname,
-                         false,
+                         verboseinfo,
                          env) != 0)
     {
       haserr = true;
@@ -260,6 +261,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
     if (initEmissionmergedesa(&emmesa,
                              indexnametab,
                              SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB,
+                             verboseinfo,
                              env) != 0)
     {
       haserr = true;

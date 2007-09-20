@@ -19,6 +19,7 @@
 #include "libgtcore/versionfunc.h"
 #include "divmodmul.h"
 #include "fmindex.h"
+#include "verbose-def.h"
 #include "stamp.h"
 
 #include "fmi-save.pr"
@@ -179,7 +180,8 @@ static int mkfmindexoptions(Mkfmcallinfo *mkfmcallinfo,
   return retval;
 }
 
-static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
+static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Verboseinfo *verboseinfo,
+                        Env *env)
 {
   Fmindex fm;
   unsigned int log2bsize,
@@ -194,6 +196,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
   fm.markpostable = NULL;
   fm.boundarray = NULL;
   fm.suffixlength = 0;
+
   if (levedescl2levelnum(str_get(mkfmcallinfo->leveldesc),
                         &log2bsize,
                         &log2markdist) != 0)
@@ -208,6 +211,7 @@ static int runmkfmindex(Mkfmcallinfo *mkfmcallinfo,Env *env)
                                 mkfmcallinfo->outfmindex,
                                 mkfmcallinfo->indexnametab,
                                 mkfmcallinfo->noindexpos ? false : true,
+                                verboseinfo,
                                 env) != 0)
   {
     haserr = true;
@@ -232,10 +236,12 @@ int parseargsandcallmkfmindex(int argc,const char **argv,Env *env)
   retval = mkfmindexoptions(&mkfmcallinfo,argc,argv,env);
   if (retval == 0)
   {
-    if (runmkfmindex(&mkfmcallinfo,env) < 0)
+    Verboseinfo *verboseinfo = newverboseinfo(false,env);
+    if (runmkfmindex(&mkfmcallinfo,verboseinfo,env) < 0)
     {
       haserr = true;
     }
+    freeverboseinfo(&verboseinfo,env);
   } else
   {
     if (retval < 0)
