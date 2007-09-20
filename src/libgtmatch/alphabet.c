@@ -23,12 +23,12 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <errno.h>
+#include "libgtcore/cstr.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fileutils.h"
+#include "libgtcore/gtdatapath.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
-#include "libgtcore/fileutils.h"
-#include "libgtcore/cstr.h"
-#include "libgtcore/gtdatapath.h"
 #include "qsorttype.h"
 #include "symboldef.h"
 #include "arraydef.h"
@@ -281,19 +281,13 @@ static int readsymbolmap(Alphabet *alpha,const Str *mapfile,Env *env)
   StrArray *lines;
 
   env_error_check(env);
-  lines = file2lines(str_get(mapfile),env);
-  if (lines == NULL)
+  lines = strarray_new_file(str_get(mapfile),env);
+  assert(lines);
+  if (readsymbolmapfromlines(alpha,mapfile,lines,env) != 0)
   {
     haserr = true;
   }
-  if (!haserr)
-  {
-    if (readsymbolmapfromlines(alpha,mapfile,lines,env) != 0)
-    {
-      haserr = true;
-    }
-    strarray_delete(lines,env);
-  }
+  strarray_delete(lines,env);
   return haserr ? -1 : 0;
 }
 

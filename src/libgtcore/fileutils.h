@@ -36,6 +36,4 @@ void           file_dirname(Str *path, const char *file, Env*);
    sets 'path' to the empty string if 'file' could not be found in $PATH. */
 int            file_find_in_path(Str *path, const char *file, Env*);
 
-StrArray *file2lines(const char *filename,Env *env);
-
 #endif

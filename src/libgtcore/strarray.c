@@ -32,6 +32,25 @@ StrArray* strarray_new(Env *env)
   return sa;
 }
 
+StrArray* strarray_new_file(const char *path, Env *env)
+{
+  StrArray *filecontent;
+  GenFile *fpin;
+  Str *line;
+  env_error_check(env);
+  fpin = genfile_xopen(path, "r", env);
+  assert(fpin);
+  line = str_new(env);
+  filecontent = strarray_new(env);
+  while (str_read_next_line_generic(line, fpin, env) != EOF) {
+    strarray_add_cstr(filecontent,str_get(line),env);
+    str_reset(line);
+  }
+  str_delete(line, env);
+  genfile_xclose(fpin, env);
+  return filecontent;
+}
+
 void strarray_add_cstr(StrArray *sa, const char *cstr, Env *env)
 {
   Str *str;
