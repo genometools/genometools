@@ -56,7 +56,7 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
                     Seqpos len, /*@unused@*/Str *str_indexfilename, Env *env)
 {
   Seqpos i,
-         k,
+         //k,
 	 offset;
   unsigned long seqnum = 
                   getrecordnumSeqpos(info->markpos, info->numofdbsequences, 
@@ -86,7 +86,6 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
   //fprintf(fastaoutinfo->formatout,"from %s ", indexfilename);
 
   // if there are sequence descriptions
-  //check if descentab in demand !!!!
   desptr = retriesequencedescription(&desclen,
                                      info->destab,
                                      info->descendtab,
@@ -96,19 +95,13 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
     fprintf(info->formatout, "%c", desptr[i]);
   }
 
-  /*if(fastaoutinfo->multiseq->descspace.spaceUchar != NULL)
-  {
-    desclength = DESCRIPTIONLENGTH(fastaoutinfo->multiseq,seqnum);
-    if(WRITETOFILEHANDLE(DESCRIPTIONPTR(fastaoutinfo->multiseq,seqnum),
-	  (Uint) sizeof(Uchar),
-	  desclength,
-	  fastaoutinfo->formatout) != 0)
-    {
-      return (Sint) -1;
-    }
-  }*/
+  encseq2symbolstring(info->formatout, info->destab,
+                      info->alpha, info->encseq,
+		      Forwardmode, startpos,
+		      (unsigned long)len,
+		      60);
 
-  (void) putc('\n',info->formatout);
+  /*(void) putc('\n',info->formatout);
   for(k=0, i = startpos; i < startpos + len; i++, k++)
   {
     if(k >= info->linewidth)
@@ -120,6 +113,7 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
       info->characters[getencodedchar(info->encseq, i, Forwardmode)] );
   }
   (void) putc('\n',info->formatout);
+  */
 
   return 0;
 }

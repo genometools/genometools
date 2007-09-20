@@ -17,7 +17,8 @@
 #include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/esa-seqread.pr"
 #include "libgtmatch/esa-mmsearch-def.h"
-#include "libgtmatch/sfx-map.pr"
+#include "libgtmatch/intcode-def.h"
+#include "libgtmatch/sfx-mappedstr.pr"
 #include "libgtmatch/esa-mmsearch.pr"
 
 #include "ltrharvest-opt.h"

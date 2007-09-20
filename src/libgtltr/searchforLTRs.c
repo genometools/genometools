@@ -10,8 +10,9 @@
 #include "libgtmatch/arraydef.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/pos2seqnum.pr"
-#include "libgtmatch/sfx-map.pr"
 #include "libgtmatch/greedyedist.pr"
+#include "libgtmatch/intcode-def.h"
+#include "libgtmatch/sfx-mappedstr.pr"
 
 #include "searchforLTRs.h"
 #include "repeattypes.h"

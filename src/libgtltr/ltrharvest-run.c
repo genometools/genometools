@@ -10,10 +10,12 @@
 
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
+//#include "libgtcore/strarray.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/esa-maxpairs.pr"
-#include "libgtmatch/sfx-map.pr"
+#include "libgtmatch/intcode-def.h"
+#include "libgtmatch/sfx-mappedstr.pr"
 #include "libgtmatch/pos2seqnum.pr"
 
 #include "ltrharvest-opt.h"
@@ -78,6 +80,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 	encseqSequentialsuffixarrayreader(ssar),
 	numofdbsequencesSequentialsuffixarrayreader(ssar), 
 	env);
+    lo->markpos = markpos;
     if(markpos == NULL)
     { 
       haserror = true;
@@ -99,6 +102,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
                        (unsigned int)lo->minseedlength,
 		       (void*)simpleexactselfmatchstore,
 		       lo,
+		       NULL,
 		       env) != 0)
   {
     haserror = true;

@@ -11,7 +11,8 @@
 #include "libgtmatch/pos2seqnum.pr"
 #include "libgtmatch/symboldef.h"
 #include "libgtmatch/alphabet.pr"
-#include "libgtmatch/sfx-map.pr"
+#include "libgtmatch/intcode-def.h"
+#include "libgtmatch/sfx-mappedstr.pr"
 
 #include "ltrharvest-opt.h"
 
