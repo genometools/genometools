@@ -452,6 +452,7 @@ void freeAlphabet(Alphabet **alpha,Env *env)
   env_error_check(env);
   ALLOCASSIGNSPACE(alpha,NULL,Alphabet,(size_t) 1);
   alpha->characters = NULL;
+  alpha->mapdomain = NULL;
   if (isdna)
   {
     assignDNAalphabet(alpha,env);
