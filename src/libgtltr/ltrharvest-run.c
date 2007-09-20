@@ -197,31 +197,15 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 int parseargsandcallltrharvest(int argc,const char *argv[],Env *env)
 {
   LTRharvestoptions lo;
-  int retval;
-  bool haserr = false;
+  int had_err;
 
-  retval = ltrharvestoptions(&lo,argc,argv,env);
-  if (retval == 0)
-  {
-    haserr = false;
+  had_err = ltrharvestoptions(&lo,argc,argv,env);
+  if (!had_err) {
     printargsline(argv,argc);
-    if (runltrharvest(&lo,env) < 0)
-    {
-      haserr = true;
-    }
-  } else
-  {
-    if (retval < 0)
-    {
-      haserr = true;
-    }
+    had_err = runltrharvest(&lo,env);
   }
+  //if (!had_err)
+  had_err = wrapltrharvestoptions(&lo,env);
 
-  retval = wrapltrharvestoptions(&lo,env);
-  if(retval != 0)
-  {
-    haserr = true;
-  }
-
-  return haserr ? -1 : 0;
+  return had_err;
 }

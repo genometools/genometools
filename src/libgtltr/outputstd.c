@@ -47,7 +47,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
   /* in order to get to visible dna characters */
   characters = getcharactersAlphabet(
                  alphabetSequentialsuffixarrayreader(ssar));
-  Seqpos *markpos;
+  Seqpos *markpos = NULL;
 
   /* count unique LTR predictions */
   //unsigned int counter = 0;
