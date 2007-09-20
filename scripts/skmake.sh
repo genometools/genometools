@@ -32,6 +32,8 @@ then
   esac
 fi
 
+make curses=no bin/skproto
+
 skproto-all.sh
 
 if test $big -eq 1
@@ -47,8 +49,6 @@ fi
 # EXTRAFLAGS="-DINLINEDENCSEQ -DINLINEDSequentialsuffixarrayreader"
 # EXTRAFLAGS="-DINLINEDENCSEQ"
 COMMON="curses=no"
-
-make bin/skproto
 
 if test $icc -eq 1
 then
