@@ -520,7 +520,7 @@ bool genome_node_tree_is_sorted(GenomeNode **buffer, GenomeNode *current_node,
 
   if (*buffer) {
     /* the last node is not larger than the current one */
-    if (genome_node_compare(buffer, &current_node) == 1)
+    if (genome_node_compare(buffer, &current_node) > 0)
       return false;
     genome_node_delete(*buffer, env);
   }
@@ -639,7 +639,7 @@ bool genome_nodes_are_sorted(const Array *nodes)
   unsigned long i;
   assert(nodes);
   for (i = 1; i < array_size(nodes); i++) {
-    if (genome_node_compare(array_get(nodes, i-1), array_get(nodes, i)) == 1)
+    if (genome_node_compare(array_get(nodes, i-1), array_get(nodes, i)) > 0)
       return false;
   }
   return true;
