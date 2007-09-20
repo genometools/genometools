@@ -39,7 +39,7 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 
   /* we have still nodes in the buffer */
   if (csa_visitor_node_buffer_size(cs->csa_visitor)) {
-    *gn = csa_visitor_get_node(cs->csa_visitor); /* return one of them */
+    *gn = csa_visitor_get_node(cs->csa_visitor, env); /* return one of them */
     return 0;
   }
 
@@ -50,7 +50,7 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
     if (had_err)
       break;
     if (csa_visitor_node_buffer_size(cs->csa_visitor)) {
-      *gn = csa_visitor_get_node(cs->csa_visitor);
+      *gn = csa_visitor_get_node(cs->csa_visitor, env);
       return 0;
     }
   }
@@ -62,7 +62,7 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   if (!had_err) {
     csa_visitor_process_cluster(cs->csa_visitor, true, env);
     if (csa_visitor_node_buffer_size(cs->csa_visitor)) {
-      *gn = csa_visitor_get_node(cs->csa_visitor);
+      *gn = csa_visitor_get_node(cs->csa_visitor, env);
       return 0;
     }
   }

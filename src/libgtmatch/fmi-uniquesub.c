@@ -21,12 +21,10 @@
 #include "fmindex.h"
 #include "format64.h"
 #include "seqdesc.h"
-#include "gqueue-def.h"
 #include "iterseq.h"
 
 #include "fmi-map.pr"
 #include "fmi-fwduni.pr"
-#include "genericqueue.pr"
 
 #define SHOWSEQUENCE   ((unsigned int) 1)
 #define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
@@ -359,7 +357,7 @@ static int findsubquerymatch(Fmindex *fmindex,
   substringinfo.processinfo = &rangespecinfo;
   INITARRAY(&sequencebuffer,Uchar);
   INITARRAY(&sequencedescription.headerbuffer,char);
-  sequencedescription.descptr = emptyqueuegeneric(env);
+  sequencedescription.descptr = queue_new(env);
   if (overallquerysequences(uniqueposinsinglesequence,
                            &substringinfo,
                            &sequencebuffer,
@@ -370,7 +368,7 @@ static int findsubquerymatch(Fmindex *fmindex,
   {
     haserr = true;
   }
-  wrapqueuegeneric(true,&sequencedescription.descptr,env);
+  queue_delete_with_contents(sequencedescription.descptr,env);
   FREEARRAY(&sequencebuffer,Uchar);
   FREEARRAY(&sequencedescription.headerbuffer,char);
   return haserr ? -1 : 0;

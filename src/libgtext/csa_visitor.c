@@ -139,7 +139,7 @@ GenomeVisitor* csa_visitor_new(unsigned long join_length, Env *env)
 {
   GenomeVisitor *gv = genome_visitor_create(csa_visitor_class(), env);
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
-  csa_visitor->genome_node_buffer = queue_new(sizeof (GenomeNode*), env);
+  csa_visitor->genome_node_buffer = queue_new(env);
   csa_visitor->join_length = join_length;
   csa_visitor->cluster = array_new(sizeof (GenomeFeature*), env);
   csa_visitor->buffered_feature = NULL;
@@ -153,10 +153,12 @@ unsigned long csa_visitor_node_buffer_size(GenomeVisitor *gv)
   return queue_size(csa_visitor->genome_node_buffer);
 }
 
-GenomeNode* csa_visitor_get_node(GenomeVisitor *gv)
+GenomeNode* csa_visitor_get_node(GenomeVisitor *gv, Env *env)
 {
-  CSAVisitor *csa_visitor = csa_visitor_cast(gv);
-  return *(GenomeNode**) queue_get(csa_visitor->genome_node_buffer);
+  CSAVisitor *csa_visitor;
+  env_error_check(env);
+  csa_visitor = csa_visitor_cast(gv);
+  return queue_get(csa_visitor->genome_node_buffer, env);
 }
 
 static Range get_genomic_range(const void *sa)

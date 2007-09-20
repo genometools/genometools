@@ -18,7 +18,6 @@ feature requests:
 - write check script to check for error_check()
 - EXIT_SUCCESS und EXIT_FAILURE only in gtr.c and gt.c
 - no exit() calls inside library
-- fix queue implementation
 - write extractseq tool
 - update design.html, describe interface inheritance
 - check random number generation
@@ -30,7 +29,7 @@ feature requests:
   strings from the given set
 
 
-merge libgtview and libgtmatch:
+merge libgtcore and libgtmatch:
 -------------------------------
 
 - Alphabet (Stefan: ersetze alphabet.pr durch alphadef.h, Gordon: evtl. mergen
@@ -38,7 +37,6 @@ merge libgtview and libgtmatch:
 - Distributions mergen (Hashtable basiert, 64bit)
 - Encodedseq und Bioseq mergen (FastaReader und fbsadv.c)
   guesprot.c
-- Queues mergen
 - generic queue unit test (Stefan)
 - basename portabel? Randf"alle! (getbasename)
 - merge Timer und measure-time.c (Ereignis, formatierter String)
