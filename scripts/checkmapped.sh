@@ -37,6 +37,6 @@ checksfxmap()
   checkerror "cmp -s $1.prj $1-sfx.prj"
 }
 
-checkerror "${VALGRIND} ../bin/gt suffixerator -tis -suf -bwt -lcp -indexname /tmp/sfxidx $*"
+checkerror "${VALGRIND} ../bin/gt suffixerator -tis -des -suf -bwt -lcp -indexname /tmp/sfxidx $*"
 checkerror "checksfxmap /tmp/sfxidx"
 checkerror "../bin/gt dev sfxmap -v -stream /tmp/sfxidx"

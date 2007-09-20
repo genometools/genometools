@@ -33,7 +33,7 @@
 #include "fbs-def.h"
 #include "stamp.h"
 #ifndef NDEBUG
-#include "addnextchar.h"
+#include "sfx-nextchar.h"
 #endif
 
 #include "fbsadv.pr"

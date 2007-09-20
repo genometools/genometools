@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include "libgtcore/str.h"
+#include "libgtcore/strarray.h"
 
 bool           file_exists(const char*);
 /* returns 1 if the file with path a has a later modification time then the file
@@ -34,5 +35,7 @@ void           file_dirname(Str *path, const char *file, Env*);
 /* find 'file' in $PATH, if it has no dirname; set 'path' to dirname otherwise.
    sets 'path' to the empty string if 'file' could not be found in $PATH. */
 int            file_find_in_path(Str *path, const char *file, Env*);
+
+StrArray *file2lines(const char *filename,Env *env);
 
 #endif

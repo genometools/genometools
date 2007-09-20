@@ -30,6 +30,9 @@
 #include "chardef.h"
 #include "sfx-suffixer.h"
 #include "sfx-lcpval.h"
+#include "iterseq.h"
+#include "verbose-def.h"
+#include "stamp.h"
 
 #include "measure-time.pr"
 #include "opensfxfile.pr"
@@ -275,6 +278,56 @@ static int suffixeratorwithoutput(
   return haserr ? -1 : 0;
 }
 
+static int outputsequencedescription(const Str *indexname,
+                                     const StrArray *filenametab,
+                                     Env *env)
+{
+  FILE *desfp;
+  bool haserr = false;
+
+  desfp = opensfxfile(indexname,DESTABSUFFIX,"wb",env);
+  if (desfp == NULL)
+  {
+    haserr = true;
+  } else
+  {
+    Scansequenceiterator *sseqit;
+    char *desc = NULL;
+    unsigned long seqlen;
+    int retval;
+
+    sseqit = newScansequenceiterator(filenametab,NULL,false,env);
+    while (!haserr)
+    {
+      retval = nextScansequenceiterator(NULL,
+                                        &seqlen,
+                                        &desc,
+                                        sseqit,
+                                        env);
+      if (retval < 0)
+      {
+        haserr = true;
+        break;
+      }
+      if (retval == 0)
+      {
+        break;
+      }
+      if (fputs(desc,desfp) == EOF)
+      {
+        env_error_set(env,"cannot write description to file %s.%s",
+                          str_get(indexname),DESTABSUFFIX);
+        haserr = true;
+      }
+      (void) putc((int) '\n',desfp);
+      FREESPACE(desc);
+    }
+    env_fa_xfclose(desfp,env);
+    freeScansequenceiterator(&sseqit,env);
+  }
+  return haserr ? -1 : 0;
+}
+
 static int runsuffixerator(Suffixeratoroptions *so,Env *env)
 {
   unsigned int numofchars = 0;
@@ -350,6 +403,13 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
       }
     }
   }
+  if (!haserr && so->outdestab)
+  {
+    if (outputsequencedescription(so->str_indexname,so->filenametab,env) != 0)
+    {
+      haserr = true;
+    }
+  }
   initoutfileinfo(&outfileinfo);
   if (so->outlcptab)
   {
@@ -370,7 +430,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
            PRINTSeqposcast(specialcharinfo.specialranges));
     if (so->readmode == Complementmode || so->readmode == Reversecomplementmode)
     {
-      if (!isdnaalphabet(alpha))
+      if (!isdnaalphabet(alpha,env))
       {
         env_error_set(env,"option %s only can be used for DNA alphabets",
                           so->readmode == Complementmode ? "-cpl" : "rcl");
@@ -435,10 +495,10 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
       }
     }
   }
-  env_fa_xfclose(outfileinfo.outfpsuftab,env);
-  env_fa_xfclose(outfileinfo.outfplcptab,env);
-  env_fa_xfclose(outfileinfo.outfpllvtab,env);
-  env_fa_xfclose(outfileinfo.outfpbwttab,env);
+  env_fa_fclose(outfileinfo.outfpsuftab,env);
+  env_fa_fclose(outfileinfo.outfplcptab,env);
+  env_fa_fclose(outfileinfo.outfpllvtab,env);
+  env_fa_fclose(outfileinfo.outfpbwttab,env);
   if (outfileinfo.lvi != NULL)
   {
     freeLcpvalueiterator(&outfileinfo.lvi,env);
@@ -462,7 +522,10 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
     }
   }
   FREESPACE(filelengthtab);
-  freeAlphabet(&alpha,env);
+  if (alpha != NULL)
+  {
+    freeAlphabet(&alpha,env);
+  }
   freeEncodedsequence(&encseq,env);
   deliverthetime(stdout,mtime,NULL,env);
   return haserr ? -1 : 0;
@@ -478,8 +541,13 @@ int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
   retval = suffixeratoroptions(&so,argc,argv,env);
   if (retval == 0)
   {
-    printf("# sizeof (Seqpos)=%lu\n",
-            (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
+    Verboseinfo *verboseinfo = newverboseinfo(false,env);
+    showverbose(verboseinfo,"# sizeof (Seqpos)=%lu\n",
+                (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
+#ifdef INLINEDENCSEQ
+    showverbose(verboseinfo,"# inlined encodeded sequence\n");
+#endif
+    freeverboseinfo(&verboseinfo,env);
   }
   if (retval == 0)
   {

@@ -31,27 +31,56 @@ typedef enum
   SEQ_suftabfrommemory
 } Sequentialaccesstype;
 
+#ifdef INLINEDSequentialsuffixarrayreader
+
+typedef struct
+{
+  Suffixarray *suffixarray;
+  Seqpos numberofsuffixes,
+         nextsuftabindex, /* for SEQ_mappedboth | SEQ_suftabfrommemory */
+         nextlcptabindex, /* for SEQ_mappedboth */
+         largelcpindex;   /* SEQ_mappedboth */
+} Sequentialsuffixarrayreader;
+
+#define NEXTSEQUENTIALLCPTABVALUE(VALUE,SSAR)\
+        if ((SSAR)->nextlcptabindex >= (SSAR)->numberofsuffixes)\
+        {\
+          break;\
+        } else\
+        {\
+          tmpsmalllcpvalue\
+            = (SSAR)->suffixarray->lcptab[(SSAR)->nextlcptabindex++];\
+          if (tmpsmalllcpvalue == (Uchar) UCHAR_MAX)\
+          {\
+            VALUE = (SSAR)->suffixarray->llvtab[\
+                    (SSAR)->largelcpindex++].value;\
+          } else\
+          {\
+            VALUE = (Seqpos) tmpsmalllcpvalue;\
+          }\
+        }
+
+#define NEXTSEQUENTIALSUFTABVALUE(VALUE,SSAR)\
+        VALUE = (SSAR)->suffixarray->suftab[(SSAR)->nextsuftabindex++]
+
+#else
+
 typedef struct Sequentialsuffixarrayreader Sequentialsuffixarrayreader;
 
-Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
-                                        const Str *indexname,
-                                        unsigned int demand,
-                                        Sequentialaccesstype seqactype,
-                                        Env *env);
+/* The following only can be used for this case */
 
 Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromRAM(
                                         const Encodedsequence *encseq,
                                         Readmode readmode,
                                         Env *env);
 
+/* The following can only be used for this case */
+
 void updateSequentialsuffixarrayreaderfromRAM(
                     Sequentialsuffixarrayreader *ssar,
                     const Seqpos *suftab,
                     bool firstpage,
                     Seqpos numberofsuffixes);
-
-void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
-                                     Env *env);
 
 int nextSequentiallcpvalue(Seqpos *currentlcp,
                            Sequentialsuffixarrayreader *ssar,
@@ -60,6 +89,17 @@ int nextSequentiallcpvalue(Seqpos *currentlcp,
 int nextSequentialsuftabvalue(Seqpos *currentsuffix,
                               Sequentialsuffixarrayreader *ssar,
                               Env *env);
+
+#endif
+
+Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
+                                        const Str *indexname,
+                                        unsigned int demand,
+                                        Sequentialaccesstype seqactype,
+                                        Env *env);
+
+void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
+                                     Env *env);
 
 const Encodedsequence *encseqSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *sarr);
@@ -72,5 +112,11 @@ const Alphabet *alphabetSequentialsuffixarrayreader(
 
 unsigned long numofdbsequencesSequentialsuffixarrayreader(
                     const Sequentialsuffixarrayreader *sarr);
+
+unsigned long destablengthSequentialsuffixarrayreader(
+              const Sequentialsuffixarrayreader *sarr);
+
+const char *destabSequentialsuffixarrayreader(
+              const Sequentialsuffixarrayreader *sarr);
 
 #endif

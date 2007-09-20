@@ -18,11 +18,13 @@
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/sarr-def.h"
-#include "libgtmatch/sfx-map.pr"
+#include "libgtmatch/verbose-def.h"
+#include "libgtmatch/esa-map.pr"
 #include "libgtmatch/test-encseq.pr"
 #include "libgtmatch/pos2seqnum.pr"
 #include "libgtmatch/test-mappedstr.pr"
 #include "libgtmatch/sfx-suftaborder.pr"
+#include "libgtmatch/echoseq.pr"
 
 static OPrval parse_options(bool *usestream,bool *verbose,int *parsed_args,
                             int argc, const char **argv,Env *env)
@@ -58,6 +60,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   int parsed_args;
   bool usestream = false,
        verbose = false;
+  Verboseinfo *verboseinfo;
 
   env_error_check(env);
 
@@ -70,15 +73,17 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   assert(parsed_args >= 1 && parsed_args <= 3);
 
   indexname = str_new_cstr(argv[parsed_args],env);
+  verboseinfo = newverboseinfo(verbose,env);
   if ((usestream ? streamsuffixarray : mapsuffixarray)(&suffixarray,
                                                        &totallength,
                                                        SARR_ALLTAB,
                                                        indexname,
-                                                       verbose,
+                                                       verboseinfo,
                                                        env) != 0)
   {
     haserr = true;
   }
+  freeverboseinfo(&verboseinfo,env);
   str_delete(indexname,env);
   if (!haserr)
   {
@@ -100,7 +105,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
 
     for (readmode = 0; readmode < 4; readmode++)
     {
-      if (isdnaalphabet(suffixarray.alpha) ||
+      if (isdnaalphabet(suffixarray.alpha,env) ||
          ((Readmode) readmode) == Forwardmode ||
          ((Readmode) readmode) == Reversemode)
       {
@@ -133,6 +138,11 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
                       true,  /* specialsareequalatdepth0 */
                       0,
                       env);
+  }
+  if (!haserr)
+  {
+    checkalldescriptions(suffixarray.destab,suffixarray.destablength,
+                         suffixarray.numofdbsequences,env);
   }
   freesuffixarray(&suffixarray,env);
   return haserr ? -1 : 0;

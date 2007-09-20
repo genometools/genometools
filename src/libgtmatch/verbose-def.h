@@ -15,33 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SFX_OPTDEF_H
-#define SFX_OPTDEF_H
+#ifndef VERBOSE_H
+#define VERBOSE_H
 
-#include <stdbool.h>
-#include "libgtcore/str.h"
-#include "libgtcore/strarray.h"
-#include "readmode-def.h"
+#include "libgtcore/env.h"
 
-#define PREFIXLENGTH_AUTOMATIC 0
+typedef struct Verboseinfo Verboseinfo;
 
-typedef struct
-{
-  unsigned int numofparts,
-               prefixlength;
-  Str *str_indexname,
-      *str_smap,
-      *str_sat;
-  StrArray *filenametab;
-  Readmode readmode;
-  bool isdna,
-       isprotein,
-       isplain,
-       outtistab,
-       outsuftab,
-       outlcptab,
-       outbwttab,
-       outdestab;
-} Suffixeratoroptions;
+void showverbose(Verboseinfo *verboseinfo,
+                 const char *format, ...)
+                 __attribute__ ((format (printf, 2, 3)));
+
+Verboseinfo *newverboseinfo(bool verbose,Env *env);
+
+void freeverboseinfo(Verboseinfo **v,Env *env);
 
 #endif

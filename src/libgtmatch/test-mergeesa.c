@@ -20,8 +20,9 @@
 #include "sarr-def.h"
 #include "emimergeesa.h"
 #include "esafileend.h"
+#include "verbose-def.h"
 
-#include "mergeesa.pr"
+#include "esa-merge.pr"
 #include "encseq2offset.pr"
 
 typedef struct
@@ -213,6 +214,7 @@ static int mergeandstoreindex(const Str *storeindex,
 
 int performtheindexmerging(const Str *storeindex,
                            const StrArray *indexnametab,
+                           Verboseinfo *verboseinfo,
                            Env *env)
 {
   Emissionmergedesa emmesa;
@@ -221,9 +223,10 @@ int performtheindexmerging(const Str *storeindex,
 
   env_error_check(env);
   if (initEmissionmergedesa(&emmesa,
-                           indexnametab,
-                           demand,
-                           env) != 0)
+                            indexnametab,
+                            demand,
+                            verboseinfo,
+                            env) != 0)
   {
     haserr = true;
   }

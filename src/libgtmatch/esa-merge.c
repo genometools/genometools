@@ -21,9 +21,10 @@
 #include "emimergeesa.h"
 #include "encseq-def.h"
 #include "trieins-def.h"
+#include "verbose-def.h"
 
 #include "trieins.pr"
-#include "sfx-map.pr"
+#include "esa-map.pr"
 
  DECLAREREADFUNCTION(Seqpos);
 
@@ -52,6 +53,7 @@ static int inputthesequences(Alphabet **alpha,
                              Suffixarray *suffixarraytable,
                              const StrArray *indexnametab,
                              unsigned int demand,
+                             Verboseinfo *verboseinfo,
                              Env *env)
 {
   unsigned long idx;
@@ -63,11 +65,11 @@ static int inputthesequences(Alphabet **alpha,
   {
     indexname = strarray_get_str(indexnametab,idx);
     if (streamsuffixarray(&suffixarraytable[idx],
-                         &totallength,
-                         demand,
-                         indexname,
-                         false,
-                         env) != 0)
+                          &totallength,
+                          demand,
+                          indexname,
+                          verboseinfo,
+                          env) != 0)
     {
       str_delete(indexname,env);
       return -1;
@@ -244,6 +246,7 @@ int stepdeleteandinsertothersuffixes(Emissionmergedesa *emmesa, Env *env)
 int initEmissionmergedesa(Emissionmergedesa *emmesa,
                           const StrArray *indexnametab,
                           unsigned int demand,
+                          Verboseinfo *verboseinfo,
                           Env *env)
 {
   unsigned int numofindexes;
@@ -262,6 +265,7 @@ int initEmissionmergedesa(Emissionmergedesa *emmesa,
                        emmesa->suffixarraytable,
                        indexnametab,
                        demand,
+                       verboseinfo,
                        env) != 0)
   {
     haserr = true;

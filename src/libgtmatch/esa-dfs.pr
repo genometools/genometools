@@ -13,11 +13,8 @@ int depthfirstesa(Sequentialsuffixarrayreader *ssar,
                                           Dfsinfo *,
                                           Dfsstate *,
                                           Env *),
-                  int(*processcompletenode)(Dfsinfo *,Dfsstate *,Env *),
-                  int(*assignleftmostleaf)(Dfsinfo *,Seqpos,Dfsstate *,Env *),
-                  int(*assignrightmostleaf)(Dfsinfo *,Seqpos,Seqpos,
-                                            Seqpos,Dfsstate *,Env *),
                   Dfsstate *state,
+                  /*@unused@*/ Verboseinfo *verboseinfo,
                   Env *env);
 
 #ifdef __cplusplus

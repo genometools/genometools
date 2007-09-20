@@ -15,6 +15,25 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifdef INLINEDSequentialsuffixarrayreader
+
+#include "libgtcore/env.h"
+#include "libgtcore/str.h"
+#include "verbose-def.h"
+#include "seqpos-def.h"
+
+int testmaxpairs(/*@unused@*/ const Str *indexname,
+                 /*@unused@*/ unsigned long samples,
+                 /*@unused@*/ unsigned int minlength,
+                 /*@unused@*/ Seqpos substringlength,
+                 /*@unused@*/ Verboseinfo *verboseinfo,
+                 /*@unused@*/ Env *env)
+{
+  return 0;
+}
+
+#else
+
 #include "libgtcore/array.h"
 #include "sarr-def.h"
 #include "arraydef.h"
@@ -23,11 +42,12 @@
 #include "alphadef.h"
 #include "format64.h"
 
-#include "sfx-map.pr"
+#include "esa-map.pr"
 #include "esa-mmsearch.pr"
 #include "esa-selfmatch.pr"
 #include "arrcmp.pr"
 #include "pos2seqnum.pr"
+#include "echoseq.pr"
 
 static Seqpos samplesubstring(Uchar *seqspace,
                               const Encodedsequence *encseq,
@@ -196,6 +216,7 @@ int testmaxpairs(const Str *indexname,
                  unsigned long samples,
                  unsigned int minlength,
                  Seqpos substringlength,
+                 Verboseinfo *verboseinfo,
                  Env *env)
 {
   Suffixarray suffixarray;
@@ -213,7 +234,7 @@ int testmaxpairs(const Str *indexname,
                      &totallength,
                      SARR_ESQTAB,
                      indexname,
-                     false,
+                     verboseinfo,
                      env) != 0)
   {
     haserr = true;
@@ -263,6 +284,7 @@ int testmaxpairs(const Str *indexname,
                                suffixarray.alpha,
                                storemaxmatchself,
                                &maxmatchselfinfo,
+                               verboseinfo,
                                env) != 0)
     {
       haserr = true;
@@ -273,21 +295,22 @@ int testmaxpairs(const Str *indexname,
     if (array_compare(tabmaxquerymatches,maxmatchselfinfo.results,
                       orderSubstringmatch) != 0)
     {
+      const unsigned long width = 60UL;
       printf("querymatches\n");
       (void) array_iterate(tabmaxquerymatches,showSubstringmatch,NULL,env);
       printf("dbmatches\n");
       (void) array_iterate(maxmatchselfinfo.results,showSubstringmatch,
                            NULL,env);
-      fastasymbolstringgeneric(stdout,"dbseq",
-                               getcharactersAlphabet(suffixarray.alpha),
-                               dbseq,
-                               (unsigned long) dblen,
-                               (unsigned long) 60);
-      fastasymbolstringgeneric(stdout,"queryseq",
-                               getcharactersAlphabet(suffixarray.alpha),
-                               query,
-                               (unsigned long) querylen,
-                               (unsigned long) 60);
+      symbolstring2fasta(stdout,"dbseq",
+                         suffixarray.alpha,
+                         dbseq,
+                         (unsigned long) dblen,
+                         width);
+      symbolstring2fasta(stdout,"queryseq",
+                         suffixarray.alpha,
+                         query,
+                         (unsigned long) querylen,
+                         width);
       exit(EXIT_FAILURE); /* programming error */
     }
     FREESPACE(maxmatchselfinfo.markpos);
@@ -300,3 +323,5 @@ int testmaxpairs(const Str *indexname,
   freesuffixarray(&suffixarray,env);
   return haserr ? -1 : 0;
 }
+
+#endif /* INLINEDSequentialsuffixarrayreader */

@@ -437,11 +437,11 @@ splint:
 sgt:${addprefix obj/,${notdir ${subst .c,.splint,${wildcard ${CURDIR}/src/libgtmatch/*.c} ${SKTOOLS}}}}
 
 splintclean:
-	find -name '*.splint' | xargs rm -f
+	find obj -name '*.splint' | xargs rm -f
 
 obj/%.splint: ${CURDIR}/src/libgtmatch/%.c
 	@echo "splint $<"
-	@splint -DBIGSEQPOS -DINLINEDENCSEQ -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/tools/%.c

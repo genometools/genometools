@@ -51,15 +51,10 @@ void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
 
 void showsymbolstring(const Alphabet *alpha,const Uchar *w,unsigned long wlen);
 
-void fastasymbolstringgeneric(FILE *fpout,
-                              const char *desc,
-                              const Uchar *characters,
-                              const Uchar *w,
-                              unsigned long wlen,
-                              unsigned long width);
+void showalphabetsymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar);
 
-bool isproteinalphabet(const Alphabet *alpha);
+bool isproteinalphabet(const Alphabet *alpha,Env *env);
 
-bool isdnaalphabet(const Alphabet *alpha);
+bool isdnaalphabet(const Alphabet *alpha,Env *env);
 
 #endif

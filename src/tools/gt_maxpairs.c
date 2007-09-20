@@ -23,6 +23,7 @@
 #include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/esa-mmsearch-def.h"
 #include "libgtmatch/format64.h"
+#include "libgtmatch/verbose-def.h"
 
 #include "libgtmatch/esa-maxpairs.pr"
 #include "libgtmatch/esa-mmsearch.pr"
@@ -113,7 +114,7 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
   option_is_mandatory(option);
 
   queryoption = option_new_filenamearray("q",
-                             "Specify query file",
+                             "Specify query files",
                              maxpairsoptions->queryfiles, env);
   option_parser_add_option(op, queryoption, env);
 
@@ -150,6 +151,7 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
   oprval = parse_options(&maxpairsoptions,&parsed_args, argc, argv, env);
   if (oprval == OPTIONPARSER_OK)
   {
+    Verboseinfo *verboseinfo = newverboseinfo(false,env);
     assert(parsed_args == argc);
     if (strarray_size(maxpairsoptions.queryfiles) == 0)
     {
@@ -160,6 +162,7 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
                              maxpairsoptions.scanfile,
                              simpleexactselfmatchoutput,
                              NULL,
+                             verboseinfo,
                              env) != 0)
         {
           haserr = true;
@@ -171,6 +174,7 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
                          maxpairsoptions.userdefinedleastlength,
                          (Seqpos) (100 *
                                    maxpairsoptions.userdefinedleastlength),
+                         verboseinfo,
                          env) != 0)
         {
           haserr = true;
@@ -184,11 +188,13 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
                                maxpairsoptions.userdefinedleastlength,
                                simpleexactquerymatchoutput,
                                NULL,
+                               verboseinfo,
                                env) != 0)
       {
         haserr = true;
       }
     }
+    freeverboseinfo(&verboseinfo,env);
   }
   str_delete(maxpairsoptions.indexname,env);
   strarray_delete(maxpairsoptions.queryfiles,env);

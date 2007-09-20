@@ -21,7 +21,71 @@
 #include "esa-seqread.h"
 #include "sfx-lcpval.h"
 
-#include "sfx-map.pr"
+#include "esa-map.pr"
+
+#ifdef INLINEDSequentialsuffixarrayreader
+
+Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
+                                  const Str *indexname,
+                                  unsigned int demand,
+                                  /*@unused@*/ Sequentialaccesstype seqactype,
+                                  Env *env)
+{
+  Sequentialsuffixarrayreader *ssar;
+  Seqpos totallength;
+
+  ALLOCASSIGNSPACE(ssar,NULL,Sequentialsuffixarrayreader,1);
+  ALLOCASSIGNSPACE(ssar->suffixarray,NULL,Suffixarray,1);
+  if (mapsuffixarray (ssar->suffixarray,
+                      &totallength,
+                      demand,
+                      indexname,
+                      NULL,
+                      env) != 0)
+  {
+    FREESPACE(ssar->suffixarray);
+    FREESPACE(ssar);
+    return NULL;
+  }
+  ssar->nextsuftabindex = 0;
+  ssar->nextlcptabindex = (Seqpos) 1;
+  ssar->largelcpindex = 0;
+  ssar->numberofsuffixes = totallength+1;
+  return ssar;
+}
+
+void freeSequentialsuffixarrayreader(Sequentialsuffixarrayreader **ssar,
+                                     Env *env)
+{
+  if ((*ssar)->suffixarray != NULL)
+  {
+    freesuffixarray((*ssar)->suffixarray,env);
+    FREESPACE((*ssar)->suffixarray);
+  }
+  FREESPACE(*ssar);
+}
+
+int nextSequentialsuftabvalue(Seqpos *currentsuffix,
+                              Sequentialsuffixarrayreader *ssar,
+                              /*@unused@*/ Env *env)
+{
+  *currentsuffix = ssar->suffixarray->suftab[ssar->nextsuftabindex++];
+  return 1;
+}
+
+const Encodedsequence *encseqSequentialsuffixarrayreader(
+                          const Sequentialsuffixarrayreader *sarr)
+{
+  return sarr->suffixarray->encseq;
+}
+
+Readmode readmodeSequentialsuffixarrayreader(
+                          const Sequentialsuffixarrayreader *sarr)
+{
+  return sarr->suffixarray->readmode;
+}
+
+#else
 
  DECLAREREADFUNCTION(Seqpos);
 
@@ -60,9 +124,10 @@ Sequentialsuffixarrayreader *newSequentialsuffixarrayreaderfromfile(
                                                &totallength,
                                                demand,
                                                indexname,
-                                               false,
+                                               NULL,
                                                env) != 0)
   {
+    FREESPACE(ssar->suffixarray);
     FREESPACE(ssar);
     return NULL;
   }
@@ -235,6 +300,7 @@ Readmode readmodeSequentialsuffixarrayreader(
 {
   return sarr->readmode;
 }
+#endif /* ifdef INLINEDSequentialsuffixarrayreader */
 
 const Alphabet *alphabetSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *sarr)
@@ -248,4 +314,16 @@ unsigned long numofdbsequencesSequentialsuffixarrayreader(
 {
   assert(sarr->suffixarray != NULL);
   return sarr->suffixarray->numofdbsequences;
+}
+
+unsigned long destablengthSequentialsuffixarrayreader(
+              const Sequentialsuffixarrayreader *sarr)
+{
+  return sarr->suffixarray->destablength;
+}
+
+const char *destabSequentialsuffixarrayreader(
+              const Sequentialsuffixarrayreader *sarr)
+{
+  return sarr->suffixarray->destab;
 }

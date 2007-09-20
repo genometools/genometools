@@ -3,6 +3,7 @@ extern "C" {
 #endif
 int performtheindexmerging(const Str *storeindex,
                            const StrArray *indexnametab,
+                           Verboseinfo *verboseinfo,
                            Env *env);
 
 #ifdef __cplusplus

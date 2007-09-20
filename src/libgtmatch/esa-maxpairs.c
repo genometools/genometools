@@ -15,10 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <limits.h>
 #include "arraydef.h"
 #include "seqpos-def.h"
 #include "esa-seqread.h"
+#include "verbose-def.h"
 
 #define ISLEFTDIVERSE   (Uchar) (state->alphabetsize)
 #define INITIALCHAR     (Uchar) (state->alphabetsize+1)
@@ -60,12 +60,12 @@ typedef struct
   unsigned int searchlength,
                alphabetsize;
   Seqpos depth;            /* value changes with each new match */
-  int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *);
-  void *processmaxpairsinfo;
   ArraySeqpos uniquechar,
-              poslist[UCHAR_MAX+1];
+              *poslist;
   const Encodedsequence *encseq;
   Readmode readmode;
+  int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *);
+  void *processmaxpairsinfo;
 } Dfsstate;
 
 #include "esa-dfs.pr"
@@ -348,6 +348,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                       unsigned int searchlength,
                       int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *),
                       void *processmaxpairsinfo,
+                      Verboseinfo *verboseinfo,
                       Env *env)
 {
   unsigned int base;
@@ -364,6 +365,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
   state.readmode = readmode;
 
   INITARRAY(&state.uniquechar,Seqpos);
+  ALLOCASSIGNSPACE(state.poslist,NULL,ArraySeqpos,alphabetsize);
   for (base = 0; base < state.alphabetsize; base++)
   {
     ptr = &state.poslist[base];
@@ -374,10 +376,13 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
                     freeDfsinfo,
                     processleafedge,
                     processbranchedge,
+                    /*
                     NULL,
                     NULL,
                     NULL,
+                    */
                     &state,
+                    verboseinfo,
                     env) != 0)
   {
     haserr = true;
@@ -388,6 +393,7 @@ int enumeratemaxpairs(Sequentialsuffixarrayreader *ssar,
     ptr = &state.poslist[base];
     FREEARRAY(ptr,Seqpos);
   }
+  FREESPACE(state.poslist);
   return haserr ? -1 : 0;
 }
 
@@ -396,6 +402,7 @@ int callenummaxpairs(const Str *indexname,
                      bool scanfile,
                      int(*processmaxpairs)(void *,Seqpos,Seqpos,Seqpos,Env *),
                      void *processmaxpairsinfo,
+                     Verboseinfo *verboseinfo,
                      Env *env)
 {
   bool haserr = false;
@@ -422,6 +429,7 @@ int callenummaxpairs(const Str *indexname,
                         userdefinedleastlength,
                         processmaxpairs,
                         processmaxpairsinfo,
+                        verboseinfo,
                         env) != 0)
   {
     haserr = true;

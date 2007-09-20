@@ -17,6 +17,7 @@
 
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/option.h"
+#include "libgtmatch/verbose-def.h"
 #include "libgtmatch/test-mergeesa.pr"
 
 static OPrval parse_options(Str *indexname,StrArray *indexnametab,
@@ -72,17 +73,22 @@ int gt_mergeesa(int argc, const char **argv, Env *env)
   if (!haserr)
   {
     unsigned long i;
+    Verboseinfo *verboseinfo;
 
     printf("# storeindex=%s\n",str_get(storeindex));
     for (i=0; i<strarray_size(indexnametab); i++)
     {
       printf("# input=%s\n",strarray_get(indexnametab,i));
     }
+    verboseinfo = newverboseinfo(false,env);
     if (performtheindexmerging(storeindex,
-                              indexnametab,env) != 0)
+                              indexnametab,
+                              verboseinfo,
+                              env) != 0)
     {
       haserr = true;
     }
+    freeverboseinfo(&verboseinfo,env);
   }
   str_delete(storeindex,env);
   strarray_delete(indexnametab,env);
