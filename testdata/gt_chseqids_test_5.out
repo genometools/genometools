@@ -1,0 +1,8 @@
+##gff-version   3
+##sequence-region   chr 1 10000
+chr	.	gene	1000	9000	.	+	.	ID=gene1
+chr	.	exon	1000	9000	.	+	.	Parent=gene1
+###
+chr	.	gene	100	900	.	+	.	ID=gene2
+chr	.	exon	100	900	.	+	.	Parent=gene2
+###

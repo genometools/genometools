@@ -49,3 +49,10 @@ Test do
   run_test "#{$bin}gt chseqids #{$testdata}gt_chseqids_test_4.chseqids #{$testdata}gt_chseqids_test_4.gff3"
   run "diff #{$last_stdout} #{$testdata}gt_chseqids_test_4.out"
 end
+
+Name "gt chseqids test 5"
+Keywords "gt_chseqids"
+Test do
+  run_test "#{$bin}gt chseqids #{$testdata}gt_chseqids_test_5.chseqids #{$testdata}gt_chseqids_test_5.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_chseqids_test_5.out"
+end

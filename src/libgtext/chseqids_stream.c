@@ -150,7 +150,7 @@ GenomeStream* chseqids_stream_new(GenomeStream *in_stream, Str *chseqids_file,
   env_error_check(env);
   assert(in_stream && chseqids_file);
   assert(genome_stream_is_sorted(in_stream));
-  gs = genome_stream_create(chseqids_stream_class(), true, env);
+  gs = genome_stream_create(chseqids_stream_class(), false, env);
   cs = chseqids_stream_cast(gs);
   cs->in_stream = in_stream;
   cs->chseqids_mapping = mapping_new(chseqids_file, "chseqids",
