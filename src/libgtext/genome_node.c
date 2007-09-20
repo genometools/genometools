@@ -513,21 +513,6 @@ bool genome_node_is_tree(GenomeNode *gn)
   return status;
 }
 
-bool genome_node_tree_is_sorted(GenomeNode **buffer, GenomeNode *current_node,
-                                Env *env)
-{
-  assert(buffer && current_node);
-
-  if (*buffer) {
-    /* the last node is not larger than the current one */
-    if (genome_node_compare(buffer, &current_node) > 0)
-      return false;
-    genome_node_delete(*buffer, env);
-  }
-  *buffer = genome_node_ref(current_node);
-  return true;
-}
-
 bool genome_node_overlaps_nodes(GenomeNode *gn, Array *nodes)
 {
   return genome_node_overlaps_nodes_mark(gn, nodes, NULL);
