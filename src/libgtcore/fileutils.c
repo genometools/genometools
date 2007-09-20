@@ -134,7 +134,7 @@ StrArray *file2lines(const char *filename,Env *env)
   StrArray *filecontent;
 
   fpin = env_fa_fopen(env, filename, "r");
-  if(fpin == NULL)
+  if (fpin == NULL)
   {
     env_error_set(env,"cannot open file \"%s\": %s\n",filename,strerror(errno));
     return NULL;
