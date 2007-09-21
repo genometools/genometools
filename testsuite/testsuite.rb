@@ -76,6 +76,7 @@ def run_test(str, opts = {})
 end
 
 # include the actual test modules
+require 'gt_include'
 require 'gt_bioseq_include'
 require 'gt_chseqids_include'
 require 'gt_cds_include'
