@@ -328,6 +328,35 @@ static int outputsequencedescription(const Str *indexname,
   return haserr ? -1 : 0;
 }
 
+static unsigned long *initcharacterdistribution(const Alphabet *alpha,Env *env)
+{
+  unsigned long *characterdistribution;
+  unsigned int mapsize, idx;
+
+  mapsize = getmapsizeAlphabet(alpha);
+  ALLOCASSIGNSPACE(characterdistribution,NULL,unsigned long,mapsize-1);
+  for(idx=0; idx<mapsize-1; idx++)
+  {
+    characterdistribution[idx] = 0;
+  }
+  return characterdistribution;
+}
+
+static void showcharacterdistribution(
+                   const  Alphabet *alpha,
+                   const unsigned long *characterdistribution)
+{
+  unsigned int mapsize, idx;
+
+  mapsize = getmapsizeAlphabet(alpha);
+  assert(characterdistribution != NULL);
+  for(idx=0; idx<mapsize-1; idx++)
+  {
+    printf("# ocurrences(%c)=%lu\n",(int) getprettysymbol(alpha,idx),
+                                    characterdistribution[idx]);
+  }
+}
+
 static int runsuffixerator(Suffixeratoroptions *so,Env *env)
 {
   unsigned int numofchars = 0;
@@ -340,6 +369,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
   Encodedsequence *encseq = NULL;
   Measuretime *mtime;
   Outfileinfo outfileinfo;
+  unsigned long *characterdistribution = NULL;
 
   env_error_check(env);
   inittheclock(&mtime,
@@ -356,6 +386,10 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
   }
   if (!haserr)
   {
+    if(!so->isplain)
+    {
+      characterdistribution = initcharacterdistribution(alpha,env);
+    }
     if (fasta2sequencekeyvalues(&numofsequences,
                                 &totallength,
                                 &specialcharinfo,
@@ -363,6 +397,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
                                 &filelengthtab,
                                 getsymbolmapAlphabet(alpha),
                                 so->isplain,
+                                characterdistribution,
                                 env) != 0)
     {
       haserr = true;
@@ -428,6 +463,10 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
            PRINTSeqposcast(specialcharinfo.specialcharacters));
     printf("# specialranges=" FormatSeqpos "\n",
            PRINTSeqposcast(specialcharinfo.specialranges));
+    if(!so->isplain)
+    {
+      showcharacterdistribution(alpha,characterdistribution);
+    }
     if (so->readmode == Complementmode || so->readmode == Reversecomplementmode)
     {
       if (!isdnaalphabet(alpha,env))
@@ -527,6 +566,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
     freeAlphabet(&alpha,env);
   }
   freeEncodedsequence(&encseq,env);
+  FREESPACE(characterdistribution);
   deliverthetime(stdout,mtime,NULL,env);
   return haserr ? -1 : 0;
 }

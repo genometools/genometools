@@ -56,6 +56,7 @@ int overallquerysequences(int(*processsequence)(void *,
                         false,
                         NULL,
                         sequencedescription,
+                        NULL,
                         env);
   sequencebuffer->nextfreeUchar = 0;
   while (true)
@@ -145,6 +146,7 @@ Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
                         false,
                         NULL,
                         &sseqit->sequencedescription,
+                        NULL,
                         env);
   sseqit->sequencebuffer.nextfreeUchar = 0;
   sseqit->exhausted = false;

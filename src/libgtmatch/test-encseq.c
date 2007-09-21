@@ -51,6 +51,7 @@ int testencodedsequence(const StrArray *filenametab,
                           false,
                           NULL,
                           NULL,
+                          NULL,
                           env);
   }
   esr = initEncodedsequencescanstate(encseq,readmode,env);

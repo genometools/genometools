@@ -95,6 +95,7 @@ void initformatbufferstate(Fastabufferstate *fbs,
                            bool plainformat,
                            Filelengthvalues **filelengthtab,
                            Sequencedescription *sequencedescription,
+                           unsigned long *characterdistribution,
                            Env *env)
 {
   env_error_check(env);
@@ -118,6 +119,7 @@ void initformatbufferstate(Fastabufferstate *fbs,
   {
     fbs->filelengthtab = NULL;
   }
+  fbs->characterdistribution = characterdistribution;
 }
 
 static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
@@ -269,6 +271,10 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
                   if (fbs->lastspeciallength > 0)
                   {
                     fbs->lastspeciallength = 0;
+                  }
+                  if(fbs->characterdistribution != NULL)
+                  {
+                    fbs->characterdistribution[charcode]++;
                   }
                 }
                 fbs->bufspace[currentposition++] = charcode;

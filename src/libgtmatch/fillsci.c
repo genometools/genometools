@@ -68,6 +68,7 @@ int fasta2sequencekeyvalues(
         Filelengthvalues **filelengthtab,
         const Uchar *symbolmap,
         bool plainformat,
+        unsigned long *characterdistribution,
         Env *env)
 {
   Fastabufferstate fbs;
@@ -92,6 +93,7 @@ int fasta2sequencekeyvalues(
                         plainformat,
                         filelengthtab,
                         NULL,
+                        characterdistribution,
                         env);
   specialrangelengths = initdistribution(env);
   for (pos = 0; /* Nothing */; pos++)

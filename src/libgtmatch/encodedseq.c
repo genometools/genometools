@@ -1638,6 +1638,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                           plainformat,
                           NULL,
                           NULL,
+                          NULL,
                           env);
     printf("# call %s\n",encodedseqfunctab[(int) sat].fillpos.funcname);
     if (encodedseqfunctab[(int) sat].fillpos.function(encseq,&fbs,env) != 0)
