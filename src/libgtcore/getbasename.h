@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -37,10 +38,15 @@
 
   If <path> is a null pointer or points to an empty string, getbasename()
   returns a pointer to the string ".".
+
+  See the implementation of getbasename_unit_test() for additional examples.
+
+  The caller is responsible for freeing the received pointer!
 */
 
 #include "libgtcore/env.h"
 
 char* getbasename(const char *path, Env*);
+int   getbasename_unit_test(Env*);
 
 #endif

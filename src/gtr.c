@@ -31,6 +31,7 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/env.h"
 #include "libgtcore/fileutils.h"
+#include "libgtcore/getbasename.h"
 #include "libgtcore/gtdatapath.h"
 #include "libgtcore/grep.h"
 #include "libgtcore/hashtable.h"
@@ -216,6 +217,8 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "dynamic bittab class", dynbittab_unit_test,
                 env);
   hashtable_add(gtr->unit_tests, "evaluator class", evaluator_unit_test, env);
+  hashtable_add(gtr->unit_tests, "getbasename module", getbasename_unit_test,
+                env);
   hashtable_add(gtr->unit_tests, "grep module", grep_unit_test, env);
   hashtable_add(gtr->unit_tests, "hashtable class", hashtable_unit_test, env);
   hashtable_add(gtr->unit_tests, "hmm class", hmm_unit_test, env);
