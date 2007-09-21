@@ -272,7 +272,7 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
                   {
                     fbs->lastspeciallength = 0;
                   }
-                  if(fbs->characterdistribution != NULL)
+                  if (fbs->characterdistribution != NULL)
                   {
                     fbs->characterdistribution[charcode]++;
                   }
