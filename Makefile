@@ -196,6 +196,10 @@ ifneq ($(curses),no)
   LDLIBS += -lncurses
 endif
 
+ifdef gttestdata
+  STEST_FLAGS += -gttestdata $(gttestdata)
+endif
+
 ifeq ($(libgtview),yes)
   GTLIBS := $(GTLIBS) lib/libgtview.a
   GT_CFLAGS += -DLIBGTVIEW
@@ -456,7 +460,7 @@ obj/%.prepro: ${CURDIR}/src/libgtmatch/%.c
 
 test: all
 	bin/gt -test
-	cd testsuite && env -i GT_MEM_BOOKKEEPING=on ruby -I. testsuite.rb -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin -cur $(CURDIR)$(STEST_FLAGS)
+	cd testsuite && env -i GT_MEM_BOOKKEEPING=on ruby -I. testsuite.rb -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin -cur $(CURDIR) $(STEST_FLAGS)
 
 clean:
 	rm -rf obj

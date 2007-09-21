@@ -38,7 +38,6 @@ merge libgtcore and libgtmatch:
 - Encodedseq und Bioseq mergen (FastaReader und fbsadv.c)
   guesprot.c
 - generic queue unit test (Stefan)
-- basename portabel? Randf"alle! (getbasename)
 - merge Timer und measure-time.c (Ereignis, formatierter String)
 - readnextline evtl. durch str_read_next_line(_generic) ersetzen (Stefan)
 

@@ -52,6 +52,10 @@ end
 
 $transdir=File.join(Dir.pwd, "..", "gtdata" , "trans", "")
 
+if $arguments["gttestdata"] then
+  $gttestdata=File.join($arguments["gttestdata"], "")
+end
+
 $systemname=`uname -s`
 $systemname.chomp!
 
@@ -72,6 +76,7 @@ def run_test(str, opts = {})
 end
 
 # include the actual test modules
+require 'gt_include'
 require 'gt_bioseq_include'
 require 'gt_chseqids_include'
 require 'gt_cds_include'

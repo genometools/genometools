@@ -575,9 +575,6 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
   /* init */
   line_buffer = str_new(env);
 
-  /* the given (buffer) queue is empty */
-  assert(!queue_size(genome_nodes));
-
   while ((rval = str_read_next_line_generic(line_buffer, fpin, env)) != EOF) {
     line = str_get(line_buffer);
     line_length = str_length(line_buffer);

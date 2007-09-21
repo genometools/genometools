@@ -77,8 +77,6 @@ bool          genome_node_direct_children_do_not_overlap_st(GenomeNode *parent,
                                                             GenomeNode *child,
                                                             Env*);
 bool          genome_node_is_tree(GenomeNode*);
-bool          genome_node_tree_is_sorted(GenomeNode **buffer,
-                                         GenomeNode *current_node, Env*);
 /* returns true if the genome node overlaps at least one of the nodes given in
    the array. O(array_size) */
 bool          genome_node_overlaps_nodes(GenomeNode*, Array*);

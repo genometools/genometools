@@ -43,19 +43,19 @@ for i, fn in ipairs(arg) do -- iterate over all files
     end
 
     -- check for missing blanks
-    if string.find(l, "if%(")     then err(fn, ln, "missing blanks") end
-    if string.find(l, "sizeof%(") then err(fn, ln, "missing blanks") end
-    if string.find(l, "switch%(") then err(fn, ln, "missing blanks") end
-    if string.find(l, "while%(")  then err(fn, ln, "missing blanks") end
-    if string.find(l, "for%(")    then err(fn, ln, "missing blanks") end
-    if string.find(l, "do%(")     then err(fn, ln, "missing blanks") end
-    if string.find(l, "%){")      then err(fn, ln, "missing blanks") end
+    if string.find(l, " if%(")     then err(fn, ln, "missing blanks") end
+    if string.find(l, " sizeof%(") then err(fn, ln, "missing blanks") end
+    if string.find(l, " switch%(") then err(fn, ln, "missing blanks") end
+    if string.find(l, " while%(")  then err(fn, ln, "missing blanks") end
+    if string.find(l, " for%(")    then err(fn, ln, "missing blanks") end
+    if string.find(l, " do%(")     then err(fn, ln, "missing blanks") end
+    if string.find(l, "%){")       then err(fn, ln, "missing blanks") end
 
     -- check line length
     if #l > 80 then err(fn, ln, "line longer than 80 characters") end
 
     -- check for C++ style comments
-    if string.find(l, "[^:]//") then err(fn, ln, "C++ style comment") end
+    if string.find(l, "[^:/\"a-z]//") then err(fn, ln, "C++ style comment") end
 
     -- check for commata at the beginning of a line
     if string.find(l, "^ *,") then
