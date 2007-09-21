@@ -335,7 +335,7 @@ static unsigned long *initcharacterdistribution(const Alphabet *alpha,Env *env)
 
   mapsize = getmapsizeAlphabet(alpha);
   ALLOCASSIGNSPACE(characterdistribution,NULL,unsigned long,mapsize-1);
-  for (idx=0; idx<mapsize-1; idx++)
+  for(idx=0; idx<mapsize-1; idx++)
   {
     characterdistribution[idx] = 0;
   }
@@ -350,7 +350,7 @@ static void showcharacterdistribution(
 
   mapsize = getmapsizeAlphabet(alpha);
   assert(characterdistribution != NULL);
-  for (idx=0; idx<mapsize-1; idx++)
+  for(idx=0; idx<mapsize-1; idx++)
   {
     printf("# ocurrences(%c)=%lu\n",(int) getprettysymbol(alpha,idx),
                                     characterdistribution[idx]);
@@ -386,7 +386,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
   }
   if (!haserr)
   {
-    if (!so->isplain)
+    if(!so->isplain)
     {
       characterdistribution = initcharacterdistribution(alpha,env);
     }
@@ -463,7 +463,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
            PRINTSeqposcast(specialcharinfo.specialcharacters));
     printf("# specialranges=" FormatSeqpos "\n",
            PRINTSeqposcast(specialcharinfo.specialranges));
-    if (!so->isplain)
+    if(!so->isplain)
     {
       showcharacterdistribution(alpha,characterdistribution);
     }

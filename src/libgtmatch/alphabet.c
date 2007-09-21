@@ -31,12 +31,14 @@
 #include "libgtcore/strarray.h"
 #include "qsorttype.h"
 #include "symboldef.h"
+#include "arraydef.h"
 #include "chardef.h"
 #include "alphadef.h"
-#include "spacedef.h"
+#include "encseq-def.h"
 #include "stamp.h"
 
 #include "guessprot.pr"
+#include "readnextline.pr"
 
  struct Alphabet                /* initial blank prevents select by skproto */
 {
