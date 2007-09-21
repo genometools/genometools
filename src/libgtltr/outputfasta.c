@@ -43,21 +43,38 @@ typedef struct
  The following function processes one predicted LTR element, i.e.
  a FASTA entry is created from the predicted LTR element.
  */
-static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
-                    Seqpos len, /*@unused@*/Str *str_indexfilename, Env *env)
-{
-  Seqpos i,
-	 offset;
-  unsigned long seqnum =
-                  getrecordnumSeqpos(info->markpos, info->numofdbsequences,
-		                     info->totallength, startpos, env);
-  unsigned long desclen;
-  const char *desptr;
 
-  (void) putc(FASTASEPARATOR,info->formatout);
+static void myencseq2symbolstring(Fastaoutinfo *info,  
+                         FILE *fpout,
+			 unsigned long seqnum,
+                         const char *desc,
+                         const Alphabet *alpha,
+                         const Encodedsequence *encseq,
+                         Readmode readmode,
+                         Seqpos start,
+                         unsigned long wlen,
+                         unsigned long width,
+			 Env *env)
+{
+  unsigned long j;
+  Seqpos idx, lastpos;
+  Uchar currentchar;
+  Seqpos offset;
+  
+  assert(width > 0);
+  if (desc == NULL)
+  {
+    fprintf(fpout,">");
+  } else
+  {
+    fprintf(fpout,">%s",desc);
+  }
+
+  //(void) putc(FASTASEPARATOR,info->formatout);
+  fprintf(info->formatout," (dbseq-nr");
   if (info->showseqnum)
   {
-    fprintf(info->formatout,"%lu ", seqnum);
+    fprintf(info->formatout," %lu) ", seqnum);
   }
   if (seqnum == 0)
   {
@@ -67,28 +84,74 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
   {
     offset = info->markpos[seqnum-1]+1;
   }
-  fprintf(info->formatout,"(seq-nr) [" FormatSeqpos ","
-                                               FormatSeqpos "] ",
+  fprintf(info->formatout,"[" FormatSeqpos "," FormatSeqpos "]\n",
 		       /* increase by one for output */
-                       PRINTSeqposcast(startpos - offset + 1),
+                       PRINTSeqposcast(start - offset + 1),
 		       /* increase by one for output */
-                       PRINTSeqposcast(startpos - offset + len) );
+                       PRINTSeqposcast(start - offset + (Seqpos)wlen) );
+
+  lastpos = start + wlen - 1;
+  for (idx = start, j = 0; ; idx++)
+  {
+    currentchar = getencodedchar(encseq,idx,readmode);
+    if (currentchar == (Uchar) SEPARATOR)
+    {
+      fprintf(fpout,"\n>\n");
+      j = 0;
+    } else
+    {
+      showalphabetsymbol(fpout,alpha,currentchar);
+    }
+    if (idx == lastpos)
+    {
+      fprintf(fpout,"\n");
+      break;
+    }
+    if (currentchar != (Uchar) SEPARATOR)
+    {
+      j++;
+      if (j >= width)
+      {
+        fprintf(fpout,"\n");
+        j = 0;
+      }
+    }
+  }
+}
+
+static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
+                    Seqpos len, /*@unused@*/Str *str_indexfilename, Env *env)
+{
+  Seqpos i;
+  unsigned long desclen;
+  const char *desptr;
+  char *destab_seqnum;
+  unsigned long seqnum =
+                  getrecordnumSeqpos(info->markpos, info->numofdbsequences,
+		                     info->totallength, startpos, env);
 
   /* if there are sequence descriptions */
   desptr = retriesequencedescription(&desclen,
                                      info->destab,
                                      info->descendtab,
                                      seqnum);
+  
+  ALLOCASSIGNSPACE(destab_seqnum, NULL, char, desclen);
   for (i=0; i < desclen; i++)
   {
-    fprintf(info->formatout, "%c", desptr[i]);
+   destab_seqnum[i] = desptr[i];
+   // fprintf(info->formatout, "%c", desptr[i]);
   }
 
-  encseq2symbolstring(info->formatout, info->destab,
+  myencseq2symbolstring(info, info->formatout, 
+                      seqnum, destab_seqnum,
                       info->alpha, info->encseq,
 		      Forwardmode, startpos,
 		      (unsigned long)len,
-		      60);
+		      60,
+		      env);
+  FREESPACE(destab_seqnum);
+  
   return 0;
 }
 

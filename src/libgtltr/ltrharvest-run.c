@@ -45,7 +45,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   }
 
   /* test if motif is valid and encode motif */
-  if (testmotifandencodemotif (&lo->motif,
+  if (testmotifandencodemotif(&lo->motif,
                              alphabetSequentialsuffixarrayreader(ssar),
                              env) != 0)
   {
@@ -60,7 +60,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 
   numofdbsequences = numofdbsequencesSequentialsuffixarrayreader(ssar);
   /* calculate markpos array for sequences offset */
-  if ( !had_err && numofdbsequences > 1)
+  if (!had_err && numofdbsequences > 1)
   {
     markpos = encseq2markpositions(
 	encseqSequentialsuffixarrayreader(ssar),

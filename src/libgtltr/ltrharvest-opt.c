@@ -315,7 +315,7 @@ static OPrval parse_options(int *parsed_args,
   lo->motif.str_motif = str_new(env);
   optionmotif = option_new_string("motif",
                              "specify 2 nucleotides startmotif + "
-                             "2 nucleotides endmotif : ****",
+                             "2 nucleotides endmotif: ****",
                              lo->motif.str_motif, NULL, env);
   option_parser_add_option(op, optionmotif, env);
 
@@ -472,10 +472,10 @@ static OPrval parse_options(int *parsed_args,
        store characters, transform them later */
     if (option_is_set(optionmotif))
     {
-      if (str_length(lo->motif.str_motif) > (unsigned long) 4)
+      if (str_length(lo->motif.str_motif) != (unsigned long) 4)
       {
 	env_error_set(env,
-	    "argument of -motif has more than 4 characters");
+	    "argument of -motif has not exactly 4 characters");
 	oprval = OPTIONPARSER_ERROR;
       }
       lo->motif.firstleft =
