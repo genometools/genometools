@@ -327,7 +327,7 @@ static int show_help(OptionParser *op, OptionType optiontype, Env *env)
         if (option->default_value.d == UNDEF_DOUBLE)
           xputs("undefined");
         else
-          printf("%f\n", option->default_value.d);
+          printf("%.2f\n", option->default_value.d);
       }
       else if (option->option_type == OPTION_INT) {
         printf("%*s  default: ", (int) max_option_length, "");
