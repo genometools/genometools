@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,11 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef QUEUE_DEF_H
-#define QUEUE_DEF_H
+#ifndef GT_CHSEQIDS_H
+#define GT_CHSEQIDS_H
 
-typedef int (*GenericQueueprocessor)(void *elem,void *info);
-
-typedef struct Genericqueue Genericqueue;
+/* the change sequence ids (chseqids) tool */
+int gt_chseqids(int argc, const char **argv, Env*);
 
 #endif

@@ -18,6 +18,7 @@
 #ifndef MA_H
 #define MA_H
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -25,7 +26,7 @@
 typedef struct MA MA;
 
 MA*           ma_new(void);
-void          ma_init(MA*, Env*);
+void          ma_init(MA*, bool bookkeeping, Env*);
 #define       ma_malloc(ma, size)\
               ma_malloc_mem(ma, size, __FILE__, __LINE__)
 void*         ma_malloc_mem(MA*, size_t size, const char*, int);

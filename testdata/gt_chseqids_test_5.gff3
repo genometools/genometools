@@ -1,0 +1,7 @@
+##gff-version   3
+##sequence-region   seq1 1 10000
+##sequence-region   seq2 1 10000
+seq1	.	gene	1000	9000	.	+	.	ID=gene1
+seq1	.	exon	1000	9000	.	+	.	Parent=gene1
+seq2	.	gene	100	900	.	+	.	ID=gene2
+seq2	.	exon	100	900	.	+	.	Parent=gene2

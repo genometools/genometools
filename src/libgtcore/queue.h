@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,18 +21,17 @@
 #include <stdio.h>
 #include "libgtcore/env.h"
 
-/* A simple queue implementation (based on arrays). Only memory efficient if
-   the queue becomes empty regularly during usage (see implementation for
-   details).  */
 typedef struct Queue Queue;
 
-Queue*        queue_new(size_t, Env*);
-void*         queue_get(Queue*);
-void*         queue_get_elem(Queue*, unsigned long);
-#define       queue_add(q, elem, env)\
-              queue_add_elem(q, &(elem), sizeof (elem), env)
-void          queue_add_elem(Queue*, void*, size_t, Env*);
+typedef int (*QueueProcessor)(void *elem, void *info, Env*);
+
+Queue*        queue_new(Env*);
+void          queue_add(Queue*, void*, Env*);
+void*         queue_get(Queue*, Env*);
+void*         queue_head(Queue*);
+int           queue_iterate(Queue*, QueueProcessor, void *info, Env*);
 unsigned long queue_size(const Queue*);
+void          queue_delete_with_contents(Queue*, Env*);
 void          queue_delete(Queue*, Env*);
 
 #endif

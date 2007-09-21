@@ -44,7 +44,17 @@ else
   $bin=File.join(Dir.pwd, "..", "bin", "")
 end
 
+if $arguments["cur"] then
+  $cur=$arguments["cur"]
+else
+  $cur=File.join(Dir.pwd, "..")
+end
+
 $transdir=File.join(Dir.pwd, "..", "gtdata" , "trans", "")
+
+if $arguments["gttestdata"] then
+  $gttestdata=File.join($arguments["gttestdata"], "")
+end
 
 $systemname=`uname -s`
 $systemname.chomp!
@@ -52,7 +62,7 @@ $systemname.chomp!
 # define helper function
 def run_test(str, opts = {})
   if $arguments["memcheck"] then
-    if $systemname == "Linux" then 
+    if $systemname == "Linux" then
       memcheck = "valgrind --tool=memcheck --suppressions="+
                  File.join($testdata, "gt.supp")+
                  " --leak-check=yes --error-exitcode=1 -q"
@@ -67,6 +77,7 @@ end
 
 # include the actual test modules
 require 'gt_bioseq_include'
+require 'gt_chseqids_include'
 require 'gt_cds_include'
 require 'gt_csa_include'
 require 'gt_eval_include'
@@ -88,3 +99,7 @@ if $arguments["libgtview"] then
   require 'gt_view_include'
 end
 require 'gt_env_options_include'
+
+if $arguments["gcov"] then
+  require 'gcov_include' # must be last
+end

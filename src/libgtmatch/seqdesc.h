@@ -18,11 +18,11 @@
 #ifndef SEQDESC_H
 #define SEQDESC_H
 
-#include "gqueue-def.h"
+#include "libgtcore/queue.h"
 
 typedef struct
 {
-  Genericqueue *descptr;
+  Queue *descptr;
   Arraychar headerbuffer;
 } Sequencedescription;
 

@@ -56,8 +56,7 @@ static bool set_of_sas_is_sorted(const void *set_of_sas,
     range_b = get_genomic_range(sa);
 
     /* compare */
-    if (!(range_a.start <= range_b.start))
-      return false;
+    if (!(range_a.start <= range_b.start)) return false;
 
     /* make the second range the first */
     range_a = range_b;
@@ -432,7 +431,7 @@ static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa,
 {
   Bittab *SA_p_complement; /* SA \ SA_p */
   unsigned long sa, sa_prime;
-  bool incompatible_found;
+  bool incompatible_found, valid = true;
 
   SA_p_complement = bittab_new(csa->number_of_sas, env);
   bittab_complement(SA_p_complement, SA_p);
@@ -440,22 +439,19 @@ static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa,
   for (sa_prime  = bittab_get_first_bitnum(SA_p_complement);
        sa_prime != bittab_get_last_bitnum(SA_p_complement);
        sa_prime  = bittab_get_next_bitnum(SA_p_complement, sa_prime)) {
-    incompatible_found = 0;
+    incompatible_found = false;
     for (sa  = bittab_get_first_bitnum(SA_p);
          sa != bittab_get_last_bitnum(SA_p);
          sa  = bittab_get_next_bitnum(SA_p, sa)) {
       if (!compatible(csa, sa, sa_prime, env)) {
-        incompatible_found = 1;
+        incompatible_found = true;
         break;
       }
     }
-    if (!incompatible_found) {
-      bittab_delete(SA_p_complement, env);
-      return false;
-    }
+    if (!incompatible_found) { valid = false; break; }
   }
   bittab_delete(SA_p_complement, env);
-  return true;
+  return valid;
 }
 #endif
 

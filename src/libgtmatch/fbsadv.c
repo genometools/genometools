@@ -22,9 +22,6 @@
 #include "fbs-def.h"
 #include "spacedef.h"
 #include "chardef.h"
-#include "gqueue-def.h"
-
-#include "genericqueue.pr"
 
 #define GZIPSUFFIX        ".gz"
 #define GZIPSUFFIXLENGTH  (sizeof (GZIPSUFFIX)-1)
@@ -215,7 +212,7 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
                                                          nextfreechar);
               strcpy(savebuffer,
                      fbs->sequencedescription->headerbuffer.spacechar);
-              enqueuegeneric(fbs->sequencedescription->descptr,savebuffer,env);
+              queue_add(fbs->sequencedescription->descptr,savebuffer,env);
               fbs->sequencedescription->headerbuffer.nextfreechar = 0;
             } else
             {

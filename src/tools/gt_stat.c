@@ -112,7 +112,7 @@ int gt_stat(int argc, const char **argv, Env *env)
   /* create a gff3 input stream */
   gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
                                                argv + parsed_args,
-                                               arguments.verbose, env);
+                                               arguments.verbose, false, env);
 
   /* pull the features through the stream , compute the statistics, and free
      them afterwards */

@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,60 +15,108 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <assert.h>
-#include "libgtcore/array.h"
 #include "libgtcore/queue.h"
-#include "libgtcore/xansi.h"
 
-struct Queue {
-  Array *queue;
-  unsigned long current_index;
+typedef struct QueueElem
+{
+  void *contents;
+  struct QueueElem *previous, *next;
+} QueueElem;
+
+struct Queue
+{
+  QueueElem *head,
+            *tail;
+  unsigned long num_of_elements;
 };
 
-Queue* queue_new(size_t size_of_elem, Env *env)
+Queue* queue_new(Env *env)
 {
-  Queue *q = env_ma_malloc(env, sizeof (Queue));
-  assert(size_of_elem);
-  q->queue = array_new(size_of_elem, env);
-  q->current_index = 0;
-  return q;
+  return env_ma_calloc(env, 1, sizeof (Queue));
 }
 
-void* queue_get(Queue *q)
+void queue_add(Queue *q, void *contents, Env *env)
 {
-  void *r;
-  assert(q && q->current_index < array_size(q->queue));
-  r = array_get(q->queue, q->current_index);
-  q->current_index++;
-  /* reset */
-  if (q->current_index == array_size(q->queue)) {
-    array_reset(q->queue);
-    q->current_index = 0;
+  QueueElem *newqueueelem;
+
+  env_error_check(env);
+  assert(q);
+
+  newqueueelem = env_ma_malloc(env, sizeof (QueueElem));
+  newqueueelem->contents = contents;
+  newqueueelem->previous = NULL;
+  newqueueelem->next = q->tail;
+  if (q->num_of_elements == 0)
+    q->head = newqueueelem;
+  else
+    q->tail->previous = newqueueelem;
+  q->tail = newqueueelem;
+  q->num_of_elements++;
+}
+
+void* queue_get(Queue *q, Env *env)
+{
+  QueueElem *oldheadptr;
+  void *contents;
+
+  assert(q && q->num_of_elements);
+
+  oldheadptr = q->head;
+  q->head = q->head->previous;
+  if (q->head == NULL)
+    q->tail = NULL;
+  else
+    q->head->next = NULL;
+  contents = oldheadptr->contents;
+  env_ma_free(oldheadptr, env);
+  q->num_of_elements--;
+
+  return contents;
+}
+
+void* queue_head(Queue *q)
+{
+  assert(q && q->num_of_elements);
+  return q->head->contents;
+}
+
+int queue_iterate(Queue *q, QueueProcessor queueprocessor, void *info, Env *env)
+{
+  QueueElem *current;
+  env_error_check(env);
+  assert(q && queueprocessor);
+  if (q->num_of_elements) {
+    for (current = q->head; current; current = current->previous) {
+      if (queueprocessor(current->contents, info, env))
+        return -1;
+    }
   }
-  return r;
-}
-
-void* queue_get_elem(Queue *q, unsigned long idx)
-{
-  assert(q && q->current_index + idx < array_size(q->queue));
-  return array_get(q->queue, q->current_index + idx);
-}
-
-void queue_add_elem(Queue *q, void *elem, size_t size_of_elem, Env *env)
-{
-  assert(q && elem && size_of_elem);
-  array_add_elem(q->queue, elem, size_of_elem, env);
+  return 0;
 }
 
 unsigned long queue_size(const Queue *q)
 {
-  assert(q && q->current_index <= array_size(q->queue));
-  return array_size(q->queue) - q->current_index;
+  assert(q);
+  return q->num_of_elements;
+}
+
+static void queue_wrap(Queue *q, bool freecontents, Env *env)
+{
+  if (!q) return;
+  while (q->num_of_elements) {
+    if (freecontents)
+      env_ma_free(q->head->contents, env);
+    (void) queue_get(q, env);
+  }
+  env_ma_free(q, env);
+}
+
+void queue_delete_with_contents(Queue *q, Env *env)
+{
+  queue_wrap(q, true, env);
 }
 
 void queue_delete(Queue *q, Env *env)
 {
-  if (!q) return;
-  array_delete(q->queue, env);
-  env_ma_free(q, env);
+  queue_wrap(q, false, env);
 }

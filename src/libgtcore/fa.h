@@ -60,7 +60,7 @@ void    fa_xmunmap(void *addr, FA*);
 int     fa_check_fptr_leak(FA*, Env*);
 /* check if all allocated memory maps have been freed, prints to stderr */
 int     fa_check_mmap_leak(FA*, Env*);
-
+void    fa_show_space_peak(FA*, FILE*);
 void    fa_delete(FA*, Env*);
 
 #endif

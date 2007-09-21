@@ -30,6 +30,7 @@ typedef struct GenomeNode GenomeNode;
 
 typedef int (*GenomeNodeTraverseFunc)(GenomeNode*, void*, Env*);
 
+GenomeNode*   genome_node_ref(GenomeNode*);
 GenomeNode*   genome_node_rec_ref(GenomeNode*, Env*);
 void*         genome_node_cast(const GenomeNodeClass*, GenomeNode*);
 /* perform depth first traversal of the given genome node */
@@ -53,14 +54,14 @@ unsigned long genome_node_get_start(GenomeNode*);
 unsigned long genome_node_get_end(GenomeNode*);
 Range         genome_node_get_range(GenomeNode*);
 void          genome_node_set_range(GenomeNode*, Range);
-void          genome_node_set_seqid(GenomeNode*, Str*);
+void          genome_node_set_seqid(GenomeNode*, Str*, Env*);
 void          genome_node_set_source(GenomeNode*, Str*);
 void          genome_node_set_phase(GenomeNode*, Phase);
 int           genome_node_accept(GenomeNode*, GenomeVisitor*, Env*);
 /* <parent> takes ownership of <child> */
 void          genome_node_is_part_of_genome_node(GenomeNode *parent,
                                                  GenomeNode *child, Env*);
-/* does not free the leaf */
+/* does not free the leaf, do not use during traversal! */
 void          genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn,
                                       Env*);
 void          genome_node_mark(GenomeNode*);
@@ -76,8 +77,6 @@ bool          genome_node_direct_children_do_not_overlap_st(GenomeNode *parent,
                                                             GenomeNode *child,
                                                             Env*);
 bool          genome_node_is_tree(GenomeNode*);
-bool          genome_node_tree_is_sorted(GenomeNode **buffer,
-                                         GenomeNode *current_node, Env*);
 /* returns true if the genome node overlaps at least one of the nodes given in
    the array. O(array_size) */
 bool          genome_node_overlaps_nodes(GenomeNode*, Array*);
@@ -96,6 +95,8 @@ void          genome_node_rec_delete(GenomeNode*, Env*);
 
 void          genome_nodes_sort(Array*);
 void          genome_nodes_sort_stable(Array*, Env*);
+bool          genome_nodes_are_equal_sequence_regions(GenomeNode*,
+                                                      GenomeNode*);
 bool          genome_nodes_are_sorted(const Array*);
 
 #endif

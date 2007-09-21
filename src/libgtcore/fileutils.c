@@ -126,27 +126,3 @@ int file_find_in_path(Str *path, const char *file, Env *env)
 
   return had_err;
 }
-
-StrArray *file2lines(const char *filename,Env *env)
-{
-  Str *line;
-  FILE *fpin;
-  StrArray *filecontent;
-
-  fpin = env_fa_fopen(env, filename, "r");
-  if(fpin == NULL)
-  {
-    env_error_set(env,"cannot open file \"%s\": %s\n",filename,strerror(errno));
-    return NULL;
-  }
-  line = str_new(env);
-  filecontent = strarray_new(env);
-  while (str_read_next_line(line, fpin, env) != EOF)
-  {
-    strarray_add_cstr(filecontent,str_get(line),env);
-    str_reset(line);
-  }
-  str_delete(line,env);
-  env_fa_fclose(fpin,env);
-  return filecontent;
-}

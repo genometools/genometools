@@ -28,12 +28,12 @@
 
 typedef struct {
   bool sort,
+       checkids,
        mergefeat,
        addintrons,
        verbose;
   long offset;
-  Str *offsetfile,
-      *chseqids;
+  Str *offsetfile;
   GenFile *outfp;
 } GFF3Arguments;
 
@@ -58,6 +58,14 @@ static OPrval parse_options(int *parsed_args, GFF3Arguments *arguments,
                                 "consumption is O(file_size))",
                                 &arguments->sort, false, env);
   option_parser_add_option(op, sort_option, env);
+
+  /* -checkids */
+  option = option_new_bool("checkids", "make sure the ID attributes are unique "
+                           "within the scope of each GFF3_file, as required by "
+                           "GFF3 specification\n"
+                           "(memory consumption is O(file_size))",
+                           &arguments->checkids, false, env);
+  option_parser_add_option(op, option, env);
 
   /* -mergefeat */
   mergefeat_option = option_new_bool("mergefeat", "merge adjacent features of "
@@ -85,11 +93,6 @@ static OPrval parse_options(int *parsed_args, GFF3Arguments *arguments,
                                           "file", arguments->offsetfile, env);
   option_parser_add_option(op, offsetfile_option, env);
   option_exclude(offset_option, offsetfile_option, env);
-
-  /* option -chseqids */
-  option = option_new_filename("chseqids", "change sequence ids by the mapping "
-                               "given in file", arguments->chseqids, env);
-  option_parser_add_option(op, option, env);
 
   /* -v */
   option = option_new_verbose(&arguments->verbose, env);
@@ -124,16 +127,13 @@ int gt_gff3(int argc, const char **argv, Env *env)
 
   /* option parsing */
   arguments.offsetfile = str_new(env);
-  arguments.chseqids = str_new(env);
   switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
       str_delete(arguments.offsetfile, env);
-      str_delete(arguments.chseqids, env);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
       str_delete(arguments.offsetfile, env);
-      str_delete(arguments.chseqids, env);
       return 0;
   }
 
@@ -141,7 +141,8 @@ int gt_gff3(int argc, const char **argv, Env *env)
   gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
                                                argv + parsed_args,
                                                arguments.verbose &&
-                                               arguments.outfp, env);
+                                               arguments.outfp,
+                                               arguments.checkids, env);
   last_stream = gff3_in_stream;
 
   /* set offset (if necessary) */
@@ -152,12 +153,6 @@ int gt_gff3(int argc, const char **argv, Env *env)
   if (str_length(arguments.offsetfile)) {
     had_err = gff3_in_stream_set_offsetfile(gff3_in_stream,
                                             arguments.offsetfile, env);
-  }
-
-  /* set chseqids (if necessary) */
-  if (!had_err && str_length(arguments.chseqids)) {
-    had_err = gff3_in_stream_set_chseqids(gff3_in_stream, arguments.chseqids,
-                                          env);
   }
 
   /* create sort stream (if necessary) */
@@ -194,7 +189,6 @@ int gt_gff3(int argc, const char **argv, Env *env)
 
   /* free */
   str_delete(arguments.offsetfile, env);
-  str_delete(arguments.chseqids, env);
   genome_stream_delete(gff3_out_stream, env);
   genome_stream_delete(sort_stream, env);
   genome_stream_delete(mergefeat_stream, env);

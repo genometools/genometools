@@ -19,13 +19,17 @@
 #define STRARRAY_H
 
 #include "libgtcore/env.h"
+#include "libgtcore/str.h"
 
 /* the string array class  */
 typedef struct StrArray StrArray;
 
 StrArray*     strarray_new(Env*);
+StrArray*     strarray_new_file(const char *path, Env*);
 void          strarray_add_cstr(StrArray*, const char*, Env*);
 const char*   strarray_get(const StrArray*, unsigned long strnum);
+/* returns an internal Str pointer (i.e., _not_ a new reference!) */
+Str*          strarray_get_str(const StrArray*, unsigned long strnum);
 unsigned long strarray_size(const StrArray*); /* returns number of strings */
 void          strarray_delete(StrArray*, Env*);
 

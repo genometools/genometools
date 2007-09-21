@@ -16,6 +16,7 @@
 */
 
 #include <assert.h>
+#include "libgtcore/cstr.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/warning.h"
 #include "libgtcore/xansi.h"
@@ -181,7 +182,7 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   evaluator->prediction = genome_stream_ref(prediction);
   evaluator->evalLTR = evalLTR;
   evaluator->LTRdelta = LTRdelta;
-  evaluator->real_features = hashtable_new(HASH_STRING, NULL,
+  evaluator->real_features = hashtable_new(HASH_STRING, env_ma_free_func,
                                            (FreeFunc) slot_delete, env);
   evaluator->gene_evaluator = evaluator_new(env);
   evaluator->mRNA_evaluator = evaluator_new(env);
@@ -1123,8 +1124,9 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                                  str_get(genome_node_get_seqid(gn))))) {
 
         slot = slot_new(env);
-        hashtable_add(se->real_features, str_get(genome_node_get_seqid(gn)),
-                      slot, env);
+        hashtable_add(se->real_features,
+                      cstr_dup(str_get(genome_node_get_seqid(gn)), env), slot,
+                      env);
       }
       assert(slot);
     }

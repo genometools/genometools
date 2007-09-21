@@ -170,14 +170,26 @@ SERVER=gordon@genometools.org
 WWWBASEDIR=/var/www/servers
 
 # process arguments
+ifeq ($(assert),no)
+  GT_CFLAGS += -DNDEBUG
+  GT_CXXFLAGS += -DNDEBUG
+endif
+
+ifeq ($(cov),yes)
+  export CCACHE_DISABLE # ccache cannot handle coverage objects
+  GT_CFLAGS += -fprofile-arcs -ftest-coverage
+  STEST_FLAGS += -gcov
+  opt=no
+endif
+
 ifneq ($(opt),no)
   GT_CFLAGS += -Os
   GT_CXXFLAGS += -Os
 endif
 
-ifeq ($(assert),no)
-  GT_CFLAGS += -DNDEBUG
-  GT_CXXFLAGS += -DNDEBUG
+ifeq ($(prof),yes)
+  GT_CFLAGS += -pg
+  GT_LDFLAGS += -pg
 endif
 
 ifeq ($(static),yes)
@@ -190,6 +202,10 @@ ifneq ($(curses),no)
   LDLIBS += -lncurses
 endif
 
+ifdef gttestdata
+  STEST_FLAGS += -gttestdata $(gttestdata)
+endif
+
 ifeq ($(libgtview),yes)
   GTLIBS := $(GTLIBS) lib/libgtview.a
   GT_CFLAGS += -DLIBGTVIEW
@@ -200,7 +216,7 @@ endif
 # set prefix for install target
 prefix ?= /usr/local
 
-all: $(GTLIBS) bin/skproto bin/gt bin/rnv
+all: $(GTLIBS) bin/skproto bin/gt bin/lua bin/rnv
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
@@ -308,10 +324,15 @@ bin/gt: obj/src/gt.o obj/src/gtr.o $(TOOLS_OBJ) $(GTLIBS)
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CXX) $(LDFLAGS) $(GT_LDFLAGS) $^ $(LDLIBS) -o $@
 
+bin/lua: obj/$(LUA_DIR)/lua.o $(LIBLUA_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@$(CC) $(LDFLAGS) $^ -lm -o $@
+
 bin/rnv: obj/$(RNV_DIR)/xcl.o lib/librnv.a lib/libexpat.a
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(LDFLAGS) $(GT_LDFLAGS) $^ -o $@
+	@$(CC) $(LDFLAGS) $^ -o $@
 
 obj/gt_build.h:
 	@date +'#define GT_BUILT "%Y-%m-%d %H:%M:%S"' > $@
@@ -375,6 +396,7 @@ obj/%.o: %.cxx
 
 # read deps
 -include obj/src/gt.d obj/src/gtlua.d obj/src/gtr.d obj/src/skproto.d \
+	obj/$(LUA_DIR)/lua.d \
          $(LIBGTCORE_DEP) $(LIBGTEXT_C_DEP) $(LIBGTEXT_CXX_DEP) \
          $(LIBGTMATCH_DEP) $(LIBGTLTR_DEP) $(LIBGTVIEW_C_DEP) $(LIBGTLUA_C_DEP) $(TOOLS_DEP) \
          $(LIBAGG_DEP) $(LIBEXPAT_DEP) $(LIBLUA_DEP) $(LIBPNG_DEP) \
@@ -452,7 +474,7 @@ obj/%.prepro: ${CURDIR}/src/libgtmatch/%.c
 
 test: all
 	bin/gt -test
-	cd testsuite && env -i ruby -I. testsuite.rb -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin $(STEST_FLAGS)
+	cd testsuite && env -i GT_MEM_BOOKKEEPING=on ruby -I. testsuite.rb -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin -cur $(CURDIR) $(STEST_FLAGS)
 
 clean:
 	rm -rf obj

@@ -31,7 +31,7 @@ struct GenomeStreamClass
 struct GenomeStream
 {
   const GenomeStreamClass *c_class;
-  GenomeNode *last_node;
+  GenomeNode *buffer;
   bool ensure_sorting;
   unsigned int reference_count;
 };

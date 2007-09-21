@@ -179,6 +179,25 @@ int array_iterate(const Array *a,
   return 0;
 }
 
+static int iterate_test_func(void *info, const void *value, Env *env)
+{
+  unsigned long *i;
+  Range range;
+  int had_err = 0;
+  env_error_check(env);
+  i = (unsigned long*) info;
+  range = *(Range*) value;
+  ensure(had_err, range.start == *i + 1);
+  ensure(had_err, range.end == *i + 101);
+  (*i)++;
+  return had_err;
+}
+
+static int iterate_fail_func(void *info, const void *value, Env *env)
+{
+  return -1;
+}
+
 int array_example(Env *env)
 {
   unsigned long i;
@@ -226,7 +245,7 @@ int array_unit_test(Env *env)
     size = ((double) rand() / RAND_MAX) * MAX_SIZE;
 
     array_reset(char_array);
-    array_reset(int_array);
+    array_set_size(int_array, 0);
 
     ensure(had_err, array_size(char_array) == 0);
     ensure(had_err, array_size(int_array) == 0);
@@ -269,7 +288,7 @@ int array_unit_test(Env *env)
     }
   }
 
-  /* test array_reverse() */
+  /* test array_reverse(), array_iterate(), and array_rem() */
   if (!had_err) {
     a = array_new(sizeof (Range), env);
     for (i = 0; i < 24; i++) {
@@ -282,6 +301,29 @@ int array_unit_test(Env *env)
       range.start = i + 1;
       range.end   = i + 101;
       ensure(had_err, !range_compare(range, *(Range*) array_get(a, 23 - i)));
+    }
+  }
+  if (!had_err) {
+    array_reverse(a, env);
+    i = 0;
+    ensure(had_err, !array_iterate(a, iterate_test_func, &i, env));
+    ensure(had_err, array_iterate(a, iterate_fail_func, NULL, env));
+  }
+  if (!had_err) {
+    array_rem(a, 13);
+    array_rem(a, 12);
+    array_rem(a, 11);
+    array_rem(a, 10);
+    ensure(had_err, array_size(a) == 20);
+    for (i = 0; !had_err && i < 10; i++) {
+      range.start = i + 1;
+      range.end   = i + 101;
+      ensure(had_err, !range_compare(range, *(Range*) array_get(a, i)));
+    }
+    for (i = 10; !had_err && i < 20; i++) {
+      range.start = 4 + i + 1;
+      range.end   = 4 + i + 101;
+      ensure(had_err, !range_compare(range, *(Range*) array_get(a, i)));
     }
   }
   array_delete(a, env);

@@ -114,8 +114,7 @@ const GenomeVisitorClass* filter_visitor_class()
                                           filter_visitor_free,
                                           filter_visitor_comment,
                                           filter_visitor_genome_feature,
-                                          filter_visitor_sequence_region,
-                                          NULL };
+                                          filter_visitor_sequence_region };
   return &gvc;
 }
 
@@ -126,7 +125,7 @@ GenomeVisitor* filter_visitor_new(Str *seqid, Str *typefilter,
 {
   GenomeVisitor *gv = genome_visitor_create(filter_visitor_class(), env);
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
-  filter_visitor->genome_node_buffer = queue_new(sizeof (GenomeNode*), env);
+  filter_visitor->genome_node_buffer = queue_new(env);
   filter_visitor->seqid = str_ref(seqid);
   filter_visitor->typefilter = str_ref(typefilter);
   filter_visitor->max_gene_length = max_gene_length;
@@ -142,8 +141,10 @@ unsigned long filter_visitor_node_buffer_size(GenomeVisitor *gv)
   return queue_size(filter_visitor->genome_node_buffer);
 }
 
-GenomeNode* filter_visitor_get_node(GenomeVisitor *gv)
+GenomeNode* filter_visitor_get_node(GenomeVisitor *gv, Env *env)
 {
-  FilterVisitor *filter_visitor = filter_visitor_cast(gv);
-  return *(GenomeNode**) queue_get(filter_visitor->genome_node_buffer);
+  FilterVisitor *filter_visitor;
+  env_error_check(env);
+  filter_visitor = filter_visitor_cast(gv);
+  return queue_get(filter_visitor->genome_node_buffer, env);
 }

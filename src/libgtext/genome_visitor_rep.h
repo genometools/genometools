@@ -28,7 +28,6 @@ struct GenomeVisitorClass {
   int  (*comment)(GenomeVisitor*, Comment*, Env*);
   int  (*genome_feature)(GenomeVisitor*, GenomeFeature*, Env*);
   int  (*sequence_region)(GenomeVisitor*, SequenceRegion*, Env*);
-  int  (*default_func)(GenomeVisitor*, GenomeNode*, Env*);
 };
 
 struct GenomeVisitor {

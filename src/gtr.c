@@ -27,6 +27,7 @@
 #include "libgtcore/countingsort.h"
 #include "libgtcore/cstr.h"
 #include "libgtcore/dlist.h"
+#include "libgtcore/dynbittab.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/env.h"
 #include "libgtcore/fileutils.h"
@@ -41,6 +42,7 @@
 #include "libgtext/alignment.h"
 #include "libgtext/bsearch.h"
 #include "libgtext/evaluator.h"
+#include "libgtext/gtdatahelp.h"
 #include "libgtext/hmm.h"
 #include "libgtext/splicedseq.h"
 #include "libgtext/toolbox.h"
@@ -49,6 +51,7 @@
 #include "libgtlua/interactive.h"
 #include "tools/gt_bioseq.h"
 #include "tools/gt_cds.h"
+#include "tools/gt_chseqids.h"
 #include "tools/gt_clean.h"
 #include "tools/gt_csa.h"
 #include "tools/gt_dev.h"
@@ -82,7 +85,7 @@ struct GTR {
   bool test,
        interactive,
        debug;
-  Str *spacepeak;
+  Str *testspacepeak;
   Toolbox *toolbox;
   Hashtable *unit_tests;
   lua_State *L;
@@ -97,7 +100,7 @@ GTR* gtr_new(Env *env)
 #ifdef LIBGTVIEW
   Str *config_file;
 #endif
-  gtr->spacepeak = str_new(env);
+  gtr->testspacepeak = str_new(env);
   gtr->L = luaL_newstate();
   assert(gtr->L); /* XXX: proper error message  */
   luaL_openlibs(gtr->L); /* open the standard libraries */
@@ -125,24 +128,28 @@ GTR* gtr_new(Env *env)
   return gtr;
 }
 
+static int show_gtr_help(const char *progname, void *data, Env* env)
+{
+  int had_err;
+  had_err = toolbox_show(progname, data, env);
+  if (!had_err)
+    had_err = gtdata_show_help(progname, NULL, env);
+  return had_err;
+}
+
 OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
                  Env *env)
 {
   OptionParser *op;
   Option *o;
   OPrval oprval;
-  static const char *spacepeak_choices[] = {
-   "stderr", /* the default */
-   "stdout",
-   NULL
-  };
 
   env_error_check(env);
   assert(gtr);
   op = option_parser_new("[option ...] [tool | script] [argument ...]",
                          "The GenomeTools (gt) genome analysis system "
                           "(http://genometools.org).", env);
-  option_parser_set_comment_func(op, toolbox_show, gtr->toolbox);
+  option_parser_set_comment_func(op, show_gtr_help, gtr->toolbox);
   o = option_new_bool("i", "enter interactive mode after executing 'tool' or "
                       "'script'", &gtr->interactive, false, env);
   option_hide_default(o);
@@ -153,10 +160,8 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   option_parser_add_option(op, o, env);
   o = option_new_debug(&gtr->debug, env);
   option_parser_add_option(op, o, env);
-  o = option_new_choice("spacepeak", "show spacepeak on stdout or stderr "
-                        "upon deletion", gtr->spacepeak, spacepeak_choices[0],
-                        spacepeak_choices, env);
-  option_argument_is_optional(o);
+  o = option_new_filename("testspacepeak", "alloc 64 MB and mmap the given "
+                          "file", gtr->testspacepeak, env);
   option_is_development_option(o);
   option_parser_add_option(op, o, env);
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
@@ -172,6 +177,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   gtr->toolbox = toolbox_new(env);
   toolbox_add(gtr->toolbox, "bioseq", gt_bioseq, env);
   toolbox_add(gtr->toolbox, "cds", gt_cds, env);
+  toolbox_add(gtr->toolbox, "chseqids", gt_chseqids, env);
   toolbox_add(gtr->toolbox, "clean", gt_clean, env);
   toolbox_add(gtr->toolbox, "csa", gt_csa, env);
   toolbox_add(gtr->toolbox, "dev", gt_dev, env);
@@ -209,6 +215,8 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test,
                 env);
   hashtable_add(gtr->unit_tests, "dlist class", dlist_unit_test, env);
+  hashtable_add(gtr->unit_tests, "dynamic bittab class", dynbittab_unit_test,
+                env);
   hashtable_add(gtr->unit_tests, "evaluator class", evaluator_unit_test, env);
   hashtable_add(gtr->unit_tests, "grep module", grep_unit_test, env);
   hashtable_add(gtr->unit_tests, "hashtable class", hashtable_unit_test, env);
@@ -288,6 +296,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
 {
   Tool tool = NULL;
   char **nargv = NULL;
+  void *mem, *map;
   int had_err = 0;
   env_error_check(env);
   assert(gtr);
@@ -295,6 +304,12 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
     env_set_log(env, log_new(env_ma(env)));
   if (gtr->test) {
     return run_tests(gtr, env);
+  }
+  if (str_length(gtr->testspacepeak)) {
+    mem = env_ma_malloc(env, 1 << 26); /* alloc 64 MB */;
+    map = env_fa_mmap_read(env, str_get(gtr->testspacepeak), NULL);
+    env_fa_xmunmap(map, env);
+    env_ma_free(mem, env);
   }
   if (argc == 0 && !gtr->interactive) {
     env_error_set(env, "neither tool nor script specified; option -help lists "
@@ -345,7 +360,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
 void gtr_delete(GTR *gtr, Env *env)
 {
   if (!gtr) return;
-  str_delete(gtr->spacepeak, env);
+  str_delete(gtr->testspacepeak, env);
   toolbox_delete(gtr->toolbox, env);
   hashtable_delete(gtr->unit_tests, env);
   if (gtr->L) lua_close(gtr->L);

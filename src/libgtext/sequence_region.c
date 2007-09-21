@@ -55,6 +55,15 @@ static void sequence_region_set_range(GenomeNode *gn, Range range)
   sr->range = range;
 }
 
+static void sequence_region_set_seqid(GenomeNode *gn, Str *seqid, Env *env)
+{
+  SequenceRegion *sr = sequence_region_cast(gn);
+  env_error_check(env);
+  assert(sr && seqid);
+  str_delete(sr->seqid, env);
+  sr->seqid = str_ref(seqid);
+}
+
 static int sequence_region_accept(GenomeNode *gn, GenomeVisitor *gv, Env *env)
 {
   SequenceRegion *sr;
@@ -71,7 +80,7 @@ const GenomeNodeClass* sequence_region_class()
                                        sequence_region_get_seqid,
                                        sequence_region_get_range,
                                        sequence_region_set_range,
-                                       NULL,
+                                       sequence_region_set_seqid,
                                        NULL,
                                        NULL,
                                        sequence_region_accept };
@@ -88,4 +97,20 @@ GenomeNode* sequence_region_new(Str *seqid, Range range, Str *filename,
   sr->seqid = str_ref(seqid);
   sr->range = range;
   return gn;
+}
+
+void sequence_regions_consolidate(GenomeNode *gn_a, GenomeNode *gn_b)
+{
+  Range range_a, range_b;
+
+  assert(gn_a);
+  assert(gn_b);
+  assert(genome_node_cast(sequence_region_class(), gn_a));
+  assert(genome_node_cast(sequence_region_class(), gn_b));
+  assert(!str_cmp(genome_node_get_seqid(gn_a), genome_node_get_seqid(gn_b)));
+
+  range_a = genome_node_get_range(gn_a);
+  range_b = genome_node_get_range(gn_b);
+  range_a = range_join(range_a, range_b);
+  genome_node_set_range(gn_a, range_a);
 }

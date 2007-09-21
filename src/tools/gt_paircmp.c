@@ -143,8 +143,7 @@ static OPrval parse_options(int *parsed_args,
             oprval = OPTIONPARSER_ERROR;
           }
           ALLOCASSIGNSPACE(pw->charlistlen,NULL,Charlistlen,1);
-          pw->charlistlen->charlist
-            = str_new_cstr(strarray_get(charlistlen,0),env);
+          pw->charlistlen->charlist = str_ref(strarray_get_str(charlistlen,0));
           if (sscanf(strarray_get(charlistlen,1UL),"%ld",&readint) != 1 ||
              readint < 1L)
           {

@@ -111,7 +111,7 @@ static int increase_reference_count(GenomeNode *gn, /*@unused@*/ void *data,
   return 0;
 }
 
-static GenomeNode* genome_node_ref(GenomeNode *gn)
+GenomeNode* genome_node_ref(GenomeNode *gn)
 {
   int had_err;
   had_err = increase_reference_count(gn, NULL, NULL);
@@ -156,7 +156,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
     array_add(node_stack, genome_node, env);
   }
   else {
-    node_queue = queue_new(sizeof (GenomeNode*), env);
+    node_queue = queue_new(env);
     queue_add(node_queue, genome_node, env);
   }
   list_of_children = array_new(sizeof (GenomeNode*), env);
@@ -168,7 +168,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
     if (depth_first)
       gn = *(GenomeNode**) array_pop(node_stack);
     else
-      gn = *(GenomeNode**) queue_get(node_queue);
+      gn = queue_get(node_queue, env);
     array_reset(list_of_children);
     if (gn->children) {
       /* a backup of the children array is necessary if traverse() frees the
@@ -297,8 +297,10 @@ unsigned long genome_node_number_of_children(const GenomeNode *gn)
 
 Str* genome_node_get_seqid(GenomeNode *gn)
 {
-  assert(gn && gn->c_class && gn->c_class->get_seqid);
-  return gn->c_class->get_seqid(gn);
+  assert(gn && gn->c_class);
+  if (gn->c_class->get_seqid)
+    return gn->c_class->get_seqid(gn);
+  return NULL;
 }
 
 Str* genome_node_get_idstr(GenomeNode *gn)
@@ -331,10 +333,11 @@ void genome_node_set_range(GenomeNode *gn, Range range)
   gn->c_class->set_range(gn, range);
 }
 
-void genome_node_set_seqid(GenomeNode *gn, Str *seqid)
+void genome_node_set_seqid(GenomeNode *gn, Str *seqid, Env *env)
 {
+  env_error_check(env);
   assert(gn && gn->c_class && gn->c_class->set_seqid && seqid);
-  gn->c_class->set_seqid(gn, seqid);
+  gn->c_class->set_seqid(gn, seqid, env);
 }
 
 void genome_node_set_source(GenomeNode *gn, Str *source)
@@ -510,21 +513,6 @@ bool genome_node_is_tree(GenomeNode *gn)
   return status;
 }
 
-bool genome_node_tree_is_sorted(GenomeNode **buffer, GenomeNode *current_node,
-                                Env *env)
-{
-  assert(buffer && current_node);
-
-  if (*buffer) {
-    /* the last node is not larger than the current one */
-    if (genome_node_compare(buffer, &current_node) == 1)
-      return false;
-    genome_node_delete(*buffer, env);
-  }
-  *buffer = genome_node_ref(current_node);
-  return true;
-}
-
 bool genome_node_overlaps_nodes(GenomeNode *gn, Array *nodes)
 {
   return genome_node_overlaps_nodes_mark(gn, nodes, NULL);
@@ -617,12 +605,26 @@ void genome_nodes_sort_stable(Array *nodes, Env *env)
 
 }
 
+bool genome_nodes_are_equal_sequence_regions(GenomeNode *gn_a, GenomeNode *gn_b)
+{
+  void *sr_a, *sr_b;
+
+  sr_a = gn_a ? genome_node_cast(sequence_region_class(), gn_a) : NULL;
+  sr_b = gn_b ? genome_node_cast(sequence_region_class(), gn_b) : NULL;
+
+  if (sr_a && sr_b && !str_cmp(genome_node_get_seqid(gn_a),
+                               genome_node_get_seqid(gn_b))) {
+    return true;
+  }
+  return false;
+}
+
 bool genome_nodes_are_sorted(const Array *nodes)
 {
   unsigned long i;
   assert(nodes);
   for (i = 1; i < array_size(nodes); i++) {
-    if (genome_node_compare(array_get(nodes, i-1), array_get(nodes, i)) == 1)
+    if (genome_node_compare(array_get(nodes, i-1), array_get(nodes, i)) > 0)
       return false;
   }
   return true;

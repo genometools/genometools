@@ -28,9 +28,9 @@ typedef struct {
   bool verbose;
   unsigned long join_length;
   GenFile *outfp;
-} Csa_arguments;
+} CSAArguments;
 
-static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
+static OPrval parse_options(int *parsed_args, CSAArguments *arguments,
                             int argc, const char **argv, Env *env)
 {
   OptionParser *op;
@@ -41,9 +41,8 @@ static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
 
   /* init */
   op = option_parser_new("[option ...] [GFF3_file]",
-                                       "Replace spliced alignments with "
-                                       "computed consensus spliced "
-                                       "alignments.", env);
+                         "Replace spliced alignments with computed consensus "
+                         "spliced alignments.", env);
   ofi = outputfileinfo_new(env);
 
   /* -join-length */
@@ -73,10 +72,10 @@ static OPrval parse_options(int *parsed_args, Csa_arguments *arguments,
 int gt_csa(int argc, const char **argv, Env *env)
 {
   GenomeStream *gff3_in_stream,
-                *csa_stream,
-                *gff3_out_stream;
+               *csa_stream,
+               *gff3_out_stream;
   GenomeNode *gn;
-  Csa_arguments arguments;
+  CSAArguments arguments;
   int parsed_args, had_err;
   env_error_check(env);
 
