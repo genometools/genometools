@@ -52,6 +52,10 @@ end
 
 $transdir=File.join(Dir.pwd, "..", "gtdata" , "trans", "")
 
+if $arguments["gttestdata"] then
+  $gttestdata=File.join($arguments["gttestdata"], "")
+end
+
 $systemname=`uname -s`
 $systemname.chomp!
 
