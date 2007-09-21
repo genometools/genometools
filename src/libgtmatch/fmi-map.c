@@ -21,15 +21,14 @@
 #include "libgtcore/env.h"
 #include "libgtcore/array.h"
 #include "libgtcore/str.h"
-#include "arraydef.h"
 #include "sfx-ri-def.h"
 #include "esafileend.h"
 #include "fmindex.h"
 #include "sarr-def.h"
 #include "verbose-def.h"
+#include "spacedef.h"
 #include "stamp.h"
 
-#include "readnextline.pr"
 #include "opensfxfile.pr"
 #include "sfx-readint.pr"
 #include "esa-map.pr"
@@ -57,11 +56,9 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
                                  Verboseinfo *verboseinfo,
                                  Env *env)
 {
-  ArrayUchar linebuffer;
   bool haserr = false;
   Array *riktab;
-  unsigned int linenum,
-               intstoreindexpos;
+  unsigned int intstoreindexpos;
 
   env_error_check(env);
   riktab = array_new(sizeofReadintkeys(),env);
@@ -81,26 +78,27 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   SETREADINTKEYS("suffixlength",&fmindex->suffixlength,NULL);
   if (!haserr)
   {
-    INITARRAY(&linebuffer,Uchar);
-    for (linenum = 0; /* Nothing */; linenum++)
+    Str *currentline;
+    unsigned int linenum;
+
+    currentline = str_new(env);
+    for (linenum = 0; str_read_next_line(currentline, fpin, env) != EOF;
+         linenum++)
     {
-      linebuffer.nextfreeUchar = 0;
-      if (readnextline(fpin,&linebuffer,env) == EOF)
-      {
-        break;
-      }
       if (analyzeuintline(indexname,
                          FMASCIIFILESUFFIX,
                          linenum,
-                         linebuffer.spaceUchar,
-                         linebuffer.nextfreeUchar,
+                         (Uchar *) str_get(currentline),
+                         str_length(currentline),
                          riktab,
                          env) != 0)
       {
         haserr = true;
         break;
       }
+      str_reset(currentline);
     }
+    str_delete(currentline,env);
   }
   if (!haserr && allkeysdefined(indexname,FMASCIIFILESUFFIX,riktab,
                                 verboseinfo,env) != 0)
@@ -124,7 +122,6 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
       }
     }
   }
-  FREEARRAY(&linebuffer,Uchar);
   array_delete(riktab,env);
   return haserr ? -1 : 0;
 }

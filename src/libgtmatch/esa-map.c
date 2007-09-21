@@ -19,18 +19,18 @@
 #include <errno.h>
 #include <stdbool.h>
 #include <limits.h>
+#include <string.h>
 #include "libgtcore/array.h"
 #include "libgtcore/endianess.h"
 #include "libgtcore/env.h"
 #include "format64.h"
-#include "arraydef.h"
 #include "sarr-def.h"
 #include "encseq-def.h"
 #include "esafileend.h"
 #include "sfx-ri-def.h"
+#include "spacedef.h"
 #include "stamp.h"
 
-#include "readnextline.pr"
 #include "opensfxfile.pr"
 #include "sfx-readint.pr"
 
@@ -54,15 +54,15 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                                  FILE *fpin,
                                  Env *env)
 {
-  ArrayUchar linebuffer;
   uint32_t integersize, littleendian, readmodeint;
   unsigned int linenum;
   unsigned long numofsequences, numofquerysequences,
-                numoffiles = 0, numofallocatedfiles = 0;
+                numoffiles = 0, numofallocatedfiles = 0, currentlinelength;
   DefinedSeqpos maxbranchdepth;
   size_t dbfilelen = strlen(DBFILEKEY);
   bool haserr = false;
   Array *riktab;
+  Str *currentline;
 
   env_error_check(env);
   riktab = array_new(sizeofReadintkeys(),env);
@@ -89,18 +89,15 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   SETREADINTKEYS("integersize",&integersize,NULL);
   SETREADINTKEYS("littleendian",&littleendian,NULL);
   SETREADINTKEYS("readmode",&readmodeint,NULL);
-  INITARRAY(&linebuffer,Uchar);
   suffixarray->filenametab = strarray_new(env);
   suffixarray->filelengthtab = NULL;
-  for (linenum = 0; /* Nothing */; linenum++)
+  currentline = str_new(env);
+  for (linenum = 0; str_read_next_line(currentline, fpin, env) != EOF;
+       linenum++)
   {
-    linebuffer.nextfreeUchar = 0;
-    if (readnextline(fpin,&linebuffer,env) == EOF)
-    {
-      break;
-    }
-    if (dbfilelen <= (size_t) linebuffer.nextfreeUchar &&
-       memcmp(DBFILEKEY,linebuffer.spaceUchar,dbfilelen) == 0)
+    currentlinelength = str_length(currentline);
+    if (dbfilelen <= (size_t) currentlinelength &&
+       memcmp(DBFILEKEY,str_get(currentline),dbfilelen) == 0)
     {
       char *tmpfilename;
       int64_t readint1, readint2;
@@ -112,17 +109,17 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
                          Filelengthvalues,numofallocatedfiles);
       }
       assert(suffixarray->filelengthtab != NULL);
-      ALLOCASSIGNSPACE(tmpfilename,NULL,char,linebuffer.nextfreeUchar);
-      if (sscanf((const char *) linebuffer.spaceUchar,
+      ALLOCASSIGNSPACE(tmpfilename,NULL,char,currentlinelength);
+      if (sscanf((const char *) str_get(currentline),
                   "dbfile=%s " FormatScanint64_t " " FormatScanint64_t "\n",
                    tmpfilename,
                    Scanuint64_tcast(&readint1),
                    Scanuint64_tcast(&readint2)) != 3)
       {
         env_error_set(env,"cannot parse line %*.*s",
-                          (int) linebuffer.nextfreeUchar,
-                          (int) linebuffer.nextfreeUchar,
-                          (const char *) linebuffer.spaceUchar);
+                          (int) currentlinelength,
+                          (int) currentlinelength,
+                          (const char *) str_get(currentline));
         FREESPACE(tmpfilename);
         FREESPACE(suffixarray->filelengthtab);
         haserr = true;
@@ -131,9 +128,9 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       if (readint1 < (int64_t) 1 || readint2 < (int64_t) 1)
       {
         env_error_set(env,"need positive integers in line %*.*s",
-                          (int) linebuffer.nextfreeUchar,
-                          (int) linebuffer.nextfreeUchar,
-                          (const char *) linebuffer.spaceUchar);
+                          (int) currentlinelength,
+                          (int) currentlinelength,
+                          (const char *) str_get(currentline));
         FREESPACE(tmpfilename);
         FREESPACE(suffixarray->filelengthtab);
         haserr = true;
@@ -162,8 +159,8 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       if (analyzeuintline(indexname,
                          PROJECTFILESUFFIX,
                          linenum,
-                         linebuffer.spaceUchar,
-                         linebuffer.nextfreeUchar,
+                         (Uchar *) str_get(currentline),
+                         currentlinelength,
                          riktab,
                          env) != 0)
       {
@@ -171,7 +168,9 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         break;
       }
     }
+    str_reset(currentline);
   }
+  str_delete(currentline,env);
   if (!haserr && allkeysdefined(indexname,PROJECTFILESUFFIX,riktab,
                                 verboseinfo,env) != 0)
   {
@@ -223,7 +222,6 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     }
     suffixarray->readmode = (Readmode) readmodeint;
   }
-  FREEARRAY(&linebuffer,Uchar);
   array_delete(riktab,env);
   return haserr ? -1 : 0;
 }

@@ -22,11 +22,12 @@
 set -e -x
 
 outoptions="-tis -lcp -suf -bwt"
+ALLOUTPUTOPTS="../scripts/alloutputoptions.rb"
 
 # the make call normally used for development
 cd testsuite
-testsuite.rb -keywords gt_suffixerator
-testsuite.rb -keywords gt_trieins
+# testsuite.rb -keywords gt_suffixerator
+# testsuite.rb -keywords gt_trieins
 # optional -memcheck   (run valgrind)
 #          -select 253 (run testcase 253)
 # the following depends on vmatch-mini.x and mkvtree.x
@@ -37,9 +38,14 @@ do
   ../scripts/iterrunmerge.sh ${num}
   num=`expr ${num} + 1`
 done
-for options in `alloutputoptions.rb`
+if test ! -f ${ALLOUTPUTOPTS}
+then
+  echo "cannot find ${ALLOUTPUTOPTS}"
+  exit 1
+fi
+for options in `${ALLOUTPUTOPTS}`
 do
-  cmpdbfile.sh ${options} -pl -db ${ATK}
+  ../scripts/cmpdbfile.sh ${options} -pl -db ${ATK}
 done
 ../scripts/checkmapped.sh -db ${ATK} ${AT} ${GRUMBACH}/*.fna -parts 3 -pl
 ../scripts/checkmapped.sh -parts 1 -pl -db ${SWK} ${SW}
