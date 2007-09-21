@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/getbasename.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "divmodmul.h"
@@ -25,7 +26,6 @@
 #include "fmi-save.pr"
 #include "fmi-keyval.pr"
 #include "fmi-sufbwtstream.pr"
-#include "getbasename.pr"
 
 typedef struct
 {

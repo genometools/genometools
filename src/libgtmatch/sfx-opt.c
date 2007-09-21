@@ -18,13 +18,13 @@
 #include <string.h>
 #include <inttypes.h>
 #include "libgtcore/env.h"
+#include "libgtcore/getbasename.h"
 #include "libgtcore/option.h"
 #include "libgtcore/str.h"
 #include "libgtcore/versionfunc.h"
 #include "sfx-optdef.h"
 #include "stamp.h"
 
-#include "getbasename.pr"
 #include "sfx-readmode.pr"
 
 static OPrval parse_options(int *parsed_args,
