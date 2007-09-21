@@ -169,12 +169,8 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
     }
     return had_err;
   }
-  if (queue_size(is->genome_node_buffer)) {
-    assert(queue_size(is->genome_node_buffer) == 1);
-    *gn = queue_get(is->genome_node_buffer, env);
-  }
-  else
-    *gn = NULL;
+  assert(!queue_size(is->genome_node_buffer));
+  *gn = NULL;
   return had_err;
 }
 
