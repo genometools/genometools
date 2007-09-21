@@ -37,7 +37,7 @@ void showrepeats (
           repeats->nextfreeRepeat, seedminlength);
   if (repeats->nextfreeRepeat == (unsigned long)0)
   {
-    // no repeats
+    /* no repeats */
     printf ("\nnone");
   }
   else
@@ -70,8 +70,8 @@ int simpleexactselfmatchoutput (
     pos2 = tmp;
   }
 
-  printf(FormatSeqpos " " 
-         FormatSeqpos " " 
+  printf(FormatSeqpos " "
+         FormatSeqpos " "
 	 FormatSeqpos "\n",
 	 PRINTSeqposcast(len),
          PRINTSeqposcast(pos1),
@@ -89,15 +89,15 @@ int simpleexactselfmatchstore (
 {
   Seqpos tmp,
          totallength;
-  const Encodedsequence *encseq = 
-          encseqSequentialsuffixarrayreader(info->repeatinfo.ssarptr);  
-  unsigned long numofdbsequences = 
+  const Encodedsequence *encseq =
+          encseqSequentialsuffixarrayreader(info->repeatinfo.ssarptr);
+  unsigned long numofdbsequences =
        numofdbsequencesSequentialsuffixarrayreader(info->repeatinfo.ssarptr);
   Seqpos *markpos = info->markpos;
   unsigned long i,
                 contignumber = 0,
                 seqnum1,
-		seqnum2; 
+		seqnum2;
   bool samecontig = false;
 
   env_error_check(env);
@@ -115,31 +115,31 @@ int simpleexactselfmatchstore (
     samecontig = true;
     contignumber = (unsigned long)0;
   }
-  // at least two db sequences
+  /* at least two db sequences */
   else
   {
-    if(markpos == NULL)
+    if (markpos == NULL)
     {
-      return -1;  
+      return -1;
     }
     totallength = getencseqtotallength(encseq);
-    for( i = 0; i < numofdbsequences - 1; i++)
+    for ( i = 0; i < numofdbsequences - 1; i++)
     {
-      seqnum1 = getrecordnumSeqpos(markpos, numofdbsequences, 
+      seqnum1 = getrecordnumSeqpos(markpos, numofdbsequences,
 	                totallength, pos1, env);
-      if( seqnum1 == numofdbsequences)
+      if ( seqnum1 == numofdbsequences)
       {
         return -1;
       }
 
-      seqnum2 = getrecordnumSeqpos(markpos, numofdbsequences, 
+      seqnum2 = getrecordnumSeqpos(markpos, numofdbsequences,
 	                totallength, pos2, env);
-      if( seqnum2 == numofdbsequences)
+      if ( seqnum2 == numofdbsequences)
       {
         return -1;
       }
 
-      if( seqnum1 == seqnum2 )
+      if ( seqnum1 == seqnum2 )
       {
 #ifdef DEBUG
 	  printf("accepted:\n");
@@ -154,15 +154,14 @@ int simpleexactselfmatchstore (
     }
   }
 
-
   /*test maximal length of candidate pair and distance constraints*/
-  if( samecontig && (len <= (Seqpos) info->repeatinfo.lmax) && 
-      ( (Seqpos) info->repeatinfo.dmin <= tmp) && 
+  if ( samecontig && (len <= (Seqpos) info->repeatinfo.lmax) &&
+      ( (Seqpos) info->repeatinfo.dmin <= tmp) &&
         (tmp <= (Seqpos) info->repeatinfo.dmax) )
   {
     Repeat *nextfreerepeatptr;
 
-    GETNEXTFREEINARRAY(nextfreerepeatptr, &info->repeatinfo.repeats, 
+    GETNEXTFREEINARRAY(nextfreerepeatptr, &info->repeatinfo.repeats,
                        Repeat, 10);
 #ifdef DEBUG
     printf("maximal repeat pos1: " FormatSeqpos "\n",
@@ -195,13 +194,13 @@ int subsimpleexactselfmatchstore (
   Repeat *nextfreerepeatptr;
   GETNEXTFREEINARRAY (nextfreerepeatptr, &info->repeats, Repeat, 10);
   nextfreerepeatptr->pos1 = info->offset1 + dbstart;
-  nextfreerepeatptr->offset = info->offset2 + (Seqpos)querystart - 
+  nextfreerepeatptr->offset = info->offset2 + (Seqpos)querystart -
     (info->offset1 + dbstart);
   nextfreerepeatptr->len = (Seqpos)len;
 
   return 0;
 }
- 
+
 int subshowrepeats (
   SubRepeatInfo *info,
   unsigned long len,
@@ -218,4 +217,4 @@ int subshowrepeats (
       PRINTSeqposcast(info->offset2 + (Seqpos)querystart));
 
   return 0;
-} 
+}

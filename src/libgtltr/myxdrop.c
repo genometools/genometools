@@ -6,12 +6,12 @@
 
 #include <string.h>
 
+#include "libgtcore/minmax.h"
 #include "libgtmatch/divmodmul.h"
 #include "libgtmatch/chardef.h"
 
 #include "repeattypes.h"
 #include "myxdrop.h"
-#include "minmax.h"
 
 #define MINUSINFINITYINT ((int)integermin)
 #define ACCESSTOFRONT(D,K) ((unsigned int) (D) * (D) + (D) + (K))
@@ -19,8 +19,8 @@
 /*
  The following function shows the matrix of the calculated fronts.
  */
-/* CAUTION: fronts, that run over the matrix boundaries are not shown in 
-   the printed matrix. 
+/* CAUTION: fronts, that run over the matrix boundaries are not shown in
+   the printed matrix.
  */
 int showmatrix ( ArrayMyfrontvalue * fronts,
   int distance,
@@ -35,17 +35,12 @@ int showmatrix ( ArrayMyfrontvalue * fronts,
 
   integermax = MAX (ulen, vlen), integermin = -integermax;
 
-/*
-  DEBUG1 (2,
-          "Num of allocates Frontvalues = fronts->nextfreeFrontvalue: %lu\n",
-          (Showuint) fronts->nextfreeFrontvalue);
-*/
   printf( "ACHTUNG: Fronten, die ueber die boundaries gehen,"
                   " erscheinen nicht in Matrix.\n");
   printf("matrix:\n");
   printf("        ");
   printf("%-3c ", vseq[0]);
-  // print vseq
+  /* print vseq */
   for (i = 1; i < vlen; i++)
   {
     printf("%-3c ", vseq[i]);
@@ -54,7 +49,7 @@ int showmatrix ( ArrayMyfrontvalue * fronts,
   for (i = 0; i <= ulen; i++)
   {
     printf("\n");
-    // print useq
+    /* print useq */
     if (i != 0)
     {
       printf("%-3c ", useq[i - 1]);
@@ -89,14 +84,14 @@ int showmatrix ( ArrayMyfrontvalue * fronts,
               break;
             }
           }
-        }           //end if
-      }         // end for l
+        }
+      }
       if (d > distance)
       {
         printf("U   ");
       }
-    }              // end for j
-  }            //end for i
+    }
+  }
 
   printf("\n%.2f percent of matrix filled\n",
            filled * 100.00 / ((ulen + 1) * (vlen + 1)));
@@ -107,16 +102,15 @@ int showmatrix ( ArrayMyfrontvalue * fronts,
 /* If showmatrix funktion = "True", then
     (A)->nextfree##TYPE = POS+1; must be set:
 
-
- ** The other case, saves more space 
+ ** The other case, saves more space
 
 #define STOREINARRAYFRONTS(A,POS,TYPE,VAL)\
         CHECKARRAYSPACEMULTI(A,TYPE,POS+1)\
         (A)->space##TYPE[POS] = VAL;\
         (A)->nextfree##TYPE = POS+1;
 */
- 
-/* 
+
+/*
  POS+1 necessary, since at POS = 0 and nextfree##TYPE = 0
  nothing will be allocated in addition!
  */
@@ -128,7 +122,7 @@ int showmatrix ( ArrayMyfrontvalue * fronts,
  The following macro swaps two values.
  */
 #define SWAPMAYBE\
-        if(m < n)\
+        if (m < n)\
         {\
           r = m;\
           m = n;\
@@ -148,20 +142,19 @@ int showmatrix ( ArrayMyfrontvalue * fronts,
 /*
  The following function calculates the distance from the given scores.
  */
-void calculatedistancesfromscores(Arbitraryscores *arbitscores, 
+void calculatedistancesfromscores(Arbitraryscores *arbitscores,
     Arbitrarydistances *arbitdistances)
 {
   unsigned int m, n, r;
   int mat, mis, ins, del;
-  
-  // if mat is odd double all scores
-  if(MOD2((unsigned int)arbitscores->mat))
-  {    
-    mat = arbitscores->mat  * (int)2; 
-    mis = arbitscores->mis  * (int)2; 
-    ins = arbitscores->ins  * (int)2; 
-    del = arbitscores->del  * (int)2; 
-    //DEBUG0(3, "scores has been doubled for calculation of distances.\n");
+
+  /* if mat is odd double all scores */
+  if (MOD2((unsigned int)arbitscores->mat))
+  {
+    mat = arbitscores->mat  * (int)2;
+    mis = arbitscores->mis  * (int)2;
+    ins = arbitscores->ins  * (int)2;
+    del = arbitscores->del  * (int)2;
   }
   else
   {
@@ -172,30 +165,20 @@ void calculatedistancesfromscores(Arbitraryscores *arbitscores,
   }
 
   m = (unsigned int)(mat - mis);
-  //DEBUG1(2, "a = %lu\n", (Showuint) m);
   n = (unsigned int)(mat/2 - ins);
-  //DEBUG1(2, "b = %lu\n", (Showuint) n);
-  SWAPMAYBE  
+  SWAPMAYBE
   GGT;
 
   n = (unsigned int)(mat/2 - del);
-  //DEBUG1(2, "c = %lu\n", (Showuint) n);
-  SWAPMAYBE  
+  SWAPMAYBE
   GGT;
-    
+
   arbitscores->gcd = (int) m;
-  //DEBUG1(2, "g = gcd(a,b,c) = %ld\n", (Showsint) arbitscores->gcd);
-  
+
   arbitdistances->mis  = (mat - mis) / arbitscores->gcd;
   arbitdistances->ins  = (mat/2 - ins)  / arbitscores->gcd;
   arbitdistances->del  = (mat/2 - del)  / arbitscores->gcd;
-  
-  /*
-  DEBUG0(2, "distances:\n");
-  DEBUG1(2, "mis = %ld\n", (Showsint) arbitdistances->mis);
-  DEBUG1(2, "ins = %ld\n", (Showsint) arbitdistances->ins);
-  DEBUG1(2, "del = %ld\n", (Showsint) arbitdistances->del);
-  */
+
 }
 
 /*
@@ -218,18 +201,18 @@ void calculateallowedMININFINITYINTgenerations(
  */
 #define COMPARESYMBOLSSEP(I,J)\
         USEQ(a,I);\
-        if(a == (unsigned char) SEPARATOR)\
+        if (a == (unsigned char) SEPARATOR)\
         {\
           ulen = I;\
           break;\
         }\
         VSEQ(b,J);\
-        if(b == (unsigned char) SEPARATOR)\
+        if (b == (unsigned char) SEPARATOR)\
         {\
           vlen = J;\
           break;\
         }\
-        if(a != b || a == (unsigned char) WILDCARD)\
+        if (a != b || a == (unsigned char) WILDCARD)\
         {\
           break;\
         }
@@ -251,8 +234,6 @@ void calculateallowedMININFINITYINTgenerations(
         (XDROPBELOWSCORE + HALFMATCHSCORE) / GCD + 1
 
 #define EVALXDROPARBITSCORES EVALXDROPARBITSCORESRIGHT
-//alt #define USEQ(A,I) A = useq[(I)]
-//alt #define VSEQ(A,J) A = vseq[(J)]
 #define USEQ(A,I) A = getencodedchar(str_useq,\
                                      useq+(Seqpos)(I),\
                                      Forwardmode)
@@ -268,14 +249,12 @@ void calculateallowedMININFINITYINTgenerations(
 
 /*
   Now we redefine the macros to compute the left to right
-  we use macros to abstract from the differences. The 
+  we use macros to abstract from the differences. The
   following 4 macros are defined for the right to left extension beginning
   with the last character of the strings under consideration.
 */
 
 #define EVALXDROPARBITSCORES EVALXDROPARBITSCORESLEFT
-//#define USEQ(A,I) A = *(useq-1-(I))
-//#define VSEQ(A,J) A = *(vseq-1-(J))
 #define USEQ(A,I) A = getencodedchar(str_useq,\
                                      useq-(Seqpos)1-(I),\
 				     Forwardmode)

@@ -17,7 +17,7 @@ typedef struct
       mis,
       ins,
       del,
-      gcd;  // greatest common divisor
+      gcd;  /* greatest common divisor */
 } Arbitraryscores;
 
 typedef struct
@@ -33,19 +33,19 @@ typedef struct
   graph to trace back.
 */
 
-#define MYREPLACEMENTBIT   ((unsigned char) 1)          // replacement
-#define MYDELETIONBIT      (((unsigned char) 1) << 1)   // deletion
-#define MYINSERTIONBIT     (((unsigned char) 1) << 2)   // insertion
-#define MYLENBIT           (((unsigned char) 1) << 3)   // length of identical substring
-#define MYMATCHBIT         (((unsigned char) 1) << 4)   // match
-#define MYMISMATCHBIT      (((unsigned char) 1) << 5)   // mismatch
+#define MYREPLACEMENTBIT   ((unsigned char) 1)          /* replacement */
+#define MYDELETIONBIT      (((unsigned char) 1) << 1)   /* deletion */ 
+#define MYINSERTIONBIT     (((unsigned char) 1) << 2)   /* insertion */ 
+#define MYLENBIT           (((unsigned char) 1) << 3)   /* length of identical substring */ 
+#define MYMATCHBIT         (((unsigned char) 1) << 4)   /* match */ 
+#define MYMISMATCHBIT      (((unsigned char) 1) << 5)   /* mismatch */ 
 
 typedef struct
 {
   int dptabrow;
-  unsigned char dptabdirection; // one of the bits REPLACEMENTBIT,
-                                //                 DELETIONBIT,
-                                //                 INSERTIONBIT
+  unsigned char dptabdirection; /* one of the bits REPLACEMENTBIT,
+                                                   DELETIONBIT,
+                                                   INSERTIONBIT */
 } Myfrontvalue;
 
 DECLAREARRAYSTRUCT(Myfrontvalue);
@@ -56,7 +56,7 @@ typedef struct
     int score;
 } Myxdropbest;
 
-// This is the type for the xdrop scores.
+/* This is the type for the xdrop scores. */
 typedef int Xdropscore;
 
 DECLAREARRAYSTRUCT(Xdropscore);
