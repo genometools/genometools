@@ -25,7 +25,6 @@
 #include "dist-if.h"
 #include "safecast-gen.h"
 
-#include "distcalc.pr"
 #include "fbsadv.pr"
 
 #include "readnextUchar.gen"

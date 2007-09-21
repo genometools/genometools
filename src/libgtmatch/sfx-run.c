@@ -31,16 +31,15 @@
 #include "sfx-suffixer.h"
 #include "sfx-lcpval.h"
 #include "iterseq.h"
+#include "readmode-def.h"
 #include "verbose-def.h"
 #include "stamp.h"
 
-#include "measure-time.pr"
 #include "opensfxfile.pr"
 #include "fillsci.pr"
 #include "sfx-opt.pr"
 #include "sfx-outprj.pr"
 #include "sfx-apfxlen.pr"
-#include "sfx-readmode.pr"
 
 typedef struct
 {

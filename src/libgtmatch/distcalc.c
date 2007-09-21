@@ -22,7 +22,7 @@
 #include "spacedef.h"
 #include "dist-if.h"
 
- struct _Distribution
+ struct Distribution
 {
   Hashtable *hashdist;
 };

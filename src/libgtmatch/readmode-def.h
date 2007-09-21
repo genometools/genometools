@@ -17,6 +17,7 @@
 
 #ifndef READMODE_DEF_H
 #define READMODE_DEF_H
+#include "libgtcore/env.h"
 
 typedef enum
 {
@@ -27,5 +28,9 @@ typedef enum
 } Readmode;
 
 #define ISDIRREVERSE(R) ((R) == Reversemode || (R) == Reversecomplementmode)
+
+const char *showreadmode(Readmode readmode);
+
+int parsereadmode(const char *dirargstring,Env *env);
 
 #endif

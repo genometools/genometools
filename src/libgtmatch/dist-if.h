@@ -17,7 +17,22 @@
 
 #ifndef DIST_IF_H
 #define DIST_IF_H
+#include "libgtcore/env.h"
 
-typedef struct _Distribution Distribution;
+typedef struct Distribution Distribution;
+
+Distribution *initdistribution(Env *env);
+
+void freedistribution(Distribution **dist,Env *env);
+
+void addmultidistribution(Distribution *dist,unsigned long ind,
+                          unsigned long howmany,Env *env);
+
+void adddistribution(Distribution *dist,unsigned long ind,Env *env);
+
+int foreachdistributionvalue(Distribution *dist,
+                             int (*hashiter)(void *key, void *value,
+                                             void *data, Env*),
+                             void *data,Env *env);
 
 #endif

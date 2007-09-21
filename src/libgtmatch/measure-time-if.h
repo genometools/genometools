@@ -17,7 +17,13 @@
 
 #ifndef MEASURE_TIME_H
 #define MEASURE_TIME_H
+#include <stdio.h>
+#include "libgtcore/env.h"
 
-typedef struct _Measuretime Measuretime;
+typedef struct Measuretime Measuretime;
+
+void inittheclock(Measuretime **mtime,const char *event,Env *env);
+
+void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent,Env *env);
 
 #endif

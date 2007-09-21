@@ -18,8 +18,6 @@
 #include "fmindex.h"
 #include "mapspec-def.h"
 
-#include "mapspec-gen.pr"
-
 static void assignfmmapspecification(ArrayMapspecification *mapspectable,
                                      void *voidinfo,
                                      /*@unused@*/ bool writemode,

@@ -26,8 +26,8 @@ ALLOUTPUTOPTS="../scripts/alloutputoptions.rb"
 
 # the make call normally used for development
 cd testsuite
-# testsuite.rb -keywords gt_suffixerator
-# testsuite.rb -keywords gt_trieins
+testsuite.rb -keywords gt_suffixerator
+testsuite.rb -keywords gt_trieins
 # optional -memcheck   (run valgrind)
 #          -select 253 (run testcase 253)
 # the following depends on vmatch-mini.x and mkvtree.x

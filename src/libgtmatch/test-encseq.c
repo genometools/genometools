@@ -18,11 +18,11 @@
 #include "libgtcore/env.h"
 #include "libgtcore/array.h"
 #include "spacedef.h"
+#include "readmode-def.h"
 #include "encseq-def.h"
 #include "fbs-def.h"
 #include "stamp.h"
 
-#include "sfx-readmode.pr"
 #include "fbsadv.pr"
 #include "arrcmp.pr"
 #include "readnextUchar.gen"

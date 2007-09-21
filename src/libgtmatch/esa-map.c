@@ -32,7 +32,6 @@
 #include "stamp.h"
 
 #include "opensfxfile.pr"
-#include "sfx-readint.pr"
 
 #define DBFILEKEY "dbfile="
 
@@ -159,7 +158,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       if (analyzeuintline(indexname,
                          PROJECTFILESUFFIX,
                          linenum,
-                         (Uchar *) str_get(currentline),
+                         str_get(currentline),
                          currentlinelength,
                          riktab,
                          env) != 0)

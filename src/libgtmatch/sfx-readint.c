@@ -32,7 +32,7 @@ typedef union
   uint64_t bigvalue;
 } Smallorbigint;
 
-struct Readintkeys
+ struct Readintkeys
 {
   const char *keystring;
   uint32_t *smallvalueptr;
@@ -83,7 +83,7 @@ void setreadintkeys(Array *riktab,
 
 static int scanuintintline(uint32_t *lengthofkey,
                            Smallorbigint *smallorbigint,
-                           const Uchar *linebuffer,
+                           const char *linebuffer,
                            unsigned long linelength,
                            Env *env)
 {
@@ -108,7 +108,7 @@ static int scanuintintline(uint32_t *lengthofkey,
         env_error_set(env,"cannot find non-negative integer in \"%*.*s\"",
                            (int) (linelength - (i+1)),
                            (int) (linelength - (i+1)),
-                           (const char *) (linebuffer + i + 1));
+                           linebuffer + i + 1);
         return -1;
       }
       if (readint <= (int64_t) UINT32_MAX)
@@ -193,7 +193,7 @@ int allkeysdefined(const Str *indexname,const char *suffix,
 int analyzeuintline(const Str *indexname,
                     const char *suffix,
                     unsigned int linenum,
-                    const Uchar *linebuffer,
+                    const char *linebuffer,
                     unsigned long linelength,
                     Array *riktab,
                     Env *env)
@@ -261,7 +261,7 @@ int analyzeuintline(const Str *indexname,
 			 linenum,
 			 (int) lengthofkey,
 			 (int) lengthofkey,
-			 (char  *) linebuffer);
+			 linebuffer);
       haserr = true;
     }
   }

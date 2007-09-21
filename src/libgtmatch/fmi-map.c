@@ -30,7 +30,6 @@
 #include "stamp.h"
 
 #include "opensfxfile.pr"
-#include "sfx-readint.pr"
 #include "esa-map.pr"
 #include "fmi-keyval.pr"
 #include "fmi-mapspec.pr"
@@ -88,7 +87,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
       if (analyzeuintline(indexname,
                          FMASCIIFILESUFFIX,
                          linenum,
-                         (Uchar *) str_get(currentline),
+                         str_get(currentline),
                          str_length(currentline),
                          riktab,
                          env) != 0)
