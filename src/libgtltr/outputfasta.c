@@ -44,7 +44,7 @@ typedef struct
  a FASTA entry is created from the predicted LTR element.
  */
 
-static void myencseq2symbolstring(Fastaoutinfo *info,  
+static void myencseq2symbolstring(Fastaoutinfo *info,
                          FILE *fpout,
 			 unsigned long seqnum,
                          const char *desc,
@@ -60,7 +60,7 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
   Seqpos idx, lastpos;
   Uchar currentchar;
   Seqpos offset;
-  
+
   assert(width > 0);
   if (desc == NULL)
   {
@@ -70,7 +70,6 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
     fprintf(fpout,">%s",desc);
   }
 
-  //(void) putc(FASTASEPARATOR,info->formatout);
   fprintf(info->formatout," (dbseq-nr");
   if (info->showseqnum)
   {
@@ -135,15 +134,14 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
                                      info->destab,
                                      info->descendtab,
                                      seqnum);
-  
+
   ALLOCASSIGNSPACE(destab_seqnum, NULL, char, desclen);
   for (i=0; i < desclen; i++)
   {
    destab_seqnum[i] = desptr[i];
-   // fprintf(info->formatout, "%c", desptr[i]);
   }
 
-  myencseq2symbolstring(info, info->formatout, 
+  myencseq2symbolstring(info, info->formatout,
                       seqnum, destab_seqnum,
                       info->alpha, info->encseq,
 		      Forwardmode, startpos,
@@ -151,7 +149,7 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
 		      60,
 		      env);
   FREESPACE(destab_seqnum);
-  
+
   return 0;
 }
 

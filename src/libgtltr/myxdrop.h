@@ -34,11 +34,12 @@ typedef struct
 */
 
 #define MYREPLACEMENTBIT   ((unsigned char) 1)          /* replacement */
-#define MYDELETIONBIT      (((unsigned char) 1) << 1)   /* deletion */ 
-#define MYINSERTIONBIT     (((unsigned char) 1) << 2)   /* insertion */ 
-#define MYLENBIT           (((unsigned char) 1) << 3)   /* length of identical substring */ 
-#define MYMATCHBIT         (((unsigned char) 1) << 4)   /* match */ 
-#define MYMISMATCHBIT      (((unsigned char) 1) << 5)   /* mismatch */ 
+#define MYDELETIONBIT      (((unsigned char) 1) << 1)   /* deletion */
+#define MYINSERTIONBIT     (((unsigned char) 1) << 2)   /* insertion */
+#define MYLENBIT           (((unsigned char) 1) << 3)
+                                     /* length of identical substring */
+#define MYMATCHBIT         (((unsigned char) 1) << 4)   /* match */
+#define MYMISMATCHBIT      (((unsigned char) 1) << 5)   /* mismatch */
 
 typedef struct
 {
@@ -68,7 +69,7 @@ int showmatrix ( ArrayMyfrontvalue * fronts,
   int ulen,
   int vlen);
 
-void calculatedistancesfromscores(Arbitraryscores *arbitscores, 
+void calculatedistancesfromscores(Arbitraryscores *arbitscores,
     Arbitrarydistances *arbitdistances);
 
 void calculateallowedMININFINITYINTgenerations(
@@ -97,7 +98,6 @@ void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
 	                             Xdropscore xdropbelowscore,
 				     Env *env);
 
-
 #define EVALXDROPARBITSCORESRIGHT\
       void evalxdroparbitscoresright(Arbitraryscores *arbitscores,\
                                      Myxdropbest * xdropbest,\
@@ -122,7 +122,7 @@ void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
 				    int vlen,
                                     Xdropscore xdropbelowscore,
 				    Env *env);
-      
+
 #define EVALXDROPARBITSCORESLEFT\
        void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,\
                                     Myxdropbest * xdropbest,\

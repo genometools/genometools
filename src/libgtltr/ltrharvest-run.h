@@ -4,7 +4,7 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#ifndef LTRHARVEST_RUNDEF 
+#ifndef LTRHARVEST_RUNDEF
 #define LTRHARVEST_RUNDEF
 
 #include "libgtcore/env.h"

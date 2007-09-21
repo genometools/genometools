@@ -4,13 +4,13 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-#ifndef OUTPUTSTD_H 
+#ifndef OUTPUTSTD_H
 #define OUTPUTSTD_H
 
 int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
                             const Sequentialsuffixarrayreader *ssar,
                             Env *env);
-//int printgff3format(LTRharvestoptions *lo, Suffixarray *suffixarray, 
+//int printgff3format(LTRharvestoptions *lo, Suffixarray *suffixarray,
 //                    Seqpos *markpos);
 
 #endif
