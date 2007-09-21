@@ -21,7 +21,7 @@ void* xcalloc(size_t nmemb, size_t size)
 {
   void *p;
   if ((p = calloc(nmemb, size)) == NULL) {
-    fprintf(stderr, "cannot calloc (%zu, %zu) memory: %s\n", nmemb, size,
+    fprintf(stderr, "cannot calloc(%zu, %zu) memory: %s\n", nmemb, size,
             strerror(errno));
     exit(EXIT_FAILURE);
   }
