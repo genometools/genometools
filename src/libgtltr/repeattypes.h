@@ -14,7 +14,7 @@
 #include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/sarr-def.h"
 
-/* The datatype Repeat stores information about the maximal repeats (seeds).
+/* The datatype Repeat stores information about the maximal repeats (seeds).*/
 typedef struct
 {
 Seqpos pos1;         /* first position of maximal repeat (seed) */
