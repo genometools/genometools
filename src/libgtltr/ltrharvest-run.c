@@ -188,7 +188,7 @@ int parseargsandcallltrharvest(int argc,const char *argv[],Env *env)
     printargsline(argv,argc);
     had_err = runltrharvest(&lo,env);
   }
-  had_err = wrapltrharvestoptions(&lo,env);
+  wrapltrharvestoptions(&lo,env);
 
   return had_err;
 }

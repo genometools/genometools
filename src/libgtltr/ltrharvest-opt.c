@@ -551,7 +551,7 @@ static OPrval parse_options(int *parsed_args,
   /* Error from optionparser occurred */
   else
   {
-    oprval = OPTIONPARSER_ERROR;
+    /*oprval = OPTIONPARSER_ERROR;*/
   }
 
   option_parser_delete(op, env);
@@ -573,28 +573,16 @@ int wrapltrharvestoptions(LTRharvestoptions *lo,Env *env)
 int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,
                         Env *env)
 {
-  int parsed_args, retval = 0;
+  int parsed_args;
   OPrval rval;
 
   env_error_check(env);
 
   /** init LTRharvestoptions lo **/
   rval = parse_options(&parsed_args, lo, argc, argv, env);
-  if (rval == OPTIONPARSER_ERROR)
+  if (rval == OPTIONPARSER_OK)
   {
-    retval = -1;
-  } else
-  {
-    if (rval == OPTIONPARSER_REQUESTS_EXIT)
-    {
-      retval = 2;
-    } else
-    {
-      if (rval == OPTIONPARSER_OK)
-      {
-	assert(parsed_args == argc);
-      }
-    }
+    assert(parsed_args == argc);
   }
-  return retval;
+  return (int)rval;
 }
