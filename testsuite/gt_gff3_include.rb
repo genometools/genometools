@@ -254,6 +254,13 @@ Test do
   grep($last_stderr, /before the corresponding/);
 end
 
+Name "gt gff3 test additional attribute"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}additional_attribute.gff3"
+  run "diff #{$last_stdout} #{$testdata}additional_attribute.gff3"
+end
+
 Name "gt gff3 fail 1"
 Keywords "gt_gff3"
 Test do
