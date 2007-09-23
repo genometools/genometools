@@ -211,7 +211,7 @@ static OPrval parse_options(int *parsed_args,
   env_error_check(env);
   op = option_parser_new("[option ...] -index filenameindex",
                          "Predict LTR retrotransposons.", env);
-  option_parser_set_mailaddress(op,"<ellinghaus@stud.zbh.uni-hamburg.de>");
+  option_parser_set_mailaddress(op,"<dellinghaus@zbh.uni-hamburg.de>");
 
   /* -index */
   lo->str_indexname = str_new(env);
