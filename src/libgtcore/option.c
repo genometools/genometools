@@ -738,6 +738,15 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 }
               }
               if (!had_err) {
+                /* maximum value check */
+                if (option->max_value_set && int_value > option->max_value.i) {
+                  env_error_set(env, "argument to option \"-%s\" must be an "
+                            "integer <= %d", str_get(option->option_str),
+                            option->max_value.i);
+                  had_err = -1;
+                }
+              }
+              if (!had_err) {
                 *(int*) option->value = int_value;
                 option_parsed = true;
               }
