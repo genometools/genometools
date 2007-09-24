@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <inttypes.h>
-#include <zlib.h>
 #include "libgtcore/strarray.h"
 #include "symboldef.h"
 #include "filelength-def.h"
@@ -28,16 +27,6 @@
 #include "seqdesc.h"
 
 #define FILEBUFFERSIZE 65536
-
-typedef struct
-{
-  bool isgzippedstream;
-  union
-  {
-    FILE *fopenstream;
-    gzFile gzippedstream;
-  } stream;
-} Genericstream;
 
 typedef struct
 {
@@ -51,7 +40,7 @@ typedef struct
        complete,
        nextfile;
   Sequencedescription *sequencedescription;
-  Genericstream inputstream;
+  GenFile *inputstream;
   Uchar bufspace[FILEBUFFERSIZE];
   uint64_t lastspeciallength;
   Filelengthvalues *filelengthtab;
