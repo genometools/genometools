@@ -51,7 +51,9 @@ void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
 
 void showsymbolstring(const Alphabet *alpha,const Uchar *w,unsigned long wlen);
 
-void showalphabetsymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar);
+void echoprettysymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar);
+
+Uchar getprettysymbol(const Alphabet *alpha,unsigned int currentchar);
 
 bool isproteinalphabet(const Alphabet *alpha,Env *env);
 

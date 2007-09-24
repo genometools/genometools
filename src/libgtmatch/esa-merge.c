@@ -23,7 +23,6 @@
 #include "trieins-def.h"
 #include "verbose-def.h"
 
-#include "trieins.pr"
 #include "esa-map.pr"
 
  DECLAREREADFUNCTION(Seqpos);

@@ -126,7 +126,7 @@ void symbolstring2fasta(FILE *fpout,
       j = 0;
     } else
     {
-      showalphabetsymbol(fpout,alpha,currentchar);
+      echoprettysymbol(fpout,alpha,currentchar);
     }
     if (i == wlen - 1)
     {
@@ -176,7 +176,7 @@ void encseq2symbolstring(FILE *fpout,
       j = 0;
     } else
     {
-      showalphabetsymbol(fpout,alpha,currentchar);
+      echoprettysymbol(fpout,alpha,currentchar);
     }
     if (idx == lastpos)
     {

@@ -22,10 +22,9 @@
 #include "libgtcore/option.h"
 #include "libgtcore/str.h"
 #include "libgtcore/versionfunc.h"
+#include "readmode-def.h"
 #include "sfx-optdef.h"
 #include "stamp.h"
-
-#include "sfx-readmode.pr"
 
 static OPrval parse_options(int *parsed_args,
                             Suffixeratoroptions *so,

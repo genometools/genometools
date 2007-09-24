@@ -58,6 +58,7 @@ typedef struct
   const StrArray *filenametab;
   const Uchar *symbolmap;
   bool plainformat;
+  unsigned long *characterdistribution;
 } Fastabufferstate;
 
 #endif

@@ -22,6 +22,8 @@
 #include "arraydef.h"
 #include "encseq-def.h"
 
+/* XXX make this type opaque */
+
 typedef struct
 {
   unsigned int idx;
@@ -61,5 +63,26 @@ typedef struct
                allocatedTrienode,
                nextfreeTrienode;
 } Trierep;
+
+void showtrie(const Trierep *trierep,
+              const Uchar *characters);
+
+void checktrie(Trierep *trierep,unsigned int numberofleaves,
+               unsigned int maxleafnum,Env *env);
+
+void showallnoderelations(const Trienode *node);
+
+void insertsuffixintotrie(Trierep *trierep,
+                          Trienode *node,
+                          Suffixinfo *suffixinfo);
+
+Trienode *findsmallestnodeintrie(const Trierep *trierep);
+
+void deletesmallestpath(Trienode *smallest,Trierep *trierep);
+
+void inittrienodetable(Trierep *trierep,Seqpos numofsuffixes,
+                       unsigned int numofindexes,Env *env);
+
+void freetrierep(Trierep *trierep,Env *env);
 
 #endif

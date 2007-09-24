@@ -24,6 +24,8 @@
 
 #define SIZEOFMERGERESULTBUFFER BUFSIZ
 
+/* make the type opaque */
+
 typedef struct
 {
   unsigned int idx;  /* index of genome in list of all genomes */

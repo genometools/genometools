@@ -26,8 +26,6 @@
 #include "libgtmatch/esa-mmsearch-def.h"
 
 #include "libgtmatch/esa-map.pr"
-#include "libgtmatch/enum-patt.pr"
-#include "libgtmatch/esa-mmsearch.pr"
 
 typedef struct
 {

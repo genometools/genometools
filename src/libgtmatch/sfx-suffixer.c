@@ -32,9 +32,7 @@
 #include "sfx-partssuf-def.h"
 #include "sfx-suffixer.h"
 
-#include "measure-time.pr"
 #include "sfx-mappedstr.pr"
-#include "sfx-partssuf.pr"
 #include "sfx-bentsedg.pr"
 
 #define CODEBITS        (32-PREFIXLENBITS)

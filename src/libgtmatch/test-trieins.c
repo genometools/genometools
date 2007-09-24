@@ -21,7 +21,6 @@
 #include "encseq-def.h"
 #include "alphadef.h"
 
-#include "trieins.pr"
 #include "esa-map.pr"
 
 static void maketrie(Trierep *trierep,

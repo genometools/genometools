@@ -20,7 +20,7 @@
 #include "libgtcore/env.h"
 #include "measure-time-if.h"
 
- struct _Measuretime
+ struct Measuretime
 {
   clock_t startclock, overalltime;
   const char *eventdescription;

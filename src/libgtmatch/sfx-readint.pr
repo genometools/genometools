@@ -1,15 +1,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-struct Readintkeys
-{
-  const char *keystring;
-  uint32_t *smallvalueptr;
-  uint64_t *bigvalueptr;
-  bool ptrdefined,
-       found,
-       *readflag;
-};
 size_t sizeofReadintkeys(void);
 
 void setreadintkeys(Array *riktab,
@@ -26,7 +17,7 @@ int allkeysdefined(const Str *indexname,const char *suffix,
 int analyzeuintline(const Str *indexname,
                     const char *suffix,
                     unsigned int linenum,
-                    const Uchar *linebuffer,
+                    const char *linebuffer,
                     unsigned long linelength,
                     Array *riktab,
                     Env *env);
