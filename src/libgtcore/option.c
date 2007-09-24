@@ -109,8 +109,8 @@ static Option *option_new(const char *option_str, const char *description,
 {
   Option *o = env_ma_calloc(env, 1, sizeof (Option));
   assert(option_str && strlen(option_str));
-  assert(option_str[0] != '-'); /* an option string should not start with '-',
-                                   this is added automatically */
+  assert("an option string should not start with '-', this is added "
+         "automatically"  && option_str[0] != '-');
   o->option_str = str_new_cstr(option_str, env);
   o->description = str_new_cstr(description, env);
   o->value = value;
@@ -163,8 +163,8 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
 {
   OptionParser *op = env_ma_malloc(env, sizeof (OptionParser));
   assert(synopsis && one_liner);
-  /* enforce upper case letter at start and '.' at end of one line desc. */
-  assert(strlen(one_liner) && isupper((int) one_liner[0]));
+  assert("one_liner must have upper case letter at start and '.' at end" &&
+         strlen(one_liner) && isupper((int) one_liner[0]));
   assert(one_liner[strlen(one_liner)-1] == '.');
   op->progname = NULL;
   op->synopsis = cstr_dup(synopsis, env);
