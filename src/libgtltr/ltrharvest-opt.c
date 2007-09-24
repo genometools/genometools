@@ -582,7 +582,11 @@ int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,
   rval = parse_options(&parsed_args, lo, argc, argv, env);
   if (rval == OPTIONPARSER_OK)
   {
-    assert(parsed_args == argc);
+    if (parsed_args != argc)
+    {
+      env_error_set(env, "Listing of options and arguments is not correct.");
+      rval = OPTIONPARSER_ERROR;
+    }
   }
   return (int)rval;
 }
