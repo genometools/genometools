@@ -7,6 +7,7 @@ void initformatbufferstate(Fastabufferstate *fbs,
                            bool plainformat,
                            Filelengthvalues **filelengthtab,
                            Sequencedescription *sequencedescription,
+                           unsigned long *characterdistribution,
                            Env *env);
 
 int advanceformatbufferstate(Fastabufferstate *fbs,Env *env);

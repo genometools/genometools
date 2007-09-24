@@ -86,6 +86,7 @@ struct Option {
   } min_value;
   union {
     double d;
+    int i;
     unsigned int ui;
     unsigned long ul;
   } max_value;
@@ -737,6 +738,15 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 }
               }
               if (!had_err) {
+                /* maximum value check */
+                if (option->max_value_set && int_value > option->max_value.i) {
+                  env_error_set(env, "argument to option \"-%s\" must be an "
+                            "integer <= %d", str_get(option->option_str),
+                            option->max_value.i);
+                  had_err = -1;
+                }
+              }
+              if (!had_err) {
                 *(int*) option->value = int_value;
                 option_parsed = true;
               }
@@ -1092,6 +1102,17 @@ Option* option_new_int_min(const char *option_str, const char *description,
   return o;
 }
 
+Option* option_new_int_max(const char *option_str, const char *description,
+                           int *value, int default_value, int max_value,
+                           Env *env)
+{
+  Option *o = option_new_int(option_str, description, value, default_value,
+                              env);
+  o->max_value_set = true;
+  o->max_value.i = max_value;
+  return o;
+}
+
 Option* option_new_uint(const char *option_str, const char *description,
                         unsigned int *value, unsigned int default_value,
                         Env *env)
@@ -1122,6 +1143,20 @@ Option* option_new_uint_max(const char *option_str, const char *description,
                               env);
   o->max_value_set = true;
   o->max_value.ui = max_value;
+  return o;
+}
+
+Option *option_new_uint_min_max(const char *option_str, const char *description,
+                                unsigned int *value, unsigned int default_value,
+                                unsigned int min_value, unsigned int max_value,
+                                Env *env)
+{
+  Option *o = option_new_uint(option_str, description, value, default_value,
+                               env);
+  o->min_value_set = true;
+  o->min_value.i = min_value;
+  o->max_value_set = true;
+  o->max_value.i = max_value;
   return o;
 }
 

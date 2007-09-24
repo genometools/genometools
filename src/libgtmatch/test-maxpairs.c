@@ -43,7 +43,6 @@ int testmaxpairs(/*@unused@*/ const Str *indexname,
 #include "format64.h"
 
 #include "esa-map.pr"
-#include "esa-mmsearch.pr"
 #include "esa-selfmatch.pr"
 #include "arrcmp.pr"
 #include "pos2seqnum.pr"

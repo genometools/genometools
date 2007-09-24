@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 David Ellinghaus <dellinghaus@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,31 +15,15 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "arraydef.h"
+#ifndef OUTPUTFASTA_H
+#define OUTPUTFASTA_H
 
-/*EE
-  The following functions read the next line from the given generic file pointer
-  and stores it in the array \texttt{line}.
-*/
+int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
+		       Seqpos *markpos,
+		       bool innerregion,
+		       unsigned int linewidth,
+                       Sequentialsuffixarrayreader *ssar,
+		       bool showseqnum,
+		       Env *env);
 
-int readnextline(FILE *fpin,ArrayUchar *line,Env *env)
-{
-  int cc;
-
-  env_error_check(env);
-  while (true)
-  {
-    cc = fgetc(fpin);
-    if (cc == EOF)
-    {
-      return EOF;
-    }
-    if (cc == (int) '\n')
-    {
-      STOREINARRAY(line,Uchar,512,(Uchar) '\0');
-      line->nextfreeUchar--;
-      return 0;
-    }
-    STOREINARRAY(line,Uchar,512,(Uchar) cc);
-  }
-}
+#endif

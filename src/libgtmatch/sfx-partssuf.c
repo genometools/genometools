@@ -30,7 +30,7 @@ typedef struct
            sumofwidth;
 } Suftabpartcomponent;
 
- struct _Suftabparts
+ struct Suftabparts
 {
   Suftabpartcomponent *components;
   unsigned int numofparts;

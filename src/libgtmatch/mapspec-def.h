@@ -18,6 +18,7 @@
 #ifndef MAPSPECDEF_H
 #define MAPSPECDEF_H
 
+#include "libgtcore/str.h"
 #include "libgtcore/env.h"
 #include "arraydef.h"
 
@@ -53,5 +54,18 @@ typedef struct
 DECLAREARRAYSTRUCT(Mapspecification);
 
 typedef void(*Assignmapspec)(ArrayMapspecification *,void *,bool,Env *);
+
+int fillmapspecstartptr(Assignmapspec assignmapspec,
+                        void **mappeduserptr,
+                        void *assignmapinfo,
+                        const Str *tmpfilename,
+                        unsigned long expectedsize,
+                        Env *env);
+
+int flushtheindex2file(FILE *fp,
+                       Assignmapspec assignmapspec,
+                       void *assignmapinfo,
+                       unsigned long expectedsize,
+                       Env *env);
 
 #endif

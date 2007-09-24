@@ -26,7 +26,6 @@
 #include "libgtmatch/verbose-def.h"
 
 #include "libgtmatch/esa-maxpairs.pr"
-#include "libgtmatch/esa-mmsearch.pr"
 #include "libgtmatch/test-maxpairs.pr"
 
 typedef struct

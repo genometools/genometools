@@ -42,6 +42,7 @@ int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
                         false,
                         NULL,
                         NULL,
+                        NULL,
                         env);
   for (currentposition = 0; currentposition < (unsigned int) 1000;
        currentposition++)

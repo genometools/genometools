@@ -16,10 +16,7 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-SKTOOLS='src/tools/gt_suffixerator.c
-        src/tools/gt_sfxmap.c
-        src/tools/gt_trieins.c
-        src/tools/gt_mergeesa.c'
+SKTOOLS=`grep -l Kurtz src/tools/*.c`
 
 for filename in `ls ${SKTOOLS} src/libgtmatch/*.c`
 do

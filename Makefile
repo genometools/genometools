@@ -58,6 +58,7 @@ endif
 # the default GenomeTools libraries which are build
 GTLIBS:=lib/libgtext.a\
         lib/libgtmatch.a\
+        lib/libgtltr.a\
         lib/libgtcore.a\
         lib/libgtlua.a\
         lib/libbz2.a
@@ -79,6 +80,11 @@ LIBGTEXT_CXX_DEP:=$(LIBGTEXT_CXX_SRC:%.cxx=obj/%.d)
 LIBGTMATCH_SRC:=$(wildcard src/libgtmatch/*.c)
 LIBGTMATCH_OBJ:=$(LIBGTMATCH_SRC:%.c=obj/%.o)
 LIBGTMATCH_DEP:=$(LIBGTMATCH_SRC:%.c=obj/%.d)
+
+# the GenomeTools LTRharvest library
+LIBGTLTR_SRC:=$(wildcard src/libgtltr/*.c)
+LIBGTLTR_OBJ:=$(LIBGTLTR_SRC:%.c=obj/%.o)
+LIBGTLTR_DEP:=$(LIBGTLTR_SRC:%.c=obj/%.d)
 
 # the GenomeTools view library
 LIBGTVIEW_C_SRC:=$(wildcard src/libgtview/*.c)
@@ -260,6 +266,14 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
+lib/libgtltr.a: $(LIBGTLTR_OBJ)
+	@echo "[link $@]"
+	@ar ru $@ $(LIBGTLTR_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
+
 lib/libgtview.a: $(LIBGTVIEW_C_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -384,7 +398,7 @@ obj/%.o: %.cxx
 -include obj/src/gt.d obj/src/gtlua.d obj/src/gtr.d obj/src/skproto.d \
 	obj/$(LUA_DIR)/lua.d \
          $(LIBGTCORE_DEP) $(LIBGTEXT_C_DEP) $(LIBGTEXT_CXX_DEP) \
-         $(LIBGTMATCH_DEP) $(LIBGTVIEW_C_DEP) $(LIBGTLUA_C_DEP) $(TOOLS_DEP) \
+         $(LIBGTMATCH_DEP) $(LIBGTLTR_DEP) $(LIBGTVIEW_C_DEP) $(LIBGTLUA_C_DEP) $(TOOLS_DEP) \
          $(LIBAGG_DEP) $(LIBEXPAT_DEP) $(LIBLUA_DEP) $(LIBPNG_DEP) \
          $(LIBTECLA_DEP) $(LIBRNV_DEP) $(LIBBBZ2_DEP)
 

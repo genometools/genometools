@@ -18,6 +18,34 @@
 #ifndef PARTSSUF_DEF_H
 #define PARTSSUF_DEF_H
 
-typedef struct _Suftabparts Suftabparts;
+typedef struct Suftabparts Suftabparts;
+
+Suftabparts *newsuftabparts(unsigned int numofparts,
+                            const Seqpos *leftborder,
+                            Codetype numofallcodes,
+                            Seqpos numofsuffixestoinsert,
+                            Seqpos fullspecials,
+                            Env *env);
+
+Codetype stpgetcurrentmincode(unsigned int part,
+                              const Suftabparts *suftabparts);
+
+uint64_t stpgetcurrentsuftaboffset(unsigned int part,
+                                   const Suftabparts *suftabparts);
+
+Codetype stpgetcurrentmaxcode(unsigned int part,
+                              const Suftabparts *suftabparts);
+
+uint64_t stpgetcurrentsumofwdith(unsigned int part,
+                                 const Suftabparts *suftabparts);
+
+Seqpos stpgetcurrentwidthofpart(unsigned int part,
+                                const Suftabparts *suftabparts);
+
+Seqpos stpgetlargestwidth(const Suftabparts *suftabparts);
+
+unsigned int stpgetnumofparts(const Suftabparts *suftabparts);
+
+void freesuftabparts(Suftabparts *suftabparts,Env *env);
 
 #endif

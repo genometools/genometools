@@ -17,10 +17,35 @@
 
 #ifndef SFX_RI_DEF_H
 #define SFX_RI_DEF_H
-
-typedef struct Readintkeys Readintkeys;
+#include "libgtcore/array.h"
+#include "libgtcore/env.h"
+#include "libgtcore/str.h"
+#include "verbose-def.h"
 
 #define SETREADINTKEYS(VALNAME,VAL,FORCEREAD)\
         setreadintkeys(riktab,VALNAME,VAL,sizeof (*(VAL)),FORCEREAD,env)
+
+typedef struct Readintkeys Readintkeys;
+
+size_t sizeofReadintkeys(void);
+
+void setreadintkeys(Array *riktab,
+                    const char *keystring,
+                    void *valueptr,
+                    size_t sizeval,
+                    bool *readflag,
+                    Env *env);
+
+int allkeysdefined(const Str *indexname,const char *suffix,
+                   const Array *riktab,Verboseinfo *verboseinfo,
+                   Env *env);
+
+int analyzeuintline(const Str *indexname,
+                    const char *suffix,
+                    unsigned int linenum,
+                    const char *linebuffer,
+                    unsigned long linelength,
+                    Array *riktab,
+                    Env *env);
 
 #endif

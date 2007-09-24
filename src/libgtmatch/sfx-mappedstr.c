@@ -513,6 +513,7 @@ static int getencseqkmersgeneric(
                             plainformat,
                             NULL,
                             NULL,
+                            NULL,
                             env);
       for (currentposition = 0; /* Nothing */; currentposition++)
       {

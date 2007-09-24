@@ -29,16 +29,13 @@
 #include "libgtcore/gtdatapath.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
+#include "spacedef.h"
 #include "qsorttype.h"
 #include "symboldef.h"
-#include "arraydef.h"
 #include "chardef.h"
 #include "alphadef.h"
-#include "encseq-def.h"
-#include "stamp.h"
 
 #include "guessprot.pr"
-#include "readnextline.pr"
 
  struct Alphabet                /* initial blank prevents select by skproto */
 {
@@ -282,7 +279,7 @@ static int readsymbolmap(Alphabet *alpha,const Str *mapfile,Env *env)
 
   env_error_check(env);
   lines = strarray_new_file(str_get(mapfile),env);
-  assert(lines);
+  assert(lines != NULL);
   if (readsymbolmapfromlines(alpha,mapfile,lines,env) != 0)
   {
     haserr = true;
@@ -593,7 +590,7 @@ void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
   }
 }
 
-void showalphabetsymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar)
+void echoprettysymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar)
 {
   if (alpha == NULL)
   {
@@ -615,6 +612,12 @@ void showalphabetsymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar)
       }
     }
   }
+}
+
+Uchar getprettysymbol(const Alphabet *alpha,unsigned int currentchar)
+{
+   assert(currentchar < alpha->mapsize-1);
+   return alpha->characters[currentchar];
 }
 
 /*

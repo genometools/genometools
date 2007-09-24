@@ -37,7 +37,6 @@
 #include "verbose-def.h"
 #include "stamp.h"
 
-#include "mapspec-gen.pr"
 #include "fbsadv.pr"
 #include "opensfxfile.pr"
 #include "fillsci.pr"
@@ -1636,6 +1635,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                           filenametab,
                           plainformat ? NULL : getsymbolmapAlphabet(alphabet),
                           plainformat,
+                          NULL,
                           NULL,
                           NULL,
                           env);
