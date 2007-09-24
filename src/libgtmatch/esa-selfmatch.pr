@@ -1,0 +1,18 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+int sarrselfsubstringmatch(const Uchar *dbseq,
+                           Seqpos dblen,
+                           const Uchar *query,
+                           unsigned long querylen,
+                           unsigned int minlength,
+                           const Alphabet *alpha,
+                           int (*processmaxmatch)(void *,Seqpos,
+                                                  Seqpos,Seqpos,Env *),
+                           void *processmaxmatchinfo,
+                           Verboseinfo *verboseinfo,
+                           Env *env);
+
+#ifdef __cplusplus
+}
+#endif

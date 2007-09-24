@@ -18,11 +18,12 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <libgtcore/cstr.h>
-#include <libgtcore/fileutils.h>
-#include <libgtcore/splitter.h>
-#include <libgtcore/xansi.h>
-#include <libgtcore/xposix.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/fileutils.h"
+#include "libgtcore/splitter.h"
+#include "libgtcore/xansi.h"
+#include "libgtcore/xposix.h"
+#include "libgtcore/array.h"
 
 bool file_exists(const char *path)
 {
@@ -47,21 +48,17 @@ bool file_is_newer(const char *a, const char *b)
   return false;
 }
 
-unsigned long file_number_of_lines(FILE *fp)
+unsigned long file_number_of_lines(const char *path, Env *env)
 {
   unsigned long number_of_lines = 0;
-  fpos_t current_pos;
+  GenFile *fp;
   int cc;
-  assert(fp);
-  xfgetpos(fp, &current_pos);
-  xfseek(fp, SEEK_SET, 0);
-  while ((cc = getc(fp)) != EOF)
+  env_error_check(env);
+  assert(path);
+  fp = genfile_xopen(path, "r", env);
+  while ((cc = genfile_getc(fp)) != EOF)
     if (cc == '\n') number_of_lines++;
-  if (ferror(fp)) {
-    perror("cannot read char");
-    exit(EXIT_FAILURE);
-  }
-  xfsetpos(fp, &current_pos);
+  genfile_xclose(fp, env);
   return number_of_lines;
 }
 

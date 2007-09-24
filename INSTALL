@@ -19,6 +19,16 @@ is called ``gmake'':
 $ gmake assert=no
 
 
+Building GenomeTools without the curses library:
+------------------------------------------------
+
+On systems without an installed curses library invoke make as above with the
+argument curses=no
+
+If you invoked make without curses=no beforehand, do not forget to run `make
+clean` before running `make curses=no`.
+
+
 Building GenomeTools with the view tool (requires installed cairo library):
 ---------------------------------------------------------------------------
 

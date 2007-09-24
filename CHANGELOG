@@ -1,8 +1,21 @@
-changes in version 1.0.3 (2007-09-04):
+changes in version 1.0.4 (2007-09-18):
+
+- `gt gff2` has new option -checkids (was the default behavior before)
+- new tool `gt chseqids` added which replaces the option -chseqids of the
+  `gt gff3` tool
+
+
+changes in version 1.0.3 (2007-09-12):
 
 - `gt view` can process multiple GFF3 files
 - the interactive mode has been improved (multiple line input, command line
   editing, similar to the Lua interpreter)
+- `gt gff3` has new option -offset
+- `gt gff3` has new option -offsetfile
+- `gt gff3` has new option -chseqids
+- all tools which process GFF3 files can read compressed GFF3 files, if the
+  ending is correct (i.e., '.gz' for gzip compressed files and '.bz2' for bzip2
+  compressed files)
 
 
 changes in version 1.0.2 (2007-08-29):

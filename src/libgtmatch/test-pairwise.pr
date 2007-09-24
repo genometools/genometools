@@ -1,0 +1,32 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
+                                const char *file1,
+                                const char *file2,
+                                Env *env);
+
+unsigned long runcheckfunctionontext(Checkcmppairfuntype checkfunction,
+                                     const char *text,
+                                     Env *env);
+
+unsigned long applycheckfunctiontotext(const Uchar *text,
+                                       unsigned long textlen,
+                                       void *info,
+                                       Env *env);
+
+unsigned long runcheckfunctiononalphalen(Checkcmppairfuntype checkfunction,
+                                         const char *charlist,
+                                         unsigned long len,
+                                         Env *env);
+
+void checkgreedyunitedist(/*@unused@*/ bool forward,
+                          const Uchar *useq,
+                          unsigned long ulen,
+                          const Uchar *vseq,
+                          unsigned long vlen,
+                          Env *env);
+
+#ifdef __cplusplus
+}
+#endif

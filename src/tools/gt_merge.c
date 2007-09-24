@@ -66,13 +66,13 @@ int gt_merge(int argc, const char **argv, Env *env)
   if (parsed_args < argc) {
     /* we got files to open */
     for (i = parsed_args; i < argc; i++) {
-      gff3_in_stream = gff3_in_stream_new_sorted(argv[i], 0, env);
+      gff3_in_stream = gff3_in_stream_new_sorted(argv[i], false, env);
       array_add(genome_streams, gff3_in_stream, env);
     }
    }
    else {
      /* use stdin */
-     gff3_in_stream = gff3_in_stream_new_sorted(NULL, 0, env);
+     gff3_in_stream = gff3_in_stream_new_sorted(NULL, false, env);
      array_add(genome_streams, gff3_in_stream, env);
    }
 

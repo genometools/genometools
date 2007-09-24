@@ -22,6 +22,7 @@
 
 static void assignfmmapspecification(ArrayMapspecification *mapspectable,
                                      void *voidinfo,
+                                     /*@unused@*/ bool writemode,
                                      Env *env)
 {
   Fmindexwithoptions *fmwithoptions = (Fmindexwithoptions *) voidinfo;

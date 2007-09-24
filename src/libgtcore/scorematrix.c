@@ -16,14 +16,14 @@
 */
 
 #include <assert.h>
-#include <libgtcore/array.h>
-#include <libgtcore/array2dim.h>
-#include <libgtcore/parseutils.h>
-#include <libgtcore/scorematrix.h>
-#include <libgtcore/str.h>
-#include <libgtcore/tokenizer.h>
-#include <libgtcore/undef.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/array.h"
+#include "libgtcore/array2dim.h"
+#include "libgtcore/parseutils.h"
+#include "libgtcore/scorematrix.h"
+#include "libgtcore/str.h"
+#include "libgtcore/tokenizer.h"
+#include "libgtcore/undef.h"
+#include "libgtcore/xansi.h"
 
 struct ScoreMatrix {
   Alpha *alpha;

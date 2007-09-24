@@ -2,7 +2,6 @@ bugs:
 -----
 
 - does not compile on Mac OS X 10.3 (glob(3) is not fully POSIX compliant)
-- is the name for the StrArray class misleading (it does not contain Strs)?
 
 
 feature requests:
@@ -19,23 +18,18 @@ feature requests:
 - write check script to check for error_check()
 - EXIT_SUCCESS und EXIT_FAILURE only in gtr.c and gt.c
 - no exit() calls inside library
-- fix queue implementation
 - write extractseq tool
 - update design.html, describe interface inheritance
 - check random number generation
 - range check
 - check for circles
 - `gt eval`: measure nucleotide level
-- extend error messages for xmalloc(), xcalloc(), and xrealloc(): show requested
-  memory sizes and maybe line number and file name)
-
-- remove GT_ENV_OPTIONS environment variable, do settings via gtdata/ dir
+- write proper memory allocator
 - function similary to option_new_choice(), but which allows to set multiple
   strings from the given set
-- use asciidoc for documentation
 
 
-merge libgtview and libgtmatch:
+merge libgtcore and libgtmatch:
 -------------------------------
 
 - Alphabet (Stefan: ersetze alphabet.pr durch alphadef.h, Gordon: evtl. mergen
@@ -43,10 +37,7 @@ merge libgtview and libgtmatch:
 - Distributions mergen (Hashtable basiert, 64bit)
 - Encodedseq und Bioseq mergen (FastaReader und fbsadv.c)
   guesprot.c
-- endianess -> core
-- Queues mergen
 - generic queue unit test (Stefan)
-- basename portabel? Randf"alle! (getbasename)
 - merge Timer und measure-time.c (Ereignis, formatierter String)
 - readnextline evtl. durch str_read_next_line(_generic) ersetzen (Stefan)
 

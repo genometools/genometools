@@ -25,6 +25,7 @@
 #include "gt_trieins.h"
 #include "gt_mergeesa.h"
 #include "gt_maxpairs.h"
+#include "gt_paircmp.h"
 #include "gt_patternmatch.h"
 #include "gt_skproto.h"
 
@@ -57,6 +58,7 @@ void register_devtools(Toolbox *dev_toolbox, Env *env)
   toolbox_add(dev_toolbox, "skproto", gt_skproto, env);
   toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs, env);
   toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch, env);
+  toolbox_add(dev_toolbox, "paircmp", gt_paircmp, env);
 }
 
 int gt_dev(int argc, const char **argv, Env *env)

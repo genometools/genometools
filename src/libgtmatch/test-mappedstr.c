@@ -30,7 +30,7 @@
 
 #include "kmer2string.pr"
 #include "sfx-mappedstr.pr"
-#include "sfx-map.pr"
+#include "esa-map.pr"
 
 static Codetype qgram2codefillspecial(unsigned int numofchars,
                                       unsigned int kmersize,

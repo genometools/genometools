@@ -101,11 +101,11 @@ int line_unit_test(Env* env)
   gn4 = genome_feature_new(gft_TF_binding_site, r4, STRAND_FORWARD, NULL, 0,
                            env);
 
-  genome_node_set_seqid((GenomeNode*) parent, seqid1);
-  genome_node_set_seqid((GenomeNode*) gn1, seqid3);
-  genome_node_set_seqid((GenomeNode*) gn2, seqid3);
-  genome_node_set_seqid((GenomeNode*) gn3, seqid2);
-  genome_node_set_seqid((GenomeNode*) gn4, seqid3);
+  genome_node_set_seqid((GenomeNode*) parent, seqid1, env);
+  genome_node_set_seqid((GenomeNode*) gn1, seqid3, env);
+  genome_node_set_seqid((GenomeNode*) gn2, seqid3, env);
+  genome_node_set_seqid((GenomeNode*) gn3, seqid2, env);
+  genome_node_set_seqid((GenomeNode*) gn4, seqid3, env);
 
   l1 = line_new(env);
   l2 = line_new(env);

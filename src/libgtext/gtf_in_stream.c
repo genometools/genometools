@@ -36,7 +36,7 @@ static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   is = gtf_in_stream_cast(gs);
   if (queue_size(is->genome_node_buffer)) {
     /* we still have a node in the buffer -> serve it from there */
-    *gn = *(GenomeNode**) queue_get(is->genome_node_buffer);
+    *gn = queue_get(is->genome_node_buffer, env);
     return 0;
   }
   /* the buffer is empty */
@@ -75,7 +75,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
   gtf_in_stream = gtf_in_stream_cast(gs);
   gtf_parser = gtf_parser_new(env);
 
-  gtf_in_stream->genome_node_buffer = queue_new(sizeof (GenomeNode*), env);
+  gtf_in_stream->genome_node_buffer = queue_new(env);
 
   /* open input file */
   if (filename)

@@ -42,8 +42,6 @@ unsigned int getmapsizeAlphabet(const Alphabet *alpha);
 
 const Uchar *getcharactersAlphabet(const Alphabet *alpha);
 
-Uchar *copycharactersAlphabet(const Alphabet *alpha,Env *env);
-
 void freeAlphabet(Alphabet **alpha,Env *env);
 
 void outputalphabet(FILE *fpout,const Alphabet *alpha);
@@ -53,8 +51,10 @@ void showsymbolstringgeneric(FILE *fpout,const Alphabet *alpha,
 
 void showsymbolstring(const Alphabet *alpha,const Uchar *w,unsigned long wlen);
 
-bool isproteinalphabet(const Alphabet *alpha);
+void showalphabetsymbol(FILE *fpout,const Alphabet *alpha,Uchar currentchar);
 
-bool isdnaalphabet(const Alphabet *alpha);
+bool isproteinalphabet(const Alphabet *alpha,Env *env);
+
+bool isdnaalphabet(const Alphabet *alpha,Env *env);
 
 #endif

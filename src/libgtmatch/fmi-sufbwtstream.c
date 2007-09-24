@@ -21,8 +21,8 @@
 #include "divmodmul.h"
 #include "chardef.h"
 
-#include "mergeesa.pr"
-#include "sfx-map.pr"
+#include "esa-merge.pr"
+#include "esa-map.pr"
 #include "encseq2offset.pr"
 #include "opensfxfile.pr"
 #include "mkidxcpy.pr"
@@ -186,6 +186,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
                    const Str *outfmindex,
                    const StrArray *indexnametab,
                    bool storeindexpos,
+                   Verboseinfo *verboseinfo,
                    Env *env)
 {
   Suffixarray suffixarray;
@@ -218,13 +219,13 @@ int sufbwt2fmindex(Fmindex *fmindex,
   numofindexes = (unsigned int) strarray_size(indexnametab);
   if (numofindexes == (unsigned int) 1)
   {
-    Str *indexname = str_new_cstr(strarray_get(indexnametab,0),env);
+    Str *indexname = strarray_get_str(indexnametab,0);
 
     if (streamsuffixarray(&suffixarray,
                          &totallength,
                          SARR_BWTTAB | (storeindexpos ? SARR_SUFTAB : 0),
                          indexname,
-                         false,
+                         verboseinfo,
                          env) != 0)
     {
       haserr = true;
@@ -254,25 +255,24 @@ int sufbwt2fmindex(Fmindex *fmindex,
       }
       */
     }
-    str_delete(indexname,env);
   } else
   {
     if (initEmissionmergedesa(&emmesa,
                              indexnametab,
                              SARR_ESQTAB | SARR_SUFTAB | SARR_LCPTAB,
+                             verboseinfo,
                              env) != 0)
     {
       haserr = true;
     }
     if (!haserr)
     {
-      Str *indexname = str_new_cstr(strarray_get(indexnametab,0),env);
+      Str *indexname = strarray_get_str(indexnametab,0);
       suffixlength = 0;
       if (makeindexfilecopy(outfmindex,indexname,ALPHABETFILESUFFIX,0,env) != 0)
       {
         haserr = true;
       }
-      str_delete(indexname,env);
     }
     if (!haserr)
     {

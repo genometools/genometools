@@ -46,18 +46,31 @@ void genome_stream_delete(GenomeStream *gs, Env *env)
   }
   assert(gs->c_class);
   if (gs->c_class->free) gs->c_class->free(gs, env);
-  genome_node_delete(gs->last_node, env);
+  genome_node_delete(gs->buffer, env);
   env_ma_free(gs, env);
 }
 
 int genome_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 {
-  int had_err;
+  GenomeNode *new_node = NULL;
+  int had_err = 0;
   assert(gs && gs->c_class && gs->c_class->next_tree);
   env_error_check(env);
-  had_err = gs->c_class->next_tree(gs, gn, env);
-  if (!had_err && *gn && gs->ensure_sorting) {
-    assert(genome_node_tree_is_sorted(&gs->last_node, *gn, env));
+  /* filling */
+  if (!gs->buffer)
+    had_err = gs->c_class->next_tree(gs, &gs->buffer, env);
+  if (!had_err && gs->buffer)
+    had_err = gs->c_class->next_tree(gs, &new_node, env);
+#ifndef NDEBUG
+  /* checking */
+  if (!had_err && gs->ensure_sorting && gs->buffer && new_node) {
+    assert(genome_node_compare(&gs->buffer, &new_node) <= 0);
+  }
+#endif
+  /* serving */
+  if (!had_err) {
+    *gn = gs->buffer;
+    gs->buffer = new_node;
   }
   return had_err;
 }

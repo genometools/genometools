@@ -17,9 +17,9 @@
 
 #include <assert.h>
 #include <string.h>
-#include <libgtcore/countingsort.h>
-#include <libgtcore/ensure.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/countingsort.h"
+#include "libgtcore/ensure.h"
+#include "libgtcore/xansi.h"
 
 void countingsort(void *out, const void *in, size_t elem_size,
                   unsigned long size, unsigned long max_elemvalue, void *data,

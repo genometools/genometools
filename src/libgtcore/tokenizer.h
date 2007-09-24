@@ -19,8 +19,8 @@
 #define TOKENIZER_H
 
 #include <stdbool.h>
-#include <libgtcore/io.h>
-#include <libgtcore/str.h>
+#include "libgtcore/io.h"
+#include "libgtcore/str.h"
 
 typedef struct Tokenizer Tokenizer;
 

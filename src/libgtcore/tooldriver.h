@@ -18,7 +18,7 @@
 #ifndef TOOLDRIVER_H
 #define TOOLDRIVER_H
 
-#include <libgtcore/env.h>
+#include "libgtcore/env.h"
 
 /* The tool driver module allows to compile a tool into a separate binary. This
    is mostly useful for legacy applications like GenomeThreader.
@@ -31,8 +31,8 @@ int tooldriver(int(*tool)(int argc, const char **argv, Env*),
 
 #if 0
 
-#include <libgtcore/tooldriver.h>
-#include <tools/gt_gff3.h>
+#include "libgtcore/tooldriver.h"
+#include "tools/gt_gff3.h"
 
 int main(int argc, char *argv[])
 {

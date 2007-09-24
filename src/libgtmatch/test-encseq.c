@@ -24,6 +24,7 @@
 
 #include "sfx-readmode.pr"
 #include "fbsadv.pr"
+#include "arrcmp.pr"
 #include "readnextUchar.gen"
 
 int testencodedsequence(const StrArray *filenametab,
@@ -114,41 +115,52 @@ int testencodedsequence(const StrArray *filenametab,
       haserr = true;
     }
   }
-  freeEncodedsequencescanstate(&esr,env);
+  if (esr != NULL)
+  {
+    freeEncodedsequencescanstate(&esr,env);
+  }
   return haserr ? -1 : 0;
 }
 
-static int comparearrays(const Array *a,const Array *b,Env *env)
+static void makeerrormsg(const Sequencerange *vala,const Sequencerange *valb,
+                         const char *cmpflag)
 {
-  unsigned long idx;
-  Sequencerange *vala, *valb;
+  fprintf(stderr,
+                "(" FormatSeqpos "," FormatSeqpos
+                ") %s (" FormatSeqpos "," FormatSeqpos
+                ")\n",
+                PRINTSeqposcast(vala->leftpos),
+                PRINTSeqposcast(vala->rightpos),
+                cmpflag,
+                PRINTSeqposcast(valb->leftpos),
+                PRINTSeqposcast(valb->rightpos));
+}
 
-  if (array_size(a) != array_size(b))
+static int compareSequencerange(const void *a,const void *b)
+{
+  const Sequencerange *vala, *valb;
+
+  vala = (Sequencerange *) a;
+  valb = (Sequencerange *) b;
+  if (vala->leftpos < valb->leftpos)
   {
-    env_error_set(env,"array_size(a) = %lu != %lu = "
-                      "array_size(b)\n",
-    (unsigned long) array_size(a),
-    (unsigned long) array_size(b));
+    makeerrormsg(vala,valb,"<");
     return -1;
   }
-  for (idx=0; idx<(unsigned long) array_size(a); idx++)
+  if (vala->leftpos > valb->leftpos)
   {
-    vala = (Sequencerange *) array_get(a,idx);
-    valb = (Sequencerange *) array_get(b,idx);
-    if (vala->leftpos != valb->leftpos || vala->rightpos != valb->rightpos)
-    {
-      env_error_set(env,
-                    "a[%lu] = (" FormatSeqpos "," FormatSeqpos
-                      ") != (" FormatSeqpos "," FormatSeqpos
-                      ") = b[%lu]",
-                      idx,
-                      PRINTSeqposcast(vala->leftpos),
-                      PRINTSeqposcast(vala->rightpos),
-                      PRINTSeqposcast(valb->leftpos),
-                      PRINTSeqposcast(valb->rightpos),
-                      idx);
-      return -1;
-    }
+    makeerrormsg(vala,valb,">");
+    return 1;
+  }
+  if (vala->rightpos < valb->rightpos)
+  {
+    makeerrormsg(vala,valb,"<");
+    return -1;
+  }
+  if (vala->rightpos > valb->rightpos)
+  {
+    makeerrormsg(vala,valb,">");
+    return 1;
   }
   return 0;
 }
@@ -185,9 +197,10 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
   {
     printf("# checkspecialrangesfast(%lu ranges)\n",
              (unsigned long) array_size(rangesforward));
-    if (comparearrays(rangesforward,rangesbackward,env) != 0)
+    if (array_compare(rangesforward,rangesbackward,
+                      compareSequencerange) != 0)
     {
-      haserr = true;
+      exit(EXIT_FAILURE);
     }
   }
   array_delete(rangesforward,env);

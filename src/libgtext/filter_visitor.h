@@ -29,6 +29,6 @@ GenomeVisitor*            filter_visitor_new(Str *seqid, Str *typefilter,
                                              unsigned long max_gene_num,
                                              double min_gene_score, Env*);
 unsigned long             filter_visitor_node_buffer_size(GenomeVisitor*);
-GenomeNode*               filter_visitor_get_node(GenomeVisitor*);
+GenomeNode*               filter_visitor_get_node(GenomeVisitor*, Env*);
 
 #endif

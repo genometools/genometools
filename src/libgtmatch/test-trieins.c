@@ -22,7 +22,7 @@
 #include "alphadef.h"
 
 #include "trieins.pr"
-#include "sfx-map.pr"
+#include "esa-map.pr"
 
 static void maketrie(Trierep *trierep,
                      /*@unused@*/ const Uchar *characters,
@@ -81,11 +81,11 @@ int test_trieins(bool onlyins,const Str *indexname,Env *env)
 
   env_error_check(env);
   if (streamsuffixarray(&suffixarray,
-                       &totallength,
-                       SARR_ESQTAB,
-                       indexname,
-                       false,
-                       env) != 0)
+                        &totallength,
+                        SARR_ESQTAB,
+                        indexname,
+                        NULL,
+                        env) != 0)
   {
     haserr = true;
   }

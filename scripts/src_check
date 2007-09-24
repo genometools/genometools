@@ -43,19 +43,19 @@ for i, fn in ipairs(arg) do -- iterate over all files
     end
 
     -- check for missing blanks
-    if string.find(l, "if%(")     then err(fn, ln, "missing blanks") end
-    if string.find(l, "sizeof%(") then err(fn, ln, "missing blanks") end
-    if string.find(l, "switch%(") then err(fn, ln, "missing blanks") end
-    if string.find(l, "while%(")  then err(fn, ln, "missing blanks") end
-    if string.find(l, "for%(")    then err(fn, ln, "missing blanks") end
-    if string.find(l, "do%(")     then err(fn, ln, "missing blanks") end
-    if string.find(l, "%){")      then err(fn, ln, "missing blanks") end
+    if string.find(l, " if%(")     then err(fn, ln, "missing blanks") end
+    if string.find(l, " sizeof%(") then err(fn, ln, "missing blanks") end
+    if string.find(l, " switch%(") then err(fn, ln, "missing blanks") end
+    if string.find(l, " while%(")  then err(fn, ln, "missing blanks") end
+    if string.find(l, " for%(")    then err(fn, ln, "missing blanks") end
+    if string.find(l, " do%(")     then err(fn, ln, "missing blanks") end
+    if string.find(l, "%){")       then err(fn, ln, "missing blanks") end
 
     -- check line length
     if #l > 80 then err(fn, ln, "line longer than 80 characters") end
 
     -- check for C++ style comments
-    if string.find(l, "[^:]//") then err(fn, ln, "C++ style comment") end
+    if string.find(l, "[^:/\"a-z]//") then err(fn, ln, "C++ style comment") end
 
     -- check for commata at the beginning of a line
     if string.find(l, "^ *,") then
@@ -65,6 +65,16 @@ for i, fn in ipairs(arg) do -- iterate over all files
     -- check for old has_err usage
     if string.find(l, " has_err") then
       err(fn, ln, "illegal variable name 'has_err', use 'had_err' instead")
+    end
+
+    -- check for gt library includes with <
+    if string.find(l, "^#include <libgt") then
+      err(fn, ln, "wrong library include (<...>), use \"...\" instead")
+    end
+
+    -- check for tool includes with <
+    if string.find(l, "^#include <tools/") then
+      err(fn, ln, "wrong tool include (<...>), use \"...\" instead")
     end
 
     -- check for two empty lines in a row

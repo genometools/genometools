@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/sig.h>
-#include <libgtcore/xposix.h>
+#include "libgtcore/sig.h"
+#include "libgtcore/xposix.h"
 
 void sig_register_all(void (*func)(int sigraised))
 {

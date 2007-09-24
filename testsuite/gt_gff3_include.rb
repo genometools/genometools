@@ -1,3 +1,15 @@
+Name "gt gff3 -help"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -help"
+end
+
+Name "gt gff3 -noop"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 -noop", :retval => 1)
+end
+
 Name "gt gff3 short test (stdin)"
 Keywords "gt_gff3"
 Test do
@@ -12,6 +24,13 @@ Test do
   run_test "#{$bin}gt gff3 #{$testdata}gff3_file_1_short.txt"
   run "env LC_ALL=C sort #{$last_stdout}"
   run "diff #{$last_stdout} #{$testdata}gff3_file_1_short_sorted.txt"
+end
+
+Name "gt gff3 short test (compressed output)"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -o test -gzip #{$testdata}gff3_file_1_short.txt"
+  grep $last_stderr, "appending it"
 end
 
 Name "gt gff3 prob 1"
@@ -31,12 +50,6 @@ Name "gt gff3 prob 3"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_prob_3.gff3"
-end
-
-Name "gt gff3 prob 4"
-Keywords "gt_gff3"
-Test do
-  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_prob_4.gff3", :retval => 1)
 end
 
 Name "gt gff3 prob 5"
@@ -93,6 +106,20 @@ Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 #{$testdata}gt_gff3_prob_11.in"
   run "diff #{$last_stdout} #{$testdata}gt_gff3_prob_11.out"
+end
+
+Name "gt gff3 prob 12"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_prob_12.gff3", :retval => 1)
+  grep $last_stderr, "has not been previously defined"
+end
+
+Name "gt gff3 prob 12 (-checkids)"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 -checkids #{$testdata}gt_gff3_prob_12.gff3", :retval => 1)
+  grep $last_stderr, "has been used already for the feature defined on line"
 end
 
 Name "gt gff3 test 1.1"
@@ -227,6 +254,13 @@ Test do
   grep($last_stderr, /before the corresponding/);
 end
 
+Name "gt gff3 test additional attribute"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 #{$testdata}additional_attribute.gff3"
+  run "diff #{$last_stdout} #{$testdata}additional_attribute.gff3"
+end
+
 Name "gt gff3 fail 1"
 Keywords "gt_gff3"
 Test do
@@ -236,6 +270,54 @@ end
 Name "gt gff3 test option -addintrons"
 Keywords "gt_gff3"
 Test do
-  run_test "#{$bin}gt gff3 -addintrons #{$testdata}standard_gene_as_tree.gff3"
-  run "diff #{$last_stdout} #{$testdata}standard_gene_with_introns_as_tree.gff3"
+  run_test "#{$bin}gt gff3 -addintrons #{$testdata}addintrons.gff3"
+  run "diff #{$last_stdout} #{$testdata}addintrons.out"
+end
+
+Name "gt gff3 test option -offset"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -offset 1000 #{$testdata}gt_gff3_offset_test.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_offset_test.out"
+end
+
+Name "gt gff3 test option -offsetfile"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -offsetfile #{$testdata}gt_gff3_offsetfile_test.offsetfile #{$testdata}gt_gff3_offsetfile_test.gff3"
+  run "diff #{$last_stdout} #{$testdata}gt_gff3_offsetfile_test.out"
+end
+
+Name "gt gff3 test option -mergefeat"
+Keywords "gt_gff3"
+Test do
+  run_test "#{$bin}gt gff3 -sort -mergefeat #{$testdata}mergefeat.gff3"
+  run "diff #{$last_stdout} #{$testdata}mergefeat.out"
+end
+
+Name "gt gff3 fail option -offsetfile"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 -offsetfile #{$testdata}empty_file #{$testdata}gt_gff3_offsetfile_test.gff3", :retval => 1)
+end
+
+Name "gt gff3 fail attribute after dot"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}attribute_after_dot.gff3", :retval => 1)
+  grep $last_stderr, "more than one attribute token defined"
+end
+
+Name "gt gff3 fail attribute with multiple equal signs"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}attribute_w_multiple_equals.gff3", :retval => 1)
+  grep $last_stderr, "does not contain exactly one"
+end
+
+Name "gt gff3 fail inconsistent sequence ids"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}inconsistent_sequence_ids.gff3", :retval => 1)
+  grep $last_stderr, "has different sequence id"
 end

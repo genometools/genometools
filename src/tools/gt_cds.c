@@ -20,7 +20,7 @@
 #include "libgtext/cds_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
-#include "libgtext/gtdata.h"
+#include "libgtext/gtdatahelp.h"
 #include "libgtext/seqid2file.h"
 
 #define GT_CDS_SOURCE_TAG "gt cds"

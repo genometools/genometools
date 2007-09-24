@@ -50,7 +50,8 @@ int gt_gff3_to_gtf(int argc, const char **argv, Env *env)
 
   /* create a gff3 input stream */
   gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
-                                               argv + parsed_args, false, env);
+                                               argv + parsed_args, false, false,
+                                               env);
 
   if (!gff3_in_stream)
     had_err = -1;

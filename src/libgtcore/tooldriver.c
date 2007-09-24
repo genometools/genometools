@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/env.h>
-#include <libgtcore/tooldriver.h>
+#include "libgtcore/env.h"
+#include "libgtcore/tooldriver.h"
 
 int tooldriver(int(*tool)(int argc, const char **argv, Env*),
                int argc, char *argv[])

@@ -15,12 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/cstr.h>
-#include <libgtcore/env.h>
-#include <libgtcore/option.h>
-#include <libgtcore/splitter.h>
-#include <libgtcore/versionfunc.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/env.h"
+#include "libgtcore/option.h"
+#include "libgtcore/splitter.h"
+#include "libgtcore/versionfunc.h"
+#include "libgtcore/warning.h"
+#include "libgtcore/xansi.h"
 
 struct Env {
   MA *ma; /* the memory allocator */
@@ -82,12 +83,16 @@ static void proc_gt_env_options(Env *env)
 
 Env* env_new(void)
 {
+  const char *bookkeeping;
   Env *env = xcalloc(1, sizeof (Env));
   env->ma = ma_new();
-  ma_init(env->ma, env);
+  bookkeeping = getenv("GT_MEM_BOOKKEEPING");
+  ma_init(env->ma, bookkeeping && !strcmp(bookkeeping, "on"), env);
   env->fa = fa_new(env);
   env->error = error_new(env->ma);
   proc_gt_env_options(env);
+  if (env->spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
+    warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
   return env;
 }
 
@@ -134,11 +139,13 @@ int env_delete(Env *env)
   log_delete(env->log, env->ma);
   error_delete(env->error, env->ma);
   env->error = NULL;
+  if (env->spacepeak) {
+    ma_show_space_peak(env->ma, stdout);
+    fa_show_space_peak(env->fa, stdout);
+  }
   fa_fptr_rval = fa_check_fptr_leak(env->fa, env);
   fa_mmap_rval = fa_check_mmap_leak(env->fa, env);
   fa_delete(env->fa, env);
-  if (env->spacepeak)
-    ma_show_space_peak(env->ma, stdout);
   ma_rval = ma_check_space_leak(env->ma, env);
   ma_clean(env->ma, env);
   ma_delete(env->ma);
@@ -153,6 +160,13 @@ void env_ma_free_func(void *ptr, Env *env)
   ma_free(ptr, env_ma(env));
 }
 
+void env_fa_fclose(FILE *stream, Env *env)
+{
+  assert(env);
+  if (!stream) return;
+  fa_fclose(stream, env_fa(env));
+}
+
 void env_fa_xfclose(FILE *stream, Env *env)
 {
   assert(env);
@@ -160,11 +174,25 @@ void env_fa_xfclose(FILE *stream, Env *env)
   fa_xfclose(stream, env_fa(env));
 }
 
+void env_fa_gzclose(gzFile stream, Env *env)
+{
+  assert(env);
+  if (!stream) return;
+  fa_gzclose(stream, env_fa(env));
+}
+
 void env_fa_xgzclose(gzFile stream, Env *env)
 {
   assert(env);
   if (!stream) return;
   fa_xgzclose(stream, env_fa(env));
+}
+
+void env_fa_bzclose(BZFILE *stream, Env *env)
+{
+  assert(env);
+  if (!stream) return;
+  fa_bzclose(stream, env_fa(env));
 }
 
 void env_fa_xbzclose(BZFILE *stream, Env *env)

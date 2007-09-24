@@ -25,7 +25,7 @@
 #include "libgtmatch/enum-patt-def.h"
 #include "libgtmatch/esa-mmsearch-def.h"
 
-#include "libgtmatch/sfx-map.pr"
+#include "libgtmatch/esa-map.pr"
 #include "libgtmatch/enum-patt.pr"
 #include "libgtmatch/esa-mmsearch.pr"
 
@@ -49,7 +49,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
                      &totallength,
                      SARR_SUFTAB | SARR_ESQTAB,
                      pmopt->indexname,
-                     false,
+                     NULL,
                      env) != 0)
   {
     haserr = true;
@@ -68,9 +68,9 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
       pptr = nextEnumpatterniterator(&patternlen,epi);
       mmsi = newmmsearchiterator(suffixarray.encseq,
                                  suffixarray.suftab,
-                                 0,
-                                 0,
-                                 totallength,
+                                 0,  /* leftbound */
+                                 totallength, /* rightbound */
+                                 0, /* offset */
                                  suffixarray.readmode,
                                  pptr,
                                  patternlen,

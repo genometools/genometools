@@ -40,7 +40,8 @@ typedef struct
        outtistab,
        outsuftab,
        outlcptab,
-       outbwttab;
+       outbwttab,
+       outdestab;
 } Suffixeratoroptions;
 
 #endif

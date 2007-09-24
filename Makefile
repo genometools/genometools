@@ -1,7 +1,18 @@
 #
 # Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-# Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg 
-# See LICENSE file or http://genometools.org/license.html for license details
+# Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
 CC:=gcc
@@ -32,7 +43,7 @@ EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DUNISTD_H="<unistd.h>" \
 GT_CXXFLAGS:= -g -pipe $(INCLUDEOPT)
 STEST_FLAGS:=
 GT_LDFLAGS:=-L/usr/local/lib -L/usr/X11R6/lib
-LDLIBS:=-lm -lz -lncurses
+LDLIBS:=-lm -lz
 
 # try to set RANLIB automatically
 SYSTEM:=$(shell uname -s)
@@ -46,11 +57,10 @@ endif
 
 # the default GenomeTools libraries which are build
 GTLIBS:=lib/libgtext.a\
-        lib/libgtcore.a\
         lib/libgtmatch.a\
+        lib/libgtcore.a\
         lib/libgtlua.a\
-        lib/libbz2.a\
-        lib/libtecla.a
+        lib/libbz2.a
 
 # the core GenomeTools library (no other dependencies)
 LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
@@ -148,22 +158,46 @@ LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
 LIBBZ2_OBJ:=$(LIBBZ2_SRC:%.c=obj/%.o)
 LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.o)
 
+SKTOOLS=$(shell grep -l Kurtz src/tools/*.c)
+
 SERVER=gordon@genometools.org
 WWWBASEDIR=/var/www/servers
 
 # process arguments
-ifneq ($(opt),no)
-  GT_CFLAGS += -Os
-  GT_CXXFLAGS += -Os
-endif
-
 ifeq ($(assert),no)
   GT_CFLAGS += -DNDEBUG
   GT_CXXFLAGS += -DNDEBUG
 endif
 
+ifeq ($(cov),yes)
+  export CCACHE_DISABLE # ccache cannot handle coverage objects
+  GT_CFLAGS += -fprofile-arcs -ftest-coverage
+  STEST_FLAGS += -gcov
+  opt=no
+endif
+
+ifneq ($(opt),no)
+  GT_CFLAGS += -Os
+  GT_CXXFLAGS += -Os
+endif
+
+ifeq ($(prof),yes)
+  GT_CFLAGS += -pg
+  GT_LDFLAGS += -pg
+endif
+
 ifeq ($(static),yes)
   GT_LDFLAGS += -static
+endif
+
+ifneq ($(curses),no)
+  GTLIBS := $(GTLIBS) lib/libtecla.a
+  GT_CFLAGS += -DCURSES
+  LDLIBS += -lncurses
+endif
+
+ifdef gttestdata
+  STEST_FLAGS += -gttestdata $(gttestdata)
 endif
 
 ifeq ($(libgtview),yes)
@@ -176,7 +210,7 @@ endif
 # set prefix for install target
 prefix ?= /usr/local
 
-all: $(GTLIBS) bin/skproto bin/gt bin/rnv
+all: $(GTLIBS) bin/skproto bin/gt bin/lua bin/rnv
 
 lib/libexpat.a: $(LIBEXPAT_OBJ)
 	@echo "[link $(@F)]"
@@ -276,10 +310,15 @@ bin/gt: obj/src/gt.o obj/src/gtr.o $(TOOLS_OBJ) $(GTLIBS)
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CXX) $(LDFLAGS) $(GT_LDFLAGS) $^ $(LDLIBS) -o $@
 
+bin/lua: obj/$(LUA_DIR)/lua.o $(LIBLUA_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@$(CC) $(LDFLAGS) $^ -lm -o $@
+
 bin/rnv: obj/$(RNV_DIR)/xcl.o lib/librnv.a lib/libexpat.a
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(LDFLAGS) $(GT_LDFLAGS) $^ -o $@
+	@$(CC) $(LDFLAGS) $^ -o $@
 
 obj/gt_build.h:
 	@date +'#define GT_BUILT "%Y-%m-%d %H:%M:%S"' > $@
@@ -343,6 +382,7 @@ obj/%.o: %.cxx
 
 # read deps
 -include obj/src/gt.d obj/src/gtlua.d obj/src/gtr.d obj/src/skproto.d \
+	obj/$(LUA_DIR)/lua.d \
          $(LIBGTCORE_DEP) $(LIBGTEXT_C_DEP) $(LIBGTEXT_CXX_DEP) \
          $(LIBGTMATCH_DEP) $(LIBGTVIEW_C_DEP) $(LIBGTLUA_C_DEP) $(TOOLS_DEP) \
          $(LIBAGG_DEP) $(LIBEXPAT_DEP) $(LIBLUA_DEP) $(LIBPNG_DEP) \
@@ -398,12 +438,17 @@ splint:
         $(CURDIR)/src/libgtext/*.c \
         $(CURDIR)/src/tools/*.c
 
-sgt:${addprefix obj/,${notdir ${subst .c,.splint,${wildcard ${CURDIR}/src/libgtmatch/*.c}}}}
+sgt:${addprefix obj/,${notdir ${subst .c,.splint,${wildcard ${CURDIR}/src/libgtmatch/*.c} ${SKTOOLS}}}}
 
 splintclean:
-	find -name '*.splint' | xargs rm -f
+	find obj -name '*.splint' | xargs rm -f
 
 obj/%.splint: ${CURDIR}/src/libgtmatch/%.c
+	@echo "splint $<"
+	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@touch $@
+
+obj/%.splint: ${CURDIR}/src/tools/%.c
 	@echo "splint $<"
 	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@
@@ -415,7 +460,7 @@ obj/%.prepro: ${CURDIR}/src/libgtmatch/%.c
 
 test: all
 	bin/gt -test
-	cd testsuite && env -i ruby -I. testsuite.rb -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin $(STEST_FLAGS)
+	cd testsuite && env -i GT_MEM_BOOKKEEPING=on ruby -I. testsuite.rb -testdata $(CURDIR)/testdata -bin $(CURDIR)/bin -cur $(CURDIR) $(STEST_FLAGS)
 
 clean:
 	rm -rf obj

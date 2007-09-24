@@ -18,15 +18,15 @@
 #include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
-#include <libgtcore/array.h>
-#include <libgtcore/cstr.h>
-#include <libgtcore/error.h>
-#include <libgtcore/mailaddress.h>
-#include <libgtcore/minmax.h>
-#include <libgtcore/option.h>
-#include <libgtcore/str.h>
-#include <libgtcore/undef.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/array.h"
+#include "libgtcore/cstr.h"
+#include "libgtcore/error.h"
+#include "libgtcore/mailaddress.h"
+#include "libgtcore/minmax.h"
+#include "libgtcore/option.h"
+#include "libgtcore/str.h"
+#include "libgtcore/undef.h"
+#include "libgtcore/xansi.h"
 
 typedef enum {
   OPTION_BOOL,
@@ -327,7 +327,7 @@ static int show_help(OptionParser *op, OptionType optiontype, Env *env)
         if (option->default_value.d == UNDEF_DOUBLE)
           xputs("undefined");
         else
-          printf("%f\n", option->default_value.d);
+          printf("%.2f\n", option->default_value.d);
       }
       else if (option->option_type == OPTION_INT) {
         printf("%*s  default: ", (int) max_option_length, "");
@@ -1182,19 +1182,32 @@ Option* option_new_string(const char *option_str, const char *description,
   return o;
 }
 
+Option* option_new_stringarray(const char *option_str,
+                               const char *description, StrArray *value,
+                               Env *env)
+{
+  Option *o = option_new(option_str, description, value, env);
+  o->option_type = OPTION_STRINGARRAY;
+  return o;
+}
+
+/* the following function would allow to handle files differently from strings
+   later on (e.g., for CGI scripts), but for now the are implemented in the same
+   way */
 Option* option_new_filename(const char *option_str, const char *description,
                             Str*filename, Env *env)
 {
   return option_new_string(option_str, description, filename, NULL, env);
 }
 
+/* the following function would allow to handle file arrays differently from
+   string arrays later on (e.g., for CGI scripts) , but for now the are
+   implemented in the same way */
 Option* option_new_filenamearray(const char *option_str,
                                  const char *description, StrArray *filenames,
                                  Env *env)
 {
-  Option *o = option_new(option_str, description, filenames, env);
-  o->option_type = OPTION_STRINGARRAY;
-  return o;
+  return option_new_stringarray(option_str, description, filenames, env);
 }
 
 Option* option_new_choice(const char *option_str, const char *description,

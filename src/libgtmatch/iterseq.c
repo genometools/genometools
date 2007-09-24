@@ -22,11 +22,10 @@
 #include "chardef.h"
 #include "fbs-def.h"
 #include "seqdesc.h"
-#include "gqueue-def.h"
 #include "format64.h"
+#include "iterseq.h"
 
 #include "fbsadv.pr"
-#include "genericqueue.pr"
 
 #include "readnextUchar.gen"
 
@@ -80,18 +79,13 @@ int overallquerysequences(int(*processsequence)(void *,
         haserr = true;
         break;
       }
-      desc = dequeuegeneric(sequencedescription->descptr,env);
-      if (desc == NULL)
-      {
-        haserr = true;
-        break;
-      }
+      desc = queue_get(sequencedescription->descptr,env);
       if (processsequence(info,
-                         unitnum,
-                         sequencebuffer->spaceUchar,
-                         sequencebuffer->nextfreeUchar,
-                         desc,
-                         env) != 0)
+                          unitnum,
+                          sequencebuffer->spaceUchar,
+                          sequencebuffer->nextfreeUchar,
+                          desc,
+                          env) != 0)
       {
         haserr = true;
         FREESPACE(desc);
@@ -107,25 +101,141 @@ int overallquerysequences(int(*processsequence)(void *,
   }
   if (!haserr && sequencebuffer->nextfreeUchar > 0)
   {
-    desc = dequeuegeneric(sequencedescription->descptr,env);
-    if (desc == NULL)
+    desc = queue_get(sequencedescription->descptr,env);
+    if (processsequence(info,
+                        unitnum,
+                        sequencebuffer->spaceUchar,
+                        sequencebuffer->nextfreeUchar,
+                        desc,
+                        env) != 0)
     {
       haserr = true;
-    }
-    if (!haserr)
-    {
-      if (processsequence(info,
-                         unitnum,
-                         sequencebuffer->spaceUchar,
-                         sequencebuffer->nextfreeUchar,
-                         desc,
-                         env) != 0)
-      {
-        haserr = true;
-      }
     }
     FREESPACE(desc);
     sequencebuffer->nextfreeUchar = 0;
   }
   return haserr ? -1 : 0;
+}
+
+ struct Scansequenceiterator
+{
+  Fastabufferstate fbs;
+  const StrArray *filenametab;
+  const Uchar *symbolmap;
+  Sequencedescription sequencedescription;
+  ArrayUchar sequencebuffer;
+  uint64_t unitnum;
+  bool withsequence, exhausted;
+};
+
+Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
+                                              const Uchar *symbolmap,
+                                              bool withsequence,
+                                              Env *env)
+{
+  Scansequenceiterator *sseqit;
+
+  ALLOCASSIGNSPACE(sseqit,NULL,Scansequenceiterator,1);
+  INITARRAY(&sseqit->sequencebuffer,Uchar);
+  INITARRAY(&sseqit->sequencedescription.headerbuffer,char);
+  sseqit->sequencedescription.descptr = queue_new(env);
+  initformatbufferstate(&sseqit->fbs,
+                        filenametab,
+                        symbolmap,
+                        false,
+                        NULL,
+                        &sseqit->sequencedescription,
+                        env);
+  sseqit->sequencebuffer.nextfreeUchar = 0;
+  sseqit->exhausted = false;
+  sseqit->unitnum = 0;
+  sseqit->withsequence = withsequence;
+  return sseqit;
+}
+
+void freeScansequenceiterator(Scansequenceiterator **sseqit,Env *env)
+{
+  queue_delete_with_contents((*sseqit)->sequencedescription.descptr,env);
+  FREEARRAY(&(*sseqit)->sequencebuffer,Uchar);
+  FREEARRAY(&(*sseqit)->sequencedescription.headerbuffer,char);
+  FREESPACE(*sseqit);
+}
+
+int nextScansequenceiterator(const Uchar **sequence,
+                             unsigned long *len,
+                             char **desc,
+                             Scansequenceiterator *sseqit,
+                             Env *env)
+{
+  Uchar charcode;
+  int retval;
+  bool haserr = false, foundseq = false;
+
+  if (sseqit->exhausted)
+  {
+    return 0;
+  }
+  while (true)
+  {
+    retval = readnextUchar(&charcode,&sseqit->fbs,env);
+    if (retval < 0)
+    {
+      haserr = true;
+      break;
+    }
+    if (retval == 0)
+    {
+      sseqit->exhausted = true;
+      break;
+    }
+    if (charcode == (Uchar) SEPARATOR)
+    {
+      if (sseqit->sequencebuffer.nextfreeUchar == 0 && sseqit->withsequence)
+      {
+        env_error_set(env,"sequence " Formatuint64_t " is empty",
+                      PRINTuint64_tcast(sseqit->unitnum));
+        haserr = true;
+        break;
+      }
+      *desc = queue_get(sseqit->sequencedescription.descptr,env);
+      *len = sseqit->sequencebuffer.nextfreeUchar;
+      if (sseqit->withsequence)
+      {
+        *sequence = sseqit->sequencebuffer.spaceUchar;
+      }
+      sseqit->sequencebuffer.nextfreeUchar = 0;
+      foundseq = true;
+      sseqit->unitnum++;
+      break;
+    } else
+    {
+      if (sseqit->withsequence)
+      {
+        STOREINARRAY(&sseqit->sequencebuffer,Uchar,1024,charcode);
+      } else
+      {
+        sseqit->sequencebuffer.nextfreeUchar++;
+      }
+    }
+  }
+  if (!haserr && sseqit->sequencebuffer.nextfreeUchar > 0)
+  {
+    *desc = queue_get(sseqit->sequencedescription.descptr,env);
+    if (sseqit->withsequence)
+    {
+      *sequence = sseqit->sequencebuffer.spaceUchar;
+    }
+    *len = sseqit->sequencebuffer.nextfreeUchar;
+    foundseq = true;
+    sseqit->sequencebuffer.nextfreeUchar = 0;
+  }
+  if (haserr)
+  {
+    return -1;
+  }
+  if (foundseq)
+  {
+    return 1;
+  }
+  return 0;
 }

@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <libgtcore/xbzlib.h>
+#include "libgtcore/xbzlib.h"
 
 BZFILE* xbzopen(const char *path, const char *mode)
 {

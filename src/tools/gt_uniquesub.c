@@ -15,7 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "gt.h"
+#include "libgtcore/env.h"
+#include "libgtmatch/fmi-uniquesub.pr"
 
 int gt_uniquesub(int argc, const char **argv, Env *env)
 {

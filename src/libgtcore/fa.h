@@ -31,16 +31,19 @@ FA*     fa_new(Env*);
 /* functions for normal file pointer */
 FILE*   fa_fopen(FA*, const char *path, const char *mode, const char*, int);
 FILE*   fa_xfopen(FA*, const char *path, const char *mode, const char*, int);
+void    fa_fclose(FILE *stream, FA*);
 void    fa_xfclose(FILE *stream, FA*);
 
 /* functions for gzip file pointer */
 gzFile  fa_gzopen(FA*, const char *path, const char *mode, const char*, int);
 gzFile  fa_xgzopen(FA*, const char *path, const char *mode, const char*, int);
+void    fa_gzclose(gzFile stream, FA*);
 void    fa_xgzclose(gzFile stream, FA*);
 
 /* functions for bzip2 file pointer */
 BZFILE* fa_bzopen(FA*, const char *path, const char *mode, const char*, int);
 BZFILE* fa_xbzopen(FA*, const char *path, const char *mode, const char*, int);
+void    fa_bzclose(BZFILE *stream, FA*);
 void    fa_xbzclose(BZFILE *stream, FA*);
 
 /* create a tmp file using <temp> as a template analog to mkstemp(3) */
@@ -57,7 +60,7 @@ void    fa_xmunmap(void *addr, FA*);
 int     fa_check_fptr_leak(FA*, Env*);
 /* check if all allocated memory maps have been freed, prints to stderr */
 int     fa_check_mmap_leak(FA*, Env*);
-
+void    fa_show_space_peak(FA*, FILE*);
 void    fa_delete(FA*, Env*);
 
 #endif

@@ -1,0 +1,4 @@
+chseqids = {
+  seq1 = "chr",
+  seq2 = "chr",
+}

@@ -17,8 +17,8 @@
 
 #include <assert.h>
 #include <stdlib.h>
-#include <libgtcore/cstr.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/xansi.h"
 
 char* cstr_dup(const char *cstr, Env *env)
 {

@@ -15,12 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <libgtcore/array.h>
-#include <libgtcore/cstr.h>
-#include <libgtcore/strarray.h>
+#include "libgtcore/array.h"
+#include "libgtcore/cstr.h"
+#include "libgtcore/strarray.h"
 
 struct StrArray {
-  Array *cstrings;
+  Array *strings;
 };
 
 StrArray* strarray_new(Env *env)
@@ -28,37 +28,62 @@ StrArray* strarray_new(Env *env)
   StrArray *sa;
   env_error_check(env);
   sa = env_ma_malloc(env, sizeof (StrArray));
-  sa->cstrings = array_new(sizeof (char*), env);
+  sa->strings = array_new(sizeof (Str*), env);
   return sa;
+}
+
+StrArray* strarray_new_file(const char *path, Env *env)
+{
+  StrArray *filecontent;
+  GenFile *fpin;
+  Str *line;
+  env_error_check(env);
+  fpin = genfile_xopen(path, "r", env);
+  assert(fpin);
+  line = str_new(env);
+  filecontent = strarray_new(env);
+  while (str_read_next_line_generic(line, fpin, env) != EOF) {
+    strarray_add_cstr(filecontent,str_get(line),env);
+    str_reset(line);
+  }
+  str_delete(line, env);
+  genfile_xclose(fpin, env);
+  return filecontent;
 }
 
 void strarray_add_cstr(StrArray *sa, const char *cstr, Env *env)
 {
-  char *cstr_copy;
+  Str *str;
   env_error_check(env);
   assert(sa && cstr);
-  cstr_copy = cstr_dup(cstr, env);
-  array_add(sa->cstrings, cstr_copy, env);
+  str = str_new_cstr(cstr, env);
+  array_add(sa->strings, str, env);
 }
 
 const char* strarray_get(const StrArray *sa, unsigned long strnum)
 {
-  assert(sa && strnum < array_size(sa->cstrings));
-  return *(char**) array_get(sa->cstrings, strnum);
+  assert(sa && strnum < array_size(sa->strings));
+  return str_get(*(Str**) array_get(sa->strings, strnum));
+}
+
+Str* strarray_get_str(const StrArray *sa, unsigned long strnum)
+{
+  assert(sa && strnum < array_size(sa->strings));
+  return *(Str**) array_get(sa->strings, strnum);
 }
 
 unsigned long strarray_size(const StrArray *sa)
 {
   assert(sa);
-  return array_size(sa->cstrings);
+  return array_size(sa->strings);
 }
 
 void strarray_delete(StrArray *sa, Env *env)
 {
   unsigned long i;
   if (!sa) return;
-  for (i = 0; i < array_size(sa->cstrings); i++)
-    env_ma_free(*(char**) array_get(sa->cstrings, i), env);
-  array_delete(sa->cstrings, env);
+  for (i = 0; i < array_size(sa->strings); i++)
+    str_delete(*(Str**) array_get(sa->strings, i), env);
+  array_delete(sa->strings, env);
   env_ma_free(sa, env);
 }

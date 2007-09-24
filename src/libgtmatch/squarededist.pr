@@ -1,0 +1,10 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+unsigned long squarededistunit (const Uchar *u, unsigned long m,
+                                const Uchar *v, unsigned long n,
+                                Env *env);
+
+#ifdef __cplusplus
+}
+#endif

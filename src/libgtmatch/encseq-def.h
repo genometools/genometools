@@ -23,14 +23,10 @@
 #include "seqpos-def.h"
 #include "alphadef.h"
 #include "readmode-def.h"
-
-#define ENCSEQFILESUFFIX     ".esq"
+#include "chardef.h"
+#include "verbose-def.h"
 
 #define REVERSEPOS(TOT,POS) ((TOT) - 1 - (POS))
-
-typedef struct Encodedsequence Encodedsequence;
-typedef struct Encodedsequencescanstate Encodedsequencescanstate;
-typedef struct Specialrangeiterator Specialrangeiterator;
 
 typedef struct
 {
@@ -38,25 +34,80 @@ typedef struct
          rightpos;
 } Sequencerange;          /* \Typedef{Sequencerange} */
 
+#ifdef INLINEDENCSEQ
+
+typedef struct
+{
+  Uchar *plainseq;
+  Seqpos totallength;
+  bool hasownmemory, mappedfile, hasspecialcharacters;
+} Encodedsequence;
+
+typedef struct
+{
+  bool moveforward, exhausted;
+  const Encodedsequence *encseq;
+  Seqpos pos,
+         specialrangelength;
+} Specialrangeiterator;
+
+typedef struct
+{
+  Readmode readmode;
+} Encodedsequencescanstate;
+
+#define getencseqtotallength(ENCSEQ) ((ENCSEQ)->totallength)
+
+#define MAKECOMPL(CC)\
+        (ISSPECIAL(CC) ? (CC) : (Uchar) 3 - (CC))
+
+#define getencodedchar(ENCSEQ,POS,RM)\
+        (((RM) == Forwardmode)\
+          ? (ENCSEQ)->plainseq[POS]\
+          : (((RM) == Reversemode)\
+            ? (ENCSEQ)->plainseq[REVERSEPOS((ENCSEQ)->totallength,POS)]\
+            : (((RM) == Complementmode) \
+              ? MAKECOMPL((ENCSEQ)->plainseq[POS])\
+              : (MAKECOMPL((ENCSEQ)->plainseq[\
+                           REVERSEPOS((ENCSEQ)->totallength,POS)])\
+              )\
+            )\
+          )\
+        )
+
+#define sequentialgetencodedchar(ENCSEQ,ENCSEQSTATE,POS)\
+        getencodedchar(ENCSEQ,POS,(ENCSEQSTATE)->readmode)
+
+#else
+
+typedef struct Encodedsequence Encodedsequence;
+typedef struct Encodedsequencescanstate Encodedsequencescanstate;
+typedef struct Specialrangeiterator Specialrangeiterator;
+
 Seqpos getencseqtotallength(const Encodedsequence *encseq);
 
 Uchar getencodedchar(const Encodedsequence *encseq,Seqpos pos,
                      Readmode readmode);
 
+Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
+                               Encodedsequencescanstate *esr,
+                               Seqpos pos);
+
+#endif
+
+/* the functions with exactly the same interface for both implementation of
+   encodedsequences */
+
 int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
 
 void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
 
-/*@null@*/ Encodedsequencescanstate *initEncodedsequencescanstate(
-                                         const Encodedsequence *encseq,
-                                         Readmode readmode,
-                                         Env *env);
+Encodedsequencescanstate *initEncodedsequencescanstate(
+                               const Encodedsequence *encseq,
+                               Readmode readmode,
+                               Env *env);
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
-
-Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
-                               Encodedsequencescanstate *esr,
-                               Seqpos pos);
 
 /*@null@*/ Encodedsequence *files2encodedsequence(bool withrange,
                                                   const StrArray *filenametab,
@@ -73,8 +124,8 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                                Seqpos totallength,
                                                const Specialcharinfo
                                                      *specialcharinfo,
-                                               const Alphabet *alphabet,
-                                               const char *str_sat,
+                                               unsigned int mapsize,
+                                               Verboseinfo *verboseinfo,
                                                Env *env);
 
 Encodedsequence *plain2encodedsequence(bool withrange,
@@ -83,21 +134,19 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        Seqpos len1,
                                        const Uchar *seq2,
                                        unsigned long len2,
-                                       const Alphabet *alphabet,
+                                       unsigned int mapsize,
                                        Env *env);
-
-bool hasspecialranges(const Encodedsequence *encseq);
 
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
                                               bool moveforward,
                                               Env *env);
 
+bool hasspecialranges(const Encodedsequence *encseq);
+
 bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
 
 void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
 
-/*@null@*/ char *encseqaccessname(const Encodedsequence *encseq);
-
-bool exhaustedspecialrangeiterator(Specialrangeiterator *sri);
+/*@null@*/ const char *encseqaccessname(const Encodedsequence *encseq);
 
 #endif

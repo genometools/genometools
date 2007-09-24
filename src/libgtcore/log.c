@@ -17,8 +17,8 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include <libgtcore/env.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/env.h"
+#include "libgtcore/xansi.h"
 
 struct Log {
   FILE *logfp;

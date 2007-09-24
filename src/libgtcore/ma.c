@@ -16,9 +16,9 @@
 */
 
 #include <stdbool.h>
-#include <libgtcore/hashtable.h>
-#include <libgtcore/ma.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
+#include "libgtcore/xansi.h"
 
 /* the memory allocator class */
 struct MA {
@@ -49,7 +49,7 @@ static void free_MAInfo(MAInfo *mainfo, /*@unused@*/ Env *env)
   free(mainfo);
 }
 
-void ma_init(MA *ma, Env *env)
+void ma_init(MA *ma, bool bookkeeping, Env *env)
 {
   assert(ma && env);
   assert(!ma->bookkeeping);
@@ -57,7 +57,7 @@ void ma_init(MA *ma, Env *env)
                                         (FreeFunc) free_MAInfo, env);
   ma->env = env;
   /* MA is ready to use */
-  ma->bookkeeping = true;
+  ma->bookkeeping = bookkeeping;
 }
 
 static void add_size(MA* ma, unsigned long size)
@@ -88,7 +88,7 @@ void* ma_malloc_mem(MA *ma, size_t size, const char *filename, int line)
     mainfo->line = line;
     mem = xmalloc(size);
     hashtable_add(ma->allocated_pointer, mem, mainfo, ma->env);
-    add_size(ma, size + sizeof (MAInfo));
+    add_size(ma, size);
     ma->bookkeeping = true;
     return mem;
   }
@@ -109,7 +109,7 @@ void* ma_calloc_mem(MA *ma, size_t nmemb, size_t size,
     mainfo->line = line;
     mem = xcalloc(nmemb, size);
     hashtable_add(ma->allocated_pointer, mem, mainfo, ma->env);
-    add_size(ma, nmemb * size + sizeof (MAInfo));
+    add_size(ma, nmemb * size);
     ma->bookkeeping = true;
     return mem;
   }
@@ -127,7 +127,7 @@ void* ma_realloc_mem(MA *ma, void *ptr, size_t size,
     if (ptr) {
       mainfo = hashtable_get(ma->allocated_pointer, ptr);
       assert(mainfo);
-      subtract_size(ma, mainfo->size + sizeof (MAInfo));
+      subtract_size(ma, mainfo->size);
       hashtable_remove(ma->allocated_pointer, ptr, ma->env);
     }
     mainfo = xmalloc(sizeof (MAInfo));
@@ -136,7 +136,7 @@ void* ma_realloc_mem(MA *ma, void *ptr, size_t size,
     mainfo->line = line;
     mem = xrealloc(ptr, size);
     hashtable_add(ma->allocated_pointer, mem, mainfo, ma->env);
-    add_size(ma, size + sizeof (MAInfo));
+    add_size(ma, size);
     ma->bookkeeping = true;
     return mem;
   }
@@ -159,7 +159,7 @@ void ma_free_mem(void *ptr, MA *ma, const char *filename, int line)
 #endif
     mainfo = hashtable_get(ma->allocated_pointer, ptr);
     assert(mainfo);
-    subtract_size(ma, mainfo->size + sizeof (MAInfo));
+    subtract_size(ma, mainfo->size);
     hashtable_remove(ma->allocated_pointer, ptr, ma->env);
     free(ptr);
     ma->bookkeeping = true;
@@ -214,7 +214,6 @@ int ma_check_space_leak(MA *ma, Env *env)
 void ma_clean(MA *ma, /*@unused@*/ Env *env)
 {
   assert(ma);
-  assert(ma->bookkeeping);
   ma->bookkeeping = false;
   hashtable_delete(ma->allocated_pointer, ma->env);
 }

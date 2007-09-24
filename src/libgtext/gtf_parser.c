@@ -142,7 +142,7 @@ static int construct_mRNAs(void *key, void *value, void *data, Env *env)
   if (!had_err) {
     mRNA_node = genome_feature_new(gft_mRNA, mRNA_range, mRNA_strand, NULL, 0,
                                    env);
-    genome_node_set_seqid(mRNA_node, mRNA_seqid);
+    genome_node_set_seqid(mRNA_node, mRNA_seqid, env);
 
     /* register children */
     for (i = 0; i < array_size(genome_node_array); i++) {
@@ -191,7 +191,7 @@ static int construct_genes(void *key, void *value, void *data, Env *env)
 
     gene_node = genome_feature_new(gft_gene, gene_range, gene_strand, NULL, 0,
                                    env);
-    genome_node_set_seqid(gene_node, gene_seqid);
+    genome_node_set_seqid(gene_node, gene_seqid, env);
 
     /* register children */
     for (i = 0; i < array_size(mRNAs); i++) {
@@ -434,7 +434,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
                       seqid_str, env);
       }
       assert(seqid_str);
-      genome_node_set_seqid(gn, seqid_str);
+      genome_node_set_seqid(gn, seqid_str, env);
 
       /* set source */
       source_str = hashtable_get(parser->source_to_str_mapping, source);

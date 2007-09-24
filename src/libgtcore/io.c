@@ -16,9 +16,9 @@
 */
 
 #include <assert.h>
-#include <libgtcore/cstr.h>
-#include <libgtcore/io.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/io.h"
+#include "libgtcore/xansi.h"
 
 struct IO {
   FILE *fp;

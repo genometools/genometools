@@ -2,6 +2,7 @@
 *.bak
 *.core
 *.diff
+*.gcov
 *.al1
 *.bck
 *.bwt
@@ -15,6 +16,7 @@
 *.sti1
 *.suf
 *.tis
+*.esq
 *.polya
 *.polya.info
 *.gt_bsi

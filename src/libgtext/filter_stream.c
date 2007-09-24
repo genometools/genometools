@@ -40,7 +40,8 @@ static int filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 
   /* we still have nodes in the buffer */
   if (filter_visitor_node_buffer_size(fs->filter_visitor)) {
-    *gn = filter_visitor_get_node(fs->filter_visitor); /* return one of them */
+    /* return one of them */
+    *gn = filter_visitor_get_node(fs->filter_visitor, env);
     return 0;
   }
 
@@ -51,7 +52,7 @@ static int filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
     if (had_err)
       break;
     if (filter_visitor_node_buffer_size(fs->filter_visitor)) {
-      *gn = filter_visitor_get_node(fs->filter_visitor);
+      *gn = filter_visitor_get_node(fs->filter_visitor, env);
       return 0;
     }
   }

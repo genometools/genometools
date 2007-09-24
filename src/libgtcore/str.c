@@ -17,11 +17,11 @@
 
 #include <math.h>
 #include <assert.h>
-#include <libgtcore/cstr.h>
-#include <libgtcore/dynalloc.h>
-#include <libgtcore/ensure.h>
-#include <libgtcore/str.h>
-#include <libgtcore/xansi.h>
+#include "libgtcore/cstr.h"
+#include "libgtcore/dynalloc.h"
+#include "libgtcore/ensure.h"
+#include "libgtcore/str.h"
+#include "libgtcore/xansi.h"
 
 struct Str {
   char *cstr;           /* the actual string (always '\0' terminated) */
@@ -240,7 +240,7 @@ int str_read_next_line_generic(Str *s, GenFile *fpin, Env *env)
 {
   int cc;
   char c;
-  assert(s && fpin);
+  assert(s);
   for (;;) {
     cc = genfile_getc(fpin); /* XXX: use xgetc */
     if (cc == EOF) {

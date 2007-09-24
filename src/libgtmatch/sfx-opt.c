@@ -18,13 +18,13 @@
 #include <string.h>
 #include <inttypes.h>
 #include "libgtcore/env.h"
+#include "libgtcore/getbasename.h"
 #include "libgtcore/option.h"
 #include "libgtcore/str.h"
 #include "libgtcore/versionfunc.h"
 #include "sfx-optdef.h"
 #include "stamp.h"
 
-#include "getbasename.pr"
 #include "sfx-readmode.pr"
 
 static OPrval parse_options(int *parsed_args,
@@ -108,7 +108,8 @@ static OPrval parse_options(int *parsed_args,
   option_parser_add_option(op, option, env);
 
   option = option_new_bool("tis",
-                           "output encoded transformed input sequence to file",
+                           "output transformed and encoded input "
+                           "sequence to file",
                            &so->outtistab,
                            false,env);
   option_parser_add_option(op, option, env);
@@ -129,6 +130,12 @@ static OPrval parse_options(int *parsed_args,
                            "output Burrows-Wheeler Transformation "
                            "(bwttab) to file",
                            &so->outbwttab,
+                           false,env);
+  option_parser_add_option(op, option, env);
+
+  option = option_new_bool("des",
+                           "output sequence descriptions to file ",
+                           &so->outdestab,
                            false,env);
   option_parser_add_option(op, option, env);
 
@@ -153,6 +160,11 @@ static OPrval parse_options(int *parsed_args,
         str_set(so->str_indexname,basenameptr,env);
         env_ma_free(basenameptr,env);
       }
+    }
+    if (strarray_size(so->filenametab) == 0)
+    {
+      env_error_set(env,"missing argument to option -db");
+      oprval = OPTIONPARSER_ERROR;
     }
   }
   if (oprval == OPTIONPARSER_OK)
@@ -224,11 +236,12 @@ static void showoptions(const Suffixeratoroptions *so)
   {
     printf("# inputfile[%lu]=%s\n",i,strarray_get(so->filenametab,i));
   }
-  printf("# outtistab=%s,outsuftab=%s,outlcptab=%s,outbwttab=%s\n",
+  printf("# outtistab=%s,outsuftab=%s,outlcptab=%s,outbwttab=%s,outdestab=%s\n",
           so->outtistab ? "true" : "false",
           so->outsuftab ? "true" : "false",
           so->outlcptab ? "true" : "false",
-          so->outbwttab ? "true" : "false");
+          so->outbwttab ? "true" : "false",
+          so->outdestab ? "true" : "false");
 }
 
 void wrapsfxoptions(Suffixeratoroptions *so,Env *env)

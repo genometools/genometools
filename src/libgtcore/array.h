@@ -19,7 +19,7 @@
 #define ARRAY_H
 
 #include <stdlib.h>
-#include <libgtcore/env.h>
+#include "libgtcore/env.h"
 
 typedef struct Array Array;
 
@@ -40,6 +40,10 @@ void          array_set_size(Array*, unsigned long);
 void          array_reset(Array*);
 size_t        array_elem_size(const Array*);
 unsigned long array_size(const Array*);
+void          array_sort(Array*, int(*compar)(const void*, const void*));
+int           array_iterate(const Array*,
+                            int(*iterfunc)(void *info, const void *value, Env*),
+                            void *info, Env*);
 int           array_example(Env*);
 int           array_unit_test(Env*);
 void          array_delete(Array*, Env*);

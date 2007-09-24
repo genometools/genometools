@@ -19,7 +19,7 @@
 #define COUNTINGSORT_H
 
 #include <stdlib.h>
-#include <libgtcore/env.h>
+#include "libgtcore/env.h"
 
 /*
   This module implements the counting sort algorithm. For a description see

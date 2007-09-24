@@ -1,0 +1,22 @@
+#ifdef __cplusplus
+extern "C" {
+#endif
+void freesuffixarray(Suffixarray *suffixarray,Env *env);
+
+int streamsuffixarray(Suffixarray *suffixarray,
+                      Seqpos *totallength,
+                      unsigned int demand,
+                      const Str *indexname,
+                      Verboseinfo *verboseinfo,
+                      Env *env);
+
+int mapsuffixarray(Suffixarray *suffixarray,
+                   Seqpos *totallength,
+                   unsigned int demand,
+                   const Str *indexname,
+                   Verboseinfo *verboseinfo,
+                   Env *env);
+
+#ifdef __cplusplus
+}
+#endif

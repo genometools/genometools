@@ -20,9 +20,9 @@
 #include <regex.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <libgtcore/ensure.h>
-#include <libgtcore/error.h>
-#include <libgtcore/grep.h>
+#include "libgtcore/ensure.h"
+#include "libgtcore/error.h"
+#include "libgtcore/grep.h"
 
 static void grep_error(int errcode, regex_t *matcher, Env *env)
 {

@@ -123,7 +123,7 @@ int bitPackArray_unit_test(Env *env)
       {
         env_log_log(env, "bsStoreUInt64/bpaGetUInt64: "
                     "Expected %llu, got %llu, seed = %lu, i = %lu, bits=%u\n",
-                    (unsigned long long)v & mask,
+                    (unsigned long long)(v & mask),
                     (unsigned long long)r, seedval, (unsigned long)i, bits);
         env_ma_free(randSrc, env);
         env_ma_free(randCmp, env);
