@@ -22,6 +22,7 @@
 #include "libgtcore/str.h"
 #include "libgtcore/option.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/versionfunc.h"
 
 #include "libgtmatch/symboldef.h"
 #include "libgtmatch/arraydef.h"
@@ -176,11 +177,6 @@ int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Env *env)
   motif->secondright = symbolmap[(unsigned int)motif->secondright];
 
   return 0;
-}
-
-static void versionfunc(const char *progname)
-{
-  printf("%s version 1.0\n",progname);
 }
 
 static OPrval parse_options(int *parsed_args,
