@@ -61,4 +61,15 @@ typedef struct
   unsigned long *characterdistribution;
 } Fastabufferstate;
 
+void initformatbufferstate(Fastabufferstate *fbs,
+                           const StrArray *filenametab,
+                           const Uchar *symbolmap,
+                           bool plainformat,
+                           Filelengthvalues **filelengthtab,
+                           Sequencedescription *sequencedescription,
+                           unsigned long *characterdistribution,
+                           Env *env);
+
+int advanceformatbufferstate(Fastabufferstate *fbs,Env *env);
+
 #endif

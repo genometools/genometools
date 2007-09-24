@@ -36,8 +36,6 @@
 #include "sfx-nextchar.h"
 #endif
 
-#include "fbsadv.pr"
-
 #include "readnextUchar.gen"
 
 #ifdef SPECIALCASE4

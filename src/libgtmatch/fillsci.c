@@ -25,8 +25,6 @@
 #include "dist-if.h"
 #include "safecast-gen.h"
 
-#include "fbsadv.pr"
-
 #include "readnextUchar.gen"
 
 static unsigned long currentrangevalue(unsigned long i,unsigned long distvalue)

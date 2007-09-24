@@ -23,8 +23,6 @@
 #include "fbs-def.h"
 #include "stamp.h"
 
-#include "fbsadv.pr"
-
 #include "readnextUchar.gen"
 
 int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
