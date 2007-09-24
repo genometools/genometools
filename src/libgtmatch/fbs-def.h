@@ -50,14 +50,14 @@ typedef struct
   unsigned long *characterdistribution;
 } Fastabufferstate;
 
-void initformatbufferstate(Fastabufferstate *fbs,
-                           const StrArray *filenametab,
-                           const Uchar *symbolmap,
-                           bool plainformat,
-                           Filelengthvalues **filelengthtab,
-                           Sequencedescription *sequencedescription,
-                           unsigned long *characterdistribution,
-                           Env *env);
+Fastabufferstate*  initformatbufferstate(const StrArray *filenametab,
+                                         const Uchar *symbolmap,
+                                         bool plainformat,
+                                         Filelengthvalues **filelengthtab,
+                                         Sequencedescription
+                                         *sequencedescription,
+                                         unsigned long *characterdistribution,
+                                         Env *env);
 
 int advanceformatbufferstate(Fastabufferstate *fbs,Env *env);
 
@@ -82,5 +82,7 @@ static inline int readnextUchar(Uchar *val,Fastabufferstate *fbs,Env *env)
   *val = fbs->bufspace[fbs->nextread++];
   return 1;
 }
+
+void fastabufferstate_delete(Fastabufferstate*, Env*);
 
 #endif

@@ -33,7 +33,7 @@ int testencodedsequence(const StrArray *filenametab,
 {
   Seqpos pos, totallength;
   Uchar ccscan = 0, ccra, ccsr;
-  Fastabufferstate fbs;
+  Fastabufferstate *fbs = NULL;
   int retval;
   bool haserr = false;
   Encodedsequencescanstate *esr;
@@ -43,21 +43,20 @@ int testencodedsequence(const StrArray *filenametab,
   totallength = getencseqtotallength(encseq);
   if (filenametab != NULL)
   {
-    initformatbufferstate(&fbs,
-                          filenametab,
-                          symbolmap,
-                          false,
-                          NULL,
-                          NULL,
-                          NULL,
-                          env);
+    fbs = initformatbufferstate(filenametab,
+                                symbolmap,
+                                false,
+                                NULL,
+                                NULL,
+                                NULL,
+                                env);
   }
   esr = initEncodedsequencescanstate(encseq,readmode,env);
   for (pos=0; /* Nothing */; pos++)
   {
     if (filenametab != NULL && readmode == Forwardmode)
     {
-      retval = readnextUchar(&ccscan,&fbs,env);
+      retval = readnextUchar(&ccscan,fbs,env);
       if (retval < 0)
       {
         haserr = true;
@@ -118,6 +117,7 @@ int testencodedsequence(const StrArray *filenametab,
   {
     freeEncodedsequencescanstate(&esr,env);
   }
+  fastabufferstate_delete(fbs, env);
   return haserr ? -1 : 0;
 }
 

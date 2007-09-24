@@ -492,7 +492,7 @@ static int getencseqkmersgeneric(
     }
   } else
   {
-    Fastabufferstate fbs;
+    Fastabufferstate *fbs;
     int retval;
 
     if (readmode != Forwardmode)
@@ -503,17 +503,16 @@ static int getencseqkmersgeneric(
     }
     if (!haserr)
     {
-      initformatbufferstate(&fbs,
-                            filenametab,
-                            symbolmap,
-                            plainformat,
-                            NULL,
-                            NULL,
-                            NULL,
-                            env);
+      fbs = initformatbufferstate(filenametab,
+                                  symbolmap,
+                                  plainformat,
+                                  NULL,
+                                  NULL,
+                                  NULL,
+                                  env);
       for (currentposition = 0; /* Nothing */; currentposition++)
       {
-        retval = readnextUchar(&charcode,&fbs,env);
+        retval = readnextUchar(&charcode,fbs,env);
         if (retval < 0)
         {
           haserr = true;
@@ -526,6 +525,7 @@ static int getencseqkmersgeneric(
         shiftrightwithchar(processkmercode,processkmercodeinfo,
                            &spwp,currentposition,charcode,env);
       }
+      fastabufferstate_delete(fbs, env);
     }
   }
   if (!haserr)

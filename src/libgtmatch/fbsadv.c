@@ -26,16 +26,18 @@
 #define FASTASEPARATOR    '>'
 #define NEWLINESYMBOL     '\n'
 
-void initformatbufferstate(Fastabufferstate *fbs,
-                           const StrArray *filenametab,
-                           const Uchar *symbolmap,
-                           bool plainformat,
-                           Filelengthvalues **filelengthtab,
-                           Sequencedescription *sequencedescription,
-                           unsigned long *characterdistribution,
-                           Env *env)
+Fastabufferstate* initformatbufferstate(const StrArray *filenametab,
+                                        const Uchar *symbolmap,
+                                        bool plainformat,
+                                        Filelengthvalues **filelengthtab,
+                                        Sequencedescription
+                                        *sequencedescription,
+                                        unsigned long *characterdistribution,
+                                        Env *env)
 {
+  Fastabufferstate *fbs;
   env_error_check(env);
+  fbs = env_ma_calloc(env, 1, sizeof (Fastabufferstate));
   fbs->plainformat = plainformat;
   fbs->filenum = 0;
   fbs->firstoverallseq = true;
@@ -57,6 +59,7 @@ void initformatbufferstate(Fastabufferstate *fbs,
     fbs->filelengthtab = NULL;
   }
   fbs->characterdistribution = characterdistribution;
+  return fbs;
 }
 
 static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
@@ -102,6 +105,7 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       if (currentchar == EOF)
       {
         genfile_xclose(fbs->inputstream, env);
+        fbs->inputstream = NULL;
         if (fbs->filelengthtab != NULL)
         {
           fbs->filelengthtab[fbs->filenum].length += currentfileread;
@@ -260,6 +264,7 @@ static int advancePlainbufferstate(Fastabufferstate *fbs,Env *env)
       if (currentchar == EOF)
       {
         genfile_xclose(fbs->inputstream, env);
+        fbs->inputstream = NULL;
         if (fbs->filelengthtab != NULL)
         {
           fbs->filelengthtab[fbs->filenum].length
@@ -299,4 +304,11 @@ int advanceformatbufferstate(Fastabufferstate *fbs,Env *env)
     return advancePlainbufferstate(fbs,env);
   }
   return advanceFastabufferstate(fbs,env);
+}
+
+void fastabufferstate_delete(Fastabufferstate *fbs, Env *env)
+{
+  if (!fbs) return;
+  genfile_xclose(fbs->inputstream, env);
+  env_ma_free(fbs, env);
 }
