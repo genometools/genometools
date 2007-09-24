@@ -7,47 +7,47 @@
 EVALXDROPARBITSCORES
 {
   int integermax, integermin, i ,     /* index i */
-    j = 0,                            /* index j */ 
-    k = 0,                            /* diagonal */ 
-    end_k = ulen - vlen,              /* diagonal of endpoint (ulen, vlen) */ 
-    lbound = 0,                       /* diagonal lower bound */ 
-    ubound = 0,                       /* diagonal upper bound */ 
-    lboundtmp = 0, 
-    uboundtmp = 0, 
-    tmprow;                           /* temporary row index */ 
+    j = 0,                            /* index j */
+    k = 0,                            /* diagonal */
+    end_k = ulen - vlen,              /* diagonal of endpoint (ulen, vlen) */
+    lbound = 0,                       /* diagonal lower bound */
+    ubound = 0,                       /* diagonal upper bound */
+    lboundtmp = 0,
+    uboundtmp = 0,
+    tmprow;                           /* temporary row index */
   unsigned char a, b;
   Myfrontvalue tmpfront;
   Arbitrarydistances arbitdistances;
-  int d = 0,                         /* distance */ 
-      d_pre = 0,                     /* distance previous */ 
+  int d = 0,                         /* distance */
+      d_pre = 0,                     /* distance previous */
       dback;
-  Xdropscore bigt_tmp;                /* best score T' seen already */ 
-  ArrayXdropscore big_t;              /* array T[d] of best score T for each d */
+  Xdropscore bigt_tmp;               /* best score T' seen already */
+  ArrayXdropscore big_t;             /* array T[d] of best score T for each d */
   bool alwaysMININFINITYINT = true;
   int allowedMININFINITYINTgenerations = 0,
-      currentMININFINITYINTgeneration = 0; 
-  
+      currentMININFINITYINTgeneration = 0;
+
   env_error_check(env);
-  
+
   calculatedistancesfromscores(arbitscores, &arbitdistances);
   calculateallowedMININFINITYINTgenerations(
      &allowedMININFINITYINTgenerations,
      &arbitdistances);
-  
+
   dback = SETDBACK(xdropbelowscore);
-  
+
   INITARRAY (&big_t, Xdropscore);
   integermax = MAX (ulen, vlen);
   integermin = -integermax;
 
-  /* "phase" 0 */ 
-  for(i = 0; i < MIN(ulen,vlen); i++)
+  /* "phase" 0 */
+  for (i = 0; i < MIN(ulen,vlen); i++)
   {
     COMPARESYMBOLSSEP(i,i);
   }
 
   /* alignment already finished */
-  if(i >= ulen || i >= vlen )
+  if (i >= ulen || i >= vlen )
   {
     lbound =  1;
     ubound = -1;
@@ -62,38 +62,39 @@ EVALXDROPARBITSCORES
 
   STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
 
-  /* "phase" d > 0 */ 
+  /* "phase" d > 0 */
   while (lbound <= ubound)
   {
     d++;
-    d_pre = d - dback; 
+    d_pre = d - dback;
 
-    /* calculate fronts */ 
+    /* calculate fronts */
     for (k = lbound - 1; k <= ubound + 1; k++)
     {
-        
-      i = MINUSINFINITYINT; 
-      /* case 1 : DELETION-EDGE  */ 
-      if ( (lbound < k) && 
-	   (d - arbitdistances.del >= 0) && 
-	   (( -(d - arbitdistances.del) <= k - 1) && (k - 1 <= d - arbitdistances.del)) 
+
+      i = MINUSINFINITYINT;
+      /* case 1 : DELETION-EDGE  */
+      if ( (lbound < k) &&
+	   (d - arbitdistances.del >= 0) &&
+	   (( -(d - arbitdistances.del) <= k - 1) && (k - 1 <= d - arbitdistances.del))
 	 )
       {
         i =
-          fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - arbitdistances.del, k - 1)].dptabrow +
-          1;
+          fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - arbitdistances.del,
+                                                  k - 1)].dptabrow + 1;
         tmpfront.dptabdirection = MYDELETIONBIT;
       }
-      /* case 2: REPLACEMENT-EDGE */ 
+      /* case 2: REPLACEMENT-EDGE */
       if ( (lbound <= k) && (k <= ubound) && (d - arbitdistances.mis >= 0) &&
-	   (( -(d - arbitdistances.mis) <= k) && (k <= d - arbitdistances.mis)) 
+	   (( -(d - arbitdistances.mis) <= k) && (k <= d - arbitdistances.mis))
 	 )
       {
-        /* test, if case 1 has happened. */ 
+        /* test, if case 1 has happened. */
         if (tmpfront.dptabdirection & MYDELETIONBIT)
         {
           tmprow =
-            fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - arbitdistances.mis, k)].dptabrow + 1;
+            fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - arbitdistances.mis,
+                                                    k)].dptabrow + 1;
           if (tmprow > i)
           {
             i = tmprow;
@@ -103,21 +104,23 @@ EVALXDROPARBITSCORES
         else
         {
           i =
-            fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - arbitdistances.mis, k)].dptabrow + 1;
+            fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - arbitdistances.mis, k)]
+            .dptabrow + 1;
           tmpfront.dptabdirection = MYREPLACEMENTBIT;
         }
 
       }
-      /* case 3: INSERTION-EDGE */  
+      /* case 3: INSERTION-EDGE */
       if ( (k < ubound) && (d - arbitdistances.ins >= 0) &&
-	   (( -(d - arbitdistances.ins) <= k + 1) && (k + 1 <= d - arbitdistances.ins)) 
+	   (( -(d - arbitdistances.ins) <= k + 1) && (k + 1 <= d - arbitdistances.ins))
 	 )
       {
         if ((tmpfront.dptabdirection & MYDELETIONBIT)
             || (tmpfront.dptabdirection & MYREPLACEMENTBIT))
         {
           tmprow =
-            fronts->spaceMyfrontvalue[ACCESSTOFRONT (d - arbitdistances.ins, k + 1)].dptabrow;
+            fronts->spaceMyfrontvalue[ACCESSTOFRONT (d - arbitdistances.ins,
+                                                     k + 1)].dptabrow;
           if (tmprow > i)
           {
             i = tmprow;
@@ -127,49 +130,49 @@ EVALXDROPARBITSCORES
         else
         {
           i =
-            fronts->spaceMyfrontvalue[ACCESSTOFRONT (d - arbitdistances.ins, k + 1)].dptabrow;
+            fronts->spaceMyfrontvalue[ACCESSTOFRONT (d - arbitdistances.ins,
+                                                     k + 1)].dptabrow;
           tmpfront.dptabdirection = MYINSERTIONBIT;
         }
       }
 
-
       j = i - k;
 
       /* if i = MINUSINFINITYINY or MINUSINFINITYINY + 1 */
-      if( i < 0)
+      if ( i < 0)
       {
-	if(tmpfront.dptabdirection == (unsigned char)0)
+	if (tmpfront.dptabdirection == (unsigned char)0)
 	{
           alwaysMININFINITYINT = false;
 	}
         tmpfront.dptabrow = MINUSINFINITYINT;
       }
       /* alignment score smaller than T - X */
-      else if( d_pre > 0 && 
+      else if ( d_pre > 0 &&
       	      (S (i + j, d) < big_t.spaceXdropscore[d_pre] - xdropbelowscore)
 	     )
       {
         tmpfront.dptabrow = MINUSINFINITYINT;
       }
-      else if( ( k <= -d || k >= d ) /* not correct boundaries for 
+      else if ( ( k <= -d || k >= d ) /* not correct boundaries for
 	                                ACCESTOFRONT(d-1,k) */
                ||
 	       ( (fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - 1, k)].dptabrow < i)
 	         &&
 	         (i <= MIN(ulen,vlen + k))
-	       ) 
+	       )
 	     )
       {
-        while(i < ulen && j < vlen) 
+        while (i < ulen && j < vlen)
         {
 	  COMPARESYMBOLSSEP(i,j);
           i++;
           j++;
         }
-      
+
         alwaysMININFINITYINT = false;
 	tmpfront.dptabrow = i;
-     
+
 	/* MAX(bigt_tmp, S(i+j,d)); */
         if (S (i + j, d) > bigt_tmp)
         {
@@ -178,11 +181,11 @@ EVALXDROPARBITSCORES
           xdropbest->jvalue = (unsigned int) j;
         }
       }
-       
-      else 
+
+      else
       {
         alwaysMININFINITYINT = false;
-        tmpfront.dptabrow = 
+        tmpfront.dptabrow =
 	  fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - 1, k)].dptabrow;
       }
 
@@ -195,14 +198,14 @@ EVALXDROPARBITSCORES
 
     }   /* end for loop */
 
-    /* if all front values are MINUSINFINITYINT, 
-       aligment prematurely finished if allowedMININFINITYINTgenerations 
+    /* if all front values are MINUSINFINITYINT,
+       aligment prematurely finished if allowedMININFINITYINTgenerations
        exceeded
        (full front has already ended at d - currentMININFINITYINTgeneration). */
     if (alwaysMININFINITYINT)
     {
       currentMININFINITYINTgeneration++;
-      if(currentMININFINITYINTgeneration > allowedMININFINITYINTgenerations)
+      if (currentMININFINITYINTgeneration > allowedMININFINITYINTgenerations)
       {
 	d = d - currentMININFINITYINTgeneration;
 	break;
@@ -213,7 +216,7 @@ EVALXDROPARBITSCORES
       currentMININFINITYINTgeneration = 0;
       alwaysMININFINITYINT = true;
     }
-    
+
     STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
 
     /* fill out of bounds values of MINUSINFINITYINT
