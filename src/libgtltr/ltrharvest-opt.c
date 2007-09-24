@@ -205,7 +205,8 @@ static OPrval parse_options(int *parsed_args,
   static const char *overlaps[] = {
     "best", /* the default */
     "no",
-    "all"
+    "all",
+    NULL
   };
 
   env_error_check(env);
