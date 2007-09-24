@@ -40,8 +40,6 @@
 #include "opensfxfile.pr"
 #include "fillsci.pr"
 
-#include "readnextUchar.gen"
-
 #ifdef Seqposequalsunsignedint
 #define Uint32Const(N)   (N##U)  /* unsigned int constant */
 #define EXTRACTENCODEDCHAR(ESEQ,IDX)\

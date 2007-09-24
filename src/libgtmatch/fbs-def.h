@@ -72,4 +72,26 @@ void initformatbufferstate(Fastabufferstate *fbs,
 
 int advanceformatbufferstate(Fastabufferstate *fbs,Env *env);
 
+static inline int readnextUchar(Uchar *val,Fastabufferstate *fbs,Env *env)
+{
+  if (fbs->nextread >= fbs->nextfree)
+  {
+    if (fbs->complete)
+    {
+      return 0;
+    }
+    if (advanceformatbufferstate(fbs,env) != 0)
+    {
+      return -1;
+    }
+    fbs->nextread = 0;
+    if (fbs->nextfree == 0)
+    {
+      return 0;
+    }
+  }
+  *val = fbs->bufspace[fbs->nextread++];
+  return 1;
+}
+
 #endif

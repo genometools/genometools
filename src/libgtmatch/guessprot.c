@@ -23,8 +23,6 @@
 #include "fbs-def.h"
 #include "stamp.h"
 
-#include "readnextUchar.gen"
-
 int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
 {
   unsigned int countnonbases = 0,

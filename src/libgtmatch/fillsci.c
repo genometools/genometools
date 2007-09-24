@@ -25,8 +25,6 @@
 #include "dist-if.h"
 #include "safecast-gen.h"
 
-#include "readnextUchar.gen"
-
 static unsigned long currentrangevalue(unsigned long i,unsigned long distvalue)
 {
   if (i <= UCHAR_MAX)

@@ -25,8 +25,6 @@
 #include "format64.h"
 #include "iterseq.h"
 
-#include "readnextUchar.gen"
-
 int overallquerysequences(int(*processsequence)(void *,
                                                 uint64_t,
                                                 const Uchar *,

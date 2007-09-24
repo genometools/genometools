@@ -36,8 +36,6 @@
 #include "sfx-nextchar.h"
 #endif
 
-#include "readnextUchar.gen"
-
 #ifdef SPECIALCASE4
 #define SUBTRACTLCHARANDSHIFT(CODE,LCHAR,NUMOFCHARS,MULTIMAPPOWER)\
         if ((NUMOFCHARS) == DNAALPHASIZE)\

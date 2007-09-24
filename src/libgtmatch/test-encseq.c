@@ -24,7 +24,6 @@
 #include "stamp.h"
 
 #include "arrcmp.pr"
-#include "readnextUchar.gen"
 
 int testencodedsequence(const StrArray *filenametab,
                         const Encodedsequence *encseq,
