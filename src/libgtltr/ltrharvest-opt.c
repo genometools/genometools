@@ -28,7 +28,6 @@
 #include "libgtmatch/arraydef.h"
 #include "libgtmatch/chardef.h"
 #include "libgtmatch/alphadef.h"
-#include "libgtmatch/alphabet.pr"
 
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
