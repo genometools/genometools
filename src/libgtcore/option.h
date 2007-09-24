@@ -112,10 +112,9 @@ Option*        option_new_int(const char *option_str,
 Option*        option_new_int_min(const char *option_str,
                                   const char *description, int *value,
                                   int default_value, int min_value, Env*);
-Option*        option_new_int_max(const char *option_str, 
-                            const char *description,
-                            int *value, int default_value,
-                            int max_value, Env *env);
+Option*        option_new_int_max(const char *option_str,
+                                  const char *description, int *value,
+                                  int default_value, int max_value, Env*);
 Option*        option_new_uint(const char *option_str, const char *description,
                                unsigned int *value, unsigned int default_value,
                                Env*);
@@ -130,10 +129,11 @@ Option*        option_new_uint_max(const char *option_str,
                                    unsigned int default_value,
                                    unsigned int max_value, Env*);
 Option*        option_new_uint_min_max(const char *option_str,
-                                 const char *description, unsigned int *value,
-                                 unsigned int default_value,
-                                 unsigned int min_value,
-                                 unsigned int max_value, Env *env);
+                                       const char *description,
+                                       unsigned int *value,
+                                       unsigned int default_value,
+                                       unsigned int min_value,
+                                       unsigned int max_value, Env*);
 Option*        option_new_long(const char *option_str, const char *description,
                                long *value, long default_value, Env*);
 Option*        option_new_ulong(const char *option_str, const char *description,
