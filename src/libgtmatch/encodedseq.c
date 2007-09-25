@@ -31,7 +31,7 @@
 #include "mapspec-def.h"
 #include "encseq-def.h"
 #include "arraydef.h"
-#include "fbs-def.h"
+#include "fastabuffer.h"
 #include "safecast-gen.h"
 #include "esafileend.h"
 #include "verbose-def.h"

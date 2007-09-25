@@ -21,7 +21,7 @@
 #include "libgtcore/strarray.h"
 #include "seqpos-def.h"
 #include "chardef.h"
-#include "fbs-def.h"
+#include "fastabuffer.h"
 #include "dist-if.h"
 #include "safecast-gen.h"
 

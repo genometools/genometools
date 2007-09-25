@@ -20,7 +20,7 @@
 #include "symboldef.h"
 #include "arraydef.h"
 #include "chardef.h"
-#include "fbs-def.h"
+#include "fastabuffer.h"
 #include "seqdesc.h"
 #include "format64.h"
 #include "iterseq.h"

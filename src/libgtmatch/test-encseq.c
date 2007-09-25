@@ -20,7 +20,7 @@
 #include "spacedef.h"
 #include "readmode-def.h"
 #include "encseq-def.h"
-#include "fbs-def.h"
+#include "fastabuffer.h"
 #include "stamp.h"
 
 #include "arrcmp.pr"

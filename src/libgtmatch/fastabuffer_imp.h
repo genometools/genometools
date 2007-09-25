@@ -15,20 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FBS_DEF_H
-#define FBS_DEF_H
-#include <stdio.h>
-#include <stdbool.h>
-#include <inttypes.h>
-#include "libgtcore/strarray.h"
-#include "symboldef.h"
-#include "filelength-def.h"
-#include "arraydef.h"
-#include "seqdesc.h"
+#ifndef FASTABUFFER_IMP_H
+#define FASTABUFFER_IMP_H
 
 #define FILEBUFFERSIZE 65536
 
-typedef struct
+struct Fastabufferstate
 {
   unsigned int filenum;
   uint64_t linenum;
@@ -48,16 +40,7 @@ typedef struct
   const Uchar *symbolmap;
   bool plainformat;
   unsigned long *characterdistribution;
-} Fastabufferstate;
-
-Fastabufferstate*  initformatbufferstate(const StrArray *filenametab,
-                                         const Uchar *symbolmap,
-                                         bool plainformat,
-                                         Filelengthvalues **filelengthtab,
-                                         Sequencedescription
-                                         *sequencedescription,
-                                         unsigned long *characterdistribution,
-                                         Env *env);
+};
 
 int advanceformatbufferstate(Fastabufferstate *fbs,Env *env);
 
@@ -82,7 +65,5 @@ static inline int readnextUchar(Uchar *val,Fastabufferstate *fbs,Env *env)
   *val = fbs->bufspace[fbs->nextread++];
   return 1;
 }
-
-void fastabufferstate_delete(Fastabufferstate*, Env*);
 
 #endif

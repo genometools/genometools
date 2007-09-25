@@ -19,7 +19,7 @@
 #include "libgtcore/env.h"
 #include "libgtcore/strarray.h"
 #include "format64.h"
-#include "fbs-def.h"
+#include "fastabuffer.h"
 #include "spacedef.h"
 #include "chardef.h"
 

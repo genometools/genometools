@@ -30,7 +30,7 @@
 #include "spacedef.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
-#include "fbs-def.h"
+#include "fastabuffer.h"
 #include "stamp.h"
 #ifndef NDEBUG
 #include "sfx-nextchar.h"
