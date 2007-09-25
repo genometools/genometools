@@ -17,6 +17,7 @@
 
 #ifndef CHARDEF_H
 #define CHARDEF_H
+
 #include <limits.h>
 #include <inttypes.h>
 
