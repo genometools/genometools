@@ -21,11 +21,11 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <inttypes.h>
+#include "libgtcore/filelengthvalues.h"
 #include "libgtcore/queue.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
 #include "arraydef.h"
-#include "filelength-def.h"
 
 typedef struct FastaBuffer FastaBuffer;
 

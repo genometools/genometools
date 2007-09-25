@@ -20,6 +20,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include "libgtcore/chardef.h"
+#include "libgtcore/filelengthvalues.h"
 #include "spacedef.h"
 #include "alphadef.h"
 #include "sfx-optdef.h"
@@ -27,7 +28,6 @@
 #include "measure-time-if.h"
 #include "esafileend.h"
 #include "intcode-def.h"
-#include "filelength-def.h"
 #include "sfx-suffixer.h"
 #include "sfx-lcpval.h"
 #include "iterseq.h"

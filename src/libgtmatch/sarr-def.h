@@ -19,9 +19,9 @@
 #define SARR_DEF_H
 
 #include <stdio.h>
+#include "libgtcore/filelengthvalues.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
-#include "filelength-def.h"
 #include "encseq-def.h"
 
 #define FILEBUFFERSIZE 65536

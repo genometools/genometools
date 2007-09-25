@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FILELENGTH_DEF_H
-#define FILELENGTH_DEF_H
+#ifndef FILELENGTHVALUES_H
+#define FILELENGTHVALUES_H
 #include <inttypes.h>
 
 typedef struct
