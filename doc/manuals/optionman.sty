@@ -1,0 +1,53 @@
+\usepackage{xspace}
+
+\newcommand{\Showoption}[1]{\mbox{\footnotesize \texttt{-#1}}}
+\newcommand{\Showoptiongroup}[1]{\hline\multicolumn{2}{c}{#1}\\}
+\newcommand{\Showoptionarg}[1]{\mbox{\footnotesize \textit{#1}}\index{#1@\textit{#1}}}
+\newcommand{\Showoptionalarg}[1]{\lbrack\Showoptionarg{#1}\rbrack}
+\newcommand{\Showoptionkey}[1]{\mbox{\footnotesize \texttt{#1}}}
+\newcommand{\Showrecentchange}[2]{\paragraph{#1; #2:}}
+\newcommand{\Option}[3]{%
+                        \item[\Showoption{#1}~#2]\mbox{}%
+                        \index{Option!\texttt{-#1}}%
+                        \\%
+#3}
+\newcommand{\Showformattype}[1]{\textsc{#1}\xspace}
+\newcommand{\Fasta}{\Showformattype{Fasta}}
+\newcommand{\Fastastart}[0]{\texttt{\symbol{62}}\xspace}
+
+\newenvironment{Showprogramwithoptions}[2]{
+The program is called as follows:
+\par
+\noindent#1 [\emph{options}] \emph{indexname}
+\par
+#2
+\par
+And here is a description of the options:
+\par
+\begin{list}{}{}
+}{\end{list}}
+
+\newenvironment{Showprogramwithoptionswithoutindex}[2]{
+The program is called as follows:
+\par
+\noindent#1 \emph{options}
+\par
+#2
+\par
+And here is a description of the options:
+\par
+\begin{list}{}{}
+}{\end{list}}
+
+\newenvironment{Justshowoptions}[0]{
+\begin{list}{}{}
+}{\end{list}}
+
+\newcommand{\Helpoption}[0]{
+\Option{help}{}{
+Show a summary of all options and terminate with \index{exit code} exit code 0.
+}
+}
+
+\parskip5pt
+\parindent0pt
