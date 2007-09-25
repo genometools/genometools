@@ -20,12 +20,12 @@
 #include <stdbool.h>
 #include <limits.h>
 #include "libgtcore/endianess.h"
+#include "libgtcore/filelengthvalues.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/str.h"
 #include "seqpos-def.h"
 #include "format64.h"
 #include "spacedef.h"
-#include "filelength-def.h"
 #include "esafileend.h"
 #include "readmode-def.h"
 #include "stamp.h"

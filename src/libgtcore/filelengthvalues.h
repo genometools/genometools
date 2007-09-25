@@ -15,10 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SYMBOLDEF_H
-#define SYMBOLDEF_H
+#ifndef FILELENGTHVALUES_H
+#define FILELENGTHVALUES_H
 #include <inttypes.h>
 
-typedef uint8_t Uchar;         /* \Typedef{Uchar} */
+typedef struct
+{
+  uint64_t length,
+           effectivelength;
+} Filelengthvalues;
 
 #endif

@@ -17,10 +17,10 @@
 
 #include <limits.h>
 #include <stdio.h>
+#include "libgtcore/chardef.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/env.h"
-#include "symboldef.h"
-#include "chardef.h"
+#include "libgtcore/symboldef.h"
 #include "spacedef.h"
 
 #define COMPARESYMBOLS(A,B)\

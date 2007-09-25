@@ -152,12 +152,10 @@ int simpleexactselfmatchstore (
 
       if ( seqnum1 == seqnum2 )
       {
-#ifdef DEBUG
-	  printf("accepted:\n");
-	  printf("pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
-	  printf("pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
-	  printf("i: " FormatSeqpos "\n", PRINTSeqposcast(i));
-#endif
+	  env_log_log(env, "accepted:\n");
+	  env_log_log(env, "pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
+	  env_log_log(env, "pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
+	  env_log_log(env, "i: %lu\n", i);
 	  samecontig = true;
           contignumber = seqnum1;
 	  break;
@@ -174,15 +172,13 @@ int simpleexactselfmatchstore (
 
     GETNEXTFREEINARRAY(nextfreerepeatptr, &info->repeatinfo.repeats,
                        Repeat, 10);
-#ifdef DEBUG
-    printf("maximal repeat pos1: " FormatSeqpos "\n",
+    env_log_log(env, "maximal repeat pos1: " FormatSeqpos "\n",
                PRINTSeqposcast(pos1));
-    printf("maximal repeat pos2: " FormatSeqpos "\n",
+    env_log_log(env, "maximal repeat pos2: " FormatSeqpos "\n",
                PRINTSeqposcast(pos2));
-    printf("len: " FormatSeqpos "\n",
+    env_log_log(env, "len: " FormatSeqpos "\n",
                PRINTSeqposcast(len));
-    printf("seq number: %lu\n\n", contignumber);
-#endif
+    env_log_log(env, "seq number: %lu\n\n", contignumber);
     nextfreerepeatptr->pos1 = pos1;
     nextfreerepeatptr->offset = tmp;
     nextfreerepeatptr->len = len;

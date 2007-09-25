@@ -16,7 +16,7 @@
 */
 
 #include <math.h>
-#include "chardef.h"
+#include "libgtcore/chardef.h"
 #include "divmodmul.h"
 #include "fmindex.h"
 

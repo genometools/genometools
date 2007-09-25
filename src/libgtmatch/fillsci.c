@@ -17,11 +17,11 @@
 
 #include <stdbool.h>
 #include <ctype.h>
+#include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
 #include "seqpos-def.h"
-#include "chardef.h"
-#include "fbs-def.h"
 #include "dist-if.h"
 #include "safecast-gen.h"
 
@@ -66,7 +66,7 @@ int fasta2sequencekeyvalues(
         unsigned long *characterdistribution,
         Env *env)
 {
-  Fastabufferstate *fbs;
+  FastaBuffer *fb;
   Uchar charcode;
   Seqpos pos;
   int retval;
@@ -82,17 +82,17 @@ int fasta2sequencekeyvalues(
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
 
-  fbs = initformatbufferstate(filenametab,
-                              symbolmap,
-                              plainformat,
-                              filelengthtab,
-                              NULL,
-                              characterdistribution,
-                              env);
+  fb = fastabuffer_new(filenametab,
+                       symbolmap,
+                       plainformat,
+                       filelengthtab,
+                       NULL,
+                       characterdistribution,
+                       env);
   specialrangelengths = initdistribution(env);
   for (pos = 0; /* Nothing */; pos++)
   {
-    retval = readnextUchar(&charcode,fbs,env);
+    retval = fastabuffer_next(fb,&charcode,env);
     if (retval < 0)
     {
       haserr = true;
@@ -149,7 +149,7 @@ int fasta2sequencekeyvalues(
     *totallength = pos;
   }
   freedistribution(&specialrangelengths,env);
-  fastabufferstate_delete(fbs, env);
+  fastabuffer_delete(fb, env);
   return haserr ? -1 : 0;
 }
 

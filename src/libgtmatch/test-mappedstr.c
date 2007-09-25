@@ -18,11 +18,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "arraydef.h"
 #include "spacedef.h"
 #include "alphadef.h"
-#include "chardef.h"
 #include "encseq-def.h"
 #include "intcode-def.h"
 #include "sarr-def.h"

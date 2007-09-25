@@ -15,15 +15,14 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ITERSEQ_H
-#define ITERSEQ_H
-#include <inttypes.h>
-#include "libgtcore/strarray.h"
-#include "symboldef.h"
-#include "arraydef.h"
-#include "seqdesc.h"
+#ifndef OVERALLSEQ_H
+#define OVERALLSEQ_H
 
-typedef struct Scansequenceiterator Scansequenceiterator;
+#include <inttypes.h>
+#include "libgtcore/queue.h"
+#include "libgtcore/strarray.h"
+#include "libgtcore/symboldef.h"
+#include "arraydef.h"
 
 int overallquerysequences(int(*processsequence)(void *,
                                                 uint64_t,
@@ -34,21 +33,8 @@ int overallquerysequences(int(*processsequence)(void *,
                           void *info,
                           ArrayUchar *sequencebuffer,
                           const StrArray *filenametab,
-                          Sequencedescription *sequencedescription,
+                          Queue *descptr,
                           const Uchar *symbolmap,
                           Env *env);
-
-Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
-                                              const Uchar *symbolmap,
-                                              bool withsequence,
-                                              Env *env);
-
-void freeScansequenceiterator(Scansequenceiterator **sseqit,Env *env);
-
-int nextScansequenceiterator(const Uchar **sequence,
-                             unsigned long *len,
-                             char **desc,
-                             Scansequenceiterator *sseqit,
-                             Env *env);
 
 #endif

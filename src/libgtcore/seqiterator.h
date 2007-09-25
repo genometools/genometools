@@ -15,14 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FILELENGTH_DEF_H
-#define FILELENGTH_DEF_H
-#include <inttypes.h>
+#ifndef SEQITERATOR_H
+#define SEQITERATOR_H
 
-typedef struct
-{
-  uint64_t length,
-           effectivelength;
-} Filelengthvalues;
+#include "libgtcore/queue.h"
+#include "libgtcore/strarray.h"
+#include "libgtcore/symboldef.h"
+
+typedef struct SeqIterator SeqIterator;
+
+SeqIterator* seqiterator_new(const StrArray *filenametab,
+                             const Uchar *symbolmap, bool withsequence, Env*);
+int          seqiterator_next(SeqIterator*, const Uchar **sequence,
+                             unsigned long *len, char **desc, Env*);
+void         seqiterator_delete(SeqIterator*, Env*);
 
 #endif

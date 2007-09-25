@@ -15,15 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQDESC_H
-#define SEQDESC_H
+#ifndef SYMBOLDEF_H
+#define SYMBOLDEF_H
 
-#include "libgtcore/queue.h"
+#include <inttypes.h>
 
-typedef struct
-{
-  Queue *descptr;
-  Arraychar headerbuffer;
-} Sequencedescription;
+typedef uint8_t Uchar;
 
 #endif

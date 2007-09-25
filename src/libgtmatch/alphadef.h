@@ -20,7 +20,7 @@
 
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
-#include "symboldef.h"
+#include "libgtcore/symboldef.h"
 
 /*
   The following type is for storing alphabets.

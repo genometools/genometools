@@ -16,19 +16,16 @@
 */
 
 #include <stdio.h>
-
+#include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "libgtcore/error.h"
 #include "libgtcore/str.h"
 #include "libgtcore/option.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/versionfunc.h"
-
-#include "libgtmatch/symboldef.h"
+#include "libgtcore/symboldef.h"
 #include "libgtmatch/arraydef.h"
-#include "libgtmatch/chardef.h"
 #include "libgtmatch/alphadef.h"
-
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
 

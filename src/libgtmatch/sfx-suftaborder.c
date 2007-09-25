@@ -17,9 +17,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "libgtcore/minmax.h"
-#include "chardef.h"
 #include "intbits-tab.h"
 #include "encseq-def.h"
 

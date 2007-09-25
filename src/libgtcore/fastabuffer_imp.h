@@ -15,20 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FBS_DEF_H
-#define FBS_DEF_H
-#include <stdio.h>
-#include <stdbool.h>
-#include <inttypes.h>
-#include "libgtcore/strarray.h"
-#include "symboldef.h"
-#include "filelength-def.h"
-#include "arraydef.h"
-#include "seqdesc.h"
+#ifndef FASTABUFFER_IMP_H
+#define FASTABUFFER_IMP_H
 
 #define FILEBUFFERSIZE 65536
 
-typedef struct
+struct FastaBuffer
 {
   unsigned int filenum;
   uint64_t linenum;
@@ -39,7 +31,7 @@ typedef struct
        firstseqinfile,
        complete,
        nextfile;
-  Sequencedescription *sequencedescription;
+  Queue *descptr;
   GenFile *inputstream;
   Uchar bufspace[FILEBUFFERSIZE];
   uint64_t lastspeciallength;
@@ -48,41 +40,31 @@ typedef struct
   const Uchar *symbolmap;
   bool plainformat;
   unsigned long *characterdistribution;
-} Fastabufferstate;
+  Str *headerbuffer;
+};
 
-Fastabufferstate*  initformatbufferstate(const StrArray *filenametab,
-                                         const Uchar *symbolmap,
-                                         bool plainformat,
-                                         Filelengthvalues **filelengthtab,
-                                         Sequencedescription
-                                         *sequencedescription,
-                                         unsigned long *characterdistribution,
-                                         Env *env);
+int advanceformatbufferstate(FastaBuffer *fb,Env *env);
 
-int advanceformatbufferstate(Fastabufferstate *fbs,Env *env);
-
-static inline int readnextUchar(Uchar *val,Fastabufferstate *fbs,Env *env)
+static inline int fastabuffer_next(FastaBuffer *fb,Uchar *val,Env *env)
 {
-  if (fbs->nextread >= fbs->nextfree)
+  if (fb->nextread >= fb->nextfree)
   {
-    if (fbs->complete)
+    if (fb->complete)
     {
       return 0;
     }
-    if (advanceformatbufferstate(fbs,env) != 0)
+    if (advanceformatbufferstate(fb,env) != 0)
     {
       return -1;
     }
-    fbs->nextread = 0;
-    if (fbs->nextfree == 0)
+    fb->nextread = 0;
+    if (fb->nextfree == 0)
     {
       return 0;
     }
   }
-  *val = fbs->bufspace[fbs->nextread++];
+  *val = fb->bufspace[fb->nextread++];
   return 1;
 }
-
-void fastabufferstate_delete(Fastabufferstate*, Env*);
 
 #endif

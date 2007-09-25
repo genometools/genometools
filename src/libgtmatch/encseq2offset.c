@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/chardef.h"
 #include "spacedef.h"
-#include "chardef.h"
 #include "sarr-def.h"
 #include "safecast-gen.h"
 
