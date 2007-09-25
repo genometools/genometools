@@ -23,33 +23,29 @@
 #include "fbs-def.h"
 #include "stamp.h"
 
-#include "fbsadv.pr"
-
-#include "readnextUchar.gen"
-
 int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
 {
   unsigned int countnonbases = 0,
                currentposition;
   Uchar currentchar;
-  Fastabufferstate fbs;
+  Fastabufferstate *fbs;
   int retval;
 
   env_error_check(env);
-  initformatbufferstate(&fbs,
-                        filenametab,
-                        NULL,
-                        false,
-                        NULL,
-                        NULL,
-                        NULL,
-                        env);
+  fbs = initformatbufferstate(filenametab,
+                              NULL,
+                              false,
+                              NULL,
+                              NULL,
+                              NULL,
+                              env);
   for (currentposition = 0; currentposition < (unsigned int) 1000;
        currentposition++)
   {
-    retval = readnextUchar(&currentchar,&fbs,env);
+    retval = readnextUchar(&currentchar,fbs,env);
     if (retval < 0)
     {
+      fastabufferstate_delete(fbs, env);
       return -1;
     }
     if (retval == 0)
@@ -70,6 +66,7 @@ int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
       default:  break;
     }
   }
+  fastabufferstate_delete(fbs, env);
   if (countnonbases > 0 && countnonbases >= currentposition/10)
   {
     return 1;

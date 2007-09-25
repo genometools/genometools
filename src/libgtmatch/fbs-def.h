@@ -20,7 +20,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <inttypes.h>
-#include <zlib.h>
 #include "libgtcore/strarray.h"
 #include "symboldef.h"
 #include "filelength-def.h"
@@ -28,16 +27,6 @@
 #include "seqdesc.h"
 
 #define FILEBUFFERSIZE 65536
-
-typedef struct
-{
-  bool isgzippedstream;
-  union
-  {
-    FILE *fopenstream;
-    gzFile gzippedstream;
-  } stream;
-} Genericstream;
 
 typedef struct
 {
@@ -51,7 +40,7 @@ typedef struct
        complete,
        nextfile;
   Sequencedescription *sequencedescription;
-  Genericstream inputstream;
+  GenFile *inputstream;
   Uchar bufspace[FILEBUFFERSIZE];
   uint64_t lastspeciallength;
   Filelengthvalues *filelengthtab;
@@ -60,5 +49,40 @@ typedef struct
   bool plainformat;
   unsigned long *characterdistribution;
 } Fastabufferstate;
+
+Fastabufferstate*  initformatbufferstate(const StrArray *filenametab,
+                                         const Uchar *symbolmap,
+                                         bool plainformat,
+                                         Filelengthvalues **filelengthtab,
+                                         Sequencedescription
+                                         *sequencedescription,
+                                         unsigned long *characterdistribution,
+                                         Env *env);
+
+int advanceformatbufferstate(Fastabufferstate *fbs,Env *env);
+
+static inline int readnextUchar(Uchar *val,Fastabufferstate *fbs,Env *env)
+{
+  if (fbs->nextread >= fbs->nextfree)
+  {
+    if (fbs->complete)
+    {
+      return 0;
+    }
+    if (advanceformatbufferstate(fbs,env) != 0)
+    {
+      return -1;
+    }
+    fbs->nextread = 0;
+    if (fbs->nextfree == 0)
+    {
+      return 0;
+    }
+  }
+  *val = fbs->bufspace[fbs->nextread++];
+  return 1;
+}
+
+void fastabufferstate_delete(Fastabufferstate*, Env*);
 
 #endif

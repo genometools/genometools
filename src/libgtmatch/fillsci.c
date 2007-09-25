@@ -25,10 +25,6 @@
 #include "dist-if.h"
 #include "safecast-gen.h"
 
-#include "fbsadv.pr"
-
-#include "readnextUchar.gen"
-
 static unsigned long currentrangevalue(unsigned long i,unsigned long distvalue)
 {
   if (i <= UCHAR_MAX)
@@ -70,7 +66,7 @@ int fasta2sequencekeyvalues(
         unsigned long *characterdistribution,
         Env *env)
 {
-  Fastabufferstate fbs;
+  Fastabufferstate *fbs;
   Uchar charcode;
   Seqpos pos;
   int retval;
@@ -86,18 +82,17 @@ int fasta2sequencekeyvalues(
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
 
-  initformatbufferstate(&fbs,
-                        filenametab,
-                        symbolmap,
-                        plainformat,
-                        filelengthtab,
-                        NULL,
-                        characterdistribution,
-                        env);
+  fbs = initformatbufferstate(filenametab,
+                              symbolmap,
+                              plainformat,
+                              filelengthtab,
+                              NULL,
+                              characterdistribution,
+                              env);
   specialrangelengths = initdistribution(env);
   for (pos = 0; /* Nothing */; pos++)
   {
-    retval = readnextUchar(&charcode,&fbs,env);
+    retval = readnextUchar(&charcode,fbs,env);
     if (retval < 0)
     {
       haserr = true;
@@ -154,6 +149,7 @@ int fasta2sequencekeyvalues(
     *totallength = pos;
   }
   freedistribution(&specialrangelengths,env);
+  fastabufferstate_delete(fbs, env);
   return haserr ? -1 : 0;
 }
 

@@ -37,11 +37,8 @@
 #include "verbose-def.h"
 #include "stamp.h"
 
-#include "fbsadv.pr"
 #include "opensfxfile.pr"
 #include "fillsci.pr"
-
-#include "readnextUchar.gen"
 
 #ifdef Seqposequalsunsignedint
 #define Uint32Const(N)   (N##U)  /* unsigned int constant */
@@ -1603,7 +1600,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   Positionaccesstype sat;
   bool haserr = false;
   int retcode;
-  Fastabufferstate fbs;
+  Fastabufferstate *fbs = NULL;
 
   env_error_check(env);
   retcode = determinesattype(NULL,totallength,
@@ -1631,16 +1628,16 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     */
     encseq->mappedptr = NULL;
     assert(filenametab != NULL);
-    initformatbufferstate(&fbs,
-                          filenametab,
-                          plainformat ? NULL : getsymbolmapAlphabet(alphabet),
-                          plainformat,
-                          NULL,
-                          NULL,
-                          NULL,
-                          env);
+    fbs = initformatbufferstate(filenametab,
+                                plainformat
+                                ? NULL : getsymbolmapAlphabet(alphabet),
+                                plainformat,
+                                NULL,
+                                NULL,
+                                NULL,
+                                env);
     printf("# call %s\n",encodedseqfunctab[(int) sat].fillpos.funcname);
-    if (encodedseqfunctab[(int) sat].fillpos.function(encseq,&fbs,env) != 0)
+    if (encodedseqfunctab[(int) sat].fillpos.function(encseq,fbs,env) != 0)
     {
       haserr = true;
     }
@@ -1649,6 +1646,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   {
     freeEncodedsequence(&encseq,env);
   }
+  fastabufferstate_delete(fbs, env);
   return haserr ? NULL : encseq;
 }
 

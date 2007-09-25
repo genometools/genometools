@@ -34,12 +34,12 @@ merge libgtcore and libgtmatch:
 
 - Alphabet (Stefan: ersetze alphabet.pr durch alphadef.h, Gordon: evtl. mergen
   mit Alpha)
-- Distributions mergen (Hashtable basiert, 64bit)
 - Encodedseq und Bioseq mergen (FastaReader und fbsadv.c)
   guesprot.c
-- generic queue unit test (Stefan)
+
+- Distributions mergen (Hashtable basiert, 64bit)
 - merge Timer und measure-time.c (Ereignis, formatierter String)
-- readnextline evtl. durch str_read_next_line(_generic) ersetzen (Stefan)
+- queue unit test (Stefan)
 
 
 view tool:
