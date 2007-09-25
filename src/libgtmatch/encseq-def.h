@@ -17,13 +17,14 @@
 
 #ifndef ENCSEQDEF_H
 #define ENCSEQDEF_H
+
+#include "libgtcore/chardef.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
 #include "symboldef.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
 #include "readmode-def.h"
-#include "chardef.h"
 #include "verbose-def.h"
 
 #define REVERSEPOS(TOT,POS) ((TOT) - 1 - (POS))

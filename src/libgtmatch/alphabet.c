@@ -23,6 +23,7 @@
 #include <stdbool.h>
 #include <limits.h>
 #include <errno.h>
+#include "libgtcore/chardef.h"
 #include "libgtcore/cstr.h"
 #include "libgtcore/env.h"
 #include "libgtcore/fileutils.h"
@@ -32,7 +33,6 @@
 #include "spacedef.h"
 #include "qsorttype.h"
 #include "symboldef.h"
-#include "chardef.h"
 #include "alphadef.h"
 
 #include "guessprot.pr"

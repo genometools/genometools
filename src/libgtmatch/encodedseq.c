@@ -20,13 +20,13 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <ctype.h>
+#include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
 #include "intbits-tab.h"
 #include "alphadef.h"
-#include "chardef.h"
 #include "divmodmul.h"
 #include "mapspec-def.h"
 #include "encseq-def.h"

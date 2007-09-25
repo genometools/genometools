@@ -16,10 +16,10 @@
 */
 
 #include <stdlib.h>
+#include "libgtcore/chardef.h"
 #include "symboldef.h"
 #include "encseq-def.h"
 #include "spacedef.h"
-#include "chardef.h"
 #include "enum-patt-def.h"
 
  struct Enumpatterniterator

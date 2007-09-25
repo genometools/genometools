@@ -16,12 +16,12 @@
 */
 
 #include <ctype.h>
+#include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "libgtcore/strarray.h"
 #include "format64.h"
 #include "fastabuffer.h"
 #include "spacedef.h"
-#include "chardef.h"
 
 #define FASTASEPARATOR    '>'
 #define NEWLINESYMBOL     '\n'

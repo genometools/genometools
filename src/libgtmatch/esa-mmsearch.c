@@ -15,13 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/chardef.h"
 #include "libgtcore/minmax.h"
 #include "sarr-def.h"
 #include "seqpos-def.h"
 #include "divmodmul.h"
 #include "symboldef.h"
 #include "spacedef.h"
-#include "chardef.h"
 #include "esa-mmsearch-def.h"
 #include "sfx-suffixer.h"
 #include "measure-time-if.h"

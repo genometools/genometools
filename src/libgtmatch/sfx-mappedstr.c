@@ -24,9 +24,9 @@
 #define NDEBUG
 #endif
 #include <assert.h>
+#include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "libgtcore/strarray.h"
-#include "chardef.h"
 #include "spacedef.h"
 #include "intcode-def.h"
 #include "encseq-def.h"

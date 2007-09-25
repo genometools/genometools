@@ -16,10 +16,10 @@
 */
 
 #include <inttypes.h>
+#include "libgtcore/chardef.h"
 #include "libgtcore/strarray.h"
 #include "symboldef.h"
 #include "arraydef.h"
-#include "chardef.h"
 #include "fastabuffer.h"
 #include "seqdesc.h"
 #include "format64.h"

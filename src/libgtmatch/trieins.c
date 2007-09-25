@@ -16,8 +16,8 @@
 */
 
 #include <assert.h>
+#include "libgtcore/chardef.h"
 #include "format64.h"
-#include "chardef.h"
 #include "intbits-tab.h"
 #include "divmodmul.h"
 #include "arraydef.h"

@@ -16,12 +16,12 @@
 */
 
 #include <assert.h>
+#include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "spacedef.h"
 #include "iterseq.h"
 #include "alphadef.h"
 #include "encseq-def.h"
-#include "chardef.h"
 
 unsigned long *calcdescendpositions(const char *destab,
                                     unsigned long destablength,

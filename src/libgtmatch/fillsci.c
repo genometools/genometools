@@ -17,10 +17,10 @@
 
 #include <stdbool.h>
 #include <ctype.h>
+#include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "libgtcore/strarray.h"
 #include "seqpos-def.h"
-#include "chardef.h"
 #include "fastabuffer.h"
 #include "dist-if.h"
 #include "safecast-gen.h"
