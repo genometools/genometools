@@ -18,9 +18,7 @@
 #ifndef FASTABUFFER_H
 #define FASTABUFFER_H
 
-#include <stdio.h>
 #include <stdbool.h>
-#include <inttypes.h>
 #include "libgtcore/filelengthvalues.h"
 #include "libgtcore/queue.h"
 #include "libgtcore/strarray.h"
