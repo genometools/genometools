@@ -15,26 +15,19 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ITERSEQ_H
-#define ITERSEQ_H
+#ifndef SEQITERATOR_H
+#define SEQITERATOR_H
 
 #include "libgtcore/queue.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
 
-typedef struct Scansequenceiterator Scansequenceiterator;
+typedef struct SeqIterator SeqIterator;
 
-Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
-                                              const Uchar *symbolmap,
-                                              bool withsequence,
-                                              Env *env);
-
-void freeScansequenceiterator(Scansequenceiterator **sseqit,Env *env);
-
-int nextScansequenceiterator(const Uchar **sequence,
-                             unsigned long *len,
-                             char **desc,
-                             Scansequenceiterator *sseqit,
-                             Env *env);
+SeqIterator* seqiterator_new(const StrArray *filenametab,
+                             const Uchar *symbolmap, bool withsequence, Env*);
+int          seqiterator_next(SeqIterator*, const Uchar **sequence,
+                             unsigned long *len, char **desc, Env*);
+void         seqiterator_delete(SeqIterator*, Env*);
 
 #endif

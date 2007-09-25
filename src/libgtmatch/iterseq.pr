@@ -19,12 +19,12 @@ Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
                                               bool withsequence,
                                               Env *env);
 
-void freeScansequenceiterator(Scansequenceiterator **sseqit,Env *env);
+void freeScansequenceiterator(Scansequenceiterator **seqit,Env *env);
 
 int nextScansequenceiterator(const Uchar **sequence,
                              unsigned long *len,
                              char **desc,
-                             Scansequenceiterator *sseqit,
+                             Scansequenceiterator *seqit,
                              Env *env);
 
 #ifdef __cplusplus

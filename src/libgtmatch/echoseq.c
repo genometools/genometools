@@ -19,7 +19,7 @@
 #include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "spacedef.h"
-#include "iterseq.h"
+#include "seqiterator.h"
 #include "alphadef.h"
 #include "encseq-def.h"
 
@@ -197,21 +197,21 @@ void encseq2symbolstring(FILE *fpout,
 
 int echodescriptionandsequence(const StrArray *filenametab,Env *env)
 {
-  Scansequenceiterator *sseqit;
+  SeqIterator *seqit;
   char *desc = NULL;
   const Uchar *sequence;
   unsigned long seqlen;
   bool haserr = false;
   int retval;
 
-  sseqit = newScansequenceiterator(filenametab,NULL,true,env);
+  seqit = seqiterator_new(filenametab,NULL,true,env);
   while (true)
   {
-    retval = nextScansequenceiterator(&sequence,
-                                      &seqlen,
-                                      &desc,
-                                      sseqit,
-                                      env);
+    retval = seqiterator_next(seqit,
+                              &sequence,
+                              &seqlen,
+                              &desc,
+                              env);
     if (retval < 0)
     {
       haserr = true;
@@ -224,6 +224,6 @@ int echodescriptionandsequence(const StrArray *filenametab,Env *env)
     symbolstring2fasta(stdout,desc,NULL,sequence,seqlen,70UL);
     FREESPACE(desc);
   }
-  freeScansequenceiterator(&sseqit,env);
+  seqiterator_delete(seqit,env);
   return haserr ? -1 : 0;
 }

@@ -25,7 +25,7 @@
 #include "esa-mmsearch-def.h"
 #include "sfx-suffixer.h"
 #include "measure-time-if.h"
-#include "iterseq.h"
+#include "seqiterator.h"
 #include "format64.h"
 #include "stamp.h"
 
@@ -408,24 +408,24 @@ int callenumquerymatches(const Str *indexname,
   }
   if (!haserr)
   {
-    Scansequenceiterator *sseqit;
+    SeqIterator *seqit;
     const Uchar *query;
     unsigned long querylen;
     char *desc = NULL;
     int retval;
     uint64_t unitnum;
 
-    sseqit = newScansequenceiterator(queryfiles,
-                                     getsymbolmapAlphabet(suffixarray.alpha),
-                                     true,
-                                     env);
+    seqit = seqiterator_new(queryfiles,
+                             getsymbolmapAlphabet(suffixarray.alpha),
+                             true,
+                             env);
     for (unitnum = 0; /* Nothing */; unitnum++)
     {
-      retval = nextScansequenceiterator(&query,
-                                        &querylen,
-                                        &desc,
-                                        sseqit,
-                                        env);
+      retval = seqiterator_next(seqit,
+                                &query,
+                                &querylen,
+                                &desc,
+                                env);
       if (retval < 0)
       {
         haserr = true;
@@ -452,7 +452,7 @@ int callenumquerymatches(const Str *indexname,
       }
       FREESPACE(desc);
     }
-    freeScansequenceiterator(&sseqit,env);
+    seqiterator_delete(seqit,env);
   }
   freesuffixarray(&suffixarray,env);
   return haserr ? -1 : 0;
