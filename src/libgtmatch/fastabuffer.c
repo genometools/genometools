@@ -21,7 +21,6 @@
 #include "libgtcore/env.h"
 #include "libgtcore/strarray.h"
 #include "fastabuffer.h"
-#include "spacedef.h"
 
 #define FASTASEPARATOR    '>'
 #define NEWLINESYMBOL     '\n'
@@ -48,15 +47,13 @@ FastaBuffer* fastabuffer_new(const StrArray *filenametab,
   fb->complete = false;
   fb->lastspeciallength = 0;
   fb->descptr = descptr;
-  if (filelengthtab != NULL)
-  {
-    ALLOCASSIGNSPACE(*filelengthtab,NULL,Filelengthvalues,
-                     strarray_size(filenametab));
+  if (filelengthtab) {
+    *filelengthtab = env_ma_calloc(env, strarray_size(filenametab),
+                                   sizeof (Filelengthvalues));
     fb->filelengthtab = *filelengthtab;
-  } else
-  {
-    fb->filelengthtab = NULL;
   }
+  else
+    fb->filelengthtab = NULL;
   fb->characterdistribution = characterdistribution;
   fb->headerbuffer = str_new(env);
   return fb;
