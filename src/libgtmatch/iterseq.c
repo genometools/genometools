@@ -20,7 +20,6 @@
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
-#include "arraydef.h"
 #include "format64.h"
 #include "iterseq.h"
 
@@ -30,7 +29,8 @@ struct Scansequenceiterator
   const StrArray *filenametab;
   const Uchar *symbolmap;
   Queue *descptr;
-  ArrayUchar sequencebuffer;
+  Str *sequencebuffer;
+  unsigned long length;
   uint64_t unitnum;
   bool withsequence, exhausted;
 };
@@ -41,9 +41,10 @@ Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
                                               Env *env)
 {
   Scansequenceiterator *sseqit;
-
-  ALLOCASSIGNSPACE(sseqit,NULL,Scansequenceiterator,1);
-  INITARRAY(&sseqit->sequencebuffer,Uchar);
+  env_error_check(env);
+  sseqit = env_ma_malloc(env, sizeof (Scansequenceiterator));
+  sseqit->sequencebuffer = str_new(env);
+  sseqit->length = 0;
   sseqit->descptr = queue_new(env);
   sseqit->fb = fastabuffer_new(filenametab,
                                symbolmap,
@@ -52,7 +53,6 @@ Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
                                sseqit->descptr,
                                NULL,
                                env);
-  sseqit->sequencebuffer.nextfreeUchar = 0;
   sseqit->exhausted = false;
   sseqit->unitnum = 0;
   sseqit->withsequence = withsequence;
@@ -63,8 +63,8 @@ void freeScansequenceiterator(Scansequenceiterator **sseqit,Env *env)
 {
   queue_delete_with_contents((*sseqit)->descptr,env);
   fastabuffer_delete((*sseqit)->fb, env);
-  FREEARRAY(&(*sseqit)->sequencebuffer,Uchar);
-  FREESPACE(*sseqit);
+  str_delete((*sseqit)->sequencebuffer, env);
+  env_ma_free(*sseqit, env);
 }
 
 int nextScansequenceiterator(const Uchar **sequence,
@@ -96,7 +96,7 @@ int nextScansequenceiterator(const Uchar **sequence,
     }
     if (charcode == (Uchar) SEPARATOR)
     {
-      if (sseqit->sequencebuffer.nextfreeUchar == 0 && sseqit->withsequence)
+      if (sseqit->length == 0 && sseqit->withsequence)
       {
         env_error_set(env,"sequence " Formatuint64_t " is empty",
                       PRINTuint64_tcast(sseqit->unitnum));
@@ -104,12 +104,13 @@ int nextScansequenceiterator(const Uchar **sequence,
         break;
       }
       *desc = queue_get(sseqit->descptr,env);
-      *len = sseqit->sequencebuffer.nextfreeUchar;
+      *len = sseqit->length;
       if (sseqit->withsequence)
       {
-        *sequence = sseqit->sequencebuffer.spaceUchar;
+        *sequence = str_get(sseqit->sequencebuffer); /* XXX: ownership prob. */
       }
-      sseqit->sequencebuffer.nextfreeUchar = 0;
+      str_reset(sseqit->sequencebuffer);
+      sseqit->length = 0;
       foundseq = true;
       sseqit->unitnum++;
       break;
@@ -117,23 +118,22 @@ int nextScansequenceiterator(const Uchar **sequence,
     {
       if (sseqit->withsequence)
       {
-        STOREINARRAY(&sseqit->sequencebuffer,Uchar,1024,charcode);
-      } else
-      {
-        sseqit->sequencebuffer.nextfreeUchar++;
+        str_append_char(sseqit->sequencebuffer, charcode, env);
       }
+      sseqit->length++;
     }
   }
-  if (!haserr && sseqit->sequencebuffer.nextfreeUchar > 0)
+  if (!haserr && sseqit->length > 0)
   {
     *desc = queue_get(sseqit->descptr,env);
     if (sseqit->withsequence)
     {
-      *sequence = sseqit->sequencebuffer.spaceUchar;
+      *sequence = str_get(sseqit->sequencebuffer); /* XXX: ownership problem */
     }
-    *len = sseqit->sequencebuffer.nextfreeUchar;
+    *len = sseqit->length;
     foundseq = true;
-    sseqit->sequencebuffer.nextfreeUchar = 0;
+    str_reset(sseqit->sequencebuffer);
+    sseqit->length = 0;
   }
   if (haserr)
   {

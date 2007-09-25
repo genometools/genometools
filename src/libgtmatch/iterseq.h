@@ -18,11 +18,9 @@
 #ifndef ITERSEQ_H
 #define ITERSEQ_H
 
-#include <inttypes.h>
 #include "libgtcore/queue.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
-#include "arraydef.h"
 
 typedef struct Scansequenceiterator Scansequenceiterator;
 
