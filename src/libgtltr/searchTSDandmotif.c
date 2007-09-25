@@ -345,12 +345,10 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
        }
     }
   }
-#ifdef DEBUG
   if (i > endrightLTR && (!motif2))
   {
-    printf("no right motif found.\n");
+    env_log_log(env, "no right motif found.\n");
   }
-#endif
   *motifmismatchesrightLTR += motifmismatches_frombestmatch;
 
   if (motif1 && motif2)
@@ -762,9 +760,8 @@ int findcorrectboundaries(
 
   env_error_check(env);
 
-  /*DEBUG0(1, "searching for correct boundaries in vicinity...\n");*/
-
-  /****** first: 5'-border of left LTR and 3'-border of right LTR *****/
+  env_log_log(env, "searching for correct boundaries in vicinity...\n");
+  /* first: 5'-border of left LTR and 3'-border of right LTR */
 
   if ( searchforTSDandorMotifoutside(lo,
                                     boundaries,
@@ -777,12 +774,11 @@ int findcorrectboundaries(
     return -1;
   }
 
-  /****** second: 3'-border of left LTR and 5'-border of right LTR *****/
-
+  /* second: 3'-border of left LTR and 5'-border of right LTR */
   if ( lo->motif.allowedmismatches < (unsigned int)4 )
   {
-    /*DEBUG0(1, "second: searching for motif only around 3'border of left"
-                " LTR and 5'-border of right LTR...\n"); */
+    env_log_log(env, "second: searching for motif only around 3'border of left"
+                " LTR and 5'-border of right LTR...\n");
     searchformotifonlyinside(lo,
         boundaries,
 	ssar,
