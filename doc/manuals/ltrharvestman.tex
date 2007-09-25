@@ -1,5 +1,5 @@
 \documentclass[12pt,titlepage]{article}
-\usepackage[a4paper,top=20mm,bottom=20mm,left=20mm,right=20mm]{geometry}
+\usepackage[a4paper,top=30mm,bottom=30mm,left=20mm,right=20mm]{geometry}
 \usepackage{url}
 \usepackage{alltt}
 \usepackage{xspace}
@@ -11,10 +11,10 @@
 
 \newcommand{\LTRharvest}{\textit{LTRharvest}\xspace}
 \newcommand{\GenomeTools}{\textit{GenomeTools}\xspace}
-\newcommand{\Gtltrprog}{\texttt{gt ltrharvest}\xspace}
+\newcommand{\Suffixerator}{\textit{Suffixerator}\xspace}
+\newcommand{\Gtltrharvest}{\texttt{gt ltrharvest}\xspace}
 \newcommand{\Gt}{\texttt{gt}\xspace}
 \newcommand{\Gtsuffixerator}{\texttt{gt suffixerator}\xspace}
-\newcommand{\Suffixerator}{\texttt{suffixerator}\xspace}
 
 \title{LTRharvest\\
 a manual}
@@ -31,14 +31,15 @@ a manual}
 This document describes \LTRharvest, a software tool
 for \textit{de novo} predictions of LTR 
 retrotransposons in genomic sequences~\cite{EKW07}.
-\LTRharvest computes boundary positions of potentially 
+\LTRharvest computes boundary positions of potential
 LTR retrotransposons
 on a persistent index structure of the genomic target sequence, 
 the \textit{enhanced suffix array} \cite{AKO04}. Usually
 the genomic target sequence is a complete chromosomal DNA sequence
 in FASTA format. Nevertheless, every DNA sequence in (multiple) 
-FASTA format can be passed to the software. For the
-prediction, \LTRharvest implements several filters.
+FASTA format can be passed to the software. 
+
+For the prediction, \LTRharvest implements several filters.
 These are consecutively applied on the sequence
 data to reject candidates, which are not conform with sequence,
 length or distance features of LTR retrotransposons. 
@@ -74,13 +75,12 @@ Some text is highlighted by different fonts according to the following rules.
 
 Since \LTRharvest is part of \Gt, \LTRharvest is called as follows.
 
-\Gtltrprog \Showoption{index} \Showoptionarg{indexname} $[$\emph{options}$]$
+\Gtltrharvest \Showoption{index} \Showoptionarg{indexname} $[$\emph{options}$]$
 
 where \Showoptionarg{indexname} denotes the enhanced suffix array index of 
-the target sequence(s) constructed by \Gtsuffixerator. 
-An overview of all possible options 
-with a short one-line description of each option is given in Table
-\ref{overviewOpt}.
+the target sequence(s) constructed by the program \Suffixerator. 
+An overview of all possible options with a short one-line description of 
+each option is given in Table \ref{overviewOpt}.
 All options can be specified only once.
 
 \begin{table}[htbp]
@@ -135,15 +135,15 @@ the right)
 \Showoption{overlaps}& specify no$|$best$|$all
 \\
 \Showoptiongroup{Alignment options}
-\Showoption{xdrop}& specify xdrop for extension-alignment
+\Showoption{xdrop}& specify xdrop value for seed extension
 \\
-\Showoption{mat}& specify matchscore for extension-alignment
+\Showoption{mat}& specify matchscore for seed extension
 \\
-\Showoption{mis}& specify mismatchscore for extension-alignment
+\Showoption{mis}& specify mismatchscore for seed extension
 \\
-\Showoption{ins}& specify insertionscore for extension-alignment
+\Showoption{ins}& specify insertionscore for seed extension
 \\
-\Showoption{del}& specify deletionscore for extension-alignment
+\Showoption{del}& specify deletionscore for seed extension
 \\
 \Showoptiongroup{Miscellaneous options}
 \Showoption{v}& verbose mode
@@ -169,10 +169,8 @@ the right)
 \Option{index}{\Showoptionarg{indexname}}{
 Specify the name of the enhanced suffix array index. The index must comprise
 the tables $\tt{suf}$, $\tt{lcp}$, $\tt{des}$ and
-$\tt{tis}$. An example construction of the enhanced suffix array index
-with \Gtsuffixerator is shown is section~\ref{Examples}. 
-%The instruction of
-%\Gtsuffixerator is included in the \emph{Vmatch manual}~\cite{vmatch}.
+$\tt{tis}$. An example of how the enhanced suffix array index is constructed
+with the program \Suffixerator can be found in section~\ref{Examples}. 
 }
 \end{Justshowoptions}
 
@@ -182,13 +180,13 @@ The option \Showoption{index} is mandatory.
 \subsection{Output options}
 
 Results are reported in tabular fashion on stdout and can easily
-be written to a file notation \texttt{\symbol{62} resultfile} as in
-the following:
+be written to a file using the notation \texttt{\symbol{62}} 
+\Showoptionarg{resultfile} as in the following:
 
-\Gtltrprog \Showoption{index} \Showoptionarg{indexname} 
+\Gtltrharvest \Showoption{index} \Showoptionarg{indexname} 
 $[$\emph{options}$]$ \texttt{\symbol{62}} \Showoptionarg{resultfile} 
 
-In addition the following options write extra information to files
+In addition, the following options write extra information to files
 \begin{Justshowoptions}
 
 \Option{out}{\Showoptionarg{outputfile}}{
@@ -197,8 +195,8 @@ Each prediction will be represented by an individual FASTA entry.
 }
 
 \Option{outinner}{\Showoptionarg{outputfile}}{
-Specify the name of a file where the inner regions - the prediction sequences 
-without the flanking LTR sequences - will be written to.
+Specify the name of a file where the inner regions (the prediction sequences 
+without the flanking LTR sequences) will be written to.
 Each prediction will be represented by an individual FASTA entry. 
 }
 
@@ -236,28 +234,28 @@ to $30$ by default.
 
 \Option{minlenltr}{\Showoptionarg{$L_{min}$}}{ 
 Specify the minimum length of each LTR. \Showoptionarg{$L_{min}$}
-has to be specified as positive integer.
+has to be specified as a positive integer.
 If this option is not selected by the user, then \Showoptionarg{$L_{min}$} 
 is set to $100$ by default.
 }
 
 \Option{maxlenltr}{\Showoptionarg{$L_{max}$}}{ 
 Specify the maximum length of each LTR. \Showoptionarg{$L_{max}$}
-has to be specified as positive integer.
+has to be specified as a positive integer.
 If this option is not selected by the user, then \Showoptionarg{$L_{max}$} 
 is set to $1000$ by default.
 }
 
 \Option{mindistltr}{\Showoptionarg{$D_{min}$}}{ 
 Specify the minimum distance of LTR starting positions.
-\Showoptionarg{$D_{min}$} has to be specified as positive integer.
+\Showoptionarg{$D_{min}$} has to be specified as a positive integer.
 If this option is not selected by the user, then \Showoptionarg{$D_{min}$} 
 is set to $1000$ by default.
 }
 
 \Option{maxdistltr}{\Showoptionarg{$D_{max}$}}{ 
 Specify the maximum distance of LTR starting positions.
-\Showoptionarg{$D_{max}$} has to be specified as positive integer.
+\Showoptionarg{$D_{max}$} has to be specified as a positive integer.
 If this option is not selected by the user, then \Showoptionarg{$D_{max}$} 
 is set to $15000$ by default.
 }
@@ -276,7 +274,7 @@ If this option is selected, a search for target site duplications
 \Showoptionarg{TSDminlen}. 
 If this option is not selected by the user, a search for TSDs
 will not be conducted.
-If this option is set but no maximum TSD length is specififed by the
+If this option is set but no maximum TSD length is specified by the
 option \Showoption{maxtsd}, then the maximum TSD length is set to $20$
 by default.
 }
@@ -310,12 +308,12 @@ This option requires the option \Showoption{motif}.
 Specify the allowed number of mismatches by the argument 
 \Showoptionarg{n}. If this option is not set, then a search for
 the exact motif will be conducted. The non-negative integer
-\Showoptionarg{n} has to be chosen from range $[0,3]$.
+\Showoptionarg{n} has to be chosen from the range $[0,3]$.
 }
 
 \Option{vic}{\Showoptionarg{l}}{
-Specify the number of (vicinity) nucleotides \Showoptionarg{l}
-(to the left and to the right, respectively) that
+Specify the number of nucleotide positions \Showoptionarg{l}
+to the left and to the right (the vicinity), that
 will be searched for TSDs and/or one motif around the 
 5' and 3' predicted boundary of a LTR retrotransposon. This option
 has only an effect, if option \Showoption{mintsd} and/or option
@@ -357,8 +355,8 @@ by the user, a default value for this options will be set.
 \begin{Justshowoptions}
 
 \Option{xdrop}{\Showoptionarg{X}}{ 
-Specify the xdrop \Showoptionarg{X} for extending a seed repeat in both
-directions allowing for matches, mismatches, insertions and deletions. The
+Specify the xdrop value \Showoptionarg{X} for extending a seed repeat in both
+directions allowing for matches, mismatches, insertions, and deletions. The
 argument \Showoptionarg{X} must be a positive integer or $0$. 
 The $X$-drop extension process stops as soon as the extension involving matches,
 mismatches, insertions, and deletions has a score smaller than $T-X$ where T
@@ -438,13 +436,13 @@ the \LTRharvest output is shown. Please note that this step is not part of
 As target
 sequence file we use some FASTA file \texttt{\small{chr02.19970727.fsa.gz}} 
 containing the \textit{S. cerevisiae} genome sequence, chromosome 2. Note
-that the file is a compressed file in gzip format (because of the suffix 
-\texttt{.gz}. This format can easily be handled by the program \Suffixerator.
+that the file is a compressed file in gzip format (because of the ending
+\texttt{.gz}). This format can be handled by the program \Suffixerator.
 
-First of all, we create the enhanced suffix array index using \Suffixerator.
-We invoke \Suffixerator with options \Showoption{tis}, \Showoption{suf}, 
+First, we create the enhanced suffix array.
+We invoke \Gtsuffixerator with options \Showoption{tis}, \Showoption{suf}, 
 \Showoption{lcp}, \Showoption{des}, since \LTRharvest needs the corresponding
-tables. Furthermore, we specify \Showoption{dna} for using a DNA-alphabet.
+tables. Furthermore, we specify \Showoption{dna}, as we process DNA-sequences.
 
 \begin{footnotesize}
 \begin{verbatim}
@@ -452,7 +450,6 @@ $ gt suffixerator -db chr02.19970727.fsa.gz -indexname chr02.19970727.fsa -tis
 -suf -lcp -des -dna
 # dna=yes
 # indexname="chr02.19970727.fsa"
-# prefixlength=automatic
 .
 .
 .
@@ -460,9 +457,9 @@ $ gt suffixerator -db chr02.19970727.fsa.gz -indexname chr02.19970727.fsa -tis
 \end{verbatim}
 \end{footnotesize}
 
-Now we can use the index with \LTRharvest. The first example call will just use
+Now we can use the index for \LTRharvest. The first example call will just use
 the default parameters for the filter and alignment options 
-without searching for TSD or a LTR start-end motif.
+without searching for TSD or an LTR start-end motif.
 
 \begin{footnotesize}
 \begin{verbatim}
@@ -618,16 +615,16 @@ ggaat  5  tg..ca  97.33  0
 \label{Example-genome}
 
 As target sequences file we use some multiple FASTA file
-\texttt{\small{chrAll.19971001.fsa}}, which contains all 16
+\texttt{\small{chrAll.19971001.fsa.gz}}, which contains all 16
 chromosomal sequences of the release before Oct. 1st, 1997, probably 
 used by Kim et al.
 in their comprehensive survey of retrotransposons~\cite{kim:1998}.
 
-First of all, we create the enhanced suffix array index using 
-\Suffixerator.
-We invoke \Suffixerator with options \Showoption{tis}, \Showoption{suf}, 
-\Showoption{lcp}, \Showoption{des}, since \LTRharvest needs the corresponding
-tables. Furthermore, we specify \Showoption{dna} for using a DNA-alphabet.
+First, we create the enhanced suffix array.
+We invoke \Gtsuffixerator with options \Showoption{tis}, 
+\Showoption{suf}, \Showoption{lcp}, \Showoption{des}, since 
+\LTRharvest needs the corresponding tables. Furthermore, we specify option
+\Showoption{dna}, as we are processing DNA sequences.
 
 \begin{footnotesize}
 \begin{verbatim}
@@ -635,7 +632,6 @@ $ gt suffixerator -db chrAll.19971001.fsa.gz -indexname chrAll.19971001.fsa -tis
 -suf -lcp -des -dna
 # dna=yes
 # indexname="chrAll.19971001.fsa"
-# prefixlength=automatic
 .
 .
 .
@@ -693,12 +689,7 @@ An index needs to be constructed from the predicted sequences by the program
 \begin{verbatim}
 $ mkvtree -db pred-chrAll.fsa -dna -pl -allout -v
 reading file "pred-chrAll.fsa"
-for this input size and alphabet size, the maximal prefixlength
-  (argument of option -pl) is 8,
-  the recommended prefixlength is 7
-  total length of sequences: 273557 (including 45 separators)
-  alphabet "aAcCgGtTuUnsywrkvbdhmNSYWRKVBDHM" (size 32) mapped to "acgtn" (size 5)
-  create file "pred-chrAll.fsa.tis"
+...
 .
 .
 .
@@ -708,14 +699,13 @@ overall space peak: main=2.61 MB (10.01 bytes/symbol), secondary=0.53 MB
 
 Now we can use \texttt{vmatch} (which is part of \textit{Vmatch}) 
 to perform a clustering of the predicted sequences.
-A default parameter set can be the one
-from Tab.~\ref{parameters-cluster-default}, 
+A reasonable parameter set is given in
+Tab.~\ref{parameters-cluster-default}, 
 page~\pageref{parameters-cluster-default}. 
-The instruction of \texttt{vmatch}
-is included in the \emph{Vmatch manual}~\cite{vmatch}.
-The following command computes clusters of all (database) sequences in 
-\texttt{\small{pred-chrAll.fsa}}. Each cluster has a unique cluster number
-with the (database) sequence numbers listed behind. 
+See the \emph{Vmatch manual}~\cite{vmatch} for an explanation of the
+options. The following command computes clusters of all (database) sequences in 
+\texttt{\small{pred-chrAll.fsa}}. Each cluster has a unique cluster number,
+followed by the sequence number contained in the cluster.
 
 \begin{footnotesize}
 \begin{verbatim}
@@ -736,8 +726,43 @@ $ vmatch -dbcluster 95 7 Cluster-pred-chrAll -p -d -seedlength 50
 \end{verbatim}
 \end{footnotesize}
 
-\bibliographystyle{plain}
-\bibliography{references}
+%\bibliographystyle{plain}
+%\bibliography{references}
+\begin{thebibliography}{1}
+
+\bibitem{gff3}
+\textsc{GFF3}, tab delimited file format for genome annotation.
+  \url{http://www.sequenceontology.org/gff3.shtml}.
+
+\bibitem{AKO04}
+M.I. Abouelhoda, S.~Kurtz, and E.~Ohlebusch.
+\newblock Replacing suffix trees with enhanced suffix arrays.
+\newblock {\em Journal of Discrete Algorithms}, 2:53--86, 2004.
+
+\bibitem{EKW07}
+D.~Ellinghaus, S.~Kurtz, and U.~Willhoeft.
+\newblock \textit{LTRharvest}, an efficient and flexible software for de novo
+  detection of \normalsize{LTR} retrotransposons.
+\newblock {\em submitted}, 2007.
+
+\bibitem{genometools}
+G.~Gremme.
+\newblock The \textsc{GenomeTools} genome analysis system.
+  \url{http://genometools.org}.
+
+\bibitem{kim:1998}
+J.M. Kim, S.~Vanguri, J.D. Boeke, A.~Gabriel, and D.F. Voytas.
+\newblock Transposable elements and genome organisation: a comprehensive survey
+  of retrotransposons revealed by the complete \textit{Saccharomyces
+  cerevisiae} genome sequence.
+\newblock {\em Genome Research}, 8(5):464--478, 1998.
+
+\bibitem{vmatch}
+S.~Kurtz.
+\newblock The \textsc{Vmatch} large scale sequence analysis software.
+  \url{http://www.vmatch.de}.
+
+\end{thebibliography}
 
 \begin{table}
 \caption{A default parameter set for \textit{Vmatch}'s single linkage 
