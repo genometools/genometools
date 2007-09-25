@@ -47,11 +47,7 @@ for options in `${ALLOUTPUTOPTS}`
 do
   ../scripts/cmpdbfile.sh ${options} -pl -db ${ATK}
 done
-../scripts/checkmapped.sh -db ${ATK} ${AT} ${GRUMBACH}/*.fna -parts 3 -pl
-../scripts/checkmapped.sh -parts 1 -pl -db ${SWK} ${SW}
-../scripts/checkmapped.sh -db ${SWK} ${SW} -parts 3 -pl
-../scripts/checkmapped.sh -parts 2 -pl -smap TransDNA -db ${AT}
-../scripts/checkmapped.sh -db ${SWK} -parts 1 -pl -smap TransProt11 
+testsuite.rb -keywords 'gt_suffixerator and gttestdata' -gttestdata ${GTTESTDATA}
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random-Small.fna
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random.fna
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Atinsert.fna ../testdata/Random.fna

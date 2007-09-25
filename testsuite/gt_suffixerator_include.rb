@@ -154,3 +154,44 @@ end
     end
   end
 end
+
+def checkmapped(args)
+  Name "gt suffixerator checkmapped"
+  Keywords "gt_suffixerator gttestdata"
+  Test do
+    run_test("#{$bin}gt suffixerator -tis -des -suf -bwt -lcp -indexname sfxidx #{args}", :maxtime => 600)
+    run_test("#{$bin}gt dev sfxmap -v sfxidx", :maxtime => 600)
+    run "grep -v '^#' #{$last_stdout} > sfxidx-sfx.prj"
+    run "cmp -s sfxidx.prj sfxidx-sfx.prj"
+    run_test("#{$bin}gt dev sfxmap -v -stream sfxidx", :maxtime => 600)
+  end
+end
+
+if $gttestdata then
+  checkmapped("-db #{$gttestdata}Iowa/at100K1 #{$gttestdata}Iowa/at100K1 " +
+              "#{$gttestdata}DNA-mix/Grumbach.fna/Wildcards.fna " +
+              "#{$gttestdata}DNA-mix/Grumbach.fna/chntxx.fna " +
+              "#{$gttestdata}DNA-mix/Grumbach.fna/hs5hcmvcg.fna " +
+              "#{$gttestdata}DNA-mix/Grumbach.fna/humdystrop.fna " +
+              "#{$gttestdata}DNA-mix/Grumbach.fna/humghcsa.fna " +
+              "#{$gttestdata}DNA-mix/Grumbach.fna/humhbb.fna " +
+              "#{$gttestdata}DNA-mix/Grumbach.fna/humhdabcd.fna " +
+              "#{$gttestdata}DNA-mix/Grumbach.fna/humhprtb.fna " +
+              "#{$gttestdata}DNA-mix/Grumbach.fna/mipacga.fna " +
+              "#{$gttestdata}DNA-mix/Grumbach.fna/mpocpcg.fna " +
+              "#{$gttestdata}DNA-mix/Grumbach.fna/mpomtcg.fna " +
+              "#{$gttestdata}DNA-mix/Grumbach.fna/vaccg.fna " +
+              "#{$gttestdata}DNA-mix/Grumbach.fna/ychrIII.fna " +
+              "-parts 3 -pl")
+
+  checkmapped("-parts 1 -pl -db #{$gttestdata}swissprot/swiss10K " +
+              "#{$gttestdata}swissprot/swiss1MB")
+
+  checkmapped("-db #{$gttestdata}swissprot/swiss10K " +
+              "#{$gttestdata}swissprot/swiss1MB -parts 3 -pl")
+
+  checkmapped("-parts 2 -pl -smap TransDNA -db  #{$gttestdata}Iowa/at100K1")
+
+  checkmapped("-db #{$gttestdata}swissprot/swiss10K -parts 1 -pl -smap " +
+              "TransProt11")
+end
