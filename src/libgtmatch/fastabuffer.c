@@ -20,7 +20,6 @@
 #include "libgtcore/cstr.h"
 #include "libgtcore/env.h"
 #include "libgtcore/strarray.h"
-#include "format64.h"
 #include "fastabuffer.h"
 #include "spacedef.h"
 
@@ -175,11 +174,10 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
                 if (charcode == (Uchar) UNDEFCHAR)
                 {
                   env_error_set(env,"illegal character '%c':"
-                                    " file \"%s\", line " Formatuint64_t,
+                                    " file \"%s\", line %llu",
                                 currentchar,
-                                strarray_get(fb->filenametab,
-                                             (unsigned long) fb->filenum),
-                                PRINTuint64_tcast(fb->linenum));
+                                strarray_get(fb->filenametab, fb->filenum),
+                                fb->linenum);
                   return -1;
                 }
                 if (ISSPECIAL(charcode))
