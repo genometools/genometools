@@ -21,10 +21,10 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <inttypes.h>
+#include "libgtcore/queue.h"
 #include "libgtcore/strarray.h"
 #include "arraydef.h"
 #include "filelength-def.h"
-#include "seqdesc.h"
 #include "symboldef.h"
 
 typedef struct FastaBuffer FastaBuffer;
@@ -32,7 +32,7 @@ typedef struct FastaBuffer FastaBuffer;
 FastaBuffer* fastabuffer_new(const StrArray *filenametab,
                              const Uchar *symbolmap, bool plainformat,
                              Filelengthvalues **filelengthtab,
-                             Sequencedescription *sequencedescription,
+                             Queue *descptr,
                              unsigned long *characterdistribution, Env*);
 static int   fastabuffer_next(FastaBuffer*, Uchar *val, Env *env);
 void         fastabuffer_delete(FastaBuffer*, Env*);

@@ -20,7 +20,6 @@
 #include "libgtcore/versionfunc.h"
 #include "fmindex.h"
 #include "format64.h"
-#include "seqdesc.h"
 #include "iterseq.h"
 
 #include "fmi-map.pr"
@@ -343,7 +342,7 @@ static int findsubquerymatch(Fmindex *fmindex,
   Substringinfo substringinfo;
   Rangespecinfo rangespecinfo;
   ArrayUchar sequencebuffer;
-  Sequencedescription sequencedescription;
+  Queue *descptr;
   bool haserr = false;
 
   env_error_check(env);
@@ -356,21 +355,19 @@ static int findsubquerymatch(Fmindex *fmindex,
   substringinfo.postprocessuniquelength = NULL;
   substringinfo.processinfo = &rangespecinfo;
   INITARRAY(&sequencebuffer,Uchar);
-  INITARRAY(&sequencedescription.headerbuffer,char);
-  sequencedescription.descptr = queue_new(env);
+  descptr = queue_new(env);
   if (overallquerysequences(uniqueposinsinglesequence,
                            &substringinfo,
                            &sequencebuffer,
                            queryfilenames,
-                           &sequencedescription,
+                           descptr,
                            getsymbolmapAlphabet(fmindex->alphabet),
                            env) != 0)
   {
     haserr = true;
   }
-  queue_delete_with_contents(sequencedescription.descptr,env);
+  queue_delete_with_contents(descptr,env);
   FREEARRAY(&sequencebuffer,Uchar);
-  FREEARRAY(&sequencedescription.headerbuffer,char);
   return haserr ? -1 : 0;
 }
 

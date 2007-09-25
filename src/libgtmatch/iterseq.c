@@ -21,7 +21,6 @@
 #include "symboldef.h"
 #include "arraydef.h"
 #include "fastabuffer.h"
-#include "seqdesc.h"
 #include "format64.h"
 #include "iterseq.h"
 
@@ -34,7 +33,7 @@ int overallquerysequences(int(*processsequence)(void *,
                           void *info,
                           ArrayUchar *sequencebuffer,
                           const StrArray *filenametab,
-                          Sequencedescription *sequencedescription,
+                          Queue *descptr,
                           const Uchar *symbolmap,
                           Env *env)
 {
@@ -50,7 +49,7 @@ int overallquerysequences(int(*processsequence)(void *,
                        symbolmap,
                        false,
                        NULL,
-                       sequencedescription,
+                       descptr,
                        NULL,
                        env);
   sequencebuffer->nextfreeUchar = 0;
@@ -75,7 +74,7 @@ int overallquerysequences(int(*processsequence)(void *,
         haserr = true;
         break;
       }
-      desc = queue_get(sequencedescription->descptr,env);
+      desc = queue_get(descptr,env);
       if (processsequence(info,
                           unitnum,
                           sequencebuffer->spaceUchar,
@@ -97,7 +96,7 @@ int overallquerysequences(int(*processsequence)(void *,
   }
   if (!haserr && sequencebuffer->nextfreeUchar > 0)
   {
-    desc = queue_get(sequencedescription->descptr,env);
+    desc = queue_get(descptr,env);
     if (processsequence(info,
                         unitnum,
                         sequencebuffer->spaceUchar,
@@ -119,7 +118,7 @@ int overallquerysequences(int(*processsequence)(void *,
   FastaBuffer *fb;
   const StrArray *filenametab;
   const Uchar *symbolmap;
-  Sequencedescription sequencedescription;
+  Queue *descptr;
   ArrayUchar sequencebuffer;
   uint64_t unitnum;
   bool withsequence, exhausted;
@@ -134,13 +133,12 @@ Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
 
   ALLOCASSIGNSPACE(sseqit,NULL,Scansequenceiterator,1);
   INITARRAY(&sseqit->sequencebuffer,Uchar);
-  INITARRAY(&sseqit->sequencedescription.headerbuffer,char);
-  sseqit->sequencedescription.descptr = queue_new(env);
+  sseqit->descptr = queue_new(env);
   sseqit->fb = fastabuffer_new(filenametab,
                                symbolmap,
                                false,
                                NULL,
-                               &sseqit->sequencedescription,
+                               sseqit->descptr,
                                NULL,
                                env);
   sseqit->sequencebuffer.nextfreeUchar = 0;
@@ -152,10 +150,9 @@ Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
 
 void freeScansequenceiterator(Scansequenceiterator **sseqit,Env *env)
 {
-  queue_delete_with_contents((*sseqit)->sequencedescription.descptr,env);
+  queue_delete_with_contents((*sseqit)->descptr,env);
   fastabuffer_delete((*sseqit)->fb, env);
   FREEARRAY(&(*sseqit)->sequencebuffer,Uchar);
-  FREEARRAY(&(*sseqit)->sequencedescription.headerbuffer,char);
   FREESPACE(*sseqit);
 }
 
@@ -195,7 +192,7 @@ int nextScansequenceiterator(const Uchar **sequence,
         haserr = true;
         break;
       }
-      *desc = queue_get(sseqit->sequencedescription.descptr,env);
+      *desc = queue_get(sseqit->descptr,env);
       *len = sseqit->sequencebuffer.nextfreeUchar;
       if (sseqit->withsequence)
       {
@@ -218,7 +215,7 @@ int nextScansequenceiterator(const Uchar **sequence,
   }
   if (!haserr && sseqit->sequencebuffer.nextfreeUchar > 0)
   {
-    *desc = queue_get(sseqit->sequencedescription.descptr,env);
+    *desc = queue_get(sseqit->descptr,env);
     if (sseqit->withsequence)
     {
       *sequence = sseqit->sequencebuffer.spaceUchar;

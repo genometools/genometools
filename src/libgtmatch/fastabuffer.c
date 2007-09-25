@@ -30,7 +30,7 @@ FastaBuffer* fastabuffer_new(const StrArray *filenametab,
                              const Uchar *symbolmap,
                              bool plainformat,
                              Filelengthvalues **filelengthtab,
-                             Sequencedescription *sequencedescription,
+                             Queue *descptr,
                              unsigned long *characterdistribution,
                              Env *env)
 {
@@ -47,7 +47,7 @@ FastaBuffer* fastabuffer_new(const StrArray *filenametab,
   fb->symbolmap = symbolmap;
   fb->complete = false;
   fb->lastspeciallength = 0;
-  fb->sequencedescription = sequencedescription;
+  fb->descptr = descptr;
   if (filelengthtab != NULL)
   {
     ALLOCASSIGNSPACE(*filelengthtab,NULL,Filelengthvalues,
@@ -58,6 +58,7 @@ FastaBuffer* fastabuffer_new(const StrArray *filenametab,
     fb->filelengthtab = NULL;
   }
   fb->characterdistribution = characterdistribution;
+  INITARRAY(&fb->headerbuffer, char);
   return fb;
 }
 
@@ -128,23 +129,19 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
             fb->linenum++;
             fb->indesc = false;
           }
-          if (fb->sequencedescription != NULL)
+          if (fb->descptr != NULL)
           {
             if (currentchar == NEWLINESYMBOL)
             {
-              STOREINARRAY(&fb->sequencedescription->headerbuffer,char,128,
-                           '\0');
+              STOREINARRAY(&fb->headerbuffer,char,128,'\0');
               ALLOCASSIGNSPACE(savebuffer,NULL,char,
-                               fb->sequencedescription->headerbuffer.
-                                                         nextfreechar);
-              strcpy(savebuffer,
-                     fb->sequencedescription->headerbuffer.spacechar);
-              queue_add(fb->sequencedescription->descptr,savebuffer,env);
-              fb->sequencedescription->headerbuffer.nextfreechar = 0;
+                               fb->headerbuffer.nextfreechar);
+              strcpy(savebuffer, fb->headerbuffer.spacechar);
+              queue_add(fb->descptr, savebuffer, env);
+              fb->headerbuffer.nextfreechar = 0;
             } else
             {
-              STOREINARRAY(&fb->sequencedescription->headerbuffer,char,128,
-                           currentchar);
+              STOREINARRAY(&fb->headerbuffer,char,128,currentchar);
             }
           }
         } else
@@ -227,7 +224,7 @@ static int advancePlainbufferstate(FastaBuffer *fb,Env *env)
   unsigned long currentposition = 0, currentfileread = 0;
 
   env_error_check(env);
-  if (fb->sequencedescription != NULL)
+  if (fb->descptr != NULL)
   {
     env_error_set(env,"no headers in plain sequence file");
     return -1;
@@ -311,5 +308,6 @@ void fastabuffer_delete(FastaBuffer *fb, Env *env)
 {
   if (!fb) return;
   genfile_xclose(fb->inputstream, env);
+  FREEARRAY(&fb->headerbuffer, char);
   env_ma_free(fb, env);
 }

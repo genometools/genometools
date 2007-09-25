@@ -31,7 +31,7 @@ struct FastaBuffer
        firstseqinfile,
        complete,
        nextfile;
-  Sequencedescription *sequencedescription;
+  Queue *descptr;
   GenFile *inputstream;
   Uchar bufspace[FILEBUFFERSIZE];
   uint64_t lastspeciallength;
@@ -40,6 +40,7 @@ struct FastaBuffer
   const Uchar *symbolmap;
   bool plainformat;
   unsigned long *characterdistribution;
+  Arraychar headerbuffer;
 };
 
 int advanceformatbufferstate(FastaBuffer *fb,Env *env);

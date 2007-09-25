@@ -18,10 +18,10 @@
 #ifndef ITERSEQ_H
 #define ITERSEQ_H
 #include <inttypes.h>
+#include "libgtcore/queue.h"
 #include "libgtcore/strarray.h"
 #include "symboldef.h"
 #include "arraydef.h"
-#include "seqdesc.h"
 
 typedef struct Scansequenceiterator Scansequenceiterator;
 
@@ -34,7 +34,7 @@ int overallquerysequences(int(*processsequence)(void *,
                           void *info,
                           ArrayUchar *sequencebuffer,
                           const StrArray *filenametab,
-                          Sequencedescription *sequencedescription,
+                          Queue *descptr,
                           const Uchar *symbolmap,
                           Env *env);
 
