@@ -100,6 +100,7 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
                                        "rb", env);
     } else
     {
+      /* XXX: use genfile_xread() */
       currentchar = genfile_getc(fb->inputstream);
       if (currentchar == EOF)
       {
@@ -259,6 +260,7 @@ static int advancePlainbufferstate(FastaBuffer *fb,Env *env)
                                        "rb", env);
     } else
     {
+      /* XXX: use genfile_xread() */
       currentchar = genfile_getc(fb->inputstream);
       if (currentchar == EOF)
       {
