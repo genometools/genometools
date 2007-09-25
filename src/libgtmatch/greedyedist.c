@@ -20,7 +20,7 @@
 #include "libgtcore/chardef.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/env.h"
-#include "symboldef.h"
+#include "libgtcore/symboldef.h"
 #include "spacedef.h"
 
 #define COMPARESYMBOLS(A,B)\

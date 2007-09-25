@@ -23,7 +23,7 @@
 #include "libgtcore/option.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/versionfunc.h"
-#include "libgtmatch/symboldef.h"
+#include "libgtcore/symboldef.h"
 #include "libgtmatch/arraydef.h"
 #include "libgtmatch/alphadef.h"
 #include "ltrharvest-opt.h"

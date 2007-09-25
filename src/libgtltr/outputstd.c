@@ -16,14 +16,13 @@
 */
 
 #include "libgtcore/env.h"
+#include "libgtcore/symboldef.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/readmode-def.h"
 #include "libgtmatch/pos2seqnum.pr"
-#include "libgtmatch/symboldef.h"
 #include "libgtmatch/intcode-def.h"
 #include "libgtmatch/sfx-mappedstr.pr"
-
 #include "ltrharvest-opt.h"
 
 /*

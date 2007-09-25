@@ -21,7 +21,7 @@
 #include "libgtcore/chardef.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
-#include "symboldef.h"
+#include "libgtcore/symboldef.h"
 #include "seqpos-def.h"
 #include "alphadef.h"
 #include "readmode-def.h"

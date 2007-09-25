@@ -30,9 +30,9 @@
 #include "libgtcore/gtdatapath.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
+#include "libgtcore/symboldef.h"
 #include "spacedef.h"
 #include "qsorttype.h"
-#include "symboldef.h"
 #include "alphadef.h"
 
 #include "guessprot.pr"

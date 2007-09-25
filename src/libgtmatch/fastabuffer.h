@@ -23,9 +23,9 @@
 #include <inttypes.h>
 #include "libgtcore/queue.h"
 #include "libgtcore/strarray.h"
+#include "libgtcore/symboldef.h"
 #include "arraydef.h"
 #include "filelength-def.h"
-#include "symboldef.h"
 
 typedef struct FastaBuffer FastaBuffer;
 

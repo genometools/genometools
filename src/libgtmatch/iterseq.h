@@ -20,7 +20,7 @@
 #include <inttypes.h>
 #include "libgtcore/queue.h"
 #include "libgtcore/strarray.h"
-#include "symboldef.h"
+#include "libgtcore/symboldef.h"
 #include "arraydef.h"
 
 typedef struct Scansequenceiterator Scansequenceiterator;

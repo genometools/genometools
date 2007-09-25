@@ -17,10 +17,10 @@
 
 #include "libgtcore/chardef.h"
 #include "libgtcore/minmax.h"
+#include "libgtcore/symboldef.h"
 #include "sarr-def.h"
 #include "seqpos-def.h"
 #include "divmodmul.h"
-#include "symboldef.h"
 #include "spacedef.h"
 #include "esa-mmsearch-def.h"
 #include "sfx-suffixer.h"

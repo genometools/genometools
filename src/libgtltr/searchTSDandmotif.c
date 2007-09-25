@@ -16,14 +16,12 @@
 */
 
 #include <stdbool.h>
-
 #include "libgtcore/env.h"
 #include "libgtcore/minmax.h"
-
+#include "libgtcore/symboldef.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/arraydef.h"
-#include "libgtmatch/symboldef.h"
 #include "libgtmatch/spacedef.h"
 #include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/esa-seqread.pr"
@@ -31,7 +29,6 @@
 #include "libgtmatch/intcode-def.h"
 #include "libgtmatch/sfx-mappedstr.pr"
 #include "libgtmatch/esa-mmsearch.pr"
-
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
 #include "repeats.h"

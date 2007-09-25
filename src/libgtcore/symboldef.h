@@ -17,8 +17,9 @@
 
 #ifndef SYMBOLDEF_H
 #define SYMBOLDEF_H
+
 #include <inttypes.h>
 
-typedef uint8_t Uchar;         /* \Typedef{Uchar} */
+typedef uint8_t Uchar;
 
 #endif

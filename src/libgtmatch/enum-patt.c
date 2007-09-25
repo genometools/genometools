@@ -17,7 +17,7 @@
 
 #include <stdlib.h>
 #include "libgtcore/chardef.h"
-#include "symboldef.h"
+#include "libgtcore/symboldef.h"
 #include "encseq-def.h"
 #include "spacedef.h"
 #include "enum-patt-def.h"

@@ -17,8 +17,9 @@
 
 #ifndef ARRAYDEF_H
 #define ARRAYDEF_H
+
+#include "libgtcore/symboldef.h"
 #include "spacedef.h"
-#include "symboldef.h"
 
 /*
   This file defines macros to conveniently declare and
