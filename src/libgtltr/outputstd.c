@@ -174,16 +174,6 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 		  characters[getencodedchar(encseq,
                                  boundaries->leftLTR_3,
 				 Forwardmode)] );
-		  /*
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->leftLTR_5)],
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->leftLTR_5+1)],
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->leftLTR_3-1)],
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->leftLTR_3)] );
-	          */
 	    }
 	    /* increase by 1 */
 	    printf(FormatSeqpos "  ",
@@ -221,16 +211,6 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 		  characters[getencodedchar(encseq,
 			         boundaries->rightLTR_3,
 				 Forwardmode)] );
-		  /*
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->rightLTR_5)],
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->rightLTR_5+1)],
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->rightLTR_3-1)],
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->rightLTR_3)] );
-	          */
 	    }
 	    /* print similarity */
 	    printf("  %.2f", boundaries->similarity);
