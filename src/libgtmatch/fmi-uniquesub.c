@@ -20,7 +20,7 @@
 #include "libgtcore/versionfunc.h"
 #include "fmindex.h"
 #include "format64.h"
-#include "iterseq.h"
+#include "overallseq.h"
 
 #include "fmi-map.pr"
 #include "fmi-fwduni.pr"
