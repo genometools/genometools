@@ -40,7 +40,7 @@ struct FastaBuffer
   const Uchar *symbolmap;
   bool plainformat;
   unsigned long *characterdistribution;
-  Arraychar headerbuffer;
+  Str *headerbuffer;
 };
 
 int advanceformatbufferstate(FastaBuffer *fb,Env *env);

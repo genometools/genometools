@@ -17,6 +17,7 @@
 
 #include <ctype.h>
 #include "libgtcore/chardef.h"
+#include "libgtcore/cstr.h"
 #include "libgtcore/env.h"
 #include "libgtcore/strarray.h"
 #include "format64.h"
@@ -58,7 +59,7 @@ FastaBuffer* fastabuffer_new(const StrArray *filenametab,
     fb->filelengthtab = NULL;
   }
   fb->characterdistribution = characterdistribution;
-  INITARRAY(&fb->headerbuffer, char);
+  fb->headerbuffer = str_new(env);
   return fb;
 }
 
@@ -67,7 +68,6 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
   int currentchar;
   unsigned long currentposition = 0, currentfileadd = 0, currentfileread = 0;
   Uchar charcode;
-  char *savebuffer;
 
   env_error_check(env);
   while (true)
@@ -133,15 +133,12 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
           {
             if (currentchar == NEWLINESYMBOL)
             {
-              STOREINARRAY(&fb->headerbuffer,char,128,'\0');
-              ALLOCASSIGNSPACE(savebuffer,NULL,char,
-                               fb->headerbuffer.nextfreechar);
-              strcpy(savebuffer, fb->headerbuffer.spacechar);
-              queue_add(fb->descptr, savebuffer, env);
-              fb->headerbuffer.nextfreechar = 0;
+              queue_add(fb->descptr, cstr_dup(str_get(fb->headerbuffer), env),
+                        env);
+              str_reset(fb->headerbuffer);
             } else
             {
-              STOREINARRAY(&fb->headerbuffer,char,128,currentchar);
+              str_append_char(fb->headerbuffer, currentchar, env);
             }
           }
         } else
@@ -308,6 +305,6 @@ void fastabuffer_delete(FastaBuffer *fb, Env *env)
 {
   if (!fb) return;
   genfile_xclose(fb->inputstream, env);
-  FREEARRAY(&fb->headerbuffer, char);
+  str_delete(fb->headerbuffer, env);
   env_ma_free(fb, env);
 }
