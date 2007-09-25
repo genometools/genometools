@@ -17,10 +17,10 @@
 
 #include "libgtcore/env.h"
 #include "libgtcore/array.h"
+#include "libgtcore/fastabuffer.h"
 #include "spacedef.h"
 #include "readmode-def.h"
 #include "encseq-def.h"
-#include "fastabuffer.h"
 #include "stamp.h"
 
 #include "arrcmp.pr"

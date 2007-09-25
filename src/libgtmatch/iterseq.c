@@ -17,10 +17,10 @@
 
 #include <inttypes.h>
 #include "libgtcore/chardef.h"
+#include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
 #include "arraydef.h"
-#include "fastabuffer.h"
 #include "format64.h"
 #include "iterseq.h"
 

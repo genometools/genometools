@@ -26,11 +26,11 @@
 #include <assert.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
 #include "spacedef.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
-#include "fastabuffer.h"
 #include "stamp.h"
 #ifndef NDEBUG
 #include "sfx-nextchar.h"

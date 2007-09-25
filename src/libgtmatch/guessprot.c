@@ -19,8 +19,8 @@
 #include <stdbool.h>
 #include <inttypes.h>
 #include "libgtcore/env.h"
+#include "libgtcore/fastabuffer.h"
 #include "libgtcore/str.h"
-#include "fastabuffer.h"
 #include "stamp.h"
 
 int guessifproteinsequencestream(const StrArray *filenametab,Env *env)

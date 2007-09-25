@@ -19,9 +19,9 @@
 #include <ctype.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
 #include "seqpos-def.h"
-#include "fastabuffer.h"
 #include "dist-if.h"
 #include "safecast-gen.h"
 

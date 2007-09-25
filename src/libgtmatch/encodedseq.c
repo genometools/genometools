@@ -22,6 +22,7 @@
 #include <ctype.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fastabuffer.h"
 #include "libgtcore/str.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
@@ -31,7 +32,6 @@
 #include "mapspec-def.h"
 #include "encseq-def.h"
 #include "arraydef.h"
-#include "fastabuffer.h"
 #include "safecast-gen.h"
 #include "esafileend.h"
 #include "verbose-def.h"

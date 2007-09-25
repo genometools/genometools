@@ -20,7 +20,7 @@
 #include "libgtcore/cstr.h"
 #include "libgtcore/env.h"
 #include "libgtcore/strarray.h"
-#include "fastabuffer.h"
+#include "libgtcore/fastabuffer.h"
 
 #define FASTASEPARATOR    '>'
 #define NEWLINESYMBOL     '\n'
