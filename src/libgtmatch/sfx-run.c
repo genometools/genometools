@@ -21,6 +21,7 @@
 #include <errno.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/filelengthvalues.h"
+#include "libgtcore/seqiterator.h"
 #include "spacedef.h"
 #include "alphadef.h"
 #include "sfx-optdef.h"
@@ -30,7 +31,6 @@
 #include "intcode-def.h"
 #include "sfx-suffixer.h"
 #include "sfx-lcpval.h"
-#include "seqiterator.h"
 #include "readmode-def.h"
 #include "verbose-def.h"
 #include "stamp.h"

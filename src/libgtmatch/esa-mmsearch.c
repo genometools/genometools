@@ -17,6 +17,7 @@
 
 #include "libgtcore/chardef.h"
 #include "libgtcore/minmax.h"
+#include "libgtcore/seqiterator.h"
 #include "libgtcore/symboldef.h"
 #include "sarr-def.h"
 #include "seqpos-def.h"
@@ -25,7 +26,6 @@
 #include "esa-mmsearch-def.h"
 #include "sfx-suffixer.h"
 #include "measure-time-if.h"
-#include "seqiterator.h"
 #include "format64.h"
 #include "stamp.h"
 

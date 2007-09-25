@@ -18,8 +18,8 @@
 #include <assert.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
+#include "libgtcore/seqiterator.h"
 #include "spacedef.h"
-#include "seqiterator.h"
 #include "alphadef.h"
 #include "encseq-def.h"
 

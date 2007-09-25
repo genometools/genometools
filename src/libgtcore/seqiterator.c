@@ -19,7 +19,7 @@
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
-#include "seqiterator.h"
+#include "libgtcore/seqiterator.h"
 
 struct SeqIterator
 {
