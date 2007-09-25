@@ -38,7 +38,7 @@ int overallquerysequences(int(*processsequence)(void *,
                           const Uchar *symbolmap,
                           Env *env)
 {
-  Fastabufferstate *fbs;
+  FastaBuffer *fb;
   Uchar charcode;
   int retval;
   uint64_t unitnum = 0;
@@ -46,17 +46,17 @@ int overallquerysequences(int(*processsequence)(void *,
   char *desc;
 
   env_error_check(env);
-  fbs = initformatbufferstate(filenametab,
-                              symbolmap,
-                              false,
-                              NULL,
-                              sequencedescription,
-                              NULL,
-                              env);
+  fb = fastabuffer_new(filenametab,
+                       symbolmap,
+                       false,
+                       NULL,
+                       sequencedescription,
+                       NULL,
+                       env);
   sequencebuffer->nextfreeUchar = 0;
   while (true)
   {
-    retval = readnextUchar(&charcode,fbs,env);
+    retval = fastabuffer_next(fb,&charcode,env);
     if (retval < 0)
     {
       haserr = true;
@@ -110,13 +110,13 @@ int overallquerysequences(int(*processsequence)(void *,
     FREESPACE(desc);
     sequencebuffer->nextfreeUchar = 0;
   }
-  fastabufferstate_delete(fbs, env);
+  fastabuffer_delete(fb, env);
   return haserr ? -1 : 0;
 }
 
  struct Scansequenceiterator
 {
-  Fastabufferstate *fbs;
+  FastaBuffer *fb;
   const StrArray *filenametab;
   const Uchar *symbolmap;
   Sequencedescription sequencedescription;
@@ -136,13 +136,13 @@ Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
   INITARRAY(&sseqit->sequencebuffer,Uchar);
   INITARRAY(&sseqit->sequencedescription.headerbuffer,char);
   sseqit->sequencedescription.descptr = queue_new(env);
-  sseqit->fbs = initformatbufferstate(filenametab,
-                                      symbolmap,
-                                      false,
-                                      NULL,
-                                      &sseqit->sequencedescription,
-                                      NULL,
-                                      env);
+  sseqit->fb = fastabuffer_new(filenametab,
+                               symbolmap,
+                               false,
+                               NULL,
+                               &sseqit->sequencedescription,
+                               NULL,
+                               env);
   sseqit->sequencebuffer.nextfreeUchar = 0;
   sseqit->exhausted = false;
   sseqit->unitnum = 0;
@@ -153,7 +153,7 @@ Scansequenceiterator *newScansequenceiterator(const StrArray *filenametab,
 void freeScansequenceiterator(Scansequenceiterator **sseqit,Env *env)
 {
   queue_delete_with_contents((*sseqit)->sequencedescription.descptr,env);
-  fastabufferstate_delete((*sseqit)->fbs, env);
+  fastabuffer_delete((*sseqit)->fb, env);
   FREEARRAY(&(*sseqit)->sequencebuffer,Uchar);
   FREEARRAY(&(*sseqit)->sequencedescription.headerbuffer,char);
   FREESPACE(*sseqit);
@@ -175,7 +175,7 @@ int nextScansequenceiterator(const Uchar **sequence,
   }
   while (true)
   {
-    retval = readnextUchar(&charcode,sseqit->fbs,env);
+    retval = fastabuffer_next(sseqit->fb,&charcode,env);
     if (retval < 0)
     {
       haserr = true;

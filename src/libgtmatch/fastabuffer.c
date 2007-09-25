@@ -26,43 +26,42 @@
 #define FASTASEPARATOR    '>'
 #define NEWLINESYMBOL     '\n'
 
-Fastabufferstate* initformatbufferstate(const StrArray *filenametab,
-                                        const Uchar *symbolmap,
-                                        bool plainformat,
-                                        Filelengthvalues **filelengthtab,
-                                        Sequencedescription
-                                        *sequencedescription,
-                                        unsigned long *characterdistribution,
-                                        Env *env)
+FastaBuffer* fastabuffer_new(const StrArray *filenametab,
+                             const Uchar *symbolmap,
+                             bool plainformat,
+                             Filelengthvalues **filelengthtab,
+                             Sequencedescription *sequencedescription,
+                             unsigned long *characterdistribution,
+                             Env *env)
 {
-  Fastabufferstate *fbs;
+  FastaBuffer *fb;
   env_error_check(env);
-  fbs = env_ma_calloc(env, 1, sizeof (Fastabufferstate));
-  fbs->plainformat = plainformat;
-  fbs->filenum = 0;
-  fbs->firstoverallseq = true;
-  fbs->firstseqinfile = true;
-  fbs->nextfile = true;
-  fbs->nextread = fbs->nextfree = 0;
-  fbs->filenametab = filenametab;
-  fbs->symbolmap = symbolmap;
-  fbs->complete = false;
-  fbs->lastspeciallength = 0;
-  fbs->sequencedescription = sequencedescription;
+  fb = env_ma_calloc(env, 1, sizeof (FastaBuffer));
+  fb->plainformat = plainformat;
+  fb->filenum = 0;
+  fb->firstoverallseq = true;
+  fb->firstseqinfile = true;
+  fb->nextfile = true;
+  fb->nextread = fb->nextfree = 0;
+  fb->filenametab = filenametab;
+  fb->symbolmap = symbolmap;
+  fb->complete = false;
+  fb->lastspeciallength = 0;
+  fb->sequencedescription = sequencedescription;
   if (filelengthtab != NULL)
   {
     ALLOCASSIGNSPACE(*filelengthtab,NULL,Filelengthvalues,
                      strarray_size(filenametab));
-    fbs->filelengthtab = *filelengthtab;
+    fb->filelengthtab = *filelengthtab;
   } else
   {
-    fbs->filelengthtab = NULL;
+    fb->filelengthtab = NULL;
   }
-  fbs->characterdistribution = characterdistribution;
-  return fbs;
+  fb->characterdistribution = characterdistribution;
+  return fb;
 }
 
-static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
+static int advancefastabufferstate(FastaBuffer *fb,Env *env)
 {
   int currentchar;
   unsigned long currentposition = 0, currentfileadd = 0, currentfileread = 0;
@@ -74,76 +73,76 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
   {
     if (currentposition >= (unsigned long) FILEBUFFERSIZE)
     {
-      if (fbs->filelengthtab != NULL)
+      if (fb->filelengthtab != NULL)
       {
-        fbs->filelengthtab[fbs->filenum].length
+        fb->filelengthtab[fb->filenum].length
           += (uint64_t) currentfileread;
-        fbs->filelengthtab[fbs->filenum].effectivelength
+        fb->filelengthtab[fb->filenum].effectivelength
           += (uint64_t) currentfileadd;
       }
       break;
     }
-    if (fbs->nextfile)
+    if (fb->nextfile)
     {
-      if (fbs->filelengthtab != NULL)
+      if (fb->filelengthtab != NULL)
       {
-        fbs->filelengthtab[fbs->filenum].length = 0;
-        fbs->filelengthtab[fbs->filenum].effectivelength = 0;
+        fb->filelengthtab[fb->filenum].length = 0;
+        fb->filelengthtab[fb->filenum].effectivelength = 0;
       }
-      fbs->nextfile = false;
-      fbs->indesc = false;
-      fbs->firstseqinfile = true;
+      fb->nextfile = false;
+      fb->indesc = false;
+      fb->firstseqinfile = true;
       currentfileadd = 0;
       currentfileread = 0;
-      fbs->linenum = (uint64_t) 1;
-      fbs->inputstream = genfile_xopen(strarray_get(fbs->filenametab,
-                                                  (unsigned long) fbs->filenum),
+      fb->linenum = (uint64_t) 1;
+      fb->inputstream = genfile_xopen(strarray_get(fb->filenametab,
+                                                  (unsigned long) fb->filenum),
                                        "rb", env);
     } else
     {
-      currentchar = genfile_getc(fbs->inputstream);
+      currentchar = genfile_getc(fb->inputstream);
       if (currentchar == EOF)
       {
-        genfile_xclose(fbs->inputstream, env);
-        fbs->inputstream = NULL;
-        if (fbs->filelengthtab != NULL)
+        genfile_xclose(fb->inputstream, env);
+        fb->inputstream = NULL;
+        if (fb->filelengthtab != NULL)
         {
-          fbs->filelengthtab[fbs->filenum].length += currentfileread;
-          fbs->filelengthtab[fbs->filenum].effectivelength += currentfileadd;
+          fb->filelengthtab[fb->filenum].length += currentfileread;
+          fb->filelengthtab[fb->filenum].effectivelength += currentfileadd;
         }
-        if ((unsigned long) fbs->filenum == strarray_size(fbs->filenametab) - 1)
+        if ((unsigned long) fb->filenum == strarray_size(fb->filenametab) - 1)
         {
-          fbs->complete = true;
+          fb->complete = true;
           break;
         }
-        fbs->filenum++;
-        fbs->nextfile = true;
+        fb->filenum++;
+        fb->nextfile = true;
       } else
       {
         currentfileread++;
-        if (fbs->indesc)
+        if (fb->indesc)
         {
           if (currentchar == NEWLINESYMBOL)
           {
-            fbs->linenum++;
-            fbs->indesc = false;
+            fb->linenum++;
+            fb->indesc = false;
           }
-          if (fbs->sequencedescription != NULL)
+          if (fb->sequencedescription != NULL)
           {
             if (currentchar == NEWLINESYMBOL)
             {
-              STOREINARRAY(&fbs->sequencedescription->headerbuffer,char,128,
+              STOREINARRAY(&fb->sequencedescription->headerbuffer,char,128,
                            '\0');
               ALLOCASSIGNSPACE(savebuffer,NULL,char,
-                               fbs->sequencedescription->headerbuffer.
+                               fb->sequencedescription->headerbuffer.
                                                          nextfreechar);
               strcpy(savebuffer,
-                     fbs->sequencedescription->headerbuffer.spacechar);
-              queue_add(fbs->sequencedescription->descptr,savebuffer,env);
-              fbs->sequencedescription->headerbuffer.nextfreechar = 0;
+                     fb->sequencedescription->headerbuffer.spacechar);
+              queue_add(fb->sequencedescription->descptr,savebuffer,env);
+              fb->sequencedescription->headerbuffer.nextfreechar = 0;
             } else
             {
-              STOREINARRAY(&fbs->sequencedescription->headerbuffer,char,128,
+              STOREINARRAY(&fb->sequencedescription->headerbuffer,char,128,
                            currentchar);
             }
           }
@@ -153,56 +152,56 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
           {
             if (currentchar == FASTASEPARATOR)
             {
-              if (fbs->firstoverallseq)
+              if (fb->firstoverallseq)
               {
-                fbs->firstoverallseq = false;
-                fbs->firstseqinfile = false;
+                fb->firstoverallseq = false;
+                fb->firstseqinfile = false;
               } else
               {
-                if (fbs->firstseqinfile)
+                if (fb->firstseqinfile)
                 {
-                  fbs->firstseqinfile = false;
+                  fb->firstseqinfile = false;
                 } else
                 {
                   currentfileadd++;
                 }
-                fbs->bufspace[currentposition++] = (Uchar) SEPARATOR;
-                fbs->lastspeciallength++;
+                fb->bufspace[currentposition++] = (Uchar) SEPARATOR;
+                fb->lastspeciallength++;
               }
-              fbs->indesc = true;
+              fb->indesc = true;
             } else
             {
-              if (fbs->symbolmap == NULL)
+              if (fb->symbolmap == NULL)
               {
-                fbs->bufspace[currentposition++] = (Uchar) currentchar;
+                fb->bufspace[currentposition++] = (Uchar) currentchar;
               } else
               {
-                charcode = fbs->symbolmap[(unsigned int) currentchar];
+                charcode = fb->symbolmap[(unsigned int) currentchar];
                 if (charcode == (Uchar) UNDEFCHAR)
                 {
                   env_error_set(env,"illegal character '%c':"
                                     " file \"%s\", line " Formatuint64_t,
                                 currentchar,
-                                strarray_get(fbs->filenametab,
-                                             (unsigned long) fbs->filenum),
-                                PRINTuint64_tcast(fbs->linenum));
+                                strarray_get(fb->filenametab,
+                                             (unsigned long) fb->filenum),
+                                PRINTuint64_tcast(fb->linenum));
                   return -1;
                 }
                 if (ISSPECIAL(charcode))
                 {
-                  fbs->lastspeciallength++;
+                  fb->lastspeciallength++;
                 } else
                 {
-                  if (fbs->lastspeciallength > 0)
+                  if (fb->lastspeciallength > 0)
                   {
-                    fbs->lastspeciallength = 0;
+                    fb->lastspeciallength = 0;
                   }
-                  if (fbs->characterdistribution != NULL)
+                  if (fb->characterdistribution != NULL)
                   {
-                    fbs->characterdistribution[charcode]++;
+                    fb->characterdistribution[charcode]++;
                   }
                 }
-                fbs->bufspace[currentposition++] = charcode;
+                fb->bufspace[currentposition++] = charcode;
               }
               currentfileadd++;
             }
@@ -211,23 +210,23 @@ static int advanceFastabufferstate(Fastabufferstate *fbs,Env *env)
       }
     }
   }
-  if (fbs->firstoverallseq)
+  if (fb->firstoverallseq)
   {
     env_error_set(env,"no sequences in multiple fasta file(s) %s ...",
-                  strarray_get(fbs->filenametab,0));
+                  strarray_get(fb->filenametab,0));
     return -2;
   }
-  fbs->nextfree = currentposition;
+  fb->nextfree = currentposition;
   return 0;
 }
 
-static int advancePlainbufferstate(Fastabufferstate *fbs,Env *env)
+static int advancePlainbufferstate(FastaBuffer *fb,Env *env)
 {
   int currentchar;
   unsigned long currentposition = 0, currentfileread = 0;
 
   env_error_check(env);
-  if (fbs->sequencedescription != NULL)
+  if (fb->sequencedescription != NULL)
   {
     env_error_set(env,"no headers in plain sequence file");
     return -1;
@@ -236,79 +235,79 @@ static int advancePlainbufferstate(Fastabufferstate *fbs,Env *env)
   {
     if (currentposition >= (unsigned long) FILEBUFFERSIZE)
     {
-      if (fbs->filelengthtab != NULL)
+      if (fb->filelengthtab != NULL)
       {
-        fbs->filelengthtab[fbs->filenum].length
+        fb->filelengthtab[fb->filenum].length
            += (uint64_t) currentfileread;
-        fbs->filelengthtab[fbs->filenum].effectivelength
+        fb->filelengthtab[fb->filenum].effectivelength
            += (uint64_t) currentfileread;
       }
       break;
     }
-    if (fbs->nextfile)
+    if (fb->nextfile)
     {
-      if (fbs->filelengthtab != NULL)
+      if (fb->filelengthtab != NULL)
       {
-        fbs->filelengthtab[fbs->filenum].length = 0;
-        fbs->filelengthtab[fbs->filenum].effectivelength = 0;
+        fb->filelengthtab[fb->filenum].length = 0;
+        fb->filelengthtab[fb->filenum].effectivelength = 0;
       }
-      fbs->nextfile = false;
-      fbs->firstseqinfile = true;
+      fb->nextfile = false;
+      fb->firstseqinfile = true;
       currentfileread = 0;
-      fbs->inputstream = genfile_xopen(strarray_get(fbs->filenametab,
-                                                  (unsigned long) fbs->filenum),
+      fb->inputstream = genfile_xopen(strarray_get(fb->filenametab,
+                                                  (unsigned long) fb->filenum),
                                        "rb", env);
     } else
     {
-      currentchar = genfile_getc(fbs->inputstream);
+      currentchar = genfile_getc(fb->inputstream);
       if (currentchar == EOF)
       {
-        genfile_xclose(fbs->inputstream, env);
-        fbs->inputstream = NULL;
-        if (fbs->filelengthtab != NULL)
+        genfile_xclose(fb->inputstream, env);
+        fb->inputstream = NULL;
+        if (fb->filelengthtab != NULL)
         {
-          fbs->filelengthtab[fbs->filenum].length
+          fb->filelengthtab[fb->filenum].length
             += (uint64_t) currentfileread;
-          fbs->filelengthtab[fbs->filenum].effectivelength
+          fb->filelengthtab[fb->filenum].effectivelength
             += (uint64_t) currentfileread;
         }
-        if ((unsigned long) fbs->filenum == strarray_size(fbs->filenametab) - 1)
+        if ((unsigned long) fb->filenum == strarray_size(fb->filenametab) - 1)
         {
-          fbs->complete = true;
+          fb->complete = true;
           break;
         }
-        fbs->filenum++;
-        fbs->nextfile = true;
+        fb->filenum++;
+        fb->nextfile = true;
       } else
       {
         currentfileread++;
-        fbs->bufspace[currentposition++] = (Uchar) currentchar;
+        fb->bufspace[currentposition++] = (Uchar) currentchar;
       }
     }
   }
   if (currentposition == 0)
   {
     env_error_set(env,"no characters in plain file(s) %s ...",
-                  strarray_get(fbs->filenametab,0));
+                  strarray_get(fb->filenametab,0));
     return -2;
   }
-  fbs->nextfree = currentposition;
+  fb->nextfree = currentposition;
   return 0;
 }
 
-int advanceformatbufferstate(Fastabufferstate *fbs,Env *env)
+int advanceformatbufferstate(FastaBuffer *fb,Env *env)
 {
   env_error_check(env);
-  if (fbs->plainformat)
+  if (fb->plainformat)
   {
-    return advancePlainbufferstate(fbs,env);
+    return advancePlainbufferstate(fb,env);
   }
-  return advanceFastabufferstate(fbs,env);
+  return advancefastabufferstate(fb,env);
 }
 
-void fastabufferstate_delete(Fastabufferstate *fbs, Env *env)
+void fastabuffer_delete(FastaBuffer *fb, Env *env)
 {
-  if (!fbs) return;
-  genfile_xclose(fbs->inputstream, env);
-  env_ma_free(fbs, env);
+  if (!fb) return;
+  genfile_xclose(fb->inputstream, env);
+  env_ma_free(fb, env);
 }

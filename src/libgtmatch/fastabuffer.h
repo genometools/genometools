@@ -27,20 +27,15 @@
 #include "seqdesc.h"
 #include "symboldef.h"
 
-typedef struct Fastabufferstate Fastabufferstate;
+typedef struct FastaBuffer FastaBuffer;
 
-Fastabufferstate* initformatbufferstate(const StrArray *filenametab,
-                                        const Uchar *symbolmap,
-                                        bool plainformat,
-                                        Filelengthvalues **filelengthtab,
-                                        Sequencedescription
-                                        *sequencedescription,
-                                        unsigned long *characterdistribution,
-                                        Env *env);
-
-static int readnextUchar(Uchar *val,Fastabufferstate *fbs,Env *env);
-
-void fastabufferstate_delete(Fastabufferstate*, Env*);
+FastaBuffer* fastabuffer_new(const StrArray *filenametab,
+                             const Uchar *symbolmap, bool plainformat,
+                             Filelengthvalues **filelengthtab,
+                             Sequencedescription *sequencedescription,
+                             unsigned long *characterdistribution, Env*);
+static int   fastabuffer_next(FastaBuffer*, Uchar *val, Env *env);
+void         fastabuffer_delete(FastaBuffer*, Env*);
 
 #include "fastabuffer_imp.h"
 
