@@ -15,12 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include <inttypes.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
-#include "format64.h"
 #include "iterseq.h"
 
 struct Scansequenceiterator
@@ -31,7 +29,7 @@ struct Scansequenceiterator
   Queue *descptr;
   Str *sequencebuffer;
   unsigned long length;
-  uint64_t unitnum;
+  unsigned long long unitnum;
   bool withsequence, exhausted;
 };
 
@@ -98,8 +96,7 @@ int nextScansequenceiterator(const Uchar **sequence,
     {
       if (sseqit->length == 0 && sseqit->withsequence)
       {
-        env_error_set(env,"sequence " Formatuint64_t " is empty",
-                      PRINTuint64_tcast(sseqit->unitnum));
+        env_error_set(env,"sequence %llu is empty", sseqit->unitnum);
         haserr = true;
         break;
       }
