@@ -55,7 +55,7 @@ FastaBuffer* fastabuffer_new(const StrArray *filenametab,
   else
     fb->filelengthtab = NULL;
   fb->characterdistribution = characterdistribution;
-  fb->headerbuffer = str_new(env);
+  INITARRAY(&fb->headerbuffer, char);
   return fb;
 }
 
@@ -129,12 +129,13 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
           {
             if (currentchar == NEWLINESYMBOL)
             {
-              queue_add(fb->descptr, cstr_dup(str_get(fb->headerbuffer), env),
+              STOREINARRAY(&fb->headerbuffer, char, 128, '\0');
+              queue_add(fb->descptr, cstr_dup(fb->headerbuffer.spacechar, env),
                         env);
-              str_reset(fb->headerbuffer);
+              fb->headerbuffer.nextfreechar = 0;
             } else
             {
-              str_append_char(fb->headerbuffer, currentchar, env);
+              STOREINARRAY(&fb->headerbuffer, char, 128, currentchar);
             }
           }
         } else
@@ -300,6 +301,6 @@ void fastabuffer_delete(FastaBuffer *fb, Env *env)
 {
   if (!fb) return;
   genfile_xclose(fb->inputstream, env);
-  str_delete(fb->headerbuffer, env);
+  FREEARRAY(&fb->headerbuffer, char);
   env_ma_free(fb, env);
 }

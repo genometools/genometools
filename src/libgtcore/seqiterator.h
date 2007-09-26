@@ -18,6 +18,7 @@
 #ifndef SEQITERATOR_H
 #define SEQITERATOR_H
 
+#include <inttypes.h>
 #include "libgtcore/queue.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"

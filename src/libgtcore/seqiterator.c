@@ -21,14 +21,15 @@
 #include "libgtcore/symboldef.h"
 #include "libgtcore/seqiterator.h"
 
+#include "libgtmatch/arraydef.h"
+
 struct SeqIterator
 {
   FastaBuffer *fb;
   const StrArray *filenametab;
   const Uchar *symbolmap;
   Queue *descptr;
-  Str *sequencebuffer;
-  unsigned long length;
+  ArrayUchar sequencebuffer;
   unsigned long long unitnum;
   bool withsequence, exhausted;
 };
@@ -41,8 +42,8 @@ SeqIterator* seqiterator_new(const StrArray *filenametab,
   SeqIterator *seqit;
   env_error_check(env);
   seqit = env_ma_malloc(env, sizeof (SeqIterator));
-  seqit->sequencebuffer = str_new(env);
-  seqit->length = 0;
+  INITARRAY(&seqit->sequencebuffer, Uchar);
+  seqit->sequencebuffer.nextfreeUchar = 0;
   seqit->descptr = queue_new(env);
   seqit->fb = fastabuffer_new(filenametab,
                                symbolmap,
@@ -89,20 +90,19 @@ int seqiterator_next(SeqIterator *seqit,
     }
     if (charcode == (Uchar) SEPARATOR)
     {
-      if (seqit->length == 0 && seqit->withsequence)
+      if (seqit->sequencebuffer.nextfreeUchar == 0 && seqit->withsequence)
       {
         env_error_set(env,"sequence %llu is empty", seqit->unitnum);
         haserr = true;
         break;
       }
       *desc = queue_get(seqit->descptr,env);
-      *len = seqit->length;
+      *len = seqit->sequencebuffer.nextfreeUchar;
       if (seqit->withsequence)
       {
-        *sequence = str_get(seqit->sequencebuffer); /* XXX: ownership prob. */
+        *sequence = seqit->sequencebuffer.spaceUchar; /* XXX: ownership prob. */
       }
-      str_reset(seqit->sequencebuffer);
-      seqit->length = 0;
+      seqit->sequencebuffer.nextfreeUchar = 0;
       foundseq = true;
       seqit->unitnum++;
       break;
@@ -110,22 +110,22 @@ int seqiterator_next(SeqIterator *seqit,
     {
       if (seqit->withsequence)
       {
-        str_append_char(seqit->sequencebuffer, charcode, env);
+        STOREINARRAY(&seqit->sequencebuffer, Uchar, 1024, charcode);
       }
-      seqit->length++;
+      else
+        seqit->sequencebuffer.nextfreeUchar++;
     }
   }
-  if (!haserr && seqit->length > 0)
+  if (!haserr && seqit->sequencebuffer.nextfreeUchar > 0)
   {
     *desc = queue_get(seqit->descptr,env);
     if (seqit->withsequence)
     {
-      *sequence = str_get(seqit->sequencebuffer); /* XXX: ownership problem */
+      *sequence = seqit->sequencebuffer.spaceUchar; /* XXX: ownership problem */
     }
-    *len = seqit->length;
+    *len = seqit->sequencebuffer.nextfreeUchar;
     foundseq = true;
-    str_reset(seqit->sequencebuffer);
-    seqit->length = 0;
+    seqit->sequencebuffer.nextfreeUchar = 0;
   }
   if (haserr)
   {
@@ -143,7 +143,7 @@ void seqiterator_delete(SeqIterator *seqit, Env *env)
   if (!seqit) return;
   queue_delete_with_contents(seqit->descptr, env);
   fastabuffer_delete(seqit->fb, env);
-  str_delete(seqit->sequencebuffer, env);
+  FREEARRAY(&seqit->sequencebuffer, Uchar);
   env_ma_free(seqit, env);
 }
 
