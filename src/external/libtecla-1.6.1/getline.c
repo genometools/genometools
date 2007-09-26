@@ -98,10 +98,6 @@
 typedef int TputsRetType;
 typedef char TputsArgType;              /* int tputs(char c, FILE *fp) */
 #define TPUTS_RETURNS_VALUE 1
-#elif defined(__APPLE__) && defined(__MACH__)
-typedef void TputsRetType;
-typedef int TputsArgType;               /* void tputs(int c, FILE *fp) */
-#define TPUTS_RETURNS_VALUE 0
 #else
 typedef int TputsRetType;
 typedef int TputsArgType;               /* int tputs(int c, FILE *fp) */
