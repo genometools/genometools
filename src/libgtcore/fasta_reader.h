@@ -18,6 +18,8 @@
 #ifndef FASTA_READER_H
 #define FASTA_READER_H
 
+/* this class is deprecated, use the SeqIterator class instead! */
+
 #include "libgtcore/str.h"
 
 typedef struct FastaReader FastaReader;
