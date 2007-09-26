@@ -131,7 +131,7 @@ bitPackStringInt16_unit_test(Env *env)
   env_log_log(env, "passed\n");
   if (numRnd > 0)
   {
-    uint16_t v = randSrc[0], r;
+    uint16_t v = randSrc[0], r = 0;
     unsigned numBits = requiredUInt16Bits(v);
     BitOffset i = offsetStart + numBits;
     uint16_t mask = ~(uint16_t)0;
@@ -352,7 +352,7 @@ bitPackStringInt16_unit_test(Env *env)
     {
       int16_t m = (int16_t)1 << (numBits - 1);
       int16_t v = (int16_t)((randSrc[0] & mask) ^ m) - m;
-      int16_t r;
+      int16_t r = 0;
       bsGetUniformInt16Array(bitStore, offsetStart,
                                 numBits, 1, &r);
       ensure(had_err, r == v);

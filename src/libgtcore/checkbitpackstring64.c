@@ -131,7 +131,7 @@ bitPackStringInt64_unit_test(Env *env)
   env_log_log(env, "passed\n");
   if (numRnd > 0)
   {
-    uint64_t v = randSrc[0], r;
+    uint64_t v = randSrc[0], r = 0;
     unsigned numBits = requiredUInt64Bits(v);
     BitOffset i = offsetStart + numBits;
     uint64_t mask = ~(uint64_t)0;
@@ -352,7 +352,7 @@ bitPackStringInt64_unit_test(Env *env)
     {
       int64_t m = (int64_t)1 << (numBits - 1);
       int64_t v = (int64_t)((randSrc[0] & mask) ^ m) - m;
-      int64_t r;
+      int64_t r = 0;
       bsGetUniformInt64Array(bitStore, offsetStart,
                                 numBits, 1, &r);
       ensure(had_err, r == v);

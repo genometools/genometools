@@ -349,7 +349,7 @@ bitPackString@iTypeTag@_unit_test(Env *env)
     {
       @iOpType@ m = (@iOpType@)1 << (numBits - 1);
       @iOpType@ v = (@iOpType@)((randSrc[0] & mask) ^ m) - m;
-      @iOpType@ r;
+      @iOpType@ r = 0;
       bsGetUniform@iTypeTag@Array(bitStore, offsetStart,
                                 numBits, 1, &r);
       ensure(had_err, r == v);

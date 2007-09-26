@@ -131,7 +131,7 @@ bitPackStringInt8_unit_test(Env *env)
   env_log_log(env, "passed\n");
   if (numRnd > 0)
   {
-    uint8_t v = randSrc[0], r;
+    uint8_t v = randSrc[0], r = 0;
     unsigned numBits = requiredUInt8Bits(v);
     BitOffset i = offsetStart + numBits;
     uint8_t mask = ~(uint8_t)0;
@@ -352,7 +352,7 @@ bitPackStringInt8_unit_test(Env *env)
     {
       int8_t m = (int8_t)1 << (numBits - 1);
       int8_t v = (int8_t)((randSrc[0] & mask) ^ m) - m;
-      int8_t r;
+      int8_t r = 0;
       bsGetUniformInt8Array(bitStore, offsetStart,
                                 numBits, 1, &r);
       ensure(had_err, r == v);

@@ -131,7 +131,7 @@ bitPackStringInt_unit_test(Env *env)
   env_log_log(env, "passed\n");
   if (numRnd > 0)
   {
-    unsigned v = randSrc[0], r;
+    unsigned v = randSrc[0], r = 0;
     unsigned numBits = requiredUIntBits(v);
     BitOffset i = offsetStart + numBits;
     unsigned mask = ~(unsigned)0;
@@ -352,7 +352,7 @@ bitPackStringInt_unit_test(Env *env)
     {
       int m = (int)1 << (numBits - 1);
       int v = (int)((randSrc[0] & mask) ^ m) - m;
-      int r;
+      int r = 0;
       bsGetUniformIntArray(bitStore, offsetStart,
                                 numBits, 1, &r);
       ensure(had_err, r == v);
