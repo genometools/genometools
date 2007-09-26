@@ -17,6 +17,7 @@
 
 #ifndef INTBITS_H
 #define INTBITS_H
+#include <inttypes.h>
 
 /*
   This file contains some definitions manipulating bitvectors represented
