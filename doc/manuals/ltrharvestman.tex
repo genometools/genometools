@@ -16,19 +16,34 @@
 \newcommand{\Gt}{\texttt{gt}\xspace}
 \newcommand{\Gtsuffixerator}{\texttt{gt suffixerator}\xspace}
 
-\title{LTRharvest\\
+\title{\LTRharvest\\
 a manual}
 \author{\begin{tabular}{c}
-         \emph{David Ellinghaus}\\
-         Center for Bioinformatics,\\
-         University of Hamburg
+         \textit{David Ellinghaus}\\
+         \textit{Stefan Kurtz}\\
+         \textit{Ute Willhoeft}\\[1cm]
+         Research Group for Genomeinformatics\\
+         Center for Bioinformatics\\
+         University of Hamburg\\
+         Bundesstrasse 43\\
+         20146 Hamburg\\
+         Germany\\[1cm]
+         \url{willhoeft@zbh.uni-hamburg.de}\\[1cm]
+         \begin{tabular}{p{0.8\textwidth}}
+        In any documentation or publication about research using \LTRharvest
+        please cite the following paper:\\[5mm]
+        D.~Ellinghaus, S.~Kurtz, and U.~Willhoeft.
+        \LTRharvest, an efficient and flexible software for de novo
+        detection of LTR retrotransposons.
+        \textit{submitted}, 2007.
+        \end{tabular}
         \end{tabular}}
 \begin{document}
 \maketitle
 
 \section{Introduction} \label{Introduction}
 
-This document describes \LTRharvest, a software tool
+This document describes \LTRharvest \cite{LTRharvesturl}, a software tool
 for \textit{de novo} predictions of LTR 
 retrotransposons in genomic sequences~\cite{EKW07}.
 \LTRharvest computes boundary positions of potential
@@ -730,6 +745,9 @@ $ vmatch -dbcluster 95 7 Cluster-pred-chrAll -p -d -seedlength 50
 %\bibliography{references}
 \begin{thebibliography}{1}
 
+\bibitem{LTRharvesturl}
+  \url{http://www.zbh.uni-hamburg.de/ltrharvest/}
+
 \bibitem{gff3}
 \textsc{GFF3}, tab delimited file format for genome annotation.
   \url{http://www.sequenceontology.org/gff3.shtml}.
@@ -741,7 +759,7 @@ M.I. Abouelhoda, S.~Kurtz, and E.~Ohlebusch.
 
 \bibitem{EKW07}
 D.~Ellinghaus, S.~Kurtz, and U.~Willhoeft.
-\newblock \textit{LTRharvest}, an efficient and flexible software for de novo
+\newblock \LTRharvest, an efficient and flexible software for de novo
   detection of \normalsize{LTR} retrotransposons.
 \newblock {\em submitted}, 2007.
 
