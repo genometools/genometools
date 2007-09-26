@@ -19,27 +19,19 @@
 #define ARRAYDEF_H
 
 #include "libgtcore/symboldef.h"
-#include "spacedef.h"
 
 /*
   This file defines macros to conveniently declare and
   manipulate dynamic arrays whose size grow on demand. Each dynamic
-  array over some type \texttt{T}
+  array over some type T
   is implemented by a structure consisting of three components:
-  \begin{enumerate}
-  \item
-  \texttt{space\#\#T} is a pointer to the space block of type \texttt{T}
-  allocated for the array.
-  \item
-  \texttt{allocated\#\#T} is an \texttt{unsigned long}-value storing the number
-  of entries in the array currently allocated.
-  \item
-  \texttt{nextfree\#\#T} holds the smallest index of the array where no
-  value is stored.
-  \end{enumerate}
-  Here \texttt{\#\#} is the concatenation operator of the C-preprocessor.
+  - space##T is a pointer to the space block of type T allocated for the array.
+  - allocated##T is an unsigned long value storing the number of entries in the
+    array currently allocated.
+  - nextfree##T holds the smallest index of the array where no value is stored.
+  Here ## is the concatenation operator of the C-preprocessor.
   The following macro expands to a corresponding type definition over
-  some given \texttt{TYPE}.
+  some given TYPE.
 */
 
 #define DECLAREARRAYSTRUCT(TYPE)\
@@ -50,7 +42,7 @@
         } Array##TYPE
 
 /*
-  \texttt{INITARRAY} initializes an empty array.
+  INITARRAY initializes an empty array.
 */
 
 #define INITARRAY(A,TYPE)\
@@ -58,16 +50,16 @@
         (A)->allocated##TYPE = (A)->nextfree##TYPE = 0
 
 /*
-  \texttt{COPYARRAY} copies an array.
+  COPYARRAY copies an array.
 */
 
 #define COPYARRAY(A,B)\
         *(A) = *(B)
 
 /*
-  \texttt{CHECKARRAYSPACE} checks if the integer \texttt{nextfree\#\#T}
+  CHECKARRAYSPACE checks if the integer nextfree##T
   points to an index for which the space is not allocated yet. If this is
-  the case, the number of cells allocated is incremented by \texttt{L}. The
+  the case, the number of cells allocated is incremented by L. The
   contents of the previously filled array elements is of course maintained.
 */
 
@@ -75,28 +67,29 @@
         if ((A)->nextfree##TYPE >= (A)->allocated##TYPE)\
         {\
           (A)->allocated##TYPE += L;\
-          ALLOCASSIGNSPACEGENERIC(__FILE__,__LINE__,(A)->space##TYPE,\
-                                  (A)->space##TYPE,\
-                                  TYPE,(A)->allocated##TYPE);\
+          (A)->space##TYPE = ma_realloc_mem(env_ma(env), (A)->space##TYPE,\
+                                            sizeof (TYPE) *\
+                                            (A)->allocated##TYPE,\
+                                            __FILE__, __LINE__);\
         }
 
 /*
-  The next macro is a variation of \texttt{CHECKARRAYSPACE},
-  which checks if the next
-  \texttt{L} cells have been allocated. If not, then this is done.
+  The next macro is a variation of CHECKARRAYSPACE, which checks if the next
+  L cells have been allocated. If not, then this is done.
 */
 
 #define CHECKARRAYSPACEMULTI(A,TYPE,L)\
         if ((A)->nextfree##TYPE + (L) >= (A)->allocated##TYPE)\
         {\
           (A)->allocated##TYPE += L;\
-          ALLOCASSIGNSPACEGENERIC(__FILE__,__LINE__,(A)->space##TYPE,\
-                                  (A)->space##TYPE,\
-                                  TYPE,(A)->allocated##TYPE);\
+          (A)->space##TYPE = ma_realloc_mem(env_ma(env), (A)->space##TYPE,\
+                                            sizeof (TYPE) *\
+                                            (A)->allocated##TYPE,\
+                                            __FILE__, __LINE__);\
         }
 
 /*
-  This macro checks the space and delivers a pointer \texttt{P}
+  This macro checks the space and delivers a pointer P
   to the next free element in the array.
 */
 
@@ -105,9 +98,8 @@
         P = (A)->space##TYPE + (A)->nextfree##TYPE++;
 
 /*
-  This macro checks the space and stores \texttt{V} in the
-  \texttt{nextfree}-component of the array. \texttt{nextfree}
-  is incremented.
+  This macro checks the space and stores V in the
+  nextfree-component of the array. nextfree is incremented.
 */
 
 #define STOREINARRAY(A,TYPE,L,VAL)\
@@ -115,13 +107,13 @@
         (A)->space##TYPE[(A)->nextfree##TYPE++] = VAL
 
 /*
-  This macro frees the space for an array if it is not \texttt{NULL}.
+  This macro frees the space for an array if it is not NULL.
 */
 
 #define FREEARRAY(A,TYPE)\
         if ((A)->space##TYPE != NULL)\
         {\
-          FREESPACE((A)->space##TYPE);\
+          env_ma_free((A)->space##TYPE, env);\
         }
 
 /*

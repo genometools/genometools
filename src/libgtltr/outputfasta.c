@@ -19,6 +19,7 @@
 #include "libgtcore/str.h"
 #include "libgtmatch/alphadef.h"
 #include "libgtmatch/sarr-def.h"
+#include "libgtmatch/spacedef.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/esa-seqread.pr"

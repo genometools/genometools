@@ -18,6 +18,7 @@
 #ifndef SEQITERATOR_H
 #define SEQITERATOR_H
 
+#include <inttypes.h>
 #include "libgtcore/queue.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
@@ -27,7 +28,7 @@ typedef struct SeqIterator SeqIterator;
 SeqIterator* seqiterator_new(const StrArray *filenametab,
                              const Uchar *symbolmap, bool withsequence, Env*);
 int          seqiterator_next(SeqIterator*, const Uchar **sequence,
-                             unsigned long *len, char **desc, Env*);
+                              unsigned long *len, char **desc, Env*);
 void         seqiterator_delete(SeqIterator*, Env*);
 
 #endif

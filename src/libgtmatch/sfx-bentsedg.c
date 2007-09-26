@@ -17,10 +17,10 @@
 
 #include <limits.h>
 #include <assert.h>
+#include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "libgtcore/minmax.h"
-#include "arraydef.h"
 #include "divmodmul.h"
 #include "sfx-codespec.h"
 #include "intcode-def.h"

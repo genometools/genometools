@@ -20,8 +20,8 @@
 
 #include <stdbool.h>
 
+#include "libgtcore/arraydef.h"
 #include "libgtcore/env.h"
-#include "libgtmatch/arraydef.h"
 #include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/sarr-def.h"
 

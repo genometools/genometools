@@ -16,16 +16,13 @@
 */
 
 #include <stdio.h>
-
 #include "libgtcore/env.h"
-
-#include "libgtmatch/arraydef.h"
+#include "libgtcore/arraydef.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/pos2seqnum.pr"
 #include "libgtmatch/intcode-def.h"
 #include "libgtmatch/sfx-mappedstr.pr"
-
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 

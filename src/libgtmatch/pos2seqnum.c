@@ -15,11 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "encseq-def.h"
-#include "arraydef.h"
 #include "divmodmul.h"
+#include "spacedef.h"
 
 DECLAREARRAYSTRUCT(Seqpos);
 

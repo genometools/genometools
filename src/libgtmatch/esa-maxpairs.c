@@ -15,7 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "arraydef.h"
+#include "libgtcore/arraydef.h"
+#include "spacedef.h"
 #include "seqpos-def.h"
 #include "esa-seqread.h"
 #include "verbose-def.h"

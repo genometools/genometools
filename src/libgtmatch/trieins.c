@@ -16,11 +16,11 @@
 */
 
 #include <assert.h>
+#include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
 #include "format64.h"
 #include "intbits-tab.h"
 #include "divmodmul.h"
-#include "arraydef.h"
 #include "encseq-def.h"
 
 #include "trieins-def.h"

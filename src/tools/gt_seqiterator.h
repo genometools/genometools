@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,24 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef BWTBOUND_H
-#define BWTBOUND_H
+#ifndef GT_SEQITERATOR_H
+#define GT_SEQITERATOR_H
 
-#include "libgtcore/arraydef.h"
-#include "seqpos-def.h"
-
-typedef struct
-{
-  Seqpos lbound,
-         ubound;
-} Bwtbound;
-
-typedef struct
-{
-  Seqpos bwtpos,
-         suftabvalue;
-} PairBwtidx;
-
-DECLAREARRAYSTRUCT(PairBwtidx);
+/* the sequence iterator tool */
+int gt_seqiterator(int argc, const char **argv, Env*);
 
 #endif

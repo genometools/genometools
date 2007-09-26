@@ -16,6 +16,7 @@
 */
 
 #include <errno.h>
+#include <string.h>
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "ushort-def.h"

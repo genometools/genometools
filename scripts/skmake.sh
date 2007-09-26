@@ -34,7 +34,7 @@ fi
 
 make curses=no bin/skproto
 
-skproto-all.sh
+# skproto-all.sh
 
 if test $big -eq 1
 then

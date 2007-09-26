@@ -18,9 +18,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
-#include "arraydef.h"
 #include "spacedef.h"
 #include "alphadef.h"
 #include "encseq-def.h"

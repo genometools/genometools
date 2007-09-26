@@ -19,10 +19,10 @@
 #define OVERALLSEQ_H
 
 #include <inttypes.h>
+#include "libgtcore/arraydef.h"
 #include "libgtcore/queue.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
-#include "arraydef.h"
 
 int overallquerysequences(int(*processsequence)(void *,
                                                 uint64_t,

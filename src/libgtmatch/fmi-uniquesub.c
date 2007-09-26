@@ -16,6 +16,7 @@
 */
 
 #include <inttypes.h>
+#include <string.h>
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "fmindex.h"

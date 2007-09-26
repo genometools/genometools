@@ -16,6 +16,8 @@
 */
 
 #include <stdio.h>
+#include <string.h>
+#include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "libgtcore/error.h"
@@ -24,7 +26,6 @@
 #include "libgtcore/undef.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/symboldef.h"
-#include "libgtmatch/arraydef.h"
 #include "libgtmatch/alphadef.h"
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"

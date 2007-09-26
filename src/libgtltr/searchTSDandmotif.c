@@ -16,12 +16,12 @@
 */
 
 #include <stdbool.h>
+#include "libgtcore/arraydef.h"
 #include "libgtcore/env.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/symboldef.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/sarr-def.h"
-#include "libgtmatch/arraydef.h"
 #include "libgtmatch/spacedef.h"
 #include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/esa-seqread.pr"

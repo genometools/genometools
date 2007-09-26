@@ -18,8 +18,8 @@
 #ifndef TRIEINS_DEF_H
 #define TRIEINS_DEF_H
 
+#include "libgtcore/arraydef.h"
 #include "seqpos-def.h"
-#include "arraydef.h"
 #include "encseq-def.h"
 
 /* XXX make this type opaque */

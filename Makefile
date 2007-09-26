@@ -452,7 +452,9 @@ splint:
         $(CURDIR)/src/libgtext/*.c \
         $(CURDIR)/src/tools/*.c
 
-sgt:${addprefix obj/,${notdir ${subst .c,.splint,${wildcard ${CURDIR}/src/libgtmatch/*.c} ${SKTOOLS}}}}
+sgt:${addprefix obj/,${notdir ${subst .c,.splint,\
+                     ${wildcard ${CURDIR}/src/libgtmatch/*.c}\
+                                ${SKTOOLS}}}}
 
 splintclean:
 	find obj -name '*.splint' | xargs rm -f
