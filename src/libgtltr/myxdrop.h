@@ -18,9 +18,9 @@
 #ifndef MYXDROP_H
 #define MYXDROP_H
 
+#include "libgtcore/arraydef.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/seqpos-def.h"
-#include "libgtmatch/arraydef.h"
 
 typedef struct
 {

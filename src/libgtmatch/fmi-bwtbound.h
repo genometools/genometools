@@ -18,8 +18,8 @@
 #ifndef BWTBOUND_H
 #define BWTBOUND_H
 
+#include "libgtcore/arraydef.h"
 #include "seqpos-def.h"
-#include "arraydef.h"
 
 typedef struct
 {

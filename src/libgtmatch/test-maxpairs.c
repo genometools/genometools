@@ -35,8 +35,8 @@ int testmaxpairs(/*@unused@*/ const Str *indexname,
 #else
 
 #include "libgtcore/array.h"
+#include "libgtcore/arraydef.h"
 #include "sarr-def.h"
-#include "arraydef.h"
 #include "spacedef.h"
 #include "esa-mmsearch-def.h"
 #include "alphadef.h"

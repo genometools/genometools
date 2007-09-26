@@ -18,9 +18,9 @@
 #ifndef MAPSPECDEF_H
 #define MAPSPECDEF_H
 
+#include "libgtcore/arraydef.h"
 #include "libgtcore/str.h"
 #include "libgtcore/env.h"
-#include "arraydef.h"
 
 #define NEWMAPSPEC(PTR,TYPE,ELEMS)\
         GETNEXTFREEINARRAY(mapspecptr,mapspectable,Mapspecification,10);\

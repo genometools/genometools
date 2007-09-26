@@ -15,13 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
 #include "libgtcore/seqiterator.h"
-
-#include "libgtmatch/arraydef.h"
 
 struct SeqIterator
 {

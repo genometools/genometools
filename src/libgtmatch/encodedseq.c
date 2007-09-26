@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <ctype.h>
+#include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "libgtcore/fastabuffer.h"
@@ -31,7 +32,6 @@
 #include "divmodmul.h"
 #include "mapspec-def.h"
 #include "encseq-def.h"
-#include "arraydef.h"
 #include "safecast-gen.h"
 #include "esafileend.h"
 #include "verbose-def.h"

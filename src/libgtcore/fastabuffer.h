@@ -19,11 +19,11 @@
 #define FASTABUFFER_H
 
 #include <stdbool.h>
+#include "libgtcore/arraydef.h"
 #include "libgtcore/filelengthvalues.h"
 #include "libgtcore/queue.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/symboldef.h"
-#include "libgtmatch/arraydef.h"
 
 typedef struct FastaBuffer FastaBuffer;
 

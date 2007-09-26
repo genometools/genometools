@@ -19,9 +19,9 @@
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
+#include "libgtcore/arraydef.h"
 #include "libgtcore/env.h"
 #include "spacedef.h"
-#include "arraydef.h"
 #include "intbits.h"
 #include "divmodmul.h"
 #include "measure-time-if.h"

@@ -15,18 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/arraydef.h"
 #include "libgtcore/env.h"
 #include "libgtcore/minmax.h"
-
 #include "libgtmatch/sarr-def.h"
-#include "libgtmatch/arraydef.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/spacedef.h"
 #include "libgtmatch/pos2seqnum.pr"
 #include "libgtmatch/greedyedist.pr"
 #include "libgtmatch/intcode-def.h"
 #include "libgtmatch/sfx-mappedstr.pr"
-
 #include "searchforLTRs.h"
 #include "repeattypes.h"
 #include "repeats.h"
