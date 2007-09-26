@@ -46,6 +46,19 @@ icmp(uint64_t a, uint64_t b)
     return 0;
 }
 
+/**
+ * \brief bit count reference
+ * @param v count the number of bits set in v
+ */
+static inline int
+genBitCount(uint64_t v)
+{
+  unsigned c; /* c accumulates the total bits set in v */
+  for (c = 0; v; c++)
+    v &= v - 1; /* clear the least significant bit set */
+  return c;
+}
+
 #define freeResourcesAndReturn(retval) \
   do {                                 \
     env_ma_free(randSrc, env);         \
@@ -118,7 +131,7 @@ bitPackStringInt64_unit_test(Env *env)
   env_log_log(env, "passed\n");
   if (numRnd > 0)
   {
-    uint64_t v = randSrc[0], r = 0;
+    uint64_t v = randSrc[0], r;
     unsigned numBits = requiredUInt64Bits(v);
     BitOffset i = offsetStart + numBits;
     uint64_t mask = ~(uint64_t)0;
@@ -430,9 +443,6 @@ bitPackStringInt64_unit_test(Env *env)
       bsStoreUniformInt64Array(bitStore, offset, numBits, numRnd,
                                     (int64_t *)randSrc);
       numResetBits = (BitOffset)numBits * numResetValues;
-      /* the following bsCopy should be equivalent to:
-       * bsStoreUniformUInt64Array(bitStoreCopy, destOffset,
-       *                              numBits, numResetValues, randSrc); */
       bsClear(bitStore, offset + (BitOffset)resetStart * numBits,
               numResetBits, bitVal);
       {
@@ -479,8 +489,53 @@ bitPackStringInt64_unit_test(Env *env)
           offset += numBits;
         }
       }
-      env_log_log(env, "passed\n");
     }
+    env_log_log(env, "passed\n");
+  }
+  if (numRnd > 0)
+  {
+    env_log_log(env, "bs1BitsCount: ");
+    {
+      /* first decide how many of the values to use and at which to start */
+      size_t numCountValues, countStart;
+      BitOffset numCountBits = 0, bitCountRef = 0, bitCountCmp;
+      unsigned numBits = random()%64 + 1;
+      uint64_t mask = ~(uint64_t)0;
+      if (numBits < 64)
+        mask = ~(mask << numBits);
+      if (random()&1)
+      {
+        numCountValues = random()%(numRnd + 1);
+        countStart = random()%(numRnd - numCountValues + 1);
+      }
+      else
+      {
+        countStart = random() % numRnd;
+        numCountValues = random()%(numRnd - countStart) + 1;
+      }
+      assert(countStart + numCountValues <= numRnd);
+      offset = offsetStart;
+      bsStoreUniformUInt64Array(bitStore, offset, numBits, numRnd, randSrc);
+      numCountBits = (BitOffset)numBits * numCountValues;
+      bitCountCmp = bs1BitsCount(bitStore,
+                                 offset + (BitOffset)countStart * numBits,
+                                 numCountBits);
+      for (i = countStart; i < countStart + numCountValues; ++i)
+      {
+        uint64_t v = (uint64_t)randSrc[i] & mask;
+        bitCountRef += genBitCount(v);
+      }
+      ensure(had_err, bitCountRef == bitCountCmp);
+      if (had_err)
+      {
+        env_log_log(env, "Expected %llu, got %llu,\n"
+                    "seed = %lu, numBits=%u\n", (unsigned long long)bitCountRef,
+                    (unsigned long long)bitCountCmp, seedval, numBits);
+        freeResourcesAndReturn(had_err);
+      }
+      offset += numBits;
+    }
+    env_log_log(env, "passed\n");
   }
   freeResourcesAndReturn(had_err);
 }
