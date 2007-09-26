@@ -3786,12 +3786,15 @@ doProlog(XML_Parser parser,
       if (startDoctypeDeclHandler) {
         if (!XmlIsPublicId(enc, s, next, eventPP))
           return XML_ERROR_PUBLICID;
-        doctypePubid = poolStoreString(&tempPool, enc,
-                                       s + enc->minBytesPerChar,
-                                       next - enc->minBytesPerChar);
-        if (!doctypePubid)
-          return XML_ERROR_NO_MEMORY;
-        normalizePublicId((XML_Char *)doctypePubid);
+        {
+          XML_Char *p;
+          doctypePubid = p = poolStoreString(&tempPool, enc,
+                                             s + enc->minBytesPerChar,
+                                             next - enc->minBytesPerChar);
+          if (!doctypePubid)
+            return XML_ERROR_NO_MEMORY;
+          normalizePublicId(p);
+        }
         poolFinish(&tempPool);
         handleDefault = XML_FALSE;
         goto alreadyChecked;
