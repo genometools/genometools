@@ -359,7 +359,9 @@ bsGetBit(const BitString str, BitOffset pos)
 static inline unsigned
 bitCountUInt32(uint32_t v)
 {
-  v = v - ((v >> 1) & 0x55555555UL);      /* reuse input as temporary */
-  v = (v & 0x33333333UL) + ((v >> 2) & 0x33333333UL);        /* temp  */
-  return (((v + (v >> 4)) & 0xF0F0F0FUL) * 0x1010101UL) >> 24; /* count */
+  v = v - ((v >> 1) & (uint32_t)0x55555555UL);   /* reuse input as temporary */
+  v = (v & (uint32_t)0x33333333UL)
+    + ((v >> 2) & (uint32_t)0x33333333UL);       /* temp  */
+  return (((v + (v >> 4)) & (uint32_t)0xF0F0F0FUL)
+          * (uint32_t)0x1010101UL) >> 24;        /* count */
 }
