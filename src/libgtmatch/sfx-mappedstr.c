@@ -24,13 +24,13 @@
 #define NDEBUG
 #endif
 #include <assert.h>
+#include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
-#include "chardef.h"
 #include "spacedef.h"
 #include "intcode-def.h"
 #include "encseq-def.h"
-#include "fbs-def.h"
 #include "stamp.h"
 #ifndef NDEBUG
 #include "sfx-nextchar.h"
@@ -492,7 +492,7 @@ static int getencseqkmersgeneric(
     }
   } else
   {
-    Fastabufferstate *fbs;
+    FastaBuffer *fb;
     int retval;
 
     if (readmode != Forwardmode)
@@ -503,16 +503,16 @@ static int getencseqkmersgeneric(
     }
     if (!haserr)
     {
-      fbs = initformatbufferstate(filenametab,
-                                  symbolmap,
-                                  plainformat,
-                                  NULL,
-                                  NULL,
-                                  NULL,
-                                  env);
+      fb = fastabuffer_new(filenametab,
+                           symbolmap,
+                           plainformat,
+                           NULL,
+                           NULL,
+                           NULL,
+                           env);
       for (currentposition = 0; /* Nothing */; currentposition++)
       {
-        retval = readnextUchar(&charcode,fbs,env);
+        retval = fastabuffer_next(fb,&charcode,env);
         if (retval < 0)
         {
           haserr = true;
@@ -525,7 +525,7 @@ static int getencseqkmersgeneric(
         shiftrightwithchar(processkmercode,processkmercodeinfo,
                            &spwp,currentposition,charcode,env);
       }
-      fastabufferstate_delete(fbs, env);
+      fastabuffer_delete(fb, env);
     }
   }
   if (!haserr)

@@ -1,5 +1,5 @@
 #include "libgtcore/env.h"
-#include "symboldef.h"
+#include "libgtcore/symboldef.h"
 #include "spacedef.h"
 
 static unsigned long squarededistunit2 (const Uchar *u, unsigned long m,

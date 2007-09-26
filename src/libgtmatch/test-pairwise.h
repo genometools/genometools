@@ -20,7 +20,7 @@
 
 #include <stdbool.h>
 #include "libgtcore/env.h"
-#include "symboldef.h"
+#include "libgtcore/symboldef.h"
 
 typedef void (*Checkcmppairfuntype)(bool,
                                     const Uchar *,unsigned long,

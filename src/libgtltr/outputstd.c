@@ -16,14 +16,13 @@
 */
 
 #include "libgtcore/env.h"
+#include "libgtcore/symboldef.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/readmode-def.h"
 #include "libgtmatch/pos2seqnum.pr"
-#include "libgtmatch/symboldef.h"
 #include "libgtmatch/intcode-def.h"
 #include "libgtmatch/sfx-mappedstr.pr"
-
 #include "ltrharvest-opt.h"
 
 /*
@@ -174,16 +173,6 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 		  characters[getencodedchar(encseq,
                                  boundaries->leftLTR_3,
 				 Forwardmode)] );
-		  /*
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->leftLTR_5)],
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->leftLTR_5+1)],
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->leftLTR_3-1)],
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->leftLTR_3)] );
-	          */
 	    }
 	    /* increase by 1 */
 	    printf(FormatSeqpos "  ",
@@ -221,16 +210,6 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 		  characters[getencodedchar(encseq,
 			         boundaries->rightLTR_3,
 				 Forwardmode)] );
-		  /*
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->rightLTR_5)],
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->rightLTR_5+1)],
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->rightLTR_3-1)],
-		  virtualtree->alpha.characters[
-		  *(sequence + boundaries->rightLTR_3)] );
-	          */
 	    }
 	    /* print similarity */
 	    printf("  %.2f", boundaries->similarity);

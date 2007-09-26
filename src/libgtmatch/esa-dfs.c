@@ -16,8 +16,8 @@
 */
 
 #include <limits.h>
+#include "libgtcore/symboldef.h"
 #include "seqpos-def.h"
-#include "symboldef.h"
 #include "spacedef.h"
 #include "esa-seqread.h"
 

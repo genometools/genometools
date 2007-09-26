@@ -19,7 +19,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "libgtcore/env.h"
-#include "symboldef.h"
+#include "libgtcore/symboldef.h"
 #include "spacedef.h"
 #include "test-pairwise.h"
 

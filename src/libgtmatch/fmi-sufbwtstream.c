@@ -15,11 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/chardef.h"
 #include "emimergeesa.h"
 #include "esafileend.h"
 #include "fmindex.h"
 #include "divmodmul.h"
-#include "chardef.h"
 
 #include "esa-merge.pr"
 #include "esa-map.pr"

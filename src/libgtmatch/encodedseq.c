@@ -20,18 +20,18 @@
 #include <stdlib.h>
 #include <limits.h>
 #include <ctype.h>
+#include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fastabuffer.h"
 #include "libgtcore/str.h"
 #include "seqpos-def.h"
 #include "ushort-def.h"
 #include "intbits-tab.h"
 #include "alphadef.h"
-#include "chardef.h"
 #include "divmodmul.h"
 #include "mapspec-def.h"
 #include "encseq-def.h"
 #include "arraydef.h"
-#include "fbs-def.h"
 #include "safecast-gen.h"
 #include "esafileend.h"
 #include "verbose-def.h"
@@ -192,7 +192,7 @@ typedef uint32_t Uint32;
 typedef struct
 {
   const char *funcname;
-  int(*function)(Encodedsequence *,Fastabufferstate *,Env *);
+  int(*function)(Encodedsequence *,FastaBuffer *,Env *);
 } Fillencposfunc;
 
 typedef struct
@@ -792,7 +792,7 @@ static Uchar delivercharViauint32tablesSpecialrange(
   return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
-static int fillplainseq(Encodedsequence *encseq,Fastabufferstate *fbs,Env *env)
+static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fb,Env *env)
 {
   Seqpos pos;
   int retval;
@@ -803,7 +803,7 @@ static int fillplainseq(Encodedsequence *encseq,Fastabufferstate *fbs,Env *env)
   encseq->plainseqptr = false;
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = readnextUchar(&cc,fbs,env);
+    retval = fastabuffer_next(fb,&cc,env);
     if (retval < 0)
     {
       FREESPACE(encseq->plainseq);
@@ -819,7 +819,7 @@ static int fillplainseq(Encodedsequence *encseq,Fastabufferstate *fbs,Env *env)
 }
 
 static int fillbitaccesstab(Encodedsequence *encseq,
-                            Fastabufferstate *fbs,
+                            FastaBuffer *fb,
                             Env *env)
 {
   Uchar cc;
@@ -832,7 +832,7 @@ static int fillbitaccesstab(Encodedsequence *encseq,
   INITBITTAB(encseq->specialbits,encseq->totallength);
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = readnextUchar(&cc,fbs,env);
+    retval = fastabuffer_next(fb,&cc,env);
     if (retval < 0)
     {
       return -1;
@@ -1600,7 +1600,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   Positionaccesstype sat;
   bool haserr = false;
   int retcode;
-  Fastabufferstate *fbs = NULL;
+  FastaBuffer *fb = NULL;
 
   env_error_check(env);
   retcode = determinesattype(NULL,totallength,
@@ -1628,16 +1628,15 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     */
     encseq->mappedptr = NULL;
     assert(filenametab != NULL);
-    fbs = initformatbufferstate(filenametab,
-                                plainformat
-                                ? NULL : getsymbolmapAlphabet(alphabet),
-                                plainformat,
-                                NULL,
-                                NULL,
-                                NULL,
-                                env);
+    fb = fastabuffer_new(filenametab,
+                         plainformat ? NULL : getsymbolmapAlphabet(alphabet),
+                         plainformat,
+                         NULL,
+                         NULL,
+                         NULL,
+                         env);
     printf("# call %s\n",encodedseqfunctab[(int) sat].fillpos.funcname);
-    if (encodedseqfunctab[(int) sat].fillpos.function(encseq,fbs,env) != 0)
+    if (encodedseqfunctab[(int) sat].fillpos.function(encseq,fb,env) != 0)
     {
       haserr = true;
     }
@@ -1646,7 +1645,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   {
     freeEncodedsequence(&encseq,env);
   }
-  fastabufferstate_delete(fbs, env);
+  fastabuffer_delete(fb, env);
   return haserr ? NULL : encseq;
 }
 

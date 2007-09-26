@@ -19,13 +19,10 @@
 #define LTRHARVEST_OPTDEF
 
 #include <stdbool.h>
-
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
-
-#include "libgtmatch/symboldef.h"
-
+#include "libgtcore/symboldef.h"
 #include "myxdrop.h"
 #include "repeattypes.h"
 

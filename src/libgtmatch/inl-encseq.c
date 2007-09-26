@@ -74,7 +74,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env)
   FREESPACE(*esr);
 }
 
-static int fillplainseq(Encodedsequence *encseq,Fastabufferstate *fbs,Env *env)
+static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Env *env)
 {
   Seqpos pos;
   int retval;
@@ -121,7 +121,7 @@ static int fillplainseq(Encodedsequence *encseq,Fastabufferstate *fbs,Env *env)
                                  Env *env)
 {
   Encodedsequence *encseq;
-  Fastabufferstate fbs;
+  FastaBuffer fbs;
 
   env_error_check(env);
   initformatbufferstate(&fbs,

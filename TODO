@@ -32,9 +32,11 @@ feature requests:
 merge libgtcore and libgtmatch:
 -------------------------------
 
+- replace (fasta_reader with SeqIterator
+- move alphabet to core
 - Alphabet (Stefan: ersetze alphabet.pr durch alphadef.h, Gordon: evtl. mergen
   mit Alpha)
-- Encodedseq und Bioseq mergen (FastaReader und fbsadv.c)
+- Encodedseq und Bioseq mergen ()
   guesprot.c
 
 - Distributions mergen (Hashtable basiert, 64bit)

@@ -19,6 +19,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <errno.h>
+#include "libgtcore/chardef.h"
+#include "libgtcore/filelengthvalues.h"
+#include "libgtcore/seqiterator.h"
 #include "spacedef.h"
 #include "alphadef.h"
 #include "sfx-optdef.h"
@@ -26,11 +29,8 @@
 #include "measure-time-if.h"
 #include "esafileend.h"
 #include "intcode-def.h"
-#include "filelength-def.h"
-#include "chardef.h"
 #include "sfx-suffixer.h"
 #include "sfx-lcpval.h"
-#include "iterseq.h"
 #include "readmode-def.h"
 #include "verbose-def.h"
 #include "stamp.h"
@@ -290,19 +290,19 @@ static int outputsequencedescription(const Str *indexname,
     haserr = true;
   } else
   {
-    Scansequenceiterator *sseqit;
+    SeqIterator *seqit;
     char *desc = NULL;
     unsigned long seqlen;
     int retval;
 
-    sseqit = newScansequenceiterator(filenametab,NULL,false,env);
+    seqit = seqiterator_new(filenametab,NULL,false,env);
     while (!haserr)
     {
-      retval = nextScansequenceiterator(NULL,
-                                        &seqlen,
-                                        &desc,
-                                        sseqit,
-                                        env);
+      retval = seqiterator_next(seqit,
+                                NULL,
+                                &seqlen,
+                                &desc,
+                                env);
       if (retval < 0)
       {
         haserr = true;
@@ -322,7 +322,7 @@ static int outputsequencedescription(const Str *indexname,
       FREESPACE(desc);
     }
     env_fa_xfclose(desfp,env);
-    freeScansequenceiterator(&sseqit,env);
+    seqiterator_delete(seqit,env);
   }
   return haserr ? -1 : 0;
 }

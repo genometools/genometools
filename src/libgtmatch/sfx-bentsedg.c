@@ -17,9 +17,9 @@
 
 #include <limits.h>
 #include <assert.h>
+#include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "libgtcore/minmax.h"
-#include "chardef.h"
 #include "arraydef.h"
 #include "divmodmul.h"
 #include "sfx-codespec.h"

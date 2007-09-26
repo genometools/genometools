@@ -21,8 +21,8 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/option.h"
 #include "libgtcore/str.h"
+#include "libgtcore/symboldef.h"
 #include "libgtmatch/spacedef.h"
-#include "libgtmatch/symboldef.h"
 #include "libgtmatch/test-pairwise.h"
 
 typedef struct

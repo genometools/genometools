@@ -16,11 +16,9 @@
 */
 
 #include <string.h>
-
+#include "libgtcore/chardef.h"
 #include "libgtcore/minmax.h"
 #include "libgtmatch/divmodmul.h"
-#include "libgtmatch/chardef.h"
-
 #include "repeattypes.h"
 #include "myxdrop.h"
 

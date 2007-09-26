@@ -21,7 +21,7 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtcore/array.h"
-#include "symboldef.h"
+#include "libgtcore/symboldef.h"
 #include "verbose-def.h"
 #include "format64.h"
 #include "sfx-ri-def.h"
