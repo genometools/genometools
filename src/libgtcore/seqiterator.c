@@ -67,7 +67,8 @@ int seqiterator_next(SeqIterator *seqit,
   int retval;
   bool haserr = false, foundseq = false;
 
-  assert(seqit);
+  assert(seqit && len && desc);
+  assert((sequence && seqit->withsequence) || seqit->withsequence);
 
   if (seqit->exhausted)
   {
