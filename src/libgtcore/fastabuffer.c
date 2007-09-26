@@ -175,7 +175,7 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
                                     " file \"%s\", line %llu",
                                 currentchar,
                                 strarray_get(fb->filenametab, fb->filenum),
-                                fb->linenum);
+                                (unsigned long long) fb->linenum);
                   return -1;
                 }
                 if (ISSPECIAL(charcode))
