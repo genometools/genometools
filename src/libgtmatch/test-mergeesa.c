@@ -17,7 +17,9 @@
 
 #include <errno.h>
 #include <limits.h>
+#include <string.h>
 #include "sarr-def.h"
+#include "spacedef.h"
 #include "emimergeesa.h"
 #include "esafileend.h"
 #include "verbose-def.h"

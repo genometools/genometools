@@ -16,6 +16,7 @@
 */
 
 #include "arraydef.h"
+#include "spacedef.h"
 #include "seqpos-def.h"
 #include "esa-seqread.h"
 #include "verbose-def.h"

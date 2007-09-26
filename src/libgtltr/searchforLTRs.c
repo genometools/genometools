@@ -21,6 +21,7 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/arraydef.h"
 #include "libgtmatch/encseq-def.h"
+#include "libgtmatch/spacedef.h"
 #include "libgtmatch/pos2seqnum.pr"
 #include "libgtmatch/greedyedist.pr"
 #include "libgtmatch/intcode-def.h"

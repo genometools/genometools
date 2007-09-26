@@ -22,6 +22,7 @@
 #include "libgtmatch/readmode-def.h"
 #include "libgtmatch/pos2seqnum.pr"
 #include "libgtmatch/intcode-def.h"
+#include "libgtmatch/spacedef.h"
 #include "libgtmatch/sfx-mappedstr.pr"
 #include "ltrharvest-opt.h"
 

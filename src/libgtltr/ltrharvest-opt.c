@@ -16,6 +16,7 @@
 */
 
 #include <stdio.h>
+#include <string.h>
 #include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
 #include "libgtcore/error.h"

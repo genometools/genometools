@@ -19,7 +19,6 @@
 #define ARRAYDEF_H
 
 #include "libgtcore/symboldef.h"
-#include "spacedef.h"
 
 /*
   This file defines macros to conveniently declare and
@@ -75,9 +74,10 @@
         if ((A)->nextfree##TYPE >= (A)->allocated##TYPE)\
         {\
           (A)->allocated##TYPE += L;\
-          ALLOCASSIGNSPACEGENERIC(__FILE__,__LINE__,(A)->space##TYPE,\
-                                  (A)->space##TYPE,\
-                                  TYPE,(A)->allocated##TYPE);\
+          (A)->space##TYPE = ma_realloc_mem(env_ma(env), (A)->space##TYPE,\
+                                            sizeof (TYPE) *\
+                                            (A)->allocated##TYPE,\
+                                            __FILE__, __LINE__);\
         }
 
 /*
@@ -90,9 +90,10 @@
         if ((A)->nextfree##TYPE + (L) >= (A)->allocated##TYPE)\
         {\
           (A)->allocated##TYPE += L;\
-          ALLOCASSIGNSPACEGENERIC(__FILE__,__LINE__,(A)->space##TYPE,\
-                                  (A)->space##TYPE,\
-                                  TYPE,(A)->allocated##TYPE);\
+          (A)->space##TYPE = ma_realloc_mem(env_ma(env), (A)->space##TYPE,\
+                                            sizeof (TYPE) *\
+                                            (A)->allocated##TYPE,\
+                                            __FILE__, __LINE__);\
         }
 
 /*
@@ -121,7 +122,7 @@
 #define FREEARRAY(A,TYPE)\
         if ((A)->space##TYPE != NULL)\
         {\
-          FREESPACE((A)->space##TYPE);\
+          env_ma_free((A)->space##TYPE, env);\
         }
 
 /*

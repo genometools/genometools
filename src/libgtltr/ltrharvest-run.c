@@ -22,6 +22,7 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/sarr-def.h"
+#include "libgtmatch/spacedef.h"
 #include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/esa-maxpairs.pr"
 #include "libgtmatch/intcode-def.h"

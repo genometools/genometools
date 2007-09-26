@@ -20,6 +20,7 @@
 #include "encseq-def.h"
 #include "arraydef.h"
 #include "divmodmul.h"
+#include "spacedef.h"
 
 DECLAREARRAYSTRUCT(Seqpos);
 

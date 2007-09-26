@@ -23,6 +23,7 @@
 #include "arraydef.h"
 #include "format64.h"
 #include "overallseq.h"
+#include "spacedef.h"
 
 int overallquerysequences(int(*processsequence)(void *,
                                                 uint64_t,

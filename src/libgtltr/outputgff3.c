@@ -17,6 +17,7 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/esa-seqread.h"
+#include "libgtmatch/spacedef.h"
 #include "libgtmatch/echoseq.pr"
 
 #include "ltrharvest-opt.h"

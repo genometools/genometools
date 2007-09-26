@@ -21,6 +21,7 @@
 #include "divmodmul.h"
 #include "fmindex.h"
 #include "verbose-def.h"
+#include "spacedef.h"
 #include "stamp.h"
 
 #include "fmi-save.pr"

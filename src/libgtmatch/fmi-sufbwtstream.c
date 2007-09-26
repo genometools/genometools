@@ -20,6 +20,7 @@
 #include "esafileend.h"
 #include "fmindex.h"
 #include "divmodmul.h"
+#include "spacedef.h"
 
 #include "esa-merge.pr"
 #include "esa-map.pr"
