@@ -2,12 +2,14 @@ Name "gt gff3 -help"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 -help"
+  grep $last_stdout, "Report bugs to"
 end
 
 Name "gt gff3 -noop"
 Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 -noop", :retval => 1)
+  grep $last_stderr, "unknown option"
 end
 
 Name "gt gff3 short test (stdin)"

@@ -2,12 +2,14 @@ Name "gt chseqids -help"
 Keywords "gt_chseqids"
 Test do
   run_test "#{$bin}gt chseqids -help"
+  grep $last_stdout, "Report bugs to"
 end
 
 Name "gt chseqids -noop"
 Keywords "gt_chseqids"
 Test do
   run_test("#{$bin}gt chseqids -noop", :retval => 1)
+  grep $last_stderr, "unknown option"
 end
 
 Name "gt chseqids empty_file"
