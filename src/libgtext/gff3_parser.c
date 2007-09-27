@@ -35,7 +35,7 @@
 
 struct GFF3Parser {
   Hashtable *id_to_genome_node_mapping,
-            *seqid_to_str_mapping,
+            *seqid_to_ssr_mapping, /* maps seqids to simple sequence regions */
             *source_to_str_mapping,
             *undefined_sequence_regions; /* contains all (automatically created)
                                             sequence regions */
@@ -73,6 +73,31 @@ static void automatic_sequence_region_delete(AutomaticSequenceRegion *auto_sr,
   env_ma_free(auto_sr, env);
 }
 
+typedef struct {
+  Str *seqid_str;
+  Range range;
+  unsigned long line;
+} SimpleSequenceRegion;
+
+static SimpleSequenceRegion* simple_sequence_region_new(const char *seqid,
+                                                        Range range,
+                                                        unsigned long line,
+                                                        Env *env)
+{
+  SimpleSequenceRegion *ssr = env_ma_malloc(env, sizeof *ssr);
+  ssr->seqid_str = str_new_cstr(seqid, env);
+  ssr->range = range;
+  ssr->line = line;
+  return ssr;
+}
+
+static void simple_sequence_region_delete(SimpleSequenceRegion *ssr, Env *env)
+{
+  if (!ssr) return;
+  str_delete(ssr->seqid_str, env);
+  env_ma_free(ssr, env);
+}
+
 GFF3Parser* gff3parser_new(bool checkids, Env *env)
 {
   GFF3Parser *gff3_parser = env_ma_malloc(env, sizeof (GFF3Parser));
@@ -81,8 +106,10 @@ GFF3Parser* gff3parser_new(bool checkids, Env *env)
                                                          (FreeFunc)
                                                          genome_node_delete,
                                                          env);
-  gff3_parser->seqid_to_str_mapping = hashtable_new(HASH_STRING, NULL,
-                                                    (FreeFunc) str_delete, env);
+  gff3_parser->seqid_to_ssr_mapping = hashtable_new(HASH_STRING, NULL,
+                                                    (FreeFunc)
+                                                  simple_sequence_region_delete,
+                                                    env);
   gff3_parser->source_to_str_mapping = hashtable_new(HASH_STRING, NULL,
                                                      (FreeFunc) str_delete,
                                                      env);
@@ -142,7 +169,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   GenomeFeatureType gft;
   Splitter *splitter, *attribute_splitter, *tmp_splitter, *parents_splitter;
   AutomaticSequenceRegion *auto_sr = NULL;
-  Str *seqid_str, *source_str, *changed_seqid = NULL;
+  Str *seqid_str = NULL, *source_str, *changed_seqid = NULL;
+  SimpleSequenceRegion *ssr;
   Strand strand_value;
   double score_value;
   Phase phase_value;
@@ -168,7 +196,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   splitter_split(splitter, line, line_length, '\t', env);
   if (splitter_size(splitter) != 9UL) {
     env_error_set(env, "line %lu in file \"%s\" does not contain 9 tab (\\t) "
-              "separated fields", line_number, filename);
+                       "separated fields", line_number, filename);
     had_err = -1;
   }
   if (!had_err) {
@@ -187,13 +215,18 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   /* parse the feature type */
   if (!had_err && genome_feature_type_get(&gft, type) == -1) {
     env_error_set(env, "type \"%s\" on line %lu in file \"%s\" is not a valid "
-                  "one", type, line_number, filename);
+                       "one", type, line_number, filename);
     had_err = -1;
   }
 
   /* parse the range */
   if (!had_err)
     had_err = parse_range(&range, start, end, line_number, filename, env);
+  if (!had_err && range.start == 0) {
+      env_error_set(env, "illegal feature start 0 on line %lu in file \"%s\" "
+                    "(GFF3 files are 1-based)", line_number, filename);
+      had_err = -1;
+  }
   if (!had_err)
     had_err = add_offset_if_necessary(&range, gff3_parser, seqid, env);
 
@@ -242,7 +275,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         splitter_split(tmp_splitter, token, strlen(token), '=', env);
         if (splitter_size(tmp_splitter) != 2) {
           env_error_set(env, "token \"%s\" on line %lu in file \"%s\" does not "
-                    "contain exactly one '='", token, line_number, filename);
+                             "contain exactly one '='", token, line_number,
+                        filename);
           had_err = -1;
           break;
         }
@@ -253,14 +287,15 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         splitter_split(tmp_splitter, token, strlen(token), '=', env);
         if (splitter_size(tmp_splitter) != 2) {
           env_error_set(env, "token \"%s\" on line %lu in file \"%s\" does not "
-                    "contain exactly one '='", token, line_number, filename);
+                             "contain exactly one '='", token, line_number,
+                        filename);
           had_err = -1;
           break;
         }
         tmp_token = splitter_get_token(tmp_splitter, 1);
         splitter_split(parents_splitter, tmp_token, strlen(tmp_token), ',',
                        env);
-        assert(splitter_size(parents_splitter)); /* XXX: should be an error */
+        assert(splitter_size(parents_splitter));
       }
       else {
         /* add other attributes here */
@@ -268,7 +303,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         splitter_split(tmp_splitter, token, strlen(token), '=', env);
         if (splitter_size(tmp_splitter) != 2) {
           env_error_set(env, "token \"%s\" on line %lu in file \"%s\" does not "
-                    "contain exactly one '='", token, line_number, filename);
+                             "contain exactly one '='", token, line_number,
+                        filename);
           had_err = -1;
           break;
         }
@@ -285,8 +321,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
 
   /* set seqid */
   if (!had_err) {
-    seqid_str = hashtable_get(gff3_parser->seqid_to_str_mapping, seqid);
-    if (!seqid_str) {
+    ssr = hashtable_get(gff3_parser->seqid_to_ssr_mapping, seqid);
+    if (!ssr) {
       /* sequence region has not been previously introduced -> check if one has
          already been created automatically */
       auto_sr = hashtable_get(gff3_parser->undefined_sequence_regions, seqid);
@@ -314,11 +350,25 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                                                            ->sequence_region)));
       }
     }
+    else {
+      seqid_str = ssr->seqid_str;
+      /* perform range check */
+      if (!range_contains(ssr->range, range)) {
+        env_error_set(env, "range (%lu,%lu) of feature on line %lu in file "
+                      "\"%s\" is not contained in range (%lu,%lu) of "
+                      "corresponding sequence region on line %lu",
+                      range.start, range.end, line_number, filename,
+                      ssr->range.start, ssr->range.end, ssr->line);
+        had_err = -1;
+      }
+    }
+  }
+  if (!had_err) {
     assert(seqid_str);
     genome_node_set_seqid(genome_feature, seqid_str, env);
-    if (seqid_str_created)
-      str_delete(seqid_str, env);
   }
+  if (seqid_str_created)
+    str_delete(seqid_str, env);
 
   /* set source */
   if (!had_err) {
@@ -363,9 +413,9 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                                 splitter_get_token(parents_splitter, i));
       if (!parent_gf) {
         env_error_set(env, "%s \"%s\" on line %lu in file \"%s\" has not been "
-                  "previously defined (via \"%s=\")", PARENT_STRING,
-                  splitter_get_token(parents_splitter, i), line_number,
-                  filename, ID_STRING);
+                           "previously defined (via \"%s=\")", PARENT_STRING,
+                      splitter_get_token(parents_splitter, i), line_number,
+                      filename, ID_STRING);
         had_err = -1;
       }
       else if (str_cmp(genome_node_get_seqid(parent_gf),
@@ -414,7 +464,8 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
 {
   char *tmpline, *tmplineend, *seqid = NULL;
   GenomeNode *gn;
-  Str *seqid_str, *changed_seqid = NULL;
+  Str *changed_seqid = NULL;
+  SimpleSequenceRegion *ssr;
   Range range;
   const char *filename;
   int rval, had_err = 0;
@@ -455,16 +506,21 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         tmpline++;
       if (tmpline > tmplineend) {
         env_error_set(env, "missing sequence region start on line %lu in file "
-                  "\"%s\"", line_number, filename);
+                           "\"%s\"", line_number, filename);
         had_err = -1;
       }
     }
     if (!had_err) {
       if ((rval = sscanf(tmpline, "%lu", &range.start)) != 1) {
         env_error_set(env, "could not parse region start on line %lu in file "
-                  "\"%s\"", line_number, filename);
+                           "\"%s\"", line_number, filename);
         had_err = -1;
       }
+    }
+    if (!had_err  && range.start == 0) {
+      env_error_set(env, "illegal region start 0 on line %lu in file \"%s\" "
+                    "(GFF3 files are 1-based)", line_number, filename);
+      had_err = -1;
     }
     if (!had_err) {
       /* skip non-blanks */
@@ -475,18 +531,18 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         tmpline++;
       if (tmpline > tmplineend) {
         env_error_set(env, "missing sequence region end on line %lu in file "
-                      "\"%s\"", line_number, filename);
+                           "\"%s\"", line_number, filename);
         had_err = -1;
       }
     }
     if (!had_err && (rval = sscanf(tmpline, "%lu", &range.end)) != 1) {
       env_error_set(env, "could not parse region end on line %lu in file "
-                    "\"%s\"", line_number, filename);
+                         "\"%s\"", line_number, filename);
       had_err = -1;
     }
     if (!had_err && (range.start > range.end)) {
       env_error_set(env, "region start %lu is larger then region end %lu on "
-                    "line %lu in file \"%s\"", range.start, range.end,
+                         "line %lu in file \"%s\"", range.start, range.end,
                     line_number, filename);
       had_err = -1;
     }
@@ -504,22 +560,23 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     if (!had_err) {
       /* now we can create a sequence region node */
       assert(seqid);
-      seqid_str = hashtable_get(gff3_parser->seqid_to_str_mapping, seqid);
-      if (seqid_str) {
+      ssr = hashtable_get(gff3_parser->seqid_to_ssr_mapping, seqid);
+      if (ssr) {
         env_error_set(env, "the sequence region \"%s\" on line %lu in file "
-                      "\"%s\" has already been defined", str_get(seqid_str),
-                      line_number, filename);
+                      "\"%s\" has already been defined",
+                      str_get(ssr->seqid_str), line_number, filename);
         had_err = -1;
       }
       else {
-        seqid_str = str_new_cstr(seqid, env);
-        hashtable_add(gff3_parser->seqid_to_str_mapping, str_get(seqid_str),
-                      seqid_str, env);
+        ssr = simple_sequence_region_new(seqid, range, line_number, env);
+        hashtable_add(gff3_parser->seqid_to_ssr_mapping,
+                      str_get(ssr->seqid_str), ssr, env);
       }
     }
     if (!had_err) {
-      assert(seqid_str);
-      gn = sequence_region_new(seqid_str, range, filenamestr, line_number, env);
+      assert(ssr);
+      gn = sequence_region_new(ssr->seqid_str, range, filenamestr, line_number,
+                               env);
       queue_add(genome_nodes, gn, env);
     }
   }
@@ -583,7 +640,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
     if (*line_number == 1) {
       if (strncmp(line, GFF_VERSION_PREFIX, strlen(GFF_VERSION_PREFIX))) {
         env_error_set(env, "line %lu in file \"%s\" does not begin with \"%s\"",
-                  *line_number, filename, GFF_VERSION_PREFIX);
+                      *line_number, filename, GFF_VERSION_PREFIX);
         had_err = -1;
         break;
       }
@@ -597,7 +654,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
       if (!had_err) {
         if (version != GFF_VERSION) {
           env_error_set(env, "GFF version %d does not equal required version "
-                        "%u ", version, GFF_VERSION);
+                             "%u ", version, GFF_VERSION);
           had_err = -1;
         }
       }
@@ -649,7 +706,7 @@ void gff3parser_reset(GFF3Parser *gff3_parser, Env *env)
 {
   assert(gff3_parser && gff3_parser->id_to_genome_node_mapping);
   hashtable_reset(gff3_parser->id_to_genome_node_mapping, env);
-  hashtable_reset(gff3_parser->seqid_to_str_mapping, env);
+  hashtable_reset(gff3_parser->seqid_to_ssr_mapping, env);
   hashtable_reset(gff3_parser->source_to_str_mapping, env);
   hashtable_reset(gff3_parser->undefined_sequence_regions, env);
 }
@@ -659,7 +716,7 @@ void gff3parser_delete(GFF3Parser *gff3_parser, Env *env)
   if (!gff3_parser) return;
   assert(gff3_parser->id_to_genome_node_mapping);
   hashtable_delete(gff3_parser->id_to_genome_node_mapping, env);
-  hashtable_delete(gff3_parser->seqid_to_str_mapping, env);
+  hashtable_delete(gff3_parser->seqid_to_ssr_mapping, env);
   hashtable_delete(gff3_parser->source_to_str_mapping, env);
   hashtable_delete(gff3_parser->undefined_sequence_regions, env);
   mapping_delete(gff3_parser->offset_mapping, env);

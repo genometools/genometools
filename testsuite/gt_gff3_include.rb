@@ -2,12 +2,14 @@ Name "gt gff3 -help"
 Keywords "gt_gff3"
 Test do
   run_test "#{$bin}gt gff3 -help"
+  grep $last_stdout, "Report bugs to"
 end
 
 Name "gt gff3 -noop"
 Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 -noop", :retval => 1)
+  grep $last_stderr, "unknown option"
 end
 
 Name "gt gff3 short test (stdin)"
@@ -320,4 +322,25 @@ Keywords "gt_gff3"
 Test do
   run_test("#{$bin}gt gff3 #{$testdata}inconsistent_sequence_ids.gff3", :retval => 1)
   grep $last_stderr, "has different sequence id"
+end
+
+Name "gt gff3 fail range check"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_range_check.gff3", :retval => 1)
+  grep $last_stderr, "is not contained in range"
+end
+
+Name "gt gff3 fail illegal region start"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_illegal_region_start.gff3", :retval => 1)
+  grep $last_stderr, "illegal region start"
+end
+
+Name "gt gff3 fail illegal feature start"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_illegal_feature_start.gff3", :retval => 1)
+  grep $last_stderr, "illegal feature start"
 end
