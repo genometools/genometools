@@ -96,7 +96,7 @@ typedef struct
 {
   Slot *slot;
   bool verbose;
-} Process_real_feature_data;
+} ProcessRealFeatureInfo;
 
 typedef struct {
   Slot *slot;
@@ -113,7 +113,7 @@ typedef struct {
   unsigned long *wrong_genes,
                 *wrong_mRNAs,
                 *wrong_LTRs;
-} Process_predicted_feature_info;
+} ProcessPredictedFeatureInfo;
 
 static Slot* slot_new(bool nuceval, Range range, Env *env)
 {
@@ -393,8 +393,7 @@ static void add_real_exon(TranscriptExons *te, Range range, GenomeNode *gn,
 
 static int process_real_feature(GenomeNode *gn, void *data, Env *env)
 {
-  Process_real_feature_data *process_real_feature_data =
-    (Process_real_feature_data*) data;
+  ProcessRealFeatureInfo *info = (ProcessRealFeatureInfo*) data;
   GenomeNode *gn_ref;
   GenomeFeature *gf;
   Range range;
@@ -408,16 +407,14 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
           gn_ref = genome_node_rec_ref(gn, env);
-          array_add(process_real_feature_data->slot->genes_forward, gn_ref,
-                    env);
+          array_add(info->slot->genes_forward, gn_ref, env);
           break;
         case STRAND_REVERSE:
           gn_ref = genome_node_rec_ref(gn, env);
-          array_add(process_real_feature_data->slot->genes_reverse, gn_ref,
-                    env);
+          array_add(info->slot->genes_reverse, gn_ref, env);
           break;
         default:
-          if (process_real_feature_data->verbose) {
+          if (info->verbose) {
             fprintf(stderr, "skipping real gene with unknown orientation "
                     "(line %lu)\n", genome_node_get_line_number(gn));
           }
@@ -427,16 +424,14 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
           gn_ref = genome_node_rec_ref(gn, env);
-          array_add(process_real_feature_data->slot->mRNAs_forward, gn_ref,
-                    env);
+          array_add(info->slot->mRNAs_forward, gn_ref, env);
           break;
         case STRAND_REVERSE:
           gn_ref = genome_node_rec_ref(gn, env);
-          array_add(process_real_feature_data->slot->mRNAs_reverse, gn_ref,
-                    env);
+          array_add(info->slot->mRNAs_reverse, gn_ref, env);
           break;
         default:
-          if (process_real_feature_data->verbose) {
+          if (info->verbose) {
             fprintf(stderr, "skipping real mRNA with unknown orientation "
                     "(line %lu)\n", genome_node_get_line_number(gn));
           }
@@ -444,21 +439,19 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       break;
     case gft_LTR_retrotransposon:
       gn_ref = genome_node_rec_ref(gn, env);
-      array_add(process_real_feature_data->slot->LTRs, gn_ref, env);
+      array_add(info->slot->LTRs, gn_ref, env);
       break;
     case gft_CDS:
       range = genome_node_get_range(gn);
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
-          add_real_exon(process_real_feature_data->slot->CDS_exons_forward,
-                        range, gn, env);
+          add_real_exon(info->slot->CDS_exons_forward, range, gn, env);
           break;
         case STRAND_REVERSE:
-          add_real_exon(process_real_feature_data->slot->CDS_exons_reverse,
-                        range, gn, env);
+          add_real_exon(info->slot->CDS_exons_reverse, range, gn, env);
           break;
         default:
-          if (process_real_feature_data->verbose) {
+          if (info->verbose) {
             fprintf(stderr, "skipping real CDS exon with unknown orientation "
                     "(line %lu)\n", genome_node_get_line_number(gn));
           }
@@ -468,15 +461,13 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       range = genome_node_get_range(gn);
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
-          add_real_exon(process_real_feature_data->slot->mRNA_exons_forward,
-                        range, gn, env);
+          add_real_exon(info->slot->mRNA_exons_forward, range, gn, env);
           break;
         case STRAND_REVERSE:
-          add_real_exon(process_real_feature_data->slot->mRNA_exons_reverse,
-                        range, gn, env);
+          add_real_exon(info->slot->mRNA_exons_reverse, range, gn, env);
           break;
         default:
-          if (process_real_feature_data->verbose) {
+          if (info->verbose) {
             fprintf(stderr, "skipping real mRNA exon with unknown orientation "
                     "(line %lu)\n", genome_node_get_line_number(gn));
           }
@@ -831,7 +822,7 @@ static void store_true_exon(GenomeNode *gn, Strand predicted_strand,
 
 static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
 {
-  Process_predicted_feature_info *info = (Process_predicted_feature_info*) data;
+  ProcessPredictedFeatureInfo *info = (ProcessPredictedFeatureInfo*) data;
   Range predicted_range;
   unsigned long i, num;
   Strand predicted_strand;
@@ -1125,28 +1116,30 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   SequenceRegion *sr;
   GenomeFeature *gf;
   Slot *slot;
-  Process_real_feature_data process_real_feature_data;
-  Process_predicted_feature_info info;
+  ProcessRealFeatureInfo real_info;
+  ProcessPredictedFeatureInfo predicted_info;
   int had_err;
 
   env_error_check(env);
   assert(se);
 
   /* init */
-  process_real_feature_data.verbose = verbose;
-  info.verbose = verbose;
-  info.exondiff = exondiff;
-  info.LTRdelta = se->LTRdelta;
-  info.gene_evaluator = se->gene_evaluator;
-  info.mRNA_evaluator = se->mRNA_evaluator;
-  info.LTR_evaluator  = se->LTR_evaluator;
-  info.mRNA_exon_evaluators = se->mRNA_exon_evaluators;
-  info.mRNA_exon_evaluators_collapsed = se->mRNA_exon_evaluators_collapsed;
-  info.CDS_exon_evaluators = se->CDS_exon_evaluators;
-  info.CDS_exon_evaluators_collapsed = se->CDS_exon_evaluators_collapsed;
-  info.wrong_genes = &se->wrong_genes;
-  info.wrong_mRNAs = &se->wrong_mRNAs;
-  info.wrong_LTRs  = &se->wrong_LTRs;
+  real_info.verbose = verbose;
+  predicted_info.verbose = verbose;
+  predicted_info.exondiff = exondiff;
+  predicted_info.LTRdelta = se->LTRdelta;
+  predicted_info.gene_evaluator = se->gene_evaluator;
+  predicted_info.mRNA_evaluator = se->mRNA_evaluator;
+  predicted_info.LTR_evaluator  = se->LTR_evaluator;
+  predicted_info.mRNA_exon_evaluators = se->mRNA_exon_evaluators;
+  predicted_info.mRNA_exon_evaluators_collapsed =
+    se->mRNA_exon_evaluators_collapsed;
+  predicted_info.CDS_exon_evaluators = se->CDS_exon_evaluators;
+  predicted_info.CDS_exon_evaluators_collapsed =
+    se->CDS_exon_evaluators_collapsed;
+  predicted_info.wrong_genes = &se->wrong_genes;
+  predicted_info.wrong_mRNAs = &se->wrong_mRNAs;
+  predicted_info.wrong_LTRs  = &se->wrong_LTRs;
 
   /* process the reality stream completely */
   while (!(had_err = genome_stream_next_tree(se->reality, &gn, env)) && gn) {
@@ -1172,11 +1165,10 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
                            str_get(genome_node_get_seqid(gn)));
       assert(slot);
       /* store the exons */
-      process_real_feature_data.slot = slot;
+      real_info.slot = slot;
       genome_feature_determine_transcripttypes(gf, env);
-      had_err = genome_node_traverse_children(gn, &process_real_feature_data,
-                                              process_real_feature, false,
-                                              env);
+      had_err = genome_node_traverse_children(gn, &real_info,
+                                              process_real_feature, false, env);
       assert(!had_err); /* cannot happen, process_real_feature() is sane */
     }
     if (gv)
@@ -1201,9 +1193,9 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
         slot = hashtable_get(se->real_features,
                              str_get(genome_node_get_seqid(gn)));
         if (slot) {
-          info.slot = slot;
+          predicted_info.slot = slot;
           genome_feature_determine_transcripttypes(gf, env);
-          had_err = genome_node_traverse_children(gn, &info,
+          had_err = genome_node_traverse_children(gn, &predicted_info,
                                                   process_predicted_feature,
                                                   false, env);
           assert(!had_err); /* cannot happen, process_predicted_feature() is
