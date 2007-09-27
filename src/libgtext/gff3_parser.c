@@ -222,6 +222,11 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   /* parse the range */
   if (!had_err)
     had_err = parse_range(&range, start, end, line_number, filename, env);
+  if (!had_err && range.start == 0) {
+      env_error_set(env, "illegal feature start 0 on line %lu in file \"%s\" "
+                    "(GFF3 files are 1-based)", line_number, filename);
+      had_err = -1;
+  }
   if (!had_err)
     had_err = add_offset_if_necessary(&range, gff3_parser, seqid, env);
 
@@ -511,6 +516,11 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                            "\"%s\"", line_number, filename);
         had_err = -1;
       }
+    }
+    if (!had_err  && range.start == 0) {
+      env_error_set(env, "illegal region start 0 on line %lu in file \"%s\" "
+                    "(GFF3 files are 1-based)", line_number, filename);
+      had_err = -1;
     }
     if (!had_err) {
       /* skip non-blanks */

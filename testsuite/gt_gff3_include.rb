@@ -330,3 +330,17 @@ Test do
   run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_range_check.gff3", :retval => 1)
   grep $last_stderr, "is not contained in range"
 end
+
+Name "gt gff3 fail illegal region start"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_illegal_region_start.gff3", :retval => 1)
+  grep $last_stderr, "illegal region start"
+end
+
+Name "gt gff3 fail illegal feature start"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_illegal_feature_start.gff3", :retval => 1)
+  grep $last_stderr, "illegal feature start"
+end
