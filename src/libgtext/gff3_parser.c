@@ -196,7 +196,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   splitter_split(splitter, line, line_length, '\t', env);
   if (splitter_size(splitter) != 9UL) {
     env_error_set(env, "line %lu in file \"%s\" does not contain 9 tab (\\t) "
-              "separated fields", line_number, filename);
+                       "separated fields", line_number, filename);
     had_err = -1;
   }
   if (!had_err) {
@@ -215,7 +215,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   /* parse the feature type */
   if (!had_err && genome_feature_type_get(&gft, type) == -1) {
     env_error_set(env, "type \"%s\" on line %lu in file \"%s\" is not a valid "
-                  "one", type, line_number, filename);
+                       "one", type, line_number, filename);
     had_err = -1;
   }
 
@@ -270,7 +270,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         splitter_split(tmp_splitter, token, strlen(token), '=', env);
         if (splitter_size(tmp_splitter) != 2) {
           env_error_set(env, "token \"%s\" on line %lu in file \"%s\" does not "
-                    "contain exactly one '='", token, line_number, filename);
+                             "contain exactly one '='", token, line_number,
+                        filename);
           had_err = -1;
           break;
         }
@@ -281,7 +282,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         splitter_split(tmp_splitter, token, strlen(token), '=', env);
         if (splitter_size(tmp_splitter) != 2) {
           env_error_set(env, "token \"%s\" on line %lu in file \"%s\" does not "
-                    "contain exactly one '='", token, line_number, filename);
+                             "contain exactly one '='", token, line_number,
+                        filename);
           had_err = -1;
           break;
         }
@@ -296,7 +298,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         splitter_split(tmp_splitter, token, strlen(token), '=', env);
         if (splitter_size(tmp_splitter) != 2) {
           env_error_set(env, "token \"%s\" on line %lu in file \"%s\" does not "
-                    "contain exactly one '='", token, line_number, filename);
+                             "contain exactly one '='", token, line_number,
+                        filename);
           had_err = -1;
           break;
         }
@@ -405,9 +408,9 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                                 splitter_get_token(parents_splitter, i));
       if (!parent_gf) {
         env_error_set(env, "%s \"%s\" on line %lu in file \"%s\" has not been "
-                  "previously defined (via \"%s=\")", PARENT_STRING,
-                  splitter_get_token(parents_splitter, i), line_number,
-                  filename, ID_STRING);
+                           "previously defined (via \"%s=\")", PARENT_STRING,
+                      splitter_get_token(parents_splitter, i), line_number,
+                      filename, ID_STRING);
         had_err = -1;
       }
       else if (str_cmp(genome_node_get_seqid(parent_gf),
@@ -498,14 +501,14 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         tmpline++;
       if (tmpline > tmplineend) {
         env_error_set(env, "missing sequence region start on line %lu in file "
-                  "\"%s\"", line_number, filename);
+                           "\"%s\"", line_number, filename);
         had_err = -1;
       }
     }
     if (!had_err) {
       if ((rval = sscanf(tmpline, "%lu", &range.start)) != 1) {
         env_error_set(env, "could not parse region start on line %lu in file "
-                  "\"%s\"", line_number, filename);
+                           "\"%s\"", line_number, filename);
         had_err = -1;
       }
     }
@@ -518,18 +521,18 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         tmpline++;
       if (tmpline > tmplineend) {
         env_error_set(env, "missing sequence region end on line %lu in file "
-                      "\"%s\"", line_number, filename);
+                           "\"%s\"", line_number, filename);
         had_err = -1;
       }
     }
     if (!had_err && (rval = sscanf(tmpline, "%lu", &range.end)) != 1) {
       env_error_set(env, "could not parse region end on line %lu in file "
-                    "\"%s\"", line_number, filename);
+                         "\"%s\"", line_number, filename);
       had_err = -1;
     }
     if (!had_err && (range.start > range.end)) {
       env_error_set(env, "region start %lu is larger then region end %lu on "
-                    "line %lu in file \"%s\"", range.start, range.end,
+                         "line %lu in file \"%s\"", range.start, range.end,
                     line_number, filename);
       had_err = -1;
     }
@@ -627,7 +630,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
     if (*line_number == 1) {
       if (strncmp(line, GFF_VERSION_PREFIX, strlen(GFF_VERSION_PREFIX))) {
         env_error_set(env, "line %lu in file \"%s\" does not begin with \"%s\"",
-                  *line_number, filename, GFF_VERSION_PREFIX);
+                      *line_number, filename, GFF_VERSION_PREFIX);
         had_err = -1;
         break;
       }
@@ -641,7 +644,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
       if (!had_err) {
         if (version != GFF_VERSION) {
           env_error_set(env, "GFF version %d does not equal required version "
-                        "%u ", version, GFF_VERSION);
+                             "%u ", version, GFF_VERSION);
           had_err = -1;
         }
       }
