@@ -54,6 +54,8 @@ config =
     exon = {"mRNA","gene"},
     intron = {"mRNA", "gene"},
     mRNA = {"gene"},
+    long_terminal_repeat = {"LTR_retrotransposon","repeat_region"},
+    inverted_repeat={"repeat_region","LTR_retrotransposon"},
   },
   -- Defines various format options for drawing.
   format =
