@@ -1,3 +1,17 @@
+Name "gt stat -help"
+Keywords "gt_stat"
+Test do
+  run_test "#{$bin}gt stat -help"
+  grep $last_stdout, "Report bugs to"
+end
+
+Name "gt stat -noop"
+Keywords "gt_stat"
+Test do
+  run_test("#{$bin}gt stat -noop", :retval => 1)
+  grep $last_stderr, "unknown option"
+end
+
 Name "gt stat test 1 (no options)"
 Keywords "gt_stat"
 Test do
