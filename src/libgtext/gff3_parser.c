@@ -290,7 +290,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         tmp_token = splitter_get_token(tmp_splitter, 1);
         splitter_split(parents_splitter, tmp_token, strlen(tmp_token), ',',
                        env);
-        assert(splitter_size(parents_splitter)); /* XXX: should be an error */
+        assert(splitter_size(parents_splitter));
       }
       else {
         /* add other attributes here */
