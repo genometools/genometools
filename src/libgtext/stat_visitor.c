@@ -22,10 +22,12 @@
 
 struct StatVisitor {
   const GenomeVisitor parent_instance;
-  unsigned long number_of_genes,
+  unsigned long number_of_sequence_regions,
+                number_of_genes,
                 number_of_mRNAs,
                 number_of_exons,
                 number_of_LTR_retrotransposons;
+  unsigned long long total_length_of_sequence_regions;
   DiscDistri *gene_length_distribution,
              *gene_score_distribution,
              *exon_length_distribution,
@@ -89,13 +91,25 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   return 0;
 }
 
+static int stat_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
+                                        Env *env)
+{
+  StatVisitor *stat_visitor;
+  env_error_check(env);
+  stat_visitor = stat_visitor_cast(gv);
+  stat_visitor->number_of_sequence_regions++;
+  stat_visitor->total_length_of_sequence_regions +=
+    range_length(genome_node_get_range((GenomeNode*) sr));
+  return 0;
+}
+
 const GenomeVisitorClass* stat_visitor_class()
 {
   static const GenomeVisitorClass gvc = { sizeof (StatVisitor),
                                           stat_visitor_free,
                                           NULL,
                                           stat_visitor_genome_feature,
-                                          NULL };
+                                          stat_visitor_sequence_region };
   return &gvc;
 }
 
@@ -120,6 +134,11 @@ GenomeVisitor* stat_visitor_new(bool gene_length_distri,
 void stat_visitor_show_stats(GenomeVisitor *gv)
 {
   StatVisitor *stat_visitor = stat_visitor_cast(gv);
+  if (stat_visitor->number_of_sequence_regions) {
+    printf("sequence regions: %lu (total length: %llu)\n",
+           stat_visitor->number_of_sequence_regions,
+           stat_visitor->total_length_of_sequence_regions);
+  }
   if (stat_visitor->number_of_exons)
     printf("genes: %lu\n", stat_visitor->number_of_genes);
   if (stat_visitor->number_of_mRNAs)
