@@ -31,7 +31,7 @@
 struct StreamEvaluator {
   GenomeStream *reality,
                *prediction;
-  bool evalLTR;
+  bool nuceval, evalLTR;
   unsigned long LTRdelta;
   Hashtable *real_features; /* sequence name -> feature type hash */
   Evaluator *gene_evaluator,
@@ -63,7 +63,16 @@ typedef struct {
                    *mRNA_counts_reverse,
                    *CDS_counts_forward,
                    *CDS_counts_reverse;
-  Bittab *true_genes_forward,
+  unsigned long nucleotide_offset;
+  Bittab *real_mRNA_nucleotides_forward,
+         *pred_mRNA_nucleotides_forward,
+         *real_mRNA_nucleotides_reverse,
+         *pred_mRNA_nucleotides_reverse,
+         *real_CDS_nucleotides_forward,
+         *pred_CDS_nucleotides_forward,
+         *real_CDS_nucleotides_reverse,
+         *pred_CDS_nucleotides_reverse,
+         *true_genes_forward,
          *true_genes_reverse,
          *true_mRNAs_forward,
          *true_mRNAs_reverse,
@@ -106,9 +115,11 @@ typedef struct {
                 *wrong_LTRs;
 } Process_predicted_feature_info;
 
-static Slot* slot_new(Env *env)
+static Slot* slot_new(bool nuceval, Range range, Env *env)
 {
+  unsigned long length;
   Slot *s = env_ma_calloc(env, 1, sizeof (Slot));
+  length = range_length(range);
   s->genes_forward = array_new(sizeof (GenomeNode*), env);
   s->genes_reverse = array_new(sizeof (GenomeNode*), env);
   s->mRNAs_forward = array_new(sizeof (GenomeNode*), env);
@@ -118,6 +129,18 @@ static Slot* slot_new(Env *env)
   s->mRNA_exons_reverse = transcript_exons_new(env);
   s->CDS_exons_forward = transcript_exons_new(env);
   s->CDS_exons_reverse = transcript_exons_new(env);
+  if (nuceval) {
+  assert(range.start); /* 1-based coordinates */
+    s->nucleotide_offset = range.start - 1;
+    s->real_mRNA_nucleotides_forward = bittab_new(length, env);
+    s->pred_mRNA_nucleotides_forward = bittab_new(length, env);
+    s->real_mRNA_nucleotides_reverse = bittab_new(length, env);
+    s->pred_mRNA_nucleotides_reverse = bittab_new(length, env);
+    s->real_CDS_nucleotides_forward = bittab_new(length, env);
+    s->pred_CDS_nucleotides_forward = bittab_new(length, env);
+    s->real_CDS_nucleotides_reverse = bittab_new(length, env);
+    s->pred_CDS_nucleotides_reverse = bittab_new(length, env);
+  }
   s->used_mRNA_exons_forward = transcript_used_exons_new(env);
   s->used_mRNA_exons_reverse = transcript_used_exons_new(env);
   s->used_CDS_exons_forward = transcript_used_exons_new(env);
@@ -152,6 +175,14 @@ static void slot_delete(Slot *s, Env *env)
   transcript_counts_delete(s->mRNA_counts_reverse, env);
   transcript_counts_delete(s->CDS_counts_forward, env);
   transcript_counts_delete(s->CDS_counts_reverse, env);
+  bittab_delete( s->real_mRNA_nucleotides_forward, env);
+  bittab_delete( s->pred_mRNA_nucleotides_forward, env);
+  bittab_delete( s->real_mRNA_nucleotides_reverse, env);
+  bittab_delete( s->pred_mRNA_nucleotides_reverse, env);
+  bittab_delete( s->real_CDS_nucleotides_forward, env);
+  bittab_delete( s->pred_CDS_nucleotides_forward, env);
+  bittab_delete( s->real_CDS_nucleotides_reverse, env);
+  bittab_delete( s->pred_CDS_nucleotides_reverse, env);
   bittab_delete(s->true_genes_forward, env);
   bittab_delete(s->true_genes_reverse, env);
   bittab_delete(s->true_mRNAs_forward, env);
@@ -174,12 +205,14 @@ static void slot_delete(Slot *s, Env *env)
 }
 
 StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
-                                      GenomeStream *prediction, bool evalLTR,
-                                      unsigned long LTRdelta, Env *env)
+                                      GenomeStream *prediction, bool nuceval,
+                                      bool evalLTR, unsigned long LTRdelta,
+                                      Env *env)
 {
   StreamEvaluator *evaluator = env_ma_malloc(env, sizeof (StreamEvaluator));
   evaluator->reality = genome_stream_ref(reality);
   evaluator->prediction = genome_stream_ref(prediction);
+  evaluator->nuceval = nuceval;
   evaluator->evalLTR = evalLTR;
   evaluator->LTRdelta = LTRdelta;
   evaluator->real_features = hashtable_new(HASH_STRING, env_ma_free_func,
@@ -1123,7 +1156,8 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       if (!(slot = hashtable_get(se->real_features,
                                  str_get(genome_node_get_seqid(gn))))) {
 
-        slot = slot_new(env);
+        slot = slot_new(se->nuceval, genome_node_get_range((GenomeNode*) sr),
+                        env);
         hashtable_add(se->real_features,
                       cstr_dup(str_get(genome_node_get_seqid(gn)), env), slot,
                       env);
