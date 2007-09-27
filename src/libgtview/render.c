@@ -103,6 +103,8 @@ static DrawingRange render_convert_coords(Render *r, Range node_range, Env *env)
   DrawingRange converted_range;
   converted_range.clip = CLIPPED_NONE;
 
+  node_range.end++;
+
   /* scale coordinates to target image width */
   /* first, check if left side has to be clipped */
   if ((long) node_range.start < (long) r->range.start )

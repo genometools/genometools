@@ -41,6 +41,7 @@ static int elemcmp(const void *a, const void *b)
   return range_compare(ra, rb);
 }
 
+/*
 static void print_block(Block *block)
 {
   Dlistelem *elem;
@@ -55,6 +56,7 @@ static void print_block(Block *block)
   }
   printf("\n");
 }
+*/
 
 Block* block_new(Env *env)
 {
