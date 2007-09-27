@@ -41,7 +41,6 @@ static int elemcmp(const void *a, const void *b)
   return range_compare(ra, rb);
 }
 
-/*
 static void print_block(Block *block)
 {
   Dlistelem *elem;
@@ -50,11 +49,12 @@ static void print_block(Block *block)
        elem = dlistelem_next(elem)) {
          Element *element = (Element*) dlistelem_get_data(elem);
          Range range = element_get_range(element);
-         printf("(%lu,%lu)", range.start, range.end);
+         printf("(%lu,%lu - %s)", range.start,
+                                  range.end,
+                                  genome_feature_type_get_cstr(element_get_type(element)));
   }
   printf("\n");
 }
-*/
 
 Block* block_new(Env *env)
 {
@@ -191,7 +191,7 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
             gnnew_r.end = elem_r.end;
             e = element_new_empty(env);
             element_set_range(e, gnnew_r);
-            element_set_type(e, gn_type);
+            element_set_type(e, e_type);
             dlist_add(block->elements, e, env);
             gn_r.start = elem_r.end+1;
             if (removed)
