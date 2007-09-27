@@ -42,7 +42,6 @@ SeqIterator* seqiterator_new(const StrArray *filenametab,
   env_error_check(env);
   seqit = env_ma_malloc(env, sizeof (SeqIterator));
   INITARRAY(&seqit->sequencebuffer, Uchar);
-  seqit->sequencebuffer.nextfreeUchar = 0;
   seqit->descptr = queue_new(env);
   seqit->fb = fastabuffer_new(filenametab,
                                symbolmap,
@@ -99,7 +98,7 @@ int seqiterator_next(SeqIterator *seqit,
       *len = seqit->sequencebuffer.nextfreeUchar;
       if (seqit->withsequence)
       {
-        *sequence = seqit->sequencebuffer.spaceUchar; /* XXX: ownership prob. */
+        *sequence = seqit->sequencebuffer.spaceUchar;
       }
       seqit->sequencebuffer.nextfreeUchar = 0;
       foundseq = true;
@@ -120,7 +119,7 @@ int seqiterator_next(SeqIterator *seqit,
     *desc = queue_get(seqit->descptr,env);
     if (seqit->withsequence)
     {
-      *sequence = seqit->sequencebuffer.spaceUchar; /* XXX: ownership problem */
+      *sequence = seqit->sequencebuffer.spaceUchar;
     }
     *len = seqit->sequencebuffer.nextfreeUchar;
     foundseq = true;

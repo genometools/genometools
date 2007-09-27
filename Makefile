@@ -429,13 +429,20 @@ install:
 	test -d $(prefix)/bin || mkdir -p $(prefix)/bin
 	cp bin/gt $(prefix)/bin
 	cp -r gtdata $(prefix)/bin
-	test -d $(prefix)/include/libgtcore || mkdir -p $(prefix)/include/libgtcore
+	test -d $(prefix)/include/libgtcore \
+	  || mkdir -p $(prefix)/include/libgtcore
 	cp src/gtcore.h $(prefix)/include
 	cp src/libgtcore/*.h $(prefix)/include/libgtcore
-	test -d $(prefix)/include/libgtext || mkdir -p $(prefix)/include/libgtext
+	test -d $(prefix)/include/libgtext \
+          || mkdir -p $(prefix)/include/libgtext
 	cp src/gtext.h $(prefix)/include
 	cp src/libgtext/*.h $(prefix)/include/libgtext
 	cp src/gt.h $(prefix)/include
+	test -d $(prefix)/include/libgtmatch \
+	  || mkdir -p $(prefix)/include/libgtmatch
+	cp src/gtmatch.h $(prefix)/include
+	cp src/libgtmatch/*.h src/libgtmatch/*.pr $(prefix)/include/libgtmatch
+
 	test -d $(prefix)/lib || mkdir -p $(prefix)/lib
 	cp lib/libgtcore.a $(prefix)/lib
 ifdef RANLIB
@@ -444,6 +451,10 @@ endif
 	cp lib/libgtext.a $(prefix)/lib
 ifdef RANLIB
 	$(RANLIB) $(prefix)/lib/libgtext.a
+endif
+	cp lib/libgtmatch.a $(prefix)/lib
+ifdef RANLIB
+	$(RANLIB) $(prefix)/lib/libgtmatch.a
 endif
 
 splint:
