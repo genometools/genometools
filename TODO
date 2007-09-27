@@ -21,7 +21,6 @@ feature requests:
 - write extractseq tool
 - update design.html, describe interface inheritance
 - check random number generation
-- range check
 - check for circles
 - `gt eval`: measure nucleotide level
 - write proper memory allocator

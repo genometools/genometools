@@ -35,7 +35,7 @@
 
 struct GFF3Parser {
   Hashtable *id_to_genome_node_mapping,
-            *seqid_to_str_mapping,
+            *seqid_to_ssr_mapping, /* maps seqids to simple sequence regions */
             *source_to_str_mapping,
             *undefined_sequence_regions; /* contains all (automatically created)
                                             sequence regions */
@@ -73,6 +73,31 @@ static void automatic_sequence_region_delete(AutomaticSequenceRegion *auto_sr,
   env_ma_free(auto_sr, env);
 }
 
+typedef struct {
+  Str *seqid_str;
+  Range range;
+  unsigned long line;
+} SimpleSequenceRegion;
+
+static SimpleSequenceRegion* simple_sequence_region_new(const char *seqid,
+                                                        Range range,
+                                                        unsigned long line,
+                                                        Env *env)
+{
+  SimpleSequenceRegion *ssr = env_ma_malloc(env, sizeof *ssr);
+  ssr->seqid_str = str_new_cstr(seqid, env);
+  ssr->range = range;
+  ssr->line = line;
+  return ssr;
+}
+
+static void simple_sequence_region_delete(SimpleSequenceRegion *ssr, Env *env)
+{
+  if (!ssr) return;
+  str_delete(ssr->seqid_str, env);
+  env_ma_free(ssr, env);
+}
+
 GFF3Parser* gff3parser_new(bool checkids, Env *env)
 {
   GFF3Parser *gff3_parser = env_ma_malloc(env, sizeof (GFF3Parser));
@@ -81,8 +106,10 @@ GFF3Parser* gff3parser_new(bool checkids, Env *env)
                                                          (FreeFunc)
                                                          genome_node_delete,
                                                          env);
-  gff3_parser->seqid_to_str_mapping = hashtable_new(HASH_STRING, NULL,
-                                                    (FreeFunc) str_delete, env);
+  gff3_parser->seqid_to_ssr_mapping = hashtable_new(HASH_STRING, NULL,
+                                                    (FreeFunc)
+                                                  simple_sequence_region_delete,
+                                                    env);
   gff3_parser->source_to_str_mapping = hashtable_new(HASH_STRING, NULL,
                                                      (FreeFunc) str_delete,
                                                      env);
@@ -142,7 +169,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   GenomeFeatureType gft;
   Splitter *splitter, *attribute_splitter, *tmp_splitter, *parents_splitter;
   AutomaticSequenceRegion *auto_sr = NULL;
-  Str *seqid_str, *source_str, *changed_seqid = NULL;
+  Str *seqid_str = NULL, *source_str, *changed_seqid = NULL;
+  SimpleSequenceRegion *ssr;
   Strand strand_value;
   double score_value;
   Phase phase_value;
@@ -285,8 +313,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
 
   /* set seqid */
   if (!had_err) {
-    seqid_str = hashtable_get(gff3_parser->seqid_to_str_mapping, seqid);
-    if (!seqid_str) {
+    ssr = hashtable_get(gff3_parser->seqid_to_ssr_mapping, seqid);
+    if (!ssr) {
       /* sequence region has not been previously introduced -> check if one has
          already been created automatically */
       auto_sr = hashtable_get(gff3_parser->undefined_sequence_regions, seqid);
@@ -314,11 +342,25 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                                                            ->sequence_region)));
       }
     }
+    else {
+      seqid_str = ssr->seqid_str;
+      /* perform range check */
+      if (!range_contains(ssr->range, range)) {
+        env_error_set(env, "range (%lu,%lu) of feature on line %lu in file "
+                      "\"%s\" is not contained in range (%lu,%lu) of "
+                      "corresponding sequence region on line %lu",
+                      range.start, range.end, line_number, filename,
+                      ssr->range.start, ssr->range.end, ssr->line);
+        had_err = -1;
+      }
+    }
+  }
+  if (!had_err) {
     assert(seqid_str);
     genome_node_set_seqid(genome_feature, seqid_str, env);
-    if (seqid_str_created)
-      str_delete(seqid_str, env);
   }
+  if (seqid_str_created)
+    str_delete(seqid_str, env);
 
   /* set source */
   if (!had_err) {
@@ -414,7 +456,8 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
 {
   char *tmpline, *tmplineend, *seqid = NULL;
   GenomeNode *gn;
-  Str *seqid_str, *changed_seqid = NULL;
+  Str *changed_seqid = NULL;
+  SimpleSequenceRegion *ssr;
   Range range;
   const char *filename;
   int rval, had_err = 0;
@@ -504,22 +547,23 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     if (!had_err) {
       /* now we can create a sequence region node */
       assert(seqid);
-      seqid_str = hashtable_get(gff3_parser->seqid_to_str_mapping, seqid);
-      if (seqid_str) {
+      ssr = hashtable_get(gff3_parser->seqid_to_ssr_mapping, seqid);
+      if (ssr) {
         env_error_set(env, "the sequence region \"%s\" on line %lu in file "
-                      "\"%s\" has already been defined", str_get(seqid_str),
-                      line_number, filename);
+                      "\"%s\" has already been defined",
+                      str_get(ssr->seqid_str), line_number, filename);
         had_err = -1;
       }
       else {
-        seqid_str = str_new_cstr(seqid, env);
-        hashtable_add(gff3_parser->seqid_to_str_mapping, str_get(seqid_str),
-                      seqid_str, env);
+        ssr = simple_sequence_region_new(seqid, range, line_number, env);
+        hashtable_add(gff3_parser->seqid_to_ssr_mapping,
+                      str_get(ssr->seqid_str), ssr, env);
       }
     }
     if (!had_err) {
-      assert(seqid_str);
-      gn = sequence_region_new(seqid_str, range, filenamestr, line_number, env);
+      assert(ssr);
+      gn = sequence_region_new(ssr->seqid_str, range, filenamestr, line_number,
+                               env);
       queue_add(genome_nodes, gn, env);
     }
   }
@@ -649,7 +693,7 @@ void gff3parser_reset(GFF3Parser *gff3_parser, Env *env)
 {
   assert(gff3_parser && gff3_parser->id_to_genome_node_mapping);
   hashtable_reset(gff3_parser->id_to_genome_node_mapping, env);
-  hashtable_reset(gff3_parser->seqid_to_str_mapping, env);
+  hashtable_reset(gff3_parser->seqid_to_ssr_mapping, env);
   hashtable_reset(gff3_parser->source_to_str_mapping, env);
   hashtable_reset(gff3_parser->undefined_sequence_regions, env);
 }
@@ -659,7 +703,7 @@ void gff3parser_delete(GFF3Parser *gff3_parser, Env *env)
   if (!gff3_parser) return;
   assert(gff3_parser->id_to_genome_node_mapping);
   hashtable_delete(gff3_parser->id_to_genome_node_mapping, env);
-  hashtable_delete(gff3_parser->seqid_to_str_mapping, env);
+  hashtable_delete(gff3_parser->seqid_to_ssr_mapping, env);
   hashtable_delete(gff3_parser->source_to_str_mapping, env);
   hashtable_delete(gff3_parser->undefined_sequence_regions, env);
   mapping_delete(gff3_parser->offset_mapping, env);

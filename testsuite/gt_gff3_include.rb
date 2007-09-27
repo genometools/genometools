@@ -323,3 +323,10 @@ Test do
   run_test("#{$bin}gt gff3 #{$testdata}inconsistent_sequence_ids.gff3", :retval => 1)
   grep $last_stderr, "has different sequence id"
 end
+
+Name "gt gff3 fail range check"
+Keywords "gt_gff3"
+Test do
+  run_test("#{$bin}gt gff3 #{$testdata}gt_gff3_range_check.gff3", :retval => 1)
+  grep $last_stderr, "is not contained in range"
+end
