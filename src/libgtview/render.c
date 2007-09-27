@@ -189,6 +189,9 @@ static void render_line(Render *r, Line *line, Env *env)
       const char *style,
                  *type = genome_feature_type_get_cstr(element_get_type(elem));
 
+      if (!range_overlap(elem_range, diagram_get_range(r->dia)))
+        continue;
+
       if ((strand == STRAND_REVERSE || strand == STRAND_BOTH)
              && delem == dlist_first(elems))
         arrow_status = ARROW_LEFT;
