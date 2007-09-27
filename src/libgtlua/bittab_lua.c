@@ -100,6 +100,15 @@ static int bittab_lua_and_equal(lua_State *L)
   return 0;
 }
 
+static int bittab_lua_bit_is_set(lua_State *L)
+{
+  Bittab **bittab;
+  long bit;
+  get_bittab_and_bit(L, &bittab, &bit);
+  lua_pushboolean(L, bittab_bit_is_set(*bittab, bit));
+  return 1;
+}
+
 static int bittab_lua_delete(lua_State *L)
 {
   Bittab **bittab;
@@ -120,6 +129,7 @@ static const struct luaL_Reg bittab_lib_m [] = {
   { "complement", bittab_lua_complement },
   { "equal", bittab_lua_equal},
   { "and_equal", bittab_lua_and_equal},
+  { "bit_is_set", bittab_lua_bit_is_set},
   { NULL, NULL }
 };
 
