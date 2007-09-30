@@ -456,9 +456,8 @@ bs1BitsCount(const BitString str, BitOffset offset, BitOffset numBits)
     unsigned bits2Read = MIN(bitElemBits - bitTop, bitsLeft);
     unsigned unreadRightBits = (bitElemBits - bitTop - bits2Read);
     mask = (~((~(uint32_t)0) << bits2Read)) << unreadRightBits;
-    accum = ((*p++) & mask) >> unreadRightBits;
+    weight += bitCountUInt32(((*p++) & mask) >> unreadRightBits);
     bitsLeft -= bits2Read;
-    bitsInAccum += bits2Read;
   }
   /* get bits from intervening elems */
   while (bitsLeft >= bitElemBits)
