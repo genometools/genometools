@@ -230,14 +230,18 @@ MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
   {
     mmsi->lcpitv.left = (Seqpos) 1;
     mmsi->lcpitv.right = 0;
-  } else
-  {
-    /*
-    printf("matching interval %u %u\n",mmsi->lcpitv.left,mmsi->lcpitv.right);
-    */
   }
   mmsi->sufindex = mmsi->lcpitv.left;
   return mmsi;
+}
+
+Seqpos countmmsearchiterator(const MMsearchiterator *mmsi)
+{
+  if(mmsi->lcpitv.left <= mmsi->lcpitv.right)
+  {
+    return 0;
+  }
+  return mmsi->lcpitv.right - mmsi->lcpitv.left + 1;
 }
 
 bool nextmmsearchiterator(Seqpos *dbstart,MMsearchiterator *mmsi)
