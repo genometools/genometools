@@ -41,23 +41,6 @@ static int elemcmp(const void *a, const void *b)
   return range_compare(ra, rb);
 }
 
-/*
-static void print_block(Block *block)
-{
-  Dlistelem *elem;
-
-  for (elem = dlist_first(block->elements); elem;
-       elem = dlistelem_next(elem)) {
-         Element *element = (Element*) dlistelem_get_data(elem);
-         Range range = element_get_range(element);
-         printf("(%lu,%lu - %s)", range.start,
-                                  range.end,
-                                  genome_feature_type_get_cstr(element_get_type(element)));
-  }
-  printf("\n");
-}
-*/
-
 Block* block_new(Env *env)
 {
   Block *block;
