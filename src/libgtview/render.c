@@ -118,7 +118,7 @@ static DrawingRange render_convert_coords(Render *r, Range node_range, Env *env)
   }
 
   /* then, check right side. */
-  if ((long) node_range.end > (long) r->range.end)
+  if ((long) node_range.end > (long) r->range.end+1)
   {
     converted_range.clip = (converted_range.clip == CLIPPED_LEFT ?
                                                       CLIPPED_BOTH :
@@ -139,7 +139,6 @@ static void render_line(Render *r, Line *line, Env *env)
 
   assert(r && line);
 
-  /* XXX: make this an iterator? */
   blocks = line_get_blocks(line);
   /* begin drawing block */
   for (i=0; i<array_size(blocks); i++)
