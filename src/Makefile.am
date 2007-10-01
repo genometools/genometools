@@ -30,14 +30,14 @@ lib_LIBRARIES = libbiofmi2.a
 libbiofmi2_a_SOURCES = \
   biofmi2common.c \
   include/biofmi2.h include/biofmi2misc.h \
-  include/bwtseq.h bwtseq.c \
+  include/bwtseq.h include/bwtseqpriv.h bwtseq.c \
   include/encidxseq.h include/encidxseqpriv.h encidxseq.c blockcomp.c \
   include/fmindex.h include/warts.h \
   include/mrangealphabet.h include/mrangealphabetpriv.h mrangealphabet.c \
   include/seqranges.h seqranges.c
 
 if TJ_NO_INLINE
-libbiofmi2_a_LIBADD = mrangealphabetsimpleop.o
+libbiofmi2_a_LIBADD = mrangealphabetsimpleop.o bwtseqsimpleop.o
 endif
-EXTRA_libbiofmi2_a_SOURCES = mrangealphabetsimpleop.c
+EXTRA_libbiofmi2_a_SOURCES = mrangealphabetsimpleop.c bwtseqsimpleop.c
 

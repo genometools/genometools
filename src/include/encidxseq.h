@@ -50,7 +50,7 @@
  * @param len see parameter start for description
  * @param cbState is passed on every call back of bitInsertFunc to
  * pass information that is kept across individual calls
- * @param env passes information about allocator etc
+ * @param env genometools state, passes information about allocator etc
  * @return number of bits actually written, or (BitOffset)-1 if an
  * error occured
  */
@@ -58,6 +58,8 @@ typedef BitOffset (*bitInsertFunc)(BitString cwDest, BitOffset cwOffset,
                                    BitString varDest, BitOffset varOffset,
                                    Seqpos start, Seqpos len, void *cbState,
                                    Env *env);
+
+typedef int (*headerWriteFunc)(FILE *fp, void *headerCBData);
 
 /**
  * later inserted bits can be retrieved and will be presented in this
@@ -75,6 +77,7 @@ struct extBitsRetrieval
 
 enum extBitsRetrievalFlags
 {
+  EBRF_RETRIEVE_CWBITS = 0,
   EBRF_PERSISTENT_CWBITS = 1<<0,
   EBRF_RETRIEVE_VARBITS = 1<<1,
   EBRF_PERSISTENT_VARBITS = 1<<2,
@@ -91,15 +94,13 @@ typedef union EISHint *EISHint;
 
 extern struct encIdxSeq *
 newBlockEncIdxSeq(const Str *projectName, unsigned blockSize,
+                  size_t numExtHeaders, uint16_t *headerIDs,
+                  uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallback,
+                  void **headerCBData,
                   bitInsertFunc biFunc, BitOffset cwBitsPerPos,
                   BitOffset maxBitsPerPos, void *cbState, Env *env);
 extern struct encIdxSeq *
 loadBlockEncIdxSeq(const Str *projectName, Env *env);
-
-extern int
-searchBlock2IndexPair(const struct encIdxSeq *seqIdx,
-                      const Symbol *block,
-                      size_t idxOutput[2], Env *env);
 
 extern void
 deleteEncIdxSeq(struct encIdxSeq *seq, Env *env);
@@ -107,10 +108,31 @@ deleteEncIdxSeq(struct encIdxSeq *seq, Env *env);
 staticifinline inline const MRAEnc *
 EISGetAlphabet(const struct encIdxSeq *seq);
 
+/**
+ * \brief Return number of occurrences of symbol sym in index up to
+ * but not including given position.
+ * @param seq sequence index object to query
+ * @param sym original alphabet symbol to query occurrences of
+ * @param pos occurences are counted up to this position
+ * @param hint provides cache and direction information for queries
+ * based on previous queries
+ * @param env genometools state, passes information about allocator etc
+ */
 staticifinline inline Seqpos
 EISRank(struct encIdxSeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
         Env *env);
 
+/**
+ * \brief Return number of occurrences of symbol sym in index up to
+ * but not including given position.
+ * @param seq sequence index object to query
+ * @param sym symbol to query occurrences of, but already transformed
+ * by input alphabet
+ * @param pos occurences are counted up to this position
+ * @param hint provides cache and direction information for queries
+ * based on previous queries
+ * @param env genometools state, passes information about allocator etc
+ */
 staticifinline inline Seqpos
 EISSymTransformedRank(struct encIdxSeq *seq, Symbol msym, Seqpos pos,
                       union EISHint *hint, Env *env);
@@ -123,15 +145,21 @@ EISSymTransformedRank(struct encIdxSeq *seq, Symbol msym, Seqpos pos,
  * @param persistent if false, the retrieved BitString elements will
  * become invalid once the hint union is used in another call.
  * @param hint provides cache and direction information for queries
- * @param env genometools state
+ * @param env genometools state, passes information about allocator etc
  */
 staticifinline inline void
 EISRetrieveExtraBits(struct encIdxSeq *seq, Seqpos pos, int flags,
                      struct extBitsRetrieval *retval, union EISHint *hint,
                      Env *env);
 
+staticifinline inline void
+initExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
+
 staticifinline inline struct extBitsRetrieval *
 newExtBitsRetrieval(Env *env);
+
+staticifinline inline void
+destructExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
 
 staticifinline inline void
 deleteExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
@@ -142,8 +170,20 @@ EISSelect(struct encIdxSeq *seq, Symbol sym, Seqpos count);
 staticifinline inline Seqpos
 EISLength(struct encIdxSeq *seq);
 
+/**
+ * Return symbol at specified position. Comparable to c[pos] if the
+ * sequence was stored straight in an array c.
+ * @param seq indexed sequence object to be queried
+ * @param pos position to retrieve symbol for
+ * @param hint optional caching/hinting structure (improves average
+ * retrieval time)
+ * @param env genometools state, passes information about allocator etc
+ */
 staticifinline inline Symbol
 EISGetSym(struct encIdxSeq *seq, Seqpos pos, EISHint hint, Env *env);
+
+staticifinline inline Symbol
+EISGetTransformedSym(struct encIdxSeq *seq, Seqpos pos, EISHint hint, Env *env);
 
 staticifinline inline EISHint
 newEISHint(struct encIdxSeq *seq, Env *env);
@@ -154,6 +194,18 @@ deleteEISHint(struct encIdxSeq *seq, EISHint hint, Env *env);
 extern int
 verifyIntegrity(struct encIdxSeq *seqIdx,
                 Str *projectName, int tickPrint, FILE *fp, Env *env);
+
+staticifinline inline FILE *
+EISSeekToHeader(const struct encIdxSeq *seqIdx, uint16_t headerID,
+                uint32_t *lenRet);
+
+/**
+ * Meant for testing purposes only.
+ */
+extern int
+searchBlock2IndexPair(const struct encIdxSeq *seqIdx,
+                      const Symbol *block,
+                      size_t idxOutput[2], Env *env);
 
 #ifdef HAVE_WORKING_INLINE
 #include "../encidxseqsimpleop.c"

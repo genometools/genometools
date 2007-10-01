@@ -23,31 +23,60 @@
 #include <libgtcore/env.h>
 #include <libgtcore/str.h>
 #include <libgtmatch/sarr-def.h>
-#include <libgtmatch/sfx-map.pr>
+#include <libgtmatch/esa-map.pr>
 
 #include "biofmi2misc.h"
 #include "bwtseq.h"
+#include "bwtseqpriv.h"
 #include "encidxseq.h"
-
-struct BWTSeq
-{
-  enum seqBaseEncoding type;
-  struct encIdxSeq *seqIdx;
-  size_t alphabetSize;
-  EISHint hint;
-  Seqpos *count;
-};
 
 #if 0
 static BitOffset
 doNothing(BitString cwDest, BitOffset cwOffset,
           BitString varDest, BitOffset varOffset,
-          Seqpos start, Seqpos end, void *cbState,
+          Seqpos start, Seqpos len, void *cbState,
           Env *env)
 {
   return 0;
 }
 #endif
+
+enum {
+  LOCATE_INFO_IN_INDEX_HEADERID = 1111,
+};
+
+struct locateHeader
+{
+  unsigned sampleInterval;
+};
+
+enum {
+  LOCATE_HEADER_SIZE = sizeof(uint32_t), 
+};
+
+static int
+writeLocateInfoHeader(FILE *fp, void *cbData)
+{
+  const struct locateHeader *headerData = cbData;
+  uint32_t sampleInterval;
+  assert(cbData);
+  sampleInterval = headerData->sampleInterval;
+  return fwrite(&sampleInterval, sizeof(sampleInterval), 1, fp);
+}
+
+/**
+ * @return 0 on error
+ */
+static inline int
+readLocateInfoHeader(FILE *fp, struct locateHeader *headerData)
+{
+  uint32_t sampleInterval;
+  assert(headerData);
+  if(fread(&sampleInterval, sizeof(sampleInterval), 1, fp) != 1)
+    return 0;
+  headerData->sampleInterval = sampleInterval;
+  return 1;
+}
 
 struct seqRevMapEntry
 {
@@ -57,7 +86,7 @@ struct seqRevMapEntry
 struct addLocateInfoState
 {
   Suffixarray suffixArray;
-  unsigned sampleInterval, bitsPerSeqpos;
+  unsigned sampleInterval, bitsPerOrigPos, bitsPerSeqpos;
   size_t revMapCacheSize;
   struct seqRevMapEntry *revMapCache;
 };
@@ -65,8 +94,7 @@ struct addLocateInfoState
 static inline unsigned
 bitsPerPosUpperBound(struct addLocateInfoState *state)
 {
-  return 1                      /* one bit for flag in preceding bitmap */
-    + state->bitsPerSeqpos * 2;
+  return state->bitsPerOrigPos + state->bitsPerSeqpos;
 }
 
 static void
@@ -74,11 +102,12 @@ initAddLocateInfoState(struct addLocateInfoState *state, const Str *projectName,
                        unsigned sampleInterval, unsigned aggregationExpVal,
                        Env *env)
 {
-  Seqpos len;
-  streamsuffixarray(&state->suffixArray, &len, SARR_SUFTAB | SARR_BWTTAB,
-                    projectName, true, env);
+  Seqpos lastPos;
+  streamsuffixarray(&state->suffixArray, &lastPos, SARR_SUFTAB | SARR_BWTTAB,
+                    projectName, NULL, env);
   state->sampleInterval = sampleInterval;
-  state->bitsPerSeqpos = requiredUInt64Bits(len - 1);
+  state->bitsPerSeqpos = requiredUInt64Bits(lastPos);
+  state->bitsPerOrigPos = requiredUInt64Bits(lastPos/sampleInterval);
   state->revMapCacheSize = aggregationExpVal/sampleInterval + 1;
   state->revMapCache = env_ma_malloc(env, sizeof(state->revMapCache[0])
                                      * state->revMapCacheSize);
@@ -91,6 +120,7 @@ destructAddLocateInfoState(struct addLocateInfoState *state, Env *env)
   freesuffixarray(&state->suffixArray, env);
 }
 
+#if 1
 DECLAREREADFUNCTION(Seqpos)
 
 static BitOffset
@@ -99,7 +129,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
               Seqpos start, Seqpos len, void *cbState,
               Env *env)
 {
-  BitOffset bitsWritten = len; /* 1 bit for each position in the bit mask */
+  BitOffset bitsWritten = 0;
   struct addLocateInfoState *state = cbState;
   unsigned bitsPerBWTPos, bitsPerOrigPos;
   int retcode;
@@ -112,15 +142,15 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
     state->revMapCacheSize = len;
   }
   bitsPerBWTPos = requiredUInt64Bits(len - 1);
-  bitsPerOrigPos = state->bitsPerSeqpos;
+  bitsPerOrigPos = state->bitsPerOrigPos;
   /* 1. read rangeLen suffix array indices from suftab */
   {
     Seqpos i, mapVal;
-    size_t revMapCachePos = 0;
+    size_t revMapCacheLen = 0;
     for(i = 0; i < len; ++i)
     {
       /* 1.a read array index*/
-      if((retcode = 
+      if((retcode =
           readnextSeqposfromstream(&mapVal, &state->suffixArray.suftabstream,
                                    env)) != 1)
         return (BitOffset)-1;
@@ -129,17 +159,18 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
       if(!(mapVal % state->sampleInterval))
       {
         /* 1.b.1 enter index into cache */
-        state->revMapCache[revMapCachePos].bwtPos = start + i;
-        state->revMapCache[revMapCachePos].origPos = mapVal;
-        ++revMapCachePos;
+        state->revMapCache[revMapCacheLen].bwtPos = i;
+        state->revMapCache[revMapCacheLen].origPos
+          = mapVal / state->sampleInterval;
+        ++revMapCacheLen;
         /* 1.b.2 mark position in bwt sequence */
-        bsSetBit(varDest, varOffset + i);
+        bsSetBit(cwDest, cwOffset + i);
       }
       else
-        bsClearBit(varDest, varOffset + i);
+        bsClearBit(cwDest, cwOffset + i);
     }
     /* 2. copy revMapCache into output */
-    for(i = 0; i < revMapCachePos; ++i)
+    for(i = 0; i < revMapCacheLen; ++i)
     {
       bsStoreUInt64(varDest, varOffset + bitsWritten, bitsPerBWTPos,
                     state->revMapCache[i].bwtPos);
@@ -151,20 +182,30 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
   }
   return bitsWritten;
 }
+#endif
+
+#define newBWTSeqErrRet()                               \
+  do {                                                  \
+    destructAddLocateInfoState(&varState, env);         \
+    if(baseSeqIdx) deleteEncIdxSeq(baseSeqIdx, env);    \
+    return NULL;                                        \
+  } while(0)
+
 
 BWTSeq *
 newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
           const Str *projectName, Env *env)
 {
   struct BWTSeq *bwtSeq = NULL;
-  struct encIdxSeq *baseSeqIdx;
+  struct encIdxSeq *baseSeqIdx = NULL;
   const MRAEnc *alphabet;
   Symbol alphabetSize;
   EISHint hint;
+  unsigned sampleInterval = 16;
   struct addLocateInfoState varState;
   assert(projectName && env);
   env_error_check(env);
-  initAddLocateInfoState(&varState, projectName, 16,
+  initAddLocateInfoState(&varState, projectName, sampleInterval,
                          extraParams->blockEncParams.blockSize
                          * extraParams->blockEncParams.blockSize, env);
   switch(baseType)
@@ -172,49 +213,75 @@ newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
   case BWT_ON_BLOCK_ENC:
     if(!(baseSeqIdx = loadBlockEncIdxSeq(projectName, env)))
     {
+      struct locateHeader headerData = { sampleInterval };
+      void *p[] = { &headerData };
+      uint16_t headerIDs[] = { LOCATE_INFO_IN_INDEX_HEADERID };
+      uint32_t headerSizes[] = { LOCATE_HEADER_SIZE };
+      headerWriteFunc headerFuncs[] = { writeLocateInfoHeader };
       env_error_unset(env);
       if(!(baseSeqIdx
            = newBlockEncIdxSeq(projectName,
                                extraParams->blockEncParams.blockSize,
-                               addLocateInfo, 0,
+                               sizeof(p)/sizeof(p[0]), headerIDs, headerSizes,
+                               headerFuncs, p,
+/*                                0, NULL, NULL, NULL, NULL, */
+                               addLocateInfo, 1 /* one bit for flag */,
                                bitsPerPosUpperBound(&varState),
                                &varState, env)))
+        newBWTSeqErrRet();
+    }
+    else
+    {
+      /* FIXME: read sample interval here, to make sure, the read
+       * index has locate information */
+      FILE *fp = EISSeekToHeader(baseSeqIdx, LOCATE_INFO_IN_INDEX_HEADERID,
+                                 NULL);
+      fputs("Using pre-computed sequence index.\n", stderr);
+      if(!fp)
       {
-        destructAddLocateInfoState(&varState, env);
-        return NULL;
+        fputs("Specified index does not contain locate information.\n"
+              "Localization of matches will not be supported!", stderr);
+        sampleInterval = 0;
+      }
+      else
+      {
+        struct locateHeader header;
+        if(!readLocateInfoHeader(fp, &header))
+          newBWTSeqErrRet();
+        sampleInterval = header.sampleInterval;
       }
     }
-    destructAddLocateInfoState(&varState, env);
     alphabet = EISGetAlphabet(baseSeqIdx);
     alphabetSize = MRAEncGetSize(alphabet);
     if(!alphabetSize)
-    {
       /* weird error, shouldn't happen, but I prefer error return to
        * segfault in case someone tampered with the input */
-      deleteEncIdxSeq(baseSeqIdx, env);
-      return NULL;
-    }
+      newBWTSeqErrRet();
     bwtSeq = env_ma_malloc(env, offsetAlign(sizeof(struct BWTSeq),
                                             sizeof(Seqpos))
                            + sizeof(Seqpos) * (alphabetSize + 1));
-    bwtSeq->count = (Seqpos *)((char  *)bwtSeq + sizeof(struct BWTSeq));
+    bwtSeq->count = (Seqpos *)((char  *)bwtSeq
+                               + offsetAlign(sizeof(struct BWTSeq),
+                                             sizeof(Seqpos)));
     bwtSeq->type = baseType;
     bwtSeq->seqIdx = baseSeqIdx;
     bwtSeq->alphabetSize = alphabetSize;
+    bwtSeq->locateSampleInterval = sampleInterval;
     bwtSeq->hint = hint = newEISHint(baseSeqIdx, env);
     {
       Symbol i;
-      Seqpos lastPos = EISLength(baseSeqIdx) - 1, *count = bwtSeq->count;
+      Seqpos len = EISLength(baseSeqIdx), *count = bwtSeq->count;
       count[0] = 0;
       for(i = 0; i < alphabetSize; ++i)
         count[i + 1] = count[i]
-          + EISSymTransformedRank(baseSeqIdx, i, lastPos, hint, env);
-      fprintf(stderr, "count[alphabetSize]="FormatSeqpos
-              ", lastPos="FormatSeqpos"\n", count[alphabetSize], lastPos);
-      for(i = 0; i <= alphabetSize; ++i)
-        fprintf(stderr, "count[%u]="FormatSeqpos"\n", i, count[i]);
-      assert(count[alphabetSize] == lastPos + 1);
+          + EISSymTransformedRank(baseSeqIdx, i, len, hint, env);
+/*       fprintf(stderr, "count[alphabetSize]="FormatSeqpos */
+/*               ", len="FormatSeqpos"\n", count[alphabetSize], len); */
+/*       for(i = 0; i <= alphabetSize; ++i) */
+/*         fprintf(stderr, "count[%u]="FormatSeqpos"\n", i, count[i]); */
+      assert(count[alphabetSize] == len);
     }
+    destructAddLocateInfoState(&varState, env);
     break;
     /* FIXME: implement missing types. */
   case BWT_ON_RLE:
@@ -234,6 +301,21 @@ deleteBWTSeq(BWTSeq *bwtSeq, Env *env)
   env_ma_free(bwtSeq, env);
 }
 
+int
+BWTSeqHasLocateInformation(const BWTSeq *bwtSeq)
+{
+  return bwtSeq->locateSampleInterval;
+}
+
+static inline int
+BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
+                       struct extBitsRetrieval *extBits, Env *env)
+{
+  EISRetrieveExtraBits(bwtSeq->seqIdx, pos, EBRF_RETRIEVE_CWBITS, extBits,
+                       bwtSeq->hint, env);
+  return bsGetBit(extBits->cwPart, extBits->cwOffset + pos - extBits->start);
+}
+
 static inline Seqpos
 BWTOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Env *env)
 {
@@ -241,28 +323,171 @@ BWTOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Env *env)
   return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint, env);
 }
 
-extern Seqpos
-matchCount(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen, Env *env)
+static inline Seqpos
+BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos, Env *env)
 {
-  Seqpos i = queryLen - 1, first, last, *count;
+  Symbol tSym = EISGetTransformedSym(bwtSeq->seqIdx, pos, bwtSeq->hint, env);
+  return bwtSeq->count[tSym] + BWTOcc(bwtSeq, tSym, pos, env);
+}
+
+struct matchBound
+{
+  Seqpos upper, lower;
+};
+
+static inline void
+getMatchBound(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen,
+              struct matchBound *match, Env *env)
+{
+  size_t i = queryLen;
+  Seqpos *count;
   Symbol curSym;
   const MRAEnc *alphabet;
   assert(bwtSeq && query);
   count = bwtSeq->count;
   alphabet = EISGetAlphabet(bwtSeq->seqIdx);
-  curSym = MRAEncMapSymbol(alphabet, query[0]);
-  first = count[curSym];
-  last = count[curSym] - 1;
-  while((first <= last) && (i > 0))
+  curSym = MRAEncMapSymbol(alphabet, query[--i]);
+  match->upper = count[curSym];
+  match->lower = count[curSym + 1];
+/*   fprintf(stderr, "lower="FormatSeqpos", upper="FormatSeqpos"\n", */
+/*           match->upper, match->lower); */
+/*   fprintf(stderr, "cmpl="FormatSeqpos", cmpu="FormatSeqpos"\n", */
+/*           count[curSym] + BWTOcc(bwtSeq, curSym, 0, env), */
+/*           count[curSym] + BWTOcc(bwtSeq, curSym, BWTSeqLength(bwtSeq), env)); */
+  while((match->upper <= match->lower) && (i > 0))
   {
-    curSym = MRAEncMapSymbol(alphabet, query[i]);
-    /* FIXME: what value should first get when first == 0? */
-    first = count[curSym] + BWTOcc(bwtSeq, curSym, first, env) + 1;
-    last = count[curSym] + BWTOcc(bwtSeq, curSym, last - 1, env);
-    --i;
-  }
-  if(last < first)
-    return -1;
-  else
-    return last - first;
+    curSym = MRAEncMapSymbol(alphabet, query[--i]);
+    match->upper = count[curSym]
+      + BWTOcc(bwtSeq, curSym, match->upper, env);
+    match->lower = count[curSym]
+      + BWTOcc(bwtSeq, curSym, match->lower, env);
+  }  
 }
+
+extern Seqpos
+BWTSeqMatchCount(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen,
+                 Env *env)
+{
+  struct matchBound match;
+  assert(bwtSeq && query && env);
+  getMatchBound(bwtSeq, query, queryLen, &match, env);
+  if(match.lower < match.upper)
+    return 0;
+  else
+    return match.lower - match.upper + 1;
+}
+
+struct BWTSeqExactMatchesIterator
+{
+  struct matchBound bounds;
+  Seqpos nextMatchBWTPos;
+  struct MatchData nextMatch;
+  struct extBitsRetrieval extBits;
+};
+
+struct BWTSeqExactMatchesIterator *
+newEMIterator(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen, Env *env)
+{
+  struct BWTSeqExactMatchesIterator *newIter;
+  assert(bwtSeq && query && env);
+  if(!bwtSeq->locateSampleInterval)
+  {
+    fputs("Index does not contain locate information.\n"
+          "Localization of matches impossible!", stderr);
+    return NULL;
+  }
+  newIter = env_ma_malloc(env, sizeof(*newIter));
+  getMatchBound(bwtSeq, query, queryLen, &newIter->bounds, env);
+  newIter->nextMatchBWTPos = newIter->bounds.upper;
+  initExtBitsRetrieval(&newIter->extBits, env);
+  return newIter;
+}
+  
+void
+deleteEMIterator(struct BWTSeqExactMatchesIterator *iter, Env *env)
+{
+  env_ma_free(iter, env);
+}
+
+Seqpos
+EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter)
+{
+  assert(iter);
+  if(iter->bounds.upper > iter->bounds.lower)
+    return 0;
+  else
+    return iter->bounds.lower - iter->bounds.upper;
+}
+
+extern Seqpos
+EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter)
+{
+  assert(iter);
+  if(iter->nextMatchBWTPos > iter->bounds.lower)
+    return 0;
+  else
+    return iter->bounds.lower - iter->bounds.upper;
+}
+
+
+struct MatchData *
+EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
+                Env *env)
+{
+  if(iter->nextMatchBWTPos < iter->bounds.lower)
+  {
+    Seqpos nextLocate = iter->nextMatchBWTPos, locateOffset = 0;
+    while(!BWTSeqPosHasLocateInfo(bwtSeq, nextLocate, &iter->extBits, env))
+      nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, env), ++locateOffset;
+    EISRetrieveExtraBits(bwtSeq->seqIdx, nextLocate,
+                         EBRF_RETRIEVE_CWBITS | EBRF_RETRIEVE_VARBITS,
+                         &iter->extBits, bwtSeq->hint, env);
+    {
+      unsigned bitsPerBWTPos = requiredUInt64Bits(iter->extBits.len - 1),
+        bitsPerOrigPos = requiredUInt64Bits(
+          (EISLength(bwtSeq->seqIdx) - 1)/bwtSeq->locateSampleInterval);
+      BitOffset locateRecordIndex =
+        bs1BitsCount(iter->extBits.cwPart, iter->extBits.cwOffset,
+                     nextLocate - iter->extBits.start),
+        locateRecordOffset = (bitsPerBWTPos + bitsPerOrigPos)
+        * locateRecordIndex;
+/*       fprintf(stderr, "bitsPerBWTPos=%u, bitsPerOrigPos=%u\n" */
+/*               "value stored at index %llu: %llu, nextLocate="FormatSeqpos */
+/*               ", extBits.start="FormatSeqpos"\n", bitsPerBWTPos, */
+/*               bitsPerOrigPos, (unsigned long long) */
+/*               locateRecordIndex, (unsigned long long) */
+/*               bsGetUInt64(iter->extBits.varPart, */
+/*                           iter->extBits.varOffset + locateRecordOffset, */
+/*                           bitsPerBWTPos), nextLocate, iter->extBits.start); */
+/*       fprintf(stderr, "Locate samples stored in this region: %llu\n", */
+/*               (unsigned long long) */
+/*               bs1BitsCount(iter->extBits.cwPart, iter->extBits.cwOffset, */
+/*                            iter->extBits.len)); */
+      iter->nextMatch.sfxArrayValue =
+        bsGetUInt64(iter->extBits.varPart, iter->extBits.varOffset
+                    + locateRecordOffset + bitsPerBWTPos, bitsPerOrigPos)
+        * bwtSeq->locateSampleInterval + locateOffset;          
+/*       fprintf(stderr, "sampledPos=%llu\n", (unsigned long long) */
+/*               bsGetUInt64(iter->extBits.varPart, iter->extBits.varOffset */
+/*                           + locateRecordOffset + bitsPerBWTPos, */
+/*                           bitsPerOrigPos) * bwtSeq->locateSampleInterval); */
+/*       fprintf(stderr, "cwOffset=%llu, varOffset=%llu\n", */
+/*               (unsigned long long)iter->extBits.cwOffset, */
+/*               (unsigned long long)iter->extBits.varOffset); */
+      assert(bsGetUInt64(iter->extBits.varPart,
+                         iter->extBits.varOffset + locateRecordOffset,
+                         bitsPerBWTPos)
+             == nextLocate - iter->extBits.start);
+    }
+    {
+      /* map position back to original encoded sequence */
+      iter->nextMatch.dbFile = 0;
+    }
+    ++iter->nextMatchBWTPos;
+    return &iter->nextMatch;
+  }
+  else
+    return NULL;
+}
+
+

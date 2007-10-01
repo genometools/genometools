@@ -60,7 +60,43 @@ newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
 extern void
 deleteBWTSeq(BWTSeq *bwtseq, Env *env);
 
+extern int
+BWTSeqHasLocateInformation(const BWTSeq *bwtseq);
+
+staticifinline inline const MRAEnc *
+BWTSeqGetAlphabet(const BWTSeq *seq);
+
+staticifinline inline Seqpos
+BWTSeqLength(const BWTSeq *seq);
+
 extern Seqpos
-matchCount(const BWTSeq *bwtseq, Symbol *query, size_t queryLen, Env *env);
+BWTSeqMatchCount(const BWTSeq *bwtseq, Symbol *query, size_t queryLen,
+                 Env *env);
+
+extern struct BWTSeqExactMatchesIterator *
+newEMIterator(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen, Env *env);
+
+extern void
+deleteEMIterator(struct BWTSeqExactMatchesIterator *iter, Env *env);
+
+struct MatchData
+{
+  const char *dbFile;
+  Seqpos sfxArrayValue, dbFilePos;
+};
+
+extern struct MatchData *
+EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
+                Env *env);
+
+extern Seqpos
+EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter);
+
+extern Seqpos
+EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter);
+
+#ifdef HAVE_WORKING_INLINE
+#include "../bwtseqsimpleop.c"
+#endif
 
 #endif /* BWTSEQ_H_INCLUDED */

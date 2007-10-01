@@ -38,11 +38,10 @@
 
 #include <libgtcore/env.h>
 #include <libgtcore/str.h>
+#include <libgtcore/chardef.h>
+#include <libgtcore/symboldef.h>
 #include <libgtcore/strarray.h>
-#include <libgtmatch/symboldef.h>
-#include <libgtmatch/chardef.h>
 #include <libgtmatch/alphadef.h>
-#include <libgtmatch/alphabet.pr>
 
 #include "biofmi2.h"
 #include "mrangealphabet.h"

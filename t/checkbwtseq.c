@@ -38,9 +38,19 @@
 
 #include <libgtcore/env.h>
 #include <libgtcore/ensure.h>
+#include <libgtcore/minmax.h>
 #include <libgtcore/option.h>
 #include <libgtcore/str.h>
 #include <libgtcore/versionfunc.h>
+
+#include <libgtmatch/sarr-def.h>
+#include <libgtmatch/enum-patt-def.h>
+#include <libgtmatch/enum-patt.pr>
+#include <libgtmatch/esa-mmsearch-def.h>
+#include <libgtmatch/esa-mmsearch.pr>
+#include <libgtmatch/esa-map.pr>
+
+
 #include <bwtseq.h>
 
 enum {
@@ -80,13 +90,44 @@ parseOptions(int *parsed_args, int argc, char **argv,
   return oprval;
 }
 
+/* begin evil duplicate declaration */
+typedef struct
+{
+  Seqpos offset,
+         left,
+         right;
+} Lcpinterval;
+
+struct MMsearchiterator
+{
+  Lcpinterval lcpitv;
+  Seqpos sufindex;
+  const Seqpos *suftab;
+};
+/* end evil duplicate declaration */
+
+#define checkBWTSeqErrRet()                             \
+  do {                                                  \
+    if(inputProject) str_delete(inputProject, env);     \
+    if(query) env_ma_free(query, env);                  \
+    if(epi) freeEnumpatterniterator(&epi,env);          \
+    if(mmsi) freemmsearchiterator(&mmsi,env);           \
+    if(EMIter) deleteEMIterator(EMIter,env);            \
+    if(bwtSeq) deleteBWTSeq(bwtSeq, env);               \
+    env_delete(env);                                    \
+    return EXIT_FAILURE;                                \
+  } while(0)
 
 int
 main(int argc, char *argv[])
 {
-  struct BWTSeq *bwtseq;
-  Str *inputProject;
+  struct BWTSeq *bwtSeq = NULL;
+  Str *inputProject = NULL;
   union bwtSeqParam bwtparams;
+  Enumpatterniterator *epi = NULL;
+  MMsearchiterator *mmsi = NULL;
+  struct BWTSeqExactMatchesIterator *EMIter = NULL;
+  Symbol *query = NULL;
   int parsedArgs;
   int had_err = 0;
   Env *env = env_new();
@@ -103,51 +144,95 @@ main(int argc, char *argv[])
 
   inputProject = str_new_cstr(argv[parsedArgs], env);
   bwtparams.blockEncParams.blockSize = BLOCKSIZE;
-  bwtseq = newBWTSeq(BWT_ON_BLOCK_ENC, &bwtparams, inputProject, env);
+  bwtSeq = newBWTSeq(BWT_ON_BLOCK_ENC, &bwtparams, inputProject, env);
   
-  ensure(had_err, bwtseq);
+  ensure(had_err, bwtSeq);
   if(had_err)
+    checkBWTSeqErrRet();
   {
-    str_delete(inputProject, env);
-    env_delete(env);
-    return EXIT_FAILURE;
+    Suffixarray suffixarray;
+    const Uchar *pptr;
+    Seqpos totallength, dbstart;
+    unsigned long trial, numOfSamples = random()%1000,
+      patternlen, minpatternlength = random()%10,
+      maxpatternlength=MAX(minpatternlength, random()%100);
+    query = env_ma_malloc(env, sizeof(Symbol) * maxpatternlength);
+    if (mapsuffixarray(&suffixarray,
+                       &totallength,
+                       SARR_SUFTAB | SARR_ESQTAB,
+                       inputProject,
+                       NULL,
+                       env))
+      checkBWTSeqErrRet();
+    if(!(epi = newenumpatterniterator(minpatternlength, maxpatternlength,
+                                      suffixarray.encseq, env)))
+    {
+      fputs("Creation of pattern iterator failed!\n", stderr);
+      freesuffixarray(&suffixarray,env);
+      checkBWTSeqErrRet();
+    }
+    for (trial = 0; trial < numOfSamples; trial++)
+    {
+      pptr = nextEnumpatterniterator(&patternlen,epi);
+      mmsi = newmmsearchiterator(suffixarray.encseq,
+                                 suffixarray.suftab,
+                                 0,  /* leftbound */
+                                 totallength, /* rightbound */
+                                 0, /* offset */
+                                 suffixarray.readmode,
+                                 pptr,
+                                 patternlen,
+                                 env);
+      {
+        unsigned long i;
+        for(i = 0; i < patternlen; ++i)
+        {
+          query[i] = pptr[i];
+        }
+      }
+      EMIter = newEMIterator(bwtSeq, query, patternlen, env);
+/*       fprintf(stderr, "number of matches: "FormatSeqpos" == %llu\n", */
+/*               EMINumMatchesTotal(EMIter), */
+/*               (unsigned long long) */
+/*               MAX(0, mmsi->lcpitv.right - mmsi->lcpitv.left + 1)); */
+      assert(EMINumMatchesTotal(EMIter)
+             == MAX(0, mmsi->lcpitv.right - mmsi->lcpitv.left + 1));
+      while (nextmmsearchiterator(&dbstart,mmsi))
+      {
+        struct MatchData *match =
+          EMIGetNextMatch(EMIter, bwtSeq, env);
+        if(!match)
+        {
+          fputs("matches of fmindex expired before mmsearch!\n", stderr);
+          freesuffixarray(&suffixarray,env);
+          checkBWTSeqErrRet();
+        }
+        if(match->sfxArrayValue != dbstart)
+        {
+          fputs("fmindex match doesn't equal mmsearch match result!\n", stderr);
+          freesuffixarray(&suffixarray,env);
+          checkBWTSeqErrRet();
+        }
+      }
+      {
+        struct MatchData *match =
+          EMIGetNextMatch(EMIter, bwtSeq, env);
+        if(match)
+        {
+          fputs("matches of mmsearch expired before fmindex!\n", stderr);
+          freesuffixarray(&suffixarray,env);
+          checkBWTSeqErrRet();
+        }
+      }
+      deleteEMIterator(EMIter,env);
+      freemmsearchiterator(&mmsi,env);
+    }
+    fprintf(stderr, "Finished %lu matchings successfully.\n", numOfSamples);
+    env_ma_free(query, env);
+    freeEnumpatterniterator(&epi,env);
+    freesuffixarray(&suffixarray,env);
   }
-/*   { */
-/*     int i; */
-/*     Symbol exampleBlock[BLOCKSIZE]; */
-/*     size_t indices[2]; */
-/*     for(i = 0; i < BLOCKSIZE; ++i) */
-/*     { */
-/*       exampleBlock[i] = ((unsigned long)random())%dnasymcount; */
-/*     } */
-/*     searchBlock2IndexPair(bwtseq, exampleBlock, indices, env); */
-/*     exampleBlock[0] = 3; */
-/*     exampleBlock[1] = 0; */
-/*     exampleBlock[2] = 0; */
-/*     exampleBlock[3] = 2; */
-/*     exampleBlock[4] = 2; */
-/*     exampleBlock[5] = 2; */
-/*     exampleBlock[6] = 2; */
-/*     exampleBlock[7] = 2; */
-/*     searchBlock2IndexPair(bwtseq, exampleBlock, indices, env); */
-/*     fprintf(stderr, "indices: %lu, %lu\n", (unsigned long)indices[0], */
-/*             (unsigned long)indices[1]); */
-/*   } */
-/*   { */
-/*     int integrity = verifyIntegrity(bwtseq, inputProject, 100000, stderr, env); */
-/*     if((integrity)) */
-/*     { */
-/*       if(integrity == -1) */
-/*         perror("I/O error when checking index integrity"); */
-/*       else */
-/*         fputs("Integrity check failed for index.\n", stderr); */
-/*       deleteEncIdxBwtseq(bwtseq, env); */
-/*       str_delete(inputProject, env); */
-/*       env_delete(env); */
-/*       return EXIT_FAILURE; */
-/*     } */
-/*   } */
-  deleteBWTSeq(bwtseq, env);
+  deleteBWTSeq(bwtSeq, env);
   str_delete(inputProject, env);
   env_delete(env);
   return EXIT_SUCCESS;

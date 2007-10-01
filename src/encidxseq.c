@@ -19,7 +19,7 @@
 #include <string.h>
 
 #include <libgtmatch/sarr-def.h>
-#include <libgtmatch/sfx-map.pr>
+#include <libgtmatch/esa-map.pr>
 
 #include "encidxseq.h"
 #include "encidxseqpriv.h"
@@ -73,7 +73,7 @@ verifyIntegrity(struct encIdxSeq *seqIdx,
   /* two part process: enumerate all positions of original sequence
    * and verify that the query functions return correct values */
   if(streamsuffixarray(&suffixArray, &seqLastPos,
-                       SARR_SUFTAB | SARR_BWTTAB, projectName, true, env))
+                       SARR_SUFTAB | SARR_BWTTAB, projectName, NULL, env))
     return -1;
   memset(rankTable, 0, sizeof(rankTable));
   bwtFP = suffixArray.bwttabstream.fp;
@@ -90,7 +90,7 @@ verifyIntegrity(struct encIdxSeq *seqIdx,
     if(symEnc != symOrig)
       verifyIntegrityErrRet(1);
     if((rankExpect = ++rankTable[symOrig])
-       != (rankQueryResult = EISRank(seqIdx, symOrig, pos, hint, env)))
+       != (rankQueryResult = EISRank(seqIdx, symOrig, pos + 1, hint, env)))
       verifyIntegrityErrRet(2);
     ++pos;
     if(tickPrint && !(pos % tickPrint))

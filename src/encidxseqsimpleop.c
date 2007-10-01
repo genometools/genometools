@@ -37,6 +37,15 @@ EISGetAlphabet(const struct encIdxSeq *seq)
 staticifinline inline Symbol
 EISGetSym(struct encIdxSeq *seq, Seqpos pos, union EISHint *hint, Env *env)
 {
+  assert(seq && hint && env);
+  return MRAEncRevMapSymbol(seq->alphabet,
+                            seq->classInfo->get(seq, pos, hint, env));
+}
+
+staticifinline inline Symbol
+EISGetTransformedSym(struct encIdxSeq *seq, Seqpos pos, EISHint hint, Env *env)
+{
+  assert(seq && hint && env);
   return seq->classInfo->get(seq, pos, hint, env);
 }
 
@@ -57,22 +66,34 @@ EISRetrieveExtraBits(struct encIdxSeq *seq, Seqpos pos, int flags,
   return seq->classInfo->expose(seq, pos, flags, retval, hint, env);
 }
 
+staticifinline inline void
+initExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
+{
+  memset(r, 0, sizeof(struct extBitsRetrieval));
+}
+
 staticifinline inline struct extBitsRetrieval *
 newExtBitsRetrieval(Env *env)
 {
   struct extBitsRetrieval *retval 
-    = env_ma_calloc(env, 1, sizeof(struct extBitsRetrieval));
+    = env_ma_malloc(env, sizeof(struct extBitsRetrieval));
+  initExtBitsRetrieval(retval, env);
   return retval;
 }
 
+staticifinline inline void
+destructExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
+{
+  if((r->flags & EBRF_PERSISTENT_CWBITS) && r->cwPart)
+    env_ma_free(r->cwPart, env);
+  if((r->flags & EBRF_PERSISTENT_VARBITS) && r->varPart)
+    env_ma_free(r->varPart, env);
+}
 
 staticifinline inline void
 deleteExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
 {
-  if(r->flags & EBRF_PERSISTENT_CWBITS)
-    env_ma_free(r->cwPart, env);
-  if(r->flags & EBRF_PERSISTENT_VARBITS)
-    env_ma_free(r->varPart, env);
+  destructExtBitsRetrieval(r, env);
   env_ma_free(r, env);
 }
 
@@ -84,6 +105,13 @@ EISSymTransformedRank(struct encIdxSeq *seq, Symbol msym, Seqpos pos,
   return seq->classInfo->rank(seq, msym, pos, hint, env);
 }
 
+staticifinline inline FILE *
+EISSeekToHeader(const struct encIdxSeq *seqIdx, uint16_t headerID,
+                uint32_t *lenRet)
+{
+  assert(seqIdx);
+  return seqIdx->classInfo->seekToHeader(seqIdx, headerID, lenRet);
+}
 
 staticifinline inline EISHint
 newEISHint(struct encIdxSeq *seq, Env *env)

@@ -512,62 +512,7 @@ SRLSymbolsInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
   }
 }
 
-#if 0
-extern Seqpos
-SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
-                          Seqpos end, Symbol esym, seqRangeListSearchHint *hint)
-{
-  struct seqRange *p;
-  if(rangeList->numRanges == 0)
-    return 0;
-  p = SRLFindPositionNext(rangeList, start, hint);
-  if(p)
-  {
-    Seqpos symCount = 0;
-    Seqpos s = MAX(start, p->startPos);
-    Symbol sym = MRAEncMapSymbol(rangeList->alphabet, esym);
-    struct seqRange *maxRange = rangeList->ranges + rangeList->numRanges - 1;
-    while(s <= end)
-    {
-      if(p->sym == sym)
-        symCount += MIN(p->startPos + p->len, end + 1) - s;
-      if(p == maxRange)
-        break;
-      s = (++p)->startPos;
-    }
-    return symCount;
-  }
-  else
-    return 0;
-}
-
-extern Seqpos
-SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
-                              Seqpos end, seqRangeListSearchHint *hint)
-{
-  struct seqRange *p;
-  if(rangeList->numRanges == 0)
-    return 0;
-  p = SRLFindPositionNext(rangeList, start, hint);
-  if(p)
-  {
-    Seqpos symCount = 0;
-    Seqpos s = MAX(start, p->startPos);
-    struct seqRange *maxRange = rangeList->ranges + rangeList->numRanges - 1;
-    while(s <= end)
-    {
-      symCount += MIN(p->startPos + p->len, end + 1) - s;
-      if(p == maxRange)
-        break;
-      s = (++p)->startPos;
-    }
-    return symCount;
-  }
-  else
-    return 0;
-}
-#else
-extern Seqpos
+Seqpos
 SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
                           Seqpos end, Symbol esym, seqRangeListSearchHint *hint)
 {
@@ -602,7 +547,7 @@ SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
           symCount -= start - p->startPos;
         if(sym == q->sym)
         {
-          regionLength lastOverlap = MIN(end - q->startPos + 1, q->len);
+          regionLength lastOverlap = MIN(end - q->startPos, q->len);
           symCount += lastOverlap;
         }
         return symCount;
@@ -614,10 +559,10 @@ SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
       Seqpos s = MAX(start, p->startPos);
       Symbol sym = MRAEncMapSymbol(rangeList->alphabet, esym);
       struct seqRange *maxRange = rangeList->ranges + rangeList->numRanges - 1;
-      while(s <= end)
+      while(s < end)
       {
         if(p->sym == sym)
-          symCount += MIN(p->startPos + p->len, end + 1) - s;
+          symCount += MIN(p->startPos + p->len, end) - s;
         if(p == maxRange)
           break;
         s = (++p)->startPos;
@@ -629,7 +574,7 @@ SRLSymbolCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
     return 0;
 }
 
-extern Seqpos
+Seqpos
 SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
                               Seqpos end, seqRangeListSearchHint *hint)
 {
@@ -660,14 +605,14 @@ SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
         for(sym = 0; sym < numSyms; ++sym)
         {
           symCount += rangeList->partialSymSums[qOff * numSyms + sym]
-          - rangeList->partialSymSums[pOff * numSyms + sym];
+            - rangeList->partialSymSums[pOff * numSyms + sym];
           /* two special cases: start might be inside p and end inside q */
         }
         if(start >= p->startPos)
           symCount -= start - p->startPos;
 
         {
-          regionLength lastOverlap = MIN(end - q->startPos + 1, q->len);
+          regionLength lastOverlap = MIN(end - q->startPos, q->len);
           symCount += lastOverlap;
         }
         return symCount;
@@ -678,9 +623,9 @@ SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
       Seqpos symCount = 0;
       Seqpos s = MAX(start, p->startPos);
       struct seqRange *maxRange = rangeList->ranges + rangeList->numRanges - 1;
-      while(s <= end)
+      while(s < end)
       {
-        symCount += MIN(p->startPos + p->len, end + 1) - s;
+        symCount += MIN(p->startPos + p->len, end) - s;
         if(p == maxRange)
           break;
         s = (++p)->startPos;
@@ -691,4 +636,33 @@ SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
   else
     return 0;
 }
-#endif
+
+void
+SRLapplyRangesToSubString(struct seqRangeList *rangeList, MRAEnc *alphabet,
+                          Symbol *subString, Seqpos start, Seqpos len,
+                          Seqpos subStringOffset, seqRangeListSearchHint *hint)
+{
+  struct seqRange *nextRange;
+  Seqpos inSeqPos = start;
+  nextRange = SRLFindPositionNext(rangeList, inSeqPos, hint);
+  do {
+    if(inSeqPos < nextRange->startPos)
+    {
+      inSeqPos = nextRange->startPos;
+    }
+    else
+    {
+      size_t i;
+      unsigned maxSubstPos =
+        MIN(nextRange->startPos + nextRange->len,
+            start + len) - subStringOffset;
+      Symbol sym = MRAEncRevMapSymbol(alphabet,
+                                      nextRange->sym);
+      for(i = inSeqPos - subStringOffset; i < maxSubstPos; ++i)
+        subString[i] = sym;
+      inSeqPos = subStringOffset + maxSubstPos;
+      ++nextRange;
+    }
+  } while(inSeqPos < start + len);
+}
+

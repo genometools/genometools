@@ -19,6 +19,8 @@
 #ifndef ENCIDXSEQPRIV_H_INCLUDED
 #define ENCIDXSEQPRIV_H_INCLUDED
 
+#include <stdio.h>
+
 #include "mrangealphabet.h"
 #include "seqranges.h"
 #include "encidxseq.h"
@@ -38,6 +40,8 @@ struct encIdxSeqClass
   void (*expose)(struct encIdxSeq *seq, Seqpos pos, int persistent,
                  struct extBitsRetrieval *retval, union EISHint *hint,
                  Env *env);
+  FILE *(*seekToHeader)(const struct encIdxSeq *seq, uint16_t headerID,
+                        uint32_t *lenRet);
 };
 
 struct encIdxSeq

@@ -104,6 +104,11 @@ extern Seqpos
 SRLAllSymbolsCountInSeqRegion(struct seqRangeList *rangeList, Seqpos start,
                               Seqpos end, seqRangeListSearchHint *hint);
 
+extern void
+SRLapplyRangesToSubString(struct seqRangeList *rangeList, MRAEnc *alphabet,
+                          Symbol *subString, Seqpos start, Seqpos len,
+                          Seqpos subStringOffset, seqRangeListSearchHint *hint);
+
 extern int
 SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp);
 
