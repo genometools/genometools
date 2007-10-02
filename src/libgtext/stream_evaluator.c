@@ -33,7 +33,7 @@ struct StreamEvaluator {
                *prediction;
   bool nuceval, evalLTR;
   unsigned long LTRdelta;
-  Hashtable *real_features; /* sequence name -> feature type hash */
+  Hashtable *real_features; /* sequence id -> slot */
   Evaluator *gene_evaluator,
             *mRNA_evaluator,
             *LTR_evaluator;
