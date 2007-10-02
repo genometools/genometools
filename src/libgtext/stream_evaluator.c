@@ -63,7 +63,11 @@ typedef struct {
                    *mRNA_counts_reverse,
                    *CDS_counts_forward,
                    *CDS_counts_reverse;
-  unsigned long nucleotide_offset;
+  Range real_range;
+  unsigned long FP_mRNA_nucleotides_forward,
+                FP_mRNA_nucleotides_reverse,
+                FP_CDS_nucleotides_forward,
+                FP_CDS_nucleotides_reverse;
   Bittab *real_mRNA_nucleotides_forward,
          *pred_mRNA_nucleotides_forward,
          *real_mRNA_nucleotides_reverse,
@@ -95,12 +99,14 @@ typedef struct {
 typedef struct
 {
   Slot *slot;
-  bool verbose;
+  bool nuceval,
+       verbose;
 } ProcessRealFeatureInfo;
 
 typedef struct {
   Slot *slot;
-  bool verbose,
+  bool nuceval,
+       verbose,
        exondiff;
   unsigned long LTRdelta;
   Evaluator *gene_evaluator,
@@ -130,8 +136,7 @@ static Slot* slot_new(bool nuceval, Range range, Env *env)
   s->CDS_exons_forward = transcript_exons_new(env);
   s->CDS_exons_reverse = transcript_exons_new(env);
   if (nuceval) {
-  assert(range.start); /* 1-based coordinates */
-    s->nucleotide_offset = range.start - 1;
+    s->real_range = range;
     s->real_mRNA_nucleotides_forward = bittab_new(length, env);
     s->pred_mRNA_nucleotides_forward = bittab_new(length, env);
     s->real_mRNA_nucleotides_reverse = bittab_new(length, env);
@@ -175,14 +180,14 @@ static void slot_delete(Slot *s, Env *env)
   transcript_counts_delete(s->mRNA_counts_reverse, env);
   transcript_counts_delete(s->CDS_counts_forward, env);
   transcript_counts_delete(s->CDS_counts_reverse, env);
-  bittab_delete( s->real_mRNA_nucleotides_forward, env);
-  bittab_delete( s->pred_mRNA_nucleotides_forward, env);
-  bittab_delete( s->real_mRNA_nucleotides_reverse, env);
-  bittab_delete( s->pred_mRNA_nucleotides_reverse, env);
-  bittab_delete( s->real_CDS_nucleotides_forward, env);
-  bittab_delete( s->pred_CDS_nucleotides_forward, env);
-  bittab_delete( s->real_CDS_nucleotides_reverse, env);
-  bittab_delete( s->pred_CDS_nucleotides_reverse, env);
+  bittab_delete(s->real_mRNA_nucleotides_forward, env);
+  bittab_delete(s->pred_mRNA_nucleotides_forward, env);
+  bittab_delete(s->real_mRNA_nucleotides_reverse, env);
+  bittab_delete(s->pred_mRNA_nucleotides_reverse, env);
+  bittab_delete(s->real_CDS_nucleotides_forward, env);
+  bittab_delete(s->pred_CDS_nucleotides_forward, env);
+  bittab_delete(s->real_CDS_nucleotides_reverse, env);
+  bittab_delete(s->pred_CDS_nucleotides_reverse, env);
   bittab_delete(s->true_genes_forward, env);
   bittab_delete(s->true_genes_reverse, env);
   bittab_delete(s->true_mRNAs_forward, env);
@@ -391,6 +396,24 @@ static void add_real_exon(TranscriptExons *te, Range range, GenomeNode *gn,
   }
 }
 
+static void add_nucleotide_exon(Bittab *nucleotides, Range range,
+                                Range real_range,
+                                unsigned long *FP)
+{
+  unsigned long i;
+  assert(nucleotides);
+  for (i = range.start; i <= range.end; i++) {
+    if (range_within(real_range, i)) {
+      assert(i >= real_range.start);
+      bittab_set_bit(nucleotides, i - real_range.start);
+    }
+    else {
+      assert(FP);
+      (*FP)++;
+    }
+  }
+}
+
 static int process_real_feature(GenomeNode *gn, void *data, Env *env)
 {
   ProcessRealFeatureInfo *info = (ProcessRealFeatureInfo*) data;
@@ -446,9 +469,19 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
           add_real_exon(info->slot->CDS_exons_forward, range, gn, env);
+          /* nucleotide level */
+          if (info->nuceval) {
+            add_nucleotide_exon(info->slot->real_CDS_nucleotides_forward, range,
+                                info->slot->real_range, NULL);
+          }
           break;
         case STRAND_REVERSE:
           add_real_exon(info->slot->CDS_exons_reverse, range, gn, env);
+          /* nucleotide level */
+          if (info->nuceval) {
+            add_nucleotide_exon(info->slot->real_CDS_nucleotides_reverse, range,
+                                info->slot->real_range, NULL);
+          }
           break;
         default:
           if (info->verbose) {
@@ -462,9 +495,19 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
           add_real_exon(info->slot->mRNA_exons_forward, range, gn, env);
+          /* nucleotide level */
+          if (info->nuceval) {
+            add_nucleotide_exon(info->slot->real_mRNA_nucleotides_forward,
+                                range, info->slot->real_range, NULL);
+          }
           break;
         case STRAND_REVERSE:
           add_real_exon(info->slot->mRNA_exons_reverse, range, gn, env);
+          /* nucleotide level */
+          if (info->nuceval) {
+            add_nucleotide_exon(info->slot->real_mRNA_nucleotides_reverse,
+                                range, info->slot->real_range, NULL);
+          }
           break;
         default:
           if (info->verbose) {
@@ -1031,6 +1074,16 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                           info->slot->mRNA_exon_bittabs_reverse,
                           info->mRNA_exon_evaluators,
                           info->mRNA_exon_evaluators_collapsed);
+          /* nucleotide level */
+          if (info->nuceval) {
+            add_nucleotide_exon(predicted_strand
+                                ? info->slot->pred_mRNA_nucleotides_forward
+                                : info->slot->pred_mRNA_nucleotides_reverse,
+                                predicted_range, info->slot->real_range,
+                                predicted_strand
+                                ? &info->slot->FP_mRNA_nucleotides_forward
+                                : &info->slot->FP_mRNA_nucleotides_reverse);
+          }
           break;
         default:
           if (info->verbose) {
@@ -1065,6 +1118,16 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                           info->slot->CDS_exon_bittabs_reverse,
                           info->CDS_exon_evaluators,
                           info->CDS_exon_evaluators_collapsed);
+          /* nucleotide level */
+          if (info->nuceval) {
+            add_nucleotide_exon(predicted_strand
+                                ? info->slot->pred_CDS_nucleotides_forward
+                                : info->slot->pred_CDS_nucleotides_reverse,
+                                predicted_range, info->slot->real_range,
+                                predicted_strand
+                                ? &info->slot->FP_CDS_nucleotides_forward
+                                : &info->slot->FP_CDS_nucleotides_reverse);
+          }
           break;
         default:
           if (info->verbose) {
@@ -1124,7 +1187,9 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   assert(se);
 
   /* init */
+  real_info.nuceval = se->nuceval;
   real_info.verbose = verbose;
+  predicted_info.nuceval = se->nuceval;
   predicted_info.verbose = verbose;
   predicted_info.exondiff = exondiff;
   predicted_info.LTRdelta = se->LTRdelta;
@@ -1149,8 +1214,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       if (!(slot = hashtable_get(se->real_features,
                                  str_get(genome_node_get_seqid(gn))))) {
 
-        slot = slot_new(se->nuceval, genome_node_get_range((GenomeNode*) sr),
-                        env);
+        slot = slot_new(se->nuceval, genome_node_get_range(gn), env);
         hashtable_add(se->real_features,
                       cstr_dup(str_get(genome_node_get_seqid(gn)), env), slot,
                       env);
