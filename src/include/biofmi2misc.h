@@ -91,7 +91,7 @@ binomialCoeff(unsigned long n, unsigned long k)
  * @param numBins
  * @param binSizes points to array containing \link numBins\endlink values which
  * represent the \f$k_i\f$
- * @return \f$n\choose{k}\f$
+ * @return \f$n\choose{k_1, k_2,\dots,k_m}\f$
  */
 static inline unsigned long
 multinomialCoeff(uint32_t n, size_t numBins, const uint32_t binSizes[])

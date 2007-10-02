@@ -222,6 +222,7 @@ newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
       if(!(baseSeqIdx
            = newBlockEncIdxSeq(projectName,
                                extraParams->blockEncParams.blockSize,
+                               extraParams->blockEncParams.bucketBlocks,
                                sizeof(p)/sizeof(p[0]), headerIDs, headerSizes,
                                headerFuncs, p,
 /*                                0, NULL, NULL, NULL, NULL, */

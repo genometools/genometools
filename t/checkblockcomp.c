@@ -42,10 +42,10 @@
 #include <libgtcore/str.h>
 #include <libgtcore/versionfunc.h>
 #include <encidxseq.h>
-#include <warts.h>
 
 enum {
   BLOCKSIZE = 8,
+  BUCKETBLOCKS = 16,
 };
 
 static OPrval
@@ -106,7 +106,7 @@ main(int argc, char *argv[])
   if(!(seq = loadBlockEncIdxSeq(inputProject, env)))
   {
     env_error_unset(env);
-    seq = newBlockEncIdxSeq(inputProject, BLOCKSIZE,
+    seq = newBlockEncIdxSeq(inputProject, BLOCKSIZE, BUCKETBLOCKS,
                             0, NULL, NULL, NULL, NULL,
                             NULL, 0, 0, NULL, env);
   }

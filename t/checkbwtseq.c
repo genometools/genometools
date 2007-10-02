@@ -55,6 +55,7 @@
 
 enum {
   BLOCKSIZE = 8,
+  BUCKETBLOCKS = 16,
   MinMinPatLen = 8,
   PatLenMinVariation = 10,
   MinMaxPatLen = 50,
@@ -149,6 +150,7 @@ main(int argc, char *argv[])
 
   inputProject = str_new_cstr(argv[parsedArgs], env);
   bwtparams.blockEncParams.blockSize = BLOCKSIZE;
+  bwtparams.blockEncParams.bucketBlocks = BUCKETBLOCKS;
   bwtSeq = newBWTSeq(BWT_ON_BLOCK_ENC, &bwtparams, inputProject, env);
   
   ensure(had_err, bwtSeq);

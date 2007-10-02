@@ -27,7 +27,7 @@ struct BWTSeq
   struct encIdxSeq *seqIdx;
   size_t alphabetSize;
   EISHint hint;
-  unsigned locateSampleInterval; /*< no sampling if 0*/
+  unsigned locateSampleInterval; /**< no sampling if 0 */
   Seqpos *count;
 };
 

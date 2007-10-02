@@ -22,6 +22,7 @@
 /**
  * \file encidxseq.h
  * Interface definitions for encoded indexed sequences.
+ * \author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
 
 #ifdef HAVE_STDINT_H
@@ -69,10 +70,20 @@ typedef int (*headerWriteFunc)(FILE *fp, void *headerCBData);
  */
 struct extBitsRetrieval
 {
-  BitOffset cwOffset, varOffset;
-  Seqpos start, len;
-  BitString cwPart, varPart;
-  int flags;
+  BitOffset cwOffset,           /**< offset in constant-width string
+                                 * at which data was earlier stored by
+                                 * a bitInsertFunc */
+    varOffset;                  /**< offset in variable-width string
+                                 * at which data was earlier stored by
+                                 * a bitInsertFunc  */
+  Seqpos start,                 /**< start position of region for
+                                 * which the retried information was
+                                 * stored */
+    len;                        /**< length of region */
+  BitString cwPart,             /**< string containing
+                                 * constant-width part of data  */
+    varPart;                    /**< string containg variable-width data */
+  int flags;                    /**< flags for internal use (Don't touch) */
 };
 
 enum extBitsRetrievalFlags
@@ -94,6 +105,7 @@ typedef union EISHint *EISHint;
 
 extern struct encIdxSeq *
 newBlockEncIdxSeq(const Str *projectName, unsigned blockSize,
+                  unsigned superBlockBlocks,
                   size_t numExtHeaders, uint16_t *headerIDs,
                   uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallback,
                   void **headerCBData,

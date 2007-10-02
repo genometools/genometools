@@ -55,6 +55,7 @@
 
 enum {
   BLOCKSIZE = 8,
+  BUCKETBLOCKS = 16,
   MinMinPatLen = 8,
   PatLenMinVariation = 10,
   MinMaxPatLen = 50,
@@ -180,9 +181,8 @@ main(int argc, char *argv[])
   unsigned long *patternLengths = NULL;
   struct BWTSeqExactMatchesIterator *EMIter = NULL;
   struct timer timer;
-  unsigned long trial, numOfSamples, minpatternlength, maxpatternlength;
+  unsigned long trial, numOfSamples = 0, minpatternlength, maxpatternlength;
   int parsedArgs;
-  int had_err = 0;
   Env *env = env_new();
   env_error_check(env);
   switch (parseOptions(&parsedArgs, argc, argv, env))
@@ -197,11 +197,8 @@ main(int argc, char *argv[])
 
   inputProject = str_new_cstr(argv[parsedArgs], env);
   bwtparams.blockEncParams.blockSize = BLOCKSIZE;
-  bwtSeq = newBWTSeq(BWT_ON_BLOCK_ENC, &bwtparams, inputProject, env);
+  bwtparams.blockEncParams.bucketBlocks = BUCKETBLOCKS;
   
-  ensure(had_err, bwtSeq);
-  if(had_err)
-    checkBWTSeqErrRet();
   {
     Suffixarray suffixarray;
     Seqpos totallength, dbstart;
@@ -222,7 +219,6 @@ main(int argc, char *argv[])
                        NULL,
                        env))
       checkBWTSeqErrRet();
-
     if(!(epi = newenumpatterniterator(minpatternlength, maxpatternlength,
                                       suffixarray.encseq, env)))
     {
@@ -230,6 +226,7 @@ main(int argc, char *argv[])
       freesuffixarray(&suffixarray,env);
       checkBWTSeqErrRet();
     }
+
     for (trial = 0; trial < numOfSamples; ++trial)
     {
       const Uchar *pptr;
@@ -244,7 +241,12 @@ main(int argc, char *argv[])
         symPatterns[trial][i] = *pptr++;
       memcpy(ucPatterns[trial], pptr, patternlen);
     }
+    freesuffixarray(&suffixarray,env);
+
     startTimer(&timer);
+    bwtSeq = newBWTSeq(BWT_ON_BLOCK_ENC, &bwtparams, inputProject, env);
+    if(!bwtSeq)
+      checkBWTSeqErrRet();
     for (trial = 0; trial < numOfSamples; ++trial)
     {
       BWTSeqMatchCount(bwtSeq, symPatterns[trial], patternLengths[trial], env);
@@ -267,7 +269,18 @@ main(int argc, char *argv[])
     printf("FMI2: enumerating matches required %f seconds for %ld"
            " matchings.\n", getTimerTimeDiff(&timer), numOfSamples);
 
+    deleteBWTSeq(bwtSeq, env);
+    bwtSeq = NULL;
+    
     startTimer(&timer);
+    if (mapsuffixarray(&suffixarray,
+                       &totallength,
+                       SARR_SUFTAB | SARR_ESQTAB,
+                       inputProject,
+                       NULL,
+                       env))
+      checkBWTSeqErrRet();
+
     for (trial = 0; trial < numOfSamples; ++trial)
     {
       mmsi = newmmsearchiterator(suffixarray.encseq,
@@ -302,13 +315,13 @@ main(int argc, char *argv[])
         ;
       freemmsearchiterator(&mmsi,env);
     }
+    freesuffixarray(&suffixarray,env);
     stopTimer(&timer);
     mmsi = NULL;
     printf("ESA: enumerating matches required %f for %ld"
            " matchings.\n", getTimerTimeDiff(&timer), numOfSamples);
 
     freeEnumpatterniterator(&epi,env);
-    freesuffixarray(&suffixarray,env);
   }
   printf("Finished %lu matchings successfully.\n", numOfSamples);
   {
@@ -322,7 +335,6 @@ main(int argc, char *argv[])
     env_ma_free(ucPatterns, env);
   }
   env_ma_free(patternLengths, env);
-  deleteBWTSeq(bwtSeq, env);
   str_delete(inputProject, env);
   env_delete(env);
   return EXIT_SUCCESS;

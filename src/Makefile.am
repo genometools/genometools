@@ -28,7 +28,6 @@ AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include \
 lib_LIBRARIES = libbiofmi2.a
 
 libbiofmi2_a_SOURCES = \
-  biofmi2common.c \
   include/biofmi2.h include/biofmi2misc.h \
   include/bwtseq.h include/bwtseqpriv.h bwtseq.c \
   include/encidxseq.h include/encidxseqpriv.h encidxseq.c blockcomp.c \
