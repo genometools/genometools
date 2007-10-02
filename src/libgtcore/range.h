@@ -31,6 +31,7 @@ int           range_compare_ptr(const Range*, const Range*);
 int           range_compare_with_delta(Range, Range, unsigned long delta);
 bool          range_overlap(Range, Range);
 bool          range_contains(Range, Range);
+bool          range_within(Range, unsigned long);
 Range         range_join(Range, Range);
 Range         range_offset(Range, long offset);
 unsigned long range_length(Range);
