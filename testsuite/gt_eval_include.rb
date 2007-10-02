@@ -10,6 +10,22 @@ end
   Keywords "gt_eval"
   Test do
     run_test "#{$bin}gt eval #{$testdata}/gt_eval_test_#{i}.reality #{$testdata}/gt_eval_test_#{i}.prediction"
+    run "diff #{$last_stdout} #{$testdata}/gt_eval_test_#{i}.nuc"
+  end
+
+  Name "gt eval test #{i} -nuc no"
+  Keywords "gt_eval"
+  Test do
+    run_test "#{$bin}gt eval -nuc no #{$testdata}/gt_eval_test_#{i}.reality #{$testdata}/gt_eval_test_#{i}.prediction"
+    run "diff #{$last_stdout} #{$testdata}/gt_eval_test_#{i}.out"
+  end
+end
+
+9.upto(10) do |i|
+  Name "gt eval test #{i}"
+  Keywords "gt_eval"
+  Test do
+    run_test "#{$bin}gt eval #{$testdata}/gt_eval_test_#{i}.in #{$testdata}/gt_eval_test_#{i}.in"
     run "diff #{$last_stdout} #{$testdata}/gt_eval_test_#{i}.out"
   end
 end
@@ -17,14 +33,14 @@ end
 Name "gt eval prob 1"
 Keywords "gt_eval"
 Test do
-  run_test "#{$bin}gt eval #{$testdata}/gt_eval_prob_1.reality #{$testdata}/gt_eval_prob_1.prediction"
+  run_test "#{$bin}gt eval -nuc no #{$testdata}/gt_eval_prob_1.reality #{$testdata}/gt_eval_prob_1.prediction"
   run "diff #{$last_stdout} #{$testdata}/gt_eval_prob_1.out"
 end
 
 Name "gt eval prob 1 (swapped)"
 Keywords "gt_eval"
 Test do
-  run_test "#{$bin}gt eval #{$testdata}/gt_eval_prob_1.prediction #{$testdata}/gt_eval_prob_1.reality"
+  run_test "#{$bin}gt eval -nuc no #{$testdata}/gt_eval_prob_1.prediction #{$testdata}/gt_eval_prob_1.reality"
   run "diff #{$last_stdout} #{$testdata}/gt_eval_prob_1.out_swapped"
 end
 
@@ -48,35 +64,35 @@ if $gttestdata then
   Name "gt eval test (gth rate 0)"
   Keywords "gt_eval"
   Test do
-    run_test("#{$bin}gt eval #{$gttestdata}eval/encode_known_genes_Mar07.gff3 #{$gttestdata}eval/complete_result_all_rate_0_minscr_0.95.gff3", :maxtime => 15)
+    run_test("#{$bin}gt eval -nuc no #{$gttestdata}eval/encode_known_genes_Mar07.gff3 #{$gttestdata}eval/complete_result_all_rate_0_minscr_0.95.gff3", :maxtime => 15)
     run "diff #{$last_stdout} #{$gttestdata}eval/gth_analysis_rate_0_minscr_0.95.txt"
   end
 
   Name "gt eval test (gth rate 1)"
   Keywords "gt_eval"
   Test do
-    run_test("#{$bin}gt eval #{$gttestdata}eval/encode_known_genes_Mar07.gff3 #{$gttestdata}eval/complete_result_all_rate_1_minscr_0.95.gff3", :maxtime => 15)
+    run_test("#{$bin}gt eval -nuc no #{$gttestdata}eval/encode_known_genes_Mar07.gff3 #{$gttestdata}eval/complete_result_all_rate_1_minscr_0.95.gff3", :maxtime => 15)
     run "diff #{$last_stdout} #{$gttestdata}eval/gth_analysis_rate_1_minscr_0.95.txt"
   end
 
   Name "gt eval test (gth rate 3)"
   Keywords "gt_eval"
   Test do
-    run_test("#{$bin}gt eval #{$gttestdata}eval/encode_known_genes_Mar07.gff3 #{$gttestdata}eval/complete_result_all_rate_3_minscr_0.90.gff3", :maxtime => 15)
+    run_test("#{$bin}gt eval -nuc no #{$gttestdata}eval/encode_known_genes_Mar07.gff3 #{$gttestdata}eval/complete_result_all_rate_3_minscr_0.90.gff3", :maxtime => 15)
     run "diff #{$last_stdout} #{$gttestdata}eval/gth_analysis_rate_3_minscr_0.90.txt"
   end
 
   Name "gt eval test (gth rate 5)"
   Keywords "gt_eval"
   Test do
-    run_test("#{$bin}gt eval #{$gttestdata}eval/encode_known_genes_Mar07.gff3 #{$gttestdata}eval/complete_result_all_rate_5_minscr_0.90.gff3", :maxtime => 15)
+    run_test("#{$bin}gt eval -nuc no #{$gttestdata}eval/encode_known_genes_Mar07.gff3 #{$gttestdata}eval/complete_result_all_rate_5_minscr_0.90.gff3", :maxtime => 15)
     run "diff #{$last_stdout} #{$gttestdata}eval/gth_analysis_rate_5_minscr_0.90.txt"
   end
 
   Name "gt eval test (gth rate 10)"
   Keywords "gt_eval"
   Test do
-    run_test("#{$bin}gt eval #{$gttestdata}eval/encode_known_genes_Mar07.gff3 #{$gttestdata}eval/complete_result_all_rate_10_minscr_0.85.gff3", :maxtime => 15)
+    run_test("#{$bin}gt eval -nuc no #{$gttestdata}eval/encode_known_genes_Mar07.gff3 #{$gttestdata}eval/complete_result_all_rate_10_minscr_0.85.gff3", :maxtime => 15)
     run "diff #{$last_stdout} #{$gttestdata}eval/gth_analysis_rate_10_minscr_0.85.txt"
   end
 end

@@ -28,6 +28,10 @@
 #include "libgtext/transcript_exons.h"
 #include "libgtext/transcript_used_exons.h"
 
+typedef struct {
+  unsigned long TP, FP, FN;
+} NucEval;
+
 struct StreamEvaluator {
   GenomeStream *reality,
                *prediction;
@@ -47,6 +51,8 @@ struct StreamEvaluator {
                 wrong_mRNAs,
                 missing_LTRs,
                 wrong_LTRs;
+  NucEval mRNA_nucleotides,
+          CDS_nucleotides;
 };
 
 typedef struct {
@@ -214,7 +220,7 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
                                       bool evalLTR, unsigned long LTRdelta,
                                       Env *env)
 {
-  StreamEvaluator *evaluator = env_ma_malloc(env, sizeof (StreamEvaluator));
+  StreamEvaluator *evaluator = env_ma_calloc(env, 1, sizeof (StreamEvaluator));
   evaluator->reality = genome_stream_ref(reality);
   evaluator->prediction = genome_stream_ref(prediction);
   evaluator->nuceval = nuceval;
@@ -229,12 +235,6 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   evaluator->mRNA_exon_evaluators_collapsed = transcript_evaluators_new(env);
   evaluator->CDS_exon_evaluators = transcript_evaluators_new(env);
   evaluator->CDS_exon_evaluators_collapsed = transcript_evaluators_new(env);
-  evaluator->missing_genes = 0;
-  evaluator->wrong_genes = 0;
-  evaluator->missing_mRNAs = 0;
-  evaluator->wrong_mRNAs = 0;
-  evaluator->missing_LTRs = 0;
-  evaluator->wrong_LTRs = 0;
   return evaluator;
 }
 
@@ -1076,11 +1076,11 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                           info->mRNA_exon_evaluators_collapsed);
           /* nucleotide level */
           if (info->nuceval) {
-            add_nucleotide_exon(predicted_strand
+            add_nucleotide_exon(predicted_strand == STRAND_FORWARD
                                 ? info->slot->pred_mRNA_nucleotides_forward
                                 : info->slot->pred_mRNA_nucleotides_reverse,
                                 predicted_range, info->slot->real_range,
-                                predicted_strand
+                                predicted_strand == STRAND_FORWARD
                                 ? &info->slot->FP_mRNA_nucleotides_forward
                                 : &info->slot->FP_mRNA_nucleotides_reverse);
           }
@@ -1120,11 +1120,11 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                           info->CDS_exon_evaluators_collapsed);
           /* nucleotide level */
           if (info->nuceval) {
-            add_nucleotide_exon(predicted_strand
+            add_nucleotide_exon(predicted_strand == STRAND_FORWARD
                                 ? info->slot->pred_CDS_nucleotides_forward
                                 : info->slot->pred_CDS_nucleotides_reverse,
                                 predicted_range, info->slot->real_range,
-                                predicted_strand
+                                predicted_strand == STRAND_FORWARD
                                 ? &info->slot->FP_CDS_nucleotides_forward
                                 : &info->slot->FP_CDS_nucleotides_reverse);
           }
@@ -1169,6 +1169,65 @@ int determine_missing_features(void *key, void *value, void *data, Env *env)
     se->missing_LTRs  += bittab_size(slot->overlapped_LTRs) -
                          bittab_count_set_bits(slot->overlapped_LTRs);
   }
+  return 0;
+}
+
+static void add_nucleotide_values(NucEval *nucleotides, Bittab *real,
+                                  Bittab *pred, Bittab *tmp,
+                                  const char *level, Log *log)
+{
+  assert(nucleotides && real && pred && tmp);
+  if (log) {
+    log_log(log, level);
+    log_log(log, "reality:");
+    bittab_show(real, log_fp(log));
+    log_log(log, "prediction:");
+    bittab_show(pred, log_fp(log));
+  }
+  /* real & pred = TP */
+  bittab_and(tmp, real, pred);
+  nucleotides->TP += bittab_count_set_bits(tmp);
+  /* ~real & pred = FP */;
+  bittab_complement(tmp, real);
+  bittab_and_equal(tmp, pred);
+  nucleotides->FP += bittab_count_set_bits(tmp);
+  /* real & ~pred = FN */
+  bittab_complement(tmp, pred);
+  bittab_and_equal(tmp, real);
+  nucleotides->FN += bittab_count_set_bits(tmp);
+}
+
+int compute_nucleotides_values(void *key, void *value, void *data, Env *env)
+{
+  StreamEvaluator *se = (StreamEvaluator*) data;
+  Slot *slot = (Slot*) value;
+  Bittab *tmp;
+  env_error_check(env);
+  assert(key && value && data);
+  /* add ``out of range'' FPs */
+  se->mRNA_nucleotides.FP += slot->FP_mRNA_nucleotides_forward;
+  se->mRNA_nucleotides.FP += slot->FP_mRNA_nucleotides_reverse;
+  se->CDS_nucleotides.FP  += slot->FP_CDS_nucleotides_forward;
+  se->CDS_nucleotides.FP  += slot->FP_CDS_nucleotides_reverse;
+  /* add other values */
+  tmp = bittab_new(range_length(slot->real_range), env);
+  add_nucleotide_values(&se->mRNA_nucleotides,
+                        slot->real_mRNA_nucleotides_forward,
+                        slot->pred_mRNA_nucleotides_forward, tmp,
+                        "mRNA forward", env_log(env));
+  add_nucleotide_values(&se->mRNA_nucleotides,
+                        slot->real_mRNA_nucleotides_reverse,
+                        slot->pred_mRNA_nucleotides_reverse, tmp,
+                        "mRNA reverse", env_log(env));
+  add_nucleotide_values(&se->CDS_nucleotides,
+                        slot->real_CDS_nucleotides_forward,
+                        slot->pred_CDS_nucleotides_forward, tmp,
+                        "CDS forward", env_log(env));
+  add_nucleotide_values(&se->CDS_nucleotides,
+                        slot->real_CDS_nucleotides_reverse,
+                        slot->pred_CDS_nucleotides_reverse, tmp,
+                        "CDS reverse", env_log(env));
+  bittab_delete(tmp, env);
   return 0;
 }
 
@@ -1278,6 +1337,10 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   if (!had_err)
     had_err = hashtable_foreach(se->slots, determine_missing_features, se, env);
 
+  /* compute the nucleotides values */
+  if (!had_err && se->nuceval)
+    had_err = hashtable_foreach(se->slots, compute_nucleotides_values, se, env);
+
   return had_err;
 }
 
@@ -1337,6 +1400,27 @@ static void show_transcript_values(TranscriptEvaluators *te, const char *level,
   xfputc('\n', outfp);
 }
 
+static void show_nucleotide_values(NucEval *nucleotides, const char *level,
+                                   FILE *outfp)
+{
+  double sensitivity = 1.0, specificity = 1.0;
+  assert(nucleotides && level);
+  if (nucleotides->TP || nucleotides->FN) {
+    sensitivity = (double) nucleotides->TP /
+                  (nucleotides->TP + nucleotides->FN);
+  }
+  if (nucleotides->TP || nucleotides->FP) {
+    specificity = (double) nucleotides->TP /
+                  (nucleotides->TP + nucleotides->FP);
+  }
+  fprintf(outfp, "nucleotide sensitivity (%s level): %6.2f%% "
+          "(TP=%lu/(TP=%lu + FN=%lu))\n", level, sensitivity * 100.0,
+          nucleotides->TP, nucleotides->TP, nucleotides->FN);
+  fprintf(outfp, "nucleotide specificity (%s level): %6.2f%% "
+          "(TP=%lu/(TP=%lu + FP=%lu))\n", level, specificity * 100.0,
+          nucleotides->TP, nucleotides->TP, nucleotides->FP);
+}
+
 void stream_evaluator_show(StreamEvaluator *se, FILE *outfp)
 {
   assert(se);
@@ -1369,6 +1453,13 @@ void stream_evaluator_show(StreamEvaluator *se, FILE *outfp)
     show_transcript_values(se->CDS_exon_evaluators, "CDS", "", outfp);
     show_transcript_values(se->CDS_exon_evaluators_collapsed, "CDS",
                            ", collapsed", outfp);
+
+    if (se->nuceval) {
+      /* mRNA nucleotide level */
+      show_nucleotide_values(&se->mRNA_nucleotides, "mRNA", outfp);
+      /* CDS nucleotide level */
+      show_nucleotide_values(&se->CDS_nucleotides, "CDS", outfp);
+    }
   }
   else {
     /* LTR_retrotransposon prediction */
