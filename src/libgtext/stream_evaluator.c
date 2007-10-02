@@ -33,7 +33,7 @@ struct StreamEvaluator {
                *prediction;
   bool nuceval, evalLTR;
   unsigned long LTRdelta;
-  Hashtable *real_features; /* sequence id -> slot */
+  Hashtable *slots; /* sequence id -> slot */
   Evaluator *gene_evaluator,
             *mRNA_evaluator,
             *LTR_evaluator;
@@ -220,8 +220,8 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   evaluator->nuceval = nuceval;
   evaluator->evalLTR = evalLTR;
   evaluator->LTRdelta = LTRdelta;
-  evaluator->real_features = hashtable_new(HASH_STRING, env_ma_free_func,
-                                           (FreeFunc) slot_delete, env);
+  evaluator->slots = hashtable_new(HASH_STRING, env_ma_free_func,
+                                   (FreeFunc) slot_delete, env);
   evaluator->gene_evaluator = evaluator_new(env);
   evaluator->mRNA_evaluator = evaluator_new(env);
   evaluator->LTR_evaluator = evaluator_new(env);
@@ -1211,11 +1211,11 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
     sr = genome_node_cast(sequence_region_class(), gn);
     if (sr) {
       /* each sequence region gets its own ``slot'' */
-      if (!(slot = hashtable_get(se->real_features,
+      if (!(slot = hashtable_get(se->slots,
                                  str_get(genome_node_get_seqid(gn))))) {
 
         slot = slot_new(se->nuceval, genome_node_get_range(gn), env);
-        hashtable_add(se->real_features,
+        hashtable_add(se->slots,
                       cstr_dup(str_get(genome_node_get_seqid(gn)), env), slot,
                       env);
       }
@@ -1225,8 +1225,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
     /* we consider only genome features */
     if (gf) {
       /* each sequence must have its own ``slot'' at this point */
-      slot = hashtable_get(se->real_features,
-                           str_get(genome_node_get_seqid(gn)));
+      slot = hashtable_get(se->slots, str_get(genome_node_get_seqid(gn)));
       assert(slot);
       /* store the exons */
       real_info.slot = slot;
@@ -1242,8 +1241,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
   /* set the actuals and sort them */
   if (!had_err) {
-    had_err = hashtable_foreach(se->real_features, set_actuals_and_sort_them,
-                                se, env);
+    had_err = hashtable_foreach(se->slots, set_actuals_and_sort_them, se, env);
   }
 
   /* process the prediction stream */
@@ -1254,8 +1252,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       /* we consider only genome features */
       if (gf) {
         /* get (real) slot */
-        slot = hashtable_get(se->real_features,
-                             str_get(genome_node_get_seqid(gn)));
+        slot = hashtable_get(se->slots, str_get(genome_node_get_seqid(gn)));
         if (slot) {
           predicted_info.slot = slot;
           genome_feature_determine_transcripttypes(gf, env);
@@ -1278,10 +1275,8 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   }
 
   /* determine the missing mRNAs */
-  if (!had_err) {
-    had_err = hashtable_foreach(se->real_features, determine_missing_features,
-                                se, env);
-  }
+  if (!had_err)
+    had_err = hashtable_foreach(se->slots, determine_missing_features, se, env);
 
   return had_err;
 }
@@ -1392,7 +1387,7 @@ void stream_evaluator_delete(StreamEvaluator *se, Env *env)
   if (!se) return;
   genome_stream_delete(se->reality, env);
   genome_stream_delete(se->prediction, env);
-  hashtable_delete(se->real_features, env);
+  hashtable_delete(se->slots, env);
   evaluator_delete(se->gene_evaluator, env);
   evaluator_delete(se->mRNA_evaluator, env);
   evaluator_delete(se->LTR_evaluator, env);
