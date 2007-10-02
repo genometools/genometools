@@ -25,7 +25,15 @@ AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include \
 
 AM_LDFLAGS = -L$(top_builddir)/src
 
+<<<<<<< HEAD:t/Makefile.am
 noinst_PROGRAMS = checkblockcomp checkbwtseq
+=======
+noinst_PROGRAMS = storeretrieve_speed-ref storeretrieve_speed \
+	patternbench
+>>>>>>> Added
+- benchmark for matching with fmi2 blockcomp vs. esa-mmsearch
+- combined walking of composition indices in rank and get operations
+- same for unpacking a  block from composition and permutation index:bench/Makefile.am
 
 checkblockcomp_SOURCES = checkblockcomp.c
 checkblockcomp_LDADD = $(top_builddir)/src/libbiofmi2.a
@@ -33,6 +41,18 @@ checkblockcomp_LDADD = $(top_builddir)/src/libbiofmi2.a
 checkbwtseq_SOURCES = checkbwtseq.c
 checkbwtseq_LDADD = $(top_builddir)/src/libbiofmi2.a
 
+<<<<<<< HEAD:t/Makefile.am
+=======
+patternbench_SOURCES = patternbench.c
+
+#checkblockcomp_SOURCES = checkblockcomp.c
+#checkblockcomp_LDADD = -lpcdr
+
+#checkbitpackarray_SOURCES = checkbitpackarray.c
+>>>>>>> Added
+- benchmark for matching with fmi2 blockcomp vs. esa-mmsearch
+- combined walking of composition indices in rank and get operations
+- same for unpacking a  block from composition and permutation index:bench/Makefile.am
 #checkbitpackarray_LDADD = -lgtcore -lbz2 -lz
 
 #EXTRA_DIST = checkbitpackstring.template

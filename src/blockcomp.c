@@ -957,10 +957,50 @@ cacheFetchSuperBlock(struct blockCompositionSeq *seqIdx,
 }
 #endif /* USE_SBLOCK_CACHE */
 
+#define walkCompIndices(seqIdx, sBlock, blockNum, cwOffset, codeForCompIndex, \
+                        varOffset)                                      \
+  do {                                                                  \
+    size_t blocksLeft = blockNum;                                       \
+    cwOffset = sBlockGetCompIdxOffset(sBlock, seqIdx, 0);               \
+    varOffset = sBlock->varDataMemBase;                                 \
+    while(blocksLeft)                                                   \
+    {                                                                   \
+      size_t compIndex;                                                 \
+      compIndex = bsGetUInt64(sBlock->cwData, cwIdxMemOffset,           \
+                              bitsPerCompositionIdx);                   \
+      codeForCompIndex;                                                 \
+      varOffset +=                                                      \
+        seqIdx->compositionTable.permutations[compIndex].permIdxBits;   \
+      cwOffset += bitsPerCompositionIdx;                                \
+      --blocksLeft;                                                     \
+    }                                                                   \
+  } while(0)
+
+#define unpackBlock(seqIdx, sBlock, cwOffset, varOffset, block, sublen) \
+  do {                                                                  \
+    size_t compPermIndex[2];                                            \
+    unsigned varIdxBits,                                                \
+      bitsPerPermutation =                                              \
+      seqIdx->compositionTable.bitsPerSymbol * seqIdx->blockSize;       \
+    struct permList *permutationList;                                   \
+    compPermIndex[0] = bsGetUInt64(sBlock->cwData, cwIdxMemOffset,      \
+                                   bitsPerCompositionIdx);              \
+    permutationList =                                                   \
+      seqIdx->compositionTable.permutations + compPermIndex[0];         \
+    varIdxBits = permutationList->permIdxBits;                          \
+    compPermIndex[1] = bsGetUInt64(sBlock->varData, varDataMemOffset,   \
+                                   varIdxBits);                         \
+    bsGetUniformUIntArray(seqIdx->compositionTable.catCompsPerms,       \
+                          permutationList->catPermsOffset +             \
+                          bitsPerPermutation * compPermIndex[1],        \
+                          seqIdx->compositionTable.bitsPerSymbol,       \
+                          sublen, block);                               \
+  } while(0)
+
+
 /*
  * regular, user-accessible query functions
  */
-
 static Symbol *
 blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
                      struct blockEncIdxSeqHint *hint, int queryRangeEnc,
@@ -988,41 +1028,16 @@ blockCompSeqGetBlock(struct blockCompositionSeq *seqIdx, Seqpos blockNum,
     sBlock = fetchSuperBlock(seqIdx, superBucketNum, NULL, env);
 #endif
   }
-  varDataMemOffset = sBlock->varDataMemBase;
   relBlockNum = blockNum % seqIdx->superBucketBlocks;
   bitsPerCompositionIdx = seqIdx->compositionTable.compositionIdxBits;
   if(blockPA)
     block = blockPA;
   else
     block = env_ma_calloc(env, sizeof(Symbol), blockSize);
-  cwIdxMemOffset = sBlockGetCompIdxOffset(sBlock, seqIdx, 0);
-  while(relBlockNum)
-  {
-    size_t compIndex;
-    compIndex = bsGetUInt64(sBlock->cwData, cwIdxMemOffset,
-                            bitsPerCompositionIdx);
-    varDataMemOffset +=
-      seqIdx->compositionTable.permutations[compIndex].permIdxBits;
-    cwIdxMemOffset += bitsPerCompositionIdx;
-    --relBlockNum;
-  }
-  {
-    size_t compPermIndex[2];
-    unsigned varIdxBits,
-      bitsPerPermutation = seqIdx->compositionTable.bitsPerSymbol * blockSize;
-    struct permList *permutationList;
-    compPermIndex[0] = bsGetUInt64(sBlock->cwData, cwIdxMemOffset,
-                                   bitsPerCompositionIdx);
-    permutationList = seqIdx->compositionTable.permutations + compPermIndex[0];
-    varIdxBits = permutationList->permIdxBits;
-    compPermIndex[1] = bsGetUInt64(sBlock->varData, varDataMemOffset,
-                                   varIdxBits);
-    bsGetUniformUIntArray(seqIdx->compositionTable.catCompsPerms,
-                          permutationList->catPermsOffset +
-                          bitsPerPermutation * compPermIndex[1],
-                          seqIdx->compositionTable.bitsPerSymbol, blockSize,
-                          block);
-  }
+  walkCompIndices(seqIdx, sBlock, blockNum % seqIdx->superBucketBlocks,
+                  cwIdxMemOffset, , varDataMemOffset);
+  unpackBlock(seqIdx, sBlock, cwIdxMemOffset, varDataMemOffset, block,
+              blockSize);
   if(queryRangeEnc)
     SRLapplyRangesToSubString(seqIdx->rangeEncs, seqIdx->rangeMapAlphabet,
                               block, blockNum * blockSize, blockSize,
@@ -1065,26 +1080,12 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
 #else
     sBlock = fetchSuperBlock(seqIdx, superBucketNum, NULL, env);
 #endif
-    cwIdxMemOffset = sBlockGetCompIdxOffset(sBlock, seqIdx, 0);
-    varDataMemOffset = sBlock->varDataMemBase;
     rankCount = sBlockGetPartialSymSum(sBlock, bSym, seqIdx);
     blockNum = blockNumFromPos(seqIdx, pos);
-    {
-      /* if pos refers to last symbol in block, one can use the
-       * composition count for the last block too */
-      Seqpos relBlockNum = blockNum % seqIdx->superBucketBlocks;
-      while(relBlockNum)
-      {
-        size_t compIndex;
-        compIndex = bsGetUInt64(sBlock->cwData, cwIdxMemOffset,
-                                bitsPerCompositionIdx);
-        rankCount += symCountFromComposition(seqIdx, compIndex, bSym);
-        varDataMemOffset +=
-          seqIdx->compositionTable.permutations[compIndex].permIdxBits;
-        cwIdxMemOffset += bitsPerCompositionIdx;
-        --relBlockNum;
-      }
-    }
+    walkCompIndices(
+      seqIdx, sBlock, blockNum % seqIdx->superBucketBlocks, cwIdxMemOffset, 
+      rankCount += symCountFromComposition(seqIdx, compIndex, bSym);,
+      varDataMemOffset);
     {
       Seqpos inBlockPos;
       if((inBlockPos = pos % blockSize)
@@ -1094,10 +1095,8 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
       {
         Symbol block[blockSize];
         unsigned i;
-        /* PERFORMANCE: pull blockCompSeqGetBlock parts into here,
-         * there's much in common anyway */
-        blockCompSeqGetBlock(seqIdx, blockNum, &hint->bcHint, 0, sBlock,
-                             block, env);
+        unpackBlock(seqIdx, sBlock, cwIdxMemOffset, varDataMemOffset, block,
+                    inBlockPos);
         for(i = 0; i < inBlockPos; ++i)
         {
           if(block[i] == eSym)

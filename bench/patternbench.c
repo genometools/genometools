@@ -59,7 +59,7 @@ enum {
   PatLenMinVariation = 10,
   MinMaxPatLen = 50,
   PatLenMaxVariation = 100,
-  MaxNumSamples = 1000,
+  MaxNumSamples = 10000,
 };
 
 static OPrval
@@ -114,7 +114,24 @@ struct MMsearchiterator
 #define checkBWTSeqErrRet()                             \
   do {                                                  \
     if(inputProject) str_delete(inputProject, env);     \
-    if(query) env_ma_free(query, env);                  \
+    if(symPatterns)                                     \
+    {                                                   \
+      size_t i;                                         \
+      for(i = 0; i < numOfSamples; ++i)                 \
+        if(symPatterns[i])                              \
+          env_ma_free(symPatterns[i], env);             \
+      env_ma_free(symPatterns, env);                    \
+    }                                                   \
+    if(ucPatterns)                                      \
+    {                                                   \
+      size_t i;                                         \
+      for(i = 0; i < numOfSamples; ++i)                 \
+        if(ucPatterns[i])                               \
+          env_ma_free(ucPatterns[i], env);              \
+      env_ma_free(ucPatterns, env);                     \
+    }                                                   \
+    if(patternLengths)                                  \
+      env_ma_free(patternLengths, env);                 \
     if(epi) freeEnumpatterniterator(&epi,env);          \
     if(mmsi) freemmsearchiterator(&mmsi,env);           \
     if(EMIter) deleteEMIterator(EMIter,env);            \
@@ -122,6 +139,33 @@ struct MMsearchiterator
     env_delete(env);                                    \
     return EXIT_FAILURE;                                \
   } while(0)
+
+struct timer
+{
+  struct timeval startTime, endTime;
+};
+
+static inline void
+startTimer(struct timer *timer)
+{
+  gettimeofday(&timer->startTime, NULL);
+}
+
+static inline void
+stopTimer(struct timer *timer)
+{
+  gettimeofday(&timer->endTime, NULL);
+}
+
+static double
+getTimerTimeDiff(struct timer *timer)
+{
+  double timeDiff = ((double)timer->endTime.tv_sec
+                     + (double)timer->endTime.tv_usec * 1e-6)
+    - ((double)timer->startTime.tv_sec
+       + (double)timer->startTime.tv_usec * 1e-6);
+  return timeDiff;
+}
 
 int
 main(int argc, char *argv[])
@@ -131,8 +175,12 @@ main(int argc, char *argv[])
   union bwtSeqParam bwtparams;
   Enumpatterniterator *epi = NULL;
   MMsearchiterator *mmsi = NULL;
+  Symbol **symPatterns = NULL;
+  Uchar **ucPatterns = NULL;
+  unsigned long *patternLengths = NULL;
   struct BWTSeqExactMatchesIterator *EMIter = NULL;
-  Symbol *query = NULL;
+  struct timer timer;
+  unsigned long trial, numOfSamples, minpatternlength, maxpatternlength;
   int parsedArgs;
   int had_err = 0;
   Env *env = env_new();
@@ -156,13 +204,17 @@ main(int argc, char *argv[])
     checkBWTSeqErrRet();
   {
     Suffixarray suffixarray;
-    const Uchar *pptr;
     Seqpos totallength, dbstart;
-    unsigned long trial, numOfSamples = random()%MaxNumSamples,
-      patternlen, minpatternlength = random()%PatLenMinVariation + MinMinPatLen,
-      maxpatternlength=MAX(minpatternlength,
+    numOfSamples = random()%MaxNumSamples;
+    minpatternlength = random()%PatLenMinVariation + MinMinPatLen;
+    maxpatternlength = MAX(minpatternlength,
                            random()%PatLenMaxVariation + MinMaxPatLen);
-    query = env_ma_malloc(env, sizeof(Symbol) * maxpatternlength);
+
+    patternLengths = env_ma_calloc(env, sizeof(patternLengths[0]),
+                                   numOfSamples);
+    symPatterns = env_ma_calloc(env, sizeof(symPatterns[0]), numOfSamples);
+    ucPatterns = env_ma_malloc(env, sizeof(ucPatterns[0]) * numOfSamples);
+
     if (mapsuffixarray(&suffixarray,
                        &totallength,
                        SARR_SUFTAB | SARR_ESQTAB,
@@ -170,6 +222,7 @@ main(int argc, char *argv[])
                        NULL,
                        env))
       checkBWTSeqErrRet();
+
     if(!(epi = newenumpatterniterator(minpatternlength, maxpatternlength,
                                       suffixarray.encseq, env)))
     {
@@ -177,67 +230,98 @@ main(int argc, char *argv[])
       freesuffixarray(&suffixarray,env);
       checkBWTSeqErrRet();
     }
-    for (trial = 0; trial < numOfSamples; trial++)
+    for (trial = 0; trial < numOfSamples; ++trial)
     {
+      const Uchar *pptr;
+      unsigned long patternlen, i;
       pptr = nextEnumpatterniterator(&patternlen,epi);
+      patternLengths[trial] = patternlen;
+      ucPatterns[trial] = env_ma_malloc(
+        env, sizeof(ucPatterns[0][0]) * (patternlen + 1));
+      symPatterns[trial] = env_ma_malloc(
+        env, sizeof(symPatterns[0][0]) * (patternlen + 1));
+      for(i = 0; i < patternlen; ++i)
+        symPatterns[trial][i] = *pptr++;
+      memcpy(ucPatterns[trial], pptr, patternlen);
+    }
+    startTimer(&timer);
+    for (trial = 0; trial < numOfSamples; ++trial)
+    {
+      BWTSeqMatchCount(bwtSeq, symPatterns[trial], patternLengths[trial], env);
+    }
+    stopTimer(&timer);
+    printf("FMI2: getting match counts required %f seconds for %ld"
+           " matchings.\n", getTimerTimeDiff(&timer), numOfSamples);
+
+    startTimer(&timer);
+    for (trial = 0; trial < numOfSamples; ++trial)
+    {
+      EMIter = newEMIterator(bwtSeq, symPatterns[trial],
+                             patternLengths[trial], env);
+      while(EMIGetNextMatch(EMIter, bwtSeq, env))
+        ;
+      deleteEMIterator(EMIter,env);
+    }
+    stopTimer(&timer);
+    EMIter = NULL;
+    printf("FMI2: enumerating matches required %f seconds for %ld"
+           " matchings.\n", getTimerTimeDiff(&timer), numOfSamples);
+
+    startTimer(&timer);
+    for (trial = 0; trial < numOfSamples; ++trial)
+    {
       mmsi = newmmsearchiterator(suffixarray.encseq,
                                  suffixarray.suftab,
                                  0,  /* leftbound */
                                  totallength, /* rightbound */
                                  0, /* offset */
                                  suffixarray.readmode,
-                                 pptr,
-                                 patternlen,
+                                 ucPatterns[trial],
+                                 patternLengths[trial],
                                  env);
-      {
-        unsigned long i;
-        for(i = 0; i < patternlen; ++i)
-        {
-          query[i] = pptr[i];
-        }
-      }
-      EMIter = newEMIterator(bwtSeq, query, patternlen, env);
-/*       fprintf(stderr, "number of matches: "FormatSeqpos" == %llu\n", */
-/*               EMINumMatchesTotal(EMIter), */
-/*               (unsigned long long) */
-/*               MAX(0, mmsi->lcpitv.right - mmsi->lcpitv.left + 1)); */
-      assert(EMINumMatchesTotal(EMIter)
-             == MAX(0, mmsi->lcpitv.right - mmsi->lcpitv.left + 1));
-      while (nextmmsearchiterator(&dbstart,mmsi))
-      {
-        struct MatchData *match =
-          EMIGetNextMatch(EMIter, bwtSeq, env);
-        if(!match)
-        {
-          fputs("matches of fmindex expired before mmsearch!\n", stderr);
-          freesuffixarray(&suffixarray,env);
-          checkBWTSeqErrRet();
-        }
-        if(match->sfxArrayValue != dbstart)
-        {
-          fputs("fmindex match doesn't equal mmsearch match result!\n", stderr);
-          freesuffixarray(&suffixarray,env);
-          checkBWTSeqErrRet();
-        }
-      }
-      {
-        struct MatchData *match =
-          EMIGetNextMatch(EMIter, bwtSeq, env);
-        if(match)
-        {
-          fputs("matches of mmsearch expired before fmindex!\n", stderr);
-          freesuffixarray(&suffixarray,env);
-          checkBWTSeqErrRet();
-        }
-      }
-      deleteEMIterator(EMIter,env);
+      
       freemmsearchiterator(&mmsi,env);
     }
-    fprintf(stderr, "Finished %lu matchings successfully.\n", numOfSamples);
-    env_ma_free(query, env);
+    stopTimer(&timer);
+    printf("ESA: getting match counts required %f seconds for %ld"
+           " matchings.\n", getTimerTimeDiff(&timer), numOfSamples);
+
+    startTimer(&timer);
+    for (trial = 0; trial < numOfSamples; ++trial)
+    {
+      mmsi = newmmsearchiterator(suffixarray.encseq,
+                                 suffixarray.suftab,
+                                 0,  /* leftbound */
+                                 totallength, /* rightbound */
+                                 0, /* offset */
+                                 suffixarray.readmode,
+                                 ucPatterns[trial],
+                                 patternLengths[trial],
+                                 env);
+      while (nextmmsearchiterator(&dbstart,mmsi))
+        ;
+      freemmsearchiterator(&mmsi,env);
+    }
+    stopTimer(&timer);
+    mmsi = NULL;
+    printf("ESA: enumerating matches required %f for %ld"
+           " matchings.\n", getTimerTimeDiff(&timer), numOfSamples);
+
     freeEnumpatterniterator(&epi,env);
     freesuffixarray(&suffixarray,env);
   }
+  printf("Finished %lu matchings successfully.\n", numOfSamples);
+  {
+    size_t i;
+    for(i = 0; i < numOfSamples; ++i)
+    {
+      env_ma_free(symPatterns[i], env);
+      env_ma_free(ucPatterns[i], env);
+    }
+    env_ma_free(symPatterns, env);
+    env_ma_free(ucPatterns, env);
+  }
+  env_ma_free(patternLengths, env);
   deleteBWTSeq(bwtSeq, env);
   str_delete(inputProject, env);
   env_delete(env);
