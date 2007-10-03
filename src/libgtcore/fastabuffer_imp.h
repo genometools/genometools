@@ -18,7 +18,8 @@
 #ifndef FASTABUFFER_IMP_H
 #define FASTABUFFER_IMP_H
 
-#define FILEBUFFERSIZE 65536
+#define OUTPUTFILEBUFFERSIZE 256
+#define INPUTFILEBUFFERSIZE  512
 
 struct FastaBuffer
 {
@@ -33,7 +34,9 @@ struct FastaBuffer
        nextfile;
   Queue *descptr;
   GenFile *inputstream;
-  Uchar bufspace[FILEBUFFERSIZE];
+  Uchar outputbuffer[OUTPUTFILEBUFFERSIZE],
+        inputbuffer[INPUTFILEBUFFERSIZE];
+  ssize_t currentinpos, currentfillpos;
   uint64_t lastspeciallength;
   Filelengthvalues *filelengthtab;
   const StrArray *filenametab;
@@ -63,7 +66,7 @@ static inline int fastabuffer_next(FastaBuffer *fb,Uchar *val,Env *env)
       return 0;
     }
   }
-  *val = fb->bufspace[fb->nextread++];
+  *val = fb->outputbuffer[fb->nextread++];
   return 1;
 }
 
