@@ -24,6 +24,11 @@ AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include \
 	-I$(top_srcdir)/src/include -I$(srcdir)
 
 AM_LDFLAGS = -L$(top_builddir)/src
+<<<<<<< HEAD:t/Makefile.am
+=======
+LDADD = $(top_builddir)/src/libbiofmi2.a
+>>>>>>> - Improved naming of superBlock vs. bucket/partial symbol sums
+- Implemented complete mmapping of index:bench/Makefile.am
 
 <<<<<<< HEAD:t/Makefile.am
 noinst_PROGRAMS = checkblockcomp checkbwtseq

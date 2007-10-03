@@ -147,12 +147,18 @@ enum {
   MIN_ALIGN_REQUREMENT = 4,
 };
 
+static inline unsigned long long
+roundUp(unsigned long long v, unsigned long multipleOf)
+{
+  return v - v%multipleOf + multipleOf * (v%multipleOf?1:0);
+}
+
 static inline size_t
 offsetAlign(size_t offset, size_t sizeOfVal2Align)
 {
   size_t alignBase = MAX(MIN_ALIGN_REQUREMENT,
                          MIN(sizeOfVal2Align, MAX_ALIGN_REQUIREMENT));
-  return (offset/alignBase + ((offset%alignBase)?1:0))*alignBase;
+  return roundUp(offset, alignBase);
 }
 
 static inline unsigned long long
@@ -168,6 +174,5 @@ iPow(unsigned long long x, unsigned i)
    }
    return result;
 }
-
 
 #endif /* BIOFMI2_MISC_H_INCLUDED */

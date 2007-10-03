@@ -43,6 +43,10 @@ enum seqBaseEncoding {
   BWT_ON_WAVELET_TREE_ENC,
 };
 
+/**
+ * Stores information to construct the underlying sequence object of a
+ * BWT sequence object.
+ */
 union bwtSeqParam
 {
   struct 
@@ -50,7 +54,7 @@ union bwtSeqParam
     unsigned blockSize;         /**< number of symbols to combine in
                                  * one block a lookup-table
                                  * containing
-                                 * $alphabetsize^{blockSize}$ is
+                                 * $alphabetsize^{blockSize}$ entries is
                                  * required so adjust with caution */
     unsigned bucketBlocks;      /**< number of blocks for which to
                                  * store partial symbol sums (lower

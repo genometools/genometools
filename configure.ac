@@ -49,7 +49,7 @@ dnl No 4 Check for header files
 dnl   std c headers, this information should be used later
 AC_HEADER_STDC
 dnl   and do the same for some special cases
-AC_CHECK_HEADERS(unistd.h stdint.h inttypes.h sys/types.h)
+AC_CHECK_HEADERS(unistd.h stdint.h inttypes.h sys/types.h sys/mman.h)
 dnl ensure portable use of inline
 AC_C_INLINE
 AM_CONDITIONAL(TJ_NO_INLINE, test x$ac_cv_c_inline = xno)

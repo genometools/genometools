@@ -94,29 +94,66 @@ enum extBitsRetrievalFlags
   EBRF_PERSISTENT_VARBITS = 1<<2,
 };
 
-
-enum rangeStoreMode {
-  DIRECT_SYM_ENCODE,
-  BLOCK_COMPOSITION_INCLUDE,
-  REGIONS_LIST,
-};
-
 typedef union EISHint *EISHint;
 
+/**
+ * \brief Construct block-encoded indexed sequence object and write
+ * corresponding representation to disk.
+ * @param projectName base name of corresponding suffixerator project
+ * @param blockSize number of symbol to combine in one block, a
+ * lookup-table containing $alphabetsize^{blockSize}$ entries is
+ * required so adjust with caution
+ * @param bucketBlocks frequency at which to store partial symbol
+ * sums, low values increase storage and decrease number of
+ * computations required for rank queries on average
+ * @param numExtHeaders number of extension headers to write via callbacks
+ * @param headerIDs array of numExtHeaders ids to be used
+ * for each extension header in turn
+ * @param extHeaderSizes array of numExtHeaders sizes
+ * representing the length of each extension header
+ * @param extHeaderCallback array of numExtHeaders function pointers
+ * each of which will be called once upon writing the header
+ * @param headerCBData array of pointers passed as argument when the
+ * corresponding header writing function is called
+ * @param biFunc function to be called when a chunk of data has been
+ * accumulated for a given region of sequence data
+ * @param cwBitsPerPos exactly this many bits will be appended by
+ * biFunc for each symbol of the input sequence
+ * @param maxBitsPerPos at most this many bits will be appended to the
+ * variable width part of the data
+ * @param cbState will be passed on each call of biFunc
+ * @param env genometools reference for core functions
+ */
 extern struct encIdxSeq *
 newBlockEncIdxSeq(const Str *projectName, unsigned blockSize,
-                  unsigned superBlockBlocks,
+                  unsigned bucketBlocks,
                   size_t numExtHeaders, uint16_t *headerIDs,
                   uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallback,
                   void **headerCBData,
                   bitInsertFunc biFunc, BitOffset cwBitsPerPos,
                   BitOffset maxBitsPerPos, void *cbState, Env *env);
+/**
+ * \brief Load previously written block encoded sequence
+ * representation.
+ * @param projectName base name of corresponding suffixerator project
+ * @param env genometools reference for core functions
+ */
 extern struct encIdxSeq *
 loadBlockEncIdxSeq(const Str *projectName, Env *env);
 
+/**
+ * \brief Deallocate a previously loaded/created sequence object.
+ * @param seq reference of object to delete
+ * @param env genometools reference for core functions
+ */
 extern void
 deleteEncIdxSeq(struct encIdxSeq *seq, Env *env);
 
+/**
+ * \brief Retrieve alphabet transformation from sequence object
+ * @param seq reference of object to query for alphabet
+ * @return read-only reference of alphabet associated with sequence
+ */
 staticifinline inline const MRAEnc *
 EISGetAlphabet(const struct encIdxSeq *seq);
 
@@ -164,39 +201,90 @@ EISRetrieveExtraBits(struct encIdxSeq *seq, Seqpos pos, int flags,
                      struct extBitsRetrieval *retval, union EISHint *hint,
                      Env *env);
 
+/**
+ * \brief Initialize empty structure to hold retrieval results later.
+ * @param r struct to initialize
+ * @param env genometools state, passes information about allocator etc
+ */
 staticifinline inline void
 initExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
 
+/**
+ * \brief Allocate and initialize empty structure to hold retrieval
+ * results later. 
+ * @param env genometools state, passes information about allocator
+ * etc.
+ * @return reference of new retrieval object
+ */
 staticifinline inline struct extBitsRetrieval *
 newExtBitsRetrieval(Env *env);
 
+/**
+ * \brief Destruct structure holding retrieval data, deallocates
+ * referenced data as necessary.
+ * @param r struct to destruct
+ * @param env genometools state, passes information about allocator etc.
+ */
 staticifinline inline void
 destructExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
 
+/**
+ * \brief Destruct structure holding retrieval data, deallocates
+ * referenced data as necessary and the structure itself.
+ * @param r struct to delete
+ * @param env genometools state, passes information about allocator etc.
+ */
 staticifinline inline void
 deleteExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
 
+/**
+ * \brief Find positions of nth symbol occurrence. TODO: NOT IMPLEMENTED
+ */
 extern Seqpos
 EISSelect(struct encIdxSeq *seq, Symbol sym, Seqpos count);
 
+/**
+ * \brief Query length of stored sequence.
+ * @param seq indexed sequence object to query
+ * @return length of sequence
+ */
 staticifinline inline Seqpos
 EISLength(struct encIdxSeq *seq);
 
 /**
- * Return symbol at specified position. Comparable to c[pos] if the
+ * \brief Return symbol at specified position. Comparable to c[pos] if the
  * sequence was stored straight in an array c.
  * @param seq indexed sequence object to be queried
  * @param pos position to retrieve symbol for
  * @param hint optional caching/hinting structure (improves average
  * retrieval time)
  * @param env genometools state, passes information about allocator etc
+ * @return value of symbol as encoded in original alphabet
  */
 staticifinline inline Symbol
 EISGetSym(struct encIdxSeq *seq, Seqpos pos, EISHint hint, Env *env);
 
+/**
+ * \brief Return symbol at specified position. Comparable to c[pos] if the
+ * sequence was stored straight in an array c. Returns value of
+ * encoding, i.e. does not retranslate to original alphabet.
+ * @param seq indexed sequence object to be queried
+ * @param pos position to retrieve symbol for
+ * @param hint optional caching/hinting structure (improves average
+ * retrieval time)
+ * @param env genometools state, passes information about allocator etc
+ * @return value of symbol as processed by encoding alphabet
+ */
 staticifinline inline Symbol
 EISGetTransformedSym(struct encIdxSeq *seq, Seqpos pos, EISHint hint, Env *env);
 
+/**
+ * \brief Construct new hinting structure to accelerate operations on
+ * related positions.
+ * @param seq reference of sequence object to use
+ * @param env genometools state, passes information about allocator etc
+
+ */
 staticifinline inline EISHint
 newEISHint(struct encIdxSeq *seq, Env *env);
 
