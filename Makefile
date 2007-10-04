@@ -162,7 +162,7 @@ LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
             $(BZ2_DIR)/randtable.c $(BZ2_DIR)/compress.c \
             $(BZ2_DIR)/decompress.c $(BZ2_DIR)/bzlib.c
 LIBBZ2_OBJ:=$(LIBBZ2_SRC:%.c=obj/%.o)
-LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.o)
+LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.d)
 
 SKTOOLS=$(shell grep -l Kurtz src/tools/*.c)
 
