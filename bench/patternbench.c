@@ -238,7 +238,7 @@ main(int argc, char *argv[])
       symPatterns[trial] = env_ma_malloc(
         env, sizeof(symPatterns[0][0]) * (patternlen + 1));
       for(i = 0; i < patternlen; ++i)
-        symPatterns[trial][i] = *pptr++;
+        symPatterns[trial][i] = pptr[i];
       memcpy(ucPatterns[trial], pptr, patternlen);
     }
     freesuffixarray(&suffixarray,env);

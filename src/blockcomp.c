@@ -25,7 +25,7 @@
 /*
   TODO:
   - normalize use  of  seqIdx variable naming (seq, bseq etc.)
-  - distribute init/new functionality cleanly for all structs
+  - split init/new functionality cleanly for all structs
  */
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -61,7 +61,6 @@
 #include <libgtmatch/sarr-def.h>
 #include <libgtmatch/seqpos-def.h>
 #include <libgtmatch/esa-map.pr>
-/* #include <libgtmatch/chardef.h> */
 
 #include "biofmi2.h"
 #include "biofmi2misc.h"
@@ -2536,7 +2535,7 @@ tryMMapOfIndex(struct onDiskBlockCompIdx *idxData)
   void *indexMMap;
   assert(idxData && idxData->idxFP);
   if((indexMMap = mmap((void *)0, idxData->rangeEncPos - idxData->cwDataPos,
-                       PROT_READ, MAP_FILE, fileno(idxData->idxFP),
+                       PROT_READ, MAP_SHARED, fileno(idxData->idxFP),
                        idxData->cwDataPos)))
   {
     idxData->idxMMap = indexMMap;
