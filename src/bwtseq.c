@@ -317,24 +317,6 @@ BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
   return bsGetBit(extBits->cwPart, extBits->cwOffset + pos - extBits->start);
 }
 
-static inline Seqpos
-BWTOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Env *env)
-{
-  assert(bwtSeq && env);
-  return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint, env);
-}
-
-static inline Seqpos
-BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos, Env *env)
-{
-  Symbol tSym = EISGetTransformedSym(bwtSeq->seqIdx, pos, bwtSeq->hint, env);
-  return bwtSeq->count[tSym] + BWTOcc(bwtSeq, tSym, pos, env);
-}
-
-struct matchBound
-{
-  Seqpos upper, lower;
-};
 
 static inline void
 getMatchBound(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen,
@@ -350,18 +332,13 @@ getMatchBound(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen,
   curSym = MRAEncMapSymbol(alphabet, query[--i]);
   match->upper = count[curSym];
   match->lower = count[curSym + 1];
-/*   fprintf(stderr, "lower="FormatSeqpos", upper="FormatSeqpos"\n", */
-/*           match->upper, match->lower); */
-/*   fprintf(stderr, "cmpl="FormatSeqpos", cmpu="FormatSeqpos"\n", */
-/*           count[curSym] + BWTOcc(bwtSeq, curSym, 0, env), */
-/*           count[curSym] + BWTOcc(bwtSeq, curSym, BWTSeqLength(bwtSeq), env)); */
   while((match->upper <= match->lower) && (i > 0))
   {
     curSym = MRAEncMapSymbol(alphabet, query[--i]);
     match->upper = count[curSym]
-      + BWTOcc(bwtSeq, curSym, match->upper, env);
+      + BWTSeqOcc(bwtSeq, curSym, match->upper, env);
     match->lower = count[curSym]
-      + BWTOcc(bwtSeq, curSym, match->lower, env);
+      + BWTSeqOcc(bwtSeq, curSym, match->lower, env);
   }  
 }
 
@@ -452,36 +429,17 @@ EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
                      nextLocate - iter->extBits.start),
         locateRecordOffset = (bitsPerBWTPos + bitsPerOrigPos)
         * locateRecordIndex;
-/*       fprintf(stderr, "bitsPerBWTPos=%u, bitsPerOrigPos=%u\n" */
-/*               "value stored at index %llu: %llu, nextLocate="FormatSeqpos */
-/*               ", extBits.start="FormatSeqpos"\n", bitsPerBWTPos, */
-/*               bitsPerOrigPos, (unsigned long long) */
-/*               locateRecordIndex, (unsigned long long) */
-/*               bsGetUInt64(iter->extBits.varPart, */
-/*                           iter->extBits.varOffset + locateRecordOffset, */
-/*                           bitsPerBWTPos), nextLocate, iter->extBits.start); */
-/*       fprintf(stderr, "Locate samples stored in this region: %llu\n", */
-/*               (unsigned long long) */
-/*               bs1BitsCount(iter->extBits.cwPart, iter->extBits.cwOffset, */
-/*                            iter->extBits.len)); */
       iter->nextMatch.sfxArrayValue =
         bsGetUInt64(iter->extBits.varPart, iter->extBits.varOffset
                     + locateRecordOffset + bitsPerBWTPos, bitsPerOrigPos)
         * bwtSeq->locateSampleInterval + locateOffset;          
-/*       fprintf(stderr, "sampledPos=%llu\n", (unsigned long long) */
-/*               bsGetUInt64(iter->extBits.varPart, iter->extBits.varOffset */
-/*                           + locateRecordOffset + bitsPerBWTPos, */
-/*                           bitsPerOrigPos) * bwtSeq->locateSampleInterval); */
-/*       fprintf(stderr, "cwOffset=%llu, varOffset=%llu\n", */
-/*               (unsigned long long)iter->extBits.cwOffset, */
-/*               (unsigned long long)iter->extBits.varOffset); */
       assert(bsGetUInt64(iter->extBits.varPart,
                          iter->extBits.varOffset + locateRecordOffset,
                          bitsPerBWTPos)
              == nextLocate - iter->extBits.start);
     }
     {
-      /* map position back to original encoded sequence */
+      /* FIXME: map position back to original encoded sequence */
       iter->nextMatch.dbFile = 0;
     }
     ++iter->nextMatchBWTPos;

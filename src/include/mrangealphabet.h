@@ -84,6 +84,9 @@ MRAEncGetDomainSize(const MRAEnc *mralpha);
 staticifinline inline Symbol
 MRAEncMapSymbol(const MRAEnc *mralpha, Symbol sym);
 
+staticifinline inline int
+MRAEncSymbolHasValidMapping(const MRAEnc *mralpha, Symbol sym);
+
 staticifinline inline Symbol
 MRAEncRevMapSymbol(const MRAEnc *mralpha, Symbol sym);
 

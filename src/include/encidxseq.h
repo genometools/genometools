@@ -94,6 +94,8 @@ enum extBitsRetrievalFlags
   EBRF_PERSISTENT_VARBITS = 1<<2,
 };
 
+typedef struct encIdxSeq EISeq;
+
 typedef union EISHint *EISHint;
 
 /**
@@ -124,7 +126,7 @@ typedef union EISHint *EISHint;
  * @param cbState will be passed on each call of biFunc
  * @param env genometools reference for core functions
  */
-extern struct encIdxSeq *
+extern EISeq *
 newBlockEncIdxSeq(const Str *projectName, unsigned blockSize,
                   unsigned bucketBlocks,
                   size_t numExtHeaders, uint16_t *headerIDs,
@@ -138,7 +140,7 @@ newBlockEncIdxSeq(const Str *projectName, unsigned blockSize,
  * @param projectName base name of corresponding suffixerator project
  * @param env genometools reference for core functions
  */
-extern struct encIdxSeq *
+extern EISeq *
 loadBlockEncIdxSeq(const Str *projectName, Env *env);
 
 /**
@@ -147,7 +149,7 @@ loadBlockEncIdxSeq(const Str *projectName, Env *env);
  * @param env genometools reference for core functions
  */
 extern void
-deleteEncIdxSeq(struct encIdxSeq *seq, Env *env);
+deleteEncIdxSeq(EISeq *seq, Env *env);
 
 /**
  * \brief Retrieve alphabet transformation from sequence object
@@ -155,7 +157,7 @@ deleteEncIdxSeq(struct encIdxSeq *seq, Env *env);
  * @return read-only reference of alphabet associated with sequence
  */
 staticifinline inline const MRAEnc *
-EISGetAlphabet(const struct encIdxSeq *seq);
+EISGetAlphabet(const EISeq *seq);
 
 /**
  * \brief Return number of occurrences of symbol sym in index up to
@@ -168,7 +170,7 @@ EISGetAlphabet(const struct encIdxSeq *seq);
  * @param env genometools state, passes information about allocator etc
  */
 staticifinline inline Seqpos
-EISRank(struct encIdxSeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
+EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
         Env *env);
 
 /**
@@ -183,7 +185,7 @@ EISRank(struct encIdxSeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
  * @param env genometools state, passes information about allocator etc
  */
 staticifinline inline Seqpos
-EISSymTransformedRank(struct encIdxSeq *seq, Symbol msym, Seqpos pos,
+EISSymTransformedRank(EISeq *seq, Symbol msym, Seqpos pos,
                       union EISHint *hint, Env *env);
 
 /**
@@ -197,7 +199,7 @@ EISSymTransformedRank(struct encIdxSeq *seq, Symbol msym, Seqpos pos,
  * @param env genometools state, passes information about allocator etc
  */
 staticifinline inline void
-EISRetrieveExtraBits(struct encIdxSeq *seq, Seqpos pos, int flags,
+EISRetrieveExtraBits(EISeq *seq, Seqpos pos, int flags,
                      struct extBitsRetrieval *retval, union EISHint *hint,
                      Env *env);
 
@@ -241,7 +243,7 @@ deleteExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
  * \brief Find positions of nth symbol occurrence. TODO: NOT IMPLEMENTED
  */
 extern Seqpos
-EISSelect(struct encIdxSeq *seq, Symbol sym, Seqpos count);
+EISSelect(EISeq *seq, Symbol sym, Seqpos count);
 
 /**
  * \brief Query length of stored sequence.
@@ -249,7 +251,7 @@ EISSelect(struct encIdxSeq *seq, Symbol sym, Seqpos count);
  * @return length of sequence
  */
 staticifinline inline Seqpos
-EISLength(struct encIdxSeq *seq);
+EISLength(EISeq *seq);
 
 /**
  * \brief Return symbol at specified position. Comparable to c[pos] if the
@@ -262,7 +264,7 @@ EISLength(struct encIdxSeq *seq);
  * @return value of symbol as encoded in original alphabet
  */
 staticifinline inline Symbol
-EISGetSym(struct encIdxSeq *seq, Seqpos pos, EISHint hint, Env *env);
+EISGetSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env);
 
 /**
  * \brief Return symbol at specified position. Comparable to c[pos] if the
@@ -276,7 +278,7 @@ EISGetSym(struct encIdxSeq *seq, Seqpos pos, EISHint hint, Env *env);
  * @return value of symbol as processed by encoding alphabet
  */
 staticifinline inline Symbol
-EISGetTransformedSym(struct encIdxSeq *seq, Seqpos pos, EISHint hint, Env *env);
+EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env);
 
 /**
  * \brief Construct new hinting structure to accelerate operations on
@@ -286,24 +288,24 @@ EISGetTransformedSym(struct encIdxSeq *seq, Seqpos pos, EISHint hint, Env *env);
 
  */
 staticifinline inline EISHint
-newEISHint(struct encIdxSeq *seq, Env *env);
+newEISHint(EISeq *seq, Env *env);
 
 staticifinline inline void
-deleteEISHint(struct encIdxSeq *seq, EISHint hint, Env *env);
+deleteEISHint(EISeq *seq, EISHint hint, Env *env);
 
 extern int
-verifyIntegrity(struct encIdxSeq *seqIdx,
+verifyIntegrity(EISeq *seqIdx,
                 Str *projectName, int tickPrint, FILE *fp, Env *env);
 
 staticifinline inline FILE *
-EISSeekToHeader(const struct encIdxSeq *seqIdx, uint16_t headerID,
+EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
                 uint32_t *lenRet);
 
 /**
  * Meant for testing purposes only.
  */
 extern int
-searchBlock2IndexPair(const struct encIdxSeq *seqIdx,
+searchBlock2IndexPair(const EISeq *seqIdx,
                       const Symbol *block,
                       size_t idxOutput[2], Env *env);
 

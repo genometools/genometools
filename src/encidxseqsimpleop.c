@@ -22,20 +22,20 @@
 #include "encidxseqpriv.h"
 
 staticifinline inline Seqpos
-EISLength(struct encIdxSeq *seq)
+EISLength(EISeq *seq)
 {
   return seq->seqLen;
 }
 
 staticifinline inline const MRAEnc *
-EISGetAlphabet(const struct encIdxSeq *seq)
+EISGetAlphabet(const EISeq *seq)
 {
   assert(seq);
   return seq->alphabet;
 }
 
 staticifinline inline Symbol
-EISGetSym(struct encIdxSeq *seq, Seqpos pos, union EISHint *hint, Env *env)
+EISGetSym(EISeq *seq, Seqpos pos, union EISHint *hint, Env *env)
 {
   assert(seq && hint && env);
   return MRAEncRevMapSymbol(seq->alphabet,
@@ -43,14 +43,14 @@ EISGetSym(struct encIdxSeq *seq, Seqpos pos, union EISHint *hint, Env *env)
 }
 
 staticifinline inline Symbol
-EISGetTransformedSym(struct encIdxSeq *seq, Seqpos pos, EISHint hint, Env *env)
+EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env)
 {
   assert(seq && hint && env);
   return seq->classInfo->get(seq, pos, hint, env);
 }
 
 staticifinline inline Seqpos
-EISRank(struct encIdxSeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
+EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
         Env *env)
 {
   Symbol mSym;
@@ -59,7 +59,7 @@ EISRank(struct encIdxSeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
 }
 
 staticifinline inline void
-EISRetrieveExtraBits(struct encIdxSeq *seq, Seqpos pos, int flags,
+EISRetrieveExtraBits(EISeq *seq, Seqpos pos, int flags,
                      struct extBitsRetrieval *retval, union EISHint *hint,
                      Env *env)
 {
@@ -98,7 +98,7 @@ deleteExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
 }
 
 staticifinline inline Seqpos
-EISSymTransformedRank(struct encIdxSeq *seq, Symbol msym, Seqpos pos,
+EISSymTransformedRank(EISeq *seq, Symbol msym, Seqpos pos,
                       union EISHint *hint, Env *env)
 {
   assert(msym < MRAEncGetSize(EISGetAlphabet(seq)));
@@ -106,7 +106,7 @@ EISSymTransformedRank(struct encIdxSeq *seq, Symbol msym, Seqpos pos,
 }
 
 staticifinline inline FILE *
-EISSeekToHeader(const struct encIdxSeq *seqIdx, uint16_t headerID,
+EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
                 uint32_t *lenRet)
 {
   assert(seqIdx);
@@ -114,13 +114,13 @@ EISSeekToHeader(const struct encIdxSeq *seqIdx, uint16_t headerID,
 }
 
 staticifinline inline EISHint
-newEISHint(struct encIdxSeq *seq, Env *env)
+newEISHint(EISeq *seq, Env *env)
 {
   return seq->classInfo->newHint(seq, env);
 }
 
 staticifinline inline void
-deleteEISHint(struct encIdxSeq *seq, EISHint hint, Env *env)
+deleteEISHint(EISeq *seq, EISHint hint, Env *env)
 {
   return seq->classInfo->deleteHint(seq, hint, env);
 }

@@ -32,3 +32,51 @@ BWTSeqLength(const BWTSeq *seq)
   return EISLength(seq->seqIdx);
 }
 
+staticifinline inline Seqpos
+BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Env *env)
+{
+  assert(bwtSeq && env);
+  return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint, env);
+}
+
+staticifinline inline Seqpos
+BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos pos, Env *env)
+{
+  assert(bwtSeq && env);
+  return EISRank(bwtSeq->seqIdx, sym, pos, bwtSeq->hint, env);
+}
+
+staticifinline inline Seqpos
+BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos, Env *env)
+{
+  Symbol tSym = EISGetTransformedSym(bwtSeq->seqIdx, pos, bwtSeq->hint, env);
+  return bwtSeq->count[tSym] + BWTSeqTransformedOcc(bwtSeq, tSym, pos, env);
+}
+
+staticifinline struct matchBound *
+BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
+                Symbol nextSym, Env *env)
+{
+  const MRAEnc *alphabet;
+  Symbol curSym;
+  assert(bwtSeq && limits && env);
+  assert(limits->upper < bwtSeq->count[alphabetSize]
+         && limits->lower < bwtSeq->count[alphabetSize]);
+  alphabet = EISGetAlphabet(bwtSeq->seqIdx);
+  curSym = MRAEncMapSymbol(alphabet, nextSym);
+  assert(MRAEncSymbolHasValidMapping(alphabet, curSym));
+  limits->upper = bwtSeq->count[curSym]
+    + BWTSeqTransformedOcc(bwtSeq, curSym, limits->upper, env);
+  limits->lower = bwtSeq->count[curSym]
+    + BWTSeqTransformedOcc(bwtSeq, curSym, limits->lower, env);
+  return limits;
+}
+
+staticifinline inline const EISeq *
+BWTSeqGetEncIdxSeq(const BWTSeq *bwtSeq)
+{
+  assert(bwtSeq);
+  return bwtSeq->seqIdx;
+}
+
+

@@ -25,7 +25,7 @@
 #include "encidxseqpriv.h"
 
 void
-deleteEncIdxSeq(struct encIdxSeq *seq, Env *env)
+deleteEncIdxSeq(EISeq *seq, Env *env)
 {
   seq->classInfo->delete(seq, env);
 }
@@ -60,8 +60,8 @@ deleteEncIdxSeq(struct encIdxSeq *seq, Env *env)
  * @return -1 on error, 0 on identity, >0 on inconsistency
  */
 int
-verifyIntegrity(struct encIdxSeq *seqIdx,
-                Str *projectName, int tickPrint, FILE *fp, Env *env)
+verifyIntegrity(EISeq *seqIdx, Str *projectName, int tickPrint,
+                FILE *fp, Env *env)
 {
   Seqpos rankTable[UCHAR_MAX+1];
   FILE *bwtFP;

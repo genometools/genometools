@@ -27,20 +27,20 @@
 
 struct encIdxSeqClass
 {
-  void (*delete)(struct encIdxSeq *seq, Env *env);
-  Seqpos (*rank)(struct encIdxSeq *seq, Symbol sym, Seqpos pos,
+  void (*delete)(EISeq *seq, Env *env);
+  Seqpos (*rank)(EISeq *seq, Symbol sym, Seqpos pos,
                  union EISHint *hint, Env *env);
-  Seqpos (*select)(struct encIdxSeq *seq, Symbol sym, Seqpos count,
+  Seqpos (*select)(EISeq *seq, Symbol sym, Seqpos count,
                    union EISHint *hint, Env *env);
-  Symbol (*get)(struct encIdxSeq *seq, Seqpos pos, EISHint hint,
+  Symbol (*get)(EISeq *seq, Seqpos pos, EISHint hint,
                 Env *env);
-  union EISHint *(*newHint)(struct encIdxSeq *seq, Env *env);
-  void (*deleteHint)(struct encIdxSeq *seq, EISHint hint, Env *env);
-  const MRAEnc *(*getAlphabet)(const struct encIdxSeq *seq);
-  void (*expose)(struct encIdxSeq *seq, Seqpos pos, int persistent,
+  union EISHint *(*newHint)(EISeq *seq, Env *env);
+  void (*deleteHint)(EISeq *seq, EISHint hint, Env *env);
+  const MRAEnc *(*getAlphabet)(const EISeq *seq);
+  void (*expose)(EISeq *seq, Seqpos pos, int persistent,
                  struct extBitsRetrieval *retval, union EISHint *hint,
                  Env *env);
-  FILE *(*seekToHeader)(const struct encIdxSeq *seq, uint16_t headerID,
+  FILE *(*seekToHeader)(const EISeq *seq, uint16_t headerID,
                         uint32_t *lenRet);
 };
 

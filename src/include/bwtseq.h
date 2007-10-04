@@ -30,17 +30,26 @@
 #include <libgtcore/str.h>
 #include <libgtmatch/seqpos-def.h>
 
+#include "encidxseq.h"
 #include "mrangealphabet.h"
 
 /* FIXME:
  * - implement other index types
  */
 
+/**
+ * Names the type of encoding used:
+ */
 enum seqBaseEncoding {
-  BWT_BASETYPE_AUTOSELECT,
-  BWT_ON_RLE,
-  BWT_ON_BLOCK_ENC,
-  BWT_ON_WAVELET_TREE_ENC,
+  BWT_BASETYPE_AUTOSELECT,      /**< automatic, load any index present
+                                 *     (currently not implemented) */
+  BWT_ON_RLE,                   /**< use original fmindex run-length
+                                 * encoding  */
+  BWT_ON_BLOCK_ENC,             /**< do block compression by dividing
+                                 * sequence into strings of
+                                 * composition and permutation
+                                 * indices */
+  BWT_ON_WAVELET_TREE_ENC,      /**< encode sequence with wavelet-trees */
 };
 
 /**
@@ -69,19 +78,24 @@ union bwtSeqParam
 /*   } waveletTreeParams; */
 };
 
+/**
+ * Stores column indices of the (virtual) matrix of rotations of the
+ * input string used to construct the BWT, note that upper will
+ * typically contain the lower value since rows are numbered from 0 at
+ * the top to n-1 at the bottom.
+ */
+struct matchBound
+{
+  Seqpos upper, lower;
+};
 
 typedef struct BWTSeq BWTSeq;
 
 /**
  * \brief Creates or loads an encoded indexed sequence object of the
  * BWT transform.
- * @param baseType selects one of
- *   - BWT_BASETYPE_AUTOSELECT automatic, load any index present
- *     (currently not implemented)
- *   - BWT_ON_RLE use original fmindex run-length encoding
- *   - BWT_ON_BLOCK_ENC do block compression by dividing sequence into
- *     strings of composition and permutation indices
- *   - BWT_ON_WAVELET_TREE_ENC encode sequence with wavelet-trees
+ * @param baseType selects the encoding method of the sequence index
+ * storing the BWT sequence (see enum seqBaseEncoding).
  * @param extraParams a union holding extra parameter information
  *   specific to the type selected via parameter baseType
  * @param projectName base file name to derive name of suffixerator
@@ -104,19 +118,27 @@ deleteBWTSeq(BWTSeq *bwtseq, Env *env);
 /**
  * \brief Query BWT sequence object for availability of added
  * information to locate matches.
- * @param bwtseq reference of object to query
+ * @param bwtSeq reference of object to query
  * @return 0 if no locate information is present, non-zero otherwise
  */
 extern int
-BWTSeqHasLocateInformation(const BWTSeq *bwtseq);
+BWTSeqHasLocateInformation(const BWTSeq *bwtSeq);
 
 /**
  * \brief Retrieve alphabet transformation from BWT sequence object
- * @param bwtseq reference of object to query for alphabet
+ * @param bwtSeq reference of object to query for alphabet
  * @return read-only reference of alphabet associated with sequence
  */
 staticifinline inline const MRAEnc *
-BWTSeqGetAlphabet(const BWTSeq *bwtseq);
+BWTSeqGetAlphabet(const BWTSeq *bwtSeq);
+
+/**
+ * \brief Retrieve sequence index in which the BWT is stored
+ * @param bwtSeq reference of object to query for index
+ * @return read-only reference of index containing the sequence
+ */
+staticifinline inline const EISeq *
+BWTSeqGetEncIdxSeq(const BWTSeq *bwtSeq);
 
 /**
  * \brief Query length of stored sequence.
@@ -125,6 +147,42 @@ BWTSeqGetAlphabet(const BWTSeq *bwtseq);
  */
 staticifinline inline Seqpos
 BWTSeqLength(const BWTSeq *seq);
+
+/**
+ * \brief Query BWT sequence for the number of occurences of a symbol in a
+ * given prefix.
+ * @param bwtSeq reference of object to query
+ * @param tSym transformed symbol (as obtained by
+ * MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), origSym)
+ * @param pos right bound of BWT prefix queried
+ * @param env genometools reference for core functions
+ * @return number of occurrences of symbol up to but not including pos
+ */
+staticifinline inline Seqpos
+BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Env *env);
+
+/**
+ * \brief Query BWT sequence for the number of occurences of a symbol in a
+ * given prefix.
+ * @param bwtSeq reference of object to query
+ * @param Sym symbol
+ * @param pos right bound of BWT prefix queried
+ * @param env genometools reference for core functions
+ * @return number of occurrences of symbol up to but not including pos
+ */
+staticifinline inline Seqpos
+BWTSeqOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Env *env);
+
+/**
+ * \brief Given a position in the L-column of the matrix of rotations,
+ * find the corresponding row in the F-column.
+ * @param bwtSeq reference of object to query
+ * @param pos row index for L-column
+ * @param env genometools reference for core functions
+ * @return index of corresponding row F-column
+ */
+staticifinline inline Seqpos
+BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos, Env *env);
 
 /**
  * \brief Given a query string find number of matches in original
@@ -138,6 +196,18 @@ BWTSeqLength(const BWTSeq *seq);
 extern Seqpos
 BWTSeqMatchCount(const BWTSeq *bwtseq, Symbol *query, size_t queryLen,
                  Env *env);
+
+/**
+ * \brief Given a pair of limiting .
+ * @param bwtseq reference of object to query
+ * @param query symbol string to search matches for
+ * @param queryLen length of query string
+ * @param env genometools reference for core functions
+ * @return number of matches
+ */
+staticifinline inline struct matchBound *
+BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
+                Symbol nextSym, Env *env);
 
 /**
  * \brief Given a query string produce iterator for all matches in
