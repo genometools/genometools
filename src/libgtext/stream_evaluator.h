@@ -23,7 +23,7 @@
 typedef struct StreamEvaluator StreamEvaluator;
 
 StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
-                                      GenomeStream *prediction,
+                                      GenomeStream *prediction, bool nuceval,
                                       bool evalLTR, unsigned long LTRdelta,
                                       Env*);
 /* if <gv> is not NULL, it visits all nodes from reality and the prediction */

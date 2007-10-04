@@ -81,6 +81,10 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
   gn_r = genome_node_get_range(gn);
   gn_type = genome_feature_get_type((GenomeFeature*) gn);
 
+  env_log_log(env, "inserting %s (%lu-%lu) into block",
+                genome_feature_type_get_cstr(gn_type),
+                gn_r.start, gn_r.end);
+
   for (elem = dlist_first(block->elements); elem;
        elem = dlistelem_next(elem)) {
     element = (Element*) dlistelem_get_data(elem);
@@ -99,14 +103,21 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
           case DOMINATES_FIRST:
             break;
           case DOMINATES_NOT_SPECIFIED:
+          case DOMINATES_UNKNOWN_TYPE:
+          case DOMINATES_EQUAL:
           case DOMINATES_SECOND:
             elem_r.start = gn_r.end+1;
-            element_set_range(element, elem_r);
-            e = element_new(gn, env);
+            if (elem_r.start == elem_r.end+1) {
+              dlist_remove(block->elements, elem, env);
+              element_delete(element, env);
+            }
+            else
+              element_set_range(element, elem_r);
+            e = element_new_empty(env);
+            element_set_range(e, gn_r);
+            element_set_type(e, gn_type);
             dlist_add(block->elements, e, env);
-            break;
-          case DOMINATES_EQUAL:
-          case DOMINATES_UNKNOWN_TYPE:
+            elem = dlist_find(block->elements, e);
             break;
         }
       }
@@ -118,6 +129,8 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
             gn_r.start = elem_r.end;
             break;
           case DOMINATES_NOT_SPECIFIED:
+          case DOMINATES_UNKNOWN_TYPE:
+          case DOMINATES_EQUAL:
           case DOMINATES_SECOND:
             elem_r.end = gn_r.start-1;
             if (elem_r.start == elem_r.end+1) {
@@ -128,11 +141,9 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
               element_set_range(element, elem_r);
             e = element_new(gn, env);
             element_set_range(e, gn_r);
+            element_set_type(e, gn_type);
             dlist_add(block->elements, e, env);
             elem = dlist_find(block->elements, e);
-            break;
-          case DOMINATES_EQUAL:
-          case DOMINATES_UNKNOWN_TYPE:
             break;
         }
       }
@@ -140,19 +151,24 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
         /* Case: ----------
                  -------------- */
         bool removed = false;
+        unsigned long tmp;
         Range gnnew_r;
 
         switch (dominates) {
           case DOMINATES_FIRST:
             gn_r.start = elem_r.end+1;
             break;
+          case DOMINATES_EQUAL:
+          case DOMINATES_UNKNOWN_TYPE:
           case DOMINATES_NOT_SPECIFIED:
           case DOMINATES_SECOND:
+            tmp = elem_r.end;
             elem_r.end = gn_r.start-1;
             if (elem_r.start == elem_r.end+1) {
               dlist_remove(block->elements, elem, env);
               element_delete(element, env);
               removed = true;
+              elem_r.end = tmp;
             }
             else
               element_set_range(element, elem_r);
@@ -160,14 +176,11 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
             gnnew_r.end = elem_r.end;
             e = element_new_empty(env);
             element_set_range(e, gnnew_r);
-            element_set_type(e, gn_type);
+            element_set_type(e, e_type);
             dlist_add(block->elements, e, env);
             gn_r.start = elem_r.end+1;
             if (removed)
               elem = dlist_find(block->elements, e);
-            break;
-          case DOMINATES_EQUAL:
-          case DOMINATES_UNKNOWN_TYPE:
             break;
         }
       }
@@ -180,7 +193,10 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
         switch (dominates) {
           case DOMINATES_FIRST:
             break;
+          case DOMINATES_EQUAL:
           case DOMINATES_SECOND:
+          case DOMINATES_NOT_SPECIFIED:
+          case DOMINATES_UNKNOWN_TYPE:
             elemnew_r = elem_r;
             elem_r.end = gn_r.start-1;
             element_set_range(element, elem_r);
@@ -191,10 +207,6 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
             e = element_new(gn, env);
             dlist_add(block->elements, elemnew, env);
             dlist_add(block->elements, e, env);
-            break;
-          case DOMINATES_EQUAL:
-          case DOMINATES_NOT_SPECIFIED:
-          case DOMINATES_UNKNOWN_TYPE:
             break;
         }
       }

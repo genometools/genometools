@@ -94,6 +94,15 @@ bool range_contains(Range range_a, Range range_b)
   return false;
 }
 
+bool range_within(Range range, unsigned long point)
+{
+  assert(range.start <= range.end);
+
+  if (range.start <= point && range.end >= point)
+    return true;
+  return false;
+}
+
 Range range_join(Range range_a, Range range_b)
 {
   Range r;

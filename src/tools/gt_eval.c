@@ -24,6 +24,7 @@
 typedef struct {
   bool verbose,
        exondiff,
+       nuceval,
        evalLTR;
   unsigned long LTRdelta;
 } EvalArguments;
@@ -47,6 +48,11 @@ static OPrval parse_options(int *parsed_args, EvalArguments *arguments,
   option = option_new_bool("exondiff", "show a diff for the exons",
                            &arguments->exondiff, false, env);
   option_is_development_option(option);
+  option_parser_add_option(op, option, env);
+
+  /* -nuc */
+  option = option_new_bool("nuc", "evaluate nucleotide level (memory intense)",
+                           &arguments->nuceval, true, env);
   option_parser_add_option(op, option, env);
 
   /* -ltr */
@@ -100,7 +106,8 @@ int gt_eval(int argc, const char **argv, Env *env)
 
   /* create the stream evaluator */
   evaluator = stream_evaluator_new(reality_stream, prediction_stream,
-                                   arguments.evalLTR, arguments.LTRdelta, env);
+                                   arguments.nuceval, arguments.evalLTR,
+                                   arguments.LTRdelta, env);
 
   /* compute the evaluation */
   had_err = stream_evaluator_evaluate(evaluator, arguments.verbose,

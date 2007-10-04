@@ -21,7 +21,6 @@
 #include "libgtview/render.h"
 #include "libgtview/graphics.h"
 #include "libgtview/element.h"
-#include "libgtview/feature_index.h"
 #include "libgtview/track.h"
 #include "libgtview/line.h"
 #include "libgtview/block.h"
@@ -104,6 +103,8 @@ static DrawingRange render_convert_coords(Render *r, Range node_range, Env *env)
   DrawingRange converted_range;
   converted_range.clip = CLIPPED_NONE;
 
+  node_range.end++;
+
   /* scale coordinates to target image width */
   /* first, check if left side has to be clipped */
   if ((long) node_range.start < (long) r->range.start )
@@ -117,7 +118,7 @@ static DrawingRange render_convert_coords(Render *r, Range node_range, Env *env)
   }
 
   /* then, check right side. */
-  if ((long) node_range.end > (long) r->range.end)
+  if ((long) node_range.end > (long) r->range.end+1)
   {
     converted_range.clip = (converted_range.clip == CLIPPED_LEFT ?
                                                       CLIPPED_BOTH :
@@ -138,7 +139,6 @@ static void render_line(Render *r, Line *line, Env *env)
 
   assert(r && line);
 
-  /* XXX: make this an iterator? */
   blocks = line_get_blocks(line);
   /* begin drawing block */
   for (i=0; i<array_size(blocks); i++)
@@ -187,6 +187,9 @@ static void render_line(Render *r, Line *line, Env *env)
       int arrow_status = ARROW_NONE;
       const char *style,
                  *type = genome_feature_type_get_cstr(element_get_type(elem));
+
+      if (!range_overlap(elem_range, diagram_get_range(r->dia)))
+        continue;
 
       if ((strand == STRAND_REVERSE || strand == STRAND_BOTH)
              && delem == dlist_first(elems))
@@ -529,4 +532,3 @@ void render_delete(Render *r, Env *env)
   if (!r) return;
   env_ma_free(r, env);
 }
-
