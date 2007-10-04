@@ -59,35 +59,21 @@ FastaBuffer* fastabuffer_new(const StrArray *filenametab,
   return fb;
 }
 
-/*
-int mygenfile_getc(FastaBuffer *fb,GenFile *inputstream)
+static inline int mygenfile_getc(FastaBuffer *fb,GenFile *inputstream)
 {
-  bool haserr = false;
-
   if(fb->currentinpos >= fb->currentfillpos)
   {
-    assert(inputstream->mode == GFM_UNCOMPRESSED);
-    switch(inputstream->mode) 
+    fb->currentfillpos = skgenfile_xread(inputstream,
+                                         fb->inputbuffer,
+                                         (size_t) INPUTFILEBUFFERSIZE);
+    if(fb->currentfillpos == 0)
     {
-      case GFM_UNCOMPRESSED:
-        fb->currentfillpos = read(fileno(inputstream->fileptr.file),
-                                  fb->inputbuffer,
-                                  (size_t) INPUTFILEBUFFERSIZE);
-        break;
-      default:
+       return EOF;
     }
-    if(fb->currentfillpos < INPUTFILEBUFFERSIZE)
-    {
-      assert(fb->currentfillpos >= 0);
-      if(fb->currentfillpos == 0)
-      {
-        return EOF
-      }
-    }
+    fb->currentinpos = 0;
   }
-  return fb->inputbuffer[fp->currentfilepos++];
+  return fb->inputbuffer[fb->currentfillpos++];
 }
-*/
 
 static int advancefastabufferstate(FastaBuffer *fb,Env *env)
 {
@@ -130,7 +116,7 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
     } else
     {
       /* XXX: use genfile_xread() */
-      currentchar = genfile_getc(fb->inputstream);
+      currentchar = mygenfile_getc(fb,fb->inputstream);
       if (currentchar == EOF)
       {
         genfile_xclose(fb->inputstream, env);

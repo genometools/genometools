@@ -32,8 +32,6 @@ then
   esac
 fi
 
-make curses=no bin/skproto
-
 # skproto-all.sh
 
 if test $big -eq 1
@@ -52,16 +50,13 @@ COMMON="curses=no"
 
 if test $icc -eq 1
 then
-  echo "first case"
-  make ${COMMON} CC='ccache icc' CFLAGS='-O3 ${EXTRAFLAGS} ${bignum} -wd1418,869,981,1338' LD='icc' CXX='icc' $*
+  make ${COMMON} CC='ccache icc' CFLAGS='-O3 ${EXTRAFLAGS} ${bignum} -wd1418,869,981,1338' LD='icc' CXX='icc' bin/skproto $*
 else
   if test $do64 -eq 1
   then
-    echo "second case"
-    make ${COMMON} CC="ccache gcc" CFLAGS="-O3 -m64 ${EXTRAFLAGS}" LDFLAGS="-m64" $*
+    make ${COMMON} CC="ccache gcc" CFLAGS="-O3 -m64 ${EXTRAFLAGS}" LDFLAGS="-m64" bin/skproto $*
   else
-    echo "third case"
-    make ${COMMON} CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum} ${EXTRAFLAGS}" LDFLAGS="-m32" $*
+    make ${COMMON} CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum} ${EXTRAFLAGS}" LDFLAGS="-m32" bin/skproto $*
   fi
 fi
 

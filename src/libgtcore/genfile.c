@@ -317,6 +317,28 @@ int genfile_xread(GenFile *genfile, void *buf, size_t nbytes)
   return rval;
 }
 
+int skgenfile_xread(GenFile *genfile, void *buf, size_t nbytes)
+{
+  int rval = -1;
+  if (genfile) {
+    switch (genfile->mode) {
+      case GFM_UNCOMPRESSED:
+        rval = skxfread(buf, 1, nbytes, genfile->fileptr.file);
+        break;
+      case GFM_GZIP:
+        rval = xgzread(genfile->fileptr.gzfile, buf, nbytes);
+        break;
+      case GFM_BZIP2:
+        rval = xbzread(genfile->fileptr.bzfile, buf, nbytes);
+        break;
+      default: assert(0);
+    }
+  }
+  else
+    rval = skxfread(buf, 1, nbytes, stdin);
+  return rval;
+}
+
 void genfile_xwrite(GenFile *genfile, void *buf, size_t nbytes)
 {
   if (!genfile) {
