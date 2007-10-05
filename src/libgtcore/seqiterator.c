@@ -111,7 +111,9 @@ int seqiterator_next(SeqIterator *seqit,
         STOREINARRAY(&seqit->sequencebuffer, Uchar, 1024, charcode);
       }
       else
+      {
         seqit->sequencebuffer.nextfreeUchar++;
+      }
     }
   }
   if (!haserr && seqit->sequencebuffer.nextfreeUchar > 0)
@@ -144,4 +146,3 @@ void seqiterator_delete(SeqIterator *seqit, Env *env)
   FREEARRAY(&seqit->sequencebuffer, Uchar);
   env_ma_free(seqit, env);
 }
-
