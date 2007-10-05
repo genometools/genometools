@@ -26,12 +26,6 @@
 #include "repeattypes.h"
 #include "ltrharvest-opt.h"
 
-void showonstdout (
-  char *s)
-{
-  printf ("# %s\n", s);
-}
-
 void showrepeats (
   RepeatInfo * repeatinfo,
   unsigned long seedminlength)

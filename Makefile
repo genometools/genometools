@@ -162,7 +162,7 @@ LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
             $(BZ2_DIR)/randtable.c $(BZ2_DIR)/compress.c \
             $(BZ2_DIR)/decompress.c $(BZ2_DIR)/bzlib.c
 LIBBZ2_OBJ:=$(LIBBZ2_SRC:%.c=obj/%.o)
-LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.o)
+LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.d)
 
 SKTOOLS=$(shell grep -l Kurtz src/tools/*.c)
 
@@ -394,13 +394,27 @@ obj/%.o: %.cxx
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
-# read deps
--include obj/src/gt.d obj/src/gtlua.d obj/src/gtr.d obj/src/skproto.d \
-	obj/$(LUA_DIR)/lua.d \
-         $(LIBGTCORE_DEP) $(LIBGTEXT_C_DEP) $(LIBGTEXT_CXX_DEP) \
-         $(LIBGTMATCH_DEP) $(LIBGTLTR_DEP) $(LIBGTVIEW_C_DEP) $(LIBGTLUA_C_DEP) $(TOOLS_DEP) \
-         $(LIBAGG_DEP) $(LIBEXPAT_DEP) $(LIBLUA_DEP) $(LIBPNG_DEP) \
-         $(LIBTECLA_DEP) $(LIBRNV_DEP) $(LIBBBZ2_DEP)
+# read dependencies
+-include obj/src/gt.d \
+         obj/src/gtlua.d \
+         obj/src/gtr.d \
+         obj/src/skproto.d \
+	 obj/$(LUA_DIR)/lua.d \
+         $(LIBGTCORE_DEP) \
+         $(LIBGTEXT_C_DEP) \
+         $(LIBGTEXT_CXX_DEP) \
+         $(LIBGTMATCH_DEP) \
+         $(LIBGTLTR_DEP) \
+         $(LIBGTLUA_C_DEP) \
+         $(LIBGTVIEW_C_DEP) \
+         $(TOOLS_DEP) \
+         $(LIBAGG_DEP) \
+         $(LIBBZ2_DEP) \
+         $(LIBEXPAT_DEP) \
+         $(LIBLUA_DEP) \
+         $(LIBPNG_DEP) \
+         $(LIBRNV_DEP)\
+         $(LIBTECLA_DEP)
 
 .SUFFIXES:
 .PHONY: dist srcdist release gt install splint test clean cleanup

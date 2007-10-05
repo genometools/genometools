@@ -63,7 +63,7 @@ FA* fa_new(Env *env)
 {
   FA *fa;
   env_error_check(env);
-  fa = env_ma_malloc(env, sizeof (FA));
+  fa = env_ma_calloc(env, 1, sizeof (FA));
   fa->file_pointer = hashtable_new(HASH_DIRECT, NULL,
                                    (FreeFunc) free_FAFileInfo, env);
   fa->memory_maps = hashtable_new(HASH_DIRECT, NULL,
