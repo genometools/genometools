@@ -1,0 +1,86 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<title>The GenomeTools Design</title>
+<link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+<h1>The <tt>libgtview</tt> library</h1>
+<p>
+The library <tt>libgtview</tt> consists of several classes, which take part in
+three visualization  <i>phases</i>.
+</p>
+<p>
+<img src="images/dataflow.png" alt="[Dataflow]">
+</p>
+<p>
+These phases are separated to improve performance in the kind of non-linear use often encountered in interactive applications.
+</p>
+<h2>Phase I: Feature selection</h2>
+<p>
+The GFF3 input data are parsed into a set of directed acyclic graphs
+(Fig.~\ref{gfftree}) which represent the <i>part-of</i> relationships between
+groups of genomic features according to the
+<a href="http://www.sequenceontology.org/">Sequence Ontology</a> hierarchy.
+</p>
+<p>
+<img src="images/gfftree.png" alt="[GFF3 tree]">
+</p>
+<p>
+These graphs are then registered into a persistent <i>FeatureIndex</i> object that can be (repeatedly) queried for all the features in a genomic region of interest.
+</p>
+<h2>Phase II: Layout</h2>
+<p>
+The next step consists of processing features into a structural <i>Diagram</i>
+object which contains an abstract, output-independent layout representation.
+Features are represented by <i>Element</i> objects which are space-efficiently
+distributed into <i>Track</i>, <i>Line</i>, and <i>Block</i> objects. These
+correspond to particular building blocks of the resulting diagram. This process
+can be customized through several options.
+</p>
+<p>
+<img src="images/diagram.png" alt="[Diagram]">
+</p>
+<h2>Phase III: Rendering</h2>
+<p>
+In the final phase, the <i>Diagram</i>object is used as a blueprint to create an
+image of a given type and size, considering user-defined options.
+
+Rendering logic is implemented in a <i>Render</i> class, while  the
+<i>Graphics</i> class provides methods to draw a number of primitives to a
+drawing surface abstraction. It wraps around the low-level graphics library and
+allows for easy extension or replacement of the graphics back-end.
+</p>
+<h2>Collapsing</h2>
+<p>
+By default, features are grouped by their type, resulting in one track per type.
+To obtain a shorter yet concise output, tracks for parent types in the feature
+graph can be enabled to contain all the features of their child types.
+This process is called <i>collapsing</i>.
+</p>
+<p>
+<img src="images/collapse_types.png" alt="[Collapsing example]">
+</p>
+<h2>Configuration</h2>
+<p>
+The <a href="http://www.lua.org/">Lua</a> scripting language is used to provide
+user-defined settings. Settings can be imported from a script that is executed
+when loaded, thus eliminating the need for another parser. The Lua configuration
+data are made accessible to C via the <i>Config</i> class. Configurable options
+include assignment of display styles to each feature type, spacer and margin
+sizes, and collapsing parameters.
+</p>
+
+<div id="footer">
+Copyright &copy; 2007 <a href="mailto:gremme@gmail.com">Gordon Gremme.</a> Last
+update: 2007-10-05
+</div>
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-301256-4";
+urchinTracker();
+</script>
+</body>
+</html>
