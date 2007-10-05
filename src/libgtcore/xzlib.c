@@ -52,7 +52,7 @@ int xgzread(gzFile file, void *buf, unsigned len)
 {
   int rval;
   if ((rval = gzread(file, buf, len)) == -1) {
-    fprintf(stderr, "cannod read from compressed file\n");
+    fprintf(stderr, "cannot read from compressed file\n");
     exit(EXIT_FAILURE);
   }
   return rval;
@@ -62,7 +62,7 @@ void xgzwrite(gzFile file, void *buf, unsigned len)
 {
   assert(buf && len);
   if (gzwrite(file, buf, len) != len) {
-    fprintf(stderr, "cannod write to compressed file\n");
+    fprintf(stderr, "cannot write to compressed file\n");
     exit(EXIT_FAILURE);
   }
 }
