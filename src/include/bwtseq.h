@@ -185,6 +185,30 @@ staticifinline inline Seqpos
 BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos, Env *env);
 
 /**
+ * \brief Given a symbol, query the aggregate count of symbols with
+ * lower index, this corresponds to the first row in the C-column of
+ * standard literature on the BWT on which the given symbol is found.
+ * @param bwtSeq reference of object to query
+ * @param sym symbol to query counts sum for
+ * @param env genometools reference for core functions
+ * @return aggregate count
+ */
+staticifinline inline Seqpos
+BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym, Env *env);
+
+/**
+ * \brief Given a symbol, query the aggregate count of symbols with
+ * lower index, this corresponds to the first row in the C-column of
+ * standard literature on the BWT on which the given symbol is found,
+ * this function takes a symbol already transformed into the stored
+ * alphabet as argument.  @param bwtSeq reference of object to query
+ * @param sym symbol to query counts sum for @param env genometools
+ * reference for core functions @return aggregate count
+ */
+staticifinline inline Seqpos
+BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym, Env *env);
+
+/**
  * \brief Given a query string find number of matches in original
  * sequence (of which the sequence object is a BWT).
  * @param bwtseq reference of object to query

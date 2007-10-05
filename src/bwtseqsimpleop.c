@@ -53,6 +53,24 @@ BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos, Env *env)
   return bwtSeq->count[tSym] + BWTSeqTransformedOcc(bwtSeq, tSym, pos, env);
 }
 
+staticifinline inline Seqpos
+BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym, Env *env)
+{
+  Symbol  tSym;
+  assert(bwtSeq && env);
+  assert(MRAEncSymbolHasValidMapping(BWTSeqGetAlphabet(bwtSeq), sym));
+  tSym = MRAEncMapSymbol(BWTSeqGetAlphabet(bwtSeq), sym);
+  return bwtSeq->count[tSym];
+}
+
+staticifinline inline Seqpos
+BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym, Env *env)
+{
+  assert(bwtSeq && env);
+  assert(tSym <= bwtSeq->alphabetSize);
+  return bwtSeq->count[tSym];
+}
+
 staticifinline struct matchBound *
 BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
                 Symbol nextSym, Env *env)
