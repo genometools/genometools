@@ -63,9 +63,9 @@ static inline int mygenfile_getc(FastaBuffer *fb,GenFile *inputstream)
 {
   if (fb->currentinpos >= fb->currentfillpos)
   {
-    fb->currentfillpos = skgenfile_xread(inputstream,
-                                         fb->inputbuffer,
-                                         (size_t) INPUTFILEBUFFERSIZE);
+    fb->currentfillpos = genfile_xread(inputstream,
+                                       fb->inputbuffer,
+                                       (size_t) INPUTFILEBUFFERSIZE);
     if (fb->currentfillpos == 0)
     {
        return EOF;

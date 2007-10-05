@@ -39,7 +39,6 @@ FILE*  xfopen(const char *path, const char *mode);
 void   xfputc(int, FILE*);
 void   xfputs(const char*, FILE*);
 size_t xfread(void *ptr, size_t size, size_t nmemb, FILE*);
-size_t skxfread(void *ptr, size_t size, size_t nmemb, FILE *stream);
 void   xfseek(FILE*, long offset, int whence);
 void   xfsetpos(FILE*, const fpos_t*);
 void   xfwrite(const void *ptr, size_t size, size_t nmemb, FILE*);
