@@ -17,6 +17,8 @@
 **
 */
 
+#include <string.h>
+
 #include "mrangealphabet.h"
 #include "encidxseq.h"
 #include "encidxseqpriv.h"

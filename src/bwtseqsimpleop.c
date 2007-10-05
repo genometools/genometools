@@ -78,8 +78,8 @@ BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
   const MRAEnc *alphabet;
   Symbol curSym;
   assert(bwtSeq && limits && env);
-  assert(limits->upper < bwtSeq->count[alphabetSize]
-         && limits->lower < bwtSeq->count[alphabetSize]);
+  assert(limits->upper < bwtSeq->count[bwtSeq->alphabetSize]
+         && limits->lower < bwtSeq->count[bwtSeq->alphabetSize]);
   alphabet = EISGetAlphabet(bwtSeq->seqIdx);
   curSym = MRAEncMapSymbol(alphabet, nextSym);
   assert(MRAEncSymbolHasValidMapping(alphabet, curSym));

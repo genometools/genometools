@@ -26,6 +26,7 @@ AM_CPPFLAGS = -I$(top_builddir)/include -I$(top_srcdir)/include \
 # AM_LDFLAGS = -L$(top_builddir)/lib
 
 lib_LIBRARIES = libbiofmi2.a
+bin_PROGRAMS = mkbiofmi2
 
 libbiofmi2_a_SOURCES = \
   include/biofmi2.h include/biofmi2misc.h \
@@ -34,6 +35,9 @@ libbiofmi2_a_SOURCES = \
   include/fmindex.h include/warts.h \
   include/mrangealphabet.h include/mrangealphabetpriv.h mrangealphabet.c \
   include/seqranges.h seqranges.c
+
+mkbiofmi2_SOURCES = mkbiofmi2main.c
+mkbiofmi2_LDADD = libbiofmi2.a
 
 if TJ_NO_INLINE
 libbiofmi2_a_LIBADD = mrangealphabetsimpleop.o bwtseqsimpleop.o
