@@ -110,7 +110,7 @@ size_t skxfread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 size_t xfread(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
   size_t rval;
-  if (!(rval = fread(ptr, size, nmemb, stream)) || rval != nmemb) {
+  if ((rval = fread(ptr, size, nmemb, stream)) < nmemb) {
     if (ferror(stream)) {
       perror("cannot read from stream");
       exit(EXIT_FAILURE);
