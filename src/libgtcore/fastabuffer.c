@@ -59,7 +59,7 @@ FastaBuffer* fastabuffer_new(const StrArray *filenametab,
   return fb;
 }
 
-static inline int mygenfile_getc(FastaBuffer *fb,GenFile *inputstream)
+static inline int ownbuffergenfile_getc(FastaBuffer *fb,GenFile *inputstream)
 {
   if (fb->currentinpos >= fb->currentfillpos)
   {
@@ -72,7 +72,7 @@ static inline int mygenfile_getc(FastaBuffer *fb,GenFile *inputstream)
     }
     fb->currentinpos = 0;
   }
-  return fb->inputbuffer[fb->currentfillpos++];
+  return fb->inputbuffer[fb->currentinpos++];
 }
 
 static int advancefastabufferstate(FastaBuffer *fb,Env *env)
@@ -115,8 +115,7 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
       fb->currentfillpos = 0;
     } else
     {
-      /* XXX: use genfile_xread() */
-      currentchar = mygenfile_getc(fb,fb->inputstream);
+      currentchar = ownbuffergenfile_getc(fb,fb->inputstream);
       if (currentchar == EOF)
       {
         genfile_xclose(fb->inputstream, env);
@@ -270,8 +269,7 @@ static int advancePlainbufferstate(FastaBuffer *fb,Env *env)
       fb->currentfillpos = 0;
     } else
     {
-      /* XXX: use genfile_xread() */
-      currentchar = genfile_getc(fb->inputstream);
+      currentchar = ownbuffergenfile_getc(fb,fb->inputstream);
       if (currentchar == EOF)
       {
         genfile_xclose(fb->inputstream, env);
