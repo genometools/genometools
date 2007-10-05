@@ -32,22 +32,22 @@ gzFile xgzopen(const char *path, const char *mode)
   return file;
 }
 
-void xgzfputc(int c, gzFile stream)
+void xgzfputc(int c, gzFile file)
 {
   int errnum;
-  if (gzputc(stream, c) == -1) {
+  if (gzputc(file, c) == -1) {
     fprintf(stderr, "cannot put character to compressed file: %s\n",
-            gzerror(stream, &errnum));
+            gzerror(file, &errnum));
     exit(EXIT_FAILURE);
   }
 }
 
-void xgzfputs(const char *str, gzFile stream)
+void xgzfputs(const char *str, gzFile file)
 {
   int errnum;
-  if (gzputs(stream, str) == -1) {
+  if (gzputs(file, str) == -1) {
     fprintf(stderr, "cannot put string to compressed file: %s\n",
-            gzerror(stream, &errnum));
+            gzerror(file, &errnum));
     exit(EXIT_FAILURE);
   }
 }
