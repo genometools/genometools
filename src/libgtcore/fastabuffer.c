@@ -61,12 +61,12 @@ FastaBuffer* fastabuffer_new(const StrArray *filenametab,
 
 static inline int mygenfile_getc(FastaBuffer *fb,GenFile *inputstream)
 {
-  if(fb->currentinpos >= fb->currentfillpos)
+  if (fb->currentinpos >= fb->currentfillpos)
   {
     fb->currentfillpos = skgenfile_xread(inputstream,
                                          fb->inputbuffer,
                                          (size_t) INPUTFILEBUFFERSIZE);
-    if(fb->currentfillpos == 0)
+    if (fb->currentfillpos == 0)
     {
        return EOF;
     }
