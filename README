@@ -17,6 +17,8 @@ src/            the C source code gt itself and the runtime
 src/external/   all C source code from external sources (different license!)
 src/libgtcore/  the C source code for the ``libgtcore''
 src/libgtext/   the C source code for the ``libgtext''
+src/libgtltr/   the C source code for the ``libgtltr''
+src/libgtlua/   the C source code for the ``libgtlua''
 src/libgtmatch/ the C source code for the ``libgtmatch''
 src/libgtview/  the C source code for the ``libgtview''
 src/tools/      the C source code for all tools
