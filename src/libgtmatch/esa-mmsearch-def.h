@@ -72,4 +72,6 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                             void *processmaxmatchinfo,
                             Env *env);
 
+Seqpos countmmsearchiterator(const MMsearchiterator *mmsi);
+
 #endif
