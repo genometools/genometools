@@ -12,14 +12,16 @@ numofsequences=$1
 
 INDEXDIR=../indexdir
 INDEXNAME=${INDEXDIR}/at1MB
-QUERY=${U8}
-TMPFILE=`mktemp TMP.XXXXXX` || exit 1
-mkdir -p ${INDEXDIR}
-mkvtree.sh -indexname ${INDEXNAME} -db ${AT} -dna -pl -ois -tis
-runVmatchprog.sh vseqselect -randomnum ${numofsequences} ${INDEXNAME} > ${TMPFILE}
-splitmultifasta.pl TMP 60 0 ${TMPFILE}
-
-filelist=`ls TMP-*`
-
-../scripts/runmerge.sh ${U8} ${filelist}
-rm -f ${TMPFILE} TMP-*
+if test ! "X${GTTESTDATA}" = "X"
+then
+  QUERY=${GTTESTDATA}/Iowa/U89959.fna
+  AT=${GTTESTDATA}/Iowa/at1MB
+  TMPFILE=`mktemp TMP.XXXXXX` || exit 1
+  mkdir -p ${INDEXDIR}
+  mkvtree.sh -indexname ${INDEXNAME} -db ${AT} -dna -pl -ois -tis
+  runVmatchprog.sh vseqselect -randomnum ${numofsequences} ${INDEXNAME} > ${TMPFILE}
+  splitmultifasta.pl TMP 60 0 ${TMPFILE}
+  filelist=`ls TMP-*`
+  ../scripts/runmerge.sh ${QUERY} ${filelist}
+  rm -f ${TMPFILE} TMP-*
+fi

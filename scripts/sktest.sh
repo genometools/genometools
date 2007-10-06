@@ -28,6 +28,7 @@ ALLOUTPUTOPTS="../scripts/alloutputoptions.rb"
 cd testsuite
 testsuite.rb -keywords gt_suffixerator
 testsuite.rb -keywords gt_trieins
+testsuite.rb -keywords 'gt_suffixerator and gttestdata' -gttestdata ${GTTESTDATA}
 # optional -memcheck   (run valgrind)
 #          -select 253 (run testcase 253)
 # the following depends on vmatch-mini.x and mkvtree.x
@@ -43,14 +44,19 @@ then
   echo "cannot find ${ALLOUTPUTOPTS}"
   exit 1
 fi
-for options in `${ALLOUTPUTOPTS}`
-do
-  ../scripts/cmpdbfile.sh ${options} -pl -db ${ATK}
-done
-testsuite.rb -keywords 'gt_suffixerator and gttestdata' -gttestdata ${GTTESTDATA}
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random-Small.fna
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Random.fna
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/Atinsert.fna ../testdata/Random.fna
 ../scripts/cmpdbfile.sh ${outoptions} -pl -db ../testdata/TTT-small.fna
-../scripts/cmpdbfile.sh ${outoptions} -pl -db ${ATK} ${AT} ${GRUMBACH}/*.fna
+if test ! "X${GTTESTDATA}" = "X"
+then
+  AT=${GTTESTDATA}/Iowa/at1MB
+  ATK=${GTTESTDATA}/Iowa/at100K1
+  GRUMBACH=${GTTESTDATA}/DNA-mix/Grumbach.fna
+  for options in `${ALLOUTPUTOPTS}`
+  do
+    ../scripts/cmpdbfile.sh ${options} -pl -db ${ATK}
+  done
+  ../scripts/cmpdbfile.sh ${outoptions} -pl -db ${ATK} ${AT} ${GRUMBACH}/*.fna
+fi
 cd ..
