@@ -36,7 +36,6 @@ merge libgtcore and libgtmatch:
 - Encodedseq und Bioseq mergen ()
   guesprot.c
 
-- Distributions mergen (Hashtable basiert, 64bit)
 - merge Timer und measure-time.c (Ereignis, formatierter String)
 - queue unit test (Stefan)
 
