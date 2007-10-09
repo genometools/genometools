@@ -37,6 +37,7 @@ void               discdistri_show(const DiscDistri*, Env*); /* on stdout */
 void               discdistri_show_generic(const DiscDistri*, GenFile*, Env*);
 void               discdistri_foreach(const DiscDistri*, DiscDistriIterFunc,
                                       void *data, Env*);
+int                discdistri_unit_test(Env*);
 void               discdistri_delete(DiscDistri*, Env*);
 
 #endif

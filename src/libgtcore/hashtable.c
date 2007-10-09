@@ -59,7 +59,7 @@ void* hashtable_get(Hashtable *ht, const void *key)
 {
   st_data_t value = 0;
   void *vptr;
-  assert(ht && key);
+  assert(ht);
   (void) st_lookup(ht->st_table, (st_data_t) key, &value);
   vptr = (void*) value;
   return vptr;
@@ -67,7 +67,7 @@ void* hashtable_get(Hashtable *ht, const void *key)
 
 void hashtable_add(Hashtable *ht, void *key, void *value, Env *env)
 {
-  assert(ht && key && value);
+  assert(ht && value);
   /* the hash table containes no element with this key yet */
   assert(!st_lookup(ht->st_table, (st_data_t) key, NULL));
   (void) st_insert(ht->st_table, (st_data_t) key, (st_data_t) value, env);

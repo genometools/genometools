@@ -19,6 +19,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "libgtcore/discdistri.h"
+#include "libgtcore/ensure.h"
 #include "libgtcore/hashtable.h"
 
 struct DiscDistri {
@@ -150,6 +151,29 @@ void discdistri_foreach(const DiscDistri *d, DiscDistriIterFunc func,
     rval = hashtable_foreach_no(d->hashdist, foreach_iterfunc, &info, env);
     assert(!rval); /* foreach_iterfunc() is sane */
   }
+}
+
+int discdistri_unit_test(Env *env)
+{
+  DiscDistri *d;
+  int had_err = 0;
+
+  env_error_check(env);
+
+  d = discdistri_new(env);
+
+  ensure(had_err, discdistri_get(d, 0) == 0);
+  ensure(had_err, discdistri_get(d, 100) == 0);
+  if (!had_err) {
+    discdistri_add(d, 0, env);
+    discdistri_add_multi(d, 100, 256, env);
+  }
+  ensure(had_err, discdistri_get(d, 0) == 1);
+  ensure(had_err, discdistri_get(d, 100) == 256);
+
+  discdistri_delete(d, env);
+
+  return had_err;
 }
 
 void discdistri_delete(DiscDistri *d, Env *env)
