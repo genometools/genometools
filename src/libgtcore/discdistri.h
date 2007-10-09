@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -24,12 +25,12 @@
 /* A discrete distribution */
 typedef struct DiscDistri DiscDistri;
 
-DiscDistri*   discdistri_new(Env*);
-void          discdistri_add(DiscDistri*, unsigned long, Env*);
-void          discdistri_add_multi(DiscDistri*, unsigned long,
-                                   unsigned long long, Env*);
-void          discdistri_show(const DiscDistri*, Env*); /* on stdout */
-void          discdistri_show_generic(const DiscDistri*, GenFile*, Env*);
-void          discdistri_delete(DiscDistri*, Env*);
+DiscDistri* discdistri_new(Env*);
+void        discdistri_add(DiscDistri*, unsigned long, Env*);
+void        discdistri_add_multi(DiscDistri*, unsigned long, unsigned long long,
+                                 Env*);
+void        discdistri_show(const DiscDistri*, Env*); /* on stdout */
+void        discdistri_show_generic(const DiscDistri*, GenFile*, Env*);
+void        discdistri_delete(DiscDistri*, Env*);
 
 #endif
