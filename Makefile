@@ -64,8 +64,7 @@ GTLIBS:=lib/libgtext.a\
         lib/libgtltr.a\
         lib/libgtcore.a\
         lib/libgtlua.a\
-        lib/libbz2.a\
-        lib/libz.a
+        lib/libbz2.a
 
 # the core GenomeTools library (no other dependencies)
 LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
@@ -221,8 +220,10 @@ endif
 ifeq ($(libgtview),yes)
   GTLIBS := $(GTLIBS) lib/libgtview.a
   GT_CFLAGS += -DLIBGTVIEW
-  LDLIBS += -lcairo
+  LDLIBS += -lz -lcairo
   STEST_FLAGS += -libgtview
+else
+  GTLIBS += lib/libz.a
 endif
 
 # set prefix for install target
