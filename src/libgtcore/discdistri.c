@@ -62,6 +62,15 @@ void discdistri_add_multi(DiscDistri *d, unsigned long key,
   d->num_of_occurrences += occurrences;
 }
 
+unsigned long long discdistri_get(const DiscDistri *d, unsigned long key)
+{
+  unsigned long long *valueptr;
+  assert(d);
+  if (!d->hashdist || !(valueptr = hashtable_get(d->hashdist, (void*) key)))
+    return 0;
+  return *valueptr;
+}
+
 void discdistri_show(const DiscDistri *d, Env *env)
 {
   assert(d);
