@@ -37,6 +37,9 @@ int        hashtable_foreach(Hashtable*, Hashiteratorfunc, void*, Env*);
 /* iterate over the hashtable in alphabetical order. Requires that the hashtable
    has the HashType HASH_STRING. */
 int        hashtable_foreach_ao(Hashtable*, Hashiteratorfunc, void*, Env*);
+/* iterate over the hashtable in numerical order. Requires that the hashtable
+   has the HashType HASH_DIRECT and unsigned longs have been used as keys. */
+int        hashtable_foreach_no(Hashtable*, Hashiteratorfunc, void*, Env*);
 void       hashtable_reset(Hashtable*, Env*);
 int        hashtable_unit_test(Env*);
 void       hashtable_delete(Hashtable*, Env*);

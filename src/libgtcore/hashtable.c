@@ -131,27 +131,38 @@ static int save_hash_entry(void *key, void *value, void *data, Env *env)
   return 0;
 }
 
-int compare_hash_entries(const void *a, const void *b)
+int compare_hash_entries_alphabetically(const void *a, const void *b)
 {
   HashEntry *he_a = (HashEntry*) a, *he_b = (HashEntry*) b;
   assert(he_a && he_b);
   return strcmp(he_a->key, he_b->key);
 }
 
-int hashtable_foreach_ao(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
-                         Env *env)
+int compare_hash_entries_numerically(const void *a, const void *b)
+{
+  HashEntry *he_a = (HashEntry*) a, *he_b = (HashEntry*) b;
+  assert(he_a && he_b);
+  if ((unsigned long) he_a->key < (unsigned long) he_b->key)
+    return -1;
+  if ((unsigned long) he_a->key == (unsigned long) he_b->key)
+    return 0;
+  return 1;
+}
+
+int hashtable_foreach_ordered(Hashtable *ht, Hashiteratorfunc iterfunc,
+                              void *data, int(*cmp)(const void*, const void*),
+                              Env *env)
 {
   Array *hash_entries;
   HashEntry *he;
   unsigned long i;
   int had_err;
-  assert(ht && iterfunc);
-  assert(ht->hash_type == HASH_STRING);
+  assert(ht && iterfunc && cmp);
   hash_entries = array_new(sizeof (HashEntry), env);
   had_err = hashtable_foreach(ht, save_hash_entry, hash_entries, env);
   if (!had_err) {
     qsort(array_get_space(hash_entries), array_size(hash_entries),
-          array_elem_size(hash_entries), compare_hash_entries);
+          array_elem_size(hash_entries), cmp);
     for (i = 0; !had_err && i < array_size(hash_entries); i++) {
       he = array_get(hash_entries, i);
       had_err = iterfunc(he->key, he->value, data, env);
@@ -159,6 +170,24 @@ int hashtable_foreach_ao(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
   }
   array_delete(hash_entries, env);
   return had_err;
+}
+
+int hashtable_foreach_ao(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
+                         Env *env)
+{
+  assert(ht && iterfunc);
+  assert(ht->hash_type == HASH_STRING);
+  return hashtable_foreach_ordered(ht, iterfunc, data,
+                                   compare_hash_entries_alphabetically, env);
+}
+
+int hashtable_foreach_no(Hashtable *ht, Hashiteratorfunc iterfunc, void *data,
+                         Env *env)
+{
+  assert(ht && iterfunc);
+  assert(ht->hash_type == HASH_DIRECT);
+  return hashtable_foreach_ordered(ht, iterfunc, data,
+                                   compare_hash_entries_numerically, env);
 }
 
 static int remove_key_value_pair(void *key, void *value, void *data, Env *env)
