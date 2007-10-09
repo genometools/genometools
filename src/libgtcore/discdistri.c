@@ -47,14 +47,6 @@ void discdistri_add(DiscDistri *d, unsigned long value, Env *env)
   d->num_of_occurrences++;
 }
 
-unsigned long discdistri_get(const DiscDistri *d, unsigned long value)
-{
-  assert(d);
-  if (value < array_size(d->values))
-    return 0;
-  return *(unsigned long*) array_get(d->values, value);
-}
-
 void discdistri_show(const DiscDistri *d)
 {
   assert(d);

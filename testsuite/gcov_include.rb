@@ -1,6 +1,7 @@
 full_coverage_files = [ "src/libgtcore/array.c",
                         "src/libgtcore/bittab.c",
                         "src/libgtcore/countingsort.c",
+                        "src/libgtcore/discdistri.c",
                         "src/libgtcore/dynalloc.c",
                         "src/libgtcore/getbasename.c",
                         "src/libgtcore/msort.c",
