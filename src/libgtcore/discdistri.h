@@ -26,8 +26,10 @@ typedef struct DiscDistri DiscDistri;
 
 DiscDistri*   discdistri_new(Env*);
 void          discdistri_add(DiscDistri*, unsigned long, Env*);
-void          discdistri_show(const DiscDistri*); /* on stdout */
-void          discdistri_show_generic(const DiscDistri*, GenFile*);
+void          discdistri_add_multi(DiscDistri*, unsigned long,
+                                   unsigned long long, Env*);
+void          discdistri_show(const DiscDistri*, Env*); /* on stdout */
+void          discdistri_show_generic(const DiscDistri*, GenFile*, Env*);
 void          discdistri_delete(DiscDistri*, Env*);
 
 #endif

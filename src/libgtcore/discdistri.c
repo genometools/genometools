@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -17,13 +18,12 @@
 
 #include <assert.h>
 #include <stdio.h>
-#include "libgtcore/array.h"
 #include "libgtcore/discdistri.h"
-#include "libgtcore/xansi.h"
+#include "libgtcore/hashtable.h"
 
 struct DiscDistri {
-  Array *values;
-  unsigned long num_of_occurrences;
+  Hashtable *hashdist;
+  unsigned long long num_of_occurrences;
 };
 
 DiscDistri* discdistri_new(Env *env)
@@ -31,47 +31,91 @@ DiscDistri* discdistri_new(Env *env)
   return env_ma_calloc(env, 1, sizeof (DiscDistri));
 }
 
-void discdistri_add(DiscDistri *d, unsigned long value, Env *env)
+void discdistri_add(DiscDistri *d, unsigned long key, Env *env)
 {
-  unsigned long *distri, zero = 0;
-  assert(d);
-
-  if (!d->values)
-    d->values = array_new(sizeof (unsigned long), env);
-
-  while (array_size(d->values) <= value)
-    array_add(d->values, zero, env);
-
-  distri = array_get_space(d->values);
-  distri[value]++;
-  d->num_of_occurrences++;
+  discdistri_add_multi(d, key, 1, env);
 }
 
-void discdistri_show(const DiscDistri *d)
+static void freevalue(void *ptr, Env *env)
 {
-  assert(d);
-  discdistri_show_generic(d, NULL);
+  env_ma_free(ptr, env);
 }
 
-void discdistri_show_generic(const DiscDistri *d, GenFile *genfile)
+void discdistri_add_multi(DiscDistri *d, unsigned long key,
+                          unsigned long long occurrences, Env *env)
 {
-  unsigned long value, occurrences;
-  double probability, cumulative_probability = 0.0;
+  unsigned long long *valueptr;
   assert(d);
 
-  for (value = 0; value < array_size(d->values); value++) {
-    occurrences = *(unsigned long*) array_get(d->values, value);
-    probability = (double) occurrences / d->num_of_occurrences;
-    cumulative_probability += probability;
-    if (occurrences)
-      genfile_xprintf(genfile, "%lu: %lu (prob=%.4f,cumulative=%.4f)\n", value,
-                      occurrences, probability, cumulative_probability);
+  if (!d->hashdist)
+    d->hashdist = hashtable_new(HASH_DIRECT, NULL, freevalue, env);
+
+  valueptr = hashtable_get(d->hashdist, (void*) key);
+  if (!valueptr) {
+    valueptr = env_ma_malloc(env, sizeof *valueptr);
+    *valueptr = occurrences;
+    hashtable_add(d->hashdist, (void*) key, valueptr, env);
+  }
+  else
+    (*valueptr) += occurrences;
+
+  d->num_of_occurrences += occurrences;
+}
+
+void discdistri_show(const DiscDistri *d, Env *env)
+{
+  assert(d);
+  discdistri_show_generic(d, NULL, env);
+}
+
+typedef struct {
+  double cumulative_probability;
+  unsigned long long num_of_occurrences;
+  GenFile *genfile;
+} ShowValueInfo;
+
+static int showvalue(void *key, void *value, void *data, Env *env)
+{
+  unsigned long long occurrences;
+  double probability;
+  ShowValueInfo *info;
+
+  env_error_check(env);
+  assert(key && value && data);
+
+  occurrences = *(unsigned long long*) value;
+  assert(occurrences);
+  info = (ShowValueInfo*) data;
+
+  probability = (double) occurrences / info->num_of_occurrences;
+  info->cumulative_probability += probability;
+  genfile_xprintf(info->genfile, "%lu: %llu (prob=%.4f,cumulative=%.4f)\n",
+                  (unsigned long) key, occurrences, probability,
+                  info->cumulative_probability);
+
+  return 0;
+}
+
+void discdistri_show_generic(const DiscDistri *d, GenFile *genfile, Env *env)
+{
+  ShowValueInfo showvalueinfo;
+  int rval;
+
+  env_error_check(env);
+  assert(d);
+
+  if (d->hashdist) {
+    showvalueinfo.cumulative_probability = 0.0;
+    showvalueinfo.num_of_occurrences = d->num_of_occurrences;
+    showvalueinfo.genfile = genfile;
+    rval = hashtable_foreach_no(d->hashdist, showvalue, &showvalueinfo, env);
+    assert(!rval); /* showvalue() is sane */
   }
 }
 
 void discdistri_delete(DiscDistri *d, Env *env)
 {
   if (!d) return;
-  array_delete(d->values, env);
+  hashtable_delete(d->hashdist, env);
   env_ma_free(d, env);
 }

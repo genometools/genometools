@@ -131,7 +131,7 @@ GenomeVisitor* stat_visitor_new(bool gene_length_distri,
   return gv;
 }
 
-void stat_visitor_show_stats(GenomeVisitor *gv)
+void stat_visitor_show_stats(GenomeVisitor *gv, Env *env)
 {
   StatVisitor *stat_visitor = stat_visitor_cast(gv);
   if (stat_visitor->number_of_sequence_regions) {
@@ -151,18 +151,18 @@ void stat_visitor_show_stats(GenomeVisitor *gv)
   }
   if (stat_visitor->gene_length_distribution) {
     printf("gene length distribution:\n");
-    discdistri_show(stat_visitor->gene_length_distribution);
+    discdistri_show(stat_visitor->gene_length_distribution, env);
   }
   if (stat_visitor->gene_score_distribution) {
     printf("gene score distribution:\n");
-    discdistri_show(stat_visitor->gene_score_distribution);
+    discdistri_show(stat_visitor->gene_score_distribution, env);
   }
   if (stat_visitor->exon_length_distribution) {
     printf("exon length distribution:\n");
-    discdistri_show(stat_visitor->exon_length_distribution);
+    discdistri_show(stat_visitor->exon_length_distribution, env);
   }
   if (stat_visitor->intron_length_distribution) {
     printf("intron length distribution:\n");
-    discdistri_show(stat_visitor->intron_length_distribution);
+    discdistri_show(stat_visitor->intron_length_distribution, env);
   }
 }
