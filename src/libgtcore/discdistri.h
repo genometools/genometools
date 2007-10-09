@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DISC_DISTRI_H
-#define DISC_DISTRI_H
+#ifndef DISCDISTRI_H
+#define DISCDISTRI_H
 
 #include "libgtcore/env.h"
 #include "libgtcore/genfile.h"
@@ -24,11 +24,11 @@
 /* A discrete distribution */
 typedef struct DiscDistri DiscDistri;
 
-DiscDistri*   disc_distri_new(Env*);
-void          disc_distri_add(DiscDistri*, unsigned long, Env*);
-unsigned long disc_distri_get(const DiscDistri*, unsigned long);
-void          disc_distri_show(const DiscDistri*); /* on stdout */
-void          disc_distri_show_generic(const DiscDistri*, GenFile*);
-void          disc_distri_delete(DiscDistri*, Env*);
+DiscDistri*   discdistri_new(Env*);
+void          discdistri_add(DiscDistri*, unsigned long, Env*);
+unsigned long discdistri_get(const DiscDistri*, unsigned long);
+void          discdistri_show(const DiscDistri*); /* on stdout */
+void          discdistri_show_generic(const DiscDistri*, GenFile*);
+void          discdistri_delete(DiscDistri*, Env*);
 
 #endif

@@ -18,7 +18,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include "libgtcore/array.h"
-#include "libgtcore/disc_distri.h"
+#include "libgtcore/discdistri.h"
 #include "libgtcore/xansi.h"
 
 struct DiscDistri {
@@ -26,12 +26,12 @@ struct DiscDistri {
   unsigned long num_of_occurrences;
 };
 
-DiscDistri* disc_distri_new(Env *env)
+DiscDistri* discdistri_new(Env *env)
 {
   return env_ma_calloc(env, 1, sizeof (DiscDistri));
 }
 
-void disc_distri_add(DiscDistri *d, unsigned long value, Env *env)
+void discdistri_add(DiscDistri *d, unsigned long value, Env *env)
 {
   unsigned long *distri, zero = 0;
   assert(d);
@@ -47,7 +47,7 @@ void disc_distri_add(DiscDistri *d, unsigned long value, Env *env)
   d->num_of_occurrences++;
 }
 
-unsigned long disc_distri_get(const DiscDistri *d, unsigned long value)
+unsigned long discdistri_get(const DiscDistri *d, unsigned long value)
 {
   assert(d);
   if (value < array_size(d->values))
@@ -55,13 +55,13 @@ unsigned long disc_distri_get(const DiscDistri *d, unsigned long value)
   return *(unsigned long*) array_get(d->values, value);
 }
 
-void disc_distri_show(const DiscDistri *d)
+void discdistri_show(const DiscDistri *d)
 {
   assert(d);
-  disc_distri_show_generic(d, NULL);
+  discdistri_show_generic(d, NULL);
 }
 
-void disc_distri_show_generic(const DiscDistri *d, GenFile *genfile)
+void discdistri_show_generic(const DiscDistri *d, GenFile *genfile)
 {
   unsigned long value, occurrences;
   double probability, cumulative_probability = 0.0;
@@ -77,7 +77,7 @@ void disc_distri_show_generic(const DiscDistri *d, GenFile *genfile)
   }
 }
 
-void disc_distri_delete(DiscDistri *d, Env *env)
+void discdistri_delete(DiscDistri *d, Env *env)
 {
   if (!d) return;
   array_delete(d->values, env);
