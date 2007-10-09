@@ -8,8 +8,26 @@
 <body>
 <h1>The <i>GenomeTools</i> design</h1>
 <p>
+Major design goals of the <i>GenomeTools</i> system:
+</p>
+<ul>
+  <li>Correctness
+  <ul>
+    <li>built-in unit tests
+    <li>extensive test suite
+  </ul>
+  <li>Portability
+  <ul>
+    <li>should run on every POSIX compliant UNIX system
+    <li>depend only on a C/C++ compiler and the
+    <a href="http://www.gnu.org/software/make/">GNU Make</a> build system
+  </ul>
+  <li>Efficiency
+  <li>Minimalism (if in doubt, use the simpler solution)
+</ul>
+<p>
 The <i>GenomeTools</i> C code is split into components plus the
-runtime and the main program. There are the following types of components: 
+runtime and the main program. There are the following types of components:
 </p>
 <ul>
 <li> classes
@@ -70,7 +88,7 @@ For most classes, a simple class suffices. A simple class is a class which does
 not inherit from other classes and from which no other classes inherit. Using
 mostly simple classes avoids the problems of large class hierarchies, namely the
 interdependence of classes which inherit from one another.
-The major advantage of simple classes over simple C <code>struct</code>s is 
+The major advantage of simple classes over simple C <code>struct</code>s is
 <a href="http://en.wikipedia.org/wiki/Information_hiding">information hiding</a>.
 </p>
 
@@ -363,7 +381,7 @@ href="http://www.kernel.org/pub/software/scm/git/docs/">documentation</a>.
 <pre>
 $ git clone http://genometools.org/genometools.git
 </pre>
-<li> Start hacking on your own feature branch: 
+<li> Start hacking on your own feature branch:
 <pre>
 $ cd genometools
 $ git checkout -b my_feature_branch_name

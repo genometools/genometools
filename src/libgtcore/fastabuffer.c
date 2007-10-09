@@ -59,16 +59,32 @@ FastaBuffer* fastabuffer_new(const StrArray *filenametab,
   return fb;
 }
 
+static inline int ownbuffergenfile_getc(FastaBuffer *fb,GenFile *inputstream)
+{
+  if (fb->currentinpos >= fb->currentfillpos)
+  {
+    fb->currentfillpos = genfile_xread(inputstream,
+                                       fb->inputbuffer,
+                                       (size_t) INPUTFILEBUFFERSIZE);
+    if (fb->currentfillpos == 0)
+    {
+       return EOF;
+    }
+    fb->currentinpos = 0;
+  }
+  return fb->inputbuffer[fb->currentinpos++];
+}
+
 static int advancefastabufferstate(FastaBuffer *fb,Env *env)
 {
   int currentchar;
-  unsigned long currentposition = 0, currentfileadd = 0, currentfileread = 0;
+  unsigned long currentoutpos = 0, currentfileadd = 0, currentfileread = 0;
   Uchar charcode;
 
   env_error_check(env);
   while (true)
   {
-    if (currentposition >= (unsigned long) FILEBUFFERSIZE)
+    if (currentoutpos >= (unsigned long) OUTPUTFILEBUFFERSIZE)
     {
       if (fb->filelengthtab != NULL)
       {
@@ -95,10 +111,11 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
       fb->inputstream = genfile_xopen(strarray_get(fb->filenametab,
                                                   (unsigned long) fb->filenum),
                                        "rb", env);
+      fb->currentinpos = 0;
+      fb->currentfillpos = 0;
     } else
     {
-      /* XXX: use genfile_xread() */
-      currentchar = genfile_getc(fb->inputstream);
+      currentchar = ownbuffergenfile_getc(fb,fb->inputstream);
       if (currentchar == EOF)
       {
         genfile_xclose(fb->inputstream, env);
@@ -157,7 +174,7 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
                 {
                   currentfileadd++;
                 }
-                fb->bufspace[currentposition++] = (Uchar) SEPARATOR;
+                fb->outputbuffer[currentoutpos++] = (Uchar) SEPARATOR;
                 fb->lastspeciallength++;
               }
               fb->indesc = true;
@@ -165,7 +182,7 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
             {
               if (fb->symbolmap == NULL)
               {
-                fb->bufspace[currentposition++] = (Uchar) currentchar;
+                fb->outputbuffer[currentoutpos++] = (Uchar) currentchar;
               } else
               {
                 charcode = fb->symbolmap[(unsigned int) currentchar];
@@ -192,7 +209,7 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
                     fb->characterdistribution[charcode]++;
                   }
                 }
-                fb->bufspace[currentposition++] = charcode;
+                fb->outputbuffer[currentoutpos++] = charcode;
               }
               currentfileadd++;
             }
@@ -207,14 +224,14 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
                   strarray_get(fb->filenametab,0));
     return -2;
   }
-  fb->nextfree = currentposition;
+  fb->nextfree = currentoutpos;
   return 0;
 }
 
 static int advancePlainbufferstate(FastaBuffer *fb,Env *env)
 {
   int currentchar;
-  unsigned long currentposition = 0, currentfileread = 0;
+  unsigned long currentoutpos = 0, currentfileread = 0;
 
   env_error_check(env);
   if (fb->descptr != NULL)
@@ -224,7 +241,7 @@ static int advancePlainbufferstate(FastaBuffer *fb,Env *env)
   }
   while (true)
   {
-    if (currentposition >= (unsigned long) FILEBUFFERSIZE)
+    if (currentoutpos >= (unsigned long) OUTPUTFILEBUFFERSIZE)
     {
       if (fb->filelengthtab != NULL)
       {
@@ -248,10 +265,11 @@ static int advancePlainbufferstate(FastaBuffer *fb,Env *env)
       fb->inputstream = genfile_xopen(strarray_get(fb->filenametab,
                                                   (unsigned long) fb->filenum),
                                        "rb", env);
+      fb->currentinpos = 0;
+      fb->currentfillpos = 0;
     } else
     {
-      /* XXX: use genfile_xread() */
-      currentchar = genfile_getc(fb->inputstream);
+      currentchar = ownbuffergenfile_getc(fb,fb->inputstream);
       if (currentchar == EOF)
       {
         genfile_xclose(fb->inputstream, env);
@@ -273,17 +291,17 @@ static int advancePlainbufferstate(FastaBuffer *fb,Env *env)
       } else
       {
         currentfileread++;
-        fb->bufspace[currentposition++] = (Uchar) currentchar;
+        fb->outputbuffer[currentoutpos++] = (Uchar) currentchar;
       }
     }
   }
-  if (currentposition == 0)
+  if (currentoutpos == 0)
   {
     env_error_set(env,"no characters in plain file(s) %s ...",
                   strarray_get(fb->filenametab,0));
     return -2;
   }
-  fb->nextfree = currentposition;
+  fb->nextfree = currentoutpos;
   return 0;
 }
 

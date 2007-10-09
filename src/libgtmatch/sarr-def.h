@@ -43,7 +43,7 @@
         {\
           unsigned int nextfree,\
                        nextread;\
-          TYPE bufspace[FILEBUFFERSIZE];\
+          TYPE bufferedfilespace[FILEBUFFERSIZE];\
           FILE *fp;\
         } TYPE ## Bufferedfile
 
@@ -60,7 +60,7 @@ DECLAREBufferedfiletype(Largelcpvalue);
         {\
           if (buf->nextread >= buf->nextfree)\
           {\
-            buf->nextfree = (unsigned int) fread(buf->bufspace,\
+            buf->nextfree = (unsigned int) fread(buf->bufferedfilespace,\
                                                  sizeof (TYPE),\
                                                  (size_t) FILEBUFFERSIZE,\
                                                  buf->fp);\
@@ -75,7 +75,7 @@ DECLAREBufferedfiletype(Largelcpvalue);
               return 0;\
             }\
           }\
-          *val = buf->bufspace[buf->nextread++];\
+          *val = buf->bufferedfilespace[buf->nextread++];\
           return 1;\
         }
 

@@ -24,9 +24,11 @@ int tooldriver(int(*tool)(int argc, const char **argv, Env*),
   Env *env;
   int had_err;
   env = env_new();
+  env_error_set_progname(env, argv[0]);
   had_err = tool(argc, (const char**) argv, env);
   if (env_error_is_set(env)) {
-    fprintf(stderr, "error: %s\n", env_error_get(env));
+    fprintf(stderr, "%s: error: %s\n", env_error_get_progname(env),
+            env_error_get(env));
     assert(had_err);
   }
   if (env_delete(env))

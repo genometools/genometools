@@ -26,33 +26,39 @@ gzFile xgzopen(const char *path, const char *mode)
 {
   gzFile file;
   if (!(file = gzopen(path, mode))) {
-    fprintf(stderr, "cannot open file '%s': %s\n", path, strerror(errno));
+    fprintf(stderr, "gzopen(): cannot open file '%s': %s\n", path,
+            strerror(errno));
     exit(EXIT_FAILURE);
   }
   return file;
 }
 
-void xgzfputc(int c, gzFile stream)
+void xgzfputc(int c, gzFile file)
 {
-  if (gzputc(stream, c) == -1) {
-    fprintf(stderr, "cannot put character to compressed file\n");
+  int errnum;
+  if (gzputc(file, c) == -1) {
+    fprintf(stderr, "cannot put character to compressed file: %s\n",
+            gzerror(file, &errnum));
     exit(EXIT_FAILURE);
   }
 }
 
-void xgzfputs(const char *str, gzFile stream)
+void xgzfputs(const char *str, gzFile file)
 {
-  if (gzputs(stream, str) == -1) {
-    fprintf(stderr, "cannot put string to compressed file\n");
+  int errnum;
+  if (gzputs(file, str) == -1) {
+    fprintf(stderr, "cannot put string to compressed file: %s\n",
+            gzerror(file, &errnum));
     exit(EXIT_FAILURE);
   }
 }
 
 int xgzread(gzFile file, void *buf, unsigned len)
 {
-  int rval;
+  int errnum, rval;
   if ((rval = gzread(file, buf, len)) == -1) {
-    fprintf(stderr, "cannod read from compressed file\n");
+    fprintf(stderr, "cannot read from compressed file: %s\n",
+            gzerror(file, &errnum));
     exit(EXIT_FAILURE);
   }
   return rval;
@@ -60,9 +66,11 @@ int xgzread(gzFile file, void *buf, unsigned len)
 
 void xgzwrite(gzFile file, void *buf, unsigned len)
 {
+  int errnum;
   assert(buf && len);
   if (gzwrite(file, buf, len) != len) {
-    fprintf(stderr, "cannod write to compressed file\n");
+    fprintf(stderr, "cannot write to compressed file: %s\n",
+            gzerror(file, &errnum));
     exit(EXIT_FAILURE);
   }
 }

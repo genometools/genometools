@@ -32,34 +32,69 @@ then
   esac
 fi
 
-make curses=no bin/skproto
-
 # skproto-all.sh
 
-if test $big -eq 1
-then
-  bignum=-DBIGSEQPOS
-else
-  bignum=
-fi
+makecompilerflags()
+{
+  printf "curses=no"
+  if test $3 -eq 1
+  then
+    printf " CC='ccache icc'"
+  else
+    printf " CC='ccache gcc'"
+  fi
+  printf " CFLAGS='-O3 -m$1"
+  if test $2 -eq 1
+  then
+    printf " -DBIGSEQPOS"
+  fi
+  if test $3 -eq 1
+  then
+    printf " -wd1418,869,981,1338"
+  fi
+  printf "'"
+  printf " LDFLAGS='-m$1'"
+  if test $3 -eq 1
+  then
+    printf " LD='icc' CXX='icc'"
+  fi
+  # printf " -DWITHTRIEIDENT"
+  # printf " -DINLINEDENCSEQ -DINLINEDSequentialsuffixarrayreader"
+  # printf " -DINLINEDENCSEQ"
+  printf "\n"
+}
 
-# NOASSERT='assert=no'
-#-DWITHTRIEIDENT
-# EXTRAFLAGS="-Duint_fast32_t=uint32_t  -Duint_fast64_t=uint64_t"
-# EXTRAFLAGS="-DINLINEDENCSEQ -DINLINEDSequentialsuffixarrayreader"
-# EXTRAFLAGS="-DINLINEDENCSEQ"
-COMMON="curses=no"
+# printf "NOASSERT='assert=no'"
+if test -r LocalMakeflags
+then
+  mv LocalMakeflags LocalMakeflags.previous
+fi
 
 if test $icc -eq 1
 then
-  make ${COMMON} CC='ccache icc' CFLAGS='-O3 ${EXTRAFLAGS} ${bignum} -wd1418,869,981,1338' LD='icc' CXX='icc' $*
+  makecompilerflags 32 $big $icc > LocalMakeflags
 else
   if test $do64 -eq 1
   then
-    make ${COMMON} CC="ccache gcc" CFLAGS="-O3 -m64 ${EXTRAFLAGS}" LDFLAGS="-m64" $*
+    makecompilerflags 64 0 $icc > LocalMakeflags
   else
-    make ${COMMON} CC="ccache gcc" CFLAGS="-O3 -m32 ${bignum} ${EXTRAFLAGS}" LDFLAGS="-m32" $*
+    makecompilerflags 32 $big $icc > LocalMakeflags
   fi
 fi
+
+if test -r LocalMakeflags.previous
+then
+  cmp -s LocalMakeflags LocalMakeflags.previous
+  if test $? -eq 1
+  then
+    echo "Current and previous LocalMakeflags files differ: first remove them"
+    exit 1
+  fi
+fi
+make "`cat LocalMakeflags`"
+
+# echo ${MAKEFLAGS}
+# make ${MAKEFLAGS} bin/skproto
+# make ${MAKEFLAGS} $*
 
 #make splint-gtmatch
