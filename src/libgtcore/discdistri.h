@@ -25,12 +25,17 @@
 /* A discrete distribution */
 typedef struct DiscDistri DiscDistri;
 
+typedef void (*DiscDistriIterFunc)(unsigned long key, unsigned long long value,
+                                   void *data);
+
 DiscDistri* discdistri_new(Env*);
 void        discdistri_add(DiscDistri*, unsigned long, Env*);
 void        discdistri_add_multi(DiscDistri*, unsigned long, unsigned long long,
                                  Env*);
 void        discdistri_show(const DiscDistri*, Env*); /* on stdout */
 void        discdistri_show_generic(const DiscDistri*, GenFile*, Env*);
+void        discdistri_foreach(const DiscDistri*, DiscDistriIterFunc, void*,
+                               Env*);
 void        discdistri_delete(DiscDistri*, Env*);
 
 #endif

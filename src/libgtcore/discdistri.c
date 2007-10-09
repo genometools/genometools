@@ -113,6 +113,36 @@ void discdistri_show_generic(const DiscDistri *d, GenFile *genfile, Env *env)
   }
 }
 
+typedef struct {
+  DiscDistriIterFunc func;
+  void *data;
+} ForeachInfo;
+
+static int foreach_iterfunc(void *key, void *value, void *data, Env *env)
+{
+  ForeachInfo *info;
+  env_error_check(env);
+  assert(key && value && data);
+  info = (ForeachInfo*) data;
+  info->func((unsigned long) key, *(unsigned long long*) value, info->data);
+  return 0;
+}
+
+void discdistri_foreach(const DiscDistri *d, DiscDistriIterFunc func,
+                        void *data, Env *env)
+{
+  ForeachInfo info;
+  int rval;
+  env_error_check(env);
+  assert(d);
+  if (d->hashdist) {
+    info.func = func;
+    info.data = data;
+    rval = hashtable_foreach_no(d->hashdist, foreach_iterfunc, &info, env);
+    assert(!rval); /* foreach_iterfunc() is sane */
+  }
+}
+
 void discdistri_delete(DiscDistri *d, Env *env)
 {
   if (!d) return;
