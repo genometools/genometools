@@ -39,6 +39,7 @@ int           dlist_unit_test(Env*);
 void          dlist_delete(Dlist*, Env*);
 
 Dlistelem*    dlistelem_next(const Dlistelem*);
+Dlistelem*    dlistelem_previous(const Dlistelem*);
 void*         dlistelem_get_data(const Dlistelem*);
 
 #if 0

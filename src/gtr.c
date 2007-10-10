@@ -44,6 +44,7 @@
 #include "libgtext/alignment.h"
 #include "libgtext/bsearch.h"
 #include "libgtext/evaluator.h"
+#include "libgtext/genome_node_iterator.h"
 #include "libgtext/gtdatahelp.h"
 #include "libgtext/hmm.h"
 #include "libgtext/splicedseq.h"
@@ -222,6 +223,8 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "dynamic bittab class", dynbittab_unit_test,
                 env);
   hashtable_add(gtr->unit_tests, "evaluator class", evaluator_unit_test, env);
+  hashtable_add(gtr->unit_tests, "genome node iterator example",
+                genome_node_iterator_example, env);
   hashtable_add(gtr->unit_tests, "getbasename module", getbasename_unit_test,
                 env);
   hashtable_add(gtr->unit_tests, "grep module", grep_unit_test, env);

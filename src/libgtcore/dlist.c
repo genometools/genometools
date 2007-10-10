@@ -332,6 +332,12 @@ Dlistelem* dlistelem_next(const Dlistelem *dlistelem)
   return dlistelem->next;
 }
 
+Dlistelem* dlistelem_previous(const Dlistelem *dlistelem)
+{
+  assert(dlistelem);
+  return dlistelem->previous;
+}
+
 void* dlistelem_get_data(const Dlistelem *dlistelem)
 {
   assert(dlistelem);
