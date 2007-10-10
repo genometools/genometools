@@ -37,11 +37,6 @@ void discdistri_add(DiscDistri *d, unsigned long key, Env *env)
   discdistri_add_multi(d, key, 1, env);
 }
 
-static void freevalue(void *ptr, Env *env)
-{
-  env_ma_free(ptr, env);
-}
-
 void discdistri_add_multi(DiscDistri *d, unsigned long key,
                           unsigned long long occurrences, Env *env)
 {
@@ -49,7 +44,7 @@ void discdistri_add_multi(DiscDistri *d, unsigned long key,
   assert(d);
 
   if (!d->hashdist)
-    d->hashdist = hashtable_new(HASH_DIRECT, NULL, freevalue, env);
+    d->hashdist = hashtable_new(HASH_DIRECT, NULL, env_ma_free_func, env);
 
   valueptr = hashtable_get(d->hashdist, (void*) key);
   if (!valueptr) {
