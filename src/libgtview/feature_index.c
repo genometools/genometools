@@ -244,7 +244,7 @@ int feature_index_unit_test(Env* env)
   genome_node_is_part_of_genome_node(gn2, cds1, env);
 
   /* Create a new feature index on which we can perfom some tests */
-  fi  = feature_index_new(env);
+  fi = feature_index_new(env);
 
   ensure(had_err, fi);
   ensure(had_err, !feature_index_has_seqid(fi, "test1", env));
