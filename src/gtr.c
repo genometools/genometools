@@ -70,6 +70,7 @@
 #include "tools/gt_mmapandread.h"
 #include "tools/gt_mutate.h"
 #include "tools/gt_splitfasta.h"
+#include "tools/gt_splicesiteinfo.h"
 #include "tools/gt_stat.h"
 #include "tools/gt_suffixerator.h"
 #include "tools/gt_mkfmindex.h"
@@ -196,6 +197,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "mmapandread", gt_mmapandread, env);
   toolbox_add(gtr->toolbox, "mutate", gt_mutate, env);
   toolbox_add(gtr->toolbox, "splitfasta", gt_splitfasta, env);
+  toolbox_add(gtr->toolbox, "splicesiteinfo", gt_splicesiteinfo, env);
   toolbox_add(gtr->toolbox, "stat", gt_stat, env);
   toolbox_add(gtr->toolbox, "suffixerator", gt_suffixerator, env);
   toolbox_add(gtr->toolbox, "mkfmindex", gt_mkfmindex, env);
