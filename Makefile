@@ -18,13 +18,14 @@
 CC:=gcc
 CXX:=g++
 INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
+             -I$(CURDIR)/src/external/zlib-1.2.3 \
              -I$(CURDIR)/src/external/lua-5.1.2/src \
              -I$(CURDIR)/src/external/luafilesystem-1.2.1/src \
-             -I$(CURDIR)/src/external/expat-2.0.1/lib\
-             -I$(CURDIR)/src/external/bzip2-1.0.4\
-             -I$(CURDIR)/src/external/agg-2.4/include\
-             -I$(CURDIR)/src/external/libpng-1.2.18\
-             -I$(CURDIR)/src/external/libtecla-1.6.1\
+             -I$(CURDIR)/src/external/expat-2.0.1/lib \
+             -I$(CURDIR)/src/external/bzip2-1.0.4 \
+             -I$(CURDIR)/src/external/agg-2.4/include \
+             -I$(CURDIR)/src/external/libpng-1.2.18 \
+             -I$(CURDIR)/src/external/libtecla-1.6.1 \
              -I/usr/include/cairo\
              -I/usr/local/include/cairo
 
@@ -45,7 +46,7 @@ STEST_FLAGS:=
 GT_LDFLAGS1:=$(shell test -d /usr/local/lib && echo /usr/local/lib)
 GT_LDFLAGS2:=$(shell test -d /usr/X11R6/lib && echo /usr/X11R6/lib)
 GT_LDFLAGS:=$(foreach dir,$(GT_LDFLAGS1) $(GT_LDFLAGS2),-L$(dir))
-LDLIBS:=-lm -lz
+LDLIBS:=-lm
 
 # try to set RANLIB automatically
 SYSTEM:=$(shell uname -s)
@@ -63,7 +64,8 @@ GTLIBS:=lib/libgtext.a\
         lib/libgtltr.a\
         lib/libgtcore.a\
         lib/libgtlua.a\
-        lib/libbz2.a
+        lib/libbz2.a\
+        lib/libz.a
 
 # the core GenomeTools library (no other dependencies)
 LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
@@ -166,6 +168,14 @@ LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
 LIBBZ2_OBJ:=$(LIBBZ2_SRC:%.c=obj/%.o)
 LIBBZ2_DEP:=$(LIBBZ2_SRC:%.c=obj/%.d)
 
+ZLIB_DIR:=src/external/zlib-1.2.3
+ZLIB_SRC:=$(ZLIB_DIR)/adler32.c $(ZLIB_DIR)/compress.c $(ZLIB_DIR)/crc32.c \
+          $(ZLIB_DIR)/gzio.c $(ZLIB_DIR)/uncompr.c $(ZLIB_DIR)/deflate.c \
+          $(ZLIB_DIR)/trees.c $(ZLIB_DIR)/zutil.c $(ZLIB_DIR)/inflate.c \
+          $(ZLIB_DIR)/infback.c $(ZLIB_DIR)/inftrees.c $(ZLIB_DIR)/inffast.c
+ZLIB_OBJ:=$(ZLIB_SRC:%.c=obj/%.o)
+ZLIB_DEP:=$(ZLIB_SRC:%.c=obj/%.d)
+
 SKTOOLS=$(shell grep -l Kurtz src/tools/*.c)
 
 SERVER=gordon@genometools.org
@@ -244,6 +254,14 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
+lib/libz.a: $(ZLIB_OBJ)
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@ar ru $@ $(ZLIB_OBJ)
+ifdef RANLIB
+	@$(RANLIB) $@
+endif
+
 lib/libgtcore.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h \
                  $(LIBGTCORE_OBJ)
 	@echo "[link $(@F)]"
@@ -316,7 +334,8 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-bin/skproto: obj/src/skproto.o obj/src/tools/gt_skproto.o lib/libgtcore.a lib/libbz2.a
+bin/skproto: obj/src/skproto.o obj/src/tools/gt_skproto.o lib/libgtcore.a\
+             lib/libbz2.a lib/libz.a
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CXX) $(LDFLAGS) $(GT_LDFLAGS) $^ $(LDLIBS) -o $@
@@ -415,8 +434,9 @@ obj/%.o: %.cxx
          $(LIBEXPAT_DEP) \
          $(LIBLUA_DEP) \
          $(LIBPNG_DEP) \
-         $(LIBRNV_DEP)\
-         $(LIBTECLA_DEP)
+         $(LIBRNV_DEP) \
+         $(LIBTECLA_DEP)\
+         $(ZLIB_DEP)
 
 .SUFFIXES:
 .PHONY: dist srcdist release gt install splint test clean cleanup
