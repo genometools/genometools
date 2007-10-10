@@ -26,7 +26,8 @@ BZFILE* xbzopen(const char *path, const char *mode)
 {
   BZFILE* file;
   if (!(file = BZ2_bzopen(path, mode))) {
-    fprintf(stderr, "cannot open file '%s': %s\n", path, strerror(errno));
+    fprintf(stderr, "BZ2_bzopen: cannot open file '%s': %s\n",path,
+             strerror(errno));
     exit(EXIT_FAILURE);
   }
   return file;

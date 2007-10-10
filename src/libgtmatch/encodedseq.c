@@ -1597,7 +1597,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                                   Env *env)
 {
   Encodedsequence *encseq;
-  Positionaccesstype sat;
+  Positionaccesstype sat = Undefpositionaccesstype;
   bool haserr = false;
   int retcode;
   FastaBuffer *fb = NULL;
@@ -1659,7 +1659,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                                Env *env)
 {
   Encodedsequence *encseq;
-  Positionaccesstype sat;
+  Positionaccesstype sat = Undefpositionaccesstype;
   bool haserr = false;
   int retcode;
 

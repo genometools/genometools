@@ -212,7 +212,7 @@ static int openoutfile(FILE **fp, char *filename, Env *env)
   *fp = fopen(filename,"w");
   if (*fp == NULL)
   {
-    env_error_set(env, "cannot open file \"%s\"", filename);
+    env_error_set(env, "fopen: cannot open file \"%s\"", filename);
     return -1;
   }
   return 0;

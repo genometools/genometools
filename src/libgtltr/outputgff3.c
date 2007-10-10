@@ -56,7 +56,7 @@ int printgff3format(
   fp = fopen(str_get(lo->str_gff3filename),"w");
   if (fp == NULL)
   {
-    env_error_set(env, "cannot open file \"%s\"",
+    env_error_set(env, "fopen: cannot open file \"%s\"",
                   str_get(lo->str_gff3filename));
     return -1;
   }
