@@ -422,3 +422,18 @@ int genome_feature_foreach_attribute(GenomeFeature *gf,
   }
   return had_err;
 }
+
+bool genome_features_are_similar(GenomeFeature *gf_a, GenomeFeature *gf_b)
+{
+  assert(gf_a && gf_b);
+  if (!str_cmp(genome_node_get_seqid((GenomeNode*) gf_a),
+               genome_node_get_seqid((GenomeNode*) gf_b)) &&
+      (genome_feature_get_type(gf_a) == genome_feature_get_type(gf_b)) &&
+      (!range_compare(genome_feature_get_range((GenomeNode*) gf_a),
+                      genome_feature_get_range((GenomeNode*) gf_b))) &&
+      (genome_feature_get_strand(gf_a) == genome_feature_get_strand(gf_b)) &&
+      (genome_feature_get_phase(gf_a) == genome_feature_get_phase(gf_b))) {
+    return true;
+  }
+  return false;
+}

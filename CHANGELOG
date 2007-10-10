@@ -1,10 +1,11 @@
-changes in version 1.0.4 (2007-10-10):
+changes in version 1.0.4 (2007-10-11):
 
 - `gt gff2` has new option -checkids (was the default behavior before)
 - new tool `gt chseqids` added which replaces the option -chseqids of the
   `gt gff3` tool
 - new `gt ltrharvest` tool
 - new `gt splicesiteinfo` tool
+- new `gt uniq` tool
 
 
 changes in version 1.0.3 (2007-09-12):

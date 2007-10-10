@@ -1,0 +1,4 @@
+##gff-version   3
+##sequence-region   seq 1 1000
+seq	.	gene	1	1000	.	+	.	.
+seq	.	gene	1	1000	.	+	.	.

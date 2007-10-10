@@ -26,10 +26,12 @@ full_coverage_files = [ "src/libgtcore/array.c",
                         "src/libgtext/splicesiteinfo_visitor.c",
                         "src/libgtext/stat_visitor.c",
                         "src/libgtext/swalign.c",
+                        "src/libgtext/uniq_stream.c",
                         "src/tools/gt_chseqids.c",
                         "src/tools/gt_gff3.c",
                         "src/tools/gt_splicesiteinfo.c",
-                        "src/tools/gt_stat.c"
+                        "src/tools/gt_stat.c",
+                        "src/tools/gt_uniq.c"
                       ]
 
 full_coverage_files.each do |file|

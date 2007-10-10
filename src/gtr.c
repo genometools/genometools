@@ -67,13 +67,14 @@
 #include "tools/gt_gtf_to_gff3.h"
 #include "tools/gt_ltrharvest.h"
 #include "tools/gt_merge.h"
+#include "tools/gt_mkfmindex.h"
 #include "tools/gt_mmapandread.h"
 #include "tools/gt_mutate.h"
 #include "tools/gt_splitfasta.h"
 #include "tools/gt_splicesiteinfo.h"
 #include "tools/gt_stat.h"
 #include "tools/gt_suffixerator.h"
-#include "tools/gt_mkfmindex.h"
+#include "tools/gt_uniq.h"
 #include "tools/gt_uniquesub.h"
 
 #ifdef LIBGTVIEW
@@ -201,6 +202,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "stat", gt_stat, env);
   toolbox_add(gtr->toolbox, "suffixerator", gt_suffixerator, env);
   toolbox_add(gtr->toolbox, "mkfmindex", gt_mkfmindex, env);
+  toolbox_add(gtr->toolbox, "uniq", gt_uniq, env);
   toolbox_add(gtr->toolbox, "uniquesub", gt_uniquesub, env);
 #ifdef LIBGTVIEW
   toolbox_add(gtr->toolbox, "view", gt_view, env);
