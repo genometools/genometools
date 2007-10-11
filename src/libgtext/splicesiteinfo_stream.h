@@ -30,6 +30,7 @@ const GenomeStreamClass* splicesiteinfo_stream_class(void);
 /* create a SpliceSiteInfoStream, takes ownership of RegionMapping  */
 GenomeStream*            splicesiteinfo_stream_new(GenomeStream*,
                                                    RegionMapping*, Env*);
-void                     splicesiteinfo_stream_show(GenomeStream*, Env*);
+/* returns if an intron has been processed, false otherwise */
+bool                     splicesiteinfo_stream_show(GenomeStream*, Env*);
 
 #endif

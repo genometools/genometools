@@ -17,6 +17,7 @@
 
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
+#include "libgtcore/warning.h"
 #include "libgtext/addintrons_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/splicesiteinfo_stream.h"
@@ -113,8 +114,12 @@ int gt_splicesiteinfo(int argc, const char **argv, Env *env)
     }
   }
 
-  if (!had_err)
-    splicesiteinfo_stream_show(splicesiteinfo_stream, env);
+  if (!had_err) {
+    if (!splicesiteinfo_stream_show(splicesiteinfo_stream, env)) {
+      warning("input file(s) contained no intron, use option -addintrons to "
+              "add introns automatically");
+    }
+  }
 
   /* free */
   genome_stream_delete(splicesiteinfo_stream, env);

@@ -34,7 +34,8 @@ struct SpliceSiteInfoVisitor {
   StringDistri *splicesites,
                *donorsites,
                *acceptorsites;
-  bool show;
+  bool show,
+       intron_processed;
 };
 
 #define splicesiteinfo_visitor_cast(GV)\
@@ -63,6 +64,7 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GenomeNode *intron,
   int had_err = 0;
   env_error_check(env);
   assert(ssiv && intron);
+  ssiv->intron_processed = true;
   range = genome_node_get_range(intron);
   assert(range.start); /* 1-based coordinates */
   if (range_length(range) >= 4) {
@@ -166,7 +168,7 @@ static void showsinglesite(const char *string, unsigned long occurrences,
   printf("%s: %6.2f%% (n=%lu)\n", string, probability * 100.0, occurrences);
 }
 
-void splicesiteinfo_visitor_show(GenomeVisitor *gv, Env *env)
+bool splicesiteinfo_visitor_show(GenomeVisitor *gv, Env *env)
 {
   SpliceSiteInfoVisitor *ssiv;
   env_error_check(env);
@@ -188,4 +190,5 @@ void splicesiteinfo_visitor_show(GenomeVisitor *gv, Env *env)
     printf("acceptor site distribution (for introns >= 4bp)\n");
     stringdistri_foreach(ssiv->acceptorsites, showsinglesite, NULL, env);
   }
+  return ssiv->intron_processed;
 }
