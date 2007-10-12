@@ -17,17 +17,13 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/esa-seqread.h"
-#include "libgtmatch/spacedef.h"
 #include "libgtmatch/echoseq.pr"
 
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
 
-int printgff3format(
-  LTRharvestoptions *lo,
-  Sequentialsuffixarrayreader *ssar,
-  const Seqpos *markpos,
-  Env *env)
+void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
+                     const Seqpos *markpos, Env *env)
 {
   LTRboundaries *boundaries;
   Seqpos contiglen,
@@ -52,14 +48,7 @@ int printgff3format(
   Seqpos totallength = getencseqtotallength(
                                encseqSequentialsuffixarrayreader(ssar));
 
-  FILE *fp = NULL;
-  fp = fopen(str_get(lo->str_gff3filename),"w");
-  if (fp == NULL)
-  {
-    env_error_set(env, "fopen: cannot open file \"%s\"",
-                  str_get(lo->str_gff3filename));
-    return -1;
-  }
+  FILE *fp = env_fa_xfopen(env, str_get(lo->str_gff3filename), "w");
 
   /* for getting descriptions */
   destablength = destablengthSequentialsuffixarrayreader(ssar);
@@ -245,13 +234,6 @@ int printgff3format(
       }
     }
   }
-  FREESPACE(descendtab);
-
-  if (fclose(fp) != 0)
-  {
-    env_error_set(env, "cannot close file \"%s\"",
-                  str_get(lo->str_gff3filename));
-    return -1;
-  }
-  return 0;
+  env_ma_free(descendtab, env);
+  env_fa_xfclose(fp, env);
 }
