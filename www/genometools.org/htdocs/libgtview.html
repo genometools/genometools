@@ -9,46 +9,50 @@
 <h1>The <tt>libgtview</tt> library</h1>
 <p>
 The library <tt>libgtview</tt> consists of several classes, which take part in
-three visualization  <i>phases</i>.
+three visualization  <em>phases</em>.
 </p>
-<p>
-<img src="images/dataflow.png" alt="[Dataflow]">
-</p>
+<div class="figure">
+  <p><a name="fig1"></a><img src="images/dataflow.png" alt="[Dataflow]"></p>
+  <p><b>Figure 1: </b>Schematic of the classes involved in image creation.</p>
+</div>
+
 <p>
 These phases are separated to improve performance in the kind of non-linear use often encountered in interactive applications.
 </p>
 <h2>Phase I: Feature selection</h2>
 <p>
 The GFF3 input data are parsed into a set of directed acyclic graphs
-(Fig.~\ref{gfftree}) which represent the <i>part-of</i> relationships between
+(Fig. <a href="#fig2">2</a>) which represent the <em>part-of</em> relationships between
 groups of genomic features according to the
 <a href="http://www.sequenceontology.org/">Sequence Ontology</a> hierarchy.
 </p>
+<div class="figure">
+  <p><a name="fig2"></a><img src="images/gfftree.png" alt="[GFF3 tree]"></p>
+  <p><b>Figure 2: </b>Example sequence region containing two genes and their feature graphs depicting the <em>part-of</em> relationships between their components</p>
+</div>
 <p>
-<img src="images/gfftree.png" alt="[GFF3 tree]">
-</p>
-<p>
-These graphs are then registered into a persistent <i>FeatureIndex</i> object that can be (repeatedly) queried for all the features in a genomic region of interest.
+These graphs are then registered into a persistent <em>FeatureIndex</em> object that can be (repeatedly) queried for all the features in a genomic region of interest.
 </p>
 <h2>Phase II: Layout</h2>
 <p>
-The next step consists of processing features into a structural <i>Diagram</i>
+The next step consists of processing features into a structural <em>Diagram</em>
 object which contains an abstract, output-independent layout representation.
-Features are represented by <i>Element</i> objects which are space-efficiently
-distributed into <i>Track</i>, <i>Line</i>, and <i>Block</i> objects. These
+Features are represented by <em>Element</em> objects which are space-efficiently
+distributed into <em>Track</em>, <em>Line</em>, and <em>Block</em> objects. These
 correspond to particular building blocks of the resulting diagram. This process
 can be customized through several options.
 </p>
-<p>
-<img src="images/diagram.png" alt="[Diagram]">
-</p>
+<div class="figure">
+  <p><a name="fig3"></a><img src="images/diagram.png" alt="[Diagram]"></p>
+  <p><b>Figure 3: </b>The components of the <em>Diagram</em> class reflect sections of the resulting image.</p>
+</div>
 <h2>Phase III: Rendering</h2>
 <p>
-In the final phase, the <i>Diagram</i>object is used as a blueprint to create an
+In the final phase, the <em>Diagram</em> object is used as a blueprint to create an
 image of a given type and size, considering user-defined options.
 
-Rendering logic is implemented in a <i>Render</i> class, while  the
-<i>Graphics</i> class provides methods to draw a number of primitives to a
+Rendering logic is implemented in a <em>Render</em> class, while  the
+<em>Graphics</em> class provides methods to draw a number of primitives to a
 drawing surface abstraction. It wraps around the low-level graphics library and
 allows for easy extension or replacement of the graphics back-end.
 </p>
@@ -57,17 +61,32 @@ allows for easy extension or replacement of the graphics back-end.
 By default, features are grouped by their type, resulting in one track per type.
 To obtain a shorter yet concise output, tracks for parent types in the feature
 graph can be enabled to contain all the features of their child types.
-This process is called <i>collapsing</i>.
+This process is called <em>collapsing</em>.
 </p>
-<p>
-<img src="images/collapse_types.png" alt="[Collapsing example]">
-</p>
+<div class="figure">
+  <div class="subfigure">
+  <p><a name="fig3a"></a><img class="noborder" src="images/uncollapsed.png" alt="[uncollapsed image]"></p>
+  <p>(a)</p>
+  </div>
+  <div class="subfigure">
+  <p><a name="fig3b"></a><img class="noborder" src="images/collapse_types.png" alt="[Collapsing]"></p>
+  <p>(b)</p>
+  </div>
+  <div class="subfigure">
+  <p><a name="fig3b"></a><img class="noborder" src="images/collapsed.png" alt="[collapsed image]"></p>
+  <p>(c)</p>
+  </div>
+  <div class="subfigure">
+  <p><b>Figure 3:</b> Feature collapsing. (a) shows an uncollapsed view in which all types are drawn into separate tracks. As depicted in (b), the <em>exon</em>, <em>intron</em> and <em>CDS</em> types are collapsed into their parent type's track in (c).</p>
+  </div>
+</div>
+<div style="clear:both;"></div>
 <h2>Configuration</h2>
 <p>
 The <a href="http://www.lua.org/">Lua</a> scripting language is used to provide
 user-defined settings. Settings can be imported from a script that is executed
 when loaded, thus eliminating the need for another parser. The Lua configuration
-data are made accessible to C via the <i>Config</i> class. Configurable options
+data are made accessible to C via the <em>Config</em> class. Configurable options
 include assignment of display styles to each feature type, spacer and margin
 sizes, and collapsing parameters.
 </p>
