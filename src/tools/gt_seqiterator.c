@@ -18,7 +18,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include "libgtcore/fileutils.h"
 #include "libgtcore/option.h"
 #include "libgtcore/seqiterator.h"
 #include "libgtcore/versionfunc.h"
@@ -44,34 +44,6 @@ static OPrval parse_options(bool *verbose,int *parsed_args,
                                         env);
   option_parser_delete(op, env);
   return oprval;
-}
-
-/* add this into some other more general module */
-
-static off_t estimatetotalfilesizes(const StrArray *files)
-{
-  unsigned long filenum;
-  off_t totalsize = 0;
-  struct stat sb;
-  GenFileMode gfm;
-  int fd;
-
-  for (filenum = 0; filenum < strarray_size(files); filenum++)
-  {
-    fd = xopen(strarray_get(files,filenum), O_RDONLY, 0);
-    xfstat(fd, &sb);
-    gfm = genfilemode_determine(strarray_get(files,filenum));
-    if (gfm == GFM_UNCOMPRESSED)
-    {
-      totalsize += sb.st_size;
-    } else
-    {
-      totalsize += (4*sb.st_size); /* expected compression rate for
-                                      sequence is 0.25 */
-    }
-    xclose(fd);
-  }
-  return totalsize;
 }
 
 int gt_seqiterator(int argc, const char **argv, Env *env)
@@ -100,7 +72,7 @@ int gt_seqiterator(int argc, const char **argv, Env *env)
     strarray_add_cstr(files, argv[i], env);
   }
 
-  totalsize = estimatetotalfilesizes(files);
+  totalsize = files_estimate_total_size(files);
   printf("# estimated total size is %llu\n",(unsigned long long) totalsize);
   seqit = seqiterator_new(files, NULL, true, env);
   if (verbose)

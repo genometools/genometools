@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -125,4 +126,30 @@ int file_find_in_path(Str *path, const char *file, Env *env)
   splitter_delete(splitter, env);
 
   return had_err;
+}
+
+off_t files_estimate_total_size(const StrArray *filenames)
+{
+  unsigned long filenum;
+  off_t totalsize = 0;
+  struct stat sb;
+  GenFileMode gfm;
+  int fd;
+
+  for (filenum = 0; filenum < strarray_size(filenames); filenum++)
+  {
+    fd = xopen(strarray_get(filenames,filenum), O_RDONLY, 0);
+    xfstat(fd, &sb);
+    gfm = genfilemode_determine(strarray_get(filenames,filenum));
+    if (gfm == GFM_UNCOMPRESSED)
+    {
+      totalsize += sb.st_size;
+    } else
+    {
+      totalsize += (4*sb.st_size); /* expected compression rate for
+                                      sequence is 0.25 */
+    }
+    xclose(fd);
+  }
+  return totalsize;
 }
