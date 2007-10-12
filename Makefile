@@ -408,7 +408,7 @@ src/libgtcore/checkbitpackstring-int.c: src/libgtcore/checkbitpackstring.templat
 obj/%.o: %.c
 	@echo "[compile $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) $(EXT_FLAGS) \
+	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) $(EXT_FLAGS)\
         -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 obj/%.o: %.cxx
