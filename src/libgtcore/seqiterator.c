@@ -96,7 +96,7 @@ int seqiterator_next(SeqIterator *seqit,
       seqit->exhausted = true;
       break;
     }
-    if(seqit->currentread < seqit->maxread)
+    if (seqit->currentread < seqit->maxread)
     {
       seqit->currentread++;
     }

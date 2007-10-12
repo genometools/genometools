@@ -55,12 +55,12 @@ static off_t estimatetotalfilesizes(const StrArray *files)
   GenFileMode gfm;
   int fd;
 
-  for(filenum = 0; filenum < strarray_size(files); filenum++)
+  for (filenum = 0; filenum < strarray_size(files); filenum++)
   {
     fd = xopen(strarray_get(files,filenum), O_RDONLY, 0);
     xfstat(fd, &sb);
     gfm = genfilemode_determine(strarray_get(files,filenum));
-    if(gfm == GFM_UNCOMPRESSED)
+    if (gfm == GFM_UNCOMPRESSED)
     {
       totalsize += sb.st_size;
     } else
@@ -102,7 +102,7 @@ int gt_seqiterator(int argc, const char **argv, Env *env)
   totalsize = estimatetotalfilesizes(files);
   printf("# estimated total size is %llu\n",(unsigned long long) totalsize);
   seqit = seqiterator_new(files, NULL, true, env);
-  if(verbose)
+  if (verbose)
   {
     progressbar_start(getcurrentcounter(seqit,(unsigned long long) totalsize),
                     (unsigned long long) totalsize);
@@ -110,14 +110,14 @@ int gt_seqiterator(int argc, const char **argv, Env *env)
   while (true)
   {
     had_err = seqiterator_next(seqit, &sequence, &len, &desc, env);
-    if(had_err != 1)
+    if (had_err != 1)
     {
       break;
     }
     env_ma_free(desc, env);
   }
   seqiterator_delete(seqit, env);
-  if(verbose)
+  if (verbose)
   {
     progressbar_stop();
   }
