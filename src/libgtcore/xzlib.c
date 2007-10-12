@@ -26,7 +26,7 @@ gzFile xgzopen(const char *path, const char *mode)
 {
   gzFile file;
   if (!(file = gzopen(path, mode))) {
-    fprintf(stderr, "gzopen: cannot open file '%s': %s\n", path, 
+    fprintf(stderr, "gzopen(): cannot open file '%s': %s\n", path,
             strerror(errno));
     exit(EXIT_FAILURE);
   }

@@ -68,7 +68,7 @@ FILE *xfopen(const char *path, const char *mode)
 {
   FILE *file;
   if ((file = fopen(path, mode)) == NULL) {
-    fprintf(stderr, "fopen: cannot open file '%s': %s\n", path, 
+    fprintf(stderr, "fopen(): cannot open file '%s': %s\n", path,
             strerror(errno));
     exit(EXIT_FAILURE);
   }
