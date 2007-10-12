@@ -39,7 +39,7 @@ int gt_mmapandread(int argc, const char **argv, Env *env)
   int i, fd, parsed_args;
   void *map;
   struct stat sb;
-  unsigned long j;
+  unsigned long long j;
   unsigned int byte = 0;
   env_error_check(env);
 
@@ -69,8 +69,8 @@ int gt_mmapandread(int argc, const char **argv, Env *env)
       /* read file */
       printf("reading file \"%s\"\n", argv[i]);
       j = 0;
-      progressbar_start(&j, (unsigned long) sb.st_size);
-      for (; j < (unsigned long) sb.st_size; j++)
+      progressbar_start(&j, (unsigned long long) sb.st_size);
+      for (; j < (unsigned long long) sb.st_size; j++)
         byte |= (unsigned int) ((char*) map)[j];
       progressbar_stop();
 

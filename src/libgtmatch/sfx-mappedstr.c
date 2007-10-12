@@ -458,7 +458,7 @@ static int getencseqkmersgeneric(
                       Env *env)
 {
   unsigned int overshoot;
-  Seqpos currentposition;
+  Seqpos currentposition = 0;
   Streamstate spwp;
   Uchar charcode;
   bool haserr = false;

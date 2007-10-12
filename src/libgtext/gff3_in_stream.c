@@ -35,7 +35,7 @@ struct GFF3InStream
        file_is_open,
        be_verbose;
   GenFile *fpin;
-  unsigned long line_number;
+  unsigned long long line_number;
   Queue *genome_node_buffer;
   GFF3Parser *gff3_parser;
 };
@@ -117,8 +117,9 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
       }
       if (!had_err && is->fpin && is->be_verbose) {
         progressbar_start(&is->line_number,
+                          (unsigned long long) 
                           file_number_of_lines(strarray_get(is->files,
-                                                            is->next_file-1),
+                                               is->next_file-1),
                                                env));
       }
     }
@@ -135,9 +136,11 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
     if (had_err)
       break;
     if (status_code != EOF) {
-      had_err = gff3parser_parse_genome_nodes(&status_code, is->gff3_parser,
+      had_err = gff3parser_parse_genome_nodes(&status_code, 
+                                              is->gff3_parser,
                                               is->genome_node_buffer,
-                                              filenamestr, &is->line_number,
+                                              filenamestr, 
+                                              &is->line_number,
                                               is->fpin, env);
       if (had_err)
         break;
