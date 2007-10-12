@@ -207,42 +207,30 @@ static int overallpredictionsequences(const LTRharvestoptions *lo,
   return 0;
 }
 
-static int openoutfile(FILE **fp, char *filename, Env *env)
-{
-  *fp = fopen(filename,"w");
-  if (*fp == NULL)
-  {
-    env_error_set(env, "fopen: cannot open file \"%s\"", filename);
-    return -1;
-  }
-  return 0;
-}
-
 /*
  The following function prints sequences in multiple FASTA format to the
  specified output.
- */
+*/
 int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
-		       Seqpos *markpos,
-		       bool innerregion,
-		       unsigned int linewidth,
-                       Sequentialsuffixarrayreader *ssar,
-		       bool showseqnum,
-		       Env *env)
+		                 Seqpos *markpos,
+		                 bool innerregion,
+		                 unsigned int linewidth,
+                                 Sequentialsuffixarrayreader *ssar,
+		                 bool showseqnum,
+		                 Env *env)
 {
   Fastaoutinfo fastaoutinfo;
   FILE *formatout = NULL;
   unsigned long *descendtab = NULL,
                 destablength;
   const char *destab = NULL;
+  int had_err;
 
-  if (openoutfile(&formatout,
-     innerregion ? str_get(lo->str_fastaoutputfilenameinnerregion)
-                           : str_get(lo->str_fastaoutputfilename),
-     env) != 0 )
-  {
-    return -1;
-  }
+  formatout = env_fa_xfopen(env,
+                            innerregion
+                            ? str_get(lo->str_fastaoutputfilenameinnerregion)
+                            : str_get(lo->str_fastaoutputfilename),
+                            "w");
 
   fastaoutinfo.ssar = ssar;
   fastaoutinfo.encseq = encseqSequentialsuffixarrayreader(ssar);
@@ -266,24 +254,11 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   fastaoutinfo.destab = destab;
   fastaoutinfo.descendtab = descendtab;
 
-  if (overallpredictionsequences(lo,
-				ssar,
-                                innerregion,
-                                &fastaoutinfo,
-				showpredictionfastasequence,
-				env) != 0)
-  {
-    return -1;
-  }
+  had_err = overallpredictionsequences(lo, ssar, innerregion, &fastaoutinfo,
+				       showpredictionfastasequence, env);
 
-  FREESPACE(descendtab);
-
-  if (fclose(formatout) != 0)
-  {
-    env_error_set(env, "cannot close file \"%s\"",
-                       str_get(lo->str_fastaoutputfilename));
-    return -1;
-  }
+  env_ma_free(descendtab, env);
+  env_fa_xfclose(formatout, env);
 
   return 0;
 }
