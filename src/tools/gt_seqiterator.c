@@ -77,8 +77,10 @@ int gt_seqiterator(int argc, const char **argv, Env *env)
   seqit = seqiterator_new(files, NULL, true, env);
   if (verbose)
   {
-    progressbar_start(getcurrentcounter(seqit,(unsigned long long) totalsize),
-                    (unsigned long long) totalsize);
+    progressbar_start(seqiterator_getcurrentcounter(seqit, (unsigned long long)
+                                                           totalsize),
+                                                           (unsigned long long)
+                                                           totalsize);
   }
   while (true)
   {

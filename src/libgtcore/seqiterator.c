@@ -35,13 +35,6 @@ struct SeqIterator
                      maxread;
 };
 
-const unsigned long long *getcurrentcounter(SeqIterator *seqit,
-                                            unsigned long long maxread)
-{
-  seqit->maxread = maxread;
-  return &seqit->currentread;
-}
-
 SeqIterator* seqiterator_new(const StrArray *filenametab,
                              const Uchar *symbolmap,
                              bool withsequence,
@@ -150,6 +143,14 @@ int seqiterator_next(SeqIterator *seqit,
     return 1;
   }
   return 0;
+}
+
+const unsigned long long *seqiterator_getcurrentcounter(SeqIterator *seqit,
+                                                        unsigned long long
+                                                        maxread)
+{
+  seqit->maxread = maxread;
+  return &seqit->currentread;
 }
 
 void seqiterator_delete(SeqIterator *seqit, Env *env)

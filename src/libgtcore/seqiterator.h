@@ -29,8 +29,8 @@ SeqIterator* seqiterator_new(const StrArray *filenametab,
                              const Uchar *symbolmap, bool withsequence, Env*);
 int          seqiterator_next(SeqIterator*, const Uchar **sequence,
                               unsigned long *len, char **desc, Env*);
+const unsigned long long*
+             seqiterator_getcurrentcounter(SeqIterator*, unsigned long long);
 void         seqiterator_delete(SeqIterator*, Env*);
-const unsigned long long *getcurrentcounter(SeqIterator *,
-                                            unsigned long long);
 
 #endif
