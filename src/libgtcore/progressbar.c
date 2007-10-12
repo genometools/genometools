@@ -32,10 +32,11 @@
                                        snprintf() statment producing the bar! */
 
 static int window_size; /* the window size of the terminal */
-static unsigned long last_computation;
-static unsigned long processed_counter;
-static unsigned long computed_eta;
-static volatile const unsigned long *computation_counter; /* progress counter */
+static unsigned long long last_computation;
+static unsigned long long processed_counter;
+static unsigned long long computed_eta;
+static volatile const unsigned long long *computation_counter; 
+          /* progress counter */
 static volatile sig_atomic_t window_resized;
 static time_t computation_start,
               computed_eta_time,
@@ -191,8 +192,8 @@ static void sig_winch(int sigraised)
   window_resized = 1;
 }
 
-void progressbar_start(const unsigned long *current_computation,
-                       unsigned long number_of_computations)
+void progressbar_start(const unsigned long long *current_computation,
+                       unsigned long long number_of_computations)
 {
   computation_counter = current_computation;
   last_computation = number_of_computations;
@@ -215,7 +216,11 @@ void progressbar_stop(void)
     return;
   /* ensure the complete bar has been shown */
   if (processed_counter != last_computation) {
+    /*
+    printf("computation_counter = %lu, last_computation=%lu\n",
+            *computation_counter,last_computation);
     assert(*computation_counter == last_computation);
+    */
     refresh_progressbar();
   }
   xwrite(STDOUT_FILENO, "\n", 1); /* trailing newline */

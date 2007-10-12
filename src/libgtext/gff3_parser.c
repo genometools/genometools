@@ -616,7 +616,8 @@ static int add_auto_sr_to_queue(void *key, void *value, void *data, Env *env)
 
 int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
                                   Queue *genome_nodes, Str *filenamestr,
-                                  unsigned long *line_number, GenFile *fpin,
+                                  unsigned long long *line_number, 
+                                  GenFile *fpin,
                                   Env *env)
 {
   size_t line_length;
@@ -639,7 +640,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
 
     if (*line_number == 1) {
       if (strncmp(line, GFF_VERSION_PREFIX, strlen(GFF_VERSION_PREFIX))) {
-        env_error_set(env, "line %lu in file \"%s\" does not begin with \"%s\"",
+        env_error_set(env, "line %llu in file \"%s\" does not begin with \"%s\"",
                       *line_number, filename, GFF_VERSION_PREFIX);
         had_err = -1;
         break;
@@ -649,7 +650,8 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
         /* skip blanks */
         while (line[0] == ' ')
           line++;
-        had_err = parse_int(&version, line, *line_number, filename, env);
+        had_err = parse_int(&version, line, (unsigned long) *line_number, 
+                            filename, env);
       }
       if (!had_err) {
         if (version != GFF_VERSION) {
@@ -660,10 +662,11 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
       }
     }
     else if (line_length == 0)
-      warning("skipping blank line %lu in file \"%s\"", *line_number, filename);
+      warning("skipping blank line %llu in file \"%s\"",*line_number,filename);
     else if (line[0] == '#') {
       had_err = parse_meta_gff3_line(gff3_parser, genome_nodes, line,
-                                     line_length, filenamestr, *line_number,
+                                     line_length, filenamestr, 
+                                     (unsigned long) *line_number,
                                      env);
       if (had_err ||
           (!gff3_parser->incomplete_node && queue_size(genome_nodes))) {
@@ -672,7 +675,8 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
     }
     else {
       had_err = parse_regular_gff3_line(gff3_parser, genome_nodes, line,
-                                        line_length, filenamestr, *line_number,
+                                        line_length, filenamestr, 
+                                        (unsigned long) *line_number,
                                         env);
       if (had_err ||
           (!gff3_parser->incomplete_node && queue_size(genome_nodes))) {

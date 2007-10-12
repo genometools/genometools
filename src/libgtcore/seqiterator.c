@@ -31,7 +31,13 @@ struct SeqIterator
   ArrayUchar sequencebuffer;
   unsigned long long unitnum;
   bool withsequence, exhausted;
+  unsigned long long currentread;
 };
+
+const unsigned long long *getcurrentcounter(const SeqIterator *seqit)
+{
+  return &seqit->currentread;
+}
 
 SeqIterator* seqiterator_new(const StrArray *filenametab,
                              const Uchar *symbolmap,
@@ -53,6 +59,7 @@ SeqIterator* seqiterator_new(const StrArray *filenametab,
   seqit->exhausted = false;
   seqit->unitnum = 0;
   seqit->withsequence = withsequence;
+  seqit->currentread = 0;
   return seqit;
 }
 
@@ -86,6 +93,7 @@ int seqiterator_next(SeqIterator *seqit,
       seqit->exhausted = true;
       break;
     }
+    seqit->currentread++;
     if (charcode == (Uchar) SEPARATOR)
     {
       if (seqit->sequencebuffer.nextfreeUchar == 0 && seqit->withsequence)
