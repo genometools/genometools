@@ -35,8 +35,7 @@ static int window_size; /* the window size of the terminal */
 static unsigned long long last_computation;
 static unsigned long long processed_counter;
 static unsigned long long computed_eta;
-static volatile const unsigned long long *computation_counter; 
-          /* progress counter */
+static volatile const unsigned long long *computation_counter; /* progress counter */
 static volatile sig_atomic_t window_resized;
 static time_t computation_start,
               computed_eta_time,
@@ -216,11 +215,7 @@ void progressbar_stop(void)
     return;
   /* ensure the complete bar has been shown */
   if (processed_counter != last_computation) {
-    /*
-    printf("computation_counter = %lu, last_computation=%lu\n",
-            *computation_counter,last_computation);
     assert(*computation_counter == last_computation);
-    */
     refresh_progressbar();
   }
   xwrite(STDOUT_FILENO, "\n", 1); /* trailing newline */
