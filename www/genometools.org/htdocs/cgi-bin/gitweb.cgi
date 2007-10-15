@@ -2211,7 +2211,10 @@ sub blob_mimetype {
 	# just in case
 	return $default_blob_plain_mimetype unless $fd;
 
-	if (-T $fd) {
+        # XXX: the following line replaced this if (-T $fd) {
+        # because for unknown reasons perl on OpenBSD returns this:
+        # -T and -B not implemented on filehandles
+	if (1) {
 		return 'text/plain' .
 		       ($default_text_plain_charset ? '; charset='.$default_text_plain_charset : '');
 	} elsif (! $filename) {
