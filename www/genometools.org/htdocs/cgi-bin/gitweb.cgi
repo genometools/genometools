@@ -19,11 +19,11 @@ use File::Basename qw(basename);
 binmode STDOUT, ':utf8';
 
 BEGIN {
-	CGI->compile() if $ENV{MOD_PERL};
+	CGI->compile() if $ENV{'MOD_PERL'};
 }
 
 our $cgi = new CGI;
-our $version = "1.5.0.3";
+our $version = "1.5.3.4";
 our $my_url = $cgi->url();
 our $my_uri = $cgi->url(-absolute => 1);
 
@@ -71,6 +71,13 @@ our $logo_label = "git homepage";
 # source of projects list
 our $projects_list = "";
 
+# the width (in characters) of the projects list "Description" column
+our $projects_list_description_width = 25;
+
+# default order of projects list
+# valid values are none, project, descr, owner, and age
+our $default_projects_order = "project";
+
 # show repository only if this file exists
 # (only effective if this variable evaluates to true)
 our $export_ok = "";
@@ -90,6 +97,66 @@ our $default_text_plain_charset  = undef;
 # (relative to the current git repository)
 our $mimetypes_file = undef;
 
+# assume this charset if line contains non-UTF-8 characters;
+# it should be valid encoding (see Encoding::Supported(3pm) for list),
+# for which encoding all byte sequences are valid, for example
+# 'iso-8859-1' aka 'latin1' (it is decoded without checking, so it
+# could be even 'utf-8' for the old behavior)
+our $fallback_encoding = 'latin1';
+
+# rename detection options for git-diff and git-diff-tree
+# - default is '-M', with the cost proportional to
+#   (number of removed files) * (number of new files).
+# - more costly is '-C' (which implies '-M'), with the cost proportional to
+#   (number of changed files + number of removed files) * (number of new files)
+# - even more costly is '-C', '--find-copies-harder' with cost
+#   (number of files in the original tree) * (number of new files)
+# - one might want to include '-B' option, e.g. '-B', '-M'
+our @diff_opts = ('-M'); # taken from git_commit
+
+# information about snapshot formats that gitweb is capable of serving
+our %known_snapshot_formats = (
+	# name => {
+	# 	'display' => display name,
+	# 	'type' => mime type,
+	# 	'suffix' => filename suffix,
+	# 	'format' => --format for git-archive,
+	# 	'compressor' => [compressor command and arguments]
+	# 	                (array reference, optional)}
+	#
+	'tgz' => {
+		'display' => 'tar.gz',
+		'type' => 'application/x-gzip',
+		'suffix' => '.tar.gz',
+		'format' => 'tar',
+		'compressor' => ['gzip']},
+
+	'tbz2' => {
+		'display' => 'tar.bz2',
+		'type' => 'application/x-bzip2',
+		'suffix' => '.tar.bz2',
+		'format' => 'tar',
+		'compressor' => ['bzip2']},
+
+	'zip' => {
+		'display' => 'zip',
+		'type' => 'application/x-zip',
+		'suffix' => '.zip',
+		'format' => 'zip'},
+);
+
+# Aliases so we understand old gitweb.snapshot values in repository
+# configuration.
+our %known_snapshot_format_aliases = (
+	'gzip'  => 'tgz',
+	'bzip2' => 'tbz2',
+
+	# backward compatibility: legacy gitweb config support
+	'x-gzip' => undef, 'gz' => undef,
+	'x-bzip2' => undef, 'bz2' => undef,
+	'x-zip' => undef, '' => undef,
+);
+
 # You define site-wide feature defaults here; override them with
 # $GITWEB_CONFIG as necessary.
 our %feature = (
@@ -98,9 +165,12 @@ our %feature = (
 	# 	'override' => allow-override (boolean),
 	# 	'default' => [ default options...] (array reference)}
 	#
-	# if feature is overridable (it means that allow-override has true value,
+	# if feature is overridable (it means that allow-override has true value),
 	# then feature-sub will be called with default options as parameters;
 	# return value of feature-sub indicates if to enable specified feature
+	#
+	# if there is no 'sub' key (no feature-sub), then feature cannot be
+	# overriden
 	#
 	# use gitweb_check_feature(<feature>) to check if <feature> is enabled
 
@@ -117,24 +187,40 @@ our %feature = (
 		'override' => 0,
 		'default' => [0]},
 
-	# Enable the 'snapshot' link, providing a compressed tarball of any
+	# Enable the 'snapshot' link, providing a compressed archive of any
 	# tree. This can potentially generate high traffic if you have large
 	# project.
 
+	# Value is a list of formats defined in %known_snapshot_formats that
+	# you wish to offer.
 	# To disable system wide have in $GITWEB_CONFIG
-	# $feature{'snapshot'}{'default'} = [undef];
+	# $feature{'snapshot'}{'default'} = [];
 	# To have project specific config enable override in $GITWEB_CONFIG
 	# $feature{'snapshot'}{'override'} = 1;
-	# and in project config gitweb.snapshot = none|gzip|bzip2;
+	# and in project config, a comma-separated list of formats or "none"
+	# to disable.  Example: gitweb.snapshot = tbz2,zip;
 	'snapshot' => {
 		'sub' => \&feature_snapshot,
 		'override' => 0,
-		#         => [content-encoding, suffix, program]
-		'default' => ['x-gzip', 'gz', 'gzip']},
+		'default' => ['tgz']},
 
 	# Enable text search, which will list the commits which match author,
 	# committer or commit text to a given string.  Enabled by default.
+	# Project specific override is not supported.
 	'search' => {
+		'override' => 0,
+		'default' => [1]},
+
+	# Enable grep search, which will list the files in currently selected
+	# tree containing the given string. Enabled by default. This can be
+	# potentially CPU-intensive, of course.
+
+	# To enable system wide have in $GITWEB_CONFIG
+	# $feature{'grep'}{'default'} = [1];
+	# To have project specific config enable override in $GITWEB_CONFIG
+	# $feature{'grep'}{'override'} = 1;
+	# and in project config gitweb.grep = 0|1;
+	'grep' => {
 		'override' => 0,
 		'default' => [1]},
 
@@ -176,8 +262,8 @@ our %feature = (
 	# projects matching $projname/*.git will not be shown in the main
 	# projects list, instead a '+' mark will be added to $projname
 	# there and a 'forks' view will be enabled for the project, listing
-	# all the forks. This feature is supported only if project list
-	# is taken from a directory, not file.
+	# all the forks. If project list is taken from a file, forks have
+	# to be listed after the main project.
 
 	# To enable system wide have in $GITWEB_CONFIG
 	# $feature{'forks'}{'default'} = [1];
@@ -215,26 +301,27 @@ sub feature_blame {
 }
 
 sub feature_snapshot {
-	my ($ctype, $suffix, $command) = @_;
+	my (@fmts) = @_;
 
 	my ($val) = git_get_project_config('snapshot');
 
-	if ($val eq 'gzip') {
-		return ('x-gzip', 'gz', 'gzip');
-	} elsif ($val eq 'bzip2') {
-		return ('x-bzip2', 'bz2', 'bzip2');
-	} elsif ($val eq 'none') {
-		return ();
+	if ($val) {
+		@fmts = ($val eq 'none' ? () : split /\s*[,\s]\s*/, $val);
 	}
 
-	return ($ctype, $suffix, $command);
+	return @fmts;
 }
 
-sub gitweb_have_snapshot {
-	my ($ctype, $suffix, $command) = gitweb_check_feature('snapshot');
-	my $have_snapshot = (defined $ctype && defined $suffix);
+sub feature_grep {
+	my ($val) = git_get_project_config('grep', '--bool');
 
-	return $have_snapshot;
+	if ($val eq 'true') {
+		return (1);
+	} elsif ($val eq 'false') {
+		return (0);
+	}
+
+	return ($_[0]);
 }
 
 sub feature_pickaxe {
@@ -265,15 +352,17 @@ sub check_export_ok {
 		(!$export_ok || -e "$dir/$export_ok"));
 }
 
-# rename detection options for git-diff and git-diff-tree
-# - default is '-M', with the cost proportional to
-#   (number of removed files) * (number of new files).
-# - more costly is '-C' (or '-C', '-M'), with the cost proportional to
-#   (number of changed files + number of removed files) * (number of new files)
-# - even more costly is '-C', '--find-copies-harder' with cost
-#   (number of files in the original tree) * (number of new files)
-# - one might want to include '-B' option, e.g. '-B', '-M'
-our @diff_opts = ('-M'); # taken from git_commit
+# process alternate names for backward compatibility
+# filter out unsupported (unknown) snapshot formats
+sub filter_snapshot_fmts {
+	my @fmts = @_;
+
+	@fmts = map {
+		exists $known_snapshot_format_aliases{$_} ?
+		       $known_snapshot_format_aliases{$_} : $_} @fmts;
+	@fmts = grep(exists $known_snapshot_formats{$_}, @fmts);
+
+}
 
 our $GITWEB_CONFIG = $ENV{'GITWEB_CONFIG'} || "gitweb_config.perl";
 do $GITWEB_CONFIG if -e $GITWEB_CONFIG;
@@ -341,6 +430,22 @@ if (defined $hash_base) {
 	}
 }
 
+my %allowed_options = (
+	"--no-merges" => [ qw(rss atom log shortlog history) ],
+);
+
+our @extra_options = $cgi->param('opt');
+if (defined @extra_options) {
+	foreach my $opt (@extra_options) {
+		if (not exists $allowed_options{$opt}) {
+			die_error(undef, "Invalid option parameter");
+		}
+		if (not grep(/^$action$/, @{$allowed_options{$opt}})) {
+			die_error(undef, "Invalid option parameter for this action");
+		}
+	}
+}
+
 our $hash_parent_base = $cgi->param('hpb');
 if (defined $hash_parent_base) {
 	if (!validate_refname($hash_parent_base)) {
@@ -356,22 +461,20 @@ if (defined $page) {
 	}
 }
 
-our $searchtext = $cgi->param('s');
-if (defined $searchtext) {
-	if ($searchtext =~ m/[^a-zA-Z0-9_\.\/\-\+\:\@ ]/) {
-		die_error(undef, "Invalid search parameter");
-	}
-	if (length($searchtext) < 2) {
-		die_error(undef, "At least two characters are required for search parameter");
-	}
-	$searchtext = quotemeta $searchtext;
-}
-
 our $searchtype = $cgi->param('st');
 if (defined $searchtype) {
 	if ($searchtype =~ m/[^a-z]/) {
 		die_error(undef, "Invalid searchtype parameter");
 	}
+}
+
+our $searchtext = $cgi->param('s');
+our $search_regexp;
+if (defined $searchtext) {
+	if (length($searchtext) < 2) {
+		die_error(undef, "At least two characters are required for search parameter");
+	}
+	$search_regexp = quotemeta $searchtext;
 }
 
 # now read PATH_INFO and use it as alternative to parameters
@@ -454,10 +557,16 @@ my %actions = (
 	"project_index" => \&git_project_index,
 );
 
-if (defined $project) {
-	$action ||= 'summary';
-} else {
-	$action ||= 'project_list';
+if (!defined $action) {
+	if (defined $hash) {
+		$action = git_get_type($hash);
+	} elsif (defined $hash_base && defined $file_name) {
+		$action = git_get_type("$hash_base:$file_name");
+	} elsif (defined $project) {
+		$action = 'summary';
+	} else {
+		$action = 'project_list';
+	}
 }
 if (!defined($actions{$action})) {
 	die_error(undef, "Unknown action");
@@ -493,6 +602,8 @@ sub href(%) {
 		order => "o",
 		searchtext => "s",
 		searchtype => "st",
+		snapshot_format => "sf",
+		extra_options => "opt",
 	);
 	my %mapping = @mapping;
 
@@ -515,7 +626,13 @@ sub href(%) {
 	for (my $i = 0; $i < @mapping; $i += 2) {
 		my ($name, $symbol) = ($mapping[$i], $mapping[$i+1]);
 		if (defined $params{$name}) {
-			push @result, $symbol . "=" . esc_param($params{$name});
+			if (ref($params{$name}) eq "ARRAY") {
+				foreach my $par (@{$params{$name}}) {
+					push @result, $symbol . "=" . esc_param($par);
+				}
+			} else {
+				push @result, $symbol . "=" . esc_param($params{$name});
+			}
 		}
 	}
 	$href .= "?" . join(';', @result) if scalar @result;
@@ -560,10 +677,18 @@ sub validate_refname {
 	return $input;
 }
 
-# very thin wrapper for decode("utf8", $str, Encode::FB_DEFAULT);
+# decode sequences of octets in utf8 into Perl's internal form,
+# which is utf-8 with utf8 flag set if needed.  gitweb writes out
+# in utf-8 thanks to "binmode STDOUT, ':utf8'" at beginning
 sub to_utf8 {
 	my $str = shift;
-	return decode("utf8", $str, Encode::FB_DEFAULT);
+	my $res;
+	eval { $res = decode_utf8($str, Encode::FB_CROAK); };
+	if (defined $res) {
+		return $res;
+	} else {
+		return decode($fallback_encoding, $str, Encode::FB_DEFAULT);
+	}
 }
 
 # quote unsafe chars, but keep the slash, even when it's not
@@ -591,7 +716,7 @@ sub esc_html ($;%) {
 	my %opts = @_;
 
 	$str = to_utf8($str);
-	$str = escapeHTML($str);
+	$str = $cgi->escapeHTML($str);
 	if ($opts{'-nbsp'}) {
 		$str =~ s/ /&nbsp;/g;
 	}
@@ -605,7 +730,7 @@ sub esc_path {
 	my %opts = @_;
 
 	$str = to_utf8($str);
-	$str = escapeHTML($str);
+	$str = $cgi->escapeHTML($str);
 	if ($opts{'-nbsp'}) {
 		$str =~ s/ /&nbsp;/g;
 	}
@@ -724,7 +849,9 @@ sub chop_str {
 sub age_class {
 	my $age = shift;
 
-	if ($age < 60*60*2) {
+	if (!defined $age) {
+		return "noage";
+	} elsif ($age < 60*60*2) {
 		return "age0";
 	} elsif ($age < 60*60*24*2) {
 		return "age1";
@@ -765,11 +892,25 @@ sub age_string {
 	return $age_str;
 }
 
+use constant {
+	S_IFINVALID => 0030000,
+	S_IFGITLINK => 0160000,
+};
+
+# submodule/subproject, a commit object reference
+sub S_ISGITLINK($) {
+	my $mode = shift;
+
+	return (($mode & S_IFMT) == S_IFGITLINK)
+}
+
 # convert file mode in octal to symbolic file mode string
 sub mode_str {
 	my $mode = oct shift;
 
-	if (S_ISDIR($mode & S_IFMT)) {
+	if (S_ISGITLINK($mode)) {
+		return 'm---------';
+	} elsif (S_ISDIR($mode & S_IFMT)) {
 		return 'drwxr-xr-x';
 	} elsif (S_ISLNK($mode)) {
 		return 'lrwxrwxrwx';
@@ -795,7 +936,9 @@ sub file_type {
 		$mode = oct $mode;
 	}
 
-	if (S_ISDIR($mode & S_IFMT)) {
+	if (S_ISGITLINK($mode)) {
+		return "submodule";
+	} elsif (S_ISDIR($mode & S_IFMT)) {
 		return "directory";
 	} elsif (S_ISLNK($mode)) {
 		return "symlink";
@@ -816,7 +959,9 @@ sub file_type_long {
 		$mode = oct $mode;
 	}
 
-	if (S_ISDIR($mode & S_IFMT)) {
+	if (S_ISGITLINK($mode)) {
+		return "submodule";
+	} elsif (S_ISDIR($mode & S_IFMT)) {
 		return "directory";
 	} elsif (S_ISLNK($mode)) {
 		return "symlink";
@@ -895,23 +1040,231 @@ sub format_subject_html {
 	}
 }
 
-# format patch (diff) line (rather not to be used for diff headers)
+# format git diff header line, i.e. "diff --(git|combined|cc) ..."
+sub format_git_diff_header_line {
+	my $line = shift;
+	my $diffinfo = shift;
+	my ($from, $to) = @_;
+
+	if ($diffinfo->{'nparents'}) {
+		# combined diff
+		$line =~ s!^(diff (.*?) )"?.*$!$1!;
+		if ($to->{'href'}) {
+			$line .= $cgi->a({-href => $to->{'href'}, -class => "path"},
+			                 esc_path($to->{'file'}));
+		} else { # file was deleted (no href)
+			$line .= esc_path($to->{'file'});
+		}
+	} else {
+		# "ordinary" diff
+		$line =~ s!^(diff (.*?) )"?a/.*$!$1!;
+		if ($from->{'href'}) {
+			$line .= $cgi->a({-href => $from->{'href'}, -class => "path"},
+			                 'a/' . esc_path($from->{'file'}));
+		} else { # file was added (no href)
+			$line .= 'a/' . esc_path($from->{'file'});
+		}
+		$line .= ' ';
+		if ($to->{'href'}) {
+			$line .= $cgi->a({-href => $to->{'href'}, -class => "path"},
+			                 'b/' . esc_path($to->{'file'}));
+		} else { # file was deleted
+			$line .= 'b/' . esc_path($to->{'file'});
+		}
+	}
+
+	return "<div class=\"diff header\">$line</div>\n";
+}
+
+# format extended diff header line, before patch itself
+sub format_extended_diff_header_line {
+	my $line = shift;
+	my $diffinfo = shift;
+	my ($from, $to) = @_;
+
+	# match <path>
+	if ($line =~ s!^((copy|rename) from ).*$!$1! && $from->{'href'}) {
+		$line .= $cgi->a({-href=>$from->{'href'}, -class=>"path"},
+		                       esc_path($from->{'file'}));
+	}
+	if ($line =~ s!^((copy|rename) to ).*$!$1! && $to->{'href'}) {
+		$line .= $cgi->a({-href=>$to->{'href'}, -class=>"path"},
+		                 esc_path($to->{'file'}));
+	}
+	# match single <mode>
+	if ($line =~ m/\s(\d{6})$/) {
+		$line .= '<span class="info"> (' .
+		         file_type_long($1) .
+		         ')</span>';
+	}
+	# match <hash>
+	if ($line =~ m/^index [0-9a-fA-F]{40},[0-9a-fA-F]{40}/) {
+		# can match only for combined diff
+		$line = 'index ';
+		for (my $i = 0; $i < $diffinfo->{'nparents'}; $i++) {
+			if ($from->{'href'}[$i]) {
+				$line .= $cgi->a({-href=>$from->{'href'}[$i],
+				                  -class=>"hash"},
+				                 substr($diffinfo->{'from_id'}[$i],0,7));
+			} else {
+				$line .= '0' x 7;
+			}
+			# separator
+			$line .= ',' if ($i < $diffinfo->{'nparents'} - 1);
+		}
+		$line .= '..';
+		if ($to->{'href'}) {
+			$line .= $cgi->a({-href=>$to->{'href'}, -class=>"hash"},
+			                 substr($diffinfo->{'to_id'},0,7));
+		} else {
+			$line .= '0' x 7;
+		}
+
+	} elsif ($line =~ m/^index [0-9a-fA-F]{40}..[0-9a-fA-F]{40}/) {
+		# can match only for ordinary diff
+		my ($from_link, $to_link);
+		if ($from->{'href'}) {
+			$from_link = $cgi->a({-href=>$from->{'href'}, -class=>"hash"},
+			                     substr($diffinfo->{'from_id'},0,7));
+		} else {
+			$from_link = '0' x 7;
+		}
+		if ($to->{'href'}) {
+			$to_link = $cgi->a({-href=>$to->{'href'}, -class=>"hash"},
+			                   substr($diffinfo->{'to_id'},0,7));
+		} else {
+			$to_link = '0' x 7;
+		}
+		my ($from_id, $to_id) = ($diffinfo->{'from_id'}, $diffinfo->{'to_id'});
+		$line =~ s!$from_id\.\.$to_id!$from_link..$to_link!;
+	}
+
+	return $line . "<br/>\n";
+}
+
+# format from-file/to-file diff header
+sub format_diff_from_to_header {
+	my ($from_line, $to_line, $diffinfo, $from, $to, @parents) = @_;
+	my $line;
+	my $result = '';
+
+	$line = $from_line;
+	#assert($line =~ m/^---/) if DEBUG;
+	# no extra formatting for "^--- /dev/null"
+	if (! $diffinfo->{'nparents'}) {
+		# ordinary (single parent) diff
+		if ($line =~ m!^--- "?a/!) {
+			if ($from->{'href'}) {
+				$line = '--- a/' .
+				        $cgi->a({-href=>$from->{'href'}, -class=>"path"},
+				                esc_path($from->{'file'}));
+			} else {
+				$line = '--- a/' .
+				        esc_path($from->{'file'});
+			}
+		}
+		$result .= qq!<div class="diff from_file">$line</div>\n!;
+
+	} else {
+		# combined diff (merge commit)
+		for (my $i = 0; $i < $diffinfo->{'nparents'}; $i++) {
+			if ($from->{'href'}[$i]) {
+				$line = '--- ' .
+				        $cgi->a({-href=>href(action=>"blobdiff",
+				                             hash_parent=>$diffinfo->{'from_id'}[$i],
+				                             hash_parent_base=>$parents[$i],
+				                             file_parent=>$from->{'file'}[$i],
+				                             hash=>$diffinfo->{'to_id'},
+				                             hash_base=>$hash,
+				                             file_name=>$to->{'file'}),
+				                 -class=>"path",
+				                 -title=>"diff" . ($i+1)},
+				                $i+1) .
+				        '/' .
+				        $cgi->a({-href=>$from->{'href'}[$i], -class=>"path"},
+				                esc_path($from->{'file'}[$i]));
+			} else {
+				$line = '--- /dev/null';
+			}
+			$result .= qq!<div class="diff from_file">$line</div>\n!;
+		}
+	}
+
+	$line = $to_line;
+	#assert($line =~ m/^\+\+\+/) if DEBUG;
+	# no extra formatting for "^+++ /dev/null"
+	if ($line =~ m!^\+\+\+ "?b/!) {
+		if ($to->{'href'}) {
+			$line = '+++ b/' .
+			        $cgi->a({-href=>$to->{'href'}, -class=>"path"},
+			                esc_path($to->{'file'}));
+		} else {
+			$line = '+++ b/' .
+			        esc_path($to->{'file'});
+		}
+	}
+	$result .= qq!<div class="diff to_file">$line</div>\n!;
+
+	return $result;
+}
+
+# create note for patch simplified by combined diff
+sub format_diff_cc_simplified {
+	my ($diffinfo, @parents) = @_;
+	my $result = '';
+
+	$result .= "<div class=\"diff header\">" .
+	           "diff --cc ";
+	if (!is_deleted($diffinfo)) {
+		$result .= $cgi->a({-href => href(action=>"blob",
+		                                  hash_base=>$hash,
+		                                  hash=>$diffinfo->{'to_id'},
+		                                  file_name=>$diffinfo->{'to_file'}),
+		                    -class => "path"},
+		                   esc_path($diffinfo->{'to_file'}));
+	} else {
+		$result .= esc_path($diffinfo->{'to_file'});
+	}
+	$result .= "</div>\n" . # class="diff header"
+	           "<div class=\"diff nodifferences\">" .
+	           "Simple merge" .
+	           "</div>\n"; # class="diff nodifferences"
+
+	return $result;
+}
+
+# format patch (diff) line (not to be used for diff headers)
 sub format_diff_line {
 	my $line = shift;
 	my ($from, $to) = @_;
-	my $char = substr($line, 0, 1);
 	my $diff_class = "";
 
 	chomp $line;
 
-	if ($char eq '+') {
-		$diff_class = " add";
-	} elsif ($char eq "-") {
-		$diff_class = " rem";
-	} elsif ($char eq "@") {
-		$diff_class = " chunk_header";
-	} elsif ($char eq "\\") {
-		$diff_class = " incomplete";
+	if ($from && $to && ref($from->{'href'}) eq "ARRAY") {
+		# combined diff
+		my $prefix = substr($line, 0, scalar @{$from->{'href'}});
+		if ($line =~ m/^\@{3}/) {
+			$diff_class = " chunk_header";
+		} elsif ($line =~ m/^\\/) {
+			$diff_class = " incomplete";
+		} elsif ($prefix =~ tr/+/+/) {
+			$diff_class = " add";
+		} elsif ($prefix =~ tr/-/-/) {
+			$diff_class = " rem";
+		}
+	} else {
+		# assume ordinary diff
+		my $char = substr($line, 0, 1);
+		if ($char eq '+') {
+			$diff_class = " add";
+		} elsif ($char eq '-') {
+			$diff_class = " rem";
+		} elsif ($char eq '@') {
+			$diff_class = " chunk_header";
+		} elsif ($char eq "\\") {
+			$diff_class = " incomplete";
+		}
 	}
 	$line = untabify($line);
 	if ($from && $to && $line =~ m/^\@{2} /) {
@@ -932,8 +1285,78 @@ sub format_diff_line {
 		$line = "<span class=\"chunk_info\">@@ $from_text $to_text @@</span>" .
 		        "<span class=\"section\">" . esc_html($section, -nbsp=>1) . "</span>";
 		return "<div class=\"diff$diff_class\">$line</div>\n";
+	} elsif ($from && $to && $line =~ m/^\@{3}/) {
+		my ($prefix, $ranges, $section) = $line =~ m/^(\@+) (.*?) \@+(.*)$/;
+		my (@from_text, @from_start, @from_nlines, $to_text, $to_start, $to_nlines);
+
+		@from_text = split(' ', $ranges);
+		for (my $i = 0; $i < @from_text; ++$i) {
+			($from_start[$i], $from_nlines[$i]) =
+				(split(',', substr($from_text[$i], 1)), 0);
+		}
+
+		$to_text   = pop @from_text;
+		$to_start  = pop @from_start;
+		$to_nlines = pop @from_nlines;
+
+		$line = "<span class=\"chunk_info\">$prefix ";
+		for (my $i = 0; $i < @from_text; ++$i) {
+			if ($from->{'href'}[$i]) {
+				$line .= $cgi->a({-href=>"$from->{'href'}[$i]#l$from_start[$i]",
+				                  -class=>"list"}, $from_text[$i]);
+			} else {
+				$line .= $from_text[$i];
+			}
+			$line .= " ";
+		}
+		if ($to->{'href'}) {
+			$line .= $cgi->a({-href=>"$to->{'href'}#l$to_start",
+			                  -class=>"list"}, $to_text);
+		} else {
+			$line .= $to_text;
+		}
+		$line .= " $prefix</span>" .
+		         "<span class=\"section\">" . esc_html($section, -nbsp=>1) . "</span>";
+		return "<div class=\"diff$diff_class\">$line</div>\n";
 	}
 	return "<div class=\"diff$diff_class\">" . esc_html($line, -nbsp=>1) . "</div>\n";
+}
+
+# Generates undef or something like "_snapshot_" or "snapshot (_tbz2_ _zip_)",
+# linked.  Pass the hash of the tree/commit to snapshot.
+sub format_snapshot_links {
+	my ($hash) = @_;
+	my @snapshot_fmts = gitweb_check_feature('snapshot');
+	@snapshot_fmts = filter_snapshot_fmts(@snapshot_fmts);
+	my $num_fmts = @snapshot_fmts;
+	if ($num_fmts > 1) {
+		# A parenthesized list of links bearing format names.
+		# e.g. "snapshot (_tar.gz_ _zip_)"
+		return "snapshot (" . join(' ', map
+			$cgi->a({
+				-href => href(
+					action=>"snapshot",
+					hash=>$hash,
+					snapshot_format=>$_
+				)
+			}, $known_snapshot_formats{$_}{'display'})
+		, @snapshot_fmts) . ")";
+	} elsif ($num_fmts == 1) {
+		# A single "snapshot" link whose tooltip bears the format name.
+		# i.e. "_snapshot_"
+		my ($fmt) = @snapshot_fmts;
+		return
+			$cgi->a({
+				-href => href(
+					action=>"snapshot",
+					hash=>$hash,
+					snapshot_format=>$fmt
+				),
+				-title => "in format: $known_snapshot_formats{$fmt}{'display'}"
+			}, "snapshot");
+	} else { # $num_fmts == 0
+		return undef;
+	}
 }
 
 ## ----------------------------------------------------------------------
@@ -1008,6 +1431,11 @@ sub git_get_hash_by_path {
 	my $line = <$fd>;
 	close $fd or return undef;
 
+	if (!defined $line) {
+		# there is no tree or hash given by $path at $base
+		return undef;
+	}
+
 	#'100644 blob 0fa3f3a66fb6a137f6ec2c19351ed4d807070ffa	panic.c'
 	$line =~ m/^([0-9]+) (.+) ([0-9a-fA-F]{40})\t/;
 	if (defined $type && $type ne $2) {
@@ -1015,6 +1443,30 @@ sub git_get_hash_by_path {
 		return undef;
 	}
 	return $3;
+}
+
+# get path of entry with given hash at given tree-ish (ref)
+# used to get 'from' filename for combined diff (merge commit) for renames
+sub git_get_path_by_hash {
+	my $base = shift || return;
+	my $hash = shift || return;
+
+	local $/ = "\0";
+
+	open my $fd, "-|", git_cmd(), "ls-tree", '-r', '-t', '-z', $base
+		or return undef;
+	while (my $line = <$fd>) {
+		chomp $line;
+
+		#'040000 tree 595596a6a9117ddba9fe379b6b012b558bac8423	gitweb'
+		#'100644 blob e02e90f0429be0d2a69b76571101f20b8f75530f	gitweb/README'
+		if ($line =~ m/(?:[0-9]+) (?:.+) $hash\t(.+)$/) {
+			close $fd;
+			return $1;
+		}
+	}
+	close $fd;
+	return undef;
 }
 
 ## ......................................................................
@@ -1026,7 +1478,9 @@ sub git_get_project_description {
 	open my $fd, "$projectroot/$path/description" or return undef;
 	my $descr = <$fd>;
 	close $fd;
-	chomp $descr;
+	if (defined $descr) {
+		chomp $descr;
+	}
 	return $descr;
 }
 
@@ -1047,6 +1501,8 @@ sub git_get_projects_list {
 	$filter ||= '';
 	$filter =~ s/\.git$//;
 
+	my ($check_forks) = gitweb_check_feature('forks');
+
 	if (-d $projects_list) {
 		# search in directory
 		my $dir = $projects_list . ($filter ? "/$filter" : '');
@@ -1054,10 +1510,9 @@ sub git_get_projects_list {
 		$dir =~ s!/+$!!;
 		my $pfxlen = length("$dir");
 
-		my ($check_forks) = gitweb_check_feature('forks');
-
 		File::Find::find({
 			follow_fast => 1, # follow symbolic links
+			follow_skip => 2, # ignore duplicates
 			dangling_symlinks => 0, # ignore dangling symlinks, silently
 			wanted => sub {
 				# skip project-list toplevel, if we get it.
@@ -1081,7 +1536,9 @@ sub git_get_projects_list {
 		# 'git%2Fgit.git Linus+Torvalds'
 		# 'libs%2Fklibc%2Fklibc.git H.+Peter+Anvin'
 		# 'linux%2Fhotplug%2Fudev.git Greg+Kroah-Hartman'
+		my %paths;
 		open my ($fd), $projects_list or return;
+	PROJECT:
 		while (my $line = <$fd>) {
 			chomp $line;
 			my ($path, $owner) = split ' ', $line;
@@ -1094,11 +1551,27 @@ sub git_get_projects_list {
 				# looking for forks;
 				my $pfx = substr($path, 0, length($filter));
 				if ($pfx ne $filter) {
-					next;
+					next PROJECT;
 				}
 				my $sfx = substr($path, length($filter));
 				if ($sfx !~ /^\/.*\.git$/) {
-					next;
+					next PROJECT;
+				}
+			} elsif ($check_forks) {
+			PATH:
+				foreach my $filter (keys %paths) {
+					# looking for forks;
+					my $pfx = substr($path, 0, length($filter));
+					if ($pfx ne $filter) {
+						next PATH;
+					}
+					my $sfx = substr($path, length($filter));
+					if ($sfx !~ /^\/.*\.git$/) {
+						next PATH;
+					}
+					# is a fork, don't include it in
+					# the list
+					next PROJECT;
 				}
 			}
 			if (check_export_ok("$projectroot/$path")) {
@@ -1106,21 +1579,22 @@ sub git_get_projects_list {
 					path => $path,
 					owner => to_utf8($owner),
 				};
-				push @list, $pr
+				push @list, $pr;
+				(my $forks_path = $path) =~ s/\.git$//;
+				$paths{$forks_path}++;
 			}
 		}
 		close $fd;
 	}
-	@list = sort {$a->{'path'} cmp $b->{'path'}} @list;
 	return @list;
 }
 
-sub git_get_project_owner {
-	my $project = shift;
-	my $owner;
+our $gitweb_project_owner = undef;
+sub git_get_project_list_from_file {
 
-	return undef unless $project;
+	return if (defined $gitweb_project_owner);
 
+	$gitweb_project_owner = {};
 	# read from file (url-encoded):
 	# 'git%2Fgit.git Linus+Torvalds'
 	# 'libs%2Fklibc%2Fklibc.git H.+Peter+Anvin'
@@ -1132,12 +1606,24 @@ sub git_get_project_owner {
 			my ($pr, $ow) = split ' ', $line;
 			$pr = unescape($pr);
 			$ow = unescape($ow);
-			if ($pr eq $project) {
-				$owner = to_utf8($ow);
-				last;
-			}
+			$gitweb_project_owner->{$pr} = to_utf8($ow);
 		}
 		close $fd;
+	}
+}
+
+sub git_get_project_owner {
+	my $project = shift;
+	my $owner;
+
+	return undef unless $project;
+
+	if (!defined $gitweb_project_owner) {
+		git_get_project_list_from_file();
+	}
+
+	if (exists $gitweb_project_owner->{$project}) {
+		$owner = $gitweb_project_owner->{$project};
 	}
 	if (!defined $owner) {
 		$owner = get_file_owner("$projectroot/$project");
@@ -1158,11 +1644,13 @@ sub git_get_last_activity {
 	     'refs/heads') or return;
 	my $most_recent = <$fd>;
 	close $fd or return;
-	if ($most_recent =~ / (\d+) [-+][01]\d\d\d$/) {
+	if (defined $most_recent &&
+	    $most_recent =~ / (\d+) [-+][01]\d\d\d$/) {
 		my $timestamp = $1;
 		my $age = time - $timestamp;
 		return ($age, age_string($age));
 	}
+	return (undef, undef);
 }
 
 sub git_get_references {
@@ -1281,8 +1769,12 @@ sub parse_commit_text {
 
 	pop @commit_lines; # Remove '\0'
 
+	if (! @commit_lines) {
+		return;
+	}
+
 	my $header = shift @commit_lines;
-	if (!($header =~ m/^[0-9a-fA-F]{40}/)) {
+	if ($header !~ m/^[0-9a-fA-F]{40}/) {
 		return;
 	}
 	($co{'id'}, my @parents) = split ' ', $header;
@@ -1402,6 +1894,7 @@ sub parse_commits {
 		($arg ? ($arg) : ()),
 		("--max-count=" . $maxcount),
 		("--skip=" . $skip),
+		@extra_options,
 		$commit_id,
 		"--",
 		($filename ? ($filename) : ())
@@ -1478,6 +1971,17 @@ sub parse_difftree_raw_line {
 			$res{'file'} = unquote($7);
 		}
 	}
+	# '::100755 100755 100755 60e79ca1b01bc8b057abe17ddab484699a7f5fdb 94067cc5f73388f33722d52ae02f44692bc07490 94067cc5f73388f33722d52ae02f44692bc07490 MR	git-gui/git-gui.sh'
+	# combined diff (for merge commit)
+	elsif ($line =~ s/^(::+)((?:[0-7]{6} )+)((?:[0-9a-fA-F]{40} )+)([a-zA-Z]+)\t(.*)$//) {
+		$res{'nparents'}  = length($1);
+		$res{'from_mode'} = [ split(' ', $2) ];
+		$res{'to_mode'} = pop @{$res{'from_mode'}};
+		$res{'from_id'} = [ split(' ', $3) ];
+		$res{'to_id'} = pop @{$res{'from_id'}};
+		$res{'status'} = [ split('', $4) ];
+		$res{'to_file'} = unquote($5);
+	}
 	# 'c512b523472485aef4fff9e57b229d9d243c967f'
 	elsif ($line =~ m/^([0-9a-fA-F]{40})$/) {
 		$res{'commit'} = $1;
@@ -1505,6 +2009,48 @@ sub parse_ls_tree_line ($;%) {
 	}
 
 	return wantarray ? %res : \%res;
+}
+
+# generates _two_ hashes, references to which are passed as 2 and 3 argument
+sub parse_from_to_diffinfo {
+	my ($diffinfo, $from, $to, @parents) = @_;
+
+	if ($diffinfo->{'nparents'}) {
+		# combined diff
+		$from->{'file'} = [];
+		$from->{'href'} = [];
+		fill_from_file_info($diffinfo, @parents)
+			unless exists $diffinfo->{'from_file'};
+		for (my $i = 0; $i < $diffinfo->{'nparents'}; $i++) {
+			$from->{'file'}[$i] = $diffinfo->{'from_file'}[$i] || $diffinfo->{'to_file'};
+			if ($diffinfo->{'status'}[$i] ne "A") { # not new (added) file
+				$from->{'href'}[$i] = href(action=>"blob",
+				                           hash_base=>$parents[$i],
+				                           hash=>$diffinfo->{'from_id'}[$i],
+				                           file_name=>$from->{'file'}[$i]);
+			} else {
+				$from->{'href'}[$i] = undef;
+			}
+		}
+	} else {
+		$from->{'file'} = $diffinfo->{'from_file'} || $diffinfo->{'file'};
+		if ($diffinfo->{'status'} ne "A") { # not new (added) file
+			$from->{'href'} = href(action=>"blob", hash_base=>$hash_parent,
+			                       hash=>$diffinfo->{'from_id'},
+			                       file_name=>$from->{'file'});
+		} else {
+			delete $from->{'href'};
+		}
+	}
+
+	$to->{'file'} = $diffinfo->{'to_file'} || $diffinfo->{'file'};
+	if (!is_deleted($diffinfo)) { # file exists in result
+		$to->{'href'} = href(action=>"blob", hash_base=>$hash,
+		                     hash=>$diffinfo->{'to_id'},
+		                     file_name=>$to->{'file'});
+	} else {
+		delete $to->{'href'};
+	}
 }
 
 ## ......................................................................
@@ -1665,10 +2211,7 @@ sub blob_mimetype {
 	# just in case
 	return $default_blob_plain_mimetype unless $fd;
 
-        # XXX: the following line replaced this if (-T $fd) {
-        # because for unknown reasons perl on OpenBSD returns this:
-        # -T and -B not implemented on filehandles
-        if (1) {
+	if (-T $fd) {
 		return 'text/plain' .
 		       ($default_text_plain_charset ? '; charset='.$default_text_plain_charset : '');
 	} elsif (! $filename) {
@@ -1745,9 +2288,17 @@ EOF
 		printf('<link rel="alternate" title="%s log RSS feed" '.
 		       'href="%s" type="application/rss+xml" />'."\n",
 		       esc_param($project), href(action=>"rss"));
+		printf('<link rel="alternate" title="%s log RSS feed (no merges)" '.
+		       'href="%s" type="application/rss+xml" />'."\n",
+		       esc_param($project), href(action=>"rss",
+		                                 extra_options=>"--no-merges"));
 		printf('<link rel="alternate" title="%s log Atom feed" '.
 		       'href="%s" type="application/atom+xml" />'."\n",
 		       esc_param($project), href(action=>"atom"));
+		printf('<link rel="alternate" title="%s log Atom feed (no merges)" '.
+		       'href="%s" type="application/atom+xml" />'."\n",
+		       esc_param($project), href(action=>"atom",
+		                                 extra_options=>"--no-merges"));
 	} else {
 		printf('<link rel="alternate" title="%s projects list" '.
 		       'href="%s" type="text/plain; charset=utf-8"/>'."\n",
@@ -1781,6 +2332,8 @@ EOF
 		}
 		print "\n";
 	}
+	print "</div>\n";
+
 	my ($have_search) = gitweb_check_feature('search');
 	if ((defined $project) && ($have_search)) {
 		if (!defined $searchtext) {
@@ -1794,23 +2347,28 @@ EOF
 		} else {
 			$search_hash = "HEAD";
 		}
+		my $action = $my_uri;
+		my ($use_pathinfo) = gitweb_check_feature('pathinfo');
+		if ($use_pathinfo) {
+			$action .= "/$project";
+		} else {
+			$cgi->param("p", $project);
+		}
 		$cgi->param("a", "search");
 		$cgi->param("h", $search_hash);
-		$cgi->param("p", $project);
-		print $cgi->startform(-method => "get", -action => $my_uri) .
+		print $cgi->startform(-method => "get", -action => $action) .
 		      "<div class=\"search\">\n" .
-		      $cgi->hidden(-name => "p") . "\n" .
+		      (!$use_pathinfo && $cgi->hidden(-name => "p") . "\n") .
 		      $cgi->hidden(-name => "a") . "\n" .
 		      $cgi->hidden(-name => "h") . "\n" .
 		      $cgi->popup_menu(-name => 'st', -default => 'commit',
-				       -values => ['commit', 'author', 'committer', 'pickaxe']) .
+		                       -values => ['commit', 'grep', 'author', 'committer', 'pickaxe']) .
 		      $cgi->sup($cgi->a({-href => href(action=>"search_help")}, "?")) .
 		      " search:\n",
 		      $cgi->textfield(-name => "s", -value => $searchtext) . "\n" .
 		      "</div>" .
 		      $cgi->end_form() . "\n";
 	}
-	print "</div>\n";
 }
 
 sub git_footer_html {
@@ -1873,16 +2431,16 @@ sub git_print_page_nav {
 	my %arg = map { $_ => {action=>$_} } @navs;
 	if (defined $head) {
 		for (qw(commit commitdiff)) {
-			$arg{$_}{hash} = $head;
+			$arg{$_}{'hash'} = $head;
 		}
 		if ($current =~ m/^(tree | log | shortlog | commit | commitdiff | search)$/x) {
 			for (qw(shortlog log)) {
-				$arg{$_}{hash} = $head;
+				$arg{$_}{'hash'} = $head;
 			}
 		}
 	}
-	$arg{tree}{hash} = $treehead if defined $treehead;
-	$arg{tree}{hash_base} = $treebase if defined $treebase;
+	$arg{'tree'}{'hash'} = $treehead if defined $treehead;
+	$arg{'tree'}{'hash_base'} = $treebase if defined $treebase;
 
 	print "<div class=\"page_nav\">\n" .
 		(join " | ",
@@ -1930,9 +2488,9 @@ sub git_print_header_div {
 	my ($action, $title, $hash, $hash_base) = @_;
 	my %args = ();
 
-	$args{action} = $action;
-	$args{hash} = $hash if $hash;
-	$args{hash_base} = $hash_base if $hash_base;
+	$args{'action'} = $action;
+	$args{'hash'} = $hash if $hash;
+	$args{'hash_base'} = $hash_base if $hash_base;
 
 	print "<div class=\"header\">\n" .
 	      $cgi->a({-href => href(%args), -class => "title"},
@@ -1977,17 +2535,17 @@ sub git_print_page_path {
 			$fullname .= ($fullname ? '/' : '') . $dir;
 			print $cgi->a({-href => href(action=>"tree", file_name=>$fullname,
 			                             hash_base=>$hb),
-			              -title => esc_html($fullname)}, esc_path($dir));
+			              -title => $fullname}, esc_path($dir));
 			print " / ";
 		}
 		if (defined $type && $type eq 'blob') {
 			print $cgi->a({-href => href(action=>"blob_plain", file_name=>$file_name,
 			                             hash_base=>$hb),
-			              -title => esc_html($name)}, esc_path($basename));
+			              -title => $name}, esc_path($basename));
 		} elsif (defined $type && $type eq 'tree') {
 			print $cgi->a({-href => href(action=>"tree", file_name=>$file_name,
 			                             hash_base=>$hb),
-			              -title => esc_html($name)}, esc_path($basename));
+			              -title => $name}, esc_path($basename));
 			print " / ";
 		} else {
 			print esc_path($basename);
@@ -2178,14 +2736,67 @@ sub git_print_tree_entry {
 			              "history");
 		}
 		print "</td>\n";
+	} else {
+		# unknown object: we can only present history for it
+		# (this includes 'commit' object, i.e. submodule support)
+		print "<td class=\"list\">" .
+		      esc_path($t->{'name'}) .
+		      "</td>\n";
+		print "<td class=\"link\">";
+		if (defined $hash_base) {
+			print $cgi->a({-href => href(action=>"history",
+			                             hash_base=>$hash_base,
+			                             file_name=>"$basedir$t->{'name'}")},
+			              "history");
+		}
+		print "</td>\n";
 	}
 }
 
 ## ......................................................................
 ## functions printing large fragments of HTML
 
+sub fill_from_file_info {
+	my ($diff, @parents) = @_;
+
+	$diff->{'from_file'} = [ ];
+	$diff->{'from_file'}[$diff->{'nparents'} - 1] = undef;
+	for (my $i = 0; $i < $diff->{'nparents'}; $i++) {
+		if ($diff->{'status'}[$i] eq 'R' ||
+		    $diff->{'status'}[$i] eq 'C') {
+			$diff->{'from_file'}[$i] =
+				git_get_path_by_hash($parents[$i], $diff->{'from_id'}[$i]);
+		}
+	}
+
+	return $diff;
+}
+
+# parameters can be strings, or references to arrays of strings
+sub from_ids_eq {
+	my ($a, $b) = @_;
+
+	if (ref($a) eq "ARRAY" && ref($b) eq "ARRAY" && @$a == @$b) {
+		for (my $i = 0; $i < @$a; ++$i) {
+			return 0 unless ($a->[$i] eq $b->[$i]);
+		}
+		return 1;
+	} elsif (!ref($a) && !ref($b)) {
+		return $a eq $b;
+	} else {
+		return 0;
+	}
+}
+
+sub is_deleted {
+	my $diffinfo = shift;
+
+	return $diffinfo->{'to_id'} eq ('0' x 40);
+}
+
 sub git_difftree_body {
-	my ($difftree, $hash, $parent) = @_;
+	my ($difftree, $hash, @parents) = @_;
+	my ($parent) = $parents[0];
 	my ($have_blame) = gitweb_check_feature('blame');
 	print "<div class=\"list_head\">\n";
 	if ($#{$difftree} > 10) {
@@ -2193,11 +2804,39 @@ sub git_difftree_body {
 	}
 	print "</div>\n";
 
-	print "<table class=\"diff_tree\">\n";
+	print "<table class=\"" .
+	      (@parents > 1 ? "combined " : "") .
+	      "diff_tree\">\n";
+
+	# header only for combined diff in 'commitdiff' view
+	my $has_header = @$difftree && @parents > 1 && $action eq 'commitdiff';
+	if ($has_header) {
+		# table header
+		print "<thead><tr>\n" .
+		       "<th></th><th></th>\n"; # filename, patchN link
+		for (my $i = 0; $i < @parents; $i++) {
+			my $par = $parents[$i];
+			print "<th>" .
+			      $cgi->a({-href => href(action=>"commitdiff",
+			                             hash=>$hash, hash_parent=>$par),
+			               -title => 'commitdiff to parent number ' .
+			                          ($i+1) . ': ' . substr($par,0,7)},
+			              $i+1) .
+			      "&nbsp;</th>\n";
+		}
+		print "</tr></thead>\n<tbody>\n";
+	}
+
 	my $alternate = 1;
 	my $patchno = 0;
 	foreach my $line (@{$difftree}) {
-		my %diff = parse_difftree_raw_line($line);
+		my $diff;
+		if (ref($line) eq "HASH") {
+			# pre-parsed (or generated by hand)
+			$diff = $line;
+		} else {
+			$diff = parse_difftree_raw_line($line);
+		}
 
 		if ($alternate) {
 			print "<tr class=\"dark\">\n";
@@ -2206,31 +2845,120 @@ sub git_difftree_body {
 		}
 		$alternate ^= 1;
 
+		if (exists $diff->{'nparents'}) { # combined diff
+
+			fill_from_file_info($diff, @parents)
+				unless exists $diff->{'from_file'};
+
+			if (!is_deleted($diff)) {
+				# file exists in the result (child) commit
+				print "<td>" .
+				      $cgi->a({-href => href(action=>"blob", hash=>$diff->{'to_id'},
+				                             file_name=>$diff->{'to_file'},
+				                             hash_base=>$hash),
+				              -class => "list"}, esc_path($diff->{'to_file'})) .
+				      "</td>\n";
+			} else {
+				print "<td>" .
+				      esc_path($diff->{'to_file'}) .
+				      "</td>\n";
+			}
+
+			if ($action eq 'commitdiff') {
+				# link to patch
+				$patchno++;
+				print "<td class=\"link\">" .
+				      $cgi->a({-href => "#patch$patchno"}, "patch") .
+				      " | " .
+				      "</td>\n";
+			}
+
+			my $has_history = 0;
+			my $not_deleted = 0;
+			for (my $i = 0; $i < $diff->{'nparents'}; $i++) {
+				my $hash_parent = $parents[$i];
+				my $from_hash = $diff->{'from_id'}[$i];
+				my $from_path = $diff->{'from_file'}[$i];
+				my $status = $diff->{'status'}[$i];
+
+				$has_history ||= ($status ne 'A');
+				$not_deleted ||= ($status ne 'D');
+
+				if ($status eq 'A') {
+					print "<td  class=\"link\" align=\"right\"> | </td>\n";
+				} elsif ($status eq 'D') {
+					print "<td class=\"link\">" .
+					      $cgi->a({-href => href(action=>"blob",
+					                             hash_base=>$hash,
+					                             hash=>$from_hash,
+					                             file_name=>$from_path)},
+					              "blob" . ($i+1)) .
+					      " | </td>\n";
+				} else {
+					if ($diff->{'to_id'} eq $from_hash) {
+						print "<td class=\"link nochange\">";
+					} else {
+						print "<td class=\"link\">";
+					}
+					print $cgi->a({-href => href(action=>"blobdiff",
+					                             hash=>$diff->{'to_id'},
+					                             hash_parent=>$from_hash,
+					                             hash_base=>$hash,
+					                             hash_parent_base=>$hash_parent,
+					                             file_name=>$diff->{'to_file'},
+					                             file_parent=>$from_path)},
+					              "diff" . ($i+1)) .
+					      " | </td>\n";
+				}
+			}
+
+			print "<td class=\"link\">";
+			if ($not_deleted) {
+				print $cgi->a({-href => href(action=>"blob",
+				                             hash=>$diff->{'to_id'},
+				                             file_name=>$diff->{'to_file'},
+				                             hash_base=>$hash)},
+				              "blob");
+				print " | " if ($has_history);
+			}
+			if ($has_history) {
+				print $cgi->a({-href => href(action=>"history",
+				                             file_name=>$diff->{'to_file'},
+				                             hash_base=>$hash)},
+				              "history");
+			}
+			print "</td>\n";
+
+			print "</tr>\n";
+			next; # instead of 'else' clause, to avoid extra indent
+		}
+		# else ordinary diff
+
 		my ($to_mode_oct, $to_mode_str, $to_file_type);
 		my ($from_mode_oct, $from_mode_str, $from_file_type);
-		if ($diff{'to_mode'} ne ('0' x 6)) {
-			$to_mode_oct = oct $diff{'to_mode'};
+		if ($diff->{'to_mode'} ne ('0' x 6)) {
+			$to_mode_oct = oct $diff->{'to_mode'};
 			if (S_ISREG($to_mode_oct)) { # only for regular file
 				$to_mode_str = sprintf("%04o", $to_mode_oct & 0777); # permission bits
 			}
-			$to_file_type = file_type($diff{'to_mode'});
+			$to_file_type = file_type($diff->{'to_mode'});
 		}
-		if ($diff{'from_mode'} ne ('0' x 6)) {
-			$from_mode_oct = oct $diff{'from_mode'};
+		if ($diff->{'from_mode'} ne ('0' x 6)) {
+			$from_mode_oct = oct $diff->{'from_mode'};
 			if (S_ISREG($to_mode_oct)) { # only for regular file
 				$from_mode_str = sprintf("%04o", $from_mode_oct & 0777); # permission bits
 			}
-			$from_file_type = file_type($diff{'from_mode'});
+			$from_file_type = file_type($diff->{'from_mode'});
 		}
 
-		if ($diff{'status'} eq "A") { # created
+		if ($diff->{'status'} eq "A") { # created
 			my $mode_chng = "<span class=\"file_status new\">[new $to_file_type";
 			$mode_chng   .= " with mode: $to_mode_str" if $to_mode_str;
 			$mode_chng   .= "]</span>";
 			print "<td>";
-			print $cgi->a({-href => href(action=>"blob", hash=>$diff{'to_id'},
-			                             hash_base=>$hash, file_name=>$diff{'file'}),
-			              -class => "list"}, esc_path($diff{'file'}));
+			print $cgi->a({-href => href(action=>"blob", hash=>$diff->{'to_id'},
+			                             hash_base=>$hash, file_name=>$diff->{'file'}),
+			              -class => "list"}, esc_path($diff->{'file'}));
 			print "</td>\n";
 			print "<td>$mode_chng</td>\n";
 			print "<td class=\"link\">";
@@ -2240,17 +2968,17 @@ sub git_difftree_body {
 				print $cgi->a({-href => "#patch$patchno"}, "patch");
 				print " | ";
 			}
-			print $cgi->a({-href => href(action=>"blob", hash=>$diff{'to_id'},
-			                             hash_base=>$hash, file_name=>$diff{'file'})},
+			print $cgi->a({-href => href(action=>"blob", hash=>$diff->{'to_id'},
+			                             hash_base=>$hash, file_name=>$diff->{'file'})},
 			              "blob");
 			print "</td>\n";
 
-		} elsif ($diff{'status'} eq "D") { # deleted
+		} elsif ($diff->{'status'} eq "D") { # deleted
 			my $mode_chng = "<span class=\"file_status deleted\">[deleted $from_file_type]</span>";
 			print "<td>";
-			print $cgi->a({-href => href(action=>"blob", hash=>$diff{'from_id'},
-			                             hash_base=>$parent, file_name=>$diff{'file'}),
-			               -class => "list"}, esc_path($diff{'file'}));
+			print $cgi->a({-href => href(action=>"blob", hash=>$diff->{'from_id'},
+			                             hash_base=>$parent, file_name=>$diff->{'file'}),
+			               -class => "list"}, esc_path($diff->{'file'}));
 			print "</td>\n";
 			print "<td>$mode_chng</td>\n";
 			print "<td class=\"link\">";
@@ -2260,22 +2988,22 @@ sub git_difftree_body {
 				print $cgi->a({-href => "#patch$patchno"}, "patch");
 				print " | ";
 			}
-			print $cgi->a({-href => href(action=>"blob", hash=>$diff{'from_id'},
-			                             hash_base=>$parent, file_name=>$diff{'file'})},
+			print $cgi->a({-href => href(action=>"blob", hash=>$diff->{'from_id'},
+			                             hash_base=>$parent, file_name=>$diff->{'file'})},
 			              "blob") . " | ";
 			if ($have_blame) {
 				print $cgi->a({-href => href(action=>"blame", hash_base=>$parent,
-				                             file_name=>$diff{'file'})},
+				                             file_name=>$diff->{'file'})},
 				              "blame") . " | ";
 			}
 			print $cgi->a({-href => href(action=>"history", hash_base=>$parent,
-			                             file_name=>$diff{'file'})},
+			                             file_name=>$diff->{'file'})},
 			              "history");
 			print "</td>\n";
 
-		} elsif ($diff{'status'} eq "M" || $diff{'status'} eq "T") { # modified, or type changed
+		} elsif ($diff->{'status'} eq "M" || $diff->{'status'} eq "T") { # modified, or type changed
 			my $mode_chnge = "";
-			if ($diff{'from_mode'} != $diff{'to_mode'}) {
+			if ($diff->{'from_mode'} != $diff->{'to_mode'}) {
 				$mode_chnge = "<span class=\"file_status mode_chnge\">[changed";
 				if ($from_file_type ne $to_file_type) {
 					$mode_chnge .= " from $from_file_type to $to_file_type";
@@ -2290,9 +3018,9 @@ sub git_difftree_body {
 				$mode_chnge .= "]</span>\n";
 			}
 			print "<td>";
-			print $cgi->a({-href => href(action=>"blob", hash=>$diff{'to_id'},
-			                             hash_base=>$hash, file_name=>$diff{'file'}),
-			              -class => "list"}, esc_path($diff{'file'}));
+			print $cgi->a({-href => href(action=>"blob", hash=>$diff->{'to_id'},
+			                             hash_base=>$hash, file_name=>$diff->{'file'}),
+			              -class => "list"}, esc_path($diff->{'file'}));
 			print "</td>\n";
 			print "<td>$mode_chnge</td>\n";
 			print "<td class=\"link\">";
@@ -2301,83 +3029,86 @@ sub git_difftree_body {
 				$patchno++;
 				print $cgi->a({-href => "#patch$patchno"}, "patch") .
 				      " | ";
-			} elsif ($diff{'to_id'} ne $diff{'from_id'}) {
+			} elsif ($diff->{'to_id'} ne $diff->{'from_id'}) {
 				# "commit" view and modified file (not onlu mode changed)
 				print $cgi->a({-href => href(action=>"blobdiff",
-				                             hash=>$diff{'to_id'}, hash_parent=>$diff{'from_id'},
+				                             hash=>$diff->{'to_id'}, hash_parent=>$diff->{'from_id'},
 				                             hash_base=>$hash, hash_parent_base=>$parent,
-				                             file_name=>$diff{'file'})},
+				                             file_name=>$diff->{'file'})},
 				              "diff") .
 				      " | ";
 			}
-			print $cgi->a({-href => href(action=>"blob", hash=>$diff{'to_id'},
-			                             hash_base=>$hash, file_name=>$diff{'file'})},
+			print $cgi->a({-href => href(action=>"blob", hash=>$diff->{'to_id'},
+			                             hash_base=>$hash, file_name=>$diff->{'file'})},
 			               "blob") . " | ";
 			if ($have_blame) {
 				print $cgi->a({-href => href(action=>"blame", hash_base=>$hash,
-				                             file_name=>$diff{'file'})},
+				                             file_name=>$diff->{'file'})},
 				              "blame") . " | ";
 			}
 			print $cgi->a({-href => href(action=>"history", hash_base=>$hash,
-			                             file_name=>$diff{'file'})},
+			                             file_name=>$diff->{'file'})},
 			              "history");
 			print "</td>\n";
 
-		} elsif ($diff{'status'} eq "R" || $diff{'status'} eq "C") { # renamed or copied
+		} elsif ($diff->{'status'} eq "R" || $diff->{'status'} eq "C") { # renamed or copied
 			my %status_name = ('R' => 'moved', 'C' => 'copied');
-			my $nstatus = $status_name{$diff{'status'}};
+			my $nstatus = $status_name{$diff->{'status'}};
 			my $mode_chng = "";
-			if ($diff{'from_mode'} != $diff{'to_mode'}) {
+			if ($diff->{'from_mode'} != $diff->{'to_mode'}) {
 				# mode also for directories, so we cannot use $to_mode_str
 				$mode_chng = sprintf(", mode: %04o", $to_mode_oct & 0777);
 			}
 			print "<td>" .
 			      $cgi->a({-href => href(action=>"blob", hash_base=>$hash,
-			                             hash=>$diff{'to_id'}, file_name=>$diff{'to_file'}),
-			              -class => "list"}, esc_path($diff{'to_file'})) . "</td>\n" .
+			                             hash=>$diff->{'to_id'}, file_name=>$diff->{'to_file'}),
+			              -class => "list"}, esc_path($diff->{'to_file'})) . "</td>\n" .
 			      "<td><span class=\"file_status $nstatus\">[$nstatus from " .
 			      $cgi->a({-href => href(action=>"blob", hash_base=>$parent,
-			                             hash=>$diff{'from_id'}, file_name=>$diff{'from_file'}),
-			              -class => "list"}, esc_path($diff{'from_file'})) .
-			      " with " . (int $diff{'similarity'}) . "% similarity$mode_chng]</span></td>\n" .
+			                             hash=>$diff->{'from_id'}, file_name=>$diff->{'from_file'}),
+			              -class => "list"}, esc_path($diff->{'from_file'})) .
+			      " with " . (int $diff->{'similarity'}) . "% similarity$mode_chng]</span></td>\n" .
 			      "<td class=\"link\">";
 			if ($action eq 'commitdiff') {
 				# link to patch
 				$patchno++;
 				print $cgi->a({-href => "#patch$patchno"}, "patch") .
 				      " | ";
-			} elsif ($diff{'to_id'} ne $diff{'from_id'}) {
+			} elsif ($diff->{'to_id'} ne $diff->{'from_id'}) {
 				# "commit" view and modified file (not only pure rename or copy)
 				print $cgi->a({-href => href(action=>"blobdiff",
-				                             hash=>$diff{'to_id'}, hash_parent=>$diff{'from_id'},
+				                             hash=>$diff->{'to_id'}, hash_parent=>$diff->{'from_id'},
 				                             hash_base=>$hash, hash_parent_base=>$parent,
-				                             file_name=>$diff{'to_file'}, file_parent=>$diff{'from_file'})},
+				                             file_name=>$diff->{'to_file'}, file_parent=>$diff->{'from_file'})},
 				              "diff") .
 				      " | ";
 			}
-			print $cgi->a({-href => href(action=>"blob", hash=>$diff{'to_id'},
-			                             hash_base=>$parent, file_name=>$diff{'to_file'})},
+			print $cgi->a({-href => href(action=>"blob", hash=>$diff->{'to_id'},
+			                             hash_base=>$parent, file_name=>$diff->{'to_file'})},
 			              "blob") . " | ";
 			if ($have_blame) {
 				print $cgi->a({-href => href(action=>"blame", hash_base=>$hash,
-				                             file_name=>$diff{'to_file'})},
+				                             file_name=>$diff->{'to_file'})},
 				              "blame") . " | ";
 			}
 			print $cgi->a({-href => href(action=>"history", hash_base=>$hash,
-			                            file_name=>$diff{'to_file'})},
+			                            file_name=>$diff->{'to_file'})},
 			              "history");
 			print "</td>\n";
 
 		} # we should not encounter Unmerged (U) or Unknown (X) status
 		print "</tr>\n";
 	}
+	print "</tbody>" if $has_header;
 	print "</table>\n";
 }
 
 sub git_patchset_body {
-	my ($fd, $difftree, $hash, $hash_parent) = @_;
+	my ($fd, $difftree, $hash, @hash_parents) = @_;
+	my ($hash_parent) = $hash_parents[0];
 
 	my $patch_idx = 0;
+	my $patch_number = 0;
 	my $patch_line;
 	my $diffinfo;
 	my (%from, %to);
@@ -2399,6 +3130,7 @@ sub git_patchset_body {
 		# git diff header
 		#assert($patch_line =~ m/^diff /) if DEBUG;
 		#assert($patch_line !~ m!$/$!) if DEBUG; # is chomp-ed
+		$patch_number++;
 		push @diff_header, $patch_line;
 
 		# extended diff header
@@ -2411,6 +3143,9 @@ sub git_patchset_body {
 			if ($patch_line =~ m/^index ([0-9a-fA-F]{40})..([0-9a-fA-F]{40})/) {
 				$from_id = $1;
 				$to_id   = $2;
+			} elsif ($patch_line =~ m/^index ((?:[0-9a-fA-F]{40},)+[0-9a-fA-F]{40})..([0-9a-fA-F]{40})/) {
+				$from_id = [ split(',', $1) ];
+				$to_id   = $2;
 			}
 
 			push @diff_header, $patch_line;
@@ -2420,37 +3155,46 @@ sub git_patchset_body {
 		# check if current patch belong to current raw line
 		# and parse raw git-diff line if needed
 		if (defined $diffinfo &&
-		    $diffinfo->{'from_id'} eq $from_id &&
-		    $diffinfo->{'to_id'}   eq $to_id) {
-			# this is split patch
+		    defined $from_id && defined $to_id &&
+		    from_ids_eq($diffinfo->{'from_id'}, $from_id) &&
+		    $diffinfo->{'to_id'} eq $to_id) {
+			# this is continuation of a split patch
 			print "<div class=\"patch cont\">\n";
 		} else {
 			# advance raw git-diff output if needed
 			$patch_idx++ if defined $diffinfo;
 
-			# read and prepare patch information
-			if (ref($difftree->[$patch_idx]) eq "HASH") {
-				# pre-parsed (or generated by hand)
-				$diffinfo = $difftree->[$patch_idx];
-			} else {
-				$diffinfo = parse_difftree_raw_line($difftree->[$patch_idx]);
+			# compact combined diff output can have some patches skipped
+			# find which patch (using pathname of result) we are at now
+			my $to_name;
+			if ($diff_header[0] =~ m!^diff --cc "?(.*)"?$!) {
+				$to_name = $1;
 			}
-			$from{'file'} = $diffinfo->{'from_file'} || $diffinfo->{'file'};
-			$to{'file'}   = $diffinfo->{'to_file'}   || $diffinfo->{'file'};
-			if ($diffinfo->{'status'} ne "A") { # not new (added) file
-				$from{'href'} = href(action=>"blob", hash_base=>$hash_parent,
-				                     hash=>$diffinfo->{'from_id'},
-				                     file_name=>$from{'file'});
-			} else {
-				delete $from{'href'};
-			}
-			if ($diffinfo->{'status'} ne "D") { # not deleted file
-				$to{'href'} = href(action=>"blob", hash_base=>$hash,
-				                   hash=>$diffinfo->{'to_id'},
-				                   file_name=>$to{'file'});
-			} else {
-				delete $to{'href'};
-			}
+
+			do {
+				# read and prepare patch information
+				if (ref($difftree->[$patch_idx]) eq "HASH") {
+					# pre-parsed (or generated by hand)
+					$diffinfo = $difftree->[$patch_idx];
+				} else {
+					$diffinfo = parse_difftree_raw_line($difftree->[$patch_idx]);
+				}
+
+				# check if current raw line has no patch (it got simplified)
+				if (defined $to_name && $to_name ne $diffinfo->{'to_file'}) {
+					print "<div class=\"patch\" id=\"patch". ($patch_idx+1) ."\">\n" .
+					      format_diff_cc_simplified($diffinfo, @hash_parents) .
+					      "</div>\n";  # class="patch"
+
+					$patch_idx++;
+					$patch_number++;
+				}
+			} until (!defined $to_name || $to_name eq $diffinfo->{'to_file'} ||
+			         $patch_idx > $#$difftree);
+
+			# modifies %from, %to hashes
+			parse_from_to_diffinfo($diffinfo, \%from, \%to, @hash_parents);
+
 			# this is first patch for raw difftree line with $patch_idx index
 			# we index @$difftree array from 0, but number patches from 1
 			print "<div class=\"patch\" id=\"patch". ($patch_idx+1) ."\">\n";
@@ -2458,67 +3202,15 @@ sub git_patchset_body {
 
 		# print "git diff" header
 		$patch_line = shift @diff_header;
-		$patch_line =~ s!^(diff (.*?) )"?a/.*$!$1!;
-		if ($from{'href'}) {
-			$patch_line .= $cgi->a({-href => $from{'href'}, -class => "path"},
-			                       'a/' . esc_path($from{'file'}));
-		} else { # file was added
-			$patch_line .= 'a/' . esc_path($from{'file'});
-		}
-		$patch_line .= ' ';
-		if ($to{'href'}) {
-			$patch_line .= $cgi->a({-href => $to{'href'}, -class => "path"},
-			                       'b/' . esc_path($to{'file'}));
-		} else { # file was deleted
-			$patch_line .= 'b/' . esc_path($to{'file'});
-		}
-		print "<div class=\"diff header\">$patch_line</div>\n";
+		print format_git_diff_header_line($patch_line, $diffinfo,
+		                                  \%from, \%to);
 
 		# print extended diff header
 		print "<div class=\"diff extended_header\">\n" if (@diff_header > 0);
 	EXTENDED_HEADER:
 		foreach $patch_line (@diff_header) {
-			# match <path>
-			if ($patch_line =~ s!^((copy|rename) from ).*$!$1! && $from{'href'}) {
-				$patch_line .= $cgi->a({-href=>$from{'href'}, -class=>"path"},
-				                       esc_path($from{'file'}));
-			}
-			if ($patch_line =~ s!^((copy|rename) to ).*$!$1! && $to{'href'}) {
-				$patch_line .= $cgi->a({-href=>$to{'href'}, -class=>"path"},
-				                       esc_path($to{'file'}));
-			}
-			# match <mode>
-			if ($patch_line =~ m/\s(\d{6})$/) {
-				$patch_line .= '<span class="info"> (' .
-				               file_type_long($1) .
-				               ')</span>';
-			}
-			# match <hash>
-			if ($patch_line =~ m/^index/) {
-				my ($from_link, $to_link);
-				if ($from{'href'}) {
-					$from_link = $cgi->a({-href=>$from{'href'}, -class=>"hash"},
-					                     substr($diffinfo->{'from_id'},0,7));
-				} else {
-					$from_link = '0' x 7;
-				}
-				if ($to{'href'}) {
-					$to_link = $cgi->a({-href=>$to{'href'}, -class=>"hash"},
-					                   substr($diffinfo->{'to_id'},0,7));
-				} else {
-					$to_link = '0' x 7;
-				}
-				#affirm {
-				#	my ($from_hash, $to_hash) =
-				#		($patch_line =~ m/^index ([0-9a-fA-F]{40})..([0-9a-fA-F]{40})/);
-				#	my ($from_id, $to_id) =
-				#		($diffinfo->{'from_id'}, $diffinfo->{'to_id'});
-				#	($from_hash eq $from_id) && ($to_hash eq $to_id);
-				#} if DEBUG;
-				my ($from_id, $to_id) = ($diffinfo->{'from_id'}, $diffinfo->{'to_id'});
-				$patch_line =~ s!$from_id\.\.$to_id!$from_link..$to_link!;
-			}
-			print $patch_line . "<br/>\n";
+			print format_extended_diff_header_line($patch_line, $diffinfo,
+			                                       \%from, \%to);
 		}
 		print "</div>\n"  if (@diff_header > 0); # class="diff extended_header"
 
@@ -2530,23 +3222,15 @@ sub git_patchset_body {
 		}
 		next PATCH if ($patch_line =~ m/^diff /);
 		#assert($patch_line =~ m/^---/) if DEBUG;
-		if ($from{'href'} && $patch_line =~ m!^--- "?a/!) {
-			$patch_line = '--- a/' .
-			              $cgi->a({-href=>$from{'href'}, -class=>"path"},
-			                      esc_path($from{'file'}));
-		}
-		print "<div class=\"diff from_file\">$patch_line</div>\n";
+		#assert($patch_line eq $last_patch_line) if DEBUG;
 
 		$patch_line = <$fd>;
 		chomp $patch_line;
+		#assert($patch_line =~ m/^\+\+\+/) if DEBUG;
 
-		#assert($patch_line =~ m/^+++/) if DEBUG;
-		if ($to{'href'} && $patch_line =~ m!^\+\+\+ "?b/!) {
-			$patch_line = '+++ b/' .
-			              $cgi->a({-href=>$to{'href'}, -class=>"path"},
-			                      esc_path($to{'file'}));
-		}
-		print "<div class=\"diff to_file\">$patch_line</div>\n";
+		print format_diff_from_to_header($last_patch_line, $patch_line,
+		                                 $diffinfo, \%from, \%to,
+		                                 @hash_parents);
 
 		# the patch itself
 	LINE:
@@ -2560,6 +3244,35 @@ sub git_patchset_body {
 
 	} continue {
 		print "</div>\n"; # class="patch"
+	}
+
+	# for compact combined (--cc) format, with chunk and patch simpliciaction
+	# patchset might be empty, but there might be unprocessed raw lines
+	for ($patch_idx++ if $patch_number > 0;
+	     $patch_idx < @$difftree;
+	     $patch_idx++) {
+		# read and prepare patch information
+		if (ref($difftree->[$patch_idx]) eq "HASH") {
+			# pre-parsed (or generated by hand)
+			$diffinfo = $difftree->[$patch_idx];
+		} else {
+			$diffinfo = parse_difftree_raw_line($difftree->[$patch_idx]);
+		}
+
+		# generate anchor for "patch" links in difftree / whatchanged part
+		print "<div class=\"patch\" id=\"patch". ($patch_idx+1) ."\">\n" .
+		      format_diff_cc_simplified($diffinfo, @hash_parents) .
+		      "</div>\n";  # class="patch"
+
+		$patch_number++;
+	}
+
+	if ($patch_number == 0) {
+		if (@hash_parents > 1) {
+			print "<div class=\"diff nodifferences\">Trivial merge</div>\n";
+		} else {
+			print "<div class=\"diff nodifferences\">No differences found</div>\n";
+		}
 	}
 
 	print "</div>\n"; # class="patchset"
@@ -2582,10 +3295,10 @@ sub git_project_list_body {
 		if (!defined $pr->{'descr'}) {
 			my $descr = git_get_project_description($pr->{'path'}) || "";
 			$pr->{'descr_long'} = to_utf8($descr);
-			$pr->{'descr'} = chop_str($descr, 25, 5);
+			$pr->{'descr'} = chop_str($descr, $projects_list_description_width, 5);
 		}
 		if (!defined $pr->{'owner'}) {
-			$pr->{'owner'} = get_file_owner("$projectroot/$pr->{'path'}") || "";
+			$pr->{'owner'} = git_get_project_owner("$pr->{'path'}") || "";
 		}
 		if ($check_forks) {
 			my $pname = $pr->{'path'};
@@ -2601,7 +3314,7 @@ sub git_project_list_body {
 		push @projects, $pr;
 	}
 
-	$order ||= "project";
+	$order ||= $default_projects_order;
 	$from = 0 unless defined $from;
 	$to = $#projects if (!defined $to || $#projects < $to);
 
@@ -2672,9 +3385,9 @@ sub git_project_list_body {
 		      "<td>" . $cgi->a({-href => href(project=>$pr->{'path'}, action=>"summary"),
 		                        -class => "list", -title => $pr->{'descr_long'}},
 		                        esc_html($pr->{'descr'})) . "</td>\n" .
-		      "<td><i>" . chop_str($pr->{'owner'}, 15) . "</i></td>\n";
+		      "<td><i>" . esc_html(chop_str($pr->{'owner'}, 15)) . "</i></td>\n";
 		print "<td class=\"". age_class($pr->{'age'}) . "\">" .
-		      $pr->{'age_string'} . "</td>\n" .
+		      (defined $pr->{'age_string'} ? $pr->{'age_string'} : "No commits") . "</td>\n" .
 		      "<td class=\"link\">" .
 		      $cgi->a({-href => href(project=>$pr->{'path'}, action=>"summary")}, "summary")   . " | " .
 		      $cgi->a({-href => href(project=>$pr->{'path'}, action=>"shortlog")}, "shortlog") . " | " .
@@ -2698,8 +3411,6 @@ sub git_project_list_body {
 sub git_shortlog_body {
 	# uses global variable $project
 	my ($commitlist, $from, $to, $refs, $extra) = @_;
-
-	my $have_snapshot = gitweb_have_snapshot();
 
 	$from = 0 unless defined $from;
 	$to = $#{$commitlist} if (!defined $to || $#{$commitlist} < $to);
@@ -2727,8 +3438,9 @@ sub git_shortlog_body {
 		      $cgi->a({-href => href(action=>"commit", hash=>$commit)}, "commit") . " | " .
 		      $cgi->a({-href => href(action=>"commitdiff", hash=>$commit)}, "commitdiff") . " | " .
 		      $cgi->a({-href => href(action=>"tree", hash=>$commit, hash_base=>$commit)}, "tree");
-		if ($have_snapshot) {
-			print " | " . $cgi->a({-href => href(action=>"snapshot", hash=>$commit)}, "snapshot");
+		my $snapshot_links = format_snapshot_links($commit);
+		if (defined $snapshot_links) {
+			print " | " . $snapshot_links;
 		}
 		print "</td>\n" .
 		      "</tr>\n";
@@ -2928,7 +3640,7 @@ sub git_search_grep_body {
 			       esc_html(chop_str($co{'title'}, 50)) . "<br/>");
 		my $comment = $co{'comment'};
 		foreach my $line (@$comment) {
-			if ($line =~ m/^(.*)($searchtext)(.*)$/i) {
+			if ($line =~ m/^(.*)($search_regexp)(.*)$/i) {
 				my $lead = esc_html($1) || "";
 				$lead = chop_str($lead, 30, 10);
 				my $match = esc_html($2) || "";
@@ -2960,7 +3672,7 @@ sub git_search_grep_body {
 
 sub git_project_list {
 	my $order = $cgi->param('o');
-	if (defined $order && $order !~ m/project|descr|owner|age/) {
+	if (defined $order && $order !~ m/none|project|descr|owner|age/) {
 		die_error(undef, "Unknown order parameter");
 	}
 
@@ -2983,7 +3695,7 @@ sub git_project_list {
 
 sub git_forks {
 	my $order = $cgi->param('o');
-	if (defined $order && $order !~ m/project|descr|owner|age/) {
+	if (defined $order && $order !~ m/none|project|descr|owner|age/) {
 		die_error(undef, "Unknown order parameter");
 	}
 
@@ -3009,7 +3721,7 @@ sub git_project_index {
 
 	foreach my $pr (@projects) {
 		if (!exists $pr->{'owner'}) {
-			$pr->{'owner'} = get_file_owner("$projectroot/$pr->{'path'}");
+			$pr->{'owner'} = git_get_project_owner("$pr->{'path'}");
 		}
 
 		my ($path, $owner) = ($pr->{'path'}, $pr->{'owner'});
@@ -3026,7 +3738,7 @@ sub git_project_index {
 sub git_summary {
 	my $descr = git_get_project_description($project) || "none";
 	my %co = parse_commit("HEAD");
-	my %cd = parse_date($co{'committer_epoch'}, $co{'committer_tz'});
+	my %cd = %co ? parse_date($co{'committer_epoch'}, $co{'committer_tz'}) : ();
 	my $head = $co{'id'};
 
 	my $owner = git_get_project_owner($project);
@@ -3049,8 +3761,11 @@ sub git_summary {
 	print "<div class=\"title\">&nbsp;</div>\n";
 	print "<table cellspacing=\"0\">\n" .
 	      "<tr><td>description</td><td>" . esc_html($descr) . "</td></tr>\n" .
-	      "<tr><td>owner</td><td>$owner</td></tr>\n" .
-	      "<tr><td>last change</td><td>$cd{'rfc2822'}</td></tr>\n";
+	      "<tr><td>owner</td><td>" . esc_html($owner) . "</td></tr>\n";
+	if (defined $cd{'rfc2822'}) {
+		print "<tr><td>last change</td><td>$cd{'rfc2822'}</td></tr>\n";
+	}
+
 	# use per project git URL list in $projectroot/$project/cloneurl
 	# or make project git URL from git base URL and project name
 	my $url_tag = "URL";
@@ -3073,11 +3788,13 @@ sub git_summary {
 
 	# we need to request one more than 16 (0..15) to check if
 	# those 16 are all
-	my @commitlist = parse_commits($head, 17);
-	git_print_header_div('shortlog');
-	git_shortlog_body(\@commitlist, 0, 15, $refs,
-	                  $#commitlist <=  15 ? undef :
-	                  $cgi->a({-href => href(action=>"shortlog")}, "..."));
+	my @commitlist = $head ? parse_commits($head, 17) : ();
+	if (@commitlist) {
+		git_print_header_div('shortlog');
+		git_shortlog_body(\@commitlist, 0, 15, $refs,
+		                  $#commitlist <=  15 ? undef :
+		                  $cgi->a({-href => href(action=>"shortlog")}, "..."));
+	}
 
 	if (@taglist) {
 		git_print_header_div('tags');
@@ -3098,7 +3815,7 @@ sub git_summary {
 		git_project_list_body(\@forklist, undef, 0, 15,
 		                      $#forklist <= 15 ? undef :
 		                      $cgi->a({-href => href(action=>"forks")}, "..."),
-				      'noheader');
+		                      'noheader');
 	}
 
 	git_footer_html();
@@ -3109,6 +3826,11 @@ sub git_tag {
 	git_header_html();
 	git_print_page_nav('','', $head,undef,$head);
 	my %tag = parse_tag($hash);
+
+	if (! %tag) {
+		die_error(undef, "Unknown tag object");
+	}
+
 	git_print_header_div('commit', esc_html($tag{'name'}), $hash);
 	print "<div class=\"title_text\">\n" .
 	      "<table cellspacing=\"0\">\n" .
@@ -3157,7 +3879,7 @@ sub git_blame2 {
 	}
 	$ftype = git_get_type($hash);
 	if ($ftype !~ "blob") {
-		die_error("400 Bad Request", "Object is not a blob");
+		die_error('400 Bad Request', "Object is not a blob");
 	}
 	open ($fd, "-|", git_cmd(), "blame", '-p', '--',
 	      $file_name, $hash_base)
@@ -3205,7 +3927,7 @@ HTML
 		my $rev = substr($full_rev, 0, 8);
 		my $author = $meta->{'author'};
 		my %date = parse_date($meta->{'author-time'},
-				      $meta->{'author-tz'});
+		                      $meta->{'author-tz'});
 		my $date = $date{'iso-tz'};
 		if ($group_size) {
 			$current_color = ++$current_color % $num_colors;
@@ -3217,24 +3939,24 @@ HTML
 			print " rowspan=\"$group_size\"" if ($group_size > 1);
 			print ">";
 			print $cgi->a({-href => href(action=>"commit",
-						     hash=>$full_rev,
-						     file_name=>$file_name)},
-				      esc_html($rev));
+			                             hash=>$full_rev,
+			                             file_name=>$file_name)},
+			              esc_html($rev));
 			print "</td>\n";
 		}
 		open (my $dd, "-|", git_cmd(), "rev-parse", "$full_rev^")
-			or die_error("could not open git-rev-parse");
+			or die_error(undef, "Open git-rev-parse failed");
 		my $parent_commit = <$dd>;
 		close $dd;
 		chomp($parent_commit);
 		my $blamed = href(action => 'blame',
-				  file_name => $meta->{'filename'},
-				  hash_base => $parent_commit);
+		                  file_name => $meta->{'filename'},
+		                  hash_base => $parent_commit);
 		print "<td class=\"linenr\">";
 		print $cgi->a({ -href => "$blamed#l$orig_lineno",
-				-id => "l$lineno",
-				-class => "linenr" },
-			      esc_html($lineno));
+		                -id => "l$lineno",
+		                -class => "linenr" },
+		              esc_html($lineno));
 		print "</td>";
 		print "<td class=\"pre\">" . esc_html($data) . "</td>\n";
 		print "</tr>\n";
@@ -3500,8 +4222,6 @@ sub git_blob {
 }
 
 sub git_tree {
-	my $have_snapshot = gitweb_have_snapshot();
-
 	if (!defined $hash_base) {
 		$hash_base = "HEAD";
 	}
@@ -3535,11 +4255,10 @@ sub git_tree {
 				                       hash_base=>"HEAD", file_name=>$file_name)},
 				        "HEAD"),
 		}
-		if ($have_snapshot) {
+		my $snapshot_links = format_snapshot_links($hash);
+		if (defined $snapshot_links) {
 			# FIXME: Should be available when we have no hash base as well.
-			push @views_nav,
-				$cgi->a({-href => href(action=>"snapshot", hash=>$hash)},
-				        "snapshot");
+			push @views_nav, $snapshot_links;
 		}
 		git_print_page_nav('tree','', $hash_base, undef, undef, join(' | ', @views_nav));
 		git_print_header_div('commit', esc_html($co{'title'}) . $ref, $hash_base);
@@ -3603,34 +4322,53 @@ sub git_tree {
 }
 
 sub git_snapshot {
-	my ($ctype, $suffix, $command) = gitweb_check_feature('snapshot');
-	my $have_snapshot = (defined $ctype && defined $suffix);
-	if (!$have_snapshot) {
+	my @supported_fmts = gitweb_check_feature('snapshot');
+	@supported_fmts = filter_snapshot_fmts(@supported_fmts);
+
+	my $format = $cgi->param('sf');
+	if (!@supported_fmts) {
 		die_error('403 Permission denied', "Permission denied");
+	}
+	# default to first supported snapshot format
+	$format ||= $supported_fmts[0];
+	if ($format !~ m/^[a-z0-9]+$/) {
+		die_error(undef, "Invalid snapshot format parameter");
+	} elsif (!exists($known_snapshot_formats{$format})) {
+		die_error(undef, "Unknown snapshot format");
+	} elsif (!grep($_ eq $format, @supported_fmts)) {
+		die_error(undef, "Unsupported snapshot format");
 	}
 
 	if (!defined $hash) {
 		$hash = git_get_head_hash($project);
 	}
 
-	my $filename = to_utf8(basename($project)) . "-$hash.tar.$suffix";
+	my $git_command = git_cmd_str();
+	my $name = $project;
+	$name =~ s,([^/])/*\.git$,$1,;
+	$name = basename($name);
+	my $filename = to_utf8($name);
+	$name =~ s/\047/\047\\\047\047/g;
+	my $cmd;
+	$filename .= "-$hash$known_snapshot_formats{$format}{'suffix'}";
+	$cmd = "$git_command archive " .
+		"--format=$known_snapshot_formats{$format}{'format'} " .
+		"--prefix=\'$name\'/ $hash";
+	if (exists $known_snapshot_formats{$format}{'compressor'}) {
+		$cmd .= ' | ' . join ' ', @{$known_snapshot_formats{$format}{'compressor'}};
+	}
 
 	print $cgi->header(
-		-type => "application/$ctype",
+		-type => $known_snapshot_formats{$format}{'type'},
 		-content_disposition => 'inline; filename="' . "$filename" . '"',
 		-status => '200 OK');
 
-	my $git = git_cmd_str();
-	my $name = $project;
-	$name =~ s/\047/\047\\\047\047/g;
-	open my $fd, "-|",
-	"$git archive --format=tar --prefix=\'$name\'/ $hash | $command"
-		or die_error(undef, "Execute git-tar-tree failed.");
+	open my $fd, "-|", $cmd
+		or die_error(undef, "Execute git-archive failed");
 	binmode STDOUT, ':raw';
 	print <$fd>;
 	binmode STDOUT, ':utf8'; # as set at the beginning of gitweb.cgi
 	close $fd;
-
 }
 
 sub git_log {
@@ -3722,7 +4460,7 @@ sub git_commit {
 		$formats_nav .=
 			'(merge: ' .
 			join(' ', map {
-				$cgi->a({-href => href(action=>"commitdiff",
+				$cgi->a({-href => href(action=>"commit",
 				                       hash=>$_)},
 				        esc_html(substr($_, 0, 7)));
 			} @$parents ) .
@@ -3733,14 +4471,13 @@ sub git_commit {
 		$parent = "--root";
 	}
 	my @difftree;
-	if (@$parents <= 1) {
-		# difftree output is not printed for merges
-		open my $fd, "-|", git_cmd(), "diff-tree", '-r', "--no-commit-id",
-			@diff_opts, $parent, $hash, "--"
-				or die_error(undef, "Open git-diff-tree failed");
-		@difftree = map { chomp; $_ } <$fd>;
-		close $fd or die_error(undef, "Reading git-diff-tree failed");
-	}
+	open my $fd, "-|", git_cmd(), "diff-tree", '-r', "--no-commit-id",
+		@diff_opts,
+		(@$parents <= 1 ? $parent : '-c'),
+		$hash, "--"
+		or die_error(undef, "Open git-diff-tree failed");
+	@difftree = map { chomp; $_ } <$fd>;
+	close $fd or die_error(undef, "Reading git-diff-tree failed");
 
 	# non-textual hash id's can be cached
 	my $expires;
@@ -3749,8 +4486,6 @@ sub git_commit {
 	}
 	my $refs = git_get_references();
 	my $ref = format_ref_marker($refs, $co{'id'});
-
-	my $have_snapshot = gitweb_have_snapshot();
 
 	git_header_html(undef, $expires);
 	git_print_page_nav('commit', '',
@@ -3790,9 +4525,9 @@ sub git_commit {
 	      "<td class=\"link\">" .
 	      $cgi->a({-href => href(action=>"tree", hash=>$co{'tree'}, hash_base=>$hash)},
 	              "tree");
-	if ($have_snapshot) {
-		print " | " .
-		      $cgi->a({-href => href(action=>"snapshot", hash=>$hash)}, "snapshot");
+	my $snapshot_links = format_snapshot_links($hash);
+	if (defined $snapshot_links) {
+		print " | " . $snapshot_links;
 	}
 	print "</td>" .
 	      "</tr>\n";
@@ -3818,10 +4553,7 @@ sub git_commit {
 	git_print_log($co{'comment'});
 	print "</div>\n";
 
-	if (@$parents <= 1) {
-		# do not output difftree/whatchanged for merges
-		git_difftree_body(\@difftree, $hash, $parent);
-	}
+	git_difftree_body(\@difftree, $hash, @$parents);
 
 	git_footer_html();
 }
@@ -3888,7 +4620,7 @@ sub git_blobdiff {
 			# read raw output
 			open $fd, "-|", git_cmd(), "diff-tree", '-r', @diff_opts,
 				$hash_parent_base, $hash_base,
-				"--", $file_name
+				"--", (defined $file_parent ? $file_parent : ()), $file_name
 				or die_error(undef, "Open git-diff-tree failed");
 			@difftree = map { chomp; $_ } <$fd>;
 			close $fd
@@ -3937,8 +4669,9 @@ sub git_blobdiff {
 
 		# open patch output
 		open $fd, "-|", git_cmd(), "diff-tree", '-r', @diff_opts,
-			'-p', $hash_parent_base, $hash_base,
-			"--", $file_name
+			'-p', ($format eq 'html' ? "--full-index" : ()),
+			$hash_parent_base, $hash_base,
+			"--", (defined $file_parent ? $file_parent : ()), $file_name
 			or die_error(undef, "Open git-diff-tree failed");
 	}
 
@@ -3972,7 +4705,8 @@ sub git_blobdiff {
 		}
 
 		# open patch output
-		open $fd, "-|", git_cmd(), "diff", '-p', @diff_opts,
+		open $fd, "-|", git_cmd(), "diff", @diff_opts,
+			'-p', ($format eq 'html' ? "--full-index" : ()),
 			$hash_parent, $hash, "--"
 			or die_error(undef, "Open git-diff failed");
 	} else  {
@@ -4052,7 +4786,11 @@ sub git_commitdiff {
 		die_error(undef, "Unknown commit object");
 	}
 
-	# we need to prepare $formats_nav before any parameter munging
+	# choose format for commitdiff for merge
+	if (! defined $hash_parent && @{$co{'parents'}} > 1) {
+		$hash_parent = '--cc';
+	}
+	# we need to prepare $formats_nav before almost any parameter munging
 	my $formats_nav;
 	if ($format eq 'html') {
 		$formats_nav =
@@ -4060,14 +4798,22 @@ sub git_commitdiff {
 			                       hash=>$hash, hash_parent=>$hash_parent)},
 			        "raw");
 
-		if (defined $hash_parent) {
+		if (defined $hash_parent &&
+		    $hash_parent ne '-c' && $hash_parent ne '--cc') {
 			# commitdiff with two commits given
 			my $hash_parent_short = $hash_parent;
 			if ($hash_parent =~ m/^[0-9a-fA-F]{40}$/) {
 				$hash_parent_short = substr($hash_parent, 0, 7);
 			}
 			$formats_nav .=
-				' (from: ' .
+				' (from';
+			for (my $i = 0; $i < @{$co{'parents'}}; $i++) {
+				if ($co{'parents'}[$i] eq $hash_parent) {
+					$formats_nav .= ' parent ' . ($i+1);
+					last;
+				}
+			}
+			$formats_nav .= ': ' .
 				$cgi->a({-href => href(action=>"commitdiff",
 				                       hash=>$hash_parent)},
 				        esc_html($hash_parent_short)) .
@@ -4085,6 +4831,17 @@ sub git_commitdiff {
 				')';
 		} else {
 			# merge commit
+			if ($hash_parent eq '--cc') {
+				$formats_nav .= ' | ' .
+					$cgi->a({-href => href(action=>"commitdiff",
+					                       hash=>$hash, hash_parent=>'-c')},
+					        'combined');
+			} else { # $hash_parent eq '-c'
+				$formats_nav .= ' | ' .
+					$cgi->a({-href => href(action=>"commitdiff",
+					                       hash=>$hash, hash_parent=>'--cc')},
+					        'compact');
+			}
 			$formats_nav .=
 				' (merge: ' .
 				join(' ', map {
@@ -4096,8 +4853,11 @@ sub git_commitdiff {
 		}
 	}
 
-	if (!defined $hash_parent) {
-		$hash_parent = $co{'parent'} || '--root';
+	my $hash_parent_param = $hash_parent;
+	if (!defined $hash_parent_param) {
+		# --cc for multiple parents, --root for parentless
+		$hash_parent_param =
+			@{$co{'parents'}} > 1 ? '--cc' : $co{'parent'} || '--root';
 	}
 
 	# read commitdiff
@@ -4106,19 +4866,19 @@ sub git_commitdiff {
 	if ($format eq 'html') {
 		open $fd, "-|", git_cmd(), "diff-tree", '-r', @diff_opts,
 			"--no-commit-id", "--patch-with-raw", "--full-index",
-			$hash_parent, $hash, "--"
+			$hash_parent_param, $hash, "--"
 			or die_error(undef, "Open git-diff-tree failed");
 
 		while (my $line = <$fd>) {
 			chomp $line;
 			# empty line ends raw part of diff-tree output
 			last unless $line;
-			push @difftree, $line;
+			push @difftree, scalar parse_difftree_raw_line($line);
 		}
 
 	} elsif ($format eq 'plain') {
 		open $fd, "-|", git_cmd(), "diff-tree", '-r', @diff_opts,
-			'-p', $hash_parent, $hash, "--"
+			'-p', $hash_parent_param, $hash, "--"
 			or die_error(undef, "Open git-diff-tree failed");
 
 	} else {
@@ -4174,10 +4934,14 @@ TEXT
 
 	# write patch
 	if ($format eq 'html') {
-		git_difftree_body(\@difftree, $hash, $hash_parent);
+		my $use_parents = !defined $hash_parent ||
+			$hash_parent eq '-c' || $hash_parent eq '--cc';
+		git_difftree_body(\@difftree, $hash,
+		                  $use_parents ? @{$co{'parents'}} : $hash_parent);
 		print "<br/>\n";
 
-		git_patchset_body($fd, \@difftree, $hash, $hash_parent);
+		git_patchset_body($fd, \@difftree, $hash,
+		                  $use_parents ? @{$co{'parents'}} : $hash_parent);
 		close $fd;
 		print "</div>\n"; # class="page_body"
 		git_footer_html();
@@ -4288,6 +5052,12 @@ sub git_search {
 			die_error('403 Permission denied', "Permission denied");
 		}
 	}
+	if ($searchtype eq 'grep') {
+		my ($have_grep) = gitweb_check_feature('grep');
+		if (!$have_grep) {
+			die_error('403 Permission denied', "Permission denied");
+		}
+	}
 
 	git_header_html();
 
@@ -4300,20 +5070,20 @@ sub git_search {
 		} elsif ($searchtype eq 'committer') {
 			$greptype = "--committer=";
 		}
-		$greptype .= $searchtext;
+		$greptype .= $search_regexp;
 		my @commitlist = parse_commits($hash, 101, (100 * $page), $greptype);
 
 		my $paging_nav = '';
 		if ($page > 0) {
 			$paging_nav .=
 				$cgi->a({-href => href(action=>"search", hash=>$hash,
-						       searchtext=>$searchtext, searchtype=>$searchtype)},
-					"first");
+				                       searchtext=>$searchtext, searchtype=>$searchtype)},
+				        "first");
 			$paging_nav .= " &sdot; " .
 				$cgi->a({-href => href(action=>"search", hash=>$hash,
-						       searchtext=>$searchtext, searchtype=>$searchtype,
-						       page=>$page-1),
-					 -accesskey => "p", -title => "Alt-p"}, "prev");
+				                       searchtext=>$searchtext, searchtype=>$searchtype,
+				                       page=>$page-1),
+				         -accesskey => "p", -title => "Alt-p"}, "prev");
 		} else {
 			$paging_nav .= "first";
 			$paging_nav .= " &sdot; prev";
@@ -4321,9 +5091,9 @@ sub git_search {
 		if ($#commitlist >= 100) {
 			$paging_nav .= " &sdot; " .
 				$cgi->a({-href => href(action=>"search", hash=>$hash,
-						       searchtext=>$searchtext, searchtype=>$searchtype,
-						       page=>$page+1),
-					 -accesskey => "n", -title => "Alt-n"}, "next");
+				                       searchtext=>$searchtext, searchtype=>$searchtype,
+				                       page=>$page+1),
+				         -accesskey => "n", -title => "Alt-n"}, "next");
 		} else {
 			$paging_nav .= " &sdot; next";
 		}
@@ -4331,9 +5101,9 @@ sub git_search {
 		if ($#commitlist >= 100) {
 			$next_link =
 				$cgi->a({-href => href(action=>"search", hash=>$hash,
-						       searchtext=>$searchtext, searchtype=>$searchtype,
-						       page=>$page+1),
-					 -accesskey => "n", -title => "Alt-n"}, "next");
+				                       searchtext=>$searchtext, searchtype=>$searchtype,
+				                       page=>$page+1),
+				         -accesskey => "n", -title => "Alt-n"}, "next");
 		}
 
 		git_print_page_nav('','', $hash,$co{'tree'},$hash, $paging_nav);
@@ -4349,8 +5119,10 @@ sub git_search {
 		my $alternate = 1;
 		$/ = "\n";
 		my $git_command = git_cmd_str();
+		my $searchqtext = $searchtext;
+		$searchqtext =~ s/'/'\\''/;
 		open my $fd, "-|", "$git_command rev-list $hash | " .
-			"$git_command diff-tree -r --stdin -S\'$searchtext\'";
+			"$git_command diff-tree -r --stdin -S\'$searchqtext\'";
 		undef %co;
 		my @files;
 		while (my $line = <$fd>) {
@@ -4404,6 +5176,73 @@ sub git_search {
 
 		print "</table>\n";
 	}
+
+	if ($searchtype eq 'grep') {
+		git_print_page_nav('','', $hash,$co{'tree'},$hash);
+		git_print_header_div('commit', esc_html($co{'title'}), $hash);
+
+		print "<table cellspacing=\"0\">\n";
+		my $alternate = 1;
+		my $matches = 0;
+		$/ = "\n";
+		open my $fd, "-|", git_cmd(), 'grep', '-n', '-i', '-E', $searchtext, $co{'tree'};
+		my $lastfile = '';
+		while (my $line = <$fd>) {
+			chomp $line;
+			my ($file, $lno, $ltext, $binary);
+			last if ($matches++ > 1000);
+			if ($line =~ /^Binary file (.+) matches$/) {
+				$file = $1;
+				$binary = 1;
+			} else {
+				(undef, $file, $lno, $ltext) = split(/:/, $line, 4);
+			}
+			if ($file ne $lastfile) {
+				$lastfile and print "</td></tr>\n";
+				if ($alternate++) {
+					print "<tr class=\"dark\">\n";
+				} else {
+					print "<tr class=\"light\">\n";
+				}
+				print "<td class=\"list\">".
+					$cgi->a({-href => href(action=>"blob", hash=>$co{'hash'},
+							       file_name=>"$file"),
+						-class => "list"}, esc_path($file));
+				print "</td><td>\n";
+				$lastfile = $file;
+			}
+			if ($binary) {
+				print "<div class=\"binary\">Binary file</div>\n";
+			} else {
+				$ltext = untabify($ltext);
+				if ($ltext =~ m/^(.*)($searchtext)(.*)$/i) {
+					$ltext = esc_html($1, -nbsp=>1);
+					$ltext .= '<span class="match">';
+					$ltext .= esc_html($2, -nbsp=>1);
+					$ltext .= '</span>';
+					$ltext .= esc_html($3, -nbsp=>1);
+				} else {
+					$ltext = esc_html($ltext, -nbsp=>1);
+				}
+				print "<div class=\"pre\">" .
+					$cgi->a({-href => href(action=>"blob", hash=>$co{'hash'},
+							       file_name=>"$file").'#l'.$lno,
+						-class => "linenr"}, sprintf('%4i', $lno))
+					. ' ' .  $ltext . "</div>\n";
+			}
+		}
+		if ($lastfile) {
+			print "</td></tr>\n";
+			if ($matches > 1000) {
+				print "<div class=\"diff nodifferences\">Too many matches, listing trimmed</div>\n";
+			}
+		} else {
+			print "<div class=\"diff nodifferences\">No matches found</div>\n";
+		}
+		close $fd;
+
+		print "</table>\n";
+	}
 	git_footer_html();
 }
 
@@ -4414,6 +5253,20 @@ sub git_search_help {
 <dl>
 <dt><b>commit</b></dt>
 <dd>The commit messages and authorship information will be scanned for the given string.</dd>
+EOT
+	my ($have_grep) = gitweb_check_feature('grep');
+	if ($have_grep) {
+		print <<EOT;
+<dt><b>grep</b></dt>
+<dd>All files in the currently selected tree (HEAD unless you are explicitly browsing
+    a different one) are searched for the given
+<a href="http://en.wikipedia.org/wiki/Regular_expression">regular expression</a>
+(POSIX extended) and the matches are listed. On large
+trees, this search can take a while and put some strain on the server, so please use it with
+some consideration.</dd>
+EOT
+	}
+	print <<EOT;
 <dt><b>author</b></dt>
 <dd>Name and e-mail of the change author and date of birth of the patch will be scanned for the given string.</dd>
 <dt><b>committer</b></dt>
@@ -4476,7 +5329,7 @@ sub git_feed {
 
 	# log/feed of current (HEAD) branch, log of given branch, history of file/directory
 	my $head = $hash || 'HEAD';
-	my @commitlist = parse_commits($head, 150);
+	my @commitlist = parse_commits($head, 150, 0, undef, $file_name);
 
 	my %latest_commit;
 	my %latest_date;
@@ -4588,7 +5441,8 @@ XML
 
 		# get list of changed files
 		open my $fd, "-|", git_cmd(), "diff-tree", '-r', @diff_opts,
-			$co{'parent'}, $co{'id'}, "--", (defined $file_name ? $file_name : ())
+			$co{'parent'} || "--root",
+			$co{'id'}, "--", (defined $file_name ? $file_name : ())
 			or next;
 		my @difftree = map { chomp; $_ } <$fd>;
 		close $fd
