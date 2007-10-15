@@ -182,6 +182,9 @@ static void update_progressbar(int sigraised)
   }
   if (output_is_possible())
     refresh_progressbar();
+  (void) xsignal(SIGALRM, update_progressbar); /* set signal handler again (for
+                                                  systems which switch it back
+                                                  to SIG_DFL)*/
   (void) alarm(UPDATE_INTERVAL);
   errno = last_errno;
 }
