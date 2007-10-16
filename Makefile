@@ -488,7 +488,6 @@ install:
 	  || mkdir -p $(prefix)/include/libgtmatch
 	cp src/gtmatch.h $(prefix)/include
 	cp src/libgtmatch/*.h src/libgtmatch/*.pr $(prefix)/include/libgtmatch
-
 	test -d $(prefix)/lib || mkdir -p $(prefix)/lib
 	cp lib/libgtcore.a $(prefix)/lib
 ifdef RANLIB
