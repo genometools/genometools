@@ -6,51 +6,58 @@
 <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-<h1><i>GenomeTools</i></h1>
-<p>
-The <i>GenomeTools</i> genome analysis system is a <a
-href="license.html">free</a> collection of bioinformatics tools (in the realm of
-genome informatics) combined into a single binary named <tt>gt</tt>.
-It is based on a collection of C libraries, for example the
-<a href="libgtview.html"<tt>libgtview</tt></a> library .
-</p>
-<p>
-<a href="pub/">Download</a> <i>GenomeTools</i> or
-<a href=cgi-bin/gitweb.cgi?p=genometools.git;a=summary>browse</a> its source
-code.
-</p>
-<p>
-If you are interested in gene prediction, have a look at
-<a href="http://genomethreader.org" title="GenomeThreader gene prediction
-  software"><i>GenomeThreader</i></a>.
-</p>
-<h2>Platforms</h2>
-<p>
-<i>GenomeTools</i> has been designed to run on every
-<a href="http://en.wikipedia.org/wiki/POSIX">POSIX</a> compliant
-<a href="http://en.wikipedia.org/wiki/UNIX">UNIX</a> system. For example, Linux,
-Mac OS X, and OpenBSD. <strong>It is probably not easy to get it to compile and run on Windows.</strong>
-</p>
-<p>
-<h2>Visualization</h2>
-<p>
-With the new <tt>gt view</tt> tool (build with the
-<a href="libgtview.html"<tt>libgtview</tt></a> library) you can produce PNG
-representations out of <a href="http://song.sourceforge.net/gff3.shtml"
-  title="GFF3 format specification">GFF3</a>
-annotation files. The picture below was produced with the following command:
-</p>
-<pre>
-gt view -start 4000 -end 9000 annotation.png <a
-href="images/annotation.gff3" title="annotation file used to produce the picture">annotation.gff3</a>
-</pre>
-<p>
-<img src="images/annotation.png" alt="[Genome Annotation]">
-</p>
+  <div id="menu">
+    <ul>
+      <li><a id="current" href="index.html">Overview</a></li>
+      <li><a href="pub/">Download</a></li>
+      <li><a href="cgi-bin/gitweb.cgi?p=genometools.git;a=summary">Browse Source</a></li>
+      <li><a href="design.html">Design</a></li>
+      <li><a href="libgtview.html">View Library</a></li>
+      <li><a href="license.html">License</a></li>
+    </ul>
+  </div>
+  <div id="main">
+    <h1><i>GenomeTools</i></h1>
+    <p>
+    The <i>GenomeTools</i> genome analysis system is a <a
+    href="license.html">free</a> collection of bioinformatics tools (in the realm of
+    genome informatics) combined into a single binary named <tt>gt</tt>.
+    It is based on a collection of C libraries, for example the
+    <a href="libgtview.html"<tt>libgtview</tt></a> library .
+    </p>
+    <p>
+    If you are interested in gene prediction, have a look at
+    <a href="http://genomethreader.org" title="GenomeThreader gene prediction
+      software"><i>GenomeThreader</i></a>.
+    </p>
+    <h2>Platforms</h2>
+    <p>
+    <i>GenomeTools</i> has been designed to run on every
+    <a href="http://en.wikipedia.org/wiki/POSIX">POSIX</a> compliant
+    <a href="http://en.wikipedia.org/wiki/UNIX">UNIX</a> system. For example, Linux,
+    Mac OS X, and OpenBSD. <strong>It is probably not easy to get it to compile
+      and run on Windows.</strong> </p>
+    <p>
+    <h2>Visualization</h2>
+    <p>
+    With the new <tt>gt view</tt> tool (build with the
+    <a href="libgtview.html"<tt>libgtview</tt></a> library) you can produce PNG
+    representations out of <a href="http://song.sourceforge.net/gff3.shtml"
+      title="GFF3 format specification">GFF3</a>
+    annotation files. The picture below was produced with the following command:
+    </p>
+    <pre>
+    gt view -start 4000 -end 9000 annotation.png <a
+    href="images/annotation.gff3" title="annotation file used to produce the picture">annotation.gff3</a>
+    </pre>
+    <p>
+    <img src="images/annotation.png" alt="[Genome Annotation]">
+    </p>
 <div id="footer">
 Copyright &copy; 2006-2007
-<a href="mailto:gremme@gmail.com">Gordon Gremme.</a> Last update: 2007-10-12
+<a href="mailto:gremme@gmail.com">Gordon Gremme.</a> Last update: 2007-10-16
 </div>
+  </div>
 <script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
 </script>
 <script type="text/javascript">

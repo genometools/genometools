@@ -1,8 +1,5 @@
 body {
   font-family: Verdana, Geneva, Arial, sans-serif;
-  margin-left: 10%;
-  margin-right: 10%;
-  line-height: 1.6em;
 }
 h1, h2, h3, h4, h5, h6 {
   color: gray;
@@ -17,17 +14,56 @@ img {
   border-style: solid;
   border-width: 1px;
 }
-a:link {
+#menu {
+  float: left;
+  clear: left;
+  width: 180px;
+  padding-right: 20px;
+}
+#menu li {
+  list-style-type: none;
+  margin-bottom: 10px;
+  margin-left: -18px;
+}
+#menu li a {
+  list-style-type: none;
+  border : 1px solid black;
+  display: block;
+  padding: 4px 15px 4px 15px;
+  text-decoration: none;
+}
+#menu li a:link {
+  color: white;
+  background: rgb(60%, 60%, 90%);
+}
+#menu li a:visited {
+  color: white;
+  background: rgb(60%, 60%, 90%);
+}
+#menu li a:hover {
+  color: gray;
+  background: rgb(90%, 90%, 20%);
+}
+#menu li a#current {
+  color: gray;
+  background: rgb(90%, 90%, 20%);
+}
+#main {
+  margin-left: 220px;
+  margin-right: 10%;
+  line-height: 1.6em;
+}
+#main a:link {
   color: blue;
   text-decoration: none;
   border-bottom: thin dotted blue;
 }
-a:visited {
+#main a:visited {
   color: gray;
   text-decoration: none;
   border-bottom: thin dotted gray;
 }
-a:hover {
+#main a:hover {
   background: rgb(90%, 90%, 20%);
 }
 pre {
