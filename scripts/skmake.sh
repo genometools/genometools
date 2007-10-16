@@ -36,7 +36,7 @@ fi
 
 makecompilerflags()
 {
-  printf "curses=no"
+  printf "all:\n\t\${MAKE} curses=no"
   if test $3 -eq 1
   then
     printf " CC='ccache icc'"
@@ -65,33 +65,33 @@ makecompilerflags()
 }
 
 # printf "NOASSERT='assert=no'"
-if test -r LocalMakeflags
+if test -r LocalMakefile
 then
-  mv LocalMakeflags LocalMakeflags.previous
+  mv LocalMakefile LocalMakefile.previous
 fi
 
 if test $icc -eq 1
 then
-  makecompilerflags 32 $big $icc > LocalMakeflags
+  makecompilerflags 32 $big $icc > LocalMakefile
 else
   if test $do64 -eq 1
   then
-    makecompilerflags 64 0 $icc > LocalMakeflags
+    makecompilerflags 64 0 $icc > LocalMakefile
   else
-    makecompilerflags 32 $big $icc > LocalMakeflags
+    makecompilerflags 32 $big $icc > LocalMakefile
   fi
 fi
 
-if test -r LocalMakeflags.previous
+if test -r LocalMakefile.previous
 then
-  cmp -s LocalMakeflags LocalMakeflags.previous
+  cmp -s LocalMakefile LocalMakefile.previous
   if test $? -eq 1
   then
-    echo "Current and previous LocalMakeflags files differ: first remove them"
+    echo "Current and previous LocalMakefile files differ: first remove them"
     exit 1
   fi
 fi
-make "`cat LocalMakeflags`"
+make -f LocalMakefile
 
 # echo ${MAKEFLAGS}
 # make ${MAKEFLAGS} bin/skproto

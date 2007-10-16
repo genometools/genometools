@@ -56,6 +56,7 @@ SeqIterator* seqiterator_new(const StrArray *filenametab,
   seqit->unitnum = 0;
   seqit->withsequence = withsequence;
   seqit->currentread = 0;
+  seqit->maxread = 0;
   return seqit;
 }
 
