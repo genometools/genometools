@@ -263,7 +263,7 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgtcore.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h \
+lib/libgtcore.a: obj/gt_config.h \
                  $(LIBGTCORE_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -358,17 +358,11 @@ bin/rnv: obj/$(RNV_DIR)/xcl.o lib/librnv.a lib/libexpat.a
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(LDFLAGS) $^ -o $@
 
-obj/gt_build.h:
-	@date +'#define GT_BUILT "%Y-%m-%d %H:%M:%S"' > $@
-
-obj/gt_cc.h:
-	@echo '#define GT_CC "'`$(CC) --version | head -n 1`\" > $@
-
-obj/gt_cflags.h:
-	@echo '#define GT_CFLAGS "$(CFLAGS) $(GT_CFLAGS)"' > $@
-
-obj/gt_version.h: VERSION
-	@echo '#define GT_VERSION "'`cat VERSION`\" > $@
+obj/gt_config.h:
+	@(date +'#define GT_BUILT "%Y-%m-%d %H:%M:%S"' ;\
+	echo '#define GT_CC "'`$(CC) --version | head -n 1`\" ;\
+	echo '#define GT_CFLAGS "$(CFLAGS) $(GT_CFLAGS)"' ;\
+	echo '#define GT_VERSION "'`cat VERSION`\" ) > $@
 
 src/libgtcore/bitpackstringop8.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
@@ -470,7 +464,7 @@ install:
 	cp -r gtdata $(prefix)/bin
 	test -d $(prefix)/include/libgtcore \
 	  || mkdir -p $(prefix)/include/libgtcore
-	cp src/gtcore.h $(prefix)/include
+	cp src/gtcore.h obj/gt_config.h $(prefix)/include
 	cp src/libgtcore/*.h $(prefix)/include/libgtcore
 	test -d $(prefix)/include/libgtext \
           || mkdir -p $(prefix)/include/libgtext
