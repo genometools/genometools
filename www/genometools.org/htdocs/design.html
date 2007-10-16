@@ -109,7 +109,7 @@ We describe now how to implement a simple classes using the string class <code>s
 of <i>GenomeTools</i> as an example. The interface to a class is always given in
 the <code>.h</code> header file
 (<a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.h;hb=HEAD"<code>str.h</code></a> in our example). To achieve information hiding the header file
+  href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.h;hb=HEAD"><code>str.h</code></a> in our example). To achieve information hiding the header file
 cannot contain implementation details of the class. The implementation can
 always be found in the corresponding <code>.c</code> file (<a
 href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.c;hb=HEAD"><code>str.c</code></a> in our example).
@@ -231,10 +231,10 @@ void str_free(Str *s)
 </pre>
 <p>
 Since this string objects are pretty much useless so far, we define a couple
-more 
+more
 (object) <a href="http://en.wikipedia.org/wiki/Method_%28computer_science%29">
 methods</a> in the header file <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.h;hb=HEAD"<code>str.h</code></a>.
+href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.h;hb=HEAD"><code>str.h</code></a>.
 </p>
 <p>
 Because C does not allow the traditional
@@ -247,7 +247,7 @@ method name with <code>classname_</code>. That is, we get
 names in C. The constructor is always called <code>classname_new()</code> and
 the destructor <code>classname_free()</code>.
 See <a
-href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.c;hb=HEAD"<code>str.c</code></a>
+  href="http://genometools.org/cgi-bin/gitweb.cgi?p=genometools.git;a=blob;f=src/libgtcore/str.c;hb=HEAD"><code>str.c</code></a>
 for examples.
 </p>
 
@@ -274,7 +274,7 @@ struct Str {
 </pre>
 <p>
 implement the <code>str_ref()</code> function
-</P
+</p>
 <pre>
 Str* str_ref(Str *s)
 {
