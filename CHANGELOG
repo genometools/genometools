@@ -1,3 +1,8 @@
+changes in version 1.0.5 (2007-10-16):
+
+- bug fixes
+
+
 changes in version 1.0.4 (2007-10-15):
 
 - `gt gff2` has new option -checkids (was the default behavior before)
