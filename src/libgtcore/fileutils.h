@@ -20,6 +20,7 @@
 #define FILEUTILS_H
 
 #include <stdbool.h>
+#include <sys/types.h>
 #include <stdio.h>
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
