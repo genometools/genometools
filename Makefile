@@ -281,14 +281,16 @@ ifdef RANLIB
 endif
 
 lib/libgtmatch.a: $(LIBGTMATCH_OBJ)
-	@echo "[link $@]"
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBGTMATCH_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
 lib/libgtltr.a: $(LIBGTLTR_OBJ)
-	@echo "[link $@]"
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBGTLTR_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
