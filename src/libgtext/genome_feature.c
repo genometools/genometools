@@ -143,6 +143,118 @@ GenomeNode* genome_feature_new(GenomeFeatureType type, Range range,
   return gn;
 }
 
+GenomeNode* genome_feature_new_standard_gene(Env *env)
+{
+  GenomeNode *gn, *child, *grandchild;
+  Range range;
+  Str *seqid;
+  env_error_check(env);
+  seqid = str_new_cstr("ctg123", env);
+
+  /* gene */
+  range.start = 1000; range.end = 9000;
+  gn = genome_feature_new(gft_gene, range, STRAND_FORWARD, NULL, UNDEF_ULONG,
+                          env);
+  genome_node_set_seqid(gn, seqid, env);
+
+  /* TF binding site */
+  range.start = 1000; range.end = 1012;
+  child = genome_feature_new(gft_TF_binding_site, range, STRAND_FORWARD, NULL,
+                             UNDEF_ULONG, env);
+  genome_node_set_seqid(child, seqid, env);
+  genome_node_is_part_of_genome_node(gn, child, env);
+
+  /* first mRNA */
+  range.start = 1050; range.end = 9000;
+  child = genome_feature_new(gft_mRNA, range, STRAND_FORWARD, NULL, UNDEF_ULONG,
+                             env);
+  genome_node_set_seqid(child, seqid, env);
+  genome_node_is_part_of_genome_node(gn, child, env);
+
+  range.start = 1050; range.end = 1500;
+  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+                                  UNDEF_ULONG, env);
+  genome_node_set_seqid(grandchild, seqid, env);
+  genome_node_is_part_of_genome_node(child, grandchild, env);
+
+  range.start = 3000; range.end = 3902;
+  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+                                  UNDEF_ULONG, env);
+  genome_node_set_seqid(grandchild, seqid, env);
+  genome_node_is_part_of_genome_node(child, grandchild, env);
+
+  range.start = 5000; range.end = 5500;
+  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+                                  UNDEF_ULONG, env);
+  genome_node_set_seqid(grandchild, seqid, env);
+  genome_node_is_part_of_genome_node(child, grandchild, env);
+
+  range.start = 7000; range.end = 9000;
+  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+                                  UNDEF_ULONG, env);
+  genome_node_set_seqid(grandchild, seqid, env);
+  genome_node_is_part_of_genome_node(child, grandchild, env);
+
+  /* second mRNA */
+  range.start = 1050; range.end = 9000;
+  child = genome_feature_new(gft_mRNA, range, STRAND_FORWARD, NULL, UNDEF_ULONG,
+                             env);
+  genome_node_set_seqid(child, seqid, env);
+  genome_node_is_part_of_genome_node(gn, child, env);
+
+  range.start = 1050; range.end = 1500;
+  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+                                  UNDEF_ULONG, env);
+  genome_node_set_seqid(grandchild, seqid, env);
+  genome_node_is_part_of_genome_node(child, grandchild, env);
+
+  range.start = 5000; range.end = 5500;
+  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+                                  UNDEF_ULONG, env);
+  genome_node_set_seqid(grandchild, seqid, env);
+  genome_node_is_part_of_genome_node(child, grandchild, env);
+
+  range.start = 7000; range.end = 9000;
+  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+                                  UNDEF_ULONG, env);
+  genome_node_set_seqid(grandchild, seqid, env);
+  genome_node_is_part_of_genome_node(child, grandchild, env);
+
+  /* third mRNA */
+  range.start = 1300; range.end = 9000;
+  child = genome_feature_new(gft_mRNA, range, STRAND_FORWARD, NULL, UNDEF_ULONG,
+                             env);
+  genome_node_set_seqid(child, seqid, env);
+  genome_node_is_part_of_genome_node(gn, child, env);
+
+  range.start = 1300; range.end = 1500;
+  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+                                  UNDEF_ULONG, env);
+  genome_node_set_seqid(grandchild, seqid, env);
+  genome_node_is_part_of_genome_node(child, grandchild, env);
+
+  range.start = 3000; range.end = 3902;
+  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+                                  UNDEF_ULONG, env);
+  genome_node_set_seqid(grandchild, seqid, env);
+  genome_node_is_part_of_genome_node(child, grandchild, env);
+
+  range.start = 5000; range.end = 5500;
+  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+                                  UNDEF_ULONG, env);
+  genome_node_set_seqid(grandchild, seqid, env);
+  genome_node_is_part_of_genome_node(child, grandchild, env);
+
+  range.start = 7000; range.end = 9000;
+  grandchild = genome_feature_new(gft_exon, range, STRAND_FORWARD, NULL,
+                                  UNDEF_ULONG, env);
+  genome_node_set_seqid(grandchild, seqid, env);
+  genome_node_is_part_of_genome_node(child, grandchild, env);
+
+  str_delete(seqid, env);
+  return gn;
+}
+
 const char* genome_feature_get_source(GenomeFeature *gf)
 {
   assert(gf);
@@ -309,4 +421,19 @@ int genome_feature_foreach_attribute(GenomeFeature *gf,
                                    data, env);
   }
   return had_err;
+}
+
+bool genome_features_are_similar(GenomeFeature *gf_a, GenomeFeature *gf_b)
+{
+  assert(gf_a && gf_b);
+  if (!str_cmp(genome_node_get_seqid((GenomeNode*) gf_a),
+               genome_node_get_seqid((GenomeNode*) gf_b)) &&
+      (genome_feature_get_type(gf_a) == genome_feature_get_type(gf_b)) &&
+      (!range_compare(genome_feature_get_range((GenomeNode*) gf_a),
+                      genome_feature_get_range((GenomeNode*) gf_b))) &&
+      (genome_feature_get_strand(gf_a) == genome_feature_get_strand(gf_b)) &&
+      (genome_feature_get_phase(gf_a) == genome_feature_get_phase(gf_b))) {
+    return true;
+  }
+  return false;
 }

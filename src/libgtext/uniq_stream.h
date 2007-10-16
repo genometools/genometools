@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -15,24 +15,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DIST_IF_H
-#define DIST_IF_H
-#include "libgtcore/env.h"
+#ifndef UNIQ_STREAM_H
+#define UNIQ_STREAM_H
 
-typedef struct Distribution Distribution;
+#include <stdio.h>
+#include "libgtext/genome_stream.h"
 
-Distribution *initdistribution(Env *env);
+/* implements the ``genome_stream'' interface */
+typedef struct UniqStream UniqStream;
 
-void freedistribution(Distribution **dist,Env *env);
-
-void addmultidistribution(Distribution *dist,unsigned long ind,
-                          unsigned long howmany,Env *env);
-
-void adddistribution(Distribution *dist,unsigned long ind,Env *env);
-
-int foreachdistributionvalue(Distribution *dist,
-                             int (*hashiter)(void *key, void *value,
-                                             void *data, Env*),
-                             void *data,Env *env);
+const GenomeStreamClass* uniq_stream_class(void);
+GenomeStream*            uniq_stream_new(GenomeStream*, Env*);
 
 #endif

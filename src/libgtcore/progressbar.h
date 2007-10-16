@@ -19,8 +19,8 @@
 #define PROGRESSBAR_H
 
 /* Start showing a progress bar on stdout if possible. */
-void progressbar_start(const unsigned long *current_computation,
-                       unsigned long number_of_computations);
+void progressbar_start(const unsigned long long *current_computation,
+                       unsigned long long number_of_computations);
 
 /* Stop showing a progress bar. */
 void progressbar_stop(void);

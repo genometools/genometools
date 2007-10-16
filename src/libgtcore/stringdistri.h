@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -15,20 +15,23 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DISC_DISTRI_H
-#define DISC_DISTRI_H
+#ifndef DISCDISTRI_H
+#define DISCDISTRI_H
 
 #include "libgtcore/env.h"
 #include "libgtcore/genfile.h"
 
 /* A discrete distribution */
-typedef struct DiscDistri DiscDistri;
+typedef struct StringDistri StringDistri;
 
-DiscDistri*   disc_distri_new(Env*);
-void          disc_distri_add(DiscDistri*, unsigned long, Env*);
-unsigned long disc_distri_get(const DiscDistri*, unsigned long);
-void          disc_distri_show(const DiscDistri*); /* on stdout */
-void          disc_distri_show_generic(const DiscDistri*, GenFile*);
-void          disc_distri_delete(DiscDistri*, Env*);
+typedef void (*StringDistriIterFunc)(const char *string,
+                                     unsigned long occurrences,
+                                     double probability, void *data);
+
+StringDistri*      stringdistri_new(Env*);
+void               stringdistri_add(StringDistri*, const char*, Env*);
+void               stringdistri_foreach(const StringDistri*,
+                                        StringDistriIterFunc, void *data, Env*);
+void               stringdistri_delete(StringDistri*, Env*);
 
 #endif

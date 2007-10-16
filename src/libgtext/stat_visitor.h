@@ -28,6 +28,6 @@ GenomeVisitor*            stat_visitor_new(bool gene_length_distri,
                                            bool gene_score_distri,
                                            bool exon_length_distri,
                                            bool intron_length_distri, Env*);
-void                      stat_visitor_show_stats(GenomeVisitor*);
+void                      stat_visitor_show_stats(GenomeVisitor*, Env*);
 
 #endif

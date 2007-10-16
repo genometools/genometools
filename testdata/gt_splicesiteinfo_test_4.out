@@ -1,0 +1,10 @@
+splice site distribution (for introns >= 4bp)
+gc-ag:  33.33% (n=1)
+gt-ag:  66.67% (n=2)
+
+donor site distribution (for introns >= 4bp)
+gc:  33.33% (n=1)
+gt:  66.67% (n=2)
+
+acceptor site distribution (for introns >= 4bp)
+ag: 100.00% (n=3)

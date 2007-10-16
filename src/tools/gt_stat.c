@@ -128,7 +128,7 @@ int gt_stat(int argc, const char **argv, Env *env)
   /* show statistics */
   if (!had_err) {
     printf("parsed feature trees: %lu\n", info.number_of_trees);
-    stat_visitor_show_stats(info.stat_visitor);
+    stat_visitor_show_stats(info.stat_visitor, env);
   }
 
   /* free */

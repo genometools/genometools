@@ -162,13 +162,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   /* print GFF3 format file of predictions */
   if (!had_err && lo->gff3output)
   {
-    if (printgff3format(lo,
-	  ssar,
-	  markpos,
-	  env) != 0 )
-    {
-      had_err = true;
-    }
+    printgff3format(lo, ssar, markpos, env);
   }
 
   if (!had_err && numofdbsequences > 1)

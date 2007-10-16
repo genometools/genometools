@@ -33,3 +33,32 @@ a:hover {
 pre {
   line-height: 1.3em;
 }
+
+/* Figure environment for library documentation. */
+div.figure {
+  position: relative;
+  width: 650px;
+  margin: 0 auto;
+  background-color: white;
+}
+div.figure p {
+  text-align: center;
+  font-style: italic;
+  font-size: smaller;
+  text-indent: 0;
+  margin:0px;
+}
+div.figure img {
+  border: thin solid black;
+  padding: 10px;
+  margin: 0px;
+}
+div.figure img.noborder {
+  border: none;
+  padding: 0px;
+}
+div.figure div.subfigure {
+  width: 300px;
+  float: left;
+  margin:12px;
+}

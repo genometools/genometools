@@ -1,5 +1,6 @@
 /*
   Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c)      2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
@@ -35,5 +36,7 @@ void           file_dirname(Str *path, const char *file, Env*);
 /* find 'file' in $PATH, if it has no dirname; set 'path' to dirname otherwise.
    sets 'path' to the empty string if 'file' could not be found in $PATH. */
 int            file_find_in_path(Str *path, const char *file, Env*);
+
+off_t          files_estimate_total_size(const StrArray *filenames);
 
 #endif

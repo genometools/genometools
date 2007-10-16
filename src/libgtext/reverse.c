@@ -30,6 +30,7 @@ static int complement(char *reverse_char, char dna_char, Env *env)
     case 'c': *reverse_char = 'g'; return 0;
     case 'g': *reverse_char = 'c'; return 0;
     case 't': *reverse_char = 'a'; return 0;
+    case 'n': *reverse_char = 'n'; return 0;
     default:
       env_error_set(env, "complement of DNA character '%c' not defined",
                     dna_char);

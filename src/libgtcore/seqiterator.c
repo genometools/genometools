@@ -31,6 +31,8 @@ struct SeqIterator
   ArrayUchar sequencebuffer;
   unsigned long long unitnum;
   bool withsequence, exhausted;
+  unsigned long long currentread,
+                     maxread;
 };
 
 SeqIterator* seqiterator_new(const StrArray *filenametab,
@@ -53,6 +55,7 @@ SeqIterator* seqiterator_new(const StrArray *filenametab,
   seqit->exhausted = false;
   seqit->unitnum = 0;
   seqit->withsequence = withsequence;
+  seqit->currentread = 0;
   return seqit;
 }
 
@@ -85,6 +88,10 @@ int seqiterator_next(SeqIterator *seqit,
     {
       seqit->exhausted = true;
       break;
+    }
+    if (seqit->currentread < seqit->maxread)
+    {
+      seqit->currentread++;
     }
     if (charcode == (Uchar) SEPARATOR)
     {
@@ -138,11 +145,20 @@ int seqiterator_next(SeqIterator *seqit,
   return 0;
 }
 
+const unsigned long long *seqiterator_getcurrentcounter(SeqIterator *seqit,
+                                                        unsigned long long
+                                                        maxread)
+{
+  seqit->maxread = maxread;
+  return &seqit->currentread;
+}
+
 void seqiterator_delete(SeqIterator *seqit, Env *env)
 {
   if (!seqit) return;
   queue_delete_with_contents(seqit->descptr, env);
   fastabuffer_delete(seqit->fb, env);
   FREEARRAY(&seqit->sequencebuffer, Uchar);
+  seqit->currentread = seqit->maxread;
   env_ma_free(seqit, env);
 }

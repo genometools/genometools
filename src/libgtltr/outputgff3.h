@@ -18,10 +18,7 @@
 #ifndef OUTPUTGFF3_H
 #define OUTPUTGFF3_H
 
-int printgff3format(
-  LTRharvestoptions *lo,
-  Sequentialsuffixarrayreader *ssar,
-  const Seqpos *markpos,
-  Env *env);
+void printgff3format(LTRharvestoptions*, Sequentialsuffixarrayreader*,
+                     const Seqpos *markpos, Env*);
 
 #endif

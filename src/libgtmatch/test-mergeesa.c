@@ -53,8 +53,9 @@ static int initNameandFILE(NameandFILE *nf,
   nf->fp = env_fa_fopen(env,str_get(nf->outfilename),"wb");
   if (nf->fp == NULL)
   {
-    env_error_set(env,"cannot open file \"%s\": %s",str_get(nf->outfilename),
-                                                    strerror(errno));
+    env_error_set(env,"env_fa_open: cannot open file \"%s\": %s",
+                  str_get(nf->outfilename),
+                  strerror(errno));
     return -1;
   }
   return 0;

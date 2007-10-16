@@ -1,6 +1,6 @@
 body {
 	font-family: sans-serif;
-	font-size: 12px;
+	font-size: small;
 	border: solid #d9d8d1;
 	border-width: 1px;
 	margin: 10px;
@@ -31,7 +31,7 @@ img.logo {
 div.page_header {
 	height: 25px;
 	padding: 8px;
-	font-size: 18px;
+	font-size: 150%;
 	font-weight: bold;
 	background-color: #d9d8d1;
 }
@@ -107,13 +107,13 @@ span.age {
 	font-style: italic;
 }
 
-div.page_body span.signoff {
+span.signoff {
 	color: #888888;
 }
 
 div.log_link {
 	padding: 0px 8px;
-	font-size: 10px;
+	font-size: 70%;
 	font-family: sans-serif;
 	font-style: normal;
 	position: relative;
@@ -181,19 +181,41 @@ table.diff_tree {
 	font-family: monospace;
 }
 
+table.combined.diff_tree th {
+	text-align: center;
+}
+
+table.combined.diff_tree td {
+	padding-right: 24px;
+}
+
+table.combined.diff_tree th.link,
+table.combined.diff_tree td.link {
+	padding: 0px 2px;
+}
+
+table.combined.diff_tree td.nochange a {
+	color: #6666ff;
+}
+
+table.combined.diff_tree td.nochange a:hover,
+table.combined.diff_tree td.nochange a:visited {
+	color: #d06666;
+}
+
 table.blame {
 	border-collapse: collapse;
 }
 
 table.blame td {
 	padding: 0px 5px;
-	font-size: 12px;
+	font-size: 100%;
 	vertical-align: top;
 }
 
 th {
 	padding: 2px 5px;
-	font-size: 12px;
+	font-size: 100%;
 	text-align: left;
 }
 
@@ -215,14 +237,14 @@ tr.dark:hover {
 
 td {
 	padding: 2px 5px;
-	font-size: 12px;
+	font-size: 100%;
 	vertical-align: top;
 }
 
 td.link, td.selflink {
 	padding: 2px 5px;
 	font-family: sans-serif;
-	font-size: 10px;
+	font-size: 70%;
 }
 
 td.selflink {
@@ -257,6 +279,12 @@ table.diff_tree span.file_status.mode_chnge {
 
 table.diff_tree span.file_status.copied {
   color: #70a070;
+}
+
+/* noage: "No commits" */
+table.project_list td.noage {
+	color: #808080;
+	font-style: italic;
 }
 
 /* age2: 60*60*24*2 <= age */
@@ -387,6 +415,10 @@ div.diff.incomplete {
 	color: #cccccc;
 }
 
+div.diff.nodifferences {
+	font-weight: bold;
+	color: #600000;
+}
 
 div.index_include {
 	border: solid #d9d8d1;
@@ -395,10 +427,10 @@ div.index_include {
 }
 
 div.search {
-	font-size: 12px;
+	font-size: 100%;
 	font-weight: normal;
 	margin: 4px 8px;
-	position: absolute;
+	float: right;
 	top: 56px;
 	right: 12px
 }
@@ -423,7 +455,7 @@ a.rss_logo {
 	background-color: #ff6600;
 	font-weight: bold;
 	font-family: sans-serif;
-	font-size: 10px;
+	font-size: 70%;
 	text-align: center;
 	text-decoration: none;
 }
@@ -434,7 +466,7 @@ a.rss_logo:hover {
 
 span.refs span {
 	padding: 0px 4px;
-	font-size: 10px;
+	font-size: 70%;
 	font-weight: normal;
 	border: 1px solid;
 	background-color: #ffaaff;
@@ -462,4 +494,8 @@ span.atnight {
 
 span.match {
 	color: #e00000;
+}
+
+div.binary {
+	font-style: italic;
 }

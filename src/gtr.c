@@ -26,6 +26,7 @@
 #include "libgtcore/bittab.h"
 #include "libgtcore/countingsort.h"
 #include "libgtcore/cstr.h"
+#include "libgtcore/discdistri.h"
 #include "libgtcore/dlist.h"
 #include "libgtcore/dynbittab.h"
 #include "libgtcore/ensure.h"
@@ -43,6 +44,7 @@
 #include "libgtext/alignment.h"
 #include "libgtext/bsearch.h"
 #include "libgtext/evaluator.h"
+#include "libgtext/genome_node_iterator.h"
 #include "libgtext/gtdatahelp.h"
 #include "libgtext/hmm.h"
 #include "libgtext/splicedseq.h"
@@ -65,12 +67,14 @@
 #include "tools/gt_gtf_to_gff3.h"
 #include "tools/gt_ltrharvest.h"
 #include "tools/gt_merge.h"
+#include "tools/gt_mkfmindex.h"
 #include "tools/gt_mmapandread.h"
 #include "tools/gt_mutate.h"
 #include "tools/gt_splitfasta.h"
+#include "tools/gt_splicesiteinfo.h"
 #include "tools/gt_stat.h"
 #include "tools/gt_suffixerator.h"
-#include "tools/gt_mkfmindex.h"
+#include "tools/gt_uniq.h"
 #include "tools/gt_uniquesub.h"
 
 #ifdef LIBGTVIEW
@@ -194,9 +198,11 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "mmapandread", gt_mmapandread, env);
   toolbox_add(gtr->toolbox, "mutate", gt_mutate, env);
   toolbox_add(gtr->toolbox, "splitfasta", gt_splitfasta, env);
+  toolbox_add(gtr->toolbox, "splicesiteinfo", gt_splicesiteinfo, env);
   toolbox_add(gtr->toolbox, "stat", gt_stat, env);
   toolbox_add(gtr->toolbox, "suffixerator", gt_suffixerator, env);
   toolbox_add(gtr->toolbox, "mkfmindex", gt_mkfmindex, env);
+  toolbox_add(gtr->toolbox, "uniq", gt_uniq, env);
   toolbox_add(gtr->toolbox, "uniquesub", gt_uniquesub, env);
 #ifdef LIBGTVIEW
   toolbox_add(gtr->toolbox, "view", gt_view, env);
@@ -215,10 +221,14 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "bsearch module", bsearch_unit_test, env);
   hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test,
                 env);
+  hashtable_add(gtr->unit_tests, "disc distri class", discdistri_unit_test,
+                env);
   hashtable_add(gtr->unit_tests, "dlist class", dlist_unit_test, env);
   hashtable_add(gtr->unit_tests, "dynamic bittab class", dynbittab_unit_test,
                 env);
   hashtable_add(gtr->unit_tests, "evaluator class", evaluator_unit_test, env);
+  hashtable_add(gtr->unit_tests, "genome node iterator example",
+                genome_node_iterator_example, env);
   hashtable_add(gtr->unit_tests, "getbasename module", getbasename_unit_test,
                 env);
   hashtable_add(gtr->unit_tests, "grep module", grep_unit_test, env);
