@@ -28,6 +28,7 @@ ALLOUTPUTOPTS="../scripts/alloutputoptions.rb"
 cd testsuite
 testsuite.rb -keywords gt_suffixerator
 testsuite.rb -keywords gt_trieins
+testsuite.rb -keywords gt_ltrharvest
 testsuite.rb -keywords 'gt_suffixerator and gttestdata' -gttestdata ${GTTESTDATA}
 # optional -memcheck   (run valgrind)
 #          -select 253 (run testcase 253)
