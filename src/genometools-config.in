@@ -1,0 +1,42 @@
+#! /bin/sh
+options="-version -cc -cppflags -cflags -ldflags -cxx -cxxflags -libs"
+if [ "$#" -eq 0 -o "$1" = '-h' -o "$1" = -help ]; then
+  echo "usage: $0 OPT..."
+  echo "  where OPT is one or more from the following list:"
+  echo "$options" -all
+  exit 1
+fi
+for arg in "$@"; do
+  case  "$arg" in
+    -version)
+      echo "genometools @VERSION@ (@SYSTEM@) @BUILDSTAMP@"
+      ;;
+    -cc)
+      echo 'CC="@CC@"'
+      ;;
+    -cppflags)
+      echo 'CPPFLAGS="@CPPFLAGS@"'
+      ;;
+    -cflags)
+      echo 'CFLAGS="@CFLAGS@"'
+      ;;
+    -cxx)
+      echo 'CXX="@CXX@"'
+      ;;
+    -cxxflags)
+      echo 'CXXFLAGS="@CXXFLAGS@"'
+      ;;
+    -ldflags)
+      echo 'LDFLAGS="@LDFLAGS@"'
+      ;;
+    -libs)
+      echo 'LIBS="@LIBS@"'
+      ;;
+    -all)
+      exec $0 $options
+      ;;
+    *)
+      echo "Invalid argument: $arg"
+      ;;
+  esac
+done
