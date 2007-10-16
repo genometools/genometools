@@ -153,7 +153,7 @@ bitPackStringInt8_unit_test(Env *env)
     i = offsetStart + numBits;
     bsClear(bitStoreCopy, offsetStart, numBits, random()&1);
     v = randSrc[0];
-    while(i)
+    while (i)
     {
       int lowBit = v & 1;
       v >>= 1;
