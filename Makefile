@@ -217,6 +217,10 @@ ifdef gttestdata
   STEST_FLAGS += -gttestdata $(gttestdata)
 endif
 
+ifeq ($(memcheck),yes)
+  STEST_FLAGS += -memcheck
+endif
+
 ifeq ($(libgtview),yes)
   GTLIBS := $(GTLIBS) lib/libgtview.a
   GT_CFLAGS += -DLIBGTVIEW
