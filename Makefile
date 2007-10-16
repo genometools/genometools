@@ -17,45 +17,45 @@
 
 CC:=gcc
 CXX:=g++
-INCLUDEOPT:= -I$(CURDIR)/src -I$(CURDIR)/obj \
-             -I$(CURDIR)/src/external/zlib-1.2.3 \
-             -I$(CURDIR)/src/external/lua-5.1.2/src \
-             -I$(CURDIR)/src/external/luafilesystem-1.2.1/src \
-             -I$(CURDIR)/src/external/expat-2.0.1/lib \
-             -I$(CURDIR)/src/external/bzip2-1.0.4 \
-             -I$(CURDIR)/src/external/agg-2.4/include \
-             -I$(CURDIR)/src/external/libpng-1.2.18 \
-             -I$(CURDIR)/src/external/libtecla-1.6.1 \
-             -I/usr/include/cairo\
-             -I/usr/local/include/cairo
+INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
+            -I$(CURDIR)/src/external/zlib-1.2.3 \
+            -I$(CURDIR)/src/external/lua-5.1.2/src \
+            -I$(CURDIR)/src/external/luafilesystem-1.2.1/src \
+            -I$(CURDIR)/src/external/expat-2.0.1/lib \
+            -I$(CURDIR)/src/external/bzip2-1.0.4 \
+            -I$(CURDIR)/src/external/agg-2.4/include \
+            -I$(CURDIR)/src/external/libpng-1.2.18 \
+            -I$(CURDIR)/src/external/libtecla-1.6.1
 
 CFLAGS:=
 LDFLAGS:=
 CXXFLAGS:=
-GT_CFLAGS:= -g -Wall -Werror -pipe -D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 \
-            $(INCLUDEOPT)
+GT_CFLAGS:=-g -Wall -Werror -pipe
 # expat needs -DHAVE_MEMMOVE
 # lua needs -DLUA_USE_POSIX
 # rnv needs -DUNISTD_H="<unistd.h>" -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\""
 # tecla needs -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO
 EXT_FLAGS:= -DHAVE_MEMMOVE -DLUA_USE_POSIX -DUNISTD_H="<unistd.h>" \
-            -DEXPAT_H="<expat.h>" -DRNV_VERSION="\"1.7.8\"" \
+            -DEXPAT_H="<expat.h>" -DRNV_VERSION=\"1.7.8\" \
             -DHAVE_CURSES_H -DHAVE_TERM_H -DUSE_TERMINFO
-GT_CXXFLAGS:= -g -pipe $(INCLUDEOPT)
+CPPFLAGS:=-D_LARGEFILE_SOURCE -D_FILE_OFFSET_BITS=64 $(EXT_FLAGS)
+GT_CPPFLAGS:=$(INCLUDEOPT)
+GT_CXXFLAGS:=-g -pipe
 STEST_FLAGS:=
-GT_LDFLAGS1:=$(shell test -d /usr/local/lib && echo /usr/local/lib)
-GT_LDFLAGS2:=$(shell test -d /usr/X11R6/lib && echo /usr/X11R6/lib)
-GT_LDFLAGS:=$(foreach dir,$(GT_LDFLAGS1) $(GT_LDFLAGS2),-L$(dir))
+LDFLAGS:=$(foreach dir, \
+	$(shell test -d /usr/local/lib && echo /usr/local/lib ; \
+	test -d /usr/X11R6/lib && echo /usr/X11R6/lib),-L$(dir))
 LDLIBS:=-lm
+BUILDSTAMP:=$(shell date +'"%Y-%m-%d %H:%M:%S"')
 
 # try to set RANLIB automatically
 SYSTEM:=$(shell uname -s)
 ifeq ($(SYSTEM),Darwin)
   RANLIB:=ranlib
-  GT_CFLAGS+=-DHAVE_LLABS
+  CPPFLAGS+=-DHAVE_LLABS
 endif
 ifeq ($(SYSTEM),Linux)
-  GT_CLAGS+=-D_ISOC99_SOURCE -D_XOPEN_SOURCE=600 -DHAVE_LLABS
+  CPPLAGS+=-D_ISOC99_SOURCE -D_XOPEN_SOURCE=600 -DHAVE_LLABS
 endif
 
 # the default GenomeTools libraries which are build
@@ -63,8 +63,11 @@ GTLIBS:=lib/libgtext.a\
         lib/libgtmatch.a\
         lib/libgtltr.a\
         lib/libgtcore.a\
-        lib/libgtlua.a\
-        lib/libbz2.a
+        lib/libgtlua.a
+
+# libraries for which we build replacements (that also appear in dependencies)
+LDLIBS+=-lz -lbz2
+OVERRIDELIBS=lib/libbz2.a
 
 # the core GenomeTools library (no other dependencies)
 LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
@@ -182,8 +185,7 @@ WWWBASEDIR=/var/www/servers
 
 # process arguments
 ifeq ($(assert),no)
-  GT_CFLAGS += -DNDEBUG
-  GT_CXXFLAGS += -DNDEBUG
+  CPPFLAGS += -DNDEBUG
 endif
 
 ifeq ($(cov),yes)
@@ -209,7 +211,7 @@ endif
 
 ifneq ($(curses),no)
   GTLIBS := $(GTLIBS) lib/libtecla.a
-  GT_CFLAGS += -DCURSES
+  CPPFLAGS += -DCURSES
   LDLIBS += -lncurses
 endif
 
@@ -223,11 +225,11 @@ endif
 
 ifeq ($(libgtview),yes)
   GTLIBS := $(GTLIBS) lib/libgtview.a
-  GT_CFLAGS += -DLIBGTVIEW
-  LDLIBS += -lz -lcairo
+  CPPFLAGS += -DLIBGTVIEW
+  LDLIBS=-lcairo $(LDLIBS)
   STEST_FLAGS += -libgtview
 else
-  GTLIBS += lib/libz.a
+  OVERRIDELIBS+= lib/libz.a
 endif
 
 # set prefix for install target
@@ -267,7 +269,7 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-lib/libgtcore.a: obj/gt_build.h obj/gt_cc.h obj/gt_cflags.h obj/gt_version.h \
+lib/libgtcore.a: obj/gt_config.h \
                  $(LIBGTCORE_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -285,14 +287,16 @@ ifdef RANLIB
 endif
 
 lib/libgtmatch.a: $(LIBGTMATCH_OBJ)
-	@echo "[link $@]"
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBGTMATCH_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
 lib/libgtltr.a: $(LIBGTLTR_OBJ)
-	@echo "[link $@]"
+	@echo "[link $(@F)]"
+	@test -d $(@D) || mkdir -p $(@D)
 	@ar ru $@ $(LIBGTLTR_OBJ)
 ifdef RANLIB
 	@$(RANLIB) $@
@@ -340,15 +344,17 @@ ifdef RANLIB
 endif
 
 bin/skproto: obj/src/skproto.o obj/src/tools/gt_skproto.o lib/libgtcore.a\
-             lib/libbz2.a lib/libz.a
+             $(OVERRIDELIBS)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(LDFLAGS) $(GT_LDFLAGS) $^ $(LDLIBS) -o $@
+	@$(CC) $(LDFLAGS) $(GT_LDFLAGS) $(filter-out $(OVERRIDELIBS),$^) \
+	  $(LDLIBS) -o $@
 
-bin/gt: obj/src/gt.o obj/src/gtr.o $(TOOLS_OBJ) $(GTLIBS)
+bin/gt: obj/src/gt.o obj/src/gtr.o $(TOOLS_OBJ) $(GTLIBS) $(OVERRIDELIBS)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(LDFLAGS) $(GT_LDFLAGS) $^ $(LDLIBS) -o $@
+	@$(CC) $(LDFLAGS) $(GT_LDFLAGS) $(filter-out $(OVERRIDELIBS),$^) \
+	  $(LDLIBS) -o $@
 
 bin/lua: obj/$(LUA_DIR)/lua.o $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"
@@ -360,17 +366,14 @@ bin/rnv: obj/$(RNV_DIR)/xcl.o lib/librnv.a lib/libexpat.a
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(LDFLAGS) $^ -o $@
 
-obj/gt_build.h:
-	@date +'#define GT_BUILT "%Y-%m-%d %H:%M:%S"' > $@
-
-obj/gt_cc.h:
-	@echo '#define GT_CC "'`$(CC) --version | head -n 1`\" > $@
-
-obj/gt_cflags.h:
-	@echo '#define GT_CFLAGS "$(CFLAGS) $(GT_CFLAGS)"' > $@
-
-obj/gt_version.h: VERSION
-	@echo '#define GT_VERSION "'`cat VERSION`\" > $@
+obj/gt_config.h:
+	@(echo '#define GT_BUILT $(BUILDSTAMP)' ;\
+	echo '#define GT_CC "'`$(CC) --version | head -n 1`\" ;\
+	echo '#define GT_CFLAGS "$(CFLAGS) $(GT_CFLAGS)"' ;\
+	echo -n '#define GT_CPPFLAGS "'; \
+	echo -n '$(CPPFLAGS) $(GT_CPPFLAGS)' | sed -e 's/\([^\]\)"/\1\\"/g' \
+	-e 's/^"/\\"/g' -e 's/$$/"/' ; echo ;\
+	echo '#define GT_VERSION "'`cat VERSION`\" ) > $@
 
 src/libgtcore/bitpackstringop8.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'
@@ -412,13 +415,14 @@ src/libgtcore/checkbitpackstring-int.c: src/libgtcore/checkbitpackstring.templat
 obj/%.o: %.c
 	@echo "[compile $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) -c $< -o $@  $(CFLAGS) $(GT_CFLAGS) $(EXT_FLAGS) \
-        -MT $@ -MMD -MP -MF $(@:.o=.d)
+	@$(CC) -c $< -o $@ $(CPPFLAGS) $(GT_CPPFLAGS) $(CFLAGS) $(GT_CFLAGS) \
+	  -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 obj/%.o: %.cxx
 	@echo "[compile $@]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CXX) -c $< -o $@  $(CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+	@$(CXX) -c $< -o $@ $(CPPFLAGS) $(GT_CPPFLAGS) $(CXXFLAGS) \
+	$(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
 
 # read dependencies
 -include obj/src/gt.d \
@@ -472,7 +476,7 @@ install:
 	cp -r gtdata $(prefix)/bin
 	test -d $(prefix)/include/libgtcore \
 	  || mkdir -p $(prefix)/include/libgtcore
-	cp src/gtcore.h $(prefix)/include
+	cp src/gtcore.h obj/gt_config.h $(prefix)/include
 	cp src/libgtcore/*.h $(prefix)/include/libgtcore
 	test -d $(prefix)/include/libgtext \
           || mkdir -p $(prefix)/include/libgtext
@@ -497,6 +501,17 @@ endif
 ifdef RANLIB
 	$(RANLIB) $(prefix)/lib/libgtmatch.a
 endif
+	@echo '[build config script $(@F)]'
+	sed -e 's!@CC@!$(CC)!' -e 's!@CFLAGS@!$(CFLAGS)!' \
+	  -e 's!@CPPFLAGS@!$(CPPFLAGS)!' -e 's!@CXX@!$(CXX)!'\
+	  -e 's!@CXXFLAGS@!$(CXXFLAGS)!' \
+	  -e 's!@LDFLAGS@!$(LDFLAGS)!' -e 's!@LIBS@!$(LDLIBS)!' \
+	  -e "s!@VERSION@!`cat VERSION`!" \
+	  -e 's!@BUILDSTAMP@!$(BUILDSTAMP)!' \
+	  -e 's!@SYSTEM@!$(SYSTEM)!' <src/genometools-config.in \
+	  >$(prefix)/bin/genometools-config
+	chmod 755 $(prefix)/bin/genometools-config
+
 
 splint:
 	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) $(CURDIR)/src/*.c \
@@ -523,7 +538,8 @@ obj/%.splint: ${CURDIR}/src/tools/%.c
 
 obj/%.prepro: ${CURDIR}/src/libgtmatch/%.c
 	@echo "[generate $@]"
-	${CC} -c $< -o $@ ${CFLAGS} ${GT_CFLAGS} -E -g3
+	${CC} -c $< -o $@ $(CPPFLAGS) $(GT_CPPFLAGS) ${CFLAGS} ${GT_CFLAGS} \
+	  -E -g3
 	indent $@
 
 test: all

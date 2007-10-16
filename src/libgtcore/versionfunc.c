@@ -16,10 +16,7 @@
 */
 
 #include <stdio.h>
-#include "gt_build.h"
-#include "gt_cc.h"
-#include "gt_cflags.h"
-#include "gt_version.h"
+#include "gt_config.h"
 
 void versionfunc(const char *progname)
 {
