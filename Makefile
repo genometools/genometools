@@ -69,7 +69,7 @@ GTLIBS:=lib/libgtext.a\
 
 # libraries for which we build replacements (that also appear in dependencies)
 EXP_LDLIBS+=-lz -lbz2
-OVERRIDELIBS=lib/libbz2.a lib/libz.a
+OVERRIDELIBS:=lib/libbz2.a lib/libz.a
 
 # the core GenomeTools library (no other dependencies)
 LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
