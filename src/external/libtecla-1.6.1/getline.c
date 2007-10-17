@@ -654,7 +654,9 @@ static int gl_classify_signal(int signo);
  * file-scope variable is used to pass the current output file stream.
  * This is bad, but there doesn't seem to be any alternative.
  */
+#if defined(USE_TERMINFO) || defined(USE_TERMCAP)
 static GetLine *tputs_gl = NULL;
+#endif
 
 /*
  * Define a tab to be a string of 8 spaces.
