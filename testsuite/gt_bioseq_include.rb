@@ -38,7 +38,7 @@ Test do
   new_bsi_mtime = File.mtime("#{$testdata}gt_bioseq_succ_1.fas.gt_bsi")
   new_bsr_mtime = File.mtime("#{$testdata}gt_bioseq_succ_1.fas.gt_bsr")
   # make sure the index file have not been recreated
-  if (old_bsi_mtime != new_bsi_mtime) or (old_bsr_mtime != new_bsr_mtime) then  
+  if (old_bsi_mtime != new_bsi_mtime) or (old_bsr_mtime != new_bsr_mtime) then
     raise TestFailed, "index files have been recreated"
   end
 end
@@ -66,7 +66,7 @@ Test do
   new_bsi_mtime = File.mtime("#{$testdata}gt_bioseq_succ_2.fas.gt_bsi")
   new_bsr_mtime = File.mtime("#{$testdata}gt_bioseq_succ_2.fas.gt_bsr")
   # make sure the index file have not been recreated
-  if (old_bsi_mtime != new_bsi_mtime) or (old_bsr_mtime != new_bsr_mtime) then  
+  if (old_bsi_mtime != new_bsi_mtime) or (old_bsr_mtime != new_bsr_mtime) then
     raise TestFailed, "index files have been recreated"
   end
 end
@@ -80,14 +80,14 @@ end
 Name "gt bioseq test 3"
 Keywords "gt_bioseq"
 Test do
-  run_test "#{$bin}gt bioseq -recreate -showfasta -width 70 #{$testdata}gt_bioseq_succ_3.fas" 
+  run_test "#{$bin}gt bioseq -recreate -showfasta -width 70 #{$testdata}gt_bioseq_succ_3.fas"
   run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.fas"
 end
 
 Name "gt bioseq test 3 (stdin)"
 Keywords "gt_bioseq"
 Test do
-  run_test "cat #{$testdata}gt_bioseq_succ_3.fas | #{$bin}gt bioseq -recreate -showfasta -width 70 -" 
+  run_test "cat #{$testdata}gt_bioseq_succ_3.fas | #{$bin}gt bioseq -recreate -showfasta -width 70 -"
   run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.fas"
 end
 
