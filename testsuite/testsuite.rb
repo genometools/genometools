@@ -63,16 +63,16 @@ $systemname.chomp!
 def run_test(str, opts = {})
   if $arguments["memcheck"] then
     if $systemname == "Linux" then
-      memcheck = "valgrind --tool=memcheck --suppressions="+
-                 File.join($testdata, "gt.supp")+
-                 " --leak-check=yes --error-exitcode=1 -q"
+      $memcheck = "valgrind --tool=memcheck --suppressions="+
+                  File.join($testdata, "gt.supp")+
+                  " --leak-check=yes --error-exitcode=1 -q"
     elsif $systemname == "OpenBSD" then
-      memcheck = "env MALLOC_OPTIONS='GJ'"
+      $memcheck = "env MALLOC_OPTIONS='GJ'"
     end
   else
-    memcheck = ""
+    $memcheck = ""
   end
-  run("#{memcheck} #{$path}#{str}", opts)
+  run("#{$memcheck} #{$path}#{str}", opts)
 end
 
 # include the actual test modules

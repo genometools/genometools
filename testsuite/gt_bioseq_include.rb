@@ -46,7 +46,7 @@ end
 Name "gt bioseq test 1 (stdin)"
 Keywords "gt_bioseq"
 Test do
-  run_test "cat #{$testdata}gt_bioseq_succ_1.fas | #{$bin}gt bioseq -"
+  run "cat #{$testdata}gt_bioseq_succ_1.fas | #{$memcheck} #{$bin}gt bioseq -"
 end
 
 Name "gt bioseq test 2"
@@ -74,7 +74,7 @@ end
 Name "gt bioseq test 2 (stdin)"
 Keywords "gt_bioseq"
 Test do
-  run_test "cat #{$testdata}gt_bioseq_succ_2.fas | #{$bin}gt bioseq -"
+  run "cat #{$testdata}gt_bioseq_succ_2.fas | #{$memcheck} #{$bin}gt bioseq -"
 end
 
 Name "gt bioseq test 3"
@@ -87,7 +87,7 @@ end
 Name "gt bioseq test 3 (stdin)"
 Keywords "gt_bioseq"
 Test do
-  run_test "cat #{$testdata}gt_bioseq_succ_3.fas | #{$bin}gt bioseq -recreate -showfasta -width 70 -"
+  run "cat #{$testdata}gt_bioseq_succ_3.fas | #{$memcheck} #{$bin}gt bioseq -recreate -showfasta -width 70 -"
   run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.fas"
 end
 
@@ -104,7 +104,7 @@ end
   Name "gt bioseq test 3 out #{i} (stdin)"
   Keywords "gt_bioseq"
   Test do
-    run_test "cat #{$testdata}gt_bioseq_succ_3.fas | #{$bin}gt bioseq -showseqnum #{i} -width 70 -"
+    run "cat #{$testdata}gt_bioseq_succ_3.fas | #{$memcheck} #{$bin}gt bioseq -showseqnum #{i} -width 70 -"
     run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.out#{i}"
   end
 end
@@ -125,7 +125,7 @@ end
 Name "gt bioseq test 3 stat (stdin)"
 Keywords "gt_bioseq"
 Test do
-  run_test "cat #{$testdata}gt_bioseq_succ_3.fas | #{$bin}gt bioseq -stat -"
+  run "cat #{$testdata}gt_bioseq_succ_3.fas | #{$memcheck} #{$bin}gt bioseq -stat -"
 end
 
 Name "gt bioseq test multiple sequence files"
@@ -137,13 +137,13 @@ end
 Name "gt bioseq test multiple sequence files (incl. stdin)"
 Keywords "gt_bioseq"
 Test do
-  run_test "cat #{$testdata}gt_bioseq_succ_2.fas | #{$bin}gt bioseq -recreate #{$testdata}gt_bioseq_succ_1.fas -"
+  run "cat #{$testdata}gt_bioseq_succ_2.fas | #{$memcheck} #{$bin}gt bioseq -recreate #{$testdata}gt_bioseq_succ_1.fas -"
 end
 
 Name "gt bioseq test -gc-content"
 Keywords "gt_bioseq"
 Test do
-  run_test "cat #{$testdata}gt_bioseq_succ_3.fas | #{$bin}gt bioseq -gc-content -"
+  run "cat #{$testdata}gt_bioseq_succ_3.fas | #{$memcheck} #{$bin}gt bioseq -gc-content -"
   run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.gc"
 end
 
