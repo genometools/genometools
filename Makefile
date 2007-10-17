@@ -476,7 +476,7 @@ installwww:
 
 gt: bin/gt
 
-install:
+install: all
 	test -d $(prefix)/bin || mkdir -p $(prefix)/bin
 	cp bin/gt $(prefix)/bin
 	cp -r gtdata $(prefix)/bin
