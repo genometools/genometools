@@ -228,7 +228,7 @@ endif
 ifeq ($(libgtview),yes)
   GTLIBS := $(GTLIBS) lib/libgtview.a
   EXP_CPPFLAGS += -DLIBGTVIEW
-  GT_CPPFLAGS += -I/usr/local/include/cairo
+  GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
   STEST_FLAGS += -libgtview
   OVERRIDELIBS += -lz # using own zlib together with cairo doesn't work
