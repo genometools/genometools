@@ -468,7 +468,7 @@ release:
 	git archive --format=tar --prefix="genometools-`cat VERSION`"/ HEAD | \
 	gzip -9 > genometools-`cat VERSION`.tar.gz
 	scp "genometools-`cat VERSION`.tar.gz" $(SERVER):$(WWWBASEDIR)/genometools.org/htdocs/pub
-	git push --tags
+	git push --tags origin master
 
 installwww:
 # install genometools.org website
