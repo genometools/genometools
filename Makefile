@@ -69,7 +69,7 @@ GTLIBS:=lib/libgtext.a\
 
 # libraries for which we build replacements (that also appear in dependencies)
 EXP_LDLIBS+=-lz -lbz2
-OVERRIDELIBS:=lib/libbz2.a lib/libz.a
+OVERRIDELIBS:=lib/libbz2.a
 
 # the core GenomeTools library (no other dependencies)
 LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
@@ -231,9 +231,8 @@ ifeq ($(libgtview),yes)
   GT_CPPFLAGS += -I/usr/include/cairo -I/usr/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
   STEST_FLAGS += -libgtview
-  OVERRIDELIBS += -lz # using own zlib together with cairo doesn't work
 else
-  OVERRIDELIBS += lib/libz.a
+  OVERRIDELIBS += lib/libz.a # using own zlib together with cairo doesn't work
 endif
 
 # set prefix for install target
