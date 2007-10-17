@@ -25,8 +25,7 @@ INCLUDEOPT:=-I$(CURDIR)/src -I$(CURDIR)/obj \
             -I$(CURDIR)/src/external/bzip2-1.0.4 \
             -I$(CURDIR)/src/external/agg-2.4/include \
             -I$(CURDIR)/src/external/libpng-1.2.18 \
-            -I$(CURDIR)/src/external/libtecla-1.6.1 \
-            -I/usr/local/include/cairo
+            -I$(CURDIR)/src/external/libtecla-1.6.1
 
 CFLAGS:=
 LDFLAGS:=
@@ -227,6 +226,7 @@ endif
 ifeq ($(libgtview),yes)
   GTLIBS := $(GTLIBS) lib/libgtview.a
   CPPFLAGS += -DLIBGTVIEW
+  GT_CPPFLAGS += -I/usr/local/include/cairo
   LDLIBS:=-lcairo $(LDLIBS)
   STEST_FLAGS += -libgtview
 else
