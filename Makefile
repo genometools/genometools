@@ -231,6 +231,9 @@ ifeq ($(libgtview),yes)
   GT_CPPFLAGS += -I/usr/local/include/cairo
   EXP_LDLIBS:=-lcairo $(EXP_LDLIBS)
   STEST_FLAGS += -libgtview
+  OVERRIDELIBS += -lz # using own zlib together with cairo doesn't work
+else
+  OVERRIDELIBS += lib/libz.a
 endif
 
 # set prefix for install target
