@@ -237,7 +237,7 @@ MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
 
 Seqpos countmmsearchiterator(const MMsearchiterator *mmsi)
 {
-  if (mmsi->lcpitv.left <= mmsi->lcpitv.right)
+  if (mmsi->lcpitv.left > mmsi->lcpitv.right)
   {
     return 0;
   }
