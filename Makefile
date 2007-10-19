@@ -71,6 +71,15 @@ GTLIBS:=lib/libgtext.a\
 EXP_LDLIBS+=-lz -lbz2
 OVERRIDELIBS:=lib/libbz2.a
 
+# compiled executables
+GTMAIN_SRC:=src/gt.c src/gtr.c
+GTMAIN_OBJ:=$(GTMAIN_SRC:%.c=obj/%.o)
+GTMAIN_DEP:=$(GTMAIN_SRC:%.c=obj/%.d)
+
+SKPROTO_SRC:=src/skproto.c src/tools/gt_skproto.c
+SKPROTO_OBJ:=$(SKPROTO_SRC:%.c=obj/%.o)
+SKPROTO_DEP:=$(SKPROTO_SRC:%.c=obj/%.d)
+
 # the core GenomeTools library (no other dependencies)
 LIBGTCORE_SRC:=$(wildcard src/libgtcore/*.c)
 LIBGTCORE_OBJ:=$(LIBGTCORE_SRC:%.c=obj/%.o)
@@ -133,12 +142,16 @@ LIBLUA_SRC=$(LUA_DIR)/lapi.c $(LUA_DIR)/lcode.c $(LUA_DIR)/ldebug.c \
 LIBLUA_OBJ:=$(LIBLUA_SRC:%.c=obj/%.o)
 LIBLUA_DEP:=$(LIBLUA_SRC:%.c=obj/%.d)
 
+LUAMAIN_SRC:=$(LUA_DIR)/lua.c
+LUAMAIN_OBJ:=$(LUAMAIN_SRC:%.c=obj/%.o)
+LUAMAIN_DEP:=$(LUAMAIN_SRC:%.c=obj/%.d)
+
 PNG_DIR:=src/external/libpng-1.2.18
-LIBPNG_SRC:=$(PNG_DIR)/png.o $(PNG_DIR)/pngset.o $(PNG_DIR)/pngget.o \
-            $(PNG_DIR)/pngrutil.o $(PNG_DIR)/pngtrans.o $(PNG_DIR)/pngwutil.o \
-            $(PNG_DIR)/pngread.o $(PNG_DIR)/pngrio.o $(PNG_DIR)/pngwio.o \
-            $(PNG_DIR)/pngwrite.o $(PNG_DIR)/pngrtran.o $(PNG_DIR)/pngwtran.o \
-            $(PNG_DIR)/pngmem.o $(PNG_DIR)/pngerror.o $(PNG_DIR)/pngpread.o
+LIBPNG_SRC:=$(PNG_DIR)/png.c $(PNG_DIR)/pngset.c $(PNG_DIR)/pngget.c \
+            $(PNG_DIR)/pngrutil.c $(PNG_DIR)/pngtrans.c $(PNG_DIR)/pngwutil.c \
+            $(PNG_DIR)/pngread.c $(PNG_DIR)/pngrio.c $(PNG_DIR)/pngwio.c \
+            $(PNG_DIR)/pngwrite.c $(PNG_DIR)/pngrtran.c $(PNG_DIR)/pngwtran.c \
+            $(PNG_DIR)/pngmem.c $(PNG_DIR)/pngerror.c $(PNG_DIR)/pngpread.c
 LIBPNG_OBJ:=$(LIBPNG_SRC:%.c=obj/%.o)
 LIBPNG_DEP:=$(LIBPNG_SRC:%.c=obj/%.d)
 
@@ -164,6 +177,10 @@ LIBRNV_SRC:=$(RNV_DIR)/rn.c $(RNV_DIR)/rnc.c $(RNV_DIR)/rnd.c $(RNV_DIR)/rnl.c \
             $(RNV_DIR)/m.c $(RNV_DIR)/rx.c
 LIBRNV_OBJ:=$(LIBRNV_SRC:%.c=obj/%.o)
 LIBRNV_DEP:=$(LIBRNV_SRC:%.c=obj/%.d)
+
+RNVMAIN_SRC:=$(RNV_DIR)/xcl.c
+RNVMAIN_OBJ:=$(RNVMAIN_SRC:%.c=obj/%.o)
+RNVMAIN_DEP:=$(RNVMAIN_SRC:%.c=obj/%.d)
 
 BZ2_DIR:=src/external/bzip2-1.0.4
 LIBBZ2_SRC:=$(BZ2_DIR)/blocksort.c $(BZ2_DIR)/huffman.c $(BZ2_DIR)/crctable.c \
@@ -346,7 +363,7 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-bin/skproto: obj/src/skproto.o obj/src/tools/gt_skproto.o lib/libgtcore.a\
+bin/skproto: $(SKPROTO_OBJ) lib/libgtcore.a\
              $(OVERRIDELIBS)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
@@ -354,24 +371,26 @@ bin/skproto: obj/src/skproto.o obj/src/tools/gt_skproto.o lib/libgtcore.a\
 	  $(filter-out $(patsubst lib%.a,-l%,$(notdir $(OVERRIDELIBS))),\
 	  $(EXP_LDLIBS)) $(OVERRIDELIBS) -o $@
 
-bin/gt: obj/src/gt.o obj/src/gtr.o $(TOOLS_OBJ) $(GTLIBS) $(OVERRIDELIBS)
+bin/gt: $(GTMAIN_OBJ) $(TOOLS_OBJ) $(GTLIBS) $(OVERRIDELIBS)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(filter-out $(OVERRIDELIBS),$^) \
 	  $(filter-out $(patsubst lib%.a,-l%,$(notdir $(OVERRIDELIBS))),\
 	  $(EXP_LDLIBS)) $(OVERRIDELIBS) -o $@
 
-bin/lua: obj/$(LUA_DIR)/lua.o $(LIBLUA_OBJ)
+bin/lua: $(LUAMAIN_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $^ -lm -o $@
 
-bin/rnv: obj/$(RNV_DIR)/xcl.o lib/librnv.a lib/libexpat.a
+bin/rnv: $(RNVMAIN_OBJ) lib/librnv.a lib/libexpat.a
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) $(EXP_LDFLAGS) $^ -o $@
 
 obj/gt_config.h:
+	@echo '[create $@]'
+	@test -d $(@D) || mkdir -p $(@D)
 	@(echo '#define GT_BUILT $(BUILDSTAMP)' ;\
 	echo '#define GT_CC "'`$(CC) --version | head -n 1`\" ;\
 	echo '#define GT_CFLAGS "$(EXP_CFLAGS) $(GT_CFLAGS)"' ;\
@@ -416,41 +435,56 @@ src/libgtcore/checkbitpackstring-int.c: src/libgtcore/checkbitpackstring.templat
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl '-int' $^
 
-# we create the dependency files on the fly
 obj/%.o: %.c
 	@echo "[compile $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
-	  $(GT_CFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+	  $(GT_CFLAGS)
+	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -MM -MP \
+	  -MT $@
 
 obj/%.o: %.cxx
 	@echo "[compile $@]"
 	@test -d $(@D) || mkdir -p $(@D)
 	@$(CXX) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
-	  $(EXP_CXXFLAGS) $(GT_CXXFLAGS) -MT $@ -MMD -MP -MF $(@:.o=.d)
+	  $(EXP_CXXFLAGS) $(GT_CXXFLAGS)
+	@$(CXX) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -MM -MP \
+	  -MT $@
+
+obj/%.o: %.cpp
+	@echo "[compile $@]"
+	@test -d $(@D) || mkdir -p $(@D)
+	@$(CXX) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) \
+	  $(EXP_CXXFLAGS) $(GT_CXXFLAGS)
+	@$(CXX) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -MM -MP \
+	  -MT $@
+
+obj/src/libgtcore/versionfunc.o: obj/gt_config.h
 
 # read dependencies
--include obj/src/gt.d \
-         obj/src/gtlua.d \
-         obj/src/gtr.d \
-         obj/src/skproto.d \
-	 obj/$(LUA_DIR)/lua.d \
-         $(LIBGTCORE_DEP) \
-         $(LIBGTEXT_C_DEP) \
-         $(LIBGTEXT_CXX_DEP) \
-         $(LIBGTMATCH_DEP) \
-         $(LIBGTLTR_DEP) \
-         $(LIBGTLUA_C_DEP) \
-         $(LIBGTVIEW_C_DEP) \
-         $(TOOLS_DEP) \
-         $(LIBAGG_DEP) \
-         $(LIBBZ2_DEP) \
-         $(LIBEXPAT_DEP) \
-         $(LIBLUA_DEP) \
-         $(LIBPNG_DEP) \
-         $(LIBRNV_DEP) \
-         $(LIBTECLA_DEP)\
-         $(ZLIB_DEP)
+-include $(GTMAIN_DEP) \
+         $(SKPROTO_DEP) \
+	 $(LIBGTCORE_DEP) \
+	 $(LIBGTEXT_C_DEP) \
+	 $(LIBGTEXT_CXX_DEP) \
+	 $(LIBGTMATCH_DEP) \
+	 $(LIBGTLTR_DEP) \
+	 $(LIBGTLUA_C_DEP) \
+	 $(TOOLS_DEP) \
+	 $(LIBAGG_DEP) \
+	 $(LIBEXPAT_DEP) \
+	 $(LIBLUA_DEP) \
+         $(LUAMAIN_DEP) \
+	 $(LIBPNG_DEP) \
+	 $(LIBTECLA_DEP) \
+	 $(LIBRNV_DEP) \
+	 $(RNVMAIN_DEP) \
+	 $(LIBBZ2_DEP) \
+	 $(ZLIB_DEP)
+
+ifeq ($(libgtview),yes)
+-include $(LIBGTVIEW_C_DEP) $(LIBGTVIEW_CXX_DEP)
+endif
 
 .SUFFIXES:
 .PHONY: dist srcdist release gt install splint test clean cleanup
