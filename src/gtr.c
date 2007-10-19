@@ -61,6 +61,7 @@
 #include "tools/gt_eval.h"
 #include "tools/gt_exercise.h"
 #include "tools/gt_extractfeat.h"
+#include "tools/gt_extractseq.h"
 #include "tools/gt_filter.h"
 #include "tools/gt_gff3.h"
 #include "tools/gt_gff3_to_gtf.h"
@@ -189,6 +190,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "eval", gt_eval, env);
   toolbox_add(gtr->toolbox, "exercise", gt_exercise, env);
   toolbox_add(gtr->toolbox, "extractfeat", gt_extractfeat, env);
+  toolbox_add(gtr->toolbox, "extractseq", gt_extractseq, env);
   toolbox_add(gtr->toolbox, "filter", gt_filter, env);
   toolbox_add(gtr->toolbox, "gff3", gt_gff3, env);
   toolbox_add(gtr->toolbox, "gff3_to_gtf", gt_gff3_to_gtf, env);

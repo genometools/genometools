@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,17 +21,24 @@
 void fasta_show_entry(const char *description, const char *sequence,
                       unsigned long sequence_length, unsigned long width)
 {
+  fasta_show_entry_generic(description, sequence, sequence_length, width, NULL);
+}
+
+void fasta_show_entry_generic(const char *description, const char *sequence,
+                              unsigned long sequence_length,
+                              unsigned long width, GenFile *outfp)
+{
   unsigned long i, current_length;
-  xputchar(FASTA_SEPARATOR);
+  genfile_xfputc(FASTA_SEPARATOR, outfp);
   if (description)
-    xfputs(description, stdout);
-  xputchar('\n');
+    genfile_xfputs(description, outfp);
+  genfile_xfputc('\n', outfp);
   for (i = 0, current_length = 0; i < sequence_length; i++, current_length++) {
     if (width && current_length == width) {
-      xputchar('\n');
+      genfile_xfputc('\n', outfp);
       current_length = 0;
     }
-    xputchar(sequence[i]);
+    genfile_xfputc(sequence[i], outfp);
   }
-  xputchar('\n');
+  genfile_xfputc('\n', outfp);
 }

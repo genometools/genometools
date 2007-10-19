@@ -16,7 +16,6 @@ feature requests:
 - write check script to check for error_check()
 - EXIT_SUCCESS und EXIT_FAILURE only in gtr.c and gt.c
 - no exit() calls inside library
-- write extractseq tool
 - update design.html, describe interface inheritance
 - check random number generation
 - check for circles

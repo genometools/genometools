@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -18,11 +18,19 @@
 #ifndef FASTA_H
 #define FASTA_H
 
+#include "libgtcore/genfile.h"
+
 #define FASTA_SEPARATOR '>'
 
 /* show a fasta entry on stdout, if width is != 0 the sequence is formatted
    accordingly */
 void fasta_show_entry(const char *description, const char *sequence,
                       unsigned long sequence_length, unsigned long width);
+
+/* print a fasta entry to <outfp>, if width is != 0 the sequence is formatted
+   accordingly */
+void fasta_show_entry_generic(const char *description, const char *sequence,
+                              unsigned long sequence_length,
+                              unsigned long width, GenFile *outfp);
 
 #endif
