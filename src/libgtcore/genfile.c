@@ -187,26 +187,6 @@ int genfile_getc(GenFile *genfile)
   return c;
 }
 
-int genfile_putc(int c, GenFile *genfile)
-{
-  int rval = -1;
-  if (!genfile)
-    return putc(c, stdout);
-  switch (genfile->mode) {
-    case GFM_UNCOMPRESSED:
-      rval = putc(c, genfile->fileptr.file);
-      break;
-    case GFM_GZIP:
-      rval = gzputc(genfile->fileptr.gzfile, c);
-      break;
-    case GFM_BZIP2:
-      rval = bzputc(c, genfile->fileptr.bzfile);
-      break;
-    default: assert(0);
-  }
-  return rval;
-}
-
 static int vgzprintf(gzFile file, const char *format, va_list va)
 {
   char buf[BUFSIZ];

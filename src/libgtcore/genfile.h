@@ -69,7 +69,6 @@ GenFile*    genfile_new(FILE*, Env*);
 GenFileMode genfile_mode(GenFile*);
 
 int         genfile_getc(GenFile*);
-int         genfile_putc(int c, GenFile*); /* XXX: remove */
 
 /* printf(3) for generic files */
 void        genfile_xprintf(GenFile*, const char *format, ...)
