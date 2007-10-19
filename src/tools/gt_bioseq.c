@@ -27,9 +27,9 @@ typedef struct {
        stat;
   unsigned long showseqnum,
                 width;
-} Bioseq_arguments;
+} BioseqArguments;
 
-static OPrval parse_options(int *parsed_args, Bioseq_arguments *arguments,
+static OPrval parse_options(int *parsed_args, BioseqArguments *arguments,
                             int argc, const char **argv, Env *env)
 {
   Option *option, *option_showfasta, *option_showseqnum, *option_width,
@@ -94,7 +94,7 @@ static OPrval parse_options(int *parsed_args, Bioseq_arguments *arguments,
 
 int gt_bioseq(int argc, const char **argv, Env *env)
 {
-  Bioseq_arguments arguments;
+  BioseqArguments arguments;
   Bioseq *bioseq;
   int parsed_args, had_err = 0;
   env_error_check(env);
