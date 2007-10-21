@@ -28,7 +28,7 @@
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
 #endif /* HAVE_INTTYPES_H */
-#ifndef DEBUG
+#if (!defined DEBUG) && (!defined NDEBUG)
 #define NDEBUG
 #endif /* DEBUG */
 #include <assert.h>

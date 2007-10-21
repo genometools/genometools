@@ -34,7 +34,8 @@ libbiofmi2_a_SOURCES = \
   include/encidxseq.h include/encidxseqpriv.h encidxseq.c blockcomp.c \
   include/fmindex.h include/warts.h \
   include/mrangealphabet.h include/mrangealphabetpriv.h mrangealphabet.c \
-  include/seqranges.h seqranges.c
+  include/seqranges.h seqranges.c \
+  include/suffixerator-interface.h suffixeratorreader.c
 
 mkbiofmi2_SOURCES = mkbiofmi2main.c
 mkbiofmi2_LDADD = libbiofmi2.a

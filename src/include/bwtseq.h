@@ -108,6 +108,24 @@ newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
           const Str *projectName, Env *env);
 
 /**
+ * \brief Creates or loads an encoded indexed sequence object of the
+ * BWT transform.
+ * @param baseType selects the encoding method of the sequence index
+ * storing the BWT sequence (see enum seqBaseEncoding).
+ * @param extraParams a union holding extra parameter information
+ *   specific to the type selected via parameter baseType
+ * @param sa Suffixarray data structure to build BWT index from
+ * @param projectName base file name for index written (should be the
+ * same as the one sa was read from
+ * @param env genometools reference for core functions
+ * @return reference to new BWT sequence object
+ */
+extern BWTSeq *
+newBWTSeqFromSA(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
+                Suffixarray *sa, Seqpos totalLen,
+                const Str *projectName, Env *env);
+
+/**
  * \brief Deallocate a previously loaded/created BWT sequence object.
  * @param bwtseq reference of object to delete
  * @param env genometools reference for core functions

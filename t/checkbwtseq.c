@@ -43,6 +43,7 @@
 #include <libgtcore/str.h>
 #include <libgtcore/versionfunc.h>
 
+#include <libgtmatch/alphadef.h>
 #include <libgtmatch/sarr-def.h>
 #include <libgtmatch/enum-patt-def.h>
 #include <libgtmatch/enum-patt.pr>
@@ -95,22 +96,6 @@ parseOptions(int *parsed_args, int argc, char **argv,
   option_parser_delete(op, env);
   return oprval;
 }
-
-/* begin evil duplicate declaration */
-typedef struct
-{
-  Seqpos offset,
-         left,
-         right;
-} Lcpinterval;
-
-struct MMsearchiterator
-{
-  Lcpinterval lcpitv;
-  Seqpos sufindex;
-  const Seqpos *suftab;
-};
-/* end evil duplicate declaration */
 
 #define checkBWTSeqErrRet()                             \
   do {                                                  \
@@ -199,12 +184,16 @@ main(int argc, char *argv[])
         }
       }
       EMIter = newEMIterator(bwtSeq, query, patternlen, env);
+      assert(EMINumMatchesTotal(EMIter) == BWTSeqMatchCount(bwtSeq, query,
+                                                            patternlen, env));
+/*       fputs("pattern: ", stderr); */
+/*       showsymbolstringgeneric(stderr, suffixarray.alpha, pptr, patternlen); */
+/*       fputs("\n", stderr); */
 /*       fprintf(stderr, "number of matches: "FormatSeqpos" == %llu\n", */
 /*               EMINumMatchesTotal(EMIter), */
 /*               (unsigned long long) */
-/*               MAX(0, mmsi->lcpitv.right - mmsi->lcpitv.left + 1)); */
-      assert(EMINumMatchesTotal(EMIter)
-             == MAX(0, mmsi->lcpitv.right - mmsi->lcpitv.left + 1));
+/*               countmmsearchiterator(mmsi)); */
+      assert(EMINumMatchesTotal(EMIter) == countmmsearchiterator(mmsi));
       while (nextmmsearchiterator(&dbstart,mmsi))
       {
         struct MatchData *match =

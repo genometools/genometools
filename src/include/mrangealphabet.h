@@ -19,6 +19,17 @@
 #ifndef ALPHABET_H_INCLUDED
 #define ALPHABET_H_INCLUDED
 
+/**
+ * \file mrangealphabet.h
+ * \brief Methods for an alphabet mapping where the alphabet is mapped
+ * to multiple contiguous ranges.
+ *
+ * The mapping is constructed so that an alphabet with n symbols
+ * is mapped to the range 0..n-1 and any symbol can be queried for
+ * what range it belongs to. 
+ * \author Thomas Jahns <Thomas.Jahns@gmx.net>
+ */
+
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
@@ -35,13 +46,35 @@
 typedef unsigned int Symbol;
 typedef struct multiRangeAlphabetEncoding MRAEnc;
 
+#define UNDEF_UCHAR ((unsigned char)~0)
+
+/**
+ * \brief Create an alphabet to map a selection of unsigned characters
+ * onto the resulting ranges.
+ * @param numRanges number of distinct ranges the alphabet is to be
+ * divided into.
+ * @param symbolsPerRange gives the number of symbols for every range
+ * @param mapping maps all uint8_t input symbols to values in the
+ * range 0..sum(symbolsPerRange) or the input alphabet specific
+ * value UNDEF_UCHAR
+ * @param env 
+ */
 staticifinline inline MRAEnc *
 MRAEncUInt8New(int numRanges, int symbolsPerRange[],
                const uint8_t *mapping, Env *env);
 
+/**
+ * \brief Creates a mapping to two ranges (regular and special
+ * symbols) from a given genometools alphabet.
+ * @param alpha original alphabet
+ * @param env
+ */
 extern MRAEnc *
 MRAEncGTAlphaNew(const Alphabet *alpha, Env *env);
- 
+
+/**
+ * \brief alias of MRAEncUInt8New
+ */
 extern MRAEnc *
 newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
                                    const uint8_t *mappings, Env *env);
@@ -60,12 +93,31 @@ extern MRAEnc *
 MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
                        const int *rangeSel, Symbol fallback, Env *env);
 
+/**
+ * \brief Inserts a previously unmapped symbol into a range.
+ *
+ * All successor ranges will therefore be shifted by one in the
+ * resulting mapping.
+ * @param mralpha alphabet to add mapping to
+ * @param sym input code to map
+ * @param range number of range to insert new symbol into
+ */
 extern void
 MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, int range);
 
+/**
+ * \brief Query number of ranges in alphabet.
+ * @param mralpha alphabet to query for number of ranges
+ * @return number of ranges
+ */
 extern size_t
 MRAEncGetNumRanges(const MRAEnc *mralpha);
 
+/**
+ * \brief Query number of symbols in given range of alphabet.
+ * @param mralpha alphabet to get range from
+ * @param range 
+ */
 staticifinline inline size_t
 MRAEncGetRangeSize(const MRAEnc *mralpha, size_t range);
 
@@ -77,10 +129,16 @@ MRAEncGetSize(const MRAEnc *mralpha);
 
 /**
  * @return size of original value range of symbols in alphabet
+ * (i.e. 256 for 8 bit mapping)
  */
 staticifinline size_t
 MRAEncGetDomainSize(const MRAEnc *mralpha);
 
+/**
+ * \brief Look up code of symbol from input domain in output range.
+ * @return output code or input specific code for illegal symbol (in
+ * which case MRAEncSymbolHasValidMapping would have returned false).
+ */
 staticifinline inline Symbol
 MRAEncMapSymbol(const MRAEnc *mralpha, Symbol sym);
 

@@ -37,8 +37,6 @@ struct multiRangeAlphabetEncoding
     *symbolsPerRange;   /*< gives number of symbols in each range */
 };
 
-#define UNDEF_UCHAR ((unsigned char)~0)
-
 struct multiRangeAlphabetEncodingUInt8
 {
   struct multiRangeAlphabetEncoding baseClass;

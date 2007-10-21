@@ -117,6 +117,8 @@ main(int argc, char *argv[])
     env_delete(env);
     return EXIT_FAILURE;
   }
+  fprintf(stderr, "Using index over sequence "FormatSeqpos" symbols long.\n",
+          EISLength(seq));
   {
     int i;
     Symbol exampleBlock[BLOCKSIZE];

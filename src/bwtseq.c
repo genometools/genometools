@@ -85,7 +85,7 @@ struct seqRevMapEntry
 
 struct addLocateInfoState
 {
-  Suffixarray suffixArray;
+  Suffixarray *suffixArray;
   unsigned sampleInterval, bitsPerOrigPos, bitsPerSeqpos;
   size_t revMapCacheSize;
   struct seqRevMapEntry *revMapCache;
@@ -97,27 +97,35 @@ bitsPerPosUpperBound(struct addLocateInfoState *state)
   return state->bitsPerOrigPos + state->bitsPerSeqpos;
 }
 
-static void
-initAddLocateInfoState(struct addLocateInfoState *state, const Str *projectName,
+static int
+initAddLocateInfoState(struct addLocateInfoState *state,
+                       Suffixarray *sa, const Str *projectName,
                        unsigned sampleInterval, unsigned aggregationExpVal,
                        Env *env)
 {
   Seqpos lastPos;
-  streamsuffixarray(&state->suffixArray, &lastPos, SARR_SUFTAB | SARR_BWTTAB,
-                    projectName, NULL, env);
+  if(sampleInterval && (!sa->suftabstream.fp || !sa->longest.defined))
+  {
+    fprintf(stderr, "error: locate sampling requested but not available"
+            " for project %s", str_get(projectName));
+    return 0;
+  }
+  state->suffixArray = sa;
+  lastPos = sa->longest.valueseqpos;
   state->sampleInterval = sampleInterval;
   state->bitsPerSeqpos = requiredUInt64Bits(lastPos);
   state->bitsPerOrigPos = requiredUInt64Bits(lastPos/sampleInterval);
   state->revMapCacheSize = aggregationExpVal/sampleInterval + 1;
   state->revMapCache = env_ma_malloc(env, sizeof(state->revMapCache[0])
                                      * state->revMapCacheSize);
+  return 1;
 }
 
 static void
 destructAddLocateInfoState(struct addLocateInfoState *state, Env *env)
 {
   env_ma_free(state->revMapCache, env);
-  freesuffixarray(&state->suffixArray, env);
+  freesuffixarray(state->suffixArray, env);
 }
 
 #if 1
@@ -151,7 +159,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
     {
       /* 1.a read array index*/
       if((retcode =
-          readnextSeqposfromstream(&mapVal, &state->suffixArray.suftabstream,
+          readnextSeqposfromstream(&mapVal, &state->suffixArray->suftabstream,
                                    env)) != 1)
         return (BitOffset)-1;
       /* 1.b check wether the index into the original sequence is an
@@ -184,17 +192,36 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
 }
 #endif
 
+BWTSeq *
+newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
+          const Str *projectName, Env *env)
+{
+  struct BWTSeq *bwtSeq = NULL;
+  Suffixarray suffixArray;
+  Seqpos len;
+  streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_BWTTAB,
+                    projectName, NULL, env);
+  ++len;
+  bwtSeq = newBWTSeqFromSA(baseType, extraParams, &suffixArray, len,
+                           projectName, env);
+  freesuffixarray(&suffixArray, env);
+  return bwtSeq;
+}
+
+
 #define newBWTSeqErrRet()                               \
   do {                                                  \
-    destructAddLocateInfoState(&varState, env);         \
+    if(varState.suffixArray)                            \
+      destructAddLocateInfoState(&varState, env);       \
     if(baseSeqIdx) deleteEncIdxSeq(baseSeqIdx, env);    \
     return NULL;                                        \
   } while(0)
 
 
 BWTSeq *
-newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
-          const Str *projectName, Env *env)
+newBWTSeqFromSA(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
+                Suffixarray *sa, Seqpos totalLen, const Str *projectName,
+                Env *env)
 {
   struct BWTSeq *bwtSeq = NULL;
   struct encIdxSeq *baseSeqIdx = NULL;
@@ -205,31 +232,35 @@ newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
   struct addLocateInfoState varState;
   assert(projectName && env);
   env_error_check(env);
-  initAddLocateInfoState(&varState, projectName, sampleInterval,
-                         extraParams->blockEncParams.blockSize
-                         * extraParams->blockEncParams.blockSize, env);
+  varState.suffixArray = NULL;
   switch(baseType)
   {
   case BWT_ON_BLOCK_ENC:
-    if(!(baseSeqIdx = loadBlockEncIdxSeq(projectName, env)))
+    if(!(baseSeqIdx = loadBlockEncIdxSeqForSA(sa, totalLen, projectName, env)))
     {
       struct locateHeader headerData = { sampleInterval };
       void *p[] = { &headerData };
       uint16_t headerIDs[] = { LOCATE_INFO_IN_INDEX_HEADERID };
       uint32_t headerSizes[] = { LOCATE_HEADER_SIZE };
       headerWriteFunc headerFuncs[] = { writeLocateInfoHeader };
+      if(!initAddLocateInfoState(&varState, sa, projectName, sampleInterval,
+                                 extraParams->blockEncParams.blockSize
+                                 * extraParams->blockEncParams.blockSize, env))
+        newBWTSeqErrRet();        
       env_error_unset(env);
       if(!(baseSeqIdx
-           = newBlockEncIdxSeq(projectName,
-                               extraParams->blockEncParams.blockSize,
-                               extraParams->blockEncParams.bucketBlocks,
-                               sizeof(p)/sizeof(p[0]), headerIDs, headerSizes,
-                               headerFuncs, p,
+           = newBlockEncIdxSeqFromSA(sa, totalLen, projectName,
+                                     extraParams->blockEncParams.blockSize,
+                                     extraParams->blockEncParams.bucketBlocks,
+                                     sizeof(p)/sizeof(p[0]), headerIDs,
+                                     headerSizes,
+                                     headerFuncs, p,
 /*                                0, NULL, NULL, NULL, NULL, */
-                               addLocateInfo, 1 /* one bit for flag */,
-                               bitsPerPosUpperBound(&varState),
-                               &varState, env)))
+                                     addLocateInfo, 1 /* one bit for flag */,
+                                     bitsPerPosUpperBound(&varState),
+                                     &varState, env)))
         newBWTSeqErrRet();
+      destructAddLocateInfoState(&varState, env);
     }
     else
     {
@@ -241,7 +272,7 @@ newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
       if(!fp)
       {
         fputs("Specified index does not contain locate information.\n"
-              "Localization of matches will not be supported!", stderr);
+              "Localization of matches will not be supported!\n", stderr);
         sampleInterval = 0;
       }
       else
@@ -276,13 +307,12 @@ newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
       for(i = 0; i < alphabetSize; ++i)
         count[i + 1] = count[i]
           + EISSymTransformedRank(baseSeqIdx, i, len, hint, env);
-/*       fprintf(stderr, "count[alphabetSize]="FormatSeqpos */
-/*               ", len="FormatSeqpos"\n", count[alphabetSize], len); */
-/*       for(i = 0; i <= alphabetSize; ++i) */
-/*         fprintf(stderr, "count[%u]="FormatSeqpos"\n", i, count[i]); */
+      fprintf(stderr, "count[alphabetSize]="FormatSeqpos
+              ", len="FormatSeqpos"\n", count[alphabetSize], len);
+      for(i = 0; i <= alphabetSize; ++i)
+        fprintf(stderr, "count[%u]="FormatSeqpos"\n", i, count[i]);
       assert(count[alphabetSize] == len);
     }
-    destructAddLocateInfoState(&varState, env);
     break;
     /* FIXME: implement missing types. */
   case BWT_ON_RLE:
@@ -323,7 +353,7 @@ getMatchBound(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen,
               struct matchBound *match, Env *env)
 {
   size_t i = queryLen;
-  Seqpos *count;
+  const Seqpos *count;
   Symbol curSym;
   const MRAEnc *alphabet;
   assert(bwtSeq && query);
@@ -339,7 +369,7 @@ getMatchBound(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen,
       + BWTSeqOcc(bwtSeq, curSym, match->upper, env);
     match->lower = count[curSym]
       + BWTSeqOcc(bwtSeq, curSym, match->lower, env);
-  }  
+  }
 }
 
 extern Seqpos
@@ -352,7 +382,7 @@ BWTSeqMatchCount(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen,
   if(match.lower < match.upper)
     return 0;
   else
-    return match.lower - match.upper + 1;
+    return match.lower - match.upper;
 }
 
 struct BWTSeqExactMatchesIterator

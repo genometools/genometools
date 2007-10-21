@@ -24,16 +24,24 @@
 #include <libgtcore/option.h>
 #include <libgtcore/str.h>
 #include <libgtmatch/sfx-optdef.h>
+#include <libgtmatch/sarr-def.h>
+#include <libgtmatch/esa-map.pr>
+
 
 #include "bwtseq.h"
+#include "suffixerator-interface.h"
 
 struct extSuffixeratorOptions
 {
   Suffixeratoroptions so;
   enum seqBaseEncoding encType;
   union bwtSeqParam bwtParam;
+  unsigned locateFreq;
 };
-  
+
+static void
+initSuffixeratorOptions(Suffixeratoroptions *so, Env *env);
+
 static OPrval parse_options(int *parsed_args,
                             struct extSuffixeratorOptions *eso,
                             int argc, const char **argv, Env *env);
@@ -46,11 +54,61 @@ main(int argc, const char *argv[])
   Env *env;
   env = env_new();
   
+  initSuffixeratorOptions(&eso.so, env);
+  
   if(parse_options(&numOptionArgs, &eso, argc, argv, env)
      != OPTIONPARSER_OK)
     return EXIT_FAILURE;
+  /* find wether requested sequences have already been generated
+   * and try short-cut if so */
+  {
+    Suffixarray suffixArray;
+    Seqpos length;
+    int demand;
+    demand = (eso.so.outtistab?SARR_ESQTAB:0)
+      | (eso.so.outtistab?SARR_ESQTAB:0)
+      | (eso.so.outlcptab?SARR_LCPTAB:0)
+      | SARR_BWTTAB
+      | (eso.so.outdestab?SARR_DESTAB:0);
+    if(eso.locateFreq || eso.so.outsuftab)
+      demand |= SARR_SUFTAB;
+    if(streamsuffixarray(&suffixArray, &length,
+                         demand, eso.so.str_indexname,
+                         NULL, env))
+    {
+      BWTSeq *bwtSeq;
+      ++length;
+      bwtSeq =
+        newBWTSeqFromSA(BWT_ON_BLOCK_ENC, &eso.bwtParam, &suffixArray, length,
+                        eso.so.str_indexname, env);
+      freesuffixarray(&suffixArray, env);
+      if(!bwtSeq)
+      {
+        fputs("Index creation failed.\n", stderr);
+        env_delete(env);
+        return EXIT_FAILURE;
+      }
+      deleteBWTSeq(bwtSeq, env);
+      return EXIT_SUCCESS;
+    }
+  }
+  
+  
   return EXIT_SUCCESS;
 }
+
+static void
+initSuffixeratorOptions(Suffixeratoroptions *so, Env *env)
+{
+  so->isdna = false;
+  so->isprotein = false;
+  so->str_indexname = str_new(env);
+  so->filenametab = strarray_new(env);
+  so->str_smap = str_new(env);
+  so->str_sat = str_new(env);
+  so->prefixlength = PREFIXLENGTH_AUTOMATIC;
+}
+
 
 static void mkbiofmi2versionfunc(const char *progname);
 
@@ -85,7 +143,7 @@ static OPrval parse_options(int *parsed_args,
   option_parser_set_mailaddress(op,"<"PACKAGE_BUGREPORT">");
   optiondb = option_new_filenamearray("db","specify database files",
                                       so->filenametab,env);
-  option_is_mandatory(optiondb);
+/*   option_is_mandatory(optiondb); */
   option_parser_add_option(op, optiondb, env);
 
   optionsmap = option_new_string("smap",
@@ -176,7 +234,8 @@ static OPrval parse_options(int *parsed_args,
 
   /* begin options specific to compressed index building */
   {
-    Option *optionCompRep, *optionBlockSize, *optionBucketBlocks;
+    Option *optionCompRep, *optionBlockSize, *optionBucketBlocks,
+      *optionLocateFreq;
     optionCompRep = option_new_choice("compressed-representation",
                                       "choose a representation for an index",
                                       argIdxType, NULL, cIdxChoices, env);
@@ -191,9 +250,16 @@ static OPrval parse_options(int *parsed_args,
       "blocks-per-bucket", "how many blocks to store in one bucket",
       &eso->bwtParam.blockEncParams.bucketBlocks, 8, 1, env);
     option_parser_add_option(op, optionBucketBlocks, env);
+
+    optionLocateFreq = option_new_uint(
+      "locate-freq",
+      "store locate information for every nth entry of the suffix array",
+      &eso->locateFreq, 0, env);
+    option_parser_add_option(op, optionLocateFreq, env);
     
     option_imply(optionBlockSize, optionCompRep, env);
     option_imply(optionBucketBlocks, optionCompRep, env);
+    option_imply(optionLocateFreq, optionCompRep, env);
   }
 
   option_exclude(optionsmap, optiondna, env);
