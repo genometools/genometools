@@ -176,7 +176,8 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   Phase phase_value;
   Range range;
   char *id = NULL, *seqid = NULL, *source = NULL, *type, *start, *end, *score,
-       *strand, *phase, *attributes = NULL, *token, *tmp_token, **tokens;
+    *strand = NULL, *phase = NULL, *attributes = NULL, *token, *tmp_token,
+    **tokens;
   const char *filename;
   bool is_child = false, seqid_str_created = false;
   unsigned long i;
