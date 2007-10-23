@@ -21,6 +21,7 @@
 #include "lualib.h"
 #include "lfs.h"
 #include "libgtcore/array.h"
+#include "libgtcore/array2dim.h"
 #include "libgtcore/bitpackarray.h"
 #include "libgtcore/bitpackstring.h"
 #include "libgtcore/bittab.h"
@@ -215,6 +216,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "alignment class", alignment_unit_test, env);
   hashtable_add(gtr->unit_tests, "array class", array_unit_test, env);
   hashtable_add(gtr->unit_tests, "array example", array_example, env);
+  hashtable_add(gtr->unit_tests, "array2dim example", array2dim_example, env);
   hashtable_add(gtr->unit_tests, "bit pack array class",
                 bitPackArray_unit_test, env);
   hashtable_add(gtr->unit_tests, "bit pack string module",

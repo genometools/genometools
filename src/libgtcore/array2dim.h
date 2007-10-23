@@ -18,6 +18,7 @@
 #ifndef ARRAY2DIM_H
 #define ARRAY2DIM_H
 
+#include "libgtcore/env.h"
 #include "libgtcore/xansi.h"
 
 #define array2dim_malloc(ARRAY2DIM, ROWS, COLUMNS, TYPE, ENV)                 \
@@ -40,19 +41,10 @@
             (ARRAY2DIM)[a2d_i] = (ARRAY2DIM)[a2d_i-1] + (COLUMNS);            \
         }
 
+int     array2dim_example(Env*);
+
 #define array2dim_delete(ARRAY2DIM, ENV)                                      \
         env_ma_free((ARRAY2DIM)[0], ENV);                                     \
         env_ma_free(ARRAY2DIM, ENV);
-
-#if 0
-  example usage:
-
-  double **a2dim;
-
-  /* create a 10 * 20 double array */
-  array2dim_malloc(a2dim, 10, 20, double, env);
-  /* ... (use array a2dim in conventional way via a2dim[row][column]) */
-  array2dim_delete(a2dim, env);
-#endif
 
 #endif
