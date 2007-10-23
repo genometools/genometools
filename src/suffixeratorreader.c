@@ -91,7 +91,7 @@ struct sfxInterface
 };
 
 static Seqpos
-SfxIReadAdvance(sfxInterface *iface,
+sfxIReadAdvance(sfxInterface *iface,
                 Seqpos requestMaxPos,
                 Env *env);
 
@@ -518,7 +518,7 @@ static int suftab2file(Outfileinfo *outfileinfo,
   return haserr ? -1 : 0;
 }
 
-extern const Uchar *
+const Uchar *
 SfxIReadESQRange(sfxInterface *iface, Seqpos start, Seqpos len,
                  Uchar *dest)
 {
@@ -532,8 +532,14 @@ SfxIReadESQRange(sfxInterface *iface, Seqpos start, Seqpos len,
   return dest;
 }
 
+const Alphabet *
+getSfxIAlphabet(const sfxInterface *si)
+{
+  assert(si);
+  return si->alpha;
+}
 
-extern int
+int
 SfxIRegisterReader(sfxInterface *iface, listenerID *id,
                    enum sfxDataRequest request, Env *env)
 {
@@ -569,13 +575,13 @@ getSufTabVal(sfxInterface *iface, Seqpos pos, Env *env)
     else
     {
       while(pos >= iface->lastGeneratedStart + iface->lastGeneratedLen)
-        if(!SfxIReadAdvance(iface, pos, env))
+        if(!sfxIReadAdvance(iface, pos, env))
           break;
     }    
   }
 }
 
-extern size_t
+size_t
 SfxIReadBWTRange(sfxInterface *iface, listenerID id, size_t len,
                  Uchar *dest, Env *env)
 {
@@ -595,7 +601,27 @@ SfxIReadBWTRange(sfxInterface *iface, listenerID id, size_t len,
   return effLen;
 }
 
-extern size_t
+size_t
+readSfxIBWTRangeSym(sfxInterface *iface, listenerID id, size_t len,
+                    Symbol *dest, Env *env)
+{
+  size_t i, effLen;
+  Seqpos start;
+  assert(iface && id < iface->numReaders && dest);
+  assert(iface->readers[id].readFlag == SFX_REQUEST_BWTTAB);
+  start = iface->readers[id].nextReadPos;
+  effLen = MIN((size_t)len, (size_t)(iface->length - start));
+  for(i = 0; i < (size_t)len; ++i)
+  {
+    dest[i] = getencodedchar(iface->outfileinfo.encseq, 
+                             getSufTabVal(iface, start + i, env),
+                             iface->so.readmode);
+  }
+  iface->readers[id].nextReadPos = start + len;
+  return effLen;
+}
+
+size_t
 SfxIReadLCPRange(sfxInterface *iface, listenerID id, size_t len,
                  Seqpos *dest, Env *env)
 {
@@ -642,7 +668,7 @@ SfxIReadLCPRange(sfxInterface *iface, listenerID id, size_t len,
 
 
 
-extern size_t
+size_t
 SfxIReadSufTabRange(sfxInterface *iface, listenerID id, size_t len,
                     Seqpos *dest, Env *env)
 {
@@ -692,7 +718,7 @@ SfxIReadSufTabRange(sfxInterface *iface, listenerID id, size_t len,
     else
     {
       while(start + len > iface->prevGeneratedStart + iface->prevGeneratedLen)
-        if(!SfxIReadAdvance(iface, start + len, env))
+        if(!sfxIReadAdvance(iface, start + len, env))
         {
           /* Caution: sneakily updates the length parameter to obtain a
            * request we can fulfill */
@@ -717,7 +743,7 @@ findMinOpenRequest(sfxInterface *iface, int reqType)
 }
 
 static Seqpos
-SfxIReadAdvance(sfxInterface *iface,
+sfxIReadAdvance(sfxInterface *iface,
                 Seqpos requestMaxPos,
                 Env *env)
 {

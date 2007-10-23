@@ -56,6 +56,7 @@
 enum {
   BLOCKSIZE = 8,
   BUCKETBLOCKS = 16,
+  LOCATEINTERVAL = 16,
   MinMinPatLen = 8,
   PatLenMinVariation = 10,
   MinMaxPatLen = 50,
@@ -244,7 +245,8 @@ main(int argc, char *argv[])
     freesuffixarray(&suffixarray,env);
 
     startTimer(&timer);
-    bwtSeq = newBWTSeq(BWT_ON_BLOCK_ENC, &bwtparams, inputProject, env);
+    bwtSeq = newBWTSeq(BWT_ON_BLOCK_ENC, LOCATEINTERVAL, &bwtparams,
+                       inputProject, env);
     if(!bwtSeq)
       checkBWTSeqErrRet();
     for (trial = 0; trial < numOfSamples; ++trial)

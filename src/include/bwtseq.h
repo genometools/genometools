@@ -104,8 +104,8 @@ typedef struct BWTSeq BWTSeq;
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
-          const Str *projectName, Env *env);
+newBWTSeq(enum seqBaseEncoding baseType, unsigned locateInterval,
+          union bwtSeqParam *extraParams, const Str *projectName, Env *env);
 
 /**
  * \brief Creates or loads an encoded indexed sequence object of the
@@ -121,9 +121,9 @@ newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-newBWTSeqFromSA(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
-                Suffixarray *sa, Seqpos totalLen,
-                const Str *projectName, Env *env);
+newBWTSeqFromSA(enum seqBaseEncoding baseType, unsigned locateInterval,
+                union bwtSeqParam *extraParams, Suffixarray *sa,
+                Seqpos totalLen, const Str *projectName, Env *env);
 
 /**
  * \brief Deallocate a previously loaded/created BWT sequence object.

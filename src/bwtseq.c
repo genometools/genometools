@@ -17,6 +17,14 @@
 **  
 */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#if (!defined DEBUG) && (!defined NDEBUG)
+#define NDEBUG
+#endif /* DEBUG */
+
 #include <assert.h>
 #include <string.h>
 
@@ -30,24 +38,13 @@
 #include "bwtseqpriv.h"
 #include "encidxseq.h"
 
-#if 0
-static BitOffset
-doNothing(BitString cwDest, BitOffset cwOffset,
-          BitString varDest, BitOffset varOffset,
-          Seqpos start, Seqpos len, void *cbState,
-          Env *env)
-{
-  return 0;
-}
-#endif
-
 enum {
   LOCATE_INFO_IN_INDEX_HEADERID = 1111,
 };
 
 struct locateHeader
 {
-  unsigned sampleInterval;
+  unsigned locateInterval;
 };
 
 enum {
@@ -58,10 +55,10 @@ static int
 writeLocateInfoHeader(FILE *fp, void *cbData)
 {
   const struct locateHeader *headerData = cbData;
-  uint32_t sampleInterval;
+  uint32_t locateInterval;
   assert(cbData);
-  sampleInterval = headerData->sampleInterval;
-  return fwrite(&sampleInterval, sizeof(sampleInterval), 1, fp);
+  locateInterval = headerData->locateInterval;
+  return fwrite(&locateInterval, sizeof(locateInterval), 1, fp);
 }
 
 /**
@@ -70,11 +67,11 @@ writeLocateInfoHeader(FILE *fp, void *cbData)
 static inline int
 readLocateInfoHeader(FILE *fp, struct locateHeader *headerData)
 {
-  uint32_t sampleInterval;
+  uint32_t locateInterval;
   assert(headerData);
-  if(fread(&sampleInterval, sizeof(sampleInterval), 1, fp) != 1)
+  if(fread(&locateInterval, sizeof(locateInterval), 1, fp) != 1)
     return 0;
-  headerData->sampleInterval = sampleInterval;
+  headerData->locateInterval = locateInterval;
   return 1;
 }
 
@@ -86,7 +83,7 @@ struct seqRevMapEntry
 struct addLocateInfoState
 {
   Suffixarray *suffixArray;
-  unsigned sampleInterval, bitsPerOrigPos, bitsPerSeqpos;
+  unsigned locateInterval, bitsPerOrigPos, bitsPerSeqpos;
   size_t revMapCacheSize;
   struct seqRevMapEntry *revMapCache;
 };
@@ -100,24 +97,33 @@ bitsPerPosUpperBound(struct addLocateInfoState *state)
 static int
 initAddLocateInfoState(struct addLocateInfoState *state,
                        Suffixarray *sa, const Str *projectName,
-                       unsigned sampleInterval, unsigned aggregationExpVal,
+                       unsigned locateInterval, unsigned aggregationExpVal,
                        Env *env)
 {
   Seqpos lastPos;
-  if(sampleInterval && (!sa->suftabstream.fp || !sa->longest.defined))
+  if(locateInterval && (!sa->suftabstream.fp || !sa->longest.defined))
   {
     fprintf(stderr, "error: locate sampling requested but not available"
-            " for project %s", str_get(projectName));
+            " for project %s\n", str_get(projectName));
     return 0;
   }
   state->suffixArray = sa;
   lastPos = sa->longest.valueseqpos;
-  state->sampleInterval = sampleInterval;
+  state->locateInterval = locateInterval;
   state->bitsPerSeqpos = requiredUInt64Bits(lastPos);
-  state->bitsPerOrigPos = requiredUInt64Bits(lastPos/sampleInterval);
-  state->revMapCacheSize = aggregationExpVal/sampleInterval + 1;
-  state->revMapCache = env_ma_malloc(env, sizeof(state->revMapCache[0])
-                                     * state->revMapCacheSize);
+  if(locateInterval)
+  {
+    state->bitsPerOrigPos = requiredUInt64Bits(lastPos/locateInterval);
+    state->revMapCacheSize = aggregationExpVal/locateInterval + 1;
+    state->revMapCache = env_ma_malloc(env, sizeof(state->revMapCache[0])
+                                       * state->revMapCacheSize);
+  }
+  else
+  {
+    state->bitsPerOrigPos = 0;
+    state->revMapCacheSize = 0;
+    state->revMapCache = NULL;
+  }
   return 1;
 }
 
@@ -164,12 +170,12 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
         return (BitOffset)-1;
       /* 1.b check wether the index into the original sequence is an
        * even multiple of the sampling interval */
-      if(!(mapVal % state->sampleInterval))
+      if(!(mapVal % state->locateInterval))
       {
         /* 1.b.1 enter index into cache */
         state->revMapCache[revMapCacheLen].bwtPos = i;
         state->revMapCache[revMapCacheLen].origPos
-          = mapVal / state->sampleInterval;
+          = mapVal / state->locateInterval;
         ++revMapCacheLen;
         /* 1.b.2 mark position in bwt sequence */
         bsSetBit(cwDest, cwOffset + i);
@@ -193,17 +199,18 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
 #endif
 
 BWTSeq *
-newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
-          const Str *projectName, Env *env)
+newBWTSeq(enum seqBaseEncoding baseType, unsigned locateInterval,
+          union bwtSeqParam *extraParams, const Str *projectName, Env *env)
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
   Seqpos len;
-  streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_BWTTAB,
-                    projectName, NULL, env);
+  if(streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_BWTTAB,
+                       projectName, NULL, env))
+    return NULL;
   ++len;
-  bwtSeq = newBWTSeqFromSA(baseType, extraParams, &suffixArray, len,
-                           projectName, env);
+  bwtSeq = newBWTSeqFromSA(baseType, locateInterval, extraParams,
+                           &suffixArray, len, projectName, env);
   freesuffixarray(&suffixArray, env);
   return bwtSeq;
 }
@@ -219,47 +226,59 @@ newBWTSeq(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
 
 
 BWTSeq *
-newBWTSeqFromSA(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
-                Suffixarray *sa, Seqpos totalLen, const Str *projectName,
-                Env *env)
+newBWTSeqFromSA(enum seqBaseEncoding baseType, unsigned locateInterval,
+                union bwtSeqParam *extraParams, Suffixarray *sa,
+                Seqpos totalLen, const Str *projectName, Env *env)
 {
   struct BWTSeq *bwtSeq = NULL;
   struct encIdxSeq *baseSeqIdx = NULL;
   const MRAEnc *alphabet;
   Symbol alphabetSize;
   EISHint hint;
-  unsigned sampleInterval = 16;
   struct addLocateInfoState varState;
-  assert(projectName && env);
+  assert(sa && projectName && env);
   env_error_check(env);
-  varState.suffixArray = NULL;
+  varState.suffixArray = sa;
   switch(baseType)
   {
   case BWT_ON_BLOCK_ENC:
     if(!(baseSeqIdx = loadBlockEncIdxSeqForSA(sa, totalLen, projectName, env)))
     {
-      struct locateHeader headerData = { sampleInterval };
+      struct locateHeader headerData = { locateInterval };
       void *p[] = { &headerData };
       uint16_t headerIDs[] = { LOCATE_INFO_IN_INDEX_HEADERID };
       uint32_t headerSizes[] = { LOCATE_HEADER_SIZE };
       headerWriteFunc headerFuncs[] = { writeLocateInfoHeader };
-      if(!initAddLocateInfoState(&varState, sa, projectName, sampleInterval,
+      if(!initAddLocateInfoState(&varState, sa, projectName, locateInterval,
                                  extraParams->blockEncParams.blockSize
                                  * extraParams->blockEncParams.blockSize, env))
         newBWTSeqErrRet();        
       env_error_unset(env);
-      if(!(baseSeqIdx
-           = newBlockEncIdxSeqFromSA(sa, totalLen, projectName,
-                                     extraParams->blockEncParams.blockSize,
-                                     extraParams->blockEncParams.bucketBlocks,
-                                     sizeof(p)/sizeof(p[0]), headerIDs,
-                                     headerSizes,
-                                     headerFuncs, p,
+      if(locateInterval)
+      {
+        if(!(baseSeqIdx
+             = newBlockEncIdxSeqFromSA(sa, totalLen, projectName,
+                                       extraParams->blockEncParams.blockSize,
+                                       extraParams->blockEncParams.bucketBlocks,
+                                       sizeof(p)/sizeof(p[0]), headerIDs,
+                                       headerSizes,
+                                       headerFuncs, p,
 /*                                0, NULL, NULL, NULL, NULL, */
-                                     addLocateInfo, 1 /* one bit for flag */,
-                                     bitsPerPosUpperBound(&varState),
-                                     &varState, env)))
-        newBWTSeqErrRet();
+                                       addLocateInfo, 1 /* one bit for flag */,
+                                       bitsPerPosUpperBound(&varState),
+                                       &varState, env)))
+          newBWTSeqErrRet();
+      }
+      else
+      {
+        if(!(baseSeqIdx
+             = newBlockEncIdxSeqFromSA(sa, totalLen, projectName,
+                                       extraParams->blockEncParams.blockSize,
+                                       extraParams->blockEncParams.bucketBlocks,
+                                       0, NULL, NULL, NULL, NULL,
+                                       NULL, 0, 0, &varState, env)))
+          newBWTSeqErrRet();
+      }
       destructAddLocateInfoState(&varState, env);
     }
     else
@@ -273,14 +292,14 @@ newBWTSeqFromSA(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
       {
         fputs("Specified index does not contain locate information.\n"
               "Localization of matches will not be supported!\n", stderr);
-        sampleInterval = 0;
+        locateInterval = 0;
       }
       else
       {
         struct locateHeader header;
         if(!readLocateInfoHeader(fp, &header))
           newBWTSeqErrRet();
-        sampleInterval = header.sampleInterval;
+        locateInterval = header.locateInterval;
       }
     }
     alphabet = EISGetAlphabet(baseSeqIdx);
@@ -298,7 +317,7 @@ newBWTSeqFromSA(enum seqBaseEncoding baseType, union bwtSeqParam *extraParams,
     bwtSeq->type = baseType;
     bwtSeq->seqIdx = baseSeqIdx;
     bwtSeq->alphabetSize = alphabetSize;
-    bwtSeq->locateSampleInterval = sampleInterval;
+    bwtSeq->locateSampleInterval = locateInterval;
     bwtSeq->hint = hint = newEISHint(baseSeqIdx, env);
     {
       Symbol i;

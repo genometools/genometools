@@ -57,6 +57,7 @@
 enum {
   BLOCKSIZE = 8,
   BUCKETBLOCKS = 16,
+  LOCATEINTERVAL = 16,
   MinMinPatLen = 8,
   PatLenMinVariation = 10,
   MinMaxPatLen = 50,
@@ -128,15 +129,18 @@ main(int argc, char *argv[])
     case OPTIONPARSER_OK:
       break;
     case OPTIONPARSER_ERROR:
+      env_delete(env);
       return EXIT_FAILURE;
     case OPTIONPARSER_REQUESTS_EXIT:
+      env_delete(env);
       return EXIT_SUCCESS;
   }
 
   inputProject = str_new_cstr(argv[parsedArgs], env);
   bwtparams.blockEncParams.blockSize = BLOCKSIZE;
   bwtparams.blockEncParams.bucketBlocks = BUCKETBLOCKS;
-  bwtSeq = newBWTSeq(BWT_ON_BLOCK_ENC, &bwtparams, inputProject, env);
+  bwtSeq = newBWTSeq(BWT_ON_BLOCK_ENC, LOCATEINTERVAL, &bwtparams,
+                     inputProject, env);
   
   ensure(had_err, bwtSeq);
   if(had_err)

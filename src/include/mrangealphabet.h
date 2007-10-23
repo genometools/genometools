@@ -33,6 +33,9 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
+#if (!defined DEBUG) && (!defined NDEBUG)
+#define NDEBUG
+#endif /* DEBUG */
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #endif /* HAVE_STDINT_H */

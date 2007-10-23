@@ -22,11 +22,15 @@
  * but have the same data available to multiple listeners.
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
+#ifndef SUFFIXERATOR_INTERFACE_H_INCLUDED
+#define SUFFIXERATOR_INTERFACE_H_INCLUDED
 
 #include <libgtcore/env.h>
 
 #include <libgtmatch/sfx-suffixer.h>
 #include <libgtmatch/sfx-optdef.h>
+
+#include "mrangealphabet.h"
 
 typedef unsigned listenerID;
 
@@ -53,29 +57,39 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
 extern int
 deleteSfxInterface(sfxInterface *iface, Env *env);
 
+extern const Alphabet *
+getSfxIAlphabet(const sfxInterface *si);
+
 extern const Uchar *
-SfxIReadESQRange(sfxInterface *iface, Seqpos start, Seqpos len,
+readSfxIESQRange(sfxInterface *iface, Seqpos start, Seqpos len,
                  Uchar *dest);
 
+/**
+ * @return >0 on success, 0 on error
+ */
 extern int
 SfxIRegisterReader(sfxInterface *iface, listenerID *id,
                    enum sfxDataRequest request, Env *env);
 
 extern size_t
-SfxIReadBWTRange(sfxInterface *iface, listenerID id, size_t len,
+readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len,
                  Uchar *dest, Env *env);
 
+extern size_t
+readSfxIBWTRangeSym(sfxInterface *iface, listenerID id, size_t len,
+                    Symbol *dest, Env *env);
 /**
  * @return actual number of symbols read
  */
 extern size_t
-SfxIReadLCPRange(sfxInterface *iface, listenerID id, size_t len,
+readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
                  Seqpos *dest, Env *env);
 
 /**
  * @return actual number of symbols read
  */
 extern size_t
-SfxIReadSufTabRange(sfxInterface *iface, listenerID id, size_t len,
+readSfxISufTabRange(sfxInterface *iface, listenerID id, size_t len,
                     Seqpos *dest, Env *env);
 
+#endif /* SUFFIXERATOR_INTERFACE_H_INCLUDED */

@@ -67,11 +67,13 @@
 #include "encidxseq.h"
 #include "encidxseqpriv.h"
 #include "seqranges.h"
+#include "suffixerator-interface.h"
 
 /**
  * generic method to aquire next readLen symbols of BWT string
  */
-typedef int (*bwtReadFunc)(void *state, size_t readLen, Symbol *dest);
+typedef int (*bwtReadFunc)(void *state, size_t readLen, Symbol *dest,
+                           Env *env);
 
 
 struct encIdxSeq *
@@ -121,14 +123,13 @@ struct fileReadState
 };
 
 static int
-saBWTReadNext(void *state, size_t readLen, Symbol *dest)
+saBWTReadNext(void *state, size_t readLen, Symbol *dest, Env *env)
 {
   struct fileReadState *FRState = state;
   assert(state);
   return MRAEncReadAndTransform(FRState->alphabet, FRState->fp,
                                 readLen, dest);
 }
-
 
 extern EISeq *
 newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
@@ -158,6 +159,60 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
   newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName,
                                    state.alphabet,
                                    saBWTReadNext, &state,
+                                   blockSize, bucketBlocks, numExtHeaders,
+                                   headerIDs, extHeaderSizes,
+                                   extHeaderCallbacks, headerCBData, biFunc,
+                                   cwExtBitsPerPos, maxVarExtBitsPerPos,
+                                   cbState, env);
+  if(!newSeqIdx)
+    MRAEncDelete(state.alphabet, env);
+  return newSeqIdx;
+}
+
+struct sfxInterfaceReadState
+{
+  sfxInterface *si;
+  listenerID bwtReadId;
+  MRAEnc *alphabet;
+};
+
+static int
+sfxIBWTReadNext(void *state, size_t readLen, Symbol *dest, Env *env)
+{
+  struct sfxInterfaceReadState *SIState = state;
+  size_t readCount;
+  assert(state);
+  readCount = readSfxIBWTRangeSym(SIState->si, SIState->bwtReadId, readLen,
+                                  dest, env);
+  MRAEncSymbolsTransform(SIState->alphabet, dest, readCount);
+  return (readCount==readLen?1:-1);
+}
+
+extern EISeq *
+newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
+                          const Str *projectName,
+                          unsigned blockSize, unsigned bucketBlocks,
+                          size_t numExtHeaders, uint16_t *headerIDs,
+                          uint32_t *extHeaderSizes,
+                          headerWriteFunc *extHeaderCallbacks,
+                          void **headerCBData,
+                          bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
+                          BitOffset maxVarExtBitsPerPos, void *cbState,
+                          Env *env)
+{
+  struct encIdxSeq *newSeqIdx;
+  struct sfxInterfaceReadState state;
+  assert(si && projectName && env);
+  /* register bwttab reader */
+  if(!SfxIRegisterReader(si, &state.bwtReadId, SFX_REQUEST_BWTTAB, env))
+    return NULL;
+  state.si = si;
+  /* convert alphabet */
+  state.alphabet = MRAEncGTAlphaNew(getSfxIAlphabet(si), env);
+  MRAEncAddSymbolToRange(state.alphabet, SEPARATOR, 1);
+  newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName,
+                                   state.alphabet,
+                                   sfxIBWTReadNext, &state,
                                    blockSize, bucketBlocks, numExtHeaders,
                                    headerIDs, extHeaderSizes,
                                    extHeaderCallbacks, headerCBData, biFunc,
@@ -582,7 +637,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
             unsigned significantPermIdxBits;
             int readResult;
             /* 3. for each chunk: */
-            readResult = getNextBlock(bwtReadFuncState, blockSize, block);
+            readResult = getNextBlock(bwtReadFuncState, blockSize, block, env);
             if(readResult < 0)
             {
               hadError = 1;
@@ -639,7 +694,8 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
             unsigned significantPermIdxBits;
             int readResult;
             Seqpos symbolsLeft = totalLen % blockSize;
-            readResult = getNextBlock(bwtReadFuncState, symbolsLeft, block);
+            readResult = getNextBlock(bwtReadFuncState, symbolsLeft, block,
+                                      env);
             if(readResult < 0)
             {
               hadError = 1;
@@ -2376,6 +2432,7 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
     writeIdxHeaderErrRet(0);
   if(numExtHeaders)
   {
+    off_t offsetTargetValue = bufLen;
     if(!writeExtIdxHeader(fp, headerIDs[0], extHeaderSizes[0],
                           extHeaderCallbacks[0], headerCBData[0]))
       writeIdxHeaderErrRet(0);
@@ -2383,9 +2440,6 @@ writeIdxHeader(struct blockCompositionSeq *seqIdx,
       appendExtHeaderPos(&seqIdx->extHeaderPos, seqIdx->numExtHeaders++,
                          bufLen + EXT_HEADER_PREFIX_SIZE,
                          EH_HEADER_PREFIX | headerIDs[0], env);
-  }
-  {
-    off_t offsetTargetValue = bufLen;
     for(i = 1; i < numExtHeaders; ++i)
     {
       offsetTargetValue += EXT_HEADER_PREFIX_SIZE + extHeaderSizes[i - 1];

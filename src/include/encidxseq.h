@@ -24,6 +24,9 @@
  * Interface definitions for encoded indexed sequences.
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif /* HAVE_CONFIG_H */
 
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
@@ -39,6 +42,7 @@
 #include <libgtmatch/seqpos-def.h>
 
 #include "mrangealphabet.h"
+#include "suffixerator-interface.h"
 
 /**
  * callback function to insert variable width data into encidx
@@ -176,6 +180,48 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
                         void **headerCBData,
                         bitInsertFunc biFunc, BitOffset cwBitsPerPos,
                         BitOffset maxBitsPerPos, void *cbState, Env *env);
+/**
+ * \brief Construct block-encoded indexed sequence object and write
+ * corresponding representation to disk.
+ * @param si reference of suffixerator interface used to read
+ * construction from
+ * @param projectName base name of corresponding suffixerator project
+ * @param blockSize number of symbol to combine in one block, a
+ * lookup-table containing $alphabetsize^{blockSize}$ entries is
+ * required so adjust with caution
+ * @param bucketBlocks frequency at which to store partial symbol
+ * sums, low values increase storage and decrease number of
+ * computations required for rank queries on average
+ * @param numExtHeaders number of extension headers to write via callbacks
+ * @param headerIDs array of numExtHeaders ids to be used
+ * for each extension header in turn
+ * @param extHeaderSizes array of numExtHeaders sizes
+ * representing the length of each extension header
+ * @param extHeaderCallback array of numExtHeaders function pointers
+ * each of which will be called once upon writing the header
+ * @param headerCBData array of pointers passed as argument when the
+ * corresponding header writing function is called
+ * @param biFunc function to be called when a chunk of data has been
+ * accumulated for a given region of sequence data
+ * @param cwBitsPerPos exactly this many bits will be appended by
+ * biFunc for each symbol of the input sequence
+ * @param maxBitsPerPos at most this many bits will be appended to the
+ * variable width part of the data
+ * @param cbState will be passed on each call of biFunc
+ * @param env genometools reference for core functions
+ */
+extern EISeq *
+newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
+                          const Str *projectName,
+                          unsigned blockSize, unsigned bucketBlocks,
+                          size_t numExtHeaders, uint16_t *headerIDs,
+                          uint32_t *extHeaderSizes,
+                          headerWriteFunc *extHeaderCallbacks,
+                          void **headerCBData,
+                          bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
+                          BitOffset maxVarExtBitsPerPos, void *cbState,
+                          Env *env);
+
 /**
  * \brief Load previously written block encoded sequence
  * representation.

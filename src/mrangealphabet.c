@@ -19,9 +19,11 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif /* HAVE_CONFIG_H */
-#ifndef DEBUG
+
+#if !(defined DEBUG) && !(defined NDEBUG)
 #define NDEBUG
-#endif
+#endif /* DEBUG */
+
 #include <assert.h>
 #include <limits.h>
 #ifdef HAVE_STDINT_H

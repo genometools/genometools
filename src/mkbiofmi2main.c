@@ -36,15 +36,18 @@ struct extSuffixeratorOptions
   Suffixeratoroptions so;
   enum seqBaseEncoding encType;
   union bwtSeqParam bwtParam;
-  unsigned locateFreq;
+  unsigned locateInterval;
 };
 
 static void
-initSuffixeratorOptions(Suffixeratoroptions *so, Env *env);
+initSuffixeratorOptions(struct extSuffixeratorOptions *eso, Env *env);
 
-static OPrval parse_options(int *parsed_args,
-                            struct extSuffixeratorOptions *eso,
-                            int argc, const char **argv, Env *env);
+static void
+destructSuffixeratorOptions(struct extSuffixeratorOptions *eso, Env *env);
+
+static OPrval
+parse_options(int *parsed_args, struct extSuffixeratorOptions *eso,
+              int argc, const char **argv, Env *env);
 
 int
 main(int argc, const char *argv[])
@@ -54,11 +57,21 @@ main(int argc, const char *argv[])
   Env *env;
   env = env_new();
   
-  initSuffixeratorOptions(&eso.so, env);
+  initSuffixeratorOptions(&eso, env);
   
-  if(parse_options(&numOptionArgs, &eso, argc, argv, env)
-     != OPTIONPARSER_OK)
-    return EXIT_FAILURE;
+  switch (parse_options(&numOptionArgs, &eso, argc, argv, env))
+  {
+    case OPTIONPARSER_OK:
+      break;
+    case OPTIONPARSER_ERROR:
+      destructSuffixeratorOptions(&eso, env);
+      env_delete(env);
+      return EXIT_FAILURE;
+    case OPTIONPARSER_REQUESTS_EXIT:
+      destructSuffixeratorOptions(&eso, env);
+      env_delete(env);
+      return EXIT_SUCCESS;
+  }
   /* find wether requested sequences have already been generated
    * and try short-cut if so */
   {
@@ -66,21 +79,20 @@ main(int argc, const char *argv[])
     Seqpos length;
     int demand;
     demand = (eso.so.outtistab?SARR_ESQTAB:0)
-      | (eso.so.outtistab?SARR_ESQTAB:0)
       | (eso.so.outlcptab?SARR_LCPTAB:0)
       | SARR_BWTTAB
       | (eso.so.outdestab?SARR_DESTAB:0);
-    if(eso.locateFreq || eso.so.outsuftab)
+    if(eso.locateInterval || eso.so.outsuftab)
       demand |= SARR_SUFTAB;
-    if(streamsuffixarray(&suffixArray, &length,
-                         demand, eso.so.str_indexname,
-                         NULL, env))
+    if(!streamsuffixarray(&suffixArray, &length,
+                          demand, eso.so.str_indexname,
+                          NULL, env))
     {
       BWTSeq *bwtSeq;
       ++length;
       bwtSeq =
-        newBWTSeqFromSA(BWT_ON_BLOCK_ENC, &eso.bwtParam, &suffixArray, length,
-                        eso.so.str_indexname, env);
+        newBWTSeqFromSA(BWT_ON_BLOCK_ENC, eso.locateInterval, &eso.bwtParam,
+                        &suffixArray, length, eso.so.str_indexname, env);
       freesuffixarray(&suffixArray, env);
       if(!bwtSeq)
       {
@@ -92,29 +104,42 @@ main(int argc, const char *argv[])
       return EXIT_SUCCESS;
     }
   }
-  
-  
+
+  destructSuffixeratorOptions(&eso, env);
+  env_delete(env);
   return EXIT_SUCCESS;
 }
 
 static void
-initSuffixeratorOptions(Suffixeratoroptions *so, Env *env)
+initSuffixeratorOptions(struct extSuffixeratorOptions *eso, Env *env)
 {
-  so->isdna = false;
-  so->isprotein = false;
-  so->str_indexname = str_new(env);
-  so->filenametab = strarray_new(env);
-  so->str_smap = str_new(env);
-  so->str_sat = str_new(env);
-  so->prefixlength = PREFIXLENGTH_AUTOMATIC;
+  eso->so.isdna = false;
+  eso->so.isprotein = false;
+  eso->so.str_indexname = str_new(env);
+  eso->so.filenametab = strarray_new(env);
+  eso->so.str_smap = str_new(env);
+  eso->so.str_sat = str_new(env);
+  eso->so.prefixlength = PREFIXLENGTH_AUTOMATIC;
+  eso->bwtParam.blockEncParams.blockSize = 8;
+  eso->bwtParam.blockEncParams.bucketBlocks = 16;
+  eso->locateInterval = 0;
 }
 
+static void
+destructSuffixeratorOptions(struct extSuffixeratorOptions *eso, Env *env)
+{
+  str_delete(eso->so.str_indexname, env);
+  strarray_delete(eso->so.filenametab, env);
+  str_delete(eso->so.str_smap, env);
+  str_delete(eso->so.str_sat, env);
+}
 
-static void mkbiofmi2versionfunc(const char *progname);
+static void
+mkbiofmi2versionfunc(const char *progname);
 
-static OPrval parse_options(int *parsed_args,
-                            struct extSuffixeratorOptions *eso,
-                            int argc, const char **argv, Env *env)
+static OPrval
+parse_options(int *parsed_args, struct extSuffixeratorOptions *eso,
+              int argc, const char **argv, Env *env)
 {
   OptionParser *op;
   Option *option,
@@ -130,7 +155,7 @@ static OPrval parse_options(int *parsed_args,
   Str *dirarg = str_new(env),
     *argIdxType = str_new(env);
   Suffixeratoroptions *so = &eso->so;
-  const char *cIdxChoices[] =
+  static const char *cIdxChoices[] =
     {
       "blockwise",   /* build a block-compressed index representation */
       NULL
@@ -254,12 +279,12 @@ static OPrval parse_options(int *parsed_args,
     optionLocateFreq = option_new_uint(
       "locate-freq",
       "store locate information for every nth entry of the suffix array",
-      &eso->locateFreq, 0, env);
+      &eso->locateInterval, 0, env);
     option_parser_add_option(op, optionLocateFreq, env);
     
-    option_imply(optionBlockSize, optionCompRep, env);
-    option_imply(optionBucketBlocks, optionCompRep, env);
-    option_imply(optionLocateFreq, optionCompRep, env);
+/*     option_imply(optionBlockSize, optionCompRep, env); */
+/*     option_imply(optionBucketBlocks, optionCompRep, env); */
+/*     option_imply(optionLocateFreq, optionCompRep, env); */
   }
 
   option_exclude(optionsmap, optiondna, env);
@@ -337,7 +362,8 @@ static OPrval parse_options(int *parsed_args,
       so->readmode = (Readmode) retval;
     }
   }
-  str_delete(dirarg,env);
+  str_delete(argIdxType, env);
+  str_delete(dirarg, env);
   return oprval;
 }
 
