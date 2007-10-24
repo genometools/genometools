@@ -97,14 +97,32 @@ main(int argc, const char *argv[])
       if(!bwtSeq)
       {
         fputs("Index creation failed.\n", stderr);
+        destructSuffixeratorOptions(&eso, env);
         env_delete(env);
         return EXIT_FAILURE;
       }
       deleteBWTSeq(bwtSeq, env);
+      destructSuffixeratorOptions(&eso, env);
+      env_delete(env);
       return EXIT_SUCCESS;
     }
+    env_error_unset(env);
   }
-
+  /* this is in fact the else case corresponding to failed suffixarray
+   * construction, thus we need to create the suffix array on the
+   * fly */
+  {
+    sfxInterface *si;
+    if(!(si = newSfxInterface(&eso.so, env)))
+    {
+      fputs("Index creation failed.\n", stderr);
+      destructSuffixeratorOptions(&eso, env);
+      env_delete(env);
+      return EXIT_FAILURE;      
+    }
+    
+    deleteSfxInterface(si, env);
+  }
   destructSuffixeratorOptions(&eso, env);
   env_delete(env);
   return EXIT_SUCCESS;

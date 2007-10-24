@@ -66,6 +66,7 @@ struct sfxInterface
   Filelengthvalues *filelengthtab;
   Sfxiterator *sfi;
   Alphabet *alpha;
+  Measuretime *mtime;
   Seqpos length;
   unsigned long numofsequences;
   Specialcharinfo specialcharinfo;
@@ -222,9 +223,13 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
 
   env_error_check(env);
 
-  iface = env_ma_calloc(env, 1, sizeof(iface));
+  iface = env_ma_calloc(env, 1, sizeof(*iface));
 
   memcpy(&iface->so, so, sizeof(*so));
+
+  inittheclock(&iface->mtime,
+               "determining sequence length and number of special symbols",
+               env);
   
   if(!(iface->alpha = assigninputalphabet(so->isdna, so->isprotein,
                                    so->str_smap, so->filenametab, env)))
@@ -242,6 +247,8 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
     newSfxInterfaceWithReadersErrRet();
     
   numofchars = getnumofcharsAlphabet(iface->alpha);
+
+  deliverthetime(stdout, iface->mtime, "computing sequence encoding", env);
 
   if(!(encseq = files2encodedsequence(
          true, so->filenametab, so->isplain,
@@ -335,7 +342,7 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                                    iface->specialcharinfo.specialranges,
                                    encseq, so->readmode,
                                    numofchars, so->prefixlength,
-                                   so->numofparts, NULL, env)))
+                                   so->numofparts, iface->mtime, env)))
     newSfxInterfaceWithReadersErrRet();
   {
     size_t i;
@@ -347,7 +354,7 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
   iface->allRequests = SFX_REQUEST_NONE;
   iface->lastGeneratedSufTabSegment
     = nextSfxiterator(&iface->lastGeneratedLen, &iface->specialsuffixes,
-                      NULL, iface->sfi, env);
+                      iface->mtime, iface->sfi, env);
   iface->lastGeneratedStart = 0;
   return iface;
 }
@@ -386,7 +393,7 @@ deleteSfxInterface(sfxInterface *iface, Env *env)
   env_ma_free(iface->filelengthtab, env);
   if(iface->alpha)
     freeAlphabet(&iface->alpha, env);
-
+  deliverthetime(stdout, iface->mtime, NULL, env);
   freeEncodedsequence(&iface->outfileinfo.encseq, env);
   return !had_err;
 }
@@ -789,7 +796,7 @@ sfxIReadAdvance(sfxInterface *iface,
     /* 4. read next region of sequence by calling nextSfxIterator */
     if((iface->lastGeneratedSufTabSegment = 
         nextSfxiterator(&iface->lastGeneratedLen, &iface->specialsuffixes,
-                        NULL, iface->sfi, env)))
+                        iface->mtime, iface->sfi, env)))
       lengthOfExtension += iface->lastGeneratedLen;
     if(iface->lastGeneratedSufTabSegment == NULL
        || suftab2file(&iface->outfileinfo, iface->lastGeneratedSufTabSegment,
