@@ -54,8 +54,8 @@ Test do
   run "diff #{$last_stdout} #{$testdata}foobar.fas"
 end
 
-Name "gt extractseq test foo|"
+Name "gt extractseq test '(foo'"
 Keywords "gt_extractseq"
 Test do
-  run_test("#{$bin}gt extractseq -match 'foo|' #{$testdata}foo.fas", :retval => 1)
+  run_test("#{$bin}gt extractseq -match '(foo' #{$testdata}foo.fas", :retval => 1)
 end
