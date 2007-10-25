@@ -44,7 +44,6 @@ ARGF.each do |line|
     else
       sequences[tName] = Sequence.new(tStart.to_i, tEnd.to_i)
     end
-    #STDERR.puts misMatches
     gene = Gene.new(Range.new(tStart.to_i + 1, tEnd.to_i + 1), strand[0..0].to_s)
     exon_start_pos = tStarts.split(',')
     exon_sizes = blockSizes.split(',')

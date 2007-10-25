@@ -23,9 +23,6 @@ if ARGV.size == 0
   raise "Usage: #{$0} contig_file [file ...]"
 end
 
-#contig_file = ARGV[0]
-#ARGV.delete_at(0)
-
 class Scanner
   def initialize(input)
     @input = input
@@ -153,9 +150,7 @@ end
 def compute_coordinate_mapping(filename)
   mapping = {}
   File.open(filename).each do |line|
-    #puts line
     if line =~ /^(\S+)\s+(\d+)/ then
-      #puts $1, $2
       mapping[$1] = $2.to_i
     end
   end
