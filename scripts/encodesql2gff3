@@ -6,7 +6,7 @@ require 'gff3'
 # read input
 sequences = {}
 ARGF.each do |line|
-  name, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, exonCount, exonStarts, 
+  name, chrom, strand, txStart, txEnd, cdsStart, cdsEnd, exonCount, exonStarts,
   exonEnds, id, name2, cdsStartStat, cdsEndStat, exonFrames  = line.split
   if sequences[chrom] then
      sequences[chrom].update_range(txStart.to_i+1, txEnd.to_i)

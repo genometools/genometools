@@ -24,7 +24,7 @@ class Sequence
     @start_pos = start_pos if start_pos < @start_pos
     @end_pos = end_pos if end_pos > @end_pos
   end
-  def add_gene(gene) 
+  def add_gene(gene)
     @genes.push(gene)
   end
   attr_accessor :start_pos, :end_pos
@@ -43,7 +43,7 @@ def gff3_output(sequences, source)
       if gene.name then
         print ";Name=#{gene.name}"
       end
-      if gene.attributes then 
+      if gene.attributes then
         gene.attributes.each do |attr_name, attr_value|
           print ";#{attr_name}=#{attr_value}"
         end
@@ -55,7 +55,7 @@ def gff3_output(sequences, source)
              ".	#{gene.strand}	.	Parent=gene#{gene_number}"
         if (gene.cds_pos) then
           max_start = gene.cds_pos.begin > exon.begin ? gene.cds_pos.begin \
-                                                      : exon.begin 
+                                                      : exon.begin
           min_end = gene.cds_pos.end < exon.end ? gene.cds_pos.end : exon.end
           if (gene.cds_pos.begin <= exon.end and gene.cds_pos.end >= exon.begin)
           then

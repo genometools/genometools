@@ -18,7 +18,7 @@ class Scanner
   def peek
     if @line_buf then
       return @line_buf
-    end 
+    end
     @line_buf = @input.gets
   end
   def gets
@@ -59,7 +59,7 @@ class GMAPParser
     if line =~ /^Paths/ then
       # XXX: change parser to handle multiple paths
       if line =~ /^Paths \(1\):/ then
-        while line = scanner.gets do   
+        while line = scanner.gets do
           if line =~ /Genomic pos:/ then
             if line =~ /^.*\(([+-])/ then
               @current_strand = $1
@@ -81,7 +81,7 @@ class GMAPParser
     else
       raise "expecting 'Paths' on line #{scanner.lineno} of file \
              #{scanner.filename}"
-    end 
+    end
   end
   def parse_alignment(scanner)
     while line = scanner.gets do
