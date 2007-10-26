@@ -442,13 +442,17 @@ src/libgtcore/checkbitpackstring-int.c: src/libgtcore/checkbitpackstring.templat
 	@echo '[rebuild $@]'
 	@scripts/template2c.pl '-int' $^
 
-obj/%.o: %.c
-	@echo "[compile $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) -c $< -o $@ $(EXP_CPPFLAGS) $(GT_CPPFLAGS) $(EXP_CFLAGS) \
-	  $(GT_CFLAGS)
-	@$(CC) -c $< -o $(@:.o=.d) $(EXP_CPPFLAGS) $(GT_CPPFLAGS) -MM -MP \
-	  -MT $@
+define COMPILE_template
+$(1): $(2)
+	@echo "[compile $$(@F)]"
+	@test -d $$(@D) || mkdir -p $$(@D)
+	@$$(CC) -c $$< -o $$@ $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) $$(EXP_CFLAGS) \
+	  $$(GT_CFLAGS) $(3)
+	@$$(CC) -c $$< -o $$(@:.o=.d) $$(EXP_CPPFLAGS) $$(GT_CPPFLAGS) $$(3) -MM -MP \
+	  -MT $$@
+endef
+
+$(eval $(call COMPILE_template, obj/%.o, %.c))
 
 obj/%.o: %.cxx
 	@echo "[compile $@]"
