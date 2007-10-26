@@ -12,11 +12,18 @@ Test do
   grep $last_stderr, "unknown option"
 end
 
-Name "gt chseqids empty_file"
+Name "gt chseqids empty mapping file"
 Keywords "gt_chseqids"
 Test do
   run_test("#{$bin}gt chseqids #{$testdata}empty_file", :retval => 1)
   grep $last_stderr, "not defined"
+end
+
+Name "gt chseqids empty gff3 file"
+Keywords "gt_chseqids"
+Test do
+  run_test "#{$bin}gt chseqids #{$testdata}gt_chseqids_test_1.chseqids #{$testdata}empty_file"
+  run "diff #{$last_stdout} #{$testdata}empty_file"
 end
 
 Name "gt chseqids corrupt.gff3"
