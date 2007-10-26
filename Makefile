@@ -363,20 +363,27 @@ ifdef RANLIB
 	@$(RANLIB) $@
 endif
 
-bin/skproto: $(SKPROTO_OBJ) lib/libgtcore.a\
-             $(OVERRIDELIBS)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(filter-out $(OVERRIDELIBS),$^) \
-	  $(filter-out $(patsubst lib%.a,-l%,$(notdir $(OVERRIDELIBS))),\
-	  $(EXP_LDLIBS)) $(OVERRIDELIBS) -o $@
+define PROGRAM_template
+$(1): $(2)
+	@echo "[link $$(@F)]"
+	@test -d $$(@D) || mkdir -p $$(@D)
+	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
+	  $$(filter-out $$(patsubst lib%.a,-l%,$$(notdir $$(OVERRIDELIBS))),\
+	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) -o $$@
 
-bin/gt: $(GTMAIN_OBJ) $(TOOLS_OBJ) $(GTLIBS) $(OVERRIDELIBS)
-	@echo "[link $(@F)]"
-	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $(filter-out $(OVERRIDELIBS),$^) \
-	  $(filter-out $(patsubst lib%.a,-l%,$(notdir $(OVERRIDELIBS))),\
-	  $(EXP_LDLIBS)) $(OVERRIDELIBS) -o $@
+$(1)_static: $(2)
+	@echo "[link $$(@F)]"
+	@test -d $$(@D) || mkdir -p $$(@D)
+	@$$(CC) $$(EXP_LDFLAGS) $$(GT_LDFLAGS) $$(filter-out $$(OVERRIDELIBS),$$^) \
+	  $$(filter-out $$(patsubst lib%.a,-l%,$$(notdir $$(OVERRIDELIBS))),\
+	  $$(EXP_LDLIBS)) $$(OVERRIDELIBS) -static -o $$@
+endef
+
+$(eval $(call PROGRAM_template, bin/skproto, $(SKPROTO_OBJ) lib/libgtcore.a \
+                                             $(OVERRIDELIBS)))
+
+$(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) $(GTLIBS) \
+                                        $(OVERRIDELIBS)))
 
 bin/lua: $(LUAMAIN_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"
