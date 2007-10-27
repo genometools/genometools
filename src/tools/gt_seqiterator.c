@@ -24,6 +24,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xposix.h"
 #include "libgtcore/progressbar.h"
+#include "libgtmatch/format64.h"
 
 static OPrval parse_options(bool *verbose,int *parsed_args,
                             int argc, const char **argv,Env *env)
@@ -73,7 +74,8 @@ int gt_seqiterator(int argc, const char **argv, Env *env)
   }
 
   totalsize = files_estimate_total_size(files);
-  printf("# estimated total size is %llu\n",(unsigned long long) totalsize);
+  printf("# estimated total size is " Formatuint64_t "\n",
+            PRINTuint64_tcast(totalsize));
   seqit = seqiterator_new(files, NULL, true, env);
   if (verbose)
   {
