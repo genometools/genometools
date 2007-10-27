@@ -396,6 +396,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
                                 &filelengthtab,
                                 getsymbolmapAlphabet(alpha),
                                 so->isplain,
+                                so->outdestab,
                                 characterdistribution,
                                 env) != 0)
     {

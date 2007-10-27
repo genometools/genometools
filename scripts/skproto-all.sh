@@ -26,6 +26,6 @@ do
      test ${filename} -nt ${prfile}
   then
     echo "create ${prfile}"
-    bin/skproto ${filename} > ${prfile}
+    env unset GT_ENV_OPTIONS bin/skproto ${filename} > ${prfile}
   fi
 done
