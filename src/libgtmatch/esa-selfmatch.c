@@ -134,6 +134,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                                      query,
                                      querylen,
                                      getmapsizeAlphabet(alpha),
+                                     verboseinfo,
                                      env);
   ssi.minlength = minlength;
   ssi.processmaxmatch = processmaxmatch;

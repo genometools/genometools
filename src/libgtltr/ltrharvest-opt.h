@@ -59,7 +59,7 @@ typedef struct
   unsigned long minlengthTSD,  /* minlength of TSD, default */
                 maxlengthTSD;  /* maxlength of TSD, default */
                                /* by default no search for TSDs */
-  unsigned int vicinityforcorrectboundaries; /* vicinity for search of TSD */
+  Seqpos vicinityforcorrectboundaries; /* vicinity for search of TSD */
 					     /* and motif */
 } LTRharvestoptions;
 
@@ -71,6 +71,6 @@ int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Env *env);
 
 int ltrharvestoptions(LTRharvestoptions *lo, int argc,
                         const char **argv, Env *env);
-int wrapltrharvestoptions(LTRharvestoptions *lo,Env *env);
+void wrapltrharvestoptions(LTRharvestoptions *lo,Env *env);
 
 #endif

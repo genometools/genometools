@@ -26,9 +26,8 @@
  */
 void removeduplicates(ArrayLTRboundaries *arrayLTRboundaries)
 {
-  unsigned int i, j;
-  unsigned int startpos_i, endpos_i,
-               startpos_j, endpos_j;
+  unsigned long i, j;
+  Seqpos startpos_i, endpos_i, startpos_j, endpos_j;
   LTRboundaries *boundaries_i,
 		*boundaries_j;
 
@@ -69,9 +68,8 @@ void removeoverlapswithlowersimilarity(
   bool nooverlapallowed
   )
 {
-  unsigned int i, j;
-  unsigned int startpos_i, endpos_i,
-       startpos_j, endpos_j;
+  unsigned long i, j;
+  Seqpos startpos_i, endpos_i, startpos_j, endpos_j;
   LTRboundaries *boundaries_i,
 		*boundaries_j;
 

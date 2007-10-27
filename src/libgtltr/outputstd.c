@@ -40,22 +40,22 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 {
   LTRboundaries *boundaries;
   unsigned long h,
-                i;
-  unsigned int contignumber;
+                i,
+                contignumber;
   Seqpos offset;
   unsigned long numofdbsequences =
      numofdbsequencesSequentialsuffixarrayreader(ssar);
   const Uchar *characters;
   const Encodedsequence *encseq =
      encseqSequentialsuffixarrayreader(ssar);
+  Seqpos *markpos = NULL;
 
   /* in order to get to visible dna characters */
   characters = getcharactersAlphabet(
                  alphabetSequentialsuffixarrayreader(ssar));
-  Seqpos *markpos = NULL;
 
   /* calculate markpos array for sequence offset */
-  if ( numofdbsequences > 1)
+  if ( numofdbsequences > 1UL)
   {
     markpos = encseq2markpositions(
 	encseqSequentialsuffixarrayreader(ssar),
@@ -116,13 +116,14 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
       printf("# seq-nr = sequence number\n");
 
       /* print output sorted by contignumber*/
+      assert(markpos != NULL);
       for (h = 0; h < numofdbsequences; h++)
       {
 	for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
 	{
 	  boundaries = &(lo->arrayLTRboundaries.spaceLTRboundaries[i]);
 	  contignumber = boundaries->contignumber;
-	  if ( (!boundaries->skipped) && (unsigned long)contignumber == h)
+	  if ( (!boundaries->skipped) && contignumber == h)
 	  {
 	    if ( contignumber == 0)
 	    {
@@ -152,7 +153,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 	      for (j = 0; j < boundaries->lenleftTSD; j++)
 	      {
 		printf("%c",
-		 characters[getencodedchar(encseq,
+		 (int) characters[getencodedchar(encseq,
 		    boundaries->leftLTR_5 - boundaries->lenleftTSD + j,
 		    Forwardmode)]);
 	      }
@@ -162,16 +163,16 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 	    if (lo->motif.allowedmismatches < (unsigned int)4)
 	    {
 	      printf("%c%c..%c%c  ",
-		  characters[getencodedchar(encseq,
+		  (int) characters[getencodedchar(encseq,
                                  boundaries->leftLTR_5,
 				 Forwardmode)],
-		  characters[getencodedchar(encseq,
+		  (int) characters[getencodedchar(encseq,
                                  boundaries->leftLTR_5+(Seqpos)1,
 				 Forwardmode)],
-		  characters[getencodedchar(encseq,
+		  (int) characters[getencodedchar(encseq,
                                  boundaries->leftLTR_3-(Seqpos)1,
 				 Forwardmode)],
-		  characters[getencodedchar(encseq,
+		  (int) characters[getencodedchar(encseq,
                                  boundaries->leftLTR_3,
 				 Forwardmode)] );
 	    }
@@ -189,7 +190,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 
 	      for (j = 0; j < boundaries->lenrightTSD; j++)
 	      {
-		printf("%c", characters[getencodedchar(encseq,
+		printf("%c", (int) characters[getencodedchar(encseq,
 		    boundaries->rightLTR_3 + j + 1,
 		    Forwardmode)]);
 	      }
@@ -199,23 +200,23 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 	    if (lo->motif.allowedmismatches < (unsigned int)4)
 	    {
 	      printf("%c%c..%c%c",
-		  characters[getencodedchar(encseq,
+		  (int) characters[getencodedchar(encseq,
                                  boundaries->rightLTR_5,
 				 Forwardmode)],
-		  characters[getencodedchar(encseq,
+		  (int) characters[getencodedchar(encseq,
 			         boundaries->rightLTR_5+(Seqpos)1,
 				 Forwardmode)],
-		  characters[getencodedchar(encseq,
+		  (int) characters[getencodedchar(encseq,
 			         boundaries->rightLTR_3-(Seqpos)1,
 				 Forwardmode)],
-		  characters[getencodedchar(encseq,
+		  (int) characters[getencodedchar(encseq,
 			         boundaries->rightLTR_3,
 				 Forwardmode)] );
 	    }
 	    /* print similarity */
 	    printf("  %.2f", boundaries->similarity);
 	    /* print sequence number */
-	    printf("  %u\n", contignumber);
+	    printf("  %lu\n", contignumber);
 	  }
 	}
       }
@@ -245,6 +246,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
       printf("# seq-nr = sequence number\n");
 
       /* print output sorted by contignumber*/
+      assert(markpos != NULL);
       for (h = 0; h < numofdbsequences; h++)
       {
 	for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
@@ -287,14 +289,14 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 	    /* print similarity */
 	    printf("%.2f  ", boundaries->similarity);
 	    /* print sequence number */
-	    printf("%u\n", contignumber);
+	    printf("%lu\n", contignumber);
 	  }
 	}
       }
     }
   }
 
-  if ( numofdbsequences > 1)
+  if ( numofdbsequences > 1UL)
   {
     FREESPACE(markpos);
   }

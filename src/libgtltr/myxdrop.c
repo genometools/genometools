@@ -23,7 +23,7 @@
 #include "myxdrop.h"
 
 #define MINUSINFINITYINT ((int)integermin)
-#define ACCESSTOFRONT(D,K) ((unsigned int) (D) * (D) + (D) + (K))
+#define ACCESSTOFRONT(D,K) ((unsigned long) (D) * (D) + (D) + (K))
 
 /*
  The following function shows the matrix of the calculated fronts.
@@ -39,7 +39,7 @@ int showmatrix ( ArrayMyfrontvalue * fronts,
   int vlen)
 {
   int i, j, k, d = distance + 1, filled = 0;
-  unsigned int l;
+  unsigned long l;
   int integermax, integermin;
 
   integermax = MAX (ulen, vlen), integermin = -integermax;
@@ -210,18 +210,18 @@ void calculateallowedMININFINITYINTgenerations(
  */
 #define COMPARESYMBOLSSEP(I,J)\
         USEQ(a,I);\
-        if (a == (unsigned char) SEPARATOR)\
+        if (a == (Uchar) SEPARATOR)\
         {\
           ulen = I;\
           break;\
         }\
         VSEQ(b,J);\
-        if (b == (unsigned char) SEPARATOR)\
+        if (b == (Uchar) SEPARATOR)\
         {\
           vlen = J;\
           break;\
         }\
-        if (a != b || a == (unsigned char) WILDCARD)\
+        if (a != b || a == (Uchar) WILDCARD)\
         {\
           break;\
         }

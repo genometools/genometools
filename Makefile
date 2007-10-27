@@ -571,6 +571,7 @@ splint:
 
 sgt:${addprefix obj/,${notdir ${subst .c,.splint,\
                      ${wildcard ${CURDIR}/src/libgtmatch/*.c}\
+                     ${wildcard ${CURDIR}/src/libgtltr/*.c}\
                                 ${SKTOOLS}}}}
 
 splintclean:
@@ -582,6 +583,11 @@ obj/%.splint: ${CURDIR}/src/libgtmatch/%.c
 	@touch $@
 
 obj/%.splint: ${CURDIR}/src/tools/%.c
+	@echo "splint $<"
+	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
+	@touch $@
+
+obj/%.splint: ${CURDIR}/src/libgtltr/%.c
 	@echo "splint $<"
 	@splint -DBIGSEQPOS -Isrc -f $(CURDIR)/testdata/SKsplintoptions $<
 	@touch $@

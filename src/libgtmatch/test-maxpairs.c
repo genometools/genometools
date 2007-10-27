@@ -252,6 +252,7 @@ int testmaxpairs(const Str *indexname,
     printf("# run query match for dblen=" FormatSeqpos ",querylen= "
            FormatSeqpos ", minlength=%u\n",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
+    /* XXX */
     tabmaxquerymatches = array_new(sizeof (Substringmatch),env);
     if (sarrquerysubstringmatch(dbseq,
                                 dblen,
@@ -261,6 +262,7 @@ int testmaxpairs(const Str *indexname,
                                 suffixarray.alpha,
                                 storemaxmatchquery,
                                 tabmaxquerymatches,
+                                verboseinfo,
                                 env) != 0)
     {
       haserr = true;
@@ -269,6 +271,7 @@ int testmaxpairs(const Str *indexname,
     printf("# run self match for dblen=" FormatSeqpos ",querylen= "
            FormatSeqpos ", minlength=%u\n",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
+    /* XXX */
     maxmatchselfinfo.results = array_new(sizeof (Substringmatch),env);
     maxmatchselfinfo.dblen = dblen;
     maxmatchselfinfo.querylen = (unsigned long) querylen;
