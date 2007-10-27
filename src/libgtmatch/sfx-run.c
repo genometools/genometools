@@ -306,7 +306,8 @@ static void showcharacterdistribution(
   }
 }
 
-static int runsuffixerator(Suffixeratoroptions *so,Env *env)
+static int runsuffixerator(Suffixeratoroptions *so,Verboseinfo *verboseinfo,
+                           Env *env)
 {
   unsigned int numofchars = 0;
   unsigned long numofsequences;
@@ -374,6 +375,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
                                    str_length(so->str_sat) > 0
                                          ? str_get(so->str_sat)
                                          : NULL,
+                                   verboseinfo,
                                    env);
     if (encseq == NULL)
     {
@@ -535,10 +537,12 @@ int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
   }
   if (retval == 0)
   {
-    if (runsuffixerator(&so,env) < 0)
+    Verboseinfo *verboseinfo = newverboseinfo(false,env);
+    if (runsuffixerator(&so,verboseinfo,env) < 0)
     {
       haserr = true;
     }
+    freeverboseinfo(&verboseinfo,env);
   } else
   {
     if (retval < 0)

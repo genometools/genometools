@@ -1387,6 +1387,7 @@ static Encodedsequence *determineencseqkeyvalues(
                                      Seqpos specialcharacters,
                                      Seqpos specialranges,
                                      unsigned int mapsize,
+                                     Verboseinfo *verboseinfo,
                                      Env *env)
 {
   double spaceinbitsperchar;
@@ -1421,11 +1422,9 @@ static Encodedsequence *determineencseqkeyvalues(
   spaceinbitsperchar
     = (double) ((uint64_t) CHAR_BIT * (uint64_t) encseq->sizeofrep)/
       (double) totallength;
-  /* XXX integrate later
-  printf("# init character encoding (%s,%lu"
-         " bytes,%.2f bits/symbol)\n",
-          encseq->name,encseq->sizeofrep,spaceinbitsperchar);
-  */
+  showverbose(verboseinfo,
+              "# init character encoding (%s,%lu bytes,%.2f bits/symbol)\n",
+              encseq->name,encseq->sizeofrep,spaceinbitsperchar);
   return encseq;
 }
 
@@ -1594,6 +1593,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                                         *specialcharinfo,
                                                   const Alphabet *alphabet,
                                                   const char *str_sat,
+                                                  Verboseinfo *verboseinfo,
                                                   Env *env)
 {
   Encodedsequence *encseq;
@@ -1621,11 +1621,10 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                       specialcharinfo->specialcharacters,
                                       specialcharinfo->specialranges,
                                       getmapsizeAlphabet(alphabet),
+                                      verboseinfo,
                                       env);
     ALLASSIGNAPPENDFUNC;
-    /*
-    printf("# deliverchar=%s\n",encseq->delivercharname); XXX insert later
-    */
+    showverbose(verboseinfo,"# deliverchar=%s\n",encseq->delivercharname);
     encseq->mappedptr = NULL;
     assert(filenametab != NULL);
     fb = fastabuffer_new(filenametab,
@@ -1682,6 +1681,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                       specialcharinfo->specialcharacters,
                                       specialcharinfo->specialranges,
                                       mapsize,
+                                      verboseinfo,
                                       env);
     ALLASSIGNAPPENDFUNC;
     showverbose(verboseinfo,"# deliverchar=%s\n",
@@ -1708,6 +1708,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        const Uchar *seq2,
                                        unsigned long len2,
                                        unsigned int mapsize,
+                                       Verboseinfo *verboseinfo,
                                        Env *env)
 {
   Encodedsequence *encseq;
@@ -1736,6 +1737,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                     specialcharinfo->specialcharacters,
                                     specialcharinfo->specialranges,
                                     mapsize,
+                                    verboseinfo,
                                     env);
   encseq->plainseq = seqptr;
   encseq->plainseqptr = (seq2 == NULL) ? true : false;

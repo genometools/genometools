@@ -22,6 +22,8 @@ for filename in `ls ${SKTOOLS} src/libgtmatch/*.c`
 do
   headfile="obj/src/libgtmatch/`basename ${filename} .c`"
   rm -f ${headfile}.o ${headfile}.d ${headfile}.splint
+  headfile="obj/src/libgtltr/`basename ${filename} .c`"
+  rm -f ${headfile}.o ${headfile}.d ${headfile}.splint
 done
 
 rm -rf indexdir
@@ -29,4 +31,4 @@ rm -f lib/libgtmatch.a
 rm -f testsuite/TMP.[a-zA-Z0-9]*
 rm -f testsuite/result.mp testsuite/result.vm
 rm -f testsuite/sfxidx.esq
-rm -f LocalMakeflags LocalMakeflags.previous
+rm -f LocalMakefile LocalMakefile.previous

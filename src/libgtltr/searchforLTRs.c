@@ -42,12 +42,12 @@ static int checklengthanddistanceconstraints(
     Env *env
     )
 {
+  Seqpos ulen, vlen, dist_between_LTRs;
+
   env_error_check(env);
-
-  Seqpos ulen = boundaries->leftLTR_3  - boundaries->leftLTR_5  + 1,
-       vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1,
-       dist_between_LTRs = boundaries->rightLTR_5 - boundaries->leftLTR_5;
-
+  ulen = boundaries->leftLTR_3  - boundaries->leftLTR_5  + 1;
+  vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1;
+  dist_between_LTRs = boundaries->rightLTR_5 - boundaries->leftLTR_5;
   if (ulen > (Seqpos)repeatinfo->lmax || vlen > (Seqpos)repeatinfo->lmax ||
      ulen < (Seqpos)repeatinfo->lmin || vlen < (Seqpos)repeatinfo->lmin ||
      dist_between_LTRs > (Seqpos)repeatinfo->dmax ||
@@ -74,7 +74,7 @@ void adjustboundariesfromXdropextension(
     Seqpos seed1_endpos,
     Seqpos seed2_endpos,
     LTRboundaries *boundaries,
-    Seqpos offset,
+    /*@unused@*/ Seqpos offset,
     Env *env
     )
 {
@@ -133,7 +133,7 @@ int searchforLTRs (
   )
 {
 
-  unsigned int repeatcounter;
+  unsigned long repeatcounter;
   ArrayMyfrontvalue fronts;
   Myxdropbest xdropbest_left;
   Myxdropbest xdropbest_right;

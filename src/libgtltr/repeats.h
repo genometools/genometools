@@ -25,15 +25,13 @@
 void showrepeats (RepeatInfo * repeatinfo,
                   unsigned long seedminlength);
 
-int simpleexactselfmatchoutput(/*@unused@*/ void *info,
-    Seqpos len, Seqpos pos1, Seqpos pos2);
-
 int simpleexactselfmatchstore(LTRharvestoptions *lo, Seqpos len,
                               Seqpos pos1, Seqpos pos2);
 
-int subsimpleexactselfmatchstore(SubRepeatInfo *info, unsigned long len,
-  Seqpos dbstart, unsigned long querystart);
+int subsimpleexactselfmatchstore(void *info,unsigned long len,
+                                 Seqpos dbstart,
+                                 /*@unused@*/ uint64_t queryoffset,
+                                 unsigned long querystart,
+                                 /*@unused@*/ Env *env);
 
-int subshowrepeats (SubRepeatInfo *info, unsigned long len, Seqpos dbstart,
-                    unsigned long querystart);
 #endif

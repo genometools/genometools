@@ -26,7 +26,6 @@
 #include "libgtmatch/esa-seqread.h"
 #include "libgtmatch/esa-maxpairs.pr"
 #include "libgtmatch/intcode-def.h"
-#include "libgtmatch/sfx-mappedstr.pr"
 #include "libgtmatch/pos2seqnum.pr"
 
 #include "ltrharvest-opt.h"
@@ -49,7 +48,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   ssar = newSequentialsuffixarrayreaderfromfile(lo->str_indexname,
 		                  SARR_LCPTAB | SARR_SUFTAB |
 				  SARR_ESQTAB | SARR_DESTAB,
-				  false,
+                                  SEQ_mappedboth,
 				  env);
   if (ssar == NULL)
   {
@@ -72,7 +71,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 
   numofdbsequences = numofdbsequencesSequentialsuffixarrayreader(ssar);
   /* calculate markpos array for sequences offset */
-  if (!had_err && numofdbsequences > 1)
+  if (!had_err && numofdbsequences > 1UL)
   {
     markpos = encseq2markpositions(
 	encseqSequentialsuffixarrayreader(ssar),
@@ -135,7 +134,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
     if (showpredictionsmultiplefasta(lo,
           markpos,
 	  false,
-	  60,
+	  60U,
 	  ssar,
 	  true,
 	  env) != 0)
@@ -150,7 +149,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
     if (showpredictionsmultiplefasta(lo,
           markpos,
 	  true,
-	  60,
+	  60U,
 	  ssar,
 	  true,
 	  env) != 0)
@@ -165,7 +164,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
     printgff3format(lo, ssar, markpos, env);
   }
 
-  if (!had_err && numofdbsequences > 1)
+  if (!had_err && numofdbsequences > 1UL)
   {
     FREESPACE(markpos);
   }
@@ -173,7 +172,10 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   /* print predictions to stdout */
   if (!had_err)
   {
-    showinfoiffoundfullLTRs(lo, ssar, env);
+    if(showinfoiffoundfullLTRs(lo, ssar, env) != 0)
+    {
+      had_err = true;
+    }
   }
 
   /* free prediction array */

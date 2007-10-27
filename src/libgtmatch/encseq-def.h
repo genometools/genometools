@@ -118,6 +118,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
                                                         *specialcharinfo,
                                                   const Alphabet *alphabet,
                                                   const char *str_sat,
+                                                  Verboseinfo *verboseinfo,
                                                   Env *env);
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
@@ -136,6 +137,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        const Uchar *seq2,
                                        unsigned long len2,
                                        unsigned int mapsize,
+                                       Verboseinfo *verboseinfo,
                                        Env *env);
 
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,

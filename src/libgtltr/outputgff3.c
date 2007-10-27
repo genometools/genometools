@@ -69,7 +69,7 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
     for (h = 0; h < numofdbsequences; h++)
     {
       /* contig is first sequence, and only one sequence in multiseq */
-      if ( h == 0 && numofdbsequences == 1)
+      if ( h == 0 && numofdbsequences == 1UL)
       {
 	contiglen = totallength;
       }
@@ -164,7 +164,7 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
 	      idcounterLTR++,
 	      idcounterRetrotrans-1 );
 
-	  if (lo->minlengthTSD > 1)
+	  if (lo->minlengthTSD > 1UL)
 	  {
             /* TSDs */
 	    fprintf(fp, "seq%lu\tLTRharvest\ttarget_site_duplication\t"
@@ -190,7 +190,7 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
 	        idcounterRepregion-1 );
 	  }
 
-	  if (lo->motif.allowedmismatches < 4)
+	  if (lo->motif.allowedmismatches < 4U)
 	  {
 	    fprintf(fp, "seq%lu\tLTRharvest\tinverted_repeat\t"
 	                FormatSeqpos "\t" FormatSeqpos "\t"
