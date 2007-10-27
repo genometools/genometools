@@ -23,6 +23,7 @@
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
 #include "seqpos-def.h"
+#include "spacedef.h"
 #include "safecast-gen.h"
 
 static unsigned long currentrangevalue(unsigned long i,unsigned long distvalue)
@@ -60,6 +61,7 @@ int fasta2sequencekeyvalues(
         Filelengthvalues **filelengthtab,
         const Uchar *symbolmap,
         bool plainformat,
+        bool withdesc,
         unsigned long *characterdistribution,
         Env *env)
 {
@@ -72,6 +74,8 @@ int fasta2sequencekeyvalues(
   DiscDistri *specialrangelengths;
   unsigned long idx;
   bool haserr = false;
+  Queue *descqueue = NULL;
+  char *desc;
 
   env_error_check(env);
   *numofsequences = 0;
@@ -79,11 +83,15 @@ int fasta2sequencekeyvalues(
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
 
+  if (withdesc)
+  {
+    descqueue = queue_new(env);
+  }
   fb = fastabuffer_new(filenametab,
                        symbolmap,
                        plainformat,
                        filelengthtab,
-                       NULL,
+                       descqueue,
                        characterdistribution,
                        env);
   specialrangelengths = discdistri_new(env);
@@ -106,6 +114,11 @@ int fasta2sequencekeyvalues(
     }
     if (ISSPECIAL(charcode))
     {
+      if (withdesc && charcode == (Uchar) SEPARATOR)
+      {
+        desc = queue_get(descqueue,env);
+        FREESPACE(desc);
+      }
       if (specialprefix)
       {
         specialcharinfo->lengthofspecialprefix++;
@@ -138,6 +151,11 @@ int fasta2sequencekeyvalues(
   }
   if (!haserr)
   {
+    if (withdesc)
+    {
+      desc = queue_get(descqueue,env);
+      FREESPACE(desc);
+    }
     specialcharinfo->specialranges = 0;
     discdistri_foreach(specialrangelengths,updatesumranges,
                        &specialcharinfo->specialranges,env);
@@ -147,6 +165,7 @@ int fasta2sequencekeyvalues(
   }
   discdistri_delete(specialrangelengths,env);
   fastabuffer_delete(fb, env);
+  queue_delete_with_contents(descqueue, env);
   return haserr ? -1 : 0;
 }
 

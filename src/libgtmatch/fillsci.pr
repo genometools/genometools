@@ -9,6 +9,7 @@ int fasta2sequencekeyvalues(
         Filelengthvalues **filelengthtab,
         const Uchar *symbolmap,
         bool plainformat,
+        bool withdesc,
         unsigned long *characterdistribution,
         Env *env);
 
