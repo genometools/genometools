@@ -277,56 +277,6 @@ static int suffixeratorwithoutput(
   return haserr ? -1 : 0;
 }
 
-static int outputsequencedescription(const Str *indexname,
-                                     const StrArray *filenametab,
-                                     Env *env)
-{
-  FILE *desfp;
-  bool haserr = false;
-
-  desfp = opensfxfile(indexname,DESTABSUFFIX,"wb",env);
-  if (desfp == NULL)
-  {
-    haserr = true;
-  } else
-  {
-    SeqIterator *seqit;
-    char *desc = NULL;
-    unsigned long seqlen;
-    int retval;
-
-    seqit = seqiterator_new(filenametab,NULL,false,env);
-    while (!haserr)
-    {
-      retval = seqiterator_next(seqit,
-                                NULL,
-                                &seqlen,
-                                &desc,
-                                env);
-      if (retval < 0)
-      {
-        haserr = true;
-        break;
-      }
-      if (retval == 0)
-      {
-        break;
-      }
-      if (fputs(desc,desfp) == EOF)
-      {
-        env_error_set(env,"cannot write description to file %s.%s",
-                          str_get(indexname),DESTABSUFFIX);
-        haserr = true;
-      }
-      (void) putc((int) '\n',desfp);
-      FREESPACE(desc);
-    }
-    env_fa_xfclose(desfp,env);
-    seqiterator_delete(seqit,env);
-  }
-  return haserr ? -1 : 0;
-}
-
 static unsigned long *initcharacterdistribution(const Alphabet *alpha,Env *env)
 {
   unsigned long *characterdistribution;
@@ -389,7 +339,8 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
     {
       characterdistribution = initcharacterdistribution(alpha,env);
     }
-    if (fasta2sequencekeyvalues(&numofsequences,
+    if (fasta2sequencekeyvalues(so->str_indexname,
+                                &numofsequences,
                                 &totallength,
                                 &specialcharinfo,
                                 so->filenametab,
@@ -436,13 +387,6 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
           haserr = true;
         }
       }
-    }
-  }
-  if (!haserr && so->outdestab)
-  {
-    if (outputsequencedescription(so->str_indexname,so->filenametab,env) != 0)
-    {
-      haserr = true;
     }
   }
   initoutfileinfo(&outfileinfo);

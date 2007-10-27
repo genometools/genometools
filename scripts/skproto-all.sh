@@ -18,6 +18,11 @@
 
 localpath=src/libgtmatch
 
+if test "XX${GT_ENV_OPTIONS}" != "XX"
+then
+  unset GT_ENV_OPTIONS
+fi
+
 for filename in `ls ${localpath}/*.c`
 do
   prfile="${localpath}/`basename ${filename} .c`.pr"
@@ -26,6 +31,9 @@ do
      test ${filename} -nt ${prfile}
   then
     echo "create ${prfile}"
-    env unset GT_ENV_OPTIONS bin/skproto ${filename} > ${prfile}
+    bin/skproto ${filename} > ${prfile}
   fi
 done
+rm -f src/libgtmatch/alphabet.pr
+rm -f src/libgtmatch/encodedseq.pr
+rm -f src/libgtmatch/overallseq.pr

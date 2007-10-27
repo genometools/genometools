@@ -22,9 +22,12 @@
 #include "libgtcore/env.h"
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
+#include "esafileend.h"
 #include "seqpos-def.h"
 #include "spacedef.h"
 #include "safecast-gen.h"
+
+#include "opensfxfile.pr"
 
 static unsigned long currentrangevalue(unsigned long i,unsigned long distvalue)
 {
@@ -54,6 +57,7 @@ static void updatesumranges(unsigned long key, unsigned long long value,
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
 
 int fasta2sequencekeyvalues(
+        const Str *indexname,
         unsigned long *numofsequences,
         Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
@@ -61,21 +65,22 @@ int fasta2sequencekeyvalues(
         Filelengthvalues **filelengthtab,
         const Uchar *symbolmap,
         bool plainformat,
-        bool withdesc,
+        bool withdestab,
         unsigned long *characterdistribution,
         Env *env)
 {
-  FastaBuffer *fb;
+  FastaBuffer *fb = NULL;
   Uchar charcode;
   Seqpos pos;
   int retval;
   bool specialprefix = true;
   Seqpos lastspeciallength = 0;
-  DiscDistri *specialrangelengths;
+  DiscDistri *specialrangelengths = NULL;
   unsigned long idx;
   bool haserr = false;
   Queue *descqueue = NULL;
   char *desc;
+  FILE *desfp = NULL;
 
   env_error_check(env);
   *numofsequences = 0;
@@ -83,77 +88,100 @@ int fasta2sequencekeyvalues(
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
 
-  if (withdesc)
+  if (withdestab)
   {
     descqueue = queue_new(env);
-  }
-  fb = fastabuffer_new(filenametab,
-                       symbolmap,
-                       plainformat,
-                       filelengthtab,
-                       descqueue,
-                       characterdistribution,
-                       env);
-  specialrangelengths = discdistri_new(env);
-  for (pos = 0; /* Nothing */; pos++)
-  {
-    retval = fastabuffer_next(fb,&charcode,env);
-    if (retval < 0)
+    desfp = opensfxfile(indexname,DESTABSUFFIX,"wb",env);
+    if (desfp == NULL)
     {
       haserr = true;
-      break;
     }
-    if (retval == 0)
+  }
+  if (!haserr)
+  {
+    fb = fastabuffer_new(filenametab,
+			 symbolmap,
+			 plainformat,
+			 filelengthtab,
+			 descqueue,
+			 characterdistribution,
+			 env);
+    specialrangelengths = discdistri_new(env);
+    for (pos = 0; /* Nothing */; pos++)
     {
-      if (lastspeciallength > 0)
+      retval = fastabuffer_next(fb,&charcode,env);
+      if (retval < 0)
       {
-        idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-        discdistri_add(specialrangelengths,idx,env);
+	haserr = true;
+	break;
       }
-      break;
-    }
-    if (ISSPECIAL(charcode))
-    {
-      if (withdesc && charcode == (Uchar) SEPARATOR)
+      if (retval == 0)
       {
-        desc = queue_get(descqueue,env);
-        FREESPACE(desc);
+	if (lastspeciallength > 0)
+	{
+	  idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+	  discdistri_add(specialrangelengths,idx,env);
+	}
+	break;
       }
-      if (specialprefix)
+      if (ISSPECIAL(charcode))
       {
-        specialcharinfo->lengthofspecialprefix++;
-      }
-      specialcharinfo->specialcharacters++;
-      if (lastspeciallength == 0)
-      {
-        lastspeciallength = (Seqpos) 1;
+	if (desfp != NULL && charcode == (Uchar) SEPARATOR)
+	{
+	  desc = queue_get(descqueue,env);
+	  if (fputs(desc,desfp) == EOF)
+	  {
+	    env_error_set(env,"cannot write description to file %s.%s",
+			      str_get(indexname),DESTABSUFFIX);
+	    haserr = true;
+	    break;
+	  }
+	  (void) putc((int) '\n',desfp);
+	  FREESPACE(desc);
+	}
+	if (specialprefix)
+	{
+	  specialcharinfo->lengthofspecialprefix++;
+	}
+	specialcharinfo->specialcharacters++;
+	if (lastspeciallength == 0)
+	{
+	  lastspeciallength = (Seqpos) 1;
+	} else
+	{
+	  lastspeciallength++;
+	}
+	if (charcode == (Uchar) SEPARATOR)
+	{
+	  (*numofsequences)++;
+	}
       } else
       {
-        lastspeciallength++;
-      }
-      if (charcode == (Uchar) SEPARATOR)
-      {
-        (*numofsequences)++;
-      }
-    } else
-    {
-      if (specialprefix)
-      {
-        specialprefix = false;
-      }
-      if (lastspeciallength > 0)
-      {
-        idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-        discdistri_add(specialrangelengths,idx,env);
-        lastspeciallength = 0;
+	if (specialprefix)
+	{
+	  specialprefix = false;
+	}
+	if (lastspeciallength > 0)
+	{
+	  idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+	  discdistri_add(specialrangelengths,idx,env);
+	  lastspeciallength = 0;
+	}
       }
     }
   }
   if (!haserr)
   {
-    if (withdesc)
+    if (desfp != NULL)
     {
       desc = queue_get(descqueue,env);
+      if (fputs(desc,desfp) == EOF)
+      {
+        env_error_set(env,"cannot write description to file %s.%s",
+                          str_get(indexname),DESTABSUFFIX);
+        haserr = true;
+      }
+      (void) putc((int) '\n',desfp);
       FREESPACE(desc);
     }
     specialcharinfo->specialranges = 0;
@@ -163,6 +191,7 @@ int fasta2sequencekeyvalues(
     (*numofsequences)++;
     *totallength = pos;
   }
+  env_fa_xfclose(desfp,env);
   discdistri_delete(specialrangelengths,env);
   fastabuffer_delete(fb, env);
   queue_delete_with_contents(descqueue, env);

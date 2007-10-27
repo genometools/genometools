@@ -2,6 +2,7 @@
 extern "C" {
 #endif
 int fasta2sequencekeyvalues(
+        const Str *indexname,
         unsigned long *numofsequences,
         Seqpos *totallength,
         Specialcharinfo *specialcharinfo,
@@ -9,7 +10,7 @@ int fasta2sequencekeyvalues(
         Filelengthvalues **filelengthtab,
         const Uchar *symbolmap,
         bool plainformat,
-        bool withdesc,
+        bool withdestab,
         unsigned long *characterdistribution,
         Env *env);
 
