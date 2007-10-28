@@ -58,7 +58,7 @@ static void updatesumranges(unsigned long key, unsigned long long value,
   distvalue = (unsigned long) value; /* XXX: is this cast always OK? */
   (*updatesumrangeinfo->specialrangesptr) += currentrangevalue(key,distvalue);
   showverbose(updatesumrangeinfo->verboseinfo,
-              "# specialranges of length %lu: %lu\n",key,distvalue);
+              "specialranges of length %lu: %lu",key,distvalue);
 }
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)

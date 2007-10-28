@@ -87,7 +87,7 @@ static void removeemptyparts(Suftabparts *suftabparts,
     for (srcpart = 0; srcpart < suftabparts->numofparts; srcpart++)
     {
       assert(suftabparts->components[srcpart].widthofpart > 0);
-      showverbose(verboseinfo,"# widthofpart[%u]=" FormatSeqpos,
+      showverbose(verboseinfo,"widthofpart[%u]=" FormatSeqpos,
                   srcpart,
                   PRINTSeqposcast(suftabparts->components[srcpart].
                                   widthofpart));

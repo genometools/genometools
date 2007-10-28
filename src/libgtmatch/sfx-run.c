@@ -304,7 +304,7 @@ static void showcharacterdistribution(
   assert(characterdistribution != NULL);
   for (idx=0; idx<mapsize-1; idx++)
   {
-    showverbose(verboseinfo,"# occurrences(%c)=%lu\n",
+    showverbose(verboseinfo,"occurrences(%c)=%lu",
                 (int) getprettysymbol(alpha,idx),
                 characterdistribution[idx]);
   }
@@ -410,9 +410,9 @@ static int runsuffixerator(Suffixeratoroptions *so,Verboseinfo *verboseinfo,
   INITOUTFILEPTR(outfileinfo.outfpbwttab,so->outbwttab,BWTTABSUFFIX);
   if (!haserr)
   {
-    showverbose(verboseinfo,"# specialcharacters=" FormatSeqpos "\n",
+    showverbose(verboseinfo,"specialcharacters=" FormatSeqpos,
                 PRINTSeqposcast(specialcharinfo.specialcharacters));
-    showverbose(verboseinfo,"# specialranges=" FormatSeqpos "\n",
+    showverbose(verboseinfo,"specialranges=" FormatSeqpos,
                 PRINTSeqposcast(specialcharinfo.specialranges));
     if (!so->isplain)
     {
@@ -436,7 +436,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Verboseinfo *verboseinfo,
       {
         so->prefixlength = recommendedprefixlength(numofchars,totallength);
         showverbose(verboseinfo,
-                    "# automatically determined prefixlength = %u\n",
+                    "automatically determined prefixlength = %u",
                     so->prefixlength);
       } else
       {
@@ -536,10 +536,10 @@ int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
   {
     Verboseinfo *verboseinfo = newverboseinfo(so.beverbose,env);
 
-    showverbose(verboseinfo,"# sizeof (Seqpos)=%lu\n",
+    showverbose(verboseinfo,"sizeof (Seqpos)=%lu",
                 (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
 #ifdef INLINEDENCSEQ
-    showverbose(verboseinfo,"# inlined encodeded sequence\n");
+    showverbose(verboseinfo,"inlined encodeded sequence");
 #endif
     freeverboseinfo(&verboseinfo,env);
   }
