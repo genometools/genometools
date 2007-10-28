@@ -144,7 +144,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
         suffixarray->filelengthtab[numoffiles].effectivelength
                                                = (Seqpos) readint2;
         showverbose(verboseinfo,
-                    "%s%s " Formatuint64_t " " Formatuint64_t "\n",
+                    "%s%s " Formatuint64_t " " Formatuint64_t,
                     DBFILEKEY,
                     strarray_get(suffixarray->filenametab,numoffiles),
                     PRINTuint64_tcast(suffixarray->filelengthtab[numoffiles].

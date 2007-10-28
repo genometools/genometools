@@ -151,14 +151,14 @@ int allkeysdefined(const Str *indexname,const char *suffix,
       {
         if (rikptr->smallvalueptr != NULL)
         {
-          showverbose(verboseinfo,"%s=%u\n",
+          showverbose(verboseinfo,"%s=%u",
                       rikptr->keystring,
                       (unsigned int) *(rikptr->smallvalueptr));
         } else
         {
           if (rikptr->bigvalueptr != NULL)
           {
-            showverbose(verboseinfo,"%s=" Formatuint64_t "\n",
+            showverbose(verboseinfo,"%s=" Formatuint64_t,
                         rikptr->keystring,
                         PRINTuint64_tcast(*(rikptr->bigvalueptr)));
           } else
@@ -168,7 +168,7 @@ int allkeysdefined(const Str *indexname,const char *suffix,
         }
       } else
       {
-        showverbose(verboseinfo,"%s=0\n",rikptr->keystring);
+        showverbose(verboseinfo,"%s=0",rikptr->keystring);
       }
       if (rikptr->readflag != NULL)
       {

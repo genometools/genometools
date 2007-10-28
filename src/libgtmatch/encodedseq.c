@@ -484,7 +484,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
   {
     haserr = true;
   }
-  showverbose(verboseinfo,"# sat=%s\n",encseqaccessname(encseq));
+  showverbose(verboseinfo,"sat=%s",encseqaccessname(encseq));
   str_delete(tmpfilename,env);
   return haserr ? -1 : 0;
 }
@@ -1423,7 +1423,7 @@ static Encodedsequence *determineencseqkeyvalues(
     = (double) ((uint64_t) CHAR_BIT * (uint64_t) encseq->sizeofrep)/
       (double) totallength;
   showverbose(verboseinfo,
-              "# init character encoding (%s,%lu bytes,%.2f bits/symbol)\n",
+              "init character encoding (%s,%lu bytes,%.2f bits/symbol)",
               encseq->name,encseq->sizeofrep,spaceinbitsperchar);
   return encseq;
 }
@@ -1624,7 +1624,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                       verboseinfo,
                                       env);
     ALLASSIGNAPPENDFUNC;
-    showverbose(verboseinfo,"# deliverchar=%s\n",encseq->delivercharname);
+    showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
     encseq->mappedptr = NULL;
     assert(filenametab != NULL);
     fb = fastabuffer_new(filenametab,
@@ -1683,8 +1683,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                                       verboseinfo,
                                       env);
     ALLASSIGNAPPENDFUNC;
-    showverbose(verboseinfo,"# deliverchar=%s\n",
-                encseq->delivercharname);
+    showverbose(verboseinfo,"deliverchar=%s",encseq->delivercharname);
     if (fillencseqmapspecstartptr(encseq,indexname,verboseinfo,env) != 0)
     {
       haserr = true;

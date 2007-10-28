@@ -39,7 +39,6 @@ int testencodedsequence(const StrArray *filenametab,
   Encodedsequencescanstate *esr;
 
   env_error_check(env);
-  printf("# testencodedsequence with readmode = %s\n",showreadmode(readmode));
   totallength = getencseqtotallength(encseq);
   if (filenametab != NULL)
   {
@@ -194,8 +193,6 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
   array_reverse(rangesbackward,env);
   if (!haserr)
   {
-    printf("# checkspecialrangesfast(%lu ranges)\n",
-             (unsigned long) array_size(rangesforward));
     if (array_compare(rangesforward,rangesbackward,
                       compareSequencerange) != 0)
     {

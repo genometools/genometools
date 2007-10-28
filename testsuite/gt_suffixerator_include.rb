@@ -14,11 +14,9 @@ def checksfx(parts,pl,withsmap,sat,filelist)
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run_test "#{$bin}gt suffixerator -parts #{parts} -pl #{pl} " +
+  run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
            "#{extra} #{outoptions()}  -db " + filearg
   run_test "#{$bin}gt dev sfxmap -v sfx"
-  run "grep -v '^#' #{$last_stdout}"
-  run "cmp -s sfx.prj #{$last_stdout}"
 end
 
 def flattenfilelist(filelist)
@@ -161,8 +159,6 @@ def checkmapped(args)
   Test do
     run_test("#{$bin}gt suffixerator -tis -des -suf -bwt -lcp -indexname sfxidx #{args}", :maxtime => 600)
     run_test("#{$bin}gt dev sfxmap -v sfxidx", :maxtime => 600)
-    run "grep -v '^#' #{$last_stdout} > sfxidx-sfx.prj"
-    run "cmp -s sfxidx.prj sfxidx-sfx.prj"
     run_test("#{$bin}gt dev sfxmap -v -stream sfxidx", :maxtime => 600)
   end
 end
