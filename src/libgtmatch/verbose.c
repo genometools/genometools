@@ -19,13 +19,24 @@
 #include <stdarg.h>
 #include "verbose-def.h"
 
- struct Verboseinfo
+struct Verboseinfo
 {
   bool beverbose;
 };
 
-void showverbose(Verboseinfo *verboseinfo,
-                 const char *format, ...)
+void showdefinitelyverbose(const char *format, ...)
+{
+  va_list ap;
+
+  assert(format != NULL);
+  va_start(ap, format);
+  printf("# ");
+  (void) vprintf(format, ap);
+  printf("\n");
+  va_end(ap);
+}
+
+void showverbose(Verboseinfo *verboseinfo,const char *format, ...)
 {
   if (verboseinfo != NULL && verboseinfo->beverbose)
   {
@@ -44,7 +55,7 @@ Verboseinfo *newverboseinfo(bool verbose,Env *env)
 {
   Verboseinfo *v;
 
-  v = env_ma_malloc(env, sizeof(Verboseinfo));
+  v = env_ma_malloc(env, sizeof (Verboseinfo));
   v->beverbose = verbose;
   return v;
 }

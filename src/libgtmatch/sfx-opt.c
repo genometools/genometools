@@ -24,6 +24,7 @@
 #include "libgtcore/versionfunc.h"
 #include "readmode-def.h"
 #include "sfx-optdef.h"
+#include "verbose-def.h"
 #include "stamp.h"
 
 static OPrval parse_options(int *parsed_args,
@@ -208,42 +209,42 @@ static OPrval parse_options(int *parsed_args,
   return oprval;
 }
 
-/* XXX implement this function based on the showfunctions of verbose-def.h */
-
 static void showoptions(const Suffixeratoroptions *so)
 {
   unsigned long i;
 
   if (str_length(so->str_smap) > 0)
   {
-    printf("# smap=\"%s\"\n",str_get(so->str_smap));
+    showdefinitelyverbose("smap=\"%s\"",str_get(so->str_smap));
   }
   if (so->isdna)
   {
-    printf("# dna=yes\n");
+    showdefinitelyverbose("dna=yes");
   }
   if (so->isprotein)
   {
-    printf("# protein=yes\n");
+    showdefinitelyverbose("protein=yes");
   }
   if (so->isplain)
   {
-    printf("# plain=yes\n");
+    showdefinitelyverbose("plain=yes");
   }
-  printf("# indexname=\"%s\"\n",str_get(so->str_indexname));
+  showdefinitelyverbose("indexname=\"%s\"",str_get(so->str_indexname));
   if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
   {
-    printf("# prefixlength=automatic\n");
+    showdefinitelyverbose("prefixlength=automatic");
   } else
   {
-    printf("# prefixlength=%u\n",so->prefixlength);
+    showdefinitelyverbose("prefixlength=%u",so->prefixlength);
   }
-  printf("# parts=%u\n",so->numofparts);
+  showdefinitelyverbose("parts=%u",so->numofparts);
   for (i=0; i<strarray_size(so->filenametab); i++)
   {
-    printf("# inputfile[%lu]=%s\n",i,strarray_get(so->filenametab,i));
+    showdefinitelyverbose("inputfile[%lu]=%s",i,
+                          strarray_get(so->filenametab,i));
   }
-  printf("# outtistab=%s,outsuftab=%s,outlcptab=%s,outbwttab=%s,outdestab=%s\n",
+  showdefinitelyverbose("outtistab=%s,outsuftab=%s,outlcptab=%s,"
+                        "outbwttab=%s,outdestab=%s",
           so->outtistab ? "true" : "false",
           so->outsuftab ? "true" : "false",
           so->outlcptab ? "true" : "false",
@@ -289,7 +290,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
     {
       if (rval == OPTIONPARSER_OK)
       {
-        if(so->beverbose)
+        if (so->beverbose)
         {
           showoptions(so);
         }

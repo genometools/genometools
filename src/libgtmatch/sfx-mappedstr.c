@@ -479,7 +479,7 @@ static int getencseqkmersgeneric(
     Seqpos totallength = getencseqtotallength(encseq);
     Encodedsequencescanstate *esr;
 
-    esr = initEncodedsequencescanstate(encseq,readmode,env);
+    esr = initEncodedsequencescanstate(encseq,readmode,0,env);
     for (currentposition = 0; currentposition<totallength; currentposition++)
     {
       charcode = sequentialgetencodedchar(encseq,esr,currentposition);

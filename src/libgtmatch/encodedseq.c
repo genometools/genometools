@@ -102,19 +102,19 @@
         }
 
 #define UPDATESEQBUFFERFINAL(TABLE)\
-        if (widthbuffer == (unsigned int) 1)\
+        if (widthbuffer == 1U)\
         {\
           bitwise <<= 6;\
           TABLE[j] = (Uchar) bitwise;\
         } else\
         {\
-          if (widthbuffer == (unsigned int) 2)\
+          if (widthbuffer == 2U)\
           {\
             bitwise <<= 4;\
             TABLE[j] = (Uchar) bitwise;\
           } else\
           {\
-            if (widthbuffer == (unsigned int) 3)\
+            if (widthbuffer == 3U)\
             {\
               bitwise <<= 2;\
               TABLE[j] = (Uchar) bitwise;\
@@ -261,7 +261,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,
 {
   Seqpos firstcell, /* first position of special range */
          lastcell,  /* last position of special range */
-         nextpage, /* next page to be used */
+         nextpage,  /* next page to be used */
          numofspecialcells; /* number of pages */
   Readmode readmode;    /* mode of reading the sequence */
   unsigned int maxspecialtype;  /* maximal value of special type */
@@ -990,6 +990,11 @@ static void showallspecialpositions(const Encodedsequence *encseq)
 
 #endif
 
+/*
+   find next not empty page and set firstcell to the first index in the
+   page and lastcell to the last plus 1 index of the page.
+*/
+
 static bool nextnonemptypage(const Encodedsequence *encseq,
                              Encodedsequencescanstate *esr,
                              bool moveforward)
@@ -1005,33 +1010,27 @@ static bool nextnonemptypage(const Encodedsequence *encseq,
     {
       pageno = esr->numofspecialcells - esr->nextpage - 1;
     }
+    esr->nextpage++;
     if (pageno == 0)
     {
-      endpos0 = accessendspecialsubsUint(encseq,0);
-      esr->nextpage++;
-      if (endpos0 >= (Seqpos) 1)
-      {
-        esr->firstcell = 0;
-        esr->lastcell = endpos0;
-        return true;
-      }
+      endpos0 = 0;
     } else
     {
       endpos0 = accessendspecialsubsUint(encseq,pageno-1);
-      endpos1 = accessendspecialsubsUint(encseq,pageno);
-      esr->nextpage++;
-      if (endpos0 < endpos1)
-      {
-        esr->firstcell = endpos0;
-        esr->lastcell = endpos1;
-        return true;
-      }
+    }
+    endpos1 = accessendspecialsubsUint(encseq,pageno);
+    if (endpos0 < endpos1)
+    {
+      esr->firstcell = endpos0;
+      esr->lastcell = endpos1;
+      return true;
     }
   }
   return false;
 }
 
-static Seqpos getpageoffset(Encodedsequencescanstate *esr,bool moveforward)
+static Seqpos getpageoffset(const Encodedsequencescanstate *esr,
+                            bool moveforward)
 {
   assert(esr->nextpage > 0);
   if (moveforward)
@@ -1046,7 +1045,7 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
                                    Encodedsequencescanstate *esr,
                                    bool moveforward)
 {
-  Seqpos pageoffset, cellnum;
+  Seqpos cellnum;
 
   while (true)
   {
@@ -1065,7 +1064,6 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
     if (esr->firstcell + 1 < esr->lastcell + 1 ||
         nextnonemptypage(encseq,esr,moveforward))
     {
-      pageoffset = getpageoffset(esr,moveforward);
       if (moveforward)
       {
         cellnum = esr->firstcell;
@@ -1074,7 +1072,8 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
         cellnum = esr->lastcell - 1;
       }
       esr->currentrange.leftpos
-        = pageoffset + accessspecialpositions(encseq,cellnum);
+        = getpageoffset(esr,moveforward) +
+          accessspecialpositions(encseq,cellnum);
       esr->currentrange.rightpos
         = esr->currentrange.leftpos + encseq->specialrangelength[cellnum];
       esr->hasrange = true;
@@ -1120,12 +1119,13 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
 Encodedsequencescanstate *initEncodedsequencescanstate(
                                const Encodedsequence *encseq,
                                Readmode readmode,
+                               Seqpos startpos,
                                Env *env)
 {
   Encodedsequencescanstate *esr;
 
   env_error_check(env);
-  ALLOCASSIGNSPACE(esr,NULL,Encodedsequencescanstate,(size_t) 1);
+  ALLOCASSIGNSPACE(esr,NULL,Encodedsequencescanstate,1);
   esr->readmode = readmode;
   if (encseq->sat == Viauchartables ||
       encseq->sat == Viaushorttables ||
@@ -1134,7 +1134,29 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
     esr->hasprevious = false;
     esr->hascurrent = false;
     esr->firstcell = 0;
-    esr->nextpage = 0;
+    if (startpos == 0)
+    {
+      esr->nextpage = 0;
+    } else
+    {
+      if (encseq->sat == Viauchartables)
+      {
+        esr->nextpage = startpos >> 8;
+      } else
+      {
+        if (encseq->sat == Viaushorttables)
+        {
+          esr->nextpage = startpos >> 16;
+        } else
+        {
+#ifdef Seqposequalsunsignedint
+          esr->nextpage = 0;
+#else
+	  esr->nextpage = startpos >> 32;
+#endif
+        }
+      }
+    }
     esr->maxspecialtype = sat2maxspecialtype(encseq->sat);
     esr->numofspecialcells
       = (Seqpos) (encseq->totallength/esr->maxspecialtype + 1);
@@ -1277,7 +1299,9 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
     sri->direct = false;
     sri->esr = initEncodedsequencescanstate(encseq,
                                             moveforward ? Forwardmode
-                                                        : Reversemode,env);
+                                                        : Reversemode,
+                                            0,
+                                            env);
   }
   assert(sri != NULL);
   return sri;

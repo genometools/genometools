@@ -58,6 +58,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
 Encodedsequencescanstate *initEncodedsequencescanstate(
                                /*@unused@*/ const Encodedsequence *encseq,
                                Readmode readmode,
+                               Startpos startpos,
                                Env *env)
 {
   Encodedsequencescanstate *esr;

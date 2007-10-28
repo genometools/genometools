@@ -50,7 +50,7 @@ int testencodedsequence(const StrArray *filenametab,
                          NULL,
                          env);
   }
-  esr = initEncodedsequencescanstate(encseq,readmode,env);
+  esr = initEncodedsequencescanstate(encseq,readmode,0,env);
   for (pos=0; /* Nothing */; pos++)
   {
     if (filenametab != NULL && readmode == Forwardmode)
