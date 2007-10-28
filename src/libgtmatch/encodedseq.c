@@ -90,7 +90,7 @@
             bitwise |= (Bitstring) 1;\
           }\
         }\
-        if (widthbuffer == (unsigned int) 3)\
+        if (widthbuffer == 3U)\
         {\
           TABLE[j] = (Uchar) bitwise;\
           j++;\
@@ -272,12 +272,21 @@ Uchar getencodedchar(const Encodedsequence *encseq,
        hascurrent;      /* there is some current range */
 };
 
+#undef DEBUG
+
 Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
                                Encodedsequencescanstate *esr,
                                Seqpos pos)
 {
   if (esr->readmode == Forwardmode)
   {
+#ifdef DEBUG
+    printf("esr: nextpage=%u,firstcell=%u,lastcell=%u,",
+           esr->nextpage,esr->firstcell,esr->lastcell);
+    printf("leftpos=%u,rightpos=%u\n",
+            esr->currentrange.leftpos,
+            esr->currentrange.rightpos);
+#endif
     return encseq->seqdeliverchar(encseq,esr,pos);
   }
   if (esr->readmode == Reversemode)
@@ -356,7 +365,7 @@ static unsigned long detsizeoffourcharsinonebyte(Seqpos totallength)
 
   if (totallength < (Seqpos) 4)
   {
-    return (unsigned long) 1;
+    return 1UL;
   }
   fourcharssize = (uint64_t) 1 + DIV4(totallength - 1);
   return CALLCASTFUNC(uint64_t,unsigned_long,fourcharssize);
@@ -378,7 +387,7 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
     ALLOCASSIGNSPACE(encseq->satcharptr,NULL,Uchar,1);
     encseq->satcharptr[0] = (Uchar) encseq->sat;
   }
-  NEWMAPSPEC(encseq->satcharptr,Uchar,(unsigned long) 1);
+  NEWMAPSPEC(encseq->satcharptr,Uchar,1UL);
   switch (encseq->sat)
   {
     case Viadirectaccess:
@@ -909,7 +918,6 @@ static unsigned int sat2maxspecialtype(Positionaccesstype sat)
   exit(EXIT_FAILURE); /* programming error */
 }
 
-#undef DEBUG
 #ifdef DEBUG
 
 static void showsinglespecialrange(Seqpos startpos,
@@ -1033,6 +1041,7 @@ static Seqpos getpageoffset(const Encodedsequencescanstate *esr,
                             bool moveforward)
 {
   assert(esr->nextpage > 0);
+  assert(esr->nextpage <= esr->numofspecialcells);
   if (moveforward)
   {
     return (esr->nextpage - 1) * (esr->maxspecialtype + 1);
@@ -1133,12 +1142,18 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
   {
     esr->hasprevious = false;
     esr->hascurrent = false;
-    esr->firstcell = 0;
+    esr->firstcell = esr->lastcell = 0;
+    esr->maxspecialtype = sat2maxspecialtype(encseq->sat);
+    esr->numofspecialcells
+      = (Seqpos) (encseq->totallength/esr->maxspecialtype + 1);
     if (startpos == 0)
     {
       esr->nextpage = 0;
+      advanceEncodedseqstate(encseq,esr,ISDIRREVERSE(readmode) ? false : true);
     } else
     {
+      Seqpos reversepos;
+
       if (encseq->sat == Viauchartables)
       {
         esr->nextpage = startpos >> 8;
@@ -1156,12 +1171,32 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
 #endif
         }
       }
+      advanceEncodedseqstate(encseq,esr,
+                             ISDIRREVERSE(readmode) ? false : true);
+      reversepos = REVERSEPOS(encseq->totallength,startpos);
+      while (true)
+      {
+        if (ISDIRREVERSE(readmode))
+        {
+          if (reversepos >= esr->previousrange.leftpos || !esr->hasrange)
+          {
+            break;
+          }
+        } else
+        {
+          if (startpos < esr->previousrange.rightpos || !esr->hasrange)
+          {
+            break;
+          }
+        }
+#ifdef DEBUG
+        printf("skip (%u,%u)\n",esr->previousrange.leftpos,
+                                esr->previousrange.rightpos);
+#endif
+        advanceEncodedseqstate(encseq,esr,
+                               ISDIRREVERSE(readmode) ? false : true);
+      }
     }
-    esr->maxspecialtype = sat2maxspecialtype(encseq->sat);
-    esr->numofspecialcells
-      = (Seqpos) (encseq->totallength/esr->maxspecialtype + 1);
-    esr->lastcell = 0;
-    advanceEncodedseqstate(encseq,esr,ISDIRREVERSE(readmode) ? false : true);
   }
   assert(esr != NULL);
   return esr;

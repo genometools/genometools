@@ -25,7 +25,50 @@
 
 #include "arrcmp.pr"
 
-int testencodedsequence(const StrArray *filenametab,
+static int testscanatpos(const Encodedsequence *encseq,
+                         Readmode readmode,
+                         unsigned long trials,
+                         Env *env)
+{
+  Encodedsequencescanstate *esr = NULL;
+  Seqpos pos, startpos, totallength;
+  unsigned long trial;
+  Uchar ccra, ccsr;
+  bool haserr = false;
+
+  env_error_check(env);
+  totallength = getencseqtotallength(encseq);
+  srand48(42349421);
+  for(trial = 0; !haserr && trial < trials; trial++)
+  {
+    startpos = (Seqpos) (drand48() * (double) totallength);
+    printf("trial %lu at %u\n",trial,startpos);
+    esr = initEncodedsequencescanstate(encseq,readmode,startpos,env);
+    for (pos=startpos; !haserr && pos < totallength; pos++)
+    {
+      ccra = getencodedchar(encseq,pos,readmode);
+      ccsr = sequentialgetencodedchar(encseq,esr,pos);
+      if (ccra != ccsr)
+      {
+        env_error_set(env,"startpos = " FormatSeqpos 
+                          " access=%s, mode=%s: position=" FormatSeqpos
+                          ": random access (getencodedchar) = %u != "
+                          " %u = sequential read (sequentialgetencodedchar)",
+                          startpos,
+                          encseqaccessname(encseq),
+                          showreadmode(readmode),
+                          pos,
+                          (unsigned int) ccra,
+                          (unsigned int) ccsr);
+        haserr = true;
+      }
+    }
+    freeEncodedsequencescanstate(&esr,env);
+  }
+  return haserr ? -1 : 0;
+}
+
+static int testfullscan(const StrArray *filenametab,
                         const Encodedsequence *encseq,
                         Readmode readmode,
                         const Uchar *symbolmap,
@@ -112,11 +155,32 @@ int testencodedsequence(const StrArray *filenametab,
       haserr = true;
     }
   }
-  if (esr != NULL)
-  {
-    freeEncodedsequencescanstate(&esr,env);
-  }
+  freeEncodedsequencescanstate(&esr,env);
   fastabuffer_delete(fb, env);
+  return haserr ? -1 : 0;
+}
+
+int testencodedsequence(const StrArray *filenametab,
+                        const Encodedsequence *encseq,
+                        Readmode readmode,
+                        const Uchar *symbolmap,
+                        Env *env)
+{
+  bool haserr = false;
+
+  if(testscanatpos(encseq,
+                   readmode,
+                   10UL,
+                   env) != 0)
+  {
+    haserr = true;
+  } else
+  {
+    if(testfullscan(filenametab,encseq,readmode,symbolmap,env) != 0)
+    {
+      haserr = true;
+    }
+  }
   return haserr ? -1 : 0;
 }
 
