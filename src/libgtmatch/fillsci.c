@@ -24,6 +24,7 @@
 #include "libgtcore/strarray.h"
 #include "esafileend.h"
 #include "seqpos-def.h"
+#include "verbose-def.h"
 #include "spacedef.h"
 #include "safecast-gen.h"
 
@@ -42,16 +43,22 @@ static unsigned long currentrangevalue(unsigned long i,unsigned long distvalue)
   return (((unsigned long) 1) + i/UCHAR_MAX) * distvalue;
 }
 
+typedef struct
+{
+  Verboseinfo *verboseinfo;
+  Seqpos *specialrangesptr;
+} Updatesumrangeinfo;
+
 static void updatesumranges(unsigned long key, unsigned long long value,
                             void *data)
 {
-  unsigned long distvalue,
-                *specialrangesptr = (unsigned long *) data;
+  unsigned long distvalue;
+  Updatesumrangeinfo *updatesumrangeinfo = (Updatesumrangeinfo *) data;
 
   distvalue = (unsigned long) value; /* XXX: is this cast always OK? */
-  (*specialrangesptr) += currentrangevalue(key,distvalue);
-  /* printf("# specialranges of length %lu: %lu\n",keyvalue,distvalue);
-     XXX integrate later */
+  (*updatesumrangeinfo->specialrangesptr) += currentrangevalue(key,distvalue);
+  showverbose(updatesumrangeinfo->verboseinfo,
+              "# specialranges of length %lu: %lu\n",key,distvalue);
 }
 
  DECLARESAFECASTFUNCTION(Seqpos,Seqpos,unsigned long,unsigned_long)
@@ -67,6 +74,7 @@ int fasta2sequencekeyvalues(
         bool plainformat,
         bool withdestab,
         unsigned long *characterdistribution,
+        Verboseinfo *verboseinfo,
         Env *env)
 {
   FastaBuffer *fb = NULL;
@@ -172,6 +180,8 @@ int fasta2sequencekeyvalues(
   }
   if (!haserr)
   {
+    Updatesumrangeinfo updatesumrangeinfo;
+
     if (desfp != NULL)
     {
       desc = queue_get(descqueue,env);
@@ -185,8 +195,10 @@ int fasta2sequencekeyvalues(
       FREESPACE(desc);
     }
     specialcharinfo->specialranges = 0;
+    updatesumrangeinfo.specialrangesptr = &specialcharinfo->specialranges;
+    updatesumrangeinfo.verboseinfo = verboseinfo;
     discdistri_foreach(specialrangelengths,updatesumranges,
-                       &specialcharinfo->specialranges,env);
+                       &updatesumrangeinfo,env);
     specialcharinfo->lengthofspecialsuffix = lastspeciallength;
     (*numofsequences)++;
     *totallength = pos;
@@ -201,6 +213,7 @@ int fasta2sequencekeyvalues(
 void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
                               const Uchar *seq,
                               const Seqpos len,
+                              Verboseinfo *verboseinfo,
                               Env *env)
 {
   Uchar charcode;
@@ -209,6 +222,7 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   Seqpos lastspeciallength = 0;
   DiscDistri *specialrangelengths;
   unsigned long idx;
+  Updatesumrangeinfo updatesumrangeinfo;
 
   env_error_check(env);
   specialcharinfo->specialcharacters = 0;
@@ -252,8 +266,10 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
     discdistri_add(specialrangelengths,idx,env);
   }
   specialcharinfo->specialranges = 0;
+  updatesumrangeinfo.specialrangesptr = &specialcharinfo->specialranges;
+  updatesumrangeinfo.verboseinfo = verboseinfo;
   discdistri_foreach(specialrangelengths,updatesumranges,
-                     &specialcharinfo->specialranges,env);
+                     &updatesumrangeinfo,env);
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
   discdistri_delete(specialrangelengths,env);
 }

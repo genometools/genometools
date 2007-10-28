@@ -24,9 +24,7 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/spacedef.h"
 #include "libgtmatch/esa-seqread.h"
-#include "libgtmatch/esa-maxpairs.pr"
 #include "libgtmatch/intcode-def.h"
-#include "libgtmatch/pos2seqnum.pr"
 
 #include "ltrharvest-opt.h"
 #include "repeats.h"
@@ -35,6 +33,9 @@
 #include "outputstd.h"
 #include "outputfasta.h"
 #include "outputgff3.h"
+
+#include "libgtmatch/esa-maxpairs.pr"
+#include "libgtmatch/pos2seqnum.pr"
 
 static int runltrharvest(LTRharvestoptions *lo, Env *env)
 {

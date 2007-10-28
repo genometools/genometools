@@ -235,6 +235,7 @@ static int suffixeratorwithoutput(
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  Measuretime *mtime,
+                 Verboseinfo *verboseinfo,
                  Env *env)
 {
   const Seqpos *suftabptr;
@@ -250,6 +251,7 @@ static int suffixeratorwithoutput(
                        prefixlength,
                        numofparts,
                        mtime,
+                       verboseinfo,
                        env);
   if (sfi == NULL)
   {
@@ -350,6 +352,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Verboseinfo *verboseinfo,
                                 so->isplain,
                                 so->outdestab,
                                 characterdistribution,
+                                verboseinfo,
                                 env) != 0)
     {
       haserr = true;
@@ -463,6 +466,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Verboseinfo *verboseinfo,
                          so->prefixlength,
                          so->numofparts,
                          mtime,
+                         verboseinfo,
                          env) != 0)
         {
           haserr = true;

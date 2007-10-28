@@ -22,12 +22,12 @@
 #include "libgtmatch/spacedef.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/esa-seqread.h"
-#include "libgtmatch/esa-seqread.pr"
-#include "libgtmatch/pos2seqnum.pr"
 #include "libgtmatch/echoseq.pr"
 
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
+
+#include "libgtmatch/pos2seqnum.pr"
 
 /*
  The datetype Fastaoutinfo aggregates the values needed to show a fasta file.
