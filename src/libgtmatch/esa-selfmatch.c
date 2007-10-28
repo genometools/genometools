@@ -60,6 +60,7 @@ static int constructsarrandrunmaxpairs(
                        prefixlength,
                        numofparts,
                        mtime,
+                       NULL,
                        env);
   if (sfi == NULL)
   {

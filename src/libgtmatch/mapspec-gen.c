@@ -121,12 +121,6 @@ static int assigncorrecttype(Mapspecification *mapspec,
                     (unsigned long) mapspec->sizeofunit);
       haserr = true;
   }
-  if (!haserr)
-  {
-    /* printf("# assign pointer");
-    showmapspec(mapspec);
-    printf(" at byteoffset %lu\n",byteoffset); XXX insert later */
-  }
   return haserr ? -1 : 0;
 }
 

@@ -316,6 +316,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             unsigned int prefixlength,
                             unsigned int numofparts,
                             Measuretime *mtime,
+                            Verboseinfo *verboseinfo,
                             Env *env)
 {
   Sfxiterator *sfi;
@@ -412,6 +413,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                                       numofallcodes,
                                       sfi->totallength - specialcharacters,
                                       specialcharacters + 1,
+                                      verboseinfo,
                                       env);
     assert(sfi->suftabparts != NULL);
     ALLOCASSIGNSPACE(sfi->suftab,NULL,Seqpos,

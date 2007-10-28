@@ -21,15 +21,15 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/spacedef.h"
-#include "libgtmatch/pos2seqnum.pr"
-#include "libgtmatch/greedyedist.pr"
 #include "libgtmatch/intcode-def.h"
-#include "libgtmatch/sfx-mappedstr.pr"
 #include "searchforLTRs.h"
 #include "repeattypes.h"
 #include "repeats.h"
 #include "myxdrop.h"
 #include "searchTSDandmotif.h"
+
+#include "libgtmatch/greedyedist.pr"
+#include "libgtmatch/pos2seqnum.pr"
 
 /*
  The following function checks, if the remaining candidate pairs still

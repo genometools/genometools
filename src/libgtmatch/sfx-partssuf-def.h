@@ -18,6 +18,11 @@
 #ifndef PARTSSUF_DEF_H
 #define PARTSSUF_DEF_H
 
+#include "libgtcore/env.h"
+#include "seqpos-def.h"
+#include "verbose-def.h"
+#include "intcode-def.h"
+
 typedef struct Suftabparts Suftabparts;
 
 Suftabparts *newsuftabparts(unsigned int numofparts,
@@ -25,6 +30,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
                             Codetype numofallcodes,
                             Seqpos numofsuffixestoinsert,
                             Seqpos fullspecials,
+                            Verboseinfo *verboseinfo,
                             Env *env);
 
 Codetype stpgetcurrentmincode(unsigned int part,

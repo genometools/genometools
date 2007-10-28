@@ -17,10 +17,11 @@
 #include "libgtcore/env.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/esa-seqread.h"
-#include "libgtmatch/echoseq.pr"
 
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
+
+#include "libgtmatch/echoseq.pr"
 
 void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
                      const Seqpos *markpos, Env *env)

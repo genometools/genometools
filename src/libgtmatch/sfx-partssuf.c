@@ -62,7 +62,8 @@ static Codetype findfirstlarger(const Seqpos *leftborder,
   return found;
 }
 
-static void removeemptyparts(Suftabparts *suftabparts)
+static void removeemptyparts(Suftabparts *suftabparts,
+                             Verboseinfo *verboseinfo)
 {
   if (suftabparts->numofparts > 0)
   {
@@ -86,12 +87,10 @@ static void removeemptyparts(Suftabparts *suftabparts)
     for (srcpart = 0; srcpart < suftabparts->numofparts; srcpart++)
     {
       assert(suftabparts->components[srcpart].widthofpart > 0);
-      /*
-      XXX insert later
-      printf("# widthofpart[%u]=" FormatSeqpos "\n",
-              (unsigned int) srcpart,
-              PRINTSeqposcast(suftabparts->components[srcpart].widthofpart));
-      */
+      showverbose(verboseinfo,"# widthofpart[%u]=" FormatSeqpos,
+                  srcpart,
+                  PRINTSeqposcast(suftabparts->components[srcpart].
+                                  widthofpart));
     }
   }
 }
@@ -101,6 +100,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
                             Codetype numofallcodes,
                             Seqpos numofsuffixestoinsert,
                             Seqpos fullspecials,
+                            Verboseinfo *verboseinfo,
                             Env *env)
 {
   Suftabparts *suftabparts;
@@ -183,7 +183,7 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
     }
     assert(sumofwidth == numofsuffixestoinsert);
   }
-  removeemptyparts(suftabparts);
+  removeemptyparts(suftabparts,verboseinfo);
   return suftabparts;
 }
 

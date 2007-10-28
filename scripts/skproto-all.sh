@@ -23,7 +23,24 @@ then
   unset GT_ENV_OPTIONS
 fi
 
-for filename in `ls ${localpath}/*.c`
+TMPFILE=`mktemp /tmp/skproto-all.XXXXXX` || exit 1
+cat << END_OF_TEXT > ${TMPFILE}
+alphabet.c
+encodedseq.c
+overallseq.c
+sfx-suffixer.c
+sfx-partssuf.c
+enum-patt.c
+esa-mmsearch.c
+esa-seqread.c
+mapspec-gen.c
+measure-time.c
+sfx-readint.c
+test-pairwise.c
+verbose.c
+END_OF_TEXT
+
+for filename in `ls ${localpath}/*.c | grep -v -f ${TMPFILE}`
 do
   prfile="${localpath}/`basename ${filename} .c`.pr"
   if test ! -f ${prfile} ||
@@ -34,6 +51,5 @@ do
     bin/skproto ${filename} > ${prfile}
   fi
 done
-rm -f src/libgtmatch/alphabet.pr
-rm -f src/libgtmatch/encodedseq.pr
-rm -f src/libgtmatch/overallseq.pr
+
+rm -f ${TMPFILE}

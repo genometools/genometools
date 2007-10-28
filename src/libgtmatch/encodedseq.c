@@ -1731,7 +1731,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
     seqptr[len1] = (Uchar) SEPARATOR;
     memcpy(seqptr + len1 + 1,seq2,sizeof (Uchar) * len2);
   }
-  sequence2specialcharinfo(specialcharinfo,seqptr,len,env);
+  sequence2specialcharinfo(specialcharinfo,seqptr,len,verboseinfo,env);
   encseq = determineencseqkeyvalues(sat,
                                     len,
                                     specialcharinfo->specialcharacters,

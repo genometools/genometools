@@ -24,7 +24,6 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/spacedef.h"
 #include "libgtmatch/esa-seqread.h"
-#include "libgtmatch/esa-seqread.pr"
 #include "libgtmatch/esa-mmsearch-def.h"
 #include "libgtmatch/intcode-def.h"
 #include "ltrharvest-opt.h"

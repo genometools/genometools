@@ -492,6 +492,7 @@ static int constructsarrandrunmmsearch(
                        prefixlength,
                        numofparts,
                        mtime,
+                       NULL,
                        env);
   if (sfi == NULL)
   {
