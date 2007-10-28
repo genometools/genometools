@@ -22,6 +22,8 @@
 
 typedef struct Verboseinfo Verboseinfo;
 
+void showdefinitelyverbose(const char *format, ...);
+
 void showverbose(Verboseinfo *verboseinfo,
                  const char *format, ...)
                  __attribute__ ((format (printf, 2, 3)));

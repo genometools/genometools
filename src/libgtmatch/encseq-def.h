@@ -106,6 +106,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
 Encodedsequencescanstate *initEncodedsequencescanstate(
                                const Encodedsequence *encseq,
                                Readmode readmode,
+                               Seqpos startpos,
                                Env *env);
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);

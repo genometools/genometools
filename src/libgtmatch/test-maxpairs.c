@@ -247,7 +247,7 @@ int testmaxpairs(const Str *indexname,
   {
     dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength);
     querylen = samplesubstring(query,suffixarray.encseq,substringlength);
-    showverbose(verboseinfo,"run query match for dblen=" FormatSeqpos 
+    showverbose(verboseinfo,"run query match for dblen=" FormatSeqpos
                             ",querylen= " FormatSeqpos ", minlength=%u",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
     tabmaxquerymatches = array_new(sizeof (Substringmatch),env);
@@ -265,7 +265,7 @@ int testmaxpairs(const Str *indexname,
       haserr = true;
       break;
     }
-    showverbose(verboseinfo,"run self match for dblen=" FormatSeqpos 
+    showverbose(verboseinfo,"run self match for dblen=" FormatSeqpos
                             ",querylen= " FormatSeqpos ", minlength=%u",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
     maxmatchselfinfo.results = array_new(sizeof (Substringmatch),env);

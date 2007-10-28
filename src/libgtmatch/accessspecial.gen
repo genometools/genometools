@@ -246,7 +246,7 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
         }
       }
     }
-    if (pagenumber == (unsigned long) 1)
+    if (pagenumber == 1UL)
     {
       if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] > (Seqpos) 1)
       {
