@@ -37,6 +37,7 @@ typedef struct
   bool isdna,
        isprotein,
        isplain,
+       beverbose,
        outtistab,
        outsuftab,
        outlcptab,

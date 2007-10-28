@@ -138,6 +138,12 @@ static OPrval parse_options(int *parsed_args,
                            false,env);
   option_parser_add_option(op, option, env);
 
+  option = option_new_bool("v",
+                           "be verbose ",
+                           &so->beverbose,
+			   false,env);
+  option_parser_add_option(op, option, env);
+
   option_exclude(optionsmap, optiondna, env);
   option_exclude(optionsmap, optionprotein, env);
   option_exclude(optiondna, optionprotein, env);
@@ -201,6 +207,8 @@ static OPrval parse_options(int *parsed_args,
   str_delete(dirarg,env);
   return oprval;
 }
+
+/* XXX implement this function based on the showfunctions of verbose-def.h */
 
 static void showoptions(const Suffixeratoroptions *so)
 {
@@ -281,7 +289,10 @@ int suffixeratoroptions(Suffixeratoroptions *so,
     {
       if (rval == OPTIONPARSER_OK)
       {
-        showoptions(so);
+        if(so->beverbose)
+        {
+          showoptions(so);
+        }
       }
     }
   }
