@@ -1634,7 +1634,6 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                          NULL,
                          NULL,
                          env);
-    printf("# call %s\n",encodedseqfunctab[(int) sat].fillpos.funcname);
     if (encodedseqfunctab[(int) sat].fillpos.function(encseq,fb,env) != 0)
     {
       haserr = true;

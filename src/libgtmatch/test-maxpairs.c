@@ -226,9 +226,7 @@ int testmaxpairs(const Str *indexname,
   Array *tabmaxquerymatches;
   Maxmatchselfinfo maxmatchselfinfo;
 
-  /*
-  printf("# draw %lu samples\n",samples); XXX integrate later
-  */
+  showverbose(verboseinfo,"# draw %lu samples\n",samples);
   if (mapsuffixarray(&suffixarray,
                      &totallength,
                      SARR_ESQTAB,
@@ -249,10 +247,9 @@ int testmaxpairs(const Str *indexname,
   {
     dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength);
     querylen = samplesubstring(query,suffixarray.encseq,substringlength);
-    printf("# run query match for dblen=" FormatSeqpos ",querylen= "
-           FormatSeqpos ", minlength=%u\n",
+    showverbose(verboseinfo,"# run query match for dblen=" FormatSeqpos 
+                            ",querylen= " FormatSeqpos ", minlength=%u\n",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
-    /* XXX */
     tabmaxquerymatches = array_new(sizeof (Substringmatch),env);
     if (sarrquerysubstringmatch(dbseq,
                                 dblen,
@@ -268,10 +265,9 @@ int testmaxpairs(const Str *indexname,
       haserr = true;
       break;
     }
-    printf("# run self match for dblen=" FormatSeqpos ",querylen= "
-           FormatSeqpos ", minlength=%u\n",
+    showverbose(verboseinfo,"# run self match for dblen=" FormatSeqpos 
+                            ",querylen= " FormatSeqpos ", minlength=%u\n",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
-    /* XXX */
     maxmatchselfinfo.results = array_new(sizeof (Substringmatch),env);
     maxmatchselfinfo.dblen = dblen;
     maxmatchselfinfo.querylen = (unsigned long) querylen;

@@ -295,7 +295,8 @@ static unsigned long *initcharacterdistribution(const Alphabet *alpha,Env *env)
 
 static void showcharacterdistribution(
                    const  Alphabet *alpha,
-                   const unsigned long *characterdistribution)
+                   const unsigned long *characterdistribution,
+                   Verboseinfo *verboseinfo)
 {
   unsigned int mapsize, idx;
 
@@ -303,8 +304,9 @@ static void showcharacterdistribution(
   assert(characterdistribution != NULL);
   for (idx=0; idx<mapsize-1; idx++)
   {
-    printf("# ocurrences(%c)=%lu\n",(int) getprettysymbol(alpha,idx),
-                                    characterdistribution[idx]);
+    showverbose(verboseinfo,"# occurrences(%c)=%lu\n",
+                (int) getprettysymbol(alpha,idx),
+                characterdistribution[idx]);
   }
 }
 
@@ -408,13 +410,13 @@ static int runsuffixerator(Suffixeratoroptions *so,Verboseinfo *verboseinfo,
   INITOUTFILEPTR(outfileinfo.outfpbwttab,so->outbwttab,BWTTABSUFFIX);
   if (!haserr)
   {
-    printf("# specialcharacters=" FormatSeqpos "\n",
-           PRINTSeqposcast(specialcharinfo.specialcharacters));
-    printf("# specialranges=" FormatSeqpos "\n",
-           PRINTSeqposcast(specialcharinfo.specialranges));
+    showverbose(verboseinfo,"# specialcharacters=" FormatSeqpos "\n",
+                PRINTSeqposcast(specialcharinfo.specialcharacters));
+    showverbose(verboseinfo,"# specialranges=" FormatSeqpos "\n",
+                PRINTSeqposcast(specialcharinfo.specialranges));
     if (!so->isplain)
     {
-      showcharacterdistribution(alpha,characterdistribution);
+      showcharacterdistribution(alpha,characterdistribution,verboseinfo);
     }
     if (so->readmode == Complementmode || so->readmode == Reversecomplementmode)
     {
@@ -433,8 +435,9 @@ static int runsuffixerator(Suffixeratoroptions *so,Verboseinfo *verboseinfo,
       if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
       {
         so->prefixlength = recommendedprefixlength(numofchars,totallength);
-        printf("# automatically determined prefixlength = %u\n",
-                so->prefixlength);
+        showverbose(verboseinfo,
+                    "# automatically determined prefixlength = %u\n",
+                    so->prefixlength);
       } else
       {
         unsigned int maxprefixlen;
@@ -531,7 +534,8 @@ int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
   retval = suffixeratoroptions(&so,argc,argv,env);
   if (retval == 0)
   {
-    Verboseinfo *verboseinfo = newverboseinfo(false,env);
+    Verboseinfo *verboseinfo = newverboseinfo(so.beverbose,env);
+
     showverbose(verboseinfo,"# sizeof (Seqpos)=%lu\n",
                 (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
 #ifdef INLINEDENCSEQ
@@ -541,7 +545,7 @@ int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
   }
   if (retval == 0)
   {
-    Verboseinfo *verboseinfo = newverboseinfo(false,env);
+    Verboseinfo *verboseinfo = newverboseinfo(so.beverbose,env);
     if (runsuffixerator(&so,verboseinfo,env) < 0)
     {
       haserr = true;

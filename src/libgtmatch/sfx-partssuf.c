@@ -136,10 +136,6 @@ Suftabparts *newsuftabparts(unsigned int numofparts,
     widthofsuftabpart = (uint64_t) numofsuffixestoinsert/numofparts;
     remainder = (unsigned int) (numofsuffixestoinsert % (Seqpos) numofparts);
     suftabparts->largestwidth = 0;
-    /* XXX insert later
-    printf("# numofsuffixestoinsert=" FormatSeqpos "\n",
-           PRINTSeqposcast(numofsuffixestoinsert));
-    */
     for (part=0; part < numofparts; part++)
     {
       if (remainder > 0)

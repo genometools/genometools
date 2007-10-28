@@ -73,6 +73,7 @@ static uint64_t detexpectedaccordingtomapspec(const ArrayMapspecification
   return sumup;
 }
 
+#ifdef DEBUG
 static void showmapspec(const Mapspecification *mapspec)
 {
   printf("(%s,size=%lu,elems=%lu)",
@@ -80,6 +81,7 @@ static void showmapspec(const Mapspecification *mapspec)
            (unsigned long) mapspec->sizeofunit,
            mapspec->numofunits);
 }
+#endif
 
 static int assigncorrecttype(Mapspecification *mapspec,
                              void *ptr,
@@ -243,9 +245,11 @@ int flushtheindex2file(FILE *fp,
                     mapspectable.nextfreeMapspecification;
        mapspecptr++)
   {
+#ifdef DEBUG
     printf("# flushtheindex2file");
     showmapspec(mapspecptr);
     printf(" at byteoffset %lu\n",byteoffset);
+#endif
     if (mapspecptr->numofunits > 0)
     {
       switch (mapspecptr->typespec)
