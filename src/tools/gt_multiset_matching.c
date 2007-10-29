@@ -28,7 +28,7 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
   env_error_check(env);
   op = option_parser_new("[option ...] multiset_string text",
                          "Match multiset defined by multiset_string against "
-                         "text.",env);
+                         "text.", env);
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, 2, 2, env);
   option_parser_delete(op, env);
