@@ -30,12 +30,15 @@
         mapspecptr->numofunits = ELEMS;\
         mapspecptr->name = #PTR
 
+typedef unsigned long Unsignedlong;
+
 typedef enum
 {
   UcharType,
   UshortType,
   Uint32Type,
   Uint64Type,
+  UnsignedlongType,
   BitstringType,
   SeqposType,
   BwtboundType,

@@ -20,13 +20,14 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
                                       Env *env)
 {
   Uchar cc;
-  Seqpos pos,
-         currentspecialchar = 0;
+  unsigned long currentspecialchar = 0;
+  Seqpos pos;
   int retval;
   Bitstring bitwise = 0;
   Uchar lastspeciallength = 0;
 #ifndef NOENDPTR
-  Seqpos *endptrUint, endspecialcells, nextcheck;
+  unsigned long *endptrUint, endspecialcells;
+  Seqpos nextcheck;
 #endif
   DECLARESEQBUFFER(encseq->fourcharsinonebyte);
 
@@ -35,9 +36,9 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
   ALLOCASSIGNSPACE(encseq->specialrangelength,NULL,Uchar,
                    encseq->numofspecialstostore);
 #ifndef NOENDPTR
-  endspecialcells = (Seqpos) (encseq->totallength/MAXSPECIALTYPE + 1);
-  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,endspecialsubsUint),NULL,Seqpos,
-                   (size_t) endspecialcells);
+  endspecialcells = (unsigned long) (encseq->totallength/MAXSPECIALTYPE + 1);
+  ALLOCASSIGNSPACE(ACCESSENCSEQ(encseq,endspecialsubsUint),NULL,unsigned long,
+                   endspecialcells);
   nextcheck = (Seqpos) MAXSPECIALTYPE;
   endptrUint = ACCESSENCSEQ(encseq,endspecialsubsUint);
 #endif
@@ -107,11 +108,11 @@ static int ADDTYPE(fillspecialtables)(Encodedsequence *encseq,
   return 0;
 }
 
-static bool ADDTYPE(binarysearchpage)(SPECIALTYPE *leftptr,
-                                      SPECIALTYPE *rightptr,
+static bool ADDTYPE(binarysearchpage)(const SPECIALTYPE *leftptr,
+                                      const SPECIALTYPE *rightptr,
                                       SPECIALTYPE pos)
 {
-  SPECIALTYPE *midptr;
+  const SPECIALTYPE *midptr;
 
   while (leftptr <= rightptr)
   {
@@ -131,13 +132,13 @@ static bool ADDTYPE(binarysearchpage)(SPECIALTYPE *leftptr,
   return false;
 }
 
-/*@null@*/ static SPECIALTYPE *ADDTYPE(binarysearchpreviousequal)(
-                                             SPECIALTYPE *leftptr,
-                                             SPECIALTYPE *rightptr,
+/*@null@*/ static const SPECIALTYPE *ADDTYPE(binarysearchpreviousequal)(
+                                             const SPECIALTYPE *leftptr,
+                                             const SPECIALTYPE *rightptr,
                                              SPECIALTYPE pos)
 {
-  SPECIALTYPE *midptr,
-              *found = NULL;
+  const SPECIALTYPE *midptr,
+                    *found = NULL;
 
   while (leftptr <= rightptr)
   {
@@ -167,7 +168,7 @@ static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
 
   if (pagenumber == 0)
   {
-    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] >= (Seqpos) 1)
+    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] >= 1UL)
     {
       if (ADDTYPE(binarysearchpage)(ACCESSENCSEQ(encseq,specialpositions),
                                     ACCESSENCSEQ(encseq,specialpositions) +
@@ -200,11 +201,11 @@ static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
 static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
 {
   unsigned long pagenumber = (unsigned long) POS2PAGENUM(pos);
-  SPECIALTYPE *found, *start;
+  const SPECIALTYPE *found, *start;
 
   if (pagenumber == 0)
   {
-    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] >= (Seqpos) 1)
+    if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] >= 1UL)
     {
       start = ACCESSENCSEQ(encseq,specialpositions);
       found = ADDTYPE(binarysearchpreviousequal)(
@@ -239,7 +240,8 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
         Seqpos rangeend
                = (Seqpos) ((MAXSPECIALTYPE+1) * pagenumber) +
                  (Seqpos) *found +
-                 (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)];
+                 (Seqpos) encseq->specialrangelength[(unsigned long) 
+                                                     (found - start)];
         if (pos < rangeend)
         {
           return true;
@@ -248,9 +250,10 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
     }
     if (pagenumber == 1UL)
     {
-      if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] > (Seqpos) 1)
+      if (ACCESSENCSEQ(encseq,endspecialsubsUint)[0] > 1UL)
       {
-        Seqpos i, rangeend;
+        unsigned long i;
+        Seqpos rangeend;
 
         i = ACCESSENCSEQ(encseq,endspecialsubsUint)[0] - 1;
         rangeend = (Seqpos) ACCESSENCSEQ(encseq,specialpositions)[i] +
@@ -265,7 +268,8 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
       if (ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-2] <
           ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1])
       {
-        Seqpos i, rangeend;
+        unsigned long i;
+        Seqpos rangeend;
 
         i = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] - 1;
         rangeend = (Seqpos) ((MAXSPECIALTYPE+1) * (pagenumber-1)) +
@@ -294,7 +298,7 @@ static bool ADDTYPE(checkspecial)(const Encodedsequence *encseq,Seqpos pos)
 static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,
                                        Seqpos pos)
 {
-  SPECIALTYPE *found, *start;
+  const SPECIALTYPE *found, *start;
 
   start = ACCESSENCSEQ(encseq,specialpositions);
   found = ADDTYPE(binarysearchpreviousequal)(start,
