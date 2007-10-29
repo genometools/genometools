@@ -89,7 +89,8 @@ void showuserdefinedoptionsandvalues(LTRharvestoptions *lo)
   printf("#   maxTSDlength: %lu\n",  lo->maxlengthTSD);
   printf("#   palindromic motif: %s\n", str_get(lo->motif.str_motif));
   printf("#   motifmismatchesallowed: %u\n", lo->motif.allowedmismatches);
-  printf("#   vicinity: %u nt\n", lo->vicinityforcorrectboundaries);
+  printf("#   vicinity: " FormatSeqpos " nt\n",
+          PRINTSeqposcast(lo->vicinityforcorrectboundaries));
 }
 
 /*
@@ -205,6 +206,7 @@ static OPrval parse_options(int *parsed_args,
 	 *optionoutinner,
 	 *optiongff3;
   OPrval oprval;
+  unsigned int vicinityforcorrectboundaries;
 
   static const char *overlaps[] = {
     "best", /* the default */
@@ -341,10 +343,10 @@ static OPrval parse_options(int *parsed_args,
                         "to the right) that will be searched "
                         "for TSDs and/or motifs around 5' and 3' boundary "
 		        "of predicted LTR retrotransposons",
-                        &lo->vicinityforcorrectboundaries,
-		        (unsigned int)60,
-		        (unsigned int)1,
-		        (unsigned int)500,
+                        &vicinityforcorrectboundaries,
+		        60U,
+		        1U,
+		        500U,
 			env);
   option_parser_add_option(op, optionvic, env);
 
@@ -452,6 +454,7 @@ static OPrval parse_options(int *parsed_args,
   option_imply_either_2(optionlongoutput, optionmintsd, optionmotif, env);
 
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
+  lo->vicinityforcorrectboundaries = (Seqpos) vicinityforcorrectboundaries;
   if (oprval == OPTIONPARSER_OK)
   {
     if (lo->repeatinfo.lmin > lo->repeatinfo.lmax)

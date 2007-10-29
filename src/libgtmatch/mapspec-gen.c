@@ -103,6 +103,9 @@ static int assigncorrecttype(Mapspecification *mapspec,
     case Uint32Type:
       ASSIGNPTR2STARTPTR(uint32_t);
       break;
+    case UnsignedlongType:
+      ASSIGNPTR2STARTPTR(Unsignedlong);
+      break;
     case Uint64Type:
       ASSIGNPTR2STARTPTR(uint64_t);
       break;
@@ -262,6 +265,9 @@ int flushtheindex2file(FILE *fp,
           break;
         case Uint32Type:
           WRITEACTIONWITHTYPE(uint32_t);
+          break;
+        case UnsignedlongType:
+          WRITEACTIONWITHTYPE(Unsignedlong);
           break;
         case Uint64Type:
           WRITEACTIONWITHTYPE(uint64_t);
