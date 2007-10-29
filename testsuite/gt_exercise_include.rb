@@ -61,6 +61,25 @@ Test do
   run "diff #{$last_stdout} #{$testdata}t_coin_2.out"
 end
 
+if $gttestdata then # XXX: hack to avoid testing matchcount during normal runs
+                    # (is quite expensive due to amount of calls)
+  Name "gt exercise matchcount test"
+  Keywords "gt_exercise"
+  Test do
+    1.upto(5) do |k|
+      for u in ['a', 'b', 'ab', 'bb', 'aba', 'aab', 'baa', 'abba', 'baaba', \
+                'aaaba', 'bbbbb']
+        for v in ['a', 'b', 'aa', 'ab', 'ba', 'aba', 'abb', 'aaaa', 'baaba', \
+                  'bbbbb', 'aaaba']
+          run_test "#{$bin}gt exercise matchcount #{k} #{u} #{v}"
+          run "cat #{$last_stdout} >> result.txt"
+        end
+      end
+    end
+    run "cmp result.txt #{$testdata}gt_matchcount_test.out"
+  end
+end
+
 Name "gt exercise neighborjoining test example"
 Keywords "gt_exercise"
 Test do

@@ -25,6 +25,7 @@
 #include "gt_coin.h"
 #include "gt_consensus_sa.h"
 #include "gt_linearalign.h"
+#include "gt_matchcount.h"
 #include "gt_msaparse.h"
 #include "gt_multilcp.h"
 #include "gt_multiset_matching.h"
@@ -59,6 +60,7 @@ void register_exercises(Toolbox *exercise_toolbox, Env *env)
   toolbox_add(exercise_toolbox, "casino", gt_casino, env);
   toolbox_add(exercise_toolbox, "coin", gt_coin, env);
   toolbox_add(exercise_toolbox, "consensus_sa", gt_consensus_sa, env);
+  toolbox_add(exercise_toolbox, "matchcount", gt_matchcount, env);
   toolbox_add(exercise_toolbox, "msaparse", gt_msaparse, env);
   toolbox_add(exercise_toolbox, "msmatch", gt_multiset_matching, env);
   toolbox_add(exercise_toolbox, "multilcp", gt_multilcp, env);
