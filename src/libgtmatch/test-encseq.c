@@ -170,7 +170,7 @@ int testencodedsequence(const StrArray *filenametab,
 
   if(testscanatpos(encseq,
                    readmode,
-                   0UL,
+                   1000UL,
                    env) != 0)
   {
     haserr = true;
