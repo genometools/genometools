@@ -5,6 +5,7 @@ int testencodedsequence(const StrArray *filenametab,
                         const Encodedsequence *encseq,
                         Readmode readmode,
                         const Uchar *symbolmap,
+                        unsigned long trials,
                         Env *env);
 
 int checkspecialrangesfast(const Encodedsequence *encseq,Env *env);

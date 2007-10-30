@@ -396,7 +396,8 @@ static int inputsuffixarray(bool map,
     suffixarray->encseq = mapencodedsequence(true,
 					     indexname,
 					     *totallength,
-					     &suffixarray->specialcharinfo,
+					     suffixarray->specialcharinfo.
+                                                          specialranges,
 					     getmapsizeAlphabet(suffixarray->
                                                                 alpha),
                                              verboseinfo,

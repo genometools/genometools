@@ -164,17 +164,22 @@ int testencodedsequence(const StrArray *filenametab,
                         const Encodedsequence *encseq,
                         Readmode readmode,
                         const Uchar *symbolmap,
+                        unsigned long trials,
                         Env *env)
 {
   bool haserr = false;
 
-  if(testscanatpos(encseq,
-                   readmode,
-                   1000UL,
-                   env) != 0)
+  if(trials > 0)
   {
-    haserr = true;
-  } else
+    if(testscanatpos(encseq,
+                     readmode,
+                     trials,
+                     env) != 0)
+    {
+      haserr = true;
+    } 
+  }
+  if(!haserr)
   {
     if(testfullscan(filenametab,encseq,readmode,symbolmap,env) != 0)
     {

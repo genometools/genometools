@@ -30,17 +30,18 @@
 
 #include "opensfxfile.pr"
 
-static unsigned long currentrangevalue(unsigned long i,unsigned long distvalue)
+static unsigned long currentrangevalue(unsigned long len,
+                                       unsigned long occcount)
 {
-  if (i <= UCHAR_MAX)
+  if (len <= UCHAR_MAX)
   {
-    return distvalue;
+    return occcount;
   }
-  if (i % UCHAR_MAX == 0)
+  if (len % UCHAR_MAX == 0)
   {
-    return i/UCHAR_MAX * distvalue;
+    return len/UCHAR_MAX * occcount;
   }
-  return (((unsigned long) 1) + i/UCHAR_MAX) * distvalue;
+  return (((unsigned long) 1) + len/UCHAR_MAX) * occcount;
 }
 
 typedef struct
