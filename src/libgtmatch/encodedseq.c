@@ -145,8 +145,8 @@ typedef uint32_t Uint32;
   Positionaccesstype sat;
   unsigned int mapsize;
   void *mappedptr; /* NULL or pointer to the mapped space block */
-  Seqpos numofspecialstostore,
-         totallength;
+  unsigned long numofspecialstostore;
+  Seqpos totallength;
   unsigned long sizeofrep;
   const char *name;
   Uchar(*deliverchar)(const Encodedsequence *,Seqpos);
@@ -272,7 +272,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,
        hascurrent;      /* there is some current range */
 };
 
-#undef DEBUG
+#define DEBUG
 
 #ifdef DEBUG
 static void showsequencerange(const Sequencerange *range)
@@ -425,10 +425,10 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       NEWMAPSPEC(encseq->fourcharsinonebyte,Uchar,fourcharssize);
       if (encseq->numofspecialstostore > 0)
       {
-        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
-                                  encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->ucharspecialpositions,Uchar,numofunits);
-        NEWMAPSPEC(encseq->specialrangelength,Uchar,numofunits);
+        NEWMAPSPEC(encseq->ucharspecialpositions,Uchar,
+                   encseq->numofspecialstostore);
+        NEWMAPSPEC(encseq->specialrangelength,Uchar,
+                   encseq->numofspecialstostore);
         numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
                                   encseq->totallength/UCHAR_MAX+1);
         NEWMAPSPEC(encseq->ucharendspecialsubsUint,Unsignedlong,numofunits);
@@ -438,10 +438,10 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       NEWMAPSPEC(encseq->fourcharsinonebyte,Uchar,fourcharssize);
       if (encseq->numofspecialstostore > 0)
       {
-        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
-                                  encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->ushortspecialpositions,Ushort,numofunits);
-        NEWMAPSPEC(encseq->specialrangelength,Uchar,numofunits);
+        NEWMAPSPEC(encseq->ushortspecialpositions,Ushort,
+                   encseq->numofspecialstostore);
+        NEWMAPSPEC(encseq->specialrangelength,Uchar,
+                   encseq->numofspecialstostore);
         numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
                                   encseq->totallength/USHRT_MAX+1);
         NEWMAPSPEC(encseq->ushortendspecialsubsUint,Unsignedlong,numofunits);
@@ -451,10 +451,10 @@ static void assignencseqmapspecification(ArrayMapspecification *mapspectable,
       NEWMAPSPEC(encseq->fourcharsinonebyte,Uchar,fourcharssize);
       if (encseq->numofspecialstostore > 0)
       {
-        numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
-                                  encseq->numofspecialstostore);
-        NEWMAPSPEC(encseq->uint32specialpositions,Uint32,numofunits);
-        NEWMAPSPEC(encseq->specialrangelength,Uchar,numofunits);
+        NEWMAPSPEC(encseq->uint32specialpositions,Uint32,
+                   encseq->numofspecialstostore);
+        NEWMAPSPEC(encseq->specialrangelength,Uchar,
+                   encseq->numofspecialstostore);
         numofunits = CALLCASTFUNC(Seqpos,unsigned_long,
                                   encseq->totallength/UINT32_MAX+1);
         NEWMAPSPEC(encseq->uint32endspecialsubsUint,Unsignedlong,numofunits);
@@ -937,22 +937,6 @@ static unsigned int sat2maxspecialtype(Positionaccesstype sat)
 
 #ifdef DEBUG
 
-static void showsinglespecialrange(unsigned long idx,
-                                   Seqpos startpos,
-                                   Uchar valuespecialrangelength)
-{
-  printf("%lu: ",idx);
-  if (valuespecialrangelength == (Uchar) 1)
-  {
-    printf(FormatSeqpos "\n",PRINTSeqposcast(startpos));
-  } else
-  {
-    printf("[" FormatSeqpos "," FormatSeqpos "]\n",
-          PRINTSeqposcast(startpos),
-          PRINTSeqposcast(startpos + (Seqpos) valuespecialrangelength - 1));
-  }
-}
-
 static void showspecialpositionswithpages(const Encodedsequence *encseq,
                                           unsigned long pgnum,
                                           Seqpos offset,
@@ -961,6 +945,7 @@ static void showspecialpositionswithpages(const Encodedsequence *encseq,
 {
   unsigned long idx;
   Seqpos startpos;
+  Sequencerange range;
 
   printf("page %lu: %lu elems at offset " FormatSeqpos "\n",
           pgnum,
@@ -969,7 +954,11 @@ static void showspecialpositionswithpages(const Encodedsequence *encseq,
   for (idx=first; idx<=last; idx++)
   {
     startpos = accessspecialpositions(encseq,idx);
-    showsinglespecialrange(idx,offset+startpos,encseq->specialrangelength[idx]);
+    range.leftpos = offset + startpos; 
+    range.rightpos = range.leftpos + encseq->specialrangelength[idx] + 1;
+    printf("%lu: ",idx);
+    showsequencerange(&range);
+    printf("\n");
   }
 }
 
@@ -1074,7 +1063,7 @@ static void determinerange(Sequencerange *range,
 {
   range->leftpos = getpageoffset(esr,pagenum,moveforward) +
                    accessspecialpositions(encseq,cellnum);
-  range->rightpos = range->leftpos + encseq->specialrangelength[cellnum];
+  range->rightpos = range->leftpos + encseq->specialrangelength[cellnum] + 1;
 }
 
 static void advanceEncodedseqstate(const Encodedsequence *encseq,
@@ -1355,9 +1344,11 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
       = (unsigned long) encseq->totallength/esr->maxspecialtype + 1;
     if (startpos == 0)
     {
+      STAMP;
       esr->nextpage = 0;
       esr->firstcell = esr->lastcell = 0;
       advanceEncodedseqstate(encseq,esr,moveforward);
+      STAMP;
     } else
     {
       if (encseq->sat == Viauchartables)
@@ -1623,7 +1614,11 @@ bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri)
   {
     return bitanddirectnextspecialrangeiterator(range,sri);
   }
+  assert(sri->esr->hasprevious);
   *range = sri->esr->previousrange;
+  printf("nextspecialrangeiterator delivers ");
+  showsequencerange(range);
+  printf("\n");
   if (sri->esr->hasrange)
   {
     advanceEncodedseqstate(sri->encseq,sri->esr,sri->moveforward);
@@ -1660,7 +1655,8 @@ static Encodedsequence *determineencseqkeyvalues(
   encseq->mapsize = mapsize;
   encseq->mappedptr = NULL;
   encseq->satcharptr = NULL;
-  encseq->numofspecialstostore = specialranges;
+  encseq->numofspecialstostore = CALLCASTFUNC(Seqpos,unsigned_long,
+                                              specialranges);
   encseq->totallength = totallength;
   encseq->sizeofrep = CALLCASTFUNC(uint64_t,unsigned_long,
                                   detsizeencseq(sat,totallength,specialranges));
@@ -1874,6 +1870,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   }
   if (!haserr)
   {
+    unsigned long i;
     encseq = determineencseqkeyvalues(sat,
                                       totallength,
                                       specialranges,
@@ -1895,7 +1892,18 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     {
       haserr = true;
     }
+    for(i=0; i<encseq->numofspecialstostore; i++)
+    {
+      printf("specialrangelength[%lu]=%u\n",i,
+                 1U + (unsigned int) encseq->specialrangelength[i]);
+    }
   }
+#ifdef DEBUG
+  if (!haserr)
+  {
+    showallspecialpositions(encseq);
+  }
+#endif
   if (haserr)
   {
     freeEncodedsequence(&encseq,env);
