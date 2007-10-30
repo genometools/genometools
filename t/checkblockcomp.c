@@ -85,7 +85,6 @@ int
 main(int argc, char *argv[])
 {
   struct encIdxSeq *seq;
-  int dnasymcount = 4;
   Str *inputProject;
   int parsedArgs;
   int had_err = 0;
@@ -119,27 +118,6 @@ main(int argc, char *argv[])
   }
   fprintf(stderr, "Using index over sequence "FormatSeqpos" symbols long.\n",
           EISLength(seq));
-  {
-    int i;
-    Symbol exampleBlock[BLOCKSIZE];
-    size_t indices[2];
-    for(i = 0; i < BLOCKSIZE; ++i)
-    {
-      exampleBlock[i] = ((unsigned long)random())%dnasymcount;
-    }
-    searchBlock2IndexPair(seq, exampleBlock, indices, env);
-    exampleBlock[0] = 3;
-    exampleBlock[1] = 0;
-    exampleBlock[2] = 0;
-    exampleBlock[3] = 2;
-    exampleBlock[4] = 2;
-    exampleBlock[5] = 2;
-    exampleBlock[6] = 2;
-    exampleBlock[7] = 2;
-    searchBlock2IndexPair(seq, exampleBlock, indices, env);
-    fprintf(stderr, "indices: %lu, %lu\n", (unsigned long)indices[0],
-            (unsigned long)indices[1]);
-  }
   {
     int corrupt = verifyIntegrity(seq, inputProject, 100000, stderr, env);
     if(corrupt)

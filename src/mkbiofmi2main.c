@@ -55,6 +55,7 @@ main(int argc, const char *argv[])
   int numOptionArgs;
   struct extSuffixeratorOptions eso;
   Env *env;
+
   env = env_new();
   
   initSuffixeratorOptions(&eso, env);
@@ -78,6 +79,9 @@ main(int argc, const char *argv[])
     Suffixarray suffixArray;
     Seqpos length;
     int demand;
+    Verboseinfo *verbosity;
+    /* FIXME: handle verbosity in a more sane fashion */
+    verbosity = newverboseinfo(false, env);
     demand = (eso.so.outtistab?SARR_ESQTAB:0)
       | (eso.so.outlcptab?SARR_LCPTAB:0)
       | SARR_BWTTAB
@@ -86,7 +90,7 @@ main(int argc, const char *argv[])
       demand |= SARR_SUFTAB;
     if(!streamsuffixarray(&suffixArray, &length,
                           demand, eso.so.str_indexname,
-                          NULL, env))
+                          verbosity, env))
     {
       BWTSeq *bwtSeq;
       ++length;
@@ -98,21 +102,25 @@ main(int argc, const char *argv[])
       {
         fputs("Index creation failed.\n", stderr);
         destructSuffixeratorOptions(&eso, env);
+        freeverboseinfo(&verbosity, env);
         env_delete(env);
         return EXIT_FAILURE;
       }
       deleteBWTSeq(bwtSeq, env);
       destructSuffixeratorOptions(&eso, env);
+      freeverboseinfo(&verbosity, env);
       env_delete(env);
       return EXIT_SUCCESS;
     }
     env_error_unset(env);
+    freeverboseinfo(&verbosity, env);
   }
   /* this is in fact the else case corresponding to failed suffixarray
    * construction, thus we need to create the suffix array on the
    * fly */
   {
     sfxInterface *si;
+    BWTSeq *bwtSeq;
     if(!(si = newSfxInterface(&eso.so, env)))
     {
       fputs("Index creation failed.\n", stderr);
@@ -120,7 +128,17 @@ main(int argc, const char *argv[])
       env_delete(env);
       return EXIT_FAILURE;      
     }
-    
+    if(!(bwtSeq = newBWTSeqFromSfxI(BWT_ON_BLOCK_ENC, eso.locateInterval,
+                                    &eso.bwtParam, si, getSfxILength(si),
+                                    eso.so.str_indexname, env)))
+    {
+      fputs("Index creation failed.\n", stderr);
+      deleteSfxInterface(si, env);
+      destructSuffixeratorOptions(&eso, env);
+      env_delete(env);
+      return EXIT_FAILURE;      
+    }
+    deleteBWTSeq(bwtSeq, env);
     deleteSfxInterface(si, env);
   }
   destructSuffixeratorOptions(&eso, env);

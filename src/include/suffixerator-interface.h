@@ -60,6 +60,9 @@ deleteSfxInterface(sfxInterface *iface, Env *env);
 extern const Alphabet *
 getSfxIAlphabet(const sfxInterface *si);
 
+extern Seqpos
+getSfxILength(const sfxInterface *si);
+
 extern const Uchar *
 readSfxIESQRange(sfxInterface *iface, Seqpos start, Seqpos len,
                  Uchar *dest);

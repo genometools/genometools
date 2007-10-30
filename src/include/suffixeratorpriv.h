@@ -30,9 +30,3 @@ struct sfxListenerState
   int dataRequestFlags;
   Seqpos lastReadPos;
 };
-
-struct sfxInterface
-{
-  struct sfxListenerState *listners;
-  Sfxiterator *iterator;
-};

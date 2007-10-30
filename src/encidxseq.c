@@ -50,6 +50,7 @@ deleteEncIdxSeq(EISeq *seq, Env *env)
     }                                                                   \
     deleteEISHint(seqIdx, hint, env);                                   \
     freesuffixarray(&suffixArray, env);                                 \
+    freeverboseinfo(&verbosity, env);                                   \
     return retval;                                                      \
   } while(0)
 
@@ -70,13 +71,20 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, int tickPrint,
   Symbol symOrig, symEnc;
   EISHint hint;
   Seqpos seqLastPos, rankQueryResult, rankExpect;
+  Verboseinfo *verbosity;
+  const MRAEnc *alphabet;
+  verbosity = newverboseinfo(true, env);
   /* two part process: enumerate all positions of original sequence
    * and verify that the query functions return correct values */
   if(streamsuffixarray(&suffixArray, &seqLastPos,
-                       SARR_SUFTAB | SARR_BWTTAB, projectName, NULL, env))
+                       SARR_SUFTAB | SARR_BWTTAB, projectName, verbosity, env))
+  {
+    freeverboseinfo(&verbosity, env);
     return -1;
+  }
   memset(rankTable, 0, sizeof(rankTable));
   bwtFP = suffixArray.bwttabstream.fp;
+  alphabet = EISGetAlphabet(seqIdx);
 /*   pos = 1803218; */
 /*   fseeko(bwtFP, pos, SEEK_SET); */
   hint = newEISHint(seqIdx, env);
@@ -85,7 +93,7 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, int tickPrint,
     /* TODO: complete once query functions are finished */
 /*     fprintf(stderr, "pos: %llu\n", (unsigned long long)pos); */
     symEnc = EISGetSym(seqIdx, pos, hint, env);
-    if(symEnc == EOF)
+    if(!MRAEncSymbolHasValidMapping(alphabet, symEnc))
       verifyIntegrityErrRet(-1);
     if(symEnc != symOrig)
       verifyIntegrityErrRet(1);
@@ -104,5 +112,6 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, int tickPrint,
     verifyIntegrityErrRet(-1);
   deleteEISHint(seqIdx, hint, env);
   freesuffixarray(&suffixArray, env);
+  freeverboseinfo(&verbosity, env);
   return 0;
 }

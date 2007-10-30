@@ -45,8 +45,8 @@ typedef struct encIdxSeq *(*indexCreateFunc)
    uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallbacks,
    void **headerCBData, bitInsertFunc biFunc, BitOffset cwBitsPerPos,
    BitOffset maxBitsPerPos, void *cbState, Env *env);
-typedef struct encIdxSeq * (*indexLoadFunc)(Suffixarray *sa, Seqpos totalLen,
-                                            const Str *projectName, Env *env);
+typedef struct encIdxSeq *(*indexLoadFunc)(void *src, Seqpos totalLen,
+                                           const Str *projectName, Env *env);
 
 static BWTSeq *
 newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
@@ -224,13 +224,20 @@ newBWTSeq(enum seqBaseEncoding baseType, unsigned locateInterval,
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
   Seqpos len;
+  Verboseinfo *verbosity;
+  /* FIXME: handle verbosity in a more sane fashion */
+  verbosity = newverboseinfo(false, env);
   if(streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_BWTTAB,
-                       projectName, NULL, env))
+                       projectName, verbosity, env))
+  {
+    freeverboseinfo(&verbosity, env);
     return NULL;
+  }
   ++len;
   bwtSeq = newBWTSeqFromSA(baseType, locateInterval, extraParams,
                            &suffixArray, len, projectName, env);
   freesuffixarray(&suffixArray, env);
+  freeverboseinfo(&verbosity, env);
   return bwtSeq;
 }
 
@@ -239,7 +246,7 @@ newBWTSeqFromSA(enum seqBaseEncoding baseType, unsigned locateInterval,
                 union bwtSeqParam *extraParams, Suffixarray *sa,
                 Seqpos totalLen, const Str *projectName, Env *env)
 {
-  assert(sa);
+  assert(sa && extraParams);
   if(locateInterval && (!sa->suftabstream.fp || !sa->longest.defined))
   {
     fprintf(stderr, "error: locate sampling requested but not available"
@@ -251,6 +258,71 @@ newBWTSeqFromSA(enum seqBaseEncoding baseType, unsigned locateInterval,
                       (indexLoadFunc)loadBlockEncIdxSeqForSA,
                       streamReadSeqpos, totalLen, projectName, env);
 }
+
+static EISeq *
+loadBlockEncIdxSeqForSfxI(void *srcNotUsed, Seqpos totalLen,
+                        const Str *projectName, Env *env)
+{
+  return loadBlockEncIdxSeq(projectName, env);
+}
+
+struct sfxIReadInfo 
+{
+  sfxInterface *si;
+  listenerID id;
+};
+
+static EISeq *
+newBlockEncIdxSeqFromSfxIRI(void *src, Seqpos totalLen,
+                            const Str *projectName,
+                            unsigned blockSize, unsigned bucketBlocks,
+                            size_t numExtHeaders, uint16_t *headerIDs,
+                            uint32_t *extHeaderSizes,
+                            headerWriteFunc *extHeaderCallbacks,
+                            void **headerCBData,
+                            bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
+                            BitOffset maxVarExtBitsPerPos, void *cbState,
+                            Env *env)
+{
+  assert(src);
+  return newBlockEncIdxSeqFromSfxI(((struct sfxIReadInfo *)src)->si, totalLen,
+                                   projectName, blockSize,
+                                   bucketBlocks, numExtHeaders, headerIDs,
+                                   extHeaderSizes, extHeaderCallbacks,
+                                   headerCBData, biFunc, cwExtBitsPerPos,
+                                   maxVarExtBitsPerPos, cbState, env);
+}
+
+
+static int
+sfxIReadSeqpos(Seqpos *dest, void *src, Env *env)
+{
+  return readSfxISufTabRange(((struct sfxIReadInfo *)src)->si,
+                             ((struct sfxIReadInfo *)src)->id,
+                             1, dest, env) == 1;
+}
+
+
+BWTSeq *
+newBWTSeqFromSfxI(enum seqBaseEncoding baseType, unsigned locateInterval,
+                  union bwtSeqParam *extraParams, sfxInterface *si,
+                  Seqpos totalLen, const Str *projectName, Env *env)
+{
+  struct sfxIReadInfo siri;
+  assert(si && extraParams);
+  siri.si = si;
+  if(locateInterval)
+  {
+    if(!SfxIRegisterReader(si, &siri.id, SFX_REQUEST_SUFTAB, env))
+      return NULL;
+  }
+  return newBWTSeqGen(baseType, locateInterval, extraParams, &siri,
+                      newBlockEncIdxSeqFromSfxIRI,
+                      (indexLoadFunc)loadBlockEncIdxSeqForSfxI,
+                      sfxIReadSeqpos, totalLen, projectName, env);  
+}
+
+
 
 #define newBWTSeqErrRet()                               \
   do {                                                  \
