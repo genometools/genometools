@@ -375,7 +375,7 @@ static int runsuffixerator(Suffixeratoroptions *so,Verboseinfo *verboseinfo,
                                    so->filenametab,
                                    so->isplain,
                                    totallength,
-                                   &specialcharinfo,
+                                   specialcharinfo.specialranges,
                                    alpha,
                                    str_length(so->str_sat) > 0
                                          ? str_get(so->str_sat)

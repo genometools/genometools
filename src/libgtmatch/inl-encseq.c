@@ -115,8 +115,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Env *env)
                                  const StrArray *filenametab,
                                  bool plainformat,
                                  Seqpos totallength,
-                                 /*@unused@*/ const Specialcharinfo
-                                                   *specialcharinfo,
+                                 /*@unused@*/ Seqpos specialranges,
                                  const Alphabet *alphabet,
                                  /*@unused@*/ const char *str_sat,
                                  Env *env)
@@ -147,7 +146,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Env *env)
                                    /*@unused@*/ bool withrange,
                                    const Str *indexname,
                                    /*@unused@*/ Seqpos totallength,
-                                   const Specialcharinfo *specialcharinfo,
+                                   Seqpos specialranges,
                                    /*@unused@*/ unsigned int mapsize,
                                    /*@unused@*/ Verboseinfo *verboseinfo,
                                    Env *env)
@@ -164,8 +163,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Env *env)
   str_delete(tmpfilename,env);
   encseq->hasownmemory = false;
   encseq->mappedfile = true;
-  encseq->hasspecialcharacters
-    = (specialcharinfo->specialcharacters > 0) ?  true : false;
+  encseq->hasspecialcharacters = (specialranges > 0) ?  true : false;
   return encseq;
 }
 

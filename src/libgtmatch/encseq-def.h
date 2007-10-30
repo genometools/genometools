@@ -115,8 +115,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
                                                   const StrArray *filenametab,
                                                   bool plainformat,
                                                   Seqpos totallength,
-                                                  const Specialcharinfo
-                                                        *specialcharinfo,
+                                                  Seqpos specialranges,
                                                   const Alphabet *alphabet,
                                                   const char *str_sat,
                                                   Verboseinfo *verboseinfo,
@@ -125,8 +124,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const Str *indexname,
                                                Seqpos totallength,
-                                               const Specialcharinfo
-                                                     *specialcharinfo,
+                                               Seqpos specialranges,
                                                unsigned int mapsize,
                                                Verboseinfo *verboseinfo,
                                                Env *env);
