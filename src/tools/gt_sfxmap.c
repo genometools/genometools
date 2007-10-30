@@ -84,7 +84,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
     case OPTIONPARSER_ERROR: return -1;
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
-  assert(parsed_args >= 1 && parsed_args <= 3);
+  assert(argc > 2 && parsed_args == argc - 1);
 
   indexname = str_new_cstr(argv[parsed_args],env);
   verboseinfo = newverboseinfo(sfxmapoptions.verbose,env);
