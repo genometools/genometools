@@ -27,6 +27,7 @@
 #include "intcode-def.h"
 #include "sarr-def.h"
 #include "sfx-nextchar.h"
+#include "stamp.h"
 
 #include "kmer2string.pr"
 #include "sfx-mappedstr.pr"

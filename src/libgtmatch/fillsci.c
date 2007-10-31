@@ -84,7 +84,7 @@ int fasta2sequencekeyvalues(
   int retval;
   bool specialprefix = true;
   Seqpos lastspeciallength = 0;
-  DiscDistri *specialrangelengths = NULL;
+  DiscDistri *distspralen = NULL;
   unsigned long idx;
   bool haserr = false;
   Queue *descqueue = NULL;
@@ -115,7 +115,7 @@ int fasta2sequencekeyvalues(
 			 descqueue,
 			 characterdistribution,
 			 env);
-    specialrangelengths = discdistri_new(env);
+    distspralen = discdistri_new(env);
     for (pos = 0; /* Nothing */; pos++)
     {
       retval = fastabuffer_next(fb,&charcode,env);
@@ -129,7 +129,7 @@ int fasta2sequencekeyvalues(
 	if (lastspeciallength > 0)
 	{
 	  idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-	  discdistri_add(specialrangelengths,idx,env);
+	  discdistri_add(distspralen,idx,env);
 	}
 	break;
       }
@@ -173,7 +173,7 @@ int fasta2sequencekeyvalues(
 	if (lastspeciallength > 0)
 	{
 	  idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-	  discdistri_add(specialrangelengths,idx,env);
+	  discdistri_add(distspralen,idx,env);
 	  lastspeciallength = 0;
 	}
       }
@@ -198,14 +198,14 @@ int fasta2sequencekeyvalues(
     specialcharinfo->specialranges = 0;
     updatesumrangeinfo.specialrangesptr = &specialcharinfo->specialranges;
     updatesumrangeinfo.verboseinfo = verboseinfo;
-    discdistri_foreach(specialrangelengths,updatesumranges,
+    discdistri_foreach(distspralen,updatesumranges,
                        &updatesumrangeinfo,env);
     specialcharinfo->lengthofspecialsuffix = lastspeciallength;
     (*numofsequences)++;
     *totallength = pos;
   }
   env_fa_xfclose(desfp,env);
-  discdistri_delete(specialrangelengths,env);
+  discdistri_delete(distspralen,env);
   fastabuffer_delete(fb, env);
   queue_delete_with_contents(descqueue, env);
   return haserr ? -1 : 0;
@@ -221,7 +221,7 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   Seqpos pos;
   bool specialprefix = true;
   Seqpos lastspeciallength = 0;
-  DiscDistri *specialrangelengths;
+  DiscDistri *distspralen;
   unsigned long idx;
   Updatesumrangeinfo updatesumrangeinfo;
 
@@ -229,7 +229,7 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
-  specialrangelengths = discdistri_new(env);
+  distspralen = discdistri_new(env);
   for (pos = 0; pos < len; pos++)
   {
     charcode = seq[pos];
@@ -256,7 +256,7 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
       if (lastspeciallength > 0)
       {
         idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-        discdistri_add(specialrangelengths,idx,env);
+        discdistri_add(distspralen,idx,env);
         lastspeciallength = 0;
       }
     }
@@ -264,13 +264,12 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   if (lastspeciallength > 0)
   {
     idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-    discdistri_add(specialrangelengths,idx,env);
+    discdistri_add(distspralen,idx,env);
   }
   specialcharinfo->specialranges = 0;
   updatesumrangeinfo.specialrangesptr = &specialcharinfo->specialranges;
   updatesumrangeinfo.verboseinfo = verboseinfo;
-  discdistri_foreach(specialrangelengths,updatesumranges,
-                     &updatesumrangeinfo,env);
+  discdistri_foreach(distspralen,updatesumranges,&updatesumrangeinfo,env);
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-  discdistri_delete(specialrangelengths,env);
+  discdistri_delete(distspralen,env);
 }

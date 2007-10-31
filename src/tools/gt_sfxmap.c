@@ -19,6 +19,7 @@
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/verbose-def.h"
+#include "libgtmatch/stamp.h"
 #include "libgtmatch/esa-map.pr"
 #include "libgtmatch/test-encseq.pr"
 #include "libgtmatch/pos2seqnum.pr"
@@ -28,7 +29,7 @@
 
 typedef struct
 {
-  bool usestream, verbose;
+  bool usestream, verbose, onlytis;
   unsigned long trials;
 } Sfxmapoptions;
 
@@ -39,7 +40,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                             Env *env)
 {
   OptionParser *op;
-  Option *optionstream, *optionverbose, *optiontrials;
+  Option *optionstream, *optionverbose, *optiontrials, *optiontis;
   OPrval oprval;
 
   env_error_check(env);
@@ -50,14 +51,21 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
   optionstream = option_new_bool("stream","stream the index",
                                  &sfxmapoptions->usestream,false,env);
   option_parser_add_option(op, optionstream, env);
-  optionverbose = option_new_bool("v","be verbose",&sfxmapoptions->verbose,
-                                  false,env);
-  option_parser_add_option(op, optionverbose, env);
 
   optiontrials = option_new_ulong("trials","specify number of trials",
                                   &sfxmapoptions->trials,0,
                                   env);
   option_parser_add_option(op, optiontrials, env);
+
+  optiontis = option_new_bool("tis","only input the sequence",
+                              &sfxmapoptions->onlytis,
+                              false,env);
+  option_parser_add_option(op, optiontis, env);
+
+  optionverbose = option_new_bool("v","be verbose",&sfxmapoptions->verbose,
+                                  false,env);
+  option_parser_add_option(op, optionverbose, env);
+
 
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, (unsigned int) 1,
@@ -91,7 +99,8 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   if ((sfxmapoptions.usestream ? streamsuffixarray 
                                : mapsuffixarray)(&suffixarray,
                                                  &totallength,
-                                                 SARR_ALLTAB,
+                                                 sfxmapoptions.onlytis ?
+                                                    SARR_ESQTAB : SARR_ALLTAB,
                                                  indexname,
                                                  verboseinfo,
                                                  env) != 0)
@@ -137,14 +146,14 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
       }
     }
   }
-  if (!haserr)
+  if (suffixarray.prefixlength > 0 && !haserr)
   {
     if (verifymappedstr(&suffixarray,env) != 0)
     {
       haserr = true;
     }
   }
-  if (!haserr && !sfxmapoptions.usestream)
+  if (!haserr && !sfxmapoptions.onlytis && !sfxmapoptions.usestream)
   {
     checkentiresuftab(suffixarray.encseq,
                       suffixarray.readmode,
@@ -155,7 +164,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
                       0,
                       env);
   }
-  if (!haserr)
+  if (!sfxmapoptions.onlytis && !haserr)
   {
     checkalldescriptions(suffixarray.destab,suffixarray.destablength,
                          suffixarray.numofdbsequences,env);

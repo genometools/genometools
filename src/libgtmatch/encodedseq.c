@@ -272,7 +272,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,
        hascurrent;      /* there is some current range */
 };
 
-#define DEBUG
+#undef DEBUG
 
 #ifdef DEBUG
 static void showsequencerange(const Sequencerange *range)
@@ -1159,7 +1159,6 @@ static void advanceEncodedseqstate2(const Encodedsequence *encseq,
     {
       esr->lastcell--;
     }
-    printf("cell %lu\n",esr->firstcell);
     /* do not let comparison values become negative, hence compare with + 1 */
     if (esr->firstcell + 1 < esr->lastcell + 1 ||
         nextnonemptypage(encseq,esr,moveforward))
@@ -1181,7 +1180,6 @@ static void advanceEncodedseqstate2(const Encodedsequence *encseq,
     }
     if (esr->hasprevious)
     {
-      STAMP;
       if (moveforward)
       {
 #ifdef DEBUG
@@ -1344,11 +1342,9 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
       = (unsigned long) encseq->totallength/esr->maxspecialtype + 1;
     if (startpos == 0)
     {
-      STAMP;
       esr->nextpage = 0;
       esr->firstcell = esr->lastcell = 0;
       advanceEncodedseqstate(encseq,esr,moveforward);
-      STAMP;
     } else
     {
       if (encseq->sat == Viauchartables)
@@ -1380,9 +1376,7 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
         {
           esr->firstcell = previous;
           esr->lastcell = accessendspecialsubsUint(encseq,startpagenum);
-          STAMP;
           advanceEncodedseqstate2(encseq,esr,moveforward);
-          STAMP;
         } else
         {
           seqpreparenextrange(encseq,esr,moveforward,startpos);
@@ -1616,9 +1610,6 @@ bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri)
   }
   assert(sri->esr->hasprevious);
   *range = sri->esr->previousrange;
-  printf("nextspecialrangeiterator delivers ");
-  showsequencerange(range);
-  printf("\n");
   if (sri->esr->hasrange)
   {
     advanceEncodedseqstate(sri->encseq,sri->esr,sri->moveforward);
@@ -1870,7 +1861,6 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   }
   if (!haserr)
   {
-    unsigned long i;
     encseq = determineencseqkeyvalues(sat,
                                       totallength,
                                       specialranges,
@@ -1891,11 +1881,6 @@ static Encodedsequencefunctions encodedseqfunctab[] =
     if (encodedseqfunctab[(int) sat].fillpos.function(encseq,fb,env) != 0)
     {
       haserr = true;
-    }
-    for(i=0; i<encseq->numofspecialstostore; i++)
-    {
-      printf("specialrangelength[%lu]=%u\n",i,
-                 1U + (unsigned int) encseq->specialrangelength[i]);
     }
   }
 #ifdef DEBUG
