@@ -216,7 +216,8 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
       {
         Seqpos rangeend
                = (Seqpos) *found +
-                 (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)];
+                 (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)]
+                          + 1;
         if (pos < rangeend)
         {
           return true;
@@ -241,7 +242,7 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
                = (Seqpos) ((MAXSPECIALTYPE+1) * pagenumber) +
                  (Seqpos) *found +
                  (Seqpos) encseq->specialrangelength[(unsigned long) 
-                                                     (found - start)];
+                                                     (found - start)] + 1;
         if (pos < rangeend)
         {
           return true;
@@ -257,7 +258,7 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
 
         i = ACCESSENCSEQ(encseq,endspecialsubsUint)[0] - 1;
         rangeend = (Seqpos) ACCESSENCSEQ(encseq,specialpositions)[i] +
-                   (Seqpos) encseq->specialrangelength[i];
+                   (Seqpos) encseq->specialrangelength[i] + 1;
         if (pos < rangeend)
         {
           return true;
@@ -274,7 +275,7 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
         i = ACCESSENCSEQ(encseq,endspecialsubsUint)[pagenumber-1] - 1;
         rangeend = (Seqpos) ((MAXSPECIALTYPE+1) * (pagenumber-1)) +
                    (Seqpos) ACCESSENCSEQ(encseq,specialpositions)[i] +
-                   (Seqpos) encseq->specialrangelength[i];
+                   (Seqpos) encseq->specialrangelength[i] + 1;
         if (pos < rangeend)
         {
           return true;
@@ -309,7 +310,8 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,
   {
     Seqpos rangeend
              = (Seqpos) *found +
-               (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)];
+               (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)] 
+                        + 1;
     if (pos < rangeend)
     {
       return true;

@@ -69,13 +69,14 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
                              suftabptr[lvi->relpos]);
     if (cmp > 0)
     {
-      fprintf(stderr,"pos = " FormatSeqpos
+      fprintf(stderr,"pos=" FormatSeqpos
               ": cmp " FormatSeqpos
-              " " FormatSeqpos " = %d",
+              " " FormatSeqpos " = %d, lcpval=" FormatSeqpos "\n",
               PRINTSeqposcast(lvi->relpos),
               PRINTSeqposcast(lvi->lastsuftabentry),
               PRINTSeqposcast(suftabptr[lvi->relpos]),
-              cmp);
+              cmp,
+              lcpvalue);
       exit(EXIT_FAILURE);
     }
   }

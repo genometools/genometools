@@ -49,7 +49,7 @@ typedef struct
   bool moveforward, exhausted;
   const Encodedsequence *encseq;
   Seqpos pos,
-         specialrangelength;
+         lengthofspecialrange;
 } Specialrangeiterator;
 
 typedef struct

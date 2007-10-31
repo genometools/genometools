@@ -547,34 +547,27 @@ static void fillspecialnextpage(Sfxiterator *sfi)
         assert(rest > 0);
         if (ISDIRREVERSE(sfi->readmode))
         {
-          STAMP;
           insertfullspecialrange(sfi,sfi->overhang.leftpos + rest,
                                  sfi->overhang.rightpos);
-          STAMP;
           sfi->overhang.rightpos = sfi->overhang.leftpos + rest;
         } else
         {
-          STAMP;
           insertfullspecialrange(sfi,sfi->overhang.leftpos,
                                      sfi->overhang.rightpos - rest);
-          STAMP;
           sfi->overhang.leftpos = sfi->overhang.rightpos - rest;
         }
         break;
       }
       if (sfi->fusp.nextfreeSeqpos + width == sfi->fusp.allocatedSeqpos)
       { /* overhang fits into the buffer and buffer is full */
-        STAMP;
         insertfullspecialrange(sfi,sfi->overhang.leftpos,
                                sfi->overhang.rightpos);
-          STAMP;
         sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
         break;
       }
       /* overhang fits into the buffer and buffer is not full */
       insertfullspecialrange(sfi,sfi->overhang.leftpos,
                              sfi->overhang.rightpos);
-          STAMP;
       sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
     } else
     {
@@ -588,14 +581,12 @@ static void fillspecialnextpage(Sfxiterator *sfi)
                                width - sfi->fusp.allocatedSeqpos;
           if (ISDIRREVERSE(sfi->readmode))
           {
-          STAMP;
             insertfullspecialrange(sfi,range.leftpos + rest,
                                    range.rightpos);
             sfi->overhang.leftpos = range.leftpos;
             sfi->overhang.rightpos = range.leftpos + rest;
           } else
           {
-          STAMP;
             insertfullspecialrange(sfi,range.leftpos,range.rightpos - rest);
             sfi->overhang.leftpos = range.rightpos - rest;
             sfi->overhang.rightpos = range.rightpos;
@@ -604,12 +595,10 @@ static void fillspecialnextpage(Sfxiterator *sfi)
         }
         if (sfi->fusp.nextfreeSeqpos + width == sfi->fusp.allocatedSeqpos)
         { /* overhang fits into the buffer and buffer is full */
-          STAMP;
           insertfullspecialrange(sfi,range.leftpos,range.rightpos);
           sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
           break;
         }
-          STAMP;
         insertfullspecialrange(sfi,range.leftpos,range.rightpos);
         sfi->overhang.leftpos = sfi->overhang.rightpos = 0;
       } else

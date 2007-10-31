@@ -172,7 +172,7 @@ int testencodedsequence(const StrArray *filenametab,
   if(trials > 0)
   {
     if(testscanatpos(encseq,
-                     readmode,
+                     Forwardmode /* XXX readmode */,
                      trials,
                      env) != 0)
     {
