@@ -1,3 +1,8 @@
+changes in version 1.0.7 (2007-11-01):
+
+- `gt view` has new option -addintrons
+
+
 changes in version 1.0.6 (2007-10-19):
 
 - new `gt extractseq` tool

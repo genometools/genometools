@@ -25,6 +25,7 @@
 #include "libgtcore/splitter.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/versionfunc.h"
+#include "libgtext/addintrons_stream.h"
 #include "libgtext/gff3_in_stream.h"
 #include "libgtext/gff3_out_stream.h"
 #include "libgtview/config.h"
@@ -35,7 +36,8 @@
 
 typedef struct {
   bool pipe,
-       verbose;
+       verbose,
+       addintrons;
   Str *seqid;
   unsigned long start,
                 end;
@@ -101,6 +103,12 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
                                DEFAULT_RENDER_WIDTH, 1, env);
   option_parser_add_option(op, option, env);
 
+  /* -addintrons */
+  option = option_new_bool("addintrons", "add intron features between "
+                           "existing exon features (before drawing)",
+                           &arguments->addintrons, false, env);
+  option_parser_add_option(op, option, env);
+
   /* set contact mailaddress */
   option_parser_set_mailaddress(op, "<ssteinbiss@stud.zbh.uni-hamburg.de>");
 
@@ -123,8 +131,10 @@ static OPrval parse_options(int *parsed_args, Gff3_view_arguments *arguments,
 int gt_view(int argc, const char **argv, Env *env)
 {
   GenomeStream *gff3_in_stream = NULL,
+               *addintrons_stream = NULL,
                *gff3_out_stream = NULL,
-               *feature_stream = NULL;
+               *feature_stream = NULL,
+               *last_stream;
   Gff3_view_arguments arguments;
   GenomeNode *gn = NULL;
   FeatureIndex *features = NULL;
@@ -174,15 +184,22 @@ int gt_view(int argc, const char **argv, Env *env)
       /* create a gff3 input stream */
       gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
                                                  arguments.verbose, env);
+      last_stream = gff3_in_stream;
+
+      /* create add introns stream if -addintrons was used */
+      if (arguments.addintrons) {
+        addintrons_stream = addintrons_stream_new(last_stream, env);
+        last_stream = addintrons_stream;
+      }
+
       /* create gff3 output stream if -pipe was used */
-      if (arguments.pipe)
-        gff3_out_stream = gff3_out_stream_new(gff3_in_stream, NULL, env);
+      if (arguments.pipe) {
+        gff3_out_stream = gff3_out_stream_new(addintrons_stream, NULL, env);
+        last_stream = gff3_out_stream;
+      }
 
       /* create feature stream */
-      feature_stream = feature_stream_new(arguments.pipe
-                                          ? gff3_out_stream
-                                          : gff3_in_stream,
-                                          features, env);
+      feature_stream = feature_stream_new(last_stream, features, env);
 
       /* pull the features through the stream and free them afterwards */
       while (!(had_err = genome_stream_next_tree(feature_stream, &gn, env)) &&
@@ -191,8 +208,9 @@ int gt_view(int argc, const char **argv, Env *env)
       }
 
       genome_stream_delete(feature_stream, env);
-      genome_stream_delete(gff3_in_stream, env);
       genome_stream_delete(gff3_out_stream, env);
+      genome_stream_delete(addintrons_stream, env);
+      genome_stream_delete(gff3_in_stream, env);
 
       if (!argv[parsed_args]) /* no GFF3 file was given at all */
         break;
