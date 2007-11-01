@@ -18,8 +18,8 @@
 #include "libgtcore/env.h"
 #include "libgtmatch/sfx-run.pr"
 
-int gt_suffixerator(int argc, const char **argv, Env *env)
+int gt_packedindex(int argc, const char **argv, Env *env)
 {
   env_error_check(env);
-  return parseargsandcallsuffixerator(true,argc, argv, env);
+  return parseargsandcallsuffixerator(false,argc, argv, env);
 }

@@ -4,6 +4,7 @@ extern "C" {
 void wrapsfxoptions(Suffixeratoroptions *so,Env *env);
 
 int suffixeratoroptions(Suffixeratoroptions *so,
+                        bool doesa,
                         int argc,
                         const char **argv,
                         Env *env);

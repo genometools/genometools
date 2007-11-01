@@ -76,6 +76,7 @@
 #include "tools/gt_splicesiteinfo.h"
 #include "tools/gt_stat.h"
 #include "tools/gt_suffixerator.h"
+#include "tools/gt_packedindex.h"
 #include "tools/gt_uniq.h"
 #include "tools/gt_uniquesub.h"
 
@@ -204,6 +205,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "splicesiteinfo", gt_splicesiteinfo, env);
   toolbox_add(gtr->toolbox, "stat", gt_stat, env);
   toolbox_add(gtr->toolbox, "suffixerator", gt_suffixerator, env);
+  toolbox_add(gtr->toolbox, "packedindex", gt_packedindex, env);
   toolbox_add(gtr->toolbox, "mkfmindex", gt_mkfmindex, env);
   toolbox_add(gtr->toolbox, "uniq", gt_uniq, env);
   toolbox_add(gtr->toolbox, "uniquesub", gt_uniquesub, env);
