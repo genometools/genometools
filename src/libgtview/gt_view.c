@@ -194,7 +194,7 @@ int gt_view(int argc, const char **argv, Env *env)
 
       /* create gff3 output stream if -pipe was used */
       if (arguments.pipe) {
-        gff3_out_stream = gff3_out_stream_new(addintrons_stream, NULL, env);
+        gff3_out_stream = gff3_out_stream_new(last_stream, NULL, env);
         last_stream = gff3_out_stream;
       }
 
