@@ -27,9 +27,9 @@ typedef struct {
        exon_number_distribution,
        exon_length_distribution,
        intron_length_distribution;
-} Stat_arguments;
+} StatArguments;
 
-static OPrval parse_options(int *parsed_args, Stat_arguments *arguments,
+static OPrval parse_options(int *parsed_args, StatArguments *arguments,
                             int argc, const char **argv, Env *env)
 {
   OptionParser *op;
@@ -84,7 +84,7 @@ int gt_stat(int argc, const char **argv, Env *env)
   GenomeStream *gff3_in_stream, *stat_stream;
   GenomeNode *gn;
   int parsed_args, had_err;
-  Stat_arguments arguments;
+  StatArguments arguments;
   env_error_check(env);
 
   /* option parsing */
