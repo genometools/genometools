@@ -25,12 +25,6 @@
 
 #include "mrangealphabet.h"
 
-enum sourceEncType {
-  sourceUInt8,
-};
-
-#define UNDEF_UCHAR ((unsigned char)~0)
-
 struct multiRangeAlphabetEncoding
 {
   enum sourceEncType encType;

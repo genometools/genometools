@@ -51,6 +51,11 @@ typedef struct multiRangeAlphabetEncoding MRAEnc;
 
 #define UNDEF_UCHAR ((unsigned char)~0)
 
+enum sourceEncType {
+  sourceUnknown = 0,
+  sourceUInt8 = 1,
+};
+
 /**
  * \brief Create an alphabet to map a selection of unsigned characters
  * onto the resulting ranges.

@@ -99,6 +99,13 @@ enum extBitsRetrievalFlags
   EBRF_PERSISTENT_VARBITS = 1<<2,
 };
 
+struct seqStats
+{
+  Seqpos *symbolDistributionTable;
+  enum sourceEncType sourceAlphaType;
+};
+
+
 typedef struct encIdxSeq EISeq;
 
 typedef union EISHint *EISHint;

@@ -38,6 +38,8 @@
 #include <libgtmatch/sfx-outprj.pr>
 #include <libgtmatch/sfx-cmpsuf.pr>
 
+#include "biofmi2misc.h"
+#include "encidxseq.h"
 #include "suffixerator-interface.h"
 #include "suffixeratorpriv.h"
 
@@ -68,6 +70,7 @@ struct sfxInterface
   Sfxiterator *sfi;
   Alphabet *alpha;
   Measuretime *mtime;
+  struct seqStats *stats;
   Seqpos length;
   unsigned long numofsequences;
   Specialcharinfo specialcharinfo;
@@ -198,6 +201,32 @@ static void showcharacterdistribution(
   }
 }
 
+static struct seqStats *
+newSeqStatsFromCharDist(const Alphabet *alpha,
+                        const unsigned long *characterdistribution, Env *env)
+{
+  struct seqStats *stats = NULL;
+  unsigned i, mapSize;
+  stats = env_ma_malloc(env,
+                        offsetAlign(sizeof(*stats), sizeof(Seqpos))
+                        + (UINT8_MAX + 1) * sizeof(Seqpos));
+  stats->sourceAlphaType = sourceUInt8;
+  stats->symbolDistributionTable =
+    (Seqpos *)((char *)stats + offsetAlign(sizeof(*stats), sizeof(Seqpos)));
+  memset(stats->symbolDistributionTable, 0, sizeof(Seqpos) * (UINT8_MAX + 1));
+  mapSize = getmapsizeAlphabet(alpha);
+  for(i = 0; i < mapSize - 1; ++i)
+    stats->symbolDistributionTable[i] += characterdistribution[i];
+  return stats;
+}
+
+static void
+deleteSeqStats(struct seqStats *stats, Env *env)
+{
+  env_ma_free(stats, env);
+}
+  
+
 static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
 {
   FILE *al1fp;
@@ -223,6 +252,8 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
 
 #define newSfxInterfaceWithReadersErrRet()        \
   do {                                            \
+    if(iface->stats)                              \
+      deleteSeqStats(iface->stats, env);          \
     if(iface->alpha)                              \
       freeAlphabet(&iface->alpha, env);           \
     if(iface->filelengthtab)                      \
@@ -320,6 +351,8 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
   {
     showcharacterdistribution(iface->alpha,characterdistribution);
   }
+  iface->stats = newSeqStatsFromCharDist(iface->alpha,
+                                         characterdistribution, env);
   env_ma_free(characterdistribution, env);
 
   if((so->readmode == Complementmode || so->readmode == Reversecomplementmode)
@@ -429,6 +462,7 @@ deleteSfxInterface(sfxInterface *iface, Env *env)
   if(iface->alpha)
     freeAlphabet(&iface->alpha, env);
   deliverthetime(stdout, iface->mtime, NULL, env);
+  deleteSeqStats(iface->stats, env);
   freeEncodedsequence(&iface->outfileinfo.encseq, env);
   env_ma_free(iface->readers, env);
   env_ma_free(iface, env);
@@ -589,6 +623,13 @@ getSfxILength(const sfxInterface *si)
   assert(si);
   return si->length;
 }
+
+extern const struct seqStats *
+getSfxISeqStats(const sfxInterface *si)
+{
+  return si->stats;
+}
+
 
 int
 SfxIRegisterReader(sfxInterface *iface, listenerID *id,
