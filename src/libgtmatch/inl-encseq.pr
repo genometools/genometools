@@ -8,7 +8,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
 Encodedsequencescanstate *initEncodedsequencescanstate(
                                /*@unused@*/ const Encodedsequence *encseq,
                                Readmode readmode,
-                               Seqpos startpos,
+                               Startpos startpos,
                                Env *env);
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
@@ -18,8 +18,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
                                  const StrArray *filenametab,
                                  bool plainformat,
                                  Seqpos totallength,
-                                 /*@unused@*/ const Specialcharinfo
-                                                   *specialcharinfo,
+                                 /*@unused@*/ Seqpos specialranges,
                                  const Alphabet *alphabet,
                                  /*@unused@*/ const char *str_sat,
                                  Env *env);
@@ -28,7 +27,7 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
                                    /*@unused@*/ bool withrange,
                                    const Str *indexname,
                                    /*@unused@*/ Seqpos totallength,
-                                   const Specialcharinfo *specialcharinfo,
+                                   Seqpos specialranges,
                                    /*@unused@*/ unsigned int mapsize,
                                    /*@unused@*/ Verboseinfo *verboseinfo,
                                    Env *env);

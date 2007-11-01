@@ -310,7 +310,9 @@ static void showcharacterdistribution(
   }
 }
 
-static int runsuffixerator(Suffixeratoroptions *so,Verboseinfo *verboseinfo,
+static int runsuffixerator(bool doesa,
+                           Suffixeratoroptions *so,
+                           Verboseinfo *verboseinfo,
                            Env *env)
 {
   unsigned int numofchars = 0;
@@ -396,18 +398,6 @@ static int runsuffixerator(Suffixeratoroptions *so,Verboseinfo *verboseinfo,
       }
     }
   }
-  initoutfileinfo(&outfileinfo);
-  if (so->outlcptab)
-  {
-    outfileinfo.lvi = newLcpvalueiterator(encseq,so->readmode,env);
-  } else
-  {
-    outfileinfo.lvi = NULL;
-  }
-  INITOUTFILEPTR(outfileinfo.outfpsuftab,so->outsuftab,SUFTABSUFFIX);
-  INITOUTFILEPTR(outfileinfo.outfplcptab,so->outlcptab,LCPTABSUFFIX);
-  INITOUTFILEPTR(outfileinfo.outfpllvtab,so->outlcptab,LARGELCPTABSUFFIX);
-  INITOUTFILEPTR(outfileinfo.outfpbwttab,so->outbwttab,BWTTABSUFFIX);
   if (!haserr)
   {
     showverbose(verboseinfo,"specialcharacters=" FormatSeqpos,
@@ -428,9 +418,21 @@ static int runsuffixerator(Suffixeratoroptions *so,Verboseinfo *verboseinfo,
       }
     }
   }
+  initoutfileinfo(&outfileinfo);
+  if (so->outlcptab)
+  {
+    outfileinfo.lvi = newLcpvalueiterator(encseq,so->readmode,env);
+  } else
+  {
+    outfileinfo.lvi = NULL;
+  }
+  INITOUTFILEPTR(outfileinfo.outfpsuftab,so->outsuftab,SUFTABSUFFIX);
+  INITOUTFILEPTR(outfileinfo.outfplcptab,so->outlcptab,LCPTABSUFFIX);
+  INITOUTFILEPTR(outfileinfo.outfpllvtab,so->outlcptab,LARGELCPTABSUFFIX);
+  INITOUTFILEPTR(outfileinfo.outfpbwttab,so->outbwttab,BWTTABSUFFIX);
   if (!haserr)
   {
-    if (so->outsuftab || so->outbwttab || so->outlcptab)
+    if (so->outsuftab || so->outbwttab || so->outlcptab || !doesa)
     {
       if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
       {
@@ -459,20 +461,31 @@ static int runsuffixerator(Suffixeratoroptions *so,Verboseinfo *verboseinfo,
       }
       if (!haserr)
       {
-        if (suffixeratorwithoutput(
-                         &outfileinfo,
-                         specialcharinfo.specialcharacters,
-                         specialcharinfo.specialranges,
-                         encseq,
-                         so->readmode,
-                         numofchars,
-                         so->prefixlength,
-                         so->numofparts,
-                         mtime,
-                         verboseinfo,
-                         env) != 0)
+        if(doesa)
         {
-          haserr = true;
+          if (suffixeratorwithoutput(
+                           &outfileinfo,
+                           specialcharinfo.specialcharacters,
+                           specialcharinfo.specialranges,
+                           encseq,
+                           so->readmode,
+                           numofchars,
+                           so->prefixlength,
+                           so->numofparts,
+                           mtime,
+                           verboseinfo,
+                           env) != 0)
+          {
+            haserr = true;
+          }
+        } else
+        {
+          /* XXX Thomas: call the appropriate function here */
+          printf("run construction of packed index for:\n");
+          printf("indexname=%s\n",str_get(so->str_indexname));
+          printf("blocksize=%u\n",so->blockSize);
+          printf("blocks-per-bucket=%u\n",so->bucketBlocks);
+          printf("locfreq=%u\n",so->locateInterval);
         }
       }
     } else
@@ -524,14 +537,15 @@ static int runsuffixerator(Suffixeratoroptions *so,Verboseinfo *verboseinfo,
   return haserr ? -1 : 0;
 }
 
-int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
+int parseargsandcallsuffixerator(bool doesa,int argc,
+                                 const char **argv,Env *env)
 {
   Suffixeratoroptions so;
   int retval;
   bool haserr = false;
 
   env_error_check(env);
-  retval = suffixeratoroptions(&so,argc,argv,env);
+  retval = suffixeratoroptions(&so,doesa,argc,argv,env);
   if (retval == 0)
   {
     Verboseinfo *verboseinfo = newverboseinfo(so.beverbose,env);
@@ -546,7 +560,7 @@ int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
   if (retval == 0)
   {
     Verboseinfo *verboseinfo = newverboseinfo(so.beverbose,env);
-    if (runsuffixerator(&so,verboseinfo,env) < 0)
+    if (runsuffixerator(doesa,&so,verboseinfo,env) < 0)
     {
       haserr = true;
     }

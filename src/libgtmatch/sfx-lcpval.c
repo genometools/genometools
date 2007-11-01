@@ -76,7 +76,7 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
               PRINTSeqposcast(lvi->lastsuftabentry),
               PRINTSeqposcast(suftabptr[lvi->relpos]),
               cmp,
-              lcpvalue);
+              PRINTSeqposcast(lcpvalue));
       exit(EXIT_FAILURE);
     }
   }

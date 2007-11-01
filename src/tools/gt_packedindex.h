@@ -15,11 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#include "libgtcore/env.h"
-#include "libgtmatch/sfx-run.pr"
+#ifndef GT_PACKEDINDEX_H
+#define GT_PACKEDINDEX_H
 
-int gt_suffixerator(int argc, const char **argv, Env *env)
-{
-  env_error_check(env);
-  return parseargsandcallsuffixerator(true,argc, argv, env);
-}
+/* the packedindex tool */
+int gt_packedindex(int argc, const char **argv, Env*);
+
+#endif

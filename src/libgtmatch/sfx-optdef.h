@@ -43,6 +43,16 @@ typedef struct
        outlcptab,
        outbwttab,
        outdestab;
+  unsigned int blockSize;      /**< number of symbols to combine in
+                                 * one block a lookup-table
+                                 * containing
+                                 * $alphabetsize^{blockSize}$ entries is
+                                 * required so adjust with caution */
+  unsigned int bucketBlocks;   /**< number of blocks for which to
+                                 * store partial symbol sums (lower
+                                 * values increase index size and
+                                 * decrease computations for lookup) */
+  unsigned int locateInterval;
 } Suffixeratoroptions;
 
 #endif
