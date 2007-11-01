@@ -1,6 +1,7 @@
 changes in version 1.0.7 (2007-11-01):
 
 - `gt view` has new option -addintrons
+- `gt stat` has new option -exonnumberdistri
 
 
 changes in version 1.0.6 (2007-10-19):

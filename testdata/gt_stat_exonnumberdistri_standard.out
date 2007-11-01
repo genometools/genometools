@@ -1,0 +1,8 @@
+parsed feature trees: 2
+sequence regions: 1 (total length: 1497228)
+genes: 1
+mRNAs: 3
+exons: 11
+exon number distribution:
+3: 1 (prob=0.3333,cumulative=0.3333)
+4: 2 (prob=0.6667,cumulative=1.0000)
