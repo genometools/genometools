@@ -1,7 +1,8 @@
-changes in version 1.0.7 (2007-11-01):
+changes in version 1.0.7 (2007-11-02):
 
 - `gt view` has new option -addintrons
 - `gt stat` has new option -exonnumberdistri
+- `gt bioseq` has new option -seqlengthdistri
 
 
 changes in version 1.0.6 (2007-10-19):

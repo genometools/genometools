@@ -140,10 +140,17 @@ Test do
   run "cat #{$testdata}gt_bioseq_succ_2.fas | #{$memcheck} #{$bin}gt bioseq -recreate #{$testdata}gt_bioseq_succ_1.fas -"
 end
 
-Name "gt bioseq test -gc-content"
+Name "gt bioseq -gc-content"
 Keywords "gt_bioseq"
 Test do
   run "cat #{$testdata}gt_bioseq_succ_3.fas | #{$memcheck} #{$bin}gt bioseq -gc-content -"
   run "diff #{$last_stdout} #{$testdata}gt_bioseq_succ_3.gc"
+end
+
+Name "gt bioseq -seqlengthdistri"
+Keywords "gt_bioseq"
+Test do
+  run_test "#{$bin}gt bioseq -seqlengthdistri #{$testdata}sw100K1.fna"
+  run "diff #{$last_stdout} #{$testdata}gt_bioseq_seqlengthdistri.out"
 end
 

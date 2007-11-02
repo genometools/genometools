@@ -24,7 +24,8 @@ typedef struct {
   bool recreate,
        showfasta,
        gc_content,
-       stat;
+       stat,
+       seqlengthdistri;
   unsigned long showseqnum,
                 width;
 } BioseqArguments;
@@ -69,6 +70,12 @@ static OPrval parse_options(int *parsed_args, BioseqArguments *arguments,
   option_stat = option_new_bool("stat", "show sequence statistics",
                                 &arguments->stat, false, env);
   option_parser_add_option(op, option_stat, env);
+
+  /* -seqlengthdistri */
+  option = option_new_bool("seqlengthdistri", "show sequence length "
+                           "distribution", &arguments->seqlengthdistri, false,
+                           env);
+  option_parser_add_option(op, option, env);
 
   /* -width */
   option_width = option_new_ulong("width", "set output width for showing of "
@@ -145,6 +152,9 @@ int gt_bioseq(int argc, const char **argv, Env *env)
 
     if (!had_err && arguments.stat)
       bioseq_show_stat(bioseq);
+
+    if (!had_err && arguments.seqlengthdistri)
+      bioseq_show_seqlengthdistri(bioseq, env);
 
     /* free */
     bioseq_delete(bioseq, env);
