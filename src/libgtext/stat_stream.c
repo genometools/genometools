@@ -43,11 +43,7 @@ static int stat_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
     if (*gn) {
       stat_stream->number_of_trees++;
       had_err = genome_node_accept(*gn, stat_stream->stat_visitor, env);
-      if (had_err) {
-        /* we own the node -> delete it */
-        genome_node_rec_delete(*gn, env);
-        *gn = NULL;
-      }
+      assert(!had_err); /* the status visitor is sane */
     }
   }
   return had_err;
