@@ -17,6 +17,5 @@
 
 void removeduplicates(ArrayLTRboundaries *arrayLTRboundaries);
 
-void removeoverlapswithlowersimilarity(
-  ArrayLTRboundaries *arrayLTRboundaries,
-  bool nooverlapallowed);
+void removeoverlapswithlowersimilarity(ArrayLTRboundaries *arrayLTRboundaries,
+                                       bool nooverlapallowed);
