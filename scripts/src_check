@@ -31,10 +31,63 @@ function err(filename, line_number, msg)
   error_code = 1
 end
 
+function errf(filename, msg)
+  io.stderr:write(string.format("%s: %s\n", filename, msg))
+  error_code = 1
+end
+
+function check_header_file(fn, filecontent)
+  local ifndef = filecontent:match("^.-(#ifndef.-)\n")
+  local define = filecontent:match("^.-#ifndef.-\n(#define.-)\n")
+  local endif  = filecontent:match("\n(#endif)$")
+  local define_name
+  local had_err = false
+
+  if fn:find("/") then
+    define_name = fn:match("^.*/(.+)$")
+  else
+    define_name = fn;
+  end
+  define_name = define_name:upper()
+  define_name = define_name:gsub("%.", "_")
+  define_name = define_name:gsub("%-", "_")
+
+  if (ifndef) then
+    local given_name = ifndef:match("#ifndef (.+)")
+    if not (given_name == define_name) then
+      errf(fn, "first #ifndef should be named '" .. define_name .. "' (is '" ..
+           given_name .. "')")
+    end
+  else
+    errf(fn, "does not have #ifndef " .. define_name ..  " line")
+  end
+
+  if (define) then
+    local given_name = define:match("#define (.+)")
+    if not (given_name == define_name) then
+      errf(fn, "first #define should be named '" .. define_name .. "' (is '" ..
+           given_name .. "')")
+    end
+  else
+    errf(fn, "does not have #define " .. define_name ..
+             " line after first #ifndef line")
+  end
+
+  if not endif then
+    errf(fn, "does not end with plain #endif line")
+  end
+end
+
 for i, fn in ipairs(arg) do -- iterate over all files
   -- reset per file variables
   local empty_line_found = false
   local ln = 1 -- the line number
+  local header_file = false
+  local filelines = {}
+
+  if string.find(fn, "%.h$") then
+    header_file = true
+  end
 
   for l in io.lines(fn) do -- iterate over all lines
     -- check for unnecessary blanks
@@ -86,8 +139,18 @@ for i, fn in ipairs(arg) do -- iterate over all files
     else
       empty_line_found = false
     end
+
+    if (header_file) then
+      filelines[ln] = l
+    end
+
     -- increate line number
     ln = ln + 1
+  end
+
+  if (header_file) then
+    local filecontent = table.concat(filelines, "\n")
+    check_header_file(fn, filecontent)
   end
 end
 
