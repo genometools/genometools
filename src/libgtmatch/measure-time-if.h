@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MEASURE_TIME_H
-#define MEASURE_TIME_H
+#ifndef MEASURE_TIME_IF_H
+#define MEASURE_TIME_IF_H
 #include <stdio.h>
 #include "libgtcore/env.h"
 

@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef ENCSEQDEF_H
-#define ENCSEQDEF_H
+#ifndef ENCSEQ_DEF_H
+#define ENCSEQ_DEF_H
 
 #include "libgtcore/chardef.h"
 #include "libgtcore/str.h"

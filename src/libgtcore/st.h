@@ -3,9 +3,8 @@
 
 /* @(#) st.h 5.1 89/12/14 */
 
-#ifndef ST_INCLUDED
-
-#define ST_INCLUDED
+#ifndef ST_H
+#define ST_H
 
 #include "libgtcore/env.h"
 
@@ -56,4 +55,4 @@ st_table* st_copy(st_table*, Env*);
 
 int st_strhash(void);
 
-#endif /* ST_INCLUDED */
+#endif

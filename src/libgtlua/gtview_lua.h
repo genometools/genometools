@@ -16,7 +16,7 @@
 */
 
 #ifndef GTVIEW_LUA_H
-#define  GTVIEW_LUA_H
+#define GTVIEW_LUA_H
 
 #include "lua.h"
 

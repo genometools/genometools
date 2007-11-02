@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef VERBOSE_H
-#define VERBOSE_H
+#ifndef VERBOSE_DEF_H
+#define VERBOSE_DEF_H
 
 #include "libgtcore/env.h"
 

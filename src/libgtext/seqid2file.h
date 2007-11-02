@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SEQID2FILEOPTIONS_H
-#define SEQID2FILEOPTIONS_H
+#ifndef SEQID2FILE_H
+#define SEQID2FILE_H
 
 #include "libgtcore/option.h"
 #include "libgtext/regionmapping.h"

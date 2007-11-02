@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef COMBINATORICS_H_INCLUDED
-#define COMBINATORICS_H_INCLUDED
+#ifndef COMBINATORICS_H
+#define COMBINATORICS_H
 
 #include <assert.h>
 
@@ -122,4 +122,4 @@ iPow(unsigned long long x, unsigned i)
    return result;
 }
 
-#endif /* COMBINATORICS_H_INCLUDED */
+#endif

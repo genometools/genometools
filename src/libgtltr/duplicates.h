@@ -15,7 +15,12 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#ifndef DUPLICATES_H
+#define DUPLICATES_H
+
 void removeduplicates(ArrayLTRboundaries *arrayLTRboundaries);
 
 void removeoverlapswithlowersimilarity(ArrayLTRboundaries *arrayLTRboundaries,
                                        bool nooverlapallowed);
+
+#endif

@@ -15,8 +15,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LCPVALITERATOR_H
-#define LCPVALITERATOR_H
+#ifndef SFX_LCPVAL_H
+#define SFX_LCPVAL_H
+
 #include "libgtcore/env.h"
 #include "seqpos-def.h"
 #include "readmode-def.h"

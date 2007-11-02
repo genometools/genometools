@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DATAALIGN_H_INCLUDED
-#define DATAALIGN_H_INCLUDED
+#ifndef DATAALIGN_H
+#define DATAALIGN_H
 
 /*
  * functionality to layout data at correct alignment (=> fewer
@@ -41,4 +41,4 @@ offsetAlign(size_t offset, size_t sizeOfVal2Align)
   return roundUp(offset, alignBase);
 }
 
-#endif  /* DATAALIGN_H_INCLUDED */
+#endif

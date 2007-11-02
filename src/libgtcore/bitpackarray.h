@@ -14,8 +14,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef BITPACKARRAY_H_INCLUDED
-#define BITPACKARRAY_H_INCLUDED
+#ifndef BITPACKARRAY_H
+#define BITPACKARRAY_H
+
 /**
  * \file bitpackarray.h
  * \brief The class presented in this file encapsulates a bitstring in
@@ -141,4 +142,4 @@ bpaGetUInt64(const BitPackArray *array, BitOffset index)
 extern int
 bitPackArray_unit_test(Env *env);
 
-#endif /* BITPACKARRAY_H_INCLUDED */
+#endif
