@@ -41,7 +41,8 @@ static int testscanatpos(const Encodedsequence *encseq,
   srand48(42349421);
   for(trial = 0; !haserr && trial < trials; trial++)
   {
-    startpos = (Seqpos) (drand48() * (double) totallength);
+    startpos = (Seqpos) (drand48() * (double) totallength); /* XXX */
+    startpos = 37817;
     printf("trial %lu at " FormatSeqpos "\n",trial,PRINTSeqposcast(startpos));
     esr = initEncodedsequencescanstate(encseq,readmode,startpos,env);
     for (pos=startpos; !haserr && pos < totallength; pos++)
@@ -172,7 +173,7 @@ int testencodedsequence(const StrArray *filenametab,
   if(trials > 0)
   {
     if(testscanatpos(encseq,
-                     Forwardmode /* XXX readmode */,
+                     Reversemode, /*Forwardmode XXX readmode */
                      trials,
                      env) != 0)
     {
