@@ -40,7 +40,7 @@ struct extSuffixeratorOptions
 };
 
 static void
-initSuffixeratorOptions(struct extSuffixeratorOptions *eso, Env *env);
+initExtSuffixeratorOptions(struct extSuffixeratorOptions *eso, Env *env);
 
 static void
 destructSuffixeratorOptions(struct extSuffixeratorOptions *eso, Env *env);
@@ -58,7 +58,7 @@ main(int argc, const char *argv[])
 
   env = env_new();
   
-  initSuffixeratorOptions(&eso, env);
+  initExtSuffixeratorOptions(&eso, env);
   
   switch (parse_options(&numOptionArgs, &eso, argc, argv, env))
   {
@@ -121,10 +121,14 @@ main(int argc, const char *argv[])
   {
     sfxInterface *si;
     BWTSeq *bwtSeq;
-    if(!(si = newSfxInterface(&eso.so, env)))
+    Verboseinfo *verbosity;
+    /* FIXME: handle verbosity in a more sane fashion */
+    verbosity = newverboseinfo(false, env);
+    if(!(si = newSfxInterface(&eso.so, verbosity, env)))
     {
       fputs("Index creation failed.\n", stderr);
       destructSuffixeratorOptions(&eso, env);
+      freeverboseinfo(&verbosity, env);
       env_delete(env);
       return EXIT_FAILURE;      
     }
@@ -134,10 +138,12 @@ main(int argc, const char *argv[])
     {
       fputs("Index creation failed.\n", stderr);
       deleteSfxInterface(si, env);
+      freeverboseinfo(&verbosity, env);
       destructSuffixeratorOptions(&eso, env);
       env_delete(env);
       return EXIT_FAILURE;      
     }
+    freeverboseinfo(&verbosity, env);
     deleteBWTSeq(bwtSeq, env);
     deleteSfxInterface(si, env);
   }
@@ -147,7 +153,7 @@ main(int argc, const char *argv[])
 }
 
 static void
-initSuffixeratorOptions(struct extSuffixeratorOptions *eso, Env *env)
+initExtSuffixeratorOptions(struct extSuffixeratorOptions *eso, Env *env)
 {
   eso->so.isdna = false;
   eso->so.isprotein = false;
@@ -156,9 +162,6 @@ initSuffixeratorOptions(struct extSuffixeratorOptions *eso, Env *env)
   eso->so.str_smap = str_new(env);
   eso->so.str_sat = str_new(env);
   eso->so.prefixlength = PREFIXLENGTH_AUTOMATIC;
-  eso->bwtParam.blockEncParams.blockSize = 8;
-  eso->bwtParam.blockEncParams.bucketBlocks = 16;
-  eso->locateInterval = 0;
 }
 
 static void
@@ -290,6 +293,12 @@ parse_options(int *parsed_args, struct extSuffixeratorOptions *eso,
   option = option_new_bool("des",
                            "output sequence descriptions to file ",
                            &so->outdestab,
+                           false,env);
+  option_parser_add_option(op, option, env);
+
+  option = option_new_bool("v",
+                           "be verbose ",
+                           &so->beverbose,
                            false,env);
   option_parser_add_option(op, option, env);
 

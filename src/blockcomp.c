@@ -55,6 +55,8 @@
 #endif /* HAVE_SYS_MMAN_H */
 
 #include <libgtcore/bitpackstring.h>
+#include <libgtcore/combinatorics.h>
+#include <libgtcore/dataalign.h>
 #include <libgtcore/env.h>
 #include <libgtcore/minmax.h>
 #include <libgtcore/str.h>
@@ -62,8 +64,6 @@
 #include <libgtmatch/seqpos-def.h>
 #include <libgtmatch/esa-map.pr>
 
-#include "biofmi2.h"
-#include "biofmi2misc.h"
 #include "encidxseq.h"
 #include "encidxseqpriv.h"
 #include "seqranges.h"
@@ -1737,6 +1737,22 @@ deleteCompositionList(struct compList *clist, Env *env)
 #endif
 
 #if DEBUG > 1
+/**
+ * Compute number of digits a value would require when displayed in
+ * selected number system (i.e. 2=binary, 10=decimal).
+ * @param d value to be displayed
+ * @param base number of symbols in output alphabet
+ * @return number of digits required for output
+ */
+static inline int
+digitPlaces(long d, int base)
+{
+  int l=1;
+  while(d/=base)
+    ++l;
+  return l;
+}
+
 static void
 printComposition(FILE *fp, const unsigned *composition,
                  Symbol numSyms, unsigned blockSize)

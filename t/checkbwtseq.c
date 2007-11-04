@@ -46,9 +46,7 @@
 #include <libgtmatch/alphadef.h>
 #include <libgtmatch/sarr-def.h>
 #include <libgtmatch/enum-patt-def.h>
-#include <libgtmatch/enum-patt.pr>
 #include <libgtmatch/esa-mmsearch-def.h>
-#include <libgtmatch/esa-mmsearch.pr>
 #include <libgtmatch/esa-map.pr>
 
 

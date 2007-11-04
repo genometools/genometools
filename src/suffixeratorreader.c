@@ -22,13 +22,15 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include <libgtcore/dataalign.h>
 #include <libgtcore/filelengthvalues.h>
 #include <libgtcore/minmax.h>
-#include "libgtcore/seqiterator.h"
+#include <libgtcore/seqiterator.h>
 #include <libgtcore/str.h>
 #include <libgtcore/strarray.h>
 #include <libgtmatch/seqpos-def.h>
 #include <libgtcore/symboldef.h>
+#include <libgtmatch/verbose-def.h>
 #include <libgtmatch/fillsci.pr>
 #include <libgtmatch/opensfxfile.pr>
 #include <libgtmatch/sfx-lcpval.h>
@@ -38,7 +40,7 @@
 #include <libgtmatch/sfx-outprj.pr>
 #include <libgtmatch/sfx-cmpsuf.pr>
 
-#include "biofmi2misc.h"
+//#include "biofmi2misc.h"
 #include "encidxseq.h"
 #include "suffixerator-interface.h"
 #include "suffixeratorpriv.h"
@@ -102,10 +104,11 @@ sfxIReadAdvance(sfxInterface *iface,
 
 
 extern sfxInterface *
-newSfxInterface(Suffixeratoroptions *so,
+newSfxInterface(Suffixeratoroptions *so, Verboseinfo *verbosity,
+
                 Env *env)
 {
-  return newSfxInterfaceWithReaders(so, 0, NULL, NULL, env);
+  return newSfxInterfaceWithReaders(so, 0, NULL, NULL, verbosity, env);
 }
 
 static void initOutfileInfo(Outfileinfo *outfileinfo)
@@ -121,86 +124,27 @@ static void initOutfileInfo(Outfileinfo *outfileinfo)
   outfileinfo->longest.valueseqpos = 0;
 }
 
-static unsigned long *initcharacterdistribution(const Alphabet *alpha,Env *env)
-{
-  unsigned long *characterdistribution;
-  unsigned int mapsize, idx;
+/*==================================================================
+ *  Functions copied from genometools (because not exported)
+ */
+static int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Outfileinfo *outfileinfo,
+                       Env *env);
+static int suftab2file(Outfileinfo *outfileinfo,
+                       const Seqpos *suftab,
+                       Readmode readmode,
+                       Seqpos numberofsuffixes,
+                       Env *env);
+static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env);
+static unsigned long *initcharacterdistribution(const Alphabet *alpha,Env *env);
 
-  mapsize = getmapsizeAlphabet(alpha);
-  characterdistribution = env_ma_malloc(env,
-                                        sizeof(unsigned long) * (mapsize-1));
-  for (idx=0; idx<mapsize-1; idx++)
-  {
-    characterdistribution[idx] = 0;
-  }
-  return characterdistribution;
-}
+static void
+showcharacterdistribution(const  Alphabet *alpha,
+                          const unsigned long *characterdistribution,
+                          Verboseinfo *verboseinfo);
 
-static int outputsequencedescription(const Str *indexname,
-                                     const StrArray *filenametab,
-                                     Env *env)
-{
-  FILE *desfp;
-  bool haserr = false;
-
-  desfp = opensfxfile(indexname,DESTABSUFFIX,"wb",env);
-  if (desfp == NULL)
-  {
-    haserr = true;
-  } else
-  {
-    SeqIterator *seqit;
-    char *desc = NULL;
-    unsigned long seqlen;
-    int retval;
-
-    seqit = seqiterator_new(filenametab,NULL,false,env);
-    while (!haserr)
-    {
-      retval = seqiterator_next(seqit,
-                                NULL,
-                                &seqlen,
-                                &desc,
-                                env);
-      if (retval < 0)
-      {
-        haserr = true;
-        break;
-      }
-      if (retval == 0)
-      {
-        break;
-      }
-      if (fputs(desc,desfp) == EOF)
-      {
-        env_error_set(env,"cannot write description to file %s.%s",
-                          str_get(indexname),DESTABSUFFIX);
-        haserr = true;
-      }
-      (void) putc((int) '\n',desfp);
-      env_ma_free(desc, env);
-    }
-    env_fa_xfclose(desfp,env);
-    seqiterator_delete(seqit,env);
-  }
-  return haserr ? -1 : 0;
-}
-
-static void showcharacterdistribution(
-                   const  Alphabet *alpha,
-                   const unsigned long *characterdistribution)
-{
-  unsigned int mapsize, idx;
-
-  mapsize = getmapsizeAlphabet(alpha);
-  assert(characterdistribution != NULL);
-  for (idx=0; idx<mapsize-1; idx++)
-  {
-    printf("# ocurrences(%c)=%lu\n",(int) getprettysymbol(alpha,idx),
-                                    characterdistribution[idx]);
-  }
-}
-
+/*==================================================================
+ *  Function definitions belonging to biofmi2
+ */
 static struct seqStats *
 newSeqStatsFromCharDist(const Alphabet *alpha,
                         const unsigned long *characterdistribution, Env *env)
@@ -226,27 +170,6 @@ deleteSeqStats(struct seqStats *stats, Env *env)
   env_ma_free(stats, env);
 }
   
-
-static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
-{
-  FILE *al1fp;
-  bool haserr = false;
-
-  env_error_check(env);
-  al1fp = opensfxfile(indexname,ALPHABETFILESUFFIX,"wb",env);
-  if (al1fp == NULL)
-  {
-    haserr = true;
-  }
-  if (!haserr)
-  {
-    outputalphabet(al1fp,alpha);
-    env_fa_xfclose(al1fp,env);
-  }
-  return haserr ? -1 : 0;
-}
-
-
 #define INITOUTFILEPTR(PTR,FLAG,SUFFIX)                                 \
   ((FLAG)?(PTR = opensfxfile(so->str_indexname,SUFFIX,"wb",env)):((void*)1))
 
@@ -267,7 +190,8 @@ extern sfxInterface *
 newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                            size_t numReaders,
                            enum sfxDataRequest *requestors,
-                           listenerID *ids, Env *env)
+                           listenerID *ids,
+                           Verboseinfo *verbosity, Env *env)
 {
   Encodedsequence *encseq = NULL;
   unsigned long *characterdistribution = NULL;
@@ -291,12 +215,13 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
   if (!so->isplain)
     characterdistribution = initcharacterdistribution(iface->alpha,env);
 
-  if (fasta2sequencekeyvalues(&iface->numofsequences, &iface->length,
+  if (fasta2sequencekeyvalues(iface->so.str_indexname,
+                              &iface->numofsequences, &iface->length,
                               &iface->specialcharinfo, so->filenametab,
                               &iface->filelengthtab,
                               getsymbolmapAlphabet(iface->alpha),
-                              so->isplain, characterdistribution,
-                              env) != 0)
+                              so->isplain, so->outdestab, characterdistribution,
+                              verbosity, env) != 0)
     newSfxInterfaceWithReadersErrRet();
 
   ++iface->length;
@@ -309,17 +234,13 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
 
   if(!(encseq = files2encodedsequence(
          true, so->filenametab, so->isplain,
-         iface->length - 1, &iface->specialcharinfo, iface->alpha,
+         iface->length - 1, iface->specialcharinfo.specialranges, iface->alpha,
          str_length(so->str_sat) > 0 ? str_get(so->str_sat) : NULL,
-         env)))
+         verbosity, env)))
     newSfxInterfaceWithReadersErrRet();
 
   if (so->outtistab
       && flushencseqfile(so->str_indexname, encseq, env) != 0)
-    newSfxInterfaceWithReadersErrRet();
-
-  if(so->outdestab
-     && outputsequencedescription(so->str_indexname, so->filenametab, env))
     newSfxInterfaceWithReadersErrRet();
 
   initOutfileInfo(&iface->outfileinfo);
@@ -343,13 +264,13 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                      so->outbwttab, BWTTABSUFFIX))
     newSfxInterfaceWithReadersErrRet();
 
-  printf("# specialcharacters=" FormatSeqpos "\n",
-         PRINTSeqposcast(iface->specialcharinfo.specialcharacters));
-  printf("# specialranges=" FormatSeqpos "\n",
-         PRINTSeqposcast(iface->specialcharinfo.specialranges));
+  showverbose(verbosity,"specialcharacters=" FormatSeqpos,
+              PRINTSeqposcast(iface->specialcharinfo.specialcharacters));
+  showverbose(verbosity,"specialranges=" FormatSeqpos,
+              PRINTSeqposcast(iface->specialcharinfo.specialranges));
   if (!so->isplain)
   {
-    showcharacterdistribution(iface->alpha,characterdistribution);
+    showcharacterdistribution(iface->alpha,characterdistribution, verbosity);
   }
   iface->stats = newSeqStatsFromCharDist(iface->alpha,
                                          characterdistribution, env);
@@ -369,8 +290,9 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
     {
       iface->so.prefixlength = so->prefixlength =
         recommendedprefixlength(numofchars, iface->length - 1);
-      printf("# automatically determined prefixlength = %u\n",
-             so->prefixlength);
+      showverbose(verbosity,
+                  "automatically determined prefixlength = %u",
+                  so->prefixlength);
     }
     else
     {
@@ -401,7 +323,8 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                                    iface->specialcharinfo.specialranges,
                                    encseq, so->readmode,
                                    numofchars, so->prefixlength,
-                                   so->numofparts, iface->mtime, env)))
+                                   so->numofparts, iface->mtime,
+                                   verbosity, env)))
     newSfxInterfaceWithReadersErrRet();
   iface->allRequests = SFX_REQUEST_NONE;
   iface->specialsuffixes = false;
@@ -426,7 +349,6 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
   iface->lastGeneratedSufTabSegment = iface->prevGeneratedSufTabSegments = NULL;
   return iface;
 }
-
 
 extern int
 deleteSfxInterface(sfxInterface *iface, Env *env)
@@ -469,133 +391,6 @@ deleteSfxInterface(sfxInterface *iface, Env *env)
   return !had_err;
 }
 
-static int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Outfileinfo *outfileinfo,
-                       Env *env)
-{
-  Uchar outvalue;
-  bool haserr = false;
-
-  if (lcpvalue >= (Seqpos) UCHAR_MAX)
-  {
-    Largelcpvalue largelcpvalue;
-
-    outfileinfo->numoflargelcpvalues++;
-    largelcpvalue.position = outfileinfo->pageoffset + pos;
-    largelcpvalue.value = lcpvalue;
-    if (fwrite(&largelcpvalue,sizeof (Largelcpvalue),(size_t) 1,
-               outfileinfo->outfpllvtab) != (size_t) 1)
-    {
-      env_error_set(env,"cannot write 1 item of size %lu: "
-                        "errormsg=\"%s\"",
-                        (unsigned long) sizeof (Largelcpvalue),
-                        strerror(errno));
-      haserr = true;
-    }
-    outvalue = (Uchar) UCHAR_MAX;
-  } else
-  {
-    outvalue = (Uchar) lcpvalue;
-  }
-  if (!haserr && fwrite(&outvalue,sizeof (Uchar),(size_t) 1,
-                        outfileinfo->outfplcptab) != (size_t) 1)
-  {
-    env_error_set(env,"cannot write 1 item of size %lu: "
-                      "errormsg=\"%s\"",
-                      (unsigned long) sizeof (Uchar),
-                      strerror(errno));
-    haserr = true;
-  }
-  return haserr ? -1 : 0;
-}
-
-static int suftab2file(Outfileinfo *outfileinfo,
-                       const Seqpos *suftab,
-                       Readmode readmode,
-                       Seqpos numberofsuffixes,
-                       Env *env)
-{
-  bool haserr = false;
-
-  env_error_check(env);
-  if (outfileinfo->outfpsuftab != NULL)
-  {
-    if (fwrite(suftab,
-              sizeof (*suftab),
-              (size_t) numberofsuffixes,
-              outfileinfo->outfpsuftab)
-              != (size_t) numberofsuffixes)
-    {
-      env_error_set(env,"cannot write " FormatSeqpos " items of size %u: "
-                    "errormsg=\"%s\"",
-           PRINTSeqposcast(numberofsuffixes),
-           (unsigned int) sizeof (*suftab),
-           strerror(errno));
-      haserr = true;
-    }
-  }
-  if (!haserr)
-  {
-    Seqpos startpos, lcpvalue, pos;
-    Uchar cc = 0;
-
-    for (pos=0; pos < numberofsuffixes; pos++)
-    {
-      startpos = suftab[pos];
-      if (startpos == 0)
-      {
-        cc = (Uchar) UNDEFBWTCHAR;
-        if (outfileinfo->longest.defined)
-        {
-          env_error_set(env,"longest = " FormatSeqpos " is already defined",
-                        PRINTSeqposcast(outfileinfo->longest.valueseqpos));
-          haserr = true;
-          break;
-        }
-        outfileinfo->longest.defined = true;
-        outfileinfo->longest.valueseqpos = outfileinfo->pageoffset + pos;
-      } else
-      {
-        if (outfileinfo->outfpbwttab != NULL)
-        {
-          cc = getencodedchar(outfileinfo->encseq,startpos - 1,readmode);
-        }
-      }
-      if (outfileinfo->outfpbwttab != NULL)
-      {
-        if (fwrite(&cc,sizeof (Uchar),(size_t) 1,outfileinfo->outfpbwttab)
-                    != (size_t) 1)
-        {
-          env_error_set(env,"cannot write 1 item of size %lu: "
-                            "errormsg=\"%s\"",
-                          (unsigned long) sizeof (Uchar),
-                          strerror(errno));
-          haserr = true;
-          break;
-        }
-      }
-      if (outfileinfo->outfplcptab != NULL)
-      {
-        lcpvalue = nextLcpvalueiterator(outfileinfo->lvi,
-                                        (outfileinfo->pageoffset == 0)
-                                          ? true : false,
-                                        suftab,
-                                        numberofsuffixes);
-        if (outlcpvalue(lcpvalue,pos,outfileinfo,env) != 0)
-        {
-          haserr = true;
-          break;
-        }
-        if (outfileinfo->maxbranchdepth < lcpvalue)
-        {
-          outfileinfo->maxbranchdepth = lcpvalue;
-        }
-      }
-    }
-  }
-  outfileinfo->pageoffset += numberofsuffixes;
-  return haserr ? -1 : 0;
-}
-
 const Uchar *
 SfxIReadESQRange(sfxInterface *iface, Seqpos start, Seqpos len,
                  Uchar *dest)
@@ -629,7 +424,6 @@ getSfxISeqStats(const sfxInterface *si)
 {
   return si->stats;
 }
-
 
 int
 SfxIRegisterReader(sfxInterface *iface, listenerID *id,
@@ -908,4 +702,185 @@ sfxIReadAdvance(sfxInterface *iface,
   return lengthOfExtension;
 }
 
+
+/*==================================================================
+ *  Functions copied from genometools (because not exported)
+ */
+static int outlcpvalue(Seqpos lcpvalue,Seqpos pos,Outfileinfo *outfileinfo,
+                       Env *env)
+{
+  Uchar outvalue;
+  bool haserr = false;
+
+  if (lcpvalue >= (Seqpos) UCHAR_MAX)
+  {
+    Largelcpvalue largelcpvalue;
+
+    outfileinfo->numoflargelcpvalues++;
+    largelcpvalue.position = outfileinfo->pageoffset + pos;
+    largelcpvalue.value = lcpvalue;
+    if (fwrite(&largelcpvalue,sizeof (Largelcpvalue),(size_t) 1,
+               outfileinfo->outfpllvtab) != (size_t) 1)
+    {
+      env_error_set(env,"cannot write 1 item of size %lu: "
+                        "errormsg=\"%s\"",
+                        (unsigned long) sizeof (Largelcpvalue),
+                        strerror(errno));
+      haserr = true;
+    }
+    outvalue = (Uchar) UCHAR_MAX;
+  } else
+  {
+    outvalue = (Uchar) lcpvalue;
+  }
+  if (!haserr && fwrite(&outvalue,sizeof (Uchar),(size_t) 1,
+                        outfileinfo->outfplcptab) != (size_t) 1)
+  {
+    env_error_set(env,"cannot write 1 item of size %lu: "
+                      "errormsg=\"%s\"",
+                      (unsigned long) sizeof (Uchar),
+                      strerror(errno));
+    haserr = true;
+  }
+  return haserr ? -1 : 0;
+}
+
+static int suftab2file(Outfileinfo *outfileinfo,
+                       const Seqpos *suftab,
+                       Readmode readmode,
+                       Seqpos numberofsuffixes,
+                       Env *env)
+{
+  bool haserr = false;
+
+  env_error_check(env);
+  if (outfileinfo->outfpsuftab != NULL)
+  {
+    if (fwrite(suftab,
+              sizeof (*suftab),
+              (size_t) numberofsuffixes,
+              outfileinfo->outfpsuftab)
+              != (size_t) numberofsuffixes)
+    {
+      env_error_set(env,"cannot write " FormatSeqpos " items of size %u: "
+                    "errormsg=\"%s\"",
+           PRINTSeqposcast(numberofsuffixes),
+           (unsigned int) sizeof (*suftab),
+           strerror(errno));
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    Seqpos startpos, lcpvalue, pos;
+    Uchar cc = 0;
+
+    for (pos=0; pos < numberofsuffixes; pos++)
+    {
+      startpos = suftab[pos];
+      if (startpos == 0)
+      {
+        cc = (Uchar) UNDEFBWTCHAR;
+        if (outfileinfo->longest.defined)
+        {
+          env_error_set(env,"longest = " FormatSeqpos " is already defined",
+                        PRINTSeqposcast(outfileinfo->longest.valueseqpos));
+          haserr = true;
+          break;
+        }
+        outfileinfo->longest.defined = true;
+        outfileinfo->longest.valueseqpos = outfileinfo->pageoffset + pos;
+      } else
+      {
+        if (outfileinfo->outfpbwttab != NULL)
+        {
+          cc = getencodedchar(outfileinfo->encseq,startpos - 1,readmode);
+        }
+      }
+      if (outfileinfo->outfpbwttab != NULL)
+      {
+        if (fwrite(&cc,sizeof (Uchar),(size_t) 1,outfileinfo->outfpbwttab)
+                    != (size_t) 1)
+        {
+          env_error_set(env,"cannot write 1 item of size %lu: "
+                            "errormsg=\"%s\"",
+                          (unsigned long) sizeof (Uchar),
+                          strerror(errno));
+          haserr = true;
+          break;
+        }
+      }
+      if (outfileinfo->outfplcptab != NULL)
+      {
+        lcpvalue = nextLcpvalueiterator(outfileinfo->lvi,
+                                        (outfileinfo->pageoffset == 0)
+                                          ? true : false,
+                                        suftab,
+                                        numberofsuffixes);
+        if (outlcpvalue(lcpvalue,pos,outfileinfo,env) != 0)
+        {
+          haserr = true;
+          break;
+        }
+        if (outfileinfo->maxbranchdepth < lcpvalue)
+        {
+          outfileinfo->maxbranchdepth = lcpvalue;
+        }
+      }
+    }
+  }
+  outfileinfo->pageoffset += numberofsuffixes;
+  return haserr ? -1 : 0;
+}
+
+static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
+{
+  FILE *al1fp;
+  bool haserr = false;
+
+  env_error_check(env);
+  al1fp = opensfxfile(indexname,ALPHABETFILESUFFIX,"wb",env);
+  if (al1fp == NULL)
+  {
+    haserr = true;
+  }
+  if (!haserr)
+  {
+    outputalphabet(al1fp,alpha);
+    env_fa_xfclose(al1fp,env);
+  }
+  return haserr ? -1 : 0;
+}
+
+static unsigned long *initcharacterdistribution(const Alphabet *alpha,Env *env)
+{
+  unsigned long *characterdistribution;
+  unsigned int mapsize, idx;
+
+  mapsize = getmapsizeAlphabet(alpha);
+  characterdistribution = env_ma_malloc(env,
+                                        sizeof(unsigned long) * (mapsize-1));
+  for (idx=0; idx<mapsize-1; idx++)
+  {
+    characterdistribution[idx] = 0;
+  }
+  return characterdistribution;
+}
+
+static void showcharacterdistribution(
+                   const  Alphabet *alpha,
+                   const unsigned long *characterdistribution,
+                   Verboseinfo *verboseinfo)
+{
+  unsigned int mapsize, idx;
+
+  mapsize = getmapsizeAlphabet(alpha);
+  assert(characterdistribution != NULL);
+  for (idx=0; idx<mapsize-1; idx++)
+  {
+    showverbose(verboseinfo,"occurrences(%c)=%lu",
+                (int) getprettysymbol(alpha,idx),
+                characterdistribution[idx]);
+  }
+}
 

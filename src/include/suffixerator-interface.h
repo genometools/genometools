@@ -46,13 +46,17 @@ enum sfxDataRequest {
 };
 
 extern sfxInterface *
-newSfxInterface(Suffixeratoroptions *so, Env *env);
+newSfxInterface(Suffixeratoroptions *so,
+                Verboseinfo *verbosity,
+                Env *env);
 
 extern sfxInterface *
 newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                            size_t numReaders,
                            enum sfxDataRequest *requests,
-                           listenerID *ids, Env *env);
+                           listenerID *ids,
+                           Verboseinfo *verbosity,
+                           Env *env);
 
 extern int
 deleteSfxInterface(sfxInterface *iface, Env *env);
