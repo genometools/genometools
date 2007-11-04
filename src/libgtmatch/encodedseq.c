@@ -267,12 +267,13 @@ struct Encodedsequencescanstate
   unsigned int maxspecialtype;  /* maximal value of special type */
   Sequencerange previousrange,  /* previous range of wildcards */
                 currentrange;   /* current range of wildcards */
-  bool hasrange,        /* there is some range */
+  bool morepagesleft,
+       hasrange,        /* there is some range */
        hasprevious,     /* there is some previous range */
        hascurrent;      /* there is some current range */
 };
 
-#define DEBUG
+#undef DEBUG
 
 #ifdef DEBUG
 static void showsequencerange(const Sequencerange *range)
@@ -1003,17 +1004,6 @@ static void showallspecialpositions(const Encodedsequence *encseq)
 
 #endif
 
-static unsigned long calctranspagenum(const Encodedsequencescanstate *esr,
-                                      bool moveforward,
-                                      unsigned long pagenum)
-{
-  if (moveforward)
-  {
-    return pagenum;
-  }
-  return esr->numofspecialcells - pagenum - 1;
-}
-
 /*
    find next not empty page and set firstcell to the first index in the
    page and lastcell to the last plus 1 index of the page.
@@ -1023,20 +1013,38 @@ static bool nextnonemptypage(const Encodedsequence *encseq,
                              Encodedsequencescanstate *esr,
                              bool moveforward)
 {
-  unsigned long endpos0, endpos1, transpagenum;
+  unsigned long endpos0, endpos1, pagenum;
 
-  while (esr->nextpage < esr->numofspecialcells)
+  while (esr->morepagesleft)
   {
-    transpagenum = calctranspagenum(esr,moveforward,esr->nextpage);
-    esr->nextpage++;
-    if (transpagenum == 0)
+    pagenum = esr->nextpage;
+    if(moveforward)
+    {
+      if(esr->nextpage == esr->numofspecialcells-1)
+      {
+        esr->morepagesleft = false;
+      } else
+      {
+        esr->nextpage++;
+      }
+    } else
+    {
+      if(esr->nextpage == 0)
+      {
+        esr->morepagesleft = false;
+      } else
+      {
+        esr->nextpage--;
+      }
+    }
+    if (pagenum == 0)
     {
       endpos0 = 0;
     } else
     {
-      endpos0 = accessendspecialsubsUint(encseq,transpagenum-1);
+      endpos0 = accessendspecialsubsUint(encseq,pagenum-1);
     }
-    endpos1 = accessendspecialsubsUint(encseq,transpagenum);
+    endpos1 = accessendspecialsubsUint(encseq,pagenum);
     if (endpos0 < endpos1)
     {
       esr->firstcell = endpos0;
@@ -1060,8 +1068,7 @@ static void determinerange(Sequencerange *range,
 
 static void advanceEncodedseqstate(const Encodedsequence *encseq,
                                    Encodedsequencescanstate *esr,
-                                   bool moveforward,
-                                   bool withtrans)
+                                   bool moveforward)
 {
   unsigned long cellnum;
 
@@ -1079,8 +1086,10 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
     {
       esr->lastcell--;
     }
+#ifdef DEBUG
     printf("advance with firstcell=%lu, lastcell=%lu\n",
             esr->firstcell,esr->lastcell);
+#endif
     /* do not let comparison values become negative, hence compare with + 1 */
     if (esr->firstcell + 1 < esr->lastcell + 1 ||
         nextnonemptypage(encseq,esr,moveforward))
@@ -1093,9 +1102,9 @@ static void advanceEncodedseqstate(const Encodedsequence *encseq,
         cellnum = esr->lastcell - 1;
       }
       determinerange(&esr->currentrange,encseq,esr,
-                     withtrans ? calctranspagenum(esr,moveforward,
-                                                  esr->nextpage-1)
-                               : esr->nextpage-1,
+                     esr->morepagesleft ? (moveforward ? (esr->nextpage-1) 
+                                                       : (esr->nextpage+1))
+                                        : esr->nextpage,
                      cellnum);
       esr->hasrange = true;
     } else
@@ -1162,9 +1171,8 @@ static void binpreparenextrange(const Encodedsequence *encseq,
   unsigned long endpos0, endpos1, cellnum, pagenum;
   bool found = false;
   Sequencerange range;
-  Seqpos reversepos = REVERSEPOS(encseq->totallength,startpos);
 
-  pagenum = startpos2pagenum(encseq->sat,moveforward ? startpos : reversepos);
+  pagenum = startpos2pagenum(encseq->sat,startpos);
   if(pagenum == 0)
   {
     endpos0 = 0;
@@ -1202,31 +1210,14 @@ static void binpreparenextrange(const Encodedsequence *encseq,
       }
     } else
     {
-      /*
-      if (reversepos <= range.rightpos)
-      {
-        if(reversepos >= range.leftpos)
-        {
-          found = true;
-          esr->lastcell = cellnum+1;
-	  break;
-        }
-        endpos1 = cellnum;
-      } else
-      {
-        found = true;
-        esr->lastcell = cellnum+1;
-        endpos0 = cellnum+1;
-      }
-      */
-      if (reversepos < range.leftpos)
+      if (startpos < range.leftpos)
       {
         found = true;
         esr->lastcell = cellnum+1;
         endpos1 = cellnum;
       } else
       {
-        if (reversepos < range.rightpos)
+        if (startpos < range.rightpos)
         {
           found = true;
           esr->lastcell = cellnum+1;
@@ -1239,12 +1230,14 @@ static void binpreparenextrange(const Encodedsequence *encseq,
 #ifdef DEBUG
   if(found)
   {
-    determinerange(&range,encseq,esr,pagenum,esr->firstcell);
+    determinerange(&range,encseq,esr,pagenum,
+                   moveforward ? esr->firstcell : (esr->lastcell-1));
     printf("binary found pos " FormatSeqpos " in ",
-                 PRINTSeqposcast(moveforward ? startpos : reversepos));
+                 PRINTSeqposcast(startpos));
     showsequencerange(&range);
     printf(" at cell %lu in page %lu\n",
-            PRINTSeqposcast(esr->firstcell),pagenum);
+           PRINTSeqposcast(moveforward ? esr->firstcell : (esr->lastcell-1)),
+           pagenum);
   } else
   {
     printf("no nearby interval found for startpos " FormatSeqpos "\n",
@@ -1253,86 +1246,54 @@ static void binpreparenextrange(const Encodedsequence *encseq,
 #endif
   if(found)
   {
-    determinerange(&esr->previousrange,encseq,esr,pagenum,esr->firstcell);
+    determinerange(&esr->previousrange,encseq,esr,pagenum,
+                   moveforward ? esr->firstcell: (esr->lastcell-1));
+#ifdef DEBUG
     printf("previousrange=");
     showsequencerange(&esr->previousrange);
     printf("\n");
+#endif
+    if(esr->previousrange.leftpos <= startpos &&
+       startpos < esr->previousrange.rightpos)
+    {
+      esr->hasprevious = true;
+    }
     if(moveforward)
     {
-      if(esr->previousrange.leftpos <= startpos &&
-         startpos < esr->previousrange.rightpos)
+      if(pagenum+1 < esr->numofspecialcells)
       {
-        esr->hasprevious = true;
+        esr->morepagesleft = true;
+        esr->nextpage = pagenum+1;
+      } else
+      {
+        esr->morepagesleft = false;
+        esr->nextpage = pagenum;
       }
     } else
     {
-      if(esr->previousrange.leftpos <= reversepos &&
-         reversepos < esr->previousrange.rightpos)
+      if(pagenum > 0)
       {
-        esr->hasprevious = true;
+        esr->morepagesleft = true;
+        esr->nextpage = pagenum-1;
+      } else
+      {
+        esr->morepagesleft = false;
+        esr->nextpage = 0;
       }
     }
-    esr->nextpage = pagenum+1;
   } else
   {
     esr->firstcell = esr->lastcell = 0;
+    if(pagenum < esr->numofspecialcells)
+    {
+      esr->morepagesleft = true;
+    } else
+    {
+      esr->morepagesleft = false;
+    }
     esr->nextpage = pagenum;
   }
 }
-
-/*
-static void seqpreparenextrange(const Encodedsequence *encseq,
-                                Encodedsequencescanstate *esr,
-                                bool moveforward,
-                                Seqpos startpos)
-{
-  unsigned long pagenum, transpagenum;
-  Seqpos reversepos = REVERSEPOS(encseq->totallength,startpos);
-
-  pagenum = startpos2pagenum(encseq->sat,startpos);
-  transpagenum = calctranspagenum(esr,moveforward,pagenum);
-  if(transpagenum == 0)
-  {
-    esr->firstcell = 0;
-  } else
-  {
-    esr->firstcell = accessendspecialsubsUint(encseq,transpagenum-1);
-  }
-  esr->lastcell = accessendspecialsubsUint(encseq,transpagenum);
-  esr->nextpage = pagenum;
-  printf("firstcell=%lu,lastcell=%lu\n",esr->firstcell,esr->lastcell);
-  while (true)
-  {
-    advanceEncodedseqstate(encseq,esr,moveforward);
-    if (moveforward)
-    {
-      if (startpos < esr->previousrange.rightpos || !esr->hasrange)
-      {
-#ifdef DEBUG
-        printf("sequential found: ");
-        showsequencerange(&esr->previousrange);
-        printf(" at cell %lu\n",esr->firstcell-1);
-#endif
-        break;
-      }
-    } else
-    {
-      printf("previousrange is ");
-      showsequencerange(&esr->previousrange);
-      printf("\n");
-      if (reversepos >= esr->previousrange.leftpos || !esr->hasrange)
-      {
-#ifdef DEBUG
-        printf("sequential found: ");
-        showsequencerange(&esr->previousrange);
-        printf(" at cell %lu\n",esr->firstcell-1);
-#endif
-        break;
-      }
-    }
-  }
-}
-*/
 
 Encodedsequencescanstate *initEncodedsequencescanstate(
                                const Encodedsequence *encseq,
@@ -1344,6 +1305,10 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
   bool moveforward;
 
   env_error_check(env);
+  if(ISDIRREVERSE(readmode))
+  {
+    startpos = REVERSEPOS(encseq->totallength,startpos);
+  }
   ALLOCASSIGNSPACE(esr,NULL,Encodedsequencescanstate,1);
   esr->readmode = readmode;
   moveforward = ISDIRREVERSE(readmode) ? false : true;
@@ -1357,16 +1322,18 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
       = (unsigned long) encseq->totallength/esr->maxspecialtype + 1;
     if (startpos == 0)
     {
+      esr->morepagesleft = true; /* since there is at least one page */
       esr->nextpage = 0;
       esr->firstcell = esr->lastcell = 0;
-      advanceEncodedseqstate(encseq,esr,moveforward,true);
     } else
     {
       binpreparenextrange(encseq,esr,moveforward,startpos);
+#ifdef DEBUG
       printf("start advance at (%lu,%lu) in page %lu\n",
                        esr->firstcell,esr->lastcell,esr->nextpage);
-      advanceEncodedseqstate(encseq,esr,moveforward,false);
+#endif
     }
+    advanceEncodedseqstate(encseq,esr,moveforward);
   }
   assert(esr != NULL);
   return esr;
@@ -1433,7 +1400,7 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
       }
       if (esr->hasrange)
       {
-        advanceEncodedseqstate(encseq,esr,false,false);
+        advanceEncodedseqstate(encseq,esr,false);
       }
     }
   } else
@@ -1450,7 +1417,7 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
       }
       if (esr->hasrange)
       {
-        advanceEncodedseqstate(encseq,esr,true,true);
+        advanceEncodedseqstate(encseq,esr,true);
       }
     }
   }
@@ -1594,7 +1561,7 @@ bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri)
   *range = sri->esr->previousrange;
   if (sri->esr->hasrange)
   {
-    advanceEncodedseqstate(sri->encseq,sri->esr,sri->moveforward,true);
+    advanceEncodedseqstate(sri->encseq,sri->esr,sri->moveforward);
   } else
   {
     sri->exhausted = true;
