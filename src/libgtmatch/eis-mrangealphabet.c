@@ -1,53 +1,35 @@
 /*
-** Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
-**  
-** This program is free software; you can redistribute it and/or modify
-** it under the terms of the GNU General Public License as published by
-** the Free Software Foundation; either version 2 of the License, or
-** (at your option) any later version.
-**  
-** This program is distributed in the hope that it will be useful,
-** but WITHOUT ANY WARRANTY; without even the implied warranty of
-** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-** GNU General Public License for more details.
-**  
-** You should have received a copy of the GNU General Public License
-** along with this program; if not, write to the Free Software
-** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-**  
-*/
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif /* HAVE_CONFIG_H */
+  Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
 
-#if !(defined DEBUG) && !(defined NDEBUG)
-#define NDEBUG
-#endif /* DEBUG */
+  Permission to use, copy, modify, and distribute this software for any
+  purpose with or without fee is hereby granted, provided that the above
+  copyright notice and this permission notice appear in all copies.
+
+  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+  ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+  OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+*/
 
 #include <assert.h>
 #include <limits.h>
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-#endif  /* HAVE_STDINT_H */
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif /* HAVE_SYS_TYPES_H */
-#ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
-#endif /* HAVE_INTTYPES_H */
 #include <stdlib.h>
 #include <string.h>
 
-#include <libgtcore/env.h>
-#include <libgtcore/str.h>
-#include <libgtcore/chardef.h>
-#include <libgtcore/symboldef.h>
-#include <libgtcore/strarray.h>
-#include <libgtmatch/alphadef.h>
+#include "libgtcore/env.h"
+#include "libgtcore/str.h"
+#include "libgtcore/chardef.h"
+#include "libgtcore/symboldef.h"
+#include "libgtcore/strarray.h"
+#include "libgtmatch/alphadef.h"
 
-#include "biofmi2.h"
-#include "mrangealphabet.h"
-#include "mrangealphabetpriv.h"
+#include "libgtmatch/eis-biofmi2.h"
+#include "libgtmatch/eis-mrangealphabet.h"
+#include "libgtmatch/eis-mrangealphabetpriv.h"
 
 MRAEnc *
 newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
