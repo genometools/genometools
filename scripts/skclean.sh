@@ -16,17 +16,30 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-SKTOOLS=`grep -l Kurtz src/tools/*.c`
-
-for filename in `ls ${SKTOOLS} src/libgtmatch/*.c`
+for filename in `ls src/libgtmatch/*.c`
 do
   headfile="obj/src/libgtmatch/`basename ${filename} .c`"
   rm -f ${headfile}.o ${headfile}.d ${headfile}.splint
 done
 
+for filename in `ls ${SKTOOLS} src/libgtltr/*.c`
+do
+  headfile="obj/src/libgtltr/`basename ${filename} .c`"
+  rm -f ${headfile}.o ${headfile}.d ${headfile}.splint
+done
+
+SKTOOLS=`grep -l Kurtz src/tools/*.c`
+
+for filename in `ls ${SKTOOLS}`
+do
+  headfile="obj/src/tools/`basename ${filename} .c`"
+  rm -f ${headfile}.o ${headfile}.d ${headfile}.splint
+done
+
 rm -rf indexdir
 rm -f lib/libgtmatch.a
+rm -f lib/libgtltr.a
 rm -f testsuite/TMP.[a-zA-Z0-9]*
 rm -f testsuite/result.mp testsuite/result.vm
 rm -f testsuite/sfxidx.esq
-rm -f LocalMakeflags LocalMakeflags.previous
+rm -f LocalMakefile LocalMakefile.previous

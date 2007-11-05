@@ -45,7 +45,9 @@ int comparetwosuffixes(const Encodedsequence *encseq,
   for (pos1=start1, pos2=start2; pos1 < end1 && pos2 < end2; pos1++, pos2++)
   {
     cc1 = getencodedchar(encseq,pos1,readmode);
+    /* printf("pos1=" FormatSeqpos "cc1=%u\n",pos1,cc1); */
     cc2 = getencodedchar(encseq,pos2,readmode);
+    /* printf("pos2=" FormatSeqpos "cc2=%u\n",pos2,cc2); */
     if (ISSPECIAL(cc1))
     {
       if (ISSPECIAL(cc2))

@@ -112,16 +112,13 @@ int seqiterator_next(SeqIterator *seqit,
       foundseq = true;
       seqit->unitnum++;
       break;
+    }
+    if (seqit->withsequence)
+    {
+      STOREINARRAY(&seqit->sequencebuffer, Uchar, 1024, charcode);
     } else
     {
-      if (seqit->withsequence)
-      {
-        STOREINARRAY(&seqit->sequencebuffer, Uchar, 1024, charcode);
-      }
-      else
-      {
-        seqit->sequencebuffer.nextfreeUchar++;
-      }
+      seqit->sequencebuffer.nextfreeUchar++;
     }
   }
   if (!haserr && seqit->sequencebuffer.nextfreeUchar > 0)

@@ -31,6 +31,7 @@
 #include "sfx-codespec.h"
 #include "sfx-partssuf-def.h"
 #include "sfx-suffixer.h"
+#include "stamp.h"
 
 #include "sfx-mappedstr.pr"
 #include "sfx-bentsedg.pr"
@@ -316,6 +317,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             unsigned int prefixlength,
                             unsigned int numofparts,
                             Measuretime *mtime,
+                            Verboseinfo *verboseinfo,
                             Env *env)
 {
   Sfxiterator *sfi;
@@ -412,6 +414,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                                       numofallcodes,
                                       sfi->totallength - specialcharacters,
                                       specialcharacters + 1,
+                                      verboseinfo,
                                       env);
     assert(sfi->suftabparts != NULL);
     ALLOCASSIGNSPACE(sfi->suftab,NULL,Seqpos,
@@ -490,6 +493,11 @@ static void insertfullspecialrange(Sfxiterator *sfi,
 {
   Seqpos pos;
 
+  if(leftpos >= rightpos)
+  {
+    printf("leftpos = %lu >= %lu = rightpos\n",
+            (unsigned long) leftpos,(unsigned long) rightpos);
+  }
   assert(leftpos < rightpos);
   if (ISDIRREVERSE(sfi->readmode))
   {
@@ -566,6 +574,7 @@ static void fillspecialnextpage(Sfxiterator *sfi)
       if (sfi->sri != NULL && nextspecialrangeiterator(&range,sfi->sri))
       {
         width = range.rightpos - range.leftpos;
+        assert(width > 0);
         if (sfi->fusp.nextfreeSeqpos + width > sfi->fusp.allocatedSeqpos)
         { /* does not fit into the buffer, so only output a part */
           unsigned long rest = sfi->fusp.nextfreeSeqpos +

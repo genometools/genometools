@@ -18,15 +18,25 @@
 #include <assert.h>
 #include <stdarg.h>
 #include "verbose-def.h"
-#include "spacedef.h"
 
- struct Verboseinfo
+struct Verboseinfo
 {
   bool beverbose;
 };
 
-void showverbose(Verboseinfo *verboseinfo,
-                 const char *format, ...)
+void showdefinitelyverbose(const char *format, ...)
+{
+  va_list ap;
+
+  assert(format != NULL);
+  va_start(ap, format);
+  printf("# ");
+  (void) vprintf(format, ap);
+  printf("\n");
+  va_end(ap);
+}
+
+void showverbose(Verboseinfo *verboseinfo,const char *format, ...)
 {
   if (verboseinfo != NULL && verboseinfo->beverbose)
   {
@@ -34,7 +44,9 @@ void showverbose(Verboseinfo *verboseinfo,
 
     assert(format != NULL);
     va_start(ap, format);
+    printf("# ");
     (void) vprintf(format, ap);
+    printf("\n");
     va_end(ap);
   }
 }
@@ -43,12 +55,13 @@ Verboseinfo *newverboseinfo(bool verbose,Env *env)
 {
   Verboseinfo *v;
 
-  ALLOCASSIGNSPACE(v,NULL,Verboseinfo,1);
+  v = env_ma_malloc(env, sizeof (Verboseinfo));
   v->beverbose = verbose;
   return v;
 }
 
 void freeverboseinfo(Verboseinfo **v,Env *env)
 {
-  FREESPACE(*v);
+  env_ma_free(*v,env);
+  *v = NULL;
 }

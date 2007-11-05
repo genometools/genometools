@@ -24,9 +24,11 @@
 #include "libgtcore/versionfunc.h"
 #include "readmode-def.h"
 #include "sfx-optdef.h"
+#include "verbose-def.h"
 #include "stamp.h"
 
 static OPrval parse_options(int *parsed_args,
+                            bool doesa,
                             Suffixeratoroptions *so,
                             int argc, const char **argv, Env *env)
 {
@@ -45,7 +47,8 @@ static OPrval parse_options(int *parsed_args,
 
   env_error_check(env);
   op = option_parser_new("[option ...] -db file [...]",
-                         "Compute enhanced suffix array.", env);
+                         doesa ? "Compute enhanced suffix array." 
+                               : "Compute packed index.", env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optiondb = option_new_filenamearray("db","specify database files",
                                       so->filenametab,env);
@@ -113,30 +116,65 @@ static OPrval parse_options(int *parsed_args,
                            false,env);
   option_parser_add_option(op, option, env);
 
-  option = option_new_bool("suf",
-                           "output suffix array (suftab) to file",
-                           &so->outsuftab,
-                           false,env);
+  if(doesa)
+  {
+    option = option_new_bool("suf",
+                             "output suffix array (suftab) to file",
+                             &so->outsuftab,
+                             false,env);
+    option_parser_add_option(op, option, env);
+
+    option = option_new_bool("lcp",
+                             "output lcp table (lcptab) to file",
+                             &so->outlcptab,
+                             false,env);
+    option_parser_add_option(op, option, env);
+
+    option = option_new_bool("bwt",
+                             "output Burrows-Wheeler Transformation "
+                             "(bwttab) to file",
+                             &so->outbwttab,
+                             false,env);
+    option_parser_add_option(op, option, env);
+  
+    option = option_new_bool("des",
+                             "output sequence descriptions to file ",
+                             &so->outdestab,
+                             false,env);
+    option_parser_add_option(op, option, env);
+  } else
+  {
+    Option *optionBlockSize,
+           *optionBucketBlocks,
+           *optionLocateFreq;
+
+    optionBlockSize = option_new_uint_min("bsize", 
+                                          "specify size of blocks",
+                                          &so->blockSize, 
+					  8U, 1U, env);
+    option_parser_add_option(op, optionBlockSize, env);
+    optionBucketBlocks = option_new_uint_min("blbuck", 
+                                             "specify number of blocks per "
+                                             "bucket",
+                                             &so->bucketBlocks,
+                                             8U, 1U, env);
+    option_parser_add_option(op, optionBucketBlocks, env);
+
+    optionLocateFreq = option_new_uint("locfreq",
+                                       "specify the locate frequency\n"
+                                       "parameter i means that each i-th "
+                                       "position of input string is stored\n"
+                                       "0 = no locate information",
+                                       &so->locateInterval, 0, env);
+    option_parser_add_option(op, optionLocateFreq, env);
+  }
+
+  option = option_new_bool("v",
+                           "be verbose ",
+                           &so->beverbose,
+			   false,env);
   option_parser_add_option(op, option, env);
 
-  option = option_new_bool("lcp",
-                           "output lcp table (lcptab) to file",
-                           &so->outlcptab,
-                           false,env);
-  option_parser_add_option(op, option, env);
-
-  option = option_new_bool("bwt",
-                           "output Burrows-Wheeler Transformation "
-                           "(bwttab) to file",
-                           &so->outbwttab,
-                           false,env);
-  option_parser_add_option(op, option, env);
-
-  option = option_new_bool("des",
-                           "output sequence descriptions to file ",
-                           &so->outdestab,
-                           false,env);
-  option_parser_add_option(op, option, env);
 
   option_exclude(optionsmap, optiondna, env);
   option_exclude(optionsmap, optionprotein, env);
@@ -208,34 +246,36 @@ static void showoptions(const Suffixeratoroptions *so)
 
   if (str_length(so->str_smap) > 0)
   {
-    printf("# smap=\"%s\"\n",str_get(so->str_smap));
+    showdefinitelyverbose("smap=\"%s\"",str_get(so->str_smap));
   }
   if (so->isdna)
   {
-    printf("# dna=yes\n");
+    showdefinitelyverbose("dna=yes");
   }
   if (so->isprotein)
   {
-    printf("# protein=yes\n");
+    showdefinitelyverbose("protein=yes");
   }
   if (so->isplain)
   {
-    printf("# plain=yes\n");
+    showdefinitelyverbose("plain=yes");
   }
-  printf("# indexname=\"%s\"\n",str_get(so->str_indexname));
+  showdefinitelyverbose("indexname=\"%s\"",str_get(so->str_indexname));
   if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
   {
-    printf("# prefixlength=automatic\n");
+    showdefinitelyverbose("prefixlength=automatic");
   } else
   {
-    printf("# prefixlength=%u\n",so->prefixlength);
+    showdefinitelyverbose("prefixlength=%u",so->prefixlength);
   }
-  printf("# parts=%u\n",so->numofparts);
+  showdefinitelyverbose("parts=%u",so->numofparts);
   for (i=0; i<strarray_size(so->filenametab); i++)
   {
-    printf("# inputfile[%lu]=%s\n",i,strarray_get(so->filenametab,i));
+    showdefinitelyverbose("inputfile[%lu]=%s",i,
+                          strarray_get(so->filenametab,i));
   }
-  printf("# outtistab=%s,outsuftab=%s,outlcptab=%s,outbwttab=%s,outdestab=%s\n",
+  showdefinitelyverbose("outtistab=%s,outsuftab=%s,outlcptab=%s,"
+                        "outbwttab=%s,outdestab=%s",
           so->outtistab ? "true" : "false",
           so->outsuftab ? "true" : "false",
           so->outlcptab ? "true" : "false",
@@ -253,6 +293,7 @@ void wrapsfxoptions(Suffixeratoroptions *so,Env *env)
 }
 
 int suffixeratoroptions(Suffixeratoroptions *so,
+                        bool doesa,
                         int argc,
                         const char **argv,
                         Env *env)
@@ -268,7 +309,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->str_smap = str_new(env);
   so->str_sat = str_new(env);
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
-  rval = parse_options(&parsed_args, so, argc, argv, env);
+  rval = parse_options(&parsed_args, doesa, so, argc, argv, env);
   if (rval == OPTIONPARSER_ERROR)
   {
     retval = -1;
@@ -281,7 +322,10 @@ int suffixeratoroptions(Suffixeratoroptions *so,
     {
       if (rval == OPTIONPARSER_OK)
       {
-        showoptions(so);
+        if (so->beverbose)
+        {
+          showoptions(so);
+        }
       }
     }
   }

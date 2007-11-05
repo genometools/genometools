@@ -49,7 +49,7 @@ typedef struct
   bool moveforward, exhausted;
   const Encodedsequence *encseq;
   Seqpos pos,
-         specialrangelength;
+         lengthofspecialrange;
 } Specialrangeiterator;
 
 typedef struct
@@ -106,6 +106,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
 Encodedsequencescanstate *initEncodedsequencescanstate(
                                const Encodedsequence *encseq,
                                Readmode readmode,
+                               Seqpos startpos,
                                Env *env);
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
@@ -114,17 +115,16 @@ void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
                                                   const StrArray *filenametab,
                                                   bool plainformat,
                                                   Seqpos totallength,
-                                                  const Specialcharinfo
-                                                        *specialcharinfo,
+                                                  Seqpos specialranges,
                                                   const Alphabet *alphabet,
                                                   const char *str_sat,
+                                                  Verboseinfo *verboseinfo,
                                                   Env *env);
 
 /*@null@*/ Encodedsequence *mapencodedsequence(bool withrange,
                                                const Str *indexname,
                                                Seqpos totallength,
-                                               const Specialcharinfo
-                                                     *specialcharinfo,
+                                               Seqpos specialranges,
                                                unsigned int mapsize,
                                                Verboseinfo *verboseinfo,
                                                Env *env);
@@ -136,6 +136,7 @@ Encodedsequence *plain2encodedsequence(bool withrange,
                                        const Uchar *seq2,
                                        unsigned long len2,
                                        unsigned int mapsize,
+                                       Verboseinfo *verboseinfo,
                                        Env *env);
 
 Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,

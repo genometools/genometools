@@ -58,6 +58,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
 Encodedsequencescanstate *initEncodedsequencescanstate(
                                /*@unused@*/ const Encodedsequence *encseq,
                                Readmode readmode,
+                               Startpos startpos,
                                Env *env)
 {
   Encodedsequencescanstate *esr;
@@ -114,8 +115,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Env *env)
                                  const StrArray *filenametab,
                                  bool plainformat,
                                  Seqpos totallength,
-                                 /*@unused@*/ const Specialcharinfo
-                                                   *specialcharinfo,
+                                 /*@unused@*/ Seqpos specialranges,
                                  const Alphabet *alphabet,
                                  /*@unused@*/ const char *str_sat,
                                  Env *env)
@@ -146,7 +146,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Env *env)
                                    /*@unused@*/ bool withrange,
                                    const Str *indexname,
                                    /*@unused@*/ Seqpos totallength,
-                                   const Specialcharinfo *specialcharinfo,
+                                   Seqpos specialranges,
                                    /*@unused@*/ unsigned int mapsize,
                                    /*@unused@*/ Verboseinfo *verboseinfo,
                                    Env *env)
@@ -163,8 +163,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fbs,Env *env)
   str_delete(tmpfilename,env);
   encseq->hasownmemory = false;
   encseq->mappedfile = true;
-  encseq->hasspecialcharacters
-    = (specialcharinfo->specialcharacters > 0) ?  true : false;
+  encseq->hasspecialcharacters = (specialranges > 0) ?  true : false;
   return encseq;
 }
 
@@ -225,7 +224,7 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
   sri->moveforward = moveforward;
   sri->exhausted = encseq->hasspecialcharacters ? false : true;
   sri->encseq = encseq;
-  sri->specialrangelength = 0;
+  sri->lengthofspecialrange = 0;
   if (moveforward)
   {
     sri->pos = 0;
@@ -251,31 +250,31 @@ static bool bitanddirectnextspecialrangeiterator(Sequencerange *range,
   {
     if (ISSPECIAL(sri->encseq->plainseq[sri->pos]))
     {
-      sri->specialrangelength++;
+      sri->lengthofspecialrange++;
     } else
     {
-      if (sri->specialrangelength > 0)
+      if (sri->lengthofspecialrange > 0)
       {
         if (sri->moveforward)
         {
-          range->leftpos = sri->pos - sri->specialrangelength;
+          range->leftpos = sri->pos - sri->lengthofspecialrange;
           range->rightpos = sri->pos;
         } else
         {
           range->leftpos = sri->pos+1;
-          range->rightpos = sri->pos+1+sri->specialrangelength;
+          range->rightpos = sri->pos+1+sri->lengthofspecialrange;
         }
         success = true;
-        sri->specialrangelength = 0;
+        sri->lengthofspecialrange = 0;
       }
     }
     if (sri->moveforward)
     {
       if (sri->pos == sri->encseq->totallength - 1)
       {
-        if (sri->specialrangelength > 0)
+        if (sri->lengthofspecialrange > 0)
         {
-          range->leftpos = sri->encseq->totallength - sri->specialrangelength;
+          range->leftpos = sri->encseq->totallength - sri->lengthofspecialrange;
           range->rightpos = sri->encseq->totallength;
           success = true;
         }
@@ -287,10 +286,10 @@ static bool bitanddirectnextspecialrangeiterator(Sequencerange *range,
     {
       if (sri->pos == 0)
       {
-        if (sri->specialrangelength > 0)
+        if (sri->lengthofspecialrange > 0)
         {
           range->leftpos = 0;
-          range->rightpos = sri->specialrangelength;
+          range->rightpos = sri->lengthofspecialrange;
           success = true;
         }
         sri->exhausted = true;

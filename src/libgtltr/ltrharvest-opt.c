@@ -89,7 +89,8 @@ void showuserdefinedoptionsandvalues(LTRharvestoptions *lo)
   printf("#   maxTSDlength: %lu\n",  lo->maxlengthTSD);
   printf("#   palindromic motif: %s\n", str_get(lo->motif.str_motif));
   printf("#   motifmismatchesallowed: %u\n", lo->motif.allowedmismatches);
-  printf("#   vicinity: %u nt\n", lo->vicinityforcorrectboundaries);
+  printf("#   vicinity: " FormatSeqpos " nt\n",
+          PRINTSeqposcast(lo->vicinityforcorrectboundaries));
 }
 
 /*
@@ -117,38 +118,38 @@ void printargsline(const char **argv, int argc)
 int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Env *env)
 {
   const Uchar *symbolmap;
-  unsigned char c_tab[UCHAR_MAX+1];
-  int i;
+  Uchar c_tab[UCHAR_MAX+1];
+  unsigned int i;
 
   symbolmap = getsymbolmapAlphabet(alpha);
-  if ( UNDEFCHAR == symbolmap[(unsigned int)motif->firstleft])
+  if ( symbolmap[(unsigned int)motif->firstleft] == (Uchar) UNDEFCHAR)
   {
     env_error_set(env,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->firstleft);
     return -1;
   }
-  if ( UNDEFCHAR == symbolmap[(unsigned int)motif->secondleft] )
+  if ( symbolmap[(unsigned int)motif->secondleft] == (Uchar) UNDEFCHAR )
   {
     env_error_set(env,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->secondleft);
     return -1;
   }
-  if ( UNDEFCHAR == symbolmap[(unsigned int)motif->firstright] )
+  if ( symbolmap[(unsigned int)motif->firstright] == (Uchar) UNDEFCHAR )
   {
     env_error_set(env,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->firstright);
     return -1;
   }
-  if ( UNDEFCHAR == symbolmap[(unsigned int)motif->secondright] )
+  if ( symbolmap[(unsigned int)motif->secondright] == (Uchar) UNDEFCHAR )
   {
     env_error_set(env,"Illegal nucleotide character %c "
                       "as argument to option -motif", motif->secondright);
     return -1;
   }
 
-  for (i=0; i<=UCHAR_MAX; i++)
+  for (i=0; i<=(unsigned int) UCHAR_MAX; i++)
   {
-    c_tab[i] = UNDEFCHAR;
+    c_tab[i] = (Uchar) UNDEFCHAR;
   }
   /* define complementary symbols */
   c_tab[symbolmap['a']] = symbolmap['t'];
@@ -205,6 +206,7 @@ static OPrval parse_options(int *parsed_args,
 	 *optionoutinner,
 	 *optiongff3;
   OPrval oprval;
+  unsigned int vicinityforcorrectboundaries;
 
   static const char *overlaps[] = {
     "best", /* the default */
@@ -313,10 +315,10 @@ static OPrval parse_options(int *parsed_args,
   /* -motif */
   /* characters will be tranformed later
      into characters from virtualtree alphabet */
-  lo->motif.firstleft   = (unsigned char)'t';
-  lo->motif.secondleft  = (unsigned char)'g';
-  lo->motif.firstright  = (unsigned char)'c';
-  lo->motif.secondright = (unsigned char)'a';
+  lo->motif.firstleft   = (Uchar) 't';
+  lo->motif.secondleft  = (Uchar) 'g';
+  lo->motif.firstright  = (Uchar) 'c';
+  lo->motif.secondright = (Uchar) 'a';
   lo->motif.str_motif = str_new(env);
   optionmotif = option_new_string("motif",
                              "specify 2 nucleotides startmotif + "
@@ -341,10 +343,10 @@ static OPrval parse_options(int *parsed_args,
                         "to the right) that will be searched "
                         "for TSDs and/or motifs around 5' and 3' boundary "
 		        "of predicted LTR retrotransposons",
-                        &lo->vicinityforcorrectboundaries,
-		        (unsigned int)60,
-		        (unsigned int)1,
-		        (unsigned int)500,
+                        &vicinityforcorrectboundaries,
+		        60U,
+		        1U,
+		        500U,
 			env);
   option_parser_add_option(op, optionvic, env);
 
@@ -452,6 +454,7 @@ static OPrval parse_options(int *parsed_args,
   option_imply_either_2(optionlongoutput, optionmintsd, optionmotif, env);
 
   oprval = option_parser_parse(op, parsed_args, argc, argv, versionfunc, env);
+  lo->vicinityforcorrectboundaries = (Seqpos) vicinityforcorrectboundaries;
   if (oprval == OPTIONPARSER_OK)
   {
     if (lo->repeatinfo.lmin > lo->repeatinfo.lmax)
@@ -483,14 +486,10 @@ static OPrval parse_options(int *parsed_args,
 	    "argument of -motif has not exactly 4 characters");
 	oprval = OPTIONPARSER_ERROR;
       }
-      lo->motif.firstleft =
-	(unsigned char) str_get(lo->motif.str_motif)[0];
-      lo->motif.secondleft =
-	(unsigned char) str_get(lo->motif.str_motif)[1];
-      lo->motif.firstright =
-	(unsigned char) str_get(lo->motif.str_motif)[2];
-      lo->motif.secondright =
-	(unsigned char) str_get(lo->motif.str_motif)[3];
+      lo->motif.firstleft = (Uchar)  str_get(lo->motif.str_motif)[0];
+      lo->motif.secondleft = (Uchar)  str_get(lo->motif.str_motif)[1];
+      lo->motif.firstright = (Uchar)  str_get(lo->motif.str_motif)[2];
+      lo->motif.secondright = (Uchar)  str_get(lo->motif.str_motif)[3];
       /* default if motif specified */
       if (!option_is_set(optionmotifmis))
       {
@@ -563,7 +562,7 @@ static OPrval parse_options(int *parsed_args,
   return oprval;
 }
 
-int wrapltrharvestoptions(LTRharvestoptions *lo,Env *env)
+void wrapltrharvestoptions(LTRharvestoptions *lo,Env *env)
 {
   /* no checking if error occurs, since errors have been output before */
   str_delete(lo->str_indexname,env);
@@ -572,7 +571,6 @@ int wrapltrharvestoptions(LTRharvestoptions *lo,Env *env)
   str_delete(lo->str_gff3filename,env);
   str_delete(lo->str_overlaps,env);
   str_delete(lo->motif.str_motif,env);
-  return 0;
 }
 
 int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,

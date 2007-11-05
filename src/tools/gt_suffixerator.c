@@ -21,5 +21,5 @@
 int gt_suffixerator(int argc, const char **argv, Env *env)
 {
   env_error_check(env);
-  return parseargsandcallsuffixerator(argc, argv, env);
+  return parseargsandcallsuffixerator(true,argc, argv, env);
 }

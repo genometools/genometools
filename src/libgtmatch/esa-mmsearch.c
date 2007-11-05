@@ -492,6 +492,7 @@ static int constructsarrandrunmmsearch(
                        prefixlength,
                        numofparts,
                        mtime,
+                       NULL,
                        env);
   if (sfi == NULL)
   {
@@ -540,6 +541,7 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                                                    uint64_t,unsigned long,
                                                    Env *),
                             void *processmaxmatchinfo,
+                            Verboseinfo *verboseinfo,
                             Env *env)
 {
   Specialcharinfo samplespecialcharinfo;
@@ -554,6 +556,7 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                                    NULL,
                                    0,
                                    getmapsizeAlphabet(alpha),
+                                   verboseinfo,
                                    env);
   numofchars = getnumofcharsAlphabet(alpha);
   if (constructsarrandrunmmsearch(samplespecialcharinfo.specialcharacters,

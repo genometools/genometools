@@ -73,6 +73,7 @@ static uint64_t detexpectedaccordingtomapspec(const ArrayMapspecification
   return sumup;
 }
 
+#ifdef DEBUG
 static void showmapspec(const Mapspecification *mapspec)
 {
   printf("(%s,size=%lu,elems=%lu)",
@@ -80,6 +81,7 @@ static void showmapspec(const Mapspecification *mapspec)
            (unsigned long) mapspec->sizeofunit,
            mapspec->numofunits);
 }
+#endif
 
 static int assigncorrecttype(Mapspecification *mapspec,
                              void *ptr,
@@ -101,6 +103,9 @@ static int assigncorrecttype(Mapspecification *mapspec,
     case Uint32Type:
       ASSIGNPTR2STARTPTR(uint32_t);
       break;
+    case UnsignedlongType:
+      ASSIGNPTR2STARTPTR(Unsignedlong);
+      break;
     case Uint64Type:
       ASSIGNPTR2STARTPTR(uint64_t);
       break;
@@ -120,12 +125,6 @@ static int assigncorrecttype(Mapspecification *mapspec,
       env_error_set(env,"no assignment specification for size %lu",
                     (unsigned long) mapspec->sizeofunit);
       haserr = true;
-  }
-  if (!haserr)
-  {
-    /* printf("# assign pointer");
-    showmapspec(mapspec);
-    printf(" at byteoffset %lu\n",byteoffset); XXX insert later */
   }
   return haserr ? -1 : 0;
 }
@@ -249,9 +248,11 @@ int flushtheindex2file(FILE *fp,
                     mapspectable.nextfreeMapspecification;
        mapspecptr++)
   {
+#ifdef DEBUG
     printf("# flushtheindex2file");
     showmapspec(mapspecptr);
     printf(" at byteoffset %lu\n",byteoffset);
+#endif
     if (mapspecptr->numofunits > 0)
     {
       switch (mapspecptr->typespec)
@@ -264,6 +265,9 @@ int flushtheindex2file(FILE *fp,
           break;
         case Uint32Type:
           WRITEACTIONWITHTYPE(uint32_t);
+          break;
+        case UnsignedlongType:
+          WRITEACTIONWITHTYPE(Unsignedlong);
           break;
         case Uint64Type:
           WRITEACTIONWITHTYPE(uint64_t);

@@ -15,21 +15,10 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef VERBOSE_DEF_H
-#define VERBOSE_DEF_H
+#ifndef GT_PACKEDINDEX_H
+#define GT_PACKEDINDEX_H
 
-#include "libgtcore/env.h"
-
-typedef struct Verboseinfo Verboseinfo;
-
-void showdefinitelyverbose(const char *format, ...);
-
-void showverbose(Verboseinfo *verboseinfo,
-                 const char *format, ...)
-                 __attribute__ ((format (printf, 2, 3)));
-
-Verboseinfo *newverboseinfo(bool verbose,Env *env);
-
-void freeverboseinfo(Verboseinfo **v,Env *env);
+/* the packedindex tool */
+int gt_packedindex(int argc, const char **argv, Env*);
 
 #endif

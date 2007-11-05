@@ -25,7 +25,50 @@
 
 #include "arrcmp.pr"
 
-int testencodedsequence(const StrArray *filenametab,
+static int testscanatpos(const Encodedsequence *encseq,
+                         Readmode readmode,
+                         unsigned long trials,
+                         Env *env)
+{
+  Encodedsequencescanstate *esr = NULL;
+  Seqpos pos, startpos, totallength;
+  unsigned long trial;
+  Uchar ccra, ccsr;
+  bool haserr = false;
+
+  env_error_check(env);
+  totallength = getencseqtotallength(encseq);
+  srand48(42349421);
+  for(trial = 0; !haserr && trial < trials; trial++)
+  {
+    startpos = (Seqpos) (drand48() * (double) totallength);
+    printf("trial %lu at " FormatSeqpos "\n",trial,PRINTSeqposcast(startpos));
+    esr = initEncodedsequencescanstate(encseq,readmode,startpos,env);
+    for (pos=startpos; !haserr && pos < totallength; pos++)
+    {
+      ccra = getencodedchar(encseq,pos,readmode);
+      ccsr = sequentialgetencodedchar(encseq,esr,pos);
+      if (ccra != ccsr)
+      {
+        env_error_set(env,"startpos = " FormatSeqpos 
+                          " access=%s, mode=%s: position=" FormatSeqpos
+                          ": random access (getencodedchar) = %u != "
+                          " %u = sequential read (sequentialgetencodedchar)",
+                          startpos,
+                          encseqaccessname(encseq),
+                          showreadmode(readmode),
+                          pos,
+                          (unsigned int) ccra,
+                          (unsigned int) ccsr);
+        haserr = true;
+      }
+    }
+    freeEncodedsequencescanstate(&esr,env);
+  }
+  return haserr ? -1 : 0;
+}
+
+static int testfullscan(const StrArray *filenametab,
                         const Encodedsequence *encseq,
                         Readmode readmode,
                         const Uchar *symbolmap,
@@ -39,7 +82,6 @@ int testencodedsequence(const StrArray *filenametab,
   Encodedsequencescanstate *esr;
 
   env_error_check(env);
-  printf("# testencodedsequence with readmode = %s\n",showreadmode(readmode));
   totallength = getencseqtotallength(encseq);
   if (filenametab != NULL)
   {
@@ -51,7 +93,7 @@ int testencodedsequence(const StrArray *filenametab,
                          NULL,
                          env);
   }
-  esr = initEncodedsequencescanstate(encseq,readmode,env);
+  esr = initEncodedsequencescanstate(encseq,readmode,0,env);
   for (pos=0; /* Nothing */; pos++)
   {
     if (filenametab != NULL && readmode == Forwardmode)
@@ -113,11 +155,37 @@ int testencodedsequence(const StrArray *filenametab,
       haserr = true;
     }
   }
-  if (esr != NULL)
-  {
-    freeEncodedsequencescanstate(&esr,env);
-  }
+  freeEncodedsequencescanstate(&esr,env);
   fastabuffer_delete(fb, env);
+  return haserr ? -1 : 0;
+}
+
+int testencodedsequence(const StrArray *filenametab,
+                        const Encodedsequence *encseq,
+                        Readmode readmode,
+                        const Uchar *symbolmap,
+                        unsigned long trials,
+                        Env *env)
+{
+  bool haserr = false;
+
+  if(trials > 0)
+  {
+    if(testscanatpos(encseq,
+                     readmode,
+                     trials,
+                     env) != 0)
+    {
+      haserr = true;
+    } 
+  }
+  if(!haserr)
+  {
+    if(testfullscan(filenametab,encseq,readmode,symbolmap,env) != 0)
+    {
+      haserr = true;
+    }
+  }
   return haserr ? -1 : 0;
 }
 
@@ -194,8 +262,6 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
   array_reverse(rangesbackward,env);
   if (!haserr)
   {
-    printf("# checkspecialrangesfast(%lu ranges)\n",
-             (unsigned long) array_size(rangesforward));
     if (array_compare(rangesforward,rangesbackward,
                       compareSequencerange) != 0)
     {

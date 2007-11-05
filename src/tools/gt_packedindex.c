@@ -15,21 +15,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef VERBOSE_DEF_H
-#define VERBOSE_DEF_H
-
 #include "libgtcore/env.h"
+#include "libgtmatch/sfx-run.pr"
 
-typedef struct Verboseinfo Verboseinfo;
-
-void showdefinitelyverbose(const char *format, ...);
-
-void showverbose(Verboseinfo *verboseinfo,
-                 const char *format, ...)
-                 __attribute__ ((format (printf, 2, 3)));
-
-Verboseinfo *newverboseinfo(bool verbose,Env *env);
-
-void freeverboseinfo(Verboseinfo **v,Env *env);
-
-#endif
+int gt_packedindex(int argc, const char **argv, Env *env)
+{
+  env_error_check(env);
+  return parseargsandcallsuffixerator(false,argc, argv, env);
+}

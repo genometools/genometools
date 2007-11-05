@@ -22,12 +22,12 @@
 #include "libgtmatch/spacedef.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/esa-seqread.h"
-#include "libgtmatch/esa-seqread.pr"
-#include "libgtmatch/pos2seqnum.pr"
 #include "libgtmatch/echoseq.pr"
 
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
+
+#include "libgtmatch/pos2seqnum.pr"
 
 /*
  The datetype Fastaoutinfo aggregates the values needed to show a fasta file.
@@ -65,8 +65,7 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
                          Readmode readmode,
                          Seqpos start,
                          unsigned long wlen,
-                         unsigned long width,
-			 Env *env)
+                         unsigned long width)
 {
   unsigned long j;
   Seqpos idx, lastpos;
@@ -133,8 +132,7 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
 static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
                     Seqpos len, /*@unused@*/Str *str_indexfilename, Env *env)
 {
-  Seqpos i;
-  unsigned long desclen;
+  unsigned long i, desclen;
   const char *desptr;
   char *destab_seqnum;
   unsigned long seqnum =
@@ -150,7 +148,7 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
   ALLOCASSIGNSPACE(destab_seqnum, NULL, char, desclen);
   for (i=0; i < desclen; i++)
   {
-   destab_seqnum[i] = desptr[i];
+    destab_seqnum[i] = desptr[i];
   }
 
   myencseq2symbolstring(info, info->formatout,
@@ -158,8 +156,7 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
                       info->alpha, info->encseq,
 		      Forwardmode, startpos,
 		      (unsigned long)len,
-		      60,
-		      env);
+		      60UL);
   FREESPACE(destab_seqnum);
 
   return 0;
@@ -170,13 +167,12 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
  the function from the apply pointer.
  */
 static int overallpredictionsequences(const LTRharvestoptions *lo,
-    Sequentialsuffixarrayreader *ssar,
     bool innerregion,
     void *applyinfo,
     int(*apply)(Fastaoutinfo *,Seqpos, Seqpos, Str*, Env *env),
     Env *env)
 {
-  unsigned int i;
+  unsigned long i;
   Seqpos start,
          end;
   LTRboundaries *boundaries;
@@ -254,7 +250,7 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   fastaoutinfo.destab = destab;
   fastaoutinfo.descendtab = descendtab;
 
-  had_err = overallpredictionsequences(lo, ssar, innerregion, &fastaoutinfo,
+  had_err = overallpredictionsequences(lo, innerregion, &fastaoutinfo,
 				       showpredictionfastasequence, env);
 
   env_ma_free(descendtab, env);

@@ -24,11 +24,8 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/spacedef.h"
 #include "libgtmatch/esa-seqread.h"
-#include "libgtmatch/esa-seqread.pr"
 #include "libgtmatch/esa-mmsearch-def.h"
 #include "libgtmatch/intcode-def.h"
-#include "libgtmatch/sfx-mappedstr.pr"
-#include "libgtmatch/esa-mmsearch.pr"
 #include "ltrharvest-opt.h"
 #include "repeattypes.h"
 #include "repeats.h"
@@ -140,7 +137,7 @@ static void searchforbestTSDandormotifatborders(
 	   /* first hit */
 	   else if ( !boundaries->motif_near_tsd )
 	   {
-	     unsigned int max, min;
+	     Seqpos max, min;
 
              /* save number of mismatches */
              *motifmismatchesleftLTR  = tmp_motifmismatchesleftLTR;
@@ -166,9 +163,7 @@ static void searchforbestTSDandormotifatborders(
 	   }
 	   else
 	   {
-	     unsigned int max,
-		  min,
-		  difffromnewboundary1,
+	     Seqpos max, min, difffromnewboundary1,
 		  difffromnewboundary2;
 
 	     /* test if hit is nearer to old boundaries than previous hit */
@@ -266,7 +261,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
        /* first hit */
        if ( !motif1 )
        {
-         unsigned int max, min;
+         Seqpos max, min;
 
 	 motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
 	 boundaries->leftLTR_5 = i;
@@ -502,7 +497,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
        /* first hit */
        if ( !motif2 )
        {
-         unsigned int max, min;
+         Seqpos max, min;
 
 	 motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
 	 boundaries->rightLTR_5 = i;
@@ -514,7 +509,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
        /* next hit */
        else
        {
-         unsigned int max, min, difffromnewboundary;
+         Seqpos max, min, difffromnewboundary;
 
 	 /* test if hit is nearer to old boundaries than previous hit */
 	 max = MAX(oldrightLTR_5, i);
@@ -702,8 +697,9 @@ static int searchforTSDandorMotifoutside(
 	  (unsigned long)rightlen,
 	  (unsigned int)lo->minlengthTSD,
 	  alphabetSequentialsuffixarrayreader(ssar),
-	  (void*)subsimpleexactselfmatchstore,/*(void*)subshowrepeats,*/
+	  subsimpleexactselfmatchstore,
 	  &subrepeatinfo,
+          NULL,
 	  env) != 0)
     {
        return -1;

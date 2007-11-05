@@ -235,6 +235,7 @@ static int suffixeratorwithoutput(
                  unsigned int prefixlength,
                  unsigned int numofparts,
                  Measuretime *mtime,
+                 Verboseinfo *verboseinfo,
                  Env *env)
 {
   const Seqpos *suftabptr;
@@ -250,6 +251,7 @@ static int suffixeratorwithoutput(
                        prefixlength,
                        numofparts,
                        mtime,
+                       verboseinfo,
                        env);
   if (sfi == NULL)
   {
@@ -277,56 +279,6 @@ static int suffixeratorwithoutput(
   return haserr ? -1 : 0;
 }
 
-static int outputsequencedescription(const Str *indexname,
-                                     const StrArray *filenametab,
-                                     Env *env)
-{
-  FILE *desfp;
-  bool haserr = false;
-
-  desfp = opensfxfile(indexname,DESTABSUFFIX,"wb",env);
-  if (desfp == NULL)
-  {
-    haserr = true;
-  } else
-  {
-    SeqIterator *seqit;
-    char *desc = NULL;
-    unsigned long seqlen;
-    int retval;
-
-    seqit = seqiterator_new(filenametab,NULL,false,env);
-    while (!haserr)
-    {
-      retval = seqiterator_next(seqit,
-                                NULL,
-                                &seqlen,
-                                &desc,
-                                env);
-      if (retval < 0)
-      {
-        haserr = true;
-        break;
-      }
-      if (retval == 0)
-      {
-        break;
-      }
-      if (fputs(desc,desfp) == EOF)
-      {
-        env_error_set(env,"cannot write description to file %s.%s",
-                          str_get(indexname),DESTABSUFFIX);
-        haserr = true;
-      }
-      (void) putc((int) '\n',desfp);
-      FREESPACE(desc);
-    }
-    env_fa_xfclose(desfp,env);
-    seqiterator_delete(seqit,env);
-  }
-  return haserr ? -1 : 0;
-}
-
 static unsigned long *initcharacterdistribution(const Alphabet *alpha,Env *env)
 {
   unsigned long *characterdistribution;
@@ -343,7 +295,8 @@ static unsigned long *initcharacterdistribution(const Alphabet *alpha,Env *env)
 
 static void showcharacterdistribution(
                    const  Alphabet *alpha,
-                   const unsigned long *characterdistribution)
+                   const unsigned long *characterdistribution,
+                   Verboseinfo *verboseinfo)
 {
   unsigned int mapsize, idx;
 
@@ -351,12 +304,16 @@ static void showcharacterdistribution(
   assert(characterdistribution != NULL);
   for (idx=0; idx<mapsize-1; idx++)
   {
-    printf("# ocurrences(%c)=%lu\n",(int) getprettysymbol(alpha,idx),
-                                    characterdistribution[idx]);
+    showverbose(verboseinfo,"occurrences(%c)=%lu",
+                (int) getprettysymbol(alpha,idx),
+                characterdistribution[idx]);
   }
 }
 
-static int runsuffixerator(Suffixeratoroptions *so,Env *env)
+static int runsuffixerator(bool doesa,
+                           Suffixeratoroptions *so,
+                           Verboseinfo *verboseinfo,
+                           Env *env)
 {
   unsigned int numofchars = 0;
   unsigned long numofsequences;
@@ -389,14 +346,17 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
     {
       characterdistribution = initcharacterdistribution(alpha,env);
     }
-    if (fasta2sequencekeyvalues(&numofsequences,
+    if (fasta2sequencekeyvalues(so->str_indexname,
+                                &numofsequences,
                                 &totallength,
                                 &specialcharinfo,
                                 so->filenametab,
                                 &filelengthtab,
                                 getsymbolmapAlphabet(alpha),
                                 so->isplain,
+                                so->outdestab,
                                 characterdistribution,
+                                verboseinfo,
                                 env) != 0)
     {
       haserr = true;
@@ -417,11 +377,12 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
                                    so->filenametab,
                                    so->isplain,
                                    totallength,
-                                   &specialcharinfo,
+                                   specialcharinfo.specialranges,
                                    alpha,
                                    str_length(so->str_sat) > 0
                                          ? str_get(so->str_sat)
                                          : NULL,
+                                   verboseinfo,
                                    env);
     if (encseq == NULL)
     {
@@ -437,11 +398,24 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
       }
     }
   }
-  if (!haserr && so->outdestab)
+  if (!haserr)
   {
-    if (outputsequencedescription(so->str_indexname,so->filenametab,env) != 0)
+    showverbose(verboseinfo,"specialcharacters=" FormatSeqpos,
+                PRINTSeqposcast(specialcharinfo.specialcharacters));
+    showverbose(verboseinfo,"specialranges=" FormatSeqpos,
+                PRINTSeqposcast(specialcharinfo.specialranges));
+    if (!so->isplain)
     {
-      haserr = true;
+      showcharacterdistribution(alpha,characterdistribution,verboseinfo);
+    }
+    if (so->readmode == Complementmode || so->readmode == Reversecomplementmode)
+    {
+      if (!isdnaalphabet(alpha,env))
+      {
+        env_error_set(env,"option %s only can be used for DNA alphabets",
+                          so->readmode == Complementmode ? "-cpl" : "rcl");
+        haserr = true;
+      }
     }
   }
   initoutfileinfo(&outfileinfo);
@@ -458,33 +432,14 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
   INITOUTFILEPTR(outfileinfo.outfpbwttab,so->outbwttab,BWTTABSUFFIX);
   if (!haserr)
   {
-    printf("# specialcharacters=" FormatSeqpos "\n",
-           PRINTSeqposcast(specialcharinfo.specialcharacters));
-    printf("# specialranges=" FormatSeqpos "\n",
-           PRINTSeqposcast(specialcharinfo.specialranges));
-    if (!so->isplain)
-    {
-      showcharacterdistribution(alpha,characterdistribution);
-    }
-    if (so->readmode == Complementmode || so->readmode == Reversecomplementmode)
-    {
-      if (!isdnaalphabet(alpha,env))
-      {
-        env_error_set(env,"option %s only can be used for DNA alphabets",
-                          so->readmode == Complementmode ? "-cpl" : "rcl");
-        haserr = true;
-      }
-    }
-  }
-  if (!haserr)
-  {
-    if (so->outsuftab || so->outbwttab || so->outlcptab)
+    if (so->outsuftab || so->outbwttab || so->outlcptab || !doesa)
     {
       if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
       {
         so->prefixlength = recommendedprefixlength(numofchars,totallength);
-        printf("# automatically determined prefixlength = %u\n",
-                so->prefixlength);
+        showverbose(verboseinfo,
+                    "automatically determined prefixlength = %u",
+                    so->prefixlength);
       } else
       {
         unsigned int maxprefixlen;
@@ -506,19 +461,31 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
       }
       if (!haserr)
       {
-        if (suffixeratorwithoutput(
-                         &outfileinfo,
-                         specialcharinfo.specialcharacters,
-                         specialcharinfo.specialranges,
-                         encseq,
-                         so->readmode,
-                         numofchars,
-                         so->prefixlength,
-                         so->numofparts,
-                         mtime,
-                         env) != 0)
+        if(doesa)
         {
-          haserr = true;
+          if (suffixeratorwithoutput(
+                           &outfileinfo,
+                           specialcharinfo.specialcharacters,
+                           specialcharinfo.specialranges,
+                           encseq,
+                           so->readmode,
+                           numofchars,
+                           so->prefixlength,
+                           so->numofparts,
+                           mtime,
+                           verboseinfo,
+                           env) != 0)
+          {
+            haserr = true;
+          }
+        } else
+        {
+          /* XXX Thomas: call the appropriate function here */
+          printf("run construction of packed index for:\n");
+          printf("indexname=%s\n",str_get(so->str_indexname));
+          printf("blocksize=%u\n",so->blockSize);
+          printf("blocks-per-bucket=%u\n",so->bucketBlocks);
+          printf("locfreq=%u\n",so->locateInterval);
         }
       }
     } else
@@ -570,30 +537,34 @@ static int runsuffixerator(Suffixeratoroptions *so,Env *env)
   return haserr ? -1 : 0;
 }
 
-int parseargsandcallsuffixerator(int argc,const char **argv,Env *env)
+int parseargsandcallsuffixerator(bool doesa,int argc,
+                                 const char **argv,Env *env)
 {
   Suffixeratoroptions so;
   int retval;
   bool haserr = false;
 
   env_error_check(env);
-  retval = suffixeratoroptions(&so,argc,argv,env);
+  retval = suffixeratoroptions(&so,doesa,argc,argv,env);
   if (retval == 0)
   {
-    Verboseinfo *verboseinfo = newverboseinfo(false,env);
-    showverbose(verboseinfo,"# sizeof (Seqpos)=%lu\n",
+    Verboseinfo *verboseinfo = newverboseinfo(so.beverbose,env);
+
+    showverbose(verboseinfo,"sizeof (Seqpos)=%lu",
                 (unsigned long) (sizeof (Seqpos) * CHAR_BIT));
 #ifdef INLINEDENCSEQ
-    showverbose(verboseinfo,"# inlined encodeded sequence\n");
+    showverbose(verboseinfo,"inlined encodeded sequence");
 #endif
     freeverboseinfo(&verboseinfo,env);
   }
   if (retval == 0)
   {
-    if (runsuffixerator(&so,env) < 0)
+    Verboseinfo *verboseinfo = newverboseinfo(so.beverbose,env);
+    if (runsuffixerator(doesa,&so,verboseinfo,env) < 0)
     {
       haserr = true;
     }
+    freeverboseinfo(&verboseinfo,env);
   } else
   {
     if (retval < 0)

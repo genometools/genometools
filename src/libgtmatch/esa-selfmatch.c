@@ -60,6 +60,7 @@ static int constructsarrandrunmaxpairs(
                        prefixlength,
                        numofparts,
                        mtime,
+                       NULL,
                        env);
   if (sfi == NULL)
   {
@@ -134,6 +135,7 @@ int sarrselfsubstringmatch(const Uchar *dbseq,
                                      query,
                                      querylen,
                                      getmapsizeAlphabet(alpha),
+                                     verboseinfo,
                                      env);
   ssi.minlength = minlength;
   ssi.processmaxmatch = processmaxmatch;

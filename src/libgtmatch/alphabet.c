@@ -463,6 +463,7 @@ void freeAlphabet(Alphabet **alpha,Env *env)
           Str *prog;
           const char *progname = env_error_get_progname(env);
 
+          assert(progname != NULL);
           prog = str_new(env);
           str_append_cstr_nt(prog, progname,
                              cstr_length_up_to_char(progname, ' '), env);

@@ -21,6 +21,7 @@
 #include "encseq-def.h"
 #include "readmode-def.h"
 #include "measure-time-if.h"
+#include "verbose-def.h"
 #include "seqpos-def.h"
 
 typedef struct Sfxiterator Sfxiterator;
@@ -35,6 +36,7 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             unsigned int prefixlength,
                             unsigned int numofparts,
                             Measuretime *mtime,
+                            Verboseinfo *verboseinfo,
                             Env *env);
 
 const Seqpos *nextSfxiterator(Seqpos *len,bool *specialsuffixes,
