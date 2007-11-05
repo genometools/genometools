@@ -493,7 +493,7 @@ static void insertfullspecialrange(Sfxiterator *sfi,
 {
   Seqpos pos;
 
-  if(leftpos >= rightpos)
+  if (leftpos >= rightpos)
   {
     printf("leftpos = %lu >= %lu = rightpos\n",
             (unsigned long) leftpos,(unsigned long) rightpos);
