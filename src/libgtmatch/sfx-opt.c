@@ -142,9 +142,6 @@ static OPrval parse_options(int *parsed_args,
     option_parser_add_option(op, option, env);
   } else
   {
-    Option *optionBlockSize,
-           *optionBucketBlocks,
-           *optionLocateFreq;
     option = option_new_bool("des",
                              "output sequence descriptions to file ",
                              &so->outdestab,
