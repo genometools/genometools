@@ -39,7 +39,7 @@ static int testscanatpos(const Encodedsequence *encseq,
   env_error_check(env);
   totallength = getencseqtotallength(encseq);
   srand48(42349421);
-  for(trial = 0; !haserr && trial < trials; trial++)
+  for (trial = 0; !haserr && trial < trials; trial++)
   {
     startpos = (Seqpos) (drand48() * (double) totallength);
     printf("trial %lu at " FormatSeqpos "\n",trial,PRINTSeqposcast(startpos));
@@ -50,7 +50,7 @@ static int testscanatpos(const Encodedsequence *encseq,
       ccsr = sequentialgetencodedchar(encseq,esr,pos);
       if (ccra != ccsr)
       {
-        env_error_set(env,"startpos = " FormatSeqpos 
+        env_error_set(env,"startpos = " FormatSeqpos
                           " access=%s, mode=%s: position=" FormatSeqpos
                           ": random access (getencodedchar) = %u != "
                           " %u = sequential read (sequentialgetencodedchar)",
@@ -169,19 +169,19 @@ int testencodedsequence(const StrArray *filenametab,
 {
   bool haserr = false;
 
-  if(trials > 0)
+  if (trials > 0)
   {
-    if(testscanatpos(encseq,
+    if (testscanatpos(encseq,
                      Forwardmode /* XXX readmode */,
                      trials,
                      env) != 0)
     {
       haserr = true;
-    } 
+    }
   }
-  if(!haserr)
+  if (!haserr)
   {
-    if(testfullscan(filenametab,encseq,readmode,symbolmap,env) != 0)
+    if (testfullscan(filenametab,encseq,readmode,symbolmap,env) != 0)
     {
       haserr = true;
     }

@@ -277,7 +277,7 @@ Uchar getencodedchar(const Encodedsequence *encseq,
 #ifdef DEBUG
 static void showsequencerange(const Sequencerange *range)
 {
-  if(range->leftpos + 1 == range->rightpos)
+  if (range->leftpos + 1 == range->rightpos)
   {
     printf(FormatSeqpos,PRINTSeqposcast(range->leftpos));
   } else
@@ -542,7 +542,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          {
            sum += (uint64_t) sizeof (Uchar) * specialranges +
                   (uint64_t) sizeof (Uchar) * specialranges +
-                  (uint64_t) sizeof (unsigned long) * 
+                  (uint64_t) sizeof (unsigned long) *
                                     (totallength/UCHAR_MAX+1);
          }
          break;
@@ -552,7 +552,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          {
            sum += (uint64_t) sizeof (Ushort) * specialranges +
                   (uint64_t) sizeof (Uchar) * specialranges +
-                  (uint64_t) sizeof (unsigned long) * 
+                  (uint64_t) sizeof (unsigned long) *
                                     (totallength/USHRT_MAX+1);
          }
          break;
@@ -562,7 +562,7 @@ static uint64_t detsizeencseq(Positionaccesstype sat,
          {
            sum += (uint64_t) sizeof (uint32_t) * specialranges +
                   (uint64_t) sizeof (Uchar) * specialranges +
-                  (uint64_t) sizeof (unsigned long) * 
+                  (uint64_t) sizeof (unsigned long) *
                                     (totallength/UINT32_MAX+1);
          }
          break;
@@ -954,7 +954,7 @@ static void showspecialpositionswithpages(const Encodedsequence *encseq,
   for (idx=first; idx<=last; idx++)
   {
     startpos = accessspecialpositions(encseq,idx);
-    range.leftpos = offset + startpos; 
+    range.leftpos = offset + startpos;
     range.rightpos = range.leftpos + encseq->specialrangelength[idx] + 1;
     printf("%lu: ",idx);
     showsequencerange(&range);
@@ -1233,7 +1233,7 @@ static bool binpreparenextrange(unsigned long *previous,
   bool found = false;
   Sequencerange range;
 
-  if(pagenum == 0)
+  if (pagenum == 0)
   {
     endpos0 = 0;
   } else
@@ -1263,10 +1263,10 @@ static bool binpreparenextrange(unsigned long *previous,
     } else
     {
       endpos0 = cellnum+1;
-    }  
+    }
   }
 #ifdef DEBUG
-  if(found)
+  if (found)
   {
     determinerange(&range,encseq,esr,pagenum,moveforward,*previous);
     printf("binary found startpos " FormatSeqpos " in ",
@@ -1338,7 +1338,7 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
   {
     esr->hasprevious = esr->hascurrent = false;
     esr->maxspecialtype = sat2maxspecialtype(encseq->sat);
-    esr->numofspecialcells 
+    esr->numofspecialcells
       = (unsigned long) encseq->totallength/esr->maxspecialtype + 1;
     if (startpos == 0)
     {
@@ -1367,12 +1367,12 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
       startpagenum = esr->nextpage;
       found = binpreparenextrange(&previous,encseq,startpagenum,
                                   esr,moveforward,startpos);
-      /* 
+      /*
       seqpreparenextrange(encseq,esr,moveforward,startpos);
       */
-      if(moveforward)
+      if (moveforward)
       {
-        if(found)
+        if (found)
         {
           esr->firstcell = previous;
           esr->lastcell = accessendspecialsubsUint(encseq,startpagenum);

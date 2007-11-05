@@ -47,7 +47,7 @@ static OPrval parse_options(int *parsed_args,
 
   env_error_check(env);
   op = option_parser_new("[option ...] -db file [...]",
-                         doesa ? "Compute enhanced suffix array." 
+                         doesa ? "Compute enhanced suffix array."
                                : "Compute packed index.", env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optiondb = option_new_filenamearray("db","specify database files",
@@ -116,7 +116,7 @@ static OPrval parse_options(int *parsed_args,
                            false,env);
   option_parser_add_option(op, option, env);
 
-  if(doesa)
+  if (doesa)
   {
     option = option_new_bool("suf",
                              "output suffix array (suftab) to file",
@@ -136,7 +136,7 @@ static OPrval parse_options(int *parsed_args,
                              &so->outbwttab,
                              false,env);
     option_parser_add_option(op, option, env);
-  
+
     option = option_new_bool("des",
                              "output sequence descriptions to file ",
                              &so->outdestab,
@@ -148,12 +148,12 @@ static OPrval parse_options(int *parsed_args,
            *optionBucketBlocks,
            *optionLocateFreq;
 
-    optionBlockSize = option_new_uint_min("bsize", 
+    optionBlockSize = option_new_uint_min("bsize",
                                           "specify size of blocks",
-                                          &so->blockSize, 
+                                          &so->blockSize,
 					  8U, 1U, env);
     option_parser_add_option(op, optionBlockSize, env);
-    optionBucketBlocks = option_new_uint_min("blbuck", 
+    optionBucketBlocks = option_new_uint_min("blbuck",
                                              "specify number of blocks per "
                                              "bucket",
                                              &so->bucketBlocks,
@@ -174,7 +174,6 @@ static OPrval parse_options(int *parsed_args,
                            &so->beverbose,
 			   false,env);
   option_parser_add_option(op, option, env);
-
 
   option_exclude(optionsmap, optiondna, env);
   option_exclude(optionsmap, optionprotein, env);

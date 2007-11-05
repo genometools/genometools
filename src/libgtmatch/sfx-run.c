@@ -461,7 +461,7 @@ static int runsuffixerator(bool doesa,
       }
       if (!haserr)
       {
-        if(doesa)
+        if (doesa)
         {
           if (suffixeratorwithoutput(
                            &outfileinfo,
