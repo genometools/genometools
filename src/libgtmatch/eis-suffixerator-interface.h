@@ -97,4 +97,4 @@ extern size_t
 readSfxISufTabRange(sfxInterface *iface, listenerID id, size_t len,
                     Seqpos *dest, Env *env);
 
-#endif /* EIS_SUFFIXERATOR_INTERFACE_H */
+#endif

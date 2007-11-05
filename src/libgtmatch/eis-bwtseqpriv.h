@@ -29,4 +29,4 @@ struct BWTSeq
   Seqpos *count;
 };
 
-#endif /* EIS_BWTSEQPRIV_H */
+#endif

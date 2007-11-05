@@ -61,4 +61,4 @@ MRAEncUInt82MRAEnc(MRAEncUInt8 *mralpha)
   return &(mralpha->baseClass);
 }
 
-#endif /* EIS_MRANGEALPHABETPRIV_H */
+#endif

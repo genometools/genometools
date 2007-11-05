@@ -27,7 +27,6 @@
 #include "libgtcore/strarray.h"
 #include "libgtmatch/alphadef.h"
 
-#include "libgtmatch/eis-biofmi2.h"
 #include "libgtmatch/eis-mrangealphabet.h"
 #include "libgtmatch/eis-mrangealphabetpriv.h"
 
@@ -38,11 +37,11 @@ newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
   MRAEncUInt8 *newAlpha = NULL;
   size_t i;
   assert(numRanges > 0);
-  if((newAlpha = env_ma_calloc(env, sizeof(MRAEncUInt8), 1))
+  if ((newAlpha = env_ma_calloc(env, sizeof (MRAEncUInt8), 1))
      && (newAlpha->baseClass.rangeEndIndices =
-         env_ma_calloc(env, sizeof(size_t), numRanges))
+         env_ma_calloc(env, sizeof (size_t), numRanges))
      && (newAlpha->baseClass.symbolsPerRange =
-         env_ma_calloc(env, sizeof(size_t), numRanges)))
+         env_ma_calloc(env, sizeof (size_t), numRanges)))
   {
     newAlpha->baseClass.encType = sourceUInt8;
     newAlpha->baseClass.numRanges = (size_t)numRanges;
@@ -50,13 +49,13 @@ newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
     memset(newAlpha->revMappings, UNDEF_UCHAR, UINT8_MAX+1);
     newAlpha->baseClass.rangeEndIndices[0] =
       newAlpha->baseClass.symbolsPerRange[0] = symbolsPerRange[0];
-    for(i = 1; i < numRanges; ++i)
+    for (i = 1; i < numRanges; ++i)
     {
       newAlpha->baseClass.rangeEndIndices[i] =
         newAlpha->baseClass.rangeEndIndices[i-1]
         + (newAlpha->baseClass.symbolsPerRange[i] = symbolsPerRange[i]);
     }
-    for(i = 0; i <= UINT8_MAX; ++i)
+    for (i = 0; i <= UINT8_MAX; ++i)
     {
       newAlpha->mappings[i] = mappings[i];
       newAlpha->revMappings[mappings[i]] = i;
@@ -65,11 +64,11 @@ newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
   }
   else
   {
-    if(newAlpha)
+    if (newAlpha)
     {
-      if(newAlpha->baseClass.symbolsPerRange)
+      if (newAlpha->baseClass.symbolsPerRange)
         env_ma_free(newAlpha->baseClass.symbolsPerRange, env);
-      if(newAlpha->baseClass.rangeEndIndices)
+      if (newAlpha->baseClass.rangeEndIndices)
         env_ma_free(newAlpha->baseClass.rangeEndIndices, env);
     }
     env_ma_free(newAlpha, env);
@@ -85,11 +84,11 @@ MRAEncGTAlphaNew(const Alphabet *alpha, Env *env)
   uint8_t *mappings;
   MRAEnc *result;
   uint32_t numSyms = getmapsizeAlphabet(alpha);
-  mappings = env_ma_malloc(env, sizeof(uint8_t) * (UINT8_MAX + 1));
+  mappings = env_ma_malloc(env, sizeof (uint8_t) * (UINT8_MAX + 1));
   memset(mappings, UNDEF_UCHAR, UINT8_MAX+1);
   {
     int i;
-    for(i = 0; i < numSyms - 1; ++i)
+    for (i = 0; i < numSyms - 1; ++i)
       mappings[i] = i;
     mappings[WILDCARD] = numSyms - 1;
   }
@@ -110,7 +109,7 @@ extern size_t
 MRAEncGetSize(const MRAEnc *mralpha)
 {
   size_t range, numRanges = mralpha->numRanges, sumRanges = 0;
-  for(range = 0; range < numRanges; ++range)
+  for (range = 0; range < numRanges; ++range)
   {
     sumRanges += mralpha->symbolsPerRange[range];
   }
@@ -122,7 +121,7 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
                        const int *rangeSel, Symbol fallback, Env *env)
 {
   MRAEnc *newAlpha;
-  switch(srcAlpha->encType)
+  switch (srcAlpha->encType)
   {
   case sourceUInt8:
     {
@@ -130,24 +129,23 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
       uint8_t *mappings, destSym;
       int *newRanges, sym;
       size_t range, numRanges = MRAEncGetNumRanges(srcAlpha);
-      assert(fallback <= UINT8_MAX);
       ui8alpha = constMRAEnc2MRAEncUInt8(srcAlpha);
-      mappings = env_ma_malloc(env, sizeof(uint8_t) * (UINT8_MAX + 1));
+      mappings = env_ma_malloc(env, sizeof (uint8_t) * (UINT8_MAX + 1));
       memset(mappings, UNDEF_UCHAR, UINT8_MAX+1);
-      newRanges = env_ma_malloc(env, sizeof(int) * numRanges);
+      newRanges = env_ma_malloc(env, sizeof (int) * numRanges);
       sym = 0;
       destSym = 0;
-      for(range = 0; range < numRanges; ++range)
+      for (range = 0; range < numRanges; ++range)
       {
-        if(rangeSel[range] == selection)
+        if (rangeSel[range] == selection)
         {
-          for(; sym < srcAlpha->rangeEndIndices[range]; ++sym)
+          for (; sym < srcAlpha->rangeEndIndices[range]; ++sym)
             mappings[sym] = destSym++;
           newRanges[range] = srcAlpha->symbolsPerRange[range];
         }
         else
         {
-          for(; sym < srcAlpha->rangeEndIndices[range]; ++sym)
+          for (; sym < srcAlpha->rangeEndIndices[range]; ++sym)
             mappings[sym] = fallback;
           newRanges[range] = 0;
         }
@@ -172,24 +170,24 @@ MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, int range)
   assert(mralpha && range < mralpha->numRanges);
   insertPos = mralpha->rangeEndIndices[range];
   numSyms = mralpha->rangeEndIndices[mralpha->numRanges - 1];
-  switch(mralpha->encType)
+  switch (mralpha->encType)
   {
   case sourceUInt8:
     {
       MRAEncUInt8 *ui8alpha;
       ui8alpha = MRAEnc2MRAEncUInt8(mralpha);
-      assert(sym <= UINT8_MAX && ui8alpha->mappings[sym] == UNDEF_UCHAR);
+      assert(ui8alpha->mappings[sym] == UNDEF_UCHAR);
       /* first move all old mappings accordingly */
       {
         Symbol i;
-        for(i = numSyms; i > insertPos; --i)
+        for (i = numSyms; i > insertPos; --i)
         {
           Symbol origSym = ui8alpha->revMappings[i - 1];
           ui8alpha->revMappings[i] = origSym;
           ui8alpha->mappings[origSym] += 1;
         }
-        
-      }      
+
+      }
       /* do actual insertion */
       ui8alpha->mappings[sym] = insertPos;
       ui8alpha->revMappings[insertPos] = sym;
@@ -197,7 +195,7 @@ MRAEncAddSymbolToRange(MRAEnc *mralpha, Symbol sym, int range)
       mralpha->symbolsPerRange[range] += 1;
       {
         int i;
-        for(i = range; i < mralpha->numRanges; ++i)
+        for (i = range; i < mralpha->numRanges; ++i)
         {
           mralpha->rangeEndIndices[i] += 1;
         }
@@ -218,21 +216,21 @@ MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
                        size_t numSyms, Symbol *dest)
 {
   int retval = 1;
-  switch(mralpha->encType)
+  switch (mralpha->encType)
   {
   case sourceUInt8:
     {
       const MRAEncUInt8 *ui8alpha;
       size_t i;
       ui8alpha = constMRAEnc2MRAEncUInt8(mralpha);
-      for(i = 0; i < numSyms; ++i)
+      for (i = 0; i < numSyms; ++i)
       {
         int c = getc(fp);
-        if(c != EOF)
+        if (c != EOF)
           dest[i] = ui8alpha->mappings[c];
         else
         {
-          if(feof(fp))
+          if (feof(fp))
             retval = 0;
           else                  /*< obviously some i/o error occured */
             retval = -1;
@@ -251,14 +249,14 @@ MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
 void
 MRAEncSymbolsTransform(const MRAEnc *mralpha, Symbol *symbols, size_t numSyms)
 {
-  switch(mralpha->encType)
+  switch (mralpha->encType)
   {
   case sourceUInt8:
     {
       const MRAEncUInt8 *ui8alpha;
       size_t i;
       ui8alpha = constMRAEnc2MRAEncUInt8(mralpha);
-      for(i = 0; i < numSyms; ++i)
+      for (i = 0; i < numSyms; ++i)
       {
         symbols[i] = ui8alpha->mappings[symbols[i]];
       }
@@ -274,14 +272,14 @@ void
 MRAEncSymbolsRevTransform(const MRAEnc *mralpha, Symbol *symbols,
                           size_t numSyms)
 {
-  switch(mralpha->encType)
+  switch (mralpha->encType)
   {
   case sourceUInt8:
     {
       const MRAEncUInt8 *ui8alpha;
       size_t i;
       ui8alpha = constMRAEnc2MRAEncUInt8(mralpha);
-      for(i = 0; i < numSyms; ++i)
+      for (i = 0; i < numSyms; ++i)
       {
         symbols[i] = ui8alpha->revMappings[symbols[i]];
       }
@@ -299,12 +297,12 @@ MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
 {
   size_t range = 0;
   assert(mralpha && rangeSel);
-  while(range < mralpha->numRanges
+  while (range < mralpha->numRanges
         && sym >= mralpha->rangeEndIndices[range])
     ++range;
-  if(range < mralpha->numRanges)
+  if (range < mralpha->numRanges)
   {
-    if(rangeSel[range] == selection
+    if (rangeSel[range] == selection
        && sym >= (mralpha->rangeEndIndices[range]
                   - mralpha->symbolsPerRange[range])
        /* implicitely: && sym < mralpha->rangeEndIndices[range] */)
@@ -322,7 +320,7 @@ MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha, Env *env)
   assert(mralpha && env);
   env_ma_free(mralpha->symbolsPerRange, env);
   env_ma_free(mralpha->rangeEndIndices, env);
-  switch(mralpha->encType)
+  switch (mralpha->encType)
   {
     MRAEncUInt8 *ui8alpha;
   case sourceUInt8:
@@ -334,5 +332,3 @@ MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha, Env *env)
     break;
   }
 }
-
-

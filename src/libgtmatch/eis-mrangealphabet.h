@@ -23,7 +23,7 @@
  *
  * The mapping is constructed so that an alphabet with n symbols
  * is mapped to the range 0..n-1 and any symbol can be queried for
- * what range it belongs to. 
+ * what range it belongs to.
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
 
@@ -33,6 +33,13 @@
 #include "libgtmatch/alphadef.h"
 
 typedef unsigned char Symbol;
+
+#define bsGetSymbol bsGetUInt8
+#define bsStoreSymbol bsStoreUInt8
+#define bsGetUniformSymbolArray bsGetUniformUInt8Array
+#define bsStoreUniformSymbolArray bsStoreUniformUInt8Array
+#define requiredSymbolBits requiredUInt8Bits
+
 typedef struct multiRangeAlphabetEncoding MRAEnc;
 
 #define UNDEF_UCHAR ((unsigned char)~0)
@@ -51,9 +58,9 @@ enum sourceEncType {
  * @param mapping maps all uint8_t input symbols to values in the
  * range 0..sum(symbolsPerRange) or the input alphabet specific
  * value UNDEF_UCHAR
- * @param env 
+ * @param env
  */
-staticifinline inline MRAEnc *
+static inline MRAEnc *
 MRAEncUInt8New(int numRanges, int symbolsPerRange[],
                const uint8_t *mapping, Env *env);
 
@@ -110,9 +117,9 @@ MRAEncGetNumRanges(const MRAEnc *mralpha);
 /**
  * \brief Query number of symbols in given range of alphabet.
  * @param mralpha alphabet to get range from
- * @param range 
+ * @param range
  */
-staticifinline inline size_t
+static inline size_t
 MRAEncGetRangeSize(const MRAEnc *mralpha, size_t range);
 
 /**
@@ -125,7 +132,7 @@ MRAEncGetSize(const MRAEnc *mralpha);
  * @return size of original value range of symbols in alphabet
  * (i.e. 256 for 8 bit mapping)
  */
-staticifinline size_t
+static size_t
 MRAEncGetDomainSize(const MRAEnc *mralpha);
 
 /**
@@ -133,13 +140,13 @@ MRAEncGetDomainSize(const MRAEnc *mralpha);
  * @return output code or input specific code for illegal symbol (in
  * which case MRAEncSymbolHasValidMapping would have returned false).
  */
-staticifinline inline Symbol
+static inline Symbol
 MRAEncMapSymbol(const MRAEnc *mralpha, Symbol sym);
 
-staticifinline inline int
+static inline int
 MRAEncSymbolHasValidMapping(const MRAEnc *mralpha, Symbol sym);
 
-staticifinline inline Symbol
+static inline Symbol
 MRAEncRevMapSymbol(const MRAEnc *mralpha, Symbol sym);
 
 extern void
@@ -171,4 +178,4 @@ MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha, Env *env);
 
 #include "libgtmatch/eis-mrangealphabetsimpleop.h"
 
-#endif /* EIS_MRANGEALPHABET_H */
+#endif

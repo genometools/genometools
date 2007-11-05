@@ -67,4 +67,4 @@ union EISHint
   struct blockEncIdxSeqHint bcHint;
 };
 
-#endif /* ENCIDXSEQPRIV_H_INCLUDED */
+#endif

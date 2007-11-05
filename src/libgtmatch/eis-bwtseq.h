@@ -55,7 +55,7 @@ enum seqBaseEncoding {
  */
 union bwtSeqParam
 {
-  struct 
+  struct
   {
     unsigned blockSize;         /**< number of symbols to combine in
                                  * one block a lookup-table
@@ -162,7 +162,7 @@ BWTSeqHasLocateInformation(const BWTSeq *bwtSeq);
  * @param bwtSeq reference of object to query for alphabet
  * @return read-only reference of alphabet associated with sequence
  */
-staticifinline inline const MRAEnc *
+static inline const MRAEnc *
 BWTSeqGetAlphabet(const BWTSeq *bwtSeq);
 
 /**
@@ -170,7 +170,7 @@ BWTSeqGetAlphabet(const BWTSeq *bwtSeq);
  * @param bwtSeq reference of object to query for index
  * @return read-only reference of index containing the sequence
  */
-staticifinline inline const EISeq *
+static inline const EISeq *
 BWTSeqGetEncIdxSeq(const BWTSeq *bwtSeq);
 
 /**
@@ -178,7 +178,7 @@ BWTSeqGetEncIdxSeq(const BWTSeq *bwtSeq);
  * @param bwtseq reference of object to query
  * @return length of sequence
  */
-staticifinline inline Seqpos
+static inline Seqpos
 BWTSeqLength(const BWTSeq *seq);
 
 /**
@@ -191,7 +191,7 @@ BWTSeqLength(const BWTSeq *seq);
  * @param env genometools reference for core functions
  * @return number of occurrences of symbol up to but not including pos
  */
-staticifinline inline Seqpos
+static inline Seqpos
 BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Env *env);
 
 /**
@@ -203,7 +203,7 @@ BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Env *env);
  * @param env genometools reference for core functions
  * @return number of occurrences of symbol up to but not including pos
  */
-staticifinline inline Seqpos
+static inline Seqpos
 BWTSeqOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Env *env);
 
 /**
@@ -214,7 +214,7 @@ BWTSeqOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Env *env);
  * @param env genometools reference for core functions
  * @return index of corresponding row F-column
  */
-staticifinline inline Seqpos
+static inline Seqpos
 BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos, Env *env);
 
 /**
@@ -226,7 +226,7 @@ BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos, Env *env);
  * @param env genometools reference for core functions
  * @return aggregate count
  */
-staticifinline inline Seqpos
+static inline Seqpos
 BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym, Env *env);
 
 /**
@@ -238,7 +238,7 @@ BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym, Env *env);
  * @param sym symbol to query counts sum for @param env genometools
  * reference for core functions @return aggregate count
  */
-staticifinline inline Seqpos
+static inline Seqpos
 BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym, Env *env);
 
 /**
@@ -262,7 +262,7 @@ BWTSeqMatchCount(const BWTSeq *bwtseq, Symbol *query, size_t queryLen,
  * @param env genometools reference for core functions
  * @return number of matches
  */
-staticifinline inline struct matchBound *
+static inline struct matchBound *
 BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
                 Symbol nextSym, Env *env);
 
@@ -333,6 +333,6 @@ EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter);
 extern Seqpos
 EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter);
 
-#include "bwtseqsimpleop.h"
+#include "libgtmatch/eis-bwtseqsimpleop.h"
 
-#endif /* EIS_BWTSEQ_H */
+#endif

@@ -94,7 +94,6 @@ struct seqStats
   enum sourceEncType sourceAlphaType;
 };
 
-
 typedef struct encIdxSeq EISeq;
 
 typedef union EISHint *EISHint;
@@ -250,7 +249,7 @@ deleteEncIdxSeq(EISeq *seq, Env *env);
  * @param seq reference of object to query for alphabet
  * @return read-only reference of alphabet associated with sequence
  */
-staticifinline inline const MRAEnc *
+static inline const MRAEnc *
 EISGetAlphabet(const EISeq *seq);
 
 /**
@@ -263,7 +262,7 @@ EISGetAlphabet(const EISeq *seq);
  * based on previous queries
  * @param env genometools state, passes information about allocator etc
  */
-staticifinline inline Seqpos
+static inline Seqpos
 EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
         Env *env);
 
@@ -278,7 +277,7 @@ EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
  * based on previous queries
  * @param env genometools state, passes information about allocator etc
  */
-staticifinline inline Seqpos
+static inline Seqpos
 EISSymTransformedRank(EISeq *seq, Symbol msym, Seqpos pos,
                       union EISHint *hint, Env *env);
 
@@ -292,7 +291,7 @@ EISSymTransformedRank(EISeq *seq, Symbol msym, Seqpos pos,
  * @param hint provides cache and direction information for queries
  * @param env genometools state, passes information about allocator etc
  */
-staticifinline inline void
+static inline void
 EISRetrieveExtraBits(EISeq *seq, Seqpos pos, int flags,
                      struct extBitsRetrieval *retval, union EISHint *hint,
                      Env *env);
@@ -302,17 +301,17 @@ EISRetrieveExtraBits(EISeq *seq, Seqpos pos, int flags,
  * @param r struct to initialize
  * @param env genometools state, passes information about allocator etc
  */
-staticifinline inline void
+static inline void
 initExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
 
 /**
  * \brief Allocate and initialize empty structure to hold retrieval
- * results later. 
+ * results later.
  * @param env genometools state, passes information about allocator
  * etc.
  * @return reference of new retrieval object
  */
-staticifinline inline struct extBitsRetrieval *
+static inline struct extBitsRetrieval *
 newExtBitsRetrieval(Env *env);
 
 /**
@@ -321,7 +320,7 @@ newExtBitsRetrieval(Env *env);
  * @param r struct to destruct
  * @param env genometools state, passes information about allocator etc.
  */
-staticifinline inline void
+static inline void
 destructExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
 
 /**
@@ -330,7 +329,7 @@ destructExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
  * @param r struct to delete
  * @param env genometools state, passes information about allocator etc.
  */
-staticifinline inline void
+static inline void
 deleteExtBitsRetrieval(struct extBitsRetrieval *r, Env *env);
 
 /**
@@ -344,7 +343,7 @@ EISSelect(EISeq *seq, Symbol sym, Seqpos count);
  * @param seq indexed sequence object to query
  * @return length of sequence
  */
-staticifinline inline Seqpos
+static inline Seqpos
 EISLength(EISeq *seq);
 
 /**
@@ -357,7 +356,7 @@ EISLength(EISeq *seq);
  * @param env genometools state, passes information about allocator etc
  * @return value of symbol as encoded in original alphabet
  */
-staticifinline inline Symbol
+static inline Symbol
 EISGetSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env);
 
 /**
@@ -371,7 +370,7 @@ EISGetSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env);
  * @param env genometools state, passes information about allocator etc
  * @return value of symbol as processed by encoding alphabet
  */
-staticifinline inline Symbol
+static inline Symbol
 EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env);
 
 /**
@@ -381,17 +380,17 @@ EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env);
  * @param env genometools state, passes information about allocator etc
 
  */
-staticifinline inline EISHint
+static inline EISHint
 newEISHint(EISeq *seq, Env *env);
 
-staticifinline inline void
+static inline void
 deleteEISHint(EISeq *seq, EISHint hint, Env *env);
 
 extern int
 verifyIntegrity(EISeq *seqIdx,
                 Str *projectName, int tickPrint, FILE *fp, Env *env);
 
-staticifinline inline FILE *
+static inline FILE *
 EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
                 uint32_t *lenRet);
 
@@ -403,6 +402,6 @@ searchBlock2IndexPair(const EISeq *seqIdx,
                       const Symbol *block,
                       size_t idxOutput[2], Env *env);
 
-#include "encidxseqsimpleop.h"
+#include "libgtmatch/eis-encidxseqsimpleop.h"
 
-#endif /* EIS_ENCIDXSEQ_H */
+#endif

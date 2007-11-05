@@ -25,7 +25,7 @@
 
 typedef uint16_t regionLength;
 
-struct seqRange 
+struct seqRange
 {
   Seqpos startPos;
   regionLength len;
@@ -37,7 +37,6 @@ posIsInSeqRange(struct seqRange *p, Seqpos pos)
 {
   return (pos >= p->startPos && pos < p->startPos + p->len);
 }
-
 
 enum {
   MAX_SEQRANGE_LEN = UINT16_MAX,
@@ -112,4 +111,4 @@ extern struct seqRangeList *
 SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
                   enum SRLFeatures features, Env *env);
 
-#endif /* EIS_SEQRANGES_H */
+#endif

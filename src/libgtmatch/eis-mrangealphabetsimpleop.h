@@ -19,7 +19,7 @@
 #include "libgtmatch/eis-mrangealphabet.h"
 #include "libgtmatch/eis-mrangealphabetpriv.h"
 
-staticifinline inline MRAEnc *
+static inline MRAEnc *
 MRAEncUInt8New(int numRanges, int symbolsPerRange[],
                const uint8_t *mapping, Env *env)
 {
@@ -27,7 +27,7 @@ MRAEncUInt8New(int numRanges, int symbolsPerRange[],
                                             mapping, env);
 }
 
-staticifinline inline size_t
+static inline size_t
 MRAEncGetRangeSize(const MRAEnc *mralpha, size_t range)
 {
   assert(mralpha);
@@ -35,11 +35,11 @@ MRAEncGetRangeSize(const MRAEnc *mralpha, size_t range)
   return mralpha->symbolsPerRange[range];
 }
 
-staticifinline inline size_t
+static inline size_t
 MRAEncGetDomainSize(const MRAEnc *mralpha)
 {
   assert(mralpha);
-  switch(mralpha->encType)
+  switch (mralpha->encType)
   {
   case sourceUInt8:
     return UINT8_MAX + 1;
@@ -48,22 +48,22 @@ MRAEncGetDomainSize(const MRAEnc *mralpha)
   }
 }
 
-staticifinline inline Symbol
+static inline Symbol
 MRAEncMapSymbol(const MRAEnc *mralpha, Symbol sym)
 {
-  switch(mralpha->encType)
+  switch (mralpha->encType)
   {
   case sourceUInt8:
     return constMRAEnc2MRAEncUInt8(mralpha)->mappings[(uint8_t)sym];
   default:
     abort();
-  }  
+  }
 }
 
-staticifinline inline Symbol
+static inline Symbol
 MRAEncRevMapSymbol(const MRAEnc *mralpha, Symbol sym)
 {
-  switch(mralpha->encType)
+  switch (mralpha->encType)
   {
   case sourceUInt8:
     return constMRAEnc2MRAEncUInt8(mralpha)->revMappings[(uint8_t)sym];
@@ -72,10 +72,10 @@ MRAEncRevMapSymbol(const MRAEnc *mralpha, Symbol sym)
   }
 }
 
-staticifinline inline int
+static inline int
 MRAEncSymbolHasValidMapping(const MRAEnc *mralpha, Symbol sym)
 {
-  switch(mralpha->encType)
+  switch (mralpha->encType)
   {
   case sourceUInt8:
     return mralpha->rangeEndIndices[mralpha->numRanges] == UINT8_MAX
@@ -83,7 +83,7 @@ MRAEncSymbolHasValidMapping(const MRAEnc *mralpha, Symbol sym)
           != UNDEF_UCHAR);
   default:
     abort();
-  }  
+  }
 }
 
-#endif  /* EIS_MRANGEALPHABETSIMPLEOP_H */
+#endif

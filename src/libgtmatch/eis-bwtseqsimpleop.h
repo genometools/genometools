@@ -19,40 +19,40 @@
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseqpriv.h"
 
-staticifinline inline const MRAEnc *
+static inline const MRAEnc *
 BWTSeqGetAlphabet(const BWTSeq *seq)
 {
   return EISGetAlphabet(seq->seqIdx);
 }
 
-staticifinline inline Seqpos
+static inline Seqpos
 BWTSeqLength(const BWTSeq *seq)
 {
   return EISLength(seq->seqIdx);
 }
 
-staticifinline inline Seqpos
+static inline Seqpos
 BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Env *env)
 {
   assert(bwtSeq && env);
   return EISSymTransformedRank(bwtSeq->seqIdx, tsym, pos, bwtSeq->hint, env);
 }
 
-staticifinline inline Seqpos
+static inline Seqpos
 BWTSeqOcc(const BWTSeq *bwtSeq, Symbol sym, Seqpos pos, Env *env)
 {
   assert(bwtSeq && env);
   return EISRank(bwtSeq->seqIdx, sym, pos, bwtSeq->hint, env);
 }
 
-staticifinline inline Seqpos
+static inline Seqpos
 BWTSeqLFMap(const BWTSeq *bwtSeq, Seqpos pos, Env *env)
 {
   Symbol tSym = EISGetTransformedSym(bwtSeq->seqIdx, pos, bwtSeq->hint, env);
   return bwtSeq->count[tSym] + BWTSeqTransformedOcc(bwtSeq, tSym, pos, env);
 }
 
-staticifinline inline Seqpos
+static inline Seqpos
 BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym, Env *env)
 {
   Symbol  tSym;
@@ -62,7 +62,7 @@ BWTSeqAggCount(const BWTSeq *bwtSeq, Symbol sym, Env *env)
   return bwtSeq->count[tSym];
 }
 
-staticifinline inline Seqpos
+static inline Seqpos
 BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym, Env *env)
 {
   assert(bwtSeq && env);
@@ -70,7 +70,7 @@ BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym, Env *env)
   return bwtSeq->count[tSym];
 }
 
-staticifinline struct matchBound *
+static struct matchBound *
 BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
                 Symbol nextSym, Env *env)
 {
@@ -89,11 +89,11 @@ BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
   return limits;
 }
 
-staticifinline inline const EISeq *
+static inline const EISeq *
 BWTSeqGetEncIdxSeq(const BWTSeq *bwtSeq)
 {
   assert(bwtSeq);
   return bwtSeq->seqIdx;
 }
 
-#endif  /* EIS_BWTSEQSIMPLEOP_H */
+#endif

@@ -1,7 +1,6 @@
 *.bac
 *.bak
 *~
-<<<<<<< HEAD:.gitignore
 *.core
 *.diff
 *.gcov

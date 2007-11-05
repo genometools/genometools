@@ -29,7 +29,7 @@ deleteEncIdxSeq(EISeq *seq, Env *env)
 
 #define verifyIntegrityErrRet(retval)                                   \
   do {                                                                  \
-    switch(retval) {                                                    \
+    switch (retval) {                                                    \
     case 1:                                                             \
       fprintf(stderr, "Comparision failed at position %llu"             \
               ", reference symbol: %u, symbol read: %u\n",              \
@@ -49,7 +49,7 @@ deleteEncIdxSeq(EISeq *seq, Env *env)
     freesuffixarray(&suffixArray, env);                                 \
     freeverboseinfo(&verbosity, env);                                   \
     return retval;                                                      \
-  } while(0)
+  } while (0)
 
 /**
  * @param tickPrint if not zero, print a . every tickPrint symbols to
@@ -70,42 +70,44 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, int tickPrint,
   Seqpos seqLastPos, rankQueryResult, rankExpect;
   Verboseinfo *verbosity;
   const MRAEnc *alphabet;
+  int symRead;
   verbosity = newverboseinfo(true, env);
   /* two part process: enumerate all positions of original sequence
    * and verify that the query functions return correct values */
-  if(streamsuffixarray(&suffixArray, &seqLastPos,
+  if (streamsuffixarray(&suffixArray, &seqLastPos,
                        SARR_SUFTAB | SARR_BWTTAB, projectName, verbosity, env))
   {
     freeverboseinfo(&verbosity, env);
     return -1;
   }
-  memset(rankTable, 0, sizeof(rankTable));
+  memset(rankTable, 0, sizeof (rankTable));
   bwtFP = suffixArray.bwttabstream.fp;
   alphabet = EISGetAlphabet(seqIdx);
 /*   pos = 1803218; */
 /*   fseeko(bwtFP, pos, SEEK_SET); */
   hint = newEISHint(seqIdx, env);
-  while((symOrig = getc(bwtFP)) != EOF)
+  while ((symRead = getc(bwtFP)) != EOF)
   {
+    symOrig = symRead;
     /* TODO: complete once query functions are finished */
 /*     fprintf(stderr, "pos: %llu\n", (unsigned long long)pos); */
     symEnc = EISGetSym(seqIdx, pos, hint, env);
-    if(!MRAEncSymbolHasValidMapping(alphabet, symEnc))
+    if (!MRAEncSymbolHasValidMapping(alphabet, symEnc))
       verifyIntegrityErrRet(-1);
-    if(symEnc != symOrig)
+    if (symEnc != symOrig)
       verifyIntegrityErrRet(1);
-    if((rankExpect = ++rankTable[symOrig])
+    if ((rankExpect = ++rankTable[symOrig])
        != (rankQueryResult = EISRank(seqIdx, symOrig, pos + 1, hint, env)))
       verifyIntegrityErrRet(2);
     ++pos;
-    if(tickPrint && !(pos % tickPrint))
+    if (tickPrint && !(pos % tickPrint))
       putc('.', fp);
-/*     if(pos > 2000) */
+/*     if (pos > 2000) */
 /*       break; */
   }
-  if(tickPrint)
+  if (tickPrint)
     putc('\n', fp);
-  if(ferror(bwtFP))
+  if (ferror(bwtFP))
     verifyIntegrityErrRet(-1);
   deleteEISHint(seqIdx, hint, env);
   freesuffixarray(&suffixArray, env);

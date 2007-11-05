@@ -13,8 +13,8 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_ENCIDXSIMPLEOP_H
-#define EIS_ENCIDXSIMPLEOP_H
+#ifndef EIS_ENCIDXSEQSIMPLEOP_H
+#define EIS_ENCIDXSEQSIMPLEOP_H
 
 #include <string.h>
 
@@ -22,20 +22,20 @@
 #include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-encidxseqpriv.h"
 
-staticifinline inline Seqpos
+static inline Seqpos
 EISLength(EISeq *seq)
 {
   return seq->seqLen;
 }
 
-staticifinline inline const MRAEnc *
+static inline const MRAEnc *
 EISGetAlphabet(const EISeq *seq)
 {
   assert(seq);
   return seq->alphabet;
 }
 
-staticifinline inline Symbol
+static inline Symbol
 EISGetSym(EISeq *seq, Seqpos pos, union EISHint *hint, Env *env)
 {
   assert(seq && hint && env);
@@ -43,14 +43,14 @@ EISGetSym(EISeq *seq, Seqpos pos, union EISHint *hint, Env *env)
                             seq->classInfo->get(seq, pos, hint, env));
 }
 
-staticifinline inline Symbol
+static inline Symbol
 EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env)
 {
   assert(seq && hint && env);
   return seq->classInfo->get(seq, pos, hint, env);
 }
 
-staticifinline inline Seqpos
+static inline Seqpos
 EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
         Env *env)
 {
@@ -59,7 +59,7 @@ EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
   return seq->classInfo->rank(seq, mSym, pos, hint, env);
 }
 
-staticifinline inline void
+static inline void
 EISRetrieveExtraBits(EISeq *seq, Seqpos pos, int flags,
                      struct extBitsRetrieval *retval, union EISHint *hint,
                      Env *env)
@@ -67,38 +67,38 @@ EISRetrieveExtraBits(EISeq *seq, Seqpos pos, int flags,
   return seq->classInfo->expose(seq, pos, flags, retval, hint, env);
 }
 
-staticifinline inline void
+static inline void
 initExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
 {
-  memset(r, 0, sizeof(struct extBitsRetrieval));
+  memset(r, 0, sizeof (struct extBitsRetrieval));
 }
 
-staticifinline inline struct extBitsRetrieval *
+static inline struct extBitsRetrieval *
 newExtBitsRetrieval(Env *env)
 {
-  struct extBitsRetrieval *retval 
-    = env_ma_malloc(env, sizeof(struct extBitsRetrieval));
+  struct extBitsRetrieval *retval
+    = env_ma_malloc(env, sizeof (struct extBitsRetrieval));
   initExtBitsRetrieval(retval, env);
   return retval;
 }
 
-staticifinline inline void
+static inline void
 destructExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
 {
-  if((r->flags & EBRF_PERSISTENT_CWBITS) && r->cwPart)
+  if ((r->flags & EBRF_PERSISTENT_CWBITS) && r->cwPart)
     env_ma_free(r->cwPart, env);
-  if((r->flags & EBRF_PERSISTENT_VARBITS) && r->varPart)
+  if ((r->flags & EBRF_PERSISTENT_VARBITS) && r->varPart)
     env_ma_free(r->varPart, env);
 }
 
-staticifinline inline void
+static inline void
 deleteExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
 {
   destructExtBitsRetrieval(r, env);
   env_ma_free(r, env);
 }
 
-staticifinline inline Seqpos
+static inline Seqpos
 EISSymTransformedRank(EISeq *seq, Symbol msym, Seqpos pos,
                       union EISHint *hint, Env *env)
 {
@@ -106,7 +106,7 @@ EISSymTransformedRank(EISeq *seq, Symbol msym, Seqpos pos,
   return seq->classInfo->rank(seq, msym, pos, hint, env);
 }
 
-staticifinline inline FILE *
+static inline FILE *
 EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
                 uint32_t *lenRet)
 {
@@ -114,16 +114,16 @@ EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
   return seqIdx->classInfo->seekToHeader(seqIdx, headerID, lenRet);
 }
 
-staticifinline inline EISHint
+static inline EISHint
 newEISHint(EISeq *seq, Env *env)
 {
   return seq->classInfo->newHint(seq, env);
 }
 
-staticifinline inline void
+static inline void
 deleteEISHint(EISeq *seq, EISHint hint, Env *env)
 {
   return seq->classInfo->deleteHint(seq, hint, env);
 }
 
-#endif  /* EIS_ENCIDXSEQSIMPLEOP_H */
+#endif
