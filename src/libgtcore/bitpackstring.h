@@ -14,8 +14,9 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef BITPACKSTRING_H_INCLUDED
-#define BITPACKSTRING_H_INCLUDED
+#ifndef BITPACKSTRING_H
+#define BITPACKSTRING_H
+
 /**
  * \file bitpackstring.h
  *
@@ -631,4 +632,4 @@ bitPackStringInt64_unit_test(Env *env);
 
 #include "bitpackstringsimpleop.h"
 
-#endif /* BITPACKSTRING_H_INCLUDED */
+#endif

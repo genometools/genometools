@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DISCDISTRI_H
-#define DISCDISTRI_H
+#ifndef STRINGDISTRI_H
+#define STRINGDISTRI_H
 
 #include "libgtcore/env.h"
 #include "libgtcore/genfile.h"

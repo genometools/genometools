@@ -15,7 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef COIN_HMM
+#ifndef COIN_HMM_H
+#define COIN_HMM_H
 
 #include "libgtcore/alpha.h"
 #include "libgtext/hmm.h"

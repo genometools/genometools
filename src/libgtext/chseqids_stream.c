@@ -54,7 +54,10 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   if (!cs->sequence_regions_processed) {
     while (!had_err) {
       if (!(had_err = genome_stream_next_tree(cs->in_stream, &node, env))) {
-        array_add(cs->genome_node_buffer, node, env);
+        if (node)
+          array_add(cs->genome_node_buffer, node, env);
+        else
+          break;
         if (!(genome_node_cast(sequence_region_class(), node)))
           break; /* no more sequence regions */
       }
@@ -80,7 +83,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
     if (!had_err)
       genome_nodes_sort(cs->genome_node_buffer);
     /* consolidate them */
-    for (i = 1; !had_err && i < array_size(cs->genome_node_buffer) - 1; i++) {
+    for (i = 1; !had_err && i + 1 < array_size(cs->genome_node_buffer); i++) {
       gn_a = array_get(cs->genome_node_buffer, i-1);
       gn_b = array_get(cs->genome_node_buffer, i);
       if (genome_nodes_are_equal_sequence_regions(*gn_a, *gn_b)) {

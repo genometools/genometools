@@ -67,7 +67,6 @@ static OPrval parse_options(int *parsed_args,
   optionprotein = option_new_bool("protein","input is Protein sequence",
                                   &so->isprotein,false,env);
   option_parser_add_option(op, optionprotein, env);
-
   optionplain = option_new_bool("plain","process as plain text",
                                 &so->isplain,false,env);
   option_parser_add_option(op, optionplain, env);
@@ -129,7 +128,6 @@ static OPrval parse_options(int *parsed_args,
                              &so->outlcptab,
                              false,env);
     option_parser_add_option(op, option, env);
-
     option = option_new_bool("bwt",
                              "output Burrows-Wheeler Transformation "
                              "(bwttab) to file",

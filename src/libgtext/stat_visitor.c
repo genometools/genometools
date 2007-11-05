@@ -26,11 +26,13 @@ struct StatVisitor {
                 number_of_genes,
                 number_of_mRNAs,
                 number_of_exons,
-                number_of_LTR_retrotransposons;
+                number_of_LTR_retrotransposons,
+                exon_number_for_distri;
   unsigned long long total_length_of_sequence_regions;
   DiscDistri *gene_length_distribution,
              *gene_score_distribution,
              *exon_length_distribution,
+             *exon_number_distribution,
              *intron_length_distribution;
 };
 
@@ -43,15 +45,30 @@ static void stat_visitor_free(GenomeVisitor *gv, Env *env)
   discdistri_delete(stat_visitor->gene_length_distribution, env);
   discdistri_delete(stat_visitor->gene_score_distribution, env);
   discdistri_delete(stat_visitor->exon_length_distribution, env);
+  discdistri_delete(stat_visitor->exon_number_distribution, env);
   discdistri_delete(stat_visitor->intron_length_distribution, env);
 }
 
-static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                       Env *env)
+static int add_exon_number(GenomeNode *gn, void *data, Env *env)
+{
+  StatVisitor *stat_visitor = (StatVisitor*) data;
+  GenomeFeature *gf = (GenomeFeature*) gn;
+  env_error_check(env);
+  assert(stat_visitor && gf);
+  if (genome_feature_get_type(gf) == gft_exon)
+    stat_visitor->exon_number_for_distri++;
+  return 0;
+}
+
+static int compute_statistics(GenomeNode *gn, void *data, Env *env)
 {
   StatVisitor *stat_visitor;
+  GenomeFeature *gf;
+  int rval;
   env_error_check(env);
-  stat_visitor = stat_visitor_cast(gv);
+  assert(data);
+  stat_visitor = (StatVisitor*) data;
+  gf = (GenomeFeature*) gn;
   switch (genome_feature_get_type(gf)) {
     case gft_gene:
       stat_visitor->number_of_genes++;
@@ -88,7 +105,27 @@ static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
       break;
     default: assert(1); /* nothing to do for all other types */
   }
+  if (stat_visitor->exon_number_distribution) {
+    stat_visitor->exon_number_for_distri = 0;
+    rval = genome_node_traverse_direct_children(gn, stat_visitor,
+                                                add_exon_number, env);
+    assert(!rval); /* add_exon_number() is sane */
+    if (stat_visitor->exon_number_for_distri) {
+      discdistri_add(stat_visitor->exon_number_distribution,
+                     stat_visitor->exon_number_for_distri, env);
+    }
+  }
   return 0;
+}
+
+static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
+                                       Env *env)
+{
+  StatVisitor *stat_visitor;
+  env_error_check(env);
+  stat_visitor = stat_visitor_cast(gv);
+  return genome_node_traverse_children((GenomeNode*) gf, stat_visitor,
+                                       compute_statistics, false, env);
 }
 
 static int stat_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
@@ -116,6 +153,7 @@ const GenomeVisitorClass* stat_visitor_class()
 GenomeVisitor* stat_visitor_new(bool gene_length_distri,
                                 bool gene_score_distri,
                                 bool exon_length_distri,
+                                bool exon_number_distri,
                                 bool intron_length_distri, Env *env)
 {
   GenomeVisitor *gv = genome_visitor_create(stat_visitor_class(), env);
@@ -126,6 +164,8 @@ GenomeVisitor* stat_visitor_new(bool gene_length_distri,
     stat_visitor->gene_score_distribution = discdistri_new(env);
   if (exon_length_distri)
     stat_visitor->exon_length_distribution = discdistri_new(env);
+  if (exon_number_distri)
+    stat_visitor->exon_number_distribution = discdistri_new(env);
   if (intron_length_distri)
     stat_visitor->intron_length_distribution = discdistri_new(env);
   return gv;
@@ -160,6 +200,10 @@ void stat_visitor_show_stats(GenomeVisitor *gv, Env *env)
   if (stat_visitor->exon_length_distribution) {
     printf("exon length distribution:\n");
     discdistri_show(stat_visitor->exon_length_distribution, env);
+  }
+  if (stat_visitor->exon_number_distribution) {
+    printf("exon number distribution:\n");
+    discdistri_show(stat_visitor->exon_number_distribution, env);
   }
   if (stat_visitor->intron_length_distribution) {
     printf("intron length distribution:\n");

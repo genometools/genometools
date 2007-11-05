@@ -13,6 +13,10 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
+#ifndef BITPACKSTRINGSIMPLEOP_H
+#define BITPACKSTRINGSIMPLEOP_H
+
 #include <assert.h>
 #include <inttypes.h>
 #include <limits.h>
@@ -365,3 +369,5 @@ bitCountUInt32(uint32_t v)
   return (((v + (v >> 4)) & (uint32_t)0xF0F0F0FUL)
           * (uint32_t)0x1010101UL) >> 24;        /* count */
 }
+
+#endif

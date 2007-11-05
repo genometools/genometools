@@ -173,7 +173,7 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   /* print predictions to stdout */
   if (!had_err)
   {
-    if(showinfoiffoundfullLTRs(lo, ssar, env) != 0)
+    if (showinfoiffoundfullLTRs(lo, ssar, env) != 0)
     {
       had_err = true;
     }

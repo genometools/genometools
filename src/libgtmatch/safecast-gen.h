@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef SAFE_CAST_GEN_H
-#define SAFE_CAST_GEN_H
+#ifndef SAFECAST_GEN_H
+#define SAFECAST_GEN_H
 #include <stdlib.h>
 #include <stdio.h>
 #include <inttypes.h>

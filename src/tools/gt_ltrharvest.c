@@ -4,7 +4,6 @@
   See LICENSE file or http://genometools.org/license.html for license details.
 */
 
-//#include "gt.h"
 #include "libgtltr/ltrharvest-run.h"
 
 int gt_ltrharvest(int argc, const char **argv, Env *env)

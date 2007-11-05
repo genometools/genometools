@@ -182,6 +182,34 @@ Test do
   run "diff #{$last_stdout} #{$testdata}test_3_result.txt"
 end
 
+Name "gt exercise multilcp -help"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise multilcp -help"
+  grep $last_stdout, "Report bugs to"
+end
+
+Name "gt exercise multilcp -noop"
+Keywords "gt_exercise"
+Test do
+  run_test("#{$bin}gt exercise multilcp -noop", :retval => 1)
+  grep $last_stderr, "unknown option"
+end
+
+Name "gt exercise multilcp test"
+Keywords "gt_exercise"
+Test do
+  run_test "#{$bin}gt exercise multilcp aacacac ccacacaa"
+  run "diff #{$last_stdout} #{$testdata}gt_multilcp_test.out"
+end
+
+Name "gt exercise multilcp fail"
+Keywords "gt_exercise"
+Test do
+  run_test("#{$bin}gt exercise multilcp '' ''", :retval => 1)
+  grep $last_stderr, "sequence of length 0 not allowed"
+end
+
 Name "gt exercise scorematrix test BLOSUM62"
 Keywords "gt_exercise"
 Test do

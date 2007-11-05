@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LTRHARVEST_OPTDEF
-#define LTRHARVEST_OPTDEF
+#ifndef LTRHARVEST_OPT_H
+#define LTRHARVEST_OPT_H
 
 #include <stdbool.h>
 #include "libgtcore/env.h"

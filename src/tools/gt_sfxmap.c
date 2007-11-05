@@ -35,7 +35,7 @@ typedef struct
 
 static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                             int *parsed_args,
-                            int argc, 
+                            int argc,
                             const char **argv,
                             Env *env)
 {
@@ -66,7 +66,6 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                                   false,env);
   option_parser_add_option(op, optionverbose, env);
 
-
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc, argv,
                                             versionfunc, (unsigned int) 1,
                                             (unsigned int) 2, env);
@@ -96,7 +95,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
 
   indexname = str_new_cstr(argv[parsed_args],env);
   verboseinfo = newverboseinfo(sfxmapoptions.verbose,env);
-  if ((sfxmapoptions.usestream ? streamsuffixarray 
+  if ((sfxmapoptions.usestream ? streamsuffixarray
                                : mapsuffixarray)(&suffixarray,
                                                  &totallength,
                                                  sfxmapoptions.onlytis ?

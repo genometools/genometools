@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef MAPSPECDEF_H
-#define MAPSPECDEF_H
+#ifndef MAPSPEC_DEF_H
+#define MAPSPEC_DEF_H
 
 #include "libgtcore/arraydef.h"
 #include "libgtcore/str.h"

@@ -15,8 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef BWTBOUND_H
-#define BWTBOUND_H
+#ifndef FMI_BWTBOUND_H
+#define FMI_BWTBOUND_H
 
 #include "libgtcore/arraydef.h"
 #include "seqpos-def.h"

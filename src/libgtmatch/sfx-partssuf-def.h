@@ -15,8 +15,13 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef PARTSSUF_DEF_H
-#define PARTSSUF_DEF_H
+#ifndef SFX_PARTSSUF_DEF_H
+#define SFX_PARTSSUF_DEF_H
+
+#include "libgtcore/env.h"
+#include "seqpos-def.h"
+#include "verbose-def.h"
+#include "intcode-def.h"
 
 #include "libgtcore/env.h"
 #include "seqpos-def.h"

@@ -25,9 +25,6 @@ struct ExtractFeatStream
   const GenomeStream parent_instance;
   GenomeStream *in_stream;
   GenomeVisitor *extractfeat_visitor;
-  GenomeFeatureType type;
-  bool join,
-       translate;
 };
 
 #define extractfeat_stream_cast(GS)\
@@ -78,10 +75,7 @@ GenomeStream* extractfeat_stream_new(GenomeStream *in_stream, RegionMapping *rm,
                                           env);
   ExtractFeatStream *efs = extractfeat_stream_cast(gs);
   efs->in_stream = in_stream;
-  efs->type = type;
-  efs->join = join;
-  efs->translate = translate;
-  efs->extractfeat_visitor = extractfeat_visitor_new(rm, efs->type, efs->join,
-                                                     efs->translate, env);
+  efs->extractfeat_visitor = extractfeat_visitor_new(rm, type, join, translate,
+                                                     env);
   return gs;
 }

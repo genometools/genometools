@@ -15,7 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef DICE_HMM
+#ifndef DICE_HMM_H
+#define DICE_HMM_H
 
 #include "libgtcore/alpha.h"
 #include "libgtext/hmm.h"

@@ -17,8 +17,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef FEATUREINDEX_H
-#define FEATUREINDEX_H
+#ifndef FEATURE_INDEX_H
+#define FEATURE_INDEX_H
 
 #include "libgtcore/array.h"
 #include "libgtcore/str.h"

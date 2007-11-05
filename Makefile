@@ -388,12 +388,12 @@ $(eval $(call PROGRAM_template, bin/gt, $(GTMAIN_OBJ) $(TOOLS_OBJ) $(GTLIBS) \
 bin/lua: $(LUAMAIN_OBJ) $(LIBLUA_OBJ)
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $^ -lm -o $@
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -lm -o $@
 
 bin/rnv: $(RNVMAIN_OBJ) lib/librnv.a lib/libexpat.a
 	@echo "[link $(@F)]"
 	@test -d $(@D) || mkdir -p $(@D)
-	@$(CC) $(EXP_LDFLAGS) $^ -o $@
+	@$(CC) $(EXP_LDFLAGS) $(GT_LDFLAGS) $^ -o $@
 
 obj/gt_config.h:
 	@echo '[create $@]'
