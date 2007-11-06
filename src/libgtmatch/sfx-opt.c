@@ -41,13 +41,14 @@ static OPrval parse_options(int *parsed_args,
          *optionpl,
          *optionindexname,
          *optiondb,
-         *optiondir;
+         *optiondir,
+         *optiondes;
   OPrval oprval;
   Str *dirarg = str_new(env);
 
   env_error_check(env);
   op = option_parser_new("[option ...] -db file [...]",
-                         doesa ? "Compute enhanced suffix array." 
+                         doesa ? "Compute enhanced suffix array."
                                : "Compute packed index.", env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optiondb = option_new_filenamearray("db","specify database files",
@@ -67,7 +68,6 @@ static OPrval parse_options(int *parsed_args,
   optionprotein = option_new_bool("protein","input is Protein sequence",
                                   &so->isprotein,false,env);
   option_parser_add_option(op, optionprotein, env);
-
   optionplain = option_new_bool("plain","process as plain text",
                                 &so->isplain,false,env);
   option_parser_add_option(op, optionplain, env);
@@ -116,7 +116,13 @@ static OPrval parse_options(int *parsed_args,
                            false,env);
   option_parser_add_option(op, option, env);
 
-  if(doesa)
+  optiondes = option_new_bool("des",
+                              "output sequence descriptions to file ",
+                              &so->outdestab,
+                              false,env);
+  option_parser_add_option(op, optiondes, env);
+
+  if (doesa)
   {
     option = option_new_bool("suf",
                              "output suffix array (suftab) to file",
@@ -129,31 +135,25 @@ static OPrval parse_options(int *parsed_args,
                              &so->outlcptab,
                              false,env);
     option_parser_add_option(op, option, env);
-
     option = option_new_bool("bwt",
                              "output Burrows-Wheeler Transformation "
                              "(bwttab) to file",
                              &so->outbwttab,
                              false,env);
     option_parser_add_option(op, option, env);
-  
-    option = option_new_bool("des",
-                             "output sequence descriptions to file ",
-                             &so->outdestab,
-                             false,env);
-    option_parser_add_option(op, option, env);
+
   } else
   {
     Option *optionBlockSize,
            *optionBucketBlocks,
            *optionLocateFreq;
 
-    optionBlockSize = option_new_uint_min("bsize", 
+    optionBlockSize = option_new_uint_min("bsize",
                                           "specify size of blocks",
-                                          &so->blockSize, 
+                                          &so->blockSize,
 					  8U, 1U, env);
     option_parser_add_option(op, optionBlockSize, env);
-    optionBucketBlocks = option_new_uint_min("blbuck", 
+    optionBucketBlocks = option_new_uint_min("blbuck",
                                              "specify number of blocks per "
                                              "bucket",
                                              &so->bucketBlocks,
@@ -174,7 +174,6 @@ static OPrval parse_options(int *parsed_args,
                            &so->beverbose,
 			   false,env);
   option_parser_add_option(op, option, env);
-
 
   option_exclude(optionsmap, optiondna, env);
   option_exclude(optionsmap, optionprotein, env);
@@ -309,6 +308,9 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->str_smap = str_new(env);
   so->str_sat = str_new(env);
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
+  so->outsuftab = false;
+  so->outlcptab = false;
+  so->outbwttab = false;
   rval = parse_options(&parsed_args, doesa, so, argc, argv, env);
   if (rval == OPTIONPARSER_ERROR)
   {

@@ -241,7 +241,7 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,Seqpos pos)
         Seqpos rangeend
                = (Seqpos) ((MAXSPECIALTYPE+1) * pagenumber) +
                  (Seqpos) *found +
-                 (Seqpos) encseq->specialrangelength[(unsigned long) 
+                 (Seqpos) encseq->specialrangelength[(unsigned long)
                                                      (found - start)] + 1;
         if (pos < rangeend)
         {
@@ -310,7 +310,7 @@ static bool ADDTYPE(checkspecialrange)(const Encodedsequence *encseq,
   {
     Seqpos rangeend
              = (Seqpos) *found +
-               (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)] 
+               (Seqpos) encseq->specialrangelength[(Seqpos) (found - start)]
                         + 1;
     if (pos < rangeend)
     {

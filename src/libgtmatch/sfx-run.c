@@ -419,21 +419,21 @@ static int runsuffixerator(bool doesa,
     }
   }
   initoutfileinfo(&outfileinfo);
-  if (so->outlcptab)
-  {
-    outfileinfo.lvi = newLcpvalueiterator(encseq,so->readmode,env);
-  } else
-  {
-    outfileinfo.lvi = NULL;
-  }
-  INITOUTFILEPTR(outfileinfo.outfpsuftab,so->outsuftab,SUFTABSUFFIX);
-  INITOUTFILEPTR(outfileinfo.outfplcptab,so->outlcptab,LCPTABSUFFIX);
-  INITOUTFILEPTR(outfileinfo.outfpllvtab,so->outlcptab,LARGELCPTABSUFFIX);
-  INITOUTFILEPTR(outfileinfo.outfpbwttab,so->outbwttab,BWTTABSUFFIX);
   if (!haserr)
   {
     if (so->outsuftab || so->outbwttab || so->outlcptab || !doesa)
     {
+      if (so->outlcptab)
+      {
+        outfileinfo.lvi = newLcpvalueiterator(encseq,so->readmode,env);
+      } else
+      {
+        outfileinfo.lvi = NULL;
+      }
+      INITOUTFILEPTR(outfileinfo.outfpsuftab,so->outsuftab,SUFTABSUFFIX);
+      INITOUTFILEPTR(outfileinfo.outfplcptab,so->outlcptab,LCPTABSUFFIX);
+      INITOUTFILEPTR(outfileinfo.outfpllvtab,so->outlcptab,LARGELCPTABSUFFIX);
+      INITOUTFILEPTR(outfileinfo.outfpbwttab,so->outbwttab,BWTTABSUFFIX);
       if (so->prefixlength == PREFIXLENGTH_AUTOMATIC)
       {
         so->prefixlength = recommendedprefixlength(numofchars,totallength);
@@ -461,13 +461,13 @@ static int runsuffixerator(bool doesa,
       }
       if (!haserr)
       {
-        if(doesa)
+        if (doesa)
         {
           if (suffixeratorwithoutput(
-                           &outfileinfo,
-                           specialcharinfo.specialcharacters,
-                           specialcharinfo.specialranges,
-                           encseq,
+                             &outfileinfo,
+                             specialcharinfo.specialcharacters,
+                             specialcharinfo.specialranges,
+                             encseq,
                            so->readmode,
                            numofchars,
                            so->prefixlength,
@@ -488,6 +488,14 @@ static int runsuffixerator(bool doesa,
           printf("locfreq=%u\n",so->locateInterval);
         }
       }
+      env_fa_fclose(outfileinfo.outfpsuftab,env);
+      env_fa_fclose(outfileinfo.outfplcptab,env);
+      env_fa_fclose(outfileinfo.outfpllvtab,env);
+      env_fa_fclose(outfileinfo.outfpbwttab,env);
+      if (outfileinfo.lvi != NULL)
+      {
+        freeLcpvalueiterator(&outfileinfo.lvi,env);
+      }
     } else
     {
       if (so->readmode != Forwardmode)
@@ -499,14 +507,6 @@ static int runsuffixerator(bool doesa,
         haserr = true;
       }
     }
-  }
-  env_fa_fclose(outfileinfo.outfpsuftab,env);
-  env_fa_fclose(outfileinfo.outfplcptab,env);
-  env_fa_fclose(outfileinfo.outfpllvtab,env);
-  env_fa_fclose(outfileinfo.outfpbwttab,env);
-  if (outfileinfo.lvi != NULL)
-  {
-    freeLcpvalueiterator(&outfileinfo.lvi,env);
   }
   if (!haserr)
   {
@@ -520,8 +520,8 @@ static int runsuffixerator(bool doesa,
                    so->prefixlength,
                    outfileinfo.numoflargelcpvalues,
                    outfileinfo.maxbranchdepth,
-                   &outfileinfo.longest,
-                   env) != 0)
+		   &outfileinfo.longest,
+		   env) != 0)
     {
       haserr = true;
     }

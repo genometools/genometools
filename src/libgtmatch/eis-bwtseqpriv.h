@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
+  Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -13,33 +13,20 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#ifndef EIS_BWTSEQPRIV_H
+#define EIS_BWTSEQPRIV_H
 
-#ifndef DATAALIGN_H
-#define DATAALIGN_H
+#include "libgtmatch/eis-bwtseq.h"
+#include "libgtmatch/eis-encidxseq.h"
 
-#include "minmax.h"
-
-/*
- * functionality to layout data at correct alignment (=> fewer
- * individual mallocs)
- */
-enum {
-  MAX_ALIGN_REQUIREMENT = 8,
-  MIN_ALIGN_REQUREMENT = 4,
+struct BWTSeq
+{
+  enum seqBaseEncoding type;
+  struct encIdxSeq *seqIdx;
+  size_t alphabetSize;
+  EISHint hint;
+  unsigned locateSampleInterval; /**< no sampling if 0 */
+  Seqpos *count;
 };
-
-static inline unsigned long long
-roundUp(unsigned long long v, unsigned long multipleOf)
-{
-  return v - v%multipleOf + multipleOf * (v%multipleOf?1:0);
-}
-
-static inline size_t
-offsetAlign(size_t offset, size_t sizeOfVal2Align)
-{
-  size_t alignBase = MAX(MIN_ALIGN_REQUREMENT,
-                         MIN(sizeOfVal2Align, MAX_ALIGN_REQUIREMENT));
-  return roundUp(offset, alignBase);
-}
 
 #endif

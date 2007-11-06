@@ -23,6 +23,11 @@
 #include "verbose-def.h"
 #include "intcode-def.h"
 
+#include "libgtcore/env.h"
+#include "seqpos-def.h"
+#include "verbose-def.h"
+#include "intcode-def.h"
+
 typedef struct Suftabparts Suftabparts;
 
 Suftabparts *newsuftabparts(unsigned int numofparts,
