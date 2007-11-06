@@ -1221,7 +1221,7 @@ static void binpreparenextrange(const Encodedsequence *encseq,
         {
           found = true;
           esr->lastcell = cellnum+1;
-	  break;
+          break;
         }
         endpos0 = cellnum+1;
       }

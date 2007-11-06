@@ -16,7 +16,7 @@ def checksfx(parts,pl,withsmap,sat,filelist)
   end
   run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
            "#{extra} #{outoptions()}  -db " + filearg
-  run_test "#{$bin}gt dev sfxmap -v sfx"
+  run_test "#{$bin}gt dev sfxmap -trials 10 -v sfx"
 end
 
 def flattenfilelist(filelist)
@@ -102,7 +102,7 @@ Keywords "gt_suffixerator"
 Test do
   run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx " +
            "-db #{$testdata}Random.fna"
-  run_test "#{$bin}gt dev sfxmap localidx",:retval => 1
+  run_test "#{$bin}gt dev sfxmap -trials 10 localidx",:retval => 1
 end
 
 Name "gt suffixerator bwt"
@@ -158,7 +158,7 @@ def checkmapped(args)
   Keywords "gt_suffixerator gttestdata"
   Test do
     run_test("#{$bin}gt suffixerator -tis -des -suf -bwt -lcp -indexname sfxidx #{args}", :maxtime => 600)
-    run_test("#{$bin}gt dev sfxmap -v sfxidx", :maxtime => 600)
+    run_test("#{$bin}gt dev sfxmap -trials 10 -v sfxidx", :maxtime => 600)
     run_test("#{$bin}gt dev sfxmap -v -stream sfxidx", :maxtime => 600)
   end
 end

@@ -41,7 +41,8 @@ static OPrval parse_options(int *parsed_args,
          *optionpl,
          *optionindexname,
          *optiondb,
-         *optiondir;
+         *optiondir,
+         *optiondes;
   OPrval oprval;
   Str *dirarg = str_new(env);
 
@@ -115,6 +116,12 @@ static OPrval parse_options(int *parsed_args,
                            false,env);
   option_parser_add_option(op, option, env);
 
+  optiondes = option_new_bool("des",
+                              "output sequence descriptions to file ",
+                              &so->outdestab,
+                              false,env);
+  option_parser_add_option(op, optiondes, env);
+
   if (doesa)
   {
     option = option_new_bool("suf",
@@ -135,11 +142,6 @@ static OPrval parse_options(int *parsed_args,
                              false,env);
     option_parser_add_option(op, option, env);
 
-    option = option_new_bool("des",
-                             "output sequence descriptions to file ",
-                             &so->outdestab,
-                             false,env);
-    option_parser_add_option(op, option, env);
   } else
   {
     Option *optionBlockSize,
@@ -306,6 +308,9 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->str_smap = str_new(env);
   so->str_sat = str_new(env);
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
+  so->outsuftab = false;
+  so->outlcptab = false;
+  so->outbwttab = false;
   rval = parse_options(&parsed_args, doesa, so, argc, argv, env);
   if (rval == OPTIONPARSER_ERROR)
   {
