@@ -66,6 +66,7 @@ union bwtSeqParam
                                  * store partial symbol sums (lower
                                  * values increase index size and
                                  * decrease computations for lookup) */
+    int EISFeatureSet;
   } blockEncParams;
 /*   struct  */
 /*   { */

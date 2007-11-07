@@ -98,6 +98,12 @@ typedef struct encIdxSeq EISeq;
 
 typedef union EISHint *EISHint;
 
+enum EISFeatureBits
+{
+  EISFeatureNone = 0,
+  EISFeatureRegionSums = 1<<0,
+};
+
 /**
  * \brief Construct block-encoded indexed sequence object and write
  * corresponding representation to disk.
@@ -128,7 +134,7 @@ typedef union EISHint *EISHint;
  */
 extern EISeq *
 newBlockEncIdxSeq(const Str *projectName, unsigned blockSize,
-                  unsigned bucketBlocks,
+                  unsigned bucketBlocks, int features,
                   size_t numExtHeaders, uint16_t *headerIDs,
                   uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallbacks,
                   void **headerCBData,
@@ -169,7 +175,7 @@ extern EISeq *
 newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
                         const Str *projectName,
                         unsigned blockSize, unsigned bucketBlocks,
-                        size_t numExtHeaders, uint16_t *headerIDs,
+                        int features, size_t numExtHeaders, uint16_t *headerIDs,
                         uint32_t *extHeaderSizes,
                         headerWriteFunc *extHeaderCallbacks,
                         void **headerCBData,
@@ -209,8 +215,8 @@ extern EISeq *
 newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
                           const Str *projectName,
                           unsigned blockSize, unsigned bucketBlocks,
-                          size_t numExtHeaders, uint16_t *headerIDs,
-                          uint32_t *extHeaderSizes,
+                          int features, size_t numExtHeaders,
+                          uint16_t *headerIDs, uint32_t *extHeaderSizes,
                           headerWriteFunc *extHeaderCallbacks,
                           void **headerCBData,
                           bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
@@ -224,7 +230,7 @@ newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
  * @param env genometools reference for core functions
  */
 extern EISeq *
-loadBlockEncIdxSeq(const Str *projectName, Env *env);
+loadBlockEncIdxSeq(const Str *projectName, int features, Env *env);
 
 /**
  * \brief Load previously written block encoded sequence
@@ -234,7 +240,7 @@ loadBlockEncIdxSeq(const Str *projectName, Env *env);
  */
 struct encIdxSeq *
 loadBlockEncIdxSeqForSA(Suffixarray *sa, Seqpos totalLen,
-                        const Str *projectName, Env *env);
+                        const Str *projectName, int features, Env *env);
 
 /**
  * \brief Deallocate a previously loaded/created sequence object.

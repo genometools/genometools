@@ -18,7 +18,7 @@
 
 #include <limits.h>
 #include <stddef.h>
-#include <stdint.h>
+#include <inttypes.h>
 
 #include "libgtmatch/eis-mrangealphabet.h"
 
