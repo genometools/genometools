@@ -44,7 +44,7 @@ typedef struct
        outbwttab,
        outdestab;
   unsigned int blockSize;      /**< number of symbols to combine in
-                                 * one block a lookup-table
+                                 * one block, a lookup-table
                                  * containing
                                  * $alphabetsize^{blockSize}$ entries is
                                  * required so adjust with caution */
@@ -52,7 +52,8 @@ typedef struct
                                  * store partial symbol sums (lower
                                  * values increase index size and
                                  * decrease computations for lookup) */
-  unsigned int locateInterval;
+  unsigned int locateInterval;  /**< sample suffix array values at
+                                 * this interval, or not at all if 0 */
 } Suffixeratoroptions;
 
 #endif

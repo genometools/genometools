@@ -41,6 +41,10 @@
 #include "sfx-outprj.pr"
 #include "sfx-apfxlen.pr"
 
+#include "eis-encidxseq.h"
+#include "eis-bwtseq.h"
+#include "eis-suffixerator-interface.h"
+
 typedef struct
 {
   FILE *outfpsuftab,
@@ -480,12 +484,33 @@ static int runsuffixerator(bool doesa,
           }
         } else
         {
-          /* XXX Thomas: call the appropriate function here */
-          printf("run construction of packed index for:\n");
-          printf("indexname=%s\n",str_get(so->str_indexname));
-          printf("blocksize=%u\n",so->blockSize);
-          printf("blocks-per-bucket=%u\n",so->bucketBlocks);
-          printf("locfreq=%u\n",so->locateInterval);
+          sfxInterface *si;
+          BWTSeq *bwtSeq;
+          union bwtSeqParam bwtParams;
+          showverbose(verboseinfo, "run construction of packed index for:\n"
+                      "blocksize=%u\nblocks-per-bucket=%u\nlocfreq=%u\n",
+                      so->blockSize, so->bucketBlocks, so->locateInterval);
+          bwtParams.blockEncParams.blockSize = so->blockSize;
+          bwtParams.blockEncParams.bucketBlocks = so->bucketBlocks;
+          bwtParams.blockEncParams.EISFeatureSet = EIS_FEATURE_NONE;
+          if(!(si = newSfxInterface(so, verboseinfo, env)))
+          {
+            fputs("Index creation failed.\n", stderr);
+            haserr = true;
+          }
+          else if(
+            !(bwtSeq = newBWTSeqFromSfxI(BWT_ON_BLOCK_ENC, so->locateInterval,
+                                         &bwtParams, si, getSfxILength(si),
+                                         so->str_indexname, env)))
+          {
+            fputs("Index creation failed.\n", stderr);
+            deleteSfxInterface(si, env);
+            haserr = true;
+          }
+          else
+            deleteBWTSeq(bwtSeq, env); /**< the actual object is not
+                                        * used here */
+          deleteSfxInterface(si, env);
         }
       }
       env_fa_fclose(outfileinfo.outfpsuftab,env);

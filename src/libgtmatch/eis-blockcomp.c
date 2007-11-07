@@ -648,7 +648,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
   }
   {
     int regionFeatures = SRL_NO_FEATURES;
-    if (features & EISFeatureRegionSums)
+    if (features & EIS_FEATURE_REGION_SUMS)
       regionFeatures |= SRL_PARTIAL_SYMBOL_SUMS;
     newSeqIdx->rangeEncs = newSeqRangeList(regionsEstimate, rangeMapAlphabet,
                                            regionFeatures, env);
@@ -2789,7 +2789,7 @@ loadBlockEncIdxSeqForSA(Suffixarray *sa, Seqpos totalLen,
     loadBlockEncIdxSeqErrRet();
   {
     int regionFeatures = SRL_NO_FEATURES;
-    if (features & EISFeatureRegionSums)
+    if (features & EIS_FEATURE_REGION_SUMS)
       regionFeatures |= SRL_PARTIAL_SYMBOL_SUMS;
     if (!(newSeqIdx->rangeEncs =
           SRLReadFromStream(newSeqIdx->externalData.idxFP, rangeMapAlphabet,
