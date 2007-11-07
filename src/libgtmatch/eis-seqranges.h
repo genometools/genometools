@@ -43,6 +43,7 @@ enum {
 };
 
 enum SRLFeatures {
+  SRL_NO_FEATURES = 0,
   SRL_PARTIAL_SYMBOL_SUMS = 1 << 0,
 };
 

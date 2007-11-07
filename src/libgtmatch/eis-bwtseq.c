@@ -30,12 +30,14 @@
 typedef int (*srcReadFunc)(Seqpos *dest, void *src, Env *env);
 typedef struct encIdxSeq *(*indexCreateFunc)
   (void *src, Seqpos totalLen, const Str *projectName, unsigned blockSize,
-   unsigned bucketBlocks, size_t numExtHeaders, uint16_t *headerIDs,
-   uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallbacks,
-   void **headerCBData, bitInsertFunc biFunc, BitOffset cwBitsPerPos,
-   BitOffset maxBitsPerPos, void *cbState, Env *env);
+   unsigned bucketBlocks, int features, size_t numExtHeaders,
+   uint16_t *headerIDs, uint32_t *extHeaderSizes,
+   headerWriteFunc *extHeaderCallbacks, void **headerCBData,
+   bitInsertFunc biFunc, BitOffset cwBitsPerPos, BitOffset maxBitsPerPos,
+   void *cbState, Env *env);
 typedef struct encIdxSeq *(*indexLoadFunc)(void *src, Seqpos totalLen,
-                                           const Str *projectName, Env *env);
+                                           const Str *projectName,
+                                           int features, Env *env);
 
 static BWTSeq *
 newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
@@ -250,9 +252,9 @@ newBWTSeqFromSA(enum seqBaseEncoding baseType, unsigned locateInterval,
 
 static EISeq *
 loadBlockEncIdxSeqForSfxI(void *srcNotUsed, Seqpos totalLen,
-                        const Str *projectName, Env *env)
+                          const Str *projectName, int features, Env *env)
 {
-  return loadBlockEncIdxSeq(projectName, env);
+  return loadBlockEncIdxSeq(projectName, features, env);
 }
 
 struct sfxIReadInfo
@@ -263,8 +265,8 @@ struct sfxIReadInfo
 
 static EISeq *
 newBlockEncIdxSeqFromSfxIRI(void *src, Seqpos totalLen,
-                            const Str *projectName,
-                            unsigned blockSize, unsigned bucketBlocks,
+                            const Str *projectName, unsigned blockSize,
+                            unsigned bucketBlocks, int features,
                             size_t numExtHeaders, uint16_t *headerIDs,
                             uint32_t *extHeaderSizes,
                             headerWriteFunc *extHeaderCallbacks,
@@ -275,8 +277,8 @@ newBlockEncIdxSeqFromSfxIRI(void *src, Seqpos totalLen,
 {
   assert(src);
   return newBlockEncIdxSeqFromSfxI(((struct sfxIReadInfo *)src)->si, totalLen,
-                                   projectName, blockSize,
-                                   bucketBlocks, numExtHeaders, headerIDs,
+                                   projectName, blockSize, bucketBlocks,
+                                   features, numExtHeaders, headerIDs,
                                    extHeaderSizes, extHeaderCallbacks,
                                    headerCBData, biFunc, cwExtBitsPerPos,
                                    maxVarExtBitsPerPos, cbState, env);
@@ -337,7 +339,9 @@ newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
   switch (baseType)
   {
   case BWT_ON_BLOCK_ENC:
-    if (!(baseSeqIdx = loadIndex(baseSrc, totalLen, projectName, env)))
+    if (!(baseSeqIdx = loadIndex(baseSrc, totalLen, projectName,
+                                 extraParams->blockEncParams.EISFeatureSet,
+                                 env)))
     {
       struct locateHeader headerData = { locateInterval };
       void *p[] = { &headerData };
@@ -355,6 +359,7 @@ newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
              = createIndex(baseSrc, totalLen, projectName,
                            extraParams->blockEncParams.blockSize,
                            extraParams->blockEncParams.bucketBlocks,
+                           extraParams->blockEncParams.EISFeatureSet,
                            sizeof (p)/sizeof (p[0]), headerIDs,
                            headerSizes,
                            headerFuncs, p,
@@ -369,6 +374,7 @@ newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
              = createIndex(baseSrc, totalLen, projectName,
                            extraParams->blockEncParams.blockSize,
                            extraParams->blockEncParams.bucketBlocks,
+                           extraParams->blockEncParams.EISFeatureSet,
                            0, NULL, NULL, NULL, NULL, NULL, 0, 0,
                            &varState, env)))
           newBWTSeqErrRet();

@@ -140,11 +140,12 @@ showcharacterdistribution(const  Alphabet *alpha,
  *  Function definitions belonging to biofmi2
  */
 static struct seqStats *
-newSeqStatsFromCharDist(const Alphabet *alpha,
+newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
                         const unsigned long *characterdistribution, Env *env)
 {
   struct seqStats *stats = NULL;
   unsigned i, mapSize;
+  Seqpos regularSymsSum = 0;
   stats = env_ma_malloc(env,
                         offsetAlign(sizeof (*stats), sizeof (Seqpos))
                         + (UINT8_MAX + 1) * sizeof (Seqpos));
@@ -154,7 +155,11 @@ newSeqStatsFromCharDist(const Alphabet *alpha,
   memset(stats->symbolDistributionTable, 0, sizeof (Seqpos) * (UINT8_MAX + 1));
   mapSize = getmapsizeAlphabet(alpha);
   for (i = 0; i < mapSize - 1; ++i)
-    stats->symbolDistributionTable[i] += characterdistribution[i];
+    regularSymsSum +=
+      (stats->symbolDistributionTable[i] = characterdistribution[i]);
+  stats->symbolDistributionTable[WILDCARD] = len - regularSymsSum - numOfSeqs;
+  stats->symbolDistributionTable[SEPARATOR] += numOfSeqs;
+  stats->symbolDistributionTable[UNDEFBWTCHAR] += 1;
   return stats;
 }
 
@@ -266,7 +271,8 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
   {
     showcharacterdistribution(iface->alpha,characterdistribution, verbosity);
   }
-  iface->stats = newSeqStatsFromCharDist(iface->alpha,
+  iface->stats = newSeqStatsFromCharDist(iface->alpha, iface->length,
+                                         iface->numofsequences,
                                          characterdistribution, env);
   env_ma_free(characterdistribution, env);
 
@@ -861,7 +867,7 @@ static unsigned long *initcharacterdistribution(const Alphabet *alpha,Env *env)
 }
 
 static void showcharacterdistribution(
-                   const  Alphabet *alpha,
+                   const Alphabet *alpha,
                    const unsigned long *characterdistribution,
                    Verboseinfo *verboseinfo)
 {
