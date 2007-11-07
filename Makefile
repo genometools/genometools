@@ -401,10 +401,10 @@ obj/gt_config.h:
 	@(echo '#define GT_BUILT $(BUILDSTAMP)' ;\
 	echo '#define GT_CC "'`$(CC) --version | head -n 1`\" ;\
 	echo '#define GT_CFLAGS "$(EXP_CFLAGS) $(GT_CFLAGS)"' ;\
-	echo -n '#define GT_CPPFLAGS "'; \
-	echo -n '$(EXP_CPPFLAGS) $(GT_CPPFLAGS)' | \
-          sed -e 's/\([^\]\)"/\1\\"/g' -e 's/^"/\\"/g' -e 's/$$/"/' ; \
-        echo ; echo '#define GT_VERSION "'`cat VERSION`\" ) > $@
+	echo '$(EXP_CPPFLAGS) $(GT_CPPFLAGS)' | \
+	sed -e 's/\([^\]\)"/\1\\"/g' -e 's/^"/\\"/g' -e 's/$$/"/' \
+	    -e 's/^/#define GT_CPPFLAGS "/'; \
+	  echo '#define GT_VERSION "'`cat VERSION`\" ) > $@
 
 src/libgtcore/bitpackstringop8.c: src/libgtcore/bitpackstringop.template
 	@echo '[rebuild $@]'

@@ -972,8 +972,10 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx)
     seqIdx->partialSymSumBitsSums[i] = seqIdx->partialSymSumBitsSums[i - 1]
       + (seqIdx->partialSymSumBits[i] = seqIdx->bitsPerSeqpos);
   seqIdx->symSumBits = blockMapAlphabetSize * seqIdx->bitsPerSeqpos;
-  fprintf(stderr, "symSumBits="FormatSeqpos", blockEncNumSyms=%u\n",
+#ifdef DEBUG
+  fprintf(stderr, "symSumBits=%u, blockEncNumSyms=%u\n",
           seqIdx->symSumBits, seqIdx->blockEncNumSyms);
+#endif
   assert(seqIdx->partialSymSumBitsSums[i - 1] + seqIdx->bitsPerSeqpos
          == seqIdx->symSumBits);
 }
