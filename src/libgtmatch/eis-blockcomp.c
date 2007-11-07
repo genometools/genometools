@@ -629,7 +629,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
              && ((bSym = MRAEncMapSymbol(blockMapAlphabet, eSym))
                  < blockMapAlphabetSize))
             regionSymCount += stats->symbolDistributionTable[i];
-        regionsEstimate = regionSymCount/2;
+        regionsEstimate = regionSymCount/20;
 #ifdef DEBUG
         fprintf(stderr, "Expected "FormatSeqpos
                 " symbols to encode in regions.\n",
