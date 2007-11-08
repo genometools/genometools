@@ -493,12 +493,12 @@ static int runsuffixerator(bool doesa,
           bwtParams.blockEncParams.blockSize = so->blockSize;
           bwtParams.blockEncParams.bucketBlocks = so->bucketBlocks;
           bwtParams.blockEncParams.EISFeatureSet = EIS_FEATURE_NONE;
-          if(!(si = newSfxInterface(so, verboseinfo, env)))
+          if (!(si = newSfxInterface(so, verboseinfo, env)))
           {
             fputs("Index creation failed.\n", stderr);
             haserr = true;
           }
-          else if(
+          else if (
             !(bwtSeq = newBWTSeqFromSfxI(BWT_ON_BLOCK_ENC, so->locateInterval,
                                          &bwtParams, si, getSfxILength(si),
                                          so->str_indexname, env)))
