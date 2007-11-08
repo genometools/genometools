@@ -100,8 +100,8 @@ typedef union EISHint *EISHint;
 
 enum EISFeatureBits
 {
-  EISFeatureNone = 0,
-  EISFeatureRegionSums = 1<<0,
+  EIS_FEATURE_NONE = 0,
+  EIS_FEATURE_REGION_SUMS = 1<<0,
 };
 
 /**
