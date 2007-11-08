@@ -383,8 +383,6 @@ newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
     }
     else
     {
-      /* FIXME: read sample interval here, to make sure, the read
-       * index has locate information */
       FILE *fp = EISSeekToHeader(baseSeqIdx, LOCATE_INFO_IN_INDEX_HEADERID,
                                  NULL);
       fputs("Using pre-computed sequence index.\n", stderr);
