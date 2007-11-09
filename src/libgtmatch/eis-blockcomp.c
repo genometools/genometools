@@ -1102,9 +1102,7 @@ fetchSuperBlock(struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
                 struct superBlock *sBlockPreAlloc, Env *env)
 {
   struct superBlock *retval = NULL;
-  FILE *idxFP;
   assert(seqIdx);
-  idxFP = seqIdx->externalData.idxFP;
   assert(bucketNum * seqIdx->bucketBlocks * seqIdx->blockSize
          < seqIdx->baseClass.seqLen);
   if (sBlockPreAlloc)
@@ -1127,9 +1125,11 @@ fetchSuperBlock(struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
   }
   else
   {
+    FILE *idxFP;
     off_t superBlockCWDiskSize = superBlockCWMaxReadSize(seqIdx);
     BitOffset bucketOffset = bucketNum * superBlockCWBits(seqIdx);
     BitOffset varDataOffset;
+    idxFP = seqIdx->externalData.idxFP;
     if (fseeko(idxFP, seqIdx->externalData.cwDataPos
               + bucketOffset / bitElemBits * sizeof (BitElem), SEEK_SET))
       fetchSuperBlockErrRet();
@@ -1344,7 +1344,7 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
                                         eSym, BLOCK_COMPOSITION_INCLUDE,
                                         seqIdx->modes) >= 0);
   if (MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet, eSym,
-                                    BLOCK_COMPOSITION_INCLUDE, seqIdx->modes))
+                                     BLOCK_COMPOSITION_INCLUDE, seqIdx->modes))
   {
     BitOffset varDataMemOffset, cwIdxMemOffset;
     struct superBlock *sBlock;
@@ -1369,9 +1369,9 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
     {
       Seqpos inBlockPos;
       if ((inBlockPos = pos % blockSize)
-         && symCountFromComposition(seqIdx,
-                                    bsGetUInt64(sBlock->cwData, cwIdxMemOffset,
-                                                bitsPerCompositionIdx), bSym))
+          && symCountFromComposition(seqIdx,
+                                     bsGetUInt64(sBlock->cwData, cwIdxMemOffset,
+                                                 bitsPerCompositionIdx), bSym))
       {
         Symbol block[blockSize];
         unsigned i;

@@ -428,7 +428,7 @@ newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
       fprintf(stderr, "count[alphabetSize]="FormatSeqpos
               ", len="FormatSeqpos"\n", count[alphabetSize], len);
       for (i = 0; i <= alphabetSize; ++i)
-        fprintf(stderr, "count[%u]="FormatSeqpos"\n", i, count[i]);
+        fprintf(stderr, "count[%u]="FormatSeqpos"\n", (unsigned)i, count[i]);
 #endif
       assert(count[alphabetSize] == len);
     }

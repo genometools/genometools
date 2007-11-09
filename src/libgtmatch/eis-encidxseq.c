@@ -75,7 +75,7 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, int tickPrint,
   /* two part process: enumerate all positions of original sequence
    * and verify that the query functions return correct values */
   if (streamsuffixarray(&suffixArray, &seqLastPos,
-                       SARR_SUFTAB | SARR_BWTTAB, projectName, verbosity, env))
+                        SARR_BWTTAB, projectName, verbosity, env))
   {
     freeverboseinfo(&verbosity, env);
     return -1;

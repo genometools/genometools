@@ -488,7 +488,7 @@ static int runsuffixerator(bool doesa,
           BWTSeq *bwtSeq;
           union bwtSeqParam bwtParams;
           showverbose(verboseinfo, "run construction of packed index for:\n"
-                      "blocksize=%u\nblocks-per-bucket=%u\nlocfreq=%u\n",
+                      "blocksize=%u\nblocks-per-bucket=%u\nlocfreq=%u",
                       so->blockSize, so->bucketBlocks, so->locateInterval);
           bwtParams.blockEncParams.blockSize = so->blockSize;
           bwtParams.blockEncParams.bucketBlocks = so->bucketBlocks;
