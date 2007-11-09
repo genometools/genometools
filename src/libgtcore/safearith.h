@@ -69,6 +69,7 @@
           }                                                               \
         } while (0)
 
+int safearith_example(Env*);
 int safearith_unit_test(Env*);
 
 #endif

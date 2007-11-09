@@ -19,6 +19,40 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/safearith.h"
 
+int safearith_example(Env *env)
+{
+  unsigned long ulong;
+  long slong;
+  unsigned int a, b, c;
+  int dest, src;
+
+  env_error_check(env);
+
+  /* safe assignments */
+  slong = 256;
+  safeassign(ulong, slong);
+  assert(ulong = 256);
+
+  /* safe additions */
+  a = 256;
+  b = 1;
+  safeadd(c, a, b);
+  assert(c == 257);
+
+  /* safe subtractions */
+  a = 256;
+  b = 1;
+  safesub(c, a, b);
+  assert(c == 255);
+
+  /* safe absolutes */
+  src = -256;
+  safeabs(dest, src);
+  assert(dest == 256);
+
+  return 0;
+}
+
 int safearith_unit_test(Env *env)
 {
   int had_err = 0;

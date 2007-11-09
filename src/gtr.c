@@ -243,6 +243,7 @@ void gtr_register_components(GTR *gtr, Env *env)
   hashtable_add(gtr->unit_tests, "hmm class", hmm_unit_test, env);
   hashtable_add(gtr->unit_tests, "range class", range_unit_test, env);
   hashtable_add(gtr->unit_tests, "safearith module", safearith_unit_test, env);
+  hashtable_add(gtr->unit_tests, "safearith example", safearith_example, env);
   hashtable_add(gtr->unit_tests, "splicedseq class", splicedseq_unit_test, env);
   hashtable_add(gtr->unit_tests, "splitter class", splitter_unit_test, env);
   hashtable_add(gtr->unit_tests, "string class", str_unit_test, env);
