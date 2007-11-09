@@ -821,8 +821,8 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                 newBlockEncIdxSeqLoopErr();
               }
               if (!writeIdxHeader(newSeqIdx, numExtHeaders, headerIDs,
-                                 extHeaderSizes, extHeaderCallbacks,
-                                 headerCBData, env))
+                                  extHeaderSizes, extHeaderCallbacks,
+                                  headerCBData, env))
               {
                 hadError = 1;
                 perror("error condition while writing block-compressed"
@@ -2546,10 +2546,10 @@ loadBlockEncIdxSeq(const Str *projectName, int features, Env *env)
   Suffixarray suffixArray;
   Seqpos len;
   Verboseinfo *verbosity;
-  /* FIXME: handle verbosity in a more sane fashion */
+  /* FIXME: handle verbosity in a saner fashion */
   verbosity = newverboseinfo(false, env);
   if (streamsuffixarray(&suffixArray, &len,
-                       0, projectName, verbosity, env))
+                        0, projectName, verbosity, env))
   {
     freeverboseinfo(&verbosity, env);
     return NULL;
@@ -2796,7 +2796,7 @@ loadBlockEncIdxSeqForSA(Suffixarray *sa, Seqpos totalLen,
                               newSeqIdx->maxVarExtBitsPerBucket));
 
   if (fseeko(newSeqIdx->externalData.idxFP,
-            newSeqIdx->externalData.rangeEncPos, SEEK_SET))
+             newSeqIdx->externalData.rangeEncPos, SEEK_SET))
     loadBlockEncIdxSeqErrRet();
   {
     int regionFeatures = SRL_NO_FEATURES;
@@ -2818,8 +2818,8 @@ tryMMapOfIndex(struct onDiskBlockCompIdx *idxData)
   void *indexMMap;
   assert(idxData && idxData->idxFP);
   if ((indexMMap = mmap((void *)0, idxData->rangeEncPos - idxData->cwDataPos,
-                       PROT_READ, MAP_SHARED, fileno(idxData->idxFP),
-                       idxData->cwDataPos)))
+                        PROT_READ, MAP_SHARED, fileno(idxData->idxFP),
+                        idxData->cwDataPos)))
   {
     idxData->idxMMap = indexMMap;
   }
@@ -2901,8 +2901,8 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
       return 0;
     recordsExpected = 1;
     if (recordsExpected != fwrite(aState->permCache, sizeof (BitElem),
-                                 recordsExpected,
-                                 seqIdx->externalData.idxFP))
+                                  recordsExpected,
+                                  seqIdx->externalData.idxFP))
       return 0;
   }
   rangeEncPos = seqIdx->externalData.varDataPos
