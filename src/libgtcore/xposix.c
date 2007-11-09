@@ -138,7 +138,7 @@ void (*xsignal(int sigcatch, void (*func)(int sigraised)))(int)
 void xstat(const char *path, struct stat *sb)
 {
   if (stat(path, sb)) {
-    perror("cannot stat");
+    fprintf(stderr, "cannot stat() file '%s': %s\n", path, strerror(errno));
     exit(EXIT_FAILURE);
   }
 }
