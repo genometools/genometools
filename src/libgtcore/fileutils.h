@@ -26,8 +26,8 @@
 #include "libgtcore/strarray.h"
 
 bool           file_exists(const char*);
-/* returns 1 if the file with path a has a later modification time then the file
-   with path b, 0 otherwise. */
+/* returns true if the file with path <a> has a later modification time than the
+   file with path <b>, false otherwise. */
 bool           file_is_newer(const char *a, const char *b);
 unsigned long  file_number_of_lines(const char*, Env*);
 
