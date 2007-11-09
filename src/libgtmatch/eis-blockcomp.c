@@ -1126,7 +1126,7 @@ fetchSuperBlock(struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
   else
   {
     FILE *idxFP;
-    off_t superBlockCWDiskSize = superBlockCWMaxReadSize(seqIdx);
+    size_t superBlockCWDiskSize = superBlockCWMaxReadSize(seqIdx);
     BitOffset bucketOffset = bucketNum * superBlockCWBits(seqIdx);
     BitOffset varDataOffset;
     idxFP = seqIdx->externalData.idxFP;
@@ -1601,6 +1601,10 @@ printComposition(FILE *fp, const unsigned *composition, Symbol numSyms,
                  unsigned blockSize);
 #endif /* DEBUG > 1 */
 
+#ifndef SIZE_MAX
+#define SIZE_MAX ~(size_t)0
+#endif
+
 #define initCompositionListErrRet()                                     \
   do {                                                                  \
     if (newList->permutations)                                          \
@@ -1630,7 +1634,9 @@ initCompositionList(struct compList *newList,
   BitOffset bitsPerComp, bitsPerCount, bitsPerPerm;
   size_t numCompositions, cmpIdx = 0;
   size_t maxNumPermutations = 0, numTotalPermutations;
-  assert(seqIdx);
+  assert(seqIdx && newList);
+  newList->permutations = NULL;
+  newList->catCompsPerms = NULL;
   blockSize = seqIdx->blockSize;
   if (!(composition =
        env_ma_malloc(env, sizeof (composition[0]) * blockSize)))
@@ -1643,9 +1649,14 @@ initCompositionList(struct compList *newList,
   newList->compositionIdxBits = requiredUInt64Bits(numCompositions - 1);
   newList->bitsPerSymbol = requiredUIntBits(maxSym);
   bitsPerPerm = newList->bitsPerSymbol * blockSize;
-  newList->catCompsPerms = env_ma_malloc(env,
-    bitElemsAllocSize(numCompositions * bitsPerComp
-                      + numTotalPermutations * bitsPerPerm) * sizeof (BitElem));
+  {
+    size_t size = bitElemsAllocSize(numCompositions * bitsPerComp
+                                    + numTotalPermutations * bitsPerPerm)
+      * sizeof (BitElem);
+    if (size == SIZE_MAX)
+      initCompositionListErrRet();
+    newList->catCompsPerms = env_ma_malloc(env, size);
+  }
   newList->permutations =
     env_ma_calloc(env, sizeof (struct permList), numCompositions);
   {
