@@ -78,6 +78,8 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
   if (streamsuffixarray(&suffixArray, &seqLastPos,
                         SARR_BWTTAB, projectName, verbosity, env))
   {
+    env_error_set(env, "Cannot load suffix array project with"
+                  " demand for BWT file\n");
     freeverboseinfo(&verbosity, env);
     return -1;
   }
