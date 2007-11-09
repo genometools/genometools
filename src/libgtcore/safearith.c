@@ -79,10 +79,12 @@ int safearith_unit_test(Env *env)
     ensure(had_err, __MIN(unsigned long) == 0);
     ensure(had_err, __MAX(unsigned long) == ULONG_MAX);
 
+#ifdef LLONG_MIN
     ensure(had_err, __MIN(long long) == LLONG_MIN);
     ensure(had_err, __MAX(long long) == LLONG_MAX);
     ensure(had_err, __MIN(unsigned long long) == 0);
     ensure(had_err, __MAX(unsigned long long) == ULLONG_MAX);
+#endif
   }
 
   {
@@ -174,6 +176,7 @@ int safearith_unit_test(Env *env)
     ensure(had_err, x == INT_MAX);
   }
 
+#ifdef LLONG_MIN
   {
     long long x;
     x = LLONG_MAX;
@@ -185,6 +188,7 @@ int safearith_unit_test(Env *env)
     x = 0;
     ensure(had_err, abs_of(x, LLONG_MIN));
   }
+#endif
 
   return had_err;
 }
