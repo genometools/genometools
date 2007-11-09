@@ -562,7 +562,7 @@ endif
 	chmod 755 $(prefix)/bin/genometools-config
 
 
-splint:
+splint: obj/gt_config.h
 	splint -f $(CURDIR)/testdata/Splintoptions $(INCLUDEOPT) \
 	$(CURDIR)/src/*.c \
         $(CURDIR)/src/libgtcore/*.c \
