@@ -30,22 +30,24 @@ deleteEncIdxSeq(EISeq *seq, Env *env)
 
 #define verifyIntegrityErrRet(retval)                                   \
   do {                                                                  \
-    switch (retval) {                                                    \
+    switch (retval) {                                                   \
     case 1:                                                             \
-      fprintf(stderr, "Comparision failed at position %llu"             \
+      fprintf(stderr, "Comparision failed at position "FormatSeqpos     \
               ", reference symbol: %u, symbol read: %u\n",              \
-              (unsigned long long)pos, symOrig, symEnc);                \
+              pos, symOrig, symEnc);                                    \
       break;                                                            \
     case -1:                                                            \
-      fprintf(stderr, "Read of symbol failed at position %llu\n",       \
-              (unsigned long long)pos);                                 \
+      fprintf(stderr, "Read of symbol failed at position "              \
+              FormatSeqpos"\n", pos);                                   \
       break;                                                            \
     case 2:                                                             \
-      fprintf(stderr, "At position %llu, rank operation yielded"        \
-              " wrong count: "FormatSeqpos" expected "FormatSeqpos"\n", \
-              (unsigned long long)pos, rankQueryResult, rankExpect);    \
+      fprintf(stderr, "At position "FormatSeqpos                        \
+              ", rank operation yielded  wrong count: "FormatSeqpos     \
+              " expected "FormatSeqpos"\n",                             \
+              pos, rankQueryResult, rankExpect);                        \
       break;                                                            \
     }                                                                   \
+    EISPrintDiagsForPos(seqIdx, pos, stderr, hint, env);                \
     deleteEISHint(seqIdx, hint, env);                                   \
     freesuffixarray(&suffixArray, env);                                 \
     freeverboseinfo(&verbosity, env);                                   \
@@ -64,7 +66,7 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
 {
   Seqpos rankTable[UCHAR_MAX+1];
   FILE *bwtFP;
-  off_t pos = 0;
+  Seqpos pos = 0;
   Suffixarray suffixArray;
   Symbol symOrig, symEnc;
   EISHint hint;
