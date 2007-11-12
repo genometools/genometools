@@ -15,6 +15,7 @@
 */
 #include <string.h>
 
+#include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/esa-map.pr"
 
@@ -58,8 +59,8 @@ deleteEncIdxSeq(EISeq *seq, Env *env)
  * @return -1 on error, 0 on identity, >0 on inconsistency
  */
 int
-verifyIntegrity(EISeq *seqIdx, Str *projectName, int tickPrint,
-                FILE *fp, Env *env)
+verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
+                int tickPrint, FILE *fp, Env *env)
 {
   Seqpos rankTable[UCHAR_MAX+1];
   FILE *bwtFP;
@@ -82,10 +83,27 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, int tickPrint,
   }
   memset(rankTable, 0, sizeof (rankTable));
   bwtFP = suffixArray.bwttabstream.fp;
-  alphabet = EISGetAlphabet(seqIdx);
-/*   pos = 1803218; */
-/*   fseeko(bwtFP, pos, SEEK_SET); */
   hint = newEISHint(seqIdx, env);
+  alphabet = EISGetAlphabet(seqIdx);
+  if (skip > 0)
+  {
+    Seqpos len = EISLength(seqIdx);
+    unsigned sym;
+    if (skip >= len)
+    {
+      showverbose(verbosity, "Invalid skip request: %lld,"
+                  " too large for sequence length: "FormatSeqpos,
+                  (long long)skip, len);
+      freeverboseinfo(&verbosity, env);
+      return -1;
+    } 
+    fseeko(bwtFP, skip, SEEK_SET);
+    for(sym = 0; sym < UCHAR_MAX+1; ++sym)
+      if(MRAEncSymbolHasValidMapping(alphabet, sym))
+        rankTable[sym] = EISRank(seqIdx, sym, skip, hint, env);
+    pos = skip;
+  }
+  
   while ((symRead = getc(bwtFP)) != EOF)
   {
     symOrig = symRead;
