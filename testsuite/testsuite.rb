@@ -97,6 +97,7 @@ require 'gt_scripts_include'
 require 'gt_splicesiteinfo_include'
 require 'gt_stat_include'
 require 'gt_suffixerator_include'
+require 'gt_packedindex_include'
 require 'gt_trieins_include'
 require 'gt_uniq_include'
 if $arguments["libgtview"] then
