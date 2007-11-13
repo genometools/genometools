@@ -62,7 +62,7 @@ deleteEncIdxSeq(EISeq *seq, Env *env)
  */
 int
 verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
-                int tickPrint, FILE *fp, Env *env)
+                unsigned long tickPrint, FILE *fp, Env *env)
 {
   Seqpos rankTable[UCHAR_MAX+1];
   FILE *bwtFP;
@@ -107,12 +107,11 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
         rankTable[sym] = EISRank(seqIdx, sym, skip, hint, env);
     pos = skip;
   }
-  
+/*   EISPrintDiagsForPos(seqIdx, ((unsigned long)random())%EISLength(seqIdx), */
+/*                       stderr, hint, env); */
   while ((symRead = getc(bwtFP)) != EOF)
   {
     symOrig = symRead;
-    /* TODO: complete once query functions are finished */
-/*     fprintf(stderr, "pos: %llu\n", (unsigned long long)pos); */
     symEnc = EISGetSym(seqIdx, pos, hint, env);
     if (!MRAEncSymbolHasValidMapping(alphabet, symEnc))
       verifyIntegrityErrRet(-1);
@@ -124,8 +123,6 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
     ++pos;
     if (tickPrint && !(pos % tickPrint))
       putc('.', fp);
-/*     if (pos > 2000) */
-/*       break; */
   }
   if (tickPrint)
     putc('\n', fp);

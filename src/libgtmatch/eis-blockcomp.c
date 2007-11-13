@@ -2293,7 +2293,7 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
     {
       bsStoreSeqpos(aState->compCache,
                     aState->cwMemOldBits + seqIdx->partialSymSumBitsSums[i],
-                    seqIdx->partialSymSumBits[0], buck[i]);
+                    seqIdx->partialSymSumBits[i], buck[i]);
     }
   }
   /* append variable width offset position */
@@ -2907,6 +2907,7 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
     return 0;
   if (!(SRLSaveToStream(seqIdx->rangeEncs, seqIdx->externalData.idxFP)))
      return 0;
+  fflush(seqIdx->externalData.idxFP);
   return 1;
 }
 
@@ -2956,7 +2957,7 @@ printBlock(Symbol *block, unsigned blockSize, FILE *fp)
   unsigned i;
   int outCount = 0;
   for(i = 0; i < blockSize; ++i)
-    outCount += fprintf(fp, " %02d", (int)block[i]);
+    outCount += fprintf(fp, " %d", (int)block[i]);
   return outCount;
 }
 
@@ -2976,13 +2977,13 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
     bucketNum = lastBucket;
   }
   start = bucketBasePos(seqIdx, bucketNum);
-  end = bucketNum == lastBucket?
-    bucketBasePos(seqIdx, bucketNum + 1):
-    EISLength(&seqIdx->baseClass);
+  end = ((bucketNum < lastBucket)?
+         bucketBasePos(seqIdx, bucketNum + 1):
+         EISLength(&seqIdx->baseClass));
   outCount +=
     fprintf(fp, "# Inspecting bucket: "FormatSeqpos"\n"
             "# bucket position start="FormatSeqpos", end="FormatSeqpos"\n"
-            "# partial symbol sums up to start:",
+            "# partial symbol sums up to start:\n",
             bucketNum, start, end - 1);
   {
     struct superBlock *sBlock;
@@ -3009,16 +3010,15 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
               sBlockGetcbOffset(sBlock, seqIdx));
     i = 0;
     walkCompIndices(
-      seqIdx, sBlock, blockNumFromPos(seqIdx, end - 1)% seqIdx->bucketBlocks,
-      cwIdxMemOffset,
+      seqIdx, sBlock, seqIdx->bucketBlocks, cwIdxMemOffset,
       outCount +=
       fprintf(
-        fp, "# block %u: comp idx: %lu, perm idx: %lu, permIdxBits=%u",
-        i, (unsigned long)compIndex, (unsigned long)
-        bsGetUInt64(
+        fp, "# block %u: comp idx: %lu, permIdxBits=%u, perm idx: %lu =>",
+        i, (unsigned long)compIndex,
+        (unsigned)seqIdx->compositionTable.permutations[compIndex].permIdxBits,
+        (unsigned long)bsGetUInt64(
           sBlock->varData, varDataMemOffset,
-          seqIdx->compositionTable.permutations[compIndex].permIdxBits),
-        (unsigned)seqIdx->compositionTable.permutations[compIndex].permIdxBits);
+          seqIdx->compositionTable.permutations[compIndex].permIdxBits));
       unpackBlock(seqIdx, sBlock, cwIdxMemOffset, varDataMemOffset, block,
                   blockSize);
       outCount += printBlock(block, blockSize, fp);

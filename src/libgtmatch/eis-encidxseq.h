@@ -395,7 +395,7 @@ deleteEISHint(EISeq *seq, EISHint hint, Env *env);
 
 extern int
 verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
-                int tickPrint, FILE *fp, Env *env);
+                unsigned long tickPrint, FILE *fp, Env *env);
 
 static inline FILE *
 EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,

@@ -164,7 +164,7 @@ static OPrval parse_options(int *parsed_args,
                                        "specify the locate frequency\n"
                                        "parameter i means that each i-th "
                                        "position of input string is stored\n"
-                                       "0 = no locate information",
+                                       "0 => no locate information",
                                        &so->locateInterval, 0, env);
     option_parser_add_option(op, optionLocateFreq, env);
   }
