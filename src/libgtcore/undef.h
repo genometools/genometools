@@ -1,6 +1,6 @@
 /*
-  Copyright (c) 2006 Gordon Gremme <gremme@zbh.uni-hamburg.de>
-  Copyright (c) 2006 Center for Bioinformatics, University of Hamburg
+  Copyright (c) 2006-2007 Gordon Gremme <gremme@zbh.uni-hamburg.de>
+  Copyright (c) 2006-2007 Center for Bioinformatics, University of Hamburg
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -21,6 +21,7 @@
 #include <float.h>
 #include <limits.h>
 
+#define UNDEF_BOOL       (bool) ~0
 #define UNDEF_CHAR       CHAR_MAX
 #define UNDEF_DOUBLE     DBL_MAX
 #define UNDEF_INT        ~0
