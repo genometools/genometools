@@ -40,11 +40,9 @@ typedef struct encIdxSeq *(*indexLoadFunc)(void *src, Seqpos totalLen,
                                            int features, Env *env);
 
 static BWTSeq *
-newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
-             union bwtSeqParam *extraParams, void *baseSrc,
+newBWTSeqGen(const struct bwtParam *params, void *baseSrc,
              indexCreateFunc createIndex, indexLoadFunc loadIndex,
-             srcReadFunc readCallback, Seqpos totalLen,
-             const Str *projectName, Env *env);
+             srcReadFunc readCallback, Seqpos totalLen, Env *env);
 
 enum {
   LOCATE_INFO_IN_INDEX_HEADERID = 1111,
@@ -93,6 +91,7 @@ struct addLocateInfoState
   void *src;
   srcReadFunc readSeqpos;
   unsigned locateInterval, bitsPerOrigPos, bitsPerSeqpos;
+  int locateFeatures;
   size_t revMapCacheSize;
   struct seqRevMapEntry *revMapCache;
 };
@@ -208,9 +207,8 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
 }
 #endif
 
-BWTSeq *
-newBWTSeq(enum seqBaseEncoding baseType, unsigned locateInterval,
-          union bwtSeqParam *extraParams, const Str *projectName, Env *env)
+extern BWTSeq *
+newBWTSeq(const struct bwtParam *params, Env *env)
 {
   struct BWTSeq *bwtSeq = NULL;
   Suffixarray suffixArray;
@@ -219,35 +217,34 @@ newBWTSeq(enum seqBaseEncoding baseType, unsigned locateInterval,
   /* FIXME: handle verbosity in a more sane fashion */
   verbosity = newverboseinfo(false, env);
   if (streamsuffixarray(&suffixArray, &len, SARR_SUFTAB | SARR_BWTTAB,
-                       projectName, verbosity, env))
+                        params->projectName, verbosity, env))
   {
     freeverboseinfo(&verbosity, env);
     return NULL;
   }
   ++len;
-  bwtSeq = newBWTSeqFromSA(baseType, locateInterval, extraParams,
-                           &suffixArray, len, projectName, env);
+  bwtSeq = newBWTSeqFromSA(params, &suffixArray, len, env);
   freesuffixarray(&suffixArray, env);
   freeverboseinfo(&verbosity, env);
   return bwtSeq;
 }
 
 BWTSeq *
-newBWTSeqFromSA(enum seqBaseEncoding baseType, unsigned locateInterval,
-                union bwtSeqParam *extraParams, Suffixarray *sa,
-                Seqpos totalLen, const Str *projectName, Env *env)
+newBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
+                Seqpos totalLen, Env *env)
 {
-  assert(sa && extraParams);
-  if (locateInterval && (!sa->suftabstream.fp || !sa->longest.defined))
+  assert(sa && params && env);
+  if (params->locateInterval &&
+      (!sa->suftabstream.fp || !sa->longest.defined))
   {
     fprintf(stderr, "error: locate sampling requested but not available"
-            " for project %s\n", str_get(projectName));
+            " for project %s\n", str_get(params->projectName));
     return NULL;
   }
-  return newBWTSeqGen(baseType, locateInterval, extraParams, sa,
+  return newBWTSeqGen(params, sa,
                       (indexCreateFunc)newBlockEncIdxSeqFromSA,
                       (indexLoadFunc)loadBlockEncIdxSeqForSA,
-                      streamReadSeqpos, totalLen, projectName, env);
+                      streamReadSeqpos, totalLen, env);
 }
 
 static EISeq *
@@ -293,22 +290,20 @@ sfxIReadSeqpos(Seqpos *dest, void *src, Env *env)
 }
 
 BWTSeq *
-newBWTSeqFromSfxI(enum seqBaseEncoding baseType, unsigned locateInterval,
-                  union bwtSeqParam *extraParams, sfxInterface *si,
-                  Seqpos totalLen, const Str *projectName, Env *env)
+newBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
+                  Seqpos totalLen, Env *env)
 {
   struct sfxIReadInfo siri;
-  assert(si && extraParams);
+  assert(si && params && env);
   siri.si = si;
-  if (locateInterval)
+  if (params->locateInterval)
   {
     if (!SfxIRegisterReader(si, &siri.id, SFX_REQUEST_SUFTAB, env))
       return NULL;
   }
-  return newBWTSeqGen(baseType, locateInterval, extraParams, &siri,
-                      newBlockEncIdxSeqFromSfxIRI,
+  return newBWTSeqGen(params, &siri, newBlockEncIdxSeqFromSfxIRI,
                       (indexLoadFunc)loadBlockEncIdxSeqForSfxI,
-                      sfxIReadSeqpos, totalLen, projectName, env);
+                      sfxIReadSeqpos, totalLen, env);
 }
 
 #define newBWTSeqErrRet()                                \
@@ -321,11 +316,9 @@ newBWTSeqFromSfxI(enum seqBaseEncoding baseType, unsigned locateInterval,
 
 /* FIXME: make flag bits optional */
 static BWTSeq *
-newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
-             union bwtSeqParam *extraParams, void *baseSrc,
+newBWTSeqGen(const struct bwtParam *params, void *baseSrc,
              indexCreateFunc createIndex, indexLoadFunc loadIndex,
-             srcReadFunc readCallback, Seqpos totalLen,
-             const Str *projectName, Env *env)
+             srcReadFunc readCallback, Seqpos totalLen, Env *env)
 {
   struct BWTSeq *bwtSeq = NULL;
   struct encIdxSeq *baseSeqIdx = NULL;
@@ -333,14 +326,16 @@ newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
   Symbol alphabetSize;
   EISHint hint;
   struct addLocateInfoState varState;
-  assert(baseSrc && projectName && env);
+  unsigned locateInterval;
+  assert(baseSrc && params && env);
+  locateInterval = params->locateInterval;
   env_error_check(env);
   varState.src = NULL;
-  switch (baseType)
+  switch (params->baseType)
   {
   case BWT_ON_BLOCK_ENC:
-    if (!(baseSeqIdx = loadIndex(baseSrc, totalLen, projectName,
-                                 extraParams->blockEnc.EISFeatureSet,
+    if (!(baseSeqIdx = loadIndex(baseSrc, totalLen, params->projectName,
+                                 params->seqParams.blockEnc.EISFeatureSet,
                                  env)))
     {
       struct locateHeader headerData = { locateInterval };
@@ -350,16 +345,16 @@ newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
       headerWriteFunc headerFuncs[] = { writeLocateInfoHeader };
       env_error_unset(env);
       initAddLocateInfoState(&varState, baseSrc, readCallback, totalLen,
-                             projectName, locateInterval,
-                             extraParams->blockEnc.blockSize
-                             * extraParams->blockEnc.blockSize, env);
+                             params->projectName, locateInterval,
+                             params->seqParams.blockEnc.blockSize
+                             * params->seqParams.blockEnc.blockSize, env);
       if (locateInterval)
       {
         if (!(baseSeqIdx
-             = createIndex(baseSrc, totalLen, projectName,
-                           extraParams->blockEnc.blockSize,
-                           extraParams->blockEnc.bucketBlocks,
-                           extraParams->blockEnc.EISFeatureSet,
+             = createIndex(baseSrc, totalLen, params->projectName,
+                           params->seqParams.blockEnc.blockSize,
+                           params->seqParams.blockEnc.bucketBlocks,
+                           params->seqParams.blockEnc.EISFeatureSet,
                            sizeof (p)/sizeof (p[0]), headerIDs,
                            headerSizes,
                            headerFuncs, p,
@@ -371,10 +366,10 @@ newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
       else
       {
         if (!(baseSeqIdx
-             = createIndex(baseSrc, totalLen, projectName,
-                           extraParams->blockEnc.blockSize,
-                           extraParams->blockEnc.bucketBlocks,
-                           extraParams->blockEnc.EISFeatureSet,
+             = createIndex(baseSrc, totalLen, params->projectName,
+                           params->seqParams.blockEnc.blockSize,
+                           params->seqParams.blockEnc.bucketBlocks,
+                           params->seqParams.blockEnc.EISFeatureSet,
                            0, NULL, NULL, NULL, NULL, NULL, 0, 0,
                            &varState, env)))
           newBWTSeqErrRet();
@@ -412,7 +407,7 @@ newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
     bwtSeq->count = (Seqpos *)((char  *)bwtSeq
                                + offsetAlign(sizeof (struct BWTSeq),
                                              sizeof (Seqpos)));
-    bwtSeq->type = baseType;
+    bwtSeq->type = params->baseType;
     bwtSeq->seqIdx = baseSeqIdx;
     bwtSeq->alphabetSize = alphabetSize;
     bwtSeq->locateSampleInterval = locateInterval;

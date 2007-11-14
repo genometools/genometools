@@ -486,22 +486,24 @@ static int runsuffixerator(bool doesa,
         {
           sfxInterface *si;
           BWTSeq *bwtSeq;
-          union bwtSeqParam bwtParams;
+          struct bwtParam bwtParams;
           showverbose(verboseinfo, "run construction of packed index for:\n"
                       "blocksize=%u\nblocks-per-bucket=%u\nlocfreq=%u",
                       so->blockSize, so->bucketBlocks, so->locateInterval);
-          bwtParams.blockEnc.blockSize = so->blockSize;
-          bwtParams.blockEnc.bucketBlocks = so->bucketBlocks;
-          bwtParams.blockEnc.EISFeatureSet = EIS_FEATURE_NONE;
+          bwtParams.seqParams.blockEnc.blockSize = so->blockSize;
+          bwtParams.seqParams.blockEnc.bucketBlocks = so->bucketBlocks;
+          bwtParams.seqParams.blockEnc.EISFeatureSet = EIS_FEATURE_NONE;
+          bwtParams.baseType = BWT_ON_BLOCK_ENC;
+          bwtParams.locateInterval = so->locateInterval;
+          bwtParams.projectName = so->str_indexname;
           if (!(si = newSfxInterface(so, verboseinfo, env)))
           {
             fputs("Index creation failed.\n", stderr);
             haserr = true;
           }
           else if (
-            !(bwtSeq = newBWTSeqFromSfxI(BWT_ON_BLOCK_ENC, so->locateInterval,
-                                         &bwtParams, si, getSfxILength(si),
-                                         so->str_indexname, env)))
+            !(bwtSeq = newBWTSeqFromSfxI(&bwtParams, si, getSfxILength(si),
+                                         env)))
           {
             fputs("Index creation failed.\n", stderr);
             deleteSfxInterface(si, env);
