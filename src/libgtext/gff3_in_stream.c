@@ -27,7 +27,7 @@
 struct GFF3InStream
 {
   const GenomeStream parent_instance;
-  int next_file;
+  unsigned long next_file;
   StrArray *files;
   Str *stdinstr;
   bool ensure_sorting,
