@@ -314,6 +314,13 @@ SRLFindPositionNext(struct seqRangeList *rangeList, Seqpos pos,
       *hint = hintCopy;
     return rangeList->ranges + hintCopy;
   }
+  else if (hintCopy && rangeNextMatch(hintCopy - 1))
+  {
+    --hintCopy;
+    if (hint)
+      *hint = hintCopy;
+    return rangeList->ranges + hintCopy;
+  }
   else if (numRanges > 2)
   {
     Seqpos searchPos = pos;
