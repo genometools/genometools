@@ -202,7 +202,7 @@ parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
 
   env_error_check(env);
   op = option_parser_new("indexname",
-                         "Map <indexname> block composition index"
+                         "Map <indexname> block composition index "
                          "and bwt and check index integrity.",
                          env);
   option = option_new_ulong("skip", "number of symbols to skip",
