@@ -387,14 +387,6 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
           break;
         assert(EMINumMatchesTotal(EMIter)
                == BWTSeqMatchCount(bwtSeq, pptr, patternLen, env));
-/*       fputs("pattern: ", stderr); */
-/*       showsymbolstringgeneric(stderr, suffixarray.alpha, pptr,
- *                               patternlen); */
-/*       fputs("\n", stderr); */
-/*       fprintf(stderr, "number of matches: "FormatSeqpos" == %llu\n", */
-/*               EMINumMatchesTotal(EMIter), */
-/*               (unsigned long long) */
-/*               countmmsearchiterator(mmsi)); */
         assert(EMINumMatchesTotal(EMIter) == countmmsearchiterator(mmsi));
         while (nextmmsearchiterator(&dbstart,mmsi))
         {
