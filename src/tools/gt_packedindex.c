@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>  
+  Copyright (c) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
   Copyright (c) 2007 Stefan Kurtz <kurtz@zbh.uni-hamburg.de>
   Copyright (c) 2007 Center for Bioinformatics, University of Hamburg
 
@@ -105,7 +105,6 @@ parse_subtool_options(int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-
 static int
 gt_packedindex_make(int argc, const char *argv[], Env *env);
 
@@ -164,7 +163,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
   env_error_check(env);
   seq = loadBlockEncIdxSeq(inputProject, EIS_FEATURE_REGION_SUMS, env);
   ensure(had_err, seq);
-  if(had_err)
+  if (had_err)
   {
     env_error_set(env, "Failed to load index: %s", str_get(inputProject));
   }
@@ -178,15 +177,15 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
              !(corrupt = verifyIntegrity(seq, inputProject, options.skipCount,
                                          options.progressInterval, stderr,
                                          env)));
-      if(corrupt == -1)
+      if (corrupt == -1)
         perror("I/O error when checking index integrity");
-      else if(corrupt)
+      else if (corrupt)
         fputs("Integrity check failed for index.\n", stderr);
     }
   }
-  if(seq)
+  if (seq)
     deleteEncIdxSeq(seq, env);
-  if(inputProject)
+  if (inputProject)
     str_delete(inputProject, env);
   return had_err?-1:0;
 }
@@ -326,7 +325,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
     bwtSeq = newBWTSeq(BWT_ON_BLOCK_ENC, params.locateInterval,
                        &params.constructBWT, inputProject, env);
     ensure(had_err, bwtSeq);
-    if(had_err)
+    if (had_err)
       break;
     {
       const Uchar *pptr;
@@ -345,7 +344,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
       saIsLoaded = true;
       ensure(had_err, params.minPatLen < 0L || params.maxPatLen < 0L
              || params.minPatLen < params.maxPatLen);
-      if(had_err)
+      if (had_err)
         break;
       if (params.minPatLen < 0 || params.maxPatLen < 0)
       {
@@ -360,7 +359,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
       fprintf(stderr, "Using patterns of lengths %lu to %lu\n",
               params.minPatLen, params.maxPatLen);
       ensure(had_err, totalLen = BWTSeqLength(bwtSeq));
-      
+
       ensure(had_err,
              (epi = newenumpatterniterator(params.minPatLen, params.maxPatLen,
                                            suffixarray.encseq, env)));
@@ -384,7 +383,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
 
         EMIter = newEMIterator(bwtSeq, pptr, patternLen, env);
         ensure(had_err, EMIter);
-        if(had_err)
+        if (had_err)
           break;
         assert(EMINumMatchesTotal(EMIter)
                == BWTSeqMatchCount(bwtSeq, pptr, patternLen, env));
@@ -419,7 +418,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
           struct MatchData *trailingMatch =
             EMIGetNextMatch(EMIter, bwtSeq, env);
           ensure(had_err, !trailingMatch);
-          if(had_err)
+          if (had_err)
           {
             fputs("matches of mmsearch expired before fmindex!\n", stderr);
             break;
@@ -429,11 +428,11 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
       fprintf(stderr, "Finished %lu matchings successfully.\n",
               params.numOfSamples);
     }
-  } while(0);
-  if(epi) freeEnumpatterniterator(&epi,env);
-  if(mmsi) freemmsearchiterator(&mmsi,env);
-  if(EMIter) deleteEMIterator(EMIter,env);
-  if(bwtSeq) deleteBWTSeq(bwtSeq, env);
-  if(inputProject) str_delete(inputProject, env);
+  } while (0);
+  if (epi) freeEnumpatterniterator(&epi,env);
+  if (mmsi) freemmsearchiterator(&mmsi,env);
+  if (EMIter) deleteEMIterator(EMIter,env);
+  if (bwtSeq) deleteBWTSeq(bwtSeq, env);
+  if (inputProject) str_delete(inputProject, env);
   return had_err?-1:0;
 }

@@ -396,7 +396,7 @@ SRLFindPositionLast(struct seqRangeList *rangeList, Seqpos pos,
     if (hint)
       *hint = hintCopy;
     return rangeList->ranges + hintCopy;
-  }  
+  }
   else if (numRanges > 2)
   {
     Seqpos searchPos = pos;

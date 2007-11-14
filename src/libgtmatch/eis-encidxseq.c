@@ -100,10 +100,10 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
                   (long long)skip, len);
       freeverboseinfo(&verbosity, env);
       return -1;
-    } 
+    }
     fseeko(bwtFP, skip, SEEK_SET);
-    for(sym = 0; sym < UCHAR_MAX+1; ++sym)
-      if(MRAEncSymbolHasValidMapping(alphabet, sym))
+    for (sym = 0; sym < UCHAR_MAX+1; ++sym)
+      if (MRAEncSymbolHasValidMapping(alphabet, sym))
         rankTable[sym] = EISRank(seqIdx, sym, skip, hint, env);
     pos = skip;
   }
