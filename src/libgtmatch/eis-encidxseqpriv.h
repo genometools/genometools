@@ -39,6 +39,8 @@ struct encIdxSeqClass
                  Env *env);
   FILE *(*seekToHeader)(const EISeq *seq, uint16_t headerID,
                         uint32_t *lenRet);
+  int (*printPosDiags)(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
+                       Env *env);
 };
 
 struct encIdxSeq

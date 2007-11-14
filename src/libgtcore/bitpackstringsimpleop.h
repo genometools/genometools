@@ -41,10 +41,16 @@
 #ifndef HAVE_LLABS
 #define llabs(i) (((i) < 0)?-i:i)
 #endif
+#ifndef SIZE_MAX
+#define SIZE_MAX ~(size_t)0
+#endif
+
 static inline size_t
 bitElemsAllocSize(BitOffset numBits)
 {
-  return numBits/bitElemBits + ((numBits%bitElemBits)?1:0);
+  BitOffset size = numBits/bitElemBits + ((numBits%bitElemBits)?1:0);
+  return ((size * sizeof (BitElem) > SIZE_MAX)?
+          SIZE_MAX / sizeof (BitElem) : size);
 }
 
 static inline int8_t

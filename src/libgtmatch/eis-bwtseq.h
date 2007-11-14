@@ -67,7 +67,7 @@ union bwtSeqParam
                                  * values increase index size and
                                  * decrease computations for lookup) */
     int EISFeatureSet;
-  } blockEncParams;
+  } blockEnc;
 /*   struct  */
 /*   { */
 /*   } RLEParams; */
@@ -252,7 +252,7 @@ BWTSeqAggTransformedCount(const BWTSeq *bwtSeq, Symbol tSym, Env *env);
  * @return number of matches
  */
 extern Seqpos
-BWTSeqMatchCount(const BWTSeq *bwtseq, Symbol *query, size_t queryLen,
+BWTSeqMatchCount(const BWTSeq *bwtseq, const Symbol *query, size_t queryLen,
                  Env *env);
 
 /**
@@ -280,7 +280,8 @@ BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
  * @return reference of iterator object, NULL on error
  */
 extern struct BWTSeqExactMatchesIterator *
-newEMIterator(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen, Env *env);
+newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
+              Env *env);
 
 /**
  * \brief Deallocate an iterator object.

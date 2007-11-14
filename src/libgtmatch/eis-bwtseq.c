@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
+  Copyright (c) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -340,7 +340,7 @@ newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
   {
   case BWT_ON_BLOCK_ENC:
     if (!(baseSeqIdx = loadIndex(baseSrc, totalLen, projectName,
-                                 extraParams->blockEncParams.EISFeatureSet,
+                                 extraParams->blockEnc.EISFeatureSet,
                                  env)))
     {
       struct locateHeader headerData = { locateInterval };
@@ -351,15 +351,15 @@ newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
       env_error_unset(env);
       initAddLocateInfoState(&varState, baseSrc, readCallback, totalLen,
                              projectName, locateInterval,
-                             extraParams->blockEncParams.blockSize
-                             * extraParams->blockEncParams.blockSize, env);
+                             extraParams->blockEnc.blockSize
+                             * extraParams->blockEnc.blockSize, env);
       if (locateInterval)
       {
         if (!(baseSeqIdx
              = createIndex(baseSrc, totalLen, projectName,
-                           extraParams->blockEncParams.blockSize,
-                           extraParams->blockEncParams.bucketBlocks,
-                           extraParams->blockEncParams.EISFeatureSet,
+                           extraParams->blockEnc.blockSize,
+                           extraParams->blockEnc.bucketBlocks,
+                           extraParams->blockEnc.EISFeatureSet,
                            sizeof (p)/sizeof (p[0]), headerIDs,
                            headerSizes,
                            headerFuncs, p,
@@ -372,9 +372,9 @@ newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
       {
         if (!(baseSeqIdx
              = createIndex(baseSrc, totalLen, projectName,
-                           extraParams->blockEncParams.blockSize,
-                           extraParams->blockEncParams.bucketBlocks,
-                           extraParams->blockEncParams.EISFeatureSet,
+                           extraParams->blockEnc.blockSize,
+                           extraParams->blockEnc.bucketBlocks,
+                           extraParams->blockEnc.EISFeatureSet,
                            0, NULL, NULL, NULL, NULL, NULL, 0, 0,
                            &varState, env)))
           newBWTSeqErrRet();
@@ -383,8 +383,6 @@ newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
     }
     else
     {
-      /* FIXME: read sample interval here, to make sure, the read
-       * index has locate information */
       FILE *fp = EISSeekToHeader(baseSeqIdx, LOCATE_INFO_IN_INDEX_HEADERID,
                                  NULL);
       fputs("Using pre-computed sequence index.\n", stderr);
@@ -430,7 +428,7 @@ newBWTSeqGen(enum seqBaseEncoding baseType, unsigned locateInterval,
       fprintf(stderr, "count[alphabetSize]="FormatSeqpos
               ", len="FormatSeqpos"\n", count[alphabetSize], len);
       for (i = 0; i <= alphabetSize; ++i)
-        fprintf(stderr, "count[%u]="FormatSeqpos"\n", i, count[i]);
+        fprintf(stderr, "count[%u]="FormatSeqpos"\n", (unsigned)i, count[i]);
 #endif
       assert(count[alphabetSize] == len);
     }
@@ -469,7 +467,7 @@ BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
 }
 
 static inline void
-getMatchBound(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen,
+getMatchBound(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
               struct matchBound *match, Env *env)
 {
   size_t i = queryLen;
@@ -493,7 +491,7 @@ getMatchBound(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen,
 }
 
 extern Seqpos
-BWTSeqMatchCount(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen,
+BWTSeqMatchCount(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
                  Env *env)
 {
   struct matchBound match;
@@ -514,7 +512,8 @@ struct BWTSeqExactMatchesIterator
 };
 
 struct BWTSeqExactMatchesIterator *
-newEMIterator(const BWTSeq *bwtSeq, Symbol *query, size_t queryLen, Env *env)
+newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
+              Env *env)
 {
   struct BWTSeqExactMatchesIterator *newIter;
   assert(bwtSeq && query && env);

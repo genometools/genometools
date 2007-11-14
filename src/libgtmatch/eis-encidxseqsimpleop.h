@@ -23,7 +23,7 @@
 #include "libgtmatch/eis-encidxseqpriv.h"
 
 static inline Seqpos
-EISLength(EISeq *seq)
+EISLength(const EISeq *seq)
 {
   return seq->seqLen;
 }
@@ -36,7 +36,7 @@ EISGetAlphabet(const EISeq *seq)
 }
 
 static inline Symbol
-EISGetSym(EISeq *seq, Seqpos pos, union EISHint *hint, Env *env)
+EISGetSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env)
 {
   assert(seq && hint && env);
   return MRAEncRevMapSymbol(seq->alphabet,
@@ -124,6 +124,16 @@ static inline void
 deleteEISHint(EISeq *seq, EISHint hint, Env *env)
 {
   return seq->classInfo->deleteHint(seq, hint, env);
+}
+
+extern int
+EISPrintDiagsForPos(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
+                    Env *env)
+{
+  if(seq->classInfo->printPosDiags)
+    return seq->classInfo->printPosDiags(seq, pos, fp, hint, env);
+  else
+    return 0;
 }
 
 #endif

@@ -62,7 +62,8 @@ enum {
  * of consecutive bits.
  * @param numBits number of bits to be stored in total
  * @return number of BitElem objects needed to store numBits
- * consecutive bits
+ * consecutive bits or SIZE_MAX / sizeof (BitElem) if numBits exceeds
+ * the addressable storage
  */
 static inline size_t
 bitElemsAllocSize(BitOffset numBits);

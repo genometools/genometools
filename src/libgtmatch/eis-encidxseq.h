@@ -22,6 +22,7 @@
  * Interface definitions for encoded indexed sequences.
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
+#include <stdio.h>
 #include <inttypes.h>
 
 #include "libgtcore/bitpackstring.h"
@@ -350,7 +351,7 @@ EISSelect(EISeq *seq, Symbol sym, Seqpos count);
  * @return length of sequence
  */
 static inline Seqpos
-EISLength(EISeq *seq);
+EISLength(const EISeq *seq);
 
 /**
  * \brief Return symbol at specified position. Comparable to c[pos] if the
@@ -393,20 +394,16 @@ static inline void
 deleteEISHint(EISeq *seq, EISHint hint, Env *env);
 
 extern int
-verifyIntegrity(EISeq *seqIdx,
-                Str *projectName, int tickPrint, FILE *fp, Env *env);
+verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
+                unsigned long tickPrint, FILE *fp, Env *env);
 
 static inline FILE *
 EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
                 uint32_t *lenRet);
 
-/**
- * Meant for testing purposes only.
- */
-extern int
-searchBlock2IndexPair(const EISeq *seqIdx,
-                      const Symbol *block,
-                      size_t idxOutput[2], Env *env);
+static inline int
+EISPrintDiagsForPos(const EISeq *seqIdx, Seqpos pos, FILE *fp, EISHint hint,
+                    Env *env);
 
 #include "libgtmatch/eis-encidxseqsimpleop.h"
 

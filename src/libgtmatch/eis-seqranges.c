@@ -390,6 +390,13 @@ SRLFindPositionLast(struct seqRangeList *rangeList, Seqpos pos,
       *hint = hintCopy;
     return rangeList->ranges + hintCopy;
   }
+  else if (hintCopy && rangeLastMatch(hintCopy - 1))
+  {
+    --hintCopy;
+    if (hint)
+      *hint = hintCopy;
+    return rangeList->ranges + hintCopy;
+  }  
   else if (numRanges > 2)
   {
     Seqpos searchPos = pos;
@@ -446,15 +453,13 @@ SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
            numRanges, fp) != numRanges)
   {
     deleteSeqRangeList(newRangeList, env);
-    if (newRangeList->partialSymSums)
-      env_ma_free(newRangeList->partialSymSums, env);
     return NULL;
   }
   if (features & SRL_PARTIAL_SYMBOL_SUMS)
   {
     Seqpos *partialSymSums;
     size_t numSyms = MRAEncGetSize(alphabet), i;
-    partialSymSums = newRangeList->partialSymSums =
+    newRangeList->partialSymSums = partialSymSums =
       env_ma_malloc(env, sizeof (Seqpos) * MRAEncGetSize(alphabet) * numRanges);
     memset(partialSymSums, 0, sizeof (Seqpos) * numSyms);
     for (i = 1; i < numRanges; ++i)
