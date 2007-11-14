@@ -18,6 +18,7 @@ Test do
     flattenfilelist(allfiles), :maxtime => 100
   run_test "#{$bin}gt packedindex chkintegrity -ticks 1000 miniindex", :maxtime => 100
 end
+
 if $gttestdata then
   Name "gt packedindex check tools for chr01 yeast"
   Keywords "gt_packedindex"
