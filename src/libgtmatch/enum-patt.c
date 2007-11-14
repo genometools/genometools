@@ -131,6 +131,7 @@ const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
 
 void freeEnumpatterniterator(Enumpatterniterator **epi,Env *env)
 {
+  if (!(*epi)) return;
   FREESPACE((*epi)->patternspace);
   FREESPACE((*epi)->patternstat);
   FREESPACE(*epi);
