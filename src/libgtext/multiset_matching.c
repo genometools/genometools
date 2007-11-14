@@ -31,7 +31,7 @@ void multiset_matching(unsigned char *multiset_string,
   unsigned long i;
   long multiset[UCHAR_MAX],
        exhausted_characters = 0,
-       alphabet_size = 0; /* with resprect to the multiset */
+       alphabet_size = 0; /* with respect to the multiset */
 
   /* init multiset */
   for (i = 0; i < UCHAR_MAX; i++)
