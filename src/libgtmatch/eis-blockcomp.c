@@ -2956,7 +2956,7 @@ printBlock(Symbol *block, unsigned blockSize, FILE *fp)
 {
   unsigned i;
   int outCount = 0;
-  for(i = 0; i < blockSize; ++i)
+  for (i = 0; i < blockSize; ++i)
     outCount += fprintf(fp, " %d", (int)block[i]);
   return outCount;
 }
@@ -2970,7 +2970,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
   unsigned i, blockMapAlphabetSize = seqIdx->blockEncNumSyms;
   int outCount = 0;
   assert(seqIdx && fp && hint && env);
-  if(bucketBasePos(seqIdx, bucketNum) >= EISLength(&seqIdx->baseClass))
+  if (bucketBasePos(seqIdx, bucketNum) >= EISLength(&seqIdx->baseClass))
   {
     fprintf(stderr, "warning: querying bucket "FormatSeqpos
             " beyond end of sequence!\n", bucketNum);
@@ -2996,8 +2996,8 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
 #else
     sBlock = fetchSuperBlock(seqIdx, bucketNum, NULL, env);
 #endif
-    block = env_ma_malloc(env, sizeof(block[0]) * seqIdx->blockSize);
-    for(i = 0; i < blockMapAlphabetSize; ++i)
+    block = env_ma_malloc(env, sizeof (block[0]) * seqIdx->blockSize);
+    for (i = 0; i < blockMapAlphabetSize; ++i)
     {
       outCount +=
         fprintf(fp, "# partial sum[%u]="FormatSeqpos"\n", i,
@@ -3029,7 +3029,6 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
   return outCount;
 }
 
-
 static int
 printBlockEncPosDiags(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
                       Env *env)
@@ -3044,14 +3043,14 @@ printBlockEncPosDiags(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
         "# This bucket:\n"
         "##################################################\n", fp);
   outCount += printBucket(seqIdx, bucketNum, fp, hint, env);
-  if(bucketNum)
+  if (bucketNum)
   {
     fputs("##################################################\n"
           "# Previous bucket:\n"
           "##################################################\n", fp);
     outCount += printBucket(seqIdx, bucketNum - 1, fp, hint, env);
   }
-  if(bucketNum < bucketNumFromPos(seqIdx, EISLength(seq)))
+  if (bucketNum < bucketNumFromPos(seqIdx, EISLength(seq)))
   {
     fputs("##################################################\n"
           "# Next bucket:\n"
@@ -3060,7 +3059,6 @@ printBlockEncPosDiags(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
   }
   return outCount;
 }
-
 
 static const struct encIdxSeqClass blockCompositionSeqClass =
 {

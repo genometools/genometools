@@ -130,7 +130,7 @@ extern int
 EISPrintDiagsForPos(const EISeq *seq, Seqpos pos, FILE *fp, EISHint hint,
                     Env *env)
 {
-  if(seq->classInfo->printPosDiags)
+  if (seq->classInfo->printPosDiags)
     return seq->classInfo->printPosDiags(seq, pos, fp, hint, env);
   else
     return 0;
