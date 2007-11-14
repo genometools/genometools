@@ -3024,6 +3024,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
       outCount += printBlock(block, blockSize, fp);
       fputs("\n", fp);
       i++; , varDataMemOffset);
+    env_ma_free(block, env);
   }
   return outCount;
 }
