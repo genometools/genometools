@@ -77,6 +77,44 @@ union bwtSeqParam
 };
 
 /**
+ * all parameters for building the BWT sequence index
+ */
+struct bwtParam
+{
+  union bwtSeqParam seqParams;    /**< a union holding extra parameter
+                                   *   information specific to the
+                                   *   type selected via parameter
+                                   *   baseType */
+  enum seqBaseEncoding baseType;  /**< baseType selects the encoding
+                                   *   method of the sequence index *
+                                   *   storing the BWT sequence (see
+                                   *   enum seqBaseEncoding). */
+  int bwtFeatureToggles;          /**< set of bittoggles composed
+                                   *   from enum BWTFeatures */
+  unsigned locateInterval;        /**< store locate information
+                                   * (mapping from BWT sequence to
+                                   * original sequence for every nth
+                                   * position in original sequence) at
+                                   * this frequency, unless
+                                   * locateInterval = 0, which implies
+                                   * storing no locate information at
+                                   * all */
+  const Str *projectName;         /**< base file name to derive name
+                                   *   of suffixerator project from*/
+
+};
+
+/**
+ * Select specifics of how
+ * - the locate information is stored
+ */
+enum BWTFeatures
+{
+  BWTLocateBitmap = 1 << 0,
+  BWTLocateCount  = 1 << 1,
+};
+
+/**
  * Stores column indices of the (virtual) matrix of rotations of the
  * input string used to construct the BWT, note that upper will
  * typically contain the lower value since rows are numbered from 0 at
@@ -92,54 +130,38 @@ typedef struct BWTSeq BWTSeq;
 /**
  * \brief Creates or loads an encoded indexed sequence object of the
  * BWT transform.
- * @param baseType selects the encoding method of the sequence index
- * storing the BWT sequence (see enum seqBaseEncoding).
- * @param extraParams a union holding extra parameter information
- *   specific to the type selected via parameter baseType
- * @param projectName base file name to derive name of suffixerator
- *   project from
+ * @param params a struct holding parameter information for index construction
  * @param env genometools reference for core functions
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-newBWTSeq(enum seqBaseEncoding baseType, unsigned locateInterval,
-          union bwtSeqParam *extraParams, const Str *projectName, Env *env);
+newBWTSeq(const struct bwtParam *params, Env *env);
 
 /**
  * \brief Creates or loads an encoded indexed sequence object of the
  * BWT transform.
- * @param baseType selects the encoding method of the sequence index
- * storing the BWT sequence (see enum seqBaseEncoding).
- * @param extraParams a union holding extra parameter information
- *   specific to the type selected via parameter baseType
+ * @param params a struct holding parameter information for index construction
  * @param sa Suffixarray data structure to build BWT index from
- * @param projectName base file name for index written (should be the
- * same as the one sa was read from
  * @param env genometools reference for core functions
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-newBWTSeqFromSA(enum seqBaseEncoding baseType, unsigned locateInterval,
-                union bwtSeqParam *extraParams, Suffixarray *sa,
-                Seqpos totalLen, const Str *projectName, Env *env);
+newBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
+                Seqpos totalLen, Env *env);
 
 /**
  * \brief Creates or loads an encoded indexed sequence object of the
  * BWT transform.
- * @param baseType selects the encoding method of the sequence index
- * storing the BWT sequence (see enum seqBaseEncoding).
- * @param extraParams a union holding extra parameter information
- *   specific to the type selected via parameter baseType
+ * @param params a struct holding parameter information for index construction
  * @param si Suffixerator interface to read data for BWT index from
  * @param projectName base file name for index written (should be the
  * same as the one sa was read from
  * @param env genometools reference for core functions
  * @return reference to new BWT sequence object
  */
-BWTSeq *
-newBWTSeqFromSfxI(enum seqBaseEncoding baseType, unsigned locateInterval,
-                  union bwtSeqParam *extraParams, sfxInterface *si,
-                  Seqpos totalLen, const Str *projectName, Env *env);
+extern BWTSeq *
+newBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
+                  Seqpos totalLen, Env *env);
 
 /**
  * \brief Deallocate a previously loaded/created BWT sequence object.
