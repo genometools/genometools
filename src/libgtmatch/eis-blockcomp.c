@@ -29,14 +29,10 @@
 #include <inttypes.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef NDEBUG
-#include <math.h>
-#endif
 #include <unistd.h>
 #include <sys/mman.h>
 
 #include "libgtcore/bitpackstring.h"
-#include "libgtcore/combinatorics.h"
 #include "libgtcore/dataalign.h"
 #include "libgtcore/env.h"
 #include "libgtcore/minmax.h"
@@ -48,6 +44,7 @@
 #include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-encidxseqpriv.h"
 #include "libgtmatch/eis-seqranges.h"
+#include "libgtmatch/eis-seqblocktranslate.h"
 #include "libgtmatch/eis-suffixerator-interface.h"
 
 /**
@@ -239,26 +236,6 @@ struct onDiskBlockCompIdx
                                 *  symbol representation */
 };
 
-struct permList
-{
-  size_t numPermutations;
-  unsigned permIdxBits;
-  BitOffset catPermsOffset;
-};
-
-struct compList
-{
-  size_t numCompositions;
-  struct permList *permutations;
-  BitString catCompsPerms;             /*< bitstring with all
-                                        * compositions, followed by
-                                        * all permutations encoded in
-                                        * minimal space concatenated
-                                        * together */
-  unsigned bitsPerCount, bitsPerSymbol, compositionIdxBits, maxPermIdxBits;
-  size_t maxPermCount;
-};
-
 /**
  * mode in which to encode a range of the alphabet
  */
@@ -348,37 +325,6 @@ constBlockCompositionSeq2encIdxSeq(const struct blockCompositionSeq *seq)
   return &(seq->baseClass);
 }
 
-static int
-initCompositionList(struct compList *compList,
-                    const struct blockCompositionSeq *seqIdx,
-                    unsigned numSyms, Env *env);
-static void
-destructCompositionList(struct compList *clist, Env *env);
-
-#if 0
-static struct compList *
-newCompositionList(const struct blockCompositionSeq *seqIdx,
-                   unsigned numSyms, Env *env);
-
-static void
-deleteCompositionList(struct compList *clist, Env *env);
-#endif
-
-static int
-block2IndexPair(const struct blockCompositionSeq *seqIdx,
-                const Symbol *block,
-                size_t idxOutput[2],
-                unsigned *bitsOfPermIdx,
-                Env *env,
-                BitString permCompPA, unsigned *compPA);
-
-static inline BitOffset
-compListPermStartOffset(struct compList *list, unsigned numSyms);
-
-static unsigned
-symCountFromComposition(const struct blockCompositionSeq *seqIdx,
-                        size_t compIndex, Symbol sym);
-
 struct appendState
 {
   BitString compCache, permCache;
@@ -393,10 +339,10 @@ initAppendState(struct appendState *aState,
 static void
 destructAppendState(struct appendState *aState, Env *env);
 
-static void
+static inline void
 append2IdxOutput(struct blockCompositionSeq *newSeqIdx,
                  struct appendState *state,
-                 size_t permCompIdx[2],
+                 PermCompIndex permCompIdx[2],
                  unsigned bitsOfCompositionIdx, unsigned bitsOfPermutationIdx);
 
 static BitOffset
@@ -408,16 +354,16 @@ appendCallBackOutput(struct appendState *state,
 typedef Seqpos *partialSymSums;
 
 static inline partialSymSums
-newPartialSymSums(size_t alphabetSize, Env *env);
+newPartialSymSums(unsigned alphabetSize, Env *env);
 
 static inline void
 deletePartialSymSums(partialSymSums sums, Env *env);
 
 static inline void
-addBlock2PartialSymSums(partialSymSums sums, Symbol *block, size_t blockSize);
+addBlock2PartialSymSums(partialSymSums sums, Symbol *block, unsigned blockSize);
 
 static inline void
-copyPartialSymSums(size_t numSums, partialSymSums dest,
+copyPartialSymSums(unsigned alphabetSize, partialSymSums dest,
                    const partialSymSums src);
 
 static inline Seqpos
@@ -427,13 +373,12 @@ static inline off_t
 cwSize(const struct blockCompositionSeq *seqIdx);
 
 static inline BitOffset
-vwBits(Seqpos seqLen, unsigned blockSize, size_t bucketBlocks,
+vwBits(Seqpos seqLen, unsigned blockSize, unsigned bucketBlocks,
        unsigned maxPermIdxBits, BitOffset maxVarExtBitsPerBucket);
 
 static void
 addRangeEncodedSyms(struct seqRangeList *rangeList, Symbol *block,
-                    size_t blockSize,
-                    Seqpos blockNum, MRAEnc *alphabet,
+                    unsigned blockSize, Seqpos blockNum, MRAEnc *alphabet,
                     int selection, int *rangeSel, Env *env);
 
 static int
@@ -657,8 +602,8 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
   newSeqIdx->blockSize = blockSize;
   newSeqIdx->cwExtBitsPerBucket = cwExtBitsPerPos * bucketLen;
   newSeqIdx->maxVarExtBitsPerBucket = maxVarExtBitsPerPos * bucketLen;
-  if (!initCompositionList(&newSeqIdx->compositionTable, newSeqIdx,
-                          blockMapAlphabetSize, env))
+  if (!initCompositionList(&newSeqIdx->compositionTable, blockSize,
+                           blockMapAlphabetSize, env))
     newBlockEncIdxSeqErrRet();
   bitsPerComposition = newSeqIdx->compositionTable.bitsPerCount
     * blockMapAlphabetSize;
@@ -712,7 +657,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
           blockNum = 0;
           while (blockNum < numFullBlocks)
           {
-            size_t permCompIdx[2];
+            PermCompIndex permCompIdx[2];
             unsigned significantPermIdxBits;
             int readResult;
             /* 3. for each chunk: */
@@ -733,9 +678,10 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
             /* 3.c. add to table of composition/permutation indices */
             MRAEncSymbolsTransform(blockMapAlphabet, block, blockSize);
             /* FIXME control remapping */
-            block2IndexPair(newSeqIdx, block, permCompIdx,
-                            &significantPermIdxBits, env, permCompBSPreAlloc,
-                            compositionPreAlloc);
+            block2IndexPair(&newSeqIdx->compositionTable, blockSize,
+                            blockMapAlphabetSize, block, permCompIdx,
+                            &significantPermIdxBits, env,
+                            permCompBSPreAlloc, compositionPreAlloc);
             append2IdxOutput(newSeqIdx, &aState,
                              permCompIdx, compositionIdxBits,
                              significantPermIdxBits);
@@ -769,7 +715,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
           /* handle last chunk */
           if (!hadError)
           {
-            size_t permCompIdx[2];
+            PermCompIndex permCompIdx[2];
             unsigned significantPermIdxBits;
             int readResult;
             Seqpos symbolsLeft = totalLen % blockSize;
@@ -790,9 +736,10 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                                   blockNum, alphabet, REGIONS_LIST,
                                   modesCopy, env);
               MRAEncSymbolsTransform(blockMapAlphabet, block, blockSize);
-              block2IndexPair(newSeqIdx, block, permCompIdx,
-                              &significantPermIdxBits, env, permCompBSPreAlloc,
-                              compositionPreAlloc);
+              block2IndexPair(&newSeqIdx->compositionTable, blockSize,
+                              blockMapAlphabetSize, block, permCompIdx,
+                              &significantPermIdxBits, env,
+                              permCompBSPreAlloc, compositionPreAlloc);
               append2IdxOutput(newSeqIdx, &aState, permCompIdx,
                                compositionIdxBits, significantPermIdxBits);
               if (biFunc)
@@ -914,28 +861,28 @@ superBlockCWBits(const struct blockCompositionSeq *seqIdx);
 static inline size_t
 superBlockMemSize(const struct blockCompositionSeq *seqIdx)
 {
-  size_t offset;
   if (seqIdxUsesMMap(seqIdx))
   {
     return sizeof (struct superBlock);
   }
   else
   {
+    size_t offset;
     offset = offsetAlign(sizeof (struct superBlock), sizeof (BitElem));
     offset = offsetAlign(offset + superBlockCWMaxReadSize(seqIdx),
                          sizeof (BitElem));
     offset += superBlockVarMaxReadSize(seqIdx);
+    return offsetAlign(offset, MAX_ALIGN_REQUIREMENT);
   }
-  return offsetAlign(offset, MAX_ALIGN_REQUIREMENT);
 }
 
 static inline void
 initEmptySuperBlock(struct superBlock *sBlock,
                     const struct blockCompositionSeq *seqIdx)
 {
-  size_t offset;
   if (!seqIdxUsesMMap(seqIdx))
   {
+    size_t offset;
     sBlock->cwData = (BitString)
       ((char *)sBlock + (offset = offsetAlign(sizeof (*sBlock),
                                               sizeof (BitElem))));
@@ -964,7 +911,7 @@ deleteSuperBlock(struct superBlock *sBlock, Env *env)
 static inline void
 symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx)
 {
-  size_t i;
+  unsigned i;
   unsigned blockMapAlphabetSize = seqIdx->blockEncNumSyms;
   seqIdx->partialSymSumBitsSums[0] = 0;
   seqIdx->partialSymSumBits[0] = seqIdx->bitsPerSeqpos;
@@ -1058,13 +1005,13 @@ sBlockGetcbOffset(const struct superBlock *sBlock,
   return bsGetUInt64(sBlock->cwData, offset, seqIdx->callBackDataOffsetBits);
 }
 
-static inline size_t
+static inline PermCompIndex
 sBlockGetCompIdx(const struct superBlock *sBlock, unsigned compIdxNum,
                  const struct blockCompositionSeq *seqIdx)
 {
   BitOffset offset = sBlockGetCompIdxOffset(sBlock, seqIdx, compIdxNum);
   unsigned bitsPerCompositionIdx = seqIdx->compositionTable.compositionIdxBits;
-  return bsGetUInt64(sBlock->cwData, offset, bitsPerCompositionIdx);
+  return bsGetPermCompIndex(sBlock->cwData, offset, bitsPerCompositionIdx);
 }
 
 static inline Seqpos
@@ -1155,6 +1102,7 @@ blockCompSeqSelect(struct encIdxSeq *seq, Symbol sym, Seqpos count,
                    union EISHint *hint, Env *env)
 {
   /* FIXME: implementation pending */
+  abort();
   return 0;
 }
 
@@ -1236,16 +1184,16 @@ cacheFetchSuperBlock(const struct blockCompositionSeq *seqIdx,
 #define walkCompIndices(seqIdx, sBlock, blockNum, cwOffset,             \
                         codeForCompIndex, varOffset)                    \
   do {                                                                  \
-    size_t blocksLeft = blockNum;                                       \
+    unsigned blocksLeft = blockNum;                                     \
     unsigned bitsPerCompositionIdx =                                    \
       seqIdx->compositionTable.compositionIdxBits;                      \
     cwOffset = sBlockGetCompIdxOffset(sBlock, seqIdx, 0);               \
     varOffset = sBlock->varDataMemBase;                                 \
     while (blocksLeft)                                                  \
     {                                                                   \
-      size_t compIndex;                                                 \
-      compIndex = bsGetUInt64(sBlock->cwData, cwIdxMemOffset,           \
-                              bitsPerCompositionIdx);                   \
+      PermCompIndex compIndex;                                          \
+      compIndex = bsGetPermCompIndex(sBlock->cwData, cwIdxMemOffset,    \
+                                     bitsPerCompositionIdx);            \
       codeForCompIndex;                                                 \
       varOffset +=                                                      \
         seqIdx->compositionTable.permutations[compIndex].permIdxBits;   \
@@ -1260,24 +1208,15 @@ unpackBlock(const struct blockCompositionSeq *seqIdx,
             BitOffset cwOffset, BitOffset varOffset, Symbol *block,
             unsigned sublen)
 {
-  size_t compPermIndex[2];
-  unsigned varIdxBits,
-    bitsPerPermutation =
-    seqIdx->compositionTable.bitsPerSymbol * seqIdx->blockSize,
-    bitsPerCompositionIdx =
-    seqIdx->compositionTable.compositionIdxBits;
-  struct permList *permutationList;
-  compPermIndex[0] = bsGetUInt64(sBlock->cwData, cwOffset,
+  unsigned varIdxBits, bitsPerCompositionIdx;
+  PermCompIndex compIndex, permIndex;
+  bitsPerCompositionIdx = seqIdx->compositionTable.compositionIdxBits;
+  compIndex = bsGetPermCompIndex(sBlock->cwData, cwOffset,
                                  bitsPerCompositionIdx);
-  permutationList =
-    seqIdx->compositionTable.permutations + compPermIndex[0];
-  varIdxBits = permutationList->permIdxBits;
-  compPermIndex[1] = bsGetUInt64(sBlock->varData, varOffset, varIdxBits);
-  bsGetUniformSymbolArray(seqIdx->compositionTable.catCompsPerms,
-                          permutationList->catPermsOffset +
-                          bitsPerPermutation * compPermIndex[1],
-                          seqIdx->compositionTable.bitsPerSymbol,
-                          sublen, block);
+  varIdxBits = seqIdx->compositionTable.permutations[compIndex].permIdxBits;
+  permIndex = bsGetPermCompIndex(sBlock->varData, varOffset, varIdxBits);
+  indexPair2block(&seqIdx->compositionTable, seqIdx->blockSize,
+                  compIndex, permIndex, block, sublen);
 }
 
 /*
@@ -1338,7 +1277,6 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
 {
   struct blockCompositionSeq *seqIdx;
   Seqpos blockNum, rankCount;
-  unsigned blockSize;
   assert(eSeqIdx && env && eSeqIdx->classInfo == &blockCompositionSeqClass);
   seqIdx = encIdxSeq2blockCompositionSeq(eSeqIdx);
   assert(MRAEncSymbolIsInSelectedRanges(seqIdx->baseClass.alphabet,
@@ -1351,9 +1289,8 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
     struct superBlock *sBlock;
     Symbol bSym = MRAEncMapSymbol(seqIdx->blockMapAlphabet, eSym);
     Seqpos bucketNum;
-    unsigned bitsPerCompositionIdx
+    unsigned blockSize = seqIdx->blockSize, bitsPerCompositionIdx
       = seqIdx->compositionTable.compositionIdxBits;
-    blockSize = seqIdx->blockSize;
     bucketNum = bucketNumFromPos(seqIdx, pos);
 #ifdef USE_SBLOCK_CACHE
     sBlock = cacheFetchSuperBlock(seqIdx, bucketNum,
@@ -1365,14 +1302,16 @@ blockCompSeqRank(struct encIdxSeq *eSeqIdx, Symbol eSym, Seqpos pos,
     blockNum = blockNumFromPos(seqIdx, pos);
     walkCompIndices(
       seqIdx, sBlock, blockNum % seqIdx->bucketBlocks, cwIdxMemOffset,
-      rankCount += symCountFromComposition(seqIdx, compIndex, bSym);,
+      rankCount += symCountFromComposition(
+        &seqIdx->compositionTable, seqIdx->blockEncNumSyms, compIndex, bSym);,
       varDataMemOffset);
     {
       Seqpos inBlockPos;
       if ((inBlockPos = pos % blockSize)
-          && symCountFromComposition(seqIdx,
-                                     bsGetUInt64(sBlock->cwData, cwIdxMemOffset,
-                                                 bitsPerCompositionIdx), bSym))
+          && symCountFromComposition(
+            &seqIdx->compositionTable, seqIdx->blockEncNumSyms,
+            bsGetPermCompIndex(sBlock->cwData, cwIdxMemOffset,
+                               bitsPerCompositionIdx), bSym))
       {
         Symbol block[blockSize];
         unsigned i;
@@ -1500,582 +1439,8 @@ blockCompSeqGet(struct encIdxSeq *seq, Seqpos pos, union EISHint *hint,
   return sym;
 }
 
-#if 1
-/**
- * Setup composition array for lexically maximal composition.
- * @param maxSym last symbol to represent (lexical maximum)
- * @param blockSize sum of symbol counts in composition
- * (i.e. composition contains this many symbols)
- * @param composition vector of symbol counts
- * @param symRMNZ points to index of rightmost non-zero symbol count
- * in composition vector (state of generating procedure)
- */
-static inline void
-initComposition(Symbol maxSym, unsigned blockSize,
-                unsigned composition[maxSym + 1], unsigned *symRMNZ)
-{
-  memset(composition, 0, sizeof (composition[0]) * (maxSym));
-  composition[*symRMNZ = maxSym] = blockSize;
-}
-#else
-/**
- * Setup composition array for lexically minimal composition.
- * @param maxSym last symbol to represent (lexical maximum)
- * @param blockSize sum of symbol counts in composition
- * (i.e. composition contains this many symbols)
- * @param composition vector of symbol counts
- * @param symRMNZ points to index of rightmost non-zero symbol count
- * in composition vector (state of generating procedure)
- */
-static inline void
-initComposition(Symbol maxSym, unsigned blockSize,
-                unsigned composition[maxSym + 1], unsigned *symLMNZ)
-{
-  memset(composition + 1, 0, sizeof (composition[0]) * (maxSym));
-  composition[*symLMNZ = 0] = blockSize;
-}
-#endif
-
-#if 1
-/**
- * Compute lexically previous composition given any composition in
- * \link composition \endlink.
- * @param composition array[0..maxSym] of occurrence counts for each symbol
- * @param maxSym last symbol index of composition
- * @param symMNZ rightmost non-zero entry of composition[]
- */
-static inline void
-nextComposition(unsigned composition[],
-                Symbol maxSym,
-                unsigned *symRMNZ)
-{
-  ++composition[*symRMNZ - 1];
-  if (!(--composition[*symRMNZ]))
-  {
-    --*symRMNZ;
-  }
-  else if (!(composition[maxSym]))
-  {
-    composition[maxSym] = composition[*symRMNZ];
-    composition[*symRMNZ] = 0;
-    *symRMNZ = maxSym;
-  }
-}
-#else
-/**
- * Compute lexically next composition given any composition in
- * \link composition \endlink.
- * @param composition array[0..maxSym] of occurrence counts for each symbol
- * @param maxSym last symbol index of composition
- * @param symMNZ rightmost non-zero entry of composition[]
- */
-static inline void
-nextComposition(unsigned composition[],
-                Symbol maxSym,
-                unsigned *symLMNZ)
-{
-  ++composition[*symLMNZ + 1];
-  if (!(--composition[*symLMNZ]))
-  {
-    ++*symLMNZ;
-  }
-  else if (!(composition[0]))
-  {
-    composition[0] = composition[*symLMNZ];
-    composition[*symLMNZ] = 0;
-    *symLMNZ = 0;
-  }
-}
-#endif
-
-static int
-initPermutationsList(const unsigned *composition, struct permList *permutation,
-                     BitString permStore, BitOffset permOffset,
-                     unsigned blockSize, Symbol numSyms,
-                     unsigned bitsPerSymbol, Env *env);
-static void
-destructPermutationsList(struct permList *permutation, Env *env);
-
-#if DEBUG > 1
-static void
-printComposition(FILE *fp, const unsigned *composition, Symbol numSyms,
-                 unsigned blockSize);
-#endif /* DEBUG > 1 */
-
-#ifndef SIZE_MAX
-#define SIZE_MAX ~(size_t)0
-#endif
-
-#define initCompositionListErrRet()                                     \
-  do {                                                                  \
-    if (newList->permutations)                                          \
-    {                                                                   \
-      unsigned i;                                                       \
-      for (i = 0; i < cmpIdx; ++i)                                      \
-        destructPermutationsList(newList->permutations + i, env);       \
-      env_ma_free(newList->permutations, env);                          \
-    }                                                                   \
-    if (newList->catCompsPerms)                                         \
-      env_ma_free(newList->catCompsPerms, env);                         \
-    if (composition) env_ma_free(composition, env);                     \
-    return 0;                                                           \
-  } while (0)
-
-/**
- * @return 0 on error, !0 otherwise
- */
-static int
-initCompositionList(struct compList *newList,
-                    const struct blockCompositionSeq *seqIdx,
-                    unsigned numSyms, Env *env)
-{
-  unsigned *composition = NULL;
-  unsigned blockSize;
-  Symbol maxSym = numSyms - 1;
-  BitOffset bitsPerComp, bitsPerCount, bitsPerPerm;
-  size_t numCompositions, cmpIdx = 0;
-  size_t maxNumPermutations = 0, numTotalPermutations;
-  assert(seqIdx && newList);
-  newList->permutations = NULL;
-  newList->catCompsPerms = NULL;
-  blockSize = seqIdx->blockSize;
-  if (!(composition =
-       env_ma_malloc(env, sizeof (composition[0]) * blockSize)))
-    initCompositionListErrRet();
-  bitsPerComp = numSyms * (bitsPerCount = requiredUIntBits(blockSize));
-  newList->bitsPerCount = bitsPerCount;
-  numCompositions = newList->numCompositions =
-    binomialCoeff(blockSize + maxSym, maxSym);
-  numTotalPermutations = iPow(numSyms, blockSize);
-  newList->compositionIdxBits = requiredUInt64Bits(numCompositions - 1);
-  newList->bitsPerSymbol = requiredUIntBits(maxSym);
-  bitsPerPerm = newList->bitsPerSymbol * blockSize;
-  {
-    size_t size = bitElemsAllocSize(numCompositions * bitsPerComp
-                                    + numTotalPermutations * bitsPerPerm)
-      * sizeof (BitElem);
-    if (size == SIZE_MAX)
-      initCompositionListErrRet();
-    newList->catCompsPerms = env_ma_malloc(env, size);
-  }
-  newList->permutations =
-    env_ma_calloc(env, sizeof (struct permList), numCompositions);
-  {
-    unsigned symRMNZ;
-    BitOffset offset = 0, permOffset =
-      compListPermStartOffset(newList, numSyms);
-#ifndef NDEBUG
-    size_t permSum = 0;
-#endif
-    initComposition(maxSym, blockSize, composition, &symRMNZ);
-    do
-    {
-#if DEBUG > 1
-      printComposition(stderr, composition, numSyms, blockSize);
-#endif /* DEBUG > 1 */
-      bsStoreUniformUIntArray(newList->catCompsPerms, offset,
-                              bitsPerCount, numSyms, composition);
-      assert(cmpIdx > 1?(bsCompare(newList->catCompsPerms, offset, bitsPerComp,
-                              newList->catCompsPerms, offset - bitsPerComp,
-                              bitsPerComp)>0):1);
-      if (initPermutationsList(composition, newList->permutations + cmpIdx,
-                              newList->catCompsPerms, permOffset,
-                              blockSize, numSyms, newList->bitsPerSymbol, env))
-        initCompositionListErrRet();
-#ifndef NDEBUG
-      env_log_log(env, "%lu",
-                  (unsigned long)newList->permutations[cmpIdx].numPermutations);
-      permSum += newList->permutations[cmpIdx].numPermutations;
-#endif
-      permOffset += newList->permutations[cmpIdx].numPermutations * bitsPerPerm;
-      if (newList->permutations[cmpIdx].numPermutations > maxNumPermutations)
-        maxNumPermutations = newList->permutations[cmpIdx].numPermutations;
-      if (++cmpIdx < numCompositions)
-        ;
-      else
-        break;
-      offset += bitsPerComp;
-      nextComposition(composition, maxSym, &symRMNZ);
-    } while (1);
-    /* verify that the last composition is indeed the lexically maximally */
-    assert(composition[0] == blockSize);
-#ifndef NDEBUG
-    env_log_log(env, "permSum=%lu, numSyms=%lu, blockSize=%d, "
-                "pow(numSyms, blockSize)=%f",
-                (unsigned long)permSum, (unsigned long)numSyms, blockSize,
-                pow(numSyms, blockSize));
-#endif
-    assert(permSum == pow(numSyms, blockSize));
-  }
-  newList->maxPermCount = maxNumPermutations;
-  newList->maxPermIdxBits = requiredUInt64Bits(maxNumPermutations - 1);
-  env_ma_free(composition, env);
-  return 1;
-}
-
-static void
-destructCompositionList(struct compList *clist, Env *env)
-{
-  {
-    unsigned i;
-    for (i = 0; i < clist->numCompositions; ++i)
-      destructPermutationsList(clist->permutations + i, env);
-  }
-  env_ma_free(clist->permutations, env);
-  env_ma_free(clist->catCompsPerms, env);
-}
-
-#if 0
-/**
- * @return NULL on error
- */
-static struct compList *
-newCompositionList(const struct blockCompositionSeq *seqIdx,
-                   Symbol numSyms, Env *env)
-{
-  struct compList *newList = NULL;
-  if (!(newList =
-       env_ma_calloc(env, 1, sizeof (struct compList))))
-    return NULL;
-  if (!initCompositionList(newList, seqIdx, numSyms, env))
-  {
-    env_ma_free(newList, env);
-    return NULL;
-  }
-  return newList;
-}
-
-static void
-deleteCompositionList(struct compList *clist, Env *env)
-{
-  destructCompositionList(clist, env);
-  env_ma_free(clist, env);
-}
-#endif
-
-#if DEBUG > 1
-/**
- * Compute number of digits a value would require when displayed in
- * selected number system (i.e. 2=binary, 10=decimal).
- * @param d value to be displayed
- * @param base number of symbols in output alphabet
- * @return number of digits required for output
- */
-static inline int
-digitPlaces(long d, int base)
-{
-  int l=1;
-  while (d/=base)
-    ++l;
-  return l;
-}
-
-static void
-printComposition(FILE *fp, const unsigned *composition,
-                 Symbol numSyms, unsigned blockSize)
-{
-  Symbol sym;
-  unsigned width = digitPlaces(blockSize, 10);
-  for (sym = 0; sym < numSyms; ++sym)
-  {
-    fprintf(fp, "%*d ", width, composition[sym]);
-  }
-  fputs("\n", fp);
-}
-#endif /* DEBUG > 1 */
-
-static unsigned
-symCountFromComposition(const struct blockCompositionSeq *seqIdx,
-                        size_t compIndex, Symbol sym)
-{
-  BitOffset bitsPerComp, bitsPerCount;
-  assert(seqIdx);
-  bitsPerCount = seqIdx->compositionTable.bitsPerCount;
-  bitsPerComp = bitsPerCount * seqIdx->blockEncNumSyms;
-  assert(compIndex < seqIdx->compositionTable.numCompositions);
-  return bsGetUInt(seqIdx->compositionTable.catCompsPerms,
-                   compIndex * bitsPerComp + sym * bitsPerCount,
-                   bitsPerCount);
-}
-
-static void
-initPermutation(Symbol *permutation, const unsigned *composition,
-                unsigned blockSize, Symbol numSyms);
-static inline void
-nextPermutation(Symbol *permutation, unsigned blockSize);
-
-#if DEBUG > 1
-static void
-printPermutation(FILE *fp, Symbol *permutation, unsigned blockSize);
-#endif /* DEBUG > 1 */
-
-static int
-initPermutationsList(const unsigned *composition, struct permList *permutation,
-                     BitString permStore, BitOffset permOffset,
-                     unsigned blockSize, Symbol numSyms,
-                     unsigned bitsPerSymbol, Env *env)
-{
-  size_t numPermutations = permutation->numPermutations =
-    multinomialCoeff(blockSize, numSyms, composition);
-  if (numPermutations > 1)
-    permutation->permIdxBits = requiredUInt64Bits(numPermutations - 1);
-  else
-    permutation->permIdxBits = 0;
-  Symbol *currentPermutation;
-  BitOffset bitsPerPermutation = bitsPerSymbol * blockSize;
-  if (!(currentPermutation = env_ma_malloc(env,
-         sizeof (Symbol) * blockSize)))
-    return -1;
-  permutation->catPermsOffset = permOffset;
-  initPermutation(currentPermutation, composition, blockSize, numSyms);
-  {
-    size_t i = 0;
-    BitOffset offset = permOffset;
-    do
-    {
-      bsStoreUniformSymbolArray(permStore, offset,
-                                bitsPerSymbol, blockSize, currentPermutation);
-#if DEBUG > 1
-      printPermutation(stderr, currentPermutation, blockSize);
-#endif /* DEBUG > 1 */
-      assert(i > 0?(bsCompare(permStore, offset, bitsPerPermutation,
-                              permStore,
-                              offset - bitsPerPermutation,
-                              bitsPerPermutation)>0):1);
-      if (++i < numPermutations)
-        ;
-      else
-        break;
-      offset += bitsPerPermutation;
-      nextPermutation(currentPermutation, blockSize);
-    } while (1);
-  }
-  env_ma_free(currentPermutation, env);
-  return 0;
-}
-
-static void
-destructPermutationsList(struct permList *permutation, Env *env)
-{
-/*   env_ma_free(permutation->catPerms, env); */
-}
-
-static void
-initPermutation(Symbol *permutation, const unsigned *composition,
-                unsigned blockSize, Symbol numSyms)
-{
-  Symbol sym, *p = permutation;
-  unsigned j;
-  for (sym = 0; sym < numSyms; ++sym)
-    for (j = 0; j < composition[sym]; ++j)
-      *(p++) = sym;
-}
-
-static void
-nextPermutation(Symbol *permutation, unsigned blockSize)
-{
-  /*
-   * Every permutation represents a leaf in the decision tree
-   * generating all permutations, thus given one permutation, we
-   * ascend in the tree until we can make a decision resulting in a
-   * lexically larger value.
-   */
-  unsigned upLvl = blockSize - 1;
-  {
-    Symbol maxSymInSuf = permutation[blockSize - 1];
-    do
-    {
-      if (upLvl == 0 || maxSymInSuf > permutation[--upLvl])
-        break;
-      if (permutation[upLvl] > maxSymInSuf)
-        maxSymInSuf = permutation[upLvl];
-    } while (1);
-  }
-  /* now that we have found the branch point, descend again,
-   * selecting first the next largest symbol */
-  {
-    Symbol saved = permutation[upLvl];
-    Symbol swap = permutation[upLvl + 1];
-    unsigned swapIdx = upLvl + 1;
-    unsigned i;
-    for (i = swapIdx + 1; i < blockSize; ++i)
-    {
-      if (permutation[i] > saved && permutation[i] < swap)
-        swap = permutation[i], swapIdx = i;
-    }
-    permutation[upLvl] = swap;
-    permutation[swapIdx] = saved;
-  }
-  for (++upLvl;upLvl < blockSize - 1; ++upLvl)
-  {
-    /* find minimal remaining symbol */
-    unsigned i, minIdx = upLvl;
-    Symbol minSym = permutation[upLvl];
-    for (i = upLvl + 1; i < blockSize; ++i)
-      if (permutation[i] < minSym)
-        minSym = permutation[i], minIdx = i;
-    permutation[minIdx] = permutation[upLvl];
-    permutation[upLvl] = minSym;
-  }
-}
-
-#if DEBUG > 1
-static void
-printPermutation(FILE *fp, Symbol *permutation, unsigned blockSize)
-{
-  unsigned i;
-  if (blockSize)
-    fprintf(fp, "%lu", (unsigned long)permutation[0]);
-  for (i = 1; i < blockSize; ++i)
-  {
-    fprintf(fp, "%lu", (unsigned long)permutation[i]);
-  }
-  fputs("\n", fp);
-}
-#endif /* DEBUG > 1 */
-
-/**
- * \brief Transforms a block-sized sequence of symbols to corresponding
- * index-pair representation of block-composition index.
- * @param seqIdx sequence index object holding tables to use for
- * lookup
- * @param block symbol sequence holding at least as many symbols as
- * required by seqIdx
- * @param idxOutput on return idxOutput[0] holds the composition
- * index, idxOutput[1] the permutation index.
- * @param bitsOfPermIdx if non-NULL, the variable pointed to holds the
- * number of significant bits for the permutation index.
- * @param env Environment to use for memory allocation etc.
- * @param permCompPA if not NULL must point to a memory region of
- * sufficient size to hold the concatenated bistring representations
- * of composition and permutation, composition at offset 0,
- * permutation at offset
- * seqIdx->compositionTable.bitsPerCount * seqIdx->blockEncNumSyms.
- * @param compPA if not NULL must reference a memory region of
- * sufficient size to hold the composition representation as alphabet
- * range sized sequence.
- * @return -1 in case of memory exhaustion, cannot happen if both
- * permCompPA and compPA are valid preallocated memory regions, 0
- * otherwise.
- */
-static int
-block2IndexPair(const struct blockCompositionSeq *seqIdx,
-                const Symbol *block,
-                size_t idxOutput[2],
-                unsigned *bitsOfPermIdx,
-                Env *env,
-                BitString permCompPA, unsigned *compPA)
-{
-  unsigned blockSize, bitsPerCount;
-  BitOffset bitsPerComposition, bitsPerPermutation;
-  Symbol numSyms;
-  const struct compList *compositionTab;
-  BitString permCompBitString;
-  assert(seqIdx && idxOutput && block);
-  assert(seqIdx->blockSize > 0);
-  compositionTab = &seqIdx->compositionTable;
-  blockSize = seqIdx->blockSize;
-  bitsPerComposition = (bitsPerCount = compositionTab->bitsPerCount)
-    * (numSyms = seqIdx->blockEncNumSyms);
-  bitsPerPermutation = compositionTab->bitsPerSymbol * blockSize;
-  if (permCompPA)
-    permCompBitString = permCompPA;
-  else
-    permCompBitString =
-      env_ma_malloc(env,
-                    bitElemsAllocSize(bitsPerComposition + bitsPerPermutation)
-                    * sizeof (BitElem));
-  {
-    /* first compute composition from block */
-    size_t i;
-    unsigned *composition;
-    if (compPA)
-    {
-      composition = compPA;
-      memset(composition, 0, sizeof (composition[0])*seqIdx->blockEncNumSyms);
-    }
-    else
-      composition = env_ma_calloc(env, sizeof (composition[0]),
-                                  seqIdx->blockEncNumSyms);
-    for (i = 0; i < blockSize; ++i)
-    {
-      ++composition[block[i]];
-    }
-    bsStoreUniformUIntArray(permCompBitString, 0, bitsPerCount,
-                            numSyms, composition);
-    if (!compPA)
-      env_ma_free(composition, env);
-  }
-  {
-    /* do binary search for composition (simplified because the list
-     * contains every composition possible and thus cmpresult will
-     * become 0 at some point) */
-    size_t compIndex = compositionTab->numCompositions / 2;
-    size_t divStep = compIndex;
-    int cmpresult;
-    while ((cmpresult = bsCompare(permCompBitString, 0, bitsPerComposition,
-                                 compositionTab->catCompsPerms,
-                                 compIndex * bitsPerComposition,
-                                 bitsPerComposition)))
-    {
-      if (divStep > 1)
-        divStep >>= 1; /* divStep /= 2 */
-      if (cmpresult > 0)
-        compIndex += divStep;
-      else /* cmpresult < 0 */
-        compIndex -= divStep;
-    }
-    idxOutput[0] = compIndex;
-  }
-  {
-    const struct permList *permutation = compositionTab->permutations
-      + idxOutput[0];
-    if (bitsOfPermIdx)
-      *bitsOfPermIdx = permutation->permIdxBits;
-    if (permutation->numPermutations > 1)
-    {
-      /* build permutation bitstring */
-      bsStoreUniformSymbolArray(permCompBitString, bitsPerComposition,
-                                compositionTab->bitsPerSymbol, blockSize,
-                                block);
-      /* do binary search for permutation */
-      {
-        size_t permIndex = permutation->numPermutations / 2;
-        size_t divStep = permIndex;
-        int cmpresult;
-        while ((cmpresult = bsCompare(permCompBitString, bitsPerComposition,
-                                     bitsPerPermutation,
-                                     compositionTab->catCompsPerms,
-                                     permutation->catPermsOffset
-                                     + permIndex * bitsPerPermutation,
-                                     bitsPerPermutation)))
-        {
-          if (divStep > 1)
-            divStep >>= 1; /* divStep /= 2 */
-          if (cmpresult > 0)
-            permIndex += divStep;
-          else /* cmpresult < 0 */
-            permIndex -= divStep;
-        }
-        idxOutput[1] = permIndex;
-      }
-    }
-    else
-        idxOutput[1] = 0;
-  }
-  if (!permCompPA)
-    env_ma_free(permCompBitString, env);
-  return 0;
-}
-
-static inline BitOffset
-compListPermStartOffset(struct compList *list, unsigned numSyms)
-{
-  return list->numCompositions * list->bitsPerCount * numSyms;
-}
-
 static inline partialSymSums
-newPartialSymSums(size_t alphabetSize, Env *env)
+newPartialSymSums(unsigned alphabetSize, Env *env)
 {
   return env_ma_calloc(env, alphabetSize, sizeof (Seqpos));
 }
@@ -2087,18 +1452,18 @@ deletePartialSymSums(partialSymSums sums, Env *env)
 }
 
 static inline void
-addBlock2PartialSymSums(partialSymSums sums, Symbol *block, size_t blockSize)
+addBlock2PartialSymSums(partialSymSums sums, Symbol *block, unsigned blockSize)
 {
-  size_t i;
+  unsigned i;
   for (i = 0; i < blockSize; ++i)
     ++(sums[block[i]]);
 }
 
 static inline void
-copyPartialSymSums(size_t numSums, partialSymSums dest,
+copyPartialSymSums(unsigned alphabetSize, partialSymSums dest,
                    const partialSymSums src)
 {
-  memcpy(dest, src, sizeof (dest[0]) * numSums);
+  memcpy(dest, src, sizeof (dest[0]) * alphabetSize);
 }
 
 static inline BitOffset
@@ -2149,7 +1514,7 @@ cwSize(const struct blockCompositionSeq *seqIdx)
 }
 
 static inline BitOffset
-vwBits(Seqpos seqLen, unsigned blockSize, size_t bucketBlocks,
+vwBits(Seqpos seqLen, unsigned blockSize, unsigned bucketBlocks,
        unsigned maxPermIdxBits, BitOffset maxVarExtBitsPerBucket)
 {
   return numBuckets(seqLen, bucketBlocks * blockSize)
@@ -2224,19 +1589,19 @@ destructAppendState(struct appendState *aState, Env *env)
 /**
  * @return 0 on successfull update, <0 on error
  */
-static void
+static inline void
 append2IdxOutput(struct blockCompositionSeq *newSeqIdx,
                  struct appendState *state,
-                 size_t permCompIdx[2],
+                 PermCompIndex permCompIdx[2],
                  unsigned bitsOfCompositionIdx, unsigned bitsOfPermutationIdx)
 {
   assert(state->cwMemPos + bitsOfCompositionIdx <= state->compCacheLen);
-  bsStoreUInt64(state->compCache, state->cwMemPos, bitsOfCompositionIdx,
-                permCompIdx[0]);
+  bsStorePermCompIndex(state->compCache, state->cwMemPos, bitsOfCompositionIdx,
+                       permCompIdx[0]);
   state->cwMemPos += bitsOfCompositionIdx;
   assert(state->varMemPos + bitsOfPermutationIdx <= state->permCacheLen);
-  bsStoreUInt64(state->permCache, state->varMemPos, bitsOfPermutationIdx,
-                permCompIdx[1]);
+  bsStorePermCompIndex(state->permCache, state->varMemPos, bitsOfPermutationIdx,
+                       permCompIdx[1]);
   state->varMemPos += bitsOfPermutationIdx;
 }
 
@@ -2275,7 +1640,8 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
                 struct appendState *aState,
                 partialSymSums buck)
 {
-  size_t recordsExpected, cwBitElems, blockAlphabetSize;
+  size_t recordsExpected, cwBitElems;
+  unsigned blockAlphabetSize;
 /*   BitOffset sBucketBits; */
   assert(seqIdx && aState && buck);
   /* seek2/write constant width indices */
@@ -2775,8 +2141,8 @@ loadBlockEncIdxSeqForSA(Suffixarray *sa, Seqpos totalLen,
       = newSeqIdx->partialSymSumBits + blockMapAlphabetSize;
     symSumBitsDefaultSetup(newSeqIdx);
   }
-  if (!initCompositionList(&newSeqIdx->compositionTable, newSeqIdx,
-                          blockMapAlphabetSize, env))
+  if (!initCompositionList(&newSeqIdx->compositionTable, newSeqIdx->blockSize,
+                           blockMapAlphabetSize, env))
     loadBlockEncIdxSeqErrRet();
   newSeqIdx->bitsPerVarDiskOffset =
     requiredUInt64Bits(vwBits(newSeqIdx->baseClass.seqLen, newSeqIdx->blockSize,
@@ -2913,11 +2279,10 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
 
 static void
 addRangeEncodedSyms(struct seqRangeList *rangeList, Symbol *block,
-                    size_t blockSize,
-                    Seqpos blockNum, MRAEnc *alphabet,
+                    unsigned blockSize, Seqpos blockNum, MRAEnc *alphabet,
                     int selection, int *rangeSel, Env *env)
 {
-  size_t i;
+  unsigned i;
   for (i = 0; i < blockSize; ++i)
   {
     assert(MRAEncSymbolIsInSelectedRanges(alphabet, block[i],
@@ -3016,7 +2381,7 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
         fp, "# block %u: comp idx: %lu, permIdxBits=%u, perm idx: %lu =>",
         i, (unsigned long)compIndex,
         (unsigned)seqIdx->compositionTable.permutations[compIndex].permIdxBits,
-        (unsigned long)bsGetUInt64(
+        (unsigned long)bsGetPermCompIndex(
           sBlock->varData, varDataMemOffset,
           seqIdx->compositionTable.permutations[compIndex].permIdxBits));
       unpackBlock(seqIdx, sBlock, cwIdxMemOffset, varDataMemOffset, block,
