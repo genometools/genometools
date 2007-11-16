@@ -16,8 +16,8 @@
 */
 
 #include <assert.h>
+#include "libgtcore/bsearch.h"
 #include "libgtcore/ensure.h"
-#include "libgtext/bsearch.h"
 
 static void* bsearch_generic(Array *members, const void *key, const void *base,
                              size_t nmemb, size_t size, Compar compar,

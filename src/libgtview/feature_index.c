@@ -18,6 +18,7 @@
 */
 
 #include <string.h>
+#include "libgtcore/bsearch.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/minmax.h"
@@ -25,7 +26,6 @@
 #include "libgtcore/undef.h"
 #include "libgtview/feature_index.h"
 #include "libgtext/genome_node.h"
-#include "libgtext/bsearch.h"
 
 struct FeatureIndex {
   Hashtable *regions;
