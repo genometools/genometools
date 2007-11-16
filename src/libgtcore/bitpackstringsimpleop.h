@@ -25,6 +25,7 @@
 #include <unistd.h>
 
 #include "libgtcore/bitpackstring.h"
+#include "libgtcore/safearith.h"
 
 /**
  * \if INTERNAL \file bitpackstringsimpleop.h \endif
@@ -37,10 +38,6 @@
  * functions work.
  */
 
-/* imitate llabs for platforms which don't have it */
-#ifndef HAVE_LLABS
-#define llabs(i) (((i) < 0)?-i:i)
-#endif
 #ifndef SIZE_MAX
 #define SIZE_MAX ~(size_t)0
 #endif
@@ -128,7 +125,7 @@ requiredInt8Bits(int8_t v)
     return sizeof (v)*CHAR_BIT;
   else
     /* one extra for sign bit */
-    return requiredUInt32Bits(abs(v)) + 1;
+    return requiredUInt32Bits(safe_abs(v)) + 1;
 }
 
 static inline int
@@ -138,7 +135,7 @@ requiredInt16Bits(int16_t v)
     return sizeof (v)*CHAR_BIT;
   else
     /* one extra for sign bit */
-    return requiredUInt32Bits(abs(v)) + 1;
+    return requiredUInt32Bits(safe_abs(v)) + 1;
 }
 
 static inline int
@@ -148,7 +145,7 @@ requiredInt32Bits(int32_t v)
     return sizeof (v)*CHAR_BIT;
   else
     /* one extra for sign bit */
-    return requiredUInt32Bits(labs(v)) + 1;
+    return requiredUInt32Bits(safe_labs(v)) + 1;
 }
 
 static inline int
@@ -158,7 +155,7 @@ requiredInt64Bits(int64_t v)
     return sizeof (v)*CHAR_BIT;
   else
     /* one extra for sign bit */
-    return requiredUInt64Bits(llabs(v)) + 1;
+    return requiredUInt64Bits(safe_llabs(v)) + 1;
 }
 
 static inline void

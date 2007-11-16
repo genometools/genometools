@@ -54,10 +54,6 @@ BUILDSTAMP:=$(shell date +'"%Y-%m-%d %H:%M:%S"')
 SYSTEM:=$(shell uname -s)
 ifeq ($(SYSTEM),Darwin)
   RANLIB:=ranlib
-  EXP_CPPFLAGS+=-DHAVE_LLABS
-endif
-ifeq ($(SYSTEM),Linux)
-  CPPLAGS+=-D_ISOC99_SOURCE -D_XOPEN_SOURCE=600 -DHAVE_LLABS
 endif
 
 # the default GenomeTools libraries which are build
