@@ -61,6 +61,9 @@
 int           safe_abs(int);
 long          safe_labs(long);
 long long     safe_llabs(long long);
+uint32_t      safe_mult_u32(uint32_t, uint32_t);
+uint64_t      safe_mult_u64(uint64_t, uint64_t);
+unsigned long safe_mult_ulong(unsigned long, unsigned long);
 long          safe_cast2long(unsigned long);
 unsigned long safe_cast2ulong(long);
 int           safearith_example(Env*);

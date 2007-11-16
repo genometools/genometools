@@ -40,6 +40,41 @@ long long safe_llabs(long long j)
   return rval;
 }
 
+uint32_t safe_mult_u32(uint32_t a, uint32_t b)
+{
+  unsigned long long x = (unsigned long long) a * b;
+  assert(x <= 0xffffffff); /* prevent overflow */
+  return x;
+}
+
+uint64_t safe_mult_u64(uint64_t a, uint64_t b)
+{
+  uint32_t a_hi = a >> 32,
+           a_lo = a & 0xffffffff,
+           b_hi = b >> 32,
+           b_lo = b & 0xffffffff;
+  /*
+     x = 0xffffffff
+     a = a_hi*x + a_lo
+     b = b_hi*x + b_lo
+     a * b = (a_hi*x + a_lo) * (b_hi*x + b_lo)
+           = a_hi*x*b_hi*x + a_hi*x*b_lo + a_lo*b_hi*x + a_lo*b_lo
+  */
+  assert(!(a_hi && b_hi)); /* prevent overflow */
+  a = (uint64_t)(a_hi) * b_lo + (uint64_t)(a_lo) * b_hi;
+  assert(a <= 0xffffffff); /* prevent overflow */
+  return (a << 32) + (uint64_t)(a_lo) * b_lo;
+}
+
+unsigned long safe_mult_ulong(unsigned long a, unsigned long b)
+{
+  assert(sizeof (unsigned long) == 4 || sizeof (unsigned long) == 8);
+  if (sizeof (unsigned long) == 4)
+    return safe_mult_u32(a, b);
+  else /* sizeof (unsigned long) == 8 */
+    return safe_mult_u64(a, b);
+}
+
 long safe_cast2long(unsigned long value)
 {
   assert(value <= (~0UL >> 1));
