@@ -100,6 +100,12 @@ SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
       p->startPos = pos;
       p->sym = sym;
       p->len = MAX_SEQRANGE_LEN;
+      {
+        size_t i;
+        for (i = 0; i < sizeof (Seqpos) - sizeof (uint16_t) - sizeof (Symbol);
+             ++i)
+          p->fill[i] = 0;
+      }
       pos += MAX_SEQRANGE_LEN;
       len -= MAX_SEQRANGE_LEN;
       if (numRanges && pSums)
@@ -126,6 +132,12 @@ SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
       p->startPos = pos;
       p->len = len;
       p->sym = sym;
+      {
+        size_t i;
+        for (i = 0; i < sizeof (Seqpos) - sizeof (uint16_t) - sizeof (Symbol);
+             ++i)
+          p->fill[i] = 0;
+      }
       if (numRanges && pSums)
       {
         Seqpos *spDest = pSums, *spSrc = pSums - numSyms;
@@ -431,7 +443,7 @@ SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp)
   if (!fwrite(&(rangeList->numRanges), sizeof (rangeList->numRanges), 1, fp))
     return 0;
   if (fwrite(rangeList->ranges, sizeof (struct seqRange),
-            numRanges, fp) != numRanges)
+             numRanges, fp) != numRanges)
     return 0;
   return 1;
 }
