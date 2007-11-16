@@ -318,7 +318,26 @@ newEISHint(EISeq *seq, Env *env);
 static inline void
 deleteEISHint(EISeq *seq, EISHint hint, Env *env);
 
-extern int
+enum integrityCheckResults
+{
+  EIS_INTEGRITY_CHECK_NO_ERROR = 0,
+  EIS_INTEGRITY_CHECK_INVALID_SYMBOL, /**< reading from the index
+                                       *   produced an incorrect symbol  */
+  EIS_INTEGRITY_CHECK_BWT_READ_ERROR, /**< reading from the BWT
+                                       *   reference file failed or
+                                       *   delivered a symbol not in
+                                       *   the alphabet (bwt file
+                                       *   corrupt?) */
+  EIS_INTEGRITY_CHECK_SA_LOAD_ERROR,  /**< loading/mapping of the
+                                       *   suffix array project failed
+                                       *   (did you generate the BWT) */
+  EIS_INTEGRITY_CHECK_RANK_FAILED     /**< the rank operation
+                                       *   delivered a wrong count */
+};
+
+extern const char *EISintegrityCheckResultStrings[];
+
+extern enum integrityCheckResults
 verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
                 unsigned long tickPrint, FILE *fp, Env *env);
 

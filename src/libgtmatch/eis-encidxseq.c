@@ -28,19 +28,30 @@ deleteEncIdxSeq(EISeq *seq, Env *env)
   seq->classInfo->delete(seq, env);
 }
 
+const char *EISintegrityCheckResultStrings[] =
+{
+  "no error in bwt comparison.",
+  "reading from the index produced an incorrect symbol.",
+  "reading from the BWT reference file failed or delivered a symbol"
+  " not in the alphabet (bwt file corrupt?) ",
+  "loading/mapping of the suffix array project failed. \n"
+  "(did you generate the BWT?)",
+  "the rank operation delivered a wrong count"
+};
+
 #define verifyIntegrityErrRet(retval)                                   \
   do {                                                                  \
     switch (retval) {                                                   \
-    case 1:                                                             \
+    case EIS_INTEGRITY_CHECK_INVALID_SYMBOL:                            \
       fprintf(stderr, "Comparision failed at position "FormatSeqpos     \
               ", reference symbol: %u, symbol read: %u\n",              \
               pos, symOrig, symEnc);                                    \
       break;                                                            \
-    case -1:                                                            \
+    case EIS_INTEGRITY_CHECK_BWT_READ_ERROR:                            \
       fprintf(stderr, "Read of symbol failed at position "              \
               FormatSeqpos"\n", pos);                                   \
       break;                                                            \
-    case 2:                                                             \
+    case EIS_INTEGRITY_CHECK_RANK_FAILED:                               \
       fprintf(stderr, "At position "FormatSeqpos                        \
               ", rank operation yielded  wrong count: "FormatSeqpos     \
               " expected "FormatSeqpos"\n",                             \
@@ -60,7 +71,7 @@ deleteEncIdxSeq(EISeq *seq, Env *env)
  * @param fp descriptor to write progress marks to.
  * @return -1 on error, 0 on identity, >0 on inconsistency
  */
-int
+extern enum integrityCheckResults
 verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
                 unsigned long tickPrint, FILE *fp, Env *env)
 {
@@ -83,7 +94,7 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
     env_error_set(env, "Cannot load suffix array project with"
                   " demand for BWT file\n");
     freeverboseinfo(&verbosity, env);
-    return -1;
+    return EIS_INTEGRITY_CHECK_SA_LOAD_ERROR;
   }
   memset(rankTable, 0, sizeof (rankTable));
   bwtFP = suffixArray.bwttabstream.fp;
@@ -114,12 +125,14 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
     symOrig = symRead;
     symEnc = EISGetSym(seqIdx, pos, hint, env);
     if (!MRAEncSymbolHasValidMapping(alphabet, symEnc))
-      verifyIntegrityErrRet(-1);
+      verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_INVALID_SYMBOL);
+    if (!MRAEncSymbolHasValidMapping(alphabet, symOrig))
+      verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_BWT_READ_ERROR);
     if (symEnc != symOrig)
-      verifyIntegrityErrRet(1);
+      verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_INVALID_SYMBOL);
     if ((rankExpect = ++rankTable[symOrig])
        != (rankQueryResult = EISRank(seqIdx, symOrig, pos + 1, hint, env)))
-      verifyIntegrityErrRet(2);
+      verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
     ++pos;
     if (tickPrint && !(pos % tickPrint))
       putc('.', fp);
@@ -127,9 +140,9 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
   if (tickPrint)
     putc('\n', fp);
   if (ferror(bwtFP))
-    verifyIntegrityErrRet(-1);
+    verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_BWT_READ_ERROR);
   deleteEISHint(seqIdx, hint, env);
   freesuffixarray(&suffixArray, env);
   freeverboseinfo(&verbosity, env);
-  return 0;
+  return EIS_INTEGRITY_CHECK_NO_ERROR;
 }

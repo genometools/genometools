@@ -76,10 +76,12 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
              !(corrupt = verifyIntegrity(seq, inputProject, options.skipCount,
                                          options.progressInterval, stderr,
                                          env)));
-      if (corrupt == -1)
-        perror("I/O error when checking index integrity");
-      else if (corrupt)
+      if (corrupt)
+      {
         fputs("Integrity check failed for index.\n", stderr);
+        fputs(EISintegrityCheckResultStrings[corrupt], stderr);
+        fputs("\n", stderr);
+      }
     }
   }
   if (seq)
