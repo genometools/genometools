@@ -24,6 +24,11 @@ feature requests:
 - function similary to option_new_choice(), but which allows to set multiple
   strings from the given set
 - replace genfile_getc() with genfile_xfgetc()
+- make sure that exons and mRNAs of a gene lie in the range defined by the gene
+- compute the phase correctly (in cds_visitor?)
+- establish naming conventions and use them throughout entire codebase
+- use safeabs for abs(), labs() and llabs() calls?
+- write safemult and safediv macros
 
 
 merge libgtcore and libgtmatch:
