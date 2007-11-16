@@ -26,6 +26,7 @@
 #include "sfx-optdef.h"
 #include "verbose-def.h"
 #include "stamp.h"
+#include "tools/gt_packedindex_bwtconstruct_params.h"
 
 static OPrval parse_options(int *parsed_args,
                             bool doesa,
@@ -144,29 +145,8 @@ static OPrval parse_options(int *parsed_args,
 
   } else
   {
-    Option *optionBlockSize,
-           *optionBucketBlocks,
-           *optionLocateFreq;
-
-    optionBlockSize = option_new_uint_min("bsize",
-                                          "specify size of blocks",
-                                          &so->blockSize,
-					  8U, 1U, env);
-    option_parser_add_option(op, optionBlockSize, env);
-    optionBucketBlocks = option_new_uint_min("blbuck",
-                                             "specify number of blocks per "
-                                             "bucket",
-                                             &so->bucketBlocks,
-                                             8U, 1U, env);
-    option_parser_add_option(op, optionBucketBlocks, env);
-
-    optionLocateFreq = option_new_uint("locfreq",
-                                       "specify the locate frequency\n"
-                                       "parameter i means that each i-th "
-                                       "position of input string is stored\n"
-                                       "0 => no locate information",
-                                       &so->locateInterval, 0, env);
-    option_parser_add_option(op, optionLocateFreq, env);
+    registerPackedIndexOptions(op, &so->bwtIdxParams, BWTDEFOPT_CONSTRUCTION,
+                               so->str_indexname, env);
   }
 
   option = option_new_bool("v",

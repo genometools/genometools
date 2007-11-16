@@ -30,6 +30,7 @@ struct seqRange
   Seqpos startPos;
   regionLength len;
   Symbol sym;
+  char fill[sizeof (Seqpos) - sizeof (uint16_t) - sizeof (Symbol)];
 };
 
 static inline int

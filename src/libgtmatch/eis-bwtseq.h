@@ -17,7 +17,7 @@
 #define EIS_BWTSEQ_H
 
 /**
- * \file bwtseq.h
+ * \file eis-bwtseq.h
  * Interface definitions for querying an indexed representation of the
  * BWT of a sequence as presented by Manzini and Ferragina (Compressed
  * Representations of Sequences and Full-Text Indexes, 2006)
@@ -55,19 +55,7 @@ enum seqBaseEncoding {
  */
 union bwtSeqParam
 {
-  struct
-  {
-    unsigned blockSize;         /**< number of symbols to combine in
-                                 * one block a lookup-table
-                                 * containing
-                                 * $alphabetsize^{blockSize}$ entries is
-                                 * required so adjust with caution */
-    unsigned bucketBlocks;      /**< number of blocks for which to
-                                 * store partial symbol sums (lower
-                                 * values increase index size and
-                                 * decrease computations for lookup) */
-    int EISFeatureSet;
-  } blockEnc;
+  struct blockEncParams blockEnc;
 /*   struct  */
 /*   { */
 /*   } RLEParams; */
@@ -101,7 +89,6 @@ struct bwtParam
                                    * all */
   const Str *projectName;         /**< base file name to derive name
                                    *   of suffixerator project from*/
-
 };
 
 /**
@@ -135,33 +122,16 @@ typedef struct BWTSeq BWTSeq;
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-newBWTSeq(const struct bwtParam *params, Env *env);
+availBWTSeq(const struct bwtParam *params, Env *env);
 
 /**
- * \brief Creates or loads an encoded indexed sequence object of the
+ * \brief Loads an encoded indexed sequence object of the
  * BWT transform.
- * @param params a struct holding parameter information for index construction
- * @param sa Suffixarray data structure to build BWT index from
  * @param env genometools reference for core functions
  * @return reference to new BWT sequence object
  */
 extern BWTSeq *
-newBWTSeqFromSA(const struct bwtParam *params, Suffixarray *sa,
-                Seqpos totalLen, Env *env);
-
-/**
- * \brief Creates or loads an encoded indexed sequence object of the
- * BWT transform.
- * @param params a struct holding parameter information for index construction
- * @param si Suffixerator interface to read data for BWT index from
- * @param projectName base file name for index written (should be the
- * same as the one sa was read from
- * @param env genometools reference for core functions
- * @return reference to new BWT sequence object
- */
-extern BWTSeq *
-newBWTSeqFromSfxI(const struct bwtParam *params, sfxInterface *si,
-                  Seqpos totalLen, Env *env);
+loadBWTSeq(const struct bwtParam *params, int EISFeatures, Env *env);
 
 /**
  * \brief Deallocate a previously loaded/created BWT sequence object.

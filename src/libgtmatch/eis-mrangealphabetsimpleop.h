@@ -78,7 +78,7 @@ MRAEncSymbolHasValidMapping(const MRAEnc *mralpha, Symbol sym)
   switch (mralpha->encType)
   {
   case sourceUInt8:
-    return mralpha->rangeEndIndices[mralpha->numRanges] == UINT8_MAX
+    return mralpha->rangeEndIndices[mralpha->numRanges - 1] == UINT8_MAX
       || (constMRAEnc2MRAEncUInt8(mralpha)->mappings[(uint8_t)sym]
           != UNDEF_UCHAR);
   default:

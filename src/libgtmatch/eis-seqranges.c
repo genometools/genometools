@@ -16,6 +16,7 @@
 #include <string.h>
 
 #include "libgtcore/minmax.h"
+#include "libgtcore/xansi.h"
 
 #include "libgtmatch/eis-seqranges.h"
 
@@ -100,6 +101,12 @@ SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
       p->startPos = pos;
       p->sym = sym;
       p->len = MAX_SEQRANGE_LEN;
+      {
+        size_t i;
+        for (i = 0; i < sizeof (Seqpos) - sizeof (uint16_t) - sizeof (Symbol);
+             ++i)
+          p->fill[i] = 0;
+      }
       pos += MAX_SEQRANGE_LEN;
       len -= MAX_SEQRANGE_LEN;
       if (numRanges && pSums)
@@ -126,6 +133,12 @@ SRLAppendNewRange(struct seqRangeList *rangeList, Seqpos pos, Seqpos len,
       p->startPos = pos;
       p->len = len;
       p->sym = sym;
+      {
+        size_t i;
+        for (i = 0; i < sizeof (Seqpos) - sizeof (uint16_t) - sizeof (Symbol);
+             ++i)
+          p->fill[i] = 0;
+      }
       if (numRanges && pSums)
       {
         Seqpos *spDest = pSums, *spSrc = pSums - numSyms;
@@ -428,11 +441,8 @@ SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp)
   size_t numRanges;
   assert(rangeList && fp);
   numRanges = rangeList->numRanges;
-  if (!fwrite(&(rangeList->numRanges), sizeof (rangeList->numRanges), 1, fp))
-    return 0;
-  if (fwrite(rangeList->ranges, sizeof (struct seqRange),
-            numRanges, fp) != numRanges)
-    return 0;
+  xfwrite(&(rangeList->numRanges), sizeof (rangeList->numRanges), 1, fp);
+  xfwrite(rangeList->ranges, sizeof (struct seqRange), numRanges, fp);
   return 1;
 }
 
@@ -445,23 +455,13 @@ SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
   size_t numRanges;
   assert(fp && env);
   newRangeList = env_ma_malloc(env, sizeof (struct seqRangeList));
-  if (!fread(&(newRangeList->numRanges),
-            sizeof (newRangeList->numRanges), 1, fp))
-  {
-    env_ma_free(newRangeList, env);
-    return NULL;
-  }
+  xfread(&(newRangeList->numRanges), sizeof (newRangeList->numRanges), 1, fp);
   numRanges = newRangeList->numRanges;
   newRangeList->partialSymSums = NULL;
   newRangeList->ranges = env_ma_malloc(env, sizeof (struct seqRange) *
                                        (newRangeList->numRangesStorable
                                         = numRanges));
-  if (fread(newRangeList->ranges, sizeof (struct seqRange),
-           numRanges, fp) != numRanges)
-  {
-    deleteSeqRangeList(newRangeList, env);
-    return NULL;
-  }
+  xfread(newRangeList->ranges, sizeof (struct seqRange), numRanges, fp);
   if (features & SRL_PARTIAL_SYMBOL_SUMS)
   {
     Seqpos *partialSymSums;

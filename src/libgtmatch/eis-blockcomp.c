@@ -42,6 +42,7 @@
 #include "libgtmatch/esa-map.pr"
 
 #include "libgtmatch/eis-encidxseq.h"
+#include "libgtmatch/eis-encidxseqconstruct.h"
 #include "libgtmatch/eis-encidxseqpriv.h"
 #include "libgtmatch/eis-seqranges.h"
 #include "libgtmatch/eis-seqblocktranslate.h"
@@ -54,11 +55,10 @@ typedef int (*bwtReadFunc)(void *state, size_t readLen, Symbol *dest,
                            Env *env);
 
 struct encIdxSeq *
-newBlockEncIdxSeq(const Str *projectName, unsigned blockSize,
-                  unsigned bucketBlocks, int features,
+newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
                   size_t numExtHeaders, uint16_t *headerIDs,
-                  uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallbacks,
-                  void **headerCBData,
+                  uint32_t *extHeaderSizes,
+                  headerWriteFunc *extHeaderCallbacks, void **headerCBData,
                   bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
                   BitOffset maxVarExtBitsPerPos, void *cbState, Env *env)
 {
@@ -78,8 +78,7 @@ newBlockEncIdxSeq(const Str *projectName, unsigned blockSize,
   }
   ++length;
   newSeqIdx = newBlockEncIdxSeqFromSA(&suffixArray, length,
-                                      projectName, blockSize,
-                                      bucketBlocks, features,
+                                      projectName, params,
                                       numExtHeaders, headerIDs,
                                       extHeaderSizes, extHeaderCallbacks,
                                       headerCBData, biFunc, cwExtBitsPerPos,
@@ -93,8 +92,8 @@ static EISeq *
 newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                      MRAEnc *alphabet, const struct seqStats *stats,
                      bwtReadFunc getNextBlock, void *bwtReadFuncState,
-                     unsigned blockSize, unsigned bucketBlocks,
-                     int features, size_t numExtHeaders, uint16_t *headerIDs,
+                     const struct blockEncParams *params,
+                     size_t numExtHeaders, uint16_t *headerIDs,
                      uint32_t *extHeaderSizes,
                      headerWriteFunc *extHeaderCallbacks,
                      void **headerCBData,
@@ -119,8 +118,8 @@ saBWTReadNext(void *state, size_t readLen, Symbol *dest, Env *env)
 extern EISeq *
 newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
                         const Str *projectName,
-                        unsigned blockSize, unsigned bucketBlocks,
-                        int features, size_t numExtHeaders, uint16_t *headerIDs,
+                        const struct blockEncParams *params,
+                        size_t numExtHeaders, uint16_t *headerIDs,
                         uint32_t *extHeaderSizes,
                         headerWriteFunc *extHeaderCallbacks,
                         void **headerCBData,
@@ -141,10 +140,8 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
   /* convert alphabet */
   state.alphabet = MRAEncGTAlphaNew(sa->alpha, env);
   MRAEncAddSymbolToRange(state.alphabet, SEPARATOR, 1);
-  newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName,
-                                   state.alphabet, NULL,
-                                   saBWTReadNext, &state,
-                                   blockSize, bucketBlocks, features,
+  newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName, state.alphabet,
+                                   NULL, saBWTReadNext, &state, params,
                                    numExtHeaders, headerIDs, extHeaderSizes,
                                    extHeaderCallbacks, headerCBData, biFunc,
                                    cwExtBitsPerPos, maxVarExtBitsPerPos,
@@ -176,12 +173,12 @@ sfxIBWTReadNext(void *state, size_t readLen, Symbol *dest, Env *env)
 extern EISeq *
 newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
                           const Str *projectName,
-                          unsigned blockSize, unsigned bucketBlocks,
-                          int features, size_t numExtHeaders,
-                          uint16_t *headerIDs, uint32_t *extHeaderSizes,
+                          const struct blockEncParams *params,
+                          size_t numExtHeaders, uint16_t *headerIDs,
+                          uint32_t *extHeaderSizes,
                           headerWriteFunc *extHeaderCallbacks,
-                          void **headerCBData,
-                          bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
+                          void **headerCBData, bitInsertFunc biFunc,
+                          BitOffset cwExtBitsPerPos,
                           BitOffset maxVarExtBitsPerPos, void *cbState,
                           Env *env)
 {
@@ -197,8 +194,7 @@ newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
   MRAEncAddSymbolToRange(state.alphabet, SEPARATOR, 1);
   newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName,
                                    state.alphabet, getSfxISeqStats(si),
-                                   sfxIBWTReadNext, &state,
-                                   blockSize, bucketBlocks, features,
+                                   sfxIBWTReadNext, &state, params,
                                    numExtHeaders, headerIDs, extHeaderSizes,
                                    extHeaderCallbacks, headerCBData, biFunc,
                                    cwExtBitsPerPos, maxVarExtBitsPerPos,
@@ -433,7 +429,7 @@ static EISeq *
 newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                      MRAEnc *alphabet, const struct seqStats *stats,
                      bwtReadFunc getNextBlock, void *bwtReadFuncState,
-                     unsigned blockSize, unsigned bucketBlocks, int features,
+                     const struct blockEncParams *params,
                      size_t numExtHeaders, uint16_t *headerIDs,
                      uint32_t *extHeaderSizes,
                      headerWriteFunc *extHeaderCallbacks,
@@ -446,7 +442,8 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
   size_t regionsEstimate=totalLen / 100;
   MRAEnc *blockMapAlphabet = NULL, *rangeMapAlphabet = NULL;
   BitOffset bitsPerComposition, bitsPerPermutation;
-  unsigned compositionIdxBits, callBackDataOffsetBits;
+  unsigned compositionIdxBits, callBackDataOffsetBits,
+    blockSize = params->blockSize, bucketBlocks = params->bucketBlocks;
   size_t bucketLen = (size_t)bucketBlocks * blockSize;
   int *modesCopy = NULL;
   enum rangeStoreMode modes[] = { BLOCK_COMPOSITION_INCLUDE,
@@ -593,7 +590,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
   }
   {
     int regionFeatures = SRL_NO_FEATURES;
-    if (features & EIS_FEATURE_REGION_SUMS)
+    if (params->EISFeatureSet & EIS_FEATURE_REGION_SUMS)
       regionFeatures |= SRL_PARTIAL_SYMBOL_SUMS;
     newSeqIdx->rangeEncs = newSeqRangeList(regionsEstimate, rangeMapAlphabet,
                                            regionFeatures, env);
@@ -2273,7 +2270,6 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
     return 0;
   if (!(SRLSaveToStream(seqIdx->rangeEncs, seqIdx->externalData.idxFP)))
      return 0;
-  fflush(seqIdx->externalData.idxFP);
   return 1;
 }
 

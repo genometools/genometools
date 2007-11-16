@@ -22,6 +22,7 @@
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
 #include "readmode-def.h"
+#include "tools/gt_packedindex_bwtconstruct_params.h"
 
 #define PREFIXLENGTH_AUTOMATIC 0
 
@@ -43,17 +44,7 @@ typedef struct
        outlcptab,
        outbwttab,
        outdestab;
-  unsigned int blockSize;      /**< number of symbols to combine in
-                                 * one block, a lookup-table
-                                 * containing
-                                 * $alphabetsize^{blockSize}$ entries is
-                                 * required so adjust with caution */
-  unsigned int bucketBlocks;   /**< number of blocks for which to
-                                 * store partial symbol sums (lower
-                                 * values increase index size and
-                                 * decrease computations for lookup) */
-  unsigned int locateInterval;  /**< sample suffix array values at
-                                 * this interval, or not at all if 0 */
+  struct bwtOptions bwtIdxParams;
 } Suffixeratoroptions;
 
 #endif

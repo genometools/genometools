@@ -14,7 +14,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 /**
- * \file suffixerator-interface.h
+ * \file eis-suffixerator-interface.h
  * \brief Methods to call suffixerator functions through one object,
  * but have the same data available to multiple listeners.
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
