@@ -34,6 +34,7 @@
 /* Caution: sizeof (BitElem) <= sizeof (unsigned long) must be met */
 typedef unsigned char BitElem;
 typedef BitElem *BitString;
+typedef const BitElem *constBitString;
 typedef unsigned long long BitOffset;
 
 enum {
@@ -164,7 +165,7 @@ requiredInt64Bits(int64_t val);
  * @return value read
  */
 extern uint8_t
-bsGetUInt8(const BitString str, BitOffset offset, unsigned numBits);
+bsGetUInt8(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Retrieve unsigned integer of specified length from bitstring
  * at given position.
@@ -174,7 +175,7 @@ bsGetUInt8(const BitString str, BitOffset offset, unsigned numBits);
  * @return value read
  */
 extern uint16_t
-bsGetUInt16(const BitString str, BitOffset offset, unsigned numBits);
+bsGetUInt16(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Retrieve unsigned integer of specified length from bitstring
  * at given position.
@@ -184,7 +185,7 @@ bsGetUInt16(const BitString str, BitOffset offset, unsigned numBits);
  * @return value read
  */
 extern uint32_t
-bsGetUInt32(const BitString str, BitOffset offset, unsigned numBits);
+bsGetUInt32(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Retrieve unsigned integer of specified length from bitstring
  * at given position.
@@ -194,7 +195,7 @@ bsGetUInt32(const BitString str, BitOffset offset, unsigned numBits);
  * @return value read
  */
 extern uint64_t
-bsGetUInt64(const BitString str, BitOffset offset, unsigned numBits);
+bsGetUInt64(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Store unsigned integer of specified length in bitstring at
  * given position.
@@ -242,7 +243,7 @@ bsStoreUInt64(BitString str, BitOffset offset, unsigned numBits, uint64_t val);
  * @param numBits number of bits composing integer to be written
  */
 static inline int8_t
-bsGetInt8(BitString str, BitOffset offset, unsigned numBits);
+bsGetInt8(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Store integer of specified length in bitstring at given
  * position.
@@ -252,7 +253,7 @@ bsGetInt8(BitString str, BitOffset offset, unsigned numBits);
  * @param numBits number of bits composing integer to be written
  */
 static inline int16_t
-bsGetInt16(BitString str, BitOffset offset, unsigned numBits);
+bsGetInt16(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Store integer of specified length in bitstring at given
  * position.
@@ -262,7 +263,7 @@ bsGetInt16(BitString str, BitOffset offset, unsigned numBits);
  * @param numBits number of bits composing integer to be written
  */
 static inline int32_t
-bsGetInt32(BitString str, BitOffset offset, unsigned numBits);
+bsGetInt32(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * \brief Store integer of specified length in bitstring at given
  * position.
@@ -272,7 +273,7 @@ bsGetInt32(BitString str, BitOffset offset, unsigned numBits);
  * @param numBits number of bits composing integer to be written
  */
 static inline int64_t
-bsGetInt64(BitString str, BitOffset offset, unsigned numBits);
+bsGetInt64(constBitString str, BitOffset offset, unsigned numBits);
 /**
  * Retrieve integer of specified length from bitstring at given position.
  * @param str bitstring to read from
@@ -422,7 +423,7 @@ bsStoreUniformInt64Array(BitString str, BitOffset offset, unsigned numBits,
  * @param store integers read in this array
  */
 void
-bsGetUniformUInt8Array(const BitString str, BitOffset offset, unsigned numBits,
+bsGetUniformUInt8Array(constBitString str, BitOffset offset, unsigned numBits,
                        size_t numValues, uint8_t val[]);
 /**
  * \brief Retrieve n unsigned integers of specified length from
@@ -434,7 +435,7 @@ bsGetUniformUInt8Array(const BitString str, BitOffset offset, unsigned numBits,
  * @param store integers read in this array
  */
 void
-bsGetUniformUInt16Array(const BitString str, BitOffset offset, unsigned numBits,
+bsGetUniformUInt16Array(constBitString str, BitOffset offset, unsigned numBits,
                         size_t numValues, uint16_t val[]);
 /**
  * \brief Retrieve n unsigned integers of specified length from
@@ -446,7 +447,7 @@ bsGetUniformUInt16Array(const BitString str, BitOffset offset, unsigned numBits,
  * @param store integers read in this array
  */
 void
-bsGetUniformUInt32Array(const BitString str, BitOffset offset, unsigned numBits,
+bsGetUniformUInt32Array(constBitString str, BitOffset offset, unsigned numBits,
                         size_t numValues, uint32_t val[]);
 /**
  * \brief Retrieve n unsigned integers of specified length from
@@ -458,7 +459,7 @@ bsGetUniformUInt32Array(const BitString str, BitOffset offset, unsigned numBits,
  * @param store integers read in this array
  */
 void
-bsGetUniformUInt64Array(const BitString str, BitOffset offset, unsigned numBits,
+bsGetUniformUInt64Array(constBitString str, BitOffset offset, unsigned numBits,
                         size_t numValues, uint64_t val[]);
 /**
  * \brief Retrieve n integers of specified length from bitstring,
@@ -470,7 +471,7 @@ bsGetUniformUInt64Array(const BitString str, BitOffset offset, unsigned numBits,
  * @param store integers read in this array
  */
 static inline void
-bsGetUniformInt8Array(const BitString str, BitOffset offset, unsigned numBits,
+bsGetUniformInt8Array(constBitString str, BitOffset offset, unsigned numBits,
                       size_t numValues, int8_t val[]);
 /**
  * \brief Retrieve n integers of specified length from bitstring,
@@ -482,7 +483,7 @@ bsGetUniformInt8Array(const BitString str, BitOffset offset, unsigned numBits,
  * @param store integers read in this array
  */
 static inline void
-bsGetUniformInt16Array(const BitString str, BitOffset offset, unsigned numBits,
+bsGetUniformInt16Array(constBitString str, BitOffset offset, unsigned numBits,
                        size_t numValues, int16_t val[]);
 /**
  * \brief Retrieve n integers of specified length from bitstring,
@@ -494,7 +495,7 @@ bsGetUniformInt16Array(const BitString str, BitOffset offset, unsigned numBits,
  * @param store integers read in this array
  */
 static inline void
-bsGetUniformInt32Array(const BitString str, BitOffset offset, unsigned numBits,
+bsGetUniformInt32Array(constBitString str, BitOffset offset, unsigned numBits,
                        size_t numValues, int32_t val[]);
 /**
  * \brief Retrieve n integers of specified length from bitstring,
@@ -506,7 +507,7 @@ bsGetUniformInt32Array(const BitString str, BitOffset offset, unsigned numBits,
  * @param store integers read in this array
  */
 static inline void
-bsGetUniformInt64Array(const BitString str, BitOffset offset, unsigned numBits,
+bsGetUniformInt64Array(constBitString str, BitOffset offset, unsigned numBits,
                        size_t numValues, int64_t val[]);
 
 /**
@@ -528,8 +529,8 @@ bsGetUniformInt64Array(const BitString str, BitOffset offset, unsigned numBits,
  * @return 0 for equality, \f$-1\f$ if \f$a < b\f$, \f$1\f$ if \f$b > a\f$
  */
 extern int
-bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
-          const BitString b, BitOffset offsetB, BitOffset numBitsB);
+bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
+          constBitString b, BitOffset offsetB, BitOffset numBitsB);
 
 /**
  * \brief copy (sub-)bitstring to another position (in same or other
@@ -541,8 +542,8 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
  * @param numBits number of bits to copy
  */
 extern void
-bsCopy(const BitString src, BitOffset offsetSrc,
-       const BitString dest, BitOffset offsetDest, BitOffset numBits);
+bsCopy(constBitString src, BitOffset offsetSrc,
+       BitString dest, BitOffset offsetDest, BitOffset numBits);
 
 /**
  * \brief set (sub-)bitstring to all one or zero bits
@@ -585,13 +586,13 @@ bsToggleBit(BitString str, BitOffset pos);
  * @return 1 if selected bit is set, 0 if not set
  */
 static inline int
-bsGetBit(const BitString str, BitOffset pos);
+bsGetBit(constBitString str, BitOffset pos);
 /**
  * \brief Compute Hamming weight of (sub-)bitstring
  * @return number of bits set in (sub-)bitstring
  */
 extern BitOffset
-bs1BitsCount(const BitString str, BitOffset offset, BitOffset numBits);
+bs1BitsCount(constBitString str, BitOffset offset, BitOffset numBits);
 
 /**
  * \brief Meta-Unit test function for bitPackString, calls all functions

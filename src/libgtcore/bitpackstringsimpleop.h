@@ -3,7 +3,7 @@
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
-  copyright notice and this permission notice appear in all copies.
+   copyright notice and this permission notice appear in all copies.
 
   THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
   WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
@@ -51,7 +51,7 @@ bitElemsAllocSize(BitOffset numBits)
 }
 
 static inline int8_t
-bsGetInt8(BitString str, BitOffset offset, unsigned numBits)
+bsGetInt8(constBitString str, BitOffset offset, unsigned numBits)
 {
   /* requires sign extension */
   int8_t m = 1 << (numBits - 1);
@@ -59,7 +59,7 @@ bsGetInt8(BitString str, BitOffset offset, unsigned numBits)
 }
 
 static inline int16_t
-bsGetInt16(BitString str, BitOffset offset, unsigned numBits)
+bsGetInt16(constBitString str, BitOffset offset, unsigned numBits)
 {
   /* requires sign extension */
   int16_t m = 1 << (numBits - 1);
@@ -67,7 +67,7 @@ bsGetInt16(BitString str, BitOffset offset, unsigned numBits)
 }
 
 static inline int32_t
-bsGetInt32(BitString str, BitOffset offset, unsigned numBits)
+bsGetInt32(constBitString str, BitOffset offset, unsigned numBits)
 {
   /* requires sign extension */
   int32_t m = 1 << (numBits - 1);
@@ -75,7 +75,7 @@ bsGetInt32(BitString str, BitOffset offset, unsigned numBits)
 }
 
 static inline int64_t
-bsGetInt64(BitString str, BitOffset offset, unsigned numBits)
+bsGetInt64(constBitString str, BitOffset offset, unsigned numBits)
 {
   /* requires sign extension */
   int64_t m = (int64_t)1 << (numBits - 1);
@@ -83,13 +83,15 @@ bsGetInt64(BitString str, BitOffset offset, unsigned numBits)
 }
 
 static inline void
-bsStoreInt8(BitString str, BitOffset offset, unsigned numBits, uint8_t val)
+bsStoreInt8(BitString str, BitOffset offset, unsigned numBits,
+            uint8_t val)
 {
   bsStoreUInt8(str, offset, numBits,  val);
 }
 
 static inline void
-bsStoreInt16(BitString str, BitOffset offset, unsigned numBits, uint16_t val)
+bsStoreInt16(BitString str, BitOffset offset, unsigned numBits,
+             uint16_t val)
 {
   bsStoreUInt16(str, offset, numBits,  val);
 }
@@ -227,8 +229,8 @@ bsSignExpandArray64(int64_t val[], size_t numValues, unsigned numBits)
 }
 
 static inline void
-bsGetUniformInt8Array(const BitString str, BitOffset offset, unsigned numBits,
-                     size_t numValues, int8_t val[])
+bsGetUniformInt8Array(constBitString str, BitOffset offset, unsigned numBits,
+                      size_t numValues, int8_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
   int blockSize = 16 * getpagesize() / sizeof (val[0]);
@@ -251,8 +253,8 @@ bsGetUniformInt8Array(const BitString str, BitOffset offset, unsigned numBits,
 }
 
 static inline void
-bsGetUniformInt16Array(const BitString str, BitOffset offset, unsigned numBits,
-                     size_t numValues, int16_t val[])
+bsGetUniformInt16Array(constBitString str, BitOffset offset, unsigned numBits,
+                       size_t numValues, int16_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
   int blockSize = 16 * getpagesize() / sizeof (val[0]);
@@ -275,8 +277,8 @@ bsGetUniformInt16Array(const BitString str, BitOffset offset, unsigned numBits,
 }
 
 static inline void
-bsGetUniformInt32Array(const BitString str, BitOffset offset, unsigned numBits,
-                     size_t numValues, int32_t val[])
+bsGetUniformInt32Array(constBitString str, BitOffset offset, unsigned numBits,
+                       size_t numValues, int32_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
   int blockSize = 16 * getpagesize() / sizeof (val[0]);
@@ -299,8 +301,8 @@ bsGetUniformInt32Array(const BitString str, BitOffset offset, unsigned numBits,
 }
 
 static inline void
-bsGetUniformInt64Array(const BitString str, BitOffset offset, unsigned numBits,
-                     size_t numValues, int64_t val[])
+bsGetUniformInt64Array(constBitString str, BitOffset offset, unsigned numBits,
+                       size_t numValues, int64_t val[])
 {
   /* read blocksize many ints at once, for later sign expansion */
   int blockSize = 16 * getpagesize() / sizeof (val[0]);
@@ -350,7 +352,7 @@ bsToggleBit(BitString str, BitOffset pos)
 }
 
 static inline int
-bsGetBit(const BitString str, BitOffset pos)
+bsGetBit(constBitString str, BitOffset pos)
 {
   unsigned bitTop = pos%bitElemBits;
   const BitElem *p = str + pos/bitElemBits;

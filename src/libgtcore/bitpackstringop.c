@@ -104,8 +104,8 @@ computeDeBruijn()
 #endif
 
 extern int
-bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
-          const BitString b, BitOffset offsetB, BitOffset numBitsB)
+bsCompare(constBitString a, BitOffset offsetA, BitOffset numBitsA,
+          constBitString b, BitOffset offsetB, BitOffset numBitsB)
 {
   BitOffset totalBitsLeftA = numBitsA, totalBitsLeftB = numBitsB;
   size_t elemStartA = offsetA/bitElemBits, elemStartB = offsetB/bitElemBits;
@@ -227,15 +227,16 @@ bsCompare(const BitString a, BitOffset offsetA, BitOffset numBitsA,
 }
 
 void
-bsCopy(const BitString src, BitOffset offsetSrc,
-       const BitString dest, BitOffset offsetDest, BitOffset numBits)
+bsCopy(constBitString src, BitOffset offsetSrc,
+       BitString dest, BitOffset offsetDest, BitOffset numBits)
 {
   size_t elemStartSrc = offsetSrc/bitElemBits,
     elemStartDest = offsetDest/bitElemBits;
   unsigned bitTopSrc = offsetSrc%bitElemBits,
     bitTopDest = offsetDest%bitElemBits;
   BitOffset bitsLeft = numBits;
-  BitElem *p = src + elemStartSrc, *q = dest + elemStartDest;
+  const BitElem *p = src + elemStartSrc;
+  BitElem *q = dest + elemStartDest;
   assert(src && dest);
   /* special optimization if equally aligned data will be copied */
   if (bitTopSrc == bitTopDest)
@@ -442,7 +443,7 @@ bsClear(BitString str, BitOffset offset, BitOffset numBits, int bitVal)
 }
 
 extern BitOffset
-bs1BitsCount(const BitString str, BitOffset offset, BitOffset numBits)
+bs1BitsCount(constBitString str, BitOffset offset, BitOffset numBits)
 {
   uint32_t accum = 0;
   BitOffset weight = 0, bitsLeft = numBits;

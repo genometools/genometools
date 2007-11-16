@@ -26,7 +26,7 @@
 #include "libgtcore/bitpackstring.h"
 
 uint8_t
-bsGetUInt8(const BitString str, BitOffset offset, unsigned numBits)
+bsGetUInt8(constBitString str, BitOffset offset, unsigned numBits)
 {
   unsigned long accum = 0;
   unsigned bitsLeft = numBits, bitTop = offset%bitElemBits;
@@ -137,7 +137,7 @@ bsStoreUInt8(BitString str, BitOffset offset,
 /**************************************************************************/
 
 void
-bsGetUniformUInt8Array(const BitString str, BitOffset offset,
+bsGetUniformUInt8Array(constBitString str, BitOffset offset,
                            unsigned numBits, size_t numValues,
                            uint8_t val[])
 {
