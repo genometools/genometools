@@ -113,6 +113,7 @@ struct matchBound
 };
 
 typedef struct BWTSeq BWTSeq;
+typedef struct BWTSeqExactMatchesIterator BWTSeqExactMatchesIterator;
 
 /**
  * \brief Creates or loads an encoded indexed sequence object of the
@@ -271,7 +272,7 @@ BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
  * @param env genometools reference for core functions
  * @return reference of iterator object, NULL on error
  */
-extern struct BWTSeqExactMatchesIterator *
+extern BWTSeqExactMatchesIterator *
 newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
               Env *env);
 
@@ -281,7 +282,7 @@ newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
  * @param env genometools reference for core functions
  */
 extern void
-deleteEMIterator(struct BWTSeqExactMatchesIterator *iter, Env *env);
+deleteEMIterator(BWTSeqExactMatchesIterator *iter, Env *env);
 
 /**
  * location data corresponding to a match
@@ -307,7 +308,7 @@ struct MatchData
  * become invalid  once the iterator has been queried again
  */
 extern struct MatchData *
-EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
+EMIGetNextMatch(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
                 Env *env);
 
 /**
@@ -316,7 +317,7 @@ EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
  * @return total number of matches
  */
 extern Seqpos
-EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter);
+EMINumMatchesTotal(const BWTSeqExactMatchesIterator *iter);
 
 /**
  * \brief Query an iterator for the number of matches not yet
@@ -325,7 +326,7 @@ EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter);
  * @return number of matches left
  */
 extern Seqpos
-EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter);
+EMINumMatchesLeft(const BWTSeqExactMatchesIterator *iter);
 
 #include "libgtmatch/eis-bwtseqsimpleop.h"
 

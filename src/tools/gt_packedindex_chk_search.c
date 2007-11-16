@@ -53,12 +53,10 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
 {
   struct chkSearchOptions params;
   Suffixarray suffixarray;
+  Enumpatterniterator *epi = NULL;
   bool saIsLoaded = false;
   struct BWTSeq *bwtSeq = NULL;
   Str *inputProject = NULL;
-  Enumpatterniterator *epi = NULL;
-  MMsearchiterator *mmsi = NULL;
-  struct BWTSeqExactMatchesIterator *EMIter = NULL;
   int parsedArgs;
   bool had_err = false;
 
@@ -84,7 +82,6 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
     if (had_err)
       break;
     {
-      const Uchar *pptr;
       Seqpos totalLen, dbstart;
       unsigned long trial, patternLen;
       ensure(had_err,
@@ -129,18 +126,19 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
       }
       for (trial = 0; !had_err && trial < params.numOfSamples; ++trial)
       {
-        pptr = nextEnumpatterniterator(&patternLen, epi);
-        mmsi = newmmsearchiterator(suffixarray.encseq,
-                                   suffixarray.suftab,
-                                   0,  /* leftbound */
-                                   totalLen, /* rightbound */
-                                   0, /* offset */
-                                   suffixarray.readmode,
-                                   pptr,
-                                   patternLen,
-                                   env);
-
-        EMIter = newEMIterator(bwtSeq, pptr, patternLen, env);
+        const Uchar *pptr = nextEnumpatterniterator(&patternLen, epi);
+        MMsearchiterator *mmsi =
+          newmmsearchiterator(suffixarray.encseq,
+                              suffixarray.suftab,
+                              0,  /* leftbound */
+                              totalLen, /* rightbound */
+                              0, /* offset */
+                              suffixarray.readmode,
+                              pptr,
+                              patternLen,
+                              env);
+        BWTSeqExactMatchesIterator *EMIter =
+          newEMIterator(bwtSeq, pptr, patternLen, env);
         ensure(had_err, EMIter);
         if (had_err)
           break;
@@ -165,8 +163,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
             break;
           }
         }
-        if (had_err)
-          break;
+        if (!had_err)
         {
           struct MatchData *trailingMatch =
             EMIGetNextMatch(EMIter, bwtSeq, env);
@@ -177,6 +174,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
             break;
           }
         }
+        deleteEMIterator(EMIter,env);
+        freemmsearchiterator(&mmsi,env);
       }
       fprintf(stderr, "Finished %lu of %lu matchings successfully.\n",
               trial, params.numOfSamples);
@@ -184,8 +183,6 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
   } while (0);
   if (saIsLoaded) freesuffixarray(&suffixarray, env);
   if (epi) freeEnumpatterniterator(&epi,env);
-  if (mmsi) freemmsearchiterator(&mmsi,env);
-  if (EMIter) deleteEMIterator(EMIter,env);
   if (bwtSeq) deleteBWTSeq(bwtSeq, env);
   if (inputProject) str_delete(inputProject, env);
   return had_err?-1:0;
