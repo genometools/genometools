@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
+  Copyright (c) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -13,27 +13,15 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_BWTSEQPRIV_H
-#define EIS_BWTSEQPRIV_H
+#ifndef GT_PACKEDINDEX_BLOCKENC_PARAMS_H
+#define GT_PACKEDINDEX_BLOCKENC_PARAMS_H
 
-#include "libgtmatch/eis-bwtseq.h"
+#include "libgtcore/env.h"
+#include "libgtcore/option.h"
 #include "libgtmatch/eis-encidxseq.h"
 
-struct BWTSeq
-{
-  struct encIdxSeq *seqIdx;
-  size_t alphabetSize;
-  EISHint hint;
-  unsigned locateSampleInterval; /**< no sampling if 0 */
-  Seqpos *count;
-};
-
-struct locateHeader
-{
-  unsigned locateInterval;
-};
-
-extern int
-readLocateInfoHeader(EISeq *seqIdx, struct locateHeader *headerData);
+extern void
+registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput,
+                        Env *env);
 
 #endif

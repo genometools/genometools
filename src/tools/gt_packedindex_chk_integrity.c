@@ -68,8 +68,8 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
   }
   else
   {
-    fprintf(stderr, "Using index over sequence "FormatSeqpos" symbols long.\n",
-            EISLength(seq));
+    fprintf(stderr, "# Using index over sequence "FormatSeqpos
+            " symbols long.\n", EISLength(seq));
     {
       int corrupt;
       ensure(had_err,

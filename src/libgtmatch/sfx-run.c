@@ -42,8 +42,9 @@
 #include "sfx-apfxlen.pr"
 
 #include "eis-encidxseq.h"
-#include "eis-bwtseq.h"
+#include "eis-bwtseqconstruct.h"
 #include "eis-suffixerator-interface.h"
+#include "tools/gt_packedindex_bwtconstruct_params.h"
 
 typedef struct
 {
@@ -486,24 +487,20 @@ static int runsuffixerator(bool doesa,
         {
           sfxInterface *si;
           BWTSeq *bwtSeq;
-          struct bwtParam bwtParams;
+          computePackedIndexDefaults(&so->bwtIdxParams, env);
           showverbose(verboseinfo, "run construction of packed index for:\n"
                       "blocksize=%u\nblocks-per-bucket=%u\nlocfreq=%u",
-                      so->blockSize, so->bucketBlocks, so->locateInterval);
-          bwtParams.seqParams.blockEnc.blockSize = so->blockSize;
-          bwtParams.seqParams.blockEnc.bucketBlocks = so->bucketBlocks;
-          bwtParams.seqParams.blockEnc.EISFeatureSet = EIS_FEATURE_NONE;
-          bwtParams.baseType = BWT_ON_BLOCK_ENC;
-          bwtParams.locateInterval = so->locateInterval;
-          bwtParams.projectName = so->str_indexname;
+                      so->bwtIdxParams.final.seqParams.blockEnc.blockSize,
+                      so->bwtIdxParams.final.seqParams.blockEnc.bucketBlocks,
+                      so->bwtIdxParams.final.locateInterval);
           if (!(si = newSfxInterface(so, verboseinfo, env)))
           {
             fputs("Index creation failed.\n", stderr);
             haserr = true;
           }
           else if (
-            !(bwtSeq = newBWTSeqFromSfxI(&bwtParams, si, getSfxILength(si),
-                                         env)))
+            !(bwtSeq = createBWTSeqFromSfxI(&so->bwtIdxParams.final, si,
+                                            getSfxILength(si), env)))
           {
             fputs("Index creation failed.\n", stderr);
             deleteSfxInterface(si, env);

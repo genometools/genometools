@@ -24,10 +24,13 @@
 #include "libgtcore/str.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtmatch/eis-bwtseq.h"
+#include "libgtmatch/encseq-def.h"
 #include "libgtmatch/enum-patt-def.h"
 #include "libgtmatch/esa-mmsearch-def.h"
+#include "libgtmatch/sarr-def.h"
 #include "libgtmatch/esa-map.pr"
 #include "libgtmatch/sfx-apfxlen.pr"
+#include "gt_packedindex_bwtconstruct_params.h"
 
 /***************************************************************************
  * routines for matching tests
@@ -35,7 +38,7 @@
 
 struct chkSearchOptions
 {
-  union bwtSeqParam constructBWT;
+  struct bwtOptions idx;
   long minPatLen, maxPatLen;
   unsigned locateInterval;
   unsigned long numOfSamples;
@@ -43,7 +46,8 @@ struct chkSearchOptions
 
 static OPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
-                   struct chkSearchOptions *param, Env *env);
+                   struct chkSearchOptions *param, const Str *projectName,
+                   Env *env);
 
 extern int
 gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
@@ -59,9 +63,12 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
   int parsedArgs;
   bool had_err = false;
 
+  inputProject = str_new(env);
+
   do {
     env_error_check(env);
-    switch (parseChkBWTOptions(&parsedArgs, argc, argv, &params, env))
+    switch (parseChkBWTOptions(&parsedArgs, argc, argv, &params,
+                               inputProject, env))
     {
     case OPTIONPARSER_OK:
       break;
@@ -70,16 +77,16 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
     case OPTIONPARSER_REQUESTS_EXIT:
       return 0;
     }
-    inputProject = str_new_cstr(argv[parsedArgs], env);
+    str_set(inputProject, argv[parsedArgs], env);
     {
       struct bwtParam bwtParams;
-      memcpy(&bwtParams.seqParams, &params.constructBWT,
+      memcpy(&bwtParams.seqParams, &params.idx,
              sizeof (union bwtSeqParam));
       bwtParams.baseType = BWT_ON_BLOCK_ENC;
       bwtParams.bwtFeatureToggles = BWTLocateBitmap;
       bwtParams.locateInterval = params.locateInterval;
       bwtParams.projectName = inputProject;
-      bwtSeq = newBWTSeq(&bwtParams, env);
+      bwtSeq = availBWTSeq(&bwtParams, env);
     }
     ensure(had_err, bwtSeq);
     if (had_err)
@@ -188,7 +195,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
 
 static OPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
-                   struct chkSearchOptions *param, Env *env)
+                   struct chkSearchOptions *param, const Str *projectName,
+                   Env *env)
 {
   OptionParser *op;
   OPrval oprval;
@@ -197,24 +205,11 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
   env_error_check(env);
   op = option_parser_new("indexname",
                          "Load (or build if necessary) BWT index for project"
-                         " <indexname>.",
-                         env);
+                         " <indexname> and perform verification of search"
+                         " results.", env);
 
-  option = option_new_uint_min("bsize",
-                               "specify size of blocks",
-                               &param->constructBWT.blockEnc.blockSize,
-                               8U, 1U, env);
-  option_parser_add_option(op, option, env);
-  option = option_new_uint_min(
-    "blbuck", "specify number of blocks per bucket",
-    &param->constructBWT.blockEnc.bucketBlocks, 8U, 1U, env);
-  option_parser_add_option(op, option, env);
-
-  option = option_new_uint(
-    "locfreq", "specify the locate frequency\n"
-    "parameter i means that each i-th position of input string is stored\n"
-    "0 => no locate information", &param->locateInterval, 16U, env);
-  option_parser_add_option(op, option, env);
+  registerPackedIndexOptions(op, &param->idx, BWTDEFOPT_CONSTRUCTION,
+                             projectName, env);
 
   option = option_new_long("minpatlen",
                            "minimum length of patterns searched for, -1 "
@@ -236,5 +231,10 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc,
                                             argv, versionfunc, 1, 1, env);
   option_parser_delete(op, env);
+
+  /* compute parameters currently not set from command-line or
+   * determined indirectly */
+  computePackedIndexDefaults(&param->idx, env);
+
   return oprval;
 }

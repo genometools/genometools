@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
+  Copyright (c) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -13,27 +13,24 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef EIS_BWTSEQPRIV_H
-#define EIS_BWTSEQPRIV_H
-
-#include "libgtmatch/eis-bwtseq.h"
+#include "libgtcore/env.h"
+#include "libgtcore/option.h"
 #include "libgtmatch/eis-encidxseq.h"
 
-struct BWTSeq
+#include "gt_packedindex_blockenc_params.h"
+
+extern void
+registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput,
+                        Env *env)
 {
-  struct encIdxSeq *seqIdx;
-  size_t alphabetSize;
-  EISHint hint;
-  unsigned locateSampleInterval; /**< no sampling if 0 */
-  Seqpos *count;
-};
+  Option *option;
 
-struct locateHeader
-{
-  unsigned locateInterval;
-};
+  env_error_check(env);
 
-extern int
-readLocateInfoHeader(EISeq *seqIdx, struct locateHeader *headerData);
-
-#endif
+  option = option_new_uint_min("bsize", "specify size of blocks",
+                               &paramOutput->blockSize, 8U, 1U, env);
+  option_parser_add_option(op, option, env);
+  option = option_new_uint_min("blbuck", "specify number of blocks per bucket",
+                               &paramOutput->bucketBlocks, 8U, 1U, env);
+  option_parser_add_option(op, option, env);
+}
