@@ -58,10 +58,12 @@
           }                                                                  \
         } while (0)
 
-int       safe_abs(int);
-long      safe_labs(long);
-long long safe_llabs(long long);
-int       safearith_example(Env*);
-int       safearith_unit_test(Env*);
+int           safe_abs(int);
+long          safe_labs(long);
+long long     safe_llabs(long long);
+long          safe_cast2long(unsigned long);
+unsigned long safe_cast2ulong(long);
+int           safearith_example(Env*);
+int           safearith_unit_test(Env*);
 
 #endif

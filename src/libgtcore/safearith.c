@@ -40,6 +40,18 @@ long long safe_llabs(long long j)
   return rval;
 }
 
+long safe_cast2long(unsigned long value)
+{
+  assert(value <= (~0UL >> 1));
+  return value;
+}
+
+unsigned long safe_cast2ulong(long value)
+{
+  assert(value >= 0);
+  return value;
+}
+
 int safearith_example(Env *env)
 {
   unsigned long ulong;
