@@ -40,7 +40,6 @@ struct chkSearchOptions
 {
   struct bwtOptions idx;
   long minPatLen, maxPatLen;
-  unsigned locateInterval;
   unsigned long numOfSamples;
 };
 
@@ -79,14 +78,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
     }
     str_set(inputProject, argv[parsedArgs], env);
     {
-      struct bwtParam bwtParams;
-      memcpy(&bwtParams.seqParams, &params.idx,
-             sizeof (union bwtSeqParam));
-      bwtParams.baseType = BWT_ON_BLOCK_ENC;
-      bwtParams.bwtFeatureToggles = BWTLocateBitmap;
-      bwtParams.locateInterval = params.locateInterval;
-      bwtParams.projectName = inputProject;
-      bwtSeq = availBWTSeq(&bwtParams, env);
+      bwtSeq = availBWTSeq(&params.idx.final, env);
     }
     ensure(had_err, bwtSeq);
     if (had_err)
@@ -98,7 +90,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
       ensure(had_err,
              mapsuffixarray(&suffixarray, &totalLen,
                             SARR_SUFTAB | SARR_ESQTAB,
-                            inputProject, NULL, env));
+                            inputProject, NULL, env) == 0);
       if (had_err)
       {
         env_error_set(env, "Can't load suffix array project with"
@@ -211,7 +203,7 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                          " <indexname> and perform verification of search"
                          " results.", env);
 
-  registerPackedIndexOptions(op, &param->idx, BWTDEFOPT_CONSTRUCTION,
+  registerPackedIndexOptions(op, &param->idx, BWTDEFOPT_MULTI_QUERY,
                              projectName, env);
 
   option = option_new_long("minpatlen",

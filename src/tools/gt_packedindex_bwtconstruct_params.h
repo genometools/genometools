@@ -23,7 +23,10 @@ enum BWTOptionDefaultsOptimizationFlags
 {
   BWTDEFOPT_LOW_RAM_OVERHEAD = 1 << 0,
   BWTDEFOPT_FAST_RANK        = 1 << 1,
+  /** optimize memory usage for construction process (i.e. don't
+   * build lookup-tables only needed to speed-up queries) */
   BWTDEFOPT_CONSTRUCTION     = BWTDEFOPT_LOW_RAM_OVERHEAD,
+  /** optimize for multiple queries */
   BWTDEFOPT_MULTI_QUERY      = BWTDEFOPT_FAST_RANK,
 };
 
