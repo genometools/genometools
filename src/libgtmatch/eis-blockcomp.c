@@ -2270,7 +2270,6 @@ finalizeIdxOutput(struct blockCompositionSeq *seqIdx,
     return 0;
   if (!(SRLSaveToStream(seqIdx->rangeEncs, seqIdx->externalData.idxFP)))
      return 0;
-  fflush(seqIdx->externalData.idxFP);
   return 1;
 }
 
