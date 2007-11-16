@@ -94,7 +94,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
       if (had_err)
       {
         env_error_set(env, "Can't load suffix array project with"
-                      " demand for BWT and suffix table files\n");
+                      " demand for encoded sequence and suffix table files\n");
         break;
       }
       saIsLoaded = true;
@@ -114,7 +114,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
       }
       fprintf(stderr, "Using patterns of lengths %lu to %lu\n",
               params.minPatLen, params.maxPatLen);
-      ensure(had_err, totalLen = BWTSeqLength(bwtSeq));
+      ensure(had_err, totalLen + 1 == BWTSeqLength(bwtSeq));
 
       ensure(had_err,
              (epi = newenumpatterniterator(params.minPatLen, params.maxPatLen,
@@ -165,6 +165,8 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
             break;
           }
         }
+        if (had_err)
+          break;
         {
           struct MatchData *trailingMatch =
             EMIGetNextMatch(EMIter, bwtSeq, env);
@@ -176,10 +178,11 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
           }
         }
       }
-      fprintf(stderr, "Finished %lu matchings successfully.\n",
-              params.numOfSamples);
+      fprintf(stderr, "Finished %lu of %lu matchings successfully.\n",
+              trial, params.numOfSamples);
     }
   } while (0);
+  if (saIsLoaded) freesuffixarray(&suffixarray, env);
   if (epi) freeEnumpatterniterator(&epi,env);
   if (mmsi) freemmsearchiterator(&mmsi,env);
   if (EMIter) deleteEMIterator(EMIter,env);
