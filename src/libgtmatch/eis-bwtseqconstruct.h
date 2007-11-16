@@ -16,6 +16,14 @@
 #ifndef EIS_BWTSEQCONSTRUCT_H
 #define EIS_BWTSEQCONSTRUCT_H
 
+/**
+ * \file eis-bwtseqconstruct.h
+ * Interface definitions for construction of an indexed representation of the
+ * BWT of a sequence as presented by Manzini and Ferragina (Compressed
+ * Representations of Sequences and Full-Text Indexes, 2006)
+ * \author Thomas Jahns <Thomas.Jahns@gmx.net>
+ */
+
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/eis-suffixerator-interface.h"
 

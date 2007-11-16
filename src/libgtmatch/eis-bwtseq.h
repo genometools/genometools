@@ -17,7 +17,7 @@
 #define EIS_BWTSEQ_H
 
 /**
- * \file bwtseq.h
+ * \file eis-bwtseq.h
  * Interface definitions for querying an indexed representation of the
  * BWT of a sequence as presented by Manzini and Ferragina (Compressed
  * Representations of Sequences and Full-Text Indexes, 2006)
