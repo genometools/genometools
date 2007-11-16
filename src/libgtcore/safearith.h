@@ -18,6 +18,7 @@
 #ifndef SAFEARITH_H
 #define SAFEARITH_H
 
+#include <inttypes.h>
 #include "libgtcore/env.h"
 #include "libgtcore/safearith_imp.h"
 
