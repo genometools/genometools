@@ -29,7 +29,7 @@
 */
 
 /* assign <src> to <dest> or exit upon overflow */
-#define safeassign(dest, src)                                               \
+#define safe_assign(dest, src)                                               \
         do {                                                                \
           if (assign(dest, src)) {                                          \
             fprintf(stderr, "%s, l.%d: overflow in assignment\n", __FILE__, \
@@ -39,7 +39,7 @@
         } while (0)
 
 /* add <a> to <b> and assign the result to <c> or exit upon overflow */
-#define safeadd(c, a, b)                                                  \
+#define safe_add(c, a, b)                                                  \
         do {                                                              \
           if (add_of(c, a, b)) {                                          \
             fprintf(stderr, "%s, l.%d: overflow in addition\n", __FILE__, \
@@ -49,7 +49,7 @@
         } while (0)
 
 /* subtract <b> from <a> and assign the result to <c> or exit upon overflow */
-#define safesub(c, a, b)                                                     \
+#define safe_sub(c, a, b)                                                     \
         do {                                                                 \
           if (sub_of(c, a, b)) {                                             \
             fprintf(stderr, "%s, l.%d: overflow in subtraction\n", __FILE__, \
@@ -58,18 +58,10 @@
           }                                                                  \
         } while (0)
 
-/* take the absolute of <src> and assign the result to <dest> or exit upon
-   overflow */
-#define safeabs(dest, src)                                                \
-        do {                                                              \
-          if (abs_of(dest, src)) {                                        \
-            fprintf(stderr, "%s, l.%d: overflow while taking absolute\n", \
-                    __FILE__, __LINE__);                                  \
-            exit(EXIT_FAILURE);                                           \
-          }                                                               \
-        } while (0)
-
-int safearith_example(Env*);
-int safearith_unit_test(Env*);
+int       safe_abs(int);
+long      safe_labs(long);
+long long safe_llabs(long long);
+int       safearith_example(Env*);
+int       safearith_unit_test(Env*);
 
 #endif

@@ -64,13 +64,4 @@
           : ((__MIN(typeof(c)) + (__b) <= (__a)) ? assign(c, __a - __b) : 1); \
         })
 
-/* safely take the absolute of <src> and assign the result to <dest>,
-   returns 0 on success, 1 otherwise */
-#define abs_of(dest, src)                               \
-        ({                                              \
-          typeof(src) __x = (src);                      \
-          typeof(src) __y =  __x < 0 ? -__x : __x;      \
-          (__x < 0 && __y < 0 ? 1 : assign(dest, __y)); \
-        })
-
 #endif

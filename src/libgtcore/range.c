@@ -120,8 +120,8 @@ Range range_offset(Range range, long offset)
 {
   Range transformed_range = { 0, 0 };
   assert(range.start <= range.end);
-  safeadd(transformed_range.start, range.start, offset);
-  safeadd(transformed_range.end, range.end, offset);
+  safe_add(transformed_range.start, range.start, offset);
+  safe_add(transformed_range.end, range.end, offset);
   assert(transformed_range.start <= transformed_range.end);
   return transformed_range;
 }

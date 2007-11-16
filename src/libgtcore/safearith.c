@@ -19,6 +19,27 @@
 #include "libgtcore/ensure.h"
 #include "libgtcore/safearith.h"
 
+int safe_abs(int j)
+{
+  int rval = j < 0 ? -j : j;
+  assert(rval >= 0); /* prevent overflow */
+  return rval;
+}
+
+long safe_labs(long j)
+{
+  long rval = j < 0 ? -j : j;
+  assert(rval >= 0); /* prevent overflow */
+  return rval;
+}
+
+long long safe_llabs(long long j)
+{
+  long long rval = j < 0 ? -j : j;
+  assert(rval >= 0); /* prevent overflow */
+  return rval;
+}
+
 int safearith_example(Env *env)
 {
   unsigned long ulong;
@@ -30,24 +51,24 @@ int safearith_example(Env *env)
 
   /* safe assignments */
   slong = 256;
-  safeassign(ulong, slong);
+  safe_assign(ulong, slong);
   assert(ulong = 256);
 
   /* safe additions */
   a = 256;
   b = 1;
-  safeadd(c, a, b);
+  safe_add(c, a, b);
   assert(c == 257);
 
   /* safe subtractions */
   a = 256;
   b = 1;
-  safesub(c, a, b);
+  safe_sub(c, a, b);
   assert(c == 255);
 
   /* safe absolutes */
   src = -256;
-  safeabs(dest, src);
+  dest = safe_abs(src);
   assert(dest == 256);
 
   return 0;
@@ -153,42 +174,39 @@ int safearith_unit_test(Env *env)
   }
 
   {
-    int x;
-    x = INT_MAX;
-    ensure(had_err, !abs_of(x, 0) && x == 0);
-    x = INT_MAX;
-    ensure(had_err, !abs_of(x, -1) && x == 1);
-    x = 0;
-    ensure(had_err, !abs_of(x, INT_MIN + 1) && x == INT_MAX);
-    x = 0;
-    ensure(had_err, abs_of(x, INT_MIN));
+    int i;
+    long l;
+    long long ll;
 
-    x = INT_MAX;
-    safeabs(x, 0);
-    ensure(had_err, x == 0);
+    i = safe_abs(0);
+    ensure(had_err, i == 0);
 
-    x = INT_MAX;
-    safeabs(x, -1);
-    ensure(had_err, x == 1);
+    i = safe_abs(-1);
+    ensure(had_err, i == 1);
 
-    x = 0;
-    safeabs(x, INT_MIN + 1);
-    ensure(had_err, x == INT_MAX);
-  }
+    i = safe_abs(INT_MIN + 1);
+    ensure(had_err, i == INT_MAX);
+
+    l = safe_labs(0);
+    ensure(had_err, l == 0);
+
+    l = safe_labs(-1);
+    ensure(had_err, l == 1);
+
+    l = safe_labs(LONG_MIN + 1);
+    ensure(had_err, l == LONG_MAX);
+
+    ll = safe_llabs(0);
+    ensure(had_err, ll == 0);
+
+    ll = safe_llabs(-1);
+    ensure(had_err, ll == 1);
 
 #ifdef LLONG_MIN
-  {
-    long long x;
-    x = LLONG_MAX;
-    ensure(had_err, !abs_of(x, 0) && x == 0);
-    x = LLONG_MAX;
-    ensure(had_err, !abs_of(x, -1) && x == 1);
-    x = 0;
-    ensure(had_err, !abs_of(x, LLONG_MIN + 1) && x == LLONG_MAX);
-    x = 0;
-    ensure(had_err, abs_of(x, LLONG_MIN));
-  }
+    ll = safe_llabs(LLONG_MIN + 1);
+    ensure(had_err, ll == LLONG_MAX);
 #endif
+  }
 
   return had_err;
 }
