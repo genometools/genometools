@@ -25,6 +25,7 @@
  */
 
 #include "libgtmatch/sarr-def.h"
+#include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-suffixerator-interface.h"
 
 /**

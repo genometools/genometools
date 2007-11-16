@@ -20,40 +20,13 @@
 #include <stdlib.h>
 
 #include "libgtcore/env.h"
+#include "libgtcore/bitpackstring.h"
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/eis-mrangealphabet.h"
-
-typedef uint16_t regionLength;
-
-struct seqRange
-{
-  Seqpos startPos;
-  regionLength len;
-  Symbol sym;
-  char fill[sizeof (Seqpos) - sizeof (uint16_t) - sizeof (Symbol)];
-};
-
-static inline int
-posIsInSeqRange(struct seqRange *p, Seqpos pos)
-{
-  return (pos >= p->startPos && pos < p->startPos + p->len);
-}
-
-enum {
-  MAX_SEQRANGE_LEN = UINT16_MAX,
-};
 
 enum SRLFeatures {
   SRL_NO_FEATURES = 0,
   SRL_PARTIAL_SYMBOL_SUMS = 1 << 0,
-};
-
-struct seqRangeList
-{
-  size_t numRangesStorable, numRanges;
-  struct seqRange *ranges;
-  Seqpos *partialSymSums;
-  const MRAEnc *alphabet;
 };
 
 typedef size_t seqRangeListSearchHint;
@@ -112,5 +85,7 @@ SRLSaveToStream(struct seqRangeList *rangeList, FILE *fp);
 extern struct seqRangeList *
 SRLReadFromStream(FILE *fp, const MRAEnc *alphabet,
                   enum SRLFeatures features, Env *env);
+
+#include "libgtmatch/eis-seqrangespriv.h"
 
 #endif

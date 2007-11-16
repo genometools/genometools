@@ -41,6 +41,7 @@
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/esa-map.pr"
 
+#include "libgtmatch/eis-bitpackseqpos.h"
 #include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-encidxseqconstruct.h"
 #include "libgtmatch/eis-encidxseqpriv.h"
@@ -203,18 +204,6 @@ newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
     MRAEncDelete(state.alphabet, env);
   return newSeqIdx;
 }
-
-#ifdef Seqposequalsunsignedint
-#define bsGetSeqpos bsGetUInt32
-#define bsStoreSeqpos bsStoreUInt32
-#define bsStoreUniformSeqposArray bsStoreUniformUInt32Array
-#define requiredSeqposBits requiredUInt32Bits
-#else
-#define bsGetSeqpos bsGetUInt64
-#define bsStoreSeqpos bsStoreUInt64
-#define bsStoreUniformSeqposArray bsStoreUniformUInt64Array
-#define requiredSeqposBits requiredUInt64Bits
-#endif
 
 struct onDiskBlockCompIdx
 {
