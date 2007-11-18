@@ -116,7 +116,6 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
       printf("# seq-nr = sequence number\n");
 
       /* print output sorted by contignumber*/
-      assert(markpos != NULL);
       for (h = 0; h < numofdbsequences; h++)
       {
 	for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
@@ -131,6 +130,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 	    }
 	    else
 	    {
+              assert(markpos != NULL);
 	      offset = markpos[contignumber-1]+(Seqpos)1;
 	    }
             /* increase positions by 1 */
@@ -246,7 +246,6 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
       printf("# seq-nr = sequence number\n");
 
       /* print output sorted by contignumber*/
-      assert(markpos != NULL);
       for (h = 0; h < numofdbsequences; h++)
       {
 	for (i = 0; i < lo->arrayLTRboundaries.nextfreeLTRboundaries; i++)
@@ -261,6 +260,7 @@ int showinfoiffoundfullLTRs(LTRharvestoptions *lo,
 	    }
 	    else
 	    {
+              assert(markpos != NULL);
 	      offset = markpos[contignumber-1]+(Seqpos)1;
 	    }
 
