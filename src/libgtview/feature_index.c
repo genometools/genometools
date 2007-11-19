@@ -206,7 +206,7 @@ bool feature_index_has_seqid(const FeatureIndex *fi, const char *seqid,
 
 int feature_index_unit_test(Env* env)
 {
-  /* First we have to create some objects that we can use for testing. */
+  /* first we have to create some objects that we can use for testing */
   GenomeNode *gn1, *gn2, *ex1, *ex2, *ex3, *cds1;
   FeatureIndex *fi;
   Range r1, r2, r3, r4, r5, check_range, rs;
@@ -215,7 +215,7 @@ int feature_index_unit_test(Env* env)
   SequenceRegion *sr1, *sr2;
   int had_err = 0;
 
-  /* Generating some ranges */
+  /* generating some ranges */
   r1.start=100UL; r1.end=1000UL;
   r2.start=100UL; r2.end=300UL;
   r3.start=500UL; r3.end=1000UL;
@@ -223,14 +223,14 @@ int feature_index_unit_test(Env* env)
   r5.start=600UL; r5.end=1000UL;
   rs.start=100UL; rs.end=1200UL;
 
-  /* Generating sequnce ids as c-strings */
+  /* generating sequnce ids as C-strings */
   seqid1 = str_new_cstr("test1", env);
   seqid2 = str_new_cstr("test2", env);
 
   sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, NULL, 0, env);
   sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, NULL, 0, env);
 
-  /* Generating a new genome_feature with the property gft_gene and the range r1
+  /* generate a new genome_feature with the property gft_gene and the range r1
      ... */
   gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN, NULL,
                            UNDEF_ULONG, env);
@@ -263,14 +263,14 @@ int feature_index_unit_test(Env* env)
   genome_node_is_part_of_genome_node(gn2, ex3, env);
   genome_node_is_part_of_genome_node(gn2, cds1, env);
 
-  /* Create a new feature index on which we can perfom some tests */
+  /* create a new feature index on which we can perfom some tests */
   fi = feature_index_new(env);
 
   ensure(had_err, fi);
   ensure(had_err, !feature_index_has_seqid(fi, "test1", env));
   ensure(had_err, !feature_index_has_seqid(fi, "test2", env));
 
-  /* Add a sequence region to the feature index and test if it has really been
+  /* add a sequence region to the feature index and test if it has really been
      added */
   feature_index_add_sequence_region(fi, sr1, env);
   ensure(had_err, feature_index_has_seqid(fi, "test1", env));
@@ -278,7 +278,7 @@ int feature_index_unit_test(Env* env)
   feature_index_add_sequence_region(fi, sr2, env);
   ensure(had_err, feature_index_has_seqid(fi, "test2", env));
 
-  /* Tests if we get a empty data structure for every added sequence region*/
+  /* tests if we get a empty data structure for every added sequence region*/
   ensure(had_err, feature_index_get_features_for_seqid(fi, "test1"));
   ensure(had_err, feature_index_get_features_for_seqid(fi, "test2"));
   ensure(had_err,
@@ -286,7 +286,7 @@ int feature_index_unit_test(Env* env)
   ensure(had_err,
          array_size(feature_index_get_features_for_seqid(fi, "test2")) == 0);
 
-  /* Add features to every sequence region and test if the according
+  /* add features to every sequence region and test if the according
      datastructures are not empty anymore. As we have added one genome_feature
      to every sequence region the size has to be one. */
   feature_index_add_genome_feature(fi, (GenomeFeature*) gn1, env);
