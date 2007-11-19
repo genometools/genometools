@@ -22,6 +22,7 @@
 
 #include "libgtcore/array.h"
 #include "libgtcore/str.h"
+#include "libgtcore/strarray.h"
 #include "libgtext/sequence_region.h"
 #include "libgtext/genome_feature.h"
 
@@ -46,6 +47,9 @@ int           feature_index_get_features_for_range(FeatureIndex*,
                                                    Env*);
 /* returns the first sequence region identifier added to the index */
 const char*   feature_index_get_first_seqid(const FeatureIndex*);
+/* returns a StrArray of all sequence region identifiers contained in the index
+   (in alphabetical order) */
+StrArray*     feature_index_get_seqids(const FeatureIndex*, Env*);
 Range         feature_index_get_range_for_seqid(FeatureIndex*, const char*);
 bool          feature_index_has_seqid(const FeatureIndex*, const char*, Env*);
 int           feature_index_unit_test(Env*);

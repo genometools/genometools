@@ -159,6 +159,27 @@ const char* feature_index_get_first_seqid(const FeatureIndex *fi)
   return fi->firstseqid;
 }
 
+int store_seqid(void *key, void *value, void *data, Env *env)
+{
+  StrArray *seqids = (StrArray*) data;
+  const char *seqid = (const char*) key;
+  assert(seqids && seqid);
+  strarray_add_cstr(seqids, seqid, env);
+  return 0;
+}
+
+StrArray* feature_index_get_seqids(const FeatureIndex *fi, Env *env)
+{
+  StrArray* seqids;
+  int rval;
+  env_error_check(env);
+  assert(fi);
+  seqids = strarray_new(env);
+  rval = hashtable_foreach_ao(fi->regions, store_seqid, seqids, env);
+  assert(!rval); /* store_seqid() is sane */
+  return seqids;
+}
+
 Range feature_index_get_range_for_seqid(FeatureIndex *fi, const char *seqid)
 {
   Range ret;
@@ -190,8 +211,9 @@ int feature_index_unit_test(Env* env)
   FeatureIndex *fi;
   Range r1, r2, r3, r4, r5, check_range, rs;
   Str *seqid1, *seqid2;
+  StrArray *seqids = NULL;
   SequenceRegion *sr1, *sr2;
-  int had_err=0;
+  int had_err = 0;
 
   /* Generating some ranges */
   r1.start=100UL; r1.end=1000UL;
@@ -280,6 +302,13 @@ int feature_index_unit_test(Env* env)
   ensure(had_err, feature_index_get_first_seqid(fi));
   ensure(had_err, strcmp("test1", feature_index_get_first_seqid(fi)) == 0);
 
+  if (!had_err) {
+    seqids = feature_index_get_seqids(fi, env);
+    ensure(had_err, strarray_size(seqids) == 2);
+    ensure(had_err, !strcmp(strarray_get(seqids, 0), "test1"));
+    ensure(had_err, !strcmp(strarray_get(seqids, 1), "test2"));
+  }
+
   check_range = feature_index_get_range_for_seqid(fi, "test1");
   ensure(had_err, check_range.start == 100UL && check_range.end == 1000UL);
 
@@ -287,6 +316,7 @@ int feature_index_unit_test(Env* env)
   ensure(had_err, feature_index_get_features_for_seqid(fi, "noexist") == NULL);
 
   /* delete all generated objects */
+  strarray_delete(seqids, env);
   feature_index_delete(fi, env);
   genome_node_rec_delete(gn1, env);
   genome_node_rec_delete(gn2, env);
