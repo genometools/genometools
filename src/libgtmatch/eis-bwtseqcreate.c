@@ -13,12 +13,14 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#include "libgtmatch/eis-bitpackseqpos.h"
+
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseqcreate.h"
 #include "libgtmatch/eis-bwtseqpriv.h"
-/*************************************************************
- * generic method for bwt index creation
- *************************************************************/
+/**
+ * \file eis-bwtseqcreate.c generic methods for bwt index creation
+ */
 
 enum {
   LOCATE_INFO_IN_INDEX_HEADERID = 1111,
@@ -88,10 +90,10 @@ initAddLocateInfoState(struct addLocateInfoState *state,
   state->readSeqpos = readFunc;
   lastPos = srcLen - 1;
   state->locateInterval = locateInterval;
-  state->bitsPerSeqpos = requiredUInt64Bits(lastPos);
+  state->bitsPerSeqpos = requiredSeqposBits(lastPos);
   if (locateInterval)
   {
-    state->bitsPerOrigPos = requiredUInt64Bits(lastPos/locateInterval);
+    state->bitsPerOrigPos = requiredSeqposBits(lastPos/locateInterval);
     state->revMapCacheSize = aggregationExpVal/locateInterval + 1;
     state->revMapCache = env_ma_malloc(env, sizeof (state->revMapCache[0])
                                        * state->revMapCacheSize);
@@ -128,7 +130,7 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
                                         len * sizeof (state->revMapCache[0]));
     state->revMapCacheSize = len;
   }
-  bitsPerBWTPos = requiredUInt64Bits(len - 1);
+  bitsPerBWTPos = requiredSeqposBits(len - 1);
   bitsPerOrigPos = state->bitsPerOrigPos;
   /* 1. read rangeLen suffix array indices from suftab */
   {
@@ -157,10 +159,10 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
     /* 2. copy revMapCache into output */
     for (i = 0; i < revMapCacheLen; ++i)
     {
-      bsStoreUInt64(varDest, varOffset + bitsWritten, bitsPerBWTPos,
+      bsStoreSeqpos(varDest, varOffset + bitsWritten, bitsPerBWTPos,
                     state->revMapCache[i].bwtPos);
       bitsWritten += bitsPerBWTPos;
-      bsStoreUInt64(varDest, varOffset + bitsWritten, bitsPerOrigPos,
+      bsStoreSeqpos(varDest, varOffset + bitsWritten, bitsPerOrigPos,
                     state->revMapCache[i].origPos);
       bitsWritten += bitsPerOrigPos;
     }
