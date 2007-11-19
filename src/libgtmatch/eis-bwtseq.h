@@ -260,6 +260,9 @@ static inline struct matchBound *
 BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
                 Symbol nextSym, Env *env);
 
+extern int
+verifyBWTSeqIntegrity(BWTSeq *bwtSeq, const Str *projectName, Env *env);
+
 /**
  * \brief Given a query string produce iterator for all matches in
  * original sequence (of which the sequence object is a BWT).

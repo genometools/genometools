@@ -14,7 +14,6 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 #include "libgtmatch/eis-bitpackseqpos.h"
-
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseqcreate.h"
 #include "libgtmatch/eis-bwtseqpriv.h"

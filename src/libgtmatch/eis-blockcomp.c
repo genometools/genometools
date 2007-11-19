@@ -136,9 +136,7 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
             str_get(projectName));
     return NULL;
   }
-  /* 1. get bwttab file pointer */
   state.fp = sa->bwttabstream.fp;
-  /* convert alphabet */
   state.alphabet = MRAEncGTAlphaNew(sa->alpha, env);
   MRAEncAddSymbolToRange(state.alphabet, SEPARATOR, 1);
   newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName, state.alphabet,
@@ -1628,14 +1626,12 @@ updateIdxOutput(struct blockCompositionSeq *seqIdx,
 {
   size_t recordsExpected, cwBitElems;
   unsigned blockAlphabetSize;
-/*   BitOffset sBucketBits; */
   assert(seqIdx && aState && buck);
   /* seek2/write constant width indices */
   assert(seqIdx->externalData.cwDataPos + aState->cwDiskOffset
          < seqIdx->externalData.varDataPos
          + aState->varDiskOffset/bitElemBits * sizeof (BitElem));
   blockAlphabetSize = seqIdx->blockEncNumSyms;
-/*   sBucketBits = seqIdx->bitsPerSeqpos * blockAlphabetSize; */
   /* put bucket data for count up to the beginning of the current
    * block into the cw BitString */
   assert(sizeof (Seqpos) * CHAR_BIT >= seqIdx->bitsPerSeqpos);

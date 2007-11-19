@@ -77,6 +77,9 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
     ensure(had_err, bwtSeq);
     if (had_err)
       break;
+    ensure(had_err, verifyBWTSeqIntegrity(bwtSeq, inputProject, env) == 0);
+    if (had_err)
+      break;
     {
       Seqpos totalLen, dbstart;
       unsigned long trial, patternLen;

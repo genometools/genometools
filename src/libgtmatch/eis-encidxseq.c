@@ -72,7 +72,7 @@ const char *EISintegrityCheckResultStrings[] =
  * @return -1 on error, 0 on identity, >0 on inconsistency
  */
 extern enum integrityCheckResults
-verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
+verifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
                 unsigned long tickPrint, FILE *fp, Env *env)
 {
   Seqpos rankTable[UCHAR_MAX+1];

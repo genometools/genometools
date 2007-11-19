@@ -338,7 +338,7 @@ enum integrityCheckResults
 extern const char *EISintegrityCheckResultStrings[];
 
 extern enum integrityCheckResults
-verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
+verifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
                 unsigned long tickPrint, FILE *fp, Env *env);
 
 static inline FILE *

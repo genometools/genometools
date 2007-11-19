@@ -23,6 +23,7 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/esa-map.pr"
 
+#include "libgtmatch/eis-bitpackseqpos.h"
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseqconstruct.h"
 #include "libgtmatch/eis-bwtseqpriv.h"
@@ -375,6 +376,7 @@ newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
 void
 deleteEMIterator(struct BWTSeqExactMatchesIterator *iter, Env *env)
 {
+  destructExtBitsRetrieval(&iter->extBits, env);
   env_ma_free(iter, env);
 }
 
@@ -411,8 +413,8 @@ EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
                          EBRF_RETRIEVE_CWBITS | EBRF_RETRIEVE_VARBITS,
                          &iter->extBits, bwtSeq->hint, env);
     {
-      unsigned bitsPerBWTPos = requiredUInt64Bits(iter->extBits.len - 1),
-        bitsPerOrigPos = requiredUInt64Bits(
+      unsigned bitsPerBWTPos = requiredSeqposBits(iter->extBits.len - 1),
+        bitsPerOrigPos = requiredSeqposBits(
           (EISLength(bwtSeq->seqIdx) - 1)/bwtSeq->locateSampleInterval);
       BitOffset locateRecordIndex =
         bs1BitsCount(iter->extBits.cwPart, iter->extBits.cwOffset,
@@ -420,10 +422,10 @@ EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
         locateRecordOffset = (bitsPerBWTPos + bitsPerOrigPos)
         * locateRecordIndex;
       iter->nextMatch.sfxArrayValue =
-        bsGetUInt64(iter->extBits.varPart, iter->extBits.varOffset
+        bsGetSeqpos(iter->extBits.varPart, iter->extBits.varOffset
                     + locateRecordOffset + bitsPerBWTPos, bitsPerOrigPos)
         * bwtSeq->locateSampleInterval + locateOffset;
-      assert(bsGetUInt64(iter->extBits.varPart,
+      assert(bsGetSeqpos(iter->extBits.varPart,
                          iter->extBits.varOffset + locateRecordOffset,
                          bitsPerBWTPos)
              == nextLocate - iter->extBits.start);
@@ -437,4 +439,64 @@ EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
   }
   else
     return NULL;
+}
+
+extern int
+verifyBWTSeqIntegrity(BWTSeq *bwtSeq, const Str *projectName, Env *env)
+{
+  Seqpos len, seqLastPos, i;
+  Verboseinfo *verbosity;
+  Suffixarray suffixArray;
+  struct extBitsRetrieval extBits;
+  unsigned bitsPerOrigPos;
+  int retval = 0;
+  assert(bwtSeq && projectName && env);
+
+  len = BWTSeqLength(bwtSeq);
+  verbosity = newverboseinfo(true, env);
+  initExtBitsRetrieval(&extBits, env);
+  bitsPerOrigPos = requiredSeqposBits(
+    (BWTSeqLength(bwtSeq) - 1)/bwtSeq->locateSampleInterval);
+  if (mapsuffixarray(&suffixArray, &seqLastPos,
+                     SARR_SUFTAB, projectName, verbosity, env))
+  {
+    env_error_set(env, "Cannot load suffix array project with"
+                  " demand for suffix table file\n");
+    freeverboseinfo(&verbosity, env);
+    return -1;
+  }
+
+  assert(seqLastPos == len - 1);
+
+  for (i = 0; i < len; ++i)
+    if (BWTSeqPosHasLocateInfo(bwtSeq, i, &extBits, env))
+    {
+      EISRetrieveExtraBits(bwtSeq->seqIdx, i,
+                           EBRF_RETRIEVE_CWBITS | EBRF_RETRIEVE_VARBITS,
+                           &extBits, bwtSeq->hint, env);
+      {
+        unsigned bitsPerBWTPos = requiredSeqposBits(extBits.len - 1);
+        BitOffset locateRecordIndex =
+          bs1BitsCount(extBits.cwPart, extBits.cwOffset,
+                       i - extBits.start),
+          locateRecordOffset = (bitsPerBWTPos + bitsPerOrigPos)
+          * locateRecordIndex;
+        Seqpos sfxArrayValue =
+          bsGetSeqpos(extBits.varPart, extBits.varOffset
+                      + locateRecordOffset + bitsPerBWTPos, bitsPerOrigPos)
+          * bwtSeq->locateSampleInterval;
+        if (sfxArrayValue != suffixArray.suftab[i])
+        {
+          fprintf(stderr, "Failed suffixarray value comparison at position "
+                  FormatSeqpos": "FormatSeqpos" != "FormatSeqpos"\n",
+                  i, sfxArrayValue, suffixArray.suftab[i]);
+          retval = -2;
+          break;
+        }
+      }
+    }
+  freesuffixarray(&suffixArray, env);
+  destructExtBitsRetrieval(&extBits, env);
+  freeverboseinfo(&verbosity, env);
+  return retval;
 }
