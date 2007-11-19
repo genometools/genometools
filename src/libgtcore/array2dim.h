@@ -19,7 +19,6 @@
 #define ARRAY2DIM_H
 
 #include "libgtcore/env.h"
-#include "libgtcore/xansi.h"
 
 #define array2dim_malloc(ARRAY2DIM, ROWS, COLUMNS, TYPE, ENV)                 \
         {                                                                     \

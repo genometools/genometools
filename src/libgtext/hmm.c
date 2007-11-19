@@ -31,6 +31,7 @@
 #include "libgtcore/array2dim.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/mathsupport.h"
+#include "libgtcore/xansi.h"
 #include "libgtext/coin_hmm.h"
 #include "libgtext/dice_hmm.h"
 #include "libgtext/hmm.h"
