@@ -32,10 +32,6 @@
 #include "libgtmatch/sfx-apfxlen.pr"
 #include "gt_packedindex_bwtconstruct_params.h"
 
-/***************************************************************************
- * routines for matching tests
- ***************************************************************************/
-
 struct chkSearchOptions
 {
   struct bwtOptions idx;
@@ -158,8 +154,9 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
           ensure(had_err, match->sfxArrayValue == dbstart);
           if (had_err)
           {
-            fputs("fmindex match doesn't equal mmsearch match result!\n",
-                  stderr);
+            fprintf(stderr, "fmindex match doesn't equal mmsearch match "
+                    "result!\n"FormatSeqpos" vs. "FormatSeqpos"\n",
+                    match->sfxArrayValue, dbstart);
             break;
           }
         }
