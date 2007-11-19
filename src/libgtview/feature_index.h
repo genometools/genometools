@@ -31,20 +31,20 @@ FeatureIndex* feature_index_new(Env*);
 FeatureIndex* feature_index_ref(FeatureIndex*);
 void          feature_index_add_sequence_region(FeatureIndex*, SequenceRegion*,
                                                 Env*);
-/* Add a GenomeFeature to the index, associating it with a sequence region
-   denoted by its identifier string. */
+/* add a GenomeFeature to the index, associating it with a sequence region
+   denoted by its identifier string */
 void          feature_index_add_genome_feature(FeatureIndex*, GenomeFeature*,
                                                Env*);
-/* Returns an array of GenomeFeatures associated with a given sequence region
-   identifier. */
+/* returns an array of GenomeFeatures associated with a given sequence region
+   identifier */
 Array*        feature_index_get_features_for_seqid(FeatureIndex*, const char*);
-/* Look up genome features for sequence region <seqid> in <range> and store them
+/* look up genome features for sequence region <seqid> in <range> and store them
    in <results> */
 int           feature_index_get_features_for_range(FeatureIndex*,
                                                    Array *results,
-                                                   const char *seqid,
-                                                   Range range, Env*);
-/* Returns the first sequence region identifier added to the index. */
+                                                   const char *seqid, Range,
+                                                   Env*);
+/* returns the first sequence region identifier added to the index */
 const char*   feature_index_get_first_seqid(FeatureIndex*);
 Range         feature_index_get_range_for_seqid(FeatureIndex*, const char*);
 bool          feature_index_has_seqid(const FeatureIndex*, const char*, Env*);
