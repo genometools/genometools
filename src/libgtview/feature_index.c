@@ -74,6 +74,7 @@ void feature_index_add_sequence_region(FeatureIndex *fi, SequenceRegion *sr,
 {
   char *seqid;
   RegionInfo *info;
+  env_error_check(env);
   assert(fi && sr);
   seqid = str_get(genome_node_get_seqid((GenomeNode*) sr));
   if (!hashtable_get(fi->regions, seqid)) {
@@ -96,8 +97,8 @@ void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf,
   char* seqid;
   Range node_range;
   RegionInfo *info;
-  env_error_check(env);
 
+  env_error_check(env);
   assert(fi && gf);
 
   gn = genome_node_rec_ref((GenomeNode*) gf, env);
@@ -135,6 +136,7 @@ int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
   GenomeNode* key;
   unsigned long i;
 
+  env_error_check(env);
   assert(fi && results);
 
   base = feature_index_get_features_for_seqid(fi, seqid);
@@ -180,6 +182,7 @@ Range feature_index_get_range_for_seqid(FeatureIndex *fi, const char *seqid)
 bool feature_index_has_seqid(const FeatureIndex *fi, const char *seqid,
                              Env *env)
 {
+  env_error_check(env);
   assert(fi);
   return (hashtable_get(fi->regions, seqid));
 }
