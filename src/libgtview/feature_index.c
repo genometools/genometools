@@ -110,9 +110,7 @@ void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf,
   assert(feature_index_has_seqid(fi, seqid, env));
   info = (RegionInfo*) hashtable_get(fi->regions, seqid);
   /* add node to the appropriate array in the hashtable. */
-  array_add(info->features,
-            gf_new,
-            env);
+  array_add(info->features, gf_new, env);
   /* update dynamic range */
   info->dyn_range.start = MIN(info->dyn_range.start, node_range.start);
   info->dyn_range.end = MAX(info->dyn_range.end, node_range.end);
@@ -121,9 +119,7 @@ void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf,
 Array* feature_index_get_features_for_seqid(FeatureIndex *fi, const char *seqid)
 {
   RegionInfo *res;
-
   assert(fi);
-
   res = (RegionInfo*) hashtable_get(fi->regions, seqid);
   return (res ? res->features : NULL);
 }
