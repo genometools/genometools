@@ -73,7 +73,7 @@ int simpleexactselfmatchstore (
   unsigned long i,
                 contignumber = 0,
                 seqnum1,
-		seqnum2;
+                seqnum2;
   bool samecontig = false;
 
   env_error_check(env);
@@ -102,14 +102,14 @@ int simpleexactselfmatchstore (
     for ( i = 0; i < numofdbsequences - 1; i++)
     {
       seqnum1 = getrecordnumSeqpos(markpos, numofdbsequences,
-	                totallength, pos1, env);
+                        totallength, pos1, env);
       if ( seqnum1 == numofdbsequences)
       {
         return -1;
       }
 
       seqnum2 = getrecordnumSeqpos(markpos, numofdbsequences,
-	                totallength, pos2, env);
+                        totallength, pos2, env);
       if ( seqnum2 == numofdbsequences)
       {
         return -1;
@@ -117,13 +117,13 @@ int simpleexactselfmatchstore (
 
       if ( seqnum1 == seqnum2 )
       {
-	  env_log_log(env, "accepted:\n");
-	  env_log_log(env, "pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
-	  env_log_log(env, "pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
-	  env_log_log(env, "i: %lu\n", i);
-	  samecontig = true;
+          env_log_log(env, "accepted:\n");
+          env_log_log(env, "pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
+          env_log_log(env, "pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
+          env_log_log(env, "i: %lu\n", i);
+          samecontig = true;
           contignumber = seqnum1;
-	  break;
+          break;
       }
     }
   }

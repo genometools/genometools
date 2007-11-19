@@ -53,7 +53,7 @@ void showuserdefinedoptionsandvalues(LTRharvestoptions *lo)
   if (lo->fastaoutputinnerregion)
   {
     printf("#   outputfile inner region: %s\n",
-	str_get(lo->str_fastaoutputfilenameinnerregion));
+        str_get(lo->str_fastaoutputfilenameinnerregion));
   }
   if (lo->gff3output)
   {
@@ -183,28 +183,28 @@ static OPrval parse_options(int *parsed_args,
 {
   OptionParser *op;
   Option *optionindex,
-	 *optionseed,
-	 *optionminlenltr,
-	 *optionmaxlenltr,
-	 *optionmindistltr,
-	 *optionmaxdistltr,
-	 *optionmintsd,
-	 *optionmaxtsd,
-	 *optionsimilar,
-	 *optionmotif,
-	 *optionmotifmis,
-	 *optionvic,
-	 *optionoverlaps,
-	 *optionxdrop,
-	 *optionmat,
-	 *optionmis,
-	 *optionins,
-	 *optiondel,
-	 *optionv,
-	 *optionlongoutput,
-	 *optionout,
-	 *optionoutinner,
-	 *optiongff3;
+         *optionseed,
+         *optionminlenltr,
+         *optionmaxlenltr,
+         *optionmindistltr,
+         *optionmaxdistltr,
+         *optionmintsd,
+         *optionmaxtsd,
+         *optionsimilar,
+         *optionmotif,
+         *optionmotifmis,
+         *optionvic,
+         *optionoverlaps,
+         *optionxdrop,
+         *optionmat,
+         *optionmis,
+         *optionins,
+         *optiondel,
+         *optionv,
+         *optionlongoutput,
+         *optionout,
+         *optionoutinner,
+         *optiongff3;
   OPrval oprval;
   unsigned int vicinityforcorrectboundaries;
 
@@ -245,7 +245,7 @@ static OPrval parse_options(int *parsed_args,
                                &lo->repeatinfo.lmin,
                                (unsigned long) 100,
                                (unsigned long) 1,
-			       UNDEF_ULONG,
+                               UNDEF_ULONG,
                                env);
   option_parser_add_option(op, optionminlenltr, env);
 
@@ -255,29 +255,29 @@ static OPrval parse_options(int *parsed_args,
                                &lo->repeatinfo.lmax,
                                (unsigned long) 1000,
                                (unsigned long) 1,
-			       UNDEF_ULONG,
+                               UNDEF_ULONG,
                                env);
   option_parser_add_option(op, optionmaxlenltr, env);
 
   /* -mindistltr */
   optionmindistltr = option_new_ulong_min_max("mindistltr",
                                "specify minimum distance of "
-			       "LTR startpositions",
+                               "LTR startpositions",
                                &lo->repeatinfo.dmin,
                                (unsigned long) 1000,
                                (unsigned long) 1,
-			       UNDEF_ULONG,
+                               UNDEF_ULONG,
                                env);
   option_parser_add_option(op, optionmindistltr, env);
 
   /* -maxdistltr */
   optionmaxdistltr = option_new_ulong_min_max("maxdistltr",
                                "specify maximum distance of "
-			       "LTR startpositions",
+                               "LTR startpositions",
                                &lo->repeatinfo.dmax,
                                (unsigned long) 15000,
                                (unsigned long) 1,
-			       UNDEF_ULONG,
+                               UNDEF_ULONG,
                                env);
   option_parser_add_option(op, optionmaxdistltr, env);
 
@@ -288,7 +288,7 @@ static OPrval parse_options(int *parsed_args,
                                &lo->similaritythreshold,
                                (double) 85.0,
                                (double) 0.0,
-			       100.0,
+                               100.0,
                                env);
   option_parser_add_option(op, optionsimilar, env);
 
@@ -298,7 +298,7 @@ static OPrval parse_options(int *parsed_args,
                                &lo->minlengthTSD,
                                (unsigned long) 0,
                                (unsigned long) 0,
-			       UNDEF_ULONG,
+                               UNDEF_ULONG,
                                env);
   option_parser_add_option(op, optionmintsd, env);
 
@@ -308,7 +308,7 @@ static OPrval parse_options(int *parsed_args,
                                &lo->maxlengthTSD,
                                (unsigned long) 20,
                                (unsigned long) 0,
-			       UNDEF_ULONG,
+                               UNDEF_ULONG,
                                env);
   option_parser_add_option(op, optionmaxtsd, env);
 
@@ -331,10 +331,10 @@ static OPrval parse_options(int *parsed_args,
                              "specify maximum number of "
                              "mismatches in motif [0,3]",
                              &lo->motif.allowedmismatches,
-			     (unsigned int)4,
-			     (unsigned int)0,
-			     (unsigned int)3,
-			     env);
+                             (unsigned int)4,
+                             (unsigned int)0,
+                             (unsigned int)3,
+                             env);
   option_parser_add_option(op, optionmotifmis, env);
 
   /* -vic */
@@ -342,31 +342,31 @@ static OPrval parse_options(int *parsed_args,
                         "specify the number of nucleotides (to the left and "
                         "to the right) that will be searched "
                         "for TSDs and/or motifs around 5' and 3' boundary "
-		        "of predicted LTR retrotransposons",
+                        "of predicted LTR retrotransposons",
                         &vicinityforcorrectboundaries,
-		        60U,
-		        1U,
-		        500U,
-			env);
+                        60U,
+                        1U,
+                        500U,
+                        env);
   option_parser_add_option(op, optionvic, env);
 
   /* -overlaps */
   lo->str_overlaps = str_new(env);
   optionoverlaps = option_new_choice("overlaps",
                "specify no|best|all",
-	       lo->str_overlaps,
+               lo->str_overlaps,
                overlaps[0],
                overlaps,
-	       env);
+               env);
   option_parser_add_option(op, optionoverlaps, env);
 
   /* -xdrop */
   optionxdrop = option_new_int_min("xdrop",
                         "specify xdropbelowscore for extension-alignment",
                         &lo->xdropbelowscore,
-		        (int)5,
-		        (int)0,
-			env);
+                        (int)5,
+                        (int)0,
+                        env);
   option_parser_add_option(op, optionxdrop, env);
 
   /* -mat */
@@ -375,36 +375,36 @@ static OPrval parse_options(int *parsed_args,
   optionmat = option_new_int_min("mat",
                         "specify matchscore for extension-alignment",
                         &lo->arbitscores.mat,
-		        (int)2,
-		        (int)1,
-			env);
+                        (int)2,
+                        (int)1,
+                        env);
   option_parser_add_option(op, optionmat, env);
 
   /* -mis */
   optionmis = option_new_int_max("mis",
                         "specify mismatchscore for extension-alignment",
                         &lo->arbitscores.mis,
-		        (int)-2,
-			(int)-1,
-			env);
+                        (int)-2,
+                        (int)-1,
+                        env);
   option_parser_add_option(op, optionmis, env);
 
   /* -ins */
   optionins = option_new_int_max("ins",
                         "specify insertionscore for extension-alignment",
                         &lo->arbitscores.ins,
-		        (int)-3,
-			(int)-1,
-			env);
+                        (int)-3,
+                        (int)-1,
+                        env);
   option_parser_add_option(op, optionins, env);
 
   /* -del */
   optiondel = option_new_int_max("del",
                         "specify deletionscore for extension-alignment",
                         &lo->arbitscores.del,
-		        (int)-3,
-			(int)-1,
-			env);
+                        (int)-3,
+                        (int)-1,
+                        env);
   option_parser_add_option(op, optiondel, env);
 
   /* -v */
@@ -412,7 +412,7 @@ static OPrval parse_options(int *parsed_args,
                            "verbose mode",
                            &lo->verbosemode,
                            false,
-			   env);
+                           env);
   option_parser_add_option(op, optionv, env);
 
   /* -longoutput */
@@ -420,7 +420,7 @@ static OPrval parse_options(int *parsed_args,
                            "additional motif/TSD output",
                            &lo->longoutput,
                            false,
-			   env);
+                           env);
   option_parser_add_option(op, optionlongoutput, env);
 
   /* -out */
@@ -460,19 +460,19 @@ static OPrval parse_options(int *parsed_args,
     if (lo->repeatinfo.lmin > lo->repeatinfo.lmax)
     {
       env_error_set(env,"argument of -minlenltr is greater than argument of"
-	  " -maxlenltr");
+          " -maxlenltr");
       oprval = OPTIONPARSER_ERROR;
     }
     if (lo->repeatinfo.dmin > lo->repeatinfo.dmax)
     {
       env_error_set(env,
-	  "argument of -mindistltr is greater than argument of -maxdistltr");
+          "argument of -mindistltr is greater than argument of -maxdistltr");
       oprval = OPTIONPARSER_ERROR;
     }
     if (lo->minlengthTSD > lo->maxlengthTSD)
     {
       env_error_set(env,
-	  "argument of -mintsd is greater than argument of -maxtsd");
+          "argument of -mintsd is greater than argument of -maxtsd");
       oprval = OPTIONPARSER_ERROR;
     }
 
@@ -482,9 +482,9 @@ static OPrval parse_options(int *parsed_args,
     {
       if (str_length(lo->motif.str_motif) != (unsigned long) 4)
       {
-	env_error_set(env,
-	    "argument of -motif has not exactly 4 characters");
-	oprval = OPTIONPARSER_ERROR;
+        env_error_set(env,
+            "argument of -motif has not exactly 4 characters");
+        oprval = OPTIONPARSER_ERROR;
       }
       lo->motif.firstleft = (Uchar)  str_get(lo->motif.str_motif)[0];
       lo->motif.secondleft = (Uchar)  str_get(lo->motif.str_motif)[1];
@@ -493,7 +493,7 @@ static OPrval parse_options(int *parsed_args,
       /* default if motif specified */
       if (!option_is_set(optionmotifmis))
       {
-	lo->motif.allowedmismatches = (unsigned int)0;
+        lo->motif.allowedmismatches = (unsigned int)0;
       }
     }
 
@@ -502,35 +502,35 @@ static OPrval parse_options(int *parsed_args,
     {
       if ( strcmp(str_get(lo->str_overlaps), "no") == 0)
       {
-	lo->bestofoverlap = false;
-	lo->nooverlapallowed = true;
+        lo->bestofoverlap = false;
+        lo->nooverlapallowed = true;
       }
       else {
-	if ( strcmp(str_get(lo->str_overlaps), "best") == 0 )
-	{
-	  lo->bestofoverlap = true;
-	  lo->nooverlapallowed = false;
-	}
-	else {
-	  if ( strcmp(str_get(lo->str_overlaps), "all") == 0 )
-	  {
-	    lo->bestofoverlap = false;
-	    lo->nooverlapallowed = false;
-	  }
-	  else
-	  {
-	    env_error_set(env,
-	       "argument of -overlaps is not valid. Choose best|all|no");
-	    oprval = OPTIONPARSER_ERROR;
-	  }
-	}
+        if ( strcmp(str_get(lo->str_overlaps), "best") == 0 )
+        {
+          lo->bestofoverlap = true;
+          lo->nooverlapallowed = false;
+        }
+        else {
+          if ( strcmp(str_get(lo->str_overlaps), "all") == 0 )
+          {
+            lo->bestofoverlap = false;
+            lo->nooverlapallowed = false;
+          }
+          else
+          {
+            env_error_set(env,
+               "argument of -overlaps is not valid. Choose best|all|no");
+            oprval = OPTIONPARSER_ERROR;
+          }
+        }
       }
     }
     else
     {
       /* default is "best" */
       lo->bestofoverlap = true;     /* take best prediction
-				       if overlap occurs, default */
+                                       if overlap occurs, default */
       lo->nooverlapallowed = false; /* overlapping predictions (not)allowed*/
     }
 

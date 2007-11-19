@@ -364,7 +364,7 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
                             env) != 0)
         {
           return -1;
-	}
+        }
       }
     }
     freemmsearchiterator(&mmsi,env);
@@ -572,7 +572,7 @@ int sarrquerysubstringmatch(const Uchar *dbseq,
                                   processmaxmatch,
                                   processmaxmatchinfo,
                                   NULL,
-		                  env) != 0)
+                                  env) != 0)
   {
     haserr = true;
   }

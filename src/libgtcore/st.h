@@ -47,11 +47,11 @@ void      st_free_table(st_table*, Env*);
 void      st_cleanup_safe(st_table*, st_data_t, Env*);
 st_table* st_copy(st_table*, Env*);
 
-#define ST_NUMCMP	((int (*)()) 0)
-#define ST_NUMHASH	((int (*)()) -2)
+#define ST_NUMCMP       ((int (*)()) 0)
+#define ST_NUMHASH      ((int (*)()) -2)
 
-#define st_numcmp	ST_NUMCMP
-#define st_numhash	ST_NUMHASH
+#define st_numcmp       ST_NUMCMP
+#define st_numhash      ST_NUMHASH
 
 int st_strhash(void);
 

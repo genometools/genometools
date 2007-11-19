@@ -96,19 +96,19 @@ void adjustboundariesfromXdropextension(
             PRINTSeqposcast( boundaries->leftLTR_3 - offset));
   printf("len leftLTR = " FormatSeqpos "\n",
             PRINTSeqposcast( (boundaries->leftLTR_3 - boundaries->leftLTR_5
-	                      + 1)));
+                              + 1)));
   printf("boundaries->rightLTR_5 = " FormatSeqpos "\n",
             PRINTSeqposcast( boundaries->rightLTR_5 - offset));
   printf("boundaries->rightLTR_3 = " FormatSeqpos "\n",
             PRINTSeqposcast( boundaries->rightLTR_3 - offset));
   printf("len rightLTR = " FormatSeqpos "\n",
             PRINTSeqposcast( (boundaries->rightLTR_3 - boundaries->rightLTR_5
-	                      + 1)));
+                              + 1)));
  */
 }
 
 #define INITBOUNDARIES(B)\
-	(B)->contignumber = repeatptr->contignumber;\
+        (B)->contignumber = repeatptr->contignumber;\
         (B)->leftLTR_5 = (Seqpos)0;\
         (B)->leftLTR_3 = (Seqpos)0;\
         (B)->rightLTR_5 = (Seqpos)0;\
@@ -139,10 +139,10 @@ int searchforLTRs (
   Myxdropbest xdropbest_right;
   Seqpos alilen = 0,
          totallength,
-	 i = 0,
-	 k = 0,
-	 ulen,
-	 vlen;
+         i = 0,
+         k = 0,
+         ulen,
+         vlen;
   Uchar *useq = NULL,
         *vseq = NULL;
   unsigned long edist;
@@ -176,30 +176,30 @@ int searchforLTRs (
     if (alilen <= repeatptr->pos1)
     {
       evalxdroparbitscoresleft(&lo->arbitscores,
-	                       &xdropbest_left,
-			       &fronts,
-			       encseq,
-			       encseq,
-			       repeatptr->pos1,
-			       repeatptr->pos1 + repeatptr->offset,
-			       (int) alilen,
-			       (int) alilen,
-			       (Xdropscore)lo->xdropbelowscore,
-			       env);
+                               &xdropbest_left,
+                               &fronts,
+                               encseq,
+                               encseq,
+                               repeatptr->pos1,
+                               repeatptr->pos1 + repeatptr->offset,
+                               (int) alilen,
+                               (int) alilen,
+                               (Xdropscore)lo->xdropbelowscore,
+                               env);
     }
     else /* do not align over left sequence boundary */
     {
       evalxdroparbitscoresleft(&lo->arbitscores,
-	                       &xdropbest_left,
-			       &fronts,
-			       encseq,
-			       encseq,
-			       repeatptr->pos1,
-			       repeatptr->pos1 + repeatptr->offset,
-			       (int) repeatptr->pos1,
-			       (int) (repeatptr->pos1 + repeatptr->offset),
-			       (Xdropscore)lo->xdropbelowscore,
-			       env);
+                               &xdropbest_left,
+                               &fronts,
+                               encseq,
+                               encseq,
+                               repeatptr->pos1,
+                               repeatptr->pos1 + repeatptr->offset,
+                               (int) repeatptr->pos1,
+                               (int) (repeatptr->pos1 + repeatptr->offset),
+                               (Xdropscore)lo->xdropbelowscore,
+                               env);
     }
     FREEARRAY (&fronts, Myfrontvalue);
 
@@ -207,45 +207,45 @@ int searchforLTRs (
     INITARRAY (&fronts, Myfrontvalue);
     totallength = getencseqtotallength(encseq);
     if (alilen <= totallength - (repeatptr->pos1 + repeatptr->offset +
-		                repeatptr->len) )
+                                repeatptr->len) )
     {
       evalxdroparbitscoresright (&lo->arbitscores,
                                  &xdropbest_right,
-				 &fronts,
-				 encseq,
-				 encseq,
-				 repeatptr->pos1 + repeatptr->len,
-				 repeatptr->pos1 + repeatptr->offset +
-				 repeatptr->len,
-				 (int) alilen,
-				 (int) alilen,
-				 lo->xdropbelowscore,
-				 env);
+                                 &fronts,
+                                 encseq,
+                                 encseq,
+                                 repeatptr->pos1 + repeatptr->len,
+                                 repeatptr->pos1 + repeatptr->offset +
+                                 repeatptr->len,
+                                 (int) alilen,
+                                 (int) alilen,
+                                 lo->xdropbelowscore,
+                                 env);
     }
     else /* do not align over right sequence boundary */
     {
       evalxdroparbitscoresright(&lo->arbitscores,
-	                        &xdropbest_right,
-				&fronts,
-				encseq,
-				encseq,
-				repeatptr->pos1 + repeatptr->len,
-				repeatptr->pos1 + repeatptr->offset +
-				repeatptr->len,
-				(int) (totallength -
-				(repeatptr->pos1 + repeatptr->len)),
-				(int) (totallength -
-				(repeatptr->pos1 + repeatptr->offset +
-				 repeatptr->len)),
-				lo->xdropbelowscore,
-				env);
+                                &xdropbest_right,
+                                &fronts,
+                                encseq,
+                                encseq,
+                                repeatptr->pos1 + repeatptr->len,
+                                repeatptr->pos1 + repeatptr->offset +
+                                repeatptr->len,
+                                (int) (totallength -
+                                (repeatptr->pos1 + repeatptr->len)),
+                                (int) (totallength -
+                                (repeatptr->pos1 + repeatptr->offset +
+                                 repeatptr->len)),
+                                lo->xdropbelowscore,
+                                env);
     }
     FREEARRAY (&fronts, Myfrontvalue);
 
     GETNEXTFREEINARRAY(boundaries,
-	               &lo->arrayLTRboundaries,
-		       LTRboundaries,
-		       5);
+                       &lo->arrayLTRboundaries,
+                       LTRboundaries,
+                       5);
     INITBOUNDARIES(boundaries);
 
     if ( boundaries->contignumber == (unsigned long)0)
@@ -268,73 +268,73 @@ int searchforLTRs (
     printf("boundaries->leftLTR_5 abs. = " FormatSeqpos "\n",
               PRINTSeqposcast(repeatptr->pos1));
     printf("boundaries->rightLTR_5 abs. = " FormatSeqpos "\n",
-	      PRINTSeqposcast(repeatptr->pos1 + repeatptr->offset));
+              PRINTSeqposcast(repeatptr->pos1 + repeatptr->offset));
 
     printf("boundaries->leftLTR_5  = " FormatSeqpos "\n",
               PRINTSeqposcast(repeatptr->pos1 - offset));
     printf("boundaries->leftLTR_3  = " FormatSeqpos "\n",
-	      PRINTSeqposcast(repeatptr->pos1 + repeatptr->len - 1
-	                - offset));
+              PRINTSeqposcast(repeatptr->pos1 + repeatptr->len - 1
+                        - offset));
     printf("boundaries->rightLTR_5 = " FormatSeqpos "\n",
-	      PRINTSeqposcast(repeatptr->pos1 + repeatptr->offset
-	                - offset));
+              PRINTSeqposcast(repeatptr->pos1 + repeatptr->offset
+                        - offset));
     printf("boundaries->rightLTR_3 = " FormatSeqpos "\n",
-	      PRINTSeqposcast(repeatptr->pos1 + repeatptr->offset +
-	                repeatptr->len - 1 - offset));
+              PRINTSeqposcast(repeatptr->pos1 + repeatptr->offset +
+                        repeatptr->len - 1 - offset));
     */
 
     /* store new boundaries-positions in boundaries */
     adjustboundariesfromXdropextension(
-	           xdropbest_left,
-		   xdropbest_right,
-	           repeatptr->pos1,  /*seed1 startpos*/
-		   repeatptr->pos1 + repeatptr->offset, /*seed2 startpos*/
+                   xdropbest_left,
+                   xdropbest_right,
+                   repeatptr->pos1,  /*seed1 startpos*/
+                   repeatptr->pos1 + repeatptr->offset, /*seed2 startpos*/
                    repeatptr->pos1 + repeatptr->len - 1, /*seed1 endpos*/
                    repeatptr->pos1 + repeatptr->offset + repeatptr->len - 1,
-		                                         /*seed2 endpos*/
-		   boundaries,
-		   offset,
-		   env);
+                                                         /*seed2 endpos*/
+                   boundaries,
+                   offset,
+                   env);
 
     /* if search for motif and/or TSD */
     if ( lo->motif.allowedmismatches < (unsigned int)4 ||
         lo->minlengthTSD > (unsigned long) 1)
     {
       if ( findcorrectboundaries(lo, boundaries, ssar,
-	                        markpos, env) != 0 )
+                                markpos, env) != 0 )
       {
         return -1;
       }
 
       /* if search for TSDs and (not) motif */
       if ( boundaries->tsd &&
-	  (lo->motif.allowedmismatches >= (unsigned int)4 ||
-	  (boundaries->motif_near_tsd && boundaries->motif_far_tsd)) )
+          (lo->motif.allowedmismatches >= (unsigned int)4 ||
+          (boundaries->motif_near_tsd && boundaries->motif_far_tsd)) )
       {
-	/* predicted as full LTR-pair, keep it */
+        /* predicted as full LTR-pair, keep it */
       }
       else
       {
-	/* if search for motif only (and not TSD) */
-	if ( lo->minlengthTSD <= (unsigned long) 1 &&
-	    boundaries->motif_near_tsd &&
-	    boundaries->motif_far_tsd )
-	{
-	  /* predicted as full LTR-pair, keep it */
-	}
-	else
-	{
-	  /* delete this LTR-pair candidate */
-	  lo->arrayLTRboundaries.nextfreeLTRboundaries--;
-	  continue;
-	}
+        /* if search for motif only (and not TSD) */
+        if ( lo->minlengthTSD <= (unsigned long) 1 &&
+            boundaries->motif_near_tsd &&
+            boundaries->motif_far_tsd )
+        {
+          /* predicted as full LTR-pair, keep it */
+        }
+        else
+        {
+          /* delete this LTR-pair candidate */
+          lo->arrayLTRboundaries.nextfreeLTRboundaries--;
+          continue;
+        }
       }
     }
 
     /* check length and distance constraints again */
     if ( checklengthanddistanceconstraints(boundaries,
-					  &lo->repeatinfo,
-					  env) != 0)
+                                          &lo->repeatinfo,
+                                          env) != 0)
     {
       /* delete this LTR-pair candidate */
       lo->arrayLTRboundaries.nextfreeLTRboundaries--;

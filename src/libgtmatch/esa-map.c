@@ -394,14 +394,14 @@ static int inputsuffixarray(bool map,
   if (!haserr && (demand & SARR_ESQTAB))
   {
     suffixarray->encseq = mapencodedsequence(true,
-					     indexname,
-					     *totallength,
-					     suffixarray->specialcharinfo.
+                                             indexname,
+                                             *totallength,
+                                             suffixarray->specialcharinfo.
                                                           specialranges,
-					     getmapsizeAlphabet(suffixarray->
+                                             getmapsizeAlphabet(suffixarray->
                                                                 alpha),
                                              verboseinfo,
-					     env);
+                                             env);
     if (suffixarray->encseq == NULL)
     {
       haserr = true;

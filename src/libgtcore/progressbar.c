@@ -25,11 +25,11 @@
 #include <sys/termios.h>
 #include "libgtcore/xposix.h"
 
-#define DEFAULT_WINDOW_SIZE	80
-#define UPDATE_INTERVAL 	1U  /* update the progress bar every second */
-#define MAXIMUM_WINDOW_SIZE	512 /* the maximum window size
-                                       do not change this without adjusting the
-                                       snprintf() statment producing the bar! */
+#define DEFAULT_WINDOW_SIZE  80
+#define UPDATE_INTERVAL      1U  /* update the progress bar every second */
+#define MAXIMUM_WINDOW_SIZE  512 /* the maximum window size
+                                    do not change this without adjusting the
+                                    snprintf() statment producing the bar! */
 
 static int window_size; /* the window size of the terminal */
 static unsigned long long last_computation;

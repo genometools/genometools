@@ -29,7 +29,7 @@ void removeduplicates(ArrayLTRboundaries *arrayLTRboundaries)
   unsigned long i, j;
   Seqpos startpos_i, endpos_i, startpos_j, endpos_j;
   LTRboundaries *boundaries_i,
-		*boundaries_j;
+                *boundaries_j;
 
   for (i = 0; i < arrayLTRboundaries->nextfreeLTRboundaries; i++)
   {
@@ -53,7 +53,7 @@ void removeduplicates(ArrayLTRboundaries *arrayLTRboundaries)
 
       if (startpos_i == startpos_j && endpos_i == endpos_j)
       {
-	boundaries_j->skipped = true;
+        boundaries_j->skipped = true;
       }
     }
   }
@@ -71,7 +71,7 @@ void removeoverlapswithlowersimilarity(
   unsigned long i, j;
   Seqpos startpos_i, endpos_i, startpos_j, endpos_j;
   LTRboundaries *boundaries_i,
-		*boundaries_j;
+                *boundaries_j;
 
   for (i = 0; i < arrayLTRboundaries->nextfreeLTRboundaries; i++)
   {
@@ -96,37 +96,37 @@ void removeoverlapswithlowersimilarity(
       /* if overlap */
       if ( !((endpos_i < startpos_j) || (endpos_j < startpos_i)) )
       {
-	if (nooverlapallowed)
-	{
+        if (nooverlapallowed)
+        {
           /* All predictions in a cluster will be deleted. */
 
-	  /* take min(startpos_i, startpos_j) */
+          /* take min(startpos_i, startpos_j) */
           if (startpos_j < startpos_i)
-	  {
-	    startpos_i = startpos_j;
-	  }
-	  /* take max(endpos_i, endpos_j) */
+          {
+            startpos_i = startpos_j;
+          }
+          /* take max(endpos_i, endpos_j) */
           if (endpos_i < endpos_j)
-	  {
+          {
             endpos_i = endpos_j;
-	  }
-	  /* delete both predictions */
+          }
+          /* delete both predictions */
           boundaries_i->skipped = true;
           boundaries_j->skipped = true;
-	}
-	else
-	{
+        }
+        else
+        {
           /* take prediction with higher similarity */
-	  if ( boundaries_i->similarity >= boundaries_j->similarity )
-	  {
+          if ( boundaries_i->similarity >= boundaries_j->similarity )
+          {
             boundaries_j->skipped = true;
-	  }
-	  else
-	  {
+          }
+          else
+          {
             boundaries_i->skipped = true;
-	    break;
-	  }
-	}
+            break;
+          }
+        }
       }
     }
   }

@@ -109,73 +109,73 @@ int fasta2sequencekeyvalues(
   if (!haserr)
   {
     fb = fastabuffer_new(filenametab,
-			 symbolmap,
-			 plainformat,
-			 filelengthtab,
-			 descqueue,
-			 characterdistribution,
-			 env);
+                         symbolmap,
+                         plainformat,
+                         filelengthtab,
+                         descqueue,
+                         characterdistribution,
+                         env);
     distspralen = discdistri_new(env);
     for (pos = 0; /* Nothing */; pos++)
     {
       retval = fastabuffer_next(fb,&charcode,env);
       if (retval < 0)
       {
-	haserr = true;
-	break;
+        haserr = true;
+        break;
       }
       if (retval == 0)
       {
-	if (lastspeciallength > 0)
-	{
-	  idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-	  discdistri_add(distspralen,idx,env);
-	}
-	break;
+        if (lastspeciallength > 0)
+        {
+          idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+          discdistri_add(distspralen,idx,env);
+        }
+        break;
       }
       if (ISSPECIAL(charcode))
       {
-	if (desfp != NULL && charcode == (Uchar) SEPARATOR)
-	{
-	  desc = queue_get(descqueue,env);
-	  if (fputs(desc,desfp) == EOF)
-	  {
-	    env_error_set(env,"cannot write description to file %s.%s",
-			      str_get(indexname),DESTABSUFFIX);
-	    haserr = true;
-	    break;
-	  }
-	  (void) putc((int) '\n',desfp);
-	  FREESPACE(desc);
-	}
-	if (specialprefix)
-	{
-	  specialcharinfo->lengthofspecialprefix++;
-	}
-	specialcharinfo->specialcharacters++;
-	if (lastspeciallength == 0)
-	{
-	  lastspeciallength = (Seqpos) 1;
-	} else
-	{
-	  lastspeciallength++;
-	}
-	if (charcode == (Uchar) SEPARATOR)
-	{
-	  (*numofsequences)++;
-	}
+        if (desfp != NULL && charcode == (Uchar) SEPARATOR)
+        {
+          desc = queue_get(descqueue,env);
+          if (fputs(desc,desfp) == EOF)
+          {
+            env_error_set(env,"cannot write description to file %s.%s",
+                              str_get(indexname),DESTABSUFFIX);
+            haserr = true;
+            break;
+          }
+          (void) putc((int) '\n',desfp);
+          FREESPACE(desc);
+        }
+        if (specialprefix)
+        {
+          specialcharinfo->lengthofspecialprefix++;
+        }
+        specialcharinfo->specialcharacters++;
+        if (lastspeciallength == 0)
+        {
+          lastspeciallength = (Seqpos) 1;
+        } else
+        {
+          lastspeciallength++;
+        }
+        if (charcode == (Uchar) SEPARATOR)
+        {
+          (*numofsequences)++;
+        }
       } else
       {
-	if (specialprefix)
-	{
-	  specialprefix = false;
-	}
-	if (lastspeciallength > 0)
-	{
-	  idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-	  discdistri_add(distspralen,idx,env);
-	  lastspeciallength = 0;
-	}
+        if (specialprefix)
+        {
+          specialprefix = false;
+        }
+        if (lastspeciallength > 0)
+        {
+          idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
+          discdistri_add(distspralen,idx,env);
+          lastspeciallength = 0;
+        }
       }
     }
   }

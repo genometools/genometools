@@ -220,48 +220,48 @@ int analyzeuintline(const Str *indexname,
     {
       rikptr = array_get(riktab,i);
       if (memcmp(linebuffer,
-		 rikptr->keystring,
-		 (size_t) lengthofkey) == 0)
+                 rikptr->keystring,
+                 (size_t) lengthofkey) == 0)
       {
-	rikptr->found = true;
-	if (rikptr->ptrdefined)
-	{
-	  if (rikptr->smallvalueptr == NULL)
-	  {
-	    if (retval == 1)
-	    {
+        rikptr->found = true;
+        if (rikptr->ptrdefined)
+        {
+          if (rikptr->smallvalueptr == NULL)
+          {
+            if (retval == 1)
+            {
               *(rikptr->bigvalueptr) = smallorbigint.bigvalue;
-	    } else
-	    {
+            } else
+            {
               *(rikptr->bigvalueptr) = (uint64_t) smallorbigint.smallvalue;
-	    }
-	  } else
-	  {
-	    if (retval == 1)
-	    {
-	      env_error_set(env,"bigvalue " Formatuint64_t
-				" does not fit into %s",
-			    PRINTuint64_tcast(smallorbigint.bigvalue),
-			    rikptr->keystring);
-	      haserr = true;
-	      break;
-	    }
+            }
+          } else
+          {
+            if (retval == 1)
+            {
+              env_error_set(env,"bigvalue " Formatuint64_t
+                                " does not fit into %s",
+                            PRINTuint64_tcast(smallorbigint.bigvalue),
+                            rikptr->keystring);
+              haserr = true;
+              break;
+            }
             *(rikptr->smallvalueptr) = smallorbigint.smallvalue;
-	  }
-	}
-	found = true;
-	break;
+          }
+        }
+        found = true;
+        break;
       }
     }
     if (!found)
     {
       env_error_set(env,"file %s%s, line %u: cannot find key for \"%*.*s\"",
-			 str_get(indexname),
-			 suffix,
-			 linenum,
-			 (int) lengthofkey,
-			 (int) lengthofkey,
-			 linebuffer);
+                         str_get(indexname),
+                         suffix,
+                         linenum,
+                         (int) lengthofkey,
+                         (int) lengthofkey,
+                         linebuffer);
       haserr = true;
     }
   }

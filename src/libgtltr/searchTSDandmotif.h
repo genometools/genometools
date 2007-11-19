@@ -22,11 +22,11 @@ int findcorrectboundaries(LTRharvestoptions *lo, LTRboundaries *boundaries,
     Sequentialsuffixarrayreader *ssar, const Seqpos *markpos, Env *env);
 
 int searchformotifonlyinside(LTRharvestoptions *lo,
-        LTRboundaries *boundaries,
-        Sequentialsuffixarrayreader *ssar,
-	const Seqpos *markpos,
-	unsigned int *motifmismatchesleftLTR,
-	unsigned int *motifmismatchesrightLTR,
-	Env *env);
+                             LTRboundaries *boundaries,
+                             Sequentialsuffixarrayreader *ssar,
+                             const Seqpos *markpos,
+                             unsigned int *motifmismatchesleftLTR,
+                             unsigned int *motifmismatchesrightLTR,
+                             Env *env);
 
 #endif

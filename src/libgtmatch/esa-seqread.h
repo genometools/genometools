@@ -105,10 +105,10 @@ const Encodedsequence *encseqSequentialsuffixarrayreader(
                           const Sequentialsuffixarrayreader *sarr);
 
 Readmode readmodeSequentialsuffixarrayreader(
-			  const Sequentialsuffixarrayreader *sarr);
+                          const Sequentialsuffixarrayreader *sarr);
 
 const Alphabet *alphabetSequentialsuffixarrayreader(
-			  const Sequentialsuffixarrayreader *sarr);
+                          const Sequentialsuffixarrayreader *sarr);
 
 unsigned long numofdbsequencesSequentialsuffixarrayreader(
                     const Sequentialsuffixarrayreader *sarr);

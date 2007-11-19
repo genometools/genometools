@@ -86,9 +86,9 @@ EVALXDROPARBITSCORES
       i = MINUSINFINITYINT;
       /* case 1 : DELETION-EDGE  */
       if ( (lbound < k) &&
-	   (d - arbitdistances.del >= 0) &&
-	   (( -(d - arbitdistances.del) <= k - 1) && (k - 1 <= d - arbitdistances.del))
-	 )
+           (d - arbitdistances.del >= 0) &&
+           (( -(d - arbitdistances.del) <= k - 1) &&
+            (k - 1 <= d - arbitdistances.del)))
       {
         i =
           fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - arbitdistances.del,
@@ -96,9 +96,8 @@ EVALXDROPARBITSCORES
         tmpfront.dptabdirection = MYDELETIONBIT;
       }
       /* case 2: REPLACEMENT-EDGE */
-      if ( (lbound <= k) && (k <= ubound) && (d - arbitdistances.mis >= 0) &&
-	   (( -(d - arbitdistances.mis) <= k) && (k <= d - arbitdistances.mis))
-	 )
+      if ((lbound <= k) && (k <= ubound) && (d - arbitdistances.mis >= 0) &&
+          (( -(d - arbitdistances.mis) <= k) && (k <= d - arbitdistances.mis)))
       {
         /* test, if case 1 has happened. */
         if (tmpfront.dptabdirection & MYDELETIONBIT)
@@ -122,9 +121,9 @@ EVALXDROPARBITSCORES
 
       }
       /* case 3: INSERTION-EDGE */
-      if ( (k < ubound) && (d - arbitdistances.ins >= 0) &&
-	   (( -(d - arbitdistances.ins) <= k + 1) && (k + 1 <= d - arbitdistances.ins))
-	 )
+      if ((k < ubound) && (d - arbitdistances.ins >= 0) &&
+          (( -(d - arbitdistances.ins) <= k + 1) &&
+           (k + 1 <= d - arbitdistances.ins)))
       {
         if ((tmpfront.dptabdirection & MYDELETIONBIT)
             || (tmpfront.dptabdirection & MYREPLACEMENTBIT))
@@ -150,41 +149,37 @@ EVALXDROPARBITSCORES
       j = i - k;
 
       /* if i = MINUSINFINITYINY or MINUSINFINITYINY + 1 */
-      if ( i < 0)
+      if (i < 0)
       {
-	if (tmpfront.dptabdirection == (Uchar) 0)
-	{
+        if (tmpfront.dptabdirection == (Uchar) 0)
+        {
           alwaysMININFINITYINT = false;
-	}
+        }
         tmpfront.dptabrow = MINUSINFINITYINT;
       }
       /* alignment score smaller than T - X */
       else if ( d_pre > 0 &&
-      	      (S (i + j, d) < big_t.spaceXdropscore[d_pre] - xdropbelowscore)
-	     )
+              (S (i + j, d) < big_t.spaceXdropscore[d_pre] - xdropbelowscore)
+             )
       {
         tmpfront.dptabrow = MINUSINFINITYINT;
       }
-      else if ( ( k <= -d || k >= d ) /* not correct boundaries for
-	                                ACCESTOFRONT(d-1,k) */
-               ||
-	       ( (fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - 1, k)].dptabrow < i)
-	         &&
-	         (i <= MIN(ulen,vlen + k))
-	       )
-	     )
+      else if (( k <= -d || k >= d ) || /* not correct boundaries for
+                                           ACCESTOFRONT(d-1,k) */
+               ((fronts->spaceMyfrontvalue[ACCESSTOFRONT(d-1, k)].dptabrow < i)
+                 && (i <= MIN(ulen,vlen + k))))
       {
         while (i < ulen && j < vlen)
         {
-	  COMPARESYMBOLSSEP(i,j);
+          COMPARESYMBOLSSEP(i,j);
           i++;
           j++;
         }
 
         alwaysMININFINITYINT = false;
-	tmpfront.dptabrow = i;
+        tmpfront.dptabrow = i;
 
-	/* MAX(bigt_tmp, S(i+j,d)); */
+        /* MAX(bigt_tmp, S(i+j,d)); */
         if (S (i + j, d) > bigt_tmp)
         {
           xdropbest->score = bigt_tmp = S (i + j, d);
@@ -197,7 +192,7 @@ EVALXDROPARBITSCORES
       {
         alwaysMININFINITYINT = false;
         tmpfront.dptabrow =
-	  fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - 1, k)].dptabrow;
+          fronts->spaceMyfrontvalue[ACCESSTOFRONT(d - 1, k)].dptabrow;
       }
 
       STOREINARRAYFRONTS (fronts, ACCESSTOFRONT (d, k), Myfrontvalue,
@@ -218,8 +213,8 @@ EVALXDROPARBITSCORES
       currentMININFINITYINTgeneration++;
       if (currentMININFINITYINTgeneration > allowedMININFINITYINTgenerations)
       {
-	d = d - currentMININFINITYINTgeneration;
-	break;
+        d = d - currentMININFINITYINTgeneration;
+        break;
       }
     }
     else

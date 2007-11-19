@@ -199,9 +199,9 @@ void calculateallowedMININFINITYINTgenerations(
    Arbitrarydistances *arbitdistances)
 {
   *allowedMININFINITYINTgenerations = MAX(arbitdistances->mis,
-      			                  arbitdistances->ins);
+                                          arbitdistances->ins);
   *allowedMININFINITYINTgenerations = MAX(*allowedMININFINITYINTgenerations,
-      			                  arbitdistances->del);
+                                          arbitdistances->del);
   (*allowedMININFINITYINTgenerations)--;
 }
 
@@ -248,7 +248,7 @@ void calculateallowedMININFINITYINTgenerations(
                                      Forwardmode)
 #define VSEQ(A,J) A = getencodedchar(str_vseq,\
                                      vseq+(Seqpos)(J),\
-				     Forwardmode)
+                                     Forwardmode)
 
 #include "myxdrop.gen"
 
@@ -266,9 +266,9 @@ void calculateallowedMININFINITYINTgenerations(
 #define EVALXDROPARBITSCORES EVALXDROPARBITSCORESLEFT
 #define USEQ(A,I) A = getencodedchar(str_useq,\
                                      useq-(Seqpos)1-(I),\
-				     Forwardmode)
+                                     Forwardmode)
 #define VSEQ(A,J) A = getencodedchar(str_vseq,\
                                      vseq-(Seqpos)1-(J),\
-				     Forwardmode)
+                                     Forwardmode)
 
 #include "myxdrop.gen"

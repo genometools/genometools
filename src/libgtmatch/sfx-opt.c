@@ -152,7 +152,7 @@ static OPrval parse_options(int *parsed_args,
   option = option_new_bool("v",
                            "be verbose ",
                            &so->beverbose,
-			   false,env);
+                           false,env);
   option_parser_add_option(op, option, env);
 
   option_exclude(optionsmap, optiondna, env);

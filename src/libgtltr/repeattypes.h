@@ -95,8 +95,8 @@ typedef struct
   Str *str_motif;
   Uchar firstleft, /* first character of left motif instance */
         secondleft,    /* second character of left motif instance */
-	firstright,    /* first character of right motif instance */
-	secondright;   /* second character of right motif instance */
+        firstright,    /* first character of right motif instance */
+        secondright;   /* second character of right motif instance */
   unsigned int allowedmismatches; /* number of allowed mismatches in the four */
                                   /*character motif */
 } Motif;

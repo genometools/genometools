@@ -99,51 +99,51 @@ void calculateallowedMININFINITYINTgenerations(
 
 void evalxdroparbitscoresright(Arbitraryscores *arbitscores,
                                      Myxdropbest * xdropbest,
-	                             ArrayMyfrontvalue * fronts,
-				     const Encodedsequence *str_useq,
-				     const Encodedsequence *str_vseq,
-	                             Seqpos useq,
-				     Seqpos vseq,
-	                             int ulen,
-				     int vlen,
-	                             Xdropscore xdropbelowscore,
-				     Env *env);
+                                     ArrayMyfrontvalue * fronts,
+                                     const Encodedsequence *str_useq,
+                                     const Encodedsequence *str_vseq,
+                                     Seqpos useq,
+                                     Seqpos vseq,
+                                     int ulen,
+                                     int vlen,
+                                     Xdropscore xdropbelowscore,
+                                     Env *env);
 
 #define EVALXDROPARBITSCORESRIGHT\
       void evalxdroparbitscoresright(Arbitraryscores *arbitscores,\
                                      Myxdropbest * xdropbest,\
-	                             ArrayMyfrontvalue * fronts,\
-				     const Encodedsequence *str_useq,\
-				     const Encodedsequence *str_vseq,\
-	                             Seqpos useq,\
-				     Seqpos vseq,\
-	                             int ulen,\
-				     int vlen,\
-	                             Xdropscore xdropbelowscore,\
-				     Env *env)
+                                     ArrayMyfrontvalue * fronts,\
+                                     const Encodedsequence *str_useq,\
+                                     const Encodedsequence *str_vseq,\
+                                     Seqpos useq,\
+                                     Seqpos vseq,\
+                                     int ulen,\
+                                     int vlen,\
+                                     Xdropscore xdropbelowscore,\
+                                     Env *env)
 
 void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,
                                     Myxdropbest * xdropbest,
                                     ArrayMyfrontvalue * fronts,
-				    const Encodedsequence *str_useq,
-				    const Encodedsequence *str_vseq,
+                                    const Encodedsequence *str_useq,
+                                    const Encodedsequence *str_vseq,
                                     Seqpos useq,
-				    Seqpos vseq,
+                                    Seqpos vseq,
                                     int ulen,
-				    int vlen,
+                                    int vlen,
                                     Xdropscore xdropbelowscore,
-				    Env *env);
+                                    Env *env);
 
 #define EVALXDROPARBITSCORESLEFT\
        void evalxdroparbitscoresleft(Arbitraryscores * arbitscores,\
                                     Myxdropbest * xdropbest,\
                                     ArrayMyfrontvalue * fronts,\
-				    const Encodedsequence *str_useq,\
-				    const Encodedsequence *str_vseq,\
+                                    const Encodedsequence *str_useq,\
+                                    const Encodedsequence *str_vseq,\
                                     Seqpos useq,\
-				    Seqpos vseq,\
+                                    Seqpos vseq,\
                                     int ulen,\
-				    int vlen,\
+                                    int vlen,\
                                     Xdropscore xdropbelowscore,\
-				    Env *env)
+                                    Env *env)
 #endif

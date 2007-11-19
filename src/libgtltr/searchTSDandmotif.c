@@ -88,113 +88,113 @@ static void searchforbestTSDandormotifatborders(
                            info->repeats.spaceRepeat[i].len;
     /* motifpos2 is two positions before the right repeat */
     motifpos2 = info->repeats.spaceRepeat[i].pos1
-		  + info->repeats.spaceRepeat[i].offset - 2;
+                  + info->repeats.spaceRepeat[i].offset - 2;
 
     for (back = 0;
         back < info->repeats.spaceRepeat[i].len - info->lmin + 1;
-	back++)
+        back++)
     {
       for (forward = 0;
-	  forward < info->repeats.spaceRepeat[i].len -
-	            info->lmin + 1 - back;
-	  forward++)
+          forward < info->repeats.spaceRepeat[i].len -
+                    info->lmin + 1 - back;
+          forward++)
       {
-	tmp_motifmismatchesleftLTR = tmp_motifmismatchesrightLTR = 0;
-	if ( getencodedchar(encseq, motifpos1 - back, Forwardmode)
-	    != lo->motif.firstleft)
-	{
-	  tmp_motifmismatchesleftLTR++;
-	}
-	if ( getencodedchar(encseq, motifpos1 + 1 - back, Forwardmode)
-	    != lo->motif.secondleft)
-	{
-	  tmp_motifmismatchesleftLTR++;
-	}
+        tmp_motifmismatchesleftLTR = tmp_motifmismatchesrightLTR = 0;
+        if ( getencodedchar(encseq, motifpos1 - back, Forwardmode)
+            != lo->motif.firstleft)
+        {
+          tmp_motifmismatchesleftLTR++;
+        }
+        if ( getencodedchar(encseq, motifpos1 + 1 - back, Forwardmode)
+            != lo->motif.secondleft)
+        {
+          tmp_motifmismatchesleftLTR++;
+        }
         if ( getencodedchar(encseq,   motifpos2 + forward, Forwardmode)
-	    != lo->motif.firstright)
-	{
-	  tmp_motifmismatchesrightLTR++;
-	}
+            != lo->motif.firstright)
+        {
+          tmp_motifmismatchesrightLTR++;
+        }
         if ( getencodedchar(encseq, motifpos2 + 1 + forward, Forwardmode)
-	    != lo->motif.secondright)
-	{
-	  tmp_motifmismatchesrightLTR++;
-	}
+            != lo->motif.secondright)
+        {
+          tmp_motifmismatchesrightLTR++;
+        }
 
-	if (tmp_motifmismatchesleftLTR <= lo->motif.allowedmismatches
-	   &&
-	   tmp_motifmismatchesrightLTR <= lo->motif.allowedmismatches
-	  )
-	{
-	   Seqpos tsd_len;
-	   tsd_len = info->repeats.spaceRepeat[i].len - back - forward;
+        if (tmp_motifmismatchesleftLTR <= lo->motif.allowedmismatches
+           &&
+           tmp_motifmismatchesrightLTR <= lo->motif.allowedmismatches
+          )
+        {
+           Seqpos tsd_len;
+           tsd_len = info->repeats.spaceRepeat[i].len - back - forward;
 
-	   /* TSD length too big */
-	   if (tsd_len > (Seqpos)info->lmax)
-	   {
+           /* TSD length too big */
+           if (tsd_len > (Seqpos)info->lmax)
+           {
              /* nothing */
-	   }
-	   /* first hit */
-	   else if ( !boundaries->motif_near_tsd )
-	   {
-	     Seqpos max, min;
+           }
+           /* first hit */
+           else if ( !boundaries->motif_near_tsd )
+           {
+             Seqpos max, min;
 
              /* save number of mismatches */
              *motifmismatchesleftLTR  = tmp_motifmismatchesleftLTR;
              *motifmismatchesrightLTR = tmp_motifmismatchesrightLTR;
 
-	     /* adjust boundaries */
-	     boundaries->motif_near_tsd = true;
-	     boundaries->leftLTR_5  = motifpos1 - back;
-	     boundaries->rightLTR_3 = motifpos2 + 1 + forward;
+             /* adjust boundaries */
+             boundaries->motif_near_tsd = true;
+             boundaries->leftLTR_5  = motifpos1 - back;
+             boundaries->rightLTR_3 = motifpos2 + 1 + forward;
 
              /* store TSD length */
              boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
 
              max = MAX(oldleftLTR_5, boundaries->leftLTR_5);
-	     min = MIN(oldleftLTR_5, boundaries->leftLTR_5);
+             min = MIN(oldleftLTR_5, boundaries->leftLTR_5);
              difffromoldboundary1 = max - min;
 
              max = MAX(oldrightLTR_3, boundaries->rightLTR_3);
-	     min = MIN(oldrightLTR_3, boundaries->rightLTR_3);
+             min = MIN(oldrightLTR_3, boundaries->rightLTR_3);
              difffromoldboundary2 = max - min;
 
-	     hitcounter++;
-	   }
-	   else
-	   {
-	     Seqpos max, min, difffromnewboundary1,
-		  difffromnewboundary2;
+             hitcounter++;
+           }
+           else
+           {
+             Seqpos max, min, difffromnewboundary1,
+                  difffromnewboundary2;
 
-	     /* test if hit is nearer to old boundaries than previous hit */
-	     max = MAX(oldleftLTR_5, (motifpos1 - back));
-	     min = MIN(oldleftLTR_5, (motifpos1 - back));
+             /* test if hit is nearer to old boundaries than previous hit */
+             max = MAX(oldleftLTR_5, (motifpos1 - back));
+             min = MIN(oldleftLTR_5, (motifpos1 - back));
              difffromnewboundary1 = max - min;
-	     max = MAX(oldrightLTR_3, (motifpos2 + 1 + forward));
+             max = MAX(oldrightLTR_3, (motifpos2 + 1 + forward));
              min = MIN(oldrightLTR_3, (motifpos2 + 1 + forward));
-	     difffromnewboundary2 = max - min;
+             difffromnewboundary2 = max - min;
 
-	     if ( (difffromnewboundary1 + difffromnewboundary2) <
-		 (difffromoldboundary1 + difffromoldboundary2) )
-	     {
+             if ( (difffromnewboundary1 + difffromnewboundary2) <
+                 (difffromoldboundary1 + difffromoldboundary2) )
+             {
 
-	         /* save number of mismatches */
+                 /* save number of mismatches */
                  *motifmismatchesleftLTR  = tmp_motifmismatchesleftLTR;
                  *motifmismatchesrightLTR = tmp_motifmismatchesrightLTR;
 
-	         /* adjust boundaries */
+                 /* adjust boundaries */
                  boundaries->leftLTR_5  = motifpos1 - back;
-	         boundaries->rightLTR_3 = motifpos2 + 1 + forward;
+                 boundaries->rightLTR_3 = motifpos2 + 1 + forward;
 
-		 /* store TSD length */
+                 /* store TSD length */
                  boundaries->lenleftTSD = boundaries->lenrightTSD = tsd_len;
 
-		 difffromoldboundary1 = difffromnewboundary1;
-		 difffromoldboundary2 = difffromnewboundary2;
-		 hitcounter++;
-	     }
-	   }
-	}
+                 difffromoldboundary1 = difffromnewboundary1;
+                 difffromoldboundary2 = difffromnewboundary2;
+                 hitcounter++;
+             }
+           }
+        }
       }
     }
   }
@@ -224,7 +224,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
        motif2 = false;
   unsigned int tmp_motifmismatchesleftLTR,
          tmp_motifmismatchesrightLTR,
-	 motifmismatches_frombestmatch = 0;
+         motifmismatches_frombestmatch = 0;
   const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
   Seqpos oldleftLTR_5  = boundaries->leftLTR_5,
          oldrightLTR_3 = boundaries->rightLTR_3,
@@ -263,29 +263,29 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
        {
          Seqpos max, min;
 
-	 motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
-	 boundaries->leftLTR_5 = i;
-	 motif1 = true;
-	 max = MAX(oldleftLTR_5, boundaries->leftLTR_5);
-	 min = MIN(oldleftLTR_5, boundaries->leftLTR_5);
-	 difffromoldboundary = max - min;
+         motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
+         boundaries->leftLTR_5 = i;
+         motif1 = true;
+         max = MAX(oldleftLTR_5, boundaries->leftLTR_5);
+         min = MIN(oldleftLTR_5, boundaries->leftLTR_5);
+         difffromoldboundary = max - min;
        }
        /* next hit */
        else
        {
          Seqpos max, min, difffromnewboundary;
 
-	 /* test if hit is nearer to old boundaries than previous hit */
-	 max = MAX(oldleftLTR_5, i);
-	 min = MIN(oldleftLTR_5, i);
-	 difffromnewboundary = max - min;
+         /* test if hit is nearer to old boundaries than previous hit */
+         max = MAX(oldleftLTR_5, i);
+         min = MIN(oldleftLTR_5, i);
+         difffromnewboundary = max - min;
 
-	 if ( difffromnewboundary < difffromoldboundary )
-	 {
-	   motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
-	   boundaries->leftLTR_5 = i;
+         if ( difffromnewboundary < difffromoldboundary )
+         {
+           motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
+           boundaries->leftLTR_5 = i;
            difffromoldboundary = difffromnewboundary;
-	 }
+         }
        }
     }
   }
@@ -310,30 +310,30 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
        /* first hit */
        if ( !motif2 )
        {
-	 Seqpos max, min;
+         Seqpos max, min;
 
-	 motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
-	 boundaries->rightLTR_3 = i;
-	 motif2 = true;
-	 max = MAX(oldrightLTR_3, boundaries->rightLTR_3);
-	 min = MIN(oldrightLTR_3, boundaries->rightLTR_3);
-	 difffromoldboundary = max - min;
+         motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
+         boundaries->rightLTR_3 = i;
+         motif2 = true;
+         max = MAX(oldrightLTR_3, boundaries->rightLTR_3);
+         min = MIN(oldrightLTR_3, boundaries->rightLTR_3);
+         difffromoldboundary = max - min;
        }
        /* next hit */
        else
        {
          Seqpos max, min, difffromnewboundary;
 
-	 /* test if hit is nearer to old boundaries than previous hit */
-	 max = MAX(oldrightLTR_3, i);
-	 min = MIN(oldrightLTR_3, i);
-	 difffromnewboundary = max - min;
+         /* test if hit is nearer to old boundaries than previous hit */
+         max = MAX(oldrightLTR_3, i);
+         min = MIN(oldrightLTR_3, i);
+         difffromnewboundary = max - min;
          if ( difffromnewboundary < difffromoldboundary )
-	 {
-	   motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
-	   boundaries->rightLTR_3 = i;
+         {
+           motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
+           boundaries->rightLTR_3 = i;
            difffromoldboundary = difffromnewboundary;
-	 }
+         }
        }
     }
   }
@@ -449,29 +449,29 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
        {
          Seqpos max, min;
 
-	 motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
-	 boundaries->leftLTR_3 = i;
-	 motif1 = true;
-	 max = MAX(oldleftLTR_3, boundaries->leftLTR_3);
-	 min = MIN(oldleftLTR_3, boundaries->leftLTR_3);
-	 difffromoldboundary = max - min;
+         motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
+         boundaries->leftLTR_3 = i;
+         motif1 = true;
+         max = MAX(oldleftLTR_3, boundaries->leftLTR_3);
+         min = MIN(oldleftLTR_3, boundaries->leftLTR_3);
+         difffromoldboundary = max - min;
        }
        /* next hit */
        else
        {
          Seqpos max, min, difffromnewboundary;
 
-	 /* test if hit is nearer to old boundaries than previous hit */
-	 max = MAX(oldleftLTR_3, i);
-	 min = MIN(oldleftLTR_3, i);
-	 difffromnewboundary = max - min;
+         /* test if hit is nearer to old boundaries than previous hit */
+         max = MAX(oldleftLTR_3, i);
+         min = MIN(oldleftLTR_3, i);
+         difffromnewboundary = max - min;
 
-	 if ( difffromnewboundary < difffromoldboundary )
-	 {
-	   motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
-	   boundaries->leftLTR_3 = i;
+         if ( difffromnewboundary < difffromoldboundary )
+         {
+           motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
+           boundaries->leftLTR_3 = i;
            difffromoldboundary = difffromnewboundary;
-	 }
+         }
        }
     }
   }
@@ -499,29 +499,29 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
        {
          Seqpos max, min;
 
-	 motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
-	 boundaries->rightLTR_5 = i;
-	 motif2 = true;
-	 max = MAX(oldrightLTR_5, boundaries->rightLTR_5);
-	 min = MIN(oldrightLTR_5, boundaries->rightLTR_5);
-	 difffromoldboundary = max - min;
+         motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
+         boundaries->rightLTR_5 = i;
+         motif2 = true;
+         max = MAX(oldrightLTR_5, boundaries->rightLTR_5);
+         min = MIN(oldrightLTR_5, boundaries->rightLTR_5);
+         difffromoldboundary = max - min;
        }
        /* next hit */
        else
        {
          Seqpos max, min, difffromnewboundary;
 
-	 /* test if hit is nearer to old boundaries than previous hit */
-	 max = MAX(oldrightLTR_5, i);
-	 min = MIN(oldrightLTR_5, i);
-	 difffromnewboundary = max - min;
+         /* test if hit is nearer to old boundaries than previous hit */
+         max = MAX(oldrightLTR_5, i);
+         min = MIN(oldrightLTR_5, i);
+         difffromnewboundary = max - min;
 
-	 if ( difffromnewboundary < difffromoldboundary )
-	 {
-	   motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
-	   boundaries->rightLTR_5 = i;
+         if ( difffromnewboundary < difffromoldboundary )
+         {
+           motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
+           boundaries->rightLTR_5 = i;
            difffromoldboundary = difffromnewboundary;
-	 }
+         }
        }
     }
   }
@@ -606,13 +606,13 @@ static int searchforTSDandorMotifoutside(
     else
     {
       if ( ((startleftLTR =
-	      boundaries->leftLTR_5 - lo->vicinityforcorrectboundaries) <
-	        markpos[contignumber-1]+1)
-	    &&
-	  (boundaries->leftLTR_5 >= markpos[contignumber-1]+1)
-	)
+              boundaries->leftLTR_5 - lo->vicinityforcorrectboundaries) <
+                markpos[contignumber-1]+1)
+            &&
+          (boundaries->leftLTR_5 >= markpos[contignumber-1]+1)
+        )
       {
-	startleftLTR = markpos[contignumber-1]+1;
+        startleftLTR = markpos[contignumber-1]+1;
       }
     }
   }
@@ -640,7 +640,7 @@ static int searchforTSDandorMotifoutside(
        in case of need decrease alignment length */
     if ( (endrightLTR =
            boundaries->rightLTR_3 + lo->vicinityforcorrectboundaries)
-	> totallength - 1)
+        > totallength - 1)
     {
       endrightLTR = totallength - 1;
     }
@@ -652,7 +652,7 @@ static int searchforTSDandorMotifoutside(
        in case of need decrease alignment length */
     if ( ((endrightLTR =
             boundaries->rightLTR_3 + lo->vicinityforcorrectboundaries) >
-	  markpos[contignumber]-1)
+          markpos[contignumber]-1)
         &&
         (boundaries->rightLTR_3 < markpos[contignumber])
       )
@@ -692,15 +692,15 @@ static int searchforTSDandorMotifoutside(
     subrepeatinfo.envptr = env;
 
     if (sarrquerysubstringmatch(dbseq,
-	  leftlen,
-	  query,
-	  (unsigned long)rightlen,
-	  (unsigned int)lo->minlengthTSD,
-	  alphabetSequentialsuffixarrayreader(ssar),
-	  subsimpleexactselfmatchstore,
-	  &subrepeatinfo,
+          leftlen,
+          query,
+          (unsigned long)rightlen,
+          (unsigned int)lo->minlengthTSD,
+          alphabetSequentialsuffixarrayreader(ssar),
+          subsimpleexactselfmatchstore,
+          &subrepeatinfo,
           NULL,
-	  env) != 0)
+          env) != 0)
     {
        return -1;
     }
@@ -709,14 +709,14 @@ static int searchforTSDandorMotifoutside(
     FREESPACE(query);
 
     searchforbestTSDandormotifatborders(&subrepeatinfo,
-	lo,
-	ssar,
-	markpos,
-	boundaries,
-	motifmismatchesleftLTR,
-	motifmismatchesrightLTR,
-	env
-	);
+        lo,
+        ssar,
+        markpos,
+        boundaries,
+        motifmismatchesleftLTR,
+        motifmismatchesrightLTR,
+        env
+        );
 
     FREEARRAY (&subrepeatinfo.repeats, Repeat);
 
@@ -724,15 +724,15 @@ static int searchforTSDandorMotifoutside(
   {
     searchformotifonlyborders(lo,
         boundaries,
-	ssar,
-	markpos,
-	startleftLTR,
-	endleftLTR,
-	startrightLTR,
-	endrightLTR,
-	motifmismatchesleftLTR,
-	motifmismatchesrightLTR,
-	env);
+        ssar,
+        markpos,
+        startleftLTR,
+        endleftLTR,
+        startrightLTR,
+        endrightLTR,
+        motifmismatchesleftLTR,
+        motifmismatchesrightLTR,
+        env);
   }
   return 0;
 }
@@ -758,11 +758,11 @@ int findcorrectboundaries(
 
   if ( searchforTSDandorMotifoutside(lo,
                                     boundaries,
-				    ssar,
-				    markpos,
-				    &motifmismatchesleftLTR,
-	                            &motifmismatchesrightLTR,
-				    env) != 0 )
+                                    ssar,
+                                    markpos,
+                                    &motifmismatchesleftLTR,
+                                    &motifmismatchesrightLTR,
+                                    env) != 0 )
   {
     return -1;
   }
@@ -774,11 +774,11 @@ int findcorrectboundaries(
                 " LTR and 5'-border of right LTR...\n");
     searchformotifonlyinside(lo,
         boundaries,
-	ssar,
-	markpos,
-	&motifmismatchesleftLTR,
-	&motifmismatchesrightLTR,
-	env);
+        ssar,
+        markpos,
+        &motifmismatchesleftLTR,
+        &motifmismatchesrightLTR,
+        env);
   }
 
   return 0;

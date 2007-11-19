@@ -47,10 +47,10 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   env_error_check(env);
 
   ssar = newSequentialsuffixarrayreaderfromfile(lo->str_indexname,
-		                  SARR_LCPTAB | SARR_SUFTAB |
-				  SARR_ESQTAB | SARR_DESTAB,
+                                  SARR_LCPTAB | SARR_SUFTAB |
+                                  SARR_ESQTAB | SARR_DESTAB,
                                   SEQ_mappedboth,
-				  env);
+                                  env);
   if (ssar == NULL)
   {
     return -1;
@@ -75,9 +75,9 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   if (!had_err && numofdbsequences > 1UL)
   {
     markpos = encseq2markpositions(
-	encseqSequentialsuffixarrayreader(ssar),
-	numofdbsequencesSequentialsuffixarrayreader(ssar),
-	env);
+        encseqSequentialsuffixarrayreader(ssar),
+        numofdbsequencesSequentialsuffixarrayreader(ssar),
+        env);
     lo->markpos = markpos;
     if (markpos == NULL)
     {
@@ -91,15 +91,15 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 
   /* search for maximal repeats */
   if (!had_err && enumeratemaxpairs(ssar,
-		       getnumofcharsAlphabet(
-		         alphabetSequentialsuffixarrayreader(ssar)),
-		       encseqSequentialsuffixarrayreader(ssar),
-		       readmodeSequentialsuffixarrayreader(ssar),
+                       getnumofcharsAlphabet(
+                         alphabetSequentialsuffixarrayreader(ssar)),
+                       encseqSequentialsuffixarrayreader(ssar),
+                       readmodeSequentialsuffixarrayreader(ssar),
                        (unsigned int)lo->minseedlength,
-		       (void*)simpleexactselfmatchstore,
-		       lo,
-		       NULL,
-		       env) != 0)
+                       (void*)simpleexactselfmatchstore,
+                       lo,
+                       NULL,
+                       env) != 0)
   {
     had_err = true;
   }
@@ -134,11 +134,11 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   {
     if (showpredictionsmultiplefasta(lo,
           markpos,
-	  false,
-	  60U,
-	  ssar,
-	  true,
-	  env) != 0)
+          false,
+          60U,
+          ssar,
+          true,
+          env) != 0)
     {
       had_err = true;
     }
@@ -149,11 +149,11 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
   {
     if (showpredictionsmultiplefasta(lo,
           markpos,
-	  true,
-	  60U,
-	  ssar,
-	  true,
-	  env) != 0)
+          true,
+          60U,
+          ssar,
+          true,
+          env) != 0)
     {
       had_err = true;
     }

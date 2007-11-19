@@ -544,8 +544,8 @@ static int runsuffixerator(bool doesa,
                    so->prefixlength,
                    outfileinfo.numoflargelcpvalues,
                    outfileinfo.maxbranchdepth,
-		   &outfileinfo.longest,
-		   env) != 0)
+                   &outfileinfo.longest,
+                   env) != 0)
     {
       haserr = true;
     }

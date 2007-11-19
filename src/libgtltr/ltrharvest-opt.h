@@ -32,7 +32,7 @@ typedef struct
   ArrayLTRboundaries arrayLTRboundaries;  /* stores all predicted */
                                           /*   LTR elements */
   Seqpos *markpos;                        /* positions of SEPARATOR symbols */
-  					  /* in encseq */
+                                          /* in encseq */
 
   Str *str_indexname;           /* name of the suffix array index */
   Str *str_fastaoutputfilename; /* name of the FASTA output file */
@@ -47,7 +47,7 @@ typedef struct
                                  /* by default: OFF */
   bool verbosemode;      /* show extra statements, by default: OFF */
   bool longoutput;       /* additionally shows motif and TSD infos */
-			 /* by default: OFF */
+                         /* by default: OFF */
   Str *str_overlaps;     /* string from argv */
   bool bestofoverlap;    /* take best prediction */
                          /* if overlap occurs, default */
@@ -59,18 +59,18 @@ typedef struct
   unsigned long minlengthTSD,  /* minlength of TSD, default */
                 maxlengthTSD;  /* maxlength of TSD, default */
                                /* by default no search for TSDs */
-  Seqpos vicinityforcorrectboundaries; /* vicinity for search of TSD */
-					     /* and motif */
+  Seqpos vicinityforcorrectboundaries; /* vicinity for search of TSD and
+                                          motif */
 } LTRharvestoptions;
 
 void showuserdefinedoptionsandvalues(LTRharvestoptions *lo);
 
 void printargsline(const char **argv, int argc);
 
-int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Env *env);
+int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Env*);
 
-int ltrharvestoptions(LTRharvestoptions *lo, int argc,
-                        const char **argv, Env *env);
-void wrapltrharvestoptions(LTRharvestoptions *lo,Env *env);
+int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv, Env*);
+
+void wrapltrharvestoptions(LTRharvestoptions *lo, Env*);
 
 #endif

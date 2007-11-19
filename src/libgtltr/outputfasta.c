@@ -58,7 +58,7 @@ typedef struct
 
 static void myencseq2symbolstring(Fastaoutinfo *info,
                          FILE *fpout,
-			 unsigned long seqnum,
+                         unsigned long seqnum,
                          const char *desc,
                          const Alphabet *alpha,
                          const Encodedsequence *encseq,
@@ -95,9 +95,9 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
     offset = info->markpos[seqnum-1]+1;
   }
   fprintf(info->formatout,"[" FormatSeqpos "," FormatSeqpos "]\n",
-		       /* increase by one for output */
+                       /* increase by one for output */
                        PRINTSeqposcast(start - offset + 1),
-		       /* increase by one for output */
+                       /* increase by one for output */
                        PRINTSeqposcast(start - offset + (Seqpos)wlen) );
 
   lastpos = start + wlen - 1;
@@ -137,7 +137,7 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
   char *destab_seqnum;
   unsigned long seqnum =
                   getrecordnumSeqpos(info->markpos, info->numofdbsequences,
-		                     info->totallength, startpos, env);
+                                     info->totallength, startpos, env);
 
   /* if there are sequence descriptions */
   desptr = retriesequencedescription(&desclen,
@@ -154,9 +154,9 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
   myencseq2symbolstring(info, info->formatout,
                       seqnum, destab_seqnum,
                       info->alpha, info->encseq,
-		      Forwardmode, startpos,
-		      (unsigned long)len,
-		      60UL);
+                      Forwardmode, startpos,
+                      (unsigned long)len,
+                      60UL);
   FREESPACE(destab_seqnum);
 
   return 0;
@@ -193,8 +193,8 @@ static int overallpredictionsequences(const LTRharvestoptions *lo,
         end = boundaries->rightLTR_3;
       }
       if (apply(applyinfo,
-	       innerregion ? boundaries->leftLTR_3 + 1: boundaries->leftLTR_5,
-	       end - start + 1, lo->str_indexname, env) != 0)
+               innerregion ? boundaries->leftLTR_3 + 1: boundaries->leftLTR_5,
+               end - start + 1, lo->str_indexname, env) != 0)
       {
         return -1;
       }
@@ -208,12 +208,12 @@ static int overallpredictionsequences(const LTRharvestoptions *lo,
  specified output.
 */
 int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
-		                 Seqpos *markpos,
-		                 bool innerregion,
-		                 unsigned int linewidth,
+                                 Seqpos *markpos,
+                                 bool innerregion,
+                                 unsigned int linewidth,
                                  Sequentialsuffixarrayreader *ssar,
-		                 bool showseqnum,
-		                 Env *env)
+                                 bool showseqnum,
+                                 Env *env)
 {
   Fastaoutinfo fastaoutinfo;
   FILE *formatout = NULL;
@@ -251,7 +251,7 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   fastaoutinfo.descendtab = descendtab;
 
   had_err = overallpredictionsequences(lo, innerregion, &fastaoutinfo,
-				       showpredictionfastasequence, env);
+                                       showpredictionfastasequence, env);
 
   env_ma_free(descendtab, env);
   env_fa_xfclose(formatout, env);

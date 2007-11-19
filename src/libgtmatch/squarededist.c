@@ -31,7 +31,7 @@ static unsigned long squarededistunit2 (const Uchar *u, unsigned long m,
       }
       if (val < *ecolptr)
       {
-	*ecolptr = val;
+        *ecolptr = val;
       }
       if ((val = we + 1) < *ecolptr)
       {

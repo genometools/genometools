@@ -20,7 +20,7 @@
 #include <stdlib.h>
 #include "libgtcore/mathsupport.h"
 
-#define EPSILON	0.0000000000001
+#define EPSILON  0.0000000000001
 
 double logsum(double p1, double p2)
 {
