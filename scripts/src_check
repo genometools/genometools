@@ -110,6 +110,11 @@ for i, fn in ipairs(arg) do -- iterate over all files
     -- check for C++ style comments
     if string.find(l, "[^:/\"a-z]//") then err(fn, ln, "C++ style comment") end
 
+    -- check for tabulators
+    if string.find(l, "\t") then
+      err(fn, ln, "tabulator found, use blanks instead")
+    end
+
     -- check for commata at the beginning of a line
     if string.find(l, "^ *,") then
       err(fn, ln, "illegal ',' at beginning of line")
