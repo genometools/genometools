@@ -71,7 +71,6 @@ EVALXDROPARBITSCORES
   xdropbest->score = bigt_tmp = S (i + i, 0);
   xdropbest->ivalue = xdropbest->jvalue = (unsigned int) i;
 
-  /* assert(big_t.spaceXdropscore != NULL);  */
   STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
 
   /* "phase" d > 0 */
