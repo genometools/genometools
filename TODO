@@ -27,6 +27,7 @@ feature requests:
 - make sure that exons and mRNAs of a gene lie in the range defined by the gene
 - compute the phase correctly (in cds_visitor?)
 - establish naming conventions and use them throughout entire codebase
+- implement simpler solution for multiset_matching
 
 
 merge libgtcore and libgtmatch:
