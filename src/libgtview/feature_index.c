@@ -153,7 +153,7 @@ int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
   return 0;
 }
 
-const char* feature_index_get_first_seqid(FeatureIndex *fi)
+const char* feature_index_get_first_seqid(const FeatureIndex *fi)
 {
   assert(fi);
   return fi->firstseqid;

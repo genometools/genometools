@@ -45,7 +45,7 @@ int           feature_index_get_features_for_range(FeatureIndex*,
                                                    const char *seqid, Range,
                                                    Env*);
 /* returns the first sequence region identifier added to the index */
-const char*   feature_index_get_first_seqid(FeatureIndex*);
+const char*   feature_index_get_first_seqid(const FeatureIndex*);
 Range         feature_index_get_range_for_seqid(FeatureIndex*, const char*);
 bool          feature_index_has_seqid(const FeatureIndex*, const char*, Env*);
 int           feature_index_unit_test(Env*);
