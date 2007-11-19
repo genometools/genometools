@@ -42,7 +42,7 @@ typedef struct {
 
 static int region_info_delete(void *data, Env *env)
 {
-  unsigned long i=0;
+  unsigned long i;
   RegionInfo *info = (RegionInfo*) data;
   for (i = 0; i < array_size(info->features); i++)
     genome_node_rec_delete(*(GenomeNode**) array_get(info->features, i), env);
@@ -133,7 +133,7 @@ int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
 {
   Array* base;
   GenomeNode* key;
-  unsigned long i = 0;
+  unsigned long i;
 
   assert(fi && results);
 
