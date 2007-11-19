@@ -28,9 +28,9 @@ typedef struct {
   bool max_replacement,
        max_deletion,
        max_insertion;
-} SWAlignDPentry;
+} DPentry;
 
-static void fillDPtable(SWAlignDPentry **dptable,
+static void fillDPtable(DPentry **dptable,
                         const char *u, unsigned long ulen,
                         const char *v, unsigned long vlen,
                         const ScoreFunction *sf,
@@ -59,7 +59,7 @@ static void fillDPtable(SWAlignDPentry **dptable,
   }
 }
 
-static Coordinate traceback(Alignment *a, SWAlignDPentry **dptable,
+static Coordinate traceback(Alignment *a, DPentry **dptable,
                             unsigned long i, unsigned long j, Env *env)
 {
   Coordinate start_coordinate = { UNDEF_ULONG, UNDEF_ULONG };
@@ -90,11 +90,10 @@ static Coordinate traceback(Alignment *a, SWAlignDPentry **dptable,
 Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf, Env *env)
 {
   Coordinate alignment_start, alignment_end = { UNDEF_ULONG, UNDEF_ULONG };
-  SWAlignDPentry **dptable;
+  DPentry **dptable;
   Alignment *a = NULL;
   assert(u && v && sf);
-  array2dim_calloc(dptable, seq_length(u) + 1, seq_length(v) + 1,
-                   SWAlignDPentry, env);
+  array2dim_calloc(dptable, seq_length(u)+1, seq_length(v)+1, DPentry, env);
   fillDPtable(dptable, seq_get_encoded(u, env), seq_length(u),
               seq_get_encoded(v, env), seq_length(v), sf, &alignment_end);
   assert(alignment_end.x != UNDEF_ULONG);
