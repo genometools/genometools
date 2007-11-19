@@ -28,6 +28,8 @@ typedef struct {
        min_insertion;
 } DPentry;
 
+/* fill <dptable> of size (<ulen> + 1) x (<vlen> + 1) with values of the edit
+   distance (unit cost) of <u> and <v>. <dptable> must be initialized to 0. */
 static void fillDPtable(DPentry **dptable,
                         const char *u, unsigned long ulen,
                         const char *v, unsigned long vlen)
