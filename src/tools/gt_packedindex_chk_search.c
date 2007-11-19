@@ -30,13 +30,14 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/esa-map.pr"
 #include "libgtmatch/sfx-apfxlen.pr"
-#include "gt_packedindex_bwtconstruct_params.h"
+#include "libgtmatch/eis-bwtconstruct_params.h"
 
 struct chkSearchOptions
 {
   struct bwtOptions idx;
   long minPatLen, maxPatLen;
   unsigned long numOfSamples;
+  bool checkSuffixArrayValues;
 };
 
 static OPrval
@@ -77,9 +78,12 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
     ensure(had_err, bwtSeq);
     if (had_err)
       break;
-    ensure(had_err, verifyBWTSeqIntegrity(bwtSeq, inputProject, env) == 0);
-    if (had_err)
-      break;
+    if (params.checkSuffixArrayValues)
+    {
+      ensure(had_err, verifyBWTSeqIntegrity(bwtSeq, inputProject, env) == 0);
+      if (had_err)
+        break;
+    }
     {
       Seqpos totalLen, dbstart;
       unsigned long trial, patternLen;
@@ -138,12 +142,17 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
                               env);
         BWTSeqExactMatchesIterator *EMIter =
           newEMIterator(bwtSeq, pptr, patternLen, env);
+        Seqpos numMatches = EMINumMatchesTotal(EMIter);
         ensure(had_err, EMIter);
         if (had_err)
           break;
-        assert(EMINumMatchesTotal(EMIter)
-               == BWTSeqMatchCount(bwtSeq, pptr, patternLen, env));
+        assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, patternLen, env));
         assert(EMINumMatchesTotal(EMIter) == countmmsearchiterator(mmsi));
+        fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n"
+                "pattern: ", trial,
+                numMatches);
+        showsymbolstringgeneric(stderr, suffixarray.alpha, pptr, patternLen);
+        fputs("\n", stderr);
         while (nextmmsearchiterator(&dbstart,mmsi))
         {
           struct MatchData *match =
@@ -160,7 +169,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
             fprintf(stderr, "fmindex match doesn't equal mmsearch match "
                     "result!\n"FormatSeqpos" vs. "FormatSeqpos"\n",
                     match->sfxArrayValue, dbstart);
-            break;
+            had_err = true;
           }
         }
         if (!had_err)
@@ -221,6 +230,11 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
   option = option_new_ulong("nsamples",
                             "number of sequences to search for",
                             &param->numOfSamples, 1000, env);
+  option_parser_add_option(op, option, env);
+
+  option = option_new_bool("chksfxarray",
+                           "verify integrity of stored suffix array positions",
+                           &param->checkSuffixArrayValues, false, env);
   option_parser_add_option(op, option, env);
 
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc,

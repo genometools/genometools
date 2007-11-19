@@ -44,7 +44,7 @@
 #include "eis-encidxseq.h"
 #include "eis-bwtseqconstruct.h"
 #include "eis-suffixerator-interface.h"
-#include "tools/gt_packedindex_bwtconstruct_params.h"
+#include "eis-bwtconstruct_params.h"
 
 typedef struct
 {

@@ -26,6 +26,7 @@
 #include "sfx-optdef.h"
 #include "verbose-def.h"
 #include "stamp.h"
+#include "libgtmatch/eis-bwtconstruct_params.h"
 
 static OPrval parse_options(int *parsed_args,
                             bool doesa,
