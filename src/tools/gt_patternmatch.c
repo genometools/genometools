@@ -61,6 +61,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
     epi = newenumpatterniterator(pmopt->minpatternlen,
                                  pmopt->maxpatternlen,
                                  suffixarray.encseq,
+                                 getnumofcharsAlphabet(suffixarray.alpha),
                                  env);
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {

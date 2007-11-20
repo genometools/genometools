@@ -19,6 +19,7 @@
 #include "libgtcore/chardef.h"
 #include "libgtcore/symboldef.h"
 #include "encseq-def.h"
+#include "alphadef.h"
 #include "spacedef.h"
 #include "enum-patt-def.h"
 
@@ -30,12 +31,14 @@
                 *patternstat;
   Uchar *patternspace;
   const Encodedsequence *sampleencseq;
+  unsigned int alphasize;
   Seqpos totallength;
 };
 
 Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
                                             unsigned long maxpatternlen,
                                             const Encodedsequence *encseq,
+                                            unsigned int alphasize,
                                             Env *env)
 {
   Enumpatterniterator *epi = NULL;
@@ -68,6 +71,7 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
   epi->maxpatternlen = maxpatternlen;
   epi->sampleencseq = encseq;
   epi->samplecount = 0;
+  epi->alphasize = alphasize;
   srand48(42349421);
   return epi;
 }
@@ -108,7 +112,7 @@ const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
     cc = getencodedchar(epi->sampleencseq,start+j,Forwardmode);
     if (ISSPECIAL(cc))
     {
-      cc = 0;
+      cc = (Uchar) (drand48() * epi->alphasize);
     }
     epi->patternspace[j] = cc;
   }
