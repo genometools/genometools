@@ -28,6 +28,8 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
 const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
                                      Enumpatterniterator *epi);
 
+void showPatterndistribution(const Enumpatterniterator *epi);
+
 void freeEnumpatterniterator(Enumpatterniterator **epi,Env *env);
 
 #endif

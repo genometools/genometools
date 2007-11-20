@@ -60,7 +60,7 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
   }
   ALLOCASSIGNSPACE(epi->patternspace,NULL,Uchar,maxpatternlen);
   ALLOCASSIGNSPACE(epi->patternstat,NULL,unsigned long,maxpatternlen+1);
-  for (i=0; i<maxpatternlen; i++)
+  for (i=0; i<=maxpatternlen; i++)
   {
     epi->patternstat[i] = 0;
   }
@@ -88,45 +88,59 @@ const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
                                      Enumpatterniterator *epi)
 {
   Seqpos start;
-  unsigned long j, requiredpatternlen;
+  unsigned long j;
+  Uchar cc;
 
   if (epi->minpatternlen == epi->maxpatternlen)
   {
-    requiredpatternlen = epi->minpatternlen;
+    *patternlen = epi->minpatternlen;
   } else
   {
-    requiredpatternlen = (unsigned long) (epi->minpatternlen +
-                                          (drand48() *
-                                          (double) (epi->maxpatternlen -
-                                                    epi->minpatternlen+1)));
+    *patternlen = (unsigned long) (epi->minpatternlen +
+                                   (drand48() *
+                                   (double) (epi->maxpatternlen -
+                                             epi->minpatternlen+1)));
   }
-  while (true)
+  start = (Seqpos) (drand48() * (double) (epi->totallength - *patternlen));
+  assert(start < (Seqpos) (epi->totallength - *patternlen));
+  for (j=0; j<*patternlen; j++)
   {
-    *patternlen = requiredpatternlen;
-    start = (Seqpos) (drand48() * (double) (epi->totallength - *patternlen));
-    assert(start < (Seqpos) (epi->totallength - *patternlen));
-    for (j=0; j<*patternlen; j++)
+    cc = getencodedchar(epi->sampleencseq,start+j,Forwardmode);
+    if (ISSPECIAL(cc))
     {
-      epi->patternspace[j] = getencodedchar(epi->sampleencseq,start+j,
-                                            Forwardmode);
-      if (ISSPECIAL(epi->patternspace[j]))
-      {
-        *patternlen = j;
-        break;
-      }
+      cc = 0;
     }
-    if (*patternlen > (unsigned long) 1)
+    epi->patternspace[j] = cc;
+  }
+  if (epi->samplecount & 1)
+  {
+    reverseinplace(epi->patternspace,*patternlen);
+  }
+  epi->samplecount++;
+  epi->patternstat[*patternlen]++;
+  return epi->patternspace;
+}
+
+void showPatterndistribution(const Enumpatterniterator *epi)
+{
+  unsigned long i;
+  double addprob, probsum = 0.0;
+
+  printf("# %lu pattern with the following length distribution:\n",
+         epi->samplecount);
+  for(i=epi->minpatternlen; i<=epi->maxpatternlen; i++)
+  {
+    if(epi->patternstat[i] > 0)
     {
-      if (epi->samplecount & 1)
-      {
-        reverseinplace(epi->patternspace,*patternlen);
-      }
-      epi->samplecount++;
-      epi->patternstat[*patternlen]++;
-      break;
+      addprob = (double) epi->patternstat[i] / epi->samplecount;
+      probsum += addprob;
+      printf("# %lu: %lu (prob=%.4f,cumulative=%.4f)\n",
+             i,
+             epi->patternstat[i],
+             addprob,
+             probsum);
     }
   }
-  return epi->patternspace;
 }
 
 void freeEnumpatterniterator(Enumpatterniterator **epi,Env *env)

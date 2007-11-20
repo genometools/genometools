@@ -26,10 +26,10 @@ ALLOUTPUTOPTS="../scripts/alloutputoptions.rb"
 
 # the make call normally used for development
 cd testsuite
-env -i testsuite.rb -keywords gt_suffixerator
-env -i testsuite.rb -keywords gt_trieins
-env -i testsuite.rb -keywords gt_ltrharvest
-env -i testsuite.rb -keywords 'gt_suffixerator and gttestdata' -gttestdata ${GTTESTDATA}
+env -i ./testsuite.rb -keywords gt_suffixerator
+env -i ./testsuite.rb -keywords gt_trieins
+env -i ./testsuite.rb -keywords gt_ltrharvest
+env -i ./testsuite.rb -keywords 'gt_suffixerator and gttestdata' -gttestdata ${GTTESTDATA}
 # optional -memcheck   (run valgrind)
 #          -select 253 (run testcase 253)
 # the following depends on vmatch-mini.x and mkvtree.x
