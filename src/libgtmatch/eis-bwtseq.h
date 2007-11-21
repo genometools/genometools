@@ -148,7 +148,7 @@ deleteBWTSeq(BWTSeq *bwtseq, Env *env);
  * @param bwtSeq reference of object to query
  * @return 0 if no locate information is present, non-zero otherwise
  */
-extern int
+static inline bool
 BWTSeqHasLocateInformation(const BWTSeq *bwtSeq);
 
 /**
@@ -260,8 +260,41 @@ static inline struct matchBound *
 BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
                 Symbol nextSym, Env *env);
 
-extern int
-verifyBWTSeqIntegrity(BWTSeq *bwtSeq, const Str *projectName, Env *env);
+enum verifyBWTSeqErrCode
+{
+  VERIFY_BWTSEQ_NO_ERROR = 0,
+  VERIFY_BWTSEQ_REFLOAD_ERROR = -1, /**< failed to load suffix array for
+                                     *   reference comparisons */
+  VERIFY_BWTSEQ_LENCOMPARE_ERROR = -2, /* lengths of bwt sequence
+                                        * index and loaded suffix arry
+                                        * don't match */
+  VERIFY_BWTSEQ_SUFVAL_ERROR = -3, /**< a marked suffix array value
+                                    * stored in the bwt sequence index
+                                    * does not match the value read directly
+                                    * from the suffix array table */
+  VERIFY_BWTSEQ_LFMAPWALK_ERROR = -4, /**< while traversing the bwt
+                                       * sequence in reverse original sequence
+                                       * order, the symbol retrieved
+                                       * does not match the
+                                       * corresponding symbol in the
+                                       * encoded sequence */
+};
+
+/**
+ * \brief Perform various checks on the burrows wheeler transform
+ *
+ * - inspect all sampled suffix array values for equality with
+ *   corresponding value of mapped reference suffix array
+ * - check wether the last-to-first traversal of the BWT sequence
+ *   index delivers the reversed encoded sequence
+ * @param tickPrint print a dot every time tickPrint many symbols have
+ *                  been processed
+ * @param fp dots printed to this file
+ */
+
+extern enum verifyBWTSeqErrCode
+BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
+                      unsigned long tickPrint, FILE *fp, Env *env);
 
 /**
  * \brief Given a query string produce iterator for all matches in

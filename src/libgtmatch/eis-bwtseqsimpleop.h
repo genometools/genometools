@@ -31,6 +31,12 @@ BWTSeqLength(const BWTSeq *seq)
   return EISLength(seq->seqIdx);
 }
 
+static inline bool
+BWTSeqHasLocateInformation(const BWTSeq *bwtSeq)
+{
+  return bwtSeq->locateSampleInterval != 0;
+}
+
 static inline Seqpos
 BWTSeqTransformedOcc(const BWTSeq *bwtSeq, Symbol tsym, Seqpos pos, Env *env)
 {

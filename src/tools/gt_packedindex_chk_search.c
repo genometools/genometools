@@ -32,17 +32,19 @@
 #include "libgtmatch/sfx-apfxlen.pr"
 #include "libgtmatch/eis-bwtconstruct_params.h"
 
+#define DEFAULT_PROGRESS_INTERVAL  100000UL
+
 struct chkSearchOptions
 {
   struct bwtOptions idx;
   long minPatLen, maxPatLen;
-  unsigned long numOfSamples;
+  unsigned long numOfSamples, progressInterval;
   bool checkSuffixArrayValues;
 };
 
 static OPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
-                   struct chkSearchOptions *param, const Str *projectName,
+                   struct chkSearchOptions *params, const Str *projectName,
                    Env *env);
 
 extern int
@@ -80,9 +82,16 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
       break;
     if (params.checkSuffixArrayValues)
     {
-      ensure(had_err, verifyBWTSeqIntegrity(bwtSeq, inputProject, env) == 0);
-      if (had_err)
+      enum verifyBWTSeqErrCode retval =
+        BWTSeqVerifyIntegrity(bwtSeq, inputProject, params.progressInterval,
+                              stderr, env);
+      if (retval != VERIFY_BWTSEQ_NO_ERROR)
+      {
+        fprintf(stderr, "index integrity check failed: %s\n",
+                error_get(env_error(env)));
+        env_error_set(env, "aborted because of index integrity check fail");
         break;
+      }
     }
     {
       Seqpos totalLen, dbstart;
@@ -199,7 +208,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
 
 static OPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
-                   struct chkSearchOptions *param, const Str *projectName,
+                   struct chkSearchOptions *params, const Str *projectName,
                    Env *env)
 {
   OptionParser *op;
@@ -212,29 +221,34 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                          " <indexname> and perform verification of search"
                          " results.", env);
 
-  registerPackedIndexOptions(op, &param->idx, BWTDEFOPT_MULTI_QUERY,
+  registerPackedIndexOptions(op, &params->idx, BWTDEFOPT_MULTI_QUERY,
                              projectName, env);
 
   option = option_new_long("minpatlen",
                            "minimum length of patterns searched for, -1 "
                            "implies automatic choice based on index "
-                           "properties", &param->minPatLen, -1, env);
+                           "properties", &params->minPatLen, -1, env);
   option_parser_add_option(op, option, env);
 
   option = option_new_long("maxpatlen",
                            "maximum length of patterns searched for, -1 "
                            "implies automatic choice based on index "
-                           "properties", &param->maxPatLen, -1, env);
+                           "properties", &params->maxPatLen, -1, env);
   option_parser_add_option(op, option, env);
 
   option = option_new_ulong("nsamples",
                             "number of sequences to search for",
-                            &param->numOfSamples, 1000, env);
+                            &params->numOfSamples, 1000, env);
   option_parser_add_option(op, option, env);
 
   option = option_new_bool("chksfxarray",
                            "verify integrity of stored suffix array positions",
-                           &param->checkSuffixArrayValues, false, env);
+                           &params->checkSuffixArrayValues, false, env);
+  option_parser_add_option(op, option, env);
+
+  option = option_new_ulong("ticks", "print dot after this many symbols"
+                            " tested okay", &params->progressInterval,
+                            DEFAULT_PROGRESS_INTERVAL, env);
   option_parser_add_option(op, option, env);
 
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc,
@@ -243,7 +257,7 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
 
   /* compute parameters currently not set from command-line or
    * determined indirectly */
-  computePackedIndexDefaults(&param->idx, env);
+  computePackedIndexDefaults(&params->idx, env);
 
   return oprval;
 }

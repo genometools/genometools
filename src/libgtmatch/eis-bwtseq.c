@@ -294,12 +294,6 @@ deleteBWTSeq(BWTSeq *bwtSeq, Env *env)
   env_ma_free(bwtSeq, env);
 }
 
-int
-BWTSeqHasLocateInformation(const BWTSeq *bwtSeq)
-{
-  return bwtSeq->locateSampleInterval;
-}
-
 static inline int
 BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
                        struct extBitsRetrieval *extBits, Env *env)
@@ -442,61 +436,124 @@ EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
 }
 
 extern int
-verifyBWTSeqIntegrity(BWTSeq *bwtSeq, const Str *projectName, Env *env)
+BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
+                      unsigned long tickPrint, FILE *fp, Env *env)
 {
-  Seqpos len, seqLastPos, i;
-  Verboseinfo *verbosity;
   Suffixarray suffixArray;
   struct extBitsRetrieval extBits;
-  unsigned bitsPerOrigPos;
-  int retval = 0;
-  assert(bwtSeq && projectName && env);
-
-  len = BWTSeqLength(bwtSeq);
-  verbosity = newverboseinfo(true, env);
-  initExtBitsRetrieval(&extBits, env);
-  bitsPerOrigPos = requiredSeqposBits(
-    (BWTSeqLength(bwtSeq) - 1)/bwtSeq->locateSampleInterval);
-  if (mapsuffixarray(&suffixArray, &seqLastPos,
-                     SARR_SUFTAB, projectName, verbosity, env))
+  bool suffixArrayIsInitialized = false, extBitsAreInitialized = false;
+  Verboseinfo *verbosity = NULL;
+  enum verifyBWTSeqErrCode retval = VERIFY_BWTSEQ_NO_ERROR;
+  do
   {
-    env_error_set(env, "Cannot load suffix array project with"
-                  " demand for suffix table file\n");
-    freeverboseinfo(&verbosity, env);
-    return -1;
-  }
+    Seqpos len;
+    unsigned bitsPerOrigPos;
+    assert(bwtSeq && projectName && env);
 
-  assert(seqLastPos == len - 1);
-
-  for (i = 0; i < len; ++i)
-    if (BWTSeqPosHasLocateInfo(bwtSeq, i, &extBits, env))
+    verbosity = newverboseinfo(true, env);
+    initExtBitsRetrieval(&extBits, env);
+    if (mapsuffixarray(&suffixArray, &len,
+                       SARR_SUFTAB | SARR_ESQTAB, projectName, verbosity, env))
     {
-      EISRetrieveExtraBits(bwtSeq->seqIdx, i,
-                           EBRF_RETRIEVE_CWBITS | EBRF_RETRIEVE_VARBITS,
-                           &extBits, bwtSeq->hint, env);
-      {
-        unsigned bitsPerBWTPos = requiredSeqposBits(extBits.len - 1);
-        BitOffset locateRecordIndex =
-          bs1BitsCount(extBits.cwPart, extBits.cwOffset,
-                       i - extBits.start),
-          locateRecordOffset = (bitsPerBWTPos + bitsPerOrigPos)
-          * locateRecordIndex;
-        Seqpos sfxArrayValue =
-          bsGetSeqpos(extBits.varPart, extBits.varOffset
-                      + locateRecordOffset + bitsPerBWTPos, bitsPerOrigPos)
-          * bwtSeq->locateSampleInterval;
-        if (sfxArrayValue != suffixArray.suftab[i])
+      env_error_set(env, "Cannot load reference suffix array project with"
+                    " demand for suffix table file and encoded sequence"
+                    " for project: %s", str_get(projectName));
+      freeverboseinfo(&verbosity, env);
+      retval = VERIFY_BWTSEQ_REFLOAD_ERROR;
+      break;
+    }
+    suffixArrayIsInitialized = true;
+    ++len;
+    if (BWTSeqLength(bwtSeq) != len)
+    {
+      env_error_set(env, "length mismatch for suffix array project %s and "
+                    "bwt sequence index", str_get(projectName));
+      retval = VERIFY_BWTSEQ_LENCOMPARE_ERROR;
+      break;
+    }
+
+    if (BWTSeqHasLocateInformation(bwtSeq))
+    {
+      Seqpos i;
+      bitsPerOrigPos = requiredSeqposBits(
+        (BWTSeqLength(bwtSeq) - 1)/bwtSeq->locateSampleInterval);
+      for (i = 0; i < len && retval == VERIFY_BWTSEQ_NO_ERROR; ++i)
+        if (BWTSeqPosHasLocateInfo(bwtSeq, i, &extBits, env))
         {
-          fprintf(stderr, "Failed suffixarray value comparison at position "
-                  FormatSeqpos": "FormatSeqpos" != "FormatSeqpos"\n",
-                  i, sfxArrayValue, suffixArray.suftab[i]);
-          retval = -2;
+          EISRetrieveExtraBits(bwtSeq->seqIdx, i,
+                               EBRF_RETRIEVE_CWBITS | EBRF_RETRIEVE_VARBITS,
+                               &extBits, bwtSeq->hint, env);
+          {
+            unsigned bitsPerBWTPos = requiredSeqposBits(extBits.len - 1);
+            BitOffset locateRecordIndex =
+              bs1BitsCount(extBits.cwPart, extBits.cwOffset,
+                           i - extBits.start),
+              locateRecordOffset = (bitsPerBWTPos + bitsPerOrigPos)
+              * locateRecordIndex;
+            Seqpos sfxArrayValue =
+              bsGetSeqpos(extBits.varPart, extBits.varOffset
+                          + locateRecordOffset + bitsPerBWTPos, bitsPerOrigPos)
+              * bwtSeq->locateSampleInterval;
+            if (sfxArrayValue != suffixArray.suftab[i])
+            {
+              env_error_set(env, "Failed suffixarray value comparison"
+                            " at position "FormatSeqpos": "FormatSeqpos" != "
+                            FormatSeqpos,
+                            i, sfxArrayValue, suffixArray.suftab[i]);
+              retval = VERIFY_BWTSEQ_SUFVAL_ERROR;
+              break;
+            }
+          }
+        }
+      if (retval != VERIFY_BWTSEQ_NO_ERROR)
+        break;
+    }
+    else
+    {
+      fputs("Not checking suftab values (no locate information present)!\n",
+            stderr);
+    }
+    if (suffixArray.longest.defined && len)
+    {
+      Seqpos nextLocate = suffixArray.longest.valueseqpos,
+        i = len;
+      /* handle first symbol specially because the encodedsequence
+       * will not return the terminator symbol */
+      {
+        Symbol sym = EISGetSym(bwtSeq->seqIdx, nextLocate, bwtSeq->hint, env);
+        if (sym != UNDEFBWTCHAR)
+        {
+          env_error_set(env, "symbol mismatch at position "FormatSeqpos": "
+                        "%d vs. reference symbol %d", i - 1, sym,
+                        UNDEFBWTCHAR);
+          retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
           break;
         }
+        --i;
+        nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, env);
+      }
+      while (i > 0)
+      {
+        Symbol symRef = getencodedchar(suffixArray.encseq,
+                                       --i, suffixArray.readmode);
+        Symbol symCmp = EISGetSym(bwtSeq->seqIdx, nextLocate, bwtSeq->hint,
+                                  env);
+        if (symCmp != symRef)
+        {
+          env_error_set(env, "symbol mismatch at position "FormatSeqpos": "
+                        "%d vs. reference symbol %d", i, symCmp, symRef);
+          retval = VERIFY_BWTSEQ_LFMAPWALK_ERROR;
+          break;
+        }
+        nextLocate = BWTSeqLFMap(bwtSeq, nextLocate, env);
       }
     }
-  freesuffixarray(&suffixArray, env);
-  destructExtBitsRetrieval(&extBits, env);
-  freeverboseinfo(&verbosity, env);
+  } while (0);
+  if (suffixArrayIsInitialized)
+    freesuffixarray(&suffixArray, env);
+  if (verbosity)
+    freeverboseinfo(&verbosity, env);
+  if (extBitsAreInitialized)
+    destructExtBitsRetrieval(&extBits, env);
   return retval;
 }

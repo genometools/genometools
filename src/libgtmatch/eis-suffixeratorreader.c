@@ -192,6 +192,7 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                            listenerID *ids,
                            Verboseinfo *verbosity, Env *env)
 {
+  /* FIXME: weed out all those structures already computed in sfx-run.c */
   Encodedsequence *encseq = NULL;
   unsigned long *characterdistribution = NULL;
   unsigned int numofchars = 0;
