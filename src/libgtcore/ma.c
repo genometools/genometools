@@ -175,10 +175,8 @@ static int check_space_leak(void *key, void *value, void *data, Env *env)
   assert(key && value && data && env);
   /* report only the first leak */
   if (!info->has_leak) {
-    /*@ignore@*/
     fprintf(stderr, "bug: %zu bytes memory leaked (allocated on line %d in "
             "file \"%s\")\n", mainfo->size, mainfo->line, mainfo->filename);
-    /*@end@*/
     info->has_leak = true;
   }
   return 0;
