@@ -1,0 +1,256 @@
+##gff-version   3
+##sequence-region   seq0 1 22217931
+seq0	Fruitfly	LTR_retrotransposon	347940	355382	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	688639	697620	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	978600	986177	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	998445	1007482	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	1221849	1229258	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	1303473	1303954	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	1680695	1688104	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	1713076	1713343	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	1802938	1808457	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	2104735	2112341	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	2286663	2291810	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	2558160	2564170	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	2765222	2771744	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	3065656	3070800	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	3195363	3202734	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	3244118	3251625	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	3642412	3647556	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	4173896	4176470	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	4594328	4601711	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	4654449	4661975	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	5819978	5828927	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	6355420	6358284	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	6419126	6423779	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	6423780	6428231	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	6428230	6437328	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	6869048	6875195	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	6983718	6990779	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	7335612	7342669	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	7540367	7542745	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	7969366	7976282	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	8005900	8011045	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	8444707	8453819	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	8586751	8593747	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	8715395	8723721	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	8992566	9000017	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	9966190	9973251	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	10148786	10156201	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	10585306	10592911	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	10869007	10876005	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	10939408	10948564	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	11529509	11536853	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	11552562	11557708	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	11702432	11709843	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	12056256	12063250	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	12547246	12554316	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	12770728	12778114	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	12922775	12930184	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	13438387	13439046	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	13504464	13509712	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	13835292	13844383	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	14624781	14633885	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	14782018	14787163	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	14962535	14970060	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	15424189	15431601	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	15564549	15571543	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	15661867	15662525	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	15662859	15664842	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	15696864	15699839	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	15701246	15705654	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	15804999	15807341	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	16119302	16124450	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	16131875	16138871	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	16490102	16497158	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	17122469	17130082	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	17798061	17803205	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	18030014	18039102	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	19125508	19132485	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	19325623	19333040	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	19630711	19635762	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	19635763	19643371	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	19643372	19646532	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	19651276	19652086	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	19681675	19690752	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	19984003	19989022	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20133886	20134160	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20135490	20135814	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20137094	20142345	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20143985	20144088	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20148441	20149279	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20150134	20150594	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20154138	20154859	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20154860	20162270	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20162270	20169186	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20169187	20169317	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20169316	20170809	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20170804	20171048	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20178952	20179192	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20241908	20242522	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20242523	20247666	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20247666	20252561	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20272957	20280368	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20377606	20382636	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20546016	20553426	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20605022	20605341	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20710045	20717862	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	20805605	20806264	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	21010933	21019137	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	21317349	21324763	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	21372835	21373265	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	21375980	21378558	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	21383095	21383351	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	21402852	21403334	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	21430204	21437889	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	21486368	21489615	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	21525003	21531415	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	21566520	21570614	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	21814814	21823919	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	21909869	21910105	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	21944136	21944820	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22015372	22015594	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22034484	22039627	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22049240	22049623	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22052309	22052654	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22116556	22123207	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22133407	22137517	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22140503	22144064	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22148784	22151268	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22155967	22156135	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22162400	22167445	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22167561	22167782	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22168147	22168625	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22169273	22169463	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22170878	22170980	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22207263	22209332	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22210048	22210140	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22214446	22214882	.	?	.	.
+###
+seq0	Fruitfly	LTR_retrotransposon	22214882	22217230	.	?	.	.
+###

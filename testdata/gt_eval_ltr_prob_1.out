@@ -1,0 +1,2 @@
+LTR_retrotransposon sensitivity:  59.06% (75/127) (missing LTRs: 46)
+LTR_retrotransposon specificity:  82.42% (75/91) (wrong LTRs: 13)

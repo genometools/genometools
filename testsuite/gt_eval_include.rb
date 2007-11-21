@@ -60,6 +60,20 @@ end
   end
 end
 
+Name "gt eval -ltr prob 1 (failure)"
+Keywords "gt_eval"
+Test do
+  run_test("#{$bin}gt eval -ltrdelta 30 -ltr #{$testdata}/gt_eval_ltr_prob_1.reality #{$testdata}/gt_eval_ltr_prob_1.prediction", :retval => 1)
+  grep($last_stderr, "is not sorted")
+end
+
+Name "gt eval -ltr prob 1 (success)"
+Keywords "gt_eval"
+Test do
+  run_test "#{$bin}gt gff3 -sort #{$testdata}/gt_eval_ltr_prob_1.prediction | #{$memcheck} #{$bin}gt eval -ltrdelta 30 -ltr #{$testdata}/gt_eval_ltr_prob_1.reality -"
+  run "diff #{$last_stdout} #{$testdata}/gt_eval_ltr_prob_1.out"
+end
+
 if $gttestdata then
   Name "gt eval test (gth rate 0)"
   Keywords "gt_eval"
