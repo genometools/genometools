@@ -33,6 +33,8 @@ Error* env_error(const Env*); /* return the error object */
 Log*   env_log(const Env*);   /* return the log object or NULL */
 void   env_set_log(Env*, Log*);
 void   env_set_spacepeak(Env*, bool);
+/* returns 0 if no memory map, file pointer, or memory has been leaked and a
+   value != 0 otherwise */
 int    env_delete(Env*);
 
 /* wrapper for memory functions */
