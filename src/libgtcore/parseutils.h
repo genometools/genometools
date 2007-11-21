@@ -23,6 +23,18 @@
 #include "libgtcore/phase.h"
 #include "libgtcore/strand.h"
 
+/* parse integer from <nptr> and store result in <out>.
+   returns 0 upon success and -1 upon failure */
+int parse_int(int *out, const char *nptr);
+
+/* parse long from <nptr> and store result in <out>.
+   returns 0 upon success and -1 upon failure */
+int parse_long(long *out, const char *nptr);
+
+/* parse double from <nptr> and store result in <out>.
+   returns 0 upon success and -1 upon failure */
+int parse_double(double *out, const char *nptr);
+
 /* enforces that start <= end */
 int parse_range(Range*, const char *start, const char *end,
                 unsigned long line_number, const char *filename, Env*);

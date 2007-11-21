@@ -17,10 +17,58 @@
 
 #include <assert.h>
 #include <errno.h>
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 #include "libgtcore/parseutils.h"
 #include "libgtcore/undef.h"
+
+int parse_int(int *out, const char *nptr)
+{
+  long lval;
+  char *ep;
+  assert(out && nptr);
+  errno = 0;
+  lval = strtol(nptr, &ep, 10);
+  if (nptr[0] == '\0' || *ep != '\0')
+    return -1;
+  if ((errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN)) ||
+      (lval > INT_MAX || lval < INT_MIN)) {
+    return -1;
+  }
+  *out = lval;
+  return 0;
+}
+
+int parse_long(long *out, const char *nptr)
+{
+  long lval;
+  char *ep;
+  assert(out && nptr);
+  errno = 0;
+  lval = strtol(nptr, &ep, 10);
+  if (nptr[0] == '\0' || *ep != '\0')
+    return -1;
+  if (errno == ERANGE && (lval == LONG_MAX || lval == LONG_MIN))
+    return -1;
+  *out = lval;
+  return 0;
+}
+
+int parse_double(double *out, const char *nptr)
+{
+  double dval;
+  char *ep;
+  assert(out && nptr);
+  errno = 0;
+  dval = strtod(nptr, &ep);
+  if (nptr[0] == '\0' || *ep != '\0')
+    return -1;
+  if (errno == ERANGE && (dval == 0 || dval == HUGE_VAL || dval == -HUGE_VAL))
+    return -1;
+  *out = dval;
+  return 0;
+}
 
 int parse_range(Range *range, const char *start, const char *end,
                 unsigned long line_number, const char *filename, Env *env)
