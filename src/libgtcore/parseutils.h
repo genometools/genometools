@@ -37,7 +37,7 @@ int parse_strand(Strand*, const char *strand,
 int parse_phase(Phase*, const char *phase,
                unsigned long line_number, const char *filename, Env*);
 
-int parse_int(int*, const char *integer,
-              unsigned long line_number, const char *filename, Env*);
+int parse_int_line(int*, const char *integer,
+                   unsigned long line_number, const char *filename, Env*);
 
 #endif

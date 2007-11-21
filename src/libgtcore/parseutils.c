@@ -152,8 +152,8 @@ int parse_phase(Phase *phase_value, const char *phase,
   return 0;
 }
 
-int parse_int(int *int_value, const char *integer, unsigned long line_number,
-              const char *filename, Env *env)
+int parse_int_line(int *int_value, const char *integer,
+                   unsigned long line_number, const char *filename, Env *env)
 {
   int rval;
   assert(integer && line_number && filename);

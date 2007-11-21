@@ -651,7 +651,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
         /* skip blanks */
         while (line[0] == ' ')
           line++;
-        had_err = parse_int(&version, line, *line_number, filename, env);
+        had_err = parse_int_line(&version, line, *line_number, filename, env);
       }
       if (!had_err) {
         if (version != GFF_VERSION) {

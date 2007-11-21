@@ -139,8 +139,9 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
   if (!had_err) {
     tokenizer_next_token(tz, env);
     while ((token = tokenizer_get_token(tz, env))) {
-      had_err = parse_int(&score, str_get(token), tokenizer_get_line_number(tz),
-                          tokenizer_get_filename(tz), env);
+      had_err = parse_int_line(&score, str_get(token),
+                               tokenizer_get_line_number(tz),
+                               tokenizer_get_filename(tz), env);
       if (had_err)
         break;
       scorematrix_set_score(s,
