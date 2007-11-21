@@ -318,7 +318,7 @@ newEISHint(EISeq *seq, Env *env);
 static inline void
 deleteEISHint(EISeq *seq, EISHint hint, Env *env);
 
-enum integrityCheckResults
+enum EISIntegrityCheckResults
 {
   EIS_INTEGRITY_CHECK_NO_ERROR = 0,
   EIS_INTEGRITY_CHECK_INVALID_SYMBOL, /**< reading from the index
@@ -335,11 +335,17 @@ enum integrityCheckResults
                                        *   delivered a wrong count */
 };
 
-extern const char *EISintegrityCheckResultStrings[];
+extern const char *EISIntegrityCheckResultStrings[];
 
-extern enum integrityCheckResults
-verifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
-                unsigned long tickPrint, FILE *fp, Env *env);
+enum EISIntegrityCheckFlags
+{
+  EIS_VERIFY_BASIC = 0,
+  EIS_VERIFY_EXT_RANK = 1 << 0,
+};
+
+extern enum EISIntegrityCheckResults
+EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
+                   unsigned long tickPrint, FILE *fp, int chkFlags, Env *env);
 
 static inline FILE *
 EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,

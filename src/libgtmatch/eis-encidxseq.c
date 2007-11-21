@@ -28,7 +28,7 @@ deleteEncIdxSeq(EISeq *seq, Env *env)
   seq->classInfo->delete(seq, env);
 }
 
-const char *EISintegrityCheckResultStrings[] =
+const char *EISIntegrityCheckResultStrings[] =
 {
   "no error in bwt comparison.",
   "reading from the index produced an incorrect symbol.",
@@ -54,8 +54,8 @@ const char *EISintegrityCheckResultStrings[] =
     case EIS_INTEGRITY_CHECK_RANK_FAILED:                               \
       fprintf(stderr, "At position "FormatSeqpos                        \
               ", rank operation yielded  wrong count: "FormatSeqpos     \
-              " expected "FormatSeqpos"\n",                             \
-              pos, rankQueryResult, rankExpect);                        \
+              ", expected "FormatSeqpos" for symbol %d\n",              \
+              pos, rankQueryResult, rankExpect, symEnc);                \
       break;                                                            \
     }                                                                   \
     EISPrintDiagsForPos(seqIdx, pos, stderr, hint, env);                \
@@ -71,15 +71,16 @@ const char *EISintegrityCheckResultStrings[] =
  * @param fp descriptor to write progress marks to.
  * @return -1 on error, 0 on identity, >0 on inconsistency
  */
-extern enum integrityCheckResults
-verifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
-                unsigned long tickPrint, FILE *fp, Env *env)
+extern enum EISIntegrityCheckResults
+EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
+                   unsigned long tickPrint, FILE *fp, int chkFlags, Env *env)
 {
   Seqpos rankTable[UCHAR_MAX+1];
   FILE *bwtFP;
   Seqpos pos = 0;
   Suffixarray suffixArray;
-  Symbol symOrig, symEnc;
+  Symbol symOrig;
+  unsigned symEnc;
   EISHint hint;
   Seqpos seqLastPos, rankQueryResult, rankExpect;
   Verboseinfo *verbosity;
@@ -113,13 +114,11 @@ verifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
       return -1;
     }
     fseeko(bwtFP, skip, SEEK_SET);
-    for (sym = 0; sym < UCHAR_MAX+1; ++sym)
+    for (sym = 0; sym <= UCHAR_MAX; ++sym)
       if (MRAEncSymbolHasValidMapping(alphabet, sym))
         rankTable[sym] = EISRank(seqIdx, sym, skip, hint, env);
     pos = skip;
   }
-/*   EISPrintDiagsForPos(seqIdx, ((unsigned long)random())%EISLength(seqIdx), */
-/*                       stderr, hint, env); */
   while ((symRead = getc(bwtFP)) != EOF)
   {
     symOrig = symRead;
@@ -130,9 +129,22 @@ verifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
       verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_BWT_READ_ERROR);
     if (symEnc != symOrig)
       verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_INVALID_SYMBOL);
-    if ((rankExpect = ++rankTable[symOrig])
-       != (rankQueryResult = EISRank(seqIdx, symOrig, pos + 1, hint, env)))
-      verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
+    ++rankTable[symOrig];
+    if (chkFlags & EIS_VERIFY_EXT_RANK)
+    {
+      for (symEnc = 0; symEnc <= UCHAR_MAX; ++symEnc)
+        if (MRAEncSymbolHasValidMapping(alphabet, symEnc)
+            && ((rankExpect = rankTable[symEnc])
+                != (rankQueryResult
+                    = EISRank(seqIdx, symEnc, pos + 1, hint, env))))
+          verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
+    }
+    else
+    {
+      if ((rankExpect = rankTable[symEnc])
+          != (rankQueryResult = EISRank(seqIdx, symEnc, pos + 1, hint, env)))
+        verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
+    }
     ++pos;
     if (tickPrint && !(pos % tickPrint))
       putc('.', fp);
