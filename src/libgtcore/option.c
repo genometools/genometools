@@ -24,6 +24,7 @@
 #include "libgtcore/mailaddress.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/option.h"
+#include "libgtcore/parseutils.h"
 #include "libgtcore/str.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/xansi.h"
@@ -661,7 +662,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                                                env);
               if (!had_err) {
                 argnum++;
-                if (sscanf(argv[argnum], "%lf", &double_value) != 1) {
+                if (parse_double(&double_value, argv[argnum])) {
                   env_error_set(env, "argument to option \"-%s\" must be "
                                      "floating-point number",
                                 str_get(option->option_str));
@@ -722,7 +723,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                                                env);
               if (!had_err) {
                 argnum++;
-                if (sscanf(argv[argnum], "%d", &int_value) != 1) {
+                if (parse_int(&int_value, argv[argnum])) {
                   env_error_set(env, "argument to option \"-%s\" must be an "
                                 "integer", str_get(option->option_str));
                   had_err = -1;
@@ -760,8 +761,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                                                env);
               if (!had_err) {
                 argnum++;
-                if (sscanf(argv[argnum], "%d", &int_value) != 1 ||
-                    int_value < 0) {
+                if (parse_int(&int_value, argv[argnum]) || int_value < 0) {
                   env_error_set(env, "argument to option \"-%s\" must be a "
                                 "non-negative integer",
                                 str_get(option->option_str));
@@ -797,7 +797,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                         env);
               if (!had_err) {
                 argnum++;
-                if (sscanf(argv[argnum], "%ld", &long_value) != 1) {
+                if (parse_long(&long_value, argv[argnum])) {
                   env_error_set(env, "argument to option \"-%s\" must be an "
                                 "integer", str_get(option->option_str));
                   had_err = -1;
@@ -817,8 +817,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                                                env);
               if (!had_err) {
                 argnum++;
-                if (sscanf(argv[argnum], "%ld", &long_value) != 1 ||
-                    long_value < 0) {
+                if (parse_long(&long_value, argv[argnum]) || long_value < 0) {
                   env_error_set(env, "argument to option \"-%s\" must be a "
                                 "non-negative integer",
                                 str_get(option->option_str));

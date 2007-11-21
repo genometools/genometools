@@ -27,6 +27,7 @@
 #include "libgtcore/fileutils.h"
 #include "libgtcore/gc_content.h"
 #include "libgtcore/grep.h"
+#include "libgtcore/parseutils.h"
 #include "libgtcore/range.h"
 #include "libgtcore/sig.h"
 #include "libgtcore/str.h"
@@ -147,7 +148,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
         break;
       case 2:
         /* process sequence start */
-        if (sscanf(str_get(index_line), "%lu", &range.start) != 1) {
+        if (parse_ulong(&range.start, str_get(index_line))) {
           env_error_set(env, "could not parse bioseq start in line %lu of file "
                     "\"%s\"", line_number, index_filename);
           had_err = -1;
@@ -155,7 +156,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
         break;
       case 0:
         /* process sequence end */
-        if (sscanf(str_get(index_line), "%lu", &range.end) != 1) {
+        if (parse_ulong(&range.end, str_get(index_line))) {
           env_error_set(env, "could not parse bioseq end in line %lu of file "
                     "\"%s\"", line_number, index_filename);
           had_err = -1;
