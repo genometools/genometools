@@ -587,7 +587,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
         /* make sure option has not been used before */
         if (option->is_set) {
           env_error_set(env, "option \"%s\" already set",
-                    str_get(option->option_str));
+                        str_get(option->option_str));
           had_err = -1;
         }
         else
@@ -663,8 +663,8 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 argnum++;
                 if (sscanf(argv[argnum], "%lf", &double_value) != 1) {
                   env_error_set(env, "argument to option \"-%s\" must be "
-                            "floating-point number",
-                            str_get(option->option_str));
+                                     "floating-point number",
+                                str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -724,7 +724,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 argnum++;
                 if (sscanf(argv[argnum], "%d", &int_value) != 1) {
                   env_error_set(env, "argument to option \"-%s\" must be an "
-                            "integer", str_get(option->option_str));
+                                "integer", str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -732,8 +732,8 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 /* minimum value check */
                 if (option->min_value_set && int_value < option->min_value.i) {
                   env_error_set(env, "argument to option \"-%s\" must be an "
-                            "integer >= %d", str_get(option->option_str),
-                            option->min_value.i);
+                                "integer >= %d", str_get(option->option_str),
+                                option->min_value.i);
                   had_err = -1;
                 }
               }
@@ -741,8 +741,8 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 /* maximum value check */
                 if (option->max_value_set && int_value > option->max_value.i) {
                   env_error_set(env, "argument to option \"-%s\" must be an "
-                            "integer <= %d", str_get(option->option_str),
-                            option->max_value.i);
+                                "integer <= %d", str_get(option->option_str),
+                                option->max_value.i);
                   had_err = -1;
                 }
               }
@@ -763,8 +763,8 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 if (sscanf(argv[argnum], "%d", &int_value) != 1 ||
                     int_value < 0) {
                   env_error_set(env, "argument to option \"-%s\" must be a "
-                            "non-negative integer",
-                            str_get(option->option_str));
+                                "non-negative integer",
+                                str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -772,8 +772,8 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 /* minimum value check */
                 if (option->min_value_set && int_value < option->min_value.ui) {
                   env_error_set(env, "argument to option \"-%s\" must be an "
-                            "integer >= %u", str_get(option->option_str),
-                            option->min_value.ui);
+                                "integer >= %u", str_get(option->option_str),
+                                option->min_value.ui);
                   had_err = -1;
                 }
               }
@@ -799,7 +799,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 argnum++;
                 if (sscanf(argv[argnum], "%ld", &long_value) != 1) {
                   env_error_set(env, "argument to option \"-%s\" must be an "
-                            "integer", str_get(option->option_str));
+                                "integer", str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -820,8 +820,8 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 if (sscanf(argv[argnum], "%ld", &long_value) != 1 ||
                     long_value < 0) {
                   env_error_set(env, "argument to option \"-%s\" must be a "
-                            "non-negative integer",
-                            str_get(option->option_str));
+                                "non-negative integer",
+                                str_get(option->option_str));
                   had_err = -1;
                 }
               }
@@ -830,8 +830,8 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 if (option->min_value_set &&
                     long_value < option->min_value.ul) {
                   env_error_set(env, "argument to option \"-%s\" must be an "
-                            "integer >= %lu", str_get(option->option_str),
-                            option->min_value.ul);
+                                "integer >= %lu", str_get(option->option_str),
+                                option->min_value.ul);
                   had_err = -1;
                 }
               }
@@ -840,8 +840,8 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                 if (option->max_value_set &&
                     long_value > option->max_value.ul) {
                   env_error_set(env, "argument to option \"-%s\" must be an "
-                            "integer <= %lu", str_get(option->option_str),
-                            option->max_value.ul);
+                                "integer <= %lu", str_get(option->option_str),
+                                option->max_value.ul);
                   had_err = -1;
                 }
               }
@@ -899,7 +899,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
     /* no matching option found -> error */
     assert(!had_err);
     env_error_set(env, "unknown option: %s (-help shows possible options)",
-              argv[argnum]);
+                  argv[argnum]);
     had_err = -1;
     break;
   }
@@ -912,7 +912,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   if (!had_err && min_additional_arguments != UNDEF_UINT &&
       argc - argnum < min_additional_arguments) {
     env_error_set(env, "missing argument\nUsage: %s %s", op->progname,
-              op->synopsis);
+                  op->synopsis);
     had_err = -1;
   }
 
@@ -920,8 +920,8 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   if (!had_err && max_additional_arguments != UNDEF_UINT &&
       argc - argnum > max_additional_arguments) {
     env_error_set(env, "superfluous argument \"%s\"\nUsage: %s %s",
-              argv[argnum + max_additional_arguments],
-              op->progname, op->synopsis);
+                  argv[argnum + max_additional_arguments], op->progname,
+                  op->synopsis);
     had_err = -1;
   }
 
