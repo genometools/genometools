@@ -31,6 +31,10 @@ int parse_int(int *out, const char *nptr);
    returns 0 upon success and -1 upon failure */
 int parse_long(long *out, const char *nptr);
 
+/* parse unsigned long from <nptr> and store result in <out>.
+   returns 0 upon success and -1 upon failure */
+int parse_ulong(unsigned long *out, const char *nptr);
+
 /* parse double from <nptr> and store result in <out>.
    returns 0 upon success and -1 upon failure */
 int parse_double(double *out, const char *nptr);
