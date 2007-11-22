@@ -18,8 +18,8 @@
 #include "libgtcore/option.h"
 #include "libgtmatch/eis-bwtseq.h"
 
-#include "gt_packedindex_blockenc_params.h"
-#include "gt_packedindex_bwtconstruct_params.h"
+#include "libgtmatch/eis-blockenc_params.h"
+#include "libgtmatch/eis-bwtconstruct_params.h"
 
 extern void
 registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
