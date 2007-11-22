@@ -13,24 +13,15 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+#ifndef EIS_BLOCKENC_PARAMS_H
+#define EIS_BLOCKENC_PARAMS_H
+
 #include "libgtcore/env.h"
 #include "libgtcore/option.h"
 #include "libgtmatch/eis-encidxseq.h"
 
-#include "gt_packedindex_blockenc_params.h"
-
 extern void
 registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput,
-                        Env *env)
-{
-  Option *option;
+                        Env *env);
 
-  env_error_check(env);
-
-  option = option_new_uint_min("bsize", "specify size of blocks",
-                               &paramOutput->blockSize, 8U, 1U, env);
-  option_parser_add_option(op, option, env);
-  option = option_new_uint_min("blbuck", "specify number of blocks per bucket",
-                               &paramOutput->bucketBlocks, 8U, 1U, env);
-  option_parser_add_option(op, option, env);
-}
+#endif
