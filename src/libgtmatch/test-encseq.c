@@ -43,7 +43,8 @@ static int testscanatpos(const Encodedsequence *encseq,
   {
     startpos = (Seqpos) (drand48() * (double) totallength);
     printf("trial %lu at " FormatSeqpos "\n",trial,PRINTSeqposcast(startpos));
-    esr = initEncodedsequencescanstate(encseq,readmode,startpos,env);
+    esr = newEncodedsequencescanstate(env);
+    initEncodedsequencescanstate(esr,encseq,readmode,startpos);
     for (pos=startpos; !haserr && pos < totallength; pos++)
     {
       ccra = getencodedchar(encseq,pos,readmode);
@@ -62,6 +63,7 @@ static int testscanatpos(const Encodedsequence *encseq,
                           (unsigned int) ccsr);
         haserr = true;
       }
+      printf("pos %lu: ccra=%u\n",(unsigned long) pos,ccra);
     }
     freeEncodedsequencescanstate(&esr,env);
   }
@@ -93,7 +95,8 @@ static int testfullscan(const StrArray *filenametab,
                          NULL,
                          env);
   }
-  esr = initEncodedsequencescanstate(encseq,readmode,0,env);
+  esr = newEncodedsequencescanstate(env);
+  initEncodedsequencescanstate(esr,encseq,readmode,0);
   for (pos=0; /* Nothing */; pos++)
   {
     if (filenametab != NULL && readmode == Forwardmode)

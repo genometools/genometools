@@ -28,6 +28,7 @@
          lastsuftabentry;
   Readmode readmode;
   const Encodedsequence *encseq;
+  Encodedsequencescanstate *esr1, *esr2;
 };
 
 Lcpvalueiterator *newLcpvalueiterator(const Encodedsequence *encseq,
@@ -37,6 +38,8 @@ Lcpvalueiterator *newLcpvalueiterator(const Encodedsequence *encseq,
   Lcpvalueiterator *lvi;
 
   ALLOCASSIGNSPACE(lvi,NULL,Lcpvalueiterator,1);
+  lvi->esr1 = newEncodedsequencescanstate(env);
+  lvi->esr2 = newEncodedsequencescanstate(env);
   lvi->encseq = encseq;
   lvi->relpos = 0;
   lvi->readmode = readmode;
@@ -66,7 +69,9 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
                              false,
                              0,
                              lvi->lastsuftabentry,
-                             suftabptr[lvi->relpos]);
+                             suftabptr[lvi->relpos],
+                             lvi->esr1,
+                             lvi->esr2);
     if (cmp > 0)
     {
       fprintf(stderr,"pos=" FormatSeqpos
@@ -93,5 +98,7 @@ Seqpos nextLcpvalueiterator(Lcpvalueiterator *lvi,
 
 void freeLcpvalueiterator(Lcpvalueiterator **lvi,Env *env)
 {
+  freeEncodedsequencescanstate(&(*lvi)->esr1,env);
+  freeEncodedsequencescanstate(&(*lvi)->esr2,env);
   FREESPACE(*lvi);
 }

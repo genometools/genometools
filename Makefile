@@ -565,8 +565,10 @@ splint: obj/gt_config.h
         $(CURDIR)/src/libgtext/*.c \
         $(CURDIR)/src/tools/*.c
 
+EISFILES=${shell ls ${CURDIR}/src/libgtmatch/*.c | grep eis-}
+
 sgt:${addprefix obj/,${notdir ${subst .c,.splint,\
-                     ${wildcard ${CURDIR}/src/libgtmatch/*.c}\
+	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/libgtmatch/*.c}}\
                      ${wildcard ${CURDIR}/src/libgtltr/*.c}\
                                 ${SKTOOLS}}}}
 

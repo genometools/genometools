@@ -93,12 +93,17 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
                                  unsigned int prefixlength,
                                  Seqpos depth,
                                  Seqpos left,
-                                 Seqpos right)
+                                 Seqpos right,
+                                 Env *env)
 {
   const Seqpos *ptr;
   Seqpos maxlcp;
   int cmp;
+  Encodedsequencescanstate *esr1, *esr2;
+  bool haserr = false;
 
+  esr1 = newEncodedsequencescanstate(env);
+  esr2 = newEncodedsequencescanstate(env);
   for (ptr = suftab + left; ptr < suftab + right; ptr++)
   {
     cmp = comparetwosuffixes(encseq,
@@ -108,7 +113,9 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
                              true,
                              depth,
                              *ptr,
-                             *(ptr+1));
+                             *(ptr+1),
+                             esr1,
+                             esr2);
     if (cmp != 0 || maxlcp != (Seqpos) prefixlength)
     {
       showcomparisonfailure("checkifprefixesareidentical",
@@ -118,8 +125,15 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
                             suftab,
                             depth,
                             ptr,ptr+1,cmp,maxlcp);
-      exit(EXIT_FAILURE); /* programming error */
+      haserr = true;
+      break;
     }
+  }
+  freeEncodedsequencescanstate(&esr1,env);
+  freeEncodedsequencescanstate(&esr2,env);
+  if(haserr)
+  {
+    exit(EXIT_FAILURE); /* programming error */
   }
 }
 
@@ -155,7 +169,10 @@ void checkentiresuftab(const Encodedsequence *encseq,
   Bitstring *startposoccurs;
   Seqpos maxlcp, countbitsset = 0, totallength = getencseqtotallength(encseq);
   int cmp;
+  Encodedsequencescanstate *esr1, *esr2;
+  bool haserr = false;
 
+  printf("check entire suftab\n");
   env_error_check(env);
   assert(!specialsareequal || specialsareequalatdepth0);
   INITBITTAB(startposoccurs,totallength+1);
@@ -177,6 +194,8 @@ void checkentiresuftab(const Encodedsequence *encseq,
     exit(EXIT_FAILURE); /* programming error */
   }
   FREESPACE(startposoccurs);
+  esr1 = newEncodedsequencescanstate(env);
+  esr2 = newEncodedsequencescanstate(env);
   for (ptr = suftab + 1; ptr <= suftab + totallength; ptr++)
   {
     cmp = comparetwosuffixes(encseq,
@@ -186,7 +205,9 @@ void checkentiresuftab(const Encodedsequence *encseq,
                              specialsareequalatdepth0,
                              depth,
                              *(ptr-1),
-                             *ptr);
+                             *ptr,
+                             esr1,
+                             esr2);
     if (cmp > 0)
     {
       showcomparisonfailure("checkentiresuftab",
@@ -199,8 +220,15 @@ void checkentiresuftab(const Encodedsequence *encseq,
                             ptr,
                             cmp,
                             maxlcp);
-      exit(EXIT_FAILURE); /* programming error */
+      haserr = true;
+      break;
     }
+  }
+  freeEncodedsequencescanstate(&esr1,env);
+  freeEncodedsequencescanstate(&esr2,env);
+  if(haserr)
+  {
+    exit(EXIT_FAILURE); /* programming error */
   }
   /*
   printf("# checkentiresuftab with mode 'specials are %s'\n",
