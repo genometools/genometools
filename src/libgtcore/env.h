@@ -100,8 +100,8 @@ void    env_error_set(Env*, const char *format, ...)
         error_set_progname(env_error(env), progname, env)
 #define env_error_get_progname(env)\
         error_get_progname(env_error(env))
-/* make sure that the error is not set, has to be used at the beginning of
-   every routine which has an Env* argument */
+/* make sure that the error is not set, should be used at the beginning of
+   every routine which has an Env* argument, except for destructors! */
 #define env_error_check(env)\
         assert(!env || !env_error(env) || !error_is_set(env_error(env)))
 
