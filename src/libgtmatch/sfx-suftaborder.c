@@ -131,7 +131,7 @@ void checkifprefixesareidentical(const Encodedsequence *encseq,
   }
   freeEncodedsequencescanstate(&esr1,env);
   freeEncodedsequencescanstate(&esr2,env);
-  if(haserr)
+  if (haserr)
   {
     exit(EXIT_FAILURE); /* programming error */
   }
@@ -226,7 +226,7 @@ void checkentiresuftab(const Encodedsequence *encseq,
   }
   freeEncodedsequencescanstate(&esr1,env);
   freeEncodedsequencescanstate(&esr2,env);
-  if(haserr)
+  if (haserr)
   {
     exit(EXIT_FAILURE); /* programming error */
   }

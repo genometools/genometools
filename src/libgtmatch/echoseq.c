@@ -146,7 +146,6 @@ void symbolstring2fasta(FILE *fpout,
 }
 
 void encseq2symbolstring(FILE *fpout,
-                         const char *desc,
                          const Alphabet *alpha,
                          const Encodedsequence *encseq,
                          Readmode readmode,
@@ -159,13 +158,6 @@ void encseq2symbolstring(FILE *fpout,
   Uchar currentchar;
 
   assert(width > 0);
-  if (desc == NULL)
-  {
-    fprintf(fpout,">\n");
-  } else
-  {
-    fprintf(fpout,">%s\n",desc);
-  }
   lastpos = start + wlen - 1;
   for (idx = start, j = 0; ; idx++)
   {
@@ -185,14 +177,40 @@ void encseq2symbolstring(FILE *fpout,
     }
     if (currentchar != (Uchar) SEPARATOR)
     {
-      j++;
-      if (j >= width)
+     j++;
+     if (j >= width)
       {
         fprintf(fpout,"\n");
         j = 0;
       }
     }
   }
+}
+
+void encseq2fastaoutput(FILE *fpout,
+                        const char *desc,
+                        const Alphabet *alpha,
+                        const Encodedsequence *encseq,
+                        Readmode readmode,
+                        Seqpos start,
+                        unsigned long wlen,
+                        unsigned long width)
+{
+  assert(width > 0);
+  if (desc == NULL)
+  {
+    fprintf(fpout,">\n");
+  } else
+  {
+    fprintf(fpout,">%s\n",desc);
+  }
+  encseq2symbolstring(fpout,
+                      alpha,
+                      encseq,
+                      readmode,
+                      start,
+                      wlen,
+                      width);
 }
 
 int echodescriptionandsequence(const StrArray *filenametab,Env *env)

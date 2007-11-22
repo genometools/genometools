@@ -49,28 +49,6 @@ int comparetwosuffixes(const Encodedsequence *encseq,
   initEncodedsequencescanstate(esr2,encseq,readmode,start2);
   for (pos1=start1, pos2=start2; /* Nothing */; pos1++, pos2++)
   {
-    /*
-    if (pos1 >= end1)
-    {
-      *maxlcp = pos1 - start1;
-      if(pos2 >= end2)
-      {
-        retval = 0;
-      } else
-      {
-        retval = -1;
-      }
-      break;
-    } else
-    {
-      if(pos2 >= end2)
-      {
-        *maxlcp = pos2 - start2;
-        retval = 1;
-        break;
-      }
-    }
-    */
     if (pos1 >= end1 || pos2 >= end2)
     {
       *maxlcp = pos1 - start1;
@@ -121,7 +99,7 @@ int comparetwosuffixes(const Encodedsequence *encseq,
       if (cc1 < cc2)
       {
         *maxlcp = pos1 - start1;
-        retval = -1;
+        retval = -1; /* a < b */
         break;
       }
       if (cc1 > cc2)
