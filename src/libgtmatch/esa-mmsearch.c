@@ -33,7 +33,6 @@
 #include "esa-map.pr"
 #include "echoseq.pr"
 
-/*
 #define COMPARE(OFFSET,LCPLEN)\
         for (sidx = (OFFSET) + LCPLEN; ; sidx++, LCPLEN++)\
         {\
@@ -61,8 +60,8 @@
             break;\
           }\
         }
-*/
 
+/*
 #define COMPARE(OFFSET,LCPLEN)\
         retcode = comparecharacters(OFFSET,&lcplen,dbencseq,readmode,\
                                     totallength,query,querylen)
@@ -79,7 +78,7 @@ static int comparecharacters(Seqpos start,
   int retcode = 0;
   Uchar currentchar;
 
-  for (sidx = start + *lcplen; /* Nothing */; sidx++, (*lcplen)++)
+  for (sidx = start + *lcplen; ; sidx++, (*lcplen)++)
   {
     if (*lcplen >= (Seqpos) querylen)
     {
@@ -91,7 +90,6 @@ static int comparecharacters(Seqpos start,
       retcode = -1;
       break;
     }
-    /* printf("getencodedchar at %u\n",sidx); */
     currentchar = getencodedchar(dbencseq,sidx,readmode);
     retcode = (int) (query[*lcplen] - currentchar);
     if (retcode == 0)
@@ -108,6 +106,7 @@ static int comparecharacters(Seqpos start,
   }
   return retcode;
 }
+*/
 
 typedef struct
 {
@@ -123,9 +122,9 @@ static bool mmsearch(const Encodedsequence *dbencseq,
                      const Uchar *query,
                      unsigned long querylen)
 {
-  Seqpos left, leftsave, mid, right, lpref, rpref, totallength;
+  Seqpos left, leftsave, mid, right, lpref, rpref, totallength, lcplen, sidx;
   int retcode = 0;
-  Seqpos lcplen;
+  Uchar currentchar;
 
   totallength = getencseqtotallength(dbencseq);
   leftsave = left = lcpitv->left;
