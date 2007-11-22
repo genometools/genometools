@@ -39,7 +39,6 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
   Suffixarray suffixarray;
   Seqpos totallength;
   bool haserr = false;
-  Enumpatterniterator *epi = NULL;
   const Uchar *pptr;
   unsigned long patternlen;
   MMsearchiterator *mmsi;
@@ -57,6 +56,7 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
   {
     unsigned long trial;
     Seqpos dbstart;
+    Enumpatterniterator *epi;
 
     epi = newenumpatterniterator(pmopt->minpatternlen,
                                  pmopt->maxpatternlen,
@@ -86,13 +86,13 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
       }
       freemmsearchiterator(&mmsi,env);
     }
-  }
-  if (pmopt->showpatt)
-  {
-    showPatterndistribution(epi);
+    if (pmopt->showpatt)
+    {
+      showPatterndistribution(epi);
+    }
+    freeEnumpatterniterator(&epi,env);
   }
   freesuffixarray(&suffixarray,env);
-  freeEnumpatterniterator(&epi,env);
   return haserr ? -1 : 0;
 }
 

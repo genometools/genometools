@@ -27,7 +27,8 @@ void encseq2symbolstring(FILE *fpout,
                          Readmode readmode,
                          Seqpos start,
                          unsigned long wlen,
-                         unsigned long width);
+                         unsigned long width,
+                         Env *env);
 
 void encseq2fastaoutput(FILE *fpout,
                         const char *desc,
@@ -36,7 +37,8 @@ void encseq2fastaoutput(FILE *fpout,
                         Readmode readmode,
                         Seqpos start,
                         unsigned long wlen,
-                        unsigned long width);
+                        unsigned long width,
+                        Env *env);
 
 int echodescriptionandsequence(const StrArray *filenametab,Env *env);
 

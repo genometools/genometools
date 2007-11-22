@@ -151,17 +151,21 @@ void encseq2symbolstring(FILE *fpout,
                          Readmode readmode,
                          Seqpos start,
                          unsigned long wlen,
-                         unsigned long width)
+                         unsigned long width,
+                         Env *env)
 {
   unsigned long j;
   Seqpos idx, lastpos;
   Uchar currentchar;
+  Encodedsequencescanstate *esr;
 
+  esr = newEncodedsequencescanstate(env);
+  initEncodedsequencescanstate(esr,encseq,readmode,start);
   assert(width > 0);
   lastpos = start + wlen - 1;
-  for (idx = start, j = 0; ; idx++)
+  for (idx = start, j = 0; /* Nothing */ ; idx++)
   {
-    currentchar = getencodedchar(encseq,idx,readmode);
+    currentchar = sequentialgetencodedchar(encseq,esr,idx);
     if (currentchar == (Uchar) SEPARATOR)
     {
       fprintf(fpout,"\n>\n");
@@ -185,6 +189,7 @@ void encseq2symbolstring(FILE *fpout,
       }
     }
   }
+  freeEncodedsequencescanstate(&esr,env);
 }
 
 void encseq2fastaoutput(FILE *fpout,
@@ -194,7 +199,8 @@ void encseq2fastaoutput(FILE *fpout,
                         Readmode readmode,
                         Seqpos start,
                         unsigned long wlen,
-                        unsigned long width)
+                        unsigned long width,
+                        Env *env)
 {
   assert(width > 0);
   if (desc == NULL)
@@ -210,7 +216,8 @@ void encseq2fastaoutput(FILE *fpout,
                       readmode,
                       start,
                       wlen,
-                      width);
+                      width,
+                      env);
 }
 
 int echodescriptionandsequence(const StrArray *filenametab,Env *env)

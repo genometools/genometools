@@ -33,6 +33,7 @@
   const Encodedsequence *sampleencseq;
   unsigned int alphasize;
   Seqpos totallength;
+  Encodedsequencescanstate *esr;
 };
 
 Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
@@ -72,6 +73,7 @@ Enumpatterniterator *newenumpatterniterator(unsigned long minpatternlen,
   epi->sampleencseq = encseq;
   epi->samplecount = 0;
   epi->alphasize = alphasize;
+  epi->esr = newEncodedsequencescanstate(env);
   srand48(42349421);
   return epi;
 }
@@ -107,9 +109,11 @@ const Uchar *nextEnumpatterniterator(unsigned long *patternlen,
   }
   start = (Seqpos) (drand48() * (double) (epi->totallength - *patternlen));
   assert(start < (Seqpos) (epi->totallength - *patternlen));
+  initEncodedsequencescanstate(epi->esr,epi->sampleencseq,Forwardmode,start);
   for (j=0; j<*patternlen; j++)
   {
-    cc = getencodedchar(epi->sampleencseq,start+j,Forwardmode);
+    /* cc = sequentialgetencodedchar(epi->sampleencseq,epi->esr,start+j); */
+    cc = sequentialgetencodedchar(epi->sampleencseq,epi->esr,start+j);
     if (ISSPECIAL(cc))
     {
       cc = (Uchar) (drand48() * epi->alphasize);
@@ -152,5 +156,6 @@ void freeEnumpatterniterator(Enumpatterniterator **epi,Env *env)
   if (!(*epi)) return;
   FREESPACE((*epi)->patternspace);
   FREESPACE((*epi)->patternstat);
+  freeEncodedsequencescanstate(&((*epi)->esr),env);
   FREESPACE(*epi);
 }
