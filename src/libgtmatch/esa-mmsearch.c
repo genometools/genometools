@@ -34,7 +34,12 @@
 #include "echoseq.pr"
 
 #define COMPARE(OFFSET,LCPLEN)\
-        for (sidx = (OFFSET) + LCPLEN; ; sidx++, LCPLEN++)\
+        sidx = (OFFSET) + (LCPLEN);\
+        if(sidx < totallength)\
+        {\
+          initEncodedsequencescanstate(esr,dbencseq,readmode,sidx);\
+        }\
+        for (/* Nothing */ ; /* Nothing */; sidx++, (LCPLEN)++)\
         {\
           if (LCPLEN >= (Seqpos) querylen)\
           {\
@@ -46,7 +51,7 @@
             retcode = -1;\
             break;\
           }\
-          currentchar = getencodedchar(dbencseq,sidx,readmode);\
+          currentchar = sequentialgetencodedchar(dbencseq,esr,sidx);\
           retcode = (int) (query[LCPLEN] - currentchar);\
           if (retcode == 0)\
           {\
@@ -61,53 +66,6 @@
           }\
         }
 
-/*
-#define COMPARE(OFFSET,LCPLEN)\
-        retcode = comparecharacters(OFFSET,&lcplen,dbencseq,readmode,\
-                                    totallength,query,querylen)
-
-static int comparecharacters(Seqpos start,
-                             Seqpos *lcplen,
-                             const Encodedsequence *dbencseq,
-                             Readmode readmode,
-                             Seqpos totallength,
-                             const Uchar *query,
-                             unsigned long querylen)
-{
-  Seqpos sidx;
-  int retcode = 0;
-  Uchar currentchar;
-
-  for (sidx = start + *lcplen; ; sidx++, (*lcplen)++)
-  {
-    if (*lcplen >= (Seqpos) querylen)
-    {
-      retcode = 0;
-      break;
-    }
-    if (sidx >= totallength)
-    {
-      retcode = -1;
-      break;
-    }
-    currentchar = getencodedchar(dbencseq,sidx,readmode);
-    retcode = (int) (query[*lcplen] - currentchar);
-    if (retcode == 0)
-    {
-      if (ISSPECIAL(currentchar) && ISSPECIAL(query[*lcplen]))
-      {
-        retcode = -1;
-        break;
-      }
-    } else
-    {
-      break;
-    }
-  }
-  return retcode;
-}
-*/
-
 typedef struct
 {
   Seqpos offset,
@@ -116,6 +74,7 @@ typedef struct
 } Lcpinterval;
 
 static bool mmsearch(const Encodedsequence *dbencseq,
+                     Encodedsequencescanstate *esr,
                      const Seqpos *suftab,
                      Readmode readmode,
                      Lcpinterval *lcpitv,
@@ -146,7 +105,6 @@ static bool mmsearch(const Encodedsequence *dbencseq,
       {
         mid = DIV2(left+right);
         lcplen = MIN(lpref,rpref);
-        /* printf("mid=%u,lcplen=%u\n",mid,lcplen); */
         COMPARE(suftab[mid],lcplen);
         if (retcode <= 0)
         {
@@ -206,6 +164,7 @@ static bool mmsearch(const Encodedsequence *dbencseq,
   Lcpinterval lcpitv;
   Seqpos sufindex;
   const Seqpos *suftab;
+  Encodedsequencescanstate *esr;
 };
 
 MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
@@ -225,7 +184,9 @@ MMsearchiterator *newmmsearchiterator(const Encodedsequence *dbencseq,
   mmsi->lcpitv.right = rightbound;
   mmsi->lcpitv.offset = offset;
   mmsi->suftab = suftab;
-  if (!mmsearch(dbencseq,suftab,readmode,&mmsi->lcpitv,pattern,patternlen))
+  mmsi->esr = newEncodedsequencescanstate(env);
+  if (!mmsearch(dbencseq,mmsi->esr,suftab,readmode,&mmsi->lcpitv,
+                pattern,patternlen))
   {
     mmsi->lcpitv.left = (Seqpos) 1;
     mmsi->lcpitv.right = 0;
@@ -255,6 +216,7 @@ bool nextmmsearchiterator(Seqpos *dbstart,MMsearchiterator *mmsi)
 
 void freemmsearchiterator(MMsearchiterator **mmsi,Env *env)
 {
+  freeEncodedsequencescanstate(&(*mmsi)->esr,env);
   FREESPACE(*mmsi);
 }
 
@@ -279,6 +241,7 @@ static bool isleftmaximal(const Encodedsequence *dbencseq,
 }
 
 static unsigned long extendright(const Encodedsequence *dbencseq,
+                                 Encodedsequencescanstate *esr,
                                  Readmode readmode,
                                  Seqpos totallength,
                                  Seqpos dbend,
@@ -290,13 +253,17 @@ static unsigned long extendright(const Encodedsequence *dbencseq,
   Seqpos dbpos;
   unsigned long querypos;
 
+  if (dbend < totallength)
+  {
+    initEncodedsequencescanstate(esr,dbencseq,readmode,dbend);
+  }
   for (dbpos = dbend, querypos = queryend; /* Nothing */; dbpos++, querypos++)
   {
     if (dbpos >= totallength || querypos >= querylength)
     {
       break;
     }
-    dbchar = getencodedchar(dbencseq,dbpos,readmode);
+    dbchar = sequentialgetencodedchar(dbencseq,esr,dbpos);
     if (dbchar != query[querypos] || ISSPECIAL(dbchar))
     {
       break;
@@ -349,6 +316,7 @@ int runquerysubstringmatch(const Encodedsequence *dbencseq,
                         currentquerystart))
       {
         extend = extendright(dbencseq,
+                             mmsi->esr,
                              readmode,
                              totallength,
                              dbstart + minlength,

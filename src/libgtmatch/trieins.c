@@ -136,7 +136,7 @@ static void showtrie2(const Trierep *trierep,
       endpos = current->suffixinfo.startpos + current->depth;
     }
     for (pos = current->suffixinfo.startpos + node->depth;
-        pos < endpos; pos++)
+         pos < endpos; pos++)
     {
       cc = getencodedchar(trierep->enseqreadinfo[current->suffixinfo.idx].
                           encseqptr,

@@ -124,12 +124,14 @@ static OPrval parse_options(Maxpairsoptions *maxpairsoptions,
     if (option_is_set(sampleoption))
     {
       env_error_set(env,"option -samples cannot be combined with option -q");
-      return OPTIONPARSER_ERROR;
-    }
-    if (option_is_set(scanoption))
+      oprval = OPTIONPARSER_ERROR;
+    } else
     {
-      env_error_set(env,"option -scan cannot be combined with option -q");
-      return OPTIONPARSER_ERROR;
+      if (option_is_set(scanoption))
+      {
+        env_error_set(env,"option -scan cannot be combined with option -q");
+        oprval = OPTIONPARSER_ERROR;
+      }
     }
   }
   option_parser_delete(op, env);
