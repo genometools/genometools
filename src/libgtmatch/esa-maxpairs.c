@@ -202,7 +202,9 @@ static int processleafedge(bool firstsucc,
     leftchar = INITIALCHAR;
   } else
   {
-    leftchar = getencodedchar(state->encseq,leafnumber-1,state->readmode);
+    leftchar = getencodedchar(state->encseq, /* Random access */
+                              leafnumber-1,
+                              state->readmode);
   }
   state->initialized = false;
   state->depth = fatherdepth;

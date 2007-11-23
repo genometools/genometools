@@ -161,7 +161,8 @@ static int suftab2file(Outfileinfo *outfileinfo,
       {
         if (outfileinfo->outfpbwttab != NULL)
         {
-          cc = getencodedchar(outfileinfo->encseq,startpos - 1,readmode);
+          cc = getencodedchar(outfileinfo->encseq, /* Random access */
+                              startpos - 1,readmode);
         }
       }
       if (outfileinfo->outfpbwttab != NULL)

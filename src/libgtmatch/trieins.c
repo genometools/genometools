@@ -65,7 +65,7 @@ static Uchar getfirstedgechar(const Trierep *trierep,
   {
     return (Uchar) SEPARATOR;
   }
-  return getencodedchar(eri->encseqptr,
+  return getencodedchar(eri->encseqptr, /* Random access */
                         node->suffixinfo.startpos + prevdepth,
                         eri->readmode);
 }
@@ -138,11 +138,12 @@ static void showtrie2(const Trierep *trierep,
     for (pos = current->suffixinfo.startpos + node->depth;
          pos < endpos; pos++)
     {
-      cc = getencodedchar(trierep->enseqreadinfo[current->suffixinfo.idx].
-                          encseqptr,
-                          pos,
-                          trierep->enseqreadinfo[current->suffixinfo.idx].
-                          readmode);
+      cc = getencodedchar( /* just for testing */
+              trierep->enseqreadinfo[current->suffixinfo.idx].
+              encseqptr,
+              pos,
+              trierep->enseqreadinfo[current->suffixinfo.idx].
+              readmode);
       if (ISSPECIAL(cc))
       {
         printf("#\n");
@@ -404,7 +405,7 @@ static Trienode *makenewbranch(Trierep *trierep,
     cc2 = (Uchar) SEPARATOR;
   } else
   {
-    cc2 = getencodedchar(eri->encseqptr,
+    cc2 = getencodedchar(eri->encseqptr, /* Random access */
                          suffixinfo->startpos + currentdepth,
                          eri->readmode);
   }
@@ -431,8 +432,8 @@ static Seqpos getlcp(const Encodedsequence *encseq1,Readmode readmode1,
 
   for (i1=start1, i2=start2; i1 <= end1 && i2 <= end2; i1++, i2++)
   {
-    cc1 = getencodedchar(encseq1,i1,readmode1);
-    if (cc1 != getencodedchar(encseq2,i2,readmode2) || ISSPECIAL(cc1))
+    cc1 = getencodedchar(/*XXX*/ encseq1,i1,readmode1);
+    if (cc1 != getencodedchar(/*XXX*/ encseq2,i2,readmode2) || ISSPECIAL(cc1))
     {
       break;
     }
@@ -478,7 +479,7 @@ void insertsuffixintotrie(Trierep *trierep,
     trierep->root = makeroot(trierep,suffixinfo);
   } else
   {
-    Seqpos currentdepth, lcpvalue;
+    Seqpos currentdepth, lcpvalue, totallength;
     Trienode *currentnode, *newleaf, *newbranch, *succ;
     Nodepair np;
     Uchar cc;
@@ -487,15 +488,15 @@ void insertsuffixintotrie(Trierep *trierep,
     assert(!ISLEAF(node));
     currentnode = node;
     currentdepth = node->depth;
+    totallength = getencseqtotallength(eri->encseqptr);
     while (true)
     {
-      if (suffixinfo->startpos + currentdepth >=
-          getencseqtotallength(eri->encseqptr))
+      if (suffixinfo->startpos + currentdepth >= totallength)
       {
         cc = (Uchar) SEPARATOR;
       } else
       {
-        cc = getencodedchar(eri->encseqptr,
+        cc = getencodedchar(eri->encseqptr, /* Random access */
                             suffixinfo->startpos + currentdepth,
                             eri->readmode);
       }

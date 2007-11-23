@@ -165,7 +165,7 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
               idcounterLTR++,
               idcounterRetrotrans-1 );
 
-          if (lo->minlengthTSD > 1UL)
+          if (lo->minlengthTSD > 1U)
           {
             /* TSDs */
             fprintf(fp, "seq%lu\tLTRharvest\ttarget_site_duplication\t"

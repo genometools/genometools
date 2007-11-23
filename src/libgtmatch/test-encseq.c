@@ -47,14 +47,13 @@ static int testscanatpos(const Encodedsequence *encseq,
     initEncodedsequencescanstate(esr,encseq,readmode,startpos);
     for (pos=startpos; !haserr && pos < totallength; pos++)
     {
-      ccra = getencodedchar(encseq,pos,readmode);
+      ccra = getencodedchar(encseq,pos,readmode); /* Random access */
       ccsr = sequentialgetencodedchar(encseq,esr,pos);
       if (ccra != ccsr)
       {
         env_error_set(env,"startpos = " FormatSeqpos
                           " access=%s, mode=%s: position=" FormatSeqpos
-                          ": random access (getencodedchar) = %u != "
-                          " %u = sequential read (sequentialgetencodedchar)",
+                          ": random access = %u != %u = sequential read",
                           startpos,
                           encseqaccessname(encseq),
                           showreadmode(readmode),
@@ -118,14 +117,14 @@ static int testfullscan(const StrArray *filenametab,
         break;
       }
     }
-    ccra = getencodedchar(encseq,pos,readmode);
+    ccra = getencodedchar(encseq,pos,readmode); /* Random access */
     if (filenametab != NULL && readmode == Forwardmode)
     {
       if (ccscan != ccra)
       {
         env_error_set(env,"access=%s, position=" FormatSeqpos
                           ": scan (readnextchar) = %u != "
-                          "%u = random access (getencodedchar)",
+                          "%u = random access",
                           encseqaccessname(encseq),
                           pos,
                           (unsigned int) ccscan,
@@ -138,8 +137,7 @@ static int testfullscan(const StrArray *filenametab,
     if (ccra != ccsr)
     {
       env_error_set(env,"access=%s, mode=%s: position=" FormatSeqpos
-                        ": random access (getencodedchar) = %u != "
-                        " %u = sequential read (sequentialgetencodedchar)",
+                        ": random access = %u != %u = sequential read",
                         encseqaccessname(encseq),
                         showreadmode(readmode),
                         pos,

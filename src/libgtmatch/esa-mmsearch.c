@@ -232,7 +232,9 @@ static bool isleftmaximal(const Encodedsequence *dbencseq,
   {
     return true;
   }
-  dbleftchar = getencodedchar(dbencseq,dbstart-1,readmode);
+  dbleftchar = getencodedchar(dbencseq, /* Random access */
+                              dbstart-1,
+                              readmode);
   if (dbleftchar != query[querystart-1] || ISSPECIAL(dbleftchar))
   {
     return true;

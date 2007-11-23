@@ -100,22 +100,26 @@ static void searchforbestTSDandormotifatborders(
           forward++)
       {
         tmp_motifmismatchesleftLTR = tmp_motifmismatchesrightLTR = 0;
-        if ( getencodedchar(encseq, motifpos1 - back, Forwardmode)
+        if (getencodedchar(/* Random access */ encseq, 
+                            motifpos1 - back, Forwardmode)
             != lo->motif.firstleft)
         {
           tmp_motifmismatchesleftLTR++;
         }
-        if ( getencodedchar(encseq, motifpos1 + 1 - back, Forwardmode)
+        if (getencodedchar(/* Random access */ encseq, motifpos1 + 1 - back, 
+                           Forwardmode)
             != lo->motif.secondleft)
         {
           tmp_motifmismatchesleftLTR++;
         }
-        if ( getencodedchar(encseq,   motifpos2 + forward, Forwardmode)
+        if (getencodedchar(/* Random access */ encseq,motifpos2 + forward,
+                           Forwardmode)
             != lo->motif.firstright)
         {
           tmp_motifmismatchesrightLTR++;
         }
-        if ( getencodedchar(encseq, motifpos2 + 1 + forward, Forwardmode)
+        if (getencodedchar(/* Random access */ encseq,motifpos2 + 1 + forward,
+                           Forwardmode)
             != lo->motif.secondright)
         {
           tmp_motifmismatchesrightLTR++;
@@ -219,7 +223,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
     )
 {
   Seqpos offset = 0,
-         i;
+         idx;
   bool motif1 = false,
        motif2 = false;
   unsigned int tmp_motifmismatchesleftLTR,
@@ -243,18 +247,19 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
 
   /**** search for left motif around leftLTR_5 ****/
 
-  for (i = startleftLTR; i < endleftLTR; i++)
+  for (idx = startleftLTR; idx < endleftLTR; idx++)
   {
-    tmp_motifmismatchesleftLTR = (unsigned int)0;
-    if (getencodedchar(encseq, i, Forwardmode) != lo->motif.firstleft)
+    tmp_motifmismatchesleftLTR = 0;
+    if (getencodedchar(/* XXX */ encseq, idx, Forwardmode) 
+        != lo->motif.firstleft)
     {
       tmp_motifmismatchesleftLTR++;
     }
-    if (getencodedchar(encseq, i+1, Forwardmode) != lo->motif.secondleft)
+    if (getencodedchar(/* XXX */ encseq, idx+1,Forwardmode) != 
+        lo->motif.secondleft)
     {
       tmp_motifmismatchesleftLTR++;
     }
-
     if (tmp_motifmismatchesleftLTR + (*motifmismatchesleftLTR)
                                 <= lo->motif.allowedmismatches)
     {
@@ -264,7 +269,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
          Seqpos max, min;
 
          motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
-         boundaries->leftLTR_5 = i;
+         boundaries->leftLTR_5 = idx;
          motif1 = true;
          max = MAX(oldleftLTR_5, boundaries->leftLTR_5);
          min = MIN(oldleftLTR_5, boundaries->leftLTR_5);
@@ -273,17 +278,17 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
        /* next hit */
        else
        {
-         Seqpos max, min, difffromnewboundary;
+         Seqpos maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
-         max = MAX(oldleftLTR_5, i);
-         min = MIN(oldleftLTR_5, i);
-         difffromnewboundary = max - min;
+         maxval = MAX(oldleftLTR_5, idx);
+         minval = MIN(oldleftLTR_5, idx);
+         difffromnewboundary = maxval - minval;
 
          if ( difffromnewboundary < difffromoldboundary )
          {
            motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
-           boundaries->leftLTR_5 = i;
+           boundaries->leftLTR_5 = idx;
            difffromoldboundary = difffromnewboundary;
          }
        }
@@ -292,14 +297,16 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
   *motifmismatchesleftLTR += motifmismatches_frombestmatch;
   motifmismatches_frombestmatch = 0;
 
-  for (i = startrightLTR + (Seqpos)1; i <= endrightLTR; i++)
+  for (idx = startrightLTR + 1; idx <= endrightLTR; idx++)
   {
     tmp_motifmismatchesrightLTR = 0;
-    if (getencodedchar(encseq, i, Forwardmode) != lo->motif.secondright)
+    if (getencodedchar(/* XXX */ encseq, idx, Forwardmode) != 
+                       lo->motif.secondright)
     {
       tmp_motifmismatchesrightLTR++;
     }
-    if (getencodedchar(encseq, i-1, Forwardmode) != lo->motif.firstright)
+    if (getencodedchar(/* XXX */ encseq, idx-1, Forwardmode) != 
+                       lo->motif.firstright)
     {
       tmp_motifmismatchesrightLTR++;
     }
@@ -313,7 +320,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
          Seqpos max, min;
 
          motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
-         boundaries->rightLTR_3 = i;
+         boundaries->rightLTR_3 = idx;
          motif2 = true;
          max = MAX(oldrightLTR_3, boundaries->rightLTR_3);
          min = MIN(oldrightLTR_3, boundaries->rightLTR_3);
@@ -322,22 +329,22 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
        /* next hit */
        else
        {
-         Seqpos max, min, difffromnewboundary;
+         Seqpos maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
-         max = MAX(oldrightLTR_3, i);
-         min = MIN(oldrightLTR_3, i);
-         difffromnewboundary = max - min;
+         maxval = MAX(oldrightLTR_3, idx);
+         minval = MIN(oldrightLTR_3, idx);
+         difffromnewboundary = maxval - minval;
          if ( difffromnewboundary < difffromoldboundary )
          {
            motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
-           boundaries->rightLTR_3 = i;
+           boundaries->rightLTR_3 = idx;
            difffromoldboundary = difffromnewboundary;
          }
        }
     }
   }
-  if (i > endrightLTR && (!motif2))
+  if (idx > endrightLTR && (!motif2))
   {
     env_log_log(env, "no right motif found.\n");
   }
@@ -351,7 +358,6 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
   {
     boundaries->motif_near_tsd = false;
   }
-
 }
 
 /*
@@ -375,13 +381,12 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
          endrightLTR,
          oldleftLTR_3  = boundaries->leftLTR_3,
          oldrightLTR_5 = boundaries->rightLTR_5,
-         difffromoldboundary = 0;
-  Seqpos offset = 0;
+         difffromoldboundary = 0,
+         offset = 0,
+         idx;
   unsigned int tmp_motifmismatchesleftLTR,
                tmp_motifmismatchesrightLTR,
                motifmismatches_frombestmatch = 0;
-
-  Seqpos i;
   const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
 
   env_error_check(env);
@@ -429,18 +434,19 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
 
   /**** search for right motif around leftLTR_3 ****/
 
-  for (i = startleftLTR + (Seqpos)1; i <= endleftLTR; i++)
+  for (idx = startleftLTR + 1; idx <= endleftLTR; idx++)
   {
     tmp_motifmismatchesleftLTR = (unsigned int)0;
-    if (getencodedchar(encseq, i, Forwardmode) != lo->motif.secondright)
+    if (getencodedchar(/* XXX */ encseq, idx, Forwardmode) 
+                       != lo->motif.secondright)
     {
       tmp_motifmismatchesleftLTR++;
     }
-    if (getencodedchar(encseq, i-1, Forwardmode) != lo->motif.firstright)
+    if (getencodedchar(/* XXX */ encseq, idx-1, Forwardmode) != 
+                       lo->motif.firstright)
     {
       tmp_motifmismatchesleftLTR++;
     }
-
     if (tmp_motifmismatchesleftLTR + (*motifmismatchesleftLTR)
                                 <= lo->motif.allowedmismatches)
     {
@@ -450,7 +456,7 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
          Seqpos max, min;
 
          motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
-         boundaries->leftLTR_3 = i;
+         boundaries->leftLTR_3 = idx;
          motif1 = true;
          max = MAX(oldleftLTR_3, boundaries->leftLTR_3);
          min = MIN(oldleftLTR_3, boundaries->leftLTR_3);
@@ -459,17 +465,17 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
        /* next hit */
        else
        {
-         Seqpos max, min, difffromnewboundary;
+         Seqpos maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
-         max = MAX(oldleftLTR_3, i);
-         min = MIN(oldleftLTR_3, i);
-         difffromnewboundary = max - min;
+         maxval = MAX(oldleftLTR_3, idx);
+         minval = MIN(oldleftLTR_3, idx);
+         difffromnewboundary = maxval - minval;
 
          if ( difffromnewboundary < difffromoldboundary )
          {
            motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
-           boundaries->leftLTR_3 = i;
+           boundaries->leftLTR_3 = idx;
            difffromoldboundary = difffromnewboundary;
          }
        }
@@ -480,14 +486,16 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
 
   /**** search for left motif around rightLTR_5 ****/
 
-  for (i = startrightLTR ; i < endrightLTR; i++)
+  for (idx = startrightLTR ; idx < endrightLTR; idx++)
   {
     tmp_motifmismatchesrightLTR = 0;
-    if (getencodedchar(encseq, i, Forwardmode) != lo->motif.firstleft)
+    if (getencodedchar(/* XXX */ encseq, idx, Forwardmode) 
+                       != lo->motif.firstleft)
     {
       tmp_motifmismatchesrightLTR++;
     }
-    if (getencodedchar(encseq, i+1, Forwardmode) != lo->motif.secondleft)
+    if (getencodedchar(/* XXX */ encseq, idx+1, Forwardmode) 
+                       != lo->motif.secondleft)
     {
       tmp_motifmismatchesrightLTR++;
     }
@@ -497,36 +505,35 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
        /* first hit */
        if ( !motif2 )
        {
-         Seqpos max, min;
+         Seqpos maxval, minval;
 
          motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
-         boundaries->rightLTR_5 = i;
+         boundaries->rightLTR_5 = idx;
          motif2 = true;
-         max = MAX(oldrightLTR_5, boundaries->rightLTR_5);
-         min = MIN(oldrightLTR_5, boundaries->rightLTR_5);
-         difffromoldboundary = max - min;
+         maxval = MAX(oldrightLTR_5, boundaries->rightLTR_5);
+         minval = MIN(oldrightLTR_5, boundaries->rightLTR_5);
+         difffromoldboundary = maxval - minval;
        }
        /* next hit */
        else
        {
-         Seqpos max, min, difffromnewboundary;
+         Seqpos maxval, minval, difffromnewboundary;
 
          /* test if hit is nearer to old boundaries than previous hit */
-         max = MAX(oldrightLTR_5, i);
-         min = MIN(oldrightLTR_5, i);
-         difffromnewboundary = max - min;
+         maxval = MAX(oldrightLTR_5, idx);
+         minval = MIN(oldrightLTR_5, idx);
+         difffromnewboundary = maxval - minval;
 
          if ( difffromnewboundary < difffromoldboundary )
          {
            motifmismatches_frombestmatch = tmp_motifmismatchesrightLTR;
-           boundaries->rightLTR_5 = i;
+           boundaries->rightLTR_5 = idx;
            difffromoldboundary = difffromnewboundary;
          }
        }
     }
   }
   *motifmismatchesrightLTR += motifmismatches_frombestmatch;
-
   if (motif1 && motif2)
   {
     boundaries->motif_far_tsd = true;
@@ -665,7 +672,7 @@ static int searchforTSDandorMotifoutside(
   /* now, search for correct boundaries */
 
   /* search for TSDs and/or motif */
-  if (lo->minlengthTSD > (unsigned long) 1)
+  if (lo->minlengthTSD > 1U)
   {
     Uchar *dbseq, *query;
     Seqpos i;
@@ -675,12 +682,12 @@ static int searchforTSDandorMotifoutside(
 
     for (i = startleftLTR; i <= endleftLTR; i++, k++)
     {
-      dbseq[k] = getencodedchar(encseq, i, Forwardmode);
+      dbseq[k] = getencodedchar(encseq, i, Forwardmode); /* XXX */
     }
 
     for (k=0, i = startrightLTR; i <= endrightLTR; i++, k++)
     {
-      query[k] = getencodedchar(encseq, i, Forwardmode);
+      query[k] = getencodedchar(encseq, i, Forwardmode); /* XXX */
     }
 
     INITARRAY(&subrepeatinfo.repeats, Repeat);
@@ -694,8 +701,8 @@ static int searchforTSDandorMotifoutside(
     if (sarrquerysubstringmatch(dbseq,
           leftlen,
           query,
-          (unsigned long)rightlen,
-          (unsigned int)lo->minlengthTSD,
+          (unsigned long) rightlen,
+          (unsigned long) lo->minlengthTSD,
           alphabetSequentialsuffixarrayreader(ssar),
           subsimpleexactselfmatchstore,
           &subrepeatinfo,

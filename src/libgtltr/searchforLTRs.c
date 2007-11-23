@@ -56,7 +56,7 @@ static int checklengthanddistanceconstraints(
   {
     boundaries->lengthdistconstraint = false;
     boundaries->similarity = 0.0;
-    return (int) -1;
+    return -1;
   }
   else
   {
@@ -132,7 +132,6 @@ int searchforLTRs (
   Env *env
   )
 {
-
   unsigned long repeatcounter;
   ArrayMyfrontvalue fronts;
   Myxdropbest xdropbest_left;
@@ -297,8 +296,7 @@ int searchforLTRs (
                    env);
 
     /* if search for motif and/or TSD */
-    if ( lo->motif.allowedmismatches < (unsigned int)4 ||
-        lo->minlengthTSD > (unsigned long) 1)
+    if ( lo->motif.allowedmismatches < 4U || lo->minlengthTSD > 1U)
     {
       if ( findcorrectboundaries(lo, boundaries, ssar,
                                 markpos, env) != 0 )
@@ -316,7 +314,7 @@ int searchforLTRs (
       else
       {
         /* if search for motif only (and not TSD) */
-        if ( lo->minlengthTSD <= (unsigned long) 1 &&
+        if ( lo->minlengthTSD <= 1U &&
             boundaries->motif_near_tsd &&
             boundaries->motif_far_tsd )
         {
@@ -349,20 +347,19 @@ int searchforLTRs (
     ALLOCASSIGNSPACE(vseq, NULL, Uchar, vlen);
     for (k=0,i=boundaries->leftLTR_5; i<=boundaries->leftLTR_3; i++, k++)
     {
-      useq[k] = getencodedchar(encseq, i, Forwardmode);
+      useq[k] = getencodedchar(encseq, i, Forwardmode); /*XXX*/
     }
     for (k=0, i=boundaries->rightLTR_5; i<=boundaries->rightLTR_3; i++, k++)
     {
-      vseq[k] = getencodedchar(encseq, i, Forwardmode);
+      vseq[k] = getencodedchar(encseq, i, Forwardmode); /*XXX*/
     }
-
-    edist = greedyunitedist(useq, (unsigned long)ulen,
-                            vseq, (unsigned long)vlen,
+    edist = greedyunitedist(useq,(unsigned long) ulen, /*Implement for encseq */
+                            vseq,(unsigned long) vlen,
                             env);
 
     /* determine similarity */
     boundaries->similarity = 100.0 *
-    (1 - (((double)(edist))/(MAX(ulen,vlen))));
+    (1 - (((double) edist)/(MAX(ulen,vlen))));
 
     if ( boundaries->similarity < lo->similaritythreshold )
     {

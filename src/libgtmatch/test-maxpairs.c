@@ -62,7 +62,7 @@ static Seqpos samplesubstring(Uchar *seqspace,
   }
   for (i = 0; i < substringlength; i++)
   {
-    seqspace[i] = getencodedchar(encseq,start+i,Forwardmode);
+    seqspace[i] = getencodedchar(encseq,start+i,Forwardmode); /* XXX */
   }
   return substringlength;
 }
