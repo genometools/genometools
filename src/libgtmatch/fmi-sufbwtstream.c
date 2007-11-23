@@ -172,7 +172,7 @@ static int nextesamergedsufbwttabvalues(DefinedSeqpos *longest,
     }
   } else
   {
-    *bwtvalue 
+    *bwtvalue
       = getencodedchar( /* Random access */
            emmesa->suffixarraytable[indexedsuffix.idx].encseq,
            indexedsuffix.startpos-1,

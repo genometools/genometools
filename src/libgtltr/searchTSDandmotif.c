@@ -100,13 +100,13 @@ static void searchforbestTSDandormotifatborders(
           forward++)
       {
         tmp_motifmismatchesleftLTR = tmp_motifmismatchesrightLTR = 0;
-        if (getencodedchar(/* Random access */ encseq, 
+        if (getencodedchar(/* Random access */ encseq,
                             motifpos1 - back, Forwardmode)
             != lo->motif.firstleft)
         {
           tmp_motifmismatchesleftLTR++;
         }
-        if (getencodedchar(/* Random access */ encseq, motifpos1 + 1 - back, 
+        if (getencodedchar(/* Random access */ encseq, motifpos1 + 1 - back,
                            Forwardmode)
             != lo->motif.secondleft)
         {
@@ -249,12 +249,12 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
   for (idx = startleftLTR; idx < endleftLTR; idx++)
   {
     tmp_motifmismatchesleftLTR = 0;
-    if (getencodedchar(/* XXX */ encseq, idx, Forwardmode) 
+    if (getencodedchar(/* XXX */ encseq, idx, Forwardmode)
         != lo->motif.firstleft)
     {
       tmp_motifmismatchesleftLTR++;
     }
-    if (getencodedchar(/* XXX */ encseq, idx+1,Forwardmode) != 
+    if (getencodedchar(/* XXX */ encseq, idx+1,Forwardmode) !=
         lo->motif.secondleft)
     {
       tmp_motifmismatchesleftLTR++;
@@ -299,12 +299,12 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
   for (idx = startrightLTR + 1; idx <= endrightLTR; idx++)
   {
     tmp_motifmismatchesrightLTR = 0;
-    if (getencodedchar(/* XXX */ encseq, idx, Forwardmode) != 
+    if (getencodedchar(/* XXX */ encseq, idx, Forwardmode) !=
                        lo->motif.secondright)
     {
       tmp_motifmismatchesrightLTR++;
     }
-    if (getencodedchar(/* XXX */ encseq, idx-1, Forwardmode) != 
+    if (getencodedchar(/* XXX */ encseq, idx-1, Forwardmode) !=
                        lo->motif.firstright)
     {
       tmp_motifmismatchesrightLTR++;
@@ -436,12 +436,12 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
   for (idx = startleftLTR + 1; idx <= endleftLTR; idx++)
   {
     tmp_motifmismatchesleftLTR = (unsigned int)0;
-    if (getencodedchar(/* XXX */ encseq, idx, Forwardmode) 
+    if (getencodedchar(/* XXX */ encseq, idx, Forwardmode)
                        != lo->motif.secondright)
     {
       tmp_motifmismatchesleftLTR++;
     }
-    if (getencodedchar(/* XXX */ encseq, idx-1, Forwardmode) != 
+    if (getencodedchar(/* XXX */ encseq, idx-1, Forwardmode) !=
                        lo->motif.firstright)
     {
       tmp_motifmismatchesleftLTR++;
@@ -488,12 +488,12 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
   for (idx = startrightLTR ; idx < endrightLTR; idx++)
   {
     tmp_motifmismatchesrightLTR = 0;
-    if (getencodedchar(/* XXX */ encseq, idx, Forwardmode) 
+    if (getencodedchar(/* XXX */ encseq, idx, Forwardmode)
                        != lo->motif.firstleft)
     {
       tmp_motifmismatchesrightLTR++;
     }
-    if (getencodedchar(/* XXX */ encseq, idx+1, Forwardmode) 
+    if (getencodedchar(/* XXX */ encseq, idx+1, Forwardmode)
                        != lo->motif.secondleft)
     {
       tmp_motifmismatchesrightLTR++;

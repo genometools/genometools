@@ -192,7 +192,7 @@ int parseargsandcallltrharvest(int argc,const char *argv[],Env *env)
   LTRharvestoptions lo;
   bool haserr = false;
 
-  if(ltrharvestoptions(&lo,argc,argv,env) != 0)
+  if (ltrharvestoptions(&lo,argc,argv,env) != 0)
   {
     haserr = true;
   } else

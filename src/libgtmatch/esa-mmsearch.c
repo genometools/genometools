@@ -35,7 +35,7 @@
 
 #define COMPARE(OFFSET,LCPLEN)\
         sidx = (OFFSET) + (LCPLEN);\
-        if(sidx < totallength)\
+        if (sidx < totallength)\
         {\
           initEncodedsequencescanstate(esr,dbencseq,readmode,sidx);\
         }\

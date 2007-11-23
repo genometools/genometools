@@ -33,7 +33,7 @@
 #define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
         {\
           Uchar cctmp = getencodedchar(ENCSEQ,POS,READMODE);\
-          if((CC) != cctmp)\
+          if ((CC) != cctmp)\
           {\
             printf("file %s, line %d: pos = %lu:cc = %u != %u = ccreal\n",\
                    __FILE__,__LINE__,\

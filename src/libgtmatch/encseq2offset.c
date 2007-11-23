@@ -58,11 +58,11 @@ Seqpos *encseqtable2seqoffsets(Seqpos *totallength,
       += (uint64_t) suffixarraytable[idx].specialcharinfo.specialranges;
     if (idx > 0)
     {
-      lastofprevious 
+      lastofprevious
         = getencodedchar(suffixarraytable[idx - 1].encseq, /* Random access */
                          tmplength-1,
                          suffixarraytable[idx - 1].readmode);
-      firstofcurrent 
+      firstofcurrent
         = getencodedchar(suffixarraytable[idx].encseq, /* Random access */
                          0,
                          suffixarraytable[idx].readmode);
