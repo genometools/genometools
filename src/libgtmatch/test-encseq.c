@@ -43,17 +43,17 @@ static int testscanatpos(const Encodedsequence *encseq,
   {
     startpos = (Seqpos) (drand48() * (double) totallength);
     printf("trial %lu at " FormatSeqpos "\n",trial,PRINTSeqposcast(startpos));
-    esr = initEncodedsequencescanstate(encseq,readmode,startpos,env);
+    esr = newEncodedsequencescanstate(env);
+    initEncodedsequencescanstate(esr,encseq,readmode,startpos);
     for (pos=startpos; !haserr && pos < totallength; pos++)
     {
-      ccra = getencodedchar(encseq,pos,readmode);
+      ccra = getencodedchar(encseq,pos,readmode); /* Random access */
       ccsr = sequentialgetencodedchar(encseq,esr,pos);
       if (ccra != ccsr)
       {
         env_error_set(env,"startpos = " FormatSeqpos
                           " access=%s, mode=%s: position=" FormatSeqpos
-                          ": random access (getencodedchar) = %u != "
-                          " %u = sequential read (sequentialgetencodedchar)",
+                          ": random access = %u != %u = sequential read",
                           startpos,
                           encseqaccessname(encseq),
                           showreadmode(readmode),
@@ -62,6 +62,7 @@ static int testscanatpos(const Encodedsequence *encseq,
                           (unsigned int) ccsr);
         haserr = true;
       }
+      printf("pos %lu: ccra=%u\n",(unsigned long) pos,ccra);
     }
     freeEncodedsequencescanstate(&esr,env);
   }
@@ -93,7 +94,8 @@ static int testfullscan(const StrArray *filenametab,
                          NULL,
                          env);
   }
-  esr = initEncodedsequencescanstate(encseq,readmode,0,env);
+  esr = newEncodedsequencescanstate(env);
+  initEncodedsequencescanstate(esr,encseq,readmode,0);
   for (pos=0; /* Nothing */; pos++)
   {
     if (filenametab != NULL && readmode == Forwardmode)
@@ -115,14 +117,14 @@ static int testfullscan(const StrArray *filenametab,
         break;
       }
     }
-    ccra = getencodedchar(encseq,pos,readmode);
+    ccra = getencodedchar(encseq,pos,readmode); /* Random access */
     if (filenametab != NULL && readmode == Forwardmode)
     {
       if (ccscan != ccra)
       {
         env_error_set(env,"access=%s, position=" FormatSeqpos
                           ": scan (readnextchar) = %u != "
-                          "%u = random access (getencodedchar)",
+                          "%u = random access",
                           encseqaccessname(encseq),
                           pos,
                           (unsigned int) ccscan,
@@ -135,8 +137,7 @@ static int testfullscan(const StrArray *filenametab,
     if (ccra != ccsr)
     {
       env_error_set(env,"access=%s, mode=%s: position=" FormatSeqpos
-                        ": random access (getencodedchar) = %u != "
-                        " %u = sequential read (sequentialgetencodedchar)",
+                        ": random access = %u != %u = sequential read",
                         encseqaccessname(encseq),
                         showreadmode(readmode),
                         pos,

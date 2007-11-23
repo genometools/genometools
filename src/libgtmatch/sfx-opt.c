@@ -26,7 +26,6 @@
 #include "sfx-optdef.h"
 #include "verbose-def.h"
 #include "stamp.h"
-#include "tools/gt_packedindex_bwtconstruct_params.h"
 
 static OPrval parse_options(int *parsed_args,
                             bool doesa,

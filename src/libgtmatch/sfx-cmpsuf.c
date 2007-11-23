@@ -25,10 +25,13 @@ int comparetwosuffixes(const Encodedsequence *encseq,
                        bool specialsareequalatdepth0,
                        Seqpos depth,
                        Seqpos start1,
-                       Seqpos start2)
+                       Seqpos start2,
+                       Encodedsequencescanstate *esr1,
+                       Encodedsequencescanstate *esr2)
 {
   Uchar cc1, cc2;
   Seqpos pos1, pos2, end1, end2;
+  int retval;
 
   end1 = end2 = getencseqtotallength(encseq);
   if (depth > 0)
@@ -42,12 +45,20 @@ int comparetwosuffixes(const Encodedsequence *encseq,
       end2 = start2 + depth;
     }
   }
-  for (pos1=start1, pos2=start2; pos1 < end1 && pos2 < end2; pos1++, pos2++)
+  initEncodedsequencescanstate(esr1,encseq,readmode,start1);
+  initEncodedsequencescanstate(esr2,encseq,readmode,start2);
+  for (pos1=start1, pos2=start2; /* Nothing */; pos1++, pos2++)
   {
-    cc1 = getencodedchar(encseq,pos1,readmode);
-    /* printf("pos1=" FormatSeqpos "cc1=%u\n",pos1,cc1); */
-    cc2 = getencodedchar(encseq,pos2,readmode);
-    /* printf("pos2=" FormatSeqpos "cc2=%u\n",pos2,cc2); */
+    if (pos1 >= end1 || pos2 >= end2)
+    {
+      *maxlcp = pos1 - start1;
+      retval = 0;
+      break;
+    }
+    cc1 = sequentialgetencodedchar(encseq,esr1,pos1);
+    CHECKENCCHAR(cc1,encseq,pos1,readmode);
+    cc2 = sequentialgetencodedchar(encseq,esr2,pos2);
+    CHECKENCCHAR(cc2,encseq,pos2,readmode);
     if (ISSPECIAL(cc1))
     {
       if (ISSPECIAL(cc2))
@@ -55,42 +66,49 @@ int comparetwosuffixes(const Encodedsequence *encseq,
         if (specialsareequal || (pos1 == start1 && specialsareequalatdepth0))
         {
           *maxlcp = pos1 - start1 + 1;
-          return 0;
+          retval = 0;
+          break;
         }
         if (pos1 < pos2)
         {
           *maxlcp = pos1  - start1;
-          return -1; /* a < b */
+          retval = -1; /* a < b */
+          break;
         }
         if (pos1 > pos2)
         {
           *maxlcp = pos1 - start1;
-          return 1; /* a > b */
+          retval = 1; /* a > b */
+          break;
         }
         *maxlcp = pos1 - start1 + 1;
-        return 0; /* a = b */
+        retval = 0; /* a = b */
+        break;
       }
       *maxlcp = pos1 - start1;
-      return 1; /* a > b */
+      retval = 1; /* a > b */
+      break;
     } else
     {
       if (ISSPECIAL(cc2))
       {
         *maxlcp = pos1 - start1;
-        return -1; /* a < b */
+        retval = -1; /* a < b */
+        break;
       }
       if (cc1 < cc2)
       {
         *maxlcp = pos1 - start1;
-        return -1;
+        retval = -1; /* a < b */
+        break;
       }
       if (cc1 > cc2)
       {
         *maxlcp = pos1 - start1;
-        return 1;
+        retval = 1;
+        break;
       }
     }
   }
-  *maxlcp = pos1 - start1;
-  return 0;
+  return retval;
 }

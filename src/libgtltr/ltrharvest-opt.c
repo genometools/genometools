@@ -85,8 +85,8 @@ void showuserdefinedoptionsandvalues(LTRharvestoptions *lo)
       printf("#   overlaps: all\n");
     }
   }
-  printf("#   minTSDlength: %lu\n",  lo->minlengthTSD);
-  printf("#   maxTSDlength: %lu\n",  lo->maxlengthTSD);
+  printf("#   minTSDlength: %u\n",  lo->minlengthTSD);
+  printf("#   maxTSDlength: %u\n",  lo->maxlengthTSD);
   printf("#   palindromic motif: %s\n", str_get(lo->motif.str_motif));
   printf("#   motifmismatchesallowed: %u\n", lo->motif.allowedmismatches);
   printf("#   vicinity: " FormatSeqpos " nt\n",
@@ -293,22 +293,22 @@ static OPrval parse_options(int *parsed_args,
   option_parser_add_option(op, optionsimilar, env);
 
   /* -mintsd */
-  optionmintsd = option_new_ulong_min_max("mintsd",
+  optionmintsd = option_new_uint_min_max("mintsd",
                               "specify minimum length for each TSD",
                                &lo->minlengthTSD,
-                               (unsigned long) 0,
-                               (unsigned long) 0,
-                               UNDEF_ULONG,
+                               0,
+                               0,
+                               UNDEF_UINT,
                                env);
   option_parser_add_option(op, optionmintsd, env);
 
   /* -maxtsd */
-  optionmaxtsd = option_new_ulong_min_max("maxtsd",
+  optionmaxtsd = option_new_uint_min_max("maxtsd",
                               "specify maximum length for each TSD",
                                &lo->maxlengthTSD,
-                               (unsigned long) 20,
-                               (unsigned long) 0,
-                               UNDEF_ULONG,
+                               20U,
+                               0,
+                               UNDEF_INT,
                                env);
   option_parser_add_option(op, optionmaxtsd, env);
 
@@ -574,7 +574,7 @@ void wrapltrharvestoptions(LTRharvestoptions *lo,Env *env)
 }
 
 int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,
-                        Env *env)
+                         Env *env)
 {
   int parsed_args;
   OPrval rval;
@@ -591,5 +591,5 @@ int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,
       rval = OPTIONPARSER_ERROR;
     }
   }
-  return (int)rval;
+  return (rval == OPTIONPARSER_OK) ? 0: - 1;
 }

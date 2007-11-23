@@ -8,8 +8,10 @@
 set -e -x
 
 # the make call normally used for development
-cd ../testsuite
-./testsuite.rb -keywords gt_ltr
+cd testsuite
+env -i ./testsuite.rb -keywords gt_ltr
+env -i ./testsuite.rb -keywords 'gt_ltrharvest' -gttestdata ${GTTESTDATA}
+cd ..
 # optional -memcheck   (run valgrind)
 #          -select 253 (run testcase 253)
 #cd ../

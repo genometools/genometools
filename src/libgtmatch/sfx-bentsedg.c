@@ -28,23 +28,22 @@
 
 #define COMPAREOFFSET   (UCHAR_MAX + 1)
 #define UNIQUEINT(P)    ((Seqpos) ((P) + COMPAREOFFSET))
-#define ACCESSCHAR(POS) getencodedchar(encseq,POS,readmode)
+#define ACCESSCHAR(POS) getencodedchar(encseq,POS,readmode) /* XXX */
 #define ISNOTEND(POS)   ((POS) < totallength && ISNOTSPECIAL(ACCESSCHAR(POS)))
 
 #define DECLARETMPC Uchar tmpsvar, tmptvar
-#define GENDEREF(VAR,A,S)\
+#define DEREF(VAR,A,S)\
         (((A) < totallength && ISNOTSPECIAL(VAR = ACCESSCHAR(S))) ?\
         ((Seqpos) VAR) : UNIQUEINT(S))
-#define DEREF(VAR,S)   GENDEREF(VAR,S,S)
 
-#define PTR2INT(VAR,I) GENDEREF(VAR,cptr = *(I)+depth,cptr)
+#define PTR2INT(VAR,I) DEREF(VAR,cptr = *(I)+depth,cptr)
 
 #define STRINGCOMPARE(S,T,OFFSET)\
         for (sptr = (S)+(OFFSET), tptr = (T)+(OFFSET); /* Nothing */;\
              sptr++, tptr++)\
         {\
-          ccs = DEREF(tmpsvar,sptr);\
-          cct = DEREF(tmptvar,tptr);\
+          ccs = DEREF(tmpsvar,sptr,sptr);\
+          cct = DEREF(tmptvar,tptr,tptr);\
           if (ccs != cct)\
           {\
             break;\

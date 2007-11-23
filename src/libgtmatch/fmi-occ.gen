@@ -15,7 +15,8 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#define ACCESSBWTTEXT(POS) getencodedchar(fm->bwtformatching,POS,Forwardmode)
+#define ACCESSBWTTEXT(POS)\
+        getencodedchar(fm->bwtformatching,POS,Forwardmode)
 
 static Seqpos fmoccurrence (const Fmindex *fm,Uchar cc,Seqpos pos)
 {

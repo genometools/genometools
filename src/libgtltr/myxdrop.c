@@ -243,10 +243,10 @@ void calculateallowedMININFINITYINTgenerations(
         (XDROPBELOWSCORE + HALFMATCHSCORE) / GCD + 1
 
 #define EVALXDROPARBITSCORES EVALXDROPARBITSCORESRIGHT
-#define USEQ(A,I) A = getencodedchar(str_useq,\
+#define USEQ(A,I) A = getencodedchar(str_useq,/* Random access */\
                                      useq+(Seqpos)(I),\
                                      Forwardmode)
-#define VSEQ(A,J) A = getencodedchar(str_vseq,\
+#define VSEQ(A,J) A = getencodedchar(str_vseq,/* Random access */\
                                      vseq+(Seqpos)(J),\
                                      Forwardmode)
 
@@ -264,10 +264,10 @@ void calculateallowedMININFINITYINTgenerations(
 */
 
 #define EVALXDROPARBITSCORES EVALXDROPARBITSCORESLEFT
-#define USEQ(A,I) A = getencodedchar(str_useq,\
+#define USEQ(A,I) A = getencodedchar(str_useq,/* Random access */\
                                      useq-(Seqpos)1-(I),\
                                      Forwardmode)
-#define VSEQ(A,J) A = getencodedchar(str_vseq,\
+#define VSEQ(A,J) A = getencodedchar(str_vseq,/* Random access */\
                                      vseq-(Seqpos)1-(J),\
                                      Forwardmode)
 

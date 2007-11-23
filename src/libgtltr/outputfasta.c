@@ -65,11 +65,9 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
                          Readmode readmode,
                          Seqpos start,
                          unsigned long wlen,
-                         unsigned long width)
+                         unsigned long width,
+                         Env *env)
 {
-  unsigned long j;
-  Seqpos idx, lastpos;
-  Uchar currentchar;
   Seqpos offset;
 
   assert(width > 0);
@@ -99,34 +97,14 @@ static void myencseq2symbolstring(Fastaoutinfo *info,
                        PRINTSeqposcast(start - offset + 1),
                        /* increase by one for output */
                        PRINTSeqposcast(start - offset + (Seqpos)wlen) );
-
-  lastpos = start + wlen - 1;
-  for (idx = start, j = 0; ; idx++)
-  {
-    currentchar = getencodedchar(encseq,idx,readmode);
-    if (currentchar == (Uchar) SEPARATOR)
-    {
-      fprintf(fpout,"\n>\n");
-      j = 0;
-    } else
-    {
-      echoprettysymbol(fpout,alpha,currentchar);
-    }
-    if (idx == lastpos)
-    {
-      fprintf(fpout,"\n");
-      break;
-    }
-    if (currentchar != (Uchar) SEPARATOR)
-    {
-      j++;
-      if (j >= width)
-      {
-        fprintf(fpout,"\n");
-        j = 0;
-      }
-    }
-  }
+  encseq2symbolstring(fpout,
+                      alpha,
+                      encseq,
+                      readmode,
+                      start,
+                      wlen,
+                      width,
+                      env);
 }
 
 static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
@@ -156,9 +134,9 @@ static int showpredictionfastasequence(Fastaoutinfo *info, Seqpos startpos,
                       info->alpha, info->encseq,
                       Forwardmode, startpos,
                       (unsigned long)len,
-                      60UL);
+                      60UL,
+                      env);
   FREESPACE(destab_seqnum);
-
   return 0;
 }
 

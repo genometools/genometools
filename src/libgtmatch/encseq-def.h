@@ -29,6 +29,23 @@
 
 #define REVERSEPOS(TOT,POS) ((TOT) - 1 - (POS))
 
+#ifdef DEBUG
+#define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
+        {\
+          Uchar cctmp = getencodedchar(ENCSEQ,POS,READMODE);\
+          if((CC) != cctmp)\
+          {\
+            printf("file %s, line %d: pos = %lu:cc = %u != %u = ccreal\n",\
+                   __FILE__,__LINE__,\
+                   (unsigned long) (POS),\
+                   CC,cctmp);\
+            exit(EXIT_FAILURE);\
+          }\
+        }
+#else
+#define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE) /* Nothing */
+#endif
+
 typedef struct
 {
   Seqpos leftpos,
@@ -101,13 +118,14 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
 
 int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env);
 
+Encodedsequencescanstate *newEncodedsequencescanstate(Env *env);
+
 void freeEncodedsequence(Encodedsequence **encseqptr,Env *env);
 
-Encodedsequencescanstate *initEncodedsequencescanstate(
-                               const Encodedsequence *encseq,
-                               Readmode readmode,
-                               Seqpos startpos,
-                               Env *env);
+void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
+                                  const Encodedsequence *encseq,
+                                  Readmode readmode,
+                                  Seqpos startpos);
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env);
 
@@ -150,5 +168,11 @@ bool nextspecialrangeiterator(Sequencerange *range,Specialrangeiterator *sri);
 void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
 
 /*@null@*/ const char *encseqaccessname(const Encodedsequence *encseq);
+
+void encseqextract(Uchar *buffer,
+                   const Encodedsequence *encseq,
+                   Seqpos frompos,
+                   Seqpos topos,
+                   Env *env);
 
 #endif

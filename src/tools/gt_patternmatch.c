@@ -30,6 +30,7 @@
 typedef struct
 {
   unsigned long minpatternlen, maxpatternlen, numofsamples;
+  bool showpatt;
   Str *indexname;
 } Pmatchoptions;
 
@@ -38,7 +39,6 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
   Suffixarray suffixarray;
   Seqpos totallength;
   bool haserr = false;
-  Enumpatterniterator *epi = NULL;
   const Uchar *pptr;
   unsigned long patternlen;
   MMsearchiterator *mmsi;
@@ -56,14 +56,21 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
   {
     unsigned long trial;
     Seqpos dbstart;
+    Enumpatterniterator *epi;
 
     epi = newenumpatterniterator(pmopt->minpatternlen,
                                  pmopt->maxpatternlen,
                                  suffixarray.encseq,
+                                 getnumofcharsAlphabet(suffixarray.alpha),
                                  env);
     for (trial = 0; trial < pmopt->numofsamples; trial++)
     {
       pptr = nextEnumpatterniterator(&patternlen,epi);
+      if (pmopt->showpatt)
+      {
+        showsymbolstring(suffixarray.alpha,pptr,patternlen);
+        printf("\n");
+      }
       mmsi = newmmsearchiterator(suffixarray.encseq,
                                  suffixarray.suftab,
                                  0,  /* leftbound */
@@ -79,9 +86,13 @@ static int callpatternmatcher(const Pmatchoptions *pmopt,Env *env)
       }
       freemmsearchiterator(&mmsi,env);
     }
+    if (pmopt->showpatt)
+    {
+      showPatterndistribution(epi);
+    }
+    freeEnumpatterniterator(&epi,env);
   }
   freesuffixarray(&suffixarray,env);
-  freeEnumpatterniterator(&epi,env);
   return haserr ? -1 : 0;
 }
 
@@ -113,6 +124,11 @@ static OPrval parse_options(Pmatchoptions *pmopt,
                             &pmopt->numofsamples,
                            (unsigned long) 100000,
                            env);
+  option_parser_add_option(op, option, env);
+
+  option = option_new_bool("s","Show generated pattern",
+                            &pmopt->showpatt,
+                            false,env);
   option_parser_add_option(op, option, env);
 
   option = option_new_string("ii",

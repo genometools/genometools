@@ -297,13 +297,11 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
   if (esr->readmode == Forwardmode)
   {
 #ifdef DEBUG
-    /*
     printf("esr: nextpage=%lu,firstcell=%lu,lastcell=%lu,",
            esr->nextpage,esr->firstcell,esr->lastcell);
     printf("leftpos=" FormatSeqpos ",rightpos=" FormatSeqpos "\n",
             PRINTSeqposcast(esr->currentrange.leftpos),
             PRINTSeqposcast(esr->currentrange.rightpos));
-    */
 #endif
     return encseq->seqdeliverchar(encseq,esr,pos);
   }
@@ -334,6 +332,26 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
   fprintf(stderr,"sequentialgetencodedchar: readmode %d not implemented\n",
                   (int) esr->readmode);
   exit(EXIT_FAILURE); /* programming error */
+}
+
+void encseqextract(Uchar *buffer,
+                   const Encodedsequence *encseq,
+                   Seqpos frompos,
+                   Seqpos topos,
+                   Env *env)
+{
+  Encodedsequencescanstate *esr;
+  unsigned long idx;
+  Seqpos pos;
+
+  assert(frompos < topos && topos < encseq->totallength);
+  esr = newEncodedsequencescanstate(env);
+  initEncodedsequencescanstate(esr,encseq,Forwardmode,frompos);
+  for(pos=frompos, idx = 0; pos <= topos; pos++, idx++)
+  {
+    buffer[idx] = sequentialgetencodedchar(encseq,esr,pos);
+  }
+  freeEncodedsequencescanstate(&esr,env);
 }
 
 typedef struct
@@ -1254,7 +1272,7 @@ static void binpreparenextrange(const Encodedsequence *encseq,
     printf("\n");
 #endif
     if (esr->previousrange.leftpos <= startpos &&
-       startpos < esr->previousrange.rightpos)
+        startpos < esr->previousrange.rightpos)
     {
       esr->hasprevious = true;
     }
@@ -1295,21 +1313,26 @@ static void binpreparenextrange(const Encodedsequence *encseq,
   }
 }
 
-Encodedsequencescanstate *initEncodedsequencescanstate(
-                               const Encodedsequence *encseq,
-                               Readmode readmode,
-                               Seqpos startpos,
-                               Env *env)
+Encodedsequencescanstate *newEncodedsequencescanstate(Env *env)
 {
   Encodedsequencescanstate *esr;
-  bool moveforward;
 
   env_error_check(env);
+  ALLOCASSIGNSPACE(esr,NULL,Encodedsequencescanstate,1);
+  return esr;
+}
+
+void initEncodedsequencescanstate(Encodedsequencescanstate *esr,
+                                  const Encodedsequence *encseq,
+                                  Readmode readmode,
+                                  Seqpos startpos)
+{
+  bool moveforward;
+
   if (ISDIRREVERSE(readmode))
   {
     startpos = REVERSEPOS(encseq->totallength,startpos);
   }
-  ALLOCASSIGNSPACE(esr,NULL,Encodedsequencescanstate,1);
   esr->readmode = readmode;
   moveforward = ISDIRREVERSE(readmode) ? false : true;
   if (encseq->sat == Viauchartables ||
@@ -1335,8 +1358,6 @@ Encodedsequencescanstate *initEncodedsequencescanstate(
     }
     advanceEncodedseqstate(encseq,esr,moveforward);
   }
-  assert(esr != NULL);
-  return esr;
 }
 
 void freeEncodedsequencescanstate(Encodedsequencescanstate **esr,Env *env)
@@ -1386,6 +1407,8 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
           PRINTSeqposcast(esr->previousrange.leftpos),
           PRINTSeqposcast(esr->previousrange.rightpos));
 #endif
+  if (esr->hasprevious)
+  {
   if (ISDIRREVERSE(esr->readmode))
   {
     if (pos < esr->previousrange.rightpos)
@@ -1420,6 +1443,7 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
         advanceEncodedseqstate(encseq,esr,true);
       }
     }
+  }
   }
   return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
@@ -1469,11 +1493,11 @@ Specialrangeiterator *newspecialrangeiterator(const Encodedsequence *encseq,
   {
     sri->pos = 0;
     sri->direct = false;
-    sri->esr = initEncodedsequencescanstate(encseq,
-                                            moveforward ? Forwardmode
-                                                        : Reversemode,
-                                            0,
-                                            env);
+    sri->esr = newEncodedsequencescanstate(env);
+    initEncodedsequencescanstate(sri->esr,encseq,
+                                 moveforward ? Forwardmode
+                                             : Reversemode,
+                                 0);
   }
   assert(sri != NULL);
   return sri;

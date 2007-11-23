@@ -146,30 +146,26 @@ void symbolstring2fasta(FILE *fpout,
 }
 
 void encseq2symbolstring(FILE *fpout,
-                         const char *desc,
                          const Alphabet *alpha,
                          const Encodedsequence *encseq,
                          Readmode readmode,
                          Seqpos start,
                          unsigned long wlen,
-                         unsigned long width)
+                         unsigned long width,
+                         Env *env)
 {
   unsigned long j;
   Seqpos idx, lastpos;
   Uchar currentchar;
+  Encodedsequencescanstate *esr;
 
+  esr = newEncodedsequencescanstate(env);
+  initEncodedsequencescanstate(esr,encseq,readmode,start);
   assert(width > 0);
-  if (desc == NULL)
-  {
-    fprintf(fpout,">\n");
-  } else
-  {
-    fprintf(fpout,">%s\n",desc);
-  }
   lastpos = start + wlen - 1;
-  for (idx = start, j = 0; ; idx++)
+  for (idx = start, j = 0; /* Nothing */ ; idx++)
   {
-    currentchar = getencodedchar(encseq,idx,readmode);
+    currentchar = sequentialgetencodedchar(encseq,esr,idx);
     if (currentchar == (Uchar) SEPARATOR)
     {
       fprintf(fpout,"\n>\n");
@@ -185,14 +181,43 @@ void encseq2symbolstring(FILE *fpout,
     }
     if (currentchar != (Uchar) SEPARATOR)
     {
-      j++;
-      if (j >= width)
+     j++;
+     if (j >= width)
       {
         fprintf(fpout,"\n");
         j = 0;
       }
     }
   }
+  freeEncodedsequencescanstate(&esr,env);
+}
+
+void encseq2fastaoutput(FILE *fpout,
+                        const char *desc,
+                        const Alphabet *alpha,
+                        const Encodedsequence *encseq,
+                        Readmode readmode,
+                        Seqpos start,
+                        unsigned long wlen,
+                        unsigned long width,
+                        Env *env)
+{
+  assert(width > 0);
+  if (desc == NULL)
+  {
+    fprintf(fpout,">\n");
+  } else
+  {
+    fprintf(fpout,">%s\n",desc);
+  }
+  encseq2symbolstring(fpout,
+                      alpha,
+                      encseq,
+                      readmode,
+                      start,
+                      wlen,
+                      width,
+                      env);
 }
 
 int echodescriptionandsequence(const StrArray *filenametab,Env *env)

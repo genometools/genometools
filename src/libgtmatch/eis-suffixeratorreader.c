@@ -539,7 +539,9 @@ readSfxILCPRange(sfxInterface *iface, listenerID id, size_t len,
                          false,
                          0,
                          getSufTabVal(iface, start + i - 1, env),
-                         getSufTabVal(iface, start + i, env));
+                         getSufTabVal(iface, start + i, env),
+                         NULL,  /* XXX FIXME */
+                         NULL);  /* XXX FIXME */
 #ifndef NDEBUG
     if (cmp > 0)
     {

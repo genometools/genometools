@@ -126,7 +126,10 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
 
       ensure(had_err,
              (epi = newenumpatterniterator(params.minPatLen, params.maxPatLen,
-                                           suffixarray.encseq, env)));
+                                           suffixarray.encseq, 
+                                           getnumofcharsAlphabet(
+                                              suffixarray.alpha),
+                                           env)));
       if (had_err)
       {
         fputs("Creation of pattern iterator failed!\n", stderr);

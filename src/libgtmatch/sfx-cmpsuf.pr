@@ -8,7 +8,9 @@ int comparetwosuffixes(const Encodedsequence *encseq,
                        bool specialsareequalatdepth0,
                        Seqpos depth,
                        Seqpos start1,
-                       Seqpos start2);
+                       Seqpos start2,
+                       Encodedsequencescanstate *esr1,
+                       Encodedsequencescanstate *esr2);
 
 #ifdef __cplusplus
 }

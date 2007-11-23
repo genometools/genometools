@@ -22,13 +22,23 @@ void symbolstring2fasta(FILE *fpout,
                         unsigned long width);
 
 void encseq2symbolstring(FILE *fpout,
-                         const char *desc,
                          const Alphabet *alpha,
                          const Encodedsequence *encseq,
                          Readmode readmode,
                          Seqpos start,
                          unsigned long wlen,
-                         unsigned long width);
+                         unsigned long width,
+                         Env *env);
+
+void encseq2fastaoutput(FILE *fpout,
+                        const char *desc,
+                        const Alphabet *alpha,
+                        const Encodedsequence *encseq,
+                        Readmode readmode,
+                        Seqpos start,
+                        unsigned long wlen,
+                        unsigned long width,
+                        Env *env);
 
 int echodescriptionandsequence(const StrArray *filenametab,Env *env);
 

@@ -56,8 +56,8 @@ typedef struct
   bool fastaoutputinnerregion;
   bool gff3output;       /* by default no gff3 output */
 
-  unsigned long minlengthTSD,  /* minlength of TSD, default */
-                maxlengthTSD;  /* maxlength of TSD, default */
+  unsigned int minlengthTSD,  /* minlength of TSD, default */
+               maxlengthTSD;  /* maxlength of TSD, default */
                                /* by default no search for TSDs */
   Seqpos vicinityforcorrectboundaries; /* vicinity for search of TSD and
                                           motif */
@@ -69,7 +69,7 @@ void printargsline(const char **argv, int argc);
 
 int testmotifandencodemotif (Motif *motif, const Alphabet *alpha, Env*);
 
-int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv, Env*);
+int ltrharvestoptions(LTRharvestoptions *lo, int argc,const char **argv, Env*);
 
 void wrapltrharvestoptions(LTRharvestoptions *lo, Env*);
 
