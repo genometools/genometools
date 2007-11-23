@@ -138,8 +138,6 @@ int searchforLTRs (
   Myxdropbest xdropbest_right;
   Seqpos alilen = 0,
          totallength,
-         i = 0,
-         k = 0,
          ulen,
          vlen;
   Uchar *useq = NULL,
@@ -345,14 +343,10 @@ int searchforLTRs (
     vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1;
     ALLOCASSIGNSPACE(useq, NULL, Uchar, ulen);
     ALLOCASSIGNSPACE(vseq, NULL, Uchar, vlen);
-    for (k=0,i=boundaries->leftLTR_5; i<=boundaries->leftLTR_3; i++, k++)
-    {
-      useq[k] = getencodedchar(encseq, i, Forwardmode); /*XXX*/
-    }
-    for (k=0, i=boundaries->rightLTR_5; i<=boundaries->rightLTR_3; i++, k++)
-    {
-      vseq[k] = getencodedchar(encseq, i, Forwardmode); /*XXX*/
-    }
+
+    encseqextract(useq,encseq,boundaries->leftLTR_5,boundaries->leftLTR_3,env);
+    encseqextract(vseq,encseq,boundaries->rightLTR_5,boundaries->rightLTR_3,
+                  env);
     edist = greedyunitedist(useq,(unsigned long) ulen, /*Implement for encseq */
                             vseq,(unsigned long) vlen,
                             env);

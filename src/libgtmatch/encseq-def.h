@@ -169,4 +169,10 @@ void freespecialrangeiterator(Specialrangeiterator **sri,Env *env);
 
 /*@null@*/ const char *encseqaccessname(const Encodedsequence *encseq);
 
+void encseqextract(Uchar *buffer,
+                   const Encodedsequence *encseq,
+                   Seqpos frompos,
+                   Seqpos topos,
+                   Env *env);
+
 #endif

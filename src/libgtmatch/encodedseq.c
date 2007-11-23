@@ -334,6 +334,26 @@ Uchar sequentialgetencodedchar(const Encodedsequence *encseq,
   exit(EXIT_FAILURE); /* programming error */
 }
 
+void encseqextract(Uchar *buffer,
+                   const Encodedsequence *encseq,
+                   Seqpos frompos,
+                   Seqpos topos,
+                   Env *env)
+{
+  Encodedsequencescanstate *esr;
+  unsigned long idx;
+  Seqpos pos;
+
+  assert(frompos < topos && topos < encseq->totallength);
+  esr = newEncodedsequencescanstate(env);
+  initEncodedsequencescanstate(esr,encseq,Forwardmode,frompos);
+  for(pos=frompos, idx = 0; pos <= topos; pos++, idx++)
+  {
+    buffer[idx] = sequentialgetencodedchar(encseq,esr,pos);
+  }
+  freeEncodedsequencescanstate(&esr,env);
+}
+
 typedef struct
 {
   Positionaccesstype sat;

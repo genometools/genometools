@@ -50,9 +50,10 @@ int testmaxpairs(/*@unused@*/ const Str *indexname,
 
 static Seqpos samplesubstring(Uchar *seqspace,
                               const Encodedsequence *encseq,
-                              Seqpos substringlength)
+                              Seqpos substringlength,
+                              Env *env)
 {
-  Seqpos i, start, totallength;
+  Seqpos start, totallength;
 
   totallength = getencseqtotallength(encseq);
   start = (Seqpos) (drand48() * (double) totallength);
@@ -60,10 +61,8 @@ static Seqpos samplesubstring(Uchar *seqspace,
   {
     substringlength = totallength - start;
   }
-  for (i = 0; i < substringlength; i++)
-  {
-    seqspace[i] = getencodedchar(encseq,start+i,Forwardmode); /* XXX */
-  }
+  assert(substringlength > 0);
+  encseqextract(seqspace,encseq,start,start+substringlength-1,env);
   return substringlength;
 }
 
@@ -245,8 +244,8 @@ int testmaxpairs(const Str *indexname,
   ALLOCASSIGNSPACE(query,NULL,Uchar,substringlength);
   for (s=0; s<samples && !haserr; s++)
   {
-    dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength);
-    querylen = samplesubstring(query,suffixarray.encseq,substringlength);
+    dblen = samplesubstring(dbseq,suffixarray.encseq,substringlength,env);
+    querylen = samplesubstring(query,suffixarray.encseq,substringlength,env);
     showverbose(verboseinfo,"run query match for dblen=" FormatSeqpos
                             ",querylen= " FormatSeqpos ", minlength=%u",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);

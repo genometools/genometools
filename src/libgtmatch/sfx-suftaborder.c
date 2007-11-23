@@ -50,7 +50,7 @@ static void showlocalsuffix(FILE *fpout,
       (void) putc('~',fpout);
       break;
     }
-    cc = getencodedchar(encseq,i,readmode); /* XXX */
+    cc = getencodedchar(encseq,i,readmode); /* for testing */
     if (ISSPECIAL(cc))
     {
       (void) putc('~',fpout);

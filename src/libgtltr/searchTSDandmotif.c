@@ -66,7 +66,7 @@ static void searchforbestTSDandormotifatborders(
 
   env_error_check(env);
 
-  if ( boundaries->contignumber == 0)
+  if (boundaries->contignumber == 0)
   {
     offset = 0;
   }
@@ -178,10 +178,9 @@ static void searchforbestTSDandormotifatborders(
              min = MIN(oldrightLTR_3, (motifpos2 + 1 + forward));
              difffromnewboundary2 = max - min;
 
-             if ( (difffromnewboundary1 + difffromnewboundary2) <
-                 (difffromoldboundary1 + difffromoldboundary2) )
+             if (difffromnewboundary1 + difffromnewboundary2 <
+                 difffromoldboundary1 + difffromoldboundary2)
              {
-
                  /* save number of mismatches */
                  *motifmismatchesleftLTR  = tmp_motifmismatchesleftLTR;
                  *motifmismatchesrightLTR = tmp_motifmismatchesrightLTR;
@@ -675,21 +674,11 @@ static int searchforTSDandorMotifoutside(
   if (lo->minlengthTSD > 1U)
   {
     Uchar *dbseq, *query;
-    Seqpos i;
-    unsigned long k = 0;
     ALLOCASSIGNSPACE(dbseq,NULL,Uchar,leftlen);
     ALLOCASSIGNSPACE(query,NULL,Uchar,rightlen);
 
-    for (i = startleftLTR; i <= endleftLTR; i++, k++)
-    {
-      dbseq[k] = getencodedchar(encseq, i, Forwardmode); /* XXX */
-    }
-
-    for (k=0, i = startrightLTR; i <= endrightLTR; i++, k++)
-    {
-      query[k] = getencodedchar(encseq, i, Forwardmode); /* XXX */
-    }
-
+    encseqextract(dbseq,encseq,startleftLTR,endleftLTR,env);
+    encseqextract(query,encseq,startrightLTR,endrightLTR,env);
     INITARRAY(&subrepeatinfo.repeats, Repeat);
     subrepeatinfo.lmin = lo->minlengthTSD;
     subrepeatinfo.lmax = lo->maxlengthTSD;

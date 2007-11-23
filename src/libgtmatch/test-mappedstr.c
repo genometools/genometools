@@ -51,7 +51,7 @@ static Codetype qgram2codefillspecial(unsigned int numofchars,
     foundspecial = true;
   } else
   {
-    cc = getencodedchar(encseq,startpos,readmode); /* XXX */
+    cc = getencodedchar(encseq,startpos,readmode); /* for testing */
     if (ISSPECIAL(cc))
     {
       integercode = numofchars - 1;
@@ -75,7 +75,7 @@ static Codetype qgram2codefillspecial(unsigned int numofchars,
         foundspecial = true;
       } else
       {
-        cc = getencodedchar(encseq,pos,readmode); /* XXX */
+        cc = getencodedchar(encseq,pos,readmode); /* for testing */
         if (ISSPECIAL(cc))
         {
           ADDNEXTCHAR(integercode,numofchars-1,numofchars);

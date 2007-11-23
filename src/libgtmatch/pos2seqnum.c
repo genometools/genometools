@@ -26,14 +26,16 @@ DECLAREARRAYSTRUCT(Seqpos);
 
 static int addmarkpos(ArraySeqpos *asp,
                       const Encodedsequence *encseq,
+                      Encodedsequencescanstate *esr,
                       const Sequencerange *seqrange)
 {
   Seqpos pos;
   Uchar currentchar;
 
+  initEncodedsequencescanstate(esr,encseq,Forwardmode,seqrange->leftpos);
   for (pos=seqrange->leftpos; pos<seqrange->rightpos; pos++)
   {
-    currentchar = getencodedchar(/* XXX */ encseq,pos,Forwardmode);
+    currentchar = sequentialgetencodedchar(encseq,esr,pos);
     assert(ISSPECIAL(currentchar));
     if (currentchar == (Uchar) SEPARATOR)
     {
@@ -52,21 +54,24 @@ Seqpos *encseq2markpositions(const Encodedsequence *encseq,
   Specialrangeiterator *sri;
   Sequencerange range;
   bool haserr = false;
+  Encodedsequencescanstate *esr;
 
-  assert (numofsequences > (unsigned long) 1);
+  assert (numofsequences > 1UL);
   asp.allocatedSeqpos = numofsequences-1;
   asp.nextfreeSeqpos = 0;
   ALLOCASSIGNSPACE(asp.spaceSeqpos,NULL,Seqpos,asp.allocatedSeqpos);
   sri = newspecialrangeiterator(encseq,true,env);
+  esr = newEncodedsequencescanstate(env);
   while (nextspecialrangeiterator(&range,sri))
   {
-    if (addmarkpos(&asp,encseq,&range) != 0)
+    if (addmarkpos(&asp,encseq,esr,&range) != 0)
     {
       haserr = true;
       break;
     }
   }
   freespecialrangeiterator(&sri,env);
+  freeEncodedsequencescanstate(&esr,env);
   if (haserr)
   {
     FREEARRAY(&asp,Seqpos);
@@ -82,7 +87,7 @@ unsigned long *sequence2markpositions(unsigned long *numofsequences,
 {
   unsigned long *spacemarkpos, i, allocatedmarkpos, nextfreemarkpos;
 
-  *numofsequences = (unsigned long) 1;
+  *numofsequences = 1UL;
   for (i=0; i<seqlen; i++)
   {
     if (seq[i] == (Uchar) SEPARATOR)
@@ -90,7 +95,7 @@ unsigned long *sequence2markpositions(unsigned long *numofsequences,
       (*numofsequences)++;
     }
   }
-  if (*numofsequences == (unsigned long) 1)
+  if (*numofsequences == 1UL)
   {
     return NULL;
   }
@@ -115,7 +120,7 @@ unsigned long getrecordnumSeqpos(const Seqpos *recordseps,
   unsigned long left, mid, right, len;
 
   assert(numofrecords > 0);
-  if (numofrecords == (unsigned long) 1 || position < recordseps[0])
+  if (numofrecords == 1UL || position < recordseps[0])
   {
     return 0;
   }
@@ -169,7 +174,7 @@ unsigned long getrecordnumulong(const unsigned long *recordseps,
   unsigned long left, mid, right, len;
 
   assert(numofrecords > 0);
-  if (numofrecords == (unsigned long) 1 || position < recordseps[0])
+  if (numofrecords == 1UL || position < recordseps[0])
   {
     return 0;
   }
@@ -216,11 +221,12 @@ int checkmarkpos(const Encodedsequence *encseq,
                  unsigned long numofdbsequences,
                  Env *env)
 {
-  if (numofdbsequences > (unsigned long) 1)
+  if (numofdbsequences > 1UL)
   {
     Seqpos *markpos, totallength, pos;
     unsigned long currentseqnum = 0, seqnum;
     Uchar currentchar;
+    Encodedsequencescanstate *esr;
 
     markpos = encseq2markpositions(encseq,
                                    numofdbsequences,
@@ -230,9 +236,11 @@ int checkmarkpos(const Encodedsequence *encseq,
       return -1;
     }
     totallength = getencseqtotallength(encseq);
+    esr = newEncodedsequencescanstate(env);
+    initEncodedsequencescanstate(esr,encseq,Forwardmode,0);
     for (pos=0; pos<totallength; pos++)
     {
-      currentchar = getencodedchar(/* XXX */ encseq,pos,Forwardmode);
+      currentchar = sequentialgetencodedchar(encseq,esr,pos);
       if (currentchar == (Uchar) SEPARATOR)
       {
         currentseqnum++;
