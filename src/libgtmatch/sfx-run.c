@@ -488,13 +488,15 @@ static int runsuffixerator(bool doesa,
         {
           sfxInterface *si;
           BWTSeq *bwtSeq;
-          computePackedIndexDefaults(&so->bwtIdxParams, env);
           showverbose(verboseinfo, "run construction of packed index for:\n"
                       "blocksize=%u\nblocks-per-bucket=%u\nlocfreq=%u",
                       so->bwtIdxParams.final.seqParams.blockEnc.blockSize,
                       so->bwtIdxParams.final.seqParams.blockEnc.bucketBlocks,
                       so->bwtIdxParams.final.locateInterval);
-          if (!(si = newSfxInterface(so, verboseinfo, env)))
+          if (!(si = newSfxInterface(so, encseq, &specialcharinfo,
+                                     numofsequences, mtime, totallength + 1,
+                                     alpha, characterdistribution,
+                                     verboseinfo, env)))
           {
             fputs("Index creation failed.\n", stderr);
             haserr = true;
@@ -510,6 +512,8 @@ static int runsuffixerator(bool doesa,
           else
             deleteBWTSeq(bwtSeq, env); /**< the actual object is not
                                         * used here */
+          outfileinfo.longest = getSfxILongestPos(si);
+
           deleteSfxInterface(si, env);
         }
       }

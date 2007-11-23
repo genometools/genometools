@@ -158,3 +158,22 @@ EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
   freeverboseinfo(&verbosity, env);
   return EIS_INTEGRITY_CHECK_NO_ERROR;
 }
+
+extern unsigned
+estimateSegmentSize(const union seqBaseEncParam *params,
+                    enum seqBaseEncoding encType, Env *env)
+{
+  unsigned segmentLen = 0;
+  switch (encType)
+  {
+  case BWT_ON_BLOCK_ENC:
+    segmentLen =
+      blockEncIdxSeqSegmentLen(&params->blockEnc, env);
+    break;
+  default:
+    env_error_set(env, "Illegal/unknown/unimplemented encoding requested!");
+    break;
+  }
+  return segmentLen;
+}
+

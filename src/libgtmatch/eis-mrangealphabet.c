@@ -60,7 +60,6 @@ newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
       newAlpha->mappings[i] = mappings[i];
       newAlpha->revMappings[mappings[i]] = i;
     }
-    return MRAEncUInt82MRAEnc(newAlpha);
   }
   else
   {
@@ -70,8 +69,8 @@ newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
         env_ma_free(newAlpha->baseClass.symbolsPerRange, env);
       if (newAlpha->baseClass.rangeEndIndices)
         env_ma_free(newAlpha->baseClass.rangeEndIndices, env);
+      env_ma_free(newAlpha, env);
     }
-    env_ma_free(newAlpha, env);
     return NULL;
   }
   return &(newAlpha->baseClass);
@@ -97,6 +96,56 @@ MRAEncGTAlphaNew(const Alphabet *alpha, Env *env)
   result = newMultiRangeAlphabetEncodingUInt8(2, symsPerRange, mappings, env);
   env_ma_free(mappings, env);
   return result;
+}
+
+extern MRAEnc *
+MRAEncCopy(const MRAEnc *alpha, Env *env)
+{
+  assert(alpha);
+  switch (alpha->encType)
+  {
+  case sourceUInt8:
+    {
+      MRAEncUInt8 *newAlpha = NULL;
+      const MRAEncUInt8 *srcAlpha = constMRAEnc2MRAEncUInt8(alpha);
+      size_t numRanges = alpha->numRanges;
+      assert(numRanges > 0);
+      if ((newAlpha = env_ma_calloc(env, sizeof (MRAEncUInt8), 1))
+          && (newAlpha->baseClass.rangeEndIndices =
+              env_ma_malloc(env, sizeof (size_t) * numRanges))
+          && (newAlpha->baseClass.symbolsPerRange =
+              env_ma_malloc(env, sizeof (size_t) * numRanges)))
+      {
+        newAlpha->baseClass.encType = sourceUInt8;
+        newAlpha->baseClass.numRanges = srcAlpha->baseClass.numRanges;
+        memcpy(newAlpha->mappings, srcAlpha->mappings, UINT8_MAX+1);
+        memcpy(newAlpha->revMappings, srcAlpha->revMappings, UINT8_MAX+1);
+        memcpy(newAlpha->baseClass.rangeEndIndices,
+               srcAlpha->baseClass.rangeEndIndices,
+               sizeof (newAlpha->baseClass.rangeEndIndices[0]) * numRanges);
+        memcpy(newAlpha->baseClass.symbolsPerRange,
+               srcAlpha->baseClass.symbolsPerRange,
+               sizeof (newAlpha->baseClass.symbolsPerRange[0]) * numRanges);
+        return &(newAlpha->baseClass);
+      }
+      else
+      {
+        if (newAlpha)
+        {
+          if (newAlpha->baseClass.symbolsPerRange)
+            env_ma_free(newAlpha->baseClass.symbolsPerRange, env);
+          if (newAlpha->baseClass.rangeEndIndices)
+            env_ma_free(newAlpha->baseClass.rangeEndIndices, env);
+          env_ma_free(newAlpha, env);
+        }
+        return NULL;
+      }
+    }
+    break;
+  default:
+    return NULL;
+    break;
+  }
 }
 
 size_t

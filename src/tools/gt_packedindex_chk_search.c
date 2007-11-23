@@ -63,15 +63,23 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
 
   do {
     env_error_check(env);
-    switch (parseChkBWTOptions(&parsedArgs, argc, argv, &params,
-                               inputProject, env))
     {
-    case OPTIONPARSER_OK:
-      break;
-    case OPTIONPARSER_ERROR:
-      return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
-      return 0;
+      bool exitNow = false;
+      switch (parseChkBWTOptions(&parsedArgs, argc, argv, &params,
+                                 inputProject, env))
+      {
+      case OPTIONPARSER_OK:
+        break;
+      case OPTIONPARSER_ERROR:
+        had_err = true;
+        exitNow = true;
+        break;
+      case OPTIONPARSER_REQUESTS_EXIT:
+        exitNow = true;
+        break;
+      }
+      if (exitNow)
+        break;
     }
     str_set(inputProject, argv[parsedArgs], env);
     {
@@ -253,11 +261,12 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
 
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc,
                                             argv, versionfunc, 1, 1, env);
-  option_parser_delete(op, env);
-
   /* compute parameters currently not set from command-line or
    * determined indirectly */
-  computePackedIndexDefaults(&params->idx, env);
+  computePackedIndexDefaults(&params->idx,
+                             BWTBaseFeatures & ~BWTProperlySorted, env);
+
+  option_parser_delete(op, env);
 
   return oprval;
 }

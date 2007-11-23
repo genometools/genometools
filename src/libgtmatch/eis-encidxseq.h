@@ -30,6 +30,7 @@
 #include "libgtcore/str.h"
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/eis-mrangealphabet.h"
+#include "libgtmatch/eis-encidxseqparam.h"
 
 /**
  * callback function to insert variable width data into encidx
@@ -95,33 +96,6 @@ struct seqStats
 typedef struct encIdxSeq EISeq;
 
 typedef union EISHint *EISHint;
-
-enum EISFeatureBits
-{
-  EIS_FEATURE_NONE = 0,
-  EIS_FEATURE_REGION_SUMS = 1<<0, /**< if set construct sum tables for
-                                   *   the special symbol ranges
-                                   *   use this on index loading if
-                                   *   you want to use this index in
-                                   *   many queries, omit if memory
-                                   *   is very tight (e.g. on construction) */
-};
-
-struct blockEncParams
-{
-  unsigned blockSize;         /**< number of symbols to combine in
-                               * one block a lookup-table
-                               * containing
-                               * $alphabetsize^{blockSize}$ entries is
-                               * required so adjust with caution */
-  unsigned bucketBlocks;      /**< number of blocks for which to
-                               * store partial symbol sums (lower
-                               * values increase index size and
-                               * decrease computations for lookup) */
-  int EISFeatureSet;          /**< bitwise or of EIS_FEATURE_NONE
-                               * and other features selectable via
-                               * enum EISFeatureBits (see eis-encidxseq.h) */
-};
 
 /**
  * \brief Construct block-encoded indexed sequence object and write

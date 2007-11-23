@@ -29,77 +29,11 @@
 
 #include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-mrangealphabet.h"
+#include "libgtmatch/eis-bwtseqparam.h"
 
 /* TODO:
  * - implement other index types
  */
-
-/**
- * Names the type of encoding used:
- */
-enum seqBaseEncoding {
-  BWT_BASETYPE_AUTOSELECT,      /**< automatic, load any index present
-                                 *     (currently not implemented) */
-  BWT_ON_RLE,                   /**< use original fmindex run-length
-                                 * encoding  */
-  BWT_ON_BLOCK_ENC,             /**< do block compression by dividing
-                                 * sequence into strings of
-                                 * composition and permutation
-                                 * indices */
-  BWT_ON_WAVELET_TREE_ENC,      /**< encode sequence with wavelet-trees */
-};
-
-/**
- * Stores information to construct the underlying sequence object of a
- * BWT sequence object.
- */
-union bwtSeqParam
-{
-  struct blockEncParams blockEnc;
-/*   struct  */
-/*   { */
-/*   } RLEParams; */
-/*   struct  */
-/*   { */
-/*   } waveletTreeParams; */
-};
-
-/**
- * all parameters for building the BWT sequence index
- */
-struct bwtParam
-{
-  union bwtSeqParam seqParams;    /**< a union holding extra parameter
-                                   *   information specific to the
-                                   *   type selected via parameter
-                                   *   baseType */
-  enum seqBaseEncoding baseType;  /**< baseType selects the encoding
-                                   *   method of the sequence index *
-                                   *   storing the BWT sequence (see
-                                   *   enum seqBaseEncoding). */
-  int bwtFeatureToggles;          /**< set of bittoggles composed
-                                   *   from enum BWTFeatures */
-  unsigned locateInterval;        /**< store locate information
-                                   * (mapping from BWT sequence to
-                                   * original sequence for every nth
-                                   * position in original sequence) at
-                                   * this frequency, unless
-                                   * locateInterval = 0, which implies
-                                   * storing no locate information at
-                                   * all */
-  const Str *projectName;         /**< base file name to derive name
-                                   *   of suffixerator project from*/
-};
-
-/**
- * Select specifics of how
- * - the locate information is stored
- */
-enum BWTFeatures
-{
-  BWTLocateBitmap = 1 << 0,
-  BWTLocateCount  = 1 << 1,
-};
 
 /**
  * Stores column indices of the (virtual) matrix of rotations of the
@@ -291,7 +225,6 @@ enum verifyBWTSeqErrCode
  *                  been processed
  * @param fp dots printed to this file
  */
-
 extern enum verifyBWTSeqErrCode
 BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
                       unsigned long tickPrint, FILE *fp, Env *env);
@@ -343,7 +276,7 @@ struct MatchData
  * match or NULL if no further match is available, the reference  will
  * become invalid  once the iterator has been queried again
  */
-extern struct MatchData *
+static inline struct MatchData *
 EMIGetNextMatch(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
                 Env *env);
 

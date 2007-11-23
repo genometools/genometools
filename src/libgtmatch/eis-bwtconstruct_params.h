@@ -17,7 +17,7 @@
 #define EIS_BWTCONSTRUCT_PARAMS_H
 
 #include "libgtcore/option.h"
-#include "libgtmatch/eis-bwtseq.h"
+#include "libgtmatch/eis-bwtseqparam.h"
 
 enum BWTOptionDefaultsOptimizationFlags
 {
@@ -34,6 +34,8 @@ struct bwtOptions
 {
   struct bwtParam final;
   int defaultOptimizationFlags;
+  bool useLocateBitmap;
+  Option *useLocateBitmapOption;
 };
 
 extern void
@@ -42,6 +44,7 @@ registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
                            const Str *projectName, Env *env);
 
 extern void
-computePackedIndexDefaults(struct bwtOptions *paramOutput, Env *env);
+computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles,
+                           Env *env);
 
 #endif

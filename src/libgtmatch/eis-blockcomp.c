@@ -47,13 +47,9 @@
 #include "libgtmatch/eis-encidxseqpriv.h"
 #include "libgtmatch/eis-seqranges.h"
 #include "libgtmatch/eis-seqblocktranslate.h"
+#include "libgtmatch/eis-construction-interface.h"
 #include "libgtmatch/eis-suffixerator-interface.h"
-
-/**
- * generic method to aquire next readLen symbols of BWT string
- */
-typedef int (*bwtReadFunc)(void *state, size_t readLen, Symbol *dest,
-                           Env *env);
+#include "libgtmatch/eis-suffixarray-interface.h"
 
 struct encIdxSeq *
 newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
@@ -92,7 +88,7 @@ newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
 static EISeq *
 newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                      MRAEnc *alphabet, const struct seqStats *stats,
-                     bwtReadFunc getNextBlock, void *bwtReadFuncState,
+                     SymReadFunc readNextBWTBlock, void *bwtReaderState,
                      const struct blockEncParams *params,
                      size_t numExtHeaders, uint16_t *headerIDs,
                      uint32_t *extHeaderSizes,
@@ -100,21 +96,6 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                      void **headerCBData,
                      bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
                      BitOffset maxVarExtBitsPerPos, void *cbState, Env *env);
-
-struct fileReadState
-{
-  FILE *fp;
-  MRAEnc *alphabet;
-};
-
-static int
-saBWTReadNext(void *state, size_t readLen, Symbol *dest, Env *env)
-{
-  struct fileReadState *FRState = state;
-  assert(state);
-  return MRAEncReadAndTransform(FRState->alphabet, FRState->fp,
-                                readLen, dest);
-}
 
 extern EISeq *
 newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
@@ -137,10 +118,9 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
     return NULL;
   }
   state.fp = sa->bwttabstream.fp;
-  state.alphabet = MRAEncGTAlphaNew(sa->alpha, env);
-  MRAEncAddSymbolToRange(state.alphabet, SEPARATOR, 1);
+  state.alphabet = newMRAEncFromSA(sa, env);
   newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName, state.alphabet,
-                                   NULL, saBWTReadNext, &state, params,
+                                   NULL, saReadBWT, &state, params,
                                    numExtHeaders, headerIDs, extHeaderSizes,
                                    extHeaderCallbacks, headerCBData, biFunc,
                                    cwExtBitsPerPos, maxVarExtBitsPerPos,
@@ -158,13 +138,13 @@ struct sfxInterfaceReadState
 };
 
 static int
-sfxIBWTReadNext(void *state, size_t readLen, Symbol *dest, Env *env)
+sfxIBWTReadNext(void *state, Symbol *dest, size_t readLen, Env *env)
 {
   struct sfxInterfaceReadState *SIState = state;
   size_t readCount;
   assert(state && SIState->si);
-  readCount = readSfxIBWTRangeSym(SIState->si, SIState->bwtReadId, readLen,
-                                  dest, env);
+  readCount = readSfxIBWTRange(SIState->si, SIState->bwtReadId, readLen,
+                               dest, env);
   MRAEncSymbolsTransform(SIState->alphabet, dest, readCount);
   return (readCount==readLen?1:-1);
 }
@@ -189,8 +169,7 @@ newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
     return NULL;
   state.si = si;
   /* convert alphabet */
-  state.alphabet = MRAEncGTAlphaNew(getSfxIAlphabet(si), env);
-  MRAEncAddSymbolToRange(state.alphabet, SEPARATOR, 1);
+  state.alphabet = newMRAEncFromSfxI(si, env);
   newSeqIdx = newGenBlockEncIdxSeq(totalLen, projectName,
                                    state.alphabet, getSfxISeqStats(si),
                                    sfxIBWTReadNext, &state, params,
@@ -415,7 +394,7 @@ symSumBitsDefaultSetup(struct blockCompositionSeq *seqIdx);
 static EISeq *
 newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
                      MRAEnc *alphabet, const struct seqStats *stats,
-                     bwtReadFunc getNextBlock, void *bwtReadFuncState,
+                     SymReadFunc readNextBWTBlock, void *bwtReaderState,
                      const struct blockEncParams *params,
                      size_t numExtHeaders, uint16_t *headerIDs,
                      uint32_t *extHeaderSizes,
@@ -548,15 +527,16 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
       }
       /* count special characters to estimate number of regions required */
       {
-        Symbol eSym, bSym;
+        Symbol eSym, rSym;
         Seqpos regionSymCount = 0;
+        unsigned rangeMapAlphabetSize = MRAEncGetSize(rangeMapAlphabet);
         unsigned i;
         for (i = 0; i <= UINT8_MAX; ++i)
           if (MRAEncSymbolIsInSelectedRanges(
                alphabet, eSym = MRAEncMapSymbol(alphabet, i),
                REGIONS_LIST, modesCopy)
-             && ((bSym = MRAEncMapSymbol(blockMapAlphabet, eSym))
-                 < blockMapAlphabetSize))
+             && ((rSym = MRAEncMapSymbol(rangeMapAlphabet, eSym))
+                 < rangeMapAlphabetSize))
             regionSymCount += stats->symbolDistributionTable[i];
         regionsEstimate = regionSymCount/20;
 #ifdef DEBUG
@@ -645,7 +625,8 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
             unsigned significantPermIdxBits;
             int readResult;
             /* 3. for each chunk: */
-            readResult = getNextBlock(bwtReadFuncState, blockSize, block, env);
+            readResult = readNextBWTBlock(bwtReaderState, block, blockSize,
+                                          env);
             if (readResult < 0)
             {
               hadError = 1;
@@ -703,8 +684,8 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
             unsigned significantPermIdxBits;
             int readResult;
             Seqpos symbolsLeft = totalLen % blockSize;
-            readResult = getNextBlock(bwtReadFuncState, symbolsLeft, block,
-                                      env);
+            readResult = readNextBWTBlock(bwtReaderState, block, symbolsLeft,
+                                          env);
             if (readResult < 0)
             {
               hadError = 1;
@@ -1932,9 +1913,7 @@ loadBlockEncIdxSeqForSA(Suffixarray *sa, Seqpos totalLen,
   assert(projectName && env);
   newSeqIdx = env_ma_calloc(env, sizeof (struct blockCompositionSeq), 1);
   newSeqIdx->baseClass.seqLen = totalLen;
-  newSeqIdx->baseClass.alphabet = alphabet =
-    MRAEncGTAlphaNew(sa->alpha, env);
-  MRAEncAddSymbolToRange(alphabet, SEPARATOR, 1);
+  newSeqIdx->baseClass.alphabet = alphabet = newMRAEncFromSA(sa, env);
   newSeqIdx->baseClass.classInfo = &blockCompositionSeqClass;
 
   if (!openOnDiskData(projectName, &newSeqIdx->externalData, "rb", env))
@@ -2373,6 +2352,12 @@ printBucket(const struct blockCompositionSeq *seqIdx, Seqpos bucketNum,
     env_ma_free(block, env);
   }
   return outCount;
+}
+
+extern unsigned
+blockEncIdxSeqSegmentLen(const struct blockEncParams *params, Env *env)
+{
+  return params->blockSize * params->bucketBlocks;
 }
 
 static int
