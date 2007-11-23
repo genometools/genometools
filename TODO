@@ -28,6 +28,8 @@ feature requests:
 - compute the phase correctly (in cds_visitor?)
 - establish naming conventions and use them throughout entire codebase
 - implement simpler solution for multiset_matching
+- implement cleanup stack exeception handling
+- get rid of env class
 
 
 merge libgtcore and libgtmatch:
