@@ -221,6 +221,8 @@ int checkmarkpos(const Encodedsequence *encseq,
                  unsigned long numofdbsequences,
                  Env *env)
 {
+  bool haserr = false;
+
   if (numofdbsequences > 1UL)
   {
     Seqpos *markpos, totallength, pos;
@@ -253,7 +255,8 @@ int checkmarkpos(const Encodedsequence *encseq,
                                     env);
         if (seqnum == numofdbsequences)
         {
-          return -1;
+          haserr = true;
+          break;
         }
         if (seqnum != currentseqnum)
         {
@@ -264,7 +267,8 @@ int checkmarkpos(const Encodedsequence *encseq,
         }
       }
     }
+    freeEncodedsequencescanstate(&esr,env);
     FREESPACE(markpos);
   }
-  return 0;
+  return haserr ? -1 : 0;
 }
