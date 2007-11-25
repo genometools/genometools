@@ -347,7 +347,7 @@ void encseqextract(Uchar *buffer,
   assert(frompos < topos && topos < encseq->totallength);
   esr = newEncodedsequencescanstate(env);
   initEncodedsequencescanstate(esr,encseq,Forwardmode,frompos);
-  for(pos=frompos, idx = 0; pos <= topos; pos++, idx++)
+  for (pos=frompos, idx = 0; pos <= topos; pos++, idx++)
   {
     buffer[idx] = sequentialgetencodedchar(encseq,esr,pos);
   }
