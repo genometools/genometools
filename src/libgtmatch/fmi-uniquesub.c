@@ -26,7 +26,7 @@
 #include "fmi-map.pr"
 #include "fmi-fwduni.pr"
 
-#define SHOWSEQUENCE   ((unsigned int) 1)
+#define SHOWSEQUENCE   1U
 #define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
 
 typedef struct
