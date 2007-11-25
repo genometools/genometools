@@ -62,7 +62,6 @@ static int testscanatpos(const Encodedsequence *encseq,
                           (unsigned int) ccsr);
         haserr = true;
       }
-      printf("pos %lu: ccra=%u\n",(unsigned long) pos,ccra);
     }
     freeEncodedsequencescanstate(&esr,env);
   }

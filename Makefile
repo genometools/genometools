@@ -565,7 +565,9 @@ splint: obj/gt_config.h
         $(CURDIR)/src/libgtext/*.c \
         $(CURDIR)/src/tools/*.c
 
-EISFILES=${shell ls ${CURDIR}/src/libgtmatch/*.c | grep eis-}
+EISFILES=${shell ls ${CURDIR}/src/libgtmatch/*.c | grep eis-}\
+         ${CURDIR}/src/libgtmatch/sfx-opt.c\
+         ${CURDIR}/src/libgtmatch/sfx-run.c
 
 sgt:${addprefix obj/,${notdir ${subst .c,.splint,\
 	             ${filter-out ${EISFILES},${wildcard ${CURDIR}/src/libgtmatch/*.c}}\

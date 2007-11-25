@@ -308,7 +308,7 @@ static OPrval parse_options(int *parsed_args,
                                &lo->maxlengthTSD,
                                20U,
                                0,
-                               UNDEF_INT,
+                               (unsigned int) UNDEF_INT,
                                env);
   option_parser_add_option(op, optionmaxtsd, env);
 

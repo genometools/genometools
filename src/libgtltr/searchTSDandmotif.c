@@ -452,14 +452,14 @@ static void searchformotifonlyinside(LTRharvestoptions *lo,
        /* first hit */
        if ( !motif1 )
        {
-         Seqpos max, min;
+         Seqpos maxval, minval;
 
          motifmismatches_frombestmatch = tmp_motifmismatchesleftLTR;
          boundaries->leftLTR_3 = idx;
          motif1 = true;
-         max = MAX(oldleftLTR_3, boundaries->leftLTR_3);
-         min = MIN(oldleftLTR_3, boundaries->leftLTR_3);
-         difffromoldboundary = max - min;
+         maxval = MAX(oldleftLTR_3, boundaries->leftLTR_3);
+         minval = MIN(oldleftLTR_3, boundaries->leftLTR_3);
+         difffromoldboundary = maxval - minval;
        }
        /* next hit */
        else
@@ -680,8 +680,8 @@ static int searchforTSDandorMotifoutside(
     encseqextract(dbseq,encseq,startleftLTR,endleftLTR,env);
     encseqextract(query,encseq,startrightLTR,endrightLTR,env);
     INITARRAY(&subrepeatinfo.repeats, Repeat);
-    subrepeatinfo.lmin = lo->minlengthTSD;
-    subrepeatinfo.lmax = lo->maxlengthTSD;
+    subrepeatinfo.lmin = (unsigned long) lo->minlengthTSD;
+    subrepeatinfo.lmax = (unsigned long) lo->maxlengthTSD;
     assert(startleftLTR < startrightLTR);
     subrepeatinfo.offset1 = startleftLTR;
     subrepeatinfo.offset2 = startrightLTR;
@@ -691,7 +691,7 @@ static int searchforTSDandorMotifoutside(
           leftlen,
           query,
           (unsigned long) rightlen,
-          (unsigned long) lo->minlengthTSD,
+          lo->minlengthTSD,
           alphabetSequentialsuffixarrayreader(ssar),
           subsimpleexactselfmatchstore,
           &subrepeatinfo,
