@@ -30,6 +30,7 @@ feature requests:
 - implement simpler solution for multiset_matching
 - implement cleanup stack exeception handling
 - get rid of env class
+- compute correlation coefficient and average in `gt eval`
 
 
 merge libgtcore and libgtmatch:
