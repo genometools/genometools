@@ -190,16 +190,16 @@ static int runltrharvest(LTRharvestoptions *lo, Env *env)
 int parseargsandcallltrharvest(int argc,const char *argv[],Env *env)
 {
   LTRharvestoptions lo;
-  bool haserr = false;
+  int had_err = 0;
 
   if (ltrharvestoptions(&lo,argc,argv,env) != 0)
   {
-    haserr = true;
+    had_err = -1;
   } else
   {
     printargsline(argv,argc);
-    haserr = runltrharvest(&lo,env);
+    had_err = runltrharvest(&lo,env);
   }
   wrapltrharvestoptions(&lo,env);
-  return haserr ? -1 : 0;
+  return had_err;
 }

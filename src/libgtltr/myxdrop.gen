@@ -71,7 +71,9 @@ EVALXDROPARBITSCORES
   xdropbest->score = bigt_tmp = S (i + i, 0);
   xdropbest->ivalue = xdropbest->jvalue = (unsigned int) i;
 
+  /*@ignore@*/
   STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
+  /*@end@*/
 
   /* "phase" d > 0 */
   while (lbound <= ubound)
@@ -159,6 +161,7 @@ EVALXDROPARBITSCORES
       }
       /* alignment score smaller than T - X */
       else if ( d_pre > 0 &&
+              big_t.spaceXdropscore != NULL &&
               (S (i + j, d) < big_t.spaceXdropscore[d_pre] - xdropbelowscore)
              )
       {
@@ -222,8 +225,10 @@ EVALXDROPARBITSCORES
       currentMININFINITYINTgeneration = 0;
       alwaysMININFINITYINT = true;
     }
-
+    
+    /*@ignore@*/
     STOREINARRAY (&big_t, Xdropscore, 10, bigt_tmp);
+    /*@end@*/
 
     /* fill out of bounds values of MINUSINFINITYINT
        needed for showmatrix function */

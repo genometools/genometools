@@ -19,14 +19,15 @@
 #include <string.h>
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
+#include "libgtcore/seqiterator.h"
 #include "fmindex.h"
+#include "spacedef.h"
 #include "format64.h"
-#include "overallseq.h"
 
 #include "fmi-map.pr"
 #include "fmi-fwduni.pr"
 
-#define SHOWSEQUENCE   ((unsigned int) 1)
+#define SHOWSEQUENCE   1U
 #define SHOWQUERYPOS   (SHOWSEQUENCE << 1)
 
 typedef struct
@@ -137,7 +138,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   uniquesubcallinfo->queryfilenames = strarray_new(env);
   flagsoutputoption = strarray_new(env);
 
-  op = option_parser_new("[option ...] -fm fmindex -quer queryfile [...]",
+  op = option_parser_new("[option ...] -fm fmindex -query queryfile [...]",
                          "Compute length of minumum unique prefixes.", env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
   optionmin = option_new_ulong_min("min",
@@ -237,51 +238,50 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   return oprval;
 }
 
-static int uniqueposinsinglesequence(void *info,
+static int uniqueposinsinglesequence(Substringinfo *substringinfo,
                                      uint64_t unitnum,
-                                     const Uchar *start,
-                                     unsigned long seqlen,
+                                     const Uchar *query,
+                                     unsigned long querylen,
                                      const char *desc,
                                      Env *env)
 {
-  Substringinfo *substringinfo = (Substringinfo *) info;
-  const Uchar *query;
+  const Uchar *qptr;
   unsigned long uniquelength, remaining;
 
   env_error_check(env);
   if (substringinfo->preprocessuniquelength != NULL &&
-     substringinfo->preprocessuniquelength(unitnum,
-                                           desc,
-                                           substringinfo->processinfo,
-                                           env) != 0)
+      substringinfo->preprocessuniquelength(unitnum,
+                                            desc,
+                                            substringinfo->processinfo,
+                                            env) != 0)
   {
     return -1;
   }
-  for (query = start, remaining = seqlen; remaining > 0; query++, remaining--)
+  for (qptr = query, remaining = querylen; remaining > 0; qptr++, remaining--)
   {
     uniquelength = skfmuniqueforward (substringinfo->fmindex,
-                                      query,start+seqlen);
+                                      qptr,query+querylen);
     if (uniquelength > 0)
     {
       if (substringinfo->processuniquelength(substringinfo->fmindex->alphabet,
-                                            start,
-                                            uniquelength,
-                                            (unsigned long) (query-start),
-                                            substringinfo->processinfo,
-                                            env) != 0)
+                                             query,
+                                             uniquelength,
+                                             (unsigned long) (qptr-query),
+                                             substringinfo->processinfo,
+                                             env) != 0)
       {
         return -2;
       }
     }
   }
   if (substringinfo->postprocessuniquelength != NULL &&
-     substringinfo->postprocessuniquelength(substringinfo->fmindex->alphabet,
-                                            unitnum,
-                                            desc,
-                                            start,
-                                            seqlen,
-                                            substringinfo->processinfo,
-                                            env) != 0)
+      substringinfo->postprocessuniquelength(substringinfo->fmindex->alphabet,
+                                             unitnum,
+                                             desc,
+                                             query,
+                                             querylen,
+                                             substringinfo->processinfo,
+                                             env) != 0)
   {
     return -3;
   }
@@ -342,9 +342,13 @@ static int findsubquerymatch(Fmindex *fmindex,
 {
   Substringinfo substringinfo;
   Rangespecinfo rangespecinfo;
-  ArrayUchar sequencebuffer;
-  Queue *descptr;
   bool haserr = false;
+  SeqIterator *seqit;
+  const Uchar *query;
+  unsigned long querylen;
+  char *desc = NULL;
+  int retval;
+  uint64_t unitnum;
 
   env_error_check(env);
   substringinfo.fmindex = fmindex;
@@ -355,20 +359,39 @@ static int findsubquerymatch(Fmindex *fmindex,
   substringinfo.processuniquelength = showifinlengthrange;
   substringinfo.postprocessuniquelength = NULL;
   substringinfo.processinfo = &rangespecinfo;
-  INITARRAY(&sequencebuffer,Uchar);
-  descptr = queue_new(env);
-  if (overallquerysequences(uniqueposinsinglesequence,
-                           &substringinfo,
-                           &sequencebuffer,
-                           queryfilenames,
-                           descptr,
-                           getsymbolmapAlphabet(fmindex->alphabet),
-                           env) != 0)
+  seqit = seqiterator_new(queryfilenames,
+                          getsymbolmapAlphabet(fmindex->alphabet),
+                          true,
+                          env);
+  for (unitnum = 0; /* Nothing */; unitnum++)
   {
-    haserr = true;
+    retval = seqiterator_next(seqit,
+                              &query,
+                              &querylen,
+                              &desc,
+                              env);
+    if (retval < 0)
+    {
+      haserr = true;
+      break;
+    }
+    if (retval == 0)
+    {
+      break;
+    }
+    if (uniqueposinsinglesequence(&substringinfo,
+                                  unitnum,
+                                  query,
+                                  querylen,
+                                  desc,
+                                  env) != 0)
+    {
+      haserr = true;
+      break;
+    }
+    FREESPACE(desc);
   }
-  queue_delete_with_contents(descptr,env);
-  FREEARRAY(&sequencebuffer,Uchar);
+  seqiterator_delete(seqit,env);
   return haserr ? -1 : 0;
 }
 

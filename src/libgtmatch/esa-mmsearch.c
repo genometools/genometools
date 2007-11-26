@@ -389,9 +389,9 @@ int callenumquerymatches(const Str *indexname,
     uint64_t unitnum;
 
     seqit = seqiterator_new(queryfiles,
-                             getsymbolmapAlphabet(suffixarray.alpha),
-                             true,
-                             env);
+                            getsymbolmapAlphabet(suffixarray.alpha),
+                            true,
+                            env);
     for (unitnum = 0; /* Nothing */; unitnum++)
     {
       retval = seqiterator_next(seqit,
@@ -409,16 +409,16 @@ int callenumquerymatches(const Str *indexname,
         break;
       }
       if (runquerysubstringmatch(suffixarray.encseq,
-                                suffixarray.suftab,
-                                suffixarray.readmode,
-                                totallength+1,
-                                unitnum,
-                                query,
-                                querylen,
-                                userdefinedleastlength,
-                                processmaxmatch,
-                                processmaxmatchinfo,
-                                env) != 0)
+                                 suffixarray.suftab,
+                                 suffixarray.readmode,
+                                 totallength+1,
+                                 unitnum,
+                                 query,
+                                 querylen,
+                                 userdefinedleastlength,
+                                 processmaxmatch,
+                                 processmaxmatchinfo,
+                                 env) != 0)
       {
         haserr = true;
         break;

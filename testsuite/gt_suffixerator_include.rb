@@ -16,7 +16,7 @@ def checksfx(parts,pl,withsmap,sat,filelist)
   end
   run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
            "#{extra} #{outoptions()}  -db " + filearg
-  run_test "#{$bin}gt dev sfxmap -trials 10 -v sfx"
+  run_test "#{$bin}gt dev sfxmap -trials 10 -v sfx",:maxtime => 600
 end
 
 def flattenfilelist(filelist)
@@ -67,7 +67,7 @@ Test do
   run_test "#{$bin}gt dev maxpairs -scan -l 8 -ii sfx"
   run "grep -v '^#' #{$last_stdout}"
   run "diff #{$last_stdout} #{$testdata}maxpairs-8-Atinsert.txt"
-  run_test "#{$bin}gt dev maxpairs -samples 50 -l 5 -ii sfx"
+  run_test "#{$bin}gt dev maxpairs -samples 40 -l 6 -ii sfx",:maxtime => 600
 end
 
 Name "gt suffixerator patternmatch"
