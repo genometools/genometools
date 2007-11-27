@@ -441,7 +441,7 @@ int config_unit_test(Env *env)
   ensure(had_err, (strcmp(str,"")==0));
 
   /* mem cleanup */
-  str_delete(luafile, env);
+  str_delete(luafile);
   config_delete(cfg, env);
 
   return had_err;
@@ -450,7 +450,7 @@ int config_unit_test(Env *env)
 void config_delete_without_state(Config *cfg, Env *env)
 {
   if (!cfg) return;
-  str_delete(cfg->filename,env);
+  str_delete(cfg->filename);
   ma_free(cfg);
 }
 

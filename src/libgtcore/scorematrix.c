@@ -73,7 +73,7 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
     }
     parsed_characters[(int) amino_acid] = UNDEF_CHAR;
     if (amino_acid == '\n') {
-      str_delete(token, env);
+      str_delete(token);
       tokenizer_next_token(tz, env);
       assert(!had_err);
       return 0;
@@ -88,12 +88,12 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
         had_err = -1;
         break;
       }
-      str_delete(token, env);
+      str_delete(token);
       tokenizer_next_token(tz, env);
       assert(!had_err);
       return 0;
     }
-    str_delete(token, env);
+    str_delete(token);
     tokenizer_next_token(tz, env);
   }
   if (!had_err) {
@@ -104,7 +104,7 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
     had_err = -1;
     }
   }
-  str_delete(token, env);
+  str_delete(token);
   return had_err;
 }
 
@@ -135,7 +135,7 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
     had_err = -1;
   }
   parsed_characters[(int) amino_acid] = UNDEF_CHAR;
-  str_delete(token, env);
+  str_delete(token);
   if (!had_err) {
     tokenizer_next_token(tz, env);
     while ((token = tokenizer_get_token(tz, env))) {
@@ -149,7 +149,7 @@ static int parse_score_line(ScoreMatrix *s, Tokenizer *tz,
                             alpha_encode(s->alpha, *(char*)
                             array_get(index_to_alpha_char_mapping, i)), score);
       i++;
-      str_delete(token, env);
+      str_delete(token);
       tokenizer_next_token(tz, env);
       if (tokenizer_line_start(tz))
           break;

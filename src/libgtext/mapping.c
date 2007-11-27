@@ -210,7 +210,7 @@ int mapping_map_integer(Mapping *m, long *output, const char *input, Env *env)
 void mapping_delete(Mapping *m, Env *env)
 {
   if (!m) return;
-  str_delete(m->mapping_file, env);
+  str_delete(m->mapping_file);
   ma_free(m->global);
   if (m->L) lua_close(m->L);
   ma_free(m);

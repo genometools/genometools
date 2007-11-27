@@ -86,20 +86,20 @@ int gt_extractfeat(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  arguments.type = str_new(env);
-  arguments.seqfile = str_new(env);
-  arguments.regionmapping = str_new(env);
+  arguments.type = str_new();
+  arguments.seqfile = str_new();
+  arguments.regionmapping = str_new();
   switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      str_delete(arguments.regionmapping, env);
-      str_delete(arguments.seqfile, env);
-      str_delete(arguments.type, env);
+      str_delete(arguments.regionmapping);
+      str_delete(arguments.seqfile);
+      str_delete(arguments.type);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(arguments.regionmapping, env);
-      str_delete(arguments.seqfile, env);
-      str_delete(arguments.type, env);
+      str_delete(arguments.regionmapping);
+      str_delete(arguments.seqfile);
+      str_delete(arguments.type);
       return 0;
   }
 
@@ -139,9 +139,9 @@ int gt_extractfeat(int argc, const char **argv, Env *env)
   /* free */
   genome_stream_delete(extractfeat_stream, env);
   genome_stream_delete(gff3_in_stream, env);
-  str_delete(arguments.regionmapping, env);
-  str_delete(arguments.seqfile, env);
-  str_delete(arguments.type, env);
+  str_delete(arguments.regionmapping);
+  str_delete(arguments.seqfile);
+  str_delete(arguments.type);
 
   return had_err;
 }

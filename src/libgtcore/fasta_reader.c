@@ -62,7 +62,7 @@ int fasta_reader_run(FastaReader *fr,
   assert(fr);
 
   /* init */
-  description = str_new(env);
+  description = str_new();
 
   /* at least one function has to be defined */
   assert(proc_description || proc_character || proc_sequence_length);
@@ -161,7 +161,7 @@ int fasta_reader_run(FastaReader *fr,
   }
 
   /* free */
-  str_delete(description, env);
+  str_delete(description);
 
   return had_err;
 }
@@ -169,7 +169,7 @@ int fasta_reader_run(FastaReader *fr,
 void fasta_reader_delete(FastaReader *fr, Env *env)
 {
   if (!fr) return;
-  str_delete(fr->sequence_filename, env);
+  str_delete(fr->sequence_filename);
   genfile_xclose(fr->sequence_file, env);
   ma_free(fr);
 }

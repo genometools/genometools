@@ -111,7 +111,7 @@ GTR* gtr_new(Env *env)
 #ifdef LIBGTVIEW
   Str *config_file;
 #endif
-  gtr->testspacepeak = str_new(env);
+  gtr->testspacepeak = str_new();
   gtr->L = luaL_newstate();
   assert(gtr->L); /* XXX: proper error message  */
   luaL_openlibs(gtr->L); /* open the standard libraries */
@@ -134,7 +134,7 @@ GTR* gtr_new(Env *env)
     else
       put_config_in_registry(gtr->L, gtr->config);
   }
-  str_delete(config_file, env);
+  str_delete(config_file);
 #endif
   return gtr;
 }
@@ -384,7 +384,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
 void gtr_delete(GTR *gtr, Env *env)
 {
   if (!gtr) return;
-  str_delete(gtr->testspacepeak, env);
+  str_delete(gtr->testspacepeak);
   toolbox_delete(gtr->toolbox, env);
   hashtable_delete(gtr->unit_tests, env);
   if (gtr->L) lua_close(gtr->L);

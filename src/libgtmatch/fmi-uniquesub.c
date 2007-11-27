@@ -134,7 +134,7 @@ static OPrval parseuniquesub(Uniquesubcallinfo *uniquesubcallinfo,
   uniquesubcallinfo->minlength.defined = false;
   uniquesubcallinfo->maxlength.defined = false;
   uniquesubcallinfo->showmode = 0;
-  uniquesubcallinfo->fmindexname = str_new(env);
+  uniquesubcallinfo->fmindexname = str_new();
   uniquesubcallinfo->queryfilenames = strarray_new(env);
   flagsoutputoption = strarray_new(env);
 
@@ -407,11 +407,11 @@ int findminuniquesubstrings(int argc,const char **argv,Env *env)
   switch (parseuniquesub(&uniquesubcallinfo, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      str_delete(uniquesubcallinfo.fmindexname,env);
+      str_delete(uniquesubcallinfo.fmindexname);
       strarray_delete(uniquesubcallinfo.queryfilenames,env);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(uniquesubcallinfo.fmindexname,env);
+      str_delete(uniquesubcallinfo.fmindexname);
       strarray_delete(uniquesubcallinfo.queryfilenames,env);
       return 0;
   }
@@ -434,7 +434,7 @@ int findminuniquesubstrings(int argc,const char **argv,Env *env)
     freefmindex(&fmindex,env);
   }
   freeverboseinfo(&verboseinfo,env);
-  str_delete(uniquesubcallinfo.fmindexname,env);
+  str_delete(uniquesubcallinfo.fmindexname);
   strarray_delete(uniquesubcallinfo.queryfilenames,env);
   return had_err;
 }

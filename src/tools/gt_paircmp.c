@@ -83,7 +83,7 @@ static OPrval parse_options(int *parsed_args,
   charlistlen = strarray_new(env);
   pw->strings = strarray_new(env);
   pw->files = strarray_new(env);
-  pw->text = str_new(env);
+  pw->text = str_new();
   pw->charlistlen = NULL;
   op = option_parser_new("options","Apply function to pairs of strings.",env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -178,10 +178,10 @@ static void freesimpleoption(Cmppairwiseopt *cmppairwise,Env *env)
 {
   strarray_delete(cmppairwise->strings,env);
   strarray_delete(cmppairwise->files,env);
-  str_delete(cmppairwise->text,env);
+  str_delete(cmppairwise->text);
   if (cmppairwise->charlistlen != NULL)
   {
-    str_delete(cmppairwise->charlistlen->charlist,env);
+    str_delete(cmppairwise->charlistlen->charlist);
     FREESPACE(cmppairwise->charlistlen);
   }
 }

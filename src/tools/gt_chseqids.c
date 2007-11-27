@@ -97,7 +97,7 @@ int gt_chseqids(int argc, const char **argv, Env *env)
   chseqids = str_new_cstr(argv[parsed_args], env);
   if (!(chseqids_stream = chseqids_stream_new(gff3_in_stream, chseqids, env)))
     had_err = -1;
-  str_delete(chseqids, env);
+  str_delete(chseqids);
   if (!had_err) {
     if (arguments.sort) {
       sort_stream = sort_stream_new(chseqids_stream, env);

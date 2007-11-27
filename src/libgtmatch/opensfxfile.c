@@ -42,7 +42,7 @@
                   str_get(tmpfilename),
                   strerror(errno));
   }
-  str_delete(tmpfilename,env);
+  str_delete(tmpfilename);
   return fp;
 }
 
@@ -57,9 +57,9 @@ bool indexfilealreadyexists(const Str *indexname,const char *suffix,Env *env)
 
   if (stat(str_get(tmpfilename),&statbuf) == 0)
   {
-    str_delete(tmpfilename,env);
+    str_delete(tmpfilename);
     return true;
   }
-  str_delete(tmpfilename,env);
+  str_delete(tmpfilename);
   return false;
 }

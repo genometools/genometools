@@ -98,7 +98,7 @@ static int construct_sequence_regions(void *key, void *value, void *data,
   range = *(Range*) value;
   gn = sequence_region_new(seqid, range, NULL, 0, env);
   queue_add(genome_nodes, gn, env);
-  str_delete(seqid, env);
+  str_delete(seqid);
   return 0;
 }
 
@@ -252,7 +252,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   filename = str_get(filenamestr);
 
   /* alloc */
-  line_buffer = str_new(env);
+  line_buffer = str_new();
   splitter = splitter_new(env),
   attribute_splitter = splitter_new(env);
 
@@ -472,7 +472,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   /* free */
   splitter_delete(splitter, env);
   splitter_delete(attribute_splitter, env);
-  str_delete(line_buffer, env);
+  str_delete(line_buffer);
 
   return had_err;
 }

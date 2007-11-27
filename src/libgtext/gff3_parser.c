@@ -95,7 +95,7 @@ static SimpleSequenceRegion* simple_sequence_region_new(const char *seqid,
 static void simple_sequence_region_delete(SimpleSequenceRegion *ssr, Env *env)
 {
   if (!ssr) return;
-  str_delete(ssr->seqid_str, env);
+  str_delete(ssr->seqid_str);
   ma_free(ssr);
 }
 
@@ -370,7 +370,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     genome_node_set_seqid(genome_feature, seqid_str, env);
   }
   if (seqid_str_created)
-    str_delete(seqid_str, env);
+    str_delete(seqid_str);
 
   /* set source */
   if (!had_err) {
@@ -450,7 +450,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     queue_add(genome_nodes, gn, env);
 
   /* free */
-  str_delete(changed_seqid, env);
+  str_delete(changed_seqid);
   splitter_delete(splitter, env);
   splitter_delete(attribute_splitter, env);
   splitter_delete(tmp_splitter, env);
@@ -592,7 +592,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     warning("skipping unknown meta line %lu in file \"%s\": %s", line_number,
             filename, line);
   }
-  str_delete(changed_seqid, env);
+  str_delete(changed_seqid);
   return had_err;
 }
 
@@ -632,7 +632,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
   filename = str_get(filenamestr);
 
   /* init */
-  line_buffer = str_new(env);
+  line_buffer = str_new();
 
   while ((rval = str_read_next_line_generic(line_buffer, fpin, env)) != EOF) {
     line = str_get(line_buffer);
@@ -699,7 +699,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
     assert(!had_err); /* add_auto_sr_to_queue() is sane */
   }
 
-  str_delete(line_buffer, env);
+  str_delete(line_buffer);
   if (queue_size(genome_nodes))
     *status_code = 0; /* at least one node was created */
   else

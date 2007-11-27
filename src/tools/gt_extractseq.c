@@ -101,14 +101,14 @@ int gt_extractseq(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  arguments.pattern = str_new(env);
+  arguments.pattern = str_new();
   switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      str_delete(arguments.pattern, env);
+      str_delete(arguments.pattern);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(arguments.pattern, env);
+      str_delete(arguments.pattern);
       return 0;
   }
 
@@ -129,7 +129,7 @@ int gt_extractseq(int argc, const char **argv, Env *env)
   }
 
   /* free */
-  str_delete(arguments.pattern, env);
+  str_delete(arguments.pattern);
   genfile_xclose(arguments.outfp, env);
 
   return had_err;

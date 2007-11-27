@@ -73,13 +73,13 @@ static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Env *env)
   env_error_check(env);
   assert(rm && seqid);
   if (!rm->sequence_file || str_cmp(rm->sequence_name, seqid)) {
-    str_delete(rm->sequence_file, env);
+    str_delete(rm->sequence_file);
     rm->sequence_file = regionmapping_map(rm, str_get(seqid), env);
     if (!rm->sequence_file)
       had_err = -1;
     else {
       if (!rm->sequence_name)
-        rm->sequence_name = str_new(env);
+        rm->sequence_name = str_new();
       else
         str_reset(rm->sequence_name);
       str_append_str(rm->sequence_name, seqid, env);
@@ -120,9 +120,9 @@ int regionmapping_get_raw_sequence_length(RegionMapping *rm,
 void regionmapping_delete(RegionMapping *rm, Env *env)
 {
   if (!rm) return;
-  str_delete(rm->sequence_filename, env);
-  str_delete(rm->sequence_file, env);
-  str_delete(rm->sequence_name, env);
+  str_delete(rm->sequence_filename);
+  str_delete(rm->sequence_file);
+  str_delete(rm->sequence_name);
   mapping_delete(rm->mapping, env);
   bioseq_delete(rm->bioseq, env);
   ma_free(rm);

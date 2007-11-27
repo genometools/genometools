@@ -323,8 +323,8 @@ int feature_index_unit_test(Env* env)
   genome_node_rec_delete(gn2, env);
   genome_node_rec_delete((GenomeNode*) sr1, env);
   genome_node_rec_delete((GenomeNode*) sr2, env);
-  str_delete(seqid1, env);
-  str_delete(seqid2, env);
+  str_delete(seqid1);
+  str_delete(seqid2);
   return had_err;
 }
 

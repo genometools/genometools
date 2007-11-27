@@ -155,7 +155,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
     haserr = true;
   }
   freeverboseinfo(&verboseinfo,env);
-  str_delete(indexname,env);
+  str_delete(indexname);
   if (!haserr)
   {
     int readmode;

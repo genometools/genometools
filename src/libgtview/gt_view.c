@@ -151,14 +151,14 @@ int gt_view(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  arguments.seqid = str_new(env);
+  arguments.seqid = str_new();
   switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      str_delete(arguments.seqid,env);
+      str_delete(arguments.seqid);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(arguments.seqid,env);
+      str_delete(arguments.seqid);
       return 0;
   }
 
@@ -252,11 +252,11 @@ int gt_view(int argc, const char **argv, Env *env)
       fprintf(stderr, "# of results: %lu\n", array_size(results));
 
     /* find and load configuration file */
-    prog = str_new(env);
+    prog = str_new();
     str_append_cstr_nt(prog, argv[0], cstr_length_up_to_char(argv[0], ' '),
                        env);
     config_file = gtdata_get_path(str_get(prog), env);
-    str_delete(prog, env);
+    str_delete(prog);
     str_append_cstr(config_file, "/config/view.lua", env);
     cfg = config_new(arguments.verbose, env);
     if (file_exists(str_get(config_file)))
@@ -272,11 +272,11 @@ int gt_view(int argc, const char **argv, Env *env)
 
   render_delete(r, env);
   config_delete(cfg, env);
-  str_delete(config_file, env);
+  str_delete(config_file);
   diagram_delete(d, env);
 
   /* free */
-  str_delete(arguments.seqid,env);
+  str_delete(arguments.seqid);
   array_delete(results, env);
   feature_index_delete(features, env);
 

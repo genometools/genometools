@@ -117,7 +117,7 @@ static void skproto(const char *filename, FILE *fpin, Env *env)
   env_error_check(env);
   assert(filename && fpin);
 
-  line = str_new(env);
+  line = str_new();
 
   while (str_read_next_line(line, fpin, env) != EOF) {
     linenum++;
@@ -156,7 +156,7 @@ static void skproto(const char *filename, FILE *fpin, Env *env)
     str_reset(line);
   }
 
-  str_delete(line, env);
+  str_delete(line);
 }
 
 int gt_skproto(int argc, const char **argv, Env *env)

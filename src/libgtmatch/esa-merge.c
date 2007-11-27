@@ -71,7 +71,7 @@ static int inputthesequences(Alphabet **alpha,
                           verboseinfo,
                           env) != 0)
     {
-      str_delete(indexname,env);
+      str_delete(indexname);
       return -1;
     }
     if (idx == 0)

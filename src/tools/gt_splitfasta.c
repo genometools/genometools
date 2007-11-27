@@ -87,7 +87,7 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
 
   if (!had_err) {
     /* open destination file */
-    destfilename = str_new(env);
+    destfilename = str_new();
     str_append_cstr_nt(destfilename, argv[parsed_args],
                        genfile_basename_length(argv[parsed_args]), env);
     str_append_char(destfilename, '.', env);
@@ -122,7 +122,7 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
   }
 
   /* free */
-  str_delete(destfilename, env);
+  str_delete(destfilename);
 
   /* close current file */
   fa_xfclose(destfp);

@@ -81,7 +81,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
     Str *currentline;
     unsigned int linenum;
 
-    currentline = str_new(env);
+    currentline = str_new();
     for (linenum = 0; str_read_next_line(currentline, fpin, env) != EOF;
          linenum++)
     {
@@ -98,7 +98,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
       }
       str_reset(currentline);
     }
-    str_delete(currentline,env);
+    str_delete(currentline);
   }
   if (!haserr && allkeysdefined(indexname,FMASCIIFILESUFFIX,riktab,
                                 verboseinfo,env) != 0)
@@ -214,7 +214,7 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,
     {
       haserr = true;
     }
-    str_delete(tmpfilename,env);
+    str_delete(tmpfilename);
   }
   if (!haserr)
   {
@@ -242,7 +242,7 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,
     {
       haserr = true;
     }
-    str_delete(tmpfilename,env);
+    str_delete(tmpfilename);
   }
   if (haserr)
   {

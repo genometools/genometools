@@ -57,7 +57,7 @@ static void remove_pattern_in_current_dir(const char *pattern, Env *env)
 
   /* free */
   globfree(&g);
-  str_delete(path, env);
+  str_delete(path);
 }
 
 int gt_clean(int argc, const char **argv, Env *env)

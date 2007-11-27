@@ -382,7 +382,7 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
     track_insert_block(track, bt->block, env);
     log_log("inserted block %s into track %s",
             str_get(block_get_caption(bt->block)), str_get(track_key));
-    str_delete(track_key, env);
+    str_delete(track_key);
     ma_free(bt);
   }
   array_delete(ni->blocktuples, env);
@@ -564,14 +564,14 @@ int diagram_unit_test(Env *env)
       !config_cstr_in_list(dia->config,"collapse","to_parent","gene", env)) {
     track_key = track_key_new("generated", gft_gene, env);
     ensure(had_err, hashtable_get(dia->tracks, str_get(track_key)));
-    str_delete(track_key, env);
+    str_delete(track_key);
   }
 
   if (!had_err &&
       !config_cstr_in_list(dia->config,"collapse","to_parent","exon", env)) {
     track_key = track_key_new("generated", gft_exon, env);
     ensure(had_err, hashtable_get(dia->tracks, str_get(track_key)));
-    str_delete(track_key, env);
+    str_delete(track_key);
   }
   ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
 
@@ -586,21 +586,21 @@ int diagram_unit_test(Env *env)
       !config_cstr_in_list(dia2->config,"collapse","to_parent","gene", env)) {
     track_key = track_key_new("generated", gft_gene, env);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
-    str_delete(track_key, env);
+    str_delete(track_key);
   }
 
   if (!had_err &&
       !config_cstr_in_list(dia2->config,"collapse","to_parent","exon", env)) {
     track_key = track_key_new("generated", gft_exon, env);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
-    str_delete(track_key, env);
+    str_delete(track_key);
   }
 
   if (!had_err &&
       !config_cstr_in_list(dia2->config,"collapse","to_parent","CDS", env)) {
     track_key = track_key_new("generated", gft_CDS, env);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
-    str_delete(track_key, env);
+    str_delete(track_key);
   }
   ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
 
@@ -613,8 +613,8 @@ int diagram_unit_test(Env *env)
   genome_node_rec_delete(gn2, env);
   genome_node_rec_delete((GenomeNode*) sr1, env);
   genome_node_rec_delete((GenomeNode*) sr2, env);
-  str_delete(seqid1, env);
-  str_delete(seqid2, env);
+  str_delete(seqid1);
+  str_delete(seqid2);
 
   return had_err;
 }

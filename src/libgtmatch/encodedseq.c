@@ -532,7 +532,7 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
     haserr = true;
   }
   showverbose(verboseinfo,"sat=%s",encseqaccessname(encseq));
-  str_delete(tmpfilename,env);
+  str_delete(tmpfilename);
   return haserr ? -1 : 0;
 }
 

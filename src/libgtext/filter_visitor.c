@@ -39,8 +39,8 @@ static void filter_visitor_free(GenomeVisitor *gv, Env *env)
 {
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
   queue_delete(filter_visitor->genome_node_buffer, env);
-  str_delete(filter_visitor->seqid, env);
-  str_delete(filter_visitor->typefilter, env);
+  str_delete(filter_visitor->seqid);
+  str_delete(filter_visitor->typefilter);
 }
 
 static int filter_visitor_comment(GenomeVisitor *gv, Comment *c, Env *env)

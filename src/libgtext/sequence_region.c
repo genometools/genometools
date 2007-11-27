@@ -34,7 +34,7 @@ static void sequence_region_free(GenomeNode *gn, Env *env)
 {
   SequenceRegion *sr = sequence_region_cast(gn);
   assert(sr && sr->seqid);
-  str_delete(sr->seqid, env);
+  str_delete(sr->seqid);
 }
 
 static Str* sequence_region_get_seqid(GenomeNode *gn)
@@ -60,7 +60,7 @@ static void sequence_region_set_seqid(GenomeNode *gn, Str *seqid, Env *env)
   SequenceRegion *sr = sequence_region_cast(gn);
   env_error_check(env);
   assert(sr && seqid);
-  str_delete(sr->seqid, env);
+  str_delete(sr->seqid);
   sr->seqid = str_ref(seqid);
 }
 

@@ -32,7 +32,7 @@ struct Splicedseq {
 Splicedseq* splicedseq_new(Env *env)
 {
   Splicedseq *ss = ma_malloc(sizeof (Splicedseq));
-  ss->splicedseq = str_new(env);
+  ss->splicedseq = str_new();
   ss->positionmapping = array_new(sizeof (unsigned long), env);
   ss->forward = true;
   return ss;
@@ -142,7 +142,7 @@ int splicedseq_unit_test(Env *env)
 void splicedseq_delete(Splicedseq *ss, Env *env)
 {
   if (!ss) return;
-  str_delete(ss->splicedseq, env);
+  str_delete(ss->splicedseq);
   array_delete(ss->positionmapping, env);
   ma_free(ss);
 }

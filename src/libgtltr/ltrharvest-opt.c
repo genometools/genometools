@@ -221,7 +221,7 @@ static OPrval parse_options(int *parsed_args,
   option_parser_set_mailaddress(op,"<dellinghaus@zbh.uni-hamburg.de>");
 
   /* -index */
-  lo->str_indexname = str_new(env);
+  lo->str_indexname = str_new();
   optionindex = option_new_string("index",
                              "specify the name of the enhanced suffix "
                              "array index (mandatory)",
@@ -319,7 +319,7 @@ static OPrval parse_options(int *parsed_args,
   lo->motif.secondleft  = (Uchar) 'g';
   lo->motif.firstright  = (Uchar) 'c';
   lo->motif.secondright = (Uchar) 'a';
-  lo->motif.str_motif = str_new(env);
+  lo->motif.str_motif = str_new();
   optionmotif = option_new_string("motif",
                              "specify 2 nucleotides startmotif + "
                              "2 nucleotides endmotif: ****",
@@ -351,7 +351,7 @@ static OPrval parse_options(int *parsed_args,
   option_parser_add_option(op, optionvic, env);
 
   /* -overlaps */
-  lo->str_overlaps = str_new(env);
+  lo->str_overlaps = str_new();
   optionoverlaps = option_new_choice("overlaps",
                "specify no|best|all",
                lo->str_overlaps,
@@ -425,7 +425,7 @@ static OPrval parse_options(int *parsed_args,
 
   /* -out */
   lo->fastaoutput = false;      /* by default no FASTA output */
-  lo->str_fastaoutputfilename = str_new(env);
+  lo->str_fastaoutputfilename = str_new();
   optionout = option_new_string("out",
                              "specify FASTA outputfilename",
                              lo->str_fastaoutputfilename, NULL, env);
@@ -433,7 +433,7 @@ static OPrval parse_options(int *parsed_args,
 
   /* -outinner */
   lo->fastaoutputinnerregion = false;
-  lo->str_fastaoutputfilenameinnerregion = str_new(env);
+  lo->str_fastaoutputfilenameinnerregion = str_new();
   optionoutinner = option_new_string("outinner",
                              "specify FASTA outputfilename for inner regions",
                              lo->str_fastaoutputfilenameinnerregion, NULL, env);
@@ -441,7 +441,7 @@ static OPrval parse_options(int *parsed_args,
 
   /* -gff3 */
   lo->gff3output = false;       /* by default no gff3 output */
-  lo->str_gff3filename = str_new(env);
+  lo->str_gff3filename = str_new();
   optiongff3 = option_new_string("gff3",
                              "specify GFF3 outputfilename",
                              lo->str_gff3filename, NULL, env);
@@ -565,16 +565,16 @@ static OPrval parse_options(int *parsed_args,
 void wrapltrharvestoptions(LTRharvestoptions *lo,Env *env)
 {
   /* no checking if error occurs, since errors have been output before */
-  str_delete(lo->str_indexname,env);
-  str_delete(lo->str_fastaoutputfilename,env);
-  str_delete(lo->str_fastaoutputfilenameinnerregion,env);
-  str_delete(lo->str_gff3filename,env);
-  str_delete(lo->str_overlaps,env);
-  str_delete(lo->motif.str_motif,env);
+  str_delete(lo->str_indexname);
+  str_delete(lo->str_fastaoutputfilename);
+  str_delete(lo->str_fastaoutputfilenameinnerregion);
+  str_delete(lo->str_gff3filename);
+  str_delete(lo->str_overlaps);
+  str_delete(lo->motif.str_motif);
 }
 
 int ltrharvestoptions(LTRharvestoptions *lo, int argc, const char **argv,
-                         Env *env)
+                      Env *env)
 {
   int parsed_args;
   OPrval rval;

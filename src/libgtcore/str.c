@@ -31,7 +31,7 @@ struct Str {
   unsigned int reference_count;
 };
 
-Str* str_new(Env *env)
+Str* str_new(void)
 {
   Str *s = ma_malloc(sizeof (Str));      /* create new string object */
   s->cstr = ma_calloc(1, sizeof (char)); /* init string with '\0' */
@@ -43,7 +43,7 @@ Str* str_new(Env *env)
 
 Str* str_new_cstr(const char *cstr, Env *env)
 {
-  Str *s = str_new(env);
+  Str *s = str_new();
   if (cstr)
     str_append_cstr(s, cstr, env);
   return s;
@@ -270,22 +270,22 @@ int str_unit_test(Env *env)
   env_error_check(env);
 
   /* the empty string */
-  s1 = str_new(env);
+  s1 = str_new();
   ensure(had_err, str_length(s1) == 0);
-  str_delete(s1, env);
+  str_delete(s1);
 
   /* string testing */
-  s1 = str_new(env);
+  s1 = str_new();
   str_set(s1, cstring_1, env);
   ensure(had_err, str_length(s1) == 11);
   ensure(had_err, strcmp(str_get(s1), cstring_1) == 0);
-  str_delete(s1, env);
+  str_delete(s1);
 
   s1 = str_new_cstr(cstring_1, env);
   ensure(had_err, str_length(s1) == 11);
-  str_delete(s1, env);
+  str_delete(s1);
 
-  s1 = str_new(env);
+  s1 = str_new();
   s2 = str_new_cstr("foo", env);
   ensure(had_err, str_length(s2) == 3);
   str_append_str(s1, s2, env);
@@ -300,11 +300,11 @@ int str_unit_test(Env *env)
   ensure(had_err, strcmp("foo", str_get(s2)) == 0);
   str_append_ulong(s1, 1984, env);
   ensure(had_err, strcmp("foobarbaz1984", str_get(s1)) == 0);
-  str_delete(s1, env);
-  str_delete(s2, env);
+  str_delete(s1);
+  str_delete(s2);
 
   /* testing str_append_ulong() and str_set_length() */
-  s = str_new(env);
+  s = str_new();
   str_append_ulong(s, 0, env);
   ensure(had_err, strcmp("0", str_get(s)) == 0);
   str_reset(s);
@@ -313,32 +313,32 @@ int str_unit_test(Env *env)
   ensure(had_err, strcmp("6", str_get(s)) == 0);
   str_append_ulong(s, 16, env);
   ensure(had_err, strcmp("616", str_get(s)) == 0);
-  str_delete(s, env);
+  str_delete(s);
 
   /* make sure that str_get never returns NULL */
-  s = str_new(env);
+  s = str_new();
   ensure(had_err, str_get(s));
   ensure(had_err, str_length(s) == 0);
   ensure(had_err, strlen(str_get(s)) == 0);
-  str_delete(s, env);
+  str_delete(s);
 
   s = str_new_cstr(NULL, env);
   ensure(had_err, str_get(s));
   ensure(had_err, str_length(s) == 0);
   ensure(had_err, strlen(str_get(s)) == 0);
-  str_delete(s, env);
+  str_delete(s);
 
   /* test str_new(env) followed by str_append_cstr_nt() */
-  s = str_new(env);
+  s = str_new();
   str_append_cstr_nt(s, "foo", 3, env);
   ensure(had_err, strcmp("foo", str_get(s)) == 0);
   ensure(had_err, str_length(s) == 3);
-  str_delete(s, env);
+  str_delete(s);
 
   return had_err;
 }
 
-void str_delete(Str *s, Env *env)
+void str_delete(Str *s)
 {
   if (!s) return;           /* return without action if 's' is NULL */
   if (s->reference_count) { /* there are multiple references to this string */

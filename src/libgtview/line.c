@@ -141,9 +141,9 @@ int line_unit_test(Env* env)
   ensure(had_err, (2 == array_size(blocks)));
 
   config_delete(cfg, env);
-  str_delete(seqid1, env);
-  str_delete(seqid2, env);
-  str_delete(seqid3, env);
+  str_delete(seqid1);
+  str_delete(seqid2);
+  str_delete(seqid3);
   line_delete(l1, env);
   line_delete(l2, env);
   genome_node_delete(parent, env);

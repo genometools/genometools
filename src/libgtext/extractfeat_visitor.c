@@ -42,9 +42,9 @@ static void extractfeat_visitor_free(GenomeVisitor *gv, Env *env)
 {
   ExtractFeatVisitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
   assert(extractfeat_visitor);
-  str_delete(extractfeat_visitor->description, env);
-  str_delete(extractfeat_visitor->sequence, env);
-  str_delete(extractfeat_visitor->protein, env);
+  str_delete(extractfeat_visitor->description);
+  str_delete(extractfeat_visitor->sequence);
+  str_delete(extractfeat_visitor->protein);
   regionmapping_delete(extractfeat_visitor->regionmapping, env);
 }
 
@@ -210,9 +210,9 @@ GenomeVisitor* extractfeat_visitor_new(RegionMapping *rm,
   assert(rm);
   gv = genome_visitor_create(extractfeat_visitor_class(), env);
   efv= extractfeat_visitor_cast(gv);
-  efv->description = str_new(env);
-  efv->sequence = str_new(env);
-  efv->protein = str_new(env);
+  efv->description = str_new();
+  efv->sequence = str_new();
+  efv->protein = str_new();
   efv->type = type;
   efv->join = join;
   efv->translate = translate;

@@ -50,7 +50,7 @@ static int genome_feature_lua_new(lua_State *L)
   gf = lua_newuserdata(L, sizeof (GenomeNode*));
   filename = str_new_cstr("Lua", env);
   *gf = genome_feature_new(type, *range, strand, filename, 0, env);
-  str_delete(filename, env);
+  str_delete(filename);
   assert(*gf);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
   lua_setmetatable(L, -2);

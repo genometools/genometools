@@ -83,7 +83,7 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
 
   /* free */
   if (L) lua_close(L);
-  str_delete(doc_file, env);
+  str_delete(doc_file);
   splitter_delete(splitter, env);
   ma_free(prog);
 

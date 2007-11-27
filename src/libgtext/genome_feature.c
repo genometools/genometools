@@ -52,8 +52,8 @@ static void genome_feature_free(GenomeNode *gn, Env *env)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   assert(gf);
-  str_delete(gf->seqid, env);
-  str_delete(gf->source, env);
+  str_delete(gf->seqid);
+  str_delete(gf->source);
   hashtable_delete(gf->attributes, env);
 }
 
@@ -82,7 +82,7 @@ static void genome_feature_set_seqid(GenomeNode *gn, Str *seqid, Env *env)
   GenomeFeature *gf = genome_feature_cast(gn);
   env_error_check(env);
   assert(gf && seqid);
-  str_delete(gf->seqid, env);
+  str_delete(gf->seqid);
   gf->seqid = str_ref(seqid);
 }
 
@@ -252,7 +252,7 @@ GenomeNode* genome_feature_new_standard_gene(Env *env)
   genome_node_set_seqid(grandchild, seqid, env);
   genome_node_is_part_of_genome_node(child, grandchild, env);
 
-  str_delete(seqid, env);
+  str_delete(seqid);
   return gn;
 }
 

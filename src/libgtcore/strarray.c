@@ -41,13 +41,13 @@ StrArray* strarray_new_file(const char *path, Env *env)
   env_error_check(env);
   fpin = genfile_xopen(path, "r", env);
   assert(fpin);
-  line = str_new(env);
+  line = str_new();
   filecontent = strarray_new(env);
   while (str_read_next_line_generic(line, fpin, env) != EOF) {
     strarray_add_cstr(filecontent,str_get(line),env);
     str_reset(line);
   }
-  str_delete(line, env);
+  str_delete(line);
   genfile_xclose(fpin, env);
   return filecontent;
 }
@@ -84,7 +84,7 @@ void strarray_delete(StrArray *sa, Env *env)
   unsigned long i;
   if (!sa) return;
   for (i = 0; i < array_size(sa->strings); i++)
-    str_delete(*(Str**) array_get(sa->strings, i), env);
+    str_delete(*(Str**) array_get(sa->strings, i));
   array_delete(sa->strings, env);
   ma_free(sa);
 }

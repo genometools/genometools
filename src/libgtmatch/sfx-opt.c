@@ -46,7 +46,7 @@ static OPrval parse_options(int *parsed_args,
          *optiondir,
          *optiondes;
   OPrval oprval;
-  Str *dirarg = str_new(env);
+  Str *dirarg = str_new();
 
   env_error_check(env);
   op = option_parser_new("[option ...] -db file [...]",
@@ -221,7 +221,7 @@ static OPrval parse_options(int *parsed_args,
       so->readmode = (Readmode) retval;
     }
   }
-  str_delete(dirarg,env);
+  str_delete(dirarg);
   return oprval;
 }
 
@@ -271,9 +271,9 @@ static void showoptions(const Suffixeratoroptions *so)
 void wrapsfxoptions(Suffixeratoroptions *so,Env *env)
 {
   /* no checking if error occurs, since errors have been output before */
-  str_delete(so->str_indexname,env);
-  str_delete(so->str_smap,env);
-  str_delete(so->str_sat,env);
+  str_delete(so->str_indexname);
+  str_delete(so->str_smap);
+  str_delete(so->str_sat);
   strarray_delete(so->filenametab,env);
 }
 
@@ -289,10 +289,10 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   env_error_check(env);
   so->isdna = false;
   so->isprotein = false;
-  so->str_indexname = str_new(env);
+  so->str_indexname = str_new();
   so->filenametab = strarray_new(env);
-  so->str_smap = str_new(env);
-  so->str_sat = str_new(env);
+  so->str_smap = str_new();
+  so->str_sat = str_new();
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;
   so->outsuftab = false;
   so->outlcptab = false;

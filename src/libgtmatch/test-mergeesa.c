@@ -65,7 +65,7 @@ static int initNameandFILE(NameandFILE *nf,
 static void freeNameandFILE(NameandFILE *nf,Env *env)
 {
   fa_xfclose(nf->fp);
-  str_delete(nf->outfilename,env);
+  str_delete(nf->outfilename);
 }
 
 static int outputsuflcpllv(void *processinfo,

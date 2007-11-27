@@ -38,7 +38,7 @@ static void cds_visitor_free(GenomeVisitor *gv, Env *env)
 {
   CDSVisitor *cds_visitor = cds_visitor_cast(gv);
   assert(cds_visitor);
-  str_delete(cds_visitor->source, env);
+  str_delete(cds_visitor->source);
   splicedseq_delete(cds_visitor->splicedseq, env);
   regionmapping_delete(cds_visitor->regionmapping, env);
 }
@@ -105,9 +105,9 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
         return -1;
     }
     /* determine ORFs for all three frames */
-    pr_0 = str_new(env);
-    pr_1 = str_new(env);
-    pr_2 = str_new(env);
+    pr_0 = str_new();
+    pr_1 = str_new();
+    pr_2 = str_new();
     /* printf("pr_0=%s\n", str_get(pr_0)); */
     orfs = array_new(sizeof (Range), env);
     translate_dna(pr_0, splicedseq_get(v->splicedseq),
@@ -177,9 +177,9 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
 
     /* free */
     array_delete(orfs, env);
-    str_delete(pr_2, env);
-    str_delete(pr_1, env);
-    str_delete(pr_0, env);
+    str_delete(pr_2);
+    str_delete(pr_1);
+    str_delete(pr_0);
   }
   return had_err;
 }

@@ -91,7 +91,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   SETREADINTKEYS("readmode",&readmodeint,NULL);
   suffixarray->filenametab = strarray_new(env);
   suffixarray->filelengthtab = NULL;
-  currentline = str_new(env);
+  currentline = str_new();
   for (linenum = 0; str_read_next_line(currentline, fpin, env) != EOF;
        linenum++)
   {
@@ -170,7 +170,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     }
     str_reset(currentline);
   }
-  str_delete(currentline,env);
+  str_delete(currentline);
   if (!haserr && allkeysdefined(indexname,PROJECTFILESUFFIX,riktab,
                                 verboseinfo,env) != 0)
   {
@@ -243,7 +243,7 @@ static void *genericmaponlytable(const Str *indexname,const char *suffix,
                   strerror(errno));
     haserr = true;
   }
-  str_delete(tmpfilename,env);
+  str_delete(tmpfilename);
   return haserr ? NULL : ptr;
 }
 
@@ -341,7 +341,7 @@ static bool scanal1file(Suffixarray *suffixarray,const Str *indexname,Env *env)
   {
     haserr = true;
   }
-  str_delete(tmpfilename,env);
+  str_delete(tmpfilename);
   return haserr;
 }
 

@@ -181,7 +181,7 @@ static void gff3_in_stream_free(GenomeStream *gs, Env *env)
 {
   GFF3InStream *gff3_in_stream = gff3_in_stream_cast(gs);
   strarray_delete(gff3_in_stream->files, env);
-  str_delete(gff3_in_stream->stdinstr, env);
+  str_delete(gff3_in_stream->stdinstr);
   while (queue_size(gff3_in_stream->genome_node_buffer)) {
     genome_node_rec_delete(queue_get(gff3_in_stream->genome_node_buffer, env),
                            env);

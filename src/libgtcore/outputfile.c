@@ -36,7 +36,7 @@ OutputFileInfo* outputfileinfo_new(Env *env)
   OutputFileInfo *ofi;
   env_error_check(env);
   ofi = ma_malloc(sizeof (OutputFileInfo));
-  ofi->output_filename = str_new(env);
+  ofi->output_filename = str_new();
   return ofi;
 }
 
@@ -120,6 +120,6 @@ void outputfile_register_options(OptionParser *op, GenFile **outfp,
 void outputfileinfo_delete(OutputFileInfo *ofi, Env *env)
 {
   if (!ofi) return;
-  str_delete(ofi->output_filename, env);
+  str_delete(ofi->output_filename);
   ma_free(ofi);
 }

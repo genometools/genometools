@@ -104,17 +104,17 @@ int gt_filter(int argc, const char **argv, Env *env)
   int parsed_args, had_err;
 
   /* option parsing */
-  arguments.seqid = str_new(env);
-  arguments.typefilter = str_new(env);
+  arguments.seqid = str_new();
+  arguments.typefilter = str_new();
   switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      str_delete(arguments.seqid, env);
-      str_delete(arguments.typefilter, env);
+      str_delete(arguments.seqid);
+      str_delete(arguments.typefilter);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(arguments.seqid, env);
-      str_delete(arguments.typefilter, env);
+      str_delete(arguments.seqid);
+      str_delete(arguments.typefilter);
       return 0;
   }
 
@@ -145,8 +145,8 @@ int gt_filter(int argc, const char **argv, Env *env)
   genome_stream_delete(filter_stream, env);
   genome_stream_delete(gff3_in_stream, env);
   genfile_xclose(arguments.outfp, env);
-  str_delete(arguments.seqid, env);
-  str_delete(arguments.typefilter, env);
+  str_delete(arguments.seqid);
+  str_delete(arguments.typefilter);
 
   return had_err;
 }

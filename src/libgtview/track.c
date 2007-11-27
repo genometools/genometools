@@ -127,7 +127,7 @@ int track_unit_test(Env *env)
   ensure(had_err, track_get_number_of_lines(track) == 2);
 
   track_delete(track, env);
-  str_delete(title, env);
+  str_delete(title);
 
   return had_err;
 }
@@ -139,7 +139,7 @@ void track_delete(Track *track, Env *env)
   for (i = 0; i < array_size(track->lines); i++)
     line_delete(*(Line**) array_get(track->lines, i), env);
   array_delete(track->lines, env);
-  str_delete(track->title, env);
+  str_delete(track->title);
   ma_free(track);
 }
 

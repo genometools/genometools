@@ -90,7 +90,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
   if (seq)
     deleteEncIdxSeq(seq, env);
   if (inputProject)
-    str_delete(inputProject, env);
+    str_delete(inputProject);
   return had_err?-1:0;
 }
 

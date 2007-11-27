@@ -70,7 +70,7 @@ GenomeStream* cds_stream_new(GenomeStream *in_stream, RegionMapping *rm,
   cds_stream->cds_visitor = cds_visitor_new(rm, source_str, env);
   if (!cds_stream->cds_visitor)
     had_err = -1;
-  str_delete(source_str, env);
+  str_delete(source_str);
   if (had_err) {
     cds_stream_free(gs, env);
     return NULL;

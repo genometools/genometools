@@ -152,7 +152,7 @@ int gt_patternmatch(int argc, const char **argv, Env *env)
 
   env_error_check(env);
 
-  pmopt.indexname = str_new(env);
+  pmopt.indexname = str_new();
   oprval = parse_options(&pmopt,&parsed_args, argc, argv, env);
   if (oprval == OPTIONPARSER_OK)
   {
@@ -162,7 +162,7 @@ int gt_patternmatch(int argc, const char **argv, Env *env)
       haserr = true;
     }
   }
-  str_delete(pmopt.indexname,env);
+  str_delete(pmopt.indexname);
   if (oprval == OPTIONPARSER_REQUESTS_EXIT)
   {
     return 0;

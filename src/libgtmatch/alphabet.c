@@ -464,11 +464,11 @@ void freeAlphabet(Alphabet **alpha,Env *env)
           const char *progname = env_error_get_progname(env);
 
           assert(progname != NULL);
-          prog = str_new(env);
+          prog = str_new();
           str_append_cstr_nt(prog, progname,
                              cstr_length_up_to_char(progname, ' '), env);
           transpath = gtdata_get_path(str_get(prog), env);
-          str_delete(prog, env);
+          str_delete(prog);
           str_append_cstr(transpath, "/trans/", env);
           str_append_cstr(transpath, str_get(smapfile), env);
         }
@@ -478,7 +478,7 @@ void freeAlphabet(Alphabet **alpha,Env *env)
         {
           haserr = true;
         }
-        str_delete(transpath, env);
+        str_delete(transpath);
       } else
       {
         if (assignProteinorDNAalphabet(alpha,filenametab,env) != 0)

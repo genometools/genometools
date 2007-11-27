@@ -573,7 +573,7 @@ void genome_node_delete(GenomeNode *gn, Env *env)
   if (gn->reference_count) { gn->reference_count--; return; }
   assert(gn->c_class);
   if (gn->c_class->free) gn->c_class->free(gn, env);
-  str_delete(gn->filename, env);
+  str_delete(gn->filename);
   dlist_delete(gn->children, env);
   ma_free(gn);
 }

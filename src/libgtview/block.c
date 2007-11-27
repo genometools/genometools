@@ -366,7 +366,7 @@ int block_unit_test(Env* env)
   ensure(had_err, (STRAND_FORWARD == s));
 
   config_delete(cfg, env);
-  str_delete(caption2, env);
+  str_delete(caption2);
   element_delete(e1, env);
   element_delete(e2, env);
   block_delete(b, env);
@@ -386,7 +386,7 @@ void block_delete(Block *block,
     Element* elem = (Element*) dlistelem_get_data(delem);
     element_delete(elem, env);
   }
-  str_delete(block->caption, env);
+  str_delete(block->caption);
   dlist_delete(block->elements, env);
   ma_free(block);
 }

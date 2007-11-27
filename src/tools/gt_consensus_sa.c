@@ -38,7 +38,7 @@ typedef struct {
 static void initSimpleSplicedAlignment(SimpleSplicedAlignment *sa, Env *env)
 {
   assert(sa);
-  sa->id = str_new(env);
+  sa->id = str_new();
   sa->forward = true;
   sa->exons = array_new(sizeof (Range), env);
 }
@@ -128,7 +128,7 @@ static int parse_input_file(Array *spliced_alignments,
   Str *line;
   env_error_check(env);
 
-  line = str_new(env);
+  line = str_new();
   input_file = fa_xfopen(file_name, "r");
 
   while (!had_err && str_read_next_line(line, input_file, env) != EOF) {
@@ -145,7 +145,7 @@ static int parse_input_file(Array *spliced_alignments,
   }
 
   fa_xfclose(input_file);
-  str_delete(line, env);
+  str_delete(line);
   return had_err;
 }
 
@@ -268,7 +268,7 @@ int gt_consensus_sa(int argc, const char **argv, Env *env)
   /* free */
   for (i = 0; i < array_size(spliced_alignments); i++) {
     sa = array_get(spliced_alignments, i);
-    str_delete(sa->id, env);
+    str_delete(sa->id);
     array_delete(sa->exons, env);
   }
   array_delete(spliced_alignments, env);

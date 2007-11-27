@@ -147,7 +147,7 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
 
   env_error_check(env);
 
-  maxpairsoptions.indexname = str_new(env);
+  maxpairsoptions.indexname = str_new();
   maxpairsoptions.queryfiles = strarray_new(env);
   oprval = parse_options(&maxpairsoptions,&parsed_args, argc, argv, env);
   if (oprval == OPTIONPARSER_OK)
@@ -197,7 +197,7 @@ int gt_maxpairs(int argc, const char **argv, Env *env)
     }
     freeverboseinfo(&verboseinfo,env);
   }
-  str_delete(maxpairsoptions.indexname,env);
+  str_delete(maxpairsoptions.indexname);
   strarray_delete(maxpairsoptions.queryfiles,env);
 
   if (oprval == OPTIONPARSER_REQUESTS_EXIT)

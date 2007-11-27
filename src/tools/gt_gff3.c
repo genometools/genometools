@@ -126,14 +126,14 @@ int gt_gff3(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  arguments.offsetfile = str_new(env);
+  arguments.offsetfile = str_new();
   switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      str_delete(arguments.offsetfile, env);
+      str_delete(arguments.offsetfile);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(arguments.offsetfile, env);
+      str_delete(arguments.offsetfile);
       return 0;
   }
 
@@ -188,7 +188,7 @@ int gt_gff3(int argc, const char **argv, Env *env)
   }
 
   /* free */
-  str_delete(arguments.offsetfile, env);
+  str_delete(arguments.offsetfile);
   genome_stream_delete(gff3_out_stream, env);
   genome_stream_delete(sort_stream, env);
   genome_stream_delete(mergefeat_stream, env);

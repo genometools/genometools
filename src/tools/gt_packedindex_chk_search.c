@@ -59,7 +59,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
   int parsedArgs;
   bool had_err = false;
 
-  inputProject = str_new(env);
+  inputProject = str_new();
 
   do {
     env_error_check(env);
@@ -210,7 +210,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
   if (saIsLoaded) freesuffixarray(&suffixarray, env);
   if (epi) freeEnumpatterniterator(&epi,env);
   if (bwtSeq) deleteBWTSeq(bwtSeq, env);
-  if (inputProject) str_delete(inputProject, env);
+  if (inputProject) str_delete(inputProject);
   return had_err?-1:0;
 }
 

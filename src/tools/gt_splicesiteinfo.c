@@ -69,17 +69,17 @@ int gt_splicesiteinfo(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  arguments.seqfile = str_new(env);
-  arguments.regionmapping = str_new(env);
+  arguments.seqfile = str_new();
+  arguments.regionmapping = str_new();
   switch (parse_options(&parsed_args, &arguments, argc, argv, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      str_delete(arguments.regionmapping, env);
-      str_delete(arguments.seqfile, env);
+      str_delete(arguments.regionmapping);
+      str_delete(arguments.seqfile);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      str_delete(arguments.regionmapping, env);
-      str_delete(arguments.seqfile, env);
+      str_delete(arguments.regionmapping);
+      str_delete(arguments.seqfile);
       return 0;
   }
 
@@ -125,8 +125,8 @@ int gt_splicesiteinfo(int argc, const char **argv, Env *env)
   genome_stream_delete(splicesiteinfo_stream, env);
   genome_stream_delete(addintrons_stream, env);
   genome_stream_delete(gff3_in_stream, env);
-  str_delete(arguments.regionmapping, env);
-  str_delete(arguments.seqfile, env);
+  str_delete(arguments.regionmapping);
+  str_delete(arguments.seqfile);
 
   return had_err;
 }

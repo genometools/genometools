@@ -472,7 +472,7 @@ static int check_option_implications(OptionParser *op, Env *env)
                                      ->option_str, env);
             str_append_cstr(error_str, "\"", env);
             env_error_set(env, "%s", str_get(error_str));
-            str_delete(error_str, env);
+            str_delete(error_str);
             return -1;
           }
         }
@@ -645,7 +645,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                                   str_get(error_str));
                     had_err = -1;
                   }
-                  str_delete(error_str, env);
+                  str_delete(error_str);
                 }
                 else {
                   str_set(option->value, option->domain[0], env);
@@ -1356,8 +1356,8 @@ void option_delete(Option *o, Env *env)
 {
   unsigned long i;
   if (!o) return;
-  str_delete(o->option_str, env);
-  str_delete(o->description, env);
+  str_delete(o->option_str);
+  str_delete(o->description);
   for (i = 0; i < array_size(o->implications); i++)
     array_delete(*(Array**) array_get(o->implications, i), env);
   array_delete(o->implications, env);

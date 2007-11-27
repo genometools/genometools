@@ -63,8 +63,8 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
 
   env_error_check(env);
   mkfmcallinfo->indexnametab = strarray_new(env);
-  mkfmcallinfo->outfmindex = str_new(env);
-  mkfmcallinfo->leveldesc = str_new(env);
+  mkfmcallinfo->outfmindex = str_new();
+  mkfmcallinfo->leveldesc = str_new();
   op = option_parser_new("[option ...] -ii indexfile [...]",
                          "Compute FMindex.", env);
   option_parser_set_mailaddress(op,"<kurtz@zbh.uni-hamburg.de>");
@@ -124,8 +124,8 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
 static void freemkfmcallinfo(Mkfmcallinfo *mkfmcallinfo,Env *env)
 {
   strarray_delete(mkfmcallinfo->indexnametab,env);
-  str_delete(mkfmcallinfo->outfmindex,env);
-  str_delete(mkfmcallinfo->leveldesc,env);
+  str_delete(mkfmcallinfo->outfmindex);
+  str_delete(mkfmcallinfo->leveldesc);
 }
 
 static int levedescl2levelnum(const char *name,

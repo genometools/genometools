@@ -138,7 +138,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
   env_error_check(env);
 
   /* parse the index file and fill the sequence to index mapping */
-  index_line = str_new(env);
+  index_line = str_new();
   index_file = fa_xfopen(index_filename, "r");
 
   while (!had_err && str_read_next_line(index_line, index_file, env) != EOF) {
@@ -181,7 +181,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
   }
 
   fa_xfclose(index_file);
-  str_delete(index_line, env);
+  str_delete(index_line);
 
   return had_err;
 }
@@ -263,8 +263,8 @@ static int bioseq_fill(Bioseq *bs, bool recreate, Env *env)
   }
 
   /* free */
-  str_delete(bioseq_index_file, env);
-  str_delete(bioseq_raw_file, env);
+  str_delete(bioseq_index_file);
+  str_delete(bioseq_raw_file);
 
   return had_err;
 }
@@ -303,7 +303,7 @@ Bioseq* bioseq_new(const char *sequence_file, Env *env)
   env_error_check(env);
   seqfile = str_new_cstr(sequence_file, env);
   bs = bioseq_new_with_recreate(seqfile, false, env);
-  str_delete(seqfile, env);
+  str_delete(seqfile);
   return bs;
 }
 
@@ -314,7 +314,7 @@ Bioseq* bioseq_new_recreate(const char *sequence_file, Env *env)
   env_error_check(env);
   seqfile = str_new_cstr(sequence_file, env);
   bs = bioseq_new_with_recreate(seqfile, true, env);
-  str_delete(seqfile, env);
+  str_delete(seqfile);
   return bs;
 }
 
@@ -401,7 +401,7 @@ void bioseq_delete(Bioseq *bs, Env *env)
 {
   unsigned long i;
   if (!bs) return;
-  str_delete(bs->sequence_file, env);
+  str_delete(bs->sequence_file);
   if (bs->seqs) {
     for (i = 0; i < array_size(bs->descriptions); i++)
       seq_delete(bs->seqs[i], env);

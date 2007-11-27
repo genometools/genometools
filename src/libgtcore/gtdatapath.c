@@ -34,7 +34,7 @@ Str* gtdata_get_path(const char *prog, Env *env)
   int had_err = 0;
   env_error_check(env);
   assert(prog);
-  path = str_new(env);
+  path = str_new();
   had_err = file_find_in_path(path, prog, env);
   if (!had_err) {
     assert(str_length(path));
@@ -50,7 +50,7 @@ Str* gtdata_get_path(const char *prog, Env *env)
     }
   }
   if (had_err) {
-    str_delete(path, env);
+    str_delete(path);
     return NULL;
   }
   return path;

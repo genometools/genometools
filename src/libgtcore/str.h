@@ -25,7 +25,7 @@
 /* the string class, string objects are strings which grow on demand */
 typedef struct Str Str;
 
-Str*          str_new(Env*);
+Str*          str_new(void);
 Str*          str_new_cstr(const char*, Env*);
 Str*          str_clone(const Str*, Env*);
 Str*          str_ref(Str*);
@@ -45,6 +45,6 @@ int           str_read_next_line(Str*, FILE*, Env*);
 int           str_read_next_line_generic(Str*, GenFile*, Env*);
 unsigned long str_length(const Str*);
 int           str_unit_test(Env*);
-void          str_delete(Str*, Env*);
+void          str_delete(Str*);
 
 #endif

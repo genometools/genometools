@@ -61,6 +61,6 @@ int gt_trieins(int argc, const char **argv, Env *env)
   {
     haserr = true;
   }
-  str_delete(indexname,env);
+  str_delete(indexname);
   return haserr ? -1 : 0;
 }
