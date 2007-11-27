@@ -19,17 +19,17 @@
 #define QUEUE_H
 
 #include <stdio.h>
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
 typedef struct Queue Queue;
 
-typedef int (*QueueProcessor)(void *elem, void *info, Env*);
+typedef int (*QueueProcessor)(void *elem, void *info, Error*);
 
 Queue*        queue_new(void);
 void          queue_add(Queue*, void*);
 void*         queue_get(Queue*);
 void*         queue_head(Queue*);
-int           queue_iterate(Queue*, QueueProcessor, void *info, Env*);
+int           queue_iterate(Queue*, QueueProcessor, void *info, Error*);
 unsigned long queue_size(const Queue*);
 void          queue_delete_with_contents(Queue*);
 void          queue_delete(Queue*);

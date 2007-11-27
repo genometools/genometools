@@ -43,11 +43,11 @@ struct GFF3InStream
 #define gff3_in_stream_cast(GS)\
         genome_stream_cast(gff3_in_stream_class(), GS)
 
-static int buffer_is_sorted(void *elem, void *info, Env *env)
+static int buffer_is_sorted(void *elem, void *info, Error *e)
 {
   GenomeNode *current_node, **last_node;
 
-  env_error_check(env);
+  error_check(e);
   assert(elem && info);
 
   current_node = elem,
@@ -55,10 +55,10 @@ static int buffer_is_sorted(void *elem, void *info, Env *env)
 
   if (*last_node && genome_node_compare(last_node, &current_node) > 0) {
     assert(*last_node);
-    env_error_set(env, "the file %s is not sorted (example: line %lu and %lu)",
-                  genome_node_get_filename(*last_node),
-                  genome_node_get_line_number(*last_node),
-                  genome_node_get_line_number(current_node));
+    error_set(e, "the file %s is not sorted (example: line %lu and %lu)",
+              genome_node_get_filename(*last_node),
+              genome_node_get_line_number(*last_node),
+              genome_node_get_line_number(current_node));
     return -1;
   }
   else
@@ -165,7 +165,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
       /* a sorted stream can have at most one input file */
       assert(strarray_size(is->files) == 0 || strarray_size(is->files) == 1);
       had_err = queue_iterate(is->genome_node_buffer, buffer_is_sorted,
-                              &last_node, env);
+                              &last_node, env_error(env));
     }
     if (!had_err) {
       *gn = queue_get(is->genome_node_buffer);

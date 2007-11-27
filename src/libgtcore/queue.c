@@ -80,14 +80,14 @@ void* queue_head(Queue *q)
   return q->head->contents;
 }
 
-int queue_iterate(Queue *q, QueueProcessor queueprocessor, void *info, Env *env)
+int queue_iterate(Queue *q, QueueProcessor queueprocessor, void *info, Error *e)
 {
   QueueElem *current;
-  env_error_check(env);
+  error_check(e);
   assert(q && queueprocessor);
   if (q->num_of_elements) {
     for (current = q->head; current; current = current->previous) {
-      if (queueprocessor(current->contents, info, env))
+      if (queueprocessor(current->contents, info, e))
         return -1;
     }
   }
