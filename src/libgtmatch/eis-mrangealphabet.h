@@ -80,6 +80,9 @@ extern MRAEnc *
 newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
                                    const uint8_t *mappings, Env *env);
 
+extern MRAEnc *
+MRAEncCopy(const MRAEnc *alpha, Env *env);
+
 /**
  * \brief remap multirange alphabet by excluding some ranges
  *

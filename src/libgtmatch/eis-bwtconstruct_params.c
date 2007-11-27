@@ -18,8 +18,8 @@
 #include "libgtcore/option.h"
 #include "libgtmatch/eis-bwtseq.h"
 
-#include "gt_packedindex_blockenc_params.h"
-#include "gt_packedindex_bwtconstruct_params.h"
+#include "libgtmatch/eis-blockenc_params.h"
+#include "libgtmatch/eis-bwtconstruct_params.h"
 
 extern void
 registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
@@ -35,7 +35,7 @@ registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
 
   paramOutput->final.baseType = BWT_ON_BLOCK_ENC;
 
-  paramOutput->final.bwtFeatureToggles = BWTLocateBitmap;
+  paramOutput->final.featureToggles = BWTBaseFeatures;
 
   option = option_new_uint(
     "locfreq", "specify the locate frequency\n"
@@ -43,14 +43,43 @@ registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
     "0 => no locate information", &paramOutput->final.locateInterval, 16U, env);
   option_parser_add_option(op, option, env);
 
+  option = option_new_bool(
+    "locbitmap", "marked/unmarked positions for locate are stored as bitmaps\n"
+    "this gives faster location of hits but increases the index by 1 bit per"
+    " symbol", &paramOutput->useLocateBitmap, true, env);
+  option_parser_add_option(op, option, env);
+  paramOutput->useLocateBitmapOption = option;
+
   paramOutput->final.projectName = projectName;
 
   paramOutput->defaultOptimizationFlags = defaultOptimizationFlags;
 }
 
-extern void
-computePackedIndexDefaults(struct bwtOptions *paramOutput, Env *env)
+static int
+estimateBestLocateTypeFeature(const struct bwtOptions *paramOutput, Env *env)
 {
+  /* two cases: we store 1 bit per position or log(segmentlen) for
+   * each marked position plus one to note the number of marked positions */
+  unsigned segmentLen = estimateSegmentSize(&paramOutput->final.seqParams,
+                                            paramOutput->final.baseType, env);
+  if (segmentLen > (segmentLen + 1) * requiredUIntBits(segmentLen)
+      / paramOutput->final.locateInterval)
+    return BWTLocateCount;
+  else
+    return BWTLocateBitmap;
+}
+
+extern void
+computePackedIndexDefaults(struct bwtOptions *paramOutput, int extraToggles,
+                           Env *env)
+{
+  if (option_is_set(paramOutput->useLocateBitmapOption))
+    paramOutput->final.featureToggles
+      |= (paramOutput->useLocateBitmap?BWTLocateBitmap:BWTLocateCount);
+  else
+    paramOutput->final.featureToggles
+      |= estimateBestLocateTypeFeature(paramOutput, env);
+  paramOutput->final.featureToggles |= extraToggles;
   switch (paramOutput->final.baseType)
   {
   case BWT_ON_BLOCK_ENC:

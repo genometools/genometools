@@ -20,18 +20,30 @@
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseqpriv.h"
 #include "libgtmatch/eis-encidxseq.h"
+#include "libgtmatch/eis-construction-interface.h"
+#include "libgtmatch/eis-mrangealphabet.h"
 
-typedef int (*srcReadFunc)(Seqpos *dest, void *src, Env *env);
+enum {
+  NORMAL_RANGE  = 0,
+  SPECIAL_RANGE = 1,
+};
+
 typedef struct encIdxSeq *(*indexCreateFunc)
   (void *src, Seqpos totalLen, const Str *projectName,
-   const union bwtSeqParam *params, size_t numExtHeaders, uint16_t *headerIDs,
-   uint32_t *extHeaderSizes, headerWriteFunc *extHeaderCallbacks,
+   const union seqBaseEncParam *params, size_t numExtHeaders,
+   uint16_t *headerIDs, uint32_t *extHeaderSizes,
+   headerWriteFunc *extHeaderCallbacks,
    void **headerCBData, bitInsertFunc biFunc, BitOffset cwBitsPerPos,
    BitOffset maxBitsPerPos, void *cbState, Env *env);
 
+typedef DefinedSeqpos (*reportLongest)(void *state);
+
 extern EISeq *
-createBWTSeqGeneric(const struct bwtParam *params, void *baseSrc,
-                    indexCreateFunc createIndex, unsigned aggInterval,
-                    srcReadFunc readCallback, Seqpos totalLen, Env *env);
+createBWTSeqGeneric(const struct bwtParam *params,
+                    indexCreateFunc createIndex, void *baseSrc, Seqpos totalLen,
+                    const MRAEnc *alphabet, int *specialRanges,
+                    GetOrigSeqSym readOrigSeq, void *origSeqState,
+                    SeqposReadFunc readNextSeqpos, void *spReadState,
+                    reportLongest lrepFunc, void *lrepState, Env *env);
 
 #endif

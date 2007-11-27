@@ -42,6 +42,13 @@ enum sfxDataRequest {
 
 extern sfxInterface *
 newSfxInterface(Suffixeratoroptions *so,
+                const Encodedsequence *encseq,
+                const Specialcharinfo *specialcharinfo,
+                unsigned long numofsequences,
+                Measuretime *mtime,
+                Seqpos length,
+                const Alphabet *alpha,
+                const unsigned long *characterdistribution,
                 Verboseinfo *verbosity,
                 Env *env);
 
@@ -50,20 +57,39 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
                            size_t numReaders,
                            enum sfxDataRequest *requests,
                            listenerID *ids,
+                           const Encodedsequence *encseq,
+                           const Specialcharinfo *specialcharinfo,
+                           unsigned long numofsequences,
+                           Measuretime *mtime,
+                           Seqpos length,
+                           const Alphabet *alpha,
+                           const unsigned long *characterdistribution,
                            Verboseinfo *verbosity,
                            Env *env);
 
 extern int
 deleteSfxInterface(sfxInterface *iface, Env *env);
 
+extern MRAEnc *
+newMRAEncFromSfxI(const sfxInterface *si, Env *env);
+
 extern const Alphabet *
 getSfxIAlphabet(const sfxInterface *si);
+
+extern const Encodedsequence *
+getSfxIEncSeq(const sfxInterface *si);
+
+extern int
+SfxIGetOrigSeq(void *state, Symbol *dest, Seqpos pos, size_t len);
 
 extern const struct seqStats *
 getSfxISeqStats(const sfxInterface *si);
 
 extern Seqpos
 getSfxILength(const sfxInterface *si);
+
+extern DefinedSeqpos
+getSfxILongestPos(const struct sfxInterface *si);
 
 extern const Uchar *
 readSfxIESQRange(sfxInterface *iface, Seqpos start, Seqpos len,
@@ -80,9 +106,6 @@ extern size_t
 readSfxIBWTRange(sfxInterface *iface, listenerID id, size_t len,
                  Uchar *dest, Env *env);
 
-extern size_t
-readSfxIBWTRangeSym(sfxInterface *iface, listenerID id, size_t len,
-                    Symbol *dest, Env *env);
 /**
  * @return actual number of symbols read
  */

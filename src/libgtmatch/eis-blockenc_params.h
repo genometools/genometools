@@ -13,32 +13,15 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef GT_PACKEDINDEX_BWTCONSTRUCT_PARAMS_H
-#define GT_PACKEDINDEX_BWTCONSTRUCT_PARAMS_H
+#ifndef EIS_BLOCKENC_PARAMS_H
+#define EIS_BLOCKENC_PARAMS_H
 
+#include "libgtcore/env.h"
 #include "libgtcore/option.h"
-#include "libgtmatch/eis-bwtseq.h"
-
-enum BWTOptionDefaultsOptimizationFlags
-{
-  BWTDEFOPT_LOW_RAM_OVERHEAD = 1 << 0,
-  BWTDEFOPT_FAST_RANK        = 1 << 1,
-  BWTDEFOPT_CONSTRUCTION     = BWTDEFOPT_LOW_RAM_OVERHEAD,
-  BWTDEFOPT_MULTI_QUERY      = BWTDEFOPT_FAST_RANK,
-};
-
-struct bwtOptions
-{
-  struct bwtParam final;
-  int defaultOptimizationFlags;
-};
+#include "libgtmatch/eis-encidxseq.h"
 
 extern void
-registerPackedIndexOptions(OptionParser *op, struct bwtOptions *paramOutput,
-                           int defaultOptimizationFlags,
-                           const Str *projectName, Env *env);
-
-extern void
-computePackedIndexDefaults(struct bwtOptions *paramOutput, Env *env);
+registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput,
+                        Env *env);
 
 #endif

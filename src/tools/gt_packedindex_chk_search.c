@@ -30,23 +30,21 @@
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/esa-map.pr"
 #include "libgtmatch/sfx-apfxlen.pr"
-#include "gt_packedindex_bwtconstruct_params.h"
+#include "libgtmatch/eis-bwtconstruct_params.h"
 
-/***************************************************************************
- * routines for matching tests
- ***************************************************************************/
+#define DEFAULT_PROGRESS_INTERVAL  100000UL
 
 struct chkSearchOptions
 {
   struct bwtOptions idx;
   long minPatLen, maxPatLen;
-  unsigned locateInterval;
-  unsigned long numOfSamples;
+  unsigned long numOfSamples, progressInterval;
+  bool checkSuffixArrayValues;
 };
 
 static OPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
-                   struct chkSearchOptions *param, const Str *projectName,
+                   struct chkSearchOptions *params, const Str *projectName,
                    Env *env);
 
 extern int
@@ -54,12 +52,10 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
 {
   struct chkSearchOptions params;
   Suffixarray suffixarray;
+  Enumpatterniterator *epi = NULL;
   bool saIsLoaded = false;
   struct BWTSeq *bwtSeq = NULL;
   Str *inputProject = NULL;
-  Enumpatterniterator *epi = NULL;
-  MMsearchiterator *mmsi = NULL;
-  struct BWTSeqExactMatchesIterator *EMIter = NULL;
   int parsedArgs;
   bool had_err = false;
 
@@ -67,42 +63,55 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
 
   do {
     env_error_check(env);
-    switch (parseChkBWTOptions(&parsedArgs, argc, argv, &params,
-                               inputProject, env))
     {
-    case OPTIONPARSER_OK:
-      break;
-    case OPTIONPARSER_ERROR:
-      return -1;
-    case OPTIONPARSER_REQUESTS_EXIT:
-      return 0;
+      bool exitNow = false;
+      switch (parseChkBWTOptions(&parsedArgs, argc, argv, &params,
+                                 inputProject, env))
+      {
+      case OPTIONPARSER_OK:
+        break;
+      case OPTIONPARSER_ERROR:
+        had_err = true;
+        exitNow = true;
+        break;
+      case OPTIONPARSER_REQUESTS_EXIT:
+        exitNow = true;
+        break;
+      }
+      if (exitNow)
+        break;
     }
     str_set(inputProject, argv[parsedArgs], env);
     {
-      struct bwtParam bwtParams;
-      memcpy(&bwtParams.seqParams, &params.idx,
-             sizeof (union bwtSeqParam));
-      bwtParams.baseType = BWT_ON_BLOCK_ENC;
-      bwtParams.bwtFeatureToggles = BWTLocateBitmap;
-      bwtParams.locateInterval = params.locateInterval;
-      bwtParams.projectName = inputProject;
-      bwtSeq = availBWTSeq(&bwtParams, env);
+      bwtSeq = availBWTSeq(&params.idx.final, env);
     }
     ensure(had_err, bwtSeq);
     if (had_err)
       break;
+    if (params.checkSuffixArrayValues)
     {
-      const Uchar *pptr;
+      enum verifyBWTSeqErrCode retval =
+        BWTSeqVerifyIntegrity(bwtSeq, inputProject, params.progressInterval,
+                              stderr, env);
+      if (retval != VERIFY_BWTSEQ_NO_ERROR)
+      {
+        fprintf(stderr, "index integrity check failed: %s\n",
+                error_get(env_error(env)));
+        env_error_set(env, "aborted because of index integrity check fail");
+        break;
+      }
+    }
+    {
       Seqpos totalLen, dbstart;
       unsigned long trial, patternLen;
       ensure(had_err,
              mapsuffixarray(&suffixarray, &totalLen,
                             SARR_SUFTAB | SARR_ESQTAB,
-                            inputProject, NULL, env));
+                            inputProject, NULL, env) == 0);
       if (had_err)
       {
         env_error_set(env, "Can't load suffix array project with"
-                      " demand for BWT and suffix table files\n");
+                      " demand for encoded sequence and suffix table files\n");
         break;
       }
       saIsLoaded = true;
@@ -122,7 +131,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
       }
       fprintf(stderr, "Using patterns of lengths %lu to %lu\n",
               params.minPatLen, params.maxPatLen);
-      ensure(had_err, totalLen = BWTSeqLength(bwtSeq));
+      ensure(had_err, totalLen + 1 == BWTSeqLength(bwtSeq));
 
       ensure(had_err,
              (epi = newenumpatterniterator(params.minPatLen, params.maxPatLen,
@@ -137,24 +146,30 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
       }
       for (trial = 0; !had_err && trial < params.numOfSamples; ++trial)
       {
-        pptr = nextEnumpatterniterator(&patternLen, epi);
-        mmsi = newmmsearchiterator(suffixarray.encseq,
-                                   suffixarray.suftab,
-                                   0,  /* leftbound */
-                                   totalLen, /* rightbound */
-                                   0, /* offset */
-                                   suffixarray.readmode,
-                                   pptr,
-                                   patternLen,
-                                   env);
-
-        EMIter = newEMIterator(bwtSeq, pptr, patternLen, env);
+        const Uchar *pptr = nextEnumpatterniterator(&patternLen, epi);
+        MMsearchiterator *mmsi =
+          newmmsearchiterator(suffixarray.encseq,
+                              suffixarray.suftab,
+                              0,  /* leftbound */
+                              totalLen, /* rightbound */
+                              0, /* offset */
+                              suffixarray.readmode,
+                              pptr,
+                              patternLen,
+                              env);
+        BWTSeqExactMatchesIterator *EMIter =
+          newEMIterator(bwtSeq, pptr, patternLen, env);
+        Seqpos numMatches = EMINumMatchesTotal(EMIter);
         ensure(had_err, EMIter);
         if (had_err)
           break;
-        assert(EMINumMatchesTotal(EMIter)
-               == BWTSeqMatchCount(bwtSeq, pptr, patternLen, env));
+        assert(numMatches == BWTSeqMatchCount(bwtSeq, pptr, patternLen, env));
         assert(EMINumMatchesTotal(EMIter) == countmmsearchiterator(mmsi));
+        fprintf(stderr, "trial %lu, "FormatSeqpos" matches\n"
+                "pattern: ", trial,
+                numMatches);
+        showsymbolstringgeneric(stderr, suffixarray.alpha, pptr, patternLen);
+        fputs("\n", stderr);
         while (nextmmsearchiterator(&dbstart,mmsi))
         {
           struct MatchData *match =
@@ -168,11 +183,13 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
           ensure(had_err, match->sfxArrayValue == dbstart);
           if (had_err)
           {
-            fputs("fmindex match doesn't equal mmsearch match result!\n",
-                  stderr);
-            break;
+            fprintf(stderr, "fmindex match doesn't equal mmsearch match "
+                    "result!\n"FormatSeqpos" vs. "FormatSeqpos"\n",
+                    match->sfxArrayValue, dbstart);
+            had_err = true;
           }
         }
+        if (!had_err)
         {
           struct MatchData *trailingMatch =
             EMIGetNextMatch(EMIter, bwtSeq, env);
@@ -183,14 +200,15 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
             break;
           }
         }
+        deleteEMIterator(EMIter,env);
+        freemmsearchiterator(&mmsi,env);
       }
-      fprintf(stderr, "Finished %lu matchings successfully.\n",
-              params.numOfSamples);
+      fprintf(stderr, "Finished %lu of %lu matchings successfully.\n",
+              trial, params.numOfSamples);
     }
   } while (0);
+  if (saIsLoaded) freesuffixarray(&suffixarray, env);
   if (epi) freeEnumpatterniterator(&epi,env);
-  if (mmsi) freemmsearchiterator(&mmsi,env);
-  if (EMIter) deleteEMIterator(EMIter,env);
   if (bwtSeq) deleteBWTSeq(bwtSeq, env);
   if (inputProject) str_delete(inputProject, env);
   return had_err?-1:0;
@@ -198,7 +216,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
 
 static OPrval
 parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
-                   struct chkSearchOptions *param, const Str *projectName,
+                   struct chkSearchOptions *params, const Str *projectName,
                    Env *env)
 {
   OptionParser *op;
@@ -211,33 +229,44 @@ parseChkBWTOptions(int *parsed_args, int argc, const char **argv,
                          " <indexname> and perform verification of search"
                          " results.", env);
 
-  registerPackedIndexOptions(op, &param->idx, BWTDEFOPT_CONSTRUCTION,
+  registerPackedIndexOptions(op, &params->idx, BWTDEFOPT_MULTI_QUERY,
                              projectName, env);
 
   option = option_new_long("minpatlen",
                            "minimum length of patterns searched for, -1 "
                            "implies automatic choice based on index "
-                           "properties", &param->minPatLen, -1, env);
+                           "properties", &params->minPatLen, -1, env);
   option_parser_add_option(op, option, env);
 
   option = option_new_long("maxpatlen",
                            "maximum length of patterns searched for, -1 "
                            "implies automatic choice based on index "
-                           "properties", &param->maxPatLen, -1, env);
+                           "properties", &params->maxPatLen, -1, env);
   option_parser_add_option(op, option, env);
 
   option = option_new_ulong("nsamples",
                             "number of sequences to search for",
-                            &param->numOfSamples, 1000, env);
+                            &params->numOfSamples, 1000, env);
+  option_parser_add_option(op, option, env);
+
+  option = option_new_bool("chksfxarray",
+                           "verify integrity of stored suffix array positions",
+                           &params->checkSuffixArrayValues, false, env);
+  option_parser_add_option(op, option, env);
+
+  option = option_new_ulong("ticks", "print dot after this many symbols"
+                            " tested okay", &params->progressInterval,
+                            DEFAULT_PROGRESS_INTERVAL, env);
   option_parser_add_option(op, option, env);
 
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc,
                                             argv, versionfunc, 1, 1, env);
-  option_parser_delete(op, env);
-
   /* compute parameters currently not set from command-line or
    * determined indirectly */
-  computePackedIndexDefaults(&param->idx, env);
+  computePackedIndexDefaults(&params->idx,
+                             BWTBaseFeatures & ~BWTProperlySorted, env);
+
+  option_parser_delete(op, env);
 
   return oprval;
 }

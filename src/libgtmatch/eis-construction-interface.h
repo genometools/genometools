@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
+  Copyright (C) 2007 Thomas Jahns <Thomas.Jahns@gmx.net>
 
   Permission to use, copy, modify, and distribute this software for any
   purpose with or without fee is hereby granted, provided that the above
@@ -13,15 +13,26 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-#ifndef GT_PACKEDINDEX_BLOCKENC_PARAMS_H
-#define GT_PACKEDINDEX_BLOCKENC_PARAMS_H
+#ifndef EIS_CONSTRUCTION_INTERFACE_H
+#define EIS_CONSTRUCTION_INTERFACE_H
 
+#include <stdlib.h>
 #include "libgtcore/env.h"
-#include "libgtcore/option.h"
-#include "libgtmatch/eis-encidxseq.h"
 
-extern void
-registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput,
-                        Env *env);
+/**
+ * generic method to aquire next readLen symbols of e.g. BWT string
+ */
+typedef int (*SymReadFunc)(void *state, Symbol *dest, size_t readLen,
+                           Env *env);
+
+/**
+ * generic method to aquire next Seqpos value from suffix array
+ */
+typedef int (*SeqposReadFunc)(void *src, Seqpos *dest, size_t len, Env *env);
+
+/**
+ * \brief generic method to access the original encoded sequence
+ */
+typedef int (*GetOrigSeqSym)(void *state, Symbol *dest, Seqpos pos, size_t len);
 
 #endif

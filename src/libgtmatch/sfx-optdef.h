@@ -22,7 +22,7 @@
 #include "libgtcore/str.h"
 #include "libgtcore/strarray.h"
 #include "readmode-def.h"
-#include "tools/gt_packedindex_bwtconstruct_params.h"
+#include "libgtmatch/eis-bwtconstruct_params.h"
 
 #define PREFIXLENGTH_AUTOMATIC 0
 

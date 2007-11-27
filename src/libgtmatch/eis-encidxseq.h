@@ -30,6 +30,7 @@
 #include "libgtcore/str.h"
 #include "libgtmatch/seqpos-def.h"
 #include "libgtmatch/eis-mrangealphabet.h"
+#include "libgtmatch/eis-encidxseqparam.h"
 
 /**
  * callback function to insert variable width data into encidx
@@ -95,33 +96,6 @@ struct seqStats
 typedef struct encIdxSeq EISeq;
 
 typedef union EISHint *EISHint;
-
-enum EISFeatureBits
-{
-  EIS_FEATURE_NONE = 0,
-  EIS_FEATURE_REGION_SUMS = 1<<0, /**< if set construct sum tables for
-                                   *   the special symbol ranges
-                                   *   use this on index loading if
-                                   *   you want to use this index in
-                                   *   many queries, omit if memory
-                                   *   is very tight (e.g. on construction) */
-};
-
-struct blockEncParams
-{
-  unsigned blockSize;         /**< number of symbols to combine in
-                               * one block a lookup-table
-                               * containing
-                               * $alphabetsize^{blockSize}$ entries is
-                               * required so adjust with caution */
-  unsigned bucketBlocks;      /**< number of blocks for which to
-                               * store partial symbol sums (lower
-                               * values increase index size and
-                               * decrease computations for lookup) */
-  int EISFeatureSet;          /**< bitwise or of EIS_FEATURE_NONE
-                               * and other features selectable via
-                               * enum EISFeatureBits (see eis-encidxseq.h) */
-};
 
 /**
  * \brief Construct block-encoded indexed sequence object and write
@@ -318,9 +292,34 @@ newEISHint(EISeq *seq, Env *env);
 static inline void
 deleteEISHint(EISeq *seq, EISHint hint, Env *env);
 
-extern int
-verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
-                unsigned long tickPrint, FILE *fp, Env *env);
+enum EISIntegrityCheckResults
+{
+  EIS_INTEGRITY_CHECK_NO_ERROR = 0,
+  EIS_INTEGRITY_CHECK_INVALID_SYMBOL, /**< reading from the index
+                                       *   produced an incorrect symbol  */
+  EIS_INTEGRITY_CHECK_BWT_READ_ERROR, /**< reading from the BWT
+                                       *   reference file failed or
+                                       *   delivered a symbol not in
+                                       *   the alphabet (bwt file
+                                       *   corrupt?) */
+  EIS_INTEGRITY_CHECK_SA_LOAD_ERROR,  /**< loading/mapping of the
+                                       *   suffix array project failed
+                                       *   (did you generate the BWT) */
+  EIS_INTEGRITY_CHECK_RANK_FAILED     /**< the rank operation
+                                       *   delivered a wrong count */
+};
+
+extern const char *EISIntegrityCheckResultStrings[];
+
+enum EISIntegrityCheckFlags
+{
+  EIS_VERIFY_BASIC = 0,
+  EIS_VERIFY_EXT_RANK = 1 << 0,
+};
+
+extern enum EISIntegrityCheckResults
+EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
+                   unsigned long tickPrint, FILE *fp, int chkFlags, Env *env);
 
 static inline FILE *
 EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,

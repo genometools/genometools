@@ -15,9 +15,8 @@
 */
 #include "libgtcore/env.h"
 #include "libgtcore/option.h"
+#include "libgtmatch/eis-blockenc_params.h"
 #include "libgtmatch/eis-encidxseq.h"
-
-#include "gt_packedindex_blockenc_params.h"
 
 extern void
 registerBlockEncOptions(OptionParser *op, struct blockEncParams *paramOutput,

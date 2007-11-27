@@ -29,77 +29,11 @@
 
 #include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-mrangealphabet.h"
+#include "libgtmatch/eis-bwtseqparam.h"
 
 /* TODO:
  * - implement other index types
  */
-
-/**
- * Names the type of encoding used:
- */
-enum seqBaseEncoding {
-  BWT_BASETYPE_AUTOSELECT,      /**< automatic, load any index present
-                                 *     (currently not implemented) */
-  BWT_ON_RLE,                   /**< use original fmindex run-length
-                                 * encoding  */
-  BWT_ON_BLOCK_ENC,             /**< do block compression by dividing
-                                 * sequence into strings of
-                                 * composition and permutation
-                                 * indices */
-  BWT_ON_WAVELET_TREE_ENC,      /**< encode sequence with wavelet-trees */
-};
-
-/**
- * Stores information to construct the underlying sequence object of a
- * BWT sequence object.
- */
-union bwtSeqParam
-{
-  struct blockEncParams blockEnc;
-/*   struct  */
-/*   { */
-/*   } RLEParams; */
-/*   struct  */
-/*   { */
-/*   } waveletTreeParams; */
-};
-
-/**
- * all parameters for building the BWT sequence index
- */
-struct bwtParam
-{
-  union bwtSeqParam seqParams;    /**< a union holding extra parameter
-                                   *   information specific to the
-                                   *   type selected via parameter
-                                   *   baseType */
-  enum seqBaseEncoding baseType;  /**< baseType selects the encoding
-                                   *   method of the sequence index *
-                                   *   storing the BWT sequence (see
-                                   *   enum seqBaseEncoding). */
-  int bwtFeatureToggles;          /**< set of bittoggles composed
-                                   *   from enum BWTFeatures */
-  unsigned locateInterval;        /**< store locate information
-                                   * (mapping from BWT sequence to
-                                   * original sequence for every nth
-                                   * position in original sequence) at
-                                   * this frequency, unless
-                                   * locateInterval = 0, which implies
-                                   * storing no locate information at
-                                   * all */
-  const Str *projectName;         /**< base file name to derive name
-                                   *   of suffixerator project from*/
-};
-
-/**
- * Select specifics of how
- * - the locate information is stored
- */
-enum BWTFeatures
-{
-  BWTLocateBitmap = 1 << 0,
-  BWTLocateCount  = 1 << 1,
-};
 
 /**
  * Stores column indices of the (virtual) matrix of rotations of the
@@ -113,6 +47,7 @@ struct matchBound
 };
 
 typedef struct BWTSeq BWTSeq;
+typedef struct BWTSeqExactMatchesIterator BWTSeqExactMatchesIterator;
 
 /**
  * \brief Creates or loads an encoded indexed sequence object of the
@@ -147,7 +82,7 @@ deleteBWTSeq(BWTSeq *bwtseq, Env *env);
  * @param bwtSeq reference of object to query
  * @return 0 if no locate information is present, non-zero otherwise
  */
-extern int
+static inline bool
 BWTSeqHasLocateInformation(const BWTSeq *bwtSeq);
 
 /**
@@ -259,6 +194,41 @@ static inline struct matchBound *
 BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
                 Symbol nextSym, Env *env);
 
+enum verifyBWTSeqErrCode
+{
+  VERIFY_BWTSEQ_NO_ERROR = 0,
+  VERIFY_BWTSEQ_REFLOAD_ERROR = -1, /**< failed to load suffix array for
+                                     *   reference comparisons */
+  VERIFY_BWTSEQ_LENCOMPARE_ERROR = -2, /* lengths of bwt sequence
+                                        * index and loaded suffix arry
+                                        * don't match */
+  VERIFY_BWTSEQ_SUFVAL_ERROR = -3, /**< a marked suffix array value
+                                    * stored in the bwt sequence index
+                                    * does not match the value read directly
+                                    * from the suffix array table */
+  VERIFY_BWTSEQ_LFMAPWALK_ERROR = -4, /**< while traversing the bwt
+                                       * sequence in reverse original sequence
+                                       * order, the symbol retrieved
+                                       * does not match the
+                                       * corresponding symbol in the
+                                       * encoded sequence */
+};
+
+/**
+ * \brief Perform various checks on the burrows wheeler transform
+ *
+ * - inspect all sampled suffix array values for equality with
+ *   corresponding value of mapped reference suffix array
+ * - check wether the last-to-first traversal of the BWT sequence
+ *   index delivers the reversed encoded sequence
+ * @param tickPrint print a dot every time tickPrint many symbols have
+ *                  been processed
+ * @param fp dots printed to this file
+ */
+extern enum verifyBWTSeqErrCode
+BWTSeqVerifyIntegrity(BWTSeq *bwtSeq, const Str *projectName,
+                      unsigned long tickPrint, FILE *fp, Env *env);
+
 /**
  * \brief Given a query string produce iterator for all matches in
  * original sequence (of which the sequence object is a BWT).
@@ -271,7 +241,7 @@ BWTSeqIncrMatch(const BWTSeq *bwtSeq, struct matchBound *limits,
  * @param env genometools reference for core functions
  * @return reference of iterator object, NULL on error
  */
-extern struct BWTSeqExactMatchesIterator *
+extern BWTSeqExactMatchesIterator *
 newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
               Env *env);
 
@@ -281,7 +251,7 @@ newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
  * @param env genometools reference for core functions
  */
 extern void
-deleteEMIterator(struct BWTSeqExactMatchesIterator *iter, Env *env);
+deleteEMIterator(BWTSeqExactMatchesIterator *iter, Env *env);
 
 /**
  * location data corresponding to a match
@@ -306,8 +276,8 @@ struct MatchData
  * match or NULL if no further match is available, the reference  will
  * become invalid  once the iterator has been queried again
  */
-extern struct MatchData *
-EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
+static inline struct MatchData *
+EMIGetNextMatch(BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
                 Env *env);
 
 /**
@@ -316,7 +286,7 @@ EMIGetNextMatch(struct BWTSeqExactMatchesIterator *iter, const BWTSeq *bwtSeq,
  * @return total number of matches
  */
 extern Seqpos
-EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter);
+EMINumMatchesTotal(const BWTSeqExactMatchesIterator *iter);
 
 /**
  * \brief Query an iterator for the number of matches not yet
@@ -325,7 +295,7 @@ EMINumMatchesTotal(const struct BWTSeqExactMatchesIterator *iter);
  * @return number of matches left
  */
 extern Seqpos
-EMINumMatchesLeft(const struct BWTSeqExactMatchesIterator *iter);
+EMINumMatchesLeft(const BWTSeqExactMatchesIterator *iter);
 
 #include "libgtmatch/eis-bwtseqsimpleop.h"
 

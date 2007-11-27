@@ -14,6 +14,11 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+/**
+ * \file gt_packedindex_chk_integrity
+ * calls routines to validate basic index integrity
+ */
+
 #include "gt_packedindex_chk_integrity.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/env.h"
@@ -24,19 +29,16 @@
 
 #define DEFAULT_PROGRESS_INTERVAL  100000UL
 
-/***************************************************************************
- * routines to validate basic index integrity
- ***************************************************************************/
-
 struct chkIndexOptions
 {
   unsigned long skipCount;
   unsigned long progressInterval;
+  int checkFlags;
 };
 
 static OPrval
 parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
-                     struct chkIndexOptions *optOut, Env *env);
+                     struct chkIndexOptions *param, Env *env);
 
 extern int
 gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
@@ -72,14 +74,17 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
             " symbols long.\n", EISLength(seq));
     {
       int corrupt;
-      ensure(had_err,
-             !(corrupt = verifyIntegrity(seq, inputProject, options.skipCount,
-                                         options.progressInterval, stderr,
-                                         env)));
-      if (corrupt == -1)
-        perror("I/O error when checking index integrity");
-      else if (corrupt)
+      ensure(
+        had_err,
+        !(corrupt = EISVerifyIntegrity(seq, inputProject, options.skipCount,
+                                       options.progressInterval, stderr,
+                                       options.checkFlags, env)));
+      if (corrupt)
+      {
         fputs("Integrity check failed for index.\n", stderr);
+        fputs(EISIntegrityCheckResultStrings[corrupt], stderr);
+        fputs("\n", stderr);
+      }
     }
   }
   if (seq)
@@ -91,12 +96,13 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
 
 static OPrval
 parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
-                     struct chkIndexOptions *optOut,
+                     struct chkIndexOptions *param,
                      Env *env)
 {
   OptionParser *op;
   Option *option;
   OPrval oprval;
+  bool extRankCheck;
 
   env_error_check(env);
   op = option_parser_new("indexname",
@@ -104,18 +110,25 @@ parseChkIndexOptions(int *parsed_args, int argc, const char *argv[],
                          "and bwt and check index integrity.",
                          env);
   option = option_new_ulong("skip", "number of symbols to skip",
-                            &optOut->skipCount, 0,
+                            &param->skipCount, 0,
                             env);
   option_parser_add_option(op, option, env);
 
   option = option_new_ulong("ticks", "print dot after this many symbols"
-                            " tested okay", &optOut->progressInterval,
+                            " tested okay", &param->progressInterval,
                             DEFAULT_PROGRESS_INTERVAL, env);
+  option_parser_add_option(op, option, env);
+
+  option = option_new_bool("ext-rank-check",
+                           "do additional checks of rank query results",
+                           &extRankCheck, false, env);
   option_parser_add_option(op, option, env);
 
   oprval = option_parser_parse_min_max_args(op, parsed_args, argc,
                                             (const char **)argv,
                                             versionfunc, 1, 1, env);
   option_parser_delete(op, env);
+  param->checkFlags = EIS_VERIFY_BASIC
+    | (extRankCheck?EIS_VERIFY_EXT_RANK:0);
   return oprval;
 }

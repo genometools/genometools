@@ -28,23 +28,34 @@ deleteEncIdxSeq(EISeq *seq, Env *env)
   seq->classInfo->delete(seq, env);
 }
 
+const char *EISIntegrityCheckResultStrings[] =
+{
+  "no error in bwt comparison.",
+  "reading from the index produced an incorrect symbol.",
+  "reading from the BWT reference file failed or delivered a symbol"
+  " not in the alphabet (bwt file corrupt?) ",
+  "loading/mapping of the suffix array project failed. \n"
+  "(did you generate the BWT?)",
+  "the rank operation delivered a wrong count"
+};
+
 #define verifyIntegrityErrRet(retval)                                   \
   do {                                                                  \
     switch (retval) {                                                   \
-    case 1:                                                             \
+    case EIS_INTEGRITY_CHECK_INVALID_SYMBOL:                            \
       fprintf(stderr, "Comparision failed at position "FormatSeqpos     \
               ", reference symbol: %u, symbol read: %u\n",              \
               pos, symOrig, symEnc);                                    \
       break;                                                            \
-    case -1:                                                            \
+    case EIS_INTEGRITY_CHECK_BWT_READ_ERROR:                            \
       fprintf(stderr, "Read of symbol failed at position "              \
               FormatSeqpos"\n", pos);                                   \
       break;                                                            \
-    case 2:                                                             \
+    case EIS_INTEGRITY_CHECK_RANK_FAILED:                               \
       fprintf(stderr, "At position "FormatSeqpos                        \
               ", rank operation yielded  wrong count: "FormatSeqpos     \
-              " expected "FormatSeqpos"\n",                             \
-              pos, rankQueryResult, rankExpect);                        \
+              ", expected "FormatSeqpos" for symbol %d\n",              \
+              pos, rankQueryResult, rankExpect, symEnc);                \
       break;                                                            \
     }                                                                   \
     EISPrintDiagsForPos(seqIdx, pos, stderr, hint, env);                \
@@ -60,15 +71,16 @@ deleteEncIdxSeq(EISeq *seq, Env *env)
  * @param fp descriptor to write progress marks to.
  * @return -1 on error, 0 on identity, >0 on inconsistency
  */
-int
-verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
-                unsigned long tickPrint, FILE *fp, Env *env)
+extern enum EISIntegrityCheckResults
+EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
+                   unsigned long tickPrint, FILE *fp, int chkFlags, Env *env)
 {
   Seqpos rankTable[UCHAR_MAX+1];
   FILE *bwtFP;
   Seqpos pos = 0;
   Suffixarray suffixArray;
-  Symbol symOrig, symEnc;
+  Symbol symOrig;
+  unsigned symEnc;
   EISHint hint;
   Seqpos seqLastPos, rankQueryResult, rankExpect;
   Verboseinfo *verbosity;
@@ -83,7 +95,7 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
     env_error_set(env, "Cannot load suffix array project with"
                   " demand for BWT file\n");
     freeverboseinfo(&verbosity, env);
-    return -1;
+    return EIS_INTEGRITY_CHECK_SA_LOAD_ERROR;
   }
   memset(rankTable, 0, sizeof (rankTable));
   bwtFP = suffixArray.bwttabstream.fp;
@@ -102,24 +114,37 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
       return -1;
     }
     fseeko(bwtFP, skip, SEEK_SET);
-    for (sym = 0; sym < UCHAR_MAX+1; ++sym)
+    for (sym = 0; sym <= UCHAR_MAX; ++sym)
       if (MRAEncSymbolHasValidMapping(alphabet, sym))
         rankTable[sym] = EISRank(seqIdx, sym, skip, hint, env);
     pos = skip;
   }
-/*   EISPrintDiagsForPos(seqIdx, ((unsigned long)random())%EISLength(seqIdx), */
-/*                       stderr, hint, env); */
   while ((symRead = getc(bwtFP)) != EOF)
   {
     symOrig = symRead;
     symEnc = EISGetSym(seqIdx, pos, hint, env);
     if (!MRAEncSymbolHasValidMapping(alphabet, symEnc))
-      verifyIntegrityErrRet(-1);
+      verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_INVALID_SYMBOL);
+    if (!MRAEncSymbolHasValidMapping(alphabet, symOrig))
+      verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_BWT_READ_ERROR);
     if (symEnc != symOrig)
-      verifyIntegrityErrRet(1);
-    if ((rankExpect = ++rankTable[symOrig])
-       != (rankQueryResult = EISRank(seqIdx, symOrig, pos + 1, hint, env)))
-      verifyIntegrityErrRet(2);
+      verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_INVALID_SYMBOL);
+    ++rankTable[symOrig];
+    if (chkFlags & EIS_VERIFY_EXT_RANK)
+    {
+      for (symEnc = 0; symEnc <= UCHAR_MAX; ++symEnc)
+        if (MRAEncSymbolHasValidMapping(alphabet, symEnc)
+            && ((rankExpect = rankTable[symEnc])
+                != (rankQueryResult
+                    = EISRank(seqIdx, symEnc, pos + 1, hint, env))))
+          verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
+    }
+    else
+    {
+      if ((rankExpect = rankTable[symEnc])
+          != (rankQueryResult = EISRank(seqIdx, symEnc, pos + 1, hint, env)))
+        verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_RANK_FAILED);
+    }
     ++pos;
     if (tickPrint && !(pos % tickPrint))
       putc('.', fp);
@@ -127,9 +152,28 @@ verifyIntegrity(EISeq *seqIdx, Str *projectName, Seqpos skip,
   if (tickPrint)
     putc('\n', fp);
   if (ferror(bwtFP))
-    verifyIntegrityErrRet(-1);
+    verifyIntegrityErrRet(EIS_INTEGRITY_CHECK_BWT_READ_ERROR);
   deleteEISHint(seqIdx, hint, env);
   freesuffixarray(&suffixArray, env);
   freeverboseinfo(&verbosity, env);
-  return 0;
+  return EIS_INTEGRITY_CHECK_NO_ERROR;
 }
+
+extern unsigned
+estimateSegmentSize(const union seqBaseEncParam *params,
+                    enum seqBaseEncoding encType, Env *env)
+{
+  unsigned segmentLen = 0;
+  switch (encType)
+  {
+  case BWT_ON_BLOCK_ENC:
+    segmentLen =
+      blockEncIdxSeqSegmentLen(&params->blockEnc, env);
+    break;
+  default:
+    env_error_set(env, "Illegal/unknown/unimplemented encoding requested!");
+    break;
+  }
+  return segmentLen;
+}
+

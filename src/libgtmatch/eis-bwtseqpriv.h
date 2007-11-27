@@ -22,18 +22,42 @@
 struct BWTSeq
 {
   struct encIdxSeq *seqIdx;
+  MRAEnc *alphabet;
   size_t alphabetSize;
   EISHint hint;
   unsigned locateSampleInterval; /**< no sampling if 0 */
+  Symbol bwtTerminatorFallback;  /**< the terminator symbol has been
+                                  * flattened into this symbol for
+                                  * storage reasons */
+  Seqpos longest;
   Seqpos *count;
+  int featureToggles;
 };
 
 struct locateHeader
 {
+  Seqpos longest;
   unsigned locateInterval;
+  int featureToggles;
 };
 
 extern int
 readLocateInfoHeader(EISeq *seqIdx, struct locateHeader *headerData);
+
+struct BWTSeqExactMatchesIterator
+{
+  struct matchBound bounds;
+  Seqpos nextMatchBWTPos;
+  struct MatchData nextMatch;
+  struct extBitsRetrieval extBits;
+};
+
+extern int
+BWTSeqPosHasLocateInfo(const BWTSeq *bwtSeq, Seqpos pos,
+                       struct extBitsRetrieval *extBits, Env *env);
+
+extern Seqpos
+BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
+                  struct extBitsRetrieval *extBits, Env *env);
 
 #endif

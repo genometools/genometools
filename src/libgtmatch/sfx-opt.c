@@ -26,6 +26,7 @@
 #include "sfx-optdef.h"
 #include "verbose-def.h"
 #include "stamp.h"
+#include "libgtmatch/eis-bwtseqparam.h"
 
 static OPrval parse_options(int *parsed_args,
                             bool doesa,
@@ -195,6 +196,11 @@ static OPrval parse_options(int *parsed_args,
         oprval = OPTIONPARSER_ERROR;
       }
     }
+  }
+  if (oprval == OPTIONPARSER_OK && !doesa)
+  {
+    computePackedIndexDefaults(&so->bwtIdxParams,
+                               BWTBaseFeatures & ~BWTProperlySorted, env);
   }
   option_parser_delete(op, env);
   if (oprval == OPTIONPARSER_OK && *parsed_args != argc)
