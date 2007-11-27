@@ -1,5 +1,5 @@
 def outoptions()
-  return "-tis -suf -bwt -lcp -des -indexname sfx"
+  return "-tis -suf -bwt -lcp -des"
 end
 
 def checksfx(parts,pl,withsmap,sat,filelist)
@@ -15,8 +15,8 @@ def checksfx(parts,pl,withsmap,sat,filelist)
     filearg += "#{$testdata}#{filename} "
   end
   run_test "#{$bin}gt suffixerator -v -parts #{parts} -pl #{pl} " +
-           "#{extra} #{outoptions()}  -db " + filearg
-  run_test "#{$bin}gt dev sfxmap -trials 10 -v sfx",:maxtime => 600
+           "#{extra} #{outoptions()} -indexname sfx -db " + filearg
+  run_test "#{$bin}gt dev sfxmap -trials 10 #{outoptions()} -v sfx",:maxtime => 600
 end
 
 def flattenfilelist(filelist)
@@ -32,7 +32,7 @@ def checkbwt(filelist)
   filelist.each do |filename|
     filearg += "#{$testdata}#{filename} "
   end
-  run_test "#{$bin}gt suffixerator -pl #{outoptions()} -db " +
+  run_test "#{$bin}gt suffixerator -pl #{outoptions()} -indexname sfx -db " +
            flattenfilelist(filelist)
 end
 
@@ -102,7 +102,7 @@ Keywords "gt_suffixerator"
 Test do
   run_test "#{$bin}gt suffixerator -tis -dna -indexname localidx " +
            "-db #{$testdata}Random.fna"
-  run_test "#{$bin}gt dev sfxmap -trials 10 localidx",:retval => 1
+  run_test "#{$bin}gt dev sfxmap -tis -suf -des -trials 10 localidx",:retval => 1
 end
 
 Name "gt suffixerator bwt"
@@ -157,9 +157,9 @@ def checkmapped(args)
   Name "gt suffixerator checkmapped"
   Keywords "gt_suffixerator gttestdata"
   Test do
-    run_test("#{$bin}gt suffixerator -tis -des -suf -bwt -lcp -indexname sfxidx #{args}", :maxtime => 600)
-    run_test("#{$bin}gt dev sfxmap -trials 10 -v sfxidx", :maxtime => 600)
-    run_test("#{$bin}gt dev sfxmap -v -stream sfxidx", :maxtime => 600)
+    run_test("#{$bin}gt suffixerator #{outoptions()} -indexname sfxidx #{args}", :maxtime => 600)
+    run_test("#{$bin}gt dev sfxmap #{outoptions()} -trials 10 -v sfxidx",:maxtime => 600)
+    run_test("#{$bin}gt dev sfxmap #{outoptions()} -stream -v sfxidx",:maxtime => 600)
   end
 end
 

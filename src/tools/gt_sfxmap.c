@@ -29,7 +29,13 @@
 
 typedef struct
 {
-  bool usestream, verbose, onlytis;
+  bool usestream, 
+       verbose, 
+       inputtis,
+       inputsuf,
+       inputdes,
+       inputbwt,
+       inputlcp;
   unsigned long trials;
 } Sfxmapoptions;
 
@@ -40,7 +46,8 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                             Env *env)
 {
   OptionParser *op;
-  Option *optionstream, *optionverbose, *optiontrials, *optiontis;
+  Option *optionstream, *optionverbose, *optiontrials, 
+         *optiontis, *optionsuf, *optiondes, *optionbwt, *optionlcp;
   OPrval oprval;
 
   env_error_check(env);
@@ -52,15 +59,36 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                                  &sfxmapoptions->usestream,false,env);
   option_parser_add_option(op, optionstream, env);
 
-  optiontrials = option_new_ulong("trials","specify number of trials",
+  optiontrials = option_new_ulong("trials",
+                                  "specify number of sequential trials",
                                   &sfxmapoptions->trials,0,
                                   env);
   option_parser_add_option(op, optiontrials, env);
 
-  optiontis = option_new_bool("tis","only input the sequence",
-                              &sfxmapoptions->onlytis,
+  optiontis = option_new_bool("tis","input the encoded sequence",
+                              &sfxmapoptions->inputtis,
                               false,env);
   option_parser_add_option(op, optiontis, env);
+
+  optiondes = option_new_bool("des","input the descriptions",
+                              &sfxmapoptions->inputdes,
+                              false,env);
+  option_parser_add_option(op, optiondes, env);
+
+  optionsuf = option_new_bool("suf","input the suffix array",
+                              &sfxmapoptions->inputsuf,
+                              false,env);
+  option_parser_add_option(op, optionsuf, env);
+
+  optionlcp = option_new_bool("lcp","input the lcp-table",
+                              &sfxmapoptions->inputlcp,
+                              false,env);
+  option_parser_add_option(op, optionlcp, env);
+
+  optionbwt = option_new_bool("bwt","input the Burrows-Wheeler Transformation",
+                              &sfxmapoptions->inputbwt,
+                              false,env);
+  option_parser_add_option(op, optionbwt, env);
 
   optionverbose = option_new_bool("v","be verbose",&sfxmapoptions->verbose,
                                   false,env);
@@ -82,6 +110,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   int parsed_args;
   Verboseinfo *verboseinfo;
   Sfxmapoptions sfxmapoptions;
+  unsigned int demand = 0;
 
   env_error_check(env);
 
@@ -95,11 +124,30 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
 
   indexname = str_new_cstr(argv[parsed_args],env);
   verboseinfo = newverboseinfo(sfxmapoptions.verbose,env);
+  if (sfxmapoptions.inputtis)
+  {
+    demand |= SARR_ESQTAB;
+  }
+  if (sfxmapoptions.inputdes)
+  {
+    demand |= SARR_DESTAB;
+  }
+  if (sfxmapoptions.inputsuf)
+  {
+    demand |= SARR_SUFTAB;
+  }
+  if (sfxmapoptions.inputlcp)
+  {
+    demand |= SARR_LCPTAB;
+  }
+  if (sfxmapoptions.inputbwt)
+  {
+    demand |= SARR_BWTTAB;
+  }
   if ((sfxmapoptions.usestream ? streamsuffixarray
                                : mapsuffixarray)(&suffixarray,
                                                  &totallength,
-                                                 sfxmapoptions.onlytis ?
-                                                    SARR_ESQTAB : SARR_ALLTAB,
+                                                 demand,
                                                  indexname,
                                                  verboseinfo,
                                                  env) != 0)
@@ -110,23 +158,9 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   str_delete(indexname,env);
   if (!haserr)
   {
-    if (checkspecialrangesfast(suffixarray.encseq,env) != 0)
-    {
-      haserr = true;
-    }
-  }
-  if (!haserr)
-  {
-    if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,env) != 0)
-    {
-      haserr = true;
-    }
-  }
-  if (!haserr)
-  {
     int readmode;
 
-    for (readmode = 0; readmode < 4; readmode++)
+    for (readmode = 0; readmode < 4; readmode++) 
     {
       if (isdnaalphabet(suffixarray.alpha,env) ||
          ((Readmode) readmode) == Forwardmode ||
@@ -145,6 +179,20 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
       }
     }
   }
+  if (!haserr)
+  {
+    if (checkspecialrangesfast(suffixarray.encseq,env) != 0)
+    {
+      haserr = true;
+    }
+  }
+  if (!haserr)
+  {
+    if (checkmarkpos(suffixarray.encseq,suffixarray.numofdbsequences,env) != 0)
+    {
+      haserr = true;
+    }
+  }
   if (suffixarray.prefixlength > 0 && !haserr)
   {
     if (verifymappedstr(&suffixarray,env) != 0)
@@ -152,7 +200,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
       haserr = true;
     }
   }
-  if (!haserr && !sfxmapoptions.onlytis && !sfxmapoptions.usestream)
+  if (!haserr && sfxmapoptions.inputsuf && !sfxmapoptions.usestream)
   {
     checkentiresuftab(suffixarray.encseq,
                       suffixarray.readmode,
@@ -163,7 +211,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
                       0,
                       env);
   }
-  if (!sfxmapoptions.onlytis && !haserr)
+  if (sfxmapoptions.inputdes && !haserr)
   {
     checkalldescriptions(suffixarray.destab,suffixarray.destablength,
                          suffixarray.numofdbsequences,env);

@@ -38,12 +38,13 @@
             printf("file %s, line %d: pos = %lu:cc = %u != %u = ccreal\n",\
                    __FILE__,__LINE__,\
                    (unsigned long) (POS),\
-                   CC,cctmp);\
+                   (unsigned int) (CC),\
+                   (unsigned int) cctmp);\
             exit(EXIT_FAILURE);\
           }\
         }
 #else
-#define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE) /* Nothing */
+#define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)
 #endif
 
 typedef struct
