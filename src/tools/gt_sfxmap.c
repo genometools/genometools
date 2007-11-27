@@ -33,7 +33,9 @@ typedef struct
        verbose, 
        inputtis,
        inputsuf,
-       inputdes;
+       inputdes,
+       inputbwt,
+       inputlcp;
   unsigned long trials;
 } Sfxmapoptions;
 
@@ -45,7 +47,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
 {
   OptionParser *op;
   Option *optionstream, *optionverbose, *optiontrials, 
-         *optiontis, *optionsuf, *optiondes;
+         *optiontis, *optionsuf, *optiondes, *optionbwt, *optionlcp;
   OPrval oprval;
 
   env_error_check(env);
@@ -68,15 +70,25 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                               false,env);
   option_parser_add_option(op, optiontis, env);
 
+  optiondes = option_new_bool("des","input the descriptions",
+                              &sfxmapoptions->inputdes,
+                              false,env);
+  option_parser_add_option(op, optiondes, env);
+
   optionsuf = option_new_bool("suf","input the suffix array",
                               &sfxmapoptions->inputsuf,
                               false,env);
   option_parser_add_option(op, optionsuf, env);
 
-  optiondes = option_new_bool("des","input the descriptions",
-                              &sfxmapoptions->inputdes,
+  optionlcp = option_new_bool("lcp","input the lcp-table",
+                              &sfxmapoptions->inputlcp,
                               false,env);
-  option_parser_add_option(op, optiondes, env);
+  option_parser_add_option(op, optionlcp, env);
+
+  optionbwt = option_new_bool("bwt","input the Burrows-Wheeler Transformation",
+                              &sfxmapoptions->inputbwt,
+                              false,env);
+  option_parser_add_option(op, optionbwt, env);
 
   optionverbose = option_new_bool("v","be verbose",&sfxmapoptions->verbose,
                                   false,env);
@@ -116,13 +128,21 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   {
     demand |= SARR_ESQTAB;
   }
+  if (sfxmapoptions.inputdes)
+  {
+    demand |= SARR_DESTAB;
+  }
   if (sfxmapoptions.inputsuf)
   {
     demand |= SARR_SUFTAB;
   }
-  if (sfxmapoptions.inputdes)
+  if (sfxmapoptions.inputlcp)
   {
-    demand |= SARR_DESTAB;
+    demand |= SARR_LCPTAB;
+  }
+  if (sfxmapoptions.inputbwt)
+  {
+    demand |= SARR_BWTTAB;
   }
   if ((sfxmapoptions.usestream ? streamsuffixarray
                                : mapsuffixarray)(&suffixarray,
