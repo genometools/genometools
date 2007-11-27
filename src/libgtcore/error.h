@@ -25,7 +25,7 @@
 /* the error class */
 typedef struct Error Error;
 
-Error*      error_new(MA*);
+Error*      error_new(void);
 void        error_set(Error*, const char *format, ...)
               __attribute__ ((format (printf, 2, 3)));
 void        error_vset(Error*, const char *format, va_list);
@@ -35,6 +35,6 @@ void        error_unset(Error*);
 const char* error_get(const Error*);
 void        error_set_progname(Error*, const char *progname, Env*);
 const char* error_get_progname(const Error*);
-void        error_delete(Error*, MA*);
+void        error_delete(Error*);
 
 #endif

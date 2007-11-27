@@ -21,13 +21,15 @@
 #include "libgtcore/xansi.h"
 
 /* the memory allocator class */
-struct MA {
+typedef struct {
   Hashtable *allocated_pointer;
   bool bookkeeping;
   Env *env;
   unsigned long current_size,
                 max_size;
-};
+} MA;
+
+static MA *ma = NULL;
 
 typedef struct {
   size_t size;
@@ -39,19 +41,15 @@ typedef struct {
   bool has_leak;
 } CheckSpaceLeakInfo;
 
-MA* ma_new(void)
-{
-  return xcalloc(1, sizeof (MA));
-}
-
 static void free_MAInfo(MAInfo *mainfo, /*@unused@*/ Env *env)
 {
   free(mainfo);
 }
 
-void ma_init(MA *ma, bool bookkeeping, Env *env)
+void ma_init(bool bookkeeping, Env *env)
 {
-  assert(ma && env);
+  if (ma) return;
+  ma = xcalloc(1, sizeof (MA));
   assert(!ma->bookkeeping);
   ma->allocated_pointer = hashtable_new(HASH_DIRECT, NULL,
                                         (FreeFunc) free_MAInfo, env);
@@ -75,7 +73,7 @@ static void subtract_size(MA *ma, unsigned long size)
   ma->current_size -= size;
 }
 
-void* ma_malloc_mem(MA *ma, size_t size, const char *filename, int line)
+void* ma_malloc_mem(size_t size, const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
@@ -95,8 +93,7 @@ void* ma_malloc_mem(MA *ma, size_t size, const char *filename, int line)
   return xmalloc(size);
 }
 
-void* ma_calloc_mem(MA *ma, size_t nmemb, size_t size,
-                    const char *filename, int line)
+void* ma_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
@@ -116,8 +113,7 @@ void* ma_calloc_mem(MA *ma, size_t nmemb, size_t size,
   return xcalloc(nmemb, size);
 }
 
-void* ma_realloc_mem(MA *ma, void *ptr, size_t size,
-                     const char *filename, int line)
+void* ma_realloc_mem(void *ptr, size_t size, const char *filename, int line)
 {
   MAInfo *mainfo;
   void *mem;
@@ -143,7 +139,7 @@ void* ma_realloc_mem(MA *ma, void *ptr, size_t size,
   return xrealloc(ptr, size);
 }
 
-void ma_free_mem(void *ptr, MA *ma, const char *filename, int line)
+void ma_free_mem(void *ptr, const char *filename, int line)
 {
   MAInfo *mainfo;
   assert(ma);
@@ -182,20 +178,20 @@ static int check_space_leak(void *key, void *value, void *data, Env *env)
   return 0;
 }
 
-unsigned long ma_get_space_peak(const MA *ma)
+unsigned long ma_get_space_peak(void)
 {
   assert(ma);
   return ma->max_size;
 }
 
-void ma_show_space_peak(MA *ma, FILE *fp)
+void ma_show_space_peak(FILE *fp)
 {
   assert(ma);
   fprintf(fp, "# space peak in megabytes: %.2f\n",
           (double) ma->max_size / (1 << 20));
 }
 
-int ma_check_space_leak(MA *ma, Env *env)
+int ma_check_space_leak(Env *env)
 {
   CheckSpaceLeakInfo info;
   int had_err;
@@ -209,15 +205,11 @@ int ma_check_space_leak(MA *ma, Env *env)
   return 0;
 }
 
-void ma_clean(MA *ma, /*@unused@*/ Env *env)
+void ma_clean(void)
 {
   assert(ma);
   ma->bookkeeping = false;
   hashtable_delete(ma->allocated_pointer, ma->env);
-}
-
-void ma_delete(MA *ma)
-{
-  if (!ma) return;
   free(ma);
+  ma = NULL;
 }

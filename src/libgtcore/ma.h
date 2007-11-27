@@ -22,28 +22,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/* the memory allocator class */
-typedef struct MA MA;
+/* the memory allocator module */
 
-MA*           ma_new(void);
-void          ma_init(MA*, bool bookkeeping, Env*);
-#define       ma_malloc(ma, size)\
-              ma_malloc_mem(ma, size, __FILE__, __LINE__)
-void*         ma_malloc_mem(MA*, size_t size, const char*, int);
-#define       ma_calloc(ma, nmemb, size)\
-              ma_calloc_mem(ma, nmemb, size, __FILE__, __LINE__)
-void*         ma_calloc_mem(MA*, size_t nmemb, size_t size, const char*, int);
-#define       ma_realloc(ma, ptr, size)\
-              ma_realloc_mem(ma, ptr, size, __FILE, __LINE__)
-void*         ma_realloc_mem(MA*, void *ptr, size_t size, const char*, int);
-#define       ma_free(ptr, ma)\
-              ma_free_mem(ptr, ma, __FILE__, __LINE__)
-void          ma_free_mem(void *ptr, MA*, const char*, int);
-unsigned long ma_get_space_peak(const MA*); /* in bytes */
-void          ma_show_space_peak(MA*, FILE*);
+void          ma_init(bool bookkeeping, Env*);
+#define       ma_malloc(size)\
+              ma_malloc_mem(size, __FILE__, __LINE__)
+void*         ma_malloc_mem(size_t size, const char*, int);
+#define       ma_calloc(nmemb, size)\
+              ma_calloc_mem(nmemb, size, __FILE__, __LINE__)
+void*         ma_calloc_mem(size_t nmemb, size_t size, const char*, int);
+#define       ma_realloc(ptr, size)\
+              ma_realloc_mem(ptr, size, __FILE, __LINE__)
+void*         ma_realloc_mem(void *ptr, size_t size, const char*, int);
+#define       ma_free(ptr)\
+              ma_free_mem(ptr, __FILE__, __LINE__)
+void          ma_free_mem(void *ptr, const char*, int);
+unsigned long ma_get_space_peak(void); /* in bytes */
+void          ma_show_space_peak(FILE*);
 /* check if all allocated memory has been freed, prints to stderr */
-int           ma_check_space_leak(MA*, Env*);
-void          ma_clean(MA*, Env*);
-void          ma_delete(MA*);
+int           ma_check_space_leak(Env*);
+void          ma_clean(void);
 
 #endif

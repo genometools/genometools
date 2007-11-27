@@ -26,9 +26,9 @@ struct Error {
   bool error_is_set;
 };
 
-Error* error_new(MA *ma)
+Error* error_new(void)
 {
-  return ma_calloc(ma, 1, sizeof (Error));
+  return ma_calloc(1, sizeof (Error));
 }
 
 void error_set(Error *e, const char *format, ...)
@@ -79,9 +79,9 @@ const char* error_get_progname(const Error *e)
   return e->progname;
 }
 
-void error_delete(Error *e, MA *ma)
+void error_delete(Error *e)
 {
   if (!e) return;
-  ma_free(e->progname, ma);
-  ma_free(e, ma);
+  ma_free(e->progname);
+  ma_free(e);
 }

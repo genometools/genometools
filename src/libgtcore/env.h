@@ -26,7 +26,6 @@ typedef struct Env Env;
 #include "libgtcore/fa.h"
 
 Env*   env_new(void);
-MA*    env_ma(const Env*);    /* return the memory allocator */
 FA*    env_fa(const Env*);    /* return the file allocator */
 Error* env_error(const Env*); /* return the error object */
 void   env_set_spacepeak(Env*, bool);
@@ -36,18 +35,18 @@ int    env_delete(Env*);
 
 /* wrapper for memory functions */
 #define env_ma_malloc(env, size)\
-        ma_malloc_mem(env_ma(env), size, __FILE__, __LINE__)
+        ma_malloc_mem(size, __FILE__, __LINE__)
 #define env_ma_calloc(env, nmemb, size)\
-        ma_calloc_mem(env_ma(env), nmemb, size, __FILE__, __LINE__)
+        ma_calloc_mem(nmemb, size, __FILE__, __LINE__)
 #define env_ma_realloc(env, ptr, size)\
-        ma_realloc_mem(env_ma(env), ptr, size, __FILE__, __LINE__)
+        ma_realloc_mem(ptr, size, __FILE__, __LINE__)
 #define env_ma_free(ptr, env)\
-        ma_free_mem(ptr, env_ma(env), __FILE__, __LINE__)
+        ma_free_mem(ptr, __FILE__, __LINE__)
 /* free functions get the data object (here the env object) _always_ as the
    last object */
 void    env_ma_free_func(void *ptr, Env*);
 #define env_ma_get_space_peak(env)\
-        ma_get_space_peak(env_ma(env))
+        ma_get_space_peak()
 
 /* wrapper for file functions */
 #define env_fa_fopen(env, path, mode)\

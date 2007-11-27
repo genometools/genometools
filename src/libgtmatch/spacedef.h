@@ -44,7 +44,7 @@
 
 #else
 #define ALLOCASSIGNSPACEGENERIC(FILENAME,LINENUM,V,S,T,N)\
-        V = ma_realloc_mem(env_ma(env), S, sizeof (T) * (N), FILENAME,\
+        V = ma_realloc_mem(S, sizeof (T) * (N), FILENAME,\
                            LINENUM)
 
 #define ALLOCASSIGNSPACE(V,S,T,N)\

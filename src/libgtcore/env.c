@@ -24,7 +24,6 @@
 #include "libgtcore/xansi.h"
 
 struct Env {
-  MA *ma; /* the memory allocator */
   FA *fa; /* the file allocator */
   Error *error;
   bool spacepeak;
@@ -84,21 +83,14 @@ Env* env_new(void)
 {
   const char *bookkeeping;
   Env *env = xcalloc(1, sizeof (Env));
-  env->ma = ma_new();
   bookkeeping = getenv("GT_MEM_BOOKKEEPING");
-  ma_init(env->ma, bookkeeping && !strcmp(bookkeeping, "on"), env);
+  ma_init(bookkeeping && !strcmp(bookkeeping, "on"), env);
   env->fa = fa_new(env);
-  env->error = error_new(env->ma);
+  env->error = error_new();
   proc_gt_env_options(env);
   if (env->spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
     warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
   return env;
-}
-
-MA* env_ma(const Env *env)
-{
-  assert(env && env->ma);
-  return env->ma;
 }
 
 FA* env_fa(const Env *env)
@@ -123,18 +115,17 @@ int env_delete(Env *env)
 {
   int fa_fptr_rval, fa_mmap_rval, ma_rval;
   assert(env);
-  error_delete(env->error, env->ma);
+  error_delete(env->error);
   env->error = NULL;
   if (env->spacepeak) {
-    ma_show_space_peak(env->ma, stdout);
+    ma_show_space_peak(stdout);
     fa_show_space_peak(env->fa, stdout);
   }
   fa_fptr_rval = fa_check_fptr_leak(env->fa, env);
   fa_mmap_rval = fa_check_mmap_leak(env->fa, env);
   fa_delete(env->fa, env);
-  ma_rval = ma_check_space_leak(env->ma, env);
-  ma_clean(env->ma, env);
-  ma_delete(env->ma);
+  ma_rval = ma_check_space_leak(env);
+  ma_clean();
   free(env);
   return fa_fptr_rval || fa_mmap_rval || ma_rval;
 }
@@ -143,7 +134,7 @@ void env_ma_free_func(void *ptr, Env *env)
 {
   assert(env);
   if (!ptr) return;
-  ma_free(ptr, env_ma(env));
+  ma_free(ptr);
 }
 
 void env_fa_fclose(FILE *stream, Env *env)
