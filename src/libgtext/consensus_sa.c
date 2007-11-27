@@ -349,7 +349,7 @@ static void compute_L(Bittab **L, Bittab **C, Bittab **left,
                       unsigned long number_of_sas, Env *env)
 {
   unsigned long sa, sa_1, sa_2, sa_1_size = 0, sa_2_size;
-  Bittab *tmpset = bittab_new(number_of_sas, env);
+  Bittab *tmpset = bittab_new(number_of_sas);
 
   for (sa = 0; sa < number_of_sas; sa++) {
     sa_1 = UNDEF_ULONG;
@@ -383,7 +383,7 @@ static void compute_L(Bittab **L, Bittab **C, Bittab **left,
       bittab_or(L[sa], L[sa_1], C[sa]);
     }
   }
-  bittab_delete(tmpset, env);
+  bittab_delete(tmpset);
 }
 
 static void compute_R(Bittab **R, Bittab **C, Bittab **right,
@@ -391,7 +391,7 @@ static void compute_R(Bittab **R, Bittab **C, Bittab **right,
 {
   unsigned long sa_1, sa_2, sa_1_size = 0, sa_2_size;
   long sa;
-  Bittab *tmpset = bittab_new(number_of_sas, env);
+  Bittab *tmpset = bittab_new(number_of_sas);
 
   for (sa = number_of_sas-1; sa >= 0; sa--) {
     sa_1 = UNDEF_ULONG;
@@ -424,7 +424,7 @@ static void compute_R(Bittab **R, Bittab **C, Bittab **right,
       bittab_or(R[sa], R[sa_1], C[sa]);
     }
   }
-  bittab_delete(tmpset, env);
+  bittab_delete(tmpset);
 }
 
 #ifndef NDEBUG
@@ -435,7 +435,7 @@ static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa,
   unsigned long sa, sa_prime;
   bool incompatible_found, valid = true;
 
-  SA_p_complement = bittab_new(csa->number_of_sas, env);
+  SA_p_complement = bittab_new(csa->number_of_sas);
   bittab_complement(SA_p_complement, SA_p);
 
   for (sa_prime  = bittab_get_first_bitnum(SA_p_complement);
@@ -452,7 +452,7 @@ static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa,
     }
     if (!incompatible_found) { valid = false; break; }
   }
-  bittab_delete(SA_p_complement, env);
+  bittab_delete(SA_p_complement);
   return valid;
 }
 #endif
@@ -475,16 +475,16 @@ static void compute_csas(ConsensusSA *csa, Env *env)
   R     = ma_malloc(sizeof (Bittab*) * csa->number_of_sas);
 
   for (i = 0; i < csa->number_of_sas; i++) {
-    C[i]     = bittab_new(csa->number_of_sas, env);
-    left[i]  = bittab_new(csa->number_of_sas, env);
-    right[i] = bittab_new(csa->number_of_sas, env);
-    L[i]     = bittab_new(csa->number_of_sas, env);
-    R[i]     = bittab_new(csa->number_of_sas, env);
+    C[i]     = bittab_new(csa->number_of_sas);
+    left[i]  = bittab_new(csa->number_of_sas);
+    right[i] = bittab_new(csa->number_of_sas);
+    L[i]     = bittab_new(csa->number_of_sas);
+    R[i]     = bittab_new(csa->number_of_sas);
   }
 
-  U_i      = bittab_new(csa->number_of_sas, env);
-  SA_i     = bittab_new(csa->number_of_sas, env);
-  SA_prime = bittab_new(csa->number_of_sas, env);
+  U_i      = bittab_new(csa->number_of_sas);
+  SA_i     = bittab_new(csa->number_of_sas);
+  SA_prime = bittab_new(csa->number_of_sas);
 
   splice_form = array_new(sizeof (unsigned long));
 
@@ -530,7 +530,7 @@ static void compute_csas(ConsensusSA *csa, Env *env)
     /* process splice form */
     if (csa->process_splice_form) {
       array_reset(splice_form);
-      bittab_get_all_bitnums(SA_i, splice_form, env);
+      bittab_get_all_bitnums(SA_i, splice_form);
       csa->process_splice_form(splice_form, csa->set_of_sas, csa->number_of_sas,
                                csa->size_of_sa, csa->userdata, env);
     }
@@ -548,20 +548,20 @@ static void compute_csas(ConsensusSA *csa, Env *env)
 
   /* free sets */
   for (i = 0; i < csa->number_of_sas; i++) {
-    bittab_delete(C[i], env);
-    bittab_delete(left[i], env);
-    bittab_delete(right[i], env);
-    bittab_delete(L[i], env);
-    bittab_delete(R[i], env);
+    bittab_delete(C[i]);
+    bittab_delete(left[i]);
+    bittab_delete(right[i]);
+    bittab_delete(L[i]);
+    bittab_delete(R[i]);
   }
   ma_free(C);
   ma_free(left);
   ma_free(right);
   ma_free(L);
   ma_free(R);
-  bittab_delete(U_i, env);
-  bittab_delete(SA_i, env);
-  bittab_delete(SA_prime, env);
+  bittab_delete(U_i);
+  bittab_delete(SA_i);
+  bittab_delete(SA_prime);
   array_delete(splice_form);
 }
 

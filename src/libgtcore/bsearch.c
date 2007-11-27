@@ -228,7 +228,7 @@ int bsearch_unit_test(Env *env)
 
   /* test bsearch_all_mark() with large case */
   array_reset(members);
-  b = bittab_new(array_size(elements), env);
+  b = bittab_new(array_size(elements));
   bsearch_all_mark(members, &key, array_get_space(elements),
                    array_size(elements), sizeof (int), cmp, NULL, b, env);
   ensure(had_err, array_size(members) == 3); /* three members found */
@@ -247,7 +247,7 @@ int bsearch_unit_test(Env *env)
   /* free */
   array_delete(elements);
   array_delete(members);
-  bittab_delete(b, env);
+  bittab_delete(b);
 
   return had_err;
 }

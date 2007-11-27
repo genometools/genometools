@@ -113,7 +113,7 @@ static void neighborjoining_compute(NeighborJoining *nj, Env *env)
   double mindist, *rtab;
 
   /* init node tab */
-  nodetab = bittab_new(nj->numofnodes, env);
+  nodetab = bittab_new(nj->numofnodes);
   for (i = 0; i < nj->num_of_taxa; i++)
     bittab_set_bit(nodetab, i);
   activenodes = nj->num_of_taxa;
@@ -179,7 +179,7 @@ static void neighborjoining_compute(NeighborJoining *nj, Env *env)
   nj->finalnodeB = nj->numofnodes - 1;
   nj->finaldist  = nj->nodes[nj->finalnodeB].distances[nj->finalnodeA];
 
-  bittab_delete(nodetab, env);
+  bittab_delete(nodetab);
   ma_free(rtab);
 }
 

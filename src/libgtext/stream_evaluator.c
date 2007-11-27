@@ -145,14 +145,14 @@ static Slot* slot_new(bool nuceval, Range range, Env *env)
   s->CDS_exons_reverse = transcript_exons_new(env);
   if (nuceval) {
     s->real_range = range;
-    s->real_mRNA_nucleotides_forward = bittab_new(length, env);
-    s->pred_mRNA_nucleotides_forward = bittab_new(length, env);
-    s->real_mRNA_nucleotides_reverse = bittab_new(length, env);
-    s->pred_mRNA_nucleotides_reverse = bittab_new(length, env);
-    s->real_CDS_nucleotides_forward = bittab_new(length, env);
-    s->pred_CDS_nucleotides_forward = bittab_new(length, env);
-    s->real_CDS_nucleotides_reverse = bittab_new(length, env);
-    s->pred_CDS_nucleotides_reverse = bittab_new(length, env);
+    s->real_mRNA_nucleotides_forward = bittab_new(length);
+    s->pred_mRNA_nucleotides_forward = bittab_new(length);
+    s->real_mRNA_nucleotides_reverse = bittab_new(length);
+    s->pred_mRNA_nucleotides_reverse = bittab_new(length);
+    s->real_CDS_nucleotides_forward = bittab_new(length);
+    s->pred_CDS_nucleotides_forward = bittab_new(length);
+    s->real_CDS_nucleotides_reverse = bittab_new(length);
+    s->pred_CDS_nucleotides_reverse = bittab_new(length);
   }
   s->used_mRNA_exons_forward = transcript_used_exons_new(env);
   s->used_mRNA_exons_reverse = transcript_used_exons_new(env);
@@ -188,24 +188,24 @@ static void slot_delete(Slot *s, Env *env)
   transcript_counts_delete(s->mRNA_counts_reverse, env);
   transcript_counts_delete(s->CDS_counts_forward, env);
   transcript_counts_delete(s->CDS_counts_reverse, env);
-  bittab_delete(s->real_mRNA_nucleotides_forward, env);
-  bittab_delete(s->pred_mRNA_nucleotides_forward, env);
-  bittab_delete(s->real_mRNA_nucleotides_reverse, env);
-  bittab_delete(s->pred_mRNA_nucleotides_reverse, env);
-  bittab_delete(s->real_CDS_nucleotides_forward, env);
-  bittab_delete(s->pred_CDS_nucleotides_forward, env);
-  bittab_delete(s->real_CDS_nucleotides_reverse, env);
-  bittab_delete(s->pred_CDS_nucleotides_reverse, env);
-  bittab_delete(s->true_genes_forward, env);
-  bittab_delete(s->true_genes_reverse, env);
-  bittab_delete(s->true_mRNAs_forward, env);
-  bittab_delete(s->true_mRNAs_reverse, env);
-  bittab_delete(s->true_LTRs, env);
-  bittab_delete(s->overlapped_genes_forward, env);
-  bittab_delete(s->overlapped_genes_reverse, env);
-  bittab_delete(s->overlapped_mRNAs_forward, env);
-  bittab_delete(s->overlapped_mRNAs_reverse, env);
-  bittab_delete(s->overlapped_LTRs, env);
+  bittab_delete(s->real_mRNA_nucleotides_forward);
+  bittab_delete(s->pred_mRNA_nucleotides_forward);
+  bittab_delete(s->real_mRNA_nucleotides_reverse);
+  bittab_delete(s->pred_mRNA_nucleotides_reverse);
+  bittab_delete(s->real_CDS_nucleotides_forward);
+  bittab_delete(s->pred_CDS_nucleotides_forward);
+  bittab_delete(s->real_CDS_nucleotides_reverse);
+  bittab_delete(s->pred_CDS_nucleotides_reverse);
+  bittab_delete(s->true_genes_forward);
+  bittab_delete(s->true_genes_reverse);
+  bittab_delete(s->true_mRNAs_forward);
+  bittab_delete(s->true_mRNAs_reverse);
+  bittab_delete(s->true_LTRs);
+  bittab_delete(s->overlapped_genes_forward);
+  bittab_delete(s->overlapped_genes_reverse);
+  bittab_delete(s->overlapped_mRNAs_forward);
+  bittab_delete(s->overlapped_mRNAs_reverse);
+  bittab_delete(s->overlapped_LTRs);
   transcript_bittabs_delete(s->mRNA_exon_bittabs_forward, env);
   transcript_bittabs_delete(s->mRNA_exon_bittabs_reverse, env);
   transcript_bittabs_delete(s->CDS_exon_bittabs_forward, env);
@@ -326,36 +326,36 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
 
   /* init true bittabs */
   s->true_genes_forward = array_size(s->genes_forward)
-                          ? bittab_new(array_size(s->genes_forward), env)
+                          ? bittab_new(array_size(s->genes_forward))
                           : NULL;
   s->true_genes_reverse = array_size(s->genes_reverse)
-                          ? bittab_new(array_size(s->genes_reverse), env)
+                          ? bittab_new(array_size(s->genes_reverse))
                           : NULL;
   s->true_mRNAs_forward = array_size(s->mRNAs_forward)
-                          ? bittab_new(array_size(s->mRNAs_forward), env)
+                          ? bittab_new(array_size(s->mRNAs_forward))
                           : NULL;
   s->true_mRNAs_reverse = array_size(s->mRNAs_reverse)
-                          ? bittab_new(array_size(s->mRNAs_reverse), env)
+                          ? bittab_new(array_size(s->mRNAs_reverse))
                           : NULL;
   s->true_LTRs          = array_size(s->LTRs)
-                          ? bittab_new(array_size(s->LTRs), env)
+                          ? bittab_new(array_size(s->LTRs))
                           : NULL;
 
   /* init overlap bittabs */
   s->overlapped_genes_forward = array_size(s->genes_forward)
-                                ? bittab_new(array_size(s->genes_forward), env)
+                                ? bittab_new(array_size(s->genes_forward))
                                 : NULL;
   s->overlapped_genes_reverse = array_size(s->genes_reverse)
-                                ? bittab_new(array_size(s->genes_reverse), env)
+                                ? bittab_new(array_size(s->genes_reverse))
                                 : NULL;
   s->overlapped_mRNAs_forward = array_size(s->mRNAs_forward)
-                                ? bittab_new(array_size(s->mRNAs_forward), env)
+                                ? bittab_new(array_size(s->mRNAs_forward))
                                 : NULL;
   s->overlapped_mRNAs_reverse = array_size(s->mRNAs_reverse)
-                                ? bittab_new(array_size(s->mRNAs_reverse), env)
+                                ? bittab_new(array_size(s->mRNAs_reverse))
                                 : NULL;
   s->overlapped_LTRs          = array_size(s->LTRs)
-                                ? bittab_new(array_size(s->LTRs), env)
+                                ? bittab_new(array_size(s->LTRs))
                                 : NULL;
 
   /* init bittabs (for collapsed exons) */
@@ -1211,7 +1211,7 @@ int compute_nucleotides_values(void *key, void *value, void *data, Env *env)
   se->CDS_nucleotides.FP  += slot->FP_CDS_nucleotides_forward;
   se->CDS_nucleotides.FP  += slot->FP_CDS_nucleotides_reverse;
   /* add other values */
-  tmp = bittab_new(range_length(slot->real_range), env);
+  tmp = bittab_new(range_length(slot->real_range));
   add_nucleotide_values(&se->mRNA_nucleotides,
                         slot->real_mRNA_nucleotides_forward,
                         slot->pred_mRNA_nucleotides_forward, tmp,
@@ -1228,7 +1228,7 @@ int compute_nucleotides_values(void *key, void *value, void *data, Env *env)
                         slot->real_CDS_nucleotides_reverse,
                         slot->pred_CDS_nucleotides_reverse, tmp,
                         "CDS reverse");
-  bittab_delete(tmp, env);
+  bittab_delete(tmp);
   return 0;
 }
 

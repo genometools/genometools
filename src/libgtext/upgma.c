@@ -97,7 +97,7 @@ static void upgma_compute(UPGMA *upgma, Env *env)
   Bittab *clustertab;
 
   /* init cluster tab */
-  clustertab = bittab_new(upgma->num_of_clusters, env);
+  clustertab = bittab_new(upgma->num_of_clusters);
   for (i = 0; i < upgma->num_of_taxa; i++)
     bittab_set_bit(clustertab, i);
 
@@ -154,7 +154,7 @@ static void upgma_compute(UPGMA *upgma, Env *env)
     newclusternum++;
   }
 
-  bittab_delete(clustertab, env);
+  bittab_delete(clustertab);
 }
 
 UPGMA* upgma_new(unsigned long num_of_taxa, void *data, UPGMADistFunc distfunc,

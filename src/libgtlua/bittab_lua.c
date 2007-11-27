@@ -37,7 +37,7 @@ static int bittab_lua_new(lua_State *L)
   env = get_env_from_registry(L);
   bittab = lua_newuserdata(L, sizeof (Bittab*));
   assert(bittab);
-  *bittab = bittab_new(num_of_bits, env);
+  *bittab = bittab_new(num_of_bits);
   luaL_getmetatable(L, BITTAB_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -112,9 +112,8 @@ static int bittab_lua_bit_is_set(lua_State *L)
 static int bittab_lua_delete(lua_State *L)
 {
   Bittab **bittab;
-  Env *env = get_env_from_registry(L);
   bittab = check_bittab(L, 1);
-  bittab_delete(*bittab, env);
+  bittab_delete(*bittab);
   return 0;
 }
 

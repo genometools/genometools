@@ -32,7 +32,7 @@ struct Bittab {
                 num_of_bits;
 };
 
-Bittab* bittab_new(unsigned long num_of_bits, Env *env)
+Bittab* bittab_new(unsigned long num_of_bits)
 {
   Bittab *b;
 
@@ -170,7 +170,7 @@ void bittab_unset(Bittab *b)
     b->tabptr[i] = 0;
 }
 
-void bittab_get_all_bitnums(const Bittab *b, Array *bitnums, Env *env)
+void bittab_get_all_bitnums(const Bittab *b, Array *bitnums)
 {
   unsigned long i;
   assert(b && bitnums);
@@ -316,9 +316,9 @@ int bittab_unit_test(Env *env)
 
   for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
     size = ((double) rand() / RAND_MAX) * MAX_SIZE + 1;
-    b = bittab_new(size, env);
-    tmp = bittab_new(size, env);
-    and = bittab_new(size, env);
+    b = bittab_new(size);
+    tmp = bittab_new(size);
+    and = bittab_new(size);
     ensure(had_err, bittab_size(b) == size);
 
     for (j = 0; j < size && !had_err; j++) {
@@ -384,24 +384,24 @@ int bittab_unit_test(Env *env)
       ensure(had_err, bittab_cmp(b, tmp));
     }
 
-    bittab_delete(b, env);
-    bittab_delete(tmp, env);
-    bittab_delete(and, env);
+    bittab_delete(b);
+    bittab_delete(tmp);
+    bittab_delete(and);
   }
 
   /* test bittab_show */
   fp = fa_xfopen("/dev/null", "w");
-  b = bittab_new(80, env);
+  b = bittab_new(80);
   for (i = 0; i < 80; i++) {
     if (i % 2)
       bittab_set_bit(b, i);
   }
   bittab_show(b, fp);
-  bittab_delete(b, env);
+  bittab_delete(b);
   fa_xfclose(fp);
 
   /* test bittab_shift_left_equal() */
-  b = bittab_new(125, env);
+  b = bittab_new(125);
   bittab_set_bit(b, 0);
   bittab_set_bit(b, 32);
   bittab_set_bit(b, 64);
@@ -417,10 +417,10 @@ int bittab_unit_test(Env *env)
   ensure(had_err, bittab_bit_is_set(b, 78));
   ensure(had_err, bittab_bit_is_set(b, 97));
   ensure(had_err, bittab_bit_is_set(b, 124));
-  bittab_delete(b, env);
+  bittab_delete(b);
 
   /* test bittab_shift_right_equal() */
-  b = bittab_new(125, env);
+  b = bittab_new(125);
   bittab_set_bit(b, 1);
   bittab_set_bit(b, 33);
   bittab_set_bit(b, 65);
@@ -436,12 +436,12 @@ int bittab_unit_test(Env *env)
   ensure(had_err, bittab_bit_is_set(b, 76));
   ensure(had_err, bittab_bit_is_set(b, 96));
   ensure(had_err, bittab_bit_is_set(b, 123));
-  bittab_delete(b, env);
+  bittab_delete(b);
 
   return had_err;
 }
 
-void bittab_delete(Bittab *b, Env *env)
+void bittab_delete(Bittab *b)
 {
   if (!b) return;
   ma_free(b->tabptr);
