@@ -24,7 +24,6 @@ typedef struct Env Env;
 #include "libgtcore/ma.h"
 #include "libgtcore/error.h"
 #include "libgtcore/fa.h"
-#include "libgtcore/log.h"
 
 Env*   env_new(void);
 MA*    env_ma(const Env*);    /* return the memory allocator */
@@ -102,9 +101,5 @@ void    env_error_set(Env*, const char *format, ...)
    every routine which has an Env* argument, except for destructors! */
 #define env_error_check(env)\
         assert(!env || !env_error(env) || !error_is_set(env_error(env)))
-
-/* wrapper for log functions */
-void    env_log_log(Env*, const char *format, ...)
-          __attribute__ ((format (printf, 2, 3)));
 
 #endif

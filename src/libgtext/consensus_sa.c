@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include "libgtcore/bittab.h"
+#include "libgtcore/log.h"
 #include "libgtcore/undef.h"
 #include "libgtext/consensus_sa.h"
 
@@ -45,7 +46,7 @@ static bool set_of_sas_is_sorted(const void *set_of_sas,
 
   /* get first range */
   range_a = get_genomic_range(set_of_sas);
-  env_log_log(env, "-from %lu", range_a.start);
+  log_log("-from %lu", range_a.start);
   max_end = range_a.end;
 
   /* loop over the other ranges */
@@ -63,7 +64,7 @@ static bool set_of_sas_is_sorted(const void *set_of_sas,
     if (range_a.end > max_end)
       max_end = range_a.end;
   }
-  env_log_log(env, "-to %lu", max_end);
+  log_log("-to %lu", max_end);
   return true;
 }
 #endif
@@ -574,7 +575,7 @@ void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
   assert(get_genomic_range && get_strand && get_exons);
   assert(set_of_sas_is_sorted(set_of_sas, number_of_sas, size_of_sa,
                               get_genomic_range, env));
-  env_log_log(env, "csa number_of_sas=%lu", number_of_sas);
+  log_log("csa number_of_sas=%lu", number_of_sas);
 
   /* init */
   csa.set_of_sas          = set_of_sas;
@@ -589,5 +590,5 @@ void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
   /* computation */
   compute_csas(&csa, env);
 
-  env_log_log(env, "csa finished");
+  log_log("csa finished");
 }

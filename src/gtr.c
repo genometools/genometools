@@ -38,6 +38,7 @@
 #include "libgtcore/gtdatapath.h"
 #include "libgtcore/grep.h"
 #include "libgtcore/hashtable.h"
+#include "libgtcore/log.h"
 #include "libgtcore/range.h"
 #include "libgtcore/safearith.h"
 #include "libgtcore/splitter.h"

@@ -19,6 +19,7 @@
 #include "libgtcore/bsearch.h"
 #include "libgtcore/cstr.h"
 #include "libgtcore/hashtable.h"
+#include "libgtcore/log.h"
 #include "libgtcore/warning.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/evaluator.h"

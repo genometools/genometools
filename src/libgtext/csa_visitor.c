@@ -16,6 +16,7 @@
 */
 
 #include <assert.h>
+#include "libgtcore/log.h"
 #include "libgtcore/queue.h"
 #include "libgtcore/undef.h"
 #include "libgtext/consensus_sa.h"
@@ -96,7 +97,7 @@ static int csa_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   }
   else {
     /* end of cluster -> process it */
-    env_log_log(env, "process cluster");
+    log_log("process cluster");
     csa_visitor->buffered_feature = gf;
     csa_visitor_process_cluster(gv, false, env);
     csa_visitor->first_range = csa_visitor->second_range;

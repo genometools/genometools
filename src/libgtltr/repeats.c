@@ -16,8 +16,9 @@
 */
 
 #include <stdio.h>
-#include "libgtcore/env.h"
 #include "libgtcore/arraydef.h"
+#include "libgtcore/env.h"
+#include "libgtcore/log.h"
 #include "libgtmatch/sarr-def.h"
 #include "libgtmatch/encseq-def.h"
 #include "libgtmatch/intcode-def.h"
@@ -117,13 +118,13 @@ int simpleexactselfmatchstore (
 
       if ( seqnum1 == seqnum2 )
       {
-          env_log_log(env, "accepted:\n");
-          env_log_log(env, "pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
-          env_log_log(env, "pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
-          env_log_log(env, "i: %lu\n", i);
-          samecontig = true;
-          contignumber = seqnum1;
-          break;
+        log_log("accepted:\n");
+        log_log("pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
+        log_log("pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
+        log_log("i: %lu\n", i);
+        samecontig = true;
+        contignumber = seqnum1;
+        break;
       }
     }
   }
@@ -137,13 +138,10 @@ int simpleexactselfmatchstore (
 
     GETNEXTFREEINARRAY(nextfreerepeatptr, &info->repeatinfo.repeats,
                        Repeat, 10);
-    env_log_log(env, "maximal repeat pos1: " FormatSeqpos "\n",
-               PRINTSeqposcast(pos1));
-    env_log_log(env, "maximal repeat pos2: " FormatSeqpos "\n",
-               PRINTSeqposcast(pos2));
-    env_log_log(env, "len: " FormatSeqpos "\n",
-               PRINTSeqposcast(len));
-    env_log_log(env, "seq number: %lu\n\n", contignumber);
+    log_log("maximal repeat pos1: " FormatSeqpos "\n", PRINTSeqposcast(pos1));
+    log_log("maximal repeat pos2: " FormatSeqpos "\n", PRINTSeqposcast(pos2));
+    log_log("len: " FormatSeqpos "\n", PRINTSeqposcast(len));
+    log_log("seq number: %lu\n\n", contignumber);
     nextfreerepeatptr->pos1 = pos1;
     nextfreerepeatptr->offset = tmp;
     nextfreerepeatptr->len = len;

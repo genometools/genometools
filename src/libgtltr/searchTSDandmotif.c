@@ -18,6 +18,7 @@
 #include <stdbool.h>
 #include "libgtcore/arraydef.h"
 #include "libgtcore/env.h"
+#include "libgtcore/log.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/symboldef.h"
 #include "libgtmatch/encseq-def.h"
@@ -345,7 +346,7 @@ static void searchformotifonlyborders(LTRharvestoptions *lo,
   }
   if (idx > endrightLTR && (!motif2))
   {
-    env_log_log(env, "no right motif found.\n");
+    log_log("no right motif found.\n");
   }
   *motifmismatchesrightLTR += motifmismatches_frombestmatch;
 
@@ -749,10 +750,10 @@ int findcorrectboundaries(
 
   env_error_check(env);
 
-  env_log_log(env, "searching for correct boundaries in vicinity...\n");
+  log_log("searching for correct boundaries in vicinity...\n");
   /* first: 5'-border of left LTR and 3'-border of right LTR */
 
-  if ( searchforTSDandorMotifoutside(lo,
+  if (searchforTSDandorMotifoutside(lo,
                                     boundaries,
                                     ssar,
                                     markpos,
@@ -766,8 +767,8 @@ int findcorrectboundaries(
   /* second: 3'-border of left LTR and 5'-border of right LTR */
   if ( lo->motif.allowedmismatches < (unsigned int)4 )
   {
-    env_log_log(env, "second: searching for motif only around 3'border of left"
-                " LTR and 5'-border of right LTR...\n");
+    log_log("second: searching for motif only around 3'border of left LTR and "
+            "5'-border of right LTR...\n");
     searchformotifonlyinside(lo,
         boundaries,
         ssar,

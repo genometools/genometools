@@ -203,13 +203,3 @@ void env_error_set(Env *env, const char *format, ...)
   error_vset(env_error(env), format, ap);
   va_end(ap);
 }
-
-void env_log_log(Env *env, const char *format, ...)
-{
-  va_list ap;
-  assert(env && format);
-  if (!log_enabled()) return;
-  va_start(ap, format);
-  log_vlog(format, ap);
-  va_end(ap);
-}

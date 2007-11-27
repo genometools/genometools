@@ -17,7 +17,7 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include "libgtcore/env.h"
+#include "libgtcore/log.h"
 #include "libgtcore/xansi.h"
 
 static bool logging = false;

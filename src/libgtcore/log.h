@@ -19,6 +19,7 @@
 #define LOG_H
 
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 
 /* enable logging */

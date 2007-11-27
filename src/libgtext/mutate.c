@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include <string.h>
+#include "libgtcore/log.h"
 #include "libgtcore/mathsupport.h"
 #include "libgtext/mutate.h"
 
@@ -89,10 +90,10 @@ static char* mutate_seq(const char *seq, unsigned long len, Alpha *alpha,
       mutated_seq[j++] = alpha_decode(alpha, cc); /* keep original character */
   }
   mutated_seq[j] = '\0'; /* terminate */
-  env_log_log(env, "total number of mutation events: %lu", total_events);
-  env_log_log(env, "number of substitution events: %lu", substitution_events);
-  env_log_log(env, "number of insertion events: %lu", insertion_events);
-  env_log_log(env, "number of deletion events: %lu", deletion_events);
+  log_log("total number of mutation events: %lu", total_events);
+  log_log("number of substitution events: %lu", substitution_events);
+  log_log("number of insertion events: %lu", insertion_events);
+  log_log("number of deletion events: %lu", deletion_events);
   return mutated_seq;
 }
 

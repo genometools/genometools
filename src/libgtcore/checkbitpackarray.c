@@ -20,8 +20,9 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include "libgtcore/ensure.h"
 #include "libgtcore/bitpackarray.h"
+#include "libgtcore/ensure.h"
+#include "libgtcore/log.h"
 
 enum {
 /*   MAX_RND_NUMS = 10, */
@@ -50,8 +51,7 @@ int bitPackArray_unit_test(Env *env)
     else
       mask = ~((~(uint32_t)0)<<bits);
 
-    env_log_log(env, "seedval = %lu, numRnd=%lu\n", seedval,
-                (long unsigned)numRnd);
+    log_log("seedval = %lu, numRnd=%lu\n", seedval, (long unsigned)numRnd);
     randSrc = env_ma_malloc(env, sizeof (uint32_t)*numRnd);
     bitStore = newBitPackArray(bits, numRnd, env);
     randCmp = env_ma_malloc(env, sizeof (uint32_t)*numRnd);
@@ -67,20 +67,20 @@ int bitPackArray_unit_test(Env *env)
       ensure(had_err, (v & mask) == r);
       if (had_err)
       {
-        env_log_log(env, "bsStoreUInt32/bpaGetUInt32: "
-                    "Expected %u, got %u, seed = %lu, i = %lu, bits=%u\n",
-                    v & mask, r, seedval, (unsigned long)i, bits);
+        log_log("bsStoreUInt32/bpaGetUInt32: "
+                "Expected %u, got %u, seed = %lu, i = %lu, bits=%u\n",
+                v & mask, r, seedval, (unsigned long)i, bits);
         env_ma_free(randSrc, env);
         env_ma_free(randCmp, env);
         deleteBitPackArray(bitStore, env);
         return had_err;
       }
     }
-    env_ma_free(randSrc, env);
-    env_ma_free(randCmp, env);
-    deleteBitPackArray(bitStore, env);
+  env_ma_free(randSrc, env);
+  env_ma_free(randCmp, env);
+  deleteBitPackArray(bitStore, env);
   }
-  env_log_log(env, "bpaStoreUInt32/bpaGetUInt32: passed\n");
+  log_log("bpaStoreUInt32/bpaGetUInt32: passed\n");
   {
     uint64_t *randSrc = NULL; /*< create random ints here for input as bit
                         *  store */
@@ -121,10 +121,10 @@ int bitPackArray_unit_test(Env *env)
       ensure(had_err, (v & mask) == r);
       if (had_err)
       {
-        env_log_log(env, "bsStoreUInt64/bpaGetUInt64: "
-                    "Expected %llu, got %llu, seed = %lu, i = %lu, bits=%u\n",
-                    (unsigned long long)(v & mask),
-                    (unsigned long long)r, seedval, (unsigned long)i, bits);
+        log_log("bsStoreUInt64/bpaGetUInt64: "
+                "Expected %llu, got %llu, seed = %lu, i = %lu, bits=%u\n",
+                (unsigned long long)(v & mask),
+                (unsigned long long)r, seedval, (unsigned long)i, bits);
         env_ma_free(randSrc, env);
         env_ma_free(randCmp, env);
         deleteBitPackArray(bitStore, env);
@@ -135,6 +135,6 @@ int bitPackArray_unit_test(Env *env)
     env_ma_free(randCmp, env);
     deleteBitPackArray(bitStore, env);
   }
-  env_log_log(env, "bpaStoreUInt64/bpaGetUInt64: passed\n");
+  log_log("bpaStoreUInt64/bpaGetUInt64: passed\n");
   return had_err;
 }

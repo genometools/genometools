@@ -18,6 +18,7 @@
 #endif
 
 #include "libgtcore/env.h"
+#include "libgtcore/log.h"
 #include "libgtcore/bitpackstring.h"
 #include "libgtcore/combinatorics.h"
 #include "libgtmatch/eis-seqblocktranslate.h"
@@ -200,8 +201,8 @@ initCompositionList(struct compList *newList, unsigned blockSize,
                                alphabetSize, newList->bitsPerSymbol, env))
         initCompositionListErrRet();
 #ifndef NDEBUG
-      env_log_log(env, "%lu",
-                  (unsigned long)newList->permutations[cmpIdx].numPermutations);
+      log_log("%lu",
+              (unsigned long)newList->permutations[cmpIdx].numPermutations);
       permSum += newList->permutations[cmpIdx].numPermutations;
 #endif
       permOffset += newList->permutations[cmpIdx].numPermutations * bitsPerPerm;
@@ -217,10 +218,10 @@ initCompositionList(struct compList *newList, unsigned blockSize,
     /* verify that the last composition is indeed the lexically maximally */
     assert(composition[0] == blockSize);
 #ifndef NDEBUG
-    env_log_log(env, "permSum=%lu, alphabetSize=%lu, blockSize=%d, "
-                "pow(alphabetSize, blockSize)=%f",
-                (unsigned long)permSum, (unsigned long)alphabetSize, blockSize,
-                pow(alphabetSize, blockSize));
+    log_log("permSum=%lu, alphabetSize=%lu, blockSize=%d, "
+            "pow(alphabetSize, blockSize)=%f",
+            (unsigned long)permSum, (unsigned long)alphabetSize, blockSize,
+            pow(alphabetSize, blockSize));
 #endif
     assert(permSum == pow(alphabetSize, blockSize));
   }

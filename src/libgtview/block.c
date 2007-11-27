@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include "libgtcore/ensure.h"
+#include "libgtcore/log.h"
 #include "libgtview/block.h"
 #include "libgtview/element.h"
 
@@ -81,9 +82,9 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
   gn_r = genome_node_get_range(gn);
   gn_type = genome_feature_get_type((GenomeFeature*) gn);
 
-  env_log_log(env, "inserting %s (%lu-%lu) into block",
-                genome_feature_type_get_cstr(gn_type),
-                gn_r.start, gn_r.end);
+  log_log("inserting %s (%lu-%lu) into block",
+          genome_feature_type_get_cstr(gn_type),
+          gn_r.start, gn_r.end);
 
   for (elem = dlist_first(block->elements); elem;
        elem = dlistelem_next(elem)) {

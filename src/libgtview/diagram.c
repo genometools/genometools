@@ -19,9 +19,10 @@
 
 #include "libgtcore/cstr.h"
 #include "libgtcore/ensure.h"
-#include "libgtcore/warning.h"
+#include "libgtcore/log.h"
 #include "libgtcore/str.h"
 #include "libgtcore/undef.h"
+#include "libgtcore/warning.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
@@ -92,10 +93,9 @@ static Block* find_block_for_type(NodeInfoElement* ni,
   assert(ni);
   for (i = 0; i < array_size(ni->blocktuples); i++) {
     BlockTuple *bt = *(BlockTuple**) array_get(ni->blocktuples, i);
-    if (bt->gft == gft)
-    {
-      env_log_log(env, "    found root block with type %s, inserting...",
-                  genome_feature_type_get_cstr(bt->gft));
+    if (bt->gft == gft) {
+      log_log("    found root block with type %s, inserting...",
+              genome_feature_type_get_cstr(bt->gft));
       block = bt->block;
       break;
     }
@@ -122,7 +122,7 @@ static void add_to_current(Diagram *d, GenomeNode *node,
   BlockTuple *bt;
   Str *caption;
 
-  env_log_log(env, "  calling add_to_current");
+  log_log("  calling add_to_current");
 
   assert(d && node);
 
@@ -158,11 +158,11 @@ static void add_to_parent(Diagram *d, GenomeNode *node,
 
   assert(d && parent && node);
 
-  env_log_log(env,"  calling add_to_parent: %s -> %s",
-            genome_feature_type_get_cstr(
-              genome_feature_get_type((GenomeFeature*) node)),
-            genome_feature_type_get_cstr(
-              genome_feature_get_type((GenomeFeature*) parent)));
+  log_log("  calling add_to_parent: %s -> %s",
+          genome_feature_type_get_cstr(
+            genome_feature_get_type((GenomeFeature*) node)),
+          genome_feature_type_get_cstr(
+            genome_feature_get_type((GenomeFeature*) parent)));
 
   par_ni = get_or_create_node_info(d, parent, env);
   ni = get_or_create_node_info(d, node, env);
@@ -192,7 +192,7 @@ static void add_to_parent(Diagram *d, GenomeNode *node,
                         env);
     array_add(par_ni->blocktuples, bt, env);
 
-    env_log_log(env, "    added %s to (%s) block for node %s",
+    log_log("    added %s to (%s) block for node %s",
                 genome_feature_type_get_cstr(
                   genome_feature_get_type((GenomeFeature*) node)),
                 genome_feature_type_get_cstr(
@@ -212,7 +212,7 @@ static void add_recursive(Diagram *d, GenomeNode *node,
   assert(d && node &&
            parent && original_node);
 
-  env_log_log(env ,"  calling add_recursive: %s (%s) -> %s (%s)",
+  log_log("  calling add_recursive: %s (%s) -> %s (%s)",
               genome_feature_type_get_cstr(
                 genome_feature_get_type((GenomeFeature*) node)),
               genome_feature_get_attribute(node,"ID"),
@@ -275,9 +275,8 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent,
     do_not_overlap =
       genome_node_direct_children_do_not_overlap_st(parent, node, env);
 
-  env_log_log(env ,"processing node: %s (%s)",
-              feature_type,
-              genome_feature_get_attribute(node, "ID" ));
+  log_log("processing node: %s (%s)", feature_type,
+          genome_feature_get_attribute(node, "ID" ));
 
   /* decide how to continue: */
   if (collapse) {
@@ -357,9 +356,10 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
   Diagram *diagram = (Diagram*) data;
   unsigned long i = 0;
 
-  if (array_size(ni->blocktuples) > 0)
-    env_log_log(env, "collecting blocks from %lu tuples...",
-                array_size(ni->blocktuples));
+  if (array_size(ni->blocktuples) > 0) {
+    log_log("collecting blocks from %lu tuples...",
+            array_size(ni->blocktuples));
+  }
 
   for (i = 0; i < array_size(ni->blocktuples); i++) {
     Track *track;
@@ -375,12 +375,12 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
       hashtable_add(diagram->tracks, cstr_dup(str_get(track_key), env), track,
                     env);
       diagram->nof_tracks++;
-      env_log_log(env , "created track: %s, diagram has now %d tracks",
-                  str_get(track_key), diagram_get_number_of_tracks(diagram));
+      log_log("created track: %s, diagram has now %d tracks",
+              str_get(track_key), diagram_get_number_of_tracks(diagram));
     }
     track_insert_block(track, bt->block, env);
-    env_log_log(env, "inserted block %s into track %s",
-                str_get(block_get_caption(bt->block)), str_get(track_key));
+    log_log("inserted block %s into track %s",
+            str_get(block_get_caption(bt->block)), str_get(track_key));
     str_delete(track_key, env);
     env_ma_free(bt, env);
   }
