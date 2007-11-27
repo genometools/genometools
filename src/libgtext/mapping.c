@@ -20,6 +20,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 #include "libgtcore/cstr.h"
+#include "libgtcore/ma.h"
 #include "libgtext/mapping.h"
 
 struct Mapping {
@@ -38,7 +39,7 @@ Mapping* mapping_new(Str *mapping_file, const char *global_name,
   env_error_check(env);
   assert(mapping_file && global_name);
   /* alloc */
-  m = env_ma_malloc(env, sizeof (Mapping));
+  m = ma_malloc(sizeof (Mapping));
   m->mapping_file = str_ref(mapping_file);
   m->global = cstr_dup(global_name, env);
   m->type = type;
@@ -210,7 +211,7 @@ void mapping_delete(Mapping *m, Env *env)
 {
   if (!m) return;
   str_delete(m->mapping_file, env);
-  env_ma_free(m->global, env);
+  ma_free(m->global);
   if (m->L) lua_close(m->L);
-  env_ma_free(m, env);
+  ma_free(m);
 }

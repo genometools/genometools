@@ -22,6 +22,7 @@
 #include <string.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/parseutils.h"
 #include "libgtcore/splitter.h"
 #include "libgtcore/undef.h"
@@ -54,7 +55,7 @@ static AutomaticSequenceRegion* automatic_sequence_region_new(Env *env)
 {
   AutomaticSequenceRegion *auto_sr;
   env_error_check(env);
-  auto_sr = env_ma_malloc(env, sizeof (AutomaticSequenceRegion));
+  auto_sr = ma_malloc(sizeof (AutomaticSequenceRegion));
   auto_sr->genome_features = array_new(sizeof (GenomeFeature*), env);
   return auto_sr;
 }
@@ -70,7 +71,7 @@ static void automatic_sequence_region_delete(AutomaticSequenceRegion *auto_sr,
                        env);
   }
   array_delete(auto_sr->genome_features, env);
-  env_ma_free(auto_sr, env);
+  ma_free(auto_sr);
 }
 
 typedef struct {
@@ -84,7 +85,7 @@ static SimpleSequenceRegion* simple_sequence_region_new(const char *seqid,
                                                         unsigned long line,
                                                         Env *env)
 {
-  SimpleSequenceRegion *ssr = env_ma_malloc(env, sizeof *ssr);
+  SimpleSequenceRegion *ssr = ma_malloc(sizeof *ssr);
   ssr->seqid_str = str_new_cstr(seqid, env);
   ssr->range = range;
   ssr->line = line;
@@ -95,12 +96,12 @@ static void simple_sequence_region_delete(SimpleSequenceRegion *ssr, Env *env)
 {
   if (!ssr) return;
   str_delete(ssr->seqid_str, env);
-  env_ma_free(ssr, env);
+  ma_free(ssr);
 }
 
 GFF3Parser* gff3parser_new(bool checkids, Env *env)
 {
-  GFF3Parser *gff3_parser = env_ma_malloc(env, sizeof (GFF3Parser));
+  GFF3Parser *gff3_parser = ma_malloc(sizeof (GFF3Parser));
   gff3_parser->id_to_genome_node_mapping = hashtable_new(HASH_STRING,
                                                          env_ma_free_func,
                                                          (FreeFunc)
@@ -397,7 +398,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                     ID_STRING, id, line_number, filename,
                     genome_node_get_line_number(gn));
       had_err = -1;
-      env_ma_free(id, env);
+      ma_free(id);
     }
     else {
       gff3_parser->incomplete_node = true;
@@ -406,7 +407,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     }
   }
   else
-    env_ma_free(id, env);
+    ma_free(id);
 
   if (!had_err) {
     for (i = 0; i < splitter_size(parents_splitter); i++) {
@@ -724,5 +725,5 @@ void gff3parser_delete(GFF3Parser *gff3_parser, Env *env)
   hashtable_delete(gff3_parser->source_to_str_mapping, env);
   hashtable_delete(gff3_parser->undefined_sequence_regions, env);
   mapping_delete(gff3_parser->offset_mapping, env);
-  env_ma_free(gff3_parser, env);
+  ma_free(gff3_parser);
 }

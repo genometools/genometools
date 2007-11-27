@@ -21,6 +21,7 @@
 */
 
 #include <string.h>
+#include "libgtcore/ma.h"
 #include "libgtcore/msort.h"
 #include "libgtcore/xansi.h"
 
@@ -71,9 +72,9 @@ void msort_r(void *base, size_t nmemb, size_t size, void *comparinfo,
              int (*compar)(void *, const void *, const void *), Env *env)
 {
   void *buf;
-  buf = env_ma_malloc(env, size * nmemb);
+  buf = ma_malloc(size * nmemb);
   msort_r_withbuf (base, nmemb, size, comparinfo, compar, buf);
-  env_ma_free(buf, env);
+  ma_free(buf);
 }
 
 int non_r_cmpfunc(void *compar, const void *a, const void *b)

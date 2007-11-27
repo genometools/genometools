@@ -27,9 +27,9 @@
 
 #include <assert.h>
 #include <stdlib.h>
-
-#include "bitpackstring.h"
+#include "libgtcore/bitpackstring.h"
 #include "libgtcore/env.h"
+#include "libgtcore/ma.h"
 
 struct BitPackArray
 {
@@ -49,13 +49,13 @@ typedef struct BitPackArray BitPackArray;
 static inline BitPackArray *
 newBitPackArray(unsigned bits, BitOffset numValues, Env *env)
 {
-  BitPackArray *newBPA = env_ma_malloc(env, sizeof (*newBPA));
+  BitPackArray *newBPA = ma_malloc(sizeof (*newBPA));
   if (newBPA)
   {
-    if (!(newBPA->store = env_ma_malloc(env, bitElemsAllocSize(bits*numValues)
-                                        * sizeof (BitElem))))
+    if (!(newBPA->store = ma_malloc(bitElemsAllocSize(bits*numValues)
+                                    * sizeof (BitElem))))
     {
-      env_ma_free(newBPA, env);
+      ma_free(newBPA);
       return NULL;
     }
     newBPA->bitsPerElem = bits;
@@ -67,8 +67,8 @@ newBitPackArray(unsigned bits, BitOffset numValues, Env *env)
 static inline void
 deleteBitPackArray(BitPackArray *bpa, Env *env)
 {
-  env_ma_free(bpa->store, env);
-  env_ma_free(bpa, env);
+  ma_free(bpa->store);
+  ma_free(bpa);
 }
 
 /**

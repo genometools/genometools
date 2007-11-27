@@ -18,6 +18,7 @@
 #include <assert.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/stringdistri.h"
 
 struct StringDistri {
@@ -29,7 +30,7 @@ StringDistri* stringdistri_new(Env *env)
 {
   StringDistri *sd;
   env_error_check(env);
-  sd = env_ma_malloc(env, sizeof *sd);
+  sd = ma_malloc(sizeof *sd);
   sd->hashdist = hashtable_new(HASH_STRING, env_ma_free_func, env_ma_free_func,
                                env);
   sd->num_of_occurrences = 0;
@@ -42,7 +43,7 @@ void stringdistri_add(StringDistri *d, const char *key, Env *env)
   assert(d && key);
   valueptr = hashtable_get(d->hashdist, (void*) key);
   if (!valueptr) {
-    valueptr = env_ma_malloc(env, sizeof *valueptr);
+    valueptr = ma_malloc(sizeof *valueptr);
     *valueptr = 1;
     hashtable_add(d->hashdist, cstr_dup(key, env), valueptr, env);
   }
@@ -90,5 +91,5 @@ void stringdistri_delete(StringDistri *d, Env *env)
 {
   if (!d) return;
   hashtable_delete(d->hashdist, env);
-  env_ma_free(d, env);
+  ma_free(d);
 }

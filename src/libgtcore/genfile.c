@@ -20,6 +20,7 @@
 #include <string.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/genfile.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/xbzlib.h"
 #include "libgtcore/xzlib.h"
@@ -80,7 +81,7 @@ GenFile* genfile_open(GenFileMode genfilemode, const char *path,
 {
   GenFile *genfile;
   assert(path && mode);
-  genfile = env_ma_calloc(env, 1, sizeof (GenFile));
+  genfile = ma_calloc(1, sizeof (GenFile));
   genfile->mode = genfilemode;
   switch (genfilemode) {
     case GFM_UNCOMPRESSED:
@@ -116,7 +117,7 @@ GenFile* genfile_xopen_w_gfmode(GenFileMode genfilemode, const char *path,
 {
   GenFile *genfile;
   assert(path && mode);
-  genfile = env_ma_calloc(env, 1, sizeof (GenFile));
+  genfile = ma_calloc(1, sizeof (GenFile));
   genfile->mode = genfilemode;
   switch (genfilemode) {
     case GFM_UNCOMPRESSED:
@@ -147,7 +148,7 @@ GenFile* genfile_new(FILE *fp, Env *env)
   GenFile *genfile;
   env_error_check(env);
   assert(fp);
-  genfile = env_ma_calloc(env, 1, sizeof (GenFile));
+  genfile = ma_calloc(1, sizeof (GenFile));
   genfile->mode = GFM_UNCOMPRESSED;
   genfile->fileptr.file = fp;
   return genfile;
@@ -338,9 +339,9 @@ void genfile_xrewind(GenFile *genfile)
 void genfile_delete(GenFile *genfile, Env *env)
 {
   if (!genfile) return;
-  env_ma_free(genfile->orig_path, env);
-  env_ma_free(genfile->orig_mode, env);
-  env_ma_free(genfile, env);
+  ma_free(genfile->orig_path);
+  ma_free(genfile->orig_mode);
+  ma_free(genfile);
 }
 
 /* the following function can only fail, if no error is set. This makes sure,

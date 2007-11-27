@@ -18,6 +18,7 @@
 #include "libgtcore/genfile.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/fa.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/mmap.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/xbzlib.h"
@@ -51,19 +52,19 @@ typedef struct {
 
 static void free_FAFileInfo(FAFileInfo *fileinfo, Env *env)
 {
-  env_ma_free(fileinfo, env);
+  ma_free(fileinfo);
 }
 
 static void free_FAMapInfo(FAMapInfo *mapinfo, Env *env)
 {
-  env_ma_free(mapinfo, env);
+  ma_free(mapinfo);
 }
 
 FA* fa_new(Env *env)
 {
   FA *fa;
   env_error_check(env);
-  fa = env_ma_calloc(env, 1, sizeof (FA));
+  fa = ma_calloc(1, sizeof (FA));
   fa->file_pointer = hashtable_new(HASH_DIRECT, NULL,
                                    (FreeFunc) free_FAFileInfo, env);
   fa->memory_maps = hashtable_new(HASH_DIRECT, NULL,
@@ -79,7 +80,7 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
   void  *fp = NULL;
   FAFileInfo *fileinfo;
   assert(fa && path && mode);
-  fileinfo = env_ma_malloc(fa->env, sizeof (FAFileInfo));
+  fileinfo = ma_malloc(sizeof (FAFileInfo));
   fileinfo->filename = filename;
   fileinfo->line = line;
   switch (genfilemode) {
@@ -97,7 +98,7 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
   if (fp)
     hashtable_add(fa->file_pointer, fp, fileinfo, fa->env);
   else
-    env_ma_free(fileinfo, fa->env);
+    ma_free(fileinfo);
   return fp;
 }
 
@@ -235,7 +236,7 @@ FILE* fa_xtmpfile(FA *fa, char *temp, const char *filename, int line)
   FAFileInfo *fileinfo;
   FILE *fp;
   assert(fa && temp);
-  fileinfo = env_ma_malloc(fa->env, sizeof (FAFileInfo));
+  fileinfo = ma_malloc(sizeof (FAFileInfo));
   fileinfo->filename = filename;
   fileinfo->line = line;
   fp = xtmpfile(temp);
@@ -250,7 +251,7 @@ static void* mmap_generic(FA *fa, const char *path, size_t *len, bool write,
   FAMapInfo *mapinfo;
   void *map;
   assert(fa && path);
-  mapinfo = env_ma_malloc(fa->env, sizeof (FAMapInfo));
+  mapinfo = ma_malloc(sizeof (FAMapInfo));
   mapinfo->filename = filename;
   mapinfo->line = line;
   if (write) {
@@ -268,7 +269,7 @@ static void* mmap_generic(FA *fa, const char *path, size_t *len, bool write,
       *len = mapinfo->len;
   }
   else
-    env_ma_free(mapinfo, fa->env);
+    ma_free(mapinfo);
   return map;
 }
 
@@ -380,5 +381,5 @@ void fa_delete(FA *fa, Env *env)
   if (!fa) return;
   hashtable_delete(fa->file_pointer, env);
   hashtable_delete(fa->memory_maps, env);
-  env_ma_free(fa, env);
+  ma_free(fa);
 }

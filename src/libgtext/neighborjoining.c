@@ -16,6 +16,7 @@
 */
 
 #include "libgtcore/bittab.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
 #include "libgtext/neighborjoining.h"
 
@@ -49,7 +50,7 @@ static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
   nj->numofnodes = 2 * num_of_taxa - 2;
   nj->finalnodeA = UNDEF_ULONG;
   nj->finalnodeB = UNDEF_ULONG;
-  nj->nodes      = env_ma_malloc(env, sizeof (NJnode) * nj->numofnodes);
+  nj->nodes      = ma_malloc(sizeof (NJnode) * nj->numofnodes);
 
   for (i = 0; i < nj->numofnodes; i++) {
     nj->nodes[i].leftdaughter  = UNDEF_ULONG;
@@ -58,7 +59,7 @@ static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
     nj->nodes[i].rightdist     = UNDEF_DOUBLE;
 
     if (i > 0) {
-      nj->nodes[i].distances = env_ma_malloc(env, sizeof (double) * i);
+      nj->nodes[i].distances = ma_malloc(sizeof (double) * i);
       for (j = 0; j < i; j++) {
         if (i < num_of_taxa) {
           retval = distfunc(i, j, data, env);
@@ -118,7 +119,7 @@ static void neighborjoining_compute(NeighborJoining *nj, Env *env)
   activenodes = nj->num_of_taxa;
 
   /* init the r table */
-  rtab = env_ma_malloc(env, sizeof (double) * nj->numofnodes);
+  rtab = ma_malloc(sizeof (double) * nj->numofnodes);
 
   /* the neighbor joining takes num_of_taxa - 2 steps */
   for (step = 0; step < nj->num_of_taxa - 2; step++) {
@@ -179,7 +180,7 @@ static void neighborjoining_compute(NeighborJoining *nj, Env *env)
   nj->finaldist  = nj->nodes[nj->finalnodeB].distances[nj->finalnodeA];
 
   bittab_delete(nodetab, env);
-  env_ma_free(rtab, env);
+  ma_free(rtab);
 }
 
 NeighborJoining* neighborjoining_new(unsigned long num_of_taxa, void *data,
@@ -187,7 +188,7 @@ NeighborJoining* neighborjoining_new(unsigned long num_of_taxa, void *data,
 {
   NeighborJoining *nj;
   assert(num_of_taxa && distfunc);
-  nj = env_ma_malloc(env, sizeof (NeighborJoining));
+  nj = ma_malloc(sizeof (NeighborJoining));
   neighborjoining_init(nj, num_of_taxa, data, distfunc, env);
   neighborjoining_compute(nj, env);
   return nj;
@@ -225,7 +226,7 @@ void neighborjoining_delete(NeighborJoining *nj, Env *env)
   unsigned long i;
   if (!nj) return;
   for (i = 1; i < nj->numofnodes; i++)
-    env_ma_free(nj->nodes[i].distances, env);
-  env_ma_free(nj->nodes, env);
-  env_ma_free(nj, env);
+    ma_free(nj->nodes[i].distances);
+  ma_free(nj->nodes);
+  ma_free(nj);
 }

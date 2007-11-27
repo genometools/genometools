@@ -17,6 +17,7 @@
 
 #include "libgtcore/cstr.h"
 #include "libgtcore/env.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/splitter.h"
 #include "libgtcore/versionfunc.h"
@@ -74,7 +75,7 @@ static void proc_gt_env_options(Env *env)
       break;
     case OPTIONPARSER_REQUESTS_EXIT: break;
   }
-  env_ma_free(env_options, env);
+  ma_free(env_options);
   splitter_delete(splitter, env);
   cstr_array_delete(argv, env);
 }
@@ -124,7 +125,7 @@ int env_delete(Env *env)
   fa_fptr_rval = fa_check_fptr_leak(env->fa, env);
   fa_mmap_rval = fa_check_mmap_leak(env->fa, env);
   fa_delete(env->fa, env);
-  ma_rval = ma_check_space_leak(env);
+  ma_rval = ma_check_space_leak();
   ma_clean();
   free(env);
   return fa_fptr_rval || fa_mmap_rval || ma_rval;

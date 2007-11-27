@@ -18,6 +18,7 @@
 #include <string.h>
 #include "libgtcore/array.h"
 #include "libgtcore/ensure.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/str.h"
 #include "libgtext/reverse.h"
 #include "libgtext/splicedseq.h"
@@ -30,7 +31,7 @@ struct Splicedseq {
 
 Splicedseq* splicedseq_new(Env *env)
 {
-  Splicedseq *ss = env_ma_malloc(env, sizeof (Splicedseq));
+  Splicedseq *ss = ma_malloc(sizeof (Splicedseq));
   ss->splicedseq = str_new(env);
   ss->positionmapping = array_new(sizeof (unsigned long), env);
   ss->forward = true;
@@ -143,5 +144,5 @@ void splicedseq_delete(Splicedseq *ss, Env *env)
   if (!ss) return;
   str_delete(ss->splicedseq, env);
   array_delete(ss->positionmapping, env);
-  env_ma_free(ss, env);
+  ma_free(ss);
 }

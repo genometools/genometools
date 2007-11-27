@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/ma.h"
 #include "libgtext/genome_node_iterator.h"
 #include "libgtext/genome_node_rep.h"
 
@@ -27,7 +28,7 @@ GenomeNodeIterator* genome_node_iterator_new(GenomeNode *gn, Env *env)
   GenomeNodeIterator *gni;
   env_error_check(env);
   assert(gn);
-  gni = env_ma_malloc(env, sizeof *gni);
+  gni = ma_malloc(sizeof *gni);
   gni->node_stack = array_new(sizeof (GenomeNode*), env);
   array_add(gni->node_stack, gn, env);
   return gni;
@@ -76,5 +77,5 @@ void genome_node_iterator_delete(GenomeNodeIterator *gni, Env *env)
 {
   if (!gni) return;
   array_delete(gni->node_stack, env);
-  env_ma_free(gni, env);
+  ma_free(gni);
 }

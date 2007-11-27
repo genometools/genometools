@@ -16,6 +16,7 @@
 */
 
 #include <assert.h>
+#include "libgtcore/ma.h"
 #include "libgtcore/seq.h"
 #include "libgtcore/xansi.h"
 
@@ -32,7 +33,7 @@ Seq* seq_new(const char *seq, unsigned long seqlen, Alpha *seqalpha, Env *env)
 {
   Seq *s;
   assert(seq && seqalpha);
-  s = env_ma_calloc(env, 1, sizeof (Seq));
+  s = ma_calloc(1, sizeof (Seq));
   s->seq = (char*) seq;
   s->seqlen = seqlen;
   s->seqalpha = alpha_ref(seqalpha);
@@ -56,7 +57,7 @@ void seq_set_description_own(Seq *s, char *desc, Env *env)
 {
   assert(s);
   if (s->description && s->own_description)
-    env_ma_free(s->description, env);
+    ma_free(s->description);
   s->description = desc;
   s->own_description = true;
 }
@@ -77,7 +78,7 @@ const char* seq_get_encoded(Seq *s, Env *env)
 {
   assert(s);
   if (!s->encoded_seq) {
-    s->encoded_seq = env_ma_malloc(env, sizeof (char) * (s->seqlen+1));
+    s->encoded_seq = ma_malloc(sizeof (char) * (s->seqlen+1));
     alpha_encode_seq(s->seqalpha, s->encoded_seq, (char*) s->seq, s->seqlen);
     s->encoded_seq[s->seqlen] = '\0';
   }
@@ -100,10 +101,10 @@ void seq_delete(Seq *s, Env *env)
 {
   if (!s) return;
   if (s->own_seq)
-    env_ma_free(s->seq, env);
+    ma_free(s->seq);
   if (s->own_description)
-    env_ma_free(s->description, env);
-  env_ma_free(s->encoded_seq, env);
+    ma_free(s->description);
+  ma_free(s->encoded_seq);
   alpha_delete(s->seqalpha, env);
-  env_ma_free(s, env);
+  ma_free(s);
 }

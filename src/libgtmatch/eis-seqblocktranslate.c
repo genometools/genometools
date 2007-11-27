@@ -13,14 +13,16 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
 #ifndef NDEBUG
 #include <math.h>
 #endif
 
-#include "libgtcore/env.h"
-#include "libgtcore/log.h"
 #include "libgtcore/bitpackstring.h"
 #include "libgtcore/combinatorics.h"
+#include "libgtcore/env.h"
+#include "libgtcore/log.h"
+#include "libgtcore/ma.h"
 #include "libgtmatch/eis-seqblocktranslate.h"
 
 #if 1
@@ -137,11 +139,11 @@ printComposition(FILE *fp, const unsigned *composition, Symbol numSyms,
       unsigned i;                                                       \
       for (i = 0; i < cmpIdx; ++i)                                      \
         destructPermutationsList(newList->permutations + i, env);       \
-      env_ma_free(newList->permutations, env);                          \
+      ma_free(newList->permutations);                                   \
     }                                                                   \
     if (newList->catCompsPerms)                                         \
-      env_ma_free(newList->catCompsPerms, env);                         \
-    if (composition) env_ma_free(composition, env);                     \
+      ma_free(newList->catCompsPerms);                                  \
+    if (composition) ma_free(composition);                              \
     return 0;                                                           \
   } while (0)
 
@@ -157,8 +159,7 @@ initCompositionList(struct compList *newList, unsigned blockSize,
   assert(env && newList);
   newList->permutations = NULL;
   newList->catCompsPerms = NULL;
-  if (!(composition =
-       env_ma_malloc(env, sizeof (composition[0]) * blockSize)))
+  if (!(composition = ma_malloc(sizeof (composition[0]) * blockSize)))
     initCompositionListErrRet();
   bitsPerComp = alphabetSize * (bitsPerCount = requiredUIntBits(blockSize));
   newList->bitsPerCount = bitsPerCount;
@@ -174,10 +175,9 @@ initCompositionList(struct compList *newList, unsigned blockSize,
       * sizeof (BitElem);
     if (size == SIZE_MAX)
       initCompositionListErrRet();
-    newList->catCompsPerms = env_ma_malloc(env, size);
+    newList->catCompsPerms = ma_malloc(size);
   }
-  newList->permutations =
-    env_ma_calloc(env, sizeof (struct permList), numCompositions);
+  newList->permutations = ma_calloc(sizeof (struct permList), numCompositions);
   {
     unsigned symRMNZ;
     BitOffset offset = 0, permOffset =
@@ -227,7 +227,7 @@ initCompositionList(struct compList *newList, unsigned blockSize,
   }
   newList->maxPermCount = maxNumPermutations;
   newList->maxPermIdxBits = requiredUInt64Bits(maxNumPermutations - 1);
-  env_ma_free(composition, env);
+  ma_free(composition);
   return 1;
 }
 
@@ -239,20 +239,19 @@ destructCompositionList(struct compList *clist, Env *env)
     for (i = 0; i < clist->numCompositions; ++i)
       destructPermutationsList(clist->permutations + i, env);
   }
-  env_ma_free(clist->permutations, env);
-  env_ma_free(clist->catCompsPerms, env);
+  ma_free(clist->permutations);
+  ma_free(clist->catCompsPerms);
 }
 
 extern struct compList *
 newCompositionList(unsigned blockSize, unsigned alphabetSize, Env *env)
 {
   struct compList *newList = NULL;
-  if (!(newList =
-       env_ma_calloc(env, 1, sizeof (struct compList))))
+  if (!(newList = ma_calloc(1, sizeof (struct compList))))
     return NULL;
   if (!initCompositionList(newList, blockSize, alphabetSize, env))
   {
-    env_ma_free(newList, env);
+    ma_free(newList);
     return NULL;
   }
   return newList;
@@ -262,7 +261,7 @@ extern void
 deleteCompositionList(struct compList *clist, Env *env)
 {
   destructCompositionList(clist, env);
-  env_ma_free(clist, env);
+  ma_free(clist);
 }
 
 #if DEBUG > 1
@@ -321,8 +320,7 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
     permutation->permIdxBits = 0;
   Symbol *currentPermutation;
   BitOffset bitsPerPermutation = bitsPerSymbol * blockSize;
-  if (!(currentPermutation = env_ma_malloc(env,
-         sizeof (Symbol) * blockSize)))
+  if (!(currentPermutation = ma_malloc(sizeof (Symbol) * blockSize)))
     return -1;
   permutation->catPermsOffset = permOffset;
   initPermutation(currentPermutation, composition, blockSize, alphabetSize);
@@ -348,14 +346,14 @@ initPermutationsList(const unsigned *composition, struct permList *permutation,
       nextPermutation(currentPermutation, blockSize);
     } while (1);
   }
-  env_ma_free(currentPermutation, env);
+  ma_free(currentPermutation);
   return 0;
 }
 
 static void
 destructPermutationsList(struct permList *permutation, Env *env)
 {
-/*   env_ma_free(permutation->catPerms, env); */
+/*   ma_free(permutation->catPerms); */
 }
 
 static void
@@ -451,9 +449,8 @@ block2IndexPair(const struct compList *compositionTable,
     permCompBitString = permCompPA;
   else
     permCompBitString =
-      env_ma_malloc(env,
-                    bitElemsAllocSize(bitsPerComposition + bitsPerPermutation)
-                    * sizeof (BitElem));
+      ma_malloc(bitElemsAllocSize(bitsPerComposition + bitsPerPermutation)
+                * sizeof (BitElem));
   {
     /* first compute composition from block */
     size_t i;
@@ -464,8 +461,7 @@ block2IndexPair(const struct compList *compositionTable,
       memset(composition, 0, sizeof (composition[0])*alphabetSize);
     }
     else
-      composition = env_ma_calloc(env, sizeof (composition[0]),
-                                  alphabetSize);
+      composition = ma_calloc(sizeof (composition[0]), alphabetSize);
     for (i = 0; i < blockSize; ++i)
     {
       ++composition[block[i]];
@@ -473,7 +469,7 @@ block2IndexPair(const struct compList *compositionTable,
     bsStoreUniformUIntArray(permCompBitString, 0, bitsPerCount,
                             alphabetSize, composition);
     if (!compPA)
-      env_ma_free(composition, env);
+      ma_free(composition);
   }
   {
     /* do binary search for composition (simplified because the list
@@ -533,6 +529,6 @@ block2IndexPair(const struct compList *compositionTable,
         idxOutput[1] = 0;
   }
   if (!permCompPA)
-    env_ma_free(permCompBitString, env);
+    ma_free(permCompBitString);
   return 0;
 }

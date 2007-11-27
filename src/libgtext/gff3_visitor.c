@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
 #include "libgtext/genome_node.h"
 #include "libgtext/genome_visitor_rep.h"
 #include "libgtext/gff3_output.h"
@@ -62,7 +63,7 @@ static void gff3_visitor_free(GenomeVisitor *gv, Env *env)
 {
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gff3_visitor);
-  env_ma_free(gff3_visitor->id_counter, env);
+  ma_free(gff3_visitor->id_counter);
   hashtable_delete(gff3_visitor->genome_feature_to_id_array, env);
   hashtable_delete(gff3_visitor->genome_feature_to_unique_id_str, env);
 }
@@ -270,9 +271,8 @@ GenomeVisitor* gff3_visitor_new(GenFile *outfp, Env *env)
   GenomeVisitor *gv = genome_visitor_create(gff3_visitor_class(), env);
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   gff3_visitor->version_string_shown = false;
-  gff3_visitor->id_counter = env_ma_calloc(env,
-                                          genome_feature_type_num_of_features(),
-                                          sizeof (unsigned long));
+  gff3_visitor->id_counter = ma_calloc(genome_feature_type_num_of_features(),
+                                       sizeof (unsigned long));
   gff3_visitor->genome_feature_to_id_array = hashtable_new(HASH_DIRECT, NULL,
                                                            (FreeFunc)
                                                            array_delete, env);

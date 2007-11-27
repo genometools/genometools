@@ -30,6 +30,7 @@
 #include "libgtcore/env.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/log.h"
+#include "libgtcore/ma.h"
 
 enum {
 /*   MAX_RND_NUMS = 10, */
@@ -62,10 +63,10 @@ genBitCount(uint16_t v)
 
 #define freeResourcesAndReturn(retval) \
   do {                                 \
-    env_ma_free(randSrc, env);         \
-    env_ma_free(randCmp, env);         \
-    env_ma_free(bitStore, env);        \
-    env_ma_free(bitStoreCopy, env);    \
+    ma_free(randSrc);                  \
+    ma_free(randCmp);                  \
+    ma_free(bitStore);                 \
+    ma_free(bitStoreCopy);             \
     return retval;                     \
   } while (0)
 
@@ -93,12 +94,10 @@ bitPackStringInt16_unit_test(Env *env)
           (long unsigned)offsetStart, (long unsigned)numRnd);
   {
     BitOffset numBits = sizeof (uint16_t) * CHAR_BIT * numRnd + offsetStart;
-    randSrc = env_ma_malloc(env, sizeof (uint16_t)*numRnd);
-    bitStore = env_ma_malloc(env, bitElemsAllocSize(numBits)
-                             * sizeof (BitElem));
-    bitStoreCopy = env_ma_calloc(env, bitElemsAllocSize(numBits),
-                                 sizeof (BitElem));
-    randCmp = env_ma_malloc(env, sizeof (uint16_t)*numRnd);
+    randSrc = ma_malloc(sizeof (uint16_t)*numRnd);
+    bitStore = ma_malloc(bitElemsAllocSize(numBits) * sizeof (BitElem));
+    bitStoreCopy = ma_calloc(bitElemsAllocSize(numBits), sizeof (BitElem));
+    randCmp = ma_malloc(sizeof (uint16_t)*numRnd);
   }
   /* first test unsigned types */
   log_log("bsStoreUInt16/bsGetUInt16: ");

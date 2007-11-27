@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <stdarg.h>
 #include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/msort.h"
 #include "libgtcore/queue.h"
 #include "libgtext/genome_node_rep.h"
@@ -81,7 +82,7 @@ GenomeNode* genome_node_create(const GenomeNodeClass *gnc, Str *filename,
 {
   GenomeNode *gn;
   assert(gnc && gnc->size);
-  gn                  = env_ma_malloc(env, gnc->size);
+  gn                  = ma_malloc(gnc->size);
   gn->c_class         = gnc;
   gn->filename        = filename ? str_ref(filename)
                                  : str_new_cstr("generated", env);
@@ -574,7 +575,7 @@ void genome_node_delete(GenomeNode *gn, Env *env)
   if (gn->c_class->free) gn->c_class->free(gn, env);
   str_delete(gn->filename, env);
   dlist_delete(gn->children, env);
-  env_ma_free(gn, env);
+  ma_free(gn);
 }
 
 static int free_genome_node(GenomeNode *gn, /*@unused@*/ void *data, Env *env)

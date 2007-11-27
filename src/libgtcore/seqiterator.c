@@ -42,7 +42,7 @@ SeqIterator* seqiterator_new(const StrArray *filenametab,
 {
   SeqIterator *seqit;
   env_error_check(env);
-  seqit = env_ma_malloc(env, sizeof (SeqIterator));
+  seqit = ma_malloc(sizeof (SeqIterator));
   INITARRAY(&seqit->sequencebuffer, Uchar);
   seqit->descptr = queue_new(env);
   seqit->fb = fastabuffer_new(filenametab,
@@ -158,5 +158,5 @@ void seqiterator_delete(SeqIterator *seqit, Env *env)
   fastabuffer_delete(seqit->fb, env);
   FREEARRAY(&seqit->sequencebuffer, Uchar);
   seqit->currentread = seqit->maxread;
-  env_ma_free(seqit, env);
+  ma_free(seqit);
 }

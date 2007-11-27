@@ -18,6 +18,7 @@
 #include <stdarg.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/error.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/xansi.h"
 
 struct Error {
@@ -69,7 +70,7 @@ const char* error_get(const Error *e)
 void error_set_progname(Error *e, const char *progname, Env *env)
 {
   assert(e && progname);
-  env_ma_free(e->progname, env);
+  ma_free(e->progname);
   e->progname = cstr_dup(progname, env);
 }
 

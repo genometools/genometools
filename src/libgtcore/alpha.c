@@ -19,6 +19,7 @@
 #include <limits.h>
 #include <string.h>
 #include "libgtcore/alpha.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/xansi.h"
 
@@ -39,7 +40,7 @@ struct Alpha {
 
 Alpha* alpha_new(Env *env)
 {
-  Alpha *a = env_ma_calloc(env, 1, sizeof (Alpha));
+  Alpha *a = ma_calloc(1, sizeof (Alpha));
   memset(a->code_to_character_map, UNDEF_UCHAR, UCHAR_MAX);
   memset(a->character_to_code_map, UNDEF_UCHAR, UCHAR_MAX);
   return a;
@@ -180,5 +181,5 @@ void alpha_delete(Alpha *a, Env *env)
 {
   if (!a) return;
   if (a->reference_count) { a->reference_count--; return; }
-  env_ma_free(a, env);
+  ma_free(a);
 }

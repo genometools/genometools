@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "libgtcore/cstr.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/xansi.h"
 
 char* cstr_dup(const char *cstr, Env *env)
@@ -26,7 +27,7 @@ char* cstr_dup(const char *cstr, Env *env)
   char *copy;
   assert(cstr);
   size = strlen(cstr) + 1;
-  copy = env_ma_malloc(env, size);
+  copy = ma_malloc(size);
   memcpy(copy, cstr, size);
   return copy;
 }
@@ -67,9 +68,9 @@ char** cstr_array_prefix_first(const char **cstr_array, const char *p, Env *env)
   char **a;
   assert(cstr_array && p);
   a_len = cstr_array_size(cstr_array);
-  a = env_ma_malloc(env, sizeof (char*) * (a_len + 1));
+  a = ma_malloc(sizeof (char*) * (a_len + 1));
   f_len = strlen(p) + strlen(cstr_array[0]) + 2; /* blank + '\0' */
-  a[0] = env_ma_malloc(env, sizeof (char) * f_len);
+  a[0] = ma_malloc(sizeof (char) * f_len);
   (void) snprintf(a[0], f_len, "%s %s", p, cstr_array[0]);
   for (i = 1; i < a_len; i++)
     a[i] = cstr_dup(cstr_array[i], env);
@@ -83,7 +84,7 @@ char** cstr_array_preprend(const char **cstr_array, const char *p, Env *env)
   char **a;
   assert(cstr_array && p);
   a_len = cstr_array_size(cstr_array);
-  a = env_ma_malloc(env, sizeof (char*) * (a_len + 2));
+  a = ma_malloc(sizeof (char*) * (a_len + 2));
   a[0] = cstr_dup(p, env);
   for (i = 0; i < a_len; i++)
     a[i+1] = cstr_dup(cstr_array[i], env);
@@ -128,6 +129,6 @@ void cstr_array_delete(char **cstr_array, Env *env)
   unsigned long i = 0;
   if (!cstr_array) return;
   while (cstr_array[i])
-    env_ma_free(cstr_array[i++], env);
-  env_ma_free(cstr_array, env);
+    ma_free(cstr_array[i++]);
+  ma_free(cstr_array);
 }

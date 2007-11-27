@@ -19,31 +19,30 @@
 #define ARRAY2DIM_H
 
 #include "libgtcore/env.h"
+#include "libgtcore/ma.h"
 
-#define array2dim_malloc(ARRAY2DIM, ROWS, COLUMNS, TYPE, ENV)                 \
-        {                                                                     \
-          unsigned long a2d_i;                                                \
-          ARRAY2DIM = env_ma_malloc(ENV, sizeof (TYPE*) * (ROWS));            \
-          (ARRAY2DIM)[0] = env_ma_malloc(ENV,                                 \
-                                         sizeof (TYPE) * (ROWS) * (COLUMNS)); \
-          for (a2d_i = 1; a2d_i < (ROWS); a2d_i++)                            \
-            (ARRAY2DIM)[a2d_i] = (ARRAY2DIM)[a2d_i-1] + (COLUMNS);            \
+#define array2dim_malloc(ARRAY2DIM, ROWS, COLUMNS, TYPE)                  \
+        {                                                                 \
+          unsigned long a2d_i;                                            \
+          ARRAY2DIM = ma_malloc(sizeof (TYPE*) * (ROWS));                 \
+          (ARRAY2DIM)[0] = ma_malloc(sizeof (TYPE) * (ROWS) * (COLUMNS)); \
+          for (a2d_i = 1; a2d_i < (ROWS); a2d_i++)                        \
+            (ARRAY2DIM)[a2d_i] = (ARRAY2DIM)[a2d_i-1] + (COLUMNS);        \
         }
 
-#define array2dim_calloc(ARRAY2DIM, ROWS, COLUMNS, TYPE, ENV)                 \
-        {                                                                     \
-          unsigned long a2d_i;                                                \
-          ARRAY2DIM = env_ma_malloc(ENV, sizeof (TYPE*) * (ROWS));            \
-          (ARRAY2DIM)[0] = env_ma_calloc(ENV, (ROWS) * (COLUMNS),             \
-                                         sizeof (TYPE));                      \
-          for (a2d_i = 1; a2d_i < (ROWS); a2d_i++)                            \
-            (ARRAY2DIM)[a2d_i] = (ARRAY2DIM)[a2d_i-1] + (COLUMNS);            \
+#define array2dim_calloc(ARRAY2DIM, ROWS, COLUMNS, TYPE)                  \
+        {                                                                 \
+          unsigned long a2d_i;                                            \
+          ARRAY2DIM = ma_malloc(sizeof (TYPE*) * (ROWS));                 \
+          (ARRAY2DIM)[0] = ma_calloc((ROWS) * (COLUMNS), sizeof (TYPE));  \
+          for (a2d_i = 1; a2d_i < (ROWS); a2d_i++)                        \
+            (ARRAY2DIM)[a2d_i] = (ARRAY2DIM)[a2d_i-1] + (COLUMNS);        \
         }
 
 int     array2dim_example(Env*);
 
-#define array2dim_delete(ARRAY2DIM, ENV)                                      \
-        env_ma_free((ARRAY2DIM)[0], ENV);                                     \
-        env_ma_free(ARRAY2DIM, ENV);
+#define array2dim_delete(ARRAY2DIM)                                       \
+        ma_free((ARRAY2DIM)[0]);                                          \
+        ma_free(ARRAY2DIM);
 
 #endif

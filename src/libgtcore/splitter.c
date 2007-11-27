@@ -20,6 +20,7 @@
 #include <string.h>
 #include "libgtcore/dynalloc.h"
 #include "libgtcore/ensure.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/splitter.h"
 #include "libgtcore/xansi.h"
 
@@ -31,7 +32,7 @@ struct Splitter {
 
 Splitter* splitter_new(Env *env)
 {
-  return env_ma_calloc(env, 1, sizeof (Splitter));
+  return ma_calloc(1, sizeof (Splitter));
 }
 
 void splitter_split(Splitter *s, char *string, unsigned long length,
@@ -164,6 +165,6 @@ int splitter_unit_test(Env *env)
 void splitter_delete(Splitter *s, Env *env)
 {
   if (!s) return;
-  env_ma_free(s->tokens, env);
-  env_ma_free(s, env);
+  ma_free(s->tokens);
+  ma_free(s);
 }

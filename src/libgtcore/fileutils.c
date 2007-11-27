@@ -19,12 +19,13 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "libgtcore/array.h"
 #include "libgtcore/cstr.h"
 #include "libgtcore/fileutils.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/splitter.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/xposix.h"
-#include "libgtcore/array.h"
 
 bool file_exists(const char *path)
 {
@@ -122,7 +123,7 @@ int file_find_in_path(Str *path, const char *file, Env *env)
   }
 
   /* free */
-  env_ma_free(pathvariable, env);
+  ma_free(pathvariable);
   splitter_delete(splitter, env);
 
   return had_err;

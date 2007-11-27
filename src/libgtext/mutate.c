@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <string.h>
 #include "libgtcore/log.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/mathsupport.h"
 #include "libgtext/mutate.h"
 
@@ -36,8 +37,7 @@ static char* mutate_description(const char *description, unsigned int rate,
                             + 3  /* for the rate */
                             + 1  /* terminal ']' */
                             + 1; /* terminal '\n' */
-  mutated_description = env_ma_malloc(env,
-                                      sizeof (char) * mutated_description_len);
+  mutated_description = ma_malloc(sizeof (char) * mutated_description_len);
   rval = snprintf(mutated_description, mutated_description_len, "%s%s%u]",
                   description, MUTATED_DESC_PRIMER, rate);
   assert(rval < mutated_description_len);
@@ -63,7 +63,7 @@ static char* mutate_seq(const char *seq, unsigned long len, Alpha *alpha,
   assert(rate <= 100);
   mutate_prob = (double) rate / 100.0;
   allocated = len * 2; /* XXX: possibly reduce this memory consumption */
-  mutated_seq = env_ma_malloc(env, sizeof (char) * allocated);
+  mutated_seq = ma_malloc(sizeof (char) * allocated);
   for (i = 0, j = 0; i < len; i++) {
     cc = alpha_encode(alpha, seq[i]);
     if (rand_0_to_1() <= mutate_prob) {

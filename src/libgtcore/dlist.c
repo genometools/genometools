@@ -19,6 +19,7 @@
 #include <limits.h>
 #include "libgtcore/dlist.h"
 #include "libgtcore/ensure.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/mathsupport.h"
 #include "libgtcore/xansi.h"
 
@@ -40,7 +41,7 @@ struct Dlistelem {
 
 Dlist* dlist_new(Compare cmp_func, Env *env)
 {
-  Dlist *dlist = env_ma_calloc(env, 1, sizeof (Dlist));
+  Dlist *dlist = ma_calloc(1, sizeof (Dlist));
   dlist->cmp_func = cmp_func;
   return dlist;
 }
@@ -82,7 +83,7 @@ void dlist_add(Dlist *dlist, void *data, Env *env)
 {
   Dlistelem *oldelem, *newelem;
   assert(dlist); /* data can be null */
-  newelem = env_ma_calloc(env, 1, sizeof (Dlistelem));
+  newelem = ma_calloc(1, sizeof (Dlistelem));
   newelem->data = data;
 
   if (!dlist->first) {
@@ -152,7 +153,7 @@ void dlist_remove(Dlist *dlist, Dlistelem *dlistelem, Env *env)
   if (dlistelem == dlist->last)
     dlist->last = dlistelem->previous;
   dlist->size--;
-  env_ma_free(dlistelem, env);
+  ma_free(dlistelem);
 }
 
 static int intcompare(const void *a, const void *b)
@@ -319,11 +320,11 @@ void dlist_delete(Dlist *dlist, Env *env)
   if (!dlist) return;
   elem = dlist->first;
   while (elem) {
-    env_ma_free(elem->previous, env);
+    ma_free(elem->previous);
     elem = elem->next;
   }
-  env_ma_free(dlist->last, env);
-  env_ma_free(dlist, env);
+  ma_free(dlist->last);
+  ma_free(dlist);
 }
 
 Dlistelem* dlistelem_next(const Dlistelem *dlistelem)

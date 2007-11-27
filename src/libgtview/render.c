@@ -17,6 +17,7 @@
 
 #include <math.h>
 #include <string.h>
+#include "libgtcore/ma.h"
 #include "libgtcore/minmax.h"
 #include "libgtview/render.h"
 #include "libgtview/graphics.h"
@@ -52,7 +53,7 @@ Render* render_new(Config *cfg, Env *env)
 {
   Render *r;
   assert(cfg);
-  r = env_ma_malloc(env, sizeof (Render));
+  r = ma_malloc(sizeof (Render));
   r->dia = NULL;
   r->cfg = cfg;
   r->margins = config_get_num(r->cfg, "format", "margins", 10, env);
@@ -530,5 +531,5 @@ int render_to_png(Render *r, Diagram *dia, const char *filename,
 void render_delete(Render *r, Env *env)
 {
   if (!r) return;
-  env_ma_free(r, env);
+  ma_free(r);
 }

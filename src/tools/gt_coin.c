@@ -16,6 +16,7 @@
 */
 
 #include <ctype.h>
+#include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
@@ -53,7 +54,7 @@ int gt_coin(int argc, const char **argv, Env *env)
 
   /* save sequence */
   num_of_emissions = strlen(argv[1]);
-  emissions = env_ma_malloc(env, sizeof (unsigned int) * num_of_emissions);
+  emissions = ma_malloc(sizeof (unsigned int) * num_of_emissions);
   for (i = 0; i < num_of_emissions; i++) {
     emissions[i] = toupper(argv[1][i]);
     switch (emissions[i]) {
@@ -75,8 +76,7 @@ int gt_coin(int argc, const char **argv, Env *env)
     hmm = coin_hmm_loaded(env);
 
     /* decoding */
-    state_sequence = env_ma_malloc(env,
-                                   sizeof (unsigned int) * num_of_emissions);
+    state_sequence = ma_malloc(sizeof (unsigned int) * num_of_emissions);
     hmm_decode(hmm, state_sequence, emissions, num_of_emissions, env);
 
     /* print most probable state sequence state sequence */
@@ -96,8 +96,8 @@ int gt_coin(int argc, const char **argv, Env *env)
 
   /* free */
   hmm_delete(hmm, env);
-  env_ma_free(emissions, env);
-  env_ma_free(state_sequence, env);
+  ma_free(emissions);
+  ma_free(state_sequence);
 
   return had_err;
 }

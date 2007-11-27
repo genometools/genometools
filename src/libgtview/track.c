@@ -17,6 +17,7 @@
 
 #include "libgtcore/ensure.h"
 #include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
 #include "libgtview/track.h"
 
 struct Track {
@@ -29,7 +30,7 @@ Track* track_new(Str *title, Env *env)
   Track *track;
   assert(title && env);
   env_error_check(env);
-  track = env_ma_malloc(env, sizeof (Track));
+  track = ma_malloc(sizeof (Track));
   track->title = str_ref(title);
   track->lines = array_new(sizeof (Line*), env);
   assert(track);
@@ -139,6 +140,6 @@ void track_delete(Track *track, Env *env)
     line_delete(*(Line**) array_get(track->lines, i), env);
   array_delete(track->lines, env);
   str_delete(track->title, env);
-  env_ma_free(track, env);
+  ma_free(track);
 }
 

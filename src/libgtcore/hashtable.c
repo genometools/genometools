@@ -19,6 +19,7 @@
 #include "libgtcore/array.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/st.h"
 #include "libgtcore/xansi.h"
 
@@ -40,7 +41,7 @@ typedef struct {
 Hashtable* hashtable_new(HashType hash_type, FreeFunc keyfree,
                          FreeFunc valuefree, Env *env)
 {
-  Hashtable *ht = env_ma_malloc(env, sizeof (Hashtable));
+  Hashtable *ht = ma_malloc(sizeof (Hashtable));
   ht->hash_type = hash_type;
   ht->key_free = keyfree;
   ht->value_free = valuefree;
@@ -262,5 +263,5 @@ void hashtable_delete(Hashtable *ht, Env *env)
   hashtable_reset(ht, env);
   assert(ht->st_table);
   st_free_table(ht->st_table, env);
-  env_ma_free(ht, env);
+  ma_free(ht);
 }

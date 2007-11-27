@@ -55,12 +55,10 @@ HMM* hmm_new(unsigned int num_of_states, unsigned int num_of_symbols, Env *env)
   assert(num_of_states > 0 && num_of_symbols > 0);
 
   /* alloc */
-  hmm = env_ma_malloc(env, sizeof (HMM));
-  hmm->initial_state_prob = env_ma_malloc(env, sizeof (double) * num_of_states);
-  array2dim_malloc(hmm->transition_prob, num_of_states, num_of_states, double,
-                   env);
-  array2dim_malloc(hmm->emission_prob, num_of_states, num_of_symbols, double,
-                   env);
+  hmm = ma_malloc(sizeof (HMM));
+  hmm->initial_state_prob = ma_malloc(sizeof (double) * num_of_states);
+  array2dim_malloc(hmm->transition_prob, num_of_states, num_of_states, double);
+  array2dim_malloc(hmm->emission_prob, num_of_states, num_of_symbols, double);
 
   /* init */
   hmm->num_of_states = num_of_states;
@@ -310,8 +308,8 @@ void hmm_decode(const HMM *hmm,
   /* alloc tables */
   num_of_rows = hmm->num_of_states;
   num_of_columns = num_of_emissions;
-  array2dim_malloc(max_probabilities, num_of_rows, 2, double, env);
-  array2dim_malloc(backtrace, num_of_rows, num_of_columns, unsigned int, env);
+  array2dim_malloc(max_probabilities, num_of_rows, 2, double);
+  array2dim_malloc(backtrace, num_of_rows, num_of_columns, unsigned int);
 
   /* fill DP table */
   for (row = 0; row < num_of_rows; row++) { /* first column */
@@ -356,8 +354,8 @@ void hmm_decode(const HMM *hmm,
     state_sequence[column] = backtrace[state_sequence[column + 1]][column + 1];
 
   /* free tables */
-  array2dim_delete(backtrace, env);
-  array2dim_delete(max_probabilities, env);
+  array2dim_delete(backtrace);
+  array2dim_delete(max_probabilities);
 }
 
 /* [DEKM98, p. 58] */
@@ -401,7 +399,7 @@ double hmm_forward(const HMM* hmm, const unsigned int *emissions,
   double **f, P;
 
   assert(hmm && emissions && num_of_emissions);
-  array2dim_malloc(f, hmm->num_of_states, num_of_emissions, double, env);
+  array2dim_malloc(f, hmm->num_of_states, num_of_emissions, double);
 
   /* XXX: we do not need the full table here, the last column would suffice */
   compute_forward_table(f, hmm, emissions, num_of_emissions);
@@ -413,7 +411,7 @@ double hmm_forward(const HMM* hmm, const unsigned int *emissions,
     P = logsum(P, f[i][num_of_emissions-1]);
   }
 
-  array2dim_delete(f, env);
+  array2dim_delete(f);
   return P;
 }
 
@@ -457,7 +455,7 @@ double hmm_backward(const HMM* hmm, const unsigned int *emissions,
   double **b, P;
 
   assert(hmm && emissions && num_of_emissions);
-  array2dim_malloc(b, hmm->num_of_states, num_of_emissions, double, env);
+  array2dim_malloc(b, hmm->num_of_states, num_of_emissions, double);
 
   /* XXX: we do not need the full table here, the last column would suffice */
   compute_backward_table(b, hmm, emissions, num_of_emissions);
@@ -471,7 +469,7 @@ double hmm_backward(const HMM* hmm, const unsigned int *emissions,
                   hmm->emission_prob[i][emissions[0]] + b[i][0]);
   }
 
-  array2dim_delete(b, env);
+  array2dim_delete(b);
   return P;
 }
 
@@ -607,7 +605,7 @@ int hmm_unit_test(Env *env)
   loaded_hmm = coin_hmm_loaded(env);
   alpha = coin_hmm_alpha(env);
   size = sizeof (coin_tosses) / sizeof (coin_tosses[0]);
-  encoded_seq = env_ma_malloc(env, sizeof (int) * strlen(coin_tosses[size-1]));
+  encoded_seq = ma_malloc(sizeof (int) * strlen(coin_tosses[size-1]));
 
   for (i = 0; i < size && !had_err; i++) {
     len = strlen(coin_tosses[i]);
@@ -627,7 +625,7 @@ int hmm_unit_test(Env *env)
                                );
   }
 
-  env_ma_free(encoded_seq, env);
+  ma_free(encoded_seq);
   alpha_delete(alpha, env);
   ensure(had_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
   ensure(had_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
@@ -639,7 +637,7 @@ int hmm_unit_test(Env *env)
   loaded_hmm = dice_hmm_loaded(env);
   alpha = dice_hmm_alpha(env);
   size = sizeof (dice_rolls) / sizeof (dice_rolls[0]);
-  encoded_seq = env_ma_malloc(env, sizeof (int) * strlen(dice_rolls[size-1]));
+  encoded_seq = ma_malloc(sizeof (int) * strlen(dice_rolls[size-1]));
 
   for (i = 0; i < size && !had_err; i++) {
     len = strlen(dice_rolls[i]);
@@ -660,7 +658,7 @@ int hmm_unit_test(Env *env)
                                );
   }
 
-  env_ma_free(encoded_seq, env);
+  ma_free(encoded_seq);
   alpha_delete(alpha, env);
   ensure(had_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
   ensure(had_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
@@ -673,8 +671,8 @@ int hmm_unit_test(Env *env)
 void hmm_delete(HMM *hmm, Env *env)
 {
   if (!hmm) return;
-  env_ma_free(hmm->initial_state_prob, env);
-  array2dim_delete(hmm->transition_prob, env);
-  array2dim_delete(hmm->emission_prob, env);
-  env_ma_free(hmm, env);
+  ma_free(hmm->initial_state_prob);
+  array2dim_delete(hmm->transition_prob);
+  array2dim_delete(hmm->emission_prob);
+  ma_free(hmm);
 }

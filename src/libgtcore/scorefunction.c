@@ -16,6 +16,7 @@
 */
 
 #include <assert.h>
+#include "libgtcore/ma.h"
 #include "libgtcore/scorefunction.h"
 #include "libgtcore/xansi.h"
 
@@ -30,7 +31,7 @@ ScoreFunction* scorefunction_new(ScoreMatrix *sm, int deletion_score,
 {
   ScoreFunction *sf;
   assert(sm);
-  sf = env_ma_malloc(env, sizeof (ScoreFunction));
+  sf = ma_malloc(sizeof (ScoreFunction));
   sf->sm = sm;
   sf->deletion_score = deletion_score;
   sf->insertion_score = insertion_score;
@@ -60,5 +61,5 @@ void scorefunction_delete(ScoreFunction *sf, Env *env)
 {
   if (!sf) return;
   scorematrix_delete(sf->sm, env);
-  env_ma_free(sf, env);
+  ma_free(sf);
 }

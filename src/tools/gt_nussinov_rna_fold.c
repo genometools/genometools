@@ -168,7 +168,7 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
   }
 
   /* alloc space for the matrix E */
-  array2dim_calloc(E, rna_length+1, rna_length+1, int, env); /* XXX */
+  array2dim_calloc(E, rna_length+1, rna_length+1, int); /* XXX */
 
   /* compute matrix */
   compute_matrix(E, rna_sequence, rna_length, l_min, energy_function);
@@ -182,7 +182,7 @@ static void nussinov_rna_fold(char *rna_sequence, unsigned long rna_length,
   xfputc('\n', fp);
 
   /* free matrix E */
-  array2dim_delete(E, env);
+  array2dim_delete(E);
 }
 
 static OPrval parse_options(int *parsed_args, int argc, const char **argv,
@@ -254,7 +254,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, Env *env)
   }
 
   /* free */
-  env_ma_free(rna_sequence, env);
+  ma_free(rna_sequence);
   scorematrix_delete(energy_function, env);
   alpha_delete(dna_alpha, env);
 

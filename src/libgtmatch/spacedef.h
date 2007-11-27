@@ -19,6 +19,7 @@
 #define SPACEDEF_H
 #include <string.h>
 #include "libgtcore/env.h"
+#include "libgtcore/ma.h"
 
 #ifdef NOSPACEBOOKKEEPING
 
@@ -59,7 +60,7 @@
 #define FREESPACE(P)\
         if ((P) != NULL)\
         {\
-          env_ma_free(P,env);\
+          ma_free(P);\
           P = NULL;\
         }
 

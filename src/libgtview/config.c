@@ -14,15 +14,12 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
-/**
- * \if INTERNAL \file config.c \endif
- * \author Sascha Steinbiss <ssteinbiss@stud.zbh.uni-hamburg.de>
- */
-#include "libgtview/config.h"
+
 #include <assert.h>
 #include <string.h>
-#include "libgtcore/warning.h"
 #include "libgtcore/ensure.h"
+#include "libgtcore/ma.h"
+#include "libgtcore/warning.h"
 #include "libgtview/config.h"
 #include "lua.h"
 #include "lauxlib.h"
@@ -46,7 +43,7 @@ Config* config_new(bool verbose, Env *env)
 {
   Config *cfg;
   env_error_check(env);
-  cfg = env_ma_calloc(env, 1, sizeof (Config));
+  cfg = ma_calloc(1, sizeof (Config));
   cfg->filename = NULL;
   cfg->verbose = verbose;
   cfg->L = luaL_newstate();
@@ -61,7 +58,7 @@ Config* config_new_with_state(lua_State *L, Env *env)
 {
   Config *cfg;
   env_error_check(env);
-  cfg = env_ma_calloc(env, 1, sizeof (Config));
+  cfg = ma_calloc(1, sizeof (Config));
   cfg->L = L;
   return cfg;
 }
@@ -454,7 +451,7 @@ void config_delete_without_state(Config *cfg, Env *env)
 {
   if (!cfg) return;
   str_delete(cfg->filename,env);
-  env_ma_free(cfg, env);
+  ma_free(cfg);
 }
 
 void config_delete(Config *cfg, Env *env)

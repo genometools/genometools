@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <stdlib.h>
 #include "libgtcore/cstr.h"
+#include "libgtcore/ma.h"
 #include "libgtext/comment.h"
 #include "libgtext/genome_node_rep.h"
 
@@ -35,7 +36,7 @@ static void comment_free(GenomeNode *gn, Env *env)
 {
   Comment *c = comment_cast(gn);
   assert(c && c->comment);
-  env_ma_free(c->comment, env);
+  ma_free(c->comment);
   str_delete(c->comment_str, env);
 }
 

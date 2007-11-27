@@ -191,14 +191,14 @@ void ma_show_space_peak(FILE *fp)
           (double) ma->max_size / (1 << 20));
 }
 
-int ma_check_space_leak(Env *env)
+int ma_check_space_leak(void)
 {
   CheckSpaceLeakInfo info;
   int had_err;
   assert(ma);
   info.has_leak = false;
   had_err = hashtable_foreach(ma->allocated_pointer, check_space_leak, &info,
-                              env);
+                              ma->env);
   assert(!had_err); /* cannot happen, check_space_leak() is sane */
   if (info.has_leak)
     return -1;

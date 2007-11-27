@@ -21,6 +21,7 @@
 #include "libgtcore/discdistri.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
 
 struct DiscDistri {
   Hashtable *hashdist;
@@ -29,7 +30,7 @@ struct DiscDistri {
 
 DiscDistri* discdistri_new(Env *env)
 {
-  return env_ma_calloc(env, 1, sizeof (DiscDistri));
+  return ma_calloc(1, sizeof (DiscDistri));
 }
 
 void discdistri_add(DiscDistri *d, unsigned long key, Env *env)
@@ -48,7 +49,7 @@ void discdistri_add_multi(DiscDistri *d, unsigned long key,
 
   valueptr = hashtable_get(d->hashdist, (void*) key);
   if (!valueptr) {
-    valueptr = env_ma_malloc(env, sizeof *valueptr);
+    valueptr = ma_malloc(sizeof *valueptr);
     *valueptr = occurrences;
     hashtable_add(d->hashdist, (void*) key, valueptr, env);
   }
@@ -175,5 +176,5 @@ void discdistri_delete(DiscDistri *d, Env *env)
 {
   if (!d) return;
   hashtable_delete(d->hashdist, env);
-  env_ma_free(d, env);
+  ma_free(d);
 }

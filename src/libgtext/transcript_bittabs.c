@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/ma.h"
 #include "libgtext/transcript_bittabs.h"
 
 struct TranscriptBittabs {
@@ -31,7 +32,7 @@ TranscriptBittabs* transcript_bittabs_new(unsigned long size_all,
                                           unsigned long size_internal,
                                           unsigned long size_terminal, Env *env)
 {
-  TranscriptBittabs *tb = env_ma_calloc(env, 1, sizeof (TranscriptBittabs));
+  TranscriptBittabs *tb = ma_calloc(1, sizeof (TranscriptBittabs));
   if (size_all) tb->bittab_all = bittab_new(size_all, env);
   if (size_single) tb->bittab_single = bittab_new(size_single, env);
   if (size_initial) tb->bittab_initial = bittab_new(size_initial, env);
@@ -78,5 +79,5 @@ void transcript_bittabs_delete(TranscriptBittabs *tb, Env *env)
   bittab_delete(tb->bittab_initial, env);
   bittab_delete(tb->bittab_internal, env);
   bittab_delete(tb->bittab_terminal, env);
-  env_ma_free(tb, env);
+  ma_free(tb);
 }

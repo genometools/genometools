@@ -20,6 +20,7 @@
 #include "libgtcore/fasta.h"
 #include "libgtcore/fasta_reader.h"
 #include "libgtcore/genfile.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/xansi.h"
 
 struct FastaReader {
@@ -36,7 +37,7 @@ typedef enum {
 
 FastaReader* fasta_reader_new(Str *sequence_filename, Env *env)
 {
-  FastaReader *fs = env_ma_calloc(env, 1, sizeof (FastaReader));
+  FastaReader *fs = ma_calloc(1, sizeof (FastaReader));
   fs->sequence_filename = str_ref(sequence_filename);
   if (sequence_filename)
     fs->sequence_file = genfile_xopen(str_get(sequence_filename), "r", env);
@@ -170,5 +171,5 @@ void fasta_reader_delete(FastaReader *fr, Env *env)
   if (!fr) return;
   str_delete(fr->sequence_filename, env);
   genfile_xclose(fr->sequence_file, env);
-  env_ma_free(fr, env);
+  ma_free(fr);
 }

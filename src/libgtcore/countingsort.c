@@ -19,6 +19,7 @@
 #include <string.h>
 #include "libgtcore/countingsort.h"
 #include "libgtcore/ensure.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/xansi.h"
 
 void countingsort(void *out, const void *in, size_t elem_size,
@@ -30,7 +31,7 @@ void countingsort(void *out, const void *in, size_t elem_size,
   assert(out && in && elem_size && size && max_elemvalue && get_elemvalue);
 
   /* allocate count array */
-  c = env_ma_calloc(env, sizeof (unsigned long), max_elemvalue + 1);
+  c = ma_calloc(sizeof (unsigned long), max_elemvalue + 1);
 
   /* count number of elements of a given value */
   for (i = 0; i < size; i++) {
@@ -50,7 +51,7 @@ void countingsort(void *out, const void *in, size_t elem_size,
     c[k]--;
   }
 
-  env_ma_free(c, env);
+  ma_free(c);
 }
 
 unsigned long countingsort_get_max(const void *in, size_t elem_size,

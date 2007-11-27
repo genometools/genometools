@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include <stdarg.h>
+#include "libgtcore/ma.h"
 #include "verbose-def.h"
 
 struct Verboseinfo
@@ -55,13 +56,13 @@ Verboseinfo *newverboseinfo(bool verbose,Env *env)
 {
   Verboseinfo *v;
 
-  v = env_ma_malloc(env, sizeof (Verboseinfo));
+  v = ma_malloc(sizeof (Verboseinfo));
   v->beverbose = verbose;
   return v;
 }
 
 void freeverboseinfo(Verboseinfo **v,Env *env)
 {
-  env_ma_free(*v,env);
+  ma_free(*v);
   *v = NULL;
 }

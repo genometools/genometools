@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/ma.h"
 #include "libgtext/transcript_counts.h"
 
 struct TranscriptCounts {
@@ -27,7 +28,7 @@ struct TranscriptCounts {
 
 TranscriptCounts* transcript_counts_new(Env *env)
 {
-  TranscriptCounts *tc = env_ma_calloc(env, 1, sizeof (TranscriptCounts));
+  TranscriptCounts *tc = ma_calloc(1, sizeof (TranscriptCounts));
   return tc;
 }
 
@@ -99,5 +100,5 @@ void transcript_counts_delete(TranscriptCounts *tc, Env *env)
   array_delete(tc->exon_array_initial, env);
   array_delete(tc->exon_array_internal, env);
   array_delete(tc->exon_array_terminal, env);
-  env_ma_free(tc, env);
+  ma_free(tc);
 }

@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/ma.h"
 #include "libgtcore/timer.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/xposix.h"
@@ -35,7 +36,7 @@ struct Timer {
 Timer* timer_new(Env *env)
 {
   Timer *t;
-  t = env_ma_malloc(env, sizeof (Timer));
+  t = ma_malloc(sizeof (Timer));
   t->state = TIMER_RUNNING;
   return t;
 }
@@ -72,5 +73,5 @@ void timer_show(Timer *t, FILE *fp)
 void timer_del(Timer *t, Env *env)
 {
   if (!t) return;
-  env_ma_free(t, env);
+  ma_free(t);
 }

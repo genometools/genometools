@@ -18,6 +18,7 @@
 #include <string.h>
 #include "libgtcore/array.h"
 #include "libgtcore/ensure.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/strand.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
@@ -45,7 +46,7 @@ Element* element_new(GenomeNode *gn, Env *env)
 Element* element_new_empty(Env *env)
 {
   env_error_check(env);
-  return env_ma_calloc(env, 1, sizeof (Element));
+  return ma_calloc(1, sizeof (Element));
 }
 
 Range element_get_range(const Element *element)
@@ -136,6 +137,6 @@ int element_unit_test(Env* env)
 void element_delete(Element *element, Env *env)
 {
   if (!element) return;
-  env_ma_free(element, env);
+  ma_free(element);
 }
 

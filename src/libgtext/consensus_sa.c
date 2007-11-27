@@ -18,6 +18,7 @@
 #include <assert.h>
 #include "libgtcore/bittab.h"
 #include "libgtcore/log.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
 #include "libgtext/consensus_sa.h"
 
@@ -467,11 +468,11 @@ static void compute_csas(ConsensusSA *csa, Env *env)
 #endif
 
   /* init sets */
-  C     = env_ma_malloc(env, sizeof (Bittab*) * csa->number_of_sas);
-  left  = env_ma_malloc(env, sizeof (Bittab*) * csa->number_of_sas);
-  right = env_ma_malloc(env, sizeof (Bittab*) * csa->number_of_sas);
-  L     = env_ma_malloc(env, sizeof (Bittab*) * csa->number_of_sas);
-  R     = env_ma_malloc(env, sizeof (Bittab*) * csa->number_of_sas);
+  C     = ma_malloc(sizeof (Bittab*) * csa->number_of_sas);
+  left  = ma_malloc(sizeof (Bittab*) * csa->number_of_sas);
+  right = ma_malloc(sizeof (Bittab*) * csa->number_of_sas);
+  L     = ma_malloc(sizeof (Bittab*) * csa->number_of_sas);
+  R     = ma_malloc(sizeof (Bittab*) * csa->number_of_sas);
 
   for (i = 0; i < csa->number_of_sas; i++) {
     C[i]     = bittab_new(csa->number_of_sas, env);
@@ -553,11 +554,11 @@ static void compute_csas(ConsensusSA *csa, Env *env)
     bittab_delete(L[i], env);
     bittab_delete(R[i], env);
   }
-  env_ma_free(C, env);
-  env_ma_free(left, env);
-  env_ma_free(right, env);
-  env_ma_free(L, env);
-  env_ma_free(R, env);
+  ma_free(C);
+  ma_free(left);
+  ma_free(right);
+  ma_free(L);
+  ma_free(R);
   bittab_delete(U_i, env);
   bittab_delete(SA_i, env);
   bittab_delete(SA_prime, env);

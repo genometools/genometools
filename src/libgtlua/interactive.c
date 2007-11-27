@@ -28,6 +28,7 @@
 #include "lauxlib.h"
 #include "libtecla.h"
 #include "libgtcore/cstr.h"
+#include "libgtcore/ma.h"
 #include "libgtlua/interactive.h"
 
 static lua_State *globalL = NULL;
@@ -157,7 +158,7 @@ static int loadline(lua_State *L, GetLine *gl, Env *env) {
                                   truncate <line> at the first newline */
     rval = gl_append_history(gl, line);
     assert(!rval);
-    env_ma_free(line, env);
+    ma_free(line);
   }
   lua_remove(L, 1);  /* remove line */
 #endif

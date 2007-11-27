@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/compare.h"
 #include "libgtext/toolbox.h"
@@ -29,7 +30,7 @@ Toolbox* toolbox_new(Env *env)
 {
   Toolbox *tb;
   env_error_check(env);
-  tb = env_ma_malloc(env, sizeof (Toolbox));
+  tb = ma_malloc(sizeof (Toolbox));
   tb->tools = hashtable_new(HASH_STRING, NULL, NULL, env);
   return tb;
 }
@@ -71,5 +72,5 @@ void toolbox_delete(Toolbox *tb, Env *env)
 {
   if (!tb) return;
   hashtable_delete(tb->tools, env);
-  env_ma_free(tb, env);
+  ma_free(tb);
 }

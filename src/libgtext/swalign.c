@@ -93,7 +93,7 @@ Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf, Env *env)
   DPentry **dptable;
   Alignment *a = NULL;
   assert(u && v && sf);
-  array2dim_calloc(dptable, seq_length(u)+1, seq_length(v)+1, DPentry, env);
+  array2dim_calloc(dptable, seq_length(u)+1, seq_length(v)+1, DPentry);
   fillDPtable(dptable, seq_get_encoded(u, env), seq_length(u),
               seq_get_encoded(v, env), seq_length(v), sf, &alignment_end);
   assert(alignment_end.x != UNDEF_ULONG);
@@ -115,6 +115,6 @@ Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf, Env *env)
                        seq_get_orig(v) + alignment_start.y,
                        alignment_end.y - alignment_start.y + 1);
   }
-  array2dim_delete(dptable, env);
+  array2dim_delete(dptable);
   return a;
 }

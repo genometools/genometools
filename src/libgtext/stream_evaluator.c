@@ -20,6 +20,7 @@
 #include "libgtcore/cstr.h"
 #include "libgtcore/hashtable.h"
 #include "libgtcore/log.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/warning.h"
 #include "libgtcore/xansi.h"
 #include "libgtext/evaluator.h"
@@ -131,7 +132,7 @@ typedef struct {
 static Slot* slot_new(bool nuceval, Range range, Env *env)
 {
   unsigned long length;
-  Slot *s = env_ma_calloc(env, 1, sizeof (Slot));
+  Slot *s = ma_calloc(1, sizeof (Slot));
   length = range_length(range);
   s->genes_forward = array_new(sizeof (GenomeNode*), env);
   s->genes_reverse = array_new(sizeof (GenomeNode*), env);
@@ -213,7 +214,7 @@ static void slot_delete(Slot *s, Env *env)
   transcript_used_exons_delete(s->used_mRNA_exons_reverse, env);
   transcript_used_exons_delete(s->used_CDS_exons_forward, env);
   transcript_used_exons_delete(s->used_CDS_exons_reverse, env);
-  env_ma_free(s, env);
+  ma_free(s);
 }
 
 StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
@@ -221,7 +222,7 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
                                       bool evalLTR, unsigned long LTRdelta,
                                       Env *env)
 {
-  StreamEvaluator *evaluator = env_ma_calloc(env, 1, sizeof (StreamEvaluator));
+  StreamEvaluator *evaluator = ma_calloc(1, sizeof (StreamEvaluator));
   evaluator->reality = genome_stream_ref(reality);
   evaluator->prediction = genome_stream_ref(prediction);
   evaluator->nuceval = nuceval;
@@ -688,7 +689,7 @@ static void add_predicted_collapsed(Dlist *used_exons, Range *predicted_range,
 {
   Range *used_range;
   if (!dlist_find(used_exons, predicted_range)) {
-    used_range = env_ma_malloc(env, sizeof (Range));
+    used_range = ma_malloc(sizeof (Range));
     used_range->start = predicted_range->start;
     used_range->end = predicted_range->end;
     dlist_add(used_exons, used_range, env);
@@ -1486,5 +1487,5 @@ void stream_evaluator_delete(StreamEvaluator *se, Env *env)
   transcript_evaluators_delete(se->mRNA_exon_evaluators_collapsed, env);
   transcript_evaluators_delete(se->CDS_exon_evaluators, env);
   transcript_evaluators_delete(se->CDS_exon_evaluators_collapsed, env);
-  env_ma_free(se, env);
+  ma_free(se);
 }

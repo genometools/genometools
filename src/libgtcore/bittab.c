@@ -18,6 +18,7 @@
 #include <assert.h>
 #include "libgtcore/bittab.h"
 #include "libgtcore/ensure.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/xansi.h"
 
@@ -36,7 +37,7 @@ Bittab* bittab_new(unsigned long num_of_bits, Env *env)
 
   assert(num_of_bits);
 
-  b = env_ma_malloc(env, sizeof (Bittab));
+  b = ma_malloc(sizeof (Bittab));
   b->num_of_bits = num_of_bits;
 
   if (num_of_bits / (8UL * sizeof (unsigned long)))
@@ -44,7 +45,7 @@ Bittab* bittab_new(unsigned long num_of_bits, Env *env)
   else
     b->tabsize = 1UL;
 
-  b->tabptr = env_ma_calloc(env, b->tabsize, sizeof (unsigned long));
+  b->tabptr = ma_calloc(b->tabsize, sizeof (unsigned long));
 
   return b;
 }
@@ -442,6 +443,6 @@ int bittab_unit_test(Env *env)
 void bittab_delete(Bittab *b, Env *env)
 {
   if (!b) return;
-  env_ma_free(b->tabptr, env);
-  env_ma_free(b, env);
+  ma_free(b->tabptr);
+  ma_free(b);
 }

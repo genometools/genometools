@@ -21,6 +21,7 @@
 #include "libgtcore/bsearch.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/range.h"
 #include "libgtcore/undef.h"
@@ -56,7 +57,7 @@ FeatureIndex* feature_index_new(Env *env)
 {
   FeatureIndex *fi;
   env_error_check(env);
-  fi = env_ma_calloc(env, 1, sizeof (FeatureIndex));
+  fi = ma_calloc(1, sizeof (FeatureIndex));
   fi->regions = hashtable_new(HASH_STRING, NULL, (FreeFunc) region_info_delete,
                               env);
   return fi;
@@ -78,7 +79,7 @@ void feature_index_add_sequence_region(FeatureIndex *fi, SequenceRegion *sr,
   assert(fi && sr);
   seqid = str_get(genome_node_get_seqid((GenomeNode*) sr));
   if (!hashtable_get(fi->regions, seqid)) {
-    info = env_ma_malloc(env, sizeof (RegionInfo));
+    info = ma_malloc(sizeof (RegionInfo));
     info->region = (SequenceRegion*) genome_node_rec_ref((GenomeNode*) sr, env);
     info->features = array_new(sizeof (GenomeNode*),env);
     info->dyn_range.start = ~0UL;
@@ -335,5 +336,5 @@ void feature_index_delete(FeatureIndex *fi, Env *env)
     return;
   }
   hashtable_delete(fi->regions, env);
-  env_ma_free(fi, env);
+  ma_free(fi);
 }

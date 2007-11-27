@@ -19,6 +19,7 @@
 #include <string.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/parseutils.h"
 #include "libgtcore/splitter.h"
 #include "libgtcore/undef.h"
@@ -71,7 +72,7 @@ static int GTF_feature_type_get(GTF_feature_type *type, char *feature_string)
 
 GTF_parser* gtf_parser_new(Env *env)
 {
-  GTF_parser *parser = env_ma_malloc(env, sizeof (GTF_parser));
+  GTF_parser *parser = ma_malloc(sizeof (GTF_parser));
   parser->sequence_region_to_range = hashtable_new(HASH_STRING,
                                                    env_ma_free_func,
                                                    env_ma_free_func, env);
@@ -337,7 +338,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       }
       else {
         /* sequence region is not already defined -> define it */
-        rangeptr = env_ma_malloc(env, sizeof (Range));
+        rangeptr = ma_malloc(sizeof (Range));
         *rangeptr = range;
         hashtable_add(parser->sequence_region_to_range, cstr_dup(seqname, env),
                       rangeptr, env);
@@ -483,5 +484,5 @@ void gtf_parser_delete(GTF_parser *parser, Env *env)
   hashtable_delete(parser->gene_id_hash, env);
   hashtable_delete(parser->seqid_to_str_mapping, env);
   hashtable_delete(parser->source_to_str_mapping, env);
-  env_ma_free(parser, env);
+  ma_free(parser);
 }

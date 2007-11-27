@@ -18,6 +18,7 @@
 #include <assert.h>
 #include "libgtcore/dynalloc.h"
 #include "libgtcore/error.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/xansi.h"
 
 #ifndef SIZE_MAX
@@ -47,7 +48,7 @@ void* dynalloc(void *ptr, size_t *allocated, size_t size, Env *env)
     }
   }
   assert(size_to_alloc);
-  rptr = env_ma_realloc(env, ptr, size_to_alloc);
+  rptr = ma_realloc(ptr, size_to_alloc);
   *allocated = size_to_alloc;
   return rptr;
 }

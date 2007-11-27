@@ -13,11 +13,12 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
 #ifndef EIS_ENCIDXSEQSIMPLEOP_H
 #define EIS_ENCIDXSEQSIMPLEOP_H
 
 #include <string.h>
-
+#include "libgtcore/ma.h"
 #include "libgtmatch/eis-mrangealphabet.h"
 #include "libgtmatch/eis-encidxseq.h"
 #include "libgtmatch/eis-encidxseqpriv.h"
@@ -76,8 +77,7 @@ initExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
 static inline struct extBitsRetrieval *
 newExtBitsRetrieval(Env *env)
 {
-  struct extBitsRetrieval *retval
-    = env_ma_malloc(env, sizeof (struct extBitsRetrieval));
+  struct extBitsRetrieval *retval = ma_malloc(sizeof (struct extBitsRetrieval));
   initExtBitsRetrieval(retval, env);
   return retval;
 }
@@ -86,16 +86,16 @@ static inline void
 destructExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
 {
   if ((r->flags & EBRF_PERSISTENT_CWBITS) && r->cwPart)
-    env_ma_free(r->cwPart, env);
+    ma_free(r->cwPart);
   if ((r->flags & EBRF_PERSISTENT_VARBITS) && r->varPart)
-    env_ma_free(r->varPart, env);
+    ma_free(r->varPart);
 }
 
 static inline void
 deleteExtBitsRetrieval(struct extBitsRetrieval *r, Env *env)
 {
   destructExtBitsRetrieval(r, env);
-  env_ma_free(r, env);
+  ma_free(r);
 }
 
 static inline Seqpos

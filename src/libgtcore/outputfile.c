@@ -17,6 +17,7 @@
 
 #include <string.h>
 #include "libgtcore/fileutils.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/outputfile.h"
 #include "libgtcore/warning.h"
 
@@ -34,7 +35,7 @@ OutputFileInfo* outputfileinfo_new(Env *env)
 {
   OutputFileInfo *ofi;
   env_error_check(env);
-  ofi = env_ma_malloc(env, sizeof (OutputFileInfo));
+  ofi = ma_malloc(sizeof (OutputFileInfo));
   ofi->output_filename = str_new(env);
   return ofi;
 }
@@ -120,5 +121,5 @@ void outputfileinfo_delete(OutputFileInfo *ofi, Env *env)
 {
   if (!ofi) return;
   str_delete(ofi->output_filename, env);
-  env_ma_free(ofi, env);
+  ma_free(ofi);
 }

@@ -21,6 +21,7 @@
 #include "libgtcore/array.h"
 #include "libgtcore/cstr.h"
 #include "libgtcore/error.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/mailaddress.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/option.h"
@@ -108,7 +109,7 @@ struct Option {
 static Option *option_new(const char *option_str, const char *description,
                           void *value, Env *env)
 {
-  Option *o = env_ma_calloc(env, 1, sizeof (Option));
+  Option *o = ma_calloc(1, sizeof (Option));
   assert(option_str && strlen(option_str));
   assert("an option string should not start with '-', this is added "
          "automatically"  && option_str[0] != '-');
@@ -162,7 +163,7 @@ static Option* option_new_version(ShowVersionFunc versionfunc, Env *env)
 OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
                                 Env *env)
 {
-  OptionParser *op = env_ma_malloc(env, sizeof (OptionParser));
+  OptionParser *op = ma_malloc(sizeof (OptionParser));
   assert(synopsis && one_liner);
   assert("one_liner must have upper case letter at start and '.' at end" &&
          strlen(one_liner) && isupper((int) one_liner[0]));
@@ -995,14 +996,14 @@ void option_parser_delete(OptionParser *op, Env *env)
 {
   unsigned long i;
   if (!op) return;
-  env_ma_free(op->progname, env);
-  env_ma_free(op->synopsis, env);
-  env_ma_free(op->one_liner, env);
+  ma_free(op->progname);
+  ma_free(op->synopsis);
+  ma_free(op->one_liner);
   for (i = 0; i < array_size(op->options); i++)
     option_delete(*(Option**) array_get(op->options, i), env);
   array_delete(op->options, env);
   array_delete(op->hooks, env);
-  env_ma_free(op, env);
+  ma_free(op);
 }
 
 Option* option_new_outputfile(FILE **outfp, Env *env)
@@ -1360,5 +1361,5 @@ void option_delete(Option *o, Env *env)
     array_delete(*(Array**) array_get(o->implications, i), env);
   array_delete(o->implications, env);
   array_delete(o->exclusions, env);
-  env_ma_free(o, env);
+  ma_free(o);
 }

@@ -21,6 +21,7 @@
 #include "libgtcore/array.h"
 #include "libgtcore/dynalloc.h"
 #include "libgtcore/ensure.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/range.h"
 #include "libgtcore/xansi.h"
 
@@ -36,7 +37,7 @@ struct Array {
 
 Array* array_new(size_t size_of_elem, Env *env)
 {
-  Array *a = env_ma_calloc(env, 1, sizeof (Array));
+  Array *a = ma_calloc(1, sizeof (Array));
   assert(size_of_elem);
   a->size_of_elem = size_of_elem;
   return a;
@@ -83,7 +84,7 @@ void array_reverse(Array *a, Env *env)
 {
   void *front, *back, *tmp;
   assert(a);
-  tmp = env_ma_malloc(env, a->size_of_elem);
+  tmp = ma_malloc(a->size_of_elem);
   for (front = a->space, back = a->space + (a->next_free-1) * a->size_of_elem;
        front < back;
        front += a->size_of_elem, back -= a->size_of_elem) {
@@ -91,7 +92,7 @@ void array_reverse(Array *a, Env *env)
     memcpy(front, back, a->size_of_elem);
     memcpy(back, tmp, a->size_of_elem);
   }
-  env_ma_free(tmp, env);
+  ma_free(tmp);
 }
 
 void* array_get_space(const Array *a)
@@ -150,9 +151,9 @@ Array* array_clone(const Array *a, Env *env)
 {
   Array *a_copy;
   assert(a);
-  a_copy = env_ma_malloc(env, sizeof (Array));
+  a_copy = ma_malloc(sizeof (Array));
   /* XXX: overflow checks -> safemult(next_free, size_of_elem) */
-  a_copy->space = env_ma_malloc(env, a->next_free * a->size_of_elem);
+  a_copy->space = ma_malloc(a->next_free * a->size_of_elem);
   memcpy(a_copy->space, a->space, a->next_free * a->size_of_elem);
   a_copy->next_free = a_copy->allocated = a->next_free;
   a_copy->size_of_elem = a->size_of_elem;
@@ -238,8 +239,8 @@ int array_unit_test(Env *env)
 
   char_array = array_new(sizeof (char), env);
   int_array = array_new(sizeof (int), env);
-  char_array_test = env_ma_malloc(env, (MAX_SIZE + 1) * sizeof (char));
-  int_array_test = env_ma_malloc(env, MAX_SIZE * sizeof (int));
+  char_array_test = ma_malloc((MAX_SIZE + 1) * sizeof (char));
+  int_array_test = ma_malloc(MAX_SIZE * sizeof (int));
 
   for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
     size = ((double) rand() / RAND_MAX) * MAX_SIZE;
@@ -330,8 +331,8 @@ int array_unit_test(Env *env)
 
   array_delete(char_array, env);
   array_delete(int_array, env);
-  env_ma_free(char_array_test, env);
-  env_ma_free(int_array_test, env);
+  ma_free(char_array_test);
+  ma_free(int_array_test);
 
   return had_err;
 }
@@ -339,6 +340,6 @@ int array_unit_test(Env *env)
 void array_delete(Array *a, Env *env)
 {
   if (!a) return;
-  env_ma_free(a->space, env);
-  env_ma_free(a, env);
+  ma_free(a->space);
+  ma_free(a);
 }

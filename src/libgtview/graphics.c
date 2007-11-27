@@ -19,6 +19,7 @@
 #include <cairo.h>
 #include <cairo-pdf.h>
 #include <cairo-ps.h>
+#include "libgtcore/ma.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/fileutils.h"
 #include "libgtview/graphics.h"
@@ -56,7 +57,7 @@ void graphics_initialize(Graphics *g, const char *filename, unsigned int width,
 Graphics* graphics_new_png(const char *filename, unsigned int width,
                            unsigned int height, Env *env)
 {
-  Graphics *g = env_ma_malloc(env, sizeof (Graphics));
+  Graphics *g = ma_malloc(sizeof (Graphics));
   g->type = PNG;
   g->surf = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
   graphics_initialize(g, filename, width, height, env);
@@ -66,7 +67,7 @@ Graphics* graphics_new_png(const char *filename, unsigned int width,
 Graphics* graphics_new_pdf(const char *filename, unsigned int width,
                            unsigned int height, Env *env)
 {
-  Graphics *g = env_ma_malloc(env, sizeof (Graphics));
+  Graphics *g = ma_malloc(sizeof (Graphics));
   g->type = PDF;
   g->surf = cairo_pdf_surface_create(filename, width, height);
   graphics_initialize(g, filename, width, height, env);
@@ -76,7 +77,7 @@ Graphics* graphics_new_pdf(const char *filename, unsigned int width,
 Graphics* graphics_new_ps(const char *filename, unsigned int width,
                           unsigned int height, Env *env)
 {
-  Graphics *g = env_ma_malloc(env, sizeof (Graphics));
+  Graphics *g = ma_malloc(sizeof (Graphics));
   g->type = PS;
   g->surf = cairo_ps_surface_create(filename, width, height);
   graphics_initialize(g, filename, width, height, env);
@@ -424,5 +425,5 @@ void graphics_delete(Graphics *g, Env *env)
   if (!g) return;
   cairo_surface_destroy(g->surf); /* reference counted */
   cairo_destroy(g->cr);
-  env_ma_free(g, env);
+  ma_free(g);
 }

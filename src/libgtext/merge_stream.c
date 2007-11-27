@@ -16,6 +16,7 @@
 */
 
 #include <assert.h>
+#include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
 #include "libgtext/genome_stream_rep.h"
 #include "libgtext/merge_stream.h"
@@ -98,7 +99,7 @@ static void merge_stream_free(GenomeStream *gs, Env *env)
 {
   MergeStream *ms = merge_stream_cast(gs);
   array_delete(ms->genome_streams, env);
-  env_ma_free(ms->buffer, env);
+  ma_free(ms->buffer);
 }
 
 const GenomeStreamClass* merge_stream_class(void)
@@ -123,7 +124,6 @@ GenomeStream* merge_stream_new(const Array *genome_streams, Env *env)
   }
 #endif
   ms->genome_streams = array_clone(genome_streams, env);
-  ms->buffer = env_ma_calloc(env, array_size(genome_streams),
-                             sizeof (GenomeNode*));
+  ms->buffer = ma_calloc(array_size(genome_streams), sizeof (GenomeNode*));
   return gs;
 }

@@ -17,13 +17,14 @@
 
 #include <assert.h>
 #include <stdlib.h>
+#include "libgtcore/ma.h"
 #include "libgtext/genome_visitor_rep.h"
 
 GenomeVisitor* genome_visitor_create(const GenomeVisitorClass *gvc, Env *env)
 {
   GenomeVisitor *gv;
   assert(gvc && gvc->size);
-  gv = env_ma_calloc(env, 1, gvc->size);
+  gv = ma_calloc(1, gvc->size);
   gv->c_class = gvc;
   return gv;
 }
@@ -67,5 +68,5 @@ void genome_visitor_delete(GenomeVisitor *gv, Env *env)
   assert(gv->c_class);
   if (gv->c_class->free)
     gv->c_class->free(gv, env);
-  env_ma_free(gv, env);
+  ma_free(gv);
 }

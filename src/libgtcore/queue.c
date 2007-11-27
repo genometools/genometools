@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/ma.h"
 #include "libgtcore/queue.h"
 
 typedef struct QueueElem
@@ -32,7 +33,7 @@ struct Queue
 
 Queue* queue_new(Env *env)
 {
-  return env_ma_calloc(env, 1, sizeof (Queue));
+  return ma_calloc(1, sizeof (Queue));
 }
 
 void queue_add(Queue *q, void *contents, Env *env)
@@ -42,7 +43,7 @@ void queue_add(Queue *q, void *contents, Env *env)
   env_error_check(env);
   assert(q);
 
-  newqueueelem = env_ma_malloc(env, sizeof (QueueElem));
+  newqueueelem = ma_malloc(sizeof (QueueElem));
   newqueueelem->contents = contents;
   newqueueelem->previous = NULL;
   newqueueelem->next = q->tail;
@@ -68,7 +69,7 @@ void* queue_get(Queue *q, Env *env)
   else
     q->head->next = NULL;
   contents = oldheadptr->contents;
-  env_ma_free(oldheadptr, env);
+  ma_free(oldheadptr);
   q->num_of_elements--;
 
   return contents;
@@ -105,10 +106,10 @@ static void queue_wrap(Queue *q, bool freecontents, Env *env)
   if (!q) return;
   while (q->num_of_elements) {
     if (freecontents)
-      env_ma_free(q->head->contents, env);
+      ma_free(q->head->contents);
     (void) queue_get(q, env);
   }
-  env_ma_free(q, env);
+  ma_free(q);
 }
 
 void queue_delete_with_contents(Queue *q, Env *env)

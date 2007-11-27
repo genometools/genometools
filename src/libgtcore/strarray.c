@@ -17,6 +17,7 @@
 
 #include "libgtcore/array.h"
 #include "libgtcore/cstr.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/strarray.h"
 
 struct StrArray {
@@ -27,7 +28,7 @@ StrArray* strarray_new(Env *env)
 {
   StrArray *sa;
   env_error_check(env);
-  sa = env_ma_malloc(env, sizeof (StrArray));
+  sa = ma_malloc(sizeof (StrArray));
   sa->strings = array_new(sizeof (Str*), env);
   return sa;
 }
@@ -85,5 +86,5 @@ void strarray_delete(StrArray *sa, Env *env)
   for (i = 0; i < array_size(sa->strings); i++)
     str_delete(*(Str**) array_get(sa->strings, i), env);
   array_delete(sa->strings, env);
-  env_ma_free(sa, env);
+  ma_free(sa);
 }

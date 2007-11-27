@@ -20,9 +20,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libgtcore/env.h"
-#include "libgtcore/str.h"
 #include "libgtcore/chardef.h"
+#include "libgtcore/env.h"
+#include "libgtcore/ma.h"
+#include "libgtcore/str.h"
 #include "libgtcore/symboldef.h"
 #include "libgtcore/strarray.h"
 #include "libgtmatch/alphadef.h"
@@ -37,11 +38,11 @@ newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
   MRAEncUInt8 *newAlpha = NULL;
   size_t i;
   assert(numRanges > 0);
-  if ((newAlpha = env_ma_calloc(env, sizeof (MRAEncUInt8), 1))
+  if ((newAlpha = ma_calloc(sizeof (MRAEncUInt8), 1))
      && (newAlpha->baseClass.rangeEndIndices =
-         env_ma_calloc(env, sizeof (size_t), numRanges))
+         ma_calloc(sizeof (size_t), numRanges))
      && (newAlpha->baseClass.symbolsPerRange =
-         env_ma_calloc(env, sizeof (size_t), numRanges)))
+         ma_calloc(sizeof (size_t), numRanges)))
   {
     newAlpha->baseClass.encType = sourceUInt8;
     newAlpha->baseClass.numRanges = (size_t)numRanges;
@@ -66,10 +67,10 @@ newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
     if (newAlpha)
     {
       if (newAlpha->baseClass.symbolsPerRange)
-        env_ma_free(newAlpha->baseClass.symbolsPerRange, env);
+        ma_free(newAlpha->baseClass.symbolsPerRange);
       if (newAlpha->baseClass.rangeEndIndices)
-        env_ma_free(newAlpha->baseClass.rangeEndIndices, env);
-      env_ma_free(newAlpha, env);
+        ma_free(newAlpha->baseClass.rangeEndIndices);
+      ma_free(newAlpha);
     }
     return NULL;
   }
@@ -83,7 +84,7 @@ MRAEncGTAlphaNew(const Alphabet *alpha, Env *env)
   uint8_t *mappings;
   MRAEnc *result;
   uint32_t numSyms = getmapsizeAlphabet(alpha);
-  mappings = env_ma_malloc(env, sizeof (uint8_t) * (UINT8_MAX + 1));
+  mappings = ma_malloc(sizeof (uint8_t) * (UINT8_MAX + 1));
   memset(mappings, UNDEF_UCHAR, UINT8_MAX+1);
   {
     int i;
@@ -94,7 +95,7 @@ MRAEncGTAlphaNew(const Alphabet *alpha, Env *env)
   symsPerRange[0] = numSyms - 1;
   symsPerRange[1] = 1;
   result = newMultiRangeAlphabetEncodingUInt8(2, symsPerRange, mappings, env);
-  env_ma_free(mappings, env);
+  ma_free(mappings);
   return result;
 }
 
@@ -110,11 +111,11 @@ MRAEncCopy(const MRAEnc *alpha, Env *env)
       const MRAEncUInt8 *srcAlpha = constMRAEnc2MRAEncUInt8(alpha);
       size_t numRanges = alpha->numRanges;
       assert(numRanges > 0);
-      if ((newAlpha = env_ma_calloc(env, sizeof (MRAEncUInt8), 1))
+      if ((newAlpha = ma_calloc(sizeof (MRAEncUInt8), 1))
           && (newAlpha->baseClass.rangeEndIndices =
-              env_ma_malloc(env, sizeof (size_t) * numRanges))
+              ma_malloc(sizeof (size_t) * numRanges))
           && (newAlpha->baseClass.symbolsPerRange =
-              env_ma_malloc(env, sizeof (size_t) * numRanges)))
+              ma_malloc(sizeof (size_t) * numRanges)))
       {
         newAlpha->baseClass.encType = sourceUInt8;
         newAlpha->baseClass.numRanges = srcAlpha->baseClass.numRanges;
@@ -133,10 +134,10 @@ MRAEncCopy(const MRAEnc *alpha, Env *env)
         if (newAlpha)
         {
           if (newAlpha->baseClass.symbolsPerRange)
-            env_ma_free(newAlpha->baseClass.symbolsPerRange, env);
+            ma_free(newAlpha->baseClass.symbolsPerRange);
           if (newAlpha->baseClass.rangeEndIndices)
-            env_ma_free(newAlpha->baseClass.rangeEndIndices, env);
-          env_ma_free(newAlpha, env);
+            ma_free(newAlpha->baseClass.rangeEndIndices);
+          ma_free(newAlpha);
         }
         return NULL;
       }
@@ -179,9 +180,9 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
       int *newRanges, sym;
       size_t range, numRanges = MRAEncGetNumRanges(srcAlpha);
       ui8alpha = constMRAEnc2MRAEncUInt8(srcAlpha);
-      mappings = env_ma_malloc(env, sizeof (uint8_t) * (UINT8_MAX + 1));
+      mappings = ma_malloc(sizeof (uint8_t) * (UINT8_MAX + 1));
       memset(mappings, UNDEF_UCHAR, UINT8_MAX+1);
-      newRanges = env_ma_malloc(env, sizeof (int) * numRanges);
+      newRanges = ma_malloc(sizeof (int) * numRanges);
       sym = 0;
       destSym = 0;
       for (range = 0; range < numRanges; ++range)
@@ -201,8 +202,8 @@ MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
       }
       newAlpha = newMultiRangeAlphabetEncodingUInt8(numRanges, newRanges,
                                                     mappings, env);
-      env_ma_free(mappings, env);
-      env_ma_free(newRanges, env);
+      ma_free(mappings);
+      ma_free(newRanges);
     }
     break;
   default:
@@ -367,14 +368,14 @@ void
 MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha, Env *env)
 {
   assert(mralpha && env);
-  env_ma_free(mralpha->symbolsPerRange, env);
-  env_ma_free(mralpha->rangeEndIndices, env);
+  ma_free(mralpha->symbolsPerRange);
+  ma_free(mralpha->rangeEndIndices);
   switch (mralpha->encType)
   {
     MRAEncUInt8 *ui8alpha;
   case sourceUInt8:
     ui8alpha = MRAEnc2MRAEncUInt8(mralpha);
-    env_ma_free(ui8alpha, env);
+    ma_free(ui8alpha);
     break;
   default:
     abort();

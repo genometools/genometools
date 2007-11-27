@@ -3,6 +3,7 @@
 
 /* static       char    sccsid[] = "@(#) st.c 5.1 89/12/14 Crucible"; */
 
+#include "libgtcore/ma.h"
 #include "libgtcore/st.h"
 #include "libgtcore/xansi.h"
 
@@ -43,8 +44,8 @@ static struct st_hash_type type_strhash = {
 
 static void rehash(st_table *, Env*);
 
-#define alloc(type) (type*)env_ma_malloc(env, (unsigned)sizeof (type))
-#define Calloc(n,s) (char*)env_ma_calloc(env, (n),(s))
+#define alloc(type) (type*)ma_malloc((unsigned)sizeof (type))
+#define Calloc(n,s) (char*)ma_calloc((n),(s))
 
 #define EQUAL(table,x,y) ((x)==(y) || (*table->type->compare)((x),(y)) == 0)
 
@@ -192,12 +193,12 @@ st_free_table(st_table *table, Env *env)
         ptr = table->bins[i];
         while (ptr != 0) {
             next = ptr->next;
-            env_ma_free(ptr, env);
+            ma_free(ptr);
             ptr = next;
         }
     }
-    env_ma_free(table->bins, env);
-    env_ma_free(table, env);
+    ma_free(table->bins);
+    ma_free(table);
 }
 
 #define PTR_NOT_EQUAL(table, ptr, hash_val, key) \
@@ -309,7 +310,7 @@ rehash(st_table *table, Env *env)
             ptr = next;
         }
     }
-    env_ma_free(table->bins, env);
+    ma_free(table->bins);
     table->num_bins = new_num_bins;
     table->bins = new_bins;
 }
@@ -331,7 +332,7 @@ st_copy(st_table *old_table, Env *env)
         Calloc((unsigned)num_bins, sizeof (st_table_entry*));
 
     if (new_table->bins == 0) {
-        env_ma_free(new_table, env);
+        ma_free(new_table);
         return 0;
     }
 
@@ -341,8 +342,8 @@ st_copy(st_table *old_table, Env *env)
         while (ptr != 0) {
             entry = alloc(st_table_entry);
             if (entry == 0) {
-                env_ma_free(new_table->bins, env);
-                env_ma_free(new_table, env);
+                ma_free(new_table->bins);
+                ma_free(new_table);
                 return 0;
             }
             *entry = *ptr;
@@ -374,7 +375,7 @@ st_delete(st_table *table, st_data_t *key, st_data_t *value, Env *env)
         table->num_entries--;
         if (value != 0) *value = ptr->record;
         *key = ptr->key;
-        env_ma_free(ptr, env);
+        ma_free(ptr);
         return 1;
     }
 
@@ -385,7 +386,7 @@ st_delete(st_table *table, st_data_t *key, st_data_t *value, Env *env)
             table->num_entries--;
             if (value != 0) *value = tmp->record;
             *key = tmp->key;
-            env_ma_free(tmp, env);
+            ma_free(tmp);
             return 1;
         }
     }
@@ -480,7 +481,7 @@ st_foreach(st_table *table, st_iterfunc_type func, st_data_t arg, Env *env)
                     last->next = ptr->next;
                 }
                 ptr = ptr->next;
-                env_ma_free(tmp, env);
+                ma_free(tmp);
                 table->num_entries--;
             }
         }

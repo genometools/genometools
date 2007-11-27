@@ -16,6 +16,7 @@
 */
 
 #include "libgtcore/ensure.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/range.h"
 #include "libgtview/block.h"
 #include "libgtview/line.h"
@@ -28,7 +29,7 @@ Line* line_new(Env *env)
 {
   Line *line;
   env_error_check(env);
-  line = env_ma_malloc(env, sizeof (Line));
+  line = ma_malloc(sizeof (Line));
   line->blocks = array_new(sizeof (Block*), env);
   return line;
 }
@@ -166,5 +167,5 @@ void line_delete(Line *line, Env *env)
   }
 
   array_delete(line->blocks, env);
-  env_ma_free(line, env);
+  ma_free(line);
 }

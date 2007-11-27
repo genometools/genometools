@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/ma.h"
 #include "libgtext/linearalign.h"
 
 static void firstEDtabRtabcolumn(unsigned long *EDtabcolumn,
@@ -138,8 +139,8 @@ static unsigned long computeCtab(const char *u, unsigned long ulen,
                 dist;
   env_error_check(env);
 
-  EDtabcolumn = env_ma_malloc(env, sizeof (unsigned long) * (ulen + 1));
-  Rtabcolumn  = env_ma_malloc(env, sizeof (unsigned long) * (ulen + 1));
+  EDtabcolumn = ma_malloc(sizeof (unsigned long) * (ulen + 1));
+  Rtabcolumn  = ma_malloc(sizeof (unsigned long) * (ulen + 1));
 
   if (vlen == 1) {
     Ctab[1] = ulen;
@@ -152,8 +153,8 @@ static unsigned long computeCtab(const char *u, unsigned long ulen,
     determineCtab0(Ctab, v[0], u);
   }
 
-  env_ma_free(Rtabcolumn, env);
-  env_ma_free(EDtabcolumn, env);
+  ma_free(Rtabcolumn);
+  ma_free(EDtabcolumn);
 
   return dist;
 }
@@ -196,10 +197,10 @@ Alignment* linearalign(const char *u, unsigned long ulen,
   Alignment *alignment;
   env_error_check(env);
   assert(u && ulen && v && vlen);
-  Ctab = env_ma_malloc(env, sizeof (unsigned long) * (vlen + 1));
+  Ctab = ma_malloc(sizeof (unsigned long) * (vlen + 1));
   dist = computeCtab(u, ulen, v, vlen, Ctab, env);
   alignment = reconstructalignment(Ctab, u, ulen, v, vlen, env);
   assert(dist == alignment_eval(alignment));
-  env_ma_free(Ctab, env);
+  ma_free(Ctab);
   return alignment;
 }

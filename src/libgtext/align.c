@@ -123,12 +123,12 @@ Alignment* align(const char *u, unsigned long ulen,
   DPentry **dptable;
   Alignment *a;
   assert(u && ulen && v && vlen);
-  array2dim_calloc(dptable, ulen+1, vlen+1, DPentry, env);
+  array2dim_calloc(dptable, ulen+1, vlen+1, DPentry);
   a = alignment_new_with_seqs(u, ulen, v, vlen, env);
   fillDPtable(dptable, u, ulen, v, vlen);
   traceback(a, dptable, ulen, vlen, env);
   assert(dptable[ulen][vlen].distvalue == alignment_eval(a));
-  array2dim_delete(dptable, env);
+  array2dim_delete(dptable);
   return a;
 }
 
@@ -142,7 +142,7 @@ void align_all(const char *u, unsigned long ulen,
   DPentry **dptable;
   Alignment *a;
   assert(u && ulen && v && vlen);
-  array2dim_calloc(dptable, ulen+1, vlen+1, DPentry, env);
+  array2dim_calloc(dptable, ulen+1, vlen+1, DPentry);
   a = alignment_new_with_seqs(u, ulen, v, vlen, env);
   fillDPtable(dptable, u, ulen, v, vlen);
   aligns = traceback_all(a, dptable, ulen, vlen, dptable[ulen][vlen].distvalue,
@@ -150,5 +150,5 @@ void align_all(const char *u, unsigned long ulen,
   if (proc_aligns)
     proc_aligns(aligns, data);
   alignment_delete(a, env);
-  array2dim_delete(dptable, env);
+  array2dim_delete(dptable);
 }

@@ -21,6 +21,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "libgtcore/env.h"
 
 /* the memory allocator module */
 
@@ -32,7 +33,7 @@ void*         ma_malloc_mem(size_t size, const char*, int);
               ma_calloc_mem(nmemb, size, __FILE__, __LINE__)
 void*         ma_calloc_mem(size_t nmemb, size_t size, const char*, int);
 #define       ma_realloc(ptr, size)\
-              ma_realloc_mem(ptr, size, __FILE, __LINE__)
+              ma_realloc_mem(ptr, size, __FILE__, __LINE__)
 void*         ma_realloc_mem(void *ptr, size_t size, const char*, int);
 #define       ma_free(ptr)\
               ma_free_mem(ptr, __FILE__, __LINE__)
@@ -40,7 +41,7 @@ void          ma_free_mem(void *ptr, const char*, int);
 unsigned long ma_get_space_peak(void); /* in bytes */
 void          ma_show_space_peak(FILE*);
 /* check if all allocated memory has been freed, prints to stderr */
-int           ma_check_space_leak(Env*);
+int           ma_check_space_leak(void);
 void          ma_clean(void);
 
 #endif

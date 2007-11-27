@@ -18,6 +18,7 @@
 #ifndef ARRAYDEF_H
 #define ARRAYDEF_H
 
+#include "libgtcore/ma.h"
 #include "libgtcore/symboldef.h"
 
 /*
@@ -113,7 +114,7 @@
 #define FREEARRAY(A,TYPE)\
         if ((A)->space##TYPE != NULL)\
         {\
-          env_ma_free((A)->space##TYPE, env);\
+          ma_free((A)->space##TYPE);\
         }
 
 /*

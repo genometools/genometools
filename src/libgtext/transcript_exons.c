@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/ma.h"
 #include "libgtcore/range.h"
 #include "libgtext/transcript_exons.h"
 
@@ -28,7 +29,7 @@ struct TranscriptExons {
 
 TranscriptExons* transcript_exons_new(Env *env)
 {
-  TranscriptExons *te = env_ma_malloc(env, sizeof (TranscriptExons));
+  TranscriptExons *te = ma_malloc(sizeof (TranscriptExons));
   te->exon_array_all = array_new(sizeof (Range), env);
   te->exon_array_single = array_new(sizeof (Range), env);
   te->exon_array_initial = array_new(sizeof (Range), env);
@@ -127,5 +128,5 @@ void transcript_exons_delete(TranscriptExons *te, Env *env)
   array_delete(te->exon_array_initial, env);
   array_delete(te->exon_array_internal, env);
   array_delete(te->exon_array_terminal, env);
-  env_ma_free(te, env);
+  ma_free(te);
 }

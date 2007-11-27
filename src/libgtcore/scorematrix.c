@@ -35,10 +35,10 @@ ScoreMatrix* scorematrix_new(Alpha *alpha, Env *env)
 {
   ScoreMatrix *s;
   assert(alpha);
-  s = env_ma_malloc(env, sizeof (ScoreMatrix));
+  s = ma_malloc(sizeof (ScoreMatrix));
   s->alpha = alpha_ref(alpha);
   s->dimension = alpha_size(alpha);
-  array2dim_calloc(s->scores, s->dimension, s->dimension, int, env);
+  array2dim_calloc(s->scores, s->dimension, s->dimension, int);
   return s;
 }
 
@@ -256,6 +256,6 @@ void scorematrix_delete(ScoreMatrix *s, Env *env)
 {
   if (!s) return;
   alpha_delete(s->alpha, env);
-  array2dim_delete(s->scores, env);
-  env_ma_free(s, env);
+  array2dim_delete(s->scores);
+  ma_free(s);
 }

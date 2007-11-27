@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/ma.h"
 #include "libgtext/transcript_evaluators.h"
 
 struct TranscriptEvaluators {
@@ -27,7 +28,7 @@ struct TranscriptEvaluators {
 
 TranscriptEvaluators* transcript_evaluators_new(Env *env)
 {
-  TranscriptEvaluators *te = env_ma_malloc(env, sizeof (TranscriptEvaluators));
+  TranscriptEvaluators *te = ma_malloc(sizeof (TranscriptEvaluators));
   te->exon_evaluator_all = evaluator_new(env);
   te->exon_evaluator_single = evaluator_new(env);
   te->exon_evaluator_initial = evaluator_new(env);
@@ -90,5 +91,5 @@ void transcript_evaluators_delete(TranscriptEvaluators *te, Env *env)
   evaluator_delete(te->exon_evaluator_initial, env);
   evaluator_delete(te->exon_evaluator_internal, env);
   evaluator_delete(te->exon_evaluator_terminal, env);
-  env_ma_free(te, env);
+  ma_free(te);
 }

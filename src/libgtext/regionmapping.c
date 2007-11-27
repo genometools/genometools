@@ -20,6 +20,7 @@
 #include "lauxlib.h"
 #include "lualib.h"
 #include "libgtcore/bioseq.h"
+#include "libgtcore/ma.h"
 #include "libgtext/mapping.h"
 #include "libgtext/regionmapping.h"
 
@@ -36,7 +37,7 @@ RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Env *env)
   RegionMapping *rm;
   env_error_check(env);
   assert(mapping_filename);
-  rm = env_ma_calloc(env, 1, sizeof (RegionMapping));
+  rm = ma_calloc(1, sizeof (RegionMapping));
   rm->mapping = mapping_new(mapping_filename, "mapping", MAPPINGTYPE_STRING,
                             env);
   if (!rm->mapping) {
@@ -50,7 +51,7 @@ RegionMapping* regionmapping_new_seqfile(Str *sequence_filename, Env *env)
 {
   RegionMapping *rm;
   assert(sequence_filename && env);
-  rm = env_ma_calloc(env, 1, sizeof (RegionMapping));
+  rm = ma_calloc(1, sizeof (RegionMapping));
   rm->sequence_filename = str_ref(sequence_filename);
   return rm;
 }
@@ -124,5 +125,5 @@ void regionmapping_delete(RegionMapping *rm, Env *env)
   str_delete(rm->sequence_name, env);
   mapping_delete(rm->mapping, env);
   bioseq_delete(rm->bioseq, env);
-  env_ma_free(rm, env);
+  ma_free(rm);
 }

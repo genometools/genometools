@@ -103,9 +103,8 @@ newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
   struct seqStats *stats = NULL;
   unsigned i, mapSize;
   Seqpos regularSymsSum = 0;
-  stats = env_ma_malloc(env,
-                        offsetAlign(sizeof (*stats), sizeof (Seqpos))
-                        + (UINT8_MAX + 1) * sizeof (Seqpos));
+  stats = ma_malloc(offsetAlign(sizeof (*stats), sizeof (Seqpos))
+                    + (UINT8_MAX + 1) * sizeof (Seqpos));
   stats->sourceAlphaType = sourceUInt8;
   stats->symbolDistributionTable =
     (Seqpos *)((char *)stats + offsetAlign(sizeof (*stats), sizeof (Seqpos)));
@@ -123,7 +122,7 @@ newSeqStatsFromCharDist(const Alphabet *alpha, Seqpos len, unsigned numOfSeqs,
 static void
 deleteSeqStats(struct seqStats *stats, Env *env)
 {
-  env_ma_free(stats, env);
+  ma_free(stats);
 }
 
 #define INITOUTFILEPTR(PTR,FLAG,SUFFIX)                                 \
@@ -131,11 +130,11 @@ deleteSeqStats(struct seqStats *stats, Env *env)
 
 #define newSfxInterfaceWithReadersErrRet()        \
   do {                                            \
-    if (iface->stats)                              \
+    if (iface->stats)                             \
       deleteSeqStats(iface->stats, env);          \
-    if (iface->readers)                            \
-      env_ma_free(iface->readers, env);           \
-    if (iface) env_ma_free(iface, env);            \
+    if (iface->readers)                           \
+      ma_free(iface->readers);                    \
+    if (iface) ma_free(iface);                    \
   } while (0)
 
 extern sfxInterface *
@@ -156,7 +155,7 @@ newSfxInterfaceWithReaders(Suffixeratoroptions *so,
 
   env_error_check(env);
 
-  iface = env_ma_calloc(env, 1, sizeof (*iface));
+  iface = ma_calloc(1, sizeof (*iface));
   memcpy(&iface->so, so, sizeof (*so));
   iface->mtime = mtime;
   iface->length = length;
@@ -197,13 +196,13 @@ deleteSfxInterface(sfxInterface *iface, Env *env)
 {
   int had_err = 0;
 
-  env_ma_free(iface->prevGeneratedSufTabSegments, env);
+  ma_free(iface->prevGeneratedSufTabSegments);
 
   freeSfxiterator(&iface->sfi, env);
 
   deleteSeqStats(iface->stats, env);
-  env_ma_free(iface->readers, env);
-  env_ma_free(iface, env);
+  ma_free(iface->readers);
+  ma_free(iface);
   return !had_err;
 }
 
@@ -266,8 +265,8 @@ SfxIRegisterReader(sfxInterface *iface, listenerID *id,
                    enum sfxDataRequest request, Env *env)
 {
   size_t availId = iface->numReaders++;
-  iface->readers = env_ma_realloc(
-    env, iface->readers, sizeof (iface->readers[0]) * (availId + 1));
+  iface->readers = ma_realloc(iface->readers,
+                              sizeof (iface->readers[0]) * (availId + 1));
   iface->readers[availId].nextReadPos = 0;
   iface->readers[availId].readFlag = request;
   iface->allRequests |= request;
@@ -503,9 +502,8 @@ sfxIReadAdvance(sfxInterface *iface,
       {
         size_t newSize = iface->prevGeneratedLen + copyLen;
         iface->prevGeneratedSufTabSegments =
-          env_ma_realloc(env, iface->prevGeneratedSufTabSegments,
-                         sizeof (iface->lastGeneratedSufTabSegment[0]) *
-                         newSize);
+          ma_realloc(iface->prevGeneratedSufTabSegments,
+                     sizeof (iface->lastGeneratedSufTabSegment[0]) * newSize);
         iface->prevGeneratedSize = newSize;
       }
       memcpy(iface->prevGeneratedSufTabSegments + iface->prevGeneratedLen,

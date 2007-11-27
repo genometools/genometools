@@ -231,7 +231,7 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   had_err = overallpredictionsequences(lo, innerregion, &fastaoutinfo,
                                        showpredictionfastasequence, env);
 
-  env_ma_free(descendtab, env);
+  ma_free(descendtab);
   env_fa_xfclose(formatout, env);
 
   return 0;

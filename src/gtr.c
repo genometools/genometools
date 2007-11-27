@@ -106,7 +106,7 @@ struct GTR {
 
 GTR* gtr_new(Env *env)
 {
-  GTR *gtr = env_ma_calloc(env, 1, sizeof (GTR));
+  GTR *gtr = ma_calloc(1, sizeof (GTR));
 #ifdef LIBGTVIEW
   Str *config_file;
 #endif
@@ -329,10 +329,10 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
     return run_tests(gtr, env);
   }
   if (str_length(gtr->testspacepeak)) {
-    mem = env_ma_malloc(env, 1 << 26); /* alloc 64 MB */;
+    mem = ma_malloc(1 << 26); /* alloc 64 MB */;
     map = env_fa_mmap_read(env, str_get(gtr->testspacepeak), NULL);
     env_fa_xmunmap(map, env);
-    env_ma_free(mem, env);
+    ma_free(mem);
   }
   if (argc == 0 && !gtr->interactive) {
     env_error_set(env, "neither tool nor script specified; option -help lists "
@@ -390,5 +390,5 @@ void gtr_delete(GTR *gtr, Env *env)
 #ifdef LIBGTVIEW
   config_delete_without_state(gtr->config, env);
 #endif
-  env_ma_free(gtr, env);
+  ma_free(gtr);
 }

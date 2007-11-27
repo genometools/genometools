@@ -311,15 +311,14 @@ newBWTSeq(EISeq *seqIdx, MRAEnc *alphabet, Seqpos longest, Env *env)
   /* alphabetSize is increased by one to handle the flattened
    * terminator symbol correctly */
   alphabetSize = MRAEncGetSize(alphabet) + 1;
-  bwtSeq = env_ma_malloc(env, offsetAlign(sizeof (struct BWTSeq),
-                                          sizeof (Seqpos))
-                         + sizeof (Seqpos) * (alphabetSize + 1));
+  bwtSeq = ma_malloc(offsetAlign(sizeof (struct BWTSeq), sizeof (Seqpos))
+                     + sizeof (Seqpos) * (alphabetSize + 1));
   counts = (Seqpos *)((char  *)bwtSeq
                       + offsetAlign(sizeof (struct BWTSeq),
                                     sizeof (Seqpos)));
   if (!initBWTSeqFromEncSeqIdx(bwtSeq, seqIdx, alphabet, longest, counts, env))
   {
-    env_ma_free(bwtSeq, env);
+    ma_free(bwtSeq);
     bwtSeq = NULL;
   }
   return bwtSeq;
@@ -331,7 +330,7 @@ deleteBWTSeq(BWTSeq *bwtSeq, Env *env)
   MRAEncDelete(bwtSeq->alphabet, env);
   deleteEISHint(bwtSeq->seqIdx, bwtSeq->hint, env);
   deleteEncIdxSeq(bwtSeq->seqIdx, env);
-  env_ma_free(bwtSeq, env);
+  ma_free(bwtSeq);
 }
 
 static inline void
@@ -386,7 +385,7 @@ newEMIterator(const BWTSeq *bwtSeq, const Symbol *query, size_t queryLen,
           "Localization of matches impossible!", stderr);
     return NULL;
   }
-  newIter = env_ma_malloc(env, sizeof (*newIter));
+  newIter = ma_malloc(sizeof (*newIter));
   getMatchBound(bwtSeq, query, queryLen, &newIter->bounds, env);
   newIter->nextMatchBWTPos = newIter->bounds.upper;
   initExtBitsRetrieval(&newIter->extBits, env);
@@ -397,7 +396,7 @@ void
 deleteEMIterator(struct BWTSeqExactMatchesIterator *iter, Env *env)
 {
   destructExtBitsRetrieval(&iter->extBits, env);
-  env_ma_free(iter, env);
+  ma_free(iter);
 }
 
 Seqpos

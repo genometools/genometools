@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include "libgtcore/ma.h"
 #include "libgtext/qgramdist.h"
 #include "libgtext/qgram.h"
 
@@ -33,10 +34,10 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q, Env *env)
   assert(alpha_is_compatible_with_alpha(alpha_a, alpha_b));
   alphasize_to_the_power_of_q = pow(alpha_size(alpha_a), q);
 
-  seq_a_profile = env_ma_calloc(env, alphasize_to_the_power_of_q,
-                                sizeof (unsigned long));
-  seq_b_profile = env_ma_calloc(env, alphasize_to_the_power_of_q,
-                                sizeof (unsigned long));
+  seq_a_profile = ma_calloc(alphasize_to_the_power_of_q,
+                            sizeof (unsigned long));
+  seq_b_profile = ma_calloc(alphasize_to_the_power_of_q,
+                            sizeof (unsigned long));
 
   seq_a_qgrams = array_new(sizeof (unsigned long), env);
   seq_b_qgrams = array_new(sizeof (unsigned long), env);
@@ -63,8 +64,8 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q, Env *env)
 
   array_delete(seq_b_qgrams, env);
   array_delete(seq_a_qgrams, env);
-  env_ma_free(seq_b_profile, env);
-  env_ma_free(seq_a_profile, env);
+  ma_free(seq_b_profile);
+  ma_free(seq_a_profile);
 
   return dist;
 }

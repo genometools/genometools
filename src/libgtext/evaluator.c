@@ -18,6 +18,7 @@
 #include <assert.h>
 #include <string.h>
 #include "libgtcore/ensure.h"
+#include "libgtcore/ma.h"
 #include "libgtext/evaluator.h"
 
 struct Evaluator {
@@ -28,7 +29,7 @@ struct Evaluator {
 
 Evaluator* evaluator_new(Env *env)
 {
-  return env_ma_calloc(env, 1, sizeof (Evaluator));
+  return ma_calloc(1, sizeof (Evaluator));
 }
 
 void evaluator_add_true(Evaluator *e)
@@ -159,5 +160,5 @@ int evaluator_unit_test(Env *env)
 void evaluator_delete(Evaluator *e, Env *env)
 {
   if (!e) return;
-  env_ma_free(e, env);
+  ma_free(e);
 }

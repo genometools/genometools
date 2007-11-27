@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/ma.h"
 #include "libgtcore/range.h"
 #include "libgtext/transcript_used_exons.h"
 
@@ -28,7 +29,7 @@ struct TranscriptUsedExons {
 
 TranscriptUsedExons* transcript_used_exons_new(Env *env)
 {
-  TranscriptUsedExons *tue = env_ma_malloc(env, sizeof (TranscriptUsedExons));
+  TranscriptUsedExons *tue = ma_malloc(sizeof (TranscriptUsedExons));
   tue->used_exons_all = dlist_new((Compare) range_compare_ptr, env);
   tue->used_exons_single = dlist_new((Compare) range_compare_ptr, env);
   tue->used_exons_initial = dlist_new((Compare) range_compare_ptr, env);
@@ -72,7 +73,7 @@ static void used_dlist_delete(Dlist *used_list, Env *env)
   Dlistelem *dlistelem;
   for (dlistelem = dlist_first(used_list); dlistelem != NULL;
        dlistelem = dlistelem_next(dlistelem)) {
-    env_ma_free(dlistelem_get_data(dlistelem), env);
+    ma_free(dlistelem_get_data(dlistelem));
   }
   dlist_delete(used_list, env);
 }
@@ -85,5 +86,5 @@ void transcript_used_exons_delete(TranscriptUsedExons *tue, Env *env)
   used_dlist_delete(tue->used_exons_initial, env);
   used_dlist_delete(tue->used_exons_internal, env);
   used_dlist_delete(tue->used_exons_terminal, env);
-  env_ma_free(tue, env);
+  ma_free(tue);
 }

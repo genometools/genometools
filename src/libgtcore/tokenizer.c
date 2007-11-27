@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include "libgtcore/ensure.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/tokenizer.h"
 #include "libgtcore/xansi.h"
 #include "libgtcore/xtmpfile.h"
@@ -31,7 +32,7 @@ Tokenizer* tokenizer_new(IO *io, Env *env)
 {
   Tokenizer *t;
   assert(io);
-  t = env_ma_calloc(env, 1, sizeof (Tokenizer));
+  t = ma_calloc(1, sizeof (Tokenizer));
   t->io = io;
   return t;
 }
@@ -184,5 +185,5 @@ void tokenizer_delete(Tokenizer *t, Env *env)
   if (!t) return;
   io_delete(t->io, env);
   str_delete(t->token, env);
-  env_ma_free(t, env);
+  ma_free(t);
 }

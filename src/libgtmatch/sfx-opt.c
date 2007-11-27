@@ -19,6 +19,7 @@
 #include <inttypes.h>
 #include "libgtcore/env.h"
 #include "libgtcore/getbasename.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/str.h"
 #include "libgtcore/versionfunc.h"
@@ -174,7 +175,7 @@ static OPrval parse_options(int *parsed_args,
 
         basenameptr = getbasename(strarray_get(so->filenametab,0),env);
         str_set(so->str_indexname,basenameptr,env);
-        env_ma_free(basenameptr,env);
+        ma_free(basenameptr);
       }
     }
     if (strarray_size(so->filenametab) == 0)

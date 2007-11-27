@@ -19,6 +19,7 @@
 #include <string.h>
 #include "libgtcore/ensure.h"
 #include "libgtcore/getbasename.h"
+#include "libgtcore/ma.h"
 
 char *getbasename(const char *path,Env *env)
 {
@@ -31,7 +32,7 @@ char *getbasename(const char *path,Env *env)
     pathlen = strlen(path);
   else
     pathlen = 0;
-  sbuf = env_ma_malloc(env, sizeof (char) * (pathlen + 2));
+  sbuf = ma_malloc(sizeof (char) * (pathlen + 2));
   if (path == NULL || *path == '\0') {
     strcpy(sbuf, ".");
     return sbuf;
@@ -62,60 +63,60 @@ int getbasename_unit_test(Env *env)
 
   bn = getbasename("/usr/lib", env);
   ensure(had_err, !strcmp(bn, "lib"));
-  env_ma_free(bn, env);
+  ma_free(bn);
 
   if (!had_err) {
     bn = getbasename("/usr/", env);
     ensure(had_err, !strcmp(bn, "usr"));
-    env_ma_free(bn, env);
+    ma_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename("usr", env);
     ensure(had_err, !strcmp(bn, "usr"));
-    env_ma_free(bn, env);
+    ma_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename("/", env);
     ensure(had_err, !strcmp(bn, "/"));
-    env_ma_free(bn, env);
+    ma_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename("///", env);
     ensure(had_err, !strcmp(bn, "/"));
-    env_ma_free(bn, env);
+    ma_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename("//usr//lib//", env);
     ensure(had_err, !strcmp(bn, "lib"));
-    env_ma_free(bn, env);
+    ma_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename(NULL, env);
     ensure(had_err, !strcmp(bn, "."));
-    env_ma_free(bn, env);
+    ma_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename("", env);
     ensure(had_err, !strcmp(bn, "."));
-    env_ma_free(bn, env);
+    ma_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename(".", env);
     ensure(had_err, !strcmp(bn, "."));
-    env_ma_free(bn, env);
+    ma_free(bn);
   }
 
   if (!had_err) {
     bn = getbasename("..", env);
     ensure(had_err, !strcmp(bn, ".."));
-    env_ma_free(bn, env);
+    ma_free(bn);
   }
 
   return had_err;

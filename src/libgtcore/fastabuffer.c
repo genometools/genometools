@@ -35,7 +35,7 @@ FastaBuffer* fastabuffer_new(const StrArray *filenametab,
 {
   FastaBuffer *fb;
   env_error_check(env);
-  fb = env_ma_calloc(env, 1, sizeof (FastaBuffer));
+  fb = ma_calloc(1, sizeof (FastaBuffer));
   fb->plainformat = plainformat;
   fb->filenum = 0;
   fb->firstoverallseq = true;
@@ -48,8 +48,8 @@ FastaBuffer* fastabuffer_new(const StrArray *filenametab,
   fb->lastspeciallength = 0;
   fb->descptr = descptr;
   if (filelengthtab) {
-    *filelengthtab = env_ma_calloc(env, strarray_size(filenametab),
-                                   sizeof (Filelengthvalues));
+    *filelengthtab = ma_calloc(strarray_size(filenametab),
+                               sizeof (Filelengthvalues));
     fb->filelengthtab = *filelengthtab;
   }
   else
@@ -320,5 +320,5 @@ void fastabuffer_delete(FastaBuffer *fb, Env *env)
   if (!fb) return;
   genfile_xclose(fb->inputstream, env);
   FREEARRAY(&fb->headerbuffer, char);
-  env_ma_free(fb, env);
+  ma_free(fb);
 }

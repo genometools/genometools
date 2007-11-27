@@ -20,6 +20,7 @@
 #include "libgtcore/cstr.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/log.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/str.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/warning.h"
@@ -62,7 +63,7 @@ static BlockTuple* blocktuple_new(GenomeFeatureType gft, Block *block, Env* env)
 {
   BlockTuple *bt;
   assert(block);
-  bt = env_ma_malloc(env, sizeof (BlockTuple));
+  bt = ma_malloc(sizeof (BlockTuple));
   bt->gft = gft;
   bt->block = block;
   return bt;
@@ -76,7 +77,7 @@ static NodeInfoElement* get_or_create_node_info(Diagram *d,
   assert(d && node);
   ni = hashtable_get(d->nodeinfo, node);
   if (ni == NULL) {
-    NodeInfoElement *new_ni = env_ma_malloc(env, sizeof (NodeInfoElement));
+    NodeInfoElement *new_ni = ma_malloc(sizeof (NodeInfoElement));
     new_ni->blocktuples = array_new(sizeof (BlockTuple*), env);
     hashtable_add(d->nodeinfo, node, new_ni, env);
     ni = new_ni;
@@ -382,10 +383,10 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
     log_log("inserted block %s into track %s",
             str_get(block_get_caption(bt->block)), str_get(track_key));
     str_delete(track_key, env);
-    env_ma_free(bt, env);
+    ma_free(bt);
   }
   array_delete(ni->blocktuples, env);
-  env_ma_free(ni, env);
+  ma_free(ni);
   return 0;
 }
 
@@ -426,7 +427,7 @@ Diagram* diagram_new(FeatureIndex *fi, Range range, const char *seqid,
   Array *features = array_new(sizeof (GenomeNode*), env);
   int had_err;
   env_error_check(env);
-  diagram = env_ma_malloc(env, sizeof (Diagram));
+  diagram = ma_malloc(sizeof (Diagram));
   diagram->tracks = hashtable_new(HASH_STRING, env_ma_free_func, NULL, env);
   diagram->nodeinfo = hashtable_new(HASH_DIRECT, NULL, NULL, env);
   diagram->nof_tracks = 0;
@@ -624,5 +625,5 @@ void diagram_delete(Diagram *diagram, Env *env)
   (void) hashtable_foreach(diagram->tracks, diagram_track_delete, NULL, env);
   hashtable_delete(diagram->tracks, env);
   hashtable_delete(diagram->nodeinfo, env);
-  env_ma_free(diagram, env);
+  ma_free(diagram);
 }

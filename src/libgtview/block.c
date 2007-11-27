@@ -18,6 +18,7 @@
 #include <string.h>
 #include "libgtcore/ensure.h"
 #include "libgtcore/log.h"
+#include "libgtcore/ma.h"
 #include "libgtview/block.h"
 #include "libgtview/element.h"
 
@@ -47,7 +48,7 @@ Block* block_new(Env *env)
   Block *block;
   Range r;
   env_error_check(env);
-  block = env_ma_malloc(env, sizeof (Block));
+  block = ma_malloc(sizeof (Block));
   block->elements = dlist_new(elemcmp, env);
   r.start = 0;
   r.end = 0;
@@ -387,5 +388,5 @@ void block_delete(Block *block,
   }
   str_delete(block->caption, env);
   dlist_delete(block->elements, env);
-  env_ma_free(block, env);
+  ma_free(block);
 }

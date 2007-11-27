@@ -142,8 +142,8 @@ initAddLocateInfoState(struct addLocateInfoState *state,
     else
       state->bitsPerOrigPos = requiredSeqposBits(lastPos);
     state->revMapCacheSize = aggregationExpVal;
-    state->revMapCache = env_ma_malloc(env, sizeof (state->revMapCache[0])
-                                       * state->revMapCacheSize);
+    state->revMapCache = ma_malloc(sizeof (state->revMapCache[0])
+                                   * state->revMapCacheSize);
   }
   else
   {
@@ -156,7 +156,7 @@ initAddLocateInfoState(struct addLocateInfoState *state,
 static void
 destructAddLocateInfoState(struct addLocateInfoState *state, Env *env)
 {
-  env_ma_free(state->revMapCache, env);
+  ma_free(state->revMapCache);
 }
 
 static BitOffset
@@ -173,8 +173,8 @@ addLocateInfo(BitString cwDest, BitOffset cwOffset,
   /* 0. resize caches if necessary */
   if (len > state->revMapCacheSize)
   {
-    state->revMapCache = env_ma_realloc(env, state->revMapCache,
-                                        len * sizeof (state->revMapCache[0]));
+    state->revMapCache = ma_realloc(state->revMapCache,
+                                    len * sizeof (state->revMapCache[0]));
     state->revMapCacheSize = len;
   }
   bitsPerBWTPos = requiredSeqposBits(len - 1);

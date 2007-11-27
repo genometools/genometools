@@ -23,8 +23,9 @@
 #include "libgtcore/cstr.h"
 #include "libgtcore/fileutils.h"
 #include "libgtcore/getbasename.h"
-#include "libgtcore/splitter.h"
 #include "libgtcore/gtdatapath.h"
+#include "libgtcore/ma.h"
+#include "libgtcore/splitter.h"
 #include "libgtext/gtdatahelp.h"
 
 int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
@@ -64,7 +65,7 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
       /* special case for `gt` */
       bn = getbasename(progname, env);
       str_append_cstr(doc_file, bn, env);
-      env_ma_free(bn, env);
+      ma_free(bn);
     }
     else {
       /* general case for the tools */
@@ -84,7 +85,7 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
   if (L) lua_close(L);
   str_delete(doc_file, env);
   splitter_delete(splitter, env);
-  env_ma_free(prog, env);
+  ma_free(prog);
 
   return had_err;
 }

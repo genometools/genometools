@@ -18,6 +18,7 @@
 
 #include <ctype.h>
 #include <string.h>
+#include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/warning.h"
@@ -68,7 +69,7 @@ static void removecomments(Str *line, int *incomment, Env *env)
   if (!line || !str_length(line))
     return;
 
-  buffer = env_ma_malloc(env, (size_t) str_length(line) + 1);
+  buffer = ma_malloc((size_t) str_length(line) + 1);
 
   /* remove comments, except for those used for splint: */
   while (pos < str_length(line)) {
@@ -104,7 +105,7 @@ static void removecomments(Str *line, int *incomment, Env *env)
   /* copy back into line */
   memcpy(str_get(line), buffer, (size_t) (bufpos + 1));
   str_set_length(line, bufpos);
-  env_ma_free(buffer, env);
+  ma_free(buffer);
 }
 
 static void skproto(const char *filename, FILE *fpin, Env *env)

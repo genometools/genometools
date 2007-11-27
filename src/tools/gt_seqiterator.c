@@ -19,6 +19,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "libgtcore/fileutils.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/seqiterator.h"
 #include "libgtcore/versionfunc.h"
@@ -91,7 +92,7 @@ int gt_seqiterator(int argc, const char **argv, Env *env)
     {
       break;
     }
-    env_ma_free(desc, env);
+    ma_free(desc);
   }
   seqiterator_delete(seqit, env);
   if (verbose)

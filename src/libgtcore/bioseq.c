@@ -27,6 +27,7 @@
 #include "libgtcore/fileutils.h"
 #include "libgtcore/gc_content.h"
 #include "libgtcore/grep.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/parseutils.h"
 #include "libgtcore/range.h"
 #include "libgtcore/sig.h"
@@ -277,7 +278,7 @@ static Bioseq* bioseq_new_with_recreate(Str *sequence_file, bool recreate,
   Bioseq *bs;
   int had_err = 0;
   env_error_check(env);
-  bs = env_ma_calloc(env, 1, sizeof (Bioseq));
+  bs = ma_calloc(1, sizeof (Bioseq));
   if (!strcmp(str_get(sequence_file), "-"))
     bs->use_stdin = true;
   if (!bs->use_stdin && !file_exists(str_get(sequence_file))) {
@@ -348,7 +349,7 @@ Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx, Env *env)
   assert(bs);
   assert(idx < array_size(bs->descriptions));
   if (!bs->seqs)
-    bs->seqs = env_ma_calloc(env, array_size(bs->descriptions), sizeof (Seq*));
+    bs->seqs = ma_calloc(array_size(bs->descriptions), sizeof (Seq*));
   determine_alpha_if_necessary(bs, env);
   if (!bs->seqs[idx]) {
     bs->seqs[idx] = seq_new(bioseq_get_sequence(bs, idx),
@@ -407,18 +408,18 @@ void bioseq_delete(Bioseq *bs, Env *env)
   if (bs->seqs) {
     for (i = 0; i < array_size(bs->descriptions); i++)
       seq_delete(bs->seqs[i], env);
-    env_ma_free(bs->seqs, env);
+    ma_free(bs->seqs);
   }
   for (i = 0; i < array_size(bs->descriptions); i++)
-    env_ma_free(*(char**) array_get(bs->descriptions, i), env);
+    ma_free(*(char**) array_get(bs->descriptions, i));
   array_delete(bs->descriptions, env);
   array_delete(bs->sequence_ranges, env);
   if (bs->use_stdin)
-    env_ma_free(bs->raw_sequence, env);
+    ma_free(bs->raw_sequence);
   else
     env_fa_xmunmap(bs->raw_sequence, env);
   alpha_delete(bs->alpha, env);
-  env_ma_free(bs, env);
+  ma_free(bs);
 }
 
 void bioseq_show_as_fasta(Bioseq *bs, unsigned long width)

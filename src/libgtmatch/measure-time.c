@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <time.h>
 #include "libgtcore/env.h"
+#include "libgtcore/ma.h"
 #include "measure-time-if.h"
 
  struct Measuretime
@@ -29,7 +30,7 @@
 void inittheclock(Measuretime **mtime,const char *event,Env *env)
 {
   env_error_check(env);
-  *mtime = env_ma_malloc(env,sizeof (Measuretime));
+  *mtime = ma_malloc(sizeof (Measuretime));
   (*mtime)->startclock = clock();
   (*mtime)->overalltime = 0;
   (*mtime)->eventdescription = event;
@@ -49,7 +50,7 @@ void deliverthetime(FILE *fp,Measuretime *mtime,const char *newevent,Env *env)
     fprintf(fp,"# TIME overall %.2f\n",
                 (double) mtime->overalltime/(double) CLOCKS_PER_SEC);
     (void) fflush(fp);
-    env_ma_free(mtime,env);
+    ma_free(mtime);
   } else
   {
     mtime->startclock = stopclock;

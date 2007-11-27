@@ -16,6 +16,7 @@
 */
 
 #include "libgtcore/bittab.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
 #include "libgtext/upgma.h"
 
@@ -45,8 +46,7 @@ static void upgma_init(UPGMA *upgma, unsigned long num_of_taxa, void *data,
 
   upgma->num_of_taxa = num_of_taxa;
   upgma->num_of_clusters = 2 * num_of_taxa - 1;
-  upgma->clusters = env_ma_malloc(env, sizeof (UPGMAcluster) *
-                                       upgma->num_of_clusters);
+  upgma->clusters = ma_malloc(sizeof (UPGMAcluster) * upgma->num_of_clusters);
 
   for (i = 0; i < upgma->num_of_clusters; i++) {
     upgma->clusters[i].leftdaughter  = UNDEF_ULONG;
@@ -62,7 +62,7 @@ static void upgma_init(UPGMA *upgma, unsigned long num_of_taxa, void *data,
     }
 
     if ((i > 0) && (i < upgma->num_of_clusters - 1)) {
-      upgma->clusters[i].distances = env_ma_malloc(env, sizeof (double) * i);
+      upgma->clusters[i].distances = ma_malloc(sizeof (double) * i);
       for (j = 0; j < i; j++) {
         if (i < num_of_taxa) {
           retval = distfunc(i, j, data, env);
@@ -162,7 +162,7 @@ UPGMA* upgma_new(unsigned long num_of_taxa, void *data, UPGMADistFunc distfunc,
 {
   UPGMA *upgma;
   assert(num_of_taxa && distfunc);
-  upgma = env_ma_malloc(env, sizeof (UPGMA));
+  upgma = ma_malloc(sizeof (UPGMA));
   upgma_init(upgma, num_of_taxa, data, distfunc, env);
   upgma_compute(upgma, env);
   return upgma;
@@ -193,7 +193,7 @@ void upgma_delete(UPGMA *upgma, Env *env)
   unsigned long i;
   if (!upgma) return;
   for (i = 1; i < upgma->num_of_clusters - 1; i++)
-    env_ma_free(upgma->clusters[i].distances, env);
-  env_ma_free(upgma->clusters, env);
-  env_ma_free(upgma, env);
+    ma_free(upgma->clusters[i].distances);
+  ma_free(upgma->clusters);
+  ma_free(upgma);
 }

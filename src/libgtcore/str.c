@@ -20,6 +20,7 @@
 #include "libgtcore/cstr.h"
 #include "libgtcore/dynalloc.h"
 #include "libgtcore/ensure.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/str.h"
 #include "libgtcore/xansi.h"
 
@@ -32,12 +33,12 @@ struct Str {
 
 Str* str_new(Env *env)
 {
-  Str *s = env_ma_malloc(env, sizeof (Str));      /* create new string object */
-  s->cstr = env_ma_calloc(env, 1, sizeof (char)); /* init string with '\0' */
-  s->length = 0;                                  /* set the initial length */
-  s->allocated = 1;                               /* set allocated space */
-  s->reference_count = 0;                         /* set reference count */
-  return s;                                       /* return new string object */
+  Str *s = ma_malloc(sizeof (Str));      /* create new string object */
+  s->cstr = ma_calloc(1, sizeof (char)); /* init string with '\0' */
+  s->length = 0;                         /* set the initial length */
+  s->allocated = 1;                      /* set allocated space */
+  s->reference_count = 0;                /* set reference count */
+  return s;                              /* return new string object */
 }
 
 Str* str_new_cstr(const char *cstr, Env *env)
@@ -192,7 +193,7 @@ Str* str_clone(const Str *s, Env *env)
 {
   Str *s_copy;
   assert(s);
-  s_copy = env_ma_malloc(env, sizeof (Str));
+  s_copy = ma_malloc(sizeof (Str));
   s_copy->cstr = cstr_dup(s->cstr, env);
   s_copy->length = s_copy->allocated = s->length;
   s_copy->reference_count = 0;
@@ -339,11 +340,11 @@ int str_unit_test(Env *env)
 
 void str_delete(Str *s, Env *env)
 {
-  if (!s) return;            /* return without action if 's' is NULL */
-  if (s->reference_count) {  /* there are multiple references to this string */
-    s->reference_count--;    /* decrement the reference counter */
-    return;                  /* return without freeing the object */
+  if (!s) return;           /* return without action if 's' is NULL */
+  if (s->reference_count) { /* there are multiple references to this string */
+    s->reference_count--;   /* decrement the reference counter */
+    return;                 /* return without freeing the object */
   }
-  env_ma_free(s->cstr, env); /* free the stored the C string */
-  env_ma_free(s, env);       /* free the actual string object */
+  ma_free(s->cstr);         /* free the stored the C string */
+  ma_free(s);               /* free the actual string object */
 }

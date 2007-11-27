@@ -52,9 +52,9 @@ int bitPackArray_unit_test(Env *env)
       mask = ~((~(uint32_t)0)<<bits);
 
     log_log("seedval = %lu, numRnd=%lu\n", seedval, (long unsigned)numRnd);
-    randSrc = env_ma_malloc(env, sizeof (uint32_t)*numRnd);
+    randSrc = ma_malloc(sizeof (uint32_t)*numRnd);
     bitStore = newBitPackArray(bits, numRnd, env);
-    randCmp = env_ma_malloc(env, sizeof (uint32_t)*numRnd);
+    randCmp = ma_malloc(sizeof (uint32_t)*numRnd);
     for (i = 0; i < numRnd; ++i)
     {
       uint32_t v = randSrc[i] = random();
@@ -70,14 +70,14 @@ int bitPackArray_unit_test(Env *env)
         log_log("bsStoreUInt32/bpaGetUInt32: "
                 "Expected %u, got %u, seed = %lu, i = %lu, bits=%u\n",
                 v & mask, r, seedval, (unsigned long)i, bits);
-        env_ma_free(randSrc, env);
-        env_ma_free(randCmp, env);
+        ma_free(randSrc);
+        ma_free(randCmp);
         deleteBitPackArray(bitStore, env);
         return had_err;
       }
     }
-  env_ma_free(randSrc, env);
-  env_ma_free(randCmp, env);
+  ma_free(randSrc);
+  ma_free(randCmp);
   deleteBitPackArray(bitStore, env);
   }
   log_log("bpaStoreUInt32/bpaGetUInt32: passed\n");
@@ -94,17 +94,16 @@ int bitPackArray_unit_test(Env *env)
       mask = ~(uint64_t)0;
     else
       mask = ~((~(uint64_t)0)<<bits);
-    ensure(had_err,
-           (randSrc = env_ma_malloc(env, sizeof (uint64_t)*numRnd))
+    ensure(had_err, (randSrc = ma_malloc(sizeof (uint64_t)*numRnd))
            && (bitStore = newBitPackArray(bits, numRnd, env))
-           && (randCmp = env_ma_malloc(env, sizeof (uint64_t)*numRnd)));
+           && (randCmp = ma_malloc(sizeof (uint64_t)*numRnd)));
     if (had_err)
     {
       perror("Storage allocations failed");
       if (randSrc)
-        env_ma_free(randSrc, env);
+        ma_free(randSrc);
       if (randCmp)
-        env_ma_free(randCmp, env);
+        ma_free(randCmp);
       if (bitStore)
         deleteBitPackArray(bitStore, env);
       return had_err;
@@ -125,14 +124,14 @@ int bitPackArray_unit_test(Env *env)
                 "Expected %llu, got %llu, seed = %lu, i = %lu, bits=%u\n",
                 (unsigned long long)(v & mask),
                 (unsigned long long)r, seedval, (unsigned long)i, bits);
-        env_ma_free(randSrc, env);
-        env_ma_free(randCmp, env);
+        ma_free(randSrc);
+        ma_free(randCmp);
         deleteBitPackArray(bitStore, env);
         return had_err;
       }
     }
-    env_ma_free(randSrc, env);
-    env_ma_free(randCmp, env);
+    ma_free(randSrc);
+    ma_free(randCmp);
     deleteBitPackArray(bitStore, env);
   }
   log_log("bpaStoreUInt64/bpaGetUInt64: passed\n");

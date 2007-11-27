@@ -18,6 +18,7 @@
 #include <assert.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/io.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/xansi.h"
 
 struct IO {
@@ -32,7 +33,7 @@ IO* io_new(const char *path, const char *mode, Env *env)
   IO *io;
   assert(path && mode);
   assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
-  io = env_ma_malloc(env, sizeof (IO));
+  io = ma_malloc(sizeof (IO));
   io->fp = env_fa_xfopen(env, path, mode);
   io->path = cstr_dup(path, env);
   io->line_number = 1;
@@ -85,6 +86,6 @@ void io_delete(IO *io, Env *env)
 {
   if (!io) return;
   env_fa_xfclose(io->fp, env);
-  env_ma_free(io->path, env);
-  env_ma_free(io, env);
+  ma_free(io->path);
+  ma_free(io);
 }
