@@ -40,7 +40,7 @@ static void initSimpleSplicedAlignment(SimpleSplicedAlignment *sa, Env *env)
   assert(sa);
   sa->id = str_new();
   sa->forward = true;
-  sa->exons = array_new(sizeof (Range), env);
+  sa->exons = array_new(sizeof (Range));
 }
 
 static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
@@ -106,7 +106,7 @@ static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
       exon.end   = rightpos;
 
       /* save exon */
-      array_add(alignment->exons, exon, env);
+      array_add(alignment->exons, exon);
     }
     i++;
     if (i >= line_length)
@@ -138,7 +138,7 @@ static int parse_input_file(Array *spliced_alignments,
     had_err = parse_input_line(&sa, str_get(line), str_length(line), env);
     if (!had_err) {
       /* store spliced alignment */
-      array_add(spliced_alignments, sa, env);
+      array_add(spliced_alignments, sa);
       /* reset array */
       str_reset(line);
     }
@@ -171,7 +171,7 @@ static void get_exons(Array *exon_ranges, const void *sa, Env *env)
 {
   SimpleSplicedAlignment *alignment = (SimpleSplicedAlignment*) sa;
   assert(alignment);
-  array_add_array(exon_ranges, alignment->exons, env);
+  array_add_array(exon_ranges, alignment->exons);
 }
 
 static void process_splice_form(Array *spliced_alignments_in_form,
@@ -250,7 +250,7 @@ int gt_consensus_sa(int argc, const char **argv, Env *env)
   assert(parsed_args == 1);
 
   /* parse input file and store resuilts in the spliced alignment array */
-  spliced_alignments = array_new(sizeof (SimpleSplicedAlignment), env);
+  spliced_alignments = array_new(sizeof (SimpleSplicedAlignment));
   had_err = parse_input_file(spliced_alignments, argv[1], env);
 
   if (!had_err) {
@@ -269,9 +269,9 @@ int gt_consensus_sa(int argc, const char **argv, Env *env)
   for (i = 0; i < array_size(spliced_alignments); i++) {
     sa = array_get(spliced_alignments, i);
     str_delete(sa->id);
-    array_delete(sa->exons, env);
+    array_delete(sa->exons);
   }
-  array_delete(spliced_alignments, env);
+  array_delete(spliced_alignments);
 
   return had_err;
 }

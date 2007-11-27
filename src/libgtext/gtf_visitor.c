@@ -41,8 +41,8 @@ static void gtf_visitor_free(GenomeVisitor *gv, Env *env)
 {
   GTFVisitor *gtf_visitor = gtf_visitor_cast(gv);
   assert(gtf_visitor);
-  array_delete(gtf_visitor->exon_features, env);
-  array_delete(gtf_visitor->CDS_features, env);
+  array_delete(gtf_visitor->exon_features);
+  array_delete(gtf_visitor->CDS_features);
 }
 
 static int gtf_visitor_comment(GenomeVisitor *gv, Comment *c, Env *env)
@@ -63,9 +63,9 @@ static int save_exon_node(GenomeNode *gn, void *data, Env *env)
   gtf_visitor = (GTFVisitor*) data;
   gft = genome_feature_get_type((GenomeFeature*) gn);
   if (gft == gft_exon)
-    array_add(gtf_visitor->exon_features, gn, env);
+    array_add(gtf_visitor->exon_features, gn);
   else if (gft == gft_CDS)
-    array_add(gtf_visitor->CDS_features, gn, env);
+    array_add(gtf_visitor->CDS_features, gn);
   return 0;
 }
 
@@ -171,8 +171,8 @@ GenomeVisitor* gtf_visitor_new(GenFile *outfp, Env *env)
   GenomeVisitor *gv = genome_visitor_create(gtf_visitor_class(), env);
   GTFVisitor *gtf_visitor = gtf_visitor_cast(gv);
   gtf_visitor->gene_id = 0;
-  gtf_visitor->exon_features = array_new(sizeof (GenomeNode*), env);
-  gtf_visitor->CDS_features = array_new(sizeof (GenomeNode*), env);
+  gtf_visitor->exon_features = array_new(sizeof (GenomeNode*));
+  gtf_visitor->CDS_features = array_new(sizeof (GenomeNode*));
   gtf_visitor->outfp = outfp;
   return gv;
 }

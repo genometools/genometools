@@ -55,7 +55,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
     while (!had_err) {
       if (!(had_err = genome_stream_next_tree(cs->in_stream, &node, env))) {
         if (node)
-          array_add(cs->genome_node_buffer, node, env);
+          array_add(cs->genome_node_buffer, node);
         else
           break;
         if (!(genome_node_cast(sequence_region_class(), node)))
@@ -134,7 +134,7 @@ static void chseqids_stream_free(GenomeStream *gs, Env *env)
     genome_node_rec_delete(*(GenomeNode**)
                            array_get(cs->genome_node_buffer, i), env);
   }
-  array_delete(cs->genome_node_buffer, env);
+  array_delete(cs->genome_node_buffer);
 }
 
 const GenomeStreamClass* chseqids_stream_class(void)
@@ -162,6 +162,6 @@ GenomeStream* chseqids_stream_new(GenomeStream *in_stream, Str *chseqids_file,
     genome_stream_delete(gs, env);
     return NULL;
   }
-  cs->genome_node_buffer = array_new(sizeof (GenomeNode*), env);
+  cs->genome_node_buffer = array_new(sizeof (GenomeNode*));
   return gs;
 }

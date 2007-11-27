@@ -51,7 +51,7 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
   assert(ranges);
   new_range = genome_node_get_range((GenomeNode*) gf);
   if (!array_size(ranges))
-    array_add(ranges, new_range, env);
+    array_add(ranges, new_range);
   else {
     old_range_ptr = array_get_last(ranges);
     old_range = *old_range_ptr;
@@ -60,7 +60,7 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
       old_range_ptr->end = MAX(old_range_ptr->end, new_range.end);
     }
     else
-      array_add(ranges, new_range, env);
+      array_add(ranges, new_range);
   }
   return 0;
 }
@@ -72,7 +72,7 @@ static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
   Array *rangelist;
   env_error_check(env);
   regioncov_visitor = regioncov_visitor_cast(gv);
-  rangelist = array_new(sizeof (Range), env);
+  rangelist = array_new(sizeof (Range));
   hashtable_add(regioncov_visitor->region2rangelist,
                 cstr_dup(str_get(genome_node_get_seqid((GenomeNode*) sr))),
                 rangelist, env);

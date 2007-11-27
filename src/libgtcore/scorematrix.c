@@ -78,7 +78,7 @@ static int parse_alphabet_line(Array *index_to_alpha_char_mapping,
       assert(!had_err);
       return 0;
     }
-    array_add(index_to_alpha_char_mapping, amino_acid, env);
+    array_add(index_to_alpha_char_mapping, amino_acid);
     if (str_length(token) == 2) {
       if (tokenstr[1] != '\n') {
         env_error_set(env,
@@ -169,7 +169,7 @@ static int parse_scorematrix(ScoreMatrix *s, const char *path, Env *env)
   assert(s && path && s->alpha);
   env_error_check(env);
   tz = tokenizer_new(io_new(path, "r", env), env);
-  index_to_alpha_char_mapping = array_new(sizeof (char), env);
+  index_to_alpha_char_mapping = array_new(sizeof (char));
   tokenizer_skip_comment_lines(tz);
   had_err = parse_alphabet_line(index_to_alpha_char_mapping, tz, env);
   if (!had_err) {
@@ -189,7 +189,7 @@ static int parse_scorematrix(ScoreMatrix *s, const char *path, Env *env)
     had_err = -1;
   }
 
-  array_delete(index_to_alpha_char_mapping, env);
+  array_delete(index_to_alpha_char_mapping);
   tokenizer_delete(tz, env);
 
   return had_err;

@@ -32,7 +32,7 @@ Track* track_new(Str *title, Env *env)
   env_error_check(env);
   track = ma_malloc(sizeof (Track));
   track->title = str_ref(title);
-  track->lines = array_new(sizeof (Line*), env);
+  track->lines = array_new(sizeof (Line*));
   assert(track);
   return track;
 }
@@ -53,7 +53,7 @@ static Line* get_next_free_line(Track *track, Range r, Env *env)
     }
   }
   line = line_new(env);
-  array_add(track->lines, line, env);
+  array_add(track->lines, line);
 
   assert(line);
   return line;
@@ -138,7 +138,7 @@ void track_delete(Track *track, Env *env)
   if (!track) return;
   for (i = 0; i < array_size(track->lines); i++)
     line_delete(*(Line**) array_get(track->lines, i), env);
-  array_delete(track->lines, env);
+  array_delete(track->lines);
   str_delete(track->title);
   ma_free(track);
 }

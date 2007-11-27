@@ -39,8 +39,8 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q, Env *env)
   seq_b_profile = ma_calloc(alphasize_to_the_power_of_q,
                             sizeof (unsigned long));
 
-  seq_a_qgrams = array_new(sizeof (unsigned long), env);
-  seq_b_qgrams = array_new(sizeof (unsigned long), env);
+  seq_a_qgrams = array_new(sizeof (unsigned long));
+  seq_b_qgrams = array_new(sizeof (unsigned long));
 
   qgram_compute(seq_a_qgrams, seq_get_encoded(seq_a, env), seq_length(seq_a),
                 alpha_size(alpha_a), q, env);
@@ -62,8 +62,8 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q, Env *env)
       dist += seq_b_profile[i] - seq_a_profile[i];
   }
 
-  array_delete(seq_b_qgrams, env);
-  array_delete(seq_a_qgrams, env);
+  array_delete(seq_b_qgrams);
+  array_delete(seq_a_qgrams);
   ma_free(seq_b_profile);
   ma_free(seq_a_profile);
 

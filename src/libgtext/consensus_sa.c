@@ -126,16 +126,16 @@ static bool compatible(const ConsensusSA *csa,
   if (extract_strand(csa, sa_1) != extract_strand(csa, sa_2)) return false;
 
   /* init */
-  exons_sa_1 = array_new(sizeof (Range), env);
-  exons_sa_2 = array_new(sizeof (Range), env);
+  exons_sa_1 = array_new(sizeof (Range));
+  exons_sa_2 = array_new(sizeof (Range));
 
   /* get ranges */
   range_sa_1 = extract_genomic_range(csa, sa_1);
   range_sa_2 = extract_genomic_range(csa, sa_2);
 
   if (!range_overlap(range_sa_1, range_sa_2)) {
-    array_delete(exons_sa_1, env);
-    array_delete(exons_sa_2, env);
+    array_delete(exons_sa_1);
+    array_delete(exons_sa_2);
     return false;
   }
 
@@ -164,8 +164,8 @@ static bool compatible(const ConsensusSA *csa,
       j++;
   }
   if (!start_values_set) {
-    array_delete(exons_sa_1, env);
-    array_delete(exons_sa_2, env);
+    array_delete(exons_sa_1);
+    array_delete(exons_sa_2);
     return false;
   }
   /* from now on the start values are set */
@@ -173,8 +173,8 @@ static bool compatible(const ConsensusSA *csa,
   assert(start_1 != UNDEF_ULONG && start_2 != UNDEF_ULONG);
   if (!(start_1 == 0 || start_2 == 0)) {
     /* no first segment could be maped */
-    array_delete(exons_sa_1, env);
-    array_delete(exons_sa_2, env);
+    array_delete(exons_sa_1);
+    array_delete(exons_sa_2);
     return false;
   }
 
@@ -195,22 +195,22 @@ static bool compatible(const ConsensusSA *csa,
             has_acceptor_site(exons_sa_2, start_2) &&
             range_sa_1.start!= range_sa_2.start) {
           /* the acceptor sites are different */
-          array_delete(exons_sa_1, env);
-          array_delete(exons_sa_2, env);
+          array_delete(exons_sa_1);
+          array_delete(exons_sa_2);
           return false;
         }
         else if (has_acceptor_site(exons_sa_1, start_1) &&
                  range_sa_2.start + fuzzlength < range_sa_1.start) {
           /* not within fuzzlength */
-          array_delete(exons_sa_1, env);
-          array_delete(exons_sa_2, env);
+          array_delete(exons_sa_1);
+          array_delete(exons_sa_2);
           return false;
         }
         else if (has_acceptor_site(exons_sa_2, start_2) &&
                  range_sa_1.start + fuzzlength < range_sa_2.start) {
           /* not within fuzzlength */
-          array_delete(exons_sa_1, env);
-          array_delete(exons_sa_2, env);
+          array_delete(exons_sa_1);
+          array_delete(exons_sa_2);
           return false;
         }
       }
@@ -226,30 +226,30 @@ static bool compatible(const ConsensusSA *csa,
             has_donor_site(exons_sa_2, start_2) &&
             range_sa_1.end != range_sa_2.end) {
           /* the donor sites are different */
-          array_delete(exons_sa_1, env);
-          array_delete(exons_sa_2, env);
+          array_delete(exons_sa_1);
+          array_delete(exons_sa_2);
           return false;
         }
         else if (has_donor_site(exons_sa_1, start_1) &&
                  range_sa_2.end - fuzzlength > range_sa_1.end) {
           /* not within fuzzlength */
-          array_delete(exons_sa_1, env);
-          array_delete(exons_sa_2, env);
+          array_delete(exons_sa_1);
+          array_delete(exons_sa_2);
           return false;
         }
         else if (has_donor_site(exons_sa_2, start_2) &&
                  range_sa_1.end - fuzzlength > range_sa_2.end) {
           /* not within fuzzlength */
-          array_delete(exons_sa_1, env);
-          array_delete(exons_sa_2, env);
+          array_delete(exons_sa_1);
+          array_delete(exons_sa_2);
           return false;
         }
       }
     }
     else {
       /* no overlap: two ordered segments do not overlap each other */
-      array_delete(exons_sa_1, env);
-      array_delete(exons_sa_2, env);
+      array_delete(exons_sa_1);
+      array_delete(exons_sa_2);
       return false;
     }
     start_1++;
@@ -257,8 +257,8 @@ static bool compatible(const ConsensusSA *csa,
   }
 
   /* passed all tests */
-  array_delete(exons_sa_1, env);
-  array_delete(exons_sa_2, env);
+  array_delete(exons_sa_1);
+  array_delete(exons_sa_2);
   return true;
 }
 
@@ -486,7 +486,7 @@ static void compute_csas(ConsensusSA *csa, Env *env)
   SA_i     = bittab_new(csa->number_of_sas, env);
   SA_prime = bittab_new(csa->number_of_sas, env);
 
-  splice_form = array_new(sizeof (unsigned long), env);
+  splice_form = array_new(sizeof (unsigned long));
 
   /* compute sets */
   compute_C(C, csa, env);
@@ -562,7 +562,7 @@ static void compute_csas(ConsensusSA *csa, Env *env)
   bittab_delete(U_i, env);
   bittab_delete(SA_i, env);
   bittab_delete(SA_prime, env);
-  array_delete(splice_form, env);
+  array_delete(splice_form);
 }
 
 void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,

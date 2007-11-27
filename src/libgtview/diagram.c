@@ -78,7 +78,7 @@ static NodeInfoElement* get_or_create_node_info(Diagram *d,
   ni = hashtable_get(d->nodeinfo, node);
   if (ni == NULL) {
     NodeInfoElement *new_ni = ma_malloc(sizeof (NodeInfoElement));
-    new_ni->blocktuples = array_new(sizeof (BlockTuple*), env);
+    new_ni->blocktuples = array_new(sizeof (BlockTuple*));
     hashtable_add(d->nodeinfo, node, new_ni, env);
     ni = new_ni;
   }
@@ -148,7 +148,7 @@ static void add_to_current(Diagram *d, GenomeNode *node,
   bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node),
                       block,
                       env);
-  array_add(ni->blocktuples, bt, env);
+  array_add(ni->blocktuples, bt);
 }
 
 static void add_to_parent(Diagram *d, GenomeNode *node,
@@ -191,7 +191,7 @@ static void add_to_parent(Diagram *d, GenomeNode *node,
     bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node),
                         block,
                         env);
-    array_add(par_ni->blocktuples, bt, env);
+    array_add(par_ni->blocktuples, bt);
 
     log_log("    added %s to (%s) block for node %s",
                 genome_feature_type_get_cstr(
@@ -236,7 +236,7 @@ static void add_recursive(Diagram *d, GenomeNode *node,
       bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node),
                           block,
                           env);
-      array_add(ni->blocktuples, bt, env);
+      array_add(ni->blocktuples, bt);
     }
     block_insert_element(block, original_node, d->config, env);
   }
@@ -384,7 +384,7 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
     str_delete(track_key);
     ma_free(bt);
   }
-  array_delete(ni->blocktuples, env);
+  array_delete(ni->blocktuples);
   ma_free(ni);
   return 0;
 }
@@ -423,7 +423,7 @@ Diagram* diagram_new(FeatureIndex *fi, Range range, const char *seqid,
                      Config *config, Env *env)
 {
   Diagram *diagram;
-  Array *features = array_new(sizeof (GenomeNode*), env);
+  Array *features = array_new(sizeof (GenomeNode*));
   int had_err;
   env_error_check(env);
   diagram = ma_malloc(sizeof (Diagram));
@@ -439,7 +439,7 @@ Diagram* diagram_new(FeatureIndex *fi, Range range, const char *seqid,
                                                  env);
   assert(!had_err); /* <fi> must contain <seqid> */
   diagram_build(diagram, features, env);
-  array_delete(features, env);
+  array_delete(features);
   return diagram;
 }
 

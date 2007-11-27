@@ -58,7 +58,7 @@ static Array* range_table_to_array(lua_State *L, Env *env)
   /* make sure we got a table as first argument */
   luaL_checktype(L, 1, LUA_TTABLE);
   /* traverse table and save the ranges */
-  ranges = array_new(sizeof (Range), env);
+  ranges = array_new(sizeof (Range));
   lua_pushinteger(L, i);
   lua_gettable(L, 1);
   while (!lua_isnil(L, -1)) {
@@ -68,7 +68,7 @@ static Array* range_table_to_array(lua_State *L, Env *env)
       lua_getfield(L, LUA_REGISTRYINDEX, RANGE_METATABLE);
       if (lua_rawequal(L, -1, -2)) {
         lua_pop(L, 2); /* remove both metatables */
-        array_add(ranges, *range, env);
+        array_add(ranges, *range);
       }
       else
         error = true;
@@ -79,7 +79,7 @@ static Array* range_table_to_array(lua_State *L, Env *env)
       /* we have non range in the table */
       msg = lua_pushfstring(L, "expected %s as type of table entry %d",
                             RANGE_METATABLE, i);
-      array_delete(ranges, env);
+      array_delete(ranges);
       lua_error(L);
     }
     i++;
@@ -112,7 +112,7 @@ static int ranges_lua_sort(lua_State *L)
   ranges = range_table_to_array(L, env);
   ranges_sort(ranges);
   push_range_array_as_table(L, ranges);
-  array_delete(ranges, env);
+  array_delete(ranges);
   return 1;
 }
 
@@ -123,7 +123,7 @@ static int ranges_lua_are_sorted(lua_State *L)
   Env *env = get_env_from_registry(L);
   ranges = range_table_to_array(L, env);
   are_sorted = ranges_are_sorted(ranges);
-  array_delete(ranges, env);
+  array_delete(ranges);
   lua_pushboolean(L, are_sorted);
   return 1;
 }

@@ -128,7 +128,7 @@ static int save_hash_entry(void *key, void *value, void *data, Env *env)
   hash_entries = (Array*) data;
   he.key = key;
   he.value = value;
-  array_add(hash_entries, he, env);
+  array_add(hash_entries, he);
   return 0;
 }
 
@@ -159,7 +159,7 @@ int hashtable_foreach_ordered(Hashtable *ht, Hashiteratorfunc iterfunc,
   unsigned long i;
   int had_err;
   assert(ht && iterfunc && cmp);
-  hash_entries = array_new(sizeof (HashEntry), env);
+  hash_entries = array_new(sizeof (HashEntry));
   had_err = hashtable_foreach(ht, save_hash_entry, hash_entries, env);
   if (!had_err) {
     qsort(array_get_space(hash_entries), array_size(hash_entries),
@@ -169,7 +169,7 @@ int hashtable_foreach_ordered(Hashtable *ht, Hashiteratorfunc iterfunc,
       had_err = iterfunc(he->key, he->value, data, env);
     }
   }
-  array_delete(hash_entries, env);
+  array_delete(hash_entries);
   return had_err;
 }
 

@@ -95,10 +95,10 @@ void transcript_counts_set_terminal(TranscriptCounts *tc, Array *counts)
 void transcript_counts_delete(TranscriptCounts *tc, Env *env)
 {
   if (!tc) return;
-  array_delete(tc->exon_array_all, env);
-  array_delete(tc->exon_array_single, env);
-  array_delete(tc->exon_array_initial, env);
-  array_delete(tc->exon_array_internal, env);
-  array_delete(tc->exon_array_terminal, env);
+  array_delete(tc->exon_array_all);
+  array_delete(tc->exon_array_single);
+  array_delete(tc->exon_array_initial);
+  array_delete(tc->exon_array_internal);
+  array_delete(tc->exon_array_terminal);
   ma_free(tc);
 }

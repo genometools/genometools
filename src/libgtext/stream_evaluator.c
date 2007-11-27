@@ -134,11 +134,11 @@ static Slot* slot_new(bool nuceval, Range range, Env *env)
   unsigned long length;
   Slot *s = ma_calloc(1, sizeof (Slot));
   length = range_length(range);
-  s->genes_forward = array_new(sizeof (GenomeNode*), env);
-  s->genes_reverse = array_new(sizeof (GenomeNode*), env);
-  s->mRNAs_forward = array_new(sizeof (GenomeNode*), env);
-  s->mRNAs_reverse = array_new(sizeof (GenomeNode*), env);
-  s->LTRs          = array_new(sizeof (GenomeNode*), env);
+  s->genes_forward = array_new(sizeof (GenomeNode*));
+  s->genes_reverse = array_new(sizeof (GenomeNode*));
+  s->mRNAs_forward = array_new(sizeof (GenomeNode*));
+  s->mRNAs_reverse = array_new(sizeof (GenomeNode*));
+  s->LTRs          = array_new(sizeof (GenomeNode*));
   s->mRNA_exons_forward = transcript_exons_new(env);
   s->mRNA_exons_reverse = transcript_exons_new(env);
   s->CDS_exons_forward = transcript_exons_new(env);
@@ -167,19 +167,19 @@ static void slot_delete(Slot *s, Env *env)
   assert(s);
   for (i = 0; i < array_size(s->genes_forward); i++)
     genome_node_rec_delete(*(GenomeNode**) array_get(s->genes_forward, i), env);
-  array_delete(s->genes_forward, env);
+  array_delete(s->genes_forward);
   for (i = 0; i < array_size(s->genes_reverse); i++)
     genome_node_rec_delete(*(GenomeNode**) array_get(s->genes_reverse, i), env);
-  array_delete(s->genes_reverse, env);
+  array_delete(s->genes_reverse);
   for (i = 0; i < array_size(s->mRNAs_forward); i++)
     genome_node_rec_delete(*(GenomeNode**) array_get(s->mRNAs_forward, i), env);
-  array_delete(s->mRNAs_forward, env);
+  array_delete(s->mRNAs_forward);
   for (i = 0; i < array_size(s->mRNAs_reverse); i++)
     genome_node_rec_delete(*(GenomeNode**) array_get(s->mRNAs_reverse, i), env);
-  array_delete(s->mRNAs_reverse, env);
+  array_delete(s->mRNAs_reverse);
   for (i = 0; i < array_size(s->LTRs); i++)
     genome_node_rec_delete(*(GenomeNode**) array_get(s->LTRs, i), env);
-  array_delete(s->LTRs, env);
+  array_delete(s->LTRs);
   transcript_exons_delete(s->mRNA_exons_forward, env);
   transcript_exons_delete(s->mRNA_exons_reverse, env);
   transcript_exons_delete(s->CDS_exons_forward, env);
@@ -375,7 +375,7 @@ static void add_real_exon(TranscriptExons *te, Range range, GenomeNode *gn,
                           Env *env)
 {
   assert(te);
-  array_add(transcript_exons_get_all(te), range, env);
+  array_add(transcript_exons_get_all(te), range);
   switch (genome_feature_get_transcriptfeaturetype((GenomeFeature*) gn)) {
     case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
       warning("type of feature (single, initial, internal, or terminal) given "
@@ -384,16 +384,16 @@ static void add_real_exon(TranscriptExons *te, Range range, GenomeNode *gn,
               genome_node_get_line_number(gn), genome_node_get_filename(gn));
       /*@fallthrough@*/
     case TRANSCRIPT_FEATURE_TYPE_SINGLE:
-      array_add(transcript_exons_get_single(te), range, env);
+      array_add(transcript_exons_get_single(te), range);
       break;
     case TRANSCRIPT_FEATURE_TYPE_INITIAL:
-      array_add(transcript_exons_get_initial(te), range, env);
+      array_add(transcript_exons_get_initial(te), range);
       break;
     case TRANSCRIPT_FEATURE_TYPE_INTERNAL:
-      array_add(transcript_exons_get_internal(te), range, env);
+      array_add(transcript_exons_get_internal(te), range);
       break;
     case TRANSCRIPT_FEATURE_TYPE_TERMINAL:
-      array_add(transcript_exons_get_terminal(te), range, env);
+      array_add(transcript_exons_get_terminal(te), range);
       break;
   }
 }
@@ -432,11 +432,11 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
           gn_ref = genome_node_rec_ref(gn, env);
-          array_add(info->slot->genes_forward, gn_ref, env);
+          array_add(info->slot->genes_forward, gn_ref);
           break;
         case STRAND_REVERSE:
           gn_ref = genome_node_rec_ref(gn, env);
-          array_add(info->slot->genes_reverse, gn_ref, env);
+          array_add(info->slot->genes_reverse, gn_ref);
           break;
         default:
           if (info->verbose) {
@@ -449,11 +449,11 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
           gn_ref = genome_node_rec_ref(gn, env);
-          array_add(info->slot->mRNAs_forward, gn_ref, env);
+          array_add(info->slot->mRNAs_forward, gn_ref);
           break;
         case STRAND_REVERSE:
           gn_ref = genome_node_rec_ref(gn, env);
-          array_add(info->slot->mRNAs_reverse, gn_ref, env);
+          array_add(info->slot->mRNAs_reverse, gn_ref);
           break;
         default:
           if (info->verbose) {
@@ -464,7 +464,7 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       break;
     case gft_LTR_retrotransposon:
       gn_ref = genome_node_rec_ref(gn, env);
-      array_add(info->slot->LTRs, gn_ref, env);
+      array_add(info->slot->LTRs, gn_ref);
       break;
     case gft_CDS:
       range = genome_node_get_range(gn);
@@ -534,7 +534,7 @@ static int store_exon(GenomeNode *gn, void *data, Env *env)
   assert(gf && exons);
   if (genome_feature_get_type(gf) == gft_exon) {
     range = genome_node_get_range(gn);
-    array_add(exons, range, env);
+    array_add(exons, range);
   }
   return 0;
 }
@@ -548,8 +548,8 @@ static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   assert(gn_1 && gn_2);
 
   /* init */
-  exons_1 = array_new(sizeof (Range), env);
-  exons_2 = array_new(sizeof (Range), env);
+  exons_1 = array_new(sizeof (Range));
+  exons_2 = array_new(sizeof (Range));
 
   /* get exon ranges */
   had_err = genome_node_traverse_children(gn_1, exons_1, store_exon, false,
@@ -567,8 +567,8 @@ static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   equal = ranges_are_equal(exons_1, exons_2);
 
   /* free */
-  array_delete(exons_1, env);
-  array_delete(exons_2, env);
+  array_delete(exons_1);
+  array_delete(exons_2);
 
   return equal;
 }
@@ -588,11 +588,11 @@ static int store_gene_feature(GenomeNode *gn, void *data, Env *env)
   assert(gf && info);
   switch (genome_feature_get_type(gf)) {
     case gft_mRNA:
-      array_add(info->mRNAs, gf, env);
+      array_add(info->mRNAs, gf);
       break;
     case gft_exon:
       range = genome_node_get_range(gn);
-      array_add(info->exons, range, env);
+      array_add(info->exons, range);
       break;
     default:
       assert(1);
@@ -609,10 +609,10 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   int had_err;
 
   /* init */
-  exons_1 = array_new(sizeof (Range), env);
-  exons_2 = array_new(sizeof (Range), env);
-  mRNAs_1 = array_new(sizeof (GenomeNode*), env);
-  mRNAs_2 = array_new(sizeof (GenomeNode*), env);
+  exons_1 = array_new(sizeof (Range));
+  exons_2 = array_new(sizeof (Range));
+  mRNAs_1 = array_new(sizeof (GenomeNode*));
+  mRNAs_2 = array_new(sizeof (GenomeNode*));
 
   /* get (direct) gene features */
   info.exons = exons_1;
@@ -648,10 +648,10 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   }
 
   /* free */
-  array_delete(exons_1, env);
-  array_delete(exons_2, env);
-  array_delete(mRNAs_1, env);
-  array_delete(mRNAs_2, env);
+  array_delete(exons_1);
+  array_delete(exons_2);
+  array_delete(mRNAs_1);
+  array_delete(mRNAs_2);
 
   return equal;
 }
@@ -879,7 +879,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
 
   predicted_range = genome_node_get_range(gn);
   predicted_strand = genome_feature_get_strand((GenomeFeature*) gn);
-  real_genome_nodes = array_new(sizeof (GenomeNode**), env);
+  real_genome_nodes = array_new(sizeof (GenomeNode**));
 
   switch (genome_feature_get_type((GenomeFeature*) gn)) {
     case gft_gene:
@@ -1141,7 +1141,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
     default:
       assert(1); /* shut up compiler */
   }
-  array_delete(real_genome_nodes, env);
+  array_delete(real_genome_nodes);
   return 0;
 }
 

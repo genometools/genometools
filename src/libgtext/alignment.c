@@ -51,7 +51,7 @@ Alignment* alignment_new(Env *env)
 {
   Alignment *a;
   a = ma_calloc(1, sizeof (Alignment));
-  a->eops = array_new(sizeof (Multieop), env);
+  a->eops = array_new(sizeof (Multieop));
   return a;
 }
 
@@ -82,7 +82,7 @@ static void alignment_add_eop(Alignment *a, Eoptype type, Env *env)
   if (!array_size(a->eops)) {
     meop.type = type;
     meop.steps = 1;
-    array_add(a->eops, meop, env);
+    array_add(a->eops, meop);
   }
   else {
     meop_ptr = array_get_last(a->eops);
@@ -91,7 +91,7 @@ static void alignment_add_eop(Alignment *a, Eoptype type, Env *env)
     else {
       meop.type = type;
       meop.steps = 1;
-      array_add(a->eops, meop, env);
+      array_add(a->eops, meop);
     }
   }
 }
@@ -326,6 +326,6 @@ int alignment_unit_test(Env *env)
 void alignment_delete(Alignment *a, Env *env)
 {
   if (!a) return;
-  array_delete(a->eops, env);
+  array_delete(a->eops);
   ma_free(a);
 }

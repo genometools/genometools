@@ -78,7 +78,7 @@ void setreadintkeys(Array *riktab,
             break;
   }
   rikvalue.found = false;
-  array_add_elem(riktab,&rikvalue,sizeof (Readintkeys),env);
+  array_add_elem(riktab,&rikvalue,sizeof (Readintkeys));
 }
 
 static int scanuintintline(uint32_t *lengthofkey,

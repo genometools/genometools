@@ -30,11 +30,11 @@ struct TranscriptExons {
 TranscriptExons* transcript_exons_new(Env *env)
 {
   TranscriptExons *te = ma_malloc(sizeof (TranscriptExons));
-  te->exon_array_all = array_new(sizeof (Range), env);
-  te->exon_array_single = array_new(sizeof (Range), env);
-  te->exon_array_initial = array_new(sizeof (Range), env);
-  te->exon_array_internal = array_new(sizeof (Range), env);
-  te->exon_array_terminal = array_new(sizeof (Range), env);
+  te->exon_array_all = array_new(sizeof (Range));
+  te->exon_array_single = array_new(sizeof (Range));
+  te->exon_array_initial = array_new(sizeof (Range));
+  te->exon_array_internal = array_new(sizeof (Range));
+  te->exon_array_terminal = array_new(sizeof (Range));
   return te;
 }
 
@@ -123,10 +123,10 @@ TranscriptBittabs* transcript_exons_create_bittabs(const TranscriptExons *te,
 void transcript_exons_delete(TranscriptExons *te, Env *env)
 {
   if (!te) return;
-  array_delete(te->exon_array_all, env);
-  array_delete(te->exon_array_single, env);
-  array_delete(te->exon_array_initial, env);
-  array_delete(te->exon_array_internal, env);
-  array_delete(te->exon_array_terminal, env);
+  array_delete(te->exon_array_all);
+  array_delete(te->exon_array_single);
+  array_delete(te->exon_array_initial);
+  array_delete(te->exon_array_internal);
+  array_delete(te->exon_array_terminal);
   ma_free(te);
 }

@@ -61,7 +61,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
   unsigned int intstoreindexpos;
 
   env_error_check(env);
-  riktab = array_new(sizeofReadintkeys(),env);
+  riktab = array_new(sizeofReadintkeys());
   SETREADINTKEYS("bwtlength",&fmindex->bwtlength,NULL);
   SETREADINTKEYS("longest",&fmindex->longestsuffixpos,NULL);
   SETREADINTKEYS("storeindexpos",&intstoreindexpos,NULL);
@@ -121,7 +121,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
       }
     }
   }
-  array_delete(riktab,env);
+  array_delete(riktab);
   return haserr ? -1 : 0;
 }
 

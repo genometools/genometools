@@ -36,7 +36,7 @@ static void mergefeat_visitor_free(GenomeVisitor *gv, Env *env)
   MergefeatVisitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
   assert(mergefeat_visitor);
   hashtable_delete(mergefeat_visitor->ht, env);
-  array_delete(mergefeat_visitor->nodes_to_remove, env);
+  array_delete(mergefeat_visitor->nodes_to_remove);
 }
 
 static int mergefeat_in_children(GenomeNode *gn, void *data, Env *env)
@@ -61,7 +61,7 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, Env *env)
       /* XXX: compute average score ? */
       genome_feature_set_score(previous_feature, UNDEF_DOUBLE);
       assert(!genome_node_number_of_children((GenomeNode*) current_feature));
-      array_add(v->nodes_to_remove, current_feature, env);
+      array_add(v->nodes_to_remove, current_feature);
     }
     /* remove previous feature */
     hashtable_remove(v->ht, (char*) genome_feature_type_get_cstr(
@@ -124,6 +124,6 @@ GenomeVisitor* mergefeat_visitor_new(Env *env)
   GenomeVisitor *gv = genome_visitor_create(mergefeat_visitor_class(), env);
   MergefeatVisitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
   mergefeat_visitor->ht = hashtable_new(HASH_STRING, NULL, NULL, env);
-  mergefeat_visitor->nodes_to_remove = array_new(sizeof (GenomeNode*), env);
+  mergefeat_visitor->nodes_to_remove = array_new(sizeof (GenomeNode*));
   return gv;
 }

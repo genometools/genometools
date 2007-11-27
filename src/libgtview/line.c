@@ -30,14 +30,14 @@ Line* line_new(Env *env)
   Line *line;
   env_error_check(env);
   line = ma_malloc(sizeof (Line));
-  line->blocks = array_new(sizeof (Block*), env);
+  line->blocks = array_new(sizeof (Block*));
   return line;
 }
 
 void line_insert_block(Line *line, Block *block, Env *env)
 {
   assert(line && block);
-  array_add(line->blocks, block, env);
+  array_add(line->blocks, block);
 }
 
 bool line_is_occupied(const Line *line, Range r)
@@ -157,15 +157,10 @@ int line_unit_test(Env* env)
 
 void line_delete(Line *line, Env *env)
 {
-  int i;
-
+  unsigned long i;
   if (!line) return;
-
-  for (i=0; i<array_size(line->blocks); i++)
-  {
+  for (i = 0; i < array_size(line->blocks); i++)
     block_delete(*(Block**) array_get(line->blocks, i), env);
-  }
-
-  array_delete(line->blocks, env);
+  array_delete(line->blocks);
   ma_free(line);
 }

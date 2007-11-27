@@ -152,7 +152,7 @@ static int construct_mRNAs(void *key, void *value, void *data, Env *env)
     }
 
     /* store the mRNA */
-    array_add(mRNAs, mRNA_node, env);
+    array_add(mRNAs, mRNA_node);
   }
 
   return had_err;
@@ -162,7 +162,7 @@ static int construct_genes(void *key, void *value, void *data, Env *env)
 {
   Hashtable *transcript_id_hash = (Hashtable*) value;
   Queue *genome_nodes = (Queue*) data;
-  Array *mRNAs = array_new(sizeof (GenomeNode*), env);
+  Array *mRNAs = array_new(sizeof (GenomeNode*));
   GenomeNode *gene_node, *gn;
   Strand gene_strand;
   Range gene_range;
@@ -204,7 +204,7 @@ static int construct_genes(void *key, void *value, void *data, Env *env)
     queue_add(genome_nodes, gene_node, env);
 
     /* free */
-    array_delete(mRNAs, env);
+    array_delete(mRNAs);
   }
 
   return had_err;
@@ -417,7 +417,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
 
       if (!(genome_node_array = hashtable_get(transcript_id_hash,
                                               transcript_id))) {
-        genome_node_array = array_new(sizeof (GenomeNode*), env);
+        genome_node_array = array_new(sizeof (GenomeNode*));
         hashtable_add(transcript_id_hash, cstr_dup(transcript_id),
                       genome_node_array, env);
       }
@@ -451,7 +451,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         genome_feature_set_score((GenomeFeature*) gn, score_value);
       if (phase_value != PHASE_UNDEFINED)
         genome_node_set_phase(gn, phase_value);
-      array_add(genome_node_array, gn, env);
+      array_add(genome_node_array, gn);
     }
 
     str_reset(line_buffer);

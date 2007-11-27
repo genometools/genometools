@@ -87,7 +87,7 @@ static int storemaxmatchquery(void *info,
   subm.dbstart = dbstart;
   subm.queryseqnum = queryseqnum;
   subm.querystart = querystart;
-  array_add(tab,subm,env);
+  array_add(tab,subm);
   return 0;
 }
 
@@ -152,7 +152,7 @@ static int storemaxmatchself(void *info,
       }
       subm.queryseqnum = (uint64_t) queryseqnum;
     }
-    array_add(maxmatchselfinfo->results,subm,env);
+    array_add(maxmatchselfinfo->results,subm);
   }
   return 0;
 }
@@ -249,7 +249,7 @@ int testmaxpairs(const Str *indexname,
     showverbose(verboseinfo,"run query match for dblen=" FormatSeqpos
                             ",querylen= " FormatSeqpos ", minlength=%u",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
-    tabmaxquerymatches = array_new(sizeof (Substringmatch),env);
+    tabmaxquerymatches = array_new(sizeof (Substringmatch));
     if (sarrquerysubstringmatch(dbseq,
                                 dblen,
                                 query,
@@ -267,7 +267,7 @@ int testmaxpairs(const Str *indexname,
     showverbose(verboseinfo,"run self match for dblen=" FormatSeqpos
                             ",querylen= " FormatSeqpos ", minlength=%u",
            PRINTSeqposcast(dblen),PRINTSeqposcast(querylen),minlength);
-    maxmatchselfinfo.results = array_new(sizeof (Substringmatch),env);
+    maxmatchselfinfo.results = array_new(sizeof (Substringmatch));
     maxmatchselfinfo.dblen = dblen;
     maxmatchselfinfo.querylen = (unsigned long) querylen;
     maxmatchselfinfo.markpos
@@ -312,8 +312,8 @@ int testmaxpairs(const Str *indexname,
     }
     FREESPACE(maxmatchselfinfo.markpos);
     printf("# numberofmatches=%lu\n",array_size(tabmaxquerymatches));
-    array_delete(tabmaxquerymatches,env);
-    array_delete(maxmatchselfinfo.results,env);
+    array_delete(tabmaxquerymatches);
+    array_delete(maxmatchselfinfo.results);
   }
   FREESPACE(dbseq);
   FREESPACE(query);

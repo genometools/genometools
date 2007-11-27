@@ -29,7 +29,7 @@ StrArray* strarray_new(Env *env)
   StrArray *sa;
   env_error_check(env);
   sa = ma_malloc(sizeof (StrArray));
-  sa->strings = array_new(sizeof (Str*), env);
+  sa->strings = array_new(sizeof (Str*));
   return sa;
 }
 
@@ -58,7 +58,7 @@ void strarray_add_cstr(StrArray *sa, const char *cstr, Env *env)
   env_error_check(env);
   assert(sa && cstr);
   str = str_new_cstr(cstr);
-  array_add(sa->strings, str, env);
+  array_add(sa->strings, str);
 }
 
 const char* strarray_get(const StrArray *sa, unsigned long strnum)
@@ -85,6 +85,6 @@ void strarray_delete(StrArray *sa, Env *env)
   if (!sa) return;
   for (i = 0; i < array_size(sa->strings); i++)
     str_delete(*(Str**) array_get(sa->strings, i));
-  array_delete(sa->strings, env);
+  array_delete(sa->strings);
   ma_free(sa);
 }

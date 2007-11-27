@@ -153,14 +153,14 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   gn_ref = genome_node_ref(genome_node);
 
   if (depth_first) {
-    node_stack = array_new(sizeof (GenomeNode*), env);
-    array_add(node_stack, genome_node, env);
+    node_stack = array_new(sizeof (GenomeNode*));
+    array_add(node_stack, genome_node);
   }
   else {
     node_queue = queue_new(env);
     queue_add(node_queue, genome_node, env);
   }
-  list_of_children = array_new(sizeof (GenomeNode*), env);
+  list_of_children = array_new(sizeof (GenomeNode*));
 
   if (traverse_only_once)
     traversed_nodes = hashtable_new(HASH_DIRECT, NULL, NULL, env);
@@ -177,7 +177,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
       for (dlistelem = dlist_first(gn->children); dlistelem != NULL;
            dlistelem = dlistelem_next(dlistelem)) {
         child_feature = (GenomeNode*) dlistelem_get_data(dlistelem);
-        array_add(list_of_children, child_feature, env);
+        array_add(list_of_children, child_feature);
       }
     }
     /* store the implications of <gn> to the tree status of <genome_node> */
@@ -204,7 +204,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
         /* feature has not been traversed or has to be traversed multiple
            times */
         if (depth_first)
-          array_add(node_stack, child_feature, env);
+          array_add(node_stack, child_feature);
         else
           queue_add(node_queue, child_feature, env);
         if (traverse_only_once)
@@ -232,8 +232,8 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
   genome_node_delete(gn_ref, env);
   if (traverse_only_once)
     hashtable_delete(traversed_nodes, env);
-  array_delete(list_of_children, env);
-  array_delete(node_stack, env);
+  array_delete(list_of_children);
+  array_delete(node_stack);
   queue_delete(node_queue, env);
 
   return had_err;
@@ -461,7 +461,7 @@ bool genome_node_direct_children_do_not_overlap_generic(GenomeNode *parent,
     return true;
 
   /* get children ranges */
-  children_ranges = array_new(sizeof (Range), env);
+  children_ranges = array_new(sizeof (Range));
   assert(parent->children);
   for (dlistelem = dlist_first(parent->children); dlistelem != NULL;
        dlistelem = dlistelem_next(dlistelem)) {
@@ -471,7 +471,7 @@ bool genome_node_direct_children_do_not_overlap_generic(GenomeNode *parent,
          genome_feature_get_type(gf) == genome_feature_get_type(child_gf))) {
       range = genome_node_get_range((GenomeNode*)
                                     dlistelem_get_data(dlistelem));
-      array_add(children_ranges, range, env);
+      array_add(children_ranges, range);
     }
   }
 
@@ -479,7 +479,7 @@ bool genome_node_direct_children_do_not_overlap_generic(GenomeNode *parent,
   assert(ranges_are_sorted(children_ranges));
   rval = ranges_do_not_overlap(children_ranges);
 
-  array_delete(children_ranges, env);
+  array_delete(children_ranges);
 
   return rval;
 }

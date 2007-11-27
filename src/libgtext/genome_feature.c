@@ -294,7 +294,7 @@ static int save_exon(GenomeNode *gn, void *data, Env *env)
   gf = (GenomeFeature*) gn;
   assert(gf && exon_features);
   if (genome_feature_get_type(gf) == gft_exon) {
-    array_add(exon_features, gf, env);
+    array_add(exon_features, gf);
   }
   return 0;
 }
@@ -316,9 +316,9 @@ static int save_exons_and_cds(GenomeNode *gn, void *data, Env *env)
   gf = (GenomeFeature*) gn;
   assert(gf && info);
   if (genome_feature_get_type(gf) == gft_exon)
-    array_add(info->exon_features, gf, env);
+    array_add(info->exon_features, gf);
   else if (genome_feature_get_type(gf) == gft_CDS)
-    array_add(info->cds_features, gf, env);
+    array_add(info->cds_features, gf);
   return 0;
 }
 
@@ -369,15 +369,15 @@ void genome_feature_determine_transcripttypes(GenomeFeature *gf, Env *env)
   SaveExonAndCDSInfo info;
   int had_err;
   assert(gf);
-  info.exon_features = array_new(sizeof (GenomeFeature*), env);
-  info.cds_features = array_new(sizeof (GenomeFeature*), env);
+  info.exon_features = array_new(sizeof (GenomeFeature*));
+  info.cds_features = array_new(sizeof (GenomeFeature*));
   had_err = genome_node_traverse_children((GenomeNode*) gf, &info,
                                           determine_transcripttypes, false,
                                           env);
   assert(!had_err); /* cannot happen, because determine_transcripttypes() is
                        sane */
-  array_delete(info.exon_features, env);
-  array_delete(info.cds_features, env);
+  array_delete(info.exon_features);
+  array_delete(info.cds_features);
 }
 
 TranscriptFeatureType genome_feature_get_transcriptfeaturetype(GenomeFeature

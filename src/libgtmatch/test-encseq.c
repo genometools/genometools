@@ -245,22 +245,22 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
   {
     return 0;
   }
-  rangesforward = array_new(sizeof (Sequencerange),env);
-  rangesbackward = array_new(sizeof (Sequencerange),env);
+  rangesforward = array_new(sizeof (Sequencerange));
+  rangesbackward = array_new(sizeof (Sequencerange));
 
   sri = newspecialrangeiterator(encseq,true,env);
   while (nextspecialrangeiterator(&range,sri))
   {
-    array_add(rangesforward,range,env);
+    array_add(rangesforward,range);
   }
   freespecialrangeiterator(&sri,env);
   sri = newspecialrangeiterator(encseq,false,env);
   while (nextspecialrangeiterator(&range,sri))
   {
-    array_add(rangesbackward,range,env);
+    array_add(rangesbackward,range);
   }
   freespecialrangeiterator(&sri,env);
-  array_reverse(rangesbackward,env);
+  array_reverse(rangesbackward);
   if (!haserr)
   {
     if (array_compare(rangesforward,rangesbackward,
@@ -269,7 +269,7 @@ int checkspecialrangesfast(const Encodedsequence *encseq,Env *env)
       exit(EXIT_FAILURE);
     }
   }
-  array_delete(rangesforward,env);
-  array_delete(rangesbackward,env);
+  array_delete(rangesforward);
+  array_delete(rangesbackward);
   return haserr ? - 1 : 0;
 }

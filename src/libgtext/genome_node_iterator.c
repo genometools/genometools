@@ -29,8 +29,8 @@ GenomeNodeIterator* genome_node_iterator_new(GenomeNode *gn, Env *env)
   env_error_check(env);
   assert(gn);
   gni = ma_malloc(sizeof *gni);
-  gni->node_stack = array_new(sizeof (GenomeNode*), env);
-  array_add(gni->node_stack, gn, env);
+  gni->node_stack = array_new(sizeof (GenomeNode*));
+  array_add(gni->node_stack, gn);
   return gni;
 }
 
@@ -49,7 +49,7 @@ GenomeNode* genome_node_iterator_next(GenomeNodeIterator *gni, Env *env)
     for (dlistelem = dlist_last(gn->children); dlistelem != NULL;
          dlistelem = dlistelem_previous(dlistelem)) {
       child = dlistelem_get_data(dlistelem);
-      array_add(gni->node_stack, child, env);
+      array_add(gni->node_stack, child);
     }
   }
   return gn;
@@ -76,6 +76,6 @@ int genome_node_iterator_example(Env *env)
 void genome_node_iterator_delete(GenomeNodeIterator *gni, Env *env)
 {
   if (!gni) return;
-  array_delete(gni->node_stack, env);
+  array_delete(gni->node_stack);
   ma_free(gni);
 }

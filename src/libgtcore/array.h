@@ -23,19 +23,19 @@
 
 typedef struct Array Array;
 
-Array*        array_new(size_t, Env*);
-Array*        array_clone(const Array*, Env*);
+Array*        array_new(size_t);
+Array*        array_clone(const Array*);
 void*         array_get(const Array*, unsigned long);
 void*         array_get_first(const Array*);
 void*         array_get_last(const Array*);
 void*         array_pop(Array*);
 void*         array_get_space(const Array*);
-#define       array_add(a, elem, env)\
-              array_add_elem(a, &(elem), sizeof (elem), env)
-void          array_add_elem(Array*, void*, size_t, Env*);
-void          array_add_array(Array*, const Array*, Env*);
+#define       array_add(a, elem)\
+              array_add_elem(a, &(elem), sizeof (elem))
+void          array_add_elem(Array*, void*, size_t);
+void          array_add_array(Array*, const Array*);
 void          array_rem(Array*, unsigned long); /* O(n) */
-void          array_reverse(Array*, Env*);
+void          array_reverse(Array*);
 void          array_set_size(Array*, unsigned long);
 void          array_reset(Array*);
 size_t        array_elem_size(const Array*);
@@ -46,6 +46,6 @@ int           array_iterate(const Array*,
                             void *info, Env*);
 int           array_example(Env*);
 int           array_unit_test(Env*);
-void          array_delete(Array*, Env*);
+void          array_delete(Array*);
 
 #endif

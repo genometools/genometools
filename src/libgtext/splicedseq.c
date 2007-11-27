@@ -33,7 +33,7 @@ Splicedseq* splicedseq_new(Env *env)
 {
   Splicedseq *ss = ma_malloc(sizeof (Splicedseq));
   ss->splicedseq = str_new();
-  ss->positionmapping = array_new(sizeof (unsigned long), env);
+  ss->positionmapping = array_new(sizeof (unsigned long));
   ss->forward = true;
   return ss;
 }
@@ -49,7 +49,7 @@ void splicedseq_add(Splicedseq *ss, unsigned long start, unsigned long end,
   assert(!array_size(ss->positionmapping) ||
          start > *(unsigned long*) array_get_last(ss->positionmapping));
   for (i = start; i <= end; i++)
-    array_add(ss->positionmapping, i, env);
+    array_add(ss->positionmapping, i);
 }
 
 char* splicedseq_get(const Splicedseq *ss)
@@ -94,7 +94,7 @@ int splicedseq_reverse(Splicedseq *ss, Env *env)
   had_err = reverse_complement(str_get(ss->splicedseq),
                                str_length(ss->splicedseq), env);
   if (!had_err) {
-    array_reverse(ss->positionmapping, env);
+    array_reverse(ss->positionmapping);
     ss->forward = !ss->forward;
   }
   return had_err;
@@ -143,6 +143,6 @@ void splicedseq_delete(Splicedseq *ss, Env *env)
 {
   if (!ss) return;
   str_delete(ss->splicedseq);
-  array_delete(ss->positionmapping, env);
+  array_delete(ss->positionmapping);
   ma_free(ss);
 }

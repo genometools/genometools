@@ -56,7 +56,7 @@ static AutomaticSequenceRegion* automatic_sequence_region_new(Env *env)
   AutomaticSequenceRegion *auto_sr;
   env_error_check(env);
   auto_sr = ma_malloc(sizeof (AutomaticSequenceRegion));
-  auto_sr->genome_features = array_new(sizeof (GenomeFeature*), env);
+  auto_sr->genome_features = array_new(sizeof (GenomeFeature*));
   return auto_sr;
 }
 
@@ -70,7 +70,7 @@ static void automatic_sequence_region_delete(AutomaticSequenceRegion *auto_sr,
     genome_node_delete(*(GenomeNode**) array_get(auto_sr->genome_features, i),
                        env);
   }
-  array_delete(auto_sr->genome_features, env);
+  array_delete(auto_sr->genome_features);
   ma_free(auto_sr);
 }
 
@@ -441,7 +441,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   if (!had_err) {
     gn = (is_child || auto_sr) ? NULL : genome_feature;
     if (auto_sr && !is_child)
-      array_add(auto_sr->genome_features, genome_feature, env);
+      array_add(auto_sr->genome_features, genome_feature);
   }
   else
     genome_node_delete(genome_feature, env);

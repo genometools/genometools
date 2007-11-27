@@ -63,7 +63,7 @@ static int proc_description(Str *description, void *data, Env *env)
   env_error_check(env);
   if (info->bs->use_stdin) {
     description_cstr = cstr_dup(str_get(description));
-    array_add(info->bs->descriptions, description_cstr, env);
+    array_add(info->bs->descriptions, description_cstr);
   }
   else {
     if (str_length(description))
@@ -97,7 +97,7 @@ static int proc_sequence_length(unsigned long sequence_length, void *data,
   if (info->bs->use_stdin) {
     range.start = info->offset;
     range.end = info->offset + sequence_length - 1;
-    array_add(info->bs->sequence_ranges, range, env);
+    array_add(info->bs->sequence_ranges, range);
   }
   else {
     fprintf(info->bioseq_index, "%lu\n", info->offset);
@@ -146,7 +146,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
       case 1:
         /* process description */
         description = cstr_dup(str_get(index_line));
-        array_add(bs->descriptions, description, env);
+        array_add(bs->descriptions, description);
         break;
       case 2:
         /* process sequence start */
@@ -165,7 +165,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
         }
         else {
           assert(range.start <= range.end); /* XXX */
-          array_add(bs->sequence_ranges, range, env);
+          array_add(bs->sequence_ranges, range);
         }
         break;
     }
@@ -285,8 +285,8 @@ static Bioseq* bioseq_new_with_recreate(Str *sequence_file, bool recreate,
   }
   if (!had_err) {
     bs->sequence_file = str_ref(sequence_file);
-    bs->descriptions = array_new(sizeof (char*), env);
-    bs->sequence_ranges = array_new(sizeof (Range), env);
+    bs->descriptions = array_new(sizeof (char*));
+    bs->sequence_ranges = array_new(sizeof (Range));
     had_err = bioseq_fill(bs, recreate, env);
   }
   if (had_err) {
@@ -409,8 +409,8 @@ void bioseq_delete(Bioseq *bs, Env *env)
   }
   for (i = 0; i < array_size(bs->descriptions); i++)
     ma_free(*(char**) array_get(bs->descriptions, i));
-  array_delete(bs->descriptions, env);
-  array_delete(bs->sequence_ranges, env);
+  array_delete(bs->descriptions);
+  array_delete(bs->sequence_ranges);
   if (bs->use_stdin)
     ma_free(bs->raw_sequence);
   else

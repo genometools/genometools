@@ -180,10 +180,10 @@ int range_unit_test(Env *env)
                   sizeof (counts)     / sizeof (counts[0]));
 
   /* test ranges_uniq() */
-  ranges = array_new(sizeof (Range), env);
-  tmp_ranges = array_new(sizeof (Range), env);
+  ranges = array_new(sizeof (Range));
+  tmp_ranges = array_new(sizeof (Range));
   for (i = 0; i < sizeof (ranges_in) / sizeof (ranges_in[0]) && !had_err; i++)
-    array_add(ranges, ranges_in[i], env);
+    array_add(ranges, ranges_in[i]);
   ranges_uniq(tmp_ranges, ranges, env);
   ensure(had_err, array_size(ranges) ==
                   sizeof (ranges_in) / sizeof (ranges_in[0]));
@@ -198,7 +198,7 @@ int range_unit_test(Env *env)
 
   /* test ranges_uniq_in_place() */
   array_reset(tmp_ranges);
-  array_add_array(tmp_ranges, ranges, env);
+  array_add_array(tmp_ranges, ranges);
   ranges_uniq_in_place(tmp_ranges, env);
   for (i = 0; i < array_size(tmp_ranges) && !had_err; i++) {
     ensure(had_err,
@@ -219,7 +219,7 @@ int range_unit_test(Env *env)
     ensure(had_err,
            ranges_out[i].end == (*(Range*) array_get(tmp_ranges, i)).end);
   }
-  array_delete(ctr, env);
+  array_delete(ctr);
 
   /* test ranges_uniq_in_place_count() */
   ctr = ranges_uniq_in_place_count(ranges, env);
@@ -232,11 +232,11 @@ int range_unit_test(Env *env)
     ensure(had_err,
            ranges_out[i].end == (*(Range*) array_get(ranges, i)).end);
   }
-  array_delete(ctr, env);
+  array_delete(ctr);
 
   /* free */
-  array_delete(ranges, env);
-  array_delete(tmp_ranges, env);
+  array_delete(ranges);
+  array_delete(tmp_ranges);
   return had_err;
 }
 
@@ -319,13 +319,13 @@ static Array* generic_ranges_uniq(Array *out_ranges, const Array *in_ranges,
   assert(out_ranges && in_ranges);
   assert(ranges_are_sorted(in_ranges));
   if (count)
-    count_array = array_new(sizeof (unsigned long), env);
+    count_array = array_new(sizeof (unsigned long));
   for (i = 0; i < array_size(in_ranges); i++) {
     cur = *(Range*) array_get(in_ranges, i);
     if (!i) {
-      array_add(out_ranges, cur, env);
+      array_add(out_ranges, cur);
       if (count)
-        array_add(count_array, ctr, env);
+        array_add(count_array, ctr);
     }
     else {
       if (prev.start == cur.start && prev.end == cur.end) {
@@ -335,9 +335,9 @@ static Array* generic_ranges_uniq(Array *out_ranges, const Array *in_ranges,
         }
       }
       else {
-        array_add(out_ranges, cur, env);
+        array_add(out_ranges, cur);
         if (count)
-          array_add(count_array, ctr, env);
+          array_add(count_array, ctr);
       }
     }
     prev = cur;
@@ -349,14 +349,14 @@ static Array* generic_ranges_uniq_in_place(Array *ranges, bool count, Env *env)
 {
   Array *out_ranges, *count_array;
   assert(ranges);
-  out_ranges = array_new(sizeof (Range), env);
+  out_ranges = array_new(sizeof (Range));
   count_array = generic_ranges_uniq(out_ranges, ranges, count, env);
   array_reset(ranges);
-  array_add_array(ranges, out_ranges, env ); /* XXX: could be more efficient
-                                                with something like
-                                                array_replace(ranges,
-                                                              out_ranges) */
-  array_delete(out_ranges, env);
+  array_add_array(ranges, out_ranges); /* XXX: could be more efficient
+                                               with something like
+                                               array_replace(ranges,
+                                                             out_ranges) */
+  array_delete(out_ranges);
   return count_array;
 }
 

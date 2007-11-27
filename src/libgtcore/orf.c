@@ -39,7 +39,7 @@ void determine_ORFs(Array *ranges, unsigned int framenum,
     else {
       if (frame[i] == STOP_AMINO) {
         orf.end = i * CODONLENGTH + framenum + 2;
-        array_add(ranges, orf, env);
+        array_add(ranges, orf);
         orf.start = UNDEF_ULONG;
       }
     }

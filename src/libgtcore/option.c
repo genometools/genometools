@@ -172,7 +172,7 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
   op->progname = NULL;
   op->synopsis = cstr_dup(synopsis);
   op->one_liner = cstr_dup(one_liner);
-  op->options = array_new(sizeof (Option*), env);
+  op->options = array_new(sizeof (Option*));
   op->hooks = NULL;
   op->parser_called = false;
   op->comment_func = NULL;
@@ -184,7 +184,7 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
 void option_parser_add_option(OptionParser *op, Option *o, Env *env)
 {
   assert(op && o);
-  array_add(op->options, o, env);
+  array_add(op->options, o);
 }
 
 void option_parser_set_comment_func(OptionParser *op,
@@ -202,10 +202,10 @@ void option_parser_register_hook(OptionParser *op, OptionParserHookFunc hook,
   env_error_check(env);
   assert(op && hook);
   if (!op->hooks)
-    op->hooks = array_new(sizeof (HookInfo), env);
+    op->hooks = array_new(sizeof (HookInfo));
   hookinfo.hook = hook;
   hookinfo.data = data;
-  array_add(op->hooks, hookinfo, env);
+  array_add(op->hooks, hookinfo);
 }
 
 void option_parser_set_mailaddress(OptionParser *op, const char *address)
@@ -1001,8 +1001,8 @@ void option_parser_delete(OptionParser *op, Env *env)
   ma_free(op->one_liner);
   for (i = 0; i < array_size(op->options); i++)
     option_delete(*(Option**) array_get(op->options, i), env);
-  array_delete(op->options, env);
-  array_delete(op->hooks, env);
+  array_delete(op->options);
+  array_delete(op->hooks);
   ma_free(op);
 }
 
@@ -1303,10 +1303,10 @@ void option_imply(Option *o, const Option *implied_option, Env *env)
   Array *option_array;
   assert(o && implied_option);
   if (!o->implications)
-    o->implications = array_new(sizeof (Array*), env);
-  option_array = array_new(sizeof (Option*), env);
-  array_add(option_array, implied_option, env);
-  array_add(o->implications, option_array, env);
+    o->implications = array_new(sizeof (Array*));
+  option_array = array_new(sizeof (Option*));
+  array_add(option_array, implied_option);
+  array_add(o->implications, option_array);
 }
 
 void option_imply_either_2(Option *o, const Option *io1, const Option *io2,
@@ -1315,22 +1315,22 @@ void option_imply_either_2(Option *o, const Option *io1, const Option *io2,
   Array *option_array;
   assert(o && io1 && io2);
   if (!o->implications)
-    o->implications = array_new(sizeof (Array*), env);
-  option_array = array_new(sizeof (Option*), env);
-  array_add(option_array, io1, env);
-  array_add(option_array, io2, env);
-  array_add(o->implications, option_array, env);
+    o->implications = array_new(sizeof (Array*));
+  option_array = array_new(sizeof (Option*));
+  array_add(option_array, io1);
+  array_add(option_array, io2);
+  array_add(o->implications, option_array);
 }
 
 void option_exclude(Option *o_a, Option *o_b, Env *env)
 {
   assert(o_a && o_b);
   if (!o_a->exclusions)
-    o_a->exclusions = array_new(sizeof (Option*), env);
+    o_a->exclusions = array_new(sizeof (Option*));
   if (!o_b->exclusions)
-    o_b->exclusions = array_new(sizeof (Option*), env);
-  array_add(o_a->exclusions, o_b, env);
-  array_add(o_b->exclusions, o_a, env);
+    o_b->exclusions = array_new(sizeof (Option*));
+  array_add(o_a->exclusions, o_b);
+  array_add(o_b->exclusions, o_a);
 }
 
 void option_hide_default(Option *o)
@@ -1358,8 +1358,8 @@ void option_delete(Option *o, Env *env)
   str_delete(o->option_str);
   str_delete(o->description);
   for (i = 0; i < array_size(o->implications); i++)
-    array_delete(*(Array**) array_get(o->implications, i), env);
-  array_delete(o->implications, env);
-  array_delete(o->exclusions, env);
+    array_delete(*(Array**) array_get(o->implications, i));
+  array_delete(o->implications);
+  array_delete(o->exclusions);
   ma_free(o);
 }

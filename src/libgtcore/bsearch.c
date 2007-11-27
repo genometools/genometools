@@ -36,7 +36,7 @@ static void* bsearch_generic(Array *members, const void *key, const void *base,
     if ((rval = compar(key, ptr, data)) == 0) {
       /* element found */
       if (members)
-        array_add(members, ptr, env);
+        array_add(members, ptr);
       else
         return ptr; /* because we got no <members> array */
       if (b)
@@ -45,7 +45,7 @@ static void* bsearch_generic(Array *members, const void *key, const void *base,
       for (tmp_ptr = ptr - size;
            tmp_ptr >= base && !compar(key, tmp_ptr, data);
            tmp_ptr -= size) {
-        array_add(members, tmp_ptr, env);
+        array_add(members, tmp_ptr);
         if (b)
           bittab_set_bit(b, (tmp_ptr - base) / size); /* mark found element */
       }
@@ -53,7 +53,7 @@ static void* bsearch_generic(Array *members, const void *key, const void *base,
       for (tmp_ptr = ptr + size;
            tmp_ptr < base + nmemb * size && !compar(key, tmp_ptr, data);
            tmp_ptr += size) {
-        array_add(members, tmp_ptr, env);
+        array_add(members, tmp_ptr);
         if (b)
           bittab_set_bit(b, (tmp_ptr - base) / size); /* mark found element */
       }
@@ -116,8 +116,8 @@ int bsearch_unit_test(Env *env)
 
   env_error_check(env);
 
-  elements = array_new(sizeof (int), env);
-  members = array_new(sizeof (int*), env);
+  elements = array_new(sizeof (int));
+  members = array_new(sizeof (int*));
 
   /* the empty case */
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
@@ -129,7 +129,7 @@ int bsearch_unit_test(Env *env)
   /* 1 element */
   key = 7;
   element = 7;
-  array_add(elements, element, env);
+  array_add(elements, element);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof (int), cmp, NULL, env);
   ensure(had_err, array_size(members) == 1); /* one member found */
@@ -148,7 +148,7 @@ int bsearch_unit_test(Env *env)
   /* 2 elements */
   key = 7;
   array_reset(members);
-  array_add(elements, element, env);
+  array_add(elements, element);
   ensure(had_err, array_size(elements) == 2);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof (int), cmp, NULL, env);
@@ -171,7 +171,7 @@ int bsearch_unit_test(Env *env)
   /* 3 elements */
   key = 7;
   array_reset(members);
-  array_add(elements, element, env);
+  array_add(elements, element);
   ensure(had_err, array_size(elements) == 3);
   bsearch_all(members, &key, array_get_space(elements), array_size(elements),
               sizeof (int), cmp, NULL, env);
@@ -196,21 +196,21 @@ int bsearch_unit_test(Env *env)
   /* large case: -10 -5 -3 -3 -3 0 1 2 3 */
   array_reset(elements);
   element = -10;
-  array_add(elements, element, env);
+  array_add(elements, element);
   element = -5;
-  array_add(elements, element, env);
+  array_add(elements, element);
   element = -3;
-  array_add(elements, element, env);
-  array_add(elements, element, env);
-  array_add(elements, element, env);
+  array_add(elements, element);
+  array_add(elements, element);
+  array_add(elements, element);
   element = 0;
-  array_add(elements, element, env);
+  array_add(elements, element);
   element = 1;
-  array_add(elements, element, env);
+  array_add(elements, element);
   element = 2;
-  array_add(elements, element, env);
+  array_add(elements, element);
   element = 3;
-  array_add(elements, element, env);
+  array_add(elements, element);
   ensure(had_err, array_size(elements) == 9);
   key = -3;
   array_reset(members);
@@ -245,8 +245,8 @@ int bsearch_unit_test(Env *env)
   ensure(had_err, bittab_count_set_bits(b) == 3);
 
   /* free */
-  array_delete(elements, env);
-  array_delete(members, env);
+  array_delete(elements);
+  array_delete(members);
   bittab_delete(b, env);
 
   return had_err;

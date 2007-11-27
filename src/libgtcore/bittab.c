@@ -175,7 +175,7 @@ void bittab_get_all_bitnums(const Bittab *b, Array *bitnums, Env *env)
   unsigned long i;
   assert(b && bitnums);
   for (i = 0; i < b->num_of_bits; i++)
-    if (bittab_bit_is_set(b, i)) array_add(bitnums, i, env);
+    if (bittab_bit_is_set(b, i)) array_add(bitnums, i);
 }
 
 bool bittab_bit_is_set(const Bittab *b, unsigned long bit)

@@ -58,7 +58,7 @@ int gt_merge(int argc, const char **argv, Env *env)
   }
 
   /* alloc */
-  genome_streams = array_new(sizeof (GenomeStream*), env);
+  genome_streams = array_new(sizeof (GenomeStream*));
 
   /* XXX: check for multiple specification of '-' */
 
@@ -67,13 +67,13 @@ int gt_merge(int argc, const char **argv, Env *env)
     /* we got files to open */
     for (i = parsed_args; i < argc; i++) {
       gff3_in_stream = gff3_in_stream_new_sorted(argv[i], false, env);
-      array_add(genome_streams, gff3_in_stream, env);
+      array_add(genome_streams, gff3_in_stream);
     }
    }
    else {
      /* use stdin */
      gff3_in_stream = gff3_in_stream_new_sorted(NULL, false, env);
-     array_add(genome_streams, gff3_in_stream, env);
+     array_add(genome_streams, gff3_in_stream);
    }
 
   /* create a merge stream */
@@ -93,7 +93,7 @@ int gt_merge(int argc, const char **argv, Env *env)
   genome_stream_delete(merge_stream, env);
   for (i = 0; i < array_size(genome_streams); i++)
     genome_stream_delete(*(GenomeStream**) array_get(genome_streams, i), env);
-  array_delete(genome_streams, env);
+  array_delete(genome_streams);
   genfile_xclose(outfp, env);
 
   return had_err;

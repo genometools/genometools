@@ -65,7 +65,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   Str *currentline;
 
   env_error_check(env);
-  riktab = array_new(sizeofReadintkeys(),env);
+  riktab = array_new(sizeofReadintkeys());
   SETREADINTKEYS("totallength",totallength,NULL);
   SETREADINTKEYS("specialcharacters",
                  &suffixarray->specialcharinfo.specialcharacters,NULL);
@@ -221,7 +221,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
     }
     suffixarray->readmode = (Readmode) readmodeint;
   }
-  array_delete(riktab,env);
+  array_delete(riktab);
   return haserr ? -1 : 0;
 }
 

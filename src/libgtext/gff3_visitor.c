@@ -87,10 +87,10 @@ static int add_id(GenomeNode *gn, void *data, Env *env)
   assert(gn && info && info->genome_feature_to_id_array && info->id);
   parent_features = hashtable_get(info->genome_feature_to_id_array, gn);
   if (!parent_features) {
-    parent_features = array_new(sizeof (char*), env);
+    parent_features = array_new(sizeof (char*));
     hashtable_add(info->genome_feature_to_id_array, gn, parent_features, env);
   }
-  array_add(parent_features, info->id, env);
+  array_add(parent_features, info->id);
   return 0;
 }
 

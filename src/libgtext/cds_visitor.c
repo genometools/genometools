@@ -109,7 +109,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
     pr_1 = str_new();
     pr_2 = str_new();
     /* printf("pr_0=%s\n", str_get(pr_0)); */
-    orfs = array_new(sizeof (Range), env);
+    orfs = array_new(sizeof (Range));
     translate_dna(pr_0, splicedseq_get(v->splicedseq),
                   splicedseq_length(v->splicedseq), 0, env);
     translate_dna(pr_1, splicedseq_get(v->splicedseq),
@@ -176,7 +176,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
     }
 
     /* free */
-    array_delete(orfs, env);
+    array_delete(orfs);
     str_delete(pr_2);
     str_delete(pr_1);
     str_delete(pr_0);

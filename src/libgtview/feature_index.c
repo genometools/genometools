@@ -47,7 +47,7 @@ static int region_info_delete(void *data, Env *env)
   RegionInfo *info = (RegionInfo*) data;
   for (i = 0; i < array_size(info->features); i++)
     genome_node_rec_delete(*(GenomeNode**) array_get(info->features, i), env);
-  array_delete(info->features, env);
+  array_delete(info->features);
   genome_node_rec_delete((GenomeNode*)info->region, env);
   ma_free(info);
   return 0;
@@ -81,7 +81,7 @@ void feature_index_add_sequence_region(FeatureIndex *fi, SequenceRegion *sr,
   if (!hashtable_get(fi->regions, seqid)) {
     info = ma_malloc(sizeof (RegionInfo));
     info->region = (SequenceRegion*) genome_node_rec_ref((GenomeNode*) sr, env);
-    info->features = array_new(sizeof (GenomeNode*),env);
+    info->features = array_new(sizeof (GenomeNode*));
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
     hashtable_add(fi->regions, seqid, info, env);
@@ -111,7 +111,7 @@ void feature_index_add_genome_feature(FeatureIndex *fi, GenomeFeature *gf,
   assert(feature_index_has_seqid(fi, seqid, env));
   info = (RegionInfo*) hashtable_get(fi->regions, seqid);
   /* add node to the appropriate array in the hashtable. */
-  array_add(info->features, gf_new, env);
+  array_add(info->features, gf_new);
   /* update dynamic range */
   info->dyn_range.start = MIN(info->dyn_range.start, node_range.start);
   info->dyn_range.end = MAX(info->dyn_range.end, node_range.end);
@@ -148,7 +148,7 @@ int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
     GenomeNode *gn = *(GenomeNode**) array_get(base, i);
     Range r = genome_node_get_range(gn);
     if (range_overlap(r, qry_range))
-      array_add(results, gn, env);
+      array_add(results, gn);
   }
   genome_node_delete(key, env);
   return 0;

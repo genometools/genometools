@@ -77,13 +77,13 @@ static int feature_index_lua_get_features_for_range(lua_State *L)
   luaL_argcheck(L, feature_index_has_seqid(*feature_index, seqid, env), 2,
                 "feature_index does not contain seqid");
   range = check_range(L, 3);
-  features = array_new(sizeof (GenomeNode*), env);
+  features = array_new(sizeof (GenomeNode*));
   had_err = feature_index_get_features_for_range(*feature_index, features,
                                                  seqid, *range, env);
   assert(!had_err); /* it was checked before that the feature_index contains the
                        given sequence id*/
   push_features_as_table(L, features, env);
-  array_delete(features, env);
+  array_delete(features);
   return 1;
 }
 

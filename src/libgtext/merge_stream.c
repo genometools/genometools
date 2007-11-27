@@ -98,7 +98,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 static void merge_stream_free(GenomeStream *gs, Env *env)
 {
   MergeStream *ms = merge_stream_cast(gs);
-  array_delete(ms->genome_streams, env);
+  array_delete(ms->genome_streams);
   ma_free(ms->buffer);
 }
 
@@ -123,7 +123,7 @@ GenomeStream* merge_stream_new(const Array *genome_streams, Env *env)
                                    array_get(genome_streams, i)));
   }
 #endif
-  ms->genome_streams = array_clone(genome_streams, env);
+  ms->genome_streams = array_clone(genome_streams);
   ms->buffer = ma_calloc(array_size(genome_streams), sizeof (GenomeNode*));
   return gs;
 }

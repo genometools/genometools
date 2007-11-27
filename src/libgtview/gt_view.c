@@ -236,7 +236,7 @@ int gt_view(int argc, const char **argv, Env *env)
   else if (!had_err)
     seqid = str_get(arguments.seqid);
 
-  results = array_new(sizeof (GenomeNode*), env);
+  results = array_new(sizeof (GenomeNode*));
   if (!had_err) {
     sequence_region_range = feature_index_get_range_for_seqid(features, seqid);
     qry_range.start = (arguments.start == UNDEF_ULONG ?
@@ -276,7 +276,7 @@ int gt_view(int argc, const char **argv, Env *env)
 
   /* free */
   str_delete(arguments.seqid);
-  array_delete(results, env);
+  array_delete(results);
   feature_index_delete(features, env);
 
   return had_err;
