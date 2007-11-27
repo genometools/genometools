@@ -29,8 +29,8 @@
 
 typedef struct
 {
-  bool usestream, 
-       verbose, 
+  bool usestream,
+       verbose,
        inputtis,
        inputsuf,
        inputdes,
@@ -46,7 +46,7 @@ static OPrval parse_options(Sfxmapoptions *sfxmapoptions,
                             Env *env)
 {
   OptionParser *op;
-  Option *optionstream, *optionverbose, *optiontrials, 
+  Option *optionstream, *optionverbose, *optiontrials,
          *optiontis, *optionsuf, *optiondes, *optionbwt, *optionlcp;
   OPrval oprval;
 
@@ -160,7 +160,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   {
     int readmode;
 
-    for (readmode = 0; readmode < 4; readmode++) 
+    for (readmode = 0; readmode < 4; readmode++)
     {
       if (isdnaalphabet(suffixarray.alpha,env) ||
          ((Readmode) readmode) == Forwardmode ||
