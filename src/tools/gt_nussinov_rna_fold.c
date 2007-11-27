@@ -245,7 +245,7 @@ int gt_nussinov_rna_fold(int argc, const char **argv, Env *env)
   if (!had_err) {
     /* save RNA sequence */
     rna_length = strlen(argv[5]);
-    rna_sequence = cstr_dup(argv[5], env);
+    rna_sequence = cstr_dup(argv[5]);
     alpha_encode_seq(dna_alpha, rna_sequence, rna_sequence, rna_length);
 
     /* fold RNA sequence with Nussinov algorithm */

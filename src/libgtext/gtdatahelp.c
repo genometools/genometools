@@ -39,7 +39,7 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
   env_error_check(env);
   assert(progname);
 
-  prog = cstr_dup(progname, env); /* create modifiable copy for splitter */
+  prog = cstr_dup(progname); /* create modifiable copy for splitter */
   splitter = splitter_new(env);
   splitter_split(splitter, prog, strlen(prog), ' ', env);
   doc_file = gtdata_get_path(splitter_get_token(splitter, 0), env);
@@ -47,7 +47,7 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
     had_err = -1;
 
   if (!had_err) {
-    str_append_cstr(doc_file, "/doc/", env);
+    str_append_cstr(doc_file, "/doc/");
     /* create Lua & push gtdata_doc_dir to Lua */
     L = luaL_newstate();
     if (!L) {
@@ -64,16 +64,16 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
     if (splitter_size(splitter) == 1) {
       /* special case for `gt` */
       bn = getbasename(progname, env);
-      str_append_cstr(doc_file, bn, env);
+      str_append_cstr(doc_file, bn);
       ma_free(bn);
     }
     else {
       /* general case for the tools */
       str_append_cstr(doc_file,
-                      splitter_get_token(splitter, splitter_size(splitter) - 1),
-                      env);
+                      splitter_get_token(splitter,
+                                         splitter_size(splitter) - 1));
     }
-    str_append_cstr(doc_file, ".lua", env);
+    str_append_cstr(doc_file, ".lua");
     /* execute doc_file */
     if (luaL_loadfile(L, str_get(doc_file)) || lua_pcall(L, 0, 0, 0)) {
       env_error_set(env, "cannot run doc file: %s", lua_tostring(L, -1));

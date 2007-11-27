@@ -65,8 +65,7 @@ static int determine_outfp(void *data, Env *env)
       warning("output file '%s' doesn't have correct suffix '%s', appending "
               "it", str_get(ofi->output_filename),
               genfilemode_suffix(genfilemode));
-      str_append_cstr(ofi->output_filename, genfilemode_suffix(genfilemode),
-                      env);
+      str_append_cstr(ofi->output_filename, genfilemode_suffix(genfilemode));
     }
     if (!ofi->force && file_exists(str_get(ofi->output_filename))) {
         env_error_set(env, "file \"%s\" exists already, use option -%s to "

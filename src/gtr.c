@@ -123,7 +123,7 @@ GTR* gtr_new(Env *env)
 #ifdef LIBGTVIEW
   gtr->config = config_new_with_state(gtr->L, env);
   config_file = gtdata_get_path(env_error_get_progname(env), env);
-  str_append_cstr(config_file, "/config/view.lua", env);
+  str_append_cstr(config_file, "/config/view.lua");
   if (file_exists(str_get(config_file))) {
     if (config_load_file(gtr->config, config_file, env)) {
       /* XXX: hack... */

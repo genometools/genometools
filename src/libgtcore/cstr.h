@@ -22,7 +22,7 @@
 #include "libgtcore/env.h"
 #include "libgtcore/genfile.h"
 
-char*         cstr_dup(const char*, Env*);
+char*         cstr_dup(const char*);
 /* replace each occurence of <f> in <cstr> to <t> */
 void          cstr_rep(char *cstr, char f, char t);
 void          cstr_show(const char*, unsigned long length, FILE*);

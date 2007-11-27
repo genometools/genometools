@@ -92,8 +92,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   suffixarray->filenametab = strarray_new(env);
   suffixarray->filelengthtab = NULL;
   currentline = str_new();
-  for (linenum = 0; str_read_next_line(currentline, fpin, env) != EOF;
-       linenum++)
+  for (linenum = 0; str_read_next_line(currentline, fpin) != EOF; linenum++)
   {
     currentlinelength = str_length(currentline);
     if (dbfilelen <= (size_t) currentlinelength &&
@@ -234,8 +233,8 @@ static void *genericmaponlytable(const Str *indexname,const char *suffix,
   bool haserr = false;
 
   env_error_check(env);
-  tmpfilename = str_clone(indexname,env);
-  str_append_cstr(tmpfilename,suffix,env);
+  tmpfilename = str_clone(indexname);
+  str_append_cstr(tmpfilename,suffix);
   ptr = fa_mmap_read(str_get(tmpfilename),numofbytes);
   if (ptr == NULL)
   {
@@ -330,8 +329,8 @@ static bool scanal1file(Suffixarray *suffixarray,const Str *indexname,Env *env)
   bool haserr = false;
 
   env_error_check(env);
-  tmpfilename = str_clone(indexname,env);
-  str_append_cstr(tmpfilename,ALPHABETFILESUFFIX,env);
+  tmpfilename = str_clone(indexname);
+  str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
   suffixarray->alpha = assigninputalphabet(false,
                                            false,
                                            tmpfilename,

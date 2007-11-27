@@ -49,8 +49,8 @@ static int initNameandFILE(NameandFILE *nf,
                             Env *env)
 {
   env_error_check(env);
-  nf->outfilename = str_clone(outindex,env);
-  str_append_cstr(nf->outfilename,suffix,env);
+  nf->outfilename = str_clone(outindex);
+  str_append_cstr(nf->outfilename,suffix);
   nf->fp = fa_fopen(str_get(nf->outfilename),"wb");
   if (nf->fp == NULL)
   {

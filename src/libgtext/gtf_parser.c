@@ -94,7 +94,7 @@ static int construct_sequence_regions(void *key, void *value, void *data,
   Queue *genome_nodes = (Queue*) data;
   env_error_check(env);
   assert(key && value && data);
-  seqid = str_new_cstr(key, env);
+  seqid = str_new_cstr(key);
   range = *(Range*) value;
   gn = sequence_region_new(seqid, range, NULL, 0, env);
   queue_add(genome_nodes, gn, env);
@@ -271,7 +271,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
           }                                                             \
         }
 
-  while (str_read_next_line(line_buffer, fpin, env) != EOF) {
+  while (str_read_next_line(line_buffer, fpin) != EOF) {
     line = str_get(line_buffer);
     line_length = str_length(line_buffer);
     line_number++;
@@ -340,7 +340,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
         /* sequence region is not already defined -> define it */
         rangeptr = ma_malloc(sizeof (Range));
         *rangeptr = range;
-        hashtable_add(parser->sequence_region_to_range, cstr_dup(seqname, env),
+        hashtable_add(parser->sequence_region_to_range, cstr_dup(seqname),
                       rangeptr, env);
       }
 
@@ -410,7 +410,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
                                                gene_id))) {
         transcript_id_hash = hashtable_new(HASH_STRING, ma_free_func,
                                            (FreeFunc) array_delete, env);
-        hashtable_add(parser->gene_id_hash, cstr_dup(gene_id, env),
+        hashtable_add(parser->gene_id_hash, cstr_dup(gene_id),
                       transcript_id_hash, env);
       }
       assert(transcript_id_hash);
@@ -418,7 +418,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       if (!(genome_node_array = hashtable_get(transcript_id_hash,
                                               transcript_id))) {
         genome_node_array = array_new(sizeof (GenomeNode*), env);
-        hashtable_add(transcript_id_hash, cstr_dup(transcript_id, env),
+        hashtable_add(transcript_id_hash, cstr_dup(transcript_id),
                       genome_node_array, env);
       }
       assert(genome_node_array);
@@ -430,7 +430,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       /* set seqid */
       seqid_str = hashtable_get(parser->seqid_to_str_mapping, seqname);
       if (!seqid_str) {
-        seqid_str = str_new_cstr(seqname, env);
+        seqid_str = str_new_cstr(seqname);
         hashtable_add(parser->seqid_to_str_mapping, str_get(seqid_str),
                       seqid_str, env);
       }
@@ -440,7 +440,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       /* set source */
       source_str = hashtable_get(parser->source_to_str_mapping, source);
       if (!source_str) {
-        source_str = str_new_cstr(source, env);
+        source_str = str_new_cstr(source);
         hashtable_add(parser->source_to_str_mapping, str_get(source_str),
                       source_str, env);
       }

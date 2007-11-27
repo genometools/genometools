@@ -86,8 +86,8 @@ GenomeNode* comment_new(const char *comment, Str *filename,
                                       env);
   Comment *c = comment_cast(gn);
   assert(comment);
-  c->comment = cstr_dup(comment, env);
-  c->comment_str = str_new_cstr("", env);
+  c->comment = cstr_dup(comment);
+  c->comment_str = str_new_cstr("");
   return gn;
 }
 

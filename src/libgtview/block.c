@@ -310,8 +310,8 @@ int block_unit_test(Env* env)
   GenomeNode *gn1, *gn2;
   Element *e1, *e2, *elem;
   Block * b;
-  Str *caption1 = str_new_cstr("foo", env);
-  Str *caption2 = str_new_cstr("bar", env);
+  Str *caption1 = str_new_cstr("foo");
+  Str *caption2 = str_new_cstr("bar");
   Config *cfg;
 
   cfg = config_new(false, env);

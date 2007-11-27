@@ -150,7 +150,7 @@ GenomeNode* genome_feature_new_standard_gene(Env *env)
   Range range;
   Str *seqid;
   env_error_check(env);
-  seqid = str_new_cstr("ctg123", env);
+  seqid = str_new_cstr("ctg123");
 
   /* gene */
   range.start = 1000; range.end = 9000;
@@ -406,8 +406,7 @@ void genome_feature_add_attribute(GenomeFeature *gf, const char *attr_name,
   if (!gf->attributes)
     gf->attributes = hashtable_new(HASH_STRING, ma_free_func, ma_free_func,
                                    env);
-  hashtable_add(gf->attributes, cstr_dup(attr_name, env),
-                cstr_dup(attr_value, env), env);
+  hashtable_add(gf->attributes, cstr_dup(attr_name), cstr_dup(attr_value), env);
 }
 
 int genome_feature_foreach_attribute(GenomeFeature *gf,

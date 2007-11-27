@@ -133,15 +133,15 @@ static void add_to_current(Diagram *d, GenomeNode *node,
   /* create new Block tuple and add to node info */
   block = block_new_from_node(node,env);
   /* assign block caption */
-  caption = str_new_cstr("",env);
+  caption = str_new_cstr("");
   if (parent) {
     if (genome_node_has_children(parent))
-      str_append_cstr(caption, get_node_name_or_id(parent), env);
+      str_append_cstr(caption, get_node_name_or_id(parent));
     else
-      str_append_cstr(caption, "-", env);
-    str_append_cstr(caption, "/", env);
+      str_append_cstr(caption, "-");
+    str_append_cstr(caption, "/");
   }
-  str_append_cstr(caption, get_node_name_or_id(node), env);
+  str_append_cstr(caption, get_node_name_or_id(node));
   block_set_caption(block, caption);
   /* insert node into block */
   block_insert_element(block, node, d->config, env);
@@ -179,13 +179,13 @@ static void add_to_parent(Diagram *d, GenomeNode *node,
     Str *caption;
     block = block_new_from_node(parent, env);
     /* assign caption */
-    caption = str_new_cstr("",env);
+    caption = str_new_cstr("");
     if (genome_node_has_children(parent))
-      str_append_cstr(caption, get_node_name_or_id(parent), env);
+      str_append_cstr(caption, get_node_name_or_id(parent));
     else
-      str_append_cstr(caption, "-", env);
-    str_append_cstr(caption, "/", env);
-    str_append_cstr(caption, get_node_name_or_id(node), env);
+      str_append_cstr(caption, "-");
+    str_append_cstr(caption, "/");
+    str_append_cstr(caption, get_node_name_or_id(node));
     block_set_caption(block, caption);
     /* add block to nodeinfo */
     bt = blocktuple_new(genome_feature_get_type((GenomeFeature*) node),
@@ -344,9 +344,9 @@ static Str* track_key_new(const char *filename, GenomeFeatureType type,
 {
   Str *track_key;
   env_error_check(env);
-  track_key = str_new_cstr(filename, env);
-  str_append_char(track_key, FILENAME_TYPE_SEPARATOR, env);
-  str_append_cstr(track_key, genome_feature_type_get_cstr(type), env);
+  track_key = str_new_cstr(filename);
+  str_append_char(track_key, FILENAME_TYPE_SEPARATOR);
+  str_append_cstr(track_key, genome_feature_type_get_cstr(type));
   return track_key;
 }
 
@@ -373,8 +373,7 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
 
     if (track == NULL) {
       track = track_new(track_key, env);
-      hashtable_add(diagram->tracks, cstr_dup(str_get(track_key), env), track,
-                    env);
+      hashtable_add(diagram->tracks, cstr_dup(str_get(track_key)), track, env);
       diagram->nof_tracks++;
       log_log("created track: %s, diagram has now %d tracks",
               str_get(track_key), diagram_get_number_of_tracks(diagram));
@@ -497,8 +496,8 @@ int diagram_unit_test(Env *env)
   rs.start=100UL; rs.end=1200UL;
 
   /* generating sequence IDs */
-  seqid1 = str_new_cstr("test1", env);
-  seqid2 = str_new_cstr("test2", env);
+  seqid1 = str_new_cstr("test1");
+  seqid2 = str_new_cstr("test2");
 
   sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, NULL, 0, env);
   sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, NULL, 0, env);

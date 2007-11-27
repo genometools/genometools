@@ -89,9 +89,9 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
     /* open destination file */
     destfilename = str_new();
     str_append_cstr_nt(destfilename, argv[parsed_args],
-                       genfile_basename_length(argv[parsed_args]), env);
-    str_append_char(destfilename, '.', env);
-    str_append_ulong(destfilename, ++filenum, env);
+                       genfile_basename_length(argv[parsed_args]));
+    str_append_char(destfilename, '.');
+    str_append_ulong(destfilename, ++filenum);
     destfp = fa_xfopen(str_get(destfilename), "w");
     xfwrite(buf, 1, read_bytes, destfp);
 
@@ -108,9 +108,9 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
         /* open new file */
         str_reset(destfilename);
         str_append_cstr_nt(destfilename, argv[parsed_args],
-                           genfile_basename_length(argv[parsed_args]), env);
-        str_append_char(destfilename, '.', env);
-        str_append_ulong(destfilename, ++filenum, env);
+                           genfile_basename_length(argv[parsed_args]));
+        str_append_char(destfilename, '.');
+        str_append_ulong(destfilename, ++filenum);
         destfp = fa_xfopen(str_get(destfilename), "w");
         bytecount = 0;
         assert(buf[separator_pos] == '>');

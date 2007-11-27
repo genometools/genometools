@@ -42,7 +42,7 @@ FastaReader* fasta_reader_new(Str *sequence_filename, Env *env)
   if (sequence_filename)
     fs->sequence_file = genfile_xopen(str_get(sequence_filename), "r", env);
   else
-    fs->sequence_filename = str_new_cstr("stdin", env);
+    fs->sequence_filename = str_new_cstr("stdin");
   return fs;
 }
 
@@ -98,7 +98,7 @@ int fasta_reader_run(FastaReader *fr,
           }
         }
         else if (proc_description)
-          str_append_char(description, cc, env);
+          str_append_char(description, cc);
         break;
       case READING_SEQUENCE_AFTER_NEWLINE:
         if (cc == FASTA_SEPARATOR) {

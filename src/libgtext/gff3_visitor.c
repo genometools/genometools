@@ -182,8 +182,8 @@ static int store_ids(GenomeNode *gn, void *data, Env *env)
     gff3_visitor->id_counter[type]++;
 
     /* build id string */
-    id = str_new_cstr(genome_feature_type_get_cstr(type), env);
-    str_append_ulong(id, gff3_visitor->id_counter[type], env);
+    id = str_new_cstr(genome_feature_type_get_cstr(type));
+    str_append_ulong(id, gff3_visitor->id_counter[type]);
 
     /* store (unique) id */
     hashtable_add(gff3_visitor->genome_feature_to_unique_id_str, gn, id, env);

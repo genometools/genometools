@@ -62,7 +62,7 @@ static int proc_description(Str *description, void *data, Env *env)
   char *description_cstr;
   env_error_check(env);
   if (info->bs->use_stdin) {
-    description_cstr = cstr_dup(str_get(description), env);
+    description_cstr = cstr_dup(str_get(description));
     array_add(info->bs->descriptions, description_cstr, env);
   }
   else {
@@ -80,7 +80,7 @@ static int proc_character(char character, void *data, Env *env)
   if (info->bs->use_stdin) {
     info->bs->raw_sequence = dynalloc(info->bs->raw_sequence,
                                       &info->bs->allocated,
-                                      info->bs->raw_sequence_length + 1, env);
+                                      info->bs->raw_sequence_length + 1);
     info->bs->raw_sequence[info->bs->raw_sequence_length++] = character;
   }
   else
@@ -141,11 +141,11 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
   index_line = str_new();
   index_file = fa_xfopen(index_filename, "r");
 
-  while (!had_err && str_read_next_line(index_line, index_file, env) != EOF) {
+  while (!had_err && str_read_next_line(index_line, index_file) != EOF) {
     switch (line_number % 3) {
       case 1:
         /* process description */
-        description = cstr_dup(str_get(index_line), env);
+        description = cstr_dup(str_get(index_line));
         array_add(bs->descriptions, description, env);
         break;
       case 2:
@@ -240,10 +240,10 @@ static int bioseq_fill(Bioseq *bs, bool recreate, Env *env)
 
   /* construct file names */
   if (!bs->use_stdin) {
-    bioseq_index_file = str_clone(bs->sequence_file, env);
-    str_append_cstr(bioseq_index_file, GT_BIOSEQ_INDEX, env);
-    bioseq_raw_file = str_clone(bs->sequence_file, env);
-    str_append_cstr(bioseq_raw_file, GT_BIOSEQ_RAW, env);
+    bioseq_index_file = str_clone(bs->sequence_file);
+    str_append_cstr(bioseq_index_file, GT_BIOSEQ_INDEX);
+    bioseq_raw_file = str_clone(bs->sequence_file);
+    str_append_cstr(bioseq_raw_file, GT_BIOSEQ_RAW);
   }
 
   /* construct the bioseq files if necessary */
@@ -301,7 +301,7 @@ Bioseq* bioseq_new(const char *sequence_file, Env *env)
   Bioseq *bs;
   Str *seqfile;
   env_error_check(env);
-  seqfile = str_new_cstr(sequence_file, env);
+  seqfile = str_new_cstr(sequence_file);
   bs = bioseq_new_with_recreate(seqfile, false, env);
   str_delete(seqfile);
   return bs;
@@ -312,7 +312,7 @@ Bioseq* bioseq_new_recreate(const char *sequence_file, Env *env)
   Bioseq *bs;
   Str *seqfile;
   env_error_check(env);
-  seqfile = str_new_cstr(sequence_file, env);
+  seqfile = str_new_cstr(sequence_file);
   bs = bioseq_new_with_recreate(seqfile, true, env);
   str_delete(seqfile);
   return bs;

@@ -33,8 +33,8 @@
   FILE *fp;
 
   env_error_check(env);
-  tmpfilename = str_clone(indexname,env);
-  str_append_cstr(tmpfilename,suffix,env);
+  tmpfilename = str_clone(indexname);
+  str_append_cstr(tmpfilename,suffix);
   fp = fa_fopen(str_get(tmpfilename),mode);
   if (fp == NULL)
   {
@@ -52,8 +52,8 @@ bool indexfilealreadyexists(const Str *indexname,const char *suffix,Env *env)
   Str *tmpfilename;
 
   env_error_check(env);
-  tmpfilename = str_clone(indexname,env);
-  str_append_cstr(tmpfilename,suffix,env);
+  tmpfilename = str_clone(indexname);
+  str_append_cstr(tmpfilename,suffix);
 
   if (stat(str_get(tmpfilename),&statbuf) == 0)
   {

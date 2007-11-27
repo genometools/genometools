@@ -33,7 +33,7 @@ bool        error_is_set(const Error*);
 void        error_unset(Error*);
 /* get the error string (the error must be set) */
 const char* error_get(const Error*);
-void        error_set_progname(Error*, const char *progname, Env*);
+void        error_set_progname(Error*, const char *progname);
 const char* error_get_progname(const Error*);
 void        error_delete(Error*);
 

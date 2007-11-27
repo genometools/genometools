@@ -114,8 +114,8 @@ static Option *option_new(const char *option_str, const char *description,
   assert(option_str && strlen(option_str));
   assert("an option string should not start with '-', this is added "
          "automatically"  && option_str[0] != '-');
-  o->option_str = str_new_cstr(option_str, env);
-  o->description = str_new_cstr(description, env);
+  o->option_str = str_new_cstr(option_str);
+  o->description = str_new_cstr(description);
   o->value = value;
   return o;
 }
@@ -170,8 +170,8 @@ OptionParser* option_parser_new(const char *synopsis, const char *one_liner,
          strlen(one_liner) && isupper((int) one_liner[0]));
   assert(one_liner[strlen(one_liner)-1] == '.');
   op->progname = NULL;
-  op->synopsis = cstr_dup(synopsis, env);
-  op->one_liner = cstr_dup(one_liner, env);
+  op->synopsis = cstr_dup(synopsis);
+  op->one_liner = cstr_dup(one_liner);
   op->options = array_new(sizeof (Option*), env);
   op->hooks = NULL;
   op->parser_called = false;
@@ -453,24 +453,23 @@ static int check_option_implications(OptionParser *op, Env *env)
             }
           }
           if (!option_set) {
-            error_str = str_new_cstr("option \"-", env);
-            str_append_str(error_str, o->option_str, env);
-            str_append_cstr(error_str, "\" requires option", env);
+            error_str = str_new_cstr("option \"-");
+            str_append_str(error_str, o->option_str);
+            str_append_cstr(error_str, "\" requires option");
             for (l = 0; l < array_size(implied_option_array) - 1; l++) {
-              str_append_cstr(error_str, " \"-", env);
+              str_append_cstr(error_str, " \"-");
               str_append_str(error_str, (*(Option**)
-                             array_get(implied_option_array, l))->option_str,
-                             env);
-              str_append_cstr(error_str, "\"", env);
+                             array_get(implied_option_array, l))->option_str);
+              str_append_cstr(error_str, "\"");
               if (array_size(implied_option_array) > 2)
-                str_append_char(error_str, ',', env);
+                str_append_char(error_str, ',');
             }
-            str_append_cstr(error_str, " or \"-", env);
+            str_append_cstr(error_str, " or \"-");
             str_append_str(error_str, (*(Option**)
                            array_get(implied_option_array,
                                      array_size(implied_option_array) - 1))
-                                     ->option_str, env);
-            str_append_cstr(error_str, "\"", env);
+                                     ->option_str);
+            str_append_cstr(error_str, "\"");
             env_error_set(env, "%s", str_get(error_str));
             str_delete(error_str);
             return -1;
@@ -560,7 +559,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
   assert(op);
   assert(!op->parser_called); /* to avoid multiple adding of common options */
 
-  op->progname = cstr_dup(argv[0], env);
+  op->progname = cstr_dup(argv[0]);
 
   /* add common options */
   has_extended_options = has_extended_option(op->options);
@@ -628,15 +627,15 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
               if (!had_err) {
                 argnum++;
                 if (strcmp(argv[argnum], option->domain[0])) {
-                  error_str = str_new_cstr(option->domain[0], env);
+                  error_str = str_new_cstr(option->domain[0]);
                   i = 1;
                   while (option->domain[i] != NULL) {
                     if (!strcmp(argv[argnum], option->domain[i])) {
-                      str_set(option->value, option->domain[i], env);
+                      str_set(option->value, option->domain[i]);
                       break;
                     }
-                    str_append_cstr(error_str, ", ", env);
-                    str_append_cstr(error_str, option->domain[i], env);
+                    str_append_cstr(error_str, ", ");
+                    str_append_cstr(error_str, option->domain[i]);
                     i++;
                   }
                   if (option->domain[i] == NULL) {
@@ -648,7 +647,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                   str_delete(error_str);
                 }
                 else {
-                  str_set(option->value, option->domain[0], env);
+                  str_set(option->value, option->domain[0]);
                 }
               }
               if (!had_err) {
@@ -860,7 +859,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                         env);
               if (!had_err) {
                 argnum++;
-                str_set(option->value, argv[argnum], env);
+                str_set(option->value, argv[argnum]);
                 option_parsed = true;
               }
               break;
@@ -1214,7 +1213,7 @@ Option* option_new_string(const char *option_str, const char *description,
   Option *o = option_new(option_str, description, value, env);
   o->option_type = OPTION_STRING;
   o->default_value.s = default_value;
-  str_set(value, default_value, env);
+  str_set(value, default_value);
   return o;
 }
 

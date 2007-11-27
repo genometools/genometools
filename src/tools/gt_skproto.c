@@ -119,7 +119,7 @@ static void skproto(const char *filename, FILE *fpin, Env *env)
 
   line = str_new();
 
-  while (str_read_next_line(line, fpin, env) != EOF) {
+  while (str_read_next_line(line, fpin) != EOF) {
     linenum++;
     removecomments(line, &incomment, env);
     if (str_length(line)) {

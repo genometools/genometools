@@ -43,8 +43,8 @@ StrArray* strarray_new_file(const char *path, Env *env)
   assert(fpin);
   line = str_new();
   filecontent = strarray_new(env);
-  while (str_read_next_line_generic(line, fpin, env) != EOF) {
-    strarray_add_cstr(filecontent,str_get(line),env);
+  while (str_read_next_line_generic(line, fpin) != EOF) {
+    strarray_add_cstr(filecontent, str_get(line), env);
     str_reset(line);
   }
   str_delete(line);
@@ -57,7 +57,7 @@ void strarray_add_cstr(StrArray *sa, const char *cstr, Env *env)
   Str *str;
   env_error_check(env);
   assert(sa && cstr);
-  str = str_new_cstr(cstr, env);
+  str = str_new_cstr(cstr);
   array_add(sa->strings, str, env);
 }
 

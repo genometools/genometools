@@ -96,7 +96,7 @@ int track_unit_test(Env *env)
   Block *b1, *b2, *b3, *b4;
   Range r1, r2, r3, r4;
   Track *track;
-  Str *title = str_new_cstr("test", env);
+  Str *title = str_new_cstr("test");
 
   r1.start=100UL;  r1.end=1000UL;
   r2.start=1001UL; r2.end=1500UL;

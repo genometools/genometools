@@ -77,7 +77,7 @@ static int extract_join_feature(GenomeNode *gn, void *data, Env *env)
     }
     if (!had_err) {
       assert(range.end <= raw_sequence_length);
-      str_append_cstr_nt(v->sequence, raw_sequence, range_length(range), env);
+      str_append_cstr_nt(v->sequence, raw_sequence, range_length(range));
       if (genome_feature_get_strand(gf) == STRAND_REVERSE)
         v->reverse_strand = true;
     }
@@ -102,14 +102,14 @@ static int extract_feature(GenomeNode *gn, void *data, Env *env)
 
   /* construct description if necessary */
   if (!str_length(v->description)) {
-    str_append_cstr(v->description, genome_feature_type_get_cstr(v->type), env);
-    str_append_char(v->description, '_', env);
+    str_append_cstr(v->description, genome_feature_type_get_cstr(v->type));
+    str_append_char(v->description, '_');
     v->fastaseq_counter++;
-    str_append_ulong(v->description, v->fastaseq_counter, env);
+    str_append_ulong(v->description, v->fastaseq_counter);
     if (v->join)
-      str_append_cstr(v->description, " (joined)", env);
+      str_append_cstr(v->description, " (joined)");
     if (v->translate)
-      str_append_cstr(v->description, " (translated)", env);
+      str_append_cstr(v->description, " (translated)");
   }
 
   if (v->join) {
@@ -156,7 +156,7 @@ static int extract_feature(GenomeNode *gn, void *data, Env *env)
     }
     if (!had_err) {
       str_append_cstr_nt(v->sequence, raw_sequence + range.start - 1,
-                         range_length(range), env);
+                         range_length(range));
       if (genome_feature_get_strand(gf) == STRAND_REVERSE) {
         had_err = reverse_complement(str_get(v->sequence),
                                      str_length(v->sequence), env);

@@ -385,7 +385,7 @@ int config_unit_test(Env *env)
   Config *cfg;
   const char* test1 = "mRNA";
   const char* str = NULL;
-  Str *luafile = str_new_cstr("config.lua",env);
+  Str *luafile = str_new_cstr("config.lua");
   Color col1, col2, col, defcol, tmpcol;
   double num;
 

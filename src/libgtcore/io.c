@@ -36,7 +36,7 @@ IO* io_new(const char *path, const char *mode, Env *env)
   assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
   io = ma_malloc(sizeof (IO));
   io->fp = fa_xfopen(path, mode);
-  io->path = cstr_dup(path, env);
+  io->path = cstr_dup(path);
   io->line_number = 1;
   io->line_start = true;
   return io;

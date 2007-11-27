@@ -21,7 +21,7 @@
 #include "libgtcore/ma.h"
 #include "libgtcore/xansi.h"
 
-char* cstr_dup(const char *cstr, Env *env)
+char* cstr_dup(const char *cstr)
 {
   size_t size;
   char *copy;
@@ -73,7 +73,7 @@ char** cstr_array_prefix_first(const char **cstr_array, const char *p, Env *env)
   a[0] = ma_malloc(sizeof (char) * f_len);
   (void) snprintf(a[0], f_len, "%s %s", p, cstr_array[0]);
   for (i = 1; i < a_len; i++)
-    a[i] = cstr_dup(cstr_array[i], env);
+    a[i] = cstr_dup(cstr_array[i]);
   a[a_len] = NULL;
   return a;
 }
@@ -85,9 +85,9 @@ char** cstr_array_preprend(const char **cstr_array, const char *p, Env *env)
   assert(cstr_array && p);
   a_len = cstr_array_size(cstr_array);
   a = ma_malloc(sizeof (char*) * (a_len + 2));
-  a[0] = cstr_dup(p, env);
+  a[0] = cstr_dup(p);
   for (i = 0; i < a_len; i++)
-    a[i+1] = cstr_dup(cstr_array[i], env);
+    a[i+1] = cstr_dup(cstr_array[i]);
   a[a_len+1] = NULL;
   return a;
 }

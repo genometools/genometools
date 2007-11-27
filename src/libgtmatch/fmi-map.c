@@ -82,8 +82,7 @@ static int scanfmafileviafileptr(Fmindex *fmindex,
     unsigned int linenum;
 
     currentline = str_new();
-    for (linenum = 0; str_read_next_line(currentline, fpin, env) != EOF;
-         linenum++)
+    for (linenum = 0; str_read_next_line(currentline, fpin) != EOF; linenum++)
     {
       if (analyzeuintline(indexname,
                          FMASCIIFILESUFFIX,
@@ -203,8 +202,8 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,
                                           &fmindex->specialcharinfo);
     fmindex->specpos.spacePairBwtidx = NULL;
     fmindex->specpos.allocatedPairBwtidx = 0;
-    tmpfilename = str_clone(indexname,env);
-    str_append_cstr(tmpfilename,ALPHABETFILESUFFIX,env);
+    tmpfilename = str_clone(indexname);
+    str_append_cstr(tmpfilename,ALPHABETFILESUFFIX);
     fmindex->alphabet = assigninputalphabet(false,
                                             false,
                                             tmpfilename,
@@ -236,8 +235,8 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,
                         fmindex->suffixlength,
                         storeindexpos,
                         &fmindex->specialcharinfo);
-    tmpfilename = str_clone(indexname,env);
-    str_append_cstr(tmpfilename,FMDATAFILESUFFIX,env);
+    tmpfilename = str_clone(indexname);
+    str_append_cstr(tmpfilename,FMDATAFILESUFFIX);
     if (fillfmmapspecstartptr(fmindex,storeindexpos,tmpfilename,env) != 0)
     {
       haserr = true;

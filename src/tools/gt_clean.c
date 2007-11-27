@@ -40,8 +40,8 @@ static void remove_pattern_in_current_dir(const char *pattern, Env *env)
   Str *path;
   glob_t g;
 
-  path = str_new_cstr("./*", env);
-  str_append_cstr(path, pattern, env);
+  path = str_new_cstr("./*");
+  str_append_cstr(path, pattern);
   xglob(str_get(path), GLOB_NOCHECK, NULL, &g);
 
   /* remove found files */

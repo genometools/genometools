@@ -225,8 +225,8 @@ int feature_index_unit_test(Env* env)
   rs.start=100UL; rs.end=1200UL;
 
   /* generating sequnce ids as C-strings */
-  seqid1 = str_new_cstr("test1", env);
-  seqid2 = str_new_cstr("test2", env);
+  seqid1 = str_new_cstr("test1");
+  seqid2 = str_new_cstr("test2");
 
   sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, NULL, 0, env);
   sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, NULL, 0, env);

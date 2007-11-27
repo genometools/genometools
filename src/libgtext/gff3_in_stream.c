@@ -208,7 +208,7 @@ static GenomeStream* gff3_in_stream_new(StrArray *files, /* takes ownership */
   GFF3InStream *gff3_in_stream         = gff3_in_stream_cast(gs);
   gff3_in_stream->next_file              = 0;
   gff3_in_stream->files                  = files;
-  gff3_in_stream->stdinstr               = str_new_cstr("stdin", env);
+  gff3_in_stream->stdinstr               = str_new_cstr("stdin");
   gff3_in_stream->ensure_sorting         = ensure_sorting;
   gff3_in_stream->stdin_argument         = false;
   gff3_in_stream->file_is_open           = false;

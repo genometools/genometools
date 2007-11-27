@@ -69,7 +69,7 @@ static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
     }
     else {
       /* save this character of the reference id */
-      str_append_char(alignment->id, line[i], env);
+      str_append_char(alignment->id, line[i]);
     }
 
     /* increase counter */
@@ -131,7 +131,7 @@ static int parse_input_file(Array *spliced_alignments,
   line = str_new();
   input_file = fa_xfopen(file_name, "r");
 
-  while (!had_err && str_read_next_line(line, input_file, env) != EOF) {
+  while (!had_err && str_read_next_line(line, input_file) != EOF) {
     /* init new spliced alignment */
     initSimpleSplicedAlignment(&sa, env);
     /* parse input line and save result in spliced alignment */

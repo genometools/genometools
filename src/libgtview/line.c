@@ -91,9 +91,9 @@ int line_unit_test(Env* env)
   r4.start = 10UL;
   r4.end = 20UL;
 
-  seqid1 = str_new_cstr("test1", env);
-  seqid2 = str_new_cstr("test2", env);
-  seqid3 = str_new_cstr("foo", env);
+  seqid1 = str_new_cstr("test1");
+  seqid2 = str_new_cstr("test2");
+  seqid3 = str_new_cstr("foo");
 
   parent = genome_feature_new(gft_gene, r_parent, STRAND_FORWARD, NULL, 0, env);
   gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0, env);

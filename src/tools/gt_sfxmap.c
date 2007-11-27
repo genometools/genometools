@@ -122,7 +122,7 @@ int gt_sfxmap(int argc, const char **argv, Env *env)
   }
   assert(argc >= 2 && parsed_args == argc - 1);
 
-  indexname = str_new_cstr(argv[parsed_args],env);
+  indexname = str_new_cstr(argv[parsed_args]);
   verboseinfo = newverboseinfo(sfxmapoptions.verbose,env);
   if (sfxmapoptions.inputtis)
   {

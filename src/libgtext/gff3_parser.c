@@ -86,7 +86,7 @@ static SimpleSequenceRegion* simple_sequence_region_new(const char *seqid,
                                                         Env *env)
 {
   SimpleSequenceRegion *ssr = ma_malloc(sizeof *ssr);
-  ssr->seqid_str = str_new_cstr(seqid, env);
+  ssr->seqid_str = str_new_cstr(seqid);
   ssr->range = range;
   ssr->line = line;
   return ssr;
@@ -282,7 +282,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
           had_err = -1;
           break;
         }
-        id = cstr_dup(splitter_get_token(tmp_splitter, 1), env);
+        id = cstr_dup(splitter_get_token(tmp_splitter, 1));
       }
       else if (strncmp(token, PARENT_STRING, strlen(PARENT_STRING)) == 0) {
         splitter_reset(tmp_splitter);
@@ -335,7 +335,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
                 "automatically", seqid, line_number, filename,
                 GFF_SEQUENCE_REGION);
         auto_sr = automatic_sequence_region_new(env);
-        seqid_str = str_new_cstr(seqid, env);
+        seqid_str = str_new_cstr(seqid);
         seqid_str_created = true;
         auto_sr->sequence_region = sequence_region_new(seqid_str, range, NULL,
                                                        0, env);
@@ -376,7 +376,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   if (!had_err) {
     source_str = hashtable_get(gff3_parser->source_to_str_mapping, source);
     if (!source_str) {
-      source_str = str_new_cstr(source, env);
+      source_str = str_new_cstr(source);
       hashtable_add(gff3_parser->source_to_str_mapping, str_get(source_str),
                     source_str, env);
     }
@@ -634,7 +634,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
   /* init */
   line_buffer = str_new();
 
-  while ((rval = str_read_next_line_generic(line_buffer, fpin, env)) != EOF) {
+  while ((rval = str_read_next_line_generic(line_buffer, fpin)) != EOF) {
     line = str_get(line_buffer);
     line_length = str_length(line_buffer);
     (*line_number)++;

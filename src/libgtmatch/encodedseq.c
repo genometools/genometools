@@ -520,8 +520,8 @@ static int fillencseqmapspecstartptr(Encodedsequence *encseq,
   Str *tmpfilename;
 
   env_error_check(env);
-  tmpfilename = str_clone(indexname,env);
-  str_append_cstr(tmpfilename,ENCSEQFILESUFFIX,env);
+  tmpfilename = str_clone(indexname);
+  str_append_cstr(tmpfilename,ENCSEQFILESUFFIX);
   if (fillmapspecstartptr(assignencseqmapspecification,
                           &encseq->mappedptr,
                           encseq,

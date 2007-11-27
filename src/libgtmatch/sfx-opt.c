@@ -174,7 +174,7 @@ static OPrval parse_options(int *parsed_args,
         char *basenameptr;
 
         basenameptr = getbasename(strarray_get(so->filenametab,0),env);
-        str_set(so->str_indexname,basenameptr,env);
+        str_set(so->str_indexname,basenameptr);
         ma_free(basenameptr);
       }
     }

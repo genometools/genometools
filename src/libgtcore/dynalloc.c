@@ -25,7 +25,7 @@
 #define SIZE_MAX ~(size_t)0
 #endif
 
-void* dynalloc(void *ptr, size_t *allocated, size_t size, Env *env)
+void* dynalloc(void *ptr, size_t *allocated, size_t size)
 {
   size_t size_to_alloc = 0;
   void *rptr;

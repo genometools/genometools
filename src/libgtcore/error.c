@@ -67,11 +67,11 @@ const char* error_get(const Error *e)
   return e->error_string;
 }
 
-void error_set_progname(Error *e, const char *progname, Env *env)
+void error_set_progname(Error *e, const char *progname)
 {
   assert(e && progname);
   ma_free(e->progname);
-  e->progname = cstr_dup(progname, env);
+  e->progname = cstr_dup(progname);
 }
 
 const char* error_get_progname(const Error *e)

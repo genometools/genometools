@@ -50,7 +50,7 @@ void splitter_split(Splitter *s, char *string, unsigned long length,
     *end_of_token = '\0';
     if ((s->num_of_tokens + 1) * sizeof (char*) > s->allocated)
       s->tokens = dynalloc(s->tokens, &s->allocated,
-                           (s->num_of_tokens + 1) * sizeof (char*), env);
+                           (s->num_of_tokens + 1) * sizeof (char*));
     s->tokens[s->num_of_tokens++] = string_index;
     string_index = end_of_token + 1;
   }
@@ -58,7 +58,7 @@ void splitter_split(Splitter *s, char *string, unsigned long length,
   /* save last token */
   if ((s->num_of_tokens + 2) * sizeof (char*) > s->allocated)
     s->tokens = dynalloc(s->tokens, &s->allocated,
-                         (s->num_of_tokens + 2) * sizeof (char*), env);
+                         (s->num_of_tokens + 2) * sizeof (char*));
   s->tokens[s->num_of_tokens++] = string_index;
   s->tokens[s->num_of_tokens]   = NULL;
 

@@ -65,7 +65,7 @@ GenomeStream* cds_stream_new(GenomeStream *in_stream, RegionMapping *rm,
   env_error_check(env);
   gs = genome_stream_create(cds_stream_class(), true, env);
   cds_stream = cds_stream_cast(gs);
-  source_str = str_new_cstr(source, env);
+  source_str = str_new_cstr(source);
   cds_stream->in_stream = in_stream;
   cds_stream->cds_visitor = cds_visitor_new(rm, source_str, env);
   if (!cds_stream->cds_visitor)

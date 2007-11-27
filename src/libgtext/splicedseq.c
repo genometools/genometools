@@ -44,7 +44,7 @@ void splicedseq_add(Splicedseq *ss, unsigned long start, unsigned long end,
   unsigned long i;
   assert(ss && start <= end && original_sequence);
   str_append_cstr_nt(ss->splicedseq, original_sequence + start,
-                     end - start + 1, env);
+                     end - start + 1);
   /* make sure elemnts are added in ascending order */
   assert(!array_size(ss->positionmapping) ||
          start > *(unsigned long*) array_get_last(ss->positionmapping));

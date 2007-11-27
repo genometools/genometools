@@ -41,7 +41,7 @@ Mapping* mapping_new(Str *mapping_file, const char *global_name,
   /* alloc */
   m = ma_malloc(sizeof (Mapping));
   m->mapping_file = str_ref(mapping_file);
-  m->global = cstr_dup(global_name, env);
+  m->global = cstr_dup(global_name);
   m->type = type;
   /* create new lua state (i.e., interpreter) */
   m->L = luaL_newstate();
@@ -120,7 +120,7 @@ static int map_table(Mapping *m, Str **stroutput, long *integeroutput,
           had_err = -1;
         }
         if (!had_err)
-          *stroutput = str_new_cstr(lua_tostring(m->L, -1), env);
+          *stroutput = str_new_cstr(lua_tostring(m->L, -1));
         break;
       case MAPPINGTYPE_INTEGER:
         /* make sure global[input] is an integer */
@@ -164,7 +164,7 @@ static int map_function(Mapping *m, Str **stroutput, long *integeroutput,
           had_err = -1;
         }
         if (!had_err)
-          *stroutput = str_new_cstr(lua_tostring(m->L, -1), env);
+          *stroutput = str_new_cstr(lua_tostring(m->L, -1));
          break;
        case MAPPINGTYPE_INTEGER:
         if (!lua_isnumber(m->L, -1)) {

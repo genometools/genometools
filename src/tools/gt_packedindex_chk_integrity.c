@@ -60,7 +60,7 @@ gt_packedindex_chk_integrity(int argc, const char *argv[], Env *env)
       return 0;
   }
 
-  inputProject = str_new_cstr(argv[parsedArgs], env);
+  inputProject = str_new_cstr(argv[parsedArgs]);
   env_error_check(env);
   seq = loadBlockEncIdxSeq(inputProject, EIS_FEATURE_REGION_SUMS, env);
   ensure(had_err, seq);

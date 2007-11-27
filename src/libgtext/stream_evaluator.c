@@ -1276,7 +1276,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
         slot = slot_new(se->nuceval, genome_node_get_range(gn), env);
         hashtable_add(se->slots,
-                      cstr_dup(str_get(genome_node_get_seqid(gn)), env), slot,
+                      cstr_dup(str_get(genome_node_get_seqid(gn))), slot,
                       env);
       }
       assert(slot);

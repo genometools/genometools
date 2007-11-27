@@ -44,7 +44,7 @@ void stringdistri_add(StringDistri *d, const char *key, Env *env)
   if (!valueptr) {
     valueptr = ma_malloc(sizeof *valueptr);
     *valueptr = 1;
-    hashtable_add(d->hashdist, cstr_dup(key, env), valueptr, env);
+    hashtable_add(d->hashdist, cstr_dup(key), valueptr, env);
   }
   else
     (*valueptr)++;

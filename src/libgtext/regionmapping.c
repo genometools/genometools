@@ -82,7 +82,7 @@ static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Env *env)
         rm->sequence_name = str_new();
       else
         str_reset(rm->sequence_name);
-      str_append_str(rm->sequence_name, seqid, env);
+      str_append_str(rm->sequence_name, seqid);
       bioseq_delete(rm->bioseq, env);
       rm->bioseq = bioseq_new_str(rm->sequence_file, env);
       if (!rm->bioseq)

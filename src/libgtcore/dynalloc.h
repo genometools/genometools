@@ -19,7 +19,6 @@
 #define DYNALLOC_H
 
 #include <stdlib.h>
-#include "libgtcore/env.h"
 
 /*
   Do not use this function directly! It is only used internally to implement
@@ -31,9 +30,8 @@
   <ptr> the previously allocated memory
   <allocated> allocated memory size before and after the call
   <size> requested memory size
-  <env> the environment object
 */
 
-void* dynalloc(void *ptr, size_t *allocated, size_t size, Env *env);
+void* dynalloc(void *ptr, size_t *allocated, size_t size);
 
 #endif

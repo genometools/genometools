@@ -144,7 +144,7 @@ GenomeVisitor* csa_visitor_new(unsigned long join_length, Env *env)
   csa_visitor->join_length = join_length;
   csa_visitor->cluster = array_new(sizeof (GenomeFeature*), env);
   csa_visitor->buffered_feature = NULL;
-  csa_visitor->gth_csa_source_str = str_new_cstr(GT_CSA_SOURCE_TAG, env);
+  csa_visitor->gth_csa_source_str = str_new_cstr(GT_CSA_SOURCE_TAG);
   return gv;
 }
 

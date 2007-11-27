@@ -58,7 +58,7 @@ static void proc_gt_env_options(Env *env)
   env_options = getenv("GT_ENV_OPTIONS");
   if (!env_options)
     return;
-  env_options = cstr_dup(env_options, env); /* make writeable copy */
+  env_options = cstr_dup(env_options); /* make writeable copy */
   splitter = splitter_new(env);
   splitter_split(splitter, env_options, strlen(env_options), ' ', env);
   argc = splitter_size(splitter);

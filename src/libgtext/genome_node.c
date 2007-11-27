@@ -85,7 +85,7 @@ GenomeNode* genome_node_create(const GenomeNodeClass *gnc, Str *filename,
   gn                  = ma_malloc(gnc->size);
   gn->c_class         = gnc;
   gn->filename        = filename ? str_ref(filename)
-                                 : str_new_cstr("generated", env);
+                                 : str_new_cstr("generated");
   gn->line_number     = line_number;
   gn->children        = NULL; /* the children list is created on demand */
   gn->reference_count = 0;

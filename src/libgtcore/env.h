@@ -40,7 +40,7 @@ void    env_error_set(Env*, const char *format, ...)
 #define env_error_get(env)\
         error_get(env_error(env))
 #define env_error_set_progname(env, progname)\
-        error_set_progname(env_error(env), progname, env)
+        error_set_progname(env_error(env), progname)
 #define env_error_get_progname(env)\
         error_get_progname(env_error(env))
 /* make sure that the error is not set, should be used at the beginning of

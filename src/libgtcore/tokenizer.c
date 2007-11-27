@@ -68,12 +68,12 @@ Str* tokenizer_get_token(Tokenizer *t, Env *env)
           t->token = str_new();
         if (c == '\n')
           break;
-        str_append_char(t->token, c, env);
+        str_append_char(t->token, c);
       }
     } while ((io_get_char(t->io, &c) != -1) && c != ' ' && c != '\n');
     if (c == '\n' && c != EOF) {
       assert(t->token);
-      str_append_char(t->token, c, env);
+      str_append_char(t->token, c);
     }
   }
   /* return token */
@@ -130,7 +130,7 @@ int tokenizer_unit_test(Env *env)
   env_error_check(env);
 
   /* empty file (except comment line) */
-  tmpfilename = str_new_cstr(XTMPFILE_TEMPLATE, env);
+  tmpfilename = str_new_cstr(XTMPFILE_TEMPLATE);
   tmpfp = fa_xtmpfile(str_get(tmpfilename));
   fprintf(tmpfp, "# comment line\n");
   fa_xfclose(tmpfp);
@@ -142,7 +142,7 @@ int tokenizer_unit_test(Env *env)
 
   /* larger test */
   str_reset(tmpfilename);
-  str_append_cstr(tmpfilename, XTMPFILE_TEMPLATE, env);
+  str_append_cstr(tmpfilename, XTMPFILE_TEMPLATE);
   tmpfp = fa_xfopen(str_get(tmpfilename), "w");
   fprintf(tmpfp, " a bb ccc\ndddd -5");
   fa_xfclose(tmpfp);

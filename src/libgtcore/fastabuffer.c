@@ -147,8 +147,7 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
             if (currentchar == NEWLINESYMBOL)
             {
               STOREINARRAY(&fb->headerbuffer, char, 128, '\0');
-              queue_add(fb->descptr, cstr_dup(fb->headerbuffer.spacechar, env),
-                        env);
+              queue_add(fb->descptr, cstr_dup(fb->headerbuffer.spacechar), env);
               fb->headerbuffer.nextfreechar = 0;
             } else
             {

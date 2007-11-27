@@ -81,7 +81,7 @@ gt_packedindex_chk_search(int argc, const char *argv[], Env *env)
       if (exitNow)
         break;
     }
-    str_set(inputProject, argv[parsedArgs], env);
+    str_set(inputProject, argv[parsedArgs]);
     {
       bwtSeq = availBWTSeq(&params.idx.final, env);
     }

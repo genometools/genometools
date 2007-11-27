@@ -48,7 +48,7 @@ static int genome_feature_lua_new(lua_State *L)
   /* construct object */
   env = get_env_from_registry(L);
   gf = lua_newuserdata(L, sizeof (GenomeNode*));
-  filename = str_new_cstr("Lua", env);
+  filename = str_new_cstr("Lua");
   *gf = genome_feature_new(type, *range, strand, filename, 0, env);
   str_delete(filename);
   assert(*gf);
