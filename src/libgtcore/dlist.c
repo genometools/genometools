@@ -39,7 +39,7 @@ struct Dlistelem {
   void *data;
 };
 
-Dlist* dlist_new(Compare cmp_func, Env *env)
+Dlist* dlist_new(Compare cmp_func)
 {
   Dlist *dlist = ma_calloc(1, sizeof (Dlist));
   dlist->cmp_func = cmp_func;
@@ -79,7 +79,7 @@ unsigned long dlist_size(const Dlist *dlist)
   return dlist ? dlist->size : 0;
 }
 
-void dlist_add(Dlist *dlist, void *data, Env *env)
+void dlist_add(Dlist *dlist, void *data)
 {
   Dlistelem *oldelem, *newelem;
   assert(dlist); /* data can be null */
@@ -139,7 +139,7 @@ void dlist_add(Dlist *dlist, void *data, Env *env)
   dlist->size++;
 }
 
-void dlist_remove(Dlist *dlist, Dlistelem *dlistelem, Env *env)
+void dlist_remove(Dlist *dlist, Dlistelem *dlistelem)
 {
   assert(dlist && dlistelem);
   assert(!dlistelem->previous || dlistelem->previous->next == dlistelem);
@@ -174,41 +174,41 @@ int dlist_unit_test(Env *env)
   env_error_check(env);
 
   /* boundary case: empty dlist */
-  dlist = dlist_new(intcompare, env);
+  dlist = dlist_new(intcompare);
   ensure(had_err, !dlist_size(dlist));
-  dlist_delete(dlist, env);
+  dlist_delete(dlist);
 
-  dlist = dlist_new(NULL, env);
+  dlist = dlist_new(NULL);
   ensure(had_err, !dlist_size(dlist));
-  dlist_delete(dlist, env);
+  dlist_delete(dlist);
 
   /* boundary case: dlist containing one element */
-  dlist = dlist_new(intcompare, env);
-  dlist_add(dlist, &elem_a, env);
+  dlist = dlist_new(intcompare);
+  dlist_add(dlist, &elem_a);
   ensure(had_err, dlist_size(dlist) == 1);
   ensure(had_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_delete(dlist, env);
+  dlist_delete(dlist);
 
-  dlist = dlist_new(NULL, env);
-  dlist_add(dlist, &elem_a, env);
+  dlist = dlist_new(NULL);
+  dlist_add(dlist, &elem_a);
   ensure(had_err, dlist_size(dlist) == 1);
   ensure(had_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_delete(dlist, env);
+  dlist_delete(dlist);
 
   /* boundary case: dlist containing two elements */
-  dlist = dlist_new(intcompare, env);
-  dlist_add(dlist, &elem_a, env);
-  dlist_add(dlist, &elem_b, env);
+  dlist = dlist_new(intcompare);
+  dlist_add(dlist, &elem_a);
+  dlist_add(dlist, &elem_b);
   ensure(had_err, dlist_size(dlist) == 2);
   ensure(had_err, elem_b == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_delete(dlist, env);
+  dlist_delete(dlist);
 
-  dlist = dlist_new(NULL, env);
-  dlist_add(dlist, &elem_a, env);
-  dlist_add(dlist, &elem_b, env);
+  dlist = dlist_new(NULL);
+  dlist_add(dlist, &elem_a);
+  dlist_add(dlist, &elem_b);
   ensure(had_err, dlist_size(dlist) == 2);
   ensure(had_err, elem_a == *(int*) dlistelem_get_data(dlist_first(dlist)));
-  dlist_delete(dlist, env);
+  dlist_delete(dlist);
 
   for (i = 0; i < NUM_OF_TESTS && !had_err; i++) {
     /* construct the random elements for the list */
@@ -222,10 +222,10 @@ int dlist_unit_test(Env *env)
     qsort(elems_backup, size, sizeof (int), intcompare);
 
     /* test with compare function */
-    dlist = dlist_new(intcompare, env);
+    dlist = dlist_new(intcompare);
     ensure(had_err, !dlist_size(dlist));
     for (j = 0; j < size && !had_err; j++) {
-      dlist_add(dlist, elems + j, env);
+      dlist_add(dlist, elems + j);
       ensure(had_err, dlist_size(dlist) == j+1);
 
       for (dlistelem = dlist_first(dlist); dlistelem != NULL;
@@ -247,7 +247,7 @@ int dlist_unit_test(Env *env)
     }
     /* remove first element */
     if (dlist_size(dlist)) {
-      dlist_remove(dlist, dlist_first(dlist), env);
+      dlist_remove(dlist, dlist_first(dlist));
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_first(dlist));
         ensure(had_err, *data == elems_backup[1]);
@@ -255,7 +255,7 @@ int dlist_unit_test(Env *env)
     }
     /* remove last element */
     if (dlist_size(dlist)) {
-      dlist_remove(dlist, dlist_last(dlist), env);
+      dlist_remove(dlist, dlist_last(dlist));
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_last(dlist));
         ensure(had_err, *data == elems_backup[size - 2]);
@@ -268,7 +268,7 @@ int dlist_unit_test(Env *env)
       dlistelem = dlist_first(dlist);
       for (j = 1; j < dlist_size(dlist) / 2; j++)
         dlistelem = dlistelem_next(dlistelem);
-      dlist_remove(dlist, dlistelem, env);
+      dlist_remove(dlist, dlistelem);
       dlistelem = dlist_first(dlist);
       for (j = 1; j < dlist_size(dlist) / 2 + 1; j++)
         dlistelem = dlistelem_next(dlistelem);
@@ -276,13 +276,13 @@ int dlist_unit_test(Env *env)
       ensure(had_err, *data == elems_backup[size / 2 + 1]);
     }
 #endif
-    dlist_delete(dlist, env);
+    dlist_delete(dlist);
 
     /* test without compare function */
-    dlist = dlist_new(NULL, env);
+    dlist = dlist_new(NULL);
     ensure(had_err, !dlist_size(dlist));
     for (j = 0; j < size && !had_err; j++) {
-      dlist_add(dlist, elems + j, env);
+      dlist_add(dlist, elems + j);
       ensure(had_err, dlist_size(dlist) == j+1);
     }
     j = 0;
@@ -294,7 +294,7 @@ int dlist_unit_test(Env *env)
     }
     /* remove first element */
     if (dlist_size(dlist)) {
-      dlist_remove(dlist, dlist_first(dlist), env);
+      dlist_remove(dlist, dlist_first(dlist));
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_first(dlist));
         ensure(had_err, *data == elems[1]);
@@ -302,19 +302,19 @@ int dlist_unit_test(Env *env)
     }
     /* remove last element */
     if (dlist_size(dlist)) {
-      dlist_remove(dlist, dlist_last(dlist), env);
+      dlist_remove(dlist, dlist_last(dlist));
       if (dlist_size(dlist)) {
         data = dlistelem_get_data(dlist_last(dlist));
         ensure(had_err, *data == elems[size - 2]);
       }
     }
-    dlist_delete(dlist, env);
+    dlist_delete(dlist);
   }
 
   return had_err;
 }
 
-void dlist_delete(Dlist *dlist, Env *env)
+void dlist_delete(Dlist *dlist)
 {
   Dlistelem *elem;
   if (!dlist) return;

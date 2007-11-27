@@ -49,7 +49,7 @@ Block* block_new(Env *env)
   Range r;
   env_error_check(env);
   block = ma_malloc(sizeof (Block));
-  block->elements = dlist_new(elemcmp, env);
+  block->elements = dlist_new(elemcmp);
   r.start = 0;
   r.end = 0;
   block->range = r;
@@ -110,7 +110,7 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
           case DOMINATES_SECOND:
             elem_r.start = gn_r.end+1;
             if (elem_r.start == elem_r.end+1) {
-              dlist_remove(block->elements, elem, env);
+              dlist_remove(block->elements, elem);
               element_delete(element, env);
             }
             else
@@ -118,7 +118,7 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
             e = element_new_empty(env);
             element_set_range(e, gn_r);
             element_set_type(e, gn_type);
-            dlist_add(block->elements, e, env);
+            dlist_add(block->elements, e);
             elem = dlist_find(block->elements, e);
             break;
         }
@@ -136,7 +136,7 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
           case DOMINATES_SECOND:
             elem_r.end = gn_r.start-1;
             if (elem_r.start == elem_r.end+1) {
-              dlist_remove(block->elements, elem, env);
+              dlist_remove(block->elements, elem);
               element_delete(element, env);
             }
             else
@@ -144,7 +144,7 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
             e = element_new(gn, env);
             element_set_range(e, gn_r);
             element_set_type(e, gn_type);
-            dlist_add(block->elements, e, env);
+            dlist_add(block->elements, e);
             elem = dlist_find(block->elements, e);
             break;
         }
@@ -167,7 +167,7 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
             tmp = elem_r.end;
             elem_r.end = gn_r.start-1;
             if (elem_r.start == elem_r.end+1) {
-              dlist_remove(block->elements, elem, env);
+              dlist_remove(block->elements, elem);
               element_delete(element, env);
               removed = true;
               elem_r.end = tmp;
@@ -179,7 +179,7 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
             e = element_new_empty(env);
             element_set_range(e, gnnew_r);
             element_set_type(e, e_type);
-            dlist_add(block->elements, e, env);
+            dlist_add(block->elements, e);
             gn_r.start = elem_r.end+1;
             if (removed)
               elem = dlist_find(block->elements, e);
@@ -207,8 +207,8 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
             element_set_range(elemnew, elemnew_r);
             element_set_type(elemnew, e_type);
             e = element_new(gn, env);
-            dlist_add(block->elements, elemnew, env);
-            dlist_add(block->elements, e, env);
+            dlist_add(block->elements, elemnew);
+            dlist_add(block->elements, e);
             break;
         }
       }
@@ -216,7 +216,7 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
   }
   if (count == 0) {
     e = element_new(gn, env);
-    dlist_add(block->elements, e, env);
+    dlist_add(block->elements, e);
   }
 }
 
@@ -387,6 +387,6 @@ void block_delete(Block *block,
     element_delete(elem, env);
   }
   str_delete(block->caption);
-  dlist_delete(block->elements, env);
+  dlist_delete(block->elements);
   ma_free(block);
 }

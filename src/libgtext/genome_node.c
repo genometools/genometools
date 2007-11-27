@@ -366,8 +366,8 @@ void genome_node_is_part_of_genome_node(GenomeNode *parent, GenomeNode *child,
   assert(parent && child);
   /* create children list on demand */
   if (!parent->children)
-    parent->children = dlist_new((Compare) compare_genome_nodes, env);
-  dlist_add(parent->children, child, env); /* XXX: check for circles */
+    parent->children = dlist_new((Compare) compare_genome_nodes);
+  dlist_add(parent->children, child); /* XXX: check for circles */
   /* update tree status of <parent> */
   genome_node_info_set_tree_status(&parent->info,
                                    GENOME_NODE_TREE_STATUS_UNDETERMINED);
@@ -385,7 +385,7 @@ static int remove_leaf(GenomeNode *node, void *data, Env *env)
          dlistelem = dlistelem_next(dlistelem)) {
       child = (GenomeNode*) dlistelem_get_data(dlistelem);
       if (child == leaf) {
-        dlist_remove(node->children, dlistelem, env);
+        dlist_remove(node->children, dlistelem);
         break;
       }
     }
@@ -574,7 +574,7 @@ void genome_node_delete(GenomeNode *gn, Env *env)
   assert(gn->c_class);
   if (gn->c_class->free) gn->c_class->free(gn, env);
   str_delete(gn->filename);
-  dlist_delete(gn->children, env);
+  dlist_delete(gn->children);
   ma_free(gn);
 }
 

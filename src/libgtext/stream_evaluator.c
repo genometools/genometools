@@ -692,7 +692,7 @@ static void add_predicted_collapsed(Dlist *used_exons, Range *predicted_range,
     used_range = ma_malloc(sizeof (Range));
     used_range->start = predicted_range->start;
     used_range->end = predicted_range->end;
-    dlist_add(used_exons, used_range, env);
+    dlist_add(used_exons, used_range);
     evaluator_add_predicted(exon_evaluator_collapsed, 1);
   }
 }

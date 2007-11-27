@@ -26,17 +26,17 @@
 typedef struct Dlist Dlist;
 typedef struct Dlistelem Dlistelem;
 
-Dlist*        dlist_new(Compare, Env*);
+Dlist*        dlist_new(Compare);
 Dlistelem*    dlist_first(const Dlist*);
 Dlistelem*    dlist_last(const Dlist*);
 Dlistelem*    dlist_find(const Dlist*, void*); /* O(n) */
 unsigned long dlist_size(const Dlist*);
  /* usually: O(n) (O(1) if data is added in sorted order) */
-void          dlist_add(Dlist*, void *data, Env*);
+void          dlist_add(Dlist*, void *data);
 /* frees the elem */
-void          dlist_remove(Dlist*, Dlistelem*, Env*);
+void          dlist_remove(Dlist*, Dlistelem*);
 int           dlist_unit_test(Env*);
-void          dlist_delete(Dlist*, Env*);
+void          dlist_delete(Dlist*);
 
 Dlistelem*    dlistelem_next(const Dlistelem*);
 Dlistelem*    dlistelem_previous(const Dlistelem*);
