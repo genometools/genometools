@@ -27,7 +27,6 @@ struct Env {
   MA *ma; /* the memory allocator */
   FA *fa; /* the file allocator */
   Error *error;
-  Log *log;
   bool spacepeak;
 };
 
@@ -114,18 +113,6 @@ Error* env_error(const Env *env)
   return env->error;
 }
 
-Log* env_log(const Env *env)
-{
-  assert(env);
-  return env->log;
-}
-
-void env_set_log(Env *env, Log *log)
-{
-  assert(env);
-  env->log = log;
-}
-
 void env_set_spacepeak(Env *env, bool spacepeak)
 {
   assert(env);
@@ -136,7 +123,6 @@ int env_delete(Env *env)
 {
   int fa_fptr_rval, fa_mmap_rval, ma_rval;
   assert(env);
-  log_delete(env->log, env->ma);
   error_delete(env->error, env->ma);
   env->error = NULL;
   if (env->spacepeak) {
@@ -222,8 +208,8 @@ void env_log_log(Env *env, const char *format, ...)
 {
   va_list ap;
   assert(env && format);
-  if (!env_log(env)) return;
+  if (!log_enabled()) return;
   va_start(ap, format);
-  log_vlog(env_log(env), format, ap);
+  log_vlog(format, ap);
   va_end(ap);
 }

@@ -21,29 +21,25 @@
 #include <stdarg.h>
 #include <stdio.h>
 
-typedef struct Log Log;
+/* enable logging */
+void log_enable(void);
 
-/*
-  Creates a new log object, the output is directed at stderr by default.
-  @param memory allocator
-  @return log object
-*/
-Log*  log_new(MA*);
-/*
-  Prints the log message obtained from format and following
-  parameters according to Log object. The debug output is
-  prefixed with the string "debug: " and finished by a newline.
-*/
-void  log_log(Log*, const char *format, ...)
-  __attribute__ ((format (printf, 2, 3)));
-/*
-  Prints the log message obtained from format and following
-  parameter according to Log object like log_log. But in contrast to
-  log_log log_vlog not accepts individual arguments but a single
-  va_list argument instead.
-*/
-void  log_vlog(Log*, const char *format, va_list);
-FILE* log_fp(Log*);
-void  log_delete(Log*, MA*);
+/* returns true if logging is enabled, false otherwise */
+bool log_enabled(void);
+
+/* Prints the log message obtained from format and following parameters
+   according if logging is enabled. The logging output is prefixed with the
+   string "debug: " and finished by a newline.  */
+void  log_log(const char *format, ...)
+  __attribute__ ((format (printf, 1, 2)));
+
+/* Prints the log message obtained from format and following parameter according
+   to if logging is enabled analog to log_log(). But in contrast to
+   log_log() log_vlog() does not accept individual arguments but a single
+   va_list argument instead. */
+void  log_vlog(const char *format, va_list);
+
+/* return logging file pointer */
+FILE* log_fp(void);
 
 #endif

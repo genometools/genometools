@@ -1173,16 +1173,15 @@ int determine_missing_features(void *key, void *value, void *data, Env *env)
 }
 
 static void add_nucleotide_values(NucEval *nucleotides, Bittab *real,
-                                  Bittab *pred, Bittab *tmp,
-                                  const char *level, Log *log)
+                                  Bittab *pred, Bittab *tmp, const char *level)
 {
   assert(nucleotides && real && pred && tmp);
-  if (log) {
-    log_log(log, level);
-    log_log(log, "reality:");
-    bittab_show(real, log_fp(log));
-    log_log(log, "prediction:");
-    bittab_show(pred, log_fp(log));
+  if (log_enabled()) {
+    log_log(level);
+    log_log("reality:");
+    bittab_show(real, log_fp());
+    log_log("prediction:");
+    bittab_show(pred, log_fp());
   }
   /* real & pred = TP */
   bittab_and(tmp, real, pred);
@@ -1214,19 +1213,19 @@ int compute_nucleotides_values(void *key, void *value, void *data, Env *env)
   add_nucleotide_values(&se->mRNA_nucleotides,
                         slot->real_mRNA_nucleotides_forward,
                         slot->pred_mRNA_nucleotides_forward, tmp,
-                        "mRNA forward", env_log(env));
+                        "mRNA forward");
   add_nucleotide_values(&se->mRNA_nucleotides,
                         slot->real_mRNA_nucleotides_reverse,
                         slot->pred_mRNA_nucleotides_reverse, tmp,
-                        "mRNA reverse", env_log(env));
+                        "mRNA reverse");
   add_nucleotide_values(&se->CDS_nucleotides,
                         slot->real_CDS_nucleotides_forward,
                         slot->pred_CDS_nucleotides_forward, tmp,
-                        "CDS forward", env_log(env));
+                        "CDS forward");
   add_nucleotide_values(&se->CDS_nucleotides,
                         slot->real_CDS_nucleotides_reverse,
                         slot->pred_CDS_nucleotides_reverse, tmp,
-                        "CDS reverse", env_log(env));
+                        "CDS reverse");
   bittab_delete(tmp, env);
   return 0;
 }

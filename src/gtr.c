@@ -323,7 +323,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
   env_error_check(env);
   assert(gtr);
   if (gtr->debug)
-    env_set_log(env, log_new(env_ma(env)));
+    log_enable();
   if (gtr->test) {
     return run_tests(gtr, env);
   }

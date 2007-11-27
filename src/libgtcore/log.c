@@ -20,42 +20,38 @@
 #include "libgtcore/env.h"
 #include "libgtcore/xansi.h"
 
-struct Log {
-  FILE *logfp;
-};
+static bool logging = false;
+static FILE *logfp = stderr;
 
-Log* log_new(MA *ma)
+void log_enable(void)
 {
-  Log *l = ma_malloc(ma, sizeof (Log));
-  l->logfp = stderr;
-  return l;
+  logging = true;
 }
 
-void log_log(Log *l, const char *format, ...)
+bool log_enabled(void)
+{
+  return logging;
+}
+
+void log_log(const char *format, ...)
 {
   va_list ap;
-  if (!l) return;
+  if (!logging) return;
   va_start(ap, format);
-  log_vlog(l, format, ap);
+  log_vlog(format, ap);
   va_end(ap);
 }
 
-void log_vlog(Log *l, const char *format, va_list ap)
+void log_vlog(const char *format, va_list ap)
 {
-  if (!l) return;
-  fprintf(l->logfp, "debug: ");
-  (void) vfprintf(l->logfp, format, ap);
-  (void) putc('\n', l->logfp);
+  if (!logging) return;
+  fprintf(logfp, "debug: ");
+  (void) vfprintf(logfp, format, ap);
+  (void) putc('\n', logfp);
 }
 
-FILE* log_fp(Log *l)
+FILE* log_fp(void)
 {
-  assert(l);
-  return l->logfp;
-}
-
-void log_delete(Log *l, MA *ma)
-{
-  if (!l) return;
-  ma_free(l, ma);
+  assert(logging);
+  return logfp;
 }

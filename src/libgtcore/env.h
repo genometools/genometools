@@ -30,8 +30,6 @@ Env*   env_new(void);
 MA*    env_ma(const Env*);    /* return the memory allocator */
 FA*    env_fa(const Env*);    /* return the file allocator */
 Error* env_error(const Env*); /* return the error object */
-Log*   env_log(const Env*);   /* return the log object or NULL */
-void   env_set_log(Env*, Log*);
 void   env_set_spacepeak(Env*, bool);
 /* returns 0 if no memory map, file pointer, or memory has been leaked and a
    value != 0 otherwise */
