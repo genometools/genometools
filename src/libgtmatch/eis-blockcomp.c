@@ -479,7 +479,7 @@ newGenBlockEncIdxSeq(Seqpos totalLen, const Str *projectName,
     {
     case sourceUInt8:
       memset(symCounts, 0,
-             sizeof (newSeqIdx->partialSymSumBits[0]) * blockMapAlphabetSize);
+             sizeof (symCounts[0]) * blockMapAlphabetSize);
       {
         Symbol eSym, bSym;
         unsigned i;
