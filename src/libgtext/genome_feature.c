@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
 #include "libgtext/genome_feature.h"
 #include "libgtext/genome_feature_type.h"
@@ -403,8 +404,8 @@ void genome_feature_add_attribute(GenomeFeature *gf, const char *attr_name,
 {
   assert(gf && attr_name && attr_value);
   if (!gf->attributes)
-    gf->attributes = hashtable_new(HASH_STRING, env_ma_free_func,
-                                   env_ma_free_func, env);
+    gf->attributes = hashtable_new(HASH_STRING, ma_free_func, ma_free_func,
+                                   env);
   hashtable_add(gf->attributes, cstr_dup(attr_name, env),
                 cstr_dup(attr_value, env), env);
 }

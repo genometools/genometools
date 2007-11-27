@@ -18,6 +18,7 @@
 #include <assert.h>
 #include "libgtcore/cstr.h"
 #include "libgtcore/hashtable.h"
+#include "libgtcore/ma.h"
 #include "libgtcore/minmax.h"
 #include "libgtext/genome_visitor_rep.h"
 #include "libgtext/regioncov_visitor.h"
@@ -94,7 +95,7 @@ GenomeVisitor* regioncov_visitor_new(unsigned long max_feature_dist, Env *env)
   RegionCovVisitor *regioncov_visitor = regioncov_visitor_cast(gv);
   regioncov_visitor->max_feature_dist = max_feature_dist;
   regioncov_visitor->region2rangelist = hashtable_new(HASH_STRING,
-                                                      env_ma_free_func,
+                                                      ma_free_func,
                                                       (FreeFunc) array_delete,
                                                       env);
   return gv;

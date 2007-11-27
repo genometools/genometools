@@ -49,7 +49,7 @@ static int region_info_delete(void *data, Env *env)
     genome_node_rec_delete(*(GenomeNode**) array_get(info->features, i), env);
   array_delete(info->features, env);
   genome_node_rec_delete((GenomeNode*)info->region, env);
-  env_ma_free_func(info, env);
+  ma_free(info);
   return 0;
 }
 

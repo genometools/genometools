@@ -31,8 +31,7 @@ StringDistri* stringdistri_new(Env *env)
   StringDistri *sd;
   env_error_check(env);
   sd = ma_malloc(sizeof *sd);
-  sd->hashdist = hashtable_new(HASH_STRING, env_ma_free_func, env_ma_free_func,
-                               env);
+  sd->hashdist = hashtable_new(HASH_STRING, ma_free_func, ma_free_func, env);
   sd->num_of_occurrences = 0;
   return sd;
 }

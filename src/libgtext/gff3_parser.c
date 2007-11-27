@@ -103,7 +103,7 @@ GFF3Parser* gff3parser_new(bool checkids, Env *env)
 {
   GFF3Parser *gff3_parser = ma_malloc(sizeof (GFF3Parser));
   gff3_parser->id_to_genome_node_mapping = hashtable_new(HASH_STRING,
-                                                         env_ma_free_func,
+                                                         ma_free_func,
                                                          (FreeFunc)
                                                          genome_node_delete,
                                                          env);

@@ -125,13 +125,6 @@ int env_delete(Env *env)
   return fa_fptr_rval || fa_mmap_rval || ma_rval;
 }
 
-void env_ma_free_func(void *ptr, Env *env)
-{
-  assert(env);
-  if (!ptr) return;
-  ma_free(ptr);
-}
-
 void env_fa_fclose(FILE *stream, Env *env)
 {
   assert(env);

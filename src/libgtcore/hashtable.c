@@ -85,9 +85,9 @@ void hashtable_remove(Hashtable *ht, void *key, Env *env)
   assert(value);
   (void) st_delete(ht->st_table, &key_t, NULL, env);
   if (ht->key_free)
-    ht->key_free(key, env);
+    ht->key_free(key);
   if (ht->value_free)
-    ht->value_free((void*) value, env);
+    ht->value_free((void*) value);
 }
 
 static int st_iterfunc(void *key, void *value, void *data,
@@ -196,9 +196,9 @@ static int remove_key_value_pair(void *key, void *value, void *data, Env *env)
   Hashtable *ht= (Hashtable*) data;
   assert(ht);
   if (ht->key_free)
-    ht->key_free(key, env);
+    ht->key_free(key);
   if (ht->value_free)
-    ht->value_free(value, env);
+    ht->value_free(value);
   return ST_DELETE;
 }
 

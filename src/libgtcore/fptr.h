@@ -23,6 +23,6 @@
 /* the generic function pointers */
 typedef int  (*Compare)(const void*, const void*);
 typedef int  (*CompareWithData)(const void*, const void*, const void*);
-typedef void (*FreeFunc)(void*, Env*);
+typedef void (*FreeFunc)(void*);
 
 #endif

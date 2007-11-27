@@ -41,7 +41,7 @@ typedef struct {
   bool has_leak;
 } CheckSpaceLeakInfo;
 
-static void free_MAInfo(MAInfo *mainfo, /*@unused@*/ Env *env)
+static void free_MAInfo(MAInfo *mainfo)
 {
   free(mainfo);
 }
@@ -162,6 +162,12 @@ void ma_free_mem(void *ptr, const char *filename, int line)
   }
   else
     free(ptr);
+}
+
+void ma_free_func(void *ptr)
+{
+  if (!ptr) return;
+  ma_free(ptr);
 }
 
 static int check_space_leak(void *key, void *value, void *data, Env *env)

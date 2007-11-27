@@ -30,10 +30,6 @@ void   env_set_spacepeak(Env*, bool);
    value != 0 otherwise */
 int    env_delete(Env*);
 
-/* free functions get the data object (here the env object) _always_ as the
-   last object */
-void    env_ma_free_func(void *ptr, Env*);
-
 /* wrapper for error functions */
 void    env_error_set(Env*, const char *format, ...)
           __attribute__ ((format (printf, 2, 3)));

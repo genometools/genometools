@@ -38,6 +38,7 @@ void*         ma_realloc_mem(void *ptr, size_t size, const char*, int);
 #define       ma_free(ptr)\
               ma_free_mem(ptr, __FILE__, __LINE__)
 void          ma_free_mem(void *ptr, const char*, int);
+void          ma_free_func(void *ptr);
 unsigned long ma_get_space_peak(void); /* in bytes */
 void          ma_show_space_peak(FILE*);
 /* check if all allocated memory has been freed, prints to stderr */

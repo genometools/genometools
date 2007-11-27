@@ -228,7 +228,7 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   evaluator->nuceval = nuceval;
   evaluator->evalLTR = evalLTR;
   evaluator->LTRdelta = LTRdelta;
-  evaluator->slots = hashtable_new(HASH_STRING, env_ma_free_func,
+  evaluator->slots = hashtable_new(HASH_STRING, ma_free_func,
                                    (FreeFunc) slot_delete, env);
   evaluator->gene_evaluator = evaluator_new(env);
   evaluator->mRNA_evaluator = evaluator_new(env);

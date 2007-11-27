@@ -45,7 +45,7 @@ void discdistri_add_multi(DiscDistri *d, unsigned long key,
   assert(d);
 
   if (!d->hashdist)
-    d->hashdist = hashtable_new(HASH_DIRECT, NULL, env_ma_free_func, env);
+    d->hashdist = hashtable_new(HASH_DIRECT, NULL, ma_free_func, env);
 
   valueptr = hashtable_get(d->hashdist, (void*) key);
   if (!valueptr) {

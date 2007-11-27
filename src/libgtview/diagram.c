@@ -428,7 +428,7 @@ Diagram* diagram_new(FeatureIndex *fi, Range range, const char *seqid,
   int had_err;
   env_error_check(env);
   diagram = ma_malloc(sizeof (Diagram));
-  diagram->tracks = hashtable_new(HASH_STRING, env_ma_free_func, NULL, env);
+  diagram->tracks = hashtable_new(HASH_STRING, ma_free_func, NULL, env);
   diagram->nodeinfo = hashtable_new(HASH_DIRECT, NULL, NULL, env);
   diagram->nof_tracks = 0;
   diagram->config = config;
