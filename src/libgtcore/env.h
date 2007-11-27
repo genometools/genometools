@@ -25,7 +25,6 @@ typedef struct Env Env;
 #include "libgtcore/fa.h"
 
 Env*   env_new(void);
-FA*    env_fa(const Env*);    /* return the file allocator */
 Error* env_error(const Env*); /* return the error object */
 void   env_set_spacepeak(Env*, bool);
 /* returns 0 if no memory map, file pointer, or memory has been leaked and a
@@ -38,37 +37,37 @@ void    env_ma_free_func(void *ptr, Env*);
 
 /* wrapper for file functions */
 #define env_fa_fopen(env, path, mode)\
-        fa_fopen(env_fa(env), path, mode, __FILE__, __LINE__)
+        fa_fopen(path, mode, __FILE__, __LINE__)
 #define env_fa_xfopen(env, path, mode)\
-        fa_xfopen(env_fa(env), path, mode, __FILE__, __LINE__)
+        fa_xfopen(path, mode, __FILE__, __LINE__)
 void    env_fa_fclose(FILE *stream, Env*);
 void    env_fa_xfclose(FILE *stream, Env*);
 
 #define env_fa_gzopen(env, path, mode)\
-        fa_gzopen(env_fa(env), path, mode, __FILE__, __LINE__)
+        fa_gzopen(path, mode, __FILE__, __LINE__)
 #define env_fa_xgzopen(env, path, mode)\
-        fa_xgzopen(env_fa(env), path, mode, __FILE__, __LINE__)
+        fa_xgzopen(path, mode, __FILE__, __LINE__)
 void    env_fa_gzclose(gzFile stream, Env*);
 void    env_fa_xgzclose(gzFile stream, Env*);
 
 #define env_fa_bzopen(env, path, mode)\
-        fa_bzopen(env_fa(env), path, mode, __FILE__, __LINE__)
+        fa_bzopen(path, mode, __FILE__, __LINE__)
 #define env_fa_xbzopen(env, path, mode)\
-        fa_xbzopen(env_fa(env), path, mode, __FILE__, __LINE__)
+        fa_xbzopen(path, mode, __FILE__, __LINE__)
 void    env_fa_bzclose(BZFILE *stream, Env*);
 void    env_fa_xbzclose(BZFILE *stream, Env*);
 
 #define env_fa_xtmpfile(env, template)\
-        fa_xtmpfile(env_fa(env), template, __FILE__, __LINE__)
+        fa_xtmpfile(template, __FILE__, __LINE__)
 
 #define env_fa_mmap_read(env, filename, len)\
-        fa_mmap_read(env_fa(env), filename, len, __FILE__, __LINE__)
+        fa_mmap_read(filename, len, __FILE__, __LINE__)
 #define env_fa_mmap_write(env, filename, len)\
-        fa_mmap_write(env_fa(env), filename, len, __FILE__, __LINE__)
+        fa_mmap_write(filename, len, __FILE__, __LINE__)
 #define env_fa_xmmap_read(env, filename, len)\
-        fa_xmmap_read(env_fa(env), filename, len, __FILE__, __LINE__)
+        fa_xmmap_read(filename, len, __FILE__, __LINE__)
 #define env_fa_xmmap_write(env, filename, len)\
-        fa_xmmap_write(env_fa(env), filename, len, __FILE__, __LINE__)
+        fa_xmmap_write(filename, len, __FILE__, __LINE__)
 void    env_fa_xmunmap(void *addr, Env*);
 
 /* wrapper for error functions */

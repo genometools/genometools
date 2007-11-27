@@ -23,44 +23,43 @@
 #include <stdlib.h>
 #include <zlib.h>
 
-/* the file allocator class */
-typedef struct FA FA;
+/* the file allocator module */
 
-FA*     fa_new(Env*);
+void    fa_init(Env*);
 
 /* functions for normal file pointer */
-FILE*   fa_fopen(FA*, const char *path, const char *mode, const char*, int);
-FILE*   fa_xfopen(FA*, const char *path, const char *mode, const char*, int);
-void    fa_fclose(FILE *stream, FA*);
-void    fa_xfclose(FILE *stream, FA*);
+FILE*   fa_fopen(const char *path, const char *mode, const char*, int);
+FILE*   fa_xfopen(const char *path, const char *mode, const char*, int);
+void    fa_fclose(FILE *stream);
+void    fa_xfclose(FILE *stream);
 
 /* functions for gzip file pointer */
-gzFile  fa_gzopen(FA*, const char *path, const char *mode, const char*, int);
-gzFile  fa_xgzopen(FA*, const char *path, const char *mode, const char*, int);
-void    fa_gzclose(gzFile stream, FA*);
-void    fa_xgzclose(gzFile stream, FA*);
+gzFile  fa_gzopen(const char *path, const char *mode, const char*, int);
+gzFile  fa_xgzopen(const char *path, const char *mode, const char*, int);
+void    fa_gzclose(gzFile stream);
+void    fa_xgzclose(gzFile stream);
 
 /* functions for bzip2 file pointer */
-BZFILE* fa_bzopen(FA*, const char *path, const char *mode, const char*, int);
-BZFILE* fa_xbzopen(FA*, const char *path, const char *mode, const char*, int);
-void    fa_bzclose(BZFILE *stream, FA*);
-void    fa_xbzclose(BZFILE *stream, FA*);
+BZFILE* fa_bzopen(const char *path, const char *mode, const char*, int);
+BZFILE* fa_xbzopen(const char *path, const char *mode, const char*, int);
+void    fa_bzclose(BZFILE *stream);
+void    fa_xbzclose(BZFILE *stream);
 
 /* create a tmp file using <temp> as a template analog to mkstemp(3) */
-FILE*   fa_xtmpfile(FA*, char *temp, const char*, int);
+FILE*   fa_xtmpfile(char *temp, const char*, int);
 
 /* memory map functions */
-void*   fa_mmap_read(FA*, const char *path, size_t *len, const char*, int);
-void*   fa_mmap_write(FA*, const char *path, size_t *len, const char*, int);
-void*   fa_xmmap_read(FA*, const char *path, size_t *len, const char*, int);
-void*   fa_xmmap_write(FA*, const char *path, size_t *len, const char*, int);
-void    fa_xmunmap(void *addr, FA*);
+void*   fa_mmap_read(const char *path, size_t *len, const char*, int);
+void*   fa_mmap_write(const char *path, size_t *len, const char*, int);
+void*   fa_xmmap_read(const char *path, size_t *len, const char*, int);
+void*   fa_xmmap_write(const char *path, size_t *len, const char*, int);
+void    fa_xmunmap(void *addr);
 
 /* check if all allocated file pointer have been released, prints to stderr */
-int     fa_check_fptr_leak(FA*, Env*);
+int     fa_check_fptr_leak(Env*);
 /* check if all allocated memory maps have been freed, prints to stderr */
-int     fa_check_mmap_leak(FA*, Env*);
-void    fa_show_space_peak(FA*, FILE*);
-void    fa_delete(FA*, Env*);
+int     fa_check_mmap_leak(Env*);
+void    fa_show_space_peak(FILE*);
+void    fa_clean(void);
 
 #endif

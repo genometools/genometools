@@ -25,7 +25,6 @@
 #include "libgtcore/xansi.h"
 
 struct Env {
-  FA *fa; /* the file allocator */
   Error *error;
   bool spacepeak;
 };
@@ -86,18 +85,12 @@ Env* env_new(void)
   Env *env = xcalloc(1, sizeof (Env));
   bookkeeping = getenv("GT_MEM_BOOKKEEPING");
   ma_init(bookkeeping && !strcmp(bookkeeping, "on"), env);
-  env->fa = fa_new(env);
+  fa_init(env);
   env->error = error_new();
   proc_gt_env_options(env);
   if (env->spacepeak && !(bookkeeping && !strcmp(bookkeeping, "on")))
     warning("GT_ENV_OPTIONS=-spacepeak used without GT_MEM_BOOKKEEPING=on");
   return env;
-}
-
-FA* env_fa(const Env *env)
-{
-  assert(env && env->fa);
-  return env->fa;
 }
 
 Error* env_error(const Env *env)
@@ -120,11 +113,11 @@ int env_delete(Env *env)
   env->error = NULL;
   if (env->spacepeak) {
     ma_show_space_peak(stdout);
-    fa_show_space_peak(env->fa, stdout);
+    fa_show_space_peak(stdout);
   }
-  fa_fptr_rval = fa_check_fptr_leak(env->fa, env);
-  fa_mmap_rval = fa_check_mmap_leak(env->fa, env);
-  fa_delete(env->fa, env);
+  fa_fptr_rval = fa_check_fptr_leak(env);
+  fa_mmap_rval = fa_check_mmap_leak(env);
+  fa_clean();
   ma_rval = ma_check_space_leak();
   ma_clean();
   free(env);
@@ -142,49 +135,49 @@ void env_fa_fclose(FILE *stream, Env *env)
 {
   assert(env);
   if (!stream) return;
-  fa_fclose(stream, env_fa(env));
+  fa_fclose(stream);
 }
 
 void env_fa_xfclose(FILE *stream, Env *env)
 {
   assert(env);
   if (!stream) return;
-  fa_xfclose(stream, env_fa(env));
+  fa_xfclose(stream);
 }
 
 void env_fa_gzclose(gzFile stream, Env *env)
 {
   assert(env);
   if (!stream) return;
-  fa_gzclose(stream, env_fa(env));
+  fa_gzclose(stream);
 }
 
 void env_fa_xgzclose(gzFile stream, Env *env)
 {
   assert(env);
   if (!stream) return;
-  fa_xgzclose(stream, env_fa(env));
+  fa_xgzclose(stream);
 }
 
 void env_fa_bzclose(BZFILE *stream, Env *env)
 {
   assert(env);
   if (!stream) return;
-  fa_bzclose(stream, env_fa(env));
+  fa_bzclose(stream);
 }
 
 void env_fa_xbzclose(BZFILE *stream, Env *env)
 {
   assert(env);
   if (!stream) return;
-  fa_xbzclose(stream, env_fa(env));
+  fa_xbzclose(stream);
 }
 
 void env_fa_xmunmap(void *addr, Env *env)
 {
   assert(env);
   if (!addr) return;
-  fa_xmunmap(addr, env_fa(env));
+  fa_xmunmap(addr);
 }
 
 void env_error_set(Env *env, const char *format, ...)
