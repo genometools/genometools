@@ -447,7 +447,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     genome_node_delete(genome_feature, env);
 
   if (!had_err && gn)
-    queue_add(genome_nodes, gn, env);
+    queue_add(genome_nodes, gn);
 
   /* free */
   str_delete(changed_seqid);
@@ -480,7 +480,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   if (line_length == 1 || line[1] != '#') {
     /* storing comment */
     gn = comment_new(line+1, filenamestr, line_number, env);
-    queue_add(genome_nodes, gn, env);
+    queue_add(genome_nodes, gn);
   }
   else if ((strncmp(line, GFF_SEQUENCE_REGION,
                     strlen(GFF_SEQUENCE_REGION)) == 0)) {
@@ -579,7 +579,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
       assert(ssr);
       gn = sequence_region_new(ssr->seqid_str, range, filenamestr, line_number,
                                env);
-      queue_add(genome_nodes, gn, env);
+      queue_add(genome_nodes, gn);
     }
   }
   else if (strcmp(line, GFF_TERMINATOR) == 0) { /* terminator */
@@ -605,11 +605,11 @@ static int add_auto_sr_to_queue(void *key, void *value, void *data, Env *env)
   env_error_check(env);
   assert(key && value && data);
   if (array_size(auto_sr->genome_features)) {
-    queue_add(genome_nodes, auto_sr->sequence_region, env);
+    queue_add(genome_nodes, auto_sr->sequence_region);
     auto_sr->sequence_region = NULL;
     for (i = 0; i < array_size(auto_sr->genome_features); i++) {
       gf = *(GenomeNode**) array_get(auto_sr->genome_features, i);
-      queue_add(genome_nodes, gf, env);
+      queue_add(genome_nodes, gf);
     }
     array_reset(auto_sr->genome_features);
   }
@@ -689,7 +689,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
 
   if (had_err) {
     while (queue_size(genome_nodes))
-      genome_node_rec_delete(queue_get(genome_nodes, env), env);
+      genome_node_rec_delete(queue_get(genome_nodes), env);
   }
   else if (rval == EOF) {
     /* the file has been parsed completely, add automatically created sequence

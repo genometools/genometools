@@ -157,8 +157,8 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
     array_add(node_stack, genome_node);
   }
   else {
-    node_queue = queue_new(env);
-    queue_add(node_queue, genome_node, env);
+    node_queue = queue_new();
+    queue_add(node_queue, genome_node);
   }
   list_of_children = array_new(sizeof (GenomeNode*));
 
@@ -169,7 +169,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
     if (depth_first)
       gn = *(GenomeNode**) array_pop(node_stack);
     else
-      gn = queue_get(node_queue, env);
+      gn = queue_get(node_queue);
     array_reset(list_of_children);
     if (gn->children) {
       /* a backup of the children array is necessary if traverse() frees the
@@ -206,7 +206,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
         if (depth_first)
           array_add(node_stack, child_feature);
         else
-          queue_add(node_queue, child_feature, env);
+          queue_add(node_queue, child_feature);
         if (traverse_only_once)
           hashtable_add(traversed_nodes, child_feature, child_feature, env);
       }
@@ -234,7 +234,7 @@ int genome_node_traverse_children_generic(GenomeNode *genome_node,
     hashtable_delete(traversed_nodes, env);
   array_delete(list_of_children);
   array_delete(node_stack);
-  queue_delete(node_queue, env);
+  queue_delete(node_queue);
 
   return had_err;
 }

@@ -97,7 +97,7 @@ static int construct_sequence_regions(void *key, void *value, void *data,
   seqid = str_new_cstr(key);
   range = *(Range*) value;
   gn = sequence_region_new(seqid, range, NULL, 0, env);
-  queue_add(genome_nodes, gn, env);
+  queue_add(genome_nodes, gn);
   str_delete(seqid);
   return 0;
 }
@@ -201,7 +201,7 @@ static int construct_genes(void *key, void *value, void *data, Env *env)
     }
 
     /* store the gene */
-    queue_add(genome_nodes, gene_node, env);
+    queue_add(genome_nodes, gene_node);
 
     /* free */
     array_delete(mRNAs);
@@ -282,7 +282,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
     else if (line[0] == '#') {
       /* storing comment */
       gn = comment_new(line+1, filenamestr, line_number, env);
-      queue_add(genome_nodes, gn, env);
+      queue_add(genome_nodes, gn);
     }
     else {
       /* process tab delimited GTF line */

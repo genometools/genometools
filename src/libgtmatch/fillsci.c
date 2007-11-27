@@ -100,7 +100,7 @@ int fasta2sequencekeyvalues(
 
   if (withdestab)
   {
-    descqueue = queue_new(env);
+    descqueue = queue_new();
     desfp = opensfxfile(indexname,DESTABSUFFIX,"wb",env);
     if (desfp == NULL)
     {
@@ -138,7 +138,7 @@ int fasta2sequencekeyvalues(
       {
         if (desfp != NULL && charcode == (Uchar) SEPARATOR)
         {
-          desc = queue_get(descqueue,env);
+          desc = queue_get(descqueue);
           if (fputs(desc,desfp) == EOF)
           {
             env_error_set(env,"cannot write description to file %s.%s",
@@ -186,7 +186,7 @@ int fasta2sequencekeyvalues(
 
     if (desfp != NULL)
     {
-      desc = queue_get(descqueue,env);
+      desc = queue_get(descqueue);
       if (fputs(desc,desfp) == EOF)
       {
         env_error_set(env,"cannot write description to file %s.%s",
@@ -208,7 +208,7 @@ int fasta2sequencekeyvalues(
   fa_xfclose(desfp);
   discdistri_delete(distspralen,env);
   fastabuffer_delete(fb, env);
-  queue_delete_with_contents(descqueue, env);
+  queue_delete_with_contents(descqueue);
   return haserr ? -1 : 0;
 }
 

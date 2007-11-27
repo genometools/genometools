@@ -25,13 +25,13 @@ typedef struct Queue Queue;
 
 typedef int (*QueueProcessor)(void *elem, void *info, Env*);
 
-Queue*        queue_new(Env*);
-void          queue_add(Queue*, void*, Env*);
-void*         queue_get(Queue*, Env*);
+Queue*        queue_new(void);
+void          queue_add(Queue*, void*);
+void*         queue_get(Queue*);
 void*         queue_head(Queue*);
 int           queue_iterate(Queue*, QueueProcessor, void *info, Env*);
 unsigned long queue_size(const Queue*);
-void          queue_delete_with_contents(Queue*, Env*);
-void          queue_delete(Queue*, Env*);
+void          queue_delete_with_contents(Queue*);
+void          queue_delete(Queue*);
 
 #endif

@@ -52,7 +52,7 @@ typedef struct {
 static void csa_visitor_free(GenomeVisitor *gv, Env *env)
 {
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
-  queue_delete(csa_visitor->genome_node_buffer, env);
+  queue_delete(csa_visitor->genome_node_buffer);
   array_delete(csa_visitor->cluster);
   str_delete(csa_visitor->gth_csa_source_str);
 }
@@ -111,7 +111,7 @@ static int csa_visitor_default_func(GenomeVisitor *gv, GenomeNode *gn, Env *env)
   CSAVisitor *csa_visitor;
   env_error_check(env);
   csa_visitor = csa_visitor_cast(gv);
-  queue_add(csa_visitor->genome_node_buffer, gn, env);
+  queue_add(csa_visitor->genome_node_buffer, gn);
   return 0;
 }
 
@@ -140,7 +140,7 @@ GenomeVisitor* csa_visitor_new(unsigned long join_length, Env *env)
 {
   GenomeVisitor *gv = genome_visitor_create(csa_visitor_class(), env);
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
-  csa_visitor->genome_node_buffer = queue_new(env);
+  csa_visitor->genome_node_buffer = queue_new();
   csa_visitor->join_length = join_length;
   csa_visitor->cluster = array_new(sizeof (GenomeFeature*));
   csa_visitor->buffered_feature = NULL;
@@ -159,7 +159,7 @@ GenomeNode* csa_visitor_get_node(GenomeVisitor *gv, Env *env)
   CSAVisitor *csa_visitor;
   env_error_check(env);
   csa_visitor = csa_visitor_cast(gv);
-  return queue_get(csa_visitor->genome_node_buffer, env);
+  return queue_get(csa_visitor->genome_node_buffer);
 }
 
 static Range get_genomic_range(const void *sa)
@@ -450,7 +450,7 @@ void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster,
                &info,
                env);
   assert(info.gene_feature);
-  queue_add(csa_visitor->genome_node_buffer, info.gene_feature, env);
+  queue_add(csa_visitor->genome_node_buffer, info.gene_feature);
 
   /* remove the cluster genome nodes */
   for (i = 0; i < array_size(csa_visitor->cluster); i++) {

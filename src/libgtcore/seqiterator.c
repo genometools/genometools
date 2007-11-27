@@ -44,7 +44,7 @@ SeqIterator* seqiterator_new(const StrArray *filenametab,
   env_error_check(env);
   seqit = ma_malloc(sizeof (SeqIterator));
   INITARRAY(&seqit->sequencebuffer, Uchar);
-  seqit->descptr = queue_new(env);
+  seqit->descptr = queue_new();
   seqit->fb = fastabuffer_new(filenametab,
                                symbolmap,
                                false,
@@ -102,7 +102,7 @@ int seqiterator_next(SeqIterator *seqit,
         haserr = true;
         break;
       }
-      *desc = queue_get(seqit->descptr,env);
+      *desc = queue_get(seqit->descptr);
       *len = seqit->sequencebuffer.nextfreeUchar;
       if (seqit->withsequence)
       {
@@ -123,7 +123,7 @@ int seqiterator_next(SeqIterator *seqit,
   }
   if (!haserr && seqit->sequencebuffer.nextfreeUchar > 0)
   {
-    *desc = queue_get(seqit->descptr,env);
+    *desc = queue_get(seqit->descptr);
     if (seqit->withsequence)
     {
       *sequence = seqit->sequencebuffer.spaceUchar;
@@ -154,7 +154,7 @@ const unsigned long long *seqiterator_getcurrentcounter(SeqIterator *seqit,
 void seqiterator_delete(SeqIterator *seqit, Env *env)
 {
   if (!seqit) return;
-  queue_delete_with_contents(seqit->descptr, env);
+  queue_delete_with_contents(seqit->descptr);
   fastabuffer_delete(seqit->fb, env);
   FREEARRAY(&seqit->sequencebuffer, Uchar);
   seqit->currentread = seqit->maxread;

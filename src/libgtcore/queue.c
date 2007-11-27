@@ -31,16 +31,15 @@ struct Queue
   unsigned long num_of_elements;
 };
 
-Queue* queue_new(Env *env)
+Queue* queue_new(void)
 {
   return ma_calloc(1, sizeof (Queue));
 }
 
-void queue_add(Queue *q, void *contents, Env *env)
+void queue_add(Queue *q, void *contents)
 {
   QueueElem *newqueueelem;
 
-  env_error_check(env);
   assert(q);
 
   newqueueelem = ma_malloc(sizeof (QueueElem));
@@ -55,7 +54,7 @@ void queue_add(Queue *q, void *contents, Env *env)
   q->num_of_elements++;
 }
 
-void* queue_get(Queue *q, Env *env)
+void* queue_get(Queue *q)
 {
   QueueElem *oldheadptr;
   void *contents;
@@ -101,23 +100,23 @@ unsigned long queue_size(const Queue *q)
   return q->num_of_elements;
 }
 
-static void queue_wrap(Queue *q, bool freecontents, Env *env)
+static void queue_wrap(Queue *q, bool freecontents)
 {
   if (!q) return;
   while (q->num_of_elements) {
     if (freecontents)
       ma_free(q->head->contents);
-    (void) queue_get(q, env);
+    (void) queue_get(q);
   }
   ma_free(q);
 }
 
-void queue_delete_with_contents(Queue *q, Env *env)
+void queue_delete_with_contents(Queue *q)
 {
-  queue_wrap(q, true, env);
+  queue_wrap(q, true);
 }
 
-void queue_delete(Queue *q, Env *env)
+void queue_delete(Queue *q)
 {
-  queue_wrap(q, false, env);
+  queue_wrap(q, false);
 }
