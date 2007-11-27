@@ -110,7 +110,7 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
       fb->linenum = (uint64_t) 1;
       fb->inputstream = genfile_xopen(strarray_get(fb->filenametab,
                                                   (unsigned long) fb->filenum),
-                                       "rb", env);
+                                       "rb");
       fb->currentinpos = 0;
       fb->currentfillpos = 0;
     } else
@@ -118,7 +118,7 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
       currentchar = ownbuffergenfile_getc(fb,fb->inputstream);
       if (currentchar == EOF)
       {
-        genfile_xclose(fb->inputstream, env);
+        genfile_close(fb->inputstream);
         fb->inputstream = NULL;
         if (fb->filelengthtab != NULL)
         {
@@ -263,7 +263,7 @@ static int advancePlainbufferstate(FastaBuffer *fb,Env *env)
       currentfileread = 0;
       fb->inputstream = genfile_xopen(strarray_get(fb->filenametab,
                                                   (unsigned long) fb->filenum),
-                                       "rb", env);
+                                      "rb");
       fb->currentinpos = 0;
       fb->currentfillpos = 0;
     } else
@@ -271,7 +271,7 @@ static int advancePlainbufferstate(FastaBuffer *fb,Env *env)
       currentchar = ownbuffergenfile_getc(fb,fb->inputstream);
       if (currentchar == EOF)
       {
-        genfile_xclose(fb->inputstream, env);
+        genfile_close(fb->inputstream);
         fb->inputstream = NULL;
         if (fb->filelengthtab != NULL)
         {
@@ -317,7 +317,7 @@ int advanceformatbufferstate(FastaBuffer *fb,Env *env)
 void fastabuffer_delete(FastaBuffer *fb, Env *env)
 {
   if (!fb) return;
-  genfile_xclose(fb->inputstream, env);
+  genfile_close(fb->inputstream);
   FREEARRAY(&fb->headerbuffer, char);
   ma_free(fb);
 }

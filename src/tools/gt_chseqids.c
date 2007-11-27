@@ -121,7 +121,7 @@ int gt_chseqids(int argc, const char **argv, Env *env)
   genome_stream_delete(chseqids_stream, env);
   genome_stream_delete(sort_stream, env);
   genome_stream_delete(gff3_in_stream, env);
-  genfile_xclose(arguments.outfp, env);
+  genfile_close(arguments.outfp);
 
   return had_err;
 }

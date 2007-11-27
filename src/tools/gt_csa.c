@@ -103,7 +103,7 @@ int gt_csa(int argc, const char **argv, Env *env)
   genome_stream_delete(gff3_out_stream, env);
   genome_stream_delete(csa_stream, env);
   genome_stream_delete(gff3_in_stream, env);
-  genfile_xclose(arguments.outfp, env);
+  genfile_close(arguments.outfp);
 
   return had_err;
 }

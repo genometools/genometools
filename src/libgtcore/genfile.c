@@ -78,7 +78,7 @@ size_t genfile_basename_length(const char *path)
 }
 
 GenFile* genfile_open(GenFileMode genfilemode, const char *path,
-                      const char *mode, Env *env)
+                      const char *mode)
 {
   GenFile *genfile;
   assert(path && mode);
@@ -88,21 +88,21 @@ GenFile* genfile_open(GenFileMode genfilemode, const char *path,
     case GFM_UNCOMPRESSED:
       genfile->fileptr.file = fa_fopen(path, mode);
       if (!genfile->fileptr.file) {
-        genfile_delete(genfile, env);
+        genfile_delete(genfile);
         return NULL;
       }
       break;
     case GFM_GZIP:
       genfile->fileptr.gzfile = fa_gzopen(path, mode);
       if (!genfile->fileptr.gzfile) {
-        genfile_delete(genfile, env);
+        genfile_delete(genfile);
         return NULL;
       }
       break;
     case GFM_BZIP2:
       genfile->fileptr.bzfile = fa_bzopen(path, mode);
       if (!genfile->fileptr.bzfile) {
-        genfile_delete(genfile, env);
+        genfile_delete(genfile);
         return NULL;
       }
       genfile->orig_path = cstr_dup(path);
@@ -114,7 +114,7 @@ GenFile* genfile_open(GenFileMode genfilemode, const char *path,
 }
 
 GenFile* genfile_xopen_w_gfmode(GenFileMode genfilemode, const char *path,
-                                const char *mode, Env *env)
+                                const char *mode)
 {
   GenFile *genfile;
   assert(path && mode);
@@ -137,17 +137,15 @@ GenFile* genfile_xopen_w_gfmode(GenFileMode genfilemode, const char *path,
   return genfile;
 }
 
-GenFile* genfile_xopen(const char *path, const char *mode, Env *env)
+GenFile* genfile_xopen(const char *path, const char *mode)
 {
-  env_error_check(env);
   assert(path && mode);
-  return genfile_xopen_w_gfmode(genfilemode_determine(path), path, mode, env);
+  return genfile_xopen_w_gfmode(genfilemode_determine(path), path, mode);
 }
 
-GenFile* genfile_new(FILE *fp, Env *env)
+GenFile* genfile_new(FILE *fp)
 {
   GenFile *genfile;
-  env_error_check(env);
   assert(fp);
   genfile = ma_calloc(1, sizeof (GenFile));
   genfile->mode = GFM_UNCOMPRESSED;
@@ -337,7 +335,7 @@ void genfile_xrewind(GenFile *genfile)
   }
 }
 
-void genfile_delete(GenFile *genfile, Env *env)
+void genfile_delete(GenFile *genfile)
 {
   if (!genfile) return;
   ma_free(genfile->orig_path);
@@ -345,32 +343,20 @@ void genfile_delete(GenFile *genfile, Env *env)
   ma_free(genfile);
 }
 
-/* the following function can only fail, if no error is set. This makes sure,
-   that it can be used safely after an error has been set (i.e., the error is
-   always propagated upwards). */
-void genfile_xclose(GenFile *genfile, Env *env)
+void genfile_close(GenFile *genfile)
 {
   if (!genfile) return;
   switch (genfile->mode) {
     case GFM_UNCOMPRESSED:
-      if (env_error_is_set(env))
         fa_fclose(genfile->fileptr.file);
-      else
-        fa_xfclose(genfile->fileptr.file);
       break;
     case GFM_GZIP:
-      if (env_error_is_set(env))
         fa_gzclose(genfile->fileptr.gzfile);
-      else
-        fa_xgzclose(genfile->fileptr.gzfile);
       break;
     case GFM_BZIP2:
-      if (env_error_is_set(env))
         fa_bzclose(genfile->fileptr.bzfile);
-      else
-        fa_xbzclose(genfile->fileptr.bzfile);
       break;
     default: assert(0);
   }
-  genfile_delete(genfile, env);
+  genfile_delete(genfile);
 }

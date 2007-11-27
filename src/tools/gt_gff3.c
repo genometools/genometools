@@ -194,7 +194,7 @@ int gt_gff3(int argc, const char **argv, Env *env)
   genome_stream_delete(mergefeat_stream, env);
   genome_stream_delete(addintrons_stream, env);
   genome_stream_delete(gff3_in_stream, env);
-  genfile_xclose(arguments.outfp, env);
+  genfile_close(arguments.outfp);
 
   return had_err;
 }

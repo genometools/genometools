@@ -39,7 +39,7 @@ StrArray* strarray_new_file(const char *path, Env *env)
   GenFile *fpin;
   Str *line;
   env_error_check(env);
-  fpin = genfile_xopen(path, "r", env);
+  fpin = genfile_xopen(path, "r");
   assert(fpin);
   line = str_new();
   filecontent = strarray_new(env);
@@ -48,7 +48,7 @@ StrArray* strarray_new_file(const char *path, Env *env)
     str_reset(line);
   }
   str_delete(line);
-  genfile_xclose(fpin, env);
+  genfile_close(fpin);
   return filecontent;
 }
 

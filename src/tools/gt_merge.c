@@ -94,7 +94,7 @@ int gt_merge(int argc, const char **argv, Env *env)
   for (i = 0; i < array_size(genome_streams); i++)
     genome_stream_delete(*(GenomeStream**) array_get(genome_streams, i), env);
   array_delete(genome_streams);
-  genfile_xclose(outfp, env);
+  genfile_close(outfp);
 
   return had_err;
 }

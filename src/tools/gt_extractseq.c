@@ -130,7 +130,7 @@ int gt_extractseq(int argc, const char **argv, Env *env)
 
   /* free */
   str_delete(arguments.pattern);
-  genfile_xclose(arguments.outfp, env);
+  genfile_close(arguments.outfp);
 
   return had_err;
 }

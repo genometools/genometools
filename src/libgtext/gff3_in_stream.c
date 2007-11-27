@@ -101,8 +101,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
           is->stdin_argument = true;
         }
         else {
-          is->fpin = genfile_xopen(strarray_get(is->files, is->next_file), "r",
-                                   env);
+          is->fpin = genfile_xopen(strarray_get(is->files, is->next_file), "r");
           is->file_is_open = true;
         }
         is->next_file++;
@@ -148,7 +147,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
     if (status_code == EOF) {
       /* end of current file */
       if (is->be_verbose) progressbar_stop();
-      genfile_xclose(is->fpin, env);
+      genfile_close(is->fpin);
       is->fpin = NULL;
       is->file_is_open = false;
       gff3parser_reset(is->gff3_parser, env);
@@ -186,7 +185,7 @@ static void gff3_in_stream_free(GenomeStream *gs, Env *env)
     genome_node_rec_delete(queue_get(gff3_in_stream->genome_node_buffer), env);
   queue_delete(gff3_in_stream->genome_node_buffer);
   gff3parser_delete(gff3_in_stream->gff3_parser, env);
-  genfile_xclose(gff3_in_stream->fpin, env);
+  genfile_close(gff3_in_stream->fpin);
 }
 
 const GenomeStreamClass* gff3_in_stream_class(void)

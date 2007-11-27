@@ -69,7 +69,7 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
   max_filesize_in_bytes = max_filesize_in_MB << 20;
 
   /* open source file */
-  srcfp = genfile_xopen(argv[parsed_args], "r", env);
+  srcfp = genfile_xopen(argv[parsed_args], "r");
   assert(srcfp);
 
   /* read start characters */
@@ -128,7 +128,7 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
   fa_xfclose(destfp);
 
   /* close source file */
-  genfile_xclose(srcfp, env);
+  genfile_close(srcfp);
 
   return had_err;
 }

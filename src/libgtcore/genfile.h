@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "libgtcore/env.h"
 
 /*
   This class defines generic files.  A generic file is is a file which either
@@ -53,20 +52,20 @@ size_t      genfile_basename_length(const char *path);
 
 /* create a new GenFile object and open the underlying file handle, return NULL
    if the file <path> does not exist */
-GenFile*    genfile_open(GenFileMode, const char *path, const char *mode, Env*);
+GenFile*    genfile_open(GenFileMode, const char *path, const char *mode);
 
 /* create a new GenFile object and open the underlying file handle, abort if the
    file <path> does not exist, the GenFileMode has to be given explicitly */
 GenFile*    genfile_xopen_w_gfmode(GenFileMode, const char *path,
-                                   const char *mode, Env*);
+                                   const char *mode);
 
 /* create a new GenFile object and open the underlying file handle, abort if the
    file <path> does not exist, the GenFileMode is determined automatically via
    genfilemode_determine(path) */
-GenFile*    genfile_xopen(const char *path, const char *mode, Env*);
+GenFile*    genfile_xopen(const char *path, const char *mode);
 
 /* create a new GenFile object from a normal file pointer */
-GenFile*    genfile_new(FILE*, Env*);
+GenFile*    genfile_new(FILE*);
 
 GenFileMode genfile_mode(GenFile*);
 
@@ -89,9 +88,9 @@ void        genfile_xwrite(GenFile*, void *buf, size_t nbytes);
 void        genfile_xrewind(GenFile*);
 
 /* destroy the file handle object, but do not close the underlying handle */
-void        genfile_delete(GenFile*, Env*);
+void        genfile_delete(GenFile*);
 
 /* close the underlying file handle and destroy the object */
-void        genfile_xclose(GenFile*, Env*);
+void        genfile_close(GenFile*);
 
 #endif

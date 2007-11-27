@@ -40,7 +40,7 @@ FastaReader* fasta_reader_new(Str *sequence_filename, Env *env)
   FastaReader *fs = ma_calloc(1, sizeof (FastaReader));
   fs->sequence_filename = str_ref(sequence_filename);
   if (sequence_filename)
-    fs->sequence_file = genfile_xopen(str_get(sequence_filename), "r", env);
+    fs->sequence_file = genfile_xopen(str_get(sequence_filename), "r");
   else
     fs->sequence_filename = str_new_cstr("stdin");
   return fs;
@@ -170,6 +170,6 @@ void fasta_reader_delete(FastaReader *fr, Env *env)
 {
   if (!fr) return;
   str_delete(fr->sequence_filename);
-  genfile_xclose(fr->sequence_file, env);
+  genfile_close(fr->sequence_file);
   ma_free(fr);
 }

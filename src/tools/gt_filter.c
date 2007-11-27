@@ -144,7 +144,7 @@ int gt_filter(int argc, const char **argv, Env *env)
   genome_stream_delete(gff3_out_stream, env);
   genome_stream_delete(filter_stream, env);
   genome_stream_delete(gff3_in_stream, env);
-  genfile_xclose(arguments.outfp, env);
+  genfile_close(arguments.outfp);
   str_delete(arguments.seqid);
   str_delete(arguments.typefilter);
 

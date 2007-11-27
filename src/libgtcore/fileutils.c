@@ -57,10 +57,10 @@ unsigned long file_number_of_lines(const char *path, Env *env)
   int cc;
   env_error_check(env);
   assert(path);
-  fp = genfile_xopen(path, "r", env);
+  fp = genfile_xopen(path, "r");
   while ((cc = genfile_getc(fp)) != EOF)
     if (cc == '\n') number_of_lines++;
-  genfile_xclose(fp, env);
+  genfile_close(fp);
   return number_of_lines;
 }
 
