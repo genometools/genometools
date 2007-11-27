@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "libgtcore/cstr.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/genfile.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/xansi.h"
@@ -85,21 +86,21 @@ GenFile* genfile_open(GenFileMode genfilemode, const char *path,
   genfile->mode = genfilemode;
   switch (genfilemode) {
     case GFM_UNCOMPRESSED:
-      genfile->fileptr.file = env_fa_fopen(env, path, mode);
+      genfile->fileptr.file = fa_fopen(path, mode);
       if (!genfile->fileptr.file) {
         genfile_delete(genfile, env);
         return NULL;
       }
       break;
     case GFM_GZIP:
-      genfile->fileptr.gzfile = env_fa_gzopen(env, path, mode);
+      genfile->fileptr.gzfile = fa_gzopen(path, mode);
       if (!genfile->fileptr.gzfile) {
         genfile_delete(genfile, env);
         return NULL;
       }
       break;
     case GFM_BZIP2:
-      genfile->fileptr.bzfile = env_fa_bzopen(env, path, mode);
+      genfile->fileptr.bzfile = fa_bzopen(path, mode);
       if (!genfile->fileptr.bzfile) {
         genfile_delete(genfile, env);
         return NULL;
@@ -121,13 +122,13 @@ GenFile* genfile_xopen_w_gfmode(GenFileMode genfilemode, const char *path,
   genfile->mode = genfilemode;
   switch (genfilemode) {
     case GFM_UNCOMPRESSED:
-      genfile->fileptr.file = env_fa_xfopen(env, path, mode);
+      genfile->fileptr.file = fa_xfopen(path, mode);
       break;
     case GFM_GZIP:
-      genfile->fileptr.gzfile = env_fa_xgzopen(env, path, mode);
+      genfile->fileptr.gzfile = fa_xgzopen(path, mode);
       break;
     case GFM_BZIP2:
-      genfile->fileptr.bzfile = env_fa_xbzopen(env, path, mode);
+      genfile->fileptr.bzfile = fa_xbzopen(path, mode);
       genfile->orig_path = cstr_dup(path, env);
       genfile->orig_mode = cstr_dup(path, env);
       break;
@@ -353,21 +354,21 @@ void genfile_xclose(GenFile *genfile, Env *env)
   switch (genfile->mode) {
     case GFM_UNCOMPRESSED:
       if (env_error_is_set(env))
-        env_fa_fclose(genfile->fileptr.file, env);
+        fa_fclose(genfile->fileptr.file);
       else
-        env_fa_xfclose(genfile->fileptr.file, env);
+        fa_xfclose(genfile->fileptr.file);
       break;
     case GFM_GZIP:
       if (env_error_is_set(env))
-        env_fa_gzclose(genfile->fileptr.gzfile, env);
+        fa_gzclose(genfile->fileptr.gzfile);
       else
-        env_fa_xgzclose(genfile->fileptr.gzfile, env);
+        fa_xgzclose(genfile->fileptr.gzfile);
       break;
     case GFM_BZIP2:
       if (env_error_is_set(env))
-        env_fa_bzclose(genfile->fileptr.bzfile, env);
+        fa_bzclose(genfile->fileptr.bzfile);
       else
-        env_fa_xbzclose(genfile->fileptr.bzfile, env);
+        fa_xbzclose(genfile->fileptr.bzfile);
       break;
     default: assert(0);
   }

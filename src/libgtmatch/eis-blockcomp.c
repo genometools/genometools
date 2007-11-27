@@ -24,6 +24,7 @@
   - normalize use  of  seqIdx variable naming (seq, bseq etc.)
   - split init/new functionality cleanly for all structs
  */
+
 #include <assert.h>
 #include <stddef.h>
 #include <inttypes.h>
@@ -35,6 +36,7 @@
 #include "libgtcore/bitpackstring.h"
 #include "libgtcore/dataalign.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/sarr-def.h"
@@ -1490,7 +1492,7 @@ openOnDiskData(const Str *projectName, struct onDiskBlockCompIdx *idx,
 {
   Str *bdxName = str_clone(projectName, env);
   str_append_cstr(bdxName, ".bdx", env);
-  idx->idxFP = env_fa_fopen(env, str_get(bdxName), mode);
+  idx->idxFP = fa_fopen(str_get(bdxName), mode);
   str_delete(bdxName, env);
   if (!idx->idxFP)
     return 0;
@@ -1519,7 +1521,7 @@ destructOnDiskBlockCompIdx(struct onDiskBlockCompIdx *idx, Env *env)
   if (idx->idxMMap)
     munmap(idx->idxMMap, idx->rangeEncPos - idx->cwDataPos);
   if (idx->idxFP)
-    env_fa_xfclose(idx->idxFP, env);
+    fa_xfclose(idx->idxFP);
 }
 
 static inline void

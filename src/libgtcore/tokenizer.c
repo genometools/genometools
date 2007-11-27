@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include "libgtcore/ensure.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/tokenizer.h"
 #include "libgtcore/xansi.h"
@@ -130,9 +131,9 @@ int tokenizer_unit_test(Env *env)
 
   /* empty file (except comment line) */
   tmpfilename = str_new_cstr(XTMPFILE_TEMPLATE, env);
-  tmpfp = env_fa_xtmpfile(env, str_get(tmpfilename));
+  tmpfp = fa_xtmpfile(str_get(tmpfilename));
   fprintf(tmpfp, "# comment line\n");
-  env_fa_xfclose(tmpfp, env);
+  fa_xfclose(tmpfp);
   t = tokenizer_new(io_new(str_get(tmpfilename), "r", env), env);
   tokenizer_skip_comment_lines(t);
   ensure(had_err, !tokenizer_has_token(t, env));
@@ -142,9 +143,9 @@ int tokenizer_unit_test(Env *env)
   /* larger test */
   str_reset(tmpfilename);
   str_append_cstr(tmpfilename, XTMPFILE_TEMPLATE, env);
-  tmpfp = env_fa_xfopen(env, str_get(tmpfilename), "w");
+  tmpfp = fa_xfopen(str_get(tmpfilename), "w");
   fprintf(tmpfp, " a bb ccc\ndddd -5");
-  env_fa_xfclose(tmpfp, env);
+  fa_xfclose(tmpfp);
   t = tokenizer_new(io_new(str_get(tmpfilename), "r", env), env);
 
   token = tokenizer_get_token(t, env);

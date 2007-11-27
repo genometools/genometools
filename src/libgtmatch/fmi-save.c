@@ -16,7 +16,7 @@
 */
 
 #include <math.h>
-
+#include "libgtcore/fa.h"
 #include "fmindex.h"
 
 #include "fmi-mapspec.pr"
@@ -50,7 +50,7 @@ static int writefmascii (const Str *indexname,
   fprintf (fmafp, "lengthofspecialsuffix=" FormatSeqpos "\n",
                   PRINTSeqposcast(fm->specialcharinfo.lengthofspecialsuffix));
   fprintf (fmafp, "suffixlength=%u\n", fm->suffixlength);
-  env_fa_xfclose(fmafp, env);
+  fa_xfclose(fmafp);
   return 0;
 }
 
@@ -70,7 +70,7 @@ static int writefmdata (const Str *indexname,
   {
     return -2;
   }
-  env_fa_xfclose(fp, env);
+  fa_xfclose(fp);
   return 0;
 }
 

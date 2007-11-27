@@ -17,6 +17,7 @@
 
 #include <assert.h>
 #include "libgtcore/cstr.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/io.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/xansi.h"
@@ -34,7 +35,7 @@ IO* io_new(const char *path, const char *mode, Env *env)
   assert(path && mode);
   assert(!strcmp(mode, "r")); /* XXX: only the read mode has been implemented */
   io = ma_malloc(sizeof (IO));
-  io->fp = env_fa_xfopen(env, path, mode);
+  io->fp = fa_xfopen(path, mode);
   io->path = cstr_dup(path, env);
   io->line_number = 1;
   io->line_start = true;
@@ -85,7 +86,7 @@ const char* io_get_filename(const IO *io)
 void io_delete(IO *io, Env *env)
 {
   if (!io) return;
-  env_fa_xfclose(io->fp, env);
+  fa_xfclose(io->fp);
   ma_free(io->path);
   ma_free(io);
 }

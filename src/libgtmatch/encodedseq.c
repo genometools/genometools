@@ -23,6 +23,7 @@
 #include "libgtcore/arraydef.h"
 #include "libgtcore/chardef.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/str.h"
 #include "seqpos-def.h"
@@ -506,7 +507,7 @@ int flushencseqfile(const Str *indexname,Encodedsequence *encseq,Env *env)
     }
   }
   FREESPACE(encseq->satcharptr);
-  env_fa_xfclose(fp,env);
+  fa_xfclose(fp);
   return haserr ? -1 : 0;
 }
 
@@ -616,7 +617,7 @@ void freeEncodedsequence(Encodedsequence **encseqptr,Env *env)
   }
   if (encseq->mappedptr != NULL)
   {
-    env_fa_xmunmap(encseq->mappedptr,env);
+    fa_xmunmap(encseq->mappedptr);
   } else
   {
     switch (encseq->sat)
@@ -1696,7 +1697,7 @@ static int readsatfromfile(const Str *indexname,Env *env)
       haserr = true;
     }
   }
-  env_fa_xfclose(fp,env);
+  fa_xfclose(fp);
   return haserr ? -1 : cc;
 }
 

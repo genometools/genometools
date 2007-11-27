@@ -17,8 +17,9 @@
 
 #include <string.h>
 #include <inttypes.h>
-#include "libgtcore/str.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fa.h"
+#include "libgtcore/str.h"
 
 #include "opensfxfile.pr"
 
@@ -70,7 +71,7 @@ int makeindexfilecopy(const Str *destindex,
       }
     }
   }
-  env_fa_xfclose(fpdest,env);
-  env_fa_xfclose(fpsource,env);
+  fa_xfclose(fpdest);
+  fa_xfclose(fpsource);
   return haserr ? -1 : 0;
 }

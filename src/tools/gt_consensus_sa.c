@@ -16,6 +16,7 @@
 */
 
 #include "libgtcore/array.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/option.h"
 #include "libgtcore/range.h"
 #include "libgtcore/str.h"
@@ -128,7 +129,7 @@ static int parse_input_file(Array *spliced_alignments,
   env_error_check(env);
 
   line = str_new(env);
-  input_file = env_fa_xfopen(env, file_name, "r");
+  input_file = fa_xfopen(file_name, "r");
 
   while (!had_err && str_read_next_line(line, input_file, env) != EOF) {
     /* init new spliced alignment */
@@ -143,7 +144,7 @@ static int parse_input_file(Array *spliced_alignments,
     }
   }
 
-  env_fa_xfclose(input_file, env);
+  fa_xfclose(input_file);
   str_delete(line, env);
   return had_err;
 }

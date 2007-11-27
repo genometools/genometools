@@ -16,6 +16,7 @@
 */
 
 #include "libgtcore/chardef.h"
+#include "libgtcore/fa.h"
 #include "emimergeesa.h"
 #include "esafileend.h"
 #include "fmindex.h"
@@ -466,7 +467,7 @@ int sufbwt2fmindex(Fmindex *fmindex,
       {
         fmindex->longestsuffixpos = longest.valueseqpos;
       }
-      env_fa_xfclose(outbwt, env);
+      fa_xfclose(outbwt);
       wraptEmissionmergedesa(&emmesa,env);
     }
   }

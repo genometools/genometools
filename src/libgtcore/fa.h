@@ -22,36 +22,59 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <zlib.h>
+#include "libgtcore/env.h"
 
 /* the file allocator module */
 
 void    fa_init(Env*);
 
 /* functions for normal file pointer */
+#define fa_fopen(path, mode)\
+        fa_fopen_func(path, mode, __FILE__, __LINE__)
 FILE*   fa_fopen_func(const char *path, const char *mode, const char*, int);
+#define fa_xfopen(path, mode)\
+        fa_xfopen_func(path, mode, __FILE__, __LINE__)
 FILE*   fa_xfopen_func(const char *path, const char *mode, const char*, int);
 void    fa_fclose(FILE *stream);
 void    fa_xfclose(FILE *stream);
 
 /* functions for gzip file pointer */
+#define fa_gzopen(path, mode)\
+        fa_gzopen_func(path, mode, __FILE__, __LINE__)
 gzFile  fa_gzopen_func(const char *path, const char *mode, const char*, int);
+#define fa_xgzopen(path, mode)\
+        fa_xgzopen_func(path, mode, __FILE__, __LINE__)
 gzFile  fa_xgzopen_func(const char *path, const char *mode, const char*, int);
 void    fa_gzclose(gzFile stream);
 void    fa_xgzclose(gzFile stream);
 
 /* functions for bzip2 file pointer */
+#define fa_bzopen(path, mode)\
+        fa_bzopen_func(path, mode, __FILE__, __LINE__)
 BZFILE* fa_bzopen_func(const char *path, const char *mode, const char*, int);
+#define fa_xbzopen(path, mode)\
+        fa_xbzopen_func(path, mode, __FILE__, __LINE__)
 BZFILE* fa_xbzopen_func(const char *path, const char *mode, const char*, int);
 void    fa_bzclose(BZFILE *stream);
 void    fa_xbzclose(BZFILE *stream);
 
 /* create a tmp file using <temp> as a template analog to mkstemp(3) */
+#define fa_xtmpfile(temp)\
+        fa_xtmpfile_func(temp, __FILE__, __LINE__)
 FILE*   fa_xtmpfile_func(char *temp, const char*, int);
 
 /* memory map functions */
+#define fa_mmap_read(path, len)\
+        fa_mmap_read_func(path, len, __FILE__, __LINE__)
 void*   fa_mmap_read_func(const char *path, size_t *len, const char*, int);
+#define fa_mmap_write(path, len)\
+        fa_mmap_write_func(path, len, __FILE__, __LINE__)
 void*   fa_mmap_write_func(const char *path, size_t *len, const char*, int);
+#define fa_xmmap_read(path, len)\
+        fa_xmmap_read_func(path, len, __FILE__, __LINE__)
 void*   fa_xmmap_read_func(const char *path, size_t *len, const char*, int);
+#define fa_xmmap_write(path, len)\
+        fa_xmmap_write_func(path, len, __FILE__, __LINE__)
 void*   fa_xmmap_write_func(const char *path, size_t *len, const char*, int);
 void    fa_xmunmap(void *addr);
 

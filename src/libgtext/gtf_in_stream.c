@@ -16,6 +16,7 @@
 */
 
 #include <assert.h>
+#include "libgtcore/fa.h"
 #include "libgtext/genome_stream_rep.h"
 #include "libgtext/gtf_in_stream.h"
 #include "libgtext/gtf_parser.h"
@@ -79,7 +80,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
 
   /* open input file */
   if (filename)
-    fpin = env_fa_xfopen(env, filename, "r");
+    fpin = fa_xfopen(filename, "r");
   else
     fpin = stdin;
 
@@ -91,7 +92,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
 
   /* close input file, if necessary */
   if (filename)
-    env_fa_xfclose(fpin, env);
+    fa_xfclose(fpin);
 
   /* free */
   gtf_parser_delete(gtf_parser, env);

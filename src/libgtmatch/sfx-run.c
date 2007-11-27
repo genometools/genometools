@@ -20,6 +20,7 @@
 #include <stdbool.h>
 #include <errno.h>
 #include "libgtcore/chardef.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/filelengthvalues.h"
 #include "libgtcore/seqiterator.h"
 #include "spacedef.h"
@@ -215,7 +216,7 @@ static int outal1file(const Str *indexname,const Alphabet *alpha,Env *env)
   if (!haserr)
   {
     outputalphabet(al1fp,alpha);
-    env_fa_xfclose(al1fp,env);
+    fa_xfclose(al1fp);
   }
   return haserr ? -1 : 0;
 }
@@ -517,10 +518,10 @@ static int runsuffixerator(bool doesa,
           deleteSfxInterface(si, env);
         }
       }
-      env_fa_fclose(outfileinfo.outfpsuftab,env);
-      env_fa_fclose(outfileinfo.outfplcptab,env);
-      env_fa_fclose(outfileinfo.outfpllvtab,env);
-      env_fa_fclose(outfileinfo.outfpbwttab,env);
+      fa_fclose(outfileinfo.outfpsuftab);
+      fa_fclose(outfileinfo.outfplcptab);
+      fa_fclose(outfileinfo.outfpllvtab);
+      fa_fclose(outfileinfo.outfpbwttab);
       if (outfileinfo.lvi != NULL)
       {
         freeLcpvalueiterator(&outfileinfo.lvi,env);

@@ -18,6 +18,7 @@
 
 #include <ctype.h>
 #include <string.h>
+#include "libgtcore/fa.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
@@ -179,9 +180,9 @@ int gt_skproto(int argc, const char **argv, Env *env)
     skproto("(stdout)", stdin, env);
   else {
     for (i = parsed_args; i < argc; i++) {
-      fpin = env_fa_xfopen(env, argv[i], "r");
+      fpin = fa_xfopen(argv[i], "r");
       skproto(argv[i], fpin, env);
-      env_fa_xfclose(fpin, env);
+      fa_xfclose(fpin);
     }
   }
 

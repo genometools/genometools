@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "libgtcore/env.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/str.h"
 
 /*@null@*/ FILE *opensfxfile(const Str *indexname,
@@ -34,7 +35,7 @@
   env_error_check(env);
   tmpfilename = str_clone(indexname,env);
   str_append_cstr(tmpfilename,suffix,env);
-  fp = env_fa_fopen(env,str_get(tmpfilename),mode);
+  fp = fa_fopen(str_get(tmpfilename),mode);
   if (fp == NULL)
   {
     env_error_set(env,"env_fa_open: cannot open file \"%s\": %s",

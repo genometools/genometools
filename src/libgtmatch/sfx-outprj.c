@@ -20,6 +20,7 @@
 #include <stdbool.h>
 #include <limits.h>
 #include "libgtcore/endianess.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/filelengthvalues.h"
 #include "libgtcore/strarray.h"
 #include "libgtcore/str.h"
@@ -118,7 +119,7 @@ int outprjfile(const Str *indexname,
                 numoflargelcpvalues,
                 maxbranchdepth,
                 longest);
-    env_fa_xfclose(prjfp,env);
+    fa_xfclose(prjfp);
   }
   return haserr ? -1 : 0;
 }

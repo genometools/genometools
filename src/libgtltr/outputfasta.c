@@ -16,6 +16,7 @@
 */
 
 #include "libgtcore/env.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/alphadef.h"
 #include "libgtmatch/sarr-def.h"
@@ -200,11 +201,10 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
   const char *destab = NULL;
   int had_err;
 
-  formatout = env_fa_xfopen(env,
-                            innerregion
-                            ? str_get(lo->str_fastaoutputfilenameinnerregion)
-                            : str_get(lo->str_fastaoutputfilename),
-                            "w");
+  formatout = fa_xfopen(innerregion
+                        ? str_get(lo->str_fastaoutputfilenameinnerregion)
+                        : str_get(lo->str_fastaoutputfilename),
+                        "w");
 
   fastaoutinfo.ssar = ssar;
   fastaoutinfo.encseq = encseqSequentialsuffixarrayreader(ssar);
@@ -232,7 +232,7 @@ int showpredictionsmultiplefasta(const LTRharvestoptions *lo,
                                        showpredictionfastasequence, env);
 
   ma_free(descendtab);
-  env_fa_xfclose(formatout, env);
+  fa_xfclose(formatout);
 
   return 0;
 }

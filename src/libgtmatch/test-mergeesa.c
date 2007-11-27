@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <limits.h>
 #include <string.h>
+#include "libgtcore/fa.h"
 #include "sarr-def.h"
 #include "spacedef.h"
 #include "emimergeesa.h"
@@ -50,7 +51,7 @@ static int initNameandFILE(NameandFILE *nf,
   env_error_check(env);
   nf->outfilename = str_clone(outindex,env);
   str_append_cstr(nf->outfilename,suffix,env);
-  nf->fp = env_fa_fopen(env,str_get(nf->outfilename),"wb");
+  nf->fp = fa_fopen(str_get(nf->outfilename),"wb");
   if (nf->fp == NULL)
   {
     env_error_set(env,"env_fa_open: cannot open file \"%s\": %s",
@@ -63,7 +64,7 @@ static int initNameandFILE(NameandFILE *nf,
 
 static void freeNameandFILE(NameandFILE *nf,Env *env)
 {
-  env_fa_xfclose(nf->fp,env);
+  fa_xfclose(nf->fp);
   str_delete(nf->outfilename,env);
 }
 

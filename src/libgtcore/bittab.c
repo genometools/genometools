@@ -18,6 +18,7 @@
 #include <assert.h>
 #include "libgtcore/bittab.h"
 #include "libgtcore/ensure.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/undef.h"
 #include "libgtcore/xansi.h"
@@ -389,7 +390,7 @@ int bittab_unit_test(Env *env)
   }
 
   /* test bittab_show */
-  fp = env_fa_xfopen(env, "/dev/null", "w");
+  fp = fa_xfopen("/dev/null", "w");
   b = bittab_new(80, env);
   for (i = 0; i < 80; i++) {
     if (i % 2)
@@ -397,7 +398,7 @@ int bittab_unit_test(Env *env)
   }
   bittab_show(b, fp);
   bittab_delete(b, env);
-  env_fa_xfclose(fp, env);
+  fa_xfclose(fp);
 
   /* test bittab_shift_left_equal() */
   b = bittab_new(125, env);

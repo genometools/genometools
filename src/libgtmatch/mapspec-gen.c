@@ -18,6 +18,7 @@
 #include <errno.h>
 #include <string.h>
 #include "libgtcore/env.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/str.h"
 #include "ushort-def.h"
 #include "fmi-bwtbound.h"
@@ -150,7 +151,7 @@ int fillmapspecstartptr(Assignmapspec assignmapspec,
   env_error_check(env);
   INITARRAY(&mapspectable,Mapspecification);
   assignmapspec(&mapspectable,assignmapinfo,false,env);
-  mapptr = env_fa_mmap_read(env,str_get(tmpfilename), &numofbytes);
+  mapptr = fa_mmap_read(str_get(tmpfilename), &numofbytes);
   if (mapptr == NULL)
   {
     env_error_set(env,"could not map datafile %s",str_get(tmpfilename));

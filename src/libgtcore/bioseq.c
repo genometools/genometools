@@ -22,6 +22,7 @@
 #include "libgtcore/discdistri.h"
 #include "libgtcore/dynalloc.h"
 #include "libgtcore/error.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/fasta.h"
 #include "libgtcore/fasta_reader.h"
 #include "libgtcore/fileutils.h"
@@ -138,7 +139,7 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
 
   /* parse the index file and fill the sequence to index mapping */
   index_line = str_new(env);
-  index_file = env_fa_xfopen(env, index_filename, "r");
+  index_file = fa_xfopen(index_filename, "r");
 
   while (!had_err && str_read_next_line(index_line, index_file, env) != EOF) {
     switch (line_number % 3) {
@@ -176,11 +177,10 @@ static int fill_bioseq(Bioseq *bs, const char *index_filename,
     /* the number of descriptions equals the number of sequence ranges */
     assert(array_size(bs->descriptions) == array_size(bs->sequence_ranges));
     /* map the raw file */
-    bs->raw_sequence = env_fa_xmmap_read(env, raw_filename,
-                                         &bs->raw_sequence_length);
+    bs->raw_sequence = fa_xmmap_read(raw_filename, &bs->raw_sequence_length);
   }
 
-  env_fa_xfclose(index_file, env);
+  fa_xfclose(index_file);
   str_delete(index_line, env);
 
   return had_err;
@@ -196,12 +196,9 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
 
   /* open files & init */
   if (!bs->use_stdin) {
-    bioseq_files_info.bioseq_index = env_fa_xfopen(env,
-                                                   (const char *)
-                                                   str_get(bioseq_index_file),
-                                                   "w");
-    bioseq_files_info.bioseq_raw = env_fa_xfopen(env, str_get(bioseq_raw_file),
-                                                 "w");
+    bioseq_files_info.bioseq_index = fa_xfopen((const char *)
+                                               str_get(bioseq_index_file), "w");
+    bioseq_files_info.bioseq_raw = fa_xfopen(str_get(bioseq_raw_file), "w");
   }
   bioseq_files_info.offset = 0;
   bioseq_files_info.bs = bs;
@@ -226,8 +223,8 @@ static int construct_bioseq_files(Bioseq *bs, Str *bioseq_index_file,
 
   /* close files */
   if (!bs->use_stdin) {
-    env_fa_xfclose(bioseq_files_info.bioseq_index, env);
-    env_fa_xfclose(bioseq_files_info.bioseq_raw, env);
+    fa_xfclose(bioseq_files_info.bioseq_index);
+    fa_xfclose(bioseq_files_info.bioseq_raw);
   }
 
   return had_err;
@@ -417,7 +414,7 @@ void bioseq_delete(Bioseq *bs, Env *env)
   if (bs->use_stdin)
     ma_free(bs->raw_sequence);
   else
-    env_fa_xmunmap(bs->raw_sequence, env);
+    fa_xmunmap(bs->raw_sequence);
   alpha_delete(bs->alpha, env);
   ma_free(bs);
 }

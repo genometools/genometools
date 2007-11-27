@@ -20,6 +20,7 @@
 #include "libgtcore/chardef.h"
 #include "libgtcore/discdistri.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/fastabuffer.h"
 #include "libgtcore/strarray.h"
 #include "esafileend.h"
@@ -204,7 +205,7 @@ int fasta2sequencekeyvalues(
     (*numofsequences)++;
     *totallength = pos;
   }
-  env_fa_xfclose(desfp,env);
+  fa_xfclose(desfp);
   discdistri_delete(distspralen,env);
   fastabuffer_delete(fb, env);
   queue_delete_with_contents(descqueue, env);

@@ -19,6 +19,7 @@
 #include <errno.h>
 #include <stdbool.h>
 #include "libgtcore/env.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/array.h"
 #include "libgtcore/str.h"
 #include "sfx-ri-def.h"
@@ -129,7 +130,7 @@ void freefmindex(Fmindex *fmindex,Env *env)
 {
   if (fmindex->mappedptr != NULL)
   {
-    env_fa_xmunmap(fmindex->mappedptr,env);
+    fa_xmunmap(fmindex->mappedptr);
   }
   if (fmindex->bwtformatching != NULL)
   {
@@ -192,7 +193,7 @@ int mapfmindex (Fmindex *fmindex,const Str *indexname,
       haserr = true;
     }
   }
-  env_fa_xfclose(fpin, env);
+  fa_xfclose(fpin);
   if (!haserr)
   {
     Str *tmpfilename;

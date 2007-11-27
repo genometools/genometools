@@ -21,6 +21,7 @@
 #include "libgtcore/array.h"
 #include "libgtcore/cstr.h"
 #include "libgtcore/error.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/mailaddress.h"
 #include "libgtcore/minmax.h"
@@ -714,7 +715,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
                                                env);
               if (!had_err) {
                 argnum++;
-                *(FILE**) option->value = env_fa_xfopen(env, argv[argnum], "w");
+                *(FILE**) option->value = fa_xfopen(argv[argnum], "w");
                 option_parsed = true;
               }
               break;

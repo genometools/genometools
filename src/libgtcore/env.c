@@ -17,6 +17,7 @@
 
 #include "libgtcore/cstr.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/ma.h"
 #include "libgtcore/option.h"
 #include "libgtcore/splitter.h"
@@ -136,48 +137,6 @@ void env_fa_fclose(FILE *stream, Env *env)
   assert(env);
   if (!stream) return;
   fa_fclose(stream);
-}
-
-void env_fa_xfclose(FILE *stream, Env *env)
-{
-  assert(env);
-  if (!stream) return;
-  fa_xfclose(stream);
-}
-
-void env_fa_gzclose(gzFile stream, Env *env)
-{
-  assert(env);
-  if (!stream) return;
-  fa_gzclose(stream);
-}
-
-void env_fa_xgzclose(gzFile stream, Env *env)
-{
-  assert(env);
-  if (!stream) return;
-  fa_xgzclose(stream);
-}
-
-void env_fa_bzclose(BZFILE *stream, Env *env)
-{
-  assert(env);
-  if (!stream) return;
-  fa_bzclose(stream);
-}
-
-void env_fa_xbzclose(BZFILE *stream, Env *env)
-{
-  assert(env);
-  if (!stream) return;
-  fa_xbzclose(stream);
-}
-
-void env_fa_xmunmap(void *addr, Env *env)
-{
-  assert(env);
-  if (!addr) return;
-  fa_xmunmap(addr);
 }
 
 void env_error_set(Env *env, const char *format, ...)

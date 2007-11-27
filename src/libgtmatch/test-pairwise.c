@@ -19,6 +19,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include "libgtcore/env.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/symboldef.h"
 #include "spacedef.h"
 #include "test-pairwise.h"
@@ -35,13 +36,13 @@ void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
   size_t ulen, vlen;
   bool forward = true;
 
-  useq = (const Uchar *) env_fa_mmap_read(env,file1,&ulen);
+  useq = (const Uchar *) fa_mmap_read(file1,&ulen);
   if (useq == NULL)
   {
     fprintf(stderr,"cannot map file \"%s\": %s\n",file1,strerror(errno));
     exit(EXIT_FAILURE);
   }
-  vseq = (const Uchar *) env_fa_mmap_read(env,file2,&vlen);
+  vseq = (const Uchar *) fa_mmap_read(file2,&vlen);
   if (vseq == NULL)
   {
     fprintf(stderr,"cannot map file \"%s\": %s",file2,strerror(errno));
@@ -57,8 +58,8 @@ void runcheckfunctionontwofiles(Checkcmppairfuntype checkfunction,
     }
     forward = false;
   }
-  env_fa_xmunmap((void *) useq,env);
-  env_fa_xmunmap((void *) vseq,env);
+  fa_xmunmap((void *) useq);
+  fa_xmunmap((void *) vseq);
 }
 
 unsigned long runcheckfunctionontext(Checkcmppairfuntype checkfunction,

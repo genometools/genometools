@@ -33,6 +33,7 @@
 #include "libgtcore/dynbittab.h"
 #include "libgtcore/ensure.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/fileutils.h"
 #include "libgtcore/getbasename.h"
 #include "libgtcore/gtdatapath.h"
@@ -330,8 +331,8 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
   }
   if (str_length(gtr->testspacepeak)) {
     mem = ma_malloc(1 << 26); /* alloc 64 MB */;
-    map = env_fa_mmap_read(env, str_get(gtr->testspacepeak), NULL);
-    env_fa_xmunmap(map, env);
+    map = fa_mmap_read(str_get(gtr->testspacepeak), NULL);
+    fa_xmunmap(map);
     ma_free(mem);
   }
   if (argc == 0 && !gtr->interactive) {

@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include <stdio.h>
 #include <stdlib.h>
 #include "libgtcore/array.h"
 

@@ -14,14 +14,14 @@
   ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
+
 #include "libgtcore/env.h"
+#include "libgtcore/fa.h"
 #include "libgtcore/str.h"
 #include "libgtmatch/esa-seqread.h"
-
-#include "ltrharvest-opt.h"
-#include "repeattypes.h"
-
 #include "libgtmatch/echoseq.pr"
+#include "libgtltr/ltrharvest-opt.h"
+#include "libgtltr/repeattypes.h"
 
 void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
                      const Seqpos *markpos, Env *env)
@@ -49,7 +49,7 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
   Seqpos totallength = getencseqtotallength(
                                encseqSequentialsuffixarrayreader(ssar));
 
-  FILE *fp = env_fa_xfopen(env, str_get(lo->str_gff3filename), "w");
+  FILE *fp = fa_xfopen(str_get(lo->str_gff3filename), "w");
 
   /* for getting descriptions */
   destablength = destablengthSequentialsuffixarrayreader(ssar);
@@ -236,5 +236,5 @@ void printgff3format(LTRharvestoptions *lo, Sequentialsuffixarrayreader *ssar,
     }
   }
   ma_free(descendtab);
-  env_fa_xfclose(fp, env);
+  fa_xfclose(fp);
 }

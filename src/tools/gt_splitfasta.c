@@ -15,6 +15,7 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
+#include "libgtcore/fa.h"
 #include "libgtcore/option.h"
 #include "libgtcore/versionfunc.h"
 #include "libgtcore/xansi.h"
@@ -91,7 +92,7 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
                        genfile_basename_length(argv[parsed_args]), env);
     str_append_char(destfilename, '.', env);
     str_append_ulong(destfilename, ++filenum, env);
-    destfp = env_fa_xfopen(env, str_get(destfilename), "w");
+    destfp = fa_xfopen(str_get(destfilename), "w");
     xfwrite(buf, 1, read_bytes, destfp);
 
     while ((read_bytes = genfile_xread(srcfp, buf, BUFSIZ)) != 0) {
@@ -103,14 +104,14 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
         if (separator_pos)
           xfwrite(buf, 1, separator_pos, destfp);
         /* close current file */
-        env_fa_xfclose(destfp, env);
+        fa_xfclose(destfp);
         /* open new file */
         str_reset(destfilename);
         str_append_cstr_nt(destfilename, argv[parsed_args],
                            genfile_basename_length(argv[parsed_args]), env);
         str_append_char(destfilename, '.', env);
         str_append_ulong(destfilename, ++filenum, env);
-        destfp = env_fa_xfopen(env, str_get(destfilename), "w");
+        destfp = fa_xfopen(str_get(destfilename), "w");
         bytecount = 0;
         assert(buf[separator_pos] == '>');
         xfwrite(buf+separator_pos, 1, read_bytes-separator_pos, destfp);
@@ -124,7 +125,7 @@ int gt_splitfasta(int argc, const char **argv, Env *env)
   str_delete(destfilename, env);
 
   /* close current file */
-  env_fa_xfclose(destfp, env);
+  fa_xfclose(destfp);
 
   /* close source file */
   genfile_xclose(srcfp, env);

@@ -22,7 +22,6 @@
 typedef struct Env Env;
 
 #include "libgtcore/error.h"
-#include "libgtcore/fa.h"
 
 Env*   env_new(void);
 Error* env_error(const Env*); /* return the error object */
@@ -34,41 +33,6 @@ int    env_delete(Env*);
 /* free functions get the data object (here the env object) _always_ as the
    last object */
 void    env_ma_free_func(void *ptr, Env*);
-
-/* wrapper for file functions */
-#define env_fa_fopen(env, path, mode)\
-        fa_fopen_func(path, mode, __FILE__, __LINE__)
-#define env_fa_xfopen(env, path, mode)\
-        fa_xfopen_func(path, mode, __FILE__, __LINE__)
-void    env_fa_fclose(FILE *stream, Env*);
-void    env_fa_xfclose(FILE *stream, Env*);
-
-#define env_fa_gzopen(env, path, mode)\
-        fa_gzopen_func(path, mode, __FILE__, __LINE__)
-#define env_fa_xgzopen(env, path, mode)\
-        fa_xgzopen_func(path, mode, __FILE__, __LINE__)
-void    env_fa_gzclose(gzFile stream, Env*);
-void    env_fa_xgzclose(gzFile stream, Env*);
-
-#define env_fa_bzopen(env, path, mode)\
-        fa_bzopen_func(path, mode, __FILE__, __LINE__)
-#define env_fa_xbzopen(env, path, mode)\
-        fa_xbzopen_func(path, mode, __FILE__, __LINE__)
-void    env_fa_bzclose(BZFILE *stream, Env*);
-void    env_fa_xbzclose(BZFILE *stream, Env*);
-
-#define env_fa_xtmpfile(env, template)\
-        fa_xtmpfile_func(template, __FILE__, __LINE__)
-
-#define env_fa_mmap_read(env, filename, len)\
-        fa_mmap_read_func(filename, len, __FILE__, __LINE__)
-#define env_fa_mmap_write(env, filename, len)\
-        fa_mmap_write_func(filename, len, __FILE__, __LINE__)
-#define env_fa_xmmap_read(env, filename, len)\
-        fa_xmmap_read_func(filename, len, __FILE__, __LINE__)
-#define env_fa_xmmap_write(env, filename, len)\
-        fa_xmmap_write_func(filename, len, __FILE__, __LINE__)
-void    env_fa_xmunmap(void *addr, Env*);
 
 /* wrapper for error functions */
 void    env_error_set(Env*, const char *format, ...)

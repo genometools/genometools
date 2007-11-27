@@ -20,6 +20,8 @@
 #include <string.h>
 
 #include "libgtcore/dataalign.h"
+#include "libgtcore/fa.h"
+#include "libgtcore/filelengthvalues.h"
 #include "libgtcore/minmax.h"
 #include "libgtcore/seqiterator.h"
 #include "libgtcore/str.h"

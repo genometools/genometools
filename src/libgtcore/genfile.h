@@ -18,6 +18,8 @@
 #ifndef GENFILE_H
 #define GENFILE_H
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "libgtcore/env.h"
 
 /*

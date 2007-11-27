@@ -23,6 +23,7 @@
 #include "libgtcore/array.h"
 #include "libgtcore/endianess.h"
 #include "libgtcore/env.h"
+#include "libgtcore/fa.h"
 #include "format64.h"
 #include "sarr-def.h"
 #include "encseq-def.h"
@@ -235,7 +236,7 @@ static void *genericmaponlytable(const Str *indexname,const char *suffix,
   env_error_check(env);
   tmpfilename = str_clone(indexname,env);
   str_append_cstr(tmpfilename,suffix,env);
-  ptr = env_fa_mmap_read(env,str_get(tmpfilename),numofbytes);
+  ptr = fa_mmap_read(str_get(tmpfilename),numofbytes);
   if (ptr == NULL)
   {
     env_error_set(env,"cannot map file \"%s\": %s",str_get(tmpfilename),
@@ -275,7 +276,7 @@ static void *genericmaptable(const Str *indexname,
   }
   if (checkmappedfilesize(numofbytes,expectedunits,sizeofunit,env) != 0)
   {
-    env_fa_xmunmap(ptr,env);
+    fa_xmunmap(ptr);
     return NULL;
   }
   return ptr;
@@ -319,7 +320,7 @@ static bool scanprjfile(Suffixarray *suffixarray,Seqpos *totallength,
   {
     haserr = true;
   }
-  env_fa_xfclose(fp,env);
+  fa_xfclose(fp);
   return haserr;
 }
 
@@ -346,23 +347,23 @@ static bool scanal1file(Suffixarray *suffixarray,const Str *indexname,Env *env)
 
 void freesuffixarray(Suffixarray *suffixarray,Env *env)
 {
-  env_fa_xmunmap((void *) suffixarray->suftab,env);
+  fa_xmunmap((void *) suffixarray->suftab);
   suffixarray->suftab = NULL;
-  env_fa_xmunmap((void *) suffixarray->lcptab,env);
+  fa_xmunmap((void *) suffixarray->lcptab);
   suffixarray->lcptab = NULL;
-  env_fa_xmunmap((void *) suffixarray->llvtab,env);
+  fa_xmunmap((void *) suffixarray->llvtab);
   suffixarray->llvtab = NULL;
-  env_fa_xmunmap((void *) suffixarray->bwttab,env);
+  fa_xmunmap((void *) suffixarray->bwttab);
   suffixarray->bwttab = NULL;
-  env_fa_xmunmap((void *) suffixarray->destab,env);
+  fa_xmunmap((void *) suffixarray->destab);
   suffixarray->destab = NULL;
-  env_fa_xfclose(suffixarray->suftabstream.fp,env);
+  fa_xfclose(suffixarray->suftabstream.fp);
   suffixarray->suftabstream.fp = NULL;
-  env_fa_xfclose(suffixarray->lcptabstream.fp,env);
+  fa_xfclose(suffixarray->lcptabstream.fp);
   suffixarray->lcptabstream.fp = NULL;
-  env_fa_xfclose(suffixarray->llvtabstream.fp,env);
+  fa_xfclose(suffixarray->llvtabstream.fp);
   suffixarray->llvtabstream.fp = NULL;
-  env_fa_xfclose(suffixarray->bwttabstream.fp,env);
+  fa_xfclose(suffixarray->bwttabstream.fp);
   suffixarray->bwttabstream.fp = NULL;
   if (suffixarray->alpha != NULL)
   {
