@@ -12,3 +12,12 @@ end
     run "diff #{$last_stdout} #{$testdata}/gt_csa_prob_#{i}.out"
   end
 end
+
+1.upto(4) do |i|
+  Name "gt -debug csa prob #{i}"
+  Keywords "gt_csa"
+  Test do
+    run_test "#{$bin}gt -debug csa #{$testdata}/gt_csa_prob_#{i}.in"
+    run "diff #{$last_stderr} #{$testdata}/gt_csa_prob_#{i}.debug"
+  end
+end
