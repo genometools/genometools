@@ -80,9 +80,9 @@ static OPrval parse_options(int *parsed_args,
   OPrval oprval;
 
   env_error_check(env);
-  charlistlen = strarray_new(env);
-  pw->strings = strarray_new(env);
-  pw->files = strarray_new(env);
+  charlistlen = strarray_new();
+  pw->strings = strarray_new();
+  pw->files = strarray_new();
   pw->text = str_new();
   pw->charlistlen = NULL;
   op = option_parser_new("options","Apply function to pairs of strings.",env);
@@ -170,14 +170,14 @@ static OPrval parse_options(int *parsed_args,
     env_error_set(env,"superfluous program parameters");
     oprval = OPTIONPARSER_ERROR;
   }
-  strarray_delete(charlistlen,env);
+  strarray_delete(charlistlen);
   return oprval;
 }
 
 static void freesimpleoption(Cmppairwiseopt *cmppairwise,Env *env)
 {
-  strarray_delete(cmppairwise->strings,env);
-  strarray_delete(cmppairwise->files,env);
+  strarray_delete(cmppairwise->strings);
+  strarray_delete(cmppairwise->files);
   str_delete(cmppairwise->text);
   if (cmppairwise->charlistlen != NULL)
   {

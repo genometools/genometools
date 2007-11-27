@@ -68,10 +68,10 @@ int gt_seqiterator(int argc, const char **argv, Env *env)
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
 
-  files = strarray_new(env);
+  files = strarray_new();
   for (i = parsed_args; i < argc; i++)
   {
-    strarray_add_cstr(files, argv[i], env);
+    strarray_add_cstr(files, argv[i]);
   }
 
   totalsize = files_estimate_total_size(files);
@@ -99,6 +99,6 @@ int gt_seqiterator(int argc, const char **argv, Env *env)
   {
     progressbar_stop();
   }
-  strarray_delete(files, env);
+  strarray_delete(files);
   return had_err;
 }

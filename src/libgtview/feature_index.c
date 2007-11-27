@@ -165,7 +165,7 @@ int store_seqid(void *key, void *value, void *data, Env *env)
   StrArray *seqids = (StrArray*) data;
   const char *seqid = (const char*) key;
   assert(seqids && seqid);
-  strarray_add_cstr(seqids, seqid, env);
+  strarray_add_cstr(seqids, seqid);
   return 0;
 }
 
@@ -175,7 +175,7 @@ StrArray* feature_index_get_seqids(const FeatureIndex *fi, Env *env)
   int rval;
   env_error_check(env);
   assert(fi);
-  seqids = strarray_new(env);
+  seqids = strarray_new();
   rval = hashtable_foreach_ao(fi->regions, store_seqid, seqids, env);
   assert(!rval); /* store_seqid() is sane */
   return seqids;
@@ -317,7 +317,7 @@ int feature_index_unit_test(Env* env)
   ensure(had_err, feature_index_get_features_for_seqid(fi, "noexist") == NULL);
 
   /* delete all generated objects */
-  strarray_delete(seqids, env);
+  strarray_delete(seqids);
   feature_index_delete(fi, env);
   genome_node_rec_delete(gn1, env);
   genome_node_rec_delete(gn2, env);

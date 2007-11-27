@@ -274,7 +274,7 @@ void wrapsfxoptions(Suffixeratoroptions *so,Env *env)
   str_delete(so->str_indexname);
   str_delete(so->str_smap);
   str_delete(so->str_sat);
-  strarray_delete(so->filenametab,env);
+  strarray_delete(so->filenametab);
 }
 
 int suffixeratoroptions(Suffixeratoroptions *so,
@@ -290,7 +290,7 @@ int suffixeratoroptions(Suffixeratoroptions *so,
   so->isdna = false;
   so->isprotein = false;
   so->str_indexname = str_new();
-  so->filenametab = strarray_new(env);
+  so->filenametab = strarray_new();
   so->str_smap = str_new();
   so->str_sat = str_new();
   so->prefixlength = PREFIXLENGTH_AUTOMATIC;

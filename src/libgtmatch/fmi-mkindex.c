@@ -62,7 +62,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
   int parsed_args;
 
   env_error_check(env);
-  mkfmcallinfo->indexnametab = strarray_new(env);
+  mkfmcallinfo->indexnametab = strarray_new();
   mkfmcallinfo->outfmindex = str_new();
   mkfmcallinfo->leveldesc = str_new();
   op = option_parser_new("[option ...] -ii indexfile [...]",
@@ -123,7 +123,7 @@ static OPrval parsemkfmindex(Mkfmcallinfo *mkfmcallinfo,
 
 static void freemkfmcallinfo(Mkfmcallinfo *mkfmcallinfo,Env *env)
 {
-  strarray_delete(mkfmcallinfo->indexnametab,env);
+  strarray_delete(mkfmcallinfo->indexnametab);
   str_delete(mkfmcallinfo->outfmindex);
   str_delete(mkfmcallinfo->leveldesc);
 }

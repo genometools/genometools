@@ -24,27 +24,25 @@ struct StrArray {
   Array *strings;
 };
 
-StrArray* strarray_new(Env *env)
+StrArray* strarray_new(void)
 {
   StrArray *sa;
-  env_error_check(env);
   sa = ma_malloc(sizeof (StrArray));
   sa->strings = array_new(sizeof (Str*));
   return sa;
 }
 
-StrArray* strarray_new_file(const char *path, Env *env)
+StrArray* strarray_new_file(const char *path)
 {
   StrArray *filecontent;
   GenFile *fpin;
   Str *line;
-  env_error_check(env);
   fpin = genfile_xopen(path, "r");
   assert(fpin);
   line = str_new();
-  filecontent = strarray_new(env);
+  filecontent = strarray_new();
   while (str_read_next_line_generic(line, fpin) != EOF) {
-    strarray_add_cstr(filecontent, str_get(line), env);
+    strarray_add_cstr(filecontent, str_get(line));
     str_reset(line);
   }
   str_delete(line);
@@ -52,10 +50,9 @@ StrArray* strarray_new_file(const char *path, Env *env)
   return filecontent;
 }
 
-void strarray_add_cstr(StrArray *sa, const char *cstr, Env *env)
+void strarray_add_cstr(StrArray *sa, const char *cstr)
 {
   Str *str;
-  env_error_check(env);
   assert(sa && cstr);
   str = str_new_cstr(cstr);
   array_add(sa->strings, str);
@@ -79,7 +76,7 @@ unsigned long strarray_size(const StrArray *sa)
   return array_size(sa->strings);
 }
 
-void strarray_delete(StrArray *sa, Env *env)
+void strarray_delete(StrArray *sa)
 {
   unsigned long i;
   if (!sa) return;

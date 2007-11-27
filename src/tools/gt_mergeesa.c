@@ -61,7 +61,7 @@ int gt_mergeesa(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   storeindex = str_new();
-  indexnametab = strarray_new(env);
+  indexnametab = strarray_new();
   switch (parse_options(storeindex, indexnametab, &parsed_args,
                         argc, argv, env))
   {
@@ -91,6 +91,6 @@ int gt_mergeesa(int argc, const char **argv, Env *env)
     freeverboseinfo(&verboseinfo,env);
   }
   str_delete(storeindex);
-  strarray_delete(indexnametab,env);
+  strarray_delete(indexnametab);
   return haserr ? -1 : 0;
 }

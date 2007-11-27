@@ -873,7 +873,7 @@ static OPrval parse(OptionParser *op, int *parsed_args, int argc,
               while (!had_err) {
                 if (argnum + 1 < argc && argv[argnum+1][0] != '-') {
                   argnum++;
-                  strarray_add_cstr(option->value, argv[argnum], env);
+                  strarray_add_cstr(option->value, argv[argnum]);
                   option_parsed = true;
                 }
                 else

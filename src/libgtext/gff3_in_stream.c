@@ -179,7 +179,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 static void gff3_in_stream_free(GenomeStream *gs, Env *env)
 {
   GFF3InStream *gff3_in_stream = gff3_in_stream_cast(gs);
-  strarray_delete(gff3_in_stream->files, env);
+  strarray_delete(gff3_in_stream->files);
   str_delete(gff3_in_stream->stdinstr);
   while (queue_size(gff3_in_stream->genome_node_buffer))
     genome_node_rec_delete(queue_get(gff3_in_stream->genome_node_buffer), env);
@@ -235,17 +235,17 @@ GenomeStream* gff3_in_stream_new_unsorted(int num_of_files,
                                           Env *env)
 {
   int i;
-  StrArray *files = strarray_new(env);
+  StrArray *files = strarray_new();
   for (i = 0; i < num_of_files; i++)
-    strarray_add_cstr(files, filenames[i], env);
+    strarray_add_cstr(files, filenames[i]);
   return gff3_in_stream_new(files, false, be_verbose, checkids, env);
 }
 
 GenomeStream* gff3_in_stream_new_sorted(const char *filename, bool be_verbose,
                                         Env *env)
 {
-  StrArray *files = strarray_new(env);
+  StrArray *files = strarray_new();
   if (filename)
-    strarray_add_cstr(files, filename, env);
+    strarray_add_cstr(files, filename);
   return gff3_in_stream_new(files, true, be_verbose, false, env);
 }

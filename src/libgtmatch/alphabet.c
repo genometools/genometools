@@ -278,13 +278,13 @@ static int readsymbolmap(Alphabet *alpha,const Str *mapfile,Env *env)
   StrArray *lines;
 
   env_error_check(env);
-  lines = strarray_new_file(str_get(mapfile),env);
+  lines = strarray_new_file(str_get(mapfile));
   assert(lines != NULL);
   if (readsymbolmapfromlines(alpha,mapfile,lines,env) != 0)
   {
     haserr = true;
   }
-  strarray_delete(lines,env);
+  strarray_delete(lines);
   return haserr ? -1 : 0;
 }
 

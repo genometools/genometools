@@ -47,13 +47,13 @@ int gt_guessprot(int argc, const char **argv, Env *env)
     case OPTIONPARSER_REQUESTS_EXIT: return 0;
   }
 
-  filenametab = strarray_new(env);
+  filenametab = strarray_new();
   for (i=parsed_args; i < argc; i++)
   {
-    strarray_add_cstr(filenametab,argv[i],env);
+    strarray_add_cstr(filenametab,argv[i]);
   }
   retval = guessifproteinsequencestream(filenametab,env);
-  strarray_delete(filenametab,env);
+  strarray_delete(filenametab);
   if (retval < 0)
   {
     return -1;

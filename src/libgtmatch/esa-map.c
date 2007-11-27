@@ -89,7 +89,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
   SETREADINTKEYS("integersize",&integersize,NULL);
   SETREADINTKEYS("littleendian",&littleendian,NULL);
   SETREADINTKEYS("readmode",&readmodeint,NULL);
-  suffixarray->filenametab = strarray_new(env);
+  suffixarray->filenametab = strarray_new();
   suffixarray->filelengthtab = NULL;
   currentline = str_new();
   for (linenum = 0; str_read_next_line(currentline, fpin) != EOF; linenum++)
@@ -137,7 +137,7 @@ static int scanprjfileviafileptr(Suffixarray *suffixarray,
       }
       if (!haserr)
       {
-        strarray_add_cstr(suffixarray->filenametab,tmpfilename,env);
+        strarray_add_cstr(suffixarray->filenametab,tmpfilename);
         FREESPACE(tmpfilename);
         assert(suffixarray->filelengthtab != NULL);
         suffixarray->filelengthtab[numoffiles].length = (Seqpos) readint1;
@@ -369,7 +369,7 @@ void freesuffixarray(Suffixarray *suffixarray,Env *env)
     freeAlphabet(&suffixarray->alpha,env);
   }
   freeEncodedsequence(&suffixarray->encseq,env);
-  strarray_delete(suffixarray->filenametab,env);
+  strarray_delete(suffixarray->filenametab);
   suffixarray->filenametab = NULL;
   FREESPACE(suffixarray->filelengthtab);
 }
