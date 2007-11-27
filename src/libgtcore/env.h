@@ -37,37 +37,37 @@ void    env_ma_free_func(void *ptr, Env*);
 
 /* wrapper for file functions */
 #define env_fa_fopen(env, path, mode)\
-        fa_fopen(path, mode, __FILE__, __LINE__)
+        fa_fopen_func(path, mode, __FILE__, __LINE__)
 #define env_fa_xfopen(env, path, mode)\
-        fa_xfopen(path, mode, __FILE__, __LINE__)
+        fa_xfopen_func(path, mode, __FILE__, __LINE__)
 void    env_fa_fclose(FILE *stream, Env*);
 void    env_fa_xfclose(FILE *stream, Env*);
 
 #define env_fa_gzopen(env, path, mode)\
-        fa_gzopen(path, mode, __FILE__, __LINE__)
+        fa_gzopen_func(path, mode, __FILE__, __LINE__)
 #define env_fa_xgzopen(env, path, mode)\
-        fa_xgzopen(path, mode, __FILE__, __LINE__)
+        fa_xgzopen_func(path, mode, __FILE__, __LINE__)
 void    env_fa_gzclose(gzFile stream, Env*);
 void    env_fa_xgzclose(gzFile stream, Env*);
 
 #define env_fa_bzopen(env, path, mode)\
-        fa_bzopen(path, mode, __FILE__, __LINE__)
+        fa_bzopen_func(path, mode, __FILE__, __LINE__)
 #define env_fa_xbzopen(env, path, mode)\
-        fa_xbzopen(path, mode, __FILE__, __LINE__)
+        fa_xbzopen_func(path, mode, __FILE__, __LINE__)
 void    env_fa_bzclose(BZFILE *stream, Env*);
 void    env_fa_xbzclose(BZFILE *stream, Env*);
 
 #define env_fa_xtmpfile(env, template)\
-        fa_xtmpfile(template, __FILE__, __LINE__)
+        fa_xtmpfile_func(template, __FILE__, __LINE__)
 
 #define env_fa_mmap_read(env, filename, len)\
-        fa_mmap_read(filename, len, __FILE__, __LINE__)
+        fa_mmap_read_func(filename, len, __FILE__, __LINE__)
 #define env_fa_mmap_write(env, filename, len)\
-        fa_mmap_write(filename, len, __FILE__, __LINE__)
+        fa_mmap_write_func(filename, len, __FILE__, __LINE__)
 #define env_fa_xmmap_read(env, filename, len)\
-        fa_xmmap_read(filename, len, __FILE__, __LINE__)
+        fa_xmmap_read_func(filename, len, __FILE__, __LINE__)
 #define env_fa_xmmap_write(env, filename, len)\
-        fa_xmmap_write(filename, len, __FILE__, __LINE__)
+        fa_xmmap_write_func(filename, len, __FILE__, __LINE__)
 void    env_fa_xmunmap(void *addr, Env*);
 
 /* wrapper for error functions */

@@ -145,16 +145,16 @@ static void xfclose_generic(void *stream, GenFileMode genfilemode, FA *fa)
   }
 }
 
-FILE* fa_fopen(const char *path, const char *mode,
-               const char *filename, int line)
+FILE* fa_fopen_func(const char *path, const char *mode,
+                    const char *filename, int line)
 {
   assert(fa && path && mode);
   return fileopen_generic(fa, path, mode, GFM_UNCOMPRESSED, false, filename,
                           line);
 }
 
-FILE* fa_xfopen(const char *path, const char *mode,
-                const char *filename, int line)
+FILE* fa_xfopen_func(const char *path, const char *mode,
+                     const char *filename, int line)
 {
   assert(fa && path && mode);
   return fileopen_generic(fa, path, mode, GFM_UNCOMPRESSED, true, filename,
@@ -175,15 +175,15 @@ void fa_xfclose(FILE *stream)
   xfclose_generic(stream, GFM_UNCOMPRESSED, fa);
 }
 
-gzFile fa_gzopen(const char *path, const char *mode,
-                 const char *filename, int line)
+gzFile fa_gzopen_func(const char *path, const char *mode,
+                      const char *filename, int line)
 {
   assert(fa && path && mode);
   return fileopen_generic(fa, path, mode, GFM_GZIP, false, filename, line);
 }
 
-gzFile fa_xgzopen(const char *path, const char *mode,
-                  const char *filename, int line)
+gzFile fa_xgzopen_func(const char *path, const char *mode,
+                       const char *filename, int line)
 {
   assert(fa && path && mode);
   return fileopen_generic(fa, path, mode, GFM_GZIP, true, filename, line);
@@ -203,16 +203,16 @@ void fa_xgzclose(gzFile stream)
   xfclose_generic(stream, GFM_GZIP, fa);
 }
 
-BZFILE* fa_bzopen(const char *path, const char *mode,
-                  const char *filename, int line)
+BZFILE* fa_bzopen_func(const char *path, const char *mode,
+                       const char *filename, int line)
 {
   assert(fa && path && mode);
   return fileopen_generic(fa, path, mode, GFM_BZIP2, false, filename, line);
 
 }
 
-BZFILE* fa_xbzopen(const char *path, const char *mode,
-                   const char *filename, int line)
+BZFILE* fa_xbzopen_func(const char *path, const char *mode,
+                        const char *filename, int line)
 {
   assert(fa && path && mode);
   return fileopen_generic(fa, path, mode, GFM_BZIP2, true, filename, line);
@@ -232,7 +232,7 @@ void fa_xbzclose(BZFILE *stream)
   xfclose_generic(stream, GFM_BZIP2, fa);
 }
 
-FILE* fa_xtmpfile(char *temp, const char *filename, int line)
+FILE* fa_xtmpfile_func(char *temp, const char *filename, int line)
 {
   FAFileInfo *fileinfo;
   FILE *fp;
@@ -274,29 +274,29 @@ static void* mmap_generic(const char *path, size_t *len, bool write,
   return map;
 }
 
-void* fa_mmap_read(const char *path, size_t *len,
-                   const char *filename, int line)
+void* fa_mmap_read_func(const char *path, size_t *len,
+                        const char *filename, int line)
 {
   assert(fa && path);
   return mmap_generic(path, len, false, false, filename, line);
 }
 
-void* fa_mmap_write(const char *path, size_t *len,
-                    const char *filename, int line)
+void* fa_mmap_write_func(const char *path, size_t *len,
+                         const char *filename, int line)
 {
   assert(fa && path);
   return mmap_generic(path, len, true, false, filename, line);
 }
 
-void* fa_xmmap_read(const char *path, size_t *len,
-                    const char *filename, int line)
+void* fa_xmmap_read_func(const char *path, size_t *len,
+                         const char *filename, int line)
 {
   assert(fa && path);
   return mmap_generic(path, len, false, true, filename, line);
 }
 
-void* fa_xmmap_write(const char *path, size_t *len,
-                     const char *filename, int line)
+void* fa_xmmap_write_func(const char *path, size_t *len,
+                          const char *filename, int line)
 {
   assert(fa && path);
   return mmap_generic(path, len, true, true, filename, line);

@@ -28,31 +28,31 @@
 void    fa_init(Env*);
 
 /* functions for normal file pointer */
-FILE*   fa_fopen(const char *path, const char *mode, const char*, int);
-FILE*   fa_xfopen(const char *path, const char *mode, const char*, int);
+FILE*   fa_fopen_func(const char *path, const char *mode, const char*, int);
+FILE*   fa_xfopen_func(const char *path, const char *mode, const char*, int);
 void    fa_fclose(FILE *stream);
 void    fa_xfclose(FILE *stream);
 
 /* functions for gzip file pointer */
-gzFile  fa_gzopen(const char *path, const char *mode, const char*, int);
-gzFile  fa_xgzopen(const char *path, const char *mode, const char*, int);
+gzFile  fa_gzopen_func(const char *path, const char *mode, const char*, int);
+gzFile  fa_xgzopen_func(const char *path, const char *mode, const char*, int);
 void    fa_gzclose(gzFile stream);
 void    fa_xgzclose(gzFile stream);
 
 /* functions for bzip2 file pointer */
-BZFILE* fa_bzopen(const char *path, const char *mode, const char*, int);
-BZFILE* fa_xbzopen(const char *path, const char *mode, const char*, int);
+BZFILE* fa_bzopen_func(const char *path, const char *mode, const char*, int);
+BZFILE* fa_xbzopen_func(const char *path, const char *mode, const char*, int);
 void    fa_bzclose(BZFILE *stream);
 void    fa_xbzclose(BZFILE *stream);
 
 /* create a tmp file using <temp> as a template analog to mkstemp(3) */
-FILE*   fa_xtmpfile(char *temp, const char*, int);
+FILE*   fa_xtmpfile_func(char *temp, const char*, int);
 
 /* memory map functions */
-void*   fa_mmap_read(const char *path, size_t *len, const char*, int);
-void*   fa_mmap_write(const char *path, size_t *len, const char*, int);
-void*   fa_xmmap_read(const char *path, size_t *len, const char*, int);
-void*   fa_xmmap_write(const char *path, size_t *len, const char*, int);
+void*   fa_mmap_read_func(const char *path, size_t *len, const char*, int);
+void*   fa_mmap_write_func(const char *path, size_t *len, const char*, int);
+void*   fa_xmmap_read_func(const char *path, size_t *len, const char*, int);
+void*   fa_xmmap_write_func(const char *path, size_t *len, const char*, int);
 void    fa_xmunmap(void *addr);
 
 /* check if all allocated file pointer have been released, prints to stderr */
