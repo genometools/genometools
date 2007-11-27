@@ -24,6 +24,6 @@
    Alignment */
 Alignment* affinealign(const char *u, unsigned long ulen,
                        const char *v, unsigned long vlen, int replacement_cost,
-                       int gap_opening_cost, int gap_extension_cost, Env*);
+                       int gap_opening_cost, int gap_extension_cost);
 
 #endif

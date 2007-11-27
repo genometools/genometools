@@ -75,14 +75,13 @@ int gt_mutate(int argc, const char **argv, Env *env)
         mutated_seq = mutate(bioseq_get_description(bioseq, i),
                              bioseq_get_sequence(bioseq, i),
                              bioseq_get_sequence_length(bioseq, i),
-                             bioseq_get_alpha(bioseq, env), arguments.rate,
-                             env);
+                             bioseq_get_alpha(bioseq), arguments.rate);
         fasta_show_entry(seq_get_description(mutated_seq),
                          seq_get_orig(mutated_seq), seq_length(mutated_seq), 0);
-        seq_delete(mutated_seq, env);
+        seq_delete(mutated_seq);
       }
     }
-    bioseq_delete(bioseq, env);
+    bioseq_delete(bioseq);
     parsed_args++;
   }
 

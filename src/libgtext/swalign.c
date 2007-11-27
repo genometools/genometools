@@ -60,7 +60,7 @@ static void fillDPtable(DPentry **dptable,
 }
 
 static Coordinate traceback(Alignment *a, DPentry **dptable,
-                            unsigned long i, unsigned long j, Env *env)
+                            unsigned long i, unsigned long j)
 {
   Coordinate start_coordinate = { UNDEF_ULONG, UNDEF_ULONG };
   assert(a && dptable);
@@ -69,16 +69,16 @@ static Coordinate traceback(Alignment *a, DPentry **dptable,
     start_coordinate.x = i;
     start_coordinate.y = j;
     if (dptable[i][j].max_replacement) {
-      alignment_add_replacement(a, env);
+      alignment_add_replacement(a);
       i--;
       j--;
     }
     else if (dptable[i][j].max_deletion) {
-      alignment_add_deletion(a, env);
+      alignment_add_deletion(a);
       i--;;
     }
     else if (dptable[i][j].max_insertion) {
-      alignment_add_insertion(a, env);
+      alignment_add_insertion(a);
       j--;
     }
   }
@@ -87,22 +87,21 @@ static Coordinate traceback(Alignment *a, DPentry **dptable,
   return start_coordinate;
 }
 
-Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf, Env *env)
+Alignment* swalign(Seq *u, Seq *v, const ScoreFunction *sf)
 {
   Coordinate alignment_start, alignment_end = { UNDEF_ULONG, UNDEF_ULONG };
   DPentry **dptable;
   Alignment *a = NULL;
   assert(u && v && sf);
   array2dim_calloc(dptable, seq_length(u)+1, seq_length(v)+1, DPentry);
-  fillDPtable(dptable, seq_get_encoded(u, env), seq_length(u),
-              seq_get_encoded(v, env), seq_length(v), sf, &alignment_end);
+  fillDPtable(dptable, seq_get_encoded(u), seq_length(u), seq_get_encoded(v),
+              seq_length(v), sf, &alignment_end);
   assert(alignment_end.x != UNDEF_ULONG);
   assert(alignment_end.y != UNDEF_ULONG);
   if (dptable[alignment_end.x][alignment_end.y].score) {
     /* construct only an alignment if a (positive) score was computed */
-    a = alignment_new(env);
-    alignment_start = traceback(a, dptable, alignment_end.x, alignment_end.y,
-                                env);
+    a = alignment_new();
+    alignment_start = traceback(a, dptable, alignment_end.x, alignment_end.y);
     /* transform the positions in the DP matrix to sequence positions */
     alignment_start.x--;
     alignment_start.y--;

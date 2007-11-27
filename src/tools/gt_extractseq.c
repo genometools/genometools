@@ -116,7 +116,7 @@ int gt_extractseq(int argc, const char **argv, Env *env)
     bs = bioseq_new("-", env);
     had_err = extractseq(arguments.outfp, bs, str_get(arguments.pattern),
                          arguments.width, env);
-    bioseq_delete(bs, env);
+    bioseq_delete(bs);
   }
 
   /* process all files */
@@ -124,7 +124,7 @@ int gt_extractseq(int argc, const char **argv, Env *env)
     bs = bioseq_new(argv[parsed_args], env);
     had_err = extractseq(arguments.outfp, bs, str_get(arguments.pattern),
                          arguments.width, env);
-    bioseq_delete(bs, env);
+    bioseq_delete(bs);
     parsed_args++;
   }
 

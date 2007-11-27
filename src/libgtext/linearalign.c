@@ -132,12 +132,11 @@ static unsigned long determineCtab0(unsigned long *Ctab, char v0, const char *u)
 
 static unsigned long computeCtab(const char *u, unsigned long ulen,
                                  const char *v, unsigned long vlen,
-                                 unsigned long *Ctab, Env *env)
+                                 unsigned long *Ctab)
 {
   unsigned long *EDtabcolumn, /* a column of the edit distance table */
                 *Rtabcolumn,  /* a column of the row index table */
                 dist;
-  env_error_check(env);
 
   EDtabcolumn = ma_malloc(sizeof (unsigned long) * (ulen + 1));
   Rtabcolumn  = ma_malloc(sizeof (unsigned long) * (ulen + 1));
@@ -161,45 +160,42 @@ static unsigned long computeCtab(const char *u, unsigned long ulen,
 
 static Alignment* reconstructalignment(const unsigned long *Ctab,
                                        const char *u, unsigned long ulen,
-                                       const char *v, unsigned long vlen,
-                                       Env *env)
+                                       const char *v, unsigned long vlen)
 {
   unsigned long row, col = vlen;
   Alignment *alignment;
-  env_error_check(env);
   assert(Ctab && u && ulen && v && vlen);
-  alignment = alignment_new_with_seqs(u, ulen, v, vlen, env);
+  alignment = alignment_new_with_seqs(u, ulen, v, vlen);
   row = Ctab[col];
   /* process columns */
   while (col) {
     assert(Ctab[col-1] <= row);
     if (Ctab[col-1] == row)
-      alignment_add_insertion(alignment, env);
+      alignment_add_insertion(alignment);
     else if (Ctab[col-1] + 1 == row)
-      alignment_add_replacement(alignment, env);
+      alignment_add_replacement(alignment);
     else {
       while (Ctab[col-1] + 1 < row--)
-        alignment_add_deletion(alignment, env);
-      alignment_add_replacement(alignment, env);
+        alignment_add_deletion(alignment);
+      alignment_add_replacement(alignment);
     }
     row = Ctab[--col];
   }
   /* process first column */
   while (row--)
-    alignment_add_deletion(alignment, env);
+    alignment_add_deletion(alignment);
   return alignment;
 }
 
 Alignment* linearalign(const char *u, unsigned long ulen,
-                       const char *v, unsigned long vlen, Env *env)
+                       const char *v, unsigned long vlen)
 {
   unsigned long *Ctab, dist;
   Alignment *alignment;
-  env_error_check(env);
   assert(u && ulen && v && vlen);
   Ctab = ma_malloc(sizeof (unsigned long) * (vlen + 1));
-  dist = computeCtab(u, ulen, v, vlen, Ctab, env);
-  alignment = reconstructalignment(Ctab, u, ulen, v, vlen, env);
+  dist = computeCtab(u, ulen, v, vlen, Ctab);
+  alignment = reconstructalignment(Ctab, u, ulen, v, vlen);
   assert(dist == alignment_eval(alignment));
   ma_free(Ctab);
   return alignment;

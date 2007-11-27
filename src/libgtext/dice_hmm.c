@@ -82,7 +82,7 @@ HMM* dice_hmm_fair(Env *env)
 
 Alpha* dice_hmm_alpha(Env *env)
 {
-  Alpha *a = alpha_new(env);
+  Alpha *a = alpha_new();
   alpha_add_mapping(a, "1");
   alpha_add_mapping(a, "2");
   alpha_add_mapping(a, "3");

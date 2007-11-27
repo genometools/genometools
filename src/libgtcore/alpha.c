@@ -38,7 +38,7 @@ struct Alpha {
                reference_count;
 };
 
-Alpha* alpha_new(Env *env)
+Alpha* alpha_new(void)
 {
   Alpha *a = ma_calloc(1, sizeof (Alpha));
   memset(a->code_to_character_map, UNDEF_UCHAR, UCHAR_MAX);
@@ -46,10 +46,10 @@ Alpha* alpha_new(Env *env)
   return a;
 }
 
-Alpha* alpha_new_dna(Env *env)
+Alpha* alpha_new_dna(void)
 {
   unsigned int i;
-  Alpha *a = alpha_new(env);
+  Alpha *a = alpha_new();
 
   /* fill the code to character map */
   a->code_to_character_map[0] = 'a';
@@ -73,10 +73,10 @@ Alpha* alpha_new_dna(Env *env)
   return a;
 }
 
-Alpha* alpha_new_protein(Env *env)
+Alpha* alpha_new_protein(void)
 {
   unsigned int i;
-  Alpha *a = alpha_new(env);
+  Alpha *a = alpha_new();
 
   /* fill the code to character map */
   for (i = 0; PROTEIN_CHARACTERS_UPPERCASE[i] != '\0'; i++)
@@ -97,15 +97,15 @@ Alpha* alpha_new_protein(Env *env)
   return a;
 }
 
-Alpha* alpha_guess(const char *seq, unsigned long seqlen, Env *env)
+Alpha* alpha_guess(const char *seq, unsigned long seqlen)
 {
   unsigned long i;
   assert(seq && seqlen);
   for (i = 0; i < seqlen && i < ALPHA_GUESS_MAX_LENGTH; i++) {
     if (strchr(ALPHA_GUESS_PROTEIN_CHARS, seq[i]))
-      return alpha_new_protein(env);
+      return alpha_new_protein();
   }
-  return alpha_new_dna(env);
+  return alpha_new_dna();
 }
 
 Alpha* alpha_ref(Alpha *a)
@@ -177,7 +177,7 @@ unsigned int alpha_size(const Alpha *a)
   return a->map_size;
 }
 
-void alpha_delete(Alpha *a, Env *env)
+void alpha_delete(Alpha *a)
 {
   if (!a) return;
   if (a->reference_count) { a->reference_count--; return; }

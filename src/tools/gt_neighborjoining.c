@@ -95,7 +95,7 @@ int gt_neighborjoining(int argc, const char **argv, Env *env)
   if (!had_err)
     neighborjoining_show_tree(nj, stdout);
 
-  bioseq_delete(bioseq, env);
+  bioseq_delete(bioseq);
   neighborjoining_delete(nj, env);
 
   return had_err;

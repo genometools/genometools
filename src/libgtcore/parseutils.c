@@ -216,14 +216,15 @@ int parse_phase(Phase *phase_value, const char *phase,
 }
 
 int parse_int_line(int *int_value, const char *integer,
-                   unsigned long line_number, const char *filename, Env *env)
+                   unsigned long line_number, const char *filename, Error *e)
 {
   int rval;
+
+  error_check(e);
   assert(integer && line_number && filename);
-  env_error_check(env);
 
   if ((rval = sscanf(integer, "%d", int_value)) != 1) {
-    env_error_set(env, "could not parse integer '%s' on line %lu in file '%s'",
+    error_set(e, "could not parse integer '%s' on line %lu in file '%s'",
               integer, line_number, filename);
     return -1;
   }

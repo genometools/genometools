@@ -49,7 +49,7 @@ unsigned long qgram_step(unsigned long current_code, char previous, char next,
 
 void qgram_compute(Array *qgrams, const char *encoded_seq,
                    unsigned long seqlen, unsigned long alpha_size,
-                   unsigned int q, Env *env)
+                   unsigned int q)
 {
   unsigned long i, code, alpha_size_raised_to_the_power_of_q_minus_1;
   assert(qgrams && encoded_seq && alpha_size && q);

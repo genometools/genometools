@@ -96,7 +96,7 @@ int gt_msaparse(int argc, const char **argv, Env *env)
   }
 
   /* free */
-  msa_delete(msa, env);
+  msa_delete(msa);
 
   return had_err;
 }

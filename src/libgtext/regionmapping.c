@@ -83,7 +83,7 @@ static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Env *env)
       else
         str_reset(rm->sequence_name);
       str_append_str(rm->sequence_name, seqid);
-      bioseq_delete(rm->bioseq, env);
+      bioseq_delete(rm->bioseq);
       rm->bioseq = bioseq_new_str(rm->sequence_file, env);
       if (!rm->bioseq)
         had_err = -1;
@@ -124,6 +124,6 @@ void regionmapping_delete(RegionMapping *rm, Env *env)
   str_delete(rm->sequence_file);
   str_delete(rm->sequence_name);
   mapping_delete(rm->mapping, env);
-  bioseq_delete(rm->bioseq, env);
+  bioseq_delete(rm->bioseq);
   ma_free(rm);
 }

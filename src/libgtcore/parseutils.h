@@ -54,6 +54,6 @@ int parse_phase(Phase*, const char *phase,
                unsigned long line_number, const char *filename, Env*);
 
 int parse_int_line(int*, const char *integer,
-                   unsigned long line_number, const char *filename, Env*);
+                   unsigned long line_number, const char *filename, Error*);
 
 #endif

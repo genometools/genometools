@@ -24,19 +24,19 @@
 /* the Alignment class (an Alignment object has to be contructed backwards) */
 typedef struct Alignment Alignment;
 
-Alignment*    alignment_new(Env*);
+Alignment*    alignment_new(void);
 Alignment*    alignment_new_with_seqs(const char *u, unsigned long ulen,
-                                      const char *v, unsigned long vlen, Env*);
+                                      const char *v, unsigned long vlen);
 void          alignment_set_seqs(Alignment*, const char *u, unsigned long ulen,
                                  const char *v, unsigned long vlen);
-void          alignment_add_replacement(Alignment*, Env*);
-void          alignment_add_deletion(Alignment*, Env*);
-void          alignment_add_insertion(Alignment*, Env*);
+void          alignment_add_replacement(Alignment*);
+void          alignment_add_deletion(Alignment*);
+void          alignment_add_insertion(Alignment*);
 void          alignment_remove_last(Alignment*); /* undo last add operation */
 unsigned long alignment_eval(const Alignment*); /* returns unit cost */
 void          alignment_show(const Alignment*, FILE*);
 void          alignment_show_multieop_list(const Alignment*, FILE*);
 int           alignment_unit_test(Env*);
-void          alignment_delete(Alignment*, Env*);
+void          alignment_delete(Alignment*);
 
 #endif

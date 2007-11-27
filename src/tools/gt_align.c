@@ -90,24 +90,24 @@ int gt_align(int argc, const char **argv, Env *env)
                     bioseq_get_sequence_length(bioseq_1, i),
                     bioseq_get_sequence(bioseq_2, j),
                     bioseq_get_sequence_length(bioseq_2, j),
-                    show_alignment, show_aligns, NULL, env);
+                    show_alignment, show_aligns, NULL);
         }
         else {
           a = align(bioseq_get_sequence(bioseq_1, i),
                     bioseq_get_sequence_length(bioseq_1, i),
                     bioseq_get_sequence(bioseq_2, j),
-                    bioseq_get_sequence_length(bioseq_2, j), env);
+                    bioseq_get_sequence_length(bioseq_2, j));
           alignment_show(a, stdout);
           xputchar('\n');
-          alignment_delete(a, env);
+          alignment_delete(a);
         }
       }
     }
   }
 
   /* free */
-  bioseq_delete(bioseq_2, env);
-  bioseq_delete(bioseq_1, env);
+  bioseq_delete(bioseq_2);
+  bioseq_delete(bioseq_1);
 
   return had_err;
 }

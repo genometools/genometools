@@ -23,6 +23,6 @@
 /* (globally) align <u> and <v> in linear space (unit cost) and return one
    optimal Alignment */
 Alignment* linearalign(const char *u, unsigned long ulen,
-                       const char *v, unsigned long vlen, Env*);
+                       const char *v, unsigned long vlen);
 
 #endif

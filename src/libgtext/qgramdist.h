@@ -22,6 +22,6 @@
 
 /* returns the q-gram distance of two Seqs. The alphabets of the given Seqs have
    to be compatible */
-unsigned long qgramdist(Seq*, Seq*, unsigned int q, Env*);
+unsigned long qgramdist(Seq*, Seq*, unsigned int q);
 
 #endif

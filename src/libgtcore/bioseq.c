@@ -290,7 +290,7 @@ static Bioseq* bioseq_new_with_recreate(Str *sequence_file, bool recreate,
     had_err = bioseq_fill(bs, recreate, env);
   }
   if (had_err) {
-    bioseq_delete(bs, env);
+    bioseq_delete(bs);
     return NULL;
   }
   return bs;
@@ -323,35 +323,34 @@ Bioseq* bioseq_new_str(Str *sequence_file, Env *env)
   return bioseq_new_with_recreate(sequence_file, false, env);
 }
 
-static void determine_alpha_if_necessary(Bioseq *bs, Env *env)
+static void determine_alpha_if_necessary(Bioseq *bs)
 {
   assert(bs);
   if (!bs->alpha) {
     bs->alpha = alpha_guess(bioseq_get_raw_sequence(bs),
-                            bioseq_get_raw_sequence_length(bs), env);
+                            bioseq_get_raw_sequence_length(bs));
   }
 }
 
-Alpha* bioseq_get_alpha(Bioseq *bs, Env *env)
+Alpha* bioseq_get_alpha(Bioseq *bs)
 {
-  env_error_check(env);
   assert(bs);
-  determine_alpha_if_necessary(bs, env);
+  determine_alpha_if_necessary(bs);
   assert(bs->alpha);
   return bs->alpha;
 }
 
-Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx, Env *env)
+Seq* bioseq_get_seq(Bioseq *bs, unsigned long idx)
 {
   assert(bs);
   assert(idx < array_size(bs->descriptions));
   if (!bs->seqs)
     bs->seqs = ma_calloc(array_size(bs->descriptions), sizeof (Seq*));
-  determine_alpha_if_necessary(bs, env);
+  determine_alpha_if_necessary(bs);
   if (!bs->seqs[idx]) {
     bs->seqs[idx] = seq_new(bioseq_get_sequence(bs, idx),
                             bioseq_get_sequence_length(bs, idx),
-                            bs->alpha, env);
+                            bs->alpha);
     seq_set_description(bs->seqs[idx], bioseq_get_description(bs, idx));
   }
   return bs->seqs[idx];
@@ -397,14 +396,14 @@ unsigned long bioseq_number_of_sequences(Bioseq *bs)
   return array_size(bs->descriptions);
 }
 
-void bioseq_delete(Bioseq *bs, Env *env)
+void bioseq_delete(Bioseq *bs)
 {
   unsigned long i;
   if (!bs) return;
   str_delete(bs->sequence_file);
   if (bs->seqs) {
     for (i = 0; i < array_size(bs->descriptions); i++)
-      seq_delete(bs->seqs[i], env);
+      seq_delete(bs->seqs[i]);
     ma_free(bs->seqs);
   }
   for (i = 0; i < array_size(bs->descriptions); i++)
@@ -415,7 +414,7 @@ void bioseq_delete(Bioseq *bs, Env *env)
     ma_free(bs->raw_sequence);
   else
     fa_xmunmap(bs->raw_sequence);
-  alpha_delete(bs->alpha, env);
+  alpha_delete(bs->alpha);
   ma_free(bs);
 }
 
@@ -443,20 +442,19 @@ void bioseq_show_sequence_as_fasta(Bioseq *bs, unsigned long seqnum,
 
 }
 
-void bioseq_show_gc_content(Bioseq *bs, Env *env)
+void bioseq_show_gc_content(Bioseq *bs)
 {
   Alpha *dna_alpha;
-  env_error_check(env);
   assert(bs);
-  determine_alpha_if_necessary(bs, env);
-  dna_alpha = alpha_new_dna(env);
+  determine_alpha_if_necessary(bs);
+  dna_alpha = alpha_new_dna();
   if (alpha_is_compatible_with_alpha(bs->alpha, dna_alpha)) {
     printf("showing GC-content for sequence file \"%s\"\n",
            str_get(bs->sequence_file));
     gc_content_show(bioseq_get_raw_sequence(bs),
-                    bioseq_get_raw_sequence_length(bs), bs->alpha, env);
+                    bioseq_get_raw_sequence_length(bs), bs->alpha);
   }
-  alpha_delete(dna_alpha, env);
+  alpha_delete(dna_alpha);
 }
 
 void bioseq_show_stat(Bioseq *bs)

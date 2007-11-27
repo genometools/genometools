@@ -219,8 +219,8 @@ int gt_nussinov_rna_fold(int argc, const char **argv, Env *env)
   assert(parsed_args == 1);
 
   /* set DNA alphabet */
-  dna_alpha = alpha_new_dna(env);
-  energy_function = scorematrix_new(dna_alpha, env);
+  dna_alpha = alpha_new_dna();
+  energy_function = scorematrix_new(dna_alpha);
 
   /* init the energy function */
   for (i = 0; i < alpha_size(dna_alpha); i++) {
@@ -255,8 +255,8 @@ int gt_nussinov_rna_fold(int argc, const char **argv, Env *env)
 
   /* free */
   ma_free(rna_sequence);
-  scorematrix_delete(energy_function, env);
-  alpha_delete(dna_alpha, env);
+  scorematrix_delete(energy_function);
+  alpha_delete(dna_alpha);
 
   return had_err;
 }

@@ -21,7 +21,7 @@
 #include "libgtext/qgramdist.h"
 #include "libgtext/qgram.h"
 
-unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q, Env *env)
+unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q)
 {
   unsigned long i, alphasize_to_the_power_of_q, *seq_a_profile, *seq_b_profile,
                 dist = 0;
@@ -42,11 +42,11 @@ unsigned long qgramdist(Seq *seq_a, Seq *seq_b, unsigned int q, Env *env)
   seq_a_qgrams = array_new(sizeof (unsigned long));
   seq_b_qgrams = array_new(sizeof (unsigned long));
 
-  qgram_compute(seq_a_qgrams, seq_get_encoded(seq_a, env), seq_length(seq_a),
-                alpha_size(alpha_a), q, env);
+  qgram_compute(seq_a_qgrams, seq_get_encoded(seq_a), seq_length(seq_a),
+                alpha_size(alpha_a), q);
   assert(array_size(seq_a_qgrams) == seq_length(seq_a) - q + 1);
-  qgram_compute(seq_b_qgrams, seq_get_encoded(seq_b, env), seq_length(seq_b),
-                alpha_size(alpha_b), q, env);
+  qgram_compute(seq_b_qgrams, seq_get_encoded(seq_b), seq_length(seq_b),
+                alpha_size(alpha_b), q);
   assert(array_size(seq_b_qgrams) == seq_length(seq_b) - q + 1);
 
   for (i = 0; i < array_size(seq_a_qgrams); i++)

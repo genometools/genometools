@@ -29,7 +29,7 @@ struct Tokenizer {
   Str *token; /* the current token */
 };
 
-Tokenizer* tokenizer_new(IO *io, Env *env)
+Tokenizer* tokenizer_new(IO *io)
 {
   Tokenizer *t;
   assert(io);
@@ -44,7 +44,7 @@ void tokenizer_skip_comment_lines(Tokenizer *t)
   t->skip_comment_lines = true;
 }
 
-Str* tokenizer_get_token(Tokenizer *t, Env *env)
+Str* tokenizer_get_token(Tokenizer *t)
 {
   char c = EOF;
   assert(t);
@@ -82,12 +82,12 @@ Str* tokenizer_get_token(Tokenizer *t, Env *env)
   return NULL;
 }
 
-bool tokenizer_has_token(Tokenizer *t, Env *env)
+bool tokenizer_has_token(Tokenizer *t)
 {
   bool has_token = false;
   Str *token;
   assert(t);
-  token = tokenizer_get_token(t, env);
+  token = tokenizer_get_token(t);
   if (token) {
     has_token = true;
     str_delete(token);
@@ -101,7 +101,7 @@ bool tokenizer_line_start(const Tokenizer *t)
   return io_line_start(t->io);
 }
 
-void tokenizer_next_token(Tokenizer *t, Env *env)
+void tokenizer_next_token(Tokenizer *t)
 {
   assert(t);
   str_delete(t->token);
@@ -134,10 +134,10 @@ int tokenizer_unit_test(Env *env)
   tmpfp = fa_xtmpfile(str_get(tmpfilename));
   fprintf(tmpfp, "# comment line\n");
   fa_xfclose(tmpfp);
-  t = tokenizer_new(io_new(str_get(tmpfilename), "r", env), env);
+  t = tokenizer_new(io_new(str_get(tmpfilename), "r"));
   tokenizer_skip_comment_lines(t);
-  ensure(had_err, !tokenizer_has_token(t, env));
-  tokenizer_delete(t, env);
+  ensure(had_err, !tokenizer_has_token(t));
+  tokenizer_delete(t);
   xremove(str_get(tmpfilename));
 
   /* larger test */
@@ -146,45 +146,45 @@ int tokenizer_unit_test(Env *env)
   tmpfp = fa_xfopen(str_get(tmpfilename), "w");
   fprintf(tmpfp, " a bb ccc\ndddd -5");
   fa_xfclose(tmpfp);
-  t = tokenizer_new(io_new(str_get(tmpfilename), "r", env), env);
+  t = tokenizer_new(io_new(str_get(tmpfilename), "r"));
 
-  token = tokenizer_get_token(t, env);
+  token = tokenizer_get_token(t);
   ensure(had_err, !strcmp(str_get(token), "a"));
   str_delete(token);
 
-  tokenizer_next_token(t, env);
-  token = tokenizer_get_token(t, env);
+  tokenizer_next_token(t);
+  token = tokenizer_get_token(t);
   ensure(had_err, !strcmp(str_get(token), "bb"));
   str_delete(token);
 
-  tokenizer_next_token(t, env);
-  token = tokenizer_get_token(t, env);
+  tokenizer_next_token(t);
+  token = tokenizer_get_token(t);
   ensure(had_err, !strcmp(str_get(token), "ccc\n"));
   str_delete(token);
 
-  tokenizer_next_token(t, env);
-  token = tokenizer_get_token(t, env);
+  tokenizer_next_token(t);
+  token = tokenizer_get_token(t);
   ensure(had_err, !strcmp(str_get(token), "dddd"));
   str_delete(token);
 
-  tokenizer_next_token(t, env);
-  token = tokenizer_get_token(t, env);
+  tokenizer_next_token(t);
+  token = tokenizer_get_token(t);
   ensure(had_err, !strcmp(str_get(token), "-5"));
   str_delete(token);
 
-  tokenizer_next_token(t, env);
-  ensure(had_err, !tokenizer_has_token(t, env));
-  tokenizer_delete(t, env);
+  tokenizer_next_token(t);
+  ensure(had_err, !tokenizer_has_token(t));
+  tokenizer_delete(t);
   xremove(str_get(tmpfilename));
   str_delete(tmpfilename);
 
   return had_err;
 }
 
-void tokenizer_delete(Tokenizer *t, Env *env)
+void tokenizer_delete(Tokenizer *t)
 {
   if (!t) return;
-  io_delete(t->io, env);
+  io_delete(t->io);
   str_delete(t->token);
   ma_free(t);
 }

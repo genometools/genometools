@@ -29,7 +29,7 @@ struct Seq {
   Alpha *seqalpha;
 };
 
-Seq* seq_new(const char *seq, unsigned long seqlen, Alpha *seqalpha, Env *env)
+Seq* seq_new(const char *seq, unsigned long seqlen, Alpha *seqalpha)
 {
   Seq *s;
   assert(seq && seqalpha);
@@ -40,9 +40,9 @@ Seq* seq_new(const char *seq, unsigned long seqlen, Alpha *seqalpha, Env *env)
   return s;
 }
 
-Seq* seq_new_own(char* seq, unsigned long seqlen, Alpha *seqalpha, Env *env)
+Seq* seq_new_own(char* seq, unsigned long seqlen, Alpha *seqalpha)
 {
-  Seq *s = seq_new(seq, seqlen, seqalpha, env);
+  Seq *s = seq_new(seq, seqlen, seqalpha);
   s->own_seq = true;
   return s;
 }
@@ -53,7 +53,7 @@ void seq_set_description(Seq *s, const char *desc)
   s->description = (char*) desc;
 }
 
-void seq_set_description_own(Seq *s, char *desc, Env *env)
+void seq_set_description_own(Seq *s, char *desc)
 {
   assert(s);
   if (s->description && s->own_description)
@@ -74,7 +74,7 @@ const char* seq_get_orig(const Seq *s)
   return s->seq;
 }
 
-const char* seq_get_encoded(Seq *s, Env *env)
+const char* seq_get_encoded(Seq *s)
 {
   assert(s);
   if (!s->encoded_seq) {
@@ -97,7 +97,7 @@ unsigned long seq_length(const Seq *s)
   return s->seqlen;
 }
 
-void seq_delete(Seq *s, Env *env)
+void seq_delete(Seq *s)
 {
   if (!s) return;
   if (s->own_seq)
@@ -105,6 +105,6 @@ void seq_delete(Seq *s, Env *env)
   if (s->own_description)
     ma_free(s->description);
   ma_free(s->encoded_seq);
-  alpha_delete(s->seqalpha, env);
+  alpha_delete(s->seqalpha);
   ma_free(s);
 }

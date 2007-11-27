@@ -148,7 +148,7 @@ int gt_bioseq(int argc, const char **argv, Env *env)
     }
 
     if (!had_err && arguments.gc_content)
-      bioseq_show_gc_content(bioseq, env);
+      bioseq_show_gc_content(bioseq);
 
     if (!had_err && arguments.stat)
       bioseq_show_stat(bioseq);
@@ -157,7 +157,7 @@ int gt_bioseq(int argc, const char **argv, Env *env)
       bioseq_show_seqlengthdistri(bioseq, env);
 
     /* free */
-    bioseq_delete(bioseq, env);
+    bioseq_delete(bioseq);
 
     parsed_args++;
   }

@@ -24,13 +24,11 @@
 
 #define MUTATED_DESC_PRIMER " [mutated with rate "
 
-static char* mutate_description(const char *description, unsigned int rate,
-                                Env *env)
+static char* mutate_description(const char *description, unsigned int rate)
 {
   unsigned long mutated_description_len;
   char *mutated_description;
   int rval;
-  env_error_check(env);
   assert(description);
   assert(rate <= 100);
   mutated_description_len = strlen(description) + strlen(MUTATED_DESC_PRIMER)
@@ -51,14 +49,13 @@ static char random_character(Alpha *alpha)
 }
 
 static char* mutate_seq(const char *seq, unsigned long len, Alpha *alpha,
-                        unsigned int rate, Env *env)
+                        unsigned int rate)
 {
   unsigned long i, j, allocated, substitution_events = 0, insertion_events = 0,
                 deletion_events = 0, total_events = 0;
   unsigned int cc;
   double rand_prob, mutate_prob;
   char *mutated_seq;
-  env_error_check(env);
   assert(seq && alpha);
   assert(rate <= 100);
   mutate_prob = (double) rate / 100.0;
@@ -98,16 +95,15 @@ static char* mutate_seq(const char *seq, unsigned long len, Alpha *alpha,
 }
 
 Seq* mutate(const char *description, const char *orig_seq, unsigned long len,
-            Alpha *alpha, unsigned int rate, Env *env)
+            Alpha *alpha, unsigned int rate)
 {
   char *mutated_description, *mutated_seq;
   Seq *seq;
-  env_error_check(env);
   assert(description && orig_seq && alpha);
   assert(rate <= 100);
-  mutated_description = mutate_description(description, rate, env);
-  mutated_seq = mutate_seq(orig_seq, len, alpha, rate, env);
-  seq = seq_new_own(mutated_seq, strlen(mutated_seq), alpha, env);
-  seq_set_description_own(seq, mutated_description, env);
+  mutated_description = mutate_description(description, rate);
+  mutated_seq = mutate_seq(orig_seq, len, alpha, rate);
+  seq = seq_new_own(mutated_seq, strlen(mutated_seq), alpha);
+  seq_set_description_own(seq, mutated_description);
   return seq;
 }

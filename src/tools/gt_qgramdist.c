@@ -84,9 +84,9 @@ int gt_qgramdist(int argc, const char **argv, Env *env)
     /* compute q-gram distance for all sequence combinations */
     for (i = 0; i < bioseq_number_of_sequences(bioseq_1); i++) {
       for (j = 0; j < bioseq_number_of_sequences(bioseq_2); j++) {
-        seq_1 = bioseq_get_seq(bioseq_1, i, env);
-        seq_2 = bioseq_get_seq(bioseq_2, j, env);
-        dist = qgramdist(seq_1, seq_2, q, env);
+        seq_1 = bioseq_get_seq(bioseq_1, i);
+        seq_2 = bioseq_get_seq(bioseq_2, j);
+        dist = qgramdist(seq_1, seq_2, q);
         printf("qgramdist_%u_(", q);
         cstr_show(seq_get_orig(seq_1), seq_length(seq_1), stdout);
         xputchar(',');
@@ -97,8 +97,8 @@ int gt_qgramdist(int argc, const char **argv, Env *env)
   }
 
   /* free */
-  bioseq_delete(bioseq_2, env);
-  bioseq_delete(bioseq_1, env);
+  bioseq_delete(bioseq_2);
+  bioseq_delete(bioseq_1);
 
   return had_err;
 }

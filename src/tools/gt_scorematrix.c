@@ -47,12 +47,12 @@ int gt_scorematrix(int argc, const char **argv, Env *env)
   }
   assert(parsed_args == 1);
 
-  sm = scorematrix_read_protein(argv[1], env);
+  sm = scorematrix_read_protein(argv[1], env_error(env));
   if (!sm)
     had_err = -1;
   if (!had_err)
     scorematrix_show(sm, stdout);
-  scorematrix_delete(sm, env);
+  scorematrix_delete(sm);
 
   return had_err;
 }

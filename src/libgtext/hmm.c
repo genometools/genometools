@@ -626,7 +626,7 @@ int hmm_unit_test(Env *env)
   }
 
   ma_free(encoded_seq);
-  alpha_delete(alpha, env);
+  alpha_delete(alpha);
   ensure(had_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
   ensure(had_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
   hmm_delete(loaded_hmm, env);
@@ -659,7 +659,7 @@ int hmm_unit_test(Env *env)
   }
 
   ma_free(encoded_seq);
-  alpha_delete(alpha, env);
+  alpha_delete(alpha);
   ensure(had_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
   ensure(had_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
   hmm_delete(loaded_hmm, env);

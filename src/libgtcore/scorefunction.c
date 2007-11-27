@@ -27,7 +27,7 @@ struct ScoreFunction {
 };
 
 ScoreFunction* scorefunction_new(ScoreMatrix *sm, int deletion_score,
-                                 int insertion_score, Env *env)
+                                 int insertion_score)
 {
   ScoreFunction *sf;
   assert(sm);
@@ -57,9 +57,9 @@ int scorefunction_get_insertion_score(const ScoreFunction *s)
   return s->insertion_score;
 }
 
-void scorefunction_delete(ScoreFunction *sf, Env *env)
+void scorefunction_delete(ScoreFunction *sf)
 {
   if (!sf) return;
-  scorematrix_delete(sf->sm, env);
+  scorematrix_delete(sf->sm);
   ma_free(sf);
 }

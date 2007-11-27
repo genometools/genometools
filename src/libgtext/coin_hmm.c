@@ -64,7 +64,7 @@ HMM* coin_hmm_fair(Env *env)
 
 Alpha* coin_hmm_alpha(Env *env)
 {
-  Alpha *a = alpha_new(env);
+  Alpha *a = alpha_new();
   alpha_add_mapping(a, "Hh");
   alpha_add_mapping(a, "Tt");
   assert(alpha_size(a) == 2);

@@ -47,7 +47,7 @@ typedef struct {
 /* XXX: possible improvement to save memory: combine both parts into a single
         variable (use bit shifting operations) */
 
-Alignment* alignment_new(Env *env)
+Alignment* alignment_new(void)
 {
   Alignment *a;
   a = ma_calloc(1, sizeof (Alignment));
@@ -56,11 +56,11 @@ Alignment* alignment_new(Env *env)
 }
 
 Alignment* alignment_new_with_seqs(const char *u, unsigned long ulen,
-                                   const char *v, unsigned long vlen, Env *env)
+                                   const char *v, unsigned long vlen)
 {
   Alignment *a;
   assert(u && v);
-  a = alignment_new(env);
+  a = alignment_new();
   alignment_set_seqs(a, u, ulen, v, vlen);
   return a;
 }
@@ -75,7 +75,7 @@ void alignment_set_seqs(Alignment *a, const char *u, unsigned long ulen,
   a->vlen = vlen;
 }
 
-static void alignment_add_eop(Alignment *a, Eoptype type, Env *env)
+static void alignment_add_eop(Alignment *a, Eoptype type)
 {
   Multieop meop, *meop_ptr;
   assert(a);
@@ -96,19 +96,19 @@ static void alignment_add_eop(Alignment *a, Eoptype type, Env *env)
   }
 }
 
-void alignment_add_replacement(Alignment *a, Env *env)
+void alignment_add_replacement(Alignment *a)
 {
-  alignment_add_eop(a, Replacement, env);
+  alignment_add_eop(a, Replacement);
 }
 
-void alignment_add_deletion(Alignment *a, Env *env)
+void alignment_add_deletion(Alignment *a)
 {
-  alignment_add_eop(a, Deletion, env);
+  alignment_add_eop(a, Deletion);
 }
 
-void alignment_add_insertion(Alignment *a, Env *env)
+void alignment_add_insertion(Alignment *a)
 {
-  alignment_add_eop(a, Insertion, env);
+  alignment_add_eop(a, Insertion);
 }
 
 void alignment_remove_last(Alignment *a)
@@ -295,35 +295,35 @@ int alignment_unit_test(Env *env)
      agaaagaggta-agaggga
   */
 
-  a = alignment_new_with_seqs(u, strlen(u), v, strlen(v), env);
-  alignment_add_replacement(a, env);
-  alignment_add_replacement(a, env);
-  alignment_add_replacement(a, env);
-  alignment_add_insertion(a, env);
-  alignment_add_replacement(a, env);
-  alignment_add_replacement(a, env);
-  alignment_add_replacement(a, env);
-  alignment_add_deletion(a, env);
-  alignment_add_replacement(a, env);
-  alignment_add_replacement(a, env);
-  alignment_add_insertion(a, env);
-  alignment_add_insertion(a, env);
-  alignment_add_replacement(a, env);
-  alignment_add_replacement(a, env);
-  alignment_add_replacement(a, env);
-  alignment_add_replacement(a, env);
-  alignment_add_replacement(a, env);
-  alignment_add_replacement(a, env);
-  alignment_add_replacement(a, env);
+  a = alignment_new_with_seqs(u, strlen(u), v, strlen(v));
+  alignment_add_replacement(a);
+  alignment_add_replacement(a);
+  alignment_add_replacement(a);
+  alignment_add_insertion(a);
+  alignment_add_replacement(a);
+  alignment_add_replacement(a);
+  alignment_add_replacement(a);
+  alignment_add_deletion(a);
+  alignment_add_replacement(a);
+  alignment_add_replacement(a);
+  alignment_add_insertion(a);
+  alignment_add_insertion(a);
+  alignment_add_replacement(a);
+  alignment_add_replacement(a);
+  alignment_add_replacement(a);
+  alignment_add_replacement(a);
+  alignment_add_replacement(a);
+  alignment_add_replacement(a);
+  alignment_add_replacement(a);
 
   ensure(had_err, alignment_eval(a) == 10);
 
-  alignment_delete(a, env);
+  alignment_delete(a);
 
   return had_err;
 }
 
-void alignment_delete(Alignment *a, Env *env)
+void alignment_delete(Alignment *a)
 {
   if (!a) return;
   array_delete(a->eops);

@@ -89,17 +89,17 @@ int gt_affinealign(int argc, const char **argv, Env *env)
                         bioseq_get_sequence(bioseq_2, j),
                         bioseq_get_sequence_length(bioseq_2, j),
                         costs.replacement_cost, costs.gap_opening_cost,
-                        costs.gap_extension_cost, env);
+                        costs.gap_extension_cost);
         alignment_show(a, stdout);
         xputchar('\n');
-        alignment_delete(a, env);
+        alignment_delete(a);
       }
     }
   }
 
   /* free */
-  bioseq_delete(bioseq_2, env);
-  bioseq_delete(bioseq_1, env);
+  bioseq_delete(bioseq_2);
+  bioseq_delete(bioseq_1);
 
   return had_err;
 }

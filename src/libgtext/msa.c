@@ -58,7 +58,7 @@ MSA* msa_new(const char *MSA_filename, Env *env)
     }
   }
   if (had_err) {
-    msa_delete(msa, env);
+    msa_delete(msa);
     return NULL;
   }
   return msa;
@@ -172,9 +172,9 @@ void msa_show(MSA *msa)
   bioseq_show_as_fasta(msa->bs, 0);
 }
 
-void msa_delete(MSA *msa, Env *env)
+void msa_delete(MSA *msa)
 {
   if (!msa) return;
-  bioseq_delete(msa->bs, env);
+  bioseq_delete(msa->bs);
   ma_free(msa);
 }

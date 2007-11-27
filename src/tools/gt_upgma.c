@@ -93,7 +93,7 @@ int gt_upgma(int argc, const char **argv, Env *env)
   if (!had_err)
     upgma_show_tree(upgma, stdout);
 
-  bioseq_delete(bioseq, env);
+  bioseq_delete(bioseq);
   upgma_delete(upgma, env);
 
   return had_err;

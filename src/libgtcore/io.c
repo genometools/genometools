@@ -29,7 +29,7 @@ struct IO {
   bool line_start;
 };
 
-IO* io_new(const char *path, const char *mode, Env *env)
+IO* io_new(const char *path, const char *mode)
 {
   IO *io;
   assert(path && mode);
@@ -83,7 +83,7 @@ const char* io_get_filename(const IO *io)
   return io->path;
 }
 
-void io_delete(IO *io, Env *env)
+void io_delete(IO *io)
 {
   if (!io) return;
   fa_xfclose(io->fp);
