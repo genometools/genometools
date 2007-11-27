@@ -1196,7 +1196,7 @@ static void binpreparenextrange(const Encodedsequence *encseq,
     endpos0 = 0;
   } else
   {
-     endpos0 = accessendspecialsubsUint(encseq,pagenum-1);
+    endpos0 = accessendspecialsubsUint(encseq,pagenum-1);
   }
   esr->firstcell = endpos0;
   esr->lastcell = endpos1 = accessendspecialsubsUint(encseq,pagenum);
@@ -1243,6 +1243,24 @@ static void binpreparenextrange(const Encodedsequence *encseq,
         }
         endpos0 = cellnum+1;
       }
+    }
+  }
+  if (moveforward && !found && pagenum > 0)
+  {
+    if (pagenum == 1)
+    {
+      endpos0 = 0;
+    } else
+    {
+      endpos0 = accessendspecialsubsUint(encseq,pagenum-2);
+    }
+    endpos1 = accessendspecialsubsUint(encseq,pagenum-1);
+    if(endpos0 < endpos1)
+    {
+      esr->firstcell = endpos1-1;
+      esr->lastcell = endpos1;
+      pagenum--;
+      found = true;
     }
   }
 #ifdef DEBUG
@@ -1409,41 +1427,41 @@ static Uchar seqdelivercharSpecial(const Encodedsequence *encseq,
 #endif
   if (esr->hasprevious)
   {
-  if (ISDIRREVERSE(esr->readmode))
-  {
-    if (pos < esr->previousrange.rightpos)
-    {
-      if (pos >= esr->previousrange.leftpos)
-      {
-        if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
-        {
-          return (Uchar) SEPARATOR;
-        }
-        return (Uchar) WILDCARD;
-      }
-      if (esr->hasrange)
-      {
-        advanceEncodedseqstate(encseq,esr,false);
-      }
-    }
-  } else
-  {
-    if (pos >= esr->previousrange.leftpos)
+    if (ISDIRREVERSE(esr->readmode))
     {
       if (pos < esr->previousrange.rightpos)
       {
-        if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
-        {
-          return (Uchar) SEPARATOR;
-        }
-        return (Uchar) WILDCARD;
+	if (pos >= esr->previousrange.leftpos)
+	{
+	  if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+	  {
+	    return (Uchar) SEPARATOR;
+	  }
+	  return (Uchar) WILDCARD;
+	}
+	if (esr->hasrange)
+	{
+	  advanceEncodedseqstate(encseq,esr,false);
+	}
       }
-      if (esr->hasrange)
+    } else
+    {
+      if (pos >= esr->previousrange.leftpos)
       {
-        advanceEncodedseqstate(encseq,esr,true);
+	if (pos < esr->previousrange.rightpos)
+	{
+	  if (EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos))
+	  {
+	    return (Uchar) SEPARATOR;
+	  }
+	  return (Uchar) WILDCARD;
+	}
+	if (esr->hasrange)
+	{
+	  advanceEncodedseqstate(encseq,esr,true);
+	}
       }
     }
-  }
   }
   return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }

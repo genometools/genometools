@@ -29,7 +29,6 @@
 
 #define REVERSEPOS(TOT,POS) ((TOT) - 1 - (POS))
 
-#ifdef DEBUG
 #define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)\
         {\
           Uchar cctmp = getencodedchar(ENCSEQ,POS,READMODE);\
@@ -42,9 +41,11 @@
             exit(EXIT_FAILURE);\
           }\
         }
+/*
 #else
-#define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE) /* Nothing */
+#define CHECKENCCHAR(CC,ENCSEQ,POS,READMODE)
 #endif
+*/
 
 typedef struct
 {

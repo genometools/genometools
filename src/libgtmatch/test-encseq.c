@@ -53,7 +53,8 @@ static int testscanatpos(const Encodedsequence *encseq,
       {
         env_error_set(env,"startpos = " FormatSeqpos
                           " access=%s, mode=%s: position=" FormatSeqpos
-                          ": random access = %u != %u = sequential read",
+                          ": random access (correct) = %u != %u = "
+                          " sequential read (wrong)",
                           startpos,
                           encseqaccessname(encseq),
                           showreadmode(readmode),
