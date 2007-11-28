@@ -29,6 +29,6 @@ const GenomeVisitorClass* extractfeat_visitor_class(void);
 /* takes ownership of <rm> */
 GenomeVisitor*            extractfeat_visitor_new(RegionMapping *rm,
                                                   GenomeFeatureType, bool join,
-                                                  bool translate, Env*);
+                                                  bool translate);
 
 #endif

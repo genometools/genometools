@@ -93,25 +93,26 @@ int gt_chseqids(int argc, const char **argv, Env *env)
   /* create the streams */
   gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args + 1],
                                              arguments.verbose &&
-                                             arguments.outfp, env);
+                                             arguments.outfp);
   chseqids = str_new_cstr(argv[parsed_args]);
-  if (!(chseqids_stream = chseqids_stream_new(gff3_in_stream, chseqids, env)))
+  if (!(chseqids_stream = chseqids_stream_new(gff3_in_stream, chseqids,
+                                              env_error(env)))) {
     had_err = -1;
+  }
   str_delete(chseqids);
   if (!had_err) {
     if (arguments.sort) {
-      sort_stream = sort_stream_new(chseqids_stream, env);
-      gff3_out_stream = gff3_out_stream_new(sort_stream, arguments.outfp, env);
+      sort_stream = sort_stream_new(chseqids_stream);
+      gff3_out_stream = gff3_out_stream_new(sort_stream, arguments.outfp);
     }
     else
-      gff3_out_stream = gff3_out_stream_new(chseqids_stream, arguments.outfp,
-                                            env);
+      gff3_out_stream = gff3_out_stream_new(chseqids_stream, arguments.outfp);
   }
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err) {
-    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
-           gn) {
+    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn,
+                                               env_error(env))) && gn) {
       genome_node_rec_delete(gn);
     }
   }

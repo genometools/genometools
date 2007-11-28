@@ -59,8 +59,8 @@ static void proc_gt_env_options(Env *env)
   if (!env_options)
     return;
   env_options = cstr_dup(env_options); /* make writeable copy */
-  splitter = splitter_new(env);
-  splitter_split(splitter, env_options, strlen(env_options), ' ', env);
+  splitter = splitter_new();
+  splitter_split(splitter, env_options, strlen(env_options), ' ');
   argc = splitter_size(splitter);
   argv = cstr_array_preprend((const char**) splitter_get_tokens(splitter),
                              "env", env);
@@ -76,7 +76,7 @@ static void proc_gt_env_options(Env *env)
     case OPTIONPARSER_REQUESTS_EXIT: break;
   }
   ma_free(env_options);
-  splitter_delete(splitter, env);
+  splitter_delete(splitter);
   cstr_array_delete(argv, env);
 }
 

@@ -30,27 +30,27 @@ struct CSAStream {
 #define csa_stream_cast(GS)\
         genome_stream_cast(csa_stream_class(), GS)
 
-int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
+int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
 {
   CSAStream *cs;
   int had_err;
-  env_error_check(env);
+  error_check(e);
   cs = csa_stream_cast(gs);
 
   /* we have still nodes in the buffer */
   if (csa_visitor_node_buffer_size(cs->csa_visitor)) {
-    *gn = csa_visitor_get_node(cs->csa_visitor, env); /* return one of them */
+    *gn = csa_visitor_get_node(cs->csa_visitor); /* return one of them */
     return 0;
   }
 
   /* no nodes in the buffer -> get new nodes */
-  while (!(had_err = genome_stream_next_tree(cs->in_stream, gn, env)) && *gn) {
+  while (!(had_err = genome_stream_next_tree(cs->in_stream, gn, e)) && *gn) {
     assert(*gn && !had_err);
-    had_err = genome_node_accept(*gn, cs->csa_visitor, env);
+    had_err = genome_node_accept(*gn, cs->csa_visitor, e);
     if (had_err)
       break;
     if (csa_visitor_node_buffer_size(cs->csa_visitor)) {
-      *gn = csa_visitor_get_node(cs->csa_visitor, env);
+      *gn = csa_visitor_get_node(cs->csa_visitor);
       return 0;
     }
   }
@@ -60,9 +60,9 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
 
   /* if we have no error, process the last cluster */
   if (!had_err) {
-    csa_visitor_process_cluster(cs->csa_visitor, true, env);
+    csa_visitor_process_cluster(cs->csa_visitor, true);
     if (csa_visitor_node_buffer_size(cs->csa_visitor)) {
-      *gn = csa_visitor_get_node(cs->csa_visitor, env);
+      *gn = csa_visitor_get_node(cs->csa_visitor);
       return 0;
     }
   }
@@ -83,14 +83,12 @@ const GenomeStreamClass* csa_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* csa_stream_new(GenomeStream *in_stream, unsigned long join_length,
-                             Env *env)
+GenomeStream* csa_stream_new(GenomeStream *in_stream, unsigned long join_length)
 {
   GenomeStream *gs = genome_stream_create(csa_stream_class(),
-                                          genome_stream_is_sorted(in_stream),
-                                          env);
+                                          genome_stream_is_sorted(in_stream));
   CSAStream *cs = csa_stream_cast(gs);
   cs->in_stream = in_stream;
-  cs->csa_visitor = csa_visitor_new(join_length, env);
+  cs->csa_visitor = csa_visitor_new(join_length);
   return gs;
 }

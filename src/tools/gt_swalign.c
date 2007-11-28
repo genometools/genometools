@@ -68,11 +68,11 @@ int gt_swalign(int argc, const char **argv, Env *env)
   scorematrix  = scorematrix_read_protein(argv[parsed_args], env_error(env));
   if (scorematrix) {
     scorefunction = scorefunction_new(scorematrix, indelscore, indelscore);
-    bioseq_1 = bioseq_new(argv[parsed_args+1], env);
+    bioseq_1 = bioseq_new(argv[parsed_args+1], env_error(env));
     if (!bioseq_1)
       had_err = -1;
     if (!had_err) {
-      bioseq_2 = bioseq_new(argv[parsed_args+2], env);
+      bioseq_2 = bioseq_new(argv[parsed_args+2], env_error(env));
       if (!bioseq_2)
         had_err = -1;
     }

@@ -78,7 +78,7 @@ int gt_msaparse(int argc, const char **argv, Env *env)
 
   if (!had_err) {
     /* multiple sequence alignment construction */
-    msa = msa_new(argv[parsed_args], env);
+    msa = msa_new(argv[parsed_args], env_error(env));
     if (!msa)
       had_err = -1;
   }

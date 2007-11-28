@@ -56,12 +56,12 @@ static Range comment_get_range(/*@unused@*/ GenomeNode *gn)
   return range;
 }
 
-static int comment_accept(GenomeNode *gn, GenomeVisitor *gv, Env *env)
+static int comment_accept(GenomeNode *gn, GenomeVisitor *gv, Error *e)
 {
   Comment *c;
-  env_error_check(env);
+  error_check(e);
   c = comment_cast(gn);
-  return genome_visitor_visit_comment(gv, c, env);
+  return genome_visitor_visit_comment(gv, c, e);
 }
 
 const GenomeNodeClass* comment_class()

@@ -49,23 +49,23 @@ static void stat_visitor_free(GenomeVisitor *gv)
   discdistri_delete(stat_visitor->intron_length_distribution);
 }
 
-static int add_exon_number(GenomeNode *gn, void *data, Env *env)
+static int add_exon_number(GenomeNode *gn, void *data, Error *e)
 {
   StatVisitor *stat_visitor = (StatVisitor*) data;
   GenomeFeature *gf = (GenomeFeature*) gn;
-  env_error_check(env);
+  error_check(e);
   assert(stat_visitor && gf);
   if (genome_feature_get_type(gf) == gft_exon)
     stat_visitor->exon_number_for_distri++;
   return 0;
 }
 
-static int compute_statistics(GenomeNode *gn, void *data, Env *env)
+static int compute_statistics(GenomeNode *gn, void *data, Error *e)
 {
   StatVisitor *stat_visitor;
   GenomeFeature *gf;
   int rval;
-  env_error_check(env);
+  error_check(e);
   assert(data);
   stat_visitor = (StatVisitor*) data;
   gf = (GenomeFeature*) gn;
@@ -105,7 +105,7 @@ static int compute_statistics(GenomeNode *gn, void *data, Env *env)
   if (stat_visitor->exon_number_distribution) {
     stat_visitor->exon_number_for_distri = 0;
     rval = genome_node_traverse_direct_children(gn, stat_visitor,
-                                                add_exon_number, env);
+                                                add_exon_number, e);
     assert(!rval); /* add_exon_number() is sane */
     if (stat_visitor->exon_number_for_distri) {
       discdistri_add(stat_visitor->exon_number_distribution,
@@ -116,20 +116,20 @@ static int compute_statistics(GenomeNode *gn, void *data, Env *env)
 }
 
 static int stat_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                       Env *env)
+                                       Error *e)
 {
   StatVisitor *stat_visitor;
-  env_error_check(env);
+  error_check(e);
   stat_visitor = stat_visitor_cast(gv);
   return genome_node_traverse_children((GenomeNode*) gf, stat_visitor,
-                                       compute_statistics, false, env);
+                                       compute_statistics, false, e);
 }
 
 static int stat_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
-                                        Env *env)
+                                        Error *e)
 {
   StatVisitor *stat_visitor;
-  env_error_check(env);
+  error_check(e);
   stat_visitor = stat_visitor_cast(gv);
   stat_visitor->number_of_sequence_regions++;
   stat_visitor->total_length_of_sequence_regions +=
@@ -151,9 +151,9 @@ GenomeVisitor* stat_visitor_new(bool gene_length_distri,
                                 bool gene_score_distri,
                                 bool exon_length_distri,
                                 bool exon_number_distri,
-                                bool intron_length_distri, Env *env)
+                                bool intron_length_distri)
 {
-  GenomeVisitor *gv = genome_visitor_create(stat_visitor_class(), env);
+  GenomeVisitor *gv = genome_visitor_create(stat_visitor_class());
   StatVisitor *stat_visitor = stat_visitor_cast(gv);
   if (gene_length_distri)
     stat_visitor->gene_length_distribution = discdistri_new();
@@ -168,7 +168,7 @@ GenomeVisitor* stat_visitor_new(bool gene_length_distri,
   return gv;
 }
 
-void stat_visitor_show_stats(GenomeVisitor *gv, Env *env)
+void stat_visitor_show_stats(GenomeVisitor *gv)
 {
   StatVisitor *stat_visitor = stat_visitor_cast(gv);
   if (stat_visitor->number_of_sequence_regions) {

@@ -26,10 +26,11 @@ typedef struct GenomeVisitor GenomeVisitor;
 #include "libgtext/genome_feature.h"
 #include "libgtext/sequence_region.h"
 
-int  genome_visitor_visit_comment(GenomeVisitor*, Comment*, Env*);
-int  genome_visitor_visit_genome_feature(GenomeVisitor*, GenomeFeature*, Env*);
+int  genome_visitor_visit_comment(GenomeVisitor*, Comment*, Error*);
+int  genome_visitor_visit_genome_feature(GenomeVisitor*, GenomeFeature*,
+                                         Error*);
 int  genome_visitor_visit_sequence_region(GenomeVisitor*, SequenceRegion*,
-                                          Env*);
+                                          Error*);
 void genome_visitor_delete(GenomeVisitor *gv);
 
 #endif

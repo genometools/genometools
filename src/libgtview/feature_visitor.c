@@ -37,20 +37,20 @@ static void feature_visitor_free(GenomeVisitor *gv)
 }
 
 static int feature_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                          Env *env)
+                                          Error *e)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
-  env_error_check(env);
-  feature_index_add_genome_feature(v->feature_index, gf, env);
+  error_check(e);
+  feature_index_add_genome_feature(v->feature_index, gf);
   return 0;
 }
 
 static int feature_visitor_sequence_region(GenomeVisitor *gv,
-                                           SequenceRegion *sr, Env *env)
+                                           SequenceRegion *sr, Error *e)
 {
   FeatureVisitor *v = feature_visitor_cast(gv);
-  env_error_check(env);
-  feature_index_add_sequence_region(v->feature_index, sr, env);
+  error_check(e);
+  feature_index_add_sequence_region(v->feature_index, sr);
   return 0;
 }
 
@@ -64,13 +64,12 @@ const GenomeVisitorClass* feature_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* feature_visitor_new(FeatureIndex *fi, Env *env)
+GenomeVisitor* feature_visitor_new(FeatureIndex *fi)
 {
   GenomeVisitor *gv;
   FeatureVisitor *feature_visitor;
-  env_error_check(env);
   assert(fi != NULL);
-  gv = genome_visitor_create(feature_visitor_class(), env);
+  gv = genome_visitor_create(feature_visitor_class());
   feature_visitor = feature_visitor_cast(gv);
   feature_visitor->feature_index = feature_index_ref(fi);
   assert(feature_visitor != NULL);

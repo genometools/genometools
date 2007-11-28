@@ -35,9 +35,9 @@ typedef struct Mapping Mapping;
 Mapping* mapping_new(Str *mapping_file, const char *global_name,
                      MappingType type, Error*);
 /* map <input> to string, returns NULL on error */
-Str*     mapping_map_string(Mapping*, const char *input, Env*);
+Str*     mapping_map_string(Mapping*, const char *input, Error*);
 /* map <input> to integer <output>, returns -1 on error */
-int      mapping_map_integer(Mapping*, long *output, const char *input, Env*);
+int      mapping_map_integer(Mapping*, long *output, const char *input, Error*);
 void     mapping_delete(Mapping*);
 
 #endif

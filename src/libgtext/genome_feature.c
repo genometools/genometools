@@ -99,12 +99,12 @@ static void genome_feature_set_phase(GenomeNode *gn, Phase phase)
   gf->phase = phase;
 }
 
-static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, Env *env)
+static int genome_feature_accept(GenomeNode *gn, GenomeVisitor *gv, Error *e)
 {
   GenomeFeature *gf;
-  env_error_check(env);
+  error_check(e);
   gf = genome_feature_cast(gn);
-  return genome_visitor_visit_genome_feature(gv, gf, env);
+  return genome_visitor_visit_genome_feature(gv, gf, e);
 }
 
 const GenomeNodeClass* genome_feature_class()
@@ -283,11 +283,11 @@ Phase genome_feature_get_phase(GenomeFeature *gf)
   return gf->phase;
 }
 
-static int save_exon(GenomeNode *gn, void *data, Env *env)
+static int save_exon(GenomeNode *gn, void *data, Error *e)
 {
   GenomeFeature *gf;
   Array *exon_features = (Array*) data;
-  env_error_check(env);
+  error_check(e);
   gf = (GenomeFeature*) gn;
   assert(gf && exon_features);
   if (genome_feature_get_type(gf) == gft_exon) {
@@ -296,20 +296,20 @@ static int save_exon(GenomeNode *gn, void *data, Env *env)
   return 0;
 }
 
-void genome_feature_get_exons(GenomeFeature *gf, Array *exon_features, Env *env)
+void genome_feature_get_exons(GenomeFeature *gf, Array *exon_features)
 {
   int had_err;
   assert(gf && exon_features && !array_size(exon_features));
   had_err = genome_node_traverse_children((GenomeNode*) gf, exon_features,
-                                          save_exon, false, env);
+                                          save_exon, false, NULL);
   assert(!had_err); /* cannot happen, because save_exon() is sane */
 }
 
-static int save_exons_and_cds(GenomeNode *gn, void *data, Env *env)
+static int save_exons_and_cds(GenomeNode *gn, void *data, Error *e)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
   GenomeFeature *gf;
-  env_error_check(env);
+  error_check(e);
   gf = (GenomeFeature*) gn;
   assert(gf && info);
   if (genome_feature_get_type(gf) == gft_exon)
@@ -342,18 +342,18 @@ static void set_transcript_types(Array *features)
   }
 }
 
-static int determine_transcripttypes(GenomeNode *gn, void *data, Env *env)
+static int determine_transcripttypes(GenomeNode *gn, void *data, Error *e)
 {
   SaveExonAndCDSInfo *info = (SaveExonAndCDSInfo*) data;
   int had_err;
-  env_error_check(env);
+  error_check(e);
   assert(gn && info);
   /* reset exon_features and cds_features */
   array_reset(info->exon_features);
   array_reset(info->cds_features);
   /* collect all direct children exons */
   had_err = genome_node_traverse_direct_children(gn, info, save_exons_and_cds,
-                                                 env);
+                                                 NULL);
   assert(!had_err); /* cannot happen, because save_exon() is sane */
   /* set transcript feature type, if necessary */
   set_transcript_types(info->exon_features);
@@ -361,7 +361,7 @@ static int determine_transcripttypes(GenomeNode *gn, void *data, Env *env)
   return 0;
 }
 
-void genome_feature_determine_transcripttypes(GenomeFeature *gf, Env *env)
+void genome_feature_determine_transcripttypes(GenomeFeature *gf)
 {
   SaveExonAndCDSInfo info;
   int had_err;
@@ -370,7 +370,7 @@ void genome_feature_determine_transcripttypes(GenomeFeature *gf, Env *env)
   info.cds_features = array_new(sizeof (GenomeFeature*));
   had_err = genome_node_traverse_children((GenomeNode*) gf, &info,
                                           determine_transcripttypes, false,
-                                          env);
+                                          NULL);
   assert(!had_err); /* cannot happen, because determine_transcripttypes() is
                        sane */
   array_delete(info.exon_features);

@@ -37,7 +37,7 @@ static void addintrons_visitor_free(GenomeVisitor *gv)
 #endif
 }
 
-static int addintrons_in_children(GenomeNode *gn, void *data, Env *env)
+static int addintrons_in_children(GenomeNode *gn, void *data, Error *e)
 {
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
   GenomeFeature *current_feature;
@@ -45,7 +45,7 @@ static int addintrons_in_children(GenomeNode *gn, void *data, Env *env)
   Range previous_range, current_range, intron_range;
   Strand previous_strand, current_strand, intron_strand;
   Str *parent_seqid;
-  env_error_check(env);
+  error_check(e);
   current_feature = genome_node_cast(genome_feature_class(), gn);
   assert(current_feature);
   if (genome_feature_get_type(current_feature) == gft_exon) {
@@ -83,27 +83,26 @@ static int addintrons_in_children(GenomeNode *gn, void *data, Env *env)
   return 0;
 }
 
-static int addintrons_if_necessary(GenomeNode *gn, void *data, Env *env)
+static int addintrons_if_necessary(GenomeNode *gn, void *data, Error *e)
 {
   AddIntronsVisitor *v = (AddIntronsVisitor*) data;
   GenomeFeature *gf;
-  env_error_check(env);
+  error_check(e);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
   v->parent_feature = gf;
   v->previous_exon_feature = NULL;
-  return genome_node_traverse_direct_children(gn, v, addintrons_in_children,
-                                              env);
+  return genome_node_traverse_direct_children(gn, v, addintrons_in_children, e);
 }
 
 static int addintrons_visitor_genome_feature(GenomeVisitor *gv,
-                                             GenomeFeature *gf, Env *env)
+                                             GenomeFeature *gf, Error *e)
 {
   AddIntronsVisitor *v;
-  env_error_check(env);
+  error_check(e);
   v = addintrons_visitor_cast(gv);
   return genome_node_traverse_children((GenomeNode*) gf, v,
-                                       addintrons_if_necessary, false, env);
+                                       addintrons_if_necessary, false, e);
 }
 
 const GenomeVisitorClass* addintrons_visitor_class()
@@ -116,7 +115,7 @@ const GenomeVisitorClass* addintrons_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* addintrons_visitor_new(Env *env)
+GenomeVisitor* addintrons_visitor_new(void)
 {
-  return genome_visitor_create(addintrons_visitor_class(), env);
+  return genome_visitor_create(addintrons_visitor_class());
 }

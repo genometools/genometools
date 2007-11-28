@@ -43,7 +43,7 @@ static void cds_visitor_free(GenomeVisitor *gv)
   regionmapping_delete(cds_visitor->regionmapping);
 }
 
-static int extract_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
+static int extract_cds_if_necessary(GenomeNode *gn, void *data, Error *e)
 {
   CDSVisitor *v = (CDSVisitor*) data;
   GenomeFeature *gf;
@@ -52,7 +52,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
   unsigned long raw_sequence_length;
   int had_err = 0;
 
-  env_error_check(env);
+  error_check(e);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
 
@@ -60,14 +60,14 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
       (genome_feature_get_strand(gf) == STRAND_FORWARD ||
        genome_feature_get_strand(gf) == STRAND_REVERSE)) {
     had_err = regionmapping_get_raw_sequence(v->regionmapping, &raw_sequence,
-                                             genome_node_get_seqid(gn), env);
+                                             genome_node_get_seqid(gn), e);
     if (!had_err) {
       range = genome_node_get_range(gn);
       assert(range.start && range.end); /* 1-based coordinates */
       had_err = regionmapping_get_raw_sequence_length(v->regionmapping,
                                                       &raw_sequence_length,
                                                       genome_node_get_seqid(gn),
-                                                      env);
+                                                      e);
     }
     if (!had_err) {
       assert(range.end <= raw_sequence_length);
@@ -78,7 +78,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
   return had_err;
 }
 
-static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
+static int add_cds_if_necessary(GenomeNode *gn, void *data, Error *e)
 {
   CDSVisitor *v = (CDSVisitor*) data;
   GenomeNode *cds_feature;
@@ -90,18 +90,18 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
   Strand strand;
   int had_err;
 
-  env_error_check(env);
+  error_check(e);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
 
   /* traverse the direct children */
   splicedseq_reset(v->splicedseq);
   had_err = genome_node_traverse_direct_children(gn, v,
-                                                 extract_cds_if_necessary, env);
+                                                 extract_cds_if_necessary, e);
   if (!had_err && splicedseq_length(v->splicedseq) > 2) {
     strand = genome_feature_get_strand(gf);
     if (strand == STRAND_REVERSE) {
-      if (splicedseq_reverse(v->splicedseq, env_error(env)))
+      if (splicedseq_reverse(v->splicedseq, e))
         return -1;
     }
     /* determine ORFs for all three frames */
@@ -185,12 +185,12 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
 }
 
 static int cds_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                      Env *env)
+                                      Error *e)
 {
   CDSVisitor *v = cds_visitor_cast(gv);
-  env_error_check(env);
+  error_check(e);
   return genome_node_traverse_children((GenomeNode*) gf, v,
-                                       add_cds_if_necessary, false, env);
+                                       add_cds_if_necessary, false, e);
 
 }
 
@@ -204,14 +204,12 @@ const GenomeVisitorClass* cds_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* cds_visitor_new(RegionMapping *regionmapping, Str *source,
-                               Env *env)
+GenomeVisitor* cds_visitor_new(RegionMapping *regionmapping, Str *source)
 {
   GenomeVisitor *gv;
   CDSVisitor *cds_visitor;
-  env_error_check(env);
   assert(regionmapping);
-  gv = genome_visitor_create(cds_visitor_class(), env);
+  gv = genome_visitor_create(cds_visitor_class());
   cds_visitor = cds_visitor_cast(gv);
   cds_visitor->source = str_ref(source);
   cds_visitor->splicedseq = splicedseq_new();

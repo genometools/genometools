@@ -113,17 +113,23 @@ int gt_extractseq(int argc, const char **argv, Env *env)
   }
 
   if (parsed_args == argc) { /* no file given, use stdin */
-    bs = bioseq_new("-", env);
-    had_err = extractseq(arguments.outfp, bs, str_get(arguments.pattern),
-                         arguments.width, env);
+    if (!(bs = bioseq_new("-", env_error(env))))
+      had_err = -1;
+    if (!had_err) {
+      had_err = extractseq(arguments.outfp, bs, str_get(arguments.pattern),
+                           arguments.width, env);
+    }
     bioseq_delete(bs);
   }
 
   /* process all files */
   while (!had_err && parsed_args < argc) {
-    bs = bioseq_new(argv[parsed_args], env);
-    had_err = extractseq(arguments.outfp, bs, str_get(arguments.pattern),
-                         arguments.width, env);
+    if (!(bs = bioseq_new(argv[parsed_args], env_error(env))))
+      had_err = -1;
+    if (!had_err) {
+      had_err = extractseq(arguments.outfp, bs, str_get(arguments.pattern),
+                           arguments.width, env);
+    }
     bioseq_delete(bs);
     parsed_args++;
   }

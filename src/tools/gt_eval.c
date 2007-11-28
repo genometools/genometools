@@ -98,11 +98,11 @@ int gt_eval(int argc, const char **argv, Env *env)
 
   /* create the reality stream */
   reality_stream = gff3_in_stream_new_sorted(argv[parsed_args],
-                                             arguments.verbose, env);
+                                             arguments.verbose);
 
   /* create the prediction stream */
   prediction_stream = gff3_in_stream_new_sorted(argv[parsed_args + 1],
-                                                arguments.verbose, env);
+                                                arguments.verbose);
 
   /* create the stream evaluator */
   evaluator = stream_evaluator_new(reality_stream, prediction_stream,
@@ -111,7 +111,7 @@ int gt_eval(int argc, const char **argv, Env *env)
 
   /* compute the evaluation */
   had_err = stream_evaluator_evaluate(evaluator, arguments.verbose,
-                                      arguments.exondiff, NULL, env);
+                                      arguments.exondiff, NULL, env_error(env));
 
   /* show the evaluation */
   if (!had_err)

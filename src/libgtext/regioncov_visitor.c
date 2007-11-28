@@ -39,12 +39,12 @@ static void regioncov_visitor_free(GenomeVisitor *gv)
 }
 
 static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
-                                            GenomeFeature *gf, Env *env)
+                                            GenomeFeature *gf, Error *e)
 {
   Range *old_range_ptr, old_range, new_range;
   Array *ranges;
   RegionCovVisitor *regioncov_visitor;
-  env_error_check(env);
+  error_check(e);
   regioncov_visitor = regioncov_visitor_cast(gv);
   ranges = hashtable_get(regioncov_visitor->region2rangelist,
                          str_get(genome_node_get_seqid((GenomeNode*) gf)));
@@ -66,11 +66,11 @@ static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
 }
 
 static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
-                                             SequenceRegion *sr, Env *env)
+                                             SequenceRegion *sr, Error *e)
 {
   RegionCovVisitor *regioncov_visitor;
   Array *rangelist;
-  env_error_check(env);
+  error_check(e);
   regioncov_visitor = regioncov_visitor_cast(gv);
   rangelist = array_new(sizeof (Range));
   hashtable_add(regioncov_visitor->region2rangelist,
@@ -89,9 +89,9 @@ const GenomeVisitorClass* regioncov_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* regioncov_visitor_new(unsigned long max_feature_dist, Env *env)
+GenomeVisitor* regioncov_visitor_new(unsigned long max_feature_dist)
 {
-  GenomeVisitor *gv = genome_visitor_create(regioncov_visitor_class(), env);
+  GenomeVisitor *gv = genome_visitor_create(regioncov_visitor_class());
   RegionCovVisitor *regioncov_visitor = regioncov_visitor_cast(gv);
   regioncov_visitor->max_feature_dist = max_feature_dist;
   regioncov_visitor->region2rangelist = hashtable_new(HASH_STRING,

@@ -39,12 +39,12 @@ static void mergefeat_visitor_free(GenomeVisitor *gv)
   array_delete(mergefeat_visitor->nodes_to_remove);
 }
 
-static int mergefeat_in_children(GenomeNode *gn, void *data, Env *env)
+static int mergefeat_in_children(GenomeNode *gn, void *data, Error *e)
 {
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GenomeFeature *previous_feature, *current_feature;
   Range previous_range, current_range;
-  env_error_check(env);
+  error_check(e);
   current_feature = genome_node_cast(genome_feature_class(), gn);
   assert(current_feature);
   if ((previous_feature = hashtable_get(v->ht, genome_feature_type_get_cstr(
@@ -73,35 +73,34 @@ static int mergefeat_in_children(GenomeNode *gn, void *data, Env *env)
   return 0;
 }
 
-static int mergefeat_if_necessary(GenomeNode *gn, void *data, Env *env)
+static int mergefeat_if_necessary(GenomeNode *gn, void *data, Error *e)
 {
   MergefeatVisitor *v = (MergefeatVisitor*) data;
   GenomeFeature *gf;
-  env_error_check(env);
+  error_check(e);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
   v->current_tree = gn;
   hashtable_reset(v->ht);
-  return genome_node_traverse_direct_children(gn, v, mergefeat_in_children,
-                                              env);
+  return genome_node_traverse_direct_children(gn, v, mergefeat_in_children, e);
 }
 
 static int mergefeat_visitor_genome_feature(GenomeVisitor *gv,
-                                            GenomeFeature *gf, Env *env)
+                                            GenomeFeature *gf, Error *e)
 {
   MergefeatVisitor *v;
   GenomeNode *leaf;
   unsigned long i;
   int had_err = 0;
-  env_error_check(env);
+  error_check(e);
   v = mergefeat_visitor_cast(gv);
   array_reset(v->nodes_to_remove);
   had_err = genome_node_traverse_children((GenomeNode*) gf, v,
-                                          mergefeat_if_necessary, false, env);
+                                          mergefeat_if_necessary, false, e);
   if (!had_err) {
     for (i = 0; i < array_size(v->nodes_to_remove); i++) {
       leaf = *(GenomeNode**) array_get(v->nodes_to_remove, i);
-      genome_node_remove_leaf((GenomeNode*) gf, leaf, env);
+      genome_node_remove_leaf((GenomeNode*) gf, leaf);
       genome_node_delete(leaf);
     }
   }
@@ -118,9 +117,9 @@ const GenomeVisitorClass* mergefeat_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* mergefeat_visitor_new(Env *env)
+GenomeVisitor* mergefeat_visitor_new(void)
 {
-  GenomeVisitor *gv = genome_visitor_create(mergefeat_visitor_class(), env);
+  GenomeVisitor *gv = genome_visitor_create(mergefeat_visitor_class());
   MergefeatVisitor *mergefeat_visitor = mergefeat_visitor_cast(gv);
   mergefeat_visitor->ht = hashtable_new(HASH_STRING, NULL, NULL);
   mergefeat_visitor->nodes_to_remove = array_new(sizeof (GenomeNode*));

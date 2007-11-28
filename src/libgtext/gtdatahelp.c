@@ -40,8 +40,8 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
   assert(progname);
 
   prog = cstr_dup(progname); /* create modifiable copy for splitter */
-  splitter = splitter_new(env);
-  splitter_split(splitter, prog, strlen(prog), ' ', env);
+  splitter = splitter_new();
+  splitter_split(splitter, prog, strlen(prog), ' ');
   doc_file = gtdata_get_path(splitter_get_token(splitter, 0), env);
   if (!doc_file)
     had_err = -1;
@@ -84,7 +84,7 @@ int gtdata_show_help(const char *progname, /*@unused@*/ void *unused, Env *env)
   /* free */
   if (L) lua_close(L);
   str_delete(doc_file);
-  splitter_delete(splitter, env);
+  splitter_delete(splitter);
   ma_free(prog);
 
   return had_err;

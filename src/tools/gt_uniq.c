@@ -79,16 +79,17 @@ int gt_uniq(int argc, const char **argv, Env *env)
   /* create gff3 input stream */
   gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
                                              arguments.verbose &&
-                                             arguments.outfp, env);
+                                             arguments.outfp);
 
   /* create uniq stream */
-  uniq_stream = uniq_stream_new(gff3_in_stream, env);
+  uniq_stream = uniq_stream_new(gff3_in_stream);
 
   /* create gff3 output stream */
-  gff3_out_stream = gff3_out_stream_new(uniq_stream, arguments.outfp, env);
+  gff3_out_stream = gff3_out_stream_new(uniq_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) && gn)
+  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn,
+                                             env_error(env))) && gn)
     genome_node_rec_delete(gn);
 
   /* free */

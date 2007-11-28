@@ -35,7 +35,7 @@ typedef enum {
   READING_SEQUENCE
 } FastaReader_state;
 
-FastaReader* fasta_reader_new(Str *sequence_filename, Env *env)
+FastaReader* fasta_reader_new(Str *sequence_filename)
 {
   FastaReader *fs = ma_calloc(1, sizeof (FastaReader));
   fs->sequence_filename = str_ref(sequence_filename);
@@ -50,7 +50,7 @@ int fasta_reader_run(FastaReader *fr,
                      FastaReaderProcDescription proc_description,
                      FastaReaderProcCharacter proc_character,
                      FastaReaderProcSequenceLength proc_sequence_length,
-                     void *data, Env *env)
+                     void *data, Error *e)
 {
   unsigned char cc;
   FastaReader_state state = EXPECTING_SEPARATOR;
@@ -58,7 +58,7 @@ int fasta_reader_run(FastaReader *fr,
   Str *description;
   int had_err = 0;
 
-  env_error_check(env);
+  error_check(e);
   assert(fr);
 
   /* init */
@@ -76,7 +76,7 @@ int fasta_reader_run(FastaReader *fr,
     switch (state) {
       case EXPECTING_SEPARATOR:
         if (cc != FASTA_SEPARATOR) {
-          env_error_set(env,
+          error_set(e,
                     "the first character of fasta file \"%s\" has to be '%c'",
                     str_get(fr->sequence_filename), FASTA_SEPARATOR);
           had_err = -1;
@@ -87,7 +87,7 @@ int fasta_reader_run(FastaReader *fr,
       case READING_DESCRIPTION:
         if (cc == '\n') {
           if (proc_description) {
-            had_err = proc_description(description, data, env);
+            had_err = proc_description(description, data, e);
             if (!had_err)
               str_reset(description);
           }
@@ -104,14 +104,14 @@ int fasta_reader_run(FastaReader *fr,
         if (cc == FASTA_SEPARATOR) {
           if (!sequence_length) {
             assert(line_counter);
-            env_error_set(env, "empty sequence after description given in line "
-                          "%lu", line_counter - 1);
+            error_set(e, "empty sequence after description given in line %lu",
+                      line_counter - 1);
             had_err = -1;
             break;
           }
           else {
             if (proc_sequence_length)
-              had_err = proc_sequence_length(sequence_length, data, env);
+              had_err = proc_sequence_length(sequence_length, data, e);
             if (had_err)
               break;
             state = READING_DESCRIPTION;
@@ -127,7 +127,7 @@ int fasta_reader_run(FastaReader *fr,
         else {
           sequence_length++;
           if (proc_character)
-            had_err = proc_character(cc, data, env);
+            had_err = proc_character(cc, data, e);
         }
         break;
     }
@@ -137,26 +137,25 @@ int fasta_reader_run(FastaReader *fr,
     /* checks after reading */
     switch (state) {
       case EXPECTING_SEPARATOR:
-        env_error_set(env, "sequence file \"%s\" is empty",
+        error_set(e, "sequence file \"%s\" is empty",
                   str_get(fr->sequence_filename));
         had_err = -1;
         break;
       case READING_DESCRIPTION:
-        env_error_set(env, "unfinished fasta entry in line %lu of sequence "
-                      "file \"%s\"", line_counter,
-                      str_get(fr->sequence_filename));
+        error_set(e, "unfinished fasta entry in line %lu of sequence file "
+                  "\"%s\"", line_counter, str_get(fr->sequence_filename));
         had_err = -1;
         break;
       case READING_SEQUENCE_AFTER_NEWLINE:
       case READING_SEQUENCE:
         if (!sequence_length) {
           assert(line_counter);
-          env_error_set(env, "empty sequence after description given in line "
-                        "%lu", line_counter - 1);
+          error_set(e, "empty sequence after description given in line %lu",
+                    line_counter - 1);
           had_err = -1;
         }
         else if (proc_sequence_length)
-          had_err = proc_sequence_length(sequence_length, data, env);
+          had_err = proc_sequence_length(sequence_length, data, e);
     }
   }
 
@@ -166,7 +165,7 @@ int fasta_reader_run(FastaReader *fr,
   return had_err;
 }
 
-void fasta_reader_delete(FastaReader *fr, Env *env)
+void fasta_reader_delete(FastaReader *fr)
 {
   if (!fr) return;
   str_delete(fr->sequence_filename);

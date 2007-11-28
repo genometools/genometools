@@ -102,13 +102,13 @@ int track_unit_test(Env *env)
   r3.start=700UL;  r3.end=1200UL;
   r4.start=10UL;   r4.end=200UL;
 
-  b1 = block_new(env);
+  b1 = block_new();
   block_set_range(b1, r1);
-  b2 = block_new(env);
+  b2 = block_new();
   block_set_range(b2, r2);
-  b3 = block_new(env);
+  b3 = block_new();
   block_set_range(b3, r3);
-  b4 = block_new(env);
+  b4 = block_new();
   block_set_range(b4, r4);
 
   track = track_new(title);

@@ -183,27 +183,27 @@ int gt_view(int argc, const char **argv, Env *env)
     do {
       /* create a gff3 input stream */
       gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
-                                                 arguments.verbose, env);
+                                                 arguments.verbose);
       last_stream = gff3_in_stream;
 
       /* create add introns stream if -addintrons was used */
       if (arguments.addintrons) {
-        addintrons_stream = addintrons_stream_new(last_stream, env);
+        addintrons_stream = addintrons_stream_new(last_stream);
         last_stream = addintrons_stream;
       }
 
       /* create gff3 output stream if -pipe was used */
       if (arguments.pipe) {
-        gff3_out_stream = gff3_out_stream_new(last_stream, NULL, env);
+        gff3_out_stream = gff3_out_stream_new(last_stream, NULL);
         last_stream = gff3_out_stream;
       }
 
       /* create feature stream */
-      feature_stream = feature_stream_new(last_stream, features, env);
+      feature_stream = feature_stream_new(last_stream, features);
 
       /* pull the features through the stream and free them afterwards */
-      while (!(had_err = genome_stream_next_tree(feature_stream, &gn, env)) &&
-             gn) {
+      while (!(had_err = genome_stream_next_tree(feature_stream, &gn,
+                                                 env_error(env))) && gn) {
         genome_node_rec_delete(gn);
       }
 
@@ -227,8 +227,7 @@ int gt_view(int argc, const char **argv, Env *env)
     }
   }
   else if (!had_err && !feature_index_has_seqid(features,
-                                                str_get(arguments.seqid),
-                                                env)) {
+                                                str_get(arguments.seqid))) {
     env_error_set(env, "sequence region '%s' does not exist in GFF input file",
                   str_get(arguments.seqid));
     had_err = -1;
@@ -264,12 +263,12 @@ int gt_view(int argc, const char **argv, Env *env)
 
   if (!had_err) {
     /* create and write image file */
-    d = diagram_new(features, qry_range, seqid, cfg, env);
+    d = diagram_new(features, qry_range, seqid, cfg);
     r = render_new(cfg);
-    had_err = render_to_png(r, d, png_file, arguments.width, env);
+    had_err = render_to_png(r, d, png_file, arguments.width, env_error(env));
   }
 
-  render_delete(r, env);
+  render_delete(r);
   config_delete(cfg, env);
   str_delete(config_file);
   diagram_delete(d, env);

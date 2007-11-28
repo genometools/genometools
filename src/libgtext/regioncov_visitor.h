@@ -24,8 +24,7 @@ typedef struct RegionCovVisitor RegionCovVisitor;
 #include "libgtext/genome_visitor.h"
 
 const GenomeVisitorClass* regioncov_visitor_class(void);
-GenomeVisitor*            regioncov_visitor_new(unsigned long max_feature_dist,
-                                                Env*);
+GenomeVisitor*            regioncov_visitor_new(unsigned long max_feature_dist);
 void                      regioncov_visitor_show_coverage(GenomeVisitor*);
 
 #endif

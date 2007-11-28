@@ -26,10 +26,10 @@ typedef struct RegionMapping RegionMapping;
 RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Error*);
 RegionMapping* regionmapping_new_seqfile(Str *sequence_filename);
 int            regionmapping_get_raw_sequence(RegionMapping*, const char**,
-                                              Str *seqid, Env*);
+                                              Str *seqid, Error*);
 int            regionmapping_get_raw_sequence_length(RegionMapping*,
                                                      unsigned long*,
-                                                     Str *seqid, Env*);
+                                                     Str *seqid, Error*);
 void           regionmapping_delete(RegionMapping*);
 
 #endif

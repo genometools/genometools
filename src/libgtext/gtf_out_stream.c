@@ -28,16 +28,15 @@ struct GTFOutStream {
 #define gtf_out_stream_cast(GS)\
         genome_stream_cast(gtf_out_stream_class(), GS);
 
-static int gtf_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                     Env *env)
+static int gtf_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
 {
   GTFOutStream *gtf_out_stream;
   int had_err;
-  env_error_check(env);
+  error_check(e);
   gtf_out_stream = gtf_out_stream_cast(gs);
-  had_err = genome_stream_next_tree(gtf_out_stream->in_stream, gn, env);
+  had_err = genome_stream_next_tree(gtf_out_stream->in_stream, gn, e);
   if (!had_err && *gn)
-    had_err = genome_node_accept(*gn, gtf_out_stream->gtf_visitor, env);
+    had_err = genome_node_accept(*gn, gtf_out_stream->gtf_visitor, e);
   return had_err;
 }
 
@@ -55,14 +54,12 @@ const GenomeStreamClass* gtf_out_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* gtf_out_stream_new(GenomeStream *in_stream, GenFile *outfp,
-                                  Env *env)
+GenomeStream* gtf_out_stream_new(GenomeStream *in_stream, GenFile *outfp)
 {
   GenomeStream *gs = genome_stream_create(gtf_out_stream_class(),
-                                          genome_stream_is_sorted(in_stream),
-                                          env);
+                                          genome_stream_is_sorted(in_stream));
   GTFOutStream *gtf_out_stream = gtf_out_stream_cast(gs);
   gtf_out_stream->in_stream = in_stream;
-  gtf_out_stream->gtf_visitor = gtf_visitor_new(outfp, env);
+  gtf_out_stream->gtf_visitor = gtf_visitor_new(outfp);
   return gs;
 }

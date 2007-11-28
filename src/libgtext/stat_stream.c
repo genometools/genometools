@@ -31,18 +31,18 @@ struct StatStream
 #define stat_stream_cast(GS)\
         genome_stream_cast(stat_stream_class(), GS)
 
-static int stat_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
+static int stat_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
 {
   StatStream *stat_stream;
   int had_err;
-  env_error_check(env);
+  error_check(e);
   stat_stream = stat_stream_cast(gs);
-  had_err = genome_stream_next_tree(stat_stream->in_stream, gn, env);
+  had_err = genome_stream_next_tree(stat_stream->in_stream, gn, e);
   if (!had_err) {
     assert(stat_stream->stat_visitor);
     if (*gn) {
       stat_stream->number_of_trees++;
-      had_err = genome_node_accept(*gn, stat_stream->stat_visitor, env);
+      had_err = genome_node_accept(*gn, stat_stream->stat_visitor, e);
       assert(!had_err); /* the status visitor is sane */
     }
   }
@@ -68,22 +68,20 @@ GenomeStream* stat_stream_new(GenomeStream *in_stream,
                               bool gene_score_distri,
                               bool exon_length_distri,
                               bool exon_number_distri,
-                              bool intron_length_distri, Env *env)
+                              bool intron_length_distri)
 {
-  GenomeStream *gs = genome_stream_create(stat_stream_class(), true,
-                                          env);
+  GenomeStream *gs = genome_stream_create(stat_stream_class(), true);
   StatStream *ss = stat_stream_cast(gs);
   ss->in_stream = in_stream;
   ss->stat_visitor = stat_visitor_new(gene_length_distri, gene_score_distri,
                                       exon_length_distri, exon_number_distri,
-                                      intron_length_distri, env);
+                                      intron_length_distri);
   return gs;
 }
 
-void stat_stream_show_stats(GenomeStream *gs, Env *env)
+void stat_stream_show_stats(GenomeStream *gs)
 {
   StatStream *ss = stat_stream_cast(gs);
-  env_error_check(env);
   printf("parsed feature trees: %lu\n", ss->number_of_trees);
-  stat_visitor_show_stats(ss->stat_visitor, env);
+  stat_visitor_show_stats(ss->stat_visitor);
 }

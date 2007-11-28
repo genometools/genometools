@@ -30,13 +30,13 @@ struct Splitter {
   size_t allocated;
 };
 
-Splitter* splitter_new(Env *env)
+Splitter* splitter_new(void)
 {
   return ma_calloc(1, sizeof (Splitter));
 }
 
 void splitter_split(Splitter *s, char *string, unsigned long length,
-                    char delimiter, Env *env)
+                    char delimiter)
 {
 
   char *end_of_token, *string_index = string;
@@ -101,11 +101,11 @@ int splitter_unit_test(Env *env)
   Splitter *s;
   int had_err = 0;
   env_error_check(env);
-  s = splitter_new(env);
+  s = splitter_new();
 
   /* string_1 */
   ensure(had_err, !splitter_size(s));
-  splitter_split(s, string_1, strlen(string_1), ' ', env);
+  splitter_split(s, string_1, strlen(string_1), ' ');
   ensure(had_err, splitter_size(s) == 5);
   ensure(had_err, strcmp(splitter_get_token(s, 0), "a") == 0);
   ensure(had_err, strcmp(splitter_get_token(s, 1), "bb") == 0);
@@ -116,7 +116,7 @@ int splitter_unit_test(Env *env)
 
   /* string_2 */
   ensure(had_err, !splitter_size(s));
-  splitter_split(s, string_2, strlen(string_2), '\t', env);
+  splitter_split(s, string_2, strlen(string_2), '\t');
   ensure(had_err, splitter_size(s) == 5);
   ensure(had_err, strcmp(splitter_get_token(s, 0), "a") == 0);
   ensure(had_err, strcmp(splitter_get_token(s, 1), "bb") == 0);
@@ -127,14 +127,14 @@ int splitter_unit_test(Env *env)
 
   /* string_3 */
   ensure(had_err, !splitter_size(s));
-  splitter_split(s, string_3, strlen(string_3), '\t', env);
+  splitter_split(s, string_3, strlen(string_3), '\t');
   ensure(had_err, splitter_size(s) == 1);
   ensure(had_err, strcmp(splitter_get_token(s, 0), "") == 0);
   splitter_reset(s);
 
   /* string_4 */
   ensure(had_err, !splitter_size(s));
-  splitter_split(s, string_4, strlen(string_4), ' ', env);
+  splitter_split(s, string_4, strlen(string_4), ' ');
   ensure(had_err, splitter_size(s) == 3);
   ensure(had_err, strcmp(splitter_get_token(s, 0), "a") == 0);
   ensure(had_err, strcmp(splitter_get_token(s, 1), "") == 0);
@@ -143,7 +143,7 @@ int splitter_unit_test(Env *env)
 
   /* string_5 */
   ensure(had_err, !splitter_size(s));
-  splitter_split(s, string_5, strlen(string_5), ' ', env);
+  splitter_split(s, string_5, strlen(string_5), ' ');
   ensure(had_err, splitter_size(s) == 3);
   ensure(had_err, strcmp(splitter_get_token(s, 0), "ac") == 0);
   ensure(had_err, strcmp(splitter_get_token(s, 1), "bc") == 0);
@@ -152,17 +152,17 @@ int splitter_unit_test(Env *env)
 
   /* string_6 */
   ensure(had_err, !splitter_size(s));
-  splitter_split(s, string_6, strlen(string_6), ';', env);
+  splitter_split(s, string_6, strlen(string_6), ';');
   ensure(had_err, splitter_size(s) == 1);
   ensure(had_err, strcmp(splitter_get_token(s, 0), "test") == 0);
 
   /* free */
-  splitter_delete(s, env);
+  splitter_delete(s);
 
   return had_err;
 }
 
-void splitter_delete(Splitter *s, Env *env)
+void splitter_delete(Splitter *s)
 {
   if (!s) return;
   ma_free(s->tokens);

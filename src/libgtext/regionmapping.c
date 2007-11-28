@@ -56,24 +56,24 @@ RegionMapping* regionmapping_new_seqfile(Str *sequence_filename)
 }
 
 static Str* regionmapping_map(RegionMapping *rm, const char *sequence_region,
-                              Env *env)
+                              Error *e)
 {
-  env_error_check(env);
+  error_check(e);
   assert(rm && sequence_region);
   if (rm->sequence_filename)
     return str_ref(rm->sequence_filename);
   else
-    return mapping_map_string(rm->mapping, sequence_region, env);
+    return mapping_map_string(rm->mapping, sequence_region, e);
 }
 
-static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Env *env)
+static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Error *e)
 {
   int had_err = 0;
-  env_error_check(env);
+  error_check(e);
   assert(rm && seqid);
   if (!rm->sequence_file || str_cmp(rm->sequence_name, seqid)) {
     str_delete(rm->sequence_file);
-    rm->sequence_file = regionmapping_map(rm, str_get(seqid), env);
+    rm->sequence_file = regionmapping_map(rm, str_get(seqid), e);
     if (!rm->sequence_file)
       had_err = -1;
     else {
@@ -83,7 +83,7 @@ static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Env *env)
         str_reset(rm->sequence_name);
       str_append_str(rm->sequence_name, seqid);
       bioseq_delete(rm->bioseq);
-      rm->bioseq = bioseq_new_str(rm->sequence_file, env);
+      rm->bioseq = bioseq_new_str(rm->sequence_file, e);
       if (!rm->bioseq)
         had_err = -1;
     }
@@ -92,12 +92,12 @@ static int update_bioseq_if_necessary(RegionMapping *rm, Str *seqid, Env *env)
 }
 
 int regionmapping_get_raw_sequence(RegionMapping *rm, const char **raw,
-                                   Str *seqid, Env *env)
+                                   Str *seqid, Error *e)
 {
   int had_err = 0;
-  env_error_check(env);
+  error_check(e);
   assert(rm && seqid);
-  had_err = update_bioseq_if_necessary(rm, seqid, env);
+  had_err = update_bioseq_if_necessary(rm, seqid, e);
   if (!had_err)
     *raw = bioseq_get_raw_sequence(rm->bioseq);
   return had_err;
@@ -105,12 +105,12 @@ int regionmapping_get_raw_sequence(RegionMapping *rm, const char **raw,
 
 int regionmapping_get_raw_sequence_length(RegionMapping *rm,
                                           unsigned long *length, Str *seqid,
-                                          Env *env)
+                                          Error *e)
 {
   int had_err = 0;
-  env_error_check(env);
+  error_check(e);
   assert(rm && seqid);
-  had_err = update_bioseq_if_necessary(rm, seqid, env);
+  had_err = update_bioseq_if_necessary(rm, seqid, e);
   if (!had_err)
     *length = bioseq_get_raw_sequence_length(rm->bioseq);
   return had_err;

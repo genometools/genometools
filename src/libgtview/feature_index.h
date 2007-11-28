@@ -30,12 +30,10 @@ typedef struct FeatureIndex FeatureIndex;
 
 FeatureIndex* feature_index_new(void);
 FeatureIndex* feature_index_ref(FeatureIndex*);
-void          feature_index_add_sequence_region(FeatureIndex*, SequenceRegion*,
-                                                Env*);
+void          feature_index_add_sequence_region(FeatureIndex*, SequenceRegion*);
 /* add a GenomeFeature to the index, associating it with a sequence region
    denoted by its identifier string */
-void          feature_index_add_genome_feature(FeatureIndex*, GenomeFeature*,
-                                               Env*);
+void          feature_index_add_genome_feature(FeatureIndex*, GenomeFeature*);
 /* returns an array of GenomeFeatures associated with a given sequence region
    identifier */
 Array*        feature_index_get_features_for_seqid(FeatureIndex*, const char*);
@@ -44,14 +42,14 @@ Array*        feature_index_get_features_for_seqid(FeatureIndex*, const char*);
 int           feature_index_get_features_for_range(FeatureIndex*,
                                                    Array *results,
                                                    const char *seqid, Range,
-                                                   Env*);
+                                                   Error*);
 /* returns the first sequence region identifier added to the index */
 const char*   feature_index_get_first_seqid(const FeatureIndex*);
 /* returns a StrArray of all sequence region identifiers contained in the index
    (in alphabetical order) */
 StrArray*     feature_index_get_seqids(const FeatureIndex*);
 Range         feature_index_get_range_for_seqid(FeatureIndex*, const char*);
-bool          feature_index_has_seqid(const FeatureIndex*, const char*, Env*);
+bool          feature_index_has_seqid(const FeatureIndex*, const char*);
 int           feature_index_unit_test(Env*);
 void          feature_index_delete(FeatureIndex*);
 

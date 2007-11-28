@@ -25,6 +25,6 @@
 typedef struct UniqStream UniqStream;
 
 const GenomeStreamClass* uniq_stream_class(void);
-GenomeStream*            uniq_stream_new(GenomeStream*, Env*);
+GenomeStream*            uniq_stream_new(GenomeStream*);
 
 #endif

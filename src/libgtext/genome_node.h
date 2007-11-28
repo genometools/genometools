@@ -28,23 +28,23 @@ typedef struct GenomeNode GenomeNode;
 #include "libgtcore/str.h"
 #include "libgtext/genome_visitor.h"
 
-typedef int (*GenomeNodeTraverseFunc)(GenomeNode*, void*, Env*);
+typedef int (*GenomeNodeTraverseFunc)(GenomeNode*, void*, Error*);
 
 GenomeNode*   genome_node_ref(GenomeNode*);
-GenomeNode*   genome_node_rec_ref(GenomeNode*, Env*);
+GenomeNode*   genome_node_rec_ref(GenomeNode*);
 void*         genome_node_cast(const GenomeNodeClass*, GenomeNode*);
 /* perform depth first traversal of the given genome node */
 int           genome_node_traverse_children(GenomeNode*, void*,
                                             GenomeNodeTraverseFunc,
-                                            bool traverse_only_once, Env*);
+                                            bool traverse_only_once, Error*);
 /* perform breadth first traversal of the given genome node  */
 int           genome_node_traverse_children_breadth(GenomeNode*, void*,
                                                     GenomeNodeTraverseFunc,
                                                     bool traverse_only_once,
-                                                    Env*);
+                                                    Error*);
 int           genome_node_traverse_direct_children(GenomeNode*, void*,
                                                    GenomeNodeTraverseFunc,
-                                                   Env*);
+                                                   Error*);
 const char*   genome_node_get_filename(const GenomeNode*);
 unsigned long genome_node_get_line_number(const GenomeNode*);
 unsigned long genome_node_number_of_children(const GenomeNode*);
@@ -57,25 +57,23 @@ void          genome_node_set_range(GenomeNode*, Range);
 void          genome_node_set_seqid(GenomeNode*, Str*);
 void          genome_node_set_source(GenomeNode*, Str*);
 void          genome_node_set_phase(GenomeNode*, Phase);
-int           genome_node_accept(GenomeNode*, GenomeVisitor*, Env*);
+int           genome_node_accept(GenomeNode*, GenomeVisitor*, Error*);
 /* <parent> takes ownership of <child> */
 void          genome_node_is_part_of_genome_node(GenomeNode *parent,
                                                  GenomeNode *child);
 /* does not free the leaf, do not use during traversal! */
-void          genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn,
-                                      Env*);
+void          genome_node_remove_leaf(GenomeNode *tree, GenomeNode *leafn);
 void          genome_node_mark(GenomeNode*);
 /* returns true if the (top-level) node is marked */
 bool          genome_node_is_marked(const GenomeNode*);
 /* returns true if the given node graph contains a marked node */
-bool          genome_node_contains_marked(GenomeNode*, Env*);
+bool          genome_node_contains_marked(GenomeNode*);
 bool          genome_node_has_children(GenomeNode*);
-bool          genome_node_direct_children_do_not_overlap(GenomeNode*, Env*);
+bool          genome_node_direct_children_do_not_overlap(GenomeNode*);
 /* returns true if all direct childred of <parent> with the same type (s.t.) as
    <child> do not overlap */
 bool          genome_node_direct_children_do_not_overlap_st(GenomeNode *parent,
-                                                            GenomeNode *child,
-                                                            Env*);
+                                                            GenomeNode *child);
 bool          genome_node_is_tree(GenomeNode*);
 /* returns true if the genome node overlaps at least one of the nodes given in
    the array. O(array_size) */

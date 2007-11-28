@@ -25,6 +25,6 @@ typedef struct CDSVisitor CDSVisitor;
 #include "libgtext/regionmapping.h"
 
 const GenomeVisitorClass* cds_visitor_class(void);
-GenomeVisitor*            cds_visitor_new(RegionMapping* , Str *source, Env*);
+GenomeVisitor*            cds_visitor_new(RegionMapping*, Str *source);
 
 #endif

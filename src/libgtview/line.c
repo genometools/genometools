@@ -115,11 +115,11 @@ int line_unit_test(Env* env)
   genome_feature_add_attribute((GenomeFeature*) gn3, "Name", blub);
   genome_feature_add_attribute((GenomeFeature*) gn4, "Name", bar);
 
-  b1 = block_new(env);
-  b2 = block_new(env);
+  b1 = block_new();
+  b2 = block_new();
 
-  block_insert_element(b1, gn1, cfg, env);
-  block_insert_element(b2, gn2, cfg, env);
+  block_insert_element(b1, gn1, cfg);
+  block_insert_element(b2, gn2, cfg);
   block_set_range(b1, r1);
   block_set_range(b2, r2);
 

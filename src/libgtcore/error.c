@@ -35,7 +35,7 @@ Error* error_new(void)
 void error_set(Error *e, const char *format, ...)
 {
   va_list ap;
-  assert(e);
+  if (!e) return;
   va_start(ap, format);
   error_vset(e, format, ap);
   va_end(ap);

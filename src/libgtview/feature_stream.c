@@ -29,15 +29,15 @@ struct FeatureStream {
 #define feature_stream_cast(GS)\
         genome_stream_cast(feature_stream_class(), GS)
 
-static int feature_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
+static int feature_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
 {
   FeatureStream *feature_stream;
   int had_err;
-  env_error_check(env);
+  error_check(e);
   feature_stream = feature_stream_cast(gs);
-  had_err = genome_stream_next_tree(feature_stream->in_stream, gn, env);
+  had_err = genome_stream_next_tree(feature_stream->in_stream, gn, e);
   if (!had_err && *gn)
-    had_err = genome_node_accept(*gn, feature_stream->feature_visitor, env);
+    had_err = genome_node_accept(*gn, feature_stream->feature_visitor, e);
   return had_err;
 }
 
@@ -56,15 +56,13 @@ const GenomeStreamClass* feature_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* feature_stream_new(GenomeStream *in_stream,
-                                 FeatureIndex *fi, Env *env)
+GenomeStream* feature_stream_new(GenomeStream *in_stream, FeatureIndex *fi)
 {
   GenomeStream *gs;
   FeatureStream *feature_stream;
-  env_error_check(env);
-  gs = genome_stream_create(feature_stream_class(), true, env);
+  gs = genome_stream_create(feature_stream_class(), true);
   feature_stream = feature_stream_cast(gs);
   feature_stream->in_stream = genome_stream_ref(in_stream);
-  feature_stream->feature_visitor = feature_visitor_new(fi, env);
+  feature_stream->feature_visitor = feature_visitor_new(fi);
   return gs;
 }

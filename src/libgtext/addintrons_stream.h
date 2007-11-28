@@ -25,6 +25,6 @@
 typedef struct AddIntronsStream AddIntronsStream;
 
 const GenomeStreamClass* addintrons_stream_class(void);
-GenomeStream*            addintrons_stream_new(GenomeStream*, Env*);
+GenomeStream*            addintrons_stream_new(GenomeStream*);
 
 #endif

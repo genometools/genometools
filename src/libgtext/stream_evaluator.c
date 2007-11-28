@@ -414,14 +414,14 @@ static void add_nucleotide_exon(Bittab *nucleotides, Range range,
   }
 }
 
-static int process_real_feature(GenomeNode *gn, void *data, Env *env)
+static int process_real_feature(GenomeNode *gn, void *data, Error *e)
 {
   ProcessRealFeatureInfo *info = (ProcessRealFeatureInfo*) data;
   GenomeNode *gn_ref;
   GenomeFeature *gf;
   Range range;
 
-  env_error_check(env);
+  error_check(e);
   assert(gn && data);
   gf = (GenomeFeature*) gn;
 
@@ -429,11 +429,11 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
     case gft_gene:
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
-          gn_ref = genome_node_rec_ref(gn, env);
+          gn_ref = genome_node_rec_ref(gn);
           array_add(info->slot->genes_forward, gn_ref);
           break;
         case STRAND_REVERSE:
-          gn_ref = genome_node_rec_ref(gn, env);
+          gn_ref = genome_node_rec_ref(gn);
           array_add(info->slot->genes_reverse, gn_ref);
           break;
         default:
@@ -446,11 +446,11 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
     case gft_mRNA:
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
-          gn_ref = genome_node_rec_ref(gn, env);
+          gn_ref = genome_node_rec_ref(gn);
           array_add(info->slot->mRNAs_forward, gn_ref);
           break;
         case STRAND_REVERSE:
-          gn_ref = genome_node_rec_ref(gn, env);
+          gn_ref = genome_node_rec_ref(gn);
           array_add(info->slot->mRNAs_reverse, gn_ref);
           break;
         default:
@@ -461,7 +461,7 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       }
       break;
     case gft_LTR_retrotransposon:
-      gn_ref = genome_node_rec_ref(gn, env);
+      gn_ref = genome_node_rec_ref(gn);
       array_add(info->slot->LTRs, gn_ref);
       break;
     case gft_CDS:
@@ -522,12 +522,12 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
   return 0;
 }
 
-static int store_exon(GenomeNode *gn, void *data, Env *env)
+static int store_exon(GenomeNode *gn, void *data, Error *e)
 {
   Array *exons = (Array*) data;
   Range range;
   GenomeFeature *gf;
-  env_error_check(env);
+  error_check(e);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf && exons);
   if (genome_feature_get_type(gf) == gft_exon) {
@@ -537,7 +537,7 @@ static int store_exon(GenomeNode *gn, void *data, Env *env)
   return 0;
 }
 
-static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
+static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
 {
   Array *exons_1, *exons_2;
   bool equal;
@@ -551,10 +551,10 @@ static bool mRNAs_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
 
   /* get exon ranges */
   had_err = genome_node_traverse_children(gn_1, exons_1, store_exon, false,
-                                          env);
+                                          NULL);
   assert(!had_err); /* cannot happen, store_exon() is sane */
   had_err = genome_node_traverse_children(gn_2, exons_2, store_exon, false,
-                                          env);
+                                          NULL);
   assert(!had_err); /* cannot happen, store_exon() is sane */
 
   /* sort exon ranges */
@@ -576,12 +576,12 @@ typedef struct {
         *mRNAs;
 } Store_gene_feature_info;
 
-static int store_gene_feature(GenomeNode *gn, void *data, Env *env)
+static int store_gene_feature(GenomeNode *gn, void *data, Error *e)
 {
   GenomeFeature *gf;
   Store_gene_feature_info *info = (Store_gene_feature_info*) data;
   Range range;
-  env_error_check(env);
+  error_check(e);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf && info);
   switch (genome_feature_get_type(gf)) {
@@ -598,7 +598,7 @@ static int store_gene_feature(GenomeNode *gn, void *data, Env *env)
   return 0;
 }
 
-static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
+static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2)
 {
   Array *exons_1, *exons_2, *mRNAs_1, *mRNAs_2;
   Store_gene_feature_info info;
@@ -616,12 +616,12 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
   info.exons = exons_1;
   info.mRNAs = mRNAs_1;
   had_err = genome_node_traverse_direct_children(gn_1, &info,
-                                                 store_gene_feature, env);
+                                                 store_gene_feature, NULL);
   assert(!had_err); /* cannot happen, store_gene_feature() is sane */
   info.exons = exons_2;
   info.mRNAs = mRNAs_2;
   had_err = genome_node_traverse_direct_children(gn_2, &info,
-                                                 store_gene_feature, env);
+                                                 store_gene_feature, NULL);
   assert(!had_err); /* cannot happen, store_gene_feature() is sane */
 
   /* sort exon ranges */
@@ -639,7 +639,7 @@ static bool genes_are_equal(GenomeNode *gn_1, GenomeNode *gn_2, Env *env)
     for (i = 0; i < array_size(mRNAs_1); i++) {
       assert(equal);
       equal = mRNAs_are_equal(*(GenomeNode**) array_get(mRNAs_1, i),
-                              *(GenomeNode**) array_get(mRNAs_2, i), env);
+                              *(GenomeNode**) array_get(mRNAs_2, i));
       if (!equal)
         break;
     }
@@ -682,8 +682,7 @@ static void store_predicted_exon(TranscriptEvaluators *te, GenomeNode *gn)
 
 /* adds exon only if necessary */
 static void add_predicted_collapsed(Dlist *used_exons, Range *predicted_range,
-                                    Evaluator *exon_evaluator_collapsed,
-                                    Env *env)
+                                    Evaluator *exon_evaluator_collapsed)
 {
   Range *used_range;
   if (!dlist_find(used_exons, predicted_range)) {
@@ -698,11 +697,10 @@ static void add_predicted_collapsed(Dlist *used_exons, Range *predicted_range,
 static void store_predicted_exon_collapsed(TranscriptUsedExons *used_exons,
                                            Range *predicted_range,
                                            TranscriptEvaluators *te,
-                                           GenomeNode *gn, Env *env)
+                                           GenomeNode *gn)
 {
   add_predicted_collapsed(transcript_used_exons_get_all(used_exons),
-                          predicted_range, transcript_evaluators_get_all(te),
-                          env);
+                          predicted_range, transcript_evaluators_get_all(te));
   switch (genome_feature_get_transcriptfeaturetype((GenomeFeature*) gn)) {
     case TRANSCRIPT_FEATURE_TYPE_UNDETERMINED:
       /* we do not show a warning here, because store_predicted_exon() has been
@@ -710,23 +708,23 @@ static void store_predicted_exon_collapsed(TranscriptUsedExons *used_exons,
     case TRANSCRIPT_FEATURE_TYPE_SINGLE:
       add_predicted_collapsed(transcript_used_exons_get_single(used_exons),
                               predicted_range,
-                              transcript_evaluators_get_single(te), env);
+                              transcript_evaluators_get_single(te));
       break;
     case TRANSCRIPT_FEATURE_TYPE_INITIAL:
       add_predicted_collapsed(transcript_used_exons_get_initial(used_exons),
                               predicted_range,
-                              transcript_evaluators_get_initial(te), env);
-          break;
+                              transcript_evaluators_get_initial(te));
+      break;
     case TRANSCRIPT_FEATURE_TYPE_INTERNAL:
       add_predicted_collapsed(transcript_used_exons_get_internal(used_exons),
                               predicted_range,
-                              transcript_evaluators_get_internal(te), env);
-          break;
+                              transcript_evaluators_get_internal(te));
+      break;
     case TRANSCRIPT_FEATURE_TYPE_TERMINAL:
       add_predicted_collapsed(transcript_used_exons_get_terminal(used_exons),
                               predicted_range,
-                              transcript_evaluators_get_terminal(te), env);
-          break;
+                              transcript_evaluators_get_terminal(te));
+      break;
   }
 }
 
@@ -863,7 +861,7 @@ static void store_true_exon(GenomeNode *gn, Strand predicted_strand,
   }
 }
 
-static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
+static int process_predicted_feature(GenomeNode *gn, void *data, Error *e)
 {
   ProcessPredictedFeatureInfo *info = (ProcessPredictedFeatureInfo*) data;
   Range predicted_range;
@@ -872,7 +870,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
   Array *real_genome_nodes;
   GenomeNode **real_gn;
 
-  env_error_check(env);
+  error_check(e);
   assert(gn && data);
 
   predicted_range = genome_node_get_range(gn);
@@ -899,12 +897,12 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                            NULL,
                            predicted_strand == STRAND_FORWARD
                            ? info->slot->overlapped_genes_forward
-                           : info->slot->overlapped_genes_reverse, env);
+                           : info->slot->overlapped_genes_reverse);
           if (array_size(real_genome_nodes)) {
             /* gene(s) with the same range found -> check if they are equal */
             for (i = 0; i < array_size(real_genome_nodes); i++) {
               real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
-              if (genes_are_equal(gn, *real_gn, env)) {
+              if (genes_are_equal(gn, *real_gn)) {
                 if (predicted_strand == STRAND_FORWARD) {
                   num = real_gn - (GenomeNode**)
                         array_get_space(info->slot->genes_forward);
@@ -968,12 +966,12 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                            NULL,
                            predicted_strand == STRAND_FORWARD
                            ? info->slot->overlapped_mRNAs_forward
-                           : info->slot->overlapped_mRNAs_reverse, env);
+                           : info->slot->overlapped_mRNAs_reverse);
           if (array_size(real_genome_nodes)) {
             /* mRNA(s) with the same range found -> check if they are equal */
             for (i = 0; i < array_size(real_genome_nodes); i++) {
               real_gn = *(GenomeNode***) array_get(real_genome_nodes, i);
-              if (mRNAs_are_equal(gn, *real_gn, env)) {
+              if (mRNAs_are_equal(gn, *real_gn)) {
                 if (predicted_strand == STRAND_FORWARD) {
                   num = real_gn - (GenomeNode**)
                         array_get_space(info->slot->mRNAs_forward);
@@ -1026,7 +1024,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                        array_get_space(info->slot->LTRs),
                        array_size(info->slot->LTRs), sizeof (GenomeNode*),
                        (CompareWithData) genome_node_compare_delta,
-                       &info->LTRdelta, info->slot->overlapped_LTRs, env);
+                       &info->LTRdelta, info->slot->overlapped_LTRs);
 
       if (array_size(real_genome_nodes)) {
         for (i = 0; i < array_size(real_genome_nodes); i++) {
@@ -1057,8 +1055,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                      ? info->slot->used_mRNA_exons_forward
                                      : info->slot->used_mRNA_exons_reverse,
                                      &predicted_range,
-                                     info->mRNA_exon_evaluators_collapsed, gn,
-                                     env);
+                                     info->mRNA_exon_evaluators_collapsed, gn);
 
       /* determine true exon (mRNA level)*/
       switch (predicted_strand) {
@@ -1101,8 +1098,7 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
                                      ? info->slot->used_CDS_exons_forward
                                      : info->slot->used_CDS_exons_reverse,
                                      &predicted_range,
-                                     info->CDS_exon_evaluators_collapsed, gn,
-                                     env);
+                                     info->CDS_exon_evaluators_collapsed, gn);
 
       /* determine true exon (CDS level) */
       switch (predicted_strand) {
@@ -1231,7 +1227,7 @@ int compute_nucleotides_values(void *key, void *value, void *data, Error *e)
 }
 
 int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
-                              GenomeVisitor *gv, Env *env)
+                              GenomeVisitor *gv, Error *e)
 {
   GenomeNode *gn;
   SequenceRegion *sr;
@@ -1241,7 +1237,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   ProcessPredictedFeatureInfo predicted_info;
   int had_err;
 
-  env_error_check(env);
+  error_check(e);
   assert(se);
 
   /* init */
@@ -1265,7 +1261,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   predicted_info.wrong_LTRs  = &se->wrong_LTRs;
 
   /* process the reality stream completely */
-  while (!(had_err = genome_stream_next_tree(se->reality, &gn, env)) && gn) {
+  while (!(had_err = genome_stream_next_tree(se->reality, &gn, e)) && gn) {
     sr = genome_node_cast(sequence_region_class(), gn);
     if (sr) {
       /* each sequence region gets its own ``slot'' */
@@ -1286,13 +1282,14 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       assert(slot);
       /* store the exons */
       real_info.slot = slot;
-      genome_feature_determine_transcripttypes(gf, env);
+      genome_feature_determine_transcripttypes(gf);
       had_err = genome_node_traverse_children(gn, &real_info,
-                                              process_real_feature, false, env);
+                                              process_real_feature, false,
+                                              NULL);
       assert(!had_err); /* cannot happen, process_real_feature() is sane */
     }
     if (gv)
-      genome_node_accept(gn, gv, env);
+      genome_node_accept(gn, gv, e);
     genome_node_rec_delete(gn);
   }
 
@@ -1304,7 +1301,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
   /* process the prediction stream */
   if (!had_err) {
-    while (!(had_err = genome_stream_next_tree(se->prediction, &gn, env)) &&
+    while (!(had_err = genome_stream_next_tree(se->prediction, &gn, e)) &&
            gn) {
       gf = genome_node_cast(genome_feature_class(), gn);
       /* we consider only genome features */
@@ -1313,10 +1310,10 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
         slot = hashtable_get(se->slots, str_get(genome_node_get_seqid(gn)));
         if (slot) {
           predicted_info.slot = slot;
-          genome_feature_determine_transcripttypes(gf, env);
+          genome_feature_determine_transcripttypes(gf);
           had_err = genome_node_traverse_children(gn, &predicted_info,
                                                   process_predicted_feature,
-                                                  false, env);
+                                                  false, NULL);
           assert(!had_err); /* cannot happen, process_predicted_feature() is
                                sane */
         }
@@ -1327,7 +1324,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
         }
       }
       if (gv)
-        genome_node_accept(gn, gv, env);
+        had_err = genome_node_accept(gn, gv, e);
       genome_node_rec_delete(gn);
     }
   }

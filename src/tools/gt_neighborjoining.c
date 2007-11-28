@@ -83,7 +83,7 @@ int gt_neighborjoining(int argc, const char **argv, Env *env)
   if (use_hard_coded_example)
     nj = neighborjoining_new(5, NULL, exampledistfunc, env);
   else {
-    bioseq = bioseq_new(argv[1], env);
+    bioseq = bioseq_new(argv[1], env_error(env));
     if (!bioseq)
       had_err = -1;
     if (!had_err) {

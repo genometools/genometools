@@ -23,7 +23,7 @@
 /* the multiple sequence alignment (MSA) class */
 typedef struct MSA MSA;
 
-MSA*          msa_new(const char *MSA_filename, Env*);
+MSA*          msa_new(const char *MSA_filename, Error*);
 unsigned long msa_consensus_distance(const MSA*, Env*);
 unsigned long msa_sum_of_pairwise_scores(const MSA*, Env*);
 void          msa_show(MSA*); /* on stdout */

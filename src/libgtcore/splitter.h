@@ -22,12 +22,12 @@
 
 typedef struct Splitter Splitter;
 
-Splitter*     splitter_new(Env *env);
+Splitter*     splitter_new(void);
 
 /* split 'string' of given 'length' into tokens delimited by 'delimiter'.
    'string' is modified in the splitting process! */
 void          splitter_split(Splitter*, char *string, unsigned long length,
-                             char delimiter, Env*);
+                             char delimiter);
 
 /* get all tokens */
 char**        splitter_get_tokens(Splitter*);
@@ -42,6 +42,6 @@ void          splitter_reset(Splitter*);
 unsigned long splitter_size(Splitter*);
 
 int           splitter_unit_test(Env*);
-void          splitter_delete(Splitter*, Env*);
+void          splitter_delete(Splitter*);
 
 #endif

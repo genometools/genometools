@@ -31,18 +31,18 @@ struct SpliceSiteInfoStream
         genome_stream_cast(splicesiteinfo_stream_class(), GS)
 
 static int splicesiteinfo_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                        Env *env)
+                                           Error *e)
 {
   SpliceSiteInfoStream *splicesiteinfo_stream;
   int had_err;
-  env_error_check(env);
+  error_check(e);
   splicesiteinfo_stream = splicesiteinfo_stream_cast(gs);
-  had_err = genome_stream_next_tree(splicesiteinfo_stream->in_stream, gn, env);
+  had_err = genome_stream_next_tree(splicesiteinfo_stream->in_stream, gn, e);
   if (!had_err) {
     assert(splicesiteinfo_stream->splicesiteinfo_visitor);
     if (*gn) {
       had_err = genome_node_accept(*gn, splicesiteinfo_stream
-                                        ->splicesiteinfo_visitor, env);
+                                        ->splicesiteinfo_visitor, e);
       if (had_err) {
         /* we own the node -> delete it */
         genome_node_rec_delete(*gn);
@@ -68,13 +68,12 @@ const GenomeStreamClass* splicesiteinfo_stream_class(void)
 }
 
 GenomeStream* splicesiteinfo_stream_new(GenomeStream *in_stream,
-                                        RegionMapping *rm, Env *env)
+                                        RegionMapping *rm)
 {
-  GenomeStream *gs = genome_stream_create(splicesiteinfo_stream_class(), false,
-                                          env);
+  GenomeStream *gs = genome_stream_create(splicesiteinfo_stream_class(), false);
   SpliceSiteInfoStream *ssis = splicesiteinfo_stream_cast(gs);
   ssis->in_stream = in_stream;
-  ssis->splicesiteinfo_visitor = splicesiteinfo_visitor_new(rm, env);
+  ssis->splicesiteinfo_visitor = splicesiteinfo_visitor_new(rm);
   return gs;
 }
 

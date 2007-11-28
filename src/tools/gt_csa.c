@@ -89,13 +89,13 @@ int gt_csa(int argc, const char **argv, Env *env)
   /* create the streams */
   gff3_in_stream  = gff3_in_stream_new_sorted(argv[parsed_args],
                                               arguments.verbose &&
-                                              arguments.outfp, env);
-  csa_stream      = csa_stream_new(gff3_in_stream, arguments.join_length, env);
-  gff3_out_stream = gff3_out_stream_new(csa_stream, arguments.outfp, env);
+                                              arguments.outfp);
+  csa_stream      = csa_stream_new(gff3_in_stream, arguments.join_length);
+  gff3_out_stream = gff3_out_stream_new(csa_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
-         gn) {
+  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn,
+                                             env_error(env))) && gn) {
     genome_node_rec_delete(gn);
   }
 

@@ -29,7 +29,7 @@ bool           file_exists(const char*);
 /* returns true if the file with path <a> has a later modification time than the
    file with path <b>, false otherwise. */
 bool           file_is_newer(const char *a, const char *b);
-unsigned long  file_number_of_lines(const char*, Env*);
+unsigned long  file_number_of_lines(const char*);
 
 /* set <path> to the dirname of <file>, if it has one, to "" otherwise */
 void           file_dirname(Str *path, const char *file, Env*);

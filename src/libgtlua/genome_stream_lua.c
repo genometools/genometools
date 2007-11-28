@@ -28,15 +28,13 @@ static int gff3_in_stream_lua_new_sorted(lua_State *L)
 {
   GenomeStream **gs;
   const char *filename;
-  Env *env;
   assert(L);
   /* get/check parameters */
   filename = luaL_checkstring(L, 1);
   luaL_argcheck(L, file_exists(filename), 1, "file does not exist");
   /* construct object */
-  env = get_env_from_registry(L);
   gs = lua_newuserdata(L, sizeof (GenomeStream*));
-  *gs = gff3_in_stream_new_sorted(filename, false, env);
+  *gs = gff3_in_stream_new_sorted(filename, false);
   assert(*gs);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
   lua_setmetatable(L, -2);
@@ -46,11 +44,10 @@ static int gff3_in_stream_lua_new_sorted(lua_State *L)
 static int gff3_out_stream_lua_new(lua_State *L)
 {
   GenomeStream **out_stream, **in_stream = check_genome_stream(L, 1);
-  Env *env = get_env_from_registry(L);
   assert(L);
   /* construct object */
   out_stream = lua_newuserdata(L, sizeof (GenomeStream*));
-  *out_stream = gff3_out_stream_new(*in_stream, NULL, env);
+  *out_stream = gff3_out_stream_new(*in_stream, NULL);
   assert(*out_stream);
   luaL_getmetatable(L, GENOME_STREAM_METATABLE);
   lua_setmetatable(L, -2);
@@ -61,13 +58,14 @@ static int genome_stream_lua_next_tree(lua_State *L)
 {
   GenomeStream **gs = check_genome_stream(L, 1);
   GenomeNode *gn;
-  Env *env = get_env_from_registry(L);
-  if (genome_stream_next_tree(*gs, &gn, env))
-    return luagt_error(L, env); /* handle error */
+  Error *e = error_new();
+  if (genome_stream_next_tree(*gs, &gn, e))
+    return luagt_error(L, e); /* handle error */
   else if (gn)
     genome_node_lua_push(L, gn);
   else
     lua_pushnil(L);
+  error_delete(e);
   return 1;
 }
 

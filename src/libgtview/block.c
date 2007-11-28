@@ -43,11 +43,10 @@ static int elemcmp(const void *a, const void *b)
   return range_compare(ra, rb);
 }
 
-Block* block_new(Env *env)
+Block* block_new(void)
 {
   Block *block;
   Range r;
-  env_error_check(env);
   block = ma_malloc(sizeof (Block));
   block->elements = dlist_new(elemcmp);
   r.start = 0;
@@ -59,17 +58,17 @@ Block* block_new(Env *env)
   return block;
 }
 
-Block* block_new_from_node(GenomeNode *node, Env *env)
+Block* block_new_from_node(GenomeNode *node)
 {
   Block *block;
   assert(node);
-  block = block_new(env);
+  block = block_new();
   block_set_range(block, genome_node_get_range(node));
   block_set_strand(block, genome_feature_get_strand((GenomeFeature*) node));
   return block;
 }
 
-void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
+void block_insert_element(Block *block, GenomeNode *gn, Config *cfg)
 {
   Dlistelem *elem;
   Range elem_r, gn_r;
@@ -115,7 +114,7 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
             }
             else
               element_set_range(element, elem_r);
-            e = element_new_empty(env);
+            e = element_new_empty();
             element_set_range(e, gn_r);
             element_set_type(e, gn_type);
             dlist_add(block->elements, e);
@@ -141,7 +140,7 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
             }
             else
               element_set_range(element, elem_r);
-            e = element_new(gn, env);
+            e = element_new(gn);
             element_set_range(e, gn_r);
             element_set_type(e, gn_type);
             dlist_add(block->elements, e);
@@ -176,7 +175,7 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
               element_set_range(element, elem_r);
             gnnew_r = gn_r;
             gnnew_r.end = elem_r.end;
-            e = element_new_empty(env);
+            e = element_new_empty();
             element_set_range(e, gnnew_r);
             element_set_type(e, e_type);
             dlist_add(block->elements, e);
@@ -203,10 +202,10 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
             elem_r.end = gn_r.start-1;
             element_set_range(element, elem_r);
             elemnew_r.start = gn_r.end+1;
-            elemnew = element_new_empty(env);
+            elemnew = element_new_empty();
             element_set_range(elemnew, elemnew_r);
             element_set_type(elemnew, e_type);
-            e = element_new(gn, env);
+            e = element_new(gn);
             dlist_add(block->elements, elemnew);
             dlist_add(block->elements, e);
             break;
@@ -215,7 +214,7 @@ void block_insert_element(Block *block, GenomeNode *gn, Config *cfg, Env *env)
     }
   }
   if (count == 0) {
-    e = element_new(gn, env);
+    e = element_new(gn);
     dlist_add(block->elements, e);
   }
 }
@@ -325,16 +324,16 @@ int block_unit_test(Env* env)
   gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0);
   gn2 = genome_feature_new(gft_intron, r2, STRAND_FORWARD, NULL, 0);
 
-  e1 = element_new(gn1, env);
-  e2 = element_new(gn2, env);
+  e1 = element_new(gn1);
+  e2 = element_new(gn2);
 
-  b = block_new(env);
+  b = block_new();
 
   /* test block_insert_elements */
   ensure(had_err, (0UL == dlist_size(block_get_elements(b))));
-  block_insert_element(b, gn1, cfg, env);
+  block_insert_element(b, gn1, cfg);
   ensure(had_err, (1UL == dlist_size(block_get_elements(b))));
-  block_insert_element(b, gn2, cfg, env);
+  block_insert_element(b, gn2, cfg);
   ensure(had_err, (2UL == dlist_size(block_get_elements(b))));
 
   /* test block_get_elements */

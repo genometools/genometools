@@ -63,12 +63,12 @@ static void sequence_region_set_seqid(GenomeNode *gn, Str *seqid)
   sr->seqid = str_ref(seqid);
 }
 
-static int sequence_region_accept(GenomeNode *gn, GenomeVisitor *gv, Env *env)
+static int sequence_region_accept(GenomeNode *gn, GenomeVisitor *gv, Error *e)
 {
   SequenceRegion *sr;
-  env_error_check(env);
+  error_check(e);
   sr = sequence_region_cast(gn);
-  return genome_visitor_visit_sequence_region(gv, sr, env);
+  return genome_visitor_visit_sequence_region(gv, sr, e);
 }
 
 const GenomeNodeClass* sequence_region_class()

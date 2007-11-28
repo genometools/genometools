@@ -29,6 +29,6 @@ typedef struct FeatureStream FeatureStream;
 const GenomeStreamClass* feature_stream_class(void);
 
 /* create a FeatureStream which writes to FeatureIndex */
-GenomeStream*            feature_stream_new(GenomeStream*, FeatureIndex*, Env*);
+GenomeStream*            feature_stream_new(GenomeStream*, FeatureIndex*);
 
 #endif

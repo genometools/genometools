@@ -39,7 +39,7 @@ struct Graphics {
 };
 
 void graphics_initialize(Graphics *g, const char *filename, unsigned int width,
-                         unsigned int height, Env *env)
+                         unsigned int height)
 {
   g->filename = filename;
   g->cr = cairo_create(g->surf);
@@ -55,32 +55,32 @@ void graphics_initialize(Graphics *g, const char *filename, unsigned int width,
 }
 
 Graphics* graphics_new_png(const char *filename, unsigned int width,
-                           unsigned int height, Env *env)
+                           unsigned int height)
 {
   Graphics *g = ma_malloc(sizeof (Graphics));
   g->type = PNG;
   g->surf = cairo_image_surface_create(CAIRO_FORMAT_RGB24, width, height);
-  graphics_initialize(g, filename, width, height, env);
+  graphics_initialize(g, filename, width, height);
   return g;
 }
 
 Graphics* graphics_new_pdf(const char *filename, unsigned int width,
-                           unsigned int height, Env *env)
+                           unsigned int height)
 {
   Graphics *g = ma_malloc(sizeof (Graphics));
   g->type = PDF;
   g->surf = cairo_pdf_surface_create(filename, width, height);
-  graphics_initialize(g, filename, width, height, env);
+  graphics_initialize(g, filename, width, height);
   return g;
 }
 
 Graphics* graphics_new_ps(const char *filename, unsigned int width,
-                          unsigned int height, Env *env)
+                          unsigned int height)
 {
   Graphics *g = ma_malloc(sizeof (Graphics));
   g->type = PS;
   g->surf = cairo_ps_surface_create(filename, width, height);
-  graphics_initialize(g, filename, width, height, env);
+  graphics_initialize(g, filename, width, height);
   return g;
 }
 
@@ -392,10 +392,10 @@ void graphics_draw_arrowhead(Graphics *g, double x, double y,
   cairo_restore(g->cr);
 }
 
-int graphics_save(const Graphics *g, Env *env)
+int graphics_save(const Graphics *g, Error *e)
 {
   cairo_status_t rval = CAIRO_STATUS_SUCCESS;
-  env_error_check(env);
+  error_check(e);
   assert(g);
 
   switch (g->type)
@@ -413,14 +413,14 @@ int graphics_save(const Graphics *g, Env *env)
   }
   assert(rval == CAIRO_STATUS_SUCCESS || rval == CAIRO_STATUS_WRITE_ERROR);
   if (rval == CAIRO_STATUS_WRITE_ERROR) {
-    env_error_set(env, "an I/O error occurred while attempting to write image "
-                  "file \"%s\"", g->filename);
+    error_set(e, "an I/O error occurred while attempting to write image file "
+                 "\"%s\"", g->filename);
     return -1;
   }
   return 0;
 }
 
-void graphics_delete(Graphics *g, Env *env)
+void graphics_delete(Graphics *g)
 {
   if (!g) return;
   cairo_surface_destroy(g->surf); /* reference counted */

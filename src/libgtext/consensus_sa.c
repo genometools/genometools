@@ -37,7 +37,7 @@ typedef struct {
 static bool set_of_sas_is_sorted(const void *set_of_sas,
                                  unsigned long number_of_sas,
                                  size_t size_of_sa, GetGenomicRangeFunc
-                                 get_genomic_range, Env *env)
+                                 get_genomic_range)
 {
   Range range_a, range_b;
   unsigned long max_end;
@@ -86,10 +86,10 @@ static Strand extract_strand(const ConsensusSA *csa, unsigned long sa)
 }
 
 static void extract_exons(const ConsensusSA *csa, Array *exon_ranges,
-                          unsigned long sa, Env *env)
+                          unsigned long sa)
 {
   assert(csa && exon_ranges && csa->set_of_sas && sa < csa->number_of_sas);
-  csa->get_exons(exon_ranges, csa->set_of_sas + csa->size_of_sa * sa, env);
+  csa->get_exons(exon_ranges, csa->set_of_sas + csa->size_of_sa * sa);
   assert(array_size(exon_ranges));
   assert(ranges_are_sorted_and_do_not_overlap(exon_ranges));
 }
@@ -111,7 +111,7 @@ static bool has_acceptor_site(Array *gene, unsigned long exon)
 }
 
 static bool compatible(const ConsensusSA *csa,
-                       unsigned long sa_1, unsigned long sa_2, Env *env)
+                       unsigned long sa_1, unsigned long sa_2)
 {
   Array *exons_sa_1, *exons_sa_2;
   Range range_sa_1, range_sa_2;
@@ -140,8 +140,8 @@ static bool compatible(const ConsensusSA *csa,
   }
 
   /* get exons */
-  extract_exons(csa, exons_sa_1, sa_1, env);
-  extract_exons(csa, exons_sa_2, sa_2, env);
+  extract_exons(csa, exons_sa_1, sa_1);
+  extract_exons(csa, exons_sa_2, sa_2);
 
   /* determine the first overlapping exon pair */
   i = 0;
@@ -263,7 +263,7 @@ static bool compatible(const ConsensusSA *csa,
 }
 
 static bool contains(const ConsensusSA *csa,
-                     unsigned long sa_1, unsigned long sa_2, Env *env)
+                     unsigned long sa_1, unsigned long sa_2)
 {
   Range range_sa_1, range_sa_2;
   assert(csa);
@@ -272,20 +272,18 @@ static bool contains(const ConsensusSA *csa,
   range_sa_1 = extract_genomic_range(csa, sa_1);
   range_sa_2 = extract_genomic_range(csa, sa_2);
 
-  if (range_contains(range_sa_1, range_sa_2) &&
-      compatible(csa, sa_1, sa_2, env)) {
+  if (range_contains(range_sa_1, range_sa_2) && compatible(csa, sa_1, sa_2))
     return true;
-  }
   return false;
 }
 
-static void compute_C(Bittab **C, const ConsensusSA *csa, Env *env)
+static void compute_C(Bittab **C, const ConsensusSA *csa)
 {
   unsigned long sa, sa_1;
   assert(csa);
   for (sa = 0; sa < csa->number_of_sas; sa++) {
     for (sa_1 = 0; sa_1 < csa->number_of_sas; sa_1++) {
-      if (contains(csa, sa, sa_1, env))
+      if (contains(csa, sa, sa_1))
         bittab_set_bit(C[sa], sa_1);
     }
     assert(bittab_bit_is_set(C[sa], sa));
@@ -296,14 +294,13 @@ static void compute_left_or_right(Bittab **left_or_right,
                                   const ConsensusSA *csa,
                                   bool (*cmp_func) (const ConsensusSA *csa,
                                                     unsigned long sa_1,
-                                                    unsigned long sa_2),
-                                                    Env *env)
+                                                    unsigned long sa_2))
 {
   unsigned long sa, sa_1;
   assert(csa && left_or_right && *left_or_right);
   for (sa = 0; sa < csa->number_of_sas; sa++) {
     for (sa_1 = 0; sa_1 < csa->number_of_sas; sa_1++) {
-      if (cmp_func(csa, sa, sa_1) && compatible(csa, sa, sa_1, env))
+      if (cmp_func(csa, sa, sa_1) && compatible(csa, sa, sa_1))
         bittab_set_bit(left_or_right[sa], sa_1);
     }
   }
@@ -333,20 +330,20 @@ static bool is_left_of(const ConsensusSA *csa,
   return false;
 }
 
-static void compute_left(Bittab **left, const ConsensusSA *csa, Env *env)
+static void compute_left(Bittab **left, const ConsensusSA *csa)
 {
   assert(csa);
-  compute_left_or_right(left, csa, is_right_of, env);
+  compute_left_or_right(left, csa, is_right_of);
 }
 
-static void compute_right(Bittab **right, const ConsensusSA *csa, Env *env)
+static void compute_right(Bittab **right, const ConsensusSA *csa)
 {
   assert(csa);
-  compute_left_or_right(right, csa, is_left_of, env);
+  compute_left_or_right(right, csa, is_left_of);
 }
 
 static void compute_L(Bittab **L, Bittab **C, Bittab **left,
-                      unsigned long number_of_sas, Env *env)
+                      unsigned long number_of_sas)
 {
   unsigned long sa, sa_1, sa_2, sa_1_size = 0, sa_2_size;
   Bittab *tmpset = bittab_new(number_of_sas);
@@ -387,7 +384,7 @@ static void compute_L(Bittab **L, Bittab **C, Bittab **left,
 }
 
 static void compute_R(Bittab **R, Bittab **C, Bittab **right,
-                      unsigned long number_of_sas, Env *env)
+                      unsigned long number_of_sas)
 {
   unsigned long sa_1, sa_2, sa_1_size = 0, sa_2_size;
   long sa;
@@ -428,8 +425,7 @@ static void compute_R(Bittab **R, Bittab **C, Bittab **right,
 }
 
 #ifndef NDEBUG
-static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa,
-                                 Env *env)
+static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa)
 {
   Bittab *SA_p_complement; /* SA \ SA_p */
   unsigned long sa, sa_prime;
@@ -445,7 +441,7 @@ static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa,
     for (sa  = bittab_get_first_bitnum(SA_p);
          sa != bittab_get_last_bitnum(SA_p);
          sa  = bittab_get_next_bitnum(SA_p, sa)) {
-      if (!compatible(csa, sa, sa_prime, env)) {
+      if (!compatible(csa, sa, sa_prime)) {
         incompatible_found = true;
         break;
       }
@@ -457,7 +453,7 @@ static bool splice_form_is_valid(Bittab *SA_p, const ConsensusSA *csa,
 }
 #endif
 
-static void compute_csas(ConsensusSA *csa, Env *env)
+static void compute_csas(ConsensusSA *csa)
 {
   unsigned long i, sa_i, sa_i_size = 0, sa_prime, sa_prime_size;
   Array *splice_form;
@@ -489,11 +485,11 @@ static void compute_csas(ConsensusSA *csa, Env *env)
   splice_form = array_new(sizeof (unsigned long));
 
   /* compute sets */
-  compute_C(C, csa, env);
-  compute_left(left, csa, env);
-  compute_right(right, csa, env);
-  compute_L(L, C, left, csa->number_of_sas, env);
-  compute_R(R, C, right, csa->number_of_sas, env);
+  compute_C(C, csa);
+  compute_left(left, csa);
+  compute_right(right, csa);
+  compute_L(L, C, left, csa->number_of_sas);
+  compute_R(R, C, right, csa->number_of_sas);
 
   /* U_0 = SA */
   for (i = 0; i < csa->number_of_sas; i++)
@@ -525,14 +521,14 @@ static void compute_csas(ConsensusSA *csa, Env *env)
     }
 
     /* make sure the computed splice form is maximal w.r.t. to compatibility */
-    assert(splice_form_is_valid(SA_i, csa, env));
+    assert(splice_form_is_valid(SA_i, csa));
 
     /* process splice form */
     if (csa->process_splice_form) {
       array_reset(splice_form);
       bittab_get_all_bitnums(SA_i, splice_form);
       csa->process_splice_form(splice_form, csa->set_of_sas, csa->number_of_sas,
-                               csa->size_of_sa, csa->userdata, env);
+                               csa->size_of_sa, csa->userdata);
     }
 
     /* U_i = U_i-1 \ SA_i */
@@ -568,14 +564,13 @@ static void compute_csas(ConsensusSA *csa, Env *env)
 void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
                   size_t size_of_sa, GetGenomicRangeFunc get_genomic_range,
                   GetStrandFunc get_strand, GetExonsFunc get_exons,
-                  ProcessSpliceFormFunc process_splice_form, void *userdata,
-                  Env *env)
+                  ProcessSpliceFormFunc process_splice_form, void *userdata)
 {
   ConsensusSA csa;
   assert(set_of_sas && number_of_sas && size_of_sa);
   assert(get_genomic_range && get_strand && get_exons);
   assert(set_of_sas_is_sorted(set_of_sas, number_of_sas, size_of_sa,
-                              get_genomic_range, env));
+                              get_genomic_range));
   log_log("csa number_of_sas=%lu", number_of_sas);
 
   /* init */
@@ -589,7 +584,7 @@ void consensus_sa(const void *set_of_sas, unsigned long number_of_sas,
   csa.userdata            = userdata;
 
   /* computation */
-  compute_csas(&csa, env);
+  compute_csas(&csa);
 
   log_log("csa finished");
 }

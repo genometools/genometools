@@ -30,15 +30,15 @@ struct AddIntronsStream{
         genome_stream_cast(addintrons_stream_class(), GS)
 
 static int addintrons_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                             Env *env)
+                                       Error *e)
 {
   AddIntronsStream *ais;
   int had_err;
-  env_error_check(env);
+  error_check(e);
   ais = addintrons_stream_cast(gs);
-  had_err = genome_stream_next_tree(ais->in_stream, gn, env);
+  had_err = genome_stream_next_tree(ais->in_stream, gn, e);
   if (!had_err && *gn)
-    had_err = genome_node_accept(*gn, ais->addintrons_visitor, env);
+    had_err = genome_node_accept(*gn, ais->addintrons_visitor, e);
   return had_err;
 }
 
@@ -56,12 +56,12 @@ const GenomeStreamClass* addintrons_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* addintrons_stream_new(GenomeStream *in_stream, Env *env)
+GenomeStream* addintrons_stream_new(GenomeStream *in_stream)
 {
-  GenomeStream *gs = genome_stream_create(addintrons_stream_class(), true, env);
+  GenomeStream *gs = genome_stream_create(addintrons_stream_class(), true);
   AddIntronsStream *ais = addintrons_stream_cast(gs);
   assert(in_stream);
   ais->in_stream = in_stream;
-  ais->addintrons_visitor = addintrons_visitor_new(env);
+  ais->addintrons_visitor = addintrons_visitor_new();
   return gs;
 }

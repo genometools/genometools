@@ -86,13 +86,13 @@ int parse_double(double *out, const char *nptr)
 }
 
 int parse_range(Range *range, const char *start, const char *end,
-                unsigned long line_number, const char *filename, Env *env)
+                unsigned long line_number, const char *filename, Error *e)
 {
   long start_val, end_val;
   char *ep;
 
   assert(start && end && line_number && filename);
-  env_error_check(env);
+  error_check(e);
 
   range->start = UNDEF_ULONG;
   range->end = UNDEF_ULONG;
@@ -101,18 +101,18 @@ int parse_range(Range *range, const char *start, const char *end,
   errno = 0;
   start_val = strtol(start, &ep, 10);
   if (start[0] == '\0' || *ep != '\0') {
-    env_error_set(env, "could not parse number '%s$' on line %lu in file '%s'",
-                  start, line_number, filename);
+    error_set(e, "could not parse number '%s$' on line %lu in file '%s'", start,
+              line_number, filename);
     return -1;
   }
   if (errno == ERANGE && (start_val == LONG_MAX || start_val == LONG_MIN)) {
-    env_error_set(env, "number '%s' out of range on line %lu in file '%s'",
-                  start, line_number, filename);
+    error_set(e, "number '%s' out of range on line %lu in file '%s'", start,
+              line_number, filename);
     return -1;
   }
   if (start_val < 0) {
-    env_error_set(env, "start '%s' is negative on line %lu in file '%s'",
-              start, line_number, filename);
+    error_set(e, "start '%s' is negative on line %lu in file '%s'", start,
+              line_number, filename);
     return -1;
   }
 
@@ -120,25 +120,25 @@ int parse_range(Range *range, const char *start, const char *end,
   errno = 0;
   end_val = strtol(end, &ep, 10);
   if (end[0] == '\0' || *ep != '\0') {
-    env_error_set(env, "could not parse number '%s$' on line %lu in file '%s'",
-                  end, line_number, filename);
+    error_set(e, "could not parse number '%s$' on line %lu in file '%s'", end,
+              line_number, filename);
     return -1;
   }
   if (errno == ERANGE && (end_val == LONG_MAX || end_val == LONG_MIN)) {
-    env_error_set(env, "number '%s' out of range on line %lu in file '%s'",
-                  end, line_number, filename);
+    error_set(e, "number '%s' out of range on line %lu in file '%s'", end,
+              line_number, filename);
     return -1;
   }
   if (end_val < 0) {
-    env_error_set(env, "end '%s' is negative on line %lu in file '%s'",
-                  end, line_number, filename);
+    error_set(e, "end '%s' is negative on line %lu in file '%s'", end,
+              line_number, filename);
     return -1;
   }
 
   /* check range */
   if (start_val > end_val) {
-    env_error_set(env, "start '%lu' is larger then end '%lu' on line %lu in "
-              "file '%s'", start_val, end_val, line_number, filename);
+    error_set(e, "start '%lu' is larger then end '%lu' on line %lu in file "
+              "'%s'", start_val, end_val, line_number, filename);
     return -1;
   }
 
@@ -150,18 +150,18 @@ int parse_range(Range *range, const char *start, const char *end,
 }
 
 int parse_score(double *score_value, const char *score,
-                unsigned long line_number, const char *filename, Env *env)
+                unsigned long line_number, const char *filename, Error *e)
 {
   int rval;
 
   assert(score && line_number && filename);
-  env_error_check(env);
+  error_check(e);
 
   if (strlen(score) == 1 && score[0] == '.')
     *score_value = UNDEF_DOUBLE;
   else if ((rval = sscanf(score, "%lf", score_value)) != 1) {
-    env_error_set(env, "could not parse score '%s' on line %lu in file '%s'",
-              score, line_number, filename);
+    error_set(e, "could not parse score '%s' on line %lu in file '%s'", score,
+              line_number, filename);
     return -1;
   }
 
@@ -169,21 +169,20 @@ int parse_score(double *score_value, const char *score,
 }
 
 int parse_strand(Strand *strand_value, const char *strand,
-                 unsigned long line_number, const char *filename, Env *env)
+                 unsigned long line_number, const char *filename, Error *e)
 {
   assert(strand && line_number && filename);
-  env_error_check(env);
+  error_check(e);
 
   if (strlen(strand) != 1) {
-    env_error_set(env, "strand '%s' not one character long on line %lu in file "
-                  "'%s'", strand, line_number, filename);
+    error_set(e, "strand '%s' not one character long on line %lu in file '%s'",
+              strand, line_number, filename);
     *strand_value = STRAND_UNKNOWN;
     return -1;
   }
   if (strspn(strand, STRANDCHARS) != 1) {
-    env_error_set(env, "strand '%s' on line %lu in file '%s' not a valid "
-                  "character from the set '%s'", strand, line_number, filename,
-                   STRANDCHARS);
+    error_set(e, "strand '%s' on line %lu in file '%s' not a valid character "
+              "from the set '%s'", strand, line_number, filename, STRANDCHARS);
     *strand_value = STRAND_UNKNOWN;
     return -1;
   }
@@ -192,22 +191,20 @@ int parse_strand(Strand *strand_value, const char *strand,
 }
 
 int parse_phase(Phase *phase_value, const char *phase,
-                unsigned long line_number, const char *filename, Env *env)
+                unsigned long line_number, const char *filename, Error *e)
 {
   assert(phase && line_number && filename);
-  env_error_check(env);
+  error_check(e);
 
   if (strlen(phase) != 1) {
-    env_error_set(env,
-              "phase '%s' not one character long on line %lu in file '%s'",
+    error_set(e, "phase '%s' not one character long on line %lu in file '%s'",
               phase, line_number, filename);
     *phase_value = PHASE_UNDEFINED;
     return -1;
   }
   if (strspn(phase, PHASECHARS) != 1) {
-    env_error_set(env, "phase '%s' on line %lu in file '%s' not a valid "
-                  "character from the set '%s'", phase, line_number, filename,
-                  PHASECHARS);
+    error_set(e, "phase '%s' on line %lu in file '%s' not a valid character "
+              "from the set '%s'", phase, line_number, filename, PHASECHARS);
     *phase_value = PHASE_UNDEFINED;
     return -1;
   }

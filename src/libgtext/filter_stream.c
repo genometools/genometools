@@ -31,28 +31,28 @@ struct FilterStream
 #define filter_stream_cast(GS)\
         genome_stream_cast(filter_stream_class(), GS);
 
-static int filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
+static int filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
 {
   FilterStream *fs;
   int had_err;
-  env_error_check(env);
+  error_check(e);
   fs = filter_stream_cast(gs);
 
   /* we still have nodes in the buffer */
   if (filter_visitor_node_buffer_size(fs->filter_visitor)) {
     /* return one of them */
-    *gn = filter_visitor_get_node(fs->filter_visitor, env);
+    *gn = filter_visitor_get_node(fs->filter_visitor);
     return 0;
   }
 
   /* no nodes in the buffer -> get new nodes */
-  while (!(had_err = genome_stream_next_tree(fs->in_stream, gn, env)) && *gn) {
+  while (!(had_err = genome_stream_next_tree(fs->in_stream, gn, e)) && *gn) {
     assert(*gn && !had_err);
-    had_err = genome_node_accept(*gn, fs->filter_visitor, env);
+    had_err = genome_node_accept(*gn, fs->filter_visitor, e);
     if (had_err)
       break;
     if (filter_visitor_node_buffer_size(fs->filter_visitor)) {
-      *gn = filter_visitor_get_node(fs->filter_visitor, env);
+      *gn = filter_visitor_get_node(fs->filter_visitor);
       return 0;
     }
   }
@@ -80,17 +80,16 @@ GenomeStream* filter_stream_new(GenomeStream *in_stream,
                                 Str *seqid, Str *typefilter,
                                 unsigned long max_gene_length,
                                 unsigned long max_gene_num,
-                                double min_gene_score, Env *env)
+                                double min_gene_score)
 {
   GenomeStream *gs = genome_stream_create(filter_stream_class(),
-                                          genome_stream_is_sorted(in_stream),
-                                          env);
+                                          genome_stream_is_sorted(in_stream));
   FilterStream *filter_stream = filter_stream_cast(gs);
   assert(in_stream);
   filter_stream->in_stream = in_stream;
   filter_stream->filter_visitor = filter_visitor_new(seqid, typefilter,
                                                      max_gene_length,
                                                      max_gene_num,
-                                                     min_gene_score, env);
+                                                     min_gene_score);
   return gs;
 }

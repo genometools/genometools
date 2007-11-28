@@ -31,18 +31,18 @@ struct ExtractFeatStream
         genome_stream_cast(extractfeat_stream_class(), GS)
 
 static int extractfeat_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                        Env *env)
+                                        Error *e)
 {
   ExtractFeatStream *extractfeat_stream;
   int had_err;
-  env_error_check(env);
+  error_check(e);
   extractfeat_stream = extractfeat_stream_cast(gs);
-  had_err = genome_stream_next_tree(extractfeat_stream->in_stream, gn, env);
+  had_err = genome_stream_next_tree(extractfeat_stream->in_stream, gn, e);
   if (!had_err) {
     assert(extractfeat_stream->extractfeat_visitor);
     if (*gn) {
       had_err = genome_node_accept(*gn, extractfeat_stream->extractfeat_visitor,
-                                   env);
+                                   e);
       if (had_err) {
         /* we own the node -> delete it */
         genome_node_rec_delete(*gn);
@@ -69,13 +69,11 @@ const GenomeStreamClass* extractfeat_stream_class(void)
 
 GenomeStream* extractfeat_stream_new(GenomeStream *in_stream, RegionMapping *rm,
                                      GenomeFeatureType type,
-                                     bool join, bool translate, Env *env)
+                                     bool join, bool translate)
 {
-  GenomeStream *gs = genome_stream_create(extractfeat_stream_class(), true,
-                                          env);
+  GenomeStream *gs = genome_stream_create(extractfeat_stream_class(), true);
   ExtractFeatStream *efs = extractfeat_stream_cast(gs);
   efs->in_stream = in_stream;
-  efs->extractfeat_visitor = extractfeat_visitor_new(rm, type, join, translate,
-                                                     env);
+  efs->extractfeat_visitor = extractfeat_visitor_new(rm, type, join, translate);
   return gs;
 }

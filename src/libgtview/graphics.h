@@ -37,11 +37,11 @@ typedef struct Graphics Graphics;
    This constructor creates a Graphics that can be written out as an image file
    <filename>. */
 Graphics* graphics_new_png(const char *filename, unsigned int width,
-                           unsigned int height, Env*);
+                           unsigned int height);
 Graphics* graphics_new_pdf(const char *filename, unsigned int width,
-                           unsigned int height, Env*);
+                           unsigned int height);
 Graphics* graphics_new_ps(const char *filename, unsigned int width,
-                          unsigned int height, Env*);
+                          unsigned int height);
 void      graphics_draw_text(Graphics*, double x, double y, const char*);
 #define   graphics_draw_text_left(g,x,y,t) \
           graphics_draw_text(g,x,y,t);
@@ -82,8 +82,8 @@ void      graphics_draw_rectangle(Graphics*, double x, double y,
 void      graphics_draw_arrowhead(Graphics*, double x, double y, Color,
                                   ArrowStatus);
 /* Write out the Graphic to the chosen source. */
-int       graphics_save(const Graphics*, Env *env);
+int       graphics_save(const Graphics*, Error*);
 
-void      graphics_delete(Graphics*, Env*);
+void      graphics_delete(Graphics*);
 
 #endif

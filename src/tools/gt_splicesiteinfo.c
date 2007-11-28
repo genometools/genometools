@@ -86,8 +86,8 @@ int gt_splicesiteinfo(int argc, const char **argv, Env *env)
   if (!had_err) {
     /* create gff3 input stream */
     gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
-                                                 argv + parsed_args, false,
-                                                 false, env);
+                                                 argv + parsed_args,
+                                                 false, false);
 
     /* create region mapping */
     regionmapping = seqid2file_regionmapping_new(arguments.seqfile,
@@ -100,17 +100,17 @@ int gt_splicesiteinfo(int argc, const char **argv, Env *env)
   if (!had_err) {
     /* create addintrons stream (if necessary) */
     if (arguments.addintrons)
-      addintrons_stream = addintrons_stream_new(gff3_in_stream, env);
+      addintrons_stream = addintrons_stream_new(gff3_in_stream);
 
     /* create extract feature stream */
     splicesiteinfo_stream = splicesiteinfo_stream_new(arguments.addintrons
                                                       ? addintrons_stream
                                                       : gff3_in_stream,
-                                                      regionmapping, env);
+                                                      regionmapping);
 
     /* pull the features through the stream and free them afterwards */
     while (!(had_err = genome_stream_next_tree(splicesiteinfo_stream, &gn,
-                                               env)) && gn) {
+                                               env_error(env))) && gn) {
       genome_node_rec_delete(gn);
     }
   }

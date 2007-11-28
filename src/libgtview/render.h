@@ -30,7 +30,7 @@ typedef struct Render Render;
 Render* render_new(Config*);
 /* Render <diagram> to PNG file <filename> (relative to working directory) */
 int     render_to_png(Render*, Diagram *diagram, const char *filename,
-                      unsigned int width, Env*);
-void    render_delete(Render*, Env*);
+                      unsigned int width, Error*);
+void    render_delete(Render*);
 
 #endif

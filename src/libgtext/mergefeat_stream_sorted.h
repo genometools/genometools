@@ -25,6 +25,6 @@
 typedef struct MergefeatStreamSorted MergefeatStreamSorted;
 
 const GenomeStreamClass* mergefeat_stream_sorted_class(void);
-GenomeStream*            mergefeat_stream_sorted_new(GenomeStream*, Env*);
+GenomeStream*            mergefeat_stream_sorted_new(GenomeStream*);
 
 #endif

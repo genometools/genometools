@@ -46,7 +46,7 @@ static int render_lua_to_png(lua_State *L)
   Diagram **diagram;
   const char *filename;
   unsigned int width;
-  Env *env = get_env_from_registry(L);
+  Error *err;
   render = check_render(L);
   diagram = check_diagram(L, 2);
   filename = luaL_checkstring(L, 3);
@@ -54,17 +54,17 @@ static int render_lua_to_png(lua_State *L)
     width = luaL_checkint(L, 4);
   else
     width = DEFAULT_RENDER_WIDTH;
-  if (render_to_png(*render, *diagram, filename, width, env))
-    return luagt_error(L, env);
+  err = error_new();
+  if (render_to_png(*render, *diagram, filename, width, err))
+    return luagt_error(L, err);
+  error_delete(err);
   return 0;
 }
 
 static int render_lua_delete(lua_State *L)
 {
   Render **render = check_render(L);
-  Env *env;
-  env = get_env_from_registry(L);
-  render_delete(*render, env);
+  render_delete(*render);
   return 0;
 }
 

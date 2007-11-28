@@ -29,10 +29,10 @@
 typedef struct Bioseq Bioseq;
 
 /* construct a new bioseq object (and create the bioseq files, if necessary) */
-Bioseq*       bioseq_new(const char *sequence_file, Env*);
+Bioseq*       bioseq_new(const char *sequence_file, Error*);
 /* construct a new bioseq object (and always create the the bioseq files) */
-Bioseq*       bioseq_new_recreate(const char *sequence_file, Env*);
-Bioseq*       bioseq_new_str(Str* sequence_file, Env*);
+Bioseq*       bioseq_new_recreate(const char *sequence_file, Error*);
+Bioseq*       bioseq_new_str(Str* sequence_file, Error*);
 Alpha*        bioseq_get_alpha(Bioseq*);
 Seq*          bioseq_get_seq(Bioseq*, unsigned long);
 const char*   bioseq_get_description(Bioseq*, unsigned long);

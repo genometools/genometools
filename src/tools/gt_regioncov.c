@@ -71,14 +71,15 @@ int gt_regioncov(int argc, const char **argv, Env *env)
   /* create gff3 input stream */
   assert(parsed_args < argc);
   gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
-                                             arguments.verbose, env);
+                                             arguments.verbose);
 
   /* create region coverage visitor */
-  regioncov_visitor = regioncov_visitor_new(arguments.max_feature_dist, env);
+  regioncov_visitor = regioncov_visitor_new(arguments.max_feature_dist);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn, env)) && gn) {
-      had_err = genome_node_accept(gn, regioncov_visitor, env);
+  while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn,
+                                             env_error(env))) && gn) {
+      had_err = genome_node_accept(gn, regioncov_visitor, env_error(env));
       genome_node_rec_delete(gn);
   }
 

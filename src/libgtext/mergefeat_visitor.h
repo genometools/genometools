@@ -24,6 +24,6 @@ typedef struct MergefeatVisitor MergefeatVisitor;
 #include "libgtext/genome_visitor.h"
 
 const GenomeVisitorClass* mergefeat_visitor_class(void);
-GenomeVisitor*            mergefeat_visitor_new(Env*);
+GenomeVisitor*            mergefeat_visitor_new(void);
 
 #endif

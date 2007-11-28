@@ -32,14 +32,13 @@ void* bsearch_data(const void *key, const void *base, size_t nmemb, size_t size,
    equal are stored in the <members> array. The order in which the elements
    are added is undefined */
 void  bsearch_all(Array *members, const void *key, const void *base,
-                  size_t nmemb, size_t size, Compar, void *data, Env*);
+                  size_t nmemb, size_t size, Compar, void *data);
 
 /* similar interface to bsearch_all(). Additionally, if a bittab is given (which
    must be of size <nmemb>), the bits corresponding to the found elements are
    marked (i.e., set) */
 void  bsearch_all_mark(Array *members, const void *key, const void *base,
-                       size_t nmemb, size_t size, Compar, void *data, Bittab*,
-                       Env*);
+                       size_t nmemb, size_t size, Compar, void *data, Bittab*);
 
 int   bsearch_unit_test(Env*);
 

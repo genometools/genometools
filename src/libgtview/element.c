@@ -30,22 +30,20 @@ struct Element {
   bool mark;
 };
 
-Element* element_new(GenomeNode *gn, Env *env)
+Element* element_new(GenomeNode *gn)
 {
   Element *element;
   GenomeFeature *gf = (GenomeFeature*) gn;
-  env_error_check(env);
   assert(gn);
-  element = element_new_empty(env);
+  element = element_new_empty();
   element_set_type(element,genome_feature_get_type(gf));
   element_set_range(element, genome_node_get_range(gn));
   element->mark = genome_node_is_marked(gn);
   return element;
 }
 
-Element* element_new_empty(Env *env)
+Element* element_new_empty(void)
 {
-  env_error_check(env);
   return ma_calloc(1, sizeof (Element));
 }
 
@@ -103,9 +101,9 @@ int element_unit_test(Env* env)
   gn = genome_feature_new(gft_exon, r1, STRAND_BOTH, NULL, 0);
   gn2 = genome_feature_new(gft_exon, r2, STRAND_BOTH, NULL, 0);
 
-  e = element_new(gn, env);
-  e2 = element_new(gn, env);
-  e3 = element_new(gn2, env);
+  e = element_new(gn);
+  e2 = element_new(gn);
+  e3 = element_new(gn2);
 
   /* tests element_get_range */
   r_temp = element_get_range(e);

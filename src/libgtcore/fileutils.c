@@ -50,12 +50,11 @@ bool file_is_newer(const char *a, const char *b)
   return false;
 }
 
-unsigned long file_number_of_lines(const char *path, Env *env)
+unsigned long file_number_of_lines(const char *path)
 {
   unsigned long number_of_lines = 0;
   GenFile *fp;
   int cc;
-  env_error_check(env);
   assert(path);
   fp = genfile_xopen(path, "r");
   while ((cc = genfile_getc(fp)) != EOF)
@@ -100,8 +99,8 @@ int file_find_in_path(Str *path, const char *file, Env *env)
   }
 
   if (!had_err) {
-    splitter = splitter_new(env);
-    splitter_split(splitter, pathvariable, strlen(pathvariable), ':', env);
+    splitter = splitter_new();
+    splitter_split(splitter, pathvariable, strlen(pathvariable), ':');
     for (i = 0; i < splitter_size(splitter); i++) {
       pathcomponent = splitter_get_token(splitter, i);
       str_set_length(path, 0);
@@ -124,7 +123,7 @@ int file_find_in_path(Str *path, const char *file, Env *env)
 
   /* free */
   ma_free(pathvariable);
-  splitter_delete(splitter, env);
+  splitter_delete(splitter);
 
   return had_err;
 }

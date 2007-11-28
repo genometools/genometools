@@ -29,6 +29,6 @@ const GenomeStreamClass* cds_stream_class(void);
 
 /* create a CDSSTream, takes ownership of RegionMapping */
 GenomeStream*            cds_stream_new(GenomeStream*, RegionMapping*,
-                                        const char *source, Env*);
+                                        const char *source);
 
 #endif

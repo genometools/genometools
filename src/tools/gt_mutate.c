@@ -67,7 +67,7 @@ int gt_mutate(int argc, const char **argv, Env *env)
   assert(parsed_args < argc);
 
   while (!had_err && parsed_args < argc) {
-    bioseq = bioseq_new(argv[parsed_args], env);
+    bioseq = bioseq_new(argv[parsed_args], env_error(env));
     if (!bioseq)
       had_err = -1;
     if (!had_err) {

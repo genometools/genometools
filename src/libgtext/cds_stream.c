@@ -29,15 +29,15 @@ struct CDSStream
 #define cds_stream_cast(GS)\
         genome_stream_cast(cds_stream_class(), GS)
 
-static int cds_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
+static int cds_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
 {
   CDSStream *cds_stream;
   int had_err;
-  env_error_check(env);
+  error_check(e);
   cds_stream = cds_stream_cast(gs);
-  had_err = genome_stream_next_tree(cds_stream->in_stream, gn, env);
+  had_err = genome_stream_next_tree(cds_stream->in_stream, gn, e);
   if (!had_err && *gn)
-    had_err = genome_node_accept(*gn, cds_stream->cds_visitor, env);
+    had_err = genome_node_accept(*gn, cds_stream->cds_visitor, e);
   return had_err;
 }
 
@@ -56,18 +56,17 @@ const GenomeStreamClass* cds_stream_class(void)
 }
 
 GenomeStream* cds_stream_new(GenomeStream *in_stream, RegionMapping *rm,
-                             const char *source, Env *env)
+                             const char *source)
 {
   GenomeStream *gs;
   CDSStream *cds_stream;
   Str *source_str;
   int had_err = 0;
-  env_error_check(env);
-  gs = genome_stream_create(cds_stream_class(), true, env);
+  gs = genome_stream_create(cds_stream_class(), true);
   cds_stream = cds_stream_cast(gs);
   source_str = str_new_cstr(source);
   cds_stream->in_stream = in_stream;
-  cds_stream->cds_visitor = cds_visitor_new(rm, source_str, env);
+  cds_stream->cds_visitor = cds_visitor_new(rm, source_str);
   if (!cds_stream->cds_visitor)
     had_err = -1;
   str_delete(source_str);

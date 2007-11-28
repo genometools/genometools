@@ -31,7 +31,7 @@ struct MergeStream {
 #define merge_stream_cast(GS)\
         genome_stream_cast(merge_stream_class(), GS)
 
-int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
+int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
 {
   MergeStream *ms;
   GenomeNode *min_node = NULL;
@@ -39,7 +39,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   unsigned int genome_node_consolidated;
   int had_err = 0;
 
-  env_error_check(env);
+  error_check(e);
 
   ms = merge_stream_cast(gs);
 
@@ -48,7 +48,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
     if (!ms->buffer[i]) {
       had_err = genome_stream_next_tree(*(GenomeStream**)
                                         array_get(ms->genome_streams, i),
-                                        ms->buffer + i, env);
+                                        ms->buffer + i, e);
       if (had_err)
         break;
     }
@@ -110,9 +110,9 @@ const GenomeStreamClass* merge_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* merge_stream_new(const Array *genome_streams, Env *env)
+GenomeStream* merge_stream_new(const Array *genome_streams)
 {
-  GenomeStream *gs = genome_stream_create(merge_stream_class(), true, env);
+  GenomeStream *gs = genome_stream_create(merge_stream_class(), true);
   MergeStream *ms = merge_stream_cast(gs);
 #ifndef NDEBUG
   unsigned long i;

@@ -45,20 +45,20 @@ static void gtf_visitor_free(GenomeVisitor *gv)
   array_delete(gtf_visitor->CDS_features);
 }
 
-static int gtf_visitor_comment(GenomeVisitor *gv, Comment *c, Env *env)
+static int gtf_visitor_comment(GenomeVisitor *gv, Comment *c, Error *e)
 {
   GTFVisitor *gtf_visitor;
-  env_error_check(env);
+  error_check(e);
   gtf_visitor = gtf_visitor_cast(gv);
   genfile_xprintf(gtf_visitor->outfp, "#%s\n", comment_get_comment(c));
   return 0;
 }
 
-static int save_exon_node(GenomeNode *gn, void *data, Env *env)
+static int save_exon_node(GenomeNode *gn, void *data, Error *e)
 {
   GTFVisitor *gtf_visitor;
   GenomeFeatureType gft;
-  env_error_check(env);
+  error_check(e);
   assert(gn && data);
   gtf_visitor = (GTFVisitor*) data;
   gft = genome_feature_get_type((GenomeFeature*) gn);
@@ -70,17 +70,17 @@ static int save_exon_node(GenomeNode *gn, void *data, Env *env)
 }
 
 static int gtf_show_transcript(GenomeNode *gn, GTFVisitor *gtf_visitor,
-                               Env *env)
+                               Error *e)
 {
   GenomeFeature *gf;
   unsigned long i;
   int had_err;
-  env_error_check(env);
+  error_check(e);
   assert(gn && gtf_visitor);
   array_reset(gtf_visitor->exon_features);
   array_reset(gtf_visitor->CDS_features);
   had_err = genome_node_traverse_direct_children(gn, gtf_visitor,
-                                                 save_exon_node, env);
+                                                 save_exon_node, e);
   if (array_size(gtf_visitor->exon_features)) {
     /* sort exon features */
     qsort(array_get_space(gtf_visitor->exon_features),
@@ -118,7 +118,7 @@ static int gtf_show_transcript(GenomeNode *gn, GTFVisitor *gtf_visitor,
   return had_err;
 }
 
-static int gtf_show_genome_feature(GenomeNode *gn, void *data, Env *env)
+static int gtf_show_genome_feature(GenomeNode *gn, void *data, Error *e)
 {
   GTFVisitor *gtf_visitor = (GTFVisitor*) data;
   GenomeFeatureType gft;
@@ -127,10 +127,10 @@ static int gtf_show_genome_feature(GenomeNode *gn, void *data, Env *env)
     case gft_gene:
       gtf_visitor->gene_id++;
       gtf_visitor->transcript_id = 0;
-      had_err = gtf_show_transcript(gn, gtf_visitor, env);
+      had_err = gtf_show_transcript(gn, gtf_visitor, e);
       break;
     case gft_mRNA:
-      had_err = gtf_show_transcript(gn, gtf_visitor, env);
+      had_err = gtf_show_transcript(gn, gtf_visitor, e);
       break;
     case gft_CDS:
     case gft_exon:
@@ -145,14 +145,14 @@ static int gtf_show_genome_feature(GenomeNode *gn, void *data, Env *env)
 }
 
 static int gtf_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
-                                      Env *env)
+                                      Error *e)
 {
   GTFVisitor *gtf_visitor;
   int had_err;
-  env_error_check(env);
+  error_check(e);
   gtf_visitor = gtf_visitor_cast(gv);
   had_err = genome_node_traverse_children((GenomeNode*) gf, gtf_visitor,
-                                          gtf_show_genome_feature, false, env);
+                                          gtf_show_genome_feature, false, e);
   return had_err;
 }
 
@@ -166,9 +166,9 @@ const GenomeVisitorClass* gtf_visitor_class()
   return &gvc;
 }
 
-GenomeVisitor* gtf_visitor_new(GenFile *outfp, Env *env)
+GenomeVisitor* gtf_visitor_new(GenFile *outfp)
 {
-  GenomeVisitor *gv = genome_visitor_create(gtf_visitor_class(), env);
+  GenomeVisitor *gv = genome_visitor_create(gtf_visitor_class());
   GTFVisitor *gtf_visitor = gtf_visitor_cast(gv);
   gtf_visitor->gene_id = 0;
   gtf_visitor->exon_features = array_new(sizeof (GenomeNode*));

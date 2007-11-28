@@ -31,7 +31,7 @@ GenomeStream*            stat_stream_new(GenomeStream*,
                                          bool gene_score_distri,
                                          bool exon_length_distri,
                                          bool exon_number_distri,
-                                         bool intron_length_distri, Env*);
-void                     stat_stream_show_stats(GenomeStream*, Env*);
+                                         bool intron_length_distri);
+void                     stat_stream_show_stats(GenomeStream*);
 
 #endif

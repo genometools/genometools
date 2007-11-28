@@ -26,6 +26,6 @@ typedef struct CSAStream CSAStream;
 
 const GenomeStreamClass* csa_stream_class(void);
 GenomeStream*            csa_stream_new(GenomeStream*,
-                                        unsigned long join_length, Env*);
+                                        unsigned long join_length);
 
 #endif

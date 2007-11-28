@@ -61,7 +61,7 @@ Render* render_new(Config *cfg)
 }
 
 /* Calculate the final height of the image to be created. */
-static unsigned int render_calculate_height(Render *r, Env *env)
+static unsigned int render_calculate_height(Render *r)
 {
   unsigned int lines = diagram_get_total_lines(r->dia);
   unsigned int height;
@@ -404,7 +404,7 @@ static void format_ruler_label(char *txt, long pos)
 }
 
 /* Renders a ruler with dynamic scale labeling and optional grid. */
-static void render_ruler(Render *r, Env* env)
+static void render_ruler(Render *r)
 {
   double step, minorstep, vmajor, vminor;
   long base_length, tick;
@@ -476,11 +476,11 @@ static void render_ruler(Render *r, Env* env)
 }
 
 int render_to_png(Render *r, Diagram *dia, const char *filename,
-                  unsigned int width, Env *env)
+                  unsigned int width, Error *e)
 {
   unsigned int height, had_err;
 
-  env_error_check(env);
+  error_check(e);
   assert(r && filename && width > 1);
 
   /* set initial image-specific values */
@@ -488,7 +488,7 @@ int render_to_png(Render *r, Diagram *dia, const char *filename,
   r->width = width;
   r->dia = dia;
   r->range = diagram_get_range(dia);
-  r->height = height = render_calculate_height(r, env);
+  r->height = height = render_calculate_height(r);
 
   /* calculate scaling factor */
     r->factor = ((double) r->width
@@ -498,11 +498,11 @@ int render_to_png(Render *r, Diagram *dia, const char *filename,
      fprintf(stderr, "scaling factor is %f\n",r->factor);
 
   /* create new Graphics backend */
-  r->g = graphics_new_png(filename, width, height, env);
+  r->g = graphics_new_png(filename, width, height);
   graphics_set_margins(r->g, r->margins, 0);
 
   /* Add ruler/scale to the image */
-  render_ruler(r, env);
+  render_ruler(r);
 
   r->cur_track = 0;
   if (diagram_get_number_of_tracks(r->dia) > 0)
@@ -518,13 +518,13 @@ int render_to_png(Render *r, Diagram *dia, const char *filename,
     fprintf(stderr, "actual used height: %f\n", r->y);
 
   /* write out result file */
-  had_err = graphics_save(r->g, env);
-  graphics_delete(r->g, env);
+  had_err = graphics_save(r->g, e);
+  graphics_delete(r->g);
 
   return had_err;
 }
 
-void render_delete(Render *r, Env *env)
+void render_delete(Render *r)
 {
   if (!r) return;
   ma_free(r);

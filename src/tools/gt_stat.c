@@ -97,7 +97,7 @@ int gt_stat(int argc, const char **argv, Env *env)
   /* create a gff3 input stream */
   gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
                                                argv + parsed_args,
-                                               arguments.verbose, false, env);
+                                               arguments.verbose, false);
 
   /* create s status stream */
   stat_stream = stat_stream_new(gff3_in_stream,
@@ -105,11 +105,12 @@ int gt_stat(int argc, const char **argv, Env *env)
                                 arguments.gene_score_distribution,
                                 arguments.exon_length_distribution,
                                 arguments.exon_number_distribution,
-                                arguments.intron_length_distribution, env);
+                                arguments.intron_length_distribution);
 
   /* pull the features through the stream , compute the statistics, and free
      them afterwards */
-  while (!(had_err = genome_stream_next_tree(stat_stream, &gn, env)) && gn) {
+  while (!(had_err = genome_stream_next_tree(stat_stream, &gn,
+                                             env_error(env))) && gn) {
     genome_node_rec_delete(gn);
     if (had_err)
       break;
@@ -117,7 +118,7 @@ int gt_stat(int argc, const char **argv, Env *env)
 
   /* show statistics */
   if (!had_err)
-    stat_stream_show_stats(stat_stream, env);
+    stat_stream_show_stats(stat_stream);
 
   /* free */
   genome_stream_delete(stat_stream);

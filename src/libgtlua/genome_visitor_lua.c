@@ -23,11 +23,10 @@
 static int gff3_visitor_lua_new(lua_State *L)
 {
   GenomeVisitor **gv;
-  Env *env = get_env_from_registry(L);
   assert(L);
   /* construct object */
   gv = lua_newuserdata(L, sizeof (GenomeVisitor*));
-  *gv = gff3_visitor_new(NULL, env);
+  *gv = gff3_visitor_new(NULL);
   assert(*gv);
   luaL_getmetatable(L, GENOME_VISITOR_METATABLE);
   lua_setmetatable(L, -2);

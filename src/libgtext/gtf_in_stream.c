@@ -30,10 +30,10 @@ struct GTFInStream
 #define gtf_in_stream_cast(GS)\
         genome_stream_cast(gtf_in_stream_class(), GS)
 
-static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
+static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
 {
   GTFInStream *is;
-  env_error_check(env);
+  error_check(e);
   is = gtf_in_stream_cast(gs);
   if (queue_size(is->genome_node_buffer)) {
     /* we still have a node in the buffer -> serve it from there */
@@ -61,7 +61,7 @@ const GenomeStreamClass* gtf_in_stream_class(void)
 }
 
 GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
-                                Env *env)
+                                Error *e)
 {
   GenomeStream *gs;
   GTFInStream *gtf_in_stream;
@@ -70,9 +70,9 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
   int had_err;
   FILE *fpin;
 
-  env_error_check(env);
+  error_check(e);
 
-  gs = genome_stream_create(gtf_in_stream_class(), false, env);
+  gs = genome_stream_create(gtf_in_stream_class(), false);
   gtf_in_stream = gtf_in_stream_cast(gs);
   gtf_parser = gtf_parser_new();
 
@@ -87,7 +87,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
   /* parse input file */
   filenamestr = str_new_cstr(filename ? filename : "stdin");
   had_err = gtf_parser_parse(gtf_parser, gtf_in_stream->genome_node_buffer,
-                             filenamestr, fpin, be_tolerant, env);
+                             filenamestr, fpin, be_tolerant, e);
   str_delete(filenamestr);
 
   /* close input file, if necessary */

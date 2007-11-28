@@ -29,15 +29,15 @@ struct GFF3OutStream {
         genome_stream_cast(gff3_out_stream_class(), GS);
 
 static int gff3_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
-                                     Env *env)
+                                     Error *e)
 {
   GFF3OutStream *gff3_out_stream;
   int had_err;
-  env_error_check(env);
+  error_check(e);
   gff3_out_stream = gff3_out_stream_cast(gs);
-  had_err = genome_stream_next_tree(gff3_out_stream->in_stream, gn, env);
+  had_err = genome_stream_next_tree(gff3_out_stream->in_stream, gn, e);
   if (!had_err && *gn)
-    had_err = genome_node_accept(*gn, gff3_out_stream->gff3_visitor, env);
+    had_err = genome_node_accept(*gn, gff3_out_stream->gff3_visitor, e);
   return had_err;
 }
 
@@ -56,14 +56,12 @@ const GenomeStreamClass* gff3_out_stream_class(void)
   return &gsc;
 }
 
-GenomeStream* gff3_out_stream_new(GenomeStream *in_stream, GenFile *outfp,
-                                  Env *env)
+GenomeStream* gff3_out_stream_new(GenomeStream *in_stream, GenFile *outfp)
 {
   GenomeStream *gs = genome_stream_create(gff3_out_stream_class(),
-                                          genome_stream_is_sorted(in_stream),
-                                          env);
+                                          genome_stream_is_sorted(in_stream));
   GFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
   gff3_out_stream->in_stream = genome_stream_ref(in_stream);
-  gff3_out_stream->gff3_visitor = gff3_visitor_new(outfp, env);
+  gff3_out_stream->gff3_visitor = gff3_visitor_new(outfp);
   return gs;
 }

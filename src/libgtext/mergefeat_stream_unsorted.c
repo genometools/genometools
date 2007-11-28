@@ -30,15 +30,15 @@ struct MergefeatStreamUnsorted {
         genome_stream_cast(mergefeat_stream_unsorted_class(), GS)
 
 static int mergefeat_stream_unsorted_next_tree(GenomeStream *gs,
-                                               GenomeNode **gn, Env *env)
+                                               GenomeNode **gn, Error *e)
 {
   MergefeatStreamUnsorted *mfs;
   int had_err;
-  env_error_check(env);
+  error_check(e);
   mfs = mergefeat_stream_unsorted_cast(gs);
-  had_err = genome_stream_next_tree(mfs->in_stream, gn, env);
+  had_err = genome_stream_next_tree(mfs->in_stream, gn, e);
   if (!had_err && *gn)
-    had_err = genome_node_accept(*gn, mfs->mergefeat_visitor, env);
+    had_err = genome_node_accept(*gn, mfs->mergefeat_visitor, e);
   return had_err;
 }
 
@@ -56,12 +56,12 @@ const GenomeStreamClass* mergefeat_stream_unsorted_class(void)
   return &gsc;
 }
 
-GenomeStream* mergefeat_stream_unsorted_new(GenomeStream *in_stream, Env *env)
+GenomeStream* mergefeat_stream_unsorted_new(GenomeStream *in_stream)
 {
   GenomeStream *gs = genome_stream_create(mergefeat_stream_unsorted_class(),
-                                          false, env);
+                                          false);
   MergefeatStreamUnsorted *mfs = mergefeat_stream_unsorted_cast(gs);
   mfs->in_stream = in_stream;
-  mfs->mergefeat_visitor = mergefeat_visitor_new(env);
+  mfs->mergefeat_visitor = mergefeat_visitor_new();
   return gs;
 }

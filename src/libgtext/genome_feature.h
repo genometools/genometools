@@ -45,9 +45,8 @@ double                 genome_feature_get_score(GenomeFeature*);
 Strand                 genome_feature_get_strand(GenomeFeature*);
 Phase                  genome_feature_get_phase(GenomeFeature*);
 void                   genome_feature_get_exons(GenomeFeature*,
-                                                Array *exon_features, Env*);
-void                   genome_feature_determine_transcripttypes(GenomeFeature*,
-                                                                Env*);
+                                                Array *exon_features);
+void                   genome_feature_determine_transcripttypes(GenomeFeature*);
 TranscriptFeatureType  genome_feature_get_transcriptfeaturetype(GenomeFeature*);
 void                   genome_feature_set_end(GenomeFeature*, unsigned long);
 void                   genome_feature_set_score(GenomeFeature*, double);

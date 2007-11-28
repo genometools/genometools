@@ -124,9 +124,9 @@ int gt_bioseq(int argc, const char **argv, Env *env)
   while (!had_err && parsed_args < argc) {
     /* bioseq construction */
     if (arguments.recreate)
-      bioseq = bioseq_new_recreate(argv[parsed_args], env);
+      bioseq = bioseq_new_recreate(argv[parsed_args], env_error(env));
     else
-      bioseq = bioseq_new(argv[parsed_args], env);
+      bioseq = bioseq_new(argv[parsed_args], env_error(env));
     if (!bioseq)
       had_err = -1;
 

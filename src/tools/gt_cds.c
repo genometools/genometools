@@ -84,7 +84,7 @@ int gt_cds(int argc, const char **argv, Env *env)
   /* create gff3 input stream */
   assert(parsed_args < argc);
   gff3_in_stream = gff3_in_stream_new_sorted(argv[parsed_args],
-                                             arguments.verbose, env);
+                                             arguments.verbose);
 
   /* create region mapping */
   regionmapping = seqid2file_regionmapping_new(arguments.seqfile,
@@ -96,7 +96,7 @@ int gt_cds(int argc, const char **argv, Env *env)
   /* create CDS stream */
   if (!had_err) {
     cds_stream = cds_stream_new(gff3_in_stream, regionmapping,
-                                GT_CDS_SOURCE_TAG, env);
+                                GT_CDS_SOURCE_TAG);
     if (!cds_stream)
       had_err = -1;
   }
@@ -104,11 +104,11 @@ int gt_cds(int argc, const char **argv, Env *env)
   /* create gff3 output stream */
   /* XXX: replace NULL with proper outfile */
   if (!had_err)
-    gff3_out_stream = gff3_out_stream_new(cds_stream, NULL, env);
+    gff3_out_stream = gff3_out_stream_new(cds_stream, NULL);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
-         gn) {
+  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn,
+                                             env_error(env))) && gn) {
     genome_node_rec_delete(gn);
   }
 

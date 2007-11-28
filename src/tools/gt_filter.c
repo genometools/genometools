@@ -122,21 +122,21 @@ int gt_filter(int argc, const char **argv, Env *env)
   gff3_in_stream = gff3_in_stream_new_unsorted(argc - parsed_args,
                                                argv + parsed_args,
                                                arguments.verbose &&
-                                               arguments.outfp, false, env);
+                                               arguments.outfp, false);
 
   /* create a filter stream */
   filter_stream = filter_stream_new(gff3_in_stream, arguments.seqid,
                                     arguments.typefilter,
                                     arguments.max_gene_length,
                                     arguments.max_gene_num,
-                                    arguments.min_gene_score, env);
+                                    arguments.min_gene_score);
 
   /* create a gff3 output stream */
-  gff3_out_stream = gff3_out_stream_new(filter_stream, arguments.outfp, env);
+  gff3_out_stream = gff3_out_stream_new(filter_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
-         gn) {
+  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn,
+                                             env_error(env))) && gn) {
     genome_node_rec_delete(gn);
   }
 

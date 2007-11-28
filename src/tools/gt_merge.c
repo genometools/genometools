@@ -66,25 +66,25 @@ int gt_merge(int argc, const char **argv, Env *env)
   if (parsed_args < argc) {
     /* we got files to open */
     for (i = parsed_args; i < argc; i++) {
-      gff3_in_stream = gff3_in_stream_new_sorted(argv[i], false, env);
+      gff3_in_stream = gff3_in_stream_new_sorted(argv[i], false);
       array_add(genome_streams, gff3_in_stream);
     }
    }
    else {
      /* use stdin */
-     gff3_in_stream = gff3_in_stream_new_sorted(NULL, false, env);
+     gff3_in_stream = gff3_in_stream_new_sorted(NULL, false);
      array_add(genome_streams, gff3_in_stream);
    }
 
   /* create a merge stream */
-  merge_stream = merge_stream_new(genome_streams, env);
+  merge_stream = merge_stream_new(genome_streams);
 
   /* create a gff3 output stream */
-  gff3_out_stream = gff3_out_stream_new(merge_stream, outfp, env);
+  gff3_out_stream = gff3_out_stream_new(merge_stream, outfp);
 
   /* pull the features through the stream and free them afterwards */
-  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
-         gn) {
+  while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn,
+                                             env_error(env))) && gn) {
     genome_node_rec_delete(gn);
   }
 

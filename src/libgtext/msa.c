@@ -27,20 +27,20 @@ struct MSA {
   Bioseq *bs;
 };
 
-MSA* msa_new(const char *MSA_filename, Env *env)
+MSA* msa_new(const char *MSA_filename, Error *e)
 {
   unsigned long i, firstseqlen;
   int had_err = 0;
   MSA *msa;
-  env_error_check(env);
+  error_check(e);
   msa = ma_malloc(sizeof (MSA));
-  msa->bs = bioseq_new(MSA_filename, env);
+  msa->bs = bioseq_new(MSA_filename, e);
   if (!msa->bs)
     had_err = -1;
   if (!had_err) {
     /* make sure that the MSA contains at least two sequences */
     if (bioseq_number_of_sequences(msa->bs) < 2) {
-      env_error_set(env, "the MSA file '%s' contains less then 2 sequences",
+      error_set(e, "the MSA file '%s' contains less then 2 sequences",
                 MSA_filename);
       had_err = -1;
     }
@@ -50,8 +50,8 @@ MSA* msa_new(const char *MSA_filename, Env *env)
     firstseqlen = bioseq_get_sequence_length(msa->bs, 0);
     for (i = 1; i < bioseq_number_of_sequences(msa->bs); i++) {
       if (bioseq_get_sequence_length(msa->bs, i) != firstseqlen) {
-        env_error_set(env, "length of sequence %lu in the MSA file '%s' "
-                      "differs from the first", i, MSA_filename);
+        error_set(e, "length of sequence %lu in the MSA file '%s' differs "
+                  "from the first", i, MSA_filename);
         had_err = -1;
         break;
       }

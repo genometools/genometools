@@ -25,16 +25,16 @@
 struct GenomeVisitorClass {
   size_t size;
   void (*free)(GenomeVisitor*);
-  int  (*comment)(GenomeVisitor*, Comment*, Env*);
-  int  (*genome_feature)(GenomeVisitor*, GenomeFeature*, Env*);
-  int  (*sequence_region)(GenomeVisitor*, SequenceRegion*, Env*);
+  int  (*comment)(GenomeVisitor*, Comment*, Error*);
+  int  (*genome_feature)(GenomeVisitor*, GenomeFeature*, Error*);
+  int  (*sequence_region)(GenomeVisitor*, SequenceRegion*, Error*);
 };
 
 struct GenomeVisitor {
   const GenomeVisitorClass *c_class;
 };
 
-GenomeVisitor* genome_visitor_create(const GenomeVisitorClass*, Env*);
+GenomeVisitor* genome_visitor_create(const GenomeVisitorClass*);
 void*          genome_visitor_cast(const GenomeVisitorClass*, GenomeVisitor*);
 
 #endif

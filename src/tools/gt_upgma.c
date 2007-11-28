@@ -82,7 +82,7 @@ int gt_upgma(int argc, const char **argv, Env *env)
   if (use_hard_coded_example)
     upgma = upgma_new(5, NULL, exampledistfunc, env);
   else {
-    bioseq = bioseq_new(argv[parsed_args], env);
+    bioseq = bioseq_new(argv[parsed_args], env_error(env));
     if (!bioseq)
       had_err = -1;
     if (!had_err)

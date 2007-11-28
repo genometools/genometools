@@ -29,12 +29,12 @@
    contains element objects. */
 typedef struct Block Block;
 
-Block*            block_new(Env*);
+Block*            block_new(void);
 /* Create a new Block object, setting block parameters (such as strand, range)
    from a given <node> template. */
-Block*            block_new_from_node(GenomeNode *node, Env*);
+Block*            block_new_from_node(GenomeNode *node);
 /* Insert <node> into block. */
-void              block_insert_element(Block*, GenomeNode *node, Config*, Env*);
+void              block_insert_element(Block*, GenomeNode *node, Config*);
 Range             block_get_range(const Block*);
 void              block_set_range(Block*, Range r);
 /* Checks whether a Block is occupied completely by a single element. */

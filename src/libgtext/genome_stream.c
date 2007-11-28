@@ -21,7 +21,7 @@
 #include "libgtext/genome_stream_rep.h"
 
 GenomeStream* genome_stream_create(const GenomeStreamClass *gsc,
-                                   bool ensure_sorting, Env *env)
+                                   bool ensure_sorting)
 {
   GenomeStream *gs;
   assert(gsc && gsc->size);
@@ -51,17 +51,17 @@ void genome_stream_delete(GenomeStream *gs)
   ma_free(gs);
 }
 
-int genome_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
+int genome_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
 {
   GenomeNode *new_node = NULL;
   int had_err = 0;
   assert(gs && gs->c_class && gs->c_class->next_tree);
-  env_error_check(env);
+  error_check(e);
   /* filling */
   if (!gs->buffer)
-    had_err = gs->c_class->next_tree(gs, &gs->buffer, env);
+    had_err = gs->c_class->next_tree(gs, &gs->buffer, e);
   if (!had_err && gs->buffer)
-    had_err = gs->c_class->next_tree(gs, &new_node, env);
+    had_err = gs->c_class->next_tree(gs, &new_node, e);
 #ifndef NDEBUG
   /* checking */
   if (!had_err && gs->ensure_sorting && gs->buffer && new_node) {

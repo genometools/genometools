@@ -24,6 +24,6 @@
 typedef struct SortStream SortStream;
 
 const GenomeStreamClass* sort_stream_class(void);
-GenomeStream*            sort_stream_new(GenomeStream*, Env*);
+GenomeStream*            sort_stream_new(GenomeStream*);
 
 #endif

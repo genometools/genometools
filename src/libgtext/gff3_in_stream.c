@@ -66,13 +66,13 @@ static int buffer_is_sorted(void *elem, void *info, Error *e)
   return 0;
 }
 
-static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
+static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Error *e)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
   Str *filenamestr;
   int had_err = 0, status_code;
 
-  env_error_check(env);
+  error_check(e);
 
   if (queue_size(is->genome_node_buffer) > 1) {
     /* we still have at least two nodes in the buffer -> serve from there */
@@ -91,8 +91,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
       if (strarray_size(is->files)) {
         if (strcmp(strarray_get(is->files, is->next_file), "-") == 0) {
           if (is->stdin_argument) {
-            env_error_set(env,
-                          "multiple specification of argument file \"-\"\n");
+            error_set(e, "multiple specification of argument file \"-\"\n");
             had_err = -1;
             break;
           }
@@ -119,8 +118,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
       if (!had_err && is->fpin && is->be_verbose) {
         progressbar_start(&is->line_number,
                           file_number_of_lines(strarray_get(is->files,
-                                                            is->next_file-1),
-                                               env));
+                                                            is->next_file-1)));
       }
     }
 
@@ -132,14 +130,14 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
     /* read two nodes */
     had_err = gff3parser_parse_genome_nodes(&status_code, is->gff3_parser,
                                             is->genome_node_buffer, filenamestr,
-                                            &is->line_number, is->fpin, env);
+                                            &is->line_number, is->fpin, e);
     if (had_err)
       break;
     if (status_code != EOF) {
       had_err = gff3parser_parse_genome_nodes(&status_code, is->gff3_parser,
                                               is->genome_node_buffer,
                                               filenamestr, &is->line_number,
-                                              is->fpin, env);
+                                              is->fpin, e);
       if (had_err)
         break;
     }
@@ -164,7 +162,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
       /* a sorted stream can have at most one input file */
       assert(strarray_size(is->files) == 0 || strarray_size(is->files) == 1);
       had_err = queue_iterate(is->genome_node_buffer, buffer_is_sorted,
-                              &last_node, env_error(env));
+                              &last_node, e);
     }
     if (!had_err) {
       *gn = queue_get(is->genome_node_buffer);
@@ -198,10 +196,10 @@ const GenomeStreamClass* gff3_in_stream_class(void)
 
 static GenomeStream* gff3_in_stream_new(StrArray *files, /* takes ownership */
                                         bool ensure_sorting, bool be_verbose,
-                                        bool checkids, Env *env)
+                                        bool checkids)
 {
   GenomeStream *gs = genome_stream_create(gff3_in_stream_class(),
-                                          ensure_sorting, env);
+                                          ensure_sorting);
   GFF3InStream *gff3_in_stream         = gff3_in_stream_cast(gs);
   gff3_in_stream->next_file              = 0;
   gff3_in_stream->files                  = files;
@@ -223,29 +221,27 @@ void gff3_in_stream_set_offset(GenomeStream *gs, long offset)
   gff3parser_set_offset(is->gff3_parser, offset);
 }
 
-int gff3_in_stream_set_offsetfile(GenomeStream *gs, Str *offsetfile, Env *env)
+int gff3_in_stream_set_offsetfile(GenomeStream *gs, Str *offsetfile, Error *e)
 {
   GFF3InStream *is = gff3_in_stream_cast(gs);
-  return gff3parser_set_offsetfile(is->gff3_parser, offsetfile, env);
+  return gff3parser_set_offsetfile(is->gff3_parser, offsetfile, e);
 }
 
 GenomeStream* gff3_in_stream_new_unsorted(int num_of_files,
                                           const char **filenames,
-                                          bool be_verbose, bool checkids,
-                                          Env *env)
+                                          bool be_verbose, bool checkids)
 {
   int i;
   StrArray *files = strarray_new();
   for (i = 0; i < num_of_files; i++)
     strarray_add_cstr(files, filenames[i]);
-  return gff3_in_stream_new(files, false, be_verbose, checkids, env);
+  return gff3_in_stream_new(files, false, be_verbose, checkids);
 }
 
-GenomeStream* gff3_in_stream_new_sorted(const char *filename, bool be_verbose,
-                                        Env *env)
+GenomeStream* gff3_in_stream_new_sorted(const char *filename, bool be_verbose)
 {
   StrArray *files = strarray_new();
   if (filename)
     strarray_add_cstr(files, filename);
-  return gff3_in_stream_new(files, true, be_verbose, false, env);
+  return gff3_in_stream_new(files, true, be_verbose, false);
 }

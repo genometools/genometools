@@ -35,7 +35,7 @@ typedef struct {
   Array *exons; /* the exon ranges */
 } SimpleSplicedAlignment;
 
-static void initSimpleSplicedAlignment(SimpleSplicedAlignment *sa, Env *env)
+static void initSimpleSplicedAlignment(SimpleSplicedAlignment *sa)
 {
   assert(sa);
   sa->id = str_new();
@@ -44,18 +44,18 @@ static void initSimpleSplicedAlignment(SimpleSplicedAlignment *sa, Env *env)
 }
 
 static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
-                            unsigned long line_length, Env *env)
+                            unsigned long line_length, Error *e)
 {
   long leftpos, rightpos;
   unsigned long i = 0;
   Range exon;
-  env_error_check(env);
+  error_check(e);
 
 #define CHECKLINELENGTH\
-        if (i >= line_length) {                    \
-          env_error_set(env, "incomplete input line\n" \
-                         "line=%s", line);         \
-          return -1;                               \
+        if (i >= line_length) {                  \
+          error_set(e, "incomplete input line\n" \
+                       "line=%s", line);         \
+          return -1;                             \
         }
 
   /* parsing id */
@@ -82,15 +82,15 @@ static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
   else if (line[i] == REVERSESTRANDCHAR)
     alignment->forward = false;
   else {
-    env_error_set(env, "wrong formatted input line, orientation must be %c or "
-                  "%c\nline=%s", FORWARDSTRANDCHAR, REVERSESTRANDCHAR, line);
+    error_set(e, "wrong formatted input line, orientation must be %c or %c\n"
+                 "line=%s", FORWARDSTRANDCHAR, REVERSESTRANDCHAR, line);
     return -1;
   }
   i++;
   CHECKLINELENGTH;
 
   if (line[i] != DELIMITER) {
-    env_error_set(env, "incomplete input line\nline=%s", line);
+    error_set(e, "incomplete input line\nline=%s", line);
     return -1;
   }
 
@@ -99,7 +99,7 @@ static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
       i++;
       CHECKLINELENGTH;
       if (sscanf(line+i, "%ld-%ld", &leftpos, &rightpos) != 2) {
-        env_error_set(env, "incomplete input line\nline=%s", line);
+        error_set(e, "incomplete input line\nline=%s", line);
         return -1;
       }
       exon.start = leftpos;
@@ -120,22 +120,22 @@ static int parse_input_line(SimpleSplicedAlignment *alignment, const char *line,
 }
 
 static int parse_input_file(Array *spliced_alignments,
-                             const char *file_name, Env *env)
+                             const char *file_name, Error *e)
 {
   FILE *input_file;
   SimpleSplicedAlignment sa;
   int had_err = 0;
   Str *line;
-  env_error_check(env);
+  error_check(e);
 
   line = str_new();
   input_file = fa_xfopen(file_name, "r");
 
   while (!had_err && str_read_next_line(line, input_file) != EOF) {
     /* init new spliced alignment */
-    initSimpleSplicedAlignment(&sa, env);
+    initSimpleSplicedAlignment(&sa);
     /* parse input line and save result in spliced alignment */
-    had_err = parse_input_line(&sa, str_get(line), str_length(line), env);
+    had_err = parse_input_line(&sa, str_get(line), str_length(line), e);
     if (!had_err) {
       /* store spliced alignment */
       array_add(spliced_alignments, sa);
@@ -167,7 +167,7 @@ static Strand get_strand(const void *sa)
   return STRAND_REVERSE;
 }
 
-static void get_exons(Array *exon_ranges, const void *sa, Env *env)
+static void get_exons(Array *exon_ranges, const void *sa)
 {
   SimpleSplicedAlignment *alignment = (SimpleSplicedAlignment*) sa;
   assert(alignment);
@@ -178,8 +178,7 @@ static void process_splice_form(Array *spliced_alignments_in_form,
                                 /*@unused@*/ const void *set_of_sas,
                                 /*@unused@*/ unsigned long number_of_sas,
                                 /*@unused@*/ size_t size_of_sa,
-                                /*@unused@*/ void *userdata,
-                                /*@unused@*/ Env *env)
+                                /*@unused@*/ void *userdata)
 {
   unsigned long i;
 
@@ -251,7 +250,7 @@ int gt_consensus_sa(int argc, const char **argv, Env *env)
 
   /* parse input file and store resuilts in the spliced alignment array */
   spliced_alignments = array_new(sizeof (SimpleSplicedAlignment));
-  had_err = parse_input_file(spliced_alignments, argv[1], env);
+  had_err = parse_input_file(spliced_alignments, argv[1], env_error(env));
 
   if (!had_err) {
     /* sort spliced alignments */
@@ -262,7 +261,7 @@ int gt_consensus_sa(int argc, const char **argv, Env *env)
     consensus_sa(array_get_space(spliced_alignments),
                  array_size(spliced_alignments),
                  sizeof (SimpleSplicedAlignment), get_genomic_range, get_strand,
-                 get_exons, process_splice_form, NULL, env);
+                 get_exons, process_splice_form, NULL);
   }
 
   /* free */

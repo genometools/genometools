@@ -72,23 +72,22 @@ static int genome_node_lua_accept(lua_State *L)
 {
   GenomeNode **gn;
   GenomeVisitor **gv;
-  Env *env;
+  Error *e;
   gn = check_genome_node(L, 1);
   gv = check_genome_visitor(L, 2);
-  env = get_env_from_registry(L);
-  env_error_check(env);
-  if (genome_node_accept(*gn, *gv, env))
-    return luagt_error(L, env);
+  e = error_new();
+  if (genome_node_accept(*gn, *gv, e))
+    return luagt_error(L, e);
+  error_delete(e);
   return 0;
 }
 
 static int genome_node_lua_is_part_of_genome_node(lua_State *L)
 {
   GenomeNode **parent, **child;
-  Env *env = get_env_from_registry(L);
   parent = check_genome_node(L, 1);
   child  = check_genome_node(L, 2);
-  genome_node_is_part_of_genome_node(*parent, genome_node_rec_ref(*child, env));
+  genome_node_is_part_of_genome_node(*parent, genome_node_rec_ref(*child));
   return 0;
 }
 
@@ -109,9 +108,8 @@ static int genome_node_lua_is_marked(lua_State *L)
 static int genome_node_lua_contains_marked(lua_State *L)
 {
   GenomeNode **gn;
-  Env *env = get_env_from_registry(L);
   gn = check_genome_node(L, 1);
-  lua_pushboolean(L, genome_node_contains_marked(*gn, env));
+  lua_pushboolean(L, genome_node_contains_marked(*gn));
   return 1;
 }
 

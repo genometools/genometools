@@ -142,7 +142,7 @@ int gt_gff3(int argc, const char **argv, Env *env)
                                                argv + parsed_args,
                                                arguments.verbose &&
                                                arguments.outfp,
-                                               arguments.checkids, env);
+                                               arguments.checkids);
   last_stream = gff3_in_stream;
 
   /* set offset (if necessary) */
@@ -152,37 +152,38 @@ int gt_gff3(int argc, const char **argv, Env *env)
   /* set offsetfile (if necessary) */
   if (str_length(arguments.offsetfile)) {
     had_err = gff3_in_stream_set_offsetfile(gff3_in_stream,
-                                            arguments.offsetfile, env);
+                                            arguments.offsetfile,
+                                            env_error(env));
   }
 
   /* create sort stream (if necessary) */
   if (!had_err && arguments.sort) {
-    sort_stream = sort_stream_new(gff3_in_stream, env);
+    sort_stream = sort_stream_new(gff3_in_stream);
     last_stream = sort_stream;
   }
 
   /* create merge feature stream (if necessary) */
   if (!had_err && arguments.mergefeat) {
     assert(sort_stream);
-    mergefeat_stream = mergefeat_stream_sorted_new(sort_stream, env);
+    mergefeat_stream = mergefeat_stream_sorted_new(sort_stream);
     last_stream = mergefeat_stream;
   }
 
   /* create addintrons stream (if necessary) */
   if (!had_err && arguments.addintrons) {
     assert(last_stream);
-    addintrons_stream = addintrons_stream_new(last_stream, env);
+    addintrons_stream = addintrons_stream_new(last_stream);
     last_stream = addintrons_stream;
   }
 
   /* create gff3 output stream */
   if (!had_err)
-    gff3_out_stream = gff3_out_stream_new(last_stream, arguments.outfp, env);
+    gff3_out_stream = gff3_out_stream_new(last_stream, arguments.outfp);
 
   /* pull the features through the stream and free them afterwards */
   if (!had_err) {
-    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
-           gn) {
+    while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn,
+                                               env_error(env))) && gn) {
       genome_node_rec_delete(gn);
     }
   }

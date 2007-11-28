@@ -48,7 +48,7 @@ static void extractfeat_visitor_free(GenomeVisitor *gv)
   regionmapping_delete(extractfeat_visitor->regionmapping);
 }
 
-static int extract_join_feature(GenomeNode *gn, void *data, Env *env)
+static int extract_join_feature(GenomeNode *gn, void *data, Error *e)
 {
   ExtractFeatVisitor *v = (ExtractFeatVisitor*) data;
   GenomeFeatureType gf_type;
@@ -58,22 +58,22 @@ static int extract_join_feature(GenomeNode *gn, void *data, Env *env)
   Range range;
   int had_err = 0;
 
-  env_error_check(env);
+  error_check(e);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
   gf_type = genome_feature_get_type(gf);
 
   if (gf_type == v->type) {
     had_err = regionmapping_get_raw_sequence(v->regionmapping, &raw_sequence,
-                                             genome_node_get_seqid(gn), env);
+                                             genome_node_get_seqid(gn), e);
     if (!had_err) {
       range = genome_node_get_range(gn);
       assert(range.start); /* 1-based coordinates */
       raw_sequence += range.start - 1;
       had_err = regionmapping_get_raw_sequence_length(v->regionmapping,
                                                       &raw_sequence_length,
-                                                     genome_node_get_seqid(gn),
-                                                     env);
+                                                      genome_node_get_seqid(gn),
+                                                      e);
     }
     if (!had_err) {
       assert(range.end <= raw_sequence_length);
@@ -85,7 +85,7 @@ static int extract_join_feature(GenomeNode *gn, void *data, Env *env)
   return had_err;
 }
 
-static int extract_feature(GenomeNode *gn, void *data, Env *env)
+static int extract_feature(GenomeNode *gn, void *data, Error *e)
 {
   ExtractFeatVisitor *v = (ExtractFeatVisitor*) data;
   GenomeFeatureType gf_type;
@@ -95,7 +95,7 @@ static int extract_feature(GenomeNode *gn, void *data, Env *env)
   unsigned long raw_sequence_length;
   int had_err = 0;
 
-  env_error_check(env);
+  error_check(e);
   gf = genome_node_cast(genome_feature_class(), gn);
   assert(gf);
   gf_type = genome_feature_get_type(gf);
@@ -117,11 +117,11 @@ static int extract_feature(GenomeNode *gn, void *data, Env *env)
     str_reset(v->sequence);
     v->reverse_strand = false;
     had_err = genome_node_traverse_direct_children(gn, v, extract_join_feature,
-                                                   env);
+                                                   e);
     if (!had_err && str_length(v->sequence)) {
       if (v->reverse_strand) {
         had_err = reverse_complement(str_get(v->sequence),
-                                     str_length(v->sequence), env_error(env));
+                                     str_length(v->sequence), e);
       }
       if (!had_err) {
         if (v->translate) {
@@ -147,19 +147,19 @@ static int extract_feature(GenomeNode *gn, void *data, Env *env)
     had_err = regionmapping_get_raw_sequence_length(v->regionmapping,
                                                     &raw_sequence_length,
                                                     genome_node_get_seqid(gn),
-                                                    env);
+                                                    e);
     if (!had_err) {
       assert(range.end <= raw_sequence_length);
       str_reset(v->sequence);
       had_err = regionmapping_get_raw_sequence(v->regionmapping, &raw_sequence,
-                                               genome_node_get_seqid(gn), env);
+                                               genome_node_get_seqid(gn), e);
     }
     if (!had_err) {
       str_append_cstr_nt(v->sequence, raw_sequence + range.start - 1,
                          range_length(range));
       if (genome_feature_get_strand(gf) == STRAND_REVERSE) {
         had_err = reverse_complement(str_get(v->sequence),
-                                     str_length(v->sequence), env_error(env));
+                                     str_length(v->sequence), e);
       }
     }
     if (!had_err) {
@@ -181,14 +181,14 @@ static int extract_feature(GenomeNode *gn, void *data, Env *env)
 }
 
 static int extractfeat_visitor_genome_feature(GenomeVisitor *gv,
-                                              GenomeFeature *gf, Env *env)
+                                              GenomeFeature *gf, Error *e)
 {
   ExtractFeatVisitor *efv;
-  env_error_check(env);
+  error_check(e);
   efv = extractfeat_visitor_cast(gv);
   assert(efv->regionmapping);
   return genome_node_traverse_children((GenomeNode*) gf, efv, extract_feature,
-                                       false, env);
+                                       false, e);
 }
 
 const GenomeVisitorClass* extractfeat_visitor_class()
@@ -203,12 +203,12 @@ const GenomeVisitorClass* extractfeat_visitor_class()
 
 GenomeVisitor* extractfeat_visitor_new(RegionMapping *rm,
                                        GenomeFeatureType type, bool join,
-                                       bool translate, Env *env)
+                                       bool translate)
 {
   GenomeVisitor *gv;
   ExtractFeatVisitor *efv;
   assert(rm);
-  gv = genome_visitor_create(extractfeat_visitor_class(), env);
+  gv = genome_visitor_create(extractfeat_visitor_class());
   efv= extractfeat_visitor_cast(gv);
   efv->description = str_new();
   efv->sequence = str_new();
