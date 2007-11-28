@@ -36,6 +36,8 @@
  * corresponding representation to disk.
  * @param si reference of suffixerator interface used to read
  * construction from
+ * @param totalLen length of indexed sequence (including terminator
+ * and separators)
  * @param projectName base name of corresponding suffixerator project
  * @param params parameters describing the composition of blocks,
  * buckets and construction of in memory structures
@@ -44,15 +46,15 @@
  * for each extension header in turn
  * @param extHeaderSizes array of numExtHeaders sizes
  * representing the length of each extension header
- * @param extHeaderCallback array of numExtHeaders function pointers
+ * @param extHeaderCallbacks array of numExtHeaders function pointers
  * each of which will be called once upon writing the header
  * @param headerCBData array of pointers passed as argument when the
  * corresponding header writing function is called
  * @param biFunc function to be called when a chunk of data has been
  * accumulated for a given region of sequence data
- * @param cwBitsPerPos exactly this many bits will be appended by
+ * @param cwExtBitsPerPos exactly this many bits will be appended by
  * biFunc for each symbol of the input sequence
- * @param maxBitsPerPos at most this many bits will be appended to the
+ * @param maxVarExtBitsPerPos at most this many bits will be appended to the
  * variable width part of the data
  * @param cbState will be passed on each call of biFunc
  * @param env genometools reference for core functions
@@ -74,6 +76,8 @@ newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
  * corresponding representation to disk.
  * @param sa reference of suffix-array data structure to read
  * construction from
+ * @param totalLen length of indexed sequence (including terminator
+ * and separators)
  * @param projectName base name of corresponding suffixerator project
  * @param params parameters describing the composition of blocks,
  * buckets and construction of in memory structures
@@ -82,15 +86,15 @@ newBlockEncIdxSeqFromSfxI(sfxInterface *si, Seqpos totalLen,
  * for each extension header in turn
  * @param extHeaderSizes array of numExtHeaders sizes
  * representing the length of each extension header
- * @param extHeaderCallback array of numExtHeaders function pointers
+ * @param extHeaderCallbacks array of numExtHeaders function pointers
  * each of which will be called once upon writing the header
  * @param headerCBData array of pointers passed as argument when the
  * corresponding header writing function is called
  * @param biFunc function to be called when a chunk of data has been
  * accumulated for a given region of sequence data
- * @param cwBitsPerPos exactly this many bits will be appended by
+ * @param cwExtBitsPerPos exactly this many bits will be appended by
  * biFunc for each symbol of the input sequence
- * @param maxBitsPerPos at most this many bits will be appended to the
+ * @param maxVarExtBitsPerPos at most this many bits will be appended to the
  * variable width part of the data
  * @param cbState will be passed on each call of biFunc
  * @param env genometools reference for core functions
@@ -103,12 +107,17 @@ newBlockEncIdxSeqFromSA(Suffixarray *sa, Seqpos totalLen,
                         uint32_t *extHeaderSizes,
                         headerWriteFunc *extHeaderCallbacks,
                         void **headerCBData,
-                        bitInsertFunc biFunc, BitOffset cwBitsPerPos,
-                        BitOffset maxBitsPerPos, void *cbState, Env *env);
+                        bitInsertFunc biFunc, BitOffset cwExtBitsPerPos,
+                        BitOffset maxVarExtBitsPerPos, void *cbState, Env *env);
 
 /**
  * \brief Load previously written block encoded sequence
  * representation for already opened suffix-array structure.
+ * @param sa reference of suffix-array data structure to read
+ * construction from
+ * @param totalLen length of indexed sequence (including terminator
+ * and separators)
+ * @param features select optional in-memory structures
  * @param projectName base name of corresponding suffixerator project
  * @param env genometools reference for core functions
  */

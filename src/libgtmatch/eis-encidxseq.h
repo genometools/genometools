@@ -18,7 +18,7 @@
 #define EIS_ENCIDXSEQ_H
 
 /**
- * \file encidxseq.h
+ * \file eis-encidxseq.h
  * Interface definitions for encoded indexed sequences.
  * \author Thomas Jahns <Thomas.Jahns@gmx.net>
  */
@@ -53,6 +53,10 @@ typedef BitOffset (*bitInsertFunc)(BitString cwDest, BitOffset cwOffset,
                                    Seqpos start, Seqpos len, void *cbState,
                                    Env *env);
 
+/**
+ * Callback to insert one header field. The data written can later be
+ * retrieved via EISSeekToHeader.
+ */
 typedef int (*headerWriteFunc)(FILE *fp, void *headerCBData);
 
 /**
@@ -79,40 +83,49 @@ struct extBitsRetrieval
   int flags;                    /**< flags for internal use (Don't touch) */
 };
 
+/**
+ * Select which parts of the stored data to retrieve: only constant width
+ * part or also from the variable part. Join with bitwise or to form a
+ * request for extBitsRetrieval.
+ */
 enum extBitsRetrievalFlags
 {
-  EBRF_RETRIEVE_CWBITS = 0,
-  EBRF_PERSISTENT_CWBITS = 1<<0,
-  EBRF_RETRIEVE_VARBITS = 1<<1,
-  EBRF_PERSISTENT_VARBITS = 1<<2,
+  EBRF_RETRIEVE_CWBITS = 0,        /**< retrieve the constant-width part */
+  EBRF_PERSISTENT_CWBITS = 1<<0,   /**< make constant width string persistent,
+                                    * i.e. survive further calls to
+                                    * query functions */
+  EBRF_RETRIEVE_VARBITS = 1<<1,    /**< retrieve variable-width string */
+  EBRF_PERSISTENT_VARBITS = 1<<2,  /**< make variable-width string persistent,
+                                    * i.e. survive further calls to
+                                    * query functions */
 };
 
+/**
+ * Stores the number of occurrences for every symbol of the input alphabet.
+ */
 struct seqStats
 {
-  Seqpos *symbolDistributionTable;
-  enum sourceEncType sourceAlphaType;
+  Seqpos *symbolDistributionTable;          /**< indexed by symbol value */
+  enum sourceEncType sourceAlphaType;       /**< defines alphabet width */
 };
 
+/** holds encoded indexed sequence object */
 typedef struct encIdxSeq EISeq;
-
+/** hints to speed up retrievals when accessing positions in sequence
+ * (or at least close to one another) */
 typedef union EISHint *EISHint;
 
 /**
  * \brief Construct block-encoded indexed sequence object and write
  * corresponding representation to disk.
  * @param projectName base name of corresponding suffixerator project
- * @param blockSize number of symbol to combine in one block, a
- * lookup-table containing $alphabetsize^{blockSize}$ entries is
- * required so adjust with caution
- * @param bucketBlocks frequency at which to store partial symbol
- * sums, low values increase storage and decrease number of
- * computations required for rank queries on average
+ * @param params parameters for index construction
  * @param numExtHeaders number of extension headers to write via callbacks
  * @param headerIDs array of numExtHeaders ids to be used
  * for each extension header in turn
  * @param extHeaderSizes array of numExtHeaders sizes
  * representing the length of each extension header
- * @param extHeaderCallback array of numExtHeaders function pointers
+ * @param extHeaderCallbacks array of numExtHeaders function pointers
  * each of which will be called once upon writing the header
  * @param headerCBData array of pointers passed as argument when the
  * corresponding header writing function is called
@@ -137,6 +150,7 @@ newBlockEncIdxSeq(const Str *projectName, const struct blockEncParams *params,
  * \brief Load previously written block encoded sequence
  * representation.
  * @param projectName base name of corresponding suffixerator project
+ * @param features select optional in-memory data structures for speed-up
  * @param env genometools reference for core functions
  */
 extern EISeq *
@@ -176,7 +190,7 @@ EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
  * \brief Return number of occurrences of symbol sym in index up to
  * but not including given position.
  * @param seq sequence index object to query
- * @param sym symbol to query occurrences of, but already transformed
+ * @param tSym symbol to query occurrences of, but already transformed
  * by input alphabet
  * @param pos occurences are counted up to this position
  * @param hint provides cache and direction information for queries
@@ -184,7 +198,7 @@ EISRank(EISeq *seq, Symbol sym, Seqpos pos, union EISHint *hint,
  * @param env genometools state, passes information about allocator etc
  */
 static inline Seqpos
-EISSymTransformedRank(EISeq *seq, Symbol msym, Seqpos pos,
+EISSymTransformedRank(EISeq *seq, Symbol tSym, Seqpos pos,
                       union EISHint *hint, Env *env);
 
 /**
@@ -192,8 +206,8 @@ EISSymTransformedRank(EISeq *seq, Symbol msym, Seqpos pos,
  * @param seq
  * @param pos sequence position for which to retrieve corresponding
  * area
- * @param persistent if false, the retrieved BitString elements will
- * become invalid once the hint union is used in another call.
+ * @param flags select which part of the extension bits to query
+ * @param retval store information of retrieved bits here
  * @param hint provides cache and direction information for queries
  * @param env genometools state, passes information about allocator etc
  */
@@ -284,17 +298,26 @@ EISGetTransformedSym(EISeq *seq, Seqpos pos, EISHint hint, Env *env);
  * related positions.
  * @param seq reference of sequence object to use
  * @param env genometools state, passes information about allocator etc
-
  */
 static inline EISHint
 newEISHint(EISeq *seq, Env *env);
 
+/**
+ * Deallocate hinting data.
+ * @param seq sequence associated
+ * @param hint hint to free
+ * @param env
+ */
 static inline void
 deleteEISHint(EISeq *seq, EISHint hint, Env *env);
 
+/**
+ * Possible outcome of index integrity check.
+ */
 enum EISIntegrityCheckResults
 {
-  EIS_INTEGRITY_CHECK_NO_ERROR = 0,
+  EIS_INTEGRITY_CHECK_NO_ERROR = 0,   /**< all tests completed
+                                       * without error */
   EIS_INTEGRITY_CHECK_INVALID_SYMBOL, /**< reading from the index
                                        *   produced an incorrect symbol  */
   EIS_INTEGRITY_CHECK_BWT_READ_ERROR, /**< reading from the BWT
@@ -309,22 +332,57 @@ enum EISIntegrityCheckResults
                                        *   delivered a wrong count */
 };
 
+/** table of error descriptions indexed by return values of
+ * EISVerifyIntegrity  */
 extern const char *EISIntegrityCheckResultStrings[];
 
+/**
+ * Select potentially expensive checks to perform on index.
+ */
 enum EISIntegrityCheckFlags
 {
-  EIS_VERIFY_BASIC = 0,
-  EIS_VERIFY_EXT_RANK = 1 << 0,
+  EIS_VERIFY_BASIC = 0,         /**< just basic checks  */
+  EIS_VERIFY_EXT_RANK = 1 << 0, /**< do rank queries for all
+                                 * positions for all symbols in the
+                                 * alphabet, not only for ranks changed */
 };
 
+/**
+ * @brief Check wether index contains same symbols as reference
+ * sequence and delivers correct rank counts.
+ * @param seqIdx index to check
+ * @param projectName name of corresponding suffix array project to
+ * use as reference
+ * @param skip omit this many symbols at the beginning
+ * @param tickPrint print a dot every tickPrint symbols processed
+ * @param fp print dots to this file pointer
+ * @param chkFlags select additional tests (see enum EISIntegrityCheckFlags)
+ * @param env
+ */
 extern enum EISIntegrityCheckResults
 EISVerifyIntegrity(EISeq *seqIdx, const Str *projectName, Seqpos skip,
                    unsigned long tickPrint, FILE *fp, int chkFlags, Env *env);
 
+/**
+ * @brief Position file pointer at header written by upper layer.
+ * @param seqIdx index to search header in
+ * @param headerID number of header to search for
+ * @param lenRet write length of header here
+ * @return appropriate file pointer or NULL if header was not found
+ */
 static inline FILE *
 EISSeekToHeader(const EISeq *seqIdx, uint16_t headerID,
                 uint32_t *lenRet);
 
+/**
+ * Given a position write debugging output for surrounding sequence.
+ * @param seqIdx sequence index to query
+ * @param pos position for which to print context
+ * @param fp print diagnostics to this file pointer
+ * @param hint use this structure for hinting
+ * @param env
+ * @return 0 if an I/O error occured wrt fp
+ */
 static inline int
 EISPrintDiagsForPos(const EISeq *seqIdx, Seqpos pos, FILE *fp, EISHint hint,
                     Env *env);

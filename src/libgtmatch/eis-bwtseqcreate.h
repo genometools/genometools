@@ -17,6 +17,11 @@
 #ifndef EIS_BWTSEQCREATE_H
 #define EIS_BWTSEQCREATE_H
 
+/**
+ * @file eis-bwtseqcreate.h
+ * @brief Generic BWT index creation routines.
+ */
+
 #include "libgtmatch/eis-bwtseq.h"
 #include "libgtmatch/eis-bwtseqpriv.h"
 #include "libgtmatch/eis-encidxseq.h"

@@ -17,9 +17,17 @@
 #ifndef EIS_ENCIDXSEQPARAM_H
 #define EIS_ENCIDXSEQPARAM_H
 
+/**
+ * @file eis-encidxseqparam.h
+ * @brief Parameter definitions for index creation routines.
+ */
+
+/**
+ * Select features to use for index in-memory representation.
+ */
 enum EISFeatureBits
 {
-  EIS_FEATURE_NONE = 0,
+  EIS_FEATURE_NONE = 0,           /**< fallback value */
   EIS_FEATURE_REGION_SUMS = 1<<0, /**< if set construct sum tables for
                                    *   the special symbol ranges
                                    *   use this on index loading if
@@ -28,6 +36,9 @@ enum EISFeatureBits
                                    *   is very tight (e.g. on construction) */
 };
 
+/**
+ * Parameters to construct a block composition compressed index.
+ */
 struct blockEncParams
 {
   unsigned blockSize;         /**< number of symbols to combine in
@@ -64,7 +75,7 @@ enum seqBaseEncoding {
  */
 union seqBaseEncParam
 {
-  struct blockEncParams blockEnc;
+  struct blockEncParams blockEnc; /**< parameters for block encoding  */
 /*   struct  */
 /*   { */
 /*   } RLEParams; */
@@ -73,6 +84,17 @@ union seqBaseEncParam
 /*   } waveletTreeParams; */
 };
 
+/**
+ * @brief Given the construction parameters for a sequence index,
+ * estimate how many symbols will be encoded together.
+ *
+ * Extension information can be expected to be stored at a intervals
+ * corresponding to the return value of this function.
+ * @param params paramters for sequence index construction
+ * @param encType select which type of index will be constructed
+ * @param env
+ * @return number of symbols stored consecutively
+ */
 extern unsigned
 estimateSegmentSize(const union seqBaseEncParam *params,
                     enum seqBaseEncoding encType, Env *env);

@@ -17,7 +17,7 @@
 #define EIS_MRANGEALPHABET_H
 
 /**
- * \file mrangealphabet.h
+ * \file eis-mrangealphabet.h
  * \brief Methods for an alphabet mapping where the alphabet is mapped
  * to multiple contiguous ranges.
  *
@@ -32,21 +32,34 @@
 #include "libgtcore/env.h"
 #include "libgtmatch/alphadef.h"
 
+/** symbols are stored in this scalar type */
 typedef unsigned char Symbol;
 
+/** retrieve symbol from BitString */
 #define bsGetSymbol bsGetUInt8
+/** store symbol in BitString */
 #define bsStoreSymbol bsStoreUInt8
+/** retrieve array of symbols from BitString  */
 #define bsGetUniformSymbolArray bsGetUniformUInt8Array
+/** store array of symbols in BitString  */
 #define bsStoreUniformSymbolArray bsStoreUniformUInt8Array
+/** how many bits are required to store given symbol value */
 #define requiredSymbolBits requiredUInt8Bits
 
+/**
+ * Describes an alphabet i.e. a mapping function from a given input
+ * type to a contiguous range of integers which are divided into
+ * multiple ranges, which are again continuous.
+ */
 typedef struct multiRangeAlphabetEncoding MRAEnc;
 
+/** used to describe a symbol not occurring in the alphabet */
 #define UNDEF_UCHAR ((unsigned char)~0)
 
+/** select width of symbol input */
 enum sourceEncType {
-  sourceUnknown = 0,
-  sourceUInt8 = 1,
+  sourceUnknown = 0,            /**< invalid/undefined  */
+  sourceUInt8 = 1,              /**< input in the range 0..255 */
 };
 
 /**
@@ -80,6 +93,12 @@ extern MRAEnc *
 newMultiRangeAlphabetEncodingUInt8(int numRanges, const int symbolsPerRange[],
                                    const uint8_t *mappings, Env *env);
 
+/**
+ * @brief Copy constructor for multi-range alphabets
+ * @param alpha alphabet to copy
+ * @param env
+ * @return new alphabet object
+ */
 extern MRAEnc *
 MRAEncCopy(const MRAEnc *alpha, Env *env);
 
@@ -89,9 +108,13 @@ MRAEncCopy(const MRAEnc *alpha, Env *env);
  * Maps symbols from all included ranges to new values 0 to n where all
  * symbols from non-included ranges are mapped to fallback
  * @param srcAlpha alphabet to remap
- * @param rangeIncludeFlag array of integer flags, 0 => map all symbols in
- * range to fallback, otherwise append to already mapped symbols
+ * @param selection ranges with this value in rangeSel are carried
+ * over to new alphabet
+ * @param rangeSel array of integer flags, if != selection for given
+ * range => maps all symbols in range to fallback, otherwise append to
+ * already mapped symbols
  * @param fallback symbol to map not-included ranges to
+ * @param env
  */
 extern MRAEnc *
 MRAEncSecondaryMapping(const MRAEnc *srcAlpha, int selection,
@@ -126,12 +149,16 @@ static inline size_t
 MRAEncGetRangeSize(const MRAEnc *mralpha, size_t range);
 
 /**
+ * @brief Get number of different symbols in alphabet.
+ * @param mralpha
  * @return number of symbols in alphabet
  */
 extern size_t
 MRAEncGetSize(const MRAEnc *mralpha);
 
 /**
+ * @brief Get range of input symbols.
+ * @param mralpha
  * @return size of original value range of symbols in alphabet
  * (i.e. 256 for 8 bit mapping)
  */
@@ -146,19 +173,45 @@ MRAEncGetDomainSize(const MRAEnc *mralpha);
 static inline Symbol
 MRAEncMapSymbol(const MRAEnc *mralpha, Symbol sym);
 
+/**
+ * @brief Find wether a symbol from input is accurately represented in
+ * the alphabet or illegal input.
+ * @param mralpha
+ * @param sym symbol to map
+ * @return 0 if alphabet has no valid mapping, !0 otherwise
+ */
 static inline int
 MRAEncSymbolHasValidMapping(const MRAEnc *mralpha, Symbol sym);
 
+/**
+ * @brief Apply reverse mapping of transformed symbol to input alphabet.
+ * @param mralpha
+ * @param sym symbol to un-map
+ * @return inverse mapping of sym
+ */
 static inline Symbol
 MRAEncRevMapSymbol(const MRAEnc *mralpha, Symbol sym);
 
+/**
+ * @brief Apply mapping of input string.
+ * @param mralpha
+ * @param symbols symbols to convert
+ * @param numSyms length of symbols string
+ */
 extern void
 MRAEncSymbolsTransform(const MRAEnc *mralpha, Symbol *symbols, size_t numSyms);
 
+/**
+ * @brief Apply reverse mapping of string.
+ * @param mralpha
+ * @param symbols symbols to convert
+ * @param numSyms length of symbols string
+ */
 extern void
 MRAEncSymbolsRevTransform(const MRAEnc *mralpha, Symbol *symbols,
                           size_t numSyms);
 /**
+ * @brief Query wether a symbol belongs to a selected range
  * @param mralpha alphabet to query
  * @param sym symbol to look-up range for
  * @param selection value to test rangeSel for
@@ -172,10 +225,23 @@ extern int
 MRAEncSymbolIsInSelectedRanges(const MRAEnc *mralpha, Symbol sym,
                                int selection, int *rangeSel);
 
+/**
+ * @brief Read symbols from file and transform according to
+ * mapping.
+ * @param mralpha
+ * @param fp file pointer
+ * @param numSyms read this many symbols
+ * @param dest write converted symbols here
+ */
 extern int
 MRAEncReadAndTransform(const MRAEnc *mralpha, FILE *fp,
                        size_t numSyms, Symbol *dest);
 
+/**
+ * @brief Delete alphabet object.
+ * @param mralpha
+ * @param env
+ */
 extern void
 MRAEncDelete(struct multiRangeAlphabetEncoding *mralpha, Env *env);
 

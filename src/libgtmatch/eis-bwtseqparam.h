@@ -17,6 +17,12 @@
 #ifndef EIS_BWTSEQPARAM_H
 #define EIS_BWTSEQPARAM_H
 
+/**
+ * @file eis-bwtseqparam.h
+ * @brief Construction parameters for BWT index creation
+ * routines.
+ */
+
 #include "libgtmatch/eis-encidxseqparam.h"
 
 /**
@@ -24,7 +30,7 @@
  */
 struct bwtParam
 {
-  union seqBaseEncParam seqParams;    /**< a union holding extra parameter
+  union seqBaseEncParam seqParams;/**< a union holding extra parameter
                                    *   information specific to the
                                    *   type selected via parameter
                                    *   baseType */
@@ -32,7 +38,7 @@ struct bwtParam
                                    *   method of the sequence index *
                                    *   storing the BWT sequence (see
                                    *   enum seqBaseEncoding). */
-  int featureToggles;          /**< set of bittoggles composed
+  int featureToggles;             /**< set of bittoggles composed
                                    *   from enum BWTFeatures */
   unsigned locateInterval;        /**< store locate information
                                    * (mapping from BWT sequence to

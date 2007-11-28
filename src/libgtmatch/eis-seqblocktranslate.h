@@ -16,64 +16,102 @@
 #ifndef EIS_SEQBLOCKTRANSLATE_H
 #define EIS_SEQBLOCKTRANSLATE_H
 
+/**
+ * \file eis-seqblocktranslate.h
+ * Translate fixed length substrings (q-words) to a pair of indices: one to
+ * designate the composition counts and one to define the actual
+ * sequence
+ */
 #include <stdlib.h>
 #include <string.h>
 #include <inttypes.h>
 
 #include "libgtmatch/eis-mrangealphabet.h"
 
+/** store indices in this scalar */
 typedef uint32_t PermCompIndex;
+/** method to retrieve one index from a BitString */
 #define bsGetPermCompIndex bsGetUInt32
+/** method to store one index in a BitString */
 #define bsStorePermCompIndex bsStoreUInt32
 
+/**
+ * For permutations common to one composition.
+ */
 struct permList
 {
-  size_t numPermutations;
-  unsigned permIdxBits;
-  BitOffset catPermsOffset;
-};
-
-struct compList
-{
-  size_t numCompositions;
-  struct permList *permutations;
-  BitString catCompsPerms;             /**< bitstring with all
-                                        *   compositions, followed by
-                                        *   all permutations encoded
-                                        *   in minimal space
-                                        *   concatenated together */
-  unsigned bitsPerCount, bitsPerSymbol, compositionIdxBits, maxPermIdxBits;
-  size_t maxPermCount;
+  size_t numPermutations;       /**< number of permutations this
+                                 * composition produces  */
+  unsigned permIdxBits;         /**< bits required to store values
+                                 * from 0..numPermuations-1  */
+  BitOffset catPermsOffset;     /**< offset into the table of all
+                                 * permutations at which the
+                                 * permutations corresponding to this
+                                 * composition are stored */
 };
 
 /**
+ * Holds the lists of compositions and permutations.
+ */
+struct compList
+{
+  size_t numCompositions;       /**< how many ways are there to choose
+                                 *   q symbols from the given alphabet */
+  struct permList *permutations;/**< reference of list of permutations */
+  BitString catCompsPerms;      /**< bitstring with all compositions,
+                                 *   followed by all permutations
+                                 *   encoded in minimal space
+                                 *   concatenated together */
+  unsigned bitsPerCount,        /**< bits required to hold one value 0..q */
+    bitsPerSymbol,              /**< bits for each symbol */
+    compositionIdxBits,         /**< log_2 of numcompositions */
+    maxPermIdxBits;             /**< maximum bit length of permutation
+                                 *   indices */
+};
+
+/**
+ * @brief construct object to translate q-words to
+ * composition/permutation index tuple
+ * @param compList
+ * @param blockSize length of q-words to encode
+ * @param numSyms size of alphabet
+ * @param env
  * @return 0 on error, !0 otherwise
  */
 extern int
 initCompositionList(struct compList *compList, unsigned blockSize,
                     unsigned numSyms, Env *env);
+/**
+ * Deallocate resources of composition list object, storage struct is not freed.
+ * @param clist
+ * @param env
+ */
 extern void
 destructCompositionList(struct compList *clist, Env *env);
 
 /**
+ * @brief create new object to map q-words to composition/permutation
+ * index tuples
+ * @param blockSize length of q-words to map
+ * @param alphabetSize
+ * @param env
  * @return NULL on error
  */
 extern struct compList *
 newCompositionList(unsigned blockSize, unsigned alphabetSize, Env *env);
 
+/**
+ * Delete composition list object.
+ * @param clist
+ * @param env
+ */
 extern void
 deleteCompositionList(struct compList *clist, Env *env);
-
-static inline BitOffset
-compListPermStartOffset(struct compList *list, unsigned numSyms)
-{
-  return list->numCompositions * list->bitsPerCount * numSyms;
-}
 
 /**
  * \brief Transforms a block-sized sequence of symbols to corresponding
  * index-pair representation of block-composition index.
- * @param tables to use for lookup
+ * @param compositionTable tables to use for lookup
  * @param blockSize length of encoded sequence blocks
  * @param alphabetSize encoded symbols are from range 0..(alphabetSize - 1)
  * @param block symbol sequence holding at least as many symbols as
@@ -101,22 +139,40 @@ block2IndexPair(const struct compList *compositionTable,
                 unsigned *bitsOfPermIdx, Env *env,
                 BitString permCompPA, unsigned *compPA);
 
+/**
+ * @brief Give q-word corresponding to pair of indices.
+ * @param compositionTable
+ * @param blockSize q-word length (must be same as used on construction)
+ * @param compIdx composition index
+ * @param permIdx permutation index
+ * @param block write sequence of symbols here
+ * @param subLen only unpack this many symbols
+ */
 static inline void
 indexPair2block(const struct compList *compositionTable, unsigned blockSize,
                 PermCompIndex compIdx, PermCompIndex permIdx,
-                Symbol *block, unsigned sublen)
+                Symbol *block, unsigned subLen)
 {
   unsigned bitsPerPermutation;
   struct permList *permutationList;
   assert(compositionTable && block);
+  assert(subLen <= blockSize);
   bitsPerPermutation = compositionTable->bitsPerSymbol * blockSize;
   permutationList = compositionTable->permutations + compIdx;
   bsGetUniformSymbolArray(
     compositionTable->catCompsPerms,
     permutationList->catPermsOffset + bitsPerPermutation * permIdx,
-    compositionTable->bitsPerSymbol, sublen, block);
+    compositionTable->bitsPerSymbol, subLen, block);
 }
 
+/**
+ * @brief Find how often a symbol occurs in a composition given by index
+ * @param compositionTable
+ * @param alphabetSize
+ * @param compIndex composition index
+ * @param sym
+ * @return number of symbol occurrences
+ */
 static inline unsigned
 symCountFromComposition(struct compList *compositionTable,
                         unsigned alphabetSize,

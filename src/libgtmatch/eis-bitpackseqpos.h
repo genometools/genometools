@@ -16,6 +16,12 @@
 #ifndef EIS_BITPACKSEQPOS_H
 #define EIS_BITPACKSEQPOS_H
 
+/**
+ * @file eis-bitpackseqpos.h
+ * @brief Defines appropriate width routines for storing and retrieving
+ * Seqpos values in/from BitString.
+ */
+
 #include "libgtmatch/seqpos-def.h"
 
 #ifdef Seqposequalsunsignedint

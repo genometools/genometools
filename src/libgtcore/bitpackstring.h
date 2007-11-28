@@ -31,30 +31,46 @@
 
 #include "libgtcore/env.h"
 
+/** basic unit of addressing BitStrings */
 /* Caution: sizeof (BitElem) <= sizeof (unsigned long) must be met */
 typedef unsigned char BitElem;
+/** Stores arbitrary bit sequences */
 typedef BitElem *BitString;
+/** Immutable BitStrings */
 typedef const BitElem *constBitString;
+/** Since even on 32-bit architectures 512MiB hold over 2 billion
+ * bits, offsets into BitStrings must be stored as unsigned long long x*/
 typedef unsigned long long BitOffset;
 
 enum {
+  /** bits held in one BitElem */
   bitElemBits = sizeof (BitElem)*CHAR_BIT,
 };
 
+/** bits required to store an unsigned value ranging from 0..val */
 #define requiredUIntBits(val) requiredUInt32Bits(val)
+/** bits required to store int value val exactly */
 #define requiredIntBits(val) requiredInt32Bits(val)
+/** extract unsigned from BitString */
 #define bsGetUInt(str, offset, numBits) bsGetUInt32(str, offset, numBits)
+/** extract int from BitString */
 #define bsGetInt(str, offset, numBits) bsGetInt32(str, offset, numBits)
+/** store unsigned in BitString */
 #define bsStoreUInt(str, offset, numBits, val) \
   bsStoreUInt32(str, offset, numBits, val)
+/** store int in BitString */
 #define bsStoreInt(str, offset, numBits, val) \
   bsStoreInt32(str, offset, numBits, val)
+/** store array of unsigned ints in BitString */
 #define bsStoreUniformUIntArray(str, offset, numBits, numValues, val) \
   bsStoreUniformUInt32Array(str, offset, numBits, numValues, val)
+/** store array of ints in BitString */
 #define bsStoreUniformIntArray(str, offset, numBits, numValues, val) \
   bsStoreUniformInt32Array(str, offset, numBits, numValues, val)
+/** get array of unsigned ints from BitString */
 #define bsGetUniformUIntArray(str, offset, numBits, numValues, val) \
   bsGetUniformUInt32Array(str, offset, numBits, numValues, val)
+/** get array of ints from BitString */
 #define bsGetUniformIntArray(str, offset, numBits, numValues, val) \
   bsGetUniformInt32Array(str, offset, numBits, numValues, val)
 
@@ -73,7 +89,7 @@ bitElemsAllocSize(BitOffset numBits);
  * 8-bit type.
  *
  * An unsigned integer \f$v\f$ can be represented in this many bits.
- * @param val value to find log2 of.
+ * @param val value to compute log2 of.
  * @return \f$\lfloor{}log_2v\rfloor + 1\f$
  */
 static inline int
@@ -83,7 +99,7 @@ requiredUInt8Bits(uint8_t val);
  * 16-bit type.
  *
  * An unsigned integer \f$v\f$ can be represented in this many bits.
- * @param val value to find log2 of.
+ * @param val value to compute log2 of.
  * @return \f$\lfloor{}log_2v\rfloor + 1\f$
  */
 static inline int
@@ -93,7 +109,7 @@ requiredUInt16Bits(uint16_t val);
  * 32-bit type.
  *
  * An unsigned integer \f$v\f$ can be represented in this many bits.
- * @param val value to find log2 of.
+ * @param val value to compute log2 of.
  * @return \f$\lfloor{}log_2v\rfloor + 1\f$
  */
 extern int
@@ -103,18 +119,17 @@ requiredUInt32Bits(uint32_t val);
  * 64-bit type.
  *
  * An unsigned integer \f$v\f$ can be represented in this many bits.
- * @param val value to find log2 of.
+ * @param val value to compute log2 of.
  * @return \f$\lfloor{}log_2v\rfloor + 1\f$
  */
 extern int
 requiredUInt64Bits(uint64_t val);
-
 /**
  * \brief Computes \f$\log_2v + 2\f$, where \f$v\f$ is of signed 8-bit
  * type.
  *
  * An integer \f$v\f$ can be represented in this many bits.
- * @param val value to find log2 of.
+ * @param v value to compute log2 of.
  * @return \f$\lfloor{}|log_2v|\rfloor + 2\f$. Special case: INT8_MIN
  * is representable in 8 bits although
  * \f[\left\lfloor{}log_2\left|-(2^{7})\right|\right\rfloor + 2 = 9.\f]
@@ -126,7 +141,7 @@ requiredInt8Bits(int8_t v);
  * 16-bit type.
  *
  * An integer \f$v\f$ can be represented in this many bits.
- * @param val value to find log2 of.
+ * @param v value to compute log2 of.
  * @return \f$\lfloor{}|log_2v|\rfloor + 2\f$. Special case: INT16_MIN
  * is representable in 16 bits although
  * \f[\left\lfloor{}log_2\left|-(2^{15})\right|\right\rfloor + 2 = 17.\f]
@@ -138,24 +153,24 @@ requiredInt16Bits(int16_t v);
  * 32-bit type.
  *
  * An integer \f$v\f$ can be represented in this many bits.
- * @param val value to find log2 of.
+ * @param v value to compute log2 of.
  * @return \f$\lfloor{}|log_2v|\rfloor + 2\f$. Special case: INT32_MIN
  * is representable in 32 bits although
  * \f[\left\lfloor{}log_2\left|-(2^{31})\right|\right\rfloor + 2 = 33.\f]
  */
 static inline int
-requiredInt32Bits(int32_t val);
+requiredInt32Bits(int32_t v);
 /**
  * \brief Computes \f$\log_2v + 2\f$, where \f$v\f$ is of signed
  * 64-bit type.
  *
  * An integer \f$v\f$ can be represented in this many bits.
- * @param val value to find log2 of.
+ * @param v value to compute log2 of.
  * @return \f$\left\lfloor{}log_2|v|\right\rfloor + 2\f$
  * (Special case: INT64_MIN is representable in 64 bits)
  */
 static inline int
-requiredInt64Bits(int64_t val);
+requiredInt64Bits(int64_t v);
 /**
  * \brief Retrieve unsigned integer of specified length from
  * bitstring at given position.
@@ -203,6 +218,7 @@ bsGetUInt64(constBitString str, BitOffset offset, unsigned numBits);
  * @param str bitstring to write to
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing integer to be written
+ * @param val value to store
  */
 extern void
 bsStoreUInt8(BitString str, BitOffset offset, unsigned numBits, uint8_t val);
@@ -213,6 +229,7 @@ bsStoreUInt8(BitString str, BitOffset offset, unsigned numBits, uint8_t val);
  * @param str bitstring to write to
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing integer to be written
+ * @param val value to store
  */
 extern void
 bsStoreUInt16(BitString str, BitOffset offset, unsigned numBits, uint16_t val);
@@ -223,6 +240,7 @@ bsStoreUInt16(BitString str, BitOffset offset, unsigned numBits, uint16_t val);
  * @param str bitstring to write to
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing integer to be written
+ * @param val value to store
  */
 extern void
 bsStoreUInt32(BitString str, BitOffset offset, unsigned numBits, uint32_t val);
@@ -233,86 +251,95 @@ bsStoreUInt32(BitString str, BitOffset offset, unsigned numBits, uint32_t val);
  * @param str bitstring to write to
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing integer to be written
+ * @param val value to store
  */
 extern void
 bsStoreUInt64(BitString str, BitOffset offset, unsigned numBits, uint64_t val);
 /**
- * Store integer of specified length in bitstring at given position.
- * @param str bitstring to write to
+ * \brief Retrieve integer of specified length from bitstring at given
+ * position.
+ *
+ * @param str bitstring to read from
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing integer to be written
+ * @return value read
  */
 static inline int8_t
 bsGetInt8(constBitString str, BitOffset offset, unsigned numBits);
 /**
- * \brief Store integer of specified length in bitstring at given
+ * \brief Retrieve integer of specified length from bitstring at given
  * position.
  *
- * @param str bitstring to write to
+ * @param str bitstring to read from
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing integer to be written
+ * @return value read
  */
 static inline int16_t
 bsGetInt16(constBitString str, BitOffset offset, unsigned numBits);
 /**
- * \brief Store integer of specified length in bitstring at given
+ * \brief Retrieve integer of specified length from bitstring at given
  * position.
  *
- * @param str bitstring to write to
+ * @param str bitstring to read from
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing integer to be written
+ * @return value read
  */
 static inline int32_t
 bsGetInt32(constBitString str, BitOffset offset, unsigned numBits);
 /**
- * \brief Store integer of specified length in bitstring at given
+ * \brief Retrieve integer of specified length from bitstring at given
  * position.
  *
- * @param str bitstring to write to
+ * @param str bitstring to read from
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing integer to be written
+ * @return value read
  */
 static inline int64_t
 bsGetInt64(constBitString str, BitOffset offset, unsigned numBits);
 /**
- * Retrieve integer of specified length from bitstring at given position.
- * @param str bitstring to read from
+ * \brief Store integer of specified length in bitstring at given
+ * position.
+ *
+ * @param str bitstring to write to
  * @param offset position to start reading at (bit exact)
  * @param numBits number of bits composing integer to be read
- * @return value read
+ * @param val value to store
  */
 static inline void
 bsStoreInt8(BitString str, BitOffset offset, unsigned numBits, uint8_t val);
 /**
- * \brief Retrieve integer of specified length from bitstring at given
+ * \brief Store integer of specified length in bitstring at given
  * position.
  *
- * @param str bitstring to read from
+ * @param str bitstring to write to
  * @param offset position to start reading at (bit exact)
  * @param numBits number of bits composing integer to be read
- * @return value read
+ * @param val value to store
  */
 static inline void
 bsStoreInt16(BitString str, BitOffset offset, unsigned numBits, uint16_t val);
 /**
- * \brief Retrieve integer of specified length from bitstring at given
+ * \brief Store integer of specified length in bitstring at given
  * position.
  *
- * @param str bitstring to read from
+ * @param str bitstring to write to
  * @param offset position to start reading at (bit exact)
  * @param numBits number of bits composing integer to be read
- * @return value read
+ * @param val value to store
  */
 static inline void
 bsStoreInt32(BitString str, BitOffset offset, unsigned numBits, uint32_t val);
 /**
- * \brief Retrieve integer of specified length from bitstring at given
+ * \brief Store integer of specified length in bitstring at given
  * position.
  *
- * @param str bitstring to read from
+ * @param str bitstring to write to
  * @param offset position to start reading at (bit exact)
  * @param numBits number of bits composing integer to be read
- * @return value read
+ * @param val value to store
  */
 static inline void
 bsStoreInt64(BitString str, BitOffset offset, unsigned numBits, uint64_t val);
@@ -324,7 +351,7 @@ bsStoreInt64(BitString str, BitOffset offset, unsigned numBits, uint64_t val);
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing each integer
  * @param numValues number of integers to read
- * @param read integers from this array
+ * @param val read integers from this array
  */
 void
 bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
@@ -336,7 +363,7 @@ bsStoreUniformUInt8Array(BitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing each integer
  * @param numValues number of integers to read
- * @param read integers from this array
+ * @param val read integers from this array
  */
 void
 bsStoreUniformUInt16Array(BitString str, BitOffset offset, unsigned numBits,
@@ -348,7 +375,7 @@ bsStoreUniformUInt16Array(BitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing each integer
  * @param numValues number of integers to read
- * @param read integers from this array
+ * @param val read integers from this array
  */
 void
 bsStoreUniformUInt32Array(BitString str, BitOffset offset, unsigned numBits,
@@ -360,7 +387,7 @@ bsStoreUniformUInt32Array(BitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing each integer
  * @param numValues number of integers to read
- * @param read integers from this array
+ * @param val read integers from this array
  */
 void
 bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
@@ -372,7 +399,7 @@ bsStoreUniformUInt64Array(BitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing each integer
  * @param numValues number of integers to read
- * @param read integers from this array
+ * @param val read integers from this array
  */
 static inline void
 bsStoreUniformInt8Array(BitString str, BitOffset offset, unsigned numBits,
@@ -384,7 +411,7 @@ bsStoreUniformInt8Array(BitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing each integer
  * @param numValues number of integers to read
- * @param read integers from this array
+ * @param val read integers from this array
  */
 static inline void
 bsStoreUniformInt16Array(BitString str, BitOffset offset, unsigned numBits,
@@ -396,7 +423,7 @@ bsStoreUniformInt16Array(BitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing each integer
  * @param numValues number of integers to read
- * @param read integers from this array
+ * @param val read integers from this array
  */
 static inline void
 bsStoreUniformInt32Array(BitString str, BitOffset offset, unsigned numBits,
@@ -408,7 +435,7 @@ bsStoreUniformInt32Array(BitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start writing at (bit exact)
  * @param numBits number of bits composing each integer
  * @param numValues number of integers to read
- * @param read integers from this array
+ * @param val read integers from this array
  */
 static inline void
 bsStoreUniformInt64Array(BitString str, BitOffset offset, unsigned numBits,
@@ -420,7 +447,7 @@ bsStoreUniformInt64Array(BitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start reading at (bit exact)
  * @param numBits number of bits composing each integer
  * @param numValues number of integers to read
- * @param store integers read in this array
+ * @param val store integers read in this array
  */
 void
 bsGetUniformUInt8Array(constBitString str, BitOffset offset, unsigned numBits,
@@ -432,7 +459,7 @@ bsGetUniformUInt8Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start reading at (bit exact)
  * @param numBits number of bits composing each integer
  * @param numValues number of integers to read
- * @param store integers read in this array
+ * @param val store integers read in this array
  */
 void
 bsGetUniformUInt16Array(constBitString str, BitOffset offset, unsigned numBits,
@@ -444,7 +471,7 @@ bsGetUniformUInt16Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start reading at (bit exact)
  * @param numBits number of bits composing each integer
  * @param numValues number of integers to read
- * @param store integers read in this array
+ * @param val store integers read in this array
  */
 void
 bsGetUniformUInt32Array(constBitString str, BitOffset offset, unsigned numBits,
@@ -456,7 +483,7 @@ bsGetUniformUInt32Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start reading at (bit exact)
  * @param numBits number of bits composing each integer
  * @param numValues number of integers to read
- * @param store integers read in this array
+ * @param val store integers read in this array
  */
 void
 bsGetUniformUInt64Array(constBitString str, BitOffset offset, unsigned numBits,
@@ -468,7 +495,7 @@ bsGetUniformUInt64Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start reading at (bit exact)
  * @param numBits number of bits composing integer to be read
  * @param numValues number of integers to read
- * @param store integers read in this array
+ * @param val store integers read in this array
  */
 static inline void
 bsGetUniformInt8Array(constBitString str, BitOffset offset, unsigned numBits,
@@ -480,7 +507,7 @@ bsGetUniformInt8Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start reading at (bit exact)
  * @param numBits number of bits composing integer to be read
  * @param numValues number of integers to read
- * @param store integers read in this array
+ * @param val store integers read in this array
  */
 static inline void
 bsGetUniformInt16Array(constBitString str, BitOffset offset, unsigned numBits,
@@ -492,7 +519,7 @@ bsGetUniformInt16Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start reading at (bit exact)
  * @param numBits number of bits composing integer to be read
  * @param numValues number of integers to read
- * @param store integers read in this array
+ * @param val store integers read in this array
  */
 static inline void
 bsGetUniformInt32Array(constBitString str, BitOffset offset, unsigned numBits,
@@ -504,7 +531,7 @@ bsGetUniformInt32Array(constBitString str, BitOffset offset, unsigned numBits,
  * @param offset position to start reading at (bit exact)
  * @param numBits number of bits composing integer to be read
  * @param numValues number of integers to read
- * @param store integers read in this array
+ * @param val store integers read in this array
  */
 static inline void
 bsGetUniformInt64Array(constBitString str, BitOffset offset, unsigned numBits,

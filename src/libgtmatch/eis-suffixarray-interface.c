@@ -20,12 +20,13 @@
 #include "libgtmatch/eis-suffixarray-interface.h"
 
 extern int
-saReadBWT(void *state, Symbol *dest, size_t readLen, Env *env)
+saReadBWT(void *state, Symbol *dest, size_t len, Env *env)
 {
-  struct fileReadState *FRState = state;
+  struct suffixarrayReadState *saRState;
   assert(state);
-  return MRAEncReadAndTransform(FRState->alphabet, FRState->fp,
-                                readLen, dest);
+  saRState = state;
+  return MRAEncReadAndTransform(saRState->alphabet,
+                                saRState->sa->bwttabstream.fp, len, dest);
 }
 
 extern int
