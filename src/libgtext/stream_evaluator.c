@@ -219,8 +219,7 @@ static void slot_delete(Slot *s)
 
 StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
                                       GenomeStream *prediction, bool nuceval,
-                                      bool evalLTR, unsigned long LTRdelta,
-                                      Env *env)
+                                      bool evalLTR, unsigned long LTRdelta)
 {
   StreamEvaluator *evaluator = ma_calloc(1, sizeof (StreamEvaluator));
   evaluator->reality = genome_stream_ref(reality);
@@ -230,13 +229,13 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   evaluator->LTRdelta = LTRdelta;
   evaluator->slots = hashtable_new(HASH_STRING, ma_free_func,
                                    (FreeFunc) slot_delete);
-  evaluator->gene_evaluator = evaluator_new(env);
-  evaluator->mRNA_evaluator = evaluator_new(env);
-  evaluator->LTR_evaluator = evaluator_new(env);
-  evaluator->mRNA_exon_evaluators = transcript_evaluators_new(env);
-  evaluator->mRNA_exon_evaluators_collapsed = transcript_evaluators_new(env);
-  evaluator->CDS_exon_evaluators = transcript_evaluators_new(env);
-  evaluator->CDS_exon_evaluators_collapsed = transcript_evaluators_new(env);
+  evaluator->gene_evaluator = evaluator_new();
+  evaluator->mRNA_evaluator = evaluator_new();
+  evaluator->LTR_evaluator = evaluator_new();
+  evaluator->mRNA_exon_evaluators = transcript_evaluators_new();
+  evaluator->mRNA_exon_evaluators_collapsed = transcript_evaluators_new();
+  evaluator->CDS_exon_evaluators = transcript_evaluators_new();
+  evaluator->CDS_exon_evaluators_collapsed = transcript_evaluators_new();
   return evaluator;
 }
 
@@ -371,8 +370,7 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
   return 0;
 }
 
-static void add_real_exon(TranscriptExons *te, Range range, GenomeNode *gn,
-                          Env *env)
+static void add_real_exon(TranscriptExons *te, Range range, GenomeNode *gn)
 {
   assert(te);
   array_add(transcript_exons_get_all(te), range);
@@ -470,7 +468,7 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       range = genome_node_get_range(gn);
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
-          add_real_exon(info->slot->CDS_exons_forward, range, gn, env);
+          add_real_exon(info->slot->CDS_exons_forward, range, gn);
           /* nucleotide level */
           if (info->nuceval) {
             add_nucleotide_exon(info->slot->real_CDS_nucleotides_forward, range,
@@ -478,7 +476,7 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
           }
           break;
         case STRAND_REVERSE:
-          add_real_exon(info->slot->CDS_exons_reverse, range, gn, env);
+          add_real_exon(info->slot->CDS_exons_reverse, range, gn);
           /* nucleotide level */
           if (info->nuceval) {
             add_nucleotide_exon(info->slot->real_CDS_nucleotides_reverse, range,
@@ -496,7 +494,7 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
       range = genome_node_get_range(gn);
       switch (genome_feature_get_strand(gf)) {
         case STRAND_FORWARD:
-          add_real_exon(info->slot->mRNA_exons_forward, range, gn, env);
+          add_real_exon(info->slot->mRNA_exons_forward, range, gn);
           /* nucleotide level */
           if (info->nuceval) {
             add_nucleotide_exon(info->slot->real_mRNA_nucleotides_forward,
@@ -504,7 +502,7 @@ static int process_real_feature(GenomeNode *gn, void *data, Env *env)
           }
           break;
         case STRAND_REVERSE:
-          add_real_exon(info->slot->mRNA_exons_reverse, range, gn, env);
+          add_real_exon(info->slot->mRNA_exons_reverse, range, gn);
           /* nucleotide level */
           if (info->nuceval) {
             add_nucleotide_exon(info->slot->real_mRNA_nucleotides_reverse,
@@ -1480,18 +1478,18 @@ void stream_evaluator_show(StreamEvaluator *se, FILE *outfp)
   }
 }
 
-void stream_evaluator_delete(StreamEvaluator *se, Env *env)
+void stream_evaluator_delete(StreamEvaluator *se)
 {
   if (!se) return;
   genome_stream_delete(se->reality);
   genome_stream_delete(se->prediction);
   hashtable_delete(se->slots);
-  evaluator_delete(se->gene_evaluator, env);
-  evaluator_delete(se->mRNA_evaluator, env);
-  evaluator_delete(se->LTR_evaluator, env);
-  transcript_evaluators_delete(se->mRNA_exon_evaluators, env);
-  transcript_evaluators_delete(se->mRNA_exon_evaluators_collapsed, env);
-  transcript_evaluators_delete(se->CDS_exon_evaluators, env);
-  transcript_evaluators_delete(se->CDS_exon_evaluators_collapsed, env);
+  evaluator_delete(se->gene_evaluator);
+  evaluator_delete(se->mRNA_evaluator);
+  evaluator_delete(se->LTR_evaluator);
+  transcript_evaluators_delete(se->mRNA_exon_evaluators);
+  transcript_evaluators_delete(se->mRNA_exon_evaluators_collapsed);
+  transcript_evaluators_delete(se->CDS_exon_evaluators);
+  transcript_evaluators_delete(se->CDS_exon_evaluators_collapsed);
   ma_free(se);
 }

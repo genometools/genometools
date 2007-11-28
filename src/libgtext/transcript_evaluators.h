@@ -24,7 +24,7 @@
 /* a container class for transcript evaluators */
 typedef struct TranscriptEvaluators TranscriptEvaluators;
 
-TranscriptEvaluators* transcript_evaluators_new(Env*);
+TranscriptEvaluators* transcript_evaluators_new(void);
 
 /* return the evaluator for all exons */
 Evaluator*            transcript_evaluators_get_all(const
@@ -50,6 +50,6 @@ void                  transcript_evaluators_add_actuals(const
                                                         TranscriptEvaluators*,
                                                         const TranscriptExons*);
 
-void                  transcript_evaluators_delete(TranscriptEvaluators*, Env*);
+void                  transcript_evaluators_delete(TranscriptEvaluators*);
 
 #endif

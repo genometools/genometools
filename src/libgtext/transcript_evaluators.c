@@ -26,14 +26,14 @@ struct TranscriptEvaluators {
             *exon_evaluator_terminal;
 };
 
-TranscriptEvaluators* transcript_evaluators_new(Env *env)
+TranscriptEvaluators* transcript_evaluators_new(void)
 {
   TranscriptEvaluators *te = ma_malloc(sizeof (TranscriptEvaluators));
-  te->exon_evaluator_all = evaluator_new(env);
-  te->exon_evaluator_single = evaluator_new(env);
-  te->exon_evaluator_initial = evaluator_new(env);
-  te->exon_evaluator_internal = evaluator_new(env);
-  te->exon_evaluator_terminal = evaluator_new(env);
+  te->exon_evaluator_all = evaluator_new();
+  te->exon_evaluator_single = evaluator_new();
+  te->exon_evaluator_initial = evaluator_new();
+  te->exon_evaluator_internal = evaluator_new();
+  te->exon_evaluator_terminal = evaluator_new();
   return te;
 }
 
@@ -83,13 +83,13 @@ void transcript_evaluators_add_actuals(const TranscriptEvaluators *evaluators,
                        array_size(transcript_exons_get_terminal(exons)));
 }
 
-void transcript_evaluators_delete(TranscriptEvaluators *te, Env *env)
+void transcript_evaluators_delete(TranscriptEvaluators *te)
 {
   if (!te) return;
-  evaluator_delete(te->exon_evaluator_all, env);
-  evaluator_delete(te->exon_evaluator_single, env);
-  evaluator_delete(te->exon_evaluator_initial, env);
-  evaluator_delete(te->exon_evaluator_internal, env);
-  evaluator_delete(te->exon_evaluator_terminal, env);
+  evaluator_delete(te->exon_evaluator_all);
+  evaluator_delete(te->exon_evaluator_single);
+  evaluator_delete(te->exon_evaluator_initial);
+  evaluator_delete(te->exon_evaluator_internal);
+  evaluator_delete(te->exon_evaluator_terminal);
   ma_free(te);
 }

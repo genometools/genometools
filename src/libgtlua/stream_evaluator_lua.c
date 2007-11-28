@@ -32,12 +32,11 @@ static int stream_evaluator_lua_new(lua_State *L)
 {
   StreamEvaluator **stream_evaluator;
   GenomeStream **reality_stream, **prediction_stream;
-  Env *env = get_env_from_registry(L);
   reality_stream = check_genome_stream(L, 1);
   prediction_stream = check_genome_stream(L, 2);
   stream_evaluator = lua_newuserdata(L, sizeof (StreamEvaluator*));
   *stream_evaluator = stream_evaluator_new(*reality_stream, *prediction_stream,
-                                           true, false, 0, env);
+                                           true, false, 0);
   luaL_getmetatable(L, STREAM_EVALUATOR_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -69,9 +68,8 @@ static int stream_evaluator_lua_show(lua_State *L)
 static int stream_evaluator_lua_delete(lua_State *L)
 {
   StreamEvaluator **stream_evaluator;
-  Env *env = get_env_from_registry(L);
   stream_evaluator = check_stream_evaluator(L);
-  stream_evaluator_delete(*stream_evaluator, env);
+  stream_evaluator_delete(*stream_evaluator);
   return 0;
 }
 

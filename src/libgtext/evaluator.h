@@ -23,7 +23,7 @@
 
 typedef struct Evaluator Evaluator;
 
-Evaluator* evaluator_new(Env*);
+Evaluator* evaluator_new(void);
 void       evaluator_add_true(Evaluator*);
 void       evaluator_add_actual(Evaluator*, unsigned long);
 void       evaluator_add_predicted(Evaluator*, unsigned long);
@@ -33,6 +33,6 @@ void       evaluator_show_sensitivity(const Evaluator*, FILE*);
 void       evaluator_show_specificity(const Evaluator*, FILE*);
 void       evaluator_reset(Evaluator*);
 int        evaluator_unit_test(Env*);
-void       evaluator_delete(Evaluator*, Env*);
+void       evaluator_delete(Evaluator*);
 
 #endif

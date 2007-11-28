@@ -107,7 +107,7 @@ int gt_eval(int argc, const char **argv, Env *env)
   /* create the stream evaluator */
   evaluator = stream_evaluator_new(reality_stream, prediction_stream,
                                    arguments.nuceval, arguments.evalLTR,
-                                   arguments.LTRdelta, env);
+                                   arguments.LTRdelta);
 
   /* compute the evaluation */
   had_err = stream_evaluator_evaluate(evaluator, arguments.verbose,
@@ -118,7 +118,7 @@ int gt_eval(int argc, const char **argv, Env *env)
     stream_evaluator_show(evaluator, stdout);
 
   /* free */
-  stream_evaluator_delete(evaluator, env);
+  stream_evaluator_delete(evaluator);
   genome_stream_delete(prediction_stream);
   genome_stream_delete(reality_stream);
 
