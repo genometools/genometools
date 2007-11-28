@@ -116,7 +116,7 @@ int gt_splicesiteinfo(int argc, const char **argv, Env *env)
   }
 
   if (!had_err) {
-    if (!splicesiteinfo_stream_show(splicesiteinfo_stream, env)) {
+    if (!splicesiteinfo_stream_show(splicesiteinfo_stream)) {
       warning("input file(s) contained no intron, use option -addintrons to "
               "add introns automatically");
     }

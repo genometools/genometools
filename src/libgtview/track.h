@@ -27,13 +27,13 @@
 /* A track has a title and a type und contains line objects. */
 typedef struct Track Track;
 
-Track* track_new(Str* title, Env* env);
-void   track_insert_block(Track*, Block*, Env*);
+Track* track_new(Str* title);
+void   track_insert_block(Track*, Block*);
 Str*   track_get_title(const Track*);
 /* Returns Array containing Pointers to Line objects. */
 Array* track_get_lines(const Track*);
 int    track_get_number_of_lines(const Track*);
 int    track_unit_test(Env*);
-void   track_delete(Track*, Env*);
+void   track_delete(Track*);
 
 #endif

@@ -99,11 +99,10 @@ static void
 register_packedindextools(Toolbox *packedindex_toolbox, Env *env)
 {
   assert(packedindex_toolbox);
-  toolbox_add(packedindex_toolbox, "mkindex", gt_packedindex_make, env);
+  toolbox_add(packedindex_toolbox, "mkindex", gt_packedindex_make);
   toolbox_add(packedindex_toolbox, "chkintegrity",
-              gt_packedindex_chk_integrity, env);
-  toolbox_add(packedindex_toolbox, "chksearch", gt_packedindex_chk_search,
-              env);
+              gt_packedindex_chk_integrity );
+  toolbox_add(packedindex_toolbox, "chksearch", gt_packedindex_chk_search);
 }
 
 /***************************************************************************

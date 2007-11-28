@@ -56,11 +56,11 @@ typedef struct {
   unsigned long num_of_occurrences;
 } ForeachInfo;
 
-static int foreach_iterfunc(void *key, void *value, void *data, Env *env)
+static int foreach_iterfunc(void *key, void *value, void *data, Error *e)
 {
   unsigned long occurrences;
   ForeachInfo *info;
-  env_error_check(env);
+  error_check(e);
   assert(key && value && data);
   occurrences = *(unsigned long*) value;
   info = (ForeachInfo*) data;
@@ -70,17 +70,16 @@ static int foreach_iterfunc(void *key, void *value, void *data, Env *env)
 }
 
 void stringdistri_foreach(const StringDistri *d, StringDistriIterFunc func,
-                        void *data, Env *env)
+                          void *data)
 {
   ForeachInfo info;
   int rval;
-  env_error_check(env);
   assert(d);
   if (d->hashdist) {
     info.func = func;
     info.data = data;
     info.num_of_occurrences = d->num_of_occurrences;
-    rval = hashtable_foreach_ao(d->hashdist, foreach_iterfunc, &info, env);
+    rval = hashtable_foreach_ao(d->hashdist, foreach_iterfunc, &info, NULL);
     assert(!rval); /* foreach_iterfunc() is sane */
   }
 }

@@ -95,10 +95,10 @@ static int add_id(GenomeNode *gn, void *data, Env *env)
 }
 
 static int show_attribute(const char *attr_name, const char *attr_value,
-                          void *data, Env *env)
+                          void *data, Error *e)
 {
   ShowAttributeInfo *info = (ShowAttributeInfo*) data;
-  env_error_check(env);
+  error_check(e);
   assert(attr_name && attr_value && info);
   if (strcmp(attr_name, ID_STRING) && strcmp(attr_name, PARENT_STRING)) {
     if (*info->attribute_shown)
@@ -118,7 +118,7 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data, Env *env)
   Array *parent_features = NULL;
   ShowAttributeInfo info;
   unsigned long i;
-  int had_err = 0;
+  int had_err;
   Str *id;
 
   env_error_check(env);
@@ -152,7 +152,8 @@ static int gff3_show_genome_feature(GenomeNode *gn, void *data, Env *env)
   /* show missing part of attributes */
   info.attribute_shown = &part_shown;
   info.outfp = gff3_visitor->outfp;
-  had_err = genome_feature_foreach_attribute(gf, show_attribute, &info, env);
+  had_err = genome_feature_foreach_attribute(gf, show_attribute, &info, NULL);
+  assert(!had_err); /* show_attribute() is sane */
 
   /* show dot if no attributes have been shown */
   if (!part_shown)

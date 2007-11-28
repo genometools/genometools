@@ -97,12 +97,10 @@ void config_reload(Config *cfg, Env *env)
 /* Searches for  <section> inside the config table, creating it if it does not
    exist and finally pushing it on the Lua stack (at the top).
    Returns the total number of items pushed on the stack by this function. */
-static int config_find_section_for_setting(Config* cfg, const char *section,
-                                           Env* env)
+static int config_find_section_for_setting(Config* cfg, const char *section)
 {
   int depth = 0;
   assert(cfg && section);
-  env_error_check(env);
   lua_getglobal(cfg->L, "config");
   if (lua_isnil(cfg->L, -1)) {
     lua_pop(cfg->L, 1);
@@ -124,7 +122,7 @@ static int config_find_section_for_setting(Config* cfg, const char *section,
 /* Searches for <section> inside the config table, returning -1 if it is not
    found. Otherwise the number of items pushed onto the stack is returned. */
 static int config_find_section_for_getting(const Config *cfg,
-                                           const char *section, Env* env)
+                                           const char *section)
 {
   int depth = 0;
   assert(cfg && section);
@@ -143,16 +141,15 @@ static int config_find_section_for_getting(const Config *cfg,
   return depth;
 }
 
-Color config_get_color(const Config *cfg, const char *key, Env* env)
+Color config_get_color(const Config *cfg, const char *key)
 {
   Color color;
   int i = 0;
-  env_error_check(env);
   assert(cfg && key);
   /* set default colors */
   color.red=0.8; color.green = 0.8; color.blue=0.8;
   /* get section */
-  i = config_find_section_for_getting(cfg, "colors", env);
+  i = config_find_section_for_getting(cfg, "colors");
   /* could not get section, return default */
   if (i < 0) {
     lua_pop(cfg->L, i);
@@ -197,11 +194,11 @@ Color config_get_color(const Config *cfg, const char *key, Env* env)
   return color;
 }
 
-void config_set_color(Config *cfg, const char *key, Color color, Env* env)
+void config_set_color(Config *cfg, const char *key, Color color)
 {
   int i = 0;
   assert(cfg && key);
-  i = config_find_section_for_setting(cfg, "colors", env);
+  i = config_find_section_for_setting(cfg, "colors");
   lua_getfield(cfg->L, -1, key);
   i++;
   if (lua_isnil(cfg->L, -1)) {
@@ -222,14 +219,13 @@ void config_set_color(Config *cfg, const char *key, Color color, Env* env)
 }
 
 const char* config_get_cstr(const Config *cfg, const char *section,
-                            const char *key, const char *deflt, Env* env)
+                            const char *key, const char *deflt)
 {
   const char *str = deflt;
   int i = 0;
-  env_error_check(env);
   assert(cfg && key && section);
   /* get section */
-  i = config_find_section_for_getting(cfg, section, env);
+  i = config_find_section_for_getting(cfg, section);
   /* could not get section, return default */
   if (i < 0) {
     lua_pop(cfg->L, i);
@@ -251,11 +247,11 @@ const char* config_get_cstr(const Config *cfg, const char *section,
 }
 
 void config_set_cstr(Config *cfg, const char *section, const char *key,
-                     const char *str, Env* env)
+                     const char *str)
 {
   int i = 0;
   assert(cfg && section && key);
-  i = config_find_section_for_setting(cfg, section, env);
+  i = config_find_section_for_setting(cfg, section);
   lua_pushstring(cfg->L, key);
   lua_pushstring(cfg->L, str);
   lua_settable(cfg->L, -3);
@@ -263,14 +259,13 @@ void config_set_cstr(Config *cfg, const char *section, const char *key,
 }
 
 double config_get_num(const Config *cfg, const char *section, const char *key,
-                      double deflt, Env* env)
+                      double deflt)
 {
   double num = deflt;
   int i = 0;
-  env_error_check(env);
   assert(cfg && key && section);
   /* get section */
-  i = config_find_section_for_getting(cfg, section, env);
+  i = config_find_section_for_getting(cfg, section);
   /* could not get section, return default */
   if (i < 0) {
     lua_pop(cfg->L, i);
@@ -292,11 +287,11 @@ double config_get_num(const Config *cfg, const char *section, const char *key,
 }
 
 void config_set_num(Config *cfg, const char *section, const char *key,
-                    double number, Env* env)
+                    double number)
 {
   int i = 0;
   assert(cfg && section && key);
-  i = config_find_section_for_setting(cfg, section, env);
+  i = config_find_section_for_setting(cfg, section);
   lua_pushstring(cfg->L, key);
   lua_pushnumber(cfg->L, number);
   lua_settable(cfg->L, -3);
@@ -304,14 +299,13 @@ void config_set_num(Config *cfg, const char *section, const char *key,
 }
 
 bool config_cstr_in_list(const Config *cfg, const char *section,
-                         const char *key, const char *checkstr, Env* env)
+                         const char *key, const char *checkstr)
 {
   int i = 0, had_err = 0;
   bool ret = false;
-  env_error_check(env);
   assert(cfg && key && section && checkstr);
   /* get section */
-  i = config_find_section_for_getting(cfg, section, env);
+  i = config_find_section_for_getting(cfg, section);
   if (i < 0) {
     lua_pop(cfg->L, i);
     return false;
@@ -357,7 +351,7 @@ bool config_get_verbose(const Config *cfg)
 }
 
 DominateStatus config_dominates(Config* cfg, GenomeFeatureType gft1,
-                                GenomeFeatureType gft2, Env* env)
+                                GenomeFeatureType gft2)
 {
   char *fts1, *fts2;
 
@@ -370,9 +364,9 @@ DominateStatus config_dominates(Config* cfg, GenomeFeatureType gft1,
   if (fts1 == NULL || fts2 == NULL)
     return DOMINATES_UNKNOWN_TYPE;
   else {
-    if (config_cstr_in_list(cfg, "dominate",fts1, fts2, env))
+    if (config_cstr_in_list(cfg, "dominate",fts1, fts2))
       return DOMINATES_FIRST;
-    else if (config_cstr_in_list(cfg, "dominate",fts2, fts1, env))
+    else if (config_cstr_in_list(cfg, "dominate",fts2, fts1))
       return DOMINATES_SECOND;
     else
       return DOMINATES_NOT_SPECIFIED;
@@ -399,45 +393,45 @@ int config_unit_test(Env *env)
   cfg = config_new(false, env);
 
   /* at the beginning, all values are defaults, since nothing is defined */
-  tmpcol = config_get_color(cfg, "exon", env);
+  tmpcol = config_get_color(cfg, "exon");
   ensure(had_err, color_equals(tmpcol,defcol));
-  tmpcol = config_get_color(cfg, "cds", env);
+  tmpcol = config_get_color(cfg, "cds");
   ensure(had_err, color_equals(tmpcol,defcol));
-  tmpcol = config_get_color(cfg, "foo", env);
+  tmpcol = config_get_color(cfg, "foo");
   ensure(had_err, color_equals(tmpcol,defcol));
-  num = config_get_num(cfg,"format", "margins", 10.0, env);
+  num = config_get_num(cfg,"format", "margins", 10.0);
   ensure(had_err, num == 10.0);
-  str = config_get_cstr(cfg, "collapse", "exon", "", env);
+  str = config_get_cstr(cfg, "collapse", "exon", "");
   ensure(had_err, (strcmp(str,"")==0));
 
   /* change some values... */
-  config_set_color(cfg, "exon", col, env);
-  config_set_num(cfg,"format", "margins", 11.0, env);
-  config_set_num(cfg,"format", "foo", 2.0, env);
+  config_set_color(cfg, "exon", col);
+  config_set_num(cfg,"format", "margins", 11.0);
+  config_set_num(cfg,"format", "foo", 2.0);
 
   /* is it saved correctly? */
-  tmpcol = config_get_color(cfg, "exon", env);
+  tmpcol = config_get_color(cfg, "exon");
   ensure(had_err, !color_equals(tmpcol,defcol));
-  tmpcol = config_get_color(cfg, "exon", env);
+  tmpcol = config_get_color(cfg, "exon");
   ensure(had_err, color_equals(tmpcol,col));
-  num = config_get_num(cfg,"format", "margins", 10.0,  env);
+  num = config_get_num(cfg,"format", "margins", 10.0);
   ensure(had_err, num == 11.0);
-  num = config_get_num(cfg,"format", "foo", 10.0, env);
+  num = config_get_num(cfg,"format", "foo", 10.0);
   ensure(had_err, num == 2.0);
 
   /* create a new color definition */
-  config_set_color(cfg, "foo", col, env);
-  config_set_cstr(cfg, "bar", "baz", test1, env);
+  config_set_color(cfg, "foo", col);
+  config_set_cstr(cfg, "bar", "baz", test1);
 
   /* is it saved correctly? */
-  tmpcol = config_get_color(cfg, "foo", env);
+  tmpcol = config_get_color(cfg, "foo");
   ensure(had_err, !color_equals(tmpcol,defcol));
-  tmpcol = config_get_color(cfg, "foo", env);
+  tmpcol = config_get_color(cfg, "foo");
   ensure(had_err, color_equals(tmpcol,col));
-  str = config_get_cstr(cfg, "bar", "baz", "", env);
+  str = config_get_cstr(cfg, "bar", "baz", "");
   ensure(had_err, (strcmp(str,"")!=0));
   ensure(had_err, (strcmp(str,test1)==0));
-  str = config_get_cstr(cfg, "bar", "test", "", env);
+  str = config_get_cstr(cfg, "bar", "test", "");
   ensure(had_err, (strcmp(str,"")==0));
 
   /* mem cleanup */

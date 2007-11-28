@@ -55,22 +55,22 @@ static OPrval parse_options(int *parsed_args, int argc, const char **argv,
 void register_exercises(Toolbox *exercise_toolbox, Env *env)
 {
   assert(exercise_toolbox);
-  toolbox_add(exercise_toolbox, "affinealign", gt_affinealign, env);
-  toolbox_add(exercise_toolbox, "align", gt_align, env);
-  toolbox_add(exercise_toolbox, "casino", gt_casino, env);
-  toolbox_add(exercise_toolbox, "coin", gt_coin, env);
-  toolbox_add(exercise_toolbox, "consensus_sa", gt_consensus_sa, env);
-  toolbox_add(exercise_toolbox, "matchcount", gt_matchcount, env);
-  toolbox_add(exercise_toolbox, "msaparse", gt_msaparse, env);
-  toolbox_add(exercise_toolbox, "msmatch", gt_multiset_matching, env);
-  toolbox_add(exercise_toolbox, "multilcp", gt_multilcp, env);
-  toolbox_add(exercise_toolbox, "linearalign", gt_linearalign, env);
-  toolbox_add(exercise_toolbox, "neighborjoining", gt_neighborjoining, env);
-  toolbox_add(exercise_toolbox, "nussinov_rna_fold", gt_nussinov_rna_fold, env);
-  toolbox_add(exercise_toolbox, "qgramdist", gt_qgramdist, env);
-  toolbox_add(exercise_toolbox, "scorematrix", gt_scorematrix, env);
-  toolbox_add(exercise_toolbox, "swalign", gt_swalign, env);
-  toolbox_add(exercise_toolbox, "upgma", gt_upgma, env);
+  toolbox_add(exercise_toolbox, "affinealign", gt_affinealign);
+  toolbox_add(exercise_toolbox, "align", gt_align);
+  toolbox_add(exercise_toolbox, "casino", gt_casino);
+  toolbox_add(exercise_toolbox, "coin", gt_coin);
+  toolbox_add(exercise_toolbox, "consensus_sa", gt_consensus_sa);
+  toolbox_add(exercise_toolbox, "matchcount", gt_matchcount);
+  toolbox_add(exercise_toolbox, "msaparse", gt_msaparse);
+  toolbox_add(exercise_toolbox, "msmatch", gt_multiset_matching);
+  toolbox_add(exercise_toolbox, "multilcp", gt_multilcp);
+  toolbox_add(exercise_toolbox, "linearalign", gt_linearalign);
+  toolbox_add(exercise_toolbox, "neighborjoining", gt_neighborjoining);
+  toolbox_add(exercise_toolbox, "nussinov_rna_fold", gt_nussinov_rna_fold);
+  toolbox_add(exercise_toolbox, "qgramdist", gt_qgramdist);
+  toolbox_add(exercise_toolbox, "scorematrix", gt_scorematrix);
+  toolbox_add(exercise_toolbox, "swalign", gt_swalign);
+  toolbox_add(exercise_toolbox, "upgma", gt_upgma);
 }
 
 int gt_exercise(int argc, const char **argv, Env *env)

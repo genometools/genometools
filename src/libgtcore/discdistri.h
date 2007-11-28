@@ -28,15 +28,15 @@ typedef struct DiscDistri DiscDistri;
 typedef void (*DiscDistriIterFunc)(unsigned long key, unsigned long long value,
                                    void *data);
 
-DiscDistri*        discdistri_new(Env*);
-void               discdistri_add(DiscDistri*, unsigned long, Env*);
+DiscDistri*        discdistri_new(void);
+void               discdistri_add(DiscDistri*, unsigned long);
 void               discdistri_add_multi(DiscDistri*, unsigned long,
-                                        unsigned long long, Env*);
+                                        unsigned long long);
 unsigned long long discdistri_get(const DiscDistri*, unsigned long);
-void               discdistri_show(const DiscDistri*, Env*); /* on stdout */
-void               discdistri_show_generic(const DiscDistri*, GenFile*, Env*);
+void               discdistri_show(const DiscDistri*); /* on stdout */
+void               discdistri_show_generic(const DiscDistri*, GenFile*);
 void               discdistri_foreach(const DiscDistri*, DiscDistriIterFunc,
-                                      void *data, Env*);
+                                      void *data);
 int                discdistri_unit_test(Env*);
 void               discdistri_delete(DiscDistri*);
 

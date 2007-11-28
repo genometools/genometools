@@ -116,8 +116,8 @@ int env_delete(Env *env)
     ma_show_space_peak(stdout);
     fa_show_space_peak(stdout);
   }
-  fa_fptr_rval = fa_check_fptr_leak(env);
-  fa_mmap_rval = fa_check_mmap_leak(env);
+  fa_fptr_rval = fa_check_fptr_leak();
+  fa_mmap_rval = fa_check_mmap_leak();
   fa_clean();
   ma_rval = ma_check_space_leak();
   ma_clean();

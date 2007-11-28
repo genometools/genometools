@@ -312,7 +312,7 @@ void fa_xmunmap(void *addr)
   hashtable_remove(fa->memory_maps, addr);
 }
 
-static int check_fptr_leak(void *key, void *value, void *data, Env *env)
+static int check_fptr_leak(void *key, void *value, void *data, Error *e)
 {
   CheckLeakInfo *info = (CheckLeakInfo*) data;
   FAFileInfo *fileinfo = (FAFileInfo*) value;
@@ -326,7 +326,7 @@ static int check_fptr_leak(void *key, void *value, void *data, Env *env)
   return 0;
 }
 
-static int check_mmap_leak(void *key, void *value, void *data, Env *env)
+static int check_mmap_leak(void *key, void *value, void *data, Error *e)
 {
   CheckLeakInfo *info = (CheckLeakInfo*) data;
   FAMapInfo *mapinfo = (FAMapInfo*) value;
@@ -341,26 +341,26 @@ static int check_mmap_leak(void *key, void *value, void *data, Env *env)
   return 0;
 }
 
-int fa_check_fptr_leak(Env *env)
+int fa_check_fptr_leak(void)
 {
   CheckLeakInfo info;
   int had_err;
   assert(fa);
   info.has_leak = false;
-  had_err = hashtable_foreach(fa->file_pointer, check_fptr_leak, &info, env);
+  had_err = hashtable_foreach(fa->file_pointer, check_fptr_leak, &info, NULL);
   assert(!had_err); /* cannot happen, check_fptr_leak() is sane */
   if (info.has_leak)
     return -1;
   return 0;
 }
 
-int fa_check_mmap_leak(Env *env)
+int fa_check_mmap_leak(void)
 {
   CheckLeakInfo info;
   int had_err;
   assert(fa);
   info.has_leak = false;
-  had_err = hashtable_foreach(fa->memory_maps, check_mmap_leak, &info, env);
+  had_err = hashtable_foreach(fa->memory_maps, check_mmap_leak, &info, NULL);
   assert(!had_err); /* cannot happen, check_mmap_leak() is sane */
   if (info.has_leak)
     return -1;

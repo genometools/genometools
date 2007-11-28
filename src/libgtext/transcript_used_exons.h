@@ -22,12 +22,12 @@
 
 typedef struct TranscriptUsedExons TranscriptUsedExons;
 
-TranscriptUsedExons* transcript_used_exons_new(Env*);
+TranscriptUsedExons* transcript_used_exons_new(void);
 Dlist*               transcript_used_exons_get_all(TranscriptUsedExons*);
 Dlist*               transcript_used_exons_get_single(TranscriptUsedExons*);
 Dlist*               transcript_used_exons_get_initial(TranscriptUsedExons*);
 Dlist*               transcript_used_exons_get_internal(TranscriptUsedExons*);
 Dlist*               transcript_used_exons_get_terminal(TranscriptUsedExons*);
-void                 transcript_used_exons_delete(TranscriptUsedExons*, Env*);
+void                 transcript_used_exons_delete(TranscriptUsedExons*);
 
 #endif

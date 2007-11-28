@@ -27,7 +27,7 @@ struct TranscriptUsedExons {
         *used_exons_terminal;
 };
 
-TranscriptUsedExons* transcript_used_exons_new(Env *env)
+TranscriptUsedExons* transcript_used_exons_new(void)
 {
   TranscriptUsedExons *tue = ma_malloc(sizeof (TranscriptUsedExons));
   tue->used_exons_all = dlist_new((Compare) range_compare_ptr);
@@ -68,7 +68,7 @@ Dlist* transcript_used_exons_get_terminal(TranscriptUsedExons *tue)
   return tue->used_exons_terminal;
 }
 
-static void used_dlist_delete(Dlist *used_list, Env *env)
+static void used_dlist_delete(Dlist *used_list)
 {
   Dlistelem *dlistelem;
   for (dlistelem = dlist_first(used_list); dlistelem != NULL;
@@ -78,13 +78,13 @@ static void used_dlist_delete(Dlist *used_list, Env *env)
   dlist_delete(used_list);
 }
 
-void transcript_used_exons_delete(TranscriptUsedExons *tue, Env *env)
+void transcript_used_exons_delete(TranscriptUsedExons *tue)
 {
   if (!tue) return;
-  used_dlist_delete(tue->used_exons_all, env);
-  used_dlist_delete(tue->used_exons_single, env);
-  used_dlist_delete(tue->used_exons_initial, env);
-  used_dlist_delete(tue->used_exons_internal, env);
-  used_dlist_delete(tue->used_exons_terminal, env);
+  used_dlist_delete(tue->used_exons_all);
+  used_dlist_delete(tue->used_exons_single);
+  used_dlist_delete(tue->used_exons_initial);
+  used_dlist_delete(tue->used_exons_internal);
+  used_dlist_delete(tue->used_exons_terminal);
   ma_free(tue);
 }

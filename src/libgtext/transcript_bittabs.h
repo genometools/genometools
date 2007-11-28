@@ -28,7 +28,7 @@ TranscriptBittabs* transcript_bittabs_new(unsigned long size_all,
                                           unsigned long size_single,
                                           unsigned long size_initial,
                                           unsigned long size_internal,
-                                          unsigned long size_terminal, Env*);
+                                          unsigned long size_terminal);
 
 /* return the bittab for all exons */
 Bittab*            transcript_bittabs_get_all(const TranscriptBittabs*);
@@ -45,6 +45,6 @@ Bittab*            transcript_bittabs_get_internal(const TranscriptBittabs*);
 /* return the bittab for terminal exons */
 Bittab*            transcript_bittabs_get_terminal(const TranscriptBittabs*);
 
-void               transcript_bittabs_delete(TranscriptBittabs*, Env*);
+void               transcript_bittabs_delete(TranscriptBittabs*);
 
 #endif

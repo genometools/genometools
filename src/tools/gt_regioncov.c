@@ -84,7 +84,7 @@ int gt_regioncov(int argc, const char **argv, Env *env)
 
   /* show region coverage */
   if (!had_err)
-    regioncov_visitor_show_coverage(regioncov_visitor, env);
+    regioncov_visitor_show_coverage(regioncov_visitor);
 
   /* free */
   genome_visitor_delete(regioncov_visitor);

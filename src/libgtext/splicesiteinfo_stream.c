@@ -78,11 +78,10 @@ GenomeStream* splicesiteinfo_stream_new(GenomeStream *in_stream,
   return gs;
 }
 
-bool splicesiteinfo_stream_show(GenomeStream *gs, Env *env)
+bool splicesiteinfo_stream_show(GenomeStream *gs)
 {
   SpliceSiteInfoStream *ssis;
-  env_error_check(env);
   assert(gs);
   ssis = splicesiteinfo_stream_cast(gs);
-  return splicesiteinfo_visitor_show(ssis->splicesiteinfo_visitor, env);
+  return splicesiteinfo_visitor_show(ssis->splicesiteinfo_visitor);
 }

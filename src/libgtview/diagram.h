@@ -38,7 +38,7 @@ Diagram*    diagram_new(FeatureIndex*, Range range, const char *seqid,
 Range       diagram_get_range(Diagram*);
 void        diagram_set_config(Diagram*, Config*, Env*);
 Hashtable*  diagram_get_tracks(const Diagram*);
-int         diagram_get_total_lines(const Diagram*, Env*);
+int         diagram_get_total_lines(const Diagram*);
 int         diagram_get_number_of_tracks(const Diagram*);
 int         diagram_unit_test(Env*);
 void        diagram_delete(Diagram*, Env*);

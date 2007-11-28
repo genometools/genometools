@@ -49,27 +49,27 @@ int            config_load_file(Config*, Str *filename, Env*);
 /* Reload the Lua configuration file. */
 void           config_reload(Config*, Env *env);
 /* Retrieve a color value from the configuration for <key> (i.e., feature). */
-Color          config_get_color(const Config*, const char *key, Env*);
+Color          config_get_color(const Config*, const char *key);
 /* Sets a color value in the configuration for <key> (i.e., feature) to a
    certain value. */
-void           config_set_color(Config*, const char *key, Color, Env*);
+void           config_set_color(Config*, const char *key, Color);
 /* Retrieve string value of <key> in <section>.
    If not set, <deflt> is returned. */
 const char*    config_get_cstr(const Config*, const char *section,
-                               const char *key, const char *deflt, Env *env);
+                               const char *key, const char *deflt);
 /* Set string <key> in <section> to <value>. */
 void           config_set_cstr(Config*, const char *section, const char *key,
-                               const char *value, Env*);
+                               const char *value);
 /* Retrieve numeric value of <key> in <section>.
    If not set, <deflt> is returned.*/
 double         config_get_num(const Config*, const char *section,
-                              const char *key, double deflt, Env*);
+                              const char *key, double deflt);
 /* Set numeric value of <key> in <section> to <number>. */
 void           config_set_num(Config*, const char *section, const char *key,
-                              double number, Env*);
+                              double number);
 /* Check if <checkstr> appears in list of strings named <key> in <section>. */
 bool           config_cstr_in_list(const Config*, const char *section,
-                                   const char *key, const char *checkstr, Env*);
+                                   const char *key, const char *checkstr);
 /* Returns verbosity status. */
 bool           config_get_verbose(const Config*);
 
@@ -77,7 +77,7 @@ bool           config_get_verbose(const Config*);
    precendence as defined in the config object.
    If a type dominates, it will be drawn on top of the other in the image. */
 DominateStatus config_dominates(Config*, GenomeFeatureType gft1,
-                                GenomeFeatureType gft2, Env*);
+                                GenomeFeatureType gft2);
 int            config_unit_test(Env*);
 /* Deletes a Config object but leaves the internal Lua state intact. */
 void           config_delete_without_state(Config*, Env*);

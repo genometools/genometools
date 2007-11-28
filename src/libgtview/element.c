@@ -100,8 +100,8 @@ int element_unit_test(Env* env)
   r2.start = 20UL;
   r2.end = 50UL;
 
-  gn = genome_feature_new(gft_exon, r1, STRAND_BOTH, NULL, 0, env);
-  gn2 = genome_feature_new(gft_exon, r2, STRAND_BOTH, NULL, 0, env);
+  gn = genome_feature_new(gft_exon, r1, STRAND_BOTH, NULL, 0);
+  gn2 = genome_feature_new(gft_exon, r2, STRAND_BOTH, NULL, 0);
 
   e = element_new(gn, env);
   e2 = element_new(gn, env);
@@ -124,9 +124,9 @@ int element_unit_test(Env* env)
   ensure(had_err, !elements_are_equal(e, e3));
   ensure(had_err, !elements_are_equal(e2, e3));
 
-  element_delete(e, env);
-  element_delete(e2, env);
-  element_delete(e3, env);
+  element_delete(e);
+  element_delete(e2);
+  element_delete(e3);
   genome_node_delete(gn);
   genome_node_delete(gn2);
 
@@ -134,7 +134,7 @@ int element_unit_test(Env* env)
 
 }
 
-void element_delete(Element *element, Env *env)
+void element_delete(Element *element)
 {
   if (!element) return;
   ma_free(element);

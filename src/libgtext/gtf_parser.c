@@ -86,23 +86,23 @@ GTF_parser* gtf_parser_new(void)
 }
 
 static int construct_sequence_regions(void *key, void *value, void *data,
-                                      Env *env)
+                                      Error *e)
 {
   Str *seqid;
   Range range;
   GenomeNode *gn;
   Queue *genome_nodes = (Queue*) data;
-  env_error_check(env);
+  error_check(e);
   assert(key && value && data);
   seqid = str_new_cstr(key);
   range = *(Range*) value;
-  gn = sequence_region_new(seqid, range, NULL, 0, env);
+  gn = sequence_region_new(seqid, range, NULL, 0);
   queue_add(genome_nodes, gn);
   str_delete(seqid);
   return 0;
 }
 
-static int construct_mRNAs(void *key, void *value, void *data, Env *env)
+static int construct_mRNAs(void *key, void *value, void *data, Error *e)
 {
   Array *genome_node_array = (Array*) value,
         *mRNAs = (Array*) data;
@@ -113,7 +113,7 @@ static int construct_mRNAs(void *key, void *value, void *data, Env *env)
   unsigned long i;
   int had_err = 0;
 
-  env_error_check(env);
+  error_check(e);
   assert(key && value && data);
   assert(array_size(genome_node_array)); /* at least one node in array */
 
@@ -130,7 +130,7 @@ static int construct_mRNAs(void *key, void *value, void *data, Env *env)
     mRNA_strand = strand_join(mRNA_strand,
                               genome_feature_get_strand((GenomeFeature*) gn));
     if (str_cmp(mRNA_seqid, genome_node_get_seqid(gn))) {
-      env_error_set(env, "The features on lines %lu and %lu refer to different "
+      error_set(e, "The features on lines %lu and %lu refer to different "
                 "genomic sequences (``seqname''), although they have the same "
                 "gene IDs (``gene_id'') which must be globally unique",
                 genome_node_get_line_number(first_node),
@@ -141,14 +141,13 @@ static int construct_mRNAs(void *key, void *value, void *data, Env *env)
   }
 
   if (!had_err) {
-    mRNA_node = genome_feature_new(gft_mRNA, mRNA_range, mRNA_strand, NULL, 0,
-                                   env);
-    genome_node_set_seqid(mRNA_node, mRNA_seqid, env);
+    mRNA_node = genome_feature_new(gft_mRNA, mRNA_range, mRNA_strand, NULL, 0);
+    genome_node_set_seqid(mRNA_node, mRNA_seqid);
 
     /* register children */
     for (i = 0; i < array_size(genome_node_array); i++) {
       gn = *(GenomeNode**) array_get(genome_node_array, i);
-      genome_node_is_part_of_genome_node(mRNA_node, gn, env);
+      genome_node_is_part_of_genome_node(mRNA_node, gn);
     }
 
     /* store the mRNA */
@@ -158,7 +157,7 @@ static int construct_mRNAs(void *key, void *value, void *data, Env *env)
   return had_err;
 }
 
-static int construct_genes(void *key, void *value, void *data, Env *env)
+static int construct_genes(void *key, void *value, void *data, Error *e)
 {
   Hashtable *transcript_id_hash = (Hashtable*) value;
   Queue *genome_nodes = (Queue*) data;
@@ -170,10 +169,10 @@ static int construct_genes(void *key, void *value, void *data, Env *env)
   unsigned long i;
   int had_err = 0;
 
-  env_error_check(env);
+  error_check(e);
   assert(key && value && data);
 
-  had_err = hashtable_foreach(transcript_id_hash, construct_mRNAs, mRNAs, env);
+  had_err = hashtable_foreach(transcript_id_hash, construct_mRNAs, mRNAs, e);
   if (!had_err) {
     assert(array_size(mRNAs)); /* at least one mRNA constructed */
 
@@ -190,14 +189,13 @@ static int construct_genes(void *key, void *value, void *data, Env *env)
       assert(str_cmp(gene_seqid, genome_node_get_seqid(gn)) == 0);
     }
 
-    gene_node = genome_feature_new(gft_gene, gene_range, gene_strand, NULL, 0,
-                                   env);
-    genome_node_set_seqid(gene_node, gene_seqid, env);
+    gene_node = genome_feature_new(gft_gene, gene_range, gene_strand, NULL, 0);
+    genome_node_set_seqid(gene_node, gene_seqid);
 
     /* register children */
     for (i = 0; i < array_size(mRNAs); i++) {
       gn = *(GenomeNode**) array_get(mRNAs, i);
-      genome_node_is_part_of_genome_node(gene_node, gn, env);
+      genome_node_is_part_of_genome_node(gene_node, gn);
     }
 
     /* store the gene */
@@ -281,7 +279,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
       warning("skipping blank line %lu in file \"%s\"", line_number, filename);
     else if (line[0] == '#') {
       /* storing comment */
-      gn = comment_new(line+1, filenamestr, line_number, env);
+      gn = comment_new(line+1, filenamestr, line_number);
       queue_add(genome_nodes, gn);
     }
     else {
@@ -425,7 +423,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
 
       /* construct the new feature */
       gn = genome_feature_new(gff_feature_type, range, strand_value,
-                              filenamestr, line_number, env);
+                              filenamestr, line_number);
 
       /* set seqid */
       seqid_str = hashtable_get(parser->seqid_to_str_mapping, seqname);
@@ -435,7 +433,7 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
                       seqid_str);
       }
       assert(seqid_str);
-      genome_node_set_seqid(gn, seqid_str, env);
+      genome_node_set_seqid(gn, seqid_str);
 
       /* set source */
       source_str = hashtable_get(parser->source_to_str_mapping, source);
@@ -460,13 +458,14 @@ int gtf_parser_parse(GTF_parser *parser, Queue *genome_nodes,
   /* process all comments features */
   if (!had_err) {
     had_err = hashtable_foreach(parser->sequence_region_to_range,
-                                construct_sequence_regions, genome_nodes, env);
+                                construct_sequence_regions, genome_nodes, NULL);
+    assert(!had_err); /* construct_sequence_regions() is sane */
   }
 
   /* process all genome_features */
   if (!had_err) {
     had_err = hashtable_foreach(parser->gene_id_hash, construct_genes,
-                                genome_nodes, env);
+                                genome_nodes, env_error(env));
   }
 
   /* free */

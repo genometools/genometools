@@ -168,11 +168,12 @@ void ma_free_func(void *ptr)
   ma_free(ptr);
 }
 
-static int check_space_leak(void *key, void *value, void *data, Env *env)
+static int check_space_leak(void *key, void *value, void *data, Error *e)
 {
   CheckSpaceLeakInfo *info = (CheckSpaceLeakInfo*) data;
   MAInfo *mainfo = (MAInfo*) value;
-  assert(key && value && data && env);
+  error_check(e);
+  assert(key && value && data);
   /* report only the first leak */
   if (!info->has_leak) {
     fprintf(stderr, "bug: %zu bytes memory leaked (allocated on line %d in "

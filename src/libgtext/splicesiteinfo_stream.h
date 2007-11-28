@@ -31,6 +31,6 @@ const GenomeStreamClass* splicesiteinfo_stream_class(void);
 GenomeStream*            splicesiteinfo_stream_new(GenomeStream*,
                                                    RegionMapping*, Env*);
 /* returns if an intron has been processed, false otherwise */
-bool                     splicesiteinfo_stream_show(GenomeStream*, Env*);
+bool                     splicesiteinfo_stream_show(GenomeStream*);
 
 #endif

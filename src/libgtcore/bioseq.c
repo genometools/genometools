@@ -472,16 +472,15 @@ void bioseq_show_stat(Bioseq *bs)
   }
 }
 
-void bioseq_show_seqlengthdistri(Bioseq *bs, Env *env)
+void bioseq_show_seqlengthdistri(Bioseq *bs)
 {
   DiscDistri *d;
   unsigned long i;
-  env_error_check(env);
   assert(bs);
-  d = discdistri_new(env);
+  d = discdistri_new();
   for (i = 0; i < bioseq_number_of_sequences(bs); i++)
-    discdistri_add(d, bioseq_get_sequence_length(bs, i), env);
+    discdistri_add(d, bioseq_get_sequence_length(bs, i));
   printf("sequence length distribution:\n");
-  discdistri_show(d, env);
+  discdistri_show(d);
   discdistri_delete(d);
 }

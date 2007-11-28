@@ -28,18 +28,18 @@ struct DiscDistri {
   unsigned long long num_of_occurrences;
 };
 
-DiscDistri* discdistri_new(Env *env)
+DiscDistri* discdistri_new(void)
 {
   return ma_calloc(1, sizeof (DiscDistri));
 }
 
-void discdistri_add(DiscDistri *d, unsigned long key, Env *env)
+void discdistri_add(DiscDistri *d, unsigned long key)
 {
-  discdistri_add_multi(d, key, 1, env);
+  discdistri_add_multi(d, key, 1);
 }
 
 void discdistri_add_multi(DiscDistri *d, unsigned long key,
-                          unsigned long long occurrences, Env *env)
+                          unsigned long long occurrences)
 {
   unsigned long long *valueptr;
   assert(d);
@@ -68,10 +68,10 @@ unsigned long long discdistri_get(const DiscDistri *d, unsigned long key)
   return *valueptr;
 }
 
-void discdistri_show(const DiscDistri *d, Env *env)
+void discdistri_show(const DiscDistri *d)
 {
   assert(d);
-  discdistri_show_generic(d, NULL, env);
+  discdistri_show_generic(d, NULL);
 }
 
 typedef struct {
@@ -80,13 +80,13 @@ typedef struct {
   GenFile *genfile;
 } ShowValueInfo;
 
-static int showvalue(void *key, void *value, void *data, Env *env)
+static int showvalue(void *key, void *value, void *data, Error *e)
 {
   unsigned long long occurrences;
   double probability;
   ShowValueInfo *info;
 
-  env_error_check(env);
+  error_check(e);
   assert(key && value && data);
 
   occurrences = *(unsigned long long*) value;
@@ -102,19 +102,18 @@ static int showvalue(void *key, void *value, void *data, Env *env)
   return 0;
 }
 
-void discdistri_show_generic(const DiscDistri *d, GenFile *genfile, Env *env)
+void discdistri_show_generic(const DiscDistri *d, GenFile *genfile)
 {
   ShowValueInfo showvalueinfo;
   int rval;
 
-  env_error_check(env);
   assert(d);
 
   if (d->hashdist) {
     showvalueinfo.cumulative_probability = 0.0;
     showvalueinfo.num_of_occurrences = d->num_of_occurrences;
     showvalueinfo.genfile = genfile;
-    rval = hashtable_foreach_no(d->hashdist, showvalue, &showvalueinfo, env);
+    rval = hashtable_foreach_no(d->hashdist, showvalue, &showvalueinfo, NULL);
     assert(!rval); /* showvalue() is sane */
   }
 }
@@ -124,10 +123,10 @@ typedef struct {
   void *data;
 } ForeachInfo;
 
-static int foreach_iterfunc(void *key, void *value, void *data, Env *env)
+static int foreach_iterfunc(void *key, void *value, void *data, Error *e)
 {
   ForeachInfo *info;
-  env_error_check(env);
+  error_check(e);
   assert(key && value && data);
   info = (ForeachInfo*) data;
   info->func((unsigned long) key, *(unsigned long long*) value, info->data);
@@ -135,16 +134,15 @@ static int foreach_iterfunc(void *key, void *value, void *data, Env *env)
 }
 
 void discdistri_foreach(const DiscDistri *d, DiscDistriIterFunc func,
-                        void *data, Env *env)
+                        void *data)
 {
   ForeachInfo info;
   int rval;
-  env_error_check(env);
   assert(d);
   if (d->hashdist) {
     info.func = func;
     info.data = data;
-    rval = hashtable_foreach_no(d->hashdist, foreach_iterfunc, &info, env);
+    rval = hashtable_foreach_no(d->hashdist, foreach_iterfunc, &info, NULL);
     assert(!rval); /* foreach_iterfunc() is sane */
   }
 }
@@ -156,13 +154,13 @@ int discdistri_unit_test(Env *env)
 
   env_error_check(env);
 
-  d = discdistri_new(env);
+  d = discdistri_new();
 
   ensure(had_err, discdistri_get(d, 0) == 0);
   ensure(had_err, discdistri_get(d, 100) == 0);
   if (!had_err) {
-    discdistri_add(d, 0, env);
-    discdistri_add_multi(d, 100, 256, env);
+    discdistri_add(d, 0);
+    discdistri_add_multi(d, 100, 256);
   }
   ensure(had_err, discdistri_get(d, 0) == 1);
   ensure(had_err, discdistri_get(d, 100) == 256);

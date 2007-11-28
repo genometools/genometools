@@ -29,14 +29,14 @@ typedef struct GenomeFeature GenomeFeature;
 #include "libgtext/transcript_feature_type.h"
 
 typedef int (*AttributeIterFunc)(const char *attr_name, const char *attr_value,
-                                 void *data, Env*);
+                                 void *data, Error*);
 
 const GenomeNodeClass* genome_feature_class(void);
 GenomeNode*            genome_feature_new(GenomeFeatureType, Range, Strand,
                                           Str *filename,
-                                          unsigned long line_number, Env*);
+                                          unsigned long line_number);
 /* return the ``standard gene'' (mainly for testing purposes) */
-GenomeNode*            genome_feature_new_standard_gene(Env*);
+GenomeNode*            genome_feature_new_standard_gene(void);
 const char*            genome_feature_get_source(GenomeFeature*);
 const char*            genome_feature_get_attribute(GenomeNode *gn,
                                                     const char *attr_name);
@@ -56,7 +56,7 @@ void                   genome_feature_add_attribute(GenomeFeature*,
                                                     const char *attr_value);
 int                    genome_feature_foreach_attribute(GenomeFeature*,
                                                         AttributeIterFunc,
-                                                        void *data, Env*);
+                                                        void *data, Error*);
 /* returns true, if the given features have the same seqid, feature type, range,
    strand, and phase */
 bool                   genome_features_are_similar(GenomeFeature*,

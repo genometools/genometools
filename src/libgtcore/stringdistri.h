@@ -31,7 +31,7 @@ typedef void (*StringDistriIterFunc)(const char *string,
 StringDistri*      stringdistri_new(void);
 void               stringdistri_add(StringDistri*, const char*);
 void               stringdistri_foreach(const StringDistri*,
-                                        StringDistriIterFunc, void *data, Env*);
+                                        StringDistriIterFunc, void *data);
 void               stringdistri_delete(StringDistri*);
 
 #endif

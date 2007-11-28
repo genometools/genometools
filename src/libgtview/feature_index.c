@@ -141,7 +141,7 @@ int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
   }
   assert(fi && results && seqid && base && (qry_range.start < qry_range.end));
   key = genome_feature_new(gft_gene, qry_range, STRAND_UNKNOWN, NULL,
-                           UNDEF_ULONG, env);
+                           UNDEF_ULONG);
   for (i = 0; i < array_size(base); i++) {
     GenomeNode *gn = *(GenomeNode**) array_get(base, i);
     Range r = genome_node_get_range(gn);
@@ -158,7 +158,7 @@ const char* feature_index_get_first_seqid(const FeatureIndex *fi)
   return fi->firstseqid;
 }
 
-int store_seqid(void *key, void *value, void *data, Env *env)
+int store_seqid(void *key, void *value, void *data, Error *e)
 {
   StrArray *seqids = (StrArray*) data;
   const char *seqid = (const char*) key;
@@ -167,14 +167,13 @@ int store_seqid(void *key, void *value, void *data, Env *env)
   return 0;
 }
 
-StrArray* feature_index_get_seqids(const FeatureIndex *fi, Env *env)
+StrArray* feature_index_get_seqids(const FeatureIndex *fi)
 {
   StrArray* seqids;
   int rval;
-  env_error_check(env);
   assert(fi);
   seqids = strarray_new();
-  rval = hashtable_foreach_ao(fi->regions, store_seqid, seqids, env);
+  rval = hashtable_foreach_ao(fi->regions, store_seqid, seqids, NULL);
   assert(!rval); /* store_seqid() is sane */
   return seqids;
 }
@@ -226,41 +225,35 @@ int feature_index_unit_test(Env* env)
   seqid1 = str_new_cstr("test1");
   seqid2 = str_new_cstr("test2");
 
-  sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, NULL, 0, env);
-  sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, NULL, 0, env);
+  sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, NULL, 0);
+  sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, NULL, 0);
 
   /* generate a new genome_feature with the property gft_gene and the range r1
      ... */
-  gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN, NULL,
-                           UNDEF_ULONG, env);
+  gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
   /* ... and assign a sequence id to the new genome_feature-object. */
-  genome_node_set_seqid(gn1, seqid1, env);
+  genome_node_set_seqid(gn1, seqid1);
 
-  gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN, NULL,
-                           UNDEF_ULONG, env);
-  genome_node_set_seqid(gn2, seqid2, env);
+  gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  genome_node_set_seqid(gn2, seqid2);
 
-  ex1 = genome_feature_new(gft_exon, r2, STRAND_UNKNOWN, NULL,
-                           UNDEF_ULONG, env);
-  genome_node_set_seqid(ex1, seqid1, env);
+  ex1 = genome_feature_new(gft_exon, r2, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  genome_node_set_seqid(ex1, seqid1);
 
-  ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN, NULL,
-                           UNDEF_ULONG, env);
-  genome_node_set_seqid(ex2, seqid1, env);
+  ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  genome_node_set_seqid(ex2, seqid1);
 
-  ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN, NULL,
-                           UNDEF_ULONG, env);
-  genome_node_set_seqid(ex3, seqid2, env);
+  ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  genome_node_set_seqid(ex3, seqid2);
 
-  cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN, NULL,
-                            UNDEF_ULONG, env);
-  genome_node_set_seqid(cds1, seqid2, env);
+  cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  genome_node_set_seqid(cds1, seqid2);
 
   /* Determine the structure of our feature tree */
-  genome_node_is_part_of_genome_node(gn1, ex1, env);
-  genome_node_is_part_of_genome_node(gn1, ex2, env);
-  genome_node_is_part_of_genome_node(gn2, ex3, env);
-  genome_node_is_part_of_genome_node(gn2, cds1, env);
+  genome_node_is_part_of_genome_node(gn1, ex1);
+  genome_node_is_part_of_genome_node(gn1, ex2);
+  genome_node_is_part_of_genome_node(gn2, ex3);
+  genome_node_is_part_of_genome_node(gn2, cds1);
 
   /* create a new feature index on which we can perfom some tests */
   fi = feature_index_new();
@@ -302,7 +295,7 @@ int feature_index_unit_test(Env* env)
   ensure(had_err, strcmp("test1", feature_index_get_first_seqid(fi)) == 0);
 
   if (!had_err) {
-    seqids = feature_index_get_seqids(fi, env);
+    seqids = feature_index_get_seqids(fi);
     ensure(had_err, strarray_size(seqids) == 2);
     ensure(had_err, !strcmp(strarray_get(seqids, 0), "test1"));
     ensure(had_err, !strcmp(strarray_get(seqids, 1), "test2"));

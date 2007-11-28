@@ -115,7 +115,7 @@ int fasta2sequencekeyvalues(
                          filelengthtab,
                          descqueue,
                          characterdistribution);
-    distspralen = discdistri_new(env);
+    distspralen = discdistri_new();
     for (pos = 0; /* Nothing */; pos++)
     {
       retval = fastabuffer_next(fb,&charcode,env_error(env));
@@ -129,7 +129,7 @@ int fasta2sequencekeyvalues(
         if (lastspeciallength > 0)
         {
           idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-          discdistri_add(distspralen,idx,env);
+          discdistri_add(distspralen,idx);
         }
         break;
       }
@@ -173,7 +173,7 @@ int fasta2sequencekeyvalues(
         if (lastspeciallength > 0)
         {
           idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-          discdistri_add(distspralen,idx,env);
+          discdistri_add(distspralen,idx);
           lastspeciallength = 0;
         }
       }
@@ -199,7 +199,7 @@ int fasta2sequencekeyvalues(
     updatesumrangeinfo.specialrangesptr = &specialcharinfo->specialranges;
     updatesumrangeinfo.verboseinfo = verboseinfo;
     discdistri_foreach(distspralen,updatesumranges,
-                       &updatesumrangeinfo,env);
+                       &updatesumrangeinfo);
     specialcharinfo->lengthofspecialsuffix = lastspeciallength;
     (*numofsequences)++;
     *totallength = pos;
@@ -229,7 +229,7 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   specialcharinfo->specialcharacters = 0;
   specialcharinfo->lengthofspecialprefix = 0;
   specialcharinfo->lengthofspecialsuffix = 0;
-  distspralen = discdistri_new(env);
+  distspralen = discdistri_new();
   for (pos = 0; pos < len; pos++)
   {
     charcode = seq[pos];
@@ -256,7 +256,7 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
       if (lastspeciallength > 0)
       {
         idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-        discdistri_add(distspralen,idx,env);
+        discdistri_add(distspralen,idx);
         lastspeciallength = 0;
       }
     }
@@ -264,12 +264,12 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   if (lastspeciallength > 0)
   {
     idx = CALLCASTFUNC(Seqpos,unsigned_long,lastspeciallength);
-    discdistri_add(distspralen,idx,env);
+    discdistri_add(distspralen,idx);
   }
   specialcharinfo->specialranges = 0;
   updatesumrangeinfo.specialrangesptr = &specialcharinfo->specialranges;
   updatesumrangeinfo.verboseinfo = verboseinfo;
-  discdistri_foreach(distspralen,updatesumranges,&updatesumrangeinfo,env);
+  discdistri_foreach(distspralen,updatesumranges,&updatesumrangeinfo);
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
   discdistri_delete(distspralen);
 }

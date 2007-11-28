@@ -32,7 +32,7 @@ struct GenomeNodeClass
   Str*  (*get_idstr)(GenomeNode*);
   Range (*get_range)(GenomeNode*);
   void  (*set_range)(GenomeNode*, Range);
-  void  (*set_seqid)(GenomeNode*, Str*, Env*);
+  void  (*set_seqid)(GenomeNode*, Str*);
   void  (*set_source)(GenomeNode*, Str*);
   void  (*set_phase)(GenomeNode*, Phase);
   int   (*accept)(GenomeNode*, GenomeVisitor*, Env*);
@@ -50,6 +50,6 @@ struct GenomeNode
 };
 
 GenomeNode* genome_node_create(const GenomeNodeClass*, Str *filename,
-                               unsigned long line_number, Env *env);
+                               unsigned long line_number);
 
 #endif

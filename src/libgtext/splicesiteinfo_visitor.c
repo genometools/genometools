@@ -116,12 +116,12 @@ static int splicesiteinfo_visitor_genome_feature(GenomeVisitor *gv,
   env_error_check(env);
   ssiv = splicesiteinfo_visitor_cast(gv);
   assert(ssiv->regionmapping);
-  gni = genome_node_iterator_new((GenomeNode*) gf, env);
-  while (!had_err && (node = genome_node_iterator_next(gni, env))) {
+  gni = genome_node_iterator_new((GenomeNode*) gf);
+  while (!had_err && (node = genome_node_iterator_next(gni))) {
     if (genome_feature_get_type((GenomeFeature*) node) == gft_intron)
       had_err = process_intron(ssiv, node, env);
   }
-  genome_node_iterator_delete(gni, env);
+  genome_node_iterator_delete(gni);
   return had_err;
 }
 
@@ -168,27 +168,26 @@ static void showsinglesite(const char *string, unsigned long occurrences,
   printf("%s: %6.2f%% (n=%lu)\n", string, probability * 100.0, occurrences);
 }
 
-bool splicesiteinfo_visitor_show(GenomeVisitor *gv, Env *env)
+bool splicesiteinfo_visitor_show(GenomeVisitor *gv)
 {
   SpliceSiteInfoVisitor *ssiv;
-  env_error_check(env);
   assert(gv);
   ssiv = splicesiteinfo_visitor_cast(gv);
 
   if (ssiv->show) {
     /* show splice sites */
     printf("splice site distribution (for introns >= 4bp)\n");
-    stringdistri_foreach(ssiv->splicesites, showsplicesite, NULL, env);
+    stringdistri_foreach(ssiv->splicesites, showsplicesite, NULL);
     xputchar('\n');
 
     /* show donor sites */
     printf("donor site distribution (for introns >= 4bp)\n");
-    stringdistri_foreach(ssiv->donorsites, showsinglesite, NULL, env);
+    stringdistri_foreach(ssiv->donorsites, showsinglesite, NULL);
     xputchar('\n');
 
     /* show acceptor sites */
     printf("acceptor site distribution (for introns >= 4bp)\n");
-    stringdistri_foreach(ssiv->acceptorsites, showsinglesite, NULL, env);
+    stringdistri_foreach(ssiv->acceptorsites, showsinglesite, NULL);
   }
   return ssiv->intron_processed;
 }

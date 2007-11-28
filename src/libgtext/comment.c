@@ -80,10 +80,9 @@ const GenomeNodeClass* comment_class()
 }
 
 GenomeNode* comment_new(const char *comment, Str *filename,
-                        unsigned long line_number, Env *env)
+                        unsigned long line_number)
 {
-  GenomeNode *gn = genome_node_create(comment_class(), filename, line_number,
-                                      env);
+  GenomeNode *gn = genome_node_create(comment_class(), filename, line_number);
   Comment *c = comment_cast(gn);
   assert(comment);
   c->comment = cstr_dup(comment);

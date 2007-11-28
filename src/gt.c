@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
   env = env_new();
   env_error_set_progname(env, argv[0]);
   gtr = gtr_new(env);
-  gtr_register_components(gtr, env);
+  gtr_register_components(gtr);
   switch (gtr_parse(gtr, &rval, argc, (const char**) argv, env)) {
     case OPTIONPARSER_OK:
       argc -= rval;

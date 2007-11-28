@@ -24,7 +24,7 @@
 typedef struct TranscriptCounts TranscriptCounts;
 
 /* create an empy container */
-TranscriptCounts* transcript_counts_new(Env*);
+TranscriptCounts* transcript_counts_new(void);
 
 /* return the count array for all exons */
 Array*            transcript_counts_get_all(const TranscriptCounts*);
@@ -46,6 +46,6 @@ void              transcript_counts_set_internal(TranscriptCounts*, Array*);
 Array*            transcript_counts_get_terminal(const TranscriptCounts*);
 void              transcript_counts_set_terminal(TranscriptCounts*, Array*);
 
-void              transcript_counts_delete(TranscriptCounts*, Env*);
+void              transcript_counts_delete(TranscriptCounts*);
 
 #endif

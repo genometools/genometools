@@ -154,7 +154,7 @@ int gt_bioseq(int argc, const char **argv, Env *env)
       bioseq_show_stat(bioseq);
 
     if (!had_err && arguments.seqlengthdistri)
-      bioseq_show_seqlengthdistri(bioseq, env);
+      bioseq_show_seqlengthdistri(bioseq);
 
     /* free */
     bioseq_delete(bioseq);

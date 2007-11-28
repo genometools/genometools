@@ -136,9 +136,9 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
       /*printf("%lu, %lu\n", cds.start, cds.end);*/
       cds_feature = genome_feature_new(gft_CDS, cds,
                                        genome_feature_get_strand(gf), NULL,
-                                       UNDEF_ULONG, env);
+                                       UNDEF_ULONG);
       genome_node_set_source(cds_feature, v->source);
-      genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn), env);
+      genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
       genome_node_set_phase(cds_feature, PHASE_ZERO);
       /* all CDS features in between */
       for (i = strand == STRAND_FORWARD ? orf.start + 1 : orf.end - 1;
@@ -148,7 +148,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
           /*printf("i=%lu\n", i);*/
           genome_feature_set_end((GenomeFeature*) cds_feature,
                                  splicedseq_map(v->splicedseq, i) + 1);
-          genome_node_is_part_of_genome_node(gn, cds_feature, env);
+          genome_node_is_part_of_genome_node(gn, cds_feature);
           if (strand == STRAND_FORWARD)
             orf.start = i + 1;
           else
@@ -159,9 +159,9 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
                                    ? orf.end : orf.start) + 1;
           cds_feature = genome_feature_new(gft_CDS, cds,
                                            genome_feature_get_strand(gf),
-                                           NULL, UNDEF_ULONG, env);
+                                           NULL, UNDEF_ULONG);
           genome_node_set_source(cds_feature, v->source);
-          genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn), env);
+          genome_node_set_seqid(cds_feature, genome_node_get_seqid(gn));
           /* XXX correct this */
           genome_node_set_phase(cds_feature, (Phase)
                                 splicedseq_map(v->splicedseq, orf.start) % 3);
@@ -172,7 +172,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
                              splicedseq_map(v->splicedseq,
                                             strand == STRAND_FORWARD
                                             ? orf.end : orf.start) + 1);
-      genome_node_is_part_of_genome_node(gn, cds_feature, env);
+      genome_node_is_part_of_genome_node(gn, cds_feature);
     }
 
     /* free */

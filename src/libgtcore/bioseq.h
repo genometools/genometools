@@ -60,6 +60,6 @@ void bioseq_show_gc_content(Bioseq*);
 void bioseq_show_stat(Bioseq*);
 
 /* shows bioseq sequence length distribution (on stdout) */
-void bioseq_show_seqlengthdistri(Bioseq*, Env*);
+void bioseq_show_seqlengthdistri(Bioseq*);
 
 #endif

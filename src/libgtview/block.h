@@ -51,6 +51,6 @@ GenomeFeatureType block_get_type(const Block*);
 /* Returns Dlist with Pointer to Element objects. */
 Dlist*            block_get_elements(const Block*);
 int               block_unit_test(Env*);
-void              block_delete(Block*, Env*);
+void              block_delete(Block*);
 
 #endif

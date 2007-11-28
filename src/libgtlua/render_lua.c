@@ -31,11 +31,10 @@ static int render_lua_new(lua_State *L)
 {
   Render **render;
   Config *config;
-  Env *env = get_env_from_registry(L);
   render = lua_newuserdata(L, sizeof (Render*));
   assert(render);
   config = get_config_from_registry(L);
-  *render = render_new(config, env);
+  *render = render_new(config);
   luaL_getmetatable(L, RENDER_METATABLE);
   lua_setmetatable(L, -2);
   return 1;

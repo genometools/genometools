@@ -37,6 +37,6 @@ void              element_set_type(Element*, GenomeFeatureType);
 bool              element_is_marked(const Element*);
 bool              elements_are_equal(const Element*, const Element*);
 int               element_unit_test(Env* env);
-void              element_delete(Element* element, Env* env);
+void              element_delete(Element* element);
 
 #endif

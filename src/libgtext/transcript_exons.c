@@ -27,7 +27,7 @@ struct TranscriptExons {
         *exon_array_terminal;
 };
 
-TranscriptExons* transcript_exons_new(Env *env)
+TranscriptExons* transcript_exons_new(void)
 {
   TranscriptExons *te = ma_malloc(sizeof (TranscriptExons));
   te->exon_array_all = array_new(sizeof (Range));
@@ -78,22 +78,21 @@ void transcript_exons_sort(const TranscriptExons *te)
   ranges_sort(te->exon_array_terminal);
 }
 
-TranscriptCounts* transcript_exons_uniq_in_place_count(TranscriptExons *te,
-                                                       Env *env)
+TranscriptCounts* transcript_exons_uniq_in_place_count(TranscriptExons *te)
 {
   TranscriptCounts *tc;
   Array *counts;
   assert(te);
-  tc = transcript_counts_new(env);
-  counts = ranges_uniq_in_place_count(te->exon_array_all, env);
+  tc = transcript_counts_new();
+  counts = ranges_uniq_in_place_count(te->exon_array_all);
   transcript_counts_set_all(tc, counts);
-  counts = ranges_uniq_in_place_count(te->exon_array_single, env);
+  counts = ranges_uniq_in_place_count(te->exon_array_single);
   transcript_counts_set_single(tc, counts);
-  counts = ranges_uniq_in_place_count(te->exon_array_initial, env);
+  counts = ranges_uniq_in_place_count(te->exon_array_initial);
   transcript_counts_set_initial(tc, counts);
-  counts = ranges_uniq_in_place_count(te->exon_array_internal, env);
+  counts = ranges_uniq_in_place_count(te->exon_array_internal);
   transcript_counts_set_internal(tc, counts);
-  counts = ranges_uniq_in_place_count(te->exon_array_terminal, env);
+  counts = ranges_uniq_in_place_count(te->exon_array_terminal);
   transcript_counts_set_terminal(tc, counts);
   return tc;
 }
@@ -109,18 +108,17 @@ bool transcript_exons_are_sorted(const TranscriptExons *te)
   return true;
 }
 
-TranscriptBittabs* transcript_exons_create_bittabs(const TranscriptExons *te,
-                                                   Env *env)
+TranscriptBittabs* transcript_exons_create_bittabs(const TranscriptExons *te)
 {
   assert(te);
   return transcript_bittabs_new(array_size(te->exon_array_all),
                                 array_size(te->exon_array_single),
                                 array_size(te->exon_array_initial),
                                 array_size(te->exon_array_internal),
-                                array_size(te->exon_array_terminal), env);
+                                array_size(te->exon_array_terminal));
 }
 
-void transcript_exons_delete(TranscriptExons *te, Env *env)
+void transcript_exons_delete(TranscriptExons *te)
 {
   if (!te) return;
   array_delete(te->exon_array_all);

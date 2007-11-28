@@ -139,7 +139,7 @@ GTR* gtr_new(Env *env)
   return gtr;
 }
 
-static int show_gtr_help(const char *progname, void *data, Env* env)
+static int show_gtr_help(const char *progname, void *data, Env *env)
 {
   int had_err;
   had_err = toolbox_show(progname, data, env);
@@ -180,40 +180,40 @@ OPrval gtr_parse(GTR *gtr, int *parsed_args, int argc, const char **argv,
   return oprval;
 }
 
-void gtr_register_components(GTR *gtr, Env *env)
+void gtr_register_components(GTR *gtr)
 {
   assert(gtr);
   /* add tools */
   toolbox_delete(gtr->toolbox);
   gtr->toolbox = toolbox_new();
-  toolbox_add(gtr->toolbox, "bioseq", gt_bioseq, env);
-  toolbox_add(gtr->toolbox, "cds", gt_cds, env);
-  toolbox_add(gtr->toolbox, "chseqids", gt_chseqids, env);
-  toolbox_add(gtr->toolbox, "clean", gt_clean, env);
-  toolbox_add(gtr->toolbox, "csa", gt_csa, env);
-  toolbox_add(gtr->toolbox, "dev", gt_dev, env);
-  toolbox_add(gtr->toolbox, "eval", gt_eval, env);
-  toolbox_add(gtr->toolbox, "exercise", gt_exercise, env);
-  toolbox_add(gtr->toolbox, "extractfeat", gt_extractfeat, env);
-  toolbox_add(gtr->toolbox, "extractseq", gt_extractseq, env);
-  toolbox_add(gtr->toolbox, "filter", gt_filter, env);
-  toolbox_add(gtr->toolbox, "gff3", gt_gff3, env);
-  toolbox_add(gtr->toolbox, "gff3_to_gtf", gt_gff3_to_gtf, env);
-  toolbox_add(gtr->toolbox, "gtf_to_gff3", gt_gtf_to_gff3, env);
-  toolbox_add(gtr->toolbox, "ltrharvest", gt_ltrharvest, env);
-  toolbox_add(gtr->toolbox, "merge", gt_merge, env);
-  toolbox_add(gtr->toolbox, "mmapandread", gt_mmapandread, env);
-  toolbox_add(gtr->toolbox, "mutate", gt_mutate, env);
-  toolbox_add(gtr->toolbox, "splitfasta", gt_splitfasta, env);
-  toolbox_add(gtr->toolbox, "splicesiteinfo", gt_splicesiteinfo, env);
-  toolbox_add(gtr->toolbox, "stat", gt_stat, env);
-  toolbox_add(gtr->toolbox, "suffixerator", gt_suffixerator, env);
-  toolbox_add(gtr->toolbox, "packedindex", gt_packedindex, env);
-  toolbox_add(gtr->toolbox, "mkfmindex", gt_mkfmindex, env);
-  toolbox_add(gtr->toolbox, "uniq", gt_uniq, env);
-  toolbox_add(gtr->toolbox, "uniquesub", gt_uniquesub, env);
+  toolbox_add(gtr->toolbox, "bioseq", gt_bioseq);
+  toolbox_add(gtr->toolbox, "cds", gt_cds);
+  toolbox_add(gtr->toolbox, "chseqids", gt_chseqids);
+  toolbox_add(gtr->toolbox, "clean", gt_clean);
+  toolbox_add(gtr->toolbox, "csa", gt_csa);
+  toolbox_add(gtr->toolbox, "dev", gt_dev);
+  toolbox_add(gtr->toolbox, "eval", gt_eval);
+  toolbox_add(gtr->toolbox, "exercise", gt_exercise);
+  toolbox_add(gtr->toolbox, "extractfeat", gt_extractfeat);
+  toolbox_add(gtr->toolbox, "extractseq", gt_extractseq);
+  toolbox_add(gtr->toolbox, "filter", gt_filter);
+  toolbox_add(gtr->toolbox, "gff3", gt_gff3);
+  toolbox_add(gtr->toolbox, "gff3_to_gtf", gt_gff3_to_gtf);
+  toolbox_add(gtr->toolbox, "gtf_to_gff3", gt_gtf_to_gff3);
+  toolbox_add(gtr->toolbox, "ltrharvest", gt_ltrharvest);
+  toolbox_add(gtr->toolbox, "merge", gt_merge);
+  toolbox_add(gtr->toolbox, "mmapandread", gt_mmapandread);
+  toolbox_add(gtr->toolbox, "mutate", gt_mutate);
+  toolbox_add(gtr->toolbox, "splitfasta", gt_splitfasta);
+  toolbox_add(gtr->toolbox, "splicesiteinfo", gt_splicesiteinfo);
+  toolbox_add(gtr->toolbox, "stat", gt_stat);
+  toolbox_add(gtr->toolbox, "suffixerator", gt_suffixerator);
+  toolbox_add(gtr->toolbox, "packedindex", gt_packedindex);
+  toolbox_add(gtr->toolbox, "mkfmindex", gt_mkfmindex);
+  toolbox_add(gtr->toolbox, "uniq", gt_uniq);
+  toolbox_add(gtr->toolbox, "uniquesub", gt_uniquesub);
 #ifdef LIBGTVIEW
-  toolbox_add(gtr->toolbox, "view", gt_view, env);
+  toolbox_add(gtr->toolbox, "view", gt_view);
 #endif
   /* add unit tests */
   hashtable_delete(gtr->unit_tests);
@@ -258,24 +258,24 @@ void gtr_register_components(GTR *gtr, Env *env)
 #endif
 }
 
-int run_test(void *key, void *value, void *data, Env *env)
+int run_test(void *key, void *value, void *data, Error *e)
 {
   const char *testname;
-  int (*test)(Env*);
+  int (*test)(Error*);
   int had_err, *had_errp;
-  env_error_check(env);
+  error_check(e);
   assert(key && value && data);
   testname = (const char*) key;
-  test = (int (*)(Env *)) value;
+  test = (int (*)(Error*)) value;
   had_errp = (int*) data;
   printf("%s...", testname);
   xfflush(stdout);
-  had_err = test(env);
+  had_err = test(e);
   if (had_err) {
     xputs("error");
     *had_errp = had_err;
-    fprintf(stderr, "first error: %s\n", env_error_get(env));
-    env_error_unset(env);
+    fprintf(stderr, "first error: %s\n", error_get(e));
+    error_unset(e);
     xfflush(stderr);
   }
   else
@@ -304,7 +304,8 @@ static int run_tests(GTR *gtr, Env *env)
   ensure(had_err, sizeof (unsigned long long) == 8);
 
   if (gtr->unit_tests) {
-    had_err = hashtable_foreach_ao(gtr->unit_tests, run_test, &test_err, env);
+    had_err = hashtable_foreach_ao(gtr->unit_tests, run_test, &test_err,
+                                   env_error(env));
     assert(!had_err); /* cannot happen, run_test() is sane */
   }
   if (test_err)

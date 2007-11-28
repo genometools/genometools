@@ -26,6 +26,6 @@ typedef struct RegionCovVisitor RegionCovVisitor;
 const GenomeVisitorClass* regioncov_visitor_class(void);
 GenomeVisitor*            regioncov_visitor_new(unsigned long max_feature_dist,
                                                 Env*);
-void                      regioncov_visitor_show_coverage(GenomeVisitor*, Env*);
+void                      regioncov_visitor_show_coverage(GenomeVisitor*);
 
 #endif

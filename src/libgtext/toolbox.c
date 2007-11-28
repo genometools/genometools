@@ -34,9 +34,8 @@ Toolbox* toolbox_new(void)
   return tb;
 }
 
-void toolbox_add(Toolbox *tb, const char *toolname, Tool tool, Env *env)
+void toolbox_add(Toolbox *tb, const char *toolname, Tool tool)
 {
-  env_error_check(env);
   assert(tb && tb->tools);
   hashtable_add(tb->tools, (char*) toolname, tool);
 }
@@ -47,9 +46,9 @@ Tool toolbox_get(const Toolbox *tb, const char *toolname)
   return hashtable_get(tb->tools, toolname);
 }
 
-static int show_tool_name(void *key, void *value, void *data, Env *env)
+static int show_tool_name(void *key, void *value, void *data, Error *e)
 {
-  env_error_check(env);
+  error_check(e);
   assert(key && value);
   if (strcmp(key, "dev"))
     xputs(key);
@@ -59,11 +58,13 @@ static int show_tool_name(void *key, void *value, void *data, Env *env)
 int toolbox_show(const char *progname, void *toolbox, Env *env)
 {
   Toolbox *tb;
+  int had_err = 0;
   env_error_check(env);
   assert(toolbox);
   tb = (Toolbox*) toolbox;
   printf("\nTools:\n\n");
-  hashtable_foreach_ao(tb->tools, show_tool_name, NULL, env);
+  had_err = hashtable_foreach_ao(tb->tools, show_tool_name, NULL, NULL);
+  assert(!had_err); /* show_tool_name() is sane */
   return 0;
 }
 

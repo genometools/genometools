@@ -32,41 +32,39 @@ struct UniqStream{
         genome_stream_cast(uniq_stream_class(), GS)
 
 static bool nodes_are_equal_feature_trees(GenomeNode *first_node,
-                                          GenomeNode *second_node, Env *env)
+                                          GenomeNode *second_node)
 {
   bool equal = false;
   GenomeNodeIterator *gni_a, *gni_b;
   GenomeFeature *gf_a, *gf_b;
-  env_error_check(env);
   gf_a = genome_node_cast(genome_feature_class(), first_node);
   gf_b = genome_node_cast(genome_feature_class(), second_node);
   if (gf_a && gf_b) {
-    gni_a = genome_node_iterator_new(first_node, env);
-    gni_b = genome_node_iterator_new(second_node, env);
-    for (gf_a = (GenomeFeature*) genome_node_iterator_next(gni_a, env),
-         gf_b = (GenomeFeature*) genome_node_iterator_next(gni_b, env);
+    gni_a = genome_node_iterator_new(first_node);
+    gni_b = genome_node_iterator_new(second_node);
+    for (gf_a = (GenomeFeature*) genome_node_iterator_next(gni_a),
+         gf_b = (GenomeFeature*) genome_node_iterator_next(gni_b);
          gf_a && gf_b;
-         gf_a = (GenomeFeature*) genome_node_iterator_next(gni_a, env),
-         gf_b = (GenomeFeature*) genome_node_iterator_next(gni_b, env)) {
+         gf_a = (GenomeFeature*) genome_node_iterator_next(gni_a),
+         gf_b = (GenomeFeature*) genome_node_iterator_next(gni_b)) {
       if (!gf_b || !genome_features_are_similar(gf_a, gf_b))
         break;
     }
-    gf_b = (GenomeFeature*) genome_node_iterator_next(gni_b, env);
+    gf_b = (GenomeFeature*) genome_node_iterator_next(gni_b);
     if (!gf_a && !gf_b)
       equal = true;
-    genome_node_iterator_delete(gni_a, env);
-    genome_node_iterator_delete(gni_b, env);
+    genome_node_iterator_delete(gni_a);
+    genome_node_iterator_delete(gni_b);
     return equal;
   }
   return false;
 }
 
-static bool uniq(GenomeNode **first_node, GenomeNode **second_node, Env *env)
+static bool uniq(GenomeNode **first_node, GenomeNode **second_node)
 {
   double first_score, second_score;
-  env_error_check(env);
   assert(*first_node && *second_node);
-  if (nodes_are_equal_feature_trees(*first_node, *second_node, env)) {
+  if (nodes_are_equal_feature_trees(*first_node, *second_node)) {
     first_score = genome_feature_get_score((GenomeFeature*) *first_node);
     second_score = genome_feature_get_score((GenomeFeature*) *second_node);
     if ((first_score == UNDEF_DOUBLE && second_score == UNDEF_DOUBLE) ||
@@ -112,7 +110,7 @@ static int uniq_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
     assert(us->first_node && !us->second_node);
     had_err = genome_stream_next_tree(us->in_stream, &us->second_node, env);
     if (!had_err && us->second_node) {
-      if (!uniq(&us->first_node, &us->second_node, env))
+      if (!uniq(&us->first_node, &us->second_node))
         break; /* no uniq possible */
     }
     else

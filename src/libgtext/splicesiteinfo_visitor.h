@@ -28,6 +28,6 @@ typedef struct SpliceSiteInfoVisitor SpliceSiteInfoVisitor;
 const GenomeVisitorClass* splicesiteinfo_visitor_class(void);
 /* takes ownership of <rm> */
 GenomeVisitor*            splicesiteinfo_visitor_new(RegionMapping *rm, Env*);
-bool                      splicesiteinfo_visitor_show(GenomeVisitor*, Env*);
+bool                      splicesiteinfo_visitor_show(GenomeVisitor*);
 
 #endif

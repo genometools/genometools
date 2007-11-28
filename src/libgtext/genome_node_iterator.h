@@ -22,9 +22,9 @@
 
 typedef struct GenomeNodeIterator GenomeNodeIterator;
 
-GenomeNodeIterator* genome_node_iterator_new(GenomeNode*, Env*);
-GenomeNode*         genome_node_iterator_next(GenomeNodeIterator*, Env*);
-int                 genome_node_iterator_example(Env*);
-void                genome_node_iterator_delete(GenomeNodeIterator*, Env*);
+GenomeNodeIterator* genome_node_iterator_new(GenomeNode*);
+GenomeNode*         genome_node_iterator_next(GenomeNodeIterator*);
+int                 genome_node_iterator_example(void);
+void                genome_node_iterator_delete(GenomeNodeIterator*);
 
 #endif

@@ -242,7 +242,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   /* create the feature */
   if (!had_err) {
     genome_feature = genome_feature_new(gft, range, strand_value, filenamestr,
-                                        line_number, env);
+                                        line_number);
   }
 
   /* parse the unique id and the parents */
@@ -333,7 +333,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         seqid_str = str_new_cstr(seqid);
         seqid_str_created = true;
         auto_sr->sequence_region = sequence_region_new(seqid_str, range, NULL,
-                                                       0, env);
+                                                       0);
         hashtable_add(gff3_parser->undefined_sequence_regions,
                       str_get(seqid_str), auto_sr);
       }
@@ -362,7 +362,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   }
   if (!had_err) {
     assert(seqid_str);
-    genome_node_set_seqid(genome_feature, seqid_str, env);
+    genome_node_set_seqid(genome_feature, seqid_str);
   }
   if (seqid_str_created)
     str_delete(seqid_str);
@@ -427,7 +427,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
       }
       else {
         assert(gff3_parser->incomplete_node);
-        genome_node_is_part_of_genome_node(parent_gf, genome_feature, env);
+        genome_node_is_part_of_genome_node(parent_gf, genome_feature);
         is_child = true;
       }
     }
@@ -474,7 +474,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
 
   if (line_length == 1 || line[1] != '#') {
     /* storing comment */
-    gn = comment_new(line+1, filenamestr, line_number, env);
+    gn = comment_new(line+1, filenamestr, line_number);
     queue_add(genome_nodes, gn);
   }
   else if ((strncmp(line, GFF_SEQUENCE_REGION,
@@ -572,8 +572,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     }
     if (!had_err) {
       assert(ssr);
-      gn = sequence_region_new(ssr->seqid_str, range, filenamestr, line_number,
-                               env);
+      gn = sequence_region_new(ssr->seqid_str, range, filenamestr, line_number);
       queue_add(genome_nodes, gn);
     }
   }
@@ -591,13 +590,13 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
   return had_err;
 }
 
-static int add_auto_sr_to_queue(void *key, void *value, void *data, Env *env)
+static int add_auto_sr_to_queue(void *key, void *value, void *data, Error *e)
 {
   AutomaticSequenceRegion *auto_sr = value;
   Queue *genome_nodes = data;
   GenomeNode *gf;
   unsigned int i;
-  env_error_check(env);
+  error_check(e);
   assert(key && value && data);
   if (array_size(auto_sr->genome_features)) {
     queue_add(genome_nodes, auto_sr->sequence_region);
@@ -691,7 +690,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
     /* the file has been parsed completely, add automatically created sequence
        regions to queue */
     had_err = hashtable_foreach(gff3_parser->undefined_sequence_regions,
-                                add_auto_sr_to_queue, genome_nodes, env);
+                                add_auto_sr_to_queue, genome_nodes, NULL);
     assert(!had_err); /* add_auto_sr_to_queue() is sane */
   }
 

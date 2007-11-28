@@ -78,7 +78,7 @@ static int compare_genome_nodes_with_delta(GenomeNode *gn_a, GenomeNode *gn_b,
 }
 
 GenomeNode* genome_node_create(const GenomeNodeClass *gnc, Str *filename,
-                               unsigned long line_number, Env *env)
+                               unsigned long line_number)
 {
   GenomeNode *gn;
   assert(gnc && gnc->size);
@@ -334,11 +334,10 @@ void genome_node_set_range(GenomeNode *gn, Range range)
   gn->c_class->set_range(gn, range);
 }
 
-void genome_node_set_seqid(GenomeNode *gn, Str *seqid, Env *env)
+void genome_node_set_seqid(GenomeNode *gn, Str *seqid)
 {
-  env_error_check(env);
   assert(gn && gn->c_class && gn->c_class->set_seqid && seqid);
-  gn->c_class->set_seqid(gn, seqid, env);
+  gn->c_class->set_seqid(gn, seqid);
 }
 
 void genome_node_set_source(GenomeNode *gn, Str *source)
@@ -360,8 +359,7 @@ int genome_node_accept(GenomeNode *gn, GenomeVisitor *gv, Env *env)
   return gn->c_class->accept(gn, gv, env);
 }
 
-void genome_node_is_part_of_genome_node(GenomeNode *parent, GenomeNode *child,
-                                        Env *env)
+void genome_node_is_part_of_genome_node(GenomeNode *parent, GenomeNode *child)
 {
   assert(parent && child);
   /* create children list on demand */

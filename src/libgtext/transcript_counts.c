@@ -26,7 +26,7 @@ struct TranscriptCounts {
         *exon_array_terminal;
 };
 
-TranscriptCounts* transcript_counts_new(Env *env)
+TranscriptCounts* transcript_counts_new(void)
 {
   TranscriptCounts *tc = ma_calloc(1, sizeof (TranscriptCounts));
   return tc;
@@ -92,7 +92,7 @@ void transcript_counts_set_terminal(TranscriptCounts *tc, Array *counts)
   tc->exon_array_terminal = counts;
 }
 
-void transcript_counts_delete(TranscriptCounts *tc, Env *env)
+void transcript_counts_delete(TranscriptCounts *tc)
 {
   if (!tc) return;
   array_delete(tc->exon_array_all);

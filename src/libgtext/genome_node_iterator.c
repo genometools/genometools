@@ -23,10 +23,9 @@ struct GenomeNodeIterator {
   Array *node_stack;
 };
 
-GenomeNodeIterator* genome_node_iterator_new(GenomeNode *gn, Env *env)
+GenomeNodeIterator* genome_node_iterator_new(GenomeNode *gn)
 {
   GenomeNodeIterator *gni;
-  env_error_check(env);
   assert(gn);
   gni = ma_malloc(sizeof *gni);
   gni->node_stack = array_new(sizeof (GenomeNode*));
@@ -34,7 +33,7 @@ GenomeNodeIterator* genome_node_iterator_new(GenomeNode *gn, Env *env)
   return gni;
 }
 
-GenomeNode* genome_node_iterator_next(GenomeNodeIterator *gni, Env *env)
+GenomeNode* genome_node_iterator_next(GenomeNodeIterator *gni)
 {
   GenomeNode *gn, *child;
   Dlistelem *dlistelem;
@@ -55,25 +54,24 @@ GenomeNode* genome_node_iterator_next(GenomeNodeIterator *gni, Env *env)
   return gn;
 }
 
-int genome_node_iterator_example(Env *env)
+int genome_node_iterator_example(void)
 {
   GenomeNodeIterator *gni;
   GenomeNode *gn, *node;
-  env_error_check(env);
-  gn = genome_feature_new_standard_gene(env);
+  gn = genome_feature_new_standard_gene();
 
   /* an example genome node iterator use case */
-  gni = genome_node_iterator_new(gn, env);
-  while ((node = genome_node_iterator_next(gni, env))) {
+  gni = genome_node_iterator_new(gn);
+  while ((node = genome_node_iterator_next(gni))) {
     /* do something with <node> */
   }
-  genome_node_iterator_delete(gni, env);
+  genome_node_iterator_delete(gni);
 
   genome_node_rec_delete(gn);
   return 0;
 }
 
-void genome_node_iterator_delete(GenomeNodeIterator *gni, Env *env)
+void genome_node_iterator_delete(GenomeNodeIterator *gni)
 {
   if (!gni) return;
   array_delete(gni->node_stack);

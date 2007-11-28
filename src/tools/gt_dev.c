@@ -51,16 +51,16 @@ void register_devtools(Toolbox *dev_toolbox, Env *env)
   assert(dev_toolbox);
   /* add development tools here with a function call like this:
      toolbox_add(dev_toolbox, "devtool", gt_devtool, env); */
-  toolbox_add(dev_toolbox, "guessprot", gt_guessprot, env);
-  toolbox_add(dev_toolbox, "regioncov", gt_regioncov, env);
-  toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap, env);
-  toolbox_add(dev_toolbox, "seqiterator", gt_seqiterator, env);
-  toolbox_add(dev_toolbox, "trieins", gt_trieins, env);
-  toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa, env);
-  toolbox_add(dev_toolbox, "skproto", gt_skproto, env);
-  toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs, env);
-  toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch, env);
-  toolbox_add(dev_toolbox, "paircmp", gt_paircmp, env);
+  toolbox_add(dev_toolbox, "guessprot", gt_guessprot);
+  toolbox_add(dev_toolbox, "regioncov", gt_regioncov);
+  toolbox_add(dev_toolbox, "sfxmap", gt_sfxmap);
+  toolbox_add(dev_toolbox, "seqiterator", gt_seqiterator);
+  toolbox_add(dev_toolbox, "trieins", gt_trieins);
+  toolbox_add(dev_toolbox, "mergeesa", gt_mergeesa);
+  toolbox_add(dev_toolbox, "skproto", gt_skproto);
+  toolbox_add(dev_toolbox, "maxpairs", gt_maxpairs);
+  toolbox_add(dev_toolbox, "patternmatch", gt_patternmatch);
+  toolbox_add(dev_toolbox, "paircmp", gt_paircmp);
 }
 
 int gt_dev(int argc, const char **argv, Env *env)

@@ -268,8 +268,7 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent,
   /* check if this is a collapsing type */
   feature_type = genome_feature_type_get_cstr(
                    genome_feature_get_type((GenomeFeature*) node));
-  collapse = config_cstr_in_list(d->config,"collapse","to_parent",feature_type,
-                                 env);
+  collapse = config_cstr_in_list(d->config,"collapse","to_parent",feature_type);
 
   /* check if direct children overlap */
   if (parent)
@@ -304,17 +303,16 @@ static void process_node(Diagram *d, GenomeNode *node, GenomeNode *parent,
   assert(hashtable_get(d->nodeinfo, node));
 }
 
-static int diagram_add_tracklines(void *key, void *value, void *data,
-                                  Env* env)
+static int diagram_add_tracklines(void *key, void *value, void *data, Error *e)
 {
   int *add = (int*) data;
   *add += track_get_number_of_lines((Track*) value);
   return 0;
 }
 
-static int diagram_track_delete(void *key, void *value, void *data, Env* env)
+static int diagram_track_delete(void *key, void *value, void *data, Error *e)
 {
-  track_delete((Track*) value, env);
+  track_delete((Track*) value);
   return 0;
 }
 
@@ -339,11 +337,9 @@ static int visit_child(GenomeNode* gn, void* genome_node_children, Env* env)
   return 0;
 }
 
-static Str* track_key_new(const char *filename, GenomeFeatureType type,
-                          Env *env)
+static Str* track_key_new(const char *filename, GenomeFeatureType type)
 {
   Str *track_key;
-  env_error_check(env);
   track_key = str_new_cstr(filename);
   str_append_char(track_key, FILENAME_TYPE_SEPARATOR);
   str_append_cstr(track_key, genome_feature_type_get_cstr(type));
@@ -351,7 +347,7 @@ static Str* track_key_new(const char *filename, GenomeFeatureType type,
 }
 
 /* Create Tracks for all Blocks in the diagram. */
-static int collect_blocks(void *key, void *value, void *data, Env *env)
+static int collect_blocks(void *key, void *value, void *data, Error *e)
 {
   NodeInfoElement *ni = (NodeInfoElement*) value;
   Diagram *diagram = (Diagram*) data;
@@ -368,17 +364,17 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
     Str *track_key;
     BlockTuple *bt = *(BlockTuple**) array_get(ni->blocktuples, i);
     filename = genome_node_get_filename(ni->parent);
-    track_key = track_key_new(filename, bt->gft, env);
+    track_key = track_key_new(filename, bt->gft);
     track = hashtable_get(diagram->tracks, str_get(track_key));
 
     if (track == NULL) {
-      track = track_new(track_key, env);
+      track = track_new(track_key);
       hashtable_add(diagram->tracks, cstr_dup(str_get(track_key)), track);
       diagram->nof_tracks++;
       log_log("created track: %s, diagram has now %d tracks",
               str_get(track_key), diagram_get_number_of_tracks(diagram));
     }
-    track_insert_block(track, bt->block, env);
+    track_insert_block(track, bt->block);
     log_log("inserted block %s into track %s",
             str_get(block_get_caption(bt->block)), str_get(track_key));
     str_delete(track_key);
@@ -408,6 +404,7 @@ static void traverse_genome_nodes(GenomeNode *gn, void *genome_node_children,
 static void diagram_build(Diagram *diagram, Array *features, Env *env)
 {
   unsigned long i = 0;
+  int had_err;
   NodeTraverseInfo genome_node_children;
   genome_node_children.diagram = diagram;
   /* do node traversal for each root feature */
@@ -416,7 +413,8 @@ static void diagram_build(Diagram *diagram, Array *features, Env *env)
     traverse_genome_nodes(current_root, &genome_node_children, env);
   }
   /* collect blocks from nodeinfo structures and create the tracks */
-  (void) hashtable_foreach(diagram->nodeinfo, collect_blocks, diagram, env);
+  had_err = hashtable_foreach(diagram->nodeinfo, collect_blocks, diagram, NULL);
+  assert(!had_err); /* collect_blocks() is sane */
 }
 
 Diagram* diagram_new(FeatureIndex *fi, Range range, const char *seqid,
@@ -461,12 +459,13 @@ Hashtable* diagram_get_tracks(const Diagram *diagram)
   return diagram->tracks;
 }
 
-int diagram_get_total_lines(const Diagram *diagram, Env *env)
+int diagram_get_total_lines(const Diagram *diagram)
 {
-  int total_lines = 0;
+  int total_lines = 0, had_err;
   assert(diagram);
-  (void) hashtable_foreach(diagram->tracks, diagram_add_tracklines,
-                           &total_lines, env);
+  had_err = hashtable_foreach(diagram->tracks, diagram_add_tracklines,
+                              &total_lines, NULL);
+  assert(!had_err); /* diagram_add_tracklines() is sane */
   return total_lines;
 }
 
@@ -499,38 +498,32 @@ int diagram_unit_test(Env *env)
   seqid1 = str_new_cstr("test1");
   seqid2 = str_new_cstr("test2");
 
-  sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, NULL, 0, env);
-  sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, NULL, 0, env);
+  sr1 = (SequenceRegion*) sequence_region_new(seqid1, rs, NULL, 0);
+  sr2 = (SequenceRegion*) sequence_region_new(seqid2, rs, NULL, 0);
 
-  gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN, NULL,
-                           UNDEF_ULONG, env);
-  genome_node_set_seqid((GenomeNode*) gn1, seqid1, env);
+  gn1 = genome_feature_new(gft_gene, r1, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  genome_node_set_seqid((GenomeNode*) gn1, seqid1);
 
-  gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN, NULL,
-                           UNDEF_ULONG, env);
-  genome_node_set_seqid((GenomeNode*) gn2, seqid2, env);
+  gn2 = genome_feature_new(gft_gene, r4, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  genome_node_set_seqid((GenomeNode*) gn2, seqid2);
 
-  ex1 = genome_feature_new(gft_exon, r2, STRAND_UNKNOWN, NULL,
-                           UNDEF_ULONG, env);
-  genome_node_set_seqid((GenomeNode*) ex1, seqid1, env);
+  ex1 = genome_feature_new(gft_exon, r2, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  genome_node_set_seqid((GenomeNode*) ex1, seqid1);
 
-  ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN, NULL,
-                           UNDEF_ULONG, env);
-  genome_node_set_seqid((GenomeNode*) ex2, seqid1, env);
+  ex2 = genome_feature_new(gft_exon, r3, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  genome_node_set_seqid((GenomeNode*) ex2, seqid1);
 
-  ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN, NULL,
-                           UNDEF_ULONG, env);
-  genome_node_set_seqid((GenomeNode*) ex3, seqid2, env);
+  ex3 = genome_feature_new(gft_exon, r4, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  genome_node_set_seqid((GenomeNode*) ex3, seqid2);
 
-  cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN, NULL,
-                            UNDEF_ULONG, env);
-  genome_node_set_seqid((GenomeNode*) cds1, seqid2, env);
+  cds1 = genome_feature_new(gft_CDS, r5, STRAND_UNKNOWN, NULL, UNDEF_ULONG);
+  genome_node_set_seqid((GenomeNode*) cds1, seqid2);
 
   /* determine the structure of our feature tree */
-  genome_node_is_part_of_genome_node(gn1, ex1, env);
-  genome_node_is_part_of_genome_node(gn1, ex2, env);
-  genome_node_is_part_of_genome_node(gn2, ex3, env);
-  genome_node_is_part_of_genome_node(gn2, cds1, env);
+  genome_node_is_part_of_genome_node(gn1, ex1);
+  genome_node_is_part_of_genome_node(gn1, ex2);
+  genome_node_is_part_of_genome_node(gn2, ex3);
+  genome_node_is_part_of_genome_node(gn2, cds1);
 
   /* create a new feature index on which we can perfom some tests */
   fi = feature_index_new();
@@ -560,15 +553,15 @@ int diagram_unit_test(Env *env)
   ensure(had_err, dia->range.start == 400UL);
   ensure(had_err, dia->range.end == 900UL);
   if (!had_err &&
-      !config_cstr_in_list(dia->config,"collapse","to_parent","gene", env)) {
-    track_key = track_key_new("generated", gft_gene, env);
+      !config_cstr_in_list(dia->config,"collapse","to_parent","gene")) {
+    track_key = track_key_new("generated", gft_gene);
     ensure(had_err, hashtable_get(dia->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
-      !config_cstr_in_list(dia->config,"collapse","to_parent","exon", env)) {
-    track_key = track_key_new("generated", gft_exon, env);
+      !config_cstr_in_list(dia->config,"collapse","to_parent","exon")) {
+    track_key = track_key_new("generated", gft_exon);
     ensure(had_err, hashtable_get(dia->tracks, str_get(track_key)));
     str_delete(track_key);
   }
@@ -582,22 +575,22 @@ int diagram_unit_test(Env *env)
   }
 
   if (!had_err &&
-      !config_cstr_in_list(dia2->config,"collapse","to_parent","gene", env)) {
-    track_key = track_key_new("generated", gft_gene, env);
+      !config_cstr_in_list(dia2->config,"collapse","to_parent","gene")) {
+    track_key = track_key_new("generated", gft_gene);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
-      !config_cstr_in_list(dia2->config,"collapse","to_parent","exon", env)) {
-    track_key = track_key_new("generated", gft_exon, env);
+      !config_cstr_in_list(dia2->config,"collapse","to_parent","exon")) {
+    track_key = track_key_new("generated", gft_exon);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
   }
 
   if (!had_err &&
-      !config_cstr_in_list(dia2->config,"collapse","to_parent","CDS", env)) {
-    track_key = track_key_new("generated", gft_CDS, env);
+      !config_cstr_in_list(dia2->config,"collapse","to_parent","CDS")) {
+    track_key = track_key_new("generated", gft_CDS);
     ensure(had_err, hashtable_get(dia2->tracks, str_get(track_key)));
     str_delete(track_key);
   }
@@ -621,7 +614,7 @@ int diagram_unit_test(Env *env)
 void diagram_delete(Diagram *diagram, Env *env)
 {
   if (!diagram) return;
-  (void) hashtable_foreach(diagram->tracks, diagram_track_delete, NULL, env);
+  (void) hashtable_foreach(diagram->tracks, diagram_track_delete, NULL, NULL);
   hashtable_delete(diagram->tracks);
   hashtable_delete(diagram->nodeinfo);
   ma_free(diagram);

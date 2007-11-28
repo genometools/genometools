@@ -25,16 +25,15 @@ struct Line {
   Array *blocks;
 };
 
-Line* line_new(Env *env)
+Line* line_new(void)
 {
   Line *line;
-  env_error_check(env);
   line = ma_malloc(sizeof (Line));
   line->blocks = array_new(sizeof (Block*));
   return line;
 }
 
-void line_insert_block(Line *line, Block *block, Env *env)
+void line_insert_block(Line *line, Block *block)
 {
   assert(line && block);
   array_add(line->blocks, block);
@@ -95,21 +94,20 @@ int line_unit_test(Env* env)
   seqid2 = str_new_cstr("test2");
   seqid3 = str_new_cstr("foo");
 
-  parent = genome_feature_new(gft_gene, r_parent, STRAND_FORWARD, NULL, 0, env);
-  gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0, env);
-  gn2 = genome_feature_new(gft_exon, r2, STRAND_FORWARD, NULL, 0, env);
-  gn3 = genome_feature_new(gft_exon, r3, STRAND_FORWARD, NULL, 0, env);
-  gn4 = genome_feature_new(gft_TF_binding_site, r4, STRAND_FORWARD, NULL, 0,
-                           env);
+  parent = genome_feature_new(gft_gene, r_parent, STRAND_FORWARD, NULL, 0);
+  gn1 = genome_feature_new(gft_exon, r1, STRAND_FORWARD, NULL, 0);
+  gn2 = genome_feature_new(gft_exon, r2, STRAND_FORWARD, NULL, 0);
+  gn3 = genome_feature_new(gft_exon, r3, STRAND_FORWARD, NULL, 0);
+  gn4 = genome_feature_new(gft_TF_binding_site, r4, STRAND_FORWARD, NULL, 0);
 
-  genome_node_set_seqid((GenomeNode*) parent, seqid1, env);
-  genome_node_set_seqid((GenomeNode*) gn1, seqid3, env);
-  genome_node_set_seqid((GenomeNode*) gn2, seqid3, env);
-  genome_node_set_seqid((GenomeNode*) gn3, seqid2, env);
-  genome_node_set_seqid((GenomeNode*) gn4, seqid3, env);
+  genome_node_set_seqid((GenomeNode*) parent, seqid1);
+  genome_node_set_seqid((GenomeNode*) gn1, seqid3);
+  genome_node_set_seqid((GenomeNode*) gn2, seqid3);
+  genome_node_set_seqid((GenomeNode*) gn3, seqid2);
+  genome_node_set_seqid((GenomeNode*) gn4, seqid3);
 
-  l1 = line_new(env);
-  l2 = line_new(env);
+  l1 = line_new();
+  l2 = line_new();
 
   genome_feature_add_attribute((GenomeFeature*) parent, "Name", foo);
   genome_feature_add_attribute((GenomeFeature*) gn1, "Name", bar);
@@ -127,9 +125,9 @@ int line_unit_test(Env* env)
 
   /* test line_insert_block */
   ensure(had_err,  (0 == array_size(line_get_blocks(l1))));
-  line_insert_block(l1, b1, env);
+  line_insert_block(l1, b1);
   ensure(had_err,  (1 == array_size(line_get_blocks(l1))));
-  line_insert_block(l1, b2, env);
+  line_insert_block(l1, b2);
   ensure(had_err,  (2 == array_size(line_get_blocks(l1))));
 
   /* test line_is_occupied */
@@ -144,8 +142,8 @@ int line_unit_test(Env* env)
   str_delete(seqid1);
   str_delete(seqid2);
   str_delete(seqid3);
-  line_delete(l1, env);
-  line_delete(l2, env);
+  line_delete(l1);
+  line_delete(l2);
   genome_node_delete(parent);
   genome_node_delete(gn1);
   genome_node_delete(gn2);
@@ -155,12 +153,12 @@ int line_unit_test(Env* env)
   return had_err;
 }
 
-void line_delete(Line *line, Env *env)
+void line_delete(Line *line)
 {
   unsigned long i;
   if (!line) return;
   for (i = 0; i < array_size(line->blocks); i++)
-    block_delete(*(Block**) array_get(line->blocks, i), env);
+    block_delete(*(Block**) array_get(line->blocks, i));
   array_delete(line->blocks);
   ma_free(line);
 }

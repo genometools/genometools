@@ -74,12 +74,11 @@ static int compute_statistics(GenomeNode *gn, void *data, Env *env)
       stat_visitor->number_of_genes++;
       if (stat_visitor->gene_length_distribution) {
         discdistri_add(stat_visitor->gene_length_distribution,
-                       range_length(genome_node_get_range((GenomeNode*) gf)),
-                       env);
+                       range_length(genome_node_get_range((GenomeNode*) gf)));
       }
       if (stat_visitor->gene_score_distribution) {
         discdistri_add(stat_visitor->gene_score_distribution,
-                       genome_feature_get_score(gf) * 100.0, env);
+                       genome_feature_get_score(gf) * 100.0);
       }
       break;
     case gft_mRNA:
@@ -89,15 +88,13 @@ static int compute_statistics(GenomeNode *gn, void *data, Env *env)
       stat_visitor->number_of_exons++;
       if (stat_visitor->exon_length_distribution) {
         discdistri_add(stat_visitor->exon_length_distribution,
-                       range_length(genome_node_get_range((GenomeNode*) gf)),
-                       env);
+                       range_length(genome_node_get_range((GenomeNode*) gf)));
       }
       break;
     case gft_intron:
       if (stat_visitor->intron_length_distribution) {
         discdistri_add(stat_visitor->intron_length_distribution,
-                       range_length(genome_node_get_range((GenomeNode*) gf)),
-                       env);
+                       range_length(genome_node_get_range((GenomeNode*) gf)));
       }
       break;
     case gft_LTR_retrotransposon:
@@ -112,7 +109,7 @@ static int compute_statistics(GenomeNode *gn, void *data, Env *env)
     assert(!rval); /* add_exon_number() is sane */
     if (stat_visitor->exon_number_for_distri) {
       discdistri_add(stat_visitor->exon_number_distribution,
-                     stat_visitor->exon_number_for_distri, env);
+                     stat_visitor->exon_number_for_distri);
     }
   }
   return 0;
@@ -159,15 +156,15 @@ GenomeVisitor* stat_visitor_new(bool gene_length_distri,
   GenomeVisitor *gv = genome_visitor_create(stat_visitor_class(), env);
   StatVisitor *stat_visitor = stat_visitor_cast(gv);
   if (gene_length_distri)
-    stat_visitor->gene_length_distribution = discdistri_new(env);
+    stat_visitor->gene_length_distribution = discdistri_new();
   if (gene_score_distri)
-    stat_visitor->gene_score_distribution = discdistri_new(env);
+    stat_visitor->gene_score_distribution = discdistri_new();
   if (exon_length_distri)
-    stat_visitor->exon_length_distribution = discdistri_new(env);
+    stat_visitor->exon_length_distribution = discdistri_new();
   if (exon_number_distri)
-    stat_visitor->exon_number_distribution = discdistri_new(env);
+    stat_visitor->exon_number_distribution = discdistri_new();
   if (intron_length_distri)
-    stat_visitor->intron_length_distribution = discdistri_new(env);
+    stat_visitor->intron_length_distribution = discdistri_new();
   return gv;
 }
 
@@ -191,22 +188,22 @@ void stat_visitor_show_stats(GenomeVisitor *gv, Env *env)
   }
   if (stat_visitor->gene_length_distribution) {
     printf("gene length distribution:\n");
-    discdistri_show(stat_visitor->gene_length_distribution, env);
+    discdistri_show(stat_visitor->gene_length_distribution);
   }
   if (stat_visitor->gene_score_distribution) {
     printf("gene score distribution:\n");
-    discdistri_show(stat_visitor->gene_score_distribution, env);
+    discdistri_show(stat_visitor->gene_score_distribution);
   }
   if (stat_visitor->exon_length_distribution) {
     printf("exon length distribution:\n");
-    discdistri_show(stat_visitor->exon_length_distribution, env);
+    discdistri_show(stat_visitor->exon_length_distribution);
   }
   if (stat_visitor->exon_number_distribution) {
     printf("exon number distribution:\n");
-    discdistri_show(stat_visitor->exon_number_distribution, env);
+    discdistri_show(stat_visitor->exon_number_distribution);
   }
   if (stat_visitor->intron_length_distribution) {
     printf("intron length distribution:\n");
-    discdistri_show(stat_visitor->intron_length_distribution, env);
+    discdistri_show(stat_visitor->intron_length_distribution);
   }
 }

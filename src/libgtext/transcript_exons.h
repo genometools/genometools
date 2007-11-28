@@ -24,7 +24,7 @@
 /* a container class for transcript exon arrays */
 typedef struct TranscriptExons TranscriptExons;
 
-TranscriptExons*   transcript_exons_new(Env*);
+TranscriptExons*   transcript_exons_new(void);
 
 /* return the exon array for all exons */
 Array*             transcript_exons_get_all(const TranscriptExons*);
@@ -43,12 +43,11 @@ Array*             transcript_exons_get_terminal(const TranscriptExons*);
 
 void               transcript_exons_sort(const TranscriptExons*);
 
-TranscriptCounts*  transcript_exons_uniq_in_place_count(TranscriptExons*, Env*);
+TranscriptCounts*  transcript_exons_uniq_in_place_count(TranscriptExons*);
 
 bool               transcript_exons_are_sorted(const TranscriptExons*);
-TranscriptBittabs* transcript_exons_create_bittabs(const TranscriptExons*,
-                                                   Env*);
+TranscriptBittabs* transcript_exons_create_bittabs(const TranscriptExons*);
 
-void               transcript_exons_delete(TranscriptExons*, Env*);
+void               transcript_exons_delete(TranscriptExons*);
 
 #endif

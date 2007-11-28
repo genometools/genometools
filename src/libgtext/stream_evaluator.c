@@ -129,7 +129,7 @@ typedef struct {
                 *wrong_LTRs;
 } ProcessPredictedFeatureInfo;
 
-static Slot* slot_new(bool nuceval, Range range, Env *env)
+static Slot* slot_new(bool nuceval, Range range)
 {
   unsigned long length;
   Slot *s = ma_calloc(1, sizeof (Slot));
@@ -139,10 +139,10 @@ static Slot* slot_new(bool nuceval, Range range, Env *env)
   s->mRNAs_forward = array_new(sizeof (GenomeNode*));
   s->mRNAs_reverse = array_new(sizeof (GenomeNode*));
   s->LTRs          = array_new(sizeof (GenomeNode*));
-  s->mRNA_exons_forward = transcript_exons_new(env);
-  s->mRNA_exons_reverse = transcript_exons_new(env);
-  s->CDS_exons_forward = transcript_exons_new(env);
-  s->CDS_exons_reverse = transcript_exons_new(env);
+  s->mRNA_exons_forward = transcript_exons_new();
+  s->mRNA_exons_reverse = transcript_exons_new();
+  s->CDS_exons_forward = transcript_exons_new();
+  s->CDS_exons_reverse = transcript_exons_new();
   if (nuceval) {
     s->real_range = range;
     s->real_mRNA_nucleotides_forward = bittab_new(length);
@@ -154,14 +154,14 @@ static Slot* slot_new(bool nuceval, Range range, Env *env)
     s->real_CDS_nucleotides_reverse = bittab_new(length);
     s->pred_CDS_nucleotides_reverse = bittab_new(length);
   }
-  s->used_mRNA_exons_forward = transcript_used_exons_new(env);
-  s->used_mRNA_exons_reverse = transcript_used_exons_new(env);
-  s->used_CDS_exons_forward = transcript_used_exons_new(env);
-  s->used_CDS_exons_reverse = transcript_used_exons_new(env);
+  s->used_mRNA_exons_forward = transcript_used_exons_new();
+  s->used_mRNA_exons_reverse = transcript_used_exons_new();
+  s->used_CDS_exons_forward = transcript_used_exons_new();
+  s->used_CDS_exons_reverse = transcript_used_exons_new();
   return s;
 }
 
-static void slot_delete(Slot *s, Env *env)
+static void slot_delete(Slot *s)
 {
   unsigned long i;
   assert(s);
@@ -180,14 +180,14 @@ static void slot_delete(Slot *s, Env *env)
   for (i = 0; i < array_size(s->LTRs); i++)
     genome_node_rec_delete(*(GenomeNode**) array_get(s->LTRs, i));
   array_delete(s->LTRs);
-  transcript_exons_delete(s->mRNA_exons_forward, env);
-  transcript_exons_delete(s->mRNA_exons_reverse, env);
-  transcript_exons_delete(s->CDS_exons_forward, env);
-  transcript_exons_delete(s->CDS_exons_reverse, env);
-  transcript_counts_delete(s->mRNA_counts_forward, env);
-  transcript_counts_delete(s->mRNA_counts_reverse, env);
-  transcript_counts_delete(s->CDS_counts_forward, env);
-  transcript_counts_delete(s->CDS_counts_reverse, env);
+  transcript_exons_delete(s->mRNA_exons_forward);
+  transcript_exons_delete(s->mRNA_exons_reverse);
+  transcript_exons_delete(s->CDS_exons_forward);
+  transcript_exons_delete(s->CDS_exons_reverse);
+  transcript_counts_delete(s->mRNA_counts_forward);
+  transcript_counts_delete(s->mRNA_counts_reverse);
+  transcript_counts_delete(s->CDS_counts_forward);
+  transcript_counts_delete(s->CDS_counts_reverse);
   bittab_delete(s->real_mRNA_nucleotides_forward);
   bittab_delete(s->pred_mRNA_nucleotides_forward);
   bittab_delete(s->real_mRNA_nucleotides_reverse);
@@ -206,14 +206,14 @@ static void slot_delete(Slot *s, Env *env)
   bittab_delete(s->overlapped_mRNAs_forward);
   bittab_delete(s->overlapped_mRNAs_reverse);
   bittab_delete(s->overlapped_LTRs);
-  transcript_bittabs_delete(s->mRNA_exon_bittabs_forward, env);
-  transcript_bittabs_delete(s->mRNA_exon_bittabs_reverse, env);
-  transcript_bittabs_delete(s->CDS_exon_bittabs_forward, env);
-  transcript_bittabs_delete(s->CDS_exon_bittabs_reverse, env);
-  transcript_used_exons_delete(s->used_mRNA_exons_forward, env);
-  transcript_used_exons_delete(s->used_mRNA_exons_reverse, env);
-  transcript_used_exons_delete(s->used_CDS_exons_forward, env);
-  transcript_used_exons_delete(s->used_CDS_exons_reverse, env);
+  transcript_bittabs_delete(s->mRNA_exon_bittabs_forward);
+  transcript_bittabs_delete(s->mRNA_exon_bittabs_reverse);
+  transcript_bittabs_delete(s->CDS_exon_bittabs_forward);
+  transcript_bittabs_delete(s->CDS_exon_bittabs_reverse);
+  transcript_used_exons_delete(s->used_mRNA_exons_forward);
+  transcript_used_exons_delete(s->used_mRNA_exons_reverse);
+  transcript_used_exons_delete(s->used_CDS_exons_forward);
+  transcript_used_exons_delete(s->used_CDS_exons_reverse);
   ma_free(s);
 }
 
@@ -241,12 +241,12 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
 }
 
 static int set_actuals_and_sort_them(void *key, void *value, void *data,
-                                     Env *env)
+                                     Error *e)
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *s = (Slot*) value;
 
-  env_error_check(env);
+  error_check(e);
   assert(key && value && data);
 
   /* set actual genes */
@@ -289,13 +289,13 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
 
   /* determine true exons */
   s->mRNA_counts_forward =
-    transcript_exons_uniq_in_place_count(s->mRNA_exons_forward, env);
+    transcript_exons_uniq_in_place_count(s->mRNA_exons_forward);
   s->mRNA_counts_reverse =
-    transcript_exons_uniq_in_place_count(s->mRNA_exons_reverse, env);
+    transcript_exons_uniq_in_place_count(s->mRNA_exons_reverse);
   s->CDS_counts_forward =
-    transcript_exons_uniq_in_place_count(s->CDS_exons_forward, env);
+    transcript_exons_uniq_in_place_count(s->CDS_exons_forward);
   s->CDS_counts_reverse =
-    transcript_exons_uniq_in_place_count(s->CDS_exons_reverse, env);
+    transcript_exons_uniq_in_place_count(s->CDS_exons_reverse);
 
   /* set actual exons for the collapsed case (after uniq!) */
   transcript_evaluators_add_actuals(se->mRNA_exon_evaluators_collapsed,
@@ -360,13 +360,13 @@ static int set_actuals_and_sort_them(void *key, void *value, void *data,
 
   /* init bittabs (for collapsed exons) */
   s->mRNA_exon_bittabs_forward =
-    transcript_exons_create_bittabs(s->mRNA_exons_forward, env);
+    transcript_exons_create_bittabs(s->mRNA_exons_forward);
   s->mRNA_exon_bittabs_reverse =
-    transcript_exons_create_bittabs(s->mRNA_exons_reverse, env);
+    transcript_exons_create_bittabs(s->mRNA_exons_reverse);
   s->CDS_exon_bittabs_forward =
-    transcript_exons_create_bittabs(s->CDS_exons_forward, env);
+    transcript_exons_create_bittabs(s->CDS_exons_forward);
   s->CDS_exon_bittabs_reverse =
-    transcript_exons_create_bittabs(s->CDS_exons_reverse, env);
+    transcript_exons_create_bittabs(s->CDS_exons_reverse);
 
   return 0;
 }
@@ -1145,11 +1145,11 @@ static int process_predicted_feature(GenomeNode *gn, void *data, Env *env)
   return 0;
 }
 
-int determine_missing_features(void *key, void *value, void *data, Env *env)
+int determine_missing_features(void *key, void *value, void *data, Error *e)
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *slot = (Slot*) value;
-  env_error_check(env);
+  error_check(e);
   assert(key && value && data);
   if (slot->overlapped_genes_forward) {
     se->missing_genes += bittab_size(slot->overlapped_genes_forward) -
@@ -1198,12 +1198,12 @@ static void add_nucleotide_values(NucEval *nucleotides, Bittab *real,
   nucleotides->FN += bittab_count_set_bits(tmp);
 }
 
-int compute_nucleotides_values(void *key, void *value, void *data, Env *env)
+int compute_nucleotides_values(void *key, void *value, void *data, Error *e)
 {
   StreamEvaluator *se = (StreamEvaluator*) data;
   Slot *slot = (Slot*) value;
   Bittab *tmp;
-  env_error_check(env);
+  error_check(e);
   assert(key && value && data);
   /* add ``out of range'' FPs */
   se->mRNA_nucleotides.FP += slot->FP_mRNA_nucleotides_forward;
@@ -1274,7 +1274,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       if (!(slot = hashtable_get(se->slots,
                                  str_get(genome_node_get_seqid(gn))))) {
 
-        slot = slot_new(se->nuceval, genome_node_get_range(gn), env);
+        slot = slot_new(se->nuceval, genome_node_get_range(gn));
         hashtable_add(se->slots,
                       cstr_dup(str_get(genome_node_get_seqid(gn))), slot);
       }
@@ -1300,7 +1300,8 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
   /* set the actuals and sort them */
   if (!had_err) {
-    had_err = hashtable_foreach(se->slots, set_actuals_and_sort_them, se, env);
+    had_err = hashtable_foreach(se->slots, set_actuals_and_sort_them, se, NULL);
+    assert(!had_err); /* set_actuals_and_sort_them() is sane */
   }
 
   /* process the prediction stream */
@@ -1334,12 +1335,18 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
   }
 
   /* determine the missing mRNAs */
-  if (!had_err)
-    had_err = hashtable_foreach(se->slots, determine_missing_features, se, env);
+  if (!had_err) {
+    had_err = hashtable_foreach(se->slots, determine_missing_features, se,
+                                NULL);
+    assert(!had_err); /* determine_missing_features() is sane */
+  }
 
   /* compute the nucleotides values */
-  if (!had_err && se->nuceval)
-    had_err = hashtable_foreach(se->slots, compute_nucleotides_values, se, env);
+  if (!had_err && se->nuceval) {
+    had_err = hashtable_foreach(se->slots, compute_nucleotides_values, se,
+                                NULL);
+    assert(!had_err); /* compute_nucleotides_values() is sane */
+  }
 
   return had_err;
 }

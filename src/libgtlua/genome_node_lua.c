@@ -34,7 +34,6 @@ static int genome_feature_lua_new(lua_State *L)
   const char *type_str, *strand_str;
   size_t length;
   Str *filename;
-  Env *env;
   assert(L);
   /* get/check parameters */
   type_str = luaL_checkstring(L, 1);
@@ -46,10 +45,9 @@ static int genome_feature_lua_new(lua_State *L)
   luaL_argcheck(L, (strand = strand_get(strand_str[0])) != NUM_OF_STRAND_TYPES,
                 3, "invalid strand");
   /* construct object */
-  env = get_env_from_registry(L);
   gf = lua_newuserdata(L, sizeof (GenomeNode*));
   filename = str_new_cstr("Lua");
-  *gf = genome_feature_new(type, *range, strand, filename, 0, env);
+  *gf = genome_feature_new(type, *range, strand, filename, 0);
   str_delete(filename);
   assert(*gf);
   luaL_getmetatable(L, GENOME_NODE_METATABLE);
@@ -90,8 +88,7 @@ static int genome_node_lua_is_part_of_genome_node(lua_State *L)
   Env *env = get_env_from_registry(L);
   parent = check_genome_node(L, 1);
   child  = check_genome_node(L, 2);
-  genome_node_is_part_of_genome_node(*parent, genome_node_rec_ref(*child, env),
-                                     env);
+  genome_node_is_part_of_genome_node(*parent, genome_node_rec_ref(*child, env));
   return 0;
 }
 

@@ -79,9 +79,9 @@ void*   fa_xmmap_write_func(const char *path, size_t *len, const char*, int);
 void    fa_xmunmap(void *addr);
 
 /* check if all allocated file pointer have been released, prints to stderr */
-int     fa_check_fptr_leak(Env*);
+int     fa_check_fptr_leak(void);
 /* check if all allocated memory maps have been freed, prints to stderr */
-int     fa_check_mmap_leak(Env*);
+int     fa_check_mmap_leak(void);
 void    fa_show_space_peak(FILE*);
 void    fa_clean(void);
 

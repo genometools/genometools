@@ -49,33 +49,33 @@ struct Render {
   unsigned int width, height, cur_track;
 };
 
-Render* render_new(Config *cfg, Env *env)
+Render* render_new(Config *cfg)
 {
   Render *r;
   assert(cfg);
   r = ma_malloc(sizeof (Render));
   r->dia = NULL;
   r->cfg = cfg;
-  r->margins = config_get_num(r->cfg, "format", "margins", 10, env);
+  r->margins = config_get_num(r->cfg, "format", "margins", 10);
   return r;
 }
 
 /* Calculate the final height of the image to be created. */
 static unsigned int render_calculate_height(Render *r, Env *env)
 {
-  unsigned int lines = diagram_get_total_lines(r->dia, env);
+  unsigned int lines = diagram_get_total_lines(r->dia);
   unsigned int height;
   /* obtain line height and spacer from configuration settings */
   unsigned int line_height = ((unsigned int) config_get_num(r->cfg,
                                                             "format",
                                                             "bar_height",
-                                                            15,
-                                                            env)) +
+                                                            15
+                                                            )) +
                              ((unsigned int) config_get_num(r->cfg,
                                                             "format",
                                                             "bar_vspace",
-                                                            10,
-                                                            env)) + 15;
+                                                            10
+                                                            )) + 15;
 
   assert(r);
 
@@ -83,7 +83,7 @@ static unsigned int render_calculate_height(Render *r, Env *env)
   height = lines * line_height;
   /* add track caption height and spacer */
   height += diagram_get_number_of_tracks(r->dia)
-              * ((config_get_num(r->cfg, "format","track_vspace", 20, env))+15);
+              * ((config_get_num(r->cfg, "format","track_vspace", 20))+15);
   /* add header space and footer */
   height += 70 + 20;
   if (config_get_verbose(r->cfg))
@@ -99,7 +99,7 @@ double render_convert_point(Render *r, long pos)
 
 /* Converts base range <node_range> into a pixel range.
    If the range exceeds visibility boundaries, clipping info is set. */
-static DrawingRange render_convert_coords(Render *r, Range node_range, Env *env)
+static DrawingRange render_convert_coords(Render *r, Range node_range)
 {
   DrawingRange converted_range;
   converted_range.clip = CLIPPED_NONE;
@@ -133,7 +133,7 @@ static DrawingRange render_convert_coords(Render *r, Range node_range, Env *env)
   return converted_range;
 }
 
-static void render_line(Render *r, Line *line, Env *env)
+static void render_line(Render *r, Line *line)
 {
   int i;
   Array *blocks;
@@ -153,7 +153,7 @@ static void render_line(Render *r, Line *line, Env *env)
     Strand strand = block_get_strand(block);
 
     /* draw block caption */
-    draw_range = render_convert_coords(r, block_range, env);
+    draw_range = render_convert_coords(r, block_range);
     if (block_caption_is_visible(block))
     {
       caption = str_get(block_get_caption(block));
@@ -170,13 +170,13 @@ static void render_line(Render *r, Line *line, Env *env)
                          r->y,
                          draw_range.end - draw_range.start,
                          config_get_num(r->cfg, "format",
-                                        "bar_height", 15, env),
+                                        "bar_height", 15),
                          ARROW_NONE,
                          config_get_num(r->cfg, "format",
-                                        "arrow_width", 6, env),
+                                        "arrow_width", 6),
                          config_get_num(r->cfg, "format",
-                                        "stroke_width", 1, env),
-                         config_get_color(r->cfg, "stroke", env));
+                                        "stroke_width", 1),
+                         config_get_color(r->cfg, "stroke"));
 
     /* draw elements in block */
     for (delem = dlist_first(elems); delem; delem = dlistelem_next(delem)) {
@@ -200,7 +200,7 @@ static void render_line(Render *r, Line *line, Env *env)
         arrow_status = (arrow_status == ARROW_LEFT ? ARROW_BOTH : ARROW_RIGHT);
 
       grey.red = grey.green = grey.blue = .85;
-      bar_height = config_get_num(r->cfg, "format", "bar_height", 15, env);
+      bar_height = config_get_num(r->cfg, "format", "bar_height", 15);
 
       if (config_get_verbose(r->cfg))
         fprintf(stderr, "processing element from %lu to %lu, strand %d\n",
@@ -208,7 +208,7 @@ static void render_line(Render *r, Line *line, Env *env)
                 elem_range.end,
                 (int) strand);
 
-      draw_range = render_convert_coords(r, elem_range, env);
+      draw_range = render_convert_coords(r, elem_range);
       elem_start = draw_range.start;
       elem_width = draw_range.end - draw_range.start;
 
@@ -219,20 +219,16 @@ static void render_line(Render *r, Line *line, Env *env)
                 arrow_status);
 
       /* draw each element according to style set in the config */
-      style = config_get_cstr(r->cfg,
-                              "feature_styles",
-                              type,
-                              "box",
-                              env);
+      style = config_get_cstr(r->cfg, "feature_styles", type, "box");
 
       if (element_is_marked(elem)) {
-        elem_color = config_get_color(r->cfg, "stroke_marked", env);
+        elem_color = config_get_color(r->cfg, "stroke_marked");
         stroke_width = config_get_num(r->cfg, "format", "stroke_marked_width",
-                                      1, env);
+                                      1);
       }
       else {
-        elem_color = config_get_color(r->cfg, "stroke", env);
-        stroke_width = config_get_num(r->cfg, "format", "stroke_width", 1, env);
+        elem_color = config_get_color(r->cfg, "stroke");
+        stroke_width = config_get_num(r->cfg, "format", "stroke_width", 1);
       }
 
       if (strcmp(style, "box")==0)
@@ -242,9 +238,9 @@ static void render_line(Render *r, Line *line, Env *env)
                        r->y,
                        elem_width,
                        bar_height,
-                       config_get_color(r->cfg, type, env),
+                       config_get_color(r->cfg, type),
                        arrow_status,
-                       config_get_num(r->cfg, "format", "arrow_width", 6, env),
+                       config_get_num(r->cfg, "format", "arrow_width", 6),
                        stroke_width,
                        elem_color);
       }
@@ -256,7 +252,7 @@ static void render_line(Render *r, Line *line, Env *env)
                        elem_width,
                        bar_height,
                        arrow_status,
-                       config_get_num(r->cfg, "format", "arrow_width", 6, env),
+                       config_get_num(r->cfg, "format", "arrow_width", 6),
                        stroke_width,
                        elem_color);
       }
@@ -268,7 +264,7 @@ static void render_line(Render *r, Line *line, Env *env)
                        elem_width,
                        bar_height,
                        arrow_status,
-                       config_get_num(r->cfg, "format", "arrow_width", 6, env),
+                       config_get_num(r->cfg, "format", "arrow_width", 6),
                        stroke_width,
                        elem_color);
       }
@@ -286,9 +282,9 @@ static void render_line(Render *r, Line *line, Env *env)
                        r->y,
                        elem_width,
                        bar_height,
-                       config_get_color(r->cfg, type, env),
+                       config_get_color(r->cfg, type),
                        arrow_status,
-                       config_get_num(r->cfg, "format", "arrow_width", 6, env),
+                       config_get_num(r->cfg, "format", "arrow_width", 6),
                        stroke_width,
                        elem_color);
       }
@@ -310,13 +306,13 @@ static void render_line(Render *r, Line *line, Env *env)
   }
   /* do not add line spacing after the last line of a track */
   if (i!=array_size(blocks)-1)
-    r->y += config_get_num(r->cfg, "format", "bar_height", 15, env) +
-               config_get_num(r->cfg, "format", "bar_vspace", 10, env) + 15;
+    r->y += config_get_num(r->cfg, "format", "bar_height", 15) +
+               config_get_num(r->cfg, "format", "bar_vspace", 10) + 15;
 }
 
 /* This function disables captions for blocks if they overlap with
    neighboring captions. */
-static void mark_caption_collisions(Render *r, Line *line, Env* env)
+static void mark_caption_collisions(Render *r, Line *line)
 {
   int i, j;
   Array *blocks;
@@ -366,7 +362,7 @@ static void mark_caption_collisions(Render *r, Line *line, Env* env)
   }
 }
 
-static int render_track(void *key, void *value, void *data, Env *env)
+static int render_track(void *key, void *value, void *data, Error *e)
 {
   Render* r = (Render*) data;
   Track* track = (Track*) value;
@@ -382,7 +378,7 @@ static int render_track(void *key, void *value, void *data, Env *env)
   graphics_draw_colored_text(r->g,
                              r->margins,
                              r->y-6,
-                             config_get_color(r->cfg, "track_title", env),
+                             config_get_color(r->cfg, "track_title"),
                              str_get(track_get_title(track)));
   r->y += 15;
 
@@ -390,13 +386,13 @@ static int render_track(void *key, void *value, void *data, Env *env)
   for (i=0; i<array_size(lines); i++)
   {
     Line* line = *(Line**) array_get(lines, i);
-    mark_caption_collisions(r, line, env);
-    render_line(r, line, env);
+    mark_caption_collisions(r, line);
+    render_line(r, line);
   }
 
   /* put track spacer after track, except if at last track */
   if (r->cur_track++ != diagram_get_number_of_tracks(r->dia))
-    r->y += config_get_num(r->cfg, "format", "track_vspace", 20, env);
+    r->y += config_get_num(r->cfg, "format", "track_vspace", 20);
   return 0;
 }
 
@@ -452,7 +448,7 @@ static void render_ruler(Render *r, Env* env)
     for (tick = vminor; tick <= r->range.end; tick += minorstep)
     {
       if (tick < r->range.start) continue;
-      if (strcmp(config_get_cstr(r->cfg, "format","show_grid", "no", env),
+      if (strcmp(config_get_cstr(r->cfg, "format","show_grid", "no"),
                  "yes") == 0)
         graphics_draw_vertical_line(r->g,
                                     render_convert_point(r, tick),
@@ -513,7 +509,7 @@ int render_to_png(Render *r, Diagram *dia, const char *filename,
   {
     /* process (render) each track */
     Hashtable *tracks = diagram_get_tracks(r->dia);
-    (void) hashtable_foreach_ao(tracks, render_track, r, env);
+    (void) hashtable_foreach_ao(tracks, render_track, r, NULL);
   }
   else if (config_get_verbose(r->cfg))
     fprintf(stderr, "diagram has no tracks!\n");

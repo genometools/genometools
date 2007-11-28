@@ -55,10 +55,9 @@ static void sequence_region_set_range(GenomeNode *gn, Range range)
   sr->range = range;
 }
 
-static void sequence_region_set_seqid(GenomeNode *gn, Str *seqid, Env *env)
+static void sequence_region_set_seqid(GenomeNode *gn, Str *seqid)
 {
   SequenceRegion *sr = sequence_region_cast(gn);
-  env_error_check(env);
   assert(sr && seqid);
   str_delete(sr->seqid);
   sr->seqid = str_ref(seqid);
@@ -88,10 +87,10 @@ const GenomeNodeClass* sequence_region_class()
 }
 
 GenomeNode* sequence_region_new(Str *seqid, Range range, Str *filename,
-                                unsigned long line_number, Env *env)
+                                unsigned long line_number)
 {
   GenomeNode *gn = genome_node_create(sequence_region_class(), filename,
-                                      line_number, env);
+                                      line_number);
   SequenceRegion *sr = sequence_region_cast(gn);
   assert(seqid);
   sr->seqid = str_ref(seqid);

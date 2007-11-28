@@ -25,11 +25,10 @@ struct Track {
   Array *lines;
 };
 
-Track* track_new(Str *title, Env *env)
+Track* track_new(Str *title)
 {
   Track *track;
-  assert(title && env);
-  env_error_check(env);
+  assert(title);
   track = ma_malloc(sizeof (Track));
   track->title = str_ref(title);
   track->lines = array_new(sizeof (Line*));
@@ -37,7 +36,7 @@ Track* track_new(Str *title, Env *env)
   return track;
 }
 
-static Line* get_next_free_line(Track *track, Range r, Env *env)
+static Line* get_next_free_line(Track *track, Range r)
 {
   unsigned long i;
   Line* line;
@@ -52,22 +51,22 @@ static Line* get_next_free_line(Track *track, Range r, Env *env)
       return line;
     }
   }
-  line = line_new(env);
+  line = line_new();
   array_add(track->lines, line);
 
   assert(line);
   return line;
 }
 
-void track_insert_block(Track *track, Block *block, Env *env)
+void track_insert_block(Track *track, Block *block)
 {
   Range r;
   Line *line;
 
   assert(track && block);
   r = block_get_range(block);
-  line = get_next_free_line(track, r, env);
-  line_insert_block(line, block, env);
+  line = get_next_free_line(track, r);
+  line_insert_block(line, block);
 }
 
 Str* track_get_title(const Track *track)
@@ -112,32 +111,32 @@ int track_unit_test(Env *env)
   b4 = block_new(env);
   block_set_range(b4, r4);
 
-  track = track_new(title, env);
+  track = track_new(title);
   ensure(had_err, track);
   ensure(had_err, track_get_title(track) == title);
 
   ensure(had_err, track_get_number_of_lines(track) == 0);
-  track_insert_block(track, b1, env);
+  track_insert_block(track, b1);
   ensure(had_err, track_get_number_of_lines(track) == 1);
-  track_insert_block(track, b2, env);
+  track_insert_block(track, b2);
   ensure(had_err, track_get_number_of_lines(track) == 1);
-  track_insert_block(track, b3, env);
+  track_insert_block(track, b3);
   ensure(had_err, track_get_number_of_lines(track) == 2);
-  track_insert_block(track, b4, env);
+  track_insert_block(track, b4);
   ensure(had_err, track_get_number_of_lines(track) == 2);
 
-  track_delete(track, env);
+  track_delete(track);
   str_delete(title);
 
   return had_err;
 }
 
-void track_delete(Track *track, Env *env)
+void track_delete(Track *track)
 {
   unsigned long i;
   if (!track) return;
   for (i = 0; i < array_size(track->lines); i++)
-    line_delete(*(Line**) array_get(track->lines, i), env);
+    line_delete(*(Line**) array_get(track->lines, i));
   array_delete(track->lines);
   str_delete(track->title);
   ma_free(track);

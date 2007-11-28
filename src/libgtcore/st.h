@@ -29,7 +29,7 @@ struct st_table {
 
 enum st_retval {ST_CONTINUE, ST_STOP, ST_DELETE, ST_CHECK};
 
-typedef int (*st_iterfunc_type)(void *key, void *value, void *data, Env*);
+typedef int (*st_iterfunc_type)(void *key, void *value, void *data, Error*);
 
 st_table* st_init_table(struct st_hash_type*);
 st_table* st_init_table_with_size(struct st_hash_type*, int);
@@ -41,10 +41,10 @@ int       st_delete(st_table*, st_data_t*, st_data_t*);
 int       st_delete_safe(st_table*, st_data_t*, st_data_t*, st_data_t);
 int       st_insert(st_table*, st_data_t, st_data_t);
 int       st_lookup(st_table*, st_data_t, st_data_t*);
-int       st_foreach(st_table*, st_iterfunc_type, st_data_t, Env*);
+int       st_foreach(st_table*, st_iterfunc_type, st_data_t, Error*);
 void      st_add_direct(st_table*, st_data_t, st_data_t, Env*);
 void      st_free_table(st_table*);
-void      st_cleanup_safe(st_table*, st_data_t, Env*);
+void      st_cleanup_safe(st_table*, st_data_t, Error*);
 st_table* st_copy(st_table*, Env*);
 
 #define ST_NUMCMP       ((int (*)()) 0)

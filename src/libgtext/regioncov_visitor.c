@@ -100,12 +100,12 @@ GenomeVisitor* regioncov_visitor_new(unsigned long max_feature_dist, Env *env)
   return gv;
 }
 
-static int show_rangelist(void *key, void *value, void *data, Env *env)
+static int show_rangelist(void *key, void *value, void *data, Error *e)
 {
   unsigned long i;
   Array *rangelist;
   Range *rangeptr;
-  env_error_check(env);
+  error_check(e);
   assert(key && value);
   rangelist = (Array*) value;
   if (array_size(rangelist)) {
@@ -119,10 +119,11 @@ static int show_rangelist(void *key, void *value, void *data, Env *env)
   return 0;
 }
 
-void regioncov_visitor_show_coverage(GenomeVisitor *gv, Env *env)
+void regioncov_visitor_show_coverage(GenomeVisitor *gv)
 {
   RegionCovVisitor *regioncov_visitor = regioncov_visitor_cast(gv);
-  env_error_check(env);
-  hashtable_foreach_ao(regioncov_visitor->region2rangelist, show_rangelist,
-                       NULL, env);
+  int had_err;
+  had_err = hashtable_foreach_ao(regioncov_visitor->region2rangelist,
+                                 show_rangelist, NULL, NULL);
+  assert(!had_err); /* show_rangelist() is sane */
 }

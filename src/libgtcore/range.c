@@ -184,7 +184,7 @@ int range_unit_test(Env *env)
   tmp_ranges = array_new(sizeof (Range));
   for (i = 0; i < sizeof (ranges_in) / sizeof (ranges_in[0]) && !had_err; i++)
     array_add(ranges, ranges_in[i]);
-  ranges_uniq(tmp_ranges, ranges, env);
+  ranges_uniq(tmp_ranges, ranges);
   ensure(had_err, array_size(ranges) ==
                   sizeof (ranges_in) / sizeof (ranges_in[0]));
   ensure(had_err, array_size(tmp_ranges) ==
@@ -199,7 +199,7 @@ int range_unit_test(Env *env)
   /* test ranges_uniq_in_place() */
   array_reset(tmp_ranges);
   array_add_array(tmp_ranges, ranges);
-  ranges_uniq_in_place(tmp_ranges, env);
+  ranges_uniq_in_place(tmp_ranges);
   for (i = 0; i < array_size(tmp_ranges) && !had_err; i++) {
     ensure(had_err,
            ranges_out[i].start == (*(Range*) array_get(tmp_ranges, i)).start);
@@ -209,7 +209,7 @@ int range_unit_test(Env *env)
 
   /* test ranges_uniq_count() */
   array_reset(tmp_ranges);
-  ctr = ranges_uniq_count(tmp_ranges, ranges, env);
+  ctr = ranges_uniq_count(tmp_ranges, ranges);
   ensure(had_err, array_size(tmp_ranges) == array_size(ctr));
   ensure(had_err, array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
   for (i = 0; i < array_size(ctr) && !had_err; i++) {
@@ -222,7 +222,7 @@ int range_unit_test(Env *env)
   array_delete(ctr);
 
   /* test ranges_uniq_in_place_count() */
-  ctr = ranges_uniq_in_place_count(ranges, env);
+  ctr = ranges_uniq_in_place_count(ranges);
   ensure(had_err, array_size(ranges) == array_size(ctr));
   ensure(had_err, array_size(ctr) == sizeof (counts) / sizeof (counts[0]));
   for (i = 0; i < array_size(ctr) && !had_err; i++) {
@@ -310,7 +310,7 @@ bool ranges_are_equal(const Array *ranges_1, const Array *ranges_2)
 }
 
 static Array* generic_ranges_uniq(Array *out_ranges, const Array *in_ranges,
-                                  bool count, Env *env)
+                                  bool count)
 {
   unsigned long i, *ctr_ptr, ctr = 1;
   Array *count_array = NULL;
@@ -345,12 +345,12 @@ static Array* generic_ranges_uniq(Array *out_ranges, const Array *in_ranges,
   return count_array;
 }
 
-static Array* generic_ranges_uniq_in_place(Array *ranges, bool count, Env *env)
+static Array* generic_ranges_uniq_in_place(Array *ranges, bool count)
 {
   Array *out_ranges, *count_array;
   assert(ranges);
   out_ranges = array_new(sizeof (Range));
-  count_array = generic_ranges_uniq(out_ranges, ranges, count, env);
+  count_array = generic_ranges_uniq(out_ranges, ranges, count);
   array_reset(ranges);
   array_add_array(ranges, out_ranges); /* XXX: could be more efficient
                                                with something like
@@ -360,26 +360,26 @@ static Array* generic_ranges_uniq_in_place(Array *ranges, bool count, Env *env)
   return count_array;
 }
 
-void ranges_uniq(Array *out_ranges, const Array *in_ranges, Env *env)
+void ranges_uniq(Array *out_ranges, const Array *in_ranges)
 {
   assert(out_ranges && in_ranges);
-  (void) generic_ranges_uniq(out_ranges, in_ranges, false, env);
+  (void) generic_ranges_uniq(out_ranges, in_ranges, false);
 }
 
-void ranges_uniq_in_place(Array *ranges, Env *env)
+void ranges_uniq_in_place(Array *ranges)
 {
   assert(ranges);
-  (void) generic_ranges_uniq_in_place(ranges, false, env);
+  (void) generic_ranges_uniq_in_place(ranges, false);
 }
 
-Array* ranges_uniq_count(Array *out_ranges, const Array *in_ranges, Env *env)
+Array* ranges_uniq_count(Array *out_ranges, const Array *in_ranges)
 {
   assert(out_ranges && in_ranges);
-  return generic_ranges_uniq(out_ranges, in_ranges, true, env);
+  return generic_ranges_uniq(out_ranges, in_ranges, true);
 }
 
-Array* ranges_uniq_in_place_count(Array *ranges, Env *env)
+Array* ranges_uniq_in_place_count(Array *ranges)
 {
   assert(ranges);
-  return generic_ranges_uniq_in_place(ranges, true, env);
+  return generic_ranges_uniq_in_place(ranges, true);
 }

@@ -265,7 +265,7 @@ int gt_view(int argc, const char **argv, Env *env)
   if (!had_err) {
     /* create and write image file */
     d = diagram_new(features, qry_range, seqid, cfg, env);
-    r = render_new(cfg, env);
+    r = render_new(cfg);
     had_err = render_to_png(r, d, png_file, arguments.width, env);
   }
 
