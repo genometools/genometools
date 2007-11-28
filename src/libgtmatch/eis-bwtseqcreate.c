@@ -446,12 +446,8 @@ BWTSeqLocateMatch(const BWTSeq *bwtSeq, Seqpos pos,
       + locateOffset;
     return matchPos;
   }
-#ifndef NDEBUG
-  else
-  {
-    fputs("Internal error: Trying to locate in BWT sequence index without"
-          " locate information.", stderr);
-    abort();
-  }
-#endif
+  /* Internal error: Trying to locate in BWT sequence index without locate
+     information. */
+   assert(0);
+   return 0; /* shut up compiler */
 }
