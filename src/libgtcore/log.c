@@ -25,12 +25,12 @@ static FILE *logfp = NULL;
 
 void log_enable(void)
 {
+  logfp = stderr;
   logging = true;
 }
 
 bool log_enabled(void)
 {
-  logfp = stderr;
   return logging;
 }
 
@@ -46,6 +46,7 @@ void log_log(const char *format, ...)
 void log_vlog(const char *format, va_list ap)
 {
   if (!logging) return;
+  assert(logfp);
   fprintf(logfp, "debug: ");
   (void) vfprintf(logfp, format, ap);
   (void) putc('\n', logfp);
