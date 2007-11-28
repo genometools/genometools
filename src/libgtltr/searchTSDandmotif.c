@@ -76,7 +76,7 @@ static void searchforbestTSDandormotifatborders(
     offset = markpos[boundaries->contignumber-1]+1;
   }
 
-  if ( info->repeats.nextfreeRepeat > 0 )
+  if (info->repeats.nextfreeRepeat > 0 )
   {
     boundaries->tsd = true;
   }
