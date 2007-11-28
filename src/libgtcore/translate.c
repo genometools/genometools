@@ -20,7 +20,7 @@
 #include "libgtcore/translate.h"
 
 void translate_dna(Str *protein, const char *dnaseq, unsigned long dnalen,
-                   unsigned int frame, Env *env)
+                   unsigned int frame)
 {
   const char *dnaptr;
   assert(protein && !str_length(protein) && dnaseq && frame < 3);

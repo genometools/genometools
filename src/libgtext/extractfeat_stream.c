@@ -45,7 +45,7 @@ static int extractfeat_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                                    env);
       if (had_err) {
         /* we own the node -> delete it */
-        genome_node_rec_delete(*gn, env);
+        genome_node_rec_delete(*gn);
         *gn = NULL;
       }
     }
@@ -53,10 +53,10 @@ static int extractfeat_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   return had_err;
 }
 
-static void extractfeat_stream_free(GenomeStream *gs, Env *env)
+static void extractfeat_stream_free(GenomeStream *gs)
 {
   ExtractFeatStream *extractfeat_stream = extractfeat_stream_cast(gs);
-  genome_visitor_delete(extractfeat_stream->extractfeat_visitor, env);
+  genome_visitor_delete(extractfeat_stream->extractfeat_visitor);
 }
 
 const GenomeStreamClass* extractfeat_stream_class(void)

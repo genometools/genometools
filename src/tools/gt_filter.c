@@ -137,13 +137,13 @@ int gt_filter(int argc, const char **argv, Env *env)
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
          gn) {
-    genome_node_rec_delete(gn, env);
+    genome_node_rec_delete(gn);
   }
 
   /* free */
-  genome_stream_delete(gff3_out_stream, env);
-  genome_stream_delete(filter_stream, env);
-  genome_stream_delete(gff3_in_stream, env);
+  genome_stream_delete(gff3_out_stream);
+  genome_stream_delete(filter_stream);
+  genome_stream_delete(gff3_in_stream);
   genfile_close(arguments.outfp);
   str_delete(arguments.seqid);
   str_delete(arguments.typefilter);

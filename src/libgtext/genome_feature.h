@@ -53,8 +53,7 @@ void                   genome_feature_set_end(GenomeFeature*, unsigned long);
 void                   genome_feature_set_score(GenomeFeature*, double);
 void                   genome_feature_add_attribute(GenomeFeature*,
                                                     const char *attr_name,
-                                                    const char *attr_value,
-                                                    Env*);
+                                                    const char *attr_value);
 int                    genome_feature_foreach_attribute(GenomeFeature*,
                                                         AttributeIterFunc,
                                                         void *data, Env*);

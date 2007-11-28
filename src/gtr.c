@@ -184,8 +184,8 @@ void gtr_register_components(GTR *gtr, Env *env)
 {
   assert(gtr);
   /* add tools */
-  toolbox_delete(gtr->toolbox, env);
-  gtr->toolbox = toolbox_new(env);
+  toolbox_delete(gtr->toolbox);
+  gtr->toolbox = toolbox_new();
   toolbox_add(gtr->toolbox, "bioseq", gt_bioseq, env);
   toolbox_add(gtr->toolbox, "cds", gt_cds, env);
   toolbox_add(gtr->toolbox, "chseqids", gt_chseqids, env);
@@ -216,49 +216,45 @@ void gtr_register_components(GTR *gtr, Env *env)
   toolbox_add(gtr->toolbox, "view", gt_view, env);
 #endif
   /* add unit tests */
-  hashtable_delete(gtr->unit_tests, env);
-  gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL, env);
-  hashtable_add(gtr->unit_tests, "alignment class", alignment_unit_test, env);
-  hashtable_add(gtr->unit_tests, "array class", array_unit_test, env);
-  hashtable_add(gtr->unit_tests, "array example", array_example, env);
-  hashtable_add(gtr->unit_tests, "array2dim example", array2dim_example, env);
+  hashtable_delete(gtr->unit_tests);
+  gtr->unit_tests = hashtable_new(HASH_STRING, NULL, NULL);
+  hashtable_add(gtr->unit_tests, "alignment class", alignment_unit_test);
+  hashtable_add(gtr->unit_tests, "array class", array_unit_test);
+  hashtable_add(gtr->unit_tests, "array example", array_example);
+  hashtable_add(gtr->unit_tests, "array2dim example", array2dim_example);
   hashtable_add(gtr->unit_tests, "bit pack array class",
-                bitPackArray_unit_test, env);
+                bitPackArray_unit_test);
   hashtable_add(gtr->unit_tests, "bit pack string module",
-                bitPackString_unit_test, env);
-  hashtable_add(gtr->unit_tests, "bittab class", bittab_unit_test, env);
-  hashtable_add(gtr->unit_tests, "bsearch module", bsearch_unit_test, env);
-  hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test,
-                env);
-  hashtable_add(gtr->unit_tests, "disc distri class", discdistri_unit_test,
-                env);
-  hashtable_add(gtr->unit_tests, "dlist class", dlist_unit_test, env);
-  hashtable_add(gtr->unit_tests, "dynamic bittab class", dynbittab_unit_test,
-                env);
-  hashtable_add(gtr->unit_tests, "evaluator class", evaluator_unit_test, env);
+                bitPackString_unit_test);
+  hashtable_add(gtr->unit_tests, "bittab class", bittab_unit_test);
+  hashtable_add(gtr->unit_tests, "bsearch module", bsearch_unit_test);
+  hashtable_add(gtr->unit_tests, "countingsort module", countingsort_unit_test);
+  hashtable_add(gtr->unit_tests, "disc distri class", discdistri_unit_test);
+  hashtable_add(gtr->unit_tests, "dlist class", dlist_unit_test);
+  hashtable_add(gtr->unit_tests, "dynamic bittab class", dynbittab_unit_test);
+  hashtable_add(gtr->unit_tests, "evaluator class", evaluator_unit_test);
   hashtable_add(gtr->unit_tests, "genome node iterator example",
-                genome_node_iterator_example, env);
-  hashtable_add(gtr->unit_tests, "getbasename module", getbasename_unit_test,
-                env);
-  hashtable_add(gtr->unit_tests, "grep module", grep_unit_test, env);
-  hashtable_add(gtr->unit_tests, "hashtable class", hashtable_unit_test, env);
-  hashtable_add(gtr->unit_tests, "hmm class", hmm_unit_test, env);
-  hashtable_add(gtr->unit_tests, "range class", range_unit_test, env);
-  hashtable_add(gtr->unit_tests, "safearith module", safearith_unit_test, env);
-  hashtable_add(gtr->unit_tests, "safearith example", safearith_example, env);
-  hashtable_add(gtr->unit_tests, "splicedseq class", splicedseq_unit_test, env);
-  hashtable_add(gtr->unit_tests, "splitter class", splitter_unit_test, env);
-  hashtable_add(gtr->unit_tests, "string class", str_unit_test, env);
-  hashtable_add(gtr->unit_tests, "tokenizer class", tokenizer_unit_test, env);
+                genome_node_iterator_example);
+  hashtable_add(gtr->unit_tests, "getbasename module", getbasename_unit_test);
+  hashtable_add(gtr->unit_tests, "grep module", grep_unit_test);
+  hashtable_add(gtr->unit_tests, "hashtable class", hashtable_unit_test);
+  hashtable_add(gtr->unit_tests, "hmm class", hmm_unit_test);
+  hashtable_add(gtr->unit_tests, "range class", range_unit_test);
+  hashtable_add(gtr->unit_tests, "safearith module", safearith_unit_test);
+  hashtable_add(gtr->unit_tests, "safearith example", safearith_example);
+  hashtable_add(gtr->unit_tests, "splicedseq class", splicedseq_unit_test);
+  hashtable_add(gtr->unit_tests, "splitter class", splitter_unit_test);
+  hashtable_add(gtr->unit_tests, "string class", str_unit_test);
+  hashtable_add(gtr->unit_tests, "tokenizer class", tokenizer_unit_test);
 #ifdef LIBGTVIEW
-  hashtable_add(gtr->unit_tests, "block class", block_unit_test, env);
-  hashtable_add(gtr->unit_tests, "config class", config_unit_test, env);
-  hashtable_add(gtr->unit_tests, "diagram class", diagram_unit_test, env);
-  hashtable_add(gtr->unit_tests, "element class", element_unit_test, env);
-  hashtable_add(gtr->unit_tests, "feature index class", feature_index_unit_test,
-                env);
-  hashtable_add(gtr->unit_tests, "line class", line_unit_test, env);
-  hashtable_add(gtr->unit_tests, "track class", track_unit_test, env);
+  hashtable_add(gtr->unit_tests, "block class", block_unit_test);
+  hashtable_add(gtr->unit_tests, "config class", config_unit_test);
+  hashtable_add(gtr->unit_tests, "diagram class", diagram_unit_test);
+  hashtable_add(gtr->unit_tests, "element class", element_unit_test);
+  hashtable_add(gtr->unit_tests, "feature index class",
+                feature_index_unit_test);
+  hashtable_add(gtr->unit_tests, "line class", line_unit_test);
+  hashtable_add(gtr->unit_tests, "track class", track_unit_test);
 #endif
 }
 
@@ -385,8 +381,8 @@ void gtr_delete(GTR *gtr, Env *env)
 {
   if (!gtr) return;
   str_delete(gtr->testspacepeak);
-  toolbox_delete(gtr->toolbox, env);
-  hashtable_delete(gtr->unit_tests, env);
+  toolbox_delete(gtr->toolbox);
+  hashtable_delete(gtr->unit_tests);
   if (gtr->L) lua_close(gtr->L);
 #ifdef LIBGTVIEW
   config_delete_without_state(gtr->config, env);

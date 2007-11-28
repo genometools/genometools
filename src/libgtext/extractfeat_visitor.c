@@ -38,14 +38,14 @@ struct ExtractFeatVisitor {
 #define extractfeat_visitor_cast(GV)\
         genome_visitor_cast(extractfeat_visitor_class(), GV)
 
-static void extractfeat_visitor_free(GenomeVisitor *gv, Env *env)
+static void extractfeat_visitor_free(GenomeVisitor *gv)
 {
   ExtractFeatVisitor *extractfeat_visitor = extractfeat_visitor_cast(gv);
   assert(extractfeat_visitor);
   str_delete(extractfeat_visitor->description);
   str_delete(extractfeat_visitor->sequence);
   str_delete(extractfeat_visitor->protein);
-  regionmapping_delete(extractfeat_visitor->regionmapping, env);
+  regionmapping_delete(extractfeat_visitor->regionmapping);
 }
 
 static int extract_join_feature(GenomeNode *gn, void *data, Env *env)
@@ -121,13 +121,13 @@ static int extract_feature(GenomeNode *gn, void *data, Env *env)
     if (!had_err && str_length(v->sequence)) {
       if (v->reverse_strand) {
         had_err = reverse_complement(str_get(v->sequence),
-                                     str_length(v->sequence), env);
+                                     str_length(v->sequence), env_error(env));
       }
       if (!had_err) {
         if (v->translate) {
           str_reset(v->protein);
           translate_dna(v->protein, str_get(v->sequence),
-                        str_length(v->sequence), 0, env);
+                        str_length(v->sequence), 0);
           fasta_show_entry(str_get(v->description), str_get(v->protein),
                            str_length(v->protein), 0);
         }
@@ -159,14 +159,14 @@ static int extract_feature(GenomeNode *gn, void *data, Env *env)
                          range_length(range));
       if (genome_feature_get_strand(gf) == STRAND_REVERSE) {
         had_err = reverse_complement(str_get(v->sequence),
-                                     str_length(v->sequence), env);
+                                     str_length(v->sequence), env_error(env));
       }
     }
     if (!had_err) {
       if (v->translate) {
         str_reset(v->protein);
         translate_dna(v->protein, str_get(v->sequence), str_length(v->sequence),
-                      0, env);
+                      0);
         fasta_show_entry(str_get(v->description), str_get(v->protein),
                          str_length(v->protein), 0);
       }

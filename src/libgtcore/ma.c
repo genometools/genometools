@@ -24,7 +24,6 @@
 typedef struct {
   Hashtable *allocated_pointer;
   bool bookkeeping;
-  Env *env;
   unsigned long current_size,
                 max_size;
 } MA;
@@ -46,14 +45,13 @@ static void free_MAInfo(MAInfo *mainfo)
   free(mainfo);
 }
 
-void ma_init(bool bookkeeping, Env *env)
+void ma_init(bool bookkeeping)
 {
   if (ma) return;
   ma = xcalloc(1, sizeof (MA));
   assert(!ma->bookkeeping);
   ma->allocated_pointer = hashtable_new(HASH_DIRECT, NULL,
-                                        (FreeFunc) free_MAInfo, env);
-  ma->env = env;
+                                        (FreeFunc) free_MAInfo);
   /* MA is ready to use */
   ma->bookkeeping = bookkeeping;
 }
@@ -85,7 +83,7 @@ void* ma_malloc_mem(size_t size, const char *filename, int line)
     mainfo->filename = filename;
     mainfo->line = line;
     mem = xmalloc(size);
-    hashtable_add(ma->allocated_pointer, mem, mainfo, ma->env);
+    hashtable_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, size);
     ma->bookkeeping = true;
     return mem;
@@ -105,7 +103,7 @@ void* ma_calloc_mem(size_t nmemb, size_t size, const char *filename, int line)
     mainfo->filename = filename;
     mainfo->line = line;
     mem = xcalloc(nmemb, size);
-    hashtable_add(ma->allocated_pointer, mem, mainfo, ma->env);
+    hashtable_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, nmemb * size);
     ma->bookkeeping = true;
     return mem;
@@ -124,14 +122,14 @@ void* ma_realloc_mem(void *ptr, size_t size, const char *filename, int line)
       mainfo = hashtable_get(ma->allocated_pointer, ptr);
       assert(mainfo);
       subtract_size(ma, mainfo->size);
-      hashtable_remove(ma->allocated_pointer, ptr, ma->env);
+      hashtable_remove(ma->allocated_pointer, ptr);
     }
     mainfo = xmalloc(sizeof (MAInfo));
     mainfo->size = size;
     mainfo->filename = filename;
     mainfo->line = line;
     mem = xrealloc(ptr, size);
-    hashtable_add(ma->allocated_pointer, mem, mainfo, ma->env);
+    hashtable_add(ma->allocated_pointer, mem, mainfo);
     add_size(ma, size);
     ma->bookkeeping = true;
     return mem;
@@ -156,7 +154,7 @@ void ma_free_mem(void *ptr, const char *filename, int line)
     mainfo = hashtable_get(ma->allocated_pointer, ptr);
     assert(mainfo);
     subtract_size(ma, mainfo->size);
-    hashtable_remove(ma->allocated_pointer, ptr, ma->env);
+    hashtable_remove(ma->allocated_pointer, ptr);
     free(ptr);
     ma->bookkeeping = true;
   }
@@ -204,7 +202,7 @@ int ma_check_space_leak(void)
   assert(ma);
   info.has_leak = false;
   had_err = hashtable_foreach(ma->allocated_pointer, check_space_leak, &info,
-                              ma->env);
+                              NULL);
   assert(!had_err); /* cannot happen, check_space_leak() is sane */
   if (info.has_leak)
     return -1;
@@ -215,7 +213,7 @@ void ma_clean(void)
 {
   assert(ma);
   ma->bookkeeping = false;
-  hashtable_delete(ma->allocated_pointer, ma->env);
+  hashtable_delete(ma->allocated_pointer);
   free(ma);
   ma = NULL;
 }

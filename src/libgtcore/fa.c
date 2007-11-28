@@ -30,7 +30,6 @@
 typedef struct {
   Hashtable *file_pointer,
             *memory_maps;
-  Env *env;
   unsigned long current_size,
                 max_size;
 } FA;
@@ -52,26 +51,24 @@ typedef struct {
   bool has_leak;
 } CheckLeakInfo;
 
-static void free_FAFileInfo(FAFileInfo *fileinfo, Env *env)
+static void free_FAFileInfo(FAFileInfo *fileinfo)
 {
   ma_free(fileinfo);
 }
 
-static void free_FAMapInfo(FAMapInfo *mapinfo, Env *env)
+static void free_FAMapInfo(FAMapInfo *mapinfo)
 {
   ma_free(mapinfo);
 }
 
-void fa_init(Env *env)
+void fa_init(void)
 {
   if (fa) return;
-  env_error_check(env);
   fa = ma_calloc(1, sizeof (FA));
   fa->file_pointer = hashtable_new(HASH_DIRECT, NULL,
-                                   (FreeFunc) free_FAFileInfo, NULL);
+                                   (FreeFunc) free_FAFileInfo);
   fa->memory_maps = hashtable_new(HASH_DIRECT, NULL,
-                                  (FreeFunc) free_FAMapInfo, NULL);
-  fa->env = env;
+                                  (FreeFunc) free_FAMapInfo);
 }
 
 static void* fileopen_generic(FA *fa, const char *path, const char *mode,
@@ -97,7 +94,7 @@ static void* fileopen_generic(FA *fa, const char *path, const char *mode,
     default: assert(0);
   }
   if (fp)
-    hashtable_add(fa->file_pointer, fp, fileinfo, fa->env);
+    hashtable_add(fa->file_pointer, fp, fileinfo);
   else
     ma_free(fileinfo);
   return fp;
@@ -109,7 +106,7 @@ static void fclose_generic(void *stream, GenFileMode genfilemode, FA *fa)
   assert(stream && fa);
   fileinfo = hashtable_get(fa->file_pointer, stream);
   assert(fileinfo);
-  hashtable_remove(fa->file_pointer, stream, fa->env);
+  hashtable_remove(fa->file_pointer, stream);
   switch (genfilemode) {
     case GFM_UNCOMPRESSED:
       fclose(stream);
@@ -130,7 +127,7 @@ static void xfclose_generic(void *stream, GenFileMode genfilemode, FA *fa)
   assert(stream && fa);
   fileinfo = hashtable_get(fa->file_pointer, stream);
   assert(fileinfo);
-  hashtable_remove(fa->file_pointer, stream, fa->env);
+  hashtable_remove(fa->file_pointer, stream);
   switch (genfilemode) {
     case GFM_UNCOMPRESSED:
       xfclose(stream);
@@ -242,7 +239,7 @@ FILE* fa_xtmpfile_func(char *temp, const char *filename, int line)
   fileinfo->line = line;
   fp = xtmpfile(temp);
   assert(fp);
-  hashtable_add(fa->file_pointer, fp, fileinfo, fa->env);
+  hashtable_add(fa->file_pointer, fp, fileinfo);
   return fp;
 }
 
@@ -262,7 +259,7 @@ static void* mmap_generic(const char *path, size_t *len, bool write,
   else
     map = x ? xmmap_read(path, &mapinfo->len) : mmap_read(path, &mapinfo->len);
   if (map) {
-    hashtable_add(fa->memory_maps, map, mapinfo, fa->env);
+    hashtable_add(fa->memory_maps, map, mapinfo);
     fa->current_size += mapinfo->len;
     if (fa->current_size > fa->max_size)
       fa->max_size = fa->current_size;
@@ -312,14 +309,14 @@ void fa_xmunmap(void *addr)
   xmunmap(addr, mapinfo->len);
   assert(fa->current_size >= mapinfo->len);
   fa->current_size -= mapinfo->len;
-  hashtable_remove(fa->memory_maps, addr, fa->env);
+  hashtable_remove(fa->memory_maps, addr);
 }
 
 static int check_fptr_leak(void *key, void *value, void *data, Env *env)
 {
   CheckLeakInfo *info = (CheckLeakInfo*) data;
   FAFileInfo *fileinfo = (FAFileInfo*) value;
-  assert(key && value && data && env);
+  assert(key && value && data);
   /* report only the first leak */
   if (!info->has_leak) {
     fprintf(stderr, "bug: file pointer leaked (opened on line %d in file "
@@ -333,7 +330,7 @@ static int check_mmap_leak(void *key, void *value, void *data, Env *env)
 {
   CheckLeakInfo *info = (CheckLeakInfo*) data;
   FAMapInfo *mapinfo = (FAMapInfo*) value;
-  assert(key && value && data && env);
+  assert(key && value && data);
   /* report only the first leak */
   if (!info->has_leak) {
     fprintf(stderr, "bug: memory map of length %zu leaked (opened on line %d "
@@ -380,8 +377,8 @@ void fa_show_space_peak(FILE *fp)
 void fa_clean(void)
 {
   if (!fa) return;
-  hashtable_delete(fa->file_pointer, fa->env);
-  hashtable_delete(fa->memory_maps, fa->env);
+  hashtable_delete(fa->file_pointer);
+  hashtable_delete(fa->memory_maps);
   ma_free(fa);
   fa = NULL;
 }

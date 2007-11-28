@@ -41,10 +41,10 @@ static int cds_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return had_err;
 }
 
-static void cds_stream_free(GenomeStream *gs, Env *env)
+static void cds_stream_free(GenomeStream *gs)
 {
   CDSStream *cds_stream = cds_stream_cast(gs);
-  genome_visitor_delete(cds_stream->cds_visitor, env);
+  genome_visitor_delete(cds_stream->cds_visitor);
 }
 
 const GenomeStreamClass* cds_stream_class(void)
@@ -72,7 +72,7 @@ GenomeStream* cds_stream_new(GenomeStream *in_stream, RegionMapping *rm,
     had_err = -1;
   str_delete(source_str);
   if (had_err) {
-    cds_stream_free(gs, env);
+    cds_stream_free(gs);
     return NULL;
   }
   return gs;

@@ -41,10 +41,10 @@ static int gtf_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   return had_err;
 }
 
-static void gtf_out_stream_free(GenomeStream *gs, Env *env)
+static void gtf_out_stream_free(GenomeStream *gs)
 {
   GTFOutStream *gtf_out_stream = gtf_out_stream_cast(gs);
-  genome_visitor_delete(gtf_out_stream->gtf_visitor, env);
+  genome_visitor_delete(gtf_out_stream->gtf_visitor);
 }
 
 const GenomeStreamClass* gtf_out_stream_class(void)

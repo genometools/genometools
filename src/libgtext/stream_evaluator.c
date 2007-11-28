@@ -166,19 +166,19 @@ static void slot_delete(Slot *s, Env *env)
   unsigned long i;
   assert(s);
   for (i = 0; i < array_size(s->genes_forward); i++)
-    genome_node_rec_delete(*(GenomeNode**) array_get(s->genes_forward, i), env);
+    genome_node_rec_delete(*(GenomeNode**) array_get(s->genes_forward, i));
   array_delete(s->genes_forward);
   for (i = 0; i < array_size(s->genes_reverse); i++)
-    genome_node_rec_delete(*(GenomeNode**) array_get(s->genes_reverse, i), env);
+    genome_node_rec_delete(*(GenomeNode**) array_get(s->genes_reverse, i));
   array_delete(s->genes_reverse);
   for (i = 0; i < array_size(s->mRNAs_forward); i++)
-    genome_node_rec_delete(*(GenomeNode**) array_get(s->mRNAs_forward, i), env);
+    genome_node_rec_delete(*(GenomeNode**) array_get(s->mRNAs_forward, i));
   array_delete(s->mRNAs_forward);
   for (i = 0; i < array_size(s->mRNAs_reverse); i++)
-    genome_node_rec_delete(*(GenomeNode**) array_get(s->mRNAs_reverse, i), env);
+    genome_node_rec_delete(*(GenomeNode**) array_get(s->mRNAs_reverse, i));
   array_delete(s->mRNAs_reverse);
   for (i = 0; i < array_size(s->LTRs); i++)
-    genome_node_rec_delete(*(GenomeNode**) array_get(s->LTRs, i), env);
+    genome_node_rec_delete(*(GenomeNode**) array_get(s->LTRs, i));
   array_delete(s->LTRs);
   transcript_exons_delete(s->mRNA_exons_forward, env);
   transcript_exons_delete(s->mRNA_exons_reverse, env);
@@ -229,7 +229,7 @@ StreamEvaluator* stream_evaluator_new(GenomeStream *reality,
   evaluator->evalLTR = evalLTR;
   evaluator->LTRdelta = LTRdelta;
   evaluator->slots = hashtable_new(HASH_STRING, ma_free_func,
-                                   (FreeFunc) slot_delete, env);
+                                   (FreeFunc) slot_delete);
   evaluator->gene_evaluator = evaluator_new(env);
   evaluator->mRNA_evaluator = evaluator_new(env);
   evaluator->LTR_evaluator = evaluator_new(env);
@@ -1276,8 +1276,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
 
         slot = slot_new(se->nuceval, genome_node_get_range(gn), env);
         hashtable_add(se->slots,
-                      cstr_dup(str_get(genome_node_get_seqid(gn))), slot,
-                      env);
+                      cstr_dup(str_get(genome_node_get_seqid(gn))), slot);
       }
       assert(slot);
     }
@@ -1296,7 +1295,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
     }
     if (gv)
       genome_node_accept(gn, gv, env);
-    genome_node_rec_delete(gn, env);
+    genome_node_rec_delete(gn);
   }
 
   /* set the actuals and sort them */
@@ -1330,7 +1329,7 @@ int stream_evaluator_evaluate(StreamEvaluator *se, bool verbose, bool exondiff,
       }
       if (gv)
         genome_node_accept(gn, gv, env);
-      genome_node_rec_delete(gn, env);
+      genome_node_rec_delete(gn);
     }
   }
 
@@ -1477,9 +1476,9 @@ void stream_evaluator_show(StreamEvaluator *se, FILE *outfp)
 void stream_evaluator_delete(StreamEvaluator *se, Env *env)
 {
   if (!se) return;
-  genome_stream_delete(se->reality, env);
-  genome_stream_delete(se->prediction, env);
-  hashtable_delete(se->slots, env);
+  genome_stream_delete(se->reality);
+  genome_stream_delete(se->prediction);
+  hashtable_delete(se->slots);
   evaluator_delete(se->gene_evaluator, env);
   evaluator_delete(se->mRNA_evaluator, env);
   evaluator_delete(se->LTR_evaluator, env);

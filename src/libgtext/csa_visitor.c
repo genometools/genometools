@@ -49,7 +49,7 @@ typedef struct {
 #define csa_visitor_cast(GV)\
         genome_visitor_cast(csa_visitor_class(), GV)
 
-static void csa_visitor_free(GenomeVisitor *gv, Env *env)
+static void csa_visitor_free(GenomeVisitor *gv)
 {
   CSAVisitor *csa_visitor = csa_visitor_cast(gv);
   queue_delete(csa_visitor->genome_node_buffer);
@@ -453,9 +453,7 @@ void csa_visitor_process_cluster(GenomeVisitor *gv, bool final_cluster,
   queue_add(csa_visitor->genome_node_buffer, info.gene_feature);
 
   /* remove the cluster genome nodes */
-  for (i = 0; i < array_size(csa_visitor->cluster); i++) {
-    genome_node_rec_delete(*(GenomeNode**) array_get(csa_visitor->cluster, i),
-                           env);
-  }
+  for (i = 0; i < array_size(csa_visitor->cluster); i++)
+    genome_node_rec_delete(*(GenomeNode**) array_get(csa_visitor->cluster, i));
   array_reset(csa_visitor->cluster);
 }

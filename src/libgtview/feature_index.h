@@ -28,7 +28,7 @@
 
 typedef struct FeatureIndex FeatureIndex;
 
-FeatureIndex* feature_index_new(Env*);
+FeatureIndex* feature_index_new(void);
 FeatureIndex* feature_index_ref(FeatureIndex*);
 void          feature_index_add_sequence_region(FeatureIndex*, SequenceRegion*,
                                                 Env*);
@@ -53,6 +53,6 @@ StrArray*     feature_index_get_seqids(const FeatureIndex*, Env*);
 Range         feature_index_get_range_for_seqid(FeatureIndex*, const char*);
 bool          feature_index_has_seqid(const FeatureIndex*, const char*, Env*);
 int           feature_index_unit_test(Env*);
-void          feature_index_delete(FeatureIndex*, Env*);
+void          feature_index_delete(FeatureIndex*);
 
 #endif

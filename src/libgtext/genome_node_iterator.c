@@ -69,7 +69,7 @@ int genome_node_iterator_example(Env *env)
   }
   genome_node_iterator_delete(gni, env);
 
-  genome_node_rec_delete(gn, env);
+  genome_node_rec_delete(gn);
   return 0;
 }
 

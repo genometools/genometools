@@ -41,11 +41,11 @@ static int feature_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return had_err;
 }
 
-static void feature_stream_free(GenomeStream *gs, Env *env)
+static void feature_stream_free(GenomeStream *gs)
 {
   FeatureStream *feature_stream = feature_stream_cast(gs);
-  genome_stream_delete(feature_stream->in_stream, env);
-  genome_visitor_delete(feature_stream->feature_visitor, env);
+  genome_stream_delete(feature_stream->in_stream);
+  genome_visitor_delete(feature_stream->feature_visitor);
 }
 
 const GenomeStreamClass* feature_stream_class(void)

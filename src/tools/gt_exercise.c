@@ -82,15 +82,15 @@ int gt_exercise(int argc, const char **argv, Env *env)
   env_error_check(env);
 
   /* option parsing */
-  exercise_toolbox = toolbox_new(env);
+  exercise_toolbox = toolbox_new();
   register_exercises(exercise_toolbox, env);
   switch (parse_options(&parsed_args, argc, argv, exercise_toolbox, env)) {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      toolbox_delete(exercise_toolbox, env);
+      toolbox_delete(exercise_toolbox);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      toolbox_delete(exercise_toolbox, env);
+      toolbox_delete(exercise_toolbox);
       return 0;
   }
   assert(parsed_args < argc);
@@ -110,7 +110,7 @@ int gt_exercise(int argc, const char **argv, Env *env)
 
   /* free */
   cstr_array_delete(nargv, env);
-  toolbox_delete(exercise_toolbox, env);
+  toolbox_delete(exercise_toolbox);
 
   return had_err;
 }

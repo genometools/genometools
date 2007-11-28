@@ -60,16 +60,13 @@ static AutomaticSequenceRegion* automatic_sequence_region_new(Env *env)
   return auto_sr;
 }
 
-static void automatic_sequence_region_delete(AutomaticSequenceRegion *auto_sr,
-                                             Env *env)
+static void automatic_sequence_region_delete(AutomaticSequenceRegion *auto_sr)
 {
   unsigned long i;
   if (!auto_sr) return;
-  genome_node_delete(auto_sr->sequence_region, env);
-  for (i = 0; i < array_size(auto_sr->genome_features); i++) {
-    genome_node_delete(*(GenomeNode**) array_get(auto_sr->genome_features, i),
-                       env);
-  }
+  genome_node_delete(auto_sr->sequence_region);
+  for (i = 0; i < array_size(auto_sr->genome_features); i++)
+    genome_node_delete(*(GenomeNode**) array_get(auto_sr->genome_features, i));
   array_delete(auto_sr->genome_features);
   ma_free(auto_sr);
 }
@@ -99,23 +96,20 @@ static void simple_sequence_region_delete(SimpleSequenceRegion *ssr, Env *env)
   ma_free(ssr);
 }
 
-GFF3Parser* gff3parser_new(bool checkids, Env *env)
+GFF3Parser* gff3parser_new(bool checkids)
 {
   GFF3Parser *gff3_parser = ma_malloc(sizeof (GFF3Parser));
   gff3_parser->id_to_genome_node_mapping = hashtable_new(HASH_STRING,
                                                          ma_free_func,
                                                          (FreeFunc)
-                                                         genome_node_delete,
-                                                         env);
+                                                         genome_node_delete);
   gff3_parser->seqid_to_ssr_mapping = hashtable_new(HASH_STRING, NULL,
                                                     (FreeFunc)
-                                                  simple_sequence_region_delete,
-                                                    env);
+                                                 simple_sequence_region_delete);
   gff3_parser->source_to_str_mapping = hashtable_new(HASH_STRING, NULL,
-                                                     (FreeFunc) str_delete,
-                                                     env);
+                                                     (FreeFunc) str_delete);
   gff3_parser->undefined_sequence_regions = hashtable_new(HASH_STRING, NULL,
-                              (FreeFunc) automatic_sequence_region_delete, env);
+                              (FreeFunc) automatic_sequence_region_delete);
   gff3_parser->incomplete_node = false;
   gff3_parser->checkids = checkids;
   gff3_parser->offset = UNDEF_LONG;
@@ -137,7 +131,8 @@ int gff3parser_set_offsetfile(GFF3Parser *gff3_parser, Str *offsetfile,
   assert(gff3_parser);
   assert(gff3_parser->offset == UNDEF_LONG);
   gff3_parser->offset_mapping = mapping_new(offsetfile, "offsets",
-                                            MAPPINGTYPE_INTEGER, env);
+                                            MAPPINGTYPE_INTEGER,
+                                            env_error(env));
   if (gff3_parser->offset_mapping)
     return 0;
   return -1;
@@ -316,7 +311,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
            generated */
         genome_feature_add_attribute((GenomeFeature*) genome_feature,
                                      splitter_get_token(tmp_splitter, 0),
-                                     splitter_get_token(tmp_splitter, 1), env);
+                                     splitter_get_token(tmp_splitter, 1));
       }
     }
   }
@@ -340,7 +335,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
         auto_sr->sequence_region = sequence_region_new(seqid_str, range, NULL,
                                                        0, env);
         hashtable_add(gff3_parser->undefined_sequence_regions,
-                      str_get(seqid_str), auto_sr, env);
+                      str_get(seqid_str), auto_sr);
       }
       else {
         /* get seqid string */
@@ -378,7 +373,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     if (!source_str) {
       source_str = str_new_cstr(source);
       hashtable_add(gff3_parser->source_to_str_mapping, str_get(source_str),
-                    source_str, env);
+                    source_str);
     }
     assert(source_str);
     genome_node_set_source(genome_feature, source_str);
@@ -403,7 +398,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     else {
       gff3_parser->incomplete_node = true;
       hashtable_add(gff3_parser->id_to_genome_node_mapping, id,
-                    genome_node_ref(genome_feature), env);
+                    genome_node_ref(genome_feature));
     }
   }
   else
@@ -444,7 +439,7 @@ static int parse_regular_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
       array_add(auto_sr->genome_features, genome_feature);
   }
   else
-    genome_node_delete(genome_feature, env);
+    genome_node_delete(genome_feature);
 
   if (!had_err && gn)
     queue_add(genome_nodes, gn);
@@ -572,7 +567,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
       else {
         ssr = simple_sequence_region_new(seqid, range, line_number, env);
         hashtable_add(gff3_parser->seqid_to_ssr_mapping,
-                      str_get(ssr->seqid_str), ssr, env);
+                      str_get(ssr->seqid_str), ssr);
       }
     }
     if (!had_err) {
@@ -586,7 +581,7 @@ static int parse_meta_gff3_line(GFF3Parser *gff3_parser, Queue *genome_nodes,
     /* now all nodes are complete */
     gff3_parser->incomplete_node = false;
     if (!gff3_parser->checkids)
-      hashtable_reset(gff3_parser->id_to_genome_node_mapping, env);
+      hashtable_reset(gff3_parser->id_to_genome_node_mapping);
   }
   else {
     warning("skipping unknown meta line %lu in file \"%s\": %s", line_number,
@@ -690,7 +685,7 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
 
   if (had_err) {
     while (queue_size(genome_nodes))
-      genome_node_rec_delete(queue_get(genome_nodes), env);
+      genome_node_rec_delete(queue_get(genome_nodes));
   }
   else if (rval == EOF) {
     /* the file has been parsed completely, add automatically created sequence
@@ -708,23 +703,23 @@ int gff3parser_parse_genome_nodes(int *status_code, GFF3Parser *gff3_parser,
   return had_err;
 }
 
-void gff3parser_reset(GFF3Parser *gff3_parser, Env *env)
+void gff3parser_reset(GFF3Parser *gff3_parser)
 {
   assert(gff3_parser && gff3_parser->id_to_genome_node_mapping);
-  hashtable_reset(gff3_parser->id_to_genome_node_mapping, env);
-  hashtable_reset(gff3_parser->seqid_to_ssr_mapping, env);
-  hashtable_reset(gff3_parser->source_to_str_mapping, env);
-  hashtable_reset(gff3_parser->undefined_sequence_regions, env);
+  hashtable_reset(gff3_parser->id_to_genome_node_mapping);
+  hashtable_reset(gff3_parser->seqid_to_ssr_mapping);
+  hashtable_reset(gff3_parser->source_to_str_mapping);
+  hashtable_reset(gff3_parser->undefined_sequence_regions);
 }
 
-void gff3parser_delete(GFF3Parser *gff3_parser, Env *env)
+void gff3parser_delete(GFF3Parser *gff3_parser)
 {
   if (!gff3_parser) return;
   assert(gff3_parser->id_to_genome_node_mapping);
-  hashtable_delete(gff3_parser->id_to_genome_node_mapping, env);
-  hashtable_delete(gff3_parser->seqid_to_ssr_mapping, env);
-  hashtable_delete(gff3_parser->source_to_str_mapping, env);
-  hashtable_delete(gff3_parser->undefined_sequence_regions, env);
-  mapping_delete(gff3_parser->offset_mapping, env);
+  hashtable_delete(gff3_parser->id_to_genome_node_mapping);
+  hashtable_delete(gff3_parser->seqid_to_ssr_mapping);
+  hashtable_delete(gff3_parser->source_to_str_mapping);
+  hashtable_delete(gff3_parser->undefined_sequence_regions);
+  mapping_delete(gff3_parser->offset_mapping);
   ma_free(gff3_parser);
 }

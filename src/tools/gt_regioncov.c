@@ -79,7 +79,7 @@ int gt_regioncov(int argc, const char **argv, Env *env)
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = genome_stream_next_tree(gff3_in_stream, &gn, env)) && gn) {
       had_err = genome_node_accept(gn, regioncov_visitor, env);
-      genome_node_rec_delete(gn, env);
+      genome_node_rec_delete(gn);
   }
 
   /* show region coverage */
@@ -87,8 +87,8 @@ int gt_regioncov(int argc, const char **argv, Env *env)
     regioncov_visitor_show_coverage(regioncov_visitor, env);
 
   /* free */
-  genome_visitor_delete(regioncov_visitor, env);
-  genome_stream_delete(gff3_in_stream, env);
+  genome_visitor_delete(regioncov_visitor);
+  genome_stream_delete(gff3_in_stream);
 
   return had_err;
 }

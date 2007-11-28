@@ -34,13 +34,13 @@ struct CDSVisitor {
 #define cds_visitor_cast(GV)\
         genome_visitor_cast(cds_visitor_class(), GV)
 
-static void cds_visitor_free(GenomeVisitor *gv, Env *env)
+static void cds_visitor_free(GenomeVisitor *gv)
 {
   CDSVisitor *cds_visitor = cds_visitor_cast(gv);
   assert(cds_visitor);
   str_delete(cds_visitor->source);
-  splicedseq_delete(cds_visitor->splicedseq, env);
-  regionmapping_delete(cds_visitor->regionmapping, env);
+  splicedseq_delete(cds_visitor->splicedseq);
+  regionmapping_delete(cds_visitor->regionmapping);
 }
 
 static int extract_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
@@ -72,7 +72,7 @@ static int extract_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
     if (!had_err) {
       assert(range.end <= raw_sequence_length);
       splicedseq_add(v->splicedseq, range.start - 1, range.end - 1,
-                     raw_sequence, env);
+                     raw_sequence);
     }
   }
   return had_err;
@@ -101,7 +101,7 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
   if (!had_err && splicedseq_length(v->splicedseq) > 2) {
     strand = genome_feature_get_strand(gf);
     if (strand == STRAND_REVERSE) {
-      if (splicedseq_reverse(v->splicedseq, env))
+      if (splicedseq_reverse(v->splicedseq, env_error(env)))
         return -1;
     }
     /* determine ORFs for all three frames */
@@ -111,18 +111,18 @@ static int add_cds_if_necessary(GenomeNode *gn, void *data, Env *env)
     /* printf("pr_0=%s\n", str_get(pr_0)); */
     orfs = array_new(sizeof (Range));
     translate_dna(pr_0, splicedseq_get(v->splicedseq),
-                  splicedseq_length(v->splicedseq), 0, env);
+                  splicedseq_length(v->splicedseq), 0);
     translate_dna(pr_1, splicedseq_get(v->splicedseq),
-                  splicedseq_length(v->splicedseq), 1, env);
+                  splicedseq_length(v->splicedseq), 1);
     translate_dna(pr_2, splicedseq_get(v->splicedseq),
-                  splicedseq_length(v->splicedseq), 2, env);
-    determine_ORFs(orfs, 0, str_get(pr_0), str_length(pr_0), env);
-    determine_ORFs(orfs, 1, str_get(pr_1), str_length(pr_1), env);
-    determine_ORFs(orfs, 2, str_get(pr_2), str_length(pr_2), env);
+                  splicedseq_length(v->splicedseq), 2);
+    determine_ORFs(orfs, 0, str_get(pr_0), str_length(pr_0));
+    determine_ORFs(orfs, 1, str_get(pr_1), str_length(pr_1));
+    determine_ORFs(orfs, 2, str_get(pr_2), str_length(pr_2));
 
     if (array_size(orfs)) {
       /* sort ORFs according to length */
-      ranges_sort_by_length_stable(orfs, env);
+      ranges_sort_by_length_stable(orfs);
 
       /* create CDS features from the longest ORF */
       orf = *(Range*) array_get(orfs, 0);
@@ -214,7 +214,7 @@ GenomeVisitor* cds_visitor_new(RegionMapping *regionmapping, Str *source,
   gv = genome_visitor_create(cds_visitor_class(), env);
   cds_visitor = cds_visitor_cast(gv);
   cds_visitor->source = str_ref(source);
-  cds_visitor->splicedseq = splicedseq_new(env);
+  cds_visitor->splicedseq = splicedseq_new();
   cds_visitor->regionmapping = regionmapping;
   return gv;
 }

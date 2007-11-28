@@ -37,7 +37,7 @@ struct GTFVisitor {
 #define gtf_visitor_cast(GV)\
         genome_visitor_cast(gtf_visitor_class(), GV)
 
-static void gtf_visitor_free(GenomeVisitor *gv, Env *env)
+static void gtf_visitor_free(GenomeVisitor *gv)
 {
   GTFVisitor *gtf_visitor = gtf_visitor_cast(gv);
   assert(gtf_visitor);

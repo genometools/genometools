@@ -28,10 +28,10 @@ typedef void (*StringDistriIterFunc)(const char *string,
                                      unsigned long occurrences,
                                      double probability, void *data);
 
-StringDistri*      stringdistri_new(Env*);
-void               stringdistri_add(StringDistri*, const char*, Env*);
+StringDistri*      stringdistri_new(void);
+void               stringdistri_add(StringDistri*, const char*);
 void               stringdistri_foreach(const StringDistri*,
                                         StringDistriIterFunc, void *data, Env*);
-void               stringdistri_delete(StringDistri*, Env*);
+void               stringdistri_delete(StringDistri*);
 
 #endif

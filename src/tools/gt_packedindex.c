@@ -41,17 +41,17 @@ gt_packedindex(int argc, const char **argv, Env *env)
   char **nargv = NULL;
   env_error_check(env);
 
-  index_toolbox = toolbox_new(env);
+  index_toolbox = toolbox_new();
   register_packedindextools(index_toolbox, env);
 
   switch (parse_subtool_options(&parsed_args, argc, argv, index_toolbox, env))
   {
     case OPTIONPARSER_OK: break;
     case OPTIONPARSER_ERROR:
-      toolbox_delete(index_toolbox, env);
+      toolbox_delete(index_toolbox);
       return -1;
     case OPTIONPARSER_REQUESTS_EXIT:
-      toolbox_delete(index_toolbox, env);
+      toolbox_delete(index_toolbox);
       return 0;
   }
   assert(parsed_args < argc);
@@ -71,7 +71,7 @@ gt_packedindex(int argc, const char **argv, Env *env)
   }
 
   cstr_array_delete(nargv, env);
-  toolbox_delete(index_toolbox, env);
+  toolbox_delete(index_toolbox);
   return had_err?-1:0;
 }
 

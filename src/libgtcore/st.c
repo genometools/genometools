@@ -42,7 +42,7 @@ static struct st_hash_type type_strhash = {
     strhash,
 };
 
-static void rehash(st_table *, Env*);
+static void rehash(st_table *);
 
 #define alloc(type) (type*)ma_malloc((unsigned)sizeof (type))
 #define Calloc(n,s) (char*)ma_calloc((n),(s))
@@ -131,7 +131,7 @@ stat_col()
 #endif
 
 st_table*
-st_init_table_with_size(struct st_hash_type *type, int size, Env *env)
+st_init_table_with_size(struct st_hash_type *type, int size)
 {
     st_table *tbl;
 
@@ -154,37 +154,37 @@ st_init_table_with_size(struct st_hash_type *type, int size, Env *env)
 }
 
 st_table*
-st_init_table(struct st_hash_type *type, Env *env)
+st_init_table(struct st_hash_type *type)
 {
-    return st_init_table_with_size(type, 0, env);
+    return st_init_table_with_size(type, 0);
 }
 
 st_table*
-st_init_numtable(Env *env)
+st_init_numtable(void)
 {
-    return st_init_table(&type_numhash, env);
+    return st_init_table(&type_numhash);
 }
 
 st_table*
-st_init_numtable_with_size(int size, Env *env)
+st_init_numtable_with_size(int size)
 {
-    return st_init_table_with_size(&type_numhash, size, env);
+    return st_init_table_with_size(&type_numhash, size);
 }
 
 st_table*
-st_init_strtable(Env *env)
+st_init_strtable(void)
 {
-    return st_init_table(&type_strhash, env);
+    return st_init_table(&type_strhash);
 }
 
 st_table*
-st_init_strtable_with_size(int size, Env *env)
+st_init_strtable_with_size(int size)
 {
-    return st_init_table_with_size(&type_strhash, size, env);
+    return st_init_table_with_size(&type_strhash, size);
 }
 
 void
-st_free_table(st_table *table, Env *env)
+st_free_table(st_table *table)
 {
     register st_table_entry *ptr, *next;
     int i;
@@ -247,7 +247,7 @@ st_lookup(table, key, value)
 do {\
     st_table_entry *entry;\
     if (table->num_entries/(table->num_bins) > ST_DEFAULT_MAX_DENSITY) {\
-        rehash(table, env);\
+        rehash(table);\
         bin_pos = hash_val % table->num_bins;\
     }\
     \
@@ -262,7 +262,7 @@ do {\
 } while (0)
 
 int
-st_insert(st_table *table, st_data_t key, st_data_t value, Env *env)
+st_insert(st_table *table, st_data_t key, st_data_t value)
 {
     unsigned int hash_val, bin_pos;
     register st_table_entry *ptr;
@@ -291,7 +291,7 @@ st_add_direct(st_table *table, st_data_t key, st_data_t value, Env *env)
 }
 
 static void
-rehash(st_table *table, Env *env)
+rehash(st_table *table)
 {
     register st_table_entry *ptr, *next, **new_bins;
     int i, old_num_bins = table->num_bins, new_num_bins;
@@ -356,7 +356,7 @@ st_copy(st_table *old_table, Env *env)
 }
 
 int
-st_delete(st_table *table, st_data_t *key, st_data_t *value, Env *env)
+st_delete(st_table *table, st_data_t *key, st_data_t *value)
 {
     unsigned int hash_val;
     st_table_entry *tmp;

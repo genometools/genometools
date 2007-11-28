@@ -29,7 +29,7 @@ struct Splicedseq {
   bool forward;
 };
 
-Splicedseq* splicedseq_new(Env *env)
+Splicedseq* splicedseq_new(void)
 {
   Splicedseq *ss = ma_malloc(sizeof (Splicedseq));
   ss->splicedseq = str_new();
@@ -39,7 +39,7 @@ Splicedseq* splicedseq_new(Env *env)
 }
 
 void splicedseq_add(Splicedseq *ss, unsigned long start, unsigned long end,
-                    const char *original_sequence, Env *env)
+                    const char *original_sequence)
 {
   unsigned long i;
   assert(ss && start <= end && original_sequence);
@@ -87,12 +87,13 @@ unsigned long splicedseq_length(const Splicedseq *ss)
   return str_length(ss->splicedseq);
 }
 
-int splicedseq_reverse(Splicedseq *ss, Env *env)
+int splicedseq_reverse(Splicedseq *ss, Error *e)
 {
   int had_err;
+  error_check(e);
   assert(ss);
   had_err = reverse_complement(str_get(ss->splicedseq),
-                               str_length(ss->splicedseq), env);
+                               str_length(ss->splicedseq), e);
   if (!had_err) {
     array_reverse(ss->positionmapping);
     ss->forward = !ss->forward;
@@ -113,8 +114,8 @@ static int check_splicedseq(Splicedseq *ss, Env *env)
   static char *origseq = "aaccaagtga", *splicedseq = "ccgtg";
   int had_err = 0;
   env_error_check(env);
-  splicedseq_add(ss, 2, 3, origseq, env);
-  splicedseq_add(ss, 6, 8, origseq, env);
+  splicedseq_add(ss, 2, 3, origseq);
+  splicedseq_add(ss, 6, 8, origseq);
   ensure(had_err, strcmp(splicedseq_get(ss), splicedseq) == 0);
   ensure(had_err, !splicedseq_pos_is_border(ss, 0));
   ensure(had_err,  splicedseq_pos_is_border(ss, 1));
@@ -129,17 +130,17 @@ int splicedseq_unit_test(Env *env)
   Splicedseq *ss;
   int had_err = 0;
   env_error_check(env);
-  ss = splicedseq_new(env);
+  ss = splicedseq_new();
   had_err = check_splicedseq(ss, env);
   if (!had_err) {
     splicedseq_reset(ss);
     had_err = check_splicedseq(ss, env);
   }
-  splicedseq_delete(ss, env);
+  splicedseq_delete(ss);
   return had_err;
 }
 
-void splicedseq_delete(Splicedseq *ss, Env *env)
+void splicedseq_delete(Splicedseq *ss)
 {
   if (!ss) return;
   str_delete(ss->splicedseq);

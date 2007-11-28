@@ -48,13 +48,13 @@ typedef struct {
 #define genome_feature_cast(GN)\
         genome_node_cast(genome_feature_class(), GN)
 
-static void genome_feature_free(GenomeNode *gn, Env *env)
+static void genome_feature_free(GenomeNode *gn)
 {
   GenomeFeature *gf = genome_feature_cast(gn);
   assert(gf);
   str_delete(gf->seqid);
   str_delete(gf->source);
-  hashtable_delete(gf->attributes, env);
+  hashtable_delete(gf->attributes);
 }
 
 const char* genome_feature_get_attribute(GenomeNode *gn, const char *attr_name)
@@ -400,13 +400,12 @@ void genome_feature_set_score(GenomeFeature *gf, double score)
 }
 
 void genome_feature_add_attribute(GenomeFeature *gf, const char *attr_name,
-                                  const char *attr_value, Env *env)
+                                  const char *attr_value)
 {
   assert(gf && attr_name && attr_value);
   if (!gf->attributes)
-    gf->attributes = hashtable_new(HASH_STRING, ma_free_func, ma_free_func,
-                                   env);
-  hashtable_add(gf->attributes, cstr_dup(attr_name), cstr_dup(attr_value), env);
+    gf->attributes = hashtable_new(HASH_STRING, ma_free_func, ma_free_func);
+  hashtable_add(gf->attributes, cstr_dup(attr_name), cstr_dup(attr_value));
 }
 
 int genome_feature_foreach_attribute(GenomeFeature *gf,

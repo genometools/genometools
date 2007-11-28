@@ -49,10 +49,10 @@ static int stat_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return had_err;
 }
 
-static void stat_stream_free(GenomeStream *gs, Env *env)
+static void stat_stream_free(GenomeStream *gs)
 {
   StatStream *stat_stream = stat_stream_cast(gs);
-  genome_visitor_delete(stat_stream->stat_visitor, env);
+  genome_visitor_delete(stat_stream->stat_visitor);
 }
 
 const GenomeStreamClass* stat_stream_class(void)

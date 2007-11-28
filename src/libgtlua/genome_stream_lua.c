@@ -74,9 +74,7 @@ static int genome_stream_lua_next_tree(lua_State *L)
 static int genome_stream_lua_delete(lua_State *L)
 {
   GenomeStream **gs = check_genome_stream(L, 1);
-  Env *env;
-  env = get_env_from_registry(L);
-  genome_stream_delete(*gs, env);
+  genome_stream_delete(*gs);
   return 0;
 }
 

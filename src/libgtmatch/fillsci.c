@@ -206,7 +206,7 @@ int fasta2sequencekeyvalues(
     *totallength = pos;
   }
   fa_xfclose(desfp);
-  discdistri_delete(distspralen,env);
+  discdistri_delete(distspralen);
   fastabuffer_delete(fb, env);
   queue_delete_with_contents(descqueue);
   return haserr ? -1 : 0;
@@ -272,5 +272,5 @@ void sequence2specialcharinfo(Specialcharinfo *specialcharinfo,
   updatesumrangeinfo.verboseinfo = verboseinfo;
   discdistri_foreach(distspralen,updatesumranges,&updatesumrangeinfo,env);
   specialcharinfo->lengthofspecialsuffix = lastspeciallength;
-  discdistri_delete(distspralen,env);
+  discdistri_delete(distspralen);
 }

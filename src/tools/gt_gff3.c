@@ -183,17 +183,17 @@ int gt_gff3(int argc, const char **argv, Env *env)
   if (!had_err) {
     while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
            gn) {
-      genome_node_rec_delete(gn, env);
+      genome_node_rec_delete(gn);
     }
   }
 
   /* free */
   str_delete(arguments.offsetfile);
-  genome_stream_delete(gff3_out_stream, env);
-  genome_stream_delete(sort_stream, env);
-  genome_stream_delete(mergefeat_stream, env);
-  genome_stream_delete(addintrons_stream, env);
-  genome_stream_delete(gff3_in_stream, env);
+  genome_stream_delete(gff3_out_stream);
+  genome_stream_delete(sort_stream);
+  genome_stream_delete(mergefeat_stream);
+  genome_stream_delete(addintrons_stream);
+  genome_stream_delete(gff3_in_stream);
   genfile_close(arguments.outfp);
 
   return had_err;

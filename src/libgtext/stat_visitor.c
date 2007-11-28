@@ -39,14 +39,14 @@ struct StatVisitor {
 #define stat_visitor_cast(GV)\
         genome_visitor_cast(stat_visitor_class(), GV)
 
-static void stat_visitor_free(GenomeVisitor *gv, Env *env)
+static void stat_visitor_free(GenomeVisitor *gv)
 {
   StatVisitor *stat_visitor = stat_visitor_cast(gv);
-  discdistri_delete(stat_visitor->gene_length_distribution, env);
-  discdistri_delete(stat_visitor->gene_score_distribution, env);
-  discdistri_delete(stat_visitor->exon_length_distribution, env);
-  discdistri_delete(stat_visitor->exon_number_distribution, env);
-  discdistri_delete(stat_visitor->intron_length_distribution, env);
+  discdistri_delete(stat_visitor->gene_length_distribution);
+  discdistri_delete(stat_visitor->gene_score_distribution);
+  discdistri_delete(stat_visitor->exon_length_distribution);
+  discdistri_delete(stat_visitor->exon_number_distribution);
+  discdistri_delete(stat_visitor->intron_length_distribution);
 }
 
 static int add_exon_number(GenomeNode *gn, void *data, Env *env)

@@ -69,7 +69,7 @@ static void msort_r_withbuf(void *base, size_t numofelems, size_t size,
 }
 
 void msort_r(void *base, size_t nmemb, size_t size, void *comparinfo,
-             int (*compar)(void *, const void *, const void *), Env *env)
+             int (*compar)(void *, const void *, const void *))
 {
   void *buf;
   buf = ma_malloc(size * nmemb);
@@ -85,7 +85,7 @@ int non_r_cmpfunc(void *compar, const void *a, const void *b)
 }
 
 void msort(void *base, size_t nmemb, size_t size,
-           int (*compar)(const void *, const void *), Env *env)
+           int (*compar)(const void *, const void *))
 {
-  msort_r(base, nmemb, size, compar, non_r_cmpfunc, env);
+  msort_r(base, nmemb, size, compar, non_r_cmpfunc);
 }

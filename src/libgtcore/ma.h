@@ -25,7 +25,7 @@
 
 /* the memory allocator module */
 
-void          ma_init(bool bookkeeping, Env*);
+void          ma_init(bool bookkeeping);
 #define       ma_malloc(size)\
               ma_malloc_mem(size, __FILE__, __LINE__)
 void*         ma_malloc_mem(size_t size, const char*, int);

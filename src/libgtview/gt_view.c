@@ -178,7 +178,7 @@ int gt_view(int argc, const char **argv, Env *env)
 
   if (!had_err) {
     /* create feature index */
-    features = feature_index_new(env);
+    features = feature_index_new();
     parsed_args++;
     do {
       /* create a gff3 input stream */
@@ -204,13 +204,13 @@ int gt_view(int argc, const char **argv, Env *env)
       /* pull the features through the stream and free them afterwards */
       while (!(had_err = genome_stream_next_tree(feature_stream, &gn, env)) &&
              gn) {
-        genome_node_rec_delete(gn, env);
+        genome_node_rec_delete(gn);
       }
 
-      genome_stream_delete(feature_stream, env);
-      genome_stream_delete(gff3_out_stream, env);
-      genome_stream_delete(addintrons_stream, env);
-      genome_stream_delete(gff3_in_stream, env);
+      genome_stream_delete(feature_stream);
+      genome_stream_delete(gff3_out_stream);
+      genome_stream_delete(addintrons_stream);
+      genome_stream_delete(gff3_in_stream);
 
       if (!argv[parsed_args]) /* no GFF3 file was given at all */
         break;
@@ -277,7 +277,7 @@ int gt_view(int argc, const char **argv, Env *env)
   /* free */
   str_delete(arguments.seqid);
   array_delete(results);
-  feature_index_delete(features, env);
+  feature_index_delete(features);
 
   return had_err;
 }

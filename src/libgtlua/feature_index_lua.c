@@ -25,10 +25,9 @@
 static int feature_index_lua_new(lua_State *L)
 {
   FeatureIndex **feature_index;
-  Env *env = get_env_from_registry(L);
   feature_index = lua_newuserdata(L, sizeof (FeatureIndex*));
   assert(feature_index);
-  *feature_index = feature_index_new(env);
+  *feature_index = feature_index_new();
   luaL_getmetatable(L, FEATURE_INDEX_METATABLE);
   lua_setmetatable(L, -2);
   return 1;
@@ -116,9 +115,7 @@ static int feature_index_lua_get_range_for_seqid(lua_State *L)
 static int feature_index_lua_delete(lua_State *L)
 {
   FeatureIndex **feature_index = check_feature_index(L, 1);
-  Env *env;
-  env = get_env_from_registry(L);
-  feature_index_delete(*feature_index, env);
+  feature_index_delete(*feature_index);
   return 0;
 }
 

@@ -26,6 +26,6 @@ void           seqid2file_options(OptionParser*, Str *seqfile,
                                   Str *regionmapping, Env*);
 
 RegionMapping* seqid2file_regionmapping_new(Str *seqfile, Str *regionmapping,
-                                            Env *env);
+                                            Error*);
 
 #endif

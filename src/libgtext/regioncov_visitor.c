@@ -32,10 +32,10 @@ struct RegionCovVisitor {
 #define regioncov_visitor_cast(GV)\
         genome_visitor_cast(regioncov_visitor_class(), GV)
 
-static void regioncov_visitor_free(GenomeVisitor *gv, Env *env)
+static void regioncov_visitor_free(GenomeVisitor *gv)
 {
   RegionCovVisitor *regioncov_visitor = regioncov_visitor_cast(gv);
-  hashtable_delete(regioncov_visitor->region2rangelist, env);
+  hashtable_delete(regioncov_visitor->region2rangelist);
 }
 
 static int regioncov_visitor_genome_feature(GenomeVisitor *gv,
@@ -75,7 +75,7 @@ static int regioncov_visitor_sequence_region(GenomeVisitor *gv,
   rangelist = array_new(sizeof (Range));
   hashtable_add(regioncov_visitor->region2rangelist,
                 cstr_dup(str_get(genome_node_get_seqid((GenomeNode*) sr))),
-                rangelist, env);
+                rangelist);
   return 0;
 }
 
@@ -96,8 +96,7 @@ GenomeVisitor* regioncov_visitor_new(unsigned long max_feature_dist, Env *env)
   regioncov_visitor->max_feature_dist = max_feature_dist;
   regioncov_visitor->region2rangelist = hashtable_new(HASH_STRING,
                                                       ma_free_func,
-                                                      (FreeFunc) array_delete,
-                                                      env);
+                                                      (FreeFunc) array_delete);
   return gv;
 }
 

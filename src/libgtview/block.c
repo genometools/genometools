@@ -370,8 +370,8 @@ int block_unit_test(Env* env)
   element_delete(e1, env);
   element_delete(e2, env);
   block_delete(b, env);
-  genome_node_delete(gn1, env);
-  genome_node_delete(gn2, env);
+  genome_node_delete(gn1);
+  genome_node_delete(gn2);
 
   return had_err;
 }

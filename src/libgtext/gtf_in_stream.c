@@ -46,7 +46,7 @@ static int gtf_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return 0;
 }
 
-static void gtf_in_stream_free(GenomeStream *gs, Env *env)
+static void gtf_in_stream_free(GenomeStream *gs)
 {
   GTFInStream *gtf_in_stream = gtf_in_stream_cast(gs);
   queue_delete(gtf_in_stream->genome_node_buffer);
@@ -74,7 +74,7 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
 
   gs = genome_stream_create(gtf_in_stream_class(), false, env);
   gtf_in_stream = gtf_in_stream_cast(gs);
-  gtf_parser = gtf_parser_new(env);
+  gtf_parser = gtf_parser_new();
 
   gtf_in_stream->genome_node_buffer = queue_new();
 
@@ -95,10 +95,10 @@ GenomeStream* gtf_in_stream_new(const char *filename, bool be_tolerant,
     fa_xfclose(fpin);
 
   /* free */
-  gtf_parser_delete(gtf_parser, env);
+  gtf_parser_delete(gtf_parser);
 
   if (had_err) {
-    genome_stream_delete(gs, env);
+    genome_stream_delete(gs);
     return NULL;
   }
   return gs;

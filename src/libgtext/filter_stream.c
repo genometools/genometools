@@ -62,10 +62,10 @@ static int filter_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return had_err;
 }
 
-static void filter_stream_free(GenomeStream *gs, Env *env)
+static void filter_stream_free(GenomeStream *gs)
 {
   FilterStream *fs = filter_stream_cast(gs);
-  genome_visitor_delete(fs->filter_visitor, env);
+  genome_visitor_delete(fs->filter_visitor);
 }
 
 const GenomeStreamClass* filter_stream_class(void)

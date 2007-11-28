@@ -32,11 +32,11 @@ struct Mapping {
 };
 
 Mapping* mapping_new(Str *mapping_file, const char *global_name,
-                     MappingType type, Env *env)
+                     MappingType type, Error *e)
 {
   Mapping *m;
   int had_err = 0;
-  env_error_check(env);
+  error_check(e);
   assert(mapping_file && global_name);
   /* alloc */
   m = ma_malloc(sizeof (Mapping));
@@ -46,7 +46,7 @@ Mapping* mapping_new(Str *mapping_file, const char *global_name,
   /* create new lua state (i.e., interpreter) */
   m->L = luaL_newstate();
   if (!m->L) {
-    env_error_set(env, "out of memory (cannot create new lua state)");
+    error_set(e, "out of memory (cannot create new lua state)");
     had_err = -1;
   }
   /* load the standard libs into the lua interpreter */
@@ -56,7 +56,7 @@ Mapping* mapping_new(Str *mapping_file, const char *global_name,
   if (!had_err) {
     if (luaL_loadfile(m->L, str_get(mapping_file)) ||
         lua_pcall(m->L, 0, 0, 0)) {
-      env_error_set(env, "cannot run file: %s", lua_tostring(m->L, -1));
+      error_set(e, "cannot run file: %s", lua_tostring(m->L, -1));
       had_err = -1;
     }
   }
@@ -64,16 +64,16 @@ Mapping* mapping_new(Str *mapping_file, const char *global_name,
   if (!had_err) {
     lua_getglobal(m->L, global_name);
     if (lua_isnil(m->L, -1)) {
-      env_error_set(env, "'%s' is not defined in \"%s\"", global_name,
-                    str_get(mapping_file));
+      error_set(e, "'%s' is not defined in \"%s\"", global_name,
+                str_get(mapping_file));
       had_err = -1;
     }
   }
   /* make sure it is either a table or a function */
   if (!had_err) {
     if (!(lua_istable(m->L, -1) || lua_isfunction(m->L, -1))) {
-      env_error_set(env, "'%s' must be either a table or a function (defined "
-                    "in \"%s\")", global_name, str_get(mapping_file));
+      error_set(e, "'%s' must be either a table or a function (defined "
+                   "in \"%s\")", global_name, str_get(mapping_file));
       had_err = -1;
     }
   }
@@ -88,7 +88,7 @@ Mapping* mapping_new(Str *mapping_file, const char *global_name,
   }
   /* return */
   if (had_err) {
-    mapping_delete(m, env);
+    mapping_delete(m);
     return NULL;
   }
   return m;
@@ -207,7 +207,7 @@ int mapping_map_integer(Mapping *m, long *output, const char *input, Env *env)
   return map_generic(m, NULL, output, input, env);
 }
 
-void mapping_delete(Mapping *m, Env *env)
+void mapping_delete(Mapping *m)
 {
   if (!m) return;
   str_delete(m->mapping_file);

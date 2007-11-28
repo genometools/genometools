@@ -110,7 +110,7 @@ int gt_stat(int argc, const char **argv, Env *env)
   /* pull the features through the stream , compute the statistics, and free
      them afterwards */
   while (!(had_err = genome_stream_next_tree(stat_stream, &gn, env)) && gn) {
-    genome_node_rec_delete(gn, env);
+    genome_node_rec_delete(gn);
     if (had_err)
       break;
   }
@@ -120,8 +120,8 @@ int gt_stat(int argc, const char **argv, Env *env)
     stat_stream_show_stats(stat_stream, env);
 
   /* free */
-  genome_stream_delete(stat_stream, env);
-  genome_stream_delete(gff3_in_stream, env);
+  genome_stream_delete(stat_stream);
+  genome_stream_delete(gff3_in_stream);
 
   return had_err;
 }

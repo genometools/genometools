@@ -20,6 +20,6 @@
 
 #include "libgtcore/str.h"
 
-void translate_dna(Str*, const char*, unsigned long, unsigned int frame, Env*);
+void translate_dna(Str*, const char*, unsigned long, unsigned int frame);
 
 #endif

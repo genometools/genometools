@@ -41,11 +41,11 @@ static int gff3_out_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   return had_err;
 }
 
-static void gff3_out_stream_free(GenomeStream *gs, Env *env)
+static void gff3_out_stream_free(GenomeStream *gs)
 {
   GFF3OutStream *gff3_out_stream = gff3_out_stream_cast(gs);
-  genome_stream_delete(gff3_out_stream->in_stream, env);
-  genome_visitor_delete(gff3_out_stream->gff3_visitor, env);
+  genome_stream_delete(gff3_out_stream->in_stream);
+  genome_visitor_delete(gff3_out_stream->gff3_visitor);
 }
 
 const GenomeStreamClass* gff3_out_stream_class(void)

@@ -30,7 +30,7 @@ struct SequenceRegion
 #define sequence_region_cast(GN)\
         genome_node_cast(sequence_region_class(), GN)
 
-static void sequence_region_free(GenomeNode *gn, Env *env)
+static void sequence_region_free(GenomeNode *gn)
 {
   SequenceRegion *sr = sequence_region_cast(gn);
   assert(sr && sr->seqid);

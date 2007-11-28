@@ -88,7 +88,7 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
       gn_b = array_get(cs->genome_node_buffer, i);
       if (genome_nodes_are_equal_sequence_regions(*gn_a, *gn_b)) {
         sequence_regions_consolidate(*gn_b, *gn_a);
-        genome_node_rec_delete(*gn_a, env);
+        genome_node_rec_delete(*gn_a);
         *gn_a = NULL;
       }
     }
@@ -124,15 +124,15 @@ int chseqids_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return had_err;
 }
 
-static void chseqids_stream_free(GenomeStream *gs, Env *env)
+static void chseqids_stream_free(GenomeStream *gs)
 {
   ChseqidsStream *cs;
   unsigned long i;
   cs = chseqids_stream_cast(gs);
-  mapping_delete(cs->chseqids_mapping, env);
+  mapping_delete(cs->chseqids_mapping);
   for (i = cs->buffer_index; i < array_size(cs->genome_node_buffer); i++) {
     genome_node_rec_delete(*(GenomeNode**)
-                           array_get(cs->genome_node_buffer, i), env);
+                           array_get(cs->genome_node_buffer, i));
   }
   array_delete(cs->genome_node_buffer);
 }
@@ -157,9 +157,9 @@ GenomeStream* chseqids_stream_new(GenomeStream *in_stream, Str *chseqids_file,
   cs = chseqids_stream_cast(gs);
   cs->in_stream = in_stream;
   cs->chseqids_mapping = mapping_new(chseqids_file, "chseqids",
-                                     MAPPINGTYPE_STRING, env);
+                                     MAPPINGTYPE_STRING, env_error(env));
   if (!cs->chseqids_mapping) {
-    genome_stream_delete(gs, env);
+    genome_stream_delete(gs);
     return NULL;
   }
   cs->genome_node_buffer = array_new(sizeof (GenomeNode*));

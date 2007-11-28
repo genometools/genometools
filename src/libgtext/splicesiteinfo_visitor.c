@@ -41,15 +41,15 @@ struct SpliceSiteInfoVisitor {
 #define splicesiteinfo_visitor_cast(GV)\
         genome_visitor_cast(splicesiteinfo_visitor_class(), GV)
 
-static void splicesiteinfo_visitor_free(GenomeVisitor *gv, Env *env)
+static void splicesiteinfo_visitor_free(GenomeVisitor *gv)
 {
   SpliceSiteInfoVisitor *splicesiteinfo_visitor;
   assert(gv);
   splicesiteinfo_visitor = splicesiteinfo_visitor_cast(gv);
-  regionmapping_delete(splicesiteinfo_visitor->regionmapping, env);
-  stringdistri_delete(splicesiteinfo_visitor->splicesites, env);
-  stringdistri_delete(splicesiteinfo_visitor->donorsites, env);
-  stringdistri_delete(splicesiteinfo_visitor->acceptorsites, env);
+  regionmapping_delete(splicesiteinfo_visitor->regionmapping);
+  stringdistri_delete(splicesiteinfo_visitor->splicesites);
+  stringdistri_delete(splicesiteinfo_visitor->donorsites);
+  stringdistri_delete(splicesiteinfo_visitor->acceptorsites);
 }
 
 static int process_intron(SpliceSiteInfoVisitor *ssiv, GenomeNode *intron,
@@ -86,13 +86,13 @@ static int process_intron(SpliceSiteInfoVisitor *ssiv, GenomeNode *intron,
         site[3] = tolower(sequence[range.end-1]);
         site[4] = '\0';
         if (strand == STRAND_REVERSE)
-          had_err = reverse_complement(site, 4, env);
+          had_err = reverse_complement(site, 4, env_error(env));
         if (!had_err) {
           /* add site to distributions */
-          stringdistri_add(ssiv->splicesites, site, env);
-          stringdistri_add(ssiv->acceptorsites, site + 2, env);
+          stringdistri_add(ssiv->splicesites, site);
+          stringdistri_add(ssiv->acceptorsites, site + 2);
           site[2] = '\0';
-          stringdistri_add(ssiv->donorsites, site, env);
+          stringdistri_add(ssiv->donorsites, site);
           ssiv->show = true;
         }
       }
@@ -143,9 +143,9 @@ GenomeVisitor* splicesiteinfo_visitor_new(RegionMapping *rm, Env *env)
   gv = genome_visitor_create(splicesiteinfo_visitor_class(), env);
   ssiv = splicesiteinfo_visitor_cast(gv);
   ssiv->regionmapping = rm;
-  ssiv->splicesites = stringdistri_new(env);
-  ssiv->acceptorsites = stringdistri_new(env);
-  ssiv->donorsites = stringdistri_new(env);
+  ssiv->splicesites = stringdistri_new();
+  ssiv->acceptorsites = stringdistri_new();
+  ssiv->donorsites = stringdistri_new();
   return gv;
 }
 

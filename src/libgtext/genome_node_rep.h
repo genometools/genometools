@@ -27,7 +27,7 @@
 struct GenomeNodeClass
 {
   size_t size;
-  void  (*free)(GenomeNode*, Env*);
+  void  (*free)(GenomeNode*);
   Str*  (*get_seqid)(GenomeNode*);
   Str*  (*get_idstr)(GenomeNode*);
   Range (*get_range)(GenomeNode*);

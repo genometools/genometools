@@ -88,7 +88,8 @@ int gt_cds(int argc, const char **argv, Env *env)
 
   /* create region mapping */
   regionmapping = seqid2file_regionmapping_new(arguments.seqfile,
-                                               arguments.regionmapping, env);
+                                               arguments.regionmapping,
+                                               env_error(env));
   if (!regionmapping)
     had_err = -1;
 
@@ -108,13 +109,13 @@ int gt_cds(int argc, const char **argv, Env *env)
   /* pull the features through the stream and free them afterwards */
   while (!(had_err = genome_stream_next_tree(gff3_out_stream, &gn, env)) &&
          gn) {
-    genome_node_rec_delete(gn, env);
+    genome_node_rec_delete(gn);
   }
 
   /* free */
-  genome_stream_delete(gff3_out_stream, env);
-  genome_stream_delete(cds_stream, env);
-  genome_stream_delete(gff3_in_stream, env);
+  genome_stream_delete(gff3_out_stream);
+  genome_stream_delete(cds_stream);
+  genome_stream_delete(gff3_in_stream);
   str_delete(arguments.regionmapping);
   str_delete(arguments.seqfile);
 

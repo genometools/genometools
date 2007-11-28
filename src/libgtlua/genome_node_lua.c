@@ -121,9 +121,8 @@ static int genome_node_lua_contains_marked(lua_State *L)
 static int genome_node_lua_delete(lua_State *L)
 {
   GenomeNode **gn;
-  Env *env = get_env_from_registry(L);
   gn = check_genome_node(L, 1);
-  genome_node_rec_delete(*gn, env);
+  genome_node_rec_delete(*gn);
   return 0;
 }
 

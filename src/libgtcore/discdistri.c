@@ -45,13 +45,13 @@ void discdistri_add_multi(DiscDistri *d, unsigned long key,
   assert(d);
 
   if (!d->hashdist)
-    d->hashdist = hashtable_new(HASH_DIRECT, NULL, ma_free_func, env);
+    d->hashdist = hashtable_new(HASH_DIRECT, NULL, ma_free_func);
 
   valueptr = hashtable_get(d->hashdist, (void*) key);
   if (!valueptr) {
     valueptr = ma_malloc(sizeof *valueptr);
     *valueptr = occurrences;
-    hashtable_add(d->hashdist, (void*) key, valueptr, env);
+    hashtable_add(d->hashdist, (void*) key, valueptr);
   }
   else
     (*valueptr) += occurrences;
@@ -167,14 +167,14 @@ int discdistri_unit_test(Env *env)
   ensure(had_err, discdistri_get(d, 0) == 1);
   ensure(had_err, discdistri_get(d, 100) == 256);
 
-  discdistri_delete(d, env);
+  discdistri_delete(d);
 
   return had_err;
 }
 
-void discdistri_delete(DiscDistri *d, Env *env)
+void discdistri_delete(DiscDistri *d)
 {
   if (!d) return;
-  hashtable_delete(d->hashdist, env);
+  hashtable_delete(d->hashdist);
   ma_free(d);
 }

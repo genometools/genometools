@@ -483,5 +483,5 @@ void bioseq_show_seqlengthdistri(Bioseq *bs, Env *env)
     discdistri_add(d, bioseq_get_sequence_length(bs, i), env);
   printf("sequence length distribution:\n");
   discdistri_show(d, env);
-  discdistri_delete(d, env);
+  discdistri_delete(d);
 }

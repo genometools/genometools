@@ -74,11 +74,11 @@ static bool uniq(GenomeNode **first_node, GenomeNode **second_node, Env *env)
         (first_score != UNDEF_DOUBLE && second_score != UNDEF_DOUBLE &&
          first_score >= second_score)) {
       /* keep first node */
-      genome_node_rec_delete(*second_node, env);
+      genome_node_rec_delete(*second_node);
     }
     else {
       /* keep second node */
-      genome_node_rec_delete(*first_node, env);
+      genome_node_rec_delete(*first_node);
       *first_node = *second_node;
     }
     *second_node = NULL;
@@ -130,11 +130,11 @@ static int uniq_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return had_err;
 }
 
-static void uniq_stream_free(GenomeStream *gs, Env *env)
+static void uniq_stream_free(GenomeStream *gs)
 {
   UniqStream *us = uniq_stream_cast(gs);
-  genome_node_rec_delete(us->first_node, env);
-  genome_node_rec_delete(us->second_node, env);
+  genome_node_rec_delete(us->first_node);
+  genome_node_rec_delete(us->second_node);
 }
 
 const GenomeStreamClass* uniq_stream_class(void)

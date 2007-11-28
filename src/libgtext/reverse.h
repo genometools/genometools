@@ -18,9 +18,9 @@
 #ifndef REVERSE_H
 #define REVERSE_H
 
-#include "libgtcore/env.h"
+#include "libgtcore/error.h"
 
-/* reverse 'dna_seq' of length 'seqlen' in place */
-int reverse_complement(char *dna_seq, unsigned long seqlen, Env*);
+/* reverse <dna_seq> of length <seqlen> in place */
+int reverse_complement(char *dna_seq, unsigned long seqlen, Error*);
 
 #endif

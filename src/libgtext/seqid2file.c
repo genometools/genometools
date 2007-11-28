@@ -44,15 +44,15 @@ void seqid2file_options(OptionParser *op, Str *seqfile, Str *regionmapping,
 }
 
 RegionMapping* seqid2file_regionmapping_new(Str *seqfile, Str *regionmapping,
-                                            Env *env)
+                                            Error *e)
 {
-  env_error_check(env);
+  error_check(e);
   assert(seqfile && regionmapping);
   assert(str_length(seqfile) || str_length(regionmapping));
   assert(!(str_length(seqfile) && str_length(regionmapping)));
   /* create region mapping */
   if (str_length(seqfile))
-    return regionmapping_new_seqfile(seqfile, env);
+    return regionmapping_new_seqfile(seqfile);
   else
-    return regionmapping_new_mapping(regionmapping, env);
+    return regionmapping_new_mapping(regionmapping, e);
 }

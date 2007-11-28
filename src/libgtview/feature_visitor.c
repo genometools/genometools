@@ -29,12 +29,11 @@ struct FeatureVisitor {
 #define feature_visitor_cast(GV)\
         genome_visitor_cast(feature_visitor_class(), GV)
 
-static void feature_visitor_free(GenomeVisitor *gv,
-                                 Env *env)
+static void feature_visitor_free(GenomeVisitor *gv)
 {
   FeatureVisitor *feature_visitor = feature_visitor_cast(gv);
   assert(feature_visitor);
-  feature_index_delete(feature_visitor->feature_index, env);
+  feature_index_delete(feature_visitor->feature_index);
 }
 
 static int feature_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,

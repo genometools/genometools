@@ -127,8 +127,8 @@ int element_unit_test(Env* env)
   element_delete(e, env);
   element_delete(e2, env);
   element_delete(e3, env);
-  genome_node_delete(gn, env);
-  genome_node_delete(gn2, env);
+  genome_node_delete(gn);
+  genome_node_delete(gn2);
 
   return had_err;
 

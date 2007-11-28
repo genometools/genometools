@@ -37,9 +37,7 @@ static int gff3_visitor_lua_new(lua_State *L)
 static int genome_visitor_lua_delete(lua_State *L)
 {
   GenomeVisitor **gv = check_genome_visitor(L, 1);
-  Env *env;
-  env = get_env_from_registry(L);
-  genome_visitor_delete(*gv, env);
+  genome_visitor_delete(*gv);
   return 0;
 }
 

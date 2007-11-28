@@ -42,10 +42,10 @@ static int addintrons_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   return had_err;
 }
 
-static void addintrons_stream_free(GenomeStream *gs, Env *env)
+static void addintrons_stream_free(GenomeStream *gs)
 {
   AddIntronsStream *ais = addintrons_stream_cast(gs);
-  genome_visitor_delete(ais->addintrons_visitor, env);
+  genome_visitor_delete(ais->addintrons_visitor);
 }
 
 const GenomeStreamClass* addintrons_stream_class(void)

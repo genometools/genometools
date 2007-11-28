@@ -26,12 +26,11 @@ struct Toolbox {
   Hashtable *tools;
 };
 
-Toolbox* toolbox_new(Env *env)
+Toolbox* toolbox_new(void)
 {
   Toolbox *tb;
-  env_error_check(env);
   tb = ma_malloc(sizeof (Toolbox));
-  tb->tools = hashtable_new(HASH_STRING, NULL, NULL, env);
+  tb->tools = hashtable_new(HASH_STRING, NULL, NULL);
   return tb;
 }
 
@@ -39,7 +38,7 @@ void toolbox_add(Toolbox *tb, const char *toolname, Tool tool, Env *env)
 {
   env_error_check(env);
   assert(tb && tb->tools);
-  hashtable_add(tb->tools, (char*) toolname, tool, env);
+  hashtable_add(tb->tools, (char*) toolname, tool);
 }
 
 Tool toolbox_get(const Toolbox *tb, const char *toolname)
@@ -68,9 +67,9 @@ int toolbox_show(const char *progname, void *toolbox, Env *env)
   return 0;
 }
 
-void toolbox_delete(Toolbox *tb, Env *env)
+void toolbox_delete(Toolbox *tb)
 {
   if (!tb) return;
-  hashtable_delete(tb->tools, env);
+  hashtable_delete(tb->tools);
   ma_free(tb);
 }

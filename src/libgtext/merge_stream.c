@@ -64,7 +64,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
           if (genome_nodes_are_equal_sequence_regions(ms->buffer[i],
                                                       ms->buffer[j])) {
             sequence_regions_consolidate(ms->buffer[i], ms->buffer[j]);
-            genome_node_rec_delete(ms->buffer[j], env);
+            genome_node_rec_delete(ms->buffer[j]);
             ms->buffer[j] = NULL;
           }
         }
@@ -95,7 +95,7 @@ int merge_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return had_err;
 }
 
-static void merge_stream_free(GenomeStream *gs, Env *env)
+static void merge_stream_free(GenomeStream *gs)
 {
   MergeStream *ms = merge_stream_cast(gs);
   array_delete(ms->genome_streams);

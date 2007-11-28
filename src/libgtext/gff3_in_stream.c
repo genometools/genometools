@@ -150,7 +150,7 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
       genfile_close(is->fpin);
       is->fpin = NULL;
       is->file_is_open = false;
-      gff3parser_reset(is->gff3_parser, env);
+      gff3parser_reset(is->gff3_parser);
       if (!strarray_size(is->files))
         break;
       continue;
@@ -176,15 +176,15 @@ static int gff3_in_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return had_err;
 }
 
-static void gff3_in_stream_free(GenomeStream *gs, Env *env)
+static void gff3_in_stream_free(GenomeStream *gs)
 {
   GFF3InStream *gff3_in_stream = gff3_in_stream_cast(gs);
   strarray_delete(gff3_in_stream->files);
   str_delete(gff3_in_stream->stdinstr);
   while (queue_size(gff3_in_stream->genome_node_buffer))
-    genome_node_rec_delete(queue_get(gff3_in_stream->genome_node_buffer), env);
+    genome_node_rec_delete(queue_get(gff3_in_stream->genome_node_buffer));
   queue_delete(gff3_in_stream->genome_node_buffer);
-  gff3parser_delete(gff3_in_stream->gff3_parser, env);
+  gff3parser_delete(gff3_in_stream->gff3_parser);
   genfile_close(gff3_in_stream->fpin);
 }
 
@@ -212,7 +212,7 @@ static GenomeStream* gff3_in_stream_new(StrArray *files, /* takes ownership */
   gff3_in_stream->fpin                   = NULL;
   gff3_in_stream->line_number            = 0;
   gff3_in_stream->genome_node_buffer     = queue_new();
-  gff3_in_stream->gff3_parser            = gff3parser_new(checkids, env);
+  gff3_in_stream->gff3_parser            = gff3parser_new(checkids);
   gff3_in_stream->be_verbose             = be_verbose;
   return gs;
 }

@@ -46,20 +46,18 @@ static int region_info_delete(void *data, Env *env)
   unsigned long i;
   RegionInfo *info = (RegionInfo*) data;
   for (i = 0; i < array_size(info->features); i++)
-    genome_node_rec_delete(*(GenomeNode**) array_get(info->features, i), env);
+    genome_node_rec_delete(*(GenomeNode**) array_get(info->features, i));
   array_delete(info->features);
-  genome_node_rec_delete((GenomeNode*)info->region, env);
+  genome_node_rec_delete((GenomeNode*)info->region);
   ma_free(info);
   return 0;
 }
 
-FeatureIndex* feature_index_new(Env *env)
+FeatureIndex* feature_index_new(void)
 {
   FeatureIndex *fi;
-  env_error_check(env);
   fi = ma_calloc(1, sizeof (FeatureIndex));
-  fi->regions = hashtable_new(HASH_STRING, NULL, (FreeFunc) region_info_delete,
-                              env);
+  fi->regions = hashtable_new(HASH_STRING, NULL, (FreeFunc) region_info_delete);
   return fi;
 }
 
@@ -84,7 +82,7 @@ void feature_index_add_sequence_region(FeatureIndex *fi, SequenceRegion *sr,
     info->features = array_new(sizeof (GenomeNode*));
     info->dyn_range.start = ~0UL;
     info->dyn_range.end   = 0;
-    hashtable_add(fi->regions, seqid, info, env);
+    hashtable_add(fi->regions, seqid, info);
     if (fi->nof_sequence_regions++ == 0)
       fi->firstseqid = seqid;
   }
@@ -150,7 +148,7 @@ int feature_index_get_features_for_range(FeatureIndex *fi, Array *results,
     if (range_overlap(r, qry_range))
       array_add(results, gn);
   }
-  genome_node_delete(key, env);
+  genome_node_delete(key);
   return 0;
 }
 
@@ -265,7 +263,7 @@ int feature_index_unit_test(Env* env)
   genome_node_is_part_of_genome_node(gn2, cds1, env);
 
   /* create a new feature index on which we can perfom some tests */
-  fi = feature_index_new(env);
+  fi = feature_index_new();
 
   ensure(had_err, fi);
   ensure(had_err, !feature_index_has_seqid(fi, "test1", env));
@@ -318,23 +316,23 @@ int feature_index_unit_test(Env* env)
 
   /* delete all generated objects */
   strarray_delete(seqids);
-  feature_index_delete(fi, env);
-  genome_node_rec_delete(gn1, env);
-  genome_node_rec_delete(gn2, env);
-  genome_node_rec_delete((GenomeNode*) sr1, env);
-  genome_node_rec_delete((GenomeNode*) sr2, env);
+  feature_index_delete(fi);
+  genome_node_rec_delete(gn1);
+  genome_node_rec_delete(gn2);
+  genome_node_rec_delete((GenomeNode*) sr1);
+  genome_node_rec_delete((GenomeNode*) sr2);
   str_delete(seqid1);
   str_delete(seqid2);
   return had_err;
 }
 
-void feature_index_delete(FeatureIndex *fi, Env *env)
+void feature_index_delete(FeatureIndex *fi)
 {
   if (!fi) return;
   if (fi->reference_count) {
     fi->reference_count--;
     return;
   }
-  hashtable_delete(fi->regions, env);
+  hashtable_delete(fi->regions);
   ma_free(fi);
 }

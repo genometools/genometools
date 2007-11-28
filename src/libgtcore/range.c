@@ -247,11 +247,11 @@ void ranges_sort(Array *ranges)
         (Compare) range_compare_ptr);
 }
 
-void ranges_sort_by_length_stable(Array *ranges, Env *env)
+void ranges_sort_by_length_stable(Array *ranges)
 {
   assert(ranges);
   msort(array_get_space(ranges), array_size(ranges), sizeof (Range),
-        (Compare) range_compare_by_length_ptr, env);
+        (Compare) range_compare_by_length_ptr);
 }
 
 bool ranges_are_sorted(const Array *ranges)

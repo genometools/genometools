@@ -59,13 +59,13 @@ static void gff3_version_string(GenomeVisitor *gv)
   }
 }
 
-static void gff3_visitor_free(GenomeVisitor *gv, Env *env)
+static void gff3_visitor_free(GenomeVisitor *gv)
 {
   GFF3Visitor *gff3_visitor = gff3_visitor_cast(gv);
   assert(gff3_visitor);
   ma_free(gff3_visitor->id_counter);
-  hashtable_delete(gff3_visitor->genome_feature_to_id_array, env);
-  hashtable_delete(gff3_visitor->genome_feature_to_unique_id_str, env);
+  hashtable_delete(gff3_visitor->genome_feature_to_id_array);
+  hashtable_delete(gff3_visitor->genome_feature_to_unique_id_str);
 }
 
 static int gff3_visitor_comment(GenomeVisitor *gv, Comment *c, Env *env)
@@ -88,7 +88,7 @@ static int add_id(GenomeNode *gn, void *data, Env *env)
   parent_features = hashtable_get(info->genome_feature_to_id_array, gn);
   if (!parent_features) {
     parent_features = array_new(sizeof (char*));
-    hashtable_add(info->genome_feature_to_id_array, gn, parent_features, env);
+    hashtable_add(info->genome_feature_to_id_array, gn, parent_features);
   }
   array_add(parent_features, info->id);
   return 0;
@@ -186,7 +186,7 @@ static int store_ids(GenomeNode *gn, void *data, Env *env)
     str_append_ulong(id, gff3_visitor->id_counter[type]);
 
     /* store (unique) id */
-    hashtable_add(gff3_visitor->genome_feature_to_unique_id_str, gn, id, env);
+    hashtable_add(gff3_visitor->genome_feature_to_unique_id_str, gn, id);
 
     /* for each child -> store the parent feature in the hash table */
     add_id_info.genome_feature_to_id_array =
@@ -227,8 +227,8 @@ static int gff3_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
   }
 
   /* reset hashtables */
-  hashtable_reset(gff3_visitor->genome_feature_to_id_array, env);
-  hashtable_reset(gff3_visitor->genome_feature_to_unique_id_str, env);
+  hashtable_reset(gff3_visitor->genome_feature_to_id_array);
+  hashtable_reset(gff3_visitor->genome_feature_to_unique_id_str);
 
   /* show terminator, if the feature has children (otherwise it is clear that
      the feature is complete, because no ID attribute has been shown) */
@@ -275,12 +275,11 @@ GenomeVisitor* gff3_visitor_new(GenFile *outfp, Env *env)
                                        sizeof (unsigned long));
   gff3_visitor->genome_feature_to_id_array = hashtable_new(HASH_DIRECT, NULL,
                                                            (FreeFunc)
-                                                           array_delete, env);
+                                                           array_delete);
   gff3_visitor->genome_feature_to_unique_id_str = hashtable_new(HASH_DIRECT,
                                                                 NULL,
                                                                 (FreeFunc)
-                                                                str_delete,
-                                                                env);
+                                                                str_delete);
   gff3_visitor->outfp = outfp;
   return gv;
 }

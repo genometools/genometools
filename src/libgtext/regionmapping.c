@@ -32,25 +32,24 @@ struct RegionMapping {
   Bioseq *bioseq; /* the current bioseq */
 };
 
-RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Env *env)
+RegionMapping* regionmapping_new_mapping(Str *mapping_filename, Error *e)
 {
   RegionMapping *rm;
-  env_error_check(env);
+  error_check(e);
   assert(mapping_filename);
   rm = ma_calloc(1, sizeof (RegionMapping));
-  rm->mapping = mapping_new(mapping_filename, "mapping", MAPPINGTYPE_STRING,
-                            env);
+  rm->mapping = mapping_new(mapping_filename, "mapping", MAPPINGTYPE_STRING, e);
   if (!rm->mapping) {
-    regionmapping_delete(rm, env);
+    regionmapping_delete(rm);
     return NULL;
   }
   return rm;
 }
 
-RegionMapping* regionmapping_new_seqfile(Str *sequence_filename, Env *env)
+RegionMapping* regionmapping_new_seqfile(Str *sequence_filename)
 {
   RegionMapping *rm;
-  assert(sequence_filename && env);
+  assert(sequence_filename);
   rm = ma_calloc(1, sizeof (RegionMapping));
   rm->sequence_filename = str_ref(sequence_filename);
   return rm;
@@ -117,13 +116,13 @@ int regionmapping_get_raw_sequence_length(RegionMapping *rm,
   return had_err;
 }
 
-void regionmapping_delete(RegionMapping *rm, Env *env)
+void regionmapping_delete(RegionMapping *rm)
 {
   if (!rm) return;
   str_delete(rm->sequence_filename);
   str_delete(rm->sequence_file);
   str_delete(rm->sequence_name);
-  mapping_delete(rm->mapping, env);
+  mapping_delete(rm->mapping);
   bioseq_delete(rm->bioseq);
   ma_free(rm);
 }

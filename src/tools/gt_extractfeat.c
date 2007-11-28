@@ -118,7 +118,8 @@ int gt_extractfeat(int argc, const char **argv, Env *env)
 
     /* create region mapping */
     regionmapping = seqid2file_regionmapping_new(arguments.seqfile,
-                                                 arguments.regionmapping, env);
+                                                 arguments.regionmapping,
+                                                 env_error(env));
     if (!regionmapping)
       had_err = -1;
   }
@@ -132,13 +133,13 @@ int gt_extractfeat(int argc, const char **argv, Env *env)
     /* pull the features through the stream and free them afterwards */
     while (!(had_err = genome_stream_next_tree(extractfeat_stream, &gn, env)) &&
            gn) {
-      genome_node_rec_delete(gn, env);
+      genome_node_rec_delete(gn);
     }
   }
 
   /* free */
-  genome_stream_delete(extractfeat_stream, env);
-  genome_stream_delete(gff3_in_stream, env);
+  genome_stream_delete(extractfeat_stream);
+  genome_stream_delete(gff3_in_stream);
   str_delete(arguments.regionmapping);
   str_delete(arguments.seqfile);
   str_delete(arguments.type);

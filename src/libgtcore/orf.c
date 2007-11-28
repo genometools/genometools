@@ -25,7 +25,7 @@
 #define STOP_AMINO  '*'
 
 void determine_ORFs(Array *ranges, unsigned int framenum,
-                    const char *frame, unsigned long framelen, Env *env)
+                    const char *frame, unsigned long framelen)
 {
   unsigned long i;
   Range orf;

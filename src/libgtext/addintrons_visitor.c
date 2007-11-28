@@ -29,7 +29,7 @@ struct AddIntronsVisitor {
 #define addintrons_visitor_cast(GV)\
         genome_visitor_cast(addintrons_visitor_class(), GV)
 
-static void addintrons_visitor_free(GenomeVisitor *gv, /*@unused@*/ Env *env)
+static void addintrons_visitor_free(GenomeVisitor *gv)
 {
 #ifndef NDEBUG
   AddIntronsVisitor *addintrons_visitor = addintrons_visitor_cast(gv);

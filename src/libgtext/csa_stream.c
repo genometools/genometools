@@ -69,10 +69,10 @@ int csa_stream_next_tree(GenomeStream *gs, GenomeNode **gn, Env *env)
   return had_err;
 }
 
-static void csa_stream_free(GenomeStream *gs, Env *env)
+static void csa_stream_free(GenomeStream *gs)
 {
   CSAStream *cs = csa_stream_cast(gs);
-  genome_visitor_delete(cs->csa_visitor, env);
+  genome_visitor_delete(cs->csa_visitor);
 }
 
 const GenomeStreamClass* csa_stream_class(void)

@@ -38,7 +38,7 @@ GenomeStream* genome_stream_ref(GenomeStream *gs)
   return gs;
 }
 
-void genome_stream_delete(GenomeStream *gs, Env *env)
+void genome_stream_delete(GenomeStream *gs)
 {
   if (!gs) return;
   if (gs->reference_count) {
@@ -46,8 +46,8 @@ void genome_stream_delete(GenomeStream *gs, Env *env)
     return;
   }
   assert(gs->c_class);
-  if (gs->c_class->free) gs->c_class->free(gs, env);
-  genome_node_delete(gs->buffer, env);
+  if (gs->c_class->free) gs->c_class->free(gs);
+  genome_node_delete(gs->buffer);
   ma_free(gs);
 }
 

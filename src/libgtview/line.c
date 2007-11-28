@@ -111,11 +111,11 @@ int line_unit_test(Env* env)
   l1 = line_new(env);
   l2 = line_new(env);
 
-  genome_feature_add_attribute((GenomeFeature*) parent, "Name", foo, env);
-  genome_feature_add_attribute((GenomeFeature*) gn1, "Name", bar, env);
-  genome_feature_add_attribute((GenomeFeature*) gn2, "Name", bar, env);
-  genome_feature_add_attribute((GenomeFeature*) gn3, "Name", blub, env);
-  genome_feature_add_attribute((GenomeFeature*) gn4, "Name", bar, env);
+  genome_feature_add_attribute((GenomeFeature*) parent, "Name", foo);
+  genome_feature_add_attribute((GenomeFeature*) gn1, "Name", bar);
+  genome_feature_add_attribute((GenomeFeature*) gn2, "Name", bar);
+  genome_feature_add_attribute((GenomeFeature*) gn3, "Name", blub);
+  genome_feature_add_attribute((GenomeFeature*) gn4, "Name", bar);
 
   b1 = block_new(env);
   b2 = block_new(env);
@@ -146,11 +146,11 @@ int line_unit_test(Env* env)
   str_delete(seqid3);
   line_delete(l1, env);
   line_delete(l2, env);
-  genome_node_delete(parent, env);
-  genome_node_delete(gn1, env);
-  genome_node_delete(gn2, env);
-  genome_node_delete(gn3, env);
-  genome_node_delete(gn4, env);
+  genome_node_delete(parent);
+  genome_node_delete(gn1);
+  genome_node_delete(gn2);
+  genome_node_delete(gn3);
+  genome_node_delete(gn4);
 
   return had_err;
 }

@@ -26,7 +26,7 @@
 
 /* the file allocator module */
 
-void    fa_init(Env*);
+void    fa_init(void);
 
 /* functions for normal file pointer */
 #define fa_fopen(path, mode)\

@@ -26,17 +26,16 @@ struct StringDistri {
   unsigned long num_of_occurrences;
 };
 
-StringDistri* stringdistri_new(Env *env)
+StringDistri* stringdistri_new(void)
 {
   StringDistri *sd;
-  env_error_check(env);
   sd = ma_malloc(sizeof *sd);
-  sd->hashdist = hashtable_new(HASH_STRING, ma_free_func, ma_free_func, env);
+  sd->hashdist = hashtable_new(HASH_STRING, ma_free_func, ma_free_func);
   sd->num_of_occurrences = 0;
   return sd;
 }
 
-void stringdistri_add(StringDistri *d, const char *key, Env *env)
+void stringdistri_add(StringDistri *d, const char *key)
 {
   unsigned long *valueptr;
   assert(d && key);
@@ -44,7 +43,7 @@ void stringdistri_add(StringDistri *d, const char *key, Env *env)
   if (!valueptr) {
     valueptr = ma_malloc(sizeof *valueptr);
     *valueptr = 1;
-    hashtable_add(d->hashdist, cstr_dup(key), valueptr, env);
+    hashtable_add(d->hashdist, cstr_dup(key), valueptr);
   }
   else
     (*valueptr)++;
@@ -86,9 +85,9 @@ void stringdistri_foreach(const StringDistri *d, StringDistriIterFunc func,
   }
 }
 
-void stringdistri_delete(StringDistri *d, Env *env)
+void stringdistri_delete(StringDistri *d)
 {
   if (!d) return;
-  hashtable_delete(d->hashdist, env);
+  hashtable_delete(d->hashdist);
   ma_free(d);
 }

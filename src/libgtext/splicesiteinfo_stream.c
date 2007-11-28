@@ -45,7 +45,7 @@ static int splicesiteinfo_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
                                         ->splicesiteinfo_visitor, env);
       if (had_err) {
         /* we own the node -> delete it */
-        genome_node_rec_delete(*gn, env);
+        genome_node_rec_delete(*gn);
         *gn = NULL;
       }
     }
@@ -53,10 +53,10 @@ static int splicesiteinfo_stream_next_tree(GenomeStream *gs, GenomeNode **gn,
   return had_err;
 }
 
-static void splicesiteinfo_stream_free(GenomeStream *gs, Env *env)
+static void splicesiteinfo_stream_free(GenomeStream *gs)
 {
   SpliceSiteInfoStream *splicesiteinfo_stream = splicesiteinfo_stream_cast(gs);
-  genome_visitor_delete(splicesiteinfo_stream->splicesiteinfo_visitor, env);
+  genome_visitor_delete(splicesiteinfo_stream->splicesiteinfo_visitor);
 }
 
 const GenomeStreamClass* splicesiteinfo_stream_class(void)

@@ -35,7 +35,7 @@ struct FilterVisitor {
 #define filter_visitor_cast(GV)\
         genome_visitor_cast(filter_visitor_class(), GV)
 
-static void filter_visitor_free(GenomeVisitor *gv, Env *env)
+static void filter_visitor_free(GenomeVisitor *gv)
 {
   FilterVisitor *filter_visitor = filter_visitor_cast(gv);
   queue_delete(filter_visitor->genome_node_buffer);
@@ -85,7 +85,7 @@ static int filter_visitor_genome_feature(GenomeVisitor *gv, GenomeFeature *gf,
     filter_node = true;
 
   if (filter_node)
-    genome_node_rec_delete((GenomeNode*) gf, env);
+    genome_node_rec_delete((GenomeNode*) gf);
   else
     queue_add(fv->genome_node_buffer, gf);
 
@@ -104,7 +104,7 @@ static int filter_visitor_sequence_region(GenomeVisitor *gv, SequenceRegion *sr,
     queue_add(filter_visitor->genome_node_buffer, sr);
   }
   else
-    genome_node_rec_delete((GenomeNode*) sr, env);
+    genome_node_rec_delete((GenomeNode*) sr);
   return 0;
 }
 

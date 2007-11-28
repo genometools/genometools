@@ -30,6 +30,6 @@ int  genome_visitor_visit_comment(GenomeVisitor*, Comment*, Env*);
 int  genome_visitor_visit_genome_feature(GenomeVisitor*, GenomeFeature*, Env*);
 int  genome_visitor_visit_sequence_region(GenomeVisitor*, SequenceRegion*,
                                           Env*);
-void genome_visitor_delete(GenomeVisitor *gv, Env*);
+void genome_visitor_delete(GenomeVisitor *gv);
 
 #endif

@@ -79,7 +79,7 @@ static NodeInfoElement* get_or_create_node_info(Diagram *d,
   if (ni == NULL) {
     NodeInfoElement *new_ni = ma_malloc(sizeof (NodeInfoElement));
     new_ni->blocktuples = array_new(sizeof (BlockTuple*));
-    hashtable_add(d->nodeinfo, node, new_ni, env);
+    hashtable_add(d->nodeinfo, node, new_ni);
     ni = new_ni;
   }
   return ni;
@@ -373,7 +373,7 @@ static int collect_blocks(void *key, void *value, void *data, Env *env)
 
     if (track == NULL) {
       track = track_new(track_key, env);
-      hashtable_add(diagram->tracks, cstr_dup(str_get(track_key)), track, env);
+      hashtable_add(diagram->tracks, cstr_dup(str_get(track_key)), track);
       diagram->nof_tracks++;
       log_log("created track: %s, diagram has now %d tracks",
               str_get(track_key), diagram_get_number_of_tracks(diagram));
@@ -427,8 +427,8 @@ Diagram* diagram_new(FeatureIndex *fi, Range range, const char *seqid,
   int had_err;
   env_error_check(env);
   diagram = ma_malloc(sizeof (Diagram));
-  diagram->tracks = hashtable_new(HASH_STRING, ma_free_func, NULL, env);
-  diagram->nodeinfo = hashtable_new(HASH_DIRECT, NULL, NULL, env);
+  diagram->tracks = hashtable_new(HASH_STRING, ma_free_func, NULL);
+  diagram->nodeinfo = hashtable_new(HASH_DIRECT, NULL, NULL);
   diagram->nof_tracks = 0;
   diagram->config = config;
   diagram->range = range;
@@ -533,7 +533,7 @@ int diagram_unit_test(Env *env)
   genome_node_is_part_of_genome_node(gn2, cds1, env);
 
   /* create a new feature index on which we can perfom some tests */
-  fi = feature_index_new(env);
+  fi = feature_index_new();
 
   /* add a sequence region the feature index and test if it has really been
      added */
@@ -607,11 +607,11 @@ int diagram_unit_test(Env *env)
   config_delete(cfg, env);
   diagram_delete(dia,env);
   diagram_delete(dia2,env);
-  feature_index_delete(fi, env);
-  genome_node_rec_delete(gn1, env);
-  genome_node_rec_delete(gn2, env);
-  genome_node_rec_delete((GenomeNode*) sr1, env);
-  genome_node_rec_delete((GenomeNode*) sr2, env);
+  feature_index_delete(fi);
+  genome_node_rec_delete(gn1);
+  genome_node_rec_delete(gn2);
+  genome_node_rec_delete((GenomeNode*) sr1);
+  genome_node_rec_delete((GenomeNode*) sr2);
   str_delete(seqid1);
   str_delete(seqid2);
 
@@ -622,7 +622,7 @@ void diagram_delete(Diagram *diagram, Env *env)
 {
   if (!diagram) return;
   (void) hashtable_foreach(diagram->tracks, diagram_track_delete, NULL, env);
-  hashtable_delete(diagram->tracks, env);
-  hashtable_delete(diagram->nodeinfo, env);
+  hashtable_delete(diagram->tracks);
+  hashtable_delete(diagram->nodeinfo);
   ma_free(diagram);
 }

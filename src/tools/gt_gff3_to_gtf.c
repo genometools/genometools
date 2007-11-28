@@ -63,13 +63,13 @@ int gt_gff3_to_gtf(int argc, const char **argv, Env *env)
     /* pull the features through the stream and free them afterwards */
     while (!(had_err = genome_stream_next_tree(gtf_out_stream, &gn, env)) &&
            gn) {
-      genome_node_rec_delete(gn, env);
+      genome_node_rec_delete(gn);
     }
   }
 
   /* free */
-  genome_stream_delete(gff3_in_stream, env);
-  genome_stream_delete(gtf_out_stream, env);
+  genome_stream_delete(gff3_in_stream);
+  genome_stream_delete(gtf_out_stream);
 
   return had_err;
 }

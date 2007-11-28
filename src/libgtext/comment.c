@@ -32,7 +32,7 @@ struct Comment
 #define comment_cast(GN)\
         genome_node_cast(comment_class(), GN)
 
-static void comment_free(GenomeNode *gn, Env *env)
+static void comment_free(GenomeNode *gn)
 {
   Comment *c = comment_cast(gn);
   assert(c && c->comment);
