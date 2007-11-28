@@ -37,15 +37,14 @@ int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
                        false,
                        NULL,
                        NULL,
-                       NULL,
-                       env);
+                       NULL);
   for (currentposition = 0; currentposition < (unsigned int) 1000;
        currentposition++)
   {
-    retval = fastabuffer_next(fb,&currentchar,env);
+    retval = fastabuffer_next(fb,&currentchar,env_error(env));
     if (retval < 0)
     {
-      fastabuffer_delete(fb, env);
+      fastabuffer_delete(fb);
       return -1;
     }
     if (retval == 0)
@@ -66,7 +65,7 @@ int guessifproteinsequencestream(const StrArray *filenametab,Env *env)
       default:  break;
     }
   }
-  fastabuffer_delete(fb, env);
+  fastabuffer_delete(fb);
   if (countnonbases > 0 && countnonbases >= currentposition/10)
   {
     return 1;

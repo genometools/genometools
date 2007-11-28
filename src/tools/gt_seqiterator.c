@@ -77,7 +77,7 @@ int gt_seqiterator(int argc, const char **argv, Env *env)
   totalsize = files_estimate_total_size(files);
   printf("# estimated total size is " Formatuint64_t "\n",
             PRINTuint64_tcast(totalsize));
-  seqit = seqiterator_new(files, NULL, true, env);
+  seqit = seqiterator_new(files, NULL, true);
   if (verbose)
   {
     progressbar_start(seqiterator_getcurrentcounter(seqit, (unsigned long long)
@@ -87,14 +87,14 @@ int gt_seqiterator(int argc, const char **argv, Env *env)
   }
   while (true)
   {
-    had_err = seqiterator_next(seqit, &sequence, &len, &desc, env);
+    had_err = seqiterator_next(seqit, &sequence, &len, &desc, env_error(env));
     if (had_err != 1)
     {
       break;
     }
     ma_free(desc);
   }
-  seqiterator_delete(seqit, env);
+  seqiterator_delete(seqit);
   if (verbose)
   {
     progressbar_stop();

@@ -30,11 +30,9 @@ FastaBuffer* fastabuffer_new(const StrArray *filenametab,
                              bool plainformat,
                              Filelengthvalues **filelengthtab,
                              Queue *descptr,
-                             unsigned long *characterdistribution,
-                             Env *env)
+                             unsigned long *characterdistribution)
 {
   FastaBuffer *fb;
-  env_error_check(env);
   fb = ma_calloc(1, sizeof (FastaBuffer));
   fb->plainformat = plainformat;
   fb->filenum = 0;
@@ -75,13 +73,13 @@ static inline int ownbuffergenfile_getc(FastaBuffer *fb,GenFile *inputstream)
   return fb->inputbuffer[fb->currentinpos++];
 }
 
-static int advancefastabufferstate(FastaBuffer *fb,Env *env)
+static int advancefastabufferstate(FastaBuffer *fb, Error *e)
 {
   int currentchar;
   unsigned long currentoutpos = 0, currentfileadd = 0, currentfileread = 0;
   Uchar charcode;
 
-  env_error_check(env);
+  error_check(e);
   while (true)
   {
     if (currentoutpos >= (unsigned long) OUTPUTFILEBUFFERSIZE)
@@ -187,11 +185,10 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
                 charcode = fb->symbolmap[(unsigned int) currentchar];
                 if (charcode == (Uchar) UNDEFCHAR)
                 {
-                  env_error_set(env,"illegal character '%c':"
-                                    " file \"%s\", line %llu",
-                                currentchar,
-                                strarray_get(fb->filenametab, fb->filenum),
-                                (unsigned long long) fb->linenum);
+                  error_set(e,"illegal character '%c': file \"%s\", line %llu",
+                            currentchar,
+                            strarray_get(fb->filenametab, fb->filenum),
+                            (unsigned long long) fb->linenum);
                   return -1;
                 }
                 if (ISSPECIAL(charcode))
@@ -219,23 +216,23 @@ static int advancefastabufferstate(FastaBuffer *fb,Env *env)
   }
   if (fb->firstoverallseq)
   {
-    env_error_set(env,"no sequences in multiple fasta file(s) %s ...",
-                  strarray_get(fb->filenametab,0));
+    error_set(e,"no sequences in multiple fasta file(s) %s ...",
+              strarray_get(fb->filenametab,0));
     return -2;
   }
   fb->nextfree = currentoutpos;
   return 0;
 }
 
-static int advancePlainbufferstate(FastaBuffer *fb,Env *env)
+static int advancePlainbufferstate(FastaBuffer *fb, Error *e)
 {
   int currentchar;
   unsigned long currentoutpos = 0, currentfileread = 0;
 
-  env_error_check(env);
+  error_check(e);
   if (fb->descptr != NULL)
   {
-    env_error_set(env,"no headers in plain sequence file");
+    error_set(e, "no headers in plain sequence file");
     return -1;
   }
   while (true)
@@ -296,25 +293,25 @@ static int advancePlainbufferstate(FastaBuffer *fb,Env *env)
   }
   if (currentoutpos == 0)
   {
-    env_error_set(env,"no characters in plain file(s) %s ...",
-                  strarray_get(fb->filenametab,0));
+    error_set(e, "no characters in plain file(s) %s ...",
+              strarray_get(fb->filenametab,0));
     return -2;
   }
   fb->nextfree = currentoutpos;
   return 0;
 }
 
-int advanceformatbufferstate(FastaBuffer *fb,Env *env)
+int advanceformatbufferstate(FastaBuffer *fb, Error *e)
 {
-  env_error_check(env);
+  error_check(e);
   if (fb->plainformat)
   {
-    return advancePlainbufferstate(fb,env);
+    return advancePlainbufferstate(fb, e);
   }
-  return advancefastabufferstate(fb,env);
+  return advancefastabufferstate(fb, e);
 }
 
-void fastabuffer_delete(FastaBuffer *fb, Env *env)
+void fastabuffer_delete(FastaBuffer *fb)
 {
   if (!fb) return;
   genfile_close(fb->inputstream);

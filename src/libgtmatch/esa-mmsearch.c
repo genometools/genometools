@@ -374,7 +374,7 @@ int callenumquerymatches(const Str *indexname,
   }
   if (!haserr && echoquery)
   {
-    if (echodescriptionandsequence(queryfiles,env) != 0)
+    if (echodescriptionandsequence(queryfiles,env_error(env)) != 0)
     {
       haserr = true;
     }
@@ -390,15 +390,14 @@ int callenumquerymatches(const Str *indexname,
 
     seqit = seqiterator_new(queryfiles,
                             getsymbolmapAlphabet(suffixarray.alpha),
-                            true,
-                            env);
+                            true);
     for (unitnum = 0; /* Nothing */; unitnum++)
     {
       retval = seqiterator_next(seqit,
                                 &query,
                                 &querylen,
                                 &desc,
-                                env);
+                                env_error(env));
       if (retval < 0)
       {
         haserr = true;
@@ -425,7 +424,7 @@ int callenumquerymatches(const Str *indexname,
       }
       FREESPACE(desc);
     }
-    seqiterator_delete(seqit,env);
+    seqiterator_delete(seqit);
   }
   freesuffixarray(&suffixarray,env);
   return haserr ? -1 : 0;

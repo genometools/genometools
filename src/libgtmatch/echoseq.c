@@ -220,7 +220,7 @@ void encseq2fastaoutput(FILE *fpout,
                       env);
 }
 
-int echodescriptionandsequence(const StrArray *filenametab,Env *env)
+int echodescriptionandsequence(const StrArray *filenametab,Error *e)
 {
   SeqIterator *seqit;
   char *desc = NULL;
@@ -229,14 +229,14 @@ int echodescriptionandsequence(const StrArray *filenametab,Env *env)
   bool haserr = false;
   int retval;
 
-  seqit = seqiterator_new(filenametab,NULL,true,env);
+  seqit = seqiterator_new(filenametab,NULL,true);
   while (true)
   {
     retval = seqiterator_next(seqit,
                               &sequence,
                               &seqlen,
                               &desc,
-                              env);
+                              e);
     if (retval < 0)
     {
       haserr = true;
@@ -249,6 +249,6 @@ int echodescriptionandsequence(const StrArray *filenametab,Env *env)
     symbolstring2fasta(stdout,desc,NULL,sequence,seqlen,70UL);
     FREESPACE(desc);
   }
-  seqiterator_delete(seqit,env);
+  seqiterator_delete(seqit);
   return haserr ? -1 : 0;
 }

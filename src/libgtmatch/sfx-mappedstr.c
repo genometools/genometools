@@ -510,11 +510,10 @@ static int getencseqkmersgeneric(
                            plainformat,
                            NULL,
                            NULL,
-                           NULL,
-                           env);
+                           NULL);
       for (currentposition = 0; /* Nothing */; currentposition++)
       {
-        retval = fastabuffer_next(fb,&charcode,env);
+        retval = fastabuffer_next(fb,&charcode,env_error(env));
         if (retval < 0)
         {
           haserr = true;
@@ -527,7 +526,7 @@ static int getencseqkmersgeneric(
         shiftrightwithchar(processkmercode,processkmercodeinfo,
                            &spwp,currentposition,charcode,env);
       }
-      fastabuffer_delete(fb, env);
+      fastabuffer_delete(fb);
     }
   }
   if (!haserr)

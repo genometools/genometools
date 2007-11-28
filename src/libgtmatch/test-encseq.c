@@ -91,8 +91,7 @@ static int testfullscan(const StrArray *filenametab,
                          false,
                          NULL,
                          NULL,
-                         NULL,
-                         env);
+                         NULL);
   }
   esr = newEncodedsequencescanstate(env);
   initEncodedsequencescanstate(esr,encseq,readmode,0);
@@ -100,7 +99,7 @@ static int testfullscan(const StrArray *filenametab,
   {
     if (filenametab != NULL && readmode == Forwardmode)
     {
-      retval = fastabuffer_next(fb,&ccscan,env);
+      retval = fastabuffer_next(fb,&ccscan,env_error(env));
       if (retval < 0)
       {
         haserr = true;
@@ -157,7 +156,7 @@ static int testfullscan(const StrArray *filenametab,
     }
   }
   freeEncodedsequencescanstate(&esr,env);
-  fastabuffer_delete(fb, env);
+  fastabuffer_delete(fb);
   return haserr ? -1 : 0;
 }
 

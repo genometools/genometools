@@ -31,9 +31,9 @@ FastaBuffer* fastabuffer_new(const StrArray *filenametab,
                              const Uchar *symbolmap, bool plainformat,
                              Filelengthvalues **filelengthtab,
                              Queue *descptr,
-                             unsigned long *characterdistribution, Env*);
-static int   fastabuffer_next(FastaBuffer*, Uchar *val, Env *env);
-void         fastabuffer_delete(FastaBuffer*, Env*);
+                             unsigned long *characterdistribution);
+static int   fastabuffer_next(FastaBuffer*, Uchar *val, Error*);
+void         fastabuffer_delete(FastaBuffer*);
 
 #include "fastabuffer_imp.h"
 

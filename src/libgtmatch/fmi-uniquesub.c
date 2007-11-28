@@ -361,15 +361,14 @@ static int findsubquerymatch(Fmindex *fmindex,
   substringinfo.processinfo = &rangespecinfo;
   seqit = seqiterator_new(queryfilenames,
                           getsymbolmapAlphabet(fmindex->alphabet),
-                          true,
-                          env);
+                          true);
   for (unitnum = 0; /* Nothing */; unitnum++)
   {
     retval = seqiterator_next(seqit,
                               &query,
                               &querylen,
                               &desc,
-                              env);
+                              env_error(env));
     if (retval < 0)
     {
       haserr = true;
@@ -391,7 +390,7 @@ static int findsubquerymatch(Fmindex *fmindex,
     }
     FREESPACE(desc);
   }
-  seqiterator_delete(seqit,env);
+  seqiterator_delete(seqit);
   return haserr ? -1 : 0;
 }
 

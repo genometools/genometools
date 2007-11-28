@@ -37,11 +37,9 @@ struct SeqIterator
 
 SeqIterator* seqiterator_new(const StrArray *filenametab,
                              const Uchar *symbolmap,
-                             bool withsequence,
-                             Env *env)
+                             bool withsequence)
 {
   SeqIterator *seqit;
-  env_error_check(env);
   seqit = ma_malloc(sizeof (SeqIterator));
   INITARRAY(&seqit->sequencebuffer, Uchar);
   seqit->descptr = queue_new();
@@ -50,8 +48,7 @@ SeqIterator* seqiterator_new(const StrArray *filenametab,
                                false,
                                NULL,
                                seqit->descptr,
-                               NULL,
-                               env);
+                               NULL);
   seqit->exhausted = false;
   seqit->unitnum = 0;
   seqit->withsequence = withsequence;
@@ -64,7 +61,7 @@ int seqiterator_next(SeqIterator *seqit,
                      const Uchar **sequence,
                      unsigned long *len,
                      char **desc,
-                     Env *env)
+                     Error *e)
 {
   Uchar charcode;
   int retval;
@@ -79,7 +76,7 @@ int seqiterator_next(SeqIterator *seqit,
   }
   while (true)
   {
-    retval = fastabuffer_next(seqit->fb,&charcode,env);
+    retval = fastabuffer_next(seqit->fb,&charcode,e);
     if (retval < 0)
     {
       haserr = true;
@@ -98,7 +95,7 @@ int seqiterator_next(SeqIterator *seqit,
     {
       if (seqit->sequencebuffer.nextfreeUchar == 0 && seqit->withsequence)
       {
-        env_error_set(env,"sequence %llu is empty", seqit->unitnum);
+        error_set(e,"sequence %llu is empty", seqit->unitnum);
         haserr = true;
         break;
       }
@@ -151,11 +148,11 @@ const unsigned long long *seqiterator_getcurrentcounter(SeqIterator *seqit,
   return &seqit->currentread;
 }
 
-void seqiterator_delete(SeqIterator *seqit, Env *env)
+void seqiterator_delete(SeqIterator *seqit)
 {
   if (!seqit) return;
   queue_delete_with_contents(seqit->descptr);
-  fastabuffer_delete(seqit->fb, env);
+  fastabuffer_delete(seqit->fb);
   FREEARRAY(&seqit->sequencebuffer, Uchar);
   seqit->currentread = seqit->maxread;
   ma_free(seqit);

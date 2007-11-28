@@ -114,12 +114,11 @@ int fasta2sequencekeyvalues(
                          plainformat,
                          filelengthtab,
                          descqueue,
-                         characterdistribution,
-                         env);
+                         characterdistribution);
     distspralen = discdistri_new(env);
     for (pos = 0; /* Nothing */; pos++)
     {
-      retval = fastabuffer_next(fb,&charcode,env);
+      retval = fastabuffer_next(fb,&charcode,env_error(env));
       if (retval < 0)
       {
         haserr = true;
@@ -207,7 +206,7 @@ int fasta2sequencekeyvalues(
   }
   fa_xfclose(desfp);
   discdistri_delete(distspralen);
-  fastabuffer_delete(fb, env);
+  fastabuffer_delete(fb);
   queue_delete_with_contents(descqueue);
   return haserr ? -1 : 0;
 }

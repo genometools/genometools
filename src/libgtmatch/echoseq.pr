@@ -40,7 +40,7 @@ void encseq2fastaoutput(FILE *fpout,
                         unsigned long width,
                         Env *env);
 
-int echodescriptionandsequence(const StrArray *filenametab,Env *env);
+int echodescriptionandsequence(const StrArray *filenametab,Error *e);
 
 #ifdef __cplusplus
 }

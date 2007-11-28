@@ -26,11 +26,11 @@
 typedef struct SeqIterator SeqIterator;
 
 SeqIterator* seqiterator_new(const StrArray *filenametab,
-                             const Uchar *symbolmap, bool withsequence, Env*);
+                             const Uchar *symbolmap, bool withsequence);
 int          seqiterator_next(SeqIterator*, const Uchar **sequence,
-                              unsigned long *len, char **desc, Env*);
+                              unsigned long *len, char **desc, Error*);
 const unsigned long long*
              seqiterator_getcurrentcounter(SeqIterator*, unsigned long long);
-void         seqiterator_delete(SeqIterator*, Env*);
+void         seqiterator_delete(SeqIterator*);
 
 #endif

@@ -193,7 +193,7 @@ typedef uint32_t Uint32;
 typedef struct
 {
   const char *funcname;
-  int(*function)(Encodedsequence *,FastaBuffer *,Env *);
+  int(*function)(Encodedsequence *,FastaBuffer *,Error *);
 } Fillencposfunc;
 
 typedef struct
@@ -837,18 +837,18 @@ static Uchar delivercharViauint32tablesSpecialrange(
   return (Uchar) EXTRACTENCODEDCHAR(encseq->fourcharsinonebyte,pos);
 }
 
-static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fb,Env *env)
+static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fb,Error *e)
 {
   Seqpos pos;
   int retval;
   Uchar cc;
 
-  env_error_check(env);
+  error_check(e);
   ALLOCASSIGNSPACE(encseq->plainseq,NULL,Uchar,encseq->totallength);
   encseq->plainseqptr = false;
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = fastabuffer_next(fb,&cc,env);
+    retval = fastabuffer_next(fb,&cc,e);
     if (retval < 0)
     {
       FREESPACE(encseq->plainseq);
@@ -865,7 +865,7 @@ static int fillplainseq(Encodedsequence *encseq,FastaBuffer *fb,Env *env)
 
 static int fillbitaccesstab(Encodedsequence *encseq,
                             FastaBuffer *fb,
-                            Env *env)
+                            Error *e)
 {
   Uchar cc;
   Seqpos pos;
@@ -873,11 +873,11 @@ static int fillbitaccesstab(Encodedsequence *encseq,
   Bitstring bitwise = 0;
   DECLARESEQBUFFER(encseq->fourcharsinonebyte);
 
-  env_error_check(env);
+  error_check(e);
   INITBITTAB(encseq->specialbits,encseq->totallength);
   for (pos=0; /* Nothing */; pos++)
   {
-    retval = fastabuffer_next(fb,&cc,env);
+    retval = fastabuffer_next(fb,&cc,e);
     if (retval < 0)
     {
       return -1;
@@ -1868,9 +1868,9 @@ static Encodedsequencefunctions encodedseqfunctab[] =
                          plainformat,
                          NULL,
                          NULL,
-                         NULL,
-                         env);
-    if (encodedseqfunctab[(int) sat].fillpos.function(encseq,fb,env) != 0)
+                         NULL);
+    if (encodedseqfunctab[(int) sat].fillpos.function(encseq,fb,
+                                                      env_error(env)) != 0)
     {
       haserr = true;
     }
@@ -1885,7 +1885,7 @@ static Encodedsequencefunctions encodedseqfunctab[] =
   {
     freeEncodedsequence(&encseq,env);
   }
-  fastabuffer_delete(fb, env);
+  fastabuffer_delete(fb);
   return haserr ? NULL : encseq;
 }
 
