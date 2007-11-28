@@ -36,15 +36,11 @@
  fulfill the length and distance constraints of LTRs.
  */
 
-static int checklengthanddistanceconstraints(
-    LTRboundaries *boundaries,
-    RepeatInfo *repeatinfo,
-    Env *env
-    )
+static int checklengthanddistanceconstraints(LTRboundaries *boundaries,
+                                             RepeatInfo *repeatinfo)
 {
   Seqpos ulen, vlen, dist_between_LTRs;
 
-  env_error_check(env);
   ulen = boundaries->leftLTR_3  - boundaries->leftLTR_5  + 1;
   vlen = boundaries->rightLTR_3 - boundaries->rightLTR_5 + 1;
   dist_between_LTRs = boundaries->rightLTR_5 - boundaries->leftLTR_5;
@@ -66,20 +62,15 @@ static int checklengthanddistanceconstraints(
   return 0;
 }
 
-void adjustboundariesfromXdropextension(
-    Myxdropbest xdropbest_left,
-    Myxdropbest xdropbest_right,
-    Seqpos seed1_startpos,
-    Seqpos seed2_startpos,
-    Seqpos seed1_endpos,
-    Seqpos seed2_endpos,
-    LTRboundaries *boundaries,
-    /*@unused@*/ Seqpos offset,
-    Env *env
-    )
+static void adjustboundariesfromXdropextension(Myxdropbest xdropbest_left,
+                                               Myxdropbest xdropbest_right,
+                                               Seqpos seed1_startpos,
+                                               Seqpos seed2_startpos,
+                                               Seqpos seed1_endpos,
+                                               Seqpos seed2_endpos,
+                                               LTRboundaries *boundaries,
+                                               /*@unused@*/ Seqpos offset)
 {
-  env_error_check(env);
-
   /* left alignment */
   boundaries->leftLTR_5  = seed1_startpos - xdropbest_left.ivalue;
   boundaries->rightLTR_5 = seed2_startpos - xdropbest_left.jvalue;
@@ -125,12 +116,8 @@ void adjustboundariesfromXdropextension(
  The following function applies the filter algorithms one after another
  to all candidate pairs.
 */
-int searchforLTRs (
-  Sequentialsuffixarrayreader *ssar,
-  LTRharvestoptions *lo,
-  const Seqpos *markpos,
-  Env *env
-  )
+int searchforLTRs(Sequentialsuffixarrayreader *ssar, LTRharvestoptions *lo,
+                  const Seqpos *markpos, Env *env)
 {
   unsigned long repeatcounter;
   ArrayMyfrontvalue fronts;
@@ -290,8 +277,7 @@ int searchforLTRs (
                    repeatptr->pos1 + repeatptr->offset + repeatptr->len - 1,
                                                          /*seed2 endpos*/
                    boundaries,
-                   offset,
-                   env);
+                   offset);
 
     /* if search for motif and/or TSD */
     if ( lo->motif.allowedmismatches < 4U || lo->minlengthTSD > 1U)
@@ -328,10 +314,7 @@ int searchforLTRs (
     }
 
     /* check length and distance constraints again */
-    if ( checklengthanddistanceconstraints(boundaries,
-                                          &lo->repeatinfo,
-                                          env) != 0)
-    {
+    if (checklengthanddistanceconstraints(boundaries, &lo->repeatinfo)) {
       /* delete this LTR-pair candidate */
       lo->arrayLTRboundaries.nextfreeLTRboundaries--;
       continue;
