@@ -21,7 +21,7 @@
 #include "libgtcore/xansi.h"
 
 static bool logging = false;
-static FILE *logfp = stderr;
+static FILE *logfp = NULL;
 
 void log_enable(void)
 {
@@ -30,6 +30,7 @@ void log_enable(void)
 
 bool log_enabled(void)
 {
+  logfp = stderr;
   return logging;
 }
 
