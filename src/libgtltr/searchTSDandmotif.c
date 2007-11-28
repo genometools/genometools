@@ -40,16 +40,16 @@
  a simple motif check at the boundaries of the TSDs is performed.
  */
 
-static void searchforbestTSDandormotifatborders(
-    SubRepeatInfo *info,
-    LTRharvestoptions *lo,
-    Sequentialsuffixarrayreader *ssar,
-    Seqpos *markpos,
-    LTRboundaries *boundaries,
-    unsigned int *motifmismatchesleftLTR,
-    unsigned int *motifmismatchesrightLTR,
-    Env *env
-    )
+static void searchforbestTSDandormotifatborders(SubRepeatInfo *info,
+                                                LTRharvestoptions *lo,
+                                                Sequentialsuffixarrayreader
+                                                *ssar,
+                                                Seqpos *markpos,
+                                                LTRboundaries *boundaries,
+                                                unsigned int
+                                                *motifmismatchesleftLTR,
+                                                unsigned int
+                                                *motifmismatchesrightLTR)
 {
   unsigned long i;
   Seqpos offset,
@@ -64,8 +64,6 @@ static void searchforbestTSDandormotifatborders(
        difffromoldboundary2 = 0;
   unsigned int hitcounter = 0;
   const Encodedsequence *encseq = encseqSequentialsuffixarrayreader(ssar);
-
-  env_error_check(env);
 
   if (boundaries->contignumber == 0)
   {
@@ -706,30 +704,28 @@ static int searchforTSDandorMotifoutside(
     FREESPACE(query);
 
     searchforbestTSDandormotifatborders(&subrepeatinfo,
-        lo,
-        ssar,
-        markpos,
-        boundaries,
-        motifmismatchesleftLTR,
-        motifmismatchesrightLTR,
-        env
-        );
+                                        lo,
+                                        ssar,
+                                        markpos,
+                                        boundaries,
+                                        motifmismatchesleftLTR,
+                                        motifmismatchesrightLTR);
 
     FREEARRAY (&subrepeatinfo.repeats, Repeat);
 
   } else /* no search for TSDs, search for motif only */
   {
     searchformotifonlyborders(lo,
-        boundaries,
-        ssar,
-        markpos,
-        startleftLTR,
-        endleftLTR,
-        startrightLTR,
-        endrightLTR,
-        motifmismatchesleftLTR,
-        motifmismatchesrightLTR,
-        env);
+                              boundaries,
+                              ssar,
+                              markpos,
+                              startleftLTR,
+                              endleftLTR,
+                              startrightLTR,
+                              endrightLTR,
+                              motifmismatchesleftLTR,
+                              motifmismatchesrightLTR,
+                              env);
   }
   return 0;
 }
