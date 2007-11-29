@@ -105,7 +105,7 @@ int comparetwosuffixes(const Encodedsequence *encseq,
       if (cc1 > cc2)
       {
         *maxlcp = pos1 - start1;
-        retval = 1;
+        retval = 1; /* a > b */
         break;
       }
     }

@@ -27,11 +27,14 @@ TMPFILE=`mktemp /tmp/skproto-all.XXXXXX` || exit 1
 cat << END_OF_TEXT > ${TMPFILE}
 alphabet.c
 eis-blockcomp.c
+eis-blockenc_params.c
+eis-bwtconstruct_params.c
 eis-bwtseq.c
 eis-bwtseqcreate.c
 eis-encidxseq.c
 eis-seqblocktranslate.c
 eis-seqranges.c
+eis-suffixarray-interface.c
 eis-suffixeratorreader.c
 encodedseq.c
 enum-patt.c
