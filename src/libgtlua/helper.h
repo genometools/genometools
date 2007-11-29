@@ -28,8 +28,6 @@ void put_config_in_registry(lua_State*, Config*);
 Config* get_config_from_registry(lua_State*);
 #endif
 
-void put_env_in_registry(lua_State*, Env*);
-Env* get_env_from_registry(lua_State*);
 void set_arg_in_lua_interpreter(lua_State*, const char *argv_0,
                                 const char **argv);
 /* Propagate the error given in <env> (which must be set) to <L>.

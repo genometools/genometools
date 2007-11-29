@@ -115,9 +115,6 @@ GTR* gtr_new(Env *env)
   gtr->L = luaL_newstate();
   assert(gtr->L); /* XXX: proper error message  */
   luaL_openlibs(gtr->L); /* open the standard libraries */
-  put_env_in_registry(gtr->L, env); /* we have to register the env object,
-                                       before we can open the GenomeTools
-                                       libraries */
   luaopen_gt(gtr->L); /* open all GenomeTools libraries */
   luaopen_lfs(gtr->L); /* open Lua filesystem */
 #ifdef LIBGTVIEW
@@ -372,7 +369,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
   if (!had_err && gtr->interactive) {
     showshortversion(env_error_get_progname(env));
     set_arg_in_lua_interpreter(gtr->L, env_error_get_progname(env), argv);
-    run_interactive_lua_interpreter(gtr->L, env);
+    run_interactive_lua_interpreter(gtr->L);
   }
   if (had_err)
     return EXIT_FAILURE;

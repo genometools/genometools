@@ -20,6 +20,6 @@
 
 #include "lua.h"
 
-void run_interactive_lua_interpreter(lua_State*, Env*);
+void run_interactive_lua_interpreter(lua_State*);
 
 #endif

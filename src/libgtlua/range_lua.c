@@ -48,7 +48,7 @@ static int range_lua_get_end(lua_State *L)
   return 1;
 }
 
-static Array* range_table_to_array(lua_State *L, Env *env)
+static Array* range_table_to_array(lua_State *L)
 {
   lua_Integer i = 1;
   Array *ranges;
@@ -108,8 +108,7 @@ static void push_range_array_as_table(lua_State *L, Array *ranges)
 static int ranges_lua_sort(lua_State *L)
 {
   Array *ranges;
-  Env *env = get_env_from_registry(L);
-  ranges = range_table_to_array(L, env);
+  ranges = range_table_to_array(L);
   ranges_sort(ranges);
   push_range_array_as_table(L, ranges);
   array_delete(ranges);
@@ -120,8 +119,7 @@ static int ranges_lua_are_sorted(lua_State *L)
 {
   Array *ranges;
   bool are_sorted;
-  Env *env = get_env_from_registry(L);
-  ranges = range_table_to_array(L, env);
+  ranges = range_table_to_array(L);
   are_sorted = ranges_are_sorted(ranges);
   array_delete(ranges);
   lua_pushboolean(L, are_sorted);

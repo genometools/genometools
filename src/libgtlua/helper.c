@@ -51,26 +51,6 @@ Config* get_config_from_registry(lua_State *L)
 }
 #endif
 
-void put_env_in_registry(lua_State *L, Env *env)
-{
-  assert(L && env);
-  lua_pushlightuserdata(L, ENV_KEY); /* push the key */
-  lua_pushlightuserdata(L, env); /* push the value */
-  lua_rawset(L, LUA_REGISTRYINDEX); /* store env in registry */
-}
-
-Env* get_env_from_registry(lua_State *L)
-{
-  Env *env;
-  assert(L);
-  lua_pushlightuserdata(L, ENV_KEY);
-  lua_rawget(L, LUA_REGISTRYINDEX);
-  assert(lua_islightuserdata(L, -1));
-  env = lua_touserdata(L, -1);
-  lua_pop(L, 1);
-  return env;
-}
-
 void set_arg_in_lua_interpreter(lua_State *L, const char *argv_0,
                                 const char **argv)
 {

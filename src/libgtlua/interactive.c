@@ -132,10 +132,9 @@ static int pushline(lua_State *L, bool firstline, GetLine *gl) {
   return 1;
 }
 
-static int loadline(lua_State *L, GetLine *gl, Env *env) {
+static int loadline(lua_State *L, GetLine *gl) {
   int status;
   lua_settop(L, 0);
-  env_error_check(env);
   if (!pushline(L, true, gl))
     return -1;  /* no input */
   for (;;) {  /* repeat until gets a complete line */
@@ -165,10 +164,9 @@ static int loadline(lua_State *L, GetLine *gl, Env *env) {
   return status;
 }
 
-static void dotty(lua_State *L, GetLine *gl, Env *env) {
+static void dotty(lua_State *L, GetLine *gl) {
   int status;
-  env_error_check(env);
-  while ((status = loadline(L, gl, env)) != -1) {
+  while ((status = loadline(L, gl)) != -1) {
     if (status == 0) status = docall(L, 0, 0);
     report(L, status);
     if (status == 0 && lua_gettop(L) > 0) {  /* any result to print? */
@@ -186,7 +184,7 @@ static void dotty(lua_State *L, GetLine *gl, Env *env) {
   fflush(stdout);
 }
 
-void run_interactive_lua_interpreter(lua_State *L, Env *env)
+void run_interactive_lua_interpreter(lua_State *L)
 {
 #ifdef CURSES
   GetLine *gl;
@@ -198,12 +196,11 @@ void run_interactive_lua_interpreter(lua_State *L, Env *env)
     exit(EXIT_FAILURE);
   }
 #endif
-  env_error_check(env);
   globalL = L; /* for signal handling */
 #ifdef CURSES
-  dotty(L, gl, env);
+  dotty(L, gl);
   del_GetLine(gl);
 #else
-  dotty(L, NULL, env);
+  dotty(L, NULL);
 #endif
 }

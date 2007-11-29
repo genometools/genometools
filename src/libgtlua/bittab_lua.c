@@ -30,11 +30,9 @@ static int bittab_lua_new(lua_State *L)
 {
   long num_of_bits;
   Bittab **bittab;
-  Env *env;
   assert(L);
   num_of_bits = luaL_checklong(L, 1);
   luaL_argcheck(L, num_of_bits > 0, 1, "must be > 0");
-  env = get_env_from_registry(L);
   bittab = lua_newuserdata(L, sizeof (Bittab*));
   assert(bittab);
   *bittab = bittab_new(num_of_bits);
