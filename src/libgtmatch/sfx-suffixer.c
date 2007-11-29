@@ -71,8 +71,9 @@ DECLAREARRAYSTRUCT(Seqpos);
   Suftabparts *suftabparts;
   const Encodedsequence *encseq;
   Readmode readmode;
-  Seqpos widthofpart;
-  Seqpos totallength;
+  Seqpos widthofpart,
+         totallength,
+         *lcpsubtab;
   unsigned int part,
                numofchars,
                prefixlength;
@@ -244,25 +245,21 @@ static void derivespecialcodes(/*@unused@*/ const Encodedsequence *encseq,
                              sfi->spaceCodeatposition[j].code,
                              prefixindex,
                              sfi->spaceCodeatposition[j].maxprefixlen);
-        if (code >= sfi->currentmincode &&
-            code <= sfi->currentmaxcode)
+        if (code >= sfi->currentmincode && code <= sfi->currentmaxcode &&
+            (prefixindex > 0 || code != sfi->filltable[0]))
         {
-          if (code != sfi->filltable[0] || prefixindex > 0)
-          {
-            sfi->countspecialcodes[FROMCODE2SPECIALCODE(code,
-                                                        sfi->numofchars)]++;
-            stidx = --sfi->leftborder[code];
+          sfi->countspecialcodes[FROMCODE2SPECIALCODE(code,sfi->numofchars)]++;
+          stidx = --sfi->leftborder[code];
 #ifdef LONGOUTPUT
-            printf("insert special_suffix " FormatSeqpos
-                   " (code %u) at location " FormatSeqpos "\n",
-                   PRINTSeqposcast(sfi->spaceCodeatposition[j].position -
-                                   prefixindex),
-                   (unsigned int) code,
-                   PRINTSeqposcast(stidx));
+          printf("insert special_suffix " FormatSeqpos
+                 " (code %u) at location " FormatSeqpos "\n",
+                 PRINTSeqposcast(sfi->spaceCodeatposition[j].position -
+                                 prefixindex),
+                 (unsigned int) code,
+                 PRINTSeqposcast(stidx));
 #endif
-            sfi->suftabptr[stidx] = sfi->spaceCodeatposition[j].position -
-                                    prefixindex;
-          }
+          sfi->suftabptr[stidx] = sfi->spaceCodeatposition[j].position -
+                                  prefixindex;
         }
       }
       if (deletevalues)
@@ -291,7 +288,7 @@ void freeSfxiterator(Sfxiterator **sfi,Env *env)
   Codetype specialcode;
 
   specialcode = FROMCODE2SPECIALCODE((*sfi)->filltable[0],
-                                    (*sfi)->numofchars);
+                                     (*sfi)->numofchars);
   (*sfi)->countspecialcodes[specialcode] += ((*sfi)->specialcharacters + 1);
   if ((*sfi)->sri != NULL)
   {
@@ -303,6 +300,7 @@ void freeSfxiterator(Sfxiterator **sfi,Env *env)
   FREESPACE((*sfi)->leftborder);
   FREESPACE((*sfi)->countspecialcodes);
   FREESPACE((*sfi)->suftab);
+  FREESPACE((*sfi)->lcpsubtab);
   freesuftabparts((*sfi)->suftabparts,env);
   FREESPACE(*sfi);
 }
@@ -320,37 +318,40 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
                             Verboseinfo *verboseinfo,
                             Env *env)
 {
-  Sfxiterator *sfi;
+  Sfxiterator *sfi = NULL;
   unsigned int numofallcodes = 0, numofspecialcodes;
   Seqpos *optr;
   bool haserr = false;
 
   env_error_check(env);
-  ALLOCASSIGNSPACE(sfi,NULL,Sfxiterator,1);
-  ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,
-                   Codeatposition,specialranges+1);
-  sfi->nextfreeCodeatposition = 0;
-  sfi->filltable = NULL;
-  sfi->basepower = NULL;
-  sfi->leftborder = NULL;
-  sfi->countspecialcodes = NULL;
-  sfi->suftab = NULL;
-  sfi->suftabptr = NULL;
-  sfi->suftabparts = NULL;
-  sfi->encseq = encseq;
-  sfi->readmode = readmode;
-  sfi->numofchars = numofchars;
-  sfi->prefixlength = prefixlength;
-  sfi->totallength = getencseqtotallength(encseq);
-  sfi->specialcharacters = specialcharacters;
-  sfi->sri = NULL;
-  sfi->part = 0;
-  sfi->exhausted = false;
   if (prefixlength == 0 || prefixlength > MAXPREFIXLENGTH)
   {
     env_error_set(env,"argument for option -pl must be in the range [1,%u]",
                   MAXPREFIXLENGTH);
     haserr = true;
+  } else
+  {
+    ALLOCASSIGNSPACE(sfi,NULL,Sfxiterator,1);
+    ALLOCASSIGNSPACE(sfi->spaceCodeatposition,NULL,
+                     Codeatposition,specialranges+1);
+    sfi->nextfreeCodeatposition = 0;
+    sfi->filltable = NULL;
+    sfi->basepower = NULL;
+    sfi->leftborder = NULL;
+    sfi->countspecialcodes = NULL;
+    sfi->suftab = NULL;
+    sfi->suftabptr = NULL;
+    sfi->suftabparts = NULL;
+    sfi->encseq = encseq;
+    sfi->readmode = readmode;
+    sfi->numofchars = numofchars;
+    sfi->prefixlength = prefixlength;
+    sfi->totallength = getencseqtotallength(encseq);
+    sfi->specialcharacters = specialcharacters;
+    sfi->lcpsubtab = NULL;
+    sfi->sri = NULL;
+    sfi->part = 0;
+    sfi->exhausted = false;
   }
   if (!haserr && initbasepower(&sfi->basepower,
                                &sfi->filltable,
@@ -438,7 +439,10 @@ Sfxiterator *newSfxiterator(Seqpos specialcharacters,
   }
   if (haserr)
   {
-    freeSfxiterator(&sfi,env);
+    if (sfi != NULL)
+    {
+      freeSfxiterator(&sfi,env);
+    }
     return NULL;
   }
   return sfi;
@@ -448,6 +452,8 @@ static void preparethispart(Sfxiterator *sfi,
                             Measuretime *mtime,
                             Env *env)
 {
+  Seqpos maxbucketsize;
+
   sfi->currentmincode = stpgetcurrentmincode(sfi->part,sfi->suftabparts);
   sfi->currentmaxcode = stpgetcurrentmaxcode(sfi->part,sfi->suftabparts);
   sfi->widthofpart = stpgetcurrentwidthofpart(sfi->part,sfi->suftabparts);
@@ -473,6 +479,14 @@ static void preparethispart(Sfxiterator *sfi,
   {
     deliverthetime(stdout,mtime,"sorting the buckets",env);
   }
+  maxbucketsize 
+    = determinemaxbucketsize(sfi->leftborder,
+                             sfi->countspecialcodes,
+                             sfi->currentmincode,
+                             sfi->currentmaxcode,
+                             stpgetcurrentsumofwdith(sfi->part,
+                                                     sfi->suftabparts),
+                             sfi->numofchars);
   sortallbuckets(sfi->suftabptr,
                  sfi->encseq,
                  sfi->readmode,
@@ -483,6 +497,7 @@ static void preparethispart(Sfxiterator *sfi,
                  sfi->currentmincode,
                  sfi->currentmaxcode,
                  stpgetcurrentsumofwdith(sfi->part,sfi->suftabparts),
+                 sfi->lcpsubtab,
                  env);
   sfi->part++;
 }

@@ -27,6 +27,7 @@
 #include "sfx-suffixer.h"
 #include "measure-time-if.h"
 #include "format64.h"
+#include "lcpinterval.h"
 #include "stamp.h"
 
 #include "sfx-apfxlen.pr"
@@ -65,13 +66,6 @@
             break;\
           }\
         }
-
-typedef struct
-{
-  Seqpos offset,
-         left,
-         right;
-} Lcpinterval;
 
 static bool mmsearch(const Encodedsequence *dbencseq,
                      Encodedsequencescanstate *esr,

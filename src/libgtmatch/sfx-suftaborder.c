@@ -239,9 +239,9 @@ void checkentiresuftab(const Encodedsequence *encseq,
       {
         break;
       }
-      if(maxlcp != currentlcp)
+      if (maxlcp != currentlcp)
       {
-        fprintf(stderr,"%lu: startpos=" FormatSeqpos "firstchar=%u, startpos=" 
+        fprintf(stderr,"%lu: startpos=" FormatSeqpos "firstchar=%u, startpos="
                 FormatSeqpos "=%u",
                 (unsigned long) (ptr - suftab),
                 PRINTSeqposcast(*(ptr-1)),
