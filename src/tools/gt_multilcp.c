@@ -58,7 +58,7 @@ int gt_multilcp(int argc, const char **argv, Env *env)
     env_error_set(env, "sequence of length 0 not allowed");
     return -1;
   }
-  multilcptab = multilcp_compute(seq1, len1, seq2, len2, env);
+  multilcptab = multilcp_compute(seq1, len1, seq2, len2);
   multilcp_show(multilcptab, len1, len2);
   array2dim_delete(multilcptab);
 

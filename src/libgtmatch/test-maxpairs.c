@@ -198,7 +198,7 @@ static int orderSubstringmatch(const void *a,const void *b)
 }
 
 static int showSubstringmatch(/*@unused@*/ void *info,const void *a,
-                              /*@unused@*/ Env *env)
+                              /*@unused@*/ Error *err)
 {
   Substringmatch *m = (Substringmatch *) a;
 
@@ -294,10 +294,11 @@ int testmaxpairs(const Str *indexname,
     {
       const unsigned long width = 60UL;
       printf("querymatches\n");
-      (void) array_iterate(tabmaxquerymatches,showSubstringmatch,NULL,env);
+      (void) array_iterate(tabmaxquerymatches,showSubstringmatch,NULL,
+                           env_error(env));
       printf("dbmatches\n");
       (void) array_iterate(maxmatchselfinfo.results,showSubstringmatch,
-                           NULL,env);
+                           NULL,env_error(env));
       symbolstring2fasta(stdout,"dbseq",
                          suffixarray.alpha,
                          dbseq,

@@ -54,10 +54,8 @@ static int diagram_lua_new(lua_State *L)
 static int diagram_lua_delete(lua_State *L)
 {
   Diagram **diagram;
-  Env *env;
   diagram = check_diagram(L, 1);
-  env = get_env_from_registry(L);
-  diagram_delete(*diagram, env);
+  diagram_delete(*diagram);
   return 0;
 }
 

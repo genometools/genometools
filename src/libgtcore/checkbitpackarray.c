@@ -53,7 +53,7 @@ int bitPackArray_unit_test(Env *env)
 
     log_log("seedval = %lu, numRnd=%lu\n", seedval, (long unsigned)numRnd);
     randSrc = ma_malloc(sizeof (uint32_t)*numRnd);
-    bitStore = newBitPackArray(bits, numRnd, env);
+    bitStore = newBitPackArray(bits, numRnd);
     randCmp = ma_malloc(sizeof (uint32_t)*numRnd);
     for (i = 0; i < numRnd; ++i)
     {
@@ -72,13 +72,13 @@ int bitPackArray_unit_test(Env *env)
                 v & mask, r, seedval, (unsigned long)i, bits);
         ma_free(randSrc);
         ma_free(randCmp);
-        deleteBitPackArray(bitStore, env);
+        deleteBitPackArray(bitStore);
         return had_err;
       }
     }
   ma_free(randSrc);
   ma_free(randCmp);
-  deleteBitPackArray(bitStore, env);
+  deleteBitPackArray(bitStore);
   }
   log_log("bpaStoreUInt32/bpaGetUInt32: passed\n");
   {
@@ -95,7 +95,7 @@ int bitPackArray_unit_test(Env *env)
     else
       mask = ~((~(uint64_t)0)<<bits);
     ensure(had_err, (randSrc = ma_malloc(sizeof (uint64_t)*numRnd))
-           && (bitStore = newBitPackArray(bits, numRnd, env))
+           && (bitStore = newBitPackArray(bits, numRnd))
            && (randCmp = ma_malloc(sizeof (uint64_t)*numRnd)));
     if (had_err)
     {
@@ -105,7 +105,7 @@ int bitPackArray_unit_test(Env *env)
       if (randCmp)
         ma_free(randCmp);
       if (bitStore)
-        deleteBitPackArray(bitStore, env);
+        deleteBitPackArray(bitStore);
       return had_err;
     }
     for (i = 0; i < numRnd; ++i)
@@ -126,13 +126,13 @@ int bitPackArray_unit_test(Env *env)
                 (unsigned long long)r, seedval, (unsigned long)i, bits);
         ma_free(randSrc);
         ma_free(randCmp);
-        deleteBitPackArray(bitStore, env);
+        deleteBitPackArray(bitStore);
         return had_err;
       }
     }
     ma_free(randSrc);
     ma_free(randCmp);
-    deleteBitPackArray(bitStore, env);
+    deleteBitPackArray(bitStore);
   }
   log_log("bpaStoreUInt64/bpaGetUInt64: passed\n");
   return had_err;

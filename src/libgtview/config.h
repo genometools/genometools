@@ -40,14 +40,14 @@ typedef struct Config Config;
 
 /* Create a new Config object with given verbosity. If set, warnings will be
    given. */
-Config*        config_new(bool verbose, Env *env);
+Config*        config_new(bool verbose, Error*);
 /* Create a Config object wich reuses the given Lua state. */
-Config*        config_new_with_state(lua_State*, Env*);
+Config*        config_new_with_state(lua_State*, Error*);
 /* Load and executes a Lua configuration file with given <filename>.
    This file must contain a global table called 'config'. */
-int            config_load_file(Config*, Str *filename, Env*);
+int            config_load_file(Config*, Str *filename, Error*);
 /* Reload the Lua configuration file. */
-void           config_reload(Config*, Env *env);
+void           config_reload(Config*);
 /* Retrieve a color value from the configuration for <key> (i.e., feature). */
 Color          config_get_color(const Config*, const char *key);
 /* Sets a color value in the configuration for <key> (i.e., feature) to a
@@ -80,7 +80,7 @@ DominateStatus config_dominates(Config*, GenomeFeatureType gft1,
                                 GenomeFeatureType gft2);
 int            config_unit_test(Env*);
 /* Deletes a Config object but leaves the internal Lua state intact. */
-void           config_delete_without_state(Config*, Env*);
-void           config_delete(Config*, Env*);
+void           config_delete_without_state(Config*);
+void           config_delete(Config*);
 
 #endif

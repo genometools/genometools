@@ -63,7 +63,7 @@ static void proc_gt_env_options(Env *env)
   splitter_split(splitter, env_options, strlen(env_options), ' ');
   argc = splitter_size(splitter);
   argv = cstr_array_preprend((const char**) splitter_get_tokens(splitter),
-                             "env", env);
+                             "env");
   argc++;
   /* parse options contained in $GT_ENV_OPTIONS */
   switch (parse_env_options(argc, (const char**) argv, env)) {
@@ -77,7 +77,7 @@ static void proc_gt_env_options(Env *env)
   }
   ma_free(env_options);
   splitter_delete(splitter);
-  cstr_array_delete(argv, env);
+  cstr_array_delete(argv);
 }
 
 Env* env_new(void)

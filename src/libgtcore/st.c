@@ -281,7 +281,7 @@ st_insert(st_table *table, st_data_t key, st_data_t value)
 }
 
 void
-st_add_direct(st_table *table, st_data_t key, st_data_t value, Env *env)
+st_add_direct(st_table *table, st_data_t key, st_data_t value)
 {
     unsigned int hash_val, bin_pos;
 
@@ -316,7 +316,7 @@ rehash(st_table *table)
 }
 
 st_table*
-st_copy(st_table *old_table, Env *env)
+st_copy(st_table *old_table)
 {
     st_table *new_table;
     st_table_entry *ptr, *entry;

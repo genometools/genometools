@@ -62,7 +62,7 @@ unsigned long cstr_length_up_to_char(const char *cstr, char c)
   return strlen(cstr);
 }
 
-char** cstr_array_prefix_first(const char **cstr_array, const char *p, Env *env)
+char** cstr_array_prefix_first(const char **cstr_array, const char *p)
 {
   unsigned long i, a_len, f_len;
   char **a;
@@ -78,7 +78,7 @@ char** cstr_array_prefix_first(const char **cstr_array, const char *p, Env *env)
   return a;
 }
 
-char** cstr_array_preprend(const char **cstr_array, const char *p, Env *env)
+char** cstr_array_preprend(const char **cstr_array, const char *p)
 {
   unsigned long i, a_len;
   char **a;
@@ -124,7 +124,7 @@ unsigned long cstr_array_size(const char **cstr_array)
   return i;
 }
 
-void cstr_array_delete(char **cstr_array, Env *env)
+void cstr_array_delete(char **cstr_array)
 {
   unsigned long i = 0;
   if (!cstr_array) return;

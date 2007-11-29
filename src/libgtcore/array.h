@@ -42,8 +42,9 @@ size_t        array_elem_size(const Array*);
 unsigned long array_size(const Array*);
 void          array_sort(Array*, int(*compar)(const void*, const void*));
 int           array_iterate(const Array*,
-                            int(*iterfunc)(void *info, const void *value, Env*),
-                            void *info, Env*);
+                            int(*iterfunc)(void *info, const void *value,
+                                           Error*),
+                            void *info, Error*);
 int           array_example(Env*);
 int           array_unit_test(Env*);
 void          array_delete(Array*);

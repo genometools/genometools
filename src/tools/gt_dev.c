@@ -95,13 +95,13 @@ int gt_dev(int argc, const char **argv, Env *env)
 
   /* call development tool */
   if (!had_err) {
-    nargv = cstr_array_prefix_first(argv+parsed_args, argv[0], env);
+    nargv = cstr_array_prefix_first(argv+parsed_args, argv[0]);
     env_error_set_progname(env, nargv[0]);
     had_err = devtool(argc-parsed_args, (const char**) nargv, env);
   }
 
   /* free */
-  cstr_array_delete(nargv, env);
+  cstr_array_delete(nargv);
   toolbox_delete(dev_toolbox);
 
   return had_err;

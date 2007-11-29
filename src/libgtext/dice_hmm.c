@@ -18,12 +18,12 @@
 #include <assert.h>
 #include "libgtext/dice_hmm.h"
 
-HMM* dice_hmm_loaded(Env *env)
+HMM* dice_hmm_loaded(void)
 {
   HMM *hmm;
 
   /* create the HMM */
-  hmm = hmm_new(DICE_NUM_OF_STATES, DICE_NUM_OF_SYMBOLS, env);
+  hmm = hmm_new(DICE_NUM_OF_STATES, DICE_NUM_OF_SYMBOLS);
 
   /* set emmission probabilities */
   hmm_set_emission_probability(hmm, DICE_FAIR, ONE,   1.0/6);
@@ -49,12 +49,12 @@ HMM* dice_hmm_loaded(Env *env)
   return hmm;
 }
 
-HMM* dice_hmm_fair(Env *env)
+HMM* dice_hmm_fair(void)
 {
   HMM *hmm;
 
   /* create the HMM */
-  hmm = hmm_new(DICE_NUM_OF_STATES, DICE_NUM_OF_SYMBOLS, env);
+  hmm = hmm_new(DICE_NUM_OF_STATES, DICE_NUM_OF_SYMBOLS);
 
   /* set emmission probabilities */
   hmm_set_emission_probability(hmm, DICE_FAIR, ONE,   1.0/6);
@@ -80,7 +80,7 @@ HMM* dice_hmm_fair(Env *env)
   return hmm;
 }
 
-Alpha* dice_hmm_alpha(Env *env)
+Alpha* dice_hmm_alpha(void)
 {
   Alpha *a = alpha_new();
   alpha_add_mapping(a, "1");

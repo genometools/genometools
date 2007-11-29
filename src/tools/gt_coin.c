@@ -73,11 +73,11 @@ int gt_coin(int argc, const char **argv, Env *env)
 
   if (!had_err) {
     /* create the HMM */
-    hmm = coin_hmm_loaded(env);
+    hmm = coin_hmm_loaded();
 
     /* decoding */
     state_sequence = ma_malloc(sizeof (unsigned int) * num_of_emissions);
-    hmm_decode(hmm, state_sequence, emissions, num_of_emissions, env);
+    hmm_decode(hmm, state_sequence, emissions, num_of_emissions);
 
     /* print most probable state sequence state sequence */
     for (i = 0 ; i < num_of_emissions; i++) {
@@ -95,7 +95,7 @@ int gt_coin(int argc, const char **argv, Env *env)
   }
 
   /* free */
-  hmm_delete(hmm, env);
+  hmm_delete(hmm);
   ma_free(emissions);
   ma_free(state_sequence);
 

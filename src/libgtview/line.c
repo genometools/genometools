@@ -73,7 +73,8 @@ int line_unit_test(Env* env)
   const char* bar = "bar";
   const char* blub = "blub";
 
-  cfg = config_new(false, env);
+  if (!(cfg = config_new(false, env_error(env))))
+    had_err = -1;
 
   r_parent.start = 10UL;
   r_parent.end = 80UL;
@@ -138,7 +139,7 @@ int line_unit_test(Env* env)
   blocks = line_get_blocks(l1);
   ensure(had_err, (2 == array_size(blocks)));
 
-  config_delete(cfg, env);
+  config_delete(cfg);
   str_delete(seqid1);
   str_delete(seqid2);
   str_delete(seqid3);

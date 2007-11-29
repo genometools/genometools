@@ -24,8 +24,7 @@
 
 void countingsort(void *out, const void *in, size_t elem_size,
                   unsigned long size, unsigned long max_elemvalue, void *data,
-                  unsigned long (*get_elemvalue)(const void *elem, void *data),
-                  Env *env)
+                  unsigned long (*get_elemvalue)(const void *elem, void *data))
 {
   unsigned long i, k, *c;
   assert(out && in && elem_size && size && max_elemvalue && get_elemvalue);
@@ -82,7 +81,7 @@ int countingsort_unit_test(Env *env)
   env_error_check(env);
   countingsort(numbers_out, numbers, sizeof (unsigned int), 5,
                countingsort_get_max(numbers, sizeof (unsigned int), 5, NULL,
-                                    get_int), NULL,  get_int, env);
+                                    get_int), NULL,  get_int);
   ensure(had_err,
          !memcmp(sorted_numbers, numbers_out, sizeof (unsigned int) * 5));
   return had_err;

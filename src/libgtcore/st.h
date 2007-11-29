@@ -42,10 +42,10 @@ int       st_delete_safe(st_table*, st_data_t*, st_data_t*, st_data_t);
 int       st_insert(st_table*, st_data_t, st_data_t);
 int       st_lookup(st_table*, st_data_t, st_data_t*);
 int       st_foreach(st_table*, st_iterfunc_type, st_data_t, Error*);
-void      st_add_direct(st_table*, st_data_t, st_data_t, Env*);
+void      st_add_direct(st_table*, st_data_t, st_data_t);
 void      st_free_table(st_table*);
 void      st_cleanup_safe(st_table*, st_data_t, Error*);
-st_table* st_copy(st_table*, Env*);
+st_table* st_copy(st_table*);
 
 #define ST_NUMCMP       ((int (*)()) 0)
 #define ST_NUMHASH      ((int (*)()) -2)

@@ -66,12 +66,12 @@ gt_packedindex(int argc, const char **argv, Env *env)
 
   /* call sub-tool */
   if (!had_err) {
-    nargv = cstr_array_prefix_first(argv+parsed_args, argv[0], env);
+    nargv = cstr_array_prefix_first(argv+parsed_args, argv[0]);
     env_error_set_progname(env, nargv[0]);
     had_err = indexTool(argc-parsed_args, (const char**) nargv, env);
   }
 
-  cstr_array_delete(nargv, env);
+  cstr_array_delete(nargv);
   toolbox_delete(index_toolbox);
   return had_err?-1:0;
 }

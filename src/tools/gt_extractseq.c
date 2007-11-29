@@ -70,20 +70,20 @@ static OPrval parse_options(int *parsed_args, ExtractSeqArguments *arguments,
 }
 
 static int extractseq(GenFile *outfp, Bioseq *bs, const char *pattern,
-                     unsigned long width, Env *env)
+                      unsigned long width, Error *err)
 {
   const char *desc;
   unsigned long i;
   bool match;
   int had_err = 0;
 
-  env_error_check(env);
+  error_check(err);
   assert(bs && pattern);
 
   for (i = 0; !had_err && i < bioseq_number_of_sequences(bs); i++) {
     desc = bioseq_get_description(bs, i);
     assert(desc);
-    had_err = grep(&match, pattern, desc, env);
+    had_err = grep(&match, pattern, desc, err);
     if (!had_err && match) {
       fasta_show_entry_generic(desc, bioseq_get_sequence(bs, i),
                                bioseq_get_sequence_length(bs, i), width, outfp);
@@ -117,7 +117,7 @@ int gt_extractseq(int argc, const char **argv, Env *env)
       had_err = -1;
     if (!had_err) {
       had_err = extractseq(arguments.outfp, bs, str_get(arguments.pattern),
-                           arguments.width, env);
+                           arguments.width, env_error(env));
     }
     bioseq_delete(bs);
   }
@@ -128,7 +128,7 @@ int gt_extractseq(int argc, const char **argv, Env *env)
       had_err = -1;
     if (!had_err) {
       had_err = extractseq(arguments.outfp, bs, str_get(arguments.pattern),
-                           arguments.width, env);
+                           arguments.width, env_error(env));
     }
     bioseq_delete(bs);
     parsed_args++;

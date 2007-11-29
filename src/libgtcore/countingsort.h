@@ -38,7 +38,7 @@ void          countingsort(void *out, const void *in, size_t elem_size,
                            unsigned long size, unsigned long max_elemvalue,
                            void *data,
                            unsigned long (*get_elemvalue)(const void *elem,
-                                                          void *data), Env*);
+                                                          void *data));
 
 /* if <max_elemvalue> is not known, it can be determined with this function */
 unsigned long countingsort_get_max(const void *in, size_t elem_size,

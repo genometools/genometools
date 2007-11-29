@@ -64,7 +64,7 @@ MSA* msa_new(const char *MSA_filename, Error *e)
   return msa;
 }
 
-static char** get_msa_array(Bioseq *bs, Env *env)
+static char** get_msa_array(Bioseq *bs)
 {
   unsigned long i;
   char **msa;
@@ -76,7 +76,7 @@ static char** get_msa_array(Bioseq *bs, Env *env)
 }
 
 static unsigned long** get_count(char **msa, unsigned long number_of_seqs,
-                                 unsigned long seqlen, Env *env)
+                                 unsigned long seqlen)
 {
   unsigned long col, seq, **count;
   assert(msa);
@@ -88,8 +88,7 @@ static unsigned long** get_count(char **msa, unsigned long number_of_seqs,
   return count;
 }
 
-static char* get_consensus(unsigned long **count, unsigned long seqlen,
-                           Env *env)
+static char* get_consensus(unsigned long **count, unsigned long seqlen)
 {
   unsigned long col, c, max_count;
   char *consensus, consensus_char = GAPSYMBOL;
@@ -109,7 +108,7 @@ static char* get_consensus(unsigned long **count, unsigned long seqlen,
   return consensus;
 }
 
-unsigned long msa_consensus_distance(const MSA *msa, Env *env)
+unsigned long msa_consensus_distance(const MSA *msa)
 {
   unsigned long col, number_of_seqs, seqlen, **count, dist = 0;
   char **msa_array, *consensus;
@@ -120,13 +119,13 @@ unsigned long msa_consensus_distance(const MSA *msa, Env *env)
   seqlen = bioseq_get_sequence_length(msa->bs, 0);
 
   /* get the MSA in a convenient form */
-  msa_array = get_msa_array(msa->bs, env);
+  msa_array = get_msa_array(msa->bs);
 
   /* compute the character count array */
-  count = get_count(msa_array, number_of_seqs, seqlen, env);
+  count = get_count(msa_array, number_of_seqs, seqlen);
 
   /* compute the consensus from the count array */
-  consensus = get_consensus(count, seqlen, env);
+  consensus = get_consensus(count, seqlen);
 
   /* compute the actual consensus distance */
   for (col = 0; col < seqlen; col++) {
@@ -141,7 +140,7 @@ unsigned long msa_consensus_distance(const MSA *msa, Env *env)
   return dist;
 }
 
-unsigned long msa_sum_of_pairwise_scores(const MSA *msa, Env *env)
+unsigned long msa_sum_of_pairwise_scores(const MSA *msa)
 {
   unsigned long i, j, col, number_of_seqs, seqlen, sum = 0;
   char **msa_array;
@@ -152,7 +151,7 @@ unsigned long msa_sum_of_pairwise_scores(const MSA *msa, Env *env)
   seqlen = bioseq_get_sequence_length(msa->bs, 0);
 
   /* get the MSA in a convenient form */
-  msa_array = get_msa_array(msa->bs, env);
+  msa_array = get_msa_array(msa->bs);
 
   /* compute the actual sum of pairwise scores */
   for (i = 0; i < number_of_seqs-1; i++) {

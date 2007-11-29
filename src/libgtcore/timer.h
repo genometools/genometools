@@ -26,10 +26,10 @@
 /* the timer class */
 typedef struct Timer Timer;
 
-Timer* timer_new(Env*);
+Timer* timer_new(void);
 void   timer_start(Timer*);
 void   timer_stop(Timer*);
 void   timer_show(Timer*, FILE*);
-void   timer_del(Timer*, Env*);
+void   timer_del(Timer*);
 
 #endif

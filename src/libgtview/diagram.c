@@ -428,7 +428,7 @@ Range diagram_get_range(Diagram* diagram)
   return diagram->range;
 }
 
-void diagram_set_config(Diagram *diagram, Config *config, Env *env)
+void diagram_set_config(Diagram *diagram, Config *config)
 {
   assert(diagram && config);
   diagram->config = config;
@@ -523,8 +523,10 @@ int diagram_unit_test(Env *env)
   dr1.end   = 900UL;
 
   /* create a config object */
-  if (!had_err)
-    cfg = config_new(false, env);
+  if (!had_err) {
+    if (!(cfg = config_new(false, env_error(env))))
+      had_err = -1;
+  }
 
   /* create a diagram object and test it */
   if (!had_err)
@@ -578,9 +580,9 @@ int diagram_unit_test(Env *env)
   ensure(had_err, range_compare(diagram_get_range(dia),dr1) == 0);
 
   /* delete all generated objects */
-  config_delete(cfg, env);
-  diagram_delete(dia,env);
-  diagram_delete(dia2,env);
+  config_delete(cfg);
+  diagram_delete(dia);
+  diagram_delete(dia2);
   feature_index_delete(fi);
   genome_node_rec_delete(gn1);
   genome_node_rec_delete(gn2);
@@ -592,7 +594,7 @@ int diagram_unit_test(Env *env)
   return had_err;
 }
 
-void diagram_delete(Diagram *diagram, Env *env)
+void diagram_delete(Diagram *diagram)
 {
   if (!diagram) return;
   (void) hashtable_foreach(diagram->tracks, diagram_track_delete, NULL, NULL);

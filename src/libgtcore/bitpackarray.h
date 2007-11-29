@@ -47,7 +47,7 @@ typedef struct BitPackArray BitPackArray;
  * @return pointer to new BitPackArray structure or NULL on failure
  */
 static inline BitPackArray *
-newBitPackArray(unsigned bits, BitOffset numValues, Env *env)
+newBitPackArray(unsigned bits, BitOffset numValues)
 {
   BitPackArray *newBPA = ma_malloc(sizeof (*newBPA));
   if (newBPA)
@@ -65,7 +65,7 @@ newBitPackArray(unsigned bits, BitOffset numValues, Env *env)
 }
 
 static inline void
-deleteBitPackArray(BitPackArray *bpa, Env *env)
+deleteBitPackArray(BitPackArray *bpa)
 {
   ma_free(bpa->store);
   ma_free(bpa);

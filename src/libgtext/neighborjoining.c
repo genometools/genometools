@@ -40,8 +40,7 @@ struct NeighborJoining {
 };
 
 static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
-                                 void *data, NeighborJoiningDistFunc distfunc,
-                                 Env *env)
+                                 void *data, NeighborJoiningDistFunc distfunc)
 {
   unsigned long i, j;
   double retval;
@@ -62,7 +61,7 @@ static void neighborjoining_init(NeighborJoining *nj, unsigned long num_of_taxa,
       nj->nodes[i].distances = ma_malloc(sizeof (double) * i);
       for (j = 0; j < i; j++) {
         if (i < num_of_taxa) {
-          retval = distfunc(i, j, data, env);
+          retval = distfunc(i, j, data);
           /* the Neighbor-Joining distance function returns a value >= 0.0 */
           assert(retval >= 0.0);
           nj->nodes[i].distances[j] = retval;
@@ -104,7 +103,7 @@ static void updatertab(double *rtab, Bittab *nodetab, unsigned long activenodes,
   }
 }
 
-static void neighborjoining_compute(NeighborJoining *nj, Env *env)
+static void neighborjoining_compute(NeighborJoining *nj)
 {
   unsigned long i, j, min_i = UNDEF_ULONG, min_j = UNDEF_ULONG, step,
                 newnodenum = nj->num_of_taxa,
@@ -184,13 +183,13 @@ static void neighborjoining_compute(NeighborJoining *nj, Env *env)
 }
 
 NeighborJoining* neighborjoining_new(unsigned long num_of_taxa, void *data,
-                                     NeighborJoiningDistFunc distfunc, Env *env)
+                                     NeighborJoiningDistFunc distfunc)
 {
   NeighborJoining *nj;
   assert(num_of_taxa && distfunc);
   nj = ma_malloc(sizeof (NeighborJoining));
-  neighborjoining_init(nj, num_of_taxa, data, distfunc, env);
-  neighborjoining_compute(nj, env);
+  neighborjoining_init(nj, num_of_taxa, data, distfunc);
+  neighborjoining_compute(nj);
   return nj;
 }
 
@@ -221,7 +220,7 @@ void neighborjoining_show_tree(const NeighborJoining *nj, FILE *fp)
     neighborjoining_show_node(nj, nj->finalnodeB, fp);
 }
 
-void neighborjoining_delete(NeighborJoining *nj, Env *env)
+void neighborjoining_delete(NeighborJoining *nj)
 {
   unsigned long i;
   if (!nj) return;

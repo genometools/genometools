@@ -24,11 +24,11 @@
 /* a bittab which grows on demand */
 typedef struct DynBittab DynBittab;
 
-DynBittab*    dynbittab_new(Env*);
-void          dynbittab_set_bit(DynBittab*, unsigned long, Env*);
+DynBittab*    dynbittab_new(void);
+void          dynbittab_set_bit(DynBittab*, unsigned long);
 void          dynbittab_unset_bit(DynBittab*, unsigned long);
 bool          dynbittab_bit_is_set(const DynBittab*, unsigned long);
 int           dynbittab_unit_test(Env*);
-void          dynbittab_delete(DynBittab*, Env*);
+void          dynbittab_delete(DynBittab*);
 
 #endif

@@ -27,7 +27,7 @@ struct DynBittab {
                 num_of_bits;
 };
 
-DynBittab* dynbittab_new(Env *env)
+DynBittab* dynbittab_new(void)
 {
   return ma_calloc(1, sizeof (DynBittab));
 }
@@ -39,10 +39,9 @@ static unsigned long determine_tabsize(unsigned long num_of_bits)
   return 1UL;
 }
 
-void dynbittab_set_bit(DynBittab *b, unsigned long bit, Env *env)
+void dynbittab_set_bit(DynBittab *b, unsigned long bit)
 {
   unsigned long new_tabsize;
-  env_error_check(env);
   assert(b);
   /* make sure tab is large enough */
   if (bit >= b->num_of_bits) {
@@ -85,17 +84,17 @@ int dynbittab_unit_test(Env *env)
   DynBittab *b;
   int had_err = 0;
 
-  b = dynbittab_new(env);
+  b = dynbittab_new();
   for (i = 0; !had_err && i < 256; i++) {
     ensure(had_err, !dynbittab_bit_is_set(b, i));
   }
   if (!had_err) {
-    dynbittab_set_bit(b, 0, env);
-    dynbittab_set_bit(b, 32, env);
-    dynbittab_set_bit(b, 64, env);
-    dynbittab_set_bit(b, 77, env);
-    dynbittab_set_bit(b, 96, env);
-    dynbittab_set_bit(b, 123, env);
+    dynbittab_set_bit(b, 0);
+    dynbittab_set_bit(b, 32);
+    dynbittab_set_bit(b, 64);
+    dynbittab_set_bit(b, 77);
+    dynbittab_set_bit(b, 96);
+    dynbittab_set_bit(b, 123);
   }
   ensure(had_err, dynbittab_bit_is_set(b, 0));
   ensure(had_err, dynbittab_bit_is_set(b, 32));
@@ -106,19 +105,19 @@ int dynbittab_unit_test(Env *env)
   for (i = 124; !had_err && i < 256; i++) {
     ensure(had_err, !dynbittab_bit_is_set(b, i));
   }
-  dynbittab_delete(b, env);
+  dynbittab_delete(b);
 
-  b = dynbittab_new(env);
+  b = dynbittab_new();
   for (i = 0; !had_err && i < 256; i++) {
     ensure(had_err, !dynbittab_bit_is_set(b, i));
   }
   if (!had_err) {
-    dynbittab_set_bit(b, 1, env);
-    dynbittab_set_bit(b, 33, env);
-    dynbittab_set_bit(b, 65, env);
-    dynbittab_set_bit(b, 77, env);
-    dynbittab_set_bit(b, 97, env);
-    dynbittab_set_bit(b, 124, env);
+    dynbittab_set_bit(b, 1);
+    dynbittab_set_bit(b, 33);
+    dynbittab_set_bit(b, 65);
+    dynbittab_set_bit(b, 77);
+    dynbittab_set_bit(b, 97);
+    dynbittab_set_bit(b, 124);
   }
   ensure(had_err, dynbittab_bit_is_set(b, 1));
   ensure(had_err, dynbittab_bit_is_set(b, 33));
@@ -129,12 +128,12 @@ int dynbittab_unit_test(Env *env)
   for (i = 125; !had_err && i < 256; i++) {
     ensure(had_err, !dynbittab_bit_is_set(b, i));
   }
-  dynbittab_delete(b, env);
+  dynbittab_delete(b);
 
   return had_err;
 }
 
-void dynbittab_delete(DynBittab *b, Env *env)
+void dynbittab_delete(DynBittab *b)
 {
   if (!b) return;
   ma_free(b->tabptr);

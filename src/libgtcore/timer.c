@@ -33,7 +33,7 @@ struct Timer {
   Timerstate state;
 };
 
-Timer* timer_new(Env *env)
+Timer* timer_new(void)
 {
   Timer *t;
   t = ma_malloc(sizeof (Timer));
@@ -70,7 +70,7 @@ void timer_show(Timer *t, FILE *fp)
           t->stop_ru.ru_stime.tv_sec - t->stop_ru.ru_stime.tv_sec);
 }
 
-void timer_del(Timer *t, Env *env)
+void timer_del(Timer *t)
 {
   if (!t) return;
   ma_free(t);

@@ -21,7 +21,7 @@
 #include "libgtcore/array2dim.h"
 #include "libgtext/multilcp.h"
 
-int** multilcp_compute(const char *u, int m, const char *v, int n, Env *env)
+int** multilcp_compute(const char *u, int m, const char *v, int n)
 {
   int i, j, **prefix;
 

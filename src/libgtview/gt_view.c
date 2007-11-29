@@ -252,9 +252,10 @@ int gt_view(int argc, const char **argv, Env *env)
     config_file = gtdata_get_path(str_get(prog), env_error(env));
     str_delete(prog);
     str_append_cstr(config_file, "/config/view.lua");
-    cfg = config_new(arguments.verbose, env);
-    if (file_exists(str_get(config_file)))
-      had_err = config_load_file(cfg, config_file, env);
+    if (!(cfg = config_new(arguments.verbose, env_error(env))))
+      had_err = -1;
+    if (!had_err && file_exists(str_get(config_file)))
+      had_err = config_load_file(cfg, config_file, env_error(env));
   }
 
   if (!had_err) {
@@ -265,9 +266,9 @@ int gt_view(int argc, const char **argv, Env *env)
   }
 
   render_delete(r);
-  config_delete(cfg, env);
+  config_delete(cfg);
   str_delete(config_file);
-  diagram_delete(d, env);
+  diagram_delete(d);
 
   /* free */
   str_delete(arguments.seqid);

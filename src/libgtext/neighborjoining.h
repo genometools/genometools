@@ -23,12 +23,11 @@
 
 typedef struct NeighborJoining NeighborJoining;
 
-typedef double (*NeighborJoiningDistFunc)(unsigned long, unsigned long, void*,
-                                          Env*);
+typedef double (*NeighborJoiningDistFunc)(unsigned long, unsigned long, void*);
 
 NeighborJoining* neighborjoining_new(unsigned long num_of_taxa, void *data,
-                                     NeighborJoiningDistFunc, Env*);
+                                     NeighborJoiningDistFunc);
 void             neighborjoining_show_tree(const NeighborJoining*, FILE*);
-void             neighborjoining_delete(NeighborJoining*, Env*);
+void             neighborjoining_delete(NeighborJoining*);
 
 #endif

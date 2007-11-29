@@ -39,59 +39,61 @@ static void config_lua_new_table(lua_State *L, const char *key)
   lua_settable(L, -3);
 }
 
-Config* config_new(bool verbose, Env *env)
+Config* config_new(bool verbose, Error *err)
 {
   Config *cfg;
-  env_error_check(env);
+  error_check(err);
   cfg = ma_calloc(1, sizeof (Config));
   cfg->filename = NULL;
   cfg->verbose = verbose;
   cfg->L = luaL_newstate();
   if (!cfg->L)
   {
-    env_error_set(env, "out of memory (cannot create new lua state)");
+    error_set(err, "out of memory (cannot create new lua state)");
   } else luaL_openlibs(cfg->L);
   return cfg;
 }
 
-Config* config_new_with_state(lua_State *L, Env *env)
+Config* config_new_with_state(lua_State *L, Error *err)
 {
   Config *cfg;
-  env_error_check(env);
+  error_check(err);
   cfg = ma_calloc(1, sizeof (Config));
   cfg->L = L;
   return cfg;
 }
 
-int config_load_file(Config *cfg, Str *fn, Env* env)
+int config_load_file(Config *cfg, Str *fn, Error *err)
 {
   int had_err = 0;
-  env_error_check(env);
+  error_check(err);
   assert(cfg && cfg->L && fn);
   cfg->filename = str_ref(fn);
   if (config_get_verbose(cfg))
     fprintf(stderr, "Trying to load config file: %s...\n", str_get(fn));
   if (luaL_loadfile(cfg->L, str_get(fn)) ||
       lua_pcall(cfg->L, 0, 0, 0)) {
-    env_error_set(env, "cannot run configuration file: %s",
-                  lua_tostring(cfg->L, -1));
+    error_set(err, "cannot run configuration file: %s",
+              lua_tostring(cfg->L, -1));
     had_err = -1;
   }
   if (!had_err) {
     lua_getglobal(cfg->L, "config");
     if (lua_isnil(cfg->L, -1) || !lua_istable(cfg->L, -1)) {
-      env_error_set(env, "'config' is not defined or not a table in \"%s\"",
-                    str_get(fn));
+      error_set(err, "'config' is not defined or not a table in \"%s\"",
+                str_get(fn));
     }
     lua_pop(cfg->L, 1);
   }
   return had_err;
 }
 
-void config_reload(Config *cfg, Env *env)
+void config_reload(Config *cfg)
 {
+  int rval;
   assert(cfg && cfg->filename);
-  (void) config_load_file(cfg, cfg->filename, env);
+  rval = config_load_file(cfg, cfg->filename, NULL);
+  assert(!rval); /* should not happen, config file was loaded before */
 }
 
 /* Searches for  <section> inside the config table, creating it if it does not
@@ -390,7 +392,8 @@ int config_unit_test(Env *env)
   defcol.red=.8;defcol.green=.8;defcol.blue=.8;
 
   /* instantiate new config object */
-  cfg = config_new(false, env);
+  if (!(cfg = config_new(false, env_error(env))))
+    had_err = -1;
 
   /* at the beginning, all values are defaults, since nothing is defined */
   tmpcol = config_get_color(cfg, "exon");
@@ -436,21 +439,21 @@ int config_unit_test(Env *env)
 
   /* mem cleanup */
   str_delete(luafile);
-  config_delete(cfg, env);
+  config_delete(cfg);
 
   return had_err;
 }
 
-void config_delete_without_state(Config *cfg, Env *env)
+void config_delete_without_state(Config *cfg)
 {
   if (!cfg) return;
   str_delete(cfg->filename);
   ma_free(cfg);
 }
 
-void config_delete(Config *cfg, Env *env)
+void config_delete(Config *cfg)
 {
   if (!cfg) return;
   if (cfg->L) lua_close(cfg->L);
-  config_delete_without_state(cfg, env);
+  config_delete_without_state(cfg);
 }

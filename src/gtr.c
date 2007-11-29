@@ -121,11 +121,12 @@ GTR* gtr_new(Env *env)
   luaopen_gt(gtr->L); /* open all GenomeTools libraries */
   luaopen_lfs(gtr->L); /* open Lua filesystem */
 #ifdef LIBGTVIEW
-  gtr->config = config_new_with_state(gtr->L, env);
+  gtr->config = config_new_with_state(gtr->L, env_error(env));
+  assert(gtr->config); /* XXX */
   config_file = gtdata_get_path(env_error_get_progname(env), env_error(env));
   str_append_cstr(config_file, "/config/view.lua");
   if (file_exists(str_get(config_file))) {
-    if (config_load_file(gtr->config, config_file, env)) {
+    if (config_load_file(gtr->config, config_file, env_error(env))) {
       /* XXX: hack... */
       fprintf(stderr, "%s: error: %s\n", env_error_get_progname(env),
               env_error_get(env));
@@ -342,7 +343,7 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
       /* no tool found -> try to open script */
       if (file_exists(argv[0])) {
         /* run script */
-        nargv = cstr_array_prefix_first(argv, env_error_get_progname(env), env);
+        nargv = cstr_array_prefix_first(argv, env_error_get_progname(env));
         set_arg_in_lua_interpreter(gtr->L, nargv[0], (const char**) nargv+1);
         if (luaL_dofile(gtr->L, argv[0])) {
           /* error */
@@ -362,12 +363,12 @@ int gtr_run(GTR *gtr, int argc, const char **argv, Env *env)
     }
     else {
       /* run tool */
-      nargv = cstr_array_prefix_first(argv, env_error_get_progname(env), env);
+      nargv = cstr_array_prefix_first(argv, env_error_get_progname(env));
       env_error_set_progname(env, nargv[0]);
       had_err = tool(argc, (const char**) nargv, env);
     }
   }
-  cstr_array_delete(nargv, env);
+  cstr_array_delete(nargv);
   if (!had_err && gtr->interactive) {
     showshortversion(env_error_get_progname(env));
     set_arg_in_lua_interpreter(gtr->L, env_error_get_progname(env), argv);
@@ -386,7 +387,7 @@ void gtr_delete(GTR *gtr, Env *env)
   hashtable_delete(gtr->unit_tests);
   if (gtr->L) lua_close(gtr->L);
 #ifdef LIBGTVIEW
-  config_delete_without_state(gtr->config, env);
+  config_delete_without_state(gtr->config);
 #endif
   ma_free(gtr);
 }

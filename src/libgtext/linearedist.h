@@ -22,6 +22,6 @@
 
 /* Compute the edit distance of sequences u and v in O(max{|u|,|v|}) space */
 unsigned long linearedist(const char *u, unsigned long n,
-                          const char *v, unsigned long m, Env*);
+                          const char *v, unsigned long m);
 
 #endif

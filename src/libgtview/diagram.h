@@ -35,11 +35,11 @@ typedef struct Diagram Diagram;
    FeatureIndex in region <seqid> overlapping with <range>. */
 Diagram*    diagram_new(FeatureIndex*, Range range, const char *seqid, Config*);
 Range       diagram_get_range(Diagram*);
-void        diagram_set_config(Diagram*, Config*, Env*);
+void        diagram_set_config(Diagram*, Config*);
 Hashtable*  diagram_get_tracks(const Diagram*);
 int         diagram_get_total_lines(const Diagram*);
 int         diagram_get_number_of_tracks(const Diagram*);
 int         diagram_unit_test(Env*);
-void        diagram_delete(Diagram*, Env*);
+void        diagram_delete(Diagram*);
 
 #endif

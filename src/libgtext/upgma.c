@@ -37,7 +37,7 @@ struct UPGMA {
 };
 
 static void upgma_init(UPGMA *upgma, unsigned long num_of_taxa, void *data,
-                       UPGMADistFunc distfunc, Env *env)
+                       UPGMADistFunc distfunc)
 {
   unsigned long i, j;
   double retval;
@@ -65,7 +65,7 @@ static void upgma_init(UPGMA *upgma, unsigned long num_of_taxa, void *data,
       upgma->clusters[i].distances = ma_malloc(sizeof (double) * i);
       for (j = 0; j < i; j++) {
         if (i < num_of_taxa) {
-          retval = distfunc(i, j, data, env);
+          retval = distfunc(i, j, data);
           /* the UPGMA distance function returns a value >= 0.0 */
           assert(retval >= 0.0);
           upgma->clusters[i].distances[j] = retval;
@@ -89,7 +89,7 @@ static double distance(const UPGMA *upgma, unsigned long i, unsigned long j)
   return distance;
 }
 
-static void upgma_compute(UPGMA *upgma, Env *env)
+static void upgma_compute(UPGMA *upgma)
 {
   unsigned long i, j, k, step, min_i = UNDEF_ULONG, min_j = UNDEF_ULONG,
                 newclusternum = upgma->num_of_taxa; /* denoted 'l' in script */
@@ -157,14 +157,13 @@ static void upgma_compute(UPGMA *upgma, Env *env)
   bittab_delete(clustertab);
 }
 
-UPGMA* upgma_new(unsigned long num_of_taxa, void *data, UPGMADistFunc distfunc,
-                 Env *env)
+UPGMA* upgma_new(unsigned long num_of_taxa, void *data, UPGMADistFunc distfunc)
 {
   UPGMA *upgma;
   assert(num_of_taxa && distfunc);
   upgma = ma_malloc(sizeof (UPGMA));
-  upgma_init(upgma, num_of_taxa, data, distfunc, env);
-  upgma_compute(upgma, env);
+  upgma_init(upgma, num_of_taxa, data, distfunc);
+  upgma_compute(upgma);
   return upgma;
 }
 
@@ -188,7 +187,7 @@ void upgma_show_tree(const UPGMA *upgma, FILE *fp)
   upgma_show_node(upgma, upgma->num_of_clusters-1, 0, fp);
 }
 
-void upgma_delete(UPGMA *upgma, Env *env)
+void upgma_delete(UPGMA *upgma)
 {
   unsigned long i;
   if (!upgma) return;

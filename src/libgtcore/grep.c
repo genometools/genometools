@@ -24,32 +24,32 @@
 #include "libgtcore/error.h"
 #include "libgtcore/grep.h"
 
-static void grep_error(int errcode, regex_t *matcher, Env *env)
+static void grep_error(int errcode, regex_t *matcher, Error *err)
 {
   char sbuf[BUFSIZ], *buf;
   size_t bufsize;
-  env_error_check(env);
+  error_check(err);
   bufsize = regerror(errcode, matcher, NULL, 0);
   buf = malloc(bufsize);
   (void) regerror(errcode, matcher, buf ? buf : sbuf, buf ? bufsize : BUFSIZ);
-  env_error_set(env, "grep(): %s", buf ? buf : sbuf);
+  error_set(err, "grep(): %s", buf ? buf : sbuf);
   free(buf);
 }
 
-int grep(bool *match, const char *pattern, const char *line, Env *env)
+int grep(bool *match, const char *pattern, const char *line, Error *err)
 {
   regex_t matcher;
   int rval, had_err = 0;
-  env_error_check(env);
+  error_check(err);
   assert(pattern && line);
   if ((rval = regcomp(&matcher, pattern, REG_EXTENDED | REG_NOSUB))) {
-    grep_error(rval, &matcher, env);
+    grep_error(rval, &matcher, err);
     had_err = -1;
   }
   if (!had_err) {
     rval = regexec(&matcher, line, 0, NULL, 0);
     if (rval && rval != REG_NOMATCH) {
-      grep_error(rval, &matcher, env);
+      grep_error(rval, &matcher, err);
       had_err = -1;
     }
   }

@@ -47,7 +47,7 @@ struct HMM {
          **emission_prob;     /* log values */
 };
 
-HMM* hmm_new(unsigned int num_of_states, unsigned int num_of_symbols, Env *env)
+HMM* hmm_new(unsigned int num_of_states, unsigned int num_of_symbols)
 {
   HMM *hmm;
   unsigned int i, j;
@@ -295,7 +295,7 @@ void hmm_init_random(HMM *hmm)
 void hmm_decode(const HMM *hmm,
                 unsigned int *state_sequence,
                 const unsigned int *emissions,
-                unsigned int num_of_emissions, Env *env)
+                unsigned int num_of_emissions)
 {
   double **max_probabilities, tmp_prob;
   unsigned int **backtrace, colidx, precolidx;
@@ -393,7 +393,7 @@ static void compute_forward_table(double **f, const HMM *hmm,
 
 /* [DEKM98, p. 58] */
 double hmm_forward(const HMM* hmm, const unsigned int *emissions,
-                   unsigned int num_of_emissions, Env *env)
+                   unsigned int num_of_emissions)
 {
   unsigned int i;
   double **f, P;
@@ -449,7 +449,7 @@ static void compute_backward_table(double **b, const HMM *hmm,
 
 /* [DEKM98, p. 59] */
 double hmm_backward(const HMM* hmm, const unsigned int *emissions,
-                    unsigned int num_of_emissions, Env *env)
+                    unsigned int num_of_emissions)
 {
   unsigned int i;
   double **b, P;
@@ -601,9 +601,9 @@ int hmm_unit_test(Env *env)
   env_error_check(env);
 
   /* test the HMM class with the coin HMMs */
-  fair_hmm = coin_hmm_fair(env);
-  loaded_hmm = coin_hmm_loaded(env);
-  alpha = coin_hmm_alpha(env);
+  fair_hmm = coin_hmm_fair();
+  loaded_hmm = coin_hmm_loaded();
+  alpha = coin_hmm_alpha();
   size = sizeof (coin_tosses) / sizeof (coin_tosses[0]);
   encoded_seq = ma_malloc(sizeof (int) * strlen(coin_tosses[size-1]));
 
@@ -613,15 +613,11 @@ int hmm_unit_test(Env *env)
       encoded_seq[j] = alpha_encode(alpha, coin_tosses[i][j]);
     /* XXX: remove exp() calls */
     ensure(had_err,
-           double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len,
-                                                env)),
-                                exp(hmm_backward(fair_hmm, encoded_seq, len,
-                                                 env))));
+           double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
+                                exp(hmm_backward(fair_hmm, encoded_seq, len))));
     ensure(had_err,
-           double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len,
-                                                env)),
-                                exp(hmm_backward(loaded_hmm, encoded_seq, len,
-                                                 env)))
+           double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len)),
+                                exp(hmm_backward(loaded_hmm, encoded_seq, len)))
                                );
   }
 
@@ -629,13 +625,13 @@ int hmm_unit_test(Env *env)
   alpha_delete(alpha);
   ensure(had_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
   ensure(had_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
-  hmm_delete(loaded_hmm, env);
-  hmm_delete(fair_hmm, env);
+  hmm_delete(loaded_hmm);
+  hmm_delete(fair_hmm);
 
   /* test the HMM class with the dice HMMs */
-  fair_hmm = dice_hmm_fair(env);
-  loaded_hmm = dice_hmm_loaded(env);
-  alpha = dice_hmm_alpha(env);
+  fair_hmm = dice_hmm_fair();
+  loaded_hmm = dice_hmm_loaded();
+  alpha = dice_hmm_alpha();
   size = sizeof (dice_rolls) / sizeof (dice_rolls[0]);
   encoded_seq = ma_malloc(sizeof (int) * strlen(dice_rolls[size-1]));
 
@@ -646,15 +642,11 @@ int hmm_unit_test(Env *env)
     }
     /* XXX: remove exp() calls */
     ensure(had_err,
-           double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len,
-                                                env)),
-                                exp(hmm_backward(fair_hmm, encoded_seq, len,
-                                                 env))));
+           double_equals_double(exp(hmm_forward(fair_hmm, encoded_seq, len)),
+                                exp(hmm_backward(fair_hmm, encoded_seq, len))));
     ensure(had_err,
-           double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len,
-                                                env)),
-                                exp(hmm_backward(loaded_hmm, encoded_seq, len,
-                                                 env)))
+           double_equals_double(exp(hmm_forward(loaded_hmm, encoded_seq, len)),
+                                exp(hmm_backward(loaded_hmm, encoded_seq, len)))
                                );
   }
 
@@ -662,13 +654,13 @@ int hmm_unit_test(Env *env)
   alpha_delete(alpha);
   ensure(had_err, double_equals_double(hmm_rmsd(fair_hmm, fair_hmm), 0.0));
   ensure(had_err, double_equals_double(hmm_rmsd(loaded_hmm, loaded_hmm), 0.0));
-  hmm_delete(loaded_hmm, env);
-  hmm_delete(fair_hmm, env);
+  hmm_delete(loaded_hmm);
+  hmm_delete(fair_hmm);
 
   return had_err;
 }
 
-void hmm_delete(HMM *hmm, Env *env)
+void hmm_delete(HMM *hmm)
 {
   if (!hmm) return;
   ma_free(hmm->initial_state_prob);

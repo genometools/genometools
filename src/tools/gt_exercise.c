@@ -105,12 +105,12 @@ int gt_exercise(int argc, const char **argv, Env *env)
 
   /* call exercise */
   if (!had_err) {
-    nargv = cstr_array_prefix_first(argv+parsed_args, argv[0], env);
+    nargv = cstr_array_prefix_first(argv+parsed_args, argv[0]);
     had_err = exercise(argc-parsed_args, (const char**) nargv, env);
   }
 
   /* free */
-  cstr_array_delete(nargv, env);
+  cstr_array_delete(nargv);
   toolbox_delete(exercise_toolbox);
 
   return had_err;

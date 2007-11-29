@@ -313,7 +313,8 @@ int block_unit_test(Env* env)
   Str *caption2 = str_new_cstr("bar");
   Config *cfg;
 
-  cfg = config_new(false, env);
+  if (!(cfg = config_new(false, env_error(env))))
+    had_err = -1;
 
   r1.start = 10UL;
   r1.end = 50UL;
@@ -364,7 +365,7 @@ int block_unit_test(Env* env)
   s = block_get_strand(b);
   ensure(had_err, (STRAND_FORWARD == s));
 
-  config_delete(cfg, env);
+  config_delete(cfg);
   str_delete(caption2);
   element_delete(e1);
   element_delete(e2);

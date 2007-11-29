@@ -18,12 +18,12 @@
 #include <assert.h>
 #include "libgtext/coin_hmm.h"
 
-HMM* coin_hmm_loaded(Env *env)
+HMM* coin_hmm_loaded(void)
 {
   HMM *hmm;
 
   /* create the HMM */
-  hmm = hmm_new(COIN_NUM_OF_STATES, COIN_NUM_OF_SYMBOLS, env);
+  hmm = hmm_new(COIN_NUM_OF_STATES, COIN_NUM_OF_SYMBOLS);
 
   /* set emmission probabilities */
   hmm_set_emission_probability(hmm, COIN_FAIR, HEAD, 0.5);
@@ -40,12 +40,12 @@ HMM* coin_hmm_loaded(Env *env)
   return hmm;
 }
 
-HMM* coin_hmm_fair(Env *env)
+HMM* coin_hmm_fair(void)
 {
   HMM *hmm;
 
   /* create the HMM */
-  hmm = hmm_new(COIN_NUM_OF_STATES, COIN_NUM_OF_SYMBOLS, env);
+  hmm = hmm_new(COIN_NUM_OF_STATES, COIN_NUM_OF_SYMBOLS);
 
   /* set emmission probabilities */
   hmm_set_emission_probability(hmm, COIN_FAIR, HEAD, 0.5);
@@ -62,7 +62,7 @@ HMM* coin_hmm_fair(Env *env)
   return hmm;
 }
 
-Alpha* coin_hmm_alpha(Env *env)
+Alpha* coin_hmm_alpha(void)
 {
   Alpha *a = alpha_new();
   alpha_add_mapping(a, "Hh");
